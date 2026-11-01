@@ -13,7 +13,7 @@ import type {
 } from './api.ts';
 import type { BrainAtlas } from './model/brain-atlas.ts';
 import type { BrainSections } from './slices/sections.ts';
-import { centeredFrame } from './slices/coordinates.ts';
+import { stagedFrame } from './slices/coordinates.ts';
 import type { Frame } from './slices/coordinates.ts';
 
 const toTuple = (vector: Vector3): Vec3 => [vector.x, vector.y, vector.z];
@@ -176,7 +176,10 @@ export function createEngineSections(sections: BrainSections): EngineSections {
     setWindow: (center, width) => sections.setWindow(center, width),
     setSurfaceColor: (mode, current) => sections.setSurfaceColor(mode, current),
 
-    mprFrame: (plane: MprPlane) => planeFrame(centeredFrame(plane, sections.state.crosshair)),
+    mprFrame: (plane: MprPlane) => {
+      const { crosshair, mode, reverse } = sections.state;
+      return planeFrame(stagedFrame(plane, crosshair, mode === plane && reverse));
+    },
     pixels: (frame) => sections.pixels(frameOf(frame)),
     sample: (point): VolumeSample => sections.sample(point),
   };

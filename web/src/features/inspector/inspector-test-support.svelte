@@ -21,6 +21,7 @@
     Language,
     Region,
     Rgb,
+    StriatalNetworks,
   } from '../../lib/types/index.ts';
   import Tooltip from '../../lib/ui/Tooltip.svelte';
   import RegionDetail from './RegionDetail.svelte';
@@ -76,6 +77,7 @@
   receptors={receptorFile as unknown as ReceptorFingerprints}
   territories={manifest.arterial_territories as unknown as ArterialTerritories}
   cerebellarFunctions={manifest.cerebellar_functions as unknown as CerebellarFunctions}
+  striatalNetworks={manifest.striatal_networks as unknown as StriatalNetworks}
   onfocus={() => calls.push('focus')}
   onisolate={() => calls.push('isolate')}
   onhide={() => calls.push('hide')}

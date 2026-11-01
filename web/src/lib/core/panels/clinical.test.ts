@@ -182,12 +182,12 @@ test('PANEL-13 the Functions tab brings its own busy and failure text', () => {
   );
 });
 
-test('PANEL-15 the two published corrections are listed with their DOI, link and summary', () => {
+test('PANEL-15 the four published corrections are listed with their DOI, link and summary', () => {
   const data = readRepoYaml<ClinicalData>('data/neuropsychology.yaml');
   const corrected = data.references.filter((reference) => reference.corrections);
   assert.deepEqual(
     corrected.map((reference) => reference.id),
-    ['karnath-2000', 'bouvier-2006'],
+    ['karnath-2000', 'bouvier-2006', 'woolgar-2010', 'weaver-2021'],
   );
   assert.deepEqual(publishedCorrections(corrected[0], 'en'), [
     {
@@ -207,4 +207,13 @@ test('PANEL-15 the two published corrections are listed with their DOI, link and
   ]);
   assert.equal(publishedCorrections(corrected[1], 'en')[0].doi, 'doi:10.1093/cercor/bhl065');
   assert.match(publishedCorrections(corrected[1], 'fr')[0].summary, /^Corrige une phrase/);
+  assert.equal(publishedCorrections(corrected[2], 'en')[0].doi, 'doi:10.1073/pnas.1513862112');
+  assert.match(
+    publishedCorrections(corrected[2], 'fr')[0].summary,
+    /^Corrige le résultat du groupe frontal/,
+  );
+  assert.equal(
+    publishedCorrections(corrected[3], 'en')[0].doi,
+    'doi:10.1016/s1474-4422(24)00094-2',
+  );
 });

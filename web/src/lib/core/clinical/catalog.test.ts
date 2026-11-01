@@ -308,6 +308,9 @@ test('CAT-45 · a deficit named by the query comes first, then the rest alphabet
       domain: { en: 'Amnesia domain', fr: 'Domaine' },
     },
   );
+  for (const deficit of ['amnesia-transient', 'aphasia']) {
+    data.associations.push({ ...structuredClone(data.associations[0]), id: deficit, deficit });
+  }
   const catalog = create(data);
   assert.deepEqual(
     catalog.search('amnesia', 'en').map((d) => d.id),

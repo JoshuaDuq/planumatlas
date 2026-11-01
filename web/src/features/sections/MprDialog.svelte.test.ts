@@ -141,12 +141,13 @@ describe('opening and closing', () => {
 describe('the three planes', () => {
   test('each plane is a named section with a picture, a position slider and its own Save button', async () => {
     await opened();
-    for (const [plane, label] of [
-      ['sagittal', 'Sagittal'],
-      ['coronal', 'Coronal'],
-      ['axial', 'Axial'],
+    // Each names the side it is seen from, as the 3D view faces its cut.
+    for (const [plane, label, side] of [
+      ['sagittal', 'Sagittal', 'from the right'],
+      ['coronal', 'Coronal', 'from the front'],
+      ['axial', 'Axial', 'from above'],
     ] as const) {
-      await expect.element(page.getByRole('region', { name: label })).toBeVisible();
+      await expect.element(page.getByRole('region', { name: `${label} ${side}` })).toBeVisible();
       await expect.element(slider(`${label} position`)).toBeVisible();
       await expect
         .element(page.getByRole('button', { name: `Save PNG, ${plane}`, exact: true }))
@@ -384,6 +385,21 @@ describe('the pictures', () => {
     engine.sections.setCrosshair([3, 0, 0]);
     await expect.poll(() => calls('pixels').length).toBe(6);
   });
+
+  test('reversing the cut on a plane turns that panel to the side the stage now faces, and redraws it', async () => {
+    await opened();
+    await engine.sections.setMode('coronal');
+    await expect
+      .poll(() => section('coronal').querySelector('h3')!.textContent)
+      .toMatch(/from the front/);
+    const drawn = calls('pixels').length;
+    engine.sections.setDisplay({ reverse: true });
+    await expect
+      .poll(() => section('coronal').querySelector('h3')!.textContent)
+      .toMatch(/from behind/);
+    await expect.poll(() => calls('pixels').length).toBeGreaterThan(drawn);
+    expect(canvas('coronal').getAttribute('aria-label')).toMatch(/patient right at the right/);
+  });
 });
 
 describe('the readout', () => {
@@ -507,7 +523,7 @@ describe('on a phone', () => {
   test('the plane still has its heading for a screen reader, though the radio names it', async () => {
     await opened();
     await expect
-      .element(page.getByRole('heading', { name: 'Axial', level: 3 }))
+      .element(page.getByRole('heading', { name: 'Axial from above', level: 3 }))
       .toBeInTheDocument();
     const heading = section('axial').querySelector('h3')!.getBoundingClientRect();
     expect(heading.width).toBeLessThanOrEqual(1);

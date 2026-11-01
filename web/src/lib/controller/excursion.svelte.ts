@@ -15,7 +15,7 @@ import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { t } from '../core/i18n/index.ts';
 import type { CircuitCatalog } from '../core/learning/catalog.ts';
-import { revealNotice } from '../core/panels/clinical.ts';
+import { revealNotice, revealSettings as settingsOf } from '../core/panels/clinical.ts';
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import { createInvolvement } from '../core/panels/related.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
@@ -46,6 +46,7 @@ export interface ExcursionDeps {
     | 'revealRegions'
     | 'openRegion'
     | 'prepareCut'
+    | 'showSpinalCord'
     | 'chooseAtlas'
     | 'chooseSurfaceColor'
   >;
@@ -140,6 +141,8 @@ export function createExcursions(
     domains,
     chooseExplorer,
     leaveLesson: lessons.leave,
+    leaveExcursion,
+    excursionHeld: () => beforeExcursion !== null,
     openFunction: panels.openFunction,
     openDeficit: panels.openDeficit,
   });
@@ -195,6 +198,35 @@ export function createExcursions(
     return true;
   }
 
+  /**
+   * Another tab than Functions or Deficits ends the excursion as leaving a lesson does: the scene from
+   * before it comes back, and the open function or deficit stays, drawn again on the way back.
+   */
+  async function leaveExcursion(value: Explorer): Promise<void> {
+    const from = session.state.explorer;
+    if (!beforeExcursion || from === value) return;
+    if (from !== 'functions' && from !== 'deficits') return;
+    if (value === 'functions' || value === 'deficits') return;
+    const before = beforeExcursion;
+    beforeExcursion = null;
+    excursionOrigin = null;
+    seenThroughByNotice = false;
+    const current = commands.begin();
+    const failures = await reader.apply(before, current);
+    if (!current()) return;
+    if (failures.length) {
+      commands.fail(
+        'restore',
+        new AggregateError(
+          failures.map(({ error }) => error),
+          'The scene from before the excursion was not fully restored.',
+        ),
+      );
+      return;
+    }
+    session.notify({ text: t(lang(), 'clinical').stageRestored });
+  }
+
   /** Closing a deficit ends its excursion: the scene stays, and there is nothing left to restore. */
   function closeDeficit() {
     session.setDeficit(null);
@@ -208,20 +240,8 @@ export function createExcursions(
     render();
   }
 
-  /** The reader's own settings a reveal can change, compared after it to say which it did. */
   function revealSettings(): RevealSettings {
-    const { atlas, surfaceColor, detail, cutActive, isolatedRegion, hemisphere, cortexVisible } =
-      model.settings;
-    return {
-      atlas,
-      cutAtlas: sections.state.cutAtlas,
-      colour: surfaceColor,
-      detail,
-      cut: cutActive,
-      isolated: Boolean(isolatedRegion),
-      hemisphere,
-      cortex: cortexVisible,
-    };
+    return settingsOf(model.settings, sections.state.cutAtlas);
   }
 
   /**
@@ -523,6 +543,7 @@ export function createExcursions(
     openCircuit: lessons.openCircuit,
     openLessonLandmark: lessons.openLandmarkOf,
     openLessonStep: lessons.openStep,
+    openLessonRoute: lessons.openRoute,
     openLinkedMri: lessons.openLinkedMri,
     openLessonMri: lessons.openMri,
     focusLandmark: lessons.focusLandmark,

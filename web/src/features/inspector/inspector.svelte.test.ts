@@ -335,6 +335,36 @@ describe('evidence sections', () => {
     expect(text(networks)).toContain('CAB-NP networks');
   });
 
+  test('a striatal structure lists its networks’ striatal territories; a territory says what it is', async () => {
+    const screen = await render(Fixture, { regionId: 'aseg:left:12' });
+    const networks = () => section('Functional networks');
+    networks().open = true;
+    expect(text(networks())).toContain('Striatal networks (Choi et al. 2012)');
+    expect(text(networks())).not.toContain('Yeo 7 networks');
+    const rows = [...networks().querySelectorAll('.network-row')].map(text);
+    expect(rows.some((row) => /^Somatomotor .*%$/.test(row))).toBe(true);
+    expect(text(networks())).toContain(
+      'Share of this structure’s voxels in each network’s striatal territory.',
+    );
+    expect(text(networks())).toContain('borders sit a few millimetres off');
+    expect(text(networks())).toMatch(/Choi’s confidence: \d+\s?% of its labelled voxels confident/);
+    expect(text(networks())).toContain('a share of at least 0.5 of the voxel’s 25 most correlated');
+    expect(text(networks())).toContain('least confident around the dorsal putamen');
+    // A caudate gets its confidence but not the putamen's warning.
+    await screen.rerender({ regionId: 'aseg:left:11' });
+    networks().open = true;
+    expect(text(networks())).toContain('Choi’s confidence:');
+    expect(text(networks())).not.toContain('dorsal putamen');
+    await screen.rerender({ regionId: 'choi:left:SomMot' });
+    networks().open = true;
+    expect([...networks().querySelectorAll('.network-row')].map(text)).toEqual([
+      expect.stringMatching(/^Somatomotor .*100\s?%$/),
+    ]);
+    expect(text(networks())).toContain(
+      'The striatal voxels whose resting-state connectivity most resembles this cortical network',
+    );
+  });
+
   test('functional division names the section, the source and the areas', async () => {
     render(Fixture, { regionId: V1 });
     const division = section('Functional division');

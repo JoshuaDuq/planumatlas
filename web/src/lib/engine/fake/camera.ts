@@ -134,6 +134,8 @@ export function createFakeCamera({
   }
 
   const distance = () => distanceBetween(position, target);
+  const dot = (a: readonly number[], b: readonly number[]) =>
+    a[0]! * b[0]! + a[1]! * b[1]! + a[2]! * b[2]!;
 
   function face(name: ViewName) {
     const direction = normalize(DIRECTIONS[name]);
@@ -231,6 +233,17 @@ export function createFakeCamera({
       position = position.map((value, axis) => value + delta[axis]!) as Vector;
       target = [...point];
       reframe();
+    },
+    // Orthographic at the scale bar's 10 px per millimetre, about the target at the canvas centre.
+    project(points) {
+      const { right, up: top } = current.basis;
+      return points.map((point) => {
+        const offset = point.map((value, axis) => value - target[axis]!);
+        return {
+          x: size.width / 2 + dot(offset, right) * 10,
+          y: size.height / 2 - dot(offset, top) * 10,
+        };
+      });
     },
 
     orbitBy() {

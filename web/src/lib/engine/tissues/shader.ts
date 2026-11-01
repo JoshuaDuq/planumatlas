@@ -3,6 +3,7 @@ import type { IUniform, WebGLProgramParametersWithUniforms } from 'three';
 import type { TissueAppearance } from '../render/materials.ts';
 import { HIGHLIGHT_CHUNK } from './highlight.ts';
 import { LABEL_AT } from './label-sampling.ts';
+import { STRIATAL_COLOUR } from './striatal-overlay.ts';
 
 /** The uniforms a cut material reads, which the cut layer owns and updates. */
 export type CutUniforms = Record<string, IUniform>;
@@ -46,6 +47,7 @@ export function createCutMaterial(
       varying vec3 sourceWorld;
       ${HIGHLIGHT_CHUNK}
       ${LABEL_AT}
+      ${STRIATAL_COLOUR}
       ${shader.fragmentShader}`.replace(
       '#include <color_fragment>',
       `
@@ -58,7 +60,8 @@ export function createCutMaterial(
         // Texture coordinates address voxel centers, not voxel corners.
         float t1 = texture(mriVolume, (mriVoxel + 0.5) / mriShape).r * 255.0;
         float intensity = clamp((t1 - t1Range.x) / (t1Range.y - t1Range.x), 0.0, 1.0);
-        vec3 lit = tissue.rgb * (1.0 + tissueVariation * (2.0 * intensity - 1.0));
+        vec3 lit = striatalColour(tissue.rgb, sourceWorld)
+          * (1.0 + tissueVariation * (2.0 * intensity - 1.0));
         // Codes are small integers, so equality on them is exact in a float.
         float here = float(code);
         float lift = here == highlightCodes.y ? highlightLifts.y
@@ -67,6 +70,6 @@ export function createCutMaterial(
       `,
     );
   };
-  material.customProgramCacheKey = () => 'registered-tissue-cut-v4';
+  material.customProgramCacheKey = () => 'registered-tissue-cut-v5';
   return material;
 }

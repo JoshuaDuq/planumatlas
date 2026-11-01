@@ -1,0 +1,58 @@
+{
+  "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+  "method": "mri_synthmorph register -m joint (skull-stripped MNI152NLin6Asym \u2192 brain.mgz); mri_synthseg --robust on the template; apply -m nearest to the atlas, its confidence and the segmentation",
+  "source": {
+    "directory": "average/Choi_JNeurophysiol12_MNI152",
+    "files": {
+      "atlas": [
+        "Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+        "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+      ],
+      "lut": [
+        "Choi2012_7Networks_ColorLUT.txt",
+        "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+      ],
+      "confidence": [
+        "Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+        "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+      ]
+    }
+  },
+  "template": {
+    "base": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym",
+    "files": {
+      "t1": [
+        "tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+        "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+      ],
+      "mask": [
+        "tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+        "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+      ]
+    }
+  },
+  "checks": {
+    "striatum_dice": {
+      "left_caudate": 0.9046,
+      "right_caudate": 0.8979,
+      "left_putamen": 0.9177,
+      "right_putamen": 0.9104,
+      "left_accumbens": 0.8501,
+      "right_accumbens": 0.7776
+    },
+    "striatum_dice_mean": 0.8764,
+    "structure_covered": {
+      "left_caudate": 0.9601,
+      "right_caudate": 0.9537,
+      "left_putamen": 0.9872,
+      "right_putamen": 0.9865,
+      "left_accumbens": 0.8898,
+      "right_accumbens": 0.8281
+    },
+    "structure_covered_min": 0.8281
+  },
+  "acceptance": {
+    "striatum_dice_mean_min": 0.8,
+    "structure_covered_min": 0.75
+  }
+}

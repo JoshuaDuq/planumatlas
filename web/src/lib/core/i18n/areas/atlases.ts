@@ -12,6 +12,7 @@ export const en = {
   pam50: 'PAM50 cord atlas on this spinal cord',
   arterial: 'Arterial territory atlas (Liu et al. 2023)',
   nettekoven: 'Functional cerebellar atlas (Nettekoven et al. 2024)',
+  choi: 'Striatal network atlas (Choi et al. 2012)',
 };
 
 export const fr: typeof en = {
@@ -28,4 +29,5 @@ export const fr: typeof en = {
   pam50: 'Atlas médullaire PAM50 sur cette moelle',
   arterial: 'Atlas des territoires artériels (Liu et al. 2023)',
   nettekoven: 'Atlas fonctionnel du cervelet (Nettekoven et al. 2024)',
+  choi: 'Atlas des réseaux striataux (Choi et al. 2012)',
 };

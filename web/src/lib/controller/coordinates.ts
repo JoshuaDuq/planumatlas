@@ -16,13 +16,18 @@ export function createCoordinatePlacement({
   ui,
 }: {
   coordinates: Pick<Coordinates, 'metadata' | 'map'>;
-  lesion: Pick<LesionStore, 'placeCoordinate' | 'sphere'>;
+  lesion: Pick<LesionStore, 'placeCoordinate' | 'sphere' | 'coordinate'>;
   engine: {
     sections: Pick<Engine['sections'], 'setCrosshair'>;
     camera: Pick<Engine['camera'], 'focusPoint'>;
   };
   commands: Pick<SceneCommands, 'begin'>;
-  ui: { showAnatomy(): void; showDetail(): void };
+  ui: {
+    showAnatomy(): void;
+    showDetail(): void;
+    /** The one sphere held a lesion the reader placed, which the coordinate has taken. */
+    sayLesionReplaced(): void;
+  };
 }) {
   return {
     metadata: coordinates.metadata,
@@ -31,12 +36,14 @@ export function createCoordinatePlacement({
       const current = commands.begin();
       const landing = await coordinates.map(entered, space);
       if (landing && current()) {
+        const replacing = lesion.sphere !== null && lesion.coordinate === null;
         ui.showAnatomy();
         lesion.placeCoordinate({ entered, space }, landing, coordinates.metadata.radius_mm);
         const { centre } = lesion.sphere!;
         engine.sections.setCrosshair(centre);
         engine.camera.focusPoint(centre);
         ui.showDetail();
+        if (replacing) ui.sayLesionReplaced();
       }
       return landing !== null;
     },

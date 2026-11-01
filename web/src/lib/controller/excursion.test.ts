@@ -236,6 +236,7 @@ describe('an excursion into a function', () => {
     )!;
     scene.excursions.chooseExplorer('circuits');
     await scene.excursions.openCircuit(circuit.id);
+    await scene.excursions.openLessonStep(0);
     assert.equal(scene.engine.model.settings.hemisphere, 'left');
     assert.match(scene.session.state.notice!.text, /^left hemisphere shown alone/i);
     await scene.excursions.leaveLesson();

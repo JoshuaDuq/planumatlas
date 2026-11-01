@@ -28,7 +28,7 @@ Every tour’s Sources panel distinguishes **Deficit evidence** from **Circuit b
 
 On 31 October 2026, 31 network/function and clinical landmark tours were removed from this category. Three more—auditory, somatosensory and reward/valuation—were withheld pending anatomical rework.
 
-All 34 withdrawn tours remain in the [source archive](https://github.com/JoshuaDuq/neuroatlas/blob/main/data/archived-circuit-tours.yaml), with bilingual descriptions and citations. The archive is not loaded by the viewer. Their associated deficit evidence and functional maps remain in the existing **Deficits** and **Functions** sections. Archived citations and atlas labels remain subject to automated checks.
+On 1 November 2026, the archived voluntary gaze control tour was deleted with the oculomotor-apraxia profile it was linked to, which coloured no atlas region. The other 33 withdrawn tours remain in the [source archive](https://github.com/JoshuaDuq/neuroatlas/blob/main/data/archived-circuit-tours.yaml), with bilingual descriptions and citations. The archive is not loaded by the viewer. Their associated deficit evidence and functional maps remain in the existing **Deficits** and **Functions** sections. Archived citations and atlas labels remain subject to automated checks.
 
 A link to a withdrawn circuit ID reports unsupported circuit/step parameters and retains the other valid scene fields. It does not open a different tour under the old ID.
 

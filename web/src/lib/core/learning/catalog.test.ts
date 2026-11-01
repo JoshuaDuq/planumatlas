@@ -26,14 +26,14 @@ const create = (copy: object, manifest = published[0]) =>
 
 test('withdrawn tours remain source-checkable in the archive and cannot be opened as active circuits', () => {
   const activeIds = new Set(data.circuits.map((circuit) => circuit.id));
-  assert.equal(archived.circuits.length, 34);
+  assert.equal(archived.circuits.length, 33);
   assert.deepEqual(archived.withheld_pending_rework, ['hearing', 'touch', 'valuation']);
   assert.equal(
     [...data.circuits, ...archived.circuits].reduce(
       (sum, circuit) => sum + circuit.steps.length,
       0,
     ),
-    128,
+    125,
   );
   for (const manifest of published) {
     const catalog = create(data, manifest);

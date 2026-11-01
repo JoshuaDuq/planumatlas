@@ -4,6 +4,7 @@ import { createCoordinatePlacement } from '../lib/controller/coordinates.ts';
 import { createAnatomyCommands } from '../lib/controller/anatomy.ts';
 import type { AppContext } from '../lib/controller/context.ts';
 import { createExcursions } from '../lib/controller/excursion.svelte.ts';
+import type { SceneReader } from '../lib/controller/excursion.svelte.ts';
 import { installKeymap } from '../lib/controller/keymap.ts';
 import { createLinks } from '../lib/controller/links.ts';
 import type { Links } from '../lib/controller/links.ts';
@@ -12,6 +13,7 @@ import { loadClinicalCatalog } from '../lib/core/clinical/load.ts';
 import { createCoordinateSpaces } from '../lib/core/coordinates/spaces.ts';
 import { isIndependentTractReference } from '../lib/core/diffusion/presentation.ts';
 import { failureNotice } from '../lib/core/i18n/errors.ts';
+import { t } from '../lib/core/i18n/index.ts';
 import { loadCircuitCatalog } from '../lib/core/learning/load.ts';
 import type { ReaderState } from '../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../lib/core/state/scene-commands.ts';
@@ -107,16 +109,17 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     const link = createLink({ engine, view, lesion, write: () => links.write() });
     const context: AppContext = { engine, engineState, session, lesson, view, catalog, link };
 
+    const reader: SceneReader = {
+      capture: () => handedScene ?? links.captureReaderState(),
+      apply: (target, current) => links.applyReaderState(target, current),
+    };
     const excursions = createExcursions(context, {
       anatomy: regions,
       domains,
       clinical,
       circuits,
       commands,
-      reader: {
-        capture: () => handedScene ?? links.captureReaderState(),
-        apply: (target, current) => links.applyReaderState(target, current),
-      },
+      reader,
       shell: ports,
       mri: { show: ports.showMri, openPreparedPlane: ports.openPreparedPlane },
       panels: {
@@ -129,6 +132,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     });
     const anatomy = createAnatomyCommands(context, {
       commands,
+      reader,
       ui: {
         showDetail: ports.showDetail,
         showList: ports.showList,
@@ -203,6 +207,9 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
             showDetail() {
               flushSync();
               ports.showDetailInPlace();
+            },
+            sayLesionReplaced() {
+              session.notify({ text: t(session.state.lang, 'coordinate').replacedLesion });
             },
           },
         }),

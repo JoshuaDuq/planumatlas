@@ -97,6 +97,50 @@ const wedge = () =>
 const published = (r: number, g: number, b: number) =>
   new Color().setRGB(r / 255, g / 255, b / 255, SRGBColorSpace);
 
+test('only a striatal structure’s cap takes its voxels’ networks, and only when asked', () => {
+  const lookup = {
+    ...LOOKUP,
+    regions: new Map([
+      ...(LOOKUP.regions as Map<string, unknown>),
+      ['learning:left:caudate', { striatal_networks: [{ network: 'Cont', fraction: 0.5 }] }],
+      ['learning:left:thalamus', {}],
+    ]),
+  } as unknown as PaletteLookup;
+  const unit = (region: string) => {
+    const made = solid({
+      hemisphere: 'left',
+      kind: 'structure',
+      detail: 'learning',
+      region_id: region,
+    });
+    made.cap.material.userData.striatalHere = { value: false };
+    return made;
+  };
+  const caudate = unit('learning:left:caudate');
+  const thalamus = unit('learning:left:thalamus');
+  const run = (striatal: boolean) =>
+    paintSolids(
+      { solids: [caudate, thalamus] },
+      {
+        labels: LABELS,
+        state: asDisplaySettings({ ...STATE, surfaceColor: 'network', detail: 'learning' }),
+        atlas: 'destrieux',
+        detail: 'learning',
+        wedged: true,
+        appearance,
+        lookup,
+        striatal,
+      },
+    );
+  run(true);
+  assert.deepEqual(
+    [caudate, thalamus].map((made) => made.cap.material.userData.striatalHere!.value),
+    [true, false],
+  );
+  run(false);
+  assert.equal(caudate.cap.material.userData.striatalHere!.value, false);
+});
+
 test('the white envelope stays white matter where a parcel reuses its code', () => {
   const labels = indexLabels([
     {

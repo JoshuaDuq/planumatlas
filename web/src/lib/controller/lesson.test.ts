@@ -5,6 +5,12 @@ import type { Scene } from './excursion-test-support.ts';
 
 const firstCircuit = (scene: Scene) => scene.circuits.all[0]!;
 
+/** A circuit opened on its whole route, then stepped on to its first landmark. */
+async function onFirstLandmark(scene: Scene, id = firstCircuit(scene).id) {
+  await scene.excursions.openCircuit(id);
+  await scene.excursions.openLessonStep(0);
+}
+
 describe('opening a lesson', () => {
   test('the corticospinal tour reveals the spinal cord before selecting its final right-sided landmark', async () => {
     const scene = createScene();
@@ -21,22 +27,45 @@ describe('opening a lesson', () => {
     assert.equal(scene.engine.model.state.selectedRegion?.id, circuit.steps.at(-1)!.region);
   });
 
-  test('holds the scene, shows the detail, draws and frames the first landmark, then starts', async () => {
+  test('holds the scene, shows the detail, then starts on the whole route: nothing selected, the cortex seen through, the oblique view', async () => {
     const scene = createScene();
     const circuit = firstCircuit(scene);
-    const [first] = circuit.steps;
+    scene.engine.model.select('destrieux:left:25');
     const mark = scene.engine.calls.length;
     await scene.excursions.openCircuit(circuit.id);
 
     assert.equal(scene.reader.capture.mock.calls.length, 1);
-    assert.deepEqual(scene.lesson.state, { circuit: circuit.id, step: 0, visited: [0] });
-    assert.equal(scene.engine.model.state.selectedRegion?.id, first!.region);
+    assert.deepEqual(scene.lesson.state, {
+      circuit: circuit.id,
+      step: 0,
+      visited: [0],
+      route: true,
+    });
+    assert.equal(scene.engine.model.state.selectedRegion, null);
+    const { settings, manifest } = scene.engine.model;
+    assert.equal(settings.cortexVisible, true);
+    assert.equal(settings.cortexOpacity, manifest.appearance.see_through_opacity);
+    assert.equal(settings.hemisphere, 'both');
+    assert.equal(scene.session.state.view, 'oblique');
     const timeline = scene.calls(mark);
     assert.equal(timeline[0], 'shell.showDetail');
-    const framed = scene.engine.calls.findLast((call) => call.method === 'frameLandmark')!;
-    assert.deepEqual(framed.args, [first!.region, first!.view, scene.circuits.contextMarginMm, {}]);
-    assert.equal(scene.session.state.view, first!.view);
+    assert.equal(timeline.includes('camera.frameLandmark'), false);
     assert.equal(timeline.at(-1), 'app.render');
+  });
+
+  test('stepping on from the route gives the cortex back its opacity; Previous from the first landmark returns to the route', async () => {
+    const scene = createScene();
+    const circuit = firstCircuit(scene);
+    scene.engine.model.setCortexOpacity(0.6);
+    await scene.excursions.openCircuit(circuit.id);
+    await scene.excursions.openLessonStep(0);
+    assert.equal(scene.lesson.state.route, false);
+    assert.equal(scene.engine.model.state.selectedRegion?.id, circuit.steps[0]!.region);
+    assert.equal(scene.engine.model.settings.cortexOpacity, 0.6);
+    await scene.excursions.openLessonRoute();
+    assert.equal(scene.lesson.state.route, true);
+    assert.equal(scene.lesson.state.step, 0);
+    assert.equal(scene.engine.model.state.selectedRegion, null);
   });
 
   test('a lesson already open keeps the scene it holds', async () => {
@@ -47,13 +76,27 @@ describe('opening a lesson', () => {
     assert.equal(scene.reader.capture.mock.calls.length, 1);
   });
 
-  test('a landmark whose geometry is not drawn is refused, not framed', async () => {
+  test('a route with a landmark that has no anchor in this brain fails rather than drawing a number nowhere', async () => {
     const scene = createScene();
-    vi.spyOn(scene.engine.camera, 'frameLandmark').mockReturnValue(false);
-    await expect(scene.excursions.openCircuit(firstCircuit(scene).id)).rejects.toThrow(
-      /Landmark geometry unavailable/,
+    const circuit = firstCircuit(scene);
+    const anchorOf = scene.engine.model.anchorOf.bind(scene.engine.model);
+    vi.spyOn(scene.engine.model, 'anchorOf').mockImplementation((id) =>
+      id === circuit.steps[1]!.region ? null : anchorOf(id),
+    );
+    await expect(scene.excursions.openCircuit(circuit.id)).rejects.toThrow(
+      `Missing landmark anchor: ${circuit.steps[1]!.region}`,
     );
     assert.equal(scene.lesson.state.circuit, null);
+  });
+
+  test('a landmark whose geometry is not drawn is refused, not framed', async () => {
+    const scene = createScene();
+    await scene.excursions.openCircuit(firstCircuit(scene).id);
+    vi.spyOn(scene.engine.camera, 'frameLandmark').mockReturnValue(false);
+    await expect(scene.excursions.openLessonStep(0)).rejects.toThrow(
+      /Landmark geometry unavailable/,
+    );
+    assert.equal(scene.lesson.state.route, true);
   });
 
   test('a command that overtakes it stops it before it frames or starts', async () => {
@@ -63,7 +106,7 @@ describe('opening a lesson', () => {
     await opening;
     assert.equal(scene.lesson.state.circuit, null);
     assert.equal(
-      scene.engine.calls.some((call) => call.method === 'frameLandmark'),
+      scene.engine.calls.some((call) => call.method === 'applyView'),
       false,
     );
   });
@@ -73,7 +116,12 @@ describe('opening a lesson', () => {
     const circuit = scene.circuits.all.find((entry) => entry.steps.length > 2)!;
     await scene.excursions.openLessonLandmark(circuit.id, 2);
     assert.equal(scene.session.state.explorer, 'circuits');
-    assert.deepEqual(scene.lesson.state, { circuit: circuit.id, step: 2, visited: [0, 2] });
+    assert.deepEqual(scene.lesson.state, {
+      circuit: circuit.id,
+      step: 2,
+      visited: [0, 2],
+      route: false,
+    });
     assert.equal(scene.engine.model.state.selectedRegion?.id, circuit.steps[2]!.region);
   });
 
@@ -97,6 +145,10 @@ describe('opening a lesson', () => {
     const circuit = firstCircuit(scene);
     assert.equal(scene.excursions.lessonLandmark(), null);
     await scene.excursions.openCircuit(circuit.id);
+    scene.session.setExplorer('circuits');
+    assert.equal(scene.excursions.lessonLandmark(), null, 'the whole route');
+    await scene.excursions.openLessonStep(0);
+    scene.session.setExplorer('anatomy');
     assert.equal(scene.excursions.lessonLandmark(), null, 'not on the Circuits tab');
     scene.session.setExplorer('circuits');
     assert.equal(scene.excursions.lessonLandmark(), circuit.steps[0]);
@@ -210,7 +262,7 @@ describe('the Linked MRI', () => {
     const scene = createScene();
     const circuit = firstCircuit(scene);
     const [step] = circuit.steps;
-    await scene.excursions.openCircuit(circuit.id);
+    await onFirstLandmark(scene, circuit.id);
     scene.session.setExplorer('circuits');
     const mark = scene.engine.calls.length;
     await scene.excursions.openLinkedMri({ atRegion: true, instant: true });
@@ -244,7 +296,7 @@ describe('the Linked MRI', () => {
   test('the prepared plane waits for nothing a reader has moved on from', async () => {
     const scene = createScene();
     const circuit = firstCircuit(scene);
-    await scene.excursions.openCircuit(circuit.id);
+    await onFirstLandmark(scene, circuit.id);
     scene.session.setExplorer('circuits');
     scene.mri.openPreparedPlane.mockImplementationOnce(async (_plane, canOpen) => {
       assert.equal(canOpen(), true);
@@ -258,7 +310,7 @@ describe('the Linked MRI', () => {
 
   test('a lesson’s MRI stops where the reader left the Circuits tab', async () => {
     const scene = createScene();
-    await scene.excursions.openCircuit(firstCircuit(scene).id);
+    await onFirstLandmark(scene);
     scene.session.setExplorer('circuits');
     await scene.excursions.openLinkedMri({ atRegion: true });
     scene.session.setExplorer('anatomy');
@@ -271,7 +323,7 @@ describe('focusing the open landmark', () => {
   test('frames it as the lesson authored it, with the move options, and renders', async () => {
     const scene = createScene();
     const circuit = firstCircuit(scene);
-    await scene.excursions.openCircuit(circuit.id);
+    await onFirstLandmark(scene, circuit.id);
     scene.session.setExplorer('circuits');
     const mark = scene.engine.calls.length;
     assert.equal(scene.excursions.focusLandmark({ immediate: true }), true);
@@ -301,7 +353,7 @@ describe('focusing the open landmark', () => {
 describe('the lesson’s MRI, overtaken while the cut is prepared', () => {
   test('opens no plane once a newer command took over', async () => {
     const scene = createScene();
-    await scene.excursions.openCircuit(firstCircuit(scene).id);
+    await onFirstLandmark(scene);
     scene.session.setExplorer('circuits');
     const prepare = scene.commands.prepareCut;
     vi.spyOn(scene.commands, 'prepareCut').mockImplementationOnce(async (current) => {

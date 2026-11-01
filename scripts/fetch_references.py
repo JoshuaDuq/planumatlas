@@ -4,7 +4,8 @@ The identifiers come from data/neuropsychology.yaml, data/circuits.yaml,
 data/archived-circuit-tours.yaml,
 config/functional-regions.yaml, config/neuropsych-domains.yaml,
 config/receptor-fingerprints.yaml, config/arterial-territories.yaml,
-config/cerebellar-functions.yaml and docs/reference/references.md. PubMed gives each
+config/cerebellar-functions.yaml, config/striatal-networks.yaml and
+docs/reference/references.md. PubMed gives each
 PMID's title, authors, issue year, DOI and erratum links; Bookshelf gives each NBK
 chapter's; Crossref supplies a DOI that PubMed lacks and the DOI of each correction
 notice. Abstracts are not stored. The reference tests read only the written file.
@@ -95,7 +96,7 @@ def cited_identifiers():
             pmid = str(source["pmid"])
             pmids.add(pmid)
             dois[pmid] = source["doi"].removeprefix("https://doi.org/")
-    for config in ("arterial-territories", "cerebellar-functions"):
+    for config in ("arterial-territories", "cerebellar-functions", "striatal-networks"):
         source = yaml.safe_load((ROOT / f"config/{config}.yaml").read_text())
         pmids.add(str(source["pmid"]))
         dois[str(source["pmid"])] = source["doi"].removeprefix("https://doi.org/")
@@ -169,8 +170,10 @@ def notices(article, doi, title, issn):
             continue
         citation = comment.findtext("RefSource")
         volume, page = NOTICE_LOCATION.search(citation).groups()
+        # Some notices carry their DOI in PubMed's citation but no page in Crossref.
         match = [item for item in linked
-                 if item["volume"] == volume and item["page"].split("-")[0] == page]
+                 if item["doi"] in citation.lower()
+                 or (item["volume"] == volume and item["page"].split("-")[0] == page)]
         if not match:
             # Crossref has no update link for some older notices; they share the title.
             items = crossref("", **{"query.bibliographic": title, "filter": f"issn:{issn}", "rows": 20})["items"]

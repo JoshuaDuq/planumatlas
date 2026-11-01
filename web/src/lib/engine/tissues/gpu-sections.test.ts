@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { BoxGeometry, DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from 'three';
+import {
+  BoxGeometry,
+  DoubleSide,
+  Mesh,
+  MeshBasicMaterial,
+  Raycaster,
+  RedIntegerFormat,
+  Vector3,
+} from 'three';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { centeredFrame, rasToWorld } from '../slices/coordinates.ts';
 import { Volume } from '../slices/volume.ts';
@@ -231,6 +239,90 @@ function fixture() {
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   return { sections, model, layer, region };
 }
+
+test('Yeo colouring points the cut and the caps at the striatal network volume, and only Yeo colouring', () => {
+  const { sections, model } = fixture();
+  const striatal = sections.anatomy.striatal;
+  const labels = [
+    {
+      source_label_id: 0,
+      region_id: null,
+      kind: 'tissue',
+      hemisphere: 'midline',
+      color: [0, 0, 0],
+    },
+    {
+      source_label_id: 7,
+      region_id: 'choi:left:Default',
+      kind: 'tissue',
+      hemisphere: 'left',
+      color: [205, 62, 78],
+    },
+  ];
+  const choi = {
+    shape: [2, 2, 2],
+    order: 'F',
+    labels,
+    voxel_to_surface_ras_mm: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+  };
+  const frame = centeredFrame('coronal', [0, 0, 0]);
+  model.state.surfaceColor = 'network';
+  // An anatomy without striatal networks never asks for them.
+  sections.metadata = { schema_version: 1, atlases: {} };
+  assert.equal(sections.wantsStriatal(), false);
+  sections.metadata = { schema_version: 1, atlases: { choi } };
+  assert.equal(sections.wantsStriatal(), true);
+  // Asked for but not yet loaded, the cut draws without it rather than failing.
+  sections.update(frame, 'destrieux');
+  assert.equal(striatal.striatalEnabled.value, false);
+
+  const layer = sections.createLayer(choi, new Volume(choi, new Uint16Array(8).fill(1)));
+  sections.layers.set('choi', layer);
+  sections.update(frame, 'destrieux');
+  assert.equal(striatal.striatalEnabled.value, true);
+  assert.equal(striatal.striatalVolume.value, layer.texture);
+  assert.equal(striatal.worldToStriatal.value, layer.uniforms.worldToVoxel.value);
+  // Code 1 is the Default network label: opaque, so the cut takes its colour.
+  assert.equal(striatal.striatalPalette.value.image.data[7], 1);
+  assert.equal(striatal.striatalPalette.value.image.data[3], 0);
+  // The cut plane of the drawn atlas reads the same uniforms.
+  const cut = sections.layers.get('destrieux').mesh.material;
+  const shader: Stub = {
+    uniforms: {},
+    vertexShader: '#include <begin_vertex>',
+    fragmentShader: '#include <color_fragment>',
+  };
+  cut.onBeforeCompile(shader);
+  assert.equal(shader.uniforms.striatalEnabled, striatal.striatalEnabled);
+
+  for (const state of [
+    { surfaceColor: 'atlas' },
+    { surfaceColor: 'network', paint: { id: 'function:memory', colors: new Map() } },
+  ]) {
+    Object.assign(model.state, { paint: null }, state);
+    sections.update(frame, 'destrieux');
+    assert.equal(striatal.striatalEnabled.value, false, JSON.stringify(state));
+  }
+  sections.dispose();
+});
+
+test('switched off, the striatal sampler still holds an integer label volume, as WebGL requires', () => {
+  // An integer sampler bound to three's empty float texture makes WebGL drop every draw of the
+  // material, which takes every cap off the cut.
+  const { sections, layer } = fixture();
+  const striatal = sections.anatomy.striatal;
+  assert.equal(striatal.striatalEnabled.value, false);
+  assert.equal(striatal.striatalVolume.value, layer.texture);
+  assert.equal(striatal.striatalVolume.value.format, RedIntegerFormat);
+  assert.equal(striatal.striatalConfidence.value, layer.texture);
+  assert.ok(striatal.striatalPalette.value);
+  sections.dispose();
+});
 
 test('moving every cut orientation reuses geometry, volume and palette without uploads', () => {
   const { sections, layer } = fixture();

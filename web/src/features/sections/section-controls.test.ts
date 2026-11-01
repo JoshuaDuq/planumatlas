@@ -263,6 +263,7 @@ test('the cut labels are the manifest’s, and NextBrain is known to be segmente
     'nextbrain',
     'arterial',
     'nettekoven',
+    'choi',
   ]);
   expect(controls.nextbrainSegmented).toBe(true);
 });

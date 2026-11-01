@@ -81,13 +81,13 @@ describe('STORE-04: the lesson store shows each step taken, and refuses a step t
   test('start, go and close show at once', () => {
     const store = lesson();
     store.start('c');
-    expect(store.state).toEqual({ circuit: 'c', step: 0, visited: [0] });
+    expect(store.state).toEqual({ circuit: 'c', step: 0, visited: [0], route: false });
     store.go(2);
-    expect(store.state).toEqual({ circuit: 'c', step: 2, visited: [0, 2] });
+    expect(store.state).toEqual({ circuit: 'c', step: 2, visited: [0, 2], route: false });
     store.go(2);
     expect(store.state.visited).toEqual([0, 2]);
     store.close();
-    expect(store.state).toEqual({ circuit: null, step: 0, visited: [] });
+    expect(store.state).toEqual({ circuit: null, step: 0, visited: [], route: false });
   });
 
   test('a step that does not exist throws a RangeError and leaves the state', () => {
@@ -98,6 +98,6 @@ describe('STORE-04: the lesson store shows each step taken, and refuses a step t
       expect(() => store.go(bad)).toThrow(RangeError);
       expect(() => store.go(bad)).toThrow(/^Invalid landmark index: /);
     }
-    expect(store.state).toEqual({ circuit: 'c', step: 2, visited: [0, 2] });
+    expect(store.state).toEqual({ circuit: 'c', step: 2, visited: [0, 2], route: false });
   });
 });

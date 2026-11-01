@@ -109,7 +109,12 @@ describe('the view', () => {
     lesson.go(2);
     flushSync();
     expect(view.current.lang).toBe('fr');
-    expect(view.current.lesson).toEqual({ circuit: 'circuit', step: 2, visited: [0, 2] });
+    expect(view.current.lesson).toEqual({
+      circuit: 'circuit',
+      step: 2,
+      visited: [0, 2],
+      route: false,
+    });
   });
 
   test('follows each engine change, copied: the model’s and the sections’', () => {
@@ -275,6 +280,21 @@ describe('a lesson landmark’s tract', () => {
     act(() => lesson.close());
     expect(tracts.showLandmarkTract).toHaveBeenCalledTimes(3);
     expect(tracts.clearLandmarkTract).toHaveBeenCalledTimes(3);
+  });
+
+  test('the whole route draws no landmark’s tract; stepping on to the landmark draws it', () => {
+    const { session, lesson, tracts } = lessonWorld();
+    session.setExplorer('circuits');
+    lesson.start('corticospinal');
+    lesson.showRoute();
+    flushSync();
+    expect(tracts.showLandmarkTract).not.toHaveBeenCalled();
+    lesson.go(0);
+    flushSync();
+    expect(tracts.showLandmarkTract.mock.calls).toEqual([['cst-left']]);
+    lesson.showRoute();
+    flushSync();
+    expect(tracts.clearLandmarkTract).toHaveBeenCalledTimes(1);
   });
 
   test('a failed download is said once, and tried again on coming back to the landmark', async () => {

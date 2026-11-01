@@ -49,9 +49,9 @@ describe('the list', () => {
       const label = document.getElementById(group.getAttribute('aria-labelledby')!)!;
       expect(label.tagName).toBe('H3');
     }
-    expect(rows()).toHaveLength(70);
+    expect(rows()).toHaveLength(120);
     expect(document.querySelector('.scope-note')!.textContent).toContain(
-      '70 profiles · adult acquired deficits',
+      '120 profiles · adult acquired deficits',
     );
     expect(document.querySelector('[role="group"][aria-label="Deficits"]')).not.toBeNull();
     await expect.element(page.getByRole('searchbox', { name: /search deficits/i })).toBeVisible();
@@ -75,7 +75,7 @@ describe('the list', () => {
     expect(field().value).toBe('');
     expect(document.activeElement).toBe(field());
     expect(calls.at(-1)).toBe('query:');
-    await expect.poll(announced, { timeout: 2000 }).toBe('70 deficits');
+    await expect.poll(announced, { timeout: 2000 }).toBe('120 deficits');
   });
 
   test('an equal sentence for a different query is said again', async () => {
@@ -85,7 +85,7 @@ describe('the list', () => {
     await expect.poll(announced, { timeout: 2000 }).toBe('1 deficit');
     // Stands for the screen reader having spoken it: only a new write is said again.
     document.querySelector('.visually-hidden[role="status"]')!.textContent = '';
-    await userEvent.fill(field(), 'amnesi');
+    await userEvent.fill(field(), 'astasi');
     await expect.poll(() => rows().length).toBe(1);
     await expect.poll(announced, { timeout: 2000 }).toBe('1 deficit');
   });
@@ -158,7 +158,7 @@ describe('the list', () => {
       expect(items.length).toBeGreaterThan(0);
       expect(group.querySelectorAll('ul > li > button.row')).toHaveLength(items.length);
     }
-    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(70);
+    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(120);
   });
 
   test('one clear control: the custom button, with the native cancel hidden (D9)', async () => {
@@ -228,20 +228,25 @@ describe('the list', () => {
 });
 
 describe('opening a deficit', () => {
-  test('a profile without parcel-level evidence opens with its publications and no region buttons', async () => {
+  test('a finding without parcel-level evidence shows its publication and no region buttons beside a mapped one', async () => {
     const { view } = await mount();
-    await row('autotopagnosia').click();
-    await expect.poll(() => heading().textContent!.trim()).toBe('Autotopagnosia');
-    expect(document.querySelectorAll('button.region')).toHaveLength(0);
-    await expect.element(page.getByText('No atlas mapping available.')).toBeVisible();
-    document.querySelector<HTMLElement>('summary')!.click();
-    expect(document.querySelectorAll('article.publication')).toHaveLength(2);
+    await row('motor-neglect').click();
+    await expect.poll(() => heading().textContent!.trim()).toBe('Motor neglect');
+    const finding = (id: string) =>
+      document.querySelector<HTMLElement>(`article.association[data-association="${id}"]`)!;
+    const unmapped = finding('motor-neglect-parietal');
+    expect(unmapped.querySelectorAll('button.region')).toHaveLength(0);
+    expect(unmapped.querySelector('.regions')!.textContent!.trim()).toBe(
+      'No atlas mapping available.',
+    );
+    expect(finding('motor-neglect-putamen').querySelectorAll('button.region')).toHaveLength(1);
+    unmapped.querySelector<HTMLElement>('summary')!.click();
+    expect(unmapped.querySelectorAll('article.publication')).toHaveLength(1);
     view.lang = 'fr';
-    await expect.poll(() => heading().textContent!.trim()).toBe('Autotopoagnosie');
-    await expect
-      .element(page.getByText('Aucune correspondance disponible dans l’atlas.'))
-      .toBeVisible();
-    expect(document.querySelectorAll('button.region')).toHaveLength(0);
+    await expect.poll(() => heading().textContent!.trim()).toBe('Négligence motrice');
+    expect(unmapped.querySelector('.regions')!.textContent!.trim()).toBe(
+      'Aucune correspondance disponible dans l’atlas.',
+    );
   });
 
   test('the heading takes focus once the profile for that deficit is in the page (x2-focus-after-render)', async () => {

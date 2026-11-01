@@ -12,7 +12,8 @@ HEMISPHERES = {"lh": "left", "rh": "right"}
 
 # What an anatomy may publish beside its cortex, aseg structures and volumes.
 LAYERS = ("networks", "nextbrain", "cerebellar_lobules", "white_matter", "spinal_cord",
-          "neurosynth_terms", "arterial_territories", "cerebellar_functions", "coordinate_spaces")
+          "neurosynth_terms", "arterial_territories", "cerebellar_functions", "coordinate_spaces",
+          "striatal_networks")
 
 
 def resolve_config(document):

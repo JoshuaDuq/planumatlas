@@ -41,6 +41,7 @@ const receptors = readRepoYaml<{ sources: Record<string, Source> }>(
 );
 const territories = readRepoYaml<Source>('config/arterial-territories.yaml');
 const cerebellar = readRepoYaml<Source>('config/cerebellar-functions.yaml');
+const striatal = readRepoYaml<Source>('config/striatal-networks.yaml');
 const bibliography = readFileSync(resolve(repoRoot, 'docs/reference/references.md'), 'utf8');
 
 /** Case, accents and punctuation are ignored; any other difference is a different work. */
@@ -143,6 +144,7 @@ test('functional-region, domain and receptor sources cite their PMID’s DOI, ti
     ...receptors.sources,
     territories,
     cerebellar,
+    striatal,
   })) {
     const work = record(`pmid:${source.pmid}`);
     assert.equal(source.doi.toLowerCase(), `https://doi.org/${work.doi}`, `${id}: DOI`);
@@ -186,6 +188,7 @@ test('the records file holds exactly the cited works', () => {
     ...Object.values(receptors.sources).map((source) => `pmid:${source.pmid}`),
     `pmid:${territories.pmid}`,
     `pmid:${cerebellar.pmid}`,
+    `pmid:${striatal.pmid}`,
     ...bibliographyEntries.map((line) => `pmid:${line.match(/\bPMID (\d+)\b/)?.[1]}`),
   ]);
   assert.deepEqual([...cited].sort(), Object.keys(records).sort());

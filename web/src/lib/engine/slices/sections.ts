@@ -8,6 +8,7 @@ import type {
   SegmentationAgreement,
 } from '../../core/catalog/segmentation-agreement.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
+import { STRIATAL_ATLAS } from '../tissues/striatal-overlay.ts';
 import type {
   Anatomy,
   CutHit,
@@ -161,7 +162,8 @@ export class BrainSections extends EventTarget {
           return;
         }
         const detailReady = this.tissues.hasDetail(s.detail);
-        if (this.tissues.layers.has(this.state.cutAtlas) && detailReady) this.update();
+        if (this.tissues.layers.has(this.state.cutAtlas) && detailReady && this.striatalReady)
+          this.update();
         else {
           this.group.visible = false;
           // `setMode` has already reported the failure before rejecting.
@@ -175,6 +177,11 @@ export class BrainSections extends EventTarget {
 
   get active(): boolean {
     return this.state.mode !== 'off';
+  }
+
+  /** Whether the striatal network volume the cut's colouring reads is there, if it reads one. */
+  private get striatalReady(): boolean {
+    return !this.tissues.wantsStriatal() || this.tissues.layers.has(STRIATAL_ATLAS);
   }
 
   /** Whether a cut can be drawn without first downloading the tissue envelopes it caps. */
@@ -286,6 +293,7 @@ export class BrainSections extends EventTarget {
       loaded = this.state.cutAtlas;
       await this.tissues.load(loaded);
     }
+    if (this.tissues.wantsStriatal()) await this.tissues.load(STRIATAL_ATLAS);
     this.loadedCutAtlas = loaded;
     if (this.display) this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
   }

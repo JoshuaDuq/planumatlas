@@ -7,7 +7,7 @@ import numpy as np
 from nibabel.freesurfer.io import read_annot, read_geometry
 from scipy.spatial import cKDTree
 
-from ..layers import arterial_territories, cerebellar_functions
+from ..layers import arterial_territories, cerebellar_functions, striatal_networks
 from ..sources import read_color_table, read_config, sha256, verify_sources, write_json
 from . import nextbrain, white_matter
 from .placement import placements
@@ -214,6 +214,11 @@ def export_tissue_labels(config, manifest):
     if cerebellar_functions.is_declared(config):
         atlases[cerebellar_functions.ATLAS_ID] = cerebellar_functions.export_cut_atlas(
             config, cerebellar_functions.read_definition(), image, codes,
+            [dict(label) for label in labels], manifest["regions"],
+        )
+    if striatal_networks.is_declared(config):
+        atlases[striatal_networks.ATLAS_ID] = striatal_networks.export_cut_atlas(
+            config, striatal_networks.read_definition(), image, codes,
             [dict(label) for label in labels], manifest["regions"],
         )
     metadata = {

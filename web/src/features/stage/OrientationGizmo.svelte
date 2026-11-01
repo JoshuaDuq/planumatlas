@@ -1,7 +1,9 @@
 <!--
   The orientation gizmo, top right of the visible stage, after Blender's: each anatomical direction as the
-  camera sees it frames its view, the centre the oblique one. Positions follow the per-frame `camera` event
-  straight into the DOM. The chevrons are the single-pointer alternative to dragging (WCAG 2.5.7).
+  camera sees it frames its view; the centre is only the axes' origin, since a direction toward the viewer
+  lands on it. Under it, the held view in words and the oblique view's link. Positions follow the
+  per-frame `camera` event straight into the DOM. The chevrons are the single-pointer alternative to
+  dragging (WCAG 2.5.7).
 -->
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
@@ -63,6 +65,8 @@
     return engine.on('viewHeld', (event) => (held = event.held));
   });
   const heldName = $derived(held ? viewName : '');
+  // A letter's view is named beside the oblique link; the oblique view names itself.
+  const heldLetter = $derived(heldName && heldName !== 'oblique' ? heldName : '');
 
   const buttons = {} as Record<Letter, HTMLElement>;
   // Each axis is drawn twice: the stage's dark halo under a faint line, so it reads over tissue too.
@@ -115,6 +119,22 @@
   {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
   {@attach rove}
 >
+  <!-- First in the toolbar, as the centre was, so the arrows walk on from it to the letters. -->
+  <p class="gizmo-caption">
+    {#if heldLetter}
+      <span>{copy.namedView(names[heldLetter as ViewName])}</span>
+      <span aria-hidden="true">·</span>
+    {/if}
+    <button
+      type="button"
+      class="gizmo-oblique"
+      aria-label={copy.namedView(names.oblique)}
+      aria-pressed={heldName === 'oblique'}
+      onclick={() => choose('oblique')}
+    >
+      {heldName === 'oblique' ? copy.namedView(names.oblique) : names.oblique}
+    </button>
+  </p>
   <div class="gizmo-field">
     <svg class="gizmo-axes" viewBox="-1 -1 2 2" aria-hidden="true" focusable="false">
       {#each ['halo', 'ink'] as layer (layer)}
@@ -127,14 +147,7 @@
         {/each}
       {/each}
     </svg>
-    <button
-      type="button"
-      class="gizmo-centre"
-      aria-label={copy.namedView(names.oblique)}
-      aria-pressed={heldName === 'oblique'}
-      data-tooltip={copy.namedView(names.oblique)}
-      onclick={() => choose('oblique')}
-    ></button>
+    <span class="gizmo-centre" aria-hidden="true"></span>
     {#each LETTERS as letter (letter)}
       <button
         type="button"
@@ -245,9 +258,10 @@
       background-clip: padding-box;
       cursor: pointer;
     }
+    /* The origin: under the directions toward the viewer, over those pointing away. */
     .gizmo-centre {
       z-index: 50;
-      background: none;
+      pointer-events: none;
     }
     .gizmo-centre::before {
       content: '';
@@ -277,8 +291,7 @@
       background-color: var(--overlay-track);
       color: var(--overlay-ink-muted);
     }
-    .gizmo-letter[aria-pressed='true'],
-    .gizmo-centre[aria-pressed='true']::before {
+    .gizmo-letter[aria-pressed='true'] {
       background-color: var(--overlay-accent);
       color: var(--overlay-halo-core);
     }
@@ -287,8 +300,50 @@
         background-color: var(--overlay-control-border);
         color: var(--overlay-ink);
       }
-      .gizmo-centre:hover:not([aria-pressed='true'])::before {
-        background: var(--overlay-ink);
+    }
+    /*
+     * A marking under the axes, haloed like the stage's letters. Anchored at the gizmo's right edge, it is
+     * centred under the axes while it fits and grows leftward, into the stage, when it does not. A coarse
+     * pointer's spill is hit area only, so the words keep the gutter.
+     */
+    .gizmo-caption {
+      position: absolute;
+      top: calc(100% - var(--space-1));
+      right: var(--gizmo-spill);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-1);
+      min-width: calc(100% - 2 * var(--gizmo-spill));
+      margin: 0;
+      color: var(--overlay-ink);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      white-space: nowrap;
+      text-shadow:
+        0 0 1px var(--overlay-halo-core),
+        0 0 2px var(--overlay-halo-core),
+        0 0 4px var(--overlay-halo);
+    }
+    .gizmo-oblique {
+      min-height: var(--gizmo-target);
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--overlay-accent);
+      font: inherit;
+      text-shadow: inherit;
+      cursor: pointer;
+    }
+    .gizmo-oblique[aria-pressed='true'] {
+      color: var(--overlay-ink);
+      cursor: default;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .gizmo-oblique:not([aria-pressed='true']):hover {
+        color: var(--overlay-accent-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
     }
     .orientation-gizmo :global(.icon-button) {
@@ -367,10 +422,12 @@
       .gizmo-axes line {
         stroke: CanvasText;
       }
-      .gizmo-letter[aria-pressed='true'],
-      .gizmo-centre[aria-pressed='true'] {
+      .gizmo-letter[aria-pressed='true'] {
         outline: 2px solid Highlight;
         outline-offset: 1px;
+      }
+      .gizmo-oblique:not([aria-pressed='true']) {
+        color: LinkText;
       }
     }
   }

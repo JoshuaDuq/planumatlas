@@ -1,6 +1,7 @@
 <!--
-  The open landmark (viewer/ui/panels/circuits.js:167-196, index.html:341): the circuit's name for the
-  outline, the step's title (the focus target when a landmark opens), its side and group, its role and
+  The whole route ahead of a lesson's landmarks: the route the circuit takes and what the stage's
+  numbers mark. Then the open landmark (viewer/ui/panels/circuits.js:167-196, index.html:341): the
+  circuit's name for the outline, the step's title (the focus target when a landmark opens), its side and group, its role and
   explanation, and, once the reader has wandered to another region, a way back. The landmark's own
   commands are the region's, which I1 renders below this in `RegionDetail`; `landmarkSelected` on the
   model tells it which of its parts to leave out. Not a landmark region (deviations/x3-no-landmarks.md).
@@ -21,7 +22,16 @@
   });
 </script>
 
-{#if model.exploring && model.circuit && model.step}
+{#if model.route && model.circuit}
+  <div class="circuit-profile" aria-busy={model.busy} bind:this={root}>
+    <h2 class="visually-hidden">{model.circuit.name[lang]}</h2>
+    <div class="circuit-content">
+      <h3 class="circuit-title" data-circuit-title tabindex="-1">{copy.routeTitle}</h3>
+      <p class="circuit-explanation circuit-route">{model.circuit.route[lang]}</p>
+      <p class="circuit-note">{copy.routeNote}</p>
+    </div>
+  </div>
+{:else if model.exploring && model.circuit && model.step}
   {@const step = model.step}
   <div
     class="circuit-profile"
@@ -109,6 +119,9 @@
     }
     .circuit-explanation {
       margin-top: var(--space-4);
+    }
+    .circuit-route {
+      margin-top: var(--space-2);
     }
     .circuit-note {
       margin-top: var(--space-3);

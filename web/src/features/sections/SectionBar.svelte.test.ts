@@ -227,6 +227,7 @@ describe('the Section popover', () => {
       'nextbrain',
       'arterial',
       'nettekoven',
+      'choi',
     ]);
     expect(element.value).toBe('destrieux');
     await select.selectOptions('hcp-mmp');

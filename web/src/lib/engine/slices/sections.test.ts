@@ -48,6 +48,7 @@ function fixture() {
     async load() {},
     layers: new Map([['destrieux', {}]]),
     hasDetail: () => true,
+    wantsStriatal: () => false,
     solids: { warm() {} },
     update() {},
     intersect() {
@@ -137,6 +138,37 @@ test('GPU cut plane preserves fractional coordinates and reverse-side clipping',
   await sections.setMode('off');
   assert.equal(sections.group.visible, false);
   assert.deepEqual(model.clippingPlanes, []);
+  sections.dispose();
+});
+
+test('Yeo colouring chosen during a cut loads the striatal network volume before drawing', async () => {
+  const { sections, model, tissues } = fixture();
+  const loaded: string[] = [];
+  const drawn: string[] = [];
+  tissues.load = async (atlas: string) => {
+    loaded.push(atlas);
+    tissues.layers.set(atlas, {});
+  };
+  tissues.update = (_frame: unknown, atlas: string) => drawn.push(atlas);
+  await sections.setMode('coronal');
+  assert.deepEqual(loaded, ['destrieux']);
+
+  model.state.surfaceColor = 'network';
+  tissues.wantsStriatal = () => model.state.surfaceColor === 'network';
+  drawn.length = 0;
+  model.dispatchEvent(new Event('change'));
+  // The change finds the striatal volume missing, so it prepares the cut rather than drawing.
+  assert.deepEqual(drawn, []);
+  await vi.waitFor(() => assert.deepEqual(loaded, ['destrieux', 'destrieux', 'choi']));
+  await vi.waitFor(() => assert.ok(drawn.length > 0));
+  assert.ok(drawn.every((atlas) => atlas === 'destrieux'));
+
+  // Loaded once, it is reused: the next colour change draws straight away.
+  model.state.surfaceColor = 'tissue';
+  model.dispatchEvent(new Event('change'));
+  model.state.surfaceColor = 'network';
+  model.dispatchEvent(new Event('change'));
+  assert.equal(loaded.filter((atlas) => atlas === 'choi').length, 1);
   sections.dispose();
 });
 

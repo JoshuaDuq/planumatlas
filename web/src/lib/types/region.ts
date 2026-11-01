@@ -34,6 +34,14 @@ export interface Region {
   cerebellar_functions?: { region: string; fraction: number }[];
   /** The share of the lobule in no functional region, counted rather than inferred. */
   cerebellar_functions_unassigned?: number;
+  /** A striatal structure's shares in each network's striatal territory (Choi et al. 2012), largest first. */
+  striatal_networks?: { network: string; fraction: number }[];
+  /** The share of the structure outside the striatum the atlas labels, counted rather than inferred. */
+  striatal_networks_unassigned?: number;
+  /** Its labelled striatal voxels by Choi's confidence: reached and confident, reached but low, or filled. */
+  striatal_networks_confidence?: { filled: number; low: number; confident: number };
+  /** The share of its labelled striatal voxels that lie in the putamen. */
+  striatal_networks_putamen?: number;
   vertex_count?: number;
   triangle_count?: number;
   surface_area_mm2?: number;

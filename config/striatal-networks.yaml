@@ -1,0 +1,52 @@
+# Striatal networks (Choi et al. 2012): each striatal voxel of a 1,000-adult
+# resting-state group assigned to the Yeo et al. (2011) cortical network its
+# connectivity most resembles, in FSL's MNI152 (MNI152NLin6Asym).
+# scripts/register_striatal_networks.py registers that template to this brain
+# with SynthMorph, carries the atlas across by nearest neighbour and keeps it to
+# this brain's caudate, putamen and accumbens; the build reads the result. It is
+# a group map placed on this brain, not this brain's measured function.
+label: Striatal networks (Choi et al. 2012)
+citation: Choi EY, Yeo BTT, Buckner RL (2012) The organization of the human striatum estimated by intrinsic functional connectivity. J Neurophysiol 108:2242-2263
+doi: https://doi.org/10.1152/jn.00270.2012
+pmid: 22832566
+# Distributed with FreeSurfer, whose software licence covers the data it ships;
+# the paper and its wiki page name no separate licence.
+license: Distributed with FreeSurfer (FreeSurfer Software License)
+source:
+  # The FreeSurfer installation's average/Choi_JNeurophysiol12_MNI152 directory.
+  directory: average/Choi_JNeurophysiol12_MNI152
+  files:
+    # The loose mask reaches past the group's striatum so that a brain's own
+    # striatum can cut it; the tight mask leaves a third of the caudate out.
+    atlas: [Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz, 4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3]
+    lut: [Choi2012_7Networks_ColorLUT.txt, f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26]
+    # Each voxel's confidence (Choi et al. 2012, Methods): the fraction of its 25 most correlated
+    # cortical vertices that belong to the network it was assigned.
+    confidence: [Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz, e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d]
+# The template the atlas is drawn in, pinned as config/coordinate-spaces.yaml pins it.
+template:
+  base: https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym
+  files:
+    t1: [tpl-MNI152NLin6Asym_res-01_T1w.nii.gz, f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258]
+    mask: [tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz, 6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428]
+# Fixed before the atlas was carried onto CDMD (2026-10-31). The template's own
+# SynthSeg striatum, carried by the same warp, must meet this brain's aseg; and
+# no more than a quarter of any striatal structure may be filled from a
+# neighbouring voxel rather than reached by the atlas itself.
+acceptance:
+  striatum_dice_mean_min: 0.8
+  structure_covered_min: 0.75
+# Below this confidence the assigned network holds a plurality, not a majority, of a voxel's 25
+# most correlated cortical vertices; the cut draws such voxels, and those the atlas did not reach,
+# paler. The authors recommend reading the parcellation with its confidence.
+minimum_confidence: 0.5
+# Choi's values 1 to 7, which are Yeo's seven networks in their published order
+# and colours (brain_model/layers/networks.py). Names as the viewer spells them.
+networks:
+  Vis: {name: Visual, name_fr: Visuel}
+  SomMot: {name: Somatomotor, name_fr: Somatomoteur}
+  DorsAttn: {name: Dorsal attention, name_fr: Attention dorsale}
+  SalVentAttn: {name: Salience / ventral attention, name_fr: Saillance / attention ventrale}
+  Limbic: {name: Limbic, name_fr: Limbique}
+  Cont: {name: Frontoparietal control, name_fr: Contrôle frontopariétal}
+  Default: {name: Default mode, name_fr: Mode par défaut}

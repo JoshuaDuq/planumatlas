@@ -82,3 +82,12 @@ Derived layers that are not cortical parcellations.
 .. automodule:: brain_model.layers.cerebellar_functions
    :members:
 ```
+
+## Striatal networks
+
+`brain_model.layers.striatal_networks`: The Choi et al. (2012) striatal network atlas, registered from FSL's MNI152 template and kept to the caudate, putamen and accumbens: its regions, cut labels, region shares and checks.
+
+```{eval-rst}
+.. automodule:: brain_model.layers.striatal_networks
+   :members:
+```

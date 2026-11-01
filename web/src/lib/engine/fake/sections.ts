@@ -10,6 +10,7 @@ import type {
   Vec3,
 } from '../api.ts';
 import type { FakeModel } from './model.ts';
+import { stagedFrame } from '../slices/coordinates.ts';
 import { coded } from './support.ts';
 
 export interface FakeSectionsOptions {
@@ -323,7 +324,17 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
       emit();
     },
 
-    mprFrame: (plane) => centeredFrame(plane, state.crosshair, state.tilt, state.azimuth),
+    mprFrame(plane) {
+      const frame = stagedFrame(plane, state.crosshair, state.mode === plane && state.reverse);
+      const array = (vector: { toArray(): number[] }) => vector.toArray() as Vector;
+      return {
+        center: array(frame.center),
+        normal: array(frame.normal),
+        u: array(frame.u),
+        v: array(frame.v),
+        edges: [...frame.edges],
+      };
+    },
     pixels() {
       const { size } = requireVolumes();
       const pixels = new Uint8ClampedArray(size * size * 4);

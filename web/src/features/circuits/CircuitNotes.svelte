@@ -35,13 +35,21 @@
     open = closed();
   });
 
+  // On the whole route no landmark is the current one.
+  const progressOf = (index: number) =>
+    model.route
+      ? model.lesson.visited.includes(index)
+        ? 'visited'
+        : 'upcoming'
+      : stepProgress(index, model.lesson);
+
   let sequence = $state<HTMLElement | null>(null);
   $effect(() => {
     if (sequence) return neighbourKeys(sequence);
   });
 </script>
 
-{#if model.exploring && model.circuit && model.step}
+{#if model.exploring && model.circuit && (model.step || model.route)}
   {@const circuit = model.circuit}
   {@const step = model.step}
   <div class="circuit-notes" aria-busy={model.busy}>
@@ -49,7 +57,7 @@
       <h3 id="{uid}-landmarks" class="landmarks-heading">{copy.landmarks}</h3>
       <ol class="steps" role="list" aria-labelledby="{uid}-landmarks" bind:this={sequence}>
         {#each circuit.steps as landmark, index (landmark.id)}
-          {@const progress = stepProgress(index, model.lesson)}
+          {@const progress = progressOf(index)}
           <li>
             <button
               type="button"
@@ -81,14 +89,16 @@
         </div>
       </Disclosure>
     </div>
-    <div class="note">
-      <Disclosure summary={copy.mapping} variant="section" bind:open={open.mapping}>
-        <div class="body">
-          <p>{step.mapping[lang]}</p>
-          <p class="small">{copy.mriNote}</p>
-        </div>
-      </Disclosure>
-    </div>
+    {#if step}
+      <div class="note">
+        <Disclosure summary={copy.mapping} variant="section" bind:open={open.mapping}>
+          <div class="body">
+            <p>{step.mapping[lang]}</p>
+            <p class="small">{copy.mriNote}</p>
+          </div>
+        </Disclosure>
+      </div>
+    {/if}
     <div class="note">
       <Disclosure summary={copy.clinical} variant="section" bind:open={open.clinical}>
         <div class="body">

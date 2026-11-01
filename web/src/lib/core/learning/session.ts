@@ -4,19 +4,21 @@ export interface CircuitSessionState {
   circuit: string | null;
   step: number;
   visited: number[];
+  /** The whole route is shown, every landmark at once, ahead of the steps. */
+  route: boolean;
 }
 
 /** Learning progress is independent of free anatomical exploration. `visited` lists the landmarks seen, in order. */
 export function createCircuitSession(catalog: Pick<CircuitCatalog, 'get'>) {
-  let state: CircuitSessionState = { circuit: null, step: 0, visited: [] };
+  let state: CircuitSessionState = { circuit: null, step: 0, visited: [], route: false };
   return {
     snapshot: (): CircuitSessionState => ({ ...state, visited: [...state.visited] }),
     start(id: string) {
       catalog.get(id);
-      state = { circuit: id, step: 0, visited: [0] };
+      state = { circuit: id, step: 0, visited: [0], route: false };
     },
     close() {
-      state = { circuit: null, step: 0, visited: [] };
+      state = { circuit: null, step: 0, visited: [], route: false };
     },
     go(step: number) {
       const circuit = catalog.get(state.circuit!);
@@ -27,7 +29,13 @@ export function createCircuitSession(catalog: Pick<CircuitCatalog, 'get'>) {
         ...state,
         step,
         visited: state.visited.includes(step) ? state.visited : [...state.visited, step],
+        route: false,
       };
+    },
+    /** The route in front of the open lesson's steps; the step it leaves is kept for the way back in. */
+    showRoute() {
+      if (!state.circuit) throw new Error('No lesson is open to show the route of.');
+      state = { ...state, route: true };
     },
   };
 }

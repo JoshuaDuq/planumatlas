@@ -435,6 +435,24 @@ describe('placement', () => {
     }
   });
 
+  test.each([
+    [375, 'en'],
+    [375, 'fr'],
+    [360, 'en'],
+    [360, 'fr'],
+  ] as const)('on a %i px phone in %s the four tools sit on one row', async (width, lang) => {
+    await page.viewport(width, 800);
+    try {
+      await mount({ phone: true, lang }, { width, height: 700 });
+      const tools = [...dock().querySelectorAll<HTMLElement>('.stage-tool:not([hidden])')];
+      expect(tools).toHaveLength(4);
+      const rows = new Set(tools.map((node) => Math.round(node.getBoundingClientRect().top)));
+      expect(rows.size).toBe(1);
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
   test('on a phone it fills the stage between the gutters and leaves the top third in sight', async () => {
     await mount({ phone: true }, { width: 390, height: 700, bottomInset: 200 });
     // Text at 200 % makes the popover taller than the room.

@@ -24,6 +24,7 @@
   import type { Fullscreen } from '../../features/stage/fullscreen.ts';
   import type { HoverSources } from '../../features/stage/hover-text.ts';
   import OrientationGizmo from '../../features/stage/OrientationGizmo.svelte';
+  import RouteMarks from '../../features/stage/RouteMarks.svelte';
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
   import StageKeys from '../../features/stage/StageKeys.svelte';
   import StageOverlay from '../../features/stage/StageOverlay.svelte';
@@ -282,6 +283,18 @@
         />
       {/snippet}
     </Dock>
+    {@const lessonCopy = t(current.lang, 'circuits')}
+    <RouteMarks
+      engine={world.engine}
+      marks={current.explorer === 'circuits' && current.lesson.circuit && current.lesson.route
+        ? world.circuits.get(current.lesson.circuit).steps.map((step, index) => ({
+            region: step.region,
+            label: lessonCopy.routeMark(index, step.name[current.lang]),
+          }))
+        : []}
+      label={lessonCopy.wholeRoute}
+      onOpen={(index) => app.ports.openLessonStep(index)}
+    />
     <OrientationGizmo
       engine={world.engine}
       stage={app.stage}
@@ -434,7 +447,7 @@
     /* A raised phone sheet leaves the picture a strip: the tools and markings would collide in it (stage.css:720-721). */
     :global(
       #viewport[data-sheet-full='true']
-        :is(.stage-dock, .scale-bar, .orientation, .orientation-gizmo)
+        :is(.stage-dock, .scale-bar, .orientation, .orientation-gizmo, .route-marks)
     ) {
       visibility: hidden;
     }

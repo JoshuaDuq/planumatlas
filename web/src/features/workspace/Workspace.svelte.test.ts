@@ -473,6 +473,29 @@ describe('notice', () => {
     expect(focused()).toBe(el(tab('Anatomy')));
   });
 
+  test('on the rails an open detail’s notice follows its location bar, which holds still; the sheet keeps it after the tablist', async () => {
+    const { world, holder } = await mount(
+      { notice: { text: 'Cortex hidden.' } },
+      { slots: 'stepper' },
+    );
+    holder.workspace!.showDetail();
+    await settle();
+    const order = () =>
+      [...document.querySelectorAll('[role=tablist], .notice, .detail-location')].map(
+        (n) => n.getAttribute('role') ?? n.classList[0],
+      );
+    const bar = () => document.querySelector('.detail-location')!.getBoundingClientRect().top;
+    expect(order()).toEqual(['tablist', 'detail-location', 'notice']);
+    const held = bar();
+    world.notice = null;
+    await settle();
+    expect(bar()).toBe(held);
+    world.notice = { text: 'Left hemisphere shown alone.' };
+    world.shell = 'sheet';
+    await settle();
+    expect(order()).toEqual(['tablist', 'notice', 'detail-location']);
+  });
+
   test('a shell change keeps focus where it was inside the notice', async () => {
     const { world } = await mount({ notice: { text: 'Planum was updated.', action: 'reload' } });
     el(button('Reload')).focus();

@@ -909,6 +909,29 @@
     },
     "regions_with_shares": 27
   },
+  "striatal_networks": {
+    "checks": {
+      "striatum_dice": {
+        "left_caudate": 0.9046,
+        "right_caudate": 0.8979,
+        "left_putamen": 0.9177,
+        "right_putamen": 0.9104,
+        "left_accumbens": 0.8501,
+        "right_accumbens": 0.7776
+      },
+      "striatum_dice_mean": 0.8764,
+      "structure_covered": {
+        "left_caudate": 0.9601,
+        "right_caudate": 0.9537,
+        "left_putamen": 0.9872,
+        "right_putamen": 0.9865,
+        "left_accumbens": 0.8898,
+        "right_accumbens": 0.8281
+      },
+      "structure_covered_min": 0.8281
+    },
+    "regions_with_shares": 23
+  },
   "coordinate_spaces": {
     "mni152nlin2009casym": {
       "hemisphere_agreement": 0.9977,
@@ -4647,7 +4670,8 @@
       "pam50": 34,
       "wmparc": 68,
       "arterial": 30,
-      "nettekoven": 32
+      "nettekoven": 32,
+      "choi": 14
     },
     "placed_on_surface_no_ribbon_voxel": [
       "julich:left:23",
@@ -4737,7 +4761,8 @@
     "neurosynth_terms",
     "arterial_territories",
     "cerebellar_functions",
-    "coordinate_spaces"
+    "coordinate_spaces",
+    "striatal_networks"
   ],
   "published_files": [
     "aseg.volume",
@@ -4780,6 +4805,8 @@
     "tissue-envelopes.glb",
     "tissue-labels.json",
     "tissues-arterial.volume",
+    "tissues-choi-confidence.volume",
+    "tissues-choi.volume",
     "tissues-destrieux.volume",
     "tissues-hcp-mmp.volume",
     "tissues-julich.volume",

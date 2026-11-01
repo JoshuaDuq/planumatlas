@@ -2,7 +2,7 @@
 
 Review date: 29 October 2026.
 
-This is the historical audit of the first 29 tours. Following the 31 October classification cleanup, the active catalogue contains five tours and 25 landmarks. The counts below retain their original audit scope.
+This is the historical audit of the first 29 tours. Following the 31 October classification cleanup, the active catalogue contains five tours and 25 landmarks. The counts below retain their original audit scope. On 1 November 2026, the voluntary gaze control tour was deleted from the archive with its linked `oculomotor-apraxia` profile.
 
 ## Scope and status
 

@@ -298,6 +298,19 @@
         min-height: 44px;
       }
     }
+    /*
+     * A phone's stage holds the four tools on one row, in French too, down to a 360px screen. A tool has
+     * no ground until it opens, so the targets can meet.
+     */
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .stage-toolbar {
+        gap: 0;
+      }
+      :global(.stage-tool) {
+        gap: var(--space-1);
+        padding: 0 var(--space-2);
+      }
+    }
     :global(.stage-tool[hidden]) {
       display: none;
     }

@@ -1,7 +1,9 @@
 <!--
   The task panel's frame (viewer/ui/chrome/workspace.js:120-314, index.html:204-226, layout.css:13-122):
   one tablist of the five modes, the notice, the selection strip, and the two always-mounted panels,
-  the list (`#navigator`) and the drill-in detail (`#inspector`) with its location bar. The tablist is
+  the list (`#navigator`) and the drill-in detail (`#inspector`) with its location bar. On the rails an
+  open detail's notice follows its location bar, so the bar and a lesson's stepper hold still while
+  notices come and go; the sheet keeps its notice in the grip, on screen at every rest. The tablist is
   one instance in both shells, placed by CSS (decision 0007). The lists and the detail's content are
   the features' own, given as snippets.
 
@@ -214,6 +216,7 @@
   }
 
   const showStrip = $derived(shell === 'rails' && stripVisible({ view, mode, selection }));
+  const noticeInDetail = $derived(shell === 'rails' && view === 'detail');
 
   // ---- tab keys ----------------------------------------------------------------------------
 
@@ -270,7 +273,9 @@
     {/each}
   </div>
 
-  <NoticeBar {lang} {notice} onAction={onNoticeAction} {onDismiss} />
+  {#if !noticeInDetail}
+    <NoticeBar {lang} {notice} onAction={onNoticeAction} {onDismiss} />
+  {/if}
 
   <SelectionStrip
     {lang}
@@ -310,6 +315,9 @@
       {stepper}
       {trailing}
     />
+    {#if noticeInDetail}
+      <NoticeBar {lang} {notice} onAction={onNoticeAction} {onDismiss} />
+    {/if}
     {@render detail?.()}
   </div>
 </div>

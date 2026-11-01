@@ -89,6 +89,22 @@ const SIDES = ['top', 'right', 'bottom', 'left'] as const;
 
 export const planeName = (plane: MprPlane, lang: Language): string => t(lang, 'mpr').labels[plane];
 
+type Side = 'right' | 'left' | 'anterior' | 'posterior' | 'superior' | 'inferior';
+
+/** The side a plane is seen from, by the letter at its panel's right edge. */
+const SEEN: Record<MprPlane, Readonly<Record<string, Side>>> = {
+  sagittal: { A: 'right', P: 'left' },
+  coronal: { L: 'anterior', R: 'posterior' },
+  axial: { R: 'superior', L: 'inferior' },
+};
+
+/** The side a panel shows its plane from, read off its edge letters. */
+export function seenFrom(plane: MprPlane, edges: readonly string[]): Side {
+  const side = SEEN[plane][edges[1]!];
+  if (!side) throw new Error(`A ${plane} panel cannot have ${edges[1]} at its right edge.`);
+  return side;
+}
+
 /** The slider's visible label, and so its name (deviations/g5-slider-label-in-name.md). */
 export const positionLabel = (plane: MprPlane, lang: Language): string =>
   t(lang, 'mpr').positionLabel(planeName(plane, lang));

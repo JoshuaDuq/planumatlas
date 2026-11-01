@@ -1534,6 +1534,156 @@
       "procedure": "scripts/register_coordinate_spaces.py: SynthMorph registration of each MNI template to brain.mgz, inverse warp sampled on a coarse grid",
       "citation": "https://doi.org/10.1016/S1053-8119(09)70884-5; https://doi.org/10.1016/j.neuroimage.2005.02.018",
       "license": "MNI template licence (use, copy, modify and distribute with the copyright notice); GPL-2.0 or later (SPM12, version 7771); the maps derive from the IXI dataset (CC BY-SA 3.0)"
+    },
+    {
+      "path": "data/cdmd/mri/striatal-networks.mgz",
+      "sha256": "ecee2beb3fd35dd4cb9306396a295803a78bd3c0f964f748dd1f782bf8c9eedc",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/cdmd/mri/striatal-networks-carried.mgz",
+      "sha256": "55f89a998527e89ad36c488abba88787eeee19761fd2636d8f9a2d07bc793920",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/cdmd/mri/striatal-template-aseg.mgz",
+      "sha256": "068e319d8d7602042bc3d196a86774cca11cd87c1e7d953342857dad25276c42",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/cdmd/mri/striatal-networks-confidence.mgz",
+      "sha256": "6902d573004218b5b15b479d8b4c49dda2cb503625290c73e0f7eeae0b7c6907",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/cdmd/striatal-registration.json",
+      "sha256": "05a1ef0227e256f1f1be657197fd51be4c3da26cb231ce72ee5c8077584ec21c",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
     }
   ]
 }

@@ -75,6 +75,7 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
     region.atlas === 'learning' ||
     region.atlas === 'arterial' ||
     region.atlas === 'nettekoven' ||
+    region.atlas === 'choi' ||
     region.supplemental
   ) {
     return {

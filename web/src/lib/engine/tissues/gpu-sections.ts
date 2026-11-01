@@ -63,6 +63,12 @@ import type { MriUniforms } from '../render/mri-material.ts';
 import type { Appearance } from '../render/materials.ts';
 import { token } from '../render/tokens.ts';
 import { createCapLabels, updateCapLabels } from './cap-labels.ts';
+import {
+  STRIATAL_ATLAS,
+  createStriatalPalette,
+  createStriatalUniforms,
+} from './striatal-overlay.ts';
+import type { StriatalUniforms } from './striatal-overlay.ts';
 import type { CapLabelUniforms } from './cap-labels.ts';
 import { addBoundaryEdges, createEdgeUniforms, pairTexture } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
@@ -86,6 +92,8 @@ export interface VolumeMetadata {
 export interface TissueAtlasRecord extends VolumeFile {
   labels: readonly Label[];
   voxel_spacing_mm?: readonly number[];
+  /** The striatal network atlas's confidence classes: 0 outside, 1 filled, 2 low, 3 confident. */
+  confidence?: VolumeFile & { classes: readonly string[] };
 }
 
 export interface TissueMetadata {
@@ -107,6 +115,7 @@ export interface Anatomy {
   mriUniforms: MriUniforms;
   capLabels: CapLabelUniforms;
   capEdges: EdgeUniforms;
+  striatal: StriatalUniforms;
 }
 
 /** One loaded cut atlas: its label grid on the GPU and the plane that samples it. */
@@ -197,6 +206,12 @@ export class TissueSections {
   private readonly details = new Map<string, number>();
   private whiteMatter: WhiteMatter | null = null;
   private paintKey: string | undefined;
+  private striatalPalette: DataTexture | null = null;
+  private striatalConfidence: {
+    texture: Data3DTexture;
+    worldToVoxel: Matrix4;
+    shape: Vector3;
+  } | null = null;
 
   private readonly model: CutModel;
   private readonly baseUrl: string | URL;
@@ -365,6 +380,7 @@ export class TissueSections {
       mriUniforms: createMriUniforms({ texture, worldToVoxel, volume }),
       capLabels: createCapLabels(),
       capEdges: createEdgeUniforms(),
+      striatal: createStriatalUniforms(),
     };
     this.markWith(anatomy.mriUniforms);
     return anatomy;
@@ -386,6 +402,63 @@ export class TissueSections {
     if (this.anatomy) setMriWindow(this.anatomy.mriUniforms, center, width);
   }
 
+  /**
+   * Whether the cut colours the striatum by its own voxels' networks, and how confidently: under
+   * Yeo colouring, or with the striatal network labels in their own colours, when the anatomy
+   * publishes them. The caller loads that atlas's volume before drawing.
+   */
+  wantsStriatal(): boolean {
+    const state = this.model.state;
+    return (
+      Boolean(this.metadata?.atlases[STRIATAL_ATLAS]) &&
+      !usesPaint(state) &&
+      (usesNetworkColors(state) || (state.cutAtlas === STRIATAL_ATLAS && usesAtlasColors(state)))
+    );
+  }
+
+  /**
+   * Point the cut and the caps at the striatal network volume, or switch it off.
+   *
+   * Switched off, the sampler still holds the drawn layer's own label volume, as the cap labels'
+   * does: an integer sampler bound to three's empty float texture makes WebGL drop every draw of
+   * the material, and with it every cap on the cut.
+   */
+  private updateStriatal(uniforms: StriatalUniforms, layer: TissueLayer): boolean {
+    const source = this.wantsStriatal() ? this.layers.get(STRIATAL_ATLAS) : undefined;
+    uniforms.striatalEnabled.value = Boolean(source);
+    if (source) this.striatalPalette ??= createStriatalPalette(source.metadata.labels);
+    const sampled = source ?? layer;
+    uniforms.striatalVolume.value = sampled.texture;
+    uniforms.striatalPalette.value = source ? this.striatalPalette : layer.palette;
+    uniforms.worldToStriatal.value = sampled.uniforms.worldToVoxel.value;
+    uniforms.striatalShape.value = sampled.uniforms.volumeShape.value;
+    const confidence = source ? this.striatalConfidence : null;
+    uniforms.striatalConfidence.value = confidence?.texture ?? sampled.texture;
+    uniforms.worldToConfidence.value =
+      confidence?.worldToVoxel ?? sampled.uniforms.worldToVoxel.value;
+    uniforms.confidenceShape.value = confidence?.shape ?? sampled.uniforms.volumeShape.value;
+    return Boolean(source);
+  }
+
+  /** The striatal network atlas's confidence classes on the GPU, beside its labels. */
+  private async loadStriatalConfidence(record: NonNullable<TissueAtlasRecord['confidence']>) {
+    const volume = await loadVolume(record, this.baseUrl);
+    if (!(volume.data instanceof Uint8Array)) throw new Error('Expected uint8 confidence classes.');
+    const texture = new Data3DTexture(volume.data, ...volume.shape);
+    texture.format = RedIntegerFormat;
+    texture.type = UnsignedByteType;
+    texture.internalFormat = 'R8UI';
+    texture.minFilter = NearestFilter;
+    texture.magFilter = NearestFilter;
+    texture.unpackAlignment = 1;
+    texture.needsUpdate = true;
+    this.striatalConfidence = {
+      texture,
+      worldToVoxel: worldToVoxelMatrix(volume),
+      shape: new Vector3(...volume.shape),
+    };
+  }
+
   /** Load one named label volume. The caller owns which atlas the cut samples. */
   async load(atlas: string): Promise<void> {
     if (this.disposed) throw new Error('Tissue sections disposed.');
@@ -399,6 +472,7 @@ export class TissueSections {
     const pending = Promise.all([
       loadVolume(metadata, this.baseUrl),
       this.model.ensureRibbonWedges(atlas, this.baseUrl),
+      metadata.confidence ? this.loadStriatalConfidence(metadata.confidence) : null,
     ])
       .then(([volume, wedges]) => {
         if (this.disposed) throw new Error('Tissue sections disposed during loading.');
@@ -462,7 +536,7 @@ export class TissueSections {
       highlightCodes: { value: new Vector2(-1, -1) },
       highlightLifts: { value: new Vector2(0, 0) },
     };
-    const material = createCutMaterial(uniforms, tissue);
+    const material = createCutMaterial({ ...uniforms, ...this.anatomy.striatal }, tissue);
     addMriAppearance(material, this.anatomy.mriUniforms, 'lift');
     const edges = createEdgeUniforms();
     addBoundaryEdges(material, edges, {
@@ -502,6 +576,7 @@ export class TissueSections {
     const mri = state.surfaceColor === 'mri' && !usesPaint(state);
     anatomy.mriUniforms.scanEnabled.value = mri;
     updateCapLabels(anatomy.capLabels, layer, state);
+    const striatal = this.updateStriatal(anatomy.striatal, layer);
     anatomy.capEdges.edgeEnabled.value = layer.edges.edgeEnabled.value;
     anatomy.capEdges.edgePairs.value = layer.edges.edgePairs.value;
     const solid = layer.wedged || state.surfaceColor === 'tissue' || mri;
@@ -535,6 +610,7 @@ export class TissueSections {
         constituents,
         atlas,
         layer.wedged,
+        striatal,
         this.whiteMatter?.active ?? false,
         [...(state.hiddenRegions ?? [])].sort().join(','),
       ].join('|');
@@ -549,6 +625,7 @@ export class TissueSections {
           appearance: this.model.manifest.appearance,
           lookup: this.paletteLookup,
           whiteMatter: this.whiteMatter?.active ? this.whiteMatter : null,
+          striatal,
         });
       }
       if (!solid) {
@@ -697,6 +774,8 @@ export class TissueSections {
       layer.mesh.geometry.dispose();
       layer.mesh.material.dispose();
     }
+    this.striatalPalette?.dispose();
+    this.striatalConfidence?.texture.dispose();
     this.anatomy?.texture.dispose();
     this.anatomy = null;
     this.layers.clear();

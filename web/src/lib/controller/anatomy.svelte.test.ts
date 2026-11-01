@@ -13,6 +13,7 @@ import type { MoveOptions } from '../engine/api.ts';
 import type { Explorer, Manifest } from '../types/index.ts';
 import { FOCUS_TARGETS, registerFocusTarget } from '../ui/focus.ts';
 import { createAnatomyCommands } from './anatomy.ts';
+import type { SceneReader } from './lesson.ts';
 
 const published = manifest as unknown as Manifest;
 const SULCUS = 'destrieux:left:30';
@@ -33,6 +34,10 @@ function build() {
     chooseExplorer: ReturnType<typeof vi.fn<(explorer: Explorer) => void>>;
     scene: ReturnType<typeof createSceneCommands>;
     frameLandmark: ReturnType<typeof vi.fn<(options: MoveOptions) => boolean>>;
+    reader: {
+      capture: ReturnType<typeof vi.fn<SceneReader['capture']>>;
+      apply: ReturnType<typeof vi.fn<SceneReader['apply']>>;
+    };
   };
   cleanup = $effect.root(() => {
     const engineState = createEngineSync(engine);
@@ -57,6 +62,10 @@ function build() {
       session.setExplorer(explorer);
     });
     parts.frameLandmark = vi.fn<(options: MoveOptions) => boolean>(() => false);
+    parts.reader = {
+      capture: vi.fn<SceneReader['capture']>(() => ({ label: 'before the reveal' }) as never),
+      apply: vi.fn<SceneReader['apply']>(async () => []),
+    };
     parts.scene = createSceneCommands({
       model: engine.model,
       sections: engine.sections,
@@ -67,6 +76,7 @@ function build() {
       { engine, engineState, session, lesson, view, catalog, link: undefined as never },
       {
         commands: parts.scene,
+        reader: parts.reader,
         ui: parts.ui,
         chooseExplorer: parts.chooseExplorer,
         frameLandmark: parts.frameLandmark,
@@ -262,7 +272,7 @@ describe('the dissection', () => {
     anatomy.selectRegion(SULCUS);
     anatomy.focusSelection({ immediate: true });
     expect(frameLandmark).toHaveBeenCalledWith({ immediate: true });
-    expect(cameraCalls()[0]!.args).toEqual([SULCUS, { immediate: true }]);
+    expect(cameraCalls()[0]!.args).toEqual([SULCUS, { immediate: true, context: false }]);
   });
 
   test('isolating with nothing selected fails', () => {
@@ -386,6 +396,50 @@ describe('internal anatomy', () => {
   });
 });
 
+describe('focusing a structure beneath the cortex', () => {
+  const THALAMUS = 'learning:left:thalamus';
+  const framing = () =>
+    cameraCalls()
+      .filter((call) => call.method === 'frameRegion')
+      .map((call) => call.args);
+
+  test('behind the opaque cortex, it is framed with its surroundings and seeing through is offered', () => {
+    const { anatomy, session } = build();
+    anatomy.selectRegion(THALAMUS, { frame: true });
+    expect(framing()).toEqual([[THALAMUS, { immediate: false, context: true }]]);
+    expect(session.state.notice).toEqual({
+      text: 'Thalamus lies beneath the cortex.',
+      action: 'see-through',
+    });
+  });
+
+  test('Focus again frames it again but says nothing new', () => {
+    const { anatomy, session } = build();
+    anatomy.selectRegion(THALAMUS, { frame: true });
+    anatomy.focusSelection();
+    expect(framing()).toHaveLength(2);
+    expect(session.state.notice?.text).toBe('Thalamus lies beneath the cortex.');
+  });
+
+  test.each([
+    ['a see-through cortex', () => engine.model.setCortexOpacity(0.3)],
+    ['a hidden cortex', () => engine.model.setCortexVisible(false)],
+  ])('through %s, it is framed alone and nothing is said', (_, cortex) => {
+    const { anatomy, session } = build();
+    cortex();
+    anatomy.selectRegion(THALAMUS, { frame: true });
+    expect(framing()).toEqual([[THALAMUS, { immediate: false, context: false }]]);
+    expect(session.state.notice).toBeNull();
+  });
+
+  test('a cortical region is framed alone and nothing is said', () => {
+    const { anatomy, session } = build();
+    anatomy.selectRegion(SULCUS, { frame: true });
+    expect(framing()).toEqual([[SULCUS, { immediate: false, context: false }]]);
+    expect(session.state.notice).toBeNull();
+  });
+});
+
 describe('revealing a region', () => {
   test('undoes what hides it, selects it, then frames it', async () => {
     const { anatomy } = build();
@@ -411,6 +465,24 @@ describe('revealing a region', () => {
     await anatomy.revealRegion('hemisphere', HCP);
     expect(session.state.notice).not.toBeNull();
     expect(engine.model.state.selectedRegion).toBeNull();
+  });
+
+  test('what the reveal changed of the reader’s settings is said, with the view before it to restore', async () => {
+    const { anatomy, session, reader } = build();
+    engine.model.setHemisphere('right');
+    await anatomy.revealRegion('hemisphere', SULCUS);
+    expect(session.state.notice).toEqual({ text: 'Both hemispheres shown.', action: 'restore' });
+    await anatomy.restoreBeforeReveal();
+    expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results[0]!.value);
+    expect(session.state.notice).toEqual({ text: 'Previous view restored.', action: null });
+  });
+
+  test('a reveal that leaves the reader’s settings as they were says nothing', async () => {
+    const { anatomy, session } = build();
+    engine.model.hideRegions([SULCUS]);
+    await anatomy.revealRegion('removed', SULCUS);
+    expect(engine.model.state.selectedRegion?.id).toBe(SULCUS);
+    expect(session.state.notice).toBeNull();
   });
 
   test('a constituent opens with its own layers, then is framed', async () => {

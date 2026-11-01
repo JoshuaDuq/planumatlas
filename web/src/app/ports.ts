@@ -29,6 +29,8 @@ export interface UiPorts
   openFunction: ExcursionDeps['panels']['openFunction'];
   openDeficit: ExcursionDeps['panels']['openDeficit'];
   openLessonMri: ExcursionDeps['panels']['openMri'];
+  /** The Circuits panel's way into one landmark of the open lesson, from the route's marks on the stage. */
+  openLessonStep(index: number): unknown;
   /**
    * Shows the detail without raising a phone's sheet over the camera: a link restores a view,
    * it does not pick (`links.hooks.showDetail`). `showDetail` (a selection) raises it.
@@ -61,6 +63,7 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   openFunction: true,
   openDeficit: true,
   openLessonMri: true,
+  openLessonStep: true,
 };
 
 /**

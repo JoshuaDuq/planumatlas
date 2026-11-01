@@ -47,7 +47,7 @@ The subject's own T1 in three planes around a shared crosshair, with the label u
 
 **[Map what damage is associated with](guides/functions-and-deficits.md#deficits)**
 
-70 acquired deficits, each finding with its population, evidence and limits.
+120 acquired deficits, each finding with its population, evidence and limits.
 :::
 
 :::{container} feature
@@ -138,6 +138,21 @@ api/index
 reference/references
 reference/circuit-evidence
 reference/full-text-review
+reference/deficit-additions-2026-10-31
+reference/deficit-additions-2026-11-01
+reference/deficit-additions-2026-11-01-reading-perception-mood
+reference/deficit-additions-2026-11-01-actions-and-motion
+reference/deficit-additions-2026-11-01-eye-movements
+reference/deficit-additions-2026-11-01-visual-awareness
+reference/deficit-additions-2026-11-01-facial-cough-bladder
+reference/deficit-additions-2026-11-01-reading-writing-memory
+reference/deficit-additions-2026-11-01-memory-fluency-moral
+reference/deficit-additions-2026-11-01-reward-reasoning-vertigo
+reference/deficit-additions-2026-11-01-orientation-grammar-medulla-smoking
+reference/deficit-additions-2026-11-01-cardiac-hiccups-adaptation
+reference/deficit-additions-2026-11-01-sign-cognition-restless-legs
+reference/deficit-additions-2026-11-01-amnesia-sensory-ataxic
+reference/deficit-additions-2026-11-01-sma-recognition-verbs
 ```
 
 ```{toctree}

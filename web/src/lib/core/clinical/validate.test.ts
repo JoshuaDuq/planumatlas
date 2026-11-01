@@ -210,6 +210,16 @@ const rejections: [string, (f: Fixture) => void, string][] = [
     'hippocampal-amnesia: invalid evidence role',
   ],
   [
+    'a deficit whose findings map no region',
+    (f) => (association(f).mappings = []),
+    'amnesia: no finding maps a region',
+  ],
+  [
+    'a deficit with no finding',
+    (f) => f.data.deficits.push({ ...deficit(f), id: 'aphasia', aliases: { en: [], fr: [] } }),
+    'aphasia: no finding maps a region',
+  ],
+  [
     'mappings that are not a list',
     (f) => (association(f).mappings = {}),
     'hippocampal-amnesia: mappings must be a list',

@@ -103,6 +103,28 @@ export function createFrame(
   };
 }
 
+/** The anatomical letter a unit RAS axis points to. */
+function letterOf(direction: Vector3): EdgeLetter {
+  const [right, anterior, superior] = direction.toArray().map(Math.round);
+  if (right) return right > 0 ? 'R' : 'L';
+  if (anterior) return anterior > 0 ? 'A' : 'P';
+  if (superior) return superior > 0 ? 'S' : 'I';
+  throw new Error('A panel axis must lie along an anatomical axis.');
+}
+
+/**
+ * A linked-MRI panel's centred frame, seen as the stage faces that cut (framing.ts faceCut): from the
+ * side its normal points to, the other when reversed, with the frame's own v up. Its right is then
+ * v × the direction toward the eye, so the two pictures of a cut agree.
+ */
+export function stagedFrame(plane: SectionPlane, crosshair: Ras, reverse: boolean): Frame {
+  const frame = centeredFrame(plane, crosshair);
+  const towardEye = frame.normal.clone().multiplyScalar(reverse ? -1 : 1);
+  const u = frame.v.clone().cross(towardEye);
+  const edges = [frame.v, u, frame.v.clone().negate(), u.clone().negate()].map(letterOf);
+  return { ...frame, u, edges };
+}
+
 /** Positive source-axis half is removed unless reverse is selected. */
 export function clippingPlane(frame: Frame, reverse: boolean): Plane {
   const normal = rasToWorld(frame.normal.toArray())

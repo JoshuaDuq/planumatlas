@@ -67,6 +67,12 @@ export interface CameraView {
   basis: { right: Vec3; up: Vec3; back: Vec3 };
 }
 
+/** A point on the canvas, in CSS pixels from its top left. */
+export interface ScreenPoint {
+  x: number;
+  y: number;
+}
+
 /** Where the pointer is over the stage, in CSS pixels relative to the canvas (picking.js:93). */
 export interface HoverEvent {
   region: Region | null;
@@ -380,6 +386,11 @@ export interface MoveOptions {
   immediate?: boolean;
 }
 
+export interface FrameRegionOptions extends MoveOptions {
+  /** Frame the region with the context around it, as a deficit's regions are, not filling the stage alone. */
+  context?: boolean;
+}
+
 /** Radians; the turn one arrow key makes (keyboard-orbit.js:19). */
 export interface OrbitTurn {
   azimuth?: number;
@@ -428,7 +439,7 @@ export interface EngineCamera {
    */
   frameRegions(ids: readonly string[]): readonly string[];
   /** Frame one drawn region from the current heading (app.js:510-524). Releases the view; false when it has no drawn mesh. */
-  frameRegion(id: string, options?: MoveOptions): boolean;
+  frameRegion(id: string, options?: FrameRegionOptions): boolean;
   /**
    * Frame a lesson landmark as authored: its view, with the context margin around it (app.js:457).
    * Releases the view. False when the region has no drawn mesh.
@@ -456,6 +467,8 @@ export interface EngineCamera {
   keepFraming(before: number): void;
   /** Move the camera onto a surface point in RAS millimetres, released from any view (app.js:1783). */
   focusPoint(point: Vec3): void;
+  /** Where points in RAS millimetres fall on the canvas as the camera stands; null for one behind it. */
+  project(points: readonly Vec3[]): (ScreenPoint | null)[];
 
   /** One arrow key's turn, applied at once; releases the held view (app.js:1859, decision 22). */
   orbitBy(turn: OrbitTurn): void;

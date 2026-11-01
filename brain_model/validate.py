@@ -35,6 +35,7 @@ from .layers import (
     neurosynth_terms,
     receptor_fingerprints,
     spinal_cord,
+    striatal_networks,
 )
 from .sources import read_color_table, read_config, sha256, verify_sources, write_json
 from .surfaces.geometry import (
@@ -711,9 +712,10 @@ def validate_cut_only_regions(config, regions, nextbrain_source):
     for region_id, region in regions.items():
         if region["kind"] == "tissue-region":
             by_source.setdefault(region["atlas"], {})[region_id] = region
-    # Arterial territory and cerebellar functional regions are checked against their volumes by their layers.
+    # Arterial territory, cerebellar functional and striatal network regions are checked against their
+    # volumes by their layers.
     unknown = sorted(set(by_source) - {nextbrain.ATLAS_ID, white_matter.ATLAS_ID, arterial_territories.ATLAS_ID,
-                                       cerebellar_functions.ATLAS_ID})
+                                       cerebellar_functions.ATLAS_ID, striatal_networks.ATLAS_ID})
     if unknown:
         raise ValueError(f"Cut-only regions from an unknown source: {unknown}")
     white_matter.validate_regions(config, by_source.get(white_matter.ATLAS_ID, {}))
@@ -858,6 +860,7 @@ def validate_layers(config, manifest, tissues):
     fine = [nextbrain.ATLAS_ID] if "nextbrain" in declared else []
     fine += [arterial_territories.ATLAS_ID] if arterial_territories.LAYER in declared else []
     fine += [cerebellar_functions.ATLAS_ID] if cerebellar_functions.LAYER in declared else []
+    fine += [striatal_networks.ATLAS_ID] if striatal_networks.LAYER in declared else []
     expected = {
         "networks": networks.metadata() if "networks" in declared else None,
         "cut_atlases": cut + fine,
@@ -878,6 +881,10 @@ def validate_layers(config, manifest, tissues):
             cerebellar_functions.metadata(config, cerebellar_functions.read_definition())
             if cerebellar_functions.LAYER in declared else None
         ),
+        "striatal_networks": (
+            striatal_networks.metadata(config, striatal_networks.read_definition())
+            if striatal_networks.LAYER in declared else None
+        ),
         "coordinate_spaces": coordinate_spaces.LAYER in declared,
     }
     published = {
@@ -894,6 +901,7 @@ def validate_layers(config, manifest, tissues):
         "segmentation_agreement": "segmentation_agreement" in manifest,
         "arterial_territories": manifest.get("arterial_territories"),
         "cerebellar_functions": manifest.get("cerebellar_functions"),
+        "striatal_networks": manifest.get("striatal_networks"),
         "coordinate_spaces": "coordinate_spaces" in manifest,
     }
     differ = [key for key in expected if published[key] != expected[key]]
@@ -984,6 +992,8 @@ def main():
            if arterial_territories.is_declared(config) else {}),
         **({"cerebellar_functions": cerebellar_functions.validate(config, manifest)}
            if cerebellar_functions.is_declared(config) else {}),
+        **({"striatal_networks": striatal_networks.validate(config, manifest)}
+           if striatal_networks.is_declared(config) else {}),
         **({"coordinate_spaces": coordinate_spaces.validate(config, manifest)}
            if coordinate_spaces.is_declared(config) else {}),
         "neuropsych_domains": neuropsych_domains.validate(config, manifest),

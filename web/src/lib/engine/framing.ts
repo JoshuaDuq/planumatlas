@@ -8,6 +8,7 @@ import type {
   ChromeInsets,
   EngineCamera,
   EngineEvents,
+  FrameRegionOptions,
   FramingClearance,
   MoveOptions,
   OrbitTurn,
@@ -575,14 +576,21 @@ export function createFraming({
     return [...shares].filter(([, share]) => share === 0).map(([id]) => id);
   }
 
-  function frameRegion(id: string, { immediate = false }: MoveOptions = {}): boolean {
+  function frameRegion(
+    id: string,
+    { immediate = false, context = false }: FrameRegionOptions = {},
+  ): boolean {
     const box = boundsOf(meshesOf(id));
     if (box.isEmpty()) return false;
     const direction = heading();
     held.release();
-    moveCamera(planFraming(camera, controls, box, direction, frameTo, framingFit({ immediate })), {
-      immediate,
-    });
+    const bounds = context ? withContext(box) : box;
+    moveCamera(
+      planFraming(camera, controls, bounds, direction, frameTo, framingFit({ immediate })),
+      {
+        immediate,
+      },
+    );
     rememberZoom();
     return true;
   }
@@ -761,6 +769,16 @@ export function createFraming({
       else refit(before);
     },
     focusPoint: (point: Vec3) => focusWorldPoint(rasToWorld(point)),
+    project(points: readonly Vec3[]) {
+      camera.updateMatrixWorld();
+      const { width, height } = scene.hostSize;
+      return points.map((point) => {
+        const at = rasToWorld(point).project(camera);
+        // Beyond the far side of normalized depth: behind the camera.
+        if (at.z > 1) return null;
+        return { x: ((at.x + 1) / 2) * width, y: ((1 - at.y) / 2) * height };
+      });
+    },
 
     orbitBy(turn: OrbitTurn) {
       held.release();

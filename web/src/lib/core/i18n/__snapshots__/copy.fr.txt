@@ -51,7 +51,8 @@
   "wmparc": "Parcellisation de la substance blanche FreeSurfer",
   "pam50": "Atlas médullaire PAM50 sur cette moelle",
   "arterial": "Atlas des territoires artériels (Liu et al. 2023)",
-  "nettekoven": "Atlas fonctionnel du cervelet (Nettekoven et al. 2024)"
+  "nettekoven": "Atlas fonctionnel du cervelet (Nettekoven et al. 2024)",
+  "choi": "Atlas des réseaux striataux (Choi et al. 2012)"
  },
  "boundary": {
   "heading": "Certitude des limites",
@@ -125,7 +126,15 @@
    "[183,12345] → \"184 sur 12345\"",
    "[12345,0] → \"12346 sur 0\""
   ],
-  "inCircuits": "Dans les parcours guidés"
+  "inCircuits": "Dans les parcours guidés",
+  "route": "Trajet",
+  "wholeRoute": "Trajet complet",
+  "routeTitle": "Le trajet complet",
+  "routeNote": "Chaque numéro marque l’emplacement de son repère dans ce cerveau, vu à travers le cortex<NNBSP>: un ordre, pas le chemin des fibres. Choisissez un numéro, ici ou sur l’image, pour l’ouvrir.",
+  "routeMark": [
+   "[\"Alpha\",\"\"] → \"Repère Alpha1<NNBSP>: \"",
+   "[\"\",\"Alpha\"] → \"Repère 1<NNBSP>: Alpha\""
+  ]
  },
  "clinical": {
   "deficits": "Déficits",
@@ -298,6 +307,7 @@
   "unreadable": "Entrez trois nombres, x, y, z, en millimètres.",
   "outside": "Cette coordonnée se trouve hors du cerveau du gabarit<NNBSP>; elle n’est pas placée.",
   "failed": "La coordonnée n’a pas pu être placée.",
+  "replacedLesion": "Lésion remplacée par la sphère de la coordonnée.",
   "reportTitle": "Coordonnée publiée",
   "entered": [
    "[\"Alpha\",\"\"] → \"Alpha dans \"",
@@ -410,6 +420,8 @@
    "oblique": "Coupe oblique"
   },
   "networkByRegion": "réseaux par part dominante de chaque région",
+  "striatumByVoxel": "striatum par ses voxels, plus pâle où moins confiant (Choi et al. 2012)",
+  "striatalPaler": "plus pâle où Choi et al. sont moins confiants",
   "territoryByRegion": "territoire qui contient la majorité de chaque région",
   "cabNpByArea": "réseau CAB-NP de chaque aire HCP-MMP",
   "cabNpOtherLabels": "CAB-NP ne colore que les étiquettes HCP-MMP",
@@ -423,6 +435,7 @@
   "nextbrainSegmented": "NextBrain segmentées sur ce cerveau",
   "arterialRegistered": "territoires artériels typiques recalés sur ce cerveau",
   "nettekovenRegistered": "régions fonctionnelles cérébelleuses de groupe recalées sur ce cerveau",
+  "choiRegistered": "réseaux striataux de groupe recalés sur ce cerveau",
   "cutLabels": "Étiquettes de coupe"
  },
  "deficitKey": {
@@ -502,6 +515,10 @@
   "seeThrough": "Voir à travers le cortex",
   "seenThrough": "Cortex rendu transparent<NNBSP>; ses aires colorées restent opaques. Affichage règle l’opacité.",
   "opaqueAgain": "Cortex rendu de nouveau opaque.",
+  "deepSelected": [
+   "[\"Alpha\"] → \"Alpha se trouve sous le cortex.\"",
+   "[\"\"] → \" se trouve sous le cortex.\""
+  ],
   "both": "Les deux",
   "left": "Gauche",
   "right": "Droite",
@@ -841,7 +858,8 @@
    "wmparc": "wmparc",
    "pam50": "PAM50",
    "arterial": "Territoires artériels",
-   "nettekoven": "Fonctions cérébelleuses"
+   "nettekoven": "Fonctions cérébelleuses",
+   "choi": "Réseaux striataux"
   },
   "subject": "Sujet",
   "atlas": "Atlas",
@@ -1113,7 +1131,16 @@
    "[\"Alpha\",\"\",12345] → \"Alpha —  (étiquette 12345)\"",
    "[\"\",\"Alpha\",0] → \" — Alpha (étiquette 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (étiquette 1)\""
-  ]
+  ],
+  "asStage": "Chaque plan est montré comme la vue 3D voit sa coupe<NNBSP>; les deux images d’une coupe concordent.",
+  "seenFrom": {
+   "right": "depuis la droite",
+   "left": "depuis la gauche",
+   "anterior": "depuis l’avant",
+   "posterior": "depuis l’arrière",
+   "superior": "depuis le haut",
+   "inferior": "depuis le bas"
+  }
  },
  "mri": {
   "dialog": {
@@ -1243,6 +1270,23 @@
    "vertices": "Parts des sommets source assignés<NNBSP>; sommets non assignés exclus. Parts inférieures à 5<NNBSP>% masquées sans renormalisation.",
    "voxels": "Parts des voxels corticaux assignés<NNBSP>; voxels non assignés exclus. Parts inférieures à 5<NNBSP>% masquées sans renormalisation."
   },
+  "territory": "Les voxels du striatum dont la connectivité de repos ressemble le plus à ce réseau cortical (Choi et al. 2012).",
+  "striatal": "Réseaux striataux (Choi et al. 2012)",
+  "striatalNote": "Part des voxels de cette structure dans le territoire striatal de chaque réseau. Parts inférieures à 5<NNBSP>% masquées sans renormalisation.",
+  "striatalUnassigned": [
+   "[\"Alpha\"] → \"Alpha se trouve hors du striatum que l’atlas étiquette.\"",
+   "[\"\"] → \" se trouve hors du striatum que l’atlas étiquette.\""
+  ],
+  "striatalCaveat": "Un atlas de groupe recalé sur ce cerveau depuis le gabarit MNI152 de FSL<NNBSP>: les limites sont décalées de quelques millimètres, et chaque voxel ne montre que le réseau auquel sa connectivité ressemble le plus.",
+  "confidence": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Confiance de Choi<NNBSP>: Alpha de ses voxels étiquetés confiants,  faibles, Alpha comblés.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Confiance de Choi<NNBSP>:  de ses voxels étiquetés confiants, Alpha faibles,  comblés.\""
+  ],
+  "confidenceNote": [
+   "[\"Alpha\"] → \"Confiant<NNBSP>: une part d’au moins Alpha des 25 sommets corticaux les plus corrélés au voxel appartient à son réseau<NNBSP>; faible<NNBSP>: moins<NNBSP>; comblé<NNBSP>: l’atlas ne l’atteignait pas. La coupe dessine les voxels faibles et comblés plus pâles.\"",
+   "[\"\"] → \"Confiant<NNBSP>: une part d’au moins  des 25 sommets corticaux les plus corrélés au voxel appartient à son réseau<NNBSP>; faible<NNBSP>: moins<NNBSP>; comblé<NNBSP>: l’atlas ne l’atteignait pas. La coupe dessine les voxels faibles et comblés plus pâles.\""
+  ],
+  "putamenCaveat": "Choi et al. sont le moins confiants autour du putamen dorsal, où le signal de l’insula voisine n’est que partiellement retiré<NNBSP>: une partie de sa part de saillance peut venir de l’insula.",
   "caveat": "Réseaux de repos de groupe, sans mesure fonctionnelle de ce cerveau."
  },
  "orientation": {

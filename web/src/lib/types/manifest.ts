@@ -121,6 +121,7 @@ export interface Manifest {
   arterial_territories?: ArterialTerritories;
   coordinate_spaces?: CoordinateSpaces;
   cerebellar_functions?: CerebellarFunctions;
+  striatal_networks?: StriatalNetworks;
   receptor_fingerprints?: ManifestFile & Record<string, unknown>;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
@@ -150,6 +151,19 @@ export interface CerebellarFunctions {
   license: string;
   domains: Record<string, { name: string; name_fr: string }>;
   regions: CerebellarFunctionRegion[];
+  registration: Record<string, unknown>;
+  method: string;
+}
+
+/** `manifest.striatal_networks`: the registered Choi et al. (2012) striatal network atlas. */
+export interface StriatalNetworks {
+  id: 'choi';
+  label: string;
+  citation: string;
+  license: string;
+  networks: Record<string, { name: string; name_fr: string }>;
+  /** Below this confidence a voxel's network holds a plurality, not a majority, of its 25 cortical vertices. */
+  minimum_confidence: number;
   registration: Record<string, unknown>;
   method: string;
 }

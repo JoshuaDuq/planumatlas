@@ -20,6 +20,7 @@
     ArterialTerritories,
     CerebellarFunctions,
     Explorer,
+    StriatalNetworks,
     Language,
     Region,
     Rgb,
@@ -77,6 +78,8 @@
     territories?: ArterialTerritories | null;
     /** The manifest's functional cerebellar atlas, for each lobule's shares. */
     cerebellarFunctions?: CerebellarFunctions | null;
+    /** The manifest's striatal network atlas, for its confidence threshold. */
+    striatalNetworks?: StriatalNetworks | null;
     /** Takes no arguments: I1 wires `focusSelection()`, which frames with an animation (only the F key is immediate). */
     onfocus: () => void;
     /** Takes no arguments: I1 wires `isolateSelection`. */
@@ -117,6 +120,7 @@
     receptors,
     territories = null,
     cerebellarFunctions = null,
+    striatalNetworks = null,
     onfocus,
     onisolate,
     onhide,
@@ -208,7 +212,7 @@
   <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
   <FunctionalSection {region} {lang} {functionalRegions} />
   <DomainSection {region} {lang} {domains} />
-  <NetworkSection {region} {lang} colors={networkColors} {cabNp} />
+  <NetworkSection {region} {lang} colors={networkColors} {cabNp} striatal={striatalNetworks} />
   <CerebellarFunctionsSection {region} {lang} functions={cerebellarFunctions} />
   <SupplySection {region} {lang} {territories} />
 </div>

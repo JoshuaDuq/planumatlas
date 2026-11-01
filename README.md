@@ -60,7 +60,7 @@ Paint the cortex and deep structures with 70 curated functions, from working mem
 
 [![Hemispatial neglect on the right hemisphere, with each finding in its own colour and the evidence listed in the panel](.github/assets/readme/deficits.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=deficits&deficit=neglect&view=right)
 
-Seventy profiles of acquired adult deficits, from aphasia and amnesia to neglect and ataxia, colour the regions their cited findings name. Every finding carries its population, evidence and limits, so you can see why a region is there and how strong the case is.
+120 profiles of acquired adult deficits, from aphasia and amnesia to neglect and ataxia, colour the regions their cited findings name. Every finding carries its population, evidence and limits, so you can see why a region is there and how strong the case is.
 
 ### Take a guided tour
 
@@ -77,7 +77,7 @@ Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report list
 ### And more
 
 - **Compare atlases.** See how a region of any cortical atlas shares its surface with the areas of another, in mm², and download every pair as CSV.
-- **Colour by network.** Yeo 7 or CAB-NP functional networks.
+- **Colour by network.** Yeo 7 or CAB-NP functional networks; Yeo's carry into the striatum voxel by voxel on any cut (Choi et al. 2012).
 - **Go deeper on a region.** Region details add receptor fingerprints (36, from EBRAINS) and typical arterial supply, from territories of 15 branches per hemisphere mapped in 1,298 stroke patients.
 - **Know how sure a boundary is.** NextBrain regions show where the segmentation nearly chose a neighbouring label.
 - **Share exactly what you see.** The address bar holds the selection, camera, section, display and a placed lesion, so a link reopens the same view. **Save image** exports the stage with its orientation letters, scale bar and colour key.

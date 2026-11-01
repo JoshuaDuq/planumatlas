@@ -229,9 +229,12 @@ describe('the explorers’ entry points', () => {
     await expect
       .element(page.getByRole('navigation', { name: 'Breadcrumb' }))
       .toHaveTextContent(`Circuits ${circuit.name.en}`);
-    expect(detail().querySelector('.region-detail')!.getAttribute('data-landmark-selected')).toBe(
-      'true',
-    );
+    // It opens on the whole route, which selects nothing; Next opens the first landmark.
+    expect(detail().querySelector('.region-detail')).toBeNull();
+    await userEvent.click(page.getByRole('button', { name: 'Next landmark' }));
+    await expect
+      .poll(() => detail().querySelector('.region-detail')?.getAttribute('data-landmark-selected'))
+      .toBe('true');
   });
 
   test('a deficit’s profile sits above the selected region, which reads as a second subject', async () => {

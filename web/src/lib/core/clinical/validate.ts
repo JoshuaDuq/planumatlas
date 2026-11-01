@@ -162,5 +162,14 @@ export function validateClinicalData(data: ClinicalData, manifest: Pick<Manifest
   for (const reference of indexes.references.values()) validateReference(reference);
   for (const association of indexes.associations.values())
     validateAssociation(association, indexes);
+  // A profile is shown as a map, so one that colours no region has nothing to show.
+  for (const deficit of indexes.deficits.keys()) {
+    requireValue(
+      [...indexes.associations.values()].some(
+        (association) => association.deficit === deficit && association.mappings.length > 0,
+      ),
+      `${deficit}: no finding maps a region`,
+    );
+  }
   return indexes;
 }

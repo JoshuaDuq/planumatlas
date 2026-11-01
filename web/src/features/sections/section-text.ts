@@ -57,7 +57,7 @@ export interface SentenceInput {
   /** NextBrain is segmented on this brain rather than warped to it (manifest `procedure`). */
   nextbrainSegmented: boolean;
   /** The atlases CAB-NP and the domains colour. */
-  colourAtlases: { cabNp?: string; domains?: string };
+  colourAtlases: { cabNp?: string; domains?: string; striatal?: string };
   /** An error the bar itself caught, said in place of the state's sentence until the cut changes again. */
   failure: unknown;
 }
@@ -82,21 +82,27 @@ export function sectionSentences(input: SentenceInput): { said: string; shown: s
       nextbrain: input.nextbrainSegmented ? copy.nextbrainSegmented : copy.nextbrainWarped,
       arterial: copy.arterialRegistered,
       nettekoven: copy.nettekovenRegistered,
+      choi: copy.choiRegistered,
     }[state.cutAtlas] ?? state.cutAtlas;
   // A cut is sampled from a label volume, so its network colour is per parcel while the surface's is
-  // per vertex. CAB-NP groups HCP-MMP areas: other labels have none.
-  const { cabNp, domains } = input.colourAtlases;
+  // per vertex; the striatum's comes from its own voxels. CAB-NP groups HCP-MMP areas: other labels
+  // have none.
+  const { cabNp, domains, striatal } = input.colourAtlases;
   const colourNote = input.paint
     ? null
     : input.surfaceColor === 'network'
-      ? copy.networkByRegion
+      ? striatal
+        ? `${copy.networkByRegion} · ${copy.striatumByVoxel}`
+        : copy.networkByRegion
       : input.surfaceColor === 'territory' && state.cutAtlas !== 'arterial'
         ? copy.territoryByRegion
         : input.surfaceColor === 'cab-np'
           ? state.cutAtlas === cabNp
             ? copy.cabNpByArea
             : copy.cabNpOtherLabels
-          : null;
+          : input.surfaceColor === 'atlas' && striatal && state.cutAtlas === striatal
+            ? copy.striatalPaler
+            : null;
   // A function's paint, like the HCP-MMP colourings, has areas only on HCP-MMP labels.
   const paintNote =
     paintKind(input.paint) === 'function'

@@ -46,10 +46,18 @@ const summary = (name: string) =>
 const returnButton = () =>
   document.querySelector<HTMLButtonElement>('.circuit-return button') ?? null;
 
-/** Opens a circuit's lesson and waits until its first landmark has the focus. */
-async function open(id: string) {
+/** Opens a circuit's lesson on its whole route, and waits until the route's title has the focus. */
+async function openRoute(id: string) {
   await userEvent.click(rowOf(id));
-  await expect.poll(() => world.lesson.state.circuit).toBe(id);
+  await expect.poll(() => world.lesson.state.route && world.lesson.state.circuit).toBe(id);
+  await expect.poll(() => document.activeElement).toBe(title());
+}
+
+/** Opens a circuit's lesson, steps from its route to its first landmark, and waits for that title's focus. */
+async function open(id: string) {
+  await openRoute(id);
+  await world.explorer.openStep(0);
+  await expect.poll(() => world.lesson.state.route).toBe(false);
   await expect.poll(() => document.activeElement).toBe(title());
 }
 
@@ -82,6 +90,43 @@ function accessibleName(element: HTMLElement) {
   for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) hidden.remove();
   return copy.textContent!;
 }
+
+describe('the whole route', () => {
+  test('a lesson opens on it: the route sentence, what the numbers mark, every landmark listed and none current', async () => {
+    mount();
+    await openRoute('vision');
+    const circuit = world.circuits.get('vision');
+    expect(title().textContent).toBe('The whole route');
+    expect(document.querySelector('.circuit-route')!.textContent).toBe(circuit.route.en);
+    expect(progress()).toBe('Route');
+    expect(control('previous').hidden).toBe(true);
+    expect(stepRows()).toHaveLength(circuit.steps.length);
+    expect(document.querySelectorAll('[aria-current="step"]')).toHaveLength(0);
+    // What this atlas shows belongs to one landmark: the route has none.
+    expect(summary('What this atlas shows')).toBeUndefined();
+    await expectAxeClean();
+  });
+
+  test('Next opens the first landmark, whose Previous is the whole route again', async () => {
+    mount();
+    await openRoute('vision');
+    await userEvent.click(control('next'));
+    await expect.poll(() => world.lesson.state.route).toBe(false);
+    expect(world.lesson.state.step).toBe(0);
+    expect(control('previous').hidden).toBe(false);
+    expect(control('previous').getAttribute('aria-label')).toBe('Whole route');
+    await userEvent.click(control('previous'));
+    await expect.poll(() => world.lesson.state.route).toBe(true);
+    expect(progress()).toBe('Route');
+  });
+
+  test('is French in French', async () => {
+    mount('fr');
+    await openRoute('vision');
+    expect(title().textContent).toBe('Le trajet complet');
+    expect(progress()).toBe('Trajet');
+  });
+});
 
 describe('the list', () => {
   test('offers only the retained pathways and no archived landmark or deferred circuit tours', () => {
@@ -340,7 +385,8 @@ describe('the retained pathway tours', () => {
 describe('the stepper', () => {
   test('is a labelled group of Previous, the place and Next; the ends leave rather than grey out', async () => {
     mount();
-    await open('vision');
+    // The whole route is where the lesson starts.
+    await openRoute('vision');
     const group = document.querySelector('.circuit-stepper')!;
     expect(group.getAttribute('role')).toBe('group');
     expect(group.getAttribute('aria-label')).toBe('Landmarks');
@@ -348,7 +394,10 @@ describe('the stepper', () => {
     expect(control('next').hidden).toBe(false);
     expect(control('next').getAttribute('aria-label')).toBe('Next landmark');
     expect(control('next').dataset.tooltip).toBe('Next landmark');
-    expect(control('previous').getAttribute('aria-label')).toBe('Previous landmark');
+    await world.explorer.openStep(1);
+    await expect
+      .poll(() => control('previous').getAttribute('aria-label'))
+      .toBe('Previous landmark');
   });
 
   test('Next moves one landmark on and keeps focus on Next; at the end focus goes to Previous', async () => {

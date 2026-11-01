@@ -52,6 +52,8 @@ export const en = {
     oblique: 'Oblique section',
   },
   networkByRegion: 'networks by each region’s dominant share',
+  striatumByVoxel: 'striatum by its voxels, paler where less confident (Choi et al. 2012)',
+  striatalPaler: 'paler where Choi et al. are less confident',
   territoryByRegion: 'territory holding a majority of each region',
   cabNpByArea: 'CAB-NP network of each HCP-MMP area',
   cabNpOtherLabels: 'CAB-NP colours HCP-MMP labels only',
@@ -65,6 +67,7 @@ export const en = {
   nextbrainSegmented: 'NextBrain labels segmented on this brain',
   arterialRegistered: 'typical arterial territories registered onto this brain',
   nettekovenRegistered: 'group functional cerebellar regions registered onto this brain',
+  choiRegistered: 'group striatal networks registered onto this brain',
   cutLabels: 'Cut labels',
 };
 
@@ -117,6 +120,8 @@ export const fr: typeof en = {
     oblique: 'Coupe oblique',
   },
   networkByRegion: 'réseaux par part dominante de chaque région',
+  striatumByVoxel: 'striatum par ses voxels, plus pâle où moins confiant (Choi et al. 2012)',
+  striatalPaler: 'plus pâle où Choi et al. sont moins confiants',
   territoryByRegion: 'territoire qui contient la majorité de chaque région',
   cabNpByArea: 'réseau CAB-NP de chaque aire HCP-MMP',
   cabNpOtherLabels: 'CAB-NP ne colore que les étiquettes HCP-MMP',
@@ -130,5 +135,6 @@ export const fr: typeof en = {
   nextbrainSegmented: 'NextBrain segmentées sur ce cerveau',
   arterialRegistered: 'territoires artériels typiques recalés sur ce cerveau',
   nettekovenRegistered: 'régions fonctionnelles cérébelleuses de groupe recalées sur ce cerveau',
+  choiRegistered: 'réseaux striataux de groupe recalés sur ce cerveau',
   cutLabels: 'Étiquettes de coupe',
 };

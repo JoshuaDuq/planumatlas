@@ -1,0 +1,39 @@
+# Deficit additions: reward learning, reasoning, multitasking, grasping and vertigo
+
+Review date and catalogue revision: `2026-11-01`.
+
+This pass adds five bilingual profiles, seven findings and 16 references, bringing the catalogue to 104 profiles, 163 findings and 235 references. All 99 earlier profiles, 156 findings, 219 references and their cached citation records retain their values. One existing reference, Fellows & Farah (2005), is now also cited by the reversal-learning finding. The preceding [memory, fluency, fear learning and moral judgement review](deficit-additions-2026-11-01-memory-fluency-moral.md) and earlier linked reviews retain their historical scopes and counts.
+
+## Inclusion decisions
+
+Selection required peer-reviewed primary human patient evidence and complementary evidence from more than one sample. Each profile also had to name a location defensible as an atlas landmark. The reversal-learning profile separates adjusting to changed rewards from the gambling-task decisions already profiled, which Fellows & Farah (2005) partly attribute to it. Fluid intelligence is separated from specific executive tests, and multitasking from fluid intelligence, because Roca et al. (2010) found that one fully explains frontal deficits on classic tests but not on multitasking. Pathological grasping is a motor release sign, distinct from alien hand and utilization behaviour. Cerebellar vertigo is distinct from gaze-evoked nystagmus and lateropulsion.
+
+This is a targeted content review, not a systematic review or independent specialist assessment. Studies drawing on the same research panels or laboratories are not treated as independent replications.
+
+| Profile | Primary evidence | Limits and mapping decision |
+| --- | --- | --- |
+| Impaired reversal learning | [Fellows & Farah (2003)](https://pubmed.ncbi.nlm.nih.gov/12821528/) find selectively impaired reversal after ventromedial damage. [Hornak et al. (2004)](https://pubmed.ncbi.nlm.nih.gov/15072681/) find impairment only after bilateral orbitofrontal excision. [Tsuchida et al. (2010)](https://pubmed.ncbi.nlm.nih.gov/21159958/) test 39 frontal patients. [Fellows & Farah (2005)](https://pubmed.ncbi.nlm.nih.gov/15217900/) link gambling-task impairment to reversal. | Orbital and gyrus rectus parcels on both sides; medial and lateral orbitofrontal sectors are not separated. Tsuchida's voxelwise map did not survive multiple-comparison correction, so the orbitofrontal claim rests on its group comparison. Initial learning was spared or impaired depending on the task. |
+| Reduced fluid intelligence | [Woolgar et al. (2010)](https://pubmed.ncbi.nlm.nih.gov/20679241/) relate fluid intelligence loss in 80 patients to multiple-demand damage. [Roca et al. (2010)](https://pubmed.ncbi.nlm.nih.gov/19903732/) show it explains classic executive deficits in 44 frontal patients. [Gläscher et al. (2010)](https://pubmed.ncbi.nlm.nih.gov/20176936/) and [Barbey et al. (2012)](https://pubmed.ncbi.nlm.nih.gov/22396393/) map a general factor in 241 and 182 patients. | Woolgar's [published correction](https://doi.org/10.1073/pnas.1513862112) is recorded: the frontal-group effect does not survive partialling out damage outside the multiple-demand regions. Only the inferior frontal and intraparietal sulci are coloured, both sides, because the regions were mirrored by design. The general-factor finding colours only the left frontal pole; its main white-matter effect is not shown. |
+| Impaired multitasking | [Shallice & Burgess (1991)](https://pubmed.ncbi.nlm.nih.gov/2043945/) describe three patients with otherwise good test scores. [Roca et al. (2011)](https://pubmed.ncbi.nlm.nih.gov/21930138/) relate multitasking to right lateral area 10. [Burgess et al. (2000)](https://pubmed.ncbi.nlm.nih.gov/10689059/) study 60 patients with circumscribed lesions. | The right frontopolar parcel marks lateral area 10, and the left posterior cingulate parcels Burgess's main finding; the forceps major is not coloured. [Smith et al. (2022)](https://pubmed.ncbi.nlm.nih.gov/34847482/) qualify the profile: naturalistic-task deficits were associated with diverse lesions rather than one region. |
+| Pathological grasping | [De Renzi & Barbieri (1992)](https://pubmed.ncbi.nlm.nih.gov/1559160/) screen 491 admissions and then 44 patients. [Hashimoto & Tanaka (1998)](https://pubmed.ncbi.nlm.nih.gov/9748673/) study 28 unilateral strokes. | The series disagree on whether the cingulate or the supplementary motor area is critical, so both the superior frontal gyri and the anterior midcingulate parcels are coloured; the pregenual anterior cingulate parcel is not. Grasping also follows lateral premotor and deep lesions and often affects both hands. |
+| Acute vertigo from cerebellar stroke | [Lee et al. (2006)](https://pubmed.ncbi.nlm.nih.gov/17030749/) find 25 vestibular-neuritis-like presentations among 240 cerebellar infarcts, 24 in the medial posterior inferior cerebellar artery territory. [Moon et al. (2009)](https://pubmed.ncbi.nlm.nih.gov/19109545/) describe eight isolated nodular infarcts. | Only the nodulus is coloured; the wider arterial territory is not reconstructed. [Kattah et al. (2009)](https://pubmed.ncbi.nlm.nih.gov/19762709/) qualify the imaging-defined series: early diffusion MRI missed 12% of strokes that a bedside examination detected. |
+
+## Source identity and extraction scope
+
+The 16 new PMIDs, titles, author lists, issue years and DOIs were fetched with the existing PubMed/Crossref reference-checking code and merged into the reference cache without altering earlier records. Woolgar et al. (2010) is the only work with a linked notice, an erratum, now recorded in both the catalogue and the cache. No retraction or expression of concern was returned.
+
+The reference script could not at first resolve that erratum. PubMed's notice citation gives its DOI, but Crossref records no page, so the existing volume-and-page match failed. `notices` in `scripts/fetch_references.py` now also accepts a Crossref-linked notice whose DOI appears in PubMed's citation. It still fails unless exactly one DOI matches. Both previously corrected records re-derive unchanged under the new rule.
+
+All 16 references use abstract scope. Selected main-text passages were consulted for four articles. These were Woolgar et al. (2010): sample composition, multiple-demand region definitions and the corrected regression; Roca et al. (2010): the 44 frontal patients and 33 controls; Tsuchida et al. (2010): the 11-patient orbitofrontal group and the uncorrected voxelwise threshold; and Gläscher et al. (2010) with Barbey et al. (2012): left-hemisphere and white-matter emphasis. Woolgar's correction notice was read in full. This consultation does not upgrade any of them to full-text extraction.
+
+The catalogue now contains 64 full-text and 171 abstract-based reference records.
+
+## Screened evidence not imported
+
+Giroud & Dumas (1995, PMID 7673948) describe callosal disconnection signs in five of eight callosal infarcts. A callosal disconnection profile would rest mainly on this one small series, so it was deferred until complementary evidence is reviewed.
+
+Lee et al. (2014, PMID 24812698) describe a tonsillar infarct with abnormal pursuit and a normal vestibulo-ocular reflex. It does not concern vertigo, so it is not cited for the vertigo profile.
+
+## Verification
+
+Targeted tests fix each new profile's coloured regions and the left frontal-pole-only paint of the general-factor finding. They also keep the pregenual cingulate out of the grasping profile and check Woolgar's recorded correction DOI. Each profile is tested to rank first for a distinct English or French search term. A baseline comparison confirmed that every earlier catalogue entry and cached citation record is unchanged. These checks establish integration and provenance, not diagnostic or prognostic performance.

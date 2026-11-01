@@ -51,7 +51,8 @@
   "wmparc": "FreeSurfer white-matter parcellation",
   "pam50": "PAM50 cord atlas on this spinal cord",
   "arterial": "Arterial territory atlas (Liu et al. 2023)",
-  "nettekoven": "Functional cerebellar atlas (Nettekoven et al. 2024)"
+  "nettekoven": "Functional cerebellar atlas (Nettekoven et al. 2024)",
+  "choi": "Striatal network atlas (Choi et al. 2012)"
  },
  "boundary": {
   "heading": "Boundary certainty",
@@ -125,7 +126,15 @@
    "[183,12345] → \"184 of 12345\"",
    "[12345,0] → \"12346 of 0\""
   ],
-  "inCircuits": "In guided circuits"
+  "inCircuits": "In guided circuits",
+  "route": "Route",
+  "wholeRoute": "Whole route",
+  "routeTitle": "The whole route",
+  "routeNote": "Each number marks where its landmark lies in this brain, seen through the cortex: an order, not the path the fibres take. Choose a number, here or on the picture, to open it.",
+  "routeMark": [
+   "[\"Alpha\",\"\"] → \"Landmark Alpha1: \"",
+   "[\"\",\"Alpha\"] → \"Landmark 1: Alpha\""
+  ]
  },
  "clinical": {
   "deficits": "Deficits",
@@ -298,6 +307,7 @@
   "unreadable": "Enter three numbers, x, y, z, in millimetres.",
   "outside": "This coordinate lies beyond the template’s brain, so it is not placed.",
   "failed": "The coordinate could not be placed.",
+  "replacedLesion": "Lesion replaced by the coordinate’s sphere.",
   "reportTitle": "Published coordinate",
   "entered": [
    "[\"Alpha\",\"\"] → \"Alpha in \"",
@@ -410,6 +420,8 @@
    "oblique": "Oblique section"
   },
   "networkByRegion": "networks by each region’s dominant share",
+  "striatumByVoxel": "striatum by its voxels, paler where less confident (Choi et al. 2012)",
+  "striatalPaler": "paler where Choi et al. are less confident",
   "territoryByRegion": "territory holding a majority of each region",
   "cabNpByArea": "CAB-NP network of each HCP-MMP area",
   "cabNpOtherLabels": "CAB-NP colours HCP-MMP labels only",
@@ -423,6 +435,7 @@
   "nextbrainSegmented": "NextBrain labels segmented on this brain",
   "arterialRegistered": "typical arterial territories registered onto this brain",
   "nettekovenRegistered": "group functional cerebellar regions registered onto this brain",
+  "choiRegistered": "group striatal networks registered onto this brain",
   "cutLabels": "Cut labels"
  },
  "deficitKey": {
@@ -502,6 +515,10 @@
   "seeThrough": "See through the cortex",
   "seenThrough": "Cortex made see-through; its painted areas stay opaque. Display sets the opacity.",
   "opaqueAgain": "Cortex made opaque again.",
+  "deepSelected": [
+   "[\"Alpha\"] → \"Alpha lies beneath the cortex.\"",
+   "[\"\"] → \" lies beneath the cortex.\""
+  ],
   "both": "Both",
   "left": "Left",
   "right": "Right",
@@ -841,7 +858,8 @@
    "wmparc": "wmparc",
    "pam50": "PAM50",
    "arterial": "Arterial territories",
-   "nettekoven": "Cerebellar functions"
+   "nettekoven": "Cerebellar functions",
+   "choi": "Striatal networks"
   },
   "subject": "Subject",
   "atlas": "Atlas",
@@ -1113,7 +1131,16 @@
    "[\"Alpha\",\"\",12345] → \"Alpha —  (label 12345)\"",
    "[\"\",\"Alpha\",0] → \" — Alpha (label 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (label 1)\""
-  ]
+  ],
+  "asStage": "Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree.",
+  "seenFrom": {
+   "right": "from the right",
+   "left": "from the left",
+   "anterior": "from the front",
+   "posterior": "from behind",
+   "superior": "from above",
+   "inferior": "from below"
+  }
  },
  "mri": {
   "dialog": {
@@ -1243,6 +1270,23 @@
    "vertices": "Shares of assigned source vertices; unassigned vertices excluded. Shares below 5% hidden without rescaling.",
    "voxels": "Shares of assigned cortical voxels; unassigned voxels excluded. Shares below 5% hidden without rescaling."
   },
+  "territory": "The striatal voxels whose resting-state connectivity most resembles this cortical network (Choi et al. 2012).",
+  "striatal": "Striatal networks (Choi et al. 2012)",
+  "striatalNote": "Share of this structure’s voxels in each network’s striatal territory. Shares below 5% hidden without rescaling.",
+  "striatalUnassigned": [
+   "[\"Alpha\"] → \"Alpha lies outside the striatum the atlas labels.\"",
+   "[\"\"] → \" lies outside the striatum the atlas labels.\""
+  ],
+  "striatalCaveat": "A group atlas registered onto this brain from FSL’s MNI152 template: borders sit a few millimetres off, and each voxel shows only the network its connectivity most resembles.",
+  "confidence": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Choi’s confidence: Alpha of its labelled voxels confident,  low, Alpha filled.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Choi’s confidence:  of its labelled voxels confident, Alpha low,  filled.\""
+  ],
+  "confidenceNote": [
+   "[\"Alpha\"] → \"Confident: a share of at least Alpha of the voxel’s 25 most correlated cortical vertices lies in its network; low: less; filled: the atlas did not reach it. The cut draws low and filled voxels paler.\"",
+   "[\"\"] → \"Confident: a share of at least  of the voxel’s 25 most correlated cortical vertices lies in its network; low: less; filled: the atlas did not reach it. The cut draws low and filled voxels paler.\""
+  ],
+  "putamenCaveat": "Choi et al. are least confident around the dorsal putamen, where signal from the adjacent insula is only partly removed: part of its salience share may come from the insula.",
   "caveat": "Group resting-state networks, not measured function in this brain."
  },
  "orientation": {

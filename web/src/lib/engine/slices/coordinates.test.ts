@@ -8,6 +8,7 @@ import {
   offsetThrough,
   pointOnFrame,
   rasToWorld,
+  stagedFrame,
   worldToRas,
   worldToVoxelMatrix,
 } from './coordinates.ts';
@@ -146,4 +147,12 @@ test('RENDER-43 the world-to-voxel matrix composes the inverse affine with world
   const shifted = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 0, 0, 1];
   const moved = world.clone().applyMatrix4(worldToVoxelMatrix({ inverse: shifted }));
   assert.ok(moved.distanceTo(new Vector3(31, 37, 49)) < 1e-9);
+});
+
+test('the coronal panel faced from the front puts the subject’s right on the left, as the anterior view does', () => {
+  assert.deepEqual(stagedFrame('coronal', [0, 0, 0], false).edges, ['S', 'L', 'I', 'R']);
+  assert.deepEqual(stagedFrame('coronal', [0, 0, 0], true).edges, ['S', 'R', 'I', 'L']);
+  // From below the stage keeps anterior up, so the axial panel turns over side to side.
+  assert.deepEqual(stagedFrame('axial', [0, 0, 0], false).edges, ['A', 'R', 'P', 'L']);
+  assert.deepEqual(stagedFrame('axial', [0, 0, 0], true).edges, ['A', 'L', 'P', 'R']);
 });

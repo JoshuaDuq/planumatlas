@@ -14,6 +14,15 @@ export const en = {
   note: (anatomy: { individual: boolean }) =>
     `1 mm ${anatomy.individual ? 'single-subject' : 'averaged-template'} grid · surface RAS coordinates · L/R explicitly marked. MRI shows the full volume independently of surface visibility. Cortical atlas areas remain surface labels.`,
   readout: (ras: string, name: string, labelId: number) => `${ras} — ${name} (label ${labelId})`,
+  asStage: 'Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree.',
+  seenFrom: {
+    right: 'from the right',
+    left: 'from the left',
+    anterior: 'from the front',
+    posterior: 'from behind',
+    superior: 'from above',
+    inferior: 'from below',
+  },
 };
 
 export const fr: typeof en = {
@@ -43,4 +52,14 @@ export const fr: typeof en = {
     `Grille 1 mm ${anatomy.individual ? 'd’un sujet unique' : 'd’un gabarit moyenné'} · coordonnées RAS de surface · G/D explicitement marqués. L’IRM montre le volume complet indépendamment de la visibilité de surface. Les aires corticales de l’atlas restent des étiquettes de surface.`,
   readout: (ras: string, name: string, labelId: number) =>
     `${ras} — ${name} (étiquette ${labelId})`,
+  asStage:
+    'Chaque plan est montré comme la vue 3D voit sa coupe\u202f; les deux images d’une coupe concordent.',
+  seenFrom: {
+    right: 'depuis la droite',
+    left: 'depuis la gauche',
+    anterior: 'depuis l’avant',
+    posterior: 'depuis l’arrière',
+    superior: 'depuis le haut',
+    inferior: 'depuis le bas',
+  },
 };

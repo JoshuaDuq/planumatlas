@@ -124,7 +124,10 @@
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />
     <DeficitProfile explorer={deficits} view={current} />
-    {#if lesionShown && lesion.coordinate}
+    {#if circuits.route}
+      <!-- The whole route selects nothing: its landmarks and the lesson's notes follow it. -->
+      <CircuitNotes model={circuits} />
+    {:else if lesionShown && lesion.coordinate}
       <CoordinateReport
         {lesion}
         lang={current.lang}
@@ -173,6 +176,7 @@
         {receptors}
         territories={manifest.arterial_territories ?? null}
         cerebellarFunctions={manifest.cerebellar_functions ?? null}
+        striatalNetworks={manifest.striatal_networks ?? null}
         onfocus={() => anatomy.focusSelection()}
         onisolate={anatomy.isolateSelection}
         onhide={() => void anatomy.hideSelection()}

@@ -274,23 +274,6 @@ references:
     citation: Dehaene & Cohen · Cortex · 1997
     pmid: '9220256'
     url: https://pubmed.ncbi.nlm.nih.gov/9220256/
-  - id: gaze-imaging
-    title: 'Cortical networks subserving pursuit and saccadic eye movements in humans: an FMRI study'
-    citation: Berman et al. · Human Brain Mapping · 1999
-    pmid: '10619415'
-    pmcid: PMC6873313
-    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC6873313/
-  - id: gaze-parietal
-    title: Location of the human posterior eye field with functional magnetic resonance imaging
-    citation: Müri et al. · Journal of Neurology, Neurosurgery & Psychiatry · 1996
-    pmid: '8774415'
-    pmcid: PMC1073903
-    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC1073903/
-  - id: gaze-stroke
-    title: 'Parietal motor syndrome: a clinical description in 32 patients in the acute phase of pure parietal strokes studied prospectively'
-    citation: Ghika et al. · Clinical Neurology and Neurosurgery · 1998
-    pmid: '9879853'
-    url: https://pubmed.ncbi.nlm.nih.gov/9879853/
   - id: speech-insula
     title: A new brain region for coordinating speech articulation
     citation: Dronkers · Nature · 1996
@@ -416,12 +399,6 @@ references:
     pmid: '24729106'
     pmcid: PMC3987254
     url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3987254/
-  - id: clinical-aboulhosn-2022
-    title: Partial Balint's syndrome and left homonymous hemianopsia presenting after resection of a right occipito-parietal glioblastoma
-    citation: Aboulhosn et al. · Neurocase · 2022
-    pmid: '36794351'
-    url: https://pubmed.ncbi.nlm.nih.gov/36794351/
-
   - id: clinical-sperber-2024
     title: 'The neuroanatomy of visual extinction following right hemisphere brain damage: Insights from multivariate and Bayesian lesion analyses in acute stroke'
     citation: Sperber et al. · Human Brain Mapping · 2024
@@ -1585,64 +1562,6 @@ circuits:
           fr: Le lobule entier dépasse les territoires postérieurs du modèle. L’hémisphère opposé est omis et aucune ligne numérique mentale n’est mesurée sur cette surface.
         view: superior
         plane: axial
-
-  - id: gaze
-    name: { en: Voluntary gaze control, fr: Contrôle volontaire du regard }
-    summary:
-      en: Locate parietal and frontal landmarks recruited during saccadic eye movements.
-      fr: Repérez les territoires pariétaux et frontaux mobilisés pendant les saccades oculaires.
-    route:
-      en: Intraparietal sulcus · frontal eye field · supplementary and cingulate eye field parcel
-      fr: Sillon intrapariétal · champ oculomoteur frontal · parcelle des champs oculomoteurs supplémentaire et cingulaire
-    scope:
-      en: Three right-sided landmarks in bilateral oculomotor systems. The order does not establish a parietal-to-frontal chain. Subcortical, brainstem and cerebellar contributions are not visited; this tour concerns cortical control rather than the full motor apparatus of the eyes.
-      fr: Trois repères droits dans des systèmes oculomoteurs bilatéraux. L’ordre n’établit pas une chaîne pariéto-frontale. Les contributions sous-corticales, du tronc cérébral et du cervelet ne sont pas parcourues ; ce parcours concerne le contrôle cortical plutôt que tout l’appareil moteur des yeux.
-    clinical:
-      en: Ghika reported oculomotor apraxia with bilateral posterior lesions; Aboulhosn’s selected tumor-resection case showed partial Bálint syndrome after unilateral right injury. These findings neither require bilateral damage in every patient nor isolate one right frontal parcel as causal. The functional eye-field landmarks are not reconstructed clinical lesions.
-      fr: Ghika rapportait une apraxie oculomotrice avec des lésions postérieures bilatérales ; le cas sélectionné de résection tumorale d’Aboulhosn présentait un syndrome de Bálint partiel après atteinte droite unilatérale. Ces constats n’exigent pas une atteinte bilatérale chez tout patient et n’isolent pas une parcelle frontale droite comme causale. Les repères fonctionnels oculomoteurs ne sont pas des lésions cliniques reconstruites.
-    deficit: oculomotor-apraxia
-    references: [gaze-imaging, gaze-parietal, gaze-stroke, cortical-parcellation, clinical-aboulhosn-2022]
-    clinical_references: [gaze-stroke, clinical-aboulhosn-2022]
-    steps:
-      - id: intraparietal
-        region: destrieux:right:57
-        source_name: S_intrapariet_and_P_trans
-        name: { en: Right intraparietal and transverse parietal sulci, fr: Sillons intrapariétal et pariétal transverse droits }
-        role: { en: Parietal oculomotor landmark, fr: Repère oculomoteur pariétal }
-        explanation:
-          en: Müri and colleagues observed bilateral intraparietal activity during visually guided saccades and proposed a parietal eye-field location.
-          fr: Müri et ses collègues ont observé une activité intrapariétale bilatérale pendant les saccades visuellement guidées et proposé une localisation du champ oculomoteur pariétal.
-        mapping:
-          en: This combined sulcal parcel exceeds the functional focus in the deep intraparietal sulcus. It does not isolate the parietal eye field or measure a saccade signal.
-          fr: Cette parcelle sulcale combinée dépasse le foyer fonctionnel du sillon intrapariétal profond. Elle n’isole pas le champ oculomoteur pariétal et ne mesure pas de signal de saccade.
-        view: superior
-        plane: axial
-      - id: frontal-eye-field
-        region: hcp-mmp:right:10
-        source_name: R_FEF_ROI
-        name: { en: Right frontal eye field parcel, fr: Parcelle du champ oculomoteur frontal droit }
-        role: { en: Frontal oculomotor landmark, fr: Repère oculomoteur frontal }
-        explanation:
-          en: Berman and colleagues found frontal eye-field activation during both saccades and smooth pursuit. The region’s involvement is not specific to one eye-movement task.
-          fr: Berman et ses collègues ont observé une activation du champ oculomoteur frontal pendant les saccades et la poursuite lente. Sa participation n’est pas spécifique à une seule tâche oculomotrice.
-        mapping:
-          en: HCP-MMP FEF is an atlas parcel, not Berman’s functional activation cluster or an individual stimulation-defined eye field.
-          fr: FEF de HCP-MMP est une parcelle d’atlas, et non le foyer d’activation fonctionnelle de Berman ni un champ oculomoteur individuel défini par stimulation.
-        view: right
-        plane: axial
-      - id: supplementary-cingulate
-        region: hcp-mmp:right:43
-        source_name: R_SCEF_ROI
-        name: { en: Right supplementary and cingulate eye field parcel, fr: Parcelle des champs oculomoteurs supplémentaire et cingulaire droits }
-        role: { en: Medial frontal oculomotor landmark, fr: Repère oculomoteur frontal médial }
-        explanation:
-          en: Berman’s study also found supplementary eye-field and cingulate activation during saccades and pursuit. Compare this medial frontal territory with the lateral frontal landmark.
-          fr: L’étude de Berman rapportait aussi des activations oculomotrices supplémentaires et cingulaires pendant les saccades et la poursuite. Comparez ce territoire frontal médial au repère frontal latéral.
-        mapping:
-          en: HCP-MMP SCEF combines supplementary and cingulate eye-field territory. It does not separately delineate Berman’s supplementary eye field and anterior cingulate activations or reproduce their exact boundaries.
-          fr: SCEF de HCP-MMP combine des territoires oculomoteurs supplémentaire et cingulaire. Elle ne délimite pas séparément les activations du champ supplémentaire et du cortex cingulaire antérieur de Berman et ne reproduit pas leurs limites exactes.
-        view: left
-        plane: sagittal
 
   - id: speech-planning
     name: { en: Speech apraxia lesion findings, fr: Résultats lésionnels de l’apraxie de la parole }

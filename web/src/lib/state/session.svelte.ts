@@ -57,6 +57,7 @@ export function createLessonStore(...args: Parameters<typeof createCircuitSessio
     start: refreshing(core.start, refresh),
     close: refreshing(core.close, refresh),
     go: refreshing(core.go, refresh),
+    showRoute: refreshing(core.showRoute, refresh),
     get state() {
       return state;
     },

@@ -2,8 +2,9 @@
   The lesson's place and its landmark steps, for the location bar's `stepper` slot (viewer/ui/panels/
   circuits.js:74-100, index.html:335). Previous and Next are separate named buttons in a labelled
   group (APG Carousel's pair); at an end the control leaves rather than greying out, and a fixed
-  three-column grid keeps the count still. While a run is in flight a control stays focusable and
-  refuses (deviations/x3-busy-keeps-focus.md).
+  three-column grid keeps the count still. The whole route comes before the first landmark: Previous
+  from there returns to it. While a run is in flight a control stays focusable and refuses
+  (deviations/x3-busy-keeps-focus.md).
 -->
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
@@ -15,7 +16,12 @@
 
   const copy = $derived(t(model.lang, 'circuits'));
   const total = $derived(model.circuit?.steps.length ?? 0);
-  const targets = $derived(stepperTargets(model.lesson.step, total));
+  const route = $derived(model.lesson.route);
+  const targets = $derived(
+    route ? { previous: null, next: 0 } : stepperTargets(model.lesson.step, total),
+  );
+  // The first landmark's Previous is the whole route.
+  const toRoute = $derived(!route && targets.previous === null);
   let root = $state<HTMLElement | null>(null);
 
   $effect(() => {
@@ -24,26 +30,31 @@
 </script>
 
 {#snippet control(direction: Direction, label: string)}
+  {@const routeBack = direction === 'previous' && toRoute}
   <IconButton
     icon={direction}
     {label}
     class="stepper-{direction}"
     data-tooltip={label}
     data-step-direction={direction}
-    hidden={targets[direction] === null}
+    hidden={targets[direction] === null && !routeBack}
     aria-disabled={model.busy ? 'true' : undefined}
-    onclick={() => model.openStep(targets[direction]!, direction)}
+    onclick={() => (routeBack ? model.openRoute() : model.openStep(targets[direction]!, direction))}
   />
 {/snippet}
 
 {#if model.exploring && model.circuit}
   <div role="group" aria-label={copy.landmarks} class="circuit-stepper" bind:this={root}>
-    {@render control('previous', copy.previousLandmark)}
+    {@render control('previous', toRoute ? copy.wholeRoute : copy.previousLandmark)}
     <p class="progress">
-      <span class="visually-hidden">{copy.landmark}{' '}</span>{copy.stepShort(
-        model.lesson.step,
-        total,
-      )}
+      {#if route}
+        {copy.route}
+      {:else}
+        <span class="visually-hidden">{copy.landmark}{' '}</span>{copy.stepShort(
+          model.lesson.step,
+          total,
+        )}
+      {/if}
     </p>
     {@render control('next', copy.nextLandmark)}
   </div>

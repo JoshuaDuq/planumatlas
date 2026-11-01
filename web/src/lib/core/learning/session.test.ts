@@ -18,15 +18,20 @@ const catalog = {
 
 test('starting and navigating a lesson validates landmarks', () => {
   const session = createCircuitSession(catalog);
-  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [] });
+  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [], route: false });
   session.start('vision');
   session.go(1);
-  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 1, visited: [0, 1] });
+  assert.deepEqual(session.snapshot(), {
+    circuit: 'vision',
+    step: 1,
+    visited: [0, 1],
+    route: false,
+  });
   assert.throws(() => session.go(2), /landmark/);
   assert.throws(() => session.go(-1), /landmark/);
   assert.throws(() => session.go(0.5), /landmark/);
   session.start('vision');
-  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 0, visited: [0] });
+  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 0, visited: [0], route: false });
 });
 
 test('a lesson remembers which landmarks were seen, once each, until it restarts', () => {
@@ -59,7 +64,7 @@ test('a link without a lesson closes the one open', () => {
   session.start('vision');
   session.go(1);
   session.close();
-  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [] });
+  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [], route: false });
 });
 
 test('CAT-55 · a landmark index that is not a whole number inside the circuit fails with the index', () => {
@@ -71,7 +76,7 @@ test('CAT-55 · a landmark index that is not a whole number inside the circuit f
       message: `Invalid landmark index: ${index}`,
     });
   }
-  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 0, visited: [0] });
+  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 0, visited: [0], route: false });
 });
 
 test('CAT-55 · going to a landmark before any start fails, and a failed start changes nothing', () => {
@@ -86,9 +91,14 @@ test('CAT-55 · going to a landmark before any start fails, and a failed start c
     message: 'Unknown circuit: null',
   });
   assert.throws(() => session.go(0), { message: 'Unknown circuit' });
-  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [] });
+  assert.deepEqual(session.snapshot(), { circuit: null, step: 0, visited: [], route: false });
   session.start('vision');
   session.go(1);
   assert.throws(() => session.start('missing'));
-  assert.deepEqual(session.snapshot(), { circuit: 'vision', step: 1, visited: [0, 1] });
+  assert.deepEqual(session.snapshot(), {
+    circuit: 'vision',
+    step: 1,
+    visited: [0, 1],
+    route: false,
+  });
 });

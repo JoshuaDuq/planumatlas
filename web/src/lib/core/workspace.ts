@@ -128,13 +128,15 @@ export function locationCrumbs({
   return crumbs;
 }
 
-/** What a notice's one action is called (notice.js:36-39): a reload, or seeing through the cortex. */
+/** What a notice's one action is called (notice.js:36-39): a reload, seeing through the cortex, or restoring the view. */
 export function noticeActionLabel(lang: Language, action: NonNullable<Notice['action']>): string {
   switch (action) {
     case 'reload':
       return t(lang, 'errors').reload;
     case 'see-through':
       return t(lang, 'display').seeThrough;
+    case 'restore':
+      return t(lang, 'clinical').restore;
     default:
       throw new Error(`Unknown notice action: ${action}`);
   }

@@ -22,6 +22,8 @@ import {
 } from './palette.ts';
 import type { Label, PaletteLookup } from './palette.ts';
 import { buildRibbonWedges } from './ribbon-wedges.ts';
+import { addStriatalOverlay } from './striatal-overlay.ts';
+import type { StriatalUniforms } from './striatal-overlay.ts';
 import { createSolidMaterial } from './solid-material.ts';
 import type { SolidAnatomy, SolidUserData } from './solid-material.ts';
 import type { Band, SolidSource, SolidSections } from './solid-sections.ts';
@@ -43,13 +45,14 @@ interface CutSourceData {
 
 /** What a cap material carries on `userData`: `createSolidMaterial`'s uniforms and the label-sampling flag. */
 export type CapUserData = Pick<SolidUserData, 'tissueVariation'> &
-  Partial<SolidUserData> & { sampledLabels: { value: boolean } };
+  Partial<SolidUserData> & { sampledLabels: { value: boolean }; striatalHere?: { value: boolean } };
 
 /** The registered MRI and cut labels the solids' materials read. */
 export interface SolidSourceAnatomy extends SolidAnatomy {
   capLabels: CapLabelUniforms;
   capEdges: EdgeUniforms;
   mriUniforms: MriUniforms;
+  striatal: StriatalUniforms;
 }
 
 /** An atlas's `ribbon_labels` record in the manifest. */
@@ -199,6 +202,7 @@ export function addSolidSources(
     const sampled = source.userData['boundary'] === 'white' ? whiteMatter : null;
     const material = createSolidMaterial(anatomy, appearance, sampled);
     addCapLabels(material, anatomy.capLabels);
+    addStriatalOverlay(material, anatomy.striatal);
     addMriAppearance(material, anatomy.mriUniforms, 'capLift');
     addBoundaryEdges(material, anatomy.capEdges, {
       volume: 'capLabelVolume',
@@ -318,6 +322,7 @@ export function paintSolids(
     appearance,
     lookup,
     whiteMatter,
+    striatal = false,
   }: {
     labels: LabelIndex;
     state: SolidPaintState;
@@ -327,6 +332,8 @@ export function paintSolids(
     appearance: Pick<Appearance, 'tissue' | 'intensity'>;
     lookup?: PaletteLookup;
     whiteMatter?: WhiteMatter | null;
+    /** Whether striatal structures' caps take their voxels' network colours. */
+    striatal?: boolean;
   },
 ): void {
   // Only tissue colour carries the T1 brightness it was tuned against; under a
@@ -365,6 +372,11 @@ export function paintSolids(
     solid.cap.material.userData['sampledLabels'].value = sampled;
     const capState = sampledIsolation && sampled ? { ...state, isolatedRegion: null } : state;
     if (sampled) solid.region = null;
+    const striatalId = solid.region ?? source.userData.region_id;
+    const striatalRegion = striatalId ? lookup?.regions?.get(striatalId) : undefined;
+    if (cap.material.userData.striatalHere)
+      cap.material.userData.striatalHere.value =
+        striatal && Boolean(striatalRegion?.striatal_networks?.length);
     const isolatedWhiteMatter = holdsIsolatedWhiteMatter(source, state, lookup, whiteMatter);
     if (!label) {
       const { boundary } = source.userData;

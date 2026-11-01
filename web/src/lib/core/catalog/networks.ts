@@ -93,15 +93,25 @@ export function networksOf(
   return (region?.networks ?? []).filter((share) => share.fraction >= minimum);
 }
 
+/** A striatal structure's network shares (Choi et al. 2012), largest first, below-threshold shares hidden. */
+export function striatalNetworksOf(
+  region: Pick<Region, 'striatal_networks'> | null | undefined,
+  minimum = MINIMUM_SHARE,
+) {
+  return (region?.striatal_networks ?? []).filter((share) => share.fraction >= minimum);
+}
+
 /** The samples counted by the build, excluding samples assigned to no network. */
 export function networkBasis(region: {
   id?: string;
   atlas?: string;
   kind?: string;
-}): 'vertices' | 'voxels' {
+}): 'vertices' | 'voxels' | 'territory' {
   if (['destrieux', 'hcp-mmp', 'julich', 'schaefer'].includes(region.atlas ?? ''))
     return 'vertices';
   if (region.atlas === 'nextbrain' && region.kind === 'tissue-region') return 'voxels';
+  // A striatal network region is that network's striatal territory, whole.
+  if (region.atlas === 'choi') return 'territory';
   throw new Error(`Unknown network composition basis for ${region.id ?? region.atlas}.`);
 }
 

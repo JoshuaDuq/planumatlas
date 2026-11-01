@@ -1,5 +1,6 @@
 // The orientation gizmo over the fake engine in a real browser: where the six directions are drawn, what a
-// letter, the centre, a chevron and Reset view do, and the APG Toolbar keys and WCAG 2.5.7 it answers to.
+// letter, the caption's oblique link, a chevron and Reset view do, and the APG Toolbar keys and WCAG 2.5.7
+// it answers to.
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { flushSync } from 'svelte';
@@ -173,12 +174,38 @@ describe('choosing a view', () => {
     });
   });
 
-  test('the centre frames the oblique view', async () => {
+  test('the link under the axes frames the oblique view', async () => {
     await mount();
     diagonal();
     await userEvent.click(button('Oblique view'));
     expect(commands.chooseView.mock.calls).toEqual([['oblique']]);
     expect(stage.hintRetired).toBe(true);
+  });
+
+  test('the origin is no target: at the oblique view the left letter over it is what a click there chooses', async () => {
+    await mount();
+    const origin = centreOf(document.querySelector('.gizmo-field')!);
+    const hit = document.elementFromPoint(origin.x, origin.y)!.closest('button');
+    expect(hit).toBe(letter('L'));
+    expect(button('Oblique view').getBoundingClientRect().top).toBeGreaterThan(
+      letter('I').getBoundingClientRect().bottom,
+    );
+  });
+
+  test('the caption names the held view in words, and offers the oblique view from any other', async () => {
+    await mount();
+    const caption = () =>
+      document.querySelector('.gizmo-caption')!.textContent!.replace(/\s+/g, ' ').trim();
+    expect(caption()).toBe('Oblique view');
+    await userEvent.click(button('Left view'));
+    expect(caption()).toBe('Left view · Oblique');
+    engine.camera.orbitBy({ azimuth: 0.1 });
+    flushSync();
+    expect(caption()).toBe('Oblique');
+    live.lang = 'fr';
+    flushSync();
+    await userEvent.click(button('Vue postérieure'));
+    expect(caption()).toBe('Vue postérieure · Oblique');
   });
 
   test('a view reads as pressed only while the engine holds it', async () => {
@@ -271,7 +298,7 @@ describe('the toolbar', () => {
 });
 
 describe('size', () => {
-  test('its targets are 24 px; on a coarse pointer the chevrons and Reset view grow to 44 px and the glyphs stay', async () => {
+  test('its targets are 24 px; on a coarse pointer the chevrons, Reset view and the oblique link grow to 44 px and the glyphs stay', async () => {
     await mount();
     const turns = () =>
       [...gizmo().querySelectorAll<HTMLElement>('.icon-button')].map((node) => [
@@ -279,10 +306,11 @@ describe('size', () => {
         node.offsetHeight,
       ]);
     const glyph = () => centreOf(button('Turn right').querySelector('svg')!).x;
-    for (const node of gizmo().querySelectorAll<HTMLElement>('button')) {
+    for (const node of gizmo().querySelectorAll<HTMLElement>('button:not(.gizmo-oblique)')) {
       expect(node.offsetWidth).toBe(24);
       expect(node.offsetHeight).toBe(24);
     }
+    expect(button('Oblique view').offsetHeight).toBe(24);
     const drawn = glyph();
     const session = cdp();
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
@@ -290,6 +318,7 @@ describe('size', () => {
       expect(matchMedia('(pointer: coarse)').matches).toBe(true);
       expect(turns()).toEqual(Array(5).fill([44, 44]));
       expect(glyph()).toBeCloseTo(drawn, 0);
+      expect(button('Oblique view').offsetHeight).toBe(44);
     } finally {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
     }

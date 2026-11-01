@@ -147,6 +147,7 @@
 
   function noticeAction(action: NonNullable<Notice['action']>) {
     if (action === 'reload') void reloadWithoutStoredModels();
+    else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
     else world!.excursions.seeThroughCortex();
   }
 
@@ -199,6 +200,7 @@
       openFunction: (id) => panels.functions.openFunction(id),
       openDeficit: (id) => panels.deficits.openDeficit(id),
       openLessonMri: () => panels.circuits.openMri(),
+      openLessonStep: (index) => panels.circuits.openStep(index),
     });
   });
 

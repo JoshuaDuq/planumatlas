@@ -7,8 +7,10 @@ function setup(landing: [number, number, number] | null) {
   const calls: string[] = [];
   const lesion = {
     sphere: null as { centre: [number, number, number]; radius: number } | null,
-    placeCoordinate: vi.fn((_placed, [x, y, z]: number[], radius: number) => {
+    coordinate: null as unknown,
+    placeCoordinate: vi.fn((placed, [x, y, z]: number[], radius: number) => {
       calls.push('place');
+      lesion.coordinate = placed;
       lesion.sphere = { centre: [Math.round(x! * 10) / 10, y!, z!], radius };
     }),
   };
@@ -37,6 +39,7 @@ function setup(landing: [number, number, number] | null) {
     ui: {
       showAnatomy: () => void calls.push('anatomy'),
       showDetail: () => void calls.push('detail'),
+      sayLesionReplaced: () => void calls.push('replaced'),
     },
   });
   return { placement, lesion, engine, calls, settle, supersede: () => intent++ };
@@ -72,4 +75,23 @@ test('a later command while the field downloads takes over', async () => {
   settle();
   expect(await placing).toBe(true);
   expect(calls).toEqual([]);
+});
+
+test('a lesion the reader placed is said to be replaced, once the coordinate holds the sphere', async () => {
+  const { placement, lesion, calls, settle } = setup([0, 0, 0]);
+  lesion.sphere = { centre: [10, 10, 10], radius: 5 };
+  const placing = placement.place([-42, 22, 6], 'unstated');
+  settle();
+  await placing;
+  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'focus', 'detail', 'replaced']);
+});
+
+test('a coordinate placed over another coordinate replaces no lesion', async () => {
+  const { placement, lesion, calls, settle } = setup([0, 0, 0]);
+  lesion.sphere = { centre: [10, 10, 10], radius: 5 };
+  lesion.coordinate = { entered: [1, 2, 3], space: 'unstated' };
+  const placing = placement.place([-42, 22, 6], 'unstated');
+  settle();
+  await placing;
+  expect(calls).not.toContain('replaced');
 });

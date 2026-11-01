@@ -32,6 +32,7 @@ from .layers import (
     neurosynth_terms,
     receptor_fingerprints,
     spinal_cord,
+    striatal_networks,
 )
 from .sources import (
     HEMISPHERES,
@@ -105,6 +106,14 @@ def require_layer_inputs(config):
             cerebellar_functions.volume_path(config),
             cerebellar_functions.lobules_path(config),
             cerebellar_functions.report_path(config),
+        ],
+        "striatal_networks": lambda: [
+            striatal_networks.DEFINITION,
+            striatal_networks.volume_path(config),
+            striatal_networks.carried_path(config),
+            striatal_networks.template_aseg_path(config),
+            striatal_networks.confidence_path(config),
+            striatal_networks.report_path(config),
         ],
         "coordinate_spaces": lambda: [
             coordinate_spaces.DEFINITION,
@@ -374,6 +383,8 @@ def cut_atlases(config):
         atlases.append(arterial_territories.cut_atlas(arterial_territories.read_definition()))
     if cerebellar_functions.is_declared(config):
         atlases.append(cerebellar_functions.cut_atlas(cerebellar_functions.read_definition()))
+    if striatal_networks.is_declared(config):
+        atlases.append(striatal_networks.cut_atlas(striatal_networks.read_definition()))
     return atlases
 
 
@@ -571,7 +582,7 @@ def main():
         path = config["output_directory"] / built["file"]
         cord_layers = [spinal_cord.layer(config, built, cord_regions, path)]
         regions.extend(cord_regions)
-    if arterial_territories.is_declared(config) or cerebellar_functions.is_declared(config):
+    if any(layer.is_declared(config) for layer in (arterial_territories, cerebellar_functions, striatal_networks)):
         grids = territory_grids(config)
     if arterial_territories.is_declared(config):
         territories = arterial_territories.read_definition()
@@ -581,6 +592,10 @@ def main():
         cerebellar = cerebellar_functions.read_definition()
         regions.extend(cerebellar_functions.build_regions(config, cerebellar))
         cerebellar_functions.compose(config, cerebellar, regions, grids[0])
+    if striatal_networks.is_declared(config):
+        striatal = striatal_networks.read_definition()
+        regions.extend(striatal_networks.build_regions(config, striatal))
+        striatal_networks.compose(config, striatal, regions, *grids)
     manifest = {
         "supplemental_layers": cord_layers,
         "volumes": {"file": "volumes.json"},
@@ -630,6 +645,11 @@ def main():
             else {}
         ),
         **(
+            {"striatal_networks": striatal_networks.metadata(config, striatal)}
+            if striatal_networks.is_declared(config)
+            else {}
+        ),
+        **(
             {"coordinate_spaces": coordinate_spaces.export(config, coordinate_spaces.read_definition())}
             if coordinate_spaces.is_declared(config)
             else {}
@@ -666,6 +686,7 @@ def main():
             *white_matter.limitations(config),
             *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
             *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),
+            *(striatal_networks.limitations(config, striatal) if striatal_networks.is_declared(config) else []),
             *(coordinate_spaces.limitations(coordinate_spaces.read_definition())
               if coordinate_spaces.is_declared(config) else []),
         ],

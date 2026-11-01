@@ -2,6 +2,7 @@
 // each plane's controls. Fixed expected words; the legacy source is not imported (decision on #4,
 // 2026-10-26: tests state business rules).
 import { describe, expect, test } from 'vitest';
+import { stagedFrame } from '../../lib/engine/slices/coordinates.ts';
 import {
   canvasName,
   planeName,
@@ -10,6 +11,7 @@ import {
   readoutText,
   sampleName,
   saveSuffix,
+  seenFrom,
   savedAnnouncement,
 } from './mpr-words.ts';
 
@@ -116,4 +118,18 @@ describe("the picture's text alternative", () => {
     expect(() => canvasName('axial', [], 'en')).toThrow(RangeError);
     expect(() => canvasName('axial', ['A', 'R', 'P', 'X'], 'en')).toThrow(/Unknown orientation/);
   });
+});
+
+test('each panel names the side it is seen from by its own edge letters, as the stage faces each cut', () => {
+  for (const [plane, reverse, side] of [
+    ['sagittal', false, 'right'],
+    ['sagittal', true, 'left'],
+    ['coronal', false, 'anterior'],
+    ['coronal', true, 'posterior'],
+    ['axial', false, 'superior'],
+    ['axial', true, 'inferior'],
+  ] as const) {
+    expect(seenFrom(plane, stagedFrame(plane, [0, 0, 0], reverse).edges), plane).toBe(side);
+  }
+  expect(() => seenFrom('axial', ['R', 'A', 'L', 'P'])).toThrow('axial panel');
 });

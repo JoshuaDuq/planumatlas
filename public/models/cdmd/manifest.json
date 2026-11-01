@@ -2166,6 +2166,64 @@
     },
     "method": "The SUIT cerebellar template registered to this brain's skull-stripped T1, kept to its infratentorial compartment, with SynthMorph (joint affine and deformable); the atlas carried across by nearest neighbour and kept to this brain's cerebellar cortex. Each lobule's shares count its own voxels"
   },
+  "striatal_networks": {
+    "id": "choi",
+    "label": "Striatal networks (Choi et al. 2012)",
+    "citation": "https://doi.org/10.1152/jn.00270.2012",
+    "license": "Distributed with FreeSurfer (FreeSurfer Software License)",
+    "networks": {
+      "Vis": {
+        "name": "Visual",
+        "name_fr": "Visuel"
+      },
+      "SomMot": {
+        "name": "Somatomotor",
+        "name_fr": "Somatomoteur"
+      },
+      "DorsAttn": {
+        "name": "Dorsal attention",
+        "name_fr": "Attention dorsale"
+      },
+      "SalVentAttn": {
+        "name": "Salience / ventral attention",
+        "name_fr": "Saillance / attention ventrale"
+      },
+      "Limbic": {
+        "name": "Limbic",
+        "name_fr": "Limbique"
+      },
+      "Cont": {
+        "name": "Frontoparietal control",
+        "name_fr": "Contr\u00f4le frontopari\u00e9tal"
+      },
+      "Default": {
+        "name": "Default mode",
+        "name_fr": "Mode par d\u00e9faut"
+      }
+    },
+    "minimum_confidence": 0.5,
+    "registration": {
+      "striatum_dice": {
+        "left_caudate": 0.9046,
+        "right_caudate": 0.8979,
+        "left_putamen": 0.9177,
+        "right_putamen": 0.9104,
+        "left_accumbens": 0.8501,
+        "right_accumbens": 0.7776
+      },
+      "striatum_dice_mean": 0.8764,
+      "structure_covered": {
+        "left_caudate": 0.9601,
+        "right_caudate": 0.9537,
+        "left_putamen": 0.9872,
+        "right_putamen": 0.9865,
+        "left_accumbens": 0.8898,
+        "right_accumbens": 0.8281
+      },
+      "structure_covered_min": 0.8281
+    },
+    "method": "FSL's MNI152 template (MNI152NLin6Asym), skull-stripped, registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable); the atlas's loose mask carried across by nearest neighbour and kept to this brain's caudate, putamen and accumbens. A voxel the atlas does not reach takes the network of the nearest voxel it reaches in the same structure. Each region's shares count its own voxels"
+  },
   "coordinate_spaces": {
     "label": "Published coordinates",
     "radius_mm": 5,
@@ -2453,6 +2511,13 @@
       "id": "nettekoven",
       "label": "Functional cerebellar regions (Nettekoven et al. 2024)",
       "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+      "surface": false,
+      "procedure": "registered-template"
+    },
+    {
+      "id": "choi",
+      "label": "Striatal networks (Choi et al. 2012)",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
       "surface": false,
       "procedure": "registered-template"
     }
@@ -55128,7 +55193,28 @@
           "fraction": 0.013814756671899528
         }
       ],
-      "territory_unassigned": 0.2675039246467818
+      "territory_unassigned": 0.2675039246467818,
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.48948194662480377
+        },
+        {
+          "network": "Default",
+          "fraction": 0.4455259026687598
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.06059654631083203
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.039874411302982735,
+        "low": 0.009733124018838305,
+        "confident": 0.950392464678179
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:left:12",
@@ -55173,7 +55259,36 @@
           "fraction": 0.04748482220294883
         }
       ],
-      "territory_unassigned": 0.031439722463139634
+      "territory_unassigned": 0.031439722463139634,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3113616652211622
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2417606244579358
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.191673894189072
+        },
+        {
+          "network": "Default",
+          "fraction": 0.1702081526452732
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.08434518647007806
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.012792714657415438,
+        "low": 0.008022549869904597,
+        "confident": 0.9791847354726799
+      },
+      "striatal_networks_putamen": 1.0
     },
     {
       "id": "aseg:left:13",
@@ -55454,7 +55569,24 @@
           "fraction": 0.015527950310559006
         }
       ],
-      "territory_unassigned": 0.453416149068323
+      "territory_unassigned": 0.453416149068323,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8493788819875776
+        },
+        {
+          "network": "Default",
+          "fraction": 0.15062111801242237
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.11024844720496894,
+        "low": 0.009316770186335404,
+        "confident": 0.8804347826086957
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:left:28",
@@ -55802,7 +55934,28 @@
           "fraction": 0.024790919952210274
         }
       ],
-      "territory_unassigned": 0.008064516129032258
+      "territory_unassigned": 0.008064516129032258,
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.5731780167264038
+        },
+        {
+          "network": "Default",
+          "fraction": 0.3497610513739546
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.06182795698924731
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.046296296296296294,
+        "low": 0.010752688172043012,
+        "confident": 0.9429510155316607
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:right:51",
@@ -55851,7 +56004,40 @@
           "fraction": 0.052608600742196025
         }
       ],
-      "territory_unassigned": 0.024012224405151713
+      "territory_unassigned": 0.024012224405151713,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.43724077712289894
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.22811613184894128
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.18183802663173979
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.08316961362148002
+        },
+        {
+          "network": "Default",
+          "fraction": 0.044968347522375024
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.02226588081204977
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.013534162846540057,
+        "low": 0.0032743942370661427,
+        "confident": 0.9831914429163938
+      },
+      "striatal_networks_putamen": 1.0
     },
     {
       "id": "aseg:right:52",
@@ -56027,7 +56213,24 @@
           "fraction": 0.11578947368421053
         }
       ],
-      "territory_unassigned": 0.2982456140350877
+      "territory_unassigned": 0.2982456140350877,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8912280701754386
+        },
+        {
+          "network": "Default",
+          "fraction": 0.10877192982456141
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.17192982456140352,
+        "low": 0.014035087719298246,
+        "confident": 0.8140350877192982
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:right:60",
@@ -56323,7 +56526,28 @@
           "fraction": 0.016348474873820497
         }
       ],
-      "territory_unassigned": 0.1663375027430327
+      "territory_unassigned": 0.1663375027430327,
+      "striatal_networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5561773096335308
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.28500109721307876
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.10297344744349353
+        }
+      ],
+      "striatal_networks_unassigned": 0.05491551459293395,
+      "striatal_networks_confidence": {
+        "filled": 0.006733615835606896,
+        "low": 0.006008010680907877,
+        "confident": 0.9872583734834852
+      },
+      "striatal_networks_putamen": 0.002554130144540547
     },
     {
       "id": "nextbrain:left:79",
@@ -56369,7 +56593,36 @@
           "fraction": 0.03210141748483428
         }
       ],
-      "territory_unassigned": 0.01751811566797271
+      "territory_unassigned": 0.01751811566797271,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.30671830325401267
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.23404384067288928
+        },
+        {
+          "network": "Default",
+          "fraction": 0.17487859855074656
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.17099072659334674
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.04229762643147815
+        }
+      ],
+      "striatal_networks_unassigned": 0.0709044975265873,
+      "striatal_networks_confidence": {
+        "filled": 0.0038752116712257394,
+        "low": 0.004656766966262863,
+        "confident": 0.9914680213625114
+      },
+      "striatal_networks_putamen": 0.9988765142633841
     },
     {
       "id": "nextbrain:left:99",
@@ -56457,7 +56710,24 @@
           "fraction": 0.01198650064005586
         }
       ],
-      "territory_unassigned": 0.5290352612591644
+      "territory_unassigned": 0.5290352612591644,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8866519259862679
+        },
+        {
+          "network": "Default",
+          "fraction": 0.055277551495403233
+        }
+      ],
+      "striatal_networks_unassigned": 0.05807052251832887,
+      "striatal_networks_confidence": {
+        "filled": 0.05979738077588337,
+        "low": 0.01013096120583148,
+        "confident": 0.9300716580182852
+      },
+      "striatal_networks_putamen": 0.34531751914998765
     },
     {
       "id": "nextbrain:left:102",
@@ -56667,7 +56937,20 @@
           "fraction": 0.07121277514026758
         }
       ],
-      "territory_unassigned": 0.36447993094518777
+      "territory_unassigned": 0.36447993094518777,
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.9358006042296072
+        }
+      ],
+      "striatal_networks_unassigned": 0.058480794130340956,
+      "striatal_networks_confidence": {
+        "filled": 0.021888608755443503,
+        "low": 0.0013752005500802201,
+        "confident": 0.9767361906944763
+      },
+      "striatal_networks_putamen": 0.00011460004584001834
     },
     {
       "id": "nextbrain:left:119",
@@ -62358,7 +62641,28 @@
           "fraction": 0.1250741120034496
         }
       ],
-      "territory_unassigned": 0.0042580714709211445
+      "territory_unassigned": 0.0042580714709211445,
+      "striatal_networks": [
+        {
+          "network": "Default",
+          "fraction": 0.44448337196140786
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.41764135180294293
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.09947178353905028
+        }
+      ],
+      "striatal_networks_unassigned": 0.03339082628146391,
+      "striatal_networks_confidence": {
+        "filled": 0.009005492514010094,
+        "low": 0.006022248863858143,
+        "confident": 0.9849722586221318
+      },
+      "striatal_networks_putamen": 0.000920065798644994
     },
     {
       "id": "nextbrain:right:10079",
@@ -62408,7 +62712,40 @@
           "fraction": 0.038942725990819355
         }
       ],
-      "territory_unassigned": 0.012750892562479374
+      "territory_unassigned": 0.012750892562479374,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.42895502685187964
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.23634154390807358
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.17453721760523236
+        },
+        {
+          "network": "Default",
+          "fraction": 0.041432900303021214
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.032177252407668534
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.012255857910053704
+        }
+      ],
+      "striatal_networks_unassigned": 0.07275509285649996,
+      "striatal_networks_confidence": {
+        "filled": 0.005338769171034751,
+        "low": 0.0016339869281045752,
+        "confident": 0.9930272439008607
+      },
+      "striatal_networks_putamen": 0.9979453827735715
     },
     {
       "id": "nextbrain:right:10099",
@@ -62496,7 +62833,24 @@
           "fraction": 0.021795890566466115
         }
       ],
-      "territory_unassigned": 0.3571347485526166
+      "territory_unassigned": 0.3571347485526166,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8605971165853105
+        },
+        {
+          "network": "Default",
+          "fraction": 0.06447950959246225
+        }
+      ],
+      "striatal_networks_unassigned": 0.0731070496083551,
+      "striatal_networks_confidence": {
+        "filled": 0.08499693815064299,
+        "low": 0.01702388242498469,
+        "confident": 0.8979791794243723
+      },
+      "striatal_networks_putamen": 0.38591549295774646
     },
     {
       "id": "nextbrain:right:10102",
@@ -62706,7 +63060,24 @@
           "fraction": 0.02897196261682243
         }
       ],
-      "territory_unassigned": 0.0024922118380062306
+      "territory_unassigned": 0.0024922118380062306,
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.9277258566978193
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.013707165109034268
+        }
+      ],
+      "striatal_networks_unassigned": 0.05358255451713396,
+      "striatal_networks_confidence": {
+        "filled": 0.04838709677419355,
+        "low": 0.005266622778143515,
+        "confident": 0.9463462804476629
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "nextbrain:right:10119",
@@ -65479,7 +65850,28 @@
           "fraction": 0.10256410256410256
         }
       ],
-      "territory_unassigned": 0.0
+      "territory_unassigned": 0.0,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.3498168498168498
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.14285714285714285
+        },
+        {
+          "network": "Default",
+          "fraction": 0.06593406593406594
+        }
+      ],
+      "striatal_networks_unassigned": 0.4413919413919414,
+      "striatal_networks_confidence": {
+        "filled": 0.006557377049180328,
+        "low": 0.006557377049180328,
+        "confident": 0.9868852459016394
+      },
+      "striatal_networks_putamen": 1.0
     },
     {
       "id": "nextbrain:right:10350",
@@ -68289,7 +68681,28 @@
           "fraction": 0.012593535031160374
         }
       ],
-      "territory_unassigned": 0.20419209453776982
+      "territory_unassigned": 0.20419209453776982,
+      "striatal_networks": [
+        {
+          "network": "Default",
+          "fraction": 0.43753908524356844
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.4110797231147435
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.08095227826536994
+        }
+      ],
+      "striatal_networks_unassigned": 0.06885472149742307,
+      "striatal_networks_confidence": {
+        "filled": 0.009796201945345067,
+        "low": 0.0050717924965261695,
+        "confident": 0.9851320055581287
+      },
+      "striatal_networks_putamen": 0.00206113941639648
     },
     {
       "id": "learning:right:caudate",
@@ -68358,7 +68771,28 @@
           "fraction": 0.01344261604264554
         }
       ],
-      "territory_unassigned": 0.004003286909251807
+      "territory_unassigned": 0.004003286909251807,
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.5147594867364784
+        },
+        {
+          "network": "Default",
+          "fraction": 0.34843345062261644
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.07785339541939698
+        }
+      ],
+      "striatal_networks_unassigned": 0.05225342913128674,
+      "striatal_networks_confidence": {
+        "filled": 0.01698494920077366,
+        "low": 0.005869144750005558,
+        "confident": 0.9771459060492208
+      },
+      "striatal_networks_putamen": 0.0007336430937506948
     },
     {
       "id": "learning:left:putamen",
@@ -68425,7 +68859,36 @@
           "fraction": 0.03188580015026296
         }
       ],
-      "territory_unassigned": 0.017400450788880542
+      "territory_unassigned": 0.017400450788880542,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3046581517655898
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.23383921863260707
+        },
+        {
+          "network": "Default",
+          "fraction": 0.17439519158527422
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.16984222389181067
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.04241923365890308
+        }
+      ],
+      "striatal_networks_unassigned": 0.07468069120961683,
+      "striatal_networks_confidence": {
+        "filled": 0.0038648911984410523,
+        "low": 0.004644365053588828,
+        "confident": 0.9914907437479701
+      },
+      "striatal_networks_putamen": 0.9988795063332251
     },
     {
       "id": "learning:right:putamen",
@@ -68496,7 +68959,40 @@
           "fraction": 0.04039697655041066
         }
       ],
-      "territory_unassigned": 0.012647303892393763
+      "territory_unassigned": 0.012647303892393763,
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.42547018212117604
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2355820735626711
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.1731192715152958
+        },
+        {
+          "network": "Default",
+          "fraction": 0.041631948577550294
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.03475776693250803
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.012156290917747887
+        }
+      ],
+      "striatal_networks_unassigned": 0.0757499107249137,
+      "striatal_networks_confidence": {
+        "filled": 0.00534475264420368,
+        "low": 0.0016581612119065635,
+        "confident": 0.9929970861438897
+      },
+      "striatal_networks_putamen": 0.9979554711270666
     },
     {
       "id": "learning:left:pallidum-external",
@@ -68813,7 +69309,24 @@
           "fraction": 0.01198650064005586
         }
       ],
-      "territory_unassigned": 0.5290352612591644
+      "territory_unassigned": 0.5290352612591644,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8866519259862679
+        },
+        {
+          "network": "Default",
+          "fraction": 0.055277551495403233
+        }
+      ],
+      "striatal_networks_unassigned": 0.05807052251832887,
+      "striatal_networks_confidence": {
+        "filled": 0.05979738077588337,
+        "low": 0.01013096120583148,
+        "confident": 0.9300716580182852
+      },
+      "striatal_networks_putamen": 0.34531751914998765
     },
     {
       "id": "learning:right:accumbens",
@@ -68878,7 +69391,24 @@
           "fraction": 0.021795890566466115
         }
       ],
-      "territory_unassigned": 0.3571347485526166
+      "territory_unassigned": 0.3571347485526166,
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8605971165853105
+        },
+        {
+          "network": "Default",
+          "fraction": 0.06447950959246225
+        }
+      ],
+      "striatal_networks_unassigned": 0.0731070496083551,
+      "striatal_networks_confidence": {
+        "filled": 0.08499693815064299,
+        "low": 0.01702388242498469,
+        "confident": 0.8979791794243723
+      },
+      "striatal_networks_putamen": 0.38591549295774646
     },
     {
       "id": "learning:left:subthalamic",
@@ -76185,6 +76715,19 @@
         10.400002896785736,
         18.800001710653305
       ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.0,
+        "low": 0.0,
+        "confident": 1.0
+      },
+      "striatal_networks_putamen": 0.0,
       "cut_atlases": []
     },
     {
@@ -80800,6 +81343,19 @@
         10.8000029027462,
         18.000001698732376
       ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.4,
+        "low": 0.6,
+        "confident": 0.0
+      },
+      "striatal_networks_putamen": 0.0,
       "cut_atlases": []
     },
     {
@@ -92907,6 +93463,720 @@
         -22.0,
         -31.0
       ]
+    },
+    {
+      "id": "choi:left:Vis",
+      "label": "Striatum \u00b7 Visual \u00b7 left",
+      "source_name": "Vis",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 1,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Visual",
+        "fr": "Striatum \u00b7 Visuel"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        120,
+        18,
+        134
+      ],
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 7,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7.0,
+      "centroid_ras_mm": [
+        -13.714285714285714,
+        18.571428571428573,
+        34.142857142857146
+      ],
+      "anchor_ras_mm": [
+        -11.0,
+        22.0,
+        37.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.0,
+        "low": 0.2857142857142857,
+        "confident": 0.7142857142857143
+      },
+      "striatal_networks_putamen": 0.14285714285714285
+    },
+    {
+      "id": "choi:left:SomMot",
+      "label": "Striatum \u00b7 Somatomotor \u00b7 left",
+      "source_name": "SomMot",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 2,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Somatomotor",
+        "fr": "Striatum \u00b7 Somatomoteur"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        70,
+        130,
+        180
+      ],
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 884,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 884.0,
+      "centroid_ras_mm": [
+        -27.28846153846154,
+        -1.6119909502262444,
+        25.231900452488688
+      ],
+      "anchor_ras_mm": [
+        -27.0,
+        -2.0,
+        25.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.013574660633484163,
+        "low": 0.004524886877828055,
+        "confident": 0.9819004524886877
+      },
+      "striatal_networks_putamen": 1.0
+    },
+    {
+      "id": "choi:left:DorsAttn",
+      "label": "Striatum \u00b7 Dorsal attention \u00b7 left",
+      "source_name": "DorsAttn",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 3,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Dorsal attention",
+        "fr": "Striatum \u00b7 Attention dorsale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        0,
+        118,
+        14
+      ],
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 4,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4.0,
+      "centroid_ras_mm": [
+        -21.5,
+        -12.75,
+        28.0
+      ],
+      "anchor_ras_mm": [
+        -27.0,
+        -7.0,
+        19.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.25,
+        "low": 0.25,
+        "confident": 0.5
+      },
+      "striatal_networks_putamen": 0.5
+    },
+    {
+      "id": "choi:left:SalVentAttn",
+      "label": "Striatum \u00b7 Salience / ventral attention \u00b7 left",
+      "source_name": "SalVentAttn",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 4,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Salience / ventral attention",
+        "fr": "Striatum \u00b7 Saillance / attention ventrale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        196,
+        58,
+        250
+      ],
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1442,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1442.0,
+      "centroid_ras_mm": [
+        -22.292649098474342,
+        5.7073509015256585,
+        30.296116504854368
+      ],
+      "anchor_ras_mm": [
+        -22.0,
+        6.0,
+        30.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.010402219140083218,
+        "low": 0.009015256588072122,
+        "confident": 0.9805825242718447
+      },
+      "striatal_networks_putamen": 0.9958391123439667
+    },
+    {
+      "id": "choi:left:Limbic",
+      "label": "Striatum \u00b7 Limbic \u00b7 left",
+      "source_name": "Limbic",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 5,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Limbic",
+        "fr": "Striatum \u00b7 Limbique"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        220,
+        248,
+        164
+      ],
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1129,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1129.0,
+      "centroid_ras_mm": [
+        -10.703277236492472,
+        15.768821966341896,
+        20.811337466784764
+      ],
+      "anchor_ras_mm": [
+        -11.0,
+        16.0,
+        21.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.08768821966341896,
+        "low": 0.0070859167404783,
+        "confident": 0.9052258635961028
+      },
+      "striatal_networks_putamen": 0.3445527015057573
+    },
+    {
+      "id": "choi:left:Cont",
+      "label": "Striatum \u00b7 Frontoparietal control \u00b7 left",
+      "source_name": "Cont",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 6,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Frontoparietal control",
+        "fr": "Striatum \u00b7 Contr\u00f4le frontopari\u00e9tal"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        230,
+        148,
+        34
+      ],
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2674,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2674.0,
+      "centroid_ras_mm": [
+        -16.587135377711295,
+        5.529917726252805,
+        31.768511593118923
+      ],
+      "anchor_ras_mm": [
+        -17.0,
+        6.0,
+        31.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.032535527299925204,
+        "low": 0.010471204188481676,
+        "confident": 0.9569932685115932
+      },
+      "striatal_networks_putamen": 0.4169783096484667
+    },
+    {
+      "id": "choi:left:Default",
+      "label": "Striatum \u00b7 Default mode \u00b7 left",
+      "source_name": "Default",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 7,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Default mode",
+        "fr": "Striatum \u00b7 Mode par d\u00e9faut"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        205,
+        62,
+        78
+      ],
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2301,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2301.0,
+      "centroid_ras_mm": [
+        -13.574532811820948,
+        13.353324641460235,
+        28.904823989569753
+      ],
+      "anchor_ras_mm": [
+        -11.0,
+        14.0,
+        28.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.018687527162103434,
+        "low": 0.007822685788787484,
+        "confident": 0.973489787049109
+      },
+      "striatal_networks_putamen": 0.3411560191221208
+    },
+    {
+      "id": "choi:right:Vis",
+      "label": "Striatum \u00b7 Visual \u00b7 right",
+      "source_name": "Vis",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 8,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Visual",
+        "fr": "Striatum \u00b7 Visuel"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        120,
+        18,
+        134
+      ],
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 15,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 15.0,
+      "centroid_ras_mm": [
+        22.133333333333333,
+        1.3333333333333333,
+        20.466666666666665
+      ],
+      "anchor_ras_mm": [
+        24.0,
+        -4.0,
+        15.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.0,
+        "low": 0.0,
+        "confident": 1.0
+      },
+      "striatal_networks_putamen": 0.7333333333333333
+    },
+    {
+      "id": "choi:right:SomMot",
+      "label": "Striatum \u00b7 Somatomotor \u00b7 right",
+      "source_name": "SomMot",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 9,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Somatomotor",
+        "fr": "Striatum \u00b7 Somatomoteur"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        70,
+        130,
+        180
+      ],
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 833,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 833.0,
+      "centroid_ras_mm": [
+        27.07082833133253,
+        -3.0108043217286915,
+        21.92917166866747
+      ],
+      "anchor_ras_mm": [
+        27.0,
+        -3.0,
+        22.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.007202881152460984,
+        "low": 0.0024009603841536613,
+        "confident": 0.9903961584633854
+      },
+      "striatal_networks_putamen": 1.0
+    },
+    {
+      "id": "choi:right:DorsAttn",
+      "label": "Striatum \u00b7 Dorsal attention \u00b7 right",
+      "source_name": "DorsAttn",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 10,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Dorsal attention",
+        "fr": "Striatum \u00b7 Attention dorsale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        0,
+        118,
+        14
+      ],
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 135,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 135.0,
+      "centroid_ras_mm": [
+        25.555555555555557,
+        -10.962962962962964,
+        19.214814814814815
+      ],
+      "anchor_ras_mm": [
+        26.0,
+        -12.0,
+        16.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.22962962962962963,
+        "low": 0.007407407407407408,
+        "confident": 0.762962962962963
+      },
+      "striatal_networks_putamen": 0.7555555555555555
+    },
+    {
+      "id": "choi:right:SalVentAttn",
+      "label": "Striatum \u00b7 Salience / ventral attention \u00b7 right",
+      "source_name": "SalVentAttn",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 11,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Salience / ventral attention",
+        "fr": "Striatum \u00b7 Saillance / attention ventrale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        196,
+        58,
+        250
+      ],
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2017,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2017.0,
+      "centroid_ras_mm": [
+        23.023797719385225,
+        4.023797719385225,
+        26.852751611303916
+      ],
+      "anchor_ras_mm": [
+        23.0,
+        4.0,
+        27.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.017848289538919187,
+        "low": 0.002478929102627665,
+        "confident": 0.9796727813584531
+      },
+      "striatal_networks_putamen": 0.9930589985126426
+    },
+    {
+      "id": "choi:right:Limbic",
+      "label": "Striatum \u00b7 Limbic \u00b7 right",
+      "source_name": "Limbic",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 12,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Limbic",
+        "fr": "Striatum \u00b7 Limbique"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        220,
+        248,
+        164
+      ],
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1096,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1096.0,
+      "centroid_ras_mm": [
+        10.977189781021897,
+        14.670620437956204,
+        20.3521897810219
+      ],
+      "anchor_ras_mm": [
+        11.0,
+        15.0,
+        20.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.10218978102189781,
+        "low": 0.010948905109489052,
+        "confident": 0.8868613138686131
+      },
+      "striatal_networks_putamen": 0.3476277372262774
+    },
+    {
+      "id": "choi:right:Cont",
+      "label": "Striatum \u00b7 Frontoparietal control \u00b7 right",
+      "source_name": "Cont",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 13,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Frontoparietal control",
+        "fr": "Striatum \u00b7 Contr\u00f4le frontopari\u00e9tal"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        230,
+        148,
+        34
+      ],
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2964,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2964.0,
+      "centroid_ras_mm": [
+        16.569500674763834,
+        6.389338731443995,
+        30.675775978407557
+      ],
+      "anchor_ras_mm": [
+        18.0,
+        3.0,
+        29.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.03205128205128205,
+        "low": 0.007422402159244264,
+        "confident": 0.9605263157894737
+      },
+      "striatal_networks_putamen": 0.3525641025641026
+    },
+    {
+      "id": "choi:right:Default",
+      "label": "Striatum \u00b7 Default mode \u00b7 right",
+      "source_name": "Default",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 14,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Default mode",
+        "fr": "Striatum \u00b7 Mode par d\u00e9faut"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        205,
+        62,
+        78
+      ],
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1439,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1439.0,
+      "centroid_ras_mm": [
+        11.356497567755385,
+        14.892981236970119,
+        29.280750521195273
+      ],
+      "anchor_ras_mm": [
+        11.0,
+        16.0,
+        29.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.024322446143154968,
+        "low": 0.0118137595552467,
+        "confident": 0.9638637943015983
+      },
+      "striatal_networks_putamen": 0.14315496872828354
     }
   ],
   "boundary_convention": "Barycentric vertex cells on mixed-label triangles",
@@ -92971,6 +94241,10 @@
     "Territory borders are where one territory's lesions give way to another's, not watershed zones; border-zone probabilities are not published here.",
     "Functional cerebellar regions are a group atlas (Nettekoven et al. 2024) fused from seven task-based fMRI datasets and registered onto this brain from the SUIT template; this brain's function was not measured. Individual functional boundaries differ from the group's, and the authors show that an individual's own localizer data place them better.",
     "Registration from a group template places lobule borders a few millimetres off: SUIT's own lobules, carried by the same warp, meet this brain's CerebNet lobules at a mean Dice of 0.65. A region's border on a cut is approximate; a lobule's shares, summed over its whole volume, are steadier.",
+    "Striatal networks are a group atlas (Choi et al. 2012) from 1,000 adults' resting-state connectivity, registered onto this brain from FSL's MNI152 template; this brain's function was not measured. Each voxel takes only the cortical network its connectivity most resembles.",
+    "Registration from a group template places network borders a few millimetres off. The atlas reached at least 83% of each striatal structure on this brain (least: right accumbens); the rest takes the network of the nearest voxel it reached in the same structure.",
+    "Choi et al. give each voxel a confidence: the fraction of its 25 most correlated cortical vertices that belong to its network. Of this brain's labelled striatum, 1% falls below 0.5, where its network holds only a plurality, and 3% was filled rather than reached; the cut draws both paler.",
+    "Choi et al. are least confident around the dorsal putamen, where signal from the adjacent insula is only partly removed, so a putamen's salience share may partly reflect the insula.",
     "A published coordinate is placed by registering its template to this brain (SynthMorph, joint affine and deformable); it marks where that template location falls on this one brain, not where this person's own peak would be, and not what this brain does there.",
     "Cortical coordinates are reported as the regions within 5 mm, not as one parcel: at template cortex, a single Schaefer parcel agreed between an MNI-space lookup and this brain's own projection only about 60% of the time.",
     "An MNI coordinate whose template is not stated is read as the first published template; the other MNI152 templates measured land a few millimetres away on this brain, and the report gives those measured offsets."
@@ -94356,6 +95630,156 @@
         "procedure": "scripts/register_coordinate_spaces.py: SynthMorph registration of each MNI template to brain.mgz, inverse warp sampled on a coarse grid",
         "citation": "https://doi.org/10.1016/S1053-8119(09)70884-5; https://doi.org/10.1016/j.neuroimage.2005.02.018",
         "license": "MNI template licence (use, copy, modify and distribute with the copyright notice); GPL-2.0 or later (SPM12, version 7771); the maps derive from the IXI dataset (CC BY-SA 3.0)"
+      },
+      {
+        "path": "data/cdmd/mri/striatal-networks.mgz",
+        "sha256": "ecee2beb3fd35dd4cb9306396a295803a78bd3c0f964f748dd1f782bf8c9eedc",
+        "anatomy": "cdmd",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/cdmd/mri/striatal-networks-carried.mgz",
+        "sha256": "55f89a998527e89ad36c488abba88787eeee19761fd2636d8f9a2d07bc793920",
+        "anatomy": "cdmd",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/cdmd/mri/striatal-template-aseg.mgz",
+        "sha256": "068e319d8d7602042bc3d196a86774cca11cd87c1e7d953342857dad25276c42",
+        "anatomy": "cdmd",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/cdmd/mri/striatal-networks-confidence.mgz",
+        "sha256": "6902d573004218b5b15b479d8b4c49dda2cb503625290c73e0f7eeae0b7c6907",
+        "anatomy": "cdmd",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/cdmd/striatal-registration.json",
+        "sha256": "05a1ef0227e256f1f1be657197fd51be4c3da26cb231ce72ee5c8077584ec21c",
+        "anatomy": "cdmd",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
       }
     ]
   },

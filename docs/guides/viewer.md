@@ -38,7 +38,7 @@ Search by name, or browse the **Whole brain** or **By system**. Select a region 
 - **Functional regions (group atlas)**, for a cerebellar lobule: its share in each functional region of the registered Nettekoven et al. (2024) atlas, with each region's domain. A functional region chosen on a cut shows what the paper found it does. See [Atlases](../concepts/atlases.md#functional-cerebellar-regions).
 - **Boundary certainty**, for a NextBrain region: each rated neighbour, largest shared boundary first, with the share of that boundary where NextBrain nearly chose the other label. A name selects the neighbour without moving the camera. See [Atlases](../concepts/atlases.md#boundary-certainty).
 - **Segmentation agreement**, for the caudate, putamen, thalamus, hippocampus or amygdala, whether aseg's structure, NextBrain's union or a NextBrain label in it: the volume both segmentations label, aseg alone and NextBrain alone on aseg's 1 mm grid, with their Dice. **Show on linked MRI** opens the scan at the region with those voxels inked. See [Atlases](../concepts/atlases.md#segmentation-agreement).
-- **Functional division**, **Neuropsychological functions** and **Functional networks**, as disclosures that stay open between selections.
+- **Functional division**, **Neuropsychological functions** and **Functional networks**, as disclosures that stay open between selections. For the caudate, putamen or accumbens, **Functional networks** lists its share in each Yeo network's striatal territory (Choi et al. 2012), Choi's confidence in those voxels and, for the putamen, the authors' warning about signal from the insula; see [Atlases](../concepts/atlases.md#striatal-networks).
 - The deficits and guided-circuit landmarks that involve the region, each opening in its own tab.
 
 ### Dissection
@@ -55,7 +55,7 @@ The orientation gizmo at the top right shows the six anatomical directions as th
 
 The dock at the bottom left holds four tools.
 
-- **Section** chooses the cutting plane (full brain, sagittal, coronal, axial, oblique) and the cut labels. **Cerebellar functions** colours the cerebellar cortex by the registered group functional atlas. With NextBrain cut labels, a selected NextBrain region is outlined on the cut: solid where its boundary is firm, dashed where soft, grey where unrated.
+- **Section** chooses the cutting plane (full brain, sagittal, coronal, axial, oblique) and the cut labels. **Cerebellar functions** colours the cerebellar cortex by the registered group functional atlas, and **Striatal networks** the caudate, putamen and accumbens by the Yeo network each voxel couples to. Under **Yeo 7 networks** colouring, every cut colours the striatum that way, whatever its cut labels, and draws paler the voxels Choi et al. are less confident of or that the atlas did not reach. With NextBrain cut labels, a selected NextBrain region is outlined on the cut: solid where its boundary is firm, dashed where soft, grey where unrated.
 - **Lesion** places a sphere (3–30 mm radius). Set **A click on the brain** to **Places the lesion**, then click the brain or a cut face to set the centre; the choice returns to selecting when the popover closes. Cut first to place it at depth.
 - **Coordinate** places a published MNI coordinate, read in its template, with a 5 mm sphere; see [Atlases](../concepts/atlases.md#published-coordinates).
 - **Display** holds hemisphere, cortex and its opacity, internal anatomy and spinal cord.

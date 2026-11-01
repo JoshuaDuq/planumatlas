@@ -10,7 +10,7 @@ import numpy as np
 
 from .labels import nextbrain, white_matter
 from .labels.tissue_labels import describe_source_label
-from .layers import arterial_territories, cerebellar_functions, learning, spinal_cord
+from .layers import arterial_territories, cerebellar_functions, learning, spinal_cord, striatal_networks
 from .sources import read_color_table
 from .validate_volumes import published_codes
 
@@ -100,6 +100,7 @@ def validate_placements(config, manifest, tissues, nextbrain_source):
         (arterial_territories, lambda: arterial_territories.load(
             config, arterial_territories.read_definition())),
         (cerebellar_functions, lambda: cerebellar_functions.load(config)),
+        (striatal_networks, lambda: striatal_networks.load(config)),
     ):
         if not module.is_declared(config):
             continue

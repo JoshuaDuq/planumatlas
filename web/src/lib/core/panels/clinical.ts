@@ -1,4 +1,10 @@
-import type { Hemisphere, Language, Region, SurfaceColor } from '../../types/index.ts';
+import type {
+  DisplaySettings,
+  Hemisphere,
+  Language,
+  Region,
+  SurfaceColor,
+} from '../../types/index.ts';
 import type { Translated } from '../clinical/types.ts';
 import { failureNotice } from '../i18n/errors.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
@@ -13,6 +19,22 @@ export interface RevealSettings {
   detail: string;
   hemisphere: Hemisphere;
   cortex: boolean;
+}
+
+/** The reader's own settings a reveal can change, read before and after it to say which it did. */
+export function revealSettings(settings: DisplaySettings, cutAtlas: string): RevealSettings {
+  const { atlas, surfaceColor, detail, cutActive, isolatedRegion, hemisphere, cortexVisible } =
+    settings;
+  return {
+    atlas,
+    cutAtlas,
+    colour: surfaceColor,
+    detail,
+    cut: cutActive,
+    isolated: Boolean(isolatedRegion),
+    hemisphere,
+    cortex: cortexVisible,
+  };
 }
 
 /** A published correction, in the reader's language, with its DOI link. */

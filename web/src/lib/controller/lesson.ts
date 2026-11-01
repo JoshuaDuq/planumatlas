@@ -1,4 +1,4 @@
-import type { CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
+import type { Circuit, CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
@@ -51,7 +51,7 @@ export function createLessons({
   session: Pick<SessionStore, 'state' | 'setView'>;
   lesson: LessonStore;
   circuits: Pick<CircuitCatalog, 'get' | 'contextMarginMm'>;
-  commands: Pick<SceneCommands, 'begin' | 'openRegion' | 'prepareCut' | 'fail'>;
+  commands: Pick<SceneCommands, 'begin' | 'openRegion' | 'prepareCut' | 'fail' | 'showSpinalCord'>;
   reader: SceneReader;
   shell: Shell;
   mri: MriDialog;
@@ -73,11 +73,13 @@ export function createLessons({
   let beforeLesson: ReaderState | null = null;
   // A step of the open lesson said what it changed, so leaving it says the scene came back.
   let changesSaid = false;
+  // The cortex opacity the whole route found, given back when the reader steps on to a landmark.
+  let beforeRoute: number | null = null;
 
   /** The lesson step whose landmark is the selection, while that lesson is the open circuit. */
   function lessonLandmark(): Landmark | null {
-    const { circuit, step } = lesson.state;
-    if (!circuit || session.state.explorer !== 'circuits') return null;
+    const { circuit, step, route } = lesson.state;
+    if (!circuit || route || session.state.explorer !== 'circuits') return null;
     const landmark = circuits.get(circuit).steps[step]!;
     return landmark.region === model.state.selectedRegion?.id ? landmark : null;
   }
@@ -101,10 +103,48 @@ export function createLessons({
 
   /** A lesson's landmark opened as a step the reader took, saying what it changed on the stage. */
   async function stepTo(step: Landmark, current: () => boolean): Promise<boolean> {
+    if (beforeRoute !== null) {
+      model.setCortexOpacity(beforeRoute);
+      beforeRoute = null;
+    }
     const before = stage.settings();
     if (!(await openLandmark(step, current))) return false;
     if (stage.sayChanged(before)) changesSaid = true;
     return true;
+  }
+
+  /**
+   * The whole route at once: nothing selected, no cut, both hemispheres, and the cortex seen through, so
+   * the stage's numbered marks at each landmark's anchor in this brain show where it lies. The landmarks'
+   * own meshes are not all drawn: their layers (a teaching set, NextBrain, the cord) need not coexist.
+   */
+  async function showRoute(circuit: Circuit, current: () => boolean): Promise<boolean> {
+    const before = stage.settings();
+    for (const step of circuit.steps) {
+      if (!model.anchorOf(step.region)) throw new Error(`Missing landmark anchor: ${step.region}`);
+    }
+    await sections.setMode('off');
+    if (!current()) return false;
+    const cord = circuit.steps.some((step) => model.regions.get(step.region)?.atlas === 'pam50');
+    if (cord && !(await commands.showSpinalCord(true, current))) return false;
+    model.select(null);
+    model.clearIsolation();
+    model.setHemisphere('both');
+    model.showRegions(circuit.steps.flatMap((step) => step.covering_regions ?? []));
+    model.setCortexVisible(true);
+    beforeRoute ??= model.settings.cortexOpacity;
+    model.setCortexOpacity(seeThroughOpacity());
+    model.setInternalVisible(true);
+    session.setView('oblique');
+    camera.applyView('oblique');
+    if (stage.sayChanged(before)) changesSaid = true;
+    return true;
+  }
+
+  function seeThroughOpacity() {
+    const opacity = model.manifest.appearance.see_through_opacity;
+    if (opacity === undefined) throw new Error('This build publishes no see-through opacity.');
+    return opacity;
   }
 
   /** The scene a lesson opens over, unless one is already open and holds it. */
@@ -124,6 +164,7 @@ export function createLessons({
     const said = changesSaid;
     beforeLesson = null;
     changesSaid = false;
+    beforeRoute = null;
     lesson.close();
     render();
     if (!before) return;
@@ -147,8 +188,9 @@ export function createLessons({
 
   /** The prepared plane of the lesson's open landmark, centred on this individual's own landmark. */
   async function openLessonMri() {
+    const { circuit, step: index, route } = lesson.state;
+    if (route) throw new Error('The whole route has no one landmark to open in the MRI.');
     const current = commands.begin();
-    const { circuit, step: index } = lesson.state;
     const step = circuits.get(circuit!).steps[index]!;
     const canOpen = () => {
       const shown = lesson.state;
@@ -197,6 +239,7 @@ export function createLessons({
       const before = beforeLesson;
       beforeLesson = null;
       changesSaid = false;
+      beforeRoute = null;
       return before;
     },
 
@@ -210,14 +253,23 @@ export function createLessons({
       beforeLesson = null;
     },
 
-    /** A circuit opens on its first landmark. */
+    /** A circuit opens on its whole route, ahead of its first landmark. */
     async openCircuit(id: string) {
       const current = commands.begin();
       const circuit = circuits.get(id);
       rememberBeforeLesson();
       shell.showDetail();
-      if (!(await stepTo(circuit.steps[0]!, current))) return;
+      if (!(await showRoute(circuit, current))) return;
       lesson.start(id);
+      lesson.showRoute();
+      render();
+    },
+
+    /** The open lesson goes back to its whole route. */
+    async openRoute() {
+      const current = commands.begin();
+      if (!(await showRoute(circuits.get(lesson.state.circuit!), current))) return;
+      lesson.showRoute();
       render();
     },
 

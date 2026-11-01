@@ -70,6 +70,7 @@ function portStubs() {
     openFunction: vi.fn(),
     openDeficit: vi.fn(),
     openLessonMri: vi.fn(),
+    openLessonStep: vi.fn(),
     focusInDetail: () => false,
     mprOpen: () => false,
     diffusionMriOpen: () => false,

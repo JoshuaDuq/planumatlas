@@ -3,6 +3,8 @@ export const en = {
   seeThrough: 'See through the cortex',
   seenThrough: 'Cortex made see-through; its painted areas stay opaque. Display sets the opacity.',
   opaqueAgain: 'Cortex made opaque again.',
+  // The region's name arrives capitalized, as the inspector titles it.
+  deepSelected: (region: string) => `${region} lies beneath the cortex.`,
   both: 'Both',
   left: 'Left',
   right: 'Right',
@@ -49,6 +51,7 @@ export const fr: typeof en = {
   seenThrough:
     'Cortex rendu transparent\u202f; ses aires colorées restent opaques. Affichage règle l’opacité.',
   opaqueAgain: 'Cortex rendu de nouveau opaque.',
+  deepSelected: (region: string) => `${region} se trouve sous le cortex.`,
   both: 'Les deux',
   left: 'Gauche',
   right: 'Droite',

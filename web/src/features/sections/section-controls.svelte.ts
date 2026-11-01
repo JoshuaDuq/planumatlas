@@ -165,6 +165,7 @@ export function createSectionControls({
     colourAtlases: {
       cabNp: model.cabNp?.atlas,
       domains: model.domains?.atlas,
+      striatal: model.manifest.striatal_networks?.id,
     },
 
     /**

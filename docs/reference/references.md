@@ -12,6 +12,8 @@ Every DOI and PMID here, and in the clinical and circuit data, is checked agains
   Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K., Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., & Van Essen, D. C. (2016). A multi-modal parcellation of human cerebral cortex. *Nature*, 536(7615), 171–178. [doi:10.1038/nature18933](https://doi.org/10.1038/nature18933). PMID 27437579.
 - **Yeo 7 resting-state functional networks.**
   Yeo, B. T. T., Krienen, F. M., Sepulcre, J., Sabuncu, M. R., Lashkari, D., Hollinshead, M., Roffman, J. L., Smoller, J. W., Zöllei, L., Polimeni, J. R., Fischl, B., Liu, H., & Buckner, R. L. (2011). The organization of the human cerebral cortex estimated by intrinsic functional connectivity. *Journal of Neurophysiology*, 106(3), 1125–1165. [doi:10.1152/jn.00338.2011](https://doi.org/10.1152/jn.00338.2011). PMID 21653723.
+- **Striatal networks.**
+  Choi, E. Y., Yeo, B. T. T., & Buckner, R. L. (2012). The organization of the human striatum estimated by intrinsic functional connectivity. *Journal of Neurophysiology*, 108(8), 2242–2263. [doi:10.1152/jn.00270.2012](https://doi.org/10.1152/jn.00270.2012). PMID 22832566. The 7-network loose-mask volume FreeSurfer 8.2 ships in `average/Choi_JNeurophysiol12_MNI152`.
 - **Cole-Anticevic Brain-wide Network Partition (CAB-NP).**
   Ji, J. L., Spronk, M., Kulkarni, K., Repovš, G., Anticevic, A., & Cole, M. W. (2019). Mapping the human brain's cortical-subcortical functional network organization. *NeuroImage*, 185, 35–57. [doi:10.1016/j.neuroimage.2018.10.006](https://doi.org/10.1016/j.neuroimage.2018.10.006). PMID 30291974. Label key v1.1.6 from [ColeLab/ColeAnticevicNetPartition](https://github.com/ColeLab/ColeAnticevicNetPartition) at commit `e4ea9fd`.
 - **Orbitofrontal, ventromedial prefrontal and anterior cingulate groupings of HCP-MMP areas.**
@@ -76,6 +78,7 @@ Every DOI and PMID here, and in the clinical and circuit data, is checked agains
 | `cortex-julich.glb`, `ribbon-julich.labels`, `tissues-julich.volume` | Julich-Brain 3.1 (EBRAINS) | CC BY-NC-SA 4.0 |
 | `tissues-arterial.volume`, the cortex meshes' `_TERRITORY` attribute, arterial regions and territory shares in `manifest.json` | Liu et al. 2023 | CC BY-SA 4.0 |
 | `tissues-nettekoven.volume`, cerebellar functional regions and shares in `manifest.json` | Nettekoven et al. 2024 on the SUIT template (Diedrichsen lab) | CC BY-NC 3.0 |
+| `tissues-choi.volume`, striatal network regions and shares in `manifest.json` | Choi et al. 2012, distributed with FreeSurfer 8.2 | FreeSurfer Software License |
 | `cortex-schaefer.glb`, `ribbon-schaefer.labels`, `tissues-schaefer.volume` | Schaefer 2018 (ThomasYeoLab/CBIG) | MIT |
 | `neuropsych-domains.json`, area scores | Neurosynth | ODbL 1.0 |
 | NextBrain-derived files | FreeSurfer 8.2 | None named beyond FreeSurfer's |

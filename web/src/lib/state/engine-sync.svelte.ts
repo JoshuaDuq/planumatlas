@@ -88,7 +88,8 @@ export function syncLessonTract(
   $effect(() => {
     const { explorer, lesson } = view.current;
     const tract =
-      explorer === 'circuits' && lesson.circuit
+      // The whole route is no one landmark, so it draws none's tract.
+      explorer === 'circuits' && lesson.circuit && !lesson.route
         ? (circuits.get(lesson.circuit).steps[lesson.step]!.tract ?? null)
         : null;
     if (tract === shown) return;

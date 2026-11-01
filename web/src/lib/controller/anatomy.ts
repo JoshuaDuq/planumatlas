@@ -1,19 +1,23 @@
 import { tick } from 'svelte';
+import { beneathCortex } from '../core/catalog/labels.ts';
 import { visibilityOf } from '../core/catalog/visibility.ts';
 import type { HiddenReason } from '../core/catalog/visibility.ts';
 import { atlasSwitchLabel, t } from '../core/i18n/index.ts';
+import { revealNotice, revealSettings } from '../core/panels/clinical.ts';
 import {
   captureBeforeInternal,
   insideInternal,
   leaveInternal,
 } from '../core/state/internal-mode.ts';
 import type { InternalEntry } from '../core/state/internal-mode.ts';
+import type { ReaderState } from '../core/state/reader-state.ts';
 import { publishesSpinalCord } from '../core/state/scene-commands.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { MoveOptions, Vec3 } from '../engine/api.ts';
 import type { Explorer } from '../types/index.ts';
 import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../ui/focus.ts';
 import type { AppContext } from './context.ts';
+import type { SceneReader } from './lesson.ts';
 
 /** What choosing a region does to the interface around the stage (app.js:526-532, 718-720). */
 export interface SelectionInterface {
@@ -34,12 +38,15 @@ export function createAnatomyCommands(
   { engine, engineState, session, view, catalog }: AppContext,
   {
     commands,
+    reader,
     ui,
     chooseExplorer,
     frameLandmark,
     afterReset,
   }: {
     commands: SceneCommands;
+    /** The whole scene, held before a reveal changes the reader's settings and put back by its notice. */
+    reader: SceneReader;
     ui: SelectionInterface;
     chooseExplorer: (explorer: Explorer) => void;
     /** Frame the open lesson's landmark as its lesson authored it; false when none is open or it has no drawn mesh. */
@@ -52,6 +59,8 @@ export function createAnatomyCommands(
   const hasSpinalCord = publishesSpinalCord(model.manifest);
   // Taken at each of the two doors into internal anatomy, and spent on the way out.
   let beforeInternal: InternalEntry | null = null;
+  // The scene before the last reveal that changed the reader's settings, which its notice's Restore puts back.
+  let beforeReveal: ReaderState | null = null;
 
   /** Open the tree branch that holds a region, so a selection is never out of sight. */
   function revealInTree(id: string) {
@@ -59,11 +68,26 @@ export function createAnatomyCommands(
     if (group && !view.current.expanded.has(group.key)) session.toggleGroup(group.key);
   }
 
-  /** Frame the selected region from where the camera already is (app.js:516-524). */
+  /**
+   * Frame the selected region from where the camera already is (app.js:516-524). A structure the opaque
+   * cortex hides is framed with its surroundings, where its outline shows where it lies, and seeing
+   * through the cortex is offered.
+   */
   function focusSelection({ immediate = false }: MoveOptions = {}) {
     if (frameLandmark({ immediate })) return;
     const id = engineState.model.selectedRegion?.id;
-    if (id) camera.frameRegion(id, { immediate });
+    if (!id) return;
+    const { cortexVisible, cortexOpacity } = model.settings;
+    const hidden = beneathCortex(model.regions.get(id)!) && cortexVisible && cortexOpacity >= 1;
+    if (!camera.frameRegion(id, { immediate, context: hidden }) || !hidden) return;
+    const { lang } = session.state;
+    const name = catalog.label(id).name;
+    const text = t(lang, 'display').deepSelected(
+      `${name.charAt(0).toLocaleUpperCase(lang)}${name.slice(1)}`,
+    );
+    // Focus again says nothing new.
+    if (session.state.notice?.text.includes(text)) return;
+    session.notify({ text, action: 'see-through' });
   }
 
   /**
@@ -183,13 +207,49 @@ export function createAnatomyCommands(
     return true;
   }
 
-  /** The navigator's way to show a region that is not on screen, and frame it once it is. */
+  const settingsNow = () => revealSettings(model.settings, sections.state.cutAtlas);
+
+  /**
+   * The navigator's way to show a region that is not on screen, and frame it once it is. What the
+   * reveal changed of the reader's own settings is said, with the way back.
+   */
   async function revealRegion(reason: HiddenReason, id: string) {
     const current = commands.begin();
+    const scene = reader.capture();
+    const before = settingsNow();
     try {
-      if ((await reveal(reason, id, current)) && id) focusSelection();
+      if (!(await reveal(reason, id, current)) || !id) return;
+      // What the reveal changed comes first, so its Restore is the notice's action.
+      const said = revealNotice(session.state.lang, before, settingsNow());
+      if (said) {
+        beforeReveal = scene;
+        session.notify({ text: said, action: 'restore' });
+      }
+      focusSelection();
     } catch (error) {
       commands.failIfCurrent(current, 'region', error);
+    }
+  }
+
+  /** The reveal notice's Restore: the scene from before the reveal, in place of what it said. */
+  async function restoreBeforeReveal() {
+    if (!beforeReveal) throw new Error('There is no scene from before a reveal to restore.');
+    const scene = beforeReveal;
+    beforeReveal = null;
+    const current = commands.begin();
+    const failures = await reader.apply(scene, current);
+    if (!current()) return;
+    session.notify(null);
+    if (failures.length) {
+      commands.fail(
+        'restore',
+        new AggregateError(
+          failures.map(({ error }) => error),
+          'The scene from before the reveal was not fully restored.',
+        ),
+      );
+    } else {
+      session.notify({ text: t(session.state.lang, 'clinical').stageRestored });
     }
   }
 
@@ -317,6 +377,7 @@ export function createAnatomyCommands(
     undoDissection,
     restoreHiddenRegions,
     revealRegion,
+    restoreBeforeReveal,
     openConstituent,
     toggleInternalAnatomy,
     chooseInternalSystem,

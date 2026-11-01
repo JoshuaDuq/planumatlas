@@ -25,7 +25,12 @@
   } from '../../lib/core/catalog/segmentation-agreement.ts';
   import { decimal, formatRas, millimetres } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
-  import type { EngineSections, MprPlane, SectionsState } from '../../lib/engine/api.ts';
+  import type {
+    EngineSections,
+    MprPlane,
+    PlaneFrame,
+    SectionsState,
+  } from '../../lib/engine/api.ts';
   import { PHONE_QUERY } from '../../lib/types/index.ts';
   import type { Language, ManifestAnatomy } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
@@ -38,6 +43,7 @@
   import {
     canvasName,
     planeName,
+    seenFrom,
     pngFileName,
     positionLabel,
     readoutText,
@@ -86,6 +92,13 @@
     if (!display) throw new Error('The linked MRI dialog opened before the scan loaded.');
     return { display, sample: engine.sections.sample(crosshair) };
   });
+  // Each panel as the stage faces its cut: read again with every snapshot, as the cut's side may change.
+  const frames = $derived.by(() => {
+    void engineState.sections;
+    return Object.fromEntries(
+      PLANES.map((plane) => [plane, engine.sections.mprFrame(plane)]),
+    ) as Record<MprPlane, PlaneFrame>;
+  });
   const visible = $derived(PLANES.filter((plane) => !phone.current || plane === mpr.plane));
   const readout = $derived(
     reading ? readoutText(formatRas(crosshair, lang), reading.sample, lang) : '',
@@ -95,6 +108,8 @@
     reading &&
       JSON.stringify([
         crosshair,
+        // Which way each panel faces, which changes only with the side its own cut is faced from.
+        PLANES.map((plane) => frames[plane].edges.join('')),
         engineState.sections.overlay,
         engineState.sections.agreement,
         reading.display.windowCenter,
@@ -110,7 +125,7 @@
     untrack(() => {
       const { display } = reading!;
       for (const plane of visible) {
-        const frame = engine.sections.mprFrame(plane);
+        const frame = frames[plane];
         drawPanel(canvases[plane]!, {
           plane,
           frame,
@@ -256,14 +271,17 @@
           hidden={!visible.includes(plane)}
           aria-labelledby="{uid}-{plane}"
         >
-          <h3 id="{uid}-{plane}">{planeName(plane, lang)}</h3>
+          <h3 id="{uid}-{plane}">
+            {planeName(plane, lang)}
+            <span class="seen-from">{copy.seenFrom[seenFrom(plane, frames[plane].edges)]}</span>
+          </h3>
           <!-- A picture of data is an image (ARIA 1.2 img; HTML-AAM allows it on canvas). -->
           <!-- svelte-ignore a11y_no_interactive_element_to_noninteractive_role -->
           <canvas
             role="img"
             width="512"
             height="512"
-            aria-label={canvasName(plane, engine.sections.mprFrame(plane).edges, lang)}
+            aria-label={canvasName(plane, frames[plane].edges, lang)}
             bind:this={canvases[plane]}
             {@attach pointer(plane)}
           ></canvas>
@@ -347,6 +365,7 @@
     </div>
 
     <div class="note">
+      <p>{copy.asStage}</p>
       <p>{copy.subtitle}</p>
       <p>{copy.note(anatomy)}</p>
     </div>
@@ -388,6 +407,12 @@
       margin: 0;
       font-size: var(--text-ui);
       font-weight: 600;
+    }
+    /* Which side the picture faces, quieter than the plane it qualifies. */
+    .seen-from {
+      margin-inline-start: var(--space-1);
+      color: var(--text-secondary);
+      font-weight: 400;
     }
     .save {
       grid-column: 2;

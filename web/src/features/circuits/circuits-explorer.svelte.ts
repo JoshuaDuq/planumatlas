@@ -23,6 +23,7 @@ export interface CircuitExplorerDeps {
     | 'openCircuit'
     | 'openLessonLandmark'
     | 'openLessonStep'
+    | 'openLessonRoute'
     | 'openLessonMri'
     | 'offerReload'
     | 'involved'
@@ -51,7 +52,8 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
 
   const lesson = $derived(view.current.lesson);
   const circuit = $derived(lesson.circuit ? circuits.get(lesson.circuit) : null);
-  const step = $derived(circuit ? circuit.steps[lesson.step]! : null);
+  // On the whole route no one landmark is open.
+  const step = $derived(circuit && !lesson.route ? circuit.steps[lesson.step]! : null);
   const exploring = $derived(view.current.explorer === 'circuits');
   const related = $derived.by(() => {
     const id = view.current.selectedRegion?.id;
@@ -85,7 +87,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
    */
   function announceStep(regionBefore: string | undefined) {
     const { selectedRegion, lang, lesson: shown } = view.current;
-    if (selectedRegion?.id === regionBefore && shown.circuit) {
+    if (selectedRegion?.id === regionBefore && shown.circuit && !shown.route) {
       const { steps } = circuits.get(shown.circuit);
       announce(
         `${t(lang, 'circuits').step(shown.step, steps.length)}: ${steps[shown.step]!.name[lang]}`,
@@ -146,6 +148,10 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     },
     get step() {
       return step;
+    },
+    /** The open lesson shows its whole route, every landmark at once. */
+    get route() {
+      return exploring && circuit !== null && lesson.route;
     },
     /**
      * Whether the selected region is the lesson's landmark (true), or the reader is exploring another
@@ -209,8 +215,10 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
       };
     },
 
-    /** A circuit opens on its first landmark. */
+    /** A circuit opens on its whole route. */
     openCircuit: (id: string) => run(() => excursions.openCircuit(id), 'landmark', {}),
+    /** The open lesson goes back to its whole route, from its first landmark's Previous. */
+    openRoute: () => run(() => excursions.openLessonRoute(), 'landmark', { direction: 'previous' }),
     /** A lesson opens on one of its landmarks, from the lessons a region takes part in. */
     openLandmark: (id: string, index: number) =>
       run(() => excursions.openLessonLandmark(id, index), 'landmark', {}),

@@ -68,9 +68,10 @@ export function createExplorerChoice({
 }
 
 /**
- * A tab chosen during a lesson waits for the lesson's scene to come back; a later choice wins
- * (app.js:1335-1350). Back on Functions or Deficits after another tab changed the atlas, the open
- * item's regions are drawn again, so its key never describes a brain that does not carry them.
+ * A tab chosen during a lesson, or away from Functions and Deficits, waits for the scene from before
+ * it to come back; a later choice wins (app.js:1335-1350). Back on Functions or Deficits after that
+ * scene came back, or after another tab changed the atlas, the open item's regions are drawn again,
+ * so its key never describes a brain that does not carry them.
  */
 export function createModes({
   engine,
@@ -79,16 +80,22 @@ export function createModes({
   domains,
   chooseExplorer,
   leaveLesson,
+  leaveExcursion,
+  excursionHeld,
   openFunction,
   openDeficit,
 }: {
   engine: Pick<Engine, 'model'>;
-  session: Pick<SessionStore, 'state'>;
+  session: Pick<SessionStore, 'state' | 'holdNotices' | 'releaseNotices'>;
   clinical: Pick<ClinicalCatalog, 'mappedRegions'>;
   /** The neuropsychological domains' atlas, and the internal layers that draw their structures. */
   domains: Pick<NeuropsychDomains, 'atlas' | 'structure_atlas' | 'unit_atlas'>;
   chooseExplorer: (value: Explorer) => void;
   leaveLesson: () => Promise<void>;
+  /** Puts back the scene from before a function or deficit when the tab chosen is neither. */
+  leaveExcursion: (value: Explorer) => Promise<void>;
+  /** The scene from before a function or deficit is still held, so the open item is still drawn. */
+  excursionHeld: () => boolean;
   /** The panels' entry points (busy state, failure wording), fired and not awaited, as legacy did. */
   openFunction: (id: string) => unknown;
   openDeficit: (id: string) => unknown;
@@ -97,10 +104,19 @@ export function createModes({
   return {
     async chooseMode(value: Explorer) {
       wanted = value;
-      await leaveLesson();
-      if (wanted !== value) return;
-      chooseExplorer(value);
+      const previous = session.state.explorer;
+      // What leaving says (the scene put back) outlasts the tab change, which clears a standing notice.
+      session.holdNotices();
+      try {
+        await leaveLesson();
+        await leaveExcursion(value);
+        if (wanted !== value) return;
+        chooseExplorer(value);
+      } finally {
+        session.releaseNotices();
+      }
       const { selectedFunction, selectedDeficit } = session.state;
+      const putBack = previous !== value && !excursionHeld();
       const { regions, settings } = engine.model;
       const shownAtlas = settings.atlas;
       const structuresDrawn = [domains.structure_atlas, domains.unit_atlas].includes(
@@ -109,17 +125,18 @@ export function createModes({
       if (
         value === 'functions' &&
         selectedFunction &&
-        (shownAtlas !== domains.atlas || !structuresDrawn)
+        (putBack || shownAtlas !== domains.atlas || !structuresDrawn)
       ) {
         openFunction(selectedFunction);
       }
       if (
         value === 'deficits' &&
         selectedDeficit &&
-        clinical.mappedRegions(selectedDeficit).some((id) => {
-          const region = regions.get(id)!;
-          return region.kind === 'cortex' && region.atlas !== shownAtlas;
-        })
+        (putBack ||
+          clinical.mappedRegions(selectedDeficit).some((id) => {
+            const region = regions.get(id)!;
+            return region.kind === 'cortex' && region.atlas !== shownAtlas;
+          }))
       ) {
         openDeficit(selectedDeficit);
       }

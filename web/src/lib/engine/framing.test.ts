@@ -16,7 +16,7 @@ import { createFraming } from './framing.ts';
 import type { Framing, FramingModel } from './framing.ts';
 import { createHeldView } from './held-view.ts';
 import type { AtlasMesh } from './model/brain-atlas.ts';
-import { createFrame, rasToWorld } from './slices/coordinates.ts';
+import { createFrame, rasToWorld, stagedFrame, worldToRas } from './slices/coordinates.ts';
 import type { Frame } from './slices/coordinates.ts';
 import { ORBIT_ROUNDING_MM } from '../core/state/url-state.ts';
 import { FRAME_FILL, VIEW_DIRECTIONS, upFor, withContext } from './render/camera-views.ts';
@@ -275,6 +275,39 @@ describe('the magnification after a framing (deviation e7-zoom-after-framing)', 
     // Legacy re-fitted the whole brain times the stale magnification of 1 here, jumping back out.
     stage.resize(390, 792);
     assert.ok(Math.abs(stage.distance() - focused) < 1e-12);
+  });
+
+  it('frames a region with its context farther out, along the same heading, letting go of the view', () => {
+    const stage = fixture({ meshes: drawn() });
+    stage.camera.applyView('left', { immediate: true });
+    assert.equal(stage.camera.frameRegion('small', { immediate: true }), true);
+    const alone = stage.distance();
+    stage.camera.applyView('left', { immediate: true });
+    assert.equal(stage.camera.frameRegion('small', { immediate: true, context: true }), true);
+    // The context box reaches the minimum radius around a 10 mm region: several times the region alone.
+    assert.ok(stage.distance() > 3 * alone, 'context framing stands back');
+    const { position, target } = stage.scene.destination;
+    assert.ok(position.clone().sub(target).normalize().distanceTo(VIEW_DIRECTIONS.left) < 1e-9);
+    assert.equal(stage.camera.viewHeld, false);
+  });
+
+  it('projects RAS points onto the canvas as the camera sees them; one behind the camera is null', () => {
+    const stage = fixture({ meshes: drawn() });
+    stage.camera.applyView('anterior', { immediate: true });
+    const [x, y, z] = worldToRas(stage.scene.controls.target);
+    const behind = y + stage.distance() * 2000;
+    const [centre, right, superior, back] = stage.camera.project([
+      [x, y, z],
+      [x + 20, y, z],
+      [x, y, z + 20],
+      [x, behind, z],
+    ]);
+    assert.ok(centre && right && superior);
+    // Seen from the front, the subject's right is on the viewer's left, and superior is up the canvas.
+    assert.ok(right.x < centre.x - 1);
+    assert.ok(Math.abs(right.y - centre.y) < 1e-6);
+    assert.ok(superior.y < centre.y - 1);
+    assert.equal(back, null);
   });
 
   it('keeps the distance of a landmark when the stage next resizes', () => {
@@ -681,6 +714,28 @@ describe('facing the cut', () => {
     stage.sections.state = { mode, reverse };
     return stage;
   };
+
+  it('a linked-MRI panel is the picture the faced cut shows: its right and up are the camera’s', () => {
+    for (const mode of ['sagittal', 'coronal', 'axial'] as const) {
+      for (const reverse of [false, true]) {
+        const stage = faceWith(mode, reverse, [0, 0, 0]);
+        stage.camera.faceCut({ immediate: true });
+        const { camera } = stage.scene;
+        camera.updateMatrixWorld();
+        const right = new Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+        const up = new Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+        const panel = stagedFrame(mode, [0, 0, 0], reverse);
+        const side = `${mode}${reverse ? ' reversed' : ''}`;
+        // rasToWorld takes millimetres to metres: compare directions. Looking straight down or up, the
+        // camera sits a micro-tilt off the axis, so the tolerance is 1e-5.
+        assert.ok(
+          rasToWorld(panel.u.toArray()).normalize().distanceTo(right) < 1e-9,
+          `${side} right`,
+        );
+        assert.ok(rasToWorld(panel.v.toArray()).normalize().distanceTo(up) < 1e-5, `${side} up`);
+      }
+    }
+  });
 
   it('FACADE-09 with no cut there is nothing to face', () => {
     const stage = fixture({ meshes: wholeBrain() });

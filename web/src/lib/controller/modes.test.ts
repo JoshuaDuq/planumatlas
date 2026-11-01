@@ -138,6 +138,8 @@ describe('choosing a tab', () => {
       domains: { atlas: 'hcp-mmp', structure_atlas: 'aseg', unit_atlas: 'learning' },
       chooseExplorer: (value) => void chosen.push(value),
       leaveLesson: () => waiting,
+      leaveExcursion: async () => undefined,
+      excursionHeld: () => true,
       openFunction: async () => true,
       openDeficit: async () => true,
     });
@@ -205,16 +207,53 @@ describe('choosing a tab', () => {
     assert.ok(engine.calls.slice(mark).some((call) => call.method === 'frameRegions'));
   });
 
+  test('away from Functions, puts back the scene from before the function and says so', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    await scene.settled();
+    const held = scene.reader.capture.mock.results.at(-1)!.value;
+    await scene.excursions.chooseMode('anatomy');
+    assert.equal(scene.reader.apply.mock.calls.at(-1)![0], held);
+    assert.equal(scene.session.state.explorer, 'anatomy');
+    assert.equal(scene.session.state.selectedFunction, 'language');
+    assert.equal(scene.session.state.notice?.text, 'Previous view restored.');
+    assert.equal(scene.excursions.restorable, false);
+  });
+
+  test('between Functions and Deficits, the scene from before stays held', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    await scene.settled();
+    await scene.excursions.chooseMode('deficits');
+    expect(scene.reader.apply).not.toHaveBeenCalled();
+    assert.equal(scene.excursions.restorable, true);
+  });
+
+  test('back on Functions after its scene was put back, opens the function again', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    await scene.settled();
+    await scene.excursions.chooseMode('anatomy');
+    scene.panels.openFunction.mockClear();
+    await scene.excursions.chooseMode('functions');
+    expect(scene.panels.openFunction).toHaveBeenCalledWith('language');
+  });
+
   test('re-opens through the panel’s entry point and does not wait for it', async () => {
     const scene = createScene();
     const openFunction = vi.fn(() => new Promise<never>(() => undefined));
     const { chooseMode } = createModes({
       engine: scene.engine,
-      session: { state: { ...scene.session.state, selectedFunction: 'language' } },
+      session: {
+        ...scene.session,
+        state: { ...scene.session.state, selectedFunction: 'language' },
+      },
       clinical: { mappedRegions: () => [] },
       domains: { atlas: 'not-the-atlas', structure_atlas: 'aseg', unit_atlas: 'learning' },
       chooseExplorer: vi.fn(),
       leaveLesson: async () => undefined,
+      leaveExcursion: async () => undefined,
+      excursionHeld: () => true,
       openFunction,
       openDeficit: vi.fn(),
     });

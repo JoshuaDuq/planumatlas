@@ -88,6 +88,24 @@ describe('the status sentence', () => {
     expect(note({ surfaceColor: 'atlas' })).toBeUndefined();
   });
 
+  test('says the striatum takes its networks from its own voxels when the anatomy has them', () => {
+    const atlases = { cabNp: 'hcp-mmp', domains: 'hcp-mmp', striatal: 'choi' };
+    expect(sectionSentences(input({ surfaceColor: 'network', colourAtlases: atlases })).shown).toBe(
+      '1\u202fmm source grid · native Destrieux labels · networks by each region’s dominant share · striatum by its voxels, paler where less confident (Choi et al. 2012)',
+    );
+    expect(
+      sectionSentences(input({ surfaceColor: 'cab-np', colourAtlases: atlases })).shown,
+    ).not.toContain('striatum');
+    // The striatal network labels in their own colours are drawn by confidence too.
+    const choi = { status: 'ready', error: null, cutAtlas: 'choi' } as const;
+    expect(
+      sectionSentences(input({ surfaceColor: 'atlas', colourAtlases: atlases, state: choi })).shown,
+    ).toMatch(/· paler where Choi et al\. are less confident$/);
+    expect(
+      sectionSentences(input({ surfaceColor: 'atlas', colourAtlases: atlases })).shown,
+    ).not.toContain('paler');
+  });
+
   test('under a function’s paint the note is about the functions, never the surface colour', () => {
     const paint = { id: 'function:memory', colors: new Map() } as Paint;
     const shown = sectionSentences(input({ surfaceColor: 'network', paint })).shown;
