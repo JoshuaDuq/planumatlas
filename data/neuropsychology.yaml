@@ -1,4 +1,4 @@
-revised: '2026-11-01'
+revised: '2026-11-02'
 
 groups:
   - id: attention-executive
@@ -20,19 +20,19 @@ deficits:
     domain: {en: Language, fr: Langage}
     group: language-number
     summary:
-      en: Acquired language difficulties. This profile starts with evidence about understanding words and sentences.
-      fr: Difficultés acquises du langage. Ce profil présente d’abord les données sur la compréhension des mots et des phrases.
+      en: Acquired language impairment can affect understanding, expression, naming, repetition, reading or writing in different combinations. The findings concern specific language tasks.
+      fr: Un trouble acquis du langage peut toucher la compréhension, l’expression, la dénomination, la répétition, la lecture ou l’écriture selon différentes combinaisons. Les résultats portent sur des tâches langagières précises.
     aliases:
-      en: [language comprehension, understanding speech, word comprehension, sentence comprehension]
-      fr: [compréhension du langage, compréhension orale, compréhension des mots, compréhension des phrases]
+      en: [language comprehension, understanding speech, word comprehension, sentence comprehension, Broca’s aphasia]
+      fr: [compréhension du langage, compréhension orale, compréhension des mots, compréhension des phrases, aphasie de Broca]
 
   - id: amnesia
     name: {en: Amnesia, fr: Amnésie}
     domain: {en: Memory, fr: Mémoire}
     group: memory
     summary:
-      en: Difficulty learning or recalling information. The initial evidence concerns acquired anterograde memory impairment.
-      fr: Difficulté à apprendre ou à rappeler des informations. Les premières données concernent l’amnésie antérograde acquise.
+      en: Amnesia can affect learning new information, recall of earlier information, or both. Different memory structures and connections can be involved.
+      fr: L’amnésie peut toucher l’apprentissage de nouvelles informations, le rappel d’informations antérieures ou les deux. Différentes structures de la mémoire et leurs connexions peuvent être en cause.
     aliases:
       en: [memory loss, forgetfulness, anterograde amnesia, learning, hippocampus]
       fr: [perte de mémoire, oubli, amnésie antérograde, apprentissage, hippocampe]
@@ -53,11 +53,22 @@ deficits:
     domain: {en: Praxis, fr: Praxies}
     group: sensorimotor
     summary:
-      en: Difficulty performing learned or imitated gestures beyond primary weakness. This profile examines meaningless hand and finger imitation.
-      fr: Difficulté à réaliser des gestes appris ou imités au-delà d’une faiblesse motrice primaire. Ce profil examine l’imitation de postures manuelles et digitales sans signification.
+      en: Difficulty performing learned or imitated gestures beyond primary weakness. Imitation, pantomime of tool use and real tool use assess related but distinct abilities; this profile compares their lesion associations and those of deep lesions.
+      fr: Difficulté à réaliser des gestes appris ou imités au-delà d’une faiblesse motrice primaire. L’imitation, le pantomime de l’utilisation d’outils et l’utilisation réelle d’outils évaluent des capacités apparentées mais distinctes; ce profil compare leurs associations lésionnelles et celles des lésions profondes.
     aliases:
-      en: [apraxia, gesture imitation, hand postures, finger postures, ideomotor]
-      fr: [apraxie, imitation de gestes, postures de la main, postures des doigts, idéomotrice]
+      en: [apraxia, gesture imitation, hand postures, finger postures, ideomotor, pantomime, tool use, object use, deep apraxia]
+      fr: [apraxie, imitation de gestes, postures de la main, postures des doigts, idéomotrice, pantomime, utilisation d’outils, utilisation d’objets, apraxie profonde]
+
+  - id: callosal-apraxia
+    name: {en: Callosal apraxia, fr: Apraxie calleuse}
+    domain: {en: Praxis, fr: Praxies}
+    group: sensorimotor
+    summary:
+      en: Apraxia confined to the left hand after corpus callosum injury, with preserved praxis of the right hand. It is attributed to disconnecting the right hemisphere from left-hemisphere movement representations.
+      fr: Apraxie limitée à la main gauche après une atteinte du corps calleux, avec praxies préservées à la main droite. Elle est attribuée à la déconnexion de l’hémisphère droit des représentations motrices de l’hémisphère gauche.
+    aliases:
+      en: [callosal apraxia, left-hand apraxia, unilateral apraxia, split brain, callosotomy, callosal disconnection]
+      fr: [apraxie calleuse, apraxie de la main gauche, apraxie unilatérale, cerveau divisé, callosotomie, déconnexion calleuse]
 
   - id: agnosia
     name: {en: Visual agnosia, fr: Agnosie visuelle}
@@ -89,8 +100,8 @@ deficits:
       en: Loss of the same side of the visual field in both eyes after damage behind the optic chiasm. This profile reports where such lesions were found in a large clinical series.
       fr: Perte du même côté du champ visuel dans les deux yeux après une lésion située derrière le chiasma optique. Ce profil présente la localisation des lésions dans une grande série clinique.
     aliases:
-      en: [visual field loss, hemianopia, quadrantanopia, visual field defect, occipital, cortical blindness]
-      fr: [perte du champ visuel, hémianopsie, quadranopsie, déficit du champ visuel, occipital, cécité corticale]
+      en: [visual field loss, hemianopia, visual field defect, occipital]
+      fr: [perte du champ visuel, hémianopsie, déficit du champ visuel, occipital]
 
   - id: ataxia
     name: {en: Cerebellar ataxia, fr: Ataxie cérébelleuse}
@@ -133,8 +144,8 @@ deficits:
       en: Misreaching toward visual targets despite adequate vision and limb strength. This profile re-examines the classic superior parietal localization.
       fr: Erreurs d’atteinte vers des cibles visuelles malgré une vision et une force des membres adéquates. Ce profil réexamine la localisation pariétale supérieure classique.
     aliases:
-      en: [misreaching, visually guided reaching, dorsal stream, parietal, Bálint]
-      fr: [erreurs d’atteinte, atteinte visuellement guidée, voie dorsale, pariétal, Bálint]
+      en: [misreaching, visually guided reaching, dorsal stream, parietal, Bálint syndrome]
+      fr: [erreurs d’atteinte, atteinte visuellement guidée, voie dorsale, pariétal, syndrome de Bálint]
 
   - id: somatosensory
     name: {en: Somatosensory loss, fr: Déficit somatosensoriel}
@@ -221,8 +232,8 @@ deficits:
       en: Apathy with loss of initiative, spontaneous thought and emotional response. This profile follows focal basal ganglia lesions.
       fr: Apathie avec perte d’initiative, de pensée spontanée et de réponse émotionnelle. Ce profil concerne les lésions focales des noyaux gris centraux.
     aliases:
-      en: [apathy, loss of initiative, caudate, basal ganglia, disinhibition, motivation]
-      fr: [apathie, perte d’initiative, noyau caudé, noyaux gris centraux, désinhibition, motivation]
+      en: [apathy, loss of initiative, caudate, basal ganglia, motivation]
+      fr: [apathie, perte d’initiative, noyau caudé, noyaux gris centraux, motivation]
 
   - id: parkinsonism
     name: {en: Parkinsonism, fr: Syndrome parkinsonien}
@@ -357,15 +368,15 @@ deficits:
       fr: [amusie, musique, perception de la hauteur, perception du rythme, mélodie]
 
   - id: simultanagnosia
-    name: {en: Dorsal simultanagnosia, fr: Simultanagnosie dorsale}
+    name: {en: Simultanagnosia, fr: Simultanagnosie}
     domain: {en: Visual attention, fr: Attention visuelle}
     group: attention-executive
     summary:
       en: Difficulty attending to multiple objects at once. This profile concerns posterior attention-network damage.
       fr: Difficulté à prêter attention à plusieurs objets simultanément. Ce profil concerne les atteintes du réseau attentionnel postérieur.
     aliases:
-      en: [simultanagnosia, simultaneous perception, multiple objects, Bálint syndrome]
-      fr: [simultanagnosie, perception simultanée, objets multiples, syndrome de Bálint]
+      en: [simultanagnosia, simultaneous perception, multiple objects, Bálint syndrome, dorsal simultanagnosia]
+      fr: [simultanagnosie, perception simultanée, objets multiples, syndrome de Bálint, simultanagnosie dorsale]
 
   - id: tactile-agnosia
     name: {en: Tactile agnosia, fr: Agnosie tactile}
@@ -925,8 +936,8 @@ deficits:
       en: Acquired difficulty reading pronounceable unfamiliar letter strings relative to familiar words. This profile concerns phonological decoding and its links to spoken language, distinct from the visual word-recognition impairment of pure alexia.
       fr: Difficulté acquise à lire des suites de lettres inconnues prononçables par rapport aux mots familiers. Ce profil concerne le décodage phonologique et ses liens avec le langage oral, distincts du trouble de reconnaissance visuelle des mots de l’alexie pure.
     aliases:
-      en: [phonological alexia, phonological dyslexia, pseudoword reading, nonword reading, sublexical reading]
-      fr: [alexie phonologique, dyslexie phonologique acquise, lecture de pseudomots, lecture de non-mots, lecture sublexicale]
+      en: [phonological alexia, phonological dyslexia, acquired dyslexia, pseudoword reading, nonword reading, sublexical reading]
+      fr: [alexie phonologique, dyslexie phonologique acquise, dyslexie acquise, lecture de pseudomots, lecture de non-mots, lecture sublexicale]
 
   - id: post-stroke-depressive-symptoms
     name: {en: Post-stroke depressive symptoms, fr: Symptômes dépressifs après AVC}
@@ -947,8 +958,8 @@ deficits:
       en: Acquired reading errors in which an irregular word is pronounced using more typical spelling-to-sound rules. This profile focuses on regularization errors, distinguishing them from difficulty decoding unfamiliar letter strings or visually recognizing words.
       fr: Erreurs acquises de lecture dans lesquelles un mot irrégulier est prononcé selon des règles de conversion orthographe-son plus habituelles. Ce profil concerne les erreurs de régularisation, distinctes des difficultés de décodage de suites de lettres inconnues ou de reconnaissance visuelle des mots.
     aliases:
-      en: [surface alexia, acquired surface dyslexia, regularization errors, irregular word reading, whole-word reading]
-      fr: [alexie de surface, dyslexie de surface acquise, erreurs de régularisation, lecture de mots irréguliers, lecture lexicale]
+      en: [surface alexia, acquired surface dyslexia, acquired dyslexia, regularization errors, irregular word reading, whole-word reading]
+      fr: [alexie de surface, dyslexie de surface acquise, dyslexie acquise, erreurs de régularisation, lecture de mots irréguliers, lecture lexicale]
 
   - id: personal-neglect
     name: {en: Personal neglect, fr: Négligence personnelle}
@@ -5152,6 +5163,188 @@ references:
       en: 16 people with left-hemisphere stroke tested on noun and verb naming.
       fr: 16 personnes ayant un AVC de l’hémisphère gauche évaluées sur la dénomination de noms et de verbes.
 
+  - id: goldenberg-2007
+    title: Pantomime of tool use depends on integrity of left inferior frontal cortex
+    authors: Goldenberg G, Hermsdörfer J, Glindemann R, Rorden C, Karnath HO
+    year: 2007
+    journal: Cerebral Cortex
+    doi: 10.1093/cercor/bhm004
+    pmid: '17339607'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: Patients with left-brain damage and aphasia, grouped by normal or defective pantomime of tool use; lesion subtraction analysis.
+      fr: Patients avec lésion cérébrale gauche et aphasie, regroupés selon un pantomime d’utilisation d’outils normal ou déficitaire; analyse lésionnelle par soustraction.
+
+  - id: manuel-2013
+    title: 'Inter- and intrahemispheric dissociations in ideomotor apraxia: a large-scale lesion-symptom mapping study in subacute brain-damaged patients'
+    authors: Manuel AL, Radman N, Mesot D, Chouiter L, Clarke S, Annoni JM, Spierer L
+    year: 2013
+    journal: Cerebral Cortex
+    doi: 10.1093/cercor/bhs280
+    pmid: '22989580'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 150 subacute patients with left- or right-hemisphere stroke or tumour; voxel-based mapping of two types of pantomime error.
+      fr: 150 patients en phase subaiguë avec AVC ou tumeur de l’hémisphère gauche ou droit; cartographie voxel par voxel de deux types d’erreurs de pantomime.
+
+  - id: hoeren-2014
+    title: 'Neural bases of imitation and pantomime in acute stroke patients: distinct streams for praxis'
+    authors: Hoeren M, Kümmerer D, Bormann T, Beume L, Ludwig VM, Vry MS, Mader I, Rijntjes M, Kaller CP, Weiller C
+    year: 2014
+    journal: Brain
+    doi: 10.1093/brain/awu203
+    pmid: '25062694'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 96 consecutive patients with acute left-hemisphere ischaemic stroke, examined a mean of 5.3 days after onset on imitating meaningless postures and pantomiming the use of 14 tools shown as line drawings.
+      fr: 96 patients consécutifs avec AVC ischémique gauche aigu, évalués en moyenne 5,3 jours après le début sur l’imitation de postures sans signification et le pantomime de l’utilisation de 14 outils présentés en dessins.
+
+  - id: buxbaum-2014
+    title: 'Critical brain regions for tool-related and imitative actions: a componential analysis'
+    authors: Buxbaum LJ, Shapiro AD, Coslett HB
+    year: 2014
+    journal: Brain
+    doi: 10.1093/brain/awu111
+    pmid: '24776969'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 71 people with left-hemisphere stroke, gesturing with the ipsilesional hand to viewed tools, imitating tool gestures and imitating meaningless gestures; voxel-based mapping with posture and kinematic scores.
+      fr: 71 personnes avec AVC de l’hémisphère gauche, produisant avec la main ipsilésionnelle des gestes à la vue d’outils, imitant des gestes d’outils et des gestes sans signification; cartographie voxel par voxel avec scores de posture et de cinématique.
+
+  - id: goldenberg-2009
+    title: The neural basis of tool use
+    authors: Goldenberg G, Spatt J
+    year: 2009
+    journal: Brain
+    doi: 10.1093/brain/awp080
+    pmid: '19351777'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 38 patients with left-brain damage and aphasia tested on functional associations, novel tools and the use of common tools and objects; voxel-wise lesion analysis.
+      fr: 38 patients avec lésion cérébrale gauche et aphasie évalués sur les associations fonctionnelles, les outils nouveaux et l’utilisation d’outils et d’objets courants; analyse lésionnelle voxel par voxel.
+
+  - id: martin-2016
+    title: Differential roles of ventral and dorsal streams for conceptual and production-related components of tool use in acute stroke patients
+    authors: Martin M, Beume L, Kümmerer D, Schmidt CS, Bormann T, Dressing A, Ludwig VM, Umarova RM, Mader I, Rijntjes M, Kaller CP, Weiller C
+    year: 2016
+    journal: Cerebral Cortex
+    doi: 10.1093/cercor/bhv179
+    pmid: '26271112'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 136 patients with acute left-hemisphere stroke, prospectively tested on selecting a tool’s recipient and using tools; voxel-based mapping.
+      fr: 136 patients avec AVC gauche aigu, évalués prospectivement sur la sélection du destinataire d’un outil et l’utilisation d’outils; cartographie voxel par voxel.
+
+  - id: pramstaller-1996
+    title: The basal ganglia and apraxia
+    authors: Pramstaller PP, Marsden CD
+    year: 1996
+    journal: Brain
+    doi: 10.1093/brain/119.1.319
+    pmid: '8624692'
+    method: meta-analysis
+    scope: abstract
+    population:
+      en: 82 published cases of apraxia after deep lesions, nine studied neuropathologically and 73 with CT or MRI.
+      fr: 82 cas publiés d’apraxie après lésions profondes, neuf étudiés en neuropathologie et 73 par TDM ou IRM.
+
+  - id: de-renzi-1986
+    title: Limb apraxia in patients with damage confined to the left basal ganglia and thalamus
+    authors: De Renzi E, Faglioni P, Scarpa M, Crisi G
+    year: 1986
+    journal: Journal of Neurology, Neurosurgery, and Psychiatry
+    doi: 10.1136/jnnp.49.9.1030
+    pmid: '3760891'
+    method: case-series
+    scope: abstract
+    population:
+      en: 14 patients whose CT showed a vascular lesion confined to the left basal ganglia, thalamus or both, tested with standardised apraxia tests.
+      fr: 14 patients dont la TDM montrait une lésion vasculaire limitée aux noyaux gris centraux gauches, au thalamus ou aux deux, évalués par des tests d’apraxie standardisés.
+
+  - id: watson-1983
+    title: Callosal apraxia
+    authors: Watson RT, Heilman KM
+    year: 1983
+    journal: Brain
+    doi: 10.1093/brain/106.2.391
+    pmid: '6850274'
+    method: case-report
+    scope: abstract
+    population:
+      en: One 43-year-old woman with a spontaneous callosal disconnection; CT at five months showed infarction of only the body of the corpus callosum.
+      fr: Une femme de 43 ans avec une déconnexion calleuse spontanée; la TDM à cinq mois montrait un infarctus limité au corps du corps calleux.
+
+  - id: graff-radford-1987
+    title: Callosal apraxia
+    authors: Graff-Radford NR, Welsh K, Godersky J
+    year: 1987
+    journal: Neurology
+    doi: 10.1212/wnl.37.1.100
+    pmid: '3796825'
+    method: case-report
+    scope: abstract
+    population:
+      en: One right-handed 39-year-old woman after a ruptured pericallosal aneurysm, with damage to the genu and most of the callosal body; tested repeatedly over four months.
+      fr: Une femme droitière de 39 ans après rupture d’un anévrisme péricalleux, avec atteinte du genou et de la majeure partie du corps calleux; évaluée à plusieurs reprises pendant quatre mois.
+
+  - id: lausberg-2003
+    title: 'Pantomime to visual presentation of objects: left hand dyspraxia in patients with complete callosotomy'
+    authors: Lausberg H, Cruz RF, Kita S, Zaidel E, Ptito A
+    year: 2003
+    journal: Brain
+    doi: 10.1093/brain/awg042
+    pmid: '12538402'
+    method: case-series
+    scope: abstract
+    population:
+      en: Three patients with complete callosotomy, five with partial callosotomy and nine healthy participants, tested on pantomime to visually presented objects and on actual object use with each hand.
+      fr: Trois patients avec callosotomie complète, cinq avec callosotomie partielle et neuf participants sains, évalués sur le pantomime à la présentation visuelle d’objets et sur l’utilisation réelle d’objets avec chaque main.
+
+  - id: watson-1986
+    title: Apraxia and the supplementary motor area
+    authors: Watson RT, Fleet WS, Gonzalez-Rothi L, Heilman KM
+    year: 1986
+    journal: Archives of Neurology
+    doi: 10.1001/archneur.1986.00520080035016
+    pmid: '3729758'
+    method: case-series
+    scope: abstract
+    population:
+      en: Two patients with left medial hemisphere infarcts that included the supplementary motor area.
+      fr: Deux patients avec infarctus de la face médiale de l’hémisphère gauche incluant l’aire motrice supplémentaire.
+
+  - id: stoll-2022
+    title: 100 years after Liepmann-Lesion correlates of diminished selection and application of familiar versus novel tools
+    authors: Stoll SEM, Finkel L, Buchmann I, Hassa T, Spiteri S, Liepert J, Randerath J
+    year: 2022
+    journal: Cortex
+    doi: 10.1016/j.cortex.2021.10.002
+    pmid: '34801831'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 58 left- and 51 right-hemisphere stroke patients tested on selecting and applying familiar and novel tools, with semantic, spatial working-memory and imitation control tasks; voxel-based mapping.
+      fr: 58 patients avec AVC gauche et 51 avec AVC droit évalués sur la sélection et l’application d’outils familiers et nouveaux, avec des tâches témoins sémantique, de mémoire de travail spatiale et d’imitation; cartographie voxel par voxel.
+
+  - id: epelbaum-2008
+    title: 'Pure alexia as a disconnection syndrome: new diffusion imaging evidence for an old concept'
+    authors: Epelbaum S, Pinel P, Gaillard R, Delmaire C, Perrin M, Dupont S, Dehaene S, Cohen L
+    year: 2008
+    journal: Cortex
+    doi: 10.1016/j.cortex.2008.05.003
+    pmid: '18586235'
+    method: case-report
+    scope: abstract
+    population:
+      en: One patient with pure alexia after a small surgical lesion near the visual word form area, with diffusion and functional imaging before, early after and late after surgery.
+      fr: Un patient avec alexie pure après une petite lésion chirurgicale proche de l’aire de la forme visuelle des mots, avec imagerie de diffusion et fonctionnelle avant, peu après et longtemps après la chirurgie.
+
 associations:
   - id: aphasia-comprehension
     deficit: aphasia
@@ -5272,6 +5465,114 @@ associations:
       - {reference: goldenberg-2006, role: supporting}
       - {reference: achilles-2017, role: qualifying}
 
+  - id: apraxia-pantomime-frontal
+    deficit: apraxia
+    title: {en: Pantomiming tool use after frontal damage, fr: Pantomime de l’utilisation d’outils après atteinte frontale}
+    network: {en: Left inferior frontal praxis system, fr: Système praxique frontal inférieur gauche}
+    laterality: left
+    finding:
+      en: In patients with left-brain damage and aphasia, defective pantomime of tool use was associated with inferior frontal damage extending into the adjacent insula and precentral gyrus, also after equating comprehension and lesion size; parietal lesions had no specific effect. In 150 patients with left- or right-hemisphere damage, both scored types of pantomime error were associated with left inferior frontal damage.
+      fr: Chez des patients avec lésion cérébrale gauche et aphasie, un pantomime déficitaire de l’utilisation d’outils était associé à une atteinte frontale inférieure s’étendant à l’insula et au gyrus précentral adjacents, y compris après appariement sur la compréhension et la taille lésionnelle; les lésions pariétales n’avaient pas d’effet spécifique. Chez 150 patients avec atteinte de l’hémisphère gauche ou droit, les deux types d’erreurs de pantomime évalués étaient associés à une atteinte frontale inférieure gauche.
+    limitation:
+      en: The subtraction study included only aphasic patients, and the 150-patient study described the frontal role as unspecific to the type of error. A 96-patient acute stroke study instead associated pantomime with supramarginal and ventral-stream damage, so inferior frontal cortex is not the only site where lesions disrupt pantomime.
+      fr: L’étude par soustraction n’incluait que des patients aphasiques, et l’étude de 150 patients décrivait le rôle frontal comme non spécifique du type d’erreur. Une étude de 96 patients en phase aiguë d’AVC associait plutôt le pantomime à une atteinte supramarginale et de la voie ventrale; le cortex frontal inférieur n’est donc pas le seul site où une lésion perturbe le pantomime.
+    mapping_note:
+      en: The opercular and triangular parcels mark the left inferior frontal gyrus; the consulted abstracts do not name a subdivision. The adjacent insula and precentral gyrus are not coloured.
+      fr: Les parcelles operculaire et triangulaire repèrent le gyrus frontal inférieur gauche; les résumés consultés ne nomment pas de subdivision. L’insula et le gyrus précentral adjacents ne sont pas colorés.
+    mappings:
+      - {region: 'destrieux:left:12', source_name: G_front_inf-Opercular}
+      - {region: 'destrieux:left:14', source_name: G_front_inf-Triangul}
+    evidence:
+      - {reference: goldenberg-2007, role: supporting}
+      - {reference: manuel-2013, role: supporting}
+      - {reference: hoeren-2014, role: qualifying}
+
+  - id: apraxia-pantomime-posterior
+    deficit: apraxia
+    title: {en: Pantomiming tool use after parietal and temporal damage, fr: Pantomime de l’utilisation d’outils après atteinte pariétale et temporale}
+    network: {en: Left parietotemporal praxis system, fr: Système praxique pariétotemporal gauche}
+    laterality: left
+    finding:
+      en: In 96 consecutive acute left-hemisphere strokes, pantomime of tool use, unlike imitation of meaningless postures, was associated with supramarginal and ventral-stream damage; content errors related to anterior temporal damage. In 71 left-hemisphere strokes, gesturing to the sight of tools was associated with a large posterior temporal region extending toward extrastriate cortex, with smaller inferior parietal and frontal regions.
+      fr: Chez 96 patients consécutifs en phase aiguë d’AVC gauche, le pantomime de l’utilisation d’outils, contrairement à l’imitation de postures sans signification, était associé à une atteinte supramarginale et de la voie ventrale; les erreurs de contenu étaient liées à une atteinte temporale antérieure. Chez 71 patients avec AVC gauche, les gestes produits à la vue d’outils étaient associés à une vaste région temporale postérieure s’étendant vers le cortex extrastrié, avec des régions pariétales inférieures et frontales plus petites.
+    limitation:
+      en: Both studies elicited pantomime from pictured or viewed tools rather than verbal command, and movement errors had no consistent lesion location. In an aphasic sample, a subtraction study found no specific parietal effect, so the location depends on the task, the type of error and the sample.
+      fr: Les deux études suscitaient le pantomime par des outils dessinés ou vus plutôt que par une consigne verbale, et les erreurs de mouvement n’avaient pas de localisation lésionnelle constante. Dans un échantillon aphasique, une étude par soustraction ne trouvait pas d’effet pariétal spécifique; la localisation dépend donc de la tâche, du type d’erreur et de l’échantillon.
+    mapping_note:
+      en: The supramarginal parcel marks the parietal result. The whole middle temporal gyrus is a broad landmark for the posterior temporal region, which also extends into inferior temporal and occipital cortex. The extreme capsule and anterior temporal lobe are not coloured.
+      fr: La parcelle supramarginale repère le résultat pariétal. Le gyrus temporal moyen entier est un repère large de la région temporale postérieure, qui s’étend aussi au cortex temporal inférieur et occipital. La capsule extrême et le lobe temporal antérieur ne sont pas colorés.
+    mappings:
+      - {region: 'destrieux:left:26', source_name: G_pariet_inf-Supramar}
+      - {region: 'destrieux:left:38', source_name: G_temporal_middle}
+    evidence:
+      - {reference: hoeren-2014, role: supporting}
+      - {reference: buxbaum-2014, role: supporting}
+      - {reference: goldenberg-2007, role: qualifying}
+
+  - id: apraxia-tool-use
+    deficit: apraxia
+    title: {en: Using real tools, fr: Utilisation d’outils réels}
+    network: {en: Left parietal tool-use system, fr: Système pariétal gauche d’utilisation des outils}
+    laterality: left
+    finding:
+      en: In 136 acute left-hemisphere strokes, deficits in using real tools and in selecting a tool’s recipient were both associated with inferior parietal damage; selection deficits were additionally related to anterior temporal damage. In 38 patients with left-brain damage and aphasia, parietal lesions extending from the supramarginal gyrus impaired the use of common and novel tools but not the retrieval of functional associations.
+      fr: Chez 136 patients en phase aiguë d’AVC gauche, les déficits d’utilisation d’outils réels et de sélection du destinataire d’un outil étaient tous deux associés à une atteinte pariétale inférieure; les déficits de sélection étaient en outre liés à une atteinte temporale antérieure. Chez 38 patients avec lésion cérébrale gauche et aphasie, les lésions pariétales s’étendant depuis le gyrus supramarginal altéraient l’utilisation d’outils courants et nouveaux, mais pas la récupération d’associations fonctionnelles.
+    limitation:
+      en: The second study included only aphasic patients, and its frontal lesion region impaired every test, including the aphasia test, so it is not shown as specific to tool use. In 58 left- and 51 right-hemisphere strokes, lesion foci were more ventral for familiar and more dorsal for novel tools, and more anterior for selecting than for applying them, so real tool use does not depend on a single parietal site.
+      fr: La seconde étude n’incluait que des patients aphasiques, et sa région lésionnelle frontale altérait tous les tests, y compris le test d’aphasie; elle n’est donc pas présentée comme spécifique de l’utilisation d’outils. Chez 58 patients avec AVC gauche et 51 avec AVC droit, les foyers lésionnels étaient plus ventraux pour les outils familiers et plus dorsaux pour les outils nouveaux, et plus antérieurs pour leur sélection que pour leur application; l’utilisation réelle d’outils ne dépend donc pas d’un site pariétal unique.
+    mapping_note:
+      en: The supramarginal parcel marks the common parietal landmark. In the second study the lesion region extended through the inferior to the superior parietal lobule; the frontal and anterior temporal results are not coloured.
+      fr: La parcelle supramarginale repère le site pariétal commun. Dans la seconde étude, la région lésionnelle s’étendait du lobule pariétal inférieur au lobule pariétal supérieur; les résultats frontaux et temporaux antérieurs ne sont pas colorés.
+    mappings:
+      - {region: 'destrieux:left:26', source_name: G_pariet_inf-Supramar}
+    evidence:
+      - {reference: martin-2016, role: supporting}
+      - {reference: goldenberg-2009, role: supporting}
+      - {reference: stoll-2022, role: qualifying}
+
+  - id: apraxia-deep
+    deficit: apraxia
+    title: {en: Apraxia after deep lesions, fr: Apraxie après lésions profondes}
+    network: {en: Deep left-hemisphere praxis pathways, fr: Voies praxiques profondes de l’hémisphère gauche}
+    laterality: left
+    finding:
+      en: In 82 published cases of apraxia after deep lesions, apraxia was most often seen when lenticular or putaminal lesions extended into adjacent capsular, periventricular or peristriatal white matter; lesions confined to the basal ganglia rarely, if ever, caused it, whereas thalamic lesions sometimes did.
+      fr: Dans 82 cas publiés d’apraxie après lésions profondes, l’apraxie survenait surtout quand des lésions lenticulaires ou putaminales s’étendaient à la substance blanche capsulaire, périventriculaire ou péristriée adjacente; les lésions limitées aux noyaux gris centraux en causaient rarement, voire jamais, alors que les lésions thalamiques en causaient parfois.
+    limitation:
+      en: The review pooled published case reports, mostly imaged with CT. Among 14 patients whose CT lesions were confined to the left basal ganglia or thalamus, sparing cortex and adjacent white matter, five were severely impaired in imitation and pantomime, so the deep nuclei themselves may contribute. Neither source establishes how often deep lesions cause apraxia.
+      fr: La revue regroupait des cas publiés, surtout imagés par TDM. Parmi 14 patients dont les lésions en TDM étaient limitées aux noyaux gris centraux gauches ou au thalamus, épargnant le cortex et la substance blanche adjacente, cinq étaient sévèrement altérés en imitation et en pantomime; les noyaux profonds eux-mêmes pourraient donc contribuer. Aucune source n’établit la fréquence de l’apraxie après lésions profondes.
+    mapping_note:
+      en: No parcel is coloured. The review attributes most cases to white matter adjacent to the lenticular nucleus, which is not drawn as a parcel, and colouring the basal ganglia would contradict its conclusion that damage confined to them rarely suffices.
+      fr: Aucune parcelle n’est colorée. La revue attribue la plupart des cas à la substance blanche adjacente au noyau lenticulaire, qui n’est pas dessinée comme parcelle, et colorer les noyaux gris centraux contredirait sa conclusion qu’une atteinte limitée à ces noyaux suffit rarement.
+    mappings: []
+    evidence:
+      - {reference: pramstaller-1996, role: supporting}
+      - {reference: de-renzi-1986, role: qualifying}
+
+  - id: callosal-apraxia-anterior
+    deficit: callosal-apraxia
+    title: {en: Left-hand apraxia after callosal injury, fr: Apraxie de la main gauche après atteinte calleuse}
+    network: {en: Interhemispheric praxis transfer, fr: Transfert praxique interhémisphérique}
+    laterality: bilateral
+    finding:
+      en: After a callosal infarct later limited to the body, one patient had apraxia confined to the left hand. A second patient, with damage to the genu and most of the body that spared the splenium and both supplementary motor areas, had left-hand apraxia that persisted longest on verbal commands. Three patients with complete callosotomy made apraxic errors only with the left hand when pantomiming to visually presented objects, while actual object use was intact.
+      fr: Après un infarctus calleux finalement limité au corps, une patiente avait une apraxie limitée à la main gauche. Une seconde patiente, avec atteinte du genou et de la majeure partie du corps épargnant le splénium et les deux aires motrices supplémentaires, avait une apraxie de la main gauche persistant le plus longtemps sur consigne verbale. Trois patients avec callosotomie complète faisaient des erreurs apraxiques uniquement de la main gauche en pantomime à la présentation visuelle d’objets, alors que l’utilisation réelle des objets était préservée.
+    limitation:
+      en: Two single cases and three surgical patients. Left medial frontal infarcts that include the supplementary motor area can cause apraxia of both hands, so medial frontal damage accompanying callosal lesions may contribute. Left-hemisphere dominance for praxis varied with the test and between individuals.
+      fr: Deux cas isolés et trois patients opérés. Des infarctus frontaux médiaux gauches incluant l’aire motrice supplémentaire peuvent causer une apraxie des deux mains; une atteinte frontale médiale associée aux lésions calleuses peut donc contribuer. La dominance gauche pour les praxies variait selon le test et d’une personne à l’autre.
+    mapping_note:
+      en: The anterior, mid-anterior and central FreeSurfer callosal subdivisions approximate the genu and body named in the case reports; their boundaries do not reconstruct the lesions, and the callosotomies divided the whole callosum. The bilateral label describes a midline structure; the deficit affects the left hand.
+      fr: Les subdivisions calleuses antérieure, moyenne antérieure et centrale de FreeSurfer approchent le genou et le corps nommés dans les cas rapportés; leurs limites ne reconstruisent pas les lésions, et les callosotomies sectionnaient le corps calleux entier. L’étiquette bilatérale décrit une structure médiane; le déficit touche la main gauche.
+    mappings:
+      - {region: 'aseg:midline:255', source_name: CC_Anterior}
+      - {region: 'aseg:midline:254', source_name: CC_Mid_Anterior}
+      - {region: 'aseg:midline:253', source_name: CC_Central}
+    evidence:
+      - {reference: watson-1983, role: supporting}
+      - {reference: graff-radford-1987, role: supporting}
+      - {reference: lausberg-2003, role: supporting}
+      - {reference: watson-1986, role: qualifying}
+
   - id: agnosia-face
     deficit: agnosia
     title: {en: Facial configuration in prosopagnosia, fr: Configuration faciale dans la prosopagnosie}
@@ -5319,11 +5620,11 @@ associations:
     network: {en: Left dorsal language pathway, fr: Voie langagière dorsale gauche}
     laterality: left
     finding:
-      en: Across 25 pooled lesion-mapping studies, repetition-selective deficits arose only from lesions involving the posterior superior temporal gyrus.
-      fr: Sur 25 études de cartographie lésionnelle regroupées, les déficits sélectifs de répétition ne survenaient que pour des lésions impliquant le gyrus temporal supérieur postérieur.
+      en: In this pooled analysis, the repetition-selective lesion association was localized to the left posterior superior temporal gyrus.
+      fr: Dans cette analyse regroupée, l’association lésionnelle sélective de la répétition se situait dans le gyrus temporal supérieur postérieur gauche.
     limitation:
-      en: Pooled coordinates from post-stroke aphasia. Repetition is one task among several, and pooling across studies cannot resolve subregions within a gyrus.
-      fr: Coordonnées regroupées issues d’aphasies post-AVC. La répétition n’est qu’une tâche parmi d’autres, et le regroupement entre études ne peut pas distinguer les sous-régions d’un gyrus.
+      en: Pooled coordinates from post-stroke aphasia do not establish a necessary lesion site in every patient. Repetition is one task among several, and pooling cannot resolve subregions within a gyrus.
+      fr: Les coordonnées regroupées d’aphasies post-AVC ne démontrent pas qu’une lésion de ce site est nécessaire chez chaque patient. La répétition n’est qu’une tâche parmi d’autres, et le regroupement ne peut distinguer les sous-régions d’un gyrus.
     mapping_note:
       en: The whole lateral superior temporal parcel is shown. The pooled result concerns its posterior portion.
       fr: La parcelle temporale supérieure latérale entière est affichée. Le résultat regroupé concerne sa portion postérieure.
@@ -5624,8 +5925,8 @@ associations:
       en: After surgical removal of a small word-responsive portion of left occipitotemporal cortex, the patient developed a marked reading deficit while recognition of faces, houses and tools stayed intact, and only word-specific fMRI activations disappeared.
       fr: Après l’ablation chirurgicale d’une petite portion du cortex occipito-temporal gauche répondant aux mots, le patient a développé un déficit marqué de lecture alors que la reconnaissance des visages, des maisons et des outils restait intacte, et seules les activations IRMf spécifiques aux mots ont disparu.
     limitation:
-      en: A single epilepsy-surgery case with imaging before and after resection. It does not describe the range of lesions producing alexia after stroke.
-      fr: Cas unique de chirurgie de l’épilepsie avec imagerie avant et après la résection. Il ne décrit pas l’éventail des lésions produisant une alexie après un AVC.
+      en: A single epilepsy-surgery case with imaging before and after resection. A later diffusion study by the same group of a patient with pure alexia after a small resection beside the word form area, which reviews treat as this case, found that area anatomically intact while the inferior longitudinal fasciculus progressively degenerated, so disconnection may contribute to the deficit. Neither study describes the range of lesions producing alexia after stroke.
+      fr: Cas unique de chirurgie de l’épilepsie avec imagerie avant et après la résection. Une étude ultérieure de diffusion du même groupe, chez un patient avec alexie pure après une petite résection à côté de l’aire de la forme visuelle des mots, que des revues considèrent comme ce cas, montrait cette aire anatomiquement intacte alors que le faisceau longitudinal inférieur dégénérait progressivement; une déconnexion peut donc contribuer au déficit. Aucune des deux études ne décrit l’éventail des lésions produisant une alexie après un AVC.
     mapping_note:
       en: The fusiform gyrus and lateral occipitotemporal sulcus are shown whole. The word-responsive region is a small part of this territory.
       fr: Le gyrus fusiforme et le sillon occipito-temporal latéral sont affichés en entier. La région répondant aux mots n’est qu’une petite partie de ce territoire.
@@ -5634,6 +5935,7 @@ associations:
       - {region: 'destrieux:left:61', source_name: S_oc-temp_lat}
     evidence:
       - {reference: gaillard-2006, role: supporting}
+      - {reference: epelbaum-2008, role: qualifying}
 
   - id: alexia-stroke-comparison
     deficit: alexia
@@ -5707,11 +6009,11 @@ associations:
       en: Neuronal loss in the anterior thalamic nuclei was found consistently only in alcoholics with Korsakoff amnesia, whereas the mammillary and mediodorsal thalamic nuclei degenerated substantially in amnesic and non-amnesic alcoholics with Wernicke’s encephalopathy alike.
       fr: La perte neuronale des noyaux thalamiques antérieurs n’était constante que chez les alcooliques avec amnésie de Korsakoff, alors que les noyaux mamillaires et médiodorsaux dégénéraient fortement chez les alcooliques amnésiques comme non amnésiques avec encéphalopathie de Wernicke.
     limitation:
-      en: A post-mortem study of nutritional injury, not of a focal lesion. The mammillary bodies were damaged in both groups, so they mark the disease rather than the amnesia.
-      fr: Étude post-mortem d’une atteinte nutritionnelle, et non d’une lésion focale. Les corps mamillaires étaient atteints dans les deux groupes; ils marquent donc la maladie plutôt que l’amnésie.
+      en: A post-mortem study of nutritional injury, not of a focal lesion. Mammillary damage did not distinguish amnesic from non-amnesic alcoholics in this sample, but after colloid cyst removal greater mammillary atrophy went with impaired recall, so the mammillary bodies are not excluded from the amnesia.
+      fr: Étude post-mortem d’une atteinte nutritionnelle, et non d’une lésion focale. L’atteinte mamillaire ne distinguait pas les alcooliques amnésiques des non amnésiques dans cet échantillon, mais après ablation d’un kyste colloïde une atrophie mamillaire plus marquée allait de pair avec un rappel altéré; les corps mamillaires ne sont donc pas exclus de l’amnésie.
     mapping_note:
-      en: The anteroventral nucleus is the anterior thalamic nucleus available on both sides; the mammillary nuclei are shown as the co-damaged, non-differentiating site.
-      fr: Le noyau antéroventral est le noyau thalamique antérieur disponible des deux côtés; les noyaux mamillaires sont affichés comme site co-atteint mais non discriminant.
+      en: The anteroventral nucleus is the anterior thalamic nucleus available on both sides; the mammillary nuclei are shown as the site damaged in both groups of this study. The mediodorsal nucleus, also damaged in both groups, is not coloured.
+      fr: Le noyau antéroventral est le noyau thalamique antérieur disponible des deux côtés; les noyaux mamillaires sont affichés comme site atteint dans les deux groupes de cette étude. Le noyau médiodorsal, également atteint dans les deux groupes, n’est pas coloré.
     mappings:
       - {region: 'nextbrain:left:220', source_name: anteroventral_nucleus_of_thalamus}
       - {region: 'nextbrain:right:10220', source_name: anteroventral_nucleus_of_thalamus}
@@ -5719,6 +6021,7 @@ associations:
       - {region: 'learning:right:mammillary', source_name: Mammillary nuclei}
     evidence:
       - {reference: harding-2000, role: supporting}
+      - {reference: vann-2009, role: qualifying}
 
   - id: anosognosia-insula
     deficit: anosognosia
@@ -6410,11 +6713,11 @@ associations:
     network: {en: Bilateral parieto-occipital attention network, fr: Réseau attentionnel pariéto-occipital bilatéral}
     laterality: bilateral
     finding:
-      en: Simultanagnosia was associated with bilateral parieto-occipital white-matter disconnection and cortical damage including the cuneus and parieto-occipital sulcus.
-      fr: La simultanagnosie était associée à une déconnexion pariéto-occipitale bilatérale de substance blanche et à des lésions corticales incluant le cunéus et le sillon pariéto-occipital.
+      en: Simultanagnosia was associated with bilateral parieto-occipital white-matter disconnection, bilateral cortical damage including the cuneus, calcarine cortex, parieto-occipital sulcus and middle frontal area 46, and right intraparietal and postcentral damage.
+      fr: La simultanagnosie était associée à une déconnexion pariéto-occipitale bilatérale de substance blanche, à des lésions corticales bilatérales incluant le cunéus, le cortex calcarin, le sillon pariéto-occipital et l’aire frontale moyenne 46, et à une atteinte intrapariétale et postcentrale droite.
     limitation:
-      en: Network-level evidence; no displayed cortical parcel alone establishes the syndrome. This profile does not cover ventral simultanagnosia.
-      fr: Données portant sur un réseau; aucune parcelle corticale affichée ne suffit à établir le syndrome. Ce profil ne couvre pas la simultanagnosie ventrale.
+      en: Network-level evidence; no displayed cortical parcel alone establishes the syndrome. The study did not classify patients as dorsal or ventral; its bilateral parieto-occipital lesions match the pattern usually called dorsal simultanagnosia, and it does not address ventral cases.
+      fr: Données portant sur un réseau; aucune parcelle corticale affichée ne suffit à établir le syndrome. L’étude ne classait pas les patients en formes dorsale ou ventrale; ses lésions pariéto-occipitales bilatérales correspondent au profil habituellement appelé simultanagnosie dorsale, et elle ne traite pas des formes ventrales.
     mapping_note:
       en: Bilateral cortical landmarks are shown. The implicated white-matter disconnections and full lesion distribution are not reconstructed.
       fr: Des repères corticaux bilatéraux sont affichés. Les déconnexions de substance blanche impliquées et la distribution lésionnelle complète ne sont pas reconstruites.
@@ -6438,8 +6741,8 @@ associations:
       en: A small hypothesis-driven series, not a population lesion–symptom map. Elementary sensory loss must be assessed separately before interpreting poor tactile recognition.
       fr: Petite série guidée par des hypothèses, pas une carte lésion–symptôme populationnelle. Les pertes sensitives élémentaires doivent être évaluées séparément avant d’interpréter une mauvaise reconnaissance tactile.
     mapping_note:
-      en: Sulcal and gyral landmarks approximate the lesions; they are not equivalent to the study’s probabilistic cytoarchitectonic areas.
-      fr: Les repères sulcaux et gyraux situent approximativement les lésions; ils n’équivalent pas aux aires cytoarchitectoniques probabilistes de l’étude.
+      en: Sulcal and gyral landmarks approximate the lesions; they are not equivalent to the study’s probabilistic cytoarchitectonic areas. The lesions were left-sided and the agnosia affected the right hand, opposite the lesion.
+      fr: Les repères sulcaux et gyraux situent approximativement les lésions; ils n’équivalent pas aux aires cytoarchitectoniques probabilistes de l’étude. Les lésions étaient gauches et l’agnosie touchait la main droite, du côté opposé à la lésion.
     mappings:
       - {region: 'destrieux:left:68', source_name: S_postcentral}
       - {region: 'destrieux:left:27', source_name: G_parietal_sup}

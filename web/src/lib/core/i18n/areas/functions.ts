@@ -36,6 +36,8 @@ export const en = {
   populationsHeading: 'Neurosynth clinical groups',
   caveat:
     'Where studies of healthy groups report activation: not this brain, and not what damage would impair.',
+  consistencyNote:
+    'Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit. The overview combines several term maps.',
   // The region's name and side arrive as the list shows them.
   deepStrongest: (region: string, side: string, map: string) =>
     `${region} (${side}), the strongest region of ${map}, lies beneath the cortex.`,
@@ -103,6 +105,8 @@ export const fr: typeof en = {
   populationsHeading: 'Groupes cliniques Neurosynth',
   caveat:
     'Là où les études de groupes en bonne santé rapportent une activation\u202f: ni ce cerveau, ni ce qu’une lésion altérerait.',
+  consistencyNote:
+    'La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit. La vue d’ensemble combine plusieurs cartes de termes.',
   deepStrongest: (region: string, side: string, map: string) =>
     `${region} (${side}), la région la plus forte de ${map}, se trouve sous le cortex.`,
   deepAmong: (region: string, side: string, map: string, ranks: number) =>

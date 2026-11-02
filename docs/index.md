@@ -153,6 +153,8 @@ reference/deficit-additions-2026-11-01-cardiac-hiccups-adaptation
 reference/deficit-additions-2026-11-01-sign-cognition-restless-legs
 reference/deficit-additions-2026-11-01-amnesia-sensory-ataxic
 reference/deficit-additions-2026-11-01-sma-recognition-verbs
+reference/deficit-additions-2026-11-02-praxis
+reference/hart-2016-review-2026-11-02
 ```
 
 ```{toctree}

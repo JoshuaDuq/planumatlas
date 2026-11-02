@@ -58,6 +58,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'auditory-short-term-memory',
       'biological-motion',
       'buccofacial-apraxia',
+      'callosal-apraxia',
       'central-pain',
       'cerebellar-cognitive',
       'cerebellar-vertigo',
@@ -213,6 +214,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'agrammatism-inferior-frontal',
       'agraphia-orthographic-long-term',
       'apraxia-finger',
+      'apraxia-pantomime-frontal',
       'dysphagia-insula',
       'emotion-prosody',
       'emotional-empathy-inferior-frontal',
@@ -242,6 +244,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
     catalog.forRegion('destrieux:left:38').map((a) => a.deficit),
     [
       'aphasia',
+      'apraxia',
       'aphasia',
       'aphasia',
       'akinetopsia',
@@ -299,12 +302,12 @@ describe('published clinical content: fixed values', () => {
   const [, manifest] = manifests[0];
   const catalog = createClinicalCatalog(data, manifest, {});
 
-  test('CAT-50 · the published records are the revision of 2026-11-01: 6 groups, 120 deficits, 292 references, 188 associations', () => {
-    assert.equal(catalog.revised, '2026-11-01');
+  test('CAT-50 · the published records are the revision of 2026-11-02: 6 groups, 121 deficits, 305 references, 193 associations', () => {
+    assert.equal(catalog.revised, '2026-11-02');
     assert.equal(data.groups.length, 6);
-    assert.equal(data.deficits.length, 120);
-    assert.equal(data.references.length, 292);
-    assert.equal(data.associations.length, 188);
+    assert.equal(data.deficits.length, 121);
+    assert.equal(data.references.length, 306);
+    assert.equal(data.associations.length, 193);
   });
 
   test('reviewed motor-neglect and aprosodia findings preserve their mapping limits', () => {
@@ -783,6 +786,45 @@ describe('published clinical content: fixed values', () => {
     assert.equal(catalog.search('noun-verb dissociation', 'en')[0].id, 'action-naming');
   });
 
+  test('praxis findings colour only their reviewed landmarks and keep deep lesions uncoloured', () => {
+    const keys = (deficit: string, finding: string) => [
+      ...catalog.paint(deficit, finding).paint.colors.keys(),
+    ];
+    assert.deepEqual(keys('apraxia', 'apraxia-pantomime-frontal'), [
+      'destrieux:left:12',
+      'destrieux:left:14',
+    ]);
+    assert.deepEqual(keys('apraxia', 'apraxia-pantomime-posterior'), [
+      'destrieux:left:26',
+      'destrieux:left:38',
+    ]);
+    assert.deepEqual(keys('apraxia', 'apraxia-tool-use'), ['destrieux:left:26']);
+    assert.deepEqual(keys('apraxia', 'apraxia-deep'), []);
+    assert.deepEqual(catalog.mappedRegions('callosal-apraxia'), [
+      'aseg:midline:255',
+      'aseg:midline:254',
+      'aseg:midline:253',
+    ]);
+    const qualifying = (finding: string) =>
+      catalog
+        .forDeficit(finding.startsWith('callosal') ? 'callosal-apraxia' : 'apraxia')
+        .find((a) => a.id === finding)!
+        .evidence.filter((e) => e.role === 'qualifying')
+        .map((e) => e.reference);
+    assert.deepEqual(qualifying('apraxia-pantomime-frontal'), ['hoeren-2014']);
+    assert.deepEqual(qualifying('apraxia-pantomime-posterior'), ['goldenberg-2007']);
+    assert.deepEqual(qualifying('apraxia-tool-use'), ['stoll-2022']);
+    assert.deepEqual(qualifying('apraxia-deep'), ['de-renzi-1986']);
+    assert.deepEqual(qualifying('callosal-apraxia-anterior'), ['watson-1986']);
+  });
+
+  test('limb and callosal apraxia have distinct bilingual search terms', () => {
+    assert.equal(catalog.search('left-hand apraxia', 'en')[0].id, 'callosal-apraxia');
+    assert.equal(catalog.search('callosotomie', 'fr')[0].id, 'callosal-apraxia');
+    assert.equal(catalog.search('deep apraxia', 'en')[0].id, 'apraxia');
+    assert.equal(catalog.search('utilisation d’outils', 'fr')[0].id, 'apraxia');
+  });
+
   test('CAT-45 · a published search ignores case and accents and ranks the named deficit first', () => {
     const ids = (query: string, lang: 'en' | 'fr') => catalog.search(query, lang).map((d) => d.id);
     assert.deepEqual(ids('amnesia', 'en'), [
@@ -816,7 +858,7 @@ describe('published clinical content: fixed values', () => {
       'transient-global-amnesia',
       'working-memory',
     ]);
-    assert.equal(ids('', 'fr').length, 120);
+    assert.equal(ids('', 'fr').length, 121);
     assert.deepEqual(ids('unlisted', 'en'), []);
   });
 

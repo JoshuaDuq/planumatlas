@@ -12,13 +12,13 @@ The 70 curated functions are based on Neurosynth terms. **All functions** displa
 **Language**: 96 HCP-MMP areas at z ≥ 3, from 1,101 studies, strongest first.
 ```
 
-A map describes where studies using a term consistently report activation in healthy groups. It does not measure function in this subject or predict the effect of a lesion. See [the method and limitations](../concepts/atlases.md#neuropsychological-functions).
+A map describes where studies using a term consistently report activation in healthy groups. It does not show that a region serves only that function, measure function in this subject, or predict the effect of a lesion. The overview combines several term maps. See [the method and limitations](../concepts/atlases.md#neuropsychological-functions).
 
 Search also offers selected Neurosynth terms and clinical groups. These maps use the same method but have not been checked against their names or lesion studies. A clinical-group map shows reported activation in studies of that group, not where damage causes the condition. The offered terms are in [`config/neurosynth-terms.yaml`](https://github.com/JoshuaDuq/neuroatlas/blob/main/config/neurosynth-terms.yaml).
 
 ## Deficits
 
-The 120 profiles describe acquired adult deficits and selected associations with brain regions. Search by name, synonym or function. A profile identifies the evidence, population and limitations for each finding, and links to its regions and relevant function maps. Regions are coloured by finding; the key indicates findings that cannot be coloured in the current view.
+The 121 profiles describe acquired adult deficits and selected associations with brain regions. Search by name, synonym or function. A profile identifies the evidence, population and limitations for each finding, and links to its regions and relevant function maps. Regions are coloured by finding; the key indicates findings that cannot be coloured in the current view.
 
 ```{figure} ../../.github/assets/readme/deficits.webp
 :alt: Hemispatial neglect on the right hemisphere, each finding in its own colour, with the associations and evidence in the panel
@@ -59,3 +59,5 @@ The [sign language aphasia, post-stroke cognitive impairment and restless legs r
 The [transient global amnesia, pure sensory stroke and ataxic hemiparesis review](../reference/deficit-additions-2026-11-01-amnesia-sensory-ataxic.md) adds these three profiles. It treats transient hippocampal lesions as markers rather than causes and states where the commonest lesion site has no atlas parcel.
 
 The [supplementary motor area, recognition memory and action naming review](../reference/deficit-additions-2026-11-01-sma-recognition-verbs.md) adds supplementary motor area syndrome, recollection and familiarity deficits, and impaired action naming. It keeps the dispute over recollection and familiarity explicit with the opposing study as qualifying evidence.
+
+The [praxis review](../reference/deficit-additions-2026-11-02-praxis.md) adds pantomime, real tool use and deep lesions to limb apraxia, and a callosal apraxia profile. It keeps the competing frontal and parietotemporal pantomime findings apart and leaves the deep-lesion finding uncoloured because its white matter has no parcel.

@@ -825,6 +825,7 @@
   "termsHeading": "Neurosynth terms",
   "populationsHeading": "Neurosynth clinical groups",
   "caveat": "Where studies of healthy groups report activation: not this brain, and not what damage would impair.",
+  "consistencyNote": "Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit. The overview combines several term maps.",
   "deepStrongest": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), the strongest region of Alpha, lies beneath the cortex.\"",
    "[\"\",\"Alpha\",\"\"] → \" (Alpha), the strongest region of , lies beneath the cortex.\""

@@ -60,7 +60,7 @@ Paint the cortex and deep structures with 70 curated functions, from working mem
 
 [![Hemispatial neglect on the right hemisphere, with each finding in its own colour and the evidence listed in the panel](.github/assets/readme/deficits.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=deficits&deficit=neglect&view=right)
 
-120 profiles of acquired adult deficits, from aphasia and amnesia to neglect and ataxia, colour the regions their cited findings name. Every finding carries its population, evidence and limits, so you can see why a region is there and how strong the case is.
+121 profiles of acquired adult deficits, from aphasia and amnesia to neglect and ataxia, colour the regions their cited findings name. Every finding carries its population, evidence and limits, so you can see why a region is there and how strong the case is.
 
 ### Take a guided tour
 

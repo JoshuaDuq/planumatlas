@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "sources": "PubMed efetch, Bookshelf esummary and Crossref; no abstracts",
  "year": "PubMed's journal-issue publication year (PubDate, or the first year of a MedlineDate range), not the online-first year; for a Bookshelf chapter, the book's publication year",
  "records": {
@@ -404,6 +404,46 @@
    "pages": "41-9",
    "corrections": []
   },
+  "pmid:3729758": {
+   "pmid": "3729758",
+   "pmcid": null,
+   "doi": "10.1001/archneur.1986.00520080035016",
+   "doi_source": "pubmed",
+   "title": "Apraxia and the supplementary motor area",
+   "authors": [
+    "Watson RT",
+    "Fleet WS",
+    "Gonzalez-Rothi L",
+    "Heilman KM"
+   ],
+   "year": 1986,
+   "pubdate": "1986 Aug",
+   "journal": "Arch Neurol",
+   "volume": "43",
+   "issue": "8",
+   "pages": "787-92",
+   "corrections": []
+  },
+  "pmid:3760891": {
+   "pmid": "3760891",
+   "pmcid": "PMC1029008",
+   "doi": "10.1136/jnnp.49.9.1030",
+   "doi_source": "pubmed",
+   "title": "Limb apraxia in patients with damage confined to the left basal ganglia and thalamus",
+   "authors": [
+    "De Renzi E",
+    "Faglioni P",
+    "Scarpa M",
+    "Crisi G"
+   ],
+   "year": 1986,
+   "pubdate": "1986 Sep",
+   "journal": "J Neurol Neurosurg Psychiatry",
+   "volume": "49",
+   "issue": "9",
+   "pages": "1030-8",
+   "corrections": []
+  },
   "pmid:3760943": {
    "pmid": "3760943",
    "pmcid": "PMC6568782",
@@ -421,6 +461,25 @@
    "volume": "6",
    "issue": "10",
    "pages": "2950-67",
+   "corrections": []
+  },
+  "pmid:3796825": {
+   "pmid": "3796825",
+   "pmcid": null,
+   "doi": "10.1212/wnl.37.1.100",
+   "doi_source": "pubmed",
+   "title": "Callosal apraxia",
+   "authors": [
+    "Graff-Radford NR",
+    "Welsh K",
+    "Godersky J"
+   ],
+   "year": 1987,
+   "pubdate": "1987 Jan",
+   "journal": "Neurology",
+   "volume": "37",
+   "issue": "1",
+   "pages": "100-5",
    "corrections": []
   },
   "pmid:6538274": {
@@ -459,6 +518,24 @@
    "volume": "106 (Pt 2)",
    "issue": null,
    "pages": "313-40",
+   "corrections": []
+  },
+  "pmid:6850274": {
+   "pmid": "6850274",
+   "pmcid": null,
+   "doi": "10.1093/brain/106.2.391",
+   "doi_source": "pubmed",
+   "title": "Callosal apraxia",
+   "authors": [
+    "Watson RT",
+    "Heilman KM"
+   ],
+   "year": 1983,
+   "pubdate": "1983 Jun",
+   "journal": "Brain",
+   "volume": "106 (Pt 2)",
+   "issue": null,
+   "pages": "391-403",
    "corrections": []
   },
   "pmid:7191073": {
@@ -862,6 +939,24 @@
    "volume": "39",
    "issue": "4",
    "pages": "471-80",
+   "corrections": []
+  },
+  "pmid:8624692": {
+   "pmid": "8624692",
+   "pmcid": null,
+   "doi": "10.1093/brain/119.1.319",
+   "doi_source": "pubmed",
+   "title": "The basal ganglia and apraxia",
+   "authors": [
+    "Pramstaller PP",
+    "Marsden CD"
+   ],
+   "year": 1996,
+   "pubdate": "1996 Feb",
+   "journal": "Brain",
+   "volume": "119 ( Pt 1)",
+   "issue": null,
+   "pages": "319-40",
    "corrections": []
   },
   "pmid:8649515": {
@@ -1755,6 +1850,27 @@
    "volume": "5",
    "issue": "11",
    "pages": "1236-41",
+   "corrections": []
+  },
+  "pmid:12538402": {
+   "pmid": "12538402",
+   "pmcid": null,
+   "doi": "10.1093/brain/awg042",
+   "doi_source": "pubmed",
+   "title": "Pantomime to visual presentation of objects: left hand dyspraxia in patients with complete callosotomy",
+   "authors": [
+    "Lausberg H",
+    "Cruz RF",
+    "Kita S",
+    "Zaidel E",
+    "Ptito A"
+   ],
+   "year": 2003,
+   "pubdate": "2003 Feb",
+   "journal": "Brain",
+   "volume": "126",
+   "issue": "Pt 2",
+   "pages": "343-60",
    "corrections": []
   },
   "pmid:12601097": {
@@ -2969,6 +3085,27 @@
    "pages": "531-4",
    "corrections": []
   },
+  "pmid:17339607": {
+   "pmid": "17339607",
+   "pmcid": null,
+   "doi": "10.1093/cercor/bhm004",
+   "doi_source": "pubmed",
+   "title": "Pantomime of tool use depends on integrity of left inferior frontal cortex",
+   "authors": [
+    "Goldenberg G",
+    "Hermsdörfer J",
+    "Glindemann R",
+    "Rorden C",
+    "Karnath HO"
+   ],
+   "year": 2007,
+   "pubdate": "2007 Dec",
+   "journal": "Cereb Cortex",
+   "volume": "17",
+   "issue": "12",
+   "pages": "2769-76",
+   "corrections": []
+  },
   "pmid:17377536": {
    "pmid": "17377536",
    "pmcid": "PMC2244801",
@@ -3255,6 +3392,30 @@
    "volume": "102",
    "issue": "1-3",
    "pages": "80-94",
+   "corrections": []
+  },
+  "pmid:18586235": {
+   "pmid": "18586235",
+   "pmcid": null,
+   "doi": "10.1016/j.cortex.2008.05.003",
+   "doi_source": "pubmed",
+   "title": "Pure alexia as a disconnection syndrome: new diffusion imaging evidence for an old concept",
+   "authors": [
+    "Epelbaum S",
+    "Pinel P",
+    "Gaillard R",
+    "Delmaire C",
+    "Perrin M",
+    "Dupont S",
+    "Dehaene S",
+    "Cohen L"
+   ],
+   "year": 2008,
+   "pubdate": "2008 Sep",
+   "journal": "Cortex",
+   "volume": "44",
+   "issue": "8",
+   "pages": "962-74",
    "corrections": []
   },
   "pmid:18625494": {
@@ -3552,6 +3713,24 @@
    "volume": "106",
    "issue": "13",
    "pages": "5442-7",
+   "corrections": []
+  },
+  "pmid:19351777": {
+   "pmid": "19351777",
+   "pmcid": null,
+   "doi": "10.1093/brain/awp080",
+   "doi_source": "pubmed",
+   "title": "The neural basis of tool use",
+   "authors": [
+    "Goldenberg G",
+    "Spatt J"
+   ],
+   "year": 2009,
+   "pubdate": "2009 Jun",
+   "journal": "Brain",
+   "volume": "132",
+   "issue": "Pt 6",
+   "pages": "1645-55",
    "corrections": []
   },
   "pmid:19353229": {
@@ -4835,6 +5014,29 @@
    "pages": "2726-35",
    "corrections": []
   },
+  "pmid:22989580": {
+   "pmid": "22989580",
+   "pmcid": null,
+   "doi": "10.1093/cercor/bhs280",
+   "doi_source": "pubmed",
+   "title": "Inter- and intrahemispheric dissociations in ideomotor apraxia: a large-scale lesion-symptom mapping study in subacute brain-damaged patients",
+   "authors": [
+    "Manuel AL",
+    "Radman N",
+    "Mesot D",
+    "Chouiter L",
+    "Clarke S",
+    "Annoni JM",
+    "Spierer L"
+   ],
+   "year": 2013,
+   "pubdate": "2013 Dec",
+   "journal": "Cereb Cortex",
+   "volume": "23",
+   "issue": "12",
+   "pages": "2781-9",
+   "corrections": []
+  },
   "pmid:23071379": {
    "pmid": "23071379",
    "pmcid": "PMC3543080",
@@ -5165,6 +5367,25 @@
    "pages": null,
    "corrections": []
   },
+  "pmid:24776969": {
+   "pmid": "24776969",
+   "pmcid": "PMC4065019",
+   "doi": "10.1093/brain/awu111",
+   "doi_source": "pubmed",
+   "title": "Critical brain regions for tool-related and imitative actions: a componential analysis",
+   "authors": [
+    "Buxbaum LJ",
+    "Shapiro AD",
+    "Coslett HB"
+   ],
+   "year": 2014,
+   "pubdate": "2014 Jul",
+   "journal": "Brain",
+   "volume": "137",
+   "issue": "Pt 7",
+   "pages": "1971-85",
+   "corrections": []
+  },
   "pmid:24815949": {
    "pmid": "24815949",
    "pmcid": null,
@@ -5234,6 +5455,32 @@
    "volume": "62",
    "issue": null,
    "pages": "68-76",
+   "corrections": []
+  },
+  "pmid:25062694": {
+   "pmid": "25062694",
+   "pmcid": null,
+   "doi": "10.1093/brain/awu203",
+   "doi_source": "pubmed",
+   "title": "Neural bases of imitation and pantomime in acute stroke patients: distinct streams for praxis",
+   "authors": [
+    "Hoeren M",
+    "Kümmerer D",
+    "Bormann T",
+    "Beume L",
+    "Ludwig VM",
+    "Vry MS",
+    "Mader I",
+    "Rijntjes M",
+    "Kaller CP",
+    "Weiller C"
+   ],
+   "year": 2014,
+   "pubdate": "2014 Oct",
+   "journal": "Brain",
+   "volume": "137",
+   "issue": "Pt 10",
+   "pages": "2796-810",
    "corrections": []
   },
   "pmid:25243991": {
@@ -5399,6 +5646,34 @@
    "volume": "119",
    "issue": null,
    "pages": "262-71",
+   "corrections": []
+  },
+  "pmid:26271112": {
+   "pmid": "26271112",
+   "pmcid": null,
+   "doi": "10.1093/cercor/bhv179",
+   "doi_source": "pubmed",
+   "title": "Differential Roles of Ventral and Dorsal Streams for Conceptual and Production-Related Components of Tool Use in Acute Stroke Patients",
+   "authors": [
+    "Martin M",
+    "Beume L",
+    "Kümmerer D",
+    "Schmidt CS",
+    "Bormann T",
+    "Dressing A",
+    "Ludwig VM",
+    "Umarova RM",
+    "Mader I",
+    "Rijntjes M",
+    "Kaller CP",
+    "Weiller C"
+   ],
+   "year": 2016,
+   "pubdate": "2016 Sep",
+   "journal": "Cereb Cortex",
+   "volume": "26",
+   "issue": "9",
+   "pages": "3754-71",
    "corrections": []
   },
   "pmid:26585396": {
@@ -7158,6 +7433,29 @@
    "volume": "240",
    "issue": "1",
    "pages": "39-51",
+   "corrections": []
+  },
+  "pmid:34801831": {
+   "pmid": "34801831",
+   "pmcid": null,
+   "doi": "10.1016/j.cortex.2021.10.002",
+   "doi_source": "pubmed",
+   "title": "100 years after Liepmann-Lesion correlates of diminished selection and application of familiar versus novel tools",
+   "authors": [
+    "Stoll SEM",
+    "Finkel L",
+    "Buchmann I",
+    "Hassa T",
+    "Spiteri S",
+    "Liepert J",
+    "Randerath J"
+   ],
+   "year": 2022,
+   "pubdate": "2022 Jan",
+   "journal": "Cortex",
+   "volume": "146",
+   "issue": null,
+   "pages": "1-23",
    "corrections": []
   },
   "pmid:34847482": {

@@ -54,6 +54,7 @@
         </p>
       {/if}
       <p class="note caveat">{content.caveat}</p>
+      <p class="note caveat">{copy.consistencyNote}</p>
 
       {#if content.all}
         <div class="section">

@@ -825,6 +825,7 @@
   "termsHeading": "Termes Neurosynth",
   "populationsHeading": "Groupes cliniques Neurosynth",
   "caveat": "Là où les études de groupes en bonne santé rapportent une activation<NNBSP>: ni ce cerveau, ni ce qu’une lésion altérerait.",
+  "consistencyNote": "La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit. La vue d’ensemble combine plusieurs cartes de termes.",
   "deepStrongest": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), la région la plus forte de Alpha, se trouve sous le cortex.\"",
    "[\"\",\"Alpha\",\"\"] → \" (Alpha), la région la plus forte de , se trouve sous le cortex.\""
