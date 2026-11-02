@@ -40,6 +40,8 @@ source_suffix = {".md": "markdown"}
 exclude_patterns = [
     "_build",
     "superpowers",
+    "reference/circuit-additions-2026-10-30.md",
+    "reference/circuit-classification-audit-2026-10-30.md",
     "Thumbs.db",
     ".DS_Store",
 ]
