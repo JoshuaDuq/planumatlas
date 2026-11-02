@@ -137,6 +137,8 @@ api/index
 
 reference/references
 reference/circuit-evidence
+reference/circuit-classification-audit-2026-10-30
+reference/circuit-additions-2026-10-30
 reference/full-text-review
 reference/deficit-additions-2026-10-31
 reference/deficit-additions-2026-11-01

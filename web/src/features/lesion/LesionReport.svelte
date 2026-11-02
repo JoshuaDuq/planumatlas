@@ -22,7 +22,8 @@
   import type { LesionMode, LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
-  import CopyValue, { aroundValue } from '../../lib/ui/CopyValue.svelte';
+  import { aroundValue } from '../../lib/ui/clipboard.svelte.ts';
+  import CopyValue from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import SphereTracts from './SphereTracts.svelte';

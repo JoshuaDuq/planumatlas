@@ -45,3 +45,12 @@ export function createCopier(words: () => { copied: string; failed: string }) {
     },
   };
 }
+
+const SLOT = '\u0000';
+
+/** The words of a sentence before and after its value, so the value alone can be the button. */
+export function aroundValue(sentence: (value: string) => string): [string, string] {
+  const [before, after] = sentence(SLOT).split(SLOT);
+  if (after === undefined) throw new Error('The sentence does not hold its value.');
+  return [before!, after];
+}

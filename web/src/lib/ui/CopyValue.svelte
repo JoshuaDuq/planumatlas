@@ -2,17 +2,6 @@
   A value the reader can take away: the value itself is the button, quiet at rest. A press copies
   it as shown and says "Copied" in place, above the value, so nothing beside it moves.
 -->
-<script module lang="ts">
-  const SLOT = '\u0000';
-
-  /** The words of a sentence before and after its value, so the value alone can be the button. */
-  export function aroundValue(sentence: (value: string) => string): [string, string] {
-    const [before, after] = sentence(SLOT).split(SLOT);
-    if (after === undefined) throw new Error('The sentence does not hold its value.');
-    return [before!, after];
-  }
-</script>
-
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { createCopier } from './clipboard.svelte.ts';

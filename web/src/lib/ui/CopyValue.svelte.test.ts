@@ -6,8 +6,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { withMedia } from './a11y-test-support.ts';
-import { COPIED_MS, FAILED_MS } from './clipboard.svelte.ts';
-import { aroundValue } from './CopyValue.svelte';
+import { aroundValue, COPIED_MS, FAILED_MS } from './clipboard.svelte.ts';
 import Fixture from './copy-value-test-support.svelte';
 
 const VALUE = '−41.0, +26.2, +28.3 mm';

@@ -2,7 +2,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { attachAnnouncer } from './announcer.svelte.ts';
-  import CopyValue, { aroundValue } from './CopyValue.svelte';
+  import { aroundValue } from './clipboard.svelte.ts';
+  import CopyValue from './CopyValue.svelte';
 
   let { value }: { value: string } = $props();
   let region: HTMLElement;

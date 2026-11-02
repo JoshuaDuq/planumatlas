@@ -21,7 +21,8 @@
   import { sharePercent } from '../../lib/core/lesion/report.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
-  import CopyValue, { aroundValue } from '../../lib/ui/CopyValue.svelte';
+  import { aroundValue } from '../../lib/ui/clipboard.svelte.ts';
+  import CopyValue from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import { downloadText } from '../tracts/download.ts';
