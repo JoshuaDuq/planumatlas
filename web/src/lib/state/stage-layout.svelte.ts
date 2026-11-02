@@ -57,6 +57,7 @@ export function createStageLayout({
   let dockElement: HTMLElement | null = null;
   let orientation: HTMLElement | null = null;
   let scaleBar: HTMLElement | null = null;
+  let gizmo: HTMLElement | null = null;
   let keyFitter: (() => void) | null = null;
   let host: HTMLElement | null = null;
   // While the key fitter runs on the store's own behalf, a changed key band does not call `onDock`.
@@ -129,6 +130,60 @@ export function createStageLayout({
       else clear.bottom = Math.max(clear.bottom, below(b));
     }
     return clear;
+  }
+
+  /** The gizmo's drawn glyphs (not its larger targets) in framing coordinates, with the markings' gap. */
+  function gizmoBox(): Rect | null {
+    if (!gizmo || gizmo.hidden || !orientation || orientation.hidden || sheetFull) return null;
+    const frame = orientation.getBoundingClientRect();
+    const parts = [
+      ...gizmo.querySelectorAll('.gizmo-axes, .gizmo-letter > span, .control-icon'),
+    ].map((node) => node.getBoundingClientRect());
+    if (!parts.length) return null;
+    const left = Math.min(...parts.map((b) => b.left)) - frame.left - MARKING_GAP_PX;
+    const top = Math.min(...parts.map((b) => b.top)) - frame.top - MARKING_GAP_PX;
+    const right = Math.max(...parts.map((b) => b.right)) - frame.left + MARKING_GAP_PX;
+    const bottom = Math.max(...parts.map((b) => b.bottom)) - frame.top + MARKING_GAP_PX;
+    return { x: left, y: top, width: right - left, height: bottom - top };
+  }
+
+  /**
+   * The silhouette never fills its room's corners, so the gizmo counts only inside the room's inscribed
+   * ellipse; then, like a key, it takes the band above or beside it, whichever keeps the larger picture.
+   */
+  function clearGizmo(room: Size, reach: number, clear: ReturnType<typeof markingClearance>) {
+    const framed = clearFraming(room, reach, clear, FRAME_FILL);
+    // The half extents the framed anatomy may take, about the centre of its room.
+    const extents = ({ inset, scale }: typeof framed, { width, height }: Size) => ({
+      across: (scale.horizontal * FRAME_FILL * width) / 2,
+      half: (scale.vertical * FRAME_FILL * (height - inset)) / 2,
+    });
+    const plain = { ...framed, top: 0, right: 0 };
+    const box = gizmoBox();
+    if (!box) return plain;
+    const { across, half } = extents(framed, room);
+    const centre = { x: room.width / 2, y: (room.height - framed.inset) / 2 };
+    const near = {
+      x: Math.max(box.x, Math.min(centre.x, box.x + box.width)),
+      y: Math.max(box.y, Math.min(centre.y, box.y + box.height)),
+    };
+    if (((near.x - centre.x) / across) ** 2 + ((near.y - centre.y) / half) ** 2 >= 1) return plain;
+    const band = (top: number, right: number) => {
+      const rest = { width: room.width - right, height: room.height - top };
+      const cleared = clearFraming(
+        rest,
+        reach,
+        { ...clear, top: Math.max(0, clear.top - top), right: Math.max(0, clear.right - right) },
+        FRAME_FILL,
+      );
+      const kept = extents(cleared, rest);
+      // How much of the picture survives, on the axis that loses more.
+      return { ...cleared, top, right, size: Math.min(kept.across / across, kept.half / half) };
+    };
+    const below = band(box.y + box.height, 0);
+    const beside = band(0, room.width - box.x);
+    const { inset, scale, top, right } = beside.size > below.size ? beside : below;
+    return { inset, scale, top, right };
   }
 
   /**
@@ -308,9 +363,14 @@ export function createStageLayout({
       scaleBar = element;
     },
 
+    /** The orientation gizmo, whose drawn box `framing()` keeps the anatomy clear of. */
+    registerGizmo(element: HTMLElement | null) {
+      gizmo = element;
+    },
+
     /**
-     * The insets and scale the camera frames with, keeping the anatomy clear of the dock, the colour keys
-     * and the markings (viewport-chrome.js:263-270). Register it with `engine.camera.setFramingSource`.
+     * The insets and scale the camera frames with, keeping the anatomy clear of the dock, the colour keys,
+     * the markings and the gizmo (viewport-chrome.js:263-270). Register it with `engine.camera.setFramingSource`.
      */
     framing: (): FramingClearance => {
       const reach = dockReach();
@@ -322,8 +382,11 @@ export function createStageLayout({
         width: visibleRect.width - keyInset.right,
         height: visibleRect.height - keyInset.top,
       };
-      const { inset, scale } = clearFraming(room, reach, markingClearance(reach), FRAME_FILL);
-      return { inset: { ...keyInset, bottom: inset }, scale };
+      const { inset, scale, top, right } = clearGizmo(room, reach, markingClearance(reach));
+      return {
+        inset: { top: keyInset.top + top, right: keyInset.right + right, bottom: inset },
+        scale,
+      };
     },
 
     /** The reader has rotated, zoomed or clicked the model once: the drag-and-scroll hint stays retired for good. */

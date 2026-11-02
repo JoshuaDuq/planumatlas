@@ -32,10 +32,12 @@ test('while a link is applied the address bar keeps it, until that restore ends 
   let live = true;
   const restoring = () => live;
   writer.hold(restoring);
+  assert.equal(writer.held, true, 'a live restore holds the link');
   writer.schedule();
   vi.advanceTimersByTime(1000);
   assert.equal(writes, 0, 'a half-restored scene is not written over the link');
   live = false;
+  assert.equal(writer.held, false, 'an overtaken restore holds nothing');
   writer.schedule();
   vi.advanceTimersByTime(250);
   assert.equal(writes, 1, 'an overtaken restore holds nothing');

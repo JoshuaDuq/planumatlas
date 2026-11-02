@@ -1,7 +1,7 @@
-// Where a click on a panel's picture lands in the head, in RAS millimetres, with fixed frames.
+// Where a click on a panel's picture lands in the head, where the crosshair is marked on it, and its edge letters, with fixed frames.
 import { describe, expect, test } from 'vitest';
 import type { PlaneFrame } from '../../lib/engine/api.ts';
-import { pointOnPlane } from './mpr-draw.ts';
+import { crosshairOnPlane, edgeLetter, pointOnPlane } from './mpr-draw.ts';
 
 const axial: PlaneFrame = {
   center: [0, 0, 10],
@@ -34,5 +34,34 @@ describe('a click on the picture', () => {
 
   test('the field of view scales the reach', () => {
     expect(pointOnPlane(axial, 1, 0.5, 100)).toEqual([50, 0, 10]);
+  });
+});
+
+describe('where the crosshair falls on a picture', () => {
+  test('is the inverse of a click: the point under a click marks the crosshair at that click', () => {
+    const point = pointOnPlane(sagittal, 0.75, 0.25, 200);
+    expect(crosshairOnPlane(sagittal, point, 200)).toEqual([0.75, 0.25]);
+  });
+
+  test('ignores the distance off the plane: an axial picture marks right and anterior alone', () => {
+    // 64 mm right and anterior of the centre of a 256 mm field, 30 mm above the slice.
+    expect(crosshairOnPlane(axial, [64, 64, 40], 256)).toEqual([0.75, 0.25]);
+  });
+});
+
+describe('an edge letter', () => {
+  test("is the reader's: right and left are D and G in French", () => {
+    expect(['R', 'L', 'A', 'P', 'S', 'I'].map((edge) => edgeLetter(edge, 'fr'))).toEqual([
+      'D',
+      'G',
+      'A',
+      'P',
+      'S',
+      'I',
+    ]);
+  });
+
+  test('is never a guess: an unknown letter is an error', () => {
+    expect(() => edgeLetter('X', 'en')).toThrow(RangeError);
   });
 });

@@ -5,15 +5,10 @@ import { Color, SRGBColorSpace } from 'three';
 import { parse } from 'yaml';
 import type { Region } from '../../types/index.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
-import {
-  anatomies,
-  asDisplaySettings,
-  asRegion,
-  readModel,
-} from '../../core/catalog/test-support.ts';
-import { tissueColor } from '../render/materials.ts';
+import { anatomies, asModelState, asRegion, readModel } from '../../core/catalog/test-support.ts';
+import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { TissueAppearance } from '../render/materials.ts';
-import { createPalette, labelVisible } from './palette.ts';
+import { createPalette, ghostKey, labelVisible } from './palette.ts';
 import type { Label, PaletteLookup } from './palette.ts';
 
 const published = anatomies.default;
@@ -49,7 +44,7 @@ const labels = [
     color: [245, 245, 245],
   },
 ].map(asLabel);
-const state = asDisplaySettings({
+const state = asModelState({
   atlas: 'destrieux',
   surfaceColor: 'atlas',
   cortexVisible: true,
@@ -84,7 +79,7 @@ test('neutral cut and surface colours agree for gray matter, white matter and CS
   );
   const palette = createPalette(
     tissues,
-    asDisplaySettings({ ...state, surfaceColor: 'tissue' }),
+    asModelState({ ...state, surfaceColor: 'tissue' }),
     appearance.tissue,
   );
   for (const [index, label] of tissues.entries()) {
@@ -99,7 +94,7 @@ test('neutral cut and surface colours agree for gray matter, white matter and CS
 });
 
 test('removed cut labels have zero alpha and cannot be picked', () => {
-  const hidden = asDisplaySettings({ ...state, hiddenRegions: new Set([labels[1]!.region_id]) });
+  const hidden = asModelState({ ...state, hiddenRegions: new Set([labels[1]!.region_id]) });
   assert.equal(labelVisible(labels[1]!, hidden), false);
   const palette = createPalette(labels, hidden, appearance.tissue);
   assert.equal(palette[7], 0);
@@ -114,6 +109,104 @@ test('a cut paints a label in the colour its published sRGB value names', () => 
   near(palette[5]!, expected.g);
   assert.equal(palette[7], 1);
   assert.equal(palette[3], 0);
+});
+
+test('under focus a cut keeps the selection and what it is made of in colour, every other label a grey ghost', () => {
+  const nucleus = asLabel({
+    source_label_id: 10,
+    region_id: 'nextbrain:left:218',
+    kind: 'tissue',
+    hemisphere: 'left',
+    color: [120, 18, 134],
+    name: 'Left-Thalamus',
+  });
+  const cut = [...labels, nucleus];
+  const ghost = (label: Label) =>
+    ghostColor({ ...label, source_name: label.name }, appearance.tissue, new Color());
+  const published = ({ color: [red, green, blue] }: Label) =>
+    new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+  const focusOn = (selectedRegion: object) =>
+    createPalette(
+      cut,
+      asModelState({ ...state, focused: true, selectedRegion: asRegion(selectedRegion) }),
+      appearance.tissue,
+    );
+
+  const onGyrus = focusOn({ id: 'destrieux:left:1' });
+  assertColor(onGyrus, 1, published(labels[1]!));
+  assertColor(onGyrus, 3, ghost(nucleus));
+  assertColor(onGyrus, 2, ghost(labels[2]!));
+  assert.equal(onGyrus[15], 1, 'a ghosted label is still drawn');
+
+  // A teaching-set structure is cut as the labels it was built from.
+  const onThalamus = focusOn({
+    id: 'learning:left:thalamus',
+    constituent_regions: ['nextbrain:left:218'],
+  });
+  assertColor(onThalamus, 3, published(nucleus));
+  assertColor(onThalamus, 1, ghost(labels[1]!));
+
+  // A selection without focus changes nothing.
+  const unfocused = createPalette(
+    cut,
+    asModelState({
+      ...state,
+      focused: false,
+      selectedRegion: asRegion({ id: 'destrieux:left:1' }),
+    }),
+    appearance.tissue,
+  );
+  assertColor(unfocused, 3, published(nucleus));
+
+  // A paint's regions are what its key describes, so Focus never greys them.
+  const painted = createPalette(
+    cut,
+    asModelState({
+      ...state,
+      focused: true,
+      selectedRegion: asRegion({ id: 'destrieux:left:1' }),
+      paint: { id: 'deficit:test', colors: new Map([['nextbrain:left:218', [1, 2, 3]]]) },
+    }),
+    appearance.tissue,
+  );
+  assertColor(painted, 3, new Color().setRGB(1 / 255, 2 / 255, 3 / 255, SRGBColorSpace));
+  assertColor(painted, 2, ghost(labels[2]!));
+});
+
+test('around a route or Tracts a cut keeps the named regions and the selection in colour, the rest a grey ghost', () => {
+  const nucleus = asLabel({
+    source_label_id: 10,
+    region_id: 'nextbrain:left:218',
+    kind: 'tissue',
+    hemisphere: 'left',
+    color: [120, 18, 134],
+    name: 'Left-Thalamus',
+  });
+  const cut = [...labels, nucleus];
+  const ghost = (label: Label) =>
+    ghostColor({ ...label, source_name: label.name }, appearance.tissue, new Color());
+  const published = ({ color: [red, green, blue] }: Label) =>
+    new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+  const around = (ids: string[], selected: string | null = null) =>
+    asModelState({
+      ...state,
+      ghostedAround: new Set(ids),
+      selectedRegion: selected && asRegion({ id: selected }),
+    });
+
+  const route = createPalette(cut, around(['nextbrain:left:218']), appearance.tissue);
+  assertColor(route, 3, published(nucleus));
+  assertColor(route, 1, ghost(labels[1]!));
+  assertColor(route, 2, ghost(labels[2]!));
+
+  const tracts = createPalette(cut, around([], 'destrieux:left:1'), appearance.tissue);
+  assertColor(tracts, 1, published(labels[1]!));
+  assertColor(tracts, 3, ghost(nucleus));
+
+  // The cut repaints when what is ghosted changes, and not for a selection nothing ghosts around.
+  assert.equal(ghostKey(asModelState({ ...state, selectedRegion: asRegion({ id: 'a' }) })), null);
+  assert.notEqual(ghostKey(around([])), ghostKey(around(['nextbrain:left:218'])));
+  assert.notEqual(ghostKey(around([])), ghostKey(around([], 'destrieux:left:1')));
 });
 
 test('a cut carries the same network colour the surface carries', () => {
@@ -131,7 +224,7 @@ test('a cut carries the same network colour the surface carries', () => {
   ]);
   const palette = createPalette(
     labels,
-    asDisplaySettings({ ...state, surfaceColor: 'network' }),
+    asModelState({ ...state, surfaceColor: 'network' }),
     appearance.tissue,
     asLookup({ regions, networks }),
   );
@@ -190,7 +283,7 @@ test('a cut carries a territory by majority, keeps the arterial labels exact, an
 
   const other = createPalette(
     cut,
-    asDisplaySettings({ ...state, surfaceColor: 'territory', cutAtlas: 'destrieux' }),
+    asModelState({ ...state, surfaceColor: 'territory', cutAtlas: 'destrieux' }),
     appearance.tissue,
     lookup,
   );
@@ -200,7 +293,7 @@ test('a cut carries a territory by majority, keeps the arterial labels exact, an
 
   const arterial = createPalette(
     cut,
-    asDisplaySettings({ ...state, surfaceColor: 'territory', cutAtlas: 'arterial' }),
+    asModelState({ ...state, surfaceColor: 'territory', cutAtlas: 'arterial' }),
     appearance.tissue,
     lookup,
   );
@@ -212,7 +305,7 @@ test('a cut carries CAB-NP colours for the areas it assigns and tissue colour el
   const cabNp = { colors: { Default: [255, 0, 0] }, regions: { 'destrieux:left:1': 'Default' } };
   const palette = createPalette(
     labels,
-    asDisplaySettings({ ...state, surfaceColor: 'cab-np' }),
+    asModelState({ ...state, surfaceColor: 'cab-np' }),
     appearance.tissue,
     asLookup({ regions: new Map(), cabNp: cabNp as unknown as CabNpPartition }),
   );
@@ -228,7 +321,7 @@ test('a paint colours a cut as it colours the surface, over the atlas colours, a
   const paint = { id: 'deficit:aphasia', colors: new Map([['destrieux:left:1', [0, 0, 255]]]) };
   const palette = createPalette(
     labels,
-    asDisplaySettings({ ...state, paint }),
+    asModelState({ ...state, paint }),
     appearance.tissue,
     asLookup({ regions: new Map() }),
   );
@@ -286,7 +379,7 @@ test('a NextBrain cortical cut parcel carries the network colour of its region',
   ]);
   const palette = createPalette(
     nextbrainLabels,
-    asDisplaySettings({ ...state, surfaceColor: 'network' }),
+    asModelState({ ...state, surfaceColor: 'network' }),
     appearance.tissue,
     asLookup({ regions, networks }),
   );
@@ -314,7 +407,7 @@ test('published NextBrain cortical cut labels take network colour', () => {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const palette = createPalette(
     record.labels,
-    asDisplaySettings({ ...state, surfaceColor: 'network' }),
+    asModelState({ ...state, surfaceColor: 'network' }),
     manifest.appearance.tissue,
     asLookup({ regions, networks: manifest.networks }),
   );
@@ -339,7 +432,7 @@ test('a region in no network is not given one on a cut', () => {
   const regions = new Map([['destrieux:left:1', asRegion({ networks: [] })]]);
   const palette = createPalette(
     labels,
-    asDisplaySettings({ ...state, surfaceColor: 'network' }),
+    asModelState({ ...state, surfaceColor: 'network' }),
     appearance.tissue,
     asLookup({ regions, networks: { colors: { Default: [205, 62, 78] } } }),
   );
@@ -351,7 +444,7 @@ test('a region in no network is not given one on a cut', () => {
 });
 
 test('hemisphere and isolation hide samples rather than relabeling them', () => {
-  const settings = (fields: object) => asDisplaySettings({ ...state, ...fields });
+  const settings = (fields: object) => asModelState({ ...state, ...fields });
   assert.equal(labelVisible(labels[1]!, settings({ hemisphere: 'right' })), false);
   assert.equal(labelVisible(labels[1]!, settings({ isolatedRegion: 'destrieux:left:1' })), true);
   assert.equal(labelVisible(labels[2]!, settings({ isolatedRegion: 'destrieux:left:1' })), false);
@@ -397,7 +490,7 @@ test('learning systems filter detailed cut labels through source membership', ()
     source_label_id: 108,
     source_name: 'basal_nucleus_of_meynert',
   });
-  const settings = asDisplaySettings({
+  const settings = asModelState({
     detail: 'learning',
     hemisphere: 'both',
     cutAtlas: 'nextbrain',

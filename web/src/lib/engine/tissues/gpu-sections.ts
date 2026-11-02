@@ -31,6 +31,7 @@ import type { Volume, VolumeFile } from '../slices/volume.ts';
 import { codeIndex, liftFor } from './highlight.ts';
 import {
   createPalette,
+  ghostKey,
   labelVisible,
   usesAtlasColors,
   usesCabNpColors,
@@ -601,6 +602,7 @@ export class TissueSections {
         state.cortexVisible,
         state.cortexOpacity,
         state.isolatedRegion,
+        ghostKey(state),
         state.internalVisible,
         state.internalSystem,
         state.spinalCordVisible,
@@ -657,6 +659,7 @@ export class TissueSections {
       state.cortexVisible,
       state.cortexOpacity,
       state.isolatedRegion,
+      ghostKey(state),
       state.internalSystem,
       state.detail,
       [...(state.hiddenRegions ?? [])].sort(),

@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
-import { BufferGeometry, Float32BufferAttribute, Matrix4, Mesh, Vector3 } from 'three';
+import {
+  BufferGeometry,
+  Float32BufferAttribute,
+  Matrix4,
+  Mesh,
+  PerspectiveCamera,
+  Vector3,
+} from 'three';
 import { test } from 'vitest';
-import { footprint } from './marking.ts';
+import type { LesionSphere } from '../api.ts';
+import { createLesionMarking, cssPixelAt, footprint } from './marking.ts';
 
 /** Two triangles side by side: one centred at x = 0, one at x = 10. */
 function strip(matrix = new Matrix4()): Mesh {
@@ -54,4 +62,29 @@ test('keeps the surface’s own normals, turned with the mesh, so the paint shad
     [...kept].map((value) => Math.round(value)),
     [1, 0, 0, 1, 0, 0, 1, 0, 0],
   );
+});
+
+test('a CSS pixel spans twice the world length at twice the distance, and a stage half as tall doubles it', () => {
+  const camera = new PerspectiveCamera(30, 1, 0.01, 10);
+  camera.position.set(0, 0, 0.5);
+  camera.updateMatrixWorld(true);
+  const near = cssPixelAt(camera, 800, new Vector3(0, 0, 0));
+  // 2 · 0.5 m · tan(15°) over 800 px.
+  assert.ok(Math.abs(near - (2 * 0.5 * Math.tan(Math.PI / 12)) / 800) < 1e-12);
+  assert.ok(Math.abs(cssPixelAt(camera, 800, new Vector3(0, 0, -0.5)) - 2 * near) < 1e-12);
+  assert.ok(Math.abs(cssPixelAt(camera, 400, new Vector3(0, 0, 0)) - 2 * near) < 1e-12);
+});
+
+test('the ring and the dot each sit on a halo drawn just before them', () => {
+  const marking = createLesionMarking();
+  const sphere: LesionSphere = { centre: [0, 0, 0], radius: 10 };
+  marking.show(sphere, [], [], 1);
+  const [, ringHalo, dotHalo, ring, dot] = marking.group.children as Mesh[];
+  assert.equal(ringHalo!.renderOrder, ring!.renderOrder - 1);
+  assert.equal(dotHalo!.renderOrder, dot!.renderOrder - 1);
+  // A band either side of the ring's radius, 10 mm in metres.
+  const positions = ringHalo!.geometry.getAttribute('position');
+  assert.ok(Math.abs(Math.hypot(positions.getX(0), positions.getY(0)) - 0.01) < 1e-9);
+  assert.deepEqual(Array.from(ringHalo!.geometry.getAttribute('side').array.slice(0, 2)), [-1, 1]);
+  marking.dispose();
 });

@@ -317,6 +317,103 @@ describe('framing', () => {
     expect(stage.framing().inset.bottom).toBe(0);
   });
 
+  describe('the gizmo', () => {
+    /** A frame of the room's size with its four letters at the edges, and a gizmo drawn as `drawn` within it. */
+    function gizmoIn(
+      stage: ReturnType<typeof stageOf>,
+      { width, height }: { width: number; height: number },
+      drawn: { left: number; top: number; size: number },
+    ) {
+      document.body.style.margin = '0';
+      const frame = document.body.appendChild(document.createElement('div'));
+      frame.style.cssText = `position: absolute; left: 0; top: 0; width: ${width}px; height: ${height}px;`;
+      for (const [edge, css] of [
+        ['top', `left: ${width / 2 - 5}px; top: 12px;`],
+        ['bottom', `left: ${width / 2 - 5}px; top: ${height - 100}px;`],
+        ['left', `left: 12px; top: ${height / 2}px;`],
+        ['right', `left: ${width - 22}px; top: ${height / 2}px;`],
+      ]) {
+        const node = frame.appendChild(document.createElement('span'));
+        node.dataset.edge = edge;
+        node.style.cssText = `position: absolute; width: 10px; height: 20px; ${css}`;
+      }
+      const gizmo = document.body.appendChild(document.createElement('div'));
+      // Its box is larger than what it draws: the targets reach past the glyphs and take no room.
+      gizmo.style.cssText = `position: absolute; left: ${drawn.left - 30}px; top: ${drawn.top - 30}px; width: ${drawn.size + 60}px; height: ${drawn.size + 60}px;`;
+      const axes = gizmo.appendChild(document.createElement('div'));
+      axes.className = 'gizmo-axes';
+      axes.style.cssText = `position: absolute; left: 30px; top: 30px; width: ${drawn.size}px; height: ${drawn.size}px;`;
+      stage.registerOrientation(frame);
+      return gizmo;
+    }
+
+    /** Whether the ellipse the framed room inscribes reaches the box (in the frame's pixels). */
+    function reaches(
+      { width, height }: { width: number; height: number },
+      { inset, scale }: ReturnType<ReturnType<typeof stageOf>['framing']>,
+      box: { left: number; top: number; right: number; bottom: number },
+    ) {
+      const room = { width: width - inset.right!, height: height - inset.top! - inset.bottom! };
+      const centre = { x: room.width / 2, y: inset.top! + room.height / 2 };
+      const across = (scale.horizontal * FRAME_FILL * room.width) / 2;
+      const half = (scale.vertical * FRAME_FILL * room.height) / 2;
+      const x = Math.max(box.left, Math.min(centre.x, box.right));
+      const y = Math.max(box.top, Math.min(centre.y, box.bottom));
+      // A box the ellipse only touches is clear of it, to rounding.
+      return ((x - centre.x) / across) ** 2 + ((y - centre.y) / half) ** 2 < 1 - 1e-9;
+    }
+
+    test('on a narrow phone stage it gives up the band above the gizmo, and the picture clears it', () => {
+      const room = { width: 375, height: 420 };
+      const stage = stageOf(room.width, room.height, { width: 340, height: 52 });
+      const gizmo = gizmoIn(stage, room, { left: 260, top: 16, size: 100 });
+      const bare = stage.framing();
+      // Its drawn box with the markings' gap.
+      const box = { left: 252, top: 8, right: 368, bottom: 124 };
+      expect(reaches(room, bare, box)).toBe(true);
+
+      stage.registerGizmo(gizmo);
+      const cleared = stage.framing();
+      expect(reaches(room, cleared, box)).toBe(false);
+      // Like a key, it takes the band above it off the room, not the band beside it: the stage is narrow.
+      expect(cleared.inset).toEqual({ top: box.bottom, right: 0, bottom: expect.any(Number) });
+    });
+
+    test('on a wide short stage it gives up the band beside the gizmo instead', () => {
+      const room = { width: 1000, height: 320 };
+      const stage = stageOf(room.width, room.height);
+      const gizmo = gizmoIn(stage, room, { left: 860, top: 20, size: 100 });
+      const bare = stage.framing();
+      const box = { left: 852, top: 12, right: 968, bottom: 128 };
+      stage.registerGizmo(gizmo);
+      const cleared = stage.framing();
+      expect(reaches(room, bare, box)).toBe(true);
+      expect(reaches(room, cleared, box)).toBe(false);
+      expect(cleared.inset).toEqual({
+        top: 0,
+        right: room.width - box.left,
+        bottom: expect.any(Number),
+      });
+    });
+
+    test('a gizmo in a corner the picture never reaches changes nothing, nor does a hidden one', () => {
+      const room = { width: 1080, height: 840 };
+      const stage = stageOf(room.width, room.height);
+      // Either band beside or above it would cost the picture room; the ellipse never reaches it.
+      const gizmo = gizmoIn(stage, room, { left: 908, top: 20, size: 152 });
+      const bare = stage.framing();
+      stage.registerGizmo(gizmo);
+      expect(stage.framing()).toEqual(bare);
+
+      document.body.replaceChildren();
+      const big = gizmoIn(stage, room, { left: 700, top: 20, size: 360 });
+      stage.registerGizmo(big);
+      expect(stage.framing()).not.toEqual(bare);
+      big.hidden = true;
+      expect(stage.framing()).toEqual(bare);
+    });
+  });
+
   test('writes the dock variables the moment the dock is measured', () => {
     const stage = stageOf(800, 600);
     const host = document.body.appendChild(document.createElement('div'));

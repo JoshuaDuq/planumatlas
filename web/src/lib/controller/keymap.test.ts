@@ -35,7 +35,7 @@ const COMMAND_NAMES = [
   'openDiffusionMri',
   'openMpr',
   'closeMpr',
-  'focusSelection',
+  'toggleFocus',
   'isolateSelection',
   'setCortexVisible',
   'setInternalVisible',
@@ -169,7 +169,7 @@ describe('keymap', () => {
     dispatchKey(press('3'), keymap);
     dispatchKey(press('m'), keymap);
     assert.deepEqual(commands.toggleShortcuts.mock.calls, [[{ instant: true }]]);
-    assert.deepEqual(commands.focusSelection.mock.calls, [[{ immediate: true }]]);
+    assert.deepEqual(commands.toggleFocus.mock.calls, [[{ immediate: true }]]);
     assert.deepEqual(commands.chooseView.mock.calls, [['anterior', { immediate: true }]]);
     assert.deepEqual(commands.openMpr.mock.calls, [[{ instant: true }]]);
   });
@@ -177,10 +177,10 @@ describe('keymap', () => {
   it('keeps f from the tract reference and with nothing selected, and every shortcut but ? from the open sheet', () => {
     const reference = host({ tractReferenceActive: true, selectedRegion: REGION });
     dispatchKey(press('f'), reference.keymap);
-    assert.equal(calls(reference.commands.focusSelection), 0);
+    assert.equal(calls(reference.commands.toggleFocus), 0);
     const none = host();
     dispatchKey(press('f'), none.keymap);
-    assert.equal(calls(none.commands.focusSelection), 0);
+    assert.equal(calls(none.commands.toggleFocus), 0);
     const sheet = host({ shortcutsOpen: true });
     for (const key of ['c', '/', '1', 'm']) dispatchKey(press(key), sheet.keymap);
     assert.ok(Object.values(sheet.commands).every((command) => calls(command) === 0));
@@ -297,7 +297,7 @@ describe('keymap', () => {
     dispatchKey(press('F'), keymap);
     dispatchKey(press('I'), keymap);
     dispatchKey(press('M'), keymap);
-    assert.equal(calls(commands.focusSelection), 1);
+    assert.equal(calls(commands.toggleFocus), 1);
     assert.equal(calls(commands.isolateSelection), 1);
     assert.equal(calls(commands.openMpr), 1);
   });
@@ -551,8 +551,8 @@ describe('keymap outcomes', () => {
 
   it('KEY-13 F and I act only with a selection, in either case, and cancel only then', () => {
     for (const [key, command] of [
-      ['f', 'focusSelection([{"immediate":true}])'],
-      ['F', 'focusSelection([{"immediate":true}])'],
+      ['f', 'toggleFocus([{"immediate":true}])'],
+      ['F', 'toggleFocus([{"immediate":true}])'],
       ['i', 'isolateSelection'],
       ['I', 'isolateSelection'],
     ]) {

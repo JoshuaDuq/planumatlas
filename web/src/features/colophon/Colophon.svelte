@@ -1,12 +1,13 @@
 <!--
   The status bar (index.html:593-597, ui/chrome/header.js:536-542): the statement that this is
   not clinical anatomy never truncates; the description of what is loaded gives way; then the
-  count and the Provenance button. A plain <footer>, no live region (the count changes are
+  display settings away from their defaults with Reset display, the count and the Provenance button. A plain <footer>, no live region (the count changes are
   visual; mode and selection changes announce through the announcer). Phones hide it: the
   statement moves to the sheet grip and Provenance to the ⋯ menu (phone.css:48-49).
   The button exists once the owner supplies `onprovenance` (legacy shipped it hidden until boot).
 -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import type { Language } from '../../lib/types/index.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { colophonParts } from '../../lib/core/panels/header.ts';
@@ -17,12 +18,33 @@
     reference?: { label: string };
     /** The count's text (`regionCountText`); empty hides it. */
     regionCount: string;
+    /** The display settings away from their defaults (`displayChanges`); none hides the readout. */
+    displayChanges?: readonly string[];
+    onresetdisplay?: () => void;
     onprovenance?: (event: MouseEvent) => void;
   }
 
-  let { lang, anatomy, reference, regionCount, onprovenance }: Props = $props();
+  let {
+    lang,
+    anatomy,
+    reference,
+    regionCount,
+    displayChanges = [],
+    onresetdisplay,
+    onprovenance,
+  }: Props = $props();
 
   const parts = $derived(colophonParts(lang, { anatomy, reference }));
+
+  let provenance = $state<HTMLButtonElement>();
+
+  /** The readout and its button go with the reset, so focus moves on to Provenance. */
+  async function reset(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    onresetdisplay!();
+    await tick();
+    if (hadFocus) provenance!.focus();
+  }
 </script>
 
 <footer id="colophon" class="colophon">
@@ -30,9 +52,23 @@
     <span class="colophon-statement">{parts.statement}</span>
     <span class="colophon-description">{parts.description}</span>
   </p>
+  {#if displayChanges.length && onresetdisplay}
+    <span class="display-changes">
+      <span class="display-changes-text">{displayChanges.join(' · ')}</span>
+      <button type="button" class="reset-display" onclick={reset}>
+        {t(lang, 'display').resetDisplay}
+      </button>
+    </span>
+  {/if}
   <span class="region-count">{regionCount}</span>
   {#if onprovenance}
-    <button type="button" class="provenance-opener" aria-haspopup="dialog" onclick={onprovenance}>
+    <button
+      bind:this={provenance}
+      type="button"
+      class="provenance-opener"
+      aria-haspopup="dialog"
+      onclick={onprovenance}
+    >
       {t(lang, 'footer').provenance}
     </button>
   {/if}
@@ -57,10 +93,9 @@
     }
     .colophon-text {
       display: flex;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       align-items: center;
       gap: var(--space-3);
-      min-width: 0;
       margin: 0;
     }
     /* The statement never gives way; the description does. */
@@ -68,7 +103,10 @@
       flex: none;
       font-weight: 500;
     }
+    /* No width of its own: it takes what the readout and count leave, so it gives way before them. */
     .colophon-description {
+      flex: 1 1 auto;
+      width: 0;
       min-width: 0;
       padding-left: var(--space-3);
       border-left: 1px solid var(--border-subtle);
@@ -82,6 +120,41 @@
     .region-count {
       flex: none;
       font-variant-numeric: tabular-nums;
+    }
+    /* The display settings in effect, after a hairline like the description's, then their reset. */
+    .display-changes {
+      display: flex;
+      flex: 0 1 auto;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+      padding-left: var(--space-3);
+      border-left: 1px solid var(--border-subtle);
+    }
+    .display-changes-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* A text link, as Restore previous view is. */
+    .reset-display {
+      flex: none;
+      align-self: stretch;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--accent);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      cursor: pointer;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .reset-display:hover {
+        color: var(--accent-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
     }
     .provenance-opener {
       flex: none;
@@ -128,6 +201,12 @@
     @media (prefers-reduced-motion: reduce) {
       .provenance-opener:active {
         transform: none;
+      }
+    }
+    @media (forced-colors: active) {
+      .reset-display {
+        color: LinkText;
+        text-decoration: underline;
       }
     }
   }

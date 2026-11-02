@@ -8,6 +8,7 @@ import type {
   SegmentationAgreement,
 } from '../../core/catalog/segmentation-agreement.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
+import { ghostKey } from '../tissues/palette.ts';
 import { STRIATAL_ATLAS } from '../tissues/striatal-overlay.ts';
 import type {
   Anatomy,
@@ -144,6 +145,7 @@ export class BrainSections extends EventTarget {
         s.cortexVisible,
         s.cortexOpacity,
         s.isolatedRegion,
+        ghostKey(s),
         s.internalSystem,
         s.internalVisible,
         s.surfaceColor,
@@ -620,12 +622,6 @@ export class BrainSections extends EventTarget {
   /** Pick the nearest visible surface or categorical cut-face label. */
   pick(raycaster: Raycaster): Region | null | undefined {
     const hit = this.intersect(raycaster);
-    console.log(
-      '[pick-debug]',
-      hit && hit.object?.name,
-      hit && ('region' in hit ? hit.region?.id : hit.object?.userData),
-      hit?.distance,
-    );
     if (!hit) return null;
     if ('region' in hit && hit.region !== undefined) return hit.region;
     return hit.object.userData['kind'] !== 'non-region'

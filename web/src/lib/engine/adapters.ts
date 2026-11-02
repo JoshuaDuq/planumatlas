@@ -85,6 +85,8 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
     setPaint: (paint) => atlas.setPaint(paint),
     isolate: () => atlas.isolate(),
     clearIsolation: () => atlas.clearIsolation(),
+    setFocused: (focused) => atlas.setFocused(focused),
+    ghostAround: (ids) => atlas.ghostAround(ids),
     hideRegions: (ids) => atlas.hideRegions([...ids]),
     showRegions: (ids) => atlas.showRegions([...ids]),
     restoreHiddenRegions: () => atlas.restoreHiddenRegions(),

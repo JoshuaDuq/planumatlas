@@ -42,8 +42,11 @@
     onTheme: (choice: ThemeChoice) => void;
     onSingleKeys: (on: boolean) => void;
     onFullscreen: () => void;
+    /** Phones only: the masthead carries Copy link elsewhere. */
+    onCopyLink: () => void;
     /** Given the click, so the dialog opens without its entry animation from the keyboard. */
     onProvenance: (event: MouseEvent) => void;
+    onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
   }
 
@@ -61,7 +64,9 @@
     onTheme,
     onSingleKeys,
     onFullscreen,
+    onCopyLink,
     onProvenance,
+    onGuide,
     onShortcuts,
   }: Props = $props();
 
@@ -234,6 +239,14 @@
           {fullscreenLabel}
         </button>
       {/if}
+      <button
+        type="button"
+        class="menu-item phone-only"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        onclick={(event) => command(close, onCopyLink, event)}
+      >
+        {copy.copyLink}
+      </button>
       {#if provenanceReady}
         <button
           type="button"
@@ -245,6 +258,15 @@
           {t(lang, 'footer').provenance}
         </button>
       {/if}
+      <button
+        type="button"
+        class="menu-item"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        aria-haspopup="dialog"
+        onclick={(event) => command(close, onGuide, event)}
+      >
+        {copy.guide}
+      </button>
       <button
         type="button"
         class="menu-item"
@@ -340,7 +362,7 @@
         background: var(--surface-hover);
       }
     }
-    /* The status bar carries Provenance on a desktop, and the masthead the Full screen button. */
+    /* The status bar carries Provenance on a desktop, and the masthead Full screen and Copy link. */
     .phone-only {
       display: none;
     }

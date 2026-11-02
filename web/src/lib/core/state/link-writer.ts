@@ -24,6 +24,10 @@ export function createLinkWriter(write: () => void, delay = 250) {
     cancel() {
       clearTimeout(timer);
     },
+    /** A link is being applied: the address bar holds it, not the half-built scene. */
+    get held() {
+      return holding();
+    },
   };
 }
 

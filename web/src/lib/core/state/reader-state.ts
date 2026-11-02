@@ -21,6 +21,7 @@ const SCENE_FIELDS = [
   'cutAzimuth',
   'selectedRegion',
   'isolatedRegion',
+  'focused',
   'orbit',
   'mriWindow',
 ] as const;
@@ -192,6 +193,9 @@ export async function applyReaderState(
       model.select(target.selectedRegion);
     }
     if (target.selectedRegion) revealInTree(target.selectedRegion);
+  });
+  await step(['focus'], () => {
+    if (target.focused !== settings().focused) model.setFocused(target.focused);
   });
   // Without a window of its own, the scene shows the scan's published one, once the scan is loaded.
   const mriWindow = target.mriWindow ?? sections.publishedWindow;

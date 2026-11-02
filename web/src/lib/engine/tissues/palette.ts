@@ -1,9 +1,15 @@
 import { Color, SRGBColorSpace } from 'three';
-import type { DisplaySettings, Region, RegionHemisphere, Rgb } from '../../types/index.ts';
+import type {
+  DisplaySettings,
+  ModelState,
+  Region,
+  RegionHemisphere,
+  Rgb,
+} from '../../types/index.ts';
 import { dominantNetwork } from '../../core/catalog/networks.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { internalSystemAllows } from '../../core/catalog/visibility.ts';
-import { tissueColor } from '../render/materials.ts';
+import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { TissuePalette } from '../render/materials.ts';
 import { majorityTerritoryColor } from '../render/network-colors.ts';
 import type { NetworkMetadata } from '../render/network-colors.ts';
@@ -18,8 +24,36 @@ export interface Label {
   name?: string;
 }
 
-/** The display settings a label's colour and visibility depend on. */
-export type PaletteState = DisplaySettings;
+/** The display settings a label's colour and visibility depend on, and the selection a focus holds. */
+export type PaletteState = DisplaySettings & Pick<ModelState, 'selectedRegion'>;
+
+type GhostState = Pick<PaletteState, 'focused' | 'ghostedAround' | 'selectedRegion' | 'paint'>;
+
+/** Whether any region is drawn as a grey ghost: under Focus, or around a whole route or Tracts. */
+export const ghosting = (state: Pick<GhostState, 'focused' | 'ghostedAround'>) =>
+  state.focused || Boolean(state.ghostedAround);
+
+/** What decides which regions are ghosts, as one value; a cut repaints when it changes. */
+export const ghostKey = (state: GhostState) =>
+  ghosting(state)
+    ? JSON.stringify([
+        state.focused,
+        state.ghostedAround && [...state.ghostedAround].sort(),
+        state.selectedRegion?.id ?? null,
+      ])
+    : null;
+
+/** Whether a ghost greys this region: never the selection, its constituents or a paint's regions. */
+export function ghosted(regionId: string | null | undefined, state: GhostState): boolean {
+  if (!ghosting(state)) return false;
+  if (!regionId) return true;
+  if (state.paint?.colors.has(regionId)) return false;
+  const selection = state.selectedRegion;
+  if (regionId === selection?.id || selection?.constituent_regions?.includes(regionId)) {
+    return false;
+  }
+  return state.focused || !state.ghostedAround!.has(regionId);
+}
 
 /** The catalog data a label's colour can come from. */
 export interface PaletteLookup {
@@ -147,6 +181,9 @@ export function labelAppearance(
     else color.set(tissueColor({ ...label, source_name: label.name }, tissuePalette));
   }
   if (label.kind === 'cortex' && !label.region_id) color.set(tissuePalette.unlabelled);
+  if (ghosted(label.region_id, state)) {
+    ghostColor({ ...label, source_name: label.name }, tissuePalette, color);
+  }
   return { color, visible: labelVisible(label, state, lookup) };
 }
 

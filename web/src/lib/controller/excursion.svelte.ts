@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import type { createCatalog } from '../core/catalog/catalog.ts';
 import { beneathCortex } from '../core/catalog/labels.ts';
 import {
@@ -21,9 +22,13 @@ import { createInvolvement } from '../core/panels/related.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { AppContext } from './context.ts';
+import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
+import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
 import { createLessons } from './lesson.ts';
 import type { MriDialog, SceneReader, Shell } from './lesson.ts';
+import type { EngineModel } from '../engine/api.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
+import type { ViewStore } from '../state/view.svelte.ts';
 import { createExplorerChoice, createModes } from './modes.ts';
 import type { Explorer, Language, Notice } from '../types/index.ts';
 
@@ -66,7 +71,7 @@ export interface ExcursionDeps {
   };
   /** Apply pending state to the page: the legacy `render()`. Framing reads the page it has drawn. */
   render: () => void;
-  lesion: Pick<LesionStore, 'selectedTract' | 'clearTract'>;
+  lesion: Pick<LesionStore, 'selectedTract' | 'clearTract' | 'heldOpacity'>;
 }
 
 /**
@@ -103,6 +108,8 @@ export function createExcursions(
   // Whether the cortex is see-through because the reader took the notice's offer, so the next map
   // that needs no such view can put the cortex back.
   let seenThroughByNotice = false;
+  // The display the open lesson's step or route set on the stage, which its readout and reset start from.
+  let lessonDisplay = $state.raw<PreparedDisplay | null>(null);
 
   const explorerChoice = createExplorerChoice({
     engine,
@@ -124,6 +131,7 @@ export function createExcursions(
     chooseExplorer,
     openMriPanel: panels.openMri,
     render,
+    prepare: (display) => (lessonDisplay = display),
     stage: {
       settings: revealSettings,
       sayChanged: (before) => sayRevealed(before),
@@ -168,6 +176,13 @@ export function createExcursions(
     excursionOrigin = fromLesson ? 'circuits' : session.state.explorer;
   }
 
+  /** A function or deficit ends Focus, once the scene Restore returns to has it. */
+  function leaveForPaint() {
+    holdBeforeExcursion(lessons.takeBeforeLesson());
+    lesson.close();
+    if (model.settings.focused) model.setFocused(false);
+  }
+
   /**
    * Put back the scene from before the first function or deficit, unpainted, in the tab it was shown
    * in; false when a later command overtook it.
@@ -200,7 +215,8 @@ export function createExcursions(
 
   /**
    * Another tab than Functions or Deficits ends the excursion as leaving a lesson does: the scene from
-   * before it comes back, and the open function or deficit stays, drawn again on the way back.
+   * before it comes back, and the open function or deficit stays, drawn again on the way back. The
+   * chosen tab opens on its list: the selection that comes back with the scene opens no detail.
    */
   async function leaveExcursion(value: Explorer): Promise<void> {
     const from = session.state.explorer;
@@ -214,6 +230,9 @@ export function createExcursions(
     const current = commands.begin();
     const failures = await reader.apply(before, current);
     if (!current()) return;
+    // Drawn first, so the workspace has drilled into the restored selection before the list replaces it.
+    render();
+    shell.showList();
     if (failures.length) {
       commands.fail(
         'restore',
@@ -388,8 +407,7 @@ export function createExcursions(
     ];
     // Before the detail opens: on a phone, raising the sheet reframes the camera. A lesson it is
     // opened from ends here and hands over the scene from before it, for Restore to return to.
-    holdBeforeExcursion(lessons.takeBeforeLesson());
-    lesson.close();
+    leaveForPaint();
     session.setDeficit(id);
     chooseExplorer('deficits');
     render();
@@ -411,8 +429,7 @@ export function createExcursions(
    */
   async function openFunction(id: string): Promise<boolean> {
     const current = commands.begin();
-    holdBeforeExcursion(lessons.takeBeforeLesson());
-    lesson.close();
+    leaveForPaint();
     session.setFunction(id);
     chooseExplorer('functions');
     render();
@@ -485,6 +502,18 @@ export function createExcursions(
       return explorerChoice.tractsHeld;
     },
     afterReset: explorerChoice.afterReset,
+    /**
+     * The display the stage was prepared with, which the reader's changes are counted from and Reset
+     * display returns to: the open lesson's, else the defaults; a lesion's drawn bundle sees through
+     * the cortex. Tracts' own see-through cortex is `afterReset`'s.
+     */
+    get displayBaseline(): PreparedDisplay {
+      const open = lessonDisplay && lesson.state.circuit && session.state.explorer === 'circuits';
+      const prepared = open ? lessonDisplay! : DEFAULT_DISPLAY;
+      return lesion.heldOpacity !== null && prepared.cortexVisible
+        ? { ...prepared, cortexOpacity: seeThroughOpacity() }
+        : prepared;
+    },
     /** The regions a selection shares anatomy with (related lessons and evidence). */
     involved: createInvolvement(model.regions),
 
@@ -561,3 +590,30 @@ export function createExcursions(
 }
 
 export type Excursions = ReturnType<typeof createExcursions>;
+
+/** A whole route in front greys all but its landmarks and covering regions, however it leaves. */
+export function syncRouteGhost(
+  model: Pick<EngineModel, 'ghostAround' | 'settings'>,
+  view: ViewStore,
+  circuits: Pick<CircuitCatalog, 'get'>,
+) {
+  let shown: string | null = null;
+  // The ghost the route set, so ending it never ends one Tracts has set since.
+  let ghost: ReadonlySet<string> | null = null;
+  $effect(() => {
+    const { explorer, lesson } = view.current;
+    const route = explorer === 'circuits' && lesson.route ? lesson.circuit : null;
+    if (route === shown) return;
+    shown = route;
+    untrack(() => {
+      if (route) {
+        const { steps } = circuits.get(route);
+        model.ghostAround(steps.flatMap((step) => [step.region, ...(step.covering_regions ?? [])]));
+        ghost = model.settings.ghostedAround;
+        return;
+      }
+      if (ghost && model.settings.ghostedAround === ghost) model.ghostAround(null);
+      ghost = null;
+    });
+  });
+}

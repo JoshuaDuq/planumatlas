@@ -62,6 +62,12 @@ test('each unknown name is dropped and reported under its link parameter', () =>
   assert.deepEqual(state, { explorer: 'diffusion', hemisphere: 'left' });
 });
 
+test('focus needs a selected region that exists', () => {
+  assert.deepEqual(check('#focus=1').rejected, ['focus']);
+  assert.deepEqual(check('#region=nowhere&focus=1').rejected, ['region', 'focus']);
+  assert.deepEqual(check('#region=destrieux:left:29&focus=1').rejected, []);
+});
+
 test('a lesson step must exist in its circuit', () => {
   assert.deepEqual(check('#circuit=visual&step=5').rejected, ['step']);
   assert.deepEqual(check('#step=2').rejected, ['step']);

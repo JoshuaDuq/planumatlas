@@ -41,13 +41,20 @@ export interface PlacedCoordinate {
   space: string;
 }
 
+/** The lesion a placed coordinate took the sphere from, as the reader left it. */
+export interface ReplacedLesion {
+  sphere: LesionSphere;
+  mode: LesionMode;
+  tract: string | null;
+}
+
 const tenth = (value: number) => Math.round(value * 10) / 10;
 
 /**
  * The placed lesion: what the stage draws and where a click places it, its measurement and tract
  * count, each answered only for the placement that asked, and the functions and findings near it.
  * The one sphere may instead mark a published coordinate, at its own fixed radius; placing either
- * replaces the other.
+ * replaces the other. A lesion a coordinate replaced can be put back until the sphere changes again.
  */
 export function createLesionStore({
   lesion,
@@ -69,6 +76,7 @@ export function createLesionStore({
 }) {
   let sphere = $state.raw<LesionSphere | null>(null);
   let coordinate = $state.raw<PlacedCoordinate | null>(null);
+  let replaced = $state.raw<ReplacedLesion | null>(null);
   let radius = $state<number>(LESION_RADIUS.initial);
   let placing = $state(false);
   let measured = $state.raw<Measured | null>(null);
@@ -78,7 +86,7 @@ export function createLesionStore({
   let tractView = $state.raw<TractView>({ status: 'idle' });
   let viewRequest = 0;
   // The opacity an opaque cortex had before the streamlines made it see-through.
-  let heldOpacity: number | null = null;
+  let heldOpacity = $state<number | null>(null);
   // Once the reader has asked for the tracts, each later placement counts them too.
   let tractsWanted = false;
   let request = 0;
@@ -220,6 +228,10 @@ export function createLesionStore({
     get coordinate() {
       return coordinate;
     },
+    /** The lesion the coordinate on the sphere replaced, while nothing else has changed the sphere since. */
+    get replaced() {
+      return replaced;
+    },
     get radius() {
       return radius;
     },
@@ -266,6 +278,7 @@ export function createLesionStore({
       return paint;
     },
     place([right, anterior, superior]: Vec3): void {
+      replaced = null;
       coordinate = null;
       sphere = { centre: [tenth(right), tenth(anterior), tenth(superior)], radius };
       measure(sphere);
@@ -292,6 +305,7 @@ export function createLesionStore({
       [right, anterior, superior]: Vec3,
       fixed: number,
     ): void {
+      replaced = sphere && !coordinate ? { sphere, mode, tract: selectedTract } : null;
       coordinate = placed;
       mode = 'lesion';
       sphere = { centre: [tenth(right), tenth(anterior), tenth(superior)], radius: fixed };
@@ -311,6 +325,7 @@ export function createLesionStore({
     clearTract,
     /** A link's lesion: placed, coloured and, with a bundle, counted and drawn, as the reader left it. */
     restore(next: LesionSphere, nextMode: LesionMode, tract: string | null): void {
+      replaced = null;
       radius = next.radius;
       coordinate = null;
       sphere = next;
@@ -324,7 +339,21 @@ export function createLesionStore({
       tractsWanted = true;
       if (sphere) count(sphere, request);
     },
+    /** The lesion the coordinate replaced, back exactly as it was; the coordinate is cleared. */
+    restoreReplaced(): void {
+      if (!replaced) throw new Error('No lesion is waiting to be restored.');
+      const previous = replaced;
+      replaced = null;
+      radius = previous.sphere.radius;
+      coordinate = null;
+      sphere = previous.sphere;
+      mode = previous.mode;
+      measure(sphere);
+      if (previous.tract !== null) showTract(previous.tract, sphere);
+      else if (selectedTract !== null) clearTract();
+    },
     remove(): void {
+      replaced = null;
       request++;
       sphere = null;
       coordinate = null;

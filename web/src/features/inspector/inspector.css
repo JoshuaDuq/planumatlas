@@ -145,7 +145,7 @@
   .region-detail .actions .linked-mri {
     color: var(--accent);
   }
-  /* Latched isolation is drawn as a selection, teal wash and edge, so it never reads as the MRI command. */
+  /* A latched Focus or Isolate is drawn as a selection, teal wash and edge, so it never reads as the MRI command. */
   .region-detail .actions [data-active='true'] {
     border-color: var(--accent);
     background: var(--accent-wash);
@@ -202,6 +202,11 @@
     font-size: var(--text-caption);
     font-weight: 400;
     line-height: var(--lh-caption);
+  }
+  /* A copyable value ends flush with the column, as the plain ones do. */
+  .region-detail .facts dd:not(.stacked) .copy-value {
+    margin-inline-end: 0;
+    padding-inline-end: 0;
   }
   /* A value too long to share its label's line (a list of source ids, a reference's full name) takes the line under it. */
   .region-detail .facts .stacked {

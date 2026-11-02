@@ -422,12 +422,38 @@ function restorer(
 
 describe('the scene as a link writes it', () => {
   it('LINK-03 writes the cut mode and position, and the open lesson with its step', async () => {
-    const { engine, links, calls } = restorer({ lesson: { circuit: 'language', step: 2 } });
+    const { engine, links, calls } = restorer({
+      explorer: 'circuits',
+      lesson: { circuit: 'language', step: 2 },
+    });
     await engine.sections.setMode('coronal');
     engine.sections.setOffset(12.34);
     expect(links.linkState()).toMatchObject({ circuit: 'language', circuitStep: 2 });
     links.write();
     expect(calls[0]![1]).toMatch(/cut=coronal&pos=12\.3/);
+  });
+
+  it('names an open function, deficit or lesson only from its own tab, which the session still keeps it for', () => {
+    const open = {
+      selectedFunction: 'working-memory',
+      selectedDeficit: 'aphasia',
+      lesson: { circuit: 'vision', step: 3 },
+    };
+    const named = (explorer: string) => {
+      const { links, calls } = restorer({ ...open, explorer });
+      links.write();
+      const { state } = decodeState(calls[0]![1] as string);
+      return Object.fromEntries(
+        (['selectedFunction', 'selectedDeficit', 'circuit', 'circuitStep'] as const)
+          .filter((key) => key in state)
+          .map((key) => [key, state[key]]),
+      );
+    };
+    expect(named('anatomy')).toEqual({});
+    expect(named('diffusion')).toEqual({});
+    expect(named('functions')).toEqual({ selectedFunction: 'working-memory' });
+    expect(named('deficits')).toEqual({ selectedDeficit: 'aphasia' });
+    expect(named('circuits')).toEqual({ circuit: 'vision', circuitStep: 3 });
   });
 
   it('LINK-03 writes step 0 and no cut fields without a lesson or a cut', () => {

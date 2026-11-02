@@ -6,6 +6,13 @@
   .lesion-report .detail-note.lesion-error {
     color: var(--danger);
   }
+  /* Where the sphere sits on this brain, its coordinate copyable. */
+  .lesion-report .coordinate-fact {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-ui);
+    line-height: var(--lh-ui);
+    font-variant-numeric: tabular-nums;
+  }
   .lesion-report .lesion-heading {
     margin: var(--space-6) 0 0;
     font-size: var(--text-title);

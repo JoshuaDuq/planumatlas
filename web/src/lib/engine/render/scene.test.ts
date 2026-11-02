@@ -19,6 +19,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { frameTo } from './camera-views.ts';
 import * as outlineEdges from './outline-edges.ts';
 import * as outlineOccluders from './outline-occluders.ts';
+import { transparentOrder } from './ghost-order.ts';
 import { createPipeline, createScene, planFraming } from './scene.ts';
 
 // Only the renderer is replaced, since it needs a GL context.
@@ -26,6 +27,7 @@ const calls = vi.hoisted(() => ({
   order: [] as string[],
   canvas: null as EventTarget | null,
   loop: null as ((now: number) => void) | null,
+  transparentSort: null as unknown,
 }));
 
 vi.mock('three', async (importOriginal) => {
@@ -51,6 +53,9 @@ vi.mock('three', async (importOriginal) => {
       this.ratio = ratio;
     };
     getPixelRatio = () => this.ratio;
+    setTransparentSort(method: unknown) {
+      calls.transparentSort = method;
+    }
     setSize() {}
     initRenderTarget() {}
     setAnimationLoop(loop: ((now: number) => void) | null) {
@@ -214,6 +219,12 @@ describe('scene lifecycle', () => {
     assert.deepEqual(calls.order, ['dispose', 'forceContextLoss']);
     calls.canvas!.dispatchEvent(new Event('webglcontextlost', { cancelable: true }));
     assert.equal(onContextLost.mock.calls.length, 0);
+  });
+
+  it('draws translucent surfaces in the order that keeps focus ghosts from piling into a fog', () => {
+    const stage = createScene(host);
+    assert.equal(calls.transparentSort, transparentOrder);
+    stage.dispose();
   });
 
   it('reports a context lost while the scene is alive', () => {

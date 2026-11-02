@@ -31,6 +31,15 @@ export const ICONS = {
 
   fullscreen: { shapes: [path('M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5')] },
   camera: { shapes: [path('M8 5l2-2h4l2 2h4v15H4V5h4Z'), circle(12, 12, 4)] },
+  // Copying: the view's link, a value, and the check that confirms either.
+  link: {
+    shapes: [
+      path('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1'),
+      path('M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
+    ],
+  },
+  copy: { shapes: [path('M9 9h11v11H9ZM5 15H4V4h11v1')], size: 12 },
+  check: { shapes: [path('m5 12.5 4.5 4.5L19 7')] },
   more: {
     shapes: [circle(5, 12, 1.5), circle(12, 12, 1.5), circle(19, 12, 1.5)],
     filled: true,

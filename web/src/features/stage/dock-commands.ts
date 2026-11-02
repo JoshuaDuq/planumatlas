@@ -5,6 +5,7 @@ import type { ViewName } from '../../lib/types/index.ts';
 export type DockCommands = Pick<
   AnatomyCommands,
   | 'reset'
+  | 'resetDisplay'
   | 'setHemisphere'
   | 'setCortexVisible'
   | 'setCortexOpacity'

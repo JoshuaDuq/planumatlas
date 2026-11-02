@@ -102,6 +102,7 @@
   "nextLandmark": "Next landmark",
   "returnToLandmark": "Return to landmark",
   "otherSelection": "You are exploring another region.",
+  "landmarkUnselected": "The landmark is not selected.",
   "mapping": "What this atlas shows",
   "clinical": "Clinical context",
   "clinicalLink": "Open deficit evidence",
@@ -308,6 +309,8 @@
   "outside": "This coordinate lies beyond the template’s brain, so it is not placed.",
   "failed": "The coordinate could not be placed.",
   "replacedLesion": "Lesion replaced by the coordinate’s sphere.",
+  "undoReplacement": "Undo",
+  "lesionRestored": "Lesion restored.",
   "reportTitle": "Published coordinate",
   "entered": [
    "[\"Alpha\",\"\"] → \"Alpha in \"",
@@ -470,7 +473,10 @@
   "metricsScope": "Counts and lengths use complete source streamlines after the length filter. Section cuts affect the view only.",
   "outlineProvenance": "Brain outline method and provenance",
   "search": "Search tracts",
-  "noMatchHint": "Try another tract name.",
+  "noMatchHint": [
+   "[\"Alpha\",\"\"] → \"Only the Alpha tract bundles reconstructed in  are listed, and none matches this name.\"",
+   "[\"\",\"Alpha\"] → \"Only the  tract bundles reconstructed in Alpha are listed, and none matches this name.\""
+  ],
   "retry": "Reload reference dataset",
   "tryAgain": "Try again",
   "matches": [
@@ -515,10 +521,6 @@
   "seeThrough": "See through the cortex",
   "seenThrough": "Cortex made see-through; its painted areas stay opaque. Display sets the opacity.",
   "opaqueAgain": "Cortex made opaque again.",
-  "deepSelected": [
-   "[\"Alpha\"] → \"Alpha lies beneath the cortex.\"",
-   "[\"\"] → \" lies beneath the cortex.\""
-  ],
   "both": "Both",
   "left": "Left",
   "right": "Right",
@@ -554,7 +556,30 @@
    "cab-np": "Functional networks (CAB-NP, 12) on HCP-MMP areas",
    "territory": "Typical arterial territories from 1,298 stroke patients (Liu et al. 2023), registered onto this brain; not its own vessels"
   },
-  "resetView": "Reset view"
+  "resetView": "Reset view",
+  "sideShown": {
+   "both": "Both hemispheres",
+   "left": "Left hemisphere",
+   "right": "Right hemisphere"
+  },
+  "cortexHidden": "Cortex hidden",
+  "cortexShown": "Cortex shown",
+  "cortexAt": [
+   "[\"Alpha\"] → \"Cortex Alpha\"",
+   "[\"\"] → \"Cortex \""
+  ],
+  "internalHidden": "Internal anatomy hidden",
+  "internalShown": "Internal anatomy shown",
+  "shownCount": [
+   "[\"Alpha\"] → \"Alpha parts shown\"",
+   "[\"\"] → \" parts shown\""
+  ],
+  "regionIsolated": "Region isolated",
+  "focusOn": "Focus on",
+  "focusOff": "Focus off",
+  "resetDisplay": "Reset display",
+  "displayReset": "Display settings reset.",
+  "changed": ", settings changed"
  },
  "dissection": {
   "heading": "Dissection",
@@ -845,6 +870,40 @@
    "[12345,0] → \"12345 functions\""
   ]
  },
+ "guide": {
+  "title": "How to use Planum",
+  "close": "Close",
+  "lead": "One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy.",
+  "sections": [
+   [
+    "The brain",
+    [
+     "Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it.",
+     "The letters at the top right name the anatomical directions: choose one to look from that side, or the centre for the oblique view.",
+     "Section cuts the brain on a plane, with its linked MRI slices. Lesion places a sphere and reports what it reaches. Coordinate places a published MNI coordinate. Display sets the cortex, internal anatomy and hemispheres."
+    ]
+   ],
+   [
+    "The top bar",
+    [
+     "Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means."
+    ]
+   ],
+   [
+    "The panel",
+    [
+     "Anatomy lists every region, across the whole brain or by system. Functions and Deficits paint published evidence on the brain, say what they changed, and offer the way back. Circuits walks through anatomical pathways, landmark by landmark. Tracts shows white-matter bundles reconstructed from diffusion MRI."
+    ]
+   ],
+   [
+    "The medial surface",
+    [
+     "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
+    ]
+   ]
+  ],
+  "keys": "Keyboard shortcuts are listed in the settings menu, or press ?."
+ },
  "header": {
   "atlasShort": {
    "destrieux": "Destrieux",
@@ -889,7 +948,11 @@
    "nextbrain": "Histology-based atlas, segmented on this subject at 0.4<NNBSP>mm"
   },
   "skipToModel": "Skip to model",
+  "copyLink": "Copy link to this view",
+  "linkCopied": "Link copied",
+  "linkFailed": "Could not copy the link",
   "languageSwitch": "Language",
+  "guide": "How to use Planum",
   "shortcuts": "Keyboard shortcuts",
   "theme": "Theme",
   "systemTheme": "System",
@@ -918,6 +981,11 @@
   "volume": "Volume",
   "centroid": "Centroid (RAS)",
   "sourceLabel": "Source label",
+  "copyValue": {
+   "copy": "Copy",
+   "copied": "Copied",
+   "failed": "Could not copy"
+  },
   "linkedMri": "Linked MRI",
   "focus": "Focus",
   "isolate": "Isolate",
@@ -946,6 +1014,10 @@
   "meta": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha ·  sphere · Alpha\"",
    "[\"\",\"Alpha\",\"\"] → \" · Alpha sphere · \""
+  ],
+  "centre": [
+   "[\"Alpha\"] → \"Centred at Alpha on this brain (surface RAS)\"",
+   "[\"\"] → \"Centred at  on this brain (surface RAS)\""
   ],
   "caveat": "A shape placed on this one brain, measured against its 1 mm labels. It is not a patient’s lesion and predicts no deficit.",
   "measuring": "Measuring…",
@@ -1066,6 +1138,7 @@
    "detail": "internal anatomy",
    "region": "selected region",
    "isolate": "isolated region",
+   "focus": "focused region",
    "view": "view",
    "cam": "camera position",
    "cut": "section",
@@ -1443,7 +1516,7 @@
      ],
      [
       "F",
-      "Focus the selected region"
+      "Focus the selected region, or end the focus"
      ],
      [
       "I",

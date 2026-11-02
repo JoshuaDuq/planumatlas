@@ -1,11 +1,13 @@
 // The lesion report's wording: it says it predicts nothing before it shows any share, and a deficit's
 // share reads as overlap with a cited region, not as a chance of the deficit.
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
+import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import type { EngineLesion, LesionMeasurement } from '../../lib/engine/api.ts';
 import { createLesionStore } from '../../lib/state/lesion.svelte.ts';
 import type { Language } from '../../lib/types/index.ts';
+import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import LesionReport from './LesionReport.svelte';
 
 const domains = {
@@ -113,4 +115,24 @@ test('in French, the share is of a cited region in the lesion', async () => {
     button.textContent?.includes('Aphasie'),
   )!;
   expect(row.textContent).toMatch(/jusqu’à 40\s?% d’une région citée dans la lésion/);
+});
+
+test('the centre on this brain is given and copied as shown, in the reader’s notation', async () => {
+  const region = document.body.appendChild(document.createElement('div'));
+  const detach = attachAnnouncer(region);
+  const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+  try {
+    await mount('fr');
+    const centre = '\u221250,0\u202f; \u221220,0\u202f; +5,0\u202fmm';
+    expect(paragraph(/^Centrée en/).textContent!.trim()).toBe(
+      `Centrée en ${centre} sur ce cerveau (RAS de surface)`,
+    );
+    await page.getByRole('button', { name: `${centre}, Copier`, exact: true }).click();
+    expect(write).toHaveBeenCalledExactlyOnceWith(centre);
+    await expect.poll(() => region.textContent).toBe('Copié');
+  } finally {
+    write.mockRestore();
+    detach();
+    region.remove();
+  }
 });

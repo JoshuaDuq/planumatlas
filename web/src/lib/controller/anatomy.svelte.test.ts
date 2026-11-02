@@ -1,3 +1,4 @@
+import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
@@ -81,6 +82,7 @@ function build() {
         chooseExplorer: parts.chooseExplorer,
         frameLandmark: parts.frameLandmark,
         afterReset: () => {},
+        displayBaseline: () => DEFAULT_DISPLAY,
       },
     );
   });
@@ -270,9 +272,19 @@ describe('the dissection', () => {
   test('focusing passes `immediate` to the region and to the landmark', () => {
     const { anatomy, frameLandmark } = build();
     anatomy.selectRegion(SULCUS);
-    anatomy.focusSelection({ immediate: true });
+    anatomy.toggleFocus({ immediate: true });
     expect(frameLandmark).toHaveBeenCalledWith({ immediate: true });
     expect(cameraCalls()[0]!.args).toEqual([SULCUS, { immediate: true, context: false }]);
+  });
+
+  test('Focus latches on the selection, and a second press ends it where the camera is', () => {
+    const { anatomy } = build();
+    anatomy.selectRegion(SULCUS);
+    anatomy.toggleFocus();
+    expect(engine.model.settings.focused).toBe(true);
+    anatomy.toggleFocus();
+    expect(engine.model.settings.focused).toBe(false);
+    expect(cameraMethods()).toEqual(['frameRegion']);
   });
 
   test('isolating with nothing selected fails', () => {
@@ -403,22 +415,28 @@ describe('focusing a structure beneath the cortex', () => {
       .filter((call) => call.method === 'frameRegion')
       .map((call) => call.args);
 
-  test('behind the opaque cortex, it is framed with its surroundings and seeing through is offered', () => {
+  test('behind the opaque cortex, it is framed with its surroundings and focused', () => {
     const { anatomy, session } = build();
     anatomy.selectRegion(THALAMUS, { frame: true });
     expect(framing()).toEqual([[THALAMUS, { immediate: false, context: true }]]);
-    expect(session.state.notice).toEqual({
-      text: 'Thalamus lies beneath the cortex.',
-      action: 'see-through',
-    });
+    expect(engine.model.settings.focused).toBe(true);
+    expect(session.state.notice).toBeNull();
   });
 
-  test('Focus again frames it again but says nothing new', () => {
-    const { anatomy, session } = build();
+  test('Focus on a structure focused for its depth ends the focus and leaves the camera', () => {
+    const { anatomy } = build();
     anatomy.selectRegion(THALAMUS, { frame: true });
-    anatomy.focusSelection();
-    expect(framing()).toHaveLength(2);
-    expect(session.state.notice?.text).toBe('Thalamus lies beneath the cortex.');
+    anatomy.toggleFocus();
+    expect(engine.model.settings.focused).toBe(false);
+    expect(framing()).toHaveLength(1);
+  });
+
+  test('an isolated deep structure is framed but not focused', () => {
+    const { anatomy } = build();
+    anatomy.selectRegion(THALAMUS);
+    anatomy.isolateSelection();
+    expect(framing()).toEqual([[THALAMUS, { immediate: false, context: true }]]);
+    expect(engine.model.settings.focused).toBe(false);
   });
 
   test.each([
@@ -429,6 +447,7 @@ describe('focusing a structure beneath the cortex', () => {
     cortex();
     anatomy.selectRegion(THALAMUS, { frame: true });
     expect(framing()).toEqual([[THALAMUS, { immediate: false, context: false }]]);
+    expect(engine.model.settings.focused).toBe(false);
     expect(session.state.notice).toBeNull();
   });
 
@@ -436,6 +455,7 @@ describe('focusing a structure beneath the cortex', () => {
     const { anatomy, session } = build();
     anatomy.selectRegion(SULCUS, { frame: true });
     expect(framing()).toEqual([[SULCUS, { immediate: false, context: false }]]);
+    expect(engine.model.settings.focused).toBe(false);
     expect(session.state.notice).toBeNull();
   });
 });

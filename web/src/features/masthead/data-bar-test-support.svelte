@@ -56,7 +56,9 @@
   onSingleKeys={(on) => (singleKeys = on)}
   onFullscreen={() => {}}
   onSnapshot={() => {}}
+  currentLink={() => location.href}
   onProvenance={() => {}}
+  onGuide={() => {}}
   onShortcuts={() => {}}
 >
   {#snippet data()}

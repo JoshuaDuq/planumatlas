@@ -31,6 +31,10 @@ export interface DisplaySettings {
   surfaceColor: SurfaceColor;
   paint: Paint | null;
   isolatedRegion: string | null;
+  /** The selection drawn alone in its colour, everything else ghosted in tissue grey. */
+  focused: boolean;
+  /** The regions a whole route or the Tracts view keeps in colour, the rest a grey ghost; null when neither is in front. */
+  ghostedAround: ReadonlySet<string> | null;
   hiddenRegions: ReadonlySet<string>;
   dissectionCanUndo: boolean;
 }

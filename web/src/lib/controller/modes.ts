@@ -8,7 +8,7 @@ import type { Explorer } from '../types/index.ts';
 /**
  * The tab in front (app.js:1035-1060). Leaving Tracts gives the cortex back the opacity it had when
  * Tracts opened; opening Tracts on the anatomy that owns the tracts draws them over its own cortex,
- * made see-through if it was opaque.
+ * made see-through if it was opaque, and over every region but the selection in grey.
  */
 export function createExplorerChoice({
   engine,
@@ -39,6 +39,7 @@ export function createExplorerChoice({
       if (beforeTractsOpacity === null) return;
       beforeTractsOpacity = engine.model.settings.cortexOpacity;
       engine.model.setCortexOpacity(engine.tracts.defaultOpacity);
+      engine.model.ghostAround([]);
     },
     chooseExplorer(value: Explorer) {
       const previous = session.state.explorer;
@@ -49,6 +50,7 @@ export function createExplorerChoice({
         const opacity = beforeTractsOpacity;
         beforeTractsOpacity = null;
         engine.tracts.setOverlay(false);
+        engine.model.ghostAround(null);
         engine.model.setCortexOpacity(opacity);
       }
       if (
@@ -58,6 +60,7 @@ export function createExplorerChoice({
       ) {
         beforeTractsOpacity = engine.model.settings.cortexOpacity;
         engine.tracts.setOverlay(true);
+        engine.model.ghostAround([]);
         if (engine.model.settings.cortexOpacity === 1) {
           engine.model.setCortexOpacity(engine.tracts.defaultOpacity);
         }

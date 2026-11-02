@@ -5,6 +5,7 @@
   import '../../styles/index.css';
   import Tooltip from '../../lib/ui/Tooltip.svelte';
   import Dock from '../stage/Dock.svelte';
+  import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
   import type { DockCommands } from '../stage/dock-commands.ts';
   import '../stage/stage-vars.css';
   import SectionBar from './SectionBar.svelte';
@@ -33,6 +34,7 @@
     setCortexOpacity() {},
     setInternalVisible() {},
     setSpinalCordVisible: async () => {},
+    resetDisplay() {},
   };
 
   let host: HTMLElement;
@@ -75,7 +77,15 @@
       cortexOpacity: 1,
       internalVisible: true,
       spinalCordVisible: false,
+      explorer: 'anatomy',
+      anatomy: 'cdmd',
+      referenceAnatomy: 'cdmd',
+      hiddenRegions: new Set(),
+      isolatedRegion: null,
+      focused: false,
+      selectedRegion: null,
     }}
+    prepared={DEFAULT_DISPLAY}
     hasSpinalCord={false}
     {commands}
     onLesionPlacing={() => {}}

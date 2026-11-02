@@ -31,6 +31,7 @@ type Defaults = Pick<
   | 'cutAzimuth'
   | 'selectedRegion'
   | 'isolatedRegion'
+  | 'focused'
   | 'internalSystem'
   | 'anatomy'
   | 'explorer'
@@ -62,6 +63,7 @@ export const DEFAULTS: Defaults = {
   cutAzimuth: 30,
   selectedRegion: null,
   isolatedRegion: null,
+  focused: false,
   internalSystem: null,
   anatomy: null,
   explorer: 'anatomy',
@@ -251,6 +253,7 @@ const FIELDS: Field[] = [
   field('detail', 'detail', nonempty),
   field('selectedRegion', 'region', nonempty, identifier),
   field('isolatedRegion', 'isolate', nonempty, identifier),
+  field('focused', 'focus', flag, writeFlag),
   field('view', 'view', nonempty),
   field('orbit', 'cam', orbit, writeOrbit),
   field('cut', 'cut', oneOf(CUTS)),

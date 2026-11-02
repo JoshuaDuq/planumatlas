@@ -33,6 +33,7 @@ test('an empty link is the default scene on the loaded layers, with nothing left
     cutAzimuth: 30,
     selectedRegion: null,
     isolatedRegion: null,
+    focused: false,
     orbit: null,
     mriWindow: null,
     ...LOADED,
@@ -170,6 +171,10 @@ function restorationFixture(): RestorationFixture {
     isolate() {
       events.push('isolation');
       this.settings.isolatedRegion = this.state.selectedRegion!.id;
+    },
+    setFocused(value) {
+      events.push('focus');
+      this.settings.focused = value;
     },
     clearIsolation() {
       this.settings.isolatedRegion = null;
@@ -383,6 +388,7 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     cut: 'oblique',
     selectedRegion: 'region',
     isolatedRegion: 'region',
+    focused: true,
     mriWindow: { center: 90, width: 180 },
     orbit: { position: [0, 0, 300], target: [0, 0, 0] },
   });
@@ -403,6 +409,7 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     'selection',
     'isolation',
     'tree',
+    'focus',
     'mri-load',
     'mri-window',
     'camera',

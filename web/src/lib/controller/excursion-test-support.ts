@@ -100,6 +100,7 @@ export function createScene() {
   // A lesion whose streamlines a test can mark as drawn.
   const lesion = {
     selectedTract: null as string | null,
+    heldOpacity: null as number | null,
     clearTract: vi.fn(() => {
       lesion.selectedTract = null;
     }),

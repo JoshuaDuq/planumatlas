@@ -42,6 +42,7 @@ export interface LinkState {
   cutAzimuth: number;
   selectedRegion: string | null;
   isolatedRegion: string | null;
+  focused: boolean;
   internalSystem: string | null;
   anatomy: string | null;
   atlas: string;

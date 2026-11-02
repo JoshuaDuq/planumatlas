@@ -2,10 +2,12 @@
 // only a deep structure at the landing point is named, and nothing functional or clinical is attached.
 import { afterEach, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
+import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import type { EngineLesion, LesionMeasurement } from '../../lib/engine/api.ts';
 import { createLesionStore } from '../../lib/state/lesion.svelte.ts';
 import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
+import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import CoordinateReport from './CoordinateReport.svelte';
 
 const spaces = {
@@ -225,4 +227,21 @@ test('in French, the caveat and the offsets are said in French', async () => {
     'Une position du gabarit reportée sur ce seul cerveau par recalage. Ce n’est pas l’endroit où serait le pic propre à cette personne, ni ce que fait ce cerveau à cet endroit.',
   );
   expect(text()).toMatch(/MNI152NLin6Asym se place à une médiane de 1,6\s?mm/);
+});
+
+test('the landing point is copied as shown, in the reader’s notation', async () => {
+  const region = document.body.appendChild(document.createElement('div'));
+  const detach = attachAnnouncer(region);
+  const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+  try {
+    await mount('fr', 'mni152nlin2009casym');
+    const landed = '\u221240,0\u202f; +20,0\u202f; +7,0\u202fmm';
+    expect(text()).toContain(`Placée en ${landed} sur ce cerveau (RAS de surface)`);
+    await page.getByRole('button', { name: `${landed}, Copier`, exact: true }).click();
+    expect(write).toHaveBeenCalledExactlyOnceWith(landed);
+    await expect.poll(() => region.textContent).toBe('Copié');
+  } finally {
+    detach();
+    region.remove();
+  }
 });

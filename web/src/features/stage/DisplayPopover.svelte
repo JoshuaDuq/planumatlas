@@ -6,8 +6,11 @@
     value back while the reader holds the thumb (U4 `RangeField`). The spoken value is the percentage.
   - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why).
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
+  - Last, what is away from its default, Focus and hidden parts included, with Reset display: on a phone the
+    status bar that also says so is hidden.
 -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import { percent } from '../../lib/core/format.ts';
   import type { Hemisphere, Language } from '../../lib/types/index.ts';
@@ -23,11 +26,14 @@
     spinalCordVisible: boolean;
     /** The subject publishes a spinal cord. */
     hasSpinalCord: boolean;
+    /** The display settings away from their defaults (`displayChanges`). */
+    changes: readonly string[];
     onHemisphere: (hemisphere: Hemisphere) => void;
     onCortexVisible: (visible: boolean) => void;
     onCortexOpacity: (opacity: number) => void;
     onInternalVisible: (visible: boolean) => void;
     onSpinalCordVisible: (visible: boolean) => void;
+    onResetDisplay: () => void;
   }
 
   let {
@@ -38,11 +44,13 @@
     internalVisible,
     spinalCordVisible,
     hasSpinalCord,
+    changes,
     onHemisphere,
     onCortexVisible,
     onCortexOpacity,
     onInternalVisible,
     onSpinalCordVisible,
+    onResetDisplay,
   }: Props = $props();
 
   const uid = $props.id();
@@ -52,6 +60,17 @@
   const sides = $derived(
     (['both', 'left', 'right'] as const).map((value) => ({ value, label: copy[value] })),
   );
+
+  /** The button goes with the reset, so focus moves to the hemisphere chosen. */
+  async function reset(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    onResetDisplay();
+    await tick();
+    if (!hadFocus) return;
+    document
+      .querySelector<HTMLElement>(`[aria-labelledby="${hemisphereLabelId}"] [aria-checked="true"]`)!
+      .focus();
+  }
 </script>
 
 <p id={hemisphereLabelId} class="stage-field-label">{copy.hemisphere}</p>
@@ -102,6 +121,12 @@
     </label>
   {/if}
 </div>
+{#if changes.length}
+  <div class="changes">
+    <p>{changes.join(' · ')}</p>
+    <button type="button" class="reset-display" onclick={reset}>{copy.resetDisplay}</button>
+  </div>
+{/if}
 
 <style>
   @layer features {
@@ -139,6 +164,34 @@
     .check span {
       min-width: 0;
     }
+    .changes {
+      margin-top: var(--space-3);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--overlay-ink-muted);
+    }
+    .changes p {
+      margin: 0;
+    }
+    /* A text link, as Restore previous view is; the teal is the overlay's here. */
+    .reset-display {
+      min-height: var(--row-height);
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--accent);
+      font-size: var(--text-ui);
+      text-align: left;
+      cursor: pointer;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .reset-display:hover {
+        color: var(--accent-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    }
     input[type='checkbox'] {
       appearance: none;
       display: grid;
@@ -175,7 +228,8 @@
     }
     @media (pointer: coarse) {
       :global(.segmented.choice-group.hemisphere [role='radio']),
-      .check {
+      .check,
+      .reset-display {
         min-height: 44px;
       }
       /* The tick box itself is 20 px, as the legacy touch rule has it (phone.css:329). */
@@ -200,6 +254,10 @@
       }
       input[type='checkbox']::before {
         content: none;
+      }
+      .reset-display {
+        color: LinkText;
+        text-decoration: underline;
       }
     }
   }

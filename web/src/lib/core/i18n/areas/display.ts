@@ -4,7 +4,6 @@ export const en = {
   seenThrough: 'Cortex made see-through; its painted areas stay opaque. Display sets the opacity.',
   opaqueAgain: 'Cortex made opaque again.',
   // The region's name arrives capitalized, as the inspector titles it.
-  deepSelected: (region: string) => `${region} lies beneath the cortex.`,
   both: 'Both',
   left: 'Left',
   right: 'Right',
@@ -43,6 +42,22 @@ export const en = {
       'Typical arterial territories from 1,298 stroke patients (Liu et al. 2023), registered onto this brain; not its own vessels',
   },
   resetView: 'Reset view',
+  // The display settings the reader changed from the prepared display, as the status bar and Display list them.
+  sideShown: { both: 'Both hemispheres', left: 'Left hemisphere', right: 'Right hemisphere' },
+  cortexHidden: 'Cortex hidden',
+  cortexShown: 'Cortex shown',
+  cortexAt: (opacity: string) => `Cortex ${opacity}`,
+  internalHidden: 'Internal anatomy hidden',
+  internalShown: 'Internal anatomy shown',
+  shownCount: (number: number) => (number === 1 ? '1 part shown' : `${number} parts shown`),
+  regionIsolated: 'Region isolated',
+  focusOn: 'Focus on',
+  focusOff: 'Focus off',
+  // Not the gizmo's Reset view: the camera, the data and the selection stay.
+  resetDisplay: 'Reset display',
+  displayReset: 'Display settings reset.',
+  // Spoken after the Display tool's name on a phone, where the status bar is hidden.
+  changed: ', settings changed',
 };
 
 export const fr: typeof en = {
@@ -51,7 +66,6 @@ export const fr: typeof en = {
   seenThrough:
     'Cortex rendu transparent\u202f; ses aires colorées restent opaques. Affichage règle l’opacité.',
   opaqueAgain: 'Cortex rendu de nouveau opaque.',
-  deepSelected: (region: string) => `${region} se trouve sous le cortex.`,
   both: 'Les deux',
   left: 'Gauche',
   right: 'Droite',
@@ -88,4 +102,18 @@ export const fr: typeof en = {
       'Territoires artériels typiques, issus de 1\u202f298 patients victimes d’AVC (Liu et al. 2023), recalés sur ce cerveau\u202f; pas ses propres vaisseaux',
   },
   resetView: 'Réinitialiser la vue',
+  sideShown: { both: 'Les deux hémisphères', left: 'Hémisphère gauche', right: 'Hémisphère droit' },
+  cortexHidden: 'Cortex masqué',
+  cortexShown: 'Cortex affiché',
+  cortexAt: (opacity: string) => `Cortex à ${opacity}`,
+  internalHidden: 'Anatomie interne masquée',
+  internalShown: 'Anatomie interne affichée',
+  shownCount: (number: number) =>
+    number === 1 ? '1 partie affichée' : `${number} parties affichées`,
+  regionIsolated: 'Région isolée',
+  focusOn: 'Ciblage activé',
+  focusOff: 'Ciblage désactivé',
+  resetDisplay: 'Réinitialiser l’affichage',
+  displayReset: 'Réglages d’affichage réinitialisés.',
+  changed: ', réglages modifiés',
 };

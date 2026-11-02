@@ -7,7 +7,7 @@ import {
   domainPaint,
   revealedRegions,
 } from '../core/catalog/neuropsych-domains.ts';
-import { createScene } from './excursion-test-support.ts';
+import { createScene, sceneBefore } from './excursion-test-support.ts';
 
 const DEFICIT = 'acalculia';
 const OTHER_DEFICIT = 'amusia';
@@ -40,6 +40,36 @@ describe('an excursion into a deficit', () => {
     assert.deepEqual(framed.args, [scene.clinical.mappedRegions(DEFICIT)]);
   });
 
+  for (const open of ['openDeficit', 'openFunction'] as const) {
+    test(`${open} ends Focus, after holding the scene that had it for Restore`, async () => {
+      const scene = createScene();
+      const { model } = scene.engine;
+      // On the atlas the map is drawn on, so the reveal itself does not drop the selection.
+      if (open === 'openFunction') await model.setAtlas(scene.domains.atlas);
+      const cortex = [...model.regions.values()].find(
+        (region) =>
+          region.kind === 'cortex' &&
+          region.atlas === model.settings.atlas &&
+          model.canSelect(region),
+      )!;
+      model.select(cortex.id);
+      model.setFocused(true);
+      const focusedWhenHeld: boolean[] = [];
+      scene.reader.capture.mockImplementationOnce(() => {
+        focusedWhenHeld.push(scene.engine.model.settings.focused);
+        return sceneBefore('focused');
+      });
+      const mark = scene.engine.calls.length;
+      await scene.excursions[open](open === 'openDeficit' ? 'neglect' : ALL_DOMAINS);
+      assert.deepEqual(focusedWhenHeld, [true]);
+      assert.equal(scene.engine.model.settings.focused, false);
+      // Before the profile's first render, so the paint is never drawn under a ghost.
+      const timeline = scene.calls(mark);
+      assert.equal(timeline.filter((call) => call === 'model.setFocused').length, 1);
+      assert.ok(timeline.indexOf('model.setFocused') < timeline.indexOf('app.render'));
+    });
+  }
+
   test('keeps the first scene across later steps; Restore puts it back and closes the item that opened it', async () => {
     const scene = createScene();
     await scene.excursions.openDeficit(DEFICIT);
@@ -67,6 +97,19 @@ describe('an excursion into a deficit', () => {
     await scene.excursions.openDeficit(DEFICIT);
     await scene.excursions.restoreBeforeExcursion();
     assert.equal(scene.session.state.explorer, 'deficits');
+  });
+
+  test('another tab ends it on that tab’s list: the scene comes back, and its selection opens no detail', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    const mark = scene.engine.calls.length;
+    await scene.excursions.chooseMode('circuits');
+
+    assert.equal(scene.reader.apply.mock.calls.length, 1);
+    // The restored selection is drawn (and drilled into) before the list replaces it, then the tab.
+    assert.deepEqual(scene.calls(mark), ['app.render', 'shell.showList', 'app.render']);
+    assert.equal(scene.session.state.explorer, 'circuits');
+    assert.equal(scene.session.state.selectedFunction, 'language');
   });
 
   test('Restore to Tracts holds the reader’s own opacity, not the excursion’s', async () => {

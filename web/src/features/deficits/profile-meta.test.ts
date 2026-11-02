@@ -24,6 +24,8 @@ const settings: DisplaySettings = {
   surfaceColor: 'tissue',
   paint: null,
   isolatedRegion: null,
+  focused: false,
+  ghostedAround: null,
   hiddenRegions: new Set(),
   dissectionCanUndo: false,
 };

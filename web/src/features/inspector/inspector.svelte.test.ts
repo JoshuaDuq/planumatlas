@@ -3,7 +3,7 @@
 // published partitions. The view-models are C5's (core/panels/inspector.test.ts); the legacy
 // source-text tests (chrome.contract.test.js:34, 200, 392-422) are role and name assertions here.
 import { flushSync, mount } from 'svelte';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import manifest from '../../../../public/models/cdmd/manifest.json';
@@ -13,6 +13,7 @@ import agreementFile from '../../../../public/models/cdmd/segmentation-agreement
 import type { SegmentationAgreement } from '../../lib/core/catalog/segmentation-agreement.ts';
 import { decimal, quantity } from '../../lib/core/format.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
+import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
 import '../../app/layout.css';
 import Fixture from './inspector-test-support.svelte';
@@ -214,6 +215,18 @@ describe('commands', () => {
     expect(calls).toEqual(['focus', 'hide', 'clear']);
   });
 
+  test('Focus keeps its name, and is drawn and announced as pressed while it holds', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, { regionId: V1, calls });
+    const focus = () => root().querySelectorAll<HTMLElement>('.actions button')[0]!;
+    expect(focus().getAttribute('aria-pressed')).toBe('false');
+    expect(focus().getAttribute('data-active')).toBe('false');
+    await screen.rerender({ regionId: V1, calls, focused: true });
+    expect(text(focus())).toBe('Focus');
+    expect(focus().getAttribute('aria-pressed')).toBe('true');
+    expect(focus().getAttribute('data-active')).toBe('true');
+  });
+
   test('Isolate becomes Restore, is drawn as selected and never claims to be pressed', async () => {
     const calls: unknown[] = [];
     const screen = await render(Fixture, { regionId: V1, calls });
@@ -246,21 +259,27 @@ describe('commands', () => {
     expect(mri.element().getAttribute('data-tooltip')).toBe('Open linked MRI slices');
   });
 
-  test('Tab walks Clear, the four commands, the source and each section, then Enter toggles one', async () => {
+  test('Tab walks Clear, the four commands, the copyable facts and each section, then Enter toggles one', async () => {
     render(Fixture, { regionId: V1 });
     const walked: string[] = [];
     (document.querySelector('.selection-clear') as HTMLElement).focus();
-    for (let step = 0; step < 8; step++) {
+    for (let step = 0; step < 11; step++) {
       if (step > 0) await userEvent.keyboard('{Tab}');
       walked.push(text(document.activeElement!));
     }
     expect(walked.slice(0, 5)).toEqual(['', 'Focus', 'Isolate', 'Hide', 'Linked MRI']);
-    expect(walked.slice(5)).toEqual([
+    // Area, centroid and source id: each value is its own copy button.
+    expect(walked.slice(5, 8)).toEqual([
+      text(root().querySelector('dl.facts dd')!),
+      '−12.3, +56.8, −9.0 mm',
+      '1',
+    ]);
+    expect(walked.slice(8)).toEqual([
       'Functional division',
       'Neuropsychological functions',
       'Functional networks',
     ]);
-    // The ninth stop, after the networks, is the typical arterial supply.
+    // The next stop, after the networks, is the typical arterial supply.
     await userEvent.keyboard('{Tab}');
     expect(text(document.activeElement!)).toBe('Typical arterial supply');
     await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
@@ -270,6 +289,43 @@ describe('commands', () => {
     expect(networks.open).toBe(true);
     await userEvent.keyboard(' ');
     expect(networks.open).toBe(false);
+  });
+});
+
+describe('copying facts', () => {
+  test('area, centroid and source ids are each copied as shown; an absent value is not a button', async () => {
+    const region = document.body.appendChild(document.createElement('div'));
+    const detach = attachAnnouncer(region);
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    try {
+      const screen = await render(Fixture, { regionId: V1 });
+      const facts = () => root().querySelector('dl.facts')!;
+      const copies = () =>
+        [...facts().querySelectorAll<HTMLButtonElement>('button.copy-value')].map((node) =>
+          node.getAttribute('aria-label'),
+        );
+      const dd = (index: number) => facts().querySelectorAll('dd')[index]!;
+      expect(copies()).toEqual([
+        '2\u202f783\u202fmm², Copy',
+        '\u221212.3, +56.8, \u22129.0\u202fmm, Copy',
+        '1, Copy',
+      ]);
+      await page
+        .getByRole('button', { name: '\u221212.3, +56.8, \u22129.0\u202fmm, Copy' })
+        .click();
+      expect(write).toHaveBeenCalledExactlyOnceWith('\u221212.3, +56.8, \u22129.0\u202fmm');
+      await expect.poll(() => region.textContent).toBe('Copied');
+
+      // No centroid: the dash stays plain text.
+      await screen.rerender({ regionId: CERUBELLUM });
+      expect(text(dd(1))).toBe('—');
+      expect(dd(1).querySelector('button')).toBeNull();
+      expect(dd(0).querySelector('button.copy-value')!.textContent).toBe('49\u202f790\u202fmm³');
+    } finally {
+      write.mockRestore();
+      detach();
+      region.remove();
+    }
   });
 });
 
@@ -804,8 +860,8 @@ describe('receptor densities', () => {
       'https://doi.org/10.1016/j.cortex.2014.07.007',
     ]);
     await userEvent.click(page.getByRole('radio', { name: 'Ventral' }));
-    expect(text(row(receptors, 'NMDA')!)).toBe('NMDA 1129 ± 382');
-    expect(text(row(receptors, 'mGluR2/3')!)).toBe('mGluR2/3 3545 ± 913');
+    expect(text(row(receptors, 'NMDA')!)).toBe('NMDA 1 129 ± 382');
+    expect(text(row(receptors, 'mGluR2/3')!)).toBe('mGluR2/3 3 545 ± 913');
     expect(text(receptors)).toContain('Measured in: Ventral part of Area 44 (IFG).');
     await expectAxeClean();
   });
@@ -815,9 +871,9 @@ describe('receptor densities', () => {
     section('Receptor densities').open = true;
     await userEvent.click(page.getByRole('radio', { name: 'Ventral' }));
     await screen.rerender({ regionId: PUTAMEN });
-    expect(text(row(section('Receptor densities'), 'NMDA')!)).toMatch(/^NMDA \d+ ± \d+$/);
+    expect(text(row(section('Receptor densities'), 'NMDA')!)).toMatch(/^NMDA [\d ]+ ± [\d ]+$/);
     await screen.rerender({ regionId: AREA_44 });
-    expect(text(row(section('Receptor densities'), 'NMDA')!)).toBe('NMDA 1129 ± 382');
+    expect(text(row(section('Receptor densities'), 'NMDA')!)).toBe('NMDA 1 129 ± 382');
     expect(
       page.getByRole('radio', { name: 'Ventral' }).element().getAttribute('aria-checked'),
     ).toBe('true');

@@ -6,11 +6,9 @@ const MINUS = '\u2212';
 const NARROW_NBSP = '\u202f';
 const SIGNIFICANT_FIGURES = 4;
 
-/** Group digits the way quantities do, so counts and measurements agree. */
-export const grouped = (value: number | string): string => {
-  const text = String(value);
-  return text.length > 4 ? text.replace(/\B(?=(\d{3})+(?!\d))/g, NARROW_NBSP) : text;
-};
+/** Group digits in threes from four digits up (1 979 mm²), so counts and measurements agree. */
+export const grouped = (value: number | string): string =>
+  String(value).replace(/\B(?=(\d{3})+(?!\d))/g, NARROW_NBSP);
 
 const decimalMark = (lang: Language) => (lang === 'fr' ? ',' : '.');
 

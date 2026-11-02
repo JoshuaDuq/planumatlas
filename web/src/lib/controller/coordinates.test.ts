@@ -8,11 +8,15 @@ function setup(landing: [number, number, number] | null) {
   const lesion = {
     sphere: null as { centre: [number, number, number]; radius: number } | null,
     coordinate: null as unknown,
+    replaced: null as unknown,
+    // As the store keeps it: a lesion, not a coordinate, is what a coordinate replaces.
     placeCoordinate: vi.fn((placed, [x, y, z]: number[], radius: number) => {
       calls.push('place');
+      lesion.replaced = lesion.sphere && !lesion.coordinate ? { sphere: lesion.sphere } : null;
       lesion.coordinate = placed;
       lesion.sphere = { centre: [Math.round(x! * 10) / 10, y!, z!], radius };
     }),
+    restoreReplaced: vi.fn(() => void calls.push('restore')),
   };
   const engine = {
     sections: { setCrosshair: vi.fn(() => void calls.push('crosshair')) },
@@ -40,6 +44,7 @@ function setup(landing: [number, number, number] | null) {
       showAnatomy: () => void calls.push('anatomy'),
       showDetail: () => void calls.push('detail'),
       sayLesionReplaced: () => void calls.push('replaced'),
+      sayLesionRestored: () => void calls.push('restored'),
     },
   });
   return { placement, lesion, engine, calls, settle, supersede: () => intent++ };
@@ -94,4 +99,13 @@ test('a coordinate placed over another coordinate replaces no lesion', async () 
   settle();
   await placing;
   expect(calls).not.toContain('replaced');
+});
+
+test('the replacement’s undo puts the lesion back, says so, and overtakes a placement still mapping', async () => {
+  const { placement, calls, settle } = setup([0, 0, 0]);
+  const placing = placement.place([-42, 22, 6], 'unstated');
+  placement.undoReplacement();
+  settle();
+  await placing;
+  expect(calls).toEqual(['restore', 'restored']);
 });

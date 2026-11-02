@@ -1,16 +1,18 @@
 // The visible stage as a PNG that documents itself (ui/chrome/snapshot.js; viewport-chrome.js:796-831;
-// app.js:1450-1463): the rendered frame, the orientation letters, scale bar and colour keys, a caption
+// app.js:1450-1463): the rendered frame, the orientation letters, the route landmarks' labels, scale bar and
+// colour keys, a caption
 // naming subject, labels, colouring and view or section, and the not-clinical statement.
+import { tick } from 'svelte';
 import { decimal, withUnit } from '../../lib/core/format.ts';
 import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import { subjectName } from '../../lib/core/panels/header.ts';
 import type { SceneCommands } from '../../lib/core/state/scene-commands.ts';
 import type { Engine, EngineCamera, Rect } from '../../lib/engine/api.ts';
 import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
-import type { CutMode, Language, SurfaceColor, ViewName } from '../../lib/types/index.ts';
-import { announce } from '../../lib/ui/announcer.svelte.ts';
+import type { CutMode, Language, Notice, SurfaceColor, ViewName } from '../../lib/types/index.ts';
+import { leaderEnd, placeLabels } from '../stage/stage-labels.ts';
 import { SNAPSHOT_LAYOUT, snapshotMarkings } from './markings.ts';
-import type { KeyMark, Markings, StageKeysModel } from './markings.ts';
+import type { KeyMark, LabelMark, Markings, StageKeysModel } from './markings.ts';
 
 const ELLIPSIS = '…';
 
@@ -283,6 +285,41 @@ function drawScaleBar(
   haloText(ctx, label, x + pixels + scaleGap, y, palette, ratio);
 }
 
+/** A stage label, redrawn where it stands: its leader and dot, each with the stage's rim, then its words. */
+function drawLabel(
+  ctx: Context,
+  { dot, leader, leaderColor, lines }: LabelMark,
+  palette: Palette,
+  ratio: number,
+) {
+  ctx.save();
+  if (leader) {
+    ctx.beginPath();
+    ctx.moveTo(dot.x, dot.y);
+    ctx.lineTo(leader.x, leader.y);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = palette.haloCore;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.strokeStyle = leaderColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(dot.x, dot.y, 4, 0, 2 * Math.PI);
+  ctx.fillStyle = palette.haloCore;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(dot.x, dot.y, 2.5, 0, 2 * Math.PI);
+  ctx.fillStyle = dot.color;
+  ctx.fill();
+  ctx.restore();
+  for (const line of lines) {
+    ctx.font = line.font;
+    haloText(ctx, line.text, line.x, line.y, { ...palette, ink: line.color }, ratio);
+  }
+}
+
 /** A colour key, redrawn from its on-screen plate: the plate, its swatches and its words. */
 function drawKey(ctx: Context, { box, fill, edge, swatches, texts }: KeyMark) {
   ctx.save();
@@ -308,6 +345,37 @@ function drawKey(ctx: Context, { box, fill, edge, swatches, texts }: KeyMark) {
   ctx.restore();
 }
 
+const meet = (a: Rect, b: Rect) =>
+  Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x) &&
+  Math.min(a.y + a.height, b.y + b.height) > Math.max(a.y, b.y);
+
+/** A label under the image's own chrome (not where the screen's stands) is placed again round its dot. */
+export function settleLabels(
+  labels: readonly LabelMark[],
+  chrome: readonly Rect[],
+  bounds: Rect,
+): LabelMark[] {
+  const clear = (box: Rect) => !chrome.some((other) => meet(box, other));
+  const taken = labels.filter((label) => clear(label.box)).map((label) => label.box);
+  return labels.map((label) => {
+    if (clear(label.box)) return label;
+    const { width, height } = label.box;
+    const [placement] = placeLabels([{ point: label.dot, sizes: [{ width, height }] }], bounds, [
+      ...chrome,
+      ...taken,
+    ]);
+    const { box, leader } = placement!;
+    taken.push(box);
+    const [dx, dy] = [box.x - label.box.x, box.y - label.box.y];
+    return {
+      ...label,
+      box,
+      leader: leader ? leaderEnd(label.dot, box) : null,
+      lines: label.lines.map((line) => ({ ...line, x: line.x + dx, y: line.y + dy })),
+    };
+  });
+}
+
 /**
  * Write the stage's markings onto a captured frame, in place. Everything in `plan` is in CSS
  * pixels of the cropped stage; `ratio` is the frame's pixels per CSS pixel. Only marks are
@@ -317,7 +385,8 @@ export function annotateSnapshot(
   canvas: HTMLCanvasElement,
   plan: SnapshotPlan & { ratio: number },
 ): HTMLCanvasElement {
-  const { ratio, width, height, letters, caption, statement, scale, keys, font, palette } = plan;
+  const { ratio, width, height, letters, labels, caption, statement, scale, keys, font, palette } =
+    plan;
   const { gutter, line, letterGap } = SNAPSHOT_LAYOUT;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('The snapshot canvas has no 2D context.');
@@ -325,15 +394,26 @@ export function annotateSnapshot(
   ctx.scale(ratio, ratio);
   ctx.textBaseline = 'middle';
 
-  ctx.textAlign = 'center';
+  // The image's own chrome, laid out first: the labels keep clear of it, as on screen.
+  const chrome: Rect[] = keys.map((key) => key.box);
+  const lineBox = (x: number, y: number, w: number) => ({
+    x,
+    y: y - line / 2,
+    width: w,
+    height: line,
+  });
+
   ctx.font = fontOf({ weight: 600, size: STAGE_TYPE, family: font });
-  for (const letter of letters) haloText(ctx, letter.text, letter.x, letter.y, palette, ratio);
-  ctx.textAlign = 'left';
+  for (const letter of letters) {
+    const w = ctx.measureText(letter.text).width;
+    chrome.push(lineBox(letter.x - w / 2, letter.y, w));
+  }
 
   // The caption keeps to the left of the top letter, so the two never touch.
   const top = letters.find((letter) => letter.edge === 'top');
   const room =
     (top ? top.x - ctx.measureText(top.text).width / 2 - letterGap : width - gutter) - gutter;
+  const rows: { runs: Run[]; size: number; y: number }[] = [];
   let y = gutter + line / 2;
   caption.forEach((facts, index) => {
     const size = index === 0 ? STAGE_TYPE : 12;
@@ -345,12 +425,11 @@ export function annotateSnapshot(
       );
       const fitted =
         runsWidth(ctx, runs, font, size) > room ? fitRuns(ctx, runs, font, size, room) : runs;
-      drawRuns(ctx, fitted, gutter, y, font, size, palette, ratio);
+      rows.push({ runs: fitted, size, y });
+      chrome.push(lineBox(gutter, y, runsWidth(ctx, fitted, font, size)));
       y += line;
     }
   });
-
-  for (const key of keys) drawKey(ctx, key);
 
   ctx.font = fontOf({ size: 12, family: font });
   const statementWidth = ctx.measureText(statement).width;
@@ -359,6 +438,23 @@ export function annotateSnapshot(
     ? scale.pixels + SNAPSHOT_LAYOUT.scaleGap + ctx.measureText(scale.label).width
     : 0;
   const spots = bottomLine({ width, height, statementWidth, scaleWidth });
+  chrome.push(lineBox(spots.statement.x, spots.statement.y, statementWidth));
+  if (scale) chrome.push(lineBox(spots.scale.x, spots.scale.y, scaleWidth));
+
+  ctx.textAlign = 'left';
+  for (const label of settleLabels(labels, chrome, { x: 0, y: 0, width, height })) {
+    drawLabel(ctx, label, palette, ratio);
+  }
+
+  ctx.textAlign = 'center';
+  ctx.font = fontOf({ weight: 600, size: STAGE_TYPE, family: font });
+  for (const letter of letters) haloText(ctx, letter.text, letter.x, letter.y, palette, ratio);
+  ctx.textAlign = 'left';
+
+  for (const row of rows) drawRuns(ctx, row.runs, gutter, row.y, font, row.size, palette, ratio);
+
+  for (const key of keys) drawKey(ctx, key);
+
   ctx.font = fontOf({ size: 12, family: font });
   haloText(ctx, statement, spots.statement.x, spots.statement.y, palette, ratio);
   if (scale) drawScaleBar(ctx, scale, spots.scale.x, spots.scale.y, font, palette, ratio);
@@ -375,12 +471,16 @@ export function snapshotFonts(plan: SnapshotPlan) {
     SEPARATOR,
     ...plan.caption.flat(2).map((run) => run.text),
     ...plan.keys.flatMap((key) => key.texts.map((text) => text.text)),
+    ...plan.labels.flatMap((label) => label.lines.map((line) => line.text)),
   ].join(' ');
   const faces = [
     fontOf({ weight: 400, size: 12, family: plan.font }),
     fontOf({ weight: 400, size: STAGE_TYPE, family: plan.font }),
     fontOf({ weight: 600, size: STAGE_TYPE, family: plan.font }),
-    ...new Set(plan.keys.flatMap((key) => key.texts.map((text) => text.font))),
+    ...new Set([
+      ...plan.keys.flatMap((key) => key.texts.map((text) => text.font)),
+      ...plan.labels.flatMap((label) => label.lines.map((line) => line.font)),
+    ]),
   ];
   return Promise.all(faces.map((face) => document.fonts.load(face, words)));
 }
@@ -470,7 +570,12 @@ function pngOf(canvas: HTMLCanvasElement): Promise<Blob> {
   );
 }
 
-async function save(scene: SnapshotStage, subject: SnapshotSubject) {
+/** What a save reports through: its failure notice, or the notice naming the file it saved. */
+export interface SnapshotPorts extends Pick<SceneCommands, 'fail'> {
+  notify: (notice: Notice | null) => void;
+}
+
+async function save(scene: SnapshotStage, subject: SnapshotSubject, ports: SnapshotPorts) {
   const file = `planum-${subject.atlas ?? 'brain'}.png`;
   const url = URL.createObjectURL(await pngOf(await snapshotImage(scene, subject)));
   const link = document.createElement('a');
@@ -478,7 +583,11 @@ async function save(scene: SnapshotStage, subject: SnapshotSubject) {
   link.href = url;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER_MS);
-  announce(t(subject.lang, 'viewport').snapshotSaved(file));
+  // A download leaves no trace on the page, so the notice shows the file's name (and the announcer says it).
+  // Cleared first: the same file saved again is news again, which an unchanged notice would not say.
+  ports.notify(null);
+  await tick();
+  ports.notify({ text: t(subject.lang, 'viewport').snapshotSaved(file) });
 }
 
 let saving: Promise<void> | null = null;
@@ -490,10 +599,10 @@ let saving: Promise<void> | null = null;
 export function saveSnapshot(
   scene: SnapshotStage,
   subject: SnapshotSubject,
-  commands: Pick<SceneCommands, 'fail'>,
+  ports: SnapshotPorts,
 ): Promise<void> {
-  saving ??= save(scene, subject)
-    .catch((error: unknown) => commands.fail('snapshot', error))
+  saving ??= save(scene, subject, ports)
+    .catch((error: unknown) => ports.fail('snapshot', error))
     .finally(() => {
       saving = null;
     });

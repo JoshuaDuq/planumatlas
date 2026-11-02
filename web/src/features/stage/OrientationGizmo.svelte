@@ -1,9 +1,7 @@
 <!--
   The orientation gizmo, top right of the visible stage, after Blender's: each anatomical direction as the
-  camera sees it frames its view; the centre is only the axes' origin, since a direction toward the viewer
-  lands on it. Under it, the held view in words and the oblique view's link. Positions follow the
-  per-frame `camera` event straight into the DOM. The chevrons are the single-pointer alternative to
-  dragging (WCAG 2.5.7).
+  camera sees it frames its view, the centre the oblique one. Positions follow the per-frame `camera` event
+  straight into the DOM. The chevrons are the single-pointer alternative to dragging (WCAG 2.5.7).
 -->
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
@@ -22,7 +20,7 @@
     engine: Pick<Engine, 'on'> & {
       camera: Pick<Engine['camera'], 'view' | 'viewHeld' | 'orbitBy'>;
     };
-    stage: Pick<StageLayout, 'retireHint'>;
+    stage: Pick<StageLayout, 'retireHint' | 'registerGizmo'>;
     lang: Language;
     /** The anatomy is on screen (status `ready` or `switching`). */
     ready: boolean;
@@ -65,20 +63,26 @@
     return engine.on('viewHeld', (event) => (held = event.held));
   });
   const heldName = $derived(held ? viewName : '');
-  // A letter's view is named beside the oblique link; the oblique view names itself.
-  const heldLetter = $derived(heldName && heldName !== 'oblique' ? heldName : '');
 
   const buttons = {} as Record<Letter, HTMLElement>;
   // Each axis is drawn twice: the stage's dark halo under a faint line, so it reads over tissue too.
   const axes: Partial<Record<Letter, SVGLineElement[]>> = {};
+  // A letter's target and how far its centre goes from the axes' origin, in pixels; they change with the
+  // pointer and the device class, which change the gizmo's own box.
+  let metrics = { target: 24, reach: 21 };
+
+  // The basis last drawn, for a re-measure between camera events.
+  let shown: CameraView['basis'];
 
   function place(basis: CameraView['basis']) {
-    for (const { letter, x, y, depth } of projectAxes(basis)) {
+    shown = basis;
+    const drawn = projectAxes(basis);
+    for (const { letter, x, y, depth } of drawn) {
       const style = buttons[letter].style;
       style.setProperty('--x', x.toFixed(3));
       style.setProperty('--y', y.toFixed(3));
       style.setProperty('--near', ((depth + 1) / 2).toFixed(3));
-      // Toward the viewer draws over the centre and over what points away.
+      // Toward the viewer draws, and takes the pointer, over the centre and over what points away.
       style.zIndex = String(Math.round((depth + 1) * 50));
       buttons[letter].dataset.facing = depth < 0 ? 'away' : 'toward';
       for (const line of axes[letter] ?? []) {
@@ -88,6 +92,34 @@
         line.setAttribute('y2', String(-y));
       }
     }
+    // A letter pointing away whose centre lies under a facing letter's target, or the centre's, is behind
+    // it: a press there would land in front anyway, so the one behind takes none (the keyboard reaches it).
+    const toward = [{ x: 0, y: 0 }, ...drawn.filter(({ depth }) => depth >= 0)];
+    for (const { letter, x, y, depth } of drawn) {
+      buttons[letter].dataset.behind = String(
+        depth < 0 &&
+          toward.some(
+            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < metrics.target / 2,
+          ),
+      );
+    }
+  }
+
+  function measure(node: HTMLElement) {
+    stage.registerGizmo(node);
+    const observer = new ResizeObserver(() => {
+      const style = getComputedStyle(node);
+      metrics = {
+        target: parseFloat(style.getPropertyValue('--gizmo-letter-target')),
+        reach: parseFloat(style.getPropertyValue('--gizmo-span')) / 2 - 9,
+      };
+      place(shown);
+    });
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      stage.registerGizmo(null);
+    };
   }
 
   $effect(() => {
@@ -118,23 +150,8 @@
   hidden={!ready}
   {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
   {@attach rove}
+  {@attach measure}
 >
-  <!-- First in the toolbar, as the centre was, so the arrows walk on from it to the letters. -->
-  <p class="gizmo-caption">
-    {#if heldLetter}
-      <span>{copy.namedView(names[heldLetter as ViewName])}</span>
-      <span aria-hidden="true">·</span>
-    {/if}
-    <button
-      type="button"
-      class="gizmo-oblique"
-      aria-label={copy.namedView(names.oblique)}
-      aria-pressed={heldName === 'oblique'}
-      onclick={() => choose('oblique')}
-    >
-      {heldName === 'oblique' ? copy.namedView(names.oblique) : names.oblique}
-    </button>
-  </p>
   <div class="gizmo-field">
     <svg class="gizmo-axes" viewBox="-1 -1 2 2" aria-hidden="true" focusable="false">
       {#each ['halo', 'ink'] as layer (layer)}
@@ -147,7 +164,14 @@
         {/each}
       {/each}
     </svg>
-    <span class="gizmo-centre" aria-hidden="true"></span>
+    <button
+      type="button"
+      class="gizmo-centre"
+      aria-label={copy.namedView(names.oblique)}
+      aria-pressed={heldName === 'oblique'}
+      data-tooltip={copy.namedView(names.oblique)}
+      onclick={() => choose('oblique')}
+    ></button>
     {#each LETTERS as letter (letter)}
       <button
         type="button"
@@ -189,13 +213,13 @@
     /*
      * No plate: the letters and axes are markings on the picture, held off tissue by the stage's halo. The
      * chevrons and Reset view keep a small glyph by the axes; on a coarse pointer only their hit area grows,
-     * outward, so the drawn gizmo stays where it is.
+     * outward, never past the gutter.
      */
     .orientation-gizmo {
       --gizmo-span: 60px;
-      --gizmo-letter: 24px;
+      --gizmo-letter-target: 24px;
       --gizmo-target: 24px;
-      --gizmo-spill: calc(var(--gizmo-target) - 24px);
+      --gizmo-spill: min(var(--gizmo-target) - 24px, var(--stage-gutter));
       /* How far a letter's centre goes: its drawn circle (18 px) stays inside the span. */
       --gizmo-reach: calc(var(--gizmo-span) / 2 - 9px);
       --gizmo-ring: calc(var(--gizmo-span) / 2 + 3px);
@@ -220,6 +244,7 @@
     }
     @media (pointer: coarse) {
       .orientation-gizmo {
+        --gizmo-letter-target: 44px;
         --gizmo-target: 44px;
       }
     }
@@ -244,110 +269,86 @@
       stroke: var(--overlay-ink-faint);
       stroke-width: 1;
     }
+    /* Unscaled targets; only the drawn circle shrinks with depth. The one drawn in front takes the press. */
     .gizmo-centre,
     .gizmo-letter {
       position: absolute;
       top: 0;
       left: 0;
-      width: var(--gizmo-letter);
-      height: var(--gizmo-letter);
-      margin: calc(var(--gizmo-letter) / -2);
+      display: grid;
+      place-items: center;
+      width: var(--gizmo-letter-target);
+      height: var(--gizmo-letter-target);
+      margin: calc(var(--gizmo-letter-target) / -2);
       padding: 0;
-      border: 3px solid transparent;
+      border: 0;
       border-radius: 50%;
-      background-clip: padding-box;
+      background: none;
       cursor: pointer;
     }
-    /* The origin: under the directions toward the viewer, over those pointing away. */
+    .gizmo-letter[data-behind='true'] {
+      pointer-events: none;
+    }
     .gizmo-centre {
       z-index: 50;
-      pointer-events: none;
     }
     .gizmo-centre::before {
       content: '';
-      position: absolute;
-      inset: 6px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: var(--overlay-ink-muted);
       box-shadow: 0 0 0 1.5px var(--overlay-halo-core);
     }
-    /* A drawn circle of 18 px in a 24 px target; pointing away, smaller and dimmer. The held view's is the accent. */
     .gizmo-letter {
-      display: grid;
-      place-items: center;
       transform: translate(
-          calc(var(--x, 0) * var(--gizmo-reach)),
-          calc(var(--y, 0) * var(--gizmo-reach))
-        )
-        scale(calc(0.8 + 0.2 * var(--near, 1)));
-      background-color: var(--overlay-raised);
-      box-shadow: inset 0 0 0 1px var(--overlay-halo-core);
+        calc(var(--x, 0) * var(--gizmo-reach)),
+        calc(var(--y, 0) * var(--gizmo-reach))
+      );
       color: var(--overlay-ink);
       font-size: var(--text-caption);
       font-weight: 600;
       line-height: var(--lh-caption);
     }
+    /* A drawn circle of 18 px; pointing away, smaller and dimmer. The held view's is the accent. */
+    .gizmo-letter > span {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: var(--overlay-raised);
+      box-shadow: inset 0 0 0 1px var(--overlay-halo-core);
+      scale: calc(0.8 + 0.2 * var(--near, 1));
+    }
     .gizmo-letter[data-facing='away'] {
-      background-color: var(--overlay-track);
       color: var(--overlay-ink-muted);
     }
+    .gizmo-letter:global([data-facing='away']) > span {
+      background-color: var(--overlay-track);
+    }
     .gizmo-letter[aria-pressed='true'] {
-      background-color: var(--overlay-accent);
       color: var(--overlay-halo-core);
+    }
+    .gizmo-letter[aria-pressed='true'] > span,
+    .gizmo-centre[aria-pressed='true']::before {
+      background-color: var(--overlay-accent);
     }
     @media (hover: hover) and (pointer: fine) {
       .gizmo-letter:hover:not([aria-pressed='true']) {
-        background-color: var(--overlay-control-border);
         color: var(--overlay-ink);
       }
-    }
-    /*
-     * A marking under the axes, haloed like the stage's letters. Anchored at the gizmo's right edge, it is
-     * centred under the axes while it fits and grows leftward, into the stage, when it does not. A coarse
-     * pointer's spill is hit area only, so the words keep the gutter.
-     */
-    .gizmo-caption {
-      position: absolute;
-      top: calc(100% - var(--space-1));
-      right: var(--gizmo-spill);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: var(--space-1);
-      min-width: calc(100% - 2 * var(--gizmo-spill));
-      margin: 0;
-      color: var(--overlay-ink);
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-      white-space: nowrap;
-      text-shadow:
-        0 0 1px var(--overlay-halo-core),
-        0 0 2px var(--overlay-halo-core),
-        0 0 4px var(--overlay-halo);
-    }
-    .gizmo-oblique {
-      min-height: var(--gizmo-target);
-      padding: 0;
-      border: 0;
-      background: none;
-      color: var(--overlay-accent);
-      font: inherit;
-      text-shadow: inherit;
-      cursor: pointer;
-    }
-    .gizmo-oblique[aria-pressed='true'] {
-      color: var(--overlay-ink);
-      cursor: default;
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .gizmo-oblique:not([aria-pressed='true']):hover {
-        color: var(--overlay-accent-hover);
-        text-decoration: underline;
-        text-underline-offset: 3px;
+      .gizmo-letter:hover:not([aria-pressed='true']) > span {
+        background-color: var(--overlay-control-border);
+      }
+      .gizmo-centre:hover:not([aria-pressed='true'])::before {
+        background: var(--overlay-ink);
       }
     }
+    /* Over the letters' targets where they meet: a chevron's glyph is the chevron's to the ring. */
     .orientation-gizmo :global(.icon-button) {
       position: absolute;
+      z-index: 101;
       width: var(--gizmo-target);
       height: var(--gizmo-target);
       min-width: 0;
@@ -415,19 +416,18 @@
 
   @layer a11y {
     @media (forced-colors: active) {
-      .gizmo-letter,
+      .gizmo-letter > span,
       .gizmo-centre::before {
-        border-color: ButtonText;
+        outline: 1px solid ButtonText;
+        outline-offset: -1px;
       }
       .gizmo-axes line {
         stroke: CanvasText;
       }
-      .gizmo-letter[aria-pressed='true'] {
+      .gizmo-letter[aria-pressed='true'],
+      .gizmo-centre[aria-pressed='true'] {
         outline: 2px solid Highlight;
         outline-offset: 1px;
-      }
-      .gizmo-oblique:not([aria-pressed='true']) {
-        color: LinkText;
       }
     }
   }

@@ -10,7 +10,7 @@
   import '../inspector/inspector.css';
   import './report.css';
   import { networkCss } from '../../lib/core/catalog/networks.ts';
-  import { count, decimal, grouped, withUnit } from '../../lib/core/format.ts';
+  import { count, decimal, formatRas, grouped, withUnit } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import {
     lesionSides,
@@ -22,6 +22,7 @@
   import type { LesionMode, LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
+  import CopyValue, { aroundValue } from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import SphereTracts from './SphereTracts.svelte';
@@ -64,6 +65,7 @@
   const modeLabelId = `lesion-mode-${uid}`;
 
   const copy = $derived(t(lang, 'lesion'));
+  const centred = $derived(aroundValue(copy.centre));
   const sphere = $derived(lesion.sphere!);
   const measured = $derived(lesion.measured);
   const measurement = $derived(measured?.status === 'ready' ? measured.measurement : null);
@@ -173,6 +175,12 @@
       withUnit(grouped(sphere.radius), 'mm', lang),
       withUnit(measurement ? cm3(measurement.volume) : '—', 'cm³', lang),
     )}
+  </p>
+  <p class="coordinate-fact">
+    {centred[0]}<CopyValue
+      value={formatRas(sphere.centre, lang)}
+      words={t(lang, 'inspector').copyValue}
+    />{centred[1]}
   </p>
   <!-- Before any share: what follows measures overlap on this brain and predicts nothing. -->
   <p class="detail-note">{copy.caveat}</p>

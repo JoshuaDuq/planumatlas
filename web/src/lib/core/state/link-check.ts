@@ -73,6 +73,8 @@ export function checkLink(
     if (coordinate) reject('coordinate');
     if (space) reject('coordinateSpace');
   }
+  // Focus is the selection's, and means nothing without one.
+  if (state.focused && !state.selectedRegion) reject('focused');
   // A lesion's colouring and drawn tract mean nothing without it; the tract must be one it reaches.
   if ('lesionMode' in state && !state.lesion) reject('lesionMode');
   if (

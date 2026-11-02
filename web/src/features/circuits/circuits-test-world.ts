@@ -122,7 +122,7 @@ export function createWorld() {
       reader,
       shell,
       mri,
-      lesion: { selectedTract: null, clearTract() {} },
+      lesion: { selectedTract: null, clearTract() {}, heldOpacity: null },
       panels: {
         openFunction: () => undefined,
         openDeficit: () => undefined,

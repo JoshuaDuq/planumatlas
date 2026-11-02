@@ -60,7 +60,7 @@ export type KeymapState = Pick<
   singleKeys: boolean;
   /** The diffusion MRI navigator is open. */
   diffusionMriOpen: boolean;
-  /** The linked MRI dialog is open. */
+  /** The linked MRI holds the keys: focus is in the docked region, or the phone's modal is open. */
   mprOpen: boolean;
   shortcutsOpen: boolean;
   /** Focus is inside a region's detail view, where Escape is Back. */
@@ -93,7 +93,7 @@ export interface KeymapCommands {
   /** Presses the linked MRI opener; a no-op while it is disabled (sections.js:236). */
   openMpr(options: { instant: true }): void;
   closeMpr(): void;
-  focusSelection(options: { immediate: true }): void;
+  toggleFocus(options: { immediate: true }): void;
   isolateSelection(): void;
   setCortexVisible(visible: boolean): void;
   setInternalVisible(visible: boolean): void;
@@ -170,7 +170,7 @@ const COMMANDS: readonly Command[] = [
     run: (press, commands, state) => {
       if (state.tractReferenceActive || !state.selectedRegion) return;
       press.preventDefault();
-      commands.focusSelection({ immediate: true });
+      commands.toggleFocus({ immediate: true });
     },
   },
   {

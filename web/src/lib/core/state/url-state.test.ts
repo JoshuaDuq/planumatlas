@@ -393,6 +393,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     detail: 'aseg',
     selectedRegion: 'r',
     isolatedRegion: 'i',
+    focused: true,
     view: 'left',
     orbit: { position: [1, 2, 3], target: [4, 5, 6] },
     cut: 'axial',
@@ -430,6 +431,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'detail',
       'region',
       'isolate',
+      'focus',
       'view',
       'cam',
       'cut',
@@ -459,7 +461,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -469,6 +471,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     detail: 'detail',
     selectedRegion: 'region',
     isolatedRegion: 'isolate',
+    focused: 'focus',
     view: 'view',
     orbit: 'cam',
     cut: 'cut',

@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, expect, test, vi } from 'vitest';
-import { createScene } from './excursion-test-support.ts';
+import { createScene, sceneBefore } from './excursion-test-support.ts';
 import type { Scene } from './excursion-test-support.ts';
 
 const firstCircuit = (scene: Scene) => scene.circuits.all[0]!;
+const vision = (scene: Scene) => scene.circuits.get('vision');
+const stepOf = (scene: Scene, id: string) =>
+  vision(scene).steps.findIndex((step) => step.id === id);
 
 /** A circuit opened on its whole route, then stepped on to its first landmark. */
 async function onFirstLandmark(scene: Scene, id = firstCircuit(scene).id) {
@@ -66,6 +69,49 @@ describe('opening a lesson', () => {
     assert.equal(scene.lesson.state.route, true);
     assert.equal(scene.lesson.state.step, 0);
     assert.equal(scene.engine.model.state.selectedRegion, null);
+  });
+
+  test('a lesson opened on a landmark ends Focus, after holding the scene that had it', async () => {
+    const scene = createScene();
+    // A cortical landmark, its own, so the step's pick alone would carry Focus on.
+    const index = vision(scene).steps.findIndex((step) => step.id === 'v1');
+    const landmark = vision(scene).steps[index]!.region;
+    await scene.commands.revealRegions([landmark], scene.commands.begin());
+    scene.engine.model.select(landmark);
+    scene.engine.model.setFocused(true);
+    const focusedWhenHeld: boolean[] = [];
+    scene.reader.capture.mockImplementationOnce(() => {
+      focusedWhenHeld.push(scene.engine.model.settings.focused);
+      return sceneBefore('focused');
+    });
+    await scene.excursions.openLessonLandmark('vision', index);
+    assert.deepEqual(focusedWhenHeld, [true]);
+    assert.equal(scene.engine.model.settings.focused, false);
+  });
+
+  test('a deep landmark opens focused, so it shows through the anatomy around it; a cortical one does not', async () => {
+    const scene = createScene();
+    const { model } = scene.engine;
+    await scene.excursions.openCircuit('vision');
+    await scene.excursions.openLessonStep(stepOf(scene, 'lgn'));
+    assert.equal(model.state.selectedRegion?.id, 'learning:left:lateral-geniculate');
+    assert.equal(model.settings.focused, true);
+    await scene.excursions.openLessonStep(stepOf(scene, 'v1'));
+    assert.equal(model.settings.focused, false);
+    await scene.excursions.openLessonStep(stepOf(scene, 'lgn'));
+    await scene.excursions.openLessonRoute();
+    assert.equal(model.settings.focused, false);
+  });
+
+  test('the whole route draws the internal anatomy that holds its deep landmarks', async () => {
+    const scene = createScene();
+    const { model } = scene.engine;
+    await model.setDetail('aseg');
+    await scene.excursions.openCircuit('vision');
+    assert.equal(model.settings.detail, 'learning');
+    for (const step of vision(scene).steps.filter((entry) => entry.id !== 'v1')) {
+      assert.equal(model.isRegionDrawn(step.region), true, step.id);
+    }
   });
 
   test('a lesson already open keeps the scene it holds', async () => {
@@ -186,6 +232,17 @@ describe('leaving a lesson', () => {
       scene.engine.calls.some((call) => call.method === 'showList'),
       false,
     );
+  });
+
+  test('ends a deep landmark’s Focus even with no earlier scene to put back', async () => {
+    const scene = createScene();
+    await scene.excursions.openCircuit('vision');
+    scene.session.setExplorer('circuits');
+    await scene.excursions.openLessonStep(stepOf(scene, 'lgn'));
+    scene.excursions.forget();
+    await scene.excursions.leaveLesson();
+    assert.equal(scene.engine.model.state.selectedRegion?.id, 'learning:left:lateral-geniculate');
+    assert.equal(scene.engine.model.settings.focused, false);
   });
 
   test('is nothing when no lesson is open, or its tab is not in front', async () => {

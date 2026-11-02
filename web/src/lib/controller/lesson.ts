@@ -1,3 +1,4 @@
+import { beneathCortex } from '../core/catalog/labels.ts';
 import type { Circuit, CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
@@ -5,6 +6,8 @@ import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { Engine, MoveOptions, MprPlane } from '../engine/api.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
 import type { Explorer } from '../types/index.ts';
+import { preparedOf } from '../../features/colophon/display-state.ts';
+import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
 import { prepareCircuitMri, showCircuitLandmark } from './navigation/learning.ts';
 
 /** Captures and puts back a whole scene (app.js:754-779), which the link restore owns. */
@@ -45,13 +48,17 @@ export function createLessons({
   chooseExplorer,
   openMriPanel,
   render,
+  prepare,
   stage,
 }: {
   engine: Pick<Engine, 'model' | 'sections' | 'camera'>;
   session: Pick<SessionStore, 'state' | 'setView'>;
   lesson: LessonStore;
   circuits: Pick<CircuitCatalog, 'get' | 'contextMarginMm'>;
-  commands: Pick<SceneCommands, 'begin' | 'openRegion' | 'prepareCut' | 'fail' | 'showSpinalCord'>;
+  commands: Pick<
+    SceneCommands,
+    'begin' | 'openRegion' | 'revealRegions' | 'prepareCut' | 'fail' | 'showSpinalCord'
+  >;
   reader: SceneReader;
   shell: Shell;
   mri: MriDialog;
@@ -59,6 +66,8 @@ export function createLessons({
   /** The Circuits panel's entry to the lesson's MRI: its busy runner, which calls `openMri` (circuits.js:344). */
   openMriPanel: () => unknown;
   render: () => void;
+  /** The display a step or the route set on the stage; null once the lesson is left. */
+  prepare: (display: PreparedDisplay | null) => void;
   /** What a step does to the reader's own settings, said in the notice as a deficit's reveal says it. */
   stage: {
     settings: () => RevealSettings;
@@ -93,11 +102,16 @@ export function createLessons({
     return true;
   }
 
-  /** Draw, select and frame a lesson's landmark; false once a later command took over. */
+  /**
+   * Draw, select and frame a lesson's landmark; false once a later command took over. A deep landmark
+   * lies inside the internal anatomy drawn around it, so it opens focused, as a hidden pick does.
+   */
   async function openLandmark(step: Landmark, current: () => boolean): Promise<boolean> {
     if (!(await commands.openRegion(step.region, current))) return false;
     showCircuitLandmark(model, step);
+    model.setFocused(beneathCortex(model.regions.get(step.region)!));
     if (!frameLandmark(step)) throw new Error(`Landmark geometry unavailable: ${step.region}`);
+    prepare(preparedOf(model.settings));
     return true;
   }
 
@@ -125,6 +139,11 @@ export function createLessons({
     }
     await sections.setMode('off');
     if (!current()) return false;
+    // The internal anatomy that draws most of its deep landmarks, so they show in colour.
+    const structures = circuit.steps
+      .map((step) => step.region)
+      .filter((id) => model.regions.get(id)!.kind === 'structure');
+    if (!(await commands.revealRegions(structures, current))) return false;
     const cord = circuit.steps.some((step) => model.regions.get(step.region)?.atlas === 'pam50');
     if (cord && !(await commands.showSpinalCord(true, current))) return false;
     model.select(null);
@@ -137,6 +156,7 @@ export function createLessons({
     model.setInternalVisible(true);
     session.setView('oblique');
     camera.applyView('oblique');
+    prepare(preparedOf(model.settings));
     if (stage.sayChanged(before)) changesSaid = true;
     return true;
   }
@@ -147,11 +167,13 @@ export function createLessons({
     return opacity;
   }
 
-  /** The scene a lesson opens over, unless one is already open and holds it. */
+  /** The scene a lesson opens over, unless one is already open and holds it. Focus ends with it. */
   function rememberBeforeLesson() {
-    if (lesson.state.circuit) return;
-    beforeLesson = reader.capture();
-    changesSaid = false;
+    if (!lesson.state.circuit) {
+      beforeLesson = reader.capture();
+      changesSaid = false;
+    }
+    if (model.settings.focused) model.setFocused(false);
   }
 
   /**
@@ -165,7 +187,10 @@ export function createLessons({
     beforeLesson = null;
     changesSaid = false;
     beforeRoute = null;
+    prepare(null);
     lesson.close();
+    // A deep landmark's Focus is the lesson's; the scene put back has its own.
+    if (model.settings.focused) model.setFocused(false);
     render();
     if (!before) return;
     const current = commands.begin();

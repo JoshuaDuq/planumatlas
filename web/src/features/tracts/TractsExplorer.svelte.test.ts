@@ -252,7 +252,15 @@ describe('the search', () => {
     await ready();
     await search().fill('zzz');
     await expect.element(page.getByText('No match for “zzz”')).toBeVisible();
-    await expect.element(page.getByText('Try another tract name.')).toBeVisible();
+    // The dataset lists only its own reconstructed bundles, so the hint names them, not a spelling.
+    const catalog = tractCatalog('cdmd');
+    await expect
+      .element(
+        page.getByText(
+          `Only the ${catalog.bundles.length} tract bundles reconstructed in MGH CDMD · sub_013 are listed, and none matches this name.`,
+        ),
+      )
+      .toBeVisible();
     expect([...document.querySelectorAll('h4')].some((h) => h.checkVisibility())).toBe(false);
   });
 
@@ -300,7 +308,9 @@ describe('the search', () => {
     expect(region.textContent).toBe('2 tract bundles');
     await search().fill('zzz');
     vi.advanceTimersByTime(500);
-    expect(region.textContent).toBe('No match for “zzz”. Try another tract name.');
+    expect(region.textContent).toBe(
+      `No match for “zzz”. Only the ${tractCatalog('cdmd').bundles.length} tract bundles reconstructed in MGH CDMD · sub_013 are listed, and none matches this name.`,
+    );
   });
 
   test('unmounting while a result count is pending says nothing', async () => {

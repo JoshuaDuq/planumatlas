@@ -102,6 +102,8 @@ export function createFakeModel({
     surfaceColor: 'atlas' as SurfaceColor,
     paint: null as Paint | null,
     isolatedRegion: null as string | null,
+    focused: false,
+    ghostedAround: null as ReadonlySet<string> | null,
   };
   layers.add(values.atlas);
   layers.add(values.detail);
@@ -123,7 +125,10 @@ export function createFakeModel({
   /** A selection the new settings no longer show is dropped, as `update` does (brain-atlas.js:519). */
   function update() {
     const region = selectedId ? regions.get(selectedId) : undefined;
-    if (region && !canSelect(region)) selectedId = null;
+    if (region && !canSelect(region)) {
+      selectedId = null;
+      values.focused = false;
+    }
     changed();
   }
 
@@ -155,6 +160,7 @@ export function createFakeModel({
       if (!canSelect(region)) throw new Error(`Region is not visible: ${id}`);
     }
     selectedId = id;
+    if (id === null) values.focused = false;
     update();
   }
 
@@ -292,6 +298,18 @@ export function createFakeModel({
       values.isolatedRegion = null;
       update();
     },
+    setFocused(focused) {
+      requireBoolean(focused, 'Focus');
+      if (focused && !selectedId) throw new Error('Select a region before focusing.');
+      values.focused = focused;
+      update();
+    },
+    ghostAround(ids) {
+      if (ids !== null) requireRegions(ids);
+      values.ghostedAround =
+        ids && new Set(ids.flatMap((id) => [id, ...(regions.get(id)!.constituent_regions ?? [])]));
+      update();
+    },
     hideRegions(ids) {
       requireRegions(ids);
       if (!replaceHidden(new Set([...dissection.hidden, ...ids]))) return;
@@ -339,6 +357,7 @@ export function createFakeModel({
       values.spinalCordVisible = false;
       values.surfaceColor = 'atlas';
       values.isolatedRegion = null;
+      values.ghostedAround = null;
       select(null);
     },
 

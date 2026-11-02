@@ -102,6 +102,7 @@
   "nextLandmark": "Repère suivant",
   "returnToLandmark": "Revenir au repère",
   "otherSelection": "Vous explorez une autre région.",
+  "landmarkUnselected": "Le repère n’est pas sélectionné.",
   "mapping": "Ce que montre cet atlas",
   "clinical": "Contexte clinique",
   "clinicalLink": "Ouvrir les données sur le déficit",
@@ -308,6 +309,8 @@
   "outside": "Cette coordonnée se trouve hors du cerveau du gabarit<NNBSP>; elle n’est pas placée.",
   "failed": "La coordonnée n’a pas pu être placée.",
   "replacedLesion": "Lésion remplacée par la sphère de la coordonnée.",
+  "undoReplacement": "Annuler",
+  "lesionRestored": "Lésion rétablie.",
   "reportTitle": "Coordonnée publiée",
   "entered": [
    "[\"Alpha\",\"\"] → \"Alpha dans \"",
@@ -470,7 +473,10 @@
   "metricsScope": "Les nombres et longueurs utilisent les trajectoires sources complètes après le filtre de longueur. Les coupes modifient seulement la vue.",
   "outlineProvenance": "Méthode et provenance du contour cérébral",
   "search": "Rechercher des faisceaux",
-  "noMatchHint": "Essayez un autre nom de faisceau.",
+  "noMatchHint": [
+   "[\"Alpha\",\"\"] → \"Seuls les Alpha faisceaux reconstruits dans  sont listés, et aucun ne correspond à ce nom.\"",
+   "[\"\",\"Alpha\"] → \"Seuls les  faisceaux reconstruits dans Alpha sont listés, et aucun ne correspond à ce nom.\""
+  ],
   "retry": "Recharger les données de référence",
   "tryAgain": "Réessayer",
   "matches": [
@@ -515,10 +521,6 @@
   "seeThrough": "Voir à travers le cortex",
   "seenThrough": "Cortex rendu transparent<NNBSP>; ses aires colorées restent opaques. Affichage règle l’opacité.",
   "opaqueAgain": "Cortex rendu de nouveau opaque.",
-  "deepSelected": [
-   "[\"Alpha\"] → \"Alpha se trouve sous le cortex.\"",
-   "[\"\"] → \" se trouve sous le cortex.\""
-  ],
   "both": "Les deux",
   "left": "Gauche",
   "right": "Droite",
@@ -554,7 +556,30 @@
    "cab-np": "Réseaux fonctionnels (CAB-NP, 12) sur les aires HCP-MMP",
    "territory": "Territoires artériels typiques, issus de 1<NNBSP>298 patients victimes d’AVC (Liu et al. 2023), recalés sur ce cerveau<NNBSP>; pas ses propres vaisseaux"
   },
-  "resetView": "Réinitialiser la vue"
+  "resetView": "Réinitialiser la vue",
+  "sideShown": {
+   "both": "Les deux hémisphères",
+   "left": "Hémisphère gauche",
+   "right": "Hémisphère droit"
+  },
+  "cortexHidden": "Cortex masqué",
+  "cortexShown": "Cortex affiché",
+  "cortexAt": [
+   "[\"Alpha\"] → \"Cortex à Alpha\"",
+   "[\"\"] → \"Cortex à \""
+  ],
+  "internalHidden": "Anatomie interne masquée",
+  "internalShown": "Anatomie interne affichée",
+  "shownCount": [
+   "[\"Alpha\"] → \"Alpha parties affichées\"",
+   "[\"\"] → \" parties affichées\""
+  ],
+  "regionIsolated": "Région isolée",
+  "focusOn": "Ciblage activé",
+  "focusOff": "Ciblage désactivé",
+  "resetDisplay": "Réinitialiser l’affichage",
+  "displayReset": "Réglages d’affichage réinitialisés.",
+  "changed": ", réglages modifiés"
  },
  "dissection": {
   "heading": "Dissection",
@@ -845,6 +870,40 @@
    "[12345,0] → \"12345 fonctions\""
   ]
  },
+ "guide": {
+  "title": "Utiliser Planum",
+  "close": "Fermer",
+  "lead": "Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique.",
+  "sections": [
+   [
+    "Le cerveau",
+    [
+     "Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir.",
+     "Les lettres en haut à droite nomment les directions anatomiques<NNBSP>: choisissez-en une pour regarder de ce côté, ou le centre pour la vue oblique.",
+     "Coupe sectionne le cerveau selon un plan, avec ses coupes IRM liées. Lésion place une sphère et indique ce qu’elle atteint. Coordonnée place une coordonnée MNI publiée. Affichage règle le cortex, l’anatomie interne et les hémisphères."
+    ]
+   ],
+   [
+    "La barre du haut",
+    [
+     "Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel."
+    ]
+   ],
+   [
+    "Le panneau",
+    [
+     "Anatomie liste chaque région, sur tout le cerveau ou par système. Fonctions et Déficits peignent des données publiées sur le cerveau, disent ce qu’ils ont changé et offrent le retour. Circuits parcourt des voies anatomiques, repère par repère. Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion."
+    ]
+   ],
+   [
+    "La face médiale",
+    [
+     "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté<NNBSP>: l’hémisphère gauche vu de la droite montre sa face interne."
+    ]
+   ]
+  ],
+  "keys": "Les raccourcis clavier sont dans le menu des réglages, ou touche ?."
+ },
  "header": {
   "atlasShort": {
    "destrieux": "Destrieux",
@@ -889,7 +948,11 @@
    "nextbrain": "Atlas d’origine histologique, segmenté sur ce sujet à 0,4<NNBSP>mm"
   },
   "skipToModel": "Aller au modèle",
+  "copyLink": "Copier le lien de cette vue",
+  "linkCopied": "Lien copié",
+  "linkFailed": "Impossible de copier le lien",
   "languageSwitch": "Langue",
+  "guide": "Utiliser Planum",
   "shortcuts": "Raccourcis clavier",
   "theme": "Thème",
   "systemTheme": "Système",
@@ -918,6 +981,11 @@
   "volume": "Volume",
   "centroid": "Centroïde (RAS)",
   "sourceLabel": "Étiquette source",
+  "copyValue": {
+   "copy": "Copier",
+   "copied": "Copié",
+   "failed": "Copie impossible"
+  },
   "linkedMri": "IRM liée",
   "focus": "Cibler",
   "isolate": "Isoler",
@@ -946,6 +1014,10 @@
   "meta": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha · sphère de  · Alpha\"",
    "[\"\",\"Alpha\",\"\"] → \" · sphère de Alpha · \""
+  ],
+  "centre": [
+   "[\"Alpha\"] → \"Centrée en Alpha sur ce cerveau (RAS de surface)\"",
+   "[\"\"] → \"Centrée en  sur ce cerveau (RAS de surface)\""
   ],
   "caveat": "Une forme placée sur ce seul cerveau, mesurée sur ses étiquettes de 1 mm. Ce n’est pas la lésion d’un patient et elle ne prédit aucun déficit.",
   "measuring": "Mesure en cours…",
@@ -1066,6 +1138,7 @@
    "detail": "anatomie interne",
    "region": "région sélectionnée",
    "isolate": "région isolée",
+   "focus": "région ciblée",
    "view": "vue",
    "cam": "position de la caméra",
    "cut": "coupe",
@@ -1443,7 +1516,7 @@
      ],
      [
       "F",
-      "Cibler la région sélectionnée"
+      "Cibler la région sélectionnée, ou cesser de la cibler"
      ],
      [
       "I",

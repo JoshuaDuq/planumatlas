@@ -277,6 +277,17 @@ describe('opening a lesson', () => {
     await expect.poll(() => document.activeElement).toBe(title());
   });
 
+  test('with nothing selected, Return is offered without saying the reader is elsewhere', async () => {
+    mount('fr');
+    await open('vision');
+    world.engine.model.select(null);
+    flushSync();
+    const offer = document.querySelector('.circuit-return')!.textContent!;
+    expect(offer).toContain('Le repère n’est pas sélectionné.');
+    expect(offer).not.toContain('Vous explorez une autre région.');
+    expect(returnButton()).not.toBeNull();
+  });
+
   test('is French in French', async () => {
     mount('fr');
     await open('vision');

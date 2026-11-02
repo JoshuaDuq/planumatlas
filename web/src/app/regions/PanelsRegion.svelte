@@ -8,6 +8,7 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
+  import { offeredNotice } from '../../lib/core/workspace.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets } from '../../lib/engine/api.ts';
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
@@ -148,6 +149,7 @@
   function noticeAction(action: NonNullable<Notice['action']>) {
     if (action === 'reload') void reloadWithoutStoredModels();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
+    else if (action === 'restore-lesion') world!.coordinates!.undoReplacement();
     else world!.excursions.seeThroughCortex();
   }
 
@@ -243,7 +245,7 @@
         {selection}
         {place}
         groups={world.catalog.groups}
-        notice={current.notice}
+        notice={offeredNotice(current.notice, world.lesion.replaced !== null)}
         shell={app.media.phone ? 'sheet' : 'rails'}
         stepper={panels.circuits.exploring && panels.circuits.circuit ? stepper : undefined}
         trailing={world.excursions.restorable &&

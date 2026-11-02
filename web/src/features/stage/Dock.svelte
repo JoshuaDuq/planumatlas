@@ -11,11 +11,15 @@
   - A click on the brain places the lesion only while the reader has chosen so in the Lesion popover and it is
     open, and while it does, a press on the stage keeps it open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
+  - On a phone, which hides the status bar, a mark on Display says its settings are away from their defaults.
 -->
 <script lang="ts">
   import { tick } from 'svelte';
   import type { Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { displayChanges } from '../colophon/display-state.ts';
+  import type { PreparedDisplay } from '../colophon/display-state.ts';
+  import type { DisplayView } from '../colophon/display-state.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
@@ -34,11 +38,10 @@
     status: SessionState['status'];
     /** The tract reference alone is shown: it has no sections, lesion or display settings. */
     tractReference: boolean;
-    /** The display settings the Display popover shows. */
-    view: Pick<
-      View,
-      'hemisphere' | 'cortexVisible' | 'cortexOpacity' | 'internalVisible' | 'spinalCordVisible'
-    >;
+    /** The display settings the Display popover shows, and what it says is away from its defaults. */
+    view: Omit<DisplayView, 'lang'> & Pick<View, 'spinalCordVisible'>;
+    /** The display the reader's changes are counted from (`excursions.displayBaseline`). */
+    prepared: PreparedDisplay;
     /** The subject publishes a spinal cord. */
     hasSpinalCord: boolean;
     commands: Omit<DockCommands, 'chooseView' | 'reset'>;
@@ -61,6 +64,7 @@
     status,
     tractReference,
     view,
+    prepared,
     hasSpinalCord,
     commands,
     sectionPopover,
@@ -77,6 +81,9 @@
   const displayLabelId = `display-tool-${uid}`;
 
   const copy = $derived(t(lang, 'viewport'));
+  const changes = $derived(displayChanges({ ...view, lang }, prepared));
+  // A phone hides the status bar, which lists the changes.
+  const marked = $derived(media.phone && changes.length > 0);
   // The dock is not drawn while the anatomy loads, failed or lost its context (stage.css:315).
   const shown = $derived(status === 'ready' || status === 'switching');
   // A phone sheet raised over the stage covers it.
@@ -98,6 +105,16 @@
   let tools: HTMLElement;
 
   $effect(() => stage.observeDock(dock));
+
+  // A followed link replaces the whole scene (the app writes its own state with replaceState, which fires
+  // no `hashchange`): a popover still open would act on the scene it was opened for.
+  $effect(() => {
+    const closeAll = () => {
+      sectionOpen = lesionOpen = coordinateOpen = displayOpen = false;
+    };
+    addEventListener('hashchange', closeAll);
+    return () => removeEventListener('hashchange', closeAll);
+  });
 
   function rove(group: HTMLElement) {
     const roving = bindRoving(group, { selector: '.stage-tool' });
@@ -218,9 +235,13 @@
       {covered}
       style={popoverStyle}
       dialogLabelledby={displayLabelId}
+      ariaLabel={marked ? `${copy.displayTool}${t(lang, 'display').changed}` : undefined}
       {rescueFocus}
     >
-      {#snippet name()}<span id={displayLabelId}>{copy.displayTool}</span>{/snippet}
+      {#snippet name()}
+        <span id={displayLabelId}>{copy.displayTool}</span>
+        {#if marked}<span class="changed-mark" aria-hidden="true"></span>{/if}
+      {/snippet}
       {#snippet body()}
         <DisplayPopover
           {lang}
@@ -230,11 +251,13 @@
           internalVisible={view.internalVisible}
           spinalCordVisible={view.spinalCordVisible}
           {hasSpinalCord}
+          {changes}
           onHemisphere={commands.setHemisphere}
           onCortexVisible={commands.setCortexVisible}
           onCortexOpacity={commands.setCortexOpacity}
           onInternalVisible={commands.setInternalVisible}
           onSpinalCordVisible={commands.setSpinalCordVisible}
+          onResetDisplay={commands.resetDisplay}
         />
       {/snippet}
     </StagePopover>
@@ -313,6 +336,13 @@
     }
     :global(.stage-tool[hidden]) {
       display: none;
+    }
+    .changed-mark {
+      flex: none;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
     }
     @media (hover: hover) and (pointer: fine) {
       :global(.stage-tool:hover:not(:disabled)) {

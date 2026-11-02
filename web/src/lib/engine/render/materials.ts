@@ -1,5 +1,11 @@
 import { MeshPhysicalMaterial, MeshStandardMaterial } from 'three';
-import type { BufferGeometry, IUniform, Mesh, WebGLProgramParametersWithUniforms } from 'three';
+import type {
+  BufferGeometry,
+  Color,
+  IUniform,
+  Mesh,
+  WebGLProgramParametersWithUniforms,
+} from 'three';
 import type { Region } from '../../types/index.ts';
 import { isPhone } from './device.ts';
 
@@ -64,6 +70,19 @@ export function tissueColor(
   if (/(?:^|[-_\s])(?:ventricles?|vent|CSF)(?:$|[-_\s])/i.test(name)) return palette.fluid;
   if (/white|^CC_|callosum/i.test(name)) return palette.white;
   return palette.gray;
+}
+
+/**
+ * What focus draws a region it does not hold in: its tissue's lightness without its hue, which
+ * would tint the selection seen through it, and is the same grey on a cut face.
+ */
+export function ghostColor(
+  region: Parameters<typeof tissueColor>[0],
+  palette: TissuePalette,
+  color: Color,
+): Color {
+  const { r, g, b } = color.set(tissueColor(region, palette));
+  return color.setScalar(0.2126 * r + 0.7152 * g + 0.0722 * b);
 }
 
 /**

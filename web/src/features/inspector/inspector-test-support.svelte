@@ -31,6 +31,7 @@
     lang = 'en',
     explorer = 'anatomy',
     cortexVisible = true,
+    focused = false,
     isolated = false,
     landmarkSelected,
     underProfile,
@@ -41,6 +42,7 @@
     lang?: Language;
     explorer?: Explorer;
     cortexVisible?: boolean;
+    focused?: boolean;
     isolated?: boolean;
     landmarkSelected?: boolean;
     underProfile?: boolean;
@@ -63,6 +65,7 @@
   {region}
   {explorer}
   {cortexVisible}
+  {focused}
   {isolated}
   {landmarkSelected}
   {underProfile}

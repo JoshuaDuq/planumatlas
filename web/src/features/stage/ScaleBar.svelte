@@ -113,6 +113,17 @@
         var(--vis-bottom) + var(--stage-gutter) + var(--dock-height) + 2 * var(--space-2) + 16px
       );
     }
+    /* Phones: the dock owns the bottom line, so the bar takes the top left, under any key, at 13px. */
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .scale-bar,
+      :global(#viewport[data-chrome]) .scale-bar {
+        top: calc(var(--vis-top) + var(--key-top) + var(--stage-gutter));
+        right: auto;
+        bottom: auto;
+        left: calc(var(--vis-left) + var(--stage-gutter));
+        font-size: var(--text-caption);
+      }
+    }
   }
 
   @layer a11y {

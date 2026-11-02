@@ -42,8 +42,9 @@ import type { ReceptorFingerprints } from '../../core/catalog/receptor-fingerpri
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
 import { createDissection } from '../../core/state/dissection.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
-import { tissueColor, createAnatomicalMaterial } from '../render/materials.ts';
+import { ghostColor, tissueColor, createAnatomicalMaterial } from '../render/materials.ts';
 import type { Appearance, AnatomicalUserData } from '../render/materials.ts';
+import { GHOST } from '../render/ghost-order.ts';
 import {
   attachNetworkColors,
   attachTerritoryColors,
@@ -58,6 +59,7 @@ import {
 } from '../render/border-feather.ts';
 import { addMriAppearance } from '../render/mri-material.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
+import { ghosted, ghosting } from '../tissues/palette.ts';
 import { loadRibbonSources } from '../tissues/solid-assets.ts';
 import { createWhiteMatterSurfaces, exposedWhiteMatter } from '../tissues/white-matter-surfaces.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
@@ -315,6 +317,8 @@ export class BrainAtlas extends EventTarget {
   private mriUniforms: MriUniforms | null = null;
   private selectedId: string | null = null;
   private isolatedId: string | null = null;
+  private focused = false;
+  private ghostedAround: ReadonlySet<string> | null = null;
   // Separate, so a detail change does not cancel an atlas change still loading, or the reverse.
   private atlasRequest = 0;
   private detailRequest = 0;
@@ -698,6 +702,8 @@ export class BrainAtlas extends EventTarget {
       surfaceColor: this.surfaceColor,
       paint: this.paint,
       isolatedRegion: this.isolatedId,
+      focused: this.focused,
+      ghostedAround: this.ghostedAround,
       ...this.dissection.state,
     };
   }
@@ -721,7 +727,22 @@ export class BrainAtlas extends EventTarget {
   }
 
   update(): void {
+    // A selection the new settings no longer show is dropped before anything is drawn around it.
+    const selected = this.selectedId ? this.regions.get(this.selectedId)! : null;
+    const dropped = selected !== null && !this.canSelect(selected);
+    if (dropped) {
+      this.selectedId = null;
+      this.focused = false;
+    }
     const settings = this.settings;
+    const { appearance } = this.manifest;
+    const ghostState = {
+      ...settings,
+      selectedRegion: this.selectedId ? this.regions.get(this.selectedId)! : null,
+    };
+    const ghosts = ghosting(settings);
+    // Focus sees through the cortex; a route's or Tracts' grey cortex keeps the reader's opacity.
+    const focusOpacity = this.focused ? appearance.see_through_opacity! : 1;
     if (
       !this.whiteMatterSurfaces &&
       !this.pending.has(ENVELOPES) &&
@@ -729,11 +750,14 @@ export class BrainAtlas extends EventTarget {
     ) {
       this.loadEnvelopesBehind();
     }
-    this.whiteMatterSurfaces?.update(settings, this.regions, this.clippingPlanes);
+    this.whiteMatterSurfaces?.update(
+      { ...settings, cortexOpacity: Math.min(settings.cortexOpacity, focusOpacity) },
+      this.regions,
+      this.clippingPlanes,
+    );
     const paint = this.paint;
     const mri = this.surfaceColor === 'mri' && !paint;
     if (this.mriUniforms) this.mriUniforms.scanEnabled.value = mri;
-    const { appearance } = this.manifest;
     for (const [id, layer] of this.layers) {
       layer.scene.visible =
         id === this.detailId ||
@@ -742,6 +766,8 @@ export class BrainAtlas extends EventTarget {
       for (const mesh of layer.meshes) {
         const region = this.regions.get(mesh.userData['region_id'] as string)!;
         const cortex = region.kind === 'cortex' || region.kind === 'non-region';
+        // A ghost is grey at the see-through opacity; what it holds in colour is opaque.
+        const ghost = ghosted(region.id, ghostState);
         const cabNpNetwork =
           this.surfaceColor === 'cab-np' && !paint ? this.cabNp!.regions[region.id] : null;
         // The cortex carries its territories per vertex; a deep structure is drawn whole, as its cut is.
@@ -756,12 +782,15 @@ export class BrainAtlas extends EventTarget {
           // Only tissue colour carries the T1 brightness it was tuned against;
           // under a published palette that modulation would distort the datum.
           userData.tissueVariation.value =
-            this.surfaceColor === 'tissue' && !paint ? appearance.intensity.surface_strength : 0;
+            this.surfaceColor === 'tissue' && !paint && !ghost
+              ? appearance.intensity.surface_strength
+              : 0;
           if (userData.networkMix) {
-            userData.networkMix.value = this.surfaceColor === 'network' && !paint ? 1 : 0;
+            userData.networkMix.value = this.surfaceColor === 'network' && !paint && !ghost ? 1 : 0;
           }
           if (userData.territoryMix) {
-            userData.territoryMix.value = this.surfaceColor === 'territory' && !paint ? 1 : 0;
+            userData.territoryMix.value =
+              this.surfaceColor === 'territory' && !paint && !ghost ? 1 : 0;
           }
         }
         if (material.clippingPlanes !== this.clippingPlanes) {
@@ -798,22 +827,26 @@ export class BrainAtlas extends EventTarget {
         // Selection is drawn by the outline pass. Tinting the material would
         // alter a region's atlas colour, which is the datum being displayed.
         // A painted area is what the paint is about, so a see-through cortex leaves it opaque, and
-        // the unpainted cortex around it gives the context.
-        material.opacity = cortex && !painted ? this.cortexOpacity : 1;
+        // the unpainted cortex around it gives the context. What a ghost holds is opaque for the same reason.
+        if (ghost) {
+          ghostColor(region, appearance.tissue, material.color);
+          material.opacity = cortex
+            ? Math.min(focusOpacity, this.cortexOpacity)
+            : appearance.see_through_opacity!;
+        } else {
+          material.opacity = cortex && !painted && !ghosts ? this.cortexOpacity : 1;
+        }
+        mesh.userData['ghost'] = ghost ? (cortex ? GHOST.cortex : GHOST.deep) : GHOST.none;
         const transparent = material.opacity < 1;
         if (material.transparent !== transparent) {
           material.transparent = transparent;
           material.needsUpdate = true;
         }
-        material.depthWrite = !transparent;
+        material.depthWrite = !transparent || mesh.userData['ghost'] === GHOST.deep;
       }
       if (layer.featherPalette) writeFeatherPalette(layer.featherPalette, layer.meshes);
     }
-    const selected = this.selectedId ? this.regions.get(this.selectedId) : null;
-    if (selected && !this.canSelect(selected)) {
-      this.selectedId = null;
-      this.dispatchEvent(new CustomEvent('selectionchange', { detail: null }));
-    }
+    if (dropped) this.dispatchEvent(new CustomEvent('selectionchange', { detail: null }));
     this.dispatchEvent(new CustomEvent('change', { detail: this.state }));
   }
 
@@ -953,6 +986,8 @@ export class BrainAtlas extends EventTarget {
       if (!this.canSelect(region)) throw new Error(`Region is not visible: ${id}`);
     }
     this.selectedId = id;
+    // Focus follows the selection from pick to pick, and ends with it.
+    if (id === null) this.focused = false;
     this.update();
     this.dispatchEvent(new CustomEvent('selectionchange', { detail: this.state.selectedRegion }));
   }
@@ -1089,6 +1124,30 @@ export class BrainAtlas extends EventTarget {
     this.update();
   }
 
+  setFocused(focused: boolean): void {
+    if (typeof focused !== 'boolean') throw new TypeError('Focus must be boolean.');
+    if (focused && !this.selectedId) throw new Error('Select a region before focusing.');
+    if (focused && this.manifest.appearance.see_through_opacity === undefined) {
+      throw new Error('This build publishes no see-through opacity.');
+    }
+    this.focused = focused;
+    this.update();
+  }
+
+  /** Grey every region but these and their constituents, the selection and a paint's; null ends it. */
+  ghostAround(ids: readonly string[] | null): void {
+    if (ids !== null) {
+      if (this.manifest.appearance.see_through_opacity === undefined) {
+        throw new Error('This build publishes no see-through opacity.');
+      }
+      for (const id of ids) if (!this.regions.has(id)) throw new Error(`Unknown region: ${id}`);
+    }
+    this.ghostedAround =
+      ids &&
+      new Set(ids.flatMap((id) => [id, ...(this.regions.get(id)!.constituent_regions ?? [])]));
+    this.update();
+  }
+
   get dissectionSelection(): { selectedId: string | null; isolatedId: string | null } {
     return { selectedId: this.selectedId, isolatedId: this.isolatedId };
   }
@@ -1141,6 +1200,7 @@ export class BrainAtlas extends EventTarget {
     this.spinalCordVisible = false;
     this.surfaceColor = 'atlas';
     this.isolatedId = null;
+    this.ghostedAround = null;
     this.select(null);
   }
 

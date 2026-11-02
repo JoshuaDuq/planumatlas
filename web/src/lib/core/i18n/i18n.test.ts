@@ -163,7 +163,7 @@ test('a tract row counts streamlines, and what the length filter keeps of them',
   assert.equal(DIFFUSION_TEXT.en.streamlines(721, 721), '721 streamlines');
   assert.equal(DIFFUSION_TEXT.en.streamlines(640, 721), '640 of 721 streamlines');
   assert.equal(DIFFUSION_TEXT.en.streamlines(1, 1), '1 streamline');
-  assert.equal(DIFFUSION_TEXT.fr.streamlines(2140, 2140), '2140 trajectoires');
+  assert.equal(DIFFUSION_TEXT.fr.streamlines(2140, 2140), '2\u202f140 trajectoires');
   assert.equal(DIFFUSION_TEXT.en.streamlines(12345, 12345), '12 345 streamlines');
   assert.equal(DIFFUSION_TEXT.fr.streamlines(640, 721), '640 sur 721 trajectoires');
 });

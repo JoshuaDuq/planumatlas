@@ -1,5 +1,6 @@
 // The stage region as the app mounts it, over the fake engine: what it holds, the ports it hands the
-// controllers and the keymap, the two MRI dialogs, and the stage layout following the panel and window.
+// controllers and the keymap, the Tracts MRI dialog and the docked Linked MRI, and the stage layout
+// following the panel and window.
 import '../../styles/index.css';
 import '../layout.css';
 import { flushSync, mount, unmount } from 'svelte';
@@ -58,6 +59,7 @@ function boot(status: 'ready' | 'loading' = 'ready') {
 const dialogs = () => [...document.querySelectorAll<HTMLDialogElement>('dialog')];
 const dialogNamed = (name: string) =>
   dialogs().find((dialog) => dialog.querySelector('h2')?.textContent === name)!;
+const linkedMri = () => target.querySelector<HTMLElement>(':scope > .mpr-dock');
 const press = (key: string) =>
   document.body.dispatchEvent(
     new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
@@ -116,20 +118,22 @@ describe('what the stage region holds', () => {
     expect(dialogs()).toHaveLength(0);
   });
 
-  test('the two MRI dialogs are children of the app root, outside the landmark, and the Tracts MRI holds no navigator while closed', async () => {
+  test('the Tracts MRI dialog and the docked Linked MRI are children of the app root, outside the landmark; the Tracts MRI holds no navigator while closed', async () => {
     boot();
-    expect(dialogs()).toHaveLength(2);
-    for (const dialog of dialogs()) {
-      expect(dialog.parentElement).toBe(target);
-      expect(dialog.open).toBe(false);
-    }
+    expect(dialogs().map((dialog) => dialog.querySelector('h2')?.textContent)).toEqual([
+      'MRI with tracts · MGH CDMD sub_013',
+    ]);
+    expect(dialogs()[0]!.parentElement).toBe(target);
+    expect(dialogs()[0]!.open).toBe(false);
     // No navigator, so no GPU context or volume, exists while the dialog is closed.
     expect(engine.tracts.navigators).toHaveLength(0);
-    expect(
-      dialogs()
-        .map((dialog) => dialog.querySelector('h2')?.textContent)
-        .sort(),
-    ).toEqual(['MRI with tracts · MGH CDMD sub_013', 'Linked MRI sections'].sort());
+    // The Linked MRI is a grid item beside the stage, drawn only while open.
+    expect(linkedMri()).toBeNull();
+    await engine.sections.load();
+    app.ports.showMri({ instant: true });
+    flushSync();
+    expect(linkedMri()!.parentElement).toBe(target);
+    expect(document.getElementById('viewport')!.contains(linkedMri())).toBe(false);
   });
 
   test('the exit control is kept mounted and hidden outside full screen, named by its visible text', async () => {
@@ -147,17 +151,33 @@ describe('what the stage region holds', () => {
 });
 
 describe('the MRI dialogs', () => {
-  test('openMpr opens the Linked MRI dialog, mprOpen answers, closeMpr closes it', async () => {
+  test('openMpr docks the Linked MRI beside the stage, not as a modal; mprOpen answers, closeMpr closes it', async () => {
     boot();
     expect(app.ports.mprOpen()).toBe(false);
     app.ports.openMpr({ instant: true });
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
-    const dialog = dialogNamed('Linked MRI sections');
-    expect(dialog.matches(':modal')).toBe(true);
+    expect(linkedMri()!.getAttribute('aria-labelledby')).toBeTruthy();
+    expect(document.querySelector('dialog:modal')).toBeNull();
     app.ports.closeMpr();
     flushSync();
     expect(app.ports.mprOpen()).toBe(false);
-    expect(dialog.open).toBe(false);
+    expect(linkedMri()).toBeNull();
+  });
+
+  test('while it is docked the page keeps its keys outside it, and M from the stage closes it', async () => {
+    boot();
+    await engine.sections.load();
+    app.ports.showMri({ instant: true });
+    flushSync();
+    const stage = document.getElementById('viewport')!;
+    stage.focus();
+    // Open, but the keys are the page's: the stage's own shortcuts still reach the keymap.
+    expect(app.ports.mprOpen()).toBe(false);
+    expect(linkedMri()).not.toBeNull();
+    press('m');
+    flushSync();
+    expect(linkedMri()).toBeNull();
+    expect(document.activeElement).toBe(stage);
   });
 
   test('showMri opens it from the controllers, and the M key toggles it', async () => {
@@ -262,6 +282,24 @@ describe('save image', () => {
       `Image saved as planum-${app.world!.view.current.atlas}.png.`,
     );
   });
+
+  test('says a second save of the same file again', async () => {
+    boot();
+    engine.emit('viewport', {
+      visibleRect: { x: 0, y: 0, width: 1000, height: 700 },
+      hostSize: { width: 1000, height: 700 },
+    });
+    flushSync();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const save = (region as never as { saveImage(): Promise<void> }).saveImage;
+    await save();
+    const said = `Image saved as planum-${app.world!.view.current.atlas}.png.`;
+    await vi.waitFor(() => expect(announcer.textContent).toBe(said));
+    announcer.textContent = '';
+    await save();
+    await vi.waitFor(() => expect(announcer.textContent).toBe(said));
+    expect(app.session.state.notice?.text).toBe(said);
+  });
 });
 
 const call = (domain: string, method: string) =>
@@ -304,22 +342,6 @@ describe('the controllers’ entry points', () => {
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
   });
 
-  test('the Linked MRI animates a pointer opening and closes at once from the M key', async () => {
-    boot();
-    await engine.sections.load();
-    const dialog = dialogNamed('Linked MRI sections');
-    app.ports.showMri({ instant: false });
-    flushSync();
-    expect(dialog.open).toBe(true);
-    expect(dialog.hasAttribute('data-instant')).toBe(false);
-    app.ports.closeMpr();
-    flushSync();
-    expect(dialog.hasAttribute('data-instant')).toBe(true);
-    app.ports.showMri({ instant: true });
-    flushSync();
-    expect(dialog.hasAttribute('data-instant')).toBe(true);
-  });
-
   test('the Tracts MRI opens with its entry animation unless the opening was a key', async () => {
     boot();
     const dialog = dialogNamed('MRI with tracts · MGH CDMD sub_013');
@@ -352,8 +374,7 @@ describe('the controllers’ entry points', () => {
     await engine.sections.load();
     app.ports.showMri({ instant: true });
     flushSync();
-    const slider =
-      dialogNamed('Linked MRI sections').querySelector<HTMLInputElement>('input[type="range"]')!;
+    const slider = linkedMri()!.querySelector<HTMLInputElement>('input[type="range"]')!;
     const before = call('sections', 'setCrosshair').length;
     slider.value = String(Number(slider.value) + 5);
     slider.dispatchEvent(new Event('input', { bubbles: true }));

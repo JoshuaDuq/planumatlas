@@ -10,6 +10,7 @@ import {
   locationCrumbs,
   MODES,
   noticeActionLabel,
+  offeredNotice,
   registerCurrentItem,
   revealSelected,
   stripVisible,
@@ -200,4 +201,15 @@ test('a notice offers a reload or seeing through the cortex, in either language;
   assert.equal(noticeActionLabel('fr', 'reload'), 'Recharger');
   assert.equal(noticeActionLabel('fr', 'see-through'), 'Voir à travers le cortex');
   assert.throws(() => noticeActionLabel('en', 'fly' as 'reload'), /Unknown notice action: fly/);
+});
+
+test('a coordinate’s replacement offers Undo only while the replaced lesion is still waiting', () => {
+  const replaced = { text: 'Lesion replaced.', action: 'restore-lesion' as const };
+  assert.equal(noticeActionLabel('en', 'restore-lesion'), 'Undo');
+  assert.equal(noticeActionLabel('fr', 'restore-lesion'), 'Annuler');
+  assert.equal(offeredNotice(replaced, true), replaced);
+  assert.deepEqual(offeredNotice(replaced, false), { text: 'Lesion replaced.', action: null });
+  const reload = { text: 'Offline.', action: 'reload' as const };
+  assert.equal(offeredNotice(reload, false), reload);
+  assert.equal(offeredNotice(null, false), null);
 });

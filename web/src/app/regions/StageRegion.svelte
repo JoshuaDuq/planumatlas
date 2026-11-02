@@ -41,7 +41,7 @@
 
   let host = $state<HTMLElement>();
   let keys = $state<StageKeys>();
-  let linkedMriOpen = $state(false);
+  let linkedMri = $state<MprDialog>();
 
   /** What the stage's controls reach, built once for the world they run in. */
   function controllers({ engine, engineState, session, commands, anatomy, excursions }: World) {
@@ -100,7 +100,7 @@
         // `current` is null while the cut is off, so its plane is a cut plane.
         section: cut && { ...cut, plane: cut.plane as Exclude<CutMode, 'off'> },
       },
-      commands,
+      { fail: commands.fail, notify: app!.session.notify },
     );
   }
 
@@ -182,14 +182,18 @@
     const withdraw = app.registerPorts({
       showMri: (options) => mpr.show(options),
       openPreparedPlane: (plane, canOpen) => mpr.openPreparedPlane(plane, canOpen),
-      // `M` shares the opener's busy guard (legacy `M` clicked the opener).
-      openMpr: () => void sections.openLinkedMri({ instant: true }),
+      // `M` shares the opener's busy guard (legacy `M` clicked the opener); beside the stage the
+      // MRI is docked, so the page's keys reach `M` while it is open, and it closes it.
+      openMpr: () =>
+        mpr.isOpen()
+          ? mpr.close({ instant: true })
+          : void sections.openLinkedMri({ instant: true }),
       closeMpr: () => mpr.close({ instant: true }),
       openDiffusionMri(options) {
         diffusionInstant = options.instant;
         diffusionMri = true;
       },
-      mprOpen: () => mpr.isOpen(),
+      mprOpen: () => linkedMri!.holdsKeys(),
       diffusionMriOpen: () => diffusionMri,
     });
     return () => {
@@ -217,6 +221,7 @@
         if (!app.session.setView(name)) throw new Error(`Unknown view: ${name}`);
         world.engine.camera.applyView(name);
       },
+      resetDisplay: world.anatomy.resetDisplay,
     } satisfies DockCommands}
     {@const showReport = (close: () => void) => {
       world.excursions.chooseExplorer('anatomy');
@@ -251,6 +256,7 @@
       status={current.status}
       {tractReference}
       view={current}
+      prepared={world.excursions.displayBaseline}
       hasSpinalCord={publishesSpinalCord(model.manifest)}
       onLesionPlacing={world.lesion.setPlacing}
       {commands}
@@ -289,6 +295,7 @@
       marks={current.explorer === 'circuits' && current.lesson.circuit && current.lesson.route
         ? world.circuits.get(current.lesson.circuit).steps.map((step, index) => ({
             region: step.region,
+            name: step.name[current.lang],
             label: lessonCopy.routeMark(index, step.name[current.lang]),
           }))
         : []}
@@ -356,6 +363,7 @@
   {@const current = world.view.current}
   {@const engine = world.engine}
   <MprDialog
+    bind:this={linkedMri}
     mpr={stage.mpr}
     engine={world.engine}
     engineState={world.engineState}
@@ -380,12 +388,23 @@
 
 <style>
   @layer features {
+    /* Where the exit control starts: under the top letter's line. Phones set that letter a line under the scale bar (Orientation.svelte). */
+    :global(#viewport) {
+      --exit-top: calc(var(--stage-gutter) + var(--lh-caption) + var(--space-2));
+    }
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      :global(#viewport) {
+        --exit-top: calc(
+          var(--stage-gutter) + 2 * var(--lh-caption) + var(--space-1) + var(--space-2)
+        );
+      }
+    }
     /* The exit control: top end of the stage, on an opaque plate, clear of the keys (pushed below it), the letters and the dock (WCAG 2.4.11). */
     .exit-fullscreen {
       position: absolute;
       z-index: 4;
       /* Below the top letter's line, which a wide plate would cover on a phone. */
-      top: calc(var(--vis-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2));
+      top: calc(var(--vis-top) + var(--exit-top));
       right: calc(var(--vis-right) + var(--stage-gutter));
       display: inline-flex;
       align-items: center;
@@ -430,18 +449,14 @@
     }
     :global(#viewport:fullscreen .orientation-gizmo) {
       top: calc(
-        var(--vis-top) + var(--key-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2) +
-          var(--control-height) + var(--space-2)
+        var(--vis-top) + var(--key-top) + var(--exit-top) + var(--control-height) + var(--space-2)
       );
     }
     :global(#viewport:fullscreen .stage-keys) {
-      top: calc(
-        var(--vis-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-2) +
-          var(--control-height) + var(--space-2)
-      );
+      top: calc(var(--vis-top) + var(--exit-top) + var(--control-height) + var(--space-2));
       max-height: calc(
-        100% - var(--vis-top) - var(--vis-bottom) - 3 * var(--stage-gutter) - var(--dock-height) -
-          var(--lh-caption) - var(--control-height) - 2 * var(--space-2)
+        100% - var(--vis-top) - var(--vis-bottom) - 2 * var(--stage-gutter) - var(--dock-height) -
+          var(--exit-top) - var(--control-height) - var(--space-2)
       );
     }
     /* A raised phone sheet leaves the picture a strip: the tools and markings would collide in it (stage.css:720-721). */

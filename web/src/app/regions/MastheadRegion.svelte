@@ -6,6 +6,7 @@
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
+  import GuideDialog from '../../features/guide/GuideDialog.svelte';
   import DataBar from '../../features/masthead/DataBar.svelte';
   import Masthead from '../../features/masthead/Masthead.svelte';
   import ProvenanceDialog from '../../features/provenance/ProvenanceDialog.svelte';
@@ -36,6 +37,8 @@
   let singleKeys = $state(app.keyPreference.enabled);
   let settingsOpen = $state(false);
 
+  let guideOpen = $state(false);
+  let guideInstant = $state(false);
   let shortcutsOpen = $state(false);
   let shortcutsInstant = $state(false);
   let provenanceOpen = $state(false);
@@ -105,7 +108,15 @@
   }}
   {onFullscreen}
   {onSnapshot}
+  currentLink={() => {
+    if (world && !world.link.held) world.links.write();
+    return location.href;
+  }}
   onProvenance={openProvenance}
+  onGuide={(event) => {
+    guideInstant = isKeyboardActivation(event);
+    guideOpen = true;
+  }}
   onShortcuts={(event) => {
     shortcutsInstant = isKeyboardActivation(event);
     shortcutsOpen = true;
@@ -146,6 +157,12 @@
   {/snippet}
 </Masthead>
 
+<GuideDialog
+  bind:open={guideOpen}
+  bind:instant={guideInstant}
+  {lang}
+  fallbackFocus={settingsButton}
+/>
 <ShortcutsDialog
   bind:open={shortcutsOpen}
   bind:instant={shortcutsInstant}

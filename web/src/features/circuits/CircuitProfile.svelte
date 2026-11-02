@@ -1,8 +1,8 @@
 <!--
   The whole route ahead of a lesson's landmarks: the route the circuit takes and what the stage's
   numbers mark. Then the open landmark (viewer/ui/panels/circuits.js:167-196, index.html:341): the
-  circuit's name for the outline, the step's title (the focus target when a landmark opens), its side and group, its role and
-  explanation, and, once the reader has wandered to another region, a way back. The landmark's own
+  circuit's name for the outline, the step's title (the focus target when a landmark opens), its side
+  and group, its role and explanation, and, once the reader has wandered to another region, a way back. The landmark's own
   commands are the region's, which I1 renders below this in `RegionDetail`; `landmarkSelected` on the
   model tells it which of its parts to leave out. Not a landmark region (deviations/x3-no-landmarks.md).
 -->
@@ -57,7 +57,7 @@
       {#if !model.landmarkSelected}
         <!-- Back to the prepared view, offered once the reader has left the landmark. -->
         <p class="circuit-note circuit-return">
-          {copy.otherSelection}
+          {region ? copy.otherSelection : copy.landmarkUnselected}
           <button
             type="button"
             aria-disabled={model.busy ? 'true' : undefined}

@@ -220,6 +220,10 @@ export interface EngineModel {
   /** Throws without a selection (brain-atlas.js:844). */
   isolate(): void;
   clearIsolation(): void;
+  /** Throws without a selection; clearing the selection ends it. */
+  setFocused(focused: boolean): void;
+  /** Grey every region but these and their constituents, the selection and a paint's; null or `reset` ends it. */
+  ghostAround(ids: readonly string[] | null): void;
   hideRegions(ids: readonly string[]): void;
   showRegions(ids: readonly string[]): void;
   restoreHiddenRegions(): void;

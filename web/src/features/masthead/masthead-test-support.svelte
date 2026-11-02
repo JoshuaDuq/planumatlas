@@ -56,7 +56,9 @@
   onSingleKeys={(on) => ((singleKeys = on), calls.push(`keys:${on}`))}
   onFullscreen={() => calls.push('fullscreen')}
   onSnapshot={() => calls.push('snapshot')}
+  currentLink={() => location.href}
   onProvenance={() => calls.push('provenance')}
+  onGuide={() => calls.push(`guide:${document.activeElement?.getAttribute('aria-label')}`)}
   onShortcuts={() => calls.push(`shortcuts:${document.activeElement?.getAttribute('aria-label')}`)}
 >
   {#snippet data()}

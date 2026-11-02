@@ -1,7 +1,15 @@
 // Ported from viewer/ui/chrome/snapshot.test.js: the caption, how it packs and shortens, and the bottom line.
 import { expect, test } from 'vitest';
 import { SURFACE_COLORS, VIEW_NAMES } from '../../lib/types/constants.ts';
-import { SEPARATOR, bottomLine, ellipsize, packFacts, snapshotCaption } from './snapshot.ts';
+import type { LabelMark } from './markings.ts';
+import {
+  SEPARATOR,
+  bottomLine,
+  ellipsize,
+  packFacts,
+  settleLabels,
+  snapshotCaption,
+} from './snapshot.ts';
 import type { CaptionLine } from './snapshot.ts';
 
 const words = (lines: CaptionLine[]) =>
@@ -284,4 +292,50 @@ test('SNAP-09: the statement and scale never overlap, and the scale shares the l
 test('SNAP-06: a fact that fills the room exactly stays on the line', () => {
   expect(packFacts([90, 70], 30, 190)).toEqual([[0, 1]]);
   expect(packFacts([90, 70], 30, 189)).toEqual([[0], [1]]);
+});
+
+/** A landmark label of one line whose box starts 4 px right of its dot and sits above it. */
+function label(x: number, y: number): LabelMark {
+  return {
+    box: { x: x + 4, y: y - 20, width: 100, height: 24 },
+    dot: { x, y, color: '#fff' },
+    leader: null,
+    leaderColor: '#aaa',
+    lines: [{ text: 'Putamen', x: x + 8, y: y - 8, color: '#fff', font: '500 14px sans-serif' }],
+  };
+}
+
+const meets = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+  Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x) &&
+  Math.min(a.y + a.height, b.y + b.height) > Math.max(a.y, b.y);
+
+test('a label clear of the image’s caption, statement and scale bar stays where the stage drew it', () => {
+  const clear = label(200, 200);
+  const scaleBar = { x: 500, y: 560, width: 120, height: 16 };
+  expect(settleLabels([clear], [scaleBar], { x: 0, y: 0, width: 640, height: 600 })).toEqual([
+    clear,
+  ]);
+});
+
+test('a label under the image’s scale bar is placed again round its dot, clear of it and of the other labels', () => {
+  const scaleBar = { x: 500, y: 560, width: 120, height: 16 };
+  const under = label(510, 580);
+  const beside = label(300, 560);
+  const [moved, kept] = settleLabels([under, beside], [scaleBar], {
+    x: 0,
+    y: 0,
+    width: 640,
+    height: 600,
+  });
+  expect(kept).toBe(beside);
+  expect(moved!.dot).toEqual(under.dot);
+  expect(meets(moved!.box, scaleBar)).toBe(false);
+  expect(meets(moved!.box, beside.box)).toBe(false);
+  // Its words move with its box, and a leader joins it to the dot where it stands off.
+  const [dx, dy] = [moved!.box.x - under.box.x, moved!.box.y - under.box.y];
+  expect(moved!.lines[0]).toMatchObject({ x: under.lines[0]!.x + dx, y: under.lines[0]!.y + dy });
+  if (moved!.leader) {
+    expect(moved!.leader.x).toBeGreaterThanOrEqual(moved!.box.x);
+    expect(moved!.leader.x).toBeLessThanOrEqual(moved!.box.x + moved!.box.width);
+  }
 });

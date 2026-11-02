@@ -17,6 +17,7 @@ import type { MoveOptions, Vec3 } from '../engine/api.ts';
 import type { Explorer } from '../types/index.ts';
 import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../ui/focus.ts';
 import type { AppContext } from './context.ts';
+import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
 import type { SceneReader } from './lesson.ts';
 
 /** What choosing a region does to the interface around the stage (app.js:526-532, 718-720). */
@@ -43,6 +44,7 @@ export function createAnatomyCommands(
     chooseExplorer,
     frameLandmark,
     afterReset,
+    displayBaseline,
   }: {
     commands: SceneCommands;
     /** The whole scene, held before a reveal changes the reader's settings and put back by its notice. */
@@ -53,6 +55,8 @@ export function createAnatomyCommands(
     frameLandmark: (options: MoveOptions) => boolean;
     /** What the open tab keeps of its own display once a reset has given the opening one. */
     afterReset: () => void;
+    /** The display Reset display returns to (`excursions.displayBaseline`). */
+    displayBaseline: () => PreparedDisplay;
   },
 ) {
   const { model, sections, camera } = engine;
@@ -70,24 +74,27 @@ export function createAnatomyCommands(
 
   /**
    * Frame the selected region from where the camera already is (app.js:516-524). A structure the opaque
-   * cortex hides is framed with its surroundings, where its outline shows where it lies, and seeing
-   * through the cortex is offered.
+   * cortex hides is framed with its surroundings and focused, so it shows in its colour through
+   * everything ghosted around it.
    */
   function focusSelection({ immediate = false }: MoveOptions = {}) {
     if (frameLandmark({ immediate })) return;
     const id = engineState.model.selectedRegion?.id;
     if (!id) return;
-    const { cortexVisible, cortexOpacity } = model.settings;
+    const { cortexVisible, cortexOpacity, isolatedRegion } = model.settings;
     const hidden = beneathCortex(model.regions.get(id)!) && cortexVisible && cortexOpacity >= 1;
-    if (!camera.frameRegion(id, { immediate, context: hidden }) || !hidden) return;
-    const { lang } = session.state;
-    const name = catalog.label(id).name;
-    const text = t(lang, 'display').deepSelected(
-      `${name.charAt(0).toLocaleUpperCase(lang)}${name.slice(1)}`,
-    );
-    // Focus again says nothing new.
-    if (session.state.notice?.text.includes(text)) return;
-    session.notify({ text, action: 'see-through' });
+    if (hidden && !isolatedRegion && !model.settings.focused) model.setFocused(true);
+    camera.frameRegion(id, { immediate, context: hidden });
+  }
+
+  /** The inspector's Focus and the F key: frame the selection drawn alone in its colour, or end that. */
+  function toggleFocus({ immediate = false }: MoveOptions = {}) {
+    if (model.settings.focused) {
+      model.setFocused(false);
+      return;
+    }
+    model.setFocused(true);
+    focusSelection({ immediate });
   }
 
   /**
@@ -366,10 +373,31 @@ export function createAnatomyCommands(
     camera.applyView('oblique');
   }
 
+  /**
+   * Display's settings back to the prepared display (a lesson's, else the defaults); the camera, data
+   * choices, selection, cut and lesion stay.
+   */
+  function resetDisplay() {
+    commands.begin();
+    const prepared = displayBaseline();
+    display(() => {
+      model.setHemisphere(prepared.hemisphere);
+      model.setCortexVisible(prepared.cortexVisible);
+      model.setCortexOpacity(prepared.cortexOpacity);
+      model.setInternalVisible(prepared.internalVisible);
+      model.restoreHiddenRegions();
+      if (prepared.hiddenRegions.size) model.hideRegions([...prepared.hiddenRegions]);
+      model.clearIsolation();
+      model.setFocused(prepared.focused && engineState.model.selectedRegion !== null);
+    });
+    afterReset();
+    session.notify({ text: t(session.state.lang, 'display').displayReset });
+  }
+
   return {
     selectRegion,
     clearSelection,
-    focusSelection,
+    toggleFocus,
     isolateSelection,
     hideSelection,
     hideRegions,
@@ -391,6 +419,7 @@ export function createAnatomyCommands(
     setInternalVisible: (value: boolean) => display(() => model.setInternalVisible(value)),
     setSpinalCordVisible,
     reset,
+    resetDisplay,
   };
 }
 

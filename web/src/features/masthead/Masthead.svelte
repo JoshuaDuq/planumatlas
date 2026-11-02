@@ -1,14 +1,15 @@
 <!--
   The masthead (index.html:96-153, viewer/ui/chrome/header.js:96-243, styles/masthead.css:1-70,
   308-364, 365-452): the skip link, the brand, the data group H3 supplies as `data`, then
-  Full screen, Save image and the ⋯ settings panel. Full screen and Save image only emit; G6 owns
-  what they do. The page mounts one Tooltip (U5) for the `data-tooltip` triggers.
+  Full screen, Save image, Copy link and the ⋯ settings panel. Full screen and Save image only
+  emit; G6 owns what they do. Copy link copies the address, whose hash holds the whole view. The page mounts one Tooltip (U5) for the `data-tooltip` triggers.
 -->
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { onDestroy, type Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { ThemeChoice } from '../../lib/state/theme.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
+  import { createCopier } from '../../lib/ui/clipboard.svelte.ts';
   import IconButton, { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import SettingsMenu from './SettingsMenu.svelte';
@@ -34,8 +35,11 @@
     onSingleKeys: (on: boolean) => void;
     onFullscreen: () => void;
     onSnapshot: () => void;
+    /** The address of the view on screen, written now rather than after the link writer's delay. */
+    currentLink: () => string;
     /** Given the click, so the dialog opens without its entry animation from the keyboard. */
     onProvenance: (event: MouseEvent) => void;
+    onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
   }
 
@@ -55,7 +59,9 @@
     onSingleKeys,
     onFullscreen,
     onSnapshot,
+    currentLink,
     onProvenance,
+    onGuide,
     onShortcuts,
   }: Props = $props();
 
@@ -69,11 +75,16 @@
   const fullscreenAvailable = document.fullscreenEnabled;
 
   const viewport = $derived(t(lang, 'viewport'));
+  const header = $derived(t(lang, 'header'));
   const fullscreenLabel = $derived(fullscreen ? viewport.exitFullscreen : viewport.fullscreen);
 
   $effect(() => {
     document.documentElement.dataset.singleKeys = singleKeys ? 'on' : 'off';
   });
+
+  const link = createCopier(() => ({ copied: header.linkCopied, failed: header.linkFailed }));
+  onDestroy(link.dispose);
+  const copyLink = () => link.copy(currentLink());
 
   // The href works without script; the model's canvas is the better target (header.js:167-170).
   function skip(event: MouseEvent) {
@@ -83,7 +94,7 @@
 </script>
 
 <header id="masthead" {...{ [OWN_KEYS_ATTRIBUTE]: '' }}>
-  <a class="skip-link" href="#viewport" onclick={skip}>{t(lang, 'header').skipToModel}</a>
+  <a class="skip-link" href="#viewport" onclick={skip}>{header.skipToModel}</a>
   <div class="identity">
     <span class="brand-mark" aria-hidden="true">{@render iconGraphic('brand')}</span>
     <h1 class="brand">Planum</h1>
@@ -110,6 +121,15 @@
       {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
       onclick={onSnapshot}
     />
+    <IconButton
+      class="copy-link-button"
+      icon={link.state === 'copied' ? 'check' : 'link'}
+      data-copied={link.state === 'copied' || undefined}
+      label={header.copyLink}
+      data-tooltip={header.copyLink}
+      {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+      onclick={copyLink}
+    />
     <SettingsMenu
       bind:this={menu}
       disabled={settingsDisabled}
@@ -125,9 +145,16 @@
       {onTheme}
       {onSingleKeys}
       {onFullscreen}
+      onCopyLink={copyLink}
       {onProvenance}
+      {onGuide}
       {onShortcuts}
     />
+    {#if link.state !== 'idle'}
+      <span class="link-said" aria-hidden="true">
+        {link.state === 'copied' ? header.linkCopied : header.linkFailed}
+      </span>
+    {/if}
   </div>
 </header>
 
@@ -179,6 +206,7 @@
       white-space: nowrap;
     }
     .masthead-end {
+      position: relative;
       grid-column: 3;
       grid-row: 1;
       display: flex;
@@ -187,6 +215,30 @@
       gap: var(--space-1);
       margin-left: auto;
       padding-left: var(--space-2);
+    }
+    /* Said under the commands, over the stage's edge, for as long as the copier holds it. */
+    .link-said {
+      position: absolute;
+      top: calc(100% + var(--space-1));
+      right: 0;
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid var(--overlay-border);
+      border-radius: var(--radius-control);
+      background: var(--overlay-plate);
+      color: var(--overlay-ink);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      white-space: nowrap;
+      pointer-events: none;
+      transition: opacity var(--tooltip-transition) var(--ease-ui);
+    }
+    @starting-style {
+      .link-said {
+        opacity: 0;
+      }
+    }
+    .masthead-end :global(.copy-link-button[data-copied]) {
+      color: var(--accent);
     }
     /* One ground for everything pointed at in the bar: the selects', the summary's and the icons'. */
     @media (hover: hover) and (pointer: fine) {
@@ -257,8 +309,17 @@
         gap: 0;
         padding-left: 0;
       }
-      .masthead-end :global(.fullscreen-button) {
+      .masthead-end :global(.fullscreen-button),
+      .masthead-end :global(.copy-link-button) {
         display: none;
+      }
+    }
+  }
+
+  @layer a11y {
+    @media (forced-colors: active) {
+      .link-said {
+        border-color: CanvasText;
       }
     }
   }

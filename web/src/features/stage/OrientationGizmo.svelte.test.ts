@@ -1,6 +1,5 @@
 // The orientation gizmo over the fake engine in a real browser: where the six directions are drawn, what a
-// letter, the caption's oblique link, a chevron and Reset view do, and the APG Toolbar keys and WCAG 2.5.7
-// it answers to.
+// letter, the centre, a chevron and Reset view do, and the APG Toolbar keys and WCAG 2.5.7 it answers to.
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { flushSync } from 'svelte';
@@ -66,6 +65,8 @@ const offset = (code: string) => {
   return { x: at.x - disc.x, y: at.y - disc.y };
 };
 const depth = (code: string) => Number(letter(code).style.zIndex);
+/** The width of a letter's drawn circle, which shrinks with depth while its target does not. */
+const drawnWidth = (code: string) => letter(code).firstElementChild!.getBoundingClientRect().width;
 const pressed = () =>
   [...gizmo().querySelectorAll('[aria-pressed="true"]')].map((node) =>
     node.getAttribute('aria-label'),
@@ -105,8 +106,10 @@ describe('the directions', () => {
     expect(depth('A')).toBe(Math.max(...['R', 'L', 'S', 'I', 'P', 'A'].map(depth)));
     expect(depth('A')).toBeGreaterThan(depth('P'));
     expect(letter('P').dataset.facing).toBe('away');
-    expect(letter('A').getBoundingClientRect().width).toBeGreaterThan(
-      letter('P').getBoundingClientRect().width,
+    // Drawn smaller, but its target is as large.
+    expect(drawnWidth('A')).toBeGreaterThan(drawnWidth('P'));
+    expect(letter('P').getBoundingClientRect().width).toBe(
+      letter('A').getBoundingClientRect().width,
     );
   });
 
@@ -174,38 +177,65 @@ describe('choosing a view', () => {
     });
   });
 
-  test('the link under the axes frames the oblique view', async () => {
+  test('where targets overlap, the one drawn in front takes the press; a letter behind one takes none', async () => {
+    await mount();
+    const centre = document.querySelector<HTMLElement>('.gizmo-centre')!;
+    const targets = [...gizmo().querySelectorAll<HTMLElement>('.gizmo-letter'), centre];
+    const circle = (node: HTMLElement) => ({
+      ...centreOf(node),
+      r: node.getBoundingClientRect().width / 2,
+    });
+    const inside = (x: number, y: number, at: { x: number; y: number; r: number }) =>
+      (x - at.x) ** 2 + (y - at.y) ** 2 <= at.r ** 2;
+    const layer = (node: HTMLElement) => Number(getComputedStyle(node).zIndex);
+    const takes = (node: HTMLElement) => node.dataset.behind !== 'true';
+    let contested = 0;
+    for (const node of targets) {
+      const own = circle(node);
+      for (let dx = -own.r + 1.5; dx < own.r - 1; dx += 1) {
+        for (let dy = -own.r + 1.5; dy < own.r - 1; dy += 1) {
+          const [x, y] = [own.x + dx, own.y + dy];
+          if (!inside(x, y, { ...own, r: own.r - 1.5 })) continue;
+          const hit = document.elementFromPoint(x, y)?.closest('button');
+          if (!takes(node)) {
+            expect(hit, node.getAttribute('aria-label')!).not.toBe(node);
+            continue;
+          }
+          // Clear of every other target that takes presses (each a pixel wider: an edge is hit to a pixel).
+          const rivals = targets.filter(
+            (other) =>
+              other !== node &&
+              takes(other) &&
+              inside(x, y, { ...circle(other), r: circle(other).r + 1.5 }),
+          );
+          if (rivals.some((other) => layer(other) > layer(node))) continue;
+          if (rivals.length) contested++;
+          expect(hit, node.getAttribute('aria-label')!).toBe(node);
+        }
+      }
+    }
+    // The opening view crowds the letters, so the check met overlapping targets, and one letter is behind.
+    expect(contested).toBeGreaterThan(50);
+    expect(targets.filter((node) => !takes(node)).length).toBeGreaterThan(0);
+  });
+
+  test('a press anywhere in a letter’s 24 px target frames its view', async () => {
+    await mount();
+    diagonal();
+    flushSync();
+    const { x, y } = centreOf(letter('S'));
+    const edge = document.elementFromPoint(x, y - 11) as HTMLElement;
+    expect(edge.closest('button')).toBe(letter('S'));
+    edge.click();
+    expect(commands.chooseView.mock.calls).toEqual([['superior']]);
+  });
+
+  test('the centre frames the oblique view', async () => {
     await mount();
     diagonal();
     await userEvent.click(button('Oblique view'));
     expect(commands.chooseView.mock.calls).toEqual([['oblique']]);
     expect(stage.hintRetired).toBe(true);
-  });
-
-  test('the origin is no target: at the oblique view the left letter over it is what a click there chooses', async () => {
-    await mount();
-    const origin = centreOf(document.querySelector('.gizmo-field')!);
-    const hit = document.elementFromPoint(origin.x, origin.y)!.closest('button');
-    expect(hit).toBe(letter('L'));
-    expect(button('Oblique view').getBoundingClientRect().top).toBeGreaterThan(
-      letter('I').getBoundingClientRect().bottom,
-    );
-  });
-
-  test('the caption names the held view in words, and offers the oblique view from any other', async () => {
-    await mount();
-    const caption = () =>
-      document.querySelector('.gizmo-caption')!.textContent!.replace(/\s+/g, ' ').trim();
-    expect(caption()).toBe('Oblique view');
-    await userEvent.click(button('Left view'));
-    expect(caption()).toBe('Left view · Oblique');
-    engine.camera.orbitBy({ azimuth: 0.1 });
-    flushSync();
-    expect(caption()).toBe('Oblique');
-    live.lang = 'fr';
-    flushSync();
-    await userEvent.click(button('Vue postérieure'));
-    expect(caption()).toBe('Vue postérieure · Oblique');
   });
 
   test('a view reads as pressed only while the engine holds it', async () => {
@@ -214,9 +244,9 @@ describe('choosing a view', () => {
     diagonal();
     await userEvent.click(button('Left view'));
     expect(pressed()).toEqual(['Left view']);
-    expect(getComputedStyle(letter('L')).backgroundColor).not.toBe(
-      getComputedStyle(letter('R')).backgroundColor,
-    );
+    const fill = (code: string) =>
+      getComputedStyle(letter(code).firstElementChild!).backgroundColor;
+    expect(fill('L')).not.toBe(fill('R'));
     // A drag, a key or a chevron moves the camera off it; the session still names the view.
     engine.camera.orbitBy({ azimuth: 0.1 });
     flushSync();
@@ -298,7 +328,7 @@ describe('the toolbar', () => {
 });
 
 describe('size', () => {
-  test('its targets are 24 px; on a coarse pointer the chevrons, Reset view and the oblique link grow to 44 px and the glyphs stay', async () => {
+  test('its targets are 24 px; on a coarse pointer they grow to 44 px and the chevrons’ glyphs stay', async () => {
     await mount();
     const turns = () =>
       [...gizmo().querySelectorAll<HTMLElement>('.icon-button')].map((node) => [
@@ -306,19 +336,37 @@ describe('size', () => {
         node.offsetHeight,
       ]);
     const glyph = () => centreOf(button('Turn right').querySelector('svg')!).x;
-    for (const node of gizmo().querySelectorAll<HTMLElement>('button:not(.gizmo-oblique)')) {
+    for (const node of gizmo().querySelectorAll<HTMLElement>('button')) {
       expect(node.offsetWidth).toBe(24);
       expect(node.offsetHeight).toBe(24);
     }
-    expect(button('Oblique view').offsetHeight).toBe(24);
     const drawn = glyph();
     const session = cdp();
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
     try {
       expect(matchMedia('(pointer: coarse)').matches).toBe(true);
       expect(turns()).toEqual(Array(5).fill([44, 44]));
+      for (const node of gizmo().querySelectorAll<HTMLElement>('.gizmo-letter, .gizmo-centre')) {
+        expect([node.offsetWidth, node.offsetHeight]).toEqual([44, 44]);
+      }
       expect(glyph()).toBeCloseTo(drawn, 0);
-      expect(button('Oblique view').offsetHeight).toBe(44);
+    } finally {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    }
+  });
+
+  test('on a coarse pointer a chevron’s glyph is the chevron’s, though a letter’s grown target reaches it', async () => {
+    await mount();
+    engine.camera.applyView('anterior', { immediate: true });
+    const session = cdp();
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+    try {
+      const up = button('Turn up');
+      const glyph = centreOf(up.querySelector('svg')!);
+      const s = letter('S').getBoundingClientRect();
+      // S stands at the top of the axes, and its 44 px target covers the glyph.
+      expect(glyph.y).toBeGreaterThan(s.top);
+      expect(document.elementFromPoint(glyph.x, glyph.y)?.closest('button')).toBe(up);
     } finally {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
     }
@@ -334,6 +382,27 @@ describe('size', () => {
 });
 
 describe('placement', () => {
+  test('on a coarse pointer a gutter narrower than the targets’ growth moves the gizmo in, not past the edge', async () => {
+    await mount();
+    const host = document.getElementById('viewport')!;
+    host.style.setProperty('--stage-gutter', '16px');
+    const session = cdp();
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+    try {
+      const edge = host.getBoundingClientRect();
+      const box = gizmo().getBoundingClientRect();
+      expect(box.top).toBeGreaterThanOrEqual(edge.top);
+      expect(box.right).toBeLessThanOrEqual(edge.right);
+      for (const node of gizmo().querySelectorAll('button')) {
+        const target = node.getBoundingClientRect();
+        expect(target.top).toBeGreaterThanOrEqual(edge.top);
+        expect(target.right).toBeLessThanOrEqual(edge.right);
+      }
+    } finally {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    }
+  });
+
   test('top right of the visible stage, inside the colour keys’ band', async () => {
     await mount({}, { top: 30, right: 40, keyTop: 0, keyRight: 120 });
     const host = document.getElementById('viewport')!.getBoundingClientRect();

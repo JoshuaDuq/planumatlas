@@ -6,6 +6,7 @@
   import type { Language, Region } from '../../lib/types/index.ts';
   import { formatRas, quantity } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import CopyValue from '../../lib/ui/CopyValue.svelte';
   import SourceLabel from './SourceLabel.svelte';
 
   let {
@@ -22,17 +23,23 @@
   const copy = $derived(t(lang, 'inspector'));
   // A structure or a cut region is measured by its volume; a cortical area by its surface.
   const byVolume = $derived(region.kind === 'structure' || region.kind === 'tissue-region');
+  const metric = $derived(
+    byVolume
+      ? quantity(region.segmentation_volume_mm3, 'mm³', lang)
+      : quantity(region.surface_area_mm2, 'mm²', lang),
+  );
+  const ABSENT = '—';
 </script>
+
+{#snippet value(text: string)}
+  {#if text === ABSENT}{text}{:else}<CopyValue value={text} words={copy.copyValue} />{/if}
+{/snippet}
 
 <dl class="facts">
   <dt>{byVolume ? copy.volume : copy.surfaceArea}</dt>
-  <dd class="fact-metric measure">
-    {byVolume
-      ? quantity(region.segmentation_volume_mm3, 'mm³', lang)
-      : quantity(region.surface_area_mm2, 'mm²', lang)}
-  </dd>
+  <dd class="fact-metric measure">{@render value(metric)}</dd>
   <dt>{copy.centroid}</dt>
-  <dd class="measure">{centroid ? formatRas(centroid, lang) : '—'}</dd>
+  <dd class="measure">{@render value(centroid ? formatRas(centroid, lang) : ABSENT)}</dd>
   {#key `${region.id}:${lang}`}
     <SourceLabel {region} {lang} />
   {/key}

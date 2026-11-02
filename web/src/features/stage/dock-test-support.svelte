@@ -1,7 +1,9 @@
 <!-- Fixture for the dock tests: the stage host as the Stage region renders it, with the dock, stubs for the Section, Lesion and Coordinate popovers' bodies, and a tab stop each side. Not shipped. -->
 <script lang="ts">
+  import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
-  import type { Hemisphere, Language, SessionState } from '../../lib/types/index.ts';
+  import type { Language, SessionState } from '../../lib/types/index.ts';
+  import type { DisplayView } from '../colophon/display-state.ts';
   import '../../styles/index.css';
   import Dock from './Dock.svelte';
   import type { DockCommands } from './dock-commands.ts';
@@ -17,13 +19,7 @@
       hasSpinalCord: boolean;
       coordinates: boolean;
       phone: boolean;
-      view: {
-        hemisphere: Hemisphere;
-        cortexVisible: boolean;
-        cortexOpacity: number;
-        internalVisible: boolean;
-        spinalCordVisible: boolean;
-      };
+      view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
     };
     commands: Omit<DockCommands, 'chooseView' | 'reset'>;
     width: number;
@@ -68,6 +64,7 @@
     status={live.status}
     tractReference={live.tractReference}
     view={live.view}
+    prepared={DEFAULT_DISPLAY}
     hasSpinalCord={live.hasSpinalCord}
     {commands}
     onLesionPlacing={(next) => placing.push(next)}

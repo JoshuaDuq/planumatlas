@@ -18,6 +18,8 @@ import type { Region } from '../../types/index.ts';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
 import { Volume } from '../slices/volume.ts';
+import { GHOST } from '../render/ghost-order.ts';
+import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { BrainAtlas, SURFACE_COLORS } from './brain-atlas.ts';
 import type { AtlasManifest, GlbLoader } from './brain-atlas.ts';
@@ -979,6 +981,112 @@ test('selection leaves the material untouched, so atlas colour stays the datum',
   atlas.dispose();
 });
 
+test('focus draws the selection alone in its colour, everything else a grey ghost', async () => {
+  const { atlas } = fixture();
+  await atlas.initialize('a');
+  atlas.setCortexOpacity(0.5);
+  const meshOf = (id: string) =>
+    atlas.visibleMeshes.find((mesh) => mesh.userData['region_id'] === id)!;
+  const drawn = (id: string) => {
+    const { material, userData } = meshOf(id);
+    return [material.color.getHex(), material.opacity, material.depthWrite, userData['ghost']];
+  };
+  // Its tissue's lightness, without the hue that would tint the selection seen through it.
+  const grey = (id: string) => {
+    const tissue = new Color(
+      tissueColor(
+        regions.find((r) => r.id === id)!,
+        appearance.tissue,
+      ),
+    );
+    return new Color()
+      .setScalar(0.2126 * tissue.r + 0.7152 * tissue.g + 0.0722 * tissue.b)
+      .getHex();
+  };
+  const left = meshOf('a-left').material.color.getHex();
+  const right = meshOf('a-right').material.color.getHex();
+  const ghost = appearance.see_through_opacity as number;
+  assert.throws(() => atlas.setFocused(true), /Select a region/);
+
+  atlas.select('a-left');
+  atlas.setFocused(true);
+  // The selection keeps its atlas colour and comes forward through the see-through cortex. A deep
+  // ghost writes depth, so one of them covers a pixel; the cortex's blends over them.
+  assert.deepEqual(drawn('a-left'), [left, 1, true, GHOST.none]);
+  assert.deepEqual(drawn('a-right'), [grey('a-right'), ghost, false, GHOST.cortex]);
+  assert.deepEqual(drawn('stem'), [grey('stem'), ghost, true, GHOST.deep]);
+  assert.notEqual(grey('a-right'), grey('stem'));
+
+  // It follows the next pick.
+  atlas.select('a-right');
+  assert.deepEqual(drawn('a-right'), [right, 1, true, GHOST.none]);
+  assert.deepEqual(drawn('a-left'), [grey('a-left'), ghost, false, GHOST.cortex]);
+
+  // And ends with the selection, for good.
+  atlas.select(null);
+  assert.equal(atlas.settings.focused, false);
+  assert.deepEqual(drawn('a-left'), [left, 0.5, false, GHOST.none]);
+  assert.deepEqual(drawn('stem'), [meshOf('stem').material.color.getHex(), 1, true, GHOST.none]);
+  assert.notEqual(meshOf('stem').material.color.getHex(), grey('stem'));
+  atlas.select('a-left');
+  assert.equal(atlas.settings.focused, false);
+
+  // A paint's regions are what its key describes, so Focus leaves them in their paint.
+  atlas.setPaint({ id: 'deficit:test', colors: new Map([['a-right', [1, 2, 3] as const]]) });
+  atlas.setFocused(true);
+  const paint = new Color().setRGB(1 / 255, 2 / 255, 3 / 255, SRGBColorSpace).getHex();
+  assert.deepEqual(drawn('a-right'), [paint, 1, true, GHOST.none]);
+  assert.deepEqual(drawn('stem'), [grey('stem'), ghost, true, GHOST.deep]);
+  atlas.dispose();
+});
+
+test('ghosting around a route keeps its regions and the selection in colour, the rest a grey ghost', async () => {
+  const { atlas } = fixture();
+  await atlas.initialize('a');
+  const meshOf = (id: string) =>
+    atlas.visibleMeshes.find((mesh) => mesh.userData['region_id'] === id)!;
+  const drawn = (id: string) => {
+    const { material, userData } = meshOf(id);
+    return [material.color.getHex(), material.opacity, userData['ghost']];
+  };
+  const grey = (id: string) =>
+    ghostColor(
+      regions.find((r) => r.id === id)!,
+      appearance.tissue,
+      new Color(),
+    ).getHex();
+  const colour = (id: string) => meshOf(id).material.color.getHex();
+  const [left, right, stem] = ['a-left', 'a-right', 'stem'].map(colour);
+  const ghost = appearance.see_through_opacity as number;
+  assert.throws(() => atlas.ghostAround(['nowhere']), /Unknown region/);
+
+  atlas.ghostAround(['stem']);
+  assert.deepEqual(drawn('stem'), [stem, 1, GHOST.none]);
+  assert.deepEqual(drawn('a-left'), [grey('a-left'), 1, GHOST.cortex]);
+
+  // Tracts names none: only the selection keeps its colour.
+  atlas.ghostAround([]);
+  atlas.select('a-right');
+  assert.deepEqual(drawn('a-right'), [right, 1, GHOST.none]);
+  assert.deepEqual(drawn('stem'), [grey('stem'), ghost, GHOST.deep]);
+
+  // Unlike Focus, the grey cortex keeps the reader's opacity, so the slider still works.
+  atlas.setCortexOpacity(0.8);
+  assert.deepEqual(drawn('a-left'), [grey('a-left'), 0.8, GHOST.cortex]);
+  assert.equal(meshOf('a-left').material.transparent, true);
+  assert.deepEqual(drawn('stem'), [grey('stem'), ghost, GHOST.deep]);
+  atlas.setCortexOpacity(1);
+
+  // Ending it gives back every published colour.
+  atlas.ghostAround(null);
+  assert.deepEqual(drawn('a-left'), [left, 1, GHOST.none]);
+  assert.deepEqual(drawn('stem'), [stem, 1, GHOST.none]);
+  atlas.ghostAround([]);
+  atlas.reset();
+  assert.equal(atlas.settings.ghostedAround, null);
+  atlas.dispose();
+});
+
 test('settings is a cheap snapshot that does not walk the scene graph', async () => {
   const { atlas } = fixture();
   await atlas.initialize('a');
@@ -997,6 +1105,8 @@ test('settings is a cheap snapshot that does not walk the scene graph', async ()
     surfaceColor: 'atlas',
     paint: null,
     isolatedRegion: null,
+    focused: false,
+    ghostedAround: null,
     hiddenRegions: new Set(),
     dissectionCanUndo: false,
   });

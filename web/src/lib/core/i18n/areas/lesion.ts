@@ -10,6 +10,7 @@ export const en = {
   title: 'Lesion',
   sides: { left: 'Left hemisphere', right: 'Right hemisphere', both: 'Both hemispheres' },
   meta: (side: string, radius: string, volume: string) => `${side} · ${radius} sphere · ${volume}`,
+  centre: (point: string) => `Centred at ${point} on this brain (surface RAS)`,
   caveat:
     'A shape placed on this one brain, measured against its 1 mm labels. It is not a patient’s lesion and predicts no deficit.',
   measuring: 'Measuring…',
@@ -100,6 +101,7 @@ export const fr: typeof en = {
   },
   meta: (side: string, radius: string, volume: string) =>
     `${side} · sphère de ${radius} · ${volume}`,
+  centre: (point: string) => `Centrée en ${point} sur ce cerveau (RAS de surface)`,
   caveat:
     'Une forme placée sur ce seul cerveau, mesurée sur ses étiquettes de 1 mm. Ce n’est pas la lésion d’un patient et elle ne prédit aucun déficit.',
   measuring: 'Mesure en cours…',

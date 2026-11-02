@@ -56,6 +56,8 @@
     region: Region | null;
     explorer: Explorer;
     cortexVisible: boolean;
+    /** The selection is drawn alone in its colour, everything else ghosted. */
+    focused: boolean;
     isolated: boolean;
     /** A lesson is open: true when the selection is its landmark (the headline above names it), false for any other region. */
     landmarkSelected?: boolean;
@@ -80,7 +82,7 @@
     cerebellarFunctions?: CerebellarFunctions | null;
     /** The manifest's striatal network atlas, for its confidence threshold. */
     striatalNetworks?: StriatalNetworks | null;
-    /** Takes no arguments: I1 wires `focusSelection()`, which frames with an animation (only the F key is immediate). */
+    /** Takes no arguments: wires `toggleFocus()`, which frames with an animation (only the F key is immediate). */
     onfocus: () => void;
     /** Takes no arguments: I1 wires `isolateSelection`. */
     onisolate: () => void;
@@ -106,6 +108,7 @@
     region,
     explorer,
     cortexVisible,
+    focused,
     isolated,
     landmarkSelected,
     underProfile = false,
@@ -171,7 +174,13 @@
     </dl>
     {#if region.notes}<p class="selected-hint">{region.notes[lang]}</p>{/if}
     <div class="actions">
-      <button type="button" aria-keyshortcuts={ARIA_KEYSHORTCUTS.focusSelection} onclick={onfocus}>
+      <button
+        type="button"
+        data-active={focused}
+        aria-pressed={focused}
+        aria-keyshortcuts={ARIA_KEYSHORTCUTS.focusSelection}
+        onclick={onfocus}
+      >
         {copy.focus}
       </button>
       <button

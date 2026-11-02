@@ -119,6 +119,7 @@
     list.reduce((count, row) => count + (kept.has(row.key) ? row.members.length : 0), 0);
   const matches = $derived(bundlesKept(rows));
   const noMatch = $derived(t(lang, 'navigator').noMatch(query.trim()));
+  const noMatchHint = $derived(text.noMatchHint(catalog.bundles.length, catalog.name[lang]));
 
   const runner = createBusyRunner();
   const results = createDebouncedAnnouncer();
@@ -236,7 +237,7 @@
   }
 
   function say() {
-    results.say(matches === 0 ? `${noMatch}. ${text.noMatchHint}` : text.matches(matches));
+    results.say(matches === 0 ? `${noMatch}. ${noMatchHint}` : text.matches(matches));
   }
 
   function clearSearch() {
@@ -384,7 +385,7 @@
         {/each}
       </div>
       {#if matches === 0}
-        <EmptyState title={noMatch} message={text.noMatchHint} />
+        <EmptyState title={noMatch} message={noMatchHint} />
       {/if}
       {#if !matching}
         <p class="scope">{dataset.otherAnatomy}</p>

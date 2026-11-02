@@ -240,6 +240,29 @@ function fixture() {
   return { sections, model, layer, region };
 }
 
+test('a focus taken or moved while cut repaints the cut, and its end paints it back', () => {
+  const { sections, model, layer, region } = fixture();
+  const cut = () => sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
+  const code = layer.codes.get(region.id);
+  const rgb = () => Array.from(layer.palette.image.data.slice(code * 4, code * 4 + 3));
+  const published = rgb();
+  model.state.selectedRegion = { id: 'another-region' };
+  model.state.focused = true;
+  cut();
+  const [red, green, blue] = rgb();
+  assert.ok(red === green && green === blue, 'a ghosted label is grey');
+  assert.notDeepEqual(rgb(), published);
+  model.state.selectedRegion = region;
+  cut();
+  assert.deepEqual(rgb(), published, 'the label focus moves to is its own colour again');
+  model.state.selectedRegion = { id: 'another-region' };
+  cut();
+  model.state.focused = false;
+  cut();
+  assert.deepEqual(rgb(), published);
+  sections.dispose();
+});
+
 test('Yeo colouring points the cut and the caps at the striatal network volume, and only Yeo colouring', () => {
   const { sections, model } = fixture();
   const striatal = sections.anatomy.striatal;

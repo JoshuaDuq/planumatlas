@@ -1,5 +1,5 @@
 import { readRepoJson } from '../../../../test/repo.ts';
-import type { DisplaySettings, Region } from '../../types/index.ts';
+import type { DisplaySettings, ModelState, Region } from '../../types/index.ts';
 import type { CatalogSettings } from './catalog.ts';
 
 /** A published file under `public/models/`, parsed. */
@@ -14,3 +14,4 @@ export const anatomies = readModel<{ default: string; anatomies: { id: string }[
 export const asRegion = (fields: object): Region => fields as Region;
 export const asSettings = (fields: object): CatalogSettings => fields as CatalogSettings;
 export const asDisplaySettings = (fields: object): DisplaySettings => fields as DisplaySettings;
+export const asModelState = (fields: object): ModelState => fields as ModelState;

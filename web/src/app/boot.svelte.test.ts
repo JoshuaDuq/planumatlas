@@ -287,6 +287,21 @@ describe('the controllers', () => {
     expect(ports.showDetail).not.toHaveBeenCalled();
   });
 
+  test('place a lesion during a lesson without leaving it: its tab, landmark and panel stay', async () => {
+    const { app, ports } = await boot('#tab=circuits&circuit=vision&step=3');
+    const world = app.world!;
+    await vi.waitFor(() => expect(world.view.current.lesson.circuit).toBe('vision'));
+    const landmark = world.view.current.selectedRegion?.id;
+    expect(landmark).toBe('learning:left:lateral-geniculate');
+    ports.showDetailInPlace.mockClear();
+    engine.emit('lesionPoint', { point: [10, 20, 30] });
+    expect(world.lesion.sphere?.centre).toEqual([10, 20, 30]);
+    expect(world.view.current.explorer).toBe('circuits');
+    expect(world.view.current.lesson.circuit).toBe('vision');
+    expect(world.view.current.selectedRegion?.id).toBe(landmark);
+    expect(ports.showDetailInPlace).not.toHaveBeenCalled();
+  });
+
   test('say a lost graphics context and its return', async () => {
     const { app } = await boot();
     engine.emit('contextLost', undefined);

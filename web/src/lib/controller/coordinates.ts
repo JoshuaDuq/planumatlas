@@ -16,7 +16,7 @@ export function createCoordinatePlacement({
   ui,
 }: {
   coordinates: Pick<Coordinates, 'metadata' | 'map'>;
-  lesion: Pick<LesionStore, 'placeCoordinate' | 'sphere' | 'coordinate'>;
+  lesion: Pick<LesionStore, 'placeCoordinate' | 'sphere' | 'replaced' | 'restoreReplaced'>;
   engine: {
     sections: Pick<Engine['sections'], 'setCrosshair'>;
     camera: Pick<Engine['camera'], 'focusPoint'>;
@@ -25,8 +25,9 @@ export function createCoordinatePlacement({
   ui: {
     showAnatomy(): void;
     showDetail(): void;
-    /** The one sphere held a lesion the reader placed, which the coordinate has taken. */
+    /** The one sphere held a lesion the reader placed, which the coordinate has taken; offers its undo. */
     sayLesionReplaced(): void;
+    sayLesionRestored(): void;
   };
 }) {
   return {
@@ -36,16 +37,21 @@ export function createCoordinatePlacement({
       const current = commands.begin();
       const landing = await coordinates.map(entered, space);
       if (landing && current()) {
-        const replacing = lesion.sphere !== null && lesion.coordinate === null;
         ui.showAnatomy();
         lesion.placeCoordinate({ entered, space }, landing, coordinates.metadata.radius_mm);
         const { centre } = lesion.sphere!;
         engine.sections.setCrosshair(centre);
         engine.camera.focusPoint(centre);
         ui.showDetail();
-        if (replacing) ui.sayLesionReplaced();
+        if (lesion.replaced) ui.sayLesionReplaced();
       }
       return landing !== null;
+    },
+    /** The replacement's undo: the lesion back as it was, and the coordinate gone. A later command takes over. */
+    undoReplacement(): void {
+      commands.begin();
+      lesion.restoreReplaced();
+      ui.sayLesionRestored();
     },
   };
 }

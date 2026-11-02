@@ -161,8 +161,8 @@ describe('DataBar on the bar', () => {
     const props = barProps();
     const view = await wide(props);
     expect(texts(el(field('Atlas')))).toEqual(['Destrieux', 'HCP-MMP', 'FreeSurfer aseg']);
+    // No empty paint option while no tab paints: assistive technology lists only real choices.
     expect(texts(el(field('Colour')))).toEqual([
-      '',
       'Tissue',
       'T1 MRI',
       'Regions',
@@ -179,7 +179,7 @@ describe('DataBar on the bar', () => {
       'HCP-MMP',
       'FreeSurfer aseg (colour becomes Regions)',
     ]);
-    expect(texts(el(field('Colour')))[1]).toBe('Tissue');
+    expect(texts(el(field('Colour')))[0]).toBe('Tissue');
   });
 
   test('a choice downloading shows its progress in the select, and reverts if it does not land', async () => {
@@ -222,13 +222,18 @@ describe('DataBar on the bar', () => {
 
   test('a tab painting the brain shows its name in the hidden paint option', async () => {
     const paint = { id: 'function:memory', colors: new Map() };
-    await wide(barProps({ paint }));
+    const view = await wide(barProps());
     const colour = el(field('Colour')) as HTMLSelectElement;
+    // The option is added when a tab starts painting and leaves when it stops.
+    await view.rerender({ bar: barProps({ paint }) });
     expect(colour.selectedOptions[0].textContent).toBe('Functions');
     expect(colour.selectedOptions[0].hidden).toBe(true);
     expect(document.getElementById(colour.getAttribute('aria-describedby')!)!.textContent).toMatch(
       /^Set by the Functions tab/,
     );
+    await view.rerender({ bar: barProps() });
+    expect(colour.selectedOptions[0].textContent).toBe('Tissue');
+    expect([...colour.options].some((option) => option.value === 'paint')).toBe(false);
   });
 
   test('the subject select is disabled while switching, and focus is not dropped to the page', async () => {
@@ -249,6 +254,43 @@ describe('DataBar on the bar', () => {
       );
       expect(control.hasAttribute('title')).toBe(false);
     }
+  });
+
+  test('a press on a caption lists each choice and its note under the bar; it closes as a popover does', async () => {
+    await wide();
+    const caption = (name: string) =>
+      [...bar().querySelectorAll<HTMLElement>('.masthead-data label')].find(
+        (label) => label.textContent === name,
+      )!;
+    const notes = () => bar().querySelector<HTMLElement>('.data-notes');
+    await userEvent.click(caption('Atlas'));
+    expect(notes()?.checkVisibility()).toBe(true);
+    expect([...notes()!.querySelectorAll('.data-label')].map((node) => node.textContent)).toEqual([
+      'Subject',
+      'Atlas',
+      'Colour',
+      'Internal anatomy',
+    ]);
+    const described = el(field('Atlas')).getAttribute('aria-describedby')!;
+    expect(notes()!.textContent).toContain(document.getElementById(described)!.textContent);
+    // The press opens the list; it does not hand the select focus.
+    expect(document.activeElement).not.toBe(el(field('Atlas')));
+
+    await userEvent.click(caption('Colour'));
+    expect(notes()).toBeNull();
+
+    await userEvent.click(caption('Colour'));
+    let prevented = false;
+    document.addEventListener('keydown', (event) => (prevented = event.defaultPrevented), {
+      once: true,
+    });
+    await userEvent.keyboard('{Escape}');
+    expect(prevented).toBe(true);
+    expect(notes()).toBeNull();
+
+    await userEvent.click(caption('Atlas'));
+    await more().click();
+    expect(notes()).toBeNull();
   });
 
   test('French strings and names', async () => {
@@ -334,6 +376,17 @@ describe('DataBar collapsed behind its summary', () => {
     expect(prevented).toBe(true);
     expect(el(summary()).getAttribute('aria-expanded')).toBe('false');
     expect(document.activeElement).toBe(el(summary()));
+  });
+
+  test('a caption in the popover is the field’s label: a press focuses its select', async () => {
+    await phone();
+    await summary().click();
+    const caption = [...bar().querySelectorAll<HTMLElement>('.masthead-data label')].find(
+      (label) => label.textContent === 'Atlas',
+    )!;
+    await userEvent.click(caption);
+    expect(document.activeElement).toBe(el(field('Atlas')));
+    expect(bar().querySelector('.data-notes')).toBeNull();
   });
 
   test('a press outside closes it without moving focus', async () => {

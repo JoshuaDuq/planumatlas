@@ -32,6 +32,94 @@
     color: var(--overlay-ink);
   }
 
+  /* A route landmark's number and name: haloed type like the orientation letters, never a plate. */
+  .stage-label {
+    --label-dot: var(--overlay-ink);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 var(--space-1);
+    color: var(--overlay-ink);
+    font-size: var(--text-stage);
+    font-weight: 500;
+    line-height: var(--lh-caption);
+    text-align: left;
+    white-space: nowrap;
+  }
+  /* Stacked shadows, not the letters' text stroke, which axe reads as the text's own colour. */
+  .stage-label-text {
+    flex: none;
+    text-shadow:
+      0 0 1px var(--overlay-halo-core),
+      0 0 1px var(--overlay-halo-core),
+      0 0 2px var(--overlay-halo-core),
+      0 0 2px var(--overlay-halo-core),
+      0 0 4px var(--overlay-halo-core),
+      0 0 8px var(--overlay-halo);
+  }
+  .stage-label-number {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The Complete Name Rule: a long name wraps rather than truncates. */
+  .stage-label-name {
+    max-width: 20em;
+    white-space: normal;
+  }
+  /* The number alone, centred on its target; the name keeps its measured size out of sight. */
+  .stage-label[data-short='true'] {
+    justify-content: center;
+  }
+  .stage-label[data-short='true'] .stage-label-name {
+    position: absolute;
+    left: 100%;
+    width: max-content;
+    visibility: hidden;
+  }
+  .stage-label-dot,
+  .stage-label-leader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+  .stage-label-dot {
+    width: 5px;
+    height: 5px;
+    margin: -2.5px;
+    border-radius: 50%;
+    background: var(--label-dot);
+    box-shadow: 0 0 0 1.5px var(--overlay-halo-core);
+  }
+  .stage-label-leader {
+    display: none;
+    height: 1px;
+    margin-top: -0.5px;
+    transform-origin: 0 50%;
+    background: var(--overlay-ink-muted);
+    box-shadow: 0 0 0 1px var(--overlay-halo-core);
+  }
+  .stage-label[data-leader='true'] .stage-label-leader {
+    display: block;
+  }
+  /* Phone markings are 13px; a raised sheet or an open popover leaves them nothing to label. */
+  @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+    .stage-label {
+      font-size: var(--text-caption);
+    }
+    #viewport:has(.stage-popover:not([hidden])) .stage-label {
+      visibility: hidden;
+    }
+  }
+  #viewport[data-sheet-full='true'] .stage-label {
+    visibility: hidden;
+  }
+
   /* --accent is measured against a rail; on the stage it is the overlay's teal. */
   #viewport :focus-visible {
     outline-color: var(--overlay-accent);
@@ -60,6 +148,10 @@
   @media (forced-colors: active) {
     #viewport:has(> canvas:focus-visible)::after {
       border-color: Highlight;
+    }
+    /* The stage stays dark in every mode, so its labels keep the overlay ink and halo. */
+    .stage-label {
+      forced-color-adjust: none;
     }
   }
 }

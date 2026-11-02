@@ -4,6 +4,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Colophon from '../../features/colophon/Colophon.svelte';
+  import { displayChanges } from '../../features/colophon/display-state.ts';
   import { regionCountText } from '../../features/colophon/region-count.ts';
   import { getApp } from '../application.svelte.ts';
 
@@ -43,6 +44,8 @@
       visibleCount: world.catalog.visibleCount,
       choosing,
     })}
+    displayChanges={tractReference ? [] : displayChanges(current, world.excursions.displayBaseline)}
+    onresetdisplay={world.anatomy.resetDisplay}
     onprovenance={onProvenance}
   />
 {:else}

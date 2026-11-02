@@ -1,6 +1,6 @@
 // The masthead against the APG Disclosure and Radio Group tables and the legacy header.js cases
 // (header.test.js:124-169, chrome.contract.test.js:305-376), as behaviour in a real browser.
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { expectAxeClean, expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
@@ -54,7 +54,12 @@ describe('Masthead', () => {
     await render(Fixture);
     await expect.element(page.getByRole('banner')).toBeVisible();
     await expect.element(page.getByRole('heading', { level: 1, name: 'Planum' })).toBeVisible();
-    for (const name of ['Full screen', 'Save image (PNG)', 'More settings']) {
+    for (const name of [
+      'Full screen',
+      'Save image (PNG)',
+      'Copy link to this view',
+      'More settings',
+    ]) {
       const control = el(button(name));
       expect(control.dataset.tooltip).toBe(name);
       expect(control.hasAttribute('title')).toBe(false);
@@ -111,6 +116,37 @@ describe('Masthead', () => {
     await button('Full screen').click();
     await button('Save image (PNG)').click();
     expect(calls).toEqual(['fullscreen', 'snapshot']);
+  });
+
+  test('Copy link copies the address and shows and says so; a refusal is shown, not dropped', async () => {
+    history.replaceState(null, '', `${location.pathname}#atlas=aseg&view=left`);
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const said = () => document.querySelector('.link-said')?.textContent!.trim() ?? null;
+    try {
+      await render(Fixture);
+      const copy = el(button('Copy link to this view'));
+      expect(copy.dataset.tooltip).toBe('Copy link to this view');
+      expect(said()).toBeNull();
+      copy.click();
+      await expect.poll(said).toBe('Link copied');
+      expect(write).toHaveBeenCalledExactlyOnceWith(location.href);
+      expect(write.mock.calls[0]![0]).toMatch(/#atlas=aseg&view=left$/);
+      expect(announced()).toBe('Link copied');
+      expect(copy.hasAttribute('data-copied')).toBe(true);
+
+      const refusal = new DOMException('Write permission denied.', 'NotAllowedError');
+      write.mockRejectedValueOnce(refusal);
+      copy.click();
+      await expect.poll(said).toBe('Could not copy the link');
+      expect(announced()).toBe('Could not copy the link');
+      expect(copy.hasAttribute('data-copied')).toBe(false);
+      expect(logged).toHaveBeenCalledExactlyOnceWith(refusal);
+    } finally {
+      write.mockRestore();
+      logged.mockRestore();
+      history.replaceState(null, '', location.pathname);
+    }
   });
 
   test('without document.fullscreenEnabled neither Full screen control is offered', async () => {
@@ -179,17 +215,17 @@ describe('Masthead', () => {
     expect(el(radio('English')).textContent!.trim().toLowerCase()).toBe('en');
   });
 
-  test('Tab order inside the panel: language, theme, single keys, Keyboard shortcuts', async () => {
+  test('Tab order inside the panel: language, theme, single keys, How to use Planum, Keyboard shortcuts', async () => {
     await render(Fixture);
     el(more()).focus();
     await userEvent.keyboard('{Enter}');
     const order: string[] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       await userEvent.keyboard('{Tab}');
       order.push(nameOf(document.activeElement!));
     }
-    expect(order.slice(0, 3)).toEqual(['English', 'System', 'On']);
-    expect(order[3]).toMatch(/^Keyboard shortcuts/);
+    expect(order.slice(0, 4)).toEqual(['English', 'System', 'On', 'How to use Planum']);
+    expect(order[4]).toMatch(/^Keyboard shortcuts/);
   });
 
   test('arrows move and select and wrap; a keyboard choice keeps the panel open', async () => {
@@ -315,6 +351,15 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
+  test('How to use Planum closes the panel and acts with focus already on ⋯', async () => {
+    const calls: string[] = [];
+    await render(Fixture, { calls });
+    await open();
+    await button('How to use Planum').click();
+    expect(calls).toEqual(['guide:More settings']);
+    expect(panelOpen()).toBe(false);
+  });
+
   test('Provenance waits for the manifest', async () => {
     const view = await render(Fixture, { provenanceReady: false });
     await page.viewport(390, 844);
@@ -331,7 +376,7 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
-  test('phone: the menu offers Full screen and Provenance; the masthead hides its Full screen button', async () => {
+  test('phone: the menu offers Full screen, Copy link and Provenance; the masthead hides those buttons', async () => {
     const calls: string[] = [];
     await render(Fixture, { calls });
     await page.viewport(390, 844);
@@ -340,11 +385,31 @@ describe('Masthead', () => {
       const items = [...document.querySelectorAll<HTMLElement>('.settings-menu .menu-item')].map(
         (item) => item.textContent!.replace(/\s+/g, ' ').trim(),
       );
-      expect(items).toEqual(['Full screen', 'Provenance', 'Keyboard shortcuts ?']);
+      expect(items).toEqual([
+        'Full screen',
+        'Copy link to this view',
+        'Provenance',
+        'How to use Planum',
+        'Keyboard shortcuts ?',
+      ]);
       // The masthead's own button is display:none, so only the menu item is in the tree.
       expect(page.getByRole('button', { name: 'Full screen' }).elements()).toHaveLength(1);
+      expect(page.getByRole('button', { name: 'Copy link to this view' }).elements()).toHaveLength(
+        1,
+      );
       await button('Full screen').click();
       expect(calls).toEqual(['fullscreen']);
+      const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+      try {
+        await open();
+        await button('Copy link to this view').click();
+        expect(write).toHaveBeenCalledExactlyOnceWith(location.href);
+        // The menu has closed; the confirmation stands under the masthead.
+        await expect.element(page.getByText('Link copied')).toBeVisible();
+        expect(panelOpen()).toBe(false);
+      } finally {
+        write.mockRestore();
+      }
     } finally {
       await page.viewport(1280, 800);
     }

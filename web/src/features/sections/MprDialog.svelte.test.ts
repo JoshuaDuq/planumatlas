@@ -42,12 +42,15 @@ beforeEach(async () => {
   });
   announced = [];
 });
-afterEach(() => {
+afterEach(async () => {
+  if (document.fullscreenElement) await document.exitFullscreen();
   mpr.dispose();
   watcher?.disconnect();
   vi.restoreAllMocks();
   cleanup();
 });
+
+let view: { holdsKeys(): boolean };
 
 async function mount() {
   const result = await render(Fixture, {
@@ -57,32 +60,44 @@ async function mount() {
     live,
     anatomy,
   });
-  // What the dialog's live region is made to say, in order.
+  view = result.component as unknown as typeof view;
+  return result;
+}
+
+/** What the live region is made to say, in order, from the moment it is shown. */
+function listen() {
+  watcher?.disconnect();
   const status = statusRegion();
   watcher = new MutationObserver(() => {
     if (status.textContent) announced.push(status.textContent);
   });
   watcher.observe(status, { childList: true, characterData: true, subtree: true });
-  return result;
 }
 
+const dock = () => document.querySelector<HTMLElement>('.mpr-dock');
 const dialog = () => document.querySelector('dialog') as HTMLDialogElement;
-const statusRegion = () => document.querySelector('dialog [role="status"]') as HTMLElement;
+/** The docked region beside a desktop stage, the dialog on a phone. */
+const shell = (): HTMLElement => dock() ?? dialog();
+const shown = () => (dock() ? true : (dialog()?.open ?? false));
+const statusRegion = () => shell().querySelector('[role="status"]') as HTMLElement;
 const opener = () => page.getByRole('button', { name: 'Linked MRI' }).element() as HTMLElement;
+const more = () => page.getByRole('button', { name: 'More' }).element() as HTMLElement;
 const section = (plane: string) =>
-  dialog().querySelector<HTMLElement>(`.plane[data-plane="${plane}"]`)!;
+  shell().querySelector<HTMLElement>(`.plane[data-plane="${plane}"]`)!;
 const canvas = (plane: string) => section(plane).querySelector('canvas')!;
 const slider = (name: string) => page.getByRole('slider', { name, exact: true });
 const sliderElement = (name: string) => slider(name).element() as HTMLInputElement;
 const crosshair = () => engine.sections.state.crosshair;
 const calls = (method: string) =>
   engine.calls.filter((call) => call.domain === 'sections' && call.method === method);
+const box = (element: Element) => element.getBoundingClientRect();
 
-/** Keyboard open, as Enter on the opener does; waits for the dialog. */
+/** Keyboard open, as Enter on the opener does; waits for the MRI. */
 async function openFromKeyboard() {
   opener().focus();
   await userEvent.keyboard('{Enter}');
-  await expect.poll(() => dialog().open).toBe(true);
+  await expect.poll(shown).toBe(true);
+  listen();
 }
 
 async function opened() {
@@ -93,48 +108,122 @@ async function opened() {
 /** A frame later: the moves a slider makes are coalesced to one a frame. */
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-function pixel(plane: string, x: number, y: number) {
-  const context = canvas(plane).getContext('2d')!;
-  return [...context.getImageData(x, y, 1, 1).data];
+function pixel(target: HTMLCanvasElement, x: number, y: number) {
+  return [...target.getContext('2d')!.getImageData(x, y, 1, 1).data];
 }
 
-describe('opening and closing', () => {
-  test('is a modal named for what it shows, with Close the first stop', async () => {
+describe('docked beside the stage', () => {
+  test('is a region named for what it shows, not a modal: Close takes focus and the page stays live', async () => {
     await opened();
-    await expect.element(page.getByRole('dialog', { name: 'Linked MRI sections' })).toBeVisible();
+    await expect.element(page.getByRole('region', { name: 'Linked MRI sections' })).toBeVisible();
     expect(document.activeElement).toBe(page.getByRole('button', { name: 'Close' }).element());
+    expect(document.querySelector('dialog:modal')).toBeNull();
+    expect(more().closest('[inert]')).toBeNull();
+    // Tab leaves it for the page, as from any region: there is no trap.
+    more().focus();
+    expect(document.activeElement).toBe(more());
   });
 
-  test('Escape closes it at once and focus returns to the button that opened it', async () => {
+  test('takes a column beside the stage at 1280 px, and the lower half of its column at 1024 px', async () => {
     await opened();
+    const stage = document.getElementById('viewport')!;
+    expect(box(dock()!).left).toBe(box(stage).right);
+    expect(box(dock()!).top).toBe(box(stage).top);
+    expect(box(dock()!).height).toBe(box(stage).height);
+    // A 2 × 2 of slices: two planes side by side, the third under the first.
+    expect(box(canvas('coronal')).top).toBe(box(canvas('sagittal')).top);
+    expect(box(canvas('axial')).left).toBe(box(canvas('sagittal')).left);
+    await page.viewport(1024, 768);
+    await expect.poll(() => box(dock()!).top).toBe(box(stage).bottom);
+    expect(box(dock()!).left).toBe(box(stage).left);
+    expect(box(dock()!).width).toBe(box(stage).width);
+    // Three planes in a row under the stage.
+    expect(box(canvas('axial')).top).toBe(box(canvas('sagittal')).top);
+    expect(box(canvas('axial')).left).toBeGreaterThan(box(canvas('coronal')).right);
+  });
+
+  test('the stage gets its room back when it closes', async () => {
+    await mount();
+    const stage = document.getElementById('viewport')!;
+    const whole = box(stage).width;
+    await openFromKeyboard();
+    expect(box(stage).width).toBeLessThan(whole - 300);
     await userEvent.keyboard('{Escape}');
-    await expect.poll(() => dialog().open).toBe(false);
-    expect(dialog().hasAttribute('data-instant')).toBe(true);
+    await expect.poll(() => box(stage).width).toBe(whole);
+  });
+
+  test('Escape inside closes it, keeps it from the page, and focus returns to the button that opened it', async () => {
+    await opened();
+    const reachedPage: boolean[] = [];
+    const onKey = (event: KeyboardEvent) => reachedPage.push(event.defaultPrevented);
+    window.addEventListener('keydown', onKey);
+    try {
+      sliderElement('Axial position').focus();
+      await userEvent.keyboard('{Escape}');
+      await expect.poll(shown).toBe(false);
+      // The page's keymap ignores a key a control already handled: Escape does not also clear the selection.
+      expect(reachedPage).toEqual([true]);
+      await expect.poll(() => document.activeElement).toBe(opener());
+    } finally {
+      window.removeEventListener('keydown', onKey);
+    }
+  });
+
+  test('the Close button closes it and focus returns to the opener', async () => {
+    await opened();
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect.poll(shown).toBe(false);
     await expect.poll(() => document.activeElement).toBe(opener());
   });
 
-  test('a keyboard opening has no transition; a pointer opening does', async () => {
+  test('closing it while focus is elsewhere leaves focus where it is', async () => {
+    await opened();
+    more().focus();
+    mpr.close({ instant: true });
+    await expect.poll(shown).toBe(false);
+    expect(document.activeElement).toBe(more());
+  });
+
+  test('without the opener, closing hands focus to the fallback', async () => {
     await mount();
-    await openFromKeyboard();
-    expect(dialog().hasAttribute('data-instant')).toBe(true);
+    await engine.sections.load();
+    mpr.show({ instant: false });
+    await expect.poll(shown).toBe(true);
     await userEvent.keyboard('{Escape}');
-    await expect.poll(() => dialog().open).toBe(false);
-    await page.getByRole('button', { name: 'Linked MRI' }).click();
-    await expect.poll(() => dialog().open).toBe(true);
-    expect(dialog().hasAttribute('data-instant')).toBe(false);
+    await expect.poll(() => document.activeElement).toBe(more());
   });
 
-  test('is not dismissed by a click on the backdrop', async () => {
-    await opened();
-    dialog().dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await frame();
-    expect(dialog().open).toBe(true);
+  test('over the full-screen stage, where a docked region is not drawn, it is the modal on top', async () => {
+    await mount();
+    const entered = new Promise((resolve) =>
+      document.addEventListener('fullscreenchange', resolve, { once: true }),
+    );
+    await userEvent.click(page.getByRole('button', { name: 'Full screen' }));
+    await entered;
+    expect(document.fullscreenElement).toBe(document.getElementById('viewport'));
+    // As `M` opens it there: the opener outside the stage is not drawn.
+    await engine.sections.load();
+    mpr.show({ instant: true });
+    await expect.poll(() => dialog()?.open).toBe(true);
+    expect(dock()).toBeNull();
+    expect(dialog().matches(':modal')).toBe(true);
+    expect(dialog().contains(document.activeElement)).toBe(true);
+    expect(view.holdsKeys()).toBe(true);
+    // Leaving full screen docks it beside the stage again.
+    await document.exitFullscreen();
+    await expect.poll(dock).not.toBeNull();
+    expect(dock()!.contains(document.activeElement)).toBe(true);
   });
 
-  test('the Close button closes it', async () => {
-    await opened();
-    await page.getByRole('button', { name: 'Close' }).click();
-    await expect.poll(() => dialog().open).toBe(false);
+  test("the page's keys stay out only while focus is inside it", async () => {
+    await mount();
+    expect(view.holdsKeys()).toBe(false);
+    await openFromKeyboard();
+    expect(view.holdsKeys()).toBe(true);
+    sliderElement('Axial position').focus();
+    expect(view.holdsKeys()).toBe(true);
+    more().focus();
+    expect(view.holdsKeys()).toBe(false);
   });
 });
 
@@ -297,7 +386,7 @@ describe('moving the crosshair', () => {
     expect(crosshair()).toEqual([0, 0, 0]);
   });
 
-  test('the wheel at the end of the range is left to the page, so the dialog can still scroll', async () => {
+  test('the wheel at the end of the range is left to the page, so the region can still scroll', async () => {
     await opened();
     engine.sections.setCrosshair([0, 0, 128]);
     const event = new WheelEvent('wheel', { deltaY: -100, bubbles: true, cancelable: true });
@@ -335,15 +424,27 @@ describe('display', () => {
 });
 
 describe('the pictures', () => {
-  test("draw the slice at the scan's resolution with the crosshair over it", async () => {
+  test("draw the slice alone at the scan's resolution, and mark the crosshair over it at one screen pixel", async () => {
     await mount();
     engine.sections.setCrosshair([1, 1, 0]);
     await openFromKeyboard();
     await expect.poll(() => canvas('axial').width).toBe(SIZE);
-    // 1 mm of a 256 mm field on 128 pixels: the crosshair is the single column 64, ringed in dark.
-    await expect.poll(() => pixel('axial', 64, 40)).toEqual([79, 182, 224, 255]);
-    expect(pixel('axial', 63, 40)).toEqual([14, 17, 22, 255]);
-    expect(pixel('axial', 65, 40)).toEqual([14, 17, 22, 255]);
+    // The fake's slice, untouched where the crosshair falls.
+    const index = 40 * SIZE + 64;
+    expect(pixel(canvas('axial'), 64, 40)).toEqual([
+      index % 256,
+      (index * 3) % 256,
+      (index * 7) % 256,
+      255,
+    ]);
+    // 1 mm right and 1 mm anterior of the centre of a 256 mm field, seen from above.
+    const picture = box(canvas('axial'));
+    const down = box(section('axial').querySelector('.crosshair-down')!);
+    const across = box(section('axial').querySelector('.crosshair-across')!);
+    expect(down.width).toBe(1);
+    expect(across.height).toBe(1);
+    expect(down.left + 0.5).toBeCloseTo(picture.left + picture.width * (0.5 + 1 / 256), 1);
+    expect(across.top + 0.5).toBeCloseTo(picture.top + picture.height * (0.5 - 1 / 256), 1);
   });
 
   test('every voxel is shown, however the segmentation covers it', async () => {
@@ -353,27 +454,36 @@ describe('the pictures', () => {
     );
     await opened();
     await expect.poll(() => canvas('sagittal').width).toBe(SIZE);
-    expect(pixel('sagittal', 5, 5)[3]).toBe(255);
+    expect(pixel(canvas('sagittal'), 5, 5)[3]).toBe(255);
   });
 
-  test("letter the edges and the plane's offset in the reader's language, right and left as D and G in French", async () => {
-    const drawn: string[] = [];
-    vi.spyOn(CanvasRenderingContext2D.prototype, 'fillText').mockImplementation((text) => {
-      drawn.push(text);
-    });
-    await mount();
-    engine.sections.setCrosshair([0, 0, 12.5]);
-    await openFromKeyboard();
-    await expect.poll(() => drawn.length).toBeGreaterThanOrEqual(15);
-    const axial = drawn.slice(-5);
-    expect(axial).toEqual(['A', 'R', 'P', 'L', 'Axial +12.5 mm']);
-    drawn.length = 0;
+  test("letter each edge as the stage does, in the reader's language: right and left are D and G in French", async () => {
+    await opened();
+    const letters = () =>
+      [...section('axial').querySelectorAll<HTMLElement>('.edge')].map((edge) => [
+        edge.dataset.edge,
+        edge.textContent,
+      ]);
+    expect(letters()).toEqual([
+      ['top', 'A'],
+      ['right', 'R'],
+      ['bottom', 'P'],
+      ['left', 'L'],
+    ]);
+    // Type, not part of the bitmap: as legible on a small panel as on the stage.
+    const edge = section('axial').querySelector<HTMLElement>('[data-edge="left"]')!;
+    expect(getComputedStyle(edge).fontSize).toBe('14px');
+    expect(edge.getAttribute('aria-hidden')).toBe('true');
     live.lang = 'fr';
-    await expect.poll(() => drawn.length).toBeGreaterThanOrEqual(15);
-    expect(drawn.slice(-5)).toEqual(['A', 'D', 'P', 'G', 'Axial +12,5 mm']);
+    await expect.poll(letters).toEqual([
+      ['top', 'A'],
+      ['right', 'D'],
+      ['bottom', 'P'],
+      ['left', 'G'],
+    ]);
   });
 
-  test('a change that leaves the picture as it was does not resample it', async () => {
+  test('a plane is resampled only when its own slice changes', async () => {
     await opened();
     await expect.poll(() => calls('pixels').length).toBe(3);
     // The cut atlas is not part of the picture.
@@ -382,8 +492,15 @@ describe('the pictures', () => {
     await frame();
     await frame();
     expect(calls('pixels')).toHaveLength(3);
+    // Right of the midline moves the sagittal slice; the other two only move their crosshair.
     engine.sections.setCrosshair([3, 0, 0]);
-    await expect.poll(() => calls('pixels').length).toBe(6);
+    await expect.poll(() => calls('pixels').length).toBe(4);
+    expect((calls('pixels').at(-1)!.args[0] as { normal: number[] }).normal).toEqual([1, 0, 0]);
+    expect(section('coronal').querySelector<HTMLElement>('.crosshair-down')!.style.left).not.toBe(
+      '50%',
+    );
+    engine.sections.setWindow(100, 180);
+    await expect.poll(() => calls('pixels').length).toBe(7);
   });
 
   test('reversing the cut on a plane turns that panel to the side the stage now faces, and redraws it', async () => {
@@ -405,12 +522,12 @@ describe('the pictures', () => {
 describe('the readout', () => {
   test('shows where the crosshair is and what is under it, at once', async () => {
     await opened();
-    expect(dialog().querySelector('.where')!.textContent).toBe(
+    expect(shell().querySelector('.where')!.textContent).toBe(
       '0.0, 0.0, 0.0 mm — Unlabelled (label 0)',
     );
     engine.sections.setCrosshair([1, -2, 3.5]);
     await expect
-      .poll(() => dialog().querySelector('.where')!.textContent)
+      .poll(() => shell().querySelector('.where')!.textContent)
       .toBe('+1.0, −2.0, +3.5 mm — label-1 (label 1)');
   });
 
@@ -419,7 +536,7 @@ describe('the readout', () => {
     engine.sections.setCrosshair([1, -2, 3.5]);
     live.lang = 'fr';
     await expect
-      .poll(() => dialog().querySelector('.where')!.textContent)
+      .poll(() => shell().querySelector('.where')!.textContent)
       .toBe('+1,0 ; −2,0 ; +3,5 mm — label-1 (étiquette 1)');
   });
 
@@ -436,13 +553,13 @@ describe('the readout', () => {
     expect(announced).toEqual(['+4.0, 0.0, 0.0\u202fmm — Unlabelled (label 0)']);
   });
 
-  test('is the only live region in the page that can be heard: exactly one, inside the dialog, polite', async () => {
+  test('is the only live region in the page that can be heard: exactly one, inside the MRI, polite', async () => {
     await opened();
     const live = document.querySelectorAll(
       '[role="status"], [role="alert"], [role="log"], [aria-live]:not([aria-live="off"]), output:not([aria-hidden="true"])',
     );
     expect([...live]).toEqual([statusRegion()]);
-    expect(dialog().contains(statusRegion())).toBe(true);
+    expect(shell().contains(statusRegion())).toBe(true);
     expect(getComputedStyle(statusRegion()).position).toBe('absolute');
   });
 });
@@ -464,6 +581,50 @@ describe('Save PNG', () => {
     expect(clicked[0]!.download).toBe('sub_013-axial--7.5mm.png');
     expect(clicked[0]!.href.startsWith('data:image/png;base64,')).toBe(true);
     await expect.poll(() => statusRegion().textContent).toBe('Saved the axial section as a PNG.');
+  });
+
+  test('the saved picture carries its own crosshair, edge letters and offset, in the reader’s language', async () => {
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const saved: HTMLCanvasElement[] = [];
+    const toDataURL = HTMLCanvasElement.prototype.toDataURL;
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockImplementation(function (
+      this: HTMLCanvasElement,
+      ...args
+    ) {
+      saved.push(this);
+      return toDataURL.apply(this, args);
+    });
+    const drawn: string[] = [];
+    const fillText = CanvasRenderingContext2D.prototype.fillText;
+    vi.spyOn(CanvasRenderingContext2D.prototype, 'fillText').mockImplementation(function (
+      this: CanvasRenderingContext2D,
+      text,
+      ...rest
+    ) {
+      drawn.push(text);
+      fillText.call(this, text, ...rest);
+    });
+    await mount();
+    engine.sections.setCrosshair([1, 1, 12.5]);
+    await openFromKeyboard();
+    await expect.poll(() => canvas('axial').width).toBe(SIZE);
+    // The screen's picture has no text drawn into it.
+    expect(drawn).toEqual([]);
+    await page.getByRole('button', { name: 'Save PNG, axial', exact: true }).click();
+    expect(drawn).toEqual(['A', 'R', 'P', 'L', 'Axial +12.5 mm']);
+    // 1 mm of a 256 mm field on 128 pixels: the crosshair is the single column 64, ringed in dark.
+    const [image] = saved;
+    expect(image!.width).toBe(SIZE);
+    expect(pixel(image!, 64, 40)).toEqual([79, 182, 224, 255]);
+    expect(pixel(image!, 63, 40)).toEqual([14, 17, 22, 255]);
+    expect(pixel(image!, 65, 40)).toEqual([14, 17, 22, 255]);
+    drawn.length = 0;
+    live.lang = 'fr';
+    await expect
+      .poll(() => section('axial').querySelector('[data-edge="right"]')!.textContent)
+      .toBe('D');
+    await page.getByRole('button', { name: 'Enregistrer PNG, axial', exact: true }).click();
+    expect(drawn).toEqual(['A', 'D', 'P', 'G', 'Axial +12,5 mm']);
   });
 
   test('saving the same plane twice is spoken twice: the sentence is cleared, then written a moment later', async () => {
@@ -497,6 +658,42 @@ describe('Save PNG', () => {
 
 describe('on a phone', () => {
   beforeEach(() => page.viewport(390, 844));
+
+  test('there is no room beside the stage: it is a full-screen modal, Close the first stop', async () => {
+    await opened();
+    expect(dock()).toBeNull();
+    await expect.element(page.getByRole('dialog', { name: 'Linked MRI sections' })).toBeVisible();
+    expect(dialog().matches(':modal')).toBe(true);
+    expect(box(dialog()).width).toBe(390);
+    expect(document.activeElement).toBe(page.getByRole('button', { name: 'Close' }).element());
+    expect(view.holdsKeys()).toBe(true);
+  });
+
+  test('Escape closes it at once and focus returns to the button that opened it', async () => {
+    await opened();
+    await userEvent.keyboard('{Escape}');
+    await expect.poll(() => dialog().open).toBe(false);
+    expect(dialog().hasAttribute('data-instant')).toBe(true);
+    await expect.poll(() => document.activeElement).toBe(opener());
+  });
+
+  test('a keyboard opening has no transition; a pointer opening does', async () => {
+    await mount();
+    await openFromKeyboard();
+    expect(dialog().hasAttribute('data-instant')).toBe(true);
+    await userEvent.keyboard('{Escape}');
+    await expect.poll(() => dialog().open).toBe(false);
+    await page.getByRole('button', { name: 'Linked MRI' }).click();
+    await expect.poll(() => dialog().open).toBe(true);
+    expect(dialog().hasAttribute('data-instant')).toBe(false);
+  });
+
+  test('is not dismissed by a click on the backdrop', async () => {
+    await opened();
+    dialog().dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await frame();
+    expect(dialog().open).toBe(true);
+  });
 
   test('one plane is shown, chosen by a radio group, and only it is drawn', async () => {
     await opened();
@@ -545,11 +742,12 @@ describe('on a phone', () => {
     await expect.element(page.getByRole('radio', { name: 'Axial' })).toHaveFocus();
   });
 
-  test("widening the window while a radio has focus keeps focus in the dialog, on the plane's slider", async () => {
+  test("widening the window while a radio has focus keeps focus in the MRI, on the plane's slider", async () => {
     await opened();
     (page.getByRole('radio', { name: 'Axial' }).element() as HTMLElement).focus();
     await page.viewport(1280, 900);
-    await expect.poll(() => document.activeElement).toBe(sliderElement('Axial position'));
+    // The docked region replaces the dialog; the locator is retried until its slider has focus.
+    await expect.element(slider('Axial position')).toHaveFocus();
   });
 
   test('has no horizontal scroll, and the targets are 44 px on a coarse pointer', async () => {
@@ -639,7 +837,7 @@ describe('contrast and colour modes', () => {
   test('more contrast gives the dialog the stronger text and border colours', async () => {
     await opened();
     const probe = (variable: string) => {
-      const element = dialog().querySelector('.mpr')!;
+      const element = shell().querySelector('.mpr')!;
       return getComputedStyle(element).getPropertyValue(variable).trim();
     };
     const normal = probe('--border-control');
@@ -665,7 +863,7 @@ describe('accessibility', () => {
 });
 
 describe('segmentation agreement', () => {
-  const key = () => dialog().querySelector<HTMLElement>('.agreement');
+  const key = () => shell().querySelector<HTMLElement>('.agreement');
   const overlay = () =>
     page.getByRole('checkbox', { name: 'Segmentation overlay' }).element() as HTMLInputElement;
 

@@ -1,12 +1,13 @@
 <!--
   Fixture for the snapshot tests: the stage host as the Stage region renders it, with the overlay (letters,
-  scale bar) and the colour keys over the fake engine. Not shipped.
+  scale bar), the route's landmark labels and the colour keys over the fake engine. Not shipped.
 -->
 <script lang="ts">
   import type { Legend } from '../../lib/core/state/paint.ts';
   import type { FakeEngine } from '../../lib/engine/fake.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { Language, LoadStatus, SurfaceColor } from '../../lib/types/index.ts';
+  import RouteMarks from '../stage/RouteMarks.svelte';
   import StageKeys from '../stage/StageKeys.svelte';
   import StageOverlay from '../stage/StageOverlay.svelte';
   import type { HoverSources } from '../stage/hover-text.ts';
@@ -23,6 +24,8 @@
       surfaceColor: SurfaceColor;
       networks: ColoredNetworks | null;
       legend: Legend | null;
+      /** The whole route's landmarks, or none. */
+      marks: { region: string; name: string; label: string }[];
     };
     /** Receives the keys, as the Stage region binds them for the snapshot. */
     handle: { keys?: StageKeysModel };
@@ -60,6 +63,7 @@
     }}
     {sources}
   />
+  <RouteMarks {engine} marks={live.marks} label="Whole route" onOpen={() => {}} />
   <StageKeys
     bind:this={handle.keys}
     {stage}

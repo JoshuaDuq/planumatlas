@@ -21,6 +21,7 @@
   import { sharePercent } from '../../lib/core/lesion/report.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
+  import CopyValue, { aroundValue } from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import { downloadText } from '../tracts/download.ts';
@@ -112,6 +113,7 @@
       lang,
     ),
   );
+  const landed = $derived(aroundValue(copy.landed));
   const reached = (spread: SphereShares) => spread.shown.length + spread.slight.length > 0;
   // What no row covers, kept while it is a whole mm³ of the sphere.
   const rest = (spread: SphereShares) =>
@@ -209,7 +211,12 @@
     <h2 class="region-name">{copy.reportTitle}</h2>
   </div>
   <p class="selection-context">{copy.entered(entered, spaceLabel)}</p>
-  <p class="coordinate-fact">{copy.landed(formatRas(sphere.centre, lang))}</p>
+  <p class="coordinate-fact">
+    {landed[0]}<CopyValue
+      value={formatRas(sphere.centre, lang)}
+      words={t(lang, 'inspector').copyValue}
+    />{landed[1]}
+  </p>
   {#if landing}
     <p class="coordinate-fact">
       {copy.at}: {landing.tissue}{landing.structure ? ` · ${landing.structure}` : ''}
@@ -298,12 +305,6 @@
 
 <style>
   @layer features {
-    .coordinate-fact {
-      margin: var(--space-1) 0 0;
-      font-size: var(--text-ui);
-      line-height: var(--lh-ui);
-      font-variant-numeric: tabular-nums;
-    }
     .coordinate-alternatives {
       margin: var(--space-1) 0 0;
       padding-left: var(--space-4);

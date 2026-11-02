@@ -50,7 +50,11 @@ describe('what the masthead region holds', () => {
             : element.textContent!.trim()),
       );
     expect(names.slice(0, 3)).toEqual(['Skip to model', 'Planum', 'Atlas']);
-    expect(names.slice(-2)).toEqual(['Save image (PNG)', 'More settings']);
+    expect(names.slice(-3)).toEqual([
+      'Save image (PNG)',
+      'Copy link to this view',
+      'More settings',
+    ]);
     // One subject is published, so there is no Subject field.
     expect(names).toContain('Colour');
     expect(names).toContain('Internal anatomy');
@@ -407,5 +411,34 @@ describe('the dialogs', () => {
       'https://doi.org/10.6084/m9.figshare.c.5315474.v1',
       new URL(`${ASSET_BASE}diffusion/cdmd-sub-013/brain-outline.json`, location.href).href,
     ]);
+  });
+});
+
+describe('Copy link to this view', () => {
+  test('copies the view on screen at once, not the address the link writer has yet to update', async () => {
+    await shell.open();
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const { anatomy, link } = shell.app.world!;
+    anatomy.setCortexOpacity(0.5);
+    flushSync();
+    // The writer's delayed write has not come yet.
+    link.cancel();
+    expect(location.hash).not.toContain('opacity');
+    // Synchronous, so no pointer round trip lets the writer's own delayed write come first.
+    (button('Copy link to this view').element() as HTMLElement).click();
+    expect(write).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('opacity=0.5'));
+  });
+
+  test('leaves the address of a link still being applied as it is', async () => {
+    await shell.open();
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const { anatomy, link } = shell.app.world!;
+    const before = location.href;
+    link.hold(() => true);
+    anatomy.setHemisphere('left');
+    flushSync();
+    await userEvent.click(button('Copy link to this view'));
+    expect(write).toHaveBeenCalledExactlyOnceWith(before);
+    expect(location.href).toBe(before);
   });
 });

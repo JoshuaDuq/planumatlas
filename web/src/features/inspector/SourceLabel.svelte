@@ -7,11 +7,14 @@
   import type { Language, Region } from '../../lib/types/index.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { sourceLabel } from '../../lib/core/panels/inspector.ts';
+  import CopyValue from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
 
   let { region, lang }: { region: Region & { atlas: string }; lang: Language } = $props();
 
   const label = $derived(sourceLabel(region, lang));
+  // The ids alone are copied: a lookup table or script takes them, and the atlas is named beside them.
+  const words = $derived(t(lang, 'inspector').copyValue);
   const stacked = $derived(label.stacked || Boolean(label.all));
 </script>
 
@@ -20,11 +23,11 @@
   {#if label.all}
     <div class="source-labels">
       <Disclosure summary={label.atlas}>
-        <p class="code">{label.all}</p>
+        <p class="code"><CopyValue value={label.all} {words} /></p>
       </Disclosure>
     </div>
   {:else if label.ids}
-    {label.atlas} · <span class="code">{label.ids}</span>
+    {label.atlas} · <span class="code"><CopyValue value={label.ids} {words} /></span>
   {:else}
     {label.atlas}
   {/if}

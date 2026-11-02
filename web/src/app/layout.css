@@ -70,6 +70,55 @@
     }
   }
 
+  /* The linked MRI under the live stage, beside it from 1280px; the stage re-frames for what is left. */
+  @media (min-width: 801px) and (min-height: 481px),
+    (min-width: 801px) and (orientation: portrait) {
+    #app:has(> .mpr-dock) {
+      grid-template-rows:
+        var(--header-height) minmax(0, 1fr) minmax(0, 1fr)
+        var(--footer-height);
+    }
+    #app:has(> .mpr-dock) #workspace-panel {
+      grid-row: 2 / 4;
+    }
+    #app:has(> .mpr-dock) > footer {
+      grid-row: 4;
+    }
+    #app > .mpr-dock {
+      grid-column: 2;
+      grid-row: 3;
+      border-top: 1px solid var(--border-subtle);
+    }
+  }
+  @media (min-width: 1280px) and (min-height: 481px) {
+    /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width. */
+    #app:has(> .mpr-dock) {
+      grid-template-columns:
+        var(--rail-width) minmax(0, 1fr)
+        clamp(
+          400px,
+          min(
+            100dvh - var(--header-height) - var(--footer-height) - 236px,
+            (100vw - var(--rail-width)) / 2
+          ),
+          600px
+        );
+      grid-template-rows: var(--header-height) minmax(0, 1fr) var(--footer-height);
+    }
+    #app:has(> .mpr-dock) #workspace-panel {
+      grid-row: 2;
+    }
+    #app:has(> .mpr-dock) > footer {
+      grid-row: 3;
+    }
+    #app > .mpr-dock {
+      grid-column: 3;
+      grid-row: 2;
+      border-top: 0;
+      border-left: 1px solid var(--border-subtle);
+    }
+  }
+
   @media (min-width: 801px) and (max-width: 1000px) {
     :root {
       --rail-width: 320px;

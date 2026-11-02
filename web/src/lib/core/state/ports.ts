@@ -18,6 +18,7 @@ export type ReaderModelPort = Pick<
   | 'loadHiddenRegions'
   | 'isolate'
   | 'clearIsolation'
+  | 'setFocused'
 >;
 
 /** What `applyReaderState` reads and sets on the sections. */

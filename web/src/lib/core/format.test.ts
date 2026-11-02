@@ -15,12 +15,13 @@ const NNBSP = '\u202f';
 const MINUS = '\u2212';
 
 test('quantities carry four significant figures and their unit', () => {
-  assert.equal(quantity(3214.153, 'mm²'), `3214${NNBSP}mm²`);
+  assert.equal(quantity(3214.153, 'mm²'), `3${NNBSP}214${NNBSP}mm²`);
   assert.equal(quantity(775.634310225458, 'mm²'), `775.6${NNBSP}mm²`);
   assert.equal(quantity(5.1234, 'mm³'), `5.123${NNBSP}mm³`);
 });
 
-test('five digits and up get a narrow no-break space between groups, not a comma', () => {
+test('four digits and up get a narrow no-break space between groups, not a comma', () => {
+  assert.equal(quantity(1979, 'mm²'), `1${NNBSP}979${NNBSP}mm²`);
   assert.equal(quantity(21472, 'mm³'), `21${NNBSP}470${NNBSP}mm³`);
   assert.equal(quantity(64385, 'mm³'), `64${NNBSP}390${NNBSP}mm³`);
 });
@@ -36,7 +37,7 @@ test('a genuine zero is shown as zero', () => {
 });
 
 test('trailing zeros from rounding are not shown as false precision', () => {
-  assert.equal(quantity(1000, 'mm²'), `1000${NNBSP}mm²`);
+  assert.equal(quantity(1000, 'mm²'), `1${NNBSP}000${NNBSP}mm²`);
   assert.equal(quantity(2.5, 'mm²'), `2.5${NNBSP}mm²`);
 });
 
@@ -46,7 +47,7 @@ test('counts agree with their noun', () => {
   assert.equal(count(2, 'region'), '2 regions');
   assert.equal(count(1, 'study'), '1 study');
   assert.equal(count(80, 'study'), '80 studies');
-  assert.equal(count(1831, 'study', 'fr'), '1831 études');
+  assert.equal(count(1831, 'study', 'fr'), `1${NNBSP}831 études`);
   assert.equal(count(2, 'day'), '2 days');
   assert.equal(count(185, 'region'), '185 regions');
 });
@@ -117,14 +118,16 @@ test('a unit is held to its number by a narrow no-break space, never a breaking 
   }
 });
 
-test('digit groups start past four digits, as in counts and quantities alike', () => {
-  assert.equal(grouped(1234), '1234');
+test('digit groups start at four digits, as in counts and quantities alike', () => {
+  assert.equal(grouped(123), '123');
+  assert.equal(grouped(1234), `1${NNBSP}234`);
   assert.equal(grouped(123456), `123${NNBSP}456`);
 });
 
-test('I18N-23 · five digits group in threes with a narrow no-break space, four stay together', () => {
+test('I18N-23 · digits group in threes with a narrow no-break space', () => {
   assert.equal(grouped(12345), `12${NNBSP}345`);
   assert.equal(grouped(21472), `21${NNBSP}472`);
+  assert.equal(grouped(1979), `1${NNBSP}979`);
 });
 
 test('I18N-24 · no output holds its unit to its number with a breaking space', () => {
@@ -152,7 +155,7 @@ test('I18N-25 · a count takes its noun’s English plural and French word', () 
 
 test('I18N-26 · a measurement is four significant figures, with an em dash for anything absent', () => {
   assert.equal(quantity(Infinity, 'mm²'), '—');
-  assert.equal(quantity(3214.153, 'mm²', 'en'), `3214${NNBSP}mm²`);
+  assert.equal(quantity(3214.153, 'mm²', 'en'), `3${NNBSP}214${NNBSP}mm²`);
 });
 
 test('I18N-27 · a fixed-decimal number defaults to one decimal and a true minus', () => {

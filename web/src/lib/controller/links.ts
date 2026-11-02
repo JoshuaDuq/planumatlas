@@ -163,12 +163,17 @@ export function createLinks({
    */
   function linkState(): Partial<LinkInput> {
     const current = view.current;
+    const { explorer } = current;
+    // The session keeps a tab's open item for the reader's return; the link names it only from its tab.
+    const circuit = explorer === 'circuits' ? current.lesson.circuit : null;
     return {
       ...current,
+      selectedFunction: explorer === 'functions' ? current.selectedFunction : null,
+      selectedDeficit: explorer === 'deficits' ? current.selectedDeficit : null,
       cutAtlas: current.cutAtlas ?? undefined,
       ...cutState(),
-      circuit: current.lesson.circuit,
-      circuitStep: current.lesson.circuit ? current.lesson.step : 0,
+      circuit,
+      circuitStep: circuit ? current.lesson.step : 0,
       orbit: camera.orbitLink(),
       mriWindow: sections.mriWindowLink(),
       // The see-through cortex the drawn streamlines asked for comes back with them.

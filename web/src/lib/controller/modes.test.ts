@@ -31,6 +31,15 @@ describe('leaving Tracts', () => {
     assert.deepEqual(overlay(scene), [true, false]);
   });
 
+  test('the anatomy under the tracts is a grey ghost while Tracts is in front, and in colour after it', () => {
+    const { excursions, engine } = createScene();
+    excursions.chooseExplorer('diffusion');
+    // No region is the subject: only a selection keeps its colour.
+    assert.deepEqual(engine.model.settings.ghostedAround, new Set());
+    excursions.chooseExplorer('anatomy');
+    assert.equal(engine.model.settings.ghostedAround, null);
+  });
+
   test('a custom opacity returns even after adjusting it in Tracts or choosing Tracts again', () => {
     const scene = createScene();
     scene.engine.model.setCortexOpacity(0.64);
@@ -61,6 +70,7 @@ describe('leaving Tracts', () => {
     engine.model.reset();
     excursions.afterReset();
     assert.equal(engine.model.settings.cortexOpacity, engine.tracts.defaultOpacity);
+    assert.deepEqual(engine.model.settings.ghostedAround, new Set());
     excursions.chooseExplorer('anatomy');
     assert.equal(engine.model.settings.cortexOpacity, 1);
   });
@@ -85,6 +95,7 @@ describe('leaving Tracts', () => {
     scene.engine.model.setCortexOpacity(0.7);
     chooseExplorer('diffusion');
     assert.deepEqual(overlay(scene), []);
+    assert.equal(scene.engine.model.settings.ghostedAround, null);
     chooseExplorer('anatomy');
     assert.equal(scene.engine.model.settings.cortexOpacity, 0.7);
   });

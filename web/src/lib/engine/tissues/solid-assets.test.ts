@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test, vi } from 'vitest';
 import * as assetCache from '../../core/assets/asset-cache.ts';
 import { BoxGeometry, Color, Matrix4, Mesh, MeshBasicMaterial, SRGBColorSpace } from 'three';
-import { asDisplaySettings, readModel } from '../../core/catalog/test-support.ts';
+import { asModelState, readModel } from '../../core/catalog/test-support.ts';
 import type { Appearance } from '../render/materials.ts';
 import { Volume } from '../slices/volume.ts';
 import type { PaletteLookup } from './palette.ts';
@@ -81,7 +81,7 @@ function paint(
     { solids },
     {
       labels: LABELS,
-      state: asDisplaySettings({ ...STATE, ...state }),
+      state: asModelState({ ...STATE, ...state }),
       atlas: 'destrieux',
       detail,
       wedged,
@@ -123,7 +123,7 @@ test('only a striatal structure’s cap takes its voxels’ networks, and only w
       { solids: [caudate, thalamus] },
       {
         labels: LABELS,
-        state: asDisplaySettings({ ...STATE, surfaceColor: 'network', detail: 'learning' }),
+        state: asModelState({ ...STATE, surfaceColor: 'network', detail: 'learning' }),
         atlas: 'destrieux',
         detail: 'learning',
         wedged: true,
@@ -165,7 +165,7 @@ test('the white envelope stays white matter where a parcel reuses its code', () 
     { solids: [white] },
     {
       labels,
-      state: asDisplaySettings({ ...STATE, surfaceColor: 'atlas' }),
+      state: asModelState({ ...STATE, surfaceColor: 'atlas' }),
       atlas: 'hcp-mmp',
       detail: 'aseg',
       wedged: true,
@@ -358,7 +358,7 @@ test('isolating a white-matter parcel keeps its own hemisphere’s white envelop
     { solids: [left, right] },
     {
       labels: LABELS,
-      state: asDisplaySettings({ ...STATE, isolatedRegion: WHITE_MATTER_PARCEL }),
+      state: asModelState({ ...STATE, isolatedRegion: WHITE_MATTER_PARCEL }),
       atlas: 'destrieux',
       detail: 'aseg',
       wedged: true,
@@ -431,7 +431,7 @@ test('learning caps obey system filtering and remain visible during isolation', 
     { solids: [cap] },
     {
       ...options,
-      state: asDisplaySettings({ ...STATE, detail: 'learning', internalSystem: 'Brainstem' }),
+      state: asModelState({ ...STATE, detail: 'learning', internalSystem: 'Brainstem' }),
     },
   );
   assert.equal(cap.visible, false);
@@ -439,7 +439,7 @@ test('learning caps obey system filtering and remain visible during isolation', 
     { solids: [cap] },
     {
       ...options,
-      state: asDisplaySettings({
+      state: asModelState({
         ...STATE,
         detail: 'learning',
         internalSystem: 'Basal ganglia',
@@ -487,7 +487,7 @@ test('nested reference solids reach the cut after the solids that enclose them',
 });
 
 test('a hidden id missing from the region index is a named error', async () => {
-  const state = asDisplaySettings({
+  const state = asModelState({
     cortexVisible: true,
     cortexOpacity: 1,
     isolatedRegion: null,

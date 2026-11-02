@@ -8,6 +8,7 @@
   - the bar measures itself (not a breakpoint): `data-collapsed` on the root, always on phones and
     coarse pointers; the summary drops internal anatomy, then colour, as room shrinks;
   - `data-reference` on the root: the tract reference shows its name alone;
+  - on the bar, a press on a caption lists every field's choice with its note, under the bar;
   - a download started from a field is announced (WCAG 4.1.3, deviation h3-load-announcements).
 -->
 <script lang="ts">
@@ -222,6 +223,64 @@
   const printed = $derived(collapsed && !reference);
   const tip = (text: string) => (printed || !text ? undefined : text);
 
+  // The notes the popover prints, listed under the bar for a pointer: the keyboard reads each one
+  // as its field's description and tooltip.
+  const notesId = `masthead-notes-${uid}`;
+  let notesOpen = $state(false);
+  const noteRows = $derived(
+    [
+      offerAnatomies
+        ? {
+            field: 'subject',
+            caption: copy.subject,
+            value: subjectName(anatomy),
+            note: notes.subject,
+          }
+        : null,
+      { field: 'atlas', caption: copy.atlas, value: selectedLabel('atlas'), note: notes.atlas },
+      { field: 'colour', caption: copy.colour, value: selectedLabel('colour'), note: notes.colour },
+      offersDetail
+        ? {
+            field: 'detail',
+            caption: display.internalAnatomy,
+            value: selectedLabel('detail'),
+            note: notes.detail,
+          }
+        : null,
+    ].filter(
+      (row): row is { field: string; caption: string; value: string; note: string } =>
+        row !== null && row.note !== '',
+    ),
+  );
+  function showNotes(event: MouseEvent) {
+    if (collapsed) return;
+    // The caption's own press would focus its select; here it opens the list instead.
+    event.preventDefault();
+    notesOpen = !notesOpen;
+    if (notesOpen) settingsOpen = false;
+  }
+  $effect(() => {
+    if (collapsed || settingsOpen || reference) notesOpen = false;
+  });
+  $effect(() => {
+    if (!notesOpen) return;
+    const outside = (event: PointerEvent) => {
+      if (!(event.target as Element).closest?.('.data-label, .data-notes')) notesOpen = false;
+    };
+    // Marked handled, as the popover's: the page's own Escape would go on to clear the selection.
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      notesOpen = false;
+    };
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', escape);
+    };
+  });
+
   let open = $state(false);
   let instant = $state(false);
   let root: HTMLDivElement;
@@ -434,7 +493,8 @@
     {#if offerAnatomies || reference}
       <div class="data-field">
         {#if offerAnatomies && !reference}
-          <label class="data-label" for={ids.subject}>{copy.subject}</label>
+          <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+          <label class="data-label" for={ids.subject} onclick={showNotes}>{copy.subject}</label>
           <span class="select-box"
             ><select
               bind:this={selects.subject}
@@ -469,7 +529,8 @@
     {/if}
     {#if !reference}
       <div class="data-field">
-        <label class="data-label" for={ids.atlas}>{copy.atlas}</label>
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+        <label class="data-label" for={ids.atlas} onclick={showNotes}>{copy.atlas}</label>
         <span class="select-box"
           ><select
             bind:this={selects.atlas}
@@ -486,7 +547,8 @@
         {#if notes.atlas}<p class="data-note" id={noteId('atlas')}>{notes.atlas}</p>{/if}
       </div>
       <div class="data-field">
-        <label class="data-label" for={ids.colour}>{copy.colour}</label>
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+        <label class="data-label" for={ids.colour} onclick={showNotes}>{copy.colour}</label>
         <span class="select-box"
           ><select
             bind:this={selects.colour}
@@ -498,7 +560,8 @@
                 onSurfaceColor(value as SurfaceColor),
               )}
           >
-            <option value={PAINT} hidden>{paintLabel}</option>
+            <!-- Present only while a tab paints, so no empty choice reaches assistive technology. -->
+            {#if painted}<option value={PAINT} hidden>{paintLabel}</option>{/if}
             {#each colourOptions as { group, options } (group ?? options[0].value)}
               {#if group}
                 <optgroup label={copy.colourGroups[group as keyof typeof copy.colourGroups]}>
@@ -519,7 +582,10 @@
       <!-- A build without the optional fine level offers one choice, and so no control. -->
       {#if offersDetail}
         <div class="data-field">
-          <label class="data-label" for={ids.detail}>{display.internalAnatomy}</label>
+          <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+          <label class="data-label" for={ids.detail} onclick={showNotes}
+            >{display.internalAnatomy}</label
+          >
           <span class="select-box"
             ><select
               bind:this={selects.detail}
@@ -538,6 +604,17 @@
       {/if}
     {/if}
   </div>
+  {#if notesOpen}
+    <div id={notesId} class="data-notes">
+      {#each noteRows as row (row.field)}
+        <div class="data-field">
+          <p class="data-label">{row.caption}</p>
+          <p class="notes-value">{row.value}</p>
+          <p class="data-note">{row.note}</p>
+        </div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -584,6 +661,15 @@
     /* The tooltip carries the note on the bar; the popover prints it. */
     .data-note {
       display: none;
+    }
+    /* A caption on the bar opens the notes: an inquiry, not a press on its select. */
+    .data-bar:not(:global([data-collapsed])) .masthead-data .data-label {
+      cursor: help;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .data-bar:not(:global([data-collapsed])) .masthead-data .data-label:hover {
+        color: var(--text-secondary);
+      }
     }
     /* One published subject is a name, set where a select's value would sit and on its line. */
     .study-name {
@@ -833,6 +919,52 @@
       color: var(--text-secondary);
     }
 
+    /* The notes under the bar: the popover's ruled rows, caption, the choice, then what it means. */
+    .data-notes {
+      position: absolute;
+      top: calc(100% + var(--space-1));
+      left: calc(var(--stage-gutter) - 1px - var(--space-2));
+      z-index: 1;
+      width: min(320px, calc(100vw - var(--space-6)));
+      background: var(--surface-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-panel);
+      box-shadow: var(--shadow-popover);
+      transform-origin: top left;
+      transition:
+        opacity var(--popover-transition) var(--ease-ui),
+        transform var(--popover-transition) var(--ease-ui);
+    }
+    @starting-style {
+      .data-notes {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+    }
+    .data-notes .data-field {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+    .data-notes .data-field ~ .data-field {
+      border-top: 1px solid var(--border-subtle);
+    }
+    .notes-value {
+      margin: 0;
+      color: var(--text-primary);
+      font-size: var(--text-ui);
+      font-weight: 600;
+      line-height: var(--lh-ui);
+    }
+    .data-notes .data-note {
+      display: block;
+      margin: 0;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--text-secondary);
+    }
+
     /* A tract reference offers no choices: its name sits in the bar, with no popover behind it. */
     .data-bar:global([data-collapsed])[data-reference] .data-toggle {
       display: none;
@@ -933,7 +1065,8 @@
 
   @layer a11y {
     @media (prefers-reduced-motion: reduce) {
-      .masthead-data[data-open] {
+      .masthead-data[data-open],
+      .data-notes {
         transition-property: opacity;
       }
       .data-bar:global([data-collapsed]) .data-toggle::after {

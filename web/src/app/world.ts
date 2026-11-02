@@ -3,7 +3,7 @@ import { ASSET_BASE } from '../../build/site.ts';
 import { createCoordinatePlacement } from '../lib/controller/coordinates.ts';
 import { createAnatomyCommands } from '../lib/controller/anatomy.ts';
 import type { AppContext } from '../lib/controller/context.ts';
-import { createExcursions } from '../lib/controller/excursion.svelte.ts';
+import { createExcursions, syncRouteGhost } from '../lib/controller/excursion.svelte.ts';
 import type { SceneReader } from '../lib/controller/excursion.svelte.ts';
 import { installKeymap } from '../lib/controller/keymap.ts';
 import { createLinks } from '../lib/controller/links.ts';
@@ -103,6 +103,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     syncPaint(model, view, { domains, clinical, lesion });
     syncPresentation(engine, view, engineState);
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
+    syncRouteGhost(model, view, circuits);
     const catalog = createCatalogStore(regions, view);
     // Before the first restore: a link that loads hidden regions then says their count once.
     const speech = announceView(view, (region, current) => regions.label(region.id, current).name);
@@ -142,6 +143,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       chooseExplorer: excursions.chooseExplorer,
       frameLandmark: excursions.focusLandmark,
       afterReset: excursions.afterReset,
+      displayBaseline: () => excursions.displayBaseline,
     });
     links = createLinks({
       engine,
@@ -209,7 +211,14 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
               ports.showDetailInPlace();
             },
             sayLesionReplaced() {
-              session.notify({ text: t(session.state.lang, 'coordinate').replacedLesion });
+              session.notify({
+                text: t(session.state.lang, 'coordinate').replacedLesion,
+                action: 'restore-lesion',
+              });
+            },
+            sayLesionRestored() {
+              session.notify(null);
+              session.notify({ text: t(session.state.lang, 'coordinate').lesionRestored });
             },
           },
         }),
@@ -228,7 +237,13 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     engine.on('pick', ({ id }) => world.anatomy.selectRegion(id)),
     // The lesion's report is Anatomy's detail, which shows it once no region is selected. A phone's
     // sheet stays down so the brain stays in reach for the next press; Show the report raises it.
+    // A lesson stays open over its lesion, which Show the report reaches.
     engine.on('lesionPoint', ({ point }) => {
+      const { explorer, lesson } = view.current;
+      if (explorer === 'circuits' && lesson.circuit) {
+        world.lesion.place(point);
+        return;
+      }
       world.excursions.chooseExplorer('anatomy');
       world.anatomy.selectRegion(null);
       world.lesion.place(point);
@@ -284,7 +299,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
         openDiffusionMri: ports.openDiffusionMri,
         openMpr: ports.openMpr,
         closeMpr: ports.closeMpr,
-        focusSelection: world.anatomy.focusSelection,
+        toggleFocus: world.anatomy.toggleFocus,
         isolateSelection: world.anatomy.isolateSelection,
         setCortexVisible: world.anatomy.setCortexVisible,
         setInternalVisible: world.anatomy.setInternalVisible,

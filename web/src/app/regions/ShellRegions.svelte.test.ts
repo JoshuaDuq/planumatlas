@@ -92,9 +92,9 @@ describe('the dialogs', () => {
     await shell.open();
     expect(dialogs().map(titleOf).sort()).toEqual(
       [
+        'How to use Planum',
         'Keyboard shortcuts',
         'Provenance',
-        'Linked MRI sections',
         'MRI with tracts · MGH CDMD sub_013',
       ].sort(),
     );
@@ -156,7 +156,9 @@ describe('the ports', () => {
     }
     expect(ports.shortcutsOpen()).toBe(true);
     expect(ports.diffusionMriOpen()).toBe(true);
-    await vi.waitFor(() => expect(ports.mprOpen()).toBe(true));
+    // The docked Linked MRI is open but holds no keys: the shortcuts dialog has focus.
+    await vi.waitFor(() => expect(shell.target.querySelector(':scope > .mpr-dock')).not.toBeNull());
+    expect(ports.mprOpen()).toBe(false);
   });
 
   test('the tracts overlay turns on and off with the stage listening to the engine', async () => {

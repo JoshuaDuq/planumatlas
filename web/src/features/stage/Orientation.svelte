@@ -112,6 +112,21 @@
     [data-edge='right'] {
       right: var(--space-3);
     }
+    /* Phones: 13px letters on the stage gutter, the top one a line under the scale bar, which takes the top left. */
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .orientation > span {
+        font-size: var(--text-caption);
+      }
+      [data-edge='top'] {
+        top: calc(var(--stage-gutter) + var(--lh-caption) + var(--space-1));
+      }
+      [data-edge='left'] {
+        left: var(--stage-gutter);
+      }
+      [data-edge='right'] {
+        right: var(--stage-gutter);
+      }
+    }
     /* Past the middle of a short stage the bottom letter would read as the top one, so it goes. */
     :global(#viewport[data-dock-tall='true']) [data-edge='bottom'] {
       visibility: hidden;

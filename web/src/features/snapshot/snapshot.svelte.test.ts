@@ -1,5 +1,5 @@
 // The snapshot in a real browser over the fake engine: the markings measured where the stage draws them,
-// with what the keys say taken from `keys.model()`; the caption's inputs; the download, its announcement
+// with what the keys say taken from `keys.model()`; the caption's inputs; the download, its notice
 // and its failure.
 import '../../styles/index.css';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -47,6 +47,7 @@ interface Live {
   surfaceColor: 'atlas';
   networks: null;
   legend: Legend | null;
+  marks: { region: string; name: string; label: string }[];
 }
 
 let engine: FakeEngine;
@@ -70,6 +71,7 @@ async function mount(overrides: Partial<Live> = {}, { width = 1000, height = 700
     surfaceColor: 'atlas',
     networks: null,
     legend: null,
+    marks: [],
     ...overrides,
   });
   live = state;
@@ -228,6 +230,51 @@ describe('the letters and the scale bar', () => {
   });
 });
 
+describe('the route’s landmarks', () => {
+  const LONG = 'A landmark whose name is long enough to wrap onto a second line on the stage';
+  const marks = [
+    { region: 'learning:midline:optic-chiasm', name: 'Optic chiasm', label: 'Landmark 1' },
+    { region: 'learning:left:lateral-geniculate', name: LONG, label: 'Landmark 2' },
+  ];
+
+  test('each label’s dot, leader and words where the stage draws them, a long name line by line', async () => {
+    await mount({ marks });
+    const { labels } = markings();
+    const origin = host().getBoundingClientRect();
+    const buttons = [...host().querySelectorAll<HTMLElement>('.route-mark')];
+    expect(labels).toHaveLength(2);
+    labels.forEach((label, index) => {
+      const button = buttons[index]!;
+      const dot = button.querySelector('.stage-label-dot')!.getBoundingClientRect();
+      expect(label.dot.x).toBeCloseTo(dot.left + dot.width / 2 - origin.left, 3);
+      expect(label.dot.y).toBeCloseTo(dot.top + dot.height / 2 - origin.top, 3);
+      expect(label.leader === null).toBe(button.dataset.leader !== 'true');
+      expect(label.lines[0]!.text).toBe(String(index + 1));
+      expect(label.lines[0]!.font).toMatch(/^600 14px/);
+    });
+    const name = (index: number) => labels[index]!.lines.slice(1);
+    expect(name(0).map((line) => line.text)).toEqual(['Optic chiasm']);
+    // The long name wraps as the stage wraps it: its lines in order, together the whole name.
+    expect(name(1).length).toBeGreaterThan(1);
+    expect(
+      name(1)
+        .map((line) => line.text)
+        .join(' '),
+    ).toBe(LONG);
+    expect(new Set(name(1).map((line) => line.x)).size).toBe(1);
+    expect(name(1)[1]!.y).toBeGreaterThan(name(1)[0]!.y);
+  });
+
+  test('a label reduced to its number draws the number alone, and no route draws no labels', async () => {
+    await mount({ marks });
+    host().querySelector<HTMLElement>('.route-mark')!.dataset.short = 'true';
+    expect(markings().labels[0]!.lines.map((line) => line.text)).toEqual(['1']);
+    live.marks = [];
+    flushSync();
+    expect(markings().labels).toEqual([]);
+  });
+});
+
 describe('the caption', () => {
   const lines = (plan: ReturnType<typeof snapshotPlan>['plan']) =>
     plan.caption.map((line) => line.map((runs) => runs.map((run) => run.text).join('')));
@@ -262,13 +309,14 @@ describe('the caption', () => {
 describe('saving', () => {
   let region: HTMLElement;
   let links: { download: string; href: string }[];
-  const commands = { fail: vi.fn() };
+  const commands = { fail: vi.fn(), notify: vi.fn() };
 
   beforeEach(() => {
     region = document.body.appendChild(document.createElement('div'));
     cleanups.push(attachAnnouncer(region), () => region.remove());
     links = [];
     commands.fail.mockReset();
+    commands.notify.mockReset();
     // The download itself is the browser's; the link it is given is what the test reads.
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
       this: HTMLAnchorElement,
@@ -277,7 +325,7 @@ describe('saving', () => {
     });
   });
 
-  test('downloads planum-<atlas>.png, a PNG of the visible stage, and says so in the reader’s language', async () => {
+  test('downloads planum-<atlas>.png, a PNG of the visible stage, and shows its name in the reader’s language', async () => {
     await mount({ legend: DEFICIT });
     engine.camera.setChromeInsets({ bottom: 100 }, {});
     flushSync();
@@ -289,7 +337,12 @@ describe('saving', () => {
     expect(blob.type).toBe('image/png');
     const image = await createImageBitmap(blob);
     expect([image.width, image.height]).toEqual([1000, 600]);
-    expect(region.textContent).toBe('Image enregistrée : planum-hcp-mmp.png.');
+    // The notice is what a sighted reader sees; the announcer speaks notices, not this module.
+    expect(commands.notify.mock.calls).toEqual([
+      [null],
+      [{ text: 'Image enregistrée : planum-hcp-mmp.png.' }],
+    ]);
+    expect(region.textContent).toBe('');
   });
 
   test('a second request while one is being made joins it: one file', async () => {
@@ -299,7 +352,10 @@ describe('saving', () => {
     expect(second).toBe(first);
     await first;
     expect(links.map((link) => link.download)).toEqual(['planum-brain.png']);
-    expect(region.textContent).toBe('Image saved as planum-brain.png.');
+    expect(commands.notify.mock.calls).toEqual([
+      [null],
+      [{ text: 'Image saved as planum-brain.png.' }],
+    ]);
     await saveSnapshot(scene(), subject(), commands);
     expect(links).toHaveLength(2);
   });
@@ -323,7 +379,7 @@ describe('saving', () => {
     }
   });
 
-  test('a failure is the snapshot notice, and nothing is downloaded or said', async () => {
+  test('a failure is the snapshot notice, and nothing is downloaded or reported saved', async () => {
     await mount();
     const lost = new Error('context lost');
     const failing = {
@@ -338,6 +394,7 @@ describe('saving', () => {
     await saveSnapshot(failing, subject(), commands);
     expect(commands.fail).toHaveBeenCalledExactlyOnceWith('snapshot', lost);
     expect(links).toEqual([]);
+    expect(commands.notify).not.toHaveBeenCalled();
     expect(region.textContent).toBe('');
   });
 });

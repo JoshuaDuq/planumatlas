@@ -526,6 +526,47 @@ export function defineEngineContract(
         assert.equal(engine.model.settings.isolatedRegion, null);
       });
 
+      it('focuses the selection, follows it to the next pick and ends with it', () => {
+        const { engine, left } = world();
+        const { model } = engine;
+        assert.throws(() => model.setFocused(true), /Select a region/);
+        model.select(left.id);
+        model.setFocused(true);
+        assert.equal(model.settings.focused, true);
+        const other = [...model.regions.values()].find(
+          (region) => region.id !== left.id && region.kind === 'cortex' && model.canSelect(region),
+        )!;
+        model.select(other.id);
+        assert.equal(model.settings.focused, true);
+        model.select(null);
+        assert.equal(model.settings.focused, false);
+        model.select(left.id);
+        assert.equal(model.settings.focused, false, 'a later pick does not bring it back');
+        model.setFocused(true);
+        model.setCortexVisible(false);
+        assert.equal(model.settings.focused, false, 'a setting that drops the selection ends it');
+      });
+
+      it('ghosts around the regions it names until ended or reset', () => {
+        const { engine, left } = world();
+        const { model } = engine;
+        assert.throws(() => model.ghostAround(['no-such-region']), /Unknown region/);
+        assert.equal(model.settings.ghostedAround, null);
+        model.ghostAround([left.id]);
+        assert.deepEqual([...model.settings.ghostedAround!], [left.id]);
+        // A teaching-set structure holds the labels it is made of, as Focus does.
+        const built = [...model.regions.values()].find(
+          (region) => region.constituent_regions?.length,
+        )!;
+        model.ghostAround([built.id]);
+        assert.ok(model.settings.ghostedAround!.has(built.constituent_regions![0]!));
+        model.ghostAround(null);
+        assert.equal(model.settings.ghostedAround, null);
+        model.ghostAround([]);
+        model.reset();
+        assert.equal(model.settings.ghostedAround, null);
+      });
+
       it('shows the isolated region alone, and only what is shown releases it', async () => {
         const { engine, left } = world();
         const { model } = engine;

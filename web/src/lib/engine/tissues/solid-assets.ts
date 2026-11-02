@@ -3,16 +3,17 @@ import type { BufferGeometry, Color } from 'three';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { Manifest } from '../../types/index.ts';
-import type { DisplaySettings, Region } from '../../types/index.ts';
+import type { Region } from '../../types/index.ts';
 import type { CapLabelUniforms } from './cap-labels.ts';
 import { addCapLabels } from './cap-labels.ts';
 import { addBoundaryEdges } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
-import { tissueColor } from '../render/materials.ts';
+import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { addMriAppearance } from '../render/mri-material.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import {
+  ghosted,
   labelAppearance,
   usesAtlasColors,
   usesCabNpColors,
@@ -20,7 +21,7 @@ import {
   usesNetworkColors,
   usesPaint,
 } from './palette.ts';
-import type { Label, PaletteLookup } from './palette.ts';
+import type { Label, PaletteLookup, PaletteState } from './palette.ts';
 import { buildRibbonWedges } from './ribbon-wedges.ts';
 import { addStriatalOverlay } from './striatal-overlay.ts';
 import type { StriatalUniforms } from './striatal-overlay.ts';
@@ -69,7 +70,7 @@ export interface LabelIndex {
 }
 
 /** The display settings the painter reads. */
-export type SolidPaintState = DisplaySettings;
+export type SolidPaintState = PaletteState;
 
 /** The part of a solid `paintSolids` reads and writes. */
 export interface PaintableSolid {
@@ -399,6 +400,9 @@ export function paintSolids(
         cap.material.color.copy((source.material as MeshBasicMaterial).color);
       } else {
         cap.material.color.set(tissueColor(source.userData, appearance.tissue));
+      }
+      if (ghosted(source.userData.region_id, state)) {
+        ghostColor(source.userData, appearance.tissue, cap.material.color);
       }
       continue;
     }

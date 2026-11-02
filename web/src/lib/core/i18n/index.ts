@@ -18,6 +18,7 @@ import * as errors from './areas/errors.ts';
 import * as footer from './areas/footer.ts';
 import * as functional from './areas/functional.ts';
 import * as functions from './areas/functions.ts';
+import * as guide from './areas/guide.ts';
 import * as header from './areas/header.ts';
 import * as inspector from './areas/inspector.ts';
 import * as lesion from './areas/lesion.ts';
@@ -59,6 +60,7 @@ export const TRANSLATIONS = {
     footer: footer.en,
     functional: functional.en,
     functions: functions.en,
+    guide: guide.en,
     header: header.en,
     inspector: inspector.en,
     lesion: lesion.en,
@@ -99,6 +101,7 @@ export const TRANSLATIONS = {
     footer: footer.fr,
     functional: functional.fr,
     functions: functions.fr,
+    guide: guide.fr,
     header: header.fr,
     inspector: inspector.fr,
     lesion: lesion.fr,

@@ -15,6 +15,7 @@ import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import { PREF_KEYS } from '../../lib/state/prefs.ts';
 import type { Manifest } from '../../lib/types/index.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
+import type { DisplayView } from '../colophon/display-state.ts';
 import type { DockCommands } from './dock-commands.ts';
 import Fixture from './dock-test-support.svelte';
 
@@ -27,13 +28,7 @@ interface Live {
   hasSpinalCord: boolean;
   coordinates: boolean;
   phone: boolean;
-  view: {
-    hemisphere: 'both' | 'left' | 'right';
-    cortexVisible: boolean;
-    cortexOpacity: number;
-    internalVisible: boolean;
-    spinalCordVisible: boolean;
-  };
+  view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
 }
 
 let engine: FakeEngine;
@@ -56,11 +51,18 @@ function liveState(overrides: Partial<Live>): Live {
     coordinates: true,
     phone: false,
     view: {
+      explorer: 'anatomy',
+      anatomy: 'cdmd',
+      referenceAnatomy: 'cdmd',
       hemisphere: 'both',
       cortexVisible: true,
       cortexOpacity: 1,
       internalVisible: true,
       spinalCordVisible: false,
+      hiddenRegions: new Set(),
+      isolatedRegion: null,
+      focused: false,
+      selectedRegion: null,
     },
     ...overrides,
   });
@@ -84,6 +86,7 @@ async function mount(
     setCortexOpacity: vi.fn<DockCommands['setCortexOpacity']>(),
     setInternalVisible: vi.fn<DockCommands['setInternalVisible']>(),
     setSpinalCordVisible: vi.fn<DockCommands['setSpinalCordVisible']>(),
+    resetDisplay: vi.fn<DockCommands['resetDisplay']>(),
   };
   cleanups.push(
     $effect.root(() => {
@@ -366,6 +369,68 @@ describe('the Display popover', () => {
   });
 });
 
+describe('what Display has changed', () => {
+  const defaults = () => liveState({}).view;
+
+  test('lists the settings away from their defaults, and Reset display asks for them back', async () => {
+    await mount({
+      view: {
+        ...defaults(),
+        hemisphere: 'left',
+        hiddenRegions: new Set(['a', 'b', 'c']),
+        focused: true,
+      },
+    });
+    await open('Display');
+    expect(popover().querySelector('.changes p')!.textContent).toBe(
+      'Left hemisphere · 3 parts hidden · Focus on',
+    );
+    await press('button', 'Reset display');
+    expect(commands.resetDisplay).toHaveBeenCalledOnce();
+  });
+
+  test('at the defaults there is nothing to list or reset', async () => {
+    await mount();
+    await open('Display');
+    expect(popover().querySelector('.changes')).toBeNull();
+    expect(page.getByRole('button', { name: 'Reset display' }).elements()).toHaveLength(0);
+  });
+
+  test('a keyboard reset leaves focus on the hemisphere chosen, not the page', async () => {
+    await mount({ view: { ...defaults(), cortexVisible: false } });
+    commands.resetDisplay.mockImplementation(() => {
+      live.view = defaults();
+    });
+    await open('Display');
+    control('button', 'Reset display').focus();
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => expect(active()).toBe(control('radio', 'Both')));
+    expect(tool('Display').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  test('on a phone, where the status bar is hidden, the Display tool says its settings changed', async () => {
+    await page.viewport(390, 844);
+    try {
+      await mount(
+        { phone: true, view: { ...defaults(), isolatedRegion: 'a' } },
+        { width: 390, height: 700 },
+      );
+      expect(locate('button', 'Display, settings changed').elements()).toHaveLength(1);
+      live.view = defaults();
+      flushSync();
+      expect(locate('button', 'Display').elements()).toHaveLength(1);
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
+  test('on a wider screen the status bar says so, and the tool keeps its name', async () => {
+    await mount({ view: { ...defaults(), isolatedRegion: 'a' } });
+    expect(locate('button', 'Display').elements()).toHaveLength(1);
+    expect(dock().querySelector('.changed-mark')).toBeNull();
+  });
+});
+
 describe('a tool that goes away', () => {
   test('over the tract reference closes its popover and hands focus to the model, not the page', async () => {
     await mount();
@@ -415,6 +480,17 @@ describe('a tool that goes away', () => {
     live.status = 'switching';
     flushSync();
     expect(getComputedStyle(dock()).visibility).toBe('visible');
+  });
+
+  test('a followed link closes the open popover, and the Lesion popover’s placing with it', async () => {
+    await mount();
+    await press('button', 'Lesion');
+    await press('button', 'Place');
+    await vi.waitFor(() => expect(placing.at(-1)).toBe(true));
+    dispatchEvent(new HashChangeEvent('hashchange'));
+    await vi.waitFor(() => expect(dialogs()).toHaveLength(0));
+    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false');
+    expect(placing.at(-1)).toBe(false);
   });
 });
 

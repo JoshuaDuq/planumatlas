@@ -29,6 +29,7 @@ import { gpuRendererName, isAppleSilicon, isIntegratedGpu } from './device.ts';
 import { motionRatio, qualityProfile } from './quality.ts';
 import { paintOutlineEdges, sameMeshSet } from './outline-edges.ts';
 import { withOutlineOccluders } from './outline-occluders.ts';
+import { transparentOrder } from './ghost-order.ts';
 
 const TRANSITION_MS = 240;
 // How long the camera must rest before the full-resolution frame is drawn.
@@ -310,6 +311,7 @@ export function createScene(
     appleSilicon: isAppleSilicon(gpu),
   });
   renderer.localClippingEnabled = true;
+  renderer.setTransparentSort(transparentOrder);
   renderer.setPixelRatio(quality.pixelRatio);
   // Khronos PBR Neutral: a surface lit squarely shows its published colour,
   // where ACES shifted hues and bleached atlas and network colours alike.

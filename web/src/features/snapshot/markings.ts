@@ -2,6 +2,7 @@
 import type { Rect } from '../../lib/engine/api.ts';
 import type { Edge, StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import type { KeyPlate } from '../stage/stage-keys.ts';
+import { leaderEnd } from '../stage/stage-labels.ts';
 
 /** Stage geometry in CSS pixels, matching the stage styles: gutter, marking line height, caption gaps. */
 export const SNAPSHOT_LAYOUT = Object.freeze({ gutter: 16, line: 16, letterGap: 12, scaleGap: 8 });
@@ -41,15 +42,50 @@ export interface KeyMark {
   texts: KeyWords[];
 }
 
+/** A route landmark's label on the stage: its box, its dot, its leader's far end, its lines of words. */
+export interface LabelMark {
+  box: Rect;
+  dot: { x: number; y: number; color: string };
+  leader: { x: number; y: number } | null;
+  leaderColor: string;
+  /** Each line's left end and vertical middle. */
+  lines: KeyWords[];
+}
+
 export interface Markings {
   letters: Letter[];
+  labels: LabelMark[];
   keys: KeyMark[];
   scale: { pixels: number; label: string } | null;
 }
 
+/** A text node's words grouped into the lines the browser broke them into, each with its own box. */
+function wrappedLines(node: HTMLElement, local: (range: Range) => Rect) {
+  const text = node.firstChild;
+  if (!(text instanceof Text) || node.childNodes.length !== 1) {
+    throw new Error('A stage label holds one run of words.');
+  }
+  const range = document.createRange();
+  const lines: { start: number; end: number; box: Rect }[] = [];
+  for (const word of text.data.matchAll(/\S+/g)) {
+    range.setStart(text, word.index);
+    range.setEnd(text, word.index + word[0].length);
+    const box = local(range);
+    const line = lines.at(-1);
+    if (line && Math.abs(box.y - line.box.y) < box.height / 2)
+      line.end = word.index + word[0].length;
+    else lines.push({ start: word.index, end: word.index + word[0].length, box });
+  }
+  return lines.map(({ start, end, box }) => ({
+    text: text.data.slice(start, end),
+    x: box.x,
+    y: box.y + box.height / 2,
+  }));
+}
+
 /**
  * The markings as the reader sees them, in CSS pixels of the visible stage `crop`: the letters where
- * they are drawn, the scale bar's rule and words, and each colour key's plate. What a key says comes
+ * they are drawn, the route landmarks' labels, the scale bar's rule and words, and each colour key's plate. What a key says comes
  * from `keys.model()`; only where it is drawn is measured.
  */
 export function snapshotMarkings(
@@ -100,6 +136,34 @@ export function snapshotMarkings(
         }
         return spot;
       });
+
+  const shown = (node: Element) => node.checkVisibility({ visibilityProperty: true });
+  const labels = [...host.querySelectorAll<HTMLElement>('.stage-label')]
+    .filter(shown)
+    .map((label): LabelMark => {
+      const dotNode = find(label, '.stage-label-dot');
+      const dotBox = local(dotNode);
+      const dot = {
+        x: dotBox.x + dotBox.width / 2,
+        y: dotBox.y + dotBox.height / 2,
+        color: getComputedStyle(dotNode).backgroundColor,
+      };
+      const leader = find(label, '.stage-label-leader');
+      const box = local(label);
+      return {
+        box,
+        dot,
+        leader: shown(leader) ? leaderEnd(dot, box) : null,
+        leaderColor: getComputedStyle(leader).backgroundColor,
+        lines: [...label.querySelectorAll<HTMLElement>('.stage-label-text')]
+          .filter(shown)
+          .flatMap((node) => {
+            const style = getComputedStyle(node);
+            const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+            return wrappedLines(node, local).map((line) => ({ ...line, color: style.color, font }));
+          }),
+      };
+    });
 
   // A key's words; a range measures the text, not the control that holds it.
   const words = (node: HTMLElement, text: string): KeyWords => {
@@ -156,6 +220,7 @@ export function snapshotMarkings(
   const bar = find(host, '#scale-bar');
   return {
     letters,
+    labels,
     keys: keyMarks,
     scale: bar.hidden
       ? null

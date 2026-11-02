@@ -38,6 +38,7 @@ export function withHeadlessRenderer(original: typeof Three, probe: HeadlessProb
       this.ratio = ratio;
     };
     getPixelRatio = () => this.ratio;
+    setTransparentSort() {}
     setSize() {}
     initRenderTarget() {}
     setAnimationLoop = (loop: ((now: number) => void) | null) => {

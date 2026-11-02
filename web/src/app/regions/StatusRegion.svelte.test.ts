@@ -127,6 +127,132 @@ describe('the count', () => {
   });
 });
 
+describe('the display settings in effect', () => {
+  const readout = () => colophon().querySelector('.display-changes-text')?.textContent ?? null;
+  const reset = () => page.getByRole('button', { name: 'Reset display' });
+
+  test('are listed until Reset display gives back their defaults, and nothing else', async () => {
+    await shell.open();
+    const { world } = shell.app;
+    const { anatomy, engine } = world!;
+    anatomy.selectRegion('destrieux:left:30');
+    anatomy.setHemisphere('left');
+    anatomy.setCortexOpacity(0.5);
+    anatomy.hideRegions(['destrieux:left:31']);
+    anatomy.toggleFocus();
+    flushSync();
+    expect(readout()).toBe('Left hemisphere · Cortex 50% · 1 part hidden · Focus on');
+    const camera = engine.camera.capture();
+    const { atlas, detail, surfaceColor } = engine.model.settings;
+
+    reset().element().focus();
+    await userEvent.keyboard('{Enter}');
+    flushSync();
+    const view = world!.view.current;
+    expect([view.hemisphere, view.cortexOpacity, view.hiddenRegions.size, view.focused]).toEqual([
+      'both',
+      1,
+      0,
+      false,
+    ]);
+    expect(view.selectedRegion?.id).toBe('destrieux:left:30');
+    expect(engine.camera.capture()).toEqual(camera);
+    expect({ atlas: view.atlas, detail: view.detail, surfaceColor: view.surfaceColor }).toEqual({
+      atlas,
+      detail,
+      surfaceColor,
+    });
+    expect(readout()).toBeNull();
+    expect(shell.announcer.textContent).toContain(t('en', 'display').displayReset);
+    await vi.waitFor(() =>
+      expect(document.activeElement).toBe(
+        page.getByRole('button', { name: 'Provenance' }).element(),
+      ),
+    );
+  });
+
+  test('Reset display replaces a standing notice and its action rather than joining them', async () => {
+    await shell.open();
+    const { anatomy, session } = shell.app.world!;
+    anatomy.setCortexVisible(false);
+    session.notify({ text: 'Cortex shown.', action: 'restore' });
+    flushSync();
+    await userEvent.click(reset());
+    expect(session.state.notice).toEqual({
+      text: t('en', 'display').displayReset,
+      action: null,
+    });
+  });
+
+  test('a lesson step’s own display is not listed; Reset display gives that display back', async () => {
+    await shell.open({ hash: '#tab=circuits&circuit=vision&step=3' });
+    const { anatomy, view, engine } = shell.app.world!;
+    await vi.waitFor(() =>
+      expect(view.current.selectedRegion?.id).toBe('learning:left:lateral-geniculate'),
+    );
+    flushSync();
+    const step = { ...engine.model.settings };
+    expect([step.hemisphere, step.focused]).toEqual(['left', true]);
+    expect(readout()).toBeNull();
+
+    anatomy.setHemisphere('both');
+    anatomy.toggleFocus();
+    flushSync();
+    expect(readout()).toBe('Both hemispheres · Focus off');
+    await userEvent.click(reset());
+    const { hemisphere, cortexVisible, cortexOpacity, focused, hiddenRegions } =
+      engine.model.settings;
+    expect({ hemisphere, cortexVisible, cortexOpacity, focused, hiddenRegions }).toEqual({
+      hemisphere: step.hemisphere,
+      cortexVisible: step.cortexVisible,
+      cortexOpacity: step.cortexOpacity,
+      focused: step.focused,
+      hiddenRegions: step.hiddenRegions,
+    });
+    expect(readout()).toBeNull();
+  });
+
+  test('a hidden cortex is listed, and Reset display shows it again', async () => {
+    await shell.open();
+    shell.app.world!.anatomy.setCortexVisible(false);
+    flushSync();
+    expect(readout()).toBe('Cortex hidden');
+    await userEvent.click(reset());
+    expect(shell.app.world!.view.current.cortexVisible).toBe(true);
+    expect(readout()).toBeNull();
+  });
+
+  test('Tracts’ see-through cortex is its default, and a reset there keeps it until Tracts closes', async () => {
+    await shell.open();
+    const { excursions, anatomy, view } = shell.app.world!;
+    excursions.chooseExplorer('diffusion');
+    flushSync();
+    const tractsOpacity = view.current.cortexOpacity;
+    expect(tractsOpacity).toBeLessThan(1);
+    expect(readout()).toBeNull();
+    anatomy.setCortexOpacity(1);
+    flushSync();
+    expect(readout()).toBe('Cortex 100%');
+    await userEvent.click(reset());
+    expect(view.current.cortexOpacity).toBe(tractsOpacity);
+    excursions.chooseExplorer('anatomy');
+    flushSync();
+    expect(view.current.cortexOpacity).toBe(1);
+    expect(readout()).toBeNull();
+  });
+
+  test('the tract reference has no display settings to list', async () => {
+    await shell.open({ tractAnatomy: 'reference-subject' });
+    const { excursions, anatomy } = shell.app.world!;
+    anatomy.setHemisphere('left');
+    flushSync();
+    expect(readout()).toBe('Left hemisphere');
+    excursions.chooseExplorer('diffusion');
+    flushSync();
+    expect(readout()).toBeNull();
+  });
+});
+
 describe('Provenance', () => {
   test('is in the reader’s language', async () => {
     await shell.open();

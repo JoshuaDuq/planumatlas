@@ -91,6 +91,7 @@
     }
     .summary {
       margin-top: var(--space-2);
+      text-wrap: pretty;
     }
     .note {
       color: var(--text-secondary);

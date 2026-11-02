@@ -162,6 +162,7 @@
         region={current.selectedRegion}
         explorer={current.explorer}
         cortexVisible={current.cortexVisible}
+        focused={current.focused}
         isolated={current.isolatedRegion !== null}
         landmarkSelected={circuits.landmarkSelected}
         {underProfile}
@@ -177,7 +178,7 @@
         territories={manifest.arterial_territories ?? null}
         cerebellarFunctions={manifest.cerebellar_functions ?? null}
         striatalNetworks={manifest.striatal_networks ?? null}
-        onfocus={() => anatomy.focusSelection()}
+        onfocus={() => anatomy.toggleFocus()}
         onisolate={anatomy.isolateSelection}
         onhide={() => void anatomy.hideSelection()}
         onclear={() => void anatomy.clearSelection()}

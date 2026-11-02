@@ -22,7 +22,9 @@ export const en = {
     'Counts and lengths use complete source streamlines after the length filter. Section cuts affect the view only.',
   outlineProvenance: 'Brain outline method and provenance',
   search: 'Search tracts',
-  noMatchHint: 'Try another tract name.',
+  // Only the dataset's own bundles are listed: a tract it does not reconstruct is not a misspelling.
+  noMatchHint: (count: number, dataset: string) =>
+    `Only the ${count} tract bundles reconstructed in ${dataset} are listed, and none matches this name.`,
   retry: 'Reload reference dataset',
   tryAgain: 'Try again',
   // Spoken, not shown (decision 42 on #4).
@@ -77,7 +79,8 @@ export const fr: typeof en = {
     'Les nombres et longueurs utilisent les trajectoires sources complètes après le filtre de longueur. Les coupes modifient seulement la vue.',
   outlineProvenance: 'Méthode et provenance du contour cérébral',
   search: 'Rechercher des faisceaux',
-  noMatchHint: 'Essayez un autre nom de faisceau.',
+  noMatchHint: (count: number, dataset: string) =>
+    `Seuls les ${count} faisceaux reconstruits dans ${dataset} sont listés, et aucun ne correspond à ce nom.`,
   retry: 'Recharger les données de référence',
   tryAgain: 'Réessayer',
   matches: (count: number) => `${count} ${count === 1 ? 'faisceau' : 'faisceaux'}`,

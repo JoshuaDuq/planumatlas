@@ -356,3 +356,55 @@ test('a lesion link and removal both forget the coordinate', () => {
   store.remove();
   expect([store.coordinate, store.sphere]).toEqual([null, null]);
 });
+
+test('undoing a coordinate’s replacement puts the lesion back exactly: centre, radius, colouring and bundle', () => {
+  const { store, shown, views, clearTract } = build();
+  store.commitRadius(12);
+  store.place([-30.04, -10, 20]);
+  store.setMode('functions');
+  store.showTract('af-left');
+  const lesion = store.sphere;
+  const placed = { entered: [-42, 22, 6] as [number, number, number], space: 'unstated' };
+  store.placeCoordinate(placed, [-40, 20, 7], 5);
+  // The slider moved under the coordinate is the next lesion's, not this one's.
+  store.commitRadius(20);
+  expect(store.replaced).toEqual({ sphere: lesion, mode: 'functions', tract: 'af-left' });
+  store.restoreReplaced();
+  flushSync();
+  expect([store.kind, store.coordinate, store.replaced]).toEqual(['lesion', null, null]);
+  expect([store.sphere, store.radius, store.mode]).toEqual([lesion, 12, 'functions']);
+  expect(shown.at(-1)).toEqual({ centre: [-30, -10, 20], radius: 12 });
+  expect(views.at(-1)!.id).toBe('af-left');
+  expect(clearTract).not.toHaveBeenCalled();
+});
+
+test('a lesion with no bundle drawn comes back without the one the coordinate drew', () => {
+  const { store, clearTract } = build();
+  store.place([-30, -10, 20]);
+  store.placeCoordinate({ entered: [0, 0, 0], space: 'unstated' }, [0, 0, 0], 5);
+  store.showTract('af-left');
+  store.restoreReplaced();
+  expect(store.selectedTract).toBe(null);
+  expect(clearTract).toHaveBeenCalledOnce();
+});
+
+test('the undo is gone once anything else holds the sphere, and only a lesion is ever waiting', () => {
+  const placed = { entered: [-42, 22, 6] as [number, number, number], space: 'unstated' };
+  const replacements: [string, (store: ReturnType<typeof build>['store']) => void][] = [
+    ['a lesion', (store) => store.place([5, 5, 5])],
+    ['another coordinate', (store) => store.placeCoordinate(placed, [9, 9, 9], 5)],
+    ['a link', (store) => store.restore({ centre: [1, 1, 1], radius: 8 }, 'lesion', null)],
+    ['removal', (store) => store.remove()],
+  ];
+  for (const [what, replace] of replacements) {
+    const { store } = build();
+    store.place([1, 2, 3]);
+    store.placeCoordinate(placed, [0, 0, 0], 5);
+    replace(store);
+    expect(store.replaced, what).toBe(null);
+    expect(() => store.restoreReplaced(), what).toThrow(/No lesion is waiting/);
+  }
+  const { store } = build();
+  store.placeCoordinate(placed, [0, 0, 0], 5);
+  expect(store.replaced).toBe(null);
+});

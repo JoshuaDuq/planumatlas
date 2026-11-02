@@ -79,7 +79,8 @@
       grid-column: 1;
       grid-row: 2;
       justify-self: start;
-      margin: calc(-1 * var(--space-1)) 0 var(--space-2);
+      min-height: 24px;
+      margin: calc(-1 * var(--space-1) - 2px) 0 calc(var(--space-2) - 2px);
       padding: 0;
       border: 0;
       background: none;

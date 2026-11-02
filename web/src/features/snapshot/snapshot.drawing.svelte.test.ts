@@ -1,5 +1,5 @@
 // What the snapshot draws onto the image, recorded call by call on the canvas: the statement, the caption,
-// the letters, the colour keys and the scale bar (SNAP-08 to SNAP-13).
+// the letters, the route's landmark labels, the colour keys and the scale bar (SNAP-08 to SNAP-14).
 import '../../styles/index.css';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
@@ -52,7 +52,7 @@ interface Roundrect {
 }
 
 /** The plan of the 560×520 fixture, drawn at ratio 2 over a flat frame, with every drawing call recorded. */
-async function drawFixture() {
+async function drawFixture(marks: { region: string; name: string; label: string }[] = []) {
   await page.viewport(1280, 900);
   const [width, height] = [560, 520];
   const engine = createFakeEngine({
@@ -69,6 +69,7 @@ async function drawFixture() {
     surfaceColor: 'atlas' as const,
     networks: null,
     legend: DEFICIT as Legend | null,
+    marks,
   });
   const handle: { keys?: StageKeysModel } = {};
   render(Fixture, { engine, stage, live, handle, width, height });
@@ -126,6 +127,19 @@ async function drawFixture() {
     rounded.push({ x, y, width: w, height: h, fill: String(this.fillStyle) });
     roundRect.call(this, x, y, w, h, r);
   });
+  const arcs: [number, number, number][] = [];
+  const arc = proto.arc;
+  vi.spyOn(proto, 'arc').mockImplementation(function (
+    this: CanvasRenderingContext2D,
+    x,
+    y,
+    r,
+    a,
+    b,
+  ) {
+    arcs.push([x, y, r]);
+    arc.call(this, x, y, r, a, b);
+  });
   const lineTo = proto.lineTo;
   vi.spyOn(proto, 'lineTo').mockImplementation(function (this: CanvasRenderingContext2D, x, y) {
     lines.push([x, y]);
@@ -141,8 +155,13 @@ async function drawFixture() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   annotateSnapshot(canvas, { ...plan, ratio });
   const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-  return { plan, texts, rounded, lines, loaded, pixels, ratio };
+  return { plan, texts, rounded, lines, arcs, loaded, pixels, ratio };
 }
+
+const ROUTE = [
+  { region: 'learning:midline:optic-chiasm', name: 'Optic chiasm', label: 'Landmark 1' },
+  { region: 'learning:left:lateral-geniculate', name: 'Lateral geniculate', label: 'Landmark 2' },
+];
 
 const measure = (font: string, text: string) => {
   const ctx = document.createElement('canvas').getContext('2d')!;
@@ -255,8 +274,71 @@ describe('what the snapshot draws', () => {
     expect(texts.some((call) => call.text === DEFICIT.note)).toBe(false);
   });
 
+  test('SNAP-14 each route landmark is drawn where it stands: its words, its dot on the anchor, its leader', async () => {
+    const { plan, texts, arcs, lines } = await drawFixture(ROUTE);
+    expect(plan.labels).toHaveLength(2);
+    for (const label of plan.labels) {
+      for (const line of label.lines) {
+        const drawn = texts.find(
+          (call) => call.text === line.text && call.x === line.x && call.y === line.y,
+        );
+        expect(drawn, line.text).toBeDefined();
+        expect(drawn!.align).toBe('left');
+        const unquoted = (font: string) => font.replace(/"/g, '');
+        expect(unquoted(drawn!.font)).toBe(unquoted(line.font));
+      }
+      // The dot: its rim, then its ink, both on the anchor.
+      expect(
+        arcs.filter(([x, y]) => x === label.dot.x && y === label.dot.y).map(([, , r]) => r),
+      ).toEqual([4, 2.5]);
+      if (label.leader) expect(lines).toContainEqual([label.leader.x, label.leader.y]);
+    }
+  });
+
+  test('SNAP-15 a label where the image draws its scale bar is drawn clear of it', async () => {
+    const { plan, texts } = await drawFixture(ROUTE);
+    // Moved to where the image, not the screen, puts the scale bar: the bottom right.
+    const [first] = plan.labels;
+    const [dx, dy] = [plan.width - 60 - first!.box.x, plan.height - 26 - first!.box.y];
+    const moved = {
+      ...first!,
+      box: { ...first!.box, x: first!.box.x + dx, y: first!.box.y + dy },
+      dot: { ...first!.dot, x: first!.dot.x + dx, y: first!.dot.y + dy },
+      leader: null,
+      lines: first!.lines.map((line) => ({ ...line, x: line.x + dx, y: line.y + dy })),
+    };
+    const canvas = document.createElement('canvas');
+    canvas.width = plan.width;
+    canvas.height = plan.height;
+    // The fixture's recorder is still listening: these calls are this drawing's.
+    const start = texts.length;
+    annotateSnapshot(canvas, { ...plan, labels: [moved], ratio: 1 });
+    const drawn = texts.slice(start);
+    const scale = drawn.find((call) => call.text === plan.scale!.label)!;
+    // The bar's rule ends 8 px before its label, a whole line tall.
+    const bar = {
+      left: scale.x - 8 - plan.scale!.pixels,
+      right: scale.x + measure(scale.font, scale.text),
+      top: scale.y - 8,
+      bottom: scale.y + 8,
+    };
+    for (const line of moved.lines) {
+      const call = drawn.find((c) => c.text === line.text)!;
+      const box = {
+        left: call.x,
+        right: call.x + measure(call.font, call.text),
+        top: call.y - 8,
+        bottom: call.y + 8,
+      };
+      const meets =
+        Math.min(box.right, bar.right) > Math.max(box.left, bar.left) &&
+        Math.min(box.bottom, bar.bottom) > Math.max(box.top, bar.top);
+      expect(meets, line.text).toBe(false);
+    }
+  });
+
   test('SNAP-13 only marks are added: pixels far from every mark keep the frame, and the fonts are loaded first', async () => {
-    const { plan, texts, rounded, lines, loaded, pixels, ratio } = await drawFixture();
+    const { plan, texts, rounded, lines, arcs, loaded, pixels, ratio } = await drawFixture(ROUTE);
     for (const font of ['400 12px', '400 13px', '600 13px']) {
       expect(
         loaded.some((face) => face.startsWith(font)),
@@ -272,6 +354,19 @@ describe('what the snapshot draws', () => {
         return [left, call.y - 10, left + w, call.y + 10];
       }),
       ...rounded.map((r) => [r.x, r.y, r.x + r.width, r.y + r.height]),
+      ...arcs.map(([x, y, r]) => [x - r, y - r, x + r, y + r]),
+      ...plan.labels.flatMap(({ dot, leader }) =>
+        leader
+          ? [
+              [
+                Math.min(dot.x, leader.x),
+                Math.min(dot.y, leader.y),
+                Math.max(dot.x, leader.x),
+                Math.max(dot.y, leader.y),
+              ],
+            ]
+          : [],
+      ),
       [
         Math.min(...lines.map(([x]) => x)),
         Math.min(...lines.map(([, y]) => y)) - 8,

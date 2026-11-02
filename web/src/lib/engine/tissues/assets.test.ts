@@ -4,14 +4,14 @@ import { test } from 'vitest';
 import { Color, Mesh, MeshStandardMaterial, SRGBColorSpace } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { Region } from '../../types/index.ts';
-import { anatomies, asDisplaySettings, readModel } from '../../core/catalog/test-support.ts';
+import { anatomies, asModelState, readModel } from '../../core/catalog/test-support.ts';
 import type { TissueAppearance } from '../render/materials.ts';
 import { createPalette } from './palette.ts';
 import type { Label } from './palette.ts';
 
 const directory = new URL(`../../../../../public/models/${anatomies.default}/`, import.meta.url);
 
-const state = asDisplaySettings({
+const state = asModelState({
   hemisphere: 'both',
   surfaceColor: 'atlas',
   cortexVisible: true,

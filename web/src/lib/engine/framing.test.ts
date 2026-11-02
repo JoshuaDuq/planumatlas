@@ -49,6 +49,7 @@ vi.mock('three', async (importOriginal) => {
       this.ratio = ratio;
     };
     getPixelRatio = () => this.ratio;
+    setTransparentSort() {}
     setSize() {}
     initRenderTarget() {}
     setAnimationLoop = (loop: ((now: number) => void) | null) => {
