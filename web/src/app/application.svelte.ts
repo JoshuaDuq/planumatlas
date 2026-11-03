@@ -1,5 +1,5 @@
 import { flushSync, getContext } from 'svelte';
-import type { AnatomyCommands } from '../lib/controller/anatomy.ts';
+import type { AnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
 import type { AppContext } from '../lib/controller/context.ts';
 import type { CoordinatePlacement } from '../lib/controller/coordinates.ts';
 import type { Excursions } from '../lib/controller/excursion.svelte.ts';

@@ -31,6 +31,8 @@ export const en = {
   matchesInOtherCut: (countText: string, atlas: string) =>
     `${countText} in ${atlas}, which labels cuts only. `,
   switchCutAtlas: 'Switch cut labels',
+  // An on-screen region found through a part it holds, or a structure it stands in for.
+  includes: (name: string) => `includes ${name}`,
   rowHiddenAria: (name: string, side: string, reason: string) =>
     `${name}, ${side}: ${reason}. Activate to reveal.`,
   rowUnavailableAria: (name: string, side: string, reason: string) =>
@@ -69,6 +71,7 @@ export const fr: typeof en = {
   matchesInOtherCut: (countText: string, atlas: string) =>
     `${countText} dans ${atlas}, qui n’étiquette que les coupes. `,
   switchCutAtlas: 'Changer les étiquettes de coupe',
+  includes: (name: string) => `comprend ${name}`,
   rowHiddenAria: (name: string, side: string, reason: string) =>
     `${name}, ${side} : ${reason}. Activer pour afficher.`,
   rowUnavailableAria: (name: string, side: string, reason: string) =>

@@ -29,13 +29,19 @@ export const SHORTCUT_KEYS = {
   spinalCord: 'S',
   hemisphere: 'H',
   linkedMri: 'M',
+  /** With Ctrl, or ⌘ on a Mac: not a single-key shortcut. */
+  undo: 'Z',
 } as const;
 
 /**
  * The same keys as `aria-keyshortcuts` values for the controls that do the same (ARIA 1.2: a
  * character made with a modifier is written with it, so `?` is "Shift+/").
  */
-export const ARIA_KEYSHORTCUTS = { ...SHORTCUT_KEYS, shortcuts: 'Shift+/' } as const;
+export const ARIA_KEYSHORTCUTS = {
+  ...SHORTCUT_KEYS,
+  shortcuts: 'Shift+/',
+  undo: 'Control+Z Meta+Z',
+} as const;
 
 /** `1`–`6` choose these views (app.js:66); `0` chooses the oblique one. */
 const DIGIT_VIEWS: ReadonlyMap<string, ViewName> = new Map(
@@ -67,6 +73,8 @@ export type KeymapState = Pick<
   focusInDetail: boolean;
   /** The tract reference is shown alone. */
   tractReferenceActive: boolean;
+  /** A hide, show or isolate can be undone (the dissection bar's Undo). */
+  dissectionCanUndo: boolean;
 };
 
 /**
@@ -101,6 +109,7 @@ export interface KeymapCommands {
   setHemisphere(hemisphere: Hemisphere): void;
   orbitBy(turn: OrbitTurn): void;
   dolly(factor: number): void;
+  undoDissection(): void;
 }
 
 export interface KeymapHost {
@@ -211,6 +220,13 @@ const COMMANDS: readonly Command[] = [
 
 const hasModifier = (event: KeyboardEvent) => event.metaKey || event.ctrlKey || event.altKey;
 
+/** Ctrl+Z, or ⌘Z, alone: undo. */
+const isUndo = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) &&
+  !event.altKey &&
+  !event.shiftKey &&
+  event.key.toLowerCase() === SHORTCUT_KEYS.undo.toLowerCase();
+
 /** Escape steps back through the detail, the region, the open function, then the open deficit. */
 function escape(commands: KeymapCommands, state: KeymapState): void {
   // The dialog closes itself; the selection under it is not the target.
@@ -259,6 +275,14 @@ export function dispatchKey(event: KeyboardEvent, host: KeymapHost): void {
     ) {
       press.preventDefault();
       host.commands.closeMpr();
+    }
+    return;
+  }
+  // Undo steps back through the dissection, except in a field that undoes its own typing.
+  if (isUndo(press)) {
+    if (state.dissectionCanUndo && !state.shortcutsOpen && shortcutsAllowed(press.target, key)) {
+      press.preventDefault();
+      host.commands.undoDissection();
     }
     return;
   }

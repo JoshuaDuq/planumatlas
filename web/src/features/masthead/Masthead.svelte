@@ -41,6 +41,7 @@
     onProvenance: (event: MouseEvent) => void;
     onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
+    onStartOver: () => void;
   }
 
   let {
@@ -63,6 +64,7 @@
     onProvenance,
     onGuide,
     onShortcuts,
+    onStartOver,
   }: Props = $props();
 
   let menu: SettingsMenu;
@@ -149,6 +151,7 @@
       {onProvenance}
       {onGuide}
       {onShortcuts}
+      {onStartOver}
     />
     {#if link.state !== 'idle'}
       <span class="link-said" aria-hidden="true">

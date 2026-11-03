@@ -378,3 +378,34 @@ test('an accented letter is not a word start: French "ra" ranks a word start abo
     'Aire hypothalamique latérale (partie postérieure)',
   ]);
 });
+
+test('what is on screen ranks first, so the first result never changes the anatomy', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  const full = createCatalog(real);
+  const found = full.search('putamen', settings({ detail: 'learning' }));
+  // FreeSurfer's and NextBrain's putamen match as well as the teaching set's, but are not on screen.
+  assert.ok(found.rows.some((row) => !row.visible));
+  const firstHidden = found.rows.findIndex((row) => !row.visible);
+  assert.ok(found.rows.slice(firstHidden).every((row) => !row.visible));
+  assert.deepEqual(
+    found.rows.slice(0, 2).map((row) => row.region.id),
+    ['learning:left:putamen', 'learning:right:putamen'],
+  );
+});
+
+test('a match not on screen brings the on-screen region that stands in for it, saying why', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  const { units } = readModel<{ units: Record<string, string> }>(
+    `${published}/neuropsych-domains.json`,
+  );
+  const found = createCatalog(real, 'en', null, units).search(
+    'hippocampus',
+    settings({ detail: 'learning' }),
+  );
+  // No teaching-set name says hippocampus: its Hippocampal formation stands in for FreeSurfer's.
+  const first = found.rows[0]!;
+  assert.equal(first.region.id, 'learning:left:hippocampus');
+  assert.equal(first.visible, true);
+  assert.equal(first.via?.name, 'Hippocampus');
+  assert.ok(found.rows.some((row) => row.region.id === 'aseg:left:17' && !row.visible));
+});

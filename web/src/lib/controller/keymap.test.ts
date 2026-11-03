@@ -18,6 +18,7 @@ const STATE: KeymapState = {
   shortcutsOpen: false,
   focusInDetail: false,
   tractReferenceActive: false,
+  dissectionCanUndo: false,
 };
 const REGION = {} as KeymapState['selectedRegion'];
 
@@ -43,6 +44,7 @@ const COMMAND_NAMES = [
   'setHemisphere',
   'orbitBy',
   'dolly',
+  'undoDissection',
 ] as const;
 
 function host(state: Partial<KeymapState> = {}) {
@@ -340,6 +342,33 @@ describe('keymap', () => {
     assert.equal(ARIA_KEYSHORTCUTS.shortcuts, 'Shift+/');
     assert.equal(SHORTCUT_KEYS.shortcuts, '?');
     assert.equal(ARIA_KEYSHORTCUTS.cortex, SHORTCUT_KEYS.cortex);
+  });
+
+  it('Ctrl+Z or ⌘Z undoes the last dissection step, and leaves a field its own undo', () => {
+    const { keymap, commands } = host({ dissectionCanUndo: true });
+    for (const modifier of [{ ctrlKey: true }, { metaKey: true }]) {
+      const event = press('z', null, modifier);
+      dispatchKey(event, keymap);
+      assert.equal(calls(event.preventDefault), 1);
+    }
+    assert.equal(calls(commands.undoDissection), 2);
+    // Typing in the search undoes its own text; Shift is redo; with nothing to undo, the key passes.
+    const typing = press('z', { tagName: 'INPUT', type: 'search' }, { ctrlKey: true });
+    dispatchKey(typing, keymap);
+    assert.equal(calls(typing.preventDefault), 0);
+    dispatchKey(press('Z', null, { ctrlKey: true, shiftKey: true }), keymap);
+    const spent = host();
+    const unused = press('z', null, { metaKey: true });
+    dispatchKey(unused, spent.keymap);
+    assert.equal(calls(unused.preventDefault), 0);
+    assert.equal(calls(spent.commands.undoDissection), 0);
+    assert.equal(calls(commands.undoDissection), 2);
+    // Not a single-key shortcut: turning those off leaves it, and plain Z does nothing.
+    const off = host({ dissectionCanUndo: true, singleKeys: false });
+    dispatchKey(press('z', null, { ctrlKey: true }), off.keymap);
+    dispatchKey(press('z'), off.keymap);
+    assert.equal(calls(off.commands.undoDissection), 1);
+    assert.equal(ARIA_KEYSHORTCUTS.undo, 'Control+Z Meta+Z');
   });
 
   it('adds one bubble-phase keydown listener on the window and removes it', () => {

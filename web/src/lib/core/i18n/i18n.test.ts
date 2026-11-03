@@ -252,11 +252,10 @@ test('counted phrases read right for a count of 1 and of 2, in both languages', 
   assert.equal(CIRCUIT_TEXT.fr.coverage(1, 1), '1 parcours guidé · 1 repère');
   assert.equal(CIRCUIT_TEXT.fr.coverage(2, 2), '2 parcours guidés · 2 repères');
 
-  assert.deepEqual([1, 2].map(DIFFUSION_TEXT.en.bundleCollection), [
-    '1 tract bundle',
-    '2 tract bundles',
-  ]);
-  assert.deepEqual([1, 2].map(DIFFUSION_TEXT.fr.bundleCollection), ['1 faisceau', '2 faisceaux']);
+  assert.equal(DIFFUSION_TEXT.en.bundlesDrawn(0, 1), '0 of 1 tract bundle drawn');
+  assert.equal(DIFFUSION_TEXT.en.bundlesDrawn(2, 30), '2 of 30 tract bundles drawn');
+  assert.equal(DIFFUSION_TEXT.fr.bundlesDrawn(1, 30), '1 faisceau tracé sur 30');
+  assert.equal(DIFFUSION_TEXT.fr.bundlesDrawn(2, 30), '2 faisceaux tracés sur 30');
 });
 
 test('the contested-section note uses typographic apostrophes', () => {

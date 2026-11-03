@@ -26,7 +26,7 @@
     ready: boolean;
     /** The named view the session keeps. */
     viewName: string;
-    commands: Pick<DockCommands, 'chooseView' | 'reset'>;
+    commands: Pick<DockCommands, 'chooseView' | 'resetView'>;
   }
 
   let { engine, stage, lang, ready, viewName, commands }: Props = $props();
@@ -40,6 +40,8 @@
     A: 'anterior',
   };
   const LETTERS = Object.keys(VIEWS) as Letter[];
+  /** A letter's drawn circle is 18 px across, whatever its target. */
+  const DRAWN_RADIUS = 9;
   const PAIRS = [
     ['R', 'L'],
     ['S', 'I'],
@@ -74,6 +76,13 @@
   // The basis last drawn, for a re-measure between camera events.
   let shown: CameraView['basis'];
 
+  let field: HTMLElement;
+  let centre: HTMLElement;
+  // The marks a pointer can take, at their drawn centres in pixels from the axes' origin.
+  let marks: { view: ViewName; node: HTMLElement; x: number; y: number; layer: string }[] = [];
+  // The mark nearest the pointer, raised over its neighbours so hover, tooltip and press agree.
+  let hot: HTMLElement | null = null;
+
   function place(basis: CameraView['basis']) {
     shown = basis;
     const drawn = projectAxes(basis);
@@ -92,17 +101,69 @@
         line.setAttribute('y2', String(-y));
       }
     }
-    // A letter pointing away whose centre lies under a facing letter's target, or the centre's, is behind
-    // it: a press there would land in front anyway, so the one behind takes none (the keyboard reaches it).
+    // A letter pointing away whose centre lies under a facing letter's drawn circle, or the centre's, is
+    // hidden behind it, so it takes no press (the keyboard reaches it). One only overlapped is still
+    // pressed where it is nearer than its neighbours.
     const toward = [{ x: 0, y: 0 }, ...drawn.filter(({ depth }) => depth >= 0)];
     for (const { letter, x, y, depth } of drawn) {
       buttons[letter].dataset.behind = String(
         depth < 0 &&
           toward.some(
-            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < metrics.target / 2,
+            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < DRAWN_RADIUS,
           ),
       );
     }
+    marks = [
+      { view: 'oblique' as ViewName, node: centre, x: 0, y: 0, layer: '50' },
+      ...drawn
+        .filter(({ letter }) => buttons[letter].dataset.behind === 'false')
+        .map(({ letter, x, y }) => ({
+          view: VIEWS[letter],
+          node: buttons[letter],
+          x: x * metrics.reach,
+          y: y * metrics.reach,
+          layer: buttons[letter].style.zIndex,
+        })),
+    ];
+    if (hot) hot.style.zIndex = '100';
+  }
+
+  /** The mark drawn nearest a point of the page: where targets overlap, the one the pointer means. */
+  function nearest(clientX: number, clientY: number) {
+    const origin = field.getBoundingClientRect();
+    const [x, y] = [clientX - origin.left, clientY - origin.top];
+    const distance = (mark: (typeof marks)[number]) => Math.hypot(mark.x - x, mark.y - y);
+    return marks.reduce((best, mark) => (distance(mark) < distance(best) ? mark : best));
+  }
+
+  function heat(event: PointerEvent) {
+    if (event.pointerType === 'touch') return;
+    const mark = nearest(event.clientX, event.clientY);
+    if (mark.node === hot) return;
+    cool();
+    hot = mark.node;
+    hot.style.zIndex = '100';
+  }
+
+  function cool() {
+    if (!hot) return;
+    hot.style.zIndex = marks.find((mark) => mark.node === hot)?.layer ?? '';
+    hot = null;
+  }
+
+  /** The pointer over the marks, for hover; the buttons stay the controls. */
+  function follow(node: HTMLElement) {
+    node.addEventListener('pointermove', heat);
+    node.addEventListener('pointerleave', cool);
+    return () => {
+      node.removeEventListener('pointermove', heat);
+      node.removeEventListener('pointerleave', cool);
+    };
+  }
+
+  /** A pointer press frames the mark nearest it; a key press, the button that has focus. */
+  function press(event: MouseEvent, own: ViewName) {
+    choose(event.detail === 0 ? own : nearest(event.clientX, event.clientY).view);
   }
 
   function measure(node: HTMLElement) {
@@ -111,7 +172,7 @@
       const style = getComputedStyle(node);
       metrics = {
         target: parseFloat(style.getPropertyValue('--gizmo-letter-target')),
-        reach: parseFloat(style.getPropertyValue('--gizmo-span')) / 2 - 9,
+        reach: parseFloat(style.getPropertyValue('--gizmo-span')) / 2 - DRAWN_RADIUS,
       };
       place(shown);
     });
@@ -152,7 +213,7 @@
   {@attach rove}
   {@attach measure}
 >
-  <div class="gizmo-field">
+  <div class="gizmo-field" bind:this={field} {@attach follow}>
     <svg class="gizmo-axes" viewBox="-1 -1 2 2" aria-hidden="true" focusable="false">
       {#each ['halo', 'ink'] as layer (layer)}
         {#each PAIRS as [letter] (letter)}
@@ -170,7 +231,8 @@
       aria-label={copy.namedView(names.oblique)}
       aria-pressed={heldName === 'oblique'}
       data-tooltip={copy.namedView(names.oblique)}
-      onclick={() => choose('oblique')}
+      onclick={(event) => press(event, 'oblique')}
+      bind:this={centre}
     ></button>
     {#each LETTERS as letter (letter)}
       <button
@@ -180,7 +242,7 @@
         aria-pressed={heldName === VIEWS[letter]}
         data-letter={letter}
         data-tooltip={copy.namedView(names[VIEWS[letter]])}
-        onclick={() => choose(VIEWS[letter])}
+        onclick={(event) => press(event, VIEWS[letter])}
         {@attach (node) => void (buttons[letter] = node)}
       >
         <span aria-hidden="true">{letters[letter]}</span>
@@ -204,7 +266,7 @@
     class="gizmo-reset"
     label={t(lang, 'display').resetView}
     data-tooltip={t(lang, 'display').resetView}
-    onclick={commands.reset}
+    onclick={commands.resetView}
   />
 </div>
 

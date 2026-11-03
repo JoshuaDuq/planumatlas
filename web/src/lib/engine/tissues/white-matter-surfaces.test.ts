@@ -49,13 +49,13 @@ test('TISSUE-38 the exposed white surface is white tissue that follows the corte
   assert.equal(left!.userData['kind'], 'non-region');
   assert.equal(surfaces.group.visible, false);
 
-  surfaces.update(state({ cortexOpacity: 0.4 }), regions, null);
+  surfaces.update(state({ cortexOpacity: 0.4 }), regions, null, false);
   assert.equal(left!.visible, true);
   assert.equal(right!.visible, false);
   assert.equal(left!.material.opacity, 0.4);
   assert.equal(left!.material.transparent, true);
   assert.equal(left!.material.depthWrite, false);
-  surfaces.update(state({}), regions, null);
+  surfaces.update(state({}), regions, null, false);
   assert.equal(left!.material.opacity, 1);
   assert.equal(left!.material.transparent, false);
   assert.equal(left!.material.depthWrite, true);
@@ -63,4 +63,20 @@ test('TISSUE-38 the exposed white surface is white tissue that follows the corte
   assert.throws(() => createWhiteMatterSurfaces(new Group(), appearance), {
     message: 'Expected one native left white-matter surface.',
   });
+});
+
+test('TISSUE-38 under a ghost the white matter a Focus lays open is grey, as everything else it does not hold', () => {
+  const root = new Group();
+  for (const hemisphere of ['left', 'right']) {
+    const mesh = new Mesh(new BoxGeometry(0.01, 0.01, 0.01), new MeshBasicMaterial());
+    mesh.userData = { hemisphere, boundary: 'white' };
+    root.add(mesh);
+  }
+  const surfaces = createWhiteMatterSurfaces(root, appearance);
+  const [left] = surfaces.meshes;
+  surfaces.update(state({}), regions, null, true);
+  const { r, g, b } = left!.material.color;
+  assert.ok(r === g && g === b, `grey, got ${left!.material.color.getHexString()}`);
+  surfaces.update(state({}), regions, null, false);
+  assert.equal(left!.material.color.getHexString(), 'e5dbc5');
 });

@@ -211,7 +211,7 @@
     {@const tractReference = isIndependentTractReference(current)}
     {@const { model } = world.engine}
     {@const commands = {
-      reset: world.anatomy.reset,
+      resetView: world.anatomy.resetView,
       setHemisphere: world.anatomy.setHemisphere,
       setCortexVisible: world.anatomy.setCortexVisible,
       setCortexOpacity: world.anatomy.setCortexOpacity,

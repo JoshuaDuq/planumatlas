@@ -115,12 +115,23 @@ describe('the count', () => {
     expect(count()).toBe(t('en', 'header').loadingProgress('50%'));
   });
 
-  test('in the Tracts tab it counts bundles; alone, the reference is described as reference data', async () => {
+  test('in the Tracts tab it counts the bundles drawn; alone, the reference is described as reference data', async () => {
     await shell.open({ tractAnatomy: 'reference-subject' });
-    shell.app.world!.excursions.chooseExplorer('diffusion');
+    const { excursions, engine } = shell.app.world!;
+    excursions.chooseExplorer('diffusion');
+    await vi.waitFor(() => expect(engine.tracts.ready).toBe(true));
     flushSync();
     const catalog = tractCatalog('reference-subject');
-    expect(count()).toBe(t('en', 'diffusion').bundleCollection(catalog.bundles.length));
+    const drawn = () => engine.tracts.snapshot().filter((bundle) => bundle.visible);
+    const { bundlesDrawn } = t('en', 'diffusion');
+    expect(count()).toBe(bundlesDrawn(drawn().length, catalog.bundles.length));
+    // Toggling a bundle off changes the count with it.
+    const [first] = drawn();
+    expect(first).toBeDefined();
+    engine.tracts.setVisible(first!.id, false);
+    flushSync();
+    expect(count()).toBe(bundlesDrawn(drawn().length, catalog.bundles.length));
+    expect(drawn().length).toBeLessThan(engine.tracts.snapshot().length);
     expect(colophon().querySelector('.colophon-description')!.textContent).toBe(
       footer.referenceColophon(catalog.name.en),
     );
@@ -178,10 +189,14 @@ describe('the display settings in effect', () => {
     session.notify({ text: 'Cortex shown.', action: 'restore' });
     flushSync();
     await userEvent.click(reset());
+    // Its own action: the display from before the reset, which the old notice's Restore was not.
     expect(session.state.notice).toEqual({
       text: t('en', 'display').displayReset,
-      action: null,
+      action: 'restore',
     });
+    expect(shell.app.world!.view.current.cortexVisible).toBe(true);
+    await userEvent.click(page.getByRole('button', { name: t('en', 'clinical').restore }));
+    await vi.waitFor(() => expect(shell.app.world!.view.current.cortexVisible).toBe(false));
   });
 
   test('a lesson step’s own display is not listed; Reset display gives that display back', async () => {

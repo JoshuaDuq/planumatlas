@@ -62,7 +62,7 @@ const KINDS: Record<string, string> = {
   'circuits.stepShort': 'nn',
   'diffusion.matches': 'n',
   'diffusion.streamlines': 'nn',
-  'diffusion.bundleCollection': 'n',
+  'diffusion.bundlesDrawn': 'nn',
   'mri.grid': 'ds',
   'mri.dialog.grid': 'ds',
   'mri.dialog.range': 'n',

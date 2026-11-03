@@ -27,6 +27,14 @@ export const en = {
   atlasBecomes: (colour: string, atlas: string) => `${colour} (atlas becomes ${atlas})`,
   colourBecomes: (atlas: string, colour: string) => `${atlas} (colour becomes ${colour})`,
   dataSummary: 'Atlas and display settings',
+  // While a function or deficit shows its regions on another atlas than the reader's own.
+  borrowedBy: { functions: 'via Functions', deficits: 'via Deficits' },
+  borrowedNote: {
+    functions: (atlas: string, own: string) =>
+      `Set by the Functions tab: its maps lie on ${atlas} areas. Leaving the function brings back ${own}.`,
+    deficits: (atlas: string, own: string) =>
+      `Set by the Deficits tab: the open deficit’s regions lie on ${atlas}. Leaving the deficit brings back ${own}.`,
+  },
   // What each loaded choice is, in a line: the field's tooltip and the summary popover's note.
   notes: {
     destrieux: 'Sulcal and gyral regions, 74 per hemisphere',
@@ -46,6 +54,7 @@ export const en = {
   linkFailed: 'Could not copy the link',
   languageSwitch: 'Language',
   guide: 'How to use Planum',
+  startOver: 'Start over',
   shortcuts: 'Keyboard shortcuts',
   theme: 'Theme',
   systemTheme: 'System',
@@ -87,6 +96,13 @@ export const fr: typeof en = {
   atlasBecomes: (colour: string, atlas: string) => `${colour} (l’atlas devient ${atlas})`,
   colourBecomes: (atlas: string, colour: string) => `${atlas} (la couleur devient ${colour})`,
   dataSummary: 'Réglages de l’atlas et de l’affichage',
+  borrowedBy: { functions: 'via Fonctions', deficits: 'via Déficits' },
+  borrowedNote: {
+    functions: (atlas: string, own: string) =>
+      `Choisi dans l’onglet Fonctions\u202f: ses cartes portent sur les aires ${atlas}. Quitter la fonction rétablit ${own}.`,
+    deficits: (atlas: string, own: string) =>
+      `Choisi dans l’onglet Déficits\u202f: les régions du déficit ouvert sont sur ${atlas}. Quitter le déficit rétablit ${own}.`,
+  },
   notes: {
     destrieux: 'Régions des sillons et des gyrus, 74 par hémisphère',
     'hcp-mmp': 'Aires multimodales, 180 par hémisphère (Glasser 2016)',
@@ -105,6 +121,7 @@ export const fr: typeof en = {
   linkFailed: 'Impossible de copier le lien',
   languageSwitch: 'Langue',
   guide: 'Utiliser Planum',
+  startOver: 'Recommencer',
   shortcuts: 'Raccourcis clavier',
   theme: 'Thème',
   systemTheme: 'Système',

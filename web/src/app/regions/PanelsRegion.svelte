@@ -146,6 +146,15 @@
     if (group && !view.current.expanded.has(group.key)) session.toggleGroup(group.key);
   }
 
+  /** A reveal from the tree changed the reader's settings, and the region it opened is still in front. */
+  function anatomyRestorable(current: { explorer: string; selectedRegion: { id: string } | null }) {
+    return (
+      current.explorer === 'anatomy' &&
+      current.selectedRegion !== null &&
+      world!.anatomy.revealedRegion === current.selectedRegion.id
+    );
+  }
+
   function noticeAction(action: NonNullable<Notice['action']>) {
     if (action === 'reload') void reloadWithoutStoredModels();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
@@ -248,9 +257,10 @@
         notice={offeredNotice(current.notice, world.lesion.replaced !== null)}
         shell={app.media.phone ? 'sheet' : 'rails'}
         stepper={panels.circuits.exploring && panels.circuits.circuit ? stepper : undefined}
-        trailing={world.excursions.restorable &&
-        ((current.explorer === 'functions' && current.selectedFunction) ||
-          (current.explorer === 'deficits' && current.selectedDeficit))
+        trailing={(world.excursions.restorable &&
+          ((current.explorer === 'functions' && current.selectedFunction) ||
+            (current.explorer === 'deficits' && current.selectedDeficit))) ||
+        anatomyRestorable(current)
           ? trailing
           : undefined}
         onMode={(mode) => void world.excursions.chooseMode(mode)}
@@ -292,6 +302,15 @@
   {#snippet trailing()}
     <FunctionRestore model={panels.functions} />
     <DeficitRestore explorer={panels.deficits} view={world.view.current} />
+    {#if anatomyRestorable(world.view.current)}
+      <button
+        type="button"
+        class="clinical-restore"
+        onclick={() => void world.anatomy.restoreBeforeReveal()}
+      >
+        {t(lang, 'clinical').restore}
+      </button>
+    {/if}
   {/snippet}
 {:else}
   <aside

@@ -40,8 +40,36 @@ test('a deficit draws its mapped regions in the detail level holding most of the
   const ids = regions.map((region) => region.id);
   settings.detail = 'learning';
   assert.deepEqual(clinicalLayers(model, ids), { atlas: 'destrieux', detail: 'aseg' });
+  // Drawing one of the three is not enough to keep the loaded level.
   settings.detail = 'nextbrain';
+  assert.equal(clinicalLayers(model, ids).detail, 'aseg');
+  settings.detail = 'aseg';
   assert.equal(clinicalLayers(model, ids).detail, null);
+});
+
+test('the loaded detail level is kept when it draws as many as any other', () => {
+  const regions = [
+    { id: 'aseg:right:49', atlas: 'aseg', kind: 'structure' },
+    { id: 'nextbrain:right:7', atlas: 'nextbrain', kind: 'structure' },
+  ] as const;
+  const { model, settings } = scene(...regions);
+  const ids = regions.map((region) => region.id);
+  for (const detail of ['aseg', 'nextbrain']) {
+    settings.detail = detail;
+    assert.equal(clinicalLayers(model, ids).detail, null, detail);
+  }
+});
+
+test('a structure drawn on every level argues for none', () => {
+  const cord = {
+    id: 'pam50:left:1',
+    atlas: 'pam50',
+    kind: 'structure',
+    supplemental: true,
+  } as const;
+  const { model, settings } = scene(cord);
+  settings.detail = 'learning';
+  assert.equal(clinicalLayers(model, [cord.id]).detail, null);
 });
 
 test('an unknown or non-anatomical citation is an error, not a guess', () => {

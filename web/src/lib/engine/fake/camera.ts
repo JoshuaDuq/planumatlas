@@ -206,7 +206,10 @@ export function createFakeCamera({
       reframe();
       return true;
     },
-    frameWhole: () => moved(),
+    frameWhole() {
+      moved();
+      return [];
+    },
     frameInternal: () => moved(),
     faceCut() {
       if (!sections.active) return null;

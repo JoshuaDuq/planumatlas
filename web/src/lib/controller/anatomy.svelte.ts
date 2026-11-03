@@ -63,8 +63,11 @@ export function createAnatomyCommands(
   const hasSpinalCord = publishesSpinalCord(model.manifest);
   // Taken at each of the two doors into internal anatomy, and spent on the way out.
   let beforeInternal: InternalEntry | null = null;
-  // The scene before the last reveal that changed the reader's settings, which its notice's Restore puts back.
-  let beforeReveal: ReaderState | null = null;
+  // The scene before the last reveal that changed the reader's settings, or the last Reset display
+  // or Start over,
+  // which its notice's Restore puts back; and the region a reveal opened, for which the location bar
+  // offers Restore while it is selected.
+  let beforeReveal = $state.raw<{ scene: ReaderState; region: string | null } | null>(null);
 
   /** Open the tree branch that holds a region, so a selection is never out of sight. */
   function revealInTree(id: string) {
@@ -156,23 +159,48 @@ export function createAnatomyCommands(
    * The inspector's Hide: hand the selection to the dissection and put focus on its Undo, which the
    * selection's own controls no longer offer. False when focus could not be placed.
    */
+  /**
+   * The detail's Hide. A part the reader chose to hide, said as the tree's eye says it rather than as
+   * a lost selection, and the whole view before it (selection, Focus, camera) held for Restore.
+   */
   async function hideSelection(): Promise<boolean> {
-    const id = engineState.model.selectedRegion?.id;
-    if (!id) return false;
+    const region = engineState.model.selectedRegion;
+    if (!region) return false;
+    const scene = reader.capture();
     chooseExplorer('anatomy');
-    hideRegions([id]);
+    hideRegions([region.id]);
+    const { lang } = session.state;
+    beforeReveal = { scene, region: null };
+    // In place of the cleared-selection notice the hide raised, which would join this one.
+    session.notify(null);
+    session.notify({
+      text: t(lang, 'dissection').partHidden(
+        catalog.label(region.id).name,
+        t(lang, 'sides').words[region.hemisphere],
+      ),
+      action: 'restore',
+    });
     ui.showList();
     await tick();
     return requestFocus(FOCUS_TARGETS.dissectionUndo, { fallback: FOCUS_TARGETS.treeStop });
   }
 
-  /** Where a plane with this normal must sit to pass through a point, clamped to the cut's range. */
-  function offsetThrough(point: Vec3, normal: Vec3, [minimum, maximum]: readonly [number, number]) {
+  /** The crosshair for a plane with this normal through a point, clamped to the cut's range. */
+  function crosshairThrough(
+    point: Vec3,
+    normal: Vec3,
+    [minimum, maximum]: readonly [number, number],
+  ) {
     const offset = point[0] * normal[0] + point[1] * normal[1] + point[2] * normal[2];
     if (![offset, minimum, maximum].every(Number.isFinite)) {
       throw new Error('A cut through a point needs finite coordinates and a finite range.');
     }
-    return Math.min(maximum, Math.max(minimum, offset));
+    const shift = Math.min(maximum, Math.max(minimum, offset)) - offset;
+    return [
+      point[0] + shift * normal[0],
+      point[1] + shift * normal[1],
+      point[2] + shift * normal[2],
+    ] as Vec3;
   }
 
   /** Undo whatever is hiding a region, then select it; false once a later command took over. */
@@ -197,7 +225,9 @@ export function createAnatomyCommands(
       await commands.cut('coronal', current);
       const coordinates = model.anchorOf(id);
       if (current() && coordinates && sections.active) {
-        sections.setOffset(offsetThrough(coordinates, sections.frame.normal, sections.offsetRange));
+        sections.setCrosshair(
+          crosshairThrough(coordinates, sections.frame.normal, sections.offsetRange),
+        );
       }
     }
     if (reason === 'other-detail')
@@ -229,7 +259,7 @@ export function createAnatomyCommands(
       // What the reveal changed comes first, so its Restore is the notice's action.
       const said = revealNotice(session.state.lang, before, settingsNow());
       if (said) {
-        beforeReveal = scene;
+        beforeReveal = { scene, region: id };
         session.notify({ text: said, action: 'restore' });
       }
       focusSelection();
@@ -241,7 +271,7 @@ export function createAnatomyCommands(
   /** The reveal notice's Restore: the scene from before the reveal, in place of what it said. */
   async function restoreBeforeReveal() {
     if (!beforeReveal) throw new Error('There is no scene from before a reveal to restore.');
-    const scene = beforeReveal;
+    const { scene } = beforeReveal;
     beforeReveal = null;
     const current = commands.begin();
     const failures = await reader.apply(scene, current);
@@ -357,20 +387,29 @@ export function createAnatomyCommands(
     }
   }
 
+  /** The gizmo's Reset view: the opening camera, and nothing the reader built. */
+  function resetView() {
+    camera.recenter();
+    if (!session.setView('oblique')) throw new Error('Unknown view: oblique');
+    camera.applyView('oblique');
+  }
+
   /**
-   * The opening picture: display, cut, camera, and the list. Not wrapped in `display`, which would
-   * announce the cleared selection as a mishap. A command still loading would land over it, so it is
-   * overtaken.
+   * Start over, from the settings menu: the opening picture (display, cut, camera, and the list),
+   * with the scene before it held for the notice's Restore. Not wrapped in `display`, which would
+   * announce the cleared selection as a mishap. A command still loading would land over it, so it
+   * is overtaken.
    */
-  function reset() {
+  function startOver() {
     commands.begin();
+    const scene = reader.capture();
     session.setQuery('');
     void sections.setMode('off');
     model.reset();
     afterReset();
-    camera.recenter();
-    if (!session.setView('oblique')) throw new Error('Unknown view: oblique');
-    camera.applyView('oblique');
+    resetView();
+    beforeReveal = { scene, region: null };
+    session.notify({ text: t(session.state.lang, 'display').startedOver, action: 'restore' });
   }
 
   /**
@@ -379,6 +418,8 @@ export function createAnatomyCommands(
    */
   function resetDisplay() {
     commands.begin();
+    // Hidden parts, Focus and isolation can be many choices: the notice offers them back.
+    const scene = reader.capture();
     const prepared = displayBaseline();
     display(() => {
       model.setHemisphere(prepared.hemisphere);
@@ -391,7 +432,8 @@ export function createAnatomyCommands(
       model.setFocused(prepared.focused && engineState.model.selectedRegion !== null);
     });
     afterReset();
-    session.notify({ text: t(session.state.lang, 'display').displayReset });
+    beforeReveal = { scene, region: null };
+    session.notify({ text: t(session.state.lang, 'display').displayReset, action: 'restore' });
   }
 
   return {
@@ -406,6 +448,10 @@ export function createAnatomyCommands(
     restoreHiddenRegions,
     revealRegion,
     restoreBeforeReveal,
+    /** The region a reveal opened while the scene from before it is held, else null. */
+    get revealedRegion(): string | null {
+      return beforeReveal?.region ?? null;
+    },
     openConstituent,
     toggleInternalAnatomy,
     chooseInternalSystem,
@@ -418,7 +464,8 @@ export function createAnatomyCommands(
     setCortexOpacity: (value: number) => display(() => model.setCortexOpacity(value)),
     setInternalVisible: (value: boolean) => display(() => model.setInternalVisible(value)),
     setSpinalCordVisible,
-    reset,
+    resetView,
+    startOver,
     resetDisplay,
   };
 }

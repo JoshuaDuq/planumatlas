@@ -98,6 +98,16 @@ const SEEN: Record<MprPlane, Readonly<Record<string, Side>>> = {
   axial: { R: 'superior', L: 'inferior' },
 };
 
+/**
+ * The convention an axial or coronal panel is drawn in, read off the letter at its left edge: the
+ * patient's left on the screen's left is neurological, their right there radiological. A sagittal
+ * panel shows no left or right.
+ */
+export function sideConvention(edges: readonly string[]): 'neurological' | 'radiological' | null {
+  const left = edges[3];
+  return left === 'L' ? 'neurological' : left === 'R' ? 'radiological' : null;
+}
+
 /** The side a panel shows its plane from, read off its edge letters. */
 export function seenFrom(plane: MprPlane, edges: readonly string[]): Side {
   const side = SEEN[plane][edges[1]!];

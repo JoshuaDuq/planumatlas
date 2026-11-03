@@ -28,7 +28,7 @@
 
   let { stage, controls, live, width, height }: Props = $props();
 
-  const commands: Omit<DockCommands, 'chooseView' | 'reset'> = {
+  const commands: Omit<DockCommands, 'chooseView' | 'resetView'> = {
     setHemisphere() {},
     setCortexVisible() {},
     setCortexOpacity() {},

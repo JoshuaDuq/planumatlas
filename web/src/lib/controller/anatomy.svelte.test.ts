@@ -13,7 +13,7 @@ import { createView } from '../state/view.svelte.ts';
 import type { MoveOptions } from '../engine/api.ts';
 import type { Explorer, Manifest } from '../types/index.ts';
 import { FOCUS_TARGETS, registerFocusTarget } from '../ui/focus.ts';
-import { createAnatomyCommands } from './anatomy.ts';
+import { createAnatomyCommands } from './anatomy.svelte.ts';
 import type { SceneReader } from './lesson.ts';
 
 const published = manifest as unknown as Manifest;
@@ -250,6 +250,18 @@ describe('the dissection', () => {
     expect(await anatomy.hideSelection()).toBe(false);
   });
 
+  test('Hide says the part the reader hid, not a lost selection, and offers the view before it back', async () => {
+    const { anatomy, session, reader } = build();
+    anatomy.selectRegion(SULCUS);
+    await anatomy.hideSelection();
+    expect(session.state.notice).toEqual({
+      text: `Hidden: ${createCatalog(published).label(SULCUS).name}, left.`,
+      action: 'restore',
+    });
+    await anatomy.restoreBeforeReveal();
+    expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results.at(-1)!.value);
+  });
+
   test('isolating frames the region; isolating again returns to the whole brain', () => {
     const { anatomy } = build();
     anatomy.selectRegion(SULCUS);
@@ -339,20 +351,44 @@ describe('the display toggles', () => {
     expect(engine.model.settings.spinalCordVisible).toBe(false);
   });
 
-  test('reset returns to the opening picture', () => {
-    const { anatomy, session } = build();
+  test('Start over returns to the opening picture, and its notice offers the scene back', async () => {
+    const { anatomy, session, reader } = build();
     session.setView('left');
     session.setQuery('gyrus');
     anatomy.selectRegion(SULCUS);
     anatomy.setHemisphere('left');
     const logged = engine.calls.length;
-    anatomy.reset();
+    anatomy.startOver();
     expect(engine.model.settings.hemisphere).toBe('both');
     expect(engine.model.state.selectedRegion).toBeNull();
-    expect(session.state).toMatchObject({ view: 'oblique', query: '', notice: null });
+    expect(session.state).toMatchObject({
+      view: 'oblique',
+      query: '',
+      notice: { text: 'Back to the opening picture.', action: 'restore' },
+    });
     expect(engine.calls.slice(logged).map((call) => `${call.domain}.${call.method}`)).toEqual([
       'sections.setMode',
       'model.reset',
+      'camera.recenter',
+      'camera.applyView',
+    ]);
+    await anatomy.restoreBeforeReveal();
+    expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results.at(-1)!.value);
+  });
+
+  test('Reset view moves the camera only: the selection, the hemisphere and the hidden parts stay', () => {
+    const { anatomy, session } = build();
+    session.setView('left');
+    anatomy.selectRegion(SULCUS);
+    anatomy.setHemisphere('left');
+    engine.model.hideRegions([HCP]);
+    const logged = engine.calls.length;
+    anatomy.resetView();
+    expect(session.state.view).toBe('oblique');
+    expect(engine.model.state.selectedRegion?.id).toBe(SULCUS);
+    expect(engine.model.settings.hemisphere).toBe('left');
+    expect(engine.model.settings.hiddenRegions.has(HCP)).toBe(true);
+    expect(engine.calls.slice(logged).map((call) => `${call.domain}.${call.method}`)).toEqual([
       'camera.recenter',
       'camera.applyView',
     ]);
@@ -492,9 +528,12 @@ describe('revealing a region', () => {
     engine.model.setHemisphere('right');
     await anatomy.revealRegion('hemisphere', SULCUS);
     expect(session.state.notice).toEqual({ text: 'Both hemispheres shown.', action: 'restore' });
+    // Held past the notice, for the location bar's Restore while the region is in front.
+    expect(anatomy.revealedRegion).toBe(SULCUS);
     await anatomy.restoreBeforeReveal();
     expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results[0]!.value);
     expect(session.state.notice).toEqual({ text: 'Previous view restored.', action: null });
+    expect(anatomy.revealedRegion).toBeNull();
   });
 
   test('a reveal that leaves the reader’s settings as they were says nothing', async () => {
@@ -503,6 +542,7 @@ describe('revealing a region', () => {
     await anatomy.revealRegion('removed', SULCUS);
     expect(engine.model.state.selectedRegion?.id).toBe(SULCUS);
     expect(session.state.notice).toBeNull();
+    expect(anatomy.revealedRegion).toBeNull();
   });
 
   test('a constituent opens with its own layers, then is framed', async () => {
@@ -607,6 +647,7 @@ describe('a cut-only region (CTRL-19)', () => {
       await anatomy.revealRegion('no-cut', CUT_ONLY);
       expect(engine.sections.state.mode).toBe('coronal');
       expect(engine.sections.offset).toBe(expected);
+      expect(engine.sections.state.crosshair).toEqual(anchor);
       expect(engine.model.state.selectedRegion?.id).toBe(CUT_ONLY);
     },
   );
@@ -618,6 +659,7 @@ describe('a cut-only region (CTRL-19)', () => {
     vi.spyOn(engine.model, 'anchorOf').mockReturnValue([0, -500, 0]);
     await anatomy.revealRegion('no-cut', CUT_ONLY);
     expect(engine.sections.offset).toBe(minimum);
+    expect(engine.sections.state.crosshair).toEqual([0, minimum, 0]);
   });
 
   test('CTRL-19 an anchor that is not finite fails the reveal with a notice', async () => {
@@ -642,11 +684,11 @@ describe('the spinal cord and reset', () => {
     );
   });
 
-  test('CTRL-12 a command still loading when Reset is pressed applies nothing after it', async () => {
+  test('CTRL-12 a command still loading when Start over is pressed applies nothing after it', async () => {
     const { anatomy } = build();
     await engine.model.setDetail('aseg');
     const entering = anatomy.toggleInternalAnatomy();
-    anatomy.reset();
+    anatomy.startOver();
     await entering;
     expect(engine.model.settings).toMatchObject({ cortexVisible: true, hemisphere: 'both' });
     expect(cameraMethods()).not.toContain('frameInternal');

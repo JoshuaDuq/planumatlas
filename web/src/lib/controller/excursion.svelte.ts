@@ -20,6 +20,7 @@ import { revealNotice, revealSettings as settingsOf } from '../core/panels/clini
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import { createInvolvement } from '../core/panels/related.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
+import { clinicalLayers } from '../core/state/clinical-navigation.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { AppContext } from './context.ts';
 import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
@@ -223,7 +224,12 @@ export function createExcursions(
     if (!beforeExcursion || from === value) return;
     if (from !== 'functions' && from !== 'deficits') return;
     if (value === 'functions' || value === 'deficits') return;
-    const before = beforeExcursion;
+    await putBack();
+  }
+
+  /** The scene from before the excursion, back in the tab in front, which opens on its list. */
+  async function putBack(): Promise<void> {
+    const before = beforeExcursion!;
     beforeExcursion = null;
     excursionOrigin = null;
     seenThroughByNotice = false;
@@ -246,16 +252,19 @@ export function createExcursions(
     session.notify({ text: t(lang(), 'clinical').stageRestored });
   }
 
-  /** Closing a deficit ends its excursion: the scene stays, and there is nothing left to restore. */
-  function closeDeficit() {
+  /**
+   * Closing a deficit or function ends its excursion as leaving its tab does: the scene from before
+   * it, with the reader's own atlas, colour and selection, comes back.
+   */
+  async function closeDeficit(): Promise<void> {
     session.setDeficit(null);
-    beforeExcursion = null;
+    if (beforeExcursion) return putBack();
     render();
   }
 
-  function closeFunction() {
+  async function closeFunction(): Promise<void> {
     session.setFunction(null);
-    beforeExcursion = null;
+    if (beforeExcursion) return putBack();
     render();
   }
 
@@ -393,18 +402,18 @@ export function createExcursions(
   }
 
   /**
-   * The profile opens at once; the mapped regions are then drawn together and framed once, each
-   * FreeSurfer structure by its teaching-set stand-ins unless FreeSurfer's segmentation is shown.
+   * The profile opens at once; the mapped regions are then drawn together and framed once, on the
+   * internal anatomy drawing most of them, each FreeSurfer structure by its teaching-set stand-ins
+   * unless FreeSurfer's segmentation is that anatomy.
    */
   async function openDeficit(id: string): Promise<boolean> {
     const current = commands.begin();
-    const regions = [
-      ...new Set(
-        clinical
-          .mappedRegions(id)
-          .flatMap((region) => clinical.drawnAs(region, model.settings.detail)),
-      ),
+    const mapped = clinical.mappedRegions(id);
+    const drawnOn = (detail: string) => [
+      ...new Set(mapped.flatMap((region) => clinical.drawnAs(region, detail))),
     ];
+    const { detail } = clinicalLayers(model, drawnOn(model.settings.detail));
+    const regions = drawnOn(detail ?? model.settings.detail);
     // Before the detail opens: on a phone, raising the sheet reframes the camera. A lesson it is
     // opened from ends here and hands over the scene from before it, for Restore to return to.
     leaveForPaint();
@@ -438,10 +447,18 @@ export function createExcursions(
     const regions = revealedRegions(domains, domainPaint(domains, id), model.settings.detail);
     if (!(await commands.revealRegions(regions, current))) return false;
     cutLabelsFollowAtlas();
-    sayRevealed(before, seeThroughFor(deepHint(id)));
-    // A function's map spans the cortex, so the whole brain is framed, clear of the key it brings.
+    const hint = seeThroughFor(deepHint(id));
+    // A function's map spans the cortex, so the whole brain is framed, clear of the key it brings,
+    // from a view that shows its strongest areas; those no view shows are said, as a deficit's are.
     render();
-    camera.frameWhole();
+    const unseen = camera.frameWhole(
+      id === ALL_DOMAINS
+        ? []
+        : domainAreas(domains, id)
+            .slice(0, DEEP_RANKS)
+            .map(({ region }) => region),
+    );
+    sayRevealed(before, hint, unseenNotice(unseen));
     render();
     return true;
   }
@@ -497,6 +514,10 @@ export function createExcursions(
     get restorable() {
       return beforeExcursion !== null;
     },
+    /** The reader's own atlas, which closing the excursion's function or deficit puts back. */
+    get heldAtlas() {
+      return beforeExcursion?.atlas ?? null;
+    },
     /** The Tracts excursion is open, holding the cortex opacity it will give back. */
     get tractsHeld() {
       return explorerChoice.tractsHeld;
@@ -531,9 +552,14 @@ export function createExcursions(
     pickPaint,
     offerReload,
 
-    /** Another atlas holds none of a function's areas, so choosing one lifts the open paint. */
+    /**
+     * Another atlas holds none of a function's areas, so choosing one lifts the open paint. The
+     * atlas is then the reader's own: closing the excursion no longer replaces it.
+     */
     chooseAtlas(id: string) {
       session.liftPaint();
+      beforeExcursion = null;
+      excursionOrigin = null;
       render();
       return commands.chooseAtlas(id);
     },

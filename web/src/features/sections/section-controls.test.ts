@@ -82,6 +82,8 @@ describe('choosing a plane', () => {
     await controls.choose('sagittal');
     expect(controls.offset).toBe(engine.model.anchorOf(region.id)![0]);
     expect(controls.offset).not.toBe(0);
+    // At the region itself, not on the midline, so the linked MRI opens on it.
+    expect(engine.sections.state.crosshair).toEqual(engine.model.anchorOf(region.id));
   });
 
   test('the plane already on screen, or already being prepared, is not cut again', async () => {

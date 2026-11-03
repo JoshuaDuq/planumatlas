@@ -21,7 +21,7 @@
       phone: boolean;
       view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
     };
-    commands: Omit<DockCommands, 'chooseView' | 'reset'>;
+    commands: Omit<DockCommands, 'chooseView' | 'resetView'>;
     width: number;
     height: number;
     /** Each placing state the dock asks for. */

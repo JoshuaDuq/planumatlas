@@ -81,7 +81,12 @@ export function ghostColor(
   palette: TissuePalette,
   color: Color,
 ): Color {
-  const { r, g, b } = color.set(tissueColor(region, palette));
+  return greyed(color.set(tissueColor(region, palette)));
+}
+
+/** A colour as a ghost draws it: its own luminance, as grey. */
+export function greyed(color: Color): Color {
+  const { r, g, b } = color;
   return color.setScalar(0.2126 * r + 0.7152 * g + 0.0722 * b);
 }
 

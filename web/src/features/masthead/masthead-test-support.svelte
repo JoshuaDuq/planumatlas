@@ -60,6 +60,7 @@
   onProvenance={() => calls.push('provenance')}
   onGuide={() => calls.push(`guide:${document.activeElement?.getAttribute('aria-label')}`)}
   onShortcuts={() => calls.push(`shortcuts:${document.activeElement?.getAttribute('aria-label')}`)}
+  onStartOver={() => calls.push('start over')}
 >
   {#snippet data()}
     <div class="data">

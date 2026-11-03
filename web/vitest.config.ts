@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { playwright } from '@vitest/browser-playwright';
@@ -8,6 +9,8 @@ const repositoryRoot = fileURLToPath(new URL('../', import.meta.url));
 
 const shared = {
   plugins: [svelte(), yamlRecords()],
+  // As vite.config.ts serves them: a test that fetches a published file gets the file, not the page.
+  publicDir: resolve(repositoryRoot, 'public'),
   server: { fs: { allow: [repositoryRoot] } },
 };
 

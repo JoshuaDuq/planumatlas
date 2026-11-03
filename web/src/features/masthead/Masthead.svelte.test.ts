@@ -320,7 +320,7 @@ describe('Masthead', () => {
   test('Tab out closes it without taking focus; an outside press closes it where the user pressed', async () => {
     await render(Fixture);
     await open();
-    el(button('Keyboard shortcuts')).focus();
+    el(button('Start over')).focus();
     await userEvent.keyboard('{Tab}');
     expect(panelOpen()).toBe(false);
     expect(document.activeElement).toBe(el(button('Canvas')));
@@ -348,6 +348,15 @@ describe('Masthead', () => {
     await open();
     await button('Keyboard shortcuts').click();
     expect(calls).toEqual(['shortcuts:More settings']);
+    expect(panelOpen()).toBe(false);
+  });
+
+  test('Start over closes the panel and acts', async () => {
+    const calls: string[] = [];
+    await render(Fixture, { calls });
+    await open();
+    await button('Start over').click();
+    expect(calls).toEqual(['start over']);
     expect(panelOpen()).toBe(false);
   });
 
@@ -391,6 +400,7 @@ describe('Masthead', () => {
         'Provenance',
         'How to use Planum',
         'Keyboard shortcuts ?',
+        'Start over',
       ]);
       // The masthead's own button is display:none, so only the menu item is in the tree.
       expect(page.getByRole('button', { name: 'Full screen' }).elements()).toHaveLength(1);

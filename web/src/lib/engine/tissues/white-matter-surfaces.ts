@@ -2,6 +2,7 @@ import { DoubleSide, MeshPhysicalMaterial } from 'three';
 import type { Mesh, Object3D, Plane } from 'three';
 import type { DisplaySettings, Region } from '../../types/index.ts';
 import { isPhone } from '../render/device.ts';
+import { greyed } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 
 type ExposureState = Pick<
@@ -14,10 +15,12 @@ export type WhiteMatterMesh = Mesh<Mesh['geometry'], MeshPhysicalMaterial>;
 export interface WhiteMatterSurfaces {
   group: Object3D;
   meshes: WhiteMatterMesh[];
+  /** `ghost`: a Focus or a route greys what it does not hold, the white matter it lays open too. */
   update(
     state: ExposureState,
     regions: ReadonlyMap<string, Region>,
     clippingPlanes: Plane[] | null,
+    ghost: boolean,
   ): void;
 }
 
@@ -79,11 +82,13 @@ export function createWhiteMatterSurfaces(
   return {
     group,
     meshes,
-    update(state, regions, clippingPlanes) {
+    update(state, regions, clippingPlanes, ghost) {
       const exposed = exposedWhiteMatter(state, regions);
       for (const mesh of meshes) {
         mesh.visible = exposed.has(mesh.userData['hemisphere'] as string);
         const material = mesh.material;
+        material.color.set(tissue.white);
+        if (ghost) greyed(material.color);
         const transparent = state.cortexOpacity < 1;
         if (material.transparent !== transparent || material.clippingPlanes !== clippingPlanes) {
           material.needsUpdate = true;

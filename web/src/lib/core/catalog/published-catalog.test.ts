@@ -125,14 +125,15 @@ describe('the published cdmd anatomy', () => {
     assert.ok(catalogs.fr.search('cuneus', french).rows.some((r) => r.label.name === 'Cunéus'));
     const english = catalogs.en.search('cuneus', settings());
     assert.equal(english.total, 36);
+    // Destrieux's, on screen, ahead of NextBrain's exact name, which is not.
     assert.deepEqual(
       english.rows.slice(0, 5).map((row) => row.region.id),
       [
-        'nextbrain:left:2005',
-        'nextbrain:right:12005',
         'destrieux:left:11',
         'destrieux:right:11',
-        'julich:left:46',
+        'destrieux:left:30',
+        'destrieux:right:30',
+        'nextbrain:left:2005',
       ],
     );
     assert.equal(catalogs.en.search('V1', settings({ atlas: 'hcp-mmp' })).rows[0].label.code, 'V1');

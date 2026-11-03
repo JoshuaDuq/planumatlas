@@ -1,7 +1,7 @@
 import { flushSync } from 'svelte';
 import { ASSET_BASE } from '../../build/site.ts';
 import { createCoordinatePlacement } from '../lib/controller/coordinates.ts';
-import { createAnatomyCommands } from '../lib/controller/anatomy.ts';
+import { createAnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
 import type { AppContext } from '../lib/controller/context.ts';
 import { createExcursions, syncRouteGhost } from '../lib/controller/excursion.svelte.ts';
 import type { SceneReader } from '../lib/controller/excursion.svelte.ts';
@@ -47,7 +47,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
   if (!domains) {
     throw new Error('This build publishes no neuropsychological domains for the Functions tab.');
   }
-  const regions = createCatalog(model.manifest, session.state.lang, model.cabNp);
+  const regions = createCatalog(model.manifest, session.state.lang, model.cabNp, domains.units);
   const clinical = loadClinicalCatalog(model.manifest, domains.units);
   const circuits = loadCircuitCatalog(model.manifest, clinical);
   // Each space's field is published beside the manifest the engine opened (boot.ts).
@@ -263,6 +263,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           internalVisible,
           spinalCordVisible,
           hemisphere,
+          dissectionCanUndo,
         } = view.current;
         return {
           explorer,
@@ -279,6 +280,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           shortcutsOpen: ports.shortcutsOpen(),
           focusInDetail: ports.focusInDetail(),
           tractReferenceActive: isIndependentTractReference(view.current),
+          dissectionCanUndo,
         };
       },
       commands: {
@@ -308,6 +310,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
         // The engine remembers the zoom after each (E7), as the legacy keys did.
         orbitBy: camera.orbitBy,
         dolly: camera.dolly,
+        undoDissection: world.anatomy.undoDissection,
       },
     }),
   );

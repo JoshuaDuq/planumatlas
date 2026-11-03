@@ -705,19 +705,26 @@ describe('quality', () => {
         rail.getBoundingClientRect().bottom + 1,
       );
     };
+    // Into the third group and back: two headings crossed each way with the rail scrolled under
+    // them. Walking every row of the published list three times grew with each profile added,
+    // past the 15 s a browser test is given once the suite runs in parallel.
+    const groups = [...rail.querySelectorAll('[role="group"][aria-labelledby]')];
+    const end = rows().indexOf(groups[2]!.querySelector<HTMLElement>('.row')!);
+    expect(end).toBeGreaterThan(0);
     field().focus();
     await userEvent.keyboard('{ArrowDown}');
-    const last = rows().length - 1;
-    for (let step = 0; step < last; step += 1) {
+    for (let step = 0; step < end; step += 1) {
       await userEvent.keyboard('{ArrowDown}');
       expectClear();
     }
-    for (let step = 0; step < last; step += 1) {
+    // The rows went past the rail's height, so the headings were stuck over a scrolled list.
+    expect(rail.scrollTop).toBeGreaterThan(0);
+    for (let step = 0; step < end; step += 1) {
       await userEvent.keyboard('{ArrowUp}');
       expectClear();
     }
-    rows()[last].focus();
-    for (let step = 0; step < last; step += 1) {
+    rows()[end].focus();
+    for (let step = 0; step < end; step += 1) {
       await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
       expectClear();
     }

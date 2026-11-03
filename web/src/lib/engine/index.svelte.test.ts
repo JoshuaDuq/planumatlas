@@ -4,6 +4,7 @@ import outlineUrl from '../../../../public/diffusion/cdmd-sub-013/brain-outline.
 import manifestUrl from '../../../../public/models/cdmd/manifest.json?url';
 import { defineStageContract } from './fake/contract-suite.ts';
 import { createEngine } from './index.ts';
+import { SNAPSHOT_PIXEL_RATIO } from './render/scene.ts';
 
 // The tract data is served from the site's `diffusion/` directory, which this project has no public
 // directory to answer for: its requests are redirected to the repository's files.
@@ -45,8 +46,13 @@ defineStageContract('real engine', boot, { canvas });
 test('captures the settled frame, cropped to the stage rectangle asked for, with the brain drawn', async () => {
   const engine = await boot();
   onTestFinished(() => engine.dispose());
+  const screen = [engine.canvas.width, engine.canvas.height];
   const { canvas, ratio } = engine.captureSnapshot({ x: 100, y: 50, width: 400, height: 300 });
   expect([canvas.width, canvas.height]).toEqual([Math.round(400 * ratio), Math.round(300 * ratio)]);
+  // However few pixels the screen draws, the saved frame has at least two per CSS pixel; the
+  // screen keeps its own.
+  expect(ratio).toBeGreaterThanOrEqual(SNAPSHOT_PIXEL_RATIO);
+  expect([engine.canvas.width, engine.canvas.height]).toEqual(screen);
   const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
   const colours = new Set<number>();
   for (let at = 0; at < pixels.length; at += 4 * 97) {

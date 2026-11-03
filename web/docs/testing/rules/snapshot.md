@@ -135,13 +135,13 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 
 ## Saving
 
-### SNAP-14 · Save image downloads planum-<atlas>.png of the visible stage
+### SNAP-14 · Save image downloads planum-<atlas>-<view>[-<plane>].png of the visible stage
 
 - **Rule:** The download is a PNG of the visible stage (the canvas less what the sheet covers) at device pixels, named after the atlas shown, or "brain" with none.
 - **Kind:** behaviour
 - **Level:** browser: real canvas encode; e2e for the real engine and download
 - **Source:** `viewer/app.js:1450-1463`; FACADE-33
-- **Expected:** Host 1000×700, chrome insets `{ bottom: 100 }`, HCP-MMP → one link, `download` "planum-hcp-mmp.png", blob type `image/png`, decoded 1000×600 at ratio 1. Atlas `null` → "planum-brain.png". Built site 1280×800, Destrieux → suggested file "planum-destrieux.png", PNG signature, width = stage width × devicePixelRatio (±1), 0 < height ≤ ceil(stage height × ratio), focus stays on Save image.
+- **Expected:** Host 1000×700, chrome insets `{ bottom: 100 }`, HCP-MMP → one link, `download` "planum-hcp-mmp-left.png" (view left), "planum-hcp-mmp-anterior-coronal.png" with an anterior coronal cut, blob type `image/png`, decoded 1000×600 at ratio 1. Atlas `null` → "planum-brain-left.png". Built site 1280×800, HCP-MMP, oblique → suggested file "planum-hcp-mmp-oblique.png", PNG signature, width = stage width × max(devicePixelRatio, 2) (±1; a saved image is drawn at no fewer than two pixels per CSS pixel since 2026-11-02, its outline found on screen-sized buffers), 0 < height ≤ ceil(stage height × ratio), focus stays on Save image.
 - **Covered by:** `src/features/snapshot/snapshot.svelte.test.ts` (R)
 
 ### SNAP-15 · The image is handed over as a Blob URL, released 40 s after the click
@@ -159,7 +159,7 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 - **Kind:** accessibility
 - **Level:** browser: the announcer's live region
 - **Source:** decision 33 and comment 87 on #4 (`viewport.snapshotSaved`, WCAG 4.1.3)
-- **Expected:** English "Image saved as planum-destrieux.png."; French "Image enregistrée : planum-hcp-mmp.png."; "planum-brain.png" with no atlas. Built site (next): `#announcer` text "Image saved as planum-destrieux.png.".
+- **Expected:** English "Image saved as planum-brain-left.png."; French "Image enregistrée : planum-hcp-mmp-left.png."; "planum-brain-left.png" with no atlas. Built site (next): `#announcer` text "Image saved as planum-hcp-mmp-oblique.png.".
 - **Covered by:** `src/features/snapshot/snapshot.svelte.test.ts` (R)
 
 ### SNAP-17 · A second request while one is being made joins it
@@ -168,7 +168,7 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 - **Kind:** behaviour
 - **Level:** unit (with a fake stage and encoder); browser today
 - **Source:** deviation `g6-snapshot-reentry.md`
-- **Expected:** Two calls in a row return the same promise; after it settles, one link "planum-brain.png" and the announcement "Image saved as planum-brain.png."; a third call afterwards → two links.
+- **Expected:** Two calls in a row return the same promise; after it settles, one link "planum-brain-left.png" and the announcement "Image saved as planum-brain-left.png."; a third call afterwards → two links.
 - **Covered by:** `src/features/snapshot/snapshot.svelte.test.ts` (R)
 
 ### SNAP-18 · A failure is the snapshot notice, and nothing is downloaded or said

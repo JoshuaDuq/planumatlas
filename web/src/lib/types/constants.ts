@@ -41,6 +41,14 @@ export const LESION_RADIUS = { min: 3, max: 30, initial: 10 } as const;
  */
 export const PHONE_QUERY = '(max-width: 800px), (max-height: 480px) and (orientation: landscape)';
 
+/**
+ * A window whose stage would be too short to share with the linked MRI docked under it
+ * (app/layout.css, 801–1279 px wide): the stage keeps half of what is left, and below this height
+ * that is no room for the anatomy beside its cut bar and dock. The MRI opens over the page instead.
+ */
+export const SHORT_DOCK_QUERY =
+  '(min-width: 801px) and (max-width: 1279px) and (max-height: 899px)';
+
 /** The narrower phone device profile, kept apart from the layout query (render/device.js:15). */
 export const PHONE_DEVICE_QUERY =
   '(max-width: 640px), (max-height: 480px) and (orientation: landscape)';

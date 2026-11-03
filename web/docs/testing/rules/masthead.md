@@ -289,6 +289,15 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** paint `function:memory` → selected option text "Functions", `hidden`; description starts "Set by the Functions tab".
 - **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R)
 
+### MAST-31a · An atlas a function or deficit set says so in its value
+
+- **Rule:** While an open function or deficit shows its regions on another atlas than the reader's own, the Atlas value names the tab that set it, and its note names the atlas that leaving brings back.
+- **Kind:** behaviour
+- **Level:** browser: selected option text and description
+- **Source:** critique 2026-11-03 (modes changed the atlas silently)
+- **Expected:** `hcp-mmp`, borrowed from `destrieux` by Functions → selected option "HCP-MMP · via Functions"; description and tooltip "Set by the Functions tab: its maps lie on HCP-MMP areas. Leaving the function brings back Destrieux."
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R)
+
 ### MAST-32 · A choice that downloads shows its progress, and reverts if it does not land
 
 - **Rule:** While a choice made in a field downloads, that select keeps showing the choice with how far it has come. Once the choice lands, fails or is overtaken, the select shows the model's state again.

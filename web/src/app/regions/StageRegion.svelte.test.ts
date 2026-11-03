@@ -264,7 +264,7 @@ describe('the stage layout', () => {
 });
 
 describe('save image', () => {
-  test('saves the visible stage as planum-<atlas>.png and says so', async () => {
+  test('saves the visible stage as planum-<atlas>-<view>.png and says so', async () => {
     boot();
     engine.emit('viewport', {
       visibleRect: { x: 0, y: 0, width: 1000, height: 700 },
@@ -274,13 +274,13 @@ describe('save image', () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
       this: HTMLAnchorElement,
     ) {
-      expect(this.download).toBe(`planum-${app.world!.view.current.atlas}.png`);
+      const { atlas, view } = app.world!.view.current;
+      expect(this.download).toBe(`planum-${atlas}-${view}.png`);
     });
     await (region as never as { saveImage(): Promise<void> }).saveImage();
     expect(click).toHaveBeenCalledOnce();
-    expect(announcer.textContent).toBe(
-      `Image saved as planum-${app.world!.view.current.atlas}.png.`,
-    );
+    const { atlas, view } = app.world!.view.current;
+    expect(announcer.textContent).toBe(`Image saved as planum-${atlas}-${view}.png.`);
   });
 
   test('says a second save of the same file again', async () => {
@@ -293,7 +293,8 @@ describe('save image', () => {
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     const save = (region as never as { saveImage(): Promise<void> }).saveImage;
     await save();
-    const said = `Image saved as planum-${app.world!.view.current.atlas}.png.`;
+    const { atlas, view } = app.world!.view.current;
+    const said = `Image saved as planum-${atlas}-${view}.png.`;
     await vi.waitFor(() => expect(announcer.textContent).toBe(said));
     announcer.textContent = '';
     await save();
@@ -435,7 +436,7 @@ describe('focus and the crosshair', () => {
 });
 
 describe('the dock and the keys', () => {
-  test('a gizmo letter sets the session’s view and frames it; Reset view resets the model', async () => {
+  test('a gizmo letter sets the session’s view and frames it; Reset view resets the camera, not the model', async () => {
     boot();
     (
       page.getByRole('button', { name: 'Superior view', exact: true }).element() as HTMLElement
@@ -450,7 +451,10 @@ describe('the dock and the keys', () => {
         .getAttribute('aria-pressed'),
     ).toBe('true');
     await userEvent.click(page.getByRole('button', { name: 'Reset view' }));
-    expect(call('model', 'reset')).toHaveLength(1);
+    expect(call('model', 'reset')).toHaveLength(0);
+    expect(call('camera', 'recenter')).toHaveLength(1);
+    expect(call('camera', 'applyView').at(-1)?.args[0]).toBe('oblique');
+    expect(app.world!.view.current.view).toBe('oblique');
   });
 
   test('the dock offers Coordinate because the anatomy publishes coordinate spaces, and its popover holds the form', async () => {

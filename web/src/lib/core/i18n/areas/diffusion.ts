@@ -1,7 +1,9 @@
 import { grouped } from '../../format.ts';
 
 export const en = {
-  bundleCollection: (count: number) => `${count} tract ${count === 1 ? 'bundle' : 'bundles'}`,
+  // The status bar's count, as other tabs count the regions drawn.
+  bundlesDrawn: (drawn: number, total: number) =>
+    `${drawn} of ${total} tract ${total === 1 ? 'bundle' : 'bundles'} drawn`,
   classes: {
     association: 'Association tracts',
     projection: 'Projection tracts',
@@ -58,7 +60,8 @@ export const en = {
 };
 
 export const fr: typeof en = {
-  bundleCollection: (count: number) => `${count} ${count > 1 ? 'faisceaux' : 'faisceau'}`,
+  bundlesDrawn: (drawn: number, total: number) =>
+    `${drawn} ${drawn > 1 ? 'faisceaux tracés' : 'faisceau tracé'} sur ${total}`,
   classes: {
     association: 'Faisceaux d’association',
     projection: 'Faisceaux de projection',

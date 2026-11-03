@@ -153,6 +153,9 @@ export interface PipelineOptions {
   msaaSamples: number;
 }
 
+/** The fewest pixels per CSS pixel a saved image is drawn at, whatever the screen's. */
+export const SNAPSHOT_PIXEL_RATIO = 2;
+
 /**
  * The composer for one resolution: scene, a two-tone outline and the output pass.
  * Exported so a test can read the passes and their order without a GL context.
@@ -785,8 +788,21 @@ export function createScene(
     /**
      * The settled frame, copied pixel for pixel to a 2D canvas that can be annotated. `crop` is
      * the part of the canvas to keep, in CSS pixels; `ratio` is the copy's pixels per CSS pixel.
+     * A screen drawn below `SNAPSHOT_PIXEL_RATIO` (a phone, a tablet, a standard monitor) keeps it
+     * for the drag; the one frame saved is drawn at that ratio. Its outline is found and blurred on
+     * buffers the screen's size, so it is as wide for the anatomy as on screen: the blur's kernel is
+     * fixed, and a thicker one only spreads it fainter.
      */
     captureSnapshot(crop = { x: 0, y: 0, ...hostSize }) {
+      const screen = renderer.getPixelRatio();
+      const sharper = Math.max(screen, SNAPSHOT_PIXEL_RATIO);
+      const downSample = halo.downSampleRatio;
+      const draw = (pixelRatio: number, scale: number) => {
+        halo.downSampleRatio = core.downSampleRatio = downSample * scale;
+        renderer.setPixelRatio(pixelRatio);
+        settled.composer.setPixelRatio(pixelRatio);
+      };
+      if (sharper !== screen) draw(sharper, sharper / screen);
       settled.composer.render();
       const source = renderer.domElement;
       const ratio = source.width / hostSize.width;
@@ -800,6 +816,10 @@ export function createScene(
       if (!context) throw new Error('A 2D canvas context is unavailable for the snapshot.');
       // Read in the same task as the render: the drawing buffer is not preserved past it.
       context.drawImage(source, x, y, width, height, 0, 0, width, height);
+      if (sharper !== screen) {
+        draw(screen, 1);
+        invalidate();
+      }
       return { canvas, ratio };
     },
 

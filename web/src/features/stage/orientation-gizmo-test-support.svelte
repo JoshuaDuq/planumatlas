@@ -13,7 +13,7 @@
     stage: StageLayout;
     /** Reactive, so a test can change the language, whether the anatomy is ready and the session's view. */
     live: { lang: Language; ready: boolean; view: string };
-    commands: Pick<DockCommands, 'chooseView' | 'reset'>;
+    commands: Pick<DockCommands, 'chooseView' | 'resetView'>;
     /** The host's --vis-* and --key-* variables, in pixels. */
     insets: { top: number; right: number; keyTop: number; keyRight: number };
   }

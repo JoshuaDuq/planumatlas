@@ -25,6 +25,7 @@ export interface SectionControlsDeps {
       | 'offsetRange'
       | 'offset'
       | 'setMode'
+      | 'setCrosshair'
       | 'setOffset'
       | 'setOffsetReady'
       | 'setAnglesReady'
@@ -43,13 +44,25 @@ export interface SectionControlsDeps {
   openLinkedMri: (options: { instant: boolean }) => Promise<unknown>;
 }
 
-/** Where a plane with this normal passes through a point, clamped to the cut's range (coordinates.js offsetThrough). */
-function offsetThrough(point: Vec3, normal: Vec3, [minimum, maximum]: readonly [number, number]) {
+/**
+ * The crosshair for a plane with this normal through a point, clamped to the cut's range: the point
+ * itself unless clamped, so the linked MRI opens on it (coordinates.js offsetThrough).
+ */
+function crosshairThrough(
+  point: Vec3,
+  normal: Vec3,
+  [minimum, maximum]: readonly [number, number],
+) {
   const offset = point[0] * normal[0] + point[1] * normal[1] + point[2] * normal[2];
   if (![offset, minimum, maximum].every(Number.isFinite)) {
     throw new Error('A cut through a point needs finite coordinates and a finite range.');
   }
-  return Math.min(maximum, Math.max(minimum, offset));
+  const shift = Math.min(maximum, Math.max(minimum, offset)) - offset;
+  return [
+    point[0] + shift * normal[0],
+    point[1] + shift * normal[1],
+    point[2] + shift * normal[2],
+  ] as Vec3;
 }
 
 export function createSectionControls({
@@ -185,7 +198,9 @@ export function createSectionControls({
         const region = model.state.selectedRegion;
         const anchor = region && model.anchorOf(region.id);
         if (anchor) {
-          sections.setOffset(offsetThrough(anchor, sections.frame.normal, sections.offsetRange));
+          sections.setCrosshair(
+            crosshairThrough(anchor, sections.frame.normal, sections.offsetRange),
+          );
         }
         face();
       } catch (error) {

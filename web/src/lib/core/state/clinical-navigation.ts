@@ -1,6 +1,5 @@
 import type { Region } from '../../types/index.ts';
 import type { EngineModel } from '../../engine/api.ts';
-import { belongsToDetail } from '../catalog/visibility.ts';
 
 /** What navigation reads of the model, and the commands it gives. */
 export type NavigationModel = Pick<EngineModel, 'regions' | 'settings'>;
@@ -32,11 +31,21 @@ function clinicalRegions(model: NavigationModel, ids: readonly string[]): Region
   });
 }
 
+/** The detail level holding most of the structures; null when the loaded one holds as many. */
+function detailHoldingMost(structures: readonly Region[], loaded: string): string | null {
+  // A supplemental structure is drawn on every level, so it argues for none.
+  const own = structures.filter((region) => region.supplemental !== true);
+  if (!own.length) return null;
+  const held = (detail: string) => own.filter((region) => region.atlas === detail).length;
+  const commonest = commonestAtlas(own);
+  return held(commonest) > held(loaded) ? commonest : null;
+}
+
 /**
  * The layers that draw cited landmarks together. Only one detail level is
  * drawn at a time, so structures mapped in another level stay undrawn; the
- * level holding most of them wins. A layer is null when the loaded one already
- * draws some of them.
+ * level holding most of them wins, the loaded one on a tie. The cortical atlas
+ * is null when the loaded one already draws some of them.
  */
 export function clinicalLayers(
   model: NavigationModel,
@@ -50,11 +59,7 @@ export function clinicalLayers(
       cortical.length && !cortical.some((region) => region.atlas === model.settings.atlas)
         ? commonestAtlas(cortical)
         : null,
-    detail:
-      structures.length &&
-      !structures.some((region) => belongsToDetail(region, model.settings.detail))
-        ? commonestAtlas(structures)
-        : null,
+    detail: detailHoldingMost(structures, model.settings.detail),
   };
 }
 

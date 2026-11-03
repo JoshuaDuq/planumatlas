@@ -448,12 +448,12 @@
   "keyPicked": "Only this finding’s regions. Choose it again for every finding."
  },
  "diffusion": {
-  "bundleCollection": [
-   "[0] → \"0 tract bundles\"",
-   "[1] → \"1 tract bundle\"",
-   "[2] → \"2 tract bundles\"",
-   "[183] → \"183 tract bundles\"",
-   "[12345] → \"12345 tract bundles\""
+  "bundlesDrawn": [
+   "[0,1] → \"0 of 1 tract bundle drawn\"",
+   "[1,2] → \"1 of 2 tract bundles drawn\"",
+   "[2,183] → \"2 of 183 tract bundles drawn\"",
+   "[183,12345] → \"183 of 12345 tract bundles drawn\"",
+   "[12345,0] → \"12345 of 0 tract bundles drawn\""
   ],
   "classes": {
    "association": "Association tracts",
@@ -579,6 +579,7 @@
   "focusOff": "Focus off",
   "resetDisplay": "Reset display",
   "displayReset": "Display settings reset.",
+  "startedOver": "Back to the opening picture.",
   "changed": ", settings changed"
  },
  "dissection": {
@@ -825,7 +826,8 @@
   "termsHeading": "Neurosynth terms",
   "populationsHeading": "Neurosynth clinical groups",
   "caveat": "Where studies of healthy groups report activation: not this brain, and not what damage would impair.",
-  "consistencyNote": "Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit. The overview combines several term maps.",
+  "consistencyNote": "Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit.",
+  "overviewNote": "The overview combines several term maps.",
   "deepStrongest": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), the strongest region of Alpha, lies beneath the cortex.\"",
    "[\"\",\"Alpha\",\"\"] → \" (Alpha), the strongest region of , lies beneath the cortex.\""
@@ -939,6 +941,20 @@
    "[\"\",\"Alpha\"] → \" (colour becomes Alpha)\""
   ],
   "dataSummary": "Atlas and display settings",
+  "borrowedBy": {
+   "functions": "via Functions",
+   "deficits": "via Deficits"
+  },
+  "borrowedNote": {
+   "functions": [
+    "[\"Alpha\",\"\"] → \"Set by the Functions tab: its maps lie on Alpha areas. Leaving the function brings back .\"",
+    "[\"\",\"Alpha\"] → \"Set by the Functions tab: its maps lie on  areas. Leaving the function brings back Alpha.\""
+   ],
+   "deficits": [
+    "[\"Alpha\",\"\"] → \"Set by the Deficits tab: the open deficit’s regions lie on Alpha. Leaving the deficit brings back .\"",
+    "[\"\",\"Alpha\"] → \"Set by the Deficits tab: the open deficit’s regions lie on . Leaving the deficit brings back Alpha.\""
+   ]
+  },
   "notes": {
    "destrieux": "Sulcal and gyral regions, 74 per hemisphere",
    "hcp-mmp": "Multimodal areas, 180 per hemisphere (Glasser 2016)",
@@ -954,6 +970,7 @@
   "linkFailed": "Could not copy the link",
   "languageSwitch": "Language",
   "guide": "How to use Planum",
+  "startOver": "Start over",
   "shortcuts": "Keyboard shortcuts",
   "theme": "Theme",
   "systemTheme": "System",
@@ -1155,7 +1172,7 @@
    "function": "function",
    "opacity": "cortex opacity",
    "mri": "MRI window",
-   "tab": "panel",
+   "tab": "tab",
    "deficit": "deficit",
    "circuit": "circuit",
    "step": "circuit step",
@@ -1206,7 +1223,11 @@
    "[\"\",\"Alpha\",0] → \" — Alpha (label 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (label 1)\""
   ],
-  "asStage": "Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree.",
+  "asStage": "Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree. Neurological: the patient’s left on the screen’s left; radiological: their right there.",
+  "conventions": {
+   "neurological": "neurological",
+   "radiological": "radiological"
+  },
   "seenFrom": {
    "right": "from the right",
    "left": "from the left",
@@ -1326,6 +1347,10 @@
    "[\"\",\"Alpha\"] → \" in Alpha, which labels cuts only. \""
   ],
   "switchCutAtlas": "Switch cut labels",
+  "includes": [
+   "[\"Alpha\"] → \"includes Alpha\"",
+   "[\"\"] → \"includes \""
+  ],
   "rowHiddenAria": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, : Alpha. Activate to reveal.\"",
    "[\"\",\"Alpha\",\"\"] → \", Alpha: . Activate to reveal.\""
@@ -1522,6 +1547,10 @@
      [
       "I",
       "Isolate or restore the selected region"
+     ],
+     [
+      "Ctrl Z",
+      "Undo the last hide, show or isolate (⌘ Z on a Mac)"
      ]
     ]
    ],

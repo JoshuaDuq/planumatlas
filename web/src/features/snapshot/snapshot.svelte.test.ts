@@ -325,14 +325,14 @@ describe('saving', () => {
     });
   });
 
-  test('downloads planum-<atlas>.png, a PNG of the visible stage, and shows its name in the reader’s language', async () => {
+  test('downloads planum-<atlas>-<view>.png, a PNG of the visible stage, and shows its name in the reader’s language', async () => {
     await mount({ legend: DEFICIT });
     engine.camera.setChromeInsets({ bottom: 100 }, {});
     flushSync();
     await saveSnapshot(scene(), subject({ lang: 'fr' }), commands);
     expect(commands.fail).not.toHaveBeenCalled();
     expect(links).toHaveLength(1);
-    expect(links[0]!.download).toBe('planum-hcp-mmp.png');
+    expect(links[0]!.download).toBe('planum-hcp-mmp-left.png');
     const blob = await (await fetch(links[0]!.href)).blob();
     expect(blob.type).toBe('image/png');
     const image = await createImageBitmap(blob);
@@ -340,9 +340,29 @@ describe('saving', () => {
     // The notice is what a sighted reader sees; the announcer speaks notices, not this module.
     expect(commands.notify.mock.calls).toEqual([
       [null],
-      [{ text: 'Image enregistrée : planum-hcp-mmp.png.' }],
+      [{ text: 'Image enregistrée : planum-hcp-mmp-left.png.' }],
     ]);
     expect(region.textContent).toBe('');
+  });
+
+  test('a cut adds its plane to the name, so saves of the same atlas tell themselves apart', async () => {
+    await mount();
+    await saveSnapshot(
+      scene(),
+      subject({
+        view: 'anterior',
+        section: { plane: 'coronal', offset: -9.5, tilt: 0, azimuth: 0 },
+      }),
+      commands,
+    );
+    expect(links.map((link) => link.download)).toEqual(['planum-hcp-mmp-anterior-coronal.png']);
+  });
+
+  test('a view the camera has left, as the caption, is not in the name', async () => {
+    await mount();
+    const released = { ...scene(), engine: { ...engine, camera: { viewHeld: false } } };
+    await saveSnapshot(released, subject({ view: 'anterior' }), commands);
+    expect(links.map((link) => link.download)).toEqual(['planum-hcp-mmp.png']);
   });
 
   test('a second request while one is being made joins it: one file', async () => {
@@ -351,10 +371,10 @@ describe('saving', () => {
     const second = saveSnapshot(scene(), subject({ atlas: null }), commands);
     expect(second).toBe(first);
     await first;
-    expect(links.map((link) => link.download)).toEqual(['planum-brain.png']);
+    expect(links.map((link) => link.download)).toEqual(['planum-brain-left.png']);
     expect(commands.notify.mock.calls).toEqual([
       [null],
-      [{ text: 'Image saved as planum-brain.png.' }],
+      [{ text: 'Image saved as planum-brain-left.png.' }],
     ]);
     await saveSnapshot(scene(), subject(), commands);
     expect(links).toHaveLength(2);

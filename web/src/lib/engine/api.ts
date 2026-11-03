@@ -454,8 +454,12 @@ export interface EngineCamera {
     contextMarginMm: number,
     options?: MoveOptions,
   ): boolean;
-  /** Pull back to everything drawn along the current heading (app.js:1135). */
-  frameWhole(): void;
+  /**
+   * Pull back to everything drawn along the current heading (app.js:1135), or, when that heading does
+   * not clearly show every cortical region of `showing`, from the view that clearly shows most of them,
+   * releasing the view. Returns those cortical regions of `showing` wholly out of sight.
+   */
+  frameWhole(showing?: readonly string[]): readonly string[];
   /** Frame the drawn internal structures (app.js:1116). */
   frameInternal(): void;
   /**

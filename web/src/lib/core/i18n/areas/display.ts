@@ -56,6 +56,7 @@ export const en = {
   // Not the gizmo's Reset view: the camera, the data and the selection stay.
   resetDisplay: 'Reset display',
   displayReset: 'Display settings reset.',
+  startedOver: 'Back to the opening picture.',
   // Spoken after the Display tool's name on a phone, where the status bar is hidden.
   changed: ', settings changed',
 };
@@ -115,5 +116,6 @@ export const fr: typeof en = {
   focusOff: 'Ciblage désactivé',
   resetDisplay: 'Réinitialiser l’affichage',
   displayReset: 'Réglages d’affichage réinitialisés.',
+  startedOver: 'Retour à l’image de départ.',
   changed: ', réglages modifiés',
 };

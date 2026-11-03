@@ -44,7 +44,7 @@
     prepared: PreparedDisplay;
     /** The subject publishes a spinal cord. */
     hasSpinalCord: boolean;
-    commands: Omit<DockCommands, 'chooseView' | 'reset'>;
+    commands: Omit<DockCommands, 'chooseView' | 'resetView'>;
     /** G4: the body of the Section popover, and the section row above the tools. */
     sectionPopover: Snippet<[{ close: () => void }]>;
     sectionBar?: Snippet;

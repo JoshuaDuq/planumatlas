@@ -48,6 +48,8 @@
     onProvenance: (event: MouseEvent) => void;
     onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
+    /** The opening picture, undoable from its notice; offered once the anatomy is on screen. */
+    onStartOver: () => void;
   }
 
   let {
@@ -68,6 +70,7 @@
     onProvenance,
     onGuide,
     onShortcuts,
+    onStartOver,
   }: Props = $props();
 
   let moreButton: HTMLElement | undefined;
@@ -275,6 +278,15 @@
       >
         <span>{copy.shortcuts}</span>
         <kbd aria-hidden="true">?</kbd>
+      </button>
+      <button
+        type="button"
+        class="menu-item"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        disabled={!ready}
+        onclick={(event) => command(close, onStartOver, event)}
+      >
+        {copy.startOver}
       </button>
     </div>
   {/snippet}

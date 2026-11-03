@@ -6,7 +6,7 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import { domainAreas } from '../../lib/core/catalog/neuropsych-domains.ts';
+import { ALL_DOMAINS, domainAreas } from '../../lib/core/catalog/neuropsych-domains.ts';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
@@ -699,9 +699,10 @@ describe('accessibility', () => {
     mount();
     await open(few().id);
     await withMedia([{ name: 'forced-colors', value: 'active' }], async () => {
+      // With one function painted its swatch is the outline of a colour not on the stage.
       const swatch = rowOf(few().id).querySelector<HTMLElement>('.function-swatch')!;
       expect(getComputedStyle(swatch).forcedColorAdjust).toBe('none');
-      expect(getComputedStyle(swatch).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(getComputedStyle(swatch).boxShadow).not.toBe('none');
       expect(getComputedStyle(rowOf(few().id)).outlineStyle).toBe('solid');
       fieldElement().focus();
       await userEvent.keyboard('{ArrowDown}');
@@ -711,6 +712,27 @@ describe('accessibility', () => {
       await expectAxeCleanOnce('light', 1280);
       await expectAxeCleanOnce('dark', 390);
     });
+  });
+
+  test('only the overview says it combines several term maps', async () => {
+    mount();
+    const notes = () => [...document.querySelectorAll('.note.caveat')].map((n) => n.textContent);
+    await open(few().id);
+    expect(notes().join(' ')).not.toContain('combines several term maps');
+    await open(ALL_DOMAINS);
+    expect(notes().join(' ')).toContain('The overview combines several term maps.');
+  });
+
+  test('a swatch shows its colour only while the overview paints the stage; otherwise it is outlined', async () => {
+    mount();
+    const swatch = () => rowOf(few().id).querySelector<HTMLElement>('.function-swatch')!;
+    const filled = () => getComputedStyle(swatch()).backgroundColor !== 'rgba(0, 0, 0, 0)';
+    // Nothing painted yet: the stage shows the atlas's colours, which these are not.
+    expect(filled()).toBe(false);
+    await open(ALL_DOMAINS);
+    await expect.poll(filled).toBe(true);
+    await open(few().id);
+    expect(filled()).toBe(false);
   });
 
   test('targets: 24 px or more with a fine pointer', async () => {

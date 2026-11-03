@@ -1,6 +1,6 @@
 import type { KeymapCommands } from '../lib/controller/keymap.ts';
 import type { ExcursionDeps, MriDialog, Shell } from '../lib/controller/excursion.svelte.ts';
-import type { SelectionInterface } from '../lib/controller/anatomy.ts';
+import type { SelectionInterface } from '../lib/controller/anatomy.svelte.ts';
 
 /**
  * What the regions provide once they are mounted: the pieces of the interface that the controllers

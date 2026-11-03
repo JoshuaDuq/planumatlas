@@ -81,6 +81,9 @@ describe('results', () => {
     expect(hidden.element().querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toBe(
       'Cuneus, left: Hemisphere hidden. Activate to reveal.',
     );
+    // The side on screen comes first, so Enter on the first result changes nothing unasked.
+    expect(armed()).not.toBe(hidden.element());
+    await userEvent.keyboard('{ArrowDown}');
     expect(armed()).toBe(hidden.element());
     await userEvent.keyboard('{Enter}');
     expect(calls).toEqual(['reveal hemisphere d:left:cuneus']);

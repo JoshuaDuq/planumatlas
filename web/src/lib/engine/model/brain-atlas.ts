@@ -754,6 +754,7 @@ export class BrainAtlas extends EventTarget {
       { ...settings, cortexOpacity: Math.min(settings.cortexOpacity, focusOpacity) },
       this.regions,
       this.clippingPlanes,
+      ghosts,
     );
     const paint = this.paint;
     const mri = this.surfaceColor === 'mri' && !paint;

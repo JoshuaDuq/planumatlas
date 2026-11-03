@@ -21,6 +21,19 @@
   } = $props();
 
   const world = $derived(getApp().world);
+
+  // The engine is not reactive: its tract events re-read how many bundles are drawn.
+  let drawnBundles = $state(0);
+  $effect(() => {
+    if (!world) return;
+    const { engine } = world;
+    const read = () => {
+      drawnBundles = engine.tracts.snapshot().filter((bundle) => bundle.visible).length;
+    };
+    const offs = [engine.on('tractsReady', read), engine.on('tractsVisibility', read)];
+    read();
+    return () => offs.forEach((off) => off());
+  });
 </script>
 
 {#if world}
@@ -35,7 +48,8 @@
       : undefined}
     regionCount={regionCountText(current.lang, {
       tracts: tracts
-        ? t(current.lang, 'diffusion').bundleCollection(
+        ? t(current.lang, 'diffusion').bundlesDrawn(
+            drawnBundles,
             tractCatalog(current.referenceAnatomy).bundles.length,
           )
         : null,

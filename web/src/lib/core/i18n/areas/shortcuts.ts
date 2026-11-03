@@ -33,6 +33,7 @@ export const en = {
         ['0', 'Return to the oblique view'],
         ['F', 'Focus the selected region, or end the focus'],
         ['I', 'Isolate or restore the selected region'],
+        ['Ctrl Z', 'Undo the last hide, show or isolate (⌘ Z on a Mac)'],
       ],
     ],
     [
@@ -87,6 +88,7 @@ export const fr: typeof en = {
         ['0', 'Revenir à la vue oblique'],
         ['F', 'Cibler la région sélectionnée, ou cesser de la cibler'],
         ['I', 'Isoler ou rétablir la région sélectionnée'],
+        ['Ctrl Z', 'Annuler le dernier masquage, affichage ou isolement (⌘ Z sur Mac)'],
       ],
     ],
     [

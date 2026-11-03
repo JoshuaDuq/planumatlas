@@ -40,7 +40,10 @@ interface Entry {
   searchable: string[];
 }
 
-export type CatalogRow = { region: Region; label: RegionLabel } & Visibility;
+export type CatalogRow = { region: Region; label: RegionLabel } & Visibility & {
+    /** A search's matched region this one is drawn within here, when it was found through it. */
+    via?: RegionLabel;
+  };
 
 export interface CatalogGroup {
   name: string;
@@ -61,11 +64,23 @@ export function createCatalog(
   manifest: Pick<Manifest, 'regions'>,
   defaultLang: Language = 'en',
   cabNp: CabNpPartition | null = null,
+  /** The teaching units, each standing in for the FreeSurfer structure it names (domains `units`). */
+  units: Readonly<Record<string, string>> = {},
 ) {
   let activeLang: Language = defaultLang;
   let entries: Entry[] = [];
   const byId = new Map<string, Entry>();
   let selectable: Entry[] = [];
+
+  // The regions each region is drawn within on another layer: a teaching unit holding a NextBrain
+  // constituent, or standing in for a FreeSurfer structure.
+  const holders = new Map<string, string[]>();
+  const hold = (part: string, whole: string) =>
+    holders.set(part, [...(holders.get(part) ?? []), whole]);
+  for (const region of manifest.regions) {
+    for (const part of region.constituent_regions ?? []) hold(part, region.id);
+  }
+  for (const [unit, structure] of Object.entries(units)) hold(structure, unit);
 
   function build(lang: Language) {
     activeLang = lang;
@@ -136,26 +151,42 @@ export function createCatalog(
     /**
      * Ranked matches, capped, plus how many there really were. The caller
      * needs the total: showing the first fifty without saying so is the
-     * silent absence this index exists to avoid.
+     * silent absence this index exists to avoid. What is on screen comes
+     * first, so the first result never changes the anatomy unasked; a match
+     * that is not brings the on-screen region it is drawn within, at its rank.
      */
     search(rawQuery: string, settings: CatalogSettings, limit = 50) {
       if (settings?.lang) ensureLang(settings.lang);
       const query = normalise(rawQuery);
       if (!query) return { rows: [], total: 0 };
       const strippedQuery = stripDiacritics(query);
-      const matched: { entry: Entry; tier: number }[] = [];
+      const matched = new Map<Entry, { row: CatalogRow; tier: number }>();
       for (const entry of selectable) {
         const tier = Math.min(
           ...entry.searchable.map((text) =>
             Math.min(tierOf(text, query), tierOf(text, strippedQuery)),
           ),
         );
-        if (tier !== NO_MATCH) matched.push({ entry, tier });
+        if (tier !== NO_MATCH) matched.set(entry, { row: row(entry, settings), tier });
       }
-      matched.sort((a, b) => a.tier - b.tier || compare(a.entry, b.entry));
+      // A holder added on the way is on screen, so the loop passes over it.
+      for (const [entry, { row: found, tier }] of matched) {
+        if (found.visible) continue;
+        for (const id of holders.get(entry.region.id) ?? []) {
+          const whole = byId.get(id)!;
+          const known = matched.get(whole);
+          if (known && known.tier <= tier) continue;
+          const shown = row(whole, settings);
+          if (shown.visible) matched.set(whole, { row: { ...shown, via: entry.label }, tier });
+        }
+      }
+      const ranked = [...matched].sort(
+        ([a, x], [b, y]) =>
+          Number(y.row.visible) - Number(x.row.visible) || x.tier - y.tier || compare(a, b),
+      );
       return {
-        rows: matched.slice(0, limit).map(({ entry }) => row(entry, settings)),
-        total: matched.length,
+        rows: ranked.slice(0, limit).map(([, { row: found }]) => found),
+        total: ranked.length,
       };
     },
 

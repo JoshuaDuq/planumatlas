@@ -662,6 +662,32 @@ describe('framing parts of the anatomy', () => {
       assert.ok(headingOf(stage).distanceTo(VIEW_DIRECTIONS.left) < 1e-9);
     });
 
+    it('pulls back to the whole brain from the view that shows a function’s area, letting go of the view', () => {
+      const meshes = [part('ventral', { kind: 'cortex' }, [0.02, 0.005, 0.02], [0, -0.04, 0])];
+      const stage = fixture({
+        meshes,
+        regions: new Map([['ventral', { id: 'ventral', kind: 'cortex' } as Region]]),
+        scale: FULL,
+        intersect: covered((direction) => direction.y > 0.9),
+      });
+      stage.camera.applyView('left', { immediate: true });
+      stage.camera.frameWhole(['ventral']);
+      assert.ok(headingOf(stage).distanceTo(VIEW_DIRECTIONS.inferior) < 1e-9);
+      assert.equal(stage.camera.viewHeld, false);
+      // With nothing to show, it keeps the heading it was given.
+      stage.camera.applyView('left', { immediate: true });
+      stage.camera.frameWhole([]);
+      assert.ok(headingOf(stage).distanceTo(VIEW_DIRECTIONS.left) < 1e-9);
+      assert.equal(stage.camera.viewHeld, true);
+    });
+
+    it('pulling back to show a function’s areas names those no level view can show', () => {
+      const stage = sighted(sightMeshes());
+      stage.camera.applyView('left', { immediate: true });
+      assert.deepEqual(stage.camera.frameWhole(['lateral-left', 'buried']), ['buried']);
+      assert.deepEqual(stage.camera.frameWhole([]), []);
+    });
+
     it('keeps the heading and names the region no level view can show', () => {
       const stage = sighted(sightMeshes());
       stage.camera.applyView('left', { immediate: true });

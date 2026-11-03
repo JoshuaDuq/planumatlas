@@ -21,6 +21,21 @@ const deepFunction = (scene: ReturnType<typeof createScene>) =>
   )!.id;
 
 describe('an excursion into a deficit', () => {
+  test('opens on the internal anatomy drawing most of its structures, not one drawing a few', async () => {
+    const scene = createScene();
+    await scene.engine.model.setDetail('aseg');
+    // Amnesia cites two FreeSurfer hippocampi, the teaching set's fornices and mammillary bodies,
+    // and NextBrain's anterior thalamus: FreeSurfer's segmentation draws two of the eight.
+    assert.equal(await scene.excursions.openDeficit('amnesia'), true);
+    const { settings } = scene.engine.model;
+    assert.equal(settings.detail, 'learning');
+    for (const id of ['learning:left:fornix', 'learning:right:mammillary']) {
+      assert.equal(scene.engine.model.isRegionDrawn(id), true, id);
+    }
+    assert.equal(scene.excursions.restorable, true);
+    assert.notEqual(scene.session.state.notice, null);
+  });
+
   test('holds the scene it found, opens the profile at once, then draws and frames the regions', async () => {
     const scene = createScene();
     const mark = scene.engine.calls.length;
@@ -162,17 +177,48 @@ describe('an excursion into a deficit', () => {
     await expect(scene.excursions.restoreBeforeExcursion()).rejects.toThrow(/no scene/);
   });
 
-  test('closing the deficit or the function ends the excursion and leaves the scene', async () => {
+  test('closing the deficit or the function brings back the scene from before it, on the tab’s list', async () => {
     const scene = createScene();
     await scene.excursions.openDeficit(DEFICIT);
-    scene.excursions.closeDeficit();
+    await scene.excursions.closeDeficit();
     assert.equal(scene.excursions.restorable, false);
     assert.equal(scene.session.state.selectedDeficit, null);
+    assert.equal(scene.session.state.explorer, 'deficits');
+    assert.equal(scene.session.state.notice?.text, 'Previous view restored.');
 
     await scene.excursions.openFunction('language');
-    scene.excursions.closeFunction();
+    const mark = scene.engine.calls.length;
+    await scene.excursions.closeFunction();
     assert.equal(scene.excursions.restorable, false);
     assert.equal(scene.session.state.selectedFunction, null);
+    assert.deepEqual(
+      scene.reader.apply.mock.calls.map(([state]) => state),
+      [sceneBefore('scene 1'), sceneBefore('scene 2')],
+    );
+    assert.deepEqual(scene.calls(mark), ['app.render', 'shell.showList']);
+  });
+
+  test('closing with no excursion held only closes', async () => {
+    const scene = createScene();
+    scene.session.setFunction('language');
+    await scene.excursions.closeFunction();
+    assert.equal(scene.session.state.selectedFunction, null);
+    assert.equal(scene.reader.apply.mock.calls.length, 0);
+  });
+
+  test('the reader’s own atlas is held while the excursion is, and an atlas the reader chooses ends it', async () => {
+    const scene = createScene();
+    const own = scene.engine.model.settings.atlas;
+    assert.equal(scene.excursions.heldAtlas, null);
+    scene.reader.capture.mockReturnValueOnce({ ...sceneBefore('own'), atlas: own });
+    await scene.excursions.openFunction('language');
+    assert.equal(scene.excursions.heldAtlas, own);
+
+    const other = scene.engine.model.manifest.atlases.find((atlas) => atlas.id !== own)!;
+    await scene.excursions.chooseAtlas(other.id);
+    assert.equal(scene.excursions.heldAtlas, null);
+    assert.equal(scene.excursions.restorable, false);
+    await scene.excursions.closeFunction();
     assert.equal(scene.reader.apply.mock.calls.length, 0);
   });
 
@@ -205,6 +251,23 @@ describe('an excursion into a function', () => {
     ]);
     const shown = [...domainPaint(scene.domains, 'language').colors.keys()];
     assert.ok(shown.every((id) => scene.engine.model.isRegionDrawn(id)));
+    // From a view that shows its five strongest areas.
+    const framed = scene.engine.calls.findLast((call) => call.method === 'frameWhole')!;
+    assert.deepEqual(framed.args, [
+      domainAreas(scene.domains, 'language')
+        .slice(0, 5)
+        .map(({ region }) => region),
+    ]);
+  });
+
+  test('a strongest area no view shows is said, as a deficit’s out-of-sight regions are', async () => {
+    const scene = createScene();
+    const [hidden] = domainAreas(scene.domains, 'language').filter(
+      ({ region }) => scene.engine.model.regions.get(region)!.kind === 'cortex',
+    );
+    vi.spyOn(scene.engine.camera, 'frameWhole').mockReturnValue([hidden!.region]);
+    assert.equal(await scene.excursions.openFunction('language'), true);
+    expect(scene.session.state.notice?.text).toMatch(/out of sight/i);
   });
 
   for (const [detail, drawnOn] of [

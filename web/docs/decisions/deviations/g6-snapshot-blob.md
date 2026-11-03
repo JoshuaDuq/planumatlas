@@ -9,7 +9,7 @@ Status: fix (standard cited)
 
 ## New behaviour
 
-`canvas.toBlob(…, 'image/png')` (asynchronous encoding), then a link to `URL.createObjectURL(blob)`, revoked 40 s after the click, as FileSaver.js does. The PNG bytes, the file name `planum-<atlas>.png` and the click are unchanged.
+`canvas.toBlob(…, 'image/png')` (asynchronous encoding), then a link to `URL.createObjectURL(blob)`, revoked 40 s after the click, as FileSaver.js does. The PNG bytes, the file name (`planum-<atlas>.png` then; atlas, view and cut plane since 2026-11-02) and the click are unchanged.
 
 ## Standard cited
 

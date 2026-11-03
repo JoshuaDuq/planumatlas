@@ -7,6 +7,7 @@
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { FOCUS_TARGETS, registerFocusTarget, requestFocus } from '../../lib/ui/focus.ts';
@@ -55,7 +56,13 @@
   <div class="dissection" role="group" aria-labelledby={headingId} bind:this={group}>
     <h3 id={headingId} class="visually-hidden">{copy.heading}</h3>
     <p class="status">{copy.hiddenCount(hiddenCount)}</p>
-    <button type="button" bind:this={undo} disabled={!canUndo} onclick={onUndo}>{copy.undo}</button>
+    <button
+      type="button"
+      bind:this={undo}
+      disabled={!canUndo}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.undo}
+      onclick={onUndo}>{copy.undo}</button
+    >
     <button type="button" bind:this={restore} onclick={onRestore}>{copy.restoreAll}</button>
   </div>
 {/if}

@@ -288,6 +288,8 @@ export function createLessons({
       lesson.start(id);
       lesson.showRoute();
       render();
+      // The route cleared a selection before the lesson began, which returned the panel to the list.
+      shell.showDetail();
     },
 
     /** The open lesson goes back to its whole route. */

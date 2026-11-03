@@ -123,6 +123,11 @@
       font-size: var(--text-ui);
       font-variant-numeric: tabular-nums;
     }
+    /* The example in the empty field, at the contrast a search field's has (elements.css). */
+    input::placeholder {
+      color: var(--text-tertiary);
+      opacity: 1;
+    }
     input[aria-invalid='true'] {
       border-color: var(--danger);
     }

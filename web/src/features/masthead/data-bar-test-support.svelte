@@ -60,6 +60,7 @@
   onProvenance={() => {}}
   onGuide={() => {}}
   onShortcuts={() => {}}
+  onStartOver={() => {}}
 >
   {#snippet data()}
     <DataBar

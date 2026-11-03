@@ -35,6 +35,8 @@ describe('opening a lesson', () => {
     const circuit = firstCircuit(scene);
     scene.engine.model.select('destrieux:left:25');
     const mark = scene.engine.calls.length;
+    const started: (string | null)[] = [];
+    scene.shell.showDetail.mockImplementation(() => started.push(scene.lesson.state.circuit));
     await scene.excursions.openCircuit(circuit.id);
 
     assert.equal(scene.reader.capture.mock.calls.length, 1);
@@ -50,8 +52,10 @@ describe('opening a lesson', () => {
     assert.equal(settings.cortexOpacity, manifest.appearance.see_through_opacity);
     assert.equal(settings.hemisphere, 'both');
     assert.equal(scene.session.state.view, 'oblique');
+    // Shown at once, and again once the lesson has begun: clearing the selection on the way
+    // returned the panel to the list (the second click a selected region used to need).
+    assert.deepEqual(started, [null, circuit.id]);
     const timeline = scene.calls(mark);
-    assert.equal(timeline[0], 'shell.showDetail');
     assert.equal(timeline.includes('camera.frameLandmark'), false);
     assert.equal(timeline.at(-1), 'app.render');
   });

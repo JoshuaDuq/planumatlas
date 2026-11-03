@@ -133,13 +133,25 @@ describe('docked beside the stage', () => {
     // A 2 × 2 of slices: two planes side by side, the third under the first.
     expect(box(canvas('coronal')).top).toBe(box(canvas('sagittal')).top);
     expect(box(canvas('axial')).left).toBe(box(canvas('sagittal')).left);
-    await page.viewport(1024, 768);
+    await page.viewport(1024, 1000);
     await expect.poll(() => box(dock()!).top).toBe(box(stage).bottom);
     expect(box(dock()!).left).toBe(box(stage).left);
     expect(box(dock()!).width).toBe(box(stage).width);
     // Three planes in a row under the stage.
     expect(box(canvas('axial')).top).toBe(box(canvas('sagittal')).top);
     expect(box(canvas('axial')).left).toBeGreaterThan(box(canvas('coronal')).right);
+  });
+
+  test('a window too short to share opens it over the page, and leaves the stage whole', async () => {
+    await page.viewport(1024, 768);
+    await mount();
+    const stage = document.getElementById('viewport')!;
+    const whole = box(stage).height;
+    await openFromKeyboard();
+    await expect.poll(() => dialog()?.open).toBe(true);
+    expect(dialog().matches(':modal')).toBe(true);
+    expect(dock()).toBeNull();
+    expect(box(stage).height).toBe(whole);
   });
 
   test('the stage gets its room back when it closes', async () => {
@@ -230,11 +242,11 @@ describe('docked beside the stage', () => {
 describe('the three planes', () => {
   test('each plane is a named section with a picture, a position slider and its own Save button', async () => {
     await opened();
-    // Each names the side it is seen from, as the 3D view faces its cut.
+    // Each names the side it is seen from, as the 3D view faces its cut, and so its convention.
     for (const [plane, label, side] of [
       ['sagittal', 'Sagittal', 'from the right'],
-      ['coronal', 'Coronal', 'from the front'],
-      ['axial', 'Axial', 'from above'],
+      ['coronal', 'Coronal', 'from the front · radiological'],
+      ['axial', 'Axial', 'from above · neurological'],
     ] as const) {
       await expect.element(page.getByRole('region', { name: `${label} ${side}` })).toBeVisible();
       await expect.element(slider(`${label} position`)).toBeVisible();
@@ -720,7 +732,7 @@ describe('on a phone', () => {
   test('the plane still has its heading for a screen reader, though the radio names it', async () => {
     await opened();
     await expect
-      .element(page.getByRole('heading', { name: 'Axial from above', level: 3 }))
+      .element(page.getByRole('heading', { name: 'Axial from above · neurological', level: 3 }))
       .toBeInTheDocument();
     const heading = section('axial').querySelector('h3')!.getBoundingClientRect();
     expect(heading.width).toBeLessThanOrEqual(1);

@@ -12,6 +12,7 @@ import {
   sampleName,
   saveSuffix,
   seenFrom,
+  sideConvention,
   savedAnnouncement,
 } from './mpr-words.ts';
 
@@ -132,4 +133,18 @@ test('each panel names the side it is seen from by its own edge letters, as the 
     expect(seenFrom(plane, stagedFrame(plane, [0, 0, 0], reverse).edges), plane).toBe(side);
   }
   expect(() => seenFrom('axial', ['R', 'A', 'L', 'P'])).toThrow('axial panel');
+});
+
+test('an axial or coronal panel names its convention by the side at its left edge; a sagittal one has none', () => {
+  // Seen from above, the patient's left is on the screen's left; seen from the front, their right.
+  for (const [plane, reverse, convention] of [
+    ['axial', false, 'neurological'],
+    ['axial', true, 'radiological'],
+    ['coronal', false, 'radiological'],
+    ['coronal', true, 'neurological'],
+    ['sagittal', false, null],
+  ] as const) {
+    const { edges } = stagedFrame(plane, [0, 0, 0], reverse);
+    expect(sideConvention(edges), `${plane} ${reverse}`).toBe(convention);
+  }
 });

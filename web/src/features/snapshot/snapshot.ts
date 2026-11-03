@@ -576,7 +576,11 @@ export interface SnapshotPorts extends Pick<SceneCommands, 'fail'> {
 }
 
 async function save(scene: SnapshotStage, subject: SnapshotSubject, ports: SnapshotPorts) {
-  const file = `planum-${subject.atlas ?? 'brain'}.png`;
+  // Named for what it shows, so a set of saves tells itself apart: atlas, the view while the camera
+  // holds it (as the caption names it), then the cut's plane.
+  const view = scene.engine.camera.viewHeld ? subject.view : null;
+  const parts = ['planum', subject.atlas ?? 'brain', view, subject.section?.plane];
+  const file = `${[...new Set(parts.filter(Boolean))].join('-')}.png`;
   const url = URL.createObjectURL(await pngOf(await snapshotImage(scene, subject)));
   const link = document.createElement('a');
   link.download = file;
@@ -593,7 +597,7 @@ async function save(scene: SnapshotStage, subject: SnapshotSubject, ports: Snaps
 let saving: Promise<void> | null = null;
 
 /**
- * Download the visible stage as `planum-<atlas>.png` and say so. A failure is the scene commands'
+ * Download the visible stage as `planum-<atlas>-<view>[-<plane>].png` and say so. A failure is the scene commands'
  * `snapshot` notice. While one is being made, asking again joins it rather than saving twice.
  */
 export function saveSnapshot(

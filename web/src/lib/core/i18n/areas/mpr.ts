@@ -14,7 +14,9 @@ export const en = {
   note: (anatomy: { individual: boolean }) =>
     `1 mm ${anatomy.individual ? 'single-subject' : 'averaged-template'} grid · surface RAS coordinates · L/R explicitly marked. MRI shows the full volume independently of surface visibility. Cortical atlas areas remain surface labels.`,
   readout: (ras: string, name: string, labelId: number) => `${ras} — ${name} (label ${labelId})`,
-  asStage: 'Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree.',
+  asStage:
+    'Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree. Neurological: the patient’s left on the screen’s left; radiological: their right there.',
+  conventions: { neurological: 'neurological', radiological: 'radiological' },
   seenFrom: {
     right: 'from the right',
     left: 'from the left',
@@ -53,7 +55,8 @@ export const fr: typeof en = {
   readout: (ras: string, name: string, labelId: number) =>
     `${ras} — ${name} (étiquette ${labelId})`,
   asStage:
-    'Chaque plan est montré comme la vue 3D voit sa coupe\u202f; les deux images d’une coupe concordent.',
+    'Chaque plan est montré comme la vue 3D voit sa coupe\u202f; les deux images d’une coupe concordent. Neurologique\u202f: la gauche du patient à gauche de l’écran\u202f; radiologique\u202f: sa droite.',
+  conventions: { neurological: 'neurologique', radiological: 'radiologique' },
   seenFrom: {
     right: 'depuis la droite',
     left: 'depuis la gauche',

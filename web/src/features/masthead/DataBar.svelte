@@ -58,6 +58,8 @@
     anatomies: readonly ManifestAnatomy[];
     /** The tract reference, another subject with nothing to choose. */
     reference: { label: string; description?: string } | null;
+    /** The reader's own atlas while the tab's open function or deficit shows another; leaving it brings it back. */
+    borrowed: { own: string; by: 'functions' | 'deficits' } | null;
     /** The settings panel; opening this popover closes it, and it opening closes this. */
     settingsOpen?: boolean;
     /** A field holds a choice still downloading: the status bar leaves that download to the bar (header.js:538). */
@@ -85,6 +87,7 @@
     anatomy,
     anatomies,
     reference,
+    borrowed,
     settingsOpen = $bindable(false),
     choosing = $bindable(false),
     onAtlas,
@@ -132,14 +135,16 @@
   const shown = (field: Field) => chosen[field] ?? values[field];
   const required = (colour: string) => requiredAtlas(colourings, colour as SurfaceColor);
 
-  // The selected option is the field's value, and how far it has loaded while it downloads; every
-  // other option says what else choosing it would change.
+  // The selected option is the field's value, how far it has loaded while it downloads, and the tab
+  // that set an atlas; every other option says what else choosing it would change.
   const label = (field: Field, value: string, name: string, other: string) =>
     value !== shown(field)
       ? other
       : chosen[field]
         ? `${name} · ${loadingText(lang, progress)}`
-        : name;
+        : field === 'atlas' && borrowed
+          ? `${name} · ${copy.borrowedBy[borrowed.by]}`
+          : name;
 
   const atlasOptions = $derived(
     atlases.map((id) => ({
@@ -211,7 +216,12 @@
   );
   const notes = $derived({
     subject: reference ? (reference.description ?? '') : kind,
-    atlas: atlasNote(shown('atlas')),
+    atlas: borrowed
+      ? copy.borrowedNote[borrowed.by](
+          atlasSwitchLabel(shown('atlas'), lang),
+          atlasSwitchLabel(borrowed.own, lang),
+        )
+      : atlasNote(shown('atlas')),
     colour:
       (painted
         ? (display.paintTitles as Record<string, string>)[painted]

@@ -32,7 +32,9 @@
 
   const copy = $derived(t(lang, 'navigator'));
   const side = $derived(t(lang, 'sides').words[row.region.hemisphere]);
-  const alias = $derived(matchedAlias(row.label, query));
+  const alias = $derived(
+    matchedAlias(row.label, query) ?? (row.via ? copy.includes(row.via.name) : null),
+  );
   const heard = $derived(alias ? `${row.label.name}, ${alias}` : row.label.name);
   const reason = $derived(row.visible ? null : reasonText(row.reason, row.region.atlas, lang));
   const spoken = $derived(

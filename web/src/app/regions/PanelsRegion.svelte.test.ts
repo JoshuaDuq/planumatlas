@@ -157,11 +157,18 @@ describe('selection', () => {
 });
 
 describe('accessibility', () => {
-  test('the composed panel passes axe on a region’s detail and on the list', async () => {
+  // Two tests, not one: each state is four whole-panel axe runs (two themes, two widths).
+  test('the composed panel passes axe on a region’s detail', async () => {
     await boot();
     engine.emit('pick', { id: REGION });
     flushSync();
     await expectAxeCleanFitted();
+  });
+
+  test('the composed panel passes axe on the list it goes back to', async () => {
+    await boot();
+    engine.emit('pick', { id: REGION });
+    flushSync();
     app.ports.back();
     flushSync();
     await expectAxeCleanFitted();

@@ -20,7 +20,10 @@ import Fixture from './orientation-gizmo-test-support.svelte';
 let engine: FakeEngine;
 let stage: StageLayout;
 let live: { lang: Language; ready: boolean; view: string };
-let commands: { chooseView: Mock<DockCommands['chooseView']>; reset: Mock<DockCommands['reset']> };
+let commands: {
+  chooseView: Mock<DockCommands['chooseView']>;
+  resetView: Mock<DockCommands['resetView']>;
+};
 let stop: () => void;
 
 function liveState(overrides: Partial<typeof live>) {
@@ -43,12 +46,20 @@ async function mount(
       live.view = name;
       engine.camera.applyView(name);
     }),
-    reset: vi.fn(),
+    resetView: vi.fn(),
   };
   await render(Fixture, { engine, stage, live, commands, insets });
   flushSync();
 }
 
+const VIEW_OF = {
+  R: 'right',
+  L: 'left',
+  S: 'superior',
+  I: 'inferior',
+  P: 'posterior',
+  A: 'anterior',
+} as const;
 const gizmo = () => document.querySelector<HTMLElement>('.orientation-gizmo')!;
 const button = (name: string) =>
   page.getByRole('button', { name, exact: true }).element() as HTMLElement;
@@ -177,46 +188,73 @@ describe('choosing a view', () => {
     });
   });
 
-  test('where targets overlap, the one drawn in front takes the press; a letter behind one takes none', async () => {
+  test('where targets overlap, a press or the pointer on a letter’s drawn circle takes that letter, not the one in front', async () => {
     await mount();
+    // The camera stays put, so every letter is measured where the opening view draws it.
+    commands.chooseView.mockImplementation(() => {});
     const centre = document.querySelector<HTMLElement>('.gizmo-centre')!;
-    const targets = [...gizmo().querySelectorAll<HTMLElement>('.gizmo-letter'), centre];
-    const circle = (node: HTMLElement) => ({
-      ...centreOf(node),
-      r: node.getBoundingClientRect().width / 2,
-    });
-    const inside = (x: number, y: number, at: { x: number; y: number; r: number }) =>
-      (x - at.x) ** 2 + (y - at.y) ** 2 <= at.r ** 2;
-    const layer = (node: HTMLElement) => Number(getComputedStyle(node).zIndex);
+    const viewOf = (node: HTMLElement) =>
+      node === centre ? 'oblique' : VIEW_OF[node.dataset.letter as keyof typeof VIEW_OF];
     const takes = (node: HTMLElement) => node.dataset.behind !== 'true';
+    const targets = [...gizmo().querySelectorAll<HTMLElement>('.gizmo-letter'), centre].filter(
+      takes,
+    );
+    const drawn = (node: HTMLElement) => (node === centre ? node : node.firstElementChild!);
+    const at = (x: number, y: number, type: string, init: object = {}) =>
+      document.elementFromPoint(x, y)!.dispatchEvent(
+        new (type === 'click' ? MouseEvent : PointerEvent)(type, {
+          bubbles: true,
+          clientX: x,
+          clientY: y,
+          ...init,
+        }),
+      );
     let contested = 0;
     for (const node of targets) {
-      const own = circle(node);
-      for (let dx = -own.r + 1.5; dx < own.r - 1; dx += 1) {
-        for (let dy = -own.r + 1.5; dy < own.r - 1; dy += 1) {
-          const [x, y] = [own.x + dx, own.y + dy];
-          if (!inside(x, y, { ...own, r: own.r - 1.5 })) continue;
-          const hit = document.elementFromPoint(x, y)?.closest('button');
-          if (!takes(node)) {
-            expect(hit, node.getAttribute('aria-label')!).not.toBe(node);
-            continue;
-          }
-          // Clear of every other target that takes presses (each a pixel wider: an edge is hit to a pixel).
-          const rivals = targets.filter(
-            (other) =>
-              other !== node &&
-              takes(other) &&
-              inside(x, y, { ...circle(other), r: circle(other).r + 1.5 }),
-          );
-          if (rivals.some((other) => layer(other) > layer(node))) continue;
-          if (rivals.length) contested++;
-          expect(hit, node.getAttribute('aria-label')!).toBe(node);
-        }
-      }
+      const { x, y } = centreOf(drawn(node));
+      const view = node.getAttribute('aria-label');
+      // Another target lies over this one's mark: under the old rule it took the press.
+      const front = document.elementFromPoint(x, y)!.closest('button');
+      if (front !== node) contested++;
+      // A tap: no hover first, so the press itself picks the mark.
+      document.querySelector('.gizmo-field')!.dispatchEvent(new PointerEvent('pointerleave'));
+      commands.chooseView.mockClear();
+      at(x, y, 'click', { detail: 1 });
+      expect(commands.chooseView.mock.calls, view!).toEqual([[viewOf(node)]]);
+      // A mouse: hovering raises the mark, so its tooltip and hover state are the ones it takes.
+      at(x, y, 'pointermove', { pointerType: 'mouse' });
+      expect(document.elementFromPoint(x, y)!.closest('button'), view!).toBe(node);
     }
-    // The opening view crowds the letters, so the check met overlapping targets, and one letter is behind.
-    expect(contested).toBeGreaterThan(50);
-    expect(targets.filter((node) => !takes(node)).length).toBeGreaterThan(0);
+    // The opening view crowds the letters, so the check met marks under another target.
+    expect(contested).toBeGreaterThan(0);
+  });
+
+  test('a letter hidden under another’s drawn circle takes no press: looking down an axis, its far end', async () => {
+    await mount();
+    commands.chooseView.mockImplementation(() => {});
+    engine.camera.applyView('left');
+    flushSync();
+    // From the left, R points straight away, under the centre and L.
+    expect(letter('R').dataset.behind).toBe('true');
+    expect(letter('L').dataset.behind).toBe('false');
+    const { x, y } = centreOf(letter('R'));
+    expect(document.elementFromPoint(x, y)!.closest('button')).not.toBe(letter('R'));
+    (document.elementFromPoint(x, y) as HTMLElement).dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: x, clientY: y, detail: 1 }),
+    );
+    expect(commands.chooseView.mock.calls.flat()).not.toContain('right');
+  });
+
+  test('a press on the keyboard frames the focused letter’s view, wherever the pointer is', async () => {
+    await mount();
+    const target = [...gizmo().querySelectorAll<HTMLElement>('.gizmo-letter')].find(
+      (node) => node.dataset.behind !== 'true',
+    )!;
+    target.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(commands.chooseView.mock.calls.at(-1)).toEqual([
+      VIEW_OF[target.dataset.letter as keyof typeof VIEW_OF],
+    ]);
   });
 
   test('a press anywhere in a letter’s 24 px target frames its view', async () => {
@@ -254,10 +292,10 @@ describe('choosing a view', () => {
     expect(live.view).toBe('left');
   });
 
-  test('Reset view resets through the controller', async () => {
+  test('Reset view resets the camera through the controller', async () => {
     await mount();
     await userEvent.click(button('Reset view'));
-    expect(commands.reset).toHaveBeenCalledOnce();
+    expect(commands.resetView).toHaveBeenCalledOnce();
     expect(button('Reset view').dataset.tooltip).toBe('Reset view');
   });
 });
@@ -308,7 +346,7 @@ describe('the toolbar', () => {
     await userEvent.keyboard('{End}');
     expect(active()).toBe(button('Reset view'));
     await userEvent.keyboard('{Enter}');
-    expect(commands.reset).toHaveBeenCalledOnce();
+    expect(commands.resetView).toHaveBeenCalledOnce();
     await userEvent.keyboard('{Tab}');
     expect(active()).toBe(button('After'));
   });

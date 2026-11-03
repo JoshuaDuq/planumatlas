@@ -11,6 +11,7 @@
 -->
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { ALL_DOMAINS } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { networkCss } from '../../lib/core/catalog/networks.ts';
   import { grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
@@ -33,6 +34,10 @@
   const empty = $derived(
     query !== '' && content.matches.functions === 0 && content.matches.terms === 0,
   );
+
+  // A row's colour is the overview's: shown only while the overview paints the stage, outlined
+  // otherwise, as a key row with nothing coloured in this view is.
+  const painted = $derived(model.selected === ALL_DOMAINS);
 
   let input = $state<HTMLInputElement | null>(null);
   let listElement = $state<HTMLElement | null>(null);
@@ -203,7 +208,8 @@
       <span
         class="function-swatch"
         aria-hidden="true"
-        style:background={item.colour ? networkCss(item.colour) : undefined}
+        data-painted={String(painted)}
+        style:background={painted && item.colour ? networkCss(item.colour) : undefined}
       ></span>
     {/if}
     <span class="row-name" lang={item.lang ?? undefined}>{item.name}</span>
@@ -354,6 +360,9 @@
       height: 10px;
       margin: calc((var(--lh-ui) - 10px) / 2) 1px 0;
       border-radius: var(--radius-mark);
+    }
+    .function-swatch[data-painted='false'] {
+      box-shadow: inset 0 0 0 1px var(--border-control);
     }
     .group-count {
       flex: none;

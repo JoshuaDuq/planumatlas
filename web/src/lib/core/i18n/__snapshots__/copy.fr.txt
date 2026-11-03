@@ -448,12 +448,12 @@
   "keyPicked": "Seulement les régions de ce constat. Choisissez-le de nouveau pour tous les constats."
  },
  "diffusion": {
-  "bundleCollection": [
-   "[0] → \"0 faisceau\"",
-   "[1] → \"1 faisceau\"",
-   "[2] → \"2 faisceaux\"",
-   "[183] → \"183 faisceaux\"",
-   "[12345] → \"12345 faisceaux\""
+  "bundlesDrawn": [
+   "[0,1] → \"0 faisceau tracé sur 1\"",
+   "[1,2] → \"1 faisceau tracé sur 2\"",
+   "[2,183] → \"2 faisceaux tracés sur 183\"",
+   "[183,12345] → \"183 faisceaux tracés sur 12345\"",
+   "[12345,0] → \"12345 faisceaux tracés sur 0\""
   ],
   "classes": {
    "association": "Faisceaux d’association",
@@ -579,6 +579,7 @@
   "focusOff": "Ciblage désactivé",
   "resetDisplay": "Réinitialiser l’affichage",
   "displayReset": "Réglages d’affichage réinitialisés.",
+  "startedOver": "Retour à l’image de départ.",
   "changed": ", réglages modifiés"
  },
  "dissection": {
@@ -825,7 +826,8 @@
   "termsHeading": "Termes Neurosynth",
   "populationsHeading": "Groupes cliniques Neurosynth",
   "caveat": "Là où les études de groupes en bonne santé rapportent une activation<NNBSP>: ni ce cerveau, ni ce qu’une lésion altérerait.",
-  "consistencyNote": "La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit. La vue d’ensemble combine plusieurs cartes de termes.",
+  "consistencyNote": "La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit.",
+  "overviewNote": "La vue d’ensemble combine plusieurs cartes de termes.",
   "deepStrongest": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), la région la plus forte de Alpha, se trouve sous le cortex.\"",
    "[\"\",\"Alpha\",\"\"] → \" (Alpha), la région la plus forte de , se trouve sous le cortex.\""
@@ -939,6 +941,20 @@
    "[\"\",\"Alpha\"] → \" (la couleur devient Alpha)\""
   ],
   "dataSummary": "Réglages de l’atlas et de l’affichage",
+  "borrowedBy": {
+   "functions": "via Fonctions",
+   "deficits": "via Déficits"
+  },
+  "borrowedNote": {
+   "functions": [
+    "[\"Alpha\",\"\"] → \"Choisi dans l’onglet Fonctions<NNBSP>: ses cartes portent sur les aires Alpha. Quitter la fonction rétablit .\"",
+    "[\"\",\"Alpha\"] → \"Choisi dans l’onglet Fonctions<NNBSP>: ses cartes portent sur les aires . Quitter la fonction rétablit Alpha.\""
+   ],
+   "deficits": [
+    "[\"Alpha\",\"\"] → \"Choisi dans l’onglet Déficits<NNBSP>: les régions du déficit ouvert sont sur Alpha. Quitter le déficit rétablit .\"",
+    "[\"\",\"Alpha\"] → \"Choisi dans l’onglet Déficits<NNBSP>: les régions du déficit ouvert sont sur . Quitter le déficit rétablit Alpha.\""
+   ]
+  },
   "notes": {
    "destrieux": "Régions des sillons et des gyrus, 74 par hémisphère",
    "hcp-mmp": "Aires multimodales, 180 par hémisphère (Glasser 2016)",
@@ -954,6 +970,7 @@
   "linkFailed": "Impossible de copier le lien",
   "languageSwitch": "Langue",
   "guide": "Utiliser Planum",
+  "startOver": "Recommencer",
   "shortcuts": "Raccourcis clavier",
   "theme": "Thème",
   "systemTheme": "Système",
@@ -1206,7 +1223,11 @@
    "[\"\",\"Alpha\",0] → \" — Alpha (étiquette 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (étiquette 1)\""
   ],
-  "asStage": "Chaque plan est montré comme la vue 3D voit sa coupe<NNBSP>; les deux images d’une coupe concordent.",
+  "asStage": "Chaque plan est montré comme la vue 3D voit sa coupe<NNBSP>; les deux images d’une coupe concordent. Neurologique<NNBSP>: la gauche du patient à gauche de l’écran<NNBSP>; radiologique<NNBSP>: sa droite.",
+  "conventions": {
+   "neurological": "neurologique",
+   "radiological": "radiologique"
+  },
   "seenFrom": {
    "right": "depuis la droite",
    "left": "depuis la gauche",
@@ -1326,6 +1347,10 @@
    "[\"\",\"Alpha\"] → \" dans Alpha, qui n’étiquette que les coupes. \""
   ],
   "switchCutAtlas": "Changer les étiquettes de coupe",
+  "includes": [
+   "[\"Alpha\"] → \"comprend Alpha\"",
+   "[\"\"] → \"comprend \""
+  ],
   "rowHiddenAria": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha,  : Alpha. Activer pour afficher.\"",
    "[\"\",\"Alpha\",\"\"] → \", Alpha : . Activer pour afficher.\""
@@ -1522,6 +1547,10 @@
      [
       "I",
       "Isoler ou rétablir la région sélectionnée"
+     ],
+     [
+      "Ctrl Z",
+      "Annuler le dernier masquage, affichage ou isolement (⌘ Z sur Mac)"
      ]
     ]
    ],

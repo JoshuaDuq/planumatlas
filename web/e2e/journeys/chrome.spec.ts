@@ -41,13 +41,14 @@ test('data bar, comparison CSV, saved PNG and full screen on one load', async ({
   const downloading = page.waitForEvent('download');
   await save.click();
   const download = await downloading;
-  expect(download.suggestedFilename()).toBe('planum-hcp-mmp.png');
+  expect(download.suggestedFilename()).toBe('planum-hcp-mmp-oblique.png');
   const bytes = readFileSync(await download.path());
   expect(bytes.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   const stage = (await page.locator('#viewport').boundingBox())!;
-  const ratio = await page.evaluate(() => devicePixelRatio);
+  // A saved image has at least two pixels per CSS pixel (SNAPSHOT_PIXEL_RATIO), whatever the screen's.
+  const ratio = Math.max(2, await page.evaluate(() => devicePixelRatio));
   expect(Math.abs(bytes.readUInt32BE(16) - stage.width * ratio)).toBeLessThanOrEqual(1);
-  await expect(page.locator('#announcer')).toHaveText('Image saved as planum-hcp-mmp.png.');
+  await expect(page.locator('#announcer')).toHaveText('Image saved as planum-hcp-mmp-oblique.png.');
 
   // Real full screen in and out.
   const fullscreenElement = () => page.evaluate(() => document.fullscreenElement?.id ?? null);

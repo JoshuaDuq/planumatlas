@@ -41,6 +41,7 @@ function barProps(overrides: Record<string, unknown> = {}) {
     anatomy: subjects[0],
     anatomies: subjects,
     reference: null,
+    borrowed: null,
     ...overrides,
   };
   return props;
@@ -234,6 +235,24 @@ describe('DataBar on the bar', () => {
     await view.rerender({ bar: barProps() });
     expect(colour.selectedOptions[0].textContent).toBe('Tissue');
     expect([...colour.options].some((option) => option.value === 'paint')).toBe(false);
+  });
+
+  test('an atlas a function set names the tab in its value, and its note the atlas that comes back', async () => {
+    const view = await wide(barProps({ atlas: 'hcp-mmp' }));
+    const atlas = el(field('Atlas')) as HTMLSelectElement;
+    const note = () =>
+      document.getElementById(atlas.getAttribute('aria-describedby')!)!.textContent;
+    expect(atlas.selectedOptions[0].textContent).toBe('HCP-MMP');
+    expect(note()).toMatch(/^Multimodal areas/);
+
+    await view.rerender({
+      bar: barProps({ atlas: 'hcp-mmp', borrowed: { own: 'destrieux', by: 'functions' } }),
+    });
+    expect(atlas.selectedOptions[0].textContent).toBe('HCP-MMP · via Functions');
+    expect(note()).toBe(
+      'Set by the Functions tab: its maps lie on HCP-MMP areas. Leaving the function brings back Destrieux.',
+    );
+    expect(atlas.dataset.tooltip).toBe(note());
   });
 
   test('the subject select is disabled while switching, and focus is not dropped to the page', async () => {

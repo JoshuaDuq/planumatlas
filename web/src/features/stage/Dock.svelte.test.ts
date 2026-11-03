@@ -34,7 +34,7 @@ interface Live {
 let engine: FakeEngine;
 let stage: StageLayout;
 let live: Live;
-type Commands = Omit<DockCommands, 'chooseView' | 'reset'>;
+type Commands = Omit<DockCommands, 'chooseView' | 'resetView'>;
 let commands: { [K in keyof Commands]: Mock<Commands[K]> };
 let cleanups: (() => void)[];
 /** What the stage layout's `onDock` runs: the camera refit in the app. */

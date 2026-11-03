@@ -521,6 +521,46 @@ export function createFraming({
   const clearlyShown = (shares: ReadonlyMap<string, number>) =>
     [...shares.values()].filter((share) => share >= SIGHT_SHOWN).length;
 
+  /** The drawn meshes of the cortical regions among `ids`, by region. */
+  function corticalMeshes(ids: ReadonlySet<string>): Map<string, Mesh[]> {
+    const cortical = new Map<string, Mesh[]>();
+    for (const mesh of model.visibleMeshes) {
+      const id = mesh.userData['region_id'] as string;
+      if (!ids.has(id) || model.regions.get(id)?.kind !== 'cortex') continue;
+      cortical.set(id, [...(cortical.get(id) ?? []), mesh]);
+    }
+    return cortical;
+  }
+
+  /**
+   * The framing along `direction`, unless it does not clearly show every one of `cortical`: then the
+   * sight view's that clearly shows most. The camera's up is left as the chosen framing needs it.
+   */
+  function clearestFraming(
+    direction: Vector3,
+    plan: (heading: Vector3) => ReturnType<typeof planFraming>,
+    cortical: ReadonlyMap<string, readonly Mesh[]>,
+  ) {
+    let chosen = plan(direction);
+    let shares = sightFrom(chosen.position, cortical);
+    let turned = false;
+    const up = camera.up.clone();
+    for (const name of SIGHT_VIEWS) {
+      if (clearlyShown(shares) === cortical.size) break;
+      camera.up.copy(upFor(name));
+      const candidate = plan(VIEW_DIRECTIONS[name].clone());
+      const candidateShares = sightFrom(candidate.position, cortical);
+      if (clearlyShown(candidateShares) > clearlyShown(shares)) {
+        chosen = candidate;
+        shares = candidateShares;
+        turned = true;
+        up.copy(upFor(name));
+      }
+    }
+    camera.up.copy(up);
+    return { chosen, shares, turned };
+  }
+
   /**
    * Frame a deficit's regions together. When its own heading does not clearly show every coloured
    * cortical region, the view that clearly shows most is taken instead; returns those wholly out of sight.
@@ -546,30 +586,12 @@ export function createFraming({
     if (sides.size === 1 && Math.sign(direction.x) === (sides.has('left') ? 1 : -1)) {
       direction.x *= -1;
     }
-    const cortical = new Map<string, Mesh[]>();
-    for (const mesh of meshes) {
-      const id = mesh.userData['region_id'] as string;
-      if (model.regions.get(id)?.kind !== 'cortex') continue;
-      cortical.set(id, [...(cortical.get(id) ?? []), mesh]);
-    }
     const fit = framingFit();
-    const plan = (heading: Vector3) =>
-      planFraming(camera, controls, context, heading, frameTo, fit, points);
-    let chosen = plan(direction);
-    let shares = sightFrom(chosen.position, cortical);
-    const up = camera.up.clone();
-    for (const name of SIGHT_VIEWS) {
-      if (clearlyShown(shares) === cortical.size) break;
-      camera.up.copy(upFor(name));
-      const candidate = plan(VIEW_DIRECTIONS[name].clone());
-      const candidateShares = sightFrom(candidate.position, cortical);
-      if (clearlyShown(candidateShares) > clearlyShown(shares)) {
-        chosen = candidate;
-        shares = candidateShares;
-        up.copy(upFor(name));
-      }
-    }
-    camera.up.copy(up);
+    const { chosen, shares } = clearestFraming(
+      direction,
+      (heading) => planFraming(camera, controls, context, heading, frameTo, fit, points),
+      corticalMeshes(wanted),
+    );
     held.release();
     moveCamera(chosen);
     rememberZoom();
@@ -608,19 +630,18 @@ export function createFraming({
   }
 
   /** Pull back to the whole brain along the direction the reader already has. */
-  function frameWhole() {
-    moveCamera(
-      planFraming(
-        camera,
-        controls,
-        framingBounds(),
-        heading(),
-        frameTo,
-        framingFit(),
-        framingPoints(),
-      ),
+  function frameWhole(showing: readonly string[] = []): string[] {
+    const [bounds, fit, points] = [framingBounds(), framingFit(), framingPoints()];
+    const { chosen, shares, turned } = clearestFraming(
+      heading(),
+      (along) => planFraming(camera, controls, bounds, along, frameTo, fit, points),
+      corticalMeshes(new Set(showing)),
     );
+    // Turned to show what it was given, the camera has left the view it held.
+    if (turned) held.release();
+    moveCamera(chosen);
     rememberZoom();
+    return [...shares].filter(([, share]) => share === 0).map(([id]) => id);
   }
 
   function faceCut({ immediate = false }: MoveOptions = {}): ViewName | null {

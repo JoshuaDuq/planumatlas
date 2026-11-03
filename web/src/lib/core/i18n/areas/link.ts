@@ -26,7 +26,7 @@ export const en = {
     function: 'function',
     opacity: 'cortex opacity',
     mri: 'MRI window',
-    tab: 'panel',
+    tab: 'tab',
     deficit: 'deficit',
     circuit: 'circuit',
     step: 'circuit step',

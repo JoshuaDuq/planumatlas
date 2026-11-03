@@ -280,13 +280,13 @@ checks them in the browser today and could run in the unit project over the fake
 - **Expected:** deficit, deficit, listed region, Restore → `true`; the re-applied scene is the first capture; Restore not offered; `selectedDeficit: null`; notice "Previous view restored.". On Functions → `selectedFunction: null`. Partial failure → `AggregateError` with each cause logged; Restore still offered; deficit still open. Overtaken → `false`, unchanged. None held → error "no scene".
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R; the scene reader is a `vi.fn`), `functions.spec.ts` (R; enabled on `next` since #134)
 
-### CTRL-28 · Closing the deficit or function ends the excursion where it stands
+### CTRL-28 · Closing the deficit or function brings back the scene from before it
 
-- **Rule:** Closing the open deficit or function ends the excursion. The scene stays as it is and Restore is no longer offered.
+- **Rule:** Closing the open deficit or function (Escape, the sheet's clear) ends the excursion as another tab does: the scene from before it, with the reader's own atlas, colour and selection, comes back on the tab's list, and says so. With no excursion held, closing only closes.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:866-877`
-- **Expected:** open, close → item null, Restore not offered, no scene re-applied.
+- **Source:** `viewer/app.js:866-877`; changed 2026-11-03 (critique: a closed function stranded the reader on its atlas)
+- **Expected:** open, close → item null, Restore not offered, the first capture re-applied, `render` then `showList`, notice "Previous view restored.". Nothing held → item null, nothing re-applied.
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R)
 
 ### CTRL-29 · An item opened from a lesson ends it and takes over its scene
@@ -345,11 +345,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-35 · Choosing an atlas or a colour lifts the open paint first
 
-- **Rule:** A function's or deficit's paint names areas of one atlas, so choosing another atlas or surface colour lifts the paint before applying the choice.
+- **Rule:** A function's or deficit's paint names areas of one atlas, so choosing another atlas or surface colour lifts the paint before applying the choice. An atlas the reader chooses is their own: the excursion's held scene, and its atlas, are dropped, so leaving no longer replaces it.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:600-604`
-- **Expected:** with `language` open, `chooseSurfaceColor('tissue')` → `paintLifted: true`, `surfaceColor: 'tissue'`. `chooseAtlas(other)` → `paintLifted: true`, atlas = other.
+- **Expected:** with `language` open, `chooseSurfaceColor('tissue')` → `paintLifted: true`, `surfaceColor: 'tissue'`. `chooseAtlas(other)` → `paintLifted: true`, atlas = other, `heldAtlas: null`, Restore not offered, closing re-applies nothing.
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R)
 
 ### CTRL-36 · A failure that needs a newer deploy offers Reload

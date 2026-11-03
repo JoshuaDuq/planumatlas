@@ -4,7 +4,7 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
-  import type { Language } from '../../lib/types/index.ts';
+  import type { Explorer, Language } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import GuideDialog from '../../features/guide/GuideDialog.svelte';
   import DataBar from '../../features/masthead/DataBar.svelte';
@@ -48,6 +48,25 @@
   export function openProvenance(event: MouseEvent) {
     provenanceInstant = isKeyboardActivation(event);
     provenanceOpen = true;
+  }
+
+  /**
+   * The reader's own atlas while an open function or deficit shows its regions on another: the
+   * item open in the tab in front set it, else the one still open in the other evidence tab.
+   */
+  function borrowedAtlas(current: {
+    atlas: string;
+    explorer: Explorer;
+    selectedFunction: string | null;
+    selectedDeficit: string | null;
+  }) {
+    const own = world?.excursions.heldAtlas;
+    if (!own || own === current.atlas) return null;
+    if (current.explorer !== 'functions' && current.explorer !== 'deficits') return null;
+    const front =
+      current.explorer === 'functions' ? current.selectedFunction : current.selectedDeficit;
+    const other = current.explorer === 'functions' ? 'deficits' : 'functions';
+    return { own, by: front ? current.explorer : other };
   }
 
   // The skip link: the model's canvas, else the stage, which takes focus when no canvas can (header.js:167-170).
@@ -121,6 +140,7 @@
     shortcutsInstant = isKeyboardActivation(event);
     shortcutsOpen = true;
   }}
+  onStartOver={() => world?.anatomy.startOver()}
 >
   {#snippet data()}
     {#if world}
@@ -146,6 +166,7 @@
         anatomy={model.manifest.anatomy}
         anatomies={[model.manifest.anatomy]}
         reference={tractReference ? reference(current.referenceAnatomy) : null}
+        borrowed={borrowedAtlas(current)}
         bind:settingsOpen
         bind:choosing
         onAtlas={world.excursions.chooseAtlas}
