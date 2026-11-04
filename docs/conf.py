@@ -164,7 +164,7 @@ html_theme_options = {
     "sidebar_hide_name": True,
     "navigation_with_keys": False,
     "top_of_page_buttons": [],
-    "source_repository": "https://github.com/JoshuaDuq/neuroatlas",
+    "source_repository": "https://github.com/JoshuaDuq/planumatlas",
     "source_branch": "main",
     "source_directory": "docs/",
 }

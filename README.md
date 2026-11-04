@@ -13,16 +13,17 @@ Explore, cut, measure and question one person's MRI-reconstructed brain. Nothing
 <p align="center">
   <a href="https://planumatlas.com/"><strong>Open Planum</strong></a> ·
   <a href="https://planumatlas.com/docs/">Documentation</a> ·
+  <a href="https://planumatlas.com/docs/guides/viewer.html">Viewer guide</a> ·
   <a href="https://planumatlas.com/docs/validation.html">Validation and limits</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/JoshuaDuq/neuroatlas/actions/workflows/deploy.yml"><img alt="Deploy status" src="https://github.com/JoshuaDuq/neuroatlas/actions/workflows/deploy.yml/badge.svg"></a>
+  <a href="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml"><img alt="Deploy status" src="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-156b6d"></a>
   <img alt="English and French" src="https://img.shields.io/badge/languages-English%20%C2%B7%20Fran%C3%A7ais-515b63">
 </p>
 
-[![Diffusion tract bundles inside a translucent Destrieux-coloured brain, with the Tracts panel listing streamline counts and lengths](.github/assets/readme/tracts.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=diffusion)
+[![Diffusion tract bundles inside a see-through cortex, with the Tracts panel listing streamline counts and lengths](.github/assets/readme/tracts.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=diffusion)
 
 Textbook figures show an idealised brain, and many 3D models are drawn by artists. Planum shows a **real one**: MGH CDMD subject `sub_013`, reconstructed from its own T1 scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Every region, cut face and number in the viewer traces back to that data or to a cited atlas, and the app shows you which.
 
@@ -70,9 +71,27 @@ Five tours follow established anatomical pathways and loop branches: vision, a h
 
 ### Ask what a lesion would reach
 
-[![A 10 mm lesion sphere on the left subcentral gyrus, with the report listing the functions and deficits it overlaps](.github/assets/readme/lesion.webp)](https://planumatlas.com/)
+[![A 10 mm lesion sphere on the left subcentral gyrus, with the report listing the functions and deficits it overlaps](.github/assets/readme/lesion.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=anatomy&lesion=-49.2,-1.7,35.6,10)
 
-Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report lists the functions whose territories it overlaps, the deficits whose cited regions it reaches, the tissue it contains region by region, and the tract streamlines that pass through it. It measures overlap only; it predicts nothing about a patient.
+Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report lists the functions whose territories it overlaps, the deficits whose cited regions it reaches, the tissue it contains region by region, and the tract streamlines that pass through it. It measures overlap only; it predicts nothing about a patient. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#lesion-report).
+
+### Weigh a region against real strokes
+
+[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia and one with none, with their language scores](.github/assets/readme/stroke-cases.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=destrieux:left:4&cases=M2295,M2272)
+
+For a region that real strokes reached, plot each of 228 people in the Aphasia Recovery Cohort as lesion volume against language score (WAB-AQ), within a test window you choose. Pick two people to draw their own lesions on the brain, each in its own colour with the overlap in a third, or step through pairs of similar lesion size and very different outcome. It is cohort evidence, not a prediction for this brain. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#stroke-cases).
+
+### See what stimulating a region evokes
+
+[![Stimulation responses for the left hippocampal formation, a response-rate bar for each other site with its pair and people counts](.github/assets/readme/stimulation.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&focus=1)
+
+From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#stimulation-responses).
+
+### Map the visual field onto the cortex
+
+[![The visual field map: a dot 4.5 degrees from fixation on the visual field disc, with the V1, V2 and V3 territory predicted to represent it](.github/assets/readme/visual-field.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=circuits&map=visual-field&dot=4,2,1.5)
+
+Under **Circuits › Maps**, move a dot through the visual field and see the V1, V2 and V3 cortex predicted to represent it, with its area in mm², or click the cortex to read back the field position it responds to. The prediction is the Benson template applied to this brain's folding: no retinotopy was measured in this person. [Read the guide](https://planumatlas.com/docs/guides/circuits.html#visual-field-map).
 
 ### And more
 

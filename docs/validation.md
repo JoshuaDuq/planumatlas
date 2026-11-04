@@ -1,6 +1,6 @@
 # Validation and limits
 
-[`brain_model/validate.py`](https://github.com/JoshuaDuq/neuroatlas/blob/main/brain_model/validate.py) reads each built anatomy back and checks it against its sources. It establishes conversion fidelity, not clinical accuracy: every published `validation.json` has status `passed` and `clinical_accuracy_validated: false`.
+[`brain_model/validate.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/validate.py) reads each built anatomy back and checks it against its sources. It establishes conversion fidelity, not clinical accuracy: every published `validation.json` has status `passed` and `clinical_accuracy_validated: false`.
 
 The [circuit evidence audit](reference/circuit-evidence.md) records clinical-source provenance for its historical set of 29 tours, the material scientific qualifications, and the remaining clinical-use work. Deficit evidence and circuit background are labeled separately in the viewer, and published corrections are shown with their sources. The audit and software checks do not establish patient-level diagnostic or prognostic validity. After the 1 November removal of profiles that coloured no atlas region, the clinical catalogue contains 132 abstract-based extraction records requiring full-text review before any patient-specific use is assessed.
 
@@ -29,7 +29,7 @@ CI runs all three for `cdmd` on every pull request and deployment. A validation 
 13. **Boundary certainty.** `boundary-certainty.json` recounted per voxel and the label it touches must equal the build's per-pair counts exactly. The near-tie volume must sit on the label grid, name a runner-up from its winner's own hemisphere and never the winner, and have been made with the configured margin.
 14. **Segmentation agreement map.** The compared NextBrain volume, voxelised again point by point through the full affines rather than per axis, must equal the published one, and `segmentation-agreement.json`'s counts must equal a recount against aseg.
 
-Browser QA runs are recorded in [`deliverables/`](https://github.com/JoshuaDuq/neuroatlas/tree/main/deliverables); the docs build does not re-run them.
+Browser QA runs are recorded in [`deliverables/`](https://github.com/JoshuaDuq/planumatlas/tree/main/deliverables); the docs build does not re-run them.
 
 ## Geometry
 
@@ -47,7 +47,7 @@ Counts are before barycentric partition; area is conserved across it to a relati
 
 ## Atlas comparison
 
-[`tests/test_comparison.py`](https://github.com/JoshuaDuq/neuroatlas/blob/main/tests/test_comparison.py) checks the overlap calculation against explicit barycentric subdivision. CDMD publishes 1,202 positive Destrieux × HCP-MMP pairs, 1,056 Destrieux × Julich-Brain, 1,221 Destrieux × Schaefer, 1,537 HCP-MMP × Julich-Brain, 1,767 HCP-MMP × Schaefer and 1,556 Julich-Brain × Schaefer. Every pair file conserves both hemispheres to the same totals (about 85,619.412 mm² left, 85,458.887 mm² right); the largest discrepancy against the cortical meshes is $1.12 \times 10^{-4}$ mm², within the float32 bound. These are numerical checks, not proof that projected boundaries are biologically exact.
+[`tests/test_comparison.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_comparison.py) checks the overlap calculation against explicit barycentric subdivision. CDMD publishes 1,202 positive Destrieux × HCP-MMP pairs, 1,056 Destrieux × Julich-Brain, 1,221 Destrieux × Schaefer, 1,537 HCP-MMP × Julich-Brain, 1,767 HCP-MMP × Schaefer and 1,556 Julich-Brain × Schaefer. Every pair file conserves both hemispheres to the same totals (about 85,619.412 mm² left, 85,458.887 mm² right); the largest discrepancy against the cortical meshes is $1.12 \times 10^{-4}$ mm², within the float32 bound. These are numerical checks, not proof that projected boundaries are biologically exact.
 
 ## Segmentation agreement map
 

@@ -40,10 +40,10 @@ traced from its surfaces, solid behind a coronal cut and outlined in front. The
 user requested a clean, clinical, professional interface and selected a light
 clinical workspace.
 
-The custom domain is planumatlas.com. The former address,
-https://joshuaduq.github.io/neuroatlas/, is cited by a grant proposal and must
-keep resolving through GitHub Pages’ custom-domain redirect; the repository
-therefore stays named `neuroatlas`.
+The custom domain is planumatlas.com and the repository is named `planumatlas`.
+The former address, https://joshuaduq.github.io/neuroatlas/, is cited by a grant
+proposal and must keep resolving. GitHub does not redirect Pages URLs after a
+rename, so a stub `neuroatlas` repository serves a Pages redirect to the domain.
 
 ## Evidence on Hand
 

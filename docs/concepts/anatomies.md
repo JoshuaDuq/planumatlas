@@ -1,6 +1,6 @@
 # Anatomies
 
-An anatomy is a set of assets declared in [`config/model.yaml`](https://github.com/JoshuaDuq/neuroatlas/blob/main/config/model.yaml). The viewer lists published anatomies in `public/models/anatomies.json`.
+An anatomy is a set of assets declared in [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml). The viewer lists published anatomies in `public/models/anatomies.json`.
 
 | ID | Source | Availability |
 | :--- | :--- | :--- |

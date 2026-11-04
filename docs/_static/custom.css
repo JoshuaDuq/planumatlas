@@ -247,6 +247,7 @@ figcaption p { text-align: left; }
   gap: 2rem 1.5rem;
   margin: 1.25rem 0 2rem;
 }
+.feature:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 0.75rem); }
 .feature > p { margin: 0.5rem 0 0; color: var(--color-foreground-secondary); font-size: 0.9375rem; }
 .feature > p:first-child { margin: 0; }
 .feature > p:nth-child(2) { margin-top: 0.75rem; color: var(--color-foreground-primary); font-size: 1rem; }
@@ -373,4 +374,5 @@ article table th, article table td { padding: 0.65rem 0.75rem; vertical-align: t
   article h2 { margin-top: 2rem; }
   figure { margin-inline: 0; }
   .feature-grid { grid-template-columns: 1fr; }
+  .feature:last-child:nth-child(odd) { width: auto; }
 }

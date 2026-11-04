@@ -38,6 +38,8 @@ Search by name, or browse the **Whole brain** or **By system**. Select a region 
 - **Functional regions (group atlas)**, for a cerebellar lobule: its share in each functional region of the registered Nettekoven et al. (2024) atlas, with each region's domain. A functional region chosen on a cut shows what the paper found it does. See [Atlases](../concepts/atlases.md#functional-cerebellar-regions).
 - **Boundary certainty**, for a NextBrain region: each rated neighbour, largest shared boundary first, with the share of that boundary where NextBrain nearly chose the other label. A name selects the neighbour without moving the camera. See [Atlases](../concepts/atlases.md#boundary-certainty).
 - **Segmentation agreement**, for the caudate, putamen, thalamus, hippocampus or amygdala, whether aseg's structure, NextBrain's union or a NextBrain label in it: the volume both segmentations label, aseg alone and NextBrain alone on aseg's 1 mm grid, with their Dice. **Show on linked MRI** opens the scan at the region with those voxels inked. See [Atlases](../concepts/atlases.md#segmentation-agreement).
+- **Stroke cases**, for a region a real stroke reached, or one already showing a chosen pair: see [below](#stroke-cases).
+- **Stimulation responses**, for a region the authors' map labels: see [below](#stimulation-responses).
 - **Functional division**, **Neuropsychological functions** and **Functional networks**, as disclosures that stay open between selections. For the caudate, putamen or accumbens, **Functional networks** lists its share in each Yeo network's striatal territory (Choi et al. 2012), Choi's confidence in those voxels and, for the putamen, the authors' warning about signal from the insula; see [Atlases](../concepts/atlases.md#striatal-networks).
 - The deficits and guided-circuit landmarks that involve the region, each opening in its own tab.
 
@@ -48,6 +50,26 @@ The eye beside a row hides that region or group; **L** and **R** act on each sid
 ### Atlas overlap
 
 A Destrieux, HCP-MMP, Julich-Brain or Schaefer region lists the regions of another cortical atlas it shares pial surface with: the shared area in mm² and its share of the selected region's **whole** surface, with the unassigned remainder shown. **Compare with** chooses that atlas; each pair downloads the first time it is shown. The two directions give different percentages, and Julich-Brain's gap maps and Schaefer's medial wall count as unassigned. Activate a row to outline that intersection; a section turns outlines off. **Download CSV** exports every pair at full precision with checksums and citations, named after both atlases. An overlap is spatial: it does not carry one atlas's measurements, such as Julich-Brain's receptor fingerprints, to the other's regions. The method is in [Atlases](../concepts/atlases.md#comparing-cortical-atlases).
+
+### Stroke cases
+
+```{figure} ../../.github/assets/readme/stroke-cases.webp
+:alt: Two Aphasia Recovery Cohort lesions compared on the left subcentral gyrus and sulci, one with severe Broca's aphasia and one with no aphasia, drawn in overlapping colours with their WAB-AQ scores
+
+A pair chosen for the left subcentral gyrus and sulci: similar lesion size, very different language outcome. Each person's own lesion is drawn; the third colour is where they overlap.
+```
+
+A region some stroke in the Aphasia Recovery Cohort reached opens **Stroke cases**: a scatter of lesion volume (log scale) against WAB Aphasia Quotient, one dot per person whose lesion reaches a minimum share of the region, filtered to a test window (90 days, a year, or any time) from their scan. Picking a dot, or two, draws that person's own lesion on the brain; two lesions draw in separate colours plus a third for their overlap, with the regions where their damage most differs listed by share. **Much of it damaged, mild or no aphasia** calls out exceptions to the expected volume–score relationship. **Similar size, different score** steps through pairs matched for lesion volume but far apart in outcome. The cohort is real strokes in real people; it does not say what a lesion placed on this brain would do, and WAB-AQ measures aphasia severity, not this region's function alone. Sources: [Gibson et al. (2024)](https://doi.org/10.1038/s41597-024-03819-7) and the [OpenNeuro dataset](https://doi.org/10.18112/openneuro.ds004884.v1.0.2).
+
+### Stimulation responses
+
+```{figure} ../../.github/assets/readme/stimulation.webp
+:alt: Stimulation-response rates for the left hippocampal formation, a bar and percentage for each other site, with pair and subject counts
+
+The left hippocampal formation's stimulation responses: how often a pulse here evoked activity at each other site, stimulated on the same side.
+```
+
+A region the authors' intracranial map labels opens **Stimulation responses**: from single-pulse stereo-EEG stimulation in people with epilepsy, how often stimulating this site evoked a response at another, or stimulating another evoked one here. Choose the **direction** (stimulated here or recorded here) and **hemisphere** (same or opposite side); a thalamic region offers a **site**, since the authors group thalamic contacts by position, not nucleus, so every thalamic structure shows all three sites. Each row bars the response rate with the pairs it rests on and the people tested; a pair tested in too few people shows its counts with no rate, and an untested label is named separately. This is pooled evidence from implanted electrodes in a different population, not a measurement in this brain; both hemispheres show the same values. Sources: [Lyu et al. (2025)](https://doi.org/10.1038/s41593-025-02009-x) and its [Zenodo dataset](https://doi.org/10.5281/zenodo.16939708).
 
 ## Stage
 

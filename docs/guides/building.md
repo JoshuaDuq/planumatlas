@@ -1,6 +1,6 @@
 # Building an anatomy
 
-The pipeline checks source files against [`data/sources.json`](https://github.com/JoshuaDuq/neuroatlas/blob/main/data/sources.json), then compiles them into the assets used by the viewer. The sources needed for CDMD are committed, so a fresh clone can build and validate it without regenerating the segmentations:
+The pipeline checks source files against [`data/sources.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/sources.json), then compiles them into the assets used by the viewer. The sources needed for CDMD are committed, so a fresh clone can build and validate it without regenerating the segmentations:
 
 ```bash
 uv sync --locked
@@ -12,8 +12,8 @@ The build writes `public/models/cdmd/` and updates the anatomy index; validation
 
 ## Configuration
 
-- [`config/model.yaml`](https://github.com/JoshuaDuq/neuroatlas/blob/main/config/model.yaml) declares sources, optional layers and display settings. Missing inputs for declared layers cause the build to fail.
-- [`config/learning-anatomy.yaml`](https://github.com/JoshuaDuq/neuroatlas/blob/main/config/learning-anatomy.yaml) defines teaching solids as unions of source labels.
+- [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml) declares sources, optional layers and display settings. Missing inputs for declared layers cause the build to fail.
+- [`config/learning-anatomy.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/learning-anatomy.yaml) defines teaching solids as unions of source labels.
 - `config/neuropsych-domains.yaml` and `config/neurosynth-terms.yaml` select the functional maps. Their derived scores are committed under `data/`.
 
 The build does not remove files it no longer writes. Remove obsolete files from the output directory before validating a changed configuration.

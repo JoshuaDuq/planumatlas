@@ -2,8 +2,8 @@
 
 Two classes work in any Three.js application, without the viewer's interface:
 
-- [`BrainAtlas`](https://github.com/JoshuaDuq/neuroatlas/blob/main/web/src/lib/engine/model/brain-atlas.ts) loads an anatomy from its `manifest.json`, renders it as one group, and selects and picks regions.
-- [`BrainSections`](https://github.com/JoshuaDuq/neuroatlas/blob/main/web/src/lib/engine/slices/sections.ts) cuts the model with a plane, caps the cut and samples the label volumes on the cut face.
+- [`BrainAtlas`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/model/brain-atlas.ts) loads an anatomy from its `manifest.json`, renders it as one group, and selects and picks regions.
+- [`BrainSections`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/slices/sections.ts) cuts the model with a plane, caps the cut and samples the label volumes on the cut face.
 
 The following excerpt assumes an existing application that sizes and attaches the renderer, positions the camera, adds lighting, and renders the scene.
 

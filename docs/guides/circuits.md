@@ -20,15 +20,37 @@ Each landmark opens its source atlas, reveals the relevant anatomy and frames it
 
 A landmark can also draw one of this brain’s own tracts, alone and coloured by local streamline direction. Stretches hidden behind or inside the anatomy are drawn faint rather than left out. The streamlines go away on any landmark without a tract, and when the tour ends.
 
-The tours teach literature-supported anatomical relationships. Apart from the corticospinal streamlines, they do not measure connectivity in this individual. No tour reconstructs axons or establishes a necessary and sufficient lesion pattern for a deficit. Their notes identify the species, anatomical approximations and omitted components relevant to interpretation. Active lessons and mappings are in [`data/circuits.yaml`](https://github.com/JoshuaDuq/neuroatlas/blob/main/data/circuits.yaml).
+The tours teach literature-supported anatomical relationships. Apart from the corticospinal streamlines, they do not measure connectivity in this individual. No tour reconstructs axons or establishes a necessary and sufficient lesion pattern for a deficit. Their notes identify the species, anatomical approximations and omitted components relevant to interpretation. Active lessons and mappings are in [`data/circuits.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/circuits.yaml).
 
 Every tour’s Sources panel distinguishes **Deficit evidence** from **Circuit background**. A patient lesion study can support a region–deficit association without establishing the connections of the pathway taught. Sources retain their study-specific limits. Clinical accuracy has not been validated.
+
+## Maps
+
+Below the tours, **Maps** holds interactive maps that are not stepped through. It has one: the visual field map.
+
+### Visual field map
+
+```{figure} ../../.github/assets/readme/visual-field.webp
+:alt: The visual field map in the Circuits tab: a dot 4.5 degrees from fixation in the upper right of the visual field disc, its predicted V1, V2 and V3 territory in square millimetres, and the left occipital cortex lit on the brain
+
+A dot 4.5° from fixation, upper right, radius 1.5°. The panel gives the cortex predicted to represent it; the stage lights the same patch in the left occipital lobe.
+```
+
+Move a dot across the visual field and the stage lights the cortex predicted to represent it. Click V1, V2 or V3 on the brain and the panel reads back which part of the field that point is predicted to respond to.
+
+- **The disc** is the visual field with fixation at the centre and eccentricity on a log scale, with rings at 1°, 2°, 4°, 16° and 32° and the edge at 90°. Drag the dot, or focus it and use the arrow keys; <kbd>Shift</kbd> steps further. The dashed ring marks 8°, where the template's data end; beyond it the template extrapolates, the disc shades that annulus, and a note appears whenever the dot reaches into it. **Dot radius** runs from 0.1° to 10°.
+- **Hemisphere.** A dot off the vertical meridian is represented in the opposite hemisphere, shown from the midline; a dot on it reaches both.
+- **Predicted territory** is the area in mm² of V1, V2 and V3 whose predicted receptive-field centre lies inside the dot, measured on the midthickness surface, per hemisphere. If no vertex qualifies, make the dot larger. The stage draws the same dot: the core where a centre lies inside it, a dimmer reach where the receptive field comes within one σ of it, and V1, V2 and V3 in three greys.
+- **Clicked cortex** gives the predicted field position and receptive-field size at a point you click, or says the point lies outside V1–V3, where the template predicts nothing.
+- **Sharing.** The view travels as `map=visual-field&dot=x,y,radius`, in degrees from fixation, x to the right and y up.
+
+The map is a prediction, not a measurement. It is the Benson template (v4.0), fitted to the group average of 181 Human Connectome Project 7T participants and applied to this brain's folding, so no retinotopy was measured in this individual, and V1's size varies about threefold between people. Its V1 agrees with the HCP-MMP V1 at a Dice of 0.90 (left) and 0.89 (right), and with Julich-Brain's at 0.68 and 0.72; V2 and V3 agree less. Sources: [Benson et al. (2018)](https://doi.org/10.1167/18.13.23) for the data and [Benson et al. (2014)](https://doi.org/10.1371/journal.pcbi.1003538) for the method. The map names the Visual pathway tour it belongs to and opens it.
 
 ## Withdrawn tours
 
 On 31 October 2026, 31 network/function and clinical landmark tours were removed from this category. Three more—auditory, somatosensory and reward/valuation—were withheld pending anatomical rework.
 
-On 1 November 2026, the archived voluntary gaze control tour was deleted with the oculomotor-apraxia profile it was linked to, which coloured no atlas region. The other 33 withdrawn tours remain in the [source archive](https://github.com/JoshuaDuq/neuroatlas/blob/main/data/archived-circuit-tours.yaml), with bilingual descriptions and citations. The archive is not loaded by the viewer. Their associated deficit evidence and functional maps remain in the existing **Deficits** and **Functions** sections. Archived citations and atlas labels remain subject to automated checks.
+On 1 November 2026, the archived voluntary gaze control tour was deleted with the oculomotor-apraxia profile it was linked to, which coloured no atlas region. The other 33 withdrawn tours remain in the [source archive](https://github.com/JoshuaDuq/planumatlas/blob/main/data/archived-circuit-tours.yaml), with bilingual descriptions and citations. The archive is not loaded by the viewer. Their associated deficit evidence and functional maps remain in the existing **Deficits** and **Functions** sections. Archived citations and atlas labels remain subject to automated checks.
 
 A link to a withdrawn circuit ID reports unsupported circuit/step parameters and retains the other valid scene fields. It does not open a different tour under the old ID.
 

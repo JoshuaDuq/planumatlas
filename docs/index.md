@@ -7,11 +7,11 @@ A real human brain, explored in your browser: cut it, measure it, follow its tra
 Planum shows MGH CDMD subject `sub_013`, reconstructed from its own T1 scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Every region, cut face and number traces back to that data or to a cited atlas. A Python pipeline builds the assets; a browser viewer displays them, with nothing to install. Planum is for research and education; it is **not clinical anatomy**.
 
 ```{figure} ../.github/assets/readme/tracts.webp
-:alt: Diffusion tract bundles inside a translucent Destrieux-coloured brain, with the Tracts panel listing streamline counts and lengths
+:alt: Diffusion tract bundles inside a see-through cortex, with the Tracts panel listing streamline counts and lengths
 :class: hero-figure
 :target: https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=diffusion
 
-Tracts from the subject's own diffusion scan inside its Destrieux-coloured cortex. Select the image to open this view.
+Tracts from the subject's own diffusion scan inside a see-through cortex. Select the image to open this view.
 ```
 
 ## What you can do
@@ -47,7 +47,7 @@ The subject's own T1 in three planes around a shared crosshair, with the label u
 
 **[Map what damage is associated with](guides/functions-and-deficits.md#deficits)**
 
-120 acquired deficits, each finding with its population, evidence and limits.
+121 acquired deficits, each finding with its population, evidence and limits.
 :::
 
 :::{container} feature
@@ -55,7 +55,7 @@ The subject's own T1 in three planes around a shared crosshair, with the label u
 
 **[Take a guided tour](guides/circuits.md)**
 
-Thirty-five tours, from vision and movement to spelling, music, visual extinction, voice recognition and locked-in syndrome, that reveal and frame each landmark.
+Five anatomical pathway tours, 25 landmarks in all, from the visual pathway to corticospinal crossing, that reveal and frame each landmark.
 :::
 
 :::{container} feature
@@ -64,6 +64,30 @@ Thirty-five tours, from vision and movement to spelling, music, visual extinctio
 **[Ask what a lesion would reach](guides/viewer.md#lesion-report)**
 
 A 3–30 mm sphere's overlap with functions, deficits, tissue and tracts. It predicts no deficit.
+:::
+
+:::{container} feature
+[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia, one with none](../.github/assets/readme/stroke-cases.webp)](guides/viewer.md#stroke-cases)
+
+**[Weigh a region against real strokes](guides/viewer.md#stroke-cases)**
+
+For a region some stroke reached, every Aphasia Recovery Cohort case as lesion volume against language score. Compare two people's own lesions on the brain.
+:::
+
+:::{container} feature
+[![Stimulation responses for the left hippocampal formation: a response-rate bar for each site stimulation could reach](../.github/assets/readme/stimulation.webp)](guides/viewer.md#stimulation-responses)
+
+**[See what stimulating it evokes](guides/viewer.md#stimulation-responses)**
+
+From stereo-EEG in people with epilepsy: how often a single pulse here evoked a response elsewhere, same or opposite side.
+:::
+
+:::{container} feature
+[![The visual field map: a dot on the visual field disc and the cortex predicted to represent it](../.github/assets/readme/visual-field.webp)](guides/circuits.md#visual-field-map)
+
+**[Map the visual field onto the cortex](guides/circuits.md#visual-field-map)**
+
+Move a point through the visual field and see the V1, V2 and V3 territory predicted to represent it, or click the cortex to read it back.
 :::
 
 ::::
@@ -162,5 +186,5 @@ reference/hart-2016-review-2026-11-02
 :caption: Project
 
 Open the viewer <https://planumatlas.com/>
-Source on GitHub <https://github.com/JoshuaDuq/neuroatlas>
+Source on GitHub <https://github.com/JoshuaDuq/planumatlas>
 ```
