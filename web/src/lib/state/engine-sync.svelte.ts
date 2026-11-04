@@ -107,7 +107,10 @@ export function syncLessonTract(
  * Stroke cases are picked in a region's sheet, which also clears them: once no region is selected the
  * sheet is gone, so the cases on the stage go with it rather than stay where nothing controls them.
  */
-export function syncStrokeCases(view: ViewStore, cases: Pick<StrokeCasesStore, 'chosen' | 'clear'>) {
+export function syncStrokeCases(
+  view: ViewStore,
+  cases: Pick<StrokeCasesStore, 'chosen' | 'clear'>,
+) {
   const selected = $derived(view.current.selectedRegion !== null);
   $effect(() => {
     if (!selected && untrack(() => cases.chosen.length)) cases.clear();

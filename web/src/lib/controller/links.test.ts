@@ -82,7 +82,9 @@ function setup(
     show: vi.fn((ids: readonly string[]) => {
       strokeCases.chosen = ids;
     }),
-    known: vi.fn(async (ids: readonly string[]) => ids.every((id) => ['M2295', 'M2294'].includes(id))),
+    known: vi.fn(async (ids: readonly string[]) =>
+      ids.every((id) => ['M2295', 'M2294'].includes(id)),
+    ),
     clear: vi.fn(() => {
       strokeCases.chosen = [];
     }),
@@ -126,7 +128,19 @@ function setup(
     followLanguage: (lang) => followed.push(lang),
     page: page as never,
   });
-  return { followed, engine, session, lesson, links, page, calls, link, commands, lesion, strokeCases };
+  return {
+    followed,
+    engine,
+    session,
+    lesson,
+    links,
+    page,
+    calls,
+    link,
+    commands,
+    lesion,
+    strokeCases,
+  };
 }
 
 describe('writing the link', () => {
@@ -311,9 +325,9 @@ describe('stroke cases in the link', () => {
 
   it('names cases as not applied on an anatomy that publishes none', async () => {
     const { links, strokeCases } = setup({}, undefined, { strokeCasesAvailable: false });
-    expect(
-      await links.restore(decodeState('region=destrieux:left:12&cases=M2295'), {}),
-    ).toEqual(['cases']);
+    expect(await links.restore(decodeState('region=destrieux:left:12&cases=M2295'), {})).toEqual([
+      'cases',
+    ]);
     expect(strokeCases.show).not.toHaveBeenCalled();
   });
 });

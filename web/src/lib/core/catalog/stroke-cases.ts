@@ -7,13 +7,7 @@ import type { Region } from '../../types/index.ts';
  */
 
 export type WabType =
-  | 'Global'
-  | 'Broca'
-  | 'TranscorticalMotor'
-  | 'Wernicke'
-  | 'Conduction'
-  | 'Anomic'
-  | 'None';
+  'Global' | 'Broca' | 'TranscorticalMotor' | 'Wernicke' | 'Conduction' | 'Anomic' | 'None';
 
 export interface StrokeCase {
   id: string;
@@ -55,7 +49,15 @@ export interface StrokeCases {
   cases: readonly StrokeCase[];
 }
 
-const TYPES = new Set(['Global', 'Broca', 'TranscorticalMotor', 'Wernicke', 'Conduction', 'Anomic', 'None']);
+const TYPES = new Set([
+  'Global',
+  'Broca',
+  'TranscorticalMotor',
+  'Wernicke',
+  'Conduction',
+  'Anomic',
+  'None',
+]);
 
 /** The published cohort, checked against itself and against the regions it names. */
 export function validateStrokeCases(
@@ -126,9 +128,7 @@ export function discordantPairs(data: StrokeCases, cases: readonly StrokeCase[])
       }
     }
   }
-  pairs.sort(
-    (x, y) => y[1].aq - y[0].aq - (x[1].aq - x[0].aq) || x[0].id.localeCompare(y[0].id),
-  );
+  pairs.sort((x, y) => y[1].aq - y[0].aq - (x[1].aq - x[0].aq) || x[0].id.localeCompare(y[0].id));
   const seen = new Set<string>();
   return pairs.filter(([p, q]) => {
     if (seen.has(p.id) || seen.has(q.id)) return false;

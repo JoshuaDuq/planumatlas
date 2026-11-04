@@ -119,7 +119,9 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           return engine.model.settings.surfaceColor;
         },
         setColor: (color) =>
-          void engine.sections.setSurfaceColor(color).catch((error: unknown) => console.error(error)),
+          void engine.sections
+            .setSurfaceColor(color)
+            .catch((error: unknown) => console.error(error)),
       },
     });
     syncPaint(model, view, { domains, clinical, lesion });

@@ -40,7 +40,10 @@ export function voxelsOf(masks: Uint32Array, runs: readonly [number, number]): S
 }
 
 /** Two lesions as the first's voxels alone, the second's alone, and both: three disjoint sets. */
-export function partitionPair(a: Set<number>, b: Set<number>): [Set<number>, Set<number>, Set<number>] {
+export function partitionPair(
+  a: Set<number>,
+  b: Set<number>,
+): [Set<number>, Set<number>, Set<number>] {
   const onlyA = new Set<number>();
   const both = new Set<number>();
   for (const voxel of a) (b.has(voxel) ? both : onlyA).add(voxel);
@@ -96,7 +99,8 @@ export function surfaceOf(
   const strides = [1, nx, nx * ny];
   let faces = 0;
   for (const index of voxels) {
-    for (const stride of strides) faces += +!voxels.has(index + stride) + +!voxels.has(index - stride);
+    for (const stride of strides)
+      faces += +!voxels.has(index + stride) + +!voxels.has(index - stride);
   }
   const capacity = 4 * faces + 10_000;
   // Only the geometry is read; the object's own material is never drawn.
@@ -106,7 +110,8 @@ export function surfaceOf(
   cubes.field.set(field);
   cubes.update();
   // MarchingCubes writes past its buffer silently; a surface that does not fit would come back cut.
-  if (cubes.count > capacity * 3) throw new Error(`A lesion surface needs more than ${capacity} triangles.`);
+  if (cubes.count > capacity * 3)
+    throw new Error(`A lesion surface needs more than ${capacity} triangles.`);
   const positions = new Float32Array(cubes.count * 3);
   const point = new Vector3();
   const middle = size / 2;
@@ -137,7 +142,12 @@ function solid(positions: Float32Array, color: Color, planes: readonly Plane[]):
   geometry = mergeVertices(geometry, 1e-7);
   geometry.computeVertexNormals();
   // Both faces: a cut opens the solid, and its inside should read as the lesion, not as a hole.
-  const material = new MeshStandardMaterial({ color, roughness: 0.55, metalness: 0, side: DoubleSide });
+  const material = new MeshStandardMaterial({
+    color,
+    roughness: 0.55,
+    metalness: 0,
+    side: DoubleSide,
+  });
   material.clippingPlanes = [...planes];
   return new Mesh(geometry, material);
 }
@@ -174,13 +184,16 @@ export function createStrokeCaseSolids({
         return voxelsOf(masks, entry.runs);
       });
       if (entries.length > 2) throw new RangeError('At most two stroke cases are drawn at once.');
-      const toRas = new Matrix4().set(...(data.masks.voxel_to_surface_ras_mm.flat() as Parameters<Matrix4['set']>));
+      const toRas = new Matrix4().set(
+        ...(data.masks.voxel_to_surface_ras_mm.flat() as Parameters<Matrix4['set']>),
+      );
       const sets: [Set<number>, Color][] =
         entries.length === 1
           ? [[entries[0]!, new Color(token('--overlay-ink'))]]
           : entries.length === 2
             ? partitionPair(entries[0]!, entries[1]!).map(
-                (set, index) => [set, rgb([...COMPARE_COLORS, SHARED_COLOR][index]!)] as [Set<number>, Color],
+                (set, index) =>
+                  [set, rgb([...COMPARE_COLORS, SHARED_COLOR][index]!)] as [Set<number>, Color],
               )
             : [];
       // Every solid is built before any is shown, so a failure leaves none half drawn.

@@ -20,7 +20,8 @@ export const en = {
   volumeAxis: 'lesion volume, cm³',
   scoreAxis: 'WAB-AQ',
   normal: 'within normal limits',
-  dot: (title: string, volume: string, share: string) => `${title}, ${volume} cm³, ${share} of this region`,
+  dot: (title: string, volume: string, share: string) =>
+    `${title}, ${volume} cm³, ${share} of this region`,
   plotHint: 'Each dot is one person. Pick two to compare; the brain shows their lesions.',
   pairs: 'Similar size, different score',
   showPair: 'Show a pair',
@@ -29,10 +30,13 @@ export const en = {
     `Pair ${index} of ${total}: lesions within ${ratio} in size, scores ${points} points apart.`,
   exceptions: 'Much of it damaged, mild or no aphasia',
   title: (type: string, aq: string) => `${type} · WAB-AQ ${aq}`,
-  facts: (volume: string, share: string, band: string) => `${volume} cm³ lesion · ${share} of this region · ${band}`,
+  facts: (volume: string, share: string, band: string) =>
+    `${volume} cm³ lesion · ${share} of this region · ${band}`,
   timing: (months: number, gap: number, later: boolean) =>
     `Scanned ${months} ${months === 1 ? 'month' : 'months'} after the stroke · ${
-      gap === 0 ? 'tested the same day' : `tested ${gap} ${gap === 1 ? 'day' : 'days'} ${later ? 'later' : 'earlier'}`
+      gap === 0
+        ? 'tested the same day'
+        : `tested ${gap} ${gap === 1 ? 'day' : 'days'} ${later ? 'later' : 'earlier'}`
     }`,
   caseId: (id: string) => `ARC ${id}`,
   only: (title: string) => `${title} only`,
@@ -83,8 +87,10 @@ export const fr: typeof en = {
   volumeAxis: 'volume de la lésion, cm³',
   scoreAxis: 'QA-WAB',
   normal: 'dans les limites de la normale',
-  dot: (title: string, volume: string, share: string) => `${title}, ${volume} cm³, ${share} de cette région`,
-  plotHint: 'Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.',
+  dot: (title: string, volume: string, share: string) =>
+    `${title}, ${volume} cm³, ${share} de cette région`,
+  plotHint:
+    'Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.',
   pairs: 'Taille semblable, score différent',
   showPair: 'Montrer une paire',
   nextPair: 'Paire suivante',
@@ -96,7 +102,9 @@ export const fr: typeof en = {
     `Lésion de ${volume} cm³ · ${share} de cette région · ${band}`,
   timing: (months: number, gap: number, later: boolean) =>
     `Examen ${months} mois après l’AVC · ${
-      gap === 0 ? 'évaluation le même jour' : `évaluation ${gap} ${gap === 1 ? 'jour' : 'jours'} ${later ? 'plus tard' : 'plus tôt'}`
+      gap === 0
+        ? 'évaluation le même jour'
+        : `évaluation ${gap} ${gap === 1 ? 'jour' : 'jours'} ${later ? 'plus tard' : 'plus tôt'}`
     }`,
   caseId: (id: string) => `ARC ${id}`,
   only: (title: string) => `${title}, uniquement`,

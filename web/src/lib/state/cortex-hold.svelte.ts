@@ -3,7 +3,10 @@
  * under its own name; the first to ask while the cortex is opaque takes its opacity, the others join,
  * and the last to let go gives it back, unless the reader has changed it meanwhile.
  */
-export function createCortexHold(cortex: { readonly opacity: number; setOpacity(opacity: number): void }) {
+export function createCortexHold(cortex: {
+  readonly opacity: number;
+  setOpacity(opacity: number): void;
+}) {
   const owners = new Set<string>();
   // The reader's opacity before the first owner, and the see-through one put in its place.
   let held = $state<{ opacity: number; seeThrough: number } | null>(null);

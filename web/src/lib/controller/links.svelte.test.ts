@@ -52,7 +52,15 @@ function build({ announce }: { announce: boolean }) {
         coordinate: null,
         placeCoordinate() {},
       };
-      const strokeCases = { available: false, chosen: [], heldOpacity: null, heldColor: null, show() {}, clear() {}, known: async () => true };
+      const strokeCases = {
+        available: false,
+        chosen: [],
+        heldOpacity: null,
+        heldColor: null,
+        show() {},
+        clear() {},
+        known: async () => true,
+      };
       parts.links = createLinks({
         engine,
         session,

@@ -8,7 +8,8 @@ const flat = (x: number, y: number, z: number) => x + SHAPE[0] * (y + SHAPE[1] *
 
 function cube(from: number, to: number): Set<number> {
   const set = new Set<number>();
-  for (let z = from; z < to; z++) for (let y = from; y < to; y++) for (let x = from; x < to; x++) set.add(flat(x, y, z));
+  for (let z = from; z < to; z++)
+    for (let y = from; y < to; y++) for (let x = from; x < to; x++) set.add(flat(x, y, z));
   return set;
 }
 
@@ -16,15 +17,25 @@ function cube(from: number, to: number): Set<number> {
 function enclosed(positions: Float32Array): number {
   let volume = 0;
   for (let i = 0; i < positions.length; i += 9) {
-    const [ax, ay, az, bx, by, bz, cx, cy, cz] = positions.subarray(i, i + 9) as unknown as number[];
-    volume += (ax! * (by! * cz! - bz! * cy!) - ay! * (bx! * cz! - bz! * cx!) + az! * (bx! * cy! - by! * cx!)) / 6;
+    const [ax, ay, az, bx, by, bz, cx, cy, cz] = positions.subarray(
+      i,
+      i + 9,
+    ) as unknown as number[];
+    volume +=
+      (ax! * (by! * cz! - bz! * cy!) -
+        ay! * (bx! * cz! - bz! * cx!) +
+        az! * (bx! * cy! - by! * cx!)) /
+      6;
   }
   return Math.abs(volume);
 }
 
 test('runs decode to the voxels they name', () => {
   const masks = new Uint32Array([5, 3, 40, 1, 7, 2]);
-  assert.deepEqual([...voxelsOf(masks, [0, 4])].sort((a, b) => a - b), [5, 6, 7, 40]);
+  assert.deepEqual(
+    [...voxelsOf(masks, [0, 4])].sort((a, b) => a - b),
+    [5, 6, 7, 40],
+  );
   assert.deepEqual([...voxelsOf(masks, [4, 2])], [7, 8]);
 });
 
@@ -42,7 +53,8 @@ test('a voxel cube meshes as a closed surface of its own volume, where the grid 
   const volume = enclosed(positions);
   assert.ok(volume > 850 && volume < 1000, `enclosed ${volume} mm³`);
   let sum = [0, 0, 0];
-  for (let i = 0; i < positions.length; i += 3) sum = sum.map((value, axis) => value + positions[i + axis]!);
+  for (let i = 0; i < positions.length; i += 3)
+    sum = sum.map((value, axis) => value + positions[i + axis]!);
   const centre = sum.map((value) => value / (positions.length / 3));
   // Voxel centres 8…17 lie around 12.5, minus the 16 mm origin.
   for (const value of centre) assert.ok(Math.abs(value - -3.5) < 0.05, `centre ${centre}`);
@@ -71,7 +83,10 @@ test('a difference one voxel thin keeps its surface, where its voxels are', () =
 function inside(positions: Float32Array, [px, py, pz]: number[]): boolean {
   let crossings = 0;
   for (let i = 0; i < positions.length; i += 9) {
-    const [ax, ay, az, bx, by, bz, cx, cy, cz] = positions.subarray(i, i + 9) as unknown as number[];
+    const [ax, ay, az, bx, by, bz, cx, cy, cz] = positions.subarray(
+      i,
+      i + 9,
+    ) as unknown as number[];
     // Möller–Trumbore with the direction (1, 0, 0), nudged off edges.
     const e1 = [bx! - ax!, by! - ay!, bz! - az!];
     const e2 = [cx! - ax!, cy! - ay!, cz! - az!];
@@ -81,7 +96,11 @@ function inside(positions: Float32Array, [px, py, pz]: number[]): boolean {
     const s = [px! - ax!, py! + 1e-7 - ay!, pz! + 2e-7 - az!];
     const u = (s[0]! * h[0]! + s[1]! * h[1]! + s[2]! * h[2]!) / a;
     if (u < 0 || u > 1) continue;
-    const q = [s[1]! * e1[2]! - s[2]! * e1[1]!, s[2]! * e1[0]! - s[0]! * e1[2]!, s[0]! * e1[1]! - s[1]! * e1[0]!];
+    const q = [
+      s[1]! * e1[2]! - s[2]! * e1[1]!,
+      s[2]! * e1[0]! - s[0]! * e1[2]!,
+      s[0]! * e1[1]! - s[1]! * e1[0]!,
+    ];
     const v = q[0]! / a;
     if (v < 0 || u + v > 1) continue;
     if ((e2[0]! * q[0]! + e2[1]! * q[1]! + e2[2]! * q[2]!) / a > 0) crossings++;

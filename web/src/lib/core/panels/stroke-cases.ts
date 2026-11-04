@@ -7,7 +7,10 @@ import type { Language } from '../../types/index.ts';
 /** A case as the sheet and the stage key name it: its aphasia type and its score. */
 export function caseTitle(entry: StrokeCase, lang: Language): string {
   const copy = t(lang, 'strokeCases');
-  return copy.title(entry.type ? copy.types[entry.type] : copy.unrecorded, decimal(entry.aq, 1, lang));
+  return copy.title(
+    entry.type ? copy.types[entry.type] : copy.unrecorded,
+    decimal(entry.aq, 1, lang),
+  );
 }
 
 /** The stage key for the cases on show: one in the lesion's ink, or two and the damage they share. */

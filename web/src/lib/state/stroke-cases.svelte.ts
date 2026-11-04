@@ -42,7 +42,8 @@ export function createStrokeCasesStore({
 
   // Held only while the display still shows what the cases set; anything else has taken it over.
   const heldOpacity = () => (display.hold.owns(CASES) ? display.hold.held : null);
-  const heldColor = () => (heldColorState !== null && display.color === UNDER ? heldColorState : null);
+  const heldColor = () =>
+    heldColorState !== null && display.color === UNDER ? heldColorState : null;
 
   /** The cohort, downloaded once; a failure stays failed until the page is reloaded. */
   function load(): void {

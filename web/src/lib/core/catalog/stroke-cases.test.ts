@@ -36,7 +36,13 @@ const person = (
 
 const cohort = (cases: StrokeCase[]): StrokeCases => ({
   id: 'stroke_cases',
-  source: { short: 's', citation: 'c', doi: 'https://doi.org/10.1/x', pmid: 1, dataset: 'https://doi.org/10.1/y' },
+  source: {
+    short: 's',
+    citation: 'c',
+    doi: 'https://doi.org/10.1/x',
+    pmid: 1,
+    dataset: 'https://doi.org/10.1/y',
+  },
   reaches_min: 0.05,
   test_windows: [90, 365],
   pairs: { volume_ratio_max: 1.25, aq_difference_min: 25 },
@@ -61,8 +67,14 @@ test('a case reaches a region from the threshold share, within the test window',
     person('B', 20, 50, { [IFG]: 0.049 }),
     person('C', 20, 50, { [IFG]: 0.6 }, 91),
   ]);
-  assert.deepEqual(reaching(data, IFG, 90).map((entry) => entry.id), ['A']);
-  assert.deepEqual(reaching(data, IFG, 365).map((entry) => entry.id), ['A', 'C']);
+  assert.deepEqual(
+    reaching(data, IFG, 90).map((entry) => entry.id),
+    ['A'],
+  );
+  assert.deepEqual(
+    reaching(data, IFG, 365).map((entry) => entry.id),
+    ['A', 'C'],
+  );
 });
 
 test('pairs match volume within the ratio, differ by the score gap, widest first, each person once', () => {
@@ -93,7 +105,10 @@ test('exceptions are much of the region lesioned with a mild aphasia or none, be
     person('d', 98, 80, { [IFG]: 0.39 }), // too little of it
     person('e', 80, 80, { [IFG]: 0.5 }),
   ];
-  assert.deepEqual(exceptions(cohort(cases), cases, IFG).map((entry) => entry.id), ['b', 'a']);
+  assert.deepEqual(
+    exceptions(cohort(cases), cases, IFG).map((entry) => entry.id),
+    ['b', 'a'],
+  );
 });
 
 test('a score takes the band whose floor it reaches', () => {
@@ -106,8 +121,17 @@ test('a score takes the band whose floor it reaches', () => {
 
 test('differences lead with the selected region and keep to its atlas and the deep structures', () => {
   at = 0;
-  const a = person('a', 10, 80, { [IFG]: 0.3, 'destrieux:left:40': 0.9, 'hcp-mmp:left:44': 0.9, 'aseg:left:12': 0.5 });
-  const b = person('b', 90, 80, { [IFG]: 0.8, 'destrieux:left:40': 0.85, 'destrieux:left:3': 0.04 });
+  const a = person('a', 10, 80, {
+    [IFG]: 0.3,
+    'destrieux:left:40': 0.9,
+    'hcp-mmp:left:44': 0.9,
+    'aseg:left:12': 0.5,
+  });
+  const b = person('b', 90, 80, {
+    [IFG]: 0.8,
+    'destrieux:left:40': 0.85,
+    'destrieux:left:3': 0.04,
+  });
   const rows = differences(cohort([a, b]), a, b, IFG, 6);
   assert.deepEqual(
     rows.map((row) => row.id),

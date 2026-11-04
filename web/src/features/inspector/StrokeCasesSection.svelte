@@ -64,7 +64,9 @@
   const a = $derived(byId(store.chosen[0]));
   const b = $derived(byId(store.chosen[1]));
   // Where the pair on show sits among the pairs offered now, or -1.
-  const pairAt = $derived(a && b ? pairs.findIndex(([p, q]) => p.id === a.id && q.id === b.id) : -1);
+  const pairAt = $derived(
+    a && b ? pairs.findIndex(([p, q]) => p.id === a.id && q.id === b.id) : -1,
+  );
   const onPair = $derived(pairAt >= 0);
   const differ = $derived(data && region && a && b ? differences(data, a, b, region.id, 6) : []);
 
@@ -87,7 +89,11 @@
   const windowOptions = $derived(
     windows.map((days, index) => ({
       value: String(index),
-      label: Number.isFinite(days) ? (days === 365 ? copy.windows.year : copy.windows.days(days)) : copy.windows.any,
+      label: Number.isFinite(days)
+        ? days === 365
+          ? copy.windows.year
+          : copy.windows.days(days)
+        : copy.windows.any,
     })),
   );
   const windowPhrase = $derived(
@@ -142,16 +148,21 @@
   function axis(volumes: number[]): [number, number] {
     const lowest = [...STOPS].reverse().find((stop) => stop <= Math.min(...volumes));
     const highest = STOPS.find((stop) => stop >= Math.max(...volumes) && stop > (lowest ?? 0));
-    if (lowest === undefined || highest === undefined) throw new RangeError(`Lesion volumes ${volumes} are off the plot's axis.`);
+    if (lowest === undefined || highest === undefined)
+      throw new RangeError(`Lesion volumes ${volumes} are off the plot's axis.`);
     return [lowest, highest];
   }
   // Fixed for the region, so changing the test window does not rescale it.
-  const range = $derived(everyone.length ? axis(everyone.map((entry) => entry.volume_cm3)) : [1, 1000]);
+  const range = $derived(
+    everyone.length ? axis(everyone.map((entry) => entry.volume_cm3)) : [1, 1000],
+  );
   const low = $derived(range[0]);
   const high = $derived(range[1]);
   const ticks = $derived(STOPS.filter((stop) => stop >= low && stop <= high));
   const x = (cm3: number) =>
-    M.left + ((Math.log10(cm3) - Math.log10(low)) / (Math.log10(high) - Math.log10(low))) * (W - M.left - M.right);
+    M.left +
+    ((Math.log10(cm3) - Math.log10(low)) / (Math.log10(high) - Math.log10(low))) *
+      (W - M.left - M.right);
   const y = (aq: number) => M.top + (1 - aq / 100) * (H - M.top - M.bottom);
   const normal = $derived(data?.aq_bands.at(-1)!.min ?? 100);
 </script>
@@ -163,10 +174,16 @@
     <span class="case-name">
       <span class="case-title">{title(entry)}</span>
       <span class="case-meta">
-        {copy.facts(volume(entry.volume_cm3), share(shareOf(entry, region!.id)), copy.bands[band(data!, entry.aq)])}
+        {copy.facts(
+          volume(entry.volume_cm3),
+          share(shareOf(entry, region!.id)),
+          copy.bands[band(data!, entry.aq)],
+        )}
       </span>
       <span class="case-meta">
-        {copy.timing(Math.round(entry.scan_day / 30.44), gap, entry.test_day > entry.scan_day)} · {copy.caseId(entry.id)}
+        {copy.timing(Math.round(entry.scan_day / 30.44), gap, entry.test_day > entry.scan_day)} · {copy.caseId(
+          entry.id,
+        )}
       </span>
     </span>
   </li>
@@ -182,10 +199,21 @@
           {copy.none(share(data.reaches_min))}
         {/if}
       </p>
-      <ChoiceGroup class="cases-choice" label={copy.window} options={windowOptions} bind:value={window} />
+      <ChoiceGroup
+        class="cases-choice"
+        label={copy.window}
+        options={windowOptions}
+        bind:value={window}
+      />
 
       {#if list.length}
-        <svg class="case-plot" viewBox="0 0 {W} {H}" role="group" aria-label={copy.plot} bind:this={plot}>
+        <svg
+          class="case-plot"
+          viewBox="0 0 {W} {H}"
+          role="group"
+          aria-label={copy.plot}
+          bind:this={plot}
+        >
           {#each ticks as stop (stop)}
             <line class="grid" x1={x(stop)} x2={x(stop)} y1={M.top} y2={H - M.bottom} />
             <text
@@ -201,13 +229,26 @@
             <text class="tick" x={M.left - 5} y={y(aq) + 3} text-anchor="end">{aq}</text>
           {/each}
           <line class="normal" x1={M.left} x2={W - M.right} y1={y(normal)} y2={y(normal)} />
-          <text class="axis" x={W - M.right} y={y(normal) - 4} text-anchor="end">{copy.normal}</text>
-          <text class="axis" x={(M.left + W - M.right) / 2} y={H - 2} text-anchor="middle">{copy.volumeAxis}</text>
-          <text class="axis" x={-(M.top + H - M.bottom) / 2} y="9" transform="rotate(-90)" text-anchor="middle"
-            >{copy.scoreAxis}</text
+          <text class="axis" x={W - M.right} y={y(normal) - 4} text-anchor="end">{copy.normal}</text
+          >
+          <text class="axis" x={(M.left + W - M.right) / 2} y={H - 2} text-anchor="middle"
+            >{copy.volumeAxis}</text
+          >
+          <text
+            class="axis"
+            x={-(M.top + H - M.bottom) / 2}
+            y="9"
+            transform="rotate(-90)"
+            text-anchor="middle">{copy.scoreAxis}</text
           >
           {#if a && b && list.includes(a) && list.includes(b)}
-            <line class="link" x1={x(a.volume_cm3)} y1={y(a.aq)} x2={x(b.volume_cm3)} y2={y(b.aq)} />
+            <line
+              class="link"
+              x1={x(a.volume_cm3)}
+              y1={y(a.aq)}
+              x2={x(b.volume_cm3)}
+              y2={y(b.aq)}
+            />
           {/if}
           {#each list as entry (entry.id)}
             {@const color = colourOf(entry.id)}
@@ -222,7 +263,11 @@
               data-case={entry.id}
               tabindex={entry.id === focusable ? 0 : -1}
               aria-pressed={color !== null}
-              aria-label={copy.dot(title(entry), volume(entry.volume_cm3), share(shareOf(entry, region.id)))}
+              aria-label={copy.dot(
+                title(entry),
+                volume(entry.volume_cm3),
+                share(shareOf(entry, region.id)),
+              )}
               onclick={() => {
                 focused = entry.id;
                 store.toggle(entry.id);
@@ -239,12 +284,24 @@
             {#each unusual as entry (entry.id)}
               {@const color = colourOf(entry.id)}
               <li>
-                <button type="button" class="case-pick" aria-pressed={color !== null} onclick={() => store.toggle(entry.id)}>
-                  <span class="case-dot" class:hollow={!color} style:background={color ?? 'transparent'}></span>
+                <button
+                  type="button"
+                  class="case-pick"
+                  aria-pressed={color !== null}
+                  onclick={() => store.toggle(entry.id)}
+                >
+                  <span
+                    class="case-dot"
+                    class:hollow={!color}
+                    style:background={color ?? 'transparent'}
+                  ></span>
                   <span class="case-name">
                     <span class="case-pick-name">{title(entry)}</span>
                     <span class="case-meta">
-                      {copy.exceptionMeta(share(shareOf(entry, region.id)), volume(entry.volume_cm3))}
+                      {copy.exceptionMeta(
+                        share(shareOf(entry, region.id)),
+                        volume(entry.volume_cm3),
+                      )}
                     </span>
                   </span>
                 </button>
@@ -291,11 +348,16 @@
             {#each differ as row, index (row.id)}
               <li class="differ-row">
                 <span class="differ-name">
-                  {label(row.id).name}{#if index === 0}<span class="differ-this">{` · ${copy.thisRegion}`}</span>{/if}
+                  {label(row.id).name}{#if index === 0}<span class="differ-this"
+                      >{` · ${copy.thisRegion}`}</span
+                    >{/if}
                 </span>
                 {#each [[row.a, COLOR_A], [row.b, COLOR_B]] as [value, color] (color)}
                   <span class="differ-value">
-                    <span class="twin"><span style:width={`${Number(value) * 100}%`} style:background={color}></span></span>
+                    <span class="twin"
+                      ><span style:width={`${Number(value) * 100}%`} style:background={color}
+                      ></span></span
+                    >
                     <span class="measure">{share(Number(value))}</span>
                   </span>
                 {/each}

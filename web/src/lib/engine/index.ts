@@ -216,7 +216,8 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     let strokeMasks: Promise<Uint32Array> | null = null;
     const verified = async (file: string, sha256: string) => {
       const buffer = await fetchAsset(new URL(file, absoluteManifestUrl));
-      if ((await sha256Hex(buffer)) !== sha256) throw new Error(`${file} does not match its checksum.`);
+      if ((await sha256Hex(buffer)) !== sha256)
+        throw new Error(`${file} does not match its checksum.`);
       return buffer;
     };
     const loadStrokeCases = () => {
