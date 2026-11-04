@@ -739,6 +739,7 @@
   "functional": "Functional divisions",
   "receptors": "Receptor fingerprints",
   "stimulation": "Stimulation responses",
+  "strokeCases": "Stroke cases",
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
   "files": "Published files",
@@ -1511,6 +1512,104 @@
   ],
   "thalamus": "The authors grouped thalamic contacts by position, not by nucleus, so every thalamic structure shows all three sites.",
   "dataset": "Zenodo dataset"
+ },
+ "strokeCases": {
+  "heading": "Stroke cases",
+  "lead": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha people whose stroke reached at least Alpha of this region, tested .\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" people whose stroke reached at least  of this region, tested Alpha.\""
+  ],
+  "none": [
+   "[\"Alpha\"] → \"No one in the cohort had a lesion reaching Alpha of this region within this test window.\"",
+   "[\"\"] → \"No one in the cohort had a lesion reaching  of this region within this test window.\""
+  ],
+  "window": "Tested within",
+  "windows": {
+   "days": [
+    "[\"Alpha\"] → \"Alpha days\"",
+    "[\"\"] → \" days\""
+   ],
+   "year": "1 year",
+   "any": "Any"
+  },
+  "windowPhrase": {
+   "days": [
+    "[\"Alpha\"] → \"within Alpha days of their scan, before or after\"",
+    "[\"\"] → \"within  days of their scan, before or after\""
+   ],
+   "year": "within a year of their scan, before or after",
+   "any": "at any time"
+  },
+  "plot": "Language score against lesion volume",
+  "volumeAxis": "lesion volume, cm³",
+  "scoreAxis": "WAB-AQ",
+  "normal": "within normal limits",
+  "dot": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha,  cm³, Alpha of this region\"",
+   "[\"\",\"Alpha\",\"\"] → \", Alpha cm³,  of this region\""
+  ],
+  "plotHint": "Each dot is one person. Pick two to compare; the brain shows their lesions.",
+  "pairs": "Similar size, different score",
+  "showPair": "Show a pair",
+  "nextPair": "Next pair",
+  "pairOf": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Pair Alpha of : lesions within Alpha in size, scores  points apart.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Pair  of Alpha: lesions within  in size, scores Alpha points apart.\""
+  ],
+  "exceptions": "Much of it damaged, mild or no aphasia",
+  "title": [
+   "[\"Alpha\",\"\"] → \"Alpha · WAB-AQ \"",
+   "[\"\",\"Alpha\"] → \" · WAB-AQ Alpha\""
+  ],
+  "facts": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha cm³ lesion ·  of this region · Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" cm³ lesion · Alpha of this region · \""
+  ],
+  "timing": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Scanned Alpha months after the stroke · tested  days later\"",
+   "[\"\",\"Alpha\",\"\"] → \"Scanned  months after the stroke · tested Alpha days earlier\""
+  ],
+  "caseId": [
+   "[\"Alpha\"] → \"ARC Alpha\"",
+   "[\"\"] → \"ARC \""
+  ],
+  "only": [
+   "[\"Alpha\"] → \"Alpha only\"",
+   "[\"\"] → \" only\""
+  ],
+  "both": "Both",
+  "differ": "Where they differ",
+  "thisRegion": "this region",
+  "exceptionMeta": [
+   "[\"Alpha\",\"\"] → \"Alpha of it ·  cm³\"",
+   "[\"\",\"Alpha\"] → \" of it · Alpha cm³\""
+  ],
+  "clear": "Clear cases",
+  "loading": "Loading the cohort…",
+  "failed": "The cohort could not be loaded.",
+  "drawFailed": "The lesions could not be drawn.",
+  "note": [
+   "[\"Alpha\"] → \"Aphasia Recovery Cohort: Alpha people with chronic left-hemisphere stroke, recruited for aphasia studies. People with a lesion here but no aphasia are under-sampled, and no case predicts anyone else’s recovery. Each person has one Western Aphasia Battery score (WAB-AQ, 0–100; 93.8 and above is within normal limits). Lesions were drawn on each person’s MRI and carried onto this brain.\"",
+   "[\"\"] → \"Aphasia Recovery Cohort:  people with chronic left-hemisphere stroke, recruited for aphasia studies. People with a lesion here but no aphasia are under-sampled, and no case predicts anyone else’s recovery. Each person has one Western Aphasia Battery score (WAB-AQ, 0–100; 93.8 and above is within normal limits). Lesions were drawn on each person’s MRI and carried onto this brain.\""
+  ],
+  "dataset": "OpenNeuro dataset",
+  "types": {
+   "Global": "Global aphasia",
+   "Broca": "Broca’s aphasia",
+   "TranscorticalMotor": "Transcortical motor aphasia",
+   "Wernicke": "Wernicke’s aphasia",
+   "Conduction": "Conduction aphasia",
+   "Anomic": "Anomic aphasia",
+   "None": "No aphasia"
+  },
+  "unrecorded": "Type not recorded",
+  "bands": {
+   "very-severe": "very severe",
+   "severe": "severe",
+   "moderate": "moderate",
+   "mild": "mild",
+   "within-normal-limits": "within normal limits"
+  }
  },
  "territories": {
   "heading": "Typical arterial supply",

@@ -52,14 +52,16 @@ function build({ announce }: { announce: boolean }) {
         coordinate: null,
         placeCoordinate() {},
       };
+      const strokeCases = { available: false, chosen: [], heldOpacity: null, heldColor: null, show() {}, clear() {}, known: async () => true };
       parts.links = createLinks({
         engine,
         session,
         lesson,
         view,
         lesion,
+        strokeCases,
         coordinates: null,
-        link: createLink({ engine, view, lesion, write: () => {} }),
+        link: createLink({ engine, view, lesion, strokeCases, write: () => {} }),
         commands: createSceneCommands({
           model: engine.model,
           sections: engine.sections,

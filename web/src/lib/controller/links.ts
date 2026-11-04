@@ -17,6 +17,7 @@ import { PARAMS, decodeState, encodeState } from '../core/state/url-state.ts';
 import type { Engine, MoveOptions } from '../engine/api.ts';
 import { VIEW_DIRECTIONS, viewForRestoredCut } from '../engine/render/camera-views.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
+import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { LinkStore } from '../state/link.svelte.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
 import type { ViewStore } from '../state/view.svelte.ts';
@@ -64,6 +65,11 @@ export interface LinksOptions {
     | 'coordinate'
     | 'placeCoordinate'
   >;
+  /** The stroke cases on the stage, which the link carries beside the lesion. */
+  strokeCases: Pick<
+    StrokeCasesStore,
+    'available' | 'chosen' | 'show' | 'clear' | 'known' | 'heldOpacity' | 'heldColor'
+  >;
   /** The anatomy's published coordinate spaces, or null when it publishes none. */
   coordinates: Pick<Coordinates, 'metadata' | 'map'> | null;
   /** The writer from `createLink`: hold, release, schedule and cancel. */
@@ -98,6 +104,7 @@ export function createLinks({
   lesson,
   view,
   lesion,
+  strokeCases,
   coordinates,
   link,
   commands,
@@ -185,8 +192,9 @@ export function createLinks({
       mapDot: map ? current.lesson.dot! : null,
       orbit: camera.orbitLink(),
       mriWindow: sections.mriWindowLink(),
-      // The see-through cortex the drawn streamlines asked for comes back with them.
-      cortexOpacity: lesion.heldOpacity ?? current.cortexOpacity,
+      // The see-through cortex the drawn streamlines or the stroke cases asked for comes back with them.
+      cortexOpacity: lesion.heldOpacity ?? strokeCases.heldOpacity ?? current.cortexOpacity,
+      surfaceColor: strokeCases.heldColor ?? current.surfaceColor,
       // A coordinate's sphere travels as the coordinate; its landing is the field's to find again.
       lesion:
         lesion.sphere && !lesion.coordinate
@@ -196,6 +204,9 @@ export function createLinks({
       lesionTract: lesion.coordinate ? null : lesion.selectedTract,
       coordinate: lesion.coordinate && [...lesion.coordinate.entered],
       coordinateSpace: lesion.coordinate?.space ?? null,
+      // Cases are a region's; a link without the region would not show them.
+      strokeCases:
+        strokeCases.chosen.length && current.selectedRegion ? [...strokeCases.chosen] : null,
     };
   }
 
@@ -320,6 +331,8 @@ export function createLinks({
         },
         { atlas, detail: model.defaultDetail, cutAtlas: valid.cutAtlas ?? atlas },
       );
+      // Cases shown now give the display back first, so the link's own display is what lands.
+      if (strokeCases.chosen.length) strokeCases.clear();
       const failures = await applyReaderState(target, current, movement);
       if (!current()) return null;
       const present = new Set(Object.keys(linked).map((key) => PARAMS[key]));
@@ -361,6 +374,19 @@ export function createLinks({
           if (lesion.sphere) lesion.remove();
         }
       } else if (lesion.sphere) lesion.remove();
+      if (valid.strokeCases) {
+        let known = false;
+        if (strokeCases.available) {
+          try {
+            known = await strokeCases.known(valid.strokeCases);
+          } catch (error) {
+            console.error(error);
+          }
+          if (!current()) return null;
+        }
+        if (known) strokeCases.show(valid.strokeCases);
+        else notApplied.push(PARAMS.strokeCases!);
+      }
       // A lesson linked without its landmark opens on it, as choosing that step does; leaving it
       // returns to the rest of the link.
       if (explorer === 'circuits' && valid.circuit && !valid.selectedRegion) {

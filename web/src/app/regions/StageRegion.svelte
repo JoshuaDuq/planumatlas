@@ -31,6 +31,7 @@
   import MriNavigator from '../../features/tracts/MriNavigator.svelte';
   import { APP, getApp } from '../application.svelte.ts';
   import type { World } from '../application.svelte.ts';
+  import { casesKey } from '../../lib/core/panels/stroke-cases.ts';
 
   /** `children` is where I3b mounts the stage status, before and after the engine. */
   let { children }: { children?: Snippet } = $props();
@@ -341,6 +342,9 @@
               lesion: world.lesion.paint,
             },
           )}
+      cases={!tractReference && world.strokeCases.cohort.status === 'ready'
+        ? casesKey(world.strokeCases.cohort.data, world.strokeCases.chosen, current.lang)
+        : null}
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
     />

@@ -1096,6 +1096,10 @@
       }
     }
   },
+  "stroke_cases": {
+    "cases": 228,
+    "regions_reached": 606
+  },
   "neuropsych_domains": {
     "assigned_areas": 273,
     "assigned_structures": 16,
@@ -4888,7 +4892,8 @@
     "cerebellar_functions",
     "coordinate_spaces",
     "striatal_networks",
-    "retinotopy"
+    "retinotopy",
+    "stroke_cases"
   ],
   "published_files": [
     "aseg.volume",
@@ -4929,6 +4934,8 @@
     "segmentation-agreement.json",
     "spinal-cord.glb",
     "stimulation-responses.json",
+    "stroke-cases.json",
+    "stroke-cases.masks",
     "structures.glb",
     "tissue-envelopes.glb",
     "tissue-labels.json",

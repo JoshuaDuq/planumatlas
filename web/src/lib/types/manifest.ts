@@ -125,6 +125,7 @@ export interface Manifest {
   retinotopy?: Retinotopy;
   receptor_fingerprints?: ManifestFile & Record<string, unknown>;
   stimulation_responses?: ManifestFile & Record<string, unknown>;
+  stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
   atlas_comparison?: ManifestFile;
@@ -199,6 +200,17 @@ export interface RetinotopyHemisphere {
   extrapolated_share: number;
   /** Area-weighted Dice of each predicted area with the parcels of each atlas named for it. */
   agreement_dice: Record<string, Record<string, number>>;
+}
+
+/** `manifest.stroke_cases`: the Aphasia Recovery Cohort's lesions on this brain, and their masks. */
+export interface StrokeCasesRecord extends ManifestFile {
+  sha256: string;
+  masks: { file: string; sha256: string };
+  cases: number;
+  label: string;
+  license: string;
+  citations: string[];
+  method: string;
 }
 
 /** `manifest.retinotopy`: V1–V3 retinotopy predicted by the Benson template, carried per cortical vertex. */

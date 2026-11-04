@@ -421,6 +421,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     lesionTract: 't',
     coordinate: [-42, 22.5, 6],
     coordinateSpace: 'unstated',
+    strokeCases: ['M2295', 'M2294'],
   });
   assert.deepEqual(
     written.split('&').map((pair) => pair.split('=')[0]),
@@ -461,11 +462,12 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'lesiontract',
       'coord',
       'space',
+      'cases',
     ],
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -503,6 +505,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     lesionTract: 'lesiontract',
     coordinate: 'coord',
     coordinateSpace: 'space',
+    strokeCases: 'cases',
     hiddenRegions: 'hidden',
   });
 });
@@ -605,6 +608,16 @@ test('a published coordinate travels unrounded, as entered, with its space', () 
     assert.deepEqual(decodeState(`coord=${value}`), { state: {}, rejected: ['coord'] }, value);
   }
   assert.deepEqual(decodeState('space=').rejected, ['space']);
+});
+
+test('one or two stroke cases travel in order, two different cohort ids at most', () => {
+  assert.equal(encodeState({ strokeCases: ['M2295', 'M2294'] }), 'cases=M2295,M2294');
+  assert.deepEqual(decoded('cases=M2295,M2294'), { strokeCases: ['M2295', 'M2294'] });
+  assert.deepEqual(decoded('cases=M2001'), { strokeCases: ['M2001'] });
+  assert.equal(encodeState({ strokeCases: null }), '');
+  for (const value of ['M1,M2,M3', 'M1,M1', 'sub-M2001', 'M2001,', '']) {
+    assert.deepEqual(decodeState(`cases=${value}`), { state: {}, rejected: ['cases'] }, value);
+  }
 });
 
 test('an open map and its dot survive a link, the dot to hundredths of a degree', () => {

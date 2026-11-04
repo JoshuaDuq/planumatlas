@@ -5,6 +5,7 @@ import { flushSync } from 'svelte';
 import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import type { EngineLesion, LesionMeasurement } from '../../lib/engine/api.ts';
+import { createCortexHold } from '../../lib/state/cortex-hold.svelte.ts';
 import { createLesionStore } from '../../lib/state/lesion.svelte.ts';
 import type { Language } from '../../lib/types/index.ts';
 import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
@@ -59,7 +60,7 @@ async function mount(lang: Language) {
   stop = $effect.root(() => {
     store = createLesionStore({
       lesion,
-      cortex: { opacity: 1, seeThrough: 0.3, setOpacity() {} },
+      cortex: { hold: createCortexHold({ opacity: 1, setOpacity() {} }), seeThrough: 0.3 },
       associations,
       domains,
       deficitGroup: () => 'language-number',

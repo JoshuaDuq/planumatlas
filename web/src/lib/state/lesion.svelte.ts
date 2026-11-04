@@ -4,6 +4,7 @@ import type { Coordinate } from '../core/coordinates/parse.ts';
 import { SLIGHT_SHARE, findingsPaint, rankFindings } from '../core/lesion/findings.ts';
 import { functionReach, functionsPaint, lesionProfile } from '../core/lesion/functions.ts';
 import type { LesionPaint } from '../core/state/paint.ts';
+import type { CortexHold } from './cortex-hold.svelte.ts';
 import { LESION_RADIUS } from '../types/constants.ts';
 import type { LESION_MODES } from '../types/constants.ts';
 import type {
@@ -50,6 +51,9 @@ export interface ReplacedLesion {
 
 const tenth = (value: number) => Math.round(value * 10) / 10;
 
+/** What the drawn streamlines hold the cortex see-through under. */
+const TRACT = 'lesion-tract';
+
 /**
  * The placed lesion: what the stage draws and where a click places it, its measurement and tract
  * count, each answered only for the placement that asked, and the functions and findings near it.
@@ -64,12 +68,8 @@ export function createLesionStore({
   deficitGroup,
 }: {
   lesion: EngineLesion;
-  /** The cortex's opacity, and the see-through one the tracts are drawn under, as the Tracts tab does. */
-  cortex: {
-    readonly opacity: number;
-    setOpacity(opacity: number): void;
-    readonly seeThrough: number;
-  };
+  /** The see-through cortex the tracts are drawn under, as the Tracts tab does, held with whatever else needs it. */
+  cortex: { hold: CortexHold; seeThrough: number };
   associations: readonly ClinicalAssociation[];
   domains: Pick<NeuropsychDomains, 'groups' | 'domains' | 'regions'>;
   deficitGroup: (deficit: string) => string;
@@ -85,8 +85,6 @@ export function createLesionStore({
   let selectedTract = $state<string | null>(null);
   let tractView = $state.raw<TractView>({ status: 'idle' });
   let viewRequest = 0;
-  // The opacity an opaque cortex had before the streamlines made it see-through.
-  let heldOpacity = $state<number | null>(null);
   // Once the reader has asked for the tracts, each later placement counts them too.
   let tractsWanted = false;
   let request = 0;
@@ -182,10 +180,7 @@ export function createLesionStore({
     // Following the sphere keeps the bundle's lines up rather than flashing a load.
     if (selectedTract !== id || tractView.status === 'error') tractView = { status: 'loading' };
     selectedTract = id;
-    if (heldOpacity === null && cortex.opacity === 1) {
-      heldOpacity = cortex.opacity;
-      cortex.setOpacity(cortex.seeThrough);
-    }
+    cortex.hold.acquire(TRACT, cortex.seeThrough);
     lesion.showTract(id, current).then(
       () => {
         if (ask === viewRequest) tractView = { status: 'ready' };
@@ -203,10 +198,7 @@ export function createLesionStore({
     selectedTract = null;
     tractView = { status: 'idle' };
     lesion.clearTract();
-    // An opacity the reader chose since is theirs to keep.
-    if (heldOpacity !== null && cortex.opacity === cortex.seeThrough)
-      cortex.setOpacity(heldOpacity);
-    heldOpacity = null;
+    cortex.hold.release(TRACT);
   }
 
   /** The selection follows the sphere while the sphere still reaches the bundle's side. */
@@ -271,7 +263,7 @@ export function createLesionStore({
     },
     /** The reader's own cortex opacity while the streamlines hold it see-through, for a link to carry. */
     get heldOpacity() {
-      return heldOpacity;
+      return cortex.hold.owns(TRACT) ? cortex.hold.held : null;
     },
     /** The functions' territories or the findings' regions on the brain, as the mode asks. */
     get paint() {

@@ -739,6 +739,7 @@
   "functional": "Divisions fonctionnelles",
   "receptors": "Empreintes de récepteurs",
   "stimulation": "Réponses à la stimulation",
+  "strokeCases": "Cas d’AVC",
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
   "files": "Fichiers publiés",
@@ -1511,6 +1512,104 @@
   ],
   "thalamus": "Les auteurs ont regroupé les contacts thalamiques par position, pas par noyau<NNBSP>; toute structure thalamique montre donc les trois sites.",
   "dataset": "Jeu de données Zenodo"
+ },
+ "strokeCases": {
+  "heading": "Cas d’AVC",
+  "lead": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha personnes dont l’AVC atteint au moins Alpha de cette région, évaluées .\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" personnes dont l’AVC atteint au moins  de cette région, évaluées Alpha.\""
+  ],
+  "none": [
+   "[\"Alpha\"] → \"Personne dans la cohorte n’a de lésion atteignant Alpha de cette région dans ce délai d’évaluation.\"",
+   "[\"\"] → \"Personne dans la cohorte n’a de lésion atteignant  de cette région dans ce délai d’évaluation.\""
+  ],
+  "window": "Délai d’évaluation",
+  "windows": {
+   "days": [
+    "[\"Alpha\"] → \"Alpha jours\"",
+    "[\"\"] → \" jours\""
+   ],
+   "year": "1 an",
+   "any": "Tous"
+  },
+  "windowPhrase": {
+   "days": [
+    "[\"Alpha\"] → \"à moins de Alpha jours de leur examen, avant ou après\"",
+    "[\"\"] → \"à moins de  jours de leur examen, avant ou après\""
+   ],
+   "year": "à moins d’un an de leur examen, avant ou après",
+   "any": "à tout moment"
+  },
+  "plot": "Score de langage selon le volume de la lésion",
+  "volumeAxis": "volume de la lésion, cm³",
+  "scoreAxis": "QA-WAB",
+  "normal": "dans les limites de la normale",
+  "dot": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha,  cm³, Alpha de cette région\"",
+   "[\"\",\"Alpha\",\"\"] → \", Alpha cm³,  de cette région\""
+  ],
+  "plotHint": "Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.",
+  "pairs": "Taille semblable, score différent",
+  "showPair": "Montrer une paire",
+  "nextPair": "Paire suivante",
+  "pairOf": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Paire Alpha sur  : lésions de taille égale à Alpha près, scores séparés de  points.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Paire  sur Alpha : lésions de taille égale à  près, scores séparés de Alpha points.\""
+  ],
+  "exceptions": "Très atteinte, aphasie légère ou absente",
+  "title": [
+   "[\"Alpha\",\"\"] → \"Alpha · QA-WAB \"",
+   "[\"\",\"Alpha\"] → \" · QA-WAB Alpha\""
+  ],
+  "facts": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Lésion de Alpha cm³ ·  de cette région · Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"Lésion de  cm³ · Alpha de cette région · \""
+  ],
+  "timing": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Examen Alpha mois après l’AVC · évaluation  jours plus tard\"",
+   "[\"\",\"Alpha\",\"\"] → \"Examen  mois après l’AVC · évaluation Alpha jours plus tôt\""
+  ],
+  "caseId": [
+   "[\"Alpha\"] → \"ARC Alpha\"",
+   "[\"\"] → \"ARC \""
+  ],
+  "only": [
+   "[\"Alpha\"] → \"Alpha, uniquement\"",
+   "[\"\"] → \", uniquement\""
+  ],
+  "both": "Les deux",
+  "differ": "Ce qui les distingue",
+  "thisRegion": "cette région",
+  "exceptionMeta": [
+   "[\"Alpha\",\"\"] → \"Alpha atteinte ·  cm³\"",
+   "[\"\",\"Alpha\"] → \" atteinte · Alpha cm³\""
+  ],
+  "clear": "Effacer les cas",
+  "loading": "Chargement de la cohorte…",
+  "failed": "La cohorte n’a pas pu être chargée.",
+  "drawFailed": "Les lésions n’ont pas pu être dessinées.",
+  "note": [
+   "[\"Alpha\"] → \"Aphasia Recovery Cohort : Alpha personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\"",
+   "[\"\"] → \"Aphasia Recovery Cohort :  personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\""
+  ],
+  "dataset": "Jeu de données OpenNeuro",
+  "types": {
+   "Global": "Aphasie globale",
+   "Broca": "Aphasie de Broca",
+   "TranscorticalMotor": "Aphasie transcorticale motrice",
+   "Wernicke": "Aphasie de Wernicke",
+   "Conduction": "Aphasie de conduction",
+   "Anomic": "Aphasie anomique",
+   "None": "Sans aphasie"
+  },
+  "unrecorded": "Type non noté",
+  "bands": {
+   "very-severe": "très sévère",
+   "severe": "sévère",
+   "moderate": "modérée",
+   "mild": "légère",
+   "within-normal-limits": "dans les limites de la normale"
+  }
  },
  "territories": {
   "heading": "Vascularisation artérielle typique",

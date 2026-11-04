@@ -1,0 +1,70 @@
+# Real stroke lesions and the language scores measured in the same people: the
+# Aphasia Recovery Cohort (ARC), 228 adults with chronic left-hemisphere stroke
+# recruited for aphasia studies. Each lesion was drawn on the person's own T2 and
+# normalised to SPM12's tissue probability maps by its authors (SPM12 unified
+# segmentation with enantiomorphic healing). scripts/register_stroke_cases.py
+# registers the cohort's mean healed T1, which lies in that space, onto this brain
+# with SynthMorph and carries every lesion across; the build counts what each one
+# reaches on the cut's own labels. Nothing here is a prognosis for anyone.
+label: Stroke cases (Aphasia Recovery Cohort)
+license: CC0 (dataset); BSD-2-Clause (normalised lesion maps, Chris Rorden)
+source:
+  short: Gibson et al. (2024)
+  citation: Gibson M, Newman-Norlund R, Bonilha L, Fridriksson J, Hickok G, Hillis AE, den Ouden DB, Rorden C (2024) The Aphasia Recovery Cohort, an open-source chronic stroke repository. Sci Data 11:981
+  doi: https://doi.org/10.1038/s41597-024-03819-7
+  pmid: 39251640
+  dataset: https://doi.org/10.18112/openneuro.ds004884.v1.0.2
+# OpenNeuro ds004884 v1.0.2's participants table: one Western Aphasia Battery
+# (WAB-R) per person, with the days after the stroke it was given.
+participants:
+  url: https://raw.githubusercontent.com/OpenNeuroDatasets/ds004884/0885e5939abc8f909a175dd782369b7afc3fdd08/participants.tsv
+  sha256: 37a8e84577bbb5a8af8cb8a95b494473a939fed2fccbb35578262a620b1e184e
+# The authors' normalised lesions and the mean of the 228 healed T1s they were
+# normalised with, all on SPM12's 1 mm grid. A lesion file's session names the T1
+# and T2 days after the stroke (ses-<T1>x<T2>, or one day for both); the lesion
+# was drawn on the T2. Each lesion's sha256 is in stroke-cases-lesions.sha256.
+normalised:
+  base: https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI
+  mean_t1: [T1_mean_228.nii.gz, 4d7f3467b654c84ef20b2fc6204c44262bd428c656a4fdf200ccbfb0ce3cd257]
+  lesions: config/stroke-cases-lesions.sha256
+# A lesion voxel is kept on this brain's grid where the linearly interpolated
+# mask reaches this value, as the authors binarised their own.
+keep_at: 0.5
+# A case reaches a region when its lesion covers at least this share of the
+# region's voxels on the cut: the 5% sufficient-affection threshold the
+# authors' demonstration repository applies to its regional analysis.
+reaches_min: 0.05
+# Test windows the viewer offers, in days between the scan the lesion was drawn
+# on and the WAB; the first is the default. 76 of 228 people were tested more
+# than 90 days from that scan.
+test_windows: [90, 365]
+# A pair compares lesions within this volume ratio whose WAB-AQ differ by at
+# least this much. Volume is the authors' own, on SPM12's grid.
+pairs:
+  volume_ratio_max: 1.25
+  aq_difference_min: 25
+# WAB-R aphasia quotient bands (Kertesz 2007): 93.8 and above is within normal
+# limits. Each band's floor, from the most severe.
+aq_bands:
+  - {id: very-severe, min: 0}
+  - {id: severe, min: 26}
+  - {id: moderate, min: 51}
+  - {id: mild, min: 76}
+  - {id: within-normal-limits, min: 93.8}
+# Exceptions: much of the region lesioned, mild or no aphasia.
+exceptions:
+  share_min: 0.4
+  aq_min: 76
+  shown: 3
+# Set before the registration was measured (2026-11-04). The cohort's mean brain
+# keeps its stroke side's ex vacuo ventricle, which SPM12's own template does not,
+# so the mean itself is registered (left caudate 0.85 here, 0.66 through SPM12).
+acceptance:
+  hemisphere_agreement_min: 0.98
+  subcortical_dice_min: 0.70
+  subcortical_dice_median_min: 0.80
+  cortex_dice_min: 0.65
+  round_trip_median_max_mm: 0.5
+  round_trip_p95_max_mm: 1.0
+  inside_brain_median_min: 0.90
+  right_hemisphere_median_max: 0.02

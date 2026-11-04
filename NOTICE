@@ -27,7 +27,8 @@ the full texts in public/models/licenses/. Those terms include the FreeSurfer
 Software License, the HCP Open Access Data Use Terms, the non-commercial CAB-NP
 License, CC BY-NC-SA 4.0 (Julich-Brain), CC BY-NC 3.0 (Nettekoven cerebellar
 atlas, SUIT), CC BY-SA 4.0 (arterial territories), ODbL 1.0 (Neurosynth), MIT
-(Schaefer, PAM50) and CC0 1.0.
+(Schaefer, PAM50), BSD-2-Clause (the Aphasia Recovery Cohort's normalised
+lesions, Chris Rorden) and CC0 1.0.
 
 Planum is for research and education. It is not a medical device and must
 not be used for diagnosis, treatment or any other clinical decision.

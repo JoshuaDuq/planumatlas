@@ -20,7 +20,7 @@ export const KEY_NOTE_MIN_WIDTH_PX = 600;
 /** The title row, foot and edges of a plate. */
 const KEY_HEAD_PX = 42;
 
-export type KeyName = 'network' | 'paint' | 'direction';
+export type KeyName = 'network' | 'paint' | 'cases' | 'direction';
 
 export interface KeyRow {
   id: string;
@@ -61,6 +61,8 @@ export interface KeySources {
   territories?: readonly ArterialTerritory[] | null;
   /** The key of the paint on show (`legendFor`), or null. */
   legend: Legend | null;
+  /** The stroke cases on the stage: each one's colour and name, and the shared colour for two. */
+  cases?: { title: string; rows: { id: string; color: Rgb | string; label: string }[] } | null;
   /** The streamlines are drawn, coloured by direction. */
   directionShown: boolean;
 }
@@ -131,6 +133,17 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       ),
       note: legend.note,
       pickable: legend.pickable !== false && legend.rows.length > 1,
+    });
+  }
+
+  if (ready && sources.cases) {
+    plates.push({
+      name: 'cases',
+      map: 'cases',
+      title: sources.cases.title,
+      rows: sources.cases.rows.map((entry) => row(entry.id, entry.color, entry.label)),
+      note: '',
+      pickable: false,
     });
   }
 

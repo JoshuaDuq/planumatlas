@@ -7,6 +7,7 @@ import type {
   LesionSphere,
   TractCrossing,
 } from '../engine/api.ts';
+import { createCortexHold } from './cortex-hold.svelte.ts';
 import { createLesionStore } from './lesion.svelte.ts';
 
 const measurement = (regions: [string, number, number][]): LesionMeasurement => ({
@@ -91,7 +92,7 @@ function build(held = heldLesion()) {
   stop = $effect.root(() => {
     store = createLesionStore({
       lesion: held.lesion,
-      cortex: held.cortex,
+      cortex: { hold: createCortexHold(held.cortex), seeThrough: held.cortex.seeThrough },
       associations,
       domains,
       deficitGroup: () => 'language-number',

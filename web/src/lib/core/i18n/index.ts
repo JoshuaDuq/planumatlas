@@ -33,6 +33,7 @@ import * as reasons from './areas/reasons.ts';
 import * as receptors from './areas/receptors.ts';
 import * as sheet from './areas/sheet.ts';
 import * as stimulation from './areas/stimulation.ts';
+import * as strokeCases from './areas/strokeCases.ts';
 import * as territories from './areas/territories.ts';
 import * as cerebellarFunctions from './areas/cerebellarFunctions.ts';
 import * as shortcuts from './areas/shortcuts.ts';
@@ -77,6 +78,7 @@ export const TRANSLATIONS = {
     receptors: receptors.en,
     sheet: sheet.en,
     stimulation: stimulation.en,
+    strokeCases: strokeCases.en,
     territories: territories.en,
     cerebellarFunctions: cerebellarFunctions.en,
     shortcuts: shortcuts.en,
@@ -120,6 +122,7 @@ export const TRANSLATIONS = {
     receptors: receptors.fr,
     sheet: sheet.fr,
     stimulation: stimulation.fr,
+    strokeCases: strokeCases.fr,
     territories: territories.fr,
     cerebellarFunctions: cerebellarFunctions.fr,
     shortcuts: shortcuts.fr,

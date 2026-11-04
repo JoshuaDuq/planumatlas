@@ -74,6 +74,7 @@ function build() {
       engine,
       view: parts.view,
       lesion: { sphere: null, mode: 'lesion', selectedTract: null, coordinate: null },
+      strokeCases: { chosen: [] },
       write: () => {
         parts.written += 1;
       },

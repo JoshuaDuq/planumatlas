@@ -6,7 +6,7 @@ import { decodeState } from '../core/state/url-state.ts';
 import { createFakeEngine } from '../engine/fake.ts';
 import { createLessonStore, createSessionStore } from '../state/session.svelte.ts';
 import { VIEW_NAMES } from '../types/index.ts';
-import type { CoordinateSpaces, Manifest } from '../types/index.ts';
+import type { CoordinateSpaces, Manifest, SurfaceColor } from '../types/index.ts';
 import { readRepoJson } from '../../../test/repo.ts';
 import type { PlacedCoordinate } from '../state/lesion.svelte.ts';
 import { createLinks } from './links.ts';
@@ -25,6 +25,7 @@ function setup(
     circuits?: { all: unknown[]; get: (id: string) => unknown };
     hooks?: Partial<LinkHooks>;
     coordinates?: Parameters<typeof createLinks>[0]['coordinates'];
+    strokeCasesAvailable?: boolean;
   } = {},
 ) {
   const followed: string[] = [];
@@ -72,11 +73,26 @@ function setup(
       lesion.coordinate = placed;
     }),
   };
+  // The stroke cases as links reads and restores them.
+  const strokeCases = {
+    available: extras.strokeCasesAvailable ?? true,
+    chosen: [] as readonly string[],
+    heldOpacity: null as number | null,
+    heldColor: null as SurfaceColor | null,
+    show: vi.fn((ids: readonly string[]) => {
+      strokeCases.chosen = ids;
+    }),
+    known: vi.fn(async (ids: readonly string[]) => ids.every((id) => ['M2295', 'M2294'].includes(id))),
+    clear: vi.fn(() => {
+      strokeCases.chosen = [];
+    }),
+  };
   const links = createLinks({
     engine,
     session,
     lesson,
     lesion,
+    strokeCases,
     coordinates: extras.coordinates ?? null,
     view: {
       get current() {
@@ -110,7 +126,7 @@ function setup(
     followLanguage: (lang) => followed.push(lang),
     page: page as never,
   });
-  return { followed, engine, session, lesson, links, page, calls, link, commands, lesion };
+  return { followed, engine, session, lesson, links, page, calls, link, commands, lesion, strokeCases };
 }
 
 describe('writing the link', () => {
@@ -249,6 +265,56 @@ describe('restoring a link', () => {
     expect(release).toHaveBeenCalledOnce();
     expect(() => links.report(null)).not.toThrow();
     expect(session.state.notice).toBeNull();
+  });
+});
+
+describe('stroke cases in the link', () => {
+  it('carries the cases in order, with the cortex as it was before they were shown', () => {
+    const { links, strokeCases, calls } = setup({
+      cortexOpacity: 0.3,
+      surfaceColor: 'tissue',
+      selectedRegion: 'destrieux:left:12',
+    });
+    Object.assign(strokeCases, { chosen: ['M2295', 'M2294'], heldOpacity: 1, heldColor: 'atlas' });
+    links.write();
+    const hash = calls.at(-1)![1] as string;
+    expect(hash).toContain('cases=M2295,M2294');
+    expect(hash).not.toContain('opacity=');
+    expect(hash).not.toContain('colors=');
+  });
+
+  it('leaves cases out of a link without the region they were picked in', () => {
+    const { links, strokeCases } = setup();
+    strokeCases.chosen = ['M2295'];
+    expect(links.linkState().strokeCases).toBeNull();
+  });
+
+  it('shows the cases a link names, clearing those shown first, and clears those it does not name', async () => {
+    const { links, strokeCases } = setup();
+    expect(
+      await links.restore(decodeState('region=destrieux:left:12&cases=M2295,M2294'), {}),
+    ).toEqual([]);
+    expect(strokeCases.show.mock.calls).toEqual([[['M2295', 'M2294']]]);
+    await links.restore(decodeState('hemi=left'), {});
+    expect(strokeCases.clear).toHaveBeenCalledOnce();
+    expect(strokeCases.chosen).toEqual([]);
+  });
+
+  it('names cases the cohort does not hold, or that come without a region, as not applied', async () => {
+    const { links, strokeCases } = setup();
+    expect(await links.restore(decodeState('region=destrieux:left:12&cases=M9999'), {})).toEqual([
+      'cases',
+    ]);
+    expect(await links.restore(decodeState('cases=M2295'), {})).toEqual(['cases']);
+    expect(strokeCases.show).not.toHaveBeenCalled();
+  });
+
+  it('names cases as not applied on an anatomy that publishes none', async () => {
+    const { links, strokeCases } = setup({}, undefined, { strokeCasesAvailable: false });
+    expect(
+      await links.restore(decodeState('region=destrieux:left:12&cases=M2295'), {}),
+    ).toEqual(['cases']);
+    expect(strokeCases.show).not.toHaveBeenCalled();
   });
 });
 

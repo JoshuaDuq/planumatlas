@@ -7,6 +7,7 @@ import { paintFor } from '../core/state/paint.ts';
 import type { LesionPaint } from '../core/state/paint.ts';
 import type { Engine, EngineModel, EngineTracts, SectionsState } from '../engine/api.ts';
 import type { ModelState } from '../types/index.ts';
+import type { StrokeCasesStore } from './stroke-cases.svelte.ts';
 import type { ViewStore } from './view.svelte.ts';
 
 /**
@@ -99,5 +100,16 @@ export function syncLessonTract(
       if (tract) tracts.showLandmarkTract(tract).catch(fail);
       else tracts.clearLandmarkTract();
     });
+  });
+}
+
+/**
+ * Stroke cases are picked in a region's sheet, which also clears them: once no region is selected the
+ * sheet is gone, so the cases on the stage go with it rather than stay where nothing controls them.
+ */
+export function syncStrokeCases(view: ViewStore, cases: Pick<StrokeCasesStore, 'chosen' | 'clear'>) {
+  const selected = $derived(view.current.selectedRegion !== null);
+  $effect(() => {
+    if (!selected && untrack(() => cases.chosen.length)) cases.clear();
   });
 }

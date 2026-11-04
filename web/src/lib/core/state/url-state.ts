@@ -48,6 +48,7 @@ type Defaults = Pick<
   | 'lesionTract'
   | 'coordinate'
   | 'coordinateSpace'
+  | 'strokeCases'
 >;
 
 export const DEFAULTS: Defaults = {
@@ -82,6 +83,7 @@ export const DEFAULTS: Defaults = {
   lesionTract: null,
   coordinate: null,
   coordinateSpace: null,
+  strokeCases: null,
 };
 
 type Reader<T> = (value: string) => T | undefined;
@@ -194,6 +196,14 @@ const mriWindow: Reader<NonNullable<LinkState['mriWindow']>> = (value) => {
   const [center, width] = list as [number, number];
   if (center < 0 || center > 255 || width < 1 || width > 256) return undefined;
   return { center, width };
+};
+
+/** One or two cohort ids, as `M2295,M2294`: two different people, the first first. */
+const strokeCases: Reader<string[]> = (value) => {
+  const ids = value.split(',');
+  return ids.length <= 2 && ids.every((id) => /^M\d+$/.test(id)) && new Set(ids).size === ids.length
+    ? ids
+    : undefined;
 };
 
 /** A lesion as `right,anterior,superior,radius`: a centre in the volume's range, a radius the slider can set. */
@@ -310,6 +320,7 @@ const FIELDS: Field[] = [
   field('lesionTract', 'lesiontract', nonempty),
   field('coordinate', 'coord', coordinate, (point) => point.join(',')),
   field('coordinateSpace', 'space', nonempty),
+  field('strokeCases', 'cases', strokeCases, (ids) => ids.join(',')),
 ];
 
 /** The link parameter each state field travels under. */

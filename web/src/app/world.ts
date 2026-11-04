@@ -27,9 +27,12 @@ import {
   createEngineSync,
   syncLessonTract,
   syncPaint,
+  syncStrokeCases,
   syncPresentation,
 } from '../lib/state/engine-sync.svelte.ts';
+import { createCortexHold } from '../lib/state/cortex-hold.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
+import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import { createLink } from '../lib/state/link.svelte.ts';
 import { createLessonStore } from '../lib/state/session.svelte.ts';
 import { announceView, createView } from '../lib/state/view.svelte.ts';
@@ -91,20 +94,36 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       anatomy: model.manifest.anatomy.id,
       referenceAnatomy: engine.tracts.anatomy,
     });
+    // One see-through hold for everything drawn inside the cortex: a lesion's tract, stroke cases.
+    const cortexHold = createCortexHold({
+      get opacity() {
+        return engine.model.settings.cortexOpacity;
+      },
+      setOpacity: (opacity) => engine.model.setCortexOpacity(opacity),
+    });
     const lesion = createLesionStore({
       lesion: engine.lesion,
-      cortex: {
-        get opacity() {
-          return engine.model.settings.cortexOpacity;
-        },
-        setOpacity: (opacity) => engine.model.setCortexOpacity(opacity),
-        seeThrough: engine.tracts.defaultOpacity,
-      },
+      cortex: { hold: cortexHold, seeThrough: engine.tracts.defaultOpacity },
       associations: clinical.associations,
       domains,
       deficitGroup: (id) => clinical.get(id).group,
     });
+    const seeThrough = model.manifest.appearance.see_through_opacity;
+    if (seeThrough === undefined) throw new Error('This build publishes no see-through opacity.');
+    const strokeCases = createStrokeCasesStore({
+      engine: engine.strokeCases,
+      display: {
+        hold: cortexHold,
+        seeThrough,
+        get color() {
+          return engine.model.settings.surfaceColor;
+        },
+        setColor: (color) =>
+          void engine.sections.setSurfaceColor(color).catch((error: unknown) => console.error(error)),
+      },
+    });
     syncPaint(model, view, { domains, clinical, lesion });
+    syncStrokeCases(view, strokeCases);
     syncPresentation(engine, view, engineState);
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
     syncRouteGhost(model, view, circuits);
@@ -113,7 +132,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     const catalog = createCatalogStore(regions, view);
     // Before the first restore: a link that loads hidden regions then says their count once.
     const speech = announceView(view, (region, current) => regions.label(region.id, current).name);
-    const link = createLink({ engine, view, lesion, write: () => links.write() });
+    const link = createLink({ engine, view, lesion, strokeCases, write: () => links.write() });
     const context: AppContext = { engine, engineState, session, lesson, view, catalog, link };
 
     const reader: SceneReader = {
@@ -157,6 +176,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       lesson,
       view,
       lesion,
+      strokeCases,
       coordinates,
       link,
       commands,
@@ -200,6 +220,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       links,
       speech,
       lesion,
+      strokeCases,
       visualFieldMap,
       coordinates:
         coordinates &&

@@ -48,6 +48,8 @@
   import NetworkSection from './NetworkSection.svelte';
   import ReceptorSection from './ReceptorSection.svelte';
   import StimulationSection from './StimulationSection.svelte';
+  import StrokeCasesSection from './StrokeCasesSection.svelte';
+  import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
   import SupplySection from './SupplySection.svelte';
   import CerebellarFunctionsSection from './CerebellarFunctionsSection.svelte';
   import RegionFacts from './RegionFacts.svelte';
@@ -81,6 +83,8 @@
     receptors: ReceptorFingerprints | null;
     /** Lyu et al.'s stimulation responses, by the authors' label a region takes. */
     stimulation: StimulationResponses | null;
+    /** The stroke cases on the stage and their cohort; none on an anatomy that publishes no cases. */
+    strokeCases?: StrokeCasesStore | null;
     /** The manifest's arterial territories, for each region's typical supply. */
     territories?: ArterialTerritories | null;
     /** The manifest's functional cerebellar atlas, for each lobule's shares. */
@@ -127,6 +131,7 @@
     segmentationAgreement,
     receptors,
     stimulation,
+    strokeCases = null,
     territories = null,
     cerebellarFunctions = null,
     striatalNetworks = null,
@@ -224,6 +229,9 @@
     onshow={showAgreement}
   />
   <ReceptorSection {region} {lang} {receptors} />
+  {#if strokeCases?.available}
+    <StrokeCasesSection {region} {lang} store={strokeCases} label={catalog.label} />
+  {/if}
   <StimulationSection {region} {lang} {stimulation} />
   <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
   <FunctionalSection {region} {lang} {functionalRegions} />

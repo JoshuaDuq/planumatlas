@@ -177,6 +177,16 @@ export function provenanceRows(
         ]
       : [],
   );
+  const strokeCases = manifest.stroke_cases;
+  add(
+    copy.strokeCases,
+    strokeCases
+      ? [
+          { text: strokeCases.label, note: strokeCases.license },
+          ...strokeCases.citations.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
   const domainCopy = t(lang, 'domains');
   const published = manifest.neuropsych_domains as Described | undefined;
   add(

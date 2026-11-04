@@ -1,0 +1,49 @@
+{
+  "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+  "method": "mri_synthmorph register -m joint (the cohort's mean healed T1 \u2192 brain.mgz); mri_synthseg --parc --robust on the mean, carried by apply -m nearest and scored against aseg; each lesion read through the forward field, linear, kept at 0.5",
+  "reader_vs_apply_dice": 1.0,
+  "checks": {
+    "hemisphere_agreement": 0.9979,
+    "subcortical_dice": {
+      "thalamus-left": 0.8616,
+      "thalamus-right": 0.8771,
+      "caudate-left": 0.8504,
+      "caudate-right": 0.8542,
+      "putamen-left": 0.8795,
+      "putamen-right": 0.9114,
+      "pallidum-left": 0.7389,
+      "pallidum-right": 0.8797,
+      "hippocampus-left": 0.8452,
+      "hippocampus-right": 0.8619,
+      "amygdala-left": 0.8611,
+      "amygdala-right": 0.9004,
+      "lateral-ventricle-left": 0.8734,
+      "lateral-ventricle-right": 0.8969
+    },
+    "cortex_dice": 0.7206,
+    "round_trip_mm": {
+      "median": 0.0449,
+      "p95": 0.1807
+    }
+  },
+  "placement": {
+    "inside_brain": {
+      "median": 0.9728,
+      "min": 0.8503
+    },
+    "right_hemisphere": {
+      "median": 0.0,
+      "max": 0.0187
+    }
+  },
+  "acceptance": {
+    "hemisphere_agreement_min": 0.98,
+    "subcortical_dice_min": 0.7,
+    "subcortical_dice_median_min": 0.8,
+    "cortex_dice_min": 0.65,
+    "round_trip_median_max_mm": 0.5,
+    "round_trip_p95_max_mm": 1.0,
+    "inside_brain_median_min": 0.9,
+    "right_hemisphere_median_max": 0.02
+  }
+}

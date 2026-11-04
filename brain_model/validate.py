@@ -38,6 +38,7 @@ from .layers import (
     spinal_cord,
     stimulation_responses,
     striatal_networks,
+    stroke_cases,
 )
 from .sources import read_color_table, read_config, sha256, verify_sources, write_json
 from .surfaces.geometry import (
@@ -912,6 +913,7 @@ def validate_layers(config, manifest, tissues):
         ),
         "coordinate_spaces": coordinate_spaces.LAYER in declared,
         "retinotopy": retinotopy.LAYER in declared,
+        "stroke_cases": stroke_cases.metadata(config) if stroke_cases.LAYER in declared else None,
     }
     published = {
         "networks": manifest["networks"],
@@ -930,6 +932,7 @@ def validate_layers(config, manifest, tissues):
         "striatal_networks": manifest.get("striatal_networks"),
         "coordinate_spaces": "coordinate_spaces" in manifest,
         "retinotopy": "retinotopy" in manifest,
+        "stroke_cases": manifest.get("stroke_cases"),
     }
     differ = [key for key in expected if published[key] != expected[key]]
     if differ:
@@ -1025,6 +1028,8 @@ def main():
            if coordinate_spaces.is_declared(config) else {}),
         **({"retinotopy": retinotopy.validate(config, manifest)}
            if retinotopy.is_declared(config) else {}),
+        **({"stroke_cases": stroke_cases.validate(config, manifest, tissues)}
+           if stroke_cases.is_declared(config) else {}),
         "neuropsych_domains": neuropsych_domains.validate(config, manifest),
         "receptor_fingerprints": receptor_fingerprints.validate(config, manifest),
         "stimulation_responses": stimulation_responses.validate(config, manifest),

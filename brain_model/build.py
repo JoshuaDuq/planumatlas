@@ -35,6 +35,7 @@ from .layers import (
     spinal_cord,
     stimulation_responses,
     striatal_networks,
+    stroke_cases,
 )
 from .sources import (
     HEMISPHERES,
@@ -108,6 +109,12 @@ def require_layer_inputs(config):
             cerebellar_functions.volume_path(config),
             cerebellar_functions.lobules_path(config),
             cerebellar_functions.report_path(config),
+        ],
+        "stroke_cases": lambda: [
+            stroke_cases.DEFINITION,
+            stroke_cases.FACTS,
+            stroke_cases.lesions_path(config),
+            stroke_cases.report_path(config),
         ],
         "striatal_networks": lambda: [
             striatal_networks.DEFINITION,
@@ -728,6 +735,10 @@ def main():
     tissues = export_tissue_labels(config, manifest)
     if nextbrain.ATLAS_ID in tissues["atlases"]:
         nextbrain.mark_uncut(manifest["regions"], tissues["atlases"][nextbrain.ATLAS_ID])
+    if stroke_cases.is_declared(config):
+        # Shares are counted on the cut's own labels, so they follow the tissue export.
+        manifest["stroke_cases"] = stroke_cases.export(config, tissues)
+        manifest["limitations"].extend(stroke_cases.limitations())
     if comparison.is_enabled(config):
         comparison.attach_comparisons(config, manifest)
     write_json(config["output_directory"] / "manifest.json", manifest)

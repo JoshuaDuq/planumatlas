@@ -1,0 +1,1835 @@
+{
+  "source": {
+    "short": "Gibson et al. (2024)",
+    "citation": "Gibson M, Newman-Norlund R, Bonilha L, Fridriksson J, Hickok G, Hillis AE, den Ouden DB, Rorden C (2024) The Aphasia Recovery Cohort, an open-source chronic stroke repository. Sci Data 11:981",
+    "doi": "https://doi.org/10.1038/s41597-024-03819-7",
+    "pmid": 39251640,
+    "dataset": "https://doi.org/10.18112/openneuro.ds004884.v1.0.2"
+  },
+  "cases": [
+    {
+      "id": "M2001",
+      "aq": 87.1,
+      "type": "Anomic",
+      "scan_day": 1076,
+      "test_day": 895,
+      "volume_cm3": 201.8
+    },
+    {
+      "id": "M2002",
+      "aq": 72.6,
+      "type": "Broca",
+      "scan_day": 1440,
+      "test_day": 3682,
+      "volume_cm3": 161.3
+    },
+    {
+      "id": "M2004",
+      "aq": 89.4,
+      "type": "Anomic",
+      "scan_day": 524,
+      "test_day": 408,
+      "volume_cm3": 65.8
+    },
+    {
+      "id": "M2005",
+      "aq": 54.8,
+      "type": "Broca",
+      "scan_day": 520,
+      "test_day": 4334,
+      "volume_cm3": 60.3
+    },
+    {
+      "id": "M2006",
+      "aq": 85.8,
+      "type": "Anomic",
+      "scan_day": 1773,
+      "test_day": 5415,
+      "volume_cm3": 111.4
+    },
+    {
+      "id": "M2007",
+      "aq": 26.1,
+      "type": "Broca",
+      "scan_day": 6329,
+      "test_day": 7998,
+      "volume_cm3": 308.7
+    },
+    {
+      "id": "M2009",
+      "aq": 21.3,
+      "type": "Broca",
+      "scan_day": 2815,
+      "test_day": 2807,
+      "volume_cm3": 69.0
+    },
+    {
+      "id": "M2011",
+      "aq": 16.5,
+      "type": "Broca",
+      "scan_day": 268,
+      "test_day": 1422,
+      "volume_cm3": 82.8
+    },
+    {
+      "id": "M2012",
+      "aq": 92.0,
+      "type": "Anomic",
+      "scan_day": 1158,
+      "test_day": 1155,
+      "volume_cm3": 78.8
+    },
+    {
+      "id": "M2013",
+      "aq": 93.3,
+      "type": "Anomic",
+      "scan_day": 136,
+      "test_day": 202,
+      "volume_cm3": 13.9
+    },
+    {
+      "id": "M2014",
+      "aq": 94.0,
+      "type": "None",
+      "scan_day": 291,
+      "test_day": 1958,
+      "volume_cm3": 73.6
+    },
+    {
+      "id": "M2015",
+      "aq": 57.4,
+      "type": "Conduction",
+      "scan_day": 367,
+      "test_day": 367,
+      "volume_cm3": 51.3
+    },
+    {
+      "id": "M2016",
+      "aq": 30.9,
+      "type": "Broca",
+      "scan_day": 5378,
+      "test_day": 5378,
+      "volume_cm3": 367.8
+    },
+    {
+      "id": "M2017",
+      "aq": 55.6,
+      "type": "Broca",
+      "scan_day": 1142,
+      "test_day": 4239,
+      "volume_cm3": 196.7
+    },
+    {
+      "id": "M2018",
+      "aq": 68.7,
+      "type": "Anomic",
+      "scan_day": 341,
+      "test_day": 341,
+      "volume_cm3": 56.7
+    },
+    {
+      "id": "M2020",
+      "aq": 86.2,
+      "type": "Anomic",
+      "scan_day": 525,
+      "test_day": 517,
+      "volume_cm3": 91.1
+    },
+    {
+      "id": "M2021",
+      "aq": 95.2,
+      "type": "None",
+      "scan_day": 1110,
+      "test_day": 1076,
+      "volume_cm3": 18.1
+    },
+    {
+      "id": "M2022",
+      "aq": 91.3,
+      "type": "Anomic",
+      "scan_day": 1108,
+      "test_day": 1025,
+      "volume_cm3": 37.5
+    },
+    {
+      "id": "M2023",
+      "aq": 22.9,
+      "type": "Broca",
+      "scan_day": 479,
+      "test_day": 392,
+      "volume_cm3": 239.3
+    },
+    {
+      "id": "M2024",
+      "aq": 44.5,
+      "type": "Broca",
+      "scan_day": 305,
+      "test_day": 926,
+      "volume_cm3": 125.7
+    },
+    {
+      "id": "M2025",
+      "aq": 64.6,
+      "type": "Broca",
+      "scan_day": 886,
+      "test_day": 2022,
+      "volume_cm3": 163.0
+    },
+    {
+      "id": "M2026",
+      "aq": 96.4,
+      "type": "None",
+      "scan_day": 3098,
+      "test_day": 3238,
+      "volume_cm3": 8.5
+    },
+    {
+      "id": "M2027",
+      "aq": 69.5,
+      "type": "Conduction",
+      "scan_day": 195,
+      "test_day": 268,
+      "volume_cm3": 94.8
+    },
+    {
+      "id": "M2029",
+      "aq": 40.6,
+      "type": "Broca",
+      "scan_day": 180,
+      "test_day": 2709,
+      "volume_cm3": 194.7
+    },
+    {
+      "id": "M2030",
+      "aq": 51.5,
+      "type": "Broca",
+      "scan_day": 1454,
+      "test_day": 3839,
+      "volume_cm3": 209.8
+    },
+    {
+      "id": "M2031",
+      "aq": 33.9,
+      "type": "Wernicke",
+      "scan_day": 189,
+      "test_day": 2362,
+      "volume_cm3": 152.6
+    },
+    {
+      "id": "M2032",
+      "aq": 26.1,
+      "type": "Broca",
+      "scan_day": 250,
+      "test_day": 251,
+      "volume_cm3": 200.3
+    },
+    {
+      "id": "M2034",
+      "aq": 31.0,
+      "type": "Wernicke",
+      "scan_day": 1568,
+      "test_day": 1568,
+      "volume_cm3": 277.0
+    },
+    {
+      "id": "M2035",
+      "aq": 25.1,
+      "type": "Broca",
+      "scan_day": 4295,
+      "test_day": 4295,
+      "volume_cm3": 189.6
+    },
+    {
+      "id": "M2036",
+      "aq": 72.2,
+      "type": "Broca",
+      "scan_day": 695,
+      "test_day": 2722,
+      "volume_cm3": 151.4
+    },
+    {
+      "id": "M2037",
+      "aq": 85.3,
+      "type": "Anomic",
+      "scan_day": 275,
+      "test_day": 545,
+      "volume_cm3": 55.3
+    },
+    {
+      "id": "M2040",
+      "aq": 52.9,
+      "type": "Broca",
+      "scan_day": 207,
+      "test_day": 2416,
+      "volume_cm3": 243.7
+    },
+    {
+      "id": "M2041",
+      "aq": 16.32,
+      "type": "Broca",
+      "scan_day": 872,
+      "test_day": 969,
+      "volume_cm3": 116.2
+    },
+    {
+      "id": "M2042",
+      "aq": 61.6,
+      "type": "Broca",
+      "scan_day": 1953,
+      "test_day": 2621,
+      "volume_cm3": 221.1
+    },
+    {
+      "id": "M2043",
+      "aq": 95.0,
+      "type": "None",
+      "scan_day": 183,
+      "test_day": 183,
+      "volume_cm3": 4.0
+    },
+    {
+      "id": "M2044",
+      "aq": 74.8,
+      "type": "Broca",
+      "scan_day": 2150,
+      "test_day": 3120,
+      "volume_cm3": 161.0
+    },
+    {
+      "id": "M2045",
+      "aq": 5.7,
+      "type": "Broca",
+      "scan_day": 381,
+      "test_day": 381,
+      "volume_cm3": 348.2
+    },
+    {
+      "id": "M2046",
+      "aq": 55.9,
+      "type": "Conduction",
+      "scan_day": 2499,
+      "test_day": 2583,
+      "volume_cm3": 196.9
+    },
+    {
+      "id": "M2047",
+      "aq": 82.4,
+      "type": "Anomic",
+      "scan_day": 553,
+      "test_day": 553,
+      "volume_cm3": 84.2
+    },
+    {
+      "id": "M2048",
+      "aq": 63.4,
+      "type": "Conduction",
+      "scan_day": 215,
+      "test_day": 186,
+      "volume_cm3": 101.9
+    },
+    {
+      "id": "M2049",
+      "aq": 63.4,
+      "type": "Conduction",
+      "scan_day": 825,
+      "test_day": 2535,
+      "volume_cm3": 9.4
+    },
+    {
+      "id": "M2050",
+      "aq": 85.4,
+      "type": "Anomic",
+      "scan_day": 208,
+      "test_day": 207,
+      "volume_cm3": 21.5
+    },
+    {
+      "id": "M2051",
+      "aq": 34.7,
+      "type": "Broca",
+      "scan_day": 284,
+      "test_day": 705,
+      "volume_cm3": 163.0
+    },
+    {
+      "id": "M2052",
+      "aq": 15.8,
+      "type": "Global",
+      "scan_day": 3710,
+      "test_day": 3710,
+      "volume_cm3": 209.4
+    },
+    {
+      "id": "M2054",
+      "aq": 90.5,
+      "type": "Anomic",
+      "scan_day": 1598,
+      "test_day": 3462,
+      "volume_cm3": 100.0
+    },
+    {
+      "id": "M2055",
+      "aq": 90.9,
+      "type": "Anomic",
+      "scan_day": 1469,
+      "test_day": 1469,
+      "volume_cm3": 54.9
+    },
+    {
+      "id": "M2057",
+      "aq": 19.8,
+      "type": "Wernicke",
+      "scan_day": 520,
+      "test_day": 520,
+      "volume_cm3": 124.8
+    },
+    {
+      "id": "M2058",
+      "aq": 86.5,
+      "type": "Anomic",
+      "scan_day": 3471,
+      "test_day": 3471,
+      "volume_cm3": 118.1
+    },
+    {
+      "id": "M2059",
+      "aq": 53.7,
+      "type": "Broca",
+      "scan_day": 1239,
+      "test_day": 3349,
+      "volume_cm3": 101.8
+    },
+    {
+      "id": "M2060",
+      "aq": 90.3,
+      "type": "Anomic",
+      "scan_day": 220,
+      "test_day": 220,
+      "volume_cm3": 86.4
+    },
+    {
+      "id": "M2061",
+      "aq": 52.7,
+      "type": "Wernicke",
+      "scan_day": 252,
+      "test_day": 466,
+      "volume_cm3": 100.2
+    },
+    {
+      "id": "M2066",
+      "aq": 41.1,
+      "type": "Wernicke",
+      "scan_day": 325,
+      "test_day": 235,
+      "volume_cm3": 146.5
+    },
+    {
+      "id": "M2069",
+      "aq": 90.5,
+      "type": "Anomic",
+      "scan_day": 5818,
+      "test_day": 290,
+      "volume_cm3": 27.1
+    },
+    {
+      "id": "M2071",
+      "aq": 63.6,
+      "type": "Broca",
+      "scan_day": 1660,
+      "test_day": 1660,
+      "volume_cm3": 163.4
+    },
+    {
+      "id": "M2072",
+      "aq": 30.5,
+      "type": "Broca",
+      "scan_day": 715,
+      "test_day": 3004,
+      "volume_cm3": 156.9
+    },
+    {
+      "id": "M2073",
+      "aq": 66.8,
+      "type": "Conduction",
+      "scan_day": 562,
+      "test_day": 562,
+      "volume_cm3": 21.4
+    },
+    {
+      "id": "M2074",
+      "aq": 59.4,
+      "type": "Broca",
+      "scan_day": 2183,
+      "test_day": 1765,
+      "volume_cm3": 271.8
+    },
+    {
+      "id": "M2075",
+      "aq": 94.2,
+      "type": "None",
+      "scan_day": 529,
+      "test_day": 529,
+      "volume_cm3": 33.3
+    },
+    {
+      "id": "M2076",
+      "aq": 69.8,
+      "type": "Conduction",
+      "scan_day": 236,
+      "test_day": 212,
+      "volume_cm3": 84.9
+    },
+    {
+      "id": "M2077",
+      "aq": 94.6,
+      "type": "Anomic",
+      "scan_day": 250,
+      "test_day": 250,
+      "volume_cm3": 70.2
+    },
+    {
+      "id": "M2078",
+      "aq": 88.8,
+      "type": "Anomic",
+      "scan_day": 1970,
+      "test_day": 1971,
+      "volume_cm3": 44.6
+    },
+    {
+      "id": "M2079",
+      "aq": 25.3,
+      "type": "Global",
+      "scan_day": 217,
+      "test_day": 217,
+      "volume_cm3": 223.1
+    },
+    {
+      "id": "M2082",
+      "aq": 91.1,
+      "type": "Anomic",
+      "scan_day": 772,
+      "test_day": 772,
+      "volume_cm3": 8.3
+    },
+    {
+      "id": "M2083",
+      "aq": 88.1,
+      "type": "Anomic",
+      "scan_day": 198,
+      "test_day": 198,
+      "volume_cm3": 75.9
+    },
+    {
+      "id": "M2084",
+      "aq": 67.2,
+      "type": "Broca",
+      "scan_day": 222,
+      "test_day": 292,
+      "volume_cm3": 61.8
+    },
+    {
+      "id": "M2086",
+      "aq": 60.5,
+      "type": "Conduction",
+      "scan_day": 3021,
+      "test_day": 2160,
+      "volume_cm3": 122.1
+    },
+    {
+      "id": "M2087",
+      "aq": 45.9,
+      "type": "Broca",
+      "scan_day": 6127,
+      "test_day": 7135,
+      "volume_cm3": 238.7
+    },
+    {
+      "id": "M2088",
+      "aq": 87.5,
+      "type": "Anomic",
+      "scan_day": 604,
+      "test_day": 603,
+      "volume_cm3": 60.1
+    },
+    {
+      "id": "M2089",
+      "aq": 40.8,
+      "type": "Conduction",
+      "scan_day": 302,
+      "test_day": 302,
+      "volume_cm3": 168.7
+    },
+    {
+      "id": "M2092",
+      "aq": 88.8,
+      "type": "Anomic",
+      "scan_day": 321,
+      "test_day": 1552,
+      "volume_cm3": 68.9
+    },
+    {
+      "id": "M2094",
+      "aq": 50.2,
+      "type": "Broca",
+      "scan_day": 3078,
+      "test_day": 5343,
+      "volume_cm3": 303.7
+    },
+    {
+      "id": "M2095",
+      "aq": 50.5,
+      "type": "Broca",
+      "scan_day": 264,
+      "test_day": 264,
+      "volume_cm3": 129.5
+    },
+    {
+      "id": "M2096",
+      "aq": 39.2,
+      "type": "Broca",
+      "scan_day": 640,
+      "test_day": 727,
+      "volume_cm3": 198.3
+    },
+    {
+      "id": "M2097",
+      "aq": 12.7,
+      "type": "Global",
+      "scan_day": 1382,
+      "test_day": 1382,
+      "volume_cm3": 248.3
+    },
+    {
+      "id": "M2099",
+      "aq": 56.3,
+      "type": "Broca",
+      "scan_day": 658,
+      "test_day": 1952,
+      "volume_cm3": 384.0
+    },
+    {
+      "id": "M2100",
+      "aq": 13.1,
+      "type": "Global",
+      "scan_day": 6369,
+      "test_day": 6369,
+      "volume_cm3": 183.1
+    },
+    {
+      "id": "M2101",
+      "aq": 11.46,
+      "type": "Global",
+      "scan_day": 1309,
+      "test_day": 1309,
+      "volume_cm3": 223.2
+    },
+    {
+      "id": "M2102",
+      "aq": 86.0,
+      "type": "Conduction",
+      "scan_day": 169,
+      "test_day": 1400,
+      "volume_cm3": 70.7
+    },
+    {
+      "id": "M2103",
+      "aq": 82.9,
+      "type": "Conduction",
+      "scan_day": 222,
+      "test_day": 1023,
+      "volume_cm3": 32.4
+    },
+    {
+      "id": "M2104",
+      "aq": 93.0,
+      "type": "Anomic",
+      "scan_day": 483,
+      "test_day": 564,
+      "volume_cm3": 27.3
+    },
+    {
+      "id": "M2105",
+      "aq": 96.5,
+      "type": "None",
+      "scan_day": 964,
+      "test_day": 964,
+      "volume_cm3": 9.2
+    },
+    {
+      "id": "M2106",
+      "aq": 92.6,
+      "type": "Anomic",
+      "scan_day": 786,
+      "test_day": 2422,
+      "volume_cm3": 99.5
+    },
+    {
+      "id": "M2107",
+      "aq": 92.2,
+      "type": "Anomic",
+      "scan_day": 2107,
+      "test_day": 2107,
+      "volume_cm3": 100.4
+    },
+    {
+      "id": "M2109",
+      "aq": 39.8,
+      "type": "Conduction",
+      "scan_day": 336,
+      "test_day": 1160,
+      "volume_cm3": 112.9
+    },
+    {
+      "id": "M2110",
+      "aq": 91.3,
+      "type": "Anomic",
+      "scan_day": 742,
+      "test_day": 742,
+      "volume_cm3": 91.1
+    },
+    {
+      "id": "M2111",
+      "aq": 89.2,
+      "type": "Conduction",
+      "scan_day": 638,
+      "test_day": 2080,
+      "volume_cm3": 66.5
+    },
+    {
+      "id": "M2112",
+      "aq": 51.7,
+      "type": "Conduction",
+      "scan_day": 262,
+      "test_day": 307,
+      "volume_cm3": 58.9
+    },
+    {
+      "id": "M2113",
+      "aq": 20.6,
+      "type": "Global",
+      "scan_day": 300,
+      "test_day": 300,
+      "volume_cm3": 21.2
+    },
+    {
+      "id": "M2114",
+      "aq": 15.2,
+      "type": "Global",
+      "scan_day": 1811,
+      "test_day": 1865,
+      "volume_cm3": 196.8
+    },
+    {
+      "id": "M2115",
+      "aq": 36.3,
+      "type": "Broca",
+      "scan_day": 166,
+      "test_day": 829,
+      "volume_cm3": 209.2
+    },
+    {
+      "id": "M2116",
+      "aq": 46.5,
+      "type": "Broca",
+      "scan_day": 261,
+      "test_day": 281,
+      "volume_cm3": 174.3
+    },
+    {
+      "id": "M2117",
+      "aq": 49.1,
+      "type": "Broca",
+      "scan_day": 505,
+      "test_day": 663,
+      "volume_cm3": 96.7
+    },
+    {
+      "id": "M2118",
+      "aq": 41.0,
+      "type": "Broca",
+      "scan_day": 4047,
+      "test_day": 698,
+      "volume_cm3": 131.0
+    },
+    {
+      "id": "M2119",
+      "aq": 97.5,
+      "type": "None",
+      "scan_day": 316,
+      "test_day": 347,
+      "volume_cm3": 2.1
+    },
+    {
+      "id": "M2120",
+      "aq": 80.6,
+      "type": "Anomic",
+      "scan_day": 749,
+      "test_day": 767,
+      "volume_cm3": 68.3
+    },
+    {
+      "id": "M2121",
+      "aq": 98.1,
+      "type": "None",
+      "scan_day": 258,
+      "test_day": 258,
+      "volume_cm3": 38.1
+    },
+    {
+      "id": "M2122",
+      "aq": 5.0,
+      "type": "Global",
+      "scan_day": 207,
+      "test_day": 207,
+      "volume_cm3": 183.3
+    },
+    {
+      "id": "M2123",
+      "aq": 46.2,
+      "type": "Broca",
+      "scan_day": 650,
+      "test_day": 685,
+      "volume_cm3": 111.6
+    },
+    {
+      "id": "M2124",
+      "aq": 93.8,
+      "type": "None",
+      "scan_day": 595,
+      "test_day": 596,
+      "volume_cm3": 52.7
+    },
+    {
+      "id": "M2125",
+      "aq": 99.2,
+      "type": "None",
+      "scan_day": 332,
+      "test_day": 325,
+      "volume_cm3": 2.3
+    },
+    {
+      "id": "M2126",
+      "aq": 99.2,
+      "type": "None",
+      "scan_day": 270,
+      "test_day": 1635,
+      "volume_cm3": 26.8
+    },
+    {
+      "id": "M2127",
+      "aq": 52.1,
+      "type": "Broca",
+      "scan_day": 243,
+      "test_day": 435,
+      "volume_cm3": 226.2
+    },
+    {
+      "id": "M2129",
+      "aq": 5.4,
+      "type": "Global",
+      "scan_day": 5624,
+      "test_day": 5624,
+      "volume_cm3": 265.0
+    },
+    {
+      "id": "M2131",
+      "aq": 23.5,
+      "type": "Broca",
+      "scan_day": 472,
+      "test_day": 472,
+      "volume_cm3": 423.6
+    },
+    {
+      "id": "M2134",
+      "aq": 61.3,
+      "type": "Broca",
+      "scan_day": 1026,
+      "test_day": 1026,
+      "volume_cm3": 56.5
+    },
+    {
+      "id": "M2135",
+      "aq": 15.2,
+      "type": "Broca",
+      "scan_day": 1651,
+      "test_day": 1651,
+      "volume_cm3": 240.1
+    },
+    {
+      "id": "M2136",
+      "aq": 28.6,
+      "type": "Broca",
+      "scan_day": 865,
+      "test_day": 396,
+      "volume_cm3": 115.5
+    },
+    {
+      "id": "M2137",
+      "aq": 20.0,
+      "type": "Broca",
+      "scan_day": 453,
+      "test_day": 453,
+      "volume_cm3": 211.8
+    },
+    {
+      "id": "M2138",
+      "aq": 74.3,
+      "type": "Anomic",
+      "scan_day": 5979,
+      "test_day": 5984,
+      "volume_cm3": 112.5
+    },
+    {
+      "id": "M2139",
+      "aq": 85.8,
+      "type": "Anomic",
+      "scan_day": 193,
+      "test_day": 193,
+      "volume_cm3": 40.6
+    },
+    {
+      "id": "M2140",
+      "aq": 27.2,
+      "type": null,
+      "scan_day": 631,
+      "test_day": 996,
+      "volume_cm3": 194.1
+    },
+    {
+      "id": "M2141",
+      "aq": 99.1,
+      "type": "None",
+      "scan_day": 2539,
+      "test_day": 2538,
+      "volume_cm3": 0.2
+    },
+    {
+      "id": "M2142",
+      "aq": 98.4,
+      "type": "None",
+      "scan_day": 1295,
+      "test_day": 3619,
+      "volume_cm3": 7.2
+    },
+    {
+      "id": "M2143",
+      "aq": 99.2,
+      "type": "None",
+      "scan_day": 2871,
+      "test_day": 2840,
+      "volume_cm3": 2.8
+    },
+    {
+      "id": "M2144",
+      "aq": 100.0,
+      "type": "None",
+      "scan_day": 855,
+      "test_day": 3130,
+      "volume_cm3": 2.0
+    },
+    {
+      "id": "M2145",
+      "aq": 93.2,
+      "type": "Anomic",
+      "scan_day": 1616,
+      "test_day": 1617,
+      "volume_cm3": 0.5
+    },
+    {
+      "id": "M2146",
+      "aq": 96.8,
+      "type": "None",
+      "scan_day": 2612,
+      "test_day": 4696,
+      "volume_cm3": 76.6
+    },
+    {
+      "id": "M2147",
+      "aq": 97.8,
+      "type": "None",
+      "scan_day": 2667,
+      "test_day": 2667,
+      "volume_cm3": 4.9
+    },
+    {
+      "id": "M2149",
+      "aq": 98.6,
+      "type": "None",
+      "scan_day": 677,
+      "test_day": 676,
+      "volume_cm3": 0.2
+    },
+    {
+      "id": "M2150",
+      "aq": 98.3,
+      "type": "None",
+      "scan_day": 2081,
+      "test_day": 2080,
+      "volume_cm3": 0.8
+    },
+    {
+      "id": "M2151",
+      "aq": 99.1,
+      "type": "None",
+      "scan_day": 2092,
+      "test_day": 4092,
+      "volume_cm3": 109.1
+    },
+    {
+      "id": "M2152",
+      "aq": 93.1,
+      "type": "Anomic",
+      "scan_day": 733,
+      "test_day": 732,
+      "volume_cm3": 3.7
+    },
+    {
+      "id": "M2153",
+      "aq": 87.6,
+      "type": "Anomic",
+      "scan_day": 1566,
+      "test_day": 1565,
+      "volume_cm3": 76.8
+    },
+    {
+      "id": "M2155",
+      "aq": 98.9,
+      "type": "None",
+      "scan_day": 814,
+      "test_day": 813,
+      "volume_cm3": 1.0
+    },
+    {
+      "id": "M2156",
+      "aq": 96.7,
+      "type": "None",
+      "scan_day": 2653,
+      "test_day": 2652,
+      "volume_cm3": 56.5
+    },
+    {
+      "id": "M2158",
+      "aq": 99.6,
+      "type": "None",
+      "scan_day": 404,
+      "test_day": 403,
+      "volume_cm3": 1.1
+    },
+    {
+      "id": "M2159",
+      "aq": 99.1,
+      "type": "None",
+      "scan_day": 380,
+      "test_day": 349,
+      "volume_cm3": 29.1
+    },
+    {
+      "id": "M2160",
+      "aq": 96.4,
+      "type": "None",
+      "scan_day": 3078,
+      "test_day": 4822,
+      "volume_cm3": 113.8
+    },
+    {
+      "id": "M2162",
+      "aq": 98.4,
+      "type": "None",
+      "scan_day": 240,
+      "test_day": 240,
+      "volume_cm3": 2.3
+    },
+    {
+      "id": "M2164",
+      "aq": 97.0,
+      "type": "Anomic",
+      "scan_day": 622,
+      "test_day": 622,
+      "volume_cm3": 4.1
+    },
+    {
+      "id": "M2165",
+      "aq": 20.1,
+      "type": "Broca",
+      "scan_day": 687,
+      "test_day": 1456,
+      "volume_cm3": 338.3
+    },
+    {
+      "id": "M2168",
+      "aq": 71.7,
+      "type": "Broca",
+      "scan_day": 458,
+      "test_day": 1445,
+      "volume_cm3": 118.0
+    },
+    {
+      "id": "M2169",
+      "aq": 37.6,
+      "type": "Broca",
+      "scan_day": 370,
+      "test_day": 425,
+      "volume_cm3": 132.4
+    },
+    {
+      "id": "M2170",
+      "aq": 91.8,
+      "type": "Anomic",
+      "scan_day": 660,
+      "test_day": 660,
+      "volume_cm3": 21.4
+    },
+    {
+      "id": "M2172",
+      "aq": 77.2,
+      "type": "Anomic",
+      "scan_day": 205,
+      "test_day": 476,
+      "volume_cm3": 65.6
+    },
+    {
+      "id": "M2173",
+      "aq": 57.8,
+      "type": "Broca",
+      "scan_day": 590,
+      "test_day": 893,
+      "volume_cm3": 94.1
+    },
+    {
+      "id": "M2175",
+      "aq": 23.7,
+      "type": "Global",
+      "scan_day": 703,
+      "test_day": 816,
+      "volume_cm3": 46.9
+    },
+    {
+      "id": "M2176",
+      "aq": 68.9,
+      "type": "Conduction",
+      "scan_day": 664,
+      "test_day": 927,
+      "volume_cm3": 122.0
+    },
+    {
+      "id": "M2177",
+      "aq": 91.3,
+      "type": "Anomic",
+      "scan_day": 202,
+      "test_day": 344,
+      "volume_cm3": 8.3
+    },
+    {
+      "id": "M2178",
+      "aq": 30.6,
+      "type": "Broca",
+      "scan_day": 337,
+      "test_day": 408,
+      "volume_cm3": 92.7
+    },
+    {
+      "id": "M2179",
+      "aq": 25.2,
+      "type": "Global",
+      "scan_day": 2515,
+      "test_day": 2515,
+      "volume_cm3": 113.7
+    },
+    {
+      "id": "M2181",
+      "aq": 73.9,
+      "type": "Broca",
+      "scan_day": 370,
+      "test_day": 502,
+      "volume_cm3": 55.7
+    },
+    {
+      "id": "M2182",
+      "aq": 79.2,
+      "type": "Conduction",
+      "scan_day": 802,
+      "test_day": 802,
+      "volume_cm3": 207.5
+    },
+    {
+      "id": "M2183",
+      "aq": 80.3,
+      "type": "Anomic",
+      "scan_day": 367,
+      "test_day": 442,
+      "volume_cm3": 34.8
+    },
+    {
+      "id": "M2184",
+      "aq": 14.8,
+      "type": "Broca",
+      "scan_day": 358,
+      "test_day": 358,
+      "volume_cm3": 70.1
+    },
+    {
+      "id": "M2185",
+      "aq": 53.0,
+      "type": "Broca",
+      "scan_day": 388,
+      "test_day": 388,
+      "volume_cm3": 199.8
+    },
+    {
+      "id": "M2186",
+      "aq": 65.5,
+      "type": "Broca",
+      "scan_day": 378,
+      "test_day": 446,
+      "volume_cm3": 187.9
+    },
+    {
+      "id": "M2191",
+      "aq": 30.3,
+      "type": "Wernicke",
+      "scan_day": 681,
+      "test_day": 681,
+      "volume_cm3": 124.1
+    },
+    {
+      "id": "M2192",
+      "aq": 82.3,
+      "type": "Anomic",
+      "scan_day": 536,
+      "test_day": 536,
+      "volume_cm3": 145.0
+    },
+    {
+      "id": "M2195",
+      "aq": 51.9,
+      "type": "Conduction",
+      "scan_day": 601,
+      "test_day": 1460,
+      "volume_cm3": 37.0
+    },
+    {
+      "id": "M2196",
+      "aq": 82.7,
+      "type": "Anomic",
+      "scan_day": 386,
+      "test_day": 386,
+      "volume_cm3": 85.6
+    },
+    {
+      "id": "M2197",
+      "aq": 22.8,
+      "type": "Broca",
+      "scan_day": 1165,
+      "test_day": 1473,
+      "volume_cm3": 161.6
+    },
+    {
+      "id": "M2198",
+      "aq": 31.3,
+      "type": "Global",
+      "scan_day": 1073,
+      "test_day": 1073,
+      "volume_cm3": 232.6
+    },
+    {
+      "id": "M2199",
+      "aq": 27.7,
+      "type": "Broca",
+      "scan_day": 671,
+      "test_day": 671,
+      "volume_cm3": 169.2
+    },
+    {
+      "id": "M2200",
+      "aq": 31.4,
+      "type": "Broca",
+      "scan_day": 783,
+      "test_day": 783,
+      "volume_cm3": 116.2
+    },
+    {
+      "id": "M2201",
+      "aq": 99.7,
+      "type": "None",
+      "scan_day": 294,
+      "test_day": 294,
+      "volume_cm3": 0.5
+    },
+    {
+      "id": "M2202",
+      "aq": 27.4,
+      "type": "Broca",
+      "scan_day": 423,
+      "test_day": 423,
+      "volume_cm3": 150.2
+    },
+    {
+      "id": "M2204",
+      "aq": 14.5,
+      "type": "Global",
+      "scan_day": 577,
+      "test_day": 577,
+      "volume_cm3": 181.2
+    },
+    {
+      "id": "M2205",
+      "aq": 98.8,
+      "type": "None",
+      "scan_day": 429,
+      "test_day": 429,
+      "volume_cm3": 16.6
+    },
+    {
+      "id": "M2207",
+      "aq": 91.3,
+      "type": "Anomic",
+      "scan_day": 3014,
+      "test_day": 3014,
+      "volume_cm3": 27.9
+    },
+    {
+      "id": "M2208",
+      "aq": 51.1,
+      "type": "Conduction",
+      "scan_day": 446,
+      "test_day": 446,
+      "volume_cm3": 14.4
+    },
+    {
+      "id": "M2209",
+      "aq": 63.1,
+      "type": "Conduction",
+      "scan_day": 515,
+      "test_day": 515,
+      "volume_cm3": 72.5
+    },
+    {
+      "id": "M2210",
+      "aq": 89.4,
+      "type": "Anomic",
+      "scan_day": 4388,
+      "test_day": 4388,
+      "volume_cm3": 12.9
+    },
+    {
+      "id": "M2211",
+      "aq": 57.9,
+      "type": "Broca",
+      "scan_day": 453,
+      "test_day": 453,
+      "volume_cm3": 161.0
+    },
+    {
+      "id": "M2212",
+      "aq": 64.0,
+      "type": "Broca",
+      "scan_day": 6327,
+      "test_day": 6327,
+      "volume_cm3": 145.8
+    },
+    {
+      "id": "M2213",
+      "aq": 25.4,
+      "type": "Broca",
+      "scan_day": 1743,
+      "test_day": 1743,
+      "volume_cm3": 231.9
+    },
+    {
+      "id": "M2214",
+      "aq": 85.0,
+      "type": "Anomic",
+      "scan_day": 362,
+      "test_day": 362,
+      "volume_cm3": 67.0
+    },
+    {
+      "id": "M2215",
+      "aq": 23.1,
+      "type": "Broca",
+      "scan_day": 1354,
+      "test_day": 431,
+      "volume_cm3": 202.5
+    },
+    {
+      "id": "M2216",
+      "aq": 67.0,
+      "type": "Broca",
+      "scan_day": 2015,
+      "test_day": 2015,
+      "volume_cm3": 152.2
+    },
+    {
+      "id": "M2220",
+      "aq": 57.7,
+      "type": "Conduction",
+      "scan_day": 359,
+      "test_day": 359,
+      "volume_cm3": 63.9
+    },
+    {
+      "id": "M2221",
+      "aq": 83.4,
+      "type": "Conduction",
+      "scan_day": 2045,
+      "test_day": 701,
+      "volume_cm3": 124.3
+    },
+    {
+      "id": "M2222",
+      "aq": 71.4,
+      "type": "Broca",
+      "scan_day": 759,
+      "test_day": 759,
+      "volume_cm3": 73.4
+    },
+    {
+      "id": "M2223",
+      "aq": 92.2,
+      "type": "Anomic",
+      "scan_day": 644,
+      "test_day": 644,
+      "volume_cm3": 119.4
+    },
+    {
+      "id": "M2226",
+      "aq": 69.2,
+      "type": "Wernicke",
+      "scan_day": 311,
+      "test_day": 366,
+      "volume_cm3": 162.7
+    },
+    {
+      "id": "M2227",
+      "aq": 78.2,
+      "type": "TranscorticalMotor",
+      "scan_day": 424,
+      "test_day": 424,
+      "volume_cm3": 43.5
+    },
+    {
+      "id": "M2228",
+      "aq": 19.9,
+      "type": "Global",
+      "scan_day": 456,
+      "test_day": 518,
+      "volume_cm3": 286.4
+    },
+    {
+      "id": "M2230",
+      "aq": 98.0,
+      "type": "None",
+      "scan_day": 238,
+      "test_day": 561,
+      "volume_cm3": 30.3
+    },
+    {
+      "id": "M2232",
+      "aq": 90.4,
+      "type": "Anomic",
+      "scan_day": 492,
+      "test_day": 492,
+      "volume_cm3": 68.9
+    },
+    {
+      "id": "M2234",
+      "aq": 28.3,
+      "type": "Broca",
+      "scan_day": 715,
+      "test_day": 715,
+      "volume_cm3": 104.4
+    },
+    {
+      "id": "M2235",
+      "aq": 77.4,
+      "type": "Broca",
+      "scan_day": 398,
+      "test_day": 398,
+      "volume_cm3": 121.0
+    },
+    {
+      "id": "M2236",
+      "aq": 98.0,
+      "type": "None",
+      "scan_day": 1937,
+      "test_day": 1937,
+      "volume_cm3": 19.4
+    },
+    {
+      "id": "M2237",
+      "aq": 56.2,
+      "type": "Broca",
+      "scan_day": 397,
+      "test_day": 397,
+      "volume_cm3": 69.7
+    },
+    {
+      "id": "M2238",
+      "aq": 79.9,
+      "type": "Anomic",
+      "scan_day": 1374,
+      "test_day": 1282,
+      "volume_cm3": 49.9
+    },
+    {
+      "id": "M2239",
+      "aq": 44.5,
+      "type": "Broca",
+      "scan_day": 1609,
+      "test_day": 1609,
+      "volume_cm3": 369.6
+    },
+    {
+      "id": "M2240",
+      "aq": 82.2,
+      "type": "Anomic",
+      "scan_day": 1465,
+      "test_day": 422,
+      "volume_cm3": 44.7
+    },
+    {
+      "id": "M2243",
+      "aq": 86.5,
+      "type": "Anomic",
+      "scan_day": 1581,
+      "test_day": 411,
+      "volume_cm3": 21.7
+    },
+    {
+      "id": "M2245",
+      "aq": 32.4,
+      "type": "Broca",
+      "scan_day": 6526,
+      "test_day": 6580,
+      "volume_cm3": 138.3
+    },
+    {
+      "id": "M2246",
+      "aq": 86.2,
+      "type": "Anomic",
+      "scan_day": 853,
+      "test_day": 423,
+      "volume_cm3": 13.3
+    },
+    {
+      "id": "M2248",
+      "aq": 54.9,
+      "type": "Broca",
+      "scan_day": 2093,
+      "test_day": 1103,
+      "volume_cm3": 29.1
+    },
+    {
+      "id": "M2252",
+      "aq": 72.9,
+      "type": "Conduction",
+      "scan_day": 738,
+      "test_day": 381,
+      "volume_cm3": 55.5
+    },
+    {
+      "id": "M2254",
+      "aq": 22.1,
+      "type": "Broca",
+      "scan_day": 814,
+      "test_day": 471,
+      "volume_cm3": 312.1
+    },
+    {
+      "id": "M2259",
+      "aq": 76.9,
+      "type": "Anomic",
+      "scan_day": 1050,
+      "test_day": 413,
+      "volume_cm3": 57.8
+    },
+    {
+      "id": "M2260",
+      "aq": 40.1,
+      "type": "Broca",
+      "scan_day": 780,
+      "test_day": 810,
+      "volume_cm3": 378.5
+    },
+    {
+      "id": "M2262",
+      "aq": 89.6,
+      "type": "Anomic",
+      "scan_day": 400,
+      "test_day": 195,
+      "volume_cm3": 29.0
+    },
+    {
+      "id": "M2265",
+      "aq": 76.9,
+      "type": "TranscorticalMotor",
+      "scan_day": 849,
+      "test_day": 849,
+      "volume_cm3": 100.2
+    },
+    {
+      "id": "M2266",
+      "aq": 62.9,
+      "type": "Conduction",
+      "scan_day": 1380,
+      "test_day": 1380,
+      "volume_cm3": 93.6
+    },
+    {
+      "id": "M2268",
+      "aq": 31.5,
+      "type": "Broca",
+      "scan_day": 344,
+      "test_day": 344,
+      "volume_cm3": 299.2
+    },
+    {
+      "id": "M2269",
+      "aq": 72.9,
+      "type": "Anomic",
+      "scan_day": 767,
+      "test_day": 731,
+      "volume_cm3": 310.7
+    },
+    {
+      "id": "M2270",
+      "aq": 88.6,
+      "type": "Anomic",
+      "scan_day": 1947,
+      "test_day": 647,
+      "volume_cm3": 20.0
+    },
+    {
+      "id": "M2271",
+      "aq": 19.4,
+      "type": "Broca",
+      "scan_day": 207,
+      "test_day": 207,
+      "volume_cm3": 186.3
+    },
+    {
+      "id": "M2272",
+      "aq": 93.9,
+      "type": "None",
+      "scan_day": 2189,
+      "test_day": 2189,
+      "volume_cm3": 112.2
+    },
+    {
+      "id": "M2275",
+      "aq": 62.1,
+      "type": "Broca",
+      "scan_day": 871,
+      "test_day": 924,
+      "volume_cm3": 233.5
+    },
+    {
+      "id": "M2276",
+      "aq": 19.6,
+      "type": "Broca",
+      "scan_day": 1364,
+      "test_day": 1364,
+      "volume_cm3": 144.0
+    },
+    {
+      "id": "M2277",
+      "aq": 90.2,
+      "type": "Anomic",
+      "scan_day": 596,
+      "test_day": 642,
+      "volume_cm3": 8.1
+    },
+    {
+      "id": "M2278",
+      "aq": 44.0,
+      "type": "Broca",
+      "scan_day": 388,
+      "test_day": 388,
+      "volume_cm3": 113.7
+    },
+    {
+      "id": "M2279",
+      "aq": 81.9,
+      "type": "Anomic",
+      "scan_day": 272,
+      "test_day": 272,
+      "volume_cm3": 46.5
+    },
+    {
+      "id": "M2281",
+      "aq": 92.0,
+      "type": "Anomic",
+      "scan_day": 500,
+      "test_day": 430,
+      "volume_cm3": 59.3
+    },
+    {
+      "id": "M2282",
+      "aq": 87.1,
+      "type": "Conduction",
+      "scan_day": 446,
+      "test_day": 534,
+      "volume_cm3": 56.2
+    },
+    {
+      "id": "M2283",
+      "aq": 47.3,
+      "type": "Broca",
+      "scan_day": 246,
+      "test_day": 246,
+      "volume_cm3": 57.4
+    },
+    {
+      "id": "M2285",
+      "aq": 76.4,
+      "type": "Anomic",
+      "scan_day": 344,
+      "test_day": 344,
+      "volume_cm3": 34.2
+    },
+    {
+      "id": "M2287",
+      "aq": 65.3,
+      "type": "Broca",
+      "scan_day": 397,
+      "test_day": 397,
+      "volume_cm3": 143.7
+    },
+    {
+      "id": "M2290",
+      "aq": 29.7,
+      "type": "Broca",
+      "scan_day": 320,
+      "test_day": 320,
+      "volume_cm3": 102.3
+    },
+    {
+      "id": "M2291",
+      "aq": 38.3,
+      "type": "Broca",
+      "scan_day": 3786,
+      "test_day": 7218,
+      "volume_cm3": 136.0
+    },
+    {
+      "id": "M2292",
+      "aq": 90.1,
+      "type": "Anomic",
+      "scan_day": 1190,
+      "test_day": 1247,
+      "volume_cm3": 110.6
+    },
+    {
+      "id": "M2293",
+      "aq": 20.2,
+      "type": "Broca",
+      "scan_day": 209,
+      "test_day": 209,
+      "volume_cm3": 247.4
+    },
+    {
+      "id": "M2294",
+      "aq": 92.8,
+      "type": "Anomic",
+      "scan_day": 56,
+      "test_day": 42,
+      "volume_cm3": 96.4
+    },
+    {
+      "id": "M2295",
+      "aq": 15.5,
+      "type": "Broca",
+      "scan_day": 239,
+      "test_day": 239,
+      "volume_cm3": 110.0
+    },
+    {
+      "id": "M2297",
+      "aq": 40.1,
+      "type": "Broca",
+      "scan_day": 6264,
+      "test_day": 6264,
+      "volume_cm3": 179.0
+    },
+    {
+      "id": "M2298",
+      "aq": 25.2,
+      "type": "Broca",
+      "scan_day": 382,
+      "test_day": 754,
+      "volume_cm3": 183.8
+    },
+    {
+      "id": "M2299",
+      "aq": 52.5,
+      "type": "Broca",
+      "scan_day": 424,
+      "test_day": 387,
+      "volume_cm3": 165.0
+    },
+    {
+      "id": "M2300",
+      "aq": 80.4,
+      "type": "Anomic",
+      "scan_day": 1457,
+      "test_day": 1451,
+      "volume_cm3": 119.1
+    },
+    {
+      "id": "M2304",
+      "aq": 55.9,
+      "type": "Broca",
+      "scan_day": 262,
+      "test_day": 262,
+      "volume_cm3": 77.8
+    },
+    {
+      "id": "M2305",
+      "aq": 76.1,
+      "type": "Anomic",
+      "scan_day": 475,
+      "test_day": 440,
+      "volume_cm3": 12.6
+    },
+    {
+      "id": "M2306",
+      "aq": 59.5,
+      "type": "Broca",
+      "scan_day": 707,
+      "test_day": 707,
+      "volume_cm3": 163.1
+    },
+    {
+      "id": "M2307",
+      "aq": 76.3,
+      "type": "TranscorticalMotor",
+      "scan_day": 371,
+      "test_day": 371,
+      "volume_cm3": 9.3
+    },
+    {
+      "id": "M2308",
+      "aq": 90.4,
+      "type": "Anomic",
+      "scan_day": 1705,
+      "test_day": 1705,
+      "volume_cm3": 45.6
+    },
+    {
+      "id": "M2309",
+      "aq": 60.6,
+      "type": "Conduction",
+      "scan_day": 960,
+      "test_day": 960,
+      "volume_cm3": 55.1
+    },
+    {
+      "id": "M2310",
+      "aq": 67.2,
+      "type": "Conduction",
+      "scan_day": 540,
+      "test_day": 540,
+      "volume_cm3": 274.0
+    }
+  ]
+}

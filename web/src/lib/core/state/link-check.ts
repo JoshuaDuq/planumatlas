@@ -82,6 +82,8 @@ export function checkLink(
   }
   // Focus is the selection's, and means nothing without one.
   if (state.focused && !state.selectedRegion) reject('focused');
+  // Stroke cases are picked in a region's sheet, and are not shown without one.
+  if ('strokeCases' in state && !state.selectedRegion) reject('strokeCases');
   // A lesion's colouring and drawn tract mean nothing without it; the tract must be one it reaches.
   if ('lesionMode' in state && !state.lesion) reject('lesionMode');
   if (

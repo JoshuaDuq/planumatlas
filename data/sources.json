@@ -1885,6 +1885,72 @@
       "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
       "citation": "https://doi.org/10.1167/18.13.23",
       "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/cdmd/stroke-lesions.npz",
+      "sha256": "27b0bed1a0238356794147c6cbdd4ac2b21b8611870ebc26179933ffac6a9f12",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004884/0885e5939abc8f909a175dd782369b7afc3fdd08/participants.tsv",
+          "sha256": "37a8e84577bbb5a8af8cb8a95b494473a939fed2fccbb35578262a620b1e184e"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI/T1_mean_228.nii.gz",
+          "sha256": "4d7f3467b654c84ef20b2fc6204c44262bd428c656a4fdf200ccbfb0ce3cd257"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI",
+          "sha256_list": "config/stroke-cases-lesions.sha256"
+        }
+      ],
+      "procedure": "scripts/register_stroke_cases.py: SynthMorph registration of the ARC mean healed T1 to brain.mgz, each normalised lesion read through the forward field",
+      "citation": "https://doi.org/10.1038/s41597-024-03819-7",
+      "license": "CC0 (dataset); BSD-2-Clause (normalised lesion maps, Chris Rorden)"
+    },
+    {
+      "path": "data/cdmd/stroke-registration.json",
+      "sha256": "ddb9c60cac12418f3ce475cb49b7b97fb744c07547f09c2b52cf8eabcc8fcde9",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004884/0885e5939abc8f909a175dd782369b7afc3fdd08/participants.tsv",
+          "sha256": "37a8e84577bbb5a8af8cb8a95b494473a939fed2fccbb35578262a620b1e184e"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI/T1_mean_228.nii.gz",
+          "sha256": "4d7f3467b654c84ef20b2fc6204c44262bd428c656a4fdf200ccbfb0ce3cd257"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI",
+          "sha256_list": "config/stroke-cases-lesions.sha256"
+        }
+      ],
+      "procedure": "scripts/register_stroke_cases.py: SynthMorph registration of the ARC mean healed T1 to brain.mgz, each normalised lesion read through the forward field",
+      "citation": "https://doi.org/10.1038/s41597-024-03819-7",
+      "license": "CC0 (dataset); BSD-2-Clause (normalised lesion maps, Chris Rorden)"
+    },
+    {
+      "path": "data/stroke-cases.json",
+      "sha256": "000c9bd1ed2066e58da031a62a3999d486f1d78ad82faace984d5b8dabf5c900",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004884/0885e5939abc8f909a175dd782369b7afc3fdd08/participants.tsv",
+          "sha256": "37a8e84577bbb5a8af8cb8a95b494473a939fed2fccbb35578262a620b1e184e"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI/T1_mean_228.nii.gz",
+          "sha256": "4d7f3467b654c84ef20b2fc6204c44262bd428c656a4fdf200ccbfb0ce3cd257"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/neurolabusc/AphasiaRecoveryCohortDemo/1d24ad4049f4dba536d51f5f80efdb0900393ac0/NIfTI",
+          "sha256_list": "config/stroke-cases-lesions.sha256"
+        }
+      ],
+      "procedure": "scripts/register_stroke_cases.py: SynthMorph registration of the ARC mean healed T1 to brain.mgz, each normalised lesion read through the forward field",
+      "citation": "https://doi.org/10.1038/s41597-024-03819-7",
+      "license": "CC0 (dataset); BSD-2-Clause (normalised lesion maps, Chris Rorden)"
     }
   ]
 }

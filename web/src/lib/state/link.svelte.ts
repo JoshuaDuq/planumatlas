@@ -1,6 +1,7 @@
 import { createLinkWriter } from '../core/state/link-writer.ts';
 import type { Engine } from '../engine/api.ts';
 import type { LesionStore } from './lesion.svelte.ts';
+import type { StrokeCasesStore } from './stroke-cases.svelte.ts';
 import type { ViewStore } from './view.svelte.ts';
 
 /**
@@ -15,12 +16,15 @@ export function createLink({
   engine,
   view,
   lesion,
+  strokeCases,
   write,
 }: {
   engine: Pick<Engine, 'on'>;
   view: ViewStore;
   /** The placed lesion, which the link carries beside the view. */
   lesion: Pick<LesionStore, 'sphere' | 'mode' | 'selectedTract' | 'coordinate'>;
+  /** The stroke cases on the stage, which the link carries too. */
+  strokeCases: Pick<StrokeCasesStore, 'chosen'>;
   write: () => void;
 }) {
   const writer = createLinkWriter(write);
@@ -32,6 +36,7 @@ export function createLink({
     void lesion.mode;
     void lesion.selectedTract;
     void lesion.coordinate;
+    void strokeCases.chosen;
     writer.schedule();
     return writer.cancel;
   });

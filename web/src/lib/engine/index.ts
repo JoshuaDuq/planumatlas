@@ -1,6 +1,8 @@
 import { Box3, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { fetchAsset } from '../core/assets/asset-cache.ts';
+import { fetchAsset, sha256Hex } from '../core/assets/asset-cache.ts';
+import { validateStrokeCases } from '../core/catalog/stroke-cases.ts';
+import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import { readComparisonGeometry } from '../core/assets/comparison-assets.ts';
 import { parseVisualFieldTerritories } from '../core/learning/visual-field.ts';
 import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
@@ -24,6 +26,7 @@ import { createFraming } from './framing.ts';
 import type { Emit } from './framing.ts';
 import { createHeldView } from './held-view.ts';
 import { createLesion } from './lesion/lesion.ts';
+import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
@@ -130,6 +133,12 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     const lesionLayer = new Group();
     lesionLayer.add(lesion.group);
     scene.scene.add(lesionLayer);
+    const strokeSolids = createStrokeCaseSolids({
+      planes: () => atlas.clippingPlanes,
+      invalidate: scene.invalidate,
+    });
+    cleanups.push(() => strokeSolids.dispose());
+    lesionLayer.add(strokeSolids.group);
 
     const reference = {
       active: false,
@@ -202,6 +211,54 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         });
       return territories;
     };
+    // The cohort and its masks, each read once and checked against the checksum published for it.
+    let strokeCases: Promise<StrokeCases> | null = null;
+    let strokeMasks: Promise<Uint32Array> | null = null;
+    const verified = async (file: string, sha256: string) => {
+      const buffer = await fetchAsset(new URL(file, absoluteManifestUrl));
+      if ((await sha256Hex(buffer)) !== sha256) throw new Error(`${file} does not match its checksum.`);
+      return buffer;
+    };
+    const loadStrokeCases = () => {
+      const published = atlas.manifest.stroke_cases;
+      if (!published) return Promise.reject(new Error('This anatomy publishes no stroke cases.'));
+      strokeCases ??= verified(published.file, published.sha256)
+        .then((buffer) =>
+          validateStrokeCases(JSON.parse(new TextDecoder().decode(buffer)), atlas.regions),
+        )
+        .catch((error: unknown) => {
+          strokeCases = null;
+          throw error;
+        });
+      return strokeCases;
+    };
+    const loadStrokeMasks = (data: StrokeCases) => {
+      strokeMasks ??= verified(data.masks.file, data.masks.sha256)
+        .then((buffer) => {
+          const masks = new Uint32Array(buffer);
+          const last = data.cases.at(-1);
+          if (last && masks.length !== last.runs[0] + last.runs[1]) {
+            throw new Error('The stroke-case masks do not hold every case.');
+          }
+          return masks;
+        })
+        .catch((error: unknown) => {
+          strokeMasks = null;
+          throw error;
+        });
+      return strokeMasks;
+    };
+    let strokeRequest = 0;
+    const showStrokeCases = async (ids: readonly string[]) => {
+      const ask = ++strokeRequest;
+      if (!ids.length) {
+        strokeSolids.clear();
+        return;
+      }
+      const data = await loadStrokeCases();
+      const masks = await loadStrokeMasks(data);
+      if (ask === strokeRequest) strokeSolids.show(data, masks, ids);
+    };
     const showVisualField = (map: typeof visualMap) => {
       atlas.showVisualField(map, token('--overlay-accent'));
       visualMap = map;
@@ -247,6 +304,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     const onChange = () => {
       stage.invalidate();
       lesion.refresh();
+      strokeSolids.refresh();
       refresh();
       events.emit('change', { model: atlas.state, sections: engineSections.state });
     };
@@ -354,11 +412,17 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         territories: loadTerritories,
         centralRegion: (hemisphere) => atlas.visualFieldRegion(hemisphere),
       },
+      strokeCases: {
+        available: Boolean(atlas.manifest.stroke_cases),
+        cases: loadStrokeCases,
+        show: showStrokeCases,
+      },
 
       applyTheme() {
         scene.applyTheme();
         sections.applyTheme();
         lesion.applyTheme();
+        strokeSolids.applyTheme();
         if (visualMap) showVisualField(visualMap);
         refresh();
       },

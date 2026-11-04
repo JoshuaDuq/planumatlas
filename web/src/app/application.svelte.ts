@@ -1,3 +1,4 @@
+import type { StrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
 import type { AnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
@@ -52,6 +53,8 @@ export interface World extends AppContext {
   coordinates: CoordinatePlacement | null;
   /** The visual-field map's dot and the cortex last read. */
   visualFieldMap: VisualFieldMapStore;
+  /** The stroke cases on the stage, and the cohort they come from. */
+  strokeCases: StrokeCasesStore;
 }
 
 /** Runs `build` where `$effect`s may be created and settles them, as a component's setup would. */

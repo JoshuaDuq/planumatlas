@@ -22,6 +22,7 @@ import type {
 } from '../core/catalog/segmentation-agreement.ts';
 import type { ReceptorFingerprints } from '../core/catalog/receptor-fingerprints.ts';
 import type { StimulationResponses } from '../core/catalog/stimulation-responses.ts';
+import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
   CutMode,
   DisplaySettings,
@@ -692,6 +693,19 @@ export interface EngineLesion {
   clearTract(): void;
 }
 
+/** Real stroke lesions (`manifest.stroke_cases`), drawn on the stage as smoothed solids. */
+export interface EngineStrokeCases {
+  /** The anatomy publishes stroke cases; without them `cases` and `show` reject. */
+  readonly available: boolean;
+  /** The cohort, checked against the regions it names; downloaded on first call. */
+  cases(): Promise<StrokeCases>;
+  /**
+   * Draw one person's lesion, or two as the first's alone, the second's alone and both; none clears.
+   * The first call downloads the masks. A later call replaces an earlier one still meshing.
+   */
+  show(ids: readonly string[]): Promise<void>;
+}
+
 /** A point of the visual field in degrees from fixation: x to the right, y up. */
 export interface VisualFieldPoint {
   x: number;
@@ -745,6 +759,7 @@ export interface Engine extends Emitter<EngineEvents> {
   readonly tracts: EngineTracts;
   readonly lesion: EngineLesion;
   readonly visualField: EngineVisualField;
+  readonly strokeCases: EngineStrokeCases;
 
   /** Re-read the colours from the token layer after a theme change (app.js:131, 2106). */
   applyTheme(theme: Theme): void;

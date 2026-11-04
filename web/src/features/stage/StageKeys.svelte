@@ -30,7 +30,7 @@
     keyPlates,
     swatchColor,
   } from './stage-keys.ts';
-  import type { ColoredNetworks, KeyName, KeyPlate, KeyRow } from './stage-keys.ts';
+  import type { ColoredNetworks, KeyName, KeyPlate, KeyRow, KeySources } from './stage-keys.ts';
   import './stage-vars.css';
 
   interface Props {
@@ -45,6 +45,8 @@
     territories?: readonly ArterialTerritory[] | null;
     /** The key of the paint on show (`legendFor`), or null. */
     legend: Legend | null;
+    /** The stroke cases on the stage, or null. */
+    cases?: KeySources['cases'];
     directionShown: boolean;
     /** A row alone, or null for every row (`excursions.pickPaint`). */
     onPaintPick: (id: string | null) => void;
@@ -60,6 +62,7 @@
     cabNp,
     territories = null,
     legend,
+    cases = null,
     directionShown,
     onPaintPick,
   }: Props = $props();
@@ -73,6 +76,7 @@
       cabNp,
       territories,
       legend,
+      cases,
       directionShown,
     }),
   );

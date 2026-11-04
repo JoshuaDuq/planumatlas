@@ -68,6 +68,8 @@ export interface LinkState {
   coordinate: [number, number, number] | null;
   /** A published coordinate space's id, or `unstated`. */
   coordinateSpace: string | null;
+  /** The stroke cases on the stage: one person, or two compared, first first. */
+  strokeCases: string[] | null;
 }
 
 /**
