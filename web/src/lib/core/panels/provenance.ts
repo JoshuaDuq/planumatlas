@@ -167,6 +167,16 @@ export function provenanceRows(
         ]
       : [],
   );
+  const stimulation = manifest.stimulation_responses as Described | undefined;
+  add(
+    copy.stimulation,
+    stimulation
+      ? [
+          { text: stimulation.label, note: stimulation.license },
+          ...stimulation.citations!.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
   const domainCopy = t(lang, 'domains');
   const published = manifest.neuropsych_domains as Described | undefined;
   add(

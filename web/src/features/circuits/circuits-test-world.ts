@@ -8,6 +8,7 @@ import functionalRegionsFile from '../../../../public/models/cdmd/functional-reg
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import termsFile from '../../../../public/models/cdmd/neurosynth-terms.json' with { type: 'json' };
+import retinotopyFile from '../../../../public/models/cdmd/retinotopy.json' with { type: 'json' };
 import { createExcursions } from '../../lib/controller/excursion.svelte.ts';
 import { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import {
@@ -21,6 +22,7 @@ import {
 } from '../../lib/core/catalog/neuropsych-domains.ts';
 import { loadClinicalCatalog } from '../../lib/core/clinical/load.ts';
 import { loadCircuitCatalog } from '../../lib/core/learning/load.ts';
+import { parseVisualFieldTerritories } from '../../lib/core/learning/visual-field.ts';
 import type { ReaderFailure, ReaderState } from '../../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../../lib/core/state/scene-commands.ts';
 import type { DomainsData, FunctionalRegionsData, MprPlane } from '../../lib/engine/api.ts';
@@ -28,8 +30,10 @@ import { createFakeEngine } from '../../lib/engine/fake.ts';
 import { createEngineSync } from '../../lib/state/engine-sync.svelte.ts';
 import { createLessonStore, createSessionStore } from '../../lib/state/session.svelte.ts';
 import { createView } from '../../lib/state/view.svelte.ts';
+import { createVisualFieldMapStore } from '../../lib/state/visual-field-map.svelte.ts';
 import { VIEW_NAMES, type Manifest } from '../../lib/types/index.ts';
 import { createCircuitExplorer } from './circuits-explorer.svelte.ts';
+import { createVisualFieldExplorer } from './visual-field-explorer.svelte.ts';
 
 export const manifest = manifestFile as unknown as Manifest;
 
@@ -59,6 +63,7 @@ export function createWorld() {
     manifest,
     domains: domains as unknown as DomainsData,
     functionalRegions: functionalRegions as unknown as FunctionalRegionsData,
+    visualFieldTerritories: parseVisualFieldTerritories(retinotopyFile),
   });
   const engineSync = createEngineSync(engine);
   const session = createSessionStore({ views: VIEW_NAMES });
@@ -73,6 +78,7 @@ export function createWorld() {
     referenceAnatomy: engine.tracts.anatomy,
   });
   const anatomy = createCatalog(manifest);
+  const visualFieldMap = createVisualFieldMapStore(lesson);
 
   const real = createSceneCommands({
     model: engine.model,
@@ -137,6 +143,18 @@ export function createWorld() {
     excursions,
     labelOf: (id) => anatomy.label(id, { lang: session.state.lang } as never),
     openDeficit,
+    map: createVisualFieldExplorer({
+      view,
+      excursions,
+      lesson,
+      store: visualFieldMap,
+      visualField: engine.visualField,
+      retinotopy: manifest.retinotopy ?? null,
+      tours: circuits.all.filter((circuit) =>
+        circuit.steps.some((step) => step.map === 'visual-field'),
+      ),
+      openTour: (id) => explorer.openCircuit(id),
+    }),
   });
   return {
     engine,
@@ -151,6 +169,7 @@ export function createWorld() {
     mri,
     openDeficit,
     hold,
+    visualFieldMap,
   };
 }
 

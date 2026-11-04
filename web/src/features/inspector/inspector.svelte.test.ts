@@ -913,6 +913,65 @@ describe('receptor densities', () => {
   });
 });
 
+describe('stimulation responses', () => {
+  const TRIANGULAR = 'destrieux:left:14'; // takes LFC from 92 of its cortical channels
+  const LATERAL_SULCUS = 'destrieux:left:41'; // mixed channels: no label
+  const rows = (details: Element) => [...details.querySelectorAll('.stimulation-row')].map(text);
+
+  test('a parcel labelled by its contacts lists drawn rates first, then counts too thin for a rate', async () => {
+    render(Fixture, { regionId: TRIANGULAR });
+    const responses = section('Stimulation responses');
+    expect(responses.open).toBe(false);
+    responses.open = true;
+    expect(
+      page.getByRole('radio', { name: 'Stimulated here' }).element().getAttribute('aria-checked'),
+    ).toBe('true');
+    const outbound = rows(responses);
+    expect(outbound[0]).toBe('Middle thalamus 75% 167 of 223 pairs · 12 people');
+    expect(outbound.at(-2)).toBe('Frontal pole no rate 39 of 45 pairs · 1 person');
+    expect(text(responses)).toContain(
+      'Takes the authors’ label Lateral frontal cortex: 92% of the 92 cortical channels from 21 people',
+    );
+    expect([...responses.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual([
+      'https://doi.org/10.1038/s41593-025-02009-x',
+      'https://doi.org/10.5281/zenodo.16939708',
+    ]);
+    await userEvent.click(page.getByRole('radio', { name: 'Recorded here' }));
+    await userEvent.click(page.getByRole('radio', { name: 'Opposite side' }));
+    expect(rows(responses)[0]).toBe('Medial frontal cortex 37% 109 of 293 pairs · 7 people');
+    await expectAxeClean();
+  });
+
+  test('the thalamus offers its three sites by position; a parcel without a label has no section', async () => {
+    const screen = await render(Fixture, { regionId: THALAMUS });
+    const responses = section('Stimulation responses');
+    responses.open = true;
+    // Three full names overflow the sheet's segmented track; the sites are drawn short.
+    expect(
+      [...page.getByRole('radiogroup', { name: 'Thalamic site' }).element().children].map(text),
+    ).toEqual(['Anterior', 'Middle', 'Posterior']);
+    await userEvent.click(page.getByRole('radio', { name: 'Posterior thalamus' }));
+    expect(rows(responses)[0]).toBe('Posterior thalamus 88% 67 of 76 pairs · 18 people');
+    expect(text(responses)).toContain('Not tested: Insula–lateral frontal border.');
+    expect(text(responses)).toContain('grouped thalamic contacts by position, not by nucleus');
+    expect(text(responses)).toContain(
+      'Matched by name to the authors’ label Anterior thalamus, Middle thalamus, Posterior thalamus.',
+    );
+    await screen.rerender({ regionId: LATERAL_SULCUS });
+    expect(section('Stimulation responses')).toBeUndefined();
+    await screen.rerender({ regionId: V1 });
+    expect(section('Stimulation responses')).toBeUndefined();
+  });
+
+  test('French', async () => {
+    render(Fixture, { regionId: TRIANGULAR, lang: 'fr' });
+    const responses = section('Réponses à la stimulation');
+    responses.open = true;
+    expect(page.getByRole('radio', { name: 'Stimulé ici' }).element()).toBeTruthy();
+    expect(rows(responses)[0]).toBe('Thalamus moyen 75 % 167 paires sur 223 · 12 personnes');
+  });
+});
+
 describe('typical arterial supply', () => {
   test('a deep structure lists its territories by voxel share, with the caveat', async () => {
     render(Fixture, { regionId: 'aseg:left:12' });

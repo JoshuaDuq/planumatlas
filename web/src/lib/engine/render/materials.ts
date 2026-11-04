@@ -3,6 +3,7 @@ import type {
   BufferGeometry,
   Color,
   IUniform,
+  Vector3,
   Mesh,
   WebGLProgramParametersWithUniforms,
 } from 'three';
@@ -56,6 +57,25 @@ export interface AnatomicalUserData {
   territoryMix: IUniform<number> | null;
 }
 
+/** The visual-field map's uniforms, one set shared by every cortical material of an anatomy. */
+export interface VisualFieldUniforms {
+  /** 1 while the map replaces the cortex's colours. */
+  visualMix: IUniform<number>;
+  /** The dot's centre (x right, y up) and radius, in degrees; a negative radius draws no dot. */
+  visualProbe: IUniform<Vector3>;
+  /** The eccentricity the template was fitted to, in degrees; beyond it the map is drawn darker. */
+  visualMeasured: IUniform<number>;
+  /** The dot's colour, linear. */
+  visualAccent: IUniform<Color>;
+}
+
+/*
+ * The map is achromatic but for the dot: V1, V2 and V3 as three greys, lightest first, on a darker
+ * cortex, so the areas' borders read under the stage's light; the measured eccentricity is a light
+ * line, and the cortex beyond it darker. Linear values.
+ */
+const VISUAL_TONES = { outside: 0.045, areas: [0.6, 0.27, 0.11], extrapolated: 0.65, line: 0.85 };
+
 /** Display colours describe tissue classes, never a measured tissue albedo. */
 export function tissueColor(
   region: { tissue?: string; kind?: string; source_name?: string },
@@ -98,7 +118,7 @@ export function greyed(color: Color): Color {
  * in 0..1 rather than in millimetres of sulcal depth. A file written before
  * that encoding carries no span and is read straight through.
  */
-function fieldDecode(ranges: Appearance['field_ranges'], name: string): [number, number] {
+export function fieldDecode(ranges: Appearance['field_ranges'], name: string): [number, number] {
   const span = ranges?.[name];
   return span ? [span[0], span[1] - span[0]] : [0, 1];
 }
@@ -115,6 +135,7 @@ function addFoldShading(
   { folds, intensity, field_ranges: ranges }: Appearance,
   withNetworks: boolean,
   withTerritories: boolean,
+  visual: VisualFieldUniforms | null,
 ): void {
   const variation = { value: intensity.surface_strength };
   const networkMix = { value: 0 };
@@ -129,6 +150,12 @@ function addFoldShading(
     shader.uniforms.tissueVariation = variation;
     if (withNetworks) shader.uniforms.networkMix = networkMix;
     if (withTerritories) shader.uniforms.territoryMix = territoryMix;
+    if (visual) {
+      Object.assign(shader.uniforms, visual);
+      shader.uniforms.visualXDecode = { value: fieldDecode(ranges, '_FIELD_X') };
+      shader.uniforms.visualYDecode = { value: fieldDecode(ranges, '_FIELD_Y') };
+      shader.uniforms.visualSigmaDecode = { value: fieldDecode(ranges, '_PRF_SIGMA') };
+    }
     shader.uniforms.sulcDecode = { value: fieldDecode(ranges, '_SULC') };
     shader.uniforms.opennessDecode = { value: fieldDecode(ranges, '_OPENNESS') };
     shader.uniforms.t1Decode = { value: fieldDecode(ranges, '_T1') };
@@ -149,6 +176,7 @@ varying float vT1;
 varying float vSulcalDepth;
 ${withNetworks ? 'attribute vec4 _networkColor;\nvarying vec4 vNetworkColor;' : ''}
 ${withTerritories ? 'attribute vec4 _territoryColor;\nvarying vec4 vTerritoryColor;' : ''}
+${visual ? VISUAL_VERTEX_DECLARATIONS : ''}
 ${shader.vertexShader}`.replace(
       '#include <begin_vertex>',
       `#include <begin_vertex>
@@ -156,7 +184,8 @@ vSulcalDepth = _sulc * sulcDecode.y + sulcDecode.x;
 vOpenness = _openness * opennessDecode.y + opennessDecode.x;
 vT1 = _t1 * t1Decode.y + t1Decode.x;
 ${withNetworks ? 'vNetworkColor = _networkColor;' : ''}
-${withTerritories ? 'vTerritoryColor = _territoryColor;' : ''}`,
+${withTerritories ? 'vTerritoryColor = _territoryColor;' : ''}
+${visual ? VISUAL_VERTEX : ''}`,
     );
     shader.fragmentShader = `varying float vSulcalDepth;
 varying float vOpenness;
@@ -168,6 +197,7 @@ uniform vec2 foldRange;
 uniform vec2 foldStrength;
 ${withNetworks ? 'varying vec4 vNetworkColor;\nuniform float networkMix;' : ''}
 ${withTerritories ? 'varying vec4 vTerritoryColor;\nuniform float territoryMix;' : ''}
+${visual ? VISUAL_FRAGMENT_DECLARATIONS : ''}
 ${shader.fragmentShader}`
       .replace(
         '#include <color_fragment>',
@@ -189,6 +219,7 @@ ${shader.fragmentShader}`
         diffuseColor.rgb, vTerritoryColor.rgb, territoryMix * vTerritoryColor.a);`
           : ''
       }
+      ${visual ? VISUAL_FRAGMENT : ''}
       float intensity = clamp((vT1 - t1Range.x) / (t1Range.y - t1Range.x), 0.0, 1.0);
       diffuseColor.rgb *= 1.0 + tissueVariation * (2.0 * intensity - 1.0);`,
       )
@@ -204,13 +235,72 @@ ${shader.fragmentShader}`
       );
   };
   material.customProgramCacheKey = () =>
-    `source-tissue-relief-v5${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}`;
+    `source-tissue-relief-v5${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
 }
+
+/*
+ * Each vertex's position is weighted by whether it lies in V1–V3, and the fragment divides the
+ * weight back out: a triangle reaching past V3 then interpolates only its V1–V3 corners, where a
+ * plain average would pull it towards fixation (zero) across the band.
+ */
+const VISUAL_VERTEX_DECLARATIONS = `attribute float _field_x;
+attribute float _field_y;
+attribute float _prf_sigma;
+attribute float _visual_area;
+uniform vec2 visualXDecode;
+uniform vec2 visualYDecode;
+uniform vec2 visualSigmaDecode;
+varying vec3 vVisualField;
+varying vec2 vVisualArea;`;
+
+const VISUAL_VERTEX = `float visualIn = step(0.5, _visual_area);
+vVisualField = visualIn * vec3(
+  _field_x * visualXDecode.y + visualXDecode.x,
+  _field_y * visualYDecode.y + visualYDecode.x,
+  _prf_sigma * visualSigmaDecode.y + visualSigmaDecode.x);
+vVisualArea = vec2(visualIn * _visual_area, visualIn);`;
+
+const VISUAL_FRAGMENT_DECLARATIONS = `varying vec3 vVisualField;
+varying vec2 vVisualArea;
+uniform float visualMix;
+uniform vec3 visualProbe;
+uniform float visualMeasured;
+uniform vec3 visualAccent;`;
+
+const [V1_TONE, V2_TONE, V3_TONE] = VISUAL_TONES.areas.map((tone) => tone.toFixed(3));
+
+/*
+ * The dot's territory is the cortex whose predicted pRF centre lies inside it; its reach, drawn
+ * fainter, the cortex whose pRF comes within one sigma of it. The measured eccentricity is a line.
+ */
+const VISUAL_FRAGMENT = `
+      if (visualMix > 0.5) {
+        vec3 tone = vec3(${VISUAL_TONES.outside.toFixed(3)});
+        float share = vVisualArea.y;
+        if (share >= 0.5) {
+          vec3 field = vVisualField / share;
+          float area = floor(vVisualArea.x / share + 0.5);
+          tone = vec3(area < 1.5 ? ${V1_TONE} : area < 2.5 ? ${V2_TONE} : ${V3_TONE});
+          float eccentricity = length(field.xy);
+          if (eccentricity > visualMeasured) tone *= ${VISUAL_TONES.extrapolated.toFixed(3)};
+          float line = 1.0 - smoothstep(0.0, 1.5 * fwidth(eccentricity), abs(eccentricity - visualMeasured));
+          tone = mix(tone, vec3(${VISUAL_TONES.line.toFixed(3)}), 0.7 * line);
+          if (visualProbe.z >= 0.0) {
+            float d = distance(field.xy, visualProbe.xy);
+            float edge = fwidth(d);
+            float core = 1.0 - smoothstep(visualProbe.z - edge, visualProbe.z + edge, d);
+            float reach = 1.0 - smoothstep(visualProbe.z + field.z - edge, visualProbe.z + field.z + edge, d);
+            tone = mix(tone, visualAccent, max(core, 0.45 * reach));
+          }
+        }
+        diffuseColor.rgb = tone;
+      }`;
 
 export function createAnatomicalMaterial(
   mesh: Mesh<BufferGeometry, MeshStandardMaterial>,
   region: Region,
   appearance: Appearance,
+  visual: VisualFieldUniforms | null = null,
 ): MeshPhysicalMaterial {
   const material = new MeshPhysicalMaterial();
   MeshStandardMaterial.prototype.copy.call(material, mesh.material);
@@ -234,11 +324,20 @@ export function createAnatomicalMaterial(
         throw new Error(`Missing source shading attribute ${name}: ${region.id}`);
       }
     }
+    if (visual) {
+      for (const name of ['_field_x', '_field_y', '_prf_sigma', '_visual_area']) {
+        if (!mesh.geometry.getAttribute(name)) {
+          material.dispose();
+          throw new Error(`Missing visual-field attribute ${name}: ${region.id}`);
+        }
+      }
+    }
     addFoldShading(
       material,
       appearance,
       Boolean(mesh.geometry.getAttribute('_network')),
       Boolean(mesh.geometry.getAttribute('_territory')),
+      visual,
     );
   }
   return material;

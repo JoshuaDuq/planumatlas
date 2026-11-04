@@ -8,20 +8,20 @@ What opening a function does to the scene (draw, frame, hold the scene, the see-
 
 ### FUNC-01 · At rest the list shows "All functions", then every curated function under its group
 
-- **Rule:** With no query, the list starts with an "All functions" row, then lists every curated function under its group heading, groups in their published order. A row shows the function's colour swatch, its name and its study count; its accessible name continues with the study count and the areas it reaches. The "All functions" row has no count and no colour.
+- **Rule:** With no query, the list starts with an "All functions" row, then lists every curated function under its group heading, groups in their published order. A row shows the function's name and its study count, and no colour swatch (the overview's colours are keyed in its profile and on the stage); its accessible name continues with the study count and the areas it reaches. The "All functions" row has no count.
 - **Kind:** data
 - **Level:** unit (view-model: `functionList`)
 - **Source:** `viewer/ui/panels/functions.js:31-45,421-436`
-- **Expected:** `functionList(domains, '', 'en')` → `overview.id = 'all'`, `name = 'All functions'`, `studies = null`, `colour = null`, detail "Each area in its strongest core assessment function"; 6 groups in the order `attention-executive, memory, language-number, perception, sensorimotor, social-emotional`; 70 rows in all; no term groups; no suggestion. A row's `detail` reads "<n> studies · <a> areas[, <s> structures]"; `colour` is the domain's published colour; `lang` null.
+- **Expected:** `functionList(domains, '', 'en')` → `overview.id = 'all'`, `name = 'All functions'`, `studies = null`, detail "Each area in its strongest core assessment function"; 6 groups in the order `attention-executive, memory, language-number, perception, sensorimotor, social-emotional`; 70 rows in all; no term groups; no suggestion. A row's `detail` reads "<n> studies · <a> areas[, <s> structures]"; `lang` null. In the browser a row outside compare mode holds no `.pick` and has no role.
 - **Covered by:** `src/features/functions/functions-view.test.ts` (R; the group order and row count are re-derived from the data, not fixed); `src/features/functions/functions.svelte.test.ts` (R)
 
 ### FUNC-02 · Groups are labelled lists of buttons, and the count column is for the eye
 
-- **Rule:** The list is a group named "Functions". Each group is a `role="group"` labelled by its `h3`, holding a `ul` of `li` buttons; the "All functions" row is its own list. Each heading names the column of study counts ("Studies"), and the column head, the count and the swatch are hidden from assistive technology. A list of buttons, not a listbox.
+- **Rule:** The list is a group named "Functions". Each group is a `role="group"` labelled by its `h3`, holding a `ul` of `li` buttons; the "All functions" row is its own list. Each heading names the column of study counts ("Studies"), and the column head and the count are hidden from assistive technology. A list of buttons, not a listbox.
 - **Kind:** accessibility
 - **Level:** browser — DOM semantics and accessible names
 - **Source:** `viewer/ui/panels/functions.js:73-84`; deviation `x1-list-semantics.md`; decision 37 on #4
-- **Expected:** `getByRole('group', {name: 'Functions', exact: true})` visible; every `[role=group][aria-labelledby]` is labelled by an `H3` and holds `ul > li > button`; `.group-count`, `.function-swatch`, `.column-head` have `aria-hidden="true"`; every column head reads "Studies"; the first curated row's name matches `^<name> , [\d,]+ studies? ·`.
+- **Expected:** `getByRole('group', {name: 'Functions', exact: true})` visible; every `[role=group][aria-labelledby]` is labelled by an `H3` and holds `ul > li > button`; `.group-count`, `.column-head` have `aria-hidden="true"`; every column head reads "Studies"; the first curated row's name matches `^<name> , [\d,]+ studies? ·`.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
 
 ### FUNC-03 · The list's scope stands under it at rest and leaves while searching
@@ -306,13 +306,13 @@ What opening a function does to the scene (draw, frame, hold the scene, the see-
 - **Expected:** `expectAxeClean()` → no violations in each state.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R; the full theme × width matrix in each of 3 states × 2 languages, see the audit's slow tests)
 
-### FUNC-33 · In forced colours the swatches, the open row and the focus ring stay visible
+### FUNC-33 · In forced colours a ticked pick, the open row and the focus ring stay visible
 
-- **Rule:** With forced colours, a function's swatch keeps its colour, the open row has a solid outline, and a row reached by keyboard has a solid focus ring.
+- **Rule:** With forced colours, the open row has a solid outline, a ticked compare pick is filled, and a row reached by keyboard has a solid focus ring.
 - **Kind:** accessibility
 - **Level:** browser — computed CSS
 - **Source:** decision record #56
-- **Expected:** `forced-colors: active` → swatch `forced-color-adjust: none` and a non-transparent background; open row `outline-style: solid`; field, ArrowDown → the focused row `outline-style: solid`.
+- **Expected:** `forced-colors: active` → open row `outline-style: solid`; Compare, then a row → its `.pick` has a non-transparent background; field, ArrowDown → the focused row `outline-style: solid`.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
 
 ### FUNC-34 · Targets are 24 px with a fine pointer and 44 px with a coarse one
@@ -331,4 +331,40 @@ What opening a function does to the scene (draw, frame, hold the scene, the see-
 - **Level:** browser — layout
 - **Source:** WCAG 2.2 SC 1.4.4, 1.4.10, 1.4.12
 - **Expected:** every visible `button, summary, h2, h3, p, label`: `scrollWidth ≤ clientWidth + 1`; `button, summary`: `scrollHeight ≤ clientHeight + 1`; root `scrollWidth ≤ clientWidth + 1`. 390 px page → `scrollWidth − clientWidth = 0`.
+- **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
+
+## Compare
+
+A comparison is a function id of its own, `compare:<a>,<b>`: it rides the selected function through the session, the link (`function=`), Restore and the paint. Its data (`validComparison`, `comparedAreas`, `domainPaint`) is in `neuropsych-domains.test.ts`; its stage key in `paint.test.ts`; its hover chip in `hover-text.test.ts`; its link in `links.test.ts` (LINK-09).
+
+### FUNC-36 · Compare turns the rows into checkboxes that take two functions
+
+- **Rule:** A Compare button ends the search label's line. Pressed, it reads Cancel; the "All functions" row leaves; every row becomes a `role="checkbox"` with a square that ticks; a bar under the list says what to pick, then names the pair, beside a Compare button that is disabled until two are picked. With two picked the other rows are disabled and take no third. A pick survives a search, so a Neurosynth term can be compared. Cancel forgets the picks and restores the rows. Comparisons hold two functions: three colours (each function's and "both") are the most the finding palette keeps apart from one another and from tissue under colour-vision deficiency.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** Compare → `aria-pressed="true"`, text "Cancel", no `[data-function="all"]`, rows `role="checkbox"` `aria-checked="false"`, `[data-compare-open]` `aria-disabled="true"`, bar "Choose two functions or terms to compare"; Working memory, Attention → picked `['working-memory','attention']`, bar "Working memory · Attention", a third row `aria-disabled="true"` and unchanged when pressed; Cancel → picked `[]`, no bar, rows without a role. A pick, a search for "action", then `term:action` → both picked. axe clean in compare mode.
+- **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
+
+### FUNC-37 · A comparison paints each function, and the areas both reach, in its own colour
+
+- **Rule:** Opening a comparison paints each area one function reaches in that function's colour (finding colours 1 and 2) and each area both reach in the shared colour (finding colour 3); teaching units take their structure's colour. The stage key names both functions and "Both", is not pickable, and greys a colour no area carries. Hovering a painted area names the compared functions that reach it. The scene is framed on each function's strongest areas, and the see-through offer is the first function's that has one.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** `domainPaint(p, 'compare:language,memory')` colours the area both reach `SHARED_COLOR`, the others `COMPARE_COLORS[0|1]`; an invalid comparison throws; `legendFor` titles it "Langage · Mémoire" with rows Langage, Mémoire, Les deux; the hover chip on an area both reach says "Memory, Attention".
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/lib/core/state/paint.test.ts`, `src/features/stage/hover-text.test.ts` (R)
+
+### FUNC-38 · A comparison's profile lists its functions, the areas both reach with both z, then each one's own
+
+- **Rule:** The heading names the pair and takes focus; the meta line counts the areas and structures both reach at the threshold. Under the caveats (with the term caveat when a term is compared, and a note that z grows with study count, so compare reach, not z), a Functions section links each function to its own profile beside its colour; then "Areas both reach", each row with both z under colour-marked column heads and each z named for a screen reader; then, under each function's name and colour, the areas the other does not reach, strongest first. Each list shows twelve and folds the rest under a disclosure. Every area appears once.
+- **Kind:** data
+- **Level:** unit (view-model: `comparisonProfile`, `sharedCount`) and browser
+- **Expected:** `comparisonProfile(deps, 'compare:working-memory,term:action', 'fr')` → name "Mémoire de travail · action", the term marked English, shared areas exactly the intersection with z in order, each own list the remainder; a non-comparison id throws. In the browser the heading reads "Working memory · Attention", the meta line matches "Both reach … at z ≥ 3", a shared row has two `.area-z`, and the Attention link opens Attention; axe clean.
+- **Covered by:** `src/features/functions/functions-view.test.ts` (R); `src/features/functions/functions.svelte.test.ts` (R)
+
+### FUNC-39 · Restore from a comparison returns focus to Compare, with the picks kept
+
+- **Rule:** Restore closes the comparison like any function; focus returns to the bar's Compare button, and compare mode keeps its two picks so one can be swapped.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** open a comparison, Restore → `selectedFunction` null, focus on `[data-compare-open]`, picks unchanged.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)

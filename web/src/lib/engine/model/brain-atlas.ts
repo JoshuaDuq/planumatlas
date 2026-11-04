@@ -1,7 +1,16 @@
-import { Box3, BufferAttribute, Group, Matrix4, Mesh, SRGBColorSpace, Vector3 } from 'three';
+import {
+  Box3,
+  BufferAttribute,
+  Color,
+  Group,
+  Matrix4,
+  Mesh,
+  SRGBColorSpace,
+  Triangle,
+  Vector3,
+} from 'three';
 import type {
   BufferGeometry,
-  Color,
   DataTexture,
   Intersection,
   Material,
@@ -38,11 +47,20 @@ import { validateSegmentationAgreement } from '../../core/catalog/segmentation-a
 import type { SegmentationAgreement } from '../../core/catalog/segmentation-agreement.ts';
 import { validateReceptorFingerprints } from '../../core/catalog/receptor-fingerprints.ts';
 import type { ReceptorFingerprints } from '../../core/catalog/receptor-fingerprints.ts';
+import { validateStimulationResponses } from '../../core/catalog/stimulation-responses.ts';
+import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
 import { createDissection } from '../../core/state/dissection.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
-import { ghostColor, tissueColor, createAnatomicalMaterial } from '../render/materials.ts';
-import type { Appearance, AnatomicalUserData } from '../render/materials.ts';
+import {
+  ghostColor,
+  tissueColor,
+  createAnatomicalMaterial,
+  fieldDecode,
+} from '../render/materials.ts';
+import type { Appearance, AnatomicalUserData, VisualFieldUniforms } from '../render/materials.ts';
+import type { SurfaceHit } from '../render/picking.ts';
+import type { VisualFieldDot, VisualFieldReading } from '../api.ts';
 import { GHOST } from '../render/ghost-order.ts';
 import {
   attachNetworkColors,
@@ -368,28 +386,39 @@ export class BrainAtlas extends EventTarget {
     const readJson = async <T>(address: string | URL) =>
       JSON.parse(new TextDecoder().decode(await fetchAsset(address))) as T;
     const manifest = await readJson<AtlasManifest>(url.href);
-    const [cabNp, functionalRegions, domains, terms, boundaryCertainty, receptors, agreement] =
-      await Promise.all([
-        manifest.cab_np ? readJson<CabNpPartition>(new URL(manifest.cab_np.file, url)) : null,
-        manifest.functional_regions
-          ? readJson<FunctionalRegions>(new URL(manifest.functional_regions.file, url))
-          : null,
-        manifest.neuropsych_domains
-          ? readJson<NeuropsychDomains>(new URL(manifest.neuropsych_domains.file, url))
-          : null,
-        manifest.neurosynth_terms
-          ? readJson<NeurosynthTerms>(new URL(manifest.neurosynth_terms.file, url))
-          : null,
-        manifest.boundary_certainty
-          ? readJson<BoundaryCertainty>(new URL(manifest.boundary_certainty.file, url))
-          : null,
-        manifest.receptor_fingerprints
-          ? readJson<ReceptorFingerprints>(new URL(manifest.receptor_fingerprints.file, url))
-          : null,
-        manifest.segmentation_agreement
-          ? readJson<SegmentationAgreement>(new URL(manifest.segmentation_agreement.file, url))
-          : null,
-      ]);
+    const [
+      cabNp,
+      functionalRegions,
+      domains,
+      terms,
+      boundaryCertainty,
+      receptors,
+      agreement,
+      stimulation,
+    ] = await Promise.all([
+      manifest.cab_np ? readJson<CabNpPartition>(new URL(manifest.cab_np.file, url)) : null,
+      manifest.functional_regions
+        ? readJson<FunctionalRegions>(new URL(manifest.functional_regions.file, url))
+        : null,
+      manifest.neuropsych_domains
+        ? readJson<NeuropsychDomains>(new URL(manifest.neuropsych_domains.file, url))
+        : null,
+      manifest.neurosynth_terms
+        ? readJson<NeurosynthTerms>(new URL(manifest.neurosynth_terms.file, url))
+        : null,
+      manifest.boundary_certainty
+        ? readJson<BoundaryCertainty>(new URL(manifest.boundary_certainty.file, url))
+        : null,
+      manifest.receptor_fingerprints
+        ? readJson<ReceptorFingerprints>(new URL(manifest.receptor_fingerprints.file, url))
+        : null,
+      manifest.segmentation_agreement
+        ? readJson<SegmentationAgreement>(new URL(manifest.segmentation_agreement.file, url))
+        : null,
+      manifest.stimulation_responses
+        ? readJson<StimulationResponses>(new URL(manifest.stimulation_responses.file, url))
+        : null,
+    ]);
     const gltf = new GLTFLoader();
     const path = new URL('.', url).href;
     const loader: GlbLoader = {
@@ -408,6 +437,7 @@ export class BrainAtlas extends EventTarget {
       boundaryCertainty,
       receptors,
       agreement,
+      stimulation,
     );
     try {
       await model.initialize(atlasId, options);
@@ -428,6 +458,9 @@ export class BrainAtlas extends EventTarget {
   readonly boundaryCertainty: BoundaryCertainty | null;
   readonly receptors: ReceptorFingerprints | null;
   readonly segmentationAgreement: SegmentationAgreement | null;
+  readonly stimulation: StimulationResponses | null;
+  /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */
+  readonly visualField: VisualFieldUniforms | null;
   /** A panel's colours for named regions, every other region in tissue colour; null for none. */
   paint: Paint | null = null;
   readonly layers = new Map<string, Layer>();
@@ -479,6 +512,7 @@ export class BrainAtlas extends EventTarget {
     boundaryCertainty: BoundaryCertainty | null = null,
     receptors: ReceptorFingerprints | null = null,
     segmentationAgreement: SegmentationAgreement | null = null,
+    stimulation: StimulationResponses | null = null,
   ) {
     super();
     validateManifest(manifest);
@@ -495,6 +529,15 @@ export class BrainAtlas extends EventTarget {
     this.receptors = receptors && validateReceptorFingerprints(receptors, this.regions);
     this.segmentationAgreement =
       segmentationAgreement && validateSegmentationAgreement(segmentationAgreement, this.regions);
+    this.stimulation = stimulation && validateStimulationResponses(stimulation, this.regions);
+    this.visualField = manifest.retinotopy
+      ? {
+          visualMix: { value: 0 },
+          visualProbe: { value: new Vector3(0, 0, -1) },
+          visualMeasured: { value: manifest.retinotopy.measured_eccentricity_deg },
+          visualAccent: { value: new Color() },
+        }
+      : null;
     this.dissection = createDissection(this.regions);
     // What `initialize` is asked for by default; nothing is drawn until it has loaded them.
     this.atlasId = manifest.atlases[0]!.id;
@@ -758,7 +801,13 @@ export class BrainAtlas extends EventTarget {
               attachTerritoryColors(mesh.geometry, this.manifest.arterial_territories.territories);
             }
             const shown = mesh as unknown as AtlasMesh;
-            shown.material = createAnatomicalMaterial(mesh, region, this.manifest.appearance);
+            shown.material = createAnatomicalMaterial(
+              mesh,
+              region,
+              this.manifest.appearance,
+              // Every cortical atlas carries the predicted retinotopy on every vertex.
+              this.manifest.atlases.some((atlas) => atlas.id === id) ? this.visualField : null,
+            );
             if (this.mriUniforms) addMriAppearance(shown.material, this.mriUniforms);
             this.sourceColors.set(shown, shown.material.color.clone());
             // Region meshes never move after load. Skipping per-frame matrix
@@ -1269,6 +1318,110 @@ export class BrainAtlas extends EventTarget {
     if ((paint?.id ?? null) === (this.paint?.id ?? null)) return;
     this.paint = paint;
     this.update();
+  }
+
+  /**
+   * Draw the predicted retinotopy over the cortex, with the dot or without; null gives the cortex its
+   * colours back. `accent` is the dot's CSS colour. Throws without retinotopy or for a bad dot.
+   */
+  showVisualField(map: { dot: VisualFieldDot | null } | null, accent: string): void {
+    const uniforms = this.visualField;
+    if (!uniforms) throw new Error('This anatomy publishes no retinotopy.');
+    const dot = map?.dot ?? null;
+    if (dot && !([dot.x, dot.y].every(Number.isFinite) && dot.radius >= 0)) {
+      throw new RangeError(`A visual-field dot needs a finite centre and a radius ≥ 0.`);
+    }
+    uniforms.visualMix.value = map ? 1 : 0;
+    uniforms.visualProbe.value.set(dot?.x ?? 0, dot?.y ?? 0, dot ? dot.radius : -1);
+    uniforms.visualAccent.value.set(accent);
+  }
+
+  /**
+   * The current atlas's region of a hemisphere with the most predicted V1 vertices inside the measured
+   * eccentricity: where the map is measured rather than extrapolated, near the occipital pole.
+   */
+  visualFieldRegion(hemisphere: 'left' | 'right'): string {
+    const layer = this.layers.get(this.atlasId);
+    const published = this.manifest.retinotopy;
+    if (!this.visualField || !published || !layer) {
+      throw new Error('No cortical atlas with retinotopy is drawn.');
+    }
+    const ranges = this.manifest.appearance.field_ranges;
+    const [xLow, xSpan] = fieldDecode(ranges, '_FIELD_X');
+    const [yLow, ySpan] = fieldDecode(ranges, '_FIELD_Y');
+    const measured = published.measured_eccentricity_deg;
+    let best: { id: string; count: number } | null = null;
+    for (const mesh of layer.meshes) {
+      const region = this.regions.get(mesh.userData['region_id'] as string)!;
+      if (region.kind !== 'cortex' || region.hemisphere !== hemisphere) continue;
+      const { geometry } = mesh;
+      const [area, x, y] = ['_visual_area', '_field_x', '_field_y'].map((name) =>
+        geometry.getAttribute(name)!,
+      );
+      let count = 0;
+      for (let vertex = 0; vertex < area!.count; vertex += 1) {
+        const eccentricity = Math.hypot(
+          x!.getX(vertex) * xSpan + xLow,
+          y!.getX(vertex) * ySpan + yLow,
+        );
+        if (area!.getX(vertex) === 1 && eccentricity <= measured) count += 1;
+      }
+      if (count > (best?.count ?? 0)) best = { id: region.id, count };
+    }
+    if (!best) throw new Error(`No ${hemisphere} region holds predicted V1.`);
+    return best.id;
+  }
+
+  /**
+   * What the predicted retinotopy says where a ray met a cortical mesh, read as the map draws it:
+   * only the triangle's V1–V3 corners are interpolated, and a point less than half in V1–V3 has
+   * no reading. Null off the cortex.
+   */
+  visualFieldAt(hit: SurfaceHit): VisualFieldReading | null {
+    const mesh = hit.object as AtlasMesh | undefined;
+    const area = mesh?.geometry?.getAttribute('_visual_area');
+    if (!this.visualField || !mesh || !hit.face || !area) return null;
+    const { a, b, c } = hit.face;
+    const position = mesh.geometry.getAttribute('position');
+    const local = mesh.worldToLocal(hit.point.clone());
+    const weights = Triangle.getBarycoord(
+      local,
+      new Vector3().fromBufferAttribute(position, a),
+      new Vector3().fromBufferAttribute(position, b),
+      new Vector3().fromBufferAttribute(position, c),
+      new Vector3(),
+    );
+    if (!weights) return null;
+    const corners = [a, b, c];
+    const inside = corners.map((corner, k) =>
+      area.getX(corner) >= 0.5 ? weights.getComponent(k) : 0,
+    );
+    const share = inside[0]! + inside[1]! + inside[2]!;
+    if (share < 0.5) return null;
+    const ranges = this.manifest.appearance.field_ranges;
+    const read = (name: string, attribute: string): number => {
+      const [low, span] = fieldDecode(ranges, name);
+      const values = mesh.geometry.getAttribute(attribute);
+      return (
+        corners.reduce(
+          (sum, corner, k) => sum + inside[k]! * (values.getX(corner) * span + low),
+          0,
+        ) / share
+      );
+    };
+    const code = Math.round(
+      corners.reduce((sum, corner, k) => sum + inside[k]! * area.getX(corner), 0) / share,
+    );
+    const name = this.manifest.retinotopy!.areas.find((entry) => entry.code === code)?.name;
+    if (!name) throw new Error(`Visual-area code ${code} is not published.`);
+    const region = this.regions.get(mesh.userData['region_id'] as string)!;
+    return {
+      x: read('_FIELD_X', '_field_x'),
+      y: read('_FIELD_Y', '_field_y'),
+      sigma: read('_PRF_SIGMA', '_prf_sigma'),
+      area: name as VisualFieldReading['area'],
+      hemisphere: region.hemisphere as VisualFieldReading['hemisphere'],
+    };
   }
 
   setMriAnatomy(anatomy: { mriUniforms: MriUniforms } | null): void {

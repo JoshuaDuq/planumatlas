@@ -9,19 +9,30 @@
     focusable while a run is in flight (deviations/x1-focusable-while-opening.md).
 -->
 <script lang="ts">
+  import { comparedIds, isTermId } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { networkCss } from '../../lib/core/catalog/networks.ts';
+  import { decimal } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
-  import { AREAS_SHOWN, functionProfile, type AreaRow } from './functions-view.ts';
+  import {
+    AREAS_SHOWN,
+    comparisonProfile,
+    functionProfile,
+    type AreaRow,
+    type SharedAreaRow,
+  } from './functions-view.ts';
 
   let { model }: { model: FunctionExplorer } = $props();
 
   const id = $derived(model.selected);
   const lang = $derived(model.lang);
   const copy = $derived(t(lang, 'functions'));
-  const content = $derived(id ? functionProfile(model, id, lang) : null);
+  const comparing = $derived(Boolean(comparedIds(id)));
+  const content = $derived(id && !comparing ? functionProfile(model, id, lang) : null);
+  const comparison = $derived(id && comparing ? comparisonProfile(model, id, lang) : null);
+  const threshold = $derived(decimal(model.domains.threshold_z, 0, lang));
 
   let root = $state<HTMLElement | null>(null);
   $effect(() => {
@@ -30,6 +41,13 @@
 </script>
 
 <div class="profile" bind:this={root}>
+  {#if comparison}
+    <h2 class="profile-name" data-function-title tabindex="-1">
+      {#each comparison.functions as entry, index (entry.id)}
+        {#if index}{' · '}{/if}<span lang={entry.lang ?? undefined}>{entry.name}</span>
+      {/each}
+    </h2>
+  {/if}
   {#if content && id}
     <h2
       class="profile-name"
@@ -44,6 +62,94 @@
   {#key model.lang}
     <p class="meta" role="status" data-error={String(model.failed)}>{model.meta}</p>
   {/key}
+  {#if comparison}
+    <div class="content">
+      <p class="note caveat first">
+        {copy.caveat}{#if comparison.functions.some( (entry) => isTermId(entry.id) )}{' '}{copy.termCaveat}{/if}
+      </p>
+      <p class="note caveat">{copy.consistencyNote} {copy.compareNote}</p>
+
+      <div class="section">
+        <h3 class="section-heading">{copy.overviewHeading}</h3>
+        <ul class="links">
+          {#each comparison.functions as entry (entry.id)}
+            <li>
+              <button
+                type="button"
+                class="link function-link"
+                data-function={entry.id}
+                onclick={() => model.openFunction(entry.id)}
+              >
+                <span
+                  class="function-swatch"
+                  aria-hidden="true"
+                  style:background={networkCss(entry.colour)}
+                ></span>
+                <span class="link-text">
+                  <span class="link-name" lang={entry.lang ?? undefined}>{entry.name}</span>
+                  <span class="visually-hidden">, </span>
+                  <span class="link-detail">{entry.detail}</span>
+                </span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
+
+      <div class="section" data-compare-section="shared">
+        <h3 class="section-heading areas-heading">
+          <span class="swatched">
+            <span
+              class="function-swatch"
+              aria-hidden="true"
+              style:background={networkCss(comparison.shared.colour)}
+            ></span>
+            {copy.bothHeading}
+          </span>
+          {#if comparison.shared.areas.length}
+            <span class="column-head z-pair" aria-hidden="true">
+              {#each comparison.functions as entry (entry.id)}
+                <span class="z-head">
+                  <span class="z-mark" style:background={networkCss(entry.colour)}></span>z
+                </span>
+              {/each}
+            </span>
+          {/if}
+        </h3>
+        {#if !comparison.shared.areas.length}
+          <p class="note">{copy.noneShared(threshold)}</p>
+        {:else}
+          {@render areaList(comparison.shared.areas)}
+        {/if}
+      </div>
+
+      {#each comparison.only as entry (entry.id)}
+        <div class="section" data-compare-section={entry.id}>
+          <h3 class="section-heading areas-heading">
+            <span class="swatched">
+              <span
+                class="function-swatch"
+                aria-hidden="true"
+                style:background={networkCss(entry.colour)}
+              ></span>
+              <span lang={entry.lang ?? undefined}>{entry.name}</span>
+            </span>
+            {#if entry.areas.length}<span class="column-head" aria-hidden="true">z</span>{/if}
+          </h3>
+          <p class="note only-note">{copy.onlyNote}</p>
+          {#if !entry.areas.length}
+            <p class="note">{copy.noneOnly}</p>
+          {:else}
+            {@render areaList(entry.areas)}
+          {/if}
+        </div>
+      {/each}
+
+      <p class="note method">{comparison.method}</p>
+      <p class="note sources">{comparison.citation}</p>
+    </div>
+  {/if}
   {#if content && id}
     <div class="content">
       {#if content.all}
@@ -104,24 +210,7 @@
           {#if !content.areas.length}
             <p class="note">{content.noAreas}</p>
           {:else}
-            <ul class="areas">
-              {#each content.areas.slice(0, AREAS_SHOWN) as area (area.region)}
-                <li>{@render areaButton(area)}</li>
-              {/each}
-            </ul>
-            {#if content.areas.length > AREAS_SHOWN}
-              {#key id}
-                <div class="more">
-                  <Disclosure summary={copy.more(content.areas.length - AREAS_SHOWN)}>
-                    <ul class="areas">
-                      {#each content.areas.slice(AREAS_SHOWN) as area (area.region)}
-                        <li>{@render areaButton(area)}</li>
-                      {/each}
-                    </ul>
-                  </Disclosure>
-                </div>
-              {/key}
-            {/if}
+            {@render areaList(content.areas)}
           {/if}
         </div>
         {#if content.lesions}
@@ -160,6 +249,59 @@
     </div>
   {/if}
 </div>
+
+<!-- Twelve rows, the rest under a disclosure that closes on another profile. -->
+{#snippet areaList(areas: (AreaRow | SharedAreaRow)[])}
+  <ul class="areas">
+    {#each areas.slice(0, AREAS_SHOWN) as area (area.region)}
+      <li>{@render anyArea(area)}</li>
+    {/each}
+  </ul>
+  {#if areas.length > AREAS_SHOWN}
+    {#key id}
+      <div class="more">
+        <Disclosure summary={copy.more(areas.length - AREAS_SHOWN)}>
+          <ul class="areas">
+            {#each areas.slice(AREAS_SHOWN) as area (area.region)}
+              <li>{@render anyArea(area)}</li>
+            {/each}
+          </ul>
+        </Disclosure>
+      </div>
+    {/key}
+  {/if}
+{/snippet}
+
+{#snippet anyArea(area: AreaRow | SharedAreaRow)}
+  {#if Array.isArray(area.z)}
+    {@render sharedButton(area as SharedAreaRow)}
+  {:else}
+    {@render areaButton(area as AreaRow)}
+  {/if}
+{/snippet}
+
+<!-- A shared area's z for each function in turn, each named for a screen reader. -->
+{#snippet sharedButton(area: SharedAreaRow)}
+  <button
+    type="button"
+    class="function-area"
+    data-function-region={area.region}
+    aria-disabled={model.opening ? 'true' : undefined}
+    onclick={() => model.openArea(area.region)}
+  >
+    <span class="area-name">
+      <span>{area.name}</span>
+      {#if area.division}
+        <span class="visually-hidden">, </span>
+        <span class="area-division">{area.division}</span>
+      {/if}
+    </span>
+    {#each area.z as z, index (index)}
+      <span class="visually-hidden">, {comparison!.functions[index]!.name} z </span>
+      <span class="area-z">{z}</span>
+    {/each}
+  </button>
+{/snippet}
 
 {#snippet areaButton(area: AreaRow)}
   <button
@@ -275,6 +417,44 @@
     }
     .lesion-note {
       margin-top: var(--space-2);
+    }
+    .caveat.first {
+      margin-top: var(--space-4);
+    }
+    .swatched {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .swatched > .function-swatch {
+      align-self: center;
+      margin: 0 1px;
+    }
+    .only-note {
+      margin: calc(-1 * var(--space-1)) 0 var(--space-2);
+    }
+    /* Two z columns, each headed by its function's colour, as wide as the figures under them. */
+    .z-pair {
+      display: flex;
+      gap: var(--space-3);
+    }
+    .z-head {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 3px;
+      min-width: 3.5ch;
+    }
+    .z-mark {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    [data-compare-section='shared'] .area-z {
+      min-width: 3.5ch;
+      text-align: right;
     }
 
     /* Areas, strongest first: a primary-ink row whose name underlines on hover; z in the column its heading heads. */
@@ -418,7 +598,8 @@
       .profile-name:focus-visible {
         outline: 2px solid Highlight;
       }
-      .function-swatch {
+      .function-swatch,
+      .z-mark {
         forced-color-adjust: none;
       }
     }

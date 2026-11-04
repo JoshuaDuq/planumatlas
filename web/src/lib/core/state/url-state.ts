@@ -39,6 +39,8 @@ type Defaults = Pick<
   | 'selectedDeficit'
   | 'circuit'
   | 'circuitStep'
+  | 'circuitMap'
+  | 'mapDot'
   | 'orbit'
   | 'mriWindow'
   | 'lesion'
@@ -71,6 +73,8 @@ export const DEFAULTS: Defaults = {
   selectedDeficit: null,
   circuit: null,
   circuitStep: 0,
+  circuitMap: null,
+  mapDot: null,
   orbit: null,
   mriWindow: null,
   lesion: null,
@@ -217,6 +221,21 @@ const circuitStep: Reader<number> = (value) => {
   return Number.isInteger(number) && number >= 1 ? number - 1 : undefined;
 };
 
+/**
+ * The map's dot as `x,y,radius` in degrees from fixation, x to the right and y up, inside the
+ * visual field's 90°. A clicked receptive field sets the radius too, so it may lie outside the
+ * size control's range: from a hundredth of a degree, as written, to the field's 90°.
+ */
+const mapDot: Reader<NonNullable<LinkState['mapDot']>> = (value) => {
+  const list = numbers(value);
+  if (list?.length !== 3) return undefined;
+  const [x, y, radius] = list as [number, number, number];
+  if (Math.hypot(x, y) > 90 || !(radius >= 0.01 && radius <= 90)) return undefined;
+  return { x, y, radius };
+};
+
+const hundredths = (value: number) => Math.round(value * 100) / 100;
+
 /** State carries the selected region as a record; the URL carries its id. */
 const identifier = (value: NonNullable<LinkInput['selectedRegion']>) =>
   typeof value === 'object' ? value.id : value;
@@ -281,6 +300,8 @@ const FIELDS: Field[] = [
   field('selectedDeficit', 'deficit', nonempty),
   field('circuit', 'circuit', nonempty),
   field('circuitStep', 'step', circuitStep, (value) => String(value + 1)),
+  field('circuitMap', 'map', nonempty),
+  field('mapDot', 'dot', mapDot, ({ x, y, radius }) => [x, y, radius].map(hundredths).join(',')),
   field('lang', 'lang', oneOf(['en', 'fr'] as const)),
   field('lesion', 'lesion', lesion, ({ centre, radius }) =>
     [...centre.map(tenths), radius].join(','),

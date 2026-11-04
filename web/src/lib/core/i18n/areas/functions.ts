@@ -45,6 +45,21 @@ export const en = {
     `${region} (${side}), the strongest region of ${map}, lies beneath the cortex.`,
   deepAmong: (region: string, side: string, map: string, ranks: number) =>
     `${region} (${side}), among the ${ranks} strongest regions of ${map}, lies beneath the cortex.`,
+  compare: 'Compare',
+  compareCancel: 'Cancel',
+  // How many of the two are picked.
+  comparePrompt: (picked: number): string =>
+    picked ? 'Choose one more function or term' : 'Choose two functions or terms to compare',
+  compareOpen: 'Compare',
+  // The share arrives as `areasShort` words.
+  both: (areas: string, threshold: string) => `Both reach ${areas} at z\u00a0≥\u00a0${threshold}`,
+  bothHeading: 'Areas both reach',
+  onlyNote: 'Areas the other map does not reach',
+  noneShared: (threshold: string) =>
+    `The two maps share no area or structure at z\u00a0${threshold}.`,
+  noneOnly: 'The other map reaches every area this one does.',
+  compareNote:
+    'A map’s z grows with the number of studies behind its term, so compare which areas each map reaches, not one map’s z against the other’s.',
   suggest: (name: string) => `Did you mean “${name}”?`,
   // The study count arrives as words (format.js count).
   termDetail: (studies: string, areas: string) => `${studies} · ${areas}`,
@@ -114,6 +129,22 @@ export const fr: typeof en = {
     `${region} (${side}), la région la plus forte de ${map}, se trouve sous le cortex.`,
   deepAmong: (region: string, side: string, map: string, ranks: number) =>
     `${region} (${side}), parmi les ${ranks} régions les plus fortes de ${map}, se trouve sous le cortex.`,
+  compare: 'Comparer',
+  compareCancel: 'Annuler',
+  comparePrompt: (picked: number) =>
+    picked
+      ? 'Choisissez encore une fonction ou un terme'
+      : 'Choisissez deux fonctions ou termes à comparer',
+  compareOpen: 'Comparer',
+  both: (areas: string, threshold: string) =>
+    `Les deux atteignent ${areas} à z\u00a0≥\u00a0${threshold}`,
+  bothHeading: 'Aires atteintes par les deux',
+  onlyNote: 'Aires que l’autre carte n’atteint pas',
+  noneShared: (threshold: string) =>
+    `Les deux cartes ne partagent aucune aire ni structure à z\u00a0${threshold}.`,
+  noneOnly: 'L’autre carte atteint toutes les aires de celle-ci.',
+  compareNote:
+    'Le z d’une carte croît avec le nombre d’études derrière son terme\u202f: comparez les aires que chaque carte atteint, et non le z d’une carte à celui de l’autre.',
   suggest: (name: string) => `Vouliez-vous dire «\u00a0${name}\u00a0»\u202f?`,
   termDetail: (studies: string, areas: string) => `${studies} · ${areas}`,
   studiesColumn: 'Études',

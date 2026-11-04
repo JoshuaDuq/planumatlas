@@ -10,10 +10,13 @@ export interface KnownLinkIds {
   views: ReadonlySet<string>;
   surfaceColors: ReadonlySet<string>;
   explorers: ReadonlySet<string>;
-  functions: ReadonlySet<string>;
+  /** Curated functions, searched terms, the overview and comparisons of them. */
+  functions: Pick<ReadonlySet<string>, 'has'>;
   deficits: ReadonlySet<string>;
   /** Each circuit's step count. */
   circuits: ReadonlyMap<string, number>;
+  /** The interactive maps this anatomy can show. */
+  maps: ReadonlySet<string>;
   spinalCord: boolean;
   /** The coordinate spaces published, `unstated` among them; none on an anatomy without them. */
   coordinateSpaces: ReadonlySet<string>;
@@ -53,6 +56,7 @@ export function checkLink(
     ['selectedFunction', (id: string) => known.functions.has(id)],
     ['selectedDeficit', (id: string) => known.deficits.has(id)],
     ['circuit', (id: string) => known.circuits.has(id)],
+    ['circuitMap', (id: string) => known.maps.has(id)],
   ];
   for (const [key, valid] of checks) {
     if (key in state && !(valid as (value: unknown) => boolean)(state[key])) reject(key);
@@ -60,6 +64,9 @@ export function checkLink(
   if ('circuitStep' in state && !(state.circuitStep! < (known.circuits.get(state.circuit!) ?? 0))) {
     reject('circuitStep');
   }
+  // A map opens in place of a lesson, and its dot means nothing without it.
+  if ('circuitMap' in state && state.circuit) reject('circuitMap');
+  if ('mapDot' in state && !state.circuitMap) reject('mapDot');
   if (state.spinalCordVisible && !known.spinalCord) reject('spinalCordVisible');
   // A coordinate needs its space, one this anatomy publishes; it and a lesion are the one sphere.
   const coordinate = 'coordinate' in state,

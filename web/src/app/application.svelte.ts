@@ -1,3 +1,4 @@
+import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
 import type { AnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
 import type { AppContext } from '../lib/controller/context.ts';
@@ -49,6 +50,8 @@ export interface World extends AppContext {
   lesion: LesionStore;
   /** Placing a published coordinate, or null on an anatomy that publishes no coordinate spaces. */
   coordinates: CoordinatePlacement | null;
+  /** The visual-field map's dot and the cortex last read. */
+  visualFieldMap: VisualFieldMapStore;
 }
 
 /** Runs `build` where `$effect`s may be created and settles them, as a component's setup would. */

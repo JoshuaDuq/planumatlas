@@ -2,8 +2,9 @@
   The Functions tab's list (viewer/ui/panels/functions.js:384-390, 405-456, index.html:258-277,301-304):
   the search field, the functions under their groups, the Neurosynth terms a search finds, the
   bridge to the Deficits tab and the list's scope. A list of buttons, not a listbox (decision 37 on
-  #4): each row opens a profile, and every row is a Tab stop. The field's Down and Enter and the
-  rows' Up and Down are `listNav`, which leaves every other key alone.
+  #4): each row opens a profile, and every row is a Tab stop. In compare mode each row is a
+  checkbox instead, and a bar under the list opens the comparison of the two picked. The field's
+  Down and Enter and the rows' Up and Down are `listNav`, which leaves every other key alone.
   - the field has a visible label (WCAG 3.3.2, deviations/x1-search-label.md);
   - the result count is said 500 ms after typing pauses, not again on a language switch
     (deviations/x1-result-announcement.md);
@@ -11,8 +12,11 @@
 -->
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { ALL_DOMAINS } from '../../lib/core/catalog/neuropsych-domains.ts';
-  import { networkCss } from '../../lib/core/catalog/networks.ts';
+  import {
+    COMPARE_MAX,
+    compareId,
+    functionName,
+  } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
@@ -35,9 +39,7 @@
     query !== '' && content.matches.functions === 0 && content.matches.terms === 0,
   );
 
-  // A row's colour is the overview's: shown only while the overview paints the stage, outlined
-  // otherwise, as a key row with nothing coloured in this view is.
-  const painted = $derived(model.selected === ALL_DOMAINS);
+  const full = $derived(model.picked.length === COMPARE_MAX);
 
   let input = $state<HTMLInputElement | null>(null);
   let listElement = $state<HTMLElement | null>(null);
@@ -95,7 +97,17 @@
 </script>
 
 <div class="head" hidden={!model.exploring}>
-  <label class="search-label" for="{uid}-search">{copy.search}</label>
+  <div class="head-row">
+    <label class="search-label" for="{uid}-search">{copy.search}</label>
+    <button
+      type="button"
+      class="compare-toggle"
+      aria-pressed={model.comparing}
+      onclick={() => model.toggleComparing()}
+    >
+      {model.comparing ? copy.compareCancel : copy.compare}
+    </button>
+  </div>
   <div class="search-box">
     <svg
       class="search-affordance"
@@ -149,7 +161,7 @@
 
 <div class="browser scroll-fade" hidden={!model.exploring}>
   <div id="{uid}-list" role="group" aria-label={copy.list} bind:this={listElement}>
-    {#if content.overview}
+    {#if content.overview && !model.comparing}
       <ul class="rows">
         <li>{@render row(content.overview, true)}</li>
       </ul>
@@ -190,34 +202,53 @@
   <p class="scope-note" hidden={query !== ''}>
     {copy.coverage(model.domains.domains.length, model.domains.search?.terms.size ?? 0)}
   </p>
+  {#if model.comparing}
+    <div class="compare-bar">
+      <p class="compare-picked" aria-live="polite">
+        {full
+          ? functionName(model.domains, compareId(model.picked), lang)
+          : copy.comparePrompt(model.picked.length)}
+      </p>
+      <button
+        type="button"
+        class="compare-open"
+        data-compare-open
+        aria-disabled={full ? undefined : 'true'}
+        onclick={() => full && model.compare()}
+      >
+        {copy.compareOpen}
+      </button>
+    </div>
+  {/if}
 </div>
 
 <!-- The overview is the whole list, not a coloured function: it starts on the inset, like the captions. -->
 {#snippet row(item: FunctionRow, overview = false)}
-  {@const current = item.id === model.selected}
+  {@const current = !model.comparing && item.id === model.selected}
+  {@const checked = model.comparing && model.picked.includes(item.id)}
   <button
     type="button"
     class="function-row"
     class:counted={item.studies !== null}
     data-function={item.id}
+    role={model.comparing ? 'checkbox' : undefined}
+    aria-checked={model.comparing ? checked : undefined}
+    aria-disabled={model.comparing && full && !checked ? 'true' : undefined}
     aria-current={current ? 'true' : undefined}
     data-selected={String(current)}
-    onclick={() => model.openFunction(item.id)}
+    onclick={() => (model.comparing ? model.togglePick(item.id) : model.openFunction(item.id))}
   >
-    {#if !overview}
-      <span
-        class="function-swatch"
-        aria-hidden="true"
-        data-painted={String(painted)}
-        style:background={painted && item.colour ? networkCss(item.colour) : undefined}
-      ></span>
+    {#if model.comparing}
+      <span class="pick" aria-hidden="true"></span>
     {/if}
     <span class="row-name" lang={item.lang ?? undefined}>{item.name}</span>
     {#if item.studies !== null}
       <span class="group-count" aria-hidden="true">{grouped(item.studies)}</span>
     {/if}
     <span class="visually-hidden">, {item.detail}</span>
-    <span class="chevron" aria-hidden="true"></span>
+    {#if !model.comparing}
+      <span class="chevron" aria-hidden="true"></span>
+    {/if}
   </button>
 {/snippet}
 
@@ -230,6 +261,29 @@
       padding: var(--space-3) var(--panel-inset);
       border-bottom: 1px solid var(--border-subtle);
       background: var(--surface-base);
+    }
+    .head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+    /* Compare and Cancel are text, like Restore: an accent word at the label's end. */
+    .compare-toggle {
+      flex: none;
+      min-height: 24px;
+      height: auto;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--accent);
+      font-size: var(--text-caption);
+      font-weight: 400;
+      line-height: var(--lh-caption);
+    }
+    .compare-toggle:focus-visible {
+      outline-offset: 2px;
     }
     .search-box {
       position: relative;
@@ -353,17 +407,38 @@
       overflow-wrap: anywhere;
       text-wrap: pretty;
     }
-    /* A colour on the brain sits in a 12px slot like the tree's chevron, centred on the first line, so names start on the indent. */
-    .function-swatch {
+    /* A compare pick: a checkbox in a 12px slot, centred on the first line. */
+    .pick {
       flex: none;
+      position: relative;
       align-self: flex-start;
-      width: 10px;
-      height: 10px;
-      margin: calc((var(--lh-ui) - 10px) / 2) 1px 0;
+      width: 12px;
+      height: 12px;
+      margin-top: calc((var(--lh-ui) - 12px) / 2);
       border-radius: var(--radius-mark);
-    }
-    .function-swatch[data-painted='false'] {
       box-shadow: inset 0 0 0 1px var(--border-control);
+    }
+    .function-row[aria-checked='true'] .pick {
+      background: var(--accent);
+      box-shadow: none;
+    }
+    .function-row[aria-checked='true'] .pick::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1.5px;
+      width: 3px;
+      height: 6.5px;
+      border-right: 1.5px solid var(--surface-base);
+      border-bottom: 1.5px solid var(--surface-base);
+      transform: rotate(45deg);
+    }
+    .function-row[aria-disabled='true'] {
+      color: var(--text-tertiary);
+      cursor: default;
+    }
+    .function-row[aria-disabled='true'] .pick {
+      opacity: 0.5;
     }
     .group-count {
       flex: none;
@@ -395,6 +470,15 @@
     }
     /* A mouse sees the chevron on hover, focus or selection; touch always. */
     @media (hover: hover) and (pointer: fine) {
+      .compare-open:hover:not([aria-disabled='true']) {
+        background: var(--primary-fill-hover);
+        border-color: var(--primary-fill-hover);
+      }
+      .compare-toggle:hover {
+        color: var(--accent-hover);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
       .chevron {
         opacity: 0;
       }
@@ -432,6 +516,10 @@
       .function-row {
         min-height: 44px;
       }
+      .compare-toggle,
+      .compare-open {
+        min-height: 44px;
+      }
       .search-clear {
         width: 44px;
         height: 44px;
@@ -450,6 +538,45 @@
       }
     }
 
+    /* The picks and the Compare button stay in view under the list while it scrolls. */
+    .compare-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--panel-inset);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-base);
+    }
+    .compare-picked {
+      flex: 1;
+      min-width: 0;
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      overflow-wrap: anywhere;
+      text-wrap: pretty;
+    }
+    .compare-open {
+      flex: none;
+      background: var(--primary-fill);
+      border-color: var(--primary-fill);
+      color: var(--primary-ink);
+      transition:
+        background-color var(--ui-transition) var(--ease-ui),
+        transform var(--press-transition) var(--ease-ui);
+    }
+    .compare-open:active:not([aria-disabled='true'], :focus-visible) {
+      transform: scale(var(--press-scale));
+    }
+    .compare-open[aria-disabled='true'] {
+      background: transparent;
+      border-color: var(--border-control);
+      color: var(--text-tertiary);
+      cursor: default;
+    }
     .note {
       padding: var(--space-3) var(--panel-inset);
       color: var(--text-secondary);
@@ -472,9 +599,11 @@
       input[type='search']:focus-visible {
         outline-color: Highlight;
       }
-      /* A function's colour is data; a forced background would paint every swatch alike. */
-      .function-swatch {
-        forced-color-adjust: none;
+      .function-row[aria-checked='true'] .pick {
+        background: Highlight;
+      }
+      .function-row[aria-checked='true'] .pick::after {
+        border-color: HighlightText;
       }
       .function-row[data-selected='true'] {
         outline: 2px solid Highlight;

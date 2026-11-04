@@ -1,4 +1,5 @@
 import type { Language, Paint, Region, Rgb } from '../../types/index.ts';
+import { FINDING_COLORS } from '../clinical/catalog.ts';
 import { nearest } from './nearest.ts';
 
 export interface DomainGroup {
@@ -97,6 +98,79 @@ export const ALL_DOMAINS = 'all';
 const TERM = 'term:';
 export const isTermId = (id: unknown): id is string =>
   typeof id === 'string' && id.startsWith(TERM);
+
+/** A comparison's id: the compared functions' ids, comma-separated, after this prefix. */
+const COMPARE = 'compare:';
+/**
+ * Two functions: with the areas both reach, three colours, all the finding palette keeps apart from
+ * one another and from tissue under colour-vision deficiency. A third would need a fourth.
+ */
+export const COMPARE_MIN = 2;
+export const COMPARE_MAX = 2;
+/** Each compared function's colour in order, then the colour of areas more than one reaches. */
+export const COMPARE_COLORS: readonly Rgb[] = FINDING_COLORS.slice(0, COMPARE_MAX);
+export const SHARED_COLOR: Rgb = FINDING_COLORS[COMPARE_MAX]!;
+
+export const compareId = (ids: readonly string[]) => `${COMPARE}${ids.join(',')}`;
+
+/** The functions a comparison names, in order; null for any other id. */
+export const comparedIds = (id: string | null | undefined): string[] | null =>
+  id?.startsWith(COMPARE) ? id.slice(COMPARE.length).split(',') : null;
+
+/** Whether `id` compares two or three distinct published functions or terms. */
+export function validComparison(partition: NeuropsychDomains, id: string): boolean {
+  const ids = comparedIds(id);
+  return (
+    ids !== null &&
+    ids.length >= COMPARE_MIN &&
+    ids.length <= COMPARE_MAX &&
+    new Set(ids).size === ids.length &&
+    ids.every((member) => domainRecord(partition, member) !== null)
+  );
+}
+
+/** A function's or a comparison's name; a comparison names its functions in order. */
+export function functionName(partition: NeuropsychDomains, id: string, lang: Language): string {
+  const ids = comparedIds(id) ?? [id];
+  return ids
+    .map((member) => {
+      const record = domainRecord(partition, member);
+      if (!record) throw new Error(`Unknown neuropsychological domain: ${member}`);
+      return domainName(record, lang);
+    })
+    .join(' · ');
+}
+
+export interface ComparedArea {
+  region: string;
+  /** Each compared function's z here, in order; null where it falls below the threshold. */
+  z: (number | null)[];
+  /** How many of the compared functions reach the area. */
+  reached: number;
+}
+
+/**
+ * Every area or structure at least one compared function reaches, those more of them reach first,
+ * then by the strongest z among them; ties keep the first function's order.
+ */
+export function comparedAreas(partition: NeuropsychDomains, id: string): ComparedArea[] {
+  if (!validComparison(partition, id)) throw new Error(`Invalid comparison: ${id}`);
+  const ids = comparedIds(id)!;
+  const areas = new Map<string, ComparedArea>();
+  ids.forEach((member, index) => {
+    for (const { region, z } of domainAreas(partition, member)) {
+      let area = areas.get(region);
+      if (!area) {
+        area = { region, z: ids.map(() => null), reached: 0 };
+        areas.set(region, area);
+      }
+      area.z[index] = z;
+      area.reached += 1;
+    }
+  });
+  const strongest = (area: ComparedArea) => Math.max(...area.z.map((z) => z ?? -Infinity));
+  return [...areas.values()].sort((a, b) => b.reached - a.reached || strongest(b) - strongest(a));
+}
 
 const normalize = (value: string) =>
   value
@@ -390,15 +464,23 @@ export function zBand(partition: NeuropsychDomains, z: number): ZBand | undefine
 }
 
 /**
- * The model paint for `ALL_DOMAINS`, each area in its strongest overview domain's colour, or for one
- * domain or searched term alone, each area in its z-scale band's colour. Each teaching unit takes its
+ * The model paint for `ALL_DOMAINS`, each area in its strongest overview domain's colour; for one
+ * domain or searched term alone, each area in its z-scale band's colour; for a comparison, each area
+ * in the colour of the one function reaching it, or the shared colour. Each teaching unit takes its
  * structure's colour.
  */
 export function domainPaint(partition: NeuropsychDomains, id: string): Paint {
-  if (id !== ALL_DOMAINS && !domainRecord(partition, id))
+  const compared = comparedIds(id);
+  if (id !== ALL_DOMAINS && !compared && !domainRecord(partition, id))
     throw new Error(`Unknown neuropsychological domain: ${id}`);
   const colors = new Map<string, Rgb>();
-  if (id !== ALL_DOMAINS) {
+  if (compared) {
+    for (const { region, z, reached } of comparedAreas(partition, id))
+      colors.set(
+        region,
+        reached > 1 ? SHARED_COLOR : COMPARE_COLORS[z.findIndex((value) => value !== null)]!,
+      );
+  } else if (id !== ALL_DOMAINS) {
     for (const { region, z } of domainAreas(partition, id))
       colors.set(region, zBand(partition, z)!.color);
   } else {

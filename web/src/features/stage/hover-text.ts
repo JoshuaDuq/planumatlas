@@ -2,6 +2,7 @@ import { cabNpName, networkName } from '../../lib/core/catalog/networks.ts';
 import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
 import {
   ALL_DOMAINS,
+  comparedIds,
   domainAreas,
   domainName,
   domainRecord,
@@ -29,17 +30,25 @@ export interface HoverSources {
 }
 
 /**
- * The functions the painted area belongs to: the open term's name when the area carries it, else the
- * overview's (or the one shown alone) domain names.
+ * The functions the painted area belongs to: those of a comparison that reach it, the open term's name
+ * when the area carries it, else the overview's (or the one shown alone) domain names.
  */
 function domainNames(
   region: Region,
   { selectedFunction, lang }: HoverView & { lang: Language },
   domains: NeuropsychDomains,
 ): string {
+  const scored = scoredSource(domains, region.id);
+  const reaches = (id: string) => domainAreas(domains, id).some((area) => area.region === scored);
+  const compared = comparedIds(selectedFunction);
+  if (compared) {
+    return compared
+      .filter(reaches)
+      .map((id) => domainName(domainRecord(domains, id)!, lang))
+      .join(', ');
+  }
   if (isTermId(selectedFunction)) {
-    const scored = scoredSource(domains, region.id);
-    return domainAreas(domains, selectedFunction).some((area) => area.region === scored)
+    return reaches(selectedFunction)
       ? (domainRecord(domains, selectedFunction) as TermRecord).term
       : '';
   }

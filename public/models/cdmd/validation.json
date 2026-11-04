@@ -5,7 +5,7 @@
   "atlases": [
     {
       "file": "cortex-destrieux.glb",
-      "sha256": "96aa4835041b37a7ba8e50ba2f0b5d70a73407ced6835355aab97eb1661ed129",
+      "sha256": "fd1fbf406fcd6cf924471c232709588689567417eccd28f9d454d84febbf2de5",
       "mesh_count": 150,
       "hemispheres": {
         "left": {
@@ -41,6 +41,18 @@
         "_T1": [
           38.98631286621094,
           203.2353057861328
+        ],
+        "_FIELD_X": [
+          -87.60440063476562,
+          89.29246520996094
+        ],
+        "_FIELD_Y": [
+          -88.49894714355469,
+          87.7828140258789
+        ],
+        "_PRF_SIGMA": [
+          0.0,
+          23.81169891357422
         ]
       },
       "maximum_glb_coordinate_error_mm": 5.038289517018546e-06,
@@ -48,11 +60,16 @@
       "maximum_sulcal_depth_error": 0.0002399056183541859,
       "maximum_openness_error": 7.658483616723721e-06,
       "openness_outlier_share": 0.0,
-      "maximum_ribbon_T1_error": 0.001259474325507881
+      "maximum_ribbon_T1_error": 0.001259474325507881,
+      "maximum_visual_field_error": {
+        "_FIELD_X": 0.001349890112887664,
+        "_FIELD_Y": 0.001344839238143991,
+        "_PRF_SIGMA": 0.0001816635750047091
+      }
     },
     {
       "file": "cortex-hcp-mmp.glb",
-      "sha256": "2ff3450135cbcc755dc8f95886588ffec2318fa67f8f2922fd06da1f779a391b",
+      "sha256": "e197f376c068abb310fa71c59b834a81e3ef51eb32999e2d865940c79a270c0f",
       "mesh_count": 362,
       "hemispheres": {
         "left": {
@@ -88,6 +105,18 @@
         "_T1": [
           38.98631286621094,
           203.2353057861328
+        ],
+        "_FIELD_X": [
+          -87.60440063476562,
+          89.29246520996094
+        ],
+        "_FIELD_Y": [
+          -88.49894714355469,
+          87.7828140258789
+        ],
+        "_PRF_SIGMA": [
+          0.0,
+          23.81169891357422
         ]
       },
       "maximum_glb_coordinate_error_mm": 5.038289517018546e-06,
@@ -95,11 +124,16 @@
       "maximum_sulcal_depth_error": 0.0002399056183541859,
       "maximum_openness_error": 7.658483616723721e-06,
       "openness_outlier_share": 0.0,
-      "maximum_ribbon_T1_error": 0.0012588847168046868
+      "maximum_ribbon_T1_error": 0.0012588847168046868,
+      "maximum_visual_field_error": {
+        "_FIELD_X": 0.001349890112887664,
+        "_FIELD_Y": 0.001344839238143991,
+        "_PRF_SIGMA": 0.00018238826695693433
+      }
     },
     {
       "file": "cortex-julich.glb",
-      "sha256": "d91ff5e7fddb17767aa7a25cbcbffe18c513cdafdf82404415bcb7c23d6bc253",
+      "sha256": "90e6b9eafd7c2e55b5ebc739bf67f168151e71b0a9add385654229cd0331e50e",
       "mesh_count": 296,
       "hemispheres": {
         "left": {
@@ -135,6 +169,18 @@
         "_T1": [
           38.98631286621094,
           203.2353057861328
+        ],
+        "_FIELD_X": [
+          -87.60440063476562,
+          89.29246520996094
+        ],
+        "_FIELD_Y": [
+          -88.49894714355469,
+          87.7828140258789
+        ],
+        "_PRF_SIGMA": [
+          0.0,
+          23.81169891357422
         ]
       },
       "maximum_glb_coordinate_error_mm": 5.038289517018546e-06,
@@ -142,11 +188,16 @@
       "maximum_sulcal_depth_error": 0.0002399056183541859,
       "maximum_openness_error": 7.658483616723721e-06,
       "openness_outlier_share": 0.0,
-      "maximum_ribbon_T1_error": 0.0012587347925716585
+      "maximum_ribbon_T1_error": 0.0012587347925716585,
+      "maximum_visual_field_error": {
+        "_FIELD_X": 0.0013502145133088561,
+        "_FIELD_Y": 0.001344839238143991,
+        "_PRF_SIGMA": 0.00018194538695937013
+      }
     },
     {
       "file": "cortex-schaefer.glb",
-      "sha256": "d096da1a6ac419c227122259fd5a1ec25099d5b1d71c862795487132c6e9cc09",
+      "sha256": "777b4573289b4eb27a95df907dfa9675f7b2f7e41ec99c653c268ab501e30ec7",
       "mesh_count": 402,
       "hemispheres": {
         "left": {
@@ -182,6 +233,18 @@
         "_T1": [
           38.98631286621094,
           203.2353057861328
+        ],
+        "_FIELD_X": [
+          -87.60440063476562,
+          89.29246520996094
+        ],
+        "_FIELD_Y": [
+          -88.49894714355469,
+          87.7828140258789
+        ],
+        "_PRF_SIGMA": [
+          0.0,
+          23.81169891357422
         ]
       },
       "maximum_glb_coordinate_error_mm": 5.038289517018546e-06,
@@ -189,7 +252,12 @@
       "maximum_sulcal_depth_error": 0.0002399056183541859,
       "maximum_openness_error": 7.658483616723721e-06,
       "openness_outlier_share": 0.0,
-      "maximum_ribbon_T1_error": 0.0012587347925716585
+      "maximum_ribbon_T1_error": 0.0012587347925716585,
+      "maximum_visual_field_error": {
+        "_FIELD_X": 0.001349890112887664,
+        "_FIELD_Y": 0.001345153462750659,
+        "_PRF_SIGMA": 0.0001818302019369611
+      }
     }
   ],
   "ribbon_labels": [
@@ -982,6 +1050,52 @@
       }
     }
   },
+  "retinotopy": {
+    "left": {
+      "area_mm2": {
+        "V1": 2235,
+        "V2": 2230,
+        "V3": 1745
+      },
+      "extrapolated_share": 0.408,
+      "agreement_dice": {
+        "V1": {
+          "hcp-mmp": 0.9,
+          "julich": 0.68
+        },
+        "V2": {
+          "hcp-mmp": 0.76,
+          "julich": 0.56
+        },
+        "V3": {
+          "hcp-mmp": 0.78,
+          "julich": 0.57
+        }
+      }
+    },
+    "right": {
+      "area_mm2": {
+        "V1": 2570,
+        "V2": 2389,
+        "V3": 1929
+      },
+      "extrapolated_share": 0.441,
+      "agreement_dice": {
+        "V1": {
+          "hcp-mmp": 0.89,
+          "julich": 0.72
+        },
+        "V2": {
+          "hcp-mmp": 0.78,
+          "julich": 0.54
+        },
+        "V3": {
+          "hcp-mmp": 0.72,
+          "julich": 0.46
+        }
+      }
+    }
+  },
   "neuropsych_domains": {
     "assigned_areas": 273,
     "assigned_structures": 16,
@@ -1135,6 +1249,17 @@
     "datasets": 36,
     "regions_with_a_fingerprint": 94,
     "datasets_reaching_no_region": []
+  },
+  "stimulation_responses": {
+    "pairs": 1243,
+    "regions_with_a_label": 364,
+    "labels_reaching_no_region": [
+      "FP",
+      "MFC",
+      "MCC",
+      "INSULA/LFC",
+      "FG"
+    ]
   },
   "neurosynth_terms": {
     "function": 232,
@@ -4762,7 +4887,8 @@
     "arterial_territories",
     "cerebellar_functions",
     "coordinate_spaces",
-    "striatal_networks"
+    "striatal_networks",
+    "retinotopy"
   ],
   "published_files": [
     "aseg.volume",
@@ -4795,12 +4921,14 @@
     "nextbrain-compared.volume",
     "nextbrain.glb",
     "receptor-fingerprints.json",
+    "retinotopy.json",
     "ribbon-destrieux.labels",
     "ribbon-hcp-mmp.labels",
     "ribbon-julich.labels",
     "ribbon-schaefer.labels",
     "segmentation-agreement.json",
     "spinal-cord.glb",
+    "stimulation-responses.json",
     "structures.glb",
     "tissue-envelopes.glb",
     "tissue-labels.json",

@@ -14,6 +14,7 @@
   import CircuitStatus from '../circuits/CircuitStatus.svelte';
   import type { CircuitExplorer } from '../circuits/circuits-explorer.svelte.ts';
   import RelatedCircuits from '../circuits/RelatedCircuits.svelte';
+  import VisualFieldMap from '../circuits/VisualFieldMap.svelte';
   import DeficitProfile from '../deficits/DeficitProfile.svelte';
   import type { DeficitsExplorer } from '../deficits/explorer.svelte.ts';
   import RelatedDeficits from '../deficits/RelatedDeficits.svelte';
@@ -60,6 +61,7 @@
     boundaryCertainty,
     segmentationAgreement,
     receptors,
+    stimulation,
   } = $derived(engine.model);
   // The comparison file is published beside the manifest the engine opened (boot.ts).
   const manifestUrl = $derived(`${ASSET_BASE}models/${manifest.anatomy.id}/manifest.json`);
@@ -121,6 +123,7 @@
 <div class="detail-body scroll-fade">
   <div class="tab-group">
     <CircuitProfile model={circuits} />
+    <VisualFieldMap model={circuits.map} />
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />
     <DeficitProfile explorer={deficits} view={current} />
@@ -175,6 +178,7 @@
         {boundaryCertainty}
         {segmentationAgreement}
         {receptors}
+        {stimulation}
         territories={manifest.arterial_territories ?? null}
         cerebellarFunctions={manifest.cerebellar_functions ?? null}
         striatalNetworks={manifest.striatal_networks ?? null}

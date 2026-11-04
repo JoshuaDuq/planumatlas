@@ -5,14 +5,20 @@ import { tick } from 'svelte';
 import { createLatestRunner } from '../../lib/core/async/latest.ts';
 import type { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import type { FunctionalRegions } from '../../lib/core/catalog/functional-regions.ts';
-import { ALL_DOMAINS, type NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
+import {
+  ALL_DOMAINS,
+  COMPARE_MAX,
+  comparedIds,
+  compareId,
+  type NeuropsychDomains,
+} from '../../lib/core/catalog/neuropsych-domains.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import { stageMessage } from '../../lib/core/panels/clinical.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
 import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
-import { areaCount } from './functions-view.ts';
+import { areaCount, sharedCount } from './functions-view.ts';
 
 export interface FunctionExplorerDeps {
   session: Pick<SessionStore, 'state' | 'setFunctionQuery'>;
@@ -50,6 +56,9 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
   const runner = createLatestRunner();
 
   let opening = $state(false);
+  // Compare mode turns the list's rows into checkboxes; the picks outlive a comparison's profile.
+  let comparing = $state(false);
+  let picked = $state<string[]>([]);
   let run = $state<Run>(OPEN);
   // A failure belongs to the profile it happened in: another function or language clears it.
   let failed = $state.raw<{ profile: string; error: unknown } | null>(null);
@@ -87,6 +96,19 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     title.focus({ preventScroll: true });
   }
 
+  async function openFunction(id: string): Promise<boolean> {
+    const outcome = await start(OPEN, async () => {
+      const preparing = excursions.openFunction(id);
+      // The controller rendered the profile; a re-selected function has its heading already.
+      await tick();
+      if (!profile) throw new Error('The function profile is not mounted.');
+      scrollToTop(profile);
+      focusTitle();
+      return preparing;
+    });
+    return outcome.ok && outcome.value !== false;
+  }
+
   return {
     get query() {
       return session.state.functionQuery;
@@ -100,6 +122,14 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     },
     get selected() {
       return selected();
+    },
+    /** The list's rows pick functions to compare instead of opening one. */
+    get comparing() {
+      return comparing;
+    },
+    /** The functions picked to compare, in the order picked. */
+    get picked(): readonly string[] {
+      return picked;
     },
     /** A run is in flight: areas and Restore turn the reader away. */
     get opening() {
@@ -123,7 +153,12 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
         failure: run.failure,
         operation: run.operation,
         lang,
-        status: id === ALL_DOMAINS ? copy.shown : areaCount(domains, id, lang),
+        status:
+          id === ALL_DOMAINS
+            ? copy.shown
+            : comparedIds(id)
+              ? sharedCount(domains, id, lang)
+              : areaCount(domains, id, lang),
       });
     },
     get failed() {
@@ -138,6 +173,19 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     /** A search carried to the Deficits tab. */
     searchDeficits: (query: string) => excursions.searchIn('deficits', query),
     openDeficit: deps.openDeficit,
+
+    /** Enters or leaves compare mode; leaving forgets the picks. */
+    toggleComparing() {
+      comparing = !comparing;
+      picked = [];
+    },
+    /** Picks or unpicks a function; a full set takes no more. */
+    togglePick(id: string) {
+      if (picked.includes(id)) picked = picked.filter((entry) => entry !== id);
+      else if (picked.length < COMPARE_MAX) picked = [...picked, id];
+    },
+    /** Opens the comparison of the picked functions. */
+    compare: (): Promise<boolean> => openFunction(compareId(picked)),
 
     /** The field takes focus with its text selected (the `/` key). */
     focusSearch() {
@@ -160,22 +208,11 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     },
 
     /**
-     * Opens a function: the S3 controller draws it and downloads what it needs, the profile starts
-     * at its top and its name takes focus at once (functions.js:157). The entry point S3 takes as
-     * `panels.openFunction`; `chooseMode` and a paint pick call it too.
+     * Opens a function or a comparison: the S3 controller draws it and downloads what it needs, the
+     * profile starts at its top and its name takes focus at once (functions.js:157). The entry point
+     * S3 takes as `panels.openFunction`; `chooseMode` and a paint pick call it too.
      */
-    async openFunction(id: string): Promise<boolean> {
-      const outcome = await start(OPEN, async () => {
-        const preparing = excursions.openFunction(id);
-        // The controller rendered the profile; a re-selected function has its heading already.
-        await tick();
-        if (!profile) throw new Error('The function profile is not mounted.');
-        scrollToTop(profile);
-        focusTitle();
-        return preparing;
-      });
-      return outcome.ok && outcome.value !== false;
-    },
+    openFunction,
 
     /** An area the profile names: drawn, selected and framed; its name then takes focus. */
     async openArea(region: string): Promise<void> {
@@ -201,7 +238,11 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
         requestFocus(FOCUS_TARGETS.regionTitle, { fallback: FOCUS_TARGETS.activeTab });
         return;
       }
-      const row = id && list?.querySelector<HTMLElement>(`[data-function="${CSS.escape(id)}"]`);
+      // A comparison returns to the button that opened it, a function to its row.
+      const opener = comparedIds(id)
+        ? '[data-compare-open]'
+        : id && `[data-function="${CSS.escape(id)}"]`;
+      const row = opener && list?.parentElement?.querySelector<HTMLElement>(opener);
       (row || search)?.focus();
     },
   };

@@ -16,11 +16,15 @@ const CLICK_SLOP_PX = { mouse: 5, touch: 12 };
 const slopFor = (pointerType: string): number =>
   CLICK_SLOP_PX[pointerType === 'touch' ? 'touch' : 'mouse'];
 
+/** Where a ray met the drawn anatomy: the point, and the mesh and triangle when it was one. */
+export type SurfaceHit = Pick<Intersection, 'point'> &
+  Partial<Pick<Intersection, 'object' | 'face'>>;
+
 /** What the picker asks of the drawn anatomy. */
 export interface PickModel<Region extends { id: string }> {
   pick(raycaster: Raycaster): Region | null;
-  /** Used by a double click only: where the ray meets the surface. */
-  intersect?(raycaster: Raycaster): Pick<Intersection, 'point'> | null;
+  /** Used by a double click and by placing: where the ray meets the surface. */
+  intersect?(raycaster: Raycaster): SurfaceHit | null;
 }
 
 export interface PickerOptions<Region extends { id: string }> {
@@ -33,7 +37,7 @@ export interface PickerOptions<Region extends { id: string }> {
   onFocusPoint?: (point: Vector3) => void;
   /** While this holds, a click places at the point it meets rather than choosing a region. */
   placing?: () => boolean;
-  onPlace?: (point: Vector3) => void;
+  onPlace?: (hit: SurfaceHit) => void;
 }
 
 interface Press {
@@ -130,7 +134,7 @@ export function createPicker<Region extends { id: string }>({
       const rect = domElement.getBoundingClientRect();
       if (!aim(event.clientX - rect.left, event.clientY - rect.top)) return;
       const hit = model().intersect?.(raycaster) ?? null;
-      if (hit?.point) onPlace?.(hit.point);
+      if (hit?.point) onPlace?.(hit);
       return;
     }
     const id = regionAt(event)?.id;

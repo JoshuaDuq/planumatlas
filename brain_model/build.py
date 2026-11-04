@@ -31,7 +31,9 @@ from .layers import (
     neuropsych_domains,
     neurosynth_terms,
     receptor_fingerprints,
+    retinotopy,
     spinal_cord,
+    stimulation_responses,
     striatal_networks,
 )
 from .sources import (
@@ -121,6 +123,7 @@ def require_layer_inputs(config):
             *(coordinate_spaces.field_path(config, space)
               for space in coordinate_spaces.read_definition()["spaces"]),
         ],
+        "retinotopy": lambda: retinotopy.inputs(retinotopy.read_definition()),
     }
     missing = [
         str(path)
@@ -145,7 +148,25 @@ def read_networks(config, prefix, vertex_count):
     return networks.network_indices(labels, names)
 
 
-def build_cortex(config, atlas, field_ranges=None):
+def retinotopy_fields(faces, labels, projected):
+    """The projected visual-field position, pRF size and area on the atlas partition.
+
+    A vertex the partition adds between V1–V3 and the rest of the cortex averages only its
+    V1–V3 corners: the rest carry no position, and averaging their zeros in would pull it
+    towards fixation. The viewer weights each vertex by whether it lies in V1–V3 the same way.
+    """
+    inside = partition_vertex_field(faces, labels, (projected["area"] > 0).astype(float))
+    share = np.where(inside > 0, inside, 1)
+    return {
+        **{
+            name: partition_vertex_field(faces, labels, projected[key]) / share
+            for name, key in zip(retinotopy.FIELDS, ("x", "y", "sigma"))
+        },
+        retinotopy.AREA: partition_vertex_labels(faces, labels, projected["area"]),
+    }
+
+
+def build_cortex(config, atlas, field_ranges=None, retinotopic=None):
     scene = trimesh.Scene()
     regions = []
     source = config["source_directory"]
@@ -191,6 +212,9 @@ def build_cortex(config, atlas, field_ranges=None):
             None if territory_ids is None
             else partition_vertex_labels(faces, labels, territory_ids)
         )
+        visual_fields = None if retinotopic is None else retinotopy_fields(
+            faces, labels, retinotopic[prefix]
+        )
         for label in np.unique(labels):
             name = "Unknown" if label == -1 else names[label].decode()
             color = [128, 128, 128] if label == -1 else colors[label, :3].tolist()
@@ -223,6 +247,9 @@ def build_cortex(config, atlas, field_ranges=None):
                 # The medial wall and unmapped cortex are not regions; their supply says nothing.
                 if composed and region["kind"] == "cortex":
                     region.update(composed)
+            if visual_fields is not None:
+                for name, field in visual_fields.items():
+                    mesh.vertex_attributes[name] = field[indices].astype(np.float32)
             region.update(
                 vertex_count=len(mesh.vertices),
                 triangle_count=len(mesh.faces),
@@ -544,8 +571,10 @@ def main():
     atlas_metadata = []
     regions = []
     field_ranges = None
+    visual = retinotopy.read_definition() if retinotopy.is_declared(config) else None
+    retinotopic = retinotopy.project_all(config, visual) if visual else None
     for atlas in config["atlases"]:
-        metadata, cortex = build_cortex(config, atlas, field_ranges)
+        metadata, cortex = build_cortex(config, atlas, field_ranges, retinotopic)
         field_ranges = metadata.pop("field_ranges") or field_ranges
         metadata["ribbon_labels"] = export_ribbon_labels(config, atlas, cortex)
         atlas_metadata.append(metadata)
@@ -624,6 +653,7 @@ def main():
         "neuropsych_domains": neuropsych_domains.export(config, regions),
         "neurosynth_terms": neurosynth_terms.export(config, regions),
         "receptor_fingerprints": receptor_fingerprints.export(config, regions),
+        "stimulation_responses": stimulation_responses.export(config, regions),
         **(
             {"boundary_certainty": boundary_certainty.export(config, regions)}
             if boundary_certainty.is_published(config)
@@ -654,6 +684,7 @@ def main():
             if coordinate_spaces.is_declared(config)
             else {}
         ),
+        **({"retinotopy": retinotopy.export(config, visual, retinotopic)} if visual else {}),
         "cut_atlases": cut_atlases(config),
         "detail_levels": levels,
         "regions": regions,
@@ -683,12 +714,14 @@ def main():
             *neuropsych_domains.limitations(),
             *neurosynth_terms.limitations(config),
             *receptor_fingerprints.limitations(),
+            *stimulation_responses.limitations(),
             *white_matter.limitations(config),
             *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
             *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),
             *(striatal_networks.limitations(config, striatal) if striatal_networks.is_declared(config) else []),
             *(coordinate_spaces.limitations(coordinate_spaces.read_definition())
               if coordinate_spaces.is_declared(config) else []),
+            *(retinotopy.limitations(visual) if visual else []),
         ],
         "provenance": provenance,
     }

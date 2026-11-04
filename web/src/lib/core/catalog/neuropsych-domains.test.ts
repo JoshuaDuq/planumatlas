@@ -3,19 +3,24 @@ import assert from 'node:assert/strict';
 import type { Region } from '../../types/index.ts';
 import {
   ALL_DOMAINS,
+  COMPARE_COLORS,
+  comparedAreas,
   domainAreas,
   domainPaint,
   domainRecord,
   domainsOf,
   domainStudies,
   drawnAs,
+  functionName,
   groupedDomains,
   matchingTerms,
   nearestName,
   overviewDomains,
   revealedRegions,
   scoredRegion,
+  SHARED_COLOR,
   shownDomain,
+  validComparison,
   validateNeuropsychDomains,
   type TermRecord,
 } from './neuropsych-domains.ts';
@@ -413,6 +418,57 @@ test('searched terms paint the regions they reach by z band and keep their kind'
   assert.throws(
     () => domainPaint(published, 'term:praxis'),
     /Unknown neuropsychological domain: term:praxis/,
+  );
+});
+
+test('a comparison names two distinct published functions or terms, in order', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.equal(validComparison(published, 'compare:language,memory'), true);
+  assert.equal(validComparison(published, 'compare:term:fear,memory'), true);
+  for (const id of [
+    'language',
+    'compare:language',
+    'compare:language,language',
+    'compare:language,praxis',
+    'compare:all,language',
+    'compare:language,memory,visual',
+  ]) {
+    assert.equal(validComparison(published, id), false, id);
+  }
+  assert.equal(functionName(published, 'compare:memory,language', 'fr'), 'Mémoire · Langage');
+  assert.equal(functionName(published, 'compare:term:fear,memory', 'en'), 'fear · Memory');
+  assert.equal(functionName(published, 'visual', 'en'), 'Visual');
+});
+
+test('a comparison lists the areas both reach first, then each one’s own, strongest first', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.deepEqual(comparedAreas(published, 'compare:language,memory'), [
+    { region: 'hcp-mmp:left:1', z: [3.2, 7.5], reached: 2 },
+    { region: 'hcp-mmp:right:1', z: [4.1, null], reached: 1 },
+    { region: 'aseg:left:18', z: [null, 3.5], reached: 1 },
+  ]);
+  assert.throws(
+    () => comparedAreas(published, 'compare:language'),
+    /Invalid comparison: compare:language/,
+  );
+});
+
+test('a comparison paints each area in the colour of the one function reaching it, or the shared colour', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  const paint = domainPaint(published, 'compare:language,memory');
+  assert.equal(paint.id, 'function:compare:language,memory');
+  assert.deepEqual(
+    [...paint.colors],
+    [
+      ['hcp-mmp:left:1', SHARED_COLOR],
+      ['hcp-mmp:right:1', COMPARE_COLORS[0]],
+      ['aseg:left:18', COMPARE_COLORS[1]],
+      ['learning:left:amygdala', COMPARE_COLORS[1]],
+    ],
+  );
+  assert.throws(
+    () => domainPaint(published, 'compare:language,praxis'),
+    /Invalid comparison: compare:language,praxis/,
   );
 });
 

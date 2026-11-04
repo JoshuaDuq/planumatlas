@@ -8,6 +8,7 @@
   import CircuitStatus from './CircuitStatus.svelte';
   import CircuitStepper from './CircuitStepper.svelte';
   import RelatedCircuits from './RelatedCircuits.svelte';
+  import VisualFieldMap from './VisualFieldMap.svelte';
   import type { World } from './circuits-test-world.ts';
 
   let { world }: { world: World } = $props();
@@ -29,6 +30,7 @@
   <CircuitList {model} />
   <div class="detail">
     <CircuitProfile {model} />
+    <VisualFieldMap model={model.map} />
     <CircuitStatus {model} />
     <!-- Stands for RegionDetail, which reads the same flag. -->
     <div class="region" data-landmark-selected={model.landmarkSelected}>

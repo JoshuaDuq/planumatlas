@@ -4,15 +4,20 @@ import { functionalName, functionalRegionOf } from '../../lib/core/catalog/funct
 import type { FunctionalRegions } from '../../lib/core/catalog/functional-regions.ts';
 import {
   ALL_DOMAINS,
+  COMPARE_COLORS,
+  comparedAreas,
+  comparedIds,
   domainAreas,
   domainName,
   domainRecord,
   domainStudies,
+  functionName,
   groupedDomains,
   isTermId,
   matchingTerms,
   nearestName,
   overviewDomains,
+  SHARED_COLOR,
   type Domain,
   type NeuropsychDomains,
   type TermRecord,
@@ -27,14 +32,34 @@ export const AREAS_SHOWN = 12;
 /** Searched terms listed under the curated functions; the rest wait for a narrower query. */
 export const TERMS_SHOWN = 20;
 
-/** How many of the regions a domain reaches are areas and how many structures. */
-function reachedCounts(partition: NeuropsychDomains, id: string): [number, number] {
-  const reached = domainAreas(partition, id);
-  const structures = reached.filter(({ region }) =>
+/** How many of `regions` are areas and how many structures. */
+function splitCounts(partition: NeuropsychDomains, regions: string[]): [number, number] {
+  const structures = regions.filter((region) =>
     region.startsWith(`${partition.structure_atlas}:`),
   ).length;
-  return [reached.length - structures, structures];
+  return [regions.length - structures, structures];
 }
+
+/** How many of the regions a domain reaches are areas and how many structures. */
+const reachedCounts = (partition: NeuropsychDomains, id: string): [number, number] =>
+  splitCounts(
+    partition,
+    domainAreas(partition, id).map(({ region }) => region),
+  );
+
+/** The areas and structures both compared functions reach, as the comparison's meta line says it. */
+export const sharedCount = (partition: NeuropsychDomains, id: string, lang: Language): string =>
+  t(lang, 'functions').both(
+    t(lang, 'functions').areasShort(
+      ...splitCounts(
+        partition,
+        comparedAreas(partition, id)
+          .filter((area) => area.reached > 1)
+          .map(({ region }) => region),
+      ),
+    ),
+    decimal(partition.threshold_z, 0, lang),
+  );
 
 /** The areas and structures a domain reaches at the threshold, as the profile says it. */
 export const areaCount = (partition: NeuropsychDomains, id: string, lang: Language): string =>
@@ -54,8 +79,6 @@ export interface FunctionRow {
   studies: number | null;
   /** Read, not shown: the row's name continues with it. */
   detail: string;
-  /** The colour the function's areas take on the brain; a searched term has none. */
-  colour: Rgb | null;
   /** A searched term is English whatever the reader's language. */
   lang: Language | null;
 }
@@ -100,7 +123,6 @@ export function functionList(
         count(studies, 'study', lang),
         areaCountShort(domains, record.id, lang),
       ),
-      colour: searched ? null : (record as Domain).color,
       lang: searched && lang !== 'en' ? 'en' : null,
     };
   };
@@ -113,7 +135,6 @@ export function functionList(
           name: copy.all,
           studies: null,
           detail: copy.allDetail,
-          colour: null,
           lang: null,
         },
     groups: curated.map(({ group, name, domains: members }) => ({
@@ -190,6 +211,27 @@ export interface FunctionProfileContent {
   citation: string;
 }
 
+type ProfileSources = Parameters<typeof functionProfile>[0];
+
+/** An area's name with its side, and the functional division it belongs to. */
+function placeOf(
+  { anatomy, functionalRegions }: Pick<ProfileSources, 'anatomy' | 'functionalRegions'>,
+  id: string,
+  region: string,
+  lang: Language,
+): Omit<AreaRow, 'z'> {
+  const entry = anatomy.get(region);
+  if (!entry) throw new Error(`Unknown region in function ${id}: ${region}`);
+  const division =
+    functionalRegionOf(functionalRegions, 'named', region) ??
+    functionalRegionOf(functionalRegions, 'sections', region);
+  return {
+    region,
+    name: `${entry.label.name} · ${t(lang, 'sides').capitalized[entry.region.hemisphere]}`,
+    division: division ? functionalName(division, lang) : null,
+  };
+}
+
 type LesionCheck = Parameters<typeof checkedParcels>[0] & {
   association: string;
   deficit: string;
@@ -221,23 +263,13 @@ export function functionProfile(
   const source = (domains.sources as Record<string, { short: string; citation: string }>)[
     domains.scores_source as string
   ];
-  const sides = t(lang, 'sides').capitalized;
 
   const areas = all
     ? []
-    : domainAreas(domains, id).map(({ region, z }): AreaRow => {
-        const entry = anatomy.get(region);
-        if (!entry) throw new Error(`Unknown region in function ${id}: ${region}`);
-        const division =
-          functionalRegionOf(functionalRegions, 'named', region) ??
-          functionalRegionOf(functionalRegions, 'sections', region);
-        return {
-          region,
-          name: `${entry.label.name} · ${sides[entry.region.hemisphere]}`,
-          division: division ? functionalName(division, lang) : null,
-          z: decimal(z, 1, lang),
-        };
-      });
+    : domainAreas(domains, id).map(({ region, z }) => ({
+        ...placeOf({ anatomy, functionalRegions }, id, region, lang),
+        z: decimal(z, 1, lang),
+      }));
 
   const population = record?.kind === 'population';
   const found = searched && population ? deficitsMatching((record as TermRecord).term, lang) : 0;
@@ -284,6 +316,84 @@ export function functionProfile(
         }))
       : null,
     method: domainCopy.note(source.short),
+    citation: source.citation,
+  };
+}
+
+/** One of a comparison's functions, in the colour its own areas take. */
+export interface ComparedFunction {
+  id: string;
+  name: string;
+  /** A searched term is English whatever the reader's language. */
+  lang: Language | null;
+  detail: string;
+  colour: Rgb;
+}
+
+/** An area both compared functions reach, with each one's z in order. */
+export interface SharedAreaRow extends Omit<AreaRow, 'z'> {
+  z: string[];
+}
+
+export interface ComparisonContent {
+  name: string;
+  functions: ComparedFunction[];
+  shared: { colour: Rgb; areas: SharedAreaRow[] };
+  /** Each function's areas the other does not reach, strongest first. */
+  only: (ComparedFunction & { areas: AreaRow[] })[];
+  method: string;
+  citation: string;
+}
+
+/** What the profile of a comparison shows: its functions, the areas both reach, then each one's own. */
+export function comparisonProfile(
+  sources: Pick<ProfileSources, 'domains' | 'anatomy' | 'functionalRegions'>,
+  id: string,
+  lang: Language,
+): ComparisonContent {
+  const { domains } = sources;
+  const ids = comparedIds(id);
+  if (!ids) throw new Error(`Not a comparison: ${id}`);
+  const copy = t(lang, 'functions');
+  const areas = comparedAreas(domains, id);
+  const functions = ids.map((member, index): ComparedFunction => {
+    const record = domainRecord(domains, member)!;
+    return {
+      id: member,
+      name: isTermId(member) ? record.term : domainName(record, lang),
+      lang: isTermId(member) && lang !== 'en' ? 'en' : null,
+      detail: copy.termDetail(
+        count(domainStudies(domains, member), 'study', lang),
+        areaCountShort(domains, member, lang),
+      ),
+      colour: COMPARE_COLORS[index]!,
+    };
+  });
+  const source = (domains.sources as Record<string, { short: string; citation: string }>)[
+    domains.scores_source as string
+  ];
+  return {
+    name: functionName(domains, id, lang),
+    functions,
+    shared: {
+      colour: SHARED_COLOR,
+      areas: areas
+        .filter((area) => area.reached > 1)
+        .map((area) => ({
+          ...placeOf(sources, id, area.region, lang),
+          z: area.z.map((z) => decimal(z!, 1, lang)),
+        })),
+    },
+    only: functions.map((entry, index) => ({
+      ...entry,
+      areas: areas
+        .filter((area) => area.reached === 1 && area.z[index] !== null)
+        .map((area) => ({
+          ...placeOf(sources, id, area.region, lang),
+          z: decimal(area.z[index]!, 1, lang),
+        })),
+    })),
+    method: t(lang, 'domains').note(source.short),
     citation: source.citation,
   };
 }

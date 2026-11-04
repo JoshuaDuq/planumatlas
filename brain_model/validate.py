@@ -10,7 +10,7 @@ from nibabel.freesurfer.io import read_annot, read_geometry, read_morph_data
 from scipy.ndimage import center_of_mass, map_coordinates
 
 from . import validate_learning
-from .build import require_layer_inputs
+from .build import require_layer_inputs, retinotopy_fields
 from .gltf.encode import (
     decode_field,
     decode_normals,
@@ -34,7 +34,9 @@ from .layers import (
     neuropsych_domains,
     neurosynth_terms,
     receptor_fingerprints,
+    retinotopy,
     spinal_cord,
+    stimulation_responses,
     striatal_networks,
 )
 from .sources import read_color_table, read_config, sha256, verify_sources, write_json
@@ -271,6 +273,11 @@ def validate_atlas(config, atlas, records):
     territory_grid = (
         arterial_territories.territory_index(config, territories) if territories else None
     )
+    retinotopic = (
+        retinotopy.project_all(config, retinotopy.read_definition())
+        if retinotopy.is_declared(config) else None
+    )
+    visual_error = {name: 0.0 for name in retinotopy.FIELDS} if retinotopic else {}
     expected_ids = set()
     for prefix, hemisphere in [("lh", "left"), ("rh", "right")]:
         vertices, faces = read_geometry(
@@ -300,6 +307,9 @@ def validate_atlas(config, atlas, records):
         network_field, network_ids = read_network_field(config, prefix, faces, labels)
         territory_field, territory_ids = read_territory_field(
             config, territory_grid, vertices, white, faces, labels
+        )
+        visual_fields = (
+            retinotopy_fields(faces, labels, retinotopic[prefix]) if retinotopic else None
         )
         reports[hemisphere] = validate_partition(vertices, faces, labels, partition)
         for label in np.unique(labels):
@@ -353,6 +363,19 @@ def validate_atlas(config, atlas, records):
                 if any(record.get(field) != composed.get(field)
                        for field in ("territories", "territory_unassigned")):
                     raise ValueError(f"Territory composition changed: {region_id}")
+            if visual_fields is not None:
+                carried = actual.vertex_attributes.get(retinotopy.AREA)
+                if carried is None or not np.array_equal(
+                    carried.ravel(), visual_fields[retinotopy.AREA][indices]
+                ):
+                    raise ValueError(f"Visual area field changed: {region_id}")
+                for name in retinotopy.FIELDS:
+                    field = actual.vertex_attributes.get(name)
+                    if field is None or field.size != len(points):
+                        raise ValueError(f"Missing {name}: {region_id}")
+                    visual_error[name] = max(visual_error[name], float(np.abs(
+                        decode_field(field.ravel(), ranges[name]) - visual_fields[name][indices]
+                    ).max()))
             depth = actual.vertex_attributes.get("_SULC")
             if depth is None or depth.size != len(points) or not np.isfinite(depth).all():
                 raise ValueError(f"Missing or invalid sulcal depth: {region_id}")
@@ -391,6 +414,7 @@ def validate_atlas(config, atlas, records):
             ("normal_component", normal_error, normal_tolerance()),
             ("sulcal_depth", sulcal_error, field_tolerance(ranges["_SULC"])),
             ("ribbon_T1", intensity_error, field_tolerance(ranges["_T1"])),
+            *((name, error, field_tolerance(ranges[name])) for name, error in visual_error.items()),
             # Openness is re-cast in float32 on whatever CPU validates it. Where
             # the pial surface touches itself a ray can start on either side
             # of the contact, so a few vertices flip; every other vertex holds.
@@ -420,6 +444,7 @@ def validate_atlas(config, atlas, records):
         "maximum_openness_error": openness_error,
         "openness_outlier_share": openness_outliers / openness_count,
         "maximum_ribbon_T1_error": intensity_error,
+        **({"maximum_visual_field_error": visual_error} if visual_error else {}),
     }
 
 
@@ -886,6 +911,7 @@ def validate_layers(config, manifest, tissues):
             if striatal_networks.LAYER in declared else None
         ),
         "coordinate_spaces": coordinate_spaces.LAYER in declared,
+        "retinotopy": retinotopy.LAYER in declared,
     }
     published = {
         "networks": manifest["networks"],
@@ -903,6 +929,7 @@ def validate_layers(config, manifest, tissues):
         "cerebellar_functions": manifest.get("cerebellar_functions"),
         "striatal_networks": manifest.get("striatal_networks"),
         "coordinate_spaces": "coordinate_spaces" in manifest,
+        "retinotopy": "retinotopy" in manifest,
     }
     differ = [key for key in expected if published[key] != expected[key]]
     if differ:
@@ -996,8 +1023,11 @@ def main():
            if striatal_networks.is_declared(config) else {}),
         **({"coordinate_spaces": coordinate_spaces.validate(config, manifest)}
            if coordinate_spaces.is_declared(config) else {}),
+        **({"retinotopy": retinotopy.validate(config, manifest)}
+           if retinotopy.is_declared(config) else {}),
         "neuropsych_domains": neuropsych_domains.validate(config, manifest),
         "receptor_fingerprints": receptor_fingerprints.validate(config, manifest),
+        "stimulation_responses": stimulation_responses.validate(config, manifest),
         **({"neurosynth_terms": neurosynth_terms.validate(config, manifest)}
            if neurosynth_terms.is_declared(config) else {}),
         **(

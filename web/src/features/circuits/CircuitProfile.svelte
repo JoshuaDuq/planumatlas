@@ -54,6 +54,17 @@
       <p class="circuit-role">{step.role[lang]}</p>
       <p class="circuit-explanation">{step.explanation[lang]}</p>
       <p class="circuit-note">{copy.clinicalNote}</p>
+      {#if step.map && model.map.available}
+        <p class="circuit-note circuit-return">
+          <button
+            type="button"
+            aria-disabled={model.busy ? 'true' : undefined}
+            onclick={() => void model.openMap()}
+          >
+            {copy.openMap}
+          </button>
+        </p>
+      {/if}
       {#if !model.landmarkSelected}
         <!-- Back to the prepared view, offered once the reader has left the landmark. -->
         <p class="circuit-note circuit-return">

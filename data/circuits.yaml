@@ -198,6 +198,7 @@ circuits:
           fr: Cette parcelle HCP-MMP est une étiquette d’atlas projetée sur la surface individuelle, et non une localisation fonctionnelle individuelle.
         view: right
         plane: coronal
+        map: visual-field
 
   - id: memory
     name: { en: Hippocampal–diencephalic pathway, fr: Voie hippocampo-diencéphalique }

@@ -135,7 +135,8 @@
   "routeMark": [
    "[\"Alpha\",\"\"] → \"Repère Alpha1<NNBSP>: \"",
    "[\"\",\"Alpha\"] → \"Repère 1<NNBSP>: Alpha\""
-  ]
+  ],
+  "openMap": "Explorer la carte du champ visuel"
  },
  "clinical": {
   "deficits": "Déficits",
@@ -639,6 +640,8 @@
   "keyScale": "Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.",
   "keyScaleTerm": "Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.",
   "keyAll": "Chaque aire montre sa fonction la plus forte<NNBSP>; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.",
+  "keyCompare": "Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.",
+  "keyShared": "Les deux",
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: «  »\"",
    "[\"\",\"Alpha\"] → \"<NNBSP>: « Alpha »\""
@@ -697,7 +700,8 @@
    "overlap": "Impossible de charger le contour du chevauchement.",
    "restore": "Impossible de rétablir la vue précédente.",
    "fullscreen": "Impossible de passer en plein écran.",
-   "streamlines": "Impossible d’afficher les trajectoires de ce repère."
+   "streamlines": "Impossible d’afficher les trajectoires de ce repère.",
+   "map": "Impossible d’ouvrir la carte du champ visuel."
   }
  },
  "footer": {
@@ -734,6 +738,7 @@
   "networks": "Réseaux fonctionnels",
   "functional": "Divisions fonctionnelles",
   "receptors": "Empreintes de récepteurs",
+  "stimulation": "Réponses à la stimulation",
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
   "files": "Fichiers publiés",
@@ -839,6 +844,25 @@
    "[\"\",\"Alpha\",\"\",1] → \" (Alpha), parmi les 1 régions les plus fortes de , se trouve sous le cortex.\"",
    "[\"Alpha\",\"\",\"Alpha\",2] → \"Alpha (), parmi les 2 régions les plus fortes de Alpha, se trouve sous le cortex.\""
   ],
+  "compare": "Comparer",
+  "compareCancel": "Annuler",
+  "comparePrompt": [
+   "[\"Alpha\"] → \"Choisissez encore une fonction ou un terme\"",
+   "[\"\"] → \"Choisissez deux fonctions ou termes à comparer\""
+  ],
+  "compareOpen": "Comparer",
+  "both": [
+   "[\"Alpha\",\"\"] → \"Les deux atteignent Alpha à z<NBSP>≥<NBSP>\"",
+   "[\"\",\"Alpha\"] → \"Les deux atteignent  à z<NBSP>≥<NBSP>Alpha\""
+  ],
+  "bothHeading": "Aires atteintes par les deux",
+  "onlyNote": "Aires que l’autre carte n’atteint pas",
+  "noneShared": [
+   "[\"Alpha\"] → \"Les deux cartes ne partagent aucune aire ni structure à z<NBSP>Alpha.\"",
+   "[\"\"] → \"Les deux cartes ne partagent aucune aire ni structure à z<NBSP>.\""
+  ],
+  "noneOnly": "L’autre carte atteint toutes les aires de celle-ci.",
+  "compareNote": "Le z d’une carte croît avec le nombre d’études derrière son terme<NNBSP>: comparez les aires que chaque carte atteint, et non le z d’une carte à celui de l’autre.",
   "suggest": [
    "[\"Alpha\"] → \"Vouliez-vous dire «<NBSP>Alpha<NBSP>»<NNBSP>?\"",
    "[\"\"] → \"Vouliez-vous dire «<NBSP><NBSP>»<NNBSP>?\""
@@ -1454,6 +1478,40 @@
    "full": "Panneau entièrement ouvert"
   }
  },
+ "stimulation": {
+  "heading": "Réponses à la stimulation",
+  "site": "Site thalamique",
+  "direction": "Sens",
+  "from": "Stimulé ici",
+  "to": "Enregistré ici",
+  "side": "Hémisphère",
+  "same": "Même côté",
+  "opposite": "Côté opposé",
+  "counts": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha paires sur  · Alpha personnes\"",
+   "[\"\",\"Alpha\",\"\"] → \" paires sur Alpha ·  personnes\""
+  ],
+  "noRate": "sans taux",
+  "none": "Aucune paire testée de ce côté.",
+  "untested": [
+   "[\"Alpha\"] → \"Non testés<NNBSP>: Alpha.\"",
+   "[\"\"] → \"Non testés<NNBSP>: .\""
+  ],
+  "note": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Part des paires de canaux de stéréo-EEG où une stimulation à impulsion unique a évoqué une réponse, regroupées sur Alpha personnes épileptiques<NNBSP>; un taux n’est tracé que pour les paires testées chez au moins  personnes. Les Alpha paires exclues par les auteurs comme artefact ou bruit ne sont pas comptées. Non mesuré dans ce cerveau<NNBSP>; les deux hémisphères montrent les mêmes valeurs.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Part des paires de canaux de stéréo-EEG où une stimulation à impulsion unique a évoqué une réponse, regroupées sur  personnes épileptiques<NNBSP>; un taux n’est tracé que pour les paires testées chez au moins Alpha personnes. Les  paires exclues par les auteurs comme artefact ou bruit ne sont pas comptées. Non mesuré dans ce cerveau<NNBSP>; les deux hémisphères montrent les mêmes valeurs.\""
+  ],
+  "basisContacts": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Prend l’étiquette Alpha des auteurs<NNBSP>:  des Alpha canaux corticaux de  personnes situés dans cette parcelle la portent.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Prend l’étiquette  des auteurs<NNBSP>: Alpha des  canaux corticaux de Alpha personnes situés dans cette parcelle la portent.\""
+  ],
+  "basisName": [
+   "[\"Alpha\"] → \"Associée par son nom à l’étiquette Alpha des auteurs.\"",
+   "[\"\"] → \"Associée par son nom à l’étiquette  des auteurs.\""
+  ],
+  "thalamus": "Les auteurs ont regroupé les contacts thalamiques par position, pas par noyau<NNBSP>; toute structure thalamique montre donc les trois sites.",
+  "dataset": "Jeu de données Zenodo"
+ },
  "territories": {
   "heading": "Vascularisation artérielle typique",
   "basis": {
@@ -1665,6 +1723,81 @@
   "posterior": "Postérieure",
   "superior": "Supérieure",
   "inferior": "Inférieure"
+ },
+ "visualField": {
+  "guided": "Parcours guidés",
+  "maps": "Cartes",
+  "name": "Carte du champ visuel",
+  "summary": "Champ visuel ↔ V1, V2, V3, prédits",
+  "mapCount": [
+   "[\"Alpha\"] → \"Alpha carte\"",
+   "[\"\"] → \" carte\""
+  ],
+  "intro": "Déplacez le point dans le champ visuel pour voir le cortex prédit pour le représenter. Cliquez sur V1, V2 ou V3 sur le cerveau pour voir à quelle partie du champ il répondrait.",
+  "disc": "Champ visuel, fixation au centre, excentricité en échelle logarithmique",
+  "dot": "Point",
+  "dotRole": "curseur à deux dimensions",
+  "dotKeys": "Les flèches déplacent le point<NNBSP>; avec Maj, plus loin.",
+  "size": "Rayon du point",
+  "ring": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "measuredRing": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "place": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "radius": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "hemisphere": [
+   "[\"Alpha\"] → \"Représenté dans l’hémisphère droit, vu depuis la ligne médiane.\"",
+   "[\"\"] → \"Sur le méridien vertical<NNBSP>: les deux hémisphères le représentent.\""
+  ],
+  "territory": "Territoire prédit",
+  "territoryNote": "Cortex dont le centre prédit du champ récepteur se trouve dans le point, mesuré sur la surface médiane du cortex.",
+  "territoryArea": [
+   "[\"Alpha\"] → \"NaN mm²\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "sideHeading": [
+   "[\"Alpha\"] → \"Droit\"",
+   "[\"\"] → \"Droit\""
+  ],
+  "noTerritory": "Aucun centre prédit ne se trouve dans le point<NNBSP>; agrandissez-le.",
+  "extrapolated": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "legendCore": "Centre du champ récepteur dans le point",
+  "legendReach": "Champ récepteur à moins d’un σ du point",
+  "legendLine": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "legendAreas": "V1, V2, V3, du plus clair au plus sombre",
+  "reading": "Cortex cliqué",
+  "readingValue": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\""
+  ],
+  "readingNone": "Ce point est hors de V1–V3, où le gabarit ne prédit rien.",
+  "clickHint": "Cliquez sur V1, V2 ou V3 sur le cerveau pour le lire.",
+  "loading": "Chargement des territoires…",
+  "loadFailed": "Les territoires n’ont pas pu être chargés.",
+  "provenance": "Prédit à partir des plissements de ce cerveau par le gabarit de Benson (v4.0), ajusté sur la moyenne de 181 participants du HCP. Aucune rétinotopie n’a été mesurée dans ce cerveau, et la taille de V1 varie d’environ un facteur trois d’une personne à l’autre.",
+  "agreement": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"throws hcp.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\"] → \"throws hcp.toFixed is not a function\""
+  ],
+  "sources": "Sources",
+  "dataset": "Rétinotopie 7T du HCP (Benson et al. 2018)",
+  "method": "Méthode du gabarit (Benson et al. 2014)"
  },
  "workspace": {
   "modes": {

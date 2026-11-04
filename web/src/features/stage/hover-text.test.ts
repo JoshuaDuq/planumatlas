@@ -114,6 +114,13 @@ describe('hoverText', () => {
     expect(hoverText(region('u'), term, sources())).toBe('raw u · reading · Left');
   });
 
+  test('a comparison names those of its functions that reach the area, in the comparison’s order', () => {
+    const compared = view({ paint: functionPaint, selectedFunction: 'compare:memory,attention' });
+    expect(hoverText(region('a'), compared, sources())).toBe('Area A · Memory, Attention · Left');
+    expect(hoverText(region('b'), compared, sources())).toBe('raw b · Memory · Left');
+    expect(hoverText(region('u'), compared, sources())).toBe('raw u · Memory, Attention · Left');
+  });
+
   test('a deficit paint names no function', () => {
     const deficit = view({ paint: { id: 'deficit:aphasia', colors: new Map() } as Paint });
     expect(hoverText(region('a'), deficit, sources())).toBe('Area A · Left');

@@ -145,7 +145,9 @@ describe('the list', () => {
     const group = page.getByRole('group', { name: 'Guided learning', exact: true });
     await expect.element(group).toBeVisible();
     const buttons = group.element().querySelectorAll('ul > li > button');
-    expect(buttons.length).toBe(world.circuits.all.length);
+    // The guided circuits, then the one map.
+    expect(buttons.length).toBe(world.circuits.all.length + 1);
+    expect((buttons[buttons.length - 1] as HTMLElement).dataset.map).toBe('visual-field');
     const vision = rowOf('vision');
     expect(vision.querySelector('.group-count')!.getAttribute('aria-hidden')).toBe('true');
     expect(vision.querySelector('.chevron')!.getAttribute('aria-hidden')).toBe('true');
@@ -158,7 +160,7 @@ describe('the list', () => {
       .toBeVisible();
     const landmarks = world.circuits.all.reduce((sum, c) => sum + c.steps.length, 0);
     expect(document.querySelector('.scope-note')!.textContent!.trim()).toBe(
-      `${world.circuits.all.length} guided circuits · ${landmarks} landmarks`,
+      `${world.circuits.all.length} guided circuits · ${landmarks} landmarks · 1 map`,
     );
   });
 
@@ -199,9 +201,13 @@ describe('the list', () => {
     expect(document.activeElement).toBe(first);
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
     expect(document.activeElement).toBe(rows()[2]);
+    // The last guided circuit leads on to the map, the last row of all.
+    const map = document.querySelector<HTMLElement>('[data-map="visual-field"]')!;
     rows().at(-1)!.focus();
     await userEvent.keyboard('{ArrowDown}');
-    expect(document.activeElement).toBe(rows().at(-1));
+    expect(document.activeElement).toBe(map);
+    await userEvent.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(map);
   });
 
   test('keys with a modifier are left to the browser', async () => {
@@ -969,5 +975,54 @@ describe('accessibility', () => {
       style.remove();
       await page.viewport(1280, 800);
     }
+  });
+});
+
+describe('the visual-field map', () => {
+  const handle = () =>
+    document.querySelector<SVGElement>('[aria-roledescription="two-dimensional slider"]')!;
+
+  async function openMap() {
+    await userEvent.click(document.querySelector<HTMLElement>('[data-map="visual-field"]')!);
+    await expect.poll(() => world.lesson.state.map).toBe('visual-field');
+    await expect.poll(() => document.activeElement?.id).toBe('visual-field-title');
+  }
+
+  test('opens from its row on the hemisphere that sees the dot, and lists its predicted territory', async () => {
+    mount();
+    await openMap();
+    // The dot starts in the right half-field, which the left hemisphere represents.
+    expect(world.engine.model.settings.hemisphere).toBe('left');
+    await expect.poll(() => document.querySelector('.territory')).toBeTruthy();
+    const rows = [...document.querySelectorAll('.territory tbody tr')];
+    expect(rows.map((row) => row.querySelector('th')!.textContent)).toEqual(['V1', 'V2', 'V3']);
+    // A 1° dot 2.8° from fixation covers tens of mm² of each area.
+    for (const row of rows) expect(row.querySelector('td')!.textContent).toMatch(/^\d{2,3} mm²$/);
+    await expectAxeClean();
+  });
+
+  test('arrow keys move the dot, and crossing the vertical meridian turns the stage to the other hemisphere', async () => {
+    mount();
+    await openMap();
+    handle().focus();
+    const before = handle().getAttribute('aria-valuetext');
+    await userEvent.keyboard(
+      '{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}',
+    );
+    expect(handle().getAttribute('aria-valuetext')).not.toBe(before);
+    expect(world.lesson.state.dot!.x).toBeLessThan(0);
+    await expect.poll(() => world.engine.model.settings.hemisphere).toBe('right');
+    expect(handle().getAttribute('aria-valuetext')).toMatch(/upper left$/);
+  });
+
+  test('the V1 landmark of the visual pathway offers the map, and the map leads back to the tour', async () => {
+    mount();
+    await open('vision');
+    await world.explorer.openStep(3);
+    await userEvent.click(page.getByRole('button', { name: 'Explore the visual field map' }));
+    await expect.poll(() => world.lesson.state.map).toBe('visual-field');
+    await userEvent.click(page.getByRole('button', { name: 'Visual pathway', exact: true }));
+    await expect.poll(() => world.lesson.state.circuit).toBe('vision');
+    expect(world.lesson.state.map).toBeUndefined();
   });
 });

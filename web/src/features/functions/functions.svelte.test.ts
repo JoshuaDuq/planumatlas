@@ -50,6 +50,8 @@ const area = (index = 0) =>
   document.querySelectorAll<HTMLElement>('[data-function-region]')[index]!;
 const restore = () => document.querySelector<HTMLElement>('.restore');
 const announcer = () => document.getElementById('announcer')!;
+const compareToggle = () => document.querySelector<HTMLElement>('.compare-toggle')!;
+const compareOpen = () => document.querySelector<HTMLElement>('[data-compare-open]');
 
 /** Types a query and waits for the list to settle. */
 async function search(text: string) {
@@ -81,7 +83,9 @@ describe('the list', () => {
     // The count column is for the eye; the row's name carries the detail.
     const button = rowOf(first.id);
     expect(button.querySelector('.group-count')!.getAttribute('aria-hidden')).toBe('true');
-    expect(button.querySelector('.function-swatch')!.getAttribute('aria-hidden')).toBe('true');
+    // Out of compare mode a row has no square to tick.
+    expect(button.querySelector('.pick')).toBeNull();
+    expect(button.getAttribute('role')).toBeNull();
     expect(button.textContent).toMatch(/studies · \d+ areas?/);
     await expect.element(row(new RegExp(`^${first.name} , [\\d,]+ studies? ·`))).toBeVisible();
     expect(document.querySelector('.scope-note')!.hasAttribute('hidden')).toBe(false);
@@ -674,6 +678,97 @@ describe('Restore', () => {
   });
 });
 
+describe('compare', () => {
+  const pair = ['working-memory', 'attention'];
+
+  test('Compare turns the rows into checkboxes that take two functions, and Cancel forgets them', async () => {
+    mount();
+    expect(compareOpen()).toBeNull();
+    await userEvent.click(compareToggle());
+    expect(compareToggle().getAttribute('aria-pressed')).toBe('true');
+    expect(compareToggle().textContent!.trim()).toBe('Cancel');
+    // The overview cannot be compared, so its row leaves.
+    expect(document.querySelector(`[data-function="${ALL_DOMAINS}"]`)).toBeNull();
+    const [first, second] = pair.map(rowOf) as [HTMLElement, HTMLElement];
+    expect(first.getAttribute('role')).toBe('checkbox');
+    expect(first.getAttribute('aria-checked')).toBe('false');
+    expect(compareOpen()!.getAttribute('aria-disabled')).toBe('true');
+    expect(document.querySelector('.compare-picked')!.textContent!.trim()).toBe(
+      'Choose two functions or terms to compare',
+    );
+
+    await userEvent.click(first);
+    expect(first.getAttribute('aria-checked')).toBe('true');
+    expect(world.session.state.selectedFunction).toBeNull();
+    await userEvent.click(second);
+    expect(world.explorer.picked).toEqual(pair);
+    expect(compareOpen()!.getAttribute('aria-disabled')).toBeNull();
+    expect(document.querySelector('.compare-picked')!.textContent!.trim()).toBe(
+      'Working memory · Attention',
+    );
+    await expectAxeCleanOnce('dark', 390);
+    // A full pair takes no third; unticking frees a place.
+    const third = rowOf(few().id);
+    expect(third.getAttribute('aria-disabled')).toBe('true');
+    // Playwright refuses to click a control marked disabled, so the press is dispatched directly.
+    third.click();
+    flushSync();
+    expect(third.getAttribute('aria-checked')).toBe('false');
+    await userEvent.click(first);
+    expect(world.explorer.picked).toEqual([pair[1]]);
+    expect(third.getAttribute('aria-disabled')).toBeNull();
+
+    await userEvent.click(compareToggle());
+    expect(world.explorer.picked).toEqual([]);
+    expect(compareOpen()).toBeNull();
+    expect(rowOf(pair[0]!).getAttribute('role')).toBeNull();
+  });
+
+  test('a pick survives a search, so a searched term can be compared with a curated function', async () => {
+    mount();
+    await userEvent.click(compareToggle());
+    await userEvent.click(rowOf(pair[0]!));
+    await search('action');
+    await userEvent.click(rowOf('term:action'));
+    expect(world.explorer.picked).toEqual([pair[0], 'term:action']);
+  });
+
+  test('Compare opens the comparison: its heading takes focus, its meta line counts the shared areas', async () => {
+    mount();
+    await userEvent.click(compareToggle());
+    for (const id of pair) await userEvent.click(rowOf(id));
+    await userEvent.click(compareOpen()!);
+    expect(document.activeElement).toBe(title());
+    expect(title()!.textContent!.replace(/\s+/g, ' ').trim()).toBe('Working memory · Attention');
+    await expect.poll(() => meta().textContent).toMatch(/^Both reach \d+ areas?.* at z\s≥\s3$/);
+    expect(world.session.state.selectedFunction).toBe(`compare:${pair.join(',')}`);
+    await expectAxeCleanOnce('light', 1280);
+    const shared = document.querySelector('[data-compare-section="shared"]')!;
+    const sharedRows = shared.querySelectorAll('[data-function-region]');
+    expect(sharedRows.length).toBeGreaterThan(0);
+    // A shared area says both z, each named for a screen reader.
+    expect(sharedRows[0]!.querySelectorAll('.area-z').length).toBe(2);
+    expect(sharedRows[0]!.textContent).toMatch(/, Working memory z .*, Attention z /);
+    // Each function links to its own profile.
+    await userEvent.click(
+      document.querySelector<HTMLElement>('.profile [data-function="attention"]')!,
+    );
+    expect(world.session.state.selectedFunction).toBe('attention');
+  });
+
+  test('Restore returns focus to Compare, with the picks kept', async () => {
+    mount();
+    await userEvent.click(compareToggle());
+    for (const id of pair) await userEvent.click(rowOf(id));
+    await userEvent.click(compareOpen()!);
+    await expect.poll(() => meta().textContent).toMatch(/^Both reach/);
+    await userEvent.click(restore()!);
+    await expect.poll(() => world.session.state.selectedFunction).toBeNull();
+    await expect.poll(() => document.activeElement).toBe(compareOpen());
+    expect(world.explorer.picked).toEqual(pair);
+  });
+});
+
 describe('accessibility', () => {
   // Two runs per state, which together cover both themes, both widths and both languages.
   test.each([
@@ -695,15 +790,16 @@ describe('accessibility', () => {
     await expectAxeCleanOnce(theme, width);
   });
 
-  test('forced colours and more contrast keep the open row, the swatches and the focus ring visible', async () => {
+  test('forced colours and more contrast keep the open row, a ticked pick and the focus ring visible', async () => {
     mount();
     await open(few().id);
     await withMedia([{ name: 'forced-colors', value: 'active' }], async () => {
-      // With one function painted its swatch is the outline of a colour not on the stage.
-      const swatch = rowOf(few().id).querySelector<HTMLElement>('.function-swatch')!;
-      expect(getComputedStyle(swatch).forcedColorAdjust).toBe('none');
-      expect(getComputedStyle(swatch).boxShadow).not.toBe('none');
       expect(getComputedStyle(rowOf(few().id)).outlineStyle).toBe('solid');
+      await userEvent.click(compareToggle());
+      await userEvent.click(rowOf(few().id));
+      const pick = rowOf(few().id).querySelector<HTMLElement>('.pick')!;
+      expect(getComputedStyle(pick).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+      await userEvent.click(compareToggle());
       fieldElement().focus();
       await userEvent.keyboard('{ArrowDown}');
       expect(getComputedStyle(document.activeElement!).outlineStyle).toBe('solid');
@@ -721,18 +817,6 @@ describe('accessibility', () => {
     expect(notes().join(' ')).not.toContain('combines several term maps');
     await open(ALL_DOMAINS);
     expect(notes().join(' ')).toContain('The overview combines several term maps.');
-  });
-
-  test('a swatch shows its colour only while the overview paints the stage; otherwise it is outlined', async () => {
-    mount();
-    const swatch = () => rowOf(few().id).querySelector<HTMLElement>('.function-swatch')!;
-    const filled = () => getComputedStyle(swatch()).backgroundColor !== 'rgba(0, 0, 0, 0)';
-    // Nothing painted yet: the stage shows the atlas's colours, which these are not.
-    expect(filled()).toBe(false);
-    await open(ALL_DOMAINS);
-    await expect.poll(filled).toBe(true);
-    await open(few().id);
-    expect(filled()).toBe(false);
   });
 
   test('targets: 24 px or more with a fine pointer', async () => {

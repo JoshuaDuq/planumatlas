@@ -147,7 +147,7 @@ describe('picker', () => {
   it('while placing, a click hands over the point it meets instead of choosing a region', () => {
     const domElement = canvas();
     const chosen: string[] = [];
-    const placed: Vector3[] = [];
+    const placed: unknown[] = [];
     let placing = true;
     const point = { x: 0.01, y: 0.02, z: 0.03 } as Vector3;
     createPicker<Region>({
@@ -156,7 +156,7 @@ describe('picker', () => {
       model: () => ({ pick: () => ({ id: 'destrieux:left:1' }), intersect: () => ({ point }) }),
       onSelect: (id) => chosen.push(id),
       placing: () => placing,
-      onPlace: (at) => placed.push(at),
+      onPlace: (at) => placed.push(at.point),
     });
     domElement.emit('pointerdown', { button: 0 });
     domElement.emit('pointerup', { button: 0 });

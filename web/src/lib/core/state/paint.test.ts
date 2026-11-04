@@ -3,7 +3,12 @@ import { beforeAll, describe, test } from 'vitest';
 import type { Manifest, Paint } from '../../types/index.ts';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { readModel } from '../catalog/test-support.ts';
-import { ALL_DOMAINS, validateNeuropsychDomains } from '../catalog/neuropsych-domains.ts';
+import {
+  ALL_DOMAINS,
+  COMPARE_COLORS,
+  SHARED_COLOR,
+  validateNeuropsychDomains,
+} from '../catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains, NeurosynthTerms } from '../catalog/neuropsych-domains.ts';
 import { createClinicalCatalog, findingPaint } from '../clinical/catalog.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
@@ -115,6 +120,24 @@ test('the key lists the overview, or the z scale of the function chosen, or each
     ],
   );
   assert.equal(legendFor({ ...base, paint: null }, sources), null);
+});
+
+test('a comparison keys each function and the areas both reach, greying a colour no area carries', () => {
+  const state = { ...base, selectedFunction: 'compare:language,memory' };
+  const paint = paintFor(state, sources)!;
+  assert.equal(paint.id, 'function:compare:language,memory');
+  const legend = legendFor({ ...state, paint, lang: 'fr' }, sources)!;
+  assert.equal(legend.title, 'Langage · Mémoire');
+  assert.equal(legend.pickable, false);
+  // The one painted area is reached by both, so neither function's own colour is on the stage.
+  assert.deepEqual(
+    legend.rows.map((row) => [row.id, row.label, row.color, row.absent]),
+    [
+      ['language', 'Langage', COMPARE_COLORS[0], true],
+      ['memory', 'Mémoire', COMPARE_COLORS[1], true],
+      ['shared', 'Les deux', SHARED_COLOR, false],
+    ],
+  );
 });
 
 test('a paint names its tab by its id', () => {

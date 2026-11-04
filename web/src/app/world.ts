@@ -1,3 +1,7 @@
+import {
+  createVisualFieldMapStore,
+  syncVisualFieldMap,
+} from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync } from 'svelte';
 import { ASSET_BASE } from '../../build/site.ts';
 import { createCoordinatePlacement } from '../lib/controller/coordinates.ts';
@@ -104,6 +108,8 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     syncPresentation(engine, view, engineState);
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
     syncRouteGhost(model, view, circuits);
+    const visualFieldMap = createVisualFieldMapStore(lesson);
+    syncVisualFieldMap(engine.visualField, view);
     const catalog = createCatalogStore(regions, view);
     // Before the first restore: a link that loads hidden regions then says their count once.
     const speech = announceView(view, (region, current) => regions.label(region.id, current).name);
@@ -194,6 +200,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       links,
       speech,
       lesion,
+      visualFieldMap,
       coordinates:
         coordinates &&
         createCoordinatePlacement({
@@ -235,6 +242,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       session.notify(failureNotice(error, session.state.lang, 'whiteMatter')),
     ),
     engine.on('pick', ({ id }) => world.anatomy.selectRegion(id)),
+    engine.on('visualFieldPoint', ({ reading }) => world.visualFieldMap.read(reading)),
     // The lesion's report is Anatomy's detail, which shows it once no region is selected. A phone's
     // sheet stays down so the brain stays in reach for the next press; Show the report raises it.
     // A lesson stays open over its lesion, which Show the report reaches.

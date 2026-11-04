@@ -11,6 +11,7 @@
  * Ownership: F2 writes it, E7 implements it, and changes after merge go through
  * the serial engine-contract queue on the tracking issue.
  */
+import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
 import type { CabNpPartition } from '../core/catalog/networks.ts';
 import type { FunctionalRegions } from '../core/catalog/functional-regions.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
@@ -20,6 +21,7 @@ import type {
   SegmentationAgreement,
 } from '../core/catalog/segmentation-agreement.ts';
 import type { ReceptorFingerprints } from '../core/catalog/receptor-fingerprints.ts';
+import type { StimulationResponses } from '../core/catalog/stimulation-responses.ts';
 import type {
   CutMode,
   DisplaySettings,
@@ -120,6 +122,8 @@ export interface EngineEvents {
   tractsVisibility: undefined;
   /** While the lesion is being placed, a click met the brain or a cut face here, in RAS millimetres. */
   lesionPoint: { point: Vec3 };
+  /** While the visual field is probed, a click met the brain: its predicted reading, or null outside V1–V3. */
+  visualFieldPoint: { reading: VisualFieldReading | null };
   /** High frequency: every camera move. Never route through reactive state (app.js:1819-1823). */
   camera: CameraView;
   /** High frequency: pointer-over-region, once per frame of a pointer move (app.js:1804). */
@@ -157,6 +161,9 @@ export type BoundaryCertaintyData = BoundaryCertainty;
 /** Receptor densities carried to regions by name (`manifest.receptor_fingerprints` file). */
 export type ReceptorFingerprintsData = ReceptorFingerprints;
 
+/** Stimulation responses carried to regions by the authors' labels (`manifest.stimulation_responses` file). */
+export type StimulationResponsesData = StimulationResponses;
+
 /** NextBrain against aseg on aseg's grid (`manifest.segmentation_agreement` file). */
 export type SegmentationAgreementData = SegmentationAgreement;
 
@@ -177,6 +184,7 @@ export interface EngineModel {
   readonly domains: DomainsData | null;
   readonly boundaryCertainty: BoundaryCertaintyData | null;
   readonly receptors: ReceptorFingerprintsData | null;
+  readonly stimulation: StimulationResponsesData | null;
   readonly segmentationAgreement: SegmentationAgreementData | null;
   /** The grouped learning overview when published, else the first level (brain-atlas.js:212). */
   readonly defaultDetail: string;
@@ -684,6 +692,38 @@ export interface EngineLesion {
   clearTract(): void;
 }
 
+/** A point of the visual field in degrees from fixation: x to the right, y up. */
+export interface VisualFieldPoint {
+  x: number;
+  y: number;
+}
+
+/** The dot the visual-field map draws: its centre and its radius, in degrees. */
+export interface VisualFieldDot extends VisualFieldPoint {
+  radius: number;
+}
+
+/** What the predicted retinotopy says of one point of the cortex. */
+export interface VisualFieldReading extends VisualFieldPoint {
+  /** The predicted pRF size (Gaussian sigma), in degrees. */
+  sigma: number;
+  area: 'V1' | 'V2' | 'V3';
+  hemisphere: 'left' | 'right';
+}
+
+export interface EngineVisualField {
+  /** The anatomy publishes predicted V1–V3 retinotopy; without it `show` throws. */
+  readonly available: boolean;
+  /** Draw the map on the cortex, with a dot or without; null gives the cortex its colours back. */
+  show(map: { dot: VisualFieldDot | null } | null): void;
+  /** While on, a click on the brain raises `visualFieldPoint` instead of choosing a region. */
+  setProbing(probing: boolean): void;
+  /** Every V1–V3 vertex's predicted pRF centre and area, to measure territories; downloaded on first call. */
+  territories(): Promise<VisualFieldTerritories>;
+  /** The drawn cortical region of a hemisphere holding most of its predicted V1, which the map frames. */
+  centralRegion(hemisphere: 'left' | 'right'): string;
+}
+
 // ---------------------------------------------------------------------------
 // The engine
 // ---------------------------------------------------------------------------
@@ -704,6 +744,7 @@ export interface Engine extends Emitter<EngineEvents> {
   readonly comparison: EngineComparison;
   readonly tracts: EngineTracts;
   readonly lesion: EngineLesion;
+  readonly visualField: EngineVisualField;
 
   /** Re-read the colours from the token layer after a theme change (app.js:131, 2106). */
   applyTheme(theme: Theme): void;

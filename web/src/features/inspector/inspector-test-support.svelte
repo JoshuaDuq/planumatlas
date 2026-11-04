@@ -6,6 +6,7 @@
   import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json';
   import boundaryFile from '../../../../public/models/cdmd/boundary-certainty.json';
   import receptorFile from '../../../../public/models/cdmd/receptor-fingerprints.json';
+  import stimulationFile from '../../../../public/models/cdmd/stimulation-responses.json';
   import agreementFile from '../../../../public/models/cdmd/segmentation-agreement.json';
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
@@ -13,6 +14,7 @@
   import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
   import type { BoundaryCertainty } from '../../lib/core/catalog/boundary-certainty.ts';
   import type { ReceptorFingerprints } from '../../lib/core/catalog/receptor-fingerprints.ts';
+  import type { StimulationResponses } from '../../lib/core/catalog/stimulation-responses.ts';
   import type { SegmentationAgreement } from '../../lib/core/catalog/segmentation-agreement.ts';
   import type {
     ArterialTerritories,
@@ -78,6 +80,7 @@
   boundaryCertainty={boundaryFile as unknown as BoundaryCertainty}
   segmentationAgreement={agreementFile as unknown as SegmentationAgreement}
   receptors={receptorFile as unknown as ReceptorFingerprints}
+  stimulation={stimulationFile as unknown as StimulationResponses}
   territories={manifest.arterial_territories as unknown as ArterialTerritories}
   cerebellarFunctions={manifest.cerebellar_functions as unknown as CerebellarFunctions}
   striatalNetworks={manifest.striatal_networks as unknown as StriatalNetworks}

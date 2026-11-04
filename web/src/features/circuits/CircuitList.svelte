@@ -15,8 +15,11 @@
   import { neighbourKeys } from './neighbour-keys.ts';
 
   let { model }: { model: CircuitExplorer } = $props();
+  const map = $derived(model.map);
 
+  const uid = $props.id();
   const copy = $derived(t(model.lang, 'circuits'));
+  const maps = $derived(t(model.lang, 'visualField'));
   let listElement = $state<HTMLElement | null>(null);
 
   $effect(() => {
@@ -34,33 +37,62 @@
 
 <div class="browser scroll-fade" hidden={!model.exploring}>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
-    <ul class="rows">
-      {#each model.circuits as circuit (circuit.id)}
-        {@const current = circuit.id === model.lesson.circuit}
-        <li>
-          <button
-            type="button"
-            class="circuit-choice"
-            data-circuit={circuit.id}
-            aria-current={current ? 'true' : undefined}
-            aria-disabled={model.busy ? 'true' : undefined}
-            data-selected={String(current)}
-            onclick={() => model.openCircuit(circuit.id)}
-          >
-            <span class="text">
-              <span class="row-name">{circuit.name[model.lang]}</span>
-              <span class="route">{circuit.route[model.lang]}</span>
-            </span>
-            <span class="group-count" aria-hidden="true">{circuit.steps.length}</span>
-            <span class="visually-hidden">, {copy.landmarkCount(circuit.steps.length)}</span>
-            <span class="chevron" aria-hidden="true"></span>
-          </button>
-        </li>
-      {/each}
-    </ul>
+    <div class="group" role="group" aria-labelledby="{uid}-guided">
+      <h3 id="{uid}-guided" class="group-heading">{maps.guided}</h3>
+      <ul class="rows">
+        {#each model.circuits as circuit (circuit.id)}
+          {@const current = circuit.id === model.lesson.circuit}
+          <li>
+            <button
+              type="button"
+              class="circuit-choice"
+              data-circuit={circuit.id}
+              aria-current={current ? 'true' : undefined}
+              aria-disabled={model.busy ? 'true' : undefined}
+              data-selected={String(current)}
+              onclick={() => model.openCircuit(circuit.id)}
+            >
+              <span class="text">
+                <span class="row-name">{circuit.name[model.lang]}</span>
+                <span class="route">{circuit.route[model.lang]}</span>
+              </span>
+              <span class="group-count" aria-hidden="true">{circuit.steps.length}</span>
+              <span class="visually-hidden">, {copy.landmarkCount(circuit.steps.length)}</span>
+              <span class="chevron" aria-hidden="true"></span>
+            </button>
+          </li>
+        {/each}
+      </ul>
+    </div>
+    {#if map.available}
+      <div class="group" role="group" aria-labelledby="{uid}-maps">
+        <h3 id="{uid}-maps" class="group-heading">{maps.maps}</h3>
+        <ul class="rows">
+          <li>
+            <button
+              type="button"
+              class="circuit-choice"
+              data-map="visual-field"
+              aria-current={map.open ? 'true' : undefined}
+              aria-disabled={model.busy ? 'true' : undefined}
+              data-selected={String(map.open)}
+              onclick={() => void model.openMap()}
+            >
+              <span class="text">
+                <span class="row-name">{maps.name}</span>
+                <span class="route">{maps.summary}</span>
+              </span>
+              <span class="chevron" aria-hidden="true"></span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    {/if}
   </div>
   <p class="scope-note">
-    {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}
+    {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{map.available
+      ? ` · ${maps.mapCount(1)}`
+      : ''}
   </p>
 </div>
 
@@ -68,8 +100,21 @@
   @layer features {
     .rows {
       margin: 0;
-      padding: var(--space-2) 0;
+      padding: 0 0 var(--space-2);
       list-style: none;
+    }
+    .group-heading {
+      margin: 0;
+      padding: var(--space-4) var(--panel-inset) var(--space-1);
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      font-weight: 600;
+      line-height: var(--lh-caption);
+    }
+    .group:first-child > .group-heading {
+      padding-top: var(--space-3);
+      border-top: 0;
     }
     .circuit-choice {
       position: relative;

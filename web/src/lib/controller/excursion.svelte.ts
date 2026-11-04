@@ -3,6 +3,7 @@ import type { createCatalog } from '../core/catalog/catalog.ts';
 import { beneathCortex } from '../core/catalog/labels.ts';
 import {
   ALL_DOMAINS,
+  comparedIds,
   domainAreas,
   domainName,
   domainPaint,
@@ -320,9 +321,12 @@ export function createExcursions(
 
   /**
    * A function one of whose strongest regions is a structure the cortex hides says so, naming itself,
-   * and offers to see through the cortex; null for the overview, or a hidden cortex.
+   * and offers to see through the cortex; null for the overview, or a hidden cortex. A comparison
+   * says it of the first of its functions that has one.
    */
   function deepHint(id: string): Notice | null {
+    const compared = comparedIds(id);
+    if (compared) return compared.map(deepHint).find(Boolean) ?? null;
     if (id === ALL_DOMAINS || !model.settings.cortexVisible) return null;
     const strongest = domainAreas(domains, id).slice(0, DEEP_RANKS);
     const rank = strongest.findIndex(({ region }) => beneathCortex(model.regions.get(region)!));
@@ -454,9 +458,11 @@ export function createExcursions(
     const unseen = camera.frameWhole(
       id === ALL_DOMAINS
         ? []
-        : domainAreas(domains, id)
-            .slice(0, DEEP_RANKS)
-            .map(({ region }) => region),
+        : (comparedIds(id) ?? [id]).flatMap((member) =>
+            domainAreas(domains, member)
+              .slice(0, DEEP_RANKS)
+              .map(({ region }) => region),
+          ),
     );
     sayRevealed(before, hint, unseenNotice(unseen));
     render();
@@ -596,6 +602,8 @@ export function createExcursions(
 
     lessonLandmark: lessons.lessonLandmark,
     openCircuit: lessons.openCircuit,
+    openMap: lessons.openMap,
+    showMapSide: lessons.showMapSide,
     openLessonLandmark: lessons.openLandmarkOf,
     openLessonStep: lessons.openStep,
     openLessonRoute: lessons.openRoute,

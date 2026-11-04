@@ -1,10 +1,6 @@
 <script lang="ts">
   import { flushSync, hasContext, untrack } from 'svelte';
-  import {
-    ALL_DOMAINS,
-    domainName,
-    domainRecord,
-  } from '../../lib/core/catalog/neuropsych-domains.ts';
+  import { ALL_DOMAINS, functionName } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
@@ -14,6 +10,7 @@
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import { createCircuitExplorer } from '../../features/circuits/circuits-explorer.svelte.ts';
+  import { createVisualFieldExplorer } from '../../features/circuits/visual-field-explorer.svelte.ts';
   import CircuitStepper from '../../features/circuits/CircuitStepper.svelte';
   import DeficitRestore from '../../features/deficits/DeficitRestore.svelte';
   import { createDeficitsExplorer } from '../../features/deficits/explorer.svelte.ts';
@@ -42,6 +39,8 @@
     clinical,
     circuits,
     excursions,
+    lesson,
+    visualFieldMap,
   }: World) {
     const { domains, functionalRegions } = engine.model;
     if (!domains)
@@ -68,6 +67,18 @@
       excursions,
       labelOf: (id) => catalog.label(id),
       openDeficit: (id) => deficits.openDeficit(id),
+      map: createVisualFieldExplorer({
+        view,
+        excursions,
+        lesson,
+        store: visualFieldMap,
+        visualField: engine.visualField,
+        retinotopy: engine.model.manifest.retinotopy ?? null,
+        tours: circuits.all.filter((circuit) =>
+          circuit.steps.some((step) => step.map === 'visual-field'),
+        ),
+        openTour: (id) => lessons.openCircuit(id),
+      }),
     });
     return { functions, deficits, circuits: lessons };
   }
@@ -104,7 +115,7 @@
       const label =
         id === ALL_DOMAINS
           ? t(current.lang, 'functions').all
-          : domainName(domainRecord(world.engine.model.domains, id)!, current.lang);
+          : functionName(world.engine.model.domains!, id, current.lang);
       return { kind: 'function', label, clearable: true };
     }
     if (current.explorer === 'deficits' && current.selectedDeficit) {
@@ -115,6 +126,9 @@
       const label = world.circuits.get(current.lesson.circuit).name[current.lang];
       return { kind: 'lesson', label, clearable: false };
     }
+    if (current.explorer === 'circuits' && current.lesson.map) {
+      return { kind: 'lesson', label: t(current.lang, 'visualField').name, clearable: false };
+    }
     return {};
   });
 
@@ -122,9 +136,9 @@
   const place = $derived.by(() => {
     if (!world) return null;
     const { explorer, lesson, lang: language } = world.view.current;
-    return explorer === 'circuits' && lesson.circuit
-      ? world.circuits.get(lesson.circuit).name[language]
-      : null;
+    if (explorer !== 'circuits') return null;
+    if (lesson.map) return t(language, 'visualField').name;
+    return lesson.circuit ? world.circuits.get(lesson.circuit).name[language] : null;
   });
 
   /** The strip's clear takes the region first, then the function or deficit it sits under (app.js:1563-1569). */

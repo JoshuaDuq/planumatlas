@@ -1,0 +1,109 @@
+# Responses to single-pulse electrical stimulation, recorded with stereo-EEG in
+# 27 people with focal epilepsy (Lyu et al. 2025). Each stimulation–recording
+# pair of bipolar channels was classed by the authors as responding, not
+# responding, or excluded (artefact or bad channel). Nothing here is measured in
+# the anatomy shown: a region takes the authors' anatomical label, and the rates
+# are pooled over the cohort, by side (same or opposite hemisphere).
+# scripts/fetch_stimulation_responses.py reads the files below, pinned by
+# checksum, into data/stimulation-responses.json; the build reads that file.
+label: Stimulation responses (Lyu et al. 2025)
+license: CC BY 4.0
+source:
+  short: Lyu et al. (2025)
+  citation: Lyu D, Stiger JR, Lusk Z, Buch V, Parvizi J (2025) Mapping human thalamocortical connectivity with electrical stimulation and recording. Nat Neurosci 28:1797–1809
+  doi: https://doi.org/10.1038/s41593-025-02009-x
+  pmid: 40664975
+  dataset: https://doi.org/10.5281/zenodo.16939708
+archive:
+  url: https://zenodo.org/api/records/16939708/files/DATA.zip/content
+  table: [DATA/metaTable.csv, fa9ce3fde46c677becc89a4fa8fd380ee467dbca6d231811f92ceebe4e716e76]
+  # Each subject's bipolar channels with their fs_LR 32k vertex.
+  electrodes: DATA/workbench/subjects/{subject}/elec_FSLR_vIndex_wbComm_{subject}.csv
+  electrode_sha256:
+    S01_166: 43e9111a79e11d32179922774b6f4516f631d89e007af8866a6212485a70260d
+    S02_167: 1b1c615e681e03d5ece11911772ae566db609c51bf8c2e5f70f14b8a00d9afe4
+    S03_169: 754dacc684b0f86f50d56a794149ac28641cb21fa61ca446fbf2e85e33d8fe9a
+    S04_170: ec11033dfb6e97b5c17d4dc814a11a27ee130cd571acf64fd2d45c64e5d08905
+    S05_171: 96d93be1108336b57d004f424f47cc15892aa89c5f7c08f71d90b46c0d0dd247
+    S06_172: 4e02bdb2c01a535e38291304adb24119affb38b9c00487dc622da4b789857a45
+    S07_176: b7f0a167eb5e7c699c2677ab4a969bcff8908aea86d0d5414464ead797f5ec9f
+    S08_177: bee5ff7d68a12ca49b25ad7562c9495c20fa5aec156fe845ddd89cba1c3b5655
+    S09_178: 687597ff2f6569929f9da951cf7222be486fa66eb9f50a7c4ce724d26c2df925
+    S10_181: f9a211b7cf19ea69a3f2bf17b54a9b91fedb1725d619898b351a945caa2334e2
+    S11_182: 0570180905884dd8e41abab1745a3d80818613d2deaa6077e9c4e1c225a02f6f
+    S12_183: 1324ee0b5237822d83ddd903d68ea01633a042fa057bd11b8ea4a4ed83c93bdb
+    S13_185: 07c2b5cc2fcffb67ba7dbca8c95937ca50565c7bf93625ee90946deb0f466de4
+    S14_188: dfda9457d9b9fe80899869a7bc2499907f42e243961ae7007c95f75bc845dd2a
+    S15_189: c64ea2dcd4fd26d2c662ef131cc7bb6db64b673ffd671162e2b7fa756f49f0d7
+    S16_190: e0b86eec223b469cc8556691a4716eaaf7f06346d0f7b2e14ffe1891fd60a90d
+    S17_192: 792be4499921006f07b3cb22537160722b6593fe9f8bd403d877a331dc8b557f
+    S18_193: 0bd9a800c6cea1f67d9a670897644d34ee3121a489eabbcb4068e06d522a1787
+    S19_194: 79b9baece7c602a3ca900b2c0bbbc32258353ea4de7a3a8c81e3912afa112893
+    S20_195: 6c269b41ecc13c4f74f780aa629ebe82b114847490257326af0075e9c3995320
+    S21_196: c372cc544bf8d2fc47252bd0342cfcdc48f7c1afa1983bad2d712a46b3812f11
+    S22_197: bf6317899793a134000924924e9f72b75dfced9687967a95971a6d5cb4e58a92
+    S23_198: 04b6362727a47c65d1c8f2f2fa0353d4ea0d81d04b61226cb9dcbdffeb39f130
+    S24_199: 97416bb380fd8f3e2b217ad1042a7111f68f9bb263b08e39edde48d1002bbe57
+    S25_201: 343437b7124531a4d9701f6b57f59f70d9f28df3aeee0c0e5bbbd656d38a8328
+    S26_202: ac616afcb5f07e1ed048ea38d49226ee17441161fb4748997ad4a7b73b1ccf80
+    S27_205: 2efb8207936dee805298e520123bd3befdf3c3751b4b7156bd2cd80f87ea6b9d
+# HCP's fs_LR 32k sphere deformed to fsaverage: carries a channel's vertex to the
+# nearest fsaverage vertex, and so to its Destrieux parcel, by surface registration.
+spheres:
+  base: https://raw.githubusercontent.com/Washington-University/HCPpipelines/0aef592a9128b6f2090f6be0f495f310419bba3c/global/templates/standard_mesh_atlases/resample_fsaverage
+  lh: [fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii, 31987d139b6cdf1040188d1795bf23c213c57f8e84fb45f2c04823d996b0defc]
+  rh: [fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii, 8c1f67fa8fb3024ad3b292be995d5c9bae07dc4dbdd53fbac48e511e1366553d]
+# A Destrieux parcel takes the label most of the cortical channels landing in it
+# carry, only past all three. Set before any parcel was assigned (2026-11-03).
+assignment:
+  min_channels: 10
+  min_subjects: 3
+  min_share: 0.6
+# A response rate is drawn only from pairs tested in this many people; fewer
+# show their counts alone.
+rates:
+  min_subjects: 3
+# The authors' labels, assigned by hand on each person's own T1 scan, in display
+# order. CLT and FP are not spelled out in the paper; their contacts lie at the
+# claustrum (MNI305 x ±32–38, z ≈ 0 mm) and the frontal pole (y ≈ 70 mm).
+# The thalamus is labelled by position, not nucleus, as the authors chose; its
+# sites carry a short name for the choice between them.
+labels:
+  - {id: FP, name: Frontal pole, name_fr: Pôle frontal, cortical: true}
+  - {id: LFC, name: Lateral frontal cortex, name_fr: Cortex frontal latéral, cortical: true}
+  - {id: OFC, name: Orbitofrontal cortex, name_fr: Cortex orbitofrontal, cortical: true}
+  - {id: MFC, name: Medial frontal cortex, name_fr: Cortex frontal médial, cortical: true}
+  - {id: ACC, name: Anterior cingulate cortex, name_fr: Cortex cingulaire antérieur, cortical: true}
+  - {id: MCC, name: Midcingulate cortex, name_fr: Cortex cingulaire moyen, cortical: true}
+  - {id: SM, name: Sensorimotor cortex, name_fr: Cortex sensorimoteur, cortical: true}
+  - {id: INS, name: Insula, name_fr: Insula, cortical: true}
+  - {id: INSULA/LFC, name: Insula–lateral frontal border, name_fr: Limite insula–cortex frontal latéral, cortical: false}
+  - {id: PMC, name: Posteromedial cortex, name_fr: Cortex postéro-médian, cortical: true}
+  - {id: SPL, name: Superior parietal lobule, name_fr: Lobule pariétal supérieur, cortical: true}
+  - {id: IPL, name: Inferior parietal lobule, name_fr: Lobule pariétal inférieur, cortical: true}
+  - {id: OCC, name: Occipital cortex, name_fr: Cortex occipital, cortical: true}
+  - {id: STG, name: Superior temporal gyrus, name_fr: Gyrus temporal supérieur, cortical: true}
+  - {id: MTG, name: Middle temporal gyrus, name_fr: Gyrus temporal moyen, cortical: true}
+  - {id: ITG, name: Inferior temporal gyrus, name_fr: Gyrus temporal inférieur, cortical: true}
+  - {id: TP, name: Temporal pole, name_fr: Pôle temporal, cortical: true}
+  - {id: FG, name: Fusiform gyrus, name_fr: Gyrus fusiforme, cortical: true}
+  - {id: PHG, name: Parahippocampal gyrus, name_fr: Gyrus parahippocampique, cortical: true}
+  - {id: HPC, name: Hippocampus, name_fr: Hippocampe, cortical: false}
+  - {id: AMY, name: Amygdala, name_fr: Amygdale, cortical: false}
+  - {id: BG, name: Basal ganglia, name_fr: Ganglions de la base, cortical: false}
+  - {id: CLT, name: Claustrum, name_fr: Claustrum, cortical: false}
+  - {id: antTH, name: Anterior thalamus, name_fr: Thalamus antérieur, short: Anterior, short_fr: Antérieur, cortical: false}
+  - {id: midTH, name: Middle thalamus, name_fr: Thalamus moyen, short: Middle, short_fr: Moyen, cortical: false}
+  - {id: pstTH, name: Posterior thalamus, name_fr: Thalamus postérieur, short: Posterior, short_fr: Postérieur, cortical: false}
+# Deep structures take labels by name; an aseg name is matched with its
+# hemisphere prefix, and a learning unit passes its labels to its NextBrain
+# constituents. "Basal ganglia" is read as the authors describe it (putamen,
+# pallidum) with the caudate; the accumbens is left out.
+targets:
+  - {labels: [HPC], regions: [{atlas: aseg, name: Hippocampus}, {atlas: learning, name: Hippocampal formation}]}
+  - {labels: [AMY], regions: [{atlas: aseg, name: Amygdala}, {atlas: learning, name: Amygdala and transition areas}]}
+  - {labels: [BG], regions: [{atlas: aseg, name: Caudate}, {atlas: aseg, name: Putamen}, {atlas: aseg, name: Pallidum},
+                              {atlas: learning, name: Caudate nucleus}, {atlas: learning, name: Putamen},
+                              {atlas: learning, name: Globus pallidus — external}, {atlas: learning, name: Globus pallidus — internal}]}
+  - {labels: [CLT], regions: [{atlas: learning, name: Claustrum}]}
+  - {labels: [antTH, midTH, pstTH], regions: [{atlas: aseg, name: Thalamus-Proper}, {atlas: learning, name: Thalamus}]}

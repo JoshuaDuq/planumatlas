@@ -1,0 +1,34 @@
+# Predicted retinotopy of V1–V3: the Benson anatomical template (v4.0), which
+# neuropythy publishes on fsaverage, fitted to the group average of the 181 HCP
+# 7T retinotopy participants. scripts/fetch_retinotopy.py downloads it; the build
+# carries it onto this brain through the registered spheres. It is a prediction
+# from folding, not a measurement of this brain: no retinotopy was scanned here.
+label: Predicted retinotopy (Benson template v4.0)
+citation: Benson NC, Jamison KW, Arcaro MJ, Vu AT, Glasser MF, Coalson TS, Van Essen DC, Yacoub E, Ugurbil K, Winawer J, Kay K (2018) The Human Connectome Project 7 Tesla retinotopy dataset. J Vis 18(13):23
+doi: https://doi.org/10.1167/18.13.23
+pmid: 30593068
+method_citation: Benson NC, Butt OH, Brainard DH, Aguirre GK (2014) Correction of distortion in flattened representations of the cortical surface allows prediction of V1-V3 functional organization from anatomy. PLoS Comput Biol 10:e1003538
+method_doi: https://doi.org/10.1371/journal.pcbi.1003538
+method_pmid: 24676149
+# neuropythy's licence covers the files it distributes, the template among them.
+license: AGPL-3.0
+source:
+  repository: https://github.com/noahbenson/neuropythy
+  commit: a3d240f4429b544d40993db517baf7b94c3772a5
+  directory: neuropythy/lib/data/fsaverage/surf
+  files:
+    lh.benson14_angle.v4_0.mgz: 6c1c401c3e2cd9caf2057138d328e91575174f7adcb9f39741a26040d511eb91
+    lh.benson14_eccen.v4_0.mgz: 81b8603dfbbd9e4c2fc7ad1d83e05189f32a9a793065560e62a043f87888be9e
+    lh.benson14_sigma.v4_0.mgz: 4dad4231fb131eb0b3dc8d0dd2a554aabf966b8cb04850ce0b7bc1c8409b791c
+    lh.benson14_varea.v4_0.mgz: f407ca31b96f99490db8ff161ee1910e384da601657840bd65c3020e922475f5
+    rh.benson14_angle.v4_0.mgz: 738535864904e5b34bca50ef552eb634194084bf700bd1fd9d8fe1cb54a00161
+    rh.benson14_eccen.v4_0.mgz: 2b737c23f9a3e93dce5765411124107f07b9492fd5b0ea5c947cd446db777913
+    rh.benson14_sigma.v4_0.mgz: 05032e3941967558cf224174311ed1dd9a1bd7403a055b2f760f48afa988c3f0
+    rh.benson14_varea.v4_0.mgz: afe8c07267cc2e4bc00695f475817f36835f6ad26be26e2bc975393d44492dd0
+# The template's visual-area codes this layer publishes; it predicts nine more
+# areas, left out as less certain.
+areas: {V1: 1, V2: 2, V3: 3}
+# The HCP stimulus reached 8° (Benson et al. 2018); the template runs to 90°,
+# so beyond 8° it extrapolates.
+measured_eccentricity_deg: 8
+maximum_eccentricity_deg: 90

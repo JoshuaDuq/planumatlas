@@ -100,6 +100,9 @@ def cited_identifiers():
         source = yaml.safe_load((ROOT / f"config/{config}.yaml").read_text())
         pmids.add(str(source["pmid"]))
         dois[str(source["pmid"])] = source["doi"].removeprefix("https://doi.org/")
+    stimulation = yaml.safe_load((ROOT / "config/stimulation-responses.yaml").read_text())["source"]
+    pmids.add(str(stimulation["pmid"]))
+    dois[str(stimulation["pmid"])] = stimulation["doi"].removeprefix("https://doi.org/")
     for line in (ROOT / "docs/reference/references.md").read_text().splitlines():
         doi, pmid = DOI_IN_MARKDOWN.search(line), PMID_IN_MARKDOWN.search(line)
         if doi and not pmid:

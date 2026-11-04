@@ -1684,6 +1684,207 @@
       "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
       "citation": "https://doi.org/10.1152/jn.00270.2012",
       "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/stimulation-responses.json",
+      "sha256": "77efab0d12f05712c495867e47159055a00522847f357f42ce02cff0615d0115",
+      "derived_from": [
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/metaTable.csv",
+          "sha256": "fa9ce3fde46c677becc89a4fa8fd380ee467dbca6d231811f92ceebe4e716e76"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S01_166/elec_FSLR_vIndex_wbComm_S01_166.csv",
+          "sha256": "43e9111a79e11d32179922774b6f4516f631d89e007af8866a6212485a70260d"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S02_167/elec_FSLR_vIndex_wbComm_S02_167.csv",
+          "sha256": "1b1c615e681e03d5ece11911772ae566db609c51bf8c2e5f70f14b8a00d9afe4"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S03_169/elec_FSLR_vIndex_wbComm_S03_169.csv",
+          "sha256": "754dacc684b0f86f50d56a794149ac28641cb21fa61ca446fbf2e85e33d8fe9a"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S04_170/elec_FSLR_vIndex_wbComm_S04_170.csv",
+          "sha256": "ec11033dfb6e97b5c17d4dc814a11a27ee130cd571acf64fd2d45c64e5d08905"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S05_171/elec_FSLR_vIndex_wbComm_S05_171.csv",
+          "sha256": "96d93be1108336b57d004f424f47cc15892aa89c5f7c08f71d90b46c0d0dd247"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S06_172/elec_FSLR_vIndex_wbComm_S06_172.csv",
+          "sha256": "4e02bdb2c01a535e38291304adb24119affb38b9c00487dc622da4b789857a45"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S07_176/elec_FSLR_vIndex_wbComm_S07_176.csv",
+          "sha256": "b7f0a167eb5e7c699c2677ab4a969bcff8908aea86d0d5414464ead797f5ec9f"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S08_177/elec_FSLR_vIndex_wbComm_S08_177.csv",
+          "sha256": "bee5ff7d68a12ca49b25ad7562c9495c20fa5aec156fe845ddd89cba1c3b5655"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S09_178/elec_FSLR_vIndex_wbComm_S09_178.csv",
+          "sha256": "687597ff2f6569929f9da951cf7222be486fa66eb9f50a7c4ce724d26c2df925"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S10_181/elec_FSLR_vIndex_wbComm_S10_181.csv",
+          "sha256": "f9a211b7cf19ea69a3f2bf17b54a9b91fedb1725d619898b351a945caa2334e2"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S11_182/elec_FSLR_vIndex_wbComm_S11_182.csv",
+          "sha256": "0570180905884dd8e41abab1745a3d80818613d2deaa6077e9c4e1c225a02f6f"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S12_183/elec_FSLR_vIndex_wbComm_S12_183.csv",
+          "sha256": "1324ee0b5237822d83ddd903d68ea01633a042fa057bd11b8ea4a4ed83c93bdb"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S13_185/elec_FSLR_vIndex_wbComm_S13_185.csv",
+          "sha256": "07c2b5cc2fcffb67ba7dbca8c95937ca50565c7bf93625ee90946deb0f466de4"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S14_188/elec_FSLR_vIndex_wbComm_S14_188.csv",
+          "sha256": "dfda9457d9b9fe80899869a7bc2499907f42e243961ae7007c95f75bc845dd2a"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S15_189/elec_FSLR_vIndex_wbComm_S15_189.csv",
+          "sha256": "c64ea2dcd4fd26d2c662ef131cc7bb6db64b673ffd671162e2b7fa756f49f0d7"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S16_190/elec_FSLR_vIndex_wbComm_S16_190.csv",
+          "sha256": "e0b86eec223b469cc8556691a4716eaaf7f06346d0f7b2e14ffe1891fd60a90d"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S17_192/elec_FSLR_vIndex_wbComm_S17_192.csv",
+          "sha256": "792be4499921006f07b3cb22537160722b6593fe9f8bd403d877a331dc8b557f"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S18_193/elec_FSLR_vIndex_wbComm_S18_193.csv",
+          "sha256": "0bd9a800c6cea1f67d9a670897644d34ee3121a489eabbcb4068e06d522a1787"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S19_194/elec_FSLR_vIndex_wbComm_S19_194.csv",
+          "sha256": "79b9baece7c602a3ca900b2c0bbbc32258353ea4de7a3a8c81e3912afa112893"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S20_195/elec_FSLR_vIndex_wbComm_S20_195.csv",
+          "sha256": "6c269b41ecc13c4f74f780aa629ebe82b114847490257326af0075e9c3995320"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S21_196/elec_FSLR_vIndex_wbComm_S21_196.csv",
+          "sha256": "c372cc544bf8d2fc47252bd0342cfcdc48f7c1afa1983bad2d712a46b3812f11"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S22_197/elec_FSLR_vIndex_wbComm_S22_197.csv",
+          "sha256": "bf6317899793a134000924924e9f72b75dfced9687967a95971a6d5cb4e58a92"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S23_198/elec_FSLR_vIndex_wbComm_S23_198.csv",
+          "sha256": "04b6362727a47c65d1c8f2f2fa0353d4ea0d81d04b61226cb9dcbdffeb39f130"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S24_199/elec_FSLR_vIndex_wbComm_S24_199.csv",
+          "sha256": "97416bb380fd8f3e2b217ad1042a7111f68f9bb263b08e39edde48d1002bbe57"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S25_201/elec_FSLR_vIndex_wbComm_S25_201.csv",
+          "sha256": "343437b7124531a4d9701f6b57f59f70d9f28df3aeee0c0e5bbbd656d38a8328"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S26_202/elec_FSLR_vIndex_wbComm_S26_202.csv",
+          "sha256": "ac616afcb5f07e1ed048ea38d49226ee17441161fb4748997ad4a7b73b1ccf80"
+        },
+        {
+          "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S27_205/elec_FSLR_vIndex_wbComm_S27_205.csv",
+          "sha256": "2efb8207936dee805298e520123bd3befdf3c3751b4b7156bd2cd80f87ea6b9d"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/0aef592a9128b6f2090f6be0f495f310419bba3c/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii",
+          "sha256": "31987d139b6cdf1040188d1795bf23c213c57f8e84fb45f2c04823d996b0defc"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/0aef592a9128b6f2090f6be0f495f310419bba3c/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii",
+          "sha256": "8c1f67fa8fb3024ad3b292be995d5c9bae07dc4dbdd53fbac48e511e1366553d"
+        }
+      ],
+      "procedure": "scripts/fetch_stimulation_responses.py: responding and non-responding channel pairs counted by label pair and side; cortical channels carried to Destrieux parcels through the fs_LR 32k \u2192 fsaverage sphere",
+      "citation": "https://doi.org/10.1038/s41593-025-02009-x, https://doi.org/10.5281/zenodo.16939708",
+      "license": "CC BY 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.benson14_angle.v4_0.mgz",
+      "sha256": "6c1c401c3e2cd9caf2057138d328e91575174f7adcb9f39741a26040d511eb91",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/lh.benson14_angle.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.benson14_eccen.v4_0.mgz",
+      "sha256": "81b8603dfbbd9e4c2fc7ad1d83e05189f32a9a793065560e62a043f87888be9e",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/lh.benson14_eccen.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.benson14_sigma.v4_0.mgz",
+      "sha256": "4dad4231fb131eb0b3dc8d0dd2a554aabf966b8cb04850ce0b7bc1c8409b791c",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/lh.benson14_sigma.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.benson14_varea.v4_0.mgz",
+      "sha256": "f407ca31b96f99490db8ff161ee1910e384da601657840bd65c3020e922475f5",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/lh.benson14_varea.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.benson14_angle.v4_0.mgz",
+      "sha256": "738535864904e5b34bca50ef552eb634194084bf700bd1fd9d8fe1cb54a00161",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/rh.benson14_angle.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.benson14_eccen.v4_0.mgz",
+      "sha256": "2b737c23f9a3e93dce5765411124107f07b9492fd5b0ea5c947cd446db777913",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/rh.benson14_eccen.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.benson14_sigma.v4_0.mgz",
+      "sha256": "05032e3941967558cf224174311ed1dd9a1bd7403a055b2f760f48afa988c3f0",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/rh.benson14_sigma.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.benson14_varea.v4_0.mgz",
+      "sha256": "afe8c07267cc2e4bc00695f475817f36835f6ad26be26e2bc975393d44492dd0",
+      "anatomy": "fsaverage",
+      "url": "https://raw.githubusercontent.com/noahbenson/neuropythy/a3d240f4429b544d40993db517baf7b94c3772a5/neuropythy/lib/data/fsaverage/surf/rh.benson14_varea.v4_0.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: copied unchanged from the pinned neuropythy commit",
+      "citation": "https://doi.org/10.1167/18.13.23",
+      "license": "AGPL-3.0"
     }
   ]
 }

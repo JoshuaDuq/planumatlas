@@ -430,3 +430,69 @@ describe('the lesson’s MRI, overtaken while the cut is prepared', () => {
     assert.equal(after.includes('camera.faceCut'), false);
   });
 });
+
+describe('the visual-field map', () => {
+  // The left half-field is the right hemisphere's, and the right the left's.
+  const LEFT_FIELD = { x: -2, y: 1, radius: 1 };
+  const RIGHT_FIELD = { x: 2, y: 1, radius: 1 };
+
+  test('opens over the held scene on one hemisphere, uncut, opaque and seen from the midline', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.engine.sections.setMode('axial');
+    scene.engine.model.setCortexOpacity(0.3);
+    const mark = scene.engine.calls.length;
+    await scene.excursions.openMap(LEFT_FIELD);
+
+    assert.equal(scene.reader.capture.mock.calls.length, 1);
+    assert.deepEqual(scene.lesson.state, {
+      circuit: null,
+      step: 0,
+      visited: [],
+      route: false,
+      map: 'visual-field',
+      dot: LEFT_FIELD,
+    });
+    const { settings, state } = scene.engine.model;
+    assert.deepEqual(
+      [settings.hemisphere, settings.cortexOpacity, settings.internalVisible, state.selectedRegion],
+      ['right', 1, false, null],
+    );
+    assert.equal(scene.engine.sections.state.mode, 'off');
+    assert.equal(scene.session.state.view, 'left');
+    const framed = scene.engine.calls
+      .slice(mark)
+      .find((call) => call.domain === 'camera' && call.method === 'frameLandmark')!;
+    assert.deepEqual(framed.args.slice(0, 2), [
+      scene.engine.visualField.centralRegion('right'),
+      'left',
+    ]);
+  });
+
+  test('turns to the other hemisphere when asked, and only while the map is open', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await expect(scene.excursions.showMapSide('left')).rejects.toThrow(/No visual-field map/);
+    await scene.excursions.openMap(LEFT_FIELD);
+    await scene.excursions.showMapSide('left');
+    assert.equal(scene.engine.model.settings.hemisphere, 'left');
+    assert.equal(scene.session.state.view, 'right');
+  });
+
+  test('leaving it puts back the scene from before it; a lesson opened from it keeps that scene', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.excursions.openMap(RIGHT_FIELD);
+    await scene.excursions.openCircuit('vision');
+    assert.equal(scene.lesson.state.map, undefined);
+    assert.equal(scene.reader.capture.mock.calls.length, 1);
+    await scene.excursions.leaveLesson();
+    assert.equal(scene.reader.apply.mock.calls.length, 1);
+    assert.equal(scene.reader.apply.mock.calls[0]![0], scene.reader.capture.mock.results[0]!.value);
+
+    await scene.excursions.openMap(RIGHT_FIELD);
+    await scene.excursions.leaveLesson();
+    assert.deepEqual(scene.lesson.state, { circuit: null, step: 0, visited: [], route: false });
+    assert.equal(scene.reader.apply.mock.calls.length, 2);
+  });
+});

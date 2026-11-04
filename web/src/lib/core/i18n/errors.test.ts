@@ -145,12 +145,14 @@ test('I18N-18 · the 18 operations are listed in order, with subject sentences i
     'overlap',
     'restore',
   ];
-  // fullscreen is G6's addition (decision 33), after the legacy 18; a landmark's streamlines follow.
+  // fullscreen is G6's addition (decision 33), after the legacy 18; a landmark's streamlines follow,
+  // then the visual-field map.
   for (const lang of ['en', 'fr'] as const) {
     assert.deepEqual(Object.keys(t(lang, 'errors').operations), [
       ...order,
       'fullscreen',
       'streamlines',
+      'map',
     ]);
   }
   assert.equal(

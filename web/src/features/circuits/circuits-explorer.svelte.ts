@@ -13,6 +13,7 @@ import type { ViewStore } from '../../lib/state/view.svelte.ts';
 import { announce } from '../../lib/ui/announcer.svelte.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
 import { relatedLandmarks } from './circuits-view.ts';
+import type { VisualFieldExplorer } from './visual-field-explorer.svelte.ts';
 
 export interface CircuitExplorerDeps {
   view: Pick<ViewStore, 'current'>;
@@ -32,10 +33,12 @@ export interface CircuitExplorerDeps {
   labelOf: (regionId: string) => RegionLabel;
   /** X2's entry point, which opens a deficit under its own runner. */
   openDeficit: (id: string) => unknown;
+  /** The visual-field map the tab offers beside its lessons. */
+  map: VisualFieldExplorer;
 }
 
 /** What the reader is told could not be done: `failureNotice`'s operation. */
-type Operation = 'landmark' | 'mri';
+type Operation = 'landmark' | 'mri' | 'map';
 export type Direction = 'previous' | 'next';
 
 export function createCircuitExplorer(deps: CircuitExplorerDeps) {
@@ -125,6 +128,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
   }
 
   return {
+    map: deps.map,
     get lang() {
       return view.current.lang;
     },
@@ -217,6 +221,8 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
 
     /** A circuit opens on its whole route. */
     openCircuit: (id: string) => run(() => excursions.openCircuit(id), 'landmark', {}),
+    /** The visual-field map opens in place of a lesson, under the same refuse-while-busy run. */
+    openMap: () => run(() => deps.map.openMap(), 'map'),
     /** The open lesson goes back to its whole route, from its first landmark's Previous. */
     openRoute: () => run(() => excursions.openLessonRoute(), 'landmark', { direction: 'previous' }),
     /** A lesson opens on one of its landmarks, from the lessons a region takes part in. */

@@ -385,10 +385,15 @@ const linkedDomains = {
   atlas: 'hcp-mmp',
   domains: [{ id: 'language' }],
   lesion_checks: {},
-  search: { terms: new Map([['term-a', {}]]) },
+  search: {
+    terms: new Map([
+      ['term-a', {}],
+      ['term:b', {}],
+    ]),
+  },
 };
 
-/** Links for a build that publishes one function, one term, two deficits and the language circuit. */
+/** Links for a build that publishes one function, two terms, two deficits and the language circuit. */
 function restorer(
   viewState: object = {},
   extras: { engineOptions?: object; hooks?: Partial<LinkHooks> } = {},
@@ -477,6 +482,13 @@ describe('what a link may name', () => {
   it('LINK-09 accepts a Neurosynth term as a function', async () => {
     const { restore } = restorer();
     expect(await restore('tab=functions&function=term-a')).toEqual([]);
+  });
+
+  it('LINK-09 accepts a comparison of two published functions, and refuses any other', async () => {
+    const { restore } = restorer();
+    expect(await restore('tab=functions&function=compare:language,term:b')).toEqual([]);
+    expect(await restore('tab=functions&function=compare:language,bogus')).toEqual(['function']);
+    expect(await restore('tab=functions&function=compare:language')).toEqual(['function']);
   });
 
   it('LINK-09 refuses to restore links at all in a build without neuropsychological domains', () => {
@@ -724,5 +736,37 @@ describe('a published coordinate in the link', () => {
       'space',
     ]);
     expect(lesion.placeCoordinate).not.toHaveBeenCalled();
+  });
+});
+
+describe('the visual-field map', () => {
+  it('is written from the Circuits tab with its dot, and restored with it', async () => {
+    const { links, lesson, session } = setup();
+    session.setExplorer('circuits');
+    lesson.openMap('visual-field', { x: -3.21, y: 1.5, radius: 0.8 });
+    expect(links.linkState()).toMatchObject({
+      circuitMap: 'visual-field',
+      mapDot: { x: -3.21, y: 1.5, radius: 0.8 },
+    });
+    lesson.close();
+    expect(
+      await links.restore(decodeState('tab=circuits&map=visual-field&dot=4,-2,1.5'), {}),
+    ).toEqual([]);
+    expect(lesson.state).toMatchObject({ map: 'visual-field', dot: { x: 4, y: -2, radius: 1.5 } });
+  });
+
+  it('is left out where the anatomy publishes no retinotopy, and a link without it closes it', async () => {
+    const { retinotopy: _, ...blind } = published;
+    const { links, lesson } = setup({}, published.anatomy.id, {
+      engineOptions: { manifest: blind },
+    });
+    expect(
+      await links.restore(decodeState('tab=circuits&map=visual-field&dot=4,-2,1.5'), {}),
+    ).toEqual(['map', 'dot']);
+    expect(lesson.state.map).toBeUndefined();
+    const sighted = setup();
+    sighted.lesson.openMap('visual-field', { x: 1, y: 1, radius: 1 });
+    await sighted.links.restore(decodeState('tab=circuits'), {});
+    expect(sighted.lesson.state.map).toBeUndefined();
   });
 });

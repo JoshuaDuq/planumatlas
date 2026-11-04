@@ -5,7 +5,8 @@
   the comparison slot (R2), constituents, functional division, domains, networks, with NextBrain's
   boundary certainty and segmentation agreement after the comparison, all being about the labels'
   source, then the receptor
-  densities measured in the area the region is named after; the deficits
+  densities measured in the area the region is named after and the stimulation responses of the
+  label it takes; the deficits
   and circuits the region takes part in (X2, X3) follow as slots of their own.
   - the name is the `region-title` focus target; the commands that hide the selection with it
     (Clear ×, Hide) hand focus on through S2's commands, not here;
@@ -32,6 +33,7 @@
   import type { BoundaryCertainty } from '../../lib/core/catalog/boundary-certainty.ts';
   import type { SegmentationAgreement } from '../../lib/core/catalog/segmentation-agreement.ts';
   import type { ReceptorFingerprints } from '../../lib/core/catalog/receptor-fingerprints.ts';
+  import type { StimulationResponses } from '../../lib/core/catalog/stimulation-responses.ts';
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { inspectorEmptyChrome } from '../../lib/core/panels/inspector.ts';
@@ -45,6 +47,7 @@
   import FunctionalSection from './FunctionalSection.svelte';
   import NetworkSection from './NetworkSection.svelte';
   import ReceptorSection from './ReceptorSection.svelte';
+  import StimulationSection from './StimulationSection.svelte';
   import SupplySection from './SupplySection.svelte';
   import CerebellarFunctionsSection from './CerebellarFunctionsSection.svelte';
   import RegionFacts from './RegionFacts.svelte';
@@ -76,6 +79,8 @@
     boundaryCertainty: BoundaryCertainty | null;
     segmentationAgreement: SegmentationAgreement | null;
     receptors: ReceptorFingerprints | null;
+    /** Lyu et al.'s stimulation responses, by the authors' label a region takes. */
+    stimulation: StimulationResponses | null;
     /** The manifest's arterial territories, for each region's typical supply. */
     territories?: ArterialTerritories | null;
     /** The manifest's functional cerebellar atlas, for each lobule's shares. */
@@ -121,6 +126,7 @@
     boundaryCertainty,
     segmentationAgreement,
     receptors,
+    stimulation,
     territories = null,
     cerebellarFunctions = null,
     striatalNetworks = null,
@@ -218,6 +224,7 @@
     onshow={showAgreement}
   />
   <ReceptorSection {region} {lang} {receptors} />
+  <StimulationSection {region} {lang} {stimulation} />
   <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
   <FunctionalSection {region} {lang} {functionalRegions} />
   <DomainSection {region} {lang} {domains} />

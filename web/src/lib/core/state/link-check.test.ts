@@ -23,6 +23,7 @@ const known: KnownLinkIds = {
   functions: new Set(['all', 'language']),
   deficits: new Set(['aphasia']),
   circuits: new Map([['visual', 4]]),
+  maps: new Set(['visual-field']),
   spinalCord: true,
   // The left bundle while the sphere reaches the left of the midline.
   coordinateSpaces: new Set(['mni152nlin2009casym', 'unstated']),
@@ -146,4 +147,13 @@ test('a coordinate needs a published space, and is never a lesion too', () => {
   const both = check('lesion=-30,0,10,8&lesionmode=functions&coord=-42,22,6&space=unstated');
   assert.deepEqual(both.rejected, ['lesion', 'coord', 'space', 'lesionmode']);
   assert.deepEqual(both.state, {});
+});
+
+test('a map must be one this anatomy shows, never beside a lesson, and its dot needs it', () => {
+  assert.deepEqual(check('#tab=circuits&map=visual-field&dot=2,1,1').rejected, []);
+  assert.deepEqual(check('#map=somatotopy&dot=2,1,1').rejected, ['map', 'dot']);
+  assert.deepEqual(check('#circuit=visual&step=1&map=visual-field').rejected, ['map']);
+  assert.deepEqual(check('#dot=2,1,1').rejected, ['dot']);
+  const blind = checkLink(decodeState('#map=visual-field').state, { ...known, maps: new Set() });
+  assert.deepEqual(blind.rejected, ['map']);
 });

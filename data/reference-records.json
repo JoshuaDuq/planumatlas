@@ -8303,6 +8303,27 @@
    "issue": "5",
    "pages": "451-459",
    "corrections": []
+  },
+  "pmid:40664975": {
+   "pmid": "40664975",
+   "pmcid": "PMC12664536",
+   "doi": "10.1038/s41593-025-02009-x",
+   "doi_source": "pubmed",
+   "title": "Mapping human thalamocortical connectivity with electrical stimulation and recording",
+   "authors": [
+    "Lyu D",
+    "Stiger JR",
+    "Lusk Z",
+    "Buch V",
+    "Parvizi J"
+   ],
+   "year": 2025,
+   "pubdate": "2025 Aug",
+   "journal": "Nat Neurosci",
+   "volume": "28",
+   "issue": "8",
+   "pages": "1797-1809",
+   "corrections": []
   }
  }
 }

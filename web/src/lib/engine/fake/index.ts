@@ -1,3 +1,4 @@
+import type { VisualFieldTerritories } from '../../core/learning/visual-field.ts';
 import type { Manifest } from '../../types/index.ts';
 import type {
   Engine,
@@ -12,6 +13,8 @@ import type {
 } from '../api.ts';
 import { createFakeCamera } from './camera.ts';
 import { createFakeLesion } from './lesion.ts';
+import { createFakeVisualField } from './visual-field.ts';
+import type { FakeVisualField } from './visual-field.ts';
 import type { FakeLesion } from './lesion.ts';
 import { createFakeModel } from './model.ts';
 import type { FakeModel } from './model.ts';
@@ -25,6 +28,7 @@ export type { Call } from './support.ts';
 export type { FakeMriNavigator } from './mri.ts';
 export type { FakeBundle, FakeTracts } from './tracts.ts';
 export type { FakeLesion } from './lesion.ts';
+export type { FakeVisualField } from './visual-field.ts';
 
 type FakeFile = { atlas: string; [field: string]: unknown };
 
@@ -46,12 +50,15 @@ export interface FakeEngineOptions {
   tractBundles?: FakeBundle[];
   /** What a lesion measures to. */
   lesionMeasurement?: LesionMeasurement;
+  /** What the visual-field map measures territories on. */
+  visualFieldTerritories?: VisualFieldTerritories;
 }
 
 export interface FakeEngine extends Engine {
   readonly model: FakeModel;
   readonly tracts: FakeTracts;
   readonly lesion: FakeLesion;
+  readonly visualField: FakeVisualField;
   /** Every call into the engine's domains, in order. Events and getters are not recorded. */
   readonly calls: readonly Call[];
   /** What the comparison overlay shows: the highlighted overlap and whether it is visible. */
@@ -148,6 +155,24 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
     comparison: recorded('comparison', comparison, calls),
     tracts: recorded('tracts', tracts, calls),
     lesion: recorded('lesion', lesion, calls),
+    visualField: recorded(
+      'visualField',
+      createFakeVisualField(
+        Boolean(options.manifest.retinotopy),
+        options.visualFieldTerritories,
+        // Without meshes to count, the drawn atlas's first cortical region of that side stands in.
+        (hemisphere) => {
+          const { atlas } = model.settings;
+          const region = options.manifest.regions.find(
+            (entry) =>
+              entry.atlas === atlas && entry.kind === 'cortex' && entry.hemisphere === hemisphere,
+          );
+          if (!region) throw new Error(`No ${hemisphere} cortical region in ${atlas}.`);
+          return region.id;
+        },
+      ),
+      calls,
+    ),
     calls,
     get highlighted() {
       return overlayVisible ? highlighted : null;

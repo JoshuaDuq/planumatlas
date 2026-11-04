@@ -34,6 +34,7 @@ export const en = {
   routeNote:
     'Each number marks where its landmark lies in this brain, seen through the cortex: an order, not the path the fibres take. Choose a number, here or on the picture, to open it.',
   routeMark: (index: number, name: string) => `Landmark ${index + 1}: ${name}`,
+  openMap: 'Explore the visual field map',
 };
 
 export const fr: typeof en = {
@@ -72,4 +73,5 @@ export const fr: typeof en = {
   routeNote:
     'Chaque numéro marque l’emplacement de son repère dans ce cerveau, vu à travers le cortex\u202f: un ordre, pas le chemin des fibres. Choisissez un numéro, ici ou sur l’image, pour l’ouvrir.',
   routeMark: (index: number, name: string) => `Repère ${index + 1}\u202f: ${name}`,
+  openMap: 'Explorer la carte du champ visuel',
 };

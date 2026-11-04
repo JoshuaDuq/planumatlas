@@ -3,7 +3,8 @@ import type { Circuit, CircuitCatalog, Landmark } from '../core/learning/catalog
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
-import type { Engine, MoveOptions, MprPlane } from '../engine/api.ts';
+import { hemisphereFor } from '../core/learning/visual-field.ts';
+import type { Engine, MoveOptions, MprPlane, VisualFieldDot } from '../engine/api.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
 import type { Explorer } from '../types/index.ts';
 import { preparedOf } from '../../features/colophon/display-state.ts';
@@ -31,6 +32,9 @@ export interface MriDialog {
   openPreparedPlane(plane: MprPlane, canOpen: () => boolean): Promise<void>;
 }
 
+/** How much cortex around V1 the visual-field map frames, in millimetres. */
+const MAP_CONTEXT_MM = 30;
+
 /**
  * Guided lessons (app.js:1298-1411): a lesson opens over the scene it found, draws and frames its
  * landmarks, and puts the scene back when the reader leaves it. Under a lesson, a landmark's Linked
@@ -51,7 +55,7 @@ export function createLessons({
   prepare,
   stage,
 }: {
-  engine: Pick<Engine, 'model' | 'sections' | 'camera'>;
+  engine: Pick<Engine, 'model' | 'sections' | 'camera' | 'visualField'>;
   session: Pick<SessionStore, 'state' | 'setView'>;
   lesson: LessonStore;
   circuits: Pick<CircuitCatalog, 'get' | 'contextMarginMm'>;
@@ -76,7 +80,7 @@ export function createLessons({
     sayRestored: () => void;
   };
 }) {
-  const { model, sections, camera } = engine;
+  const { model, sections, camera, visualField } = engine;
   // The scene before the open lesson, put back when the reader leaves it. Null for a lesson a link
   // opened on its landmark: that scene is the link's own.
   let beforeLesson: ReaderState | null = null;
@@ -161,6 +165,30 @@ export function createLessons({
     return true;
   }
 
+  /**
+   * The visual-field map's scene: one hemisphere alone, seen from the midline where V1 lies, uncut,
+   * opaque and with nothing selected, so the map the cortex carries is what shows.
+   */
+  async function showMapSide(hemisphere: 'left' | 'right', current: () => boolean) {
+    await sections.setMode('off');
+    if (!current()) return false;
+    model.select(null);
+    model.clearIsolation();
+    model.setHemisphere(hemisphere);
+    model.setCortexVisible(true);
+    model.setCortexOpacity(1);
+    model.setInternalVisible(false);
+    const view = hemisphere === 'left' ? 'right' : 'left';
+    session.setView(view);
+    // V1 and the V2 and V3 around it, with the occipital lobe for context.
+    const central = visualField.centralRegion(hemisphere);
+    if (!camera.frameLandmark(central, view, MAP_CONTEXT_MM)) {
+      throw new Error(`The map's central region is not drawn: ${central}`);
+    }
+    prepare(preparedOf(model.settings));
+    return true;
+  }
+
   function seeThroughOpacity() {
     const opacity = model.manifest.appearance.see_through_opacity;
     if (opacity === undefined) throw new Error('This build publishes no see-through opacity.');
@@ -169,7 +197,7 @@ export function createLessons({
 
   /** The scene a lesson opens over, unless one is already open and holds it. Focus ends with it. */
   function rememberBeforeLesson() {
-    if (!lesson.state.circuit) {
+    if (!lesson.state.circuit && !lesson.state.map) {
       beforeLesson = reader.capture();
       changesSaid = false;
     }
@@ -181,7 +209,8 @@ export function createLessons({
    * it, as a deficit's Restore does. The list stays in front: a restored selection is not a new choice.
    */
   async function leave() {
-    if (!lesson.state.circuit || session.state.explorer !== 'circuits') return;
+    const open = lesson.state.circuit || lesson.state.map;
+    if (!open || session.state.explorer !== 'circuits') return;
     const before = beforeLesson;
     const said = changesSaid;
     beforeLesson = null;
@@ -290,6 +319,25 @@ export function createLessons({
       render();
       // The route cleared a selection before the lesson began, which returned the panel to the list.
       shell.showDetail();
+    },
+
+    /** The visual-field map opens over the scene it found, on the hemisphere that represents the dot. */
+    async openMap(dot: VisualFieldDot) {
+      const current = commands.begin();
+      rememberBeforeLesson();
+      shell.showDetail();
+      if (!(await showMapSide(hemisphereFor(dot) ?? 'left', current))) return;
+      lesson.openMap('visual-field', dot);
+      render();
+      shell.showDetail();
+    },
+
+    /** The open map turns to the other hemisphere, as the dot crosses the vertical meridian. */
+    async showMapSide(hemisphere: 'left' | 'right') {
+      if (lesson.state.map !== 'visual-field') throw new Error('No visual-field map is open.');
+      const current = commands.begin();
+      if (!(await showMapSide(hemisphere, current))) return;
+      render();
     },
 
     /** The open lesson goes back to its whole route. */

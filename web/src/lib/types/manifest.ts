@@ -122,7 +122,9 @@ export interface Manifest {
   coordinate_spaces?: CoordinateSpaces;
   cerebellar_functions?: CerebellarFunctions;
   striatal_networks?: StriatalNetworks;
+  retinotopy?: Retinotopy;
   receptor_fingerprints?: ManifestFile & Record<string, unknown>;
+  stimulation_responses?: ManifestFile & Record<string, unknown>;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
   atlas_comparison?: ManifestFile;
@@ -187,6 +189,29 @@ export interface ArterialTerritories {
   major: Record<string, { name: string; name_fr: string; short: string }>;
   territories: ArterialTerritory[];
   registration: Record<string, unknown>;
+  method: string;
+}
+
+/** What one hemisphere's predicted V1–V3 measure on this brain. */
+export interface RetinotopyHemisphere {
+  area_mm2: Record<string, number>;
+  /** The share of V1–V3's area predicted beyond the measured eccentricity. */
+  extrapolated_share: number;
+  /** Area-weighted Dice of each predicted area with the parcels of each atlas named for it. */
+  agreement_dice: Record<string, Record<string, number>>;
+}
+
+/** `manifest.retinotopy`: V1–V3 retinotopy predicted by the Benson template, carried per cortical vertex. */
+export interface Retinotopy extends ManifestFile {
+  label: string;
+  citation: string;
+  method_citation: string;
+  license: string;
+  attributes: { x: '_FIELD_X'; y: '_FIELD_Y'; sigma: '_PRF_SIGMA'; area: '_VISUAL_AREA' };
+  areas: { code: number; name: string }[];
+  measured_eccentricity_deg: number;
+  maximum_eccentricity_deg: number;
+  hemispheres: Record<'left' | 'right', RetinotopyHemisphere>;
   method: string;
 }
 

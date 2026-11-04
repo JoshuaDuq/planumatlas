@@ -32,12 +32,14 @@ import * as orientation from './areas/orientation.ts';
 import * as reasons from './areas/reasons.ts';
 import * as receptors from './areas/receptors.ts';
 import * as sheet from './areas/sheet.ts';
+import * as stimulation from './areas/stimulation.ts';
 import * as territories from './areas/territories.ts';
 import * as cerebellarFunctions from './areas/cerebellarFunctions.ts';
 import * as shortcuts from './areas/shortcuts.ts';
 import * as sides from './areas/sides.ts';
 import * as viewport from './areas/viewport.ts';
 import * as views from './areas/views.ts';
+import * as visualField from './areas/visualField.ts';
 import * as workspace from './areas/workspace.ts';
 
 export const TRANSLATIONS = {
@@ -74,12 +76,14 @@ export const TRANSLATIONS = {
     reasons: reasons.en,
     receptors: receptors.en,
     sheet: sheet.en,
+    stimulation: stimulation.en,
     territories: territories.en,
     cerebellarFunctions: cerebellarFunctions.en,
     shortcuts: shortcuts.en,
     sides: sides.en,
     viewport: viewport.en,
     views: views.en,
+    visualField: visualField.en,
     workspace: workspace.en,
   },
   fr: {
@@ -115,12 +119,14 @@ export const TRANSLATIONS = {
     reasons: reasons.fr,
     receptors: receptors.fr,
     sheet: sheet.fr,
+    stimulation: stimulation.fr,
     territories: territories.fr,
     cerebellarFunctions: cerebellarFunctions.fr,
     shortcuts: shortcuts.fr,
     sides: sides.fr,
     viewport: viewport.fr,
     views: views.fr,
+    visualField: visualField.fr,
     workspace: workspace.fr,
   },
 };

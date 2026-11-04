@@ -1,6 +1,8 @@
 import { VIEW_NAMES } from '../../types/index.ts';
 import type { Manifest, Region, ViewName } from '../../types/index.ts';
 import type { ClinicalCorrection, Translated } from '../clinical/types.ts';
+import { CIRCUIT_MAPS } from './session.ts';
+import type { CircuitMap } from './session.ts';
 
 /** One authored landmark of a circuit, in `data/circuits.yaml`. */
 export interface AuthoredStep {
@@ -18,6 +20,8 @@ export interface AuthoredStep {
   plane: 'axial' | 'coronal' | 'sagittal';
   /** Forms of this landmark for anatomies divided differently; each overrides the base fields. */
   alternatives?: readonly Partial<AuthoredStep>[];
+  /** An interactive map of what this landmark holds, offered from it. */
+  map?: CircuitMap;
 }
 
 export interface CircuitReference {
@@ -135,6 +139,9 @@ function validateStep(
         throw new Error(`Invalid covering region: ${id}`);
       }
     }
+  }
+  if (Object.hasOwn(step, 'map') && !CIRCUIT_MAPS.includes(step.map!)) {
+    throw new Error(`Unknown circuit map: ${step.map}`);
   }
   if (Object.hasOwn(step, 'tract') && !tracts.has(step.tract!)) {
     throw new Error(`Unknown tract bundle: ${step.tract}`);

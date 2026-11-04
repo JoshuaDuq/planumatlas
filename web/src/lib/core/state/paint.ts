@@ -2,11 +2,15 @@ import type { Language, ModelState, Paint, Rgb, SessionState } from '../../types
 import type { Translated } from '../clinical/types.ts';
 import {
   ALL_DOMAINS,
+  COMPARE_COLORS,
+  comparedIds,
   domainName,
   domainPaint,
   domainRecord,
+  functionName,
   isTermId,
   overviewDomains,
+  SHARED_COLOR,
 } from '../catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
@@ -114,6 +118,30 @@ export function legendFor(
   }
   if (kind === 'function') {
     const copy = t(lang, 'domains');
+    const compared = comparedIds(state.selectedFunction);
+    if (compared) {
+      // A colour no area carries is keyed but greyed, as a deficit's is.
+      const carried = new Set([...state.paint!.colors.values()].map((color) => color.join()));
+      const row = (id: string, color: Rgb, label: string): LegendRow => ({
+        id,
+        color,
+        label,
+        pressed: false,
+        absent: !carried.has(color.join()),
+      });
+      return {
+        map: 'function',
+        title: functionName(domains, state.selectedFunction!, lang),
+        pickable: false,
+        note: copy.keyCompare,
+        rows: [
+          ...compared.map((id, index) =>
+            row(id, COMPARE_COLORS[index]!, domainName(domainRecord(domains, id)!, lang)),
+          ),
+          row('shared', SHARED_COLOR, copy.keyShared),
+        ],
+      };
+    }
     if (state.selectedFunction !== ALL_DOMAINS) {
       const picked = domainRecord(domains, state.selectedFunction!)!;
       const bands = domains.z_scale

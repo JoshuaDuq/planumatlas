@@ -1,4 +1,6 @@
-import { ALL_DOMAINS } from '../core/catalog/neuropsych-domains.ts';
+import type { CircuitMap } from '../core/learning/session.ts';
+import { START_DOT } from '../state/visual-field-map.svelte.ts';
+import { ALL_DOMAINS, validComparison } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { UNSTATED } from '../core/coordinates/spaces.ts';
 import type { Coordinates } from '../core/coordinates/spaces.ts';
@@ -112,6 +114,11 @@ export function createLinks({
     throw new Error('This build publishes no neuropsychological domains for the Functions tab.');
   }
 
+  const functions = new Set([
+    ALL_DOMAINS,
+    ...domains.domains.map((domain) => domain.id),
+    ...(domains.search?.terms.keys() ?? []),
+  ]);
   const known: KnownLinkIds = {
     atlases: new Set(model.manifest.atlases.map((entry) => entry.id)),
     details: new Set(model.manifest.detail_levels.map((entry) => entry.id)),
@@ -126,14 +133,13 @@ export function createLinks({
       ...(model.cabNp ? ['cab-np'] : []),
       ...(model.manifest.arterial_territories ? ['territory'] : []),
     ]),
-    functions: new Set([
-      ALL_DOMAINS,
-      ...domains.domains.map((domain) => domain.id),
-      ...(domains.search?.terms.keys() ?? []),
-    ]),
+    functions: {
+      has: (id: string) => functions.has(id) || validComparison(domains, id),
+    },
     regions: model.regions,
     deficits: new Set(clinical.search('', 'en').map((deficit) => deficit.id)),
     circuits: new Map(circuits.all.map((circuit) => [circuit.id, circuit.steps.length])),
+    maps: new Set(model.manifest.retinotopy ? ['visual-field'] : []),
     spinalCord: publishesSpinalCord(model.manifest),
     coordinateSpaces: new Set(
       coordinates ? [...coordinates.metadata.spaces.map(({ id }) => id), UNSTATED] : [],
@@ -166,6 +172,7 @@ export function createLinks({
     const { explorer } = current;
     // The session keeps a tab's open item for the reader's return; the link names it only from its tab.
     const circuit = explorer === 'circuits' ? current.lesson.circuit : null;
+    const map = explorer === 'circuits' ? (current.lesson.map ?? null) : null;
     return {
       ...current,
       selectedFunction: explorer === 'functions' ? current.selectedFunction : null,
@@ -174,6 +181,8 @@ export function createLinks({
       ...cutState(),
       circuit,
       circuitStep: circuit ? current.lesson.step : 0,
+      circuitMap: map,
+      mapDot: map ? current.lesson.dot! : null,
       orbit: camera.orbitLink(),
       mriWindow: sections.mriWindowLink(),
       // The see-through cortex the drawn streamlines asked for comes back with them.
@@ -326,6 +335,9 @@ export function createLinks({
       if (valid.circuit) {
         lesson.start(valid.circuit);
         lesson.go(valid.circuitStep ?? 0);
+      } else if (valid.circuitMap) {
+        // The link carries the map's own scene; the map comes back over it, on its dot.
+        lesson.openMap(valid.circuitMap as CircuitMap, valid.mapDot ?? START_DOT);
       } else {
         lesson.close();
       }
@@ -367,7 +379,7 @@ export function createLinks({
       if (
         (explorer === 'functions' && selectedFunction) ||
         (explorer === 'deficits' && selectedDeficit) ||
-        (explorer === 'circuits' && valid.circuit) ||
+        (explorer === 'circuits' && (valid.circuit || valid.circuitMap)) ||
         // The lesion's report is Anatomy's detail while no region is selected.
         (explorer === 'anatomy' && (valid.lesion || lesion.coordinate) && !valid.selectedRegion)
       ) {

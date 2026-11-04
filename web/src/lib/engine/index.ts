@@ -1,6 +1,9 @@
 import { Box3, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { fetchAsset } from '../core/assets/asset-cache.ts';
 import { readComparisonGeometry } from '../core/assets/comparison-assets.ts';
+import { parseVisualFieldTerritories } from '../core/learning/visual-field.ts';
+import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
 import { t } from '../core/i18n/index.ts';
 import type {
   CreateEngine,
@@ -10,6 +13,7 @@ import type {
   EngineEvents,
   EngineOptions,
   Presentation,
+  VisualFieldDot,
 } from './api.ts';
 import { createEngineModel, createEngineSections } from './adapters.ts';
 import { createComparisonOverlay } from './comparison/overlay.ts';
@@ -25,6 +29,7 @@ import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
 import { stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
 import { createScene } from './render/scene.ts';
+import { token } from './render/tokens.ts';
 import type { Appearance as SceneAppearance } from './render/scene.ts';
 import { worldToRas } from './slices/coordinates.ts';
 import { BrainSections } from './slices/sections.ts';
@@ -182,6 +187,27 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     });
     const stage = framing;
 
+    // While the visual-field map is probed, a click reads the cortex there instead of choosing it.
+    let probing = false;
+    let visualMap: { dot: VisualFieldDot | null } | null = null;
+    let territories: Promise<VisualFieldTerritories> | null = null;
+    const loadTerritories = () => {
+      const published = atlas.manifest.retinotopy;
+      if (!published) return Promise.reject(new Error('This anatomy publishes no retinotopy.'));
+      territories ??= fetchAsset(new URL(published.file, absoluteManifestUrl))
+        .then((buffer) => parseVisualFieldTerritories(JSON.parse(new TextDecoder().decode(buffer))))
+        .catch((error: unknown) => {
+          territories = null;
+          throw error;
+        });
+      return territories;
+    };
+    const showVisualField = (map: typeof visualMap) => {
+      atlas.showVisualField(map, token('--overlay-accent'));
+      visualMap = map;
+      scene.invalidate();
+    };
+
     const picker = createPicker({
       domElement: scene.domElement,
       camera: scene.camera,
@@ -196,8 +222,11 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       onHover: presentation.hover,
       onSelect: (id) => events.emit('pick', { id }),
       onFocusPoint: stage.focusWorldPoint,
-      placing: () => lesion.placing && !reference.active,
-      onPlace: (point) => events.emit('lesionPoint', { point: worldToRas(point) }),
+      placing: () => (lesion.placing || probing) && !reference.active,
+      onPlace: (hit) =>
+        probing
+          ? events.emit('visualFieldPoint', { reading: atlas.visualFieldAt(hit) })
+          : events.emit('lesionPoint', { point: worldToRas(hit.point) }),
     });
     cleanups.push(() => picker.dispose());
 
@@ -316,11 +345,21 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         showTract: lesion.showTract,
         clearTract: lesion.clearTract,
       },
+      visualField: {
+        available: atlas.visualField !== null,
+        show: showVisualField,
+        setProbing(next) {
+          probing = next;
+        },
+        territories: loadTerritories,
+        centralRegion: (hemisphere) => atlas.visualFieldRegion(hemisphere),
+      },
 
       applyTheme() {
         scene.applyTheme();
         sections.applyTheme();
         lesion.applyTheme();
+        if (visualMap) showVisualField(visualMap);
         refresh();
       },
       present(presentation) {

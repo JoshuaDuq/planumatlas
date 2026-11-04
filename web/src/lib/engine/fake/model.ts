@@ -182,6 +182,7 @@ export function createFakeModel({
     boundaryCertainty: null,
     segmentationAgreement: segmentationAgreement ?? null,
     receptors: null,
+    stimulation: null,
     defaultDetail,
     get settings() {
       return settings();

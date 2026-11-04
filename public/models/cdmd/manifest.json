@@ -137,6 +137,18 @@
       "_T1": [
         38.98631286621094,
         203.2353057861328
+      ],
+      "_FIELD_X": [
+        -87.60440063476562,
+        89.29246520996094
+      ],
+      "_FIELD_Y": [
+        -88.49894714355469,
+        87.7828140258789
+      ],
+      "_PRF_SIGMA": [
+        0.0,
+        23.81169891357422
       ]
     }
   },
@@ -1623,6 +1635,17 @@
     ],
     "method": "Each EBRAINS receptor dataset's mean and SD over the sampled hemispheres, carried to the regions named after the area or structure it was measured in, in both hemispheres; never per vertex or voxel"
   },
+  "stimulation_responses": {
+    "id": "stimulation-responses",
+    "file": "stimulation-responses.json",
+    "label": "Stimulation responses (Lyu et al. 2025)",
+    "license": "CC BY 4.0",
+    "citations": [
+      "https://doi.org/10.1038/s41593-025-02009-x",
+      "https://doi.org/10.5281/zenodo.16939708"
+    ],
+    "method": "Lyu et al. (2025)'s responding and non-responding stimulation\u2013recording channel pairs, counted by the authors' anatomical labels and by side; a Destrieux parcel takes the label most cortical channels landing in it carry (fs_LR 32k \u2192 fsaverage sphere), and deep structures take labels by name"
+  },
   "boundary_certainty": {
     "id": "boundary-certainty",
     "file": "boundary-certainty.json",
@@ -2467,6 +2490,82 @@
       ]
     },
     "method": "mri_synthmorph register -m joint (skull-stripped template \u2192 brain.mgz); SynthSeg --parc --robust reads the template, carried by apply -m nearest onto aseg's grid and scored against aseg. A published field samples the inverse warp every 1.5 mm over the template's brain dilated 4 mm. Offsets read the same numbers as each template at the first published template's own cortex and deep grey, with 5 mm sphere overlap of this brain's Schaefer-400 parcels."
+  },
+  "retinotopy": {
+    "file": "retinotopy.json",
+    "label": "Predicted retinotopy (Benson template v4.0)",
+    "citation": "https://doi.org/10.1167/18.13.23",
+    "method_citation": "https://doi.org/10.1371/journal.pcbi.1003538",
+    "license": "AGPL-3.0",
+    "attributes": {
+      "x": "_FIELD_X",
+      "y": "_FIELD_Y",
+      "sigma": "_PRF_SIGMA",
+      "area": "_VISUAL_AREA"
+    },
+    "areas": [
+      {
+        "code": 1,
+        "name": "V1"
+      },
+      {
+        "code": 2,
+        "name": "V2"
+      },
+      {
+        "code": 3,
+        "name": "V3"
+      }
+    ],
+    "measured_eccentricity_deg": 8,
+    "maximum_eccentricity_deg": 90,
+    "hemispheres": {
+      "left": {
+        "area_mm2": {
+          "V1": 2235,
+          "V2": 2230,
+          "V3": 1745
+        },
+        "extrapolated_share": 0.408,
+        "agreement_dice": {
+          "V1": {
+            "hcp-mmp": 0.9,
+            "julich": 0.68
+          },
+          "V2": {
+            "hcp-mmp": 0.76,
+            "julich": 0.56
+          },
+          "V3": {
+            "hcp-mmp": 0.78,
+            "julich": 0.57
+          }
+        }
+      },
+      "right": {
+        "area_mm2": {
+          "V1": 2570,
+          "V2": 2389,
+          "V3": 1929
+        },
+        "extrapolated_share": 0.441,
+        "agreement_dice": {
+          "V1": {
+            "hcp-mmp": 0.89,
+            "julich": 0.72
+          },
+          "V2": {
+            "hcp-mmp": 0.78,
+            "julich": 0.54
+          },
+          "V3": {
+            "hcp-mmp": 0.72,
+            "julich": 0.46
+          }
+        }
+      }
+    },
+    "method": "The template's polar angle and eccentricity, as Cartesian visual-field position, and its pRF size are interpolated linearly from fsaverage's registered sphere onto this brain's; the visual area is the nearest template vertex's. Territory areas are measured on the midthickness surface"
   },
   "cut_atlases": [
     {
@@ -94235,6 +94334,8 @@
     "Receptor fingerprints are densities measured by in vitro autoradiography in two to six post-mortem brains (Zilles and Palomero-Gallagher, via EBRAINS), pooled over the hemispheres sampled. They reach this brain only by the name of the area or structure measured and are not measured in it; both hemispheres show the same values.",
     "Only the Julich-Brain areas and the deep structures a dataset names carry a fingerprint. Areas 9, 46 and 47 are published but name no Julich-Brain area and are left out. A structure the dataset names as a whole, such as the globus pallidus or the anterior thalamic nucleus, gives the same values to each of its subdivisions.",
     "A published value known to be wrong is withheld and the reason is published with it: Area ifs1's D1 SD equals the same file's A1 mean.",
+    "Stimulation responses are counts of stereo-EEG channel pairs from 27 people with focal epilepsy (Lyu et al. 2025), pooled by the authors' anatomical labels and by side. They are not measured in this brain, both hemispheres show the same values, and a person with many channels weighs more than one with few.",
+    "A Destrieux parcel takes an author label only when at least 10 cortical channels from 3 people land in it through fs_LR 32k \u2192 fsaverage surface registration and 60% of them carry that label; other parcels, and the HCP-MMP, Julich-Brain and Schaefer atlases, show none. Deep structures take labels by name, and the thalamus takes the authors' three positional sites, not nuclei.",
     "Gyral white matter is FreeSurfer's wmparc: each voxel within 5 mm of cortex takes the nearest Desikan cortical label whichever surface atlas is shown, and deeper white matter is unsegmented and belongs to no region.",
     "Arterial territories are typical territories drawn from where acute infarcts fell in 1,298 stroke patients (Liu et al. 2023), registered onto this brain from the atlas's template; they are not this brain's own, and no vessel of it was imaged. Collateral circulation and variants such as a fetal posterior communicating artery move real territories by centimetres.",
     "The atlas's anterior cerebral artery territory rests on 29 cases, and its medial lenticulostriate and anterior thalamoperforating territories on anatomical knowledge rather than lesions. It places the anterior choroidal and thalamoperforating territory under the posterior circulation, as published.",
@@ -94247,7 +94348,10 @@
     "Choi et al. are least confident around the dorsal putamen, where signal from the adjacent insula is only partly removed, so a putamen's salience share may partly reflect the insula.",
     "A published coordinate is placed by registering its template to this brain (SynthMorph, joint affine and deformable); it marks where that template location falls on this one brain, not where this person's own peak would be, and not what this brain does there.",
     "Cortical coordinates are reported as the regions within 5 mm, not as one parcel: at template cortex, a single Schaefer parcel agreed between an MNI-space lookup and this brain's own projection only about 60% of the time.",
-    "An MNI coordinate whose template is not stated is read as the first published template; the other MNI152 templates measured land a few millimetres away on this brain, and the report gives those measured offsets."
+    "An MNI coordinate whose template is not stated is read as the first published template; the other MNI152 templates measured land a few millimetres away on this brain, and the report gives those measured offsets.",
+    "Retinotopy is predicted from this brain's folding by a template fitted to 181 HCP participants' group average (Benson et al. 2018); no retinotopy was measured in this brain, and V1's size varies about threefold between people.",
+    "The HCP stimulus reached 8\u00b0 from fixation; beyond it the template extrapolates, and so does every position and territory shown there.",
+    "Only V1, V2 and V3 are published; the template's other visual areas are left out as less certain."
   ],
   "provenance": {
     "sources": [
@@ -95780,6 +95884,135 @@
         "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
         "citation": "https://doi.org/10.1152/jn.00270.2012",
         "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/stimulation-responses.json",
+        "sha256": "77efab0d12f05712c495867e47159055a00522847f357f42ce02cff0615d0115",
+        "derived_from": [
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/metaTable.csv",
+            "sha256": "fa9ce3fde46c677becc89a4fa8fd380ee467dbca6d231811f92ceebe4e716e76"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S01_166/elec_FSLR_vIndex_wbComm_S01_166.csv",
+            "sha256": "43e9111a79e11d32179922774b6f4516f631d89e007af8866a6212485a70260d"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S02_167/elec_FSLR_vIndex_wbComm_S02_167.csv",
+            "sha256": "1b1c615e681e03d5ece11911772ae566db609c51bf8c2e5f70f14b8a00d9afe4"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S03_169/elec_FSLR_vIndex_wbComm_S03_169.csv",
+            "sha256": "754dacc684b0f86f50d56a794149ac28641cb21fa61ca446fbf2e85e33d8fe9a"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S04_170/elec_FSLR_vIndex_wbComm_S04_170.csv",
+            "sha256": "ec11033dfb6e97b5c17d4dc814a11a27ee130cd571acf64fd2d45c64e5d08905"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S05_171/elec_FSLR_vIndex_wbComm_S05_171.csv",
+            "sha256": "96d93be1108336b57d004f424f47cc15892aa89c5f7c08f71d90b46c0d0dd247"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S06_172/elec_FSLR_vIndex_wbComm_S06_172.csv",
+            "sha256": "4e02bdb2c01a535e38291304adb24119affb38b9c00487dc622da4b789857a45"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S07_176/elec_FSLR_vIndex_wbComm_S07_176.csv",
+            "sha256": "b7f0a167eb5e7c699c2677ab4a969bcff8908aea86d0d5414464ead797f5ec9f"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S08_177/elec_FSLR_vIndex_wbComm_S08_177.csv",
+            "sha256": "bee5ff7d68a12ca49b25ad7562c9495c20fa5aec156fe845ddd89cba1c3b5655"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S09_178/elec_FSLR_vIndex_wbComm_S09_178.csv",
+            "sha256": "687597ff2f6569929f9da951cf7222be486fa66eb9f50a7c4ce724d26c2df925"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S10_181/elec_FSLR_vIndex_wbComm_S10_181.csv",
+            "sha256": "f9a211b7cf19ea69a3f2bf17b54a9b91fedb1725d619898b351a945caa2334e2"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S11_182/elec_FSLR_vIndex_wbComm_S11_182.csv",
+            "sha256": "0570180905884dd8e41abab1745a3d80818613d2deaa6077e9c4e1c225a02f6f"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S12_183/elec_FSLR_vIndex_wbComm_S12_183.csv",
+            "sha256": "1324ee0b5237822d83ddd903d68ea01633a042fa057bd11b8ea4a4ed83c93bdb"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S13_185/elec_FSLR_vIndex_wbComm_S13_185.csv",
+            "sha256": "07c2b5cc2fcffb67ba7dbca8c95937ca50565c7bf93625ee90946deb0f466de4"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S14_188/elec_FSLR_vIndex_wbComm_S14_188.csv",
+            "sha256": "dfda9457d9b9fe80899869a7bc2499907f42e243961ae7007c95f75bc845dd2a"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S15_189/elec_FSLR_vIndex_wbComm_S15_189.csv",
+            "sha256": "c64ea2dcd4fd26d2c662ef131cc7bb6db64b673ffd671162e2b7fa756f49f0d7"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S16_190/elec_FSLR_vIndex_wbComm_S16_190.csv",
+            "sha256": "e0b86eec223b469cc8556691a4716eaaf7f06346d0f7b2e14ffe1891fd60a90d"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S17_192/elec_FSLR_vIndex_wbComm_S17_192.csv",
+            "sha256": "792be4499921006f07b3cb22537160722b6593fe9f8bd403d877a331dc8b557f"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S18_193/elec_FSLR_vIndex_wbComm_S18_193.csv",
+            "sha256": "0bd9a800c6cea1f67d9a670897644d34ee3121a489eabbcb4068e06d522a1787"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S19_194/elec_FSLR_vIndex_wbComm_S19_194.csv",
+            "sha256": "79b9baece7c602a3ca900b2c0bbbc32258353ea4de7a3a8c81e3912afa112893"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S20_195/elec_FSLR_vIndex_wbComm_S20_195.csv",
+            "sha256": "6c269b41ecc13c4f74f780aa629ebe82b114847490257326af0075e9c3995320"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S21_196/elec_FSLR_vIndex_wbComm_S21_196.csv",
+            "sha256": "c372cc544bf8d2fc47252bd0342cfcdc48f7c1afa1983bad2d712a46b3812f11"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S22_197/elec_FSLR_vIndex_wbComm_S22_197.csv",
+            "sha256": "bf6317899793a134000924924e9f72b75dfced9687967a95971a6d5cb4e58a92"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S23_198/elec_FSLR_vIndex_wbComm_S23_198.csv",
+            "sha256": "04b6362727a47c65d1c8f2f2fa0353d4ea0d81d04b61226cb9dcbdffeb39f130"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S24_199/elec_FSLR_vIndex_wbComm_S24_199.csv",
+            "sha256": "97416bb380fd8f3e2b217ad1042a7111f68f9bb263b08e39edde48d1002bbe57"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S25_201/elec_FSLR_vIndex_wbComm_S25_201.csv",
+            "sha256": "343437b7124531a4d9701f6b57f59f70d9f28df3aeee0c0e5bbbd656d38a8328"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S26_202/elec_FSLR_vIndex_wbComm_S26_202.csv",
+            "sha256": "ac616afcb5f07e1ed048ea38d49226ee17441161fb4748997ad4a7b73b1ccf80"
+          },
+          {
+            "url": "https://zenodo.org/api/records/16939708/files/DATA.zip/content#DATA/workbench/subjects/S27_205/elec_FSLR_vIndex_wbComm_S27_205.csv",
+            "sha256": "2efb8207936dee805298e520123bd3befdf3c3751b4b7156bd2cd80f87ea6b9d"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/0aef592a9128b6f2090f6be0f495f310419bba3c/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii",
+            "sha256": "31987d139b6cdf1040188d1795bf23c213c57f8e84fb45f2c04823d996b0defc"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/0aef592a9128b6f2090f6be0f495f310419bba3c/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii",
+            "sha256": "8c1f67fa8fb3024ad3b292be995d5c9bae07dc4dbdd53fbac48e511e1366553d"
+          }
+        ],
+        "procedure": "scripts/fetch_stimulation_responses.py: responding and non-responding channel pairs counted by label pair and side; cortical channels carried to Destrieux parcels through the fs_LR 32k \u2192 fsaverage sphere",
+        "citation": "https://doi.org/10.1038/s41593-025-02009-x, https://doi.org/10.5281/zenodo.16939708",
+        "license": "CC BY 4.0"
       }
     ]
   },
@@ -95790,7 +96023,7 @@
         "hcp-mmp"
       ],
       "file": "atlas-comparison.json",
-      "sha256": "1b74b1f11d0472e96e65833d64eff2a54a759cd5eb204f2c8ba0801d226e18a3"
+      "sha256": "aea950acdda8edfb09702d9062ce03c8847618a677746f7c82b6c73061dff00e"
     },
     {
       "atlases": [
@@ -95798,7 +96031,7 @@
         "julich"
       ],
       "file": "atlas-comparison-destrieux-julich.json",
-      "sha256": "2c71400e0e931705074971a144ba415bab1c75b3326dc739916c016dd211dd90"
+      "sha256": "24498226fe59c7c06bba2f9446e255bc1cfe93d12838da22dabd32b6e89c6dc0"
     },
     {
       "atlases": [
@@ -95806,7 +96039,7 @@
         "schaefer"
       ],
       "file": "atlas-comparison-destrieux-schaefer.json",
-      "sha256": "c5678f08afe8a439cacfe8c11b6e3f8c86a9db65c2d41cc30012c5e19798c8ef"
+      "sha256": "dce3cbdd4bdd21f73c3692beb751f64b7759bbce5d150fbd61cde1e2abce77cf"
     },
     {
       "atlases": [
@@ -95814,7 +96047,7 @@
         "julich"
       ],
       "file": "atlas-comparison-hcp-mmp-julich.json",
-      "sha256": "b47236b2afb2dc09cfc76b6a1c616eceedfa5ed6c6760402491114183869e35a"
+      "sha256": "a21be5ebe6cfb10ff3843360a9d48d841f0dafa1c13da476a76964a58f2527e0"
     },
     {
       "atlases": [
@@ -95822,7 +96055,7 @@
         "schaefer"
       ],
       "file": "atlas-comparison-hcp-mmp-schaefer.json",
-      "sha256": "e90f355c1b5f80d765d89f5633773f467cecbc84b9fb0fd0b656169bd9255b1d"
+      "sha256": "8a0400703ce16a0a169448e1c62cf786e7b46764a26fc5bc82ff7a5f6fe59c46"
     },
     {
       "atlases": [
@@ -95830,11 +96063,11 @@
         "schaefer"
       ],
       "file": "atlas-comparison-julich-schaefer.json",
-      "sha256": "fa94f98cafe196538ce180c360ffc9d51754d8786e6607575712efa1664689d7"
+      "sha256": "668f4e2a5edd9c7650bb38ec847dca09d03bc7ca69922dd1c854b2dc0a9a44ca"
     }
   ],
   "atlas_comparison": {
     "file": "atlas-comparison.json",
-    "sha256": "1b74b1f11d0472e96e65833d64eff2a54a759cd5eb204f2c8ba0801d226e18a3"
+    "sha256": "aea950acdda8edfb09702d9062ce03c8847618a677746f7c82b6c73061dff00e"
   }
 }

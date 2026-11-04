@@ -102,3 +102,30 @@ test('CAT-55 · going to a landmark before any start fails, and a failed start c
     route: false,
   });
 });
+
+test('a map opens in place of the lesson with its dot, and a lesson or closing ends both', () => {
+  const session = createCircuitSession(catalog);
+  const dot = { x: 2, y: -1, radius: 0.5 };
+  assert.throws(() => session.moveDot(dot), /No map is open/);
+  session.start('vision');
+  session.go(1);
+  session.openMap('visual-field', dot);
+  assert.deepEqual(session.snapshot(), {
+    circuit: null,
+    step: 0,
+    visited: [],
+    route: false,
+    map: 'visual-field',
+    dot,
+  });
+  session.moveDot({ x: -3, y: 0, radius: 2 });
+  assert.deepEqual(session.snapshot().dot, { x: -3, y: 0, radius: 2 });
+  assert.throws(() => session.moveDot({ x: 0, y: 0, radius: 0 }), RangeError);
+  session.start('vision');
+  assert.equal(session.snapshot().map, undefined);
+  assert.equal(session.snapshot().dot, undefined);
+  session.openMap('visual-field', dot);
+  session.close();
+  assert.equal(session.snapshot().map, undefined);
+  assert.throws(() => session.openMap('somatotopy' as never, dot), /Unknown circuit map/);
+});

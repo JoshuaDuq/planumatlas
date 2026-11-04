@@ -8,6 +8,8 @@ import {
 } from '../../lib/core/catalog/functional-regions.ts';
 import {
   ALL_DOMAINS,
+  COMPARE_COLORS,
+  comparedAreas,
   domainAreas,
   validateNeuropsychDomains,
   type NeuropsychDomains,
@@ -20,8 +22,10 @@ import {
   areaCount,
   areaCountShort,
   functionList,
+  comparisonProfile,
   functionProfile,
   resultsSentence,
+  sharedCount,
 } from './functions-view.ts';
 
 const manifest = readModel<Manifest>('cdmd/manifest.json');
@@ -47,7 +51,6 @@ describe('functionList', () => {
     const list = functionList(domains, '', 'en');
     assert.equal(list.overview?.id, ALL_DOMAINS);
     assert.equal(list.overview?.studies, null);
-    assert.equal(list.overview?.colour, null);
     assert.deepEqual(
       list.groups.map(({ id }) => id),
       domains.groups.map(({ id }) => id),
@@ -57,7 +60,6 @@ describe('functionList', () => {
     assert.equal(list.suggestion, null);
     const first = list.groups[0]!.rows[0]!;
     assert.match(first.detail, /^[\d,]+ studies? · \d+ areas?/);
-    assert.deepEqual(first.colour, domains.domains.find((d) => d.id === first.id)!.color);
     assert.equal(first.lang, null);
   });
 
@@ -67,7 +69,7 @@ describe('functionList', () => {
     const shown = list.termGroups.flatMap(({ rows }) => rows);
     assert.equal(shown.length, TERMS_SHOWN);
     assert.equal(list.termsMore, list.matches.terms - TERMS_SHOWN);
-    assert.ok(shown.every((row) => row.lang === 'en' && row.colour === null));
+    assert.ok(shown.every((row) => row.lang === 'en'));
     assert.deepEqual(
       list.termGroups.map(({ id }) => id),
       ['terms-function', 'terms-population'].filter((id) =>
@@ -166,3 +168,57 @@ describe('functionProfile', () => {
     assert.throws(() => functionProfile(deps(), 'no-such-function', 'en'), /Unknown function/);
   });
 });
+
+describe('comparisonProfile', () => {
+  test('each function in its colour, the areas both reach with both z, then each one’s own areas', () => {
+    const id = 'compare:working-memory,term:action';
+    const profile = comparisonProfile(deps(), id, 'fr');
+    const memory = domainAreas(domains, 'working-memory');
+    const action = domainAreas(domains, 'term:action');
+    const actionRegions = new Set(action.map(({ region }) => region));
+    const both = memory.filter(({ region }) => actionRegions.has(region));
+    assert.ok(both.length > 0 && both.length < memory.length);
+
+    assert.equal(profile.name, 'Mémoire de travail · action');
+    assert.deepEqual(
+      profile.functions.map((entry) => [entry.id, entry.lang, entry.colour]),
+      [
+        ['working-memory', null, COMPARE_COLORS[0]],
+        ['term:action', 'en', COMPARE_COLORS[1]],
+      ],
+    );
+    assert.deepEqual(
+      profile.shared.areas.map(({ region }) => region).sort(),
+      both.map(({ region }) => region).sort(),
+    );
+    const first = profile.shared.areas[0]!;
+    const zOf = (areas: typeof memory) =>
+      areas
+        .find(({ region }) => region === first.region)!
+        .z.toFixed(1)
+        .replace('.', ',');
+    assert.deepEqual(first.z, [zOf(memory), zOf(action)]);
+    assert.match(first.name, / · (Gauche|Droit|Médian)/);
+    // Every area appears once: shared, or under the one function that reaches it.
+    assert.equal(profile.only[0]!.areas.length, memory.length - both.length);
+    assert.equal(profile.only[1]!.areas.length, action.length - both.length);
+    assert.ok(profile.only[0]!.areas.every(({ region }) => !actionRegions.has(region)));
+    assert.equal(
+      sharedCount(domains, id, 'en'),
+      `Both reach ${areaCountShortOf(both.map(({ region }) => region))} at z\u00a0≥\u00a03`,
+    );
+    assert.equal(comparedAreas(domains, id).length, memory.length + action.length - both.length);
+  });
+
+  test('a function or the overview is not a comparison', () => {
+    assert.throws(() => comparisonProfile(deps(), 'working-memory', 'en'), /Not a comparison/);
+    assert.throws(() => comparisonProfile(deps(), ALL_DOMAINS, 'en'), /Not a comparison/);
+  });
+});
+
+/** The short count the list rows use, for a set of regions. */
+function areaCountShortOf(regions: string[]): string {
+  const structures = regions.filter((region) => region.startsWith(`${domains.structure_atlas}:`));
+  const areas = regions.length - structures.length;
+  return `${areas} ${areas === 1 ? 'area' : 'areas'}${structures.length ? `, ${structures.length} ${structures.length === 1 ? 'structure' : 'structures'}` : ''}`;
+}

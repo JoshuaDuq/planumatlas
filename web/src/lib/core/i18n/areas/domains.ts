@@ -19,6 +19,9 @@ export const en = {
     'Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.',
   keyAll:
     'Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.',
+  keyCompare:
+    'Areas each function reaches at z\u00a0≥\u00a03, and those both reach. Tissue-coloured areas reach neither.',
+  keyShared: 'Both',
   termOf: (name: string, term: string) => `${name}: “${term}”`,
   lesionCheck: (items: string[]) => `Lesion check: ${items.join('; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>
@@ -47,6 +50,9 @@ export const fr: typeof en = {
     'Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. Les aires couleur tissu sont sous 3.',
   keyAll:
     'Chaque aire montre sa fonction la plus forte\u202f; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.',
+  keyCompare:
+    'Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.',
+  keyShared: 'Les deux',
   termOf: (name: string, term: string) => `${name}\u202f: « ${term} »`,
   lesionCheck: (items: string[]) => `Vérification lésionnelle\u202f: ${items.join('\u202f; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>

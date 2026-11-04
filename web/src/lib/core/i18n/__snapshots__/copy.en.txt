@@ -135,7 +135,8 @@
   "routeMark": [
    "[\"Alpha\",\"\"] → \"Landmark Alpha1: \"",
    "[\"\",\"Alpha\"] → \"Landmark 1: Alpha\""
-  ]
+  ],
+  "openMap": "Explore the visual field map"
  },
  "clinical": {
   "deficits": "Deficits",
@@ -639,6 +640,8 @@
   "keyScale": "Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.",
   "keyScaleTerm": "Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.",
   "keyAll": "Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.",
+  "keyCompare": "Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Tissue-coloured areas reach neither.",
+  "keyShared": "Both",
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha: “”\"",
    "[\"\",\"Alpha\"] → \": “Alpha”\""
@@ -697,7 +700,8 @@
    "overlap": "Could not load the overlap outline.",
    "restore": "Could not restore the previous view.",
    "fullscreen": "Could not enter full screen.",
-   "streamlines": "Could not show this landmark’s streamlines."
+   "streamlines": "Could not show this landmark’s streamlines.",
+   "map": "Could not open the visual field map."
   }
  },
  "footer": {
@@ -734,6 +738,7 @@
   "networks": "Functional networks",
   "functional": "Functional divisions",
   "receptors": "Receptor fingerprints",
+  "stimulation": "Stimulation responses",
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
   "files": "Published files",
@@ -839,6 +844,25 @@
    "[\"\",\"Alpha\",\"\",1] → \" (Alpha), among the 1 strongest regions of , lies beneath the cortex.\"",
    "[\"Alpha\",\"\",\"Alpha\",2] → \"Alpha (), among the 2 strongest regions of Alpha, lies beneath the cortex.\""
   ],
+  "compare": "Compare",
+  "compareCancel": "Cancel",
+  "comparePrompt": [
+   "[\"Alpha\"] → \"Choose one more function or term\"",
+   "[\"\"] → \"Choose two functions or terms to compare\""
+  ],
+  "compareOpen": "Compare",
+  "both": [
+   "[\"Alpha\",\"\"] → \"Both reach Alpha at z<NBSP>≥<NBSP>\"",
+   "[\"\",\"Alpha\"] → \"Both reach  at z<NBSP>≥<NBSP>Alpha\""
+  ],
+  "bothHeading": "Areas both reach",
+  "onlyNote": "Areas the other map does not reach",
+  "noneShared": [
+   "[\"Alpha\"] → \"The two maps share no area or structure at z<NBSP>Alpha.\"",
+   "[\"\"] → \"The two maps share no area or structure at z<NBSP>.\""
+  ],
+  "noneOnly": "The other map reaches every area this one does.",
+  "compareNote": "A map’s z grows with the number of studies behind its term, so compare which areas each map reaches, not one map’s z against the other’s.",
   "suggest": [
    "[\"Alpha\"] → \"Did you mean “Alpha”?\"",
    "[\"\"] → \"Did you mean “”?\""
@@ -1454,6 +1478,40 @@
    "full": "Panel fully open"
   }
  },
+ "stimulation": {
+  "heading": "Stimulation responses",
+  "site": "Thalamic site",
+  "direction": "Direction",
+  "from": "Stimulated here",
+  "to": "Recorded here",
+  "side": "Hemisphere",
+  "same": "Same side",
+  "opposite": "Opposite side",
+  "counts": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha of  pairs · Alpha people\"",
+   "[\"\",\"Alpha\",\"\"] → \" of Alpha pairs ·  people\""
+  ],
+  "noRate": "no rate",
+  "none": "No pairs tested on this side.",
+  "untested": [
+   "[\"Alpha\"] → \"Not tested: Alpha.\"",
+   "[\"\"] → \"Not tested: .\""
+  ],
+  "note": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Share of stereo-EEG channel pairs in which single-pulse stimulation evoked a response, pooled over Alpha people with epilepsy; a rate is drawn only from pairs tested in at least  people. Alpha pairs the authors excluded as artefact or noise are not counted. Not measured in this brain; both hemispheres show the same values.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Share of stereo-EEG channel pairs in which single-pulse stimulation evoked a response, pooled over  people with epilepsy; a rate is drawn only from pairs tested in at least Alpha people.  pairs the authors excluded as artefact or noise are not counted. Not measured in this brain; both hemispheres show the same values.\""
+  ],
+  "basisContacts": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Takes the authors’ label Alpha:  of the Alpha cortical channels from  people that land in this parcel carry it.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Takes the authors’ label : Alpha of the  cortical channels from Alpha people that land in this parcel carry it.\""
+  ],
+  "basisName": [
+   "[\"Alpha\"] → \"Matched by name to the authors’ label Alpha.\"",
+   "[\"\"] → \"Matched by name to the authors’ label .\""
+  ],
+  "thalamus": "The authors grouped thalamic contacts by position, not by nucleus, so every thalamic structure shows all three sites.",
+  "dataset": "Zenodo dataset"
+ },
  "territories": {
   "heading": "Typical arterial supply",
   "basis": {
@@ -1665,6 +1723,81 @@
   "posterior": "Posterior",
   "superior": "Superior",
   "inferior": "Inferior"
+ },
+ "visualField": {
+  "guided": "Guided circuits",
+  "maps": "Maps",
+  "name": "Visual field map",
+  "summary": "Visual field ↔ V1, V2, V3, predicted",
+  "mapCount": [
+   "[\"Alpha\"] → \"Alpha maps\"",
+   "[\"\"] → \" maps\""
+  ],
+  "intro": "Move the dot across the visual field to see the cortex predicted to represent it. Click V1, V2 or V3 on the brain to see which part of the field it is predicted to respond to.",
+  "disc": "Visual field, fixation at the centre, eccentricity on a log scale",
+  "dot": "Dot",
+  "dotRole": "two-dimensional slider",
+  "dotKeys": "Arrow keys move the dot; with Shift, further.",
+  "size": "Dot radius",
+  "ring": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "measuredRing": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "place": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "radius": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "hemisphere": [
+   "[\"Alpha\"] → \"Represented in the Alpha hemisphere, shown from the midline.\"",
+   "[\"\"] → \"On the vertical meridian: both hemispheres represent it.\""
+  ],
+  "territory": "Predicted territory",
+  "territoryNote": "Cortex whose predicted receptive-field centre lies inside the dot, measured on the midthickness surface.",
+  "territoryArea": [
+   "[\"Alpha\"] → \"NaN mm²\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "sideHeading": [
+   "[\"Alpha\"] → \"Right\"",
+   "[\"\"] → \"Right\""
+  ],
+  "noTerritory": "No vertex’s predicted centre lies inside the dot; make it larger.",
+  "extrapolated": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "legendCore": "Receptive-field centre inside the dot",
+  "legendReach": "Receptive field within one σ of the dot",
+  "legendLine": [
+   "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
+   "[\"\"] → \"throws value.toFixed is not a function\""
+  ],
+  "legendAreas": "V1, V2, V3 from lightest to darkest",
+  "reading": "Clicked cortex",
+  "readingValue": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\""
+  ],
+  "readingNone": "That point is outside V1–V3, where the template predicts nothing.",
+  "clickHint": "Click V1, V2 or V3 on the brain to read it.",
+  "loading": "Loading the territories…",
+  "loadFailed": "The territories could not be loaded.",
+  "provenance": "Predicted from this brain’s folding by the Benson template (v4.0), fitted to the group average of 181 HCP participants. No retinotopy was measured in this brain, and V1’s size varies about threefold between people.",
+  "agreement": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"throws hcp.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\"] → \"throws hcp.toFixed is not a function\""
+  ],
+  "sources": "Sources",
+  "dataset": "HCP 7T retinotopy (Benson et al. 2018)",
+  "method": "Template method (Benson et al. 2014)"
  },
  "workspace": {
   "modes": {
