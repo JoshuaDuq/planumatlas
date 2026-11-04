@@ -259,6 +259,7 @@
       prepared={world.excursions.displayBaseline}
       hasSpinalCord={publishesSpinalCord(model.manifest)}
       onLesionPlacing={world.lesion.setPlacing}
+      onPlate={world.engine.camera.clearPlate}
       {commands}
       coordinatePopover={world.coordinates ? coordinatePopover : undefined}
     >

@@ -3,6 +3,7 @@ import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, onTestFinished, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
+import { whilePressed } from './press-test-support.ts';
 import Fixture from './treegrid-fixture.svelte';
 
 const mount = (
@@ -453,6 +454,49 @@ describe('cell focus across rows that have no cell', () => {
     expect(getComputedStyle(row('rule')).backgroundColor).toBe(before);
     await userEvent.hover(row('insula'));
     expect(getComputedStyle(row('insula')).backgroundColor).not.toBe(before);
+  });
+});
+
+describe('press', () => {
+  const PRESSED = 'rgb(10, 20, 30)';
+  beforeEach(() => document.documentElement.style.setProperty('--surface-pressed', PRESSED));
+  afterEach(() => document.documentElement.style.removeProperty('--surface-pressed'));
+  const ground = (id: string) => getComputedStyle(row(id)).backgroundColor;
+  // The middle of a row, where the tests press, is its own ground and not one of its buttons.
+  const middleIsRow = (id: string) => {
+    const box = row(id).getBoundingClientRect();
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)!;
+    expect(hit.closest('button')).toBeNull();
+    expect(hit.closest('[role="row"]')).toBe(row(id));
+  };
+
+  test('a pointer press tints a row at once, and the tint goes with the pointer', async () => {
+    mount({ blank: true });
+    middleIsRow('top');
+    await whilePressed(row('top'), () => {
+      expect(ground('top')).toBe(PRESSED);
+      expect(getComputedStyle(row('top')).transitionDuration).toBe('0s');
+    });
+    await expect.poll(() => ground('top')).not.toBe(PRESSED);
+  });
+
+  test('a press on a button in the row leaves the row untinted', async () => {
+    mount();
+    await whilePressed(cellButtons('insula')[1]!, () => {
+      expect(cellButtons('insula')[1]!.matches(':active')).toBe(true);
+      expect(ground('insula')).not.toBe(PRESSED);
+    });
+  });
+
+  test('neither a disabled row nor the selected row takes the tint', async () => {
+    mount({ blank: true, initialSelected: 'insula' });
+    for (const id of ['rule', 'insula']) {
+      middleIsRow(id);
+      await whilePressed(row(id), () => {
+        expect(row(id).matches(':active'), id).toBe(true);
+        expect(ground(id), id).not.toBe(PRESSED);
+      });
+    }
   });
 });
 

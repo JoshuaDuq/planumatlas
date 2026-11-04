@@ -23,7 +23,7 @@ import {
   Vector3,
 } from 'three';
 import type { Intersection, Material, MeshPhysicalMaterial, StencilOp, WebGLRenderer } from 'three';
-import { acceleratedRaycast, computeBoundsTree } from 'three-mesh-bvh';
+import { MeshBVH, acceleratedRaycast, computeBoundsTree } from 'three-mesh-bvh';
 import { liftFor } from './highlight.ts';
 import { sectionTriangles } from './plane-section.ts';
 import type { BvhGeometry, SectionResult } from './plane-section.ts';
@@ -417,8 +417,8 @@ export class SolidSections {
   /** False when this solid has to be cut on the caller side. */
   private postSolid(solid: Solid): boolean {
     if (solid.workerPosted) return true;
-    const position = solid.source.geometry.getAttribute('position');
-    const index = solid.source.geometry.getIndex();
+    const { geometry } = solid.source;
+    const position = geometry.getAttribute('position');
     if (
       !position?.array ||
       position.itemSize !== 3 ||
@@ -428,14 +428,16 @@ export class SolidSections {
       return false;
     }
     const copy = position.array.slice() as Float32Array;
-    const indexCopy = index ? (index.array.slice() as Uint16Array | Uint32Array) : null;
-    const transfers: Transferable[] = [copy.buffer];
-    if (indexCopy) transfers.push(indexCopy.buffer);
+    // The worker takes a copy of the source's own BVH rather than building its twin.
+    const bvh = MeshBVH.serialize(geometry.boundsTree as MeshBVH, { cloneBuffers: true });
+    const transfers: Transferable[] = [copy.buffer, ...bvh.roots];
+    if (bvh.index) transfers.push(bvh.index.buffer);
+    if (bvh.indirectBuffer) transfers.push(bvh.indirectBuffer.buffer);
     const message: WorkerMessage = {
       type: 'store',
       id: solid.id,
       position: copy,
-      index: indexCopy,
+      bvh,
     };
     this.worker!.postMessage(message, transfers);
     solid.workerPosted = true;

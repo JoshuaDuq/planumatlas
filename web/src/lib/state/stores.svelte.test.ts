@@ -203,6 +203,39 @@ describe('the presentation', () => {
     expect(engine.presented).toEqual({ lang: 'fr', referenceOnly: false });
   });
 
+  test('a session change that alters neither the language nor the reference redraws nothing', () => {
+    const { session } = build();
+    const count = (domain: string, method: string) =>
+      engine.calls.filter((call) => call.domain === domain && call.method === method).length;
+    const presents = count('engine', 'present');
+    const visibility = count('comparison', 'setVisible');
+    session.setQuery('thal');
+    session.toggleGroup('Occipital');
+    session.setExplorer('functions');
+    session.setFunctionQuery('mem');
+    flushSync();
+    expect(count('engine', 'present')).toBe(presents);
+    expect(count('comparison', 'setVisible')).toBe(visibility);
+    session.setLang('fr');
+    flushSync();
+    expect(count('engine', 'present')).toBe(presents + 1);
+    expect(count('comparison', 'setVisible')).toBe(visibility);
+  });
+
+  test('the reference standing alone is told to the stage and hides the comparison', () => {
+    engine = createFakeEngine({ manifest: published, tractAnatomy: 'other' });
+    const { session } = build();
+    const count = (domain: string, method: string) =>
+      engine.calls.filter((call) => call.domain === domain && call.method === method).length;
+    const presents = count('engine', 'present');
+    const visibility = count('comparison', 'setVisible');
+    session.setExplorer('diffusion');
+    flushSync();
+    expect(count('engine', 'present')).toBe(presents + 1);
+    expect(count('comparison', 'setVisible')).toBe(visibility + 1);
+    expect(engine.calls.at(-1)).toMatchObject({ method: 'setVisible', args: [false] });
+  });
+
   test('the tract reference is alone when the diffusion tab is open on another anatomy', () => {
     const other = createFakeEngine({ manifest: published, tractAnatomy: 'other' });
     const previous = engine;

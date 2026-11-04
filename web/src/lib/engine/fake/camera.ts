@@ -101,6 +101,8 @@ export function createFakeCamera({
   let size: Size = { ...hostSize };
   let visibleRect: Rect = { x: 0, y: 0, ...hostSize };
   let framingSource: (() => FramingClearance) | null = null;
+  // The fake draws nothing a plate could miss, so any plate it is given covers the anatomy.
+  let plateTop: number | null = null;
   let current: CameraView = describe();
 
   function describe(): CameraView {
@@ -184,6 +186,12 @@ export function createFakeCamera({
       emit('viewport', { visibleRect: { ...visibleRect }, hostSize: { ...size } });
     },
     refitDock() {
+      framingSource?.();
+      moved();
+    },
+    clearPlate(top) {
+      if (top === plateTop) return;
+      plateTop = top;
       framingSource?.();
       moved();
     },

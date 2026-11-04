@@ -26,9 +26,11 @@
     height: number;
     /** Each placing state the dock asks for. */
     placing: boolean[];
+    /** Each popover plate the dock reports for framing. */
+    plates: { top: number | null; immediate: boolean }[];
   }
 
-  let { stage, live, commands, width, height, placing }: Props = $props();
+  let { stage, live, commands, width, height, placing, plates }: Props = $props();
 
   let host: HTMLElement;
 
@@ -68,6 +70,7 @@
     hasSpinalCord={live.hasSpinalCord}
     {commands}
     onLesionPlacing={(next) => placing.push(next)}
+    onPlate={(top, { immediate }) => plates.push({ top, immediate })}
     coordinatePopover={live.coordinates ? coordinates : undefined}
   >
     {#snippet sectionPopover()}

@@ -40,14 +40,14 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 - **Expected:** With `{132, 400, 672}`: 140 → peek; 420 or 430 → half; 700 → full; from full at 150 with velocity 0.1 → peek; 266 (134 from both) → peek; 536 → half.
 - **Covered by:** `src/lib/core/detents.test.ts` (R; the tie is uncovered); `src/features/sheet/Sheet.svelte.test.ts` (R, "a slow drag … settles on the nearest rest")
 
-### SHEET-05 · A flick moves exactly one rest in its direction, and stops at the ends
+### SHEET-05 · A flick lands on the rest nearest where it would coast, in its direction, and stops at the ends
 
-- **Rule:** A release at 0.4 px/ms or faster moves one rest in the direction thrown, however little the finger travelled. A flick past the top or bottom rest stays there. Slower releases are read by position (SHEET-04).
+- **Rule:** A release at 0.4 px/ms or faster projects where the sheet would coast, span + v · d / (1 − d) with d = 0.998 per ms, and lands on the rest nearest that point among those at or ahead of the release in the direction thrown. A hard throw can pass a rest; a throw never lands on a rest behind it. A flick past the top or bottom rest stays there. Slower releases are read by position (SHEET-04).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/ui/chrome/detents.js:62-84`
-- **Expected:** With `{132, 400, 672}`: `settleDetent('peek', 140, h, 1.2)` → half; `('half', 460, h, −1.2)` → peek; `('full', 700, h, 1.2)` → full; `('peek', 135, h, −1.2)` → peek; `('peek', 140, h, 0.4)` → half; `('peek', 140, h, 0.39)` → peek.
-- **Covered by:** `src/lib/core/detents.test.ts` (R; the 0.4 threshold itself is uncovered); `src/features/sheet/Sheet.svelte.test.ts` (R, 30 px in 10 ms → half, −30 px → peek, +40 px at full stays full)
+- **Source:** `viewer/ui/chrome/detents.js:62-84` (then exactly one rest per flick, counted from the rest the drag started on); the 2026-11-02 interface review
+- **Expected:** With `{132, 400, 672}`: `settleDetent(140, h, 0.5)` → half; `(460, h, −0.5)` → peek; `(140, h, 1.2)` → full; `(640, h, −1.2)` → peek; `(700, h, 1.2)` → full; `(120, h, −1.2)` → peek. With the measured `{95, 396, 664}`: `(215, h, 0.9)` → full; `(92, h, −0.9)` → peek. With `{100, 200, 1000}`: `(210, h, 0.4)` → full; `(990, h, −0.4)` → half.
+- **Covered by:** `src/lib/core/detents.test.ts` (R); `src/features/sheet/Sheet.svelte.test.ts` (R, 30 px in 10 ms → half, −30 px → peek, +40 px at full stays full)
 
 ### SHEET-06 · Only the last 100 ms before release count as the throw
 
@@ -98,7 +98,7 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 
 ### SHEET-11 · The stage is told the span the sheet will land on, and whether it glides there
 
-- **Rule:** The sheet reports what it covers rather than resizing the canvas: upright `{top 0, right: safe right, bottom: span, left: safe left}`, sideways `{top 0, right: safe right, bottom: safe bottom, left: span}`, all zero off the phone. It reports the target span of a change of rest, not the moving box, and says `settle: true` when it moves on its own curve and `settle: false` while it follows a finger. A window narrowed to a phone after load reports the laid-out grip's cover.
+- **Rule:** The sheet reports what it covers rather than resizing the canvas: upright `{top 0, right: safe right, bottom: span, left: safe left}`, sideways `{top 0, right: safe right, bottom: safe bottom, left: span}`, all zero off the phone. It reports the target span of a change of rest, not the moving box, once, as its spring starts, with `settle: true` and the spring's start `velocity` in whole moves per second (capped by `noOvershoot`), and `settle: false` while it follows a finger or is caught mid-spring. A window narrowed to a phone after load reports the laid-out grip's cover.
 - **Kind:** behaviour
 - **Level:** browser — layout (the span comes from measured boxes)
 - **Source:** `viewer/ui/chrome/sheet.js:103-122`; deviation `h6-first-inset-report.md`; comment 79 on #4
@@ -134,13 +134,13 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 - **Expected:** EN "Panel collapsed", "Panel half open", "Panel fully open"; FR "Panneau replié", "Panneau à moitié ouvert", "Panneau entièrement ouvert". Drag of 30 px at 400 ms released at 800 ms (back to peek) → "". Tab chosen at peek → "". Strip with Enter → "". Resize 390 × 844 → 390 × 700 at half → the earlier message unchanged.
 - **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R); the strings are in `src/lib/core/i18n/areas/sheet.ts` (I18N-)
 
-### SHEET-15 · A keyboard press moves the sheet without a glide; a pointer press, a settle or a drag each keep their own motion
+### SHEET-15 · A keyboard press puts the sheet on its rest at once; a pointer press or a release springs there
 
-- **Rule:** A settled sheet glides over 240 ms on the sheet's curve. A keyboard activation (handle, tab, strip) and the shell entry with panel focus jump at once, and the stage chrome that follows the sheet jumps too. A pointer activation restores the glide. A dragged sheet follows the finger with no transition. With reduced motion only an opacity transition remains.
+- **Rule:** A sheet released or sent to a rest by a pointer settles on a critically damped spring (`SHEET_RESPONSE` 0.3 s) that leaves at the finger's speed and never passes its rest; a press catches it where it is drawn, and a drag goes on from there. The dock, orientation and scale markings on its edge ride the same spring frame by frame (`--sheet-lag` on the stage host). A keyboard activation (handle, tab, strip), a shell entry, a rotation and reduced motion put the sheet and those markings on the rest at once. A dragged sheet follows the finger.
 - **Kind:** behaviour
-- **Level:** browser — CSS computed style
-- **Source:** `viewer/ui/chrome/sheet.js:127-139,210-220`; `viewer/styles/a11y.css:8-14`; decision record 0006
-- **Expected:** At rest `transition-property: height`, `transition-duration: 0.24s`. Enter or Space on the handle → `data-instant` present, duration `0s`; then a click → `data-instant` absent. While dragging → duration `0s`. `prefers-reduced-motion: reduce` → `transition-property: opacity`.
+- **Level:** browser — rAF-driven spans on a controlled clock
+- **Source:** `viewer/ui/chrome/sheet.js:127-139,210-220` (then a 240 ms CSS glide); decision record 0006; the 2026-11-02 interface review
+- **Expected:** Released at 0.5 px/ms toward half, each frame's span is within 2 px of peek + 30 + distance · `springAt(t, 0.3, v0)`, never decreasing and never past half, with one inset report. A throw faster than ω starts at ω and never passes full. A press 4 frames into a spring holds the span, reports `settle: false` at it, and a drag moves from it. Enter on the handle → the span is the rest at once and `--sheet-lag` is unset. Under reduced motion the span is the rest at once.
 - **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R)
 
 ## Dragging
@@ -232,11 +232,11 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 
 ### SHEET-25 · Entering the phone shell keeps a control in use on screen, and the shell remembers its rest
 
-- **Rule:** Entering the phone shell with focus inside a panel lifts a resting sheet to half at once, keeps focus where it was, reports no rest change and says nothing. With focus elsewhere the sheet rests at peek with its glide. Leaving and re-entering the shell keeps the rest it left with. A resize inside the shell re-measures the rest silently.
+- **Rule:** Entering the phone shell with focus inside a panel lifts a resting sheet to half at once, keeps focus where it was, reports no rest change and says nothing. With focus elsewhere the sheet rests at peek, also at once. Leaving and re-entering the shell keeps the rest it left with. A resize inside the shell re-measures the rest silently.
 - **Kind:** behaviour
 - **Level:** browser — media changes and focus
 - **Source:** `viewer/ui/chrome/sheet.js:266-292`; `viewer/ui/chrome/sheet.test.js:103-133,166`
-- **Expected:** 1280 × 800 with focus on a row → 390 × 844: `data-detent="half"`, `data-instant`, focus on the row, row `visibility: visible`, `onDetent` not called, announcer "". Focus on a tab instead → peek, no `data-instant`. At full → desktop → phone → `full`, span H − 128. At half, 390 × 844 → 390 × 700 → span round(0.5·H) of the new stage, reported as `bottom`.
+- **Expected:** 1280 × 800 with focus on a row → 390 × 844: `data-detent="half"` at once, focus on the row, row `visibility: visible`, `onDetent` not called, announcer "". Focus on a tab instead → peek. At full → desktop → phone → `full`, span H − 128. At half, 390 × 844 → 390 × 700 → span round(0.5·H) of the new stage, reported as `bottom`.
 - **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R)
 
 ## Size, contrast and look

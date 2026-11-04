@@ -102,6 +102,15 @@
         color: var(--text-primary);
       }
     }
+    /* A pointer press takes the thumb's fill at once; the ring arrives with the choice. */
+    :global(
+      .segmented.choice-group
+        [role='radio']:active:not(:disabled, [aria-disabled='true'], :focus-visible)
+    ) {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      transition-duration: 0s;
+    }
     /* A precise edge marks the choice; elevation belongs to floating surfaces. */
     :global(.segmented.choice-group [role='radio'][aria-checked='true']) {
       background: var(--surface-raised);

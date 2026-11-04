@@ -40,6 +40,7 @@
       background: none;
       color: var(--text-primary);
       text-align: left;
+      transition: background-color var(--ui-transition) var(--ease-ui);
     }
     .text {
       display: grid;
@@ -86,6 +87,11 @@
       .row:hover:not(:disabled) {
         background: var(--surface-hover);
       }
+    }
+    /* A pointer press tints the row at once and lets go over the colour feedback. */
+    .row:active:not(:disabled, [data-selected='true'], :focus-visible) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
   }
 </style>

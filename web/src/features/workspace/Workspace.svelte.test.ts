@@ -5,6 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
 import { expectAxeClean, expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
+import { whilePressed } from '../../lib/ui/press-test-support.ts';
 import '../../app/layout.css';
 import Fixture from './workspace-test-support.svelte';
 import { newWorld, type World } from './workspace-test-world.ts';
@@ -149,6 +150,39 @@ describe('mode tabs', () => {
     expect(calls).toEqual(expect.arrayContaining(['mode:functions', 'view:list']));
     expect(calls).not.toContain('return');
     expect(focused()).toBe(el(tab('Functions')));
+  });
+
+  test('a pointer press tints a tab at once and chooses nothing until released on it; the ink never fades', async () => {
+    const { calls } = await mount();
+    const functions = el(tab('Functions'));
+    const style = getComputedStyle(functions);
+    expect(style.transitionProperty).toBe('background-color');
+    const probe = document.body.appendChild(document.createElement('span'));
+    probe.style.background = 'var(--surface-pressed)';
+    const pressed = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    expect(style.backgroundColor).not.toBe(pressed);
+    await whilePressed(functions, () => {
+      expect(style.backgroundColor).toBe(pressed);
+      expect(style.transitionDuration).toBe('0s');
+    });
+    expect(calls).toEqual([]);
+  });
+
+  test('text too large for the bar fades the inset on the side with tabs beyond it', async () => {
+    await mount();
+    const bar = document.querySelector<HTMLElement>('[role=tablist]')!;
+    expect(bar.scrollWidth).toBeLessThanOrEqual(bar.clientWidth);
+    expect(getComputedStyle(bar).maskImage).toBe('none');
+    document.documentElement.style.fontSize = '24px';
+    try {
+      await expect.poll(() => bar.scrollWidth > bar.clientWidth).toBe(true);
+      await expect.poll(() => getComputedStyle(bar).maskPosition).toBe('-24px 0px');
+      bar.scrollLeft = bar.scrollWidth;
+      await expect.poll(() => getComputedStyle(bar).maskPosition).toBe('0px 0px');
+    } finally {
+      document.documentElement.style.fontSize = '';
+    }
   });
 
   test('the tab in front is the registered "active tab" focus target', async () => {

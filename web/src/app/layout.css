@@ -91,12 +91,12 @@
     }
   }
   @media (min-width: 1280px) and (min-height: 481px) {
-    /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width. */
+    /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width; a rail widened by reader text leaves the stage at least the dock's width. */
     #app:has(> .mpr-dock) {
       grid-template-columns:
         var(--rail-width) minmax(0, 1fr)
         clamp(
-          400px,
+          min(400px, (100vw - var(--rail-width)) / 2),
           min(
             100dvh - var(--header-height) - var(--footer-height) - 236px,
             (100vw - var(--rail-width)) / 2
@@ -121,7 +121,7 @@
 
   @media (min-width: 801px) and (max-width: 1000px) {
     :root {
-      --rail-width: 320px;
+      --rail-width: clamp(320px, 20rem, 40vw);
       --panel-inset: var(--space-5);
     }
   }

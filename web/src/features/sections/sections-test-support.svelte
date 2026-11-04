@@ -89,6 +89,7 @@
     hasSpinalCord={false}
     {commands}
     onLesionPlacing={() => {}}
+    onPlate={() => {}}
   >
     {#snippet sectionPopover({ close })}
       <SectionPopover {controls} lang={live.lang} phone={live.phone} {close} />

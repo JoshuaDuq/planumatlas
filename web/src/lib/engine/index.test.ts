@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, it, vi } from 'vitest';
-import { Matrix4, Mesh } from 'three';
-import type { Object3D } from 'three';
+import { LineBasicMaterial, Matrix4, Mesh } from 'three';
+import type { Material, Object3D } from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { t } from '../core/i18n/index.ts';
 import type { Engine } from './api.ts';
@@ -22,6 +22,7 @@ const stage = vi.hoisted(() => ({
   mriAppearance: [] as boolean[],
   rendererDisposed: 0,
   model: null as import('./model/brain-atlas.ts').BrainAtlas | null,
+  compiled: [] as Object3D[],
 }));
 
 vi.mock('three', async (importOriginal) => {
@@ -87,6 +88,12 @@ vi.mock('./render/scene.ts', async (importOriginal) => {
             };
           }
           if (key === 'scene') stage.scene = target.scene;
+          if (key === 'compile') {
+            return (root: Object3D) => {
+              stage.compiled.push(root);
+              return Promise.resolve();
+            };
+          }
           if (key === 'warmOutlines') {
             return () => {
               if (stage.warmFails) throw new Error('The outline programs did not compile.');
@@ -153,6 +160,7 @@ beforeEach(() => {
   stage.mriAppearance = [];
   stage.rendererDisposed = 0;
   stage.model = null;
+  stage.compiled = [];
   vi.spyOn(EffectComposer.prototype, 'render').mockImplementation(() => {});
   vi.stubGlobal(
     'ResizeObserver',
@@ -199,6 +207,20 @@ describe('the engine facade', () => {
     engine.dispose();
   });
 
+  it('redraws nothing for a presentation or a comparison visibility the stage already shows', async () => {
+    const engine = await boot();
+    engine.present({ lang: 'en', referenceOnly: false });
+    assert.equal(stage.attributes.get('aria-label'), t('en', 'viewport').canvasLabel);
+    stage.outlined = [];
+    engine.present({ lang: 'en', referenceOnly: false });
+    engine.comparison.setVisible(true);
+    assert.equal(stage.outlined.length, 0);
+    assert.deepEqual(stage.overlayVisible, []);
+    engine.present({ lang: 'fr', referenceOnly: false });
+    assert.equal(stage.outlined.length, 1, 'a new language is a new presentation');
+    engine.dispose();
+  });
+
   it('draws the overlap in place of the selection, and puts the selection back when it is hidden', async () => {
     const engine = await boot();
     const region = engine.model.manifest.regions.find(
@@ -231,6 +253,41 @@ describe('the engine facade', () => {
     const last = changes.at(-1) as { model: { hemisphere: string }; sections: { mode: string } };
     assert.equal(last.model.hemisphere, 'left');
     assert.equal(last.sections.mode, 'off');
+    engine.dispose();
+  });
+
+  it('compiles a first Focus’s, T1 colour’s and Tracts tab’s programs at idle, drawing nothing new', async () => {
+    const idle: (() => void)[] = [];
+    vi.stubGlobal('requestIdleCallback', (callback: () => void) => idle.push(callback));
+    vi.stubGlobal('cancelIdleCallback', () => {});
+    const engine = await boot();
+    const meshes = stage.model!.visibleMeshes;
+    const drawn = () =>
+      meshes.map(({ material }) => [material.transparent, material.customProgramCacheKey()]);
+    const before = drawn();
+    assert.equal(stage.compiled.length, 0, 'nothing is compiled until the page is idle');
+    for (const run of idle.splice(0)) run();
+    assert.equal(stage.compiled.length, 1);
+    const samples = stage.compiled[0]!;
+    assert.equal(samples.parent, null, 'the samples are not on the stage');
+    const compiled = samples.children.map((child) => (child as Mesh).material as Material);
+    const key = (kind: (region: string) => boolean) =>
+      meshes
+        .find((mesh) => kind(mesh.userData['kind'] as string))!
+        .material.customProgramCacheKey();
+    const cortex = key((kind) => kind === 'cortex');
+    const deep = key((kind) => kind !== 'cortex' && kind !== 'non-region');
+    const has = (transparent: boolean, programKey: string) =>
+      compiled.some(
+        (material) =>
+          material.transparent === transparent && material.customProgramCacheKey() === programKey,
+      );
+    assert.ok(has(true, cortex), 'Focus sees through the cortex');
+    assert.ok(has(true, deep), 'and through what lies under it');
+    assert.ok(has(false, `${cortex}-mri-0.0`), 'the T1 colour scans the cortex');
+    assert.ok(has(false, `${deep}-mri-0.0`), 'and the deep structures');
+    assert.equal(compiled.filter((material) => material instanceof LineBasicMaterial).length, 2);
+    assert.deepEqual(drawn(), before, 'what is drawn keeps its materials');
     engine.dispose();
   });
 

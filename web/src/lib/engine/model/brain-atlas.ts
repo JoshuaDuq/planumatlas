@@ -1,11 +1,10 @@
-import { Box3, Group, SRGBColorSpace, Vector3 } from 'three';
+import { Box3, BufferAttribute, Group, Matrix4, Mesh, SRGBColorSpace, Vector3 } from 'three';
 import type {
   BufferGeometry,
   Color,
   DataTexture,
   Intersection,
   Material,
-  Mesh,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   Object3D,
@@ -52,17 +51,19 @@ import {
 } from '../render/network-colors.ts';
 import type { NetworkMetadata } from '../render/network-colors.ts';
 import {
+  FEATHER_ITEM_SIZE,
   addBorderFeather,
   createFeatherPalette,
   featherBorders,
   writeFeatherPalette,
 } from '../render/border-feather.ts';
-import { addMriAppearance } from '../render/mri-material.ts';
+import { addMriAppearance, createMriUniforms } from '../render/mri-material.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import { loadRibbonSources } from '../tissues/solid-assets.ts';
 import { createWhiteMatterSurfaces, exposedWhiteMatter } from '../tissues/white-matter-surfaces.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
+import type { GeometryCopy, GeometryJob, GeometryReply } from './geometry-worker.ts';
 import { combineProgress } from './progress.ts';
 import type { ProgressCallback } from './progress.ts';
 
@@ -212,6 +213,149 @@ function disposeScene(scene: Object3D): void {
   scene.removeFromParent();
 }
 
+type Bvh = typeof import('three-mesh-bvh');
+
+/** A geometry as the worker takes it: copied, so the drawn buffers stay where they are. */
+function copyGeometry(geometry: BufferGeometry): GeometryCopy {
+  const position = geometry.getAttribute('position');
+  if (
+    !(position instanceof BufferAttribute) ||
+    !(position.array instanceof Float32Array) ||
+    position.itemSize !== 3 ||
+    position.normalized
+  ) {
+    throw new Error('Geometry work needs plain float positions.');
+  }
+  const index = geometry.getIndex();
+  return {
+    position: position.array.slice(),
+    index: index ? (index.array.slice() as Uint16Array | Uint32Array) : null,
+    drawRange: { ...geometry.drawRange },
+    groups: geometry.groups.map((group) => ({ ...group })),
+  };
+}
+
+/**
+ * The model's BVHs and border feathers, computed in a worker so that loading a layer, the envelopes
+ * or a cut's wedges keeps every frame short. Where there is no Worker (Node), the same functions
+ * run on this thread: what changes is where the work runs, never its result.
+ */
+class GeometryJobs {
+  private worker: Worker | null = null;
+  private failure: Error | null = null;
+  private token = 0;
+  private readonly pending = new Map<
+    number,
+    { resolve: (reply: GeometryReply) => void; reject: (error: Error) => void }
+  >();
+
+  /** Give each geometry that has none the indirect BVH `new MeshBVH(geometry, { indirect: true })` builds. */
+  async bvhs({ MeshBVH }: Bvh, geometries: readonly BufferGeometry[]): Promise<void> {
+    const wanted = geometries.filter((geometry) => !geometry.boundsTree);
+    if (!wanted.length) return;
+    const worker = this.ensureWorker();
+    if (!worker) {
+      for (const geometry of wanted)
+        geometry.boundsTree = new MeshBVH(geometry, { indirect: true });
+      return;
+    }
+    const reply = await this.run(worker, 'bvh', wanted);
+    if (!('bvhs' in reply))
+      throw new Error('The geometry worker answered a BVH job with feathers.');
+    reply.bvhs.forEach((data, at) => {
+      const geometry = wanted[at]!;
+      // A ray that came first has built it already.
+      if (geometry.boundsTree) return;
+      const tree = MeshBVH.deserialize(data, geometry, { setIndex: false });
+      // Building sets the box of a geometry that has none; deserializing does not.
+      geometry.boundingBox ??= tree.getBoundingBox(new Box3());
+      geometry.boundsTree = tree;
+    });
+  }
+
+  /** `featherBorders(meshes)`, off this thread. */
+  async feather(meshes: readonly Mesh[]): Promise<void> {
+    const worker = this.ensureWorker();
+    if (!worker) return featherBorders(meshes);
+    const reply = await this.run(
+      worker,
+      'feather',
+      meshes.map((mesh) => mesh.geometry),
+    );
+    if (!('feathers' in reply)) throw new Error('The geometry worker answered feathers with BVHs.');
+    reply.feathers.forEach((values, at) => {
+      meshes[at]!.geometry.setAttribute('_feather', new BufferAttribute(values, FEATHER_ITEM_SIZE));
+    });
+  }
+
+  dispose(): void {
+    this.worker?.terminate();
+    this.worker = null;
+    this.failure = new Error('BrainAtlas was disposed during geometry work.');
+    for (const pending of this.pending.values()) pending.reject(this.failure);
+    this.pending.clear();
+  }
+
+  private run(
+    worker: Worker,
+    type: GeometryJob['type'],
+    geometries: readonly BufferGeometry[],
+  ): Promise<GeometryReply> {
+    const copies = geometries.map(copyGeometry);
+    const transfers = copies.flatMap(({ position, index }) =>
+      index ? [position.buffer, index.buffer] : [position.buffer],
+    );
+    const token = ++this.token;
+    return new Promise((resolve, reject) => {
+      this.pending.set(token, { resolve, reject });
+      worker.postMessage({ type, token, geometries: copies } satisfies GeometryJob, transfers);
+    });
+  }
+
+  /** The worker, or null where the platform has none; one that failed fails every later job. */
+  private ensureWorker(): Worker | null {
+    if (this.failure) throw this.failure;
+    if (this.worker) return this.worker;
+    if (typeof Worker === 'undefined') return null;
+    const worker = new Worker(new URL('./geometry-worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = ({ data }: MessageEvent<GeometryReply>) => {
+      const pending = this.pending.get(data.token)!;
+      this.pending.delete(data.token);
+      if ('error' in data) pending.reject(new Error(data.error));
+      else pending.resolve(data);
+    };
+    worker.onerror = (event) => {
+      this.failure = new Error(event.message || 'Geometry work failed', { cause: event });
+      worker.terminate();
+      this.worker = null;
+      for (const pending of this.pending.values()) pending.reject(this.failure);
+      this.pending.clear();
+    };
+    this.worker = worker;
+    return worker;
+  }
+}
+
+/** A raycast that builds the mesh's BVH first if neither the worker nor an earlier ray has. */
+function raycastWithBvh({ MeshBVH, acceleratedRaycast }: Bvh): Mesh['raycast'] {
+  return function (this: Mesh, raycaster, intersects) {
+    this.geometry.boundsTree ??= new MeshBVH(this.geometry, { indirect: true });
+    acceleratedRaycast.call(this, raycaster, intersects);
+  };
+}
+
+/**
+ * A copy that compiles to the same program. `clone` leaves the shader chain behind, and a physical
+ * clone defines PHYSICAL, which the anatomical material's standard copy does not.
+ */
+function programCopy(material: Material): Material {
+  const copy = material.clone();
+  copy.defines = { ...material.defines };
+  copy.onBeforeCompile = material.onBeforeCompile;
+  copy.customProgramCacheKey = material.customProgramCacheKey;
+  return copy;
+}
+
 /** Asset-only controller. Add .group to your scene; coordinates remain untouched. */
 export class BrainAtlas extends EventTarget {
   static async load(
@@ -297,6 +441,7 @@ export class BrainAtlas extends EventTarget {
   spinalCordLoadError: unknown = null;
   private readonly dissection;
   private readonly pending = new Map<string, Promise<unknown>>();
+  private readonly geometryJobs = new GeometryJobs();
   /** Who hears each pending download, keyed as `pending` is. */
   private readonly listeners = new Map<string, ProgressCallback[]>();
   private atlasId: string;
@@ -445,7 +590,7 @@ export class BrainAtlas extends EventTarget {
       this.loader.loadAsync(this.manifest.solid_envelopes.file, this.share(ENVELOPES, onProgress)),
       import('three-mesh-bvh'),
     ])
-      .then(([{ scene }, { MeshBVH, acceleratedRaycast }]) => {
+      .then(async ([{ scene }, bvh]) => {
         let envelopes: Mesh[];
         try {
           if (this.isDisposed) throw new Error('BrainAtlas disposed during tissue loading.');
@@ -453,10 +598,15 @@ export class BrainAtlas extends EventTarget {
           scene.traverse((object) => {
             if ((object as Mesh).isMesh) envelopes.push(object as Mesh);
           });
+          // Every envelope is a cut source, and the white ones are picked too.
+          await this.geometryJobs.bvhs(
+            bvh,
+            envelopes.map((mesh) => mesh.geometry),
+          );
+          if (this.isDisposed) throw new Error('BrainAtlas disposed during tissue loading.');
           const surfaces = createWhiteMatterSurfaces(scene, this.manifest.appearance);
           for (const mesh of surfaces.meshes) {
-            mesh.geometry.boundsTree = new MeshBVH(mesh.geometry, { indirect: true });
-            mesh.raycast = acceleratedRaycast;
+            mesh.raycast = raycastWithBvh(bvh);
             if (this.mriUniforms) addMriAppearance(mesh.material, this.mriUniforms);
           }
           this.whiteMatterSurfaces = surfaces;
@@ -536,16 +686,20 @@ export class BrainAtlas extends EventTarget {
     if (this.pending.has(key)) return this.pending.get(key) as Promise<Mesh[]>;
     const loading = (async () => {
       const envelopes = await this.ensureEnvelopes();
-      const [wedges, { MeshBVH }] = await Promise.all([
+      const [wedges, bvh] = await Promise.all([
         loadRibbonSources(this.manifest, baseUrl, atlas, envelopes),
         import('three-mesh-bvh'),
       ]);
-      if (this.isDisposed) {
+      try {
+        if (this.isDisposed) throw new Error('BrainAtlas was disposed during loading.');
+        await this.geometryJobs.bvhs(
+          bvh,
+          wedges.map((wedge) => wedge.geometry),
+        );
+        if (this.isDisposed) throw new Error('BrainAtlas was disposed during loading.');
+      } catch (error) {
         for (const wedge of wedges) wedge.geometry.dispose();
-        throw new Error('BrainAtlas was disposed during loading.');
-      }
-      for (const wedge of wedges) {
-        wedge.geometry.boundsTree = new MeshBVH(wedge.geometry, { indirect: true });
+        throw error;
       }
       this.ribbonWedges.set(atlas, wedges);
       return wedges;
@@ -566,11 +720,12 @@ export class BrainAtlas extends EventTarget {
       this.loader.loadAsync(file, this.share(id, onProgress)),
       import('three-mesh-bvh'),
     ])
-      .then(([{ scene }, { MeshBVH, acceleratedRaycast }]) => {
+      .then(async ([{ scene }, bvh]) => {
         if (this.isDisposed) {
           disposeScene(scene);
           throw new Error('BrainAtlas was disposed during loading.');
         }
+        const raycast = raycastWithBvh(bvh);
         const meshes: AtlasMesh[] = [];
         const originalMaterials = new Set<Material>();
         try {
@@ -595,8 +750,7 @@ export class BrainAtlas extends EventTarget {
             }
             originalMaterials.add(mesh.material);
             // Indirect indexing preserves the scientific source triangle order.
-            mesh.geometry.boundsTree = new MeshBVH(mesh.geometry, { indirect: true });
-            mesh.raycast = acceleratedRaycast;
+            mesh.raycast = raycast;
             if (this.manifest.networks) {
               attachNetworkColors(mesh.geometry, this.manifest.networks);
             }
@@ -620,12 +774,30 @@ export class BrainAtlas extends EventTarget {
         } finally {
           for (const material of originalMaterials) material.dispose();
         }
-        // A cortical atlas tiles one surface, so its parcels meet at shared borders.
+        const geometries = meshes.map((mesh) => mesh.geometry);
+        // A cortical atlas tiles one surface, so its parcels meet at shared borders. Its parcels are
+        // picked, never cut: their BVHs follow the picture, and a ray that arrives first builds its own.
+        const cortical = meshes.every((mesh) =>
+          ['cortex', 'non-region'].includes(mesh.userData['kind']),
+        );
         let featherPalette: DataTexture | null = null;
-        if (meshes.every((mesh) => ['cortex', 'non-region'].includes(mesh.userData['kind']))) {
-          featherBorders(meshes);
+        try {
+          if (cortical) await this.geometryJobs.feather(meshes);
+          // A detail level's or the cord's structures are cut sources, which the first cut needs whole.
+          else await this.geometryJobs.bvhs(bvh, geometries);
+          if (this.isDisposed) throw new Error('BrainAtlas was disposed during loading.');
+        } catch (error) {
+          disposeScene(scene);
+          throw error;
+        }
+        if (cortical) {
           featherPalette = createFeatherPalette(meshes.length);
           for (const mesh of meshes) addBorderFeather(mesh.material, featherPalette);
+          this.geometryJobs.bvhs(bvh, geometries).catch((error: Error) => {
+            if (this.isDisposed) return;
+            console.error(error);
+            this.dispatchEvent(new CustomEvent('loaderror', { detail: error }));
+          });
         }
         const layer: Layer = { scene, meshes, featherPalette };
         scene.visible = false;
@@ -1113,6 +1285,41 @@ export class BrainAtlas extends EventTarget {
     }
   }
 
+  /**
+   * Detached meshes on the loaded geometry, in a copy of each kind of material as Focus draws it
+   * (see-through) and, until a scan is attached, as the T1 MRI colour does: compiled ahead, neither
+   * pays for its programs in the frame that first shows it. Never disposed: disposing a material
+   * releases the programs it compiled.
+   */
+  programSamples(): Mesh[] {
+    const kinds = new Map<string, Mesh<BufferGeometry, Material>>();
+    const meshes: Mesh<BufferGeometry, Material>[] = [
+      ...[...this.layers.values()].flatMap((layer) => layer.meshes),
+      ...(this.whiteMatterSurfaces?.meshes ?? []),
+    ];
+    for (const mesh of meshes) {
+      const { material } = mesh;
+      const kind = [material.type, material.customProgramCacheKey(), material.side];
+      kinds.set(kind.join('|'), mesh);
+    }
+    const scan = createMriUniforms({
+      texture: null,
+      worldToVoxel: new Matrix4(),
+      volume: { shape: [1, 1, 1] },
+    });
+    return [...kinds.values()].flatMap(({ geometry, material }) => {
+      const seeThrough = programCopy(material);
+      seeThrough.transparent = true;
+      const samples = [new Mesh(geometry, seeThrough)];
+      if (!this.mriUniforms) {
+        const scanned = programCopy(material);
+        addMriAppearance(scanned, scan);
+        samples.push(new Mesh(geometry, scanned));
+      }
+      return samples;
+    });
+  }
+
   isolate(): void {
     if (!this.selectedId) throw new Error('Select a region before isolating.');
     this.isolatedId = this.selectedId;
@@ -1207,6 +1414,7 @@ export class BrainAtlas extends EventTarget {
 
   dispose(): void {
     this.isDisposed = true;
+    this.geometryJobs.dispose();
     this.spinalCordRequest += 1;
     this.atlasRequest += 1;
     this.detailRequest += 1;

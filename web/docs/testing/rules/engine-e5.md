@@ -4,31 +4,31 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 
 ## Camera moves
 
-### SCENE-01 · An eased camera move lasts 240 ms and lands exactly
+### SCENE-01 · A view change rides the camera spring and lands exactly
 
-- **Rule:** A framing that is not immediate eases the camera from where it is to the planned pose over 240 ms. It ends exactly on the plan, and the plan's orbit limits apply only on arrival, so a distant camera is not yanked by a tighter limit as it leaves.
+- **Rule:** A framing that is not immediate moves the camera from where it is drawn to the planned pose on a critically damped spring (`CAMERA_RESPONSE` 0.38 s, `core/spring.ts`): 95 % of the way in about 0.29 s whatever the turn. Turn, target and distance all follow the spring's progress. It arrives on the first frame the spring is within 1e-3 rad and 1e-3 of the distance, exactly on the plan, and the plan's orbit limits apply only on arrival, so a distant camera is not yanked by a tighter limit as it leaves.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/scene.js:20,24,304-336,345-379`
-- **Expected:** `moveTo(plan)` at t0. At t0+120 ms the camera lies strictly between the start and the plan, and `controls.minDistance/maxDistance` are still the old ones. At t0+240 ms the position and target equal the plan (≤1e-12 m) and the limits equal the plan's. `scene.destination` returns the plan throughout.
+- **Source:** `viewer/render/scene.js:20,24,304-336,345-379` (then a fixed 240 ms ease); `web/src/lib/core/spring.ts`
+- **Expected:** `moveTo(plan)` for a quarter turn: mid-move the camera lies strictly between the start and the plan, the target on the straight line between them, and `controls.minDistance/maxDistance` are still the old ones. It arrives between 400 and 800 ms, on the first frame `springSettled` holds and not the one before; there the position and target equal the plan (≤1e-12 m) and the limits equal the plan's. `scene.destination` returns the plan throughout.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
 
-### SCENE-02 · Immediate moves and reduced motion land at once
+### SCENE-02 · Immediate moves land at once; under reduced motion a change dissolves
 
-- **Rule:** A move asked for as immediate, and every move, inset slide or sheet settle while the reader prefers reduced motion, lands in one step with no intermediate frames.
+- **Rule:** A move asked for as immediate lands in one step with no intermediate frames. While the reader prefers reduced motion, every move, inset slide and sheet settle is a dissolve instead: the frame on screen is drawn again and copied to a canvas over the stage, the change is made and drawn beneath it, and the copy fades out over 160 ms and is removed. A second change in the same frame keeps the first copy; one made mid-fade copies the canvas under the last copy at its opacity.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/scene.js:41-42,317-324,493-500,516-519`
-- **Expected:** With `matchMedia('(prefers-reduced-motion: reduce)').matches === true`, `moveTo(plan)` leaves the camera on the plan before the next frame. The same holds for `setFramingInset(…)` and `setChromeInsets(…, { settle: true })`, whose offsets are final on the next frame.
+- **Source:** `viewer/render/scene.js:41-42,317-324,493-500,516-519` (then a cut); `scene.ts` `dissolve`
+- **Expected:** Under reduced motion, `moveTo(plan)` in one task: render, copy the canvas, render on the plan; a 2D canvas after the WebGL one, `aria-hidden`, `pointer-events: none`, animated `opacity` 1 → 0 over 160 ms; the plan's limits apply at once. A `setChromeInsets(…, { settle: true })` in the same frame adds no copy and its offset is final. The next frame draws nothing and the loop stops. Mid-fade, `setFramingInset(…)` copies the canvas, then the last copy at its opacity, and removes it. An immediate move makes no copy. The copy is removed when its fade finishes.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
 
-### SCENE-03 · A move beside a settling sheet rides the sheet's curve
+### SCENE-03 · A move beside a settling sheet rides the sheet's spring
 
-- **Rule:** While the sheet settles on its own curve, a camera move or framing-inset slide started in that time uses the sheet's easing, so the picture and the sheet arrive together. Otherwise moves use a cubic ease-in-out.
+- **Rule:** A framing-inset slide rides the camera spring. While the sheet settles on its spring (`SHEET_RESPONSE` 0.3 s, started at the sheet's velocity), the image's offset rides that spring from the instant the sheet reported it, and a camera move or framing-inset slide started in that time rides the rest of it, so the picture and the sheet arrive together. A finger on the sheet takes the image's offset at once; a camera move under way goes on.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/scene.js:24,26-39,333,494,521`
-- **Expected:** The easing is `cubic-bezier(0.32, 0.72, 0, 1)` (the `--ease-sheet` token) over 240 ms beside a settle, and `t<0.5 ? 4t³ : 1-(-2t+2)³/2` otherwise. Sampled at 25/50/75 % of 240 ms, the progress matches the curve within 1e-6.
+- **Source:** `viewer/render/scene.js:24,26-39,333,494,521` (then the sheet's CSS curve); `web/src/lib/core/spring.ts`
+- **Expected:** A framing inset of 80 px slides with offsetY = 300 − (600 − 80 · p) / 2, p the camera spring's progress. Beside a settle reported with velocity v, both bands follow offsetY = (300 + 80) / 2 · p, p the sheet spring's from v. A reframe 40 ms into a settle arrives with it. `setChromeInsets` without `settle` mid-ride puts the offset on its value at once (125) while the camera goes on.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
 
 ### SCENE-04 · Taking hold of the camera mid-move stops the move where it is drawn
@@ -37,8 +37,44 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/render/scene.js:427-432`
-- **Expected:** `moveTo(plan)`, then a frame at +100 ms, then `controls` `start`. Later frames do not move the camera towards the plan, and `camera.up` equals the drawn frame's up.
-- **Covered by:** uncovered
+- **Expected:** `moveTo(plan)`, then a frame at +100 ms, then `controls` `start`. Later frames do not move the camera towards the plan, `scene.destination` is the drawn pose, and `camera.up` equals the drawn frame's up.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
+
+### SCENE-34 · A change of mind mid-move carries the camera's speed into the new path
+
+- **Rule:** A framing asked for while a move is under way starts its spring at the camera's current turning speed, expressed in whole moves of the new path per second, so the camera keeps turning instead of starting again from rest. It lands exactly on the new plan.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `scene.ts` `head`, `carried`
+- **Expected:** A quarter turn, then 96 ms in a framing further round the same way: the turning speed over the frame after the change is within 0.8–1.3 × the speed over the frame before, and the move ends on the second plan (≤1e-12 m) with its limits.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
+
+### SCENE-35 · A wheel step or a turn during a move changes where it goes, and it goes on
+
+- **Rule:** A zoom, turn or pan the controls are asked for during a move changes the destination, not the drawn camera, and the move goes on there; its orbit limits still wait for arrival. A wheel step scales the destination's distance to its target by the step's ratio, within the plan's limits; a key or chevron turn turns the destination by its step.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `scene.ts` `redirect`; the 2026-11-02 interface review (a wheel step used to strand the camera 38° short)
+- **Expected:** Mid-move, a wheel step leaves the drawn camera where it was and the move goes on, closer. A chevron mid-move puts the destination 5° further round the superior axis (≤1e-12 m); the camera is still moving and then arrives there.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R); `src/lib/engine/render/orbit-controls.test.ts` (R, "a turn made during a move turns the destination")
+
+### SCENE-36 · A drag turns the camera with the pointer exactly, and coasts after a moving release
+
+- **Rule:** While a pointer holds the stage, each move turns the camera in full before the next frame: the controls are undamped. Released while moving, the drag coasts on at the speed of its last 64 ms, slowing by time (by e every 100 ms, the same at 60 and 120 Hz) until below 2°/s. A pointer still for its last 50 ms lets go where it is. A grab catches a coast; a wheel step or a framing call does not. The frame on which a coast stops is drawn at full resolution.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `orbit-controls.ts` `coastOnRelease`; the 2026-11-02 interface review (damping trailed the pointer by about 80 ms)
+- **Expected:** 10 px moves on a 600 px canvas each turn 2π · 10 / 600 before the frame draws; after release the azimuth goes on changing, every frame but the last is at the reduced ratio, the last at full, and the loop stops.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R); `src/lib/engine/render/orbit-controls.test.ts` (R)
+
+### SCENE-37 · A settling sheet must start within its spring's rate
+
+- **Rule:** `setChromeInsets(…, { settle: true, velocity })` throws a RangeError for a velocity below 0 or above the sheet spring's ω, the fastest start that never passes the rest; the sheet caps its throw with `noOvershoot` before it reports.
+- **Kind:** contract
+- **Level:** unit
+- **Source:** `scene.ts` `setChromeInsets`; `core/spring.ts` `noOvershoot`
+- **Expected:** velocity −0.5, 21 (above ω ≈ 20.94) and NaN throw RangeError; ω itself does not.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
 
 ## The visible rectangle
 
@@ -73,11 +109,11 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 
 ### SCENE-08 · A moving camera draws at reduced resolution; the frame at rest is full resolution
 
-- **Rule:** While the camera or an inset is moving, frames are drawn through a lower-resolution pipeline. A full-resolution frame is drawn once the camera has been at rest for 150 ms, and the loop then stops until something changes.
+- **Rule:** While the camera or an inset is moving, frames are drawn through a lower-resolution pipeline. The frame on which a move arrives is drawn at full resolution, and the loop then stops until something changes. A drag held still draws at full resolution once it has rested 150 ms, the pointer still down; a shorter pause is no rest.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/scene.js:21-22,183-206,381-405`
-- **Expected:** During a move the composer renders at the motion pixel ratio. 150 ms after the last motion one render at the settled ratio follows, then `setAnimationLoop(null)`. Any `invalidate()` restarts the loop.
+- **Source:** `viewer/render/scene.js:21-22,183-206,381-405` (then full resolution 150 ms after every move)
+- **Expected:** During a move the composer renders at the motion pixel ratio; the arrival frame renders at the settled ratio, then `setAnimationLoop(null)`. Any `invalidate()` restarts the loop. A drag paused under 150 ms renders nothing more; at 150 ms one render at the settled ratio.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
 
 ## Outlines and theme

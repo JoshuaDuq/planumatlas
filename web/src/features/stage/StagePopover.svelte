@@ -9,6 +9,9 @@
     dock goes (`covered`: loading, or under the phone sheet). If focus was on the tool or inside the popover,
     it moves to a tool that is left instead of dropping to the page (deviation g2-focus-when-tool-hidden).
   The classes `stage-field-label`, `stage-field` and `stage-command` are for every popover body on the stage.
+  - While a pointer holds a slider, the plate clears off the picture it adjusts (`data-scrubbing`): its ground,
+    its edge and everything beside the slider's row fade out, the row keeps a strip of the plate, and all come
+    back on release. The body hears `scrubbing`, so nothing it adds grows the plate under the thumb.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
@@ -30,7 +33,7 @@
     rescueFocus: () => void;
     /** What the tool draws; the chevron follows it. */
     name: Snippet;
-    body: Snippet<[{ close: () => void }]>;
+    body: Snippet<[{ close: () => void; scrubbing: boolean }]>;
     /** A press or focus here leaves the popover open (`Popover`). */
     holdsOpen?: (node: Node) => boolean;
   }
@@ -51,6 +54,7 @@
 
   let tool = $state<HTMLElement | null>(null);
   let dialog = $state<HTMLElement | null>(null);
+  let scrubbing = $state(false);
 
   // Before the page updates: the tool still has the focus it is about to lose.
   $effect.pre(() => {
@@ -59,6 +63,50 @@
     open = false;
     if (hadFocus && !covered) rescueFocus();
   });
+
+  /** A pointer pressed a slider: clear the plate off the picture until it lets go. Keys never do. */
+  function scrub(press: PointerEvent) {
+    const range = (press.target as Element).closest<HTMLInputElement>('input[type="range"]');
+    if (!range || scrubbing || !press.isPrimary || press.button !== 0) return;
+    const row = range.closest<HTMLElement>('.control-field')!;
+    const plate = dialog!.closest<HTMLElement>('.popover')!;
+    const beside: Element[] = [];
+    for (let node: Element = row; node !== dialog; node = node.parentElement!) {
+      beside.push(...[...node.parentElement!.children].filter((other) => other !== node));
+    }
+    // The plate fades as it does when it closes, and comes back the same way.
+    const style = getComputedStyle(plate);
+    const fade = {
+      duration: parseFloat(style.getPropertyValue('--popover-exit')),
+      easing: style.getPropertyValue('--ease-ui'),
+      fill: 'forwards',
+    } as const;
+    const fades = [
+      plate.animate({ backgroundColor: 'transparent', borderColor: 'transparent' }, fade),
+      ...beside.map((element) => element.animate({ opacity: 0 }, fade)),
+    ];
+    scrubbing = true;
+    row.toggleAttribute('data-held', true);
+    plate.toggleAttribute('data-scrubbing', true);
+    const release = (end: PointerEvent) => {
+      if (end.pointerId !== press.pointerId) return;
+      for (const type of ['pointerup', 'pointercancel'] as const) {
+        removeEventListener(type, release, true);
+      }
+      range.removeEventListener('lostpointercapture', release);
+      for (const back of fades) {
+        back.reverse();
+        back.addEventListener('finish', () => back.cancel(), { once: true });
+      }
+      scrubbing = false;
+      row.removeAttribute('data-held');
+      plate.removeAttribute('data-scrubbing');
+    };
+    for (const type of ['pointerup', 'pointercancel'] as const) {
+      addEventListener(type, release, true);
+    }
+    range.addEventListener('lostpointercapture', release);
+  }
 </script>
 
 <Popover variant="stage" bind:open class="stage-popover" {style} {holdsOpen}>
@@ -76,8 +124,13 @@
     </button>
   {/snippet}
   {#snippet children({ close })}
-    <div role="dialog" aria-labelledby={dialogLabelledby} bind:this={dialog}>
-      {@render body({ close })}
+    <div
+      role="dialog"
+      aria-labelledby={dialogLabelledby}
+      bind:this={dialog}
+      onpointerdowncapture={scrub}
+    >
+      {@render body({ close, scrubbing })}
     </div>
   {/snippet}
 </Popover>
@@ -103,6 +156,13 @@
     }
     :global(.stage-field) {
       margin-top: var(--space-4);
+    }
+    /* A held slider's row keeps a strip of the plate, so its name and value stay legible over the picture. */
+    :global(.popover.stage-popover [data-held]) {
+      margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-control);
+      background: var(--overlay-plate);
     }
     /* Tonal by default (the overlay track); quiet commands drop the fill until hovered. */
     :global(.stage-command) {

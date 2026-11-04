@@ -181,13 +181,13 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 - **Expected:** `('light', dark OS) → 'light'`; `('dark', light OS) → 'dark'`; for `null`, `'system'`, `'sepia'`, `''`: dark OS → `'dark'`, light OS → `'light'`.
 - **Covered by:** `src/lib/state/theme.test.ts` (R); the head script itself is in `shell.md`
 
-### STORE-19 · A theme switch is a swap, not a fade
+### STORE-19 · A theme switch swaps every colour at once, inside one page cross-fade
 
-- **Rule:** Each switch holds colour transitions off for two animation frames, so the palettes swap in one painted frame. A second switch inside those frames holds them for its own two frames. Dispose inside the frames releases the hold for good.
+- **Rule:** Each switch holds colour transitions off for two animation frames, so no component fades between palettes and they swap in one painted frame. A second switch inside those frames holds them for its own two frames. Dispose inside the frames releases the hold for good. Where the browser has view transitions, a change after the first paint that changes the palette on screen swaps inside `document.startViewTransition`, a 200 ms cross-fade of the whole page (`--theme-transition`); the first paint, and a choice that keeps the palette on screen, swap at once. A cross-fade whose update lands after dispose swaps nothing.
 - **Kind:** behaviour
 - **Level:** unit (fake animation frames)
 - **Source:** `viewer/state/theme.js:41-44`; deviation `u2-theme-switch-frames.md`
-- **Expected:** `choose('dark')` → `data-theme-switching=""` and `data-theme="dark"`; after frame 1 still present; after frame 2 absent. `choose('dark')`, frame, `choose('light')`, frame → still present; next frame → absent. `choose('dark')`, `dispose()` → absent at once and after two frames. The CSS side is UI-12.
+- **Expected:** `choose('dark')` → `data-theme-switching=""` and `data-theme="dark"`; after frame 1 still present; after frame 2 absent. `choose('dark')`, frame, `choose('light')`, frame → still present; next frame → absent. `choose('dark')`, `dispose()` → absent at once and after two frames. With view transitions: no transition on creation; `choose('dark')` → one pending, `data-theme` still light until it runs, then dark and notified; a live OS switch cross-fades too; `choose('dark')` on a dark system starts none; `choose('dark')`, `dispose()`, then the update → light, nothing notified. The CSS side is UI-12.
 - **Covered by:** `src/lib/state/theme.test.ts` (R)
 
 ### STORE-20 · The browser's own chrome continues the masthead colour

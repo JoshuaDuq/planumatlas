@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import { test, vi } from 'vitest';
 import { PerspectiveCamera, Plane, type Raycaster, Sphere, Vector2, Vector3 } from 'three';
 import type { ViewName } from '../../types/index.ts';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -7,12 +7,16 @@ import { VIEW_DIRECTIONS, upFor } from './camera-views.ts';
 import {
   type Home,
   type Intersect,
+  coastOnRelease,
   homeward,
   levelOnOrbit,
   stayOutside,
+  takePending,
+  turnGoal,
   zoomAbout,
   zoomAboutSurface,
 } from './orbit-controls.ts';
+import { frameOf } from './camera-path.ts';
 
 type Adapt = (controls: OrbitControls) => void;
 
@@ -92,8 +96,8 @@ test('leaving the superior or inferior view, the brain stands superior up', () =
   }
 });
 
-test('a rolled camera rights itself over a few frames of a turn, not in one snap', () => {
-  // A faced cut or a grab mid-move can leave the camera rolled a quarter turn.
+/** A camera rolled a quarter turn on the left view, as a faced cut or a grab mid-move can leave it. */
+function rolledOnLeft() {
   const camera = new PerspectiveCamera(35, 1.4, 0.001, 10);
   const controls = new OrbitControls(camera);
   levelOnOrbit(controls);
@@ -101,17 +105,67 @@ test('a rolled camera rights itself over a few frames of a turn, not in one snap
   camera.position.copy(target).addScaledVector(VIEW_DIRECTIONS.left, DISTANCE);
   controls.target.copy(target);
   controls.update();
-  assert.ok(Math.abs(roll(camera, target) - Math.PI / 2) < 1e-9, 'it starts rolled');
+  return { camera, controls };
+}
 
-  controls.update();
-  assert.ok(Math.abs(roll(camera, target) - Math.PI / 2) < 1e-9, 'at rest it keeps its roll');
+/** A clock for `performance.now()`, moved on by hand. */
+function clock() {
+  let now = 1000;
+  const spy = vi.spyOn(performance, 'now').mockImplementation(() => now);
+  return {
+    advance: (ms: number) => (now += ms),
+    restore: () => spy.mockRestore(),
+  };
+}
 
-  controls.rotateLeft(0.01);
-  const first = roll(camera, target);
-  assert.ok(first > Math.PI / 4 && first < Math.PI / 2 - 0.1, `one frame eases it: ${first}`);
-  for (let i = 0; i < 60; i += 1) controls.update();
-  assert.ok(roll(camera, target) < 1e-9, 'it ends level');
-  assert.ok(camera.up.equals(new Vector3(0, 1, 0)));
+test('a rolled camera rights itself over a few frames of a turn, not in one snap', () => {
+  const time = clock();
+  try {
+    const { camera, controls } = rolledOnLeft();
+    assert.ok(Math.abs(roll(camera, target) - Math.PI / 2) < 1e-9, 'it starts rolled');
+
+    time.advance(1000 / 60);
+    controls.update();
+    assert.ok(Math.abs(roll(camera, target) - Math.PI / 2) < 1e-9, 'at rest it keeps its roll');
+
+    time.advance(1000 / 60);
+    controls.rotateLeft(0.01);
+    const first = roll(camera, target);
+    assert.ok(first > Math.PI / 4 && first < Math.PI / 2 - 0.1, `one frame eases it: ${first}`);
+    for (let i = 0; i < 60; i += 1) {
+      time.advance(1000 / 60);
+      controls.update();
+    }
+    assert.ok(roll(camera, target) < 1e-9, 'it ends level');
+    assert.ok(camera.up.equals(new Vector3(0, 1, 0)));
+  } finally {
+    time.restore();
+  }
+});
+
+test('the roll eases out by time, the same at 60 and 120 Hz, and a pause does not snap it', () => {
+  const time = clock();
+  try {
+    const after = (hz: number, ms: number, pause = 0) => {
+      const { camera, controls } = rolledOnLeft();
+      time.advance(pause);
+      controls.rotateLeft(0.01);
+      for (let frame = 0; frame < (ms * hz) / 1000; frame += 1) {
+        time.advance(1000 / hz);
+        controls.update();
+      }
+      return roll(camera, target);
+    };
+    const at60 = after(60, 100);
+    const at120 = after(120, 100);
+    assert.ok(at60 > 0.05 && at60 < Math.PI / 4, `about a quarter of the roll is left: ${at60}`);
+    assert.ok(Math.abs(at60 - at120) < 0.02, `${at60} at 60 Hz, ${at120} at 120 Hz`);
+    // The first update after a long rest levels for at most one 30 Hz frame.
+    const resumed = after(60, 0, 5000);
+    assert.ok(resumed > Math.PI / 4, `one update after a pause eases it: ${resumed}`);
+  } finally {
+    time.restore();
+  }
 });
 
 test('a framing that writes its own up mid-levelling keeps it', () => {
@@ -401,4 +455,213 @@ test('in the app’s order, zooming in still reaches the closest zoom rather tha
   const gap = SURFACE_X - camera.position.x;
   assert.ok(Math.abs(gap - LIMITS.minDistance * 0.2) < 1e-9, 'the zoom’s own approach, untouched');
   assert.ok(gap < LIMITS.minDistance / 4, 'closer than a turn may come');
+});
+
+/** The element OrbitControls listens on, without a DOM: a pointer's moves and lift arrive on its document. */
+function pointerSurface() {
+  return Object.assign(new EventTarget(), {
+    style: {} as Record<string, string>,
+    clientHeight: 600,
+    ownerDocument: new EventTarget(),
+    getRootNode: () => new EventTarget(),
+    setPointerCapture() {},
+    releasePointerCapture() {},
+  });
+}
+
+/** Undamped controls on the left view, as the scene builds them, driven by a mouse at a clock's times. */
+function draggable() {
+  const time = clock();
+  const element = pointerSurface();
+  const camera = new PerspectiveCamera(35, 1.4, 0.001, 10);
+  const controls = new OrbitControls(camera, element as unknown as HTMLElement);
+  levelOnOrbit(controls);
+  const momentum = coastOnRelease(controls);
+  camera.position.copy(target).addScaledVector(VIEW_DIRECTIONS.left, DISTANCE);
+  controls.target.copy(target);
+  controls.update();
+  const mouse = (type: string, x: number) =>
+    Object.assign(new Event(type), {
+      pointerId: 1,
+      pointerType: 'mouse',
+      button: 0,
+      clientX: x,
+      clientY: 300,
+      ctrlKey: false,
+      metaKey: false,
+      shiftKey: false,
+    });
+  let x = 100;
+  return {
+    camera,
+    controls,
+    momentum,
+    time,
+    /** The turn about the superior axis since the left view, in radians. */
+    turned: () => {
+      const offset = camera.position.clone().sub(controls.target);
+      const left = VIEW_DIRECTIONS.left;
+      return Math.abs(Math.atan2(offset.x * left.z - offset.z * left.x, offset.dot(left)));
+    },
+    press: () => element.dispatchEvent(mouse('pointerdown', x)),
+    /** `count` moves of `step` pixels, one every `every` milliseconds. */
+    drag(count: number, step: number, every: number) {
+      for (let i = 0; i < count; i += 1) {
+        time.advance(every);
+        x += step;
+        element.ownerDocument.dispatchEvent(mouse('pointermove', x));
+      }
+    },
+    lift: () => element.ownerDocument.dispatchEvent(mouse('pointerup', x)),
+    /** Updates at `hz` for `ms`, as the scene's loop runs them. */
+    run(hz: number, ms: number) {
+      for (let frame = 0; frame < (ms * hz) / 1000; frame += 1) {
+        time.advance(1000 / hz);
+        controls.update();
+      }
+    },
+  };
+}
+
+test('a drag let go while moving coasts on, slowing by time the same at 60 and 120 Hz, then stops', () => {
+  const coasts = [60, 120].map((hz) => {
+    const drag = draggable();
+    try {
+      drag.press();
+      // 10 px every 16 ms on a 600 px canvas: 2π · 625 / 600 rad/s.
+      drag.drag(10, 10, 16);
+      const atRelease = drag.turned();
+      drag.lift();
+      assert.equal(drag.momentum.coasting, true);
+      drag.run(hz, 1000);
+      assert.equal(drag.momentum.coasting, false, 'it has stopped within a second');
+      return drag.turned() - atRelease;
+    } finally {
+      drag.time.restore();
+    }
+  });
+  // ω · τ = 6.545 rad/s · 0.1 s, less the tail below 2°/s.
+  for (const coast of coasts) assert.ok(Math.abs(coast - 0.651) < 2e-3, `coasted ${coast} rad`);
+  assert.ok(Math.abs(coasts[0]! - coasts[1]!) < 1e-3, `${coasts[0]} at 60 Hz, ${coasts[1]} at 120`);
+});
+
+test('the throw is read from the last 64 ms of the drag, not its average', () => {
+  const drag = draggable();
+  try {
+    drag.press();
+    // Slow, then fast for the last four moves: the throw is the fast speed.
+    drag.drag(10, 2, 16);
+    drag.drag(4, 10, 16);
+    const atRelease = drag.turned();
+    drag.lift();
+    drag.run(60, 1000);
+    assert.ok(Math.abs(drag.turned() - atRelease - 0.651) < 2e-3);
+  } finally {
+    drag.time.restore();
+  }
+});
+
+test('a pointer held still for 50 ms before it lifts lets go where it is', () => {
+  const drag = draggable();
+  try {
+    drag.press();
+    drag.drag(10, 10, 16);
+    drag.time.advance(51);
+    const atRelease = drag.turned();
+    drag.lift();
+    assert.equal(drag.momentum.coasting, false);
+    drag.run(60, 500);
+    assert.equal(drag.turned(), atRelease);
+  } finally {
+    drag.time.restore();
+  }
+});
+
+test('a grab catches a coast, and a wheel step or a call does not', () => {
+  const drag = draggable();
+  try {
+    drag.press();
+    drag.drag(10, 10, 16);
+    drag.lift();
+    drag.run(60, 50);
+    // A wheel step dispatches start and end with no gesture held; the keys and the gizmo call in.
+    drag.controls.dispatchEvent({ type: 'start' });
+    drag.controls.dispatchEvent({ type: 'end' });
+    drag.controls.rotateLeft(0.01);
+    assert.equal(drag.momentum.coasting, true);
+    drag.press();
+    assert.equal(drag.momentum.coasting, false);
+    const caught = drag.turned();
+    drag.run(60, 300);
+    assert.equal(drag.turned(), caught, 'held, it stays where it was caught');
+  } finally {
+    drag.time.restore();
+  }
+});
+
+test('takePending leaves the controls nothing to apply', () => {
+  const { camera, controls } = settledOn('left');
+  const before = camera.position.clone();
+  const driven = controls as unknown as DrivenControls;
+  (controls as unknown as { _sphericalDelta: { theta: number } })._sphericalDelta.theta = 0.2;
+  driven._panOffset.set(0.01, 0, 0);
+  controls.dollyIn(1.5);
+  const after = camera.position.clone();
+  // dollyIn applied its own update; queue another zoom and a turn, then take them.
+  (controls as unknown as { _scale: number })._scale = 0.5;
+  (controls as unknown as { _sphericalDelta: { theta: number } })._sphericalDelta.theta = 0.3;
+  driven._panOffset.set(0.02, 0, 0);
+  const pending = takePending(controls);
+  assert.deepEqual([pending.theta, pending.scale, pending.pan.x], [0.3, 0.5, 0.02]);
+  controls.update();
+  assert.ok(camera.position.distanceTo(after) < 1e-12 && after.distanceTo(before) > 0);
+});
+
+/** A destination on a named view, as framing plans it. */
+const goalOn = (view: ViewName) => ({
+  position: target.clone().addScaledVector(VIEW_DIRECTIONS[view], DISTANCE),
+  target: target.clone(),
+  up: upFor(view),
+});
+
+test('a turn made during a move turns the destination as the controls turn the camera', () => {
+  for (const view of ['oblique', 'left', 'anterior'] as const) {
+    for (const [theta, phi] of [
+      [0.4, -0.2],
+      [-1.1, 0.5],
+      [0, 3],
+    ] as const) {
+      const { camera, controls } = settledOn(view, levelOnOrbit);
+      // OrbitControls subtracts what it is given.
+      controls.rotateLeft(-theta);
+      controls.rotateUp(-phi);
+      const goal = goalOn(view);
+      turnGoal(goal, theta, phi);
+      assert.ok(goal.position.distanceTo(camera.position) < 1e-9, `${view} ${theta} ${phi}`);
+      assert.ok(goal.up.equals(new Vector3(0, 1, 0)), `${view}: superior up stays superior`);
+      const drawn = frameOf(goal.position, goal.target, goal.up);
+      assert.ok(
+        drawn.angleTo(camera.quaternion) < 1e-6,
+        `${view} ${theta} ${phi}: the same picture`,
+      );
+    }
+  }
+});
+
+test('turned during a move, a top or bottom view spins in place or tips as the controls do', () => {
+  for (const view of ['superior', 'inferior'] as const) {
+    for (const [theta, phi] of [
+      [0.3, 0],
+      [0, view === 'superior' ? 0.4 : -0.4],
+    ] as const) {
+      const { camera, controls } = settledOn(view, levelOnOrbit);
+      controls.rotateLeft(-theta);
+      controls.rotateUp(-phi);
+      const goal = goalOn(view);
+      turnGoal(goal, theta, phi);
+      assert.ok(goal.position.distanceTo(camera.position) < 1e-4, `${view} ${theta} ${phi}: place`);
+      const drawn = frameOf(goal.position, goal.target, goal.up);
+      assert.ok(drawn.angleTo(camera.quaternion) < 1e-3, `${view} ${theta} ${phi}: picture`);
+    }
+  }
 });

@@ -49,6 +49,7 @@ const LIGHT = {
   '--surface-raised': '#ffffff',
   '--surface-tonal': '#eef1f2',
   '--surface-tonal-hover': '#e4e9eb',
+  '--surface-pressed': 'var(--surface-tonal-hover)',
   '--border-subtle': '#e0e5e7',
   '--border-control': '#77828c',
   '--thumb-ring': '#78838d',
@@ -101,10 +102,10 @@ const LIGHT = {
   '--space-5': '20px',
   '--space-6': '24px',
   '--space-8': '32px',
-  '--row-height': '32px',
-  '--control-height': '32px',
+  '--row-height': 'max(32px, 2rem)',
+  '--control-height': 'max(32px, 2rem)',
   '--tab-height': 'max(44px, 2.75rem)',
-  '--rail-width': '360px',
+  '--rail-width': 'clamp(360px, 22.5rem, 50vw)',
   '--header-height': 'max(48px, 3rem)',
   '--footer-height': 'max(32px, 2rem)',
   '--panel-inset': 'var(--space-6)',
@@ -124,6 +125,7 @@ const LIGHT = {
   '--popover-exit': '120ms',
   '--dialog-transition': '200ms',
   '--tooltip-transition': '125ms',
+  '--theme-transition': '200ms',
 };
 
 const DARK = {

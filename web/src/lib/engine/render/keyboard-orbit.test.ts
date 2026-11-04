@@ -7,11 +7,10 @@ import { levelOnOrbit } from './orbit-controls.ts';
 
 const target = new Vector3(0, 0, 0);
 
-/** Damped controls, as the scene builds them, with the camera at `position` and `up`. */
+/** Undamped controls, as the scene builds them, with the camera at `position` and `up`. */
 function controlsAt(position: Vector3, up = new Vector3(0, 1, 0)) {
   const camera = new PerspectiveCamera(35, 1.4, 0.001, 10);
   const controls = new OrbitControls(camera);
-  controls.enableDamping = true;
   levelOnOrbit(controls);
   camera.up.copy(up);
   camera.position.copy(position);
@@ -25,7 +24,7 @@ type OrbitKey = keyof typeof ORBIT_KEYS;
 const press = (key: OrbitKey, position: Vector3, up?: Vector3) => {
   const { camera, controls } = controlsAt(position, up);
   turnFromKeyboard(controls, ORBIT_KEYS[key]);
-  return { position: camera.position.clone(), controls };
+  return { position: camera.position.clone() };
 };
 
 test('an orbit step keeps the camera the same distance from what it looks at', () => {
@@ -35,13 +34,12 @@ test('an orbit step keeps the camera the same distance from what it looks at', (
   }
 });
 
-test('a press lands at once, by the whole declared step, and leaves the damping on', () => {
+test('a press lands at once, by the whole declared step', () => {
   const start = new Vector3(0, 0, 0.2);
   for (const key of Object.keys(ORBIT_KEYS) as OrbitKey[]) {
-    const { position, controls } = press(key, start);
+    const { position } = press(key, start);
     const swept = position.clone().sub(target).angleTo(start.clone().sub(target));
     assert.ok(Math.abs(swept - ORBIT_STEP) < 1e-9, key);
-    assert.equal(controls.enableDamping, true);
   }
 });
 
@@ -57,7 +55,6 @@ test('the model follows the arrow, the way it follows a drag', () => {
   // does: OrbitControls turns a drag up into a negative rotateUp.
   const start = new Vector3(0, 0, 0.2);
   const dragged = controlsAt(start);
-  dragged.controls.enableDamping = false;
   dragged.controls.rotateUp(-ORBIT_STEP);
   assert.ok(press('ArrowUp', start).position.distanceTo(dragged.camera.position) < 1e-12);
   assert.ok(press('ArrowUp', start).position.y < 0);

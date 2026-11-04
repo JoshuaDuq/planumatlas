@@ -135,6 +135,63 @@ describe('createTheme', () => {
     expect('themeSwitching' in page.root.dataset).toBe(false);
   });
 
+  describe('where the browser has view transitions', () => {
+    let pending: (() => void)[];
+    beforeEach(() => {
+      pending = [];
+      (globalThis.document as unknown as Record<string, unknown>).startViewTransition = (
+        update: () => void,
+      ) => pending.push(update);
+    });
+
+    test('the first paint swaps at once; a later change swaps inside one cross-fade', () => {
+      const notified: Theme[] = [];
+      const system = fakeSystem(false);
+      const theme = createTheme((t) => notified.push(t), options(fakeStorage(), system));
+      expect(pending).toHaveLength(0);
+      expect(page.root.dataset.theme).toBe('light');
+
+      theme.choose('dark');
+      expect(pending).toHaveLength(1);
+      // The old palette stays until the browser has captured it.
+      expect(page.root.dataset.theme).toBe('light');
+      expect(notified).toEqual(['light']);
+      pending[0]!();
+      expect(page.root.dataset.theme).toBe('dark');
+      expect(page.root.dataset.themeSwitching).toBe('');
+      expect(notified).toEqual(['light', 'dark']);
+    });
+
+    test('a live OS switch cross-fades too', () => {
+      const system = fakeSystem(false);
+      createTheme(() => {}, options(fakeStorage(), system));
+      system.flip(true);
+      expect(pending).toHaveLength(1);
+      expect(page.root.dataset.theme).toBe('light');
+      pending[0]!();
+      expect(page.root.dataset.theme).toBe('dark');
+    });
+
+    test('a cross-fade that lands after dispose swaps nothing and tells no one', () => {
+      const notified: Theme[] = [];
+      const theme = createTheme((t) => notified.push(t), options(fakeStorage(), fakeSystem(false)));
+      theme.choose('dark');
+      theme.dispose();
+      pending[0]!();
+      expect(page.root.dataset.theme).toBe('light');
+      expect('themeSwitching' in page.root.dataset).toBe(false);
+      expect(notified).toEqual(['light']);
+    });
+
+    test('a choice that keeps the palette on screen swaps without a cross-fade', () => {
+      const notified: Theme[] = [];
+      const theme = createTheme((t) => notified.push(t), options(fakeStorage(), fakeSystem(true)));
+      theme.choose('dark');
+      expect(pending).toHaveLength(0);
+      expect(notified).toEqual(['dark', 'dark']);
+    });
+  });
+
   test('an unknown choice is an error, not a silent fallback', () => {
     const theme = createTheme(() => {}, options(fakeStorage(), fakeSystem(false)));
     expect(() => theme.choose('sepia' as never)).toThrow(RangeError);

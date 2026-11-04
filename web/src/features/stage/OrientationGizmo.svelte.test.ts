@@ -300,7 +300,59 @@ describe('choosing a view', () => {
   });
 });
 
+/** CDP input lands in the runner's page, which shows this test's frame scaled to fit. */
+function onPage(element: Element) {
+  const frame = window.frameElement!.getBoundingClientRect();
+  const scale = frame.width / window.innerWidth;
+  const box = element.getBoundingClientRect();
+  return {
+    x: frame.left + (box.left + box.width / 2) * scale,
+    y: frame.top + (box.top + box.height / 2) * scale,
+  };
+}
+const mouseOn = (element: Element, type: 'mousePressed' | 'mouseReleased') =>
+  cdp().send('Input.dispatchMouseEvent', {
+    type,
+    ...onPage(element),
+    button: 'left',
+    buttons: type === 'mousePressed' ? 1 : 0,
+    clickCount: 1,
+  });
+const touchOn = (
+  element: Element,
+  type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel',
+  drift = 0,
+) => {
+  const at = onPage(element);
+  return cdp().send('Input.dispatchTouchEvent', {
+    type,
+    touchPoints:
+      type === 'touchStart' || type === 'touchMove' ? [{ x: at.x, y: at.y + drift, id: 1 }] : [],
+  });
+};
+const frames = async (count = 2) => {
+  for (let i = 0; i < count; i += 1) await new Promise(requestAnimationFrame);
+};
+
 describe('the chevrons (WCAG 2.5.7)', () => {
+  let now = 0;
+  beforeEach(() => {
+    now = 1000;
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+  /** The whole azimuth and polar turn the gizmo has asked for. */
+  const total = (turn: Mock<FakeEngine['camera']['orbitBy']>) =>
+    turn.mock.calls.reduce(
+      (sum, [{ azimuth = 0, polar = 0 }]) => ({
+        azimuth: sum.azimuth + azimuth,
+        polar: sum.polar + polar,
+      }),
+      { azimuth: 0, polar: 0 },
+    );
+
   test('are a named group of four, one arrow key of the canvas each, and leave the held view', async () => {
     await mount();
     const turn = vi.spyOn(engine.camera, 'orbitBy');
@@ -314,13 +366,61 @@ describe('the chevrons (WCAG 2.5.7)', () => {
       ['Turn down', { polar: -ORBIT_STEP }],
     ] as const;
     for (const [name, step] of expected) {
+      // A tap: one step, on the press, and nothing more for its click.
       turn.mockClear();
       await userEvent.click(button(name));
+      await frames();
       expect(turn.mock.calls, name).toEqual([[step]]);
+      // A key press steps once too.
+      turn.mockClear();
+      button(name).focus();
+      await userEvent.keyboard('{Enter}');
+      expect(turn.mock.calls, `${name} by key`).toEqual([[step]]);
       expect(button(name).dataset.tooltip).toBe(name);
     }
     expect(pressed()).toEqual([]);
     expect(stage.hintRetired).toBe(true);
+  });
+
+  test('held, turn on at 90° a second from the press, by time, until the pointer lifts', async () => {
+    await mount();
+    const turn = vi.spyOn(engine.camera, 'orbitBy');
+    const left = button('Turn left');
+    await mouseOn(left, 'mousePressed');
+    expect(total(turn).azimuth).toBeCloseTo(ORBIT_STEP, 12);
+    // Within the tap's first 56 ms it stays at the step.
+    now += 50;
+    await frames();
+    expect(total(turn).azimuth).toBeCloseTo(ORBIT_STEP, 12);
+    now += 450;
+    await frames();
+    expect(total(turn).azimuth).toBeCloseTo(Math.PI / 4, 12);
+    expect(total(turn).polar).toBe(0);
+    await mouseOn(left, 'mouseReleased');
+    const held = turn.mock.calls.length;
+    now += 1000;
+    await frames();
+    expect(turn.mock.calls.length, 'released, it stops').toBe(held);
+    expect(total(turn).azimuth).toBeCloseTo(Math.PI / 4, 12);
+  });
+
+  test('held by a finger, turn until it lifts, and stop on a cancel', async () => {
+    await mount();
+    const turn = vi.spyOn(engine.camera, 'orbitBy');
+    const down = button('Turn down');
+    for (const end of ['touchEnd', 'touchCancel'] as const) {
+      turn.mockClear();
+      await touchOn(down, 'touchStart');
+      // A finger drifts as it holds; the press must not turn into a pan the browser cancels.
+      for (const drift of [6, 12, 18]) await touchOn(down, 'touchMove', drift);
+      now += 1000;
+      await frames();
+      expect(total(turn).polar, end).toBeCloseTo(-Math.PI / 2, 12);
+      await touchOn(down, end);
+      now += 1000;
+      await frames();
+      expect(total(turn).polar, `${end} stops it`).toBeCloseTo(-Math.PI / 2, 12);
+    }
   });
 
   test('sit on the ring, each at its own side', async () => {
@@ -365,7 +465,78 @@ describe('the toolbar', () => {
   });
 });
 
+describe('a press', () => {
+  /** A token as the browser resolves it, for comparing with a computed colour. */
+  const resolved = (name: string) => {
+    const probe = document.createElement('i');
+    probe.style.color = `var(${name})`;
+    gizmo().append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  };
+
+  test('on a letter or the centre shows at once and in place, on the held view in its accent', async () => {
+    await mount();
+    diagonal();
+    flushSync();
+    const disc = letter('S').firstElementChild!;
+    const rest = getComputedStyle(disc);
+    const before = { background: rest.backgroundColor, scale: rest.scale };
+    expect(rest.transitionDuration).toBe('0s');
+    await mouseOn(letter('S'), 'mousePressed');
+    try {
+      const held = getComputedStyle(disc);
+      expect(held.backgroundColor).toBe(resolved('--overlay-plate-hover'));
+      expect(held.boxShadow).toContain(resolved('--overlay-control-border'));
+      expect(held.backgroundColor).not.toBe(before.background);
+      expect(held.scale).toBe(before.scale);
+    } finally {
+      await mouseOn(letter('S'), 'mouseReleased');
+    }
+    // The release framed the superior view, which the engine now holds.
+    expect(letter('S').getAttribute('aria-pressed')).toBe('true');
+    // Looking down the diagonal again, where no letter covers the centre.
+    diagonal();
+    flushSync();
+    const centre = document.querySelector('.gizmo-centre')!;
+    await mouseOn(centre, 'mousePressed');
+    try {
+      expect(getComputedStyle(centre, '::before').backgroundColor).toBe(
+        resolved('--overlay-control-border'),
+      );
+    } finally {
+      await mouseOn(centre, 'mouseReleased');
+    }
+    commands.chooseView('superior');
+    diagonal();
+    flushSync();
+    await mouseOn(letter('S'), 'mousePressed');
+    try {
+      expect(getComputedStyle(letter('S').firstElementChild!).backgroundColor).toBe(
+        resolved('--overlay-accent-hover'),
+      );
+    } finally {
+      await mouseOn(letter('S'), 'mouseReleased');
+    }
+  });
+});
+
 describe('size', () => {
+  test('the letters keep their size and line inside their circles however large the reader’s text', async () => {
+    await mount();
+    const root = document.documentElement;
+    try {
+      for (const size of ['', '24px', '32px']) {
+        root.style.fontSize = size;
+        const style = getComputedStyle(letter('A'));
+        expect([style.fontSize, style.lineHeight], size || 'default').toEqual(['13px', '18px']);
+      }
+    } finally {
+      root.style.fontSize = '';
+    }
+  });
+
   test('its targets are 24 px; on a coarse pointer they grow to 44 px and the chevrons’ glyphs stay', async () => {
     await mount();
     const turns = () =>

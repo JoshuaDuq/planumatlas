@@ -5,9 +5,9 @@ import type { Vector3 } from 'three';
 import { createPicker } from './picking.ts';
 
 /*
- * The browser paints between a pointer move and the raycast it schedules, so
- * the frames are held and run by hand: a test that never ran one would pass
- * against a picker that never scheduled anything.
+ * Later moves in a frame wait for its animation callbacks, so the frames are
+ * held and run by hand: a test that never ran one would pass against a picker
+ * that never scheduled anything.
  */
 function frames() {
   const queued: (FrameRequestCallback | null)[] = [];
@@ -93,6 +93,14 @@ describe('picker', () => {
     assert.deepEqual(hovered, [[region, { x: 120, y: 40 }]]);
   });
 
+  // From inside an animation callback, the scene's redraw for the ring would wait a frame.
+  it('answers the first move of a frame at once, before the frame’s callbacks', () => {
+    frames();
+    const { domElement, hovered, region } = picker();
+    domElement.emit('pointermove', { clientX: 120, clientY: 40 });
+    assert.deepEqual(hovered, [[region, { x: 120, y: 40 }]]);
+  });
+
   it('never hovers for a finger: it is pressing or it is absent', () => {
     const clock = frames();
     const { domElement, asked } = picker();
@@ -109,12 +117,15 @@ describe('picker', () => {
     assert.deepEqual(asked, []);
   });
 
-  it('asks the anatomy once a frame however far the pointer travelled', () => {
+  it('asks the anatomy at most twice a frame however far the pointer travelled', () => {
     const clock = frames();
     const { domElement, asked } = picker();
     for (let x = 0; x < 20; x++) domElement.emit('pointermove', { clientX: x });
     clock.run();
-    assert.equal(asked.length, 1);
+    assert.equal(asked.length, 2, 'the first move, then the rest at once');
+    domElement.emit('pointermove', { clientX: 30 });
+    clock.run();
+    assert.equal(asked.length, 3, 'a lone move in the next frame is asked once');
   });
 
   it('takes the name away when the pointer leaves the canvas', () => {
@@ -208,19 +219,24 @@ describe('picker', () => {
   it('cancels a hover queued before the orbit', () => {
     const clock = frames();
     const { domElement, controls, asked } = picker();
-    domElement.emit('pointermove');
+    domElement.emit('pointermove', { clientX: 20 });
+    domElement.emit('pointermove', { clientX: 120 });
     controls.dispatchEvent({ type: 'change' });
     clock.run();
-    assert.equal(asked.length, 0);
+    assert.equal(asked.length, 1);
   });
 
   it('picks at the latest pointer position when moves coalesce', () => {
     const clock = frames();
     const { domElement, hovered } = picker();
     domElement.emit('pointermove', { clientX: 20 });
+    domElement.emit('pointermove', { clientX: 60 });
     domElement.emit('pointermove', { clientX: 120 });
     clock.run();
-    assert.equal((hovered[0]![1] as { x: number }).x, 120);
+    assert.deepEqual(
+      hovered.map(([, position]) => (position as { x: number }).x),
+      [20, 120],
+    );
   });
 
   it('removes its camera listener on dispose', () => {

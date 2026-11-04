@@ -143,6 +143,12 @@
       font: inherit;
       text-align: left;
       cursor: pointer;
+      transition: background-color var(--ui-transition) var(--ease-ui);
+    }
+    .detail-back:active:not(:focus-visible),
+    .detail-crumb:active:not(:focus-visible) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
     .detail-back:focus-visible,
     .detail-crumb:focus-visible,

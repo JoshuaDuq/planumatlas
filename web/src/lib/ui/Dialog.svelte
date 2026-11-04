@@ -206,10 +206,10 @@
     .dialog-header > :first-child {
       min-width: 0;
     }
-    /* The glyph, not its ground, meets the content edge. */
+    /* The glyph, not its ground, meets the content edge; a ground grown with reader text stops at the dialog's. */
     .dialog-header :global(.dialog-close) {
       flex: none;
-      margin-right: calc((16px - var(--control-height)) / 2);
+      margin-right: max(-1 * var(--dialog-inset), (16px - var(--control-height)) / 2);
     }
     /* Phones put it against the clipped screen edge, so its ring is drawn inside. */
     .dialog-header :global(.dialog-close:focus-visible) {

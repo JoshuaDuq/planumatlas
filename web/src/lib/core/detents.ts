@@ -82,28 +82,29 @@ export function nearestDetent(height: number, heights: DetentHeights): Detent {
 /** Pixels per millisecond; Vaul's snap-point threshold. */
 const FLICK_VELOCITY = 0.4;
 
+/** Scroll deceleration per millisecond: a throw at v px/ms would coast v·d/(1−d) px (Apple's projection). */
+const DECELERATION = 0.998;
+
 /**
  * Where a drag ends up.
  *
- * A deliberate flick moves one rest in the direction it was thrown even when the finger has
- * barely travelled, because waiting to cross the midpoint of a tall sheet makes the gesture feel
- * stuck. A slow drag is read by position alone, which is what makes fine adjustment possible.
+ * A flick is thrown, not dropped: the sheet goes to the rest nearest where it would coast to, so one
+ * hard throw crosses every rest, and never to a rest behind it, so a sheet still moving up never
+ * falls back. A slow drag is read by position alone, which is what makes fine adjustment possible.
  *
  * `velocity` is pixels per millisecond, positive when the sheet is growing.
  */
-export function settleDetent(
-  from: Detent,
-  height: number,
-  heights: DetentHeights,
-  velocity = 0,
-): Detent {
-  if (Math.abs(velocity) >= FLICK_VELOCITY) {
-    const index = DETENTS.indexOf(from);
-    const next = index + (velocity > 0 ? 1 : -1);
-    if (next >= 0 && next < DETENTS.length) return DETENTS[next]!;
-    return DETENTS[Math.min(Math.max(index, 0), DETENTS.length - 1)]!;
-  }
-  return nearestDetent(height, heights);
+export function settleDetent(height: number, heights: DetentHeights, velocity = 0): Detent {
+  if (Math.abs(velocity) < FLICK_VELOCITY) return nearestDetent(height, heights);
+  const projected = height + (velocity * DECELERATION) / (1 - DECELERATION);
+  const ahead = DETENTS.filter((name) =>
+    velocity > 0 ? heights[name] >= height : heights[name] <= height,
+  );
+  // Past the outer rest the throw has nowhere further to go.
+  if (!ahead.length) return velocity > 0 ? 'full' : 'peek';
+  return ahead.reduce((best, name) =>
+    Math.abs(heights[name] - projected) < Math.abs(heights[best] - projected) ? name : best,
+  );
 }
 
 /** Only the movement just before release counts as the throw. */

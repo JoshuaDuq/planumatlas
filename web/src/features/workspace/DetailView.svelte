@@ -118,7 +118,7 @@
   }
 </script>
 
-<div class="detail-body">
+<div class="detail-body scroll-fade">
   <div class="tab-group">
     <CircuitProfile model={circuits} />
     <CircuitStatus model={circuits} />

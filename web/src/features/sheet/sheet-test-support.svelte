@@ -57,7 +57,12 @@
 <div bind:this={announcer} role="status" aria-live="polite" class="visually-hidden"></div>
 <div id="app">
   <header style="height: 52px">Masthead</header>
-  <main id="viewport" bind:this={viewport}></main>
+  <!-- What stands on the sheet's edge in the stage, as the dock and the markings do. -->
+  <main id="viewport" bind:this={viewport}>
+    <div class="stage-dock"></div>
+    <div class="orientation"></div>
+    <div class="scale-bar"></div>
+  </main>
   <Sheet
     bind:this={sheet}
     lang={world.lang}
@@ -66,7 +71,7 @@
     {view}
     selection={world.selection}
     viewport={() => viewport}
-    onInsets={(insets, { settle }) => recorded.insets.push({ insets, settle })}
+    onInsets={(insets, motion) => recorded.insets.push({ insets, ...motion })}
     onDetent={(detent) => recorded.detents.push(detent)}
     onSelection={() => {
       recorded.calls.push('selection');

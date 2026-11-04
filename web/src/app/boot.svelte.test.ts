@@ -452,9 +452,11 @@ describe('the start, the published files and the teardown', () => {
   test('gives the engine the theme the reader chooses', async () => {
     const { app } = await boot();
     app.theme.choose('dark');
-    expect(
-      engine.calls.filter((call) => call.method === 'applyTheme').map((call) => call.args),
-    ).toContainEqual(['dark']);
+    await expect
+      .poll(() =>
+        engine.calls.filter((call) => call.method === 'applyTheme').map((call) => call.args),
+      )
+      .toContainEqual(['dark']);
   });
 });
 

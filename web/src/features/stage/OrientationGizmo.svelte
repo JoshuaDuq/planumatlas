@@ -6,7 +6,7 @@
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
   import type { CameraView, Engine, OrbitTurn } from '../../lib/engine/api.ts';
-  import { ORBIT_KEYS } from '../../lib/engine/render/keyboard-orbit.ts';
+  import { ORBIT_KEYS, ORBIT_STEP } from '../../lib/engine/render/keyboard-orbit.ts';
   import { projectAxes } from '../../lib/engine/render/orientation.ts';
   import type { Letter } from '../../lib/engine/render/orientation.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
@@ -202,6 +202,53 @@
     stage.retireHint();
     engine.camera.orbitBy(step);
   }
+
+  /** A held chevron turns at 90°/s from the press, by time; a tap's step is the first 56 ms of it. */
+  const HOLD_RATE = Math.PI / 2;
+  let holding: {
+    pointer: number;
+    step: OrbitTurn;
+    start: number;
+    turned: number;
+    frame: number;
+  } | null = null;
+
+  /** A press turns by the step at once, then on while it is held. */
+  function hold(event: PointerEvent, step: OrbitTurn) {
+    if (event.button !== 0 || holding) return;
+    // Captured, the lift or a cancel arrives here wherever the pointer has gone.
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    holding = {
+      pointer: event.pointerId,
+      step,
+      start: performance.now(),
+      turned: ORBIT_STEP,
+      frame: requestAnimationFrame(advance),
+    };
+    turn(step);
+  }
+
+  function advance() {
+    if (!holding) return;
+    const angle = (HOLD_RATE * (performance.now() - holding.start)) / 1000;
+    if (angle > holding.turned) {
+      const share = (angle - holding.turned) / ORBIT_STEP;
+      const { azimuth = 0, polar = 0 } = holding.step;
+      engine.camera.orbitBy({ azimuth: azimuth * share, polar: polar * share });
+      holding.turned = angle;
+    }
+    holding.frame = requestAnimationFrame(advance);
+  }
+
+  // Lifting, a cancel and the gizmo hiding each release the capture.
+  function letGo(event: PointerEvent) {
+    if (holding?.pointer !== event.pointerId) return;
+    cancelAnimationFrame(holding.frame);
+    holding = null;
+  }
+  $effect(() => () => {
+    if (holding) cancelAnimationFrame(holding.frame);
+  });
 </script>
 
 <div
@@ -251,13 +298,16 @@
   </div>
   <div role="group" aria-label={copy.orbitGroup}>
     {#each TURNS as { key, side, turn: step } (key)}
+      <!-- A pointer turns from its press; a key's click (detail 0) steps once. -->
       <IconButton
         icon="chevron-right"
         class="gizmo-turn"
         label={copy[key]}
         data-side={side}
         data-tooltip={copy[key]}
-        onclick={() => turn(step)}
+        onpointerdown={(event) => hold(event, step)}
+        onlostpointercapture={letGo}
+        onclick={(event) => event.detail === 0 && turn(step)}
       />
     {/each}
   </div>
@@ -368,9 +418,10 @@
         calc(var(--y, 0) * var(--gizmo-reach))
       );
       color: var(--overlay-ink);
-      font-size: var(--text-caption);
+      /* Drawn inside fixed circles, like the icons: the reader's text size would crowd them. */
+      font-size: 13px;
       font-weight: 600;
-      line-height: var(--lh-caption);
+      line-height: 18px;
     }
     /* A drawn circle of 18 px; pointing away, smaller and dimmer. The held view's is the accent. */
     .gizmo-letter > span {
@@ -407,6 +458,21 @@
         background: var(--overlay-ink);
       }
     }
+    /* Pressed, at once and in place: the disc sinks to the plate inside a lighter ring. */
+    .gizmo-letter:active:not([aria-pressed='true']) {
+      color: var(--overlay-ink);
+    }
+    .gizmo-letter:active:not([aria-pressed='true']) > span {
+      background-color: var(--overlay-plate-hover);
+      box-shadow: inset 0 0 0 1px var(--overlay-control-border);
+    }
+    .gizmo-centre:active:not([aria-pressed='true'])::before {
+      background: var(--overlay-control-border);
+    }
+    .gizmo-letter[aria-pressed='true']:active > span,
+    .gizmo-centre[aria-pressed='true']:active::before {
+      background-color: var(--overlay-accent-hover);
+    }
     /* Over the letters' targets where they meet: a chevron's glyph is the chevron's to the ring. */
     .orientation-gizmo :global(.icon-button) {
       position: absolute;
@@ -429,6 +495,10 @@
     }
     .orientation-gizmo :global(.icon-button:focus-visible) {
       color: var(--overlay-ink);
+    }
+    /* A finger held on a chevron turns the model; it must not start a pan that cancels the press. */
+    .orientation-gizmo :global(.gizmo-turn) {
+      touch-action: none;
     }
     /* Each chevron's target starts at the ring and grows outward; its glyph keeps to the ring. */
     .orientation-gizmo :global(.gizmo-turn[data-side='right']) {

@@ -41,6 +41,8 @@ let cleanups: (() => void)[];
 let onDock: () => void;
 /** Each placing state the dock has asked for, in order. */
 let placing: boolean[];
+/** Each popover plate the dock has reported for framing, in order. */
+let plates: { top: number | null; immediate: boolean }[];
 
 function liveState(overrides: Partial<Live>): Live {
   const state = $state<Live>({
@@ -101,7 +103,8 @@ async function mount(
     }),
   );
   placing = [];
-  const result = await render(Fixture, { stage, live, commands, width, height, placing });
+  plates = [];
+  const result = await render(Fixture, { stage, live, commands, width, height, placing, plates });
   stage.setGutter(20);
   stage.setViewport(engine.camera.visibleRect, engine.camera.hostSize);
   flushSync();
@@ -762,5 +765,154 @@ describe('placing a lesion from the Lesion popover', () => {
     await mount({ tractReference: true });
     expect(page.getByRole('button', { name: 'Lesion' }).elements()).toHaveLength(0);
     expect(placing.at(-1)).toBe(false);
+  });
+});
+
+describe('scrubbing a slider clears the plate off the picture', () => {
+  const slider = () => control('slider', 'Cortex opacity') as HTMLInputElement;
+  const row = () => slider().closest<HTMLElement>('.control-field')!;
+  /** Presses the slider's thumb with a pointer, as a finger or a mouse does. */
+  function hold(type: 'pointerdown' | 'pointerup' | 'pointercancel', target: EventTarget, id = 1) {
+    target.dispatchEvent(
+      new PointerEvent(type, { bubbles: true, isPrimary: true, button: 0, pointerId: id }),
+    );
+  }
+  /** Every element beside the held row, at each level up to the popover's body. */
+  function beside(): Element[] {
+    const found: Element[] = [];
+    const body = popover().querySelector('[role="dialog"]')!;
+    for (let node: Element = row(); node !== body; node = node.parentElement!) {
+      found.push(...[...node.parentElement!.children].filter((other) => other !== node));
+    }
+    return found;
+  }
+  const settled = (elements: Element[]) =>
+    Promise.all(elements.flatMap((element) => element.getAnimations()).map((a) => a.finished));
+
+  test('while the thumb is held everything but its row fades out, the row keeps its strip, and all come back', async () => {
+    await mount({ view: { ...liveState({}).view, hemisphere: 'left' } });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(popover().hasAttribute('data-instant')).toBe(false));
+    await settled([popover()]);
+    const label = row().querySelector('label')!.getBoundingClientRect();
+    const others = beside();
+    expect(others.length).toBeGreaterThanOrEqual(4);
+    hold('pointerdown', slider());
+    expect(popover().hasAttribute('data-scrubbing')).toBe(true);
+    expect(row().hasAttribute('data-held')).toBe(true);
+    await settled([popover(), ...others]);
+    for (const element of others) expect(getComputedStyle(element).opacity).toBe('0');
+    expect(getComputedStyle(popover()).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(getComputedStyle(popover()).borderTopColor).toBe('rgba(0, 0, 0, 0)');
+    // The strip is the plate's own ground under the row, and nothing in the row moved for it.
+    const plate = getComputedStyle(dock()).backgroundColor;
+    expect(getComputedStyle(row()).backgroundColor).toBe(plate);
+    expect(getComputedStyle(row()).borderTopLeftRadius).toBe('4px');
+    expect(row().querySelector('label')!.getBoundingClientRect()).toEqual(label);
+    hold('pointerup', window);
+    expect(popover().hasAttribute('data-scrubbing')).toBe(false);
+    expect(row().hasAttribute('data-held')).toBe(false);
+    await settled([popover(), ...others]);
+    for (const element of others) expect(getComputedStyle(element).opacity).toBe('1');
+    expect(getComputedStyle(popover()).backgroundColor).toBe(plate);
+    expect(others.flatMap((element) => element.getAnimations())).toEqual([]);
+  });
+
+  test('what changed waits for the release, so the plate never grows under the thumb', async () => {
+    await mount();
+    await press('button', 'Display');
+    expect(popover().querySelector('.changes')).toBeNull();
+    const height = popover().offsetHeight;
+    hold('pointerdown', slider());
+    live.view.cortexOpacity = 0.25;
+    flushSync();
+    expect(popover().querySelector('.changes')).toBeNull();
+    expect(popover().offsetHeight).toBe(height);
+    hold('pointerup', window);
+    flushSync();
+    expect(popover().querySelector('.changes p')!.textContent).toBe('Cortex 25%');
+  });
+
+  test('a cancelled pointer or a lost capture ends it; another pointer, and the keys, never start it', async () => {
+    await mount();
+    await press('button', 'Display');
+    hold('pointerdown', slider());
+    hold('pointerup', window, 2);
+    expect(popover().hasAttribute('data-scrubbing')).toBe(true);
+    hold('pointercancel', window);
+    expect(popover().hasAttribute('data-scrubbing')).toBe(false);
+    hold('pointerdown', slider());
+    slider().dispatchEvent(new PointerEvent('lostpointercapture', { pointerId: 1 }));
+    expect(popover().hasAttribute('data-scrubbing')).toBe(false);
+    // A press beside the slider, or the arrows on it, leave the plate as it is.
+    hold('pointerdown', control('checkbox', 'Show cortex'));
+    expect(popover().hasAttribute('data-scrubbing')).toBe(false);
+    slider().focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(commands.setCortexOpacity).toHaveBeenCalledOnce();
+    expect(popover().hasAttribute('data-scrubbing')).toBe(false);
+  });
+});
+
+describe('on a phone the camera frames the anatomy above the open popover', () => {
+  const host = () => document.getElementById('viewport')!;
+  /** The open plate's top edge on the stage host, as laid out (the entry scale aside). */
+  const plateTop = () =>
+    Math.round(popover().getBoundingClientRect().top - host().getBoundingClientRect().top);
+
+  test('the plate is reported once it is placed, follows it as it grows, and is withdrawn on close', async () => {
+    await page.viewport(390, 844);
+    try {
+      await mount({ phone: true }, { width: 390, height: 700 });
+      await press('button', 'Display');
+      await vi.waitFor(() => expect(plates).toHaveLength(1));
+      await Promise.all(
+        popover()
+          .getAnimations()
+          .map((a) => a.finished),
+      );
+      expect(plates[0]).toEqual({ top: plateTop(), immediate: false });
+      live.view.hemisphere = 'left';
+      flushSync();
+      await vi.waitFor(() => expect(plates).toHaveLength(2));
+      expect(plates[1]!.top).toBe(plateTop());
+      expect(plates[1]!.top!).toBeLessThan(plates[0]!.top!);
+      // Another tool in its place reports its own plate, with no gap between them.
+      await press('button', 'Lesion');
+      await vi.waitFor(() => expect(plates.at(-1)!.top).toBe(plateTop()));
+      expect(plates.some(({ top }) => top === null)).toBe(false);
+      // Escape closes the popover at once, and the camera with it.
+      await userEvent.keyboard('{Escape}');
+      await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: null, immediate: true }));
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
+  test('from the keyboard the camera moves at once, both ways; a tap that closes it glides', async () => {
+    await page.viewport(390, 844);
+    try {
+      await mount({ phone: true }, { width: 390, height: 700 });
+      await open('Display');
+      await vi.waitFor(() => expect(plates).toHaveLength(1));
+      expect(plates[0]).toEqual({ top: plateTop(), immediate: true });
+      await userEvent.keyboard('{Escape}');
+      await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: null, immediate: true }));
+      await open('Display');
+      await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: plateTop(), immediate: true }));
+      await userEvent.click(host(), { position: { x: 8, y: 8 } });
+      await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: null, immediate: false }));
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
+  test('a wider screen leaves the framing alone', async () => {
+    await mount();
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(tool('Display').getAttribute('aria-expanded')).toBe('true'));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await userEvent.keyboard('{Escape}');
+    expect(plates).toEqual([]);
   });
 });

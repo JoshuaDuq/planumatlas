@@ -34,7 +34,7 @@ describe('phone tokens (viewer/styles/phone.css:15)', () => {
 
   test('a coarse pointer on a desktop-sized viewport gets 44px rows, controls and tabs (phone.css:318)', async () => {
     await page.viewport(1280, 800);
-    expect(token('--row-height')).toBe('32px');
+    expect(resolved('height', '--row-height')).toBe('32px');
     // Touch emulation is what makes Chromium report a coarse primary pointer.
     await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try {
@@ -48,9 +48,38 @@ describe('phone tokens (viewer/styles/phone.css:15)', () => {
     }
   });
 
-  test('desktop keeps instrument density', async () => {
+  test('desktop keeps instrument density at 16px text, and rows, controls and the rail grow with reader text', async () => {
     await page.viewport(1280, 800);
-    expect(token('--control-height')).toBe('32px');
-    expect(token('--row-height')).toBe('32px');
+    const sizes = (rootPx: string) => {
+      document.documentElement.style.fontSize = rootPx;
+      return ['--control-height', '--row-height'].map((name) => resolved('height', name));
+    };
+    try {
+      expect(sizes('16px')).toEqual(['32px', '32px']);
+      expect(resolved('width', '--rail-width')).toBe('360px');
+      expect(sizes('20px')).toEqual(['40px', '40px']);
+      expect(resolved('width', '--rail-width')).toBe('450px');
+      // Never more than half the window.
+      expect(sizes('32px')).toEqual(['64px', '64px']);
+      expect(resolved('width', '--rail-width')).toBe('640px');
+      // 801–1000px: 320px at 16px text, at most 40% of the window.
+      await page.viewport(900, 800);
+      sizes('16px');
+      expect(resolved('width', '--rail-width')).toBe('320px');
+      sizes('20px');
+      expect(resolved('width', '--rail-width')).toBe('360px');
+    } finally {
+      document.documentElement.style.fontSize = '';
+    }
   });
 });
+
+/** The pixel length a token gives a probe's `property`. */
+function resolved(property: 'height' | 'width', name: string): string {
+  const probe = document.createElement('div');
+  probe.style[property] = `var(${name})`;
+  document.body.append(probe);
+  const value = getComputedStyle(probe)[property];
+  probe.remove();
+  return value;
+}

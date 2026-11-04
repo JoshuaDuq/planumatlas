@@ -459,7 +459,7 @@
         onclick={() => mpr.close({ instant: false })}
       />
     </div>
-    <div class="mpr-dock-body">
+    <div class="mpr-dock-body scroll-fade">
       {@render body()}
     </div>
   </section>

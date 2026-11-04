@@ -369,6 +369,36 @@
       overscroll-behavior-x: contain;
       scrollbar-width: none;
     }
+    /* Text too large for the bar fades it over the inset on the side with tabs beyond, scroll-driven. */
+    @supports (animation-timeline: scroll()) {
+      .workspace-tabs {
+        mask-repeat: no-repeat;
+        animation: tabs-beyond linear both;
+        animation-timeline: scroll(self inline);
+      }
+    }
+    @keyframes tabs-beyond {
+      from {
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          #000 var(--panel-inset) calc(100% - var(--panel-inset)),
+          transparent
+        );
+        mask-size: calc(100% + var(--panel-inset)) 100%;
+        mask-position: calc(-1 * var(--panel-inset)) 0;
+      }
+      to {
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          #000 var(--panel-inset) calc(100% - var(--panel-inset)),
+          transparent
+        );
+        mask-size: calc(100% + var(--panel-inset)) 100%;
+        mask-position: 0 0;
+      }
+    }
     .workspace-tab {
       position: relative;
       display: flex;
@@ -391,6 +421,12 @@
       text-align: center;
       white-space: nowrap;
       cursor: pointer;
+      transition: background-color var(--ui-transition) var(--ease-ui);
+    }
+    /* A pointer press tints the tab at once, before the mode it chooses arrives; the ink never fades. */
+    .workspace-tab:active:not(:focus-visible) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
     /* The bold label's width is held, so choosing a mode moves nothing. */
     .tab-width {

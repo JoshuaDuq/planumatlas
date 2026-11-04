@@ -15,6 +15,7 @@ import { createStageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import type { CutMode, Language, Manifest, Paint, SurfaceColor } from '../../lib/types/index.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
+import { whilePressed } from '../../lib/ui/press-test-support.ts';
 import { createSectionControls } from './section-controls.svelte.ts';
 import type { SectionControls, SectionControlsDeps } from './section-controls.svelte.ts';
 import Fixture from './sections-test-support.svelte';
@@ -168,6 +169,18 @@ describe('the Section popover', () => {
     expect(active()).toBe(tool('Section'));
     expect(cut.mock.calls.map(([plane]) => plane)).toEqual(['coronal']);
     await vi.waitFor(() => expect(group()?.getAttribute('aria-label')).toBe('Coronal section'));
+  });
+
+  test('a pointer press on a plane takes the thumb fill on the stage plate at once, and cuts nothing', async () => {
+    await mount();
+    await openSection();
+    const [full, sagittal] = locate('toolbar', 'Cutting plane').getByRole('button').elements();
+    const raised = getComputedStyle(full!).backgroundColor;
+    const style = getComputedStyle(sagittal!);
+    expect(style.backgroundColor).not.toBe(raised);
+    await whilePressed(sagittal!, () => expect(style.backgroundColor).toBe(raised));
+    expect(cut).not.toHaveBeenCalled();
+    expect(tool('Section').getAttribute('aria-expanded')).toBe('true');
   });
 
   test('a pointer choice of the plane on screen closes the popover and cuts nothing', async () => {

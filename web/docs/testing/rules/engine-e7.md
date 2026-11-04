@@ -192,7 +192,7 @@ Shared expectations. "The anatomy fits" means every drawn vertex projects inside
 
 ### FACADE-20 · A wheel step's movement still counts just after the step ends
 
-- **Rule:** A wheel step reports its end before the camera moves on the next frame. So a move up to 250 ms after a gesture ends still counts as the reader's and releases the view. A move well after that (an eased framing, damping coming to rest) does not.
+- **Rule:** A wheel step reports its end before the camera moves on the next frame. So a move up to 250 ms after a gesture ends still counts as the reader's and releases the view. A move well after that (an eased framing, a coast coming to rest) does not.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:588-591`

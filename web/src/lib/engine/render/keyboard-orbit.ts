@@ -39,18 +39,12 @@ export const DOLLY_KEYS: Readonly<Record<'+' | '=' | '-', number>> = {
   '-': DOLLY_STEP,
 };
 
-/** One arrow press, applied at once: the controls' damping would ease it, and key presses do not animate. */
+/** One arrow press, applied at once: the controls are undamped, and key presses do not animate. */
 export function turnFromKeyboard(
-  controls: Pick<OrbitControls, 'enableDamping' | 'rotateLeft' | 'rotateUp'>,
+  controls: Pick<OrbitControls, 'rotateLeft' | 'rotateUp'>,
   { azimuth = 0, polar = 0 }: OrbitDelta,
 ): void {
-  const damping = controls.enableDamping;
-  controls.enableDamping = false;
-  try {
-    // OrbitControls subtracts what it is given from both angles.
-    if (azimuth) controls.rotateLeft(-azimuth);
-    if (polar) controls.rotateUp(-polar);
-  } finally {
-    controls.enableDamping = damping;
-  }
+  // OrbitControls subtracts what it is given from both angles.
+  if (azimuth) controls.rotateLeft(-azimuth);
+  if (polar) controls.rotateUp(-polar);
 }

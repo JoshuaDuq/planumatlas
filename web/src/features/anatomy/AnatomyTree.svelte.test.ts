@@ -7,6 +7,7 @@ import { cleanup, render } from 'vitest-browser-svelte';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
+import { whilePressed } from '../../lib/ui/press-test-support.ts';
 import { GROUPS } from './anatomy-tree-test-support.ts';
 import Fixture from './anatomy-tree-test-support.svelte';
 
@@ -440,6 +441,60 @@ describe('Expand all', () => {
   test('French', () => {
     mount({ lang: 'fr' });
     expect(page.getByRole('button', { name: 'Tout déplier' }).element()).toBeTruthy();
+  });
+});
+
+describe('press', () => {
+  const ground = (element: Element) => getComputedStyle(element).backgroundColor;
+  const resolved = () => {
+    const probe = document.body.appendChild(document.createElement('span'));
+    probe.style.cssText = 'background: var(--surface-pressed); color: var(--text-primary)';
+    const { backgroundColor, color } = getComputedStyle(probe);
+    probe.remove();
+    return { pressed: backgroundColor, ink: color };
+  };
+
+  test('a group row, an eye and Expand all tint at once; an eye leaves its row', async () => {
+    mount({ open: ALL });
+    const { pressed } = resolved();
+    const group = row('cortex:Frontal');
+    const middle = group.getBoundingClientRect();
+    expect(
+      document
+        .elementFromPoint(middle.x + middle.width / 2, middle.y + middle.height / 2)!
+        .closest('button'),
+    ).toBeNull();
+    await whilePressed(group, () => expect(ground(group)).toBe(pressed));
+    const eye = eyes('cortex:Frontal')[0]!;
+    await whilePressed(eye, () => {
+      expect(ground(eye)).toBe(pressed);
+      expect(ground(group)).not.toBe(pressed);
+    });
+    const expandAll = page.getByRole('button', { name: /^(Expand|Collapse) all$/ }).element();
+    await whilePressed(expandAll, () => expect(ground(expandAll)).toBe(pressed));
+  });
+
+  // Without hover, nothing else colours them: a finger's press is the only feedback.
+  test('under a coarse pointer a held eye takes the pressed ink, and a caption takes no tint', async () => {
+    await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    try {
+      expect(matchMedia('(hover: hover)').matches).toBe(false);
+      mount({ open: ALL });
+      const { pressed, ink } = resolved();
+      const eye = eyes('cortex:Frontal')[0]!;
+      expect(getComputedStyle(eye).color).not.toBe(ink);
+      await whilePressed(eye, () => {
+        expect(ground(eye)).toBe(pressed);
+        expect(getComputedStyle(eye).color).toBe(ink);
+      });
+      const caption = row('section:cortex');
+      await whilePressed(caption, () => {
+        expect(caption.matches(':active')).toBe(true);
+        expect(ground(caption)).not.toBe(pressed);
+      });
+    } finally {
+      await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    }
   });
 });
 

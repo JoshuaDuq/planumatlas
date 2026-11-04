@@ -231,6 +231,21 @@
   .visibility-control:focus-visible {
     outline-offset: 0;
   }
+  .visibility-control,
+  .tree-toggle-all {
+    transition: background-color var(--ui-transition) var(--ease-ui);
+  }
+  /*
+   * A pointer press tints at once and lets go over the colour feedback (U7's rows do the same). Group
+   * rows and section captions set their own ground here, so they answer here; a caption is no control.
+   */
+  .anatomy-tree .row[aria-expanded]:active:not(:focus-visible, :has(button:active)) {
+    background: var(--surface-pressed);
+    transition-duration: 0s;
+  }
+  .anatomy-tree .row:has(.section-label):active {
+    background: transparent;
+  }
   .anatomy-tree .row[data-selected='true'] .visibility-control,
   .anatomy-tree .row[data-selected='true'] .visibility-side {
     color: var(--accent);
@@ -312,6 +327,13 @@
     .anatomy-tree .row[aria-level='2'] .visibility-control[data-state='hidden'] svg {
       opacity: 1;
     }
+  }
+  /* After the hover rules, which share its weight: a held eye or command shows the press. */
+  .visibility-control:active:not(:disabled, :focus-visible),
+  .tree-toggle-all:active:not(:focus-visible) {
+    background: var(--surface-pressed);
+    color: var(--text-primary);
+    transition-duration: 0s;
   }
   /* Touch keeps every eye, and gives the count its own column, so every section reserves Mid. */
   @media not ((hover: hover) and (pointer: fine)) {

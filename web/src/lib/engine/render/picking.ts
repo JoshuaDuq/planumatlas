@@ -51,7 +51,8 @@ interface Press {
  *
  * Hover names what the pointer is over; a click chooses it. What made hover
  * worth removing once was the raycast it cost on every frame of an orbit, so
- * hover answers at most once a frame and never while a button is down.
+ * hover never answers while a button is down, and answers the first move of a
+ * frame at once and the rest of that frame's moves once, at its end.
  */
 export function createPicker<Region extends { id: string }>({
   domElement,
@@ -136,25 +137,36 @@ export function createPicker<Region extends { id: string }>({
     if (id) onSelect(id);
   };
 
+  function hoverAt({ clientX, clientY }: { clientX: number; clientY: number }) {
+    const region = regionAt({ clientX, clientY });
+    const rect = domElement.getBoundingClientRect();
+    hovering = Boolean(region);
+    onHover?.(region, { x: clientX - rect.left, y: clientY - rect.top });
+    // OrbitControls writes this inline too, so a stylesheet cannot reach it;
+    // `grab` is the resting cursor it is configured with in scene.ts.
+    domElement.style.cursor = region ? 'pointer' : 'grab';
+  }
+
   const onPointerMove = (event: PointerEvent) => {
     // A finger has no hover: it is either pressing or absent, and a stale
     // label left behind by the last tap would name a region the reader is no
     // longer pointing at. Held buttons are an orbit, which hover must not cost.
     if (event.pointerType === 'touch' || event.buttons) return;
-    pendingPoint = { clientX: event.clientX, clientY: event.clientY };
-    if (frame !== null) return;
+    const point = { clientX: event.clientX, clientY: event.clientY };
+    if (frame !== null) {
+      pendingPoint = point;
+      return;
+    }
+    // Answered now, the ring's redraw is asked for before this frame's animation callbacks run,
+    // so it lands in the frame that shows the name; from inside one it would wait a frame.
     frame = requestAnimationFrame(() => {
       frame = null;
-      const { clientX, clientY } = pendingPoint!;
+      if (!pendingPoint) return;
+      const latest = pendingPoint;
       pendingPoint = null;
-      const region = regionAt({ clientX, clientY });
-      const rect = domElement.getBoundingClientRect();
-      hovering = Boolean(region);
-      onHover?.(region, { x: clientX - rect.left, y: clientY - rect.top });
-      // OrbitControls writes this inline too, so a stylesheet cannot reach it;
-      // `grab` is the resting cursor it is configured with in scene.ts.
-      domElement.style.cursor = region ? 'pointer' : 'grab';
+      hoverAt(latest);
     });
+    hoverAt(point);
   };
 
   const clearPress = () => {

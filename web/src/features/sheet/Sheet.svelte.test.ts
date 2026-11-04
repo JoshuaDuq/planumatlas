@@ -3,10 +3,11 @@
 // desktop to phone transition after load that G1's review asked H6 to cover (#4, issuecomment-6405672591).
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import axe from 'axe-core';
-import { page, userEvent } from 'vitest/browser';
+import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { expectAxeClean, expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
+import { SHEET_RESPONSE, angularFrequency, noOvershoot, springAt } from '../../lib/core/spring.ts';
 import { newWorld, type World } from '../workspace/workspace-test-world.ts';
 import Fixture from './sheet-test-support.svelte';
 import { newRecorded, type Recorded } from './sheet-test-support.ts';
@@ -29,17 +30,10 @@ const stageBox = () => box(el('viewport'));
 /** The sheet's written size along its axis. */
 const span = () => parseFloat(sideways() ? sheet().style.width : sheet().style.height);
 const sideways = () => innerWidth > innerHeight && innerHeight <= 480;
-/** Animations still playing; a finished one that holds its end state stays listed, so it is skipped. */
-const playing = (target: Element | Document) =>
-  target.getAnimations().filter((animation) => animation.playState !== 'finished');
-/**
- * The sheet has glided to where it was told to be. A transition that a newer one replaces rejects
- * its `finished` with an AbortError, so every one is waited on and the sheet is looked at again.
- */
-const rested = async () => {
-  for (let running = playing(sheet()); running.length > 0; running = playing(sheet()))
-    await Promise.allSettled(running.map((animation) => animation.finished));
-};
+/** How far the drawn sheet still is from the rest it reported, as the stage chrome reads it. */
+const lag = () => el('viewport').style.getPropertyValue('--sheet-lag');
+/** The sheet has sprung to where it was told to be: nothing is left between it and its rest. */
+const rested = () => vi.waitFor(() => expect(lag()).toBe(''), { timeout: 2000 });
 const contrast = (a: string, b: string) => {
   const luminance = (colour: string) => {
     const [r, g, bl] = colour
@@ -66,8 +60,11 @@ async function resize(width: number, height: number) {
   // The new size reaches the frame in a later rendering step.
   await expect.poll(() => [innerWidth, innerHeight]).toEqual([width, height]);
 }
-/** The sheet's 240 ms glide is zeroed for every case but the ones that test motion. */
-const glide = () => document.documentElement.style.removeProperty('--camera-transition');
+/** Reduced motion puts the sheet on its rest at once: every case but the ones that test motion runs so. */
+const reduceMotion = (value: 'reduce' | '') =>
+  cdp().send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-motion', value }],
+  });
 const lastInsets = (recorded: Recorded) => recorded.insets.at(-1)!;
 
 interface Mounted {
@@ -125,16 +122,21 @@ function grip(target: Element = handle(), id = 1) {
   };
 }
 
+/** A pointer's click, as the handle sees one: `detail` 1, where Enter's click has 0. */
+const pointerClick = (target: Element) =>
+  target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+
 const halfSpan = () => Math.round((sideways() ? innerWidth : stageBox().height) * 0.5);
 const fullSpan = () => (sideways() ? Math.round(innerWidth * 0.62) : stageBox().height - 128);
 const dragging = () => sheet().dataset.dragging;
 
-beforeEach(() => {
-  // Every change of rest would otherwise wait out the glide, and a click waits for the handle to stop.
-  document.documentElement.style.setProperty('--camera-transition', '0s');
+beforeEach(async () => {
+  // Every change of rest would otherwise wait out the spring.
+  await reduceMotion('reduce');
 });
-afterEach(() => {
+afterEach(async () => {
   cleanup();
+  await reduceMotion('');
   document.documentElement.removeAttribute('style');
   document.head.querySelectorAll('style[data-test]').forEach((style) => style.remove());
 });
@@ -269,19 +271,26 @@ describe('the handle', () => {
     expect(recorded.detents).toEqual(['half', 'full', 'peek']);
   });
 
-  test('a keyboard activation moves the sheet without a glide, a pointer one restores motion', async () => {
+  test('a keyboard activation puts the sheet on its rest at once, a pointer one springs there', async () => {
+    await reduceMotion('');
     await mount();
+    const peek = span();
     handle().focus();
     await userEvent.keyboard('{Enter}');
     expect(sheet().dataset.detent).toBe('half');
-    expect(sheet().hasAttribute('data-instant')).toBe(true);
-    await userEvent.click(handle());
+    expect(span()).toBe(halfSpan());
+    expect(lag()).toBe('');
+    pointerClick(handle());
     expect(sheet().dataset.detent).toBe('full');
-    expect(sheet().hasAttribute('data-instant')).toBe(false);
+    // Nothing has moved before the spring's first frame, and the stage chrome is held where the sheet is.
+    expect(span()).toBe(halfSpan());
+    expect(lag()).toBe(`${halfSpan() - fullSpan()}px`);
+    await rested();
+    expect(span()).toBe(fullSpan());
     handle().focus();
     await userEvent.keyboard(' ');
-    expect(sheet().dataset.detent).toBe('peek');
-    expect(sheet().hasAttribute('data-instant')).toBe(true);
+    expect(span()).toBe(peek);
+    expect(lag()).toBe('');
   });
 
   test('it is a named native button, the name is French in French, and Escape leaves the sheet alone', async () => {
@@ -322,27 +331,35 @@ describe('dragging the grip', () => {
     expect(announced()).toBe('Panel half open');
   });
 
-  test('a flick moves one rest in its direction however little it travelled, and stops at the ends', async () => {
+  test('a flick is thrown to the rest it would coast to however little it travelled, and stops at the ends', async () => {
     const { stage } = await mount();
     await rested();
     const peek = span();
-    // 30 px in 10 ms is 3 px/ms, though 30 px is nearer peek than half.
+    // 30 px in 60 ms is 0.5 px/ms, which coasts 250 px: half, though 30 px is nearer peek.
     let finger = grip();
-    finger.move(30, 10);
-    finger.release(30, 20);
+    finger.move(30, 60);
+    finger.release(30, 70);
     expect(span()).toBe(halfSpan());
     finger = grip();
-    finger.move(-30, 10);
-    finger.release(-30, 20);
+    finger.move(-30, 60);
+    finger.release(-30, 70);
     expect(span()).toBe(peek);
-    await userEvent.click(handle());
-    await userEvent.click(handle());
+    // 30 px in 10 ms, 3 px/ms, crosses half to full in one throw.
+    finger = grip();
+    finger.move(30, 10);
+    finger.release(30, 20);
+    expect(span()).toBe(fullSpan());
     expect(stage.sheetFull).toBe(true);
     finger = grip();
     finger.move(40, 10);
     finger.release(40, 20);
     expect(span()).toBe(fullSpan());
     expect(stage.sheetFull).toBe(true);
+    // Thrown down from full, it passes half to peek.
+    finger = grip();
+    finger.move(-30, 10);
+    finger.release(-30, 20);
+    expect(span()).toBe(peek);
   });
 
   test('a throw that stopped before the finger lifted is not a flick', async () => {
@@ -554,12 +571,13 @@ describe('the selection in the grip', () => {
     await vi.waitFor(() => expect(span()).toBe(bare));
   });
 
-  test('Enter on the strip raises peek to half, opens the detail and moves focus to Back, silently', async () => {
+  test('Enter on the strip raises peek to half at once, opens the detail and moves focus to Back, silently', async () => {
+    await reduceMotion('');
     const { recorded } = await mount(PHONE, { selection: SELECTION });
     strip().focus();
     await userEvent.keyboard('{Enter}');
     expect(span()).toBe(halfSpan());
-    expect(sheet().hasAttribute('data-instant')).toBe(true);
+    expect(lag()).toBe('');
     expect(recorded.calls).toContain('selection');
     await vi.waitFor(() => expect(focused()).toBe(document.querySelector('.detail-back')));
     expect(sheet().dataset.view).toBe('detail');
@@ -684,12 +702,14 @@ describe('the tabs and the panels in the sheet', () => {
 
 describe('entering and leaving the shell', () => {
   test('with focus in a panel, a resting sheet is lifted to half at once, so the control stays, silently', async () => {
+    await reduceMotion('');
     const { recorded } = await mount(DESKTOP);
     const row = document.querySelector<HTMLElement>('[data-row]')!;
     row.focus();
     await resize(...PHONE);
     await vi.waitFor(() => expect(sheet().dataset.detent).toBe('half'));
-    expect(sheet().hasAttribute('data-instant')).toBe(true);
+    expect(span()).toBe(halfSpan());
+    expect(lag()).toBe('');
     expect(focused()).toBe(row);
     expect(getComputedStyle(row).visibility).toBe('visible');
     expect(recorded.detents).toEqual([]);
@@ -701,7 +721,6 @@ describe('entering and leaving the shell', () => {
     tab('Anatomy').element().focus();
     await resize(...PHONE);
     await vi.waitFor(() => expect(sheet().dataset.detent).toBe('peek'));
-    expect(sheet().hasAttribute('data-instant')).toBe(false);
   });
 
   test('a resize on the phone re-measures the rest and says nothing', async () => {
@@ -724,7 +743,7 @@ describe('entering and leaving the shell', () => {
   });
 });
 
-describe('text size and motion', () => {
+describe('text size', () => {
   test('peek follows the text: 200 % text and loosened spacing grow it so the tabs are never cut off', async () => {
     await mount();
     await rested();
@@ -745,27 +764,171 @@ describe('text size and motion', () => {
       box(tablist()).top + 1,
     );
   });
+});
 
-  test('a settled sheet glides, a keyboard activation does not, and reduced motion leaves a fade', async () => {
-    glide();
-    await mount();
-    expect(getComputedStyle(sheet()).transitionProperty).toBe('height');
-    await userEvent.click(handle());
-    expect(getComputedStyle(sheet()).transitionDuration).toBe('0.24s');
-    await withMedia([{ name: 'prefers-reduced-motion', value: 'reduce' }], () => {
-      expect(getComputedStyle(sheet()).transitionProperty).toBe('opacity');
-    });
-    handle().focus();
-    await userEvent.keyboard('{Enter}');
-    expect(getComputedStyle(sheet()).transitionDuration).toBe('0s');
+describe('the spring', () => {
+  const stub = (name: string) => el('viewport').querySelector<HTMLElement>(`.${name}`)!;
+  // The spring runs on a clock the test turns one 60 Hz frame at a time, so a loaded runner skips none.
+  const frame = async () => {
+    vi.advanceTimersToNextFrame();
+    return performance.now();
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance'] });
+    return reduceMotion('');
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  test('a dragged sheet follows the finger with no transition', async () => {
-    glide();
+  test('released, the sheet springs on at the speed of the finger, tells the stage once, and never passes its rest', async () => {
+    const { recorded } = await mount();
+    await rested();
+    const peek = span();
+    const finger = grip();
+    // 0.5 px/ms coasts to half.
+    finger.move(30, 60);
+    const reports = recorded.insets.length;
+    const began = performance.now();
+    finger.release(30, 70);
+    const distance = halfSpan() - (peek + 30);
+    const start = noOvershoot((0.5 * 1000) / distance, SHEET_RESPONSE);
+    expect(start).toBeGreaterThan(0);
+    expect(recorded.insets.length).toBe(reports + 1);
+    expect(lastInsets(recorded)).toEqual({
+      insets: { top: 0, right: 0, bottom: halfSpan(), left: 0 },
+      settle: true,
+      velocity: start,
+    });
+    const spans = [];
+    for (let at = await frame(); lag() !== ''; at = await frame()) {
+      // Where a spring that left at the finger's speed is now; one that started from rest is 5 px behind it.
+      const expected =
+        peek +
+        30 +
+        distance * springAt((performance.now() - began) / 1000, SHEET_RESPONSE, start).value;
+      expect(Math.abs(span() - expected), `at ${Math.round(at)}`).toBeLessThanOrEqual(2);
+      spans.push(span());
+    }
+    expect(spans.length).toBeGreaterThan(5);
+    for (const [index, value] of spans.entries()) {
+      expect(value).toBeGreaterThanOrEqual(index ? spans[index - 1]! : peek + 30);
+      expect(value).toBeLessThanOrEqual(halfSpan());
+    }
+    expect(span()).toBe(halfSpan());
+    // Each frame moved the sheet; none told the stage again.
+    expect(recorded.insets.length).toBe(reports + 1);
+  });
+
+  test('a throw faster than the spring is capped so it never overshoots', async () => {
+    const { recorded } = await mount();
+    await rested();
+    // Nearly to half in 10 ms: full is 290 px away, and 28 px/ms would cover it 97 times a second.
+    const travel = halfSpan() - span() - 20;
+    const finger = grip();
+    finger.move(travel, 10);
+    finger.release(travel, 20);
+    expect(sheet().dataset.detent).toBe('full');
+    expect(lastInsets(recorded).velocity).toBe(angularFrequency(SHEET_RESPONSE));
+    let highest = 0;
+    while (lag() !== '') {
+      await frame();
+      highest = Math.max(highest, span());
+    }
+    expect(highest).toBe(fullSpan());
+  });
+
+  test('a press mid-spring catches the sheet where it is drawn, and a drag goes on from there', async () => {
+    const { recorded } = await mount();
+    await rested();
+    const peek = span();
+    pointerClick(handle());
+    for (let i = 0; i < 4; i++) await frame();
+    const caught = span();
+    expect(caught).toBeGreaterThan(peek);
+    expect(caught).toBeLessThan(halfSpan());
+    const finger = grip();
+    expect(lag()).toBe('');
+    expect(lastInsets(recorded)).toEqual({
+      insets: { top: 0, right: 0, bottom: caught, left: 0 },
+      settle: false,
+    });
+    for (let i = 0; i < 3; i++) await frame();
+    expect(span()).toBe(caught);
+    finger.move(20, 10);
+    expect(span()).toBe(caught + 20);
+    finger.release(20, 400);
+    expect(sheet().dataset.detent).toBe('peek');
+    await rested();
+    expect(span()).toBe(peek);
+  });
+
+  test('a tap that catches the sheet still steps the handle, and a press that never drags lets it go on', async () => {
     await mount();
     await rested();
+    const peek = span();
+    pointerClick(handle());
+    for (let i = 0; i < 4; i++) await frame();
+    let finger = grip();
+    finger.release(0, 5);
+    pointerClick(handle());
+    expect(sheet().dataset.detent).toBe('full');
+    await rested();
+    expect(span()).toBe(fullSpan());
+    // Caught on its way down by a press on a tab that never drags: it goes on to peek.
+    pointerClick(handle());
+    for (let i = 0; i < 4; i++) await frame();
+    expect(span()).toBeGreaterThan(peek);
+    finger = grip(tab('Functions').element());
+    finger.release(0, 5);
+    await rested();
+    expect(span()).toBe(peek);
+  });
+
+  test('the dock and the markings on the edge of the sheet ride the spring frame by frame', async () => {
+    await mount();
+    await rested();
+    pointerClick(handle());
+    let seen = 0;
+    while (lag() !== '') {
+      const behind = `${span() - halfSpan()}px`;
+      expect(getComputedStyle(stub('stage-dock')).marginBottom).toBe(behind);
+      expect(getComputedStyle(stub('orientation')).marginBottom).toBe(behind);
+      seen += 1;
+      await frame();
+    }
+    expect(seen).toBeGreaterThan(3);
+    expect(getComputedStyle(stub('stage-dock')).marginBottom).toBe('0px');
+    // Sideways the sheet grows across, and so does what follows it, the scale bar included.
+    await resize(...SIDEWAYS);
+    await vi.waitFor(() => expect(sheet().style.width).not.toBe(''));
+    pointerClick(handle());
+    expect(sheet().dataset.detent).toBe('full');
+    const behind = `${span() - fullSpan()}px`;
+    expect(behind).not.toBe('0px');
+    for (const name of ['stage-dock', 'orientation', 'scale-bar']) {
+      expect(getComputedStyle(stub(name)).marginLeft, name).toBe(behind);
+      expect(getComputedStyle(stub(name)).marginBottom, name).toBe('0px');
+    }
+  });
+
+  test('reduced motion puts the sheet on its rest at once', async () => {
+    await reduceMotion('reduce');
+    await mount();
+    pointerClick(handle());
+    expect(span()).toBe(halfSpan());
+    expect(lag()).toBe('');
+  });
+
+  test('a dragged sheet follows the finger with no spring', async () => {
+    const { recorded } = await mount();
+    await rested();
+    const peek = span();
     grip().move(100, 10);
-    expect(getComputedStyle(sheet()).transitionDuration).toBe('0s');
+    expect(span()).toBe(peek + 100);
+    expect(lag()).toBe('');
+    expect(lastInsets(recorded)).toMatchObject({ settle: false });
   });
 });
 
@@ -855,11 +1018,13 @@ describe('legacy cases ported, and the notice', () => {
   });
 
   test('a keyboard activation of a tab raises a resting sheet without a glide (sheet.test.js:215-222)', async () => {
+    await reduceMotion('');
     await mount();
     tab('Functions').element().focus();
     await userEvent.keyboard('{Enter}');
     expect(sheet().dataset.detent).toBe('half');
-    expect(sheet().hasAttribute('data-instant')).toBe(true);
+    expect(span()).toBe(halfSpan());
+    expect(lag()).toBe('');
   });
 
   test('a notice in the grip grows the peek, is on screen, drags the sheet, and shrinks it again', async () => {

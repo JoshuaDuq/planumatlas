@@ -147,7 +147,7 @@
   </div>
 </div>
 
-<div class="browser" hidden={!model.exploring}>
+<div class="browser scroll-fade" hidden={!model.exploring}>
   <div id="{uid}-list" role="group" aria-label={copy.list} bind:this={listElement}>
     {#if content.overview}
       <ul class="rows">
@@ -337,6 +337,7 @@
       text-align: left;
       /* Arrow navigation keeps the focused row below its sticky group heading. */
       scroll-margin-block-start: calc(var(--lh-caption) + var(--space-6));
+      transition: background-color var(--ui-transition) var(--ease-ui);
     }
     .function-row:focus-visible {
       outline-offset: -2px;
@@ -421,6 +422,11 @@
       .function-row:is(:hover, :focus-visible) .group-count {
         visibility: hidden;
       }
+    }
+    /* After the hover rule, which shares its weight: a pointer press tints the row at once. */
+    .function-row:active:not([data-selected='true'], :focus-visible) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
     @media (pointer: coarse) {
       .function-row {

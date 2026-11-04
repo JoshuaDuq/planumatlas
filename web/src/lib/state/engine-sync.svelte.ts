@@ -60,17 +60,18 @@ export function syncPaint(
 /**
  * Pushes the view's look to the stage (app.js:1618-1630, 1638-1639): the language, whether the tract
  * reference is shown alone, and the atlas comparison's outline, which a cut or the reference hides.
+ * Each effect reads primitives only, so a keystroke or a tab that changes none of them draws nothing.
  */
 export function syncPresentation(
   engine: Pick<Engine, 'present' | 'comparison'>,
   view: ViewStore,
   engineState: EngineSync,
 ) {
-  $effect(() => {
-    const referenceOnly = isIndependentTractReference(view.current);
-    engine.present({ lang: view.current.lang, referenceOnly });
-    engine.comparison.setVisible(engineState.sections.mode === 'off' && !referenceOnly);
-  });
+  const lang = $derived(view.current.lang);
+  const referenceOnly = $derived(isIndependentTractReference(view.current));
+  const comparisonShown = $derived(engineState.sections.mode === 'off' && !referenceOnly);
+  $effect(() => engine.present({ lang, referenceOnly }));
+  $effect(() => engine.comparison.setVisible(comparisonShown));
 }
 
 /**

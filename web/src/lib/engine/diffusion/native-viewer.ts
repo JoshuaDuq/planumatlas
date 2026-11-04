@@ -1,5 +1,7 @@
 import {
   Box3,
+  BufferAttribute,
+  BufferGeometry,
   GreaterDepth,
   Group,
   LineBasicMaterial,
@@ -7,7 +9,7 @@ import {
   Mesh,
   MeshStandardMaterial,
 } from 'three';
-import type { BufferGeometry, Object3D, Plane } from 'three';
+import type { Object3D, Plane } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import type { TractBundle, TractCatalog } from '../../core/diffusion/catalogs.ts';
@@ -79,6 +81,35 @@ function requireMinimum(value: number): void {
   if (!Number.isFinite(value) || value < 1) {
     throw new RangeError('Minimum streamline length must be at least 1 mm.');
   }
+}
+
+/** A bundle's streamlines, and where a landmark's run behind the anatomy, their faint remainder. */
+function lineMaterials(clippingPlanes: Plane[]) {
+  return {
+    shown: new LineBasicMaterial({ vertexColors: true, toneMapped: false, clippingPlanes }),
+    // Transparent, so it draws after every opaque surface it is tested against.
+    hidden: new LineBasicMaterial({
+      vertexColors: true,
+      toneMapped: false,
+      clippingPlanes,
+      transparent: true,
+      opacity: HIDDEN_OPACITY,
+      depthFunc: GreaterDepth,
+      depthWrite: false,
+    }),
+  };
+}
+
+/**
+ * One segment in each of the bundles' materials, uncut, for compiling their programs before the
+ * Tracts tab first draws. Never disposed: disposing a material releases the programs it compiled.
+ */
+export function tractProgramSamples(): LineSegments[] {
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(new Float32Array(6), 3));
+  geometry.setAttribute('color', new BufferAttribute(new Uint16Array(6), 3, true));
+  const { shown, hidden } = lineMaterials([]);
+  return [new LineSegments(geometry, shown), new LineSegments(geometry, hidden)];
 }
 
 /** `loadTract` is the decode this viewer shares with the MRI navigator. */
@@ -166,28 +197,14 @@ export function createNativeTractViewer(
     const { geometry, lengths } = createTractGeometry(tract.pts, tract.offsetPt0, tract.lengths);
     filterTractGeometry(geometry, tract.offsetPt0, lengths, minimum);
     const moving = createMotionGeometry(geometry, tract.offsetPt0, lengths, minimum);
-    const lines = new LineSegments(
-      inMotion ? moving : geometry,
-      new LineBasicMaterial({ vertexColors: true, toneMapped: false, clippingPlanes }),
-    );
+    const materials = lineMaterials(clippingPlanes);
+    const lines = new LineSegments(inMotion ? moving : geometry, materials.shown);
     lines.name = bundle.id;
     lines.matrixAutoUpdate = false;
     lines.matrix.copy(RAS_MM_TO_WORLD);
     lines.matrixWorldNeedsUpdate = true;
     lines.visible = false;
-    // Transparent, so it draws after every opaque surface it is tested against.
-    const hidden = new LineSegments(
-      lines.geometry,
-      new LineBasicMaterial({
-        vertexColors: true,
-        toneMapped: false,
-        clippingPlanes,
-        transparent: true,
-        opacity: HIDDEN_OPACITY,
-        depthFunc: GreaterDepth,
-        depthWrite: false,
-      }),
-    );
+    const hidden = new LineSegments(lines.geometry, materials.hidden);
     hidden.name = `${bundle.id}-hidden`;
     hidden.matrixAutoUpdate = false;
     hidden.matrix.copy(RAS_MM_TO_WORLD);

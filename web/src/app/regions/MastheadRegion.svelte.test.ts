@@ -130,8 +130,9 @@ describe('the settings the reader chooses', () => {
     await shell.open();
     await userEvent.click(button('More settings'));
     await userEvent.click(page.getByRole('radio', { name: 'Dark' }));
-    expect(document.documentElement.dataset.theme).toBe('dark');
     expect(localStorage.getItem('planum.theme')).toBe('dark');
+    // The palette swaps inside the cross-fade's update, a frame later.
+    await expect.poll(() => document.documentElement.dataset.theme).toBe('dark');
     await userEvent.click(button('More settings'));
     await expect.element(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
     const themed = shell.engine.calls.filter(

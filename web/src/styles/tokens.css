@@ -24,6 +24,8 @@
     --surface-raised: #ffffff;
     --surface-tonal: #eef1f2;
     --surface-tonal-hover: #e4e9eb;
+    /* A held row, tab or eye: one step past either hover, and the darkest light ground on which tertiary ink keeps 4.5:1. */
+    --surface-pressed: var(--surface-tonal-hover);
     --border-subtle: #e0e5e7;
     --border-control: #77828c;
     /* Selected segment ring: 3:1 against the tonal track. */
@@ -89,11 +91,12 @@
     --space-6: 24px;
     --space-8: 32px;
 
-    /* Instrument density on a fine pointer; phone.css raises both to 44px for touch. */
-    --row-height: 32px;
-    --control-height: 32px;
+    /* Instrument density on a fine pointer, growing with reader text; phone.css raises both to 44px for touch. */
+    --row-height: max(32px, 2rem);
+    --control-height: max(32px, 2rem);
     --tab-height: max(44px, 2.75rem);
-    --rail-width: 360px;
+    /* Grows with reader text so the five tabs keep their line, up to half the window. */
+    --rail-width: clamp(360px, 22.5rem, 50vw);
     --header-height: max(48px, 3rem);
     --footer-height: max(32px, 2rem);
     --panel-inset: var(--space-6);
@@ -118,6 +121,8 @@
     --popover-exit: 120ms;
     --dialog-transition: 200ms;
     --tooltip-transition: 125ms;
+    /* The whole page cross-fades between palettes; no component fades on its own. */
+    --theme-transition: 200ms;
   }
 
   :root[data-theme='dark'] {

@@ -101,10 +101,19 @@
   }
 
   /*
-   * A theme is a state swap, not a fade (the theme store holds data-theme-switching for two frames);
-   * data-instant marks a popover, dialog or tooltip that replaces an open one and so appears at once.
-   * Important declarations of an earlier layer win, so no component transition can undo either.
+   * A theme change cross-fades the whole page once, as a view transition, and no component fades on its own
+   * (the theme store holds data-theme-switching for two frames); data-instant marks a popover, dialog or
+   * tooltip that replaces an open one and so appears at once. Important declarations of an earlier layer
+   * win, so no component transition can undo either.
    */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--theme-transition);
+  }
+  /* The snapshots are pictures: pointer input reaches the page under them. */
+  ::view-transition {
+    pointer-events: none;
+  }
   :root[data-theme-switching] *,
   :root[data-theme-switching] *::before,
   :root[data-theme-switching] *::after,

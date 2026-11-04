@@ -51,6 +51,7 @@ const PANEL_GROUNDS = [
   '--surface-raised',
   '--surface-tonal',
   '--surface-tonal-hover',
+  '--surface-pressed',
 ];
 const OVERLAY_GROUNDS = [
   '--overlay-plate',
@@ -126,6 +127,16 @@ describe.each(Object.entries(themes))('%s theme', (_name, theme) => {
       }
     },
   );
+
+  // A held segment takes the thumb's raised fill and the primary ink before its ring arrives;
+  // the panel's pair is among the grounds above.
+  it.each([
+    ['stage-vars.css', stageTokens],
+    ['the imaging dialog', imagingTokens],
+  ])('a held segment in %s keeps 4.5:1 on the raised fill', (_where, tokens) => {
+    const stage = { ...theme, ...tokens };
+    expect(contrast(stage, '--text-primary', '--surface-raised')).toBeGreaterThanOrEqual(4.5);
+  });
 
   it('the scale bar ink passes 4.5:1 on its halo core', () => {
     // axe cannot measure the bar over the canvas; each glyph is painted over a 3 px --overlay-halo-core stroke, the ground its edges touch.

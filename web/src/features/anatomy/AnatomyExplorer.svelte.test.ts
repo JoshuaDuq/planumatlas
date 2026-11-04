@@ -438,3 +438,41 @@ describe('layout and accessibility', () => {
     }
   });
 });
+
+describe('scroll edges', () => {
+  const borderSubtle = () => {
+    const probe = document.body.appendChild(document.createElement('span'));
+    probe.style.color = 'var(--border-subtle)';
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  };
+
+  test('the rule under the head shows once the tree has scrolled 8px; the tree fades its foot until its end', async () => {
+    mount();
+    const head = document.querySelector<HTMLElement>('.tree-head')!;
+    const pane = document.querySelector<HTMLElement>('.tree-pane')!;
+    await page.getByRole('button', { name: 'Expand all' }).click();
+    await expect.poll(() => pane.scrollHeight > pane.clientHeight + 12).toBe(true);
+    const rule = () => getComputedStyle(head).borderBottomColor;
+    const fade = () => getComputedStyle(pane).maskSize;
+    await expect.poll(rule).toBe('rgba(0, 0, 0, 0)');
+    await expect.poll(fade).toBe('100% 100%');
+    pane.scrollTop = 8;
+    await expect.poll(rule).toBe(borderSubtle());
+    expect(fade()).toBe('100% 100%');
+    pane.scrollTop = pane.scrollHeight;
+    await expect.poll(fade).toBe('100% calc(100% + 12px)');
+  });
+
+  test('a list with nothing to scroll has neither the fade nor the rule', async () => {
+    mount();
+    await search('cuneus');
+    await expect.element(optionNamed('Cuneus, left, Occipital')).toBeInTheDocument();
+    const explorer = document.querySelector<HTMLElement>('.explorer')!;
+    expect(explorer.scrollHeight).toBeLessThanOrEqual(explorer.clientHeight);
+    expect(getComputedStyle(explorer).maskImage).toBe('none');
+    const ground = document.querySelector('.search-box')!;
+    expect(getComputedStyle(ground, '::before').borderBottomColor).toBe('rgba(0, 0, 0, 0)');
+  });
+});

@@ -12,9 +12,11 @@
     open, and while it does, a press on the stage keeps it open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
   - On a phone, which hides the status bar, a mark on Display says its settings are away from their defaults.
+  - On a phone an open popover's plate covers most of the stage, so the camera frames the anatomy above it
+    (`onPlate`) while it is open, at once when the key that opened, changed or closed it was a key.
 -->
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import type { Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import { displayChanges } from '../colophon/display-state.ts';
@@ -55,6 +57,8 @@
     /** The Coordinate popover's body; without one the tool is not offered. */
     coordinatePopover?: Snippet<[{ close: () => void }]>;
     onLesionPlacing: (placing: boolean) => void;
+    /** On a phone, the open popover's top edge on the stage host, or null once it closes (`camera.clearPlate`). */
+    onPlate: (top: number | null, options: { immediate: boolean }) => void;
   }
 
   let {
@@ -72,6 +76,7 @@
     lesionPopover,
     coordinatePopover,
     onLesionPlacing,
+    onPlate,
   }: Props = $props();
 
   const uid = $props.id();
@@ -94,6 +99,10 @@
   let coordinateOpen = $state(false);
   let displayOpen = $state(false);
   const anyOpen = $derived(sectionOpen || lesionOpen || coordinateOpen || displayOpen);
+  // Which one, so a swap from one tool to another measures the plate that opened.
+  const openTool = $derived(
+    [sectionOpen, lesionOpen, coordinateOpen, displayOpen].findIndex(Boolean),
+  );
   // A click places the lesion only while the reader chose so, and only until the Lesion popover closes.
   let placing = $state(false);
   $effect(() => {
@@ -169,6 +178,48 @@
       current = false;
     };
   });
+  // Whether the reader's last input was a key: a plate that opens, grows or closes on one moves the camera
+  // at once. Read in capture, before Bits opens on the key or a tap outside closes the popover.
+  let keyed = false;
+  $effect(() => {
+    const key = () => (keyed = true);
+    const point = () => (keyed = false);
+    addEventListener('keydown', key, true);
+    addEventListener('pointerdown', point, true);
+    return () => {
+      removeEventListener('keydown', key, true);
+      removeEventListener('pointerdown', point, true);
+    };
+  });
+  // Whether framing has a plate to withdraw.
+  let plate = false;
+  $effect(() => {
+    if (openTool < 0 || !media.phone || !spot) return;
+    let current = true;
+    let observer: ResizeObserver | null = null;
+    tick().then(() => {
+      if (!current) return;
+      const element = dock.querySelector<HTMLElement>('.popover.stage-popover')!;
+      plate = true;
+      // Laid-out offsets, which the plate's entry scale does not move.
+      const top = () => dock.offsetTop + dock.clientTop + element.offsetTop;
+      observer = new ResizeObserver(() => onPlate(top(), { immediate: keyed }));
+      observer.observe(element);
+    });
+    return () => {
+      current = false;
+      observer?.disconnect();
+    };
+  });
+  $effect(() => {
+    if (anyOpen && media.phone) return;
+    untrack(() => {
+      if (!plate) return;
+      onPlate(null, { immediate: keyed });
+      plate = false;
+    });
+  });
+
   const popoverStyle = $derived(
     spot
       ? `left: ${spot.left}px; width: ${spot.width}px; max-height: ${spot.maxHeight}px`
@@ -242,7 +293,7 @@
         <span id={displayLabelId}>{copy.displayTool}</span>
         {#if marked}<span class="changed-mark" aria-hidden="true"></span>{/if}
       {/snippet}
-      {#snippet body()}
+      {#snippet body({ scrubbing })}
         <DisplayPopover
           {lang}
           hemisphere={view.hemisphere}
@@ -252,6 +303,7 @@
           spinalCordVisible={view.spinalCordVisible}
           {hasSpinalCord}
           {changes}
+          {scrubbing}
           onHemisphere={commands.setHemisphere}
           onCortexVisible={commands.setCortexVisible}
           onCortexOpacity={commands.setCortexOpacity}

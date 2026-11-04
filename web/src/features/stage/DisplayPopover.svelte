@@ -7,7 +7,8 @@
   - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why).
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
   - Last, what is away from its default, Focus and hidden parts included, with Reset display: on a phone the
-    status bar that also says so is hidden.
+    status bar that also says so is hidden. While the opacity slider is held it waits for the release, so the
+    plate never grows under the thumb (`scrubbing`, StagePopover).
 -->
 <script lang="ts">
   import { tick } from 'svelte';
@@ -28,6 +29,8 @@
     hasSpinalCord: boolean;
     /** The display settings away from their defaults (`displayChanges`). */
     changes: readonly string[];
+    /** A pointer holds the slider (StagePopover). */
+    scrubbing: boolean;
     onHemisphere: (hemisphere: Hemisphere) => void;
     onCortexVisible: (visible: boolean) => void;
     onCortexOpacity: (opacity: number) => void;
@@ -45,6 +48,7 @@
     spinalCordVisible,
     hasSpinalCord,
     changes,
+    scrubbing,
     onHemisphere,
     onCortexVisible,
     onCortexOpacity,
@@ -57,6 +61,11 @@
   const hemisphereLabelId = `hemisphere-label-${uid}`;
 
   const copy = $derived(t(lang, 'display'));
+  // Held at what the press found until the slider is let go.
+  let shown = $state.raw<readonly string[]>([]);
+  $effect.pre(() => {
+    if (!scrubbing) shown = changes;
+  });
   const sides = $derived(
     (['both', 'left', 'right'] as const).map((value) => ({ value, label: copy[value] })),
   );
@@ -121,9 +130,9 @@
     </label>
   {/if}
 </div>
-{#if changes.length}
+{#if shown.length}
   <div class="changes">
-    <p>{changes.join(' · ')}</p>
+    <p>{shown.join(' · ')}</p>
     <button type="button" class="reset-display" onclick={reset}>{copy.resetDisplay}</button>
   </div>
 {/if}

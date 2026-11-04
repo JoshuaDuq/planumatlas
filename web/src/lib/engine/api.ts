@@ -409,6 +409,15 @@ export interface ChromeInsets {
   left?: number;
 }
 
+/**
+ * How the cover changes: `settle` is the sheet springing to a detent rather than under the finger;
+ * `velocity` is that spring's start in whole moves per second (core/spring.ts), so the image rides it.
+ */
+export interface ChromeMotion {
+  settle?: boolean;
+  velocity?: number;
+}
+
 export interface EngineCamera {
   /** The camera still sits where a named view put it (viewport-chrome.js:792). */
   readonly viewHeld: boolean;
@@ -424,9 +433,14 @@ export interface EngineCamera {
    */
   setFramingSource(source: () => FramingClearance): void;
   /** The phone sheet covers part of the canvas; `settle` is the sheet easing to a detent (scene.js:488). */
-  setChromeInsets(insets: ChromeInsets, motion: { settle?: boolean }): void;
+  setChromeInsets(insets: ChromeInsets, motion: ChromeMotion): void;
   /** The stage dock grew or shrank: keep the heading and scale the distance to the new room (app.js:388). */
   refitDock(): void;
+  /**
+   * A phone popover covers the stage from `top` (host px) down, or no longer does (null): refit clear of
+   * it. A new cover that hides none of the drawn anatomy leaves the camera alone.
+   */
+  clearPlate(top: number | null, options?: MoveOptions): void;
 
   /**
    * Frame a named view of what is drawn, clear of the interface (app.js:406). Holds the view. Throws for a

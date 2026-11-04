@@ -13,6 +13,7 @@ import type {
 } from './api.ts';
 import { createEngineModel, createEngineSections } from './adapters.ts';
 import { createComparisonOverlay } from './comparison/overlay.ts';
+import { tractProgramSamples } from './diffusion/native-viewer.ts';
 import { createTracts } from './diffusion/tracts.ts';
 import type { Tracts, TractsOptions } from './diffusion/tracts.ts';
 import { createFraming } from './framing.ts';
@@ -201,9 +202,9 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     cleanups.push(() => picker.dispose());
 
     // What the last `present()` asked for; every change of the display reapplies it (app.js:1611-1639).
-    let shown: Presentation = { lang: 'en', referenceOnly: false };
+    let shown: Presentation | null = null;
     function refresh() {
-      const { referenceOnly } = shown;
+      const referenceOnly = shown?.referenceOnly === true;
       const { surfaceColor, paint } = atlas.settings;
       atlas.group.visible = !referenceOnly;
       sections.group.visible = !referenceOnly && sections.active;
@@ -270,6 +271,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       },
       // Redraw the outline too: the overlap's mesh is what it draws while the overlay is shown.
       setVisible(visible) {
+        if (overlay.group.visible === visible) return;
         overlay.setVisible(visible);
         presentation.outline();
       },
@@ -280,6 +282,21 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     scene.warmOutlines(atlas.group);
     stage.onResize({ canvasChanged: false });
     refresh();
+
+    // A first Focus, T1 MRI colour or Tracts tab otherwise compiles its programs in the frame that
+    // shows it. The samples are detached: nothing drawn changes.
+    const warmPrograms = () => {
+      const samples = new Group();
+      samples.add(...atlas.programSamples(), ...tractProgramSamples());
+      void scene.compile(samples);
+    };
+    if (typeof requestIdleCallback === 'function') {
+      const idle = requestIdleCallback(warmPrograms);
+      cleanups.push(() => cancelIdleCallback(idle));
+    } else {
+      const idle = setTimeout(warmPrograms, 0);
+      cleanups.push(() => clearTimeout(idle));
+    }
 
     let disposed = false;
     return {
@@ -307,6 +324,12 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         refresh();
       },
       present(presentation) {
+        if (
+          shown?.lang === presentation.lang &&
+          shown.referenceOnly === presentation.referenceOnly
+        ) {
+          return;
+        }
         shown = presentation;
         stage.invalidate();
         const viewport = t(presentation.lang, 'viewport');

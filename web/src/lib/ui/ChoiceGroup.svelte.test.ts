@@ -1,8 +1,9 @@
 // ChoiceGroup against the APG Radio Group keyboard table (decision 0003).
 import { describe, expect, test } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
-import { render } from 'vitest-browser-svelte';
+import { cleanup, render } from 'vitest-browser-svelte';
 import { expectAxeClean, withMedia } from './a11y-test-support.ts';
+import { whilePressed } from './press-test-support.ts';
 import ChoiceGroup from './ChoiceGroup.svelte';
 
 const hemispheres = [
@@ -152,6 +153,40 @@ describe('ChoiceGroup', () => {
     expect(getComputedStyle(track).boxShadow).toBe('none');
     await withMedia([{ name: 'prefers-contrast', value: 'more' }], () => {
       expect(getComputedStyle(track).boxShadow).toContain('inset');
+    });
+  });
+
+  test('a pointer press takes the thumb fill at once and lets go over the colour feedback', async () => {
+    render(ChoiceGroup, { options: hemispheres, value: 'left', label: 'Hemisphere' });
+    const raised = getComputedStyle(el('Left')).backgroundColor;
+    const style = getComputedStyle(el('Both'));
+    expect(style.backgroundColor).not.toBe(raised);
+    expect(style.transitionDuration).toBe('0.14s, 0.14s');
+    await whilePressed(el('Both'), () => {
+      expect(style.backgroundColor).toBe(raised);
+      expect(style.transitionDuration).toBe('0s');
+    });
+    expect(checked()).toEqual(['Left']);
+  });
+
+  test('a disabled option or an aria-disabled group takes no press', async () => {
+    const options = [...hemispheres.slice(0, 2), { ...hemispheres[2]!, disabled: true }];
+    render(ChoiceGroup, { options, value: 'left', label: 'Hemisphere' });
+    const resting = getComputedStyle(el('Both')).backgroundColor;
+    await whilePressed(el('Right'), () => {
+      expect(el('Right').matches(':active:disabled')).toBe(true);
+      expect(getComputedStyle(el('Right')).backgroundColor).toBe(resting);
+    });
+    cleanup();
+    render(ChoiceGroup, {
+      options: hemispheres,
+      value: 'left',
+      label: 'Hemisphere',
+      ariaDisabled: true,
+    });
+    await whilePressed(el('Both'), () => {
+      expect(el('Both').matches(':active')).toBe(true);
+      expect(getComputedStyle(el('Both')).backgroundColor).toBe(resting);
     });
   });
 

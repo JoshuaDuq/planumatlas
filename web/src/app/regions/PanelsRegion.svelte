@@ -10,7 +10,7 @@
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
   import { offeredNotice } from '../../lib/core/workspace.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
-  import type { ChromeInsets } from '../../lib/engine/api.ts';
+  import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import { createCircuitExplorer } from '../../features/circuits/circuits-explorer.svelte.ts';
@@ -168,7 +168,7 @@
    * and again where the sheet settles. Before the start has framed the camera there is none to keep.
    */
   let fitBefore: number | null = null;
-  function onInsets(insets: ChromeInsets, motion: { settle: boolean }) {
+  function onInsets(insets: ChromeInsets, motion: ChromeMotion & { settle: boolean }) {
     const { camera } = world!.engine;
     const own = app!.session.state.status !== 'loading' && !camera.viewHeld;
     if (own && fitBefore === null) fitBefore = camera.fittedDistance();

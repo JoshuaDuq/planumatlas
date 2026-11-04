@@ -7,56 +7,88 @@ import {
   PerspectiveCamera,
   Scene,
   Vector2,
+  Vector3,
   WebGLRenderer,
   WebGLRenderTarget,
 } from 'three';
-import type { Box3, Object3D, Vector3 } from 'three';
+import type { Box3, Object3D } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import {
+  CAMERA_RESPONSE,
+  SHEET_RESPONSE,
+  angularFrequency,
+  noOvershoot,
+  springAt,
+  springSettled,
+} from '../../core/spring.ts';
+import type { SpringState } from '../../core/spring.ts';
 import { token } from './tokens.ts';
 import { createAnatomicalLighting } from './lighting.ts';
 import type { LightingSettings } from './lighting.ts';
 import { fitScale, viewOffset, visibleRect } from './effective-viewport.ts';
 import type { Rect, Size } from './effective-viewport.ts';
 import { orbitPath } from './camera-path.ts';
-import type { PathPose } from './camera-path.ts';
+import type { OrbitPath } from './camera-path.ts';
 import type { FitScale } from './camera-views.ts';
-import { levelOnOrbit } from './orbit-controls.ts';
+import { coastOnRelease, grabbed, levelOnOrbit, takePending, turnGoal } from './orbit-controls.ts';
 import { gpuRendererName, isAppleSilicon, isIntegratedGpu } from './device.ts';
 import { motionRatio, qualityProfile } from './quality.ts';
 import { paintOutlineEdges, sameMeshSet } from './outline-edges.ts';
 import { withOutlineOccluders } from './outline-occluders.ts';
 import { transparentOrder } from './ghost-order.ts';
 
-const TRANSITION_MS = 240;
-// How long the camera must rest before the full-resolution frame is drawn.
+// How long a camera moved by a gesture must rest before the full-resolution frame is drawn.
 const SETTLE_MS = 150;
-
-type Ease = (t: number) => number;
-
-const easeInOut: Ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
-
-/** CSS's cubic-bezier(x1, y1, x2, y2) at progress `x`: Newton's method finds the curve's t for x. */
-function cubicBezier(x1: number, y1: number, x2: number, y2: number): Ease {
-  const along = (a: number, b: number) => (t: number) =>
-    ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
-  const x = along(x1, x2);
-  const y = along(y1, y2);
-  const slope = (t: number) => (3 * (1 - 3 * x2 + 3 * x1) * t + 2 * (3 * x2 - 6 * x1)) * t + 3 * x1;
-  return (progress) => {
-    let t = progress;
-    for (let i = 0; i < 8; i += 1) t -= (x(t) - progress) / slope(t);
-    return y(Math.min(Math.max(t, 0), 1));
-  };
-}
-// The sheet's --ease-sheet, so the picture settles with the sheet that moved it.
-const easeSheet = cubicBezier(0.32, 0.72, 0, 1);
+/** A view change has arrived within this turn, in radians, and this share of its distance to the target. */
+const ARRIVED_ANGLE = 1e-3;
+const ARRIVED_SHARE = 1e-3;
+/** An inset has arrived within half a CSS pixel. */
+const ARRIVED_PX = 0.5;
+/** Under reduced motion a change of view is a dissolve this long, in milliseconds. */
+const DISSOLVE_MS = 160;
 
 const prefersReducedMotion = (): boolean =>
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+/**
+ * A move's progress: a spring started at `started` (a `performance.now()`), or, for a move that rides
+ * one already under way, that spring's rest from its value `from`, so both arrive together.
+ */
+interface Ride {
+  started: number;
+  response: number;
+  velocity: number;
+  from: number;
+}
+
+function progressAt({ started, response, velocity, from }: Ride, now: number): SpringState {
+  const spring = springAt((now - started) / 1000, response, velocity);
+  const left = 1 - from;
+  if (!(left > 0)) return { value: 1, velocity: 0 };
+  return { value: (spring.value - from) / left, velocity: spring.velocity / left };
+}
+
+/**
+ * The start, in whole moves per second, that carries a motion's `rate` on into a move of `extent`:
+ * its share along the new move, never a backing up or an overshoot.
+ */
+function carried(rate: readonly number[], extent: readonly number[], response: number): number {
+  const length = extent.reduce((sum, part) => sum + part * part, 0);
+  if (!(length > 0)) return 0;
+  const along = rate.reduce((sum, part, i) => sum + part * extent[i]!, 0);
+  return noOvershoot(along / length, response);
+}
+
+/** A camera move's extent as one vector: its turn in radians, its target's shift and its stretch per `scale`. */
+const extentOf = ({ turn, shift, stretch }: OrbitPath, scale: number): number[] => [
+  ...turn.toArray(),
+  ...shift.toArray().map((part) => part / scale),
+  stretch / scale,
+];
 
 /** How much of each canvas edge the interface covers, in CSS pixels. */
 export interface ChromeInsets {
@@ -122,20 +154,18 @@ export type FrameTo = (
   points?: ArrayLike<number> | null,
 ) => Vector3;
 
-/** An eased move between two sets of insets. */
+/** A move between two sets of insets, on a spring. */
 interface InsetMove<Sides extends string> {
   from: Record<Sides, number>;
   to: Record<Sides, number>;
-  started: number;
-  ease: Ease;
+  ride: Ride;
 }
 
 interface Transition {
-  path: (t: number) => PathPose;
+  path: OrbitPath;
   plan: CameraDestination;
-  started: number;
+  ride: Ride;
   arrive: () => void;
-  ease: Ease;
 }
 
 export interface Pipeline {
@@ -241,20 +271,21 @@ export function createPipeline({
   return { composer, halo, core, renderHalo, renderCore };
 }
 
-/** An eased move between two sets of insets, as drawn at `now`. */
+/** A move between two sets of insets as drawn at `now`, and each side's rate there in pixels per second. */
 function insetsAt<Sides extends string>(
-  { from, to, started, ease }: InsetMove<Sides>,
+  { from, to, ride }: InsetMove<Sides>,
   now: number,
-): { insets: Record<Sides, number>; done: boolean } {
-  const t = Math.min(Math.max((now - started) / TRANSITION_MS, 0), 1);
-  const eased = ease(t);
+): { insets: Record<Sides, number>; rates: number[]; done: boolean } {
+  const sides = Object.keys(to) as Sides[];
+  const progress = progressAt(ride, now);
+  const extent = Math.max(...sides.map((side) => Math.abs(to[side] - from[side])));
+  const done = springSettled(progress, extent, ARRIVED_PX);
+  const value = done ? 1 : progress.value;
   const insets = Object.fromEntries(
-    (Object.keys(to) as Sides[]).map((side) => [
-      side,
-      from[side] + (to[side] - from[side]) * eased,
-    ]),
+    sides.map((side) => [side, from[side] + (to[side] - from[side]) * value]),
   ) as Record<Sides, number>;
-  return { insets, done: t === 1 };
+  const rates = sides.map((side) => (done ? 0 : progress.velocity * (to[side] - from[side])));
+  return { insets, rates, done };
 }
 
 export interface EngineScene {
@@ -270,15 +301,20 @@ export interface EngineScene {
   invalidate(): void;
   /** Compile the outline programs before a pointer reaches a region. */
   warmOutlines(root: Object3D): void;
-  /** Declare how much of the canvas the interface covers; `settle` is the sheet easing to a detent. */
-  setChromeInsets(next: Partial<ChromeInsets>, options?: { settle?: boolean }): void;
+  /** Compile the programs `root`'s materials need now, off the frame that first draws them. */
+  compile(root: Object3D): Promise<void>;
+  /** Declare how much of the canvas the interface covers; `settle` is the sheet springing to a detent. */
+  setChromeInsets(
+    next: Partial<ChromeInsets>,
+    options?: { settle?: boolean; velocity?: number },
+  ): void;
   /** Keep framing clear of bands of the visible rectangle. Returns whether it changed. */
   setFramingInset(next?: Partial<FramingInset>, options?: MoveOptions): boolean;
   /** The canvas rectangle the interface leaves uncovered, in CSS pixels. */
   readonly visibleRect: Rect;
   /** The fraction of each frustum axis framing may use, for `planFraming`. */
   readonly viewportFit: { horizontal: number; vertical: number };
-  /** Where the camera is headed: an eased move's plan, or where it already is. */
+  /** Where the camera is headed: a move's plan, or where it already is. */
   readonly destination: CameraDestination;
   /** The canvas's CSS size, as of the last resize. */
   readonly hostSize: Size;
@@ -340,10 +376,10 @@ export function createScene(
   // The controls own this inline, including `grabbing` for the duration of an
   // orbit, which nothing else was providing.
   controls.cursorStyle = 'grab';
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.1;
+  // Undamped, so a drag tracks the pointer exactly; a drag let go while moving coasts by time.
   controls.zoomToCursor = true;
   levelOnOrbit(controls);
+  const momentum = coastOnRelease(controls);
 
   /*
    * How much of the canvas the interface is covering. On a phone the sheet
@@ -353,7 +389,7 @@ export function createScene(
    */
   let chromeInsets: ChromeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
   // Planning reads where the sheet is going; the image is offset by where it is drawn, which
-  // eases after a settled sheet on its curve and tracks a dragged one.
+  // rides a settling sheet's spring and tracks a dragged one.
   let chromeShown = chromeInsets;
   let chromeMove: InsetMove<keyof ChromeInsets> | null = null;
   // Framing also clears the stage dock and any colour key, which `chromeInsets` must not include:
@@ -387,6 +423,9 @@ export function createScene(
   let lastMotion = -Infinity;
   let showingMotion = false;
   let transition: Transition | null = null;
+  // The camera as the scene last drew it in a move: a zoom made meanwhile is read against it.
+  const drawn = { position: new Vector3(), target: new Vector3() };
+  let fading: { overlay: HTMLCanvasElement; animation: Animation } | null = null;
   const invalidate = () => {
     dirty = true;
     if (!looping) startLoop();
@@ -499,6 +538,84 @@ export function createScene(
   }
 
   /**
+   * Under reduced motion a change of view is a dissolve, not a cut and not a move: the frame on
+   * screen is copied over the canvas, the change is made and drawn beneath it, and the copy fades.
+   * A second change in the same frame keeps the first copy.
+   */
+  function dissolve(change: () => void) {
+    if (!fading?.animation.pending) {
+      const source = renderer.domElement;
+      // The drawing buffer is not preserved past the task that drew it: draw the frame again to copy it.
+      (showingMotion ? moving : settled).composer.render();
+      const overlay = document.createElement('canvas');
+      overlay.width = source.width;
+      overlay.height = source.height;
+      const context = overlay.getContext('2d');
+      if (!context) throw new Error('A 2D canvas context is unavailable for the dissolve.');
+      context.drawImage(source, 0, 0);
+      if (fading) {
+        // Still fading: the screen shows the last copy over the canvas.
+        context.globalAlpha = Number(getComputedStyle(fading.overlay).opacity);
+        context.drawImage(fading.overlay, 0, 0, overlay.width, overlay.height);
+        fading.overlay.remove();
+      }
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.style.cssText =
+        'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;';
+      source.after(overlay);
+      const shown = {
+        overlay,
+        animation: overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DISSOLVE_MS }),
+      };
+      fading = shown;
+      void shown.animation.finished.then(() => {
+        overlay.remove();
+        if (fading === shown) fading = null;
+      });
+    }
+    change();
+    // Drawn now and at full resolution, so the copy fades onto the frame that stays.
+    if (showingMotion) onMotion?.(false);
+    showingMotion = false;
+    lastMotion = -Infinity;
+    settled.composer.render();
+    dirty = false;
+  }
+
+  /** A new move rides a settling sheet's spring; otherwise it starts on the camera's, at `velocity`. */
+  function rideFor(now: number, velocity: number): Ride {
+    if (chromeMove) return { ...chromeMove.ride, from: progressAt(chromeMove.ride, now).value };
+    return { started: now, response: CAMERA_RESPONSE, velocity, from: 0 };
+  }
+
+  /**
+   * Head for `plan` from where the camera is drawn now. A move already under way hands on its speed
+   * along the new path, so a change of mind turns the camera rather than stopping it dead.
+   */
+  function head(plan: CameraDestination, arrive: () => void) {
+    const now = performance.now();
+    const from = transition
+      ? transition.path.at(progressAt(transition.ride, now).value)
+      : {
+          quaternion: camera.quaternion.clone(),
+          position: camera.position.clone(),
+          target: controls.target.clone(),
+        };
+    const path = orbitPath(from, plan);
+    let velocity = 0;
+    if (transition) {
+      const scale = from.position.distanceTo(from.target);
+      const rate = progressAt(transition.ride, now).velocity;
+      const motion = extentOf(transition.path, scale).map((part) => part * rate);
+      velocity = carried(motion, extentOf(path, scale), CAMERA_RESPONSE);
+    }
+    drawn.position.copy(camera.position);
+    drawn.target.copy(controls.target);
+    transition = { path, plan, arrive, ride: rideFor(now, velocity) };
+    invalidate();
+  }
+
+  /**
    * Move to a framed destination. Orbit limits are applied on arrival, not on
    * departure: a tighter maxDistance would otherwise yank a distant camera.
    */
@@ -506,47 +623,77 @@ export function createScene(
     { position, target, near, far, minDistance, maxDistance }: CameraPlan,
     { immediate = false }: MoveOptions = {},
   ) {
-    camera.near = near;
-    camera.far = far;
-    camera.updateProjectionMatrix();
     const arrive = () => {
       controls.minDistance = minDistance;
       controls.maxDistance = maxDistance;
       controls.update();
     };
-    // The camera begins at the origin, inside the model. Animating the first
-    // framing would swoop out of the brain on every load; the first paint
-    // should simply be correct.
-    if (immediate || prefersReducedMotion()) {
+    const place = () => {
+      camera.near = near;
+      camera.far = far;
+      camera.updateProjectionMatrix();
       transition = null;
       camera.position.copy(position);
       controls.target.copy(target);
       arrive();
+    };
+    momentum.stop();
+    // The camera begins at the origin, inside the model. Animating the first
+    // framing would swoop out of the brain on every load; the first paint
+    // should simply be correct.
+    if (immediate) {
+      place();
       invalidate();
       return;
     }
+    if (prefersReducedMotion()) {
+      dissolve(place);
+      return;
+    }
+    camera.near = near;
+    camera.far = far;
+    camera.updateProjectionMatrix();
     // Callers write the destination's up before planning, and between frames it stays theirs.
-    const plan: CameraDestination = {
-      position: position.clone(),
-      target: target.clone(),
-      up: camera.up.clone(),
-      near,
-      far,
-      minDistance,
-      maxDistance,
-    };
-    transition = {
-      path: orbitPath(
-        { quaternion: camera.quaternion, position: camera.position, target: controls.target },
-        plan,
-      ),
-      plan,
-      started: performance.now(),
+    head(
+      {
+        position: position.clone(),
+        target: target.clone(),
+        up: camera.up.clone(),
+        near,
+        far,
+        minDistance,
+        maxDistance,
+      },
       arrive,
-      // A reframe for a settling sheet rides the sheet's curve, so the image arrives as one object.
-      ease: chromeMove ? easeSheet : easeInOut,
+    );
+  }
+
+  /**
+   * A zoom, turn or pan the controls were asked for while the camera is moving changes where it is
+   * going, and the move goes on there; its orbit limits still wait for arrival.
+   */
+  function redirect(move: Transition) {
+    const { theta, phi, pan, scale } = takePending(controls);
+    // The surface zoom has already scaled the drawn camera; the scene keeps drawing the move.
+    const zoom =
+      (camera.position.distanceTo(controls.target) / drawn.position.distanceTo(drawn.target)) *
+      scale;
+    camera.position.copy(drawn.position);
+    controls.target.copy(drawn.target);
+    if (!theta && !phi && !pan.lengthSq() && zoom === 1) return;
+    const { plan } = move;
+    const next: CameraDestination = {
+      ...plan,
+      position: plan.position.clone().add(pan),
+      target: plan.target.clone().add(pan),
+      up: plan.up.clone(),
     };
-    invalidate();
+    turnGoal(next, theta, phi);
+    const offset = next.position.clone().sub(next.target);
+    const distance = Math.min(Math.max(offset.length() * zoom, plan.minDistance), plan.maxDistance);
+    next.position.copy(next.target).addScaledVector(offset.normalize(), distance);
+    camera.up.copy(next.up);
+    head(next, move.arrive);
   }
 
   function step(now: number) {
@@ -564,16 +711,26 @@ export function createScene(
     }
     if (easing) applyViewOffset();
     if (!transition) return;
-    const t = Math.min(Math.max((now - transition.started) / TRANSITION_MS, 0), 1);
-    const pose = transition.path(transition.ease(t));
-    const { plan, arrive } = transition;
+    const { path, plan, ride, arrive } = transition;
+    const progress = progressAt(ride, now);
+    const arrived =
+      springSettled(progress, path.turn.length(), ARRIVED_ANGLE) &&
+      springSettled(
+        progress,
+        path.shift.length() + Math.abs(path.stretch),
+        ARRIVED_SHARE * plan.position.distanceTo(plan.target),
+      );
+    const pose = path.at(arrived ? 1 : progress.value);
     camera.position.copy(pose.position);
     controls.target.copy(pose.target);
-    if (t === 1) {
+    drawn.position.copy(pose.position);
+    drawn.target.copy(pose.target);
+    if (arrived) {
       transition = null;
       arrive();
-      // The last eased step can be below the controls' own change threshold; announce arrival.
+      // The last step can be below the controls' own change threshold; announce arrival.
       controls.dispatchEvent({ type: 'change' });
+      atRest();
     } else {
       // The controls stand aside while the scene moves the camera, so the move announces itself,
       // with the up it is drawing for whoever reads the frame; then the destination's is restored.
@@ -585,16 +742,27 @@ export function createScene(
     invalidate();
   }
 
+  /**
+   * A move that has arrived, or a coast that has run out, leaves the camera known to be at rest, so its
+   * full-resolution frame is drawn next rather than after `SETTLE_MS`, which waits out a drag's pauses.
+   */
+  function atRest() {
+    if (!insetMove && !chromeMove) lastMotion = -Infinity;
+  }
+
   function tick(now: number) {
     step(now);
-    // Their damping and limits would pull against an orbit in flight; they take over on arrival.
+    const coasting = momentum.coasting;
+    // Their limits would pull against an orbit in flight; they take over on arrival.
     if (!transition) controls.update();
+    if (coasting && !momentum.coasting) atRest();
     // Solid cuts interleave winding masks and caps in a defined render order.
     renderer.sortObjects = true;
     const inMotion = performance.now() - lastMotion < SETTLE_MS;
     // The camera has come to rest on a reduced frame: redraw it at full resolution.
     if (!inMotion && showingMotion) dirty = true;
-    if (!dirty && !transition && !insetMove && !inMotion) {
+    const animating = transition || insetMove || chromeMove || momentum.coasting;
+    if (!dirty && !animating && !inMotion) {
       renderer.setAnimationLoop(null);
       looping = false;
       return;
@@ -611,6 +779,13 @@ export function createScene(
     renderer.setAnimationLoop(tick);
   }
   startLoop();
+
+  const update = controls.update.bind(controls);
+  controls.update = (deltaTime) => {
+    if (!transition) return update(deltaTime);
+    redirect(transition);
+    return false;
+  };
 
   // Reported upward rather than written to the DOM: the app owns status, and
   // a status written here would be overwritten by the next render.
@@ -631,9 +806,10 @@ export function createScene(
   const observer = new ResizeObserver(setSize);
   observer.observe(host);
   controls.addEventListener('change', cameraMoved);
-  // A reader who takes hold of the camera mid-orbit keeps it where it is drawn, roll included.
+  // A reader who takes hold of the camera mid-orbit keeps it where it is drawn, roll included. A wheel
+  // step is no grab: its zoom changes where the move is going.
   const onGrab = () => {
-    if (!transition) return;
+    if (!transition || !grabbed(controls)) return;
     transition = null;
     camera.up.set(0, 1, 0).applyQuaternion(camera.quaternion);
   };
@@ -650,6 +826,10 @@ export function createScene(
     setOutlined,
     moveTo,
     invalidate,
+
+    compile(root) {
+      return renderer.compileAsync(root, camera, scene).then(() => undefined);
+    },
 
     /**
      * Compile the outline programs before a pointer reaches a region.
@@ -698,23 +878,36 @@ export function createScene(
      * Declare how much of the canvas the interface covers. Reported upward as
      * a resize, because everything derived from the viewport — framing, the
      * markers, the presets — is stale the moment it changes. A `settle` is the
-     * sheet moving on its own curve, which the image's offset follows; otherwise
-     * a finger is moving it and the offset tracks at once.
+     * sheet springing to a detent from `velocity` (whole moves per second, at most
+     * the spring's own rate), which the image's offset rides from this instant;
+     * otherwise a finger is moving it and the offset tracks at once.
      */
-    setChromeInsets(next, { settle = false } = {}) {
+    setChromeInsets(next, { settle = false, velocity = 0 } = {}) {
+      if (!(velocity >= 0 && velocity <= angularFrequency(SHEET_RESPONSE))) {
+        throw new RangeError(`A settling sheet cannot start at ${velocity} moves per second.`);
+      }
       const merged: ChromeInsets = { top: 0, right: 0, bottom: 0, left: 0, ...next };
       const same = (Object.keys(merged) as (keyof ChromeInsets)[]).every(
         (key) => merged[key] === chromeInsets[key],
       );
       if (same) return;
       chromeInsets = merged;
-      if (settle && !prefersReducedMotion()) {
-        chromeMove = { from: chromeShown, to: merged, started: performance.now(), ease: easeSheet };
-        invalidate();
-      } else {
+      const now = performance.now();
+      const shown = chromeMove ? insetsAt(chromeMove, now).insets : chromeShown;
+      if (!settle) {
         chromeMove = null;
         chromeShown = merged;
         applyViewOffset();
+      } else if (prefersReducedMotion()) {
+        chromeMove = null;
+        dissolve(() => {
+          chromeShown = merged;
+          applyViewOffset();
+        });
+      } else {
+        const ride = { started: now, response: SHEET_RESPONSE, velocity, from: 0 };
+        chromeMove = { from: shown, to: merged, ride };
+        invalidate();
       }
       // Not a canvas resize: the sheet reports this on every frame of a drag,
       // and refitting there would fight the finger. The sheet reframes itself
@@ -724,30 +917,35 @@ export function createScene(
 
     /**
      * Keep framing clear of bands of the visible rectangle: the dock's at the bottom, a colour
-     * key's at the top or right. The image slides with the camera's eased move. Returns whether
-     * it changed.
+     * key's at the top or right. The image slides on the camera's spring, or rides a settling
+     * sheet's. Returns whether it changed.
      */
     setFramingInset({ top = 0, right = 0, bottom = 0 } = {}, { immediate = false } = {}) {
       const next: FramingInset = { top, right, bottom };
-      if (
-        (Object.keys(next) as (keyof FramingInset)[]).every(
-          (side) => next[side] === framingInset[side],
-        )
-      ) {
-        return false;
-      }
+      const sides = Object.keys(next) as (keyof FramingInset)[];
+      if (sides.every((side) => next[side] === framingInset[side])) return false;
       framingInset = next;
-      if (immediate || prefersReducedMotion()) {
+      if (immediate) {
         insetMove = null;
         framingShown = next;
         applyViewOffset();
+      } else if (prefersReducedMotion()) {
+        insetMove = null;
+        dissolve(() => {
+          framingShown = next;
+          applyViewOffset();
+        });
       } else {
-        insetMove = {
-          from: framingShown,
-          to: next,
-          started: performance.now(),
-          ease: chromeMove ? easeSheet : easeInOut,
-        };
+        const now = performance.now();
+        let from = framingShown;
+        let velocity = 0;
+        if (insetMove) {
+          const { insets, rates } = insetsAt(insetMove, now);
+          from = insets;
+          const extent = sides.map((side) => next[side] - insets[side]);
+          velocity = carried(rates, extent, CAMERA_RESPONSE);
+        }
+        insetMove = { from, to: next, ride: rideFor(now, velocity) };
         invalidate();
       }
       return true;
@@ -831,6 +1029,8 @@ export function createScene(
       observer.disconnect();
       controls.removeEventListener('change', cameraMoved);
       controls.removeEventListener('start', onGrab);
+      momentum.dispose();
+      fading?.overlay.remove();
       renderer.domElement.removeEventListener('webglcontextlost', handleLost);
       renderer.domElement.removeEventListener('webglcontextrestored', handleRestored);
       controls.dispose();

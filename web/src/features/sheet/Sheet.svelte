@@ -13,6 +13,10 @@
 
   The box's size is written straight to its style, never through $state or a custom property: a drag is
   one write per pointer move, and a property every descendant inherits restyled the whole panel.
+  Released, it springs to its rest (core/spring.ts) from the finger's velocity and can be caught again
+  mid-way. The stage is told where it lands once, as the spring starts; the dock and the markings on the
+  sheet's edge follow each frame through `--sheet-lag` on the stage host, how far the sheet still is
+  from that rest.
 -->
 <script lang="ts">
   import { onMount, tick, untrack, type Snippet } from 'svelte';
@@ -29,12 +33,13 @@
     type SpanSample,
   } from '../../lib/core/detents.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { SHEET_RESPONSE, noOvershoot, springAt, springSettled } from '../../lib/core/spring.ts';
   import {
     selectionName,
     type ContextSelection,
     type WorkspaceView,
   } from '../../lib/core/workspace.ts';
-  import type { ChromeInsets } from '../../lib/engine/api.ts';
+  import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
@@ -59,7 +64,7 @@
      * target span, not the box, since framing must fit where the sheet will land. `settle` says the
      * sheet is moving there on its own curve rather than under the finger. All zero off the phone.
      */
-    onInsets: (insets: ChromeInsets, motion: { settle: boolean }) => void;
+    onInsets: (insets: ChromeInsets, motion: ChromeMotion & { settle: boolean }) => void;
     /** The sheet came to rest on a detent: a held view reframes to the room it has. */
     onDetent: (detent: Detent) => void;
     /** The strip was activated: show the selection's detail. */
@@ -89,6 +94,8 @@
   const SAMPLES_KEPT = 8;
   /** What a press starts a drag on: the grip's own row, the tabs and the notice (legacy's `.sheet-grip`). */
   const GRIP_SELECTOR = '.sheet-grip-row, [role="tablist"], .notice';
+  /** A spring this close to its rest, in pixels, has arrived. */
+  const SETTLED_PX = 0.5;
 
   interface Press {
     id: number;
@@ -99,6 +106,8 @@
     /** The rests do not move during a drag, so they are measured once. */
     heights: DetentHeights;
     dragging: boolean;
+    /** The press caught the sheet mid-spring. */
+    caught: boolean;
     samples: SpanSample[];
   }
 
@@ -109,8 +118,11 @@
 
   // The one reactive piece of state: the handle's name follows it. Everything else is written to the DOM.
   let detent = $state<Detent>('peek');
-  // The span last written, so a re-measured peek that has not moved writes nothing.
+  // The span last written, which a spring starts from and a press catches.
   let applied: number | null = null;
+  // The span the sheet rests at or is springing to, so a re-measured peek that has not moved writes nothing.
+  let rest: number | null = null;
+  let spring = 0;
   let press: Press | null = null;
   let safe = { right: 0, bottom: 0, left: 0 };
 
@@ -163,27 +175,23 @@
       : detentHeights(viewport().getBoundingClientRect().height, { ...UPRIGHT_DETENTS, peek });
   }
 
-  function report(span: number) {
-    const settle = !press?.dragging;
+  function report(span: number, motion: ChromeMotion & { settle: boolean }) {
     if (!media.phone) {
-      onInsets({ top: 0, right: 0, bottom: 0, left: 0 }, { settle });
+      onInsets({ top: 0, right: 0, bottom: 0, left: 0 }, motion);
       return;
     }
     onInsets(
       media.sideways
         ? { top: 0, right: safe.right, bottom: safe.bottom, left: span }
         : { top: 0, right: safe.right, bottom: span, left: safe.left },
-      { settle },
+      motion,
     );
   }
 
-  function applySpan(pixels: number) {
+  function writeSpan(pixels: number) {
     applied = Math.round(pixels);
     const span = `${applied}px`;
     if (media.sideways) {
-      // The viewport does not move during a drag; reading it there would force a layout.
-      if (!press?.dragging)
-        root.style.top = `${Math.round(viewport().getBoundingClientRect().top)}px`;
       root.style.width = span;
       root.style.removeProperty('height');
     } else {
@@ -191,14 +199,63 @@
       root.style.removeProperty('width');
       root.style.removeProperty('top');
     }
-    report(applied);
+  }
+
+  /** How far the drawn sheet is from the rest it reported, for the stage chrome on its edge. */
+  function lag(pixels: number) {
+    if (pixels) viewport().style.setProperty('--sheet-lag', `${pixels}px`);
+    else viewport().style.removeProperty('--sheet-lag');
+  }
+
+  function stopSpring() {
+    cancelAnimationFrame(spring);
+    spring = 0;
+  }
+
+  const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /**
+   * Move to a rest: at once for `quick` (a keyboard activation) and under reduced motion, else on a
+   * critically damped spring that starts at `velocity` (px/ms, positive growing) and never passes the rest.
+   * The stage hears the rest once, as the spring starts, with the spring's start in whole moves per second.
+   */
+  function settleTo(target: number, { quick = false, velocity = 0 } = {}) {
+    // A re-measure that finds the rest already sprung to keeps the spring, and its speed.
+    if (spring && target === rest && !quick) return;
+    stopSpring();
+    rest = target;
+    // The viewport does not move during a drag or a spring; reading it per frame would force a layout.
+    if (media.sideways) root.style.top = `${Math.round(viewport().getBoundingClientRect().top)}px`;
+    const from = applied;
+    if (quick || from === null || from === target || reducedMotion()) {
+      writeSpan(target);
+      lag(0);
+      report(target, { settle: true });
+      return;
+    }
+    const distance = target - from;
+    const start = noOvershoot((velocity * 1000) / distance, SHEET_RESPONSE);
+    report(target, { settle: true, velocity: start });
+    lag(from - target);
+    const began = performance.now();
+    const step = () => {
+      const state = springAt((performance.now() - began) / 1000, SHEET_RESPONSE, start);
+      const done = springSettled(state, Math.abs(distance), SETTLED_PX);
+      writeSpan(done ? target : from + distance * state.value);
+      lag(applied! - target);
+      spring = done ? 0 : requestAnimationFrame(step);
+    };
+    spring = requestAnimationFrame(step);
   }
 
   /** Upright peek is the grip alone; the side rail at peek is already as wide as its tabs, so it keeps the panel. */
   const panelHiddenAt = (rest: Detent) => rest === 'peek' && !media.sideways;
 
-  /** `quick` writes `data-instant`: no glide for the sheet or the stage chrome that follows it. */
-  function setDetent(next: Detent, { notify = true, quick = false, say = false } = {}) {
+  /** `quick`: no spring, the sheet and the stage chrome on its edge are there at once. */
+  function setDetent(
+    next: Detent,
+    { notify = true, quick = false, say = false, velocity = 0 } = {},
+  ) {
     // A drag that springs back to where it began has changed nothing to announce.
     const changed = next !== detent;
     // A panel that is about to hide takes its focus with it, so the handle takes it first (deviations/h6-peek-focus.md).
@@ -214,10 +271,9 @@
     detent = next;
     root.dataset.detent = next;
     root.dataset.panel = panelHiddenAt(next) ? 'hidden' : 'shown';
-    root.toggleAttribute('data-instant', quick);
     // Written before the span is reported: the framing that follows reads it as it runs.
     stage.sheetFull = next === 'full';
-    applySpan(heights()[next]);
+    settleTo(heights()[next], { quick, velocity });
     if (notify) onDetent(next);
     if (say && changed) announce(copy.detent[next]);
   }
@@ -238,6 +294,13 @@
     // A second finger mid-drag would make the sheet jump to it.
     if (!media.phone || press || !event.isPrimary || event.button !== 0) return;
     if (!(event.target as Element).closest(GRIP_SELECTOR)) return;
+    // Caught mid-spring, the sheet stops where it is drawn, and so does the stage that rides it.
+    const caught = spring !== 0;
+    if (caught) {
+      stopSpring();
+      lag(0);
+      report(applied!, { settle: false });
+    }
     const sideways = media.sideways;
     const box = root.getBoundingClientRect();
     const span = sideways ? box.width : box.height;
@@ -247,6 +310,7 @@
       span,
       heights: heights(),
       dragging: false,
+      caught,
       samples: [{ at: event.timeStamp, span }],
     };
   }
@@ -266,17 +330,22 @@
     const span = clampDrag(press.span + travel, press.heights);
     press.samples.push({ at: event.timeStamp, span });
     if (press.samples.length > SAMPLES_KEPT) press.samples.shift();
-    applySpan(span);
+    writeSpan(span);
+    report(applied!, { settle: false });
     if (event.cancelable) event.preventDefault();
   }
 
   function onPointerUp(event: PointerEvent) {
     if (!press || event.pointerId !== press.id) return;
-    const { dragging, samples } = press;
+    const { dragging, caught, samples } = press;
     const span = samples[samples.length - 1]!.span;
     const velocity = releaseVelocity(samples, event.timeStamp);
     cancelPress();
-    if (!dragging) return;
+    // A tap that caught the sheet lets it go on to its rest; the handle's click may then step it.
+    if (!dragging) {
+      if (caught) settleTo(rest!);
+      return;
+    }
     // The press ends on a button; without this the release would also switch tabs or step the handle.
     const swallow = (click: Event) => {
       click.stopPropagation();
@@ -285,7 +354,7 @@
     const sheet = root;
     sheet.addEventListener('click', swallow, { capture: true, once: true });
     setTimeout(() => sheet.removeEventListener('click', swallow, { capture: true }), 0);
-    setDetent(settleDetent(detent, span, heights(), velocity), { say: true });
+    setDetent(settleDetent(span, heights(), velocity), { say: true, velocity });
   }
 
   // A release outside the app may never reach the window after it loses focus.
@@ -336,18 +405,20 @@
 
   /** Hand the panel back to the grid. */
   function teardown() {
-    root.removeAttribute('data-instant');
+    stopSpring();
+    lag(0);
     root.style.removeProperty('height');
     root.style.removeProperty('width');
     root.style.removeProperty('top');
     delete root.dataset.detent;
     delete root.dataset.panel;
     delete root.dataset.dragging;
-    applied = null;
+    applied = rest = null;
     stage.sheetFull = false;
-    report(0);
+    report(0, { settle: true });
   }
 
+  /** A new shell or a new axis: there is no span on it to spring from, so the rest is there at once. */
   function setup() {
     const active = document.activeElement;
     const panelFocused = !!active && root.contains(active) && !!active.closest('[role="tabpanel"]');
@@ -355,7 +426,7 @@
     // Peek hides the panels, so a control already in use keeps its panel exposed on the new shell.
     setDetent(panelFocused && panelHiddenAt(detent) ? 'half' : detent, {
       notify: false,
-      quick: panelFocused,
+      quick: true,
     });
   }
 
@@ -379,7 +450,7 @@
     // The window turns a rendering step before its media query reports it, and the span already
     // follows the turn: the panel turns with it rather than waiting for the effect above.
     if (root.dataset.panel !== (panelHiddenAt(detent) ? 'hidden' : 'shown')) setup();
-    else applySpan(heights()[detent]);
+    else settleTo(heights()[detent]);
   }
 
   onMount(() => {
@@ -389,11 +460,11 @@
     safeObserver.observe(probe, { box: 'border-box' });
 
     // The grip and the tabs are sized by their text, which arrives after setup and changes with the
-    // language, the selection and the notice; a peek that follows them glides like any other change of rest.
+    // language, the selection and the notice; a peek that follows them springs like any other change of rest.
     const topObserver = new ResizeObserver(() => {
       if (!media.phone || detent !== 'peek' || press?.dragging) return;
       const peek = heights().peek;
-      if (peek !== applied) applySpan(peek);
+      if (peek !== rest) settleTo(peek);
     });
     const watch = () => {
       topObserver.disconnect();
@@ -408,6 +479,7 @@
     mutations.observe(workspace().tabs.parentElement!, { childList: true });
 
     return () => {
+      stopSpring();
       safeObserver.disconnect();
       topObserver.disconnect();
       mutations.disconnect();
@@ -510,18 +582,12 @@
         border-radius: var(--radius-panel) var(--radius-panel) 0 0;
         overscroll-behavior: contain;
       }
-      /* Only a settled sheet animates, peek included; a dragged one tracks the finger. */
-      #sheet[data-dragging='false'] {
-        transition: height var(--camera-transition) var(--ease-sheet);
-      }
-      /* What stands on the sheet's edge moves with it: on its curve when it settles, with the finger while dragged. */
-      :global(#app:has(#sheet[data-dragging='false']) :is(.stage-dock, .orientation, .scale-bar)) {
-        transition:
-          inset var(--camera-transition) var(--ease-sheet),
-          width var(--camera-transition) var(--ease-sheet);
-      }
-      :global(#app:has(#sheet[data-instant]) :is(.stage-dock, .orientation, .scale-bar)) {
-        transition: none;
+      /*
+       * What stands on the sheet's edge moves with it: with the finger while dragged, as the stage's own
+       * rectangle does, and frame by frame while it springs, offset by how far it still has to go.
+       */
+      :global(#viewport :is(.stage-dock, .orientation)) {
+        margin-bottom: var(--sheet-lag, 0px);
       }
 
       /* Peek is the grip: handle, selection, tabs, disclaimer, and the home indicator's band. */
@@ -753,8 +819,9 @@
         border-right: 1px solid var(--border-subtle);
         border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
       }
-      #sheet[data-dragging='false'] {
-        transition: width var(--camera-transition) var(--ease-sheet);
+      :global(#viewport :is(.stage-dock, .orientation, .scale-bar)) {
+        margin-bottom: 0;
+        margin-left: var(--sheet-lag, 0px);
       }
       .sheet-grip-row {
         display: contents;
@@ -857,12 +924,6 @@
   }
 
   @layer a11y {
-    /* The sheet jumps to its rest; the stage chrome beside it keeps its own opacity-only rule (G1). */
-    @media (prefers-reduced-motion: reduce) {
-      #sheet {
-        transition-property: opacity;
-      }
-    }
     /* A drawn bar is a background, which forced colours would replace with the page's own: the handle is its only cue. */
     @media (forced-colors: active) {
       .sheet-handle-bar {

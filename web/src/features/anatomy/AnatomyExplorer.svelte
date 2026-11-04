@@ -109,7 +109,7 @@
   }
 </script>
 
-<div class="explorer" bind:this={explorer} data-searching={searching || undefined}>
+<div class="explorer scroll-fade" bind:this={explorer} data-searching={searching || undefined}>
   <h2 class="visually-hidden">{copy.title}</h2>
   <AnatomySearch
     bind:this={finder}
@@ -143,7 +143,7 @@
       </TreeHeader>
       {#if inside}{@render systemPicker?.()}{/if}
     </div>
-    <div class="tree-pane">
+    <div class="tree-pane scroll-fade">
       <AnatomyTree
         bind:this={tree}
         {lang}
@@ -239,6 +239,21 @@
         background: var(--surface-hover);
       }
     }
+    /* A pointer press tints a result at once, as the tree's rows. */
+    .explorer :global(.search-option) {
+      transition: background-color var(--ui-transition) var(--ease-ui);
+    }
+    .explorer
+      :global(
+        .search-option:active:not(
+            [aria-disabled='true'],
+            :focus-visible,
+            :has(.result[data-selected])
+          )
+      ) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
+    }
     .browse {
       display: flex;
       flex: 1;
@@ -280,6 +295,27 @@
     @media (pointer: coarse) {
       .tree-head :global(.tree-scope [role='radio']) {
         min-height: 44px;
+      }
+    }
+    /* The rule under the head, and under the field while searching, appears once the list has scrolled 8px (elements.css). */
+    @supports (animation-timeline: scroll()) {
+      .browse {
+        timeline-scope: --tree-scroll;
+      }
+      .tree-pane {
+        scroll-timeline: --tree-scroll block;
+      }
+      .tree-head,
+      .explorer[data-searching] :global(.search-box)::before {
+        border-bottom-color: transparent;
+        animation: scroll-rule linear both;
+        animation-range: 0 8px;
+      }
+      .tree-head {
+        animation-timeline: --tree-scroll;
+      }
+      .explorer[data-searching] :global(.search-box)::before {
+        animation-timeline: scroll(nearest block);
       }
     }
   }

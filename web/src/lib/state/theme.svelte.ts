@@ -36,8 +36,11 @@ export function createTheme(
   let choice = $state<ThemeChoice>(initial);
   let theme = $state<Theme>(resolveTheme(stored, system.matches));
   let frame = 0;
+  let disposed = false;
 
-  function apply() {
+  function swap() {
+    // A cross-fade's update runs even when the page has moved on; a disposed store paints nothing.
+    if (disposed) return;
     const root = document.documentElement;
     // Both palettes swap in one frame: transitions are held off until the new colours have painted.
     root.dataset.themeSwitching = '';
@@ -58,9 +61,17 @@ export function createTheme(
     onChange(theme);
   }
 
+  /** A palette that changes after load cross-fades the page once (base.css), where the browser has view transitions. */
+  function change() {
+    const fades =
+      document.documentElement.dataset.theme !== theme && 'startViewTransition' in document;
+    if (fades) document.startViewTransition(swap);
+    else swap();
+  }
+
   const onSystemChange = () => {
     theme = resolveTheme(null, system.matches);
-    apply();
+    change();
   };
   const follow = (on: boolean) =>
     on
@@ -68,7 +79,8 @@ export function createTheme(
       : system.removeEventListener('change', onSystemChange);
 
   follow(initial === 'system');
-  apply();
+  // The first paint has no palette to fade from.
+  swap();
 
   return {
     /** The theme in effect: 'light' or 'dark'. */
@@ -85,9 +97,10 @@ export function createTheme(
       writePref(PREF_KEYS.theme, next === 'system' ? null : next, storage);
       follow(next === 'system');
       theme = resolveTheme(next, system.matches);
-      apply();
+      change();
     },
     dispose() {
+      disposed = true;
       follow(false);
       // A switch still inside its two frames would otherwise hold transitions off for good.
       cancelAnimationFrame(frame);

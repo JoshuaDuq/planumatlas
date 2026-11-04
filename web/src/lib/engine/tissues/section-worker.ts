@@ -1,14 +1,15 @@
 import { BufferAttribute, BufferGeometry, Matrix4, Plane, Vector3 } from 'three';
-import { computeBoundsTree } from 'three-mesh-bvh';
+import { MeshBVH } from 'three-mesh-bvh';
+import type { SerializedBVH } from 'three-mesh-bvh';
 import { sectionTriangles } from './plane-section.ts';
 import type { BvhGeometry } from './plane-section.ts';
 
-/** Copies a solid's geometry into the worker, once, ahead of the first cut. */
+/** Copies a solid's geometry and its owner's BVH (which carries the index) into the worker, once. */
 export interface StoreMessage {
   type: 'store';
   id: number;
   position: Float32Array;
-  index: Uint16Array | Uint32Array | null;
+  bvh: SerializedBVH;
 }
 
 /** Cuts every listed solid by one plane. Any message that is not `store` is a cut. */
@@ -50,8 +51,8 @@ scope.onmessage = (event) => {
   if (message.type === 'store') {
     const geometry: BvhGeometry = new BufferGeometry();
     geometry.setAttribute('position', new BufferAttribute(message.position, 3));
-    if (message.index) geometry.setIndex(new BufferAttribute(message.index, 1));
-    geometry.boundsTree = computeBoundsTree.call(geometry, { indirect: true });
+    if (message.bvh.index) geometry.setIndex(new BufferAttribute(message.bvh.index, 1));
+    geometry.boundsTree = MeshBVH.deserialize(message.bvh, geometry, { setIndex: false });
     stored.set(message.id, geometry);
     return;
   }

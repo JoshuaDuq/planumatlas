@@ -52,18 +52,48 @@ test('nearest detent picks the closest rest', () => {
 });
 
 test('a slow drag settles by position', () => {
-  assert.equal(settleDetent('peek', 420, heights, 0), 'half');
-  assert.equal(settleDetent('full', 150, heights, 0.1), 'peek');
+  assert.equal(settleDetent(420, heights, 0), 'half');
+  assert.equal(settleDetent(150, heights, 0.1), 'peek');
+  // Just under the flick threshold, moving away from the nearest rest, position still decides.
+  assert.equal(settleDetent(450, heights, -0.39), 'half');
 });
 
-test('a flick moves one rest even when the finger barely travelled', () => {
-  assert.equal(settleDetent('peek', 140, heights, 1.2), 'half');
-  assert.equal(settleDetent('half', 460, heights, -1.2), 'peek');
+test('a flick lands on the rest nearest where it would coast to', () => {
+  // 0.5 px/ms coasts 250 px: from just above peek that is half, though 140 px is nearest peek.
+  assert.equal(settleDetent(140, heights, 0.5), 'half');
+  assert.equal(settleDetent(460, heights, -0.5), 'peek');
+  // One hard throw from peek crosses half to full.
+  assert.equal(settleDetent(140, heights, 1.2), 'full');
+  assert.equal(settleDetent(640, heights, -1.2), 'peek');
+});
+
+// The rests the phone measured (sheet.json): peek 95, half 396, full 664 at 390 x 844.
+const measured = { peek: 95, half: 396, full: 664 };
+
+test('a swipe from peek released at 545 px still moving up goes on to full, not back to half', () => {
+  assert.equal(settleDetent(545, measured, 0.5), 'full');
+  assert.equal(settleDetent(545, measured, 0.9), 'full');
+});
+
+test('peek to full is one throw', () => {
+  assert.equal(settleDetent(215, measured, 0.9), 'full');
+  assert.equal(settleDetent(365, measured, 3), 'full');
+});
+
+test('dragged from full to 92 px and flicked down, the sheet goes to peek, not back up to half', () => {
+  assert.equal(settleDetent(92, measured, -0.9), 'peek');
+});
+
+test('a throw never lands on a rest behind it, even when that rest is nearer where it would coast', () => {
+  // With full far away, a short flick just past half coasts nearer half than full.
+  const far = { peek: 100, half: 200, full: 1000 };
+  assert.equal(settleDetent(210, far, 0.4), 'full');
+  assert.equal(settleDetent(990, far, -0.4), 'half');
 });
 
 test('a flick at the end of the range stays there rather than wrapping', () => {
-  assert.equal(settleDetent('full', 700, heights, 1.2), 'full');
-  assert.equal(settleDetent('peek', 135, heights, -1.2), 'peek');
+  assert.equal(settleDetent(700, heights, 1.2), 'full');
+  assert.equal(settleDetent(120, heights, -1.2), 'peek');
 });
 
 test('drag is free between the rests', () => {

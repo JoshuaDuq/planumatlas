@@ -180,6 +180,24 @@
     .functions > :global(.head) {
       flex: none;
     }
+    /* A head draws the rule under its search once its list has scrolled 8px (elements.css). */
+    @supports (animation-timeline: scroll()) {
+      .functions,
+      .deficits {
+        timeline-scope: --list-scroll;
+      }
+      .functions > :global(.browser),
+      .deficits > :global(.deficit-body) {
+        scroll-timeline: --list-scroll block;
+      }
+      .functions > :global(.head),
+      .deficits > :global(.deficit-head) {
+        border-bottom-color: transparent;
+        animation: scroll-rule linear both;
+        animation-timeline: --list-scroll;
+        animation-range: 0 8px;
+      }
+    }
 
     /* The phone sheet: H6's #navigator carries the home-indicator padding, so there is one rule (phone.css:226-231). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {

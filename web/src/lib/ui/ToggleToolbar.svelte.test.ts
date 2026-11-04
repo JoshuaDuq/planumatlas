@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { expectAxeClean, withMedia } from './a11y-test-support.ts';
+import { whilePressed } from './press-test-support.ts';
 import ToggleToolbar from './ToggleToolbar.svelte';
 
 const presets = [
@@ -107,6 +108,24 @@ describe('ToggleToolbar', () => {
       expect(box.width).toBeGreaterThanOrEqual(24);
       expect(box.height).toBeGreaterThanOrEqual(24);
     }
+  });
+
+  test('a pointer press takes the thumb fill at once and presses nothing until released on it; a disabled button takes none', async () => {
+    const onpress = vi.fn();
+    render(ToggleToolbar, props({ onpress }));
+    const raised = getComputedStyle(el('Front')).backgroundColor;
+    const style = getComputedStyle(el('Left'));
+    expect(style.backgroundColor).not.toBe(raised);
+    await whilePressed(el('Left'), () => {
+      expect(style.backgroundColor).toBe(raised);
+      expect(style.transitionDuration).toBe('0s');
+    });
+    expect(onpress).not.toHaveBeenCalled();
+    const resting = getComputedStyle(el('Top')).backgroundColor;
+    await whilePressed(el('Top'), () => {
+      expect(el('Top').matches(':active:disabled')).toBe(true);
+      expect(getComputedStyle(el('Top')).backgroundColor).toBe(resting);
+    });
   });
 
   test('forced colours mark the pressed button with a system-colour outline', async () => {

@@ -85,7 +85,7 @@
     onquery={(value) => explorer.setQuery(value)}
   />
 </div>
-<div class="deficit-body">
+<div class="deficit-body scroll-fade">
   <div id="{uid}-list" role="group" aria-label={text.deficits} bind:this={list}>
     {#each groups as { group, deficits } (group.id)}
       <div class="group" role="group" aria-labelledby="{uid}-group-{group.id}">

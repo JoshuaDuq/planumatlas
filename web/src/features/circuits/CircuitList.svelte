@@ -32,7 +32,7 @@
   );
 </script>
 
-<div class="browser" hidden={!model.exploring}>
+<div class="browser scroll-fade" hidden={!model.exploring}>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
     <ul class="rows">
       {#each model.circuits as circuit (circuit.id)}
@@ -89,6 +89,7 @@
       font-weight: 400;
       line-height: var(--lh-ui);
       text-align: left;
+      transition: background-color var(--ui-transition) var(--ease-ui);
     }
     .circuit-choice:focus-visible {
       outline-offset: -2px;
@@ -176,6 +177,11 @@
       .circuit-choice:is(:hover, :focus-visible) .group-count {
         visibility: hidden;
       }
+    }
+    /* After the hover rule, which shares its weight: a pointer press tints the row at once. */
+    .circuit-choice:active:not([data-selected='true'], [aria-disabled='true'], :focus-visible) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
     @media (pointer: coarse) {
       .circuit-choice {

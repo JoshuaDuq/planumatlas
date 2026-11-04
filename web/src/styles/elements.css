@@ -50,6 +50,37 @@
     }
   }
 
+  /*
+   * Scroll edges, driven by the scroll itself. A scroller fades its last 12px while more lies below,
+   * and a list's head draws its rule once the list has moved 8px (`scroll-rule`, set by each head).
+   * Without scroll-driven animations nothing fades and the rule stays, as before.
+   */
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade {
+      mask-position: top;
+      mask-repeat: no-repeat;
+      animation: scroll-fade linear both;
+      animation-timeline: scroll(self block);
+      animation-range: calc(100% - 12px) 100%;
+    }
+  }
+  /* A scroller with nothing to scroll has no timeline, and so no mask at all. */
+  @keyframes scroll-fade {
+    from {
+      mask-image: linear-gradient(to top, transparent, #000 12px);
+      mask-size: 100% 100%;
+    }
+    to {
+      mask-image: linear-gradient(to top, transparent, #000 12px);
+      mask-size: 100% calc(100% + 12px);
+    }
+  }
+  @keyframes scroll-rule {
+    to {
+      border-bottom-color: var(--border-subtle);
+    }
+  }
+
   /* A key is a thing you press, so it is drawn as one rather than quoted: a 20px cap. */
   kbd {
     display: inline-block;

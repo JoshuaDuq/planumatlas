@@ -39,6 +39,8 @@ export function withHeadlessRenderer(original: typeof Three, probe: HeadlessProb
     };
     getPixelRatio = () => this.ratio;
     setTransparentSort() {}
+    // No programs exist without a GL context.
+    compileAsync = () => Promise.resolve();
     setSize() {}
     initRenderTarget() {}
     setAnimationLoop = (loop: ((now: number) => void) | null) => {

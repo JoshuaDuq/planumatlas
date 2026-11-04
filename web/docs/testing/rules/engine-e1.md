@@ -200,11 +200,11 @@ below are relative to `web/`. `parity/E1.test.ts` was deleted once each rule had
 
 ### RENDER-21 · Arrow keys turn the model five degrees, like a drag
 
-- **Rule:** Each arrow press turns the orbit by ORBIT_STEP = π/36 (5°) at once, without damping, in the direction a drag would. Damping stays on for pointer drags. Holding a key never flips the horizon over a pole, and the distance to the target is kept.
+- **Rule:** Each arrow press turns the orbit by ORBIT_STEP = π/36 (5°) at once, in the direction a drag would; the controls are undamped, and a drag follows the pointer exactly (SCENE-36). Holding a key never flips the horizon over a pole, and the distance to the target is kept.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/render/keyboard-orbit.js:13-24, 30-40`
-- **Expected:** One press sweeps 0.08727 rad ± 1e-9 and keeps the distance (±1e-9). enableDamping is still true afterwards. ArrowLeft and ArrowRight move to opposite sides. ArrowUp equals a drag of rotateUp(−π/36) (±1e-12) and moves the camera below (y < 0); ArrowDown moves it above. 200 presses stay on the same side of the pole. From the superior view, ArrowLeft moves the camera > 10 mm.
+- **Expected:** One press sweeps 0.08727 rad ± 1e-9 and keeps the distance (±1e-9). ArrowLeft and ArrowRight move to opposite sides. ArrowUp equals a drag of rotateUp(−π/36) (±1e-12) and moves the camera below (y < 0); ArrowDown moves it above. 200 presses stay on the same side of the pole. From the superior view, ArrowLeft moves the camera > 10 mm.
 - **Covered by:** `src/lib/engine/render/keyboard-orbit.test.ts` (R)
 
 ### RENDER-22 · Zoom keys step by the wheel's proportion

@@ -103,6 +103,12 @@
         color: var(--text-primary);
       }
     }
+    /* A pointer press takes the thumb's fill at once (the overlay's on the stage); the ring arrives with the choice. */
+    :global(.segmented.toggle-toolbar button:active:not(:disabled, :focus-visible)) {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      transition-duration: 0s;
+    }
     :global(.segmented.toggle-toolbar button[aria-pressed='true']) {
       background: var(--surface-raised);
       color: var(--text-primary);

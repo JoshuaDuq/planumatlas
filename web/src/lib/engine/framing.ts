@@ -164,6 +164,8 @@ export function createFraming({
   let view: ViewName = 'oblique';
   let framed = false;
   let framingSource: (() => FramingClearance) | null = null;
+  // A phone's open stage popover: framing keeps the anatomy above its plate's top edge, on the host.
+  let plateTop: number | null = null;
   // The reader's magnification, as a multiple of the distance at which the whole brain just fills the
   // stage. Held across a resize so that a stage which changes shape re-fits instead of clipping the
   // anatomy off its sides or stranding it in the middle of a much larger field.
@@ -337,7 +339,10 @@ export function createFraming({
       (controls.target.y < bounds.min.y || model.state.internalSystem === 'Spinal cord'),
     );
 
-  /** Framing fits above the stage dock, measured now: the section bar can change it in the same task. */
+  /**
+   * Framing fits above the stage dock, measured now: the section bar can change it in the same task. An open
+   * popover's plate reaches higher than the dock it opens from.
+   */
   function applyFraming({ immediate = false }: MoveOptions = {}): boolean {
     const { inset, scale } = framingSource?.() ?? {
       inset: {},
@@ -346,7 +351,28 @@ export function createFraming({
     const rescaled =
       scale.horizontal !== framingScale.horizontal || scale.vertical !== framingScale.vertical;
     framingScale = scale;
-    return scene.setFramingInset(inset, { immediate }) || rescaled;
+    const { y, height } = scene.visibleRect;
+    const cleared =
+      plateTop === null
+        ? inset
+        : { ...inset, bottom: Math.max(inset.bottom ?? 0, y + height - plateTop) };
+    return scene.setFramingInset(cleared, { immediate }) || rescaled;
+  }
+
+  /** Whether anything framed is drawn below `top` on the host, with the camera as it stands. */
+  function drawnBelow(top: number): boolean {
+    const { min, max } = framingBounds();
+    // The tract reference frames a box, not vertices.
+    const points =
+      framingPoints() ??
+      [min.x, max.x].flatMap((x) => [min.y, max.y].flatMap((y) => [x, y, min.z, x, y, max.z]));
+    camera.updateMatrixWorld();
+    const point = new Vector3();
+    for (let i = 0; i < points.length; i += 3) {
+      point.set(points[i]!, points[i + 1]!, points[i + 2]!).project(camera);
+      if (point.z <= 1 && ((1 - point.y) / 2) * scene.hostSize.height > top) return true;
+    }
+    return false;
   }
 
   function framingFit(options?: MoveOptions) {
@@ -385,7 +411,7 @@ export function createFraming({
     moveCamera({ ...plan, position: plan.target.clone().addScaledVector(direction, distance) });
   }
 
-  function refitDock() {
+  function refitDock(options?: MoveOptions) {
     if (!framed) return;
     if (orbiting) {
       dockPending = true;
@@ -393,13 +419,16 @@ export function createFraming({
     }
     const plan = scene.destination;
     const direction = plan.position.clone().sub(plan.target).normalize();
-    if (!applyFraming()) return;
+    if (!applyFraming(options)) return;
     const fitted = fittedDistance(direction);
     if (!(fitted > 0)) return;
     // The magnification is the size kept, not the distance: a camera restored while a key was still
     // leaving the stage was placed for the room it lands in, and stays there.
     const distance = fitted * zoom;
-    moveCamera({ ...plan, position: plan.target.clone().addScaledVector(direction, distance) });
+    moveCamera(
+      { ...plan, position: plan.target.clone().addScaledVector(direction, distance) },
+      options,
+    );
   }
 
   /**
@@ -771,6 +800,13 @@ export function createFraming({
       publishViewport();
     },
     refitDock,
+    clearPlate(top, options) {
+      if (top === plateTop) return;
+      // A plate that covers none of the anatomy where it is drawn leaves the camera alone.
+      if (top !== null && plateTop === null && !drawnBelow(top)) return;
+      plateTop = top;
+      refitDock(options);
+    },
 
     frameCurrent,
     applyView: frameCurrent,

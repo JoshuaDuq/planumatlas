@@ -390,6 +390,7 @@
       align-items: center;
       min-height: var(--row-height);
       padding-inline-start: calc((var(--level) - 1) * var(--space-4));
+      transition: background-color var(--ui-transition) var(--ease-ui);
     }
     .row:focus-visible {
       outline: 2px solid var(--accent);
@@ -407,6 +408,16 @@
       .row:hover:not([data-selected='true'], [aria-disabled='true']) {
         background: var(--surface-hover);
       }
+    }
+    /* After the hover rule: a pointer press tints the row at once and lets go over the colour feedback; a press on one of its buttons tints only that. */
+    .row:active:not(
+        [data-selected='true'],
+        [aria-disabled='true'],
+        :focus-visible,
+        :has(:global(button:active))
+      ) {
+      background: var(--surface-pressed);
+      transition-duration: 0s;
     }
   }
 </style>
