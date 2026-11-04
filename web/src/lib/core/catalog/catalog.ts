@@ -1,5 +1,6 @@
 import type { DisplaySettings, Language, Manifest, Region } from '../../types/index.ts';
 import { labelOf, type RegionLabel } from './labels.ts';
+import { editDistance } from './nearest.ts';
 import { cabNpName, type CabNpPartition } from './networks.ts';
 import { belongsToDetail, cutAtlasesOf, visibilityOf, type Visibility } from './visibility.ts';
 
@@ -7,7 +8,9 @@ const EXACT = 0,
   PREFIX = 1,
   WORD = 2,
   SUBSTRING = 3,
-  NO_MATCH = 4;
+  // One misspelt word, then two: tried only when nothing is spelt as typed.
+  TYPO = 4,
+  NO_MATCH = 6;
 
 const normalise = (value: string) => value.trim().toLowerCase();
 const stripDiacritics = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -31,6 +34,43 @@ function tierOf(text: string, query: string): number {
   return startsAWord(text, query) ? WORD : SUBSTRING;
 }
 
+/** The edits a query word of this length may be from a name's word: none under five letters. */
+const typosAllowed = (length: number) => (length >= 8 ? 2 : length >= 5 ? 1 : 0);
+
+const wordsOf = (text: string) => text.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+/**
+ * Scores a misspelt query against a name: each query word must start one of the name's words or be
+ * within its allowance of one, and the name ranks by the most edits a word needed; NO_MATCH otherwise.
+ * Each distinct name word is measured once per query, so a scan of every region stays cheap.
+ */
+function typoTier(query: readonly string[]): (words: readonly string[]) => number {
+  const measured = query.map(() => new Map<string, number>());
+  const edits = (index: number, word: string) => {
+    const typed = query[index]!;
+    let found = measured[index]!.get(word);
+    if (found === undefined) {
+      const over = typosAllowed(typed.length) + 1;
+      found = word.startsWith(typed)
+        ? 0
+        : Math.abs(word.length - typed.length) >= over
+          ? over
+          : Math.min(editDistance(typed, word), over);
+      measured[index]!.set(word, found);
+    }
+    return found;
+  };
+  return (words) => {
+    let worst = 0;
+    for (let index = 0; index < query.length; index += 1) {
+      const best = Math.min(...words.map((word) => edits(index, word)));
+      if (best > typosAllowed(query[index]!.length)) return NO_MATCH;
+      worst = Math.max(worst, best);
+    }
+    return worst ? TYPO + worst - 1 : NO_MATCH;
+  };
+}
+
 /** The display settings a catalog reads, plus the language the caller wants the labels in. */
 export type CatalogSettings = DisplaySettings & { lang?: Language };
 
@@ -38,6 +78,8 @@ interface Entry {
   region: Region;
   label: RegionLabel;
   searchable: string[];
+  /** Each searchable string's words, for a misspelt query. */
+  words: string[][];
 }
 
 export type CatalogRow = { region: Region; label: RegionLabel } & Visibility & {
@@ -106,7 +148,7 @@ export function createCatalog(
               ...aliasTerms,
             ].filter(Boolean);
 
-      const entry: Entry = { region, label, searchable };
+      const entry: Entry = { region, label, searchable, words: searchable.map(wordsOf) };
       entries.push(entry);
       byId.set(region.id, entry);
     }
@@ -154,6 +196,7 @@ export function createCatalog(
      * silent absence this index exists to avoid. What is on screen comes
      * first, so the first result never changes the anatomy unasked; a match
      * that is not brings the on-screen region it is drawn within, at its rank.
+     * A query that matches nothing as typed finds the names it misspells.
      */
     search(rawQuery: string, settings: CatalogSettings, limit = 50) {
       if (settings?.lang) ensureLang(settings.lang);
@@ -168,6 +211,13 @@ export function createCatalog(
           ),
         );
         if (tier !== NO_MATCH) matched.set(entry, { row: row(entry, settings), tier });
+      }
+      if (!matched.size) {
+        const tierOf = typoTier(wordsOf(strippedQuery));
+        for (const entry of selectable) {
+          const tier = Math.min(...entry.words.map(tierOf));
+          if (tier !== NO_MATCH) matched.set(entry, { row: row(entry, settings), tier });
+        }
       }
       // A holder added on the way is on screen, so the loop passes over it.
       for (const [entry, { row: found, tier }] of matched) {

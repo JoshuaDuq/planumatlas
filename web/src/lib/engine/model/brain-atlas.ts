@@ -57,6 +57,7 @@ import {
   tissueColor,
   createAnatomicalMaterial,
   fieldDecode,
+  stageLegible,
 } from '../render/materials.ts';
 import type { Appearance, AnatomicalUserData, VisualFieldUniforms } from '../render/materials.ts';
 import type { SurfaceHit } from '../render/picking.ts';
@@ -809,7 +810,7 @@ export class BrainAtlas extends EventTarget {
               this.manifest.atlases.some((atlas) => atlas.id === id) ? this.visualField : null,
             );
             if (this.mriUniforms) addMriAppearance(shown.material, this.mriUniforms);
-            this.sourceColors.set(shown, shown.material.color.clone());
+            this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
             // Region meshes never move after load. Skipping per-frame matrix
             // updates is free on 400+ nuclei.
             shown.matrixAutoUpdate = false;

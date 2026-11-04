@@ -133,7 +133,7 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/render/scene.js:217-227`; deviation `e5-scene-exposure-fail-fast.md`
-- **Expected:** `--scene-exposure` of `''`, `'bright'` or `'1,2'` makes `applyTheme()` throw `/--scene-exposure/`. `'1.2'` gives `toneMappingExposure` 1.2. The halo, core and hidden edge colours equal `--scene-outline-halo`, `--scene-outline-core` and `--scene-outline-hidden`.
+- **Expected:** `--scene-exposure` of `''`, `'bright'` or `'1,2'` makes `applyTheme()` throw `/--scene-exposure/`. `'1.2'` gives `toneMappingExposure` 1.2. The halo and core edge colours equal `--scene-outline-halo` and `--scene-outline-core`. The hidden edge colour is `--scene-outline-hidden` divided by the pass's edge strength, so the additive overlay draws exactly the token.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R, the three refusals; the `'1.2'` case asserts only that it does not throw, W: `toneMappingExposure` is not read); the colours are uncovered
 
 ### SCENE-11 · The scan on the surface is drawn without tone mapping

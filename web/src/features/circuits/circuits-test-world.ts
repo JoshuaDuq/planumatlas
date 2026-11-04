@@ -129,6 +129,7 @@ export function createWorld() {
       shell,
       mri,
       lesion: { selectedTract: null, clearTract() {}, heldOpacity: null },
+      strokeCases: { chosen: [], show() {}, clear() {}, heldOpacity: null, heldColor: null },
       panels: {
         openFunction: () => undefined,
         openDeficit: () => undefined,

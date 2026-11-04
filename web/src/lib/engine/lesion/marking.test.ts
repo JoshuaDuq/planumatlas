@@ -5,8 +5,12 @@ import {
   Matrix4,
   Mesh,
   PerspectiveCamera,
+  Quaternion,
+  Scene,
+  Vector2,
   Vector3,
 } from 'three';
+import type { WebGLRenderer } from 'three';
 import { test } from 'vitest';
 import type { LesionSphere } from '../api.ts';
 import { createLesionMarking, cssPixelAt, footprint } from './marking.ts';
@@ -86,5 +90,26 @@ test('the ring and the dot each sit on a halo drawn just before them', () => {
   const positions = ringHalo!.geometry.getAttribute('position');
   assert.ok(Math.abs(Math.hypot(positions.getX(0), positions.getY(0)) - 0.01) < 1e-9);
   assert.deepEqual(Array.from(ringHalo!.geometry.getAttribute('side').array.slice(0, 2)), [-1, 1]);
+  marking.dispose();
+});
+
+test('each marking faces the camera in the frame that draws it, not the next', () => {
+  const marking = createLesionMarking();
+  marking.show({ centre: [0, 0, 0], radius: 10 }, [], [], 1);
+  const camera = new PerspectiveCamera(30, 1, 0.01, 10);
+  camera.position.set(1, 0, 0);
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
+  // The renderer settles world matrices first, then calls onBeforeRender and draws with matrixWorld.
+  marking.group.updateMatrixWorld(true);
+  const renderer = { getSize: (size: Vector2) => size.set(800, 600) } as unknown as WebGLRenderer;
+  const [, ...billboards] = marking.group.children as Mesh[];
+  const facing = new Quaternion();
+  for (const object of billboards) {
+    // The markings read only the renderer, the scene and the camera.
+    (object.onBeforeRender as (...args: unknown[]) => void)(renderer, new Scene(), camera);
+    object.matrixWorld.decompose(new Vector3(), facing, new Vector3());
+    assert.ok(facing.angleTo(camera.quaternion) < 1e-6, object.constructor.name);
+  }
   marking.dispose();
 });

@@ -181,3 +181,65 @@ export function clearFraming(
     },
   };
 }
+
+/** Halvings of the shrink `clearCorner` searches; the last is far below a pixel. */
+const CORNER_STEPS = 32;
+
+/**
+ * Framing that keeps the anatomy off a box in the room's top-right corner, such as the gizmo, by
+ * sliding it toward the bottom-left of its framing and shrinking it only as far as that takes, rather
+ * than ceding a whole band above or beside the box.
+ *
+ * `framed` is the room's framing from `clearFraming`. The anatomy is read as the ellipse inscribed in
+ * its extents, since a silhouette never fills its corners. The shrunken extents stay inside the
+ * originals, so the markings stay clear. `size` is the share of the original extents kept.
+ */
+export function clearCorner(
+  { width, height }: Size,
+  { inset, scale }: { inset: number; scale: { horizontal: number; vertical: number } },
+  box: Rect,
+  fill: number,
+): {
+  inset: number;
+  top: number;
+  right: number;
+  scale: { horizontal: number; vertical: number };
+  size: number;
+} {
+  const across = (scale.horizontal * fill * width) / 2;
+  const half = (scale.vertical * fill * (height - inset)) / 2;
+  const at = (size: number) => ({
+    x: width / 2 - (1 - size) * across,
+    y: (height - inset) / 2 + (1 - size) * half,
+  });
+  const clears = (size: number) => {
+    const centre = at(size);
+    const near = {
+      x: Math.max(box.x, Math.min(centre.x, box.x + box.width)),
+      y: Math.max(box.y, Math.min(centre.y, box.y + box.height)),
+    };
+    return (
+      ((near.x - centre.x) / (size * across)) ** 2 + ((near.y - centre.y) / (size * half)) ** 2 >= 1
+    );
+  };
+  let [lost, kept] = [0, 1];
+  if (!clears(kept)) {
+    for (let step = 0; step < CORNER_STEPS; step++) {
+      const mid = (lost + kept) / 2;
+      if (clears(mid)) lost = mid;
+      else kept = mid;
+    }
+    kept = lost;
+  }
+  const centre = at(kept);
+  return {
+    inset,
+    top: 2 * centre.y - (height - inset),
+    right: width - 2 * centre.x,
+    scale: {
+      horizontal: (kept * across) / (fill * centre.x),
+      vertical: (kept * half) / (fill * (height - inset - centre.y)),
+    },
+    size: kept,
+  };
+}

@@ -6,7 +6,7 @@ const normalize = (value: string) =>
     .replace(/[\u0300-\u036f]/g, '');
 
 /** Edits (insertions, deletions, substitutions, adjacent swaps) between two words. */
-function editDistance(a: string, b: string): number {
+export function editDistance(a: string, b: string): number {
   const rows = Array.from({ length: a.length + 1 }, (_, i) => [
     i,
     ...Array<number>(b.length).fill(0),

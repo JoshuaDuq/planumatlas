@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { ShaderLib } from 'three';
+import { Color, SRGBColorSpace, ShaderLib } from 'three';
 import type { WebGLProgramParametersWithUniforms } from 'three';
 import { afterEach, test, vi } from 'vitest';
 import type { Region } from '../../types/index.ts';
-import { createAnatomicalMaterial, tissueColor } from './materials.ts';
+import { createAnatomicalMaterial, stageLegible, tissueColor } from './materials.ts';
 import type { AnatomicalUserData } from './materials.ts';
 import { appearance, corticalMesh, patchCombinations } from './test-support.ts';
 
@@ -173,4 +173,50 @@ test('SHADER-06 the surface hands the shader the manifest fold ranges and streng
   assert.deepEqual(uniforms['opennessRange']!.value, [0.5, 0.95]);
   assert.deepEqual(uniforms['foldRange']!.value, [-0.5, 1.8]);
   assert.deepEqual(uniforms['foldStrength']!.value, [0.48, 0.78]);
+});
+
+/** OKLab lightness and hue angle of a linear sRGB colour. */
+function lightnessAndHue({ r, g, b }: Color): [number, number] {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, Math.atan2(bb, a)];
+}
+
+const published = (r: number, g: number, b: number) =>
+  new Color().setRGB(r / 255, g / 255, b / 255, SRGBColorSpace);
+
+test('a near-black published colour is lifted onto the stage floor, keeping its hue', () => {
+  // Destrieux's long insular gyrus, OKLab lightness 0.164.
+  const insula = published(23, 10, 10);
+  const [before, hue] = lightnessAndHue(insula);
+  const [after, lifted] = lightnessAndHue(stageLegible(insula));
+  assert.ok(Math.abs(after - (0.3 + (before / 0.45) * 0.15)) < 1e-4, `${after}`);
+  assert.ok(Math.abs(lifted - hue) < 1e-3);
+});
+
+test('a colour at or above the knee is drawn as published', () => {
+  const light = published(220, 180, 140);
+  const { r, g, b } = light;
+  stageLegible(light);
+  assert.deepEqual([light.r, light.g, light.b], [r, g, b]);
+});
+
+test('two dark colours keep their order of lightness', () => {
+  const [darker] = lightnessAndHue(stageLegible(published(10, 10, 30)));
+  const [lighter] = lightnessAndHue(stageLegible(published(40, 40, 60)));
+  assert.ok(darker < lighter);
+});
+
+test('a saturated dark colour is lifted inside the gamut, giving up chroma, not hue', () => {
+  // aseg's posterior corpus callosum, pure dark blue.
+  const blue = published(0, 0, 64);
+  const [, hue] = lightnessAndHue(blue);
+  const shown = stageLegible(blue);
+  for (const channel of [shown.r, shown.g, shown.b]) assert.ok(channel >= 0 && channel <= 1);
+  const [after, lifted] = lightnessAndHue(shown);
+  assert.ok(after > 0.3);
+  assert.ok(Math.abs(lifted - hue) < 1e-2, `${lifted} vs ${hue}`);
 });

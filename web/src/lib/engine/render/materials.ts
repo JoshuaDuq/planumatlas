@@ -110,6 +110,57 @@ export function greyed(color: Color): Color {
   return color.setScalar(0.2126 * r + 0.7152 * g + 0.0722 * b);
 }
 
+/*
+ * Published atlas colours run down to near-black (Destrieux's long insular gyrus, many HCP-MMP
+ * areas: OKLab lightness 0.14-0.16), which vanishes on the near-black stage. Below the knee, lightness
+ * is mapped linearly onto [floor, knee], keeping order, hue and chroma; lighter colours are untouched.
+ * The published value stays in the data and exports; only the stage draws the lifted one.
+ */
+const STAGE_LIGHTNESS = { floor: 0.3, knee: 0.45 };
+
+const toLab = (r: number, g: number, b: number): [number, number, number] => {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+};
+
+const fromLab = (L: number, a: number, b: number): [number, number, number] => {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+};
+
+/** A published colour (linear sRGB) as the stage draws it: lifted above the floor if it is darker. */
+export function stageLegible(color: Color): Color {
+  const [L, a, b] = toLab(color.r, color.g, color.b);
+  const { floor, knee } = STAGE_LIGHTNESS;
+  if (L >= knee) return color;
+  const lifted = floor + (L / knee) * (knee - floor);
+  // Lifting can leave the gamut; chroma gives way, never hue or the lifted lightness. Grey at the
+  // lifted lightness is always inside, so the most chroma that fits is found by bisection.
+  const inGamut = (rgb: number[]) => rgb.every((c) => c >= -1e-6 && c <= 1 + 1e-6);
+  let [inside, outside] = [0, 1];
+  if (inGamut(fromLab(lifted, a, b))) inside = 1;
+  else
+    for (let i = 0; i < 16; i++) {
+      const mid = (inside + outside) / 2;
+      if (inGamut(fromLab(lifted, a * mid, b * mid))) inside = mid;
+      else outside = mid;
+    }
+  const rgb = fromLab(lifted, a * inside, b * inside);
+  return color.setRGB(...(rgb.map((c) => Math.min(1, Math.max(0, c))) as [number, number, number]));
+}
+
 /**
  * How to read one shading field back to its source units.
  *

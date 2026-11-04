@@ -363,7 +363,7 @@ describe('framing', () => {
       return ((x - centre.x) / across) ** 2 + ((y - centre.y) / half) ** 2 < 1 - 1e-9;
     }
 
-    test('on a narrow phone stage it gives up the band above the gizmo, and the picture clears it', () => {
+    test('on a narrow phone stage it moves the picture out of the gizmo’s corner, keeping more of it than the band below', () => {
       const room = { width: 375, height: 420 };
       const stage = stageOf(room.width, room.height, { width: 340, height: 52 });
       const gizmo = gizmoIn(stage, room, { left: 260, top: 16, size: 100 });
@@ -375,8 +375,15 @@ describe('framing', () => {
       stage.registerGizmo(gizmo);
       const cleared = stage.framing();
       expect(reaches(room, cleared, box)).toBe(false);
-      // Like a key, it takes the band above it off the room, not the band beside it: the stage is narrow.
-      expect(cleared.inset).toEqual({ top: box.bottom, right: 0, bottom: expect.any(Number) });
+      // Giving up the whole band above the gizmo would leave the room below it; the corner keeps more.
+      expect(cleared.inset.top!).toBeLessThan(box.bottom);
+      const below = room.height - cleared.inset.bottom! - box.bottom;
+      const half =
+        (cleared.scale.vertical *
+          FRAME_FILL *
+          (room.height - cleared.inset.top! - cleared.inset.bottom!)) /
+        2;
+      expect(half).toBeGreaterThan((FRAME_FILL * below) / 2);
     });
 
     test('on a wide short stage it gives up the band beside the gizmo instead', () => {

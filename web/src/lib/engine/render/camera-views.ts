@@ -83,8 +83,17 @@ export function cameraConstraints(bounds: Box3): CameraConstraints {
 /** The share of the visible stage the framed anatomy spans on its tighter axis, leaving room for the markings. */
 export const FRAME_FILL = 0.8;
 
+/** Width over height of the brain seen from the side or obliquely, the views framing opens on. */
+export const ANATOMY_ASPECT = 1.3;
+
 /** Below this bounding radius a framed structure loses the neighbourhood that locates it, in metres. */
 export const MIN_CONTEXT_RADIUS = 0.05;
+
+/**
+ * The least bounding radius a region in plain sight is framed at, in metres: about a lobe's reach, so
+ * a gyrus opened from search sits among its neighbours instead of filling the stage alone.
+ */
+export const REGION_CONTEXT_RADIUS = 0.035;
 
 /** Bounds grown evenly on every side until their bounding sphere reaches `radius`. */
 export function withContext(bounds: Box3, radius = MIN_CONTEXT_RADIUS): Box3 {

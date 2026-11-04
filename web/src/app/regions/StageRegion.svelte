@@ -375,6 +375,7 @@
     lang={current.lang}
     anatomy={world.engine.model.manifest.anatomy}
     agreementName={agreementName(world)}
+    regionName={(id) => world.catalog.label(id).name}
     fallbackFocus={() => sectionToolOrCanvas(engine.canvas)}
   />
   <MriNavigator

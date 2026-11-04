@@ -6,7 +6,7 @@ import { parse } from 'yaml';
 import type { Region } from '../../types/index.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { anatomies, asModelState, asRegion, readModel } from '../../core/catalog/test-support.ts';
-import { ghostColor, tissueColor } from '../render/materials.ts';
+import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { TissueAppearance } from '../render/materials.ts';
 import { createPalette, ghostKey, labelVisible } from './palette.ts';
 import type { Label, PaletteLookup } from './palette.ts';
@@ -124,7 +124,7 @@ test('under focus a cut keeps the selection and what it is made of in colour, ev
   const ghost = (label: Label) =>
     ghostColor({ ...label, source_name: label.name }, appearance.tissue, new Color());
   const published = ({ color: [red, green, blue] }: Label) =>
-    new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+    stageLegible(new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace));
   const focusOn = (selectedRegion: object) =>
     createPalette(
       cut,
@@ -186,7 +186,7 @@ test('around a route or Tracts a cut keeps the named regions and the selection i
   const ghost = (label: Label) =>
     ghostColor({ ...label, source_name: label.name }, appearance.tissue, new Color());
   const published = ({ color: [red, green, blue] }: Label) =>
-    new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+    stageLegible(new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace));
   const around = (ids: string[], selected: string | null = null) =>
     asModelState({
       ...state,

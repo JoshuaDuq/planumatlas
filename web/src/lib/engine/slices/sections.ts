@@ -575,6 +575,7 @@ export class BrainSections extends EventTarget {
     intensity: number;
     ras: Ras;
     agreement: AgreementCategory | null;
+    cutRegion: Region | null;
   } {
     const { volumes } = this;
     if (!volumes) throw new Error('The linked MRI has not loaded.');
@@ -586,6 +587,9 @@ export class BrainSections extends EventTarget {
         region.kind === 'structure' &&
         region.source_label_id === labelId,
     );
+    // The cut atlas's own grid, when a cut has loaded it: the region the stage's cut face shows here.
+    const layer = this.tissues.layers.get(this.state.cutAtlas);
+    const cutId = layer?.metadata.labels[layer.volume.label(point)]?.region_id;
     return {
       labelId,
       name: volumes.metadata.labels[labelId]!.name,
@@ -593,6 +597,7 @@ export class BrainSections extends EventTarget {
       intensity: volumes.mri.linear(point),
       ras: point,
       agreement: this.agreementAt(point, labelId),
+      cutRegion: (cutId && this.model.regions.get(cutId)) || null,
     };
   }
 

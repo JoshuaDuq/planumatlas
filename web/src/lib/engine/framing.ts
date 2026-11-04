@@ -19,6 +19,8 @@ import type {
 import type { HeldView } from './held-view.ts';
 import type { AtlasMesh } from './model/brain-atlas.ts';
 import {
+  MIN_CONTEXT_RADIUS,
+  REGION_CONTEXT_RADIUS,
   VIEW_DIRECTIONS,
   cutFacingView,
   fitDistance,
@@ -635,7 +637,7 @@ export function createFraming({
     if (box.isEmpty()) return false;
     const direction = heading();
     held.release();
-    const bounds = context ? withContext(box) : box;
+    const bounds = withContext(box, context ? MIN_CONTEXT_RADIUS : REGION_CONTEXT_RADIUS);
     moveCamera(
       planFraming(camera, controls, bounds, direction, frameTo, framingFit({ immediate })),
       {

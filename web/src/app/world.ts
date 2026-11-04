@@ -157,6 +157,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       },
       render: flushSync,
       lesion,
+      strokeCases,
     });
     const anatomy = createAnatomyCommands(context, {
       commands,
@@ -239,6 +240,9 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
             showDetail() {
               flushSync();
               ports.showDetailInPlace();
+            },
+            showView(name) {
+              if (!session.setView(name)) throw new Error(`Unknown view: ${name}`);
             },
             sayLesionReplaced() {
               session.notify({

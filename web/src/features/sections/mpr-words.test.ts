@@ -58,6 +58,18 @@ describe('the readout', () => {
     );
   });
 
+  test('the region the cut labels name leads, then the structure and its label number', () => {
+    const sample = { name: 'Left-Cerebral-Cortex', labelId: 3, agreement: null };
+    const opercular = 'Opercular part of the inferior frontal gyrus';
+    expect(readoutText(position, sample, 'en', opercular)).toBe(
+      `${position} — ${opercular} · Left cerebral cortex (label 3)`,
+    );
+    // A structure the cut atlas names as the segmentation does is said once.
+    expect(readoutText(position, sample, 'en', 'Left cerebral cortex')).toBe(
+      `${position} — Left cerebral cortex (label 3)`,
+    );
+  });
+
   test('a sample with no name is unlabelled, never "(label undefined)"', () => {
     const empty = readoutText(
       position,

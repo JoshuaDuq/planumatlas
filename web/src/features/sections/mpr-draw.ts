@@ -7,6 +7,7 @@ import { decimal } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { MprPlane, PlaneFrame, Vec3 } from '../../lib/engine/api.ts';
 import type { Language } from '../../lib/types/index.ts';
+import { sideConvention } from './mpr-words.ts';
 
 /** The crosshair axis each plane's slider moves (sections.js:17). */
 export const AXES: Readonly<Record<MprPlane, 0 | 1 | 2>> = { sagittal: 0, coronal: 1, axial: 2 };
@@ -78,7 +79,10 @@ export interface PanelMarks {
   lang: Language;
 }
 
-/** The panel as saved: the drawn slice with the crosshair, the edge letters and the plane's offset in the bitmap. */
+/**
+ * The panel as saved: the drawn slice with the crosshair, the edge letters, the side convention of
+ * an axial or coronal panel and the plane's offset in the bitmap.
+ */
 export function annotatedCopy(slice: HTMLCanvasElement, marks: PanelMarks): HTMLCanvasElement {
   const { plane, frame, fieldOfView, crosshair, lang } = marks;
   const size = slice.width;
@@ -120,9 +124,17 @@ export function annotatedCopy(slice: HTMLCanvasElement, marks: PanelMarks): HTML
     context.fillText(letter, ...place);
   }
 
+  const convention = sideConvention(frame.edges);
+  context.textAlign = 'left';
+  if (convention) {
+    const mark = t(lang, 'mpr').conventionMarks[convention];
+    context.font = '600 13px ui-sans-serif, system-ui, sans-serif';
+    context.strokeText(mark, 10, 22);
+    context.fillText(mark, 10, 22);
+  }
+
   const annotation = `${t(lang, 'mpr').labels[plane]} ${decimal(crosshair[AXES[plane]], 1, lang, { signed: true })} mm`;
   context.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
-  context.textAlign = 'left';
   context.strokeText(annotation, 10, size - 12);
   context.fillText(annotation, 10, size - 12);
   return canvas;

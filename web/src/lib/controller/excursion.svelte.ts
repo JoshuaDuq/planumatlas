@@ -30,6 +30,7 @@ import { createLessons } from './lesson.ts';
 import type { MriDialog, SceneReader, Shell } from './lesson.ts';
 import type { EngineModel } from '../engine/api.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
+import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { ViewStore } from '../state/view.svelte.ts';
 import { createExplorerChoice, createModes } from './modes.ts';
 import type { Explorer, Language, Notice } from '../types/index.ts';
@@ -74,6 +75,7 @@ export interface ExcursionDeps {
   /** Apply pending state to the page: the legacy `render()`. Framing reads the page it has drawn. */
   render: () => void;
   lesion: Pick<LesionStore, 'selectedTract' | 'clearTract' | 'heldOpacity'>;
+  strokeCases: Pick<StrokeCasesStore, 'chosen' | 'show' | 'clear' | 'heldOpacity' | 'heldColor'>;
 }
 
 /**
@@ -94,6 +96,7 @@ export function createExcursions(
     panels,
     render,
     lesion,
+    strokeCases,
   }: ExcursionDeps,
 ) {
   const { engine, session, lesson, view } = ctx;
@@ -107,6 +110,9 @@ export function createExcursions(
   let beforeExcursion = $state.raw<ReaderState | null>(null);
   // The tab that scene was shown in, which Restore returns to with it.
   let excursionOrigin: Explorer | null = null;
+  // The stroke cases that scene showed. The excursion clears them, giving back the display they found,
+  // and Restore draws them again over it.
+  let casesBefore: readonly string[] = [];
   // Whether the cortex is see-through because the reader took the notice's offer, so the next map
   // that needs no such view can put the cortex back.
   let seenThroughByNotice = false;
@@ -174,8 +180,19 @@ export function createExcursions(
   /** The scene an excursion leaves, and its tab, held once: later steps of the excursion keep the first. */
   function holdBeforeExcursion(fromLesson: ReaderState | null = null) {
     if (beforeExcursion) return;
-    beforeExcursion = fromLesson ?? reader.capture();
+    const scene = fromLesson ?? reader.capture();
     excursionOrigin = fromLesson ? 'circuits' : session.state.explorer;
+    casesBefore = fromLesson ? [] : [...strokeCases.chosen];
+    // Restore draws the cases again over the display they found, not the one they hold.
+    beforeExcursion = casesBefore.length
+      ? {
+          ...scene,
+          cortexOpacity: strokeCases.heldOpacity ?? scene.cortexOpacity,
+          surfaceColor: strokeCases.heldColor ?? scene.surfaceColor,
+        }
+      : scene;
+    // Not left to the selection's clearing: an excursion that keeps the selection would keep them.
+    if (casesBefore.length) strokeCases.clear();
   }
 
   /** A function or deficit ends Focus, once the scene Restore returns to has it. */
@@ -210,6 +227,7 @@ export function createExcursions(
     // The function or deficit in front opened the excursion, so the view from before it has it closed.
     if (excursion === 'functions') session.setFunction(null);
     else session.setDeficit(null);
+    if (casesBefore.length) strokeCases.show(casesBefore);
     session.notify({ text: t(lang(), 'clinical').stageRestored });
     render();
     return true;
@@ -237,6 +255,7 @@ export function createExcursions(
     const current = commands.begin();
     const failures = await reader.apply(before, current);
     if (!current()) return;
+    if (casesBefore.length) strokeCases.show(casesBefore);
     // Drawn first, so the workspace has drilled into the restored selection before the list replaces it.
     render();
     shell.showList();

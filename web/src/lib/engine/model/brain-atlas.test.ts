@@ -19,7 +19,7 @@ import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
 import { Volume } from '../slices/volume.ts';
 import { GHOST } from '../render/ghost-order.ts';
-import { ghostColor, tissueColor } from '../render/materials.ts';
+import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { BrainAtlas, SURFACE_COLORS } from './brain-atlas.ts';
 import type { AtlasManifest, GlbLoader } from './brain-atlas.ts';
@@ -143,6 +143,7 @@ function fixture(
   cabNp: Stub | null = null,
   functional: Stub | null = null,
   domains: Stub | null = null,
+  published: Record<string, Color> = {},
 ) {
   const manifest = {
     schema_version: 1,
@@ -178,7 +179,7 @@ function fixture(
         .entries()) {
         const mesh = new Mesh(
           new BoxGeometry(0.01, 0.01, 0.01),
-          new MeshStandardMaterial({ side: DoubleSide }),
+          new MeshStandardMaterial({ side: DoubleSide, color: published[region.id] ?? 0xffffff }),
         );
         for (const name of ['_sulc', '_openness', '_t1']) {
           mesh.geometry.setAttribute(
@@ -697,6 +698,20 @@ test('selection events carry source metadata; medial wall cannot become a region
     'a-right',
     'stem',
   ]);
+  atlas.dispose();
+});
+
+test('a near-black published colour is drawn lifted under atlas colours, and back after another mode', async () => {
+  const insula = new Color().setRGB(23 / 255, 10 / 255, 10 / 255, SRGBColorSpace);
+  const { atlas } = fixture(null, null, null, { 'a-left': insula });
+  await atlas.initialize('a');
+  const mesh = atlas.visibleMeshes.find((mesh) => mesh.userData['region_id'] === 'a-left')!;
+  const lifted = stageLegible(insula.clone()).getHex();
+  assert.notEqual(lifted, insula.getHex());
+  assert.equal(mesh.material.color.getHex(), lifted);
+  atlas.setSurfaceColor('tissue');
+  atlas.setSurfaceColor('atlas');
+  assert.equal(mesh.material.color.getHex(), lifted);
   atlas.dispose();
 });
 

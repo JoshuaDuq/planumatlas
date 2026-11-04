@@ -83,9 +83,16 @@ const DOT_RADIUS_M = 0.0009;
 const RING_HALO_PX = 2;
 const DOT_HALO_PX = 1.5;
 
-/** Turn a stage marking to face the camera, as the orientation letters do. */
-const facing = (object: Object3D) => (_: unknown, __: unknown, camera: Camera) =>
+/**
+ * Turn a stage marking to face the camera, as the orientation letters do. The renderer has already
+ * settled world matrices for this frame and draws with them next, so the turn is applied to them now.
+ */
+function face(object: Object3D, camera: Camera): void {
   object.quaternion.copy(camera.quaternion);
+  object.updateMatrixWorld();
+}
+const facing = (object: Object3D) => (_: unknown, __: unknown, camera: Camera) =>
+  face(object, camera);
 
 const scratch = new Vector3();
 
@@ -169,12 +176,12 @@ transformed.xy += normalize(position.xy) * side * halfWidth;`,
   const pixel = (renderer: WebGLRenderer, camera: Camera, object: Object3D) =>
     cssPixelAt(camera, renderer.getSize(size).y, at.setFromMatrixPosition(object.matrixWorld));
   ringHalo.onBeforeRender = (renderer, _, camera) => {
-    ringHalo.quaternion.copy(camera.quaternion);
+    face(ringHalo, camera);
     halfWidth.value = RING_HALO_PX * pixel(renderer, camera, ringHalo);
   };
   dotHalo.onBeforeRender = (renderer, _, camera) => {
-    dotHalo.quaternion.copy(camera.quaternion);
     dotHalo.scale.setScalar(1 + (DOT_HALO_PX * pixel(renderer, camera, dotHalo)) / DOT_RADIUS_M);
+    face(dotHalo, camera);
   };
   group.add(surface, ringHalo, dotHalo, ring, dot);
   group.visible = false;

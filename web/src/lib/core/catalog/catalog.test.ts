@@ -409,3 +409,53 @@ test('a match not on screen brings the on-screen region that stands in for it, s
   assert.equal(first.via?.name, 'Hippocampus');
   assert.ok(found.rows.some((row) => row.region.id === 'aseg:left:17' && !row.visible));
 });
+
+test('a misspelt name finds what the name finds, one edit allowed from five letters, two from eight', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  const { units } = readModel<{ units: Record<string, string> }>(
+    `${published}/neuropsych-domains.json`,
+  );
+  const full = createCatalog(real, 'en', null, units);
+  const learning = settings({ detail: 'learning' });
+  const firstTwo = (query: string) =>
+    full
+      .search(query, learning)
+      .rows.slice(0, 2)
+      .map((row) => row.region.id);
+  assert.deepEqual(firstTwo('hipocampus'), [
+    'learning:left:hippocampus',
+    'learning:right:hippocampus',
+  ]);
+  assert.deepEqual(firstTwo('hipocampus'), firstTwo('hippocampus'));
+  assert.deepEqual(firstTwo('amigdala'), firstTwo('amygdala'));
+  assert.deepEqual(firstTwo('parahipocampal gyrus'), firstTwo('parahippocampal gyrus'));
+  // A dropped letter and a swap: two edits in an eleven-letter word.
+  assert.ok(names(full.search('hipocampsu', learning)).includes('Hippocampus'));
+  // Under five letters nothing is a typo: "ponx" is one edit from Pons.
+  assert.equal(full.search('ponx', learning).total, 0);
+  assert.equal(full.search('gyrs', learning).total, 0);
+  // Two edits in a seven-letter word are too many.
+  assert.equal(catalog.search('pttamn', settings()).total, 0);
+});
+
+test('a typo one edit away ranks above one two edits away, whatever the alphabet says', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  // One letter from paracentral, two from precentral; "Inferior part of the precentral sulcus" sorts first.
+  const rows = createCatalog(real)
+    .search('pxracentral', settings())
+    .rows.filter((row) => row.visible)
+    .map((row) => row.label.name.toLowerCase());
+  const lastOneEdit = rows.findLastIndex((name) => name.includes('paracentral'));
+  const firstTwoEdits = rows.findIndex((name) => !name.includes('paracentral'));
+  assert.ok(rows.some((name) => name.includes('precentral')));
+  assert.ok(lastOneEdit < firstTwoEdits, rows.join('\n'));
+});
+
+test('a query spelt as some name is never padded with names a typo away', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  // "central" is one edit from "ventral", so a typo pass beside exact matches would add it.
+  const found = createCatalog(real).search('ventral', settings({ detail: 'learning' }));
+  assert.ok(found.total > 0);
+  for (const row of found.rows)
+    assert.match(`${row.label.name} ${row.via?.name ?? ''}`, /ventral/i);
+});

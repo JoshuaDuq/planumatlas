@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { clearFraming, fitScale, viewOffset, visibleRect } from './effective-viewport.ts';
+import {
+  clearCorner,
+  clearFraming,
+  fitScale,
+  viewOffset,
+  visibleRect,
+} from './effective-viewport.ts';
 
 const canvas = { width: 400, height: 800 };
 
@@ -138,4 +144,62 @@ test('a stage too short for its markings still frames something', () => {
   );
   assert.ok(framing.scale.vertical > 0 && Number.isFinite(framing.scale.vertical));
   assert.ok(framing.inset >= 0);
+});
+
+/** The anatomy's centre and half extents in the room, once the scene has applied a clearCorner result. */
+function cornerExtents(
+  { width, height }: { width: number; height: number },
+  { inset, top, right, scale }: ReturnType<typeof clearCorner>,
+  fill: number,
+) {
+  const centre = { x: (width - right) / 2, y: (top + height - inset) / 2 };
+  return {
+    centre,
+    across: (fill * scale.horizontal * (width - right)) / 2,
+    half: (fill * scale.vertical * (height - inset - top)) / 2,
+  };
+}
+
+/** How far outside the ellipse inscribed in the extents the box's nearest point lies; 1 is on it. */
+function ellipseReach(
+  { centre, across, half }: ReturnType<typeof cornerExtents>,
+  box: { x: number; y: number; width: number; height: number },
+) {
+  const x = Math.max(box.x, Math.min(centre.x, box.x + box.width));
+  const y = Math.max(box.y, Math.min(centre.y, box.y + box.height));
+  return ((x - centre.x) / across) ** 2 + ((y - centre.y) / half) ** 2;
+}
+
+// Measured at 375 x 812 with the sheet at half: the gizmo's glyphs and gap take 246-356 x 21-131.
+const phoneRoom = { width: 375, height: 380 };
+const phoneFraming = clearFraming(phoneRoom, 70, { top: 64, bottom: 34, left: 32, right: 32 }, 0.8);
+const phoneGizmo = { x: 246, y: 21, width: 110, height: 110 };
+
+test('a corner box outside the anatomy leaves the framing as it was', () => {
+  const corner = clearCorner(phoneRoom, phoneFraming, { x: 350, y: 0, width: 25, height: 20 }, 0.8);
+  assert.equal(corner.size, 1);
+  assert.equal(corner.top, 0);
+  assert.equal(corner.right, 0);
+  assert.deepEqual(corner.scale, phoneFraming.scale);
+});
+
+test('a gizmo over a phone half sheet moves the anatomy aside instead of taking the band below it', () => {
+  const corner = clearCorner(phoneRoom, phoneFraming, phoneGizmo, 0.8);
+  const kept = cornerExtents(phoneRoom, corner, 0.8);
+  const whole = cornerExtents(phoneRoom, { ...phoneFraming, top: 0, right: 0, size: 1 }, 0.8);
+  // Clear of the gizmo, and only just: any larger and the ellipse would reach it.
+  assert.ok(Math.abs(ellipseReach(kept, phoneGizmo) - 1) < 1e-6);
+  assert.ok(Math.abs(kept.across / whole.across - corner.size) < 1e-9);
+  assert.ok(Math.abs(kept.half / whole.half - corner.size) < 1e-9);
+  // Inside the room's own framing, so the markings stay clear.
+  assert.ok(kept.centre.x - kept.across >= whole.centre.x - whole.across - 1e-9);
+  assert.ok(kept.centre.y + kept.half <= whole.centre.y + whole.half + 1e-9);
+  // Ceding the band below the gizmo, as the stage did, kept 72 px of half height.
+  const rest = { width: 375, height: 380 - 131 };
+  const band = framedBand(
+    rest,
+    clearFraming(rest, 70, { top: 0, bottom: 34, left: 32, right: 32 }, 0.8),
+    0.8,
+  );
+  assert.ok(kept.half > 1.15 * ((band.bottom - band.top) / 2), `half ${kept.half}`);
 });

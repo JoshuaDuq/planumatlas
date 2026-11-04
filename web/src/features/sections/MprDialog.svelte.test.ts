@@ -529,6 +529,24 @@ describe('the pictures', () => {
     await expect.poll(() => calls('pixels').length).toBeGreaterThan(drawn);
     expect(canvas('coronal').getAttribute('aria-label')).toMatch(/patient right at the right/);
   });
+
+  test('an axial or coronal picture marks its convention on the image; a sagittal one has no left or right to mark', async () => {
+    await opened();
+    const mark = (plane: string) =>
+      section(plane).querySelector('.picture .convention')?.textContent ?? null;
+    expect([mark('sagittal'), mark('coronal'), mark('axial')]).toEqual([
+      null,
+      'Radiological',
+      'Neurological',
+    ]);
+    await engine.sections.setMode('coronal');
+    engine.sections.setDisplay({ reverse: true });
+    await expect.poll(() => mark('coronal')).toBe('Neurological');
+    live.lang = 'fr';
+    await expect
+      .poll(() => [mark('coronal'), mark('axial')])
+      .toEqual(['Neurologique', 'Neurologique']);
+  });
 });
 
 describe('the readout', () => {
@@ -595,7 +613,7 @@ describe('Save PNG', () => {
     await expect.poll(() => statusRegion().textContent).toBe('Saved the axial section as a PNG.');
   });
 
-  test('the saved picture carries its own crosshair, edge letters and offset, in the reader’s language', async () => {
+  test('the saved picture carries its own crosshair, edge letters, convention and offset, in the reader’s language', async () => {
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     const saved: HTMLCanvasElement[] = [];
     const toDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -623,7 +641,7 @@ describe('Save PNG', () => {
     // The screen's picture has no text drawn into it.
     expect(drawn).toEqual([]);
     await page.getByRole('button', { name: 'Save PNG, axial', exact: true }).click();
-    expect(drawn).toEqual(['A', 'R', 'P', 'L', 'Axial +12.5 mm']);
+    expect(drawn).toEqual(['A', 'R', 'P', 'L', 'Neurological', 'Axial +12.5 mm']);
     // 1 mm of a 256 mm field on 128 pixels: the crosshair is the single column 64, ringed in dark.
     const [image] = saved;
     expect(image!.width).toBe(SIZE);
@@ -636,7 +654,7 @@ describe('Save PNG', () => {
       .poll(() => section('axial').querySelector('[data-edge="right"]')!.textContent)
       .toBe('D');
     await page.getByRole('button', { name: 'Enregistrer PNG, axial', exact: true }).click();
-    expect(drawn).toEqual(['A', 'D', 'P', 'G', 'Axial +12,5 mm']);
+    expect(drawn).toEqual(['A', 'D', 'P', 'G', 'Neurologique', 'Axial +12,5 mm']);
   });
 
   test('saving the same plane twice is spoken twice: the sentence is cleared, then written a moment later', async () => {

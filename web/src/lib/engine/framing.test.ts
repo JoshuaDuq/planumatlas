@@ -19,7 +19,14 @@ import type { AtlasMesh } from './model/brain-atlas.ts';
 import { createFrame, rasToWorld, stagedFrame, worldToRas } from './slices/coordinates.ts';
 import type { Frame } from './slices/coordinates.ts';
 import { ORBIT_ROUNDING_MM } from '../core/state/url-state.ts';
-import { FRAME_FILL, VIEW_DIRECTIONS, upFor, withContext } from './render/camera-views.ts';
+import {
+  FRAME_FILL,
+  MIN_CONTEXT_RADIUS,
+  REGION_CONTEXT_RADIUS,
+  VIEW_DIRECTIONS,
+  upFor,
+  withContext,
+} from './render/camera-views.ts';
 import { createScene } from './render/scene.ts';
 import type { EngineScene } from './render/scene.ts';
 
@@ -285,8 +292,11 @@ describe('the magnification after a framing (deviation e7-zoom-after-framing)', 
     const alone = stage.distance();
     stage.camera.applyView('left', { immediate: true });
     assert.equal(stage.camera.frameRegion('small', { immediate: true, context: true }), true);
-    // The context box reaches the minimum radius around a 10 mm region: several times the region alone.
-    assert.ok(stage.distance() > 3 * alone, 'context framing stands back');
+    // A hidden structure's context reaches farther than the lobe a region in plain sight is shown in.
+    assert.ok(
+      stage.distance() > (alone * MIN_CONTEXT_RADIUS) / REGION_CONTEXT_RADIUS - 1e-9,
+      'context framing stands back',
+    );
     const { position, target } = stage.scene.destination;
     assert.ok(position.clone().sub(target).normalize().distanceTo(VIEW_DIRECTIONS.left) < 1e-9);
     assert.equal(stage.camera.viewHeld, false);
@@ -382,6 +392,21 @@ function reachOf(stage: ReturnType<typeof fixture>, meshes: readonly AtlasMesh[]
         .project(stage.scene.camera);
       reach.x = Math.max(reach.x, Math.abs(point.x));
       reach.y = Math.max(reach.y, Math.abs(point.y));
+    }
+  }
+  return reach;
+}
+
+/** How far from the centre of the frame a box's corners project, on the farther axis. */
+function boxReach(stage: ReturnType<typeof fixture>, box: Box3) {
+  stage.scene.camera.updateMatrixWorld();
+  let reach = 0;
+  for (const x of [box.min.x, box.max.x]) {
+    for (const y of [box.min.y, box.max.y]) {
+      for (const z of [box.min.z, box.max.z]) {
+        const point = new Vector3(x, y, z).project(stage.scene.camera);
+        reach = Math.max(reach, Math.abs(point.x), Math.abs(point.y));
+      }
     }
   }
   return reach;
@@ -538,9 +563,36 @@ describe('framing parts of the anatomy', () => {
     stage.camera.applyView('anterior', { immediate: true });
     assert.equal(stage.camera.viewHeld, true);
     assert.equal(stage.camera.frameRegion('small', { immediate: true }), true);
-    assertFramed(stage, [meshes[4]!]);
+    assertFramed(stage, [meshes[4]!], false);
     assert.ok(headingOf(stage).distanceTo(VIEW_DIRECTIONS.anterior) < 1e-9);
     assert.equal(stage.camera.viewHeld, false);
+  });
+
+  it('frames a small region inside a lobe-sized neighbourhood, not filling the stage alone', () => {
+    const meshes = [...wholeBrain(), small()];
+    const stage = fixture({ meshes, scale: FULL });
+    stage.camera.applyView('left', { immediate: true });
+    assert.equal(stage.camera.frameRegion('small', { immediate: true }), true);
+    const lobe = withContext(new Box3().setFromObject(meshes[4]!), REGION_CONTEXT_RADIUS);
+    assert.ok(
+      Math.abs(boxReach(stage, lobe) - FRAME_FILL) < 1e-9,
+      'the lobe-sized box fills the room',
+    );
+    const { x, y } = reachOf(stage, [meshes[4]!]);
+    assert.ok(Math.max(x, y) < FRAME_FILL / 2, `the region alone spans ${Math.max(x, y)}`);
+  });
+
+  it('frames a region broader than a lobe by its own extent', () => {
+    const broad = part(
+      'broad',
+      { atlas: 'destrieux', kind: 'cortex' },
+      [0.02, 0.06, 0.07],
+      [-0.05, 0.02, 0],
+    );
+    const stage = fixture({ meshes: [...wholeBrain(), broad], scale: FULL });
+    stage.camera.applyView('left', { immediate: true });
+    assert.equal(stage.camera.frameRegion('broad', { immediate: true }), true);
+    assertFramed(stage, [broad]);
   });
 
   it('FACADE-05 a region with nothing drawn changes nothing and says so', () => {

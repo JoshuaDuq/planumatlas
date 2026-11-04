@@ -1253,6 +1253,10 @@
    "neurological": "neurologique",
    "radiological": "radiologique"
   },
+  "conventionMarks": {
+   "neurological": "Neurologique",
+   "radiological": "Radiologique"
+  },
   "seenFrom": {
    "right": "depuis la droite",
    "left": "depuis la gauche",

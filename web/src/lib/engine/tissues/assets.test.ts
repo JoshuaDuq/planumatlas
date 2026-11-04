@@ -5,6 +5,7 @@ import { Color, Mesh, MeshStandardMaterial, SRGBColorSpace } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { Region } from '../../types/index.ts';
 import { anatomies, asModelState, readModel } from '../../core/catalog/test-support.ts';
+import { stageLegible } from '../render/materials.ts';
 import type { TissueAppearance } from '../render/materials.ts';
 import { createPalette } from './palette.ts';
 import type { Label } from './palette.ts';
@@ -28,7 +29,7 @@ interface Manifest {
   appearance: { tissue: TissueAppearance };
 }
 
-test('cut palettes match every corresponding exported surface material', async () => {
+test('cut palettes match every corresponding exported surface material, as the stage draws both', async () => {
   const metadata = readModel<TissueLabels>(`${anatomies.default}/tissue-labels.json`);
   const manifest = readModel<Manifest>(`${anatomies.default}/manifest.json`);
   // Cut-only regions have no mesh by construction, so there is no surface
@@ -51,7 +52,7 @@ test('cut palettes match every corresponding exported surface material', async (
     scene.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       const material = object.material as MeshStandardMaterial;
-      materials.set(object.userData.region_id, material.color.toArray());
+      materials.set(object.userData.region_id, stageLegible(material.color.clone()).toArray());
       object.geometry.dispose();
       material.dispose();
     });
@@ -69,7 +70,7 @@ test('cut palettes match every corresponding exported surface material', async (
   }
 });
 
-test('cut-only palettes carry their published table colour unchanged', () => {
+test('cut-only palettes carry their published table colour, as the stage draws it', () => {
   const manifest = readModel<Manifest>(`${anatomies.default}/manifest.json`);
   const metadata = readModel<TissueLabels>(`${anatomies.default}/tissue-labels.json`);
   const record = metadata.atlases.nextbrain;
@@ -77,7 +78,9 @@ test('cut-only palettes carry their published table colour unchanged', () => {
   const palette = createPalette(record.labels, state, manifest.appearance.tissue);
   for (const [code, label] of record.labels.entries()) {
     const [red, green, blue] = label.color;
-    const expected = new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+    const expected = stageLegible(
+      new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace),
+    );
     expected
       .toArray()
       .forEach((component, axis) =>

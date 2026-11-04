@@ -8,6 +8,7 @@ import type { EngineLesion, LesionMeasurement } from '../../lib/engine/api.ts';
 import { createCortexHold } from '../../lib/state/cortex-hold.svelte.ts';
 import { createLesionStore } from '../../lib/state/lesion.svelte.ts';
 import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
+import '../../styles/index.css';
 import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
 import CoordinateReport from './CoordinateReport.svelte';
 
@@ -79,6 +80,10 @@ async function mount(
   space: string,
   centre: LesionMeasurement['centre'] = { tissue: 'cortex', region: 'destrieux:left:34' },
   edit: (regions: Map<string, { inside: number; whole: number }>) => void = () => {},
+  atlases = [
+    { id: 'destrieux', name: 'Destrieux' },
+    { id: 'schaefer', name: 'Schaefer' },
+  ],
 ) {
   let settle!: (value: LesionMeasurement) => void;
   const lesion = {
@@ -112,10 +117,7 @@ async function mount(
     lang,
     spaces,
     anatomy: 'cdmd',
-    atlases: [
-      { id: 'destrieux', name: 'Destrieux' },
-      { id: 'schaefer', name: 'Schaefer' },
-    ],
+    atlases,
     networks: { id: 'yeo7', atlas: 'schaefer' },
     territories: 'arterial',
     label: name,
@@ -244,5 +246,28 @@ test('the landing point is copied as shown, in the reader’s notation', async (
   } finally {
     detach();
     region.remove();
+  }
+});
+
+test('in a 280 px panel the atlas switch keeps each hyphenated name on one line, inside the panel', async () => {
+  await mount('en', 'mni152nlin2009casym', undefined, undefined, [
+    { id: 'destrieux', name: 'Destrieux' },
+    { id: 'hcp-mmp', name: 'HCP-MMP' },
+    { id: 'julich', name: 'Julich-Brain' },
+    { id: 'schaefer', name: 'Schaefer' },
+  ]);
+  const report = document.querySelector<HTMLElement>('.coordinate-report')!;
+  report.style.width = '280px';
+  const atlasSwitch = report.querySelector('.lesion-atlases')!;
+  const lines = (button: Element) => {
+    const range = document.createRange();
+    range.selectNodeContents(button);
+    return range.getClientRects().length;
+  };
+  for (const button of atlasSwitch.querySelectorAll('button')) {
+    expect(lines(button), button.textContent!).toBe(1);
+    expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(
+      report.getBoundingClientRect().right,
+    );
   }
 });

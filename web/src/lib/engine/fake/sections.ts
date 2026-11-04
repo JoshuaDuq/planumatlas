@@ -353,6 +353,7 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
         intensity: Math.abs(point[2]),
         ras: point,
         agreement: null,
+        cutRegion: null,
       };
     },
   };

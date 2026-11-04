@@ -6,6 +6,7 @@ import {
   HalfFloatType,
   Mesh,
   BoxGeometry,
+  Color,
   PerspectiveCamera,
   Scene,
   Vector3,
@@ -264,6 +265,31 @@ describe('scene lifecycle', () => {
       getPropertyValue: (name: string) => (name === '--scene-exposure' ? '1.2' : '#808080'),
     }));
     assert.doesNotThrow(() => stage.applyTheme());
+    stage.dispose();
+  });
+
+  it('adds a hidden outline edge in its own token colour, not edgeStrength times brighter', () => {
+    const passes: OutlinePass[] = [];
+    const addPass = EffectComposer.prototype.addPass;
+    vi.spyOn(EffectComposer.prototype, 'addPass').mockImplementation(function (
+      this: EffectComposer,
+      pass,
+    ) {
+      if (pass instanceof OutlinePass) passes.push(pass);
+      addPass.call(this, pass);
+    });
+    const stage = createScene(host);
+    vi.stubGlobal('getComputedStyle', () => ({
+      getPropertyValue: (name: string) => (name === '--scene-exposure' ? '1' : '#46505e'),
+    }));
+    stage.applyTheme();
+    assert.equal(passes.length, 4, 'the halo and core of both pipelines');
+    const token = new Color('#46505e');
+    for (const pass of passes) {
+      // OutlinePass's overlay adds edgeStrength × the edge colour.
+      const drawn = pass.hiddenEdgeColor.clone().multiplyScalar(pass.edgeStrength);
+      assert.ok(Math.abs(drawn.r - token.r) < 1e-9 && Math.abs(drawn.b - token.b) < 1e-9);
+    }
     stage.dispose();
   });
 });

@@ -9,8 +9,9 @@
     at a time, chosen by a radio group (deviations/g5-plane-radio.md, g5-plane-layout.md); each plane
     is a named section whose heading stays for assistive technology (g5-panel-names.md);
   - the pictures are `canvas role=img`, not focusable and without key handlers; the plane's slider is
-    the keyboard route (deviations/g5-canvas-not-interactive.md). The crosshair and letters are marked
-    over the slice, and drawn into the bitmap only when it is saved;
+    the keyboard route (deviations/g5-canvas-not-interactive.md). The crosshair, letters and an axial
+    or coronal panel's convention are marked over the slice, and drawn into the bitmap only when it is
+    saved;
   - the readout is said through the region's one live region after the crosshair has rested
     (g5-outputs-not-live.md, g5-unlabelled-sample.md); Save PNG is named by its plane and confirmed
     (g5-save-names.md, g5-save-announce.md); the wheel leaves Ctrl and Meta to the browser's zoom
@@ -76,11 +77,14 @@
     anatomy: Pick<ManifestAnatomy, 'subject' | 'individual'>;
     /** The structure whose segmentation agreement the planes show; null when none is. */
     agreementName: string | null;
+    /** A region's name in the reader's language, for the readout. */
+    regionName: (id: string) => string;
     /** Takes focus on close when the opener is gone. */
     fallbackFocus?: () => HTMLElement | null;
   }
 
-  let { mpr, engine, engineState, lang, anatomy, agreementName, fallbackFocus }: Props = $props();
+  let { mpr, engine, engineState, lang, anatomy, agreementName, regionName, fallbackFocus }: Props =
+    $props();
 
   /** The readout waits for the crosshair to rest, so a drag or a held key is not said per step. */
   const READOUT_QUIET_MS = 250;
@@ -124,7 +128,14 @@
   });
   const visible = $derived(PLANES.filter((plane) => !phone.current || plane === mpr.plane));
   const readout = $derived(
-    reading ? readoutText(formatRas(crosshair, lang), reading.sample, lang) : '',
+    reading
+      ? readoutText(
+          formatRas(crosshair, lang),
+          reading.sample,
+          lang,
+          reading.sample.cutRegion && regionName(reading.sample.cutRegion.id),
+        )
+      : '',
   );
 
   // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
@@ -344,6 +355,11 @@
                   >{edgeLetter(frame.edges[index]!, lang)}</span
                 >
               {/each}
+              {#if convention}
+                <!-- The heading says it too, but a row of pictures is scanned, not read. -->
+                <span class="convention" aria-hidden="true">{copy.conventionMarks[convention]}</span
+                >
+              {/if}
             {/if}
           </div>
           <div class="position">
@@ -546,6 +562,7 @@
       overflow: hidden;
       border-radius: var(--radius-mark);
       background: var(--mpr-canvas);
+      container: mpr-picture / inline-size;
     }
     canvas {
       display: block;
@@ -574,7 +591,8 @@
       translate: -0.5px 0;
     }
     /* The edge letters as the stage marks its own: haloed type, not plates (Orientation.svelte). */
-    .edge {
+    .edge,
+    .convention {
       position: absolute;
       color: var(--overlay-ink);
       -webkit-text-stroke: 3px var(--overlay-halo-core);
@@ -611,6 +629,19 @@
     }
     [data-edge='right'] {
       right: var(--space-2);
+    }
+    /* Which way left and right fall, in the corner the top letter leaves free. */
+    .convention {
+      top: var(--space-1);
+      left: var(--space-2);
+      font-size: var(--text-caption);
+      letter-spacing: 0.02em;
+    }
+    /* A picture too narrow for the word beside the top letter takes it a line lower. */
+    @container mpr-picture (width < 12.5rem) {
+      .convention {
+        top: calc(var(--space-1) + var(--lh-caption));
+      }
     }
     /* The readout and the display controls: a row under the planes, or the fourth cell of a column's 2 × 2. */
     .controls {

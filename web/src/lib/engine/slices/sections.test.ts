@@ -525,8 +525,10 @@ test('SLICE-15 a point on the published volumes reads its label, name, structure
     const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
     return entry.dtype === '<u2' ? new Uint16Array(buffer) : new Uint8Array(buffer);
   };
-  const { model, sections } = fixture();
+  const { model, sections, tissues } = fixture();
   model.regions = new Map(manifest.regions.map((region: Stub) => [region.id, region]));
+  // No cut has loaded the cut atlas's grid: there is no cut region to name.
+  tissues.layers.clear();
   Object.assign(sections, {
     volumes: {
       metadata: record,
@@ -554,5 +556,28 @@ test('SLICE-15 a point on the published volumes reads its label, name, structure
     assert.equal(sample.region?.id, regionId, String(point));
     assert.ok(Math.abs(sample.intensity - intensity) < 1e-6, String(point));
     assert.deepEqual(sample.ras, point);
+    assert.equal(sample.cutRegion, null);
   }
+});
+
+test('a sample names the region the loaded cut atlas labels there, and none on an unlabelled voxel', () => {
+  const { model, sections, tissues } = fixture();
+  const opercular = { id: 'destrieux:left:12', atlas: 'destrieux' };
+  model.regions = new Map([[opercular.id, opercular]]);
+  let code = 1;
+  tissues.layers.set('destrieux', {
+    metadata: { labels: [{ region_id: null }, { region_id: opercular.id }] },
+    volume: { label: () => code },
+  });
+  const volume = { label: () => 3, linear: () => 0 };
+  Object.assign(sections, {
+    volumes: {
+      metadata: { labels: { 3: { name: 'Left-Cerebral-Cortex' } } },
+      mri: volume,
+      segmentation: volume,
+    },
+  });
+  assert.equal(sections.sample([-42, 16, 40]).cutRegion, opercular);
+  code = 0;
+  assert.equal(sections.sample([-42, 16, 40]).cutRegion, null);
 });

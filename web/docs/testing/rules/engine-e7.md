@@ -51,7 +51,7 @@ Shared expectations. "The anatomy fits" means every drawn vertex projects inside
 
 ### FACADE-05 · Focus on a region frames it from where the reader is looking
 
-- **Rule:** Focusing a selected region frames its drawn meshes along the current heading and lets go of the held view. A region with nothing drawn does nothing and reports so.
+- **Rule:** Focusing a selected region frames its drawn meshes along the current heading, never tighter than a lobe-sized neighbourhood (35 mm), and lets go of the held view. A region with nothing drawn does nothing and reports so.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:510-524`

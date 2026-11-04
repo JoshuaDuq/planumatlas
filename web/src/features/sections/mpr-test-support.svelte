@@ -16,6 +16,7 @@
     live,
     anatomy,
     agreementName = null,
+    regionName = (id: string) => `name of ${id}`,
   }: {
     engine: FakeEngine;
     engineState: EngineSync;
@@ -24,6 +25,7 @@
     live: { lang: Language };
     anatomy: Pick<ManifestAnatomy, 'subject' | 'individual'>;
     agreementName?: string | null;
+    regionName?: (id: string) => string;
   } = $props();
 
   let more: HTMLButtonElement;
@@ -62,6 +64,7 @@
     lang={live.lang}
     {anatomy}
     {agreementName}
+    {regionName}
     fallbackFocus={() => more}
   />
   <footer></footer>

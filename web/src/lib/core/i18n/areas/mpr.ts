@@ -17,6 +17,7 @@ export const en = {
   asStage:
     'Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree. Neurological: the patient’s left on the screen’s left; radiological: their right there.',
   conventions: { neurological: 'neurological', radiological: 'radiological' },
+  conventionMarks: { neurological: 'Neurological', radiological: 'Radiological' },
   seenFrom: {
     right: 'from the right',
     left: 'from the left',
@@ -57,6 +58,7 @@ export const fr: typeof en = {
   asStage:
     'Chaque plan est montré comme la vue 3D voit sa coupe\u202f; les deux images d’une coupe concordent. Neurologique\u202f: la gauche du patient à gauche de l’écran\u202f; radiologique\u202f: sa droite.',
   conventions: { neurological: 'neurologique', radiological: 'radiologique' },
+  conventionMarks: { neurological: 'Neurologique', radiological: 'Radiologique' },
   seenFrom: {
     right: 'depuis la droite',
     left: 'depuis la gauche',

@@ -317,6 +317,8 @@ export interface VolumeSample {
   ras: Vec3;
   /** The voxel's category for the structure whose agreement is shown; null outside it or when none is. */
   agreement: AgreementCategory | null;
+  /** The region the stage's cut labels name here; null before a cut in that atlas loads, or unlabelled. */
+  cutRegion: Region | null;
 }
 
 export interface EngineSections {
@@ -400,7 +402,7 @@ export interface MoveOptions {
 }
 
 export interface FrameRegionOptions extends MoveOptions {
-  /** Frame the region with the context around it, as a deficit's regions are, not filling the stage alone. */
+  /** Frame with a hidden structure's wider context, as a deficit's regions are; a small region otherwise sits in a lobe-sized neighbourhood. */
   context?: boolean;
 }
 

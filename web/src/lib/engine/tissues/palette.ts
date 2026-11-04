@@ -9,7 +9,7 @@ import type {
 import { dominantNetwork } from '../../core/catalog/networks.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { internalSystemAllows } from '../../core/catalog/visibility.ts';
-import { ghostColor, tissueColor } from '../render/materials.ts';
+import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { TissuePalette } from '../render/materials.ts';
 import { majorityTerritoryColor } from '../render/network-colors.ts';
 import type { NetworkMetadata } from '../render/network-colors.ts';
@@ -155,8 +155,8 @@ export function labelAppearance(
   lookup?: PaletteLookup,
   color = new Color(),
 ): { color: Color; visible: boolean } {
-  // Published colours are sRGB; the surfaces' glTF factors decode to the same.
-  setPublished(color, label.color);
+  // Published colours are sRGB; the surfaces' glTF factors decode to the same, and both are drawn lifted.
+  stageLegible(setPublished(color, label.color));
   if (!usesAtlasColors(state)) {
     color.set(tissueColor({ ...label, source_name: label.name }, tissuePalette));
   }

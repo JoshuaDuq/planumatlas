@@ -144,6 +144,39 @@ describe('an excursion into a deficit', () => {
     assert.equal(scene.session.state.selectedFunction, null);
   });
 
+  for (const back of ['restore', 'another tab'] as const) {
+    test(`${back} draws compared stroke cases again over the display they found`, async () => {
+      const scene = createScene();
+      scene.reader.capture.mockReturnValueOnce({
+        ...sceneBefore('cases'),
+        cortexOpacity: 0.15,
+        surfaceColor: 'tissue',
+      });
+      Object.assign(scene.strokeCases, {
+        chosen: ['M1', 'M2'],
+        heldOpacity: 1,
+        heldColor: 'atlas',
+      });
+      await scene.excursions.openFunction('language');
+      // Cleared by the excursion itself, whether or not it kept the selection.
+      expect(scene.strokeCases.clear).toHaveBeenCalledOnce();
+
+      if (back === 'restore') await scene.excursions.restoreBeforeExcursion();
+      else await scene.excursions.chooseMode('anatomy');
+      const [target] = scene.reader.apply.mock.calls[0]!;
+      assert.equal(target.cortexOpacity, 1);
+      assert.equal(target.surfaceColor, 'atlas');
+      expect(scene.strokeCases.show).toHaveBeenCalledExactlyOnceWith(['M1', 'M2']);
+    });
+  }
+
+  test('a restore with no cases shown draws none', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    await scene.excursions.restoreBeforeExcursion();
+    expect(scene.strokeCases.show).not.toHaveBeenCalled();
+  });
+
   test('a restore that fails in part throws every cause and keeps the scene to try again', async () => {
     const scene = createScene();
     await scene.excursions.openDeficit(DEFICIT);

@@ -30,16 +30,20 @@ export function sampleName(raw: string, lang: Language): string {
 
 /**
  * The crosshair's position and what is under it (deviations/g5-unlabelled-sample.md): a sample with
- * no name is "unlabelled" rather than "(label undefined)". Where agreement is shown, the voxel's
- * category follows, so the picture's colours are also said.
+ * no name is "unlabelled" rather than "(label undefined)". The region the stage's cut labels name
+ * there leads, `cutName`, worded by the caller; the segmentation's structure and label number follow
+ * it, as the overlay inks that. Where agreement is shown, the voxel's category follows, so the
+ * picture's colours are also said.
  */
 export function readoutText(
   ras: string,
   sample: { name: string; labelId: number; agreement: AgreementCategory | null },
   lang: Language,
+  cutName: string | null = null,
 ): string {
-  const name = sampleName(sample.name, lang);
-  const text = name
+  const structure = sampleName(sample.name, lang);
+  const name = cutName && cutName !== structure ? `${cutName} · ${structure}` : structure;
+  const text = structure
     ? t(lang, 'mpr').readout(ras, name, sample.labelId)
     : `${ras} ${EM_DASH} ${t(lang, 'mri').tissueNames.Unknown}`;
   return sample.agreement ? `${text} · ${t(lang, 'agreement').category[sample.agreement]}` : text;

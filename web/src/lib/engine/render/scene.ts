@@ -453,9 +453,14 @@ export function createScene(
     renderer.toneMappingExposure = exposure;
     for (const pipeline of pipelines) {
       pipeline.halo.visibleEdgeColor.set(token('--scene-outline-halo'));
-      pipeline.halo.hiddenEdgeColor.set(token('--scene-outline-hidden'));
       pipeline.core.visibleEdgeColor.set(token('--scene-outline-core'));
-      pipeline.core.hiddenEdgeColor.set(token('--scene-outline-hidden'));
+      // The pass adds its edges times edgeStrength, which turned this slate into near-white lines
+      // wherever the selection runs on behind other cortex. Divided, the hidden edge adds its token.
+      for (const pass of [pipeline.halo, pipeline.core]) {
+        pass.hiddenEdgeColor
+          .set(token('--scene-outline-hidden'))
+          .multiplyScalar(1 / pass.edgeStrength);
+      }
     }
     invalidate();
   }

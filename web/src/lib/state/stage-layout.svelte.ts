@@ -1,6 +1,6 @@
 import type { FramingClearance, Rect, Size } from '../engine/api.ts';
-import { FRAME_FILL } from '../engine/render/camera-views.ts';
-import { clearFraming } from '../engine/render/effective-viewport.ts';
+import { ANATOMY_ASPECT, FRAME_FILL } from '../engine/render/camera-views.ts';
+import { clearCorner, clearFraming } from '../engine/render/effective-viewport.ts';
 import type { Media } from './media.svelte.ts';
 import { PREF_KEYS, defaultStorage, readPref, writePref } from './prefs.ts';
 
@@ -177,12 +177,20 @@ export function createStageLayout({
         FRAME_FILL,
       );
       const kept = extents(cleared, rest);
-      // How much of the picture survives, on the axis that loses more.
-      return { ...cleared, top, right, size: Math.min(kept.across / across, kept.half / half) };
+      return { ...cleared, top, right, size: share(kept) };
     };
+    // How much of the picture survives: the anatomy, about ANATOMY_ASPECT times as wide as tall, fills
+    // whichever of its extents bounds it.
+    const fitted = (extent: { across: number; half: number }) =>
+      Math.min(extent.half, extent.across / ANATOMY_ASPECT);
+    const share = (kept: { across: number; half: number }) =>
+      fitted(kept) / fitted({ across, half });
     const below = band(box.y + box.height, 0);
     const beside = band(0, room.width - box.x);
-    const { inset, scale, top, right } = beside.size > below.size ? beside : below;
+    const corner = clearCorner(room, framed, box, FRAME_FILL);
+    const { inset, scale, top, right } = [below, beside, corner].reduce((best, option) =>
+      option.size > best.size ? option : best,
+    );
     return { inset, scale, top, right };
   }
 

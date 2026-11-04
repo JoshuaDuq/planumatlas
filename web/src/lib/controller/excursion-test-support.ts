@@ -15,7 +15,7 @@ import { createEngineSync } from '../state/engine-sync.svelte.ts';
 import { createLessonStore, createSessionStore } from '../state/session.svelte.ts';
 import { createView } from '../state/view.svelte.ts';
 import { VIEW_NAMES } from '../types/index.ts';
-import type { Manifest } from '../types/index.ts';
+import type { Manifest, SurfaceColor } from '../types/index.ts';
 import { createExcursions } from './excursion.svelte.ts';
 
 export const manifest = manifestFile as unknown as Manifest;
@@ -105,13 +105,40 @@ export function createScene() {
       lesion.selectedTract = null;
     }),
   };
+  // Stroke cases a test can show, holding the display they found.
+  const strokeCases = {
+    chosen: [] as readonly string[],
+    heldOpacity: null as number | null,
+    heldColor: null as SurfaceColor | null,
+    show: vi.fn((ids: readonly string[]) => {
+      strokeCases.chosen = ids;
+    }),
+    // Clearing gives the display back, as the store does.
+    clear: vi.fn(() => {
+      Object.assign(strokeCases, { chosen: [], heldOpacity: null, heldColor: null });
+    }),
+  };
   const excursions = createExcursions(
     { engine, session, lesson, view },
-    { anatomy, domains, clinical, circuits, commands, reader, shell, mri, panels, render, lesion },
+    {
+      anatomy,
+      domains,
+      clinical,
+      circuits,
+      commands,
+      reader,
+      shell,
+      mri,
+      panels,
+      render,
+      lesion,
+      strokeCases,
+    },
   );
   return {
     engine,
     lesion,
+    strokeCases,
     session,
     lesson,
     view,
