@@ -19,73 +19,73 @@ Tracts from the subject's own diffusion scan inside a see-through cortex. Select
 ::::{container} feature-grid
 
 :::{container} feature
-[![A coronal section through the hippocampal formation with capped solids](../.github/assets/readme/sections.webp)](guides/viewer.md#stage)
+[![A coronal section through the hippocampal formation with capped solids](../.github/assets/readme/sections.webp)](features/sections-and-cuts.md)
 
-**[Cut it open](guides/viewer.md#stage)**
+**[Cut it open](features/sections-and-cuts.md)**
 
 Sagittal, coronal, axial or oblique sections, each solid capped and coloured from the label volume.
 :::
 
 :::{container} feature
-[![Linked MRI in three planes with a shared crosshair](../.github/assets/readme/linked-mri.webp)](guides/viewer.md#linked-mri)
+[![Linked MRI in three planes with a shared crosshair](../.github/assets/readme/linked-mri.webp)](features/linked-mri.md)
 
-**[Check it against the scan](guides/viewer.md#linked-mri)**
+**[Check it against the scan](features/linked-mri.md)**
 
 The subject's own T1 in three planes around a shared crosshair, with the label under the cursor.
 :::
 
 :::{container} feature
-[![The Neurosynth map for language on HCP-MMP areas](../.github/assets/readme/functions.webp)](guides/functions-and-deficits.md#functions)
+[![The Neurosynth map for language on HCP-MMP areas](../.github/assets/readme/functions.webp)](features/functions.md)
 
-**[See where a function is studied](guides/functions-and-deficits.md#functions)**
+**[See where a function is studied](features/functions.md)**
 
 70 curated functions from Neurosynth meta-analyses, each area ranked by its consistency.
 :::
 
 :::{container} feature
-[![Hemispatial neglect on the right hemisphere, one colour per finding](../.github/assets/readme/deficits.webp)](guides/functions-and-deficits.md#deficits)
+[![Hemispatial neglect on the right hemisphere, one colour per finding](../.github/assets/readme/deficits.webp)](features/deficits.md)
 
-**[Map what damage is associated with](guides/functions-and-deficits.md#deficits)**
+**[Map what damage is associated with](features/deficits.md)**
 
 121 acquired deficits, each finding with its population, evidence and limits.
 :::
 
 :::{container} feature
-[![The memory tour on the left hippocampal formation](../.github/assets/readme/circuits.webp)](guides/circuits.md)
+[![The memory tour on the left hippocampal formation](../.github/assets/readme/circuits.webp)](features/circuits.md)
 
-**[Take a guided tour](guides/circuits.md)**
+**[Take a guided tour](features/circuits.md)**
 
 Five anatomical pathway tours, 25 landmarks in all, from the visual pathway to corticospinal crossing, that reveal and frame each landmark.
 :::
 
 :::{container} feature
-[![A lesion sphere on the left subcentral gyrus with its report](../.github/assets/readme/lesion.webp)](guides/viewer.md#lesion-report)
+[![A lesion sphere on the left subcentral gyrus with its report](../.github/assets/readme/lesion.webp)](features/lesion-report.md)
 
-**[Ask what a lesion would reach](guides/viewer.md#lesion-report)**
+**[Ask what a lesion would reach](features/lesion-report.md)**
 
 A 3–30 mm sphere's overlap with functions, deficits, tissue and tracts. It predicts no deficit.
 :::
 
 :::{container} feature
-[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia, one with none](../.github/assets/readme/stroke-cases.webp)](guides/viewer.md#stroke-cases)
+[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia, one with none](../.github/assets/readme/stroke-cases.webp)](features/stroke-cases.md)
 
-**[Weigh a region against real strokes](guides/viewer.md#stroke-cases)**
+**[Weigh a region against real strokes](features/stroke-cases.md)**
 
 For a region some stroke reached, every Aphasia Recovery Cohort case as lesion volume against language score. Compare two people's own lesions on the brain.
 :::
 
 :::{container} feature
-[![Stimulation responses for the left hippocampal formation: a response-rate bar for each site stimulation could reach](../.github/assets/readme/stimulation.webp)](guides/viewer.md#stimulation-responses)
+[![Stimulation responses for the left hippocampal formation: a response-rate bar for each site stimulation could reach](../.github/assets/readme/stimulation.webp)](features/stimulation-responses.md)
 
-**[See what stimulating it evokes](guides/viewer.md#stimulation-responses)**
+**[See what stimulating it evokes](features/stimulation-responses.md)**
 
 From stereo-EEG in people with epilepsy: how often a single pulse here evoked a response elsewhere, same or opposite side.
 :::
 
 :::{container} feature
-[![The visual field map: a dot on the visual field disc and the cortex predicted to represent it](../.github/assets/readme/visual-field.webp)](guides/circuits.md#visual-field-map)
+[![The visual field map: a dot on the visual field disc and the cortex predicted to represent it](../.github/assets/readme/visual-field.webp)](features/visual-field-map.md)
 
-**[Map the visual field onto the cortex](guides/circuits.md#visual-field-map)**
+**[Map the visual field onto the cortex](features/visual-field-map.md)**
 
 Move a point through the visual field and see the V1, V2 and V3 territory predicted to represent it, or click the cortex to read it back.
 :::
@@ -96,88 +96,123 @@ Search or browse 148 Destrieux parcels, 360 HCP-MMP areas, 278 Julich-Brain area
 
 ## Find your way
 
-[Use the viewer](guides/viewer.md)
-: Search and select regions, make sections, and inspect linked MRI.
+[Getting started](getting-started/install.md)
+: Run the viewer locally, take a tour of the [interface](getting-started/viewer.md), or build this documentation.
 
-[Install and build](install.md)
-: Run the viewer locally, build an anatomy, or build this documentation.
+[Features](features/index.md)
+: One page per feature: what it does, the data it uses, how it was built step by step, the checks it passes and its limits.
 
-[Explore the data](concepts/atlases.md)
-: Understand the atlases, segmentations, functional layers, and their sources.
+[Data and layers](data/index.md)
+: The atlases, segmentations and functional layers, their sources and how each reaches the subject.
 
-[Validation and limits](validation.md)
-: Learn what is checked against the source and how to interpret the result.
+[Pipeline](pipeline/architecture.md)
+: The architecture of the compiler and viewer, how to [build an anatomy](pipeline/building.md), and [validation and limits](pipeline/validation.md).
 
-[Developer reference](api/index.md)
-: Browse the Python pipeline API or [embed the viewer components](guides/embedding.md) in a Three.js application.
+[Developer reference](developer/api/index.md)
+: Browse the Python pipeline API or [embed the viewer components](developer/embedding.md) in a Three.js application.
 
-The anatomy represents one individual; its folds and asymmetries are not normative. Atlas projections and segmentations are estimates. See [Anatomies](concepts/anatomies.md) and [References and licensing](reference/references.md) for provenance and data terms.
+[References and licensing](reference/references.md)
+: The bibliography, data licences and intended use.
+
+The anatomy represents one individual; its folds and asymmetries are not normative. Atlas projections and segmentations are estimates. See [Data and layers](data/index.md) and [References and licensing](reference/references.md) for provenance and data terms.
 
 ```{toctree}
 :hidden:
-:caption: Get started
+:caption: Getting started
 
-install
+getting-started/install
+getting-started/viewer
 ```
 
 ```{toctree}
 :hidden:
-:caption: Guides
+:caption: Features
 
-guides/viewer
-guides/functions-and-deficits
-guides/circuits
-guides/tracts
-guides/embedding
-guides/building
+features/index
 ```
 
 ```{toctree}
 :hidden:
-:caption: Concepts
+:caption: Stage and tools
 
-concepts/architecture
-concepts/atlases
-concepts/anatomies
+features/sections-and-cuts
+features/linked-mri
+features/dissection-and-display
+features/lesion-report
+features/published-coordinates
+features/sharing-and-snapshots
 ```
 
 ```{toctree}
 :hidden:
-:caption: Validation
+:caption: Anatomy
 
-validation
+features/cortical-atlases
+features/atlas-comparison
+features/internal-anatomy
+features/boundary-certainty
+features/segmentation-agreement
+features/spinal-cord
+features/tracts
 ```
 
 ```{toctree}
 :hidden:
-:caption: API reference
+:caption: Functional and vascular layers
 
-api/index
+features/functional-networks
+features/functional-divisions
+features/cerebellar-functions
+features/striatal-networks
+features/arterial-territories
+features/receptor-fingerprints
 ```
 
 ```{toctree}
 :hidden:
-:caption: Reference
+:caption: Evidence and tours
 
+features/functions
+features/deficits
+features/circuits
+features/visual-field-map
+features/stroke-cases
+features/stimulation-responses
+```
+
+```{toctree}
+:hidden:
+:caption: Data
+
+data/index
 reference/references
+```
+
+```{toctree}
+:hidden:
+:caption: Pipeline
+
+pipeline/architecture
+pipeline/building
+pipeline/validation
+```
+
+```{toctree}
+:hidden:
+:caption: Developer
+
+developer/api/index
+developer/embedding
+```
+
+```{toctree}
+:hidden:
+:caption: Evidence reviews
+:glob:
+
 reference/circuit-evidence
 reference/full-text-review
-reference/deficit-additions-2026-10-31
-reference/deficit-additions-2026-11-01
-reference/deficit-additions-2026-11-01-reading-perception-mood
-reference/deficit-additions-2026-11-01-actions-and-motion
-reference/deficit-additions-2026-11-01-eye-movements
-reference/deficit-additions-2026-11-01-visual-awareness
-reference/deficit-additions-2026-11-01-facial-cough-bladder
-reference/deficit-additions-2026-11-01-reading-writing-memory
-reference/deficit-additions-2026-11-01-memory-fluency-moral
-reference/deficit-additions-2026-11-01-reward-reasoning-vertigo
-reference/deficit-additions-2026-11-01-orientation-grammar-medulla-smoking
-reference/deficit-additions-2026-11-01-cardiac-hiccups-adaptation
-reference/deficit-additions-2026-11-01-sign-cognition-restless-legs
-reference/deficit-additions-2026-11-01-amnesia-sensory-ataxic
-reference/deficit-additions-2026-11-01-sma-recognition-verbs
-reference/deficit-additions-2026-11-02-praxis
+reference/deficit-additions-*
 reference/hart-2016-review-2026-11-02
 ```
 

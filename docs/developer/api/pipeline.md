@@ -13,7 +13,7 @@ Build, validation and source configuration.
 
 ## Validate
 
-`brain_model.validate`: Reads a build back against its sources and writes `validation.json`. See [Validation](../validation.md#what-is-checked).
+`brain_model.validate`: Reads a build back against its sources and writes `validation.json`. See [Validation](../../pipeline/validation.md#what-is-checked).
 
 ```{eval-rst}
 .. automodule:: brain_model.validate

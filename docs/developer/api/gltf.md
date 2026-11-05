@@ -4,7 +4,7 @@ The quantized mesh encoding and the scene export.
 
 ## Encode
 
-`brain_model.gltf.encode`: Quantizes attributes against one range per file and declares `KHR_mesh_quantization`. Bounds are in [Architecture](../concepts/architecture.md#encoding).
+`brain_model.gltf.encode`: Quantizes attributes against one range per file and declares `KHR_mesh_quantization`. Bounds are in [Architecture](../../pipeline/architecture.md#encoding).
 
 ```{eval-rst}
 .. automodule:: brain_model.gltf.encode

@@ -13,8 +13,8 @@ Explore, cut, measure and question one person's MRI-reconstructed brain. Nothing
 <p align="center">
   <a href="https://planumatlas.com/"><strong>Open Planum</strong></a> ·
   <a href="https://planumatlas.com/docs/">Documentation</a> ·
-  <a href="https://planumatlas.com/docs/guides/viewer.html">Viewer guide</a> ·
-  <a href="https://planumatlas.com/docs/validation.html">Validation and limits</a>
+  <a href="https://planumatlas.com/docs/getting-started/viewer.html">Viewer guide</a> ·
+  <a href="https://planumatlas.com/docs/pipeline/validation.html">Validation and limits</a>
 </p>
 
 <p align="center">
@@ -73,25 +73,25 @@ Five tours follow established anatomical pathways and loop branches: vision, a h
 
 [![A 10 mm lesion sphere on the left subcentral gyrus, with the report listing the functions and deficits it overlaps](.github/assets/readme/lesion.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=anatomy&lesion=-49.2,-1.7,35.6,10)
 
-Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report lists the functions whose territories it overlaps, the deficits whose cited regions it reaches, the tissue it contains region by region, and the tract streamlines that pass through it. It measures overlap only; it predicts nothing about a patient. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#lesion-report).
+Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report lists the functions whose territories it overlaps, the deficits whose cited regions it reaches, the tissue it contains region by region, and the tract streamlines that pass through it. It measures overlap only; it predicts nothing about a patient. [Read the guide](https://planumatlas.com/docs/features/lesion-report.html).
 
 ### Weigh a region against real strokes
 
 [![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia and one with none, with their language scores](.github/assets/readme/stroke-cases.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=destrieux:left:4&cases=M2295,M2272)
 
-For a region that real strokes reached, plot each of 228 people in the Aphasia Recovery Cohort as lesion volume against language score (WAB-AQ), within a test window you choose. Pick two people to draw their own lesions on the brain, each in its own colour with the overlap in a third, or step through pairs of similar lesion size and very different outcome. It is cohort evidence, not a prediction for this brain. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#stroke-cases).
+For a region that real strokes reached, plot each of 228 people in the Aphasia Recovery Cohort as lesion volume against language score (WAB-AQ), within a test window you choose. Pick two people to draw their own lesions on the brain, each in its own colour with the overlap in a third, or step through pairs of similar lesion size and very different outcome. It is cohort evidence, not a prediction for this brain. [Read the guide](https://planumatlas.com/docs/features/stroke-cases.html).
 
 ### See what stimulating a region evokes
 
 [![Stimulation responses for the left hippocampal formation, a response-rate bar for each other site with its pair and people counts](.github/assets/readme/stimulation.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&focus=1)
 
-From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/guides/viewer.html#stimulation-responses).
+From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/features/stimulation-responses.html).
 
 ### Map the visual field onto the cortex
 
-[![The visual field map: a dot 4.5 degrees from fixation on the visual field disc, with the V1, V2 and V3 territory predicted to represent it](.github/assets/readme/visual-field.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=circuits&map=visual-field&dot=4,2,1.5)
+[![The visual field map: a dot 4.5 degrees from fixation on the visual field disc, with the V1, V2 and V3 territory predicted to represent it](.github/assets/readme/visual-field.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=circuits&map=visual-field&dot=3.2,3.2,1.5&view=right&hemi=left&internal=0)
 
-Under **Circuits › Maps**, move a dot through the visual field and see the V1, V2 and V3 cortex predicted to represent it, with its area in mm², or click the cortex to read back the field position it responds to. The prediction is the Benson template applied to this brain's folding: no retinotopy was measured in this person. [Read the guide](https://planumatlas.com/docs/guides/circuits.html#visual-field-map).
+Under **Circuits › Maps**, move a dot through the visual field and see the V1, V2 and V3 cortex predicted to represent it, with its area in mm², or click the cortex to read back the field position it responds to. The prediction is the Benson template applied to this brain's folding: no retinotopy was measured in this person. [Read the guide](https://planumatlas.com/docs/features/visual-field-map.html).
 
 ### And more
 
@@ -106,7 +106,7 @@ Under **Circuits › Maps**, move a dot through the visual field and see the V1,
 
 Planum is a reference, so its numbers have to hold. [`brain_model/validate.py`](brain_model/validate.py) reads every published anatomy back against its sources: volumes decode back to the source scans exactly, solids are re-voxelised with no voxel centre misclassified, projected atlases are re-derived, segmentations must agree with the subject's own (Dice 0.8 or more, with documented exceptions), and the spinal cord must match its segmentation (Dice 0.967 measured). CI runs it, the Python tests and the web tests on every pull request and deployment. The viewer's **Provenance** panel lists the subject, reconstruction, atlases, files and sources behind what you see.
 
-The anatomy is one individual, not a population average, and projected atlases, functional maps and tractography each have limits that the docs set out. **Planum is for research and education, not clinical decisions.** See [validation and limits](https://planumatlas.com/docs/validation.html).
+The anatomy is one individual, not a population average, and projected atlases, functional maps and tractography each have limits that the docs set out. **Planum is for research and education, not clinical decisions.** See [validation and limits](https://planumatlas.com/docs/pipeline/validation.html).
 
 ## Run it yourself
 
@@ -139,11 +139,11 @@ uv sync --locked --group docs
 uv run sphinx-build -W -b html docs docs/_build/html
 ```
 
-See [installation](https://planumatlas.com/docs/install.html) and [building an anatomy](https://planumatlas.com/docs/guides/building.html) for prerequisites, source preparation and regeneration.
+See [installation](https://planumatlas.com/docs/getting-started/install.html) and [building an anatomy](https://planumatlas.com/docs/pipeline/building.html) for prerequisites, source preparation and regeneration.
 
 ### Embed it
 
-`BrainAtlas` and `BrainSections` work in any Three.js application without the viewer's interface: load an anatomy, pick regions, and cut it with capped sections. The [embedding guide](https://planumatlas.com/docs/guides/embedding.html) shows how.
+`BrainAtlas` and `BrainSections` work in any Three.js application without the viewer's interface: load an anatomy, pick regions, and cut it with capped sections. The [embedding guide](https://planumatlas.com/docs/developer/embedding.html) shows how.
 
 ## Data and licences
 

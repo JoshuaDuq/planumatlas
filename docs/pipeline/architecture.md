@@ -54,9 +54,9 @@ The cap samples integer 3D textures on the GPU (`R16UI` labels, `R8UI` white mat
 
 | Volume | Source grid | Published | GPU memory |
 | :--- | :--- | :--- | ---: |
-| `tissues-destrieux`, `tissues-hcp-mmp` | $256^3$ | $127 \times 138 \times 183$ | 6.12 MiB each |
-| `tissues-nextbrain` | $323 \times 459 \times 323$ at 0.4 mm | $160 \times 228 \times 160$ at 0.8 mm | 11.13 MiB |
-| `aseg` | $256^3$ | $127 \times 140 \times 183$ | 6.21 MiB |
+| `tissues-*` (Destrieux, HCP-MMP, Julich, Schaefer and the functional atlases) | $256^3$ | $135 \times 141 \times 152$ | 5.52 MiB each |
+| `tissues-nextbrain` | $163 \times 184 \times 162$ at 0.8 mm (resampled from 0.4 mm) | $161 \times 183 \times 161$ at 0.8 mm | 9.05 MiB |
+| `aseg` | $256^3$ | $135 \times 141 \times 152$ | 5.52 MiB |
 
 Validation rebuilds the full grid from each crop and requires equality. NextBrain is the one resampling: each $2 \times 2 \times 2$ block takes its most frequent label, ties going to the rarer label. Its surfaces and measurements keep 0.4 mm. The MRI is not cropped.
 

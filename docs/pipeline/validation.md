@@ -2,7 +2,7 @@
 
 [`brain_model/validate.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/validate.py) reads each built anatomy back and checks it against its sources. It establishes conversion fidelity, not clinical accuracy: every published `validation.json` has status `passed` and `clinical_accuracy_validated: false`.
 
-The [circuit evidence audit](reference/circuit-evidence.md) records clinical-source provenance for its historical set of 29 tours, the material scientific qualifications, and the remaining clinical-use work. Deficit evidence and circuit background are labeled separately in the viewer, and published corrections are shown with their sources. The audit and software checks do not establish patient-level diagnostic or prognostic validity. After the 1 November removal of profiles that coloured no atlas region, the clinical catalogue contains 132 abstract-based extraction records requiring full-text review before any patient-specific use is assessed.
+The [circuit evidence audit](../reference/circuit-evidence.md) records clinical-source provenance for its historical set of 29 tours, the material scientific qualifications, and the remaining clinical-use work. Deficit evidence and circuit background are labeled separately in the viewer, and published corrections are shown with their sources. The audit and software checks do not establish patient-level diagnostic or prognostic validity. After the 1 November removal of profiles that coloured no atlas region, the clinical catalogue contains 132 abstract-based extraction records requiring full-text review before any patient-specific use is assessed.
 
 ```bash
 uv run python -m brain_model.validate --anatomy cdmd
@@ -40,7 +40,7 @@ Browser QA runs are recorded in [`deliverables/`](https://github.com/JoshuaDuq/p
 | Position error (mm), bound 2e-5 | 5.038e-6 |
 | Normal component, bound 1.54e-5 | 1.529e-5 |
 | Sulcal depth (source units) | 2.399e-4 |
-| Concavity | 9.099e-6 |
+| Openness (`_OPENNESS`) | 7.66e-6 |
 | Ribbon T1 (intensity units) | 1.259e-3 |
 
 Counts are before barycentric partition; area is conserved across it to a relative $10^{-6}$. Scalar errors are within half a `uint16` step of each file's source range, $(\max - \min) / (2 \times 65535)$, in source units.

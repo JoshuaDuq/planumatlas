@@ -8,7 +8,7 @@ uv run python -m brain_model.build --anatomy cdmd
 uv run python -m brain_model.validate --anatomy cdmd
 ```
 
-The build writes `public/models/cdmd/` and updates the anatomy index; validation writes `validation.json`. Build the viewer with `npm run build --prefix web`. The build takes about two and a half minutes and 3.1 GB per anatomy. See [Validation and limits](../validation.md) for the checks.
+The build writes `public/models/cdmd/` and updates the anatomy index; validation writes `validation.json`. Build the viewer with `npm run build --prefix web`. The build takes about two and a half minutes and 3.1 GB per anatomy. See [Validation and limits](validation.md) for the checks.
 
 ## Configuration
 
@@ -32,7 +32,7 @@ These steps are needed only when changing or reconstructing sources. They requir
 - `scripts/register_coordinate_spaces.py`: the same SynthMorph and SynthSeg; about 7 minutes and 7.5 GB per template, four templates. Registers each MNI template a published coordinate may be given in to the anatomy, scores SynthSeg's reading of the template against its aseg, writes each published space's template → surface RAS field on a 1.5 mm grid, and measures where the unpublished templates' readings land beside it. It refuses a registration or an unstated-template reading that fails `config/coordinate-spaces.yaml`'s limits. `--record` registers the result.
 - `scripts/fetch_receptor_fingerprints.py`: downloads the receptor datasets `config/receptor-fingerprints.yaml` lists from EBRAINS, pinned by checksum, into `data/receptor-fingerprints.json`. `--record` registers the result.
 - `scripts/segment_spinal_cord.py`: the Spinal Cord Toolbox 7.3 (its own installer, in `~/sct_7.3` or `$SCT_DIR`), with its cord model and PAM50 pinned by checksum; approximately 10 minutes of CPU per brain. `--record` registers the result.
-- `scripts/tractseg_cdmd.py`: MRtrix3 3.0.8, TractSeg 2.10, torch and pretrained weights. See [Diffusion and tracts](tracts.md#cdmds-tractseg-bundles-and-fa) for the method and packaging commands.
+- `scripts/tractseg_cdmd.py`: MRtrix3 3.0.8, TractSeg 2.10, torch and pretrained weights. See [Diffusion and tracts](../features/tracts.md) for the method and packaging commands.
 
 For the repository's configured tool locations and command options, inspect the scripts before running them. On macOS arm64, `scripts/freesurfer/` contains the memory workarounds used for FreeSurfer 8.2; sliced convolutions may change floating-point results.
 

@@ -21,7 +21,7 @@ uv sync --locked
 uv run pytest
 ```
 
-The committed CDMD sources can be built directly. Regenerating segmentations or diffusion data has additional requirements; see [Building an anatomy](guides/building.md).
+The committed CDMD sources can be built directly. Regenerating segmentations or diffusion data has additional requirements; see [Building an anatomy](../pipeline/building.md).
 
 ## Documentation
 
