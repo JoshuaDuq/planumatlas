@@ -1,31 +1,186 @@
-// How to use Planum in Chromium: its content in both languages, the title's initial focus, and axe.
-// Opening it from the settings menu is the masthead's (Masthead.svelte.test.ts).
-import { beforeEach, expect, test } from 'vitest';
+// The guided tour in Chromium, over a stand-in for the page: which stops it keeps, the view each
+// opens and the reader's view put back, where focus and keys go, a target re-rendered mid-tour,
+// and axe. Opening it from the settings menu is the
+// masthead's (Masthead.svelte.test.ts).
+import { afterEach, beforeEach, expect, test } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from 'vitest-browser-svelte';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
-import GuideDialog from './GuideDialog.svelte';
+import { startGuide } from './tour.ts';
 
-beforeEach(() => page.viewport(1280, 800));
+const TARGETS = `
+  <header id="masthead">
+    <div class="data-bar">Destrieux · Regions</div>
+    <div class="masthead-end"><span class="popover-host" style="display: contents"><button>⋯</button></span></div>
+  </header>
+  <div role="tablist">
+    <button id="workspace-tab-functions" role="tab">Functions</button>
+    <button id="workspace-tab-deficits" role="tab">Deficits</button>
+    <button id="workspace-tab-circuits" role="tab">Circuits</button>
+    <button id="workspace-tab-diffusion" role="tab">Tracts</button>
+  </div>
+  <main id="viewport" style="height: 300px">
+    <canvas width="300" height="200" role="application" aria-label="Brain model"></canvas>
+  </main>
+  <div class="orientation-gizmo"><button>S</button></div>
+  <div class="stage-toolbar">
+    <span class="popover-host" style="display: contents"><button>Section</button></span>
+    <span class="popover-host" style="display: contents"><button>Lesion</button></span>
+    <span class="popover-host" style="display: contents"><button>Coordinate</button></span>
+    <span class="popover-host" style="display: contents"><button>Display</button></span>
+  </div>`;
 
-const dialog = () => document.querySelector('dialog') as HTMLDialogElement;
-const headings = () => [...dialog().querySelectorAll('h3')].map((h) => h.textContent);
+/** The reader's own view: a region open in a lateral view, on the Destrieux atlas. */
+const READER = '#anatomy=cdmd&atlas=destrieux&detail=learning&region=destrieux:left:29&view=left';
+const HOME = '#anatomy=cdmd&atlas=destrieux&detail=learning';
 
-test('a titled dialog of four ruled parts, its title focused, in English and French', async () => {
-  const view = await render(GuideDialog, { open: true, lang: 'en', fallbackFocus: () => null });
-  await expect.element(page.getByRole('dialog', { name: 'How to use Planum' })).toBeVisible();
-  expect(document.activeElement).toBe(dialog().querySelector('h2'));
-  expect(headings()).toEqual(['The brain', 'The top bar', 'The panel', 'The medial surface']);
-  expect(dialog().textContent).toContain('Not clinical anatomy.');
+let closed = 0;
+let hashes: string[] = [];
+const recordHash = () => hashes.push(location.hash);
+beforeEach(async () => {
+  await page.viewport(1280, 800);
+  history.replaceState(history.state, '', READER);
+  hashes = [];
+  addEventListener('hashchange', recordHash);
+  document.body.insertAdjacentHTML('beforeend', `<div id="fixture">${TARGETS}</div>`);
+  // The app styles its own controls; the stand-ins only need to pass target-size and contrast.
+  for (const button of document.querySelectorAll<HTMLElement>('#fixture button')) {
+    Object.assign(button.style, { minWidth: '24px', minHeight: '24px', background: 'none' });
+  }
+  closed = 0;
+});
+afterEach(() => {
+  document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
+  removeEventListener('hashchange', recordHash);
+  document.getElementById('fixture')?.remove();
+  history.replaceState(history.state, '', location.pathname + location.search);
+});
 
-  await view.rerender({ lang: 'fr' });
-  await expect.element(page.getByRole('dialog', { name: 'Utiliser Planum' })).toBeVisible();
-  expect(headings()).toEqual(['Le cerveau', 'La barre du haut', 'Le panneau', 'La face médiale']);
+const start = (lang: 'en' | 'fr' = 'en') =>
+  startGuide(lang, { animate: false, onClose: () => closed++ });
+const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
+const title = () => card().querySelector('.driver-popover-title')!.textContent;
+const next = () => card().querySelector<HTMLButtonElement>('.driver-popover-next-btn')!;
+const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
+  const event = new KeyboardEvent(type, { key: name, bubbles: true, cancelable: true });
+  target.dispatchEvent(event);
+  return event;
+};
+
+const STOPS = 13;
+
+test('thirteen stops in order, in English and French, with focus on Next', async () => {
+  start();
+  const titles = [title()];
+  await expect.poll(() => document.activeElement).toBe(next());
+  for (let i = 1; i < STOPS; i++) {
+    next().click();
+    titles.push(title());
+  }
+  expect(titles).toEqual([
+    'How to use Planum',
+    'The brain',
+    'Anatomical directions',
+    'Section',
+    'Lesion',
+    'Coordinate',
+    'The medial surface',
+    'The top bar',
+    'Functions',
+    'Deficits',
+    'Circuits',
+    'Tracts',
+    'Settings',
+  ]);
+  expect(next().textContent).toBe('Done');
+  expect(document.querySelector('.driver-active-element')).toBe(
+    document.querySelector('.masthead-end button'),
+  );
+  next().click();
+  expect(closed).toBe(1);
+
+  start('fr');
+  expect(title()).toBe('Utiliser Planum');
+  expect(card().lang).toBe('fr');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 13');
+});
+
+test('each stop opens its feature over the home view, and closing puts the reader’s view back', () => {
+  const entries = history.length;
+  const showing = () => document.documentElement.hasAttribute('data-guide-showing');
+  start();
+  const undimmed = [showing()];
+  for (let i = 1; i < STOPS; i++) {
+    next().click();
+    undimmed.push(showing());
+  }
+  // Only the stops that open nothing dim the page: welcome, the top bar and settings.
+  expect(undimmed).toEqual([false, ...Array(6).fill(true), false, ...Array(4).fill(true), false]);
+  expect(hashes).toEqual([
+    HOME,
+    `${HOME}&region=destrieux:left:29`,
+    `${HOME}&view=superior`,
+    `${HOME}&cut=coronal`,
+    `${HOME}&lesion=-35.5,-9.5,63.5,10`,
+    `${HOME}&coord=-38,-22,56&space=mni152nlin2009casym`,
+    `${HOME}&hemi=left&view=right`,
+    HOME,
+    // The stop's atlas replaces the reader's, as opening a function in the app does.
+    '#anatomy=cdmd&atlas=hcp-mmp&detail=learning&cuts=hcp-mmp&tab=functions&function=language',
+    `${HOME}&tab=deficits&deficit=aphasia`,
+    `${HOME}&tab=circuits&circuit=vision`,
+    `${HOME}&tab=diffusion`,
+    HOME,
+  ]);
+  next().click();
+  expect(showing()).toBe(false);
+  expect(location.hash).toBe(READER);
+  expect(hashes.at(-1)).toBe(READER);
+  // The stops replace the entry: Back still leaves the page the reader came from.
+  expect(history.length).toBe(entries);
+});
+
+test('a click on the overlay, meant for the brain, leaves the tour where it was', async () => {
+  start();
+  next().click();
+  // driver.js draws its overlay on the stop's first frame.
+  await expect.poll(() => document.querySelector('.driver-overlay path')).not.toBeNull();
+  document
+    .querySelector('.driver-overlay path')!
+    .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  expect(closed).toBe(0);
+  expect(title()).toBe('The brain');
+});
+
+test('a target the layout hides is left out of the stops and the count', () => {
+  document.querySelector<HTMLElement>('.orientation-gizmo')!.style.display = 'none';
+  start();
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 12');
+});
+
+test('a target re-rendered after the tour starts is still the one highlighted', () => {
+  start();
+  const host = document.querySelector('.masthead-end .popover-host')!;
+  host.replaceChildren(Object.assign(document.createElement('button'), { textContent: '⋯' }));
+  for (let i = 1; i < STOPS; i++) next().click();
+  expect(document.querySelector('.driver-active-element')).toBe(host.firstElementChild);
+});
+
+test('the tour claims Escape and the arrows from the page keymap, then Escape closes it', async () => {
+  start();
+  for (const name of ['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']) {
+    expect(key(next(), 'keydown', name).defaultPrevented, name).toBe(true);
+  }
+  // Enter and Space press the focused button; claiming them would stop the tour's own buttons.
+  expect(key(next(), 'keydown', 'Enter').defaultPrevented).toBe(false);
+  expect(key(next(), 'keydown', ' ').defaultPrevented).toBe(false);
+  key(next(), 'keyup', 'Escape');
+  await expect.poll(() => closed).toBe(1);
+  expect(document.querySelector('.driver-popover')).toBeNull();
 });
 
 test('axe: light and dark, desktop and 390 px', async () => {
-  await render(GuideDialog, { open: true, lang: 'en', fallbackFocus: () => null });
-  await expect.poll(() => dialog().open).toBe(true);
+  start();
+  next().click();
   await expectAxeClean();
 });

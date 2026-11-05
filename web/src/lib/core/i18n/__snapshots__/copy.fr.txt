@@ -899,38 +899,78 @@
   ]
  },
  "guide": {
-  "title": "Utiliser Planum",
-  "close": "Fermer",
-  "lead": "Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique.",
-  "sections": [
-   [
-    "Le cerveau",
-    [
-     "Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir.",
-     "Les lettres en haut à droite nomment les directions anatomiques<NNBSP>: choisissez-en une pour regarder de ce côté, ou le centre pour la vue oblique.",
-     "Coupe sectionne le cerveau selon un plan, avec ses coupes IRM liées. Lésion place une sphère et indique ce qu’elle atteint. Coordonnée place une coordonnée MNI publiée. Affichage règle le cortex, l’anatomie interne et les hémisphères."
-    ]
-   ],
-   [
-    "La barre du haut",
-    [
-     "Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel."
-    ]
-   ],
-   [
-    "Le panneau",
-    [
-     "Anatomie liste chaque région, sur tout le cerveau ou par système. Fonctions et Déficits peignent des données publiées sur le cerveau, disent ce qu’ils ont changé et offrent le retour. Circuits parcourt des voies anatomiques, repère par repère. Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion."
-    ]
-   ],
-   [
-    "La face médiale",
-    [
-     "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté<NNBSP>: l’hémisphère gauche vu de la droite montre sa face interne."
-    ]
-   ]
-  ],
-  "keys": "Les raccourcis clavier sont dans le menu des réglages, ou touche ?."
+  "next": "Suivant",
+  "previous": "Retour",
+  "done": "Terminé",
+  "close": "Fermer la visite",
+  "progress": "{{current}} sur {{total}}",
+  "stops": [
+   {
+    "id": "welcome",
+    "title": "Utiliser Planum",
+    "body": "Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique. La visite ouvre chaque fonctionnalité sur le cerveau, puis rétablit votre vue."
+   },
+   {
+    "id": "brain",
+    "title": "Le cerveau",
+    "body": "Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir : ici le gyrus précentral gauche, souligné sur le cerveau et décrit dans le panneau."
+   },
+   {
+    "id": "directions",
+    "title": "Directions anatomiques",
+    "body": "Les lettres nomment les directions anatomiques : choisissez-en une pour regarder de ce côté, comme S montre le cerveau d’en haut, ou le centre pour la vue oblique."
+   },
+   {
+    "id": "section",
+    "title": "Coupe",
+    "body": "Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées."
+   },
+   {
+    "id": "lesion",
+    "title": "Lésion",
+    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche."
+   },
+   {
+    "id": "coordinate",
+    "title": "Coordonnée",
+    "body": "Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, −22, 56."
+   },
+   {
+    "id": "medial",
+    "title": "La face médiale",
+    "body": "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne."
+   },
+   {
+    "id": "topBar",
+    "title": "La barre du haut",
+    "body": "Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel."
+   },
+   {
+    "id": "functions",
+    "title": "Fonctions",
+    "body": "Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage."
+   },
+   {
+    "id": "deficits",
+    "title": "Déficits",
+    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie."
+   },
+   {
+    "id": "circuits",
+    "title": "Circuits",
+    "body": "Circuits parcourt une voie anatomique, repère par repère : ici la voie visuelle, à partir du chiasma optique."
+   },
+   {
+    "id": "tracts",
+    "title": "Faisceaux",
+    "body": "Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion."
+   },
+   {
+    "id": "settings",
+    "title": "Réglages",
+    "body": "La langue, le thème et les raccourcis clavier (ou touche<NBSP>?) sont ici, avec Recommencer et cette visite."
+   }
+  ]
  },
  "header": {
   "atlasShort": {

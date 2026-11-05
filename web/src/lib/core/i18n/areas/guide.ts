@@ -1,72 +1,169 @@
-/** A heading and its paragraphs. */
-export type GuideSection = [heading: string, paragraphs: string[]];
+/** One stop of the tour: what it points at and what it shows are the tour's (features/guide/tour.ts). */
+export interface GuideStop {
+  id:
+    | 'welcome'
+    | 'brain'
+    | 'directions'
+    | 'section'
+    | 'lesion'
+    | 'coordinate'
+    | 'medial'
+    | 'topBar'
+    | 'functions'
+    | 'deficits'
+    | 'circuits'
+    | 'tracts'
+    | 'settings';
+  title: string;
+  body: string;
+}
 
 export const en = {
-  title: 'How to use Planum',
-  close: 'Close',
-  lead: 'One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy.',
-  sections: [
-    [
-      'The brain',
-      [
-        'Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it.',
-        'The letters at the top right name the anatomical directions: choose one to look from that side, or the centre for the oblique view.',
-        'Section cuts the brain on a plane, with its linked MRI slices. Lesion places a sphere and reports what it reaches. Coordinate places a published MNI coordinate. Display sets the cortex, internal anatomy and hemispheres.',
-      ],
-    ],
-    [
-      'The top bar',
-      [
-        'Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means.',
-      ],
-    ],
-    [
-      'The panel',
-      [
-        'Anatomy lists every region, across the whole brain or by system. Functions and Deficits paint published evidence on the brain, say what they changed, and offer the way back. Circuits walks through anatomical pathways, landmark by landmark. Tracts shows white-matter bundles reconstructed from diffusion MRI.',
-      ],
-    ],
-    [
-      'The medial surface',
-      [
-        'Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface.',
-      ],
-    ],
-  ] as GuideSection[],
-  keys: 'Keyboard shortcuts are listed in the settings menu, or press ?.',
+  next: 'Next',
+  previous: 'Back',
+  done: 'Done',
+  close: 'Close the tour',
+  progress: '{{current}} of {{total}}',
+  stops: [
+    {
+      id: 'welcome',
+      title: 'How to use Planum',
+      body: 'One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy. The tour opens each feature on the brain, then puts your view back.',
+    },
+    {
+      id: 'brain',
+      title: 'The brain',
+      body: 'Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it: here the left precentral gyrus, outlined on the brain and described in the panel.',
+    },
+    {
+      id: 'directions',
+      title: 'Anatomical directions',
+      body: 'The letters name the anatomical directions: choose one to look from that side, as S shows the brain from above, or the centre for the oblique view.',
+    },
+    {
+      id: 'section',
+      title: 'Section',
+      body: 'Section cuts the brain on a plane, here a coronal one, with its linked MRI slices.',
+    },
+    {
+      id: 'lesion',
+      title: 'Lesion',
+      body: 'Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus.',
+    },
+    {
+      id: 'coordinate',
+      title: 'Coordinate',
+      body: 'Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, −22, 56.',
+    },
+    {
+      id: 'medial',
+      title: 'The medial surface',
+      body: 'Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface.',
+    },
+    {
+      id: 'topBar',
+      title: 'The top bar',
+      body: 'Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means.',
+    },
+    {
+      id: 'functions',
+      title: 'Functions',
+      body: 'Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language.',
+    },
+    {
+      id: 'deficits',
+      title: 'Deficits',
+      body: 'Deficits paints the regions that lesion studies tie to a deficit: here aphasia.',
+    },
+    {
+      id: 'circuits',
+      title: 'Circuits',
+      body: 'Circuits walks through an anatomical pathway, landmark by landmark: here the visual pathway, starting at the optic chiasm.',
+    },
+    {
+      id: 'tracts',
+      title: 'Tracts',
+      body: 'Tracts shows white-matter bundles reconstructed from diffusion MRI.',
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      body: 'Language, theme and keyboard shortcuts (or press ?) are here, with Start over and this tour.',
+    },
+  ] as GuideStop[],
 };
 
 export const fr: typeof en = {
-  title: 'Utiliser Planum',
-  close: 'Fermer',
-  lead: 'Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique.',
-  sections: [
-    [
-      'Le cerveau',
-      [
-        'Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir.',
-        'Les lettres en haut à droite nomment les directions anatomiques : choisissez-en une pour regarder de ce côté, ou le centre pour la vue oblique.',
-        'Coupe sectionne le cerveau selon un plan, avec ses coupes IRM liées. Lésion place une sphère et indique ce qu’elle atteint. Coordonnée place une coordonnée MNI publiée. Affichage règle le cortex, l’anatomie interne et les hémisphères.',
-      ],
-    ],
-    [
-      'La barre du haut',
-      [
-        'Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel.',
-      ],
-    ],
-    [
-      'Le panneau',
-      [
-        'Anatomie liste chaque région, sur tout le cerveau ou par système. Fonctions et Déficits peignent des données publiées sur le cerveau, disent ce qu’ils ont changé et offrent le retour. Circuits parcourt des voies anatomiques, repère par repère. Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion.',
-      ],
-    ],
-    [
-      'La face médiale',
-      [
-        'Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne.',
-      ],
-    ],
-  ] as GuideSection[],
-  keys: 'Les raccourcis clavier sont dans le menu des réglages, ou touche ?.',
+  next: 'Suivant',
+  previous: 'Retour',
+  done: 'Terminé',
+  close: 'Fermer la visite',
+  progress: '{{current}} sur {{total}}',
+  stops: [
+    {
+      id: 'welcome',
+      title: 'Utiliser Planum',
+      body: 'Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique. La visite ouvre chaque fonctionnalité sur le cerveau, puis rétablit votre vue.',
+    },
+    {
+      id: 'brain',
+      title: 'Le cerveau',
+      body: 'Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir : ici le gyrus précentral gauche, souligné sur le cerveau et décrit dans le panneau.',
+    },
+    {
+      id: 'directions',
+      title: 'Directions anatomiques',
+      body: 'Les lettres nomment les directions anatomiques : choisissez-en une pour regarder de ce côté, comme S montre le cerveau d’en haut, ou le centre pour la vue oblique.',
+    },
+    {
+      id: 'section',
+      title: 'Coupe',
+      body: 'Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées.',
+    },
+    {
+      id: 'lesion',
+      title: 'Lésion',
+      body: 'Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche.',
+    },
+    {
+      id: 'coordinate',
+      title: 'Coordonnée',
+      body: 'Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, −22, 56.',
+    },
+    {
+      id: 'medial',
+      title: 'La face médiale',
+      body: 'Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne.',
+    },
+    {
+      id: 'topBar',
+      title: 'La barre du haut',
+      body: 'Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel.',
+    },
+    {
+      id: 'functions',
+      title: 'Fonctions',
+      body: 'Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage.',
+    },
+    {
+      id: 'deficits',
+      title: 'Déficits',
+      body: 'Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie.',
+    },
+    {
+      id: 'circuits',
+      title: 'Circuits',
+      body: 'Circuits parcourt une voie anatomique, repère par repère : ici la voie visuelle, à partir du chiasma optique.',
+    },
+    {
+      id: 'tracts',
+      title: 'Faisceaux',
+      body: 'Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion.',
+    },
+    {
+      id: 'settings',
+      title: 'Réglages',
+      body: 'La langue, le thème et les raccourcis clavier (ou touche ?) sont ici, avec Recommencer et cette visite.',
+    },
+  ] as GuideStop[],
 };

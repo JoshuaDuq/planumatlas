@@ -899,38 +899,78 @@
   ]
  },
  "guide": {
-  "title": "How to use Planum",
-  "close": "Close",
-  "lead": "One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy.",
-  "sections": [
-   [
-    "The brain",
-    [
-     "Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it.",
-     "The letters at the top right name the anatomical directions: choose one to look from that side, or the centre for the oblique view.",
-     "Section cuts the brain on a plane, with its linked MRI slices. Lesion places a sphere and reports what it reaches. Coordinate places a published MNI coordinate. Display sets the cortex, internal anatomy and hemispheres."
-    ]
-   ],
-   [
-    "The top bar",
-    [
-     "Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means."
-    ]
-   ],
-   [
-    "The panel",
-    [
-     "Anatomy lists every region, across the whole brain or by system. Functions and Deficits paint published evidence on the brain, say what they changed, and offer the way back. Circuits walks through anatomical pathways, landmark by landmark. Tracts shows white-matter bundles reconstructed from diffusion MRI."
-    ]
-   ],
-   [
-    "The medial surface",
-    [
-     "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
-    ]
-   ]
-  ],
-  "keys": "Keyboard shortcuts are listed in the settings menu, or press ?."
+  "next": "Next",
+  "previous": "Back",
+  "done": "Done",
+  "close": "Close the tour",
+  "progress": "{{current}} of {{total}}",
+  "stops": [
+   {
+    "id": "welcome",
+    "title": "How to use Planum",
+    "body": "One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy. The tour opens each feature on the brain, then puts your view back."
+   },
+   {
+    "id": "brain",
+    "title": "The brain",
+    "body": "Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it: here the left precentral gyrus, outlined on the brain and described in the panel."
+   },
+   {
+    "id": "directions",
+    "title": "Anatomical directions",
+    "body": "The letters name the anatomical directions: choose one to look from that side, as S shows the brain from above, or the centre for the oblique view."
+   },
+   {
+    "id": "section",
+    "title": "Section",
+    "body": "Section cuts the brain on a plane, here a coronal one, with its linked MRI slices."
+   },
+   {
+    "id": "lesion",
+    "title": "Lesion",
+    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus."
+   },
+   {
+    "id": "coordinate",
+    "title": "Coordinate",
+    "body": "Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, −22, 56."
+   },
+   {
+    "id": "medial",
+    "title": "The medial surface",
+    "body": "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
+   },
+   {
+    "id": "topBar",
+    "title": "The top bar",
+    "body": "Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means."
+   },
+   {
+    "id": "functions",
+    "title": "Functions",
+    "body": "Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language."
+   },
+   {
+    "id": "deficits",
+    "title": "Deficits",
+    "body": "Deficits paints the regions that lesion studies tie to a deficit: here aphasia."
+   },
+   {
+    "id": "circuits",
+    "title": "Circuits",
+    "body": "Circuits walks through an anatomical pathway, landmark by landmark: here the visual pathway, starting at the optic chiasm."
+   },
+   {
+    "id": "tracts",
+    "title": "Tracts",
+    "body": "Tracts shows white-matter bundles reconstructed from diffusion MRI."
+   },
+   {
+    "id": "settings",
+    "title": "Settings",
+    "body": "Language, theme and keyboard shortcuts (or press<NBSP>?) are here, with Start over and this tour."
+   }
+  ]
  },
  "header": {
   "atlasShort": {
