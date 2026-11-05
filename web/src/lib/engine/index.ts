@@ -301,7 +301,16 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       presentation.outline();
     }
 
-    const engineSections = createEngineSections(sections);
+    // The first cut otherwise downloads its anatomy, builds the parcel solids and compiles its
+    // programs after the click.
+    const prefetchCut = async () => {
+      await sections.prefetch();
+      if (disposed) return;
+      const samples = new Group();
+      samples.add(...atlas.cutProgramSamples(), ...sections.tissues.solids.programSamples());
+      await scene.compile(samples);
+    };
+    const engineSections = createEngineSections(sections, prefetchCut);
     const onChange = () => {
       stage.invalidate();
       lesion.refresh();

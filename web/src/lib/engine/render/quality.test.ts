@@ -19,6 +19,7 @@ test('a phone renders at one CSS pixel and reduces MSAA', () => {
   assert.equal(quality.pixelRatio, 1);
   assert.equal(quality.msaaSamples, 2);
   assert.equal(quality.prefetchLayers, false);
+  assert.equal(quality.prefetchCut, false);
 });
 
 test('a tablet caps pixel ratio at 1.5 and reduces MSAA', () => {
@@ -32,6 +33,7 @@ test('a tablet caps pixel ratio at 1.5 and reduces MSAA', () => {
   assert.equal(quality.pixelRatio, 1.5);
   assert.equal(quality.msaaSamples, 2);
   assert.equal(quality.prefetchLayers, false);
+  assert.equal(quality.prefetchCut, false);
 });
 
 test('a desktop workstation keeps pixel ratio at 2 and 4x MSAA', () => {
@@ -62,7 +64,7 @@ test('an integrated GPU spends fewer pixels and uses 2x MSAA', () => {
   assert.equal(quality.prefetchLayers, false);
 });
 
-test('Save-Data drops extra layer prefetch', () => {
+test('Save-Data drops extra layer and cut prefetch', () => {
   const quality = qualityProfile({
     phone: false,
     coarse: false,
@@ -71,9 +73,10 @@ test('Save-Data drops extra layer prefetch', () => {
     deviceMemory: 8,
   });
   assert.equal(quality.prefetchLayers, false);
+  assert.equal(quality.prefetchCut, false);
 });
 
-test('low-memory devices drop extra layer prefetch even on a wide screen', () => {
+test('low-memory devices drop extra layer and cut prefetch even on a wide screen', () => {
   const quality = qualityProfile({
     phone: false,
     coarse: false,
@@ -82,6 +85,7 @@ test('low-memory devices drop extra layer prefetch even on a wide screen', () =>
     deviceMemory: 2,
   });
   assert.equal(quality.prefetchLayers, false);
+  assert.equal(quality.prefetchCut, false);
 });
 
 test('an Apple Silicon Mac renders at its display density but keeps 2x MSAA', () => {
@@ -94,9 +98,26 @@ test('an Apple Silicon Mac renders at its display density but keeps 2x MSAA', ()
     deviceMemory: 16,
     integrated: true,
     appleSilicon: true,
+    effectiveType: '4g',
   });
   assert.equal(quality.pixelRatio, 2);
   assert.equal(quality.msaaSamples, 2);
+  // The other atlas is a second set of meshes to fill; the cut is downloaded on any desktop.
+  assert.equal(quality.prefetchLayers, false);
+  assert.equal(quality.prefetchCut, true);
+});
+
+test('a slow connection drops cut prefetch on a desktop', () => {
+  const quality = qualityProfile({
+    phone: false,
+    coarse: false,
+    saveData: false,
+    pixelRatio: 2,
+    deviceMemory: 16,
+    integrated: false,
+    effectiveType: '3g',
+  });
+  assert.equal(quality.prefetchCut, false);
 });
 
 test('an iPad keeps the handheld budget although its GPU is Apple silicon', () => {

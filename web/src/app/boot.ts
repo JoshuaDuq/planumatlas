@@ -7,7 +7,13 @@ import { startFailure } from '../lib/core/i18n/errors.ts';
 import { prefetchAtlas } from '../lib/core/state/boot.ts';
 import type { ConnectionHints } from '../lib/core/state/boot.ts';
 import { decodeState } from '../lib/core/state/url-state.ts';
-import type { CreateEngine, Engine, EngineError, EngineModel } from '../lib/engine/api.ts';
+import type {
+  CreateEngine,
+  Engine,
+  EngineError,
+  EngineModel,
+  EngineSections,
+} from '../lib/engine/api.ts';
 import { createEngine as createRealEngine } from '../lib/engine/index.ts';
 import { qualityProfile } from '../lib/engine/render/quality.ts';
 import { APP } from './application.svelte.ts';
@@ -45,6 +51,19 @@ function prefetchOtherAtlas(model: EngineModel): void {
     globalThis.requestIdleCallback ?? ((run: () => void) => setTimeout(run, PREFETCH_FALLBACK_MS));
   idle(() => {
     model.prefetchLayer(atlas.id).catch((error) => console.warn('Prefetch failed:', error));
+  });
+}
+
+/**
+ * Once the first atlas is on screen, download, build and compile the first cut, which otherwise
+ * waits for all three after the click. The gate reads memory and the connection, not the GPU.
+ */
+function prefetchFirstCut(sections: EngineSections): void {
+  if (!qualityProfile({ integrated: false }).prefetchCut) return;
+  const idle =
+    globalThis.requestIdleCallback ?? ((run: () => void) => setTimeout(run, PREFETCH_FALLBACK_MS));
+  idle(() => {
+    sections.prefetch().catch((error) => console.warn('Cut prefetch failed:', error));
   });
 }
 
@@ -135,6 +154,7 @@ export async function startApp(
     app.session.setStatus('ready');
     world.links.report(notApplied);
     prefetchOtherAtlas(engine.model);
+    prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);
     app.defer(() => globalThis.removeEventListener('hashchange', world.links.onHashChange));
     bindAppLifecycle(app);

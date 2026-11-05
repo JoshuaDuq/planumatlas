@@ -119,7 +119,10 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
  * snapshot of its state on every read, and the reads the panels used to make on its fields. The class
  * stays a 1-1 port (`ui/chrome/sections.js` and `app.js:825-831` computed these).
  */
-export function createEngineSections(sections: BrainSections): EngineSections {
+export function createEngineSections(
+  sections: BrainSections,
+  prefetch: () => Promise<void>,
+): EngineSections {
   const snapshot = (): SectionsState => ({
     ...sections.state,
     crosshair: [...sections.state.crosshair],
@@ -167,6 +170,7 @@ export function createEngineSections(sections: BrainSections): EngineSections {
     cutSpacingMm: (atlas) => sections.tissues.metadata?.atlases[atlas]?.voxel_spacing_mm?.[0] ?? 1,
 
     load: () => sections.load(),
+    prefetch,
     setMode: (mode) => sections.setMode(mode),
     setCrosshair: (point) => sections.setCrosshair(point),
     setOffset: (offset) => sections.setOffset(offset),

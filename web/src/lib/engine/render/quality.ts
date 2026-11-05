@@ -1,8 +1,9 @@
+import { SLOW_CONNECTIONS } from '../../core/state/boot.ts';
 import { detectIntegratedGpu, isCoarse, isPhone, pixelRatioCap } from './device.ts';
 
 /** `navigator.connection` and `deviceMemory` are not in lib.dom. */
 interface NavigatorWithHints {
-  connection?: { saveData?: boolean };
+  connection?: { saveData?: boolean; effectiveType?: string };
   deviceMemory?: number;
 }
 
@@ -10,6 +11,7 @@ export interface QualityInput {
   phone?: boolean;
   coarse?: boolean;
   saveData?: boolean;
+  effectiveType?: string;
   pixelRatio?: number;
   deviceMemory?: number;
   integrated?: boolean;
@@ -22,13 +24,15 @@ export interface QualityProfile {
   motionPixelRatio: number;
   msaaSamples: 2 | 4;
   prefetchLayers: boolean;
+  /** Whether to download and build the first cut ahead, about 22 MB on the published anatomy. */
+  prefetchCut: boolean;
 }
 
 /**
  * How much GPU work this device can take without dropping frames.
  *
  * The anatomy stays full resolution on every device. Only the presentation
- * — pixel ratio, MSAA, whether to prefetch the other atlas — scales.
+ * — pixel ratio, MSAA, what to prefetch — scales.
  * Labels, coordinates and triangle counts do not.
  */
 export function qualityProfile(input: QualityInput = {}): QualityProfile {
@@ -36,6 +40,7 @@ export function qualityProfile(input: QualityInput = {}): QualityProfile {
   const phone = input.phone ?? isPhone();
   const coarse = input.coarse ?? isCoarse();
   const saveData = input.saveData ?? Boolean(hints?.connection?.saveData);
+  const effectiveType = input.effectiveType ?? hints?.connection?.effectiveType ?? '';
   const pixelRatio = input.pixelRatio ?? globalThis.devicePixelRatio ?? 1;
   const deviceMemory = input.deviceMemory ?? hints?.deviceMemory ?? 8;
   const integrated = input.integrated ?? detectIntegratedGpu();
@@ -56,6 +61,8 @@ export function qualityProfile(input: QualityInput = {}): QualityProfile {
     motionPixelRatio: Math.min(settledRatio, 1),
     msaaSamples: fillBound ? 2 : 4,
     prefetchLayers: !fillBound,
+    // Memory and the connection, not fill: an integrated GPU holds the cut as well as any.
+    prefetchCut: !constrained && !SLOW_CONNECTIONS.has(effectiveType),
   };
 }
 

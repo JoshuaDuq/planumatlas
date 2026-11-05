@@ -1,5 +1,5 @@
 /** Connections too slow, or asked to save data, for a download nobody requested. */
-const SLOW_CONNECTIONS = new Set(['slow-2g', '2g', '3g']);
+export const SLOW_CONNECTIONS: ReadonlySet<string> = new Set(['slow-2g', '2g', '3g']);
 
 /** What the browser reports about the connection (`navigator.connection`), where it does. */
 export interface ConnectionHints {

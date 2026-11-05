@@ -41,6 +41,8 @@ export function withHeadlessRenderer(original: typeof Three, probe: HeadlessProb
     setTransparentSort() {}
     // No programs exist without a GL context.
     compileAsync = () => Promise.resolve();
+    getRenderTarget = () => null;
+    setRenderTarget() {}
     setSize() {}
     initRenderTarget() {}
     setAnimationLoop = (loop: ((now: number) => void) | null) => {

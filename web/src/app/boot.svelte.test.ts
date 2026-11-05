@@ -31,7 +31,7 @@ vi.mock('../lib/core/assets/published-anatomy.ts', async (importOriginal) => ({
 // The prefetch only runs on a device the quality profile allows; this one decides it.
 vi.mock('../lib/engine/render/quality.ts', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../lib/engine/render/quality.ts')>()),
-  qualityProfile: () => ({ prefetchLayers: true }),
+  qualityProfile: () => ({ prefetchLayers: true, prefetchCut: true }),
 }));
 
 const manifest = manifestFile as unknown as Manifest;
@@ -225,6 +225,13 @@ describe('the start', () => {
     expect(
       engine.calls.filter((call) => call.method === 'prefetchLayer').map((c) => c.args),
     ).toEqual([['hcp-mmp']]);
+  });
+
+  test('prepares the first cut ahead, once the first atlas is shown', async () => {
+    vi.stubGlobal('requestIdleCallback', (run: () => void) => run());
+    await boot();
+    vi.unstubAllGlobals();
+    expect(engine.calls.filter((call) => call.method === 'prefetch')).toHaveLength(1);
   });
 
   test('stays on the link’s address bar until a settled camera writes the scene', async () => {
