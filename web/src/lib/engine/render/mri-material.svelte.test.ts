@@ -66,6 +66,8 @@ function render(mark: string): [number, number, number] {
   material.dispose();
   texture.dispose();
   renderer.dispose();
+  // dispose() keeps the context; a live one counts against the browser's cap (scene.ts).
+  renderer.forceContextLoss();
   return [oetf(pixel[0]!), oetf(pixel[1]!), oetf(pixel[2]!)];
 }
 

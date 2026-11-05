@@ -95,5 +95,7 @@ test(
     lighting.dispose();
     expect(camera.children).toHaveLength(0);
     renderer.dispose();
+    // dispose() keeps the context; a live one counts against the browser's cap (scene.ts).
+    renderer.forceContextLoss();
   },
 );

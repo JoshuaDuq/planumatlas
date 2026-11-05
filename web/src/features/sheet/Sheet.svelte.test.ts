@@ -207,8 +207,9 @@ describe('the shell', () => {
       bottom: 0,
       left: span(),
     });
-    // The rail at peek is full height, so it keeps its panel rather than an empty column.
-    expect(getComputedStyle(el('navigator')).visibility).toBe('visible');
+    // The rail at peek is full height, so it keeps its panel rather than an empty column. The panel
+    // follows the media query, which a resize re-evaluates after its own rendering step.
+    await vi.waitFor(() => expect(getComputedStyle(el('navigator')).visibility).toBe('visible'));
     expect(box(el('navigator')).height).toBeGreaterThan(100);
     await resize(...PHONE);
     await vi.waitFor(() => expect(sheet().style.height).not.toBe(''));

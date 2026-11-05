@@ -53,5 +53,7 @@ test(
     expect(failed).toEqual([]);
     for (const material of materials) material.dispose();
     renderer.dispose();
+    // dispose() keeps the context; a live one counts against the browser's cap (scene.ts).
+    renderer.forceContextLoss();
   },
 );
