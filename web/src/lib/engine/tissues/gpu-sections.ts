@@ -179,7 +179,7 @@ const _poseV = new Vector3();
 const _poseN = new Vector3();
 const _poseBasis = new Matrix4();
 
-/** The sampled label plane is hidden while solids draw the cut, so a drag skips this. */
+/** Place the sampled label plane on the cut; a cut-only atlas draws its face with it. */
 function poseLabelPlane(mesh: Mesh, frame: Frame): void {
   _poseU.copy(rasToWorld(frame.u.toArray())).normalize();
   _poseV.copy(rasToWorld(frame.v.toArray())).normalize();
@@ -675,6 +675,14 @@ export class TissueSections {
       layer.paletteKey = key;
     }
     return true;
+  }
+
+  /**
+   * Move the sampled label plane to a drag's committed frame. A drag skips `update`, which would
+   * repaint; without this a cut-only atlas's face stays where the last update put it.
+   */
+  moveLabelPlane(frame: Frame): void {
+    if (this.current?.mesh.visible) poseLabelPlane(this.current.mesh, frame);
   }
 
   /**

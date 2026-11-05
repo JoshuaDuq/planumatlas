@@ -431,6 +431,7 @@ export class BrainSections extends EventTarget {
     }
     assign();
     if (!this.tissues.solids.applyBuild(plane, built, generation)) return;
+    this.tissues.moveLabelPlane(frame);
     this.group.visible = true;
     this.clipPlane.copy(plane);
     if (this.model.clippingPlanes[0] !== this.clipPlane)

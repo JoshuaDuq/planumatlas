@@ -407,6 +407,17 @@ test('a drag build that lands after the cut closed does not reopen it', async ()
   sections.dispose();
 });
 
+test('a drag moves the sampled label plane to the frame it commits', async () => {
+  const { tissues, sections } = fixture();
+  tissues.solids = { generation: 0, build: async () => [], applyBuild: () => true, warm() {} };
+  const moved: number[][] = [];
+  tissues.moveLabelPlane = (frame: { center: Vector3 }) => moved.push(frame.center.toArray());
+  await sections.setMode('axial');
+  await sections.setOffsetReady(10);
+  assert.deepEqual(moved, [[0, 0, 10]]);
+  sections.dispose();
+});
+
 test('hiding the internal anatomy repaints an open cut', async () => {
   const { model, tissues, sections } = fixture();
   await sections.setMode('axial');

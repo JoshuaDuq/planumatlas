@@ -491,6 +491,22 @@ test('a surfaceless cut atlas still caps and picks supplemental anatomy outside 
   sections.dispose();
 });
 
+test('a drag moves a sampled label plane to its frame, and leaves a hidden one', () => {
+  const { sections, model, layer } = fixture();
+  model.state.surfaceColor = 'atlas';
+  sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
+  assert.equal(layer.mesh.visible, true);
+  sections.moveLabelPlane(centeredFrame('coronal', [0, -40, 0]));
+  assert.ok(layer.mesh.position.distanceTo(rasToWorld([0, -40, 0])) < 1e-9);
+  // Tissue colour draws the cut with solids; their plane is not this one.
+  model.state.surfaceColor = 'tissue';
+  sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
+  const resting = layer.mesh.position.clone();
+  sections.moveLabelPlane(centeredFrame('coronal', [0, -40, 0]));
+  assert.ok(layer.mesh.position.equals(resting));
+  sections.dispose();
+});
+
 test('an atlas with parcel solids caps every colour mode, isolation included', () => {
   const { sections, model, layer, region } = fixture();
   layer.wedged = true;
