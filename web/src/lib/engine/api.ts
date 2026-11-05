@@ -345,6 +345,11 @@ export interface EngineSections {
 
   /** Download and decode the linked MRI and its segmentation (sections.js:150). */
   load(): Promise<void>;
+  /**
+   * Download and build what the first cut needs and compile its programs, drawing nothing. The
+   * app starts it at idle where the device allows (`QualityProfile.prefetchCut`).
+   */
+  prefetch(): Promise<void>;
   /** Throws for an unknown mode (sections.js:241). The first cut downloads. */
   setMode(mode: CutMode): Promise<void>;
   /** Throws a `RangeError` beyond the coordinate limit (sections.js:258). */

@@ -353,6 +353,16 @@ export class SolidSections {
     return true;
   }
 
+  /**
+   * Detached meshes on every solid's own masks and cap, so compiling them readies the programs
+   * the first cut draws with while the cut is still hidden.
+   */
+  programSamples(): Mesh[] {
+    return this.solids.flatMap(({ back, front, cap }) =>
+      [back, front, cap].map((mesh) => new Mesh(mesh.geometry, mesh.material)),
+    );
+  }
+
   /** Copy geometry to the worker ahead of the first drag. */
   warm(): void {
     const run = () => {

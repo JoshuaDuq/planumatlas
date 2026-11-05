@@ -832,8 +832,16 @@ export function createScene(
     moveTo,
     invalidate,
 
+    // Into the composer's target: a program's key carries the output colour space and tone
+    // mapping, which differ there from the canvas, so a canvas compile readies unused programs.
     compile(root) {
-      return renderer.compileAsync(root, camera, scene).then(() => undefined);
+      const previous = renderer.getRenderTarget();
+      renderer.setRenderTarget(settled.composer.readBuffer);
+      try {
+        return renderer.compileAsync(root, camera, scene).then(() => undefined);
+      } finally {
+        renderer.setRenderTarget(previous);
+      }
     },
 
     /**

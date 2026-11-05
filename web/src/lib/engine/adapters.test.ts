@@ -11,7 +11,7 @@ function link(display: object | null, published: object | null) {
     state: { crosshair: [0, 0, 0] },
     frame: centeredFrame('axial', [0, 0, 0]),
   };
-  return createEngineSections(stub as never).mriWindowLink();
+  return createEngineSections(stub as never, async () => {}).mriWindowLink();
 }
 
 const PUBLISHED = { window_center: 94, window_width: 188 };

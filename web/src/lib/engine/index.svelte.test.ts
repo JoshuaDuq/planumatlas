@@ -62,3 +62,17 @@ test('captures the settled frame, cropped to the stage rectangle asked for, with
   expect(colours.size).toBeGreaterThan(8);
   expect(engine.canvas.getAttribute('role')).toBe('application');
 });
+
+test('SCENE-38 after the cut prefetch, the first cut compiles no program of its own', async () => {
+  const engine = await boot();
+  onTestFinished(() => engine.dispose());
+  await engine.sections.prefetch();
+  const gl = engine.canvas.getContext('webgl2')!;
+  const created = vi.spyOn(gl, 'createProgram');
+  await engine.sections.setMode('coronal');
+  expect(engine.sections.active).toBe(true);
+  // The scene redraws on the frame after a change; the second frame is past it.
+  for (let frame = 0; frame < 2; frame++) await new Promise(requestAnimationFrame);
+  engine.captureSnapshot();
+  expect(created).not.toHaveBeenCalled();
+});

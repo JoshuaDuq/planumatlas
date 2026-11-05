@@ -5,6 +5,7 @@ import {
   Group,
   Matrix4,
   Mesh,
+  Plane,
   SRGBColorSpace,
   Triangle,
   Vector3,
@@ -17,7 +18,6 @@ import type {
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   Object3D,
-  Plane,
   Ray,
   Raycaster,
   Texture,
@@ -1446,22 +1446,12 @@ export class BrainAtlas extends EventTarget {
    * releases the programs it compiled.
    */
   programSamples(): Mesh[] {
-    const kinds = new Map<string, Mesh<BufferGeometry, Material>>();
-    const meshes: Mesh<BufferGeometry, Material>[] = [
-      ...[...this.layers.values()].flatMap((layer) => layer.meshes),
-      ...(this.whiteMatterSurfaces?.meshes ?? []),
-    ];
-    for (const mesh of meshes) {
-      const { material } = mesh;
-      const kind = [material.type, material.customProgramCacheKey(), material.side];
-      kinds.set(kind.join('|'), mesh);
-    }
     const scan = createMriUniforms({
       texture: null,
       worldToVoxel: new Matrix4(),
       volume: { shape: [1, 1, 1] },
     });
-    return [...kinds.values()].flatMap(({ geometry, material }) => {
+    return this.programKinds().flatMap(({ geometry, material }) => {
       const seeThrough = programCopy(material);
       seeThrough.transparent = true;
       const samples = [new Mesh(geometry, seeThrough)];
@@ -1472,6 +1462,42 @@ export class BrainAtlas extends EventTarget {
       }
       return samples;
     });
+  }
+
+  /**
+   * Copies of each kind of material clipped as a cut draws it, opaque and see-through, compiled
+   * ahead like `programSamples`: three compiles a see-through double-sided material as two passes.
+   */
+  cutProgramSamples(): Mesh[] {
+    const planes = [new Plane()];
+    return this.programKinds().flatMap(({ geometry, material }) =>
+      [false, true].map((transparent) => {
+        const clipped = programCopy(material);
+        clipped.clippingPlanes = planes;
+        clipped.transparent = transparent;
+        return new Mesh(geometry, clipped);
+      }),
+    );
+  }
+
+  /**
+   * One loaded mesh per kind of material the surfaces draw with. White matter is a kind of its
+   * own: its clearcoat is not in the key it shares with the structures.
+   */
+  private programKinds(): Mesh<BufferGeometry, Material>[] {
+    const kinds = new Map<string, Mesh<BufferGeometry, Material>>();
+    const sources: [string, Mesh<BufferGeometry, Material>[]][] = [
+      ['layer', [...this.layers.values()].flatMap((layer) => layer.meshes)],
+      ['white-matter', this.whiteMatterSurfaces?.meshes ?? []],
+    ];
+    for (const [source, meshes] of sources) {
+      for (const mesh of meshes) {
+        const { material } = mesh;
+        const kind = [source, material.type, material.customProgramCacheKey(), material.side];
+        kinds.set(kind.join('|'), mesh);
+      }
+    }
+    return [...kinds.values()];
   }
 
   isolate(): void {

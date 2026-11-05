@@ -301,6 +301,15 @@ export class BrainSections extends EventTarget {
   }
 
   /**
+   * Download and build what the first cut waits for, and copy its solids to the cut worker,
+   * while no cut is shown. Nothing drawn changes; `prepare` then finds it all loaded.
+   */
+  async prefetch(): Promise<void> {
+    await this.tissues.load(this.state.cutAtlas);
+    this.tissues.solids.warm();
+  }
+
+  /**
    * Colour the surface. `current` is the scene command's intent check: a later
    * command, or a later colour, overtakes this one, and the download it waited
    * on then lands without changing the colour.

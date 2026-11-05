@@ -233,6 +233,9 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     },
     cutSpacingMm: () => 1,
 
+    // The fake has nothing to download or compile.
+    async prefetch() {},
+
     async load() {
       if (display) return;
       state.status = 'loading';
