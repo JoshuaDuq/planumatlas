@@ -43,6 +43,11 @@ export default defineConfig({
                 args: [
                   '--use-angle=swiftshader',
                   '--enable-unsafe-swiftshader',
+                  // The real engine's snapshot draws the whole model at twice the stage's pixels:
+                  // 8 to 17.5 s of SwiftShader work on a CI runner. Past about 16 s the GPU watchdog
+                  // killed the GPU process and the frame came back blank (2 of 6 runs); with the
+                  // watchdog off, 24 of 24 captures passed (index.svelte.test.ts).
+                  '--disable-gpu-watchdog',
                   '--hide-scrollbars',
                 ],
               },

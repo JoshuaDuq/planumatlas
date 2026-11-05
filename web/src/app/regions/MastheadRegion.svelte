@@ -76,8 +76,9 @@
   }
 
   let masthead = $state<Masthead>();
-  // The ⋯ button takes focus back when the menu item that opened a dialog is gone.
-  const settingsButton = () => masthead!.settingsButton();
+  // The ⋯ button takes focus back when the menu item that opened a dialog is gone. A dialog closed
+  // as the page unmounts finds the masthead already gone, and with it any button to focus.
+  const settingsButton = () => masthead?.settingsButton() ?? null;
 
   // The key that opens the shortcuts sheet (ports.ts).
   $effect(() =>
