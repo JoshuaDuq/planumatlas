@@ -25,12 +25,8 @@ const PANEL_GAP = 8;
  * so it goes; the control keeps its ring.
  */
 function clearPanels(card: HTMLElement) {
-  // Where driver.js placed the card: its box less the step it is part-way through.
-  const [x = 0, y = 0] = getComputedStyle(card)
-    .translate.split(' ')
-    .map((value) => parseFloat(value) || 0);
-  const box = card.getBoundingClientRect();
-  const c = { left: box.left - x, right: box.right - x, top: box.top - y, bottom: box.bottom - y };
+  const { left, top, width, height } = placedBox(card);
+  const c = { left, right: left + width, top, bottom: top + height };
   // The panels stack in one column over the dock: the card clears them as one.
   const shown = [...document.querySelectorAll(STAGE_PANELS)]
     .filter((panel) => panel.getClientRects().length)
@@ -51,8 +47,33 @@ function clearPanels(card: HTMLElement) {
           : `0 ${m.top - PANEL_GAP - c.bottom}px`;
     }
   }
-  if (card.style.translate !== next) card.style.translate = next;
-  card.toggleAttribute('data-aside', next !== '');
+  setAside(card, next);
+}
+
+const setAside = (card: HTMLElement, translate: string) => {
+  if (card.style.translate !== translate) card.style.translate = translate;
+  card.toggleAttribute('data-aside', translate !== '');
+};
+
+/** Where driver.js placed the card: its box less the step it is part-way through. */
+function placedBox(card: HTMLElement) {
+  const [x = 0, y = 0] = getComputedStyle(card)
+    .translate.split(' ')
+    .map((value) => parseFloat(value) || 0);
+  const box = card.getBoundingClientRect();
+  return { left: box.left - x, top: box.top - y, width: box.width, height: box.height };
+}
+
+/** The space a card in the stage takes off its right: the card and a gap either side. */
+const stageBand = (card: HTMLElement) => card.offsetWidth + 2 * PANEL_GAP;
+
+/** The card at the stage's right edge, centred in its height, in the band the anatomy is framed clear of. */
+function placeInStage(card: HTMLElement) {
+  const stage = document.querySelector(STAGE)!.getBoundingClientRect();
+  const c = placedBox(card);
+  const left = stage.right - PANEL_GAP - c.width;
+  const top = stage.top + (stage.height - c.height) / 2;
+  setAside(card, `${left - c.left}px ${top - c.top}px`);
 }
 /** The scan's download, when the cut before has not already brought it. */
 const MRI_WAIT_MS = 10_000;
@@ -70,6 +91,8 @@ const STOPS: Record<
     view?: string;
     /** The region the Linked MRI opens on. */
     opensMri?: string;
+    /** The card sits in the stage's dark space, a band the anatomy is framed clear of. */
+    inStage?: true;
   }
 > = {
   welcome: {},
@@ -78,6 +101,7 @@ const STOPS: Record<
     side: 'left',
     align: 'center',
     view: `region=${PRECENTRAL}`,
+    inStage: true,
   },
   directions: {
     selector: '.orientation-gizmo',
@@ -175,6 +199,8 @@ interface GuideOptions {
   onLanguage: (next: Language) => void;
   /** The Linked MRI, docked beside the stage, opened on a region it selects. */
   mri: { open(region: string): unknown; close(): void };
+  /** Keeps a band this wide on the stage's right clear of anatomy; 0 gives it back. */
+  reserve: (width: number) => void;
 }
 
 /** The languages the first card offers, each named in itself. */
@@ -195,7 +221,7 @@ export function startGuide(lang: Language, options: GuideOptions): void {
 
 /** The tour in one language, over the reader's view `reader`, which closing puts back. */
 function drive(lang: Language, options: GuideOptions, reader: string): void {
-  const { animate, onClose, onLanguage, mri } = options;
+  const { animate, onClose, onLanguage, mri, reserve } = options;
   const copy = t(lang, 'guide');
   const home = parameters(reader).filter(([key]) => HOME_PARAMS.includes(key));
   // A stop's parameters replace the home view's own.
@@ -222,10 +248,14 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   const docksMri = rendered(STAGE) && !matchMedia(PHONE_QUERY).matches;
   // What a stop does before it is shown; the card waits for the panel it opens.
   const enter: ((() => void) | null)[] = [];
+  // Whether a stop's card sits in the stage; a phone's stage is under the sheet, so it keeps its own.
+  const inStage: boolean[] = [];
+  const phone = matchMedia(PHONE_QUERY).matches;
   const steps: DriveStep[] = copy.stops.flatMap(({ id, title, body }) => {
     const { selector, side, align, view = '', opensMri } = STOPS[id];
     if (opensMri ? !docksMri : selector && !rendered(selector)) return [];
     enter.push(opensMri ? () => openMri(view, opensMri) : null);
+    inStage.push(Boolean(STOPS[id].inStage) && !phone);
     return [
       {
         element: selector,
@@ -252,13 +282,16 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   const placeCard = () => {
     placing ||= requestAnimationFrame(() => {
       placing = 0;
-      if (card?.isConnected) clearPanels(card);
+      if (!card?.isConnected) return;
+      if (inStage[tour.getActiveIndex() ?? -1]) placeInStage(card);
+      else clearPanels(card);
     });
   };
   const menus = new MutationObserver(placeCard);
   menus.observe(document.body, { childList: true, subtree: true });
   const settled = ['transitionend', 'animationend'] as const;
   for (const type of settled) document.addEventListener(type, placeCard, true);
+  addEventListener('resize', placeCard);
   const tour = driver({
     steps,
     animate,
@@ -288,6 +321,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     onPopoverRender: ({ wrapper, title, description, nextButton, previousButton }) => {
       wrapper.lang = lang;
       card = wrapper;
+      // The anatomy eases out of the band first; the card follows the stage once it has.
+      reserve(inStage[tour.getActiveIndex()!] ? stageBand(wrapper) : 0);
       placeCard();
       if (tour.getActiveIndex() === 0) description.append(languageChoice());
       // driver.js focuses the first control, the close button, right after this hook.
@@ -341,6 +376,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       menus.disconnect();
       cancelAnimationFrame(placing);
       for (const type of settled) document.removeEventListener(type, placeCard, true);
+      removeEventListener('resize', placeCard);
+      reserve(0);
       leaveMri();
       tour.destroy();
       document.documentElement.removeAttribute(SHOWING);

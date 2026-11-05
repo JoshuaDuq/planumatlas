@@ -85,6 +85,7 @@
       animate: !app.media.reducedMotion,
       onClose: () => settingsButton()?.focus(),
       onLanguage: app.chooseLanguage,
+      reserve: (width) => app.stage.setGuideInset(width),
       mri: {
         open(region: string) {
           world!.anatomy.selectRegion(region);

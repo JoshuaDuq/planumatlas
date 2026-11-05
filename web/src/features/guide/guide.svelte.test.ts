@@ -50,6 +50,7 @@ beforeEach(async () => {
   closed = 0;
   mriOpens = [];
   languages = [];
+  reserved = [];
 });
 afterEach(() => {
   document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
@@ -77,12 +78,14 @@ const mri = {
   },
 };
 let languages: string[] = [];
+let reserved: number[] = [];
 const start = (lang: 'en' | 'fr' = 'en') =>
   startGuide(lang, {
     animate: false,
     onClose: () => closed++,
     onLanguage: (next) => languages.push(next),
     mri,
+    reserve: (width) => reserved.push(width),
   });
 const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
 const title = () => card().querySelector('.driver-popover-title')!.textContent;
@@ -257,6 +260,24 @@ test('a phone leaves the Linked MRI stop out, as its scan opens over the page', 
   expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 13');
   for (let i = 1; i < 13; i++) next().click();
   expect(mriOpens).toEqual([]);
+});
+
+test('the brain stop’s card sits in the stage’s dark space, in a band the anatomy is framed clear of', async () => {
+  start();
+  next().click();
+  expect(title()).toBe('The brain');
+  const stage = document.querySelector('#viewport canvas')!.getBoundingClientRect();
+  await expect
+    .poll(() => Math.round(card().getBoundingClientRect().right), { timeout: 2000 })
+    .toBe(Math.round(stage.right - 8));
+  const box = card().getBoundingClientRect();
+  expect(box.left).toBeGreaterThanOrEqual(stage.left);
+  expect(Math.round(box.top + box.height / 2)).toBe(Math.round(stage.top + stage.height / 2));
+  expect(reserved).toEqual([0, Math.round(box.width) + 16]);
+  next().click();
+  expect(reserved.at(-1)).toBe(0);
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect(reserved.at(-1)).toBe(0);
 });
 
 test('the first card offers the languages; choosing one starts the tour again in it', async () => {

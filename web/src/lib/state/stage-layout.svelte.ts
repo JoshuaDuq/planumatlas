@@ -46,6 +46,8 @@ export function createStageLayout({
   let dock = $state.raw<Size>({ width: 0, height: 0 });
   let keyInset = $state.raw({ top: 0, right: 0 });
   let keySize = $state.raw<Size>({ width: 0, height: 0 });
+  // A band on the stage's right the guided tour keeps clear of anatomy for its card.
+  let guideInset = 0;
   let sheetFull = $state(false);
   let sectionNeed = $state(0);
   let gutter = $state(0);
@@ -345,6 +347,13 @@ export function createStageLayout({
       if (changed && !fitting) onDock?.();
     },
 
+    /** The band the guided tour's card takes off the right of the framing rectangle; 0 gives it back. */
+    setGuideInset(right: number) {
+      if (right === guideInset) return;
+      guideInset = right;
+      onDock?.();
+    },
+
     /**
      * G3's fitting of the keys (viewport-chrome.js:265, 721). It runs on every framing, after the dock is measured,
      * and on every viewport change, which is every frame of a sheet drag: it must not force layout, so G3 builds it
@@ -384,15 +393,19 @@ export function createStageLayout({
       const reach = dockReach();
       fitKeys();
       if (!visibleRect?.height) {
-        return { inset: { ...keyInset, bottom: reach }, scale: { horizontal: 1, vertical: 1 } };
+        return {
+          inset: { top: keyInset.top, right: keyInset.right + guideInset, bottom: reach },
+          scale: { horizontal: 1, vertical: 1 },
+        };
       }
+      const band = keyInset.right + guideInset;
       const room = {
-        width: visibleRect.width - keyInset.right,
+        width: visibleRect.width - band,
         height: visibleRect.height - keyInset.top,
       };
       const { inset, scale, top, right } = clearGizmo(room, reach, markingClearance(reach));
       return {
-        inset: { top: keyInset.top + top, right: keyInset.right + right, bottom: inset },
+        inset: { top: keyInset.top + top, right: band + right, bottom: inset },
         scale,
       };
     },
