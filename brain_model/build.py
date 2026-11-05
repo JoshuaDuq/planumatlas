@@ -33,6 +33,7 @@ from .layers import (
     receptor_fingerprints,
     retinotopy,
     spinal_cord,
+    stimulation_ftract,
     stimulation_responses,
     striatal_networks,
     stroke_cases,
@@ -661,6 +662,7 @@ def main():
         "neurosynth_terms": neurosynth_terms.export(config, regions),
         "receptor_fingerprints": receptor_fingerprints.export(config, regions),
         "stimulation_responses": stimulation_responses.export(config, regions),
+        "stimulation_ftract": stimulation_ftract.export(config, regions),
         **(
             {"boundary_certainty": boundary_certainty.export(config, regions)}
             if boundary_certainty.is_published(config)
@@ -722,6 +724,7 @@ def main():
             *neurosynth_terms.limitations(config),
             *receptor_fingerprints.limitations(),
             *stimulation_responses.limitations(),
+            *stimulation_ftract.limitations(),
             *white_matter.limitations(config),
             *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
             *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),

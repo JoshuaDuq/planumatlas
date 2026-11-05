@@ -7,6 +7,7 @@
   import boundaryFile from '../../../../public/models/cdmd/boundary-certainty.json';
   import receptorFile from '../../../../public/models/cdmd/receptor-fingerprints.json';
   import stimulationFile from '../../../../public/models/cdmd/stimulation-responses.json';
+  import ftractFile from '../../../../public/models/cdmd/stimulation-ftract.json';
   import agreementFile from '../../../../public/models/cdmd/segmentation-agreement.json';
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
@@ -15,6 +16,7 @@
   import type { BoundaryCertainty } from '../../lib/core/catalog/boundary-certainty.ts';
   import type { ReceptorFingerprints } from '../../lib/core/catalog/receptor-fingerprints.ts';
   import type { StimulationResponses } from '../../lib/core/catalog/stimulation-responses.ts';
+  import type { StimulationFtract } from '../../lib/core/catalog/stimulation-ftract.ts';
   import type { SegmentationAgreement } from '../../lib/core/catalog/segmentation-agreement.ts';
   import type {
     ArterialTerritories,
@@ -81,6 +83,7 @@
   segmentationAgreement={agreementFile as unknown as SegmentationAgreement}
   receptors={receptorFile as unknown as ReceptorFingerprints}
   stimulation={stimulationFile as unknown as StimulationResponses}
+  ftract={ftractFile as unknown as StimulationFtract}
   territories={manifest.arterial_territories as unknown as ArterialTerritories}
   cerebellarFunctions={manifest.cerebellar_functions as unknown as CerebellarFunctions}
   striatalNetworks={manifest.striatal_networks as unknown as StriatalNetworks}

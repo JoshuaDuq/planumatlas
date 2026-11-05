@@ -177,6 +177,16 @@ export function provenanceRows(
         ]
       : [],
   );
+  const ftract = manifest.stimulation_ftract as Described | undefined;
+  add(
+    copy.stimulationFtract,
+    ftract
+      ? [
+          { text: ftract.label, note: ftract.license },
+          ...ftract.citations!.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
   const strokeCases = manifest.stroke_cases;
   add(
     copy.strokeCases,

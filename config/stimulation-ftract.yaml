@@ -1,0 +1,38 @@
+# Responses to single-pulse electrical stimulation in 613 people with focal
+# epilepsy (625 stereo-EEG implantations), aggregated by F-TRACT over the areas
+# of Julich-Brain 3.0 in MNI152 space (F-TRACT_P_01_v2307). A stimulation–
+# recording pair responded when its z-scored signal crossed 5 within 50 ms; the
+# probability is responding pairs over all, published only for at least 10
+# pairs. Rows are stimulated, columns recorded. Nothing is measured in the
+# anatomy shown: a Julich-Brain area takes the F-TRACT area of the same name.
+# scripts/fetch_stimulation_ftract.py reads the files below, pinned by checksum,
+# into data/stimulation-ftract.json; the build reads that file.
+label: Stimulation responses (F-TRACT v2307)
+license: CC BY-NC-SA 4.0
+source:
+  short: F-TRACT
+  # The method paper; the dataset (Jedynak M, Boyer A, Lemaréchal J-D, et al., F-TRACT_P_01_v2307,
+  # EBRAINS) is cited by its DOI.
+  citation: Trebaul L, Deman P, Tuyisenge V, Jedynak M, Hugues E, et al. (2018) Probabilistic functional tractography of the human cortex revisited. NeuroImage 181:414–429
+  doi: https://doi.org/10.1016/j.neuroimage.2018.07.039
+  pmid: 30025851
+  dataset: https://doi.org/10.25493/JYVR-WJ7
+files:
+  base: https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0
+  parcels: [MNI-JulichBrain-3.0.txt, c29902a880cd10e3757e4844c1367ed3015d71d1af1cdfd12024bacb4ec8b3a8]
+  probability: [probability.txt.gz, fd750d3943c249786b2273d55bdb4906bc3e3a94e037d568613a6426bd203110]
+  stimulations: [N_stimulations.txt.gz, 617ea6bb616fc9167a17b31e1a1f5586f1b47b22719dd63af1b144bad96ff3da]
+  implantations: [N_implantations.txt.gz, 131d76dc7f85dc70280d8e799602696d5d45f15a275956145980e4ff92f3341b]
+# From the data descriptor.
+cohort: {implantations: 625, people: 613, min_pairs: 10}
+# A rate is drawn only from pairs recorded in this many implantations, as Lyu
+# et al.'s needs three people. Set 2026-11-04 before any area's rows were read.
+rates:
+  min_implantations: 3
+# F-TRACT's 3.0 names that Julich-Brain 3.1 spells differently for the same
+# map. 3.0's "Subiculum (Hippocampus)" is left unmatched: 3.1 publishes a
+# "subicular complex" instead, and nothing found states it is the same map.
+renamed:
+  Entorhinal Cortex: Area EC (Hippocampal Region, Entorhinal Cortex)
+  HC-Transsubiculum (Hippocampus): TrS (Hippocampus, Transsubiculum)
+  Area TPJ (STG/SMG): Area TPJ (STG, SMG)

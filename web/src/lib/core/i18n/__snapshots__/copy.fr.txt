@@ -739,6 +739,7 @@
   "functional": "Divisions fonctionnelles",
   "receptors": "Empreintes de récepteurs",
   "stimulation": "Réponses à la stimulation",
+  "stimulationFtract": "Réponses à la stimulation (F-TRACT)",
   "strokeCases": "Cas d’AVC",
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
@@ -1555,7 +1556,30 @@
    "[\"\"] → \"Associée par son nom à l’étiquette  des auteurs.\""
   ],
   "thalamus": "Les auteurs ont regroupé les contacts thalamiques par position, pas par noyau<NNBSP>; toute structure thalamique montre donc les trois sites.",
-  "dataset": "Jeu de données Zenodo"
+  "dataset": "Jeu de données Zenodo",
+  "ftractCounts": [
+   "[\"Alpha\",\"\"] → \"Alpha paires ·  implantations\"",
+   "[\"\",\"Alpha\"] → \" paires · Alpha implantations\""
+  ],
+  "within": "Dans cette aire",
+  "more": [
+   "[\"Alpha\"] → \"Alpha aires de plus\"",
+   "[\"\"] → \" aires de plus\""
+  ],
+  "ftractRest": [
+   "[\"Alpha\",\"\"] → \"Trop peu de paires ou d’implantations pour un taux : Alpha aires. Jamais testées :  aires.\"",
+   "[\"\",\"Alpha\"] → \"Trop peu de paires ou d’implantations pour un taux :  aires. Jamais testées : Alpha aires.\""
+  ],
+  "ftractNote": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur Alpha personnes épileptiques ; un taux exige  paires issues de Alpha implantations. Non mesuré dans ce cerveau ; chaque hémisphère montre ses propres valeurs.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur  personnes épileptiques ; un taux exige Alpha paires issues de  implantations. Non mesuré dans ce cerveau ; chaque hémisphère montre ses propres valeurs.\""
+  ],
+  "ftractBasis": [
+   "[\"Alpha\"] → \"Associée par son nom à l’aire Alpha de Julich-Brain 3.0 dans F-TRACT. F-TRACT a situé les contacts avec la carte volumique de Julich-Brain dans l’espace MNI152, pas sur cette surface.\"",
+   "[\"\"] → \"Associée par son nom à l’aire  de Julich-Brain 3.0 dans F-TRACT. F-TRACT a situé les contacts avec la carte volumique de Julich-Brain dans l’espace MNI152, pas sur cette surface.\""
+  ],
+  "ftractDataset": "Jeu de données F-TRACT (EBRAINS)",
+  "ftractMethod": "Méthode (Trebaul et al. 2018)"
  },
  "strokeCases": {
   "heading": "Cas d’AVC",

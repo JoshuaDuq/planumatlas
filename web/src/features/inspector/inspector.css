@@ -310,6 +310,23 @@
   .region-detail .stimulation-counts {
     grid-column: 1 / -1;
   }
+  .region-detail .stimulation-choice {
+    margin-top: var(--space-2);
+  }
+  .region-detail .stimulation-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    padding-top: var(--space-2);
+    font-size: var(--text-caption);
+    line-height: var(--lh-caption);
+  }
+  .region-detail .stimulation-sources a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 24px;
+  }
   .region-detail .functional-row {
     grid-template-columns: 10px minmax(0, 1fr);
   }

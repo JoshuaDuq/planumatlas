@@ -22,6 +22,7 @@ import type {
 } from '../core/catalog/segmentation-agreement.ts';
 import type { ReceptorFingerprints } from '../core/catalog/receptor-fingerprints.ts';
 import type { StimulationResponses } from '../core/catalog/stimulation-responses.ts';
+import type { StimulationFtract } from '../core/catalog/stimulation-ftract.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
   CutMode,
@@ -165,6 +166,9 @@ export type ReceptorFingerprintsData = ReceptorFingerprints;
 /** Stimulation responses carried to regions by the authors' labels (`manifest.stimulation_responses` file). */
 export type StimulationResponsesData = StimulationResponses;
 
+/** F-TRACT's stimulation responses carried to Julich-Brain areas by name (`manifest.stimulation_ftract` file). */
+export type StimulationFtractData = StimulationFtract;
+
 /** NextBrain against aseg on aseg's grid (`manifest.segmentation_agreement` file). */
 export type SegmentationAgreementData = SegmentationAgreement;
 
@@ -186,6 +190,7 @@ export interface EngineModel {
   readonly boundaryCertainty: BoundaryCertaintyData | null;
   readonly receptors: ReceptorFingerprintsData | null;
   readonly stimulation: StimulationResponsesData | null;
+  readonly ftract: StimulationFtractData | null;
   readonly segmentationAgreement: SegmentationAgreementData | null;
   /** The grouped learning overview when published, else the first level (brain-atlas.js:212). */
   readonly defaultDetail: string;

@@ -62,6 +62,7 @@
     segmentationAgreement,
     receptors,
     stimulation,
+    ftract,
   } = $derived(engine.model);
   // The comparison file is published beside the manifest the engine opened (boot.ts).
   const manifestUrl = $derived(`${ASSET_BASE}models/${manifest.anatomy.id}/manifest.json`);
@@ -179,6 +180,7 @@
         {segmentationAgreement}
         {receptors}
         {stimulation}
+        {ftract}
         strokeCases={world.strokeCases}
         territories={manifest.arterial_territories ?? null}
         cerebellarFunctions={manifest.cerebellar_functions ?? null}

@@ -972,6 +972,70 @@ describe('stimulation responses', () => {
   });
 });
 
+describe('F-TRACT stimulation responses', () => {
+  const AREA_45 = 'julich:left:1';
+  const AREA_6V1 = 'julich:left:117'; // carved by Julich-Brain 3.1 out of a 3.0 gap map
+  const rows = (details: Element) => [...details.querySelectorAll('.stimulation-row')].map(text);
+
+  test('a Julich-Brain area lists its drawn rates, the first ten in view, and counts the rest', async () => {
+    render(Fixture, { regionId: AREA_45 });
+    const responses = section('Stimulation responses');
+    expect(responses.open).toBe(false);
+    responses.open = true;
+    const outbound = rows(responses);
+    expect(outbound.slice(0, 2)).toEqual([
+      'Within this area 84% 37 pairs · 6 implantations',
+      'Area Op9 (Frontal Operculum) 83% 53 pairs · 18 implantations',
+    ]);
+    const more = section('71 more areas');
+    expect(more.open).toBe(false);
+    expect(outbound).toHaveLength(81);
+    expect(text(responses)).toContain(
+      'Too few pairs or implantations for a rate: 41 areas. Never tested: 35 areas.',
+    );
+    expect(text(responses)).toContain(
+      'Matched by name to F-TRACT’s Julich-Brain 3.0 area Area 45 (IFG).',
+    );
+    expect(
+      [...responses.querySelectorAll('.stimulation-sources a')].map((link) =>
+        link.getAttribute('href'),
+      ),
+    ).toEqual([
+      'https://doi.org/10.25493/JYVR-WJ7',
+      'https://doi.org/10.1016/j.neuroimage.2018.07.039',
+    ]);
+    await userEvent.click(page.getByRole('radio', { name: 'Recorded here' }));
+    await userEvent.click(page.getByRole('radio', { name: 'Opposite side' }));
+    expect(rows(responses)[0]).toBe('Area Fo3 (OFC) 8% 13 pairs · 6 implantations');
+    expect(section('71 more areas')).toBeUndefined();
+    await expectAxeClean();
+  });
+
+  test('an area F-TRACT does not have, and a region of another atlas, show no F-TRACT section', async () => {
+    const screen = await render(Fixture, { regionId: AREA_6V1 });
+    expect(section('Stimulation responses')).toBeUndefined();
+    await screen.rerender({ regionId: V1 });
+    expect(section('Stimulation responses')).toBeUndefined();
+    // A Destrieux parcel has Lyu et al.'s section alone.
+    await screen.rerender({ regionId: 'destrieux:left:14' });
+    expect(
+      [...document.querySelectorAll('details')].filter((details) =>
+        text(details.querySelector('summary')!).startsWith('Stimulation responses'),
+      ),
+    ).toHaveLength(1);
+    expect(document.querySelector('a[href="https://doi.org/10.25493/JYVR-WJ7"]')).toBeNull();
+  });
+
+  test('French', async () => {
+    render(Fixture, { regionId: AREA_45, lang: 'fr' });
+    const responses = section('Réponses à la stimulation');
+    responses.open = true;
+    expect(rows(responses)[1]).toBe(
+      'Aire Op9 (Frontal Operculum) 83 % 53 paires · 18 implantations',
+    );
+  });
+});
+
 describe('typical arterial supply', () => {
   test('a deep structure lists its territories by voxel share, with the caveat', async () => {
     render(Fixture, { regionId: 'aseg:left:12' });

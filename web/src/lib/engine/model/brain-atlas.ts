@@ -48,6 +48,8 @@ import type { SegmentationAgreement } from '../../core/catalog/segmentation-agre
 import { validateReceptorFingerprints } from '../../core/catalog/receptor-fingerprints.ts';
 import type { ReceptorFingerprints } from '../../core/catalog/receptor-fingerprints.ts';
 import { validateStimulationResponses } from '../../core/catalog/stimulation-responses.ts';
+import { validateStimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
+import type { StimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
 import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
 import { createDissection } from '../../core/state/dissection.ts';
@@ -396,6 +398,7 @@ export class BrainAtlas extends EventTarget {
       receptors,
       agreement,
       stimulation,
+      ftract,
     ] = await Promise.all([
       manifest.cab_np ? readJson<CabNpPartition>(new URL(manifest.cab_np.file, url)) : null,
       manifest.functional_regions
@@ -419,6 +422,9 @@ export class BrainAtlas extends EventTarget {
       manifest.stimulation_responses
         ? readJson<StimulationResponses>(new URL(manifest.stimulation_responses.file, url))
         : null,
+      manifest.stimulation_ftract
+        ? readJson<StimulationFtract>(new URL(manifest.stimulation_ftract.file, url))
+        : null,
     ]);
     const gltf = new GLTFLoader();
     const path = new URL('.', url).href;
@@ -439,6 +445,7 @@ export class BrainAtlas extends EventTarget {
       receptors,
       agreement,
       stimulation,
+      ftract,
     );
     try {
       await model.initialize(atlasId, options);
@@ -460,6 +467,7 @@ export class BrainAtlas extends EventTarget {
   readonly receptors: ReceptorFingerprints | null;
   readonly segmentationAgreement: SegmentationAgreement | null;
   readonly stimulation: StimulationResponses | null;
+  readonly ftract: StimulationFtract | null;
   /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */
   readonly visualField: VisualFieldUniforms | null;
   /** A panel's colours for named regions, every other region in tissue colour; null for none. */
@@ -514,6 +522,7 @@ export class BrainAtlas extends EventTarget {
     receptors: ReceptorFingerprints | null = null,
     segmentationAgreement: SegmentationAgreement | null = null,
     stimulation: StimulationResponses | null = null,
+    ftract: StimulationFtract | null = null,
   ) {
     super();
     validateManifest(manifest);
@@ -531,6 +540,7 @@ export class BrainAtlas extends EventTarget {
     this.segmentationAgreement =
       segmentationAgreement && validateSegmentationAgreement(segmentationAgreement, this.regions);
     this.stimulation = stimulation && validateStimulationResponses(stimulation, this.regions);
+    this.ftract = ftract && validateStimulationFtract(ftract, this.regions);
     this.visualField = manifest.retinotopy
       ? {
           visualMix: { value: 0 },

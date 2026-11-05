@@ -85,7 +85,7 @@ For a region that real strokes reached, plot each of 228 people in the Aphasia R
 
 [![Stimulation responses for the left hippocampal formation, a response-rate bar for each other site with its pair and people counts](.github/assets/readme/stimulation.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&focus=1)
 
-From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/features/stimulation-responses.html).
+From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. For Julich-Brain areas, the same question at the scale of cytoarchitectonic areas from F-TRACT's 613 people. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/features/stimulation-responses.html).
 
 ### Map the visual field onto the cortex
 

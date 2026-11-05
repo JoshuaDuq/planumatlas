@@ -125,6 +125,7 @@ export interface Manifest {
   retinotopy?: Retinotopy;
   receptor_fingerprints?: ManifestFile & Record<string, unknown>;
   stimulation_responses?: ManifestFile & Record<string, unknown>;
+  stimulation_ftract?: ManifestFile & Record<string, unknown>;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;

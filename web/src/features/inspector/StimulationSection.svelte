@@ -154,25 +154,3 @@
     </Disclosure>
   </div>
 {/if}
-
-<style>
-  @layer features {
-    :global(.stimulation-choice) {
-      margin-top: var(--space-2);
-    }
-    .stimulation-sources {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-1) var(--space-3);
-      padding-top: var(--space-2);
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-    }
-    .stimulation-sources a {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      min-height: 24px;
-    }
-  }
-</style>

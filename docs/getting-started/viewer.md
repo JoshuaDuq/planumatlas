@@ -45,7 +45,7 @@ Select a region in the list or on the model to open its detail: hemisphere, lobe
 | Boundary certainty | A NextBrain region | [Boundary certainty](../features/boundary-certainty.md) |
 | Segmentation agreement | Caudate, putamen, thalamus, hippocampus, amygdala | [Segmentation agreement](../features/segmentation-agreement.md) |
 | Stroke cases | A region a real stroke reached | [Stroke cases](../features/stroke-cases.md) |
-| Stimulation responses | A region the authors' map labels | [Stimulation responses](../features/stimulation-responses.md) |
+| Stimulation responses | A region Lyu et al.'s map labels, or a Julich-Brain area F-TRACT has | [Stimulation responses](../features/stimulation-responses.md) |
 | Functional division | An HCP-MMP area | [Functional divisions](../features/functional-divisions.md) |
 | Neuropsychological functions | HCP-MMP areas and grey-matter structures | [Functions](../features/functions.md) |
 | Functional networks | Cortex, and caudate, putamen and accumbens | [Functional networks](../features/functional-networks.md), [Striatal networks](../features/striatal-networks.md) |

@@ -1,21 +1,21 @@
 # Stimulation responses
 
-A region the authors' intracranial map labels opens how often single-pulse electrical stimulation there evoked a response at each other site, or stimulating another site evoked one here, counted from stereo-EEG recordings in 27 people with epilepsy (Lyu et al. 2025).
+A region the authors' intracranial map labels opens how often single-pulse electrical stimulation there evoked a response at each other site, or stimulating another site evoked one here, counted from stereo-EEG recordings in 27 people with epilepsy (Lyu et al. 2025). A Julich-Brain area opens the same question at the resolution of its cytoarchitectonic areas, from F-TRACT's atlas of 613 people ([F-TRACT for Julich-Brain areas](#f-tract-for-julich-brain-areas)).
 
 :::{list-table}
 :widths: 22 78
 :stub-columns: 1
 
 * - Where in the viewer
-  - The region inspector's **Stimulation responses** section (collapsed, after the receptor densities), for a region that takes one of the authors' labels (364 regions on CDMD).
+  - The region inspector's **Stimulation responses** section (collapsed, after the receptor densities), for a region that takes one of the authors' labels (364 regions on CDMD), or for a Julich-Brain area F-TRACT has (252 regions)
 * - Built by
-  - [`scripts/fetch_stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/fetch_stimulation_responses.py), [`brain_model/layers/stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/stimulation_responses.py); the section is `web/src/features/inspector/StimulationSection.svelte`
+  - [`scripts/fetch_stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/fetch_stimulation_responses.py), [`brain_model/layers/stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/stimulation_responses.py); the section is `web/src/features/inspector/StimulationSection.svelte`. F-TRACT: [`scripts/fetch_stimulation_ftract.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/fetch_stimulation_ftract.py), [`brain_model/layers/stimulation_ftract.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/stimulation_ftract.py), `web/src/features/inspector/FtractSection.svelte`
 * - Configuration
-  - [`config/stimulation-responses.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/stimulation-responses.yaml); the fetched counts are committed in [`data/stimulation-responses.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/stimulation-responses.json)
+  - [`config/stimulation-responses.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/stimulation-responses.yaml); the fetched counts are committed in [`data/stimulation-responses.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/stimulation-responses.json). F-TRACT: [`config/stimulation-ftract.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/stimulation-ftract.yaml), [`data/stimulation-ftract.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/stimulation-ftract.json)
 * - Source data
-  - Lyu, Stiger, Lusk, Buch and Parvizi (2025), *Nat Neurosci* 28:1797–1809, dataset Zenodo 16939708; CC BY 4.0; HCP's fs_LR-to-fsaverage sphere deformations
+  - Lyu, Stiger, Lusk, Buch and Parvizi (2025), *Nat Neurosci* 28:1797–1809, dataset Zenodo 16939708; CC BY 4.0; HCP's fs_LR-to-fsaverage sphere deformations. F-TRACT parcellation-based atlas F-TRACT_P_01_v2307 (Jedynak et al., EBRAINS, [10.25493/JYVR-WJ7](https://doi.org/10.25493/JYVR-WJ7)); CC BY-NC-SA 4.0; method Trebaul et al. (2018), *NeuroImage* 181:414–429
 * - Checked by
-  - [`tests/test_stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_stimulation_responses.py), `brain_model.validate`, `web/src/lib/core/catalog/stimulation-responses.test.ts`, `web/src/features/inspector/inspector.svelte.test.ts` (INSP-43)
+  - [`tests/test_stimulation_responses.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_stimulation_responses.py), `brain_model.validate`, `web/src/lib/core/catalog/stimulation-responses.test.ts`, `web/src/features/inspector/inspector.svelte.test.ts` (INSP-43); F-TRACT: [`tests/test_stimulation_ftract.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_stimulation_ftract.py), `web/src/lib/core/catalog/stimulation-ftract.test.ts`, INSP-44
 :::
 
 ## What it does
@@ -64,7 +64,7 @@ For each cortical-label channel, `destrieux` takes its fs_LR 32k vertex, scales 
 - **By name (deep structures).** The `targets` list ties a label to named regions: hippocampus to `aseg` Hippocampus and the teaching set's hippocampal formation; amygdala to `aseg` Amygdala and the teaching set's amygdala and transition areas; basal ganglia to `aseg` caudate, putamen and pallidum and the teaching set's caudate, putamen and both pallidal segments (read as the authors describe it, putamen and pallidum, with the caudate; the accumbens is left out); claustrum to the teaching set's claustrum; and anterior, middle and posterior thalamus to `aseg` Thalamus-Proper and the teaching set's thalamus, so every thalamic structure shows all three sites. An `aseg` name is matched with its hemisphere prefix, and a teaching unit passes its labels to its NextBrain constituents. 280 regions take labels this way. Insula–lateral frontal border, a non-cortical label, reaches no region.
 - A region may not take two different labels; a Destrieux parcel named twice, or a target naming a cortical label, is an error.
 
-HCP-MMP, Julich-Brain and Schaefer regions show no section.
+HCP-MMP and Schaefer regions take no label, and neither do Julich-Brain areas, which show F-TRACT's rates instead.
 
 ### 4. Publish
 
@@ -96,17 +96,54 @@ HCP-MMP, Julich-Brain and Schaefer regions show no section.
 - A Destrieux parcel takes an author label only with at least 10 cortical channels from 3 people through fs_LR 32k to `fsaverage` surface registration and 60% of them carrying that label; other parcels, and the HCP-MMP, Julich-Brain and Schaefer atlases, show none. Deep structures take labels by name, and the thalamus takes the authors' three positional sites, not nuclei.
 - Labels were assigned by hand on each person's own T1; 26 labels are coarse. Timing columns in the source are template-correlation peaks, not onset latencies, and are not used.
 - "No rate" means too few people, "not tested" means the pair was never tried; neither is "no response".
-- F-TRACT v2112 was inspected for the same purpose and rejected: its counts exist only in pickled features, its "probability" is defined only where count is at least 5, and it is not a plain response rate (median 0.95, 38% exactly 1.0; 0.99 between hemispheres against 0.95 within, contradicting the published fall-off with distance); the Zenodo licence field is CC BY 4.0 but the readme says "research use only". Lyu et al.'s table separates tested-and-silent from excluded pairs, so rates and "not measured" are computable.
+- F-TRACT v2112 (Zenodo) was inspected for the same purpose and rejected: its counts exist only in pickled features, its "probability" is defined only where count is at least 5, and it is not a plain response rate (median 0.95, 38% exactly 1.0; 0.99 between hemispheres against 0.95 within, contradicting the published fall-off with distance); the Zenodo licence field is CC BY 4.0 but the readme says "research use only". Version v2307 on EBRAINS resolves each point and is used for Julich-Brain areas ([below](#f-tract-for-julich-brain-areas)).
+
+## F-TRACT for Julich-Brain areas
+
+F-TRACT aggregates single-pulse stimulation in 625 stereo-EEG implantations of 613 people with focal epilepsy over 23 parcellations (data descriptor, F-TRACT_P_01_v2307). Its Julich-Brain 3.0 matrices give, for every ordered pair of 314 areas (157 per hemisphere, rows stimulated, columns recorded), the **probability** that a pair responded, the **stimulation–recording pairs** it rests on (`N_stimulations`) and the **implantations** they come from (`N_implantations`). A pair responded when the absolute z-scored signal crossed 5 within 50 ms; the probability is responding pairs over all, published only from 10 pairs. Every file header states CC BY-NC-SA 4.0, the licence of Julich-Brain itself.
+
+### Why v2307 and not v2112
+
+Measured on 4 November 2026 on the Julich-Brain matrix: 29.5% of pairs have a probability, the median is 0.042, 35% are exactly 0 and 0.07% exactly 1; the ipsilateral median is 0.062 against 0.0 contralateral. On CDMD's Julich-Brain centroids, among drawn rates (at least 3 implantations), the median falls from 0.48 under 20 mm to 0.14 at 20–40 mm, 0.03 at 40–60 mm and 0 beyond 60 mm (Spearman ρ −0.67 with distance), and a pair's two directions agree (ρ 0.71). The counts are published beside the probability, so a pair never tested (no pairs) is told from one tested too thinly.
+
+### Build
+
+1. `scripts/fetch_stimulation_ftract.py` downloads the area list and the three matrices from the EBRAINS bucket, each pinned by SHA-256, and stops if counts are not whole, if a pair has pairs but no implantation (or the reverse), or if a probability is published below 10 pairs or missing above it. It writes every pair tested at least once (48,717) to `data/stimulation-ftract.json`; F-TRACT's `Area_45_(IFG)_L` becomes `Area 45 (IFG)` in the left hemisphere.
+2. `stimulation_ftract.assign` matches each F-TRACT area to the Julich-Brain region of the same name and hemisphere, ignoring case and the space after a comma (3.0's `Area TE 1.0 (HESCHL)` and `Area IFJ1 (IFS,PreCS)` are 3.1's `Area Te 1.0 (HESCHL)` and `Area IFJ1 (IFS, PreCS)`). Three areas 3.1 renamed are listed in the configuration: Entorhinal Cortex → Area EC, HC-Transsubiculum → TrS, and Area TPJ (STG/SMG) → Area TPJ (STG, SMG). Two parcels matching one region, or a rename matching none, stop the build.
+3. On CDMD 252 regions (126 per hemisphere) take an area. Thirteen Julich-Brain 3.1 areas per hemisphere take none: twelve that 3.1 carved out of 3.0's gap maps (6r1, 6v1–6v3, FG5, MFG4, MFG5, OTS1, Op10, SFG2–SFG4) and the subicular complex, which 3.0 publishes as "Subiculum" with nothing found stating the maps are the same. F-TRACT's gap maps and deep areas (amygdala and basal-forebrain nuclei, the subthalamic nucleus, the cerebellar nuclei and others) open no section but appear as the other end of a row.
+4. `public/models/cdmd/stimulation-ftract.json` carries the cohort, the two minima, the areas (F-TRACT's name, the region it matched and that region's 3.1 name) and every pair with at least one matched end (47,931), written compactly.
+
+### In the viewer
+
+`web/src/lib/core/catalog/stimulation-ftract.ts` validates the file and `ftractRows(data, parcel, direction, side)` returns the other areas on the chosen side: a rate is drawn from F-TRACT's probability where the pair was recorded in at least 3 implantations (the minimum of people Lyu et al.'s rates need, set before any area's rows were read), highest first and the more tested first among equals; the rest are counted as too thin, and the areas left on that side as never tested. `FtractSection.svelte` shows the first 10 rates and the rest behind "N more areas", each with its pairs and implantations; the area's own row reads "Within this area" (contacts elsewhere in the same area). Each hemisphere keeps its own values. Example: left Area 45, Stimulated here, Same side, reads first "Within this area 84%, 37 pairs · 6 implantations", then "Area Op9 (Frontal Operculum) 83%, 53 pairs · 18 implantations", 81 drawn rates, 41 areas too thin and 35 never tested.
+
+### Checks
+
+| Check | Where | Result |
+| :--- | :--- | :--- |
+| Files, cohort, minimum and renames are well formed | `read_definition` | refuses a missing hash, people above implantations, or two renames to one name |
+| Pairs are possible | `read_data`, `validateStimulationFtract` | refuse a repeated pair, an unknown area, implantations above pairs or the cohort, or a probability the 10-pair minimum contradicts |
+| Matching | `test_julich_areas_take_the_ftract_area_of_their_name_in_their_own_hemisphere` | Area 45, Te 1.0, IFJ1 and EC match in both hemispheres; gap maps, the STN and the subiculum do not |
+| Fall-off with distance | `test_the_response_rate_falls_with_distance_between_matched_areas` | median above 0.3 under 20 mm, below 0.05 beyond 60 mm |
+| The published file is the layer output | `validate`, `test_the_published_file_is_the_layer_output` | 47,931 pairs, 26,070 drawn rates, 252 regions matched, median drawn rate 0.05 |
+
+### Limits
+
+- Rates of stimulation–recording pairs pooled over 613 people with focal epilepsy, not measured in this brain; heavily implanted people weigh more, hence the implantations beside every rate. Responses are those within 50 ms; later responses are not counted.
+- A Julich-Brain area takes the F-TRACT area of the same **name**, not of the same place: F-TRACT assigned contacts with Julich-Brain 3.0's volumetric map in MNI152, while this surface carries the 3.1 `fsaverage` map projected onto CDMD. The two transfers disagree on about half the cortex (EBRAINS survey, 2026-10-28, a left-hemisphere pilot: the volumetric map carried to `fsaverage` by RF-ANTs matched the published `fsaverage` map on 48.8%).
+- F-TRACT's response features beyond the probability (amplitude, latencies, delays, speeds) are published but not shown.
 
 ## Reproduce
 
 ```bash
 # Read the pinned members of the Zenodo archive by range request (add --record to register the result)
 uv run python scripts/fetch_stimulation_responses.py
+# F-TRACT's Julich-Brain matrices from EBRAINS (add --record to register the result)
+uv run python scripts/fetch_stimulation_ftract.py
 
 uv run python -m brain_model.build --anatomy cdmd
 uv run python -m brain_model.validate --anatomy cdmd
-uv run pytest tests/test_stimulation_responses.py
+uv run pytest tests/test_stimulation_responses.py tests/test_stimulation_ftract.py
 npm test --prefix web
 ```
 

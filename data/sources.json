@@ -1951,6 +1951,31 @@
       "procedure": "scripts/register_stroke_cases.py: SynthMorph registration of the ARC mean healed T1 to brain.mgz, each normalised lesion read through the forward field",
       "citation": "https://doi.org/10.1038/s41597-024-03819-7",
       "license": "CC0 (dataset); BSD-2-Clause (normalised lesion maps, Chris Rorden)"
+    },
+    {
+      "path": "data/stimulation-ftract.json",
+      "sha256": "7914de9e33dae0b261d21983252368c83c6d3e0fc03cc195274c0abafd7f4feb",
+      "derived_from": [
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/MNI-JulichBrain-3.0.txt",
+          "sha256": "c29902a880cd10e3757e4844c1367ed3015d71d1af1cdfd12024bacb4ec8b3a8"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/probability.txt.gz",
+          "sha256": "fd750d3943c249786b2273d55bdb4906bc3e3a94e037d568613a6426bd203110"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/N_stimulations.txt.gz",
+          "sha256": "617ea6bb616fc9167a17b31e1a1f5586f1b47b22719dd63af1b144bad96ff3da"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/N_implantations.txt.gz",
+          "sha256": "131d76dc7f85dc70280d8e799602696d5d45f15a275956145980e4ff92f3341b"
+        }
+      ],
+      "procedure": "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation\u2013recording pair and implantation matrices, every pair tested at least once",
+      "citation": "https://doi.org/10.25493/JYVR-WJ7, https://doi.org/10.1016/j.neuroimage.2018.07.039",
+      "license": "CC BY-NC-SA 4.0"
     }
   ]
 }

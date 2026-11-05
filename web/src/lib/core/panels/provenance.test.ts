@@ -112,6 +112,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
       'Functional divisions',
       'Receptor fingerprints',
       'Stimulation responses',
+      'Stimulation responses (F-TRACT)',
       'Stroke cases',
       'Neuropsychological domains',
       'Supplemental layers',
@@ -162,7 +163,7 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
   assert.deepEqual(
     rowOf(en, 'Published files').items.map((item) => [item.link!.text, item.note]),
     [
-      ['manifest.json', '65 source files, each with a SHA-256 checksum'],
+      ['manifest.json', '66 source files, each with a SHA-256 checksum'],
       ['anatomies.json', 'Index of the published anatomies'],
     ],
   );

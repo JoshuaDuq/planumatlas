@@ -36,6 +36,7 @@ from .layers import (
     receptor_fingerprints,
     retinotopy,
     spinal_cord,
+    stimulation_ftract,
     stimulation_responses,
     striatal_networks,
     stroke_cases,
@@ -1033,6 +1034,7 @@ def main():
         "neuropsych_domains": neuropsych_domains.validate(config, manifest),
         "receptor_fingerprints": receptor_fingerprints.validate(config, manifest),
         "stimulation_responses": stimulation_responses.validate(config, manifest),
+        "stimulation_ftract": stimulation_ftract.validate(config, manifest),
         **({"neurosynth_terms": neurosynth_terms.validate(config, manifest)}
            if neurosynth_terms.is_declared(config) else {}),
         **(

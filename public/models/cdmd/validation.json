@@ -1265,6 +1265,28 @@
       "FG"
     ]
   },
+  "stimulation_ftract": {
+    "pairs": 47931,
+    "drawn_rates": 26070,
+    "regions_matched": 252,
+    "julich_areas_unmatched": [
+      "Area 6r1 (PreCG)",
+      "Area 6v1 (PreCG)",
+      "Area 6v2 (PreCG)",
+      "Area 6v3 (PreCG)",
+      "Area FG5 (FusG)",
+      "Area MFG4 (MFG)",
+      "Area MFG5 (MFG, IFG)",
+      "Area MFG5 (MFG,IFG)",
+      "Area OTS1 (OTS)",
+      "Area Op10 (Frontal Operculum)",
+      "Area SFG2 (SFG)",
+      "Area SFG3 (SFG)",
+      "Area SFG4 (SFG)",
+      "Subc (Hippocampus, Subicular complex)"
+    ],
+    "median_drawn_rate": 0.05
+  },
   "neurosynth_terms": {
     "function": 232,
     "population": 45
@@ -4933,6 +4955,7 @@
     "ribbon-schaefer.labels",
     "segmentation-agreement.json",
     "spinal-cord.glb",
+    "stimulation-ftract.json",
     "stimulation-responses.json",
     "stroke-cases.json",
     "stroke-cases.masks",

@@ -739,6 +739,7 @@
   "functional": "Functional divisions",
   "receptors": "Receptor fingerprints",
   "stimulation": "Stimulation responses",
+  "stimulationFtract": "Stimulation responses (F-TRACT)",
   "strokeCases": "Stroke cases",
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
@@ -1555,7 +1556,30 @@
    "[\"\"] → \"Matched by name to the authors’ label .\""
   ],
   "thalamus": "The authors grouped thalamic contacts by position, not by nucleus, so every thalamic structure shows all three sites.",
-  "dataset": "Zenodo dataset"
+  "dataset": "Zenodo dataset",
+  "ftractCounts": [
+   "[\"Alpha\",\"\"] → \"Alpha pairs ·  implantations\"",
+   "[\"\",\"Alpha\"] → \" pairs · Alpha implantations\""
+  ],
+  "within": "Within this area",
+  "more": [
+   "[\"Alpha\"] → \"Alpha more areas\"",
+   "[\"\"] → \" more areas\""
+  ],
+  "ftractRest": [
+   "[\"Alpha\",\"\"] → \"Too few pairs or implantations for a rate: Alpha areas. Never tested:  areas.\"",
+   "[\"\",\"Alpha\"] → \"Too few pairs or implantations for a rate:  areas. Never tested: Alpha areas.\""
+  ],
+  "ftractNote": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Share of stimulation–recording pairs in which a single pulse evoked a response (z-scored signal above 5 within 50 ms), aggregated by F-TRACT over Alpha people with epilepsy; a rate needs  pairs from Alpha implantations. Not measured in this brain; each hemisphere shows its own values.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Share of stimulation–recording pairs in which a single pulse evoked a response (z-scored signal above 5 within 50 ms), aggregated by F-TRACT over  people with epilepsy; a rate needs Alpha pairs from  implantations. Not measured in this brain; each hemisphere shows its own values.\""
+  ],
+  "ftractBasis": [
+   "[\"Alpha\"] → \"Matched by name to F-TRACT’s Julich-Brain 3.0 area Alpha. F-TRACT placed contacts with Julich-Brain’s volumetric map in MNI152 space, not on this surface.\"",
+   "[\"\"] → \"Matched by name to F-TRACT’s Julich-Brain 3.0 area . F-TRACT placed contacts with Julich-Brain’s volumetric map in MNI152 space, not on this surface.\""
+  ],
+  "ftractDataset": "F-TRACT dataset (EBRAINS)",
+  "ftractMethod": "Method (Trebaul et al. 2018)"
  },
  "strokeCases": {
   "heading": "Stroke cases",
