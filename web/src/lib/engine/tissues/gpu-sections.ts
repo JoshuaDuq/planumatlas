@@ -7,7 +7,6 @@ import {
   Matrix4,
   Mesh,
   NearestFilter,
-  PlaneGeometry,
   RedFormat,
   RedIntegerFormat,
   RGBAFormat,
@@ -19,12 +18,7 @@ import {
 import type { Color, Intersection, IUniform, Material, Raycaster } from 'three';
 import type { Region } from '../../types/index.ts';
 import type { Frame } from '../slices/coordinates.ts';
-import {
-  clippingPlane,
-  rasToWorld,
-  worldToRas,
-  worldToVoxelMatrix,
-} from '../slices/coordinates.ts';
+import { clippingPlane, worldToRas, worldToVoxelMatrix } from '../slices/coordinates.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import { loadVolume } from '../slices/volume.ts';
 import type { Volume, VolumeFile } from '../slices/volume.ts';
@@ -34,13 +28,10 @@ import {
   ghostKey,
   labelVisible,
   usesAtlasColors,
-  usesCabNpColors,
-  usesTerritoryColors,
   usesNetworkColors,
   usesPaint,
 } from './palette.ts';
 import type { Label, PaletteLookup, PaletteState } from './palette.ts';
-import { createCutMaterial } from './shader.ts';
 import { SolidSections } from './solid-sections.ts';
 import type { SolidHit } from './solid-sections.ts';
 import {
@@ -54,12 +45,7 @@ import {
 import type { LabelIndex } from './solid-assets.ts';
 import { createWhiteMatter } from './white-matter.ts';
 import type { WhiteMatter, WhiteMatterRecord } from './white-matter.ts';
-import {
-  addMriAppearance,
-  createMriUniforms,
-  setMriHighlight,
-  setMriWindow,
-} from '../render/mri-material.ts';
+import { createMriUniforms, setMriHighlight, setMriWindow } from '../render/mri-material.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import type { Appearance } from '../render/materials.ts';
 import { token } from '../render/tokens.ts';
@@ -71,7 +57,7 @@ import {
 } from './striatal-overlay.ts';
 import type { StriatalUniforms } from './striatal-overlay.ts';
 import type { CapLabelUniforms } from './cap-labels.ts';
-import { addBoundaryEdges, createEdgeUniforms, pairTexture } from './boundary-edges.ts';
+import { createEdgeUniforms, pairTexture } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
 import type { BoundaryCertainty } from '../../core/catalog/boundary-certainty.ts';
 
@@ -119,23 +105,15 @@ export interface Anatomy {
   striatal: StriatalUniforms;
 }
 
-/** One loaded cut atlas: its label grid on the GPU and the plane that samples it. */
+/** One loaded cut atlas: its label grid on the GPU, which the caps sample where it has no parcel solids. */
 export interface TissueLayer {
   metadata: TissueAtlasRecord;
   volume: Volume;
   texture: Data3DTexture;
   palette: DataTexture;
-  mesh: Mesh<PlaneGeometry, Material>;
   uniforms: {
-    labelVolume: IUniform<Data3DTexture>;
-    labelPalette: IUniform<DataTexture>;
     worldToVoxel: IUniform<Matrix4>;
     volumeShape: IUniform<Vector3>;
-    mriVolume: IUniform<Data3DTexture>;
-    worldToMri: IUniform<Matrix4>;
-    mriShape: IUniform<Vector3>;
-    t1Range: IUniform<number[]>;
-    tissueVariation: IUniform<number>;
     highlightCodes: IUniform<Vector2>;
     highlightLifts: IUniform<Vector2>;
   };
@@ -173,20 +151,6 @@ export type CutHit = (Intersection | SolidHit) & { region?: Region | null; label
 
 const readJson = async <T>(url: URL): Promise<T> =>
   JSON.parse(new TextDecoder().decode(await fetchAsset(url))) as T;
-
-const _poseU = new Vector3();
-const _poseV = new Vector3();
-const _poseN = new Vector3();
-const _poseBasis = new Matrix4();
-
-/** Place the sampled label plane on the cut; a cut-only atlas draws its face with it. */
-function poseLabelPlane(mesh: Mesh, frame: Frame): void {
-  _poseU.copy(rasToWorld(frame.u.toArray())).normalize();
-  _poseV.copy(rasToWorld(frame.v.toArray())).normalize();
-  _poseN.crossVectors(_poseU, _poseV);
-  mesh.quaternion.setFromRotationMatrix(_poseBasis.makeBasis(_poseU, _poseV, _poseN));
-  mesh.position.copy(rasToWorld(frame.center.toArray()));
-}
 
 /** One persistent GPU plane reads categorical tissue IDs from the native 3D grid. */
 export class TissueSections {
@@ -521,48 +485,25 @@ export class TissueSections {
       FloatType,
     );
     palette.needsUpdate = true;
-    const { intensity, tissue } = this.model.manifest.appearance;
     const uniforms: TissueLayer['uniforms'] = {
-      labelVolume: { value: texture },
-      labelPalette: { value: palette },
       worldToVoxel: { value: worldToVoxelMatrix(volume) },
       volumeShape: { value: new Vector3(...volume.shape) },
-      mriVolume: { value: this.anatomy.texture },
-      worldToMri: { value: this.anatomy.worldToVoxel },
-      mriShape: { value: new Vector3(...this.anatomy.volume.shape) },
-      t1Range: { value: [intensity.low, intensity.high] },
-      tissueVariation: { value: intensity.cut_strength },
-      // A sampled face is one mesh for every label, so it compares the
-      // pointed-at and chosen codes rather than carrying a lift of its own.
+      // A sampled cap covers many labels, so it compares the pointed-at and
+      // chosen codes rather than carrying a lift of its own.
       highlightCodes: { value: new Vector2(-1, -1) },
       highlightLifts: { value: new Vector2(0, 0) },
     };
-    const material = createCutMaterial({ ...uniforms, ...this.anatomy.striatal }, tissue);
-    addMriAppearance(material, this.anatomy.mriUniforms, 'lift');
-    const edges = createEdgeUniforms();
-    addBoundaryEdges(material, edges, {
-      volume: 'labelVolume',
-      shape: 'volumeShape',
-      toLabels: 'worldToVoxel',
-      enabled: 'true',
-      selected: 'highlightCodes.y',
-    });
-    const mesh = new Mesh(new PlaneGeometry(0.5, 0.5), material);
-    mesh.name = 'Native labelled tissue cut';
-    mesh.visible = false;
-    this.group.add(mesh);
     return {
       metadata,
       volume,
       texture,
       palette,
-      mesh,
       uniforms,
       paletteKey: null,
       solidLabels: indexLabels(metadata.labels),
       codes: codeIndex(metadata.labels),
       wedged: false,
-      edges,
+      edges: createEdgeUniforms(),
     };
   }
 
@@ -572,86 +513,62 @@ export class TissueSections {
     this.current = layer;
     const state = this.model.state;
     const anatomy = this.anatomy!;
-    // A cut-only atlas has no surface to cut parcels out of, so its published
-    // colours still have to come from the label volume.
     const mri = state.surfaceColor === 'mri' && !usesPaint(state);
     anatomy.mriUniforms.scanEnabled.value = mri;
     updateCapLabels(anatomy.capLabels, layer, state);
     const striatal = this.updateStriatal(anatomy.striatal, layer);
     anatomy.capEdges.edgeEnabled.value = layer.edges.edgeEnabled.value;
     anatomy.capEdges.edgePairs.value = layer.edges.edgePairs.value;
-    const solid = layer.wedged || state.surfaceColor === 'tissue' || mri;
-    const supplemental = this.solids.solids.some((entry) => entry.source.userData['supplemental']);
-    this.solids.group.visible = solid || supplemental;
+    // Every cut is drawn by the solids; a cut-only atlas has no parcel solids,
+    // so its caps take their colours from its label volume (updateCapLabels).
+    this.solids.group.visible = true;
     this.whiteMatter?.update({
       atlas,
       isolatedRegion: state.isolatedRegion,
       hiddenRegions: state.hiddenRegions,
     });
-    if (this.solids.group.visible) {
-      // Colour does not depend on where the plane sits. A drag only moves the
-      // plane, and repainting every solid there is work the frame cannot spare.
-      const constituents = state.internalConstituents
-        ? [...state.internalConstituents].sort().join(',')
-        : '';
-      const paintKey = [
-        state.surfaceColor,
-        state.paint?.id,
-        state.atlas,
-        state.hemisphere,
-        state.cortexVisible,
-        state.cortexOpacity,
-        state.isolatedRegion,
-        ghostKey(state),
-        state.internalVisible,
-        state.internalSystem,
-        state.spinalCordVisible,
-        state.detail,
-        state.cutAtlas,
-        state.cutActive,
-        constituents,
+    // Colour does not depend on where the plane sits. A drag only moves the
+    // plane, and repainting every solid there is work the frame cannot spare.
+    const constituents = state.internalConstituents
+      ? [...state.internalConstituents].sort().join(',')
+      : '';
+    const paintKey = [
+      state.surfaceColor,
+      state.paint?.id,
+      state.atlas,
+      state.hemisphere,
+      state.cortexVisible,
+      state.cortexOpacity,
+      state.isolatedRegion,
+      ghostKey(state),
+      state.internalVisible,
+      state.internalSystem,
+      state.spinalCordVisible,
+      state.detail,
+      state.cutAtlas,
+      state.cutActive,
+      constituents,
+      atlas,
+      layer.wedged,
+      striatal,
+      this.whiteMatter?.active ?? false,
+      [...(state.hiddenRegions ?? [])].sort().join(','),
+    ].join('|');
+    if (paintKey !== this.paintKey) {
+      this.paintKey = paintKey;
+      paintSolids(this.solids as unknown as Parameters<typeof paintSolids>[0], {
+        labels: layer.solidLabels,
+        state,
         atlas,
-        layer.wedged,
+        detail: state.detail,
+        wedged: layer.wedged,
+        appearance: this.model.manifest.appearance,
+        lookup: this.paletteLookup,
+        whiteMatter: this.whiteMatter?.active ? this.whiteMatter : null,
         striatal,
-        this.whiteMatter?.active ?? false,
-        [...(state.hiddenRegions ?? [])].sort().join(','),
-      ].join('|');
-      if (paintKey !== this.paintKey) {
-        this.paintKey = paintKey;
-        paintSolids(this.solids as unknown as Parameters<typeof paintSolids>[0], {
-          labels: layer.solidLabels,
-          state,
-          atlas,
-          detail: state.detail,
-          wedged: layer.wedged,
-          appearance: this.model.manifest.appearance,
-          lookup: this.paletteLookup,
-          whiteMatter: this.whiteMatter?.active ? this.whiteMatter : null,
-          striatal,
-        });
-      }
-      if (!solid) {
-        for (const entry of this.solids.solids)
-          entry.visible &&= entry.source.userData['supplemental'] === true;
-      }
-      this.solids.update(clippingPlane(frame, reverse));
+      });
     }
-    for (const candidate of this.layers.values()) {
-      candidate.mesh.visible = candidate === layer && !solid;
-    }
-    if (!solid) poseLabelPlane(layer.mesh, frame);
-    // Only tissue colour carries the T1 brightness it was tuned against; under
-    // a published palette — atlas or network — that modulation would distort
-    // the datum, and the cut would no longer match its key.
-    const published =
-      usesAtlasColors(state) ||
-      usesNetworkColors(state) ||
-      usesTerritoryColors(state) ||
-      usesCabNpColors(state) ||
-      usesPaint(state);
-    layer.uniforms.tissueVariation.value = published
-      ? 0
-      : this.model.manifest.appearance.intensity.cut_strength;
+    this.solids.update(clippingPlane(frame, reverse));
     const key = JSON.stringify([
       state.surfaceColor,
       state.paint?.id ?? null,
@@ -675,14 +592,6 @@ export class TissueSections {
       layer.paletteKey = key;
     }
     return true;
-  }
-
-  /**
-   * Move the sampled label plane to a drag's committed frame. A drag skips `update`, which would
-   * repaint; without this a cut-only atlas's face stays where the last update put it.
-   */
-  moveLabelPlane(frame: Frame): void {
-    if (this.current?.mesh.visible) poseLabelPlane(this.current.mesh, frame);
   }
 
   /**
@@ -729,16 +638,9 @@ export class TissueSections {
   intersect(raycaster: Raycaster): CutHit | null {
     if (!this.current) return null;
     this.group.updateMatrixWorld(true);
-    const cap = this.solids.group.visible
-      ? this.solids.intersect(raycaster, (hit) => this.capVisibleAt(hit))
-      : null;
-    const sampled = this.current.mesh.visible
-      ? raycaster.intersectObject(this.current.mesh)[0]
-      : null;
-    const hit = cap ?? sampled;
-    const solid = Boolean(cap);
+    const hit = this.solids.intersect(raycaster, (candidate) => this.capVisibleAt(candidate));
     if (!hit) return null;
-    if (cap && ((cap.object as Mesh).material as Material).userData.sampledLabels.value) {
+    if (((hit.object as Mesh).material as Material).userData.sampledLabels.value) {
       const code = this.current.volume.label(worldToRas(hit.point));
       const label = this.current.metadata.labels[code];
       const visible =
@@ -753,20 +655,16 @@ export class TissueSections {
     // are on the 1 mm grid: resampling it under a nucleus answers with
     // whatever the segmentation put there, which is a different detail
     // level's region entirely. What was drawn is what was pointed at.
-    if (cap?.region) return { ...hit, region: this.model.regions.get(cap.region) ?? null };
+    if (hit.region) return { ...hit, region: this.model.regions.get(hit.region) ?? null };
     const code = this.current.volume.label(worldToRas(hit.point));
     const label = this.current.metadata.labels[code];
-    if (solid) {
-      // The solid that was hit is the anatomy drawn there, and it is the one
-      // the viewer is showing: resampling the label grid here could name a
-      // region from a detail level that is not on screen, or a parcel across
-      // the boundary the cap just drew.
-      const parcel = this.whiteMatterAt(cap!);
-      const id = cap!.source.userData['region_id'] ?? parcel ?? label?.region_id ?? null;
-      return { ...hit, region: this.model.regions.get(id) ?? null, label };
-    }
-    if (!labelVisible(label!, this.model.state, { regions: this.model.regions })) return null;
-    return { ...hit, region: this.model.regions.get(label!.region_id!) ?? null, label };
+    // The solid that was hit is the anatomy drawn there, and it is the one the
+    // viewer is showing: resampling the label grid here could name a region
+    // from a detail level that is not on screen, or a parcel across the
+    // boundary the cap just drew.
+    const parcel = this.whiteMatterAt(hit);
+    const id = hit.source.userData['region_id'] ?? parcel ?? label?.region_id ?? null;
+    return { ...hit, region: this.model.regions.get(id) ?? null, label };
   }
 
   /** The gyral white-matter parcel a white-envelope cap draws at a hit, if it samples one. */
@@ -782,8 +680,6 @@ export class TissueSections {
     for (const layer of this.layers.values()) {
       layer.texture.dispose();
       layer.palette.dispose();
-      layer.mesh.geometry.dispose();
-      layer.mesh.material.dispose();
     }
     this.striatalPalette?.dispose();
     this.striatalConfidence?.texture.dispose();

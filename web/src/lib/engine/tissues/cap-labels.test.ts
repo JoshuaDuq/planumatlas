@@ -20,6 +20,7 @@ const layer = (wedged: boolean): CutLayer => ({
 test('SHADER-30 new cap labels are off and empty', () => {
   const caps = createCapLabels();
   assert.equal(caps.capLabelsEnabled.value, false);
+  assert.equal(caps.capLabelsColour.value, false);
   assert.equal(caps.capLabelVolume.value, null);
   assert.equal(caps.capLabelPalette.value, null);
   assert.deepEqual(caps.capHighlightCodes.value.toArray(), [-1, -1]);
@@ -27,17 +28,22 @@ test('SHADER-30 new cap labels are off and empty', () => {
   assert.equal(caps.capIsolated.value, false);
 });
 
-test('SHADER-30 caps sample the cut labels only under MRI colour on an atlas without parcel solids, and share the layer own objects', () => {
+test('SHADER-30 caps sample the cut labels on an atlas without parcel solids, for colour unless MRI or tissue colour sets it, and share the layer own objects', () => {
   const state = (surfaceColor: string, isolatedRegion: string | null = null) =>
     asDisplaySettings({ surfaceColor, isolatedRegion });
-  const enabled = (surfaceColor: string, wedged: boolean) => {
+  const sampled = (surfaceColor: string, wedged: boolean) => {
     const caps = createCapLabels();
     updateCapLabels(caps, layer(wedged), state(surfaceColor));
-    return caps.capLabelsEnabled.value;
+    return [caps.capLabelsEnabled.value, caps.capLabelsColour.value];
   };
-  assert.equal(enabled('mri', false), true);
-  assert.equal(enabled('atlas', false), false);
-  assert.equal(enabled('mri', true), false);
+  assert.deepEqual(sampled('mri', false), [true, false]);
+  for (const colour of ['atlas', 'network', 'territory']) {
+    assert.deepEqual(sampled(colour, false), [true, true]);
+  }
+  // Tissue colour paints the solids themselves.
+  assert.deepEqual(sampled('tissue', false), [false, false]);
+  for (const colour of ['mri', 'atlas', 'tissue'])
+    assert.deepEqual(sampled(colour, true), [false, false]);
 
   const own = layer(false);
   const caps = createCapLabels();

@@ -221,15 +221,16 @@ export function addSolidSources(
 /**
  * Index a cut atlas's labels the two ways a solid can be identified.
  *
- * Only tissue is found by code. A cortical parcel's code is its own atlas's
- * numbering, and HCP-MMP's areas 2 and 41 share the codes of cerebral white matter.
+ * Only tissue without a region is found by code. A region's code is its own atlas's numbering:
+ * HCP-MMP's areas 2 and 41, and the registered atlases' first regions, share the codes of
+ * cerebral white matter.
  */
 export function indexLabels(labels: readonly Label[]): LabelIndex {
   const byRegion = new Map<string, Label>();
   const byCode = new Map<number, Label>();
   for (const label of labels) {
     if (label.region_id) byRegion.set(label.region_id, label);
-    if (label.kind !== 'cortex') byCode.set(label.source_label_id, label);
+    if (!label.region_id) byCode.set(label.source_label_id, label);
   }
   return { byRegion, byCode };
 }
@@ -348,7 +349,7 @@ export function paintSolids(
     usesPaint(state);
   const variation = published ? 0 : appearance.intensity.cut_strength;
   const mri = state.surfaceColor === 'mri' && !usesPaint(state);
-  const sampledAtlas = mri && !wedged;
+  const sampledAtlas = !wedged && state.surfaceColor !== 'tissue';
   const sampledIsolation =
     sampledAtlas &&
     labels.byRegion.has(state.isolatedRegion!) &&
@@ -369,7 +370,10 @@ export function paintSolids(
     // always what its mesh was built from: an envelope borrows a tissue label,
     // and a medial wall borrows one carrying no region at all.
     solid.region = (label ? label.region_id : source.userData['region_id']) ?? null;
-    const sampled = sampledAtlas && (!solid.region || sampledIsolation);
+    // A structure the atlas relabels, a thalamus inside a territory, shows the atlas's label there;
+    // supplemental anatomy lies outside every cut volume and keeps its own.
+    const relabelled = !mri && !label && source.userData['supplemental'] !== true;
+    const sampled = sampledAtlas && (!solid.region || sampledIsolation || relabelled);
     solid.cap.material.userData['sampledLabels'].value = sampled;
     const capState = sampledIsolation && sampled ? { ...state, isolatedRegion: null } : state;
     if (sampled) solid.region = null;

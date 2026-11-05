@@ -6,10 +6,9 @@ import { patchCombinations } from './test-support.ts';
 // Real WebGL: nothing else proves a patched shader compiles and links. Each distinct combination of
 // patches is drawn once on one shared renderer at a desktop viewport and again at a phone viewport,
 // where the coat is dropped, so a program two combinations share, or that fails to link, shows in
-// the renderer's program list. The cut material is the same on both.
+// the renderer's program list. Every combination differs between the two.
 const COMPILE_TIMEOUT_MS = 120_000;
-const DISTINCT = 19;
-const SAME_ON_BOTH = 2;
+const DISTINCT = 17;
 
 test(
   'SHADER-35 every combination of patches the app uses links under real WebGL, on desktop and on a phone, and gets its own program',
@@ -43,7 +42,7 @@ test(
       cacheKey: string;
       diagnostics?: { runnable: boolean };
     }[];
-    expect(programs).toHaveLength(2 * (DISTINCT - SAME_ON_BOTH) + SAME_ON_BOTH);
+    expect(programs).toHaveLength(2 * DISTINCT);
     const failed = programs
       .filter((program) => program.diagnostics && !program.diagnostics.runnable)
       .map(

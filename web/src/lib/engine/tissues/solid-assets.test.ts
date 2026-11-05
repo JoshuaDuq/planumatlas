@@ -97,6 +97,31 @@ const wedge = () =>
 const published = (r: number, g: number, b: number) =>
   new Color().setRGB(r / 255, g / 255, b / 255, SRGBColorSpace);
 
+test('on a cut-only atlas, a cap samples the label volume where the atlas relabels what it shows', () => {
+  const sampled = (surfaceColor: string, wedged = false) => {
+    const sources = [
+      // The thalamus is no label of this atlas: inside its volume it is a territory, say.
+      solid({ hemisphere: 'left', kind: 'structure', region_id: 'aseg:left:10' }),
+      solid({ hemisphere: 'left', kind: 'structure', region_id: 'aseg:left:11' }),
+      solid({ hemisphere: 'left', boundary: 'pial' }),
+      solid({ hemisphere: 'midline', kind: 'structure', region_id: 'pam50:x', supplemental: true }),
+    ];
+    // A structure keeps its mesh's published colour where nothing samples it.
+    for (const entry of sources) entry.source.material = new MeshBasicMaterial();
+    const solids = paint(sources, { surfaceColor }, wedged);
+    return solids.map((entry) => entry.cap.material.userData.sampledLabels.value);
+  };
+  // Relabelled thalamus and envelope sample; the caudate the atlas labels, and the cord outside
+  // every cut volume, keep their own.
+  assert.deepEqual(sampled('atlas'), [true, false, true, false]);
+  assert.deepEqual(sampled('network'), [true, false, true, false]);
+  // Under MRI only what has no region of its own samples, for picking.
+  assert.deepEqual(sampled('mri'), [false, false, true, false]);
+  assert.deepEqual(sampled('tissue'), [false, false, false, false]);
+  // An atlas with parcel solids never samples.
+  assert.deepEqual(sampled('atlas', true), [false, false, false, false]);
+});
+
 test('only a striatal structure’s cap takes its voxels’ networks, and only when asked', () => {
   const lookup = {
     ...LOOKUP,
@@ -174,6 +199,29 @@ test('the white envelope stays white matter where a parcel reuses its code', () 
     },
   );
   assert.ok(white.cap.material.color.equals(published(245, 245, 245)));
+});
+
+test('the white envelope stays white matter where a registered region reuses its code', () => {
+  // A registered atlas numbers its regions from 1, after the FreeSurfer labels it keeps.
+  const labels = indexLabels([
+    {
+      source_label_id: 2,
+      name: 'Left-Cerebral-White-Matter',
+      color: [245, 245, 245],
+      hemisphere: 'left',
+      kind: 'tissue',
+      region_id: null,
+    },
+    {
+      source_label_id: 2,
+      name: 'Anterior cerebral artery (right)',
+      color: [59, 111, 182],
+      hemisphere: 'right',
+      kind: 'tissue',
+      region_id: 'arterial:right:aca',
+    },
+  ]);
+  assert.equal(labels.byCode.get(2)?.name, 'Left-Cerebral-White-Matter');
 });
 
 test('a parcel solid takes the published atlas colour', () => {

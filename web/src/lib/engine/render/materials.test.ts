@@ -153,9 +153,9 @@ test('SHADER-07 a surface built with the network layer has a network mix at 0, o
 
 test('SHADER-35 two materials with different patch sets never share a program key, and equal ones do', () => {
   const first = patchCombinations();
-  assert.equal(first.size, 19);
+  assert.equal(first.size, 17);
   const keys = [...first.values()].map((material) => material.customProgramCacheKey());
-  // The cut and plain materials differ by the MRI patch and mark alone, so every set needs its own key.
+  // The plain and solid materials differ by the MRI patch and mark alone, so every set needs its own key.
   assert.equal(new Set(keys).size, keys.length, 'keys are pairwise distinct');
   const second = patchCombinations();
   for (const [name, material] of first) {

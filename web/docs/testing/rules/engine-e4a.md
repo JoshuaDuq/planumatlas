@@ -281,13 +281,13 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 
 ## GPU cut faces
 
-### SLICE-29 · Solid caps or the sampled label plane
+### SLICE-29 · Every cut is capped by solids
 
-- **Rule:** The cut is capped by solids when the atlas has parcel solids, under tissue colour, or under MRI colour without a paint. Otherwise it shows the sampled label plane. Supplemental anatomy (the cord) is always capped.
+- **Rule:** The cut is always capped by solids: an atlas's parcel solids where it has them, otherwise the envelopes and structures, whose caps take their colours from the atlas's label volume (SHADER-30). No flat label plane is drawn, so the outline is the reconstruction's and fluid outside the pial surface is not shown. Supplemental anatomy (the cord) is always capped and keeps its own identity.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/tissues/gpu-sections.js:290-338`
-- **Expected:** a surfaceless atlas: tissue → caps, label plane hidden; atlas or network → label plane; a wedged atlas → caps in every mode and under isolation; the cord cap visible and pickable in tissue, atlas and network.
+- **Source:** `src/lib/engine/tissues/gpu-sections.ts` (`update`); 2026-11-05, replacing the sampled label plane, whose 1 mm steps and grey CSF band read as broken
+- **Expected:** a surfaceless atlas in tissue, atlas or network colour → solids drawn, cap labels on its volume, colour from it except under tissue; a wedged atlas → caps in every mode and under isolation, no cap samples; the cord cap visible and pickable in tissue, atlas and network.
 - **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R)
 
 ### SLICE-30 · The cut shows only what the display shows

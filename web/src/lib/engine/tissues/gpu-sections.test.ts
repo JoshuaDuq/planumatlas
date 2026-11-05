@@ -56,7 +56,7 @@ test('removal refreshes cached geometric cap visibility', () => {
 });
 
 test('MRI uses smooth solids for every atlas and keeps cap picking and highlights', () => {
-  const { sections, model, layer, region } = fixture();
+  const { sections, model, region } = fixture();
   const source = new Mesh(
     new BoxGeometry(0.01, 0.01, 0.01),
     new MeshBasicMaterial({ side: DoubleSide }),
@@ -68,7 +68,6 @@ test('MRI uses smooth solids for every atlas and keeps cap picking and highlight
   model.state.surfaceColor = 'mri';
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   assert.equal(sections.solids.group.visible, true);
-  assert.equal(layer.mesh.visible, false);
   const ray = new Raycaster(new Vector3(0, 0, -0.1), new Vector3(0, 0, 1));
   assert.equal(sections.intersect(ray)?.region.id, region.id);
   sections.setHighlight({ hovered: region.id });
@@ -83,22 +82,22 @@ test('MRI uses smooth solids for every atlas and keeps cap picking and highlight
   sections.dispose();
 });
 
-/** An MRI-coloured cut capped by a smooth envelope, whose face answers for the label voxel under it. */
-function mriEnvelopeCap() {
-  const stage = fixture();
+/** A smooth left pial envelope around the fixture's labels, as the cut's own solid. */
+function envelope(sections: Stub) {
   const source = new Mesh(
     new BoxGeometry(0.01, 0.01, 0.01),
     new MeshBasicMaterial({ side: DoubleSide }),
   );
   source.userData = { hemisphere: 'left', boundary: 'pial' };
-  addSolidSources(
-    stage.sections.solids,
-    [source],
-    stage.sections.anatomy,
-    appearance,
-    BANDS.envelope,
-  );
-  stage.model.state.surfaceColor = 'mri';
+  addSolidSources(sections.solids, [source], sections.anatomy, appearance, BANDS.envelope);
+  return sections.solids.solids.at(-1);
+}
+
+/** A cut capped by a smooth envelope, whose face answers for the label voxel under it. */
+function envelopeCap(surfaceColor = 'mri') {
+  const stage = fixture();
+  envelope(stage.sections);
+  stage.model.state.surfaceColor = surfaceColor;
   const cut = () => stage.sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   cut();
   const ray = new Raycaster(new Vector3(0.0002, 0.0002, -0.1), new Vector3(0, 0, 1));
@@ -106,7 +105,7 @@ function mriEnvelopeCap() {
 }
 
 test('SLICE-30 under MRI colour, a cap over a hidden region’s label is not picked', () => {
-  const { sections, model, region, ray, cut } = mriEnvelopeCap();
+  const { sections, model, region, ray, cut } = envelopeCap();
   assert.equal(sections.intersect(ray)?.region.id, region.id);
   model.state.hiddenRegions = new Set([region.id]);
   cut();
@@ -115,7 +114,7 @@ test('SLICE-30 under MRI colour, a cap over a hidden region’s label is not pic
 });
 
 test('SLICE-30 under MRI colour with a region isolated, a cap over background is not picked', () => {
-  const { sections, model, region, layer, ray, cut } = mriEnvelopeCap();
+  const { sections, model, region, layer, ray, cut } = envelopeCap();
   layer.volume.data.fill(0);
   assert.notEqual(sections.intersect(ray), null, 'background shows without an isolation');
   model.state.isolatedRegion = region.id;
@@ -136,7 +135,6 @@ test('MRI cut-only labels highlight and isolate inside smooth envelopes', () => 
   model.state.isolatedRegion = region.id;
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   assert.equal(sections.solids.solids[0].group.visible, true);
-  assert.equal(layer.mesh.visible, false);
   sections.setHighlight({ hovered: region.id });
   const shader = {
     uniforms: {} as Stub,
@@ -313,14 +311,13 @@ test('Yeo colouring points the cut and the caps at the striatal network volume, 
   // Code 1 is the Default network label: opaque, so the cut takes its colour.
   assert.equal(striatal.striatalPalette.value.image.data[7], 1);
   assert.equal(striatal.striatalPalette.value.image.data[3], 0);
-  // The cut plane of the drawn atlas reads the same uniforms.
-  const cut = sections.layers.get('destrieux').mesh.material;
+  // Every cap reads the same uniforms.
   const shader: Stub = {
     uniforms: {},
     vertexShader: '#include <begin_vertex>',
-    fragmentShader: '#include <color_fragment>',
+    fragmentShader: '#include <color_fragment>\n#include <opaque_fragment>',
   };
-  cut.onBeforeCompile(shader);
+  envelope(sections).cap.material.onBeforeCompile(shader);
   assert.equal(shader.uniforms.striatalEnabled, striatal.striatalEnabled);
 
   for (const state of [
@@ -349,7 +346,6 @@ test('switched off, the striatal sampler still holds an integer label volume, as
 
 test('moving every cut orientation reuses geometry, volume and palette without uploads', () => {
   const { sections, layer } = fixture();
-  const geometry = layer.mesh.geometry;
   const palette = layer.palette.image.data;
   const volume = layer.texture.image.data;
   const versions = [layer.palette.version, layer.texture.version];
@@ -361,11 +357,9 @@ test('moving every cut orientation reuses geometry, volume and palette without u
       );
     }
   }
-  assert.equal(layer.mesh.geometry, geometry);
   assert.equal(layer.palette.image.data, palette);
   assert.equal(layer.texture.image.data, volume);
   assert.deepEqual([layer.palette.version, layer.texture.version], versions);
-  assert.equal(geometry.index.count, 6);
   sections.dispose();
 });
 
@@ -385,8 +379,7 @@ test('GPU world-to-voxel transform agrees with CPU sampling in every voxel', () 
 });
 
 test('cut picking returns the visible voxel label and respects hemisphere and isolation', () => {
-  const { sections, model, region } = fixture();
-  const ray = new Raycaster(new Vector3(0.0002, 0.0002, -0.1), new Vector3(0, 0, 1));
+  const { sections, model, region, ray } = envelopeCap('atlas');
   assert.equal(sections.intersect(ray).region, region);
   model.state.hemisphere = 'right';
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
@@ -417,16 +410,17 @@ test('MRI texture uses its own affine and interpolation without changing labels'
   sections.anatomy.texture.dispose();
   sections.anatomy = anatomy;
   const next = sections.createLayer(layer.metadata, layer.volume);
+  const cap = envelope(sections).cap.material;
   const shader = {
     uniforms: {} as Stub,
     vertexShader: '#include <begin_vertex>',
-    fragmentShader: '#include <color_fragment>',
+    fragmentShader: '#include <color_fragment>\n#include <opaque_fragment>',
   };
-  next.mesh.material.onBeforeCompile(shader);
+  cap.onBeforeCompile(shader);
   assert.equal(shader.uniforms.mriVolume.value, anatomy.texture);
   const actual = rasToWorld([1, 5, 1]).applyMatrix4(shader.uniforms.worldToMri.value);
   actual.toArray().forEach((value) => assert.ok(Math.abs(value - 1) < 1e-12));
-  assert.equal(next.mesh.material.isMeshPhysicalMaterial, true);
+  assert.equal(cap.isMeshPhysicalMaterial, true);
   assert.deepEqual(layer.volume.data, before);
   sections.layers.set('second', next);
   model.state.surfaceColor = 'atlas';
@@ -441,22 +435,24 @@ test('MRI texture uses its own affine and interpolation without changing labels'
   assert.equal(disposed, 1);
 });
 
-test('a surfaceless atlas keeps the label volume for published colours', () => {
+test('a surfaceless atlas cuts through the solids and colours their caps from its label volume', () => {
   const { sections, model, layer } = fixture();
+  const caps = sections.anatomy.capLabels;
   const labels = layer.volume.data.slice();
   for (const color of ['tissue', 'atlas', 'network']) {
     model.state.surfaceColor = color;
     sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
-    // Without parcel solids only tissue colour can be capped from geometry.
-    assert.equal(sections.solids.group.visible, color === 'tissue');
-    assert.equal(layer.mesh.visible, color !== 'tissue');
+    assert.equal(sections.solids.group.visible, true);
+    // Tissue colour paints the solids themselves; a published palette is the label volume's.
+    assert.equal(caps.capLabelsColour.value, color !== 'tissue');
+    assert.equal(caps.capLabelVolume.value, layer.texture);
     assert.deepEqual(layer.volume.data, labels);
   }
   sections.dispose();
 });
 
 test('a surfaceless cut atlas still caps and picks supplemental anatomy outside its volume', () => {
-  const { sections, model, layer } = fixture();
+  const { sections, model } = fixture();
   const cord = {
     id: 'pam50:midline:cord',
     atlas: 'pam50',
@@ -481,29 +477,13 @@ test('a surfaceless cut atlas still caps and picks supplemental anatomy outside 
     assert.equal(sections.solids.solids[0].group.visible, true);
     const ray = new Raycaster(new Vector3(0, -0.5, 0.2), new Vector3(0, 0, -1));
     assert.equal(sections.intersect(ray)?.region.id, cord.id);
-    assert.equal(layer.mesh.visible, surfaceColor !== 'tissue');
   }
+  envelope(sections);
   model.state.surfaceColor = 'atlas';
   model.state.isolatedRegion = null;
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   const brainRay = new Raycaster(new Vector3(0, 0, 0.1), new Vector3(0, 0, -1));
   assert.equal(sections.intersect(brainRay)?.region.id, 'destrieux:left:1');
-  sections.dispose();
-});
-
-test('a drag moves a sampled label plane to its frame, and leaves a hidden one', () => {
-  const { sections, model, layer } = fixture();
-  model.state.surfaceColor = 'atlas';
-  sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
-  assert.equal(layer.mesh.visible, true);
-  sections.moveLabelPlane(centeredFrame('coronal', [0, -40, 0]));
-  assert.ok(layer.mesh.position.distanceTo(rasToWorld([0, -40, 0])) < 1e-9);
-  // Tissue colour draws the cut with solids; their plane is not this one.
-  model.state.surfaceColor = 'tissue';
-  sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
-  const resting = layer.mesh.position.clone();
-  sections.moveLabelPlane(centeredFrame('coronal', [0, -40, 0]));
-  assert.ok(layer.mesh.position.equals(resting));
   sections.dispose();
 });
 
@@ -514,12 +494,12 @@ test('an atlas with parcel solids caps every colour mode, isolation included', (
     model.state.surfaceColor = color;
     sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
     assert.equal(sections.solids.group.visible, true);
-    assert.equal(layer.mesh.visible, false);
+    // Its parcels are solids of their own: no cap samples the label volume.
+    assert.equal(sections.anatomy.capLabels.capLabelsEnabled.value, false);
   }
   model.state.isolatedRegion = region.id;
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
   assert.equal(sections.solids.group.visible, true);
-  assert.equal(layer.mesh.visible, false);
   sections.dispose();
 });
 

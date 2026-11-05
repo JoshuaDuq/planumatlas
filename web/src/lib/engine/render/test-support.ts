@@ -10,15 +10,12 @@ import {
   MeshStandardMaterial,
   RedFormat,
   UnsignedByteType,
-  Vector2,
-  Vector3,
 } from 'three';
 import type { Material } from 'three';
 import { appearance as published } from '../../../../../public/models/cdmd/manifest.json';
 import type { Region } from '../../types/index.ts';
 import { Volume } from '../slices/volume.ts';
 import { addCapLabels, createCapLabels } from '../tissues/cap-labels.ts';
-import { createCutMaterial } from '../tissues/shader.ts';
 import { createSolidMaterial } from '../tissues/solid-material.ts';
 import { createWhiteMatter } from '../tissues/white-matter.ts';
 import { addBorderFeather } from './border-feather.ts';
@@ -56,8 +53,7 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
 /**
  * One material for each distinct set of patches the app builds (decision 25 on #4), by name: the
  * anatomical surface with and without the network layer, alone, feathered, with the MRI and with
- * both in either order; a plain material with the MRI; the cut material alone and with the MRI
- * (mark `lift`); the solid material with and without white matter, alone, with the MRI (mark
+ * both in either order; a plain material with the MRI; the solid material with and without white matter, alone, with the MRI (mark
  * `capLift`) and with cap labels as well.
  */
 export function patchCombinations(): Map<string, Material> {
@@ -115,21 +111,6 @@ export function patchCombinations(): Map<string, Material> {
       clearcoat: isPhone() ? 0 : appearance.tissue.clearcoat,
     });
     addMriAppearance(material, createMriUniforms(anatomy));
-    return material;
-  });
-
-  const cutUniforms = () => ({
-    labelVolume: { value: null },
-    labelPalette: { value: null },
-    worldToVoxel: { value: new Matrix4() },
-    volumeShape: { value: new Vector3(2, 2, 2) },
-    highlightCodes: { value: new Vector2(-1, -1) },
-    highlightLifts: { value: new Vector2() },
-  });
-  add('cut material', () => createCutMaterial(cutUniforms(), appearance.tissue));
-  add('cut material + MRI', () => {
-    const material = createCutMaterial(cutUniforms(), appearance.tissue);
-    addMriAppearance(material, createMriUniforms(anatomy), 'lift');
     return material;
   });
 

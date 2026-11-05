@@ -179,14 +179,14 @@ The legacy comparison file `parity/E2.test.ts` is deleted; a rule that lists no 
 - **Expected:** the SLICE-09 fixtures drawn through `labelAt`: ramp `[1.4]³` → 51, `[1.6]³` → 102, `[1.5]³` → 51; corners `[4,9,9,9,4,9,9,9]` at `[0.4,0.4,0.5]` → 9, `[0.2,0.2,0.5]` → 4; all-7 cube at `[−0.4,.5,.5]` → 7, `[−0.6,.5,.5]` → 0.
 - **Covered by:** `src/lib/engine/tissues/label-sampling.svelte.test.ts` (R, real WebGL against `Volume.label`)
 
-### SHADER-17 · A cut face is drawn in its label's palette colour, lit as tissue, and absent where hidden
+### SHADER-17 · A sampled cap is drawn in its label's palette colour and absent where hidden
 
-- **Rule:** A sampled cut face takes its label's palette colour, varied by the T1 at the point as in SHADER-05 with the cut's own strength. A label whose palette alpha is below 0.5 is not drawn at all. The face is double-sided and pushed forward in depth so it wins over the coplanar surface. Unlike surfaces, it keeps its clear coat on a phone.
+- **Rule:** Where a cap of an atlas without parcel solids samples its labels outside MRI colour, a fragment takes its label's palette colour, lifted by its code's highlight, before the cap's own variation and lift; code 0, which the atlas leaves unlabelled, keeps the cap's own colour. A label whose palette alpha is below 0.5 is not drawn (SHADER-31). The flat sampled cut plane this rule once described was removed on 2026-11-05 (SLICE-29).
 - **Kind:** behaviour
-- **Level:** browser for the drawn face; unit for the material settings
-- **Source:** `viewer/tissues/shader.js:6-61`
-- **Expected:** material: DoubleSide, roughness 0.62, clearcoat 0.08 on desktop and phone, polygonOffset factor −1 and units −1. Drawn: palette alpha 0 → no fragment; alpha 1 with `tissueVariation` 0 → the palette colour ± 1/255 (SLICE-31); T1 = 180 with strength 0.5 → palette colour × 1.5.
-- **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R, uniforms only)
+- **Level:** browser for linking under real WebGL; unit for the switches
+- **Source:** `src/lib/engine/tissues/cap-labels.ts` (`addCapLabels`, `updateCapLabels`)
+- **Expected:** `capLabelsColour` true with cap labels on outside MRI colour; the solid material with cap labels links on desktop and phone (SHADER-35).
+- **Covered by:** `src/lib/engine/tissues/cap-labels.test.ts` (R), `src/lib/engine/render/shader-programs.svelte.test.ts` (R, linking)
 
 ### SHADER-18 · Only the pointed-at and the selected region are lifted, selection the stronger
 
@@ -304,13 +304,13 @@ The legacy comparison file `parity/E2.test.ts` is deleted; a rule that lists no 
 
 ## Cap labels of cut-only atlases
 
-### SHADER-30 · Under MRI colour, caps of an atlas without parcel solids sample its labels
+### SHADER-30 · Caps of an atlas without parcel solids sample its labels
 
-- **Rule:** Cap labels are on only under MRI colour and only when the cut atlas has no parcel solids. They read the cut layer's label volume, palette, world-to-voxel matrix and highlight codes and lifts as they stand, and know whether a region is isolated.
+- **Rule:** Cap labels are on whenever the cut atlas has no parcel solids, except under tissue colour, and give the cap its label's colour except under MRI colour without a paint. They read the cut layer's label volume, palette, world-to-voxel matrix and highlight codes and lifts as they stand, and know whether a region is isolated. A cap samples where it has no region of its own, where the isolated label exists only in the cut atlas, or, outside MRI colour, where the atlas relabels the structure it was drawn from (a thalamus inside a territory); supplemental anatomy never samples.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/tissues/cap-labels.js:5-27`
-- **Expected:** new → off, no volume or palette, highlight codes (−1, −1), lifts (0, 0), not isolated. `surfaceColor` `mri`, not wedged → on; `atlas` or wedged → off; volume, palette, matrix, codes and lifts are the layer's own objects; `isolatedRegion` set → isolated true.
+- **Source:** `src/lib/engine/tissues/cap-labels.ts`, `src/lib/engine/tissues/solid-assets.ts` (`paintSolids`)
+- **Expected:** new → off, colour off, no volume or palette, highlight codes (−1, −1), lifts (0, 0), not isolated. Not wedged: `mri` → on, colour off; `atlas`, `network`, `territory` → on, colour on; `tissue` → off. Wedged → off in every mode. Volume, palette, matrix, codes and lifts are the layer's own objects; `isolatedRegion` set → isolated true. Painting under atlas colour: relabelled thalamus and envelope sample, the labelled caudate and the cord do not; under MRI only the envelope.
 - **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R, enabled and volume, SLICE-36), `src/lib/engine/tissues/cap-labels.test.ts` (R)
 
 ### SHADER-31 · A sampled cap hides removed labels and lifts the marked one
