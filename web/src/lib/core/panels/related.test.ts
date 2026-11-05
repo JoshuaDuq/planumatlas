@@ -53,8 +53,9 @@ test('PANEL-20 the published caudate and thalamus are linked to the source regio
     'nextbrain:left:48',
   ]);
   const thalamus = involved('learning:left:thalamus');
-  assert.equal(thalamus.size, 53, 'itself and its 52 source regions');
+  assert.equal(thalamus.size, 54, 'itself and its 53 source regions');
   assert.ok(thalamus.has('nextbrain:left:190'));
+  assert.ok(thalamus.has('nextbrain:left:512'));
   assert.deepEqual([...involved('nextbrain:left:48')].sort(), [
     'learning:left:caudate',
     'nextbrain:left:48',

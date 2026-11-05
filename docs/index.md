@@ -214,6 +214,7 @@ reference/circuit-evidence
 reference/full-text-review
 reference/deficit-additions-*
 reference/hart-2016-review-2026-11-02
+reference/teaching-set-audit-2026-11-05
 ```
 
 ```{toctree}
