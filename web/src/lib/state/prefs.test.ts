@@ -9,12 +9,13 @@ describe('prefs', () => {
     delete (globalThis as Record<string, unknown>).localStorage;
   });
 
-  test('the keys are the ones the legacy viewer wrote', () => {
+  test('the keys are the ones the legacy viewer wrote, and the guided tour’s own', () => {
     expect(PREF_KEYS).toEqual({
       theme: 'planum.theme',
       language: 'planum-lang',
       singleKeyShortcuts: 'planum.single-key-shortcuts',
       stageHint: 'planum.stage-hint',
+      guide: 'planum.guide',
     });
   });
 

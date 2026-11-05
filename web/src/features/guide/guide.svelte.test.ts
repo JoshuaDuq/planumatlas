@@ -3,10 +3,10 @@
 // and axe. Opening it from the settings menu is the
 // masthead's (Masthead.svelte.test.ts).
 import { afterEach, beforeEach, expect, test } from 'vitest';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
-import { startGuide } from './tour.ts';
+import { firstLaunch, startGuide } from './tour.ts';
 
 const TARGETS = `
   <header id="masthead">
@@ -54,6 +54,7 @@ afterEach(() => {
   removeEventListener('hashchange', recordHash);
   document.getElementById('fixture')?.remove();
   history.replaceState(history.state, '', location.pathname + location.search);
+  localStorage.removeItem('planum.guide');
 });
 
 const start = (lang: 'en' | 'fr' = 'en') =>
@@ -114,8 +115,8 @@ test('each stop opens its feature over the home view, and closing puts the reade
     next().click();
     undimmed.push(showing());
   }
-  // Only the stops that open nothing dim the page: welcome, the top bar and settings.
-  expect(undimmed).toEqual([false, ...Array(6).fill(true), false, ...Array(4).fill(true), false]);
+  // Only the welcome, which points at nothing, dims the page.
+  expect(undimmed).toEqual([false, ...Array(STOPS - 1).fill(true)]);
   expect(hashes).toEqual([
     HOME,
     `${HOME}&region=destrieux:left:29`,
@@ -140,16 +141,41 @@ test('each stop opens its feature over the home view, and closing puts the reade
   expect(history.length).toBe(entries);
 });
 
-test('a click on the overlay, meant for the brain, leaves the tour where it was', async () => {
+test('a stop that points at a control leaves the page live; the welcome alone holds it back', async () => {
+  const pressed: string[] = [];
+  const tab = document.getElementById('workspace-tab-functions')!;
+  tab.addEventListener('click', () => pressed.push(title()));
   start();
-  next().click();
   // driver.js draws its overlay on the stop's first frame.
   await expect.poll(() => document.querySelector('.driver-overlay path')).not.toBeNull();
-  document
-    .querySelector('.driver-overlay path')!
-    .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  // A real pointer: the overlay over the welcome takes the press, and does not end the tour.
+  await userEvent.click(tab, { force: true });
+  expect(pressed).toEqual([]);
   expect(closed).toBe(0);
+  next().click();
+  await userEvent.click(tab);
+  expect(pressed).toEqual(['The brain']);
   expect(title()).toBe('The brain');
+});
+
+test('starting the tour again ends the one under way first, so the reader’s view still comes back', () => {
+  start();
+  next().click();
+  next().click();
+  expect(location.hash).toBe(`${HOME}&view=superior`);
+  start();
+  expect(closed).toBe(1);
+  expect(title()).toBe('How to use Planum');
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect(location.hash).toBe(READER);
+});
+
+test('the first launch offers the tour once, and only to a page opened plainly', () => {
+  expect(firstLaunch(HOME)).toBe(true);
+  expect(firstLaunch('')).toBe(true);
+  expect(firstLaunch(READER)).toBe(false);
+  start();
+  expect(firstLaunch(HOME)).toBe(false);
 });
 
 test('a target the layout hides is left out of the stops and the count', () => {
@@ -166,17 +192,29 @@ test('a target re-rendered after the tour starts is still the one highlighted', 
   expect(document.querySelector('.driver-active-element')).toBe(host.firstElementChild);
 });
 
-test('the tour claims Escape and the arrows from the page keymap, then Escape closes it', async () => {
+test('the card answers the arrows and Escape, claimed from the page keymap; elsewhere they stay the page’s', () => {
   start();
-  for (const name of ['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']) {
+  for (const name of ['ArrowUp', 'ArrowDown']) {
     expect(key(next(), 'keydown', name).defaultPrevented, name).toBe(true);
   }
   // Enter and Space press the focused button; claiming them would stop the tour's own buttons.
   expect(key(next(), 'keydown', 'Enter').defaultPrevented).toBe(false);
   expect(key(next(), 'keydown', ' ').defaultPrevented).toBe(false);
-  key(next(), 'keyup', 'Escape');
-  await expect.poll(() => closed).toBe(1);
+  expect(key(next(), 'keydown', 'ArrowLeft').defaultPrevented).toBe(true);
+  expect(title()).toBe('How to use Planum');
+  expect(key(next(), 'keydown', 'ArrowRight').defaultPrevented).toBe(true);
+  expect(title()).toBe('The brain');
+  // Escape in an open menu, or on the brain, is the page's: the tour stays.
+  const elsewhere = document.querySelector('.orientation-gizmo button')!;
+  expect(key(elsewhere, 'keydown', 'Escape').defaultPrevented).toBe(false);
+  key(elsewhere, 'keyup', 'Escape');
+  expect(title()).toBe('The brain');
+  expect(key(next(), 'keydown', 'ArrowLeft').defaultPrevented).toBe(true);
+  expect(title()).toBe('How to use Planum');
+  expect(key(next(), 'keydown', 'Escape').defaultPrevented).toBe(true);
+  expect(closed).toBe(1);
   expect(document.querySelector('.driver-popover')).toBeNull();
+  expect(location.hash).toBe(READER);
 });
 
 test('axe: light and dark, desktop and 390 px', async () => {

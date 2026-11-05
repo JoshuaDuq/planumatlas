@@ -113,12 +113,16 @@
     border-bottom-color: var(--surface-base);
   }
 
-  /* A stop that opens a view dims nothing; a ring marks the control instead. */
+  /* A stop that points at a control dims nothing and lets every click through; a ring marks the
+     control instead. The path's opacity and pointer events are driver.js's inline styles. */
   .driver-overlay path {
     transition: opacity var(--dialog-transition) var(--ease-ui);
   }
   :root[data-guide-showing] .driver-overlay path {
     opacity: 0 !important;
+  }
+  :root[data-guide-showing] :is(.driver-overlay, .driver-overlay path) {
+    pointer-events: none !important;
   }
   :root[data-guide-showing] .driver-active-element:not(canvas) {
     outline: 2px solid var(--accent);

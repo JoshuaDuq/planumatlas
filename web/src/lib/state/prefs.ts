@@ -4,6 +4,7 @@ export const PREF_KEYS = {
   language: 'planum-lang',
   singleKeyShortcuts: 'planum.single-key-shortcuts',
   stageHint: 'planum.stage-hint',
+  guide: 'planum.guide',
 } as const;
 
 export type PrefKey = (typeof PREF_KEYS)[keyof typeof PREF_KEYS];

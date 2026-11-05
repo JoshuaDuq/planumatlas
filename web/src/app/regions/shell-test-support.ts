@@ -28,8 +28,16 @@ export interface Shell {
   target: HTMLElement;
   /** The live region the page's announcer speaks through. */
   announcer: HTMLElement;
-  /** Mounts the shell; with `start`, runs the app's start on the link, as main.ts does. */
-  open(options?: { hash?: string; start?: boolean; tractAnatomy?: string }): Promise<void>;
+  /**
+   * Mounts the shell; with `start`, runs the app's start on the link, as main.ts does. The reader
+   * has seen the guided tour unless `firstVisit`, so the tour starts only where a case asks for it.
+   */
+  open(options?: {
+    hash?: string;
+    start?: boolean;
+    tractAnatomy?: string;
+    firstVisit?: boolean;
+  }): Promise<void>;
   close(): void;
 }
 
@@ -40,9 +48,15 @@ export function createShell(): Shell {
   let detach: () => void;
 
   Object.assign(shell, {
-    async open({ hash = '', start = true, tractAnatomy }: Parameters<Shell['open']>[0] = {}) {
+    async open({
+      hash = '',
+      start = true,
+      tractAnatomy,
+      firstVisit = false,
+    }: Parameters<Shell['open']>[0] = {}) {
       await page.viewport(1280, 800);
       localStorage.clear();
+      if (!firstVisit) localStorage.setItem('planum.guide', 'seen');
       history.replaceState(null, '', `${location.pathname}${hash}`);
       shell.target = document.body.appendChild(document.createElement('div'));
       shell.target.id = 'app';

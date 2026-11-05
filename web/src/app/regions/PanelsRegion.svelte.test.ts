@@ -84,6 +84,8 @@ beforeEach(async () => {
   announcer = document.body.appendChild(document.createElement('p'));
   detach = attachAnnouncer(announcer);
   localStorage.clear();
+  // The guided tour opens on a first visit; these cases are not one (ShellRegions.svelte.test.ts).
+  localStorage.setItem('planum.guide', 'seen');
 });
 afterEach(() => {
   app.dispose();

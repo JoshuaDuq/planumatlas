@@ -80,9 +80,17 @@
   // as the page unmounts finds the masthead already gone, and with it any button to focus.
   const settingsButton = () => masthead?.settingsButton() ?? null;
 
-  // The key that opens the shortcuts sheet (ports.ts).
+  function guide() {
+    startGuide(lang, {
+      animate: !app.media.reducedMotion,
+      onClose: () => settingsButton()?.focus(),
+    });
+  }
+
+  // The key that opens the shortcuts sheet, and the first launch's tour (ports.ts).
   $effect(() =>
     app.registerPorts({
+      startGuide: guide,
       toggleShortcuts({ instant }) {
         shortcutsInstant = instant;
         shortcutsOpen = !shortcutsOpen;
@@ -131,11 +139,7 @@
     return location.href;
   }}
   onProvenance={openProvenance}
-  onGuide={() =>
-    startGuide(lang, {
-      animate: !app.media.reducedMotion,
-      onClose: () => settingsButton()?.focus(),
-    })}
+  onGuide={guide}
   onShortcuts={(event) => {
     shortcutsInstant = isKeyboardActivation(event);
     shortcutsOpen = true;

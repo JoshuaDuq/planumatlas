@@ -15,6 +15,7 @@ import type { App } from './application.svelte.ts';
 import { bindAppLifecycle } from './lifecycle.ts';
 import { missingWebgl } from './webgl-check.ts';
 import { composeWorld } from './world.ts';
+import { firstLaunch } from '../features/guide/tour.ts';
 
 /** What `mount` is given for `App.svelte`: its status and language follow the app, and every region can read the app from the context. */
 export function shellOptions(app: App) {
@@ -106,8 +107,9 @@ export async function startApp(
     return;
   }
   try {
+    const arrived = location.hash;
     // A link is applied field by field: what this anatomy cannot apply is named, not fatal.
-    const link = decodeState(location.hash);
+    const link = decodeState(arrived);
     const wanted = link.state;
     const modelsUrl = `${ASSET_BASE}models`;
     const published = await loadAnatomies(`${modelsUrl}/anatomies.json`);
@@ -134,6 +136,7 @@ export async function startApp(
     const notApplied = await world.links.restore(link, { immediate: true });
     app.session.setStatus('ready');
     world.links.report(notApplied);
+    if (firstLaunch(arrived)) app.ports.startGuide();
     prefetchOtherAtlas(engine.model);
     globalThis.addEventListener('hashchange', world.links.onHashChange);
     app.defer(() => globalThis.removeEventListener('hashchange', world.links.onHashChange));

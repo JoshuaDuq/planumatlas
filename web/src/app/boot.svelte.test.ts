@@ -71,6 +71,7 @@ function portStubs() {
     openDeficit: vi.fn(),
     openLessonMri: vi.fn(),
     openLessonStep: vi.fn(),
+    startGuide: vi.fn(),
     focusInDetail: () => false,
     mprOpen: () => false,
     diffusionMriOpen: () => false,
@@ -130,6 +131,19 @@ afterEach(() => {
 });
 
 describe('the start', () => {
+  test('starts the guided tour on a first visit to a plain page, not on a shared link or a later visit', async () => {
+    const first = await boot('#anatomy=cdmd&lang=en');
+    expect(first.ports.startGuide).toHaveBeenCalledTimes(1);
+    expect(first.app.session.state.status).toBe('ready');
+
+    const shared = await boot('#region=destrieux:left:29');
+    expect(shared.ports.startGuide).not.toHaveBeenCalled();
+
+    localStorage.setItem('planum.guide', 'seen');
+    const later = await boot('');
+    expect(later.ports.startGuide).not.toHaveBeenCalled();
+  });
+
   test('frames the opening view with the stage’s own framing, then applies the link, then is ready', async () => {
     // The status each view is framed under: the link's own is applied while loading.
     const statuses: string[] = [];

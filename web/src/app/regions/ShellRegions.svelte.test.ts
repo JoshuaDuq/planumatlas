@@ -156,6 +156,17 @@ describe('the ports', () => {
     expect(ports.mprOpen()).toBe(false);
   });
 
+  test('a first visit to the plain page opens the guided tour, whose close hands focus to More settings', async () => {
+    await shell.open({ hash: '#anatomy=cdmd&lang=en', firstVisit: true });
+    const card = () => document.querySelector<HTMLElement>('.driver-popover');
+    expect(card()?.querySelector('.driver-popover-title')!.textContent).toBe('How to use Planum');
+    card()!.querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+    expect(card()).toBeNull();
+    expect(document.activeElement).toBe(
+      page.getByRole('button', { name: 'More settings' }).element(),
+    );
+  });
+
   test('the tracts overlay turns on and off with the stage listening to the engine', async () => {
     await shell.open();
     await page.getByRole('tab', { name: 'Tracts' }).click();
