@@ -122,6 +122,7 @@
   const noMatchHint = $derived(text.noMatchHint(catalog.bundles.length, catalog.name[lang]));
 
   const runner = createBusyRunner();
+  let running: Promise<boolean> = Promise.resolve(true);
   const results = createDebouncedAnnouncer();
 
   $effect(() => {
@@ -184,7 +185,7 @@
       root?.contains(document.activeElement) && document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    const ok = await runner.run(action, {
+    running = runner.run(action, {
       onStart() {
         busy = true;
         failure = null;
@@ -199,6 +200,7 @@
         refresh();
       },
     });
+    const ok = await running;
     await tick();
     restoreFocus(focused);
     return ok;
@@ -229,6 +231,26 @@
       pending.delete(id);
       if (ok && !destroyed) announce(text.loaded(name));
     });
+  }
+
+  /**
+   * Draw exactly these bundles, as a link names them: after any load in flight, the tab's first
+   * load and the missing bundles download as one, their keys shown on and busy meanwhile.
+   */
+  export async function showTracts(ids: readonly string[]) {
+    while (runner.busy) await running;
+    if (!active || destroyed) return;
+    const wanted = new Set(ids);
+    const missing = ids.filter((id) => !tracts.hasBundle(id));
+    for (const id of missing) pending.add(id);
+    await load(async () => {
+      await tracts.setActive(true);
+      for (const id of ids) if (!tracts.hasBundle(id)) await tracts.loadBundle(id);
+      for (const bundle of tracts.snapshot()) {
+        tracts.setVisible(bundle.id, wanted.has(bundle.catalogId));
+      }
+    });
+    for (const id of missing) pending.delete(id);
   }
 
   async function retry() {

@@ -225,6 +225,40 @@ describe('the list', () => {
   });
 });
 
+describe('a link’s bundles', () => {
+  test('showTracts draws exactly the linked bundles, after the first load in flight', async () => {
+    const engine = createEngine();
+    const view = await render(TractsExplorer, props(engine));
+    await view.component.showTracts(['cg-left', 'af-left']);
+    expect(drawn(engine)).toEqual(['af-left', 'cg-left']);
+    expect(el('Cingulum · left').checked).toBe(true);
+    expect(el('Corticospinal tract · right').checked).toBe(false);
+    await view.component.showTracts([]);
+    expect(drawn(engine)).toEqual([]);
+  });
+
+  test('a linked bundle shows as asked for while it downloads, and the failure is the panel’s', async () => {
+    const download = deferred();
+    const engine = slowEngine(createEngine(), { loadBundle: () => download.promise });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { view } = await ready(engine);
+    const shown = view.component.showTracts(['cg-left']);
+    await expect.poll(() => el('Cingulum · left').checked).toBe(true);
+    expect(group('Cingulum').element().getAttribute('aria-busy')).toBe('true');
+    download.reject(Object.assign(new Error('offline'), { code: 'asset-fetch' }));
+    await shown;
+    await expect.poll(() => text(page.getByRole('alert'))).toContain('could not be downloaded');
+    expect(el('Cingulum · left').checked).toBe(false);
+  });
+
+  test('a closed tab draws nothing for a link', async () => {
+    const engine = createEngine();
+    const view = await render(TractsExplorer, props(engine, { active: false }));
+    await view.component.showTracts(['cg-left']);
+    expect(engine.tracts.ready).toBe(false);
+  });
+});
+
 describe('the search', () => {
   test('filters on the tract name and any member name, without needing Enter', async () => {
     await ready();

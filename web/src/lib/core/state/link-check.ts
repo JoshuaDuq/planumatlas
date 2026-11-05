@@ -21,6 +21,8 @@ export interface KnownLinkIds {
   /** The coordinate spaces published, `unstated` among them; none on an anatomy without them. */
   coordinateSpaces: ReadonlySet<string>;
   /** The anatomy's own tract bundles a lesion reaches; none on an anatomy without tracts of its own. */
+  /** The bundles the Tracts tab lists. */
+  tracts: ReadonlySet<string>;
   lesionBundles(lesion: NonNullable<LinkState['lesion']>): readonly string[];
 }
 
@@ -57,6 +59,7 @@ export function checkLink(
     ['selectedDeficit', (id: string) => known.deficits.has(id)],
     ['circuit', (id: string) => known.circuits.has(id)],
     ['circuitMap', (id: string) => known.maps.has(id)],
+    ['tracts', (ids: string[]) => ids.every((id) => known.tracts.has(id))],
   ];
   for (const [key, valid] of checks) {
     if (key in state && !(valid as (value: unknown) => boolean)(state[key])) reject(key);
@@ -84,6 +87,8 @@ export function checkLink(
   if (state.focused && !state.selectedRegion) reject('focused');
   // Stroke cases are picked in a region's sheet, and are not shown without one.
   if ('strokeCases' in state && !state.selectedRegion) reject('strokeCases');
+  // Ticked tracts are the Tracts tab's, and are not drawn from another.
+  if ('tracts' in state && state.explorer !== 'diffusion') reject('tracts');
   // A lesion's colouring and drawn tract mean nothing without it; the tract must be one it reaches.
   if ('lesionMode' in state && !state.lesion) reject('lesionMode');
   if (

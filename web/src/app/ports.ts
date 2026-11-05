@@ -1,6 +1,7 @@
 import type { KeymapCommands } from '../lib/controller/keymap.ts';
 import type { ExcursionDeps, MriDialog, Shell } from '../lib/controller/excursion.svelte.ts';
 import type { SelectionInterface } from '../lib/controller/anatomy.svelte.ts';
+import type { LinkHooks } from '../lib/controller/links.ts';
 
 /**
  * What the regions provide once they are mounted: the pieces of the interface that the controllers
@@ -31,6 +32,8 @@ export interface UiPorts
   openLessonMri: ExcursionDeps['panels']['openMri'];
   /** The Circuits panel's way into one landmark of the open lesson, from the route's marks on the stage. */
   openLessonStep(index: number): unknown;
+  /** The Tracts panel's way to draw a link's bundles. */
+  showTracts: LinkHooks['showTracts'];
   /** The guided tour, from the masthead that opens it from the settings menu. */
   startGuide(): void;
   /**
@@ -67,6 +70,7 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   openDeficit: true,
   openLessonMri: true,
   openLessonStep: true,
+  showTracts: true,
 };
 
 /**

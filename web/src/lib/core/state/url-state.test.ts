@@ -422,6 +422,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     coordinate: [-42, 22.5, 6],
     coordinateSpace: 'unstated',
     strokeCases: ['M2295', 'M2294'],
+    tracts: ['af-left', 'slf-left'],
   });
   assert.deepEqual(
     written.split('&').map((pair) => pair.split('=')[0]),
@@ -463,11 +464,12 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'coord',
       'space',
       'cases',
+      'tracts',
     ],
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -506,8 +508,18 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     coordinate: 'coord',
     coordinateSpace: 'space',
     strokeCases: 'cases',
+    tracts: 'tracts',
     hiddenRegions: 'hidden',
   });
+});
+
+test('ticked tracts travel as ids, none as an empty list, a repeat or a blank rejected', () => {
+  assert.equal(encodeState({ tracts: [] }), 'tracts=');
+  assert.equal(encodeState({ tracts: null }), '');
+  assert.deepEqual(decoded('#tracts='), { tracts: [] });
+  assert.deepEqual(decoded('#tracts=af-left,slf-left').tracts, ['af-left', 'slf-left']);
+  assert.deepEqual(decodeState('#tracts=af-left,af-left').rejected, ['tracts']);
+  assert.deepEqual(decodeState('#tracts=af-left,').rejected, ['tracts']);
 });
 
 test('STATE-05 a repeated hidden id is read once', () => {

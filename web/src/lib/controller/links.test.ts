@@ -122,6 +122,7 @@ function setup(
       showDetail() {},
       openFunction() {},
       openDeficit() {},
+      showTracts: async () => {},
       ...extras.hooks,
     },
     defaultAnatomy: 'cdmd',
@@ -329,6 +330,67 @@ describe('stroke cases in the link', () => {
       'cases',
     ]);
     expect(strokeCases.show).not.toHaveBeenCalled();
+  });
+});
+
+describe('the ticked tracts in the link', () => {
+  const name = { en: 'n', fr: 'n' };
+  // CDMD's own initial pair, and one more.
+  const tractBundles = [
+    { id: 'af-left', name, initial: true },
+    { id: 'cst-right', name, initial: true },
+    { id: 'slf-left', name },
+  ];
+  const onTracts = (showTracts: LinkHooks['showTracts'] = async () => {}) =>
+    setup({ explorer: 'diffusion' }, undefined, {
+      engineOptions: { tractBundles },
+      hooks: { showTracts },
+    });
+
+  it('carries the ticked bundles from the Tracts tab, in catalog order, and none as an empty list', async () => {
+    const { engine, links } = onTracts();
+    expect(links.linkState().tracts).toBeNull();
+    await engine.tracts.setActive(true);
+    expect(links.linkState().tracts).toBeNull();
+    await engine.tracts.loadBundle('slf-left');
+    engine.tracts.setVisible('af-left', false);
+    expect(links.linkState().tracts).toEqual(['cst-right', 'slf-left']);
+    engine.tracts.setVisible('cst-right', false);
+    engine.tracts.setVisible('slf-left', false);
+    expect(links.linkState().tracts).toEqual([]);
+  });
+
+  it('leaves them out off the Tracts tab', async () => {
+    const { engine, links } = setup({ explorer: 'anatomy' }, undefined, {
+      engineOptions: { tractBundles },
+    });
+    await engine.tracts.setActive(true);
+    engine.tracts.setVisible('af-left', false);
+    expect(links.linkState().tracts).toBeNull();
+  });
+
+  it('draws the linked bundles on the Tracts tab, keeping them in the link until they are drawn', async () => {
+    let drawn!: () => void;
+    const showTracts = vi.fn(() => new Promise<void>((resolve) => (drawn = resolve)));
+    const { links } = onTracts(showTracts);
+    expect(await links.restore(decodeState('tab=diffusion&tracts=slf-left'), {})).toEqual([]);
+    expect(showTracts.mock.calls).toEqual([[['slf-left']]]);
+    expect(links.linkState().tracts).toEqual(['slf-left']);
+    drawn();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(links.linkState().tracts).toBeNull();
+  });
+
+  it('draws the initial bundles for a Tracts link without its own, and none off the tab', async () => {
+    const showTracts = vi.fn(async () => {});
+    const { links } = onTracts(showTracts);
+    await links.restore(decodeState('tab=diffusion'), {});
+    expect(showTracts.mock.calls).toEqual([[['af-left', 'cst-right']]]);
+    expect(await links.restore(decodeState('tab=functions&tracts=slf-left'), {})).toEqual([
+      'tracts',
+    ]);
+    expect(showTracts).toHaveBeenCalledOnce();
   });
 });
 

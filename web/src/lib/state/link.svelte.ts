@@ -29,6 +29,8 @@ export function createLink({
 }) {
   const writer = createLinkWriter(write);
   $effect(() => engine.on('cameraSettled', () => writer.schedule(0)));
+  // The ticked tracts are the engine's, not the view's.
+  $effect(() => engine.on('tractsVisibility', () => writer.schedule()));
   $effect(() => {
     // The view and the lesion are this effect's whole input; the writer ignores their values.
     void view.current;

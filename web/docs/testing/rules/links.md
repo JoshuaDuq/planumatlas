@@ -195,6 +195,15 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** announcer first, `restore(hidden=<first published region>)` → live region "1 part hidden". Announcer after → region empty, one part hidden. Whole app: boot with `#hidden=<region>` → the live region reads "1 part hidden".
 - **Covered by:** `src/lib/controller/links.svelte.test.ts` (R); `src/app/boot.svelte.test.ts` (R, a boot with `#hidden=`)
 
+### LINK-22 · A Tracts link carries its ticked bundles, and the Tracts panel draws them
+
+- **Rule:** On the Tracts tab the link carries the ticked bundles as `tracts=`, in catalog order: left out while they are the catalog's initial ones (or the tab has not loaded), empty when none is ticked. Off the tab it carries none, and a link naming them off the tab has them rejected. A Tracts link hands its bundles (the initial ones when it names none) to the Tracts panel, which draws exactly those under its own busy and failure handling without holding the restore; the link keeps them until they are drawn.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** new (no legacy counterpart)
+- **Expected:** after ticking `slf-left` and unticking `af-left` → `tracts: ['cst-right', 'slf-left']`; all unticked → `tracts: []`, written `tracts=`. `tab=diffusion&tracts=slf-left` → `showTracts(['slf-left'])`, the link still `['slf-left']` until it resolves; `tab=diffusion` → `showTracts(['af-left', 'cst-right'])`; `tab=functions&tracts=slf-left` → `['tracts']`. Boot on `#tab=diffusion&tracts=slf-left` → the port is called with `['slf-left']` and the address bar keeps it.
+- **Covered by:** `src/lib/controller/links.test.ts` (R); `src/lib/core/state/url-state.test.ts`, `src/lib/core/state/link-check.test.ts` (R, the field); `src/features/tracts/TractsExplorer.svelte.test.ts` (R, browser: drawing, the download and its failure); `src/app/boot.svelte.test.ts` (R, browser)
+
 ## The scene reader
 
 ### LINK-20 · A captured scene is put back with its view and exact camera

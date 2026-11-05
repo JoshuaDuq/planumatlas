@@ -3,6 +3,7 @@ import { START_DOT } from '../state/visual-field-map.svelte.ts';
 import { ALL_DOMAINS, validComparison } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { UNSTATED } from '../core/coordinates/spaces.ts';
+import { tractCatalog } from '../core/diffusion/catalogs.ts';
 import type { Coordinates } from '../core/coordinates/spaces.ts';
 import { linkNotice } from '../core/i18n/errors.ts';
 import type { CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
@@ -47,6 +48,8 @@ export interface LinkHooks {
   showDetail(): void;
   openFunction(id: string): void;
   openDeficit(id: string): void;
+  /** Draw exactly these bundles on the Tracts tab, under its own busy and failure handling. */
+  showTracts(ids: readonly string[]): Promise<void>;
 }
 
 export interface LinksOptions {
@@ -121,6 +124,11 @@ export function createLinks({
     throw new Error('This build publishes no neuropsychological domains for the Functions tab.');
   }
 
+  const tractBundles = tractCatalog(engine.tracts.anatomy).bundles;
+  const initialTracts = tractBundles.filter((bundle) => bundle.initial).map(({ id }) => id);
+  /** The bundles a restore is still drawing, which the link keeps meanwhile. */
+  let restoringTracts: { ids: readonly string[] } | null = null;
+
   const functions = new Set([
     ALL_DOMAINS,
     ...domains.domains.map((domain) => domain.id),
@@ -151,8 +159,37 @@ export function createLinks({
     coordinateSpaces: new Set(
       coordinates ? [...coordinates.metadata.spaces.map(({ id }) => id), UNSTATED] : [],
     ),
+    tracts: new Set(tractBundles.map(({ id }) => id)),
     lesionBundles: (sphere) => engine.lesion.tractBundles(sphere),
   };
+
+  /** The ticked bundles in catalog order; null while they are the initial ones, which a tab not yet loaded draws. */
+  function tractsState(): string[] | null {
+    let ids: readonly string[] = initialTracts;
+    if (restoringTracts) ids = restoringTracts.ids;
+    else if (engine.tracts.ready) {
+      const visible = new Set(
+        engine.tracts
+          .snapshot()
+          .filter((bundle) => bundle.visible)
+          .map((bundle) => bundle.catalogId),
+      );
+      ids = tractBundles.filter(({ id }) => visible.has(id)).map(({ id }) => id);
+    }
+    const initial =
+      ids.length === initialTracts.length && ids.every((id) => initialTracts.includes(id));
+    return initial ? null : [...ids];
+  }
+
+  /** The Tracts tab draws the link's bundles in the background; the link keeps them until it has. */
+  function restoreTracts(ids: readonly string[]) {
+    const restoring = { ids };
+    restoringTracts = restoring;
+    void hooks.showTracts(ids).finally(() => {
+      if (restoringTracts === restoring) restoringTracts = null;
+      link.schedule();
+    });
+  }
 
   /** The plane is not session state. It still belongs in the link (app.js:1754). */
   function cutState(): Partial<LinkInput> {
@@ -207,6 +244,7 @@ export function createLinks({
       // Cases are a region's; a link without the region would not show them.
       strokeCases:
         strokeCases.chosen.length && current.selectedRegion ? [...strokeCases.chosen] : null,
+      tracts: explorer === 'diffusion' ? tractsState() : null,
     };
   }
 
@@ -355,6 +393,7 @@ export function createLinks({
         lesson.close();
       }
       const { explorer, selectedFunction, selectedDeficit } = session.state;
+      if (explorer === 'diffusion') restoreTracts(valid.tracts ?? initialTracts);
       // The drawn streamlines belong to the lesion's report, on Anatomy.
       const tract = explorer === 'anatomy' ? (valid.lesionTract ?? null) : null;
       if (valid.lesionTract && !tract) notApplied.push(PARAMS.lesionTract!);

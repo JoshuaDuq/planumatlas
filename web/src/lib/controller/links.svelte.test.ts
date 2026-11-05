@@ -90,6 +90,7 @@ function build({ announce }: { announce: boolean }) {
           openLandmark: async () => true,
           revealInTree() {},
           showDetail() {},
+          showTracts: async () => {},
           openFunction() {},
           openDeficit() {},
         },

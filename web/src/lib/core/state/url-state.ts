@@ -49,6 +49,7 @@ type Defaults = Pick<
   | 'coordinate'
   | 'coordinateSpace'
   | 'strokeCases'
+  | 'tracts'
 >;
 
 export const DEFAULTS: Defaults = {
@@ -84,6 +85,7 @@ export const DEFAULTS: Defaults = {
   coordinate: null,
   coordinateSpace: null,
   strokeCases: null,
+  tracts: null,
 };
 
 type Reader<T> = (value: string) => T | undefined;
@@ -206,6 +208,12 @@ const strokeCases: Reader<string[]> = (value) => {
     : undefined;
 };
 
+/** Tract bundle ids, each once; empty when none is ticked. */
+const bundleIds: Reader<string[]> = (value) => {
+  const ids = value === '' ? [] : value.split(',');
+  return ids.every(Boolean) && new Set(ids).size === ids.length ? ids : undefined;
+};
+
 /** A lesion as `right,anterior,superior,radius`: a centre in the volume's range, a radius the slider can set. */
 const lesion: Reader<LinkLesion> = (value) => {
   const list = numbers(value);
@@ -321,6 +329,7 @@ const FIELDS: Field[] = [
   field('coordinate', 'coord', coordinate, (point) => point.join(',')),
   field('coordinateSpace', 'space', nonempty),
   field('strokeCases', 'cases', strokeCases, (ids) => ids.join(',')),
+  field('tracts', 'tracts', bundleIds, (ids) => ids.join(',')),
 ];
 
 /** The link parameter each state field travels under. */

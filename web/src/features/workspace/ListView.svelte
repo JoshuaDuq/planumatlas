@@ -74,6 +74,11 @@
     else tree!.focusSearch();
   }
 
+  /** Draw a link's tract bundles on the Tracts tab. */
+  export function showTracts(ids: readonly string[]) {
+    return tracts!.showTracts(ids);
+  }
+
   /** Up and Down from outside the tree walk its rows. */
   export function walkTree(step: 1 | -1) {
     tree!.moveFocus(step);

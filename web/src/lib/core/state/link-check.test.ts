@@ -27,6 +27,7 @@ const known: KnownLinkIds = {
   spinalCord: true,
   // The left bundle while the sphere reaches the left of the midline.
   coordinateSpaces: new Set(['mni152nlin2009casym', 'unstated']),
+  tracts: new Set(['af-left', 'cst-right', 'slf-left']),
   lesionBundles: ({ centre: [x], radius }) => (x - radius < 0 ? ['af-left'] : []),
 };
 
@@ -125,6 +126,15 @@ test('a lesion’s colouring and drawn tract need the lesion, and the tract one 
   const orphan = check('lesionmode=functions&lesiontract=af-left');
   assert.deepEqual(orphan.rejected, ['lesionmode', 'lesiontract']);
   assert.deepEqual(orphan.state, {});
+});
+
+test('ticked tracts are the Tracts tab’s, and only bundles it lists', () => {
+  assert.deepEqual(check('tab=diffusion&tracts=slf-left,af-left').rejected, []);
+  assert.deepEqual(check('tab=diffusion&tracts=').state.tracts, []);
+  assert.deepEqual(check('tab=diffusion&tracts=slf-left,bogus').rejected, ['tracts']);
+  const offTab = check('tab=anatomy&tracts=slf-left');
+  assert.deepEqual(offTab.rejected, ['tracts']);
+  assert.deepEqual(offTab.state, { explorer: 'anatomy' });
 });
 
 test('a coordinate needs a published space, and is never a lesion too', () => {

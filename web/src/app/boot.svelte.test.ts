@@ -71,6 +71,7 @@ function portStubs() {
     openDeficit: vi.fn(),
     openLessonMri: vi.fn(),
     openLessonStep: vi.fn(),
+    showTracts: vi.fn(async () => {}),
     startGuide: vi.fn(),
     focusInDetail: () => false,
     mprOpen: () => false,
@@ -170,6 +171,12 @@ describe('the start', () => {
     expect(ports.showDetailInPlace).toHaveBeenCalled();
     expect(ports.showDetail).not.toHaveBeenCalled();
     expect(ports.openFunction).toHaveBeenCalledWith(domains.domains[0]!.id);
+  });
+
+  test('hands a Tracts link’s bundles to the Tracts panel, and keeps them in the address bar', async () => {
+    const { ports } = await boot('#tab=diffusion&tracts=slf-left');
+    expect(ports.showTracts).toHaveBeenCalledWith(['slf-left']);
+    expect(location.hash).toContain('tracts=slf-left');
   });
 
   test('says what a link restored, because the announcer exists before the restore', async () => {

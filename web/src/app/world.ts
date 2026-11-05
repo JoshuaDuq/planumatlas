@@ -207,6 +207,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
         showDetail: ports.showDetailInPlace,
         openFunction: ports.openFunction,
         openDeficit: ports.openDeficit,
+        showTracts: ports.showTracts,
       },
       followLanguage: language.follow,
       defaultAnatomy,

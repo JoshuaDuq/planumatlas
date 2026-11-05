@@ -222,6 +222,7 @@
         explorer.focusSearch(mode);
       },
       walkTree: (step) => explorer.walkTree(step),
+      showTracts: (ids) => explorer.showTracts(ids),
       openFunction: (id) => panels.functions.openFunction(id),
       openDeficit: (id) => panels.deficits.openDeficit(id),
       openLessonMri: () => panels.circuits.openMri(),
