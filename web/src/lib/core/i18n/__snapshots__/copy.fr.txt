@@ -317,7 +317,7 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha se place à une médiane de  (95<NNBSP>%<NNBSP>: Alpha) sur ce cerveau\"",
    "[\"\",\"Alpha\",\"\"] → \" se place à une médiane de Alpha (95<NNBSP>%<NNBSP>: ) sur ce cerveau\""
   ],
-  "caveat": "Une position du gabarit reportée sur ce seul cerveau par recalage. Ce n’est pas l’endroit où serait le pic propre à cette personne, ni ce que fait ce cerveau à cet endroit.",
+  "caveat": "Une position du gabarit recalée sur ce cerveau<NNBSP>: ni le pic propre à cette personne, ni ce que fait ce cerveau ici.",
   "failedMeasure": "Ce qui se trouve près de la coordonnée n’a pas pu être mesuré.",
   "within": [
    "[\"Alpha\"] → \"À moins de Alpha\"",
@@ -528,9 +528,9 @@
    "lesion": "Lésion"
   },
   "paintTitles": {
-   "function": "Choisi dans l’onglet Fonctions<NNBSP>: fonctions neuropsychologiques sur les aires HCP-MMP, là où les études rapportent régulièrement une activation (Neurosynth). Choisissez une couleur ici pour l’afficher à la place.",
-   "deficit": "Choisi dans l’onglet Déficits<NNBSP>: les régions citées par les constats du déficit ouvert, une couleur par constat. Choisissez une couleur ici pour l’afficher à la place.",
-   "lesion": "Choisi dans le rapport de la lésion<NNBSP>: les territoires des fonctions qu’elle atteint, ou les régions citées par les constats proches. Choisissez une couleur ici pour l’afficher à la place."
+   "function": "Choisi dans l’onglet Fonctions<NNBSP>: fonctions sur les aires HCP-MMP où les études rapportent une activation (Neurosynth). Choisissez une couleur pour la remplacer.",
+   "deficit": "Choisi dans l’onglet Déficits<NNBSP>: les régions citées par les constats du déficit ouvert, une couleur par constat. Choisissez une couleur pour la remplacer.",
+   "lesion": "Choisi dans le rapport de la lésion<NNBSP>: les territoires des fonctions qu’elle atteint, ou les régions citées par ses constats. Choisissez une couleur pour la remplacer."
   },
   "surfaceColorTitles": {
    "tissue": "Couleurs des tissus, nuancées par la luminosité T1",
@@ -899,9 +899,14 @@
     "body": "Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées."
    },
    {
+    "id": "linkedMri",
+    "title": "IRM liée",
+    "body": "L’examen d’où ce cerveau a été reconstruit, en trois plans autour d’un même réticule. Cliquez une région du cerveau et le réticule s’y place<NNBSP>; cliquez un point d’une coupe et le cerveau sélectionne la région qui s’y trouve. Faites glisser le bord gauche du panneau pour l’agrandir. M l’ouvre et le ferme."
+   },
+   {
     "id": "lesion",
     "title": "Lésion",
-    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche."
+    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Lésion, choisissez Place la lésion, puis cliquez sur le cerveau."
    },
    {
     "id": "coordinate",
@@ -1047,7 +1052,7 @@
   "isolate": "Isoler",
   "restore": "Rétablir",
   "constituentsHeading": "Régions constitutives",
-  "constituentsNote": "Union de régions sources. Surface lissée pour la lecture<NNBSP>; volume mesuré sur les voxels sources. Les petites régions sans surface restent accessibles en coupe.",
+  "constituentsNote": "Union de régions sources. Surface lissée<NNBSP>; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.",
   "constituentCutOnly": "Coupe seulement"
  },
  "lesion": {
@@ -1075,7 +1080,7 @@
    "[\"Alpha\"] → \"Centrée en Alpha sur ce cerveau (RAS de surface)\"",
    "[\"\"] → \"Centrée en  sur ce cerveau (RAS de surface)\""
   ],
-  "caveat": "Une forme placée sur ce seul cerveau, mesurée sur ses étiquettes de 1 mm. Ce n’est pas la lésion d’un patient et elle ne prédit aucun déficit.",
+  "caveat": "Une forme placée sur ce cerveau et mesurée sur ses étiquettes de 1 mm. Pas la lésion d’un patient<NNBSP>; elle ne prédit aucun déficit.",
   "measuring": "Mesure en cours…",
   "failed": "La lésion n’a pas pu être mesurée.",
   "volumeCaption": "Volume compris, cm³",
@@ -1226,8 +1231,10 @@
  },
  "mpr": {
   "title": "Coupes IRM liées",
-  "subtitle": "Cliquez pour positionner le réticule partagé. Les flèches déplacent d’un millimètre source.",
+  "subtitle": "Cliquez pour placer le réticule. Les flèches le déplacent de 1 mm.",
   "close": "Fermer",
+  "resize": "Largeur de l’IRM liée",
+  "resizeHint": "Faites glisser pour redimensionner. Double-cliquez pour la largeur habituelle.",
   "savePng": "Enregistrer PNG",
   "contrastWindow": "Fenêtre",
   "windowCenter": "Niveau",
@@ -1251,8 +1258,8 @@
    "[\"\"] → \"Position IRM \""
   ],
   "note": [
-   "[{\"individual\":true}] → \"Grille 1 mm d’un sujet unique · coordonnées RAS de surface · G/D explicitement marqués. L’IRM montre le volume complet indépendamment de la visibilité de surface. Les aires corticales de l’atlas restent des étiquettes de surface.\"",
-   "[{\"individual\":false}] → \"Grille 1 mm d’un gabarit moyenné · coordonnées RAS de surface · G/D explicitement marqués. L’IRM montre le volume complet indépendamment de la visibilité de surface. Les aires corticales de l’atlas restent des étiquettes de surface.\""
+   "[{\"individual\":true}] → \"Grille 1 mm d’un sujet unique · coordonnées RAS de surface. L’IRM montre le volume entier<NNBSP>; les aires corticales de l’atlas n’étiquettent que la surface.\"",
+   "[{\"individual\":false}] → \"Grille 1 mm d’un gabarit moyenné · coordonnées RAS de surface. L’IRM montre le volume entier<NNBSP>; les aires corticales de l’atlas n’étiquettent que la surface.\""
   ],
   "readout": [
    "[\"Alpha\",\"\",2] → \"Alpha —  (étiquette 2)\"",
@@ -1261,7 +1268,7 @@
    "[\"\",\"Alpha\",0] → \" — Alpha (étiquette 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (étiquette 1)\""
   ],
-  "asStage": "Chaque plan est montré comme la vue 3D voit sa coupe<NNBSP>; les deux images d’une coupe concordent. Neurologique<NNBSP>: la gauche du patient à gauche de l’écran<NNBSP>; radiologique<NNBSP>: sa droite.",
+  "asStage": "Chaque plan est orienté comme sa coupe 3D. Neurologique<NNBSP>: la gauche du patient à gauche de l’écran<NNBSP>; radiologique<NNBSP>: sa droite.",
   "conventions": {
    "neurological": "neurologique",
    "radiological": "radiologique"
@@ -1282,7 +1289,7 @@
  "mri": {
   "dialog": {
    "close": "Fermer",
-   "hint": "Cliquer sur une coupe pour placer le réticule. Faire défiler pour parcourir les coupes ; les touches fléchées déplacent le réticule d’un voxel.",
+   "hint": "Cliquer pour placer le réticule. Faire défiler pour changer de coupe<NNBSP>; les flèches le déplacent d’un voxel.",
    "plane": "Vue",
    "all": "Coupes liées + 3D",
    "axial": "Axiale",

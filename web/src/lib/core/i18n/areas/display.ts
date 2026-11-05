@@ -23,11 +23,11 @@ export const en = {
   paints: { function: 'Functions', deficit: 'Deficit', lesion: 'Lesion' },
   paintTitles: {
     function:
-      'Set by the Functions tab: neuropsychological functions on HCP-MMP areas, where studies consistently report activation (Neurosynth). Choose a colour here to show it instead.',
+      'Set by the Functions tab: functions on the HCP-MMP areas where studies report activation (Neurosynth). Choose a colour to replace it.',
     deficit:
-      'Set by the Deficits tab: the regions the open deficit’s findings cite, one colour per finding. Choose a colour here to show it instead.',
+      'Set by the Deficits tab: the regions the open deficit’s findings cite, one colour per finding. Choose a colour to replace it.',
     lesion:
-      'Set by the lesion’s report: the territories of the functions it reaches, or the regions its nearby findings cite. Choose a colour here to show it instead.',
+      'Set by the lesion’s report: the territories of the functions it reaches, or the regions its findings cite. Choose a colour to replace it.',
   },
   surfaceColorTitles: {
     tissue: 'Tissue colours, shaded by T1 brightness',
@@ -80,11 +80,11 @@ export const fr: typeof en = {
   paints: { function: 'Fonctions', deficit: 'Déficit', lesion: 'Lésion' },
   paintTitles: {
     function:
-      'Choisi dans l’onglet Fonctions\u202f: fonctions neuropsychologiques sur les aires HCP-MMP, là où les études rapportent régulièrement une activation (Neurosynth). Choisissez une couleur ici pour l’afficher à la place.',
+      'Choisi dans l’onglet Fonctions\u202f: fonctions sur les aires HCP-MMP où les études rapportent une activation (Neurosynth). Choisissez une couleur pour la remplacer.',
     deficit:
-      'Choisi dans l’onglet Déficits\u202f: les régions citées par les constats du déficit ouvert, une couleur par constat. Choisissez une couleur ici pour l’afficher à la place.',
+      'Choisi dans l’onglet Déficits\u202f: les régions citées par les constats du déficit ouvert, une couleur par constat. Choisissez une couleur pour la remplacer.',
     lesion:
-      'Choisi dans le rapport de la lésion\u202f: les territoires des fonctions qu’elle atteint, ou les régions citées par les constats proches. Choisissez une couleur ici pour l’afficher à la place.',
+      'Choisi dans le rapport de la lésion\u202f: les territoires des fonctions qu’elle atteint, ou les régions citées par ses constats. Choisissez une couleur pour la remplacer.',
   },
   surfaceColorTitles: {
     tissue: 'Couleurs des tissus, nuancées par la luminosité T1',

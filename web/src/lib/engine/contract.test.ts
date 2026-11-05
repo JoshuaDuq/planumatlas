@@ -45,9 +45,9 @@ describe('the fake engine', () => {
     const heard: unknown[] = [];
     engine.on('pick', (event) => heard.push(event));
     engine.on('contextLost', () => heard.push('lost'));
-    engine.emit('pick', { id: 'a' });
+    engine.emit('pick', { id: 'a', point: null });
     engine.emit('contextLost', undefined);
-    assert.deepEqual(heard, [{ id: 'a' }, 'lost']);
+    assert.deepEqual(heard, [{ id: 'a', point: null }, 'lost']);
   });
 
   it('reports a tract reference of another anatomy as active', async () => {

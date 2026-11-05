@@ -120,6 +120,7 @@ def expected_metadata(config, nextbrain_source):
                 "label": f"{group['name']} · {side}",
                 "display_names": {"en": group["name"], "fr": group["name_fr"]},
                 "system_names": {"en": group["system"], "fr": group["system_fr"]},
+                **({"notes": group["notes"]} if "notes" in group else {}),
                 "voxel_count": count,
                 "segmentation_volume_mm3": count * grid.voxel_volume_mm3,
                 "voxel_size_mm": grid.spacing_mm,

@@ -5,6 +5,7 @@ export interface GuideStop {
     | 'brain'
     | 'directions'
     | 'section'
+    | 'linkedMri'
     | 'lesion'
     | 'coordinate'
     | 'medial'
@@ -46,9 +47,14 @@ export const en = {
       body: 'Section cuts the brain on a plane, here a coronal one, with its linked MRI slices.',
     },
     {
+      id: 'linkedMri',
+      title: 'Linked MRI',
+      body: 'The scan this brain was reconstructed from, in three planes around one crosshair. Click a region on the brain and the crosshair moves to it; click a point on a scan and the brain selects the region there. Drag the panel’s left edge to enlarge it. M opens and closes it.',
+    },
+    {
       id: 'lesion',
       title: 'Lesion',
-      body: 'Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus.',
+      body: 'Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Lesion, choose Places the lesion, then click the brain.',
     },
     {
       id: 'coordinate',
@@ -121,9 +127,14 @@ export const fr: typeof en = {
       body: 'Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées.',
     },
     {
+      id: 'linkedMri',
+      title: 'IRM liée',
+      body: 'L’examen d’où ce cerveau a été reconstruit, en trois plans autour d’un même réticule. Cliquez une région du cerveau et le réticule s’y place\u202f; cliquez un point d’une coupe et le cerveau sélectionne la région qui s’y trouve. Faites glisser le bord gauche du panneau pour l’agrandir. M l’ouvre et le ferme.',
+    },
+    {
       id: 'lesion',
       title: 'Lésion',
-      body: 'Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche.',
+      body: 'Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Lésion, choisissez Place la lésion, puis cliquez sur le cerveau.',
     },
     {
       id: 'coordinate',

@@ -86,6 +86,20 @@ describe('choosing a plane', () => {
     expect(engine.sections.state.crosshair).toEqual(engine.model.anchorOf(region.id));
   });
 
+  test('a Linked MRI click cuts through the point clicked, not the region already selected', async () => {
+    const region = published.regions.find(
+      (r) => r.atlas === engine.model.state.atlas && r.kind === 'cortex' && r.hemisphere === 'left',
+    )!;
+    engine.model.select(region.id);
+    engine.sections.setCrosshair([21, -7, 30]);
+    const controls = build();
+    await controls.showMriPlane('sagittal');
+    expect(controls.state.mode).toBe('sagittal');
+    expect(engine.sections.state.crosshair).toEqual([21, -7, 30]);
+    expect(controls.offset).toBe(21);
+    expect(setView).toHaveBeenCalled();
+  });
+
   test('the plane already on screen, or already being prepared, is not cut again', async () => {
     const controls = build();
     await controls.choose('off');

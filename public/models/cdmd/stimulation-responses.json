@@ -11745,6 +11745,14 @@
       ],
       "basis": "name"
     },
+    "nextbrain:left:512": {
+      "labels": [
+        "antTH",
+        "midTH",
+        "pstTH"
+      ],
+      "basis": "name"
+    },
     "nextbrain:left:517": {
       "labels": [
         "antTH",
@@ -11816,6 +11824,12 @@
       "basis": "name"
     },
     "nextbrain:left:568": {
+      "labels": [
+        "HPC"
+      ],
+      "basis": "name"
+    },
+    "nextbrain:left:569": {
       "labels": [
         "HPC"
       ],
@@ -12682,6 +12696,12 @@
       "basis": "name"
     },
     "nextbrain:right:10568": {
+      "labels": [
+        "HPC"
+      ],
+      "basis": "name"
+    },
+    "nextbrain:right:10569": {
       "labels": [
         "HPC"
       ],

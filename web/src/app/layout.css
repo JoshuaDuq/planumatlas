@@ -74,32 +74,35 @@
      stage re-frames for what is left. */
   @media (min-width: 801px) and (min-height: 481px),
     (min-width: 801px) and (orientation: portrait) {
+    /* The dock's own width sizes its column, so a width the reader drags it to needs no layout of its own. */
     #app:has(> .mpr-dock) {
-      /* Below 1280 px a narrow column of stacked slices; a rail widened by reader text leaves the stage
-         at least the dock's width. */
-      grid-template-columns:
-        var(--rail-width) minmax(0, 1fr)
-        clamp(240px, (100vw - var(--rail-width)) * 0.45, 400px);
+      grid-template-columns: var(--rail-width) minmax(0, 1fr) auto;
     }
     #app > .mpr-dock {
       grid-column: 3;
       grid-row: 2;
       border-left: 1px solid var(--border-subtle);
+      /* Below 1280 px a narrow column of stacked slices; a rail widened by reader text leaves the stage
+         at least the dock's width. */
+      width: clamp(240px, (100vw - var(--rail-width)) * 0.45, 400px);
+    }
+    /* Dragged wider or narrower; a window made smaller later still leaves the stage 360 px (MprDialog). */
+    #app > .mpr-dock.sized {
+      width: var(--mpr-dock-width);
+      max-width: max(240px, 100vw - var(--rail-width) - 360px);
     }
   }
   @media (min-width: 1280px) and (min-height: 481px) {
     /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width. */
-    #app:has(> .mpr-dock) {
-      grid-template-columns:
-        var(--rail-width) minmax(0, 1fr)
-        clamp(
-          min(400px, (100vw - var(--rail-width)) / 2),
-          min(
-            100dvh - var(--header-height) - var(--footer-height) - 236px,
-            (100vw - var(--rail-width)) / 2
-          ),
-          600px
-        );
+    #app > .mpr-dock:not(.sized) {
+      width: clamp(
+        min(400px, (100vw - var(--rail-width)) / 2),
+        min(
+          100dvh - var(--header-height) - var(--footer-height) - 236px,
+          (100vw - var(--rail-width)) / 2
+        ),
+        600px
+      );
     }
   }
 

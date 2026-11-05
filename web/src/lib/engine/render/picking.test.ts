@@ -167,6 +167,31 @@ describe('picker', () => {
     assert.deepEqual([placed, chosen], [[point], ['destrieux:left:1']]);
   });
 
+  it('a click hands over where the ray met the region it chose, or null without a surface', () => {
+    const domElement = canvas();
+    const chosen: unknown[][] = [];
+    const point = { x: 0.01, y: 0.02, z: 0.03 } as Vector3;
+    let surface = true;
+    createPicker<Region>({
+      domElement: domElement as unknown as HTMLElement,
+      camera: new PerspectiveCamera(),
+      model: () => ({
+        pick: () => ({ id: 'destrieux:left:1' }),
+        ...(surface && { intersect: () => ({ point }) }),
+      }),
+      onSelect: (...args) => chosen.push(args),
+    });
+    domElement.emit('pointerdown', { button: 0 });
+    domElement.emit('pointerup', { button: 0 });
+    surface = false;
+    domElement.emit('pointerdown', { button: 0 });
+    domElement.emit('pointerup', { button: 0 });
+    assert.deepEqual(chosen, [
+      ['destrieux:left:1', point],
+      ['destrieux:left:1', null],
+    ]);
+  });
+
   it('does not clear the selection on a click on the empty stage', () => {
     const { domElement, chosen } = selecting(() => null);
     domElement.emit('pointerdown', { button: 0 });

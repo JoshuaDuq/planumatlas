@@ -302,7 +302,7 @@ describe('the controllers', () => {
 
   test('select the region a click on the model picked, and show its detail', async () => {
     const { ports } = await boot();
-    engine.emit('pick', { id: PICKED });
+    engine.emit('pick', { id: PICKED, point: null });
     expect(engine.model.state.selectedRegion?.id).toBe(PICKED);
     expect(ports.showDetail).toHaveBeenCalled();
   });

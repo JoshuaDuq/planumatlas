@@ -18,7 +18,7 @@ export const en = {
   restore: 'Restore',
   constituentsHeading: 'Constituent regions',
   constituentsNote:
-    'Union of source regions. Surface smoothed for readability; volume measured from source voxels. Small regions without a surface remain available on cuts.',
+    'Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.',
   constituentCutOnly: 'Cut only',
 };
 
@@ -42,6 +42,6 @@ export const fr: typeof en = {
   restore: 'Rétablir',
   constituentsHeading: 'Régions constitutives',
   constituentsNote:
-    'Union de régions sources. Surface lissée pour la lecture\u202f; volume mesuré sur les voxels sources. Les petites régions sans surface restent accessibles en coupe.',
+    'Union de régions sources. Surface lissée\u202f; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.',
   constituentCutOnly: 'Coupe seulement',
 };

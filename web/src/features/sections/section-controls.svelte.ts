@@ -9,6 +9,7 @@ import type {
   EngineCamera,
   EngineModel,
   EngineSections,
+  MprPlane,
   SectionsState,
   Vec3,
 } from '../../lib/engine/api.ts';
@@ -104,6 +105,34 @@ export function createSectionControls({
     failure = null;
   }
 
+  /** Cuts on a plane, through the selected region or, when not, through the crosshair as it is. */
+  async function cutOn(plane: CutMode, throughSelection: boolean) {
+    act();
+    if (plane === (pendingPlane ?? sections.state.mode)) return;
+    const choice = ++choices;
+    pendingPlane = plane === 'off' ? null : plane;
+    try {
+      if (!(await commands.cut(plane, commands.begin()))) return;
+      // A plane chosen while this one was prepared replaced it; that choice frames its own cut.
+      if (!sections.active || sections.state.mode !== plane) return;
+      // The new plane meets the region already chosen, not the midline the slider was left on.
+      const region = throughSelection && model.state.selectedRegion;
+      const anchor = region && model.anchorOf(region.id);
+      if (anchor) {
+        sections.setCrosshair(
+          crosshairThrough(anchor, sections.frame.normal, sections.offsetRange),
+        );
+      }
+      face();
+    } catch (error) {
+      report(error);
+    } finally {
+      // Also after a failure, so the bar says why instead of preparing for ever; and only for the latest
+      // choice, so an overtaken one cannot end a newer plane's preparation (g4-pending-after-failure).
+      if (choice === choices) pendingPlane = null;
+    }
+  }
+
   /** The cut faces the reader, from the side it keeps (app.js:1281). */
   function face() {
     const faced = camera.faceCut();
@@ -185,32 +214,13 @@ export function createSectionControls({
      * A plane chosen in the popover is a scene command: its first cut downloads, and a later command
      * overtakes it. The bar names the plane at once. A plane already chosen does nothing.
      */
-    async choose(plane: CutMode) {
-      act();
-      if (plane === (pendingPlane ?? sections.state.mode)) return;
-      const choice = ++choices;
-      pendingPlane = plane === 'off' ? null : plane;
-      try {
-        if (!(await commands.cut(plane, commands.begin()))) return;
-        // A plane chosen while this one was prepared replaced it; that choice frames its own cut.
-        if (!sections.active || sections.state.mode !== plane) return;
-        // The new plane meets the region already chosen, not the midline the slider was left on.
-        const region = model.state.selectedRegion;
-        const anchor = region && model.anchorOf(region.id);
-        if (anchor) {
-          sections.setCrosshair(
-            crosshairThrough(anchor, sections.frame.normal, sections.offsetRange),
-          );
-        }
-        face();
-      } catch (error) {
-        report(error);
-      } finally {
-        // Also after a failure, so the bar says why instead of preparing for ever; and only for the latest
-        // choice, so an overtaken one cannot end a newer plane's preparation (g4-pending-after-failure).
-        if (choice === choices) pendingPlane = null;
-      }
-    },
+    choose: (plane: CutMode) => cutOn(plane, true),
+
+    /**
+     * A click on a Linked MRI plane: the stage cuts on the same plane through the point clicked, so the
+     * region it selects shows on the cut face.
+     */
+    showMriPlane: (plane: MprPlane) => cutOn(plane, false),
 
     /** The bar's Close: the whole brain again. The caller has already moved focus to the Section tool. */
     async close() {

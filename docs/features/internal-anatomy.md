@@ -116,6 +116,10 @@ A raw marching-cubes surface at 0.5 misplaces no centre by construction; the smo
 
 Each region records its source atlas, the source label ids present, the NextBrain `constituent_regions` (the published NextBrain regions it unions; CerebNet publishes none), the English and French names and system, a teaching colour (distinct display colours, not the source LUT), the voxel count and volume, and the display displacement.
 
+Thirty definitions also carry concise English and French coverage notes, displayed beneath the selected region's name. They explain composite units and partial structures: the accumbens core, the dorsal medial geniculate nucleus, hippocampal formation including alveus but excluding fimbria, broad brainstem territories, and the anterior vermis included in CerebNet's hemispheric lobules. Both translations must be nonempty; malformed notes stop the build. The manifest and GLB carry the same notes, checked against the definition during validation.
+
+The [2026-11-05 teaching-set audit](../reference/teaching-set-audit-2026-11-05.md) restored three omitted NextBrain constituents: suprachiasmatic nucleus (160) in the hypothalamus, stratum oriens of caudal CA2 (569) in the hippocampal formation, and suprageniculate nucleus of thalamus (512) in the thalamus. Each side includes only labels present in its source volume. Unit IDs and the 106-solid count are unchanged.
+
 **Caudal medulla.** NextBrain's lowest medullary voxel lies near surface z of −32 to −34 mm, while the scan, aseg and the cord (which starts at C1) reach lower. `nextbrain_floors` finds, for the `medulla` unit (labels 662, 654 and 765), the lowest voxel centre in surface z on each side and takes the higher of the two (so neither side has a gap above the aseg unit). `below_floors` then clears aseg's brainstem (label 16) at and above that z, and the remainder is the `caudal-medulla` unit, spanning about −48.5 to −31.4 mm on CDMD. The NextBrain level keeps the gap.
 
 ### 6. CerebNet lobules
@@ -173,7 +177,7 @@ NextBrain against aseg (Dice on NextBrain's 0.4 mm grid, aseg carried across by 
 - **FreeSurfer surface defects** before repair: 8 holes on CDMD.
 - **Shading is illustrative.** T1 relief and tissue colours are not measured optical or histological properties.
 - **Smoothing adds no resolution.** The 0.6 mm bound is a display bound; measurements remain source-voxel counts.
-- **NextBrain's medial geniculate** is only the dorsal division (label 504, about 11 mm³), so the unit is named so.
+- **The teaching set's medial geniculate unit** uses only the explicitly named dorsal division (label 504, about 11 mm³). It does not represent the whole medial geniculate body.
 - **Conversion fidelity, not clinical accuracy.** Every published `validation.json` records `clinical_accuracy_validated: false`.
 
 ## Reproduce

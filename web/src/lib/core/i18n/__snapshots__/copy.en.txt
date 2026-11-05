@@ -317,7 +317,7 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha lands a median  (95%: Alpha) away on this brain\"",
    "[\"\",\"Alpha\",\"\"] → \" lands a median Alpha (95%: ) away on this brain\""
   ],
-  "caveat": "A template location carried onto this one brain by registration. It is not where this person’s own peak would be, and not what this brain does here.",
+  "caveat": "A template location registered onto this brain: not this person’s own peak, nor what this brain does here.",
   "failedMeasure": "What lies near the coordinate could not be measured.",
   "within": [
    "[\"Alpha\"] → \"Within Alpha\"",
@@ -528,9 +528,9 @@
    "lesion": "Lesion"
   },
   "paintTitles": {
-   "function": "Set by the Functions tab: neuropsychological functions on HCP-MMP areas, where studies consistently report activation (Neurosynth). Choose a colour here to show it instead.",
-   "deficit": "Set by the Deficits tab: the regions the open deficit’s findings cite, one colour per finding. Choose a colour here to show it instead.",
-   "lesion": "Set by the lesion’s report: the territories of the functions it reaches, or the regions its nearby findings cite. Choose a colour here to show it instead."
+   "function": "Set by the Functions tab: functions on the HCP-MMP areas where studies report activation (Neurosynth). Choose a colour to replace it.",
+   "deficit": "Set by the Deficits tab: the regions the open deficit’s findings cite, one colour per finding. Choose a colour to replace it.",
+   "lesion": "Set by the lesion’s report: the territories of the functions it reaches, or the regions its findings cite. Choose a colour to replace it."
   },
   "surfaceColorTitles": {
    "tissue": "Tissue colours, shaded by T1 brightness",
@@ -899,9 +899,14 @@
     "body": "Section cuts the brain on a plane, here a coronal one, with its linked MRI slices."
    },
    {
+    "id": "linkedMri",
+    "title": "Linked MRI",
+    "body": "The scan this brain was reconstructed from, in three planes around one crosshair. Click a region on the brain and the crosshair moves to it; click a point on a scan and the brain selects the region there. Drag the panel’s left edge to enlarge it. M opens and closes it."
+   },
+   {
     "id": "lesion",
     "title": "Lesion",
-    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus."
+    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Lesion, choose Places the lesion, then click the brain."
    },
    {
     "id": "coordinate",
@@ -1047,7 +1052,7 @@
   "isolate": "Isolate",
   "restore": "Restore",
   "constituentsHeading": "Constituent regions",
-  "constituentsNote": "Union of source regions. Surface smoothed for readability; volume measured from source voxels. Small regions without a surface remain available on cuts.",
+  "constituentsNote": "Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.",
   "constituentCutOnly": "Cut only"
  },
  "lesion": {
@@ -1075,7 +1080,7 @@
    "[\"Alpha\"] → \"Centred at Alpha on this brain (surface RAS)\"",
    "[\"\"] → \"Centred at  on this brain (surface RAS)\""
   ],
-  "caveat": "A shape placed on this one brain, measured against its 1 mm labels. It is not a patient’s lesion and predicts no deficit.",
+  "caveat": "A shape placed on this brain and measured against its 1 mm labels. Not a patient’s lesion; it predicts no deficit.",
   "measuring": "Measuring…",
   "failed": "The lesion could not be measured.",
   "volumeCaption": "Volume inside, cm³",
@@ -1226,8 +1231,10 @@
  },
  "mpr": {
   "title": "Linked MRI sections",
-  "subtitle": "Click to position the shared crosshair. Arrows move one source millimetre.",
+  "subtitle": "Click to place the crosshair. Arrows move it 1 mm.",
   "close": "Close",
+  "resize": "Linked MRI width",
+  "resizeHint": "Drag to resize. Double-click for the usual width.",
   "savePng": "Save PNG",
   "contrastWindow": "Window",
   "windowCenter": "Level",
@@ -1251,8 +1258,8 @@
    "[\"\"] → \" MRI position\""
   ],
   "note": [
-   "[{\"individual\":true}] → \"1 mm single-subject grid · surface RAS coordinates · L/R explicitly marked. MRI shows the full volume independently of surface visibility. Cortical atlas areas remain surface labels.\"",
-   "[{\"individual\":false}] → \"1 mm averaged-template grid · surface RAS coordinates · L/R explicitly marked. MRI shows the full volume independently of surface visibility. Cortical atlas areas remain surface labels.\""
+   "[{\"individual\":true}] → \"1 mm single-subject grid · surface RAS coordinates. The MRI shows the full volume; cortical atlas areas label the surface only.\"",
+   "[{\"individual\":false}] → \"1 mm averaged-template grid · surface RAS coordinates. The MRI shows the full volume; cortical atlas areas label the surface only.\""
   ],
   "readout": [
    "[\"Alpha\",\"\",2] → \"Alpha —  (label 2)\"",
@@ -1261,7 +1268,7 @@
    "[\"\",\"Alpha\",0] → \" — Alpha (label 0)\"",
    "[\"Alpha\",\"\",1] → \"Alpha —  (label 1)\""
   ],
-  "asStage": "Each plane is shown as the 3D view faces its cut, so the two pictures of a cut agree. Neurological: the patient’s left on the screen’s left; radiological: their right there.",
+  "asStage": "Each plane faces the way its 3D cut does. Neurological: the patient’s left on the screen’s left; radiological: their right there.",
   "conventions": {
    "neurological": "neurological",
    "radiological": "radiological"
@@ -1282,7 +1289,7 @@
  "mri": {
   "dialog": {
    "close": "Close",
-   "hint": "Click a slice to position the crosshair. Scroll through slices; arrow keys move one voxel.",
+   "hint": "Click to place the crosshair. Scroll to change slice; arrow keys move one voxel.",
    "plane": "View",
    "all": "Linked slices + 3D",
    "axial": "Axial",

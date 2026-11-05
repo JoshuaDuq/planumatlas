@@ -344,7 +344,7 @@ test('I18N-07 · the MRI dialog reads its strings from the mri area, with the Fr
   const { en, fr } = { en: TRANSLATIONS.en.mri.dialog, fr: TRANSLATIONS.fr.mri.dialog };
   assert.equal(
     fr.hint,
-    'Cliquer sur une coupe pour placer le réticule. Faire défiler pour parcourir les coupes ; les touches fléchées déplacent le réticule d’un voxel.',
+    'Cliquer pour placer le réticule. Faire défiler pour changer de coupe\u202f; les flèches le déplacent d’un voxel.',
   );
   assert.equal(fr.voxel, 'Voxel source (indices à partir de 0)');
   assert.equal(en.ready, 'Reference MRI ready.');

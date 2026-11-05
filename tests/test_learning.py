@@ -8,6 +8,49 @@ from brain_model.sources import read_config
 from brain_model.surfaces.geometry import extract_structure, smooth_display
 
 
+@pytest.mark.parametrize("unit,label,source_name", [
+    ("hypothalamus", 160, "suprachiasmatic_nucleus"),
+    ("hippocampus", 569, "stratum_oriens_of_caudal_ca2"),
+    ("thalamus", 512, "suprageniculate_nucleus_of_thalamus"),
+])
+def test_teaching_unions_include_previously_omitted_source_parts(unit, label, source_name):
+    from brain_model.sources import ROOT
+
+    table = (ROOT / "data/nextbrain-cdmd/nextbrain-lut.txt").read_text()
+    assert f"{label}  Left-{source_name} " in table
+    units = read_definition(read_config())["nextbrain"]
+    owners = [group["id"] for group in units if label in group["labels"]]
+    assert owners == [unit]
+
+
+def test_coverage_notes_reach_both_sides_without_changing_membership():
+    from brain_model.layers.learning import expand_nextbrain, region_record
+
+    definition = read_definition(read_config())
+    group = next(unit for unit in definition["nextbrain"] if unit["id"] == "accumbens")
+    assert set(group["notes"]) == {"en", "fr"}
+    assert "shell" in group["notes"]["en"]
+    table = {101: ("core", [0, 0, 0]), 10101: ("core", [0, 0, 0])}
+    volume = np.array([[[101, 10101, 0]]])
+    for expanded in expand_nextbrain([group], table):
+        record = region_record(expanded, "nextbrain", volume)
+        assert record["notes"] == group["notes"]
+        assert record["source_label_ids"] == expanded["labels"]
+        assert record["voxel_count"] == 1
+
+
+@pytest.mark.parametrize("notes", [{"en": "Coverage"}, {"en": "", "fr": "Couverture"},
+                                  {"en": "Coverage", "fr": 3}, "Coverage"])
+def test_invalid_teaching_notes_fail_at_definition_load(monkeypatch, notes):
+    import yaml
+
+    definition = {"nextbrain": [{"id": "test", "notes": notes}], "aseg": [],
+                  "cerebnet": {"units": [], "replaces_aseg_units": []}}
+    monkeypatch.setattr(yaml, "safe_load", lambda _: definition)
+    with pytest.raises(ValueError, match="Bilingual teaching notes.*test"):
+        read_definition({"anatomy": {"layers": []}})
+
+
 def test_subject_overview_exclusions_preserve_other_units_and_subjects():
     shared = read_definition({"anatomy": {"layers": []}})
     selected = read_definition({"anatomy": {"layers": [], "learning": {

@@ -278,7 +278,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
               intersect: (ray) => sections.intersect(ray),
             },
       onHover: presentation.hover,
-      onSelect: (id) => events.emit('pick', { id }),
+      onSelect: (id, point) => events.emit('pick', { id, point: point && worldToRas(point) }),
       onFocusPoint: stage.focusWorldPoint,
       placing: () => (lesion.placing || probing) && !reference.active,
       onPlace: (hit) =>

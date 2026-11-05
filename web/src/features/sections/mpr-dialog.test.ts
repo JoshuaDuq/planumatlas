@@ -12,6 +12,7 @@ let engine: FakeEngine;
 // What the engine's solids answer for each point asked, in order.
 let answers: { promise: Promise<Region | null>; resolve: (region: Region | null) => void }[];
 let select: ReturnType<typeof vi.fn<(id: string) => void>>;
+let showPlane: ReturnType<typeof vi.fn<(plane: string) => void>>;
 let frames: (() => void)[];
 
 function build() {
@@ -25,7 +26,7 @@ function build() {
       },
     },
   });
-  return createMprDialog({ engine: { sections }, select });
+  return createMprDialog({ engine: { sections }, select, showPlane });
 }
 
 const crosshair = () => engine.sections.state.crosshair;
@@ -36,6 +37,7 @@ beforeEach(async () => {
   await engine.sections.load();
   answers = [];
   select = vi.fn();
+  showPlane = vi.fn();
   frames = [];
   vi.stubGlobal('requestAnimationFrame', (run: () => void) => frames.push(run));
   vi.stubGlobal('cancelAnimationFrame', () => frames.splice(0));
@@ -129,6 +131,17 @@ describe('a click on a picture', () => {
     mpr.place('axial', 0.75, 0.25);
     expect(crosshair()).toEqual([fieldOfView / 4, fieldOfView / 4, 12]);
   });
+
+  test('cuts the stage on its own plane; the wheel and the slider move a slice and leave the cut', () => {
+    const mpr = build();
+    mpr.wheel('axial', 1);
+    mpr.moveTo('coronal', 4);
+    nextFrame();
+    expect(showPlane).not.toHaveBeenCalled();
+    mpr.place('sagittal', 0.5, 0.5);
+    mpr.place('coronal', 0.5, 0.5);
+    expect(showPlane.mock.calls).toEqual([['sagittal'], ['coronal']]);
+  });
 });
 
 describe('the region under the crosshair', () => {
@@ -156,6 +169,32 @@ describe('the region under the crosshair', () => {
     answers[0]!.resolve(found);
     await Promise.all(answers.map(({ promise }) => promise));
     expect(select).toHaveBeenCalledExactlyOnceWith('later');
+  });
+});
+
+describe('a click on the 3D brain', () => {
+  test('moves the open crosshair to the point without choosing again', () => {
+    const mpr = build();
+    mpr.show({ instant: true });
+    mpr.follow([12, -30, 41.5]);
+    expect(crosshair()).toEqual([12, -30, 41.5]);
+    expect(answers).toHaveLength(0);
+  });
+
+  test('leaves the crosshair alone while the MRI is closed', () => {
+    const mpr = build();
+    mpr.follow([12, -30, 41.5]);
+    expect(crosshair()).toEqual([0, 0, 0]);
+  });
+
+  test('outranks an MRI click whose region is still being found', async () => {
+    const mpr = build();
+    mpr.show({ instant: true });
+    mpr.wheel('axial', 1);
+    mpr.follow([12, -30, 41.5]);
+    answers[0]!.resolve({ id: 'ctx-lh-1' } as Region);
+    await answers[0]!.promise;
+    expect(select).not.toHaveBeenCalled();
   });
 });
 

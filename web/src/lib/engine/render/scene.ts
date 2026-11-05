@@ -808,7 +808,18 @@ export function createScene(
   renderer.domElement.addEventListener('webglcontextlost', handleLost);
   renderer.domElement.addEventListener('webglcontextrestored', handleRestored);
 
-  const observer = new ResizeObserver(setSize);
+  // Resizing the canvas clears it: drawn in the observer, which runs before paint, the cleared canvas
+  // is never shown. Resizes in quick succession (a dragged dock) draw the reduced motion frame, and the
+  // full one follows once they stop.
+  let lastResize = -Infinity;
+  const observer = new ResizeObserver(() => {
+    setSize();
+    if (!hostSize.width || !hostSize.height) return;
+    const now = performance.now();
+    if (now - lastResize < SETTLE_MS) lastMotion = now;
+    lastResize = now;
+    tick(now);
+  });
   observer.observe(host);
   controls.addEventListener('change', cameraMoved);
   // A reader who takes hold of the camera mid-orbit keeps it where it is drawn, roll included. A wheel

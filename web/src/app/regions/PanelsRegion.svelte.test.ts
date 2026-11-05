@@ -113,7 +113,7 @@ describe('before the engine', () => {
 describe('selection', () => {
   test('a region picked on the model opens its detail, named in the strip of another mode', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     expect(list().hidden).toBe(true);
     await expect
@@ -128,7 +128,7 @@ describe('selection', () => {
 
   test('the inspector’s Hide hands focus to the dissection’s Undo in the list', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     await userEvent.click(page.getByRole('button', { name: 'Hide', exact: true }));
     await vi.waitFor(() =>
@@ -140,7 +140,7 @@ describe('selection', () => {
 
   test('an eye in the tree says the part it hid with the count it changed', async () => {
     const world = await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     app.ports.back();
     flushSync();
@@ -162,14 +162,14 @@ describe('accessibility', () => {
   // Two tests, not one: each state is four whole-panel axe runs (two themes, two widths).
   test('the composed panel passes axe on a region’s detail', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     await expectAxeCleanFitted();
   });
 
   test('the composed panel passes axe on the list it goes back to', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     app.ports.back();
     flushSync();
@@ -180,7 +180,7 @@ describe('accessibility', () => {
 describe('the keymap’s ports', () => {
   test('/ from the detail shows the list and focuses the search in front', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     expect(detail().hidden).toBe(false);
     press('/');
@@ -191,7 +191,7 @@ describe('the keymap’s ports', () => {
 
   test('Escape inside the detail is Back to the list', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     const focus = page.getByRole('button', { name: 'Focus', exact: true }).element() as HTMLElement;
     focus.focus();
@@ -250,7 +250,7 @@ describe('the explorers’ entry points', () => {
     const world = await boot();
     const deficit = world.clinical.grouped('', 'en')[0]!.deficits[0]!;
     await app.ports.openDeficit(deficit.id);
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     const profile = detail().querySelector('.clinical-profile')!;
     const region = detail().querySelector('.region-detail')!;
@@ -329,7 +329,7 @@ describe('the phone sheet’s strip and its clear', () => {
 describe('the location bar and the notice', () => {
   test('the group crumb clears a search and opens the collapsed group of the selected row', async () => {
     const world = await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     const group = world.catalog.groups.find((entry) =>
       entry.rows.some((row) => row.region.id === REGION),
@@ -357,7 +357,7 @@ describe('the location bar and the notice', () => {
 
   test('Restore previous view is offered once a function is opened from a scene, and not before', async () => {
     await boot();
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     const restore = page.getByRole('button', { name: t('en', 'clinical').restore });
     await expect.element(restore).not.toBeInTheDocument();
@@ -447,7 +447,7 @@ describe('the phone sheet', () => {
     expect(detail().hidden).toBe(false);
     expect(sheet().dataset.detent).toBe('peek');
 
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     expect(sheet().dataset.detent).toBe('half');
   });
@@ -455,7 +455,7 @@ describe('the phone sheet', () => {
   test('the sheet’s containers carry the home-indicator padding once, not the panels inside them', async () => {
     await boot();
     const bottom = (element: Element) => parseFloat(getComputedStyle(element).paddingBottom);
-    engine.emit('pick', { id: REGION });
+    engine.emit('pick', { id: REGION, point: null });
     flushSync();
     expect(bottom(detail())).toBeGreaterThan(0);
     expect(bottom(detailOrList('.detail-body'))).toBe(0);

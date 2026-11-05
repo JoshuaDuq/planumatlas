@@ -12,7 +12,7 @@ export const en = {
   meta: (side: string, radius: string, volume: string) => `${side} · ${radius} sphere · ${volume}`,
   centre: (point: string) => `Centred at ${point} on this brain (surface RAS)`,
   caveat:
-    'A shape placed on this one brain, measured against its 1 mm labels. It is not a patient’s lesion and predicts no deficit.',
+    'A shape placed on this brain and measured against its 1 mm labels. Not a patient’s lesion; it predicts no deficit.',
   measuring: 'Measuring…',
   failed: 'The lesion could not be measured.',
   volumeCaption: 'Volume inside, cm³',
@@ -103,7 +103,7 @@ export const fr: typeof en = {
     `${side} · sphère de ${radius} · ${volume}`,
   centre: (point: string) => `Centrée en ${point} sur ce cerveau (RAS de surface)`,
   caveat:
-    'Une forme placée sur ce seul cerveau, mesurée sur ses étiquettes de 1 mm. Ce n’est pas la lésion d’un patient et elle ne prédit aucun déficit.',
+    'Une forme placée sur ce cerveau et mesurée sur ses étiquettes de 1 mm. Pas la lésion d’un patient ; elle ne prédit aucun déficit.',
   measuring: 'Mesure en cours…',
   failed: 'La lésion n’a pas pu être mesurée.',
   volumeCaption: 'Volume compris, cm³',

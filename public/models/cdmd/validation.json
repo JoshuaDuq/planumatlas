@@ -1256,7 +1256,7 @@
   },
   "stimulation_responses": {
     "pairs": 1243,
-    "regions_with_a_label": 364,
+    "regions_with_a_label": 367,
     "labels_reaching_no_region": [
       "FP",
       "MFC",
@@ -3682,7 +3682,7 @@
   },
   "learning_structures": {
     "file": "learning.glb",
-    "sha256": "e5daa0603371c7a4691620cebbf442639b6c3674785eed9bf27abe8d0fcebb33",
+    "sha256": "2d47fa859f57d4542dc8f3491b43ee4d3c0a8d8401d05ba633ca189ee103a614",
     "regions": [
       {
         "id": "learning:left:caudate",
@@ -3841,7 +3841,7 @@
       {
         "id": "learning:left:thalamus",
         "source_atlas": "nextbrain",
-        "source_voxel_count": 103762,
+        "source_voxel_count": 103771,
         "maximum_display_displacement_mm": 0.393574897638519,
         "misclassified_voxel_centres": 0
       },
@@ -3855,14 +3855,14 @@
       {
         "id": "learning:left:hypothalamus",
         "source_atlas": "nextbrain",
-        "source_voxel_count": 7213,
+        "source_voxel_count": 7216,
         "maximum_display_displacement_mm": 0.1974898435314474,
         "misclassified_voxel_centres": 0
       },
       {
         "id": "learning:right:hypothalamus",
         "source_atlas": "nextbrain",
-        "source_voxel_count": 6865,
+        "source_voxel_count": 6868,
         "maximum_display_displacement_mm": 0.39623327872036335,
         "misclassified_voxel_centres": 0
       },
@@ -3925,14 +3925,14 @@
       {
         "id": "learning:left:hippocampus",
         "source_atlas": "nextbrain",
-        "source_voxel_count": 52890,
-        "maximum_display_displacement_mm": 0.6000002769093543,
+        "source_voxel_count": 52894,
+        "maximum_display_displacement_mm": 0.5999995438020819,
         "misclassified_voxel_centres": 0
       },
       {
         "id": "learning:right:hippocampus",
         "source_atlas": "nextbrain",
-        "source_voxel_count": 54961,
+        "source_voxel_count": 54964,
         "maximum_display_displacement_mm": 0.6000003324110943,
         "misclassified_voxel_centres": 0
       },
@@ -4476,11 +4476,11 @@
       },
       {
         "unit": "thalamus",
-        "cross_source_overlap_fraction": 0.0028122016466740397
+        "cross_source_overlap_fraction": 0.0028120820277238207
       },
       {
         "unit": "hypothalamus",
-        "cross_source_overlap_fraction": 0.0057536581900838185
+        "cross_source_overlap_fraction": 0.005751207043453564
       },
       {
         "unit": "mammillary",
@@ -4500,7 +4500,7 @@
       },
       {
         "unit": "hippocampus",
-        "cross_source_overlap_fraction": 0.020342880455443156
+        "cross_source_overlap_fraction": 0.020360103098518424
       },
       {
         "unit": "amygdala",
@@ -5033,12 +5033,12 @@
         "right": 0.8919681141903364
       },
       "thalamus": {
-        "left": 0.890220624139921,
+        "left": 0.8901811079545454,
         "right": 0.8853093223022914
       },
       "hippocampus": {
-        "left": 0.8561163387510693,
-        "right": 0.8782168495191657
+        "left": 0.8561212618900979,
+        "right": 0.8782453378029476
       },
       "amygdala": {
         "left": 0.7715825708850439,

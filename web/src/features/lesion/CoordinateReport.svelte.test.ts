@@ -135,7 +135,7 @@ const rowOf = (name: string) =>
 test('the caveat comes before any share, and each share is of the sphere, with the rest its own', async () => {
   await mount('en', 'mni152nlin2009casym');
   const caveat = [...document.querySelectorAll('p')].find((p) =>
-    p.textContent!.startsWith('A template location carried onto this one brain by registration.'),
+    p.textContent!.startsWith('A template location registered onto this brain'),
   )!;
   const within = [...document.querySelectorAll('h3')].find(
     (h) => h.textContent === 'Within 5\u202fmm',
@@ -227,7 +227,7 @@ test('the CSV leads with how it was placed, then every atlas’s shares of the s
 test('in French, the caveat and the offsets are said in French', async () => {
   await mount('fr', 'unstated');
   expect(text()).toContain(
-    'Une position du gabarit reportée sur ce seul cerveau par recalage. Ce n’est pas l’endroit où serait le pic propre à cette personne, ni ce que fait ce cerveau à cet endroit.',
+    'Une position du gabarit recalée sur ce cerveau\u202f: ni le pic propre à cette personne, ni ce que fait ce cerveau ici.',
   );
   expect(text()).toMatch(/MNI152NLin6Asym se place à une médiane de 1,6\s?mm/);
 });

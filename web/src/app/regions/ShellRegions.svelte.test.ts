@@ -75,7 +75,7 @@ describe('the one tooltip', () => {
 describe('the one tooltip, when its trigger goes', () => {
   test('a focused trigger that removes itself takes its tooltip with it', async () => {
     await shell.open();
-    shell.engine.emit('pick', { id: 'destrieux:left:30' });
+    shell.engine.emit('pick', { id: 'destrieux:left:30', point: null });
     flushSync();
     const clear = document.querySelector<HTMLElement>('.region-detail .selection-clear')!;
     await userEvent.tab();
@@ -182,7 +182,7 @@ describe('the ports', () => {
   test('focusInDetail answers true in a region’s detail', async () => {
     await shell.open();
     expect(shell.app.ports.focusInDetail()).toBe(false);
-    shell.engine.emit('pick', { id: 'destrieux:left:30' });
+    shell.engine.emit('pick', { id: 'destrieux:left:30', point: null });
     flushSync();
     page.getByRole('button', { name: 'Focus', exact: true }).element().focus();
     expect(shell.app.ports.focusInDetail()).toBe(true);

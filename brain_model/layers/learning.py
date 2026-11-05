@@ -16,6 +16,14 @@ ATLAS_ID = "learning"
 
 def read_definition(config):
     definition = yaml.safe_load((ROOT / "config/learning-anatomy.yaml").read_text())
+    for group in [*definition["nextbrain"], *definition["aseg"],
+                  *definition["cerebnet"]["units"]]:
+        if "notes" in group:
+            notes = group["notes"]
+            if (not isinstance(notes, dict) or set(notes) != {"en", "fr"}
+                    or any(not isinstance(text, str) or not text.strip()
+                           for text in notes.values())):
+                raise ValueError(f"Bilingual teaching notes required: {group['id']}")
     excluded = config["anatomy"].get("learning", {}).get("exclude_aseg_units", [])
     if not isinstance(excluded, list) or any(not isinstance(unit, str) for unit in excluded):
         raise ValueError("Overview exclusions must be a list of unit names")
@@ -191,6 +199,7 @@ def region_record(group, source, volume):
         **family_order(group),
         "display_names": {"en": group["name"], "fr": group["name_fr"]},
         "system_names": {"en": group["system"], "fr": group["system_fr"]},
+        **({"notes": group["notes"]} if "notes" in group else {}),
         "display_color": group["color"],
         "voxel_count": int(np.count_nonzero(np.isin(volume, members))),
     }

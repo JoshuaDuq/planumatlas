@@ -7,81 +7,409 @@ smoothing:
   iterations: 16
   maximum_displacement_mm: 0.6
 nextbrain:
-  - {id: caudate, color: [64, 142, 172], name: Caudate nucleus, name_fr: Noyau caudé, system: Basal ganglia, system_fr: Ganglions de la base, labels: [48, 118, 393]}
-  - {id: putamen, color: [210, 150, 67], name: Putamen, name_fr: Putamen, system: Basal ganglia, system_fr: Ganglions de la base, labels: [79, 349]}
+  - id: caudate
+    color: [64, 142, 172]
+    name: Caudate nucleus
+    name_fr: Noyau caudé
+    system: Basal ganglia
+    system_fr: Ganglions de la base
+    labels: [48, 118, 393]
+    notes:
+      en: >-
+        Combines the labelled head, body and tail of the caudate. The nucleus accumbens is
+        shown separately.
+      fr: >-
+        Réunit la tête, le corps et la queue du noyau caudé étiquetés dans l’atlas. Le noyau
+        accumbens est représenté séparément.
+  - id: putamen
+    color: [210, 150, 67]
+    name: Putamen
+    name_fr: Putamen
+    system: Basal ganglia
+    system_fr: Ganglions de la base
+    labels: [79, 349]
+    notes:
+      en: >-
+        Combines the putamen and its separately labelled posteroventral portion. This unit
+        does not distinguish functional territories.
+      fr: >-
+        Réunit le putamen et sa portion postéroventrale étiquetée séparément. Cette unité ne
+        distingue pas les territoires fonctionnels.
   - {id: pallidum-external, color: [132, 110, 180], name: Globus pallidus — external, name_fr: Globus pallidus externe, system: Basal ganglia, system_fr: Ganglions de la base, labels: [119]}
   - {id: pallidum-internal, color: [180, 91, 131], name: Globus pallidus — internal, name_fr: Globus pallidus interne, system: Basal ganglia, system_fr: Ganglions de la base, labels: [206]}
-  - {id: accumbens, color: [96, 159, 105], name: Nucleus accumbens core, name_fr: Cœur du noyau accumbens, system: Basal ganglia, system_fr: Ganglions de la base, labels: [101]}
-  - {id: subthalamic, color: [209, 112, 65], name: Subthalamic nucleus, name_fr: Noyau sous-thalamique, system: Basal ganglia, system_fr: Ganglions de la base, labels: [315, 316, 321]}
-  - {id: substantia-nigra, color: [83, 106, 143], name: Substantia nigra, name_fr: Substance noire, system: Basal ganglia, system_fr: Ganglions de la base, labels: [310, 352]}
-  - {id: claustrum, color: [135, 166, 104], name: Claustrum, name_fr: Claustrum, system: Basal forebrain, system_fr: Prosencéphale basal, labels: [102, 174]}
+  - id: accumbens
+    color: [96, 159, 105]
+    name: Nucleus accumbens core
+    name_fr: Cœur du noyau accumbens
+    system: Basal ganglia
+    system_fr: Ganglions de la base
+    labels: [101]
+    notes:
+      en: >-
+        Represents the labelled core of the nucleus accumbens, not the entire nucleus. The
+        shell is not included in this unit.
+      fr: >-
+        Représente le cœur étiqueté du noyau accumbens, et non le noyau entier. La coquille
+        n’est pas incluse dans cette unité.
+  - id: subthalamic
+    color: [209, 112, 65]
+    name: Subthalamic nucleus
+    name_fr: Noyau sous-thalamique
+    system: Basal ganglia
+    system_fr: Ganglions de la base
+    labels: [315, 316, 321]
+    notes:
+      en: >-
+        Combines the labelled medial, laterodorsal and lateroventral portions of the
+        subthalamic nucleus.
+      fr: >-
+        Réunit les portions médiale, latérodorsale et latéroventrale étiquetées du noyau
+        sous-thalamique.
+  - id: substantia-nigra
+    color: [83, 106, 143]
+    name: Substantia nigra
+    name_fr: Substance noire
+    system: Basal ganglia
+    system_fr: Ganglions de la base
+    labels: [310, 352]
+    notes:
+      en: >-
+        Combines the pars compacta and pars reticulata. Their separate labels are available
+        among the constituents in NextBrain.
+      fr: >-
+        Réunit la pars compacta et la pars reticulata. Leurs étiquettes distinctes figurent
+        parmi les constituants dans NextBrain.
+  - id: claustrum
+    color: [135, 166, 104]
+    name: Claustrum
+    name_fr: Claustrum
+    system: Basal forebrain
+    system_fr: Prosencéphale basal
+    labels: [102, 174]
+    notes:
+      en: >-
+        Combines the claustrum and temporal claustrum labels. Fragmentation of this thin
+        structure reflects the segmentation; the display does not fill the gaps.
+      fr: >-
+        Réunit les étiquettes du claustrum et du claustrum temporal. La fragmentation de
+        cette structure fine reflète la segmentation ; l’affichage ne comble pas les
+        lacunes.
   - {id: ventral-pallidum, color: [184, 136, 83], name: Ventral pallidum, name_fr: Pallidum ventral, system: Basal forebrain, system_fr: Prosencéphale basal, labels: [120]}
-  - {id: septal, color: [98, 164, 154], name: Septal and diagonal band nuclei, name_fr: Noyaux septal et de la bande diagonale, system: Basal forebrain, system_fr: Prosencéphale basal, labels: [103, 111]}
-  - {id: innominata, color: [189, 127, 145], name: Substantia innominata and basal nucleus, name_fr: Substance innominée et noyau basal, system: Basal forebrain, system_fr: Prosencéphale basal, labels: [108, 128]}
+  - id: septal
+    color: [98, 164, 154]
+    name: Medial septal nucleus and diagonal band
+    name_fr: Noyau septal médial et bande diagonale
+    system: Basal forebrain
+    system_fr: Prosencéphale basal
+    labels: [103, 111]
+    notes:
+      en: >-
+        Combines the medial septal nucleus and diagonal band labels. This is not a
+        segmentation of all septal nuclei.
+      fr: >-
+        Réunit les étiquettes du noyau septal médial et de la bande diagonale. Il ne s’agit
+        pas d’une segmentation de tous les noyaux septaux.
+  - id: innominata
+    color: [189, 127, 145]
+    name: Substantia innominata and basal nucleus of Meynert
+    name_fr: Substance innominée et noyau basal de Meynert
+    system: Basal forebrain
+    system_fr: Prosencéphale basal
+    labels: [108, 128]
+    notes:
+      en: >-
+        Combines the substantia innominata and basal nucleus of Meynert labels. The union
+        does not isolate the basal nucleus alone.
+      fr: >-
+        Réunit les étiquettes de la substance innominée et du noyau basal de Meynert. Cette
+        union n’isole pas le noyau basal seul.
   - id: thalamus
     color: [158, 119, 185]
     name: Thalamus
     name_fr: Thalamus
     system: Diencephalon
     system_fr: Diencéphale
-    labels: [190, 191, 218, 219, 220, 221, 222, 223, 224, 225, 252, 253, 254, 274, 282, 283, 284, 285, 286, 303, 312, 313, 314, 350, 378, 379, 380, 381, 382, 394, 395, 396, 397, 398, 399, 423, 424, 425, 426, 441, 443, 454, 458, 478, 479, 492, 508, 517, 519, 578, 811, 813]
+    notes:
+      en: Combines the selected thalamic labels, including reticular and pulvinar nuclei. The lateral
+        geniculate and dorsal medial geniculate units are shown separately; this union does not isolate
+        a motor or sensory relay territory.
+      fr: Réunit les étiquettes thalamiques sélectionnées, dont les noyaux réticulaires et du pulvinar.
+        Les unités géniculées latérale et médiale dorsale sont représentées séparément ; cette union
+        n’isole pas un territoire relais moteur ou sensoriel.
+    labels: [190, 191, 218, 219, 220, 221, 222, 223, 224, 225, 252, 253, 254, 274, 282, 283, 284, 285, 286, 303, 312, 313, 314, 350, 378, 379, 380, 381, 382, 394, 395, 396, 397, 398, 399, 423, 424, 425, 426, 441, 443, 454, 458, 478, 479, 492, 508, 512, 517, 519, 578, 811, 813]
   - id: hypothalamus
     color: [210, 131, 94]
     name: Hypothalamus (excluding mammillary nuclei)
     name_fr: Hypothalamus (hors noyaux mamillaires)
     system: Diencephalon
     system_fr: Diencéphale
-    labels: [147, 149, 150, 181, 192, 193, 194, 196, 207, 227, 228, 229, 230, 232, 243, 244, 245, 255, 256, 268, 275, 297, 304]
-  - {id: mammillary, color: [225, 178, 87], name: Mammillary nuclei, name_fr: Noyaux mamillaires, system: Diencephalon, system_fr: Diencéphale, labels: [305, 306, 307, 308]}
+    notes:
+      en: Includes the selected preoptic and hypothalamic labels, including the suprachiasmatic nucleus.
+        The mammillary nuclei are shown separately.
+      fr: Inclut les étiquettes préoptiques et hypothalamiques sélectionnées, dont le noyau suprachiasmatique.
+        Les noyaux mamillaires sont représentés séparément.
+    labels: [147, 149, 150, 160, 181, 192, 193, 194, 196, 207, 227, 228, 229, 230, 232, 243, 244, 245, 255, 256, 268, 275, 297, 304]
+  - id: mammillary
+    color: [225, 178, 87]
+    name: Mammillary nuclei
+    name_fr: Noyaux mamillaires
+    system: Diencephalon
+    system_fr: Diencéphale
+    labels: [305, 306, 307, 308]
+    notes:
+      en: >-
+        Combines the three labelled divisions of the medial mammillary nucleus and the
+        lateral mammillary nucleus. These are nuclei, not an outline of the entire
+        mammillary body.
+      fr: >-
+        Réunit les trois divisions étiquetées du noyau mamillaire médial et le noyau
+        mamillaire latéral. Il s’agit des noyaux, et non du contour du corps mamillaire
+        entier.
   - {id: zona-incerta, color: [116, 161, 147], name: Zona incerta, name_fr: Zona incerta, system: Diencephalon, system_fr: Diencéphale, labels: [226]}
-  - {id: lateral-geniculate, color: [81, 147, 192], name: Lateral geniculate nucleus, name_fr: Noyau géniculé latéral, system: Diencephalon, system_fr: Diencéphale, labels: [484]}
-  # NextBrain delineates only the dorsal division of the medial geniculate body.
-  - {id: medial-geniculate, color: [153, 166, 88], name: Dorsal medial geniculate nucleus, name_fr: Noyau géniculé médial dorsal, system: Diencephalon, system_fr: Diencéphale, labels: [504]}
+  - id: lateral-geniculate
+    color: [81, 147, 192]
+    name: Lateral geniculate nucleus
+    name_fr: Noyau géniculé latéral
+    system: Diencephalon
+    system_fr: Diencéphale
+    labels: [484]
+    notes:
+      en: >-
+        Uses the dorsal lateral geniculate nucleus label. The optic tract is a separate
+        teaching unit.
+      fr: >-
+        Utilise l’étiquette du noyau géniculé latéral dorsal. Le tractus optique constitue
+        une unité pédagogique distincte.
+  # This unit uses only the explicitly named dorsal medial geniculate label.
+  - id: medial-geniculate
+    color: [153, 166, 88]
+    name: Dorsal medial geniculate nucleus
+    name_fr: Noyau géniculé médial dorsal
+    system: Diencephalon
+    system_fr: Diencéphale
+    labels: [504]
+    notes:
+      en: >-
+        Uses only the dorsal medial geniculate nucleus label (504). It does not represent
+        the entire medial geniculate body or its ventral division.
+      fr: >-
+        Utilise uniquement l’étiquette du noyau géniculé médial dorsal (504). Cette unité ne
+        représente ni le corps géniculé médial entier ni sa division ventrale.
   - id: hippocampus
     color: [94, 164, 158]
     name: Hippocampal formation
     name_fr: Formation hippocampique
     system: Limbic
     system_fr: Limbique
-    labels: [326, 339, 340, 341, 342, 343, 344, 345, 346, 347, 354, 364, 365, 367, 368, 369, 370, 371, 372, 373, 374, 375, 404, 405, 407, 408, 409, 410, 411, 418, 419, 420, 421, 422, 432, 558, 559, 561, 562, 563, 564, 565, 566, 567, 568, 571, 572, 573, 574, 575, 576]
+    notes:
+      en: Combines the labelled CA fields, dentate gyrus, subiculum and alveus across uncal, rostral
+        and caudal portions. The fimbria is shown separately; entorhinal cortex is not included.
+      fr: Réunit les champs CA, le gyrus denté, le subiculum et l’alvéus étiquetés dans les portions
+        uncale, rostrale et caudale. La fimbria est représentée séparément ; le cortex entorhinal n’est
+        pas inclus.
+    labels: [326, 339, 340, 341, 342, 343, 344, 345, 346, 347, 354, 364, 365, 367, 368, 369, 370, 371, 372, 373, 374, 375, 404, 405, 407, 408, 409, 410, 411, 418, 419, 420, 421, 422, 432, 558, 559, 561, 562, 563, 564, 565, 566, 567, 568, 569, 571, 572, 573, 574, 575, 576]
   - id: amygdala
     color: [196, 126, 147]
     name: Amygdala and transition areas
     name_fr: Amygdale et aires de transition
     system: Limbic
     system_fr: Limbique
+    notes:
+      en: Includes the selected amygdaloid nuclei and amygdalocortical, amygdalostriatal and amygdalohippocampal
+        transition labels. Its boundary therefore differs from a nuclei-only definition of the amygdala.
+      fr: Inclut les noyaux amygdaliens sélectionnés et les étiquettes de transition amygdalocorticale,
+        amygdalostriatale et amygdalohippocampique. Sa limite diffère donc d’une définition de l’amygdale
+        restreinte aux noyaux.
     labels: [214, 215, 216, 217, 238, 240, 242, 277, 278, 279, 295, 301, 320, 377]
   - {id: bnST, color: [160, 150, 94], name: Bed nucleus of stria terminalis, name_fr: Noyau du lit de la strie terminale, system: Limbic, system_fr: Limbique, labels: [117]}
-  - {id: fornix, color: [210, 188, 125], name: Fornix, name_fr: Fornix, system: White matter pathways, system_fr: Voies de substance blanche, labels: [199]}
+  - id: fornix
+    color: [210, 188, 125]
+    name: Fornix
+    name_fr: Fornix
+    system: White matter pathways
+    system_fr: Voies de substance blanche
+    labels: [199]
+    notes:
+      en: >-
+        Shows the tissue labelled as fornix; the fimbria is a separate unit. A segmented
+        tract label does not show individual axons or establish connectivity in this person.
+      fr: >-
+        Montre le tissu étiqueté comme fornix ; la fimbria constitue une unité distincte.
+        Une étiquette de faisceau segmenté ne montre pas les axones individuels et n’établit
+        pas la connectivité chez cette personne.
   - {id: fimbria, color: [161, 180, 132], name: Fimbria, name_fr: Fimbria, system: White matter pathways, system_fr: Voies de substance blanche, labels: [461]}
   - {id: anterior-commissure, color: [206, 149, 100], name: Anterior commissure, name_fr: Commissure antérieure, system: White matter pathways, system_fr: Voies de substance blanche, labels: [130]}
   - {id: optic-tract, color: [111, 170, 194], name: Optic tract, name_fr: Tractus optique, system: White matter pathways, system_fr: Voies de substance blanche, labels: [208]}
-  - {id: optic-chiasm, hemisphere: midline, color: [115, 155, 190], name: Optic chiasm, name_fr: Chiasma optique, system: White matter pathways, system_fr: Voies de substance blanche, labels: [161]}
+  - id: optic-chiasm
+    hemisphere: midline
+    color: [115, 155, 190]
+    name: Optic chiasm
+    name_fr: Chiasma optique
+    system: White matter pathways
+    system_fr: Voies de substance blanche
+    labels: [161]
+    notes:
+      en: >-
+        Combines both hemisphere labels into one midline structure. The solid shows labelled
+        tissue, not the paths of crossing and uncrossed fibres.
+      fr: >-
+        Réunit les étiquettes des deux hémisphères en une structure médiane. Le volume
+        montre le tissu étiqueté, et non les trajets des fibres croisées et non croisées.
   - {id: stria-terminalis, color: [177, 145, 183], name: Stria terminalis, name_fr: Strie terminale, system: White matter pathways, system_fr: Voies de substance blanche, labels: [184]}
   - {id: mammillothalamic, color: [204, 174, 96], name: Mammillothalamic tract, name_fr: Faisceau mamillo-thalamique, system: White matter pathways, system_fr: Voies de substance blanche, labels: [276]}
   - {id: superior-cerebellar-peduncle, color: [152, 153, 119], name: Superior cerebellar peduncle, name_fr: Pédoncule cérébelleux supérieur, system: White matter pathways, system_fr: Voies de substance blanche, labels: [531]}
   - {id: inferior-cerebellar-peduncle, color: [194, 156, 138], name: Inferior cerebellar peduncle, name_fr: Pédoncule cérébelleux inférieur, system: White matter pathways, system_fr: Voies de substance blanche, labels: [697]}
-  - {id: midbrain, color: [112, 147, 173], name: Midbrain territory, name_fr: Territoire mésencéphalique, system: Brainstem, system_fr: Tronc cérébral, labels: [384, 465, 496, 498, 521]}
-  - {id: pons, color: [102, 174, 157], name: Pontine territory, name_fr: Territoire pontique, system: Brainstem, system_fr: Tronc cérébral, labels: [580, 414]}
-  - {id: medulla, color: [151, 157, 185], name: Medullary territory, name_fr: Territoire bulbaire, system: Brainstem, system_fr: Tronc cérébral, labels: [662, 654, 765]}
+  - id: midbrain
+    color: [112, 147, 173]
+    name: Midbrain territory
+    name_fr: Territoire mésencéphalique
+    system: Brainstem
+    system_fr: Tronc cérébral
+    labels: [384, 465, 496, 498, 521]
+    notes:
+      en: >-
+        Combines the broad midbrain label with periaqueductal grey, pretectal region,
+        peripeduncular nucleus and dorsal raphe. Separately displayed nuclei are excluded;
+        this is not an isolated corticospinal tract.
+      fr: >-
+        Réunit l’étiquette générale du mésencéphale avec la substance grise périaqueducale,
+        la région prétectale, le noyau péripédonculaire et le raphé dorsal. Les noyaux
+        représentés séparément sont exclus ; il ne s’agit pas d’un faisceau corticospinal
+        isolé.
+  - id: pons
+    color: [102, 174, 157]
+    name: Pontine territory
+    name_fr: Territoire pontique
+    system: Brainstem
+    system_fr: Tronc cérébral
+    labels: [580, 414]
+    notes:
+      en: >-
+        Combines the broad pons and pontine nucleus labels. This territory does not
+        delineate individual cranial nerve nuclei or fibre pathways.
+      fr: >-
+        Réunit les étiquettes générales du pont et du noyau pontique. Ce territoire ne
+        délimite pas individuellement les noyaux des nerfs crâniens ou les voies de fibres.
+  - id: medulla
+    color: [151, 157, 185]
+    name: Medullary territory
+    name_fr: Territoire bulbaire
+    system: Brainstem
+    system_fr: Tronc cérébral
+    labels: [662, 654, 765]
+    notes:
+      en: >-
+        Combines the medulla, principal inferior olivary nucleus and medullary central grey
+        labels. Its caudal continuation is shown separately using FreeSurfer; the pyramidal
+        decussation is not separately delineated.
+      fr: >-
+        Réunit les étiquettes du bulbe, du noyau principal de l’olive inférieure et de la
+        substance grise centrale bulbaire. Son prolongement caudal est représenté séparément
+        à partir de FreeSurfer ; la décussation pyramidale n’est pas délimitée séparément.
   - {id: red-nucleus, color: [202, 102, 89], name: Red nucleus, name_fr: Noyau rouge, system: Brainstem, system_fr: Tronc cérébral, labels: [385]}
   - {id: vta, color: [211, 175, 77], name: Ventral tegmental area, name_fr: Aire tegmentale ventrale, system: Brainstem, system_fr: Tronc cérébral, labels: [435]}
-  - {id: inferior-colliculus, color: [126, 152, 94], name: Inferior colliculus central nucleus, name_fr: Noyau central du colliculus inférieur, system: Brainstem, system_fr: Tronc cérébral, labels: [541]}
+  - id: inferior-colliculus
+    color: [126, 152, 94]
+    name: Inferior colliculus central nucleus
+    name_fr: Noyau central du colliculus inférieur
+    system: Brainstem
+    system_fr: Tronc cérébral
+    labels: [541]
+    notes:
+      en: >-
+        Represents only the labelled central nucleus of the inferior colliculus, not the
+        whole colliculus.
+      fr: >-
+        Représente uniquement le noyau central étiqueté du colliculus inférieur, et non le
+        colliculus entier.
   - {id: dentate, color: [139, 139, 193], name: Cerebellar dentate nucleus, name_fr: Noyau dentelé du cervelet, system: Cerebellum, system_fr: Cervelet, labels: [721]}
-  - {id: interposed, color: [187, 151, 103], name: Interposed nuclei, name_fr: Noyaux interposés, system: Cerebellum, system_fr: Cervelet, labels: [751, 752]}
+  - id: interposed
+    color: [187, 151, 103]
+    name: Interposed nuclei
+    name_fr: Noyaux interposés
+    system: Cerebellum
+    system_fr: Cervelet
+    labels: [751, 752]
+    notes:
+      en: >-
+        Combines the globose and emboliform nuclei, also called the medial and lateral
+        interposed nuclei.
+      fr: >-
+        Réunit les noyaux globuleux et emboliforme, également appelés noyaux interposés
+        médial et latéral.
   - {id: fastigial, color: [116, 168, 150], name: Fastigial nucleus, name_fr: Noyau fastigial, system: Cerebellum, system_fr: Cervelet, labels: [715]}
 aseg:
   # NextBrain labels no medulla below its lowest medullary voxels, though the scan and
   # aseg do. This unit is aseg's brainstem below the higher side's lowest voxel, so the
   # medulla meets the cord; above it, the NextBrain units stand alone.
-  - {id: caudal-medulla, color: [128, 134, 168], hemisphere: midline, name: Caudal medulla, name_fr: Bulbe caudal, system: Brainstem, system_fr: Tronc cérébral, labels: [16], below_nextbrain: medulla}
-  - {id: ventricles-left, color: [87, 139, 194], hemisphere: left, name: Lateral ventricle, name_fr: Ventricule latéral, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [4, 5]}
-  - {id: ventricles-right, color: [87, 139, 194], hemisphere: right, name: Lateral ventricle, name_fr: Ventricule latéral, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [43, 44]}
+  - id: caudal-medulla
+    color: [128, 134, 168]
+    hemisphere: midline
+    name: Caudal medulla
+    name_fr: Bulbe caudal
+    system: Brainstem
+    system_fr: Tronc cérébral
+    labels: [16]
+    below_nextbrain: medulla
+    notes:
+      en: >-
+        Uses the part of FreeSurfer’s brainstem label below the NextBrain medullary coverage
+        to continue toward the spinal cord. This boundary is a source-coverage boundary, not
+        a distinct anatomical subdivision or a traced decussation.
+      fr: >-
+        Utilise la partie de l’étiquette du tronc cérébral de FreeSurfer située sous la
+        couverture bulbaire de NextBrain pour prolonger le volume vers la moelle. Cette
+        limite correspond à la couverture des sources, et non à une subdivision anatomique
+        distincte ou à une décussation tracée.
+  - id: ventricles-left
+    color: [87, 139, 194]
+    hemisphere: left
+    name: Lateral ventricle
+    name_fr: Ventricule latéral
+    system: Ventricles and CSF
+    system_fr: Ventricules et LCR
+    labels: [4, 5]
+    notes:
+      en: >-
+        Combines the lateral ventricle and inferior lateral ventricle labels. This solid
+        represents a fluid space, not neural tissue.
+      fr: >-
+        Réunit les étiquettes du ventricule latéral et de sa partie inférieure. Ce volume
+        représente un espace liquidien, et non du tissu nerveux.
+  - id: ventricles-right
+    color: [87, 139, 194]
+    hemisphere: right
+    name: Lateral ventricle
+    name_fr: Ventricule latéral
+    system: Ventricles and CSF
+    system_fr: Ventricules et LCR
+    labels: [43, 44]
+    notes:
+      en: >-
+        Combines the lateral ventricle and inferior lateral ventricle labels. This solid
+        represents a fluid space, not neural tissue.
+      fr: >-
+        Réunit les étiquettes du ventricule latéral et de sa partie inférieure. Ce volume
+        représente un espace liquidien, et non du tissu nerveux.
   - {id: third-ventricle, color: [87, 139, 194], hemisphere: midline, name: Third ventricle, name_fr: Troisième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [14]}
   - {id: fourth-ventricle, color: [87, 139, 194], hemisphere: midline, name: Fourth ventricle, name_fr: Quatrième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [15]}
   - {id: choroid-plexus-left, color: [171, 114, 155], hemisphere: left, name: Choroid plexus, name_fr: Plexus choroïde, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [31]}
   - {id: choroid-plexus-right, color: [171, 114, 155], hemisphere: right, name: Choroid plexus, name_fr: Plexus choroïde, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [63]}
-  - {id: corpus-callosum, color: [214, 197, 160], hemisphere: midline, name: Corpus callosum, name_fr: Corps calleux, system: White matter pathways, system_fr: Voies de substance blanche, labels: [251, 252, 253, 254, 255]}
+  - id: corpus-callosum
+    color: [214, 197, 160]
+    hemisphere: midline
+    name: Corpus callosum
+    name_fr: Corps calleux
+    system: White matter pathways
+    system_fr: Voies de substance blanche
+    labels: [251, 252, 253, 254, 255]
+    notes:
+      en: >-
+        Combines FreeSurfer’s five corpus callosum labels. This is segmented tissue, not a
+        reconstruction of individual callosal fibres.
+      fr: >-
+        Réunit les cinq étiquettes du corps calleux de FreeSurfer. Il s’agit de tissu
+        segmenté, et non d’une reconstruction des fibres calleuses individuelles.
   # NextBrain has no cerebellar cortex, so the mantle comes from aseg. Its
   # cerebellar white matter stays out: the deep nuclei sit inside that label.
   - {id: cerebellar-cortex-left, color: [138, 122, 110], hemisphere: left, name: Cerebellar cortex, name_fr: Cortex cérébelleux, system: Cerebellum, system_fr: Cervelet, labels: [8]}
@@ -92,10 +420,70 @@ aseg:
 cerebnet:
   replaces_aseg_units: [cerebellar-cortex-left, cerebellar-cortex-right]
   units:
-    - {id: lobules-i-iv-left, color: [176, 120, 92], hemisphere: left, name: Lobules I–IV, name_fr: Lobules I–IV, system: Cerebellum, system_fr: Cervelet, labels: [601]}
-    - {id: lobules-i-iv-right, color: [176, 120, 92], hemisphere: right, name: Lobules I–IV, name_fr: Lobules I–IV, system: Cerebellum, system_fr: Cervelet, labels: [602]}
-    - {id: lobule-v-left, color: [92, 140, 176], hemisphere: left, name: Lobule V, name_fr: Lobule V, system: Cerebellum, system_fr: Cervelet, labels: [603]}
-    - {id: lobule-v-right, color: [92, 140, 176], hemisphere: right, name: Lobule V, name_fr: Lobule V, system: Cerebellum, system_fr: Cervelet, labels: [604]}
+    - id: lobules-i-iv-left
+      color: [176, 120, 92]
+      hemisphere: left
+      name: Lobules I–IV
+      name_fr: Lobules I–IV
+      system: Cerebellum
+      system_fr: Cervelet
+      labels: [601]
+      notes:
+        en: >-
+          CerebNet’s SUIT-based labels include the corresponding anterior vermis within the
+          hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.
+        fr: >-
+          Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur
+          correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être
+          isolé en unités distinctes dans cet ensemble.
+    - id: lobules-i-iv-right
+      color: [176, 120, 92]
+      hemisphere: right
+      name: Lobules I–IV
+      name_fr: Lobules I–IV
+      system: Cerebellum
+      system_fr: Cervelet
+      labels: [602]
+      notes:
+        en: >-
+          CerebNet’s SUIT-based labels include the corresponding anterior vermis within the
+          hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.
+        fr: >-
+          Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur
+          correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être
+          isolé en unités distinctes dans cet ensemble.
+    - id: lobule-v-left
+      color: [92, 140, 176]
+      hemisphere: left
+      name: Lobule V
+      name_fr: Lobule V
+      system: Cerebellum
+      system_fr: Cervelet
+      labels: [603]
+      notes:
+        en: >-
+          CerebNet’s SUIT-based labels include the corresponding anterior vermis within the
+          hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.
+        fr: >-
+          Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur
+          correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être
+          isolé en unités distinctes dans cet ensemble.
+    - id: lobule-v-right
+      color: [92, 140, 176]
+      hemisphere: right
+      name: Lobule V
+      name_fr: Lobule V
+      system: Cerebellum
+      system_fr: Cervelet
+      labels: [604]
+      notes:
+        en: >-
+          CerebNet’s SUIT-based labels include the corresponding anterior vermis within the
+          hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.
+        fr: >-
+          Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur
+          correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être
+          isolé en unités distinctes dans cet ensemble.
     - {id: lobule-vi-left, color: [190, 168, 96], hemisphere: left, name: Lobule VI, name_fr: Lobule VI, system: Cerebellum, system_fr: Cervelet, labels: [605]}
     - {id: lobule-vi-right, color: [190, 168, 96], hemisphere: right, name: Lobule VI, name_fr: Lobule VI, system: Cerebellum, system_fr: Cervelet, labels: [607]}
     - {id: vermis-vi, color: [136, 182, 168], hemisphere: midline, name: Vermis VI (declive), name_fr: Vermis VI (déclive), system: Cerebellum, system_fr: Cervelet, labels: [606]}

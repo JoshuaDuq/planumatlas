@@ -68743,6 +68743,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Combines the labelled head, body and tail of the caudate. The nucleus accumbens is shown separately.",
+        "fr": "R\u00e9unit la t\u00eate, le corps et la queue du noyau caud\u00e9 \u00e9tiquet\u00e9s dans l\u2019atlas. Le noyau accumbens est repr\u00e9sent\u00e9 s\u00e9par\u00e9ment."
+      },
       "display_color": [
         64,
         142,
@@ -68841,6 +68845,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Combines the labelled head, body and tail of the caudate. The nucleus accumbens is shown separately.",
+        "fr": "R\u00e9unit la t\u00eate, le corps et la queue du noyau caud\u00e9 \u00e9tiquet\u00e9s dans l\u2019atlas. Le noyau accumbens est repr\u00e9sent\u00e9 s\u00e9par\u00e9ment."
+      },
       "display_color": [
         64,
         142,
@@ -68928,6 +68936,10 @@
       "system_names": {
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
+      },
+      "notes": {
+        "en": "Combines the putamen and its separately labelled posteroventral portion. This unit does not distinguish functional territories.",
+        "fr": "R\u00e9unit le putamen et sa portion post\u00e9roventrale \u00e9tiquet\u00e9e s\u00e9par\u00e9ment. Cette unit\u00e9 ne distingue pas les territoires fonctionnels."
       },
       "display_color": [
         210,
@@ -69024,6 +69036,10 @@
       "system_names": {
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
+      },
+      "notes": {
+        "en": "Combines the putamen and its separately labelled posteroventral portion. This unit does not distinguish functional territories.",
+        "fr": "R\u00e9unit le putamen et sa portion post\u00e9roventrale \u00e9tiquet\u00e9e s\u00e9par\u00e9ment. Cette unit\u00e9 ne distingue pas les territoires fonctionnels."
       },
       "display_color": [
         210,
@@ -69379,6 +69395,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Represents the labelled core of the nucleus accumbens, not the entire nucleus. The shell is not included in this unit.",
+        "fr": "Repr\u00e9sente le c\u0153ur \u00e9tiquet\u00e9 du noyau accumbens, et non le noyau entier. La coquille n\u2019est pas incluse dans cette unit\u00e9."
+      },
       "display_color": [
         96,
         159,
@@ -69460,6 +69480,10 @@
       "system_names": {
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
+      },
+      "notes": {
+        "en": "Represents the labelled core of the nucleus accumbens, not the entire nucleus. The shell is not included in this unit.",
+        "fr": "Repr\u00e9sente le c\u0153ur \u00e9tiquet\u00e9 du noyau accumbens, et non le noyau entier. La coquille n\u2019est pas incluse dans cette unit\u00e9."
       },
       "display_color": [
         96,
@@ -69547,6 +69571,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Combines the labelled medial, laterodorsal and lateroventral portions of the subthalamic nucleus.",
+        "fr": "R\u00e9unit les portions m\u00e9diale, lat\u00e9rodorsale et lat\u00e9roventrale \u00e9tiquet\u00e9es du noyau sous-thalamique."
+      },
       "display_color": [
         209,
         112,
@@ -69608,6 +69636,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Combines the labelled medial, laterodorsal and lateroventral portions of the subthalamic nucleus.",
+        "fr": "R\u00e9unit les portions m\u00e9diale, lat\u00e9rodorsale et lat\u00e9roventrale \u00e9tiquet\u00e9es du noyau sous-thalamique."
+      },
       "display_color": [
         209,
         112,
@@ -69666,6 +69698,10 @@
       "system_names": {
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
+      },
+      "notes": {
+        "en": "Combines the pars compacta and pars reticulata. Their separate labels are available among the constituents in NextBrain.",
+        "fr": "R\u00e9unit la pars compacta et la pars reticulata. Leurs \u00e9tiquettes distinctes figurent parmi les constituants dans NextBrain."
       },
       "display_color": [
         83,
@@ -69730,6 +69766,10 @@
         "en": "Basal ganglia",
         "fr": "Ganglions de la base"
       },
+      "notes": {
+        "en": "Combines the pars compacta and pars reticulata. Their separate labels are available among the constituents in NextBrain.",
+        "fr": "R\u00e9unit la pars compacta et la pars reticulata. Leurs \u00e9tiquettes distinctes figurent parmi les constituants dans NextBrain."
+      },
       "display_color": [
         83,
         106,
@@ -69792,6 +69832,10 @@
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the claustrum and temporal claustrum labels. Fragmentation of this thin structure reflects the segmentation; the display does not fill the gaps.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du claustrum et du claustrum temporal. La fragmentation de cette structure fine refl\u00e8te la segmentation ; l\u2019affichage ne comble pas les lacunes."
       },
       "display_color": [
         135,
@@ -69863,6 +69907,10 @@
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the claustrum and temporal claustrum labels. Fragmentation of this thin structure reflects the segmentation; the display does not fill the gaps.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du claustrum et du claustrum temporal. La fragmentation de cette structure fine refl\u00e8te la segmentation ; l\u2019affichage ne comble pas les lacunes."
       },
       "display_color": [
         135,
@@ -70021,8 +70069,8 @@
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "left",
-      "label": "Septal and diagonal band nuclei \u00b7 left",
-      "source_name": "Septal and diagonal band nuclei",
+      "label": "Medial septal nucleus and diagonal band \u00b7 left",
+      "source_name": "Medial septal nucleus and diagonal band",
       "source_label_id": null,
       "source_atlas": "nextbrain",
       "source_label_ids": [
@@ -70034,12 +70082,16 @@
         "nextbrain:left:111"
       ],
       "display_names": {
-        "en": "Septal and diagonal band nuclei",
-        "fr": "Noyaux septal et de la bande diagonale"
+        "en": "Medial septal nucleus and diagonal band",
+        "fr": "Noyau septal m\u00e9dial et bande diagonale"
       },
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the medial septal nucleus and diagonal band labels. This is not a segmentation of all septal nuclei.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du noyau septal m\u00e9dial et de la bande diagonale. Il ne s\u2019agit pas d\u2019une segmentation de tous les noyaux septaux."
       },
       "display_color": [
         98,
@@ -70080,8 +70132,8 @@
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "right",
-      "label": "Septal and diagonal band nuclei \u00b7 right",
-      "source_name": "Septal and diagonal band nuclei",
+      "label": "Medial septal nucleus and diagonal band \u00b7 right",
+      "source_name": "Medial septal nucleus and diagonal band",
       "source_label_id": null,
       "source_atlas": "nextbrain",
       "source_label_ids": [
@@ -70093,12 +70145,16 @@
         "nextbrain:right:10111"
       ],
       "display_names": {
-        "en": "Septal and diagonal band nuclei",
-        "fr": "Noyaux septal et de la bande diagonale"
+        "en": "Medial septal nucleus and diagonal band",
+        "fr": "Noyau septal m\u00e9dial et bande diagonale"
       },
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the medial septal nucleus and diagonal band labels. This is not a segmentation of all septal nuclei.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du noyau septal m\u00e9dial et de la bande diagonale. Il ne s\u2019agit pas d\u2019une segmentation de tous les noyaux septaux."
       },
       "display_color": [
         98,
@@ -70143,8 +70199,8 @@
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "left",
-      "label": "Substantia innominata and basal nucleus \u00b7 left",
-      "source_name": "Substantia innominata and basal nucleus",
+      "label": "Substantia innominata and basal nucleus of Meynert \u00b7 left",
+      "source_name": "Substantia innominata and basal nucleus of Meynert",
       "source_label_id": null,
       "source_atlas": "nextbrain",
       "source_label_ids": [
@@ -70156,12 +70212,16 @@
         "nextbrain:left:128"
       ],
       "display_names": {
-        "en": "Substantia innominata and basal nucleus",
-        "fr": "Substance innomin\u00e9e et noyau basal"
+        "en": "Substantia innominata and basal nucleus of Meynert",
+        "fr": "Substance innomin\u00e9e et noyau basal de Meynert"
       },
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the substantia innominata and basal nucleus of Meynert labels. The union does not isolate the basal nucleus alone.",
+        "fr": "R\u00e9unit les \u00e9tiquettes de la substance innomin\u00e9e et du noyau basal de Meynert. Cette union n\u2019isole pas le noyau basal seul."
       },
       "display_color": [
         189,
@@ -70206,8 +70266,8 @@
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "right",
-      "label": "Substantia innominata and basal nucleus \u00b7 right",
-      "source_name": "Substantia innominata and basal nucleus",
+      "label": "Substantia innominata and basal nucleus of Meynert \u00b7 right",
+      "source_name": "Substantia innominata and basal nucleus of Meynert",
       "source_label_id": null,
       "source_atlas": "nextbrain",
       "source_label_ids": [
@@ -70219,12 +70279,16 @@
         "nextbrain:right:10128"
       ],
       "display_names": {
-        "en": "Substantia innominata and basal nucleus",
-        "fr": "Substance innomin\u00e9e et noyau basal"
+        "en": "Substantia innominata and basal nucleus of Meynert",
+        "fr": "Substance innomin\u00e9e et noyau basal de Meynert"
       },
       "system_names": {
         "en": "Basal forebrain",
         "fr": "Prosenc\u00e9phale basal"
+      },
+      "notes": {
+        "en": "Combines the substantia innominata and basal nucleus of Meynert labels. The union does not isolate the basal nucleus alone.",
+        "fr": "R\u00e9unit les \u00e9tiquettes de la substance innomin\u00e9e et du noyau basal de Meynert. Cette union n\u2019isole pas le noyau basal seul."
       },
       "display_color": [
         189,
@@ -70321,6 +70385,7 @@
         479,
         492,
         508,
+        512,
         517,
         519,
         578,
@@ -70375,6 +70440,7 @@
         "nextbrain:left:479",
         "nextbrain:left:492",
         "nextbrain:left:508",
+        "nextbrain:left:512",
         "nextbrain:left:517",
         "nextbrain:left:519",
         "nextbrain:left:578",
@@ -70389,26 +70455,30 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Combines the selected thalamic labels, including reticular and pulvinar nuclei. The lateral geniculate and dorsal medial geniculate units are shown separately; this union does not isolate a motor or sensory relay territory.",
+        "fr": "R\u00e9unit les \u00e9tiquettes thalamiques s\u00e9lectionn\u00e9es, dont les noyaux r\u00e9ticulaires et du pulvinar. Les unit\u00e9s g\u00e9nicul\u00e9es lat\u00e9rale et m\u00e9diale dorsale sont repr\u00e9sent\u00e9es s\u00e9par\u00e9ment ; cette union n\u2019isole pas un territoire relais moteur ou sensoriel."
+      },
       "display_color": [
         158,
         119,
         185
       ],
-      "voxel_count": 103762,
+      "voxel_count": 103771,
       "voxel_size_mm": [
         0.4000000059604645,
         0.4000000059604645,
         0.4000000059604645
       ],
-      "segmentation_volume_mm3": 6640.768296865466,
+      "segmentation_volume_mm3": 6641.344296891215,
       "display_maximum_displacement_mm": 0.3935751512491116,
-      "vertex_count": 26597,
-      "triangle_count": 53430,
-      "surface_area_mm2": 2682.4779492642897,
+      "vertex_count": 26635,
+      "triangle_count": 53498,
+      "surface_area_mm2": 2684.624160406017,
       "centroid_ras_mm": [
-        -11.753571382927692,
-        -12.535846792530396,
-        24.268034405228693
+        -11.754753002703785,
+        -12.535314633787099,
+        24.2672055388325
       ],
       "anchor_ras_mm": [
         -11.600000709295273,
@@ -70418,14 +70488,14 @@
       "territories": [
         {
           "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9431101944835296
+          "fraction": 0.9430476722783822
         },
         {
           "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.02897978065187641
+          "fraction": 0.029044723477657533
         }
       ],
-      "territory_unassigned": 0.023881575143115976
+      "territory_unassigned": 0.02387950390764279
     },
     {
       "id": "learning:right:thalamus",
@@ -70552,6 +70622,10 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Combines the selected thalamic labels, including reticular and pulvinar nuclei. The lateral geniculate and dorsal medial geniculate units are shown separately; this union does not isolate a motor or sensory relay territory.",
+        "fr": "R\u00e9unit les \u00e9tiquettes thalamiques s\u00e9lectionn\u00e9es, dont les noyaux r\u00e9ticulaires et du pulvinar. Les unit\u00e9s g\u00e9nicul\u00e9es lat\u00e9rale et m\u00e9diale dorsale sont repr\u00e9sent\u00e9es s\u00e9par\u00e9ment ; cette union n\u2019isole pas un territoire relais moteur ou sensoriel."
+      },
       "display_color": [
         158,
         119,
@@ -70607,6 +70681,7 @@
         147,
         149,
         150,
+        160,
         181,
         192,
         193,
@@ -70632,6 +70707,7 @@
         "nextbrain:left:147",
         "nextbrain:left:149",
         "nextbrain:left:150",
+        "nextbrain:left:160",
         "nextbrain:left:181",
         "nextbrain:left:192",
         "nextbrain:left:193",
@@ -70661,26 +70737,30 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Includes the selected preoptic and hypothalamic labels, including the suprachiasmatic nucleus. The mammillary nuclei are shown separately.",
+        "fr": "Inclut les \u00e9tiquettes pr\u00e9optiques et hypothalamiques s\u00e9lectionn\u00e9es, dont le noyau suprachiasmatique. Les noyaux mamillaires sont repr\u00e9sent\u00e9s s\u00e9par\u00e9ment."
+      },
       "display_color": [
         210,
         131,
         94
       ],
-      "voxel_count": 7213,
+      "voxel_count": 7216,
       "voxel_size_mm": [
         0.4000000059604645,
         0.4000000059604645,
         0.4000000059604645
       ],
-      "segmentation_volume_mm3": 461.6320206365587,
+      "segmentation_volume_mm3": 461.8240206451418,
       "display_maximum_displacement_mm": 0.19748971817501834,
       "vertex_count": 6639,
       "triangle_count": 13506,
-      "surface_area_mm2": 700.942313926783,
+      "surface_area_mm2": 700.8074161376684,
       "centroid_ras_mm": [
-        -4.465770740239147,
-        4.820743143608083,
-        15.091309017097505
+        -4.465466234911473,
+        4.822508356911842,
+        15.09002382831933
       ],
       "anchor_ras_mm": [
         -4.400000602006912,
@@ -70690,10 +70770,10 @@
       "territories": [
         {
           "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.09510605850547622
+          "fraction": 0.09506651884700665
         }
       ],
-      "territory_unassigned": 0.9021211701095244
+      "territory_unassigned": 0.9021618625277162
     },
     {
       "id": "learning:right:hypothalamus",
@@ -70708,6 +70788,7 @@
         10147,
         10149,
         10150,
+        10160,
         10181,
         10192,
         10193,
@@ -70732,6 +70813,7 @@
         "nextbrain:right:10147",
         "nextbrain:right:10149",
         "nextbrain:right:10150",
+        "nextbrain:right:10160",
         "nextbrain:right:10181",
         "nextbrain:right:10192",
         "nextbrain:right:10193",
@@ -70760,26 +70842,30 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Includes the selected preoptic and hypothalamic labels, including the suprachiasmatic nucleus. The mammillary nuclei are shown separately.",
+        "fr": "Inclut les \u00e9tiquettes pr\u00e9optiques et hypothalamiques s\u00e9lectionn\u00e9es, dont le noyau suprachiasmatique. Les noyaux mamillaires sont repr\u00e9sent\u00e9s s\u00e9par\u00e9ment."
+      },
       "display_color": [
         210,
         131,
         94
       ],
-      "voxel_count": 6865,
+      "voxel_count": 6868,
       "voxel_size_mm": [
         0.4000000059604645,
         0.4000000059604645,
         0.4000000059604645
       ],
-      "segmentation_volume_mm3": 439.3600196409227,
+      "segmentation_volume_mm3": 439.5520196495058,
       "display_maximum_displacement_mm": 0.3962325557727008,
-      "vertex_count": 6347,
-      "triangle_count": 12902,
-      "surface_area_mm2": 658.4292995248985,
+      "vertex_count": 6343,
+      "triangle_count": 12894,
+      "surface_area_mm2": 657.9654919633879,
       "centroid_ras_mm": [
-        3.284835637779194,
-        4.846674336248823,
-        14.658821750911413
+        3.2850315451240153,
+        4.8481682188327255,
+        14.657718597093883
       ],
       "anchor_ras_mm": [
         3.199999511241913,
@@ -70789,14 +70875,14 @@
       "territories": [
         {
           "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1887836853605244
+          "fraction": 0.18870122306348283
         },
         {
           "territory": "mca-temporal",
-          "fraction": 0.03801893663510561
+          "fraction": 0.03800232964472918
         }
       ],
-      "territory_unassigned": 0.7701383831026948
+      "territory_unassigned": 0.7702387885847408
     },
     {
       "id": "learning:left:mammillary",
@@ -70826,6 +70912,10 @@
       "system_names": {
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
+      },
+      "notes": {
+        "en": "Combines the three labelled divisions of the medial mammillary nucleus and the lateral mammillary nucleus. These are nuclei, not an outline of the entire mammillary body.",
+        "fr": "R\u00e9unit les trois divisions \u00e9tiquet\u00e9es du noyau mamillaire m\u00e9dial et le noyau mamillaire lat\u00e9ral. Il s\u2019agit des noyaux, et non du contour du corps mamillaire entier."
       },
       "display_color": [
         225,
@@ -70889,6 +70979,10 @@
       "system_names": {
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
+      },
+      "notes": {
+        "en": "Combines the three labelled divisions of the medial mammillary nucleus and the lateral mammillary nucleus. These are nuclei, not an outline of the entire mammillary body.",
+        "fr": "R\u00e9unit les trois divisions \u00e9tiquet\u00e9es du noyau mamillaire m\u00e9dial et le noyau mamillaire lat\u00e9ral. Il s\u2019agit des noyaux, et non du contour du corps mamillaire entier."
       },
       "display_color": [
         225,
@@ -71073,6 +71167,10 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Uses the dorsal lateral geniculate nucleus label. The optic tract is a separate teaching unit.",
+        "fr": "Utilise l\u2019\u00e9tiquette du noyau g\u00e9nicul\u00e9 lat\u00e9ral dorsal. Le tractus optique constitue une unit\u00e9 p\u00e9dagogique distincte."
+      },
       "display_color": [
         81,
         147,
@@ -71133,6 +71231,10 @@
       "system_names": {
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
+      },
+      "notes": {
+        "en": "Uses the dorsal lateral geniculate nucleus label. The optic tract is a separate teaching unit.",
+        "fr": "Utilise l\u2019\u00e9tiquette du noyau g\u00e9nicul\u00e9 lat\u00e9ral dorsal. Le tractus optique constitue une unit\u00e9 p\u00e9dagogique distincte."
       },
       "display_color": [
         81,
@@ -71199,6 +71301,10 @@
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
       },
+      "notes": {
+        "en": "Uses only the dorsal medial geniculate nucleus label (504). It does not represent the entire medial geniculate body or its ventral division.",
+        "fr": "Utilise uniquement l\u2019\u00e9tiquette du noyau g\u00e9nicul\u00e9 m\u00e9dial dorsal (504). Cette unit\u00e9 ne repr\u00e9sente ni le corps g\u00e9nicul\u00e9 m\u00e9dial entier ni sa division ventrale."
+      },
       "display_color": [
         153,
         166,
@@ -71259,6 +71365,10 @@
       "system_names": {
         "en": "Diencephalon",
         "fr": "Dienc\u00e9phale"
+      },
+      "notes": {
+        "en": "Uses only the dorsal medial geniculate nucleus label (504). It does not represent the entire medial geniculate body or its ventral division.",
+        "fr": "Utilise uniquement l\u2019\u00e9tiquette du noyau g\u00e9nicul\u00e9 m\u00e9dial dorsal (504). Cette unit\u00e9 ne repr\u00e9sente ni le corps g\u00e9nicul\u00e9 m\u00e9dial entier ni sa division ventrale."
       },
       "display_color": [
         153,
@@ -71353,6 +71463,7 @@
         566,
         567,
         568,
+        569,
         571,
         572,
         573,
@@ -71406,6 +71517,7 @@
         "nextbrain:left:566",
         "nextbrain:left:567",
         "nextbrain:left:568",
+        "nextbrain:left:569",
         "nextbrain:left:571",
         "nextbrain:left:572",
         "nextbrain:left:573",
@@ -71421,26 +71533,30 @@
         "en": "Limbic",
         "fr": "Limbique"
       },
+      "notes": {
+        "en": "Combines the labelled CA fields, dentate gyrus, subiculum and alveus across uncal, rostral and caudal portions. The fimbria is shown separately; entorhinal cortex is not included.",
+        "fr": "R\u00e9unit les champs CA, le gyrus dent\u00e9, le subiculum et l\u2019alv\u00e9us \u00e9tiquet\u00e9s dans les portions uncale, rostrale et caudale. La fimbria est repr\u00e9sent\u00e9e s\u00e9par\u00e9ment ; le cortex entorhinal n\u2019est pas inclus."
+      },
       "display_color": [
         94,
         164,
         158
       ],
-      "voxel_count": 52890,
+      "voxel_count": 52894,
       "voxel_size_mm": [
         0.4000000059604645,
         0.4000000059604645,
         0.4000000059604645
       ],
-      "segmentation_volume_mm3": 3384.9601513195053,
-      "display_maximum_displacement_mm": 0.600000000000001,
-      "vertex_count": 19867,
-      "triangle_count": 39966,
-      "surface_area_mm2": 2098.371541905482,
+      "segmentation_volume_mm3": 3385.2161513309493,
+      "display_maximum_displacement_mm": 0.6000000000000006,
+      "vertex_count": 19861,
+      "triangle_count": 39954,
+      "surface_area_mm2": 2098.222518950617,
       "centroid_ras_mm": [
-        -26.72670919713225,
-        -9.973686194856556,
-        8.577252456412849
+        -26.72682061179248,
+        -9.974905714004455,
+        8.5779423455676
       ],
       "anchor_ras_mm": [
         -26.800000935792923,
@@ -71450,26 +71566,26 @@
       "territories": [
         {
           "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6466439780676877
+          "fraction": 0.6466328884183461
         },
         {
           "territory": "pca-temporal",
-          "fraction": 0.12425789374172812
+          "fraction": 0.12424849699398798
         },
         {
           "territory": "pca-occipital",
-          "fraction": 0.09958404235205143
+          "fraction": 0.09961432298559383
         },
         {
           "territory": "mca-temporal",
-          "fraction": 0.09761769710720362
+          "fraction": 0.09761031496956177
         },
         {
           "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.02603516732841747
+          "fraction": 0.02603319847241653
         }
       ],
-      "territory_unassigned": 0.001833995084136888
+      "territory_unassigned": 0.0018338563920293417
     },
     {
       "id": "learning:right:hippocampus",
@@ -71526,6 +71642,7 @@
         10566,
         10567,
         10568,
+        10569,
         10571,
         10572,
         10573,
@@ -71579,6 +71696,7 @@
         "nextbrain:right:10566",
         "nextbrain:right:10567",
         "nextbrain:right:10568",
+        "nextbrain:right:10569",
         "nextbrain:right:10571",
         "nextbrain:right:10572",
         "nextbrain:right:10573",
@@ -71594,26 +71712,30 @@
         "en": "Limbic",
         "fr": "Limbique"
       },
+      "notes": {
+        "en": "Combines the labelled CA fields, dentate gyrus, subiculum and alveus across uncal, rostral and caudal portions. The fimbria is shown separately; entorhinal cortex is not included.",
+        "fr": "R\u00e9unit les champs CA, le gyrus dent\u00e9, le subiculum et l\u2019alv\u00e9us \u00e9tiquet\u00e9s dans les portions uncale, rostrale et caudale. La fimbria est repr\u00e9sent\u00e9e s\u00e9par\u00e9ment ; le cortex entorhinal n\u2019est pas inclus."
+      },
       "display_color": [
         94,
         164,
         158
       ],
-      "voxel_count": 54961,
+      "voxel_count": 54964,
       "voxel_size_mm": [
         0.4000000059604645,
         0.4000000059604645,
         0.4000000059604645
       ],
-      "segmentation_volume_mm3": 3517.504157244684,
+      "segmentation_volume_mm3": 3517.696157253267,
       "display_maximum_displacement_mm": 0.6000000000000012,
       "vertex_count": 20141,
       "triangle_count": 40566,
-      "surface_area_mm2": 2123.04095103952,
+      "surface_area_mm2": 2122.993573730932,
       "centroid_ras_mm": [
-        23.236221858166452,
-        -11.975347230122887,
-        6.148907109735787
+        23.236329043486712,
+        -11.976236429441492,
+        6.149321076761044
       ],
       "anchor_ras_mm": [
         23.199999809265137,
@@ -71623,26 +71745,26 @@
       "territories": [
         {
           "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7125780098615382
+          "fraction": 0.7125936976930355
         },
         {
           "territory": "pca-temporal",
-          "fraction": 0.12055821400629538
+          "fraction": 0.1205516337966669
         },
         {
           "territory": "mca-temporal",
-          "fraction": 0.089117738032423
+          "fraction": 0.0891128738810858
         },
         {
           "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.03935517912701734
+          "fraction": 0.03935303107488538
         },
         {
           "territory": "pca-occipital",
-          "fraction": 0.0376994596168192
+          "fraction": 0.03769740193581253
         }
       ],
-      "territory_unassigned": 0.0005458415967686177
+      "territory_unassigned": 0.0005458118040899498
     },
     {
       "id": "learning:left:amygdala",
@@ -71692,6 +71814,10 @@
       "system_names": {
         "en": "Limbic",
         "fr": "Limbique"
+      },
+      "notes": {
+        "en": "Includes the selected amygdaloid nuclei and amygdalocortical, amygdalostriatal and amygdalohippocampal transition labels. Its boundary therefore differs from a nuclei-only definition of the amygdala.",
+        "fr": "Inclut les noyaux amygdaliens s\u00e9lectionn\u00e9s et les \u00e9tiquettes de transition amygdalocorticale, amygdalostriatale et amygdalohippocampique. Sa limite diff\u00e8re donc d\u2019une d\u00e9finition de l\u2019amygdale restreinte aux noyaux."
       },
       "display_color": [
         196,
@@ -71779,6 +71905,10 @@
       "system_names": {
         "en": "Limbic",
         "fr": "Limbique"
+      },
+      "notes": {
+        "en": "Includes the selected amygdaloid nuclei and amygdalocortical, amygdalostriatal and amygdalohippocampal transition labels. Its boundary therefore differs from a nuclei-only definition of the amygdala.",
+        "fr": "Inclut les noyaux amygdaliens s\u00e9lectionn\u00e9s et les \u00e9tiquettes de transition amygdalocorticale, amygdalostriatale et amygdalohippocampique. Sa limite diff\u00e8re donc d\u2019une d\u00e9finition de l\u2019amygdale restreinte aux noyaux."
       },
       "display_color": [
         196,
@@ -71963,6 +72093,10 @@
         "en": "White matter pathways",
         "fr": "Voies de substance blanche"
       },
+      "notes": {
+        "en": "Shows the tissue labelled as fornix; the fimbria is a separate unit. A segmented tract label does not show individual axons or establish connectivity in this person.",
+        "fr": "Montre le tissu \u00e9tiquet\u00e9 comme fornix ; la fimbria constitue une unit\u00e9 distincte. Une \u00e9tiquette de faisceau segment\u00e9 ne montre pas les axones individuels et n\u2019\u00e9tablit pas la connectivit\u00e9 chez cette personne."
+      },
       "display_color": [
         210,
         188,
@@ -72023,6 +72157,10 @@
       "system_names": {
         "en": "White matter pathways",
         "fr": "Voies de substance blanche"
+      },
+      "notes": {
+        "en": "Shows the tissue labelled as fornix; the fimbria is a separate unit. A segmented tract label does not show individual axons or establish connectivity in this person.",
+        "fr": "Montre le tissu \u00e9tiquet\u00e9 comme fornix ; la fimbria constitue une unit\u00e9 distincte. Une \u00e9tiquette de faisceau segment\u00e9 ne montre pas les axones individuels et n\u2019\u00e9tablit pas la connectivit\u00e9 chez cette personne."
       },
       "display_color": [
         210,
@@ -72456,6 +72594,10 @@
       "system_names": {
         "en": "White matter pathways",
         "fr": "Voies de substance blanche"
+      },
+      "notes": {
+        "en": "Combines both hemisphere labels into one midline structure. The solid shows labelled tissue, not the paths of crossing and uncrossed fibres.",
+        "fr": "R\u00e9unit les \u00e9tiquettes des deux h\u00e9misph\u00e8res en une structure m\u00e9diane. Le volume montre le tissu \u00e9tiquet\u00e9, et non les trajets des fibres crois\u00e9es et non crois\u00e9es."
       },
       "display_color": [
         115,
@@ -73007,6 +73149,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Combines the broad midbrain label with periaqueductal grey, pretectal region, peripeduncular nucleus and dorsal raphe. Separately displayed nuclei are excluded; this is not an isolated corticospinal tract.",
+        "fr": "R\u00e9unit l\u2019\u00e9tiquette g\u00e9n\u00e9rale du m\u00e9senc\u00e9phale avec la substance grise p\u00e9riaqueducale, la r\u00e9gion pr\u00e9tectale, le noyau p\u00e9rip\u00e9donculaire et le raph\u00e9 dorsal. Les noyaux repr\u00e9sent\u00e9s s\u00e9par\u00e9ment sont exclus ; il ne s\u2019agit pas d\u2019un faisceau corticospinal isol\u00e9."
+      },
       "display_color": [
         112,
         147,
@@ -73076,6 +73222,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Combines the broad midbrain label with periaqueductal grey, pretectal region, peripeduncular nucleus and dorsal raphe. Separately displayed nuclei are excluded; this is not an isolated corticospinal tract.",
+        "fr": "R\u00e9unit l\u2019\u00e9tiquette g\u00e9n\u00e9rale du m\u00e9senc\u00e9phale avec la substance grise p\u00e9riaqueducale, la r\u00e9gion pr\u00e9tectale, le noyau p\u00e9rip\u00e9donculaire et le raph\u00e9 dorsal. Les noyaux repr\u00e9sent\u00e9s s\u00e9par\u00e9ment sont exclus ; il ne s\u2019agit pas d\u2019un faisceau corticospinal isol\u00e9."
+      },
       "display_color": [
         112,
         147,
@@ -73139,6 +73289,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Combines the broad pons and pontine nucleus labels. This territory does not delineate individual cranial nerve nuclei or fibre pathways.",
+        "fr": "R\u00e9unit les \u00e9tiquettes g\u00e9n\u00e9rales du pont et du noyau pontique. Ce territoire ne d\u00e9limite pas individuellement les noyaux des nerfs cr\u00e2niens ou les voies de fibres."
+      },
       "display_color": [
         102,
         174,
@@ -73197,6 +73351,10 @@
       "system_names": {
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
+      },
+      "notes": {
+        "en": "Combines the broad pons and pontine nucleus labels. This territory does not delineate individual cranial nerve nuclei or fibre pathways.",
+        "fr": "R\u00e9unit les \u00e9tiquettes g\u00e9n\u00e9rales du pont et du noyau pontique. Ce territoire ne d\u00e9limite pas individuellement les noyaux des nerfs cr\u00e2niens ou les voies de fibres."
       },
       "display_color": [
         102,
@@ -73259,6 +73417,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Combines the medulla, principal inferior olivary nucleus and medullary central grey labels. Its caudal continuation is shown separately using FreeSurfer; the pyramidal decussation is not separately delineated.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du bulbe, du noyau principal de l\u2019olive inf\u00e9rieure et de la substance grise centrale bulbaire. Son prolongement caudal est repr\u00e9sent\u00e9 s\u00e9par\u00e9ment \u00e0 partir de FreeSurfer ; la d\u00e9cussation pyramidale n\u2019est pas d\u00e9limit\u00e9e s\u00e9par\u00e9ment."
+      },
       "display_color": [
         151,
         157,
@@ -73319,6 +73481,10 @@
       "system_names": {
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
+      },
+      "notes": {
+        "en": "Combines the medulla, principal inferior olivary nucleus and medullary central grey labels. Its caudal continuation is shown separately using FreeSurfer; the pyramidal decussation is not separately delineated.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du bulbe, du noyau principal de l\u2019olive inf\u00e9rieure et de la substance grise centrale bulbaire. Son prolongement caudal est repr\u00e9sent\u00e9 s\u00e9par\u00e9ment \u00e0 partir de FreeSurfer ; la d\u00e9cussation pyramidale n\u2019est pas d\u00e9limit\u00e9e s\u00e9par\u00e9ment."
       },
       "display_color": [
         151,
@@ -73617,6 +73783,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Represents only the labelled central nucleus of the inferior colliculus, not the whole colliculus.",
+        "fr": "Repr\u00e9sente uniquement le noyau central \u00e9tiquet\u00e9 du colliculus inf\u00e9rieur, et non le colliculus entier."
+      },
       "display_color": [
         126,
         152,
@@ -73677,6 +73847,10 @@
       "system_names": {
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
+      },
+      "notes": {
+        "en": "Represents only the labelled central nucleus of the inferior colliculus, not the whole colliculus.",
+        "fr": "Repr\u00e9sente uniquement le noyau central \u00e9tiquet\u00e9 du colliculus inf\u00e9rieur, et non le colliculus entier."
       },
       "display_color": [
         126,
@@ -73871,6 +74045,10 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "notes": {
+        "en": "Combines the globose and emboliform nuclei, also called the medial and lateral interposed nuclei.",
+        "fr": "R\u00e9unit les noyaux globuleux et emboliforme, \u00e9galement appel\u00e9s noyaux interpos\u00e9s m\u00e9dial et lat\u00e9ral."
+      },
       "display_color": [
         187,
         151,
@@ -73933,6 +74111,10 @@
       "system_names": {
         "en": "Cerebellum",
         "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "Combines the globose and emboliform nuclei, also called the medial and lateral interposed nuclei.",
+        "fr": "R\u00e9unit les noyaux globuleux et emboliforme, \u00e9galement appel\u00e9s noyaux interpos\u00e9s m\u00e9dial et lat\u00e9ral."
       },
       "display_color": [
         187,
@@ -74117,6 +74299,10 @@
         "en": "Brainstem",
         "fr": "Tronc c\u00e9r\u00e9bral"
       },
+      "notes": {
+        "en": "Uses the part of FreeSurfer\u2019s brainstem label below the NextBrain medullary coverage to continue toward the spinal cord. This boundary is a source-coverage boundary, not a distinct anatomical subdivision or a traced decussation.",
+        "fr": "Utilise la partie de l\u2019\u00e9tiquette du tronc c\u00e9r\u00e9bral de FreeSurfer situ\u00e9e sous la couverture bulbaire de NextBrain pour prolonger le volume vers la moelle. Cette limite correspond \u00e0 la couverture des sources, et non \u00e0 une subdivision anatomique distincte ou \u00e0 une d\u00e9cussation trac\u00e9e."
+      },
       "display_color": [
         128,
         134,
@@ -74176,6 +74362,10 @@
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
       },
+      "notes": {
+        "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du ventricule lat\u00e9ral et de sa partie inf\u00e9rieure. Ce volume repr\u00e9sente un espace liquidien, et non du tissu nerveux."
+      },
       "display_color": [
         87,
         139,
@@ -74227,6 +74417,10 @@
       "system_names": {
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
+      },
+      "notes": {
+        "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
+        "fr": "R\u00e9unit les \u00e9tiquettes du ventricule lat\u00e9ral et de sa partie inf\u00e9rieure. Ce volume repr\u00e9sente un espace liquidien, et non du tissu nerveux."
       },
       "display_color": [
         87,
@@ -74386,6 +74580,10 @@
         "en": "White matter pathways",
         "fr": "Voies de substance blanche"
       },
+      "notes": {
+        "en": "Combines FreeSurfer\u2019s five corpus callosum labels. This is segmented tissue, not a reconstruction of individual callosal fibres.",
+        "fr": "R\u00e9unit les cinq \u00e9tiquettes du corps calleux de FreeSurfer. Il s\u2019agit de tissu segment\u00e9, et non d\u2019une reconstruction des fibres calleuses individuelles."
+      },
       "display_color": [
         214,
         197,
@@ -74448,6 +74646,10 @@
       "system_names": {
         "en": "Cerebellum",
         "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
       "display_color": [
         176,
@@ -74535,6 +74737,10 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
       "display_color": [
         176,
         120,
@@ -74613,6 +74819,10 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
       "display_color": [
         92,
         140,
@@ -74690,6 +74900,10 @@
       "system_names": {
         "en": "Cerebellum",
         "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
       "display_color": [
         92,

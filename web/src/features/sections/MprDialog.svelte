@@ -246,6 +246,39 @@
     };
   }
 
+  // The dock may be dragged between its narrowest useful width and leaving the stage this much.
+  const DOCK_MIN = 240;
+  const STAGE_MIN = 360;
+  const RESIZE_STEP = 24;
+  let dockWidth = $state(0);
+  let resizing: { x: number; width: number; max: number } | null = null;
+
+  /** The widest the dock may be now: what it and the stage share, less the stage's minimum. */
+  function widest(): number {
+    const stage = document.getElementById('viewport')!.getBoundingClientRect().width;
+    return Math.max(DOCK_MIN, dockWidth + stage - STAGE_MIN);
+  }
+  function resizeTo(width: number, max: number) {
+    mpr.width = Math.round(Math.min(max, Math.max(DOCK_MIN, width)));
+  }
+  function startResize(event: PointerEvent) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    resizing = { x: event.clientX, width: dockWidth, max: widest() };
+  }
+  function moveResize(event: PointerEvent) {
+    if (!resizing) return;
+    // The dock sits right of the stage, so moving left widens it.
+    resizeTo(resizing.width + resizing.x - event.clientX, resizing.max);
+  }
+  function resizeKey(event: KeyboardEvent) {
+    const step = { ArrowLeft: RESIZE_STEP, ArrowRight: -RESIZE_STEP }[event.key];
+    if (step === undefined) return;
+    event.preventDefault();
+    resizeTo(dockWidth + step, widest());
+  }
+
   /** Pointer shortcuts on a picture: a click places the crosshair, the wheel scrolls the slice. The
    * keyboard route is the plane's slider (deviations/g5-canvas-not-interactive.md). */
   function pointer(plane: MprPlane) {
@@ -462,7 +495,35 @@
     {@render body()}
   </Dialog>
 {:else if mpr.open}
-  <section class="mpr-dock" aria-labelledby="{uid}-title" bind:this={dock} {@attach docked}>
+  <section
+    class="mpr-dock"
+    class:sized={mpr.width !== null}
+    style:--mpr-dock-width={mpr.width === null ? null : `${mpr.width}px`}
+    aria-labelledby="{uid}-title"
+    bind:this={dock}
+    bind:clientWidth={dockWidth}
+    {@attach docked}
+  >
+    <!-- The dock's left edge: dragged, or moved with the arrow keys; a double click restores the layout's width. -->
+    <!-- A focusable separator is a widget (ARIA 1.2 separator), which Svelte's check does not know. -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+    <div
+      class="mpr-dock-resize"
+      role="separator"
+      tabindex="0"
+      aria-orientation="vertical"
+      aria-label={copy.resize}
+      aria-valuemin={DOCK_MIN}
+      aria-valuemax={Math.round(dockWidth ? widest() : DOCK_MIN)}
+      aria-valuenow={Math.round(dockWidth)}
+      title={copy.resizeHint}
+      onpointerdown={startResize}
+      onpointermove={moveResize}
+      onpointerup={() => (resizing = null)}
+      onpointercancel={() => (resizing = null)}
+      ondblclick={() => (mpr.width = null)}
+      onkeydown={resizeKey}
+    ></div>
     <div class="mpr-dock-header">
       <h2 id="{uid}-title">{copy.title}</h2>
       <IconButton
@@ -783,6 +844,9 @@
         background: var(--surface-hover);
         color: var(--text-primary);
       }
+      .mpr-dock-resize:hover::after {
+        background: var(--overlay-ink-muted);
+      }
     }
     @media (pointer: coarse) {
       .save {
@@ -822,6 +886,32 @@
       min-height: 0;
       background: var(--surface-base);
       color: var(--text-primary);
+    }
+    .mpr-dock {
+      position: relative;
+    }
+    /* A grip straddling the dock's border; its line shows only under the pointer or the keyboard. */
+    .mpr-dock-resize {
+      position: absolute;
+      inset: 0 auto 0 -5px;
+      z-index: 1;
+      width: 9px;
+      cursor: col-resize;
+      touch-action: none;
+    }
+    .mpr-dock-resize::after {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 4px;
+      width: 1px;
+      background: transparent;
+      transition: background-color var(--ui-transition) var(--ease-ui);
+    }
+    .mpr-dock-resize:is(:active, :focus-visible)::after {
+      background: var(--overlay-ink-muted);
+    }
+    .mpr-dock-resize:focus-visible {
+      outline-offset: -2px;
     }
     .mpr-dock :focus-visible {
       outline-color: var(--overlay-accent);

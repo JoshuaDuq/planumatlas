@@ -53,7 +53,11 @@
       session,
       openLinkedMri: excursions.openLinkedMri,
     });
-    const mpr = createMprDialog({ engine, select: anatomy.selectRegion });
+    const mpr = createMprDialog({
+      engine,
+      select: anatomy.selectRegion,
+      showPlane: sections.showMriPlane,
+    });
     return { sections, mpr };
   }
   const stage = $derived(world && untrack(() => controllers(world)));
@@ -197,8 +201,12 @@
       mprOpen: () => linkedMri!.holdsKeys(),
       diffusionMriOpen: () => diffusionMri,
     });
+    const offPick = world.engine.on('pick', ({ point }) => {
+      if (point) mpr.follow(point);
+    });
     return () => {
       withdraw();
+      offPick();
       // A slider frame still queued would run after the dialog is gone.
       mpr.dispose();
     };

@@ -39,6 +39,7 @@ beforeEach(async () => {
   mpr = createMprDialog({
     engine,
     select: () => {},
+    showPlane: () => {},
   });
   announced = [];
 });

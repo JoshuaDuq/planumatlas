@@ -262,7 +262,7 @@ describe('the canvas', () => {
     const view = page.getByRole('application', { name: /^Linked MGH CDMD MRI slices and tracts/ });
     await expect.element(view).toHaveAttribute('aria-roledescription', 'MRI viewer');
     const hint = document.getElementById(canvas().getAttribute('aria-describedby')!)!;
-    expect(hint.textContent).toContain('Click a slice to position the crosshair');
+    expect(hint.textContent).toContain('Click to place the crosshair');
     expect(hint.textContent).toContain('Page Up and Page Down');
     expect(hint.textContent).toContain('M closes this view.');
   });

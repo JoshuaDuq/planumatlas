@@ -129,6 +129,19 @@ describe('selected region', () => {
     expect(text(root().querySelector('.selected-hint')!).length).toBeGreaterThan(0);
   });
 
+  test.each([
+    ['en', 'shell is not included', 'fimbria is shown separately'],
+    ['fr', 'coquille n’est pas incluse', 'fimbria est représentée séparément'],
+  ] as const)('teaching coverage follows the selection in %s', async (lang, core, formation) => {
+    const screen = await render(Fixture, { regionId: 'learning:left:accumbens', lang });
+    expect(text(root().querySelector('.selected-hint')!)).toContain(core);
+    await screen.rerender({ regionId: 'learning:right:hippocampus', lang });
+    expect(text(root().querySelector('.selected-hint')!)).toContain(formation);
+    expect(text(root().querySelector('.selected-hint')!)).not.toContain(core);
+    await screen.rerender({ regionId: V1, lang });
+    expect(root().querySelector('.selected-hint')).toBeNull();
+  });
+
   test('the slots follow the sections: comparison first, deficits and circuits after the body', async () => {
     render(Fixture, { regionId: V1 });
     const comparison = document.querySelector('[data-slot=comparison]')!;

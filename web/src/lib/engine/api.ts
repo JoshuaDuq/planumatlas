@@ -111,8 +111,8 @@ export interface EngineEvents {
    * makes reports at once; one the reader makes, or a coast after it, reports once the camera has rested.
    */
   cameraSettled: undefined;
-  /** A click on the model chose a region (app.js:1813). */
-  pick: { id: string };
+  /** A click on the model chose a region (app.js:1813), at this surface RAS point when the model has a surface. */
+  pick: { id: string; point: Vec3 | null };
   /**
    * The tract reference became active or inactive: the Tracts tab is open on an anatomy the tracts do not belong to
    * (app.js:1431). The engine has already reframed the last named view, as legacy did, and cleared the hover.

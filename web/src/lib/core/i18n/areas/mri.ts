@@ -6,7 +6,7 @@
 export const en = {
   dialog: {
     close: 'Close',
-    hint: 'Click a slice to position the crosshair. Scroll through slices; arrow keys move one voxel.',
+    hint: 'Click to place the crosshair. Scroll to change slice; arrow keys move one voxel.',
     plane: 'View',
     all: 'Linked slices + 3D',
     axial: 'Axial',
@@ -52,7 +52,7 @@ export const en = {
 export const fr: typeof en = {
   dialog: {
     close: 'Fermer',
-    hint: 'Cliquer sur une coupe pour placer le réticule. Faire défiler pour parcourir les coupes ; les touches fléchées déplacent le réticule d’un voxel.',
+    hint: 'Cliquer pour placer le réticule. Faire défiler pour changer de coupe ; les flèches le déplacent d’un voxel.',
     plane: 'Vue',
     all: 'Coupes liées + 3D',
     axial: 'Axiale',

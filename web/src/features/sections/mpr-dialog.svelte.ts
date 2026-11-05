@@ -24,6 +24,8 @@ export interface MprDialogDeps {
   };
   /** The region the 3D brain draws under the crosshair becomes the selection. */
   select: (regionId: string) => void;
+  /** The stage cuts on the plane a picture was clicked in, through the crosshair. */
+  showPlane: (plane: MprPlane) => unknown;
 }
 
 const clamp = (value: number) => Math.max(-COORDINATE_LIMIT, Math.min(COORDINATE_LIMIT, value));
@@ -39,12 +41,14 @@ export function wheelCoordinate(coordinate: number, deltaY: number): number | nu
   return deltaY === 0 || next === coordinate ? null : next;
 }
 
-export function createMprDialog({ engine, select }: MprDialogDeps) {
+export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
   const { sections } = engine;
   let open = $state(false);
   let instant = $state(false);
   // The plane a phone shows; the crosshair stays linked across all three.
   let plane = $state<MprPlane>('axial');
+  // The dock's width the reader dragged it to, in CSS pixels; null keeps the layout's own.
+  let width = $state<number | null>(null);
 
   // One frame of work per kind, the latest value only: a drag is not a queue of resamples (sections.js:130-136).
   const waiting = new Map<string, () => void>();
@@ -97,6 +101,12 @@ export function createMprDialog({ engine, select }: MprDialogDeps) {
     get plane() {
       return plane;
     },
+    get width() {
+      return width;
+    },
+    set width(value: number | null) {
+      width = value;
+    },
     set plane(value: MprPlane) {
       plane = value;
     },
@@ -118,6 +128,16 @@ export function createMprDialog({ engine, select }: MprDialogDeps) {
       open = false;
     },
 
+    /**
+     * A click on the 3D brain: the crosshair goes to where the ray met the region's surface, and the
+     * click has already chosen the region, so the crosshair does not choose again. It also outranks
+     * an MRI click whose region is still being found.
+     */
+    follow(point: Vec3) {
+      if (!open) return;
+      request++;
+      sections.setCrosshair(point);
+    },
     /** A slider, coalesced to one move a frame. */
     moveTo(name: MprPlane, coordinate: number) {
       schedule(`position-${name}`, () => selectPoint(along(name, coordinate)));
@@ -126,6 +146,7 @@ export function createMprDialog({ engine, select }: MprDialogDeps) {
     place(name: MprPlane, xFraction: number, yFraction: number) {
       const { fieldOfView } = sections.display!;
       selectPoint(pointOnPlane(sections.mprFrame(name), xFraction, yFraction, fieldOfView));
+      void showPlane(name);
     },
     /** The wheel over a panel; false when the page should keep it. */
     wheel(name: MprPlane, deltaY: number): boolean {

@@ -30,7 +30,7 @@ The **Segmentation agreement** section, on the aseg structure, NextBrain's union
 
 - `mri/aseg.mgz` of the subject's FreeSurfer 8.2 reconstruction: the 1 mm reference grid (256³, spacing 1 mm), through its tkregister affine.
 - The NextBrain label volume on its 0.4 mm grid in surface RAS (`nextbrain.load`).
-- Compared structures, from `validation.segmentation_agreement.aseg_labels` (left / right): caudate 11 / 50, putamen 12 / 51, thalamus 10 / 49, hippocampus 17 / 53, amygdala 18 / 54. Each is paired with the teaching-set unit of the same name (`learning-anatomy.yaml`): caudate (NextBrain labels 48, 118, 393), putamen (79, 349), thalamus (52 labels), hippocampal formation (51) and amygdala with transition areas (14).
+- Compared structures, from `validation.segmentation_agreement.aseg_labels` (left / right): caudate 11 / 50, putamen 12 / 51, thalamus 10 / 49, hippocampus 17 / 53, amygdala 18 / 54. Each is paired with the teaching-set unit of the same name (`learning-anatomy.yaml`): caudate (NextBrain labels 48, 118, 393), putamen (79, 349), thalamus (53 defined labels), hippocampal formation (52) and amygdala with transition areas (14). Only source labels present in the subject contribute voxels.
 - Published files: `nextbrain-compared.volume` (uint8, on aseg's grid, cropped to the compared voxels: 69 × 47 × 57 voxels from corner (96, 84, 97) of the 256³ grid on CDMD) and `segmentation-agreement.json`.
 
 ## How it was built

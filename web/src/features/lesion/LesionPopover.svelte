@@ -72,6 +72,15 @@
 
 <style>
   @layer features {
+    /* The two clicks share the track and wrap, so a longer translation grows the pill instead of leaving it. */
+    :global(.lesion-click [role='radio']) {
+      flex: 1 1 0;
+      height: auto;
+      min-height: calc(var(--control-height) - 4px);
+      padding-block: var(--space-1);
+      white-space: normal;
+      text-wrap: balance;
+    }
     .hint {
       margin: var(--space-2) 0 0;
       font-size: var(--text-caption);

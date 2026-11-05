@@ -84,6 +84,14 @@
     startGuide(lang, {
       animate: !app.media.reducedMotion,
       onClose: () => settingsButton()?.focus(),
+      onLanguage: app.chooseLanguage,
+      mri: {
+        open(region: string) {
+          world!.anatomy.selectRegion(region);
+          return world!.excursions.openLinkedMri({ atRegion: true, instant: true });
+        },
+        close: () => app.ports.closeMpr(),
+      },
     });
   }
 

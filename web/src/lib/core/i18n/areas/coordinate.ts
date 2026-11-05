@@ -22,7 +22,7 @@ export const en = {
   alternative: (space: string, median: string, p95: string) =>
     `${space} lands a median ${median} (95%: ${p95}) away on this brain`,
   caveat:
-    'A template location carried onto this one brain by registration. It is not where this person’s own peak would be, and not what this brain does here.',
+    'A template location registered onto this brain: not this person’s own peak, nor what this brain does here.',
   failedMeasure: 'What lies near the coordinate could not be measured.',
   within: (radius: string) => `Within ${radius}`,
   shareNote: 'Share of the sphere in each region; no one region is the coordinate’s label',
@@ -69,7 +69,7 @@ export const fr: typeof en = {
   alternative: (space: string, median: string, p95: string) =>
     `${space} se place à une médiane de ${median} (95 % : ${p95}) sur ce cerveau`,
   caveat:
-    'Une position du gabarit reportée sur ce seul cerveau par recalage. Ce n’est pas l’endroit où serait le pic propre à cette personne, ni ce que fait ce cerveau à cet endroit.',
+    'Une position du gabarit recalée sur ce cerveau : ni le pic propre à cette personne, ni ce que fait ce cerveau ici.',
   failedMeasure: 'Ce qui se trouve près de la coordonnée n’a pas pu être mesuré.',
   within: (radius: string) => `À moins de ${radius}`,
   shareNote:

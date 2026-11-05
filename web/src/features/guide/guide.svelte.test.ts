@@ -48,6 +48,8 @@ beforeEach(async () => {
     Object.assign(button.style, { minWidth: '24px', minHeight: '24px', background: 'none' });
   }
   closed = 0;
+  mriOpens = [];
+  languages = [];
 });
 afterEach(() => {
   document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
@@ -57,8 +59,31 @@ afterEach(() => {
   localStorage.removeItem('planum.guide');
 });
 
+/** A stand-in for the docked Linked MRI, opened and closed as the app's would be. */
+let mriOpens: string[] = [];
+const mri = {
+  open(region: string) {
+    mriOpens.push(region);
+    if (document.querySelector('.mpr-dock')) return;
+    document
+      .getElementById('fixture')!
+      .insertAdjacentHTML(
+        'beforeend',
+        '<section class="mpr-dock" aria-label="Linked MRI sections" style="height: 200px"></section>',
+      );
+  },
+  close() {
+    document.querySelector('.mpr-dock')?.remove();
+  },
+};
+let languages: string[] = [];
 const start = (lang: 'en' | 'fr' = 'en') =>
-  startGuide(lang, { animate: false, onClose: () => closed++ });
+  startGuide(lang, {
+    animate: false,
+    onClose: () => closed++,
+    onLanguage: (next) => languages.push(next),
+    mri,
+  });
 const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
 const title = () => card().querySelector('.driver-popover-title')!.textContent;
 const next = () => card().querySelector<HTMLButtonElement>('.driver-popover-next-btn')!;
@@ -68,9 +93,9 @@ const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
   return event;
 };
 
-const STOPS = 13;
+const STOPS = 14;
 
-test('thirteen stops in order, in English and French, with focus on Next', async () => {
+test('fourteen stops in order, in English and French, with focus on Next', async () => {
   start();
   const titles = [title()];
   await expect.poll(() => document.activeElement).toBe(next());
@@ -83,6 +108,7 @@ test('thirteen stops in order, in English and French, with focus on Next', async
     'The brain',
     'Anatomical directions',
     'Section',
+    'Linked MRI',
     'Lesion',
     'Coordinate',
     'The medial surface',
@@ -103,7 +129,7 @@ test('thirteen stops in order, in English and French, with focus on Next', async
   start('fr');
   expect(title()).toBe('Utiliser Planum');
   expect(card().lang).toBe('fr');
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 13');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 14');
 });
 
 test('each stop opens its feature over the home view, and closing puts the reader’s view back', () => {
@@ -122,6 +148,7 @@ test('each stop opens its feature over the home view, and closing puts the reade
     `${HOME}&region=destrieux:left:29`,
     `${HOME}&view=superior`,
     `${HOME}&cut=coronal`,
+    `${HOME}&cut=coronal&region=destrieux:left:29`,
     `${HOME}&lesion=-35.5,-9.5,63.5,10`,
     `${HOME}&coord=-38,-22,56&space=mni152nlin2009casym`,
     `${HOME}&hemi=left&view=right`,
@@ -170,6 +197,90 @@ test('starting the tour again ends the one under way first, so the reader’s vi
   expect(location.hash).toBe(READER);
 });
 
+test('the Linked MRI stop opens the panel it points at, and leaving closes only what it opened', () => {
+  const stop = (n: number) => {
+    start();
+    for (let i = 1; i < n; i++) next().click();
+  };
+  const MRI_STOP = 5;
+  stop(MRI_STOP);
+  expect(title()).toBe('Linked MRI');
+  expect(document.querySelector('.driver-active-element')).toBe(
+    document.querySelector('.mpr-dock'),
+  );
+  next().click();
+  expect(document.querySelector('.mpr-dock')).toBeNull();
+  card().querySelector<HTMLButtonElement>('.driver-popover-prev-btn')!.click();
+  // On the left precentral gyrus, which the stop selects as its link does.
+  expect([title(), mriOpens]).toEqual(['Linked MRI', ['destrieux:left:29', 'destrieux:left:29']]);
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect(document.querySelector('.mpr-dock')).toBeNull();
+
+  // A panel the reader already had open stays open.
+  mri.open('destrieux:left:29');
+  stop(MRI_STOP + 1);
+  expect(title()).toBe('Lesion');
+  expect(document.querySelector('.mpr-dock')).not.toBeNull();
+});
+
+test.each([
+  ['a stage tool’s menu', 'popover stage-popover'],
+  ['the cut’s section bar', 'section-bar'],
+])('%s is not covered by the card, which steps aside without its arrow', async (_, className) => {
+  start();
+  while (title() !== 'Lesion') next().click();
+  const at = card().getBoundingClientRect();
+  const arrow = () => getComputedStyle(card().querySelector('.driver-popover-arrow')!).display;
+  expect(arrow()).not.toBe('none');
+  // The panel opens where the card sits, as the dock's panels open over the dock stops' cards.
+  document
+    .getElementById('fixture')!
+    .insertAdjacentHTML(
+      'beforeend',
+      `<div class="${className}" style="position: fixed; left: ${at.left - 100}px; top: ${at.top}px; width: 200px; height: 120px"></div>`,
+    );
+  const panel = document.querySelector(`.${className.split(' ').at(-1)}`)!;
+  const { right } = panel.getBoundingClientRect();
+  await expect
+    .poll(() => card().getBoundingClientRect().left, { timeout: 2000 })
+    .toBeGreaterThanOrEqual(right);
+  expect(arrow()).toBe('none');
+  // Gone, the card goes back to where driver.js put it, arrow and all.
+  panel.remove();
+  await expect.poll(() => card().getBoundingClientRect().left, { timeout: 2000 }).toBe(at.left);
+  expect(arrow()).not.toBe('none');
+});
+
+test('a phone leaves the Linked MRI stop out, as its scan opens over the page', async () => {
+  await page.viewport(390, 800);
+  start();
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 13');
+  for (let i = 1; i < 13; i++) next().click();
+  expect(mriOpens).toEqual([]);
+});
+
+test('the first card offers the languages; choosing one starts the tour again in it', async () => {
+  history.replaceState(history.state, '', `${READER}&lang=en`);
+  start();
+  const choices = () => [...card().querySelectorAll<HTMLButtonElement>('.guide-languages button')];
+  expect(choices().map((b) => [b.textContent, b.lang, b.getAttribute('aria-pressed')])).toEqual([
+    ['English', 'en', 'true'],
+    ['Français', 'fr', 'false'],
+  ]);
+  choices()[0]!.click();
+  expect(languages).toEqual([]);
+  await userEvent.click(choices()[1]!);
+  expect(languages).toEqual(['fr']);
+  expect([title(), card().lang, closed]).toEqual(['Utiliser Planum', 'fr', 0]);
+  expect(choices().map((b) => b.getAttribute('aria-pressed'))).toEqual(['false', 'true']);
+  // The stops show the home view in the new language, and closing keeps it.
+  expect(location.hash).toBe(`${HOME}&lang=fr`);
+  next().click();
+  expect(card().querySelectorAll('.guide-languages')).toHaveLength(0);
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect([location.hash, closed]).toEqual([`${READER}&lang=fr`, 1]);
+});
+
 test('the first launch offers the tour once, and only to a page opened plainly', () => {
   expect(firstLaunch(HOME)).toBe(true);
   expect(firstLaunch('')).toBe(true);
@@ -181,7 +292,7 @@ test('the first launch offers the tour once, and only to a page opened plainly',
 test('a target the layout hides is left out of the stops and the count', () => {
   document.querySelector<HTMLElement>('.orientation-gizmo')!.style.display = 'none';
   start();
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 12');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 13');
 });
 
 test('a target re-rendered after the tour starts is still the one highlighted', () => {
