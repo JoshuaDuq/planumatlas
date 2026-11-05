@@ -17,7 +17,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@fontsource-variable/source-sans-3": "5.3.0",
+    "@fontsource-variable/source-sans-3": "5.3.1",
     "@niivue/niivue": "0.69.0",
     "bits-ui": "2.20.2",
     "driver.js": "1.10.2",
