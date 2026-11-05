@@ -483,13 +483,13 @@ describe('notice', () => {
     expect(el(button('Dismiss')).dataset.tooltip).toBe('Dismiss');
   });
 
-  test('the see-through action and French labels', async () => {
+  test('the restore action and French labels', async () => {
     const { calls } = await mount({
       lang: 'fr',
-      notice: { text: 'Amygdale.', action: 'see-through' },
+      notice: { text: 'Amygdale.', action: 'restore' },
     });
-    await button('Voir à travers le cortex').click();
-    expect(calls).toEqual(['action:see-through']);
+    await button('Rétablir la vue précédente').click();
+    expect(calls).toEqual(['action:restore']);
     await expect.element(button('Fermer')).toBeVisible();
   });
 

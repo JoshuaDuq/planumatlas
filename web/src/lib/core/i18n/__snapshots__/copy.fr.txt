@@ -152,20 +152,6 @@
    "[12345] → \"Données lésionnelles et cliniques · 12345 associations\""
   ],
   "checkedMaps": "Cartes d’activation que ces données vérifient",
-  "deepMapped": [
-   "[\"Alpha\",1] → \"Alpha se trouve sous le cortex.\"",
-   "[\"\",2] → \" se trouvent sous le cortex.\"",
-   "[\"Alpha\",183] → \"Alpha se trouvent sous le cortex.\"",
-   "[\"\",12345] → \" se trouvent sous le cortex.\"",
-   "[\"Alpha\",0] → \"Alpha se trouvent sous le cortex.\""
-  ],
-  "otherMapped": [
-   "[0] → \"0 autres régions cartographiées\"",
-   "[1] → \"1 autre région cartographiée\"",
-   "[2] → \"2 autres régions cartographiées\"",
-   "[183] → \"183 autres régions cartographiées\"",
-   "[12345] → \"12345 autres régions cartographiées\""
-  ],
   "unseen": [
    "[\"Alpha\"] → \"Hors de vue sous cet angle<NNBSP>: Alpha.\"",
    "[\"\"] → \"Hors de vue sous cet angle<NNBSP>: .\""
@@ -519,9 +505,6 @@
  },
  "display": {
   "hemisphere": "Hémisphère",
-  "seeThrough": "Voir à travers le cortex",
-  "seenThrough": "Cortex rendu transparent<NNBSP>; ses aires colorées restent opaques. Affichage règle l’opacité.",
-  "opaqueAgain": "Cortex rendu de nouveau opaque.",
   "both": "Les deux",
   "left": "Gauche",
   "right": "Droite",
@@ -835,17 +818,6 @@
   "caveat": "Là où les études de groupes en bonne santé rapportent une activation<NNBSP>: ni ce cerveau, ni ce qu’une lésion altérerait.",
   "consistencyNote": "La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit.",
   "overviewNote": "La vue d’ensemble combine plusieurs cartes de termes.",
-  "deepStrongest": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), la région la plus forte de Alpha, se trouve sous le cortex.\"",
-   "[\"\",\"Alpha\",\"\"] → \" (Alpha), la région la plus forte de , se trouve sous le cortex.\""
-  ],
-  "deepAmong": [
-   "[\"Alpha\",\"\",\"Alpha\",183] → \"Alpha (), parmi les 183 régions les plus fortes de Alpha, se trouve sous le cortex.\"",
-   "[\"\",\"Alpha\",\"\",12345] → \" (Alpha), parmi les 12345 régions les plus fortes de , se trouve sous le cortex.\"",
-   "[\"Alpha\",\"\",\"Alpha\",0] → \"Alpha (), parmi les 0 régions les plus fortes de Alpha, se trouve sous le cortex.\"",
-   "[\"\",\"Alpha\",\"\",1] → \" (Alpha), parmi les 1 régions les plus fortes de , se trouve sous le cortex.\"",
-   "[\"Alpha\",\"\",\"Alpha\",2] → \"Alpha (), parmi les 2 régions les plus fortes de Alpha, se trouve sous le cortex.\""
-  ],
   "compare": "Comparer",
   "compareCancel": "Annuler",
   "comparePrompt": [

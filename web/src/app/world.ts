@@ -31,6 +31,7 @@ import {
   syncPresentation,
 } from '../lib/state/engine-sync.svelte.ts';
 import { createCortexHold } from '../lib/state/cortex-hold.svelte.ts';
+import { createPaintSeeThrough } from '../lib/state/paint-see-through.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
 import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import { createLink } from '../lib/state/link.svelte.ts';
@@ -125,6 +126,12 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       },
     });
     syncPaint(model, view, { domains, clinical, lesion });
+    const paintSeeThrough = createPaintSeeThrough({
+      view,
+      regions: model.regions,
+      hold: cortexHold,
+      seeThrough,
+    });
     syncStrokeCases(view, strokeCases);
     syncPresentation(engine, view, engineState);
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
@@ -158,6 +165,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       render: flushSync,
       lesion,
       strokeCases,
+      paintSeeThrough,
     });
     const anatomy = createAnatomyCommands(context, {
       commands,
@@ -180,6 +188,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       view,
       lesion,
       strokeCases,
+      paintSeeThrough,
       coordinates,
       link,
       commands,

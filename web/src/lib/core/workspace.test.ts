@@ -196,10 +196,9 @@ test("the current item is the first registered list's item that is on screen", (
   assert.equal(scrolled.length, 1);
 });
 
-test('a notice offers a reload or seeing through the cortex, in either language; anything else fails', () => {
+test('a notice offers a reload, in either language; anything else fails', () => {
   assert.equal(noticeActionLabel('en', 'reload'), 'Reload');
   assert.equal(noticeActionLabel('fr', 'reload'), 'Recharger');
-  assert.equal(noticeActionLabel('fr', 'see-through'), 'Voir à travers le cortex');
   assert.throws(() => noticeActionLabel('en', 'fly' as 'reload'), /Unknown notice action: fly/);
 });
 

@@ -40,11 +40,6 @@ export const en = {
     'Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit.',
   // Said of the overview alone: a single function's map is one term's.
   overviewNote: 'The overview combines several term maps.',
-  // The region's name and side arrive as the list shows them.
-  deepStrongest: (region: string, side: string, map: string) =>
-    `${region} (${side}), the strongest region of ${map}, lies beneath the cortex.`,
-  deepAmong: (region: string, side: string, map: string, ranks: number) =>
-    `${region} (${side}), among the ${ranks} strongest regions of ${map}, lies beneath the cortex.`,
   compare: 'Compare',
   compareCancel: 'Cancel',
   // How many of the two are picked.
@@ -125,10 +120,6 @@ export const fr: typeof en = {
   consistencyNote:
     'La couleur reflète la constance des activations rapportées dans les études utilisant le terme de la carte. Elle ne signifie pas qu’une région sert uniquement cette fonction ni qu’une lésion à cet endroit cause nécessairement un déficit.',
   overviewNote: 'La vue d’ensemble combine plusieurs cartes de termes.',
-  deepStrongest: (region: string, side: string, map: string) =>
-    `${region} (${side}), la région la plus forte de ${map}, se trouve sous le cortex.`,
-  deepAmong: (region: string, side: string, map: string, ranks: number) =>
-    `${region} (${side}), parmi les ${ranks} régions les plus fortes de ${map}, se trouve sous le cortex.`,
   compare: 'Comparer',
   compareCancel: 'Annuler',
   comparePrompt: (picked: number) =>

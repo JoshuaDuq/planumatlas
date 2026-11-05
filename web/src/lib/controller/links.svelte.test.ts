@@ -68,6 +68,7 @@ function build({ announce }: { announce: boolean }) {
         view,
         lesion,
         strokeCases,
+        paintSeeThrough: { heldOpacity: null },
         coordinates: null,
         link: createLink({ engine, view, lesion, strokeCases, write: () => {} }),
         commands: createSceneCommands({

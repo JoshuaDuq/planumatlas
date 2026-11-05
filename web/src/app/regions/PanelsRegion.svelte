@@ -172,8 +172,7 @@
   function noticeAction(action: NonNullable<Notice['action']>) {
     if (action === 'reload') void reloadWithoutStoredModels();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
-    else if (action === 'restore-lesion') world!.coordinates!.undoReplacement();
-    else world!.excursions.seeThroughCortex();
+    else world!.coordinates!.undoReplacement();
   }
 
   /*

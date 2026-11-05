@@ -1,13 +1,11 @@
 import { untrack } from 'svelte';
 import type { createCatalog } from '../core/catalog/catalog.ts';
-import { beneathCortex } from '../core/catalog/labels.ts';
 import {
   ALL_DOMAINS,
   comparedIds,
   domainAreas,
   domainName,
   domainPaint,
-  domainRecord,
   drawnAs,
   groupedDomains,
   matchingTerms,
@@ -30,10 +28,11 @@ import { createLessons } from './lesson.ts';
 import type { MriDialog, SceneReader, Shell } from './lesson.ts';
 import type { EngineModel } from '../engine/api.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
+import type { PaintSeeThrough } from '../state/paint-see-through.svelte.ts';
 import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { ViewStore } from '../state/view.svelte.ts';
 import { createExplorerChoice, createModes } from './modes.ts';
-import type { Explorer, Language, Notice } from '../types/index.ts';
+import type { Explorer, Language } from '../types/index.ts';
 
 export type { MriDialog, SceneReader, Shell } from './lesson.ts';
 
@@ -76,6 +75,7 @@ export interface ExcursionDeps {
   render: () => void;
   lesion: Pick<LesionStore, 'selectedTract' | 'clearTract' | 'heldOpacity'>;
   strokeCases: Pick<StrokeCasesStore, 'chosen' | 'show' | 'clear' | 'heldOpacity' | 'heldColor'>;
+  paintSeeThrough: Pick<PaintSeeThrough, 'heldOpacity'>;
 }
 
 /**
@@ -97,6 +97,7 @@ export function createExcursions(
     render,
     lesion,
     strokeCases,
+    paintSeeThrough,
   }: ExcursionDeps,
 ) {
   const { engine, session, lesson, view } = ctx;
@@ -113,9 +114,6 @@ export function createExcursions(
   // The stroke cases that scene showed. The excursion clears them, giving back the display they found,
   // and Restore draws them again over it.
   let casesBefore: readonly string[] = [];
-  // Whether the cortex is see-through because the reader took the notice's offer, so the next map
-  // that needs no such view can put the cortex back.
-  let seenThroughByNotice = false;
   // The display the open lesson's step or route set on the stage, which its readout and reset start from.
   let lessonDisplay = $state.raw<PreparedDisplay | null>(null);
 
@@ -223,7 +221,6 @@ export function createExcursions(
     }
     beforeExcursion = null;
     excursionOrigin = null;
-    seenThroughByNotice = false;
     // The function or deficit in front opened the excursion, so the view from before it has it closed.
     if (excursion === 'functions') session.setFunction(null);
     else session.setDeficit(null);
@@ -251,7 +248,6 @@ export function createExcursions(
     const before = beforeExcursion!;
     beforeExcursion = null;
     excursionOrigin = null;
-    seenThroughByNotice = false;
     const current = commands.begin();
     const failures = await reader.apply(before, current);
     if (!current()) return;
@@ -307,17 +303,10 @@ export function createExcursions(
    * What a reveal changed, what of it the framing cannot show, and any hint about seeing what it
    * revealed, as one notice; false when there was nothing to say.
    */
-  function sayRevealed(
-    before: RevealSettings,
-    hint: Notice | null = null,
-    unseen: string | null = null,
-  ): boolean {
+  function sayRevealed(before: RevealSettings, unseen: string | null = null): boolean {
     const said = revealNotice(lang(), before, revealSettings());
-    if (!said && !unseen && !hint) return false;
-    session.notify({
-      text: [said, unseen, hint?.text].filter(Boolean).join(' '),
-      action: hint?.action ?? null,
-    });
+    if (!said && !unseen) return false;
+    session.notify({ text: [said, unseen].filter(Boolean).join(' '), action: null });
     return true;
   }
 
@@ -336,92 +325,6 @@ export function createExcursions(
         `${name.charAt(0).toLocaleUpperCase(lang())}${name.slice(1)} (${list.format(side)})`,
     );
     return t(lang(), 'clinical').unseen(list.format(items));
-  }
-
-  /**
-   * A function one of whose strongest regions is a structure the cortex hides says so, naming itself,
-   * and offers to see through the cortex; null for the overview, or a hidden cortex. A comparison
-   * says it of the first of its functions that has one.
-   */
-  function deepHint(id: string): Notice | null {
-    const compared = comparedIds(id);
-    if (compared) return compared.map(deepHint).find(Boolean) ?? null;
-    if (id === ALL_DOMAINS || !model.settings.cortexVisible) return null;
-    const strongest = domainAreas(domains, id).slice(0, DEEP_RANKS);
-    const rank = strongest.findIndex(({ region }) => beneathCortex(model.regions.get(region)!));
-    if (rank < 0) return null;
-    const { region } = strongest[rank]!;
-    const copy = t(lang(), 'functions');
-    // Mid-sentence, the side is a common word.
-    const side = t(lang(), 'sides').capitalized[
-      model.regions.get(region)!.hemisphere
-    ].toLocaleLowerCase(lang());
-    const map = domainName(domainRecord(domains, id)!, lang());
-    const name = anatomy.get(region)!.label.name;
-    return {
-      text: rank
-        ? copy.deepAmong(name, side, map, DEEP_RANKS)
-        : copy.deepStrongest(name, side, map),
-      action: 'see-through',
-    };
-  }
-
-  /**
-   * The opened map's deep-structure offer as the cortex now stands: none when the cortex is already
-   * see-through for it; and a see-through cortex the notice set, which this map does not need, made
-   * opaque again and said so.
-   */
-  function seeThroughFor(hint: Notice | null): Notice | null {
-    const seeThrough = seenThroughByNotice && model.settings.cortexOpacity === seeThroughOpacity();
-    if (seeThrough && hint) return null;
-    if (seeThrough) {
-      model.setCortexOpacity(1);
-      seenThroughByNotice = false;
-      return model.settings.cortexVisible ? { text: t(lang(), 'display').opaqueAgain } : null;
-    }
-    return model.settings.cortexOpacity >= 1 ? hint : null;
-  }
-
-  /**
-   * A deficit whose mapped regions include structures the opaque cortex hides names them, its first
-   * associations' first, two of them when there are more than three, and offers to see through the cortex.
-   */
-  function deficitDeepHint(id: string): Notice | null {
-    if (!model.settings.cortexVisible) return null;
-    const names = [
-      ...new Set(
-        clinical
-          .mappedRegions(id)
-          .filter((region) => beneathCortex(model.regions.get(region)!))
-          .map((region) => anatomy.get(region)!.label.name),
-      ),
-    ]
-      // Source labels differ in case (NextBrain's are lower case); listed together, each starts with a capital.
-      .map((name) => `${name.charAt(0).toLocaleUpperCase(lang())}${name.slice(1)}`);
-    if (!names.length) return null;
-    const text = t(lang(), 'clinical');
-    const shown = names.length > 3 ? names.slice(0, 2) : names;
-    const items =
-      shown.length < names.length
-        ? [...shown, text.otherMapped(names.length - shown.length)]
-        : shown;
-    return {
-      text: text.deepMapped(
-        new Intl.ListFormat(lang(), { type: 'conjunction' }).format(items),
-        names.length,
-      ),
-      action: 'see-through',
-    };
-  }
-
-  /** The notice's offer to see an opened map's deep structures: the cortex turns see-through, and stays undoable. */
-  function seeThroughCortex() {
-    model.setCortexOpacity(seeThroughOpacity());
-    seenThroughByNotice = true;
-    // The hint is answered, so the confirmation replaces it rather than joining it.
-    session.notify(null);
-    session.notify({ text: t(lang(), 'display').seenThrough });
-    render();
   }
 
   /**
@@ -450,7 +353,7 @@ export function createExcursions(
     // Drawn first, so the framing measures the key this paint brings.
     render();
     const unseen = camera.frameRegions(regions);
-    sayRevealed(before, seeThroughFor(deficitDeepHint(id)), unseenNotice(unseen));
+    sayRevealed(before, unseenNotice(unseen));
     render();
     return true;
   }
@@ -470,7 +373,6 @@ export function createExcursions(
     const regions = revealedRegions(domains, domainPaint(domains, id), model.settings.detail);
     if (!(await commands.revealRegions(regions, current))) return false;
     cutLabelsFollowAtlas();
-    const hint = seeThroughFor(deepHint(id));
     // A function's map spans the cortex, so the whole brain is framed, clear of the key it brings,
     // from a view that shows its strongest areas; those no view shows are said, as a deficit's are.
     render();
@@ -483,7 +385,7 @@ export function createExcursions(
               .map(({ region }) => region),
           ),
     );
-    sayRevealed(before, hint, unseenNotice(unseen));
+    sayRevealed(before, unseenNotice(unseen));
     render();
     return true;
   }
@@ -551,12 +453,13 @@ export function createExcursions(
     /**
      * The display the stage was prepared with, which the reader's changes are counted from and Reset
      * display returns to: the open lesson's, else the defaults; a lesion's drawn bundle sees through
-     * the cortex. Tracts' own see-through cortex is `afterReset`'s.
+     * the cortex, as does a painted structure. Tracts' own see-through cortex is `afterReset`'s.
      */
     get displayBaseline(): PreparedDisplay {
       const open = lessonDisplay && lesson.state.circuit && session.state.explorer === 'circuits';
       const prepared = open ? lessonDisplay! : DEFAULT_DISPLAY;
-      return lesion.heldOpacity !== null && prepared.cortexVisible
+      const held = lesion.heldOpacity !== null || paintSeeThrough.heldOpacity !== null;
+      return held && prepared.cortexVisible
         ? { ...prepared, cortexOpacity: seeThroughOpacity() }
         : prepared;
     },
@@ -573,7 +476,6 @@ export function createExcursions(
     openDeficit,
     openFunction,
     openListedRegion,
-    seeThroughCortex,
     pickPaint,
     offerReload,
 

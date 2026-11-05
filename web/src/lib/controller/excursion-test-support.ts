@@ -118,6 +118,8 @@ export function createScene() {
       Object.assign(strokeCases, { chosen: [], heldOpacity: null, heldColor: null });
     }),
   };
+  // A paint a test can mark as holding the cortex see-through.
+  const paintSeeThrough = { heldOpacity: null as number | null };
   const excursions = createExcursions(
     { engine, session, lesson, view },
     {
@@ -133,12 +135,14 @@ export function createScene() {
       render,
       lesion,
       strokeCases,
+      paintSeeThrough,
     },
   );
   return {
     engine,
     lesion,
     strokeCases,
+    paintSeeThrough,
     session,
     lesson,
     view,

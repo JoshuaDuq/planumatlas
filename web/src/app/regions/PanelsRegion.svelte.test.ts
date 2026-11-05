@@ -343,19 +343,16 @@ describe('the location bar and the notice', () => {
     expect(world.view.current.expanded.has(group.key)).toBe(true);
   });
 
-  test('the notice’s see-through offer lowers the cortex opacity', async () => {
+  test('a deficit that paints a deep structure sees through the cortex, and leaving it gives it back', async () => {
     const world = await boot();
-    for (const { deficits } of world.clinical.grouped('', 'en')) {
-      for (const { id } of deficits) {
-        await world.excursions.openDeficit(id);
-        if (app.session.state.notice?.action === 'see-through') break;
-      }
-      if (app.session.state.notice?.action === 'see-through') break;
-    }
-    expect(app.session.state.notice?.action).toBe('see-through');
+    await world.excursions.openDeficit('neglect');
+    flushSync();
+    expect(engine.model.settings.cortexOpacity).toBe(
+      engine.model.manifest.appearance.see_through_opacity,
+    );
+    await world.excursions.chooseExplorer('anatomy');
+    flushSync();
     expect(engine.model.settings.cortexOpacity).toBe(1);
-    await userEvent.click(page.getByRole('button', { name: t('en', 'display').seeThrough }));
-    expect(engine.model.settings.cortexOpacity).toBeLessThan(1);
   });
 
   test('Restore previous view is offered once a function is opened from a scene, and not before', async () => {

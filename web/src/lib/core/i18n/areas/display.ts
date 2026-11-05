@@ -1,8 +1,5 @@
 export const en = {
   hemisphere: 'Hemisphere',
-  seeThrough: 'See through the cortex',
-  seenThrough: 'Cortex made see-through; its painted areas stay opaque. Display sets the opacity.',
-  opaqueAgain: 'Cortex made opaque again.',
   // The region's name arrives capitalized, as the inspector titles it.
   both: 'Both',
   left: 'Left',
@@ -63,10 +60,6 @@ export const en = {
 
 export const fr: typeof en = {
   hemisphere: 'Hémisphère',
-  seeThrough: 'Voir à travers le cortex',
-  seenThrough:
-    'Cortex rendu transparent\u202f; ses aires colorées restent opaques. Affichage règle l’opacité.',
-  opaqueAgain: 'Cortex rendu de nouveau opaque.',
   both: 'Les deux',
   left: 'Gauche',
   right: 'Droite',

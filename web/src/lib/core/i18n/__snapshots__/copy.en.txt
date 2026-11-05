@@ -152,20 +152,6 @@
    "[12345] → \"Lesion and clinical evidence · 12345 associations\""
   ],
   "checkedMaps": "Activation maps this evidence checks",
-  "deepMapped": [
-   "[\"Alpha\",1] → \"Alpha lies beneath the cortex.\"",
-   "[\"\",2] → \" lie beneath the cortex.\"",
-   "[\"Alpha\",183] → \"Alpha lie beneath the cortex.\"",
-   "[\"\",12345] → \" lie beneath the cortex.\"",
-   "[\"Alpha\",0] → \"Alpha lie beneath the cortex.\""
-  ],
-  "otherMapped": [
-   "[0] → \"0 other mapped regions\"",
-   "[1] → \"1 other mapped region\"",
-   "[2] → \"2 other mapped regions\"",
-   "[183] → \"183 other mapped regions\"",
-   "[12345] → \"12345 other mapped regions\""
-  ],
   "unseen": [
    "[\"Alpha\"] → \"Out of sight from this view: Alpha.\"",
    "[\"\"] → \"Out of sight from this view: .\""
@@ -519,9 +505,6 @@
  },
  "display": {
   "hemisphere": "Hemisphere",
-  "seeThrough": "See through the cortex",
-  "seenThrough": "Cortex made see-through; its painted areas stay opaque. Display sets the opacity.",
-  "opaqueAgain": "Cortex made opaque again.",
   "both": "Both",
   "left": "Left",
   "right": "Right",
@@ -835,17 +818,6 @@
   "caveat": "Where studies of healthy groups report activation: not this brain, and not what damage would impair.",
   "consistencyNote": "Colour reflects the consistency of reported activation in studies using the map’s term. It does not mean a region serves only that function or that damage there necessarily causes a deficit.",
   "overviewNote": "The overview combines several term maps.",
-  "deepStrongest": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha (), the strongest region of Alpha, lies beneath the cortex.\"",
-   "[\"\",\"Alpha\",\"\"] → \" (Alpha), the strongest region of , lies beneath the cortex.\""
-  ],
-  "deepAmong": [
-   "[\"Alpha\",\"\",\"Alpha\",183] → \"Alpha (), among the 183 strongest regions of Alpha, lies beneath the cortex.\"",
-   "[\"\",\"Alpha\",\"\",12345] → \" (Alpha), among the 12345 strongest regions of , lies beneath the cortex.\"",
-   "[\"Alpha\",\"\",\"Alpha\",0] → \"Alpha (), among the 0 strongest regions of Alpha, lies beneath the cortex.\"",
-   "[\"\",\"Alpha\",\"\",1] → \" (Alpha), among the 1 strongest regions of , lies beneath the cortex.\"",
-   "[\"Alpha\",\"\",\"Alpha\",2] → \"Alpha (), among the 2 strongest regions of Alpha, lies beneath the cortex.\""
-  ],
   "compare": "Compare",
   "compareCancel": "Cancel",
   "comparePrompt": [

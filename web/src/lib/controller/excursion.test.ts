@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { describe, expect, test, vi } from 'vitest';
-import { beneathCortex } from '../core/catalog/labels.ts';
 import {
   ALL_DOMAINS,
   domainAreas,
@@ -11,14 +10,6 @@ import { createScene, sceneBefore } from './excursion-test-support.ts';
 
 const DEFICIT = 'acalculia';
 const OTHER_DEFICIT = 'amusia';
-
-/** A function one of whose five strongest regions the cortex hides. */
-const deepFunction = (scene: ReturnType<typeof createScene>) =>
-  scene.domains.domains.find((domain) =>
-    domainAreas(scene.domains, domain.id)
-      .slice(0, 5)
-      .some(({ region }) => beneathCortex(scene.engine.model.regions.get(region)!)),
-  )!.id;
 
 describe('an excursion into a deficit', () => {
   test('opens on the internal anatomy drawing most of its structures, not one drawing a few', async () => {
@@ -401,85 +392,7 @@ describe('an excursion into a function', () => {
   });
 });
 
-describe('the offer to see through the cortex', () => {
-  test('a function with a deep strongest region names it and offers; taking it makes the cortex see-through', async () => {
-    const scene = createScene();
-    await scene.excursions.openFunction(deepFunction(scene));
-    const notice = scene.session.state.notice!;
-    assert.equal(notice.action, 'see-through');
-    assert.match(notice.text, /beneath the cortex/);
-
-    scene.excursions.seeThroughCortex();
-    assert.equal(
-      scene.engine.model.settings.cortexOpacity,
-      scene.engine.model.manifest.appearance.see_through_opacity,
-    );
-    assert.match(scene.session.state.notice!.text, /see-through/);
-    assert.equal(scene.session.state.notice!.action, null);
-  });
-
-  test('CTRL-31 a cortex the reader made see-through by hand gets no offer', async () => {
-    const scene = createScene();
-    scene.engine.model.setCortexOpacity(0.4);
-    await scene.excursions.openFunction(deepFunction(scene));
-    assert.equal(scene.session.state.notice?.action ?? null, null);
-  });
-
-  test('the overview offers nothing', async () => {
-    const scene = createScene();
-    await scene.excursions.openFunction(ALL_DOMAINS);
-    assert.equal(scene.session.state.notice?.action ?? null, null);
-  });
-
-  test('a see-through cortex the offer set is made opaque again by a map that needs none, and says so', async () => {
-    const scene = createScene();
-    await scene.excursions.openFunction(deepFunction(scene));
-    scene.excursions.seeThroughCortex();
-    await scene.excursions.openFunction(ALL_DOMAINS);
-    assert.equal(scene.engine.model.settings.cortexOpacity, 1);
-    assert.equal(scene.session.state.notice!.text, 'Cortex made opaque again.');
-  });
-
-  test('a see-through cortex stays for another map that makes the same offer, which is not repeated', async () => {
-    const scene = createScene();
-    const deep = deepFunction(scene);
-    await scene.excursions.openFunction(deep);
-    scene.excursions.seeThroughCortex();
-    await scene.excursions.openFunction(deep);
-    assert.equal(
-      scene.engine.model.settings.cortexOpacity,
-      scene.engine.model.manifest.appearance.see_through_opacity,
-    );
-    assert.equal(scene.session.state.notice?.action ?? null, null);
-  });
-
-  test('a deficit that maps structures the cortex hides names them and offers', async () => {
-    const scene = createScene();
-    await scene.excursions.openDeficit('neglect');
-    const notice = scene.session.state.notice!;
-    assert.equal(notice.action, 'see-through');
-    assert.match(notice.text, /lies beneath the cortex|lie beneath the cortex/);
-  });
-
-  test('a deficit with more than three deep structures names two and counts the rest', async () => {
-    const scene = createScene();
-    const { regions } = scene.engine.model;
-    const names = new Map<string, string>();
-    for (const region of regions.values()) {
-      const name = scene.anatomy.get(region.id)?.label.name;
-      if (name && beneathCortex(region) && ![...names.values()].includes(name)) {
-        names.set(region.id, name);
-      }
-      if (names.size === 5) break;
-    }
-    vi.spyOn(scene.clinical, 'mappedRegions').mockReturnValue([
-      'destrieux:left:25',
-      ...names.keys(),
-    ]);
-    await scene.excursions.openDeficit('acalculia');
-    assert.match(scene.session.state.notice!.text, /\b3 other mapped/);
-  });
-
+describe('a deficit’s FreeSurfer structures', () => {
   for (const [detail, drawnOn] of [
     ['learning', 'learning'],
     ['nextbrain', 'learning'],

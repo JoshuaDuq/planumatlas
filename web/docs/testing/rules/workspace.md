@@ -185,11 +185,11 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 
 ### WORK-20 · The one notice has its text, at most one action and a dismiss, and is not a live region
 
-- **Rule:** A notice shows its text, one optional action ("Reload" or "See through the cortex"; FR "Recharger", "Voir à travers le cortex") and a "Dismiss" icon button (FR "Fermer") with that tooltip. It sits after the tablist and before the panels in both shells. The announcer speaks it, so it has no live role. An unknown action is an error.
+- **Rule:** A notice shows its text, one optional action (e.g. "Reload"; FR "Recharger") and a "Dismiss" icon button (FR "Fermer") with that tooltip. It sits after the tablist and before the panels in both shells. The announcer speaks it, so it has no live role. An unknown action is an error.
 - **Kind:** behaviour
 - **Level:** browser — DOM order and roles; the action label is unit
 - **Source:** `viewer/ui/chrome/notice.js:1-52`; `viewer/ui/chrome/notice.test.js:50-83`
-- **Expected:** `noticeActionLabel('en', 'reload')` = "Reload"; `('fr', 'reload')` = "Recharger"; `('fr', 'see-through')` = "Voir à travers le cortex"; `('en', 'fly')` throws "Unknown notice action: fly". DOM order `tablist, notice, tabpanel, tabpanel`; no `aria-live`, `role=alert` or `role=status` in it. Reload → `action:reload`. No action → one button (Dismiss).
+- **Expected:** `noticeActionLabel('en', 'reload')` = "Reload"; `('fr', 'reload')` = "Recharger"; `('en', 'fly')` throws "Unknown notice action: fly". DOM order `tablist, notice, tabpanel, tabpanel`; no `aria-live`, `role=alert` or `role=status` in it. Reload → `action:reload`. No action → one button (Dismiss).
 - **Covered by:** `src/lib/core/workspace.test.ts` (R); `src/features/workspace/Workspace.svelte.test.ts` (R)
 
 ### WORK-21 · Dismissing the notice gives focus to the tab in front

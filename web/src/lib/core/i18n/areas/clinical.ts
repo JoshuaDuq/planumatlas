@@ -7,10 +7,6 @@ export const en = {
   evidenceKind: (count: number) =>
     `Lesion and clinical evidence · ${count} ${count === 1 ? 'association' : 'associations'}`,
   checkedMaps: 'Activation maps this evidence checks',
-  // The regions arrive as one list, and `count` says how many it names.
-  deepMapped: (list: string, count: number) =>
-    `${list} ${count === 1 ? 'lies' : 'lie'} beneath the cortex.`,
-  otherMapped: (count: number) => `${count} other mapped ${count === 1 ? 'region' : 'regions'}`,
   // Coloured cortical regions the framed view cannot show, each with its sides.
   unseen: (list: string) => `Out of sight from this view: ${list}.`,
   functionBridge: (count: number, query: string) =>
@@ -85,10 +81,6 @@ export const fr: typeof en = {
   evidenceKind: (count: number) =>
     `Données lésionnelles et cliniques · ${count} ${count === 1 ? 'association' : 'associations'}`,
   checkedMaps: 'Cartes d’activation que ces données vérifient',
-  deepMapped: (list: string, count: number) =>
-    `${list} ${count === 1 ? 'se trouve' : 'se trouvent'} sous le cortex.`,
-  otherMapped: (count: number) =>
-    `${count} ${count === 1 ? 'autre région cartographiée' : 'autres régions cartographiées'}`,
   unseen: (list: string) => `Hors de vue sous cet angle\u202f: ${list}.`,
   functionBridge: (count: number, query: string) =>
     `Fonctions\u202f: ${count} ${count === 1 ? 'carte d’activation correspond' : 'cartes d’activation correspondent'} à «\u00a0${query}\u00a0»`,

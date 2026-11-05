@@ -300,30 +300,30 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-30 · An opened map says what it changed and labels the cut with its atlas
 
-- **Rule:** After drawing a function's or deficit's regions, the reader is told which of their settings the reveal changed (atlas, cut, isolation, hemisphere, cortex), in one notice with any see-through offer. Where a cut atlas with the surface atlas's id is published, the cut is labelled by that atlas too.
+- **Rule:** After drawing a function's or deficit's regions, the reader is told which of their settings the reveal changed (atlas, cut, isolation, hemisphere, cortex), in one notice. Where a cut atlas with the surface atlas's id is published, the cut is labelled by that atlas too.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:879-900`; `viewer/ui/panels/clinical.js` (`revealNotice`)
 - **Expected:** a reveal that changes the atlas → a notice that names the change. Surface atlas `destrieux`, with `destrieux` in `cut_atlases` → `cutAtlas: 'destrieux'`.
 - **Covered by:** wording is PANEL-12 (`core-panels.md`); in the controller `src/lib/controller/excursion.test.ts` (R: the atlas change is named, the cut is labelled by the atlas)
 
-### CTRL-31 · A map with a strongest region beneath the cortex offers to see through it
+### CTRL-31 · A function or deficit that paints a structure beneath the cortex sees through it
 
-- **Rule:** With the cortex shown and fully opaque, a function offers to see through the cortex when one of its 5 strongest regions lies beneath the cortex; the offer names that region, its side and the function. A deficit offers it when its mapped regions include structures beneath the cortex. The deficit's notice names them: all of them up to three, otherwise two and "N other mapped regions". The overview of all functions offers nothing. A deficit mapped on structures alone hides the cortex and offers nothing. A cortex the reader made see-through by hand gets no offer.
+- **Rule:** While a function or deficit paints a structure beneath the cortex (`beneathCortex`) that is drawn, and the cortex is shown and fully opaque, the cortex takes the manifest's see-through opacity, so its cortical and deep regions show at once. It shares the one cortex hold with a lesion's streamlines and stroke cases. A cortex-only paint, a lesion's paint, hidden internal anatomy or a hidden cortex keeps the cortex as it is; a cortex already see-through is left alone. No notice offers it.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:902-962`; `viewer/i18n/translations.js:206-207`; `viewer/clinical/translations.js:11-12`
-- **Expected:** a deep function → notice action `see-through`, text matches /beneath the cortex/. `neglect` → action `see-through`. Five deep names → text contains "3 other mapped". `ALL_DOMAINS` → no action. `abulia` → `cortexVisible: false`, no action. Opacity 0.4 before a deep function → no offer.
-- **Covered by:** `src/lib/controller/excursion.test.ts` (R, including the by-hand see-through cortex)
+- **Source:** replaces the legacy see-through offer (`viewer/app.js:902-972`)
+- **Expected:** paint `deficit:` or `function:` with a drawn structure → `cortexOpacity` = `appearance.see_through_opacity`, `heldOpacity` 1. Paint of `ctx` only, a `lesion:` paint, or `internalVisible: false` → opacity 1. Opacity 0.5 before → stays 0.5, `heldOpacity` null.
+- **Covered by:** `src/lib/state/paint-see-through.svelte.test.ts` (R); booted in `src/app/regions/PanelsRegion.svelte.test.ts` (`neglect`)
 
-### CTRL-32 · Taking the offer makes the cortex see-through until a map needs none
+### CTRL-32 · The paint's see-through cortex goes with the paint, and is not the reader's change
 
-- **Rule:** Taking the offer sets the cortex opacity to the manifest's see-through opacity, replaces the offer with a confirmation, and keeps the change undoable from Display. A later map that makes the same offer keeps it and does not repeat the offer. A later map that needs none makes the cortex opaque again and says "Cortex made opaque again."
+- **Rule:** When the paint goes or no longer draws such a structure, the cortex is given back its opacity, unless the reader set another meanwhile, which is kept. A link carries the reader's own opacity, not the see-through one, and Reset display counts the see-through cortex as the baseline.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:932-972`; `viewer/i18n/translations.js:330-331`
-- **Expected:** take the offer → `cortexOpacity` = `appearance.see_through_opacity` (0.15 on cdmd); notice matches /see-through/; action null. Then `ALL_DOMAINS` → opacity 1, notice "Cortex made opaque again.". Then the same deep function → stays 0.15, no action.
-- **Covered by:** `src/lib/controller/excursion.test.ts` (R)
+- **Source:** `src/lib/state/cortex-hold.svelte.ts`
+- **Expected:** paint cleared → opacity 1, `heldOpacity` null. Opacity set to 0.6 while held → `heldOpacity` null, 0.6 kept after the paint goes. `paintSeeThrough.heldOpacity` 1 → `displayBaseline.cortexOpacity` = `see_through_opacity`.
+- **Covered by:** `src/lib/state/paint-see-through.svelte.test.ts`, `src/lib/controller/excursion.svelte.test.ts` (R)
 
 ### CTRL-33 · A search carried to the other evidence tab opens that tab's list on the same words
 

@@ -95,6 +95,7 @@ function setup(
     lesson,
     lesion,
     strokeCases,
+    paintSeeThrough: { heldOpacity: null },
     coordinates: extras.coordinates ?? null,
     view: {
       get current() {

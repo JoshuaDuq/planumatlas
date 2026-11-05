@@ -84,6 +84,16 @@ describe('the whole route’s grey context', () => {
   });
 });
 
+test('the see-through cortex a painted structure holds is the reset’s, not a change', () => {
+  const scene = createScene();
+  scene.paintSeeThrough.heldOpacity = 1;
+  expect(scene.excursions.displayBaseline.cortexOpacity).toBe(
+    scene.engine.model.manifest.appearance.see_through_opacity,
+  );
+  scene.paintSeeThrough.heldOpacity = null;
+  expect(scene.excursions.displayBaseline.cortexOpacity).toBe(1);
+});
+
 test('the display a lesion’s drawn bundle sees through is the reset’s, not a change; leaving the lesson drops its own', async () => {
   const scene = createScene();
   const seeThrough = scene.engine.model.manifest.appearance.see_through_opacity;

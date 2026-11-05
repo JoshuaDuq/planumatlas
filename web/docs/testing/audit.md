@@ -389,7 +389,6 @@ Rules hiding inside: CTRL-21–35, LESSON-01, -04, -05, -07–09. Rules only it 
 
 - a deficit opened from a lesson takes over its scene (CTRL-29)
 - the reveal notice and the cut-atlas label (CTRL-30)
-- a cortex made see-through by hand gets no offer (CTRL-31)
 - a right-hemisphere landmark (LESSON-07)
 - a 2-element centroid is refused (LESSON-09)
 
