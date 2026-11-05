@@ -388,6 +388,8 @@ export interface EngineSections {
   pixels(frame: PlaneFrame): Uint8ClampedArray;
   /** Needs the MRI loaded (sections.js:418). */
   sample(point: Vec3): VolumeSample;
+  /** The region whose drawn 3D solid holds a point; null where none does. */
+  regionAt(point: Vec3): Promise<Region | null>;
 }
 
 // ---------------------------------------------------------------------------

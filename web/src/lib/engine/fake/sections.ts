@@ -359,5 +359,9 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
         cutRegion: null,
       };
     },
+    // The fake draws no solids, as its sample names no region.
+    async regionAt() {
+      return null;
+    },
   };
 }

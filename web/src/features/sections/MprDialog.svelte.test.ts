@@ -124,34 +124,26 @@ describe('docked beside the stage', () => {
     expect(document.activeElement).toBe(more());
   });
 
-  test('takes a column beside the stage at 1280 px, and the lower half of its column at 1024 px', async () => {
+  test('takes a column beside the stage at 1280 px, as a 2 × 2 of slices', async () => {
     await opened();
     const stage = document.getElementById('viewport')!;
     expect(box(dock()!).left).toBe(box(stage).right);
     expect(box(dock()!).top).toBe(box(stage).top);
     expect(box(dock()!).height).toBe(box(stage).height);
-    // A 2 × 2 of slices: two planes side by side, the third under the first.
     expect(box(canvas('coronal')).top).toBe(box(canvas('sagittal')).top);
     expect(box(canvas('axial')).left).toBe(box(canvas('sagittal')).left);
-    await page.viewport(1024, 1000);
-    await expect.poll(() => box(dock()!).top).toBe(box(stage).bottom);
-    expect(box(dock()!).left).toBe(box(stage).left);
-    expect(box(dock()!).width).toBe(box(stage).width);
-    // Three planes in a row under the stage.
-    expect(box(canvas('axial')).top).toBe(box(canvas('sagittal')).top);
-    expect(box(canvas('axial')).left).toBeGreaterThan(box(canvas('coronal')).right);
   });
 
-  test('a window too short to share opens it over the page, and leaves the stage whole', async () => {
+  test('a short, narrower window keeps it beside the stage, its planes stacked, so the anatomy stays in view', async () => {
     await page.viewport(1024, 768);
-    await mount();
+    await opened();
     const stage = document.getElementById('viewport')!;
-    const whole = box(stage).height;
-    await openFromKeyboard();
-    await expect.poll(() => dialog()?.open).toBe(true);
-    expect(dialog().matches(':modal')).toBe(true);
-    expect(dock()).toBeNull();
-    expect(box(stage).height).toBe(whole);
+    expect(document.querySelector('dialog:modal')).toBeNull();
+    expect(box(dock()!).left).toBe(box(stage).right);
+    expect(box(dock()!).height).toBe(box(stage).height);
+    expect(box(stage).width).toBeGreaterThan(box(dock()!).width);
+    expect(box(canvas('coronal')).top).toBeGreaterThan(box(canvas('sagittal')).bottom);
+    expect(box(canvas('coronal')).left).toBe(box(canvas('sagittal')).left);
   });
 
   test('the stage gets its room back when it closes', async () => {

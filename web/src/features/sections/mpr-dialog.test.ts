@@ -9,21 +9,23 @@ import type { Manifest } from '../../lib/types/index.ts';
 import { createMprDialog, wheelCoordinate } from './mpr-dialog.svelte.ts';
 
 let engine: FakeEngine;
-let region: Region | undefined;
-let drawn: boolean;
+// What the engine's solids answer for each point asked, in order.
+let answers: { promise: Promise<Region | null>; resolve: (region: Region | null) => void }[];
 let select: ReturnType<typeof vi.fn<(id: string) => void>>;
 let frames: (() => void)[];
 
 function build() {
   const sections = Object.create(engine.sections, {
-    sample: {
-      value: (point: [number, number, number]) => ({ ...engine.sections.sample(point), region }),
+    regionAt: {
+      value: () => {
+        let resolve!: (region: Region | null) => void;
+        const promise = new Promise<Region | null>((settle) => (resolve = settle));
+        answers.push({ promise, resolve });
+        return promise;
+      },
     },
   });
-  return createMprDialog({
-    engine: { sections, model: { isRegionDrawn: () => drawn } },
-    select,
-  });
+  return createMprDialog({ engine: { sections }, select });
 }
 
 const crosshair = () => engine.sections.state.crosshair;
@@ -32,8 +34,7 @@ const nextFrame = () => frames.splice(0).forEach((run) => run());
 beforeEach(async () => {
   engine = createFakeEngine({ manifest: manifest as unknown as Manifest });
   await engine.sections.load();
-  region = undefined;
-  drawn = true;
+  answers = [];
   select = vi.fn();
   frames = [];
   vi.stubGlobal('requestAnimationFrame', (run: () => void) => frames.push(run));
@@ -133,22 +134,28 @@ describe('a click on a picture', () => {
 describe('the region under the crosshair', () => {
   const found = { id: 'ctx-lh-1' } as Region;
 
-  test('becomes the selection when it is drawn', () => {
-    region = found;
+  test('becomes the selection: the region the 3D brain draws there', async () => {
     build().wheel('axial', 1);
+    answers[0]!.resolve(found);
+    await answers[0]!.promise;
     expect(select).toHaveBeenCalledExactlyOnceWith('ctx-lh-1');
   });
 
-  test('does not, when its mesh is hidden: the MRI shows the whole volume', () => {
-    region = found;
-    drawn = false;
+  test('does not, where no drawn region is', async () => {
     build().wheel('axial', 1);
+    answers[0]!.resolve(null);
+    await answers[0]!.promise;
     expect(select).not.toHaveBeenCalled();
   });
 
-  test('does not, where no region is', () => {
-    build().wheel('axial', 1);
-    expect(select).not.toHaveBeenCalled();
+  test('is the latest point: an earlier answer landing after it selects nothing', async () => {
+    const mpr = build();
+    mpr.wheel('axial', 1);
+    mpr.wheel('axial', 1);
+    answers[1]!.resolve({ id: 'later' } as Region);
+    answers[0]!.resolve(found);
+    await Promise.all(answers.map(({ promise }) => promise));
+    expect(select).toHaveBeenCalledExactlyOnceWith('later');
   });
 });
 

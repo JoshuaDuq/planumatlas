@@ -4,8 +4,7 @@
   Opened by G4's Linked MRI button, `M` and the region inspector through S3's `openLinkedMri` (which
   loads the scan), or by a lesson; StageRegion mounts it.
   - on a desktop it is a region docked beside the live stage, with no focus trap;
-  - on a phone, over the full-screen stage, or in a window too short to share (SHORT_DOCK_QUERY), it
-    is the modal Dialog (U5), and a phone shows one plane
+  - on a phone or over the full-screen stage it is the modal Dialog (U5), and a phone shows one plane
     at a time, chosen by a radio group (deviations/g5-plane-radio.md, g5-plane-layout.md); each plane
     is a named section whose heading stays for assistive technology (g5-panel-names.md);
   - the pictures are `canvas role=img`, not focusable and without key handlers; the plane's slider is
@@ -33,7 +32,7 @@
     PlaneFrame,
     SectionsState,
   } from '../../lib/engine/api.ts';
-  import { PHONE_QUERY, SHORT_DOCK_QUERY } from '../../lib/types/index.ts';
+  import { PHONE_QUERY } from '../../lib/types/index.ts';
   import type { Language, ManifestAnatomy } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import { REPEAT_GAP_MS } from '../../lib/ui/announcer.svelte.ts';
@@ -94,13 +93,11 @@
   const copy = $derived(t(lang, 'mpr'));
   const agreementCopy = $derived(t(lang, 'agreement'));
   const phone = new MediaQuery(PHONE_QUERY);
-  const shortDock = new MediaQuery(SHORT_DOCK_QUERY);
   const fullscreenChange = createSubscriber((update) => on(document, 'fullscreenchange', update));
   // Only the stage goes full screen, so a docked sibling would not be drawn; the modal's top layer is.
-  // A window too short to share leaves the stage whole and opens the MRI over it.
   const modal = $derived.by(() => {
     fullscreenChange();
-    return phone.current || shortDock.current || document.fullscreenElement !== null;
+    return phone.current || document.fullscreenElement !== null;
   });
   // The region's one live region: the phone's modal makes the page's announcer inert.
   let said = $state('');
@@ -868,6 +865,12 @@
         grid-row: span 3;
       }
       .display {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+    /* A narrow column stacks the planes, each as wide as the column. */
+    @container mpr-dock (max-width: 400px) {
+      .grid {
         grid-template-columns: minmax(0, 1fr);
       }
     }

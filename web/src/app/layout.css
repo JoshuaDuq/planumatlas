@@ -70,28 +70,25 @@
     }
   }
 
-  /* The linked MRI under the live stage, beside it from 1280px; the stage re-frames for what is left. */
+  /* The linked MRI in a column beside the live stage, so the anatomy it selects stays in view; the
+     stage re-frames for what is left. */
   @media (min-width: 801px) and (min-height: 481px),
     (min-width: 801px) and (orientation: portrait) {
     #app:has(> .mpr-dock) {
-      grid-template-rows:
-        var(--header-height) minmax(0, 1fr) minmax(0, 1fr)
-        var(--footer-height);
-    }
-    #app:has(> .mpr-dock) #workspace-panel {
-      grid-row: 2 / 4;
-    }
-    #app:has(> .mpr-dock) > footer {
-      grid-row: 4;
+      /* Below 1280 px a narrow column of stacked slices; a rail widened by reader text leaves the stage
+         at least the dock's width. */
+      grid-template-columns:
+        var(--rail-width) minmax(0, 1fr)
+        clamp(240px, (100vw - var(--rail-width)) * 0.45, 400px);
     }
     #app > .mpr-dock {
-      grid-column: 2;
-      grid-row: 3;
-      border-top: 1px solid var(--border-subtle);
+      grid-column: 3;
+      grid-row: 2;
+      border-left: 1px solid var(--border-subtle);
     }
   }
   @media (min-width: 1280px) and (min-height: 481px) {
-    /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width; a rail widened by reader text leaves the stage at least the dock's width. */
+    /* A 2 × 2 of slices as tall as the stage allows, at most half the stage's width. */
     #app:has(> .mpr-dock) {
       grid-template-columns:
         var(--rail-width) minmax(0, 1fr)
@@ -103,19 +100,6 @@
           ),
           600px
         );
-      grid-template-rows: var(--header-height) minmax(0, 1fr) var(--footer-height);
-    }
-    #app:has(> .mpr-dock) #workspace-panel {
-      grid-row: 2;
-    }
-    #app:has(> .mpr-dock) > footer {
-      grid-row: 3;
-    }
-    #app > .mpr-dock {
-      grid-column: 3;
-      grid-row: 2;
-      border-top: 0;
-      border-left: 1px solid var(--border-subtle);
     }
   }
 

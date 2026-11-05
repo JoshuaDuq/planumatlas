@@ -4,7 +4,7 @@
  * click, the wheel. I2 builds one, registers `show`, `openPreparedPlane`, `close` and `isOpen` as the
  * `showMri`, `openPreparedPlane`, `closeMpr` and `mprOpen` ports, and mounts `MprDialog` with it.
  */
-import type { EngineModel, EngineSections, MprPlane, Vec3 } from '../../lib/engine/api.ts';
+import type { EngineSections, MprPlane, Vec3 } from '../../lib/engine/api.ts';
 import { AXES, COORDINATE_LIMIT, PLANES, pointOnPlane } from './mpr-draw.ts';
 
 export interface MprDialogDeps {
@@ -18,12 +18,11 @@ export interface MprDialogDeps {
       | 'setWindow'
       | 'setDisplay'
       | 'setAgreement'
-      | 'sample'
+      | 'regionAt'
       | 'mprFrame'
     >;
-    model: Pick<EngineModel, 'isRegionDrawn'>;
   };
-  /** The region under the crosshair becomes the selection (sections.js:256-262). */
+  /** The region the 3D brain draws under the crosshair becomes the selection. */
   select: (regionId: string) => void;
 }
 
@@ -41,7 +40,7 @@ export function wheelCoordinate(coordinate: number, deltaY: number): number | nu
 }
 
 export function createMprDialog({ engine, select }: MprDialogDeps) {
-  const { sections, model } = engine;
+  const { sections } = engine;
   let open = $state(false);
   let instant = $state(false);
   // The plane a phone shows; the crosshair stays linked across all three.
@@ -61,10 +60,14 @@ export function createMprDialog({ engine, select }: MprDialogDeps) {
     });
   }
 
+  // Only the latest point selects: an earlier answer can land after it while the ribbon downloads.
+  let request = 0;
   function selectPoint(point: Vec3) {
     sections.setCrosshair(point);
-    const { region } = sections.sample(point);
-    if (region && model.isRegionDrawn(region.id)) select(region.id);
+    const current = ++request;
+    void sections.regionAt(point).then((region) => {
+      if (region && current === request) select(region.id);
+    });
   }
 
   const along = (name: MprPlane, coordinate: number): Vec3 => {

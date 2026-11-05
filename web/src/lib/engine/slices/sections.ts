@@ -1,5 +1,5 @@
 import { Group, Plane, Vector3 } from 'three';
-import type { Intersection, Raycaster } from 'three';
+import type { Intersection, Mesh, Raycaster } from 'three';
 import type { CutMode, Region } from '../../types/index.ts';
 import { categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type {
@@ -52,6 +52,7 @@ export interface SectionsModel extends CutModel {
   readonly manifest: CutModel['manifest'] & { segmentation_agreement?: { volume: VolumeFile } };
   readonly segmentationAgreement: SegmentationAgreement | null;
   readonly clippingPlanes: readonly Plane[];
+  readonly visibleMeshes: readonly Mesh[];
   setClippingPlanes(planes: Plane[]): void;
   setCutState(state: { atlas: string; active: boolean }): void;
   setMriAnatomy(anatomy: Anatomy | null): void;

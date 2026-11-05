@@ -14,6 +14,7 @@ import type {
 import type { BrainAtlas } from './model/brain-atlas.ts';
 import type { BrainSections } from './slices/sections.ts';
 import { stagedFrame } from './slices/coordinates.ts';
+import { drawnRegionAt } from './slices/region-at.ts';
 import type { Frame } from './slices/coordinates.ts';
 
 const toTuple = (vector: Vector3): Vec3 => [vector.x, vector.y, vector.z];
@@ -190,5 +191,6 @@ export function createEngineSections(
     },
     pixels: (frame) => sections.pixels(frameOf(frame)),
     sample: (point): VolumeSample => sections.sample(point),
+    regionAt: (point) => drawnRegionAt(sections.model, sections.metadataUrl, point),
   };
 }

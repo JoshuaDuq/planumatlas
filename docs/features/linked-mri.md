@@ -28,11 +28,11 @@ Linked MRI opened from the selected left hippocampal formation: the subject's T1
 
 ## What it does
 
-**Linked MRI** opens the subject's T1 in three orthogonal sections (sagittal, coronal, axial) around a shared crosshair. Clicking a picture places the crosshair there, the mouse wheel moves the slice of the picture under it by 1 mm a notch, and each plane has its own position slider. The controls beneath the planes are a contrast **window** (width 10 to 256) and **level** (centre 0 to 255), a **Segmentation overlay** check box, a readout of the crosshair's position and what is under it, and **Save PNG** for each plane.
+**Linked MRI** opens the subject's T1 in three orthogonal sections (sagittal, coronal, axial) around a shared crosshair. Clicking a picture places the crosshair there and selects the region the 3D brain draws at that point (the smallest shown structure, or cortical parcel through its ribbon solid, that contains it; nothing where none does), the mouse wheel moves the slice of the picture under it by 1 mm a notch, and each plane has its own position slider. The controls beneath the planes are a contrast **window** (width 10 to 256) and **level** (centre 0 to 255), a **Segmentation overlay** check box, a readout of the crosshair's position and what is under it, and **Save PNG** for each plane.
 
 The slices always show the full original scan; dissection does not change them. Positions are FreeSurfer surface RAS millimetres. The planes are drawn as the stage faces the current cut, so a panel and the cut face agree: an axial or coronal panel carries a convention mark, neurological where the patient's left is on the screen's left and radiological where their right is, read off the letter at the panel's left edge.
 
-On a desktop the three planes dock beside the live stage with no focus trap. On a phone, over the full-screen stage, or in a window too short to share, they open as a modal dialog, and a phone shows one plane at a time.
+On a desktop or tablet the planes dock in a column to the right of the live stage with no focus trap, so the anatomy a click selects stays in view; below 1280 px wide the column is narrower and its planes are stacked. On a phone, or over the full-screen stage, they open as a modal dialog, and a phone shows one plane at a time.
 
 Shown from a region's **Segmentation agreement** section, the planes ink one structure instead of the segmentation overlay: white where both segmentations label it, magenta where only aseg does, orange where only NextBrain does. A key names the structure, the readout adds the crosshair voxel's category, and **Hide agreement** returns to the segmentation overlay. The comparison itself is built by [segmentation agreement](segmentation-agreement.md).
 
