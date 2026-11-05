@@ -56,9 +56,20 @@ let requested: readonly [number, number] | null = null;
 async function resize(width: number, height: number) {
   if (requested?.[0] === width && requested[1] === height) return;
   requested = [width, height];
+  if (innerWidth === width && innerHeight === height) return;
+  // The sheet turns on the window's resize event, which fires in a rendering step after the new size
+  // reads back. A case that turned again as soon as the size read back could do so before the event,
+  // and the sheet would never see the first turn (on a loaded runner, 4 times in 15).
+  const fired = new Promise<void>((resolve) => {
+    const onResize = () => {
+      if (innerWidth !== width || innerHeight !== height) return;
+      removeEventListener('resize', onResize);
+      resolve();
+    };
+    addEventListener('resize', onResize);
+  });
   await page.viewport(width, height);
-  // The new size reaches the frame in a later rendering step.
-  await expect.poll(() => [innerWidth, innerHeight]).toEqual([width, height]);
+  await fired;
 }
 /** Reduced motion puts the sheet on its rest at once: every case but the ones that test motion runs so. */
 const reduceMotion = (value: 'reduce' | '') =>
