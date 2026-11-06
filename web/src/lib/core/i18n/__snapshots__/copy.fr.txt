@@ -825,6 +825,7 @@
    "[\"\"] → \"Choisissez deux fonctions ou termes à comparer\""
   ],
   "compareOpen": "Comparer",
+  "compareFull": "La comparaison en prend deux. Décochez-en une pour la remplacer.",
   "both": [
    "[\"Alpha\",\"\"] → \"Les deux atteignent Alpha à z<NBSP>≥<NBSP>\"",
    "[\"\",\"Alpha\"] → \"Les deux atteignent  à z<NBSP>≥<NBSP>Alpha\""

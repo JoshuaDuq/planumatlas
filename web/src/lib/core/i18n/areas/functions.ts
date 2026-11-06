@@ -46,6 +46,7 @@ export const en = {
   comparePrompt: (picked: number): string =>
     picked ? 'Choose one more function or term' : 'Choose two functions or terms to compare',
   compareOpen: 'Compare',
+  compareFull: 'Compare takes two. Uncheck one to swap it.',
   // The share arrives as `areasShort` words.
   both: (areas: string, threshold: string) => `Both reach ${areas} at z\u00a0≥\u00a0${threshold}`,
   bothHeading: 'Areas both reach',
@@ -127,6 +128,7 @@ export const fr: typeof en = {
       ? 'Choisissez encore une fonction ou un terme'
       : 'Choisissez deux fonctions ou termes à comparer',
   compareOpen: 'Comparer',
+  compareFull: 'La comparaison en prend deux. Décochez-en une pour la remplacer.',
   both: (areas: string, threshold: string) =>
     `Les deux atteignent ${areas} à z\u00a0≥\u00a0${threshold}`,
   bothHeading: 'Aires atteintes par les deux',

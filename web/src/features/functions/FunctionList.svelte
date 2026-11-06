@@ -208,6 +208,7 @@
         {full
           ? functionName(model.domains, compareId(model.picked), lang)
           : copy.comparePrompt(model.picked.length)}
+        {#if full}<span class="compare-limit">{copy.compareFull}</span>{/if}
       </p>
       <button
         type="button"
@@ -558,6 +559,10 @@
       line-height: var(--lh-caption);
       overflow-wrap: anywhere;
       text-wrap: pretty;
+    }
+    .compare-limit {
+      display: block;
+      color: var(--text-tertiary);
     }
     .compare-open {
       flex: none;

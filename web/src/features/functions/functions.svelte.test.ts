@@ -703,8 +703,11 @@ describe('compare', () => {
     await userEvent.click(second);
     expect(world.explorer.picked).toEqual(pair);
     expect(compareOpen()!.getAttribute('aria-disabled')).toBeNull();
-    expect(document.querySelector('.compare-picked')!.textContent!.trim()).toBe(
+    expect(document.querySelector('.compare-picked')!.firstChild!.textContent!.trim()).toBe(
       'Working memory · Attention',
+    );
+    expect(document.querySelector('.compare-limit')!.textContent).toBe(
+      'Compare takes two. Uncheck one to swap it.',
     );
     await expectAxeCleanOnce('dark', 390);
     // A full pair takes no third; unticking frees a place.

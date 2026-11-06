@@ -825,6 +825,7 @@
    "[\"\"] → \"Choose two functions or terms to compare\""
   ],
   "compareOpen": "Compare",
+  "compareFull": "Compare takes two. Uncheck one to swap it.",
   "both": [
    "[\"Alpha\",\"\"] → \"Both reach Alpha at z<NBSP>≥<NBSP>\"",
    "[\"\",\"Alpha\"] → \"Both reach  at z<NBSP>≥<NBSP>Alpha\""
