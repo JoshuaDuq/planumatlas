@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: >-
+  If you use Planum, please cite it as below. Please also cite the data and
+  atlases behind the views you use, listed at
+  https://planumatlas.com/docs/reference/references.html
+type: software
+title: Planum
+abstract: >-
+  An interactive, browser-based atlas of one real human brain (MGH CDMD
+  subject sub_013), reconstructed with FreeSurfer from its own T1 scan, with
+  diffusion tracts from the same person. Users can cut, measure and query the
+  brain against cortical and subcortical atlases, function and deficit maps,
+  stimulation data and stroke lesion cases, each traced to its cited source.
+authors:
+  - given-names: Joshua
+    family-names: Duquette
+    email: joshua.duquette.1@ulaval.ca
+  - given-names: Andrew
+    family-names: Duquette
+repository-code: https://github.com/JoshuaDuq/planumatlas
+url: https://planumatlas.com
+license: AGPL-3.0-or-later
+keywords:
+  - neuroanatomy
+  - brain atlas
+  - neuroimaging
+  - MRI
+  - FreeSurfer
+  - tractography
+  - 3D visualization
+  - education
