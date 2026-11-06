@@ -128,6 +128,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     syncPaint(model, view, { domains, clinical, lesion });
     const paintSeeThrough = createPaintSeeThrough({
       view,
+      model,
       regions: model.regions,
       hold: cortexHold,
       seeThrough,
