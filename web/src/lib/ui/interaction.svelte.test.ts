@@ -204,10 +204,11 @@ describe('focus registry', () => {
     focusHeading(title);
     expect(document.activeElement).toBe(title);
     expect(title.matches(':focus-visible')).toBe(false);
+    // Tabbing out of the first control leaves the test frame, so a key press stands for the keyboard.
     document.getElementById('row')!.focus();
-    await userEvent.keyboard('{Shift>}{Tab}{/Shift}{Tab}');
-    expect(document.activeElement?.id).toBe('row');
+    await userEvent.keyboard('{Shift}');
     focusHeading(title);
+    expect(document.activeElement).toBe(title);
     expect(title.matches(':focus-visible')).toBe(true);
   });
 
