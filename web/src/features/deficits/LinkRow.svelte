@@ -80,18 +80,8 @@
       border-bottom: 1.5px solid currentColor;
       transform: translateX(-1.6px) rotate(-45deg);
     }
-    /* A mouse sees the chevron on hover or focus; touch always (clinical.css:6-11). */
+    /* The chevron always shows, as on the circuit rows, so the row reads as a link. */
     @media (hover: hover) and (pointer: fine) {
-      .chevron {
-        opacity: 0;
-      }
-      .link-row:hover .chevron {
-        opacity: 1;
-        transition: opacity var(--ui-transition) var(--ease-ui);
-      }
-      .link-row:focus-visible .chevron {
-        opacity: 1;
-      }
       .link-row:hover .name {
         color: var(--accent-hover);
         text-decoration: underline;

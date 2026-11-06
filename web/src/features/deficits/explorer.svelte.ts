@@ -4,7 +4,7 @@ import type { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import type { ClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
-import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
+import { FOCUS_TARGETS, focusHeading, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
 
 /** What the Deficits panels reach outside the stores for; I1 composes them from the controller. */
@@ -97,7 +97,7 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     const { heading } = refs;
     if (heading?.dataset.deficit === id) {
       scrollToTop(heading);
-      heading.focus({ preventScroll: true });
+      focusHeading(heading);
     }
     await running;
   }

@@ -7,6 +7,7 @@ import { announce, attachAnnouncer } from './announcer.svelte.ts';
 import {
   FOCUS_TARGETS,
   captureInvoker,
+  focusHeading,
   registerFocusTarget,
   requestFocus,
   rescueFocus,
@@ -194,6 +195,20 @@ describe('focus registry', () => {
     expect(document.activeElement).toBe(opener);
     opener.remove();
     expect(back()).toBe(false);
+  });
+
+  test('a heading focused with nothing focused takes no ring; after the keyboard it does', async () => {
+    html('<button id="row">Row</button><h2 id="title" tabindex="-1">Profile</h2>');
+    const title = document.getElementById('title')!;
+    (document.activeElement as HTMLElement).blur();
+    focusHeading(title);
+    expect(document.activeElement).toBe(title);
+    expect(title.matches(':focus-visible')).toBe(false);
+    document.getElementById('row')!.focus();
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}{Tab}');
+    expect(document.activeElement?.id).toBe('row');
+    focusHeading(title);
+    expect(title.matches(':focus-visible')).toBe(true);
   });
 
   test('captureInvoker has nothing to return to when no element had focus', () => {

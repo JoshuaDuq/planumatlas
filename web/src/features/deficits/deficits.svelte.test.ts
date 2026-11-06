@@ -577,6 +577,12 @@ describe('related deficits', () => {
     await expect.poll(() => section.hidden).toBe(false);
     expect(section.querySelector('h3')!.textContent).toBe('Neuropsychology');
     expect(section.getAttribute('aria-labelledby')).toBeNull();
+    // Each row shows its chevron at rest, as a link does, not only on hover.
+    const chevrons = [...section.querySelectorAll<HTMLElement>('.chevron')];
+    expect(chevrons.length).toBeGreaterThan(0);
+    expect(chevrons.map((chevron) => getComputedStyle(chevron).opacity)).toEqual(
+      chevrons.map(() => '1'),
+    );
     await page
       .getByTestId('detail')
       .getByRole('button', { name: /Aphasia/ })
@@ -683,6 +689,7 @@ describe('quality', () => {
       const restore = document.querySelector<HTMLElement>('.clinical-restore')!;
       expect(getComputedStyle(restore).color).toBe(system('LinkText'));
       // A key press makes the next programmatic focus a focus-visible one.
+      heading().blur();
       await userEvent.keyboard('{Shift}');
       heading().focus();
       expect(heading().matches(':focus-visible')).toBe(true);

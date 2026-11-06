@@ -84,3 +84,12 @@ export function captureInvoker(): () => boolean {
     return invoker.ownerDocument.activeElement === invoker;
   };
 }
+
+/**
+ * Focuses a profile's heading. With nothing focused yet, as when the page opened from a link, it
+ * takes focus without a ring: nobody moved focus there, and the heading is not a control.
+ */
+export function focusHeading(heading: HTMLElement): void {
+  const unfocused = heading.ownerDocument.activeElement === heading.ownerDocument.body;
+  heading.focus(unfocused ? { preventScroll: true, focusVisible: false } : { preventScroll: true });
+}

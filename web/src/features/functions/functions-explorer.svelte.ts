@@ -16,7 +16,7 @@ import { t } from '../../lib/core/i18n/index.ts';
 import { stageMessage } from '../../lib/core/panels/clinical.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
-import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
+import { FOCUS_TARGETS, focusHeading, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
 import { areaCount, sharedCount } from './functions-view.ts';
 
@@ -93,7 +93,7 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
   function focusTitle() {
     const title = profile?.querySelector<HTMLElement>('[data-function-title]');
     if (!title) throw new Error('The function profile has no title to focus.');
-    title.focus({ preventScroll: true });
+    focusHeading(title);
   }
 
   async function openFunction(id: string): Promise<boolean> {
