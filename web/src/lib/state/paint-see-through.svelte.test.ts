@@ -52,7 +52,13 @@ function setup(opacity = 1) {
   };
   let store!: ReturnType<typeof createPaintSeeThrough>;
   const stop = $effect.root(() => {
-    store = createPaintSeeThrough({ view: { current: state }, model, regions, hold, seeThrough: 0.3 });
+    store = createPaintSeeThrough({
+      view: { current: state },
+      model,
+      regions,
+      hold,
+      seeThrough: 0.3,
+    });
   });
   flushSync();
   const set = (change: Partial<ModelState>) => {
