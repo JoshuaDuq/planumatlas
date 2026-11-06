@@ -240,7 +240,8 @@ jobs:
   web-e2e:
     needs: changes
     # By hand only (Actions → Tests → Run workflow): e2e is not a gate for pull requests or the deploy.
-    if: github.event_name == 'workflow_dispatch' && needs.changes.outputs.web == 'true'
+    # A called workflow sees its caller's event and name, so a hand-started deploy must not run it.
+    if: github.event_name == 'workflow_dispatch' && github.workflow == 'Tests' && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     container:
