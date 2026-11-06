@@ -896,7 +896,7 @@
    {
     "id": "section",
     "title": "Section",
-    "body": "Section cuts the brain on a plane, here a coronal one, with its linked MRI slices."
+    "body": "Section cuts the brain on a plane, here a coronal one. Drag its slider to move the cut."
    },
    {
     "id": "linkedMri",

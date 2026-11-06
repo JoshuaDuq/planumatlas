@@ -896,7 +896,7 @@
    {
     "id": "section",
     "title": "Coupe",
-    "body": "Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées."
+    "body": "Coupe sectionne le cerveau selon un plan, ici coronal. Faites glisser son curseur pour déplacer la coupe."
    },
    {
     "id": "linkedMri",

@@ -156,12 +156,25 @@ describe('the ports', () => {
     expect(ports.mprOpen()).toBe(false);
   });
 
-  test('a first visit to the plain page opens the guided tour, whose close hands focus to More settings', async () => {
+  test('a first visit to the plain page opens the guided tour over a drawn stage, whose close folds the tree back and hands focus to More settings', async () => {
     await shell.open({ hash: '#anatomy=cdmd&lang=en', firstVisit: true });
+    const expanded = [...shell.app.session.state.expanded];
     const card = () => document.querySelector<HTMLElement>('.driver-popover');
-    expect(card()?.querySelector('.driver-popover-title')!.textContent).toBe('How to use Planum');
+    const title = () => card()?.querySelector('.driver-popover-title')!.textContent;
+    const next = () =>
+      card()!.querySelector<HTMLButtonElement>('.driver-popover-next-btn')!.click();
+    expect(title()).toBe('How to use Planum');
+    // The brain stop opens a region, and with it its group in the tree.
+    next();
+    await vi.waitFor(() =>
+      expect(shell.app.session.state.expanded.size).toBeGreaterThan(expanded.length),
+    );
+    // The gizmo, shown once the stage is ready, is one of the stops.
+    next();
+    expect(title()).toBe('Anatomical directions');
     card()!.querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
     expect(card()).toBeNull();
+    expect([...shell.app.session.state.expanded]).toEqual(expanded);
     expect(document.activeElement).toBe(
       page.getByRole('button', { name: 'More settings' }).element(),
     );

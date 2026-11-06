@@ -81,11 +81,16 @@
   const settingsButton = () => masthead?.settingsButton() ?? null;
 
   function guide() {
+    // The stops open regions, and with them their groups in the tree: closing folds those back.
+    const expanded = new Set(app.session.state.expanded);
     startGuide(lang, {
       animate: !app.media.reducedMotion,
-      onClose: () => settingsButton()?.focus(),
+      onClose: () => {
+        app.session.setExpanded(expanded);
+        settingsButton()?.focus();
+      },
       onLanguage: app.chooseLanguage,
-      reserve: (width) => app.stage.setGuideInset(width),
+      reserve: (band) => app.stage.setGuideInset(band),
       mri: {
         open(region: string) {
           world!.anatomy.selectRegion(region);

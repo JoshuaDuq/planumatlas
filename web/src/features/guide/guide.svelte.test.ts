@@ -23,12 +23,12 @@ const TARGETS = `
     <canvas width="300" height="200" role="application" aria-label="Brain model"></canvas>
   </main>
   <div class="orientation-gizmo"><button>S</button></div>
-  <div class="stage-toolbar">
+  <div class="stage-dock"><div class="stage-toolbar">
     <span class="popover-host" style="display: contents"><button>Section</button></span>
     <span class="popover-host" style="display: contents"><button>Lesion</button></span>
     <span class="popover-host" style="display: contents"><button>Coordinate</button></span>
     <span class="popover-host" style="display: contents"><button>Display</button></span>
-  </div>`;
+  </div></div>`;
 
 /** The reader's own view: a region open in a lateral view, on the Destrieux atlas. */
 const READER = '#anatomy=cdmd&atlas=destrieux&detail=learning&region=destrieux:left:29&view=left';
@@ -78,14 +78,14 @@ const mri = {
   },
 };
 let languages: string[] = [];
-let reserved: number[] = [];
+let reserved: { right: number; bottom: number }[] = [];
 const start = (lang: 'en' | 'fr' = 'en') =>
   startGuide(lang, {
     animate: false,
     onClose: () => closed++,
     onLanguage: (next) => languages.push(next),
     mri,
-    reserve: (width) => reserved.push(width),
+    reserve: (band) => reserved.push(band),
   });
 const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
 const title = () => card().querySelector('.driver-popover-title')!.textContent;
@@ -273,11 +273,74 @@ test('the brain stop’s card sits in the stage’s dark space, in a band the an
   const box = card().getBoundingClientRect();
   expect(box.left).toBeGreaterThanOrEqual(stage.left);
   expect(Math.round(box.top + box.height / 2)).toBe(Math.round(stage.top + stage.height / 2));
-  expect(reserved).toEqual([0, Math.round(box.width) + 16]);
+  expect(reserved).toEqual([
+    { right: 0, bottom: 0 },
+    { right: Math.round(box.width) + 16, bottom: 0 },
+  ]);
   next().click();
-  expect(reserved.at(-1)).toBe(0);
+  expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
   card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
-  expect(reserved.at(-1)).toBe(0);
+  expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
+});
+
+test('the panel tabs’ cards sit in the stage’s dark space, off the panel they open', async () => {
+  start();
+  while (title() !== 'Functions') next().click();
+  const stage = document.querySelector('#viewport canvas')!.getBoundingClientRect();
+  for (const stop of ['Functions', 'Deficits', 'Circuits', 'Tracts']) {
+    expect(title()).toBe(stop);
+    await expect
+      .poll(() => Math.round(card().getBoundingClientRect().right), { timeout: 2000 })
+      .toBe(Math.round(stage.right - 8));
+    expect(reserved.at(-1)).toEqual({ right: Math.round(card().offsetWidth) + 16, bottom: 0 });
+    next().click();
+  }
+});
+
+test('a phone’s first cards sit above the dock, in a band the anatomy is framed clear of', async () => {
+  await page.viewport(390, 800);
+  // The phone's stage fills the page down to the dock.
+  Object.assign(document.querySelector<HTMLElement>('#viewport')!.style, { height: '600px' });
+  Object.assign(document.querySelector<HTMLElement>('#viewport canvas')!.style, {
+    height: '600px',
+  });
+  start();
+  for (const stop of ['How to use Planum', 'The brain']) {
+    expect(title()).toBe(stop);
+    const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
+    await expect
+      .poll(() => Math.round(card().getBoundingClientRect().bottom), { timeout: 2000 })
+      .toBe(Math.round(dock.top - 8));
+    await expect
+      .poll(() => reserved.at(-1))
+      .toEqual({ right: 0, bottom: Math.round(card().offsetHeight) + 16 });
+    next().click();
+  }
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
+});
+
+test('a phone’s panel tab cards sit under the tabs, over the raised sheet, else above the dock', async () => {
+  await page.viewport(390, 800);
+  Object.assign(document.querySelector<HTMLElement>('#viewport')!.style, { height: '600px' });
+  start();
+  while (title() !== 'Deficits') next().click();
+  const tab = document.querySelector('#workspace-tab-deficits')!.getBoundingClientRect();
+  await expect
+    .poll(() => Math.round(card().getBoundingClientRect().top), { timeout: 2000 })
+    .toBe(Math.round(tab.bottom + 8));
+  expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
+  // A lowered sheet leaves no room under its tabs.
+  Object.assign(document.querySelector<HTMLElement>('[role="tablist"]')!.style, {
+    position: 'fixed',
+    bottom: '0',
+  });
+  next().click();
+  expect(title()).toBe('Circuits');
+  const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
+  await expect
+    .poll(() => Math.round(card().getBoundingClientRect().bottom), { timeout: 2000 })
+    .toBe(Math.round(dock.top - 8));
 });
 
 test('the first card offers the languages; choosing one starts the tour again in it', async () => {

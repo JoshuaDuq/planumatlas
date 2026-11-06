@@ -44,7 +44,7 @@ export const en = {
     {
       id: 'section',
       title: 'Section',
-      body: 'Section cuts the brain on a plane, here a coronal one, with its linked MRI slices.',
+      body: 'Section cuts the brain on a plane, here a coronal one. Drag its slider to move the cut.',
     },
     {
       id: 'linkedMri',
@@ -124,7 +124,7 @@ export const fr: typeof en = {
     {
       id: 'section',
       title: 'Coupe',
-      body: 'Coupe sectionne le cerveau selon un plan, ici coronal, avec ses coupes IRM liées.',
+      body: 'Coupe sectionne le cerveau selon un plan, ici coronal. Faites glisser son curseur pour déplacer la coupe.',
     },
     {
       id: 'linkedMri',

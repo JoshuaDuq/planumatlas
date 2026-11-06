@@ -67,6 +67,40 @@ function placedBox(card: HTMLElement) {
 /** The space a card in the stage takes off its right: the card and a gap either side. */
 const stageBand = (card: HTMLElement) => card.offsetWidth + 2 * PANEL_GAP;
 
+/** The top of the stage's dock, under which a phone's cards never sit. */
+const dockTop = () => document.querySelector('.stage-dock')?.getBoundingClientRect().top;
+
+/**
+ * On a phone, where the card spans the stage: over the raised sheet under its tabs, so the stage
+ * keeps the anatomy, else just above the dock, so the anatomy is framed in the stage's upper part.
+ */
+function placeOnPhone(card: HTMLElement, at: PhoneSeat, selector?: string) {
+  const c = placedBox(card);
+  const tabs = at === 'underTabs' && document.querySelector(selector!)?.getBoundingClientRect();
+  if (tabs && tabs.bottom + 2 * PANEL_GAP + c.height <= innerHeight) {
+    setAside(card, `0 ${tabs.bottom + PANEL_GAP - c.top}px`);
+    return;
+  }
+  const top = dockTop();
+  if (top !== undefined) setAside(card, `0 ${top - PANEL_GAP - c.height - c.top}px`);
+}
+
+/**
+ * The band a phone's card takes off the bottom of the stage above the dock, where it lands after
+ * stepping aside; a card in the stage's upper half, under the top bar, takes none.
+ */
+function bottomBand(card: HTMLElement) {
+  const top = dockTop();
+  const stage = document.querySelector(STAGE)?.getBoundingClientRect();
+  if (top === undefined || !stage) return 0;
+  const [, y = 0] = card.style.translate.split(' ').map((value) => parseFloat(value) || 0);
+  const { top: placed, height } = placedBox(card);
+  const cardTop = placed + y;
+  // A phone's stage runs on under the sheet: its open part ends at the dock.
+  if (cardTop + height / 2 < (stage.top + top) / 2) return 0;
+  return Math.max(0, Math.round(top - cardTop + PANEL_GAP));
+}
+
 /** The card at the stage's right edge, centred in its height, in the band the anatomy is framed clear of. */
 function placeInStage(card: HTMLElement) {
   const stage = document.querySelector(STAGE)!.getBoundingClientRect();
@@ -75,6 +109,9 @@ function placeInStage(card: HTMLElement) {
   const top = stage.top + (stage.height - c.height) / 2;
   setAside(card, `${left - c.left}px ${top - c.top}px`);
 }
+/** Where a phone's card sits, rather than over the anatomy. */
+type PhoneSeat = 'overDock' | 'underTabs';
+
 /** The scan's download, when the cut before has not already brought it. */
 const MRI_WAIT_MS = 10_000;
 
@@ -93,15 +130,18 @@ const STOPS: Record<
     opensMri?: string;
     /** The card sits in the stage's dark space, a band the anatomy is framed clear of. */
     inStage?: true;
+    /** Where a phone's card sits, rather than over the anatomy. */
+    phone?: PhoneSeat;
   }
 > = {
-  welcome: {},
+  welcome: { phone: 'overDock' },
   brain: {
     selector: STAGE,
     side: 'left',
     align: 'center',
     view: `region=${PRECENTRAL}`,
     inStage: true,
+    phone: 'overDock',
   },
   directions: {
     selector: '.orientation-gizmo',
@@ -134,20 +174,33 @@ const STOPS: Record<
     align: 'start',
     // A function is painted on HCP-MMP; opening one in the app switches the atlas and cuts too.
     view: 'atlas=hcp-mmp&cuts=hcp-mmp&tab=functions&function=language',
+    inStage: true,
+    phone: 'underTabs',
   },
   deficits: {
     selector: tab('deficits'),
     side: 'right',
     align: 'start',
     view: 'tab=deficits&deficit=aphasia',
+    inStage: true,
+    phone: 'underTabs',
   },
   circuits: {
     selector: tab('circuits'),
     side: 'right',
     align: 'start',
     view: 'tab=circuits&circuit=vision',
+    inStage: true,
+    phone: 'underTabs',
   },
-  tracts: { selector: tab('diffusion'), side: 'right', align: 'start', view: 'tab=diffusion' },
+  tracts: {
+    selector: tab('diffusion'),
+    side: 'right',
+    align: 'start',
+    view: 'tab=diffusion',
+    inStage: true,
+    phone: 'underTabs',
+  },
   settings: { selector: '.masthead-end .popover-host > button', side: 'bottom', align: 'end' },
 };
 
@@ -199,8 +252,8 @@ interface GuideOptions {
   onLanguage: (next: Language) => void;
   /** The Linked MRI, docked beside the stage, opened on a region it selects. */
   mri: { open(region: string): unknown; close(): void };
-  /** Keeps a band this wide on the stage's right clear of anatomy; 0 gives it back. */
-  reserve: (width: number) => void;
+  /** Keeps bands this wide on the stage's right and above its dock clear of anatomy; 0 gives one back. */
+  reserve: (band: { right: number; bottom: number }) => void;
 }
 
 /** The languages the first card offers, each named in itself. */
@@ -250,12 +303,15 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   const enter: ((() => void) | null)[] = [];
   // Whether a stop's card sits in the stage; a phone's stage is under the sheet, so it keeps its own.
   const inStage: boolean[] = [];
+  // Where each stop's card sits on a phone, if not where driver.js puts it.
+  const seats: { at?: PhoneSeat; selector?: string }[] = [];
   const phone = matchMedia(PHONE_QUERY).matches;
   const steps: DriveStep[] = copy.stops.flatMap(({ id, title, body }) => {
     const { selector, side, align, view = '', opensMri } = STOPS[id];
     if (opensMri ? !docksMri : selector && !rendered(selector)) return [];
     enter.push(opensMri ? () => openMri(view, opensMri) : null);
     inStage.push(Boolean(STOPS[id].inStage) && !phone);
+    seats.push(phone ? { at: STOPS[id].phone, selector } : {});
     return [
       {
         element: selector,
@@ -283,8 +339,11 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     placing ||= requestAnimationFrame(() => {
       placing = 0;
       if (!card?.isConnected) return;
-      if (inStage[tour.getActiveIndex() ?? -1]) placeInStage(card);
+      const index = tour.getActiveIndex() ?? -1;
+      if (inStage[index]) placeInStage(card);
+      else if (seats[index]?.at) placeOnPhone(card, seats[index].at, seats[index].selector);
       else clearPanels(card);
+      if (phone) reserve({ right: 0, bottom: bottomBand(card) });
     });
   };
   const menus = new MutationObserver(placeCard);
@@ -322,7 +381,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       wrapper.lang = lang;
       card = wrapper;
       // The anatomy eases out of the band first; the card follows the stage once it has.
-      reserve(inStage[tour.getActiveIndex()!] ? stageBand(wrapper) : 0);
+      if (!phone)
+        reserve({ right: inStage[tour.getActiveIndex()!] ? stageBand(wrapper) : 0, bottom: 0 });
       placeCard();
       if (tour.getActiveIndex() === 0) description.append(languageChoice());
       // driver.js focuses the first control, the close button, right after this hook.
@@ -377,7 +437,7 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       cancelAnimationFrame(placing);
       for (const type of settled) document.removeEventListener(type, placeCard, true);
       removeEventListener('resize', placeCard);
-      reserve(0);
+      reserve({ right: 0, bottom: 0 });
       leaveMri();
       tour.destroy();
       document.documentElement.removeAttribute(SHOWING);

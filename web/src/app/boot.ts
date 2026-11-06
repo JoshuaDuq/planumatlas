@@ -155,7 +155,11 @@ export async function startApp(
     const notApplied = await world.links.restore(link, { immediate: true });
     app.session.setStatus('ready');
     world.links.report(notApplied);
-    if (firstLaunch(arrived)) app.ports.startGuide();
+    if (firstLaunch(arrived)) {
+      // The controls a ready stage shows are drawn before the tour counts which ones it can point at.
+      flushSync();
+      app.ports.startGuide();
+    }
     prefetchOtherAtlas(engine.model);
     prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);

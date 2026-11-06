@@ -155,23 +155,27 @@ describe('the dock and the keys tell the camera', () => {
   });
 });
 
-describe('the guided tour’s band', () => {
-  test('widens the framing’s right inset beside the keys’ band, and refits only when it changes', () => {
+describe('the guided tour’s bands', () => {
+  test('widen the framing’s right inset beside the keys’ band and its bottom over the dock, refitting only on a change', () => {
     let calls = 0;
     const stage = createStageLayout({ media, storage: null, onDock: () => (calls += 1) });
     stage.setViewport(rect(1000, 600), { width: 1000, height: 600 });
     stage.setGutter(20);
     stage.setDock({ width: 300, height: 38 });
     stage.setKeys({ top: 0, right: 90 }, { width: 90, height: 200 });
-    const without = stage.framing().inset.right!;
+    const without = stage.framing().inset;
     calls = 0;
-    stage.setGuideInset(356);
-    stage.setGuideInset(356);
+    stage.setGuideInset({ right: 356, bottom: 0 });
+    stage.setGuideInset({ right: 356, bottom: 0 });
     expect(calls).toBe(1);
     expect(stage.framing().inset.right).toBeGreaterThanOrEqual(90 + 356);
-    stage.setGuideInset(0);
-    expect(stage.framing().inset.right).toBe(without);
+    stage.setGuideInset({ right: 0, bottom: 240 });
     expect(calls).toBe(2);
+    expect(stage.framing().inset.right).toBe(without.right);
+    expect(stage.framing().inset.bottom).toBeGreaterThanOrEqual(38 + 20 + 240);
+    stage.setGuideInset({ right: 0, bottom: 0 });
+    expect(stage.framing().inset).toEqual(without);
+    expect(calls).toBe(3);
   });
 });
 

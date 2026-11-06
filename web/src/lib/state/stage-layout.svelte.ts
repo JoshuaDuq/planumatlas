@@ -46,8 +46,8 @@ export function createStageLayout({
   let dock = $state.raw<Size>({ width: 0, height: 0 });
   let keyInset = $state.raw({ top: 0, right: 0 });
   let keySize = $state.raw<Size>({ width: 0, height: 0 });
-  // A band on the stage's right the guided tour keeps clear of anatomy for its card.
-  let guideInset = 0;
+  // The bands on the stage's right and above the dock the guided tour keeps clear of anatomy for its card.
+  let guideInset = { right: 0, bottom: 0 };
   let sheetFull = $state(false);
   let sectionNeed = $state(0);
   let gutter = $state(0);
@@ -347,10 +347,10 @@ export function createStageLayout({
       if (changed && !fitting) onDock?.();
     },
 
-    /** The band the guided tour's card takes off the right of the framing rectangle; 0 gives it back. */
-    setGuideInset(right: number) {
-      if (right === guideInset) return;
-      guideInset = right;
+    /** The bands the guided tour's card takes off the right and bottom of the framing rectangle; 0 gives one back. */
+    setGuideInset(band: { right: number; bottom: number }) {
+      if (band.right === guideInset.right && band.bottom === guideInset.bottom) return;
+      guideInset = band;
       onDock?.();
     },
 
@@ -390,15 +390,15 @@ export function createStageLayout({
      * the markings and the gizmo (viewport-chrome.js:263-270). Register it with `engine.camera.setFramingSource`.
      */
     framing: (): FramingClearance => {
-      const reach = dockReach();
+      const reach = dockReach() + guideInset.bottom;
       fitKeys();
       if (!visibleRect?.height) {
         return {
-          inset: { top: keyInset.top, right: keyInset.right + guideInset, bottom: reach },
+          inset: { top: keyInset.top, right: keyInset.right + guideInset.right, bottom: reach },
           scale: { horizontal: 1, vertical: 1 },
         };
       }
-      const band = keyInset.right + guideInset;
+      const band = keyInset.right + guideInset.right;
       const room = {
         width: visibleRect.width - band,
         height: visibleRect.height - keyInset.top,
