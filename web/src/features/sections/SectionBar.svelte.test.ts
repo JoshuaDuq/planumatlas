@@ -92,7 +92,7 @@ async function cutPlane(plane: CutMode) {
 }
 
 const locate = (
-  role: 'button' | 'slider' | 'spinbutton' | 'checkbox' | 'group' | 'toolbar',
+  role: 'button' | 'slider' | 'textbox' | 'checkbox' | 'group' | 'toolbar',
   name: string,
 ) => page.getByRole(role, { name, exact: true });
 const control = (role: Parameters<typeof locate>[0], name: string) =>
@@ -104,7 +104,7 @@ const said = () => bar().querySelector('[role="status"] .visually-hidden')!.text
 const shown = () =>
   bar().querySelector('[role="status"] [aria-hidden="true"]')?.textContent ?? null;
 const position = () => bar().querySelector<HTMLInputElement>('input[type="range"]')!;
-const exact = () => bar().querySelector<HTMLInputElement>('input[type="number"]')!;
+const exact = () => bar().querySelector<HTMLInputElement>('.cut-number')!;
 const active = () => document.activeElement;
 
 async function openSection() {
@@ -286,7 +286,7 @@ describe('the section row', () => {
       slider.getAttribute('step'),
     ]).toEqual(['-128', '128', '0.5']);
     expect(slider.getAttribute('aria-valuetext')).toBe('0.0 mm');
-    expect(control('spinbutton', 'Exact cut position in millimetres')).toBe(exact());
+    expect(control('textbox', 'Exact cut position in millimetres')).toBe(exact());
     const ends = [...bar().querySelectorAll('.cut-end')];
     expect(ends.map((end) => [end.textContent, end.getAttribute('aria-hidden')])).toEqual([
       ['L', 'true'],
@@ -305,7 +305,11 @@ describe('the section row', () => {
       'D',
     ]);
     expect(position().getAttribute('aria-valuetext')).toBe('−12,5 mm');
+    expect(exact().value).toBe('−12,5');
     expect(said()).toMatch(/^Coupe tissulaire à −12,5 mm/);
+    const setOffset = vi.spyOn(engine.sections, 'setOffset');
+    for (const value of ['7,5', '−3,5', '-2.5']) await typeExact(value);
+    expect(setOffset.mock.calls).toEqual([[7.5], [-3.5], [-2.5]]);
   });
 
   test('the slider builds the cut as it moves; the sentence waits until the slider is left', async () => {

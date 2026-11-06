@@ -19,7 +19,7 @@
   import { tick, untrack } from 'svelte';
   import type { Attachment } from 'svelte/attachments';
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
-  import { millimetres } from '../../lib/core/format.ts';
+  import { decimal, millimetres, parseDecimal } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
@@ -77,7 +77,7 @@
     const offset = controls.offset;
     if (!untrack(() => rangeFocused)) draft = offset;
     if (!untrack(() => numberFocused)) {
-      numberText = offset.toFixed(1);
+      numberText = decimal(offset, 1, lang);
       invalid = false;
     }
   });
@@ -189,12 +189,12 @@
   }
 
   function commitNumber(field: HTMLInputElement) {
-    if (field.value === '') {
-      numberText = controls.offset.toFixed(1);
+    if (field.value.trim() === '') {
+      numberText = decimal(controls.offset, 1, lang);
       invalid = false;
       return;
     }
-    const typed = Number(field.value);
+    const typed = parseDecimal(field.value);
     if (!Number.isFinite(typed) || typed < minimum || typed > maximum) {
       invalid = true;
       return;
@@ -242,7 +242,7 @@
               oninput={(event) => {
                 dragging = true;
                 draft = event.currentTarget.valueAsNumber;
-                numberText = draft.toFixed(1);
+                numberText = decimal(draft, 1, lang);
                 invalid = false;
                 controls.slideOffset(draft);
               }}
@@ -250,10 +250,9 @@
             <span class="cut-end" aria-hidden="true">{ends[1]}</span>
             <input
               class="cut-number"
-              type="number"
-              min={minimum}
-              max={maximum}
-              step="0.5"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
               disabled={!controls.active}
               aria-label={copy.exactPositionAria}
               aria-invalid={invalid}
@@ -262,7 +261,7 @@
               onfocus={() => (numberFocused = true)}
               onblur={() => {
                 numberFocused = false;
-                if (!invalid) numberText = controls.offset.toFixed(1);
+                if (!invalid) numberText = decimal(controls.offset, 1, lang);
               }}
               onchange={(event) => commitNumber(event.currentTarget)}
             />
@@ -462,7 +461,6 @@
       cursor: default;
     }
     .cut-number {
-      appearance: textfield;
       flex: none;
       width: 4.5rem;
       height: var(--control-height);
@@ -474,11 +472,6 @@
       font-size: var(--text-stage);
       font-variant-numeric: tabular-nums;
       text-align: right;
-    }
-    .cut-number::-webkit-inner-spin-button,
-    .cut-number::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
     }
     /* The same hover edge as the stage's select. */
     @media (hover: hover) and (pointer: fine) {

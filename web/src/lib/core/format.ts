@@ -87,6 +87,12 @@ export function decimal(
   return `${sign}${text.replace('.', decimalMark(lang))}`;
 }
 
+/** What a reader typed as a number, with either decimal mark and either minus; NaN when it is none. */
+export function parseDecimal(text: string): number {
+  const plain = text.trim().replace(',', '.').replace(MINUS, '-');
+  return plain === '' ? Number.NaN : Number(plain);
+}
+
 /**
  * A point in RAS millimetres: each axis signed, one decimal, true minus sign.
  * French separates the axes with semicolons because its decimal mark is a comma;

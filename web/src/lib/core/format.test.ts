@@ -4,6 +4,7 @@ import {
   count,
   decimal,
   formatRas,
+  parseDecimal,
   grouped,
   quantity,
   millimetres,
@@ -85,6 +86,14 @@ test("a stage number takes the reader's decimal mark and a true minus sign", () 
   assert.equal(decimal(12, 1, 'en', { signed: true }), '+12.0');
   assert.equal(decimal(-0.04, 1, 'fr', { signed: true }), '0,0');
   assert.equal(decimal(-30, 0, 'en', { signed: true }), `${MINUS}30`);
+});
+
+test('a typed number reads either decimal mark and either minus; blank or words are NaN', () => {
+  assert.equal(parseDecimal(`${MINUS}12,5`), -12.5);
+  assert.equal(parseDecimal(' -12.5 '), -12.5);
+  assert.equal(parseDecimal('7'), 7);
+  assert.ok(Number.isNaN(parseDecimal('  ')));
+  assert.ok(Number.isNaN(parseDecimal('abc')));
 });
 
 test('a trimmed number drops the zeros a step size does not have', () => {
