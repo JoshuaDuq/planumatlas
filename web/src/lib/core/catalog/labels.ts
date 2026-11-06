@@ -8,6 +8,7 @@ import { schaeferLabel } from './schaefer-labels.ts';
 import { NEXTBRAIN_LABELS_FR } from './nextbrain-labels.fr.ts';
 import { STRUCTURE_LABELS } from './structure-groups.ts';
 import { STRUCTURE_LABELS_FR } from './structure-groups.fr.ts';
+import { DESIKAN_REGIONS } from './desikan-labels.ts';
 import { WHITE_MATTER_LABELS } from './white-matter-labels.ts';
 import { WHITE_MATTER_LABELS_FR } from './white-matter-labels.fr.ts';
 import { canonicalSourceName } from './source-names.ts';
@@ -31,8 +32,15 @@ const BUCKETS = ['A–C', 'D–F', 'G–I', 'J–L', 'M–O', 'P–R', 'S–U', 
 /** HCP-MMP codes are cleaned mechanically: `L_V1_ROI` -> `V1`. Never expanded. */
 const hcpCode = (sourceName: string) => sourceName.replace(/^[LR]_/, '').replace(/_ROI$/, '');
 
-/** Published NextBrain names are snake_case; only the separator is changed. */
-const readable = (sourceName: string) => sourceName.replaceAll('_', ' ');
+const capitalised = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
+
+/**
+ * Published NextBrain names are lowercase snake_case: the separator becomes a space and the first
+ * letter a capital, as every other atlas's names are written. The words stay the published ones,
+ * but for its cortex, whose Desikan-Killiany names FreeSurfer runs together: those are written out.
+ */
+const readable = (sourceName: string) =>
+  capitalised(DESIKAN_REGIONS[sourceName]?.structure ?? sourceName.replaceAll('_', ' '));
 
 function alphabeticalBucket(code: string): string {
   const first = code[0].toUpperCase();
@@ -100,7 +108,7 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
       name,
       code: null,
       group: nextbrainSystem(region, lang),
-      aliases: entry?.aliases ?? [],
+      aliases: entry?.aliases ?? (isFr ? [] : (DESIKAN_REGIONS[sourceName]?.aliases ?? [])),
     };
   }
 

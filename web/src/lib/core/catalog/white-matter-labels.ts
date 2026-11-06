@@ -11,55 +11,55 @@ const CINGULATE = 'Cingulate white matter';
 const LIMBIC = 'Limbic white matter';
 const INSULAR = 'Insular white matter';
 
+import { DESIKAN_REGIONS } from './desikan-labels.ts';
+
 export interface WhiteMatterLabel {
   name: string;
   group: string;
   aliases: string[];
 }
 
-const parcel = (structure: string, group: string, aliases: string[] = []): WhiteMatterLabel => ({
-  name: `White matter of the ${structure}`,
-  group,
-  aliases,
-});
-
-export const WHITE_MATTER_LABELS: Record<string, WhiteMatterLabel> = {
-  bankssts: parcel('banks of the superior temporal sulcus', TEMPORAL),
-  caudalanteriorcingulate: parcel('caudal anterior cingulate cortex', CINGULATE),
-  caudalmiddlefrontal: parcel('caudal middle frontal gyrus', FRONTAL),
-  cuneus: parcel('cuneus', OCCIPITAL),
-  entorhinal: parcel('entorhinal cortex', LIMBIC),
-  frontalpole: parcel('frontal pole', FRONTAL),
-  fusiform: parcel('fusiform gyrus', TEMPORAL),
-  inferiorparietal: parcel('inferior parietal cortex', PARIETAL),
-  inferiortemporal: parcel('inferior temporal gyrus', TEMPORAL),
-  insula: parcel('insula', INSULAR),
-  isthmuscingulate: parcel('isthmus of the cingulate gyrus', CINGULATE),
-  lateraloccipital: parcel('lateral occipital cortex', OCCIPITAL),
-  lateralorbitofrontal: parcel('lateral orbitofrontal cortex', FRONTAL),
-  lingual: parcel('lingual gyrus', OCCIPITAL),
-  medialorbitofrontal: parcel('medial orbitofrontal cortex', FRONTAL),
-  middletemporal: parcel('middle temporal gyrus', TEMPORAL),
-  paracentral: parcel('paracentral lobule', CENTRAL),
-  parahippocampal: parcel('parahippocampal gyrus', LIMBIC),
-  parsopercularis: parcel('opercular part of the inferior frontal gyrus', FRONTAL, [
-    'pars opercularis',
-  ]),
-  parsorbitalis: parcel('orbital part of the inferior frontal gyrus', FRONTAL, ['pars orbitalis']),
-  parstriangularis: parcel('triangular part of the inferior frontal gyrus', FRONTAL, [
-    'pars triangularis',
-  ]),
-  pericalcarine: parcel('pericalcarine cortex', OCCIPITAL),
-  postcentral: parcel('postcentral gyrus', CENTRAL),
-  posteriorcingulate: parcel('posterior cingulate cortex', CINGULATE),
-  precentral: parcel('precentral gyrus', CENTRAL),
-  precuneus: parcel('precuneus', PARIETAL),
-  rostralanteriorcingulate: parcel('rostral anterior cingulate cortex', CINGULATE),
-  rostralmiddlefrontal: parcel('rostral middle frontal gyrus', FRONTAL),
-  superiorfrontal: parcel('superior frontal gyrus', FRONTAL),
-  superiorparietal: parcel('superior parietal lobule', PARIETAL),
-  superiortemporal: parcel('superior temporal gyrus', TEMPORAL),
-  supramarginal: parcel('supramarginal gyrus', PARIETAL),
-  temporalpole: parcel('temporal pole', TEMPORAL),
-  transversetemporal: parcel('transverse temporal gyrus', TEMPORAL, ['Heschl']),
+/** The lobe each parcel is listed under. */
+const LOBES: Record<string, string> = {
+  bankssts: TEMPORAL,
+  caudalanteriorcingulate: CINGULATE,
+  caudalmiddlefrontal: FRONTAL,
+  cuneus: OCCIPITAL,
+  entorhinal: LIMBIC,
+  frontalpole: FRONTAL,
+  fusiform: TEMPORAL,
+  inferiorparietal: PARIETAL,
+  inferiortemporal: TEMPORAL,
+  insula: INSULAR,
+  isthmuscingulate: CINGULATE,
+  lateraloccipital: OCCIPITAL,
+  lateralorbitofrontal: FRONTAL,
+  lingual: OCCIPITAL,
+  medialorbitofrontal: FRONTAL,
+  middletemporal: TEMPORAL,
+  paracentral: CENTRAL,
+  parahippocampal: LIMBIC,
+  parsopercularis: FRONTAL,
+  parsorbitalis: FRONTAL,
+  parstriangularis: FRONTAL,
+  pericalcarine: OCCIPITAL,
+  postcentral: CENTRAL,
+  posteriorcingulate: CINGULATE,
+  precentral: CENTRAL,
+  precuneus: PARIETAL,
+  rostralanteriorcingulate: CINGULATE,
+  rostralmiddlefrontal: FRONTAL,
+  superiorfrontal: FRONTAL,
+  superiorparietal: PARIETAL,
+  superiortemporal: TEMPORAL,
+  supramarginal: PARIETAL,
+  temporalpole: TEMPORAL,
+  transversetemporal: TEMPORAL,
 };
+
+export const WHITE_MATTER_LABELS: Record<string, WhiteMatterLabel> = Object.fromEntries(
+  Object.entries(DESIKAN_REGIONS).map(([id, { structure, aliases = [] }]) => [
+    id,
+    { name: `White matter of the ${structure}`, group: LOBES[id]!, aliases },
+  ]),
+);

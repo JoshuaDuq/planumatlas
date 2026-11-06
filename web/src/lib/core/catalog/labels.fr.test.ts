@@ -250,7 +250,7 @@ test('NextBrain regions without a French entry fall back to published English', 
     source_label_id: 10444,
   };
   const label = labelOf(r, 'fr');
-  assert.equal(label.name, 'medial habenular nucleus');
+  assert.equal(label.name, 'Medial habenular nucleus');
   assert.equal(label.group, 'Épithalamus');
 });
 
@@ -269,7 +269,10 @@ test('NextBrain cerebellar cortical layers are not named as a periventricular ar
       },
       'fr',
     );
-    assert.equal(label.name, source_name.replaceAll('_', ' '));
+    assert.equal(
+      label.name,
+      `${source_name[0]!.toUpperCase()}${source_name.slice(1).replaceAll('_', ' ')}`,
+    );
     assert.equal(label.group, 'Cervelet');
   }
 });

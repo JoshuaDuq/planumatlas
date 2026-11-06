@@ -96,7 +96,7 @@ test('every region in the published manifest resolves to a name and a group', ()
   }
 });
 
-test('NextBrain names are read from the published table, never invented', () => {
+test('NextBrain names are read from the published table, never invented, and begin with a capital', () => {
   const region = {
     kind: 'tissue-region',
     atlas: 'nextbrain',
@@ -106,9 +106,25 @@ test('NextBrain names are read from the published table, never invented', () => 
     source_published_name: 'Left-head_of_caudate',
   };
   const label = labelOf(region);
-  assert.equal(label.name, 'head of caudate');
+  assert.equal(label.name, 'Head of caudate');
   assert.equal(label.code, null);
   assert.equal(label.group, 'Basal ganglia');
+});
+
+test('NextBrain’s Desikan-Killiany cortex, published run together, is written out', () => {
+  const cortex = (source_name: string, source_label_id: number) =>
+    labelOf({
+      kind: 'tissue-region',
+      atlas: 'nextbrain',
+      hemisphere: 'left',
+      source_label_id,
+      source_name,
+    })!;
+  assert.equal(cortex('caudalanteriorcingulate', 2002).name, 'Caudal anterior cingulate cortex');
+  assert.equal(cortex('bankssts', 2001).name, 'Banks of the superior temporal sulcus');
+  const opercular = cortex('parsopercularis', 2018);
+  assert.equal(opercular.name, 'Opercular part of the inferior frontal gyrus');
+  assert.deepEqual(opercular.aliases, ['pars opercularis']);
 });
 
 test('a NextBrain name without a French entry keeps its published English', () => {
