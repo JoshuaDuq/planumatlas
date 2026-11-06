@@ -329,19 +329,21 @@
             </ul>
           </Disclosure>
         {/if}
-        <div class="comparison-row unassigned">
-          <span>{copy.unassigned}</span>
-          <span class="measure"
-            >{overlapArea(comparison.unassignedAreaMm2, lang)}<span class="visually-hidden"
-              >{' mm²'}</span
-            ></span
-          >
-          <span class="measure"
-            >{overlapShare(comparison.unassignedFraction, lang)}<span class="visually-hidden"
-              >{' %'}</span
-            ></span
-          >
-        </div>
+        {#if comparison.unassignedAreaMm2 > 0}
+          <div class="comparison-row unassigned">
+            <span>{copy.unassigned}</span>
+            <span class="measure"
+              >{overlapArea(comparison.unassignedAreaMm2, lang)}<span class="visually-hidden"
+                >{' mm²'}</span
+              ></span
+            >
+            <span class="measure"
+              >{overlapShare(comparison.unassignedFraction, lang)}<span class="visually-hidden"
+                >{' %'}</span
+              ></span
+            >
+          </div>
+        {/if}
         {#if !outlineAvailable}
           <p class="detail-note" id="{uid}-view-note">{copy.viewNote}</p>
         {/if}

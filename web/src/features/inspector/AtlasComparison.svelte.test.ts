@@ -403,6 +403,14 @@ describe('the list', () => {
     expect([...remainder.querySelectorAll('.visually-hidden')].map(text)).toEqual(['mm²', '%']);
   });
 
+  test('a region with no unassigned overlap has no remainder row', async () => {
+    serve();
+    await mount({ regionId: V1 });
+    await open();
+    expect(rows().length).toBeGreaterThan(0);
+    expect(root().querySelector('.unassigned')).toBeNull();
+  });
+
   test('the list and the method stay open from one region to the next', async () => {
     serve();
     const { screen } = await mount({ regionId: SFG });
