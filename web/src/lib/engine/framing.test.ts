@@ -643,6 +643,21 @@ describe('framing parts of the anatomy', () => {
     assert.equal(stage.camera.viewHeld, true);
   });
 
+  it('a deficit wide enough to carry its own context is framed with the whole brain in the room', () => {
+    const wide = () =>
+      part('wide', { atlas: 'destrieux', kind: 'cortex' }, [0.02, 0.08, 0.1], [-0.07, 0.02, 0.04]);
+    const meshes = [...wholeBrain(), wide()];
+    const stage = fixture({
+      meshes,
+      regions: new Map([['wide', { id: 'wide', hemisphere: 'left' } as Region]]),
+      scale: FULL,
+    });
+    stage.camera.applyView('left', { immediate: true });
+    stage.camera.frameRegions(['wide']);
+    stage.finish();
+    assertFramed(stage, meshes);
+  });
+
   describe('coloured cortical regions out of sight', () => {
     const cortex = new Map<string, Region>([
       ['lateral-left', { id: 'lateral-left', hemisphere: 'left', kind: 'cortex' } as Region],

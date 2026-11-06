@@ -304,24 +304,6 @@ export function createFraming({
     return cachedPoints;
   }
 
-  /** The meshes' vertices in world space, thinned like the whole brain's framing points. */
-  function silhouette(meshes: readonly Mesh[]): Float32Array {
-    const stride = thinned(
-      meshes.reduce((total, mesh) => total + mesh.geometry.attributes['position']!.count, 0),
-    );
-    const kept: number[] = [];
-    const point = new Vector3();
-    for (const mesh of meshes) {
-      const position = mesh.geometry.attributes['position']!;
-      mesh.updateWorldMatrix(true, false);
-      for (let i = 0; i < position.count; i += stride) {
-        point.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
-        kept.push(point.x, point.y, point.z);
-      }
-    }
-    return new Float32Array(kept);
-  }
-
   /** The scene's fit, narrowed so the anatomy also clears the orientation letters and scale bar. */
   const clearedFit = () => {
     const fit = scene.viewportFit;
@@ -604,9 +586,11 @@ export function createFraming({
     if (!meshes.length) return [];
     const box = boundsOf(meshes);
     const context = withContext(box);
-    // A mapping wide enough to carry its own context is fitted by its silhouette, as the whole brain
-    // is, so it fills the stage; a small one keeps the context box.
-    const points = context.equals(box) ? silhouette(meshes) : null;
+    // A mapping wide enough to carry its own context is framed with the whole brain, so the lobes
+    // around it are not cut off at the stage's edge; a small one keeps the context box.
+    const wide = context.equals(box);
+    const fitted = wide ? framingBounds() : context;
+    const points = wide ? framingPoints() : null;
     const direction = heading();
     const sides = new Set(
       meshes
@@ -620,7 +604,7 @@ export function createFraming({
     const fit = framingFit();
     const { chosen, shares } = clearestFraming(
       direction,
-      (heading) => planFraming(camera, controls, context, heading, frameTo, fit, points),
+      (heading) => planFraming(camera, controls, fitted, heading, frameTo, fit, points),
       corticalMeshes(wanted),
     );
     held.release();
