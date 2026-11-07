@@ -110,7 +110,11 @@ export function patchCombinations(): Map<string, Material> {
       for (const name of ['_sulc', '_t1', ...(shaded ? [] : ['_openness'])]) {
         mesh.geometry.deleteAttribute(name);
       }
-      return createAnatomicalMaterial(mesh as never, { id: 's', kind: 'structure' } as Region, appearance);
+      return createAnatomicalMaterial(
+        mesh as never,
+        { id: 's', kind: 'structure' } as Region,
+        appearance,
+      );
     });
   }
 

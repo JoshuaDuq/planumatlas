@@ -181,7 +181,11 @@ test('SHADER-36 a structure carrying openness is shaded by it over the manifest 
     for (const name of ['_sulc', '_t1', ...(openness ? [] : ['_openness'])]) {
       mesh.geometry.deleteAttribute(name);
     }
-    return createAnatomicalMaterial(mesh as never, region({ id: 's', kind: 'structure' }), appearance);
+    return createAnatomicalMaterial(
+      mesh as never,
+      region({ id: 's', kind: 'structure' }),
+      appearance,
+    );
   };
   const shaded = compile(structure(true));
   assert.deepEqual(shaded['opennessDecode']!.value, [
@@ -194,7 +198,8 @@ test('SHADER-36 a structure carrying openness is shaded by it over the manifest 
   const broken = corticalMesh(false);
   broken.geometry.setAttribute('_openness', { itemSize: 1, count: 4 } as never);
   assert.throws(
-    () => createAnatomicalMaterial(broken as never, region({ id: 's', kind: 'structure' }), appearance),
+    () =>
+      createAnatomicalMaterial(broken as never, region({ id: 's', kind: 'structure' }), appearance),
     { message: 'Missing source shading attribute _openness: s' },
   );
 });
