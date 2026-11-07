@@ -5,12 +5,13 @@
   drawn once a threshold is typed, and the field takes focus when the map is ready to ask for it.
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { UNSTATED } from '../../lib/core/coordinates/spaces.ts';
   import { formatRas, grouped, parseDecimal, percent, withUnit } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { readIn } from '../../lib/core/coordinates/spaces.ts';
   import { clusterCsv, peakLabel } from '../../lib/core/user-map/cluster-csv.ts';
+  import { mapFileReason } from '../../lib/core/user-map/map-file-error.ts';
   import {
     CORTEX_SURFACES,
     STATISTICS,
@@ -76,6 +77,7 @@
   const current = $derived(map.state);
 
   let input: HTMLInputElement;
+  let chooseButton: HTMLButtonElement;
   let thresholdField = $state<HTMLInputElement>();
   // A number as the field shows it: none yet is an empty field.
   const shown = (value: number) => (Number.isFinite(value) ? mapNumber(value, lang) : '');
@@ -108,6 +110,14 @@
 
   function apply() {
     map.setSettings(typed);
+  }
+
+  /** The button goes with the map, so focus moves to the one that chooses another. */
+  async function remove(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    map.remove();
+    await tick();
+    if (hadFocus) chooseButton.focus();
   }
 
   // Typed as a number of voxels; applied once it reads as a whole number of them.
@@ -320,7 +330,10 @@
   {:else if current.status === 'loading'}
     <p class="hint" role="status">{copy.reading(current.name)}</p>
   {:else if current.status === 'error'}
-    <p class="error" role="alert">{copy.failed(current.name)} {current.message}</p>
+    <p class="error" role="alert">
+      {copy.failed(current.name)}
+      {mapFileReason(copy, t(lang, 'errors'), current.error)}
+    </p>
   {/if}
   <input
     bind:this={input}
@@ -337,6 +350,7 @@
   />
   <div class="actions">
     <button
+      bind:this={chooseButton}
       type="button"
       class="stage-command"
       disabled={current.status === 'loading'}
@@ -345,7 +359,7 @@
       {current.status === 'ready' ? copy.another : copy.choose}
     </button>
     {#if current.status === 'ready'}
-      <button type="button" class="stage-command stage-command-quiet" onclick={map.remove}>
+      <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
         {copy.remove}
       </button>
     {/if}

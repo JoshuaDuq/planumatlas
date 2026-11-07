@@ -81,6 +81,26 @@ test('marks a bilateral finding the lesion reaches on one side only', () => {
   assert.deepEqual(sides, { both: 'left', 'reached-both': null, left: null });
 });
 
+test('a midline region, as the callosum, puts a bilateral finding on neither side', () => {
+  const ranked = rankFindings(
+    [
+      finding('callosum', ['aseg:midline:253', 'aseg:midline:254'], 'bilateral'),
+      finding(
+        'callosum-and-left',
+        ['aseg:midline:255', 'aseg:left:3', 'aseg:right:42'],
+        'bilateral',
+      ),
+    ],
+    inside([
+      ['aseg:midline:253', 50, 100],
+      ['aseg:midline:255', 50, 100],
+      ['aseg:left:3', 50, 100],
+    ]),
+  );
+  const sides = Object.fromEntries(ranked.shown.map((row) => [row.association.id, row.oneSide]));
+  assert.deepEqual(sides, { callosum: null, 'callosum-and-left': 'left' });
+});
+
 test('colours the leading findings, each region in the first colour that cites it', () => {
   const findings = Array.from({ length: FINDING_COLORS.length + 1 }, (_, n) =>
     finding(`f${n}`, [`r:left:${n}`, 'r:left:shared']),

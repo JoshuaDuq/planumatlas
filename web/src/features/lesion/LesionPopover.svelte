@@ -4,6 +4,7 @@
   The radius redraws as the thumb moves and is measured once let go.
 -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import { formatRas, withUnit } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
@@ -37,6 +38,17 @@
   const clicks = $derived(
     (['select', 'place'] as const).map((value) => ({ value, label: copy.clicks[value] })),
   );
+
+  /** The button goes with the lesion, so focus moves to the click chosen. */
+  async function remove(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    lesion.remove();
+    await tick();
+    if (!hadFocus) return;
+    document
+      .querySelector<HTMLElement>(`[aria-labelledby="${clickId}"] [aria-checked="true"]`)!
+      .focus();
+  }
 </script>
 
 <p id={clickId} class="stage-field-label">{copy.click}</p>
@@ -64,7 +76,7 @@
   <p class="centre">{formatRas(placed.centre, lang)}</p>
   <div class="actions">
     <button type="button" class="stage-command" onclick={onReport}>{copy.showReport}</button>
-    <button type="button" class="stage-command stage-command-quiet" onclick={lesion.remove}>
+    <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
       {copy.remove}
     </button>
   </div>

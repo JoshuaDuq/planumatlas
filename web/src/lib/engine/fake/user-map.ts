@@ -15,8 +15,8 @@ export interface FakeUserMap extends EngineUserMap {
   readonly clusterSizes: readonly (readonly [number, number])[];
   readonly extents: readonly (readonly [number, number])[];
   readonly surface: CortexSurface;
-  /** Settle the pending `load` with this summary, or reject it with this message. */
-  settle(result: MapSummary | string): void;
+  /** Settle the pending `load` with this summary, or reject it with this error. */
+  settle(result: MapSummary | Error): void;
 }
 
 /** The map without a brain: `load` waits until the test settles it, so its loading state can be seen. */
@@ -83,8 +83,8 @@ export function createFakeUserMap(
       if (!pending) throw new Error('No map is loading.');
       const { space, resolve, reject } = pending;
       pending = null;
-      if (typeof result === 'string') {
-        reject(new Error(result));
+      if (result instanceof Error) {
+        reject(result);
         return;
       }
       loaded = space;

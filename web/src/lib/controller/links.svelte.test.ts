@@ -89,6 +89,8 @@ function build({ announce }: { announce: boolean }) {
           forgetScenes() {},
           rememberLessonScene() {},
           openLandmark: async () => true,
+          holdRoute() {},
+          routeOpacity: () => null,
           revealInTree() {},
           showDetail() {},
           showTracts: async () => {},

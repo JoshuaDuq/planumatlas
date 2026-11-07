@@ -75,6 +75,22 @@ describe('opening a lesson', () => {
     assert.equal(scene.engine.model.state.selectedRegion, null);
   });
 
+  test('the whole route holds the cortex opacity it found, which a link’s scene replaces', async () => {
+    const scene = createScene();
+    const circuit = firstCircuit(scene);
+    scene.engine.model.setCortexOpacity(0.6);
+    await scene.excursions.openCircuit(circuit.id);
+    assert.equal(scene.excursions.routeOpacity, 0.6);
+    await scene.excursions.openLessonStep(0);
+    assert.equal(scene.excursions.routeOpacity, null);
+    await scene.excursions.openLessonRoute();
+    // A link restored over the route is the new baseline, its own opacity what the route holds.
+    scene.excursions.forget();
+    scene.engine.model.setCortexOpacity(0.9);
+    scene.excursions.holdRoute(circuit);
+    assert.equal(scene.excursions.routeOpacity, 0.9);
+  });
+
   test('a lesson opened on a landmark ends Focus, after holding the scene that had it', async () => {
     const scene = createScene();
     // A cortical landmark, its own, so the step's pick alone would carry Focus on.

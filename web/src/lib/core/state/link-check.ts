@@ -67,6 +67,7 @@ export function checkLink(
   if ('circuitStep' in state && !(state.circuitStep! < (known.circuits.get(state.circuit!) ?? 0))) {
     reject('circuitStep');
   }
+  if ('circuitRoute' in state && !state.circuit) reject('circuitRoute');
   // A map opens in place of a lesson, and its dot means nothing without it.
   if ('circuitMap' in state && state.circuit) reject('circuitMap');
   if ('mapDot' in state && !state.circuitMap) reject('mapDot');

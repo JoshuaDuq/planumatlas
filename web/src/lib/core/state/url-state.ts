@@ -39,6 +39,7 @@ type Defaults = Pick<
   | 'selectedDeficit'
   | 'circuit'
   | 'circuitStep'
+  | 'circuitRoute'
   | 'circuitMap'
   | 'mapDot'
   | 'orbit'
@@ -75,6 +76,7 @@ export const DEFAULTS: Defaults = {
   selectedDeficit: null,
   circuit: null,
   circuitStep: 0,
+  circuitRoute: false,
   circuitMap: null,
   mapDot: null,
   orbit: null,
@@ -254,6 +256,13 @@ const mapDot: Reader<NonNullable<LinkState['mapDot']>> = (value) => {
 
 const hundredths = (value: number) => Math.round(value * 100) / 100;
 
+/** The dot to hundredths, its centre cut toward fixation where rounding would carry it past 90°. */
+function writeMapDot({ x, y, radius }: NonNullable<LinkState['mapDot']>): string {
+  let centre = [hundredths(x), hundredths(y)];
+  if (Math.hypot(...centre) > 90) centre = [x, y].map((value) => Math.trunc(value * 100) / 100);
+  return [...centre, hundredths(radius)].join(',');
+}
+
 /** State carries the selected region as a record; the URL carries its id. */
 const identifier = (value: NonNullable<LinkInput['selectedRegion']>) =>
   typeof value === 'object' ? value.id : value;
@@ -318,8 +327,9 @@ const FIELDS: Field[] = [
   field('selectedDeficit', 'deficit', nonempty),
   field('circuit', 'circuit', nonempty),
   field('circuitStep', 'step', circuitStep, (value) => String(value + 1)),
+  field('circuitRoute', 'route', flag, writeFlag),
   field('circuitMap', 'map', nonempty),
-  field('mapDot', 'dot', mapDot, ({ x, y, radius }) => [x, y, radius].map(hundredths).join(',')),
+  field('mapDot', 'dot', mapDot, writeMapDot),
   field('lang', 'lang', oneOf(['en', 'fr'] as const)),
   field('lesion', 'lesion', lesion, ({ centre, radius }) =>
     [...centre.map(tenths), radius].join(','),

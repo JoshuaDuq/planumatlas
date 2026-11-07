@@ -1230,11 +1230,18 @@
    "deficit": "déficit",
    "circuit": "circuit",
    "step": "étape du circuit",
+   "route": "trajet complet",
+   "map": "carte du champ visuel",
+   "dot": "point du champ visuel",
    "lang": "langue",
    "hidden": "parties masquées",
    "lesion": "lésion",
    "lesionmode": "coloration de la lésion",
-   "lesiontract": "faisceau tracé"
+   "lesiontract": "faisceau tracé",
+   "coord": "coordonnée MNI",
+   "space": "gabarit de la coordonnée",
+   "cases": "cas d’AVC",
+   "tracts": "faisceaux"
   }
  },
  "menu": {
@@ -1556,7 +1563,91 @@
    "[\"Alpha\"] → \"Alpha de plus dans le CSV\"",
    "[\"\"] → \" de plus dans le CSV\""
   ],
-  "download": "Télécharger le CSV"
+  "download": "Télécharger le CSV",
+  "unexpected": "Une erreur inattendue l’en a empêché ; le détail figure dans la console du navigateur.",
+  "reasons": {
+   "header": "Ce fichier s’arrête au milieu de son en-tête NIfTI.",
+   "pair": "Ceci est l’en-tête d’une paire .hdr/.img ; enregistrez la carte en un seul fichier .nii.",
+   "magic": "Ce fichier n’est pas au format NIfTI-1 : son en-tête ne porte pas la signature NIfTI.",
+   "nifti2": "Ceci est un fichier NIfTI-2 ; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.",
+   "notNifti": "Ce fichier n’est pas une image NIfTI.",
+   "gzip": "Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.",
+   "rank": [
+    "[0] → \"Ce fichier n’est pas un volume 3D : il a 0 dimension.\"",
+    "[1] → \"Ce fichier n’est pas un volume 3D : il a 1 dimension.\"",
+    "[2] → \"Ce fichier n’est pas un volume 3D : il a 2 dimensions.\"",
+    "[183] → \"Ce fichier n’est pas un volume 3D : il a 183 dimensions.\"",
+    "[12345] → \"Ce fichier n’est pas un volume 3D : il a 12345 dimensions.\""
+   ],
+   "emptyAxis": [
+    "[\"Alpha\"] → \"Les dimensions Alpha de ce fichier comprennent un axe vide.\"",
+    "[\"\"] → \"Les dimensions  de ce fichier comprennent un axe vide.\""
+   ],
+   "volumes": [
+    "[0] → \"Ce fichier contient 0 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
+    "[1] → \"Ce fichier contient 1 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
+    "[2] → \"Ce fichier contient 2 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
+    "[183] → \"Ce fichier contient 183 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
+    "[12345] → \"Ce fichier contient 12<NNBSP>345 volumes ; enregistrez celui à afficher dans son propre fichier.\""
+   ],
+   "tooLarge": [
+    "[\"Alpha\",1] → \"Ce volume compte Alpha voxels, au-delà de la limite de 1.\"",
+    "[\"\",2] → \"Ce volume compte  voxels, au-delà de la limite de 2.\"",
+    "[\"Alpha\",183] → \"Ce volume compte Alpha voxels, au-delà de la limite de 183.\"",
+    "[\"\",12345] → \"Ce volume compte  voxels, au-delà de la limite de 12<NNBSP>345.\"",
+    "[\"Alpha\",0] → \"Ce volume compte Alpha voxels, au-delà de la limite de 0.\""
+   ],
+   "storedType": [
+    "[\"Alpha\",1] → \"Ce fichier stocke des valeurs Alpha (type de données 1) ; enregistrez la carte en float32.\"",
+    "[\"\",2] → \"Ce fichier stocke des valeurs  (type de données 2) ; enregistrez la carte en float32.\"",
+    "[\"Alpha\",183] → \"Ce fichier stocke des valeurs Alpha (type de données 183) ; enregistrez la carte en float32.\"",
+    "[\"\",12345] → \"Ce fichier stocke des valeurs  (type de données 12345) ; enregistrez la carte en float32.\"",
+    "[\"Alpha\",0] → \"Ce fichier stocke des valeurs Alpha (type de données 0) ; enregistrez la carte en float32.\""
+   ],
+   "unknownType": [
+    "[0] → \"Le code de type de données 0 de ce fichier n’est pas un type NIfTI-1.\"",
+    "[1] → \"Le code de type de données 1 de ce fichier n’est pas un type NIfTI-1.\"",
+    "[2] → \"Le code de type de données 2 de ce fichier n’est pas un type NIfTI-1.\"",
+    "[183] → \"Le code de type de données 183 de ce fichier n’est pas un type NIfTI-1.\"",
+    "[12345] → \"Le code de type de données 12345 de ce fichier n’est pas un type NIfTI-1.\""
+   ],
+   "offset": [
+    "[0] → \"Le décalage des données de ce fichier (vox_offset 0) tombe dans son en-tête.\"",
+    "[1] → \"Le décalage des données de ce fichier (vox_offset 1) tombe dans son en-tête.\"",
+    "[2] → \"Le décalage des données de ce fichier (vox_offset 2) tombe dans son en-tête.\"",
+    "[183] → \"Le décalage des données de ce fichier (vox_offset 183) tombe dans son en-tête.\"",
+    "[12345] → \"Le décalage des données de ce fichier (vox_offset 12345) tombe dans son en-tête.\""
+   ],
+   "truncated": [
+    "[0,1] → \"Ce fichier est tronqué : ses données demandent 0 octets, mais le fichier en compte 1.\"",
+    "[1,2] → \"Ce fichier est tronqué : ses données demandent 1 octets, mais le fichier en compte 2.\"",
+    "[2,183] → \"Ce fichier est tronqué : ses données demandent 2 octets, mais le fichier en compte 183.\"",
+    "[183,12345] → \"Ce fichier est tronqué : ses données demandent 183 octets, mais le fichier en compte 12<NNBSP>345.\"",
+    "[12345,0] → \"Ce fichier est tronqué : ses données demandent 12<NNBSP>345 octets, mais le fichier en compte 0.\""
+   ],
+   "intercept": [
+    "[0] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 0.\"",
+    "[1] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 1.\"",
+    "[2] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 2.\"",
+    "[183] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 183.\"",
+    "[12345] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 12345.\""
+   ],
+   "overflow": [
+    "[0] → \"Ce fichier contient la valeur 0, hors de la plage des float32.\"",
+    "[1] → \"Ce fichier contient la valeur 1, hors de la plage des float32.\"",
+    "[2] → \"Ce fichier contient la valeur 2, hors de la plage des float32.\"",
+    "[183] → \"Ce fichier contient la valeur 183, hors de la plage des float32.\"",
+    "[12345] → \"Ce fichier contient la valeur 12345, hors de la plage des float32.\""
+   ],
+   "orientation": "Ce fichier n’indique aucune orientation (codes sform et qform à 0) : il ne peut pas être placé.",
+   "affineFinite": "La matrice affine de ce fichier contient une valeur non finie.",
+   "singular": "La matrice affine de ce fichier est singulière : ses axes de voxels n’engendrent pas l’espace 3D.",
+   "quaternion": "Le quaternion qform de ce fichier n’est pas une rotation (b² + c² + d² > 1).",
+   "slice": "Cette carte n’est qu’une seule coupe selon un axe ; il lui faut trois dimensions.",
+   "noFinite": "Cette carte ne contient aucune valeur finie.",
+   "zeros": "Cette carte ne contient que des zéros.",
+   "outside": "Cette carte n’atteint pas le cerveau ; vérifiez le gabarit dans lequel elle est."
+  }
  },
  "reasons": {
   "no-mri": "Hors du volume IRM",

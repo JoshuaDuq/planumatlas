@@ -1,3 +1,5 @@
+import { MapFileError } from './map-file-error.ts';
+
 // Not built on nifti-reader-js (in @niivue/niivue): it takes the qform when qform_code > sform_code,
 // where nibabel takes the sform, so a map would land elsewhere than nilearn shows it.
 
@@ -51,14 +53,14 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
   const bytes = head[0] === 0x1f && head[1] === 0x8b ? await inflate(buffer) : buffer;
   const view = new DataView(bytes);
   const little = byteOrder(view);
-  if (view.byteLength < 348) throw new Error('This file ends inside its NIfTI header.');
+  if (view.byteLength < 348) throw new MapFileError('header');
 
   const magic = String.fromCharCode(...new Uint8Array(bytes, 344, 4));
   if (magic === 'ni1\0') {
-    throw new Error('This is the header of a .hdr/.img pair; save the map as a single .nii file.');
+    throw new MapFileError('pair');
   }
   if (magic !== 'n+1\0') {
-    throw new Error('This file is not NIfTI-1: its header has no NIfTI magic.');
+    throw new MapFileError('magic');
   }
 
   const shape = volumeShape(view, little);
@@ -68,23 +70,19 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
   const type = DATA_TYPES[code];
   if (!type) {
     const name = UNSUPPORTED_TYPES[code];
-    throw new Error(
-      name
-        ? `This file stores ${name} values (data type ${code}); save the map as float32.`
-        : `This file's data type code ${code} is not a NIfTI-1 type.`,
-    );
+    throw name
+      ? new MapFileError('storedType', [name, code])
+      : new MapFileError('unknownType', [code]);
   }
 
   const voxOffset = view.getFloat32(108, little);
   if (!(voxOffset >= 352)) {
-    throw new Error(`This file's data offset (vox_offset ${voxOffset}) lies inside its header.`);
+    throw new MapFileError('offset', [voxOffset]);
   }
   const offset = Math.trunc(voxOffset);
   const end = offset + voxels * type.bytes;
   if (end > view.byteLength) {
-    throw new Error(
-      `This file is truncated: its data needs ${end} bytes but the file has ${view.byteLength}.`,
-    );
+    throw new MapFileError('truncated', [end, view.byteLength]);
   }
 
   // nibabel's get_slope_inter: a zero or non-finite slope means no scaling, whatever the intercept.
@@ -92,7 +90,7 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
   let inter = view.getFloat32(116, little);
   if (slope === 0 || !Number.isFinite(slope)) [slope, inter] = [1, 0];
   else if (!Number.isFinite(inter)) {
-    throw new Error(`This file's scaling intercept (scl_inter) is ${inter}.`);
+    throw new MapFileError('intercept', [inter]);
   }
 
   const voxelToWorld = bestAffine(view, little);
@@ -103,7 +101,7 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
     data[i] = value;
     if (!Number.isFinite(data[i])) {
       if (Number.isFinite(value)) {
-        throw new Error(`This file holds the value ${value}, beyond the float32 range.`);
+        throw new MapFileError('overflow', [value]);
       }
       data[i] = NaN;
     }
@@ -119,9 +117,7 @@ async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
   try {
     return await new Response(stream).arrayBuffer();
   } catch (cause) {
-    throw new Error('This .gz file could not be decompressed; it may be truncated or damaged.', {
-      cause,
-    });
+    throw new MapFileError('gzip', [], { cause });
   }
 }
 
@@ -130,31 +126,29 @@ function byteOrder(view: DataView): boolean {
   if (view.byteLength >= 4) {
     for (const little of [true, false]) if (view.getInt32(0, little) === 348) return little;
     if ([true, false].some((little) => view.getInt32(0, little) === 540)) {
-      throw new Error('This is a NIfTI-2 file; save it as NIfTI-1 to open it here.');
+      throw new MapFileError('nifti2');
     }
   }
-  throw new Error('This file is not a NIfTI image.');
+  throw new MapFileError('notNifti');
 }
 
 function volumeShape(view: DataView, little: boolean): [number, number, number] {
   const dim = Array.from({ length: 8 }, (_, i) => view.getInt16(40 + 2 * i, little));
   const rank = dim[0];
   if (rank < 3 || rank > 7) {
-    throw new Error(`This file is not a 3-D volume: it has ${rank} dimensions.`);
+    throw new MapFileError('rank', [rank]);
   }
   const sizes = dim.slice(1, rank + 1);
   if (sizes.some((n) => n < 1)) {
-    throw new Error(`This file's dimensions ${sizes.join(' × ')} include an empty axis.`);
+    throw new MapFileError('emptyAxis', [sizes.join(' × ')]);
   }
   const volumes = sizes.slice(3).reduce((product, n) => product * n, 1);
   if (volumes > 1) {
-    throw new Error(`This file holds ${volumes} volumes; save the one to show as its own file.`);
+    throw new MapFileError('volumes', [volumes]);
   }
   const shape = sizes.slice(0, 3) as [number, number, number];
   if (shape[0] * shape[1] * shape[2] > MAX_VOXELS) {
-    throw new Error(
-      `This volume is ${shape.join(' × ')} voxels, over the limit of ${MAX_VOXELS.toLocaleString('en-US')}.`,
-    );
+    throw new MapFileError('tooLarge', [shape.join(' × '), MAX_VOXELS]);
   }
   return shape;
 }
@@ -173,13 +167,11 @@ function bestAffine(view: DataView, little: boolean): number[][] {
   } else if (xformCode(252) !== 0) {
     rows = qform(float);
   } else {
-    throw new Error(
-      'This file states no orientation (sform and qform codes are 0), so it cannot be placed.',
-    );
+    throw new MapFileError('orientation');
   }
   const affine = [...rows, [0, 0, 0, 1]];
   if (!affine.flat().every(Number.isFinite)) {
-    throw new Error("This file's affine has a non-finite entry.");
+    throw new MapFileError('affineFinite');
   }
   const [a, b, c] = [0, 1, 2].map((column) => rows.map((row) => row[column])) as [
     number[],
@@ -193,7 +185,7 @@ function bestAffine(view: DataView, little: boolean): number[][] {
   const lengths = Math.hypot(...a) * Math.hypot(...b) * Math.hypot(...c);
   // Relative to the axis lengths, so the test does not depend on voxel size.
   if (!(Math.abs(det) > 1e-6 * lengths)) {
-    throw new Error("This file's affine is singular: its voxel axes do not span 3-D space.");
+    throw new MapFileError('singular');
   }
   return affine;
 }
@@ -206,7 +198,7 @@ function qform(float: (offset: number) => number): number[][] {
   if (Math.abs(w2) < QUATERNION_THRESHOLD) {
     w = 0;
   } else if (w2 < 0) {
-    throw new Error("This file's qform quaternion is not a rotation (b² + c² + d² > 1).");
+    throw new MapFileError('quaternion');
   } else {
     w = Math.sqrt(w2);
   }

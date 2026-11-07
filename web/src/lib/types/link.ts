@@ -53,6 +53,8 @@ export interface LinkState {
   selectedDeficit: string | null;
   circuit: string | null;
   circuitStep: number;
+  /** The circuit's whole route is shown, ahead of the step it keeps for the way back in. */
+  circuitRoute: boolean;
   /** An interactive map open in the Circuits tab in place of a lesson, and its dot in degrees. */
   circuitMap: string | null;
   mapDot: { x: number; y: number; radius: number } | null;

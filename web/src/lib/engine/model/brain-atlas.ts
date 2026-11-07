@@ -262,7 +262,7 @@ function copyGeometry(geometry: BufferGeometry): GeometryCopy {
  * or a cut's wedges keeps every frame short. Where there is no Worker (Node), the same functions
  * run on this thread: what changes is where the work runs, never its result.
  */
-class GeometryJobs {
+export class GeometryJobs {
   private worker: Worker | null = null;
   private failure: Error | null = null;
   private token = 0;
@@ -281,13 +281,21 @@ class GeometryJobs {
         geometry.boundsTree = new MeshBVH(geometry, { indirect: true });
       return;
     }
+    // A parcel moved off the pial meanwhile (user-map.ts) does not take a tree of where it was.
+    const positions = wanted.map((geometry) => {
+      const attribute = geometry.getAttribute('position') as BufferAttribute;
+      return { attribute, version: attribute.version };
+    });
     const reply = await this.run(worker, 'bvh', wanted);
     if (!('bvhs' in reply))
       throw new Error('The geometry worker answered a BVH job with feathers.');
     reply.bvhs.forEach((data, at) => {
       const geometry = wanted[at]!;
-      // A ray that came first has built it already.
-      if (geometry.boundsTree) return;
+      const { attribute, version } = positions[at]!;
+      const moved =
+        geometry.getAttribute('position') !== attribute || attribute.version !== version;
+      // A ray that came first has built it already; after a move, the next ray builds it.
+      if (geometry.boundsTree || moved) return;
       const tree = MeshBVH.deserialize(data, geometry, { setIndex: false });
       // Building sets the box of a geometry that has none; deserializing does not.
       geometry.boundingBox ??= tree.getBoundingBox(new Box3());

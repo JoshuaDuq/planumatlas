@@ -1,3 +1,4 @@
+import { MapFileError } from './map-file-error.ts';
 import type { InverseField } from './inverse-field.ts';
 import type { NiftiVolume } from './nifti.ts';
 
@@ -38,7 +39,7 @@ function invert(m: readonly (readonly number[])[]): number[][] {
 export function createSampler({ shape, voxelToWorld, data }: NiftiVolume): Sampler {
   const [nx, ny, nz] = shape;
   if (nx < 2 || ny < 2 || nz < 2) {
-    throw new Error('This map is a single slice along one axis; it needs three dimensions.');
+    throw new MapFileError('slice');
   }
   const m = invert(voxelToWorld);
   const [r0, r1, r2] = [m[0]!, m[1]!, m[2]!];

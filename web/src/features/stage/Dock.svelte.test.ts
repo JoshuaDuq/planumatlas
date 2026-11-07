@@ -17,6 +17,7 @@ import type { Manifest } from '../../lib/types/index.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import type { DisplayView } from '../colophon/display-state.ts';
 import type { DockCommands } from './dock-commands.ts';
+import { startGuide } from '../guide/tour.ts';
 import Fixture from './dock-test-support.svelte';
 
 const published = manifest as unknown as Manifest;
@@ -237,6 +238,51 @@ describe('the toolbar', () => {
     expect(stage.dock.height).toBeGreaterThan(0);
     expect(stage.dock.width).toBe(Math.round(dock().getBoundingClientRect().width));
   });
+
+  test.each([
+    ['with Overlay', 1280, false],
+    ['on a phone without Overlay', 390, true],
+  ] as const)(
+    'the guided tour’s dock stops point at their own tools, %s',
+    async (_, width, phone) => {
+      await page.viewport(width, 800);
+      try {
+        await mount({ phone }, { width, height: 600 });
+        startGuide('en', {
+          animate: false,
+          onClose: () => {},
+          onLanguage: () => {},
+          mri: {
+            open: () =>
+              document.body.insertAdjacentHTML('beforeend', '<section class="mpr-dock"></section>'),
+            close: () => document.querySelector('.mpr-dock')?.remove(),
+          },
+          reserve: () => {},
+        });
+        const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
+        const pointed: Record<string, string> = {};
+        for (;;) {
+          const title = card().querySelector('.driver-popover-title')!.textContent!;
+          const target = document.querySelector('.driver-active-element');
+          if (target?.closest('.stage-dock')) pointed[title] = target.textContent!.trim();
+          const next = card().querySelector<HTMLButtonElement>('.driver-popover-next-btn')!;
+          if (next.textContent === 'Done') break;
+          next.click();
+        }
+        expect(pointed).toEqual({
+          Section: 'Section',
+          Lesion: 'Lesion',
+          Coordinate: 'Coordinate',
+          'The medial surface': 'Display',
+        });
+      } finally {
+        document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
+        localStorage.removeItem(PREF_KEYS.guide);
+        history.replaceState(history.state, '', location.pathname + location.search);
+        await page.viewport(1280, 800);
+      }
+    },
+  );
 });
 
 describe('a tool and its popover', () => {

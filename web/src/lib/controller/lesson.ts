@@ -138,9 +138,7 @@ export function createLessons({
    */
   async function showRoute(circuit: Circuit, current: () => boolean): Promise<boolean> {
     const before = stage.settings();
-    for (const step of circuit.steps) {
-      if (!model.anchorOf(step.region)) throw new Error(`Missing landmark anchor: ${step.region}`);
-    }
+    checkAnchors(circuit);
     await sections.setMode('off');
     if (!current()) return false;
     // The internal anatomy that draws most of its deep landmarks, so they show in colour.
@@ -155,14 +153,25 @@ export function createLessons({
     model.setHemisphere('both');
     model.showRegions(circuit.steps.flatMap((step) => step.covering_regions ?? []));
     model.setCortexVisible(true);
-    beforeRoute ??= model.settings.cortexOpacity;
-    model.setCortexOpacity(seeThroughOpacity());
+    seeThroughRoute();
     model.setInternalVisible(true);
     session.setView('oblique');
     camera.applyView('oblique');
     prepare(preparedOf(model.settings));
     if (stage.sayChanged(before)) changesSaid = true;
     return true;
+  }
+
+  function checkAnchors(circuit: Circuit) {
+    for (const step of circuit.steps) {
+      if (!model.anchorOf(step.region)) throw new Error(`Missing landmark anchor: ${step.region}`);
+    }
+  }
+
+  /** The route's see-through cortex, holding the opacity it found to give back. */
+  function seeThroughRoute() {
+    beforeRoute ??= model.settings.cortexOpacity;
+    model.setCortexOpacity(seeThroughOpacity());
   }
 
   /**
@@ -305,6 +314,22 @@ export function createLessons({
     /** The link's scene is the new baseline: nothing from before is held. */
     forgetBeforeLesson() {
       beforeLesson = null;
+      beforeRoute = null;
+    },
+
+    /**
+     * A link's whole route: the link's scene stands, its camera and selection included, and only the
+     * cortex is seen through, holding the link's own opacity to give back.
+     */
+    holdRoute(circuit: Circuit) {
+      checkAnchors(circuit);
+      seeThroughRoute();
+      prepare(preparedOf(model.settings));
+    },
+
+    /** The reader's own cortex opacity, while the whole route on screen sees through it. */
+    get routeOpacity() {
+      return lesson.state.route ? beforeRoute : null;
     },
 
     /** A circuit opens on its whole route, ahead of its first landmark. */

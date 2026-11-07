@@ -2,7 +2,7 @@
 // be read or lies beyond the template's brain is said under the field instead of being placed.
 import { afterEach, expect, test, vi } from 'vitest';
 import { cleanup, render } from 'vitest-browser-svelte';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
 import type { CoordinateSpaces } from '../../lib/types/index.ts';
 import CoordinatePopover from './CoordinatePopover.svelte';
@@ -77,4 +77,24 @@ test('says when the coordinate lies beyond the template’s brain', async () => 
   await expect
     .poll(alert)
     .toBe('This coordinate lies beyond the template’s brain, so it is not placed.');
+});
+
+test('Remove leaves focus on the field, not the page', async () => {
+  const placed = $state({
+    kind: 'coordinate',
+    sphere: { centre: [-38, 44, 26], radius: 5 } as { centre: number[]; radius: number } | null,
+    coordinate: null,
+    remove: () => (placed.sphere = null),
+  });
+  render(CoordinatePopover, {
+    lesion: placed as unknown as LesionStore,
+    placement: { metadata, place: async () => true },
+    lang: 'en',
+    onReport() {},
+  });
+  await page.getByRole('button', { name: 'Remove' }).click();
+  expect(placed.sphere).toBeNull();
+  await expect
+    .poll(() => document.activeElement)
+    .toBe(document.querySelector('input[type="text"]'));
 });

@@ -1,10 +1,11 @@
 import { BufferAttribute, BufferGeometry, Color, Float32BufferAttribute } from 'three';
-import type { Mesh, MeshPhysicalMaterial } from 'three';
+import type { InterleavedBufferAttribute, Mesh, MeshPhysicalMaterial, TypedArray } from 'three';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import { loadFieldData } from '../../core/coordinates/field.ts';
 import { readIn } from '../../core/coordinates/spaces.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import type { CortexSurface, MapDisplay, MapSummary } from '../../core/user-map/display.ts';
+import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import {
   partitionField,
   partitionParents,
@@ -81,8 +82,11 @@ export function createUserMap({
     worker.onmessage = ({ data }: MessageEvent<UserMapReply>) => {
       const job = waiting.get(data.token);
       waiting.delete(data.token);
-      if ('error' in data) job?.reject(new Error(data.error));
-      else job?.resolve(data);
+      if ('error' in data) {
+        job?.reject(
+          data.file ? new MapFileError(data.file.code, data.file.params) : new Error(data.error),
+        );
+      } else job?.resolve(data);
     };
     worker.onerror = (event) => {
       for (const job of waiting.values()) job.reject(new Error(event.message));
@@ -195,7 +199,10 @@ export function createUserMap({
     for (const [hemisphere, { parents, meshes }] of hemispheres) {
       for (const [index, field] of partitionField(parents, map.cortex[hemisphere])) {
         const mesh = meshes.get(index)!;
-        mesh.geometry.setAttribute(ATTRIBUTE, new BufferAttribute(field, 2));
+        const drawn = mesh.geometry.getAttribute(ATTRIBUTE) as BufferAttribute | undefined;
+        // Written over in place: a replaced attribute's GPU buffer is freed only with its geometry.
+        if (drawn) overwrite(checked(drawn, field), field);
+        else mesh.geometry.setAttribute(ATTRIBUTE, new BufferAttribute(field, 2));
         userData(mesh).userMapReady.value = true;
       }
     }
@@ -206,9 +213,8 @@ export function createUserMap({
   const unpaint = () => {
     for (const layer of atlas.layers.values()) {
       for (const mesh of layer.meshes) {
-        if (!mesh.geometry.getAttribute(ATTRIBUTE)) continue;
-        mesh.geometry.deleteAttribute(ATTRIBUTE);
-        userData(mesh).userMapReady.value = false;
+        // The values stay for the next map to write over; `userMapReady` hides them.
+        if (mesh.geometry.getAttribute(ATTRIBUTE)) userData(mesh).userMapReady.value = false;
       }
     }
     painted = null;
@@ -229,17 +235,20 @@ export function createUserMap({
     if (drawnSurface.atlas === id && drawnSurface.surface === surface) return;
     const ask = ++surfaceRequest;
     if (drawnSurface.atlas && drawnSurface.surface !== 'pial') {
-      await moveParcels(drawnSurface.atlas, 'pial');
+      await moveParcels(drawnSurface.atlas, 'pial', ask);
     }
     if (ask !== surfaceRequest) return;
-    if (surface !== 'pial') await moveParcels(id, surface);
+    if (surface !== 'pial') await moveParcels(id, surface, ask);
     if (ask !== surfaceRequest) return;
     drawnSurface = { atlas: id, surface };
     invalidate();
   };
 
-  const moveParcels = async (id: string, target: CortexSurface) => {
+  /** Nothing moves once a newer placement is asked for; what moves is recorded as it moves. */
+  const moveParcels = async (id: string, target: CortexSurface, ask: number) => {
     const [hemispheres, envelopes] = await Promise.all([layout(id), atlas.ensureEnvelopes()]);
+    if (ask !== surfaceRequest) return;
+    drawnSurface = { atlas: id, surface: target };
     for (const [hemisphere, { parents, meshes }] of hemispheres) {
       if (target === 'pial') {
         for (const mesh of meshes.values()) restorePial(mesh);
@@ -264,10 +273,13 @@ export function createUserMap({
       const normals = partitionPoints(parents, native.getAttribute('normal').array, true);
       native.dispose();
       for (const [index, mesh] of meshes) {
-        pialOf(mesh);
-        mesh.geometry.setAttribute('position', new BufferAttribute(positions.get(index)!, 3));
-        mesh.geometry.setAttribute('normal', new BufferAttribute(normals.get(index)!, 3));
-        settle(mesh);
+        if (!published.has(mesh)) {
+          published.set(mesh, {
+            position: mesh.geometry.getAttribute('position').array.slice(),
+            normal: mesh.geometry.getAttribute('normal').array.slice(),
+          });
+        }
+        placeOn(mesh, positions.get(index)!, normals.get(index)!);
       }
     }
   };
@@ -398,27 +410,57 @@ export function createUserMap({
   };
 }
 
-// Each parcel's published pial geometry, kept the first time it is read so a moved parcel can go back.
-const published = new WeakMap<Mesh, { position: BufferAttribute; normal: BufferAttribute }>();
+// A moved parcel's published pial positions and normals as stored (the normals quantized), copied
+// before it first moves and dropped when it is back on the pial.
+const published = new WeakMap<Mesh, { position: TypedArray; normal: TypedArray }>();
 
 function pialOf(mesh: Mesh): ArrayLike<number> {
-  let kept = published.get(mesh);
-  if (!kept) {
-    kept = {
-      position: mesh.geometry.getAttribute('position') as BufferAttribute,
-      normal: mesh.geometry.getAttribute('normal') as BufferAttribute,
-    };
-    published.set(mesh, kept);
-  }
-  return kept.position.array;
+  return published.get(mesh)?.position ?? mesh.geometry.getAttribute('position').array;
 }
 
 function restorePial(mesh: Mesh): void {
   const kept = published.get(mesh);
-  if (!kept || mesh.geometry.getAttribute('position') === kept.position) return;
-  mesh.geometry.setAttribute('position', kept.position);
-  mesh.geometry.setAttribute('normal', kept.normal);
+  if (!kept) return;
+  placeOn(mesh, kept.position, kept.normal);
+  published.delete(mesh);
+}
+
+/**
+ * Moved in place, so the drawn buffers are reused; a pending BVH sees the version change. Both are
+ * checked before either is written, so a parcel is never left half moved.
+ */
+function placeOn(mesh: Mesh, position: TypedArray, normal: TypedArray): void {
+  const writes = [
+    [checked(mesh.geometry.getAttribute('position'), position), position],
+    [checked(mesh.geometry.getAttribute('normal'), normal), normal],
+  ] as const;
+  for (const [attribute, values] of writes) overwrite(attribute, values);
   settle(mesh);
+}
+
+/** Values of the attribute's own type, or floats for a normalized one (the assets' Int16 normals). */
+function checked(
+  attribute: BufferAttribute | InterleavedBufferAttribute,
+  values: TypedArray,
+): BufferAttribute {
+  if (attribute instanceof BufferAttribute && attribute.array.length === values.length) {
+    if (values.constructor === attribute.array.constructor) return attribute;
+    if (attribute.normalized && attribute.itemSize === 3 && values instanceof Float32Array) {
+      return attribute;
+    }
+  }
+  throw new Error('A parcel is written over only by values of its own length and type.');
+}
+
+function overwrite(attribute: BufferAttribute, values: TypedArray): void {
+  if (values.constructor === attribute.array.constructor) attribute.array.set(values);
+  else {
+    // setXYZ quantizes into the normalized integer type.
+    for (let i = 0; i < attribute.count; i++) {
+      attribute.setXYZ(i, values[3 * i]!, values[3 * i + 1]!, values[3 * i + 2]!);
+    }
+  }
+  attribute.needsUpdate = true;
 }
 
 /** Bounds and the picking tree follow the surface drawn, so a click lands where it is seen. */

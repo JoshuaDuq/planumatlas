@@ -1,4 +1,5 @@
 import type { MapSummary } from './display.ts';
+import { MapFileError } from './map-file-error.ts';
 import type { InverseField } from './inverse-field.ts';
 import type { NiftiVolume } from './nifti.ts';
 import { createSampler, resample, sampleCortex, sampleThrough, volumeGrid } from './sampling.ts';
@@ -29,8 +30,8 @@ function sourceSummary({ shape, voxelToWorld, data, intent, description }: Nifti
     if (value > high) high = value;
     if (value !== 0 && value !== 1) binary = false;
   }
-  if (low === Infinity) throw new Error('This map holds no finite values.');
-  if (low === 0 && high === 0) throw new Error('This map holds only zeros.');
+  if (low === Infinity) throw new MapFileError('noFinite');
+  if (low === 0 && high === 0) throw new MapFileError('zeros');
   const voxelMm = [0, 1, 2].map((axis) =>
     Math.hypot(voxelToWorld[0]![axis]!, voxelToWorld[1]![axis]!, voxelToWorld[2]![axis]!),
   ) as [number, number, number];
@@ -53,7 +54,7 @@ export function carryMap(
   const grid = volumeGrid(inverse);
   const volume = resample(grid, at);
   if (!covered && volume.every(Number.isNaN)) {
-    throw new Error('This map does not reach the brain; check the template it is in.');
+    throw new MapFileError('outside');
   }
   return {
     grid,

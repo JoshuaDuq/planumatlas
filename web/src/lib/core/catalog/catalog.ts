@@ -8,9 +8,9 @@ const EXACT = 0,
   PREFIX = 1,
   WORD = 2,
   SUBSTRING = 3,
-  // One misspelt word, then two: tried only when nothing is spelt as typed.
-  TYPO = 4,
-  NO_MATCH = 6;
+  // Every query word starts a name word, in any order; then one misspelt word (5), then two (6).
+  WORDS = 4,
+  NO_MATCH = 7;
 
 const normalise = (value: string) => value.trim().toLowerCase();
 const stripDiacritics = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -38,6 +38,12 @@ function tierOf(text: string, query: string): number {
 const typosAllowed = (length: number) => (length >= 8 ? 2 : length >= 5 ? 1 : 0);
 
 const wordsOf = (text: string) => text.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+/** WORDS when every query word starts one of the name's words, NO_MATCH otherwise. */
+const wordsTier = (query: readonly string[]) => (words: readonly string[]) =>
+  query.length && query.every((typed) => words.some((word) => word.startsWith(typed)))
+    ? WORDS
+    : NO_MATCH;
 
 /**
  * Scores a misspelt query against a name: each query word must start one of the name's words or be
@@ -67,7 +73,7 @@ function typoTier(query: readonly string[]): (words: readonly string[]) => numbe
       if (best > typosAllowed(query[index]!.length)) return NO_MATCH;
       worst = Math.max(worst, best);
     }
-    return worst ? TYPO + worst - 1 : NO_MATCH;
+    return worst ? WORDS + worst : NO_MATCH; // all spelt as typed: the WORDS pass found it
   };
 }
 
@@ -203,17 +209,20 @@ export function createCatalog(
       const query = normalise(rawQuery);
       if (!query) return { rows: [], total: 0 };
       const strippedQuery = stripDiacritics(query);
+      const queryWords = wordsOf(strippedQuery);
+      const inAnyOrder = wordsTier(queryWords);
       const matched = new Map<Entry, { row: CatalogRow; tier: number }>();
       for (const entry of selectable) {
         const tier = Math.min(
           ...entry.searchable.map((text) =>
             Math.min(tierOf(text, query), tierOf(text, strippedQuery)),
           ),
+          ...entry.words.map(inAnyOrder),
         );
         if (tier !== NO_MATCH) matched.set(entry, { row: row(entry, settings), tier });
       }
       if (!matched.size) {
-        const tierOf = typoTier(wordsOf(strippedQuery));
+        const tierOf = typoTier(queryWords);
         for (const entry of selectable) {
           const tier = Math.min(...entry.words.map(tierOf));
           if (tier !== NO_MATCH) matched.set(entry, { row: row(entry, settings), tier });

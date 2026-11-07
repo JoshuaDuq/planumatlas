@@ -19,6 +19,8 @@
 
   interface Props {
     open?: boolean;
+    /** Which tool, as `data-tool` on its button: the guided tour points at it by this. */
+    tool: 'section' | 'lesion' | 'coordinate' | 'overlay' | 'display';
     /** The tool is not offered. */
     hidden: boolean;
     /** The dock is not on screen. */
@@ -40,6 +42,7 @@
 
   let {
     open = $bindable(false),
+    tool,
     hidden,
     covered,
     ariaLabel,
@@ -52,14 +55,14 @@
     holdsOpen,
   }: Props = $props();
 
-  let tool = $state<HTMLElement | null>(null);
+  let button = $state<HTMLElement | null>(null);
   let dialog = $state<HTMLElement | null>(null);
   let scrubbing = $state(false);
 
   // Before the page updates: the tool still has the focus it is about to lose.
   $effect.pre(() => {
     if (!hidden && !covered) return;
-    const hadFocus = [tool, dialog].some((node) => node?.contains(document.activeElement));
+    const hadFocus = [button, dialog].some((node) => node?.contains(document.activeElement));
     open = false;
     if (hadFocus && !covered) rescueFocus();
   });
@@ -113,9 +116,10 @@
   {#snippet trigger({ props })}
     <button
       {...props}
-      bind:this={tool}
+      bind:this={button}
       type="button"
       class={['stage-tool', className]}
+      data-tool={tool}
       {hidden}
       aria-label={ariaLabel}
     >

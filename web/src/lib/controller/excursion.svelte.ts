@@ -533,7 +533,11 @@ export function createExcursions(
     focusLandmark: lessons.focusLandmark,
     leaveLesson: lessons.leave,
     openLandmark: lessons.openLandmark,
+    holdRoute: lessons.holdRoute,
     holdBeforeLesson: lessons.holdBeforeLesson,
+    get routeOpacity() {
+      return lessons.routeOpacity;
+    },
 
     /** A link's scene is the new baseline: no excursion or lesson has anything to go back to. */
     forget() {

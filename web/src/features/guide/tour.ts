@@ -7,7 +7,7 @@ import { PHONE_QUERY } from '../../lib/types/index.ts';
 import type { Language } from '../../lib/types/index.ts';
 import './tour.css';
 
-const dock = (n: number) => `.stage-toolbar .popover-host:nth-child(${n}) > button`;
+const dock = (tool: string) => `.stage-tool[data-tool="${tool}"]`;
 const STAGE = '#viewport canvas';
 const tab = (id: string) => `#workspace-tab-${id}`;
 const MRI_DOCK = '.mpr-dock';
@@ -149,7 +149,7 @@ const STOPS: Record<
     align: 'start',
     view: 'view=superior',
   },
-  section: { selector: dock(1), side: 'top', align: 'start', view: 'cut=coronal' },
+  section: { selector: dock('section'), side: 'top', align: 'start', view: 'cut=coronal' },
   // The panel is not part of a link: the stop opens it on the left precentral gyrus.
   linkedMri: {
     selector: MRI_DOCK,
@@ -159,17 +159,22 @@ const STOPS: Record<
     opensMri: PRECENTRAL,
   },
   // The left precentral gyrus's centroid on this brain (its detail view's Centroid, surface RAS).
-  lesion: { selector: dock(2), side: 'top', align: 'start', view: 'lesion=-35.5,-9.5,63.5,10' },
+  lesion: {
+    selector: dock('lesion'),
+    side: 'top',
+    align: 'start',
+    view: 'lesion=-35.5,-9.5,63.5,10',
+  },
   // Fox et al. 2012 (Biol Psychiatry, PMID 22658708): the left DLPFC stimulation target that
   // connectivity with the subgenual cingulate optimises, in MNI. On this brain it lands in
   // cortex, half its 5 mm sphere in the middle frontal gyrus.
   coordinate: {
-    selector: dock(3),
+    selector: dock('coordinate'),
     side: 'top',
     align: 'start',
     view: 'coord=-38,44,26&space=mni152nlin2009casym',
   },
-  medial: { selector: dock(4), side: 'top', align: 'center', view: 'hemi=left&view=right' },
+  medial: { selector: dock('display'), side: 'top', align: 'center', view: 'hemi=left&view=right' },
   topBar: { selector: '#masthead .data-bar', side: 'bottom', align: 'center' },
   functions: {
     selector: tab('functions'),

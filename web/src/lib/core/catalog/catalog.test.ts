@@ -72,8 +72,9 @@ test('an exact code match outranks everything else', () => {
 
 test('ties break alphabetically, then left hemisphere before right', () => {
   const found = catalog.search('Central sulcus', settings());
+  // The insula's central sulcus, holding both words apart, follows.
   assert.deepEqual(
-    found.rows.map((row) => row.region.hemisphere),
+    found.rows.slice(0, 2).map((row) => row.region.hemisphere),
     ['left', 'right'],
   );
 });
@@ -458,4 +459,25 @@ test('a query spelt as some name is never padded with names a typo away', () => 
   assert.ok(found.total > 0);
   for (const row of found.rows)
     assert.match(`${row.label.name} ${row.via?.name ?? ''}`, /ventral/i);
+});
+
+test('a correctly spelt query finds names holding its words in another order, ranked after names holding it whole', () => {
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  const full = createCatalog(real);
+  const shown = (query: string) =>
+    full
+      .search(query, settings())
+      .rows.filter((row) => row.visible)
+      .map((row) => row.label.name.toLowerCase());
+  const superiorTemporal = shown('superior temporal');
+  assert.ok(superiorTemporal.length > 0);
+  assert.deepEqual(shown('temporal superior').toSorted(), superiorTemporal.toSorted());
+  assert.deepEqual(shown('sup temporal').toSorted(), superiorTemporal.toSorted());
+  assert.ok(shown('front inf').includes('inferior frontal sulcus'));
+  // "Posterior-dorsal cingulate gyrus" holds both words, apart.
+  const posterior = shown('posterior cingulate');
+  const firstApart = posterior.findIndex((name) => !name.includes('posterior cingulate'));
+  assert.ok(posterior.includes('posterior-dorsal cingulate gyrus'));
+  assert.ok(firstApart > 0, posterior.join('\n'));
+  assert.ok(posterior.slice(firstApart).every((name) => !name.includes('posterior cingulate')));
 });

@@ -28,11 +28,12 @@ export interface RankedFinding<F extends Finding = Finding> {
   cited: number;
   /** The largest share of a cited region inside the lesion. */
   share: number;
-  /** A bilateral finding the lesion reaches on this side only; null otherwise. */
+  /** A bilateral finding the lesion reaches on this side only, midline aside; null otherwise. */
   oneSide: Side | null;
 }
 
 const sideOf = (region: string): string => region.split(':')[1]!;
+const isSide = (side: string): side is Side => side === 'left' || side === 'right';
 
 /**
  * The findings that cite a region the lesion reaches, ranked by how much of a cited region lies
@@ -51,9 +52,10 @@ export function rankFindings<F extends Finding>(
       })
       .sort((a, b) => b.share - a.share);
     if (!reached.length) continue;
-    const sides = new Set(reached.map((reach) => sideOf(reach.region)));
+    // A midline region (the callosum) is on neither side.
+    const sides = new Set(reached.map((reach) => sideOf(reach.region)).filter(isSide));
     const oneSide =
-      association.laterality === 'bilateral' && sides.size === 1 ? ([...sides][0] as Side) : null;
+      association.laterality === 'bilateral' && sides.size === 1 ? [...sides][0]! : null;
     ranked.push({
       association,
       reached,

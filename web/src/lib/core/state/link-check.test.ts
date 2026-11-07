@@ -76,6 +76,12 @@ test('a lesson step must exist in its circuit', () => {
   assert.equal(check('#circuit=visual&step=4').state.circuitStep, 3);
 });
 
+test('a whole route needs its circuit', () => {
+  assert.deepEqual(check('#route=1').rejected, ['route']);
+  assert.deepEqual(check('#circuit=bogus&route=1').rejected, ['circuit', 'route']);
+  assert.equal(check('#circuit=visual&route=1').state.circuitRoute, true);
+});
+
 test('links to withdrawn tours reject only the circuit and step while retained pathway links still work', () => {
   const active = readRepoYaml<CircuitData>('data/circuits.yaml');
   const archived = readRepoYaml<CircuitData>('data/archived-circuit-tours.yaml');

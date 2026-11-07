@@ -413,6 +413,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     selectedDeficit: 'aphasia',
     circuit: 'visual',
     circuitStep: 1,
+    circuitRoute: true,
     circuitMap: 'visual-field',
     mapDot: { x: 2, y: 1, radius: 1 },
     lang: 'fr',
@@ -455,6 +456,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'deficit',
       'circuit',
       'step',
+      'route',
       'map',
       'dot',
       'lang',
@@ -469,7 +471,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -499,6 +501,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     selectedDeficit: 'deficit',
     circuit: 'circuit',
     circuitStep: 'step',
+    circuitRoute: 'route',
     circuitMap: 'map',
     mapDot: 'dot',
     lang: 'lang',
@@ -642,6 +645,17 @@ test('an open map and its dot survive a link, the dot to hundredths of a degree'
     state: { circuitMap: 'visual-field', mapDot: { x: -3.46, y: 0.1, radius: 0.27 } },
     rejected: [],
   });
+});
+
+test('a dot on the rim of the visual field writes a link that reads back as written, at every angle', () => {
+  for (let step = 0; step < 3600; step += 1) {
+    const angle = (step / 10) * (Math.PI / 180);
+    const dot = { x: 90 * Math.cos(angle), y: 90 * Math.sin(angle), radius: 1 };
+    const hash = encodeState({ mapDot: dot });
+    const back = decoded(hash).mapDot!;
+    assert.equal(encodeState({ mapDot: back }), hash);
+    assert.ok(Math.hypot(back.x - dot.x, back.y - dot.y) < 0.015, hash);
+  }
 });
 
 test('a dot outside the visual field, with no size, or not three numbers is left out', () => {

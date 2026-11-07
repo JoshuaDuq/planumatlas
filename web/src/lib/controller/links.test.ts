@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { describe, expect, it, vi } from 'vitest';
 import { createLinkWriter } from '../core/state/link-writer.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
-import { decodeState } from '../core/state/url-state.ts';
+import { decodeState, encodeState } from '../core/state/url-state.ts';
 import { createFakeEngine } from '../engine/fake.ts';
 import { createLessonStore, createSessionStore } from '../state/session.svelte.ts';
 import { VIEW_NAMES } from '../types/index.ts';
 import type { CoordinateSpaces, Manifest, SurfaceColor } from '../types/index.ts';
 import { readRepoJson } from '../../../test/repo.ts';
 import type { PlacedCoordinate } from '../state/lesion.svelte.ts';
+import { createScene } from './excursion-test-support.ts';
 import { createLinks } from './links.ts';
 import type { LinkHooks } from './links.ts';
 
@@ -119,6 +120,8 @@ function setup(
       forgetScenes() {},
       rememberLessonScene() {},
       openLandmark: async () => true,
+      holdRoute() {},
+      routeOpacity: () => null,
       revealInTree() {},
       showDetail() {},
       openFunction() {},
@@ -554,6 +557,7 @@ function restorer(
       log.push(`openLandmark(${step.region})`);
       return true;
     },
+    holdRoute: (circuit) => void log.push(`holdRoute(${circuit.id})`),
     showDetail: () => void log.push('showDetail'),
     openFunction: (id) => void log.push(`openFunction(${id})`),
     openDeficit: (id) => void log.push(`openDeficit(${id})`),
@@ -602,6 +606,20 @@ describe('the scene as a link writes it', () => {
     expect(named('functions')).toEqual({ selectedFunction: 'working-memory' });
     expect(named('deficits')).toEqual({ selectedDeficit: 'aphasia' });
     expect(named('circuits')).toEqual({ circuit: 'vision', circuitStep: 3 });
+  });
+
+  it('writes the whole route on screen, with the cortex opacity the reader had before it', () => {
+    const { links } = restorer(
+      {
+        explorer: 'circuits',
+        lesson: { circuit: 'language', step: 1, route: true },
+        cortexOpacity: 0.3,
+      },
+      { hooks: { routeOpacity: () => 0.8 } },
+    );
+    const { state } = decodeState(encodeState(links.linkState()));
+    expect(state).toMatchObject({ circuit: 'language', circuitStep: 1, circuitRoute: true });
+    expect(state.cortexOpacity).toBe(0.8);
   });
 
   it('LINK-03 writes step 0 and no cut fields without a lesson or a cut', () => {
@@ -793,6 +811,16 @@ describe('the Tracts excursion and the panels', () => {
     expect(named.log.some((line) => line.startsWith('openLandmark'))).toBe(false);
   });
 
+  it('opens a lesson linked on its whole route on that route, keeping the scene first', async () => {
+    const { restore, log, lesson } = restorer();
+    expect(await restore('tab=circuits&circuit=language&step=2&route=1')).toEqual([]);
+    expect(log.filter((line) => /^(remember|openLandmark|holdRoute)/.test(line))).toEqual([
+      'rememberLessonScene(object)',
+      'holdRoute(language)',
+    ]);
+    expect(lesson.state).toMatchObject({ circuit: 'language', step: 1, route: true });
+  });
+
   it('LINK-15 returns null when a later command overtakes the landmark', async () => {
     const { restore } = restorer({}, { hooks: { openLandmark: async () => false } });
     expect(await restore('tab=circuits&circuit=language&step=2')).toBeNull();
@@ -911,5 +939,92 @@ describe('the visual-field map', () => {
     sighted.lesson.openMap('visual-field', { x: 1, y: 1, radius: 1 });
     await sighted.links.restore(decodeState('tab=circuits'), {});
     expect(sighted.lesson.state.map).toBeUndefined();
+  });
+});
+
+describe('a link written on a whole route', () => {
+  /** Links over the lessons and excursions the app wires them to. */
+  function routeScene() {
+    const scene = createScene();
+    const { excursions } = scene;
+    const links = createLinks({
+      engine: scene.engine,
+      session: scene.session,
+      lesson: scene.lesson,
+      view: scene.view,
+      lesion: {
+        sphere: null,
+        mode: 'lesion',
+        selectedTract: null,
+        heldOpacity: null,
+        restore: vi.fn(),
+        remove: vi.fn(),
+        coordinate: null,
+        placeCoordinate: vi.fn(),
+      },
+      strokeCases: {
+        available: false,
+        chosen: [],
+        heldOpacity: null,
+        heldColor: null,
+        show: vi.fn(),
+        clear: vi.fn(),
+        known: vi.fn(),
+      },
+      paintSeeThrough: scene.paintSeeThrough,
+      coordinates: null,
+      link: createLinkWriter(() => {}),
+      commands: scene.commands,
+      clinical: scene.clinical,
+      circuits: scene.circuits,
+      hooks: {
+        chooseExplorer: excursions.chooseExplorer,
+        tractsExcursionOpen: () => excursions.tractsHeld,
+        forgetScenes: excursions.forget,
+        rememberLessonScene: () => excursions.holdBeforeLesson(),
+        openLandmark: excursions.openLandmark,
+        holdRoute: excursions.holdRoute,
+        routeOpacity: () => excursions.routeOpacity,
+        revealInTree() {},
+        showDetail() {},
+        openFunction() {},
+        openDeficit() {},
+        showTracts: async () => {},
+      },
+      defaultAnatomy: 'cdmd',
+      followLanguage() {},
+      page: { history: { replaceState() {} }, location: { pathname: '/', search: '' } } as never,
+    });
+    return { ...scene, links };
+  }
+
+  it('reopens as written: the route, the region picked on it, the camera and the reader’s own opacity', async () => {
+    const { links, excursions, engine, circuits, lesson } = routeScene();
+    const circuit = circuits.all[0]!;
+    engine.model.setCortexOpacity(0.6);
+    excursions.chooseExplorer('circuits');
+    await excursions.openCircuit(circuit.id);
+    // On the route, the reader picks a landmark and turns the camera.
+    const picked = circuit.steps[1]!.region;
+    engine.model.select(picked);
+    engine.camera.placeOrbit({ position: [240, 60, 30], target: [0, -10, 5] });
+    const written = encodeState(links.linkState());
+    expect(decodeState(written).state).toMatchObject({
+      circuit: circuit.id,
+      circuitRoute: true,
+      selectedRegion: picked,
+      cortexOpacity: 0.6,
+      orbit: { position: [240, 60, 30], target: [0, -10, 5] },
+    });
+
+    await excursions.leaveLesson();
+    engine.model.select(null);
+    engine.camera.applyView('left');
+    expect(await links.restore(decodeState(written), {})).toEqual([]);
+    expect(lesson.state.route).toBe(true);
+    expect(engine.model.settings.cortexOpacity).toBe(
+      engine.model.manifest.appearance.see_through_opacity,
+    );
+    expect(encodeState(links.linkState())).toBe(written);
   });
 });

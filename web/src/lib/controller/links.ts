@@ -6,7 +6,7 @@ import { UNSTATED } from '../core/coordinates/spaces.ts';
 import { tractCatalog } from '../core/diffusion/catalogs.ts';
 import type { Coordinates } from '../core/coordinates/spaces.ts';
 import { linkNotice } from '../core/i18n/errors.ts';
-import type { CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
+import type { Circuit, CircuitCatalog, Landmark } from '../core/learning/catalog.ts';
 import { checkLink } from '../core/state/link-check.ts';
 import type { KnownLinkIds } from '../core/state/link-check.ts';
 import { sameSubject } from '../core/state/link-writer.ts';
@@ -43,6 +43,10 @@ export interface LinkHooks {
   rememberLessonScene(scene: ReaderState): void;
   /** Draw, select and frame a lesson's landmark; false once a later command took over (app.js:1311). */
   openLandmark(step: Landmark, current: () => boolean): Promise<boolean>;
+  /** Hold a lesson's whole route over the link's own scene, camera and selection: the cortex seen through. */
+  holdRoute(circuit: Circuit): void;
+  /** The reader's own cortex opacity, while the whole route on screen sees through it. */
+  routeOpacity(): number | null;
   /** Open the tree branch that holds a region (app.js:527). */
   revealInTree(id: string): void;
   /** Show the workspace's detail, without raising a phone's sheet over the camera (app.js:2072). */
@@ -229,15 +233,17 @@ export function createLinks({
       ...cutState(),
       circuit,
       circuitStep: circuit ? current.lesson.step : 0,
+      circuitRoute: circuit ? current.lesson.route : false,
       circuitMap: map,
       mapDot: map ? current.lesson.dot! : null,
       orbit: camera.orbitLink(),
       mriWindow: sections.mriWindowLink(),
-      // The see-through cortex the drawn streamlines, stroke cases or paint asked for comes back with them.
+      // The see-through cortex the drawn streamlines, stroke cases, paint or route asked for comes back with them.
       cortexOpacity:
         lesion.heldOpacity ??
         strokeCases.heldOpacity ??
         paintSeeThrough.heldOpacity ??
+        (circuit && current.lesson.route ? hooks.routeOpacity() : null) ??
         current.cortexOpacity,
       surfaceColor: strokeCases.heldColor ?? current.surfaceColor,
       // A coordinate's sphere travels as the coordinate; its landing is the field's to find again.
@@ -434,18 +440,25 @@ export function createLinks({
         if (known) strokeCases.show(valid.strokeCases);
         else notApplied.push(PARAMS.strokeCases!);
       }
-      // A lesson linked without its landmark opens on it, as choosing that step does; leaving it
-      // returns to the rest of the link.
-      if (explorer === 'circuits' && valid.circuit && !valid.selectedRegion) {
+      // A lesson linked without its landmark opens on it, as choosing that step does; one linked on
+      // its whole route holds it over the link's own scene. Leaving either returns to the link.
+      if (
+        explorer === 'circuits' &&
+        valid.circuit &&
+        (valid.circuitRoute || !valid.selectedRegion)
+      ) {
         const { circuit, step } = lesson.state;
         hooks.rememberLessonScene(captureReaderState());
         try {
-          if (!(await hooks.openLandmark(circuits.get(circuit!).steps[step]!, current))) {
+          if (valid.circuitRoute) {
+            hooks.holdRoute(circuits.get(circuit!));
+            lesson.showRoute();
+          } else if (!(await hooks.openLandmark(circuits.get(circuit!).steps[step]!, current))) {
             return null;
           }
         } catch (error) {
           console.error(error);
-          notApplied.push('step');
+          notApplied.push(valid.circuitRoute ? PARAMS.circuitRoute! : 'step');
         }
       }
       // The panel opens on what the link names, without raising a phone's sheet over its camera.

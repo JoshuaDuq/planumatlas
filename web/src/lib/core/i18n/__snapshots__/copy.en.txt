@@ -1230,11 +1230,18 @@
    "deficit": "deficit",
    "circuit": "circuit",
    "step": "circuit step",
+   "route": "whole route",
+   "map": "visual field map",
+   "dot": "visual field dot",
    "lang": "language",
    "hidden": "hidden parts",
    "lesion": "lesion",
    "lesionmode": "lesion colouring",
-   "lesiontract": "drawn tract"
+   "lesiontract": "drawn tract",
+   "coord": "MNI coordinate",
+   "space": "coordinate template",
+   "cases": "stroke cases",
+   "tracts": "tracts"
   }
  },
  "menu": {
@@ -1556,7 +1563,91 @@
    "[\"Alpha\"] → \"Alpha more in the CSV\"",
    "[\"\"] → \" more in the CSV\""
   ],
-  "download": "Download CSV"
+  "download": "Download CSV",
+  "unexpected": "Something unexpected stopped it; the details are in the browser’s console.",
+  "reasons": {
+   "header": "This file ends inside its NIfTI header.",
+   "pair": "This is the header of a .hdr/.img pair; save the map as a single .nii file.",
+   "magic": "This file is not NIfTI-1: its header has no NIfTI magic.",
+   "nifti2": "This is a NIfTI-2 file; save it as NIfTI-1 to open it here.",
+   "notNifti": "This file is not a NIfTI image.",
+   "gzip": "This .gz file could not be decompressed; it may be truncated or damaged.",
+   "rank": [
+    "[0] → \"This file is not a 3-D volume: it has 0 dimensions.\"",
+    "[1] → \"This file is not a 3-D volume: it has 1 dimension.\"",
+    "[2] → \"This file is not a 3-D volume: it has 2 dimensions.\"",
+    "[183] → \"This file is not a 3-D volume: it has 183 dimensions.\"",
+    "[12345] → \"This file is not a 3-D volume: it has 12345 dimensions.\""
+   ],
+   "emptyAxis": [
+    "[\"Alpha\"] → \"This file’s dimensions Alpha include an empty axis.\"",
+    "[\"\"] → \"This file’s dimensions  include an empty axis.\""
+   ],
+   "volumes": [
+    "[0] → \"This file holds 0 volumes; save the one to show as its own file.\"",
+    "[1] → \"This file holds 1 volumes; save the one to show as its own file.\"",
+    "[2] → \"This file holds 2 volumes; save the one to show as its own file.\"",
+    "[183] → \"This file holds 183 volumes; save the one to show as its own file.\"",
+    "[12345] → \"This file holds 12<NNBSP>345 volumes; save the one to show as its own file.\""
+   ],
+   "tooLarge": [
+    "[\"Alpha\",1] → \"This volume is Alpha voxels, over the limit of 1.\"",
+    "[\"\",2] → \"This volume is  voxels, over the limit of 2.\"",
+    "[\"Alpha\",183] → \"This volume is Alpha voxels, over the limit of 183.\"",
+    "[\"\",12345] → \"This volume is  voxels, over the limit of 12<NNBSP>345.\"",
+    "[\"Alpha\",0] → \"This volume is Alpha voxels, over the limit of 0.\""
+   ],
+   "storedType": [
+    "[\"Alpha\",1] → \"This file stores Alpha values (data type 1); save the map as float32.\"",
+    "[\"\",2] → \"This file stores  values (data type 2); save the map as float32.\"",
+    "[\"Alpha\",183] → \"This file stores Alpha values (data type 183); save the map as float32.\"",
+    "[\"\",12345] → \"This file stores  values (data type 12345); save the map as float32.\"",
+    "[\"Alpha\",0] → \"This file stores Alpha values (data type 0); save the map as float32.\""
+   ],
+   "unknownType": [
+    "[0] → \"This file’s data type code 0 is not a NIfTI-1 type.\"",
+    "[1] → \"This file’s data type code 1 is not a NIfTI-1 type.\"",
+    "[2] → \"This file’s data type code 2 is not a NIfTI-1 type.\"",
+    "[183] → \"This file’s data type code 183 is not a NIfTI-1 type.\"",
+    "[12345] → \"This file’s data type code 12345 is not a NIfTI-1 type.\""
+   ],
+   "offset": [
+    "[0] → \"This file’s data offset (vox_offset 0) lies inside its header.\"",
+    "[1] → \"This file’s data offset (vox_offset 1) lies inside its header.\"",
+    "[2] → \"This file’s data offset (vox_offset 2) lies inside its header.\"",
+    "[183] → \"This file’s data offset (vox_offset 183) lies inside its header.\"",
+    "[12345] → \"This file’s data offset (vox_offset 12345) lies inside its header.\""
+   ],
+   "truncated": [
+    "[0,1] → \"This file is truncated: its data needs 0 bytes but the file has 1.\"",
+    "[1,2] → \"This file is truncated: its data needs 1 bytes but the file has 2.\"",
+    "[2,183] → \"This file is truncated: its data needs 2 bytes but the file has 183.\"",
+    "[183,12345] → \"This file is truncated: its data needs 183 bytes but the file has 12<NNBSP>345.\"",
+    "[12345,0] → \"This file is truncated: its data needs 12<NNBSP>345 bytes but the file has 0.\""
+   ],
+   "intercept": [
+    "[0] → \"This file’s scaling intercept (scl_inter) is 0.\"",
+    "[1] → \"This file’s scaling intercept (scl_inter) is 1.\"",
+    "[2] → \"This file’s scaling intercept (scl_inter) is 2.\"",
+    "[183] → \"This file’s scaling intercept (scl_inter) is 183.\"",
+    "[12345] → \"This file’s scaling intercept (scl_inter) is 12345.\""
+   ],
+   "overflow": [
+    "[0] → \"This file holds the value 0, beyond the float32 range.\"",
+    "[1] → \"This file holds the value 1, beyond the float32 range.\"",
+    "[2] → \"This file holds the value 2, beyond the float32 range.\"",
+    "[183] → \"This file holds the value 183, beyond the float32 range.\"",
+    "[12345] → \"This file holds the value 12345, beyond the float32 range.\""
+   ],
+   "orientation": "This file states no orientation (sform and qform codes are 0), so it cannot be placed.",
+   "affineFinite": "This file’s affine has a non-finite entry.",
+   "singular": "This file’s affine is singular: its voxel axes do not span 3-D space.",
+   "quaternion": "This file’s qform quaternion is not a rotation (b² + c² + d² > 1).",
+   "slice": "This map is a single slice along one axis; it needs three dimensions.",
+   "noFinite": "This map holds no finite values.",
+   "zeros": "This map holds only zeros.",
+   "outside": "This map does not reach the brain; check the template it is in."
+  }
  },
  "reasons": {
   "no-mri": "Outside the MRI scan",

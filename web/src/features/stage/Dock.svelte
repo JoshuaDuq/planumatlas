@@ -258,6 +258,7 @@
   >
     <StagePopover
       bind:open={sectionOpen}
+      tool="section"
       hidden={tractReference}
       {covered}
       style={popoverStyle}
@@ -269,6 +270,7 @@
     </StagePopover>
     <StagePopover
       bind:open={lesionOpen}
+      tool="lesion"
       hidden={tractReference}
       {covered}
       style={popoverStyle}
@@ -283,6 +285,7 @@
     </StagePopover>
     <StagePopover
       bind:open={coordinateOpen}
+      tool="coordinate"
       hidden={tractReference || !coordinatePopover}
       {covered}
       style={popoverStyle}
@@ -294,6 +297,7 @@
     </StagePopover>
     <StagePopover
       bind:open={overlayOpen}
+      tool="overlay"
       hidden={tractReference || !overlayPopover || narrow}
       {covered}
       style={popoverStyle}
@@ -305,6 +309,7 @@
     </StagePopover>
     <StagePopover
       bind:open={displayOpen}
+      tool="display"
       hidden={tractReference}
       {covered}
       style={popoverStyle}

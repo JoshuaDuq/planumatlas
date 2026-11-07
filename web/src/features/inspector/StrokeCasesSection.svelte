@@ -6,7 +6,7 @@
   always be cleared; it stays mounted so its choices survive a new selection.
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import type { Language, Region } from '../../lib/types/index.ts';
   import { COMPARE_COLORS } from '../../lib/core/catalog/neuropsych-domains.ts';
   import {
@@ -24,6 +24,7 @@
   import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
+  import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
 
   let {
@@ -139,6 +140,31 @@
     store.show([p.id, q.id]);
   }
 
+  let section = $state<HTMLElement>();
+  let nextPair = $state<HTMLButtonElement>();
+  let pairNote = $state<HTMLElement>();
+
+  /** Show a pair goes once the pair is on show, so focus moves to the next pair, else to the pair's note. */
+  async function showFirstPair(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    showPair(0);
+    await tick();
+    if (hadFocus) (nextPair ?? pairNote)!.focus();
+  }
+
+  /** Clear goes with the cases, and the section with them where no case reaches the region. */
+  async function clear(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    store.clear();
+    await tick();
+    if (!hadFocus) return;
+    const next =
+      plot?.querySelector<SVGElement>('[tabindex="0"]') ??
+      section?.querySelector<HTMLElement>('.cases-choice [aria-checked="true"]');
+    if (next) next.focus();
+    else requestFocus(FOCUS_TARGETS.regionTitle);
+  }
+
   // The plot: lesion volume on a log scale across, WAB-AQ up.
   const W = 288;
   const H = 184;
@@ -190,7 +216,7 @@
 {/snippet}
 
 {#if region && data && (everyone.length || a)}
-  <div class="evidence-section stroke-cases">
+  <div class="evidence-section stroke-cases" bind:this={section}>
     <Disclosure variant="section" summary={copy.heading} bind:open>
       <p class="detail-note">
         {#if list.length}
@@ -314,7 +340,7 @@
           <div class="pair-row">
             <span class="cases-sub">{copy.pairs}</span>
             <div class="actions">
-              <button type="button" onclick={() => showPair(0)}>{copy.showPair}</button>
+              <button type="button" onclick={showFirstPair}>{copy.showPair}</button>
             </div>
           </div>
         {/if}
@@ -327,7 +353,7 @@
         </ul>
         {#if onPair}
           <div class="pair-row">
-            <span class="detail-note">
+            <span class="detail-note" tabindex="-1" bind:this={pairNote}>
               {copy.pairOf(
                 pairAt + 1,
                 pairs.length,
@@ -337,7 +363,9 @@
             </span>
             {#if pairs.length > 1}
               <div class="actions">
-                <button type="button" onclick={() => showPair(pairAt + 1)}>{copy.nextPair}</button>
+                <button type="button" bind:this={nextPair} onclick={() => showPair(pairAt + 1)}
+                  >{copy.nextPair}</button
+                >
               </div>
             {/if}
           </div>
@@ -366,7 +394,7 @@
           </ul>
         {/if}
         <div class="actions">
-          <button type="button" onclick={() => store.clear()}>{copy.clear}</button>
+          <button type="button" onclick={clear}>{copy.clear}</button>
         </div>
       {/if}
 

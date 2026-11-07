@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import { failureNotice, linkNotice, startFailure } from './errors.ts';
+import { PARAMS } from '../state/url-state.ts';
 import { t } from './index.ts';
 
 const assetError = (code: string, message: string) => Object.assign(new Error(message), { code });
@@ -75,6 +76,13 @@ test('the fields a link could not apply are named in the reader’s words, once 
   assert.deepEqual(Object.keys(t('fr', 'link').fields), Object.keys(t('en', 'link').fields));
 });
 
+test('every link parameter has a name in both languages', () => {
+  for (const lang of ['en', 'fr'] as const) {
+    const fields: Record<string, string> = t(lang, 'link').fields;
+    for (const param of Object.values(PARAMS)) assert.ok(fields[param], `${lang}: ${param}`);
+  }
+});
+
 test('a link whose circuit is unknown names the circuit, not its step as well', () => {
   assert.equal(linkNotice(['circuit', 'step'], 'en').text, 'Not applied from this link: circuit.');
   assert.equal(
@@ -82,6 +90,7 @@ test('a link whose circuit is unknown names the circuit, not its step as well', 
     'Éléments du lien non appliqués : circuit.',
   );
   assert.equal(linkNotice(['step'], 'en').text, 'Not applied from this link: circuit step.');
+  assert.equal(linkNotice(['circuit', 'route'], 'en').text, 'Not applied from this link: circuit.');
 });
 
 test('a failed start keeps the link for a download failure and drops it otherwise', () => {

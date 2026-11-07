@@ -66,6 +66,15 @@ const KINDS: Record<string, string> = {
   'mri.dialog.moved': 'd',
   'viewport.loadingWithTotal': 'nn',
   'lesion.cited': 'sn',
+  'overlay.reasons.rank': 'n',
+  'overlay.reasons.volumes': 'n',
+  'overlay.reasons.tooLarge': 'sn',
+  'overlay.reasons.storedType': 'sn',
+  'overlay.reasons.unknownType': 'n',
+  'overlay.reasons.offset': 'n',
+  'overlay.reasons.truncated': 'nn',
+  'overlay.reasons.intercept': 'n',
+  'overlay.reasons.overflow': 'n',
 };
 
 type Fn = (...args: unknown[]) => unknown;

@@ -3,7 +3,7 @@
   and the template they are in, placed on this brain by that template's field. What cannot be read, or lies beyond the template's brain, is said under the field and not placed.
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import type { CoordinatePlacement } from '../../lib/controller/coordinates.ts';
   import { parseCoordinate } from '../../lib/core/coordinates/parse.ts';
   import { UNSTATED } from '../../lib/core/coordinates/spaces.ts';
@@ -67,6 +67,14 @@
       busy = false;
     }
   }
+
+  /** The button goes with the coordinate, so focus moves to the field. */
+  async function remove(event: MouseEvent) {
+    const hadFocus = document.activeElement === event.currentTarget;
+    lesion.remove();
+    await tick();
+    if (hadFocus) document.getElementById(fieldId)!.focus();
+  }
 </script>
 
 <form novalidate onsubmit={submit}>
@@ -101,7 +109,7 @@
       <button type="button" class="stage-command" onclick={onReport}>
         {t(lang, 'lesion').showReport}
       </button>
-      <button type="button" class="stage-command stage-command-quiet" onclick={lesion.remove}>
+      <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
         {t(lang, 'lesion').remove}
       </button>
     </div>

@@ -24,10 +24,11 @@ const TARGETS = `
   </main>
   <div class="orientation-gizmo"><button>S</button></div>
   <div class="stage-dock"><div class="stage-toolbar">
-    <span class="popover-host" style="display: contents"><button>Section</button></span>
-    <span class="popover-host" style="display: contents"><button>Lesion</button></span>
-    <span class="popover-host" style="display: contents"><button>Coordinate</button></span>
-    <span class="popover-host" style="display: contents"><button>Display</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="section">Section</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="lesion">Lesion</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="coordinate">Coordinate</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="overlay">Overlay</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="display">Display</button></span>
   </div></div>`;
 
 /** The reader's own view: a region open in a lateral view, on the Destrieux atlas. */

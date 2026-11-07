@@ -18,6 +18,7 @@
   } from '../../lib/core/learning/visual-field.ts';
   import type { FieldHemisphere } from '../../lib/core/learning/visual-field.ts';
   import type { VisualFieldPoint } from '../../lib/engine/api.ts';
+  import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import type { VisualFieldExplorer } from './visual-field-explorer.svelte.ts';
 
@@ -191,7 +192,7 @@
     </svg>
     <p id="visual-field-keys" class="visually-hidden">{copy.dotKeys}</p>
 
-    <p class="place" aria-live="polite">{where} · {copy.radius(dot.radius)}</p>
+    <p class="place">{where} · {copy.radius(dot.radius)}</p>
     <p class="note">{copy.hemisphere(hemisphereFor(dot))}</p>
 
     <div class="size">
@@ -269,8 +270,14 @@
     <p class="note">{copy.agreement(model.side, agreement['hcp-mmp']!, agreement.julich!)}</p>
     <h4 class="heading">{copy.sources}</h4>
     <ul class="sources">
-      <li><a href={record.citation} target="_blank" rel="noopener">{copy.dataset}</a></li>
-      <li><a href={record.method_citation} target="_blank" rel="noopener">{copy.method}</a></li>
+      {#each [[record.citation, copy.dataset], [record.method_citation, copy.method]] as [href, name] (href)}
+        <li>
+          <a {href} target="_blank" rel="noreferrer"
+            >{name}<span class="visually-hidden">{` ${t(model.lang, 'link').newTab}`}</span
+            >{@render iconGraphic('external-link')}</a
+          >
+        </li>
+      {/each}
     </ul>
   </section>
 {/if}

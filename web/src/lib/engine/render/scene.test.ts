@@ -253,6 +253,38 @@ describe('scene lifecycle', () => {
     stage.dispose();
   });
 
+  it('follows the display density as it changes, within the same cap, until it is disposed', () => {
+    const queries: (EventTarget & { media: string })[] = [];
+    vi.stubGlobal('devicePixelRatio', 1);
+    vi.stubGlobal('matchMedia', (media: string) => {
+      const query = Object.assign(new EventTarget(), { media, matches: false });
+      queries.push(query);
+      return query;
+    });
+    const ratios = vi.spyOn(EffectComposer.prototype, 'setPixelRatio');
+    const watched = () => queries.filter(({ media }) => media.startsWith('(resolution'));
+    const stage = createScene(host);
+    assert.deepEqual(
+      watched().map(({ media }) => media),
+      ['(resolution: 1dppx)'],
+    );
+    assert.ok(!ratios.mock.calls.some(([ratio]) => ratio > 1));
+    vi.stubGlobal('devicePixelRatio', 2);
+    watched()[0]!.dispatchEvent(new Event('change'));
+    // A GPU that does not name itself is taken as integrated: 1.5, not the display's 2.
+    assert.ok(ratios.mock.calls.some(([ratio]) => ratio === 1.5));
+    assert.deepEqual(
+      watched().map(({ media }) => media),
+      ['(resolution: 1dppx)', '(resolution: 2dppx)'],
+    );
+    stage.dispose();
+    const drawn = ratios.mock.calls.length;
+    vi.stubGlobal('devicePixelRatio', 1);
+    watched()[1]!.dispatchEvent(new Event('change'));
+    assert.equal(ratios.mock.calls.length, drawn);
+    ratios.mockRestore();
+  });
+
   it('refuses a theme without a numeric exposure', () => {
     const stage = createScene(host);
     for (const exposure of ['', 'bright', '1,2']) {
@@ -330,7 +362,11 @@ describe('scene motion', () => {
         disconnect() {}
       },
     );
-    vi.stubGlobal('matchMedia', () => ({ matches: reduced }));
+    vi.stubGlobal('matchMedia', () => ({
+      matches: reduced,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
     vi.stubGlobal('document', { documentElement: {} });
   });
 

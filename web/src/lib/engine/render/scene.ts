@@ -345,10 +345,9 @@ export function createScene(
     powerPreference: 'high-performance',
   });
   const gpu = gpuRendererName(renderer.getContext());
-  const quality = qualityProfile({
-    integrated: isIntegratedGpu(gpu),
-    appleSilicon: isAppleSilicon(gpu),
-  });
+  const profile = () =>
+    qualityProfile({ integrated: isIntegratedGpu(gpu), appleSilicon: isAppleSilicon(gpu) });
+  const quality = profile();
   renderer.localClippingEnabled = true;
   renderer.setTransparentSort(transparentOrder);
   renderer.setPixelRatio(quality.pixelRatio);
@@ -821,6 +820,20 @@ export function createScene(
     tick(now);
   });
   observer.observe(host);
+  // A window moved to another display, or a page zoom, changes devicePixelRatio without a resize. The
+  // query matches one ratio, so it is asked again at each new one.
+  let pixelRatioQuery: MediaQueryList | undefined;
+  const watchPixelRatio = () => {
+    pixelRatioQuery = globalThis.matchMedia?.(`(resolution: ${globalThis.devicePixelRatio}dppx)`);
+    pixelRatioQuery?.addEventListener('change', pixelRatioChanged, { once: true });
+  };
+  const pixelRatioChanged = () => {
+    const { pixelRatio, mriPixelRatio, motionPixelRatio } = profile();
+    Object.assign(quality, { pixelRatio, mriPixelRatio, motionPixelRatio });
+    setSize();
+    watchPixelRatio();
+  };
+  watchPixelRatio();
   controls.addEventListener('change', cameraMoved);
   // A reader who takes hold of the camera mid-orbit keeps it where it is drawn, roll included. A wheel
   // step is no grab: its zoom changes where the move is going.
@@ -1051,6 +1064,7 @@ export function createScene(
       renderer.setAnimationLoop(null);
       looping = false;
       observer.disconnect();
+      pixelRatioQuery?.removeEventListener('change', pixelRatioChanged);
       controls.removeEventListener('change', cameraMoved);
       controls.removeEventListener('start', onGrab);
       momentum.dispose();

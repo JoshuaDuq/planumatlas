@@ -1033,6 +1033,20 @@ describe('the visual-field map', () => {
     expect(handle().getAttribute('aria-valuetext')).toMatch(/upper left$/);
   });
 
+  test('the dot’s place is spoken by the handle alone, and its sources say they open a new tab', async () => {
+    mount();
+    await openMap();
+    const where = handle().getAttribute('aria-valuetext')!;
+    const live = [...document.querySelectorAll('[aria-live]')].map((node) => node.textContent);
+    expect(live.filter((text) => text!.includes(where))).toEqual([]);
+    const copy = t('en', 'visualField');
+    for (const name of [copy.dataset, copy.method]) {
+      const link = page.getByRole('link', { name: `${name} ${t('en', 'link').newTab}` });
+      expect(link.element().getAttribute('target')).toBe('_blank');
+      expect(link.element().querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    }
+  });
+
   test('the V1 landmark of the visual pathway offers the map, and the map leads back to the tour', async () => {
     mount();
     await open('vision');

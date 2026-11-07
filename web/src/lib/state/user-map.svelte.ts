@@ -9,7 +9,7 @@ export type UserMapState =
   | { status: 'empty' }
   | { status: 'loading'; name: string }
   | { status: 'ready'; name: string; summary: MapSummary }
-  | { status: 'error'; name: string; message: string };
+  | { status: 'error'; name: string; error: unknown };
 
 export type ClusterState =
   | { status: 'idle' }
@@ -141,11 +141,8 @@ export function createUserMapStore({
       if (ask !== request || (error as Error).name === 'AbortError') return;
       console.error(error);
       file = null;
-      state = {
-        status: 'error',
-        name: next.name,
-        message: error instanceof Error ? error.message : String(error),
-      };
+      // Worded by the popover in the reader's language (`mapFileReason`).
+      state = { status: 'error', name: next.name, error };
     }
   }
 

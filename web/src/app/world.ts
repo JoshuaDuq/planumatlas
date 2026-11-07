@@ -221,6 +221,8 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           }
         },
         openLandmark: excursions.openLandmark,
+        holdRoute: excursions.holdRoute,
+        routeOpacity: () => excursions.routeOpacity,
         revealInTree(id) {
           const group = catalog.groups.find((entry) =>
             entry.rows.some((row) => row.region.id === id),

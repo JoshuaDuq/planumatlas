@@ -40,8 +40,10 @@ export function failureNotice(
 export function linkNotice(params: readonly string[], lang: string): Notice {
   const copy = t(lang, 'link');
   const fields: Record<string, string | undefined> = copy.fields;
-  // A step means nothing without its circuit: naming both says "circuit" twice.
-  const said = params.includes('circuit') ? params.filter((param) => param !== 'step') : params;
+  // A step or route means nothing without its circuit: naming both says "circuit" twice.
+  const said = params.includes('circuit')
+    ? params.filter((param) => param !== 'step' && param !== 'route')
+    : params;
   const names = [...new Set(said)].map((param) => fields[param] ?? param);
   return {
     text: copy.notApplied(new Intl.ListFormat(lang, { type: 'conjunction' }).format(names)),

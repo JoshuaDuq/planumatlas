@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapSummary } from '../core/user-map/display.ts';
+import { MapFileError } from '../core/user-map/map-file-error.ts';
 import { createFakeUserMap } from '../engine/fake/user-map.ts';
 import type { SurfaceColor } from '../types/index.ts';
 import { createUserMapStore } from './user-map.svelte.ts';
@@ -112,13 +113,10 @@ test('a file that cannot be placed is reported by name, and the colour taken for
   const second = store.open(file('b.nii'));
   await loading(engine);
   expect(display.color).toBe('atlas');
-  engine.settle('This file holds 3 volumes; save the one to show as its own file.');
+  const volumes = new MapFileError('volumes', [3]);
+  engine.settle(volumes);
   await second;
-  expect(store.state).toEqual({
-    status: 'error',
-    name: 'b.nii',
-    message: 'This file holds 3 volumes; save the one to show as its own file.',
-  });
+  expect(store.state).toEqual({ status: 'error', name: 'b.nii', error: volumes });
   // The last map is not left on the stage under the error.
   expect(engine.loaded).toBeNull();
 });

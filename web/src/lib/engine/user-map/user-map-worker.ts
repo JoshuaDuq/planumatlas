@@ -3,6 +3,7 @@ import { clusterTable, withoutSmallClusters } from '../../core/user-map/clusters
 import type { Cluster } from '../../core/user-map/clusters.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import { invertField } from '../../core/user-map/inverse-field.ts';
+import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import type { InverseField } from '../../core/user-map/inverse-field.ts';
 import { readNifti } from '../../core/user-map/nifti.ts';
 import type { NiftiVolume } from '../../core/user-map/nifti.ts';
@@ -42,7 +43,7 @@ export type UserMapJob = CarryJob | ClusterJob | ExtentJob;
 export type UserMapReply =
   | { token: number; map: CarriedMap }
   | { token: number; clusters: Cluster[] }
-  | { token: number; error: string };
+  | { token: number; error: string; file?: Pick<MapFileError, 'code' | 'params'> };
 
 interface WorkerScope {
   onmessage: ((event: MessageEvent<UserMapJob>) => void) | null;
@@ -54,6 +55,8 @@ const inverses = new Map<string, InverseField>();
 let cortex: CarryJob['cortex'];
 // Kept for its clusters and their extent, which follow the threshold, with the space it was carried from.
 let source: { map: NiftiVolume; inverse: InverseField } | null = null;
+// The newest carry asked for, by token (an older one may arrive later): only it is kept as the source.
+let latest = 0;
 
 function post(token: number, map: CarriedMap) {
   scope.postMessage({ token, map }, [
@@ -77,18 +80,19 @@ scope.onmessage = async ({ data: job }) => {
       post(job.token, carryMap({ ...read, data }, inverse, cortex));
       return;
     }
+    latest = Math.max(latest, job.token);
     if (job.cortex) cortex = job.cortex;
     if (job.field) inverses.set(job.space, invertField(job.field.record, job.field.data));
     const inverse = inverses.get(job.space);
     if (!inverse || !cortex) throw new Error(`No inverted field or cortex for ${job.space}.`);
     const read = await readNifti(job.file);
     const map = carryMap(read, inverse, cortex);
-    source = { map: read, inverse };
+    if (job.token === latest) source = { map: read, inverse };
     post(job.token, map);
   } catch (error) {
-    scope.postMessage(
-      { token: job.token, error: error instanceof Error ? error.message : String(error) },
-      [],
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    const file =
+      error instanceof MapFileError ? { code: error.code, params: error.params } : undefined;
+    scope.postMessage({ token: job.token, error: message, file }, []);
   }
 };
