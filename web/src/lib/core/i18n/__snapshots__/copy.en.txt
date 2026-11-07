@@ -708,10 +708,12 @@
   "provenance": "Provenance",
   "feedback": "Feedback",
   "feedbackSubject": "Planum feedback",
-  "feedbackBody": [
-   "[\"Alpha\"] → \"What happened, or what would help?\\n\\n\\nView on screen: Alpha\"",
-   "[\"\"] → \"What happened, or what would help?\\n\\n\\nView on screen: \""
-  ],
+  "feedbackName": "Your name",
+  "feedbackMessage": "Your feedback",
+  "feedbackSend": "Send",
+  "feedbackSending": "Sending…",
+  "feedbackSent": "Thank you, your feedback was sent.",
+  "feedbackFailed": "It could not be sent. You can write to",
   "close": "Close",
   "subject": "Subject",
   "kind": [

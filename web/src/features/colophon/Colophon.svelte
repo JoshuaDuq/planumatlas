@@ -11,7 +11,7 @@
   import type { Language } from '../../lib/types/index.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { colophonParts } from '../../lib/core/panels/header.ts';
-  import { feedbackUrl } from './feedback.ts';
+  import FeedbackMenu from './FeedbackMenu.svelte';
 
   interface Props {
     lang: Language;
@@ -62,14 +62,7 @@
     </span>
   {/if}
   <span class="region-count">{regionCount}</span>
-  <!-- The view's link is read as the reader reaches for it, so the report names what is on screen. -->
-  <a
-    class="colophon-action feedback-link"
-    href={feedbackUrl(location.href, lang)}
-    onpointerdown={(event) => (event.currentTarget.href = feedbackUrl(location.href, lang))}
-    onfocus={(event) => (event.currentTarget.href = feedbackUrl(location.href, lang))}
-    >{t(lang, 'footer').feedback}</a
-  >
+  <FeedbackMenu {lang} />
   {#if onprovenance}
     <button
       bind:this={provenance}
@@ -87,6 +80,9 @@
   @layer features {
     /* masthead.css:453-509. A compact status line keeps the dataset and its limits in view. */
     .colophon {
+      /* Over the stage, as the masthead is, so the Feedback panel opening upward covers its chrome. */
+      position: relative;
+      z-index: 40;
       grid-column: 1 / -1;
       display: flex;
       align-items: center;
@@ -167,7 +163,7 @@
       }
     }
     /* Feedback and Provenance: quiet text buttons on a ground that shows on hover. */
-    .colophon-action {
+    .colophon :global(.colophon-action) {
       flex: none;
       display: inline-flex;
       align-items: center;
@@ -186,26 +182,26 @@
         color var(--ui-transition) var(--ease-ui),
         transform var(--press-transition) var(--ease-ui);
     }
-    /* The feedback link sits between the count and Provenance, which takes up its left padding. */
-    .feedback-link {
+    /* Feedback sits between the count and Provenance, which takes up its left padding. */
+    .colophon :global(.colophon-action:not(.provenance-opener)) {
       margin-right: calc(-1 * var(--space-4) + var(--space-1));
     }
     /* The words, not the ground, end on the stage gutter. */
     .provenance-opener {
       margin-right: calc(-1 * var(--space-2));
     }
-    .colophon-action:active:not(:focus-visible) {
+    .colophon :global(.colophon-action:active:not(:focus-visible)) {
       transform: scale(var(--press-scale));
     }
     /* A coarse pointer needs the project's 44px target at any width: the bar grows and the button fills it (deviations/h4-coarse-target.md). */
     @media (pointer: coarse) {
-      .colophon-action {
+      .colophon :global(.colophon-action) {
         /* The bar is 44px here (app/layout.css), and the button fills it. */
         align-self: stretch;
       }
     }
     @media (hover: hover) and (pointer: fine) {
-      .colophon-action:hover {
+      .colophon :global(.colophon-action:hover) {
         background: var(--surface-hover);
         color: var(--text-primary);
       }
@@ -219,7 +215,7 @@
   }
   @layer a11y {
     @media (prefers-reduced-motion: reduce) {
-      .colophon-action:active {
+      .colophon :global(.colophon-action:active) {
         transform: none;
       }
     }

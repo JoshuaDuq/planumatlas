@@ -51,11 +51,11 @@ async function openFromKeyboard() {
 }
 
 describe('Colophon', () => {
-  test('the statement, the description, the count and the opener, in that order', async () => {
+  test('the statement, the description, the count, Feedback and the opener, in that order', async () => {
     render(Fixture, props());
     const text = document.querySelector('.colophon')!.textContent!.replace(/\s+/g, ' ').trim();
     expect(text).toBe(
-      'Not clinical anatomy Bert · one individual’s MRI reconstruction 12 visible regions Provenance',
+      'Not clinical anatomy Bert · one individual’s MRI reconstruction 12 visible regions Feedback Provenance',
     );
     expect(document.querySelector('footer')).not.toBeNull();
     expect(opener().element().getAttribute('aria-haspopup')).toBe('dialog');
@@ -99,7 +99,9 @@ describe('Colophon', () => {
   test('the button appears only when the owner supplies an opener', async () => {
     const { Colophon } = { Colophon: (await import('../colophon/Colophon.svelte')).default };
     render(Colophon, { lang: 'en', regionCount: '' });
-    expect(document.querySelector('button')).toBeNull();
+    expect(document.querySelector('.provenance-opener')).toBeNull();
+    // Feedback needs no owner: it is offered even before anything has loaded.
+    expect(document.querySelector('.colophon-action')).not.toBeNull();
   });
 });
 

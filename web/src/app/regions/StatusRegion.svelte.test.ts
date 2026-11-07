@@ -14,7 +14,10 @@ vi.mock('../../lib/core/assets/published-anatomy.ts', async (importOriginal) => 
 }));
 
 const shell = createShell();
-afterEach(() => shell.close());
+afterEach(() => {
+  shell.close();
+  vi.restoreAllMocks();
+});
 
 const colophon = () => document.getElementById('colophon')!;
 const count = () => colophon().querySelector('.region-count')!.textContent;
@@ -68,27 +71,69 @@ describe('what the status region holds', () => {
 });
 
 describe('feedback', () => {
-  test('writes an email, no account needed, naming the view on screen', async () => {
+  test('sends a name and the feedback, with the view on screen, from inside Planum', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ success: 'true' }), { status: 200 }));
     await shell.open();
-    const link = page.getByRole('link', { name: 'Feedback' }).element() as HTMLAnchorElement;
+    await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     history.replaceState(null, '', '#atlas=hcp-mmp&lang=en');
-    link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-    const [address, query] = link.href.split('?');
-    expect(address).toBe('mailto:joshua.duquette.1@ulaval.ca');
-    // Spaces as %20: a mail client reads a mailto's `+` literally.
-    expect(query).not.toContain('+');
-    const fields = Object.fromEntries(
-      query!.split('&').map((pair) => pair.split('=').map(decodeURIComponent)),
+    await userEvent.fill(page.getByRole('textbox', { name: 'Your name' }), 'Ada');
+    await userEvent.fill(
+      page.getByRole('textbox', { name: 'Your feedback' }),
+      'The cut is lovely.',
     );
-    expect(fields.subject).toBe('Planum feedback');
-    expect(fields.body).toContain(`${location.origin}${location.pathname}#atlas=hcp-mmp&lang=en`);
+    await userEvent.click(page.getByRole('button', { name: 'Send' }));
+    // Said in the panel, in place of the form, not only by the announcer.
+    await expect
+      .poll(() => document.querySelector('.feedback-said')?.textContent)
+      .toBe('Thank you, your feedback was sent.');
+    expect(page.getByRole('textbox', { name: 'Your feedback' }).elements()).toHaveLength(0);
+    expect(fetch).toHaveBeenCalledOnce();
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe('https://formsubmit.co/ajax/joshua.duquette.1@ulaval.ca');
+    expect(init!.method).toBe('POST');
+    const sent = JSON.parse(init!.body as string);
+    expect(sent).toMatchObject({ name: 'Ada', message: 'The cut is lovely.' });
+    expect(sent.view).toBe(`${location.origin}${location.pathname}#atlas=hcp-mmp&lang=en`);
+  });
+
+  test('says when it could not send, and offers the address to write to instead', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ success: 'false', message: 'needs activation' }), {
+        status: 200,
+      }),
+    );
+    await shell.open();
+    await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
+    await userEvent.fill(page.getByRole('textbox', { name: 'Your feedback' }), 'Hello');
+    await userEvent.click(page.getByRole('button', { name: 'Send' }));
+    await expect
+      .element(page.getByRole('button', { name: 'joshua.duquette.1@ulaval.ca, Copy' }))
+      .toBeVisible();
+    // What was typed stays, to be sent again or copied.
+    expect(
+      (page.getByRole('textbox', { name: 'Your feedback' }).element() as HTMLTextAreaElement).value,
+    ).toBe('Hello');
+  });
+
+  test('sends nothing without feedback', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch');
+    await shell.open();
+    await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
+    await userEvent.click(page.getByRole('button', { name: 'Send' }));
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining('formsubmit'),
+      expect.anything(),
+    );
   });
 
   test('is offered before the engine too, in the reader’s language', async () => {
     await shell.open({ start: false });
     shell.app.chooseLanguage('fr');
     flushSync();
-    await expect.element(page.getByRole('link', { name: 'Commentaires' })).toBeVisible();
+    await expect.element(page.getByRole('button', { name: 'Commentaires' })).toBeVisible();
   });
 });
 

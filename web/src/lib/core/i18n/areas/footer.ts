@@ -7,7 +7,12 @@ export const en = {
   provenance: 'Provenance',
   feedback: 'Feedback',
   feedbackSubject: 'Planum feedback',
-  feedbackBody: (view: string) => `What happened, or what would help?\n\n\nView on screen: ${view}`,
+  feedbackName: 'Your name',
+  feedbackMessage: 'Your feedback',
+  feedbackSend: 'Send',
+  feedbackSending: 'Sending…',
+  feedbackSent: 'Thank you, your feedback was sent.',
+  feedbackFailed: 'It could not be sent. You can write to',
   close: 'Close',
   subject: 'Subject',
   kind: (individual: boolean): string =>
@@ -43,8 +48,12 @@ export const fr: typeof en = {
   provenance: 'Provenance',
   feedback: 'Commentaires',
   feedbackSubject: 'Commentaires sur Planum',
-  feedbackBody: (view: string) =>
-    `Que s’est-il passé, ou qu’est-ce qui aiderait ?\n\n\nVue à l’écran : ${view}`,
+  feedbackName: 'Votre nom',
+  feedbackMessage: 'Vos commentaires',
+  feedbackSend: 'Envoyer',
+  feedbackSending: 'Envoi…',
+  feedbackSent: 'Merci, vos commentaires ont été envoyés.',
+  feedbackFailed: 'L’envoi a échoué. Vous pouvez écrire à',
   close: 'Fermer',
   subject: 'Sujet',
   kind: (individual: boolean): string =>

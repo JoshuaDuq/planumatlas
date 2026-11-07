@@ -708,10 +708,12 @@
   "provenance": "Provenance",
   "feedback": "Commentaires",
   "feedbackSubject": "Commentaires sur Planum",
-  "feedbackBody": [
-   "[\"Alpha\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : Alpha\"",
-   "[\"\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : \""
-  ],
+  "feedbackName": "Votre nom",
+  "feedbackMessage": "Vos commentaires",
+  "feedbackSend": "Envoyer",
+  "feedbackSending": "Envoi…",
+  "feedbackSent": "Merci, vos commentaires ont été envoyés.",
+  "feedbackFailed": "L’envoi a échoué. Vous pouvez écrire à",
   "close": "Fermer",
   "subject": "Sujet",
   "kind": [
