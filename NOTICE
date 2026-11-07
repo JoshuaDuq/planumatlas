@@ -25,10 +25,14 @@ everything under data/, public/models/ and public/diffusion/ stays under the
 terms of its origin, listed in README.md and docs/reference/references.md, with
 the full texts in public/models/licenses/. Those terms include the FreeSurfer
 Software License, the HCP Open Access Data Use Terms, the non-commercial CAB-NP
-License, CC BY-NC-SA 4.0 (Julich-Brain), CC BY-NC 3.0 (Nettekoven cerebellar
-atlas, SUIT), CC BY-SA 4.0 (arterial territories), ODbL 1.0 (Neurosynth), MIT
-(Schaefer, PAM50), BSD-2-Clause (the Aphasia Recovery Cohort's normalised
-lesions, Chris Rorden) and CC0 1.0.
+License, CC BY-NC-SA 4.0 (Julich-Brain, receptor fingerprints, F-TRACT),
+CC BY-NC 3.0 (Nettekoven cerebellar atlas, SUIT), CC BY-SA 4.0 (arterial
+territories), CC BY 4.0 (Lyu et al. stimulation responses, TractSeg weights),
+ODbL 1.0 (Neurosynth), AGPL-3.0 (Benson visual-field template, neuropythy), the
+MNI template licence (MNI152NLin2009cAsym), GPL-2.0-or-later (SPM12 tissue
+probability maps, built from IXI under CC BY-SA 3.0), MIT (Schaefer, PAM50),
+BSD-2-Clause (the Aphasia Recovery Cohort's normalised lesions, Chris Rorden)
+and CC0 1.0.
 
 Planum is for research and education. It is not a medical device and must
 not be used for diagnosis, treatment or any other clinical decision.

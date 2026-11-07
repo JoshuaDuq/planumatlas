@@ -708,8 +708,9 @@
   "provenance": "Provenance",
   "feedback": "Commentaires",
   "feedbackSubject": "Commentaires sur Planum",
-  "feedbackName": "Votre nom",
+  "feedbackName": "Votre nom (facultatif)",
   "feedbackMessage": "Vos commentaires",
+  "feedbackNote": "Envoyés avec le lien de la vue à l’écran.",
   "feedbackSend": "Envoyer",
   "feedbackSending": "Envoi…",
   "feedbackSent": "Merci, vos commentaires ont été envoyés.",
@@ -921,7 +922,7 @@
    {
     "id": "coordinate",
     "title": "Coordonnée",
-    "body": "Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, −22, 56."
+    "body": "Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche."
    },
    {
     "id": "medial",

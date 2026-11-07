@@ -392,6 +392,29 @@ describe('the dialogs', () => {
     await vi.waitFor(() => expect(document.activeElement).toBe(button('More settings').element()));
   });
 
+  test('phone: Feedback opens from the menu as a dialog, sends the view on screen, and Escape returns to More settings', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ success: 'true' }), { status: 200 }));
+    await shell.open();
+    await page.viewport(390, 844);
+    await userEvent.click(button('More settings'));
+    await userEvent.click(button('Feedback'));
+    const dialog = dialogNamed('Feedback');
+    await vi.waitFor(() => expect(dialog.open).toBe(true));
+    // The title takes focus, so the phone keyboard waits for the reader to pick a field.
+    expect(document.activeElement).toBe(dialog.querySelector('h2'));
+    await userEvent.fill(page.getByRole('textbox', { name: 'Your feedback' }), 'Hello');
+    await userEvent.click(button('Send'));
+    await expect
+      .poll(() => dialog.querySelector('.feedback-said')?.textContent)
+      .toBe('Thank you, your feedback was sent.');
+    expect(JSON.parse(fetch.mock.calls[0]![1]!.body as string).view).toBe(location.href);
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(dialog.open).toBe(false));
+    await vi.waitFor(() => expect(document.activeElement).toBe(button('More settings').element()));
+  });
+
   test('the tract reference has its own Provenance rows, from the Tracts panel’s links', async () => {
     await shell.open({ tractAnatomy: 'reference-subject' });
     shell.app.world!.excursions.chooseExplorer('diffusion');

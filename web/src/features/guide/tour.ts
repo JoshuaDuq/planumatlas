@@ -160,11 +160,14 @@ const STOPS: Record<
   },
   // The left precentral gyrus's centroid on this brain (its detail view's Centroid, surface RAS).
   lesion: { selector: dock(2), side: 'top', align: 'start', view: 'lesion=-35.5,-9.5,63.5,10' },
+  // Fox et al. 2012 (Biol Psychiatry, PMID 22658708): the left DLPFC stimulation target that
+  // connectivity with the subgenual cingulate optimises, in MNI. On this brain it lands in
+  // cortex, half its 5 mm sphere in the middle frontal gyrus.
   coordinate: {
     selector: dock(3),
     side: 'top',
     align: 'start',
-    view: 'coord=-38,-22,56&space=mni152nlin2009casym',
+    view: 'coord=-38,44,26&space=mni152nlin2009casym',
   },
   medial: { selector: dock(4), side: 'top', align: 'center', view: 'hemi=left&view=right' },
   topBar: { selector: '#masthead .data-bar', side: 'bottom', align: 'center' },

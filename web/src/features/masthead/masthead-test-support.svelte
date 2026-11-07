@@ -58,6 +58,7 @@
   onSnapshot={() => calls.push('snapshot')}
   currentLink={() => location.href}
   onProvenance={() => calls.push('provenance')}
+  onFeedback={() => calls.push('feedback')}
   onGuide={() => calls.push(`guide:${document.activeElement?.getAttribute('aria-label')}`)}
   onShortcuts={() => calls.push(`shortcuts:${document.activeElement?.getAttribute('aria-label')}`)}
   onStartOver={() => calls.push('start over')}

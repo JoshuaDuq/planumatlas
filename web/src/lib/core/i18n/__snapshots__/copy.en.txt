@@ -708,8 +708,9 @@
   "provenance": "Provenance",
   "feedback": "Feedback",
   "feedbackSubject": "Planum feedback",
-  "feedbackName": "Your name",
+  "feedbackName": "Your name (optional)",
   "feedbackMessage": "Your feedback",
+  "feedbackNote": "Sent with the link to the view on screen.",
   "feedbackSend": "Send",
   "feedbackSending": "Sending…",
   "feedbackSent": "Thank you, your feedback was sent.",
@@ -921,7 +922,7 @@
    {
     "id": "coordinate",
     "title": "Coordinate",
-    "body": "Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, −22, 56."
+    "body": "Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
    },
    {
     "id": "medial",

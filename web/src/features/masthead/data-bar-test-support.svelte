@@ -58,6 +58,7 @@
   onSnapshot={() => {}}
   currentLink={() => location.href}
   onProvenance={() => {}}
+  onFeedback={() => {}}
   onGuide={() => {}}
   onShortcuts={() => {}}
   onStartOver={() => {}}

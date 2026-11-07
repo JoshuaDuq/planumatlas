@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-02",
+ "fetched": "2026-11-07",
  "sources": "PubMed efetch, Bookshelf esummary and Crossref; no abstracts",
  "year": "PubMed's journal-issue publication year (PubDate, or the first year of a MedlineDate range), not the online-first year; for a Bookshelf chapter, the book's publication year",
  "records": {
@@ -2518,6 +2518,24 @@
    "pages": "233-48",
    "corrections": []
   },
+  "pmid:15955494": {
+   "pmid": "15955494",
+   "pmcid": null,
+   "doi": "10.1016/j.neuroimage.2005.02.018",
+   "doi_source": "pubmed",
+   "title": "Unified segmentation",
+   "authors": [
+    "Ashburner J",
+    "Friston KJ"
+   ],
+   "year": 2005,
+   "pubdate": "2005 Jul 01",
+   "journal": "Neuroimage",
+   "volume": "26",
+   "issue": "3",
+   "pages": "839-51",
+   "corrections": []
+  },
   "pmid:16006345": {
    "pmid": "16006345",
    "pmcid": null,
@@ -4216,6 +4234,29 @@
    "pages": "1-15",
    "corrections": []
   },
+  "pmid:20656036": {
+   "pmid": "20656036",
+   "pmcid": "PMC2962759",
+   "doi": "10.1016/j.neuroimage.2010.07.033",
+   "doi_source": "pubmed",
+   "title": "Unbiased average age-appropriate atlases for pediatric studies",
+   "authors": [
+    "Fonov V",
+    "Evans AC",
+    "Botteron K",
+    "Almli CR",
+    "McKinstry RC",
+    "Collins DL",
+    "Brain Development Cooperative Group"
+   ],
+   "year": 2011,
+   "pubdate": "2011 Jan 01",
+   "journal": "Neuroimage",
+   "volume": "54",
+   "issue": "1",
+   "pages": "313-27",
+   "corrections": []
+  },
   "pmid:20679241": {
    "pmid": "20679241",
    "pmcid": "PMC2930407",
@@ -5345,6 +5386,26 @@
    "volume": "8",
    "issue": null,
    "pages": "8",
+   "corrections": []
+  },
+  "pmid:24676149": {
+   "pmid": "24676149",
+   "pmcid": "PMC3967932",
+   "doi": "10.1371/journal.pcbi.1003538",
+   "doi_source": "pubmed",
+   "title": "Correction of distortion in flattened representations of the cortical surface allows prediction of V1-V3 functional organization from anatomy",
+   "authors": [
+    "Benson NC",
+    "Butt OH",
+    "Brainard DH",
+    "Aguirre GK"
+   ],
+   "year": 2014,
+   "pubdate": "2014 Mar",
+   "journal": "PLoS Comput Biol",
+   "volume": "10",
+   "issue": "3",
+   "pages": "e1003538",
    "corrections": []
   },
   "pmid:24729106": {
@@ -6567,6 +6628,59 @@
    "pages": "57-68",
    "corrections": []
   },
+  "pmid:30025851": {
+   "pmid": "30025851",
+   "pmcid": "PMC6150949",
+   "doi": "10.1016/j.neuroimage.2018.07.039",
+   "doi_source": "pubmed",
+   "title": "Probabilistic functional tractography of the human cortex revisited",
+   "authors": [
+    "Trebaul L",
+    "Deman P",
+    "Tuyisenge V",
+    "Jedynak M",
+    "Hugues E",
+    "Rudrauf D",
+    "Bhattacharjee M",
+    "Tadel F",
+    "Chanteloup-Foret B",
+    "Saubat C",
+    "Reyes Mejia GC",
+    "Adam C",
+    "Nica A",
+    "Pail M",
+    "Dubeau F",
+    "Rheims S",
+    "Trébuchon A",
+    "Wang H",
+    "Liu S",
+    "Blauwblomme T",
+    "Garcés M",
+    "De Palma L",
+    "Valentin A",
+    "Metsähonkala EL",
+    "Petrescu AM",
+    "Landré E",
+    "Szurhaj W",
+    "Hirsch E",
+    "Valton L",
+    "Rocamora R",
+    "Schulze-Bonhage A",
+    "Mindruta I",
+    "Francione S",
+    "Maillard L",
+    "Taussig D",
+    "Kahane P",
+    "David O"
+   ],
+   "year": 2018,
+   "pubdate": "2018 Nov 01",
+   "journal": "Neuroimage",
+   "volume": "181",
+   "issue": null,
+   "pages": "414-429",
+   "corrections": []
+  },
   "pmid:30086412": {
    "pmid": "30086412",
    "pmcid": null,
@@ -6684,6 +6798,33 @@
    "volume": "53",
    "issue": null,
    "pages": "81-87",
+   "corrections": []
+  },
+  "pmid:30593068": {
+   "pmid": "30593068",
+   "pmcid": "PMC6314247",
+   "doi": "10.1167/18.13.23",
+   "doi_source": "pubmed",
+   "title": "The Human Connectome Project 7 Tesla retinotopy dataset: Description and population receptive field analysis",
+   "authors": [
+    "Benson NC",
+    "Jamison KW",
+    "Arcaro MJ",
+    "Vu AT",
+    "Glasser MF",
+    "Coalson TS",
+    "Van Essen DC",
+    "Yacoub E",
+    "Ugurbil K",
+    "Winawer J",
+    "Kay K"
+   ],
+   "year": 2018,
+   "pubdate": "2018 Dec 03",
+   "journal": "J Vis",
+   "volume": "18",
+   "issue": "13",
+   "pages": "23",
    "corrections": []
   },
   "pmid:30666767": {
@@ -8067,6 +8208,30 @@
    "pages": null,
    "corrections": []
   },
+  "pmid:39251640": {
+   "pmid": "39251640",
+   "pmcid": "PMC11384737",
+   "doi": "10.1038/s41597-024-03819-7",
+   "doi_source": "pubmed",
+   "title": "The Aphasia Recovery Cohort, an open-source chronic stroke repository",
+   "authors": [
+    "Gibson M",
+    "Newman-Norlund R",
+    "Bonilha L",
+    "Fridriksson J",
+    "Hickok G",
+    "Hillis AE",
+    "den Ouden DB",
+    "Rorden C"
+   ],
+   "year": 2024,
+   "pubdate": "2024 Sep 09",
+   "journal": "Sci Data",
+   "volume": "11",
+   "issue": "1",
+   "pages": "981",
+   "corrections": []
+  },
   "pmid:39333089": {
    "pmid": "39333089",
    "pmcid": "PMC11436828",
@@ -8162,6 +8327,27 @@
    "volume": "56",
    "issue": "9",
    "pages": "2527-2539",
+   "corrections": []
+  },
+  "pmid:40664975": {
+   "pmid": "40664975",
+   "pmcid": "PMC12664536",
+   "doi": "10.1038/s41593-025-02009-x",
+   "doi_source": "pubmed",
+   "title": "Mapping human thalamocortical connectivity with electrical stimulation and recording",
+   "authors": [
+    "Lyu D",
+    "Stiger JR",
+    "Lusk Z",
+    "Buch V",
+    "Parvizi J"
+   ],
+   "year": 2025,
+   "pubdate": "2025 Aug",
+   "journal": "Nat Neurosci",
+   "volume": "28",
+   "issue": "8",
+   "pages": "1797-1809",
    "corrections": []
   },
   "pmid:40708955": {
@@ -8302,80 +8488,6 @@
    "volume": "48",
    "issue": "5",
    "pages": "451-459",
-   "corrections": []
-  },
-  "pmid:40664975": {
-   "pmid": "40664975",
-   "pmcid": "PMC12664536",
-   "doi": "10.1038/s41593-025-02009-x",
-   "doi_source": "pubmed",
-   "title": "Mapping human thalamocortical connectivity with electrical stimulation and recording",
-   "authors": [
-    "Lyu D",
-    "Stiger JR",
-    "Lusk Z",
-    "Buch V",
-    "Parvizi J"
-   ],
-   "year": 2025,
-   "pubdate": "2025 Aug",
-   "journal": "Nat Neurosci",
-   "volume": "28",
-   "issue": "8",
-   "pages": "1797-1809",
-   "corrections": []
-  },
-  "pmid:30025851": {
-   "pmid": "30025851",
-   "pmcid": "PMC6150949",
-   "doi": "10.1016/j.neuroimage.2018.07.039",
-   "doi_source": "pubmed",
-   "title": "Probabilistic functional tractography of the human cortex revisited",
-   "authors": [
-    "Trebaul L",
-    "Deman P",
-    "Tuyisenge V",
-    "Jedynak M",
-    "Hugues E",
-    "Rudrauf D",
-    "Bhattacharjee M",
-    "Tadel F",
-    "Chanteloup-Foret B",
-    "Saubat C",
-    "Reyes Mejia GC",
-    "Adam C",
-    "Nica A",
-    "Pail M",
-    "Dubeau F",
-    "Rheims S",
-    "Trébuchon A",
-    "Wang H",
-    "Liu S",
-    "Blauwblomme T",
-    "Garcés M",
-    "De Palma L",
-    "Valentin A",
-    "Metsähonkala EL",
-    "Petrescu AM",
-    "Landré E",
-    "Szurhaj W",
-    "Hirsch E",
-    "Valton L",
-    "Rocamora R",
-    "Schulze-Bonhage A",
-    "Mindruta I",
-    "Francione S",
-    "Maillard L",
-    "Taussig D",
-    "Kahane P",
-    "David O"
-   ],
-   "year": 2018,
-   "pubdate": "2018 Nov 01",
-   "journal": "Neuroimage",
-   "volume": "181",
-   "issue": null,
-   "pages": "414-429",
    "corrections": []
   }
  }

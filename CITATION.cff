@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 message: >-
   If you use Planum, please cite it as below. Please also cite the data and
-  atlases behind the views you use, listed at
+  atlases behind the views you use, and include the acknowledgements they
+  require, both listed at
   https://planumatlas.com/docs/reference/references.html
 type: software
 title: Planum

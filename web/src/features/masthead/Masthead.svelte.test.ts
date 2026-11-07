@@ -385,7 +385,7 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
-  test('phone: the menu offers Full screen, Copy link and Provenance; the masthead hides those buttons', async () => {
+  test('phone: the menu offers Full screen, Copy link, Feedback and Provenance; the masthead hides those buttons', async () => {
     const calls: string[] = [];
     await render(Fixture, { calls });
     await page.viewport(390, 844);
@@ -397,6 +397,7 @@ describe('Masthead', () => {
       expect(items).toEqual([
         'Full screen',
         'Copy link to this view',
+        'Feedback',
         'Provenance',
         'How to use Planum',
         'Keyboard shortcuts ?',

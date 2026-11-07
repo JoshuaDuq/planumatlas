@@ -78,7 +78,7 @@ describe('feedback', () => {
     await shell.open();
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     history.replaceState(null, '', '#atlas=hcp-mmp&lang=en');
-    await userEvent.fill(page.getByRole('textbox', { name: 'Your name' }), 'Ada');
+    await userEvent.fill(page.getByRole('textbox', { name: 'Your name (optional)' }), 'Ada');
     await userEvent.fill(
       page.getByRole('textbox', { name: 'Your feedback' }),
       'The cut is lovely.',

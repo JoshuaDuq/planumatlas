@@ -59,7 +59,7 @@ export const en = {
     {
       id: 'coordinate',
       title: 'Coordinate',
-      body: 'Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, −22, 56.',
+      body: 'Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target.',
     },
     {
       id: 'medial',
@@ -139,7 +139,7 @@ export const fr: typeof en = {
     {
       id: 'coordinate',
       title: 'Coordonnée',
-      body: 'Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, −22, 56.',
+      body: 'Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche.',
     },
     {
       id: 'medial',

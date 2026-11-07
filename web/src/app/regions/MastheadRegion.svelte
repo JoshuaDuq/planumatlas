@@ -9,6 +9,7 @@
   import { startGuide } from '../../features/guide/tour.ts';
   import DataBar from '../../features/masthead/DataBar.svelte';
   import Masthead from '../../features/masthead/Masthead.svelte';
+  import FeedbackDialog from '../../features/colophon/FeedbackDialog.svelte';
   import ProvenanceDialog from '../../features/provenance/ProvenanceDialog.svelte';
   import ShortcutsDialog from '../../features/shortcuts/ShortcutsDialog.svelte';
   import { getApp } from '../application.svelte.ts';
@@ -41,6 +42,8 @@
   let shortcutsInstant = $state(false);
   let provenanceOpen = $state(false);
   let provenanceInstant = $state(false);
+  let feedbackOpen = $state(false);
+  let feedbackInstant = $state(false);
 
   /** The colophon's Provenance button, and the phone menu's item. */
   export function openProvenance(event: MouseEvent) {
@@ -153,6 +156,10 @@
     return location.href;
   }}
   onProvenance={openProvenance}
+  onFeedback={(event) => {
+    feedbackInstant = isKeyboardActivation(event);
+    feedbackOpen = true;
+  }}
   onGuide={guide}
   onShortcuts={(event) => {
     shortcutsInstant = isKeyboardActivation(event);
@@ -201,6 +208,12 @@
   bind:instant={shortcutsInstant}
   {lang}
   {singleKeys}
+  fallbackFocus={settingsButton}
+/>
+<FeedbackDialog
+  bind:open={feedbackOpen}
+  bind:instant={feedbackInstant}
+  {lang}
   fallbackFocus={settingsButton}
 />
 {#if world}

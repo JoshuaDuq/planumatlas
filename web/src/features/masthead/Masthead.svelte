@@ -39,6 +39,7 @@
     currentLink: () => string;
     /** Given the click, so the dialog opens without its entry animation from the keyboard. */
     onProvenance: (event: MouseEvent) => void;
+    onFeedback: (event: MouseEvent) => void;
     onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
     onStartOver: () => void;
@@ -62,6 +63,7 @@
     onSnapshot,
     currentLink,
     onProvenance,
+    onFeedback,
     onGuide,
     onShortcuts,
     onStartOver,
@@ -149,6 +151,7 @@
       {onFullscreen}
       onCopyLink={copyLink}
       {onProvenance}
+      {onFeedback}
       {onGuide}
       {onShortcuts}
       {onStartOver}

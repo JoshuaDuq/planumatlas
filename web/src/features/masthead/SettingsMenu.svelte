@@ -46,6 +46,8 @@
     onCopyLink: () => void;
     /** Given the click, so the dialog opens without its entry animation from the keyboard. */
     onProvenance: (event: MouseEvent) => void;
+    /** Phones only: the status bar carries Feedback elsewhere. */
+    onFeedback: (event: MouseEvent) => void;
     onGuide: (event: MouseEvent) => void;
     onShortcuts: (event: MouseEvent) => void;
     /** The opening picture, undoable from its notice; offered once the anatomy is on screen. */
@@ -68,6 +70,7 @@
     onFullscreen,
     onCopyLink,
     onProvenance,
+    onFeedback,
     onGuide,
     onShortcuts,
     onStartOver,
@@ -249,6 +252,15 @@
         onclick={(event) => command(close, onCopyLink, event)}
       >
         {copy.copyLink}
+      </button>
+      <button
+        type="button"
+        class="menu-item phone-only"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        aria-haspopup="dialog"
+        onclick={(event) => command(close, onFeedback, event)}
+      >
+        {t(lang, 'footer').feedback}
       </button>
       {#if provenanceReady}
         <button

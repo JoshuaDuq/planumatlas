@@ -88,10 +88,10 @@ describe('the one tooltip, when its trigger goes', () => {
 });
 
 describe('the dialogs', () => {
-  test('three native dialogs are children of the app root, and an open one makes the regions inert', async () => {
+  test('four native dialogs are children of the app root, and an open one makes the regions inert', async () => {
     await shell.open();
     expect(dialogs().map(titleOf).sort()).toEqual(
-      ['Keyboard shortcuts', 'Provenance', 'MRI with tracts · MGH CDMD sub_013'].sort(),
+      ['Feedback', 'Keyboard shortcuts', 'Provenance', 'MRI with tracts · MGH CDMD sub_013'].sort(),
     );
     for (const dialog of dialogs()) expect(dialog.parentElement).toBe(shell.target);
     // The Tracts MRI holds no navigator while closed.

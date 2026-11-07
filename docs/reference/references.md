@@ -2,7 +2,7 @@
 
 ## Bibliography
 
-Every DOI and PMID here, and in the clinical and circuit data, is checked against the PubMed, Bookshelf and Crossref records that `scripts/fetch_references.py` writes to `data/reference-records.json`. Years are PubMed's journal-issue year.
+Every paper here, and in the clinical and circuit data, is checked by its PMID and DOI against the PubMed, Bookshelf and Crossref records that `scripts/fetch_references.py` writes to `data/reference-records.json`; dataset DOIs are not. Years are PubMed's journal-issue year.
 
 ### Cortical and subcortical atlases
 
@@ -66,6 +66,72 @@ Every DOI and PMID here, and in the clinical and circuit data, is checked agains
 - **PAM50 white-matter atlas.**
   Lévy, S., Benhamou, M., Naaman, C., Rainville, P., Callot, V., & Cohen-Adad, J. (2015). White matter atlas of the human spinal cord with estimation of partial volume effect. *NeuroImage*, 119, 262–271. [doi:10.1016/j.neuroimage.2015.06.040](https://doi.org/10.1016/j.neuroimage.2015.06.040). PMID 26099457.
 
+### Group data and templates
+
+Nothing here was measured in the brain shown. Each source reaches it by an area's name, through the registered spheres, or by registering a template to it.
+
+- **Receptor fingerprints.**
+  Zilles, K., Bacha-Trams, M., Palomero-Gallagher, N., Amunts, K., & Friederici, A. D. (2015). Common molecular basis of the sentence comprehension network revealed by neurotransmitter receptor fingerprints. *Cortex*, 63, 79–89. [doi:10.1016/j.cortex.2014.07.007](https://doi.org/10.1016/j.cortex.2014.07.007). PMID 25243991.
+
+  Palomero-Gallagher, N., & Zilles, K. (2018). Cyto- and receptor architectonic mapping of the human brain. *Handbook of Clinical Neurology*, 150, 355–387. [doi:10.1016/B978-0-444-63639-3.00024-4](https://doi.org/10.1016/B978-0-444-63639-3.00024-4). PMID 29496153. Each of the 36 datasets has its own EBRAINS DOI, listed under [Receptor datasets](#receptor-datasets).
+- **F-TRACT stimulation responses.**
+  Trebaul, L., Deman, P., Tuyisenge, V., Jedynak, M., Hugues, E., Rudrauf, D., … Kahane, P., & David, O. (2018). Probabilistic functional tractography of the human cortex revisited. *NeuroImage*, 181, 414–429. [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039). PMID 30025851. The data are the parcellation-based atlas F-TRACT_P_01_v2307 (Jedynak, Boyer, Lemaréchal, Trebaul, Tadel, … & F-TRACT Consortium, 2023, EBRAINS, [10.25493/JYVR-WJ7](https://doi.org/10.25493/JYVR-WJ7)), on Julich-Brain 3.0's areas.
+- **Thalamocortical stimulation responses.**
+  Lyu, D., Stiger, J. R., Lusk, Z., Buch, V., & Parvizi, J. (2025). Mapping human thalamocortical connectivity with electrical stimulation and recording. *Nature Neuroscience*, 28(8), 1797–1809. [doi:10.1038/s41593-025-02009-x](https://doi.org/10.1038/s41593-025-02009-x). PMID 40664975. The data are the authors' Zenodo record ([10.5281/zenodo.16939708](https://doi.org/10.5281/zenodo.16939708)); contacts reach Destrieux areas through HCP's `fs_LR`-to-`fsaverage` sphere deformations.
+- **Visual field map.**
+  Benson, N. C., Jamison, K. W., Arcaro, M. J., Vu, A. T., Glasser, M. F., Coalson, T. S., Van Essen, D. C., Yacoub, E., Ugurbil, K., Winawer, J., & Kay, K. (2018). The Human Connectome Project 7 Tesla retinotopy dataset: Description and population receptive field analysis. *Journal of Vision*, 18(13), 23. [doi:10.1167/18.13.23](https://doi.org/10.1167/18.13.23). PMID 30593068.
+
+  Benson, N. C., Butt, O. H., Brainard, D. H., & Aguirre, G. K. (2014). Correction of distortion in flattened representations of the cortical surface allows prediction of V1–V3 functional organization from anatomy. *PLoS Computational Biology*, 10(3), e1003538. [doi:10.1371/journal.pcbi.1003538](https://doi.org/10.1371/journal.pcbi.1003538). PMID 24676149. The template is version 4.0, fitted to the HCP 7T group average, from [neuropythy](https://github.com/noahbenson/neuropythy) at commit `a3d240f`.
+- **Aphasia Recovery Cohort.**
+  Gibson, M., Newman-Norlund, R., Bonilha, L., Fridriksson, J., Hickok, G., Hillis, A. E., den Ouden, D. B., & Rorden, C. (2024). The Aphasia Recovery Cohort, an open-source chronic stroke repository. *Scientific Data*, 11(1), 981. [doi:10.1038/s41597-024-03819-7](https://doi.org/10.1038/s41597-024-03819-7). PMID 39251640. The dataset is OpenNeuro ds004884 v1.0.2 ([10.18112/openneuro.ds004884.v1.0.2](https://doi.org/10.18112/openneuro.ds004884.v1.0.2)); the normalised lesions and the cohort's mean T1 come from the authors' [demonstration repository](https://github.com/neurolabusc/AphasiaRecoveryCohortDemo) at commit `1d24ad4`.
+- **MNI152NLin2009cAsym template.**
+  Fonov, V., Evans, A. C., Botteron, K., Almli, C. R., McKinstry, R. C., Collins, D. L., & Brain Development Cooperative Group (2011). Unbiased average age-appropriate atlases for pediatric studies. *NeuroImage*, 54(1), 313–327. [doi:10.1016/j.neuroimage.2010.07.033](https://doi.org/10.1016/j.neuroimage.2010.07.033). PMID 20656036. The 2009c template was first described in an abstract with no PMID: Fonov, Evans, McKinstry, Almli & Collins (2009), *NeuroImage*, 47, S102 ([10.1016/S1053-8119(09)70884-5](https://doi.org/10.1016/S1053-8119(09)70884-5)). The file is TemplateFlow's.
+- **SPM12 tissue probability maps.**
+  Ashburner, J., & Friston, K. J. (2005). Unified segmentation. *NeuroImage*, 26(3), 839–851. [doi:10.1016/j.neuroimage.2005.02.018](https://doi.org/10.1016/j.neuroimage.2005.02.018). PMID 15955494. The maps are SPM12's `TPM.nii` (version 7771), built from the [IXI dataset](https://brain-development.org/ixi-dataset/).
+
+### Receptor datasets
+
+Each fingerprint is its own EBRAINS dataset of receptor densities measured by Zilles, Palomero-Gallagher and colleagues. Cite the ones you show by their DOIs.
+
+| Measured in | DOI |
+| :--- | :--- |
+| Area 3b (PostCG) | [10.25493/tzby-96w](https://doi.org/10.25493/tzby-96w) |
+| Area 4p (PreCG) | [10.25493/j5jr-yh0](https://doi.org/10.25493/j5jr-yh0) |
+| Area 7A (SPL) | [10.25493/dqj7-kc8](https://doi.org/10.25493/dqj7-kc8) |
+| Dorsal part of Area 44 (IFG) | [10.25493/yqcr-1dq](https://doi.org/10.25493/yqcr-1dq) |
+| Ventral part of Area 44 (IFG) | [10.25493/p82m-pvm](https://doi.org/10.25493/p82m-pvm) |
+| Area 45 (IFG) | [10.25493/qfsy-ywc](https://doi.org/10.25493/qfsy-ywc) |
+| Area ifs1 (IFS) | [10.25493/shg2-7rs](https://doi.org/10.25493/shg2-7rs) |
+| Area ifs2 (IFS) | [10.25493/14m7-qjr](https://doi.org/10.25493/14m7-qjr) |
+| Area ifs3 (IFS) | [10.25493/z5jn-j28](https://doi.org/10.25493/z5jn-j28) |
+| Area ifs4 (IFS) | [10.25493/yf9r-j87](https://doi.org/10.25493/yf9r-j87) |
+| Area ifj1 (IFS, PreCS) | [10.25493/js85-vqd](https://doi.org/10.25493/js85-vqd) |
+| Area ifj2 (IFS, PreCS) | [10.25493/vn1a-q2r](https://doi.org/10.25493/vn1a-q2r) |
+| Area FG1 (FusG) | [10.25493/qn6k-chn](https://doi.org/10.25493/qn6k-chn) |
+| Area FG2 (FusG) | [10.25493/vfcw-hxz](https://doi.org/10.25493/vfcw-hxz) |
+| Area PF (IPL) | [10.25493/vsfy-eyf](https://doi.org/10.25493/vsfy-eyf) |
+| Area PFcm (IPL) | [10.25493/5qdp-arh](https://doi.org/10.25493/5qdp-arh) |
+| Area PFm (IPL) | [10.25493/fs3t-2r8](https://doi.org/10.25493/fs3t-2r8) |
+| Area PFop (IPL) | [10.25493/9g1p-02s](https://doi.org/10.25493/9g1p-02s) |
+| Area PFt (IPL) | [10.25493/e7pm-fdc](https://doi.org/10.25493/e7pm-fdc) |
+| Area PGa (IPL) | [10.25493/62w8-ryf](https://doi.org/10.25493/62w8-ryf) |
+| Area PGp (IPL) | [10.25493/x71t-hz](https://doi.org/10.25493/x71t-hz) |
+| Area TE 1.0 (HESCHL) | [10.25493/ahx0-9pu](https://doi.org/10.25493/ahx0-9pu) |
+| Area TE 2.1 (STG) | [10.25493/c279-428](https://doi.org/10.25493/c279-428) |
+| Area hOc1 (V1, 17, CalcS) | [10.25493/p8sd-jmh](https://doi.org/10.25493/p8sd-jmh) |
+| Dorsal part of Area hOc2 (V2, 18) | [10.25493/zj7e-kxz](https://doi.org/10.25493/zj7e-kxz) |
+| Ventral part of Area hOc2 (V2, 18) | [10.25493/2e5c-pvm](https://doi.org/10.25493/2e5c-pvm) |
+| Dorsal part of Area hOc3 (Cuneus) | [10.25493/4etw-9xb](https://doi.org/10.25493/4etw-9xb) |
+| Ventral part of Area hOc3 (LingG) | [10.25493/tbmx-bz9](https://doi.org/10.25493/tbmx-bz9) |
+| CA1 (Hippocampus) | [10.25493/y7yv-6q6](https://doi.org/10.25493/y7yv-6q6) |
+| CA2 (Hippocampus) | [10.25493/4f4s-w5a](https://doi.org/10.25493/4f4s-w5a) |
+| CA3 (Hippocampus) | [10.25493/xfhr-x41](https://doi.org/10.25493/xfhr-x41) |
+| DG (Hippocampus) | [10.25493/m8pk-c82](https://doi.org/10.25493/m8pk-c82) |
+| Putamen | [10.25493/4gz1-shh](https://doi.org/10.25493/4gz1-shh) |
+| Globus pallidus | [10.25493/tprg-5vh](https://doi.org/10.25493/tprg-5vh) |
+| Mediodorsal thalamic nucleus | [10.25493/gky8-nzr](https://doi.org/10.25493/gky8-nzr) |
+| Anterior thalamic nucleus | [10.25493/kktt-1tk](https://doi.org/10.25493/kktt-1tk) |
+
 ## Licences
 
 | Files | Source | Licence |
@@ -81,6 +147,13 @@ Every DOI and PMID here, and in the clinical and circuit data, is checked agains
 | `tissues-choi.volume`, striatal network regions and shares in `manifest.json` | Choi et al. 2012, distributed with FreeSurfer 8.2 | FreeSurfer Software License |
 | `cortex-schaefer.glb`, `ribbon-schaefer.labels`, `tissues-schaefer.volume` | Schaefer 2018 (ThomasYeoLab/CBIG) | MIT |
 | `neuropsych-domains.json`, area scores | Neurosynth | ODbL 1.0 |
+| `receptor-fingerprints.json` | Zilles and Palomero-Gallagher receptor datasets (EBRAINS) | CC BY-NC-SA 4.0 |
+| `stimulation-ftract.json` | F-TRACT_P_01_v2307 (EBRAINS) | CC BY-NC-SA 4.0 |
+| `stimulation-responses.json` | Lyu et al. 2025 (Zenodo) | CC BY 4.0 |
+| `retinotopy.json` | Benson template v4.0 (neuropythy) | AGPL-3.0 |
+| `stroke-cases.json`, `stroke-cases.masks` | Aphasia Recovery Cohort (OpenNeuro) and its authors' normalised lesions | CC0 1.0; BSD-2-Clause |
+| `coordinates-mni152nlin2009casym.field` | MNI152NLin2009cAsym (McConnell Brain Imaging Centre, via TemplateFlow) | MNI template licence |
+| `coordinates-spm12.field` | SPM12 tissue probability maps, built from IXI | GPL-2.0-or-later; IXI under CC BY-SA 3.0 |
 | NextBrain-derived files | FreeSurfer 8.2 | None named beyond FreeSurfer's |
 | `spinal-cord.glb` | PAM50 (Spinal Cord Toolbox) on CDMD's cord | MIT |
 | Viewer and pipeline code | This repository | AGPL-3.0-or-later ([`LICENSE`](https://github.com/JoshuaDuq/planumatlas/blob/main/LICENSE), [`NOTICE`](https://github.com/JoshuaDuq/planumatlas/blob/main/NOTICE)) |
@@ -109,9 +182,7 @@ The atlas and SuperSynth model come from FreeSurfer's distribution server; the s
 
 ### HCP Open Access Data Use Terms
 
-`cortex-hcp-mmp.glb`, `ribbon-hcp-mmp.labels`, `tissues-hcp-mmp.volume`, `functional-regions.json` and `cab-np.json` derive from HCP-MMP1.0. The terms pass to every recipient, require attribution and forbid identifying or contacting participants. Full terms: [`HCP-Data-Use-Terms.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/HCP-Data-Use-Terms.txt).
-
-> Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.
+`cortex-hcp-mmp.glb`, `ribbon-hcp-mmp.labels`, `tissues-hcp-mmp.volume`, `functional-regions.json` and `cab-np.json` derive from HCP-MMP1.0. The terms pass to every recipient, require an acknowledgement in the wording given under [Acknowledgements](#acknowledgements) and forbid identifying or contacting participants. Full terms: [`HCP-Data-Use-Terms.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/HCP-Data-Use-Terms.txt).
 
 ### CAB-NP licence
 
@@ -136,6 +207,44 @@ Derived from Neurosynth under [ODbL 1.0](https://opendatacommons.org/licenses/od
 ### MIT (`spinal-cord.glb`)
 
 PAM50 and its white-matter atlas are distributed through the Spinal Cord Toolbox's OSF project, which declares the MIT licence; the PAM50 repository itself names none. Keep the copyright notice with the cord. Full terms: [`PAM50.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/PAM50.txt).
+
+### CC BY-NC-SA 4.0 (receptor fingerprints, F-TRACT)
+
+Non-commercial, and shared alike, as for Julich-Brain. `receptor-fingerprints.json` credits each dataset by its DOI ([Receptor datasets](#receptor-datasets)) and states the change: each fingerprint is given to the region of this brain that shares its area's or structure's name. `stimulation-ftract.json` credits F-TRACT_P_01_v2307 and Trebaul et al. (2018) and states the changes: Julich-Brain 3.0 areas matched to 3.1 by name, and rates drawn only from pairs recorded in at least three implantations.
+
+### CC BY 4.0 (stimulation responses)
+
+Attribution: `stimulation-responses.json` credits Lyu et al. (2025) and its Zenodo record and states the changes: the authors' per-pair classifications pooled into response rates for each pair of their labels, by side, and contacts assigned to Destrieux areas through HCP's sphere deformations. TractSeg's pretrained weights, behind the SLF I–III and callosal segments, are under the same licence and credited in the bibliography.
+
+### AGPL-3.0 (visual field map)
+
+neuropythy distributes the Benson template under the [GNU AGPL 3.0](https://www.gnu.org/licenses/agpl-3.0.html), and `retinotopy.json`, derived from it, stays under that licence, which is also Planum's code licence. Its source is the commit named in the bibliography. The change: the template carried from `fsaverage` onto this brain through the registered spheres, V1–V3 only.
+
+### CC0 1.0 and BSD-2-Clause (stroke cases)
+
+The Aphasia Recovery Cohort is dedicated to the public domain. The normalised lesion maps and the cohort's mean T1 come from Chris Rorden's demonstration repository under the BSD-2-Clause licence, whose notice ships as [`ARC-normalised-lesions-BSD-2-Clause.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/ARC-normalised-lesions-BSD-2-Clause.txt). The change: each lesion carried onto this brain through a registration of that mean T1, and counted on its regions.
+
+### MNI template licence and GPL-2.0 (published coordinates)
+
+Each coordinate field is derived from a registration of its template to this brain, and both templates' copyright notices travel in `manifest.json`. MNI152NLin2009cAsym is distributed under this notice:
+
+> Copyright (C) 1993–2004 Louis Collins, McConnell Brain Imaging Centre, Montreal Neurological Institute, McGill University.
+>
+> Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appear in all copies. The authors and McGill University make no representations about the suitability of this software for any purpose. It is provided “as is” without express or implied warranty. The authors are not responsible for any data loss, equipment damage, property loss, or injury to subjects or patients resulting from the use or misuse of this software package.
+
+SPM12's tissue probability maps are part of SPM12 (version 7771), Copyright (C) 1991,1994-2020 Wellcome Centre for Human Neuroimaging, under the [GNU GPL 2.0 or later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). They are built from the IXI dataset, which is under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+
+## Acknowledgements
+
+A paper, poster or talk that shows Planum's views cites Planum ([`CITATION.cff`](https://github.com/JoshuaDuq/planumatlas/blob/main/CITATION.cff)) and, from the bibliography, the sources behind the views it shows. Datasets are cited by their DOIs as well as their papers: CDMD, Julich-Brain 3.1, the [receptor datasets](#receptor-datasets), F-TRACT, Lyu et al.'s Zenodo record and the Aphasia Recovery Cohort.
+
+**Human Connectome Project.** The HCP terms require an acknowledgement, in this wording, for HCP-MMP and everything derived from it: the HCP-MMP atlas, the functional divisions and the CAB-NP networks. It is also the right credit for the visual field map, which is fitted to HCP 7T data.
+
+> Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.
+
+**Computing.** CDMD's RecoBundles tracts and the Neurosynth term scores were computed on Rorqual. Publications about Planum itself therefore carry the [Alliance's acknowledgement](https://alliancecan.ca/en/services/advanced-research-computing/acknowledging-alliance):
+
+> This research was enabled in part by support provided by Calcul Québec (calculquebec.ca) and the Digital Research Alliance of Canada (alliancecan.ca).
 
 ## Intended use
 
