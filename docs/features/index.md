@@ -15,6 +15,7 @@ How the model is cut, measured, inspected and shared.
 | Dissection and display | Hide, isolate and focus regions; colour modes; baked shading | [Dissection and display](dissection-and-display.md) |
 | Lesion report | A 3–30 mm sphere's overlap with functions, deficits, tissue and tracts | [Lesion report](lesion-report.md) |
 | Published coordinates | An MNI coordinate placed on this brain with a 5 mm sphere | [Published coordinates](published-coordinates.md) |
+| Overlays | A researcher's own MNI-space NIfTI map drawn on this brain, read on their computer | [Overlays](overlays.md) |
 | Sharing and snapshots | The view in the address bar; Save image | [Sharing and snapshots](sharing-and-snapshots.md) |
 
 ## Anatomy

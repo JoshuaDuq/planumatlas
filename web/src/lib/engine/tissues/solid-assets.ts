@@ -24,6 +24,8 @@ import {
 import type { Label, PaletteLookup, PaletteState } from './palette.ts';
 import { buildRibbonWedges } from './ribbon-wedges.ts';
 import { addStriatalOverlay } from './striatal-overlay.ts';
+import { addUserMapToCap } from '../user-map/overlay.ts';
+import type { UserMapUniforms } from '../user-map/overlay.ts';
 import type { StriatalUniforms } from './striatal-overlay.ts';
 import { createSolidMaterial } from './solid-material.ts';
 import type { SolidAnatomy, SolidUserData } from './solid-material.ts';
@@ -54,6 +56,7 @@ export interface SolidSourceAnatomy extends SolidAnatomy {
   capEdges: EdgeUniforms;
   mriUniforms: MriUniforms;
   striatal: StriatalUniforms;
+  userMap: UserMapUniforms;
 }
 
 /** An atlas's `ribbon_labels` record in the manifest. */
@@ -205,6 +208,7 @@ export function addSolidSources(
     addCapLabels(material, anatomy.capLabels);
     addStriatalOverlay(material, anatomy.striatal);
     addMriAppearance(material, anatomy.mriUniforms, 'capLift');
+    addUserMapToCap(material, anatomy.userMap);
     addBoundaryEdges(material, anatomy.capEdges, {
       volume: 'capLabelVolume',
       shape: 'capLabelShape',

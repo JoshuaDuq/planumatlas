@@ -56,6 +56,7 @@ import {
   createStriatalUniforms,
 } from './striatal-overlay.ts';
 import type { StriatalUniforms } from './striatal-overlay.ts';
+import type { UserMapUniforms } from '../user-map/overlay.ts';
 import type { CapLabelUniforms } from './cap-labels.ts';
 import { createEdgeUniforms, pairTexture } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
@@ -103,6 +104,7 @@ export interface Anatomy {
   capLabels: CapLabelUniforms;
   capEdges: EdgeUniforms;
   striatal: StriatalUniforms;
+  userMap: UserMapUniforms;
 }
 
 /** One loaded cut atlas: its label grid on the GPU, which the caps sample where it has no parcel solids. */
@@ -137,6 +139,7 @@ export interface CutModel extends EventTarget {
   };
   readonly regions: ReadonlyMap<string, Region>;
   readonly cabNp: PaletteLookup['cabNp'] | null;
+  readonly userMap: UserMapUniforms;
   readonly boundaryCertainty: BoundaryCertainty | null;
   readonly layers: ReadonlyMap<string, { meshes: Mesh[] }>;
   readonly sourceColors: Pick<ReadonlyMap<Mesh, Color>, 'get'>;
@@ -346,6 +349,7 @@ export class TissueSections {
       capLabels: createCapLabels(),
       capEdges: createEdgeUniforms(),
       striatal: createStriatalUniforms(),
+      userMap: this.model.userMap,
     };
     this.markWith(anatomy.mriUniforms);
     return anatomy;

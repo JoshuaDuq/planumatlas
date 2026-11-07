@@ -47,6 +47,8 @@
     legend: Legend | null;
     /** The stroke cases on the stage, or null. */
     cases?: KeySources['cases'];
+    /** The reader's own map on the stage, or null. */
+    map?: KeySources['map'];
     directionShown: boolean;
     /** A row alone, or null for every row (`excursions.pickPaint`). */
     onPaintPick: (id: string | null) => void;
@@ -63,6 +65,7 @@
     territories = null,
     legend,
     cases = null,
+    map = null,
     directionShown,
     onPaintPick,
   }: Props = $props();
@@ -77,6 +80,7 @@
       territories,
       legend,
       cases,
+      map,
       directionShown,
     }),
   );
@@ -192,7 +196,15 @@
 </script>
 
 {#snippet content(row: KeyRow)}
-  <Swatch colour={row.absent ? 'transparent' : swatchColor(row.color)} />
+  {#if row.ramp}
+    <span
+      class="network-swatch stage-key-ramp"
+      aria-hidden="true"
+      style:background="linear-gradient(to right, {row.ramp.join(', ')})"
+    ></span>
+  {:else}
+    <Swatch colour={row.absent ? 'transparent' : swatchColor(row.color)} />
+  {/if}
   <span class="stage-key-label">{row.label}</span>
   {#if row.absent}<span class="visually-hidden">. {t(lang, 'viewport').keyAbsent}</span>{/if}
 {/snippet}
@@ -301,6 +313,16 @@
       align-items: center;
       gap: var(--space-3);
       min-height: 32px;
+    }
+    /* A colour scale reads from its threshold, left, to its top, right. */
+    .stage-key-ramp {
+      display: block;
+      flex: none;
+      width: 32px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: var(--radius-mark);
+      forced-color-adjust: none;
     }
     .stage-key-toggle {
       display: inline-flex;

@@ -1456,6 +1456,108 @@
   "P": "P",
   "A": "A"
  },
+ "overlay": {
+  "intro": "Affichez sur ce cerveau une carte statistique ou un masque dans un gabarit MNI. Le fichier est lu sur cet ordinateur et n’est jamais envoyé.",
+  "space": "Gabarit",
+  "choose": "Choisir un fichier NIfTI…",
+  "another": "Choisir un autre fichier…",
+  "reading": [
+   "[\"Alpha\"] → \"Lecture du fichier Alpha…\"",
+   "[\"\"] → \"Lecture du fichier …\""
+  ],
+  "failed": [
+   "[\"Alpha\"] → \"Alpha n’a pas pu être affiché :\"",
+   "[\"\"] → \" n’a pas pu être affiché :\""
+  ],
+  "shape": [
+   "[\"Alpha\",\"\"] → \"Alpha voxels de \"",
+   "[\"\",\"Alpha\"] → \" voxels de Alpha\""
+  ],
+  "range": [
+   "[\"Alpha\",\"\"] → \"valeurs de Alpha à \"",
+   "[\"\",\"Alpha\"] → \"valeurs de  à Alpha\""
+  ],
+  "mask": "un masque de 0 et de 1",
+  "reach": [
+   "[\"Alpha\"] → \"couvre Alpha du cortex\"",
+   "[\"\"] → \"couvre  du cortex\""
+  ],
+  "title": "Titre",
+  "titleHint": "Nomme la carte dans la légende et l’image enregistrée.",
+  "statistic": "Statistique",
+  "value": "Valeur",
+  "threshold": "Seuil",
+  "thresholdHint": "Les valeurs dont la grandeur le dépasse sont affichées. La carte s’affiche une fois le seuil donné ; 0 affiche toute valeur non nulle.",
+  "max": "Couleurs jusqu’à",
+  "invalid": "Donnez un seuil de 0 ou plus, sous le haut de l’échelle.",
+  "opacity": "Opacité",
+  "minVoxels": "Taille minimale des amas, voxels",
+  "minVoxelsHint": "Les amas de moins de voxels de la carte ne sont ni affichés ni listés, comme cluster_threshold de nilearn.",
+  "minVoxelsInvalid": "Donnez un nombre entier de voxels, 0 ou plus.",
+  "captionMinVoxels": [
+   "[\"Alpha\"] → \"amas de Alpha voxels ou plus\"",
+   "[\"\"] → \"amas de  voxels ou plus\""
+  ],
+  "surface": "Surface du cortex",
+  "surfaces": {
+   "pial": "Piale",
+   "mid": "Mi-épaisseur",
+   "white": "Blanche"
+  },
+  "surfaceHint": "Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs : les plus profondes ouvrent les sillons. Une coupe affiche la piale.",
+  "captionSurface": [
+   "[\"Alpha\"] → \"sur la surface alpha\"",
+   "[\"\"] → \"sur la surface \""
+  ],
+  "show": "Afficher sur le cerveau",
+  "remove": "Retirer",
+  "caveat": "Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.",
+  "keyRange": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha de  à Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"de Alpha à \""
+  ],
+  "captionTemplate": [
+   "[\"Alpha\"] → \"depuis Alpha\"",
+   "[\"\"] → \"depuis \""
+  ],
+  "captionUnstated": [
+   "[\"Alpha\"] → \"depuis MNI, gabarit non précisé, lu comme Alpha\"",
+   "[\"\"] → \"depuis MNI, gabarit non précisé, lu comme \""
+  ],
+  "captionScale": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"|Alpha| > , couleurs jusqu’à Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"|| > Alpha, couleurs jusqu’à \""
+  ],
+  "captionOpacity": [
+   "[\"Alpha\"] → \"opacité Alpha\"",
+   "[\"\"] → \"opacité \""
+  ],
+  "readout": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha : Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" : Alpha = \""
+  ],
+  "clusters": [
+   "[\"Alpha\"] → \"Amas et pics (Alpha)\"",
+   "[\"\"] → \"Amas et pics ()\""
+  ],
+  "clustersLoading": "Recherche des amas…",
+  "clustersNone": "Aucune valeur ne dépasse le seuil.",
+  "clustersFailed": "Les amas n’ont pas pu être trouvés.",
+  "clustersHint": "Comme get_clusters_table de nilearn, en millimètres du gabarit. Choisissez un pic pour le placer comme coordonnée et voir les régions qui l’entourent sur ce cerveau.",
+  "peak": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha ·  à Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" · Alpha à \""
+  ],
+  "clusterSize": [
+   "[\"Alpha\"] → \"Alpha mm³\"",
+   "[\"\"] → \" mm³\""
+  ],
+  "morePeaks": [
+   "[\"Alpha\"] → \"Alpha de plus dans le CSV\"",
+   "[\"\"] → \" de plus dans le CSV\""
+  ],
+  "download": "Télécharger le CSV"
+ },
  "reasons": {
   "no-mri": "Hors du volume IRM",
   "hemisphere": {
@@ -1838,6 +1940,7 @@
   "sectionTool": "Coupe",
   "lesionTool": "Lésion",
   "coordinateTool": "Coordonnée",
+  "overlayTool": "Superposition",
   "displayTool": "Affichage",
   "dockLabel": "Outils du visualiseur 3D",
   "orbitGroup": "Faire pivoter le modèle",

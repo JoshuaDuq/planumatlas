@@ -8,6 +8,13 @@ import type {
   WebGLProgramParametersWithUniforms,
 } from 'three';
 import type { Region } from '../../types/index.ts';
+import {
+  USER_MAP_COLOUR,
+  USER_MAP_OVER_SCAN,
+  addUserMapToSurface,
+  createUserMapUniforms,
+} from '../user-map/overlay.ts';
+import type { UserMapUniforms } from '../user-map/overlay.ts';
 import { isPhone } from './device.ts';
 
 /** The tissue-class display colours (`appearance.tissue` in the manifest). */
@@ -55,6 +62,8 @@ export interface AnatomicalUserData {
   tissueVariation: IUniform<number>;
   networkMix: IUniform<number> | null;
   territoryMix: IUniform<number> | null;
+  /** True once this mesh carries the reader's map per vertex (`_user_map`). */
+  userMapReady: IUniform<boolean>;
 }
 
 /** The visual-field map's uniforms, one set shared by every cortical material of an anatomy. */
@@ -187,6 +196,7 @@ function addFoldShading(
   withNetworks: boolean,
   withTerritories: boolean,
   visual: VisualFieldUniforms | null,
+  userMap: UserMapUniforms,
 ): void {
   const variation = { value: intensity.surface_strength };
   const networkMix = { value: 0 };
@@ -195,6 +205,7 @@ function addFoldShading(
     tissueVariation: variation,
     networkMix: withNetworks ? networkMix : null,
     territoryMix: withTerritories ? territoryMix : null,
+    userMapReady: { value: false },
   };
   Object.assign(material.userData, userData);
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
@@ -207,6 +218,8 @@ function addFoldShading(
       shader.uniforms.visualYDecode = { value: fieldDecode(ranges, '_FIELD_Y') };
       shader.uniforms.visualSigmaDecode = { value: fieldDecode(ranges, '_PRF_SIGMA') };
     }
+    Object.assign(shader.uniforms, userMap);
+    shader.uniforms.userMapReady = userData.userMapReady;
     shader.uniforms.sulcDecode = { value: fieldDecode(ranges, '_SULC') };
     shader.uniforms.opennessDecode = { value: fieldDecode(ranges, '_OPENNESS') };
     shader.uniforms.t1Decode = { value: fieldDecode(ranges, '_T1') };
@@ -222,9 +235,11 @@ attribute float _t1;
 uniform vec2 sulcDecode;
 uniform vec2 opennessDecode;
 uniform vec2 t1Decode;
+attribute vec2 _user_map;
 varying float vOpenness;
 varying float vT1;
 varying float vSulcalDepth;
+varying vec2 vUserMap;
 ${withNetworks ? 'attribute vec4 _networkColor;\nvarying vec4 vNetworkColor;' : ''}
 ${withTerritories ? 'attribute vec4 _territoryColor;\nvarying vec4 vTerritoryColor;' : ''}
 ${visual ? VISUAL_VERTEX_DECLARATIONS : ''}
@@ -234,6 +249,7 @@ ${shader.vertexShader}`.replace(
 vSulcalDepth = _sulc * sulcDecode.y + sulcDecode.x;
 vOpenness = _openness * opennessDecode.y + opennessDecode.x;
 vT1 = _t1 * t1Decode.y + t1Decode.x;
+vUserMap = _user_map;
 ${withNetworks ? 'vNetworkColor = _networkColor;' : ''}
 ${withTerritories ? 'vTerritoryColor = _territoryColor;' : ''}
 ${visual ? VISUAL_VERTEX : ''}`,
@@ -246,6 +262,10 @@ uniform vec2 t1Range;
 uniform float tissueVariation;
 uniform vec2 foldRange;
 uniform vec2 foldStrength;
+varying vec2 vUserMap;
+uniform bool userMapReady;
+uniform vec3 userMapBase;
+${USER_MAP_COLOUR}
 ${withNetworks ? 'varying vec4 vNetworkColor;\nuniform float networkMix;' : ''}
 ${withTerritories ? 'varying vec4 vTerritoryColor;\nuniform float territoryMix;' : ''}
 ${visual ? VISUAL_FRAGMENT_DECLARATIONS : ''}
@@ -271,8 +291,10 @@ ${shader.fragmentShader}`
           : ''
       }
       ${visual ? VISUAL_FRAGMENT : ''}
+      ${USER_MAP_FRAGMENT}
       float intensity = clamp((vT1 - t1Range.x) / (t1Range.y - t1Range.x), 0.0, 1.0);
-      diffuseColor.rgb *= 1.0 + tissueVariation * (2.0 * intensity - 1.0);`,
+      diffuseColor.rgb *= 1.0 + tissueVariation * (2.0 * intensity - 1.0);
+      ${USER_MAP_COLOUR_FRAGMENT}`,
       )
       .replace(
         '#include <lights_fragment_end>',
@@ -283,10 +305,11 @@ ${shader.fragmentShader}`
       reflectedLight.directDiffuse *= 1.0 - foldStrength.x * fold;
       reflectedLight.indirectDiffuse *= 1.0 - foldStrength.y * fold;
       reflectedLight.indirectSpecular *= 1.0 - foldStrength.y * fold;`,
-      );
+      )
+      .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
   material.customProgramCacheKey = () =>
-    `source-tissue-relief-v5${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
+    `source-tissue-relief-v6${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
 }
 
 /*
@@ -317,6 +340,20 @@ uniform float visualMix;
 uniform vec3 visualProbe;
 uniform float visualMeasured;
 uniform vec3 visualAccent;`;
+
+/*
+ * While the reader's map is on, the cortex is one grey, keeping its T1 texture and fold shading, and a
+ * vertex whose parents mostly have a value takes the map's colour beyond the threshold, lit as tissue is.
+ */
+const USER_MAP_FRAGMENT = `
+      bool userMapDrawn = userMapOn && userMapReady;
+      if (userMapDrawn) diffuseColor.rgb = userMapBase;`;
+
+const USER_MAP_COLOUR_FRAGMENT = `
+      vec4 userMapMapped = vec4(0.0);
+      if (userMapDrawn && vUserMap.y >= 0.5) userMapMapped = userMapColour(vUserMap.x / vUserMap.y);
+      diffuseColor.rgb = mix(
+        diffuseColor.rgb, sRGBTransferEOTF(vec4(userMapMapped.rgb, 1.0)).rgb, userMapMapped.a);`;
 
 const [V1_TONE, V2_TONE, V3_TONE] = VISUAL_TONES.areas.map((tone) => tone.toFixed(3));
 
@@ -352,6 +389,7 @@ export function createAnatomicalMaterial(
   region: Region,
   appearance: Appearance,
   visual: VisualFieldUniforms | null = null,
+  userMap: UserMapUniforms = createUserMapUniforms(),
 ): MeshPhysicalMaterial {
   const material = new MeshPhysicalMaterial();
   MeshStandardMaterial.prototype.copy.call(material, mesh.material);
@@ -389,7 +427,8 @@ export function createAnatomicalMaterial(
       Boolean(mesh.geometry.getAttribute('_network')),
       Boolean(mesh.geometry.getAttribute('_territory')),
       visual,
+      userMap,
     );
-  }
+  } else addUserMapToSurface(material, userMap);
   return material;
 }

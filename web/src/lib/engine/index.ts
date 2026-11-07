@@ -27,6 +27,7 @@ import type { Emit } from './framing.ts';
 import { createHeldView } from './held-view.ts';
 import { createLesion } from './lesion/lesion.ts';
 import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
+import { createUserMap } from './user-map/user-map.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
@@ -260,6 +261,14 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       const masks = await loadStrokeMasks(data);
       if (ask === strokeRequest) strokeSolids.show(data, masks, ids);
     };
+    // Fields and ribbon labels are published beside the manifest.
+    const userMap = createUserMap({
+      atlas,
+      sections,
+      baseUrl: absoluteManifestUrl,
+      invalidate: scene.invalidate,
+    });
+    cleanups.push(() => userMap.dispose());
     const showVisualField = (map: typeof visualMap) => {
       atlas.showVisualField(map, token('--overlay-accent'));
       visualMap = map;
@@ -297,7 +306,9 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       sections.group.visible = !referenceOnly && sections.active;
       lesionLayer.visible = !referenceOnly;
       if (anatomy === tracts.anatomy) tracts.setClippingPlanes(atlas.clippingPlanes);
-      scene.setMriAppearance(surfaceColor === 'mri' && !paint && !referenceOnly);
+      const scanned = surfaceColor === 'mri' && !paint && !referenceOnly;
+      scene.setMriAppearance(scanned);
+      atlas.userMap.userMapOverScan.value = scanned;
       presentation.outline();
     }
 
@@ -426,6 +437,15 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         available: Boolean(atlas.manifest.stroke_cases),
         cases: loadStrokeCases,
         show: showStrokeCases,
+      },
+      userMap: {
+        available: Boolean(atlas.manifest.coordinate_spaces),
+        load: userMap.load,
+        clusters: userMap.clusters,
+        extent: userMap.extent,
+        setSurface: userMap.setSurface,
+        show: userMap.show,
+        clear: userMap.clear,
       },
 
       applyTheme() {

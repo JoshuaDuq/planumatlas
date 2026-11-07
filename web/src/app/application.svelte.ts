@@ -1,4 +1,5 @@
 import type { StrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
+import type { UserMapStore } from '../lib/state/user-map.svelte.ts';
 import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
 import type { AnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
@@ -55,6 +56,8 @@ export interface World extends AppContext {
   visualFieldMap: VisualFieldMapStore;
   /** The stroke cases on the stage, and the cohort they come from. */
   strokeCases: StrokeCasesStore;
+  /** The reader's own map, read from a file on their machine. */
+  userMap: UserMapStore;
 }
 
 /** Runs `build` where `$effect`s may be created and settles them, as a component's setup would. */

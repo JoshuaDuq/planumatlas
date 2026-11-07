@@ -29,6 +29,7 @@ import * as mri from './areas/mri.ts';
 import * as navigator from './areas/navigator.ts';
 import * as networks from './areas/networks.ts';
 import * as orientation from './areas/orientation.ts';
+import * as overlay from './areas/overlay.ts';
 import * as reasons from './areas/reasons.ts';
 import * as receptors from './areas/receptors.ts';
 import * as sheet from './areas/sheet.ts';
@@ -74,6 +75,7 @@ export const TRANSLATIONS = {
     navigator: navigator.en,
     networks: networks.en,
     orientation: orientation.en,
+    overlay: overlay.en,
     reasons: reasons.en,
     receptors: receptors.en,
     sheet: sheet.en,
@@ -118,6 +120,7 @@ export const TRANSLATIONS = {
     navigator: navigator.fr,
     networks: networks.fr,
     orientation: orientation.fr,
+    overlay: overlay.fr,
     reasons: reasons.fr,
     receptors: receptors.fr,
     sheet: sheet.fr,

@@ -20,7 +20,7 @@ export const KEY_NOTE_MIN_WIDTH_PX = 600;
 /** The title row, foot and edges of a plate. */
 const KEY_HEAD_PX = 42;
 
-export type KeyName = 'network' | 'paint' | 'cases' | 'direction';
+export type KeyName = 'map' | 'network' | 'paint' | 'cases' | 'direction';
 
 export interface KeyRow {
   id: string;
@@ -30,6 +30,8 @@ export interface KeyRow {
   pressed: boolean;
   /** Keyed but not drawn in this view. */
   absent: boolean;
+  /** A colour scale instead of one colour: CSS colours from its start to its end. */
+  ramp?: readonly string[];
 }
 
 /** One plate of the stage key, in the order the plates are drawn. */
@@ -65,6 +67,8 @@ export interface KeySources {
   cases?: { title: string; rows: { id: string; color: Rgb | string; label: string }[] } | null;
   /** The streamlines are drawn, coloured by direction. */
   directionShown: boolean;
+  /** The reader's own map on the stage: its name, and each sign's colour scale and range. */
+  map?: { title: string; rows: { id: string; ramp: readonly string[]; label: string }[] } | null;
 }
 
 const row = (id: string, color: Rgb | string, label: string, pressed = false, absent = false) => ({
@@ -87,6 +91,19 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
   const { lang, surfaceColor, legend } = sources;
   const ready = sources.status === 'ready' || sources.status === 'switching';
   const plates: KeyPlate[] = [];
+  if (ready && sources.map) {
+    plates.push({
+      name: 'map',
+      map: 'user-map',
+      title: sources.map.title,
+      rows: sources.map.rows.map((entry) => ({
+        ...row(entry.id, entry.ramp[0]!, entry.label),
+        ramp: entry.ramp,
+      })),
+      note: '',
+      pickable: false,
+    });
+  }
   // A key is titled as the masthead's Colour field names its map.
   const maps: Record<string, string> = t(lang, 'display').surfaceColors;
 

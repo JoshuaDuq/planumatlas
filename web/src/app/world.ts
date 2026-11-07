@@ -34,6 +34,7 @@ import { createCortexHold } from '../lib/state/cortex-hold.svelte.ts';
 import { createPaintSeeThrough } from '../lib/state/paint-see-through.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
 import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
+import { createUserMapStore } from '../lib/state/user-map.svelte.ts';
 import { createLink } from '../lib/state/link.svelte.ts';
 import { createLessonStore } from '../lib/state/session.svelte.ts';
 import { announceView, createView } from '../lib/state/view.svelte.ts';
@@ -116,6 +117,18 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       display: {
         hold: cortexHold,
         seeThrough,
+        get color() {
+          return engine.model.settings.surfaceColor;
+        },
+        setColor: (color) =>
+          void engine.sections
+            .setSurfaceColor(color)
+            .catch((error: unknown) => console.error(error)),
+      },
+    });
+    const userMap = createUserMapStore({
+      engine: engine.userMap,
+      display: {
         get color() {
           return engine.model.settings.surfaceColor;
         },
@@ -235,6 +248,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       speech,
       lesion,
       strokeCases,
+      userMap,
       visualFieldMap,
       coordinates:
         coordinates &&

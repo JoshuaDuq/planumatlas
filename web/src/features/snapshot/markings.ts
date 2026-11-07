@@ -31,6 +31,8 @@ export interface KeyWords {
 export interface KeySwatch extends Rect {
   color: string;
   radius: number;
+  /** A colour scale's CSS colours, left to right, drawn instead of `color`. */
+  ramp?: readonly string[];
 }
 
 /** A colour key's plate, its swatches and its words. */
@@ -204,6 +206,7 @@ export function snapshotMarkings(
           ...local(swatch),
           color: style.backgroundColor,
           radius: parseFloat(style.borderTopLeftRadius) || 0,
+          ...(row.ramp && { ramp: row.ramp }),
         });
         texts.push(words(find(item, '.stage-key-label'), row.label));
       });

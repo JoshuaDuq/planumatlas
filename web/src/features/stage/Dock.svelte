@@ -1,5 +1,5 @@
 <!--
-  The stage dock: one plate of worded tools, Section, Lesion, Coordinate and Display, each opening a popover
+  The stage dock: one plate of worded tools, Section, Lesion, Coordinate, Overlay and Display, each opening a popover
   (index.html:433-490, stage.css:311-440). APG Toolbar (deviation g2-dock-toolbar): the row is a labelled
   `role="toolbar"` with one Tab stop; ← → ↑ ↓ and Home/End move between the visible tools, Enter and Space
   open. The tract reference has none of them, so the dock is not drawn over it.
@@ -8,6 +8,8 @@
   - The popovers are placed above the whole dock on its start edge, inside the visible stage (place-popover.ts).
   - Section's popover and the section row above the tools are G4's, the Lesion's and Coordinate's bodies the
     lesion feature's: they come in as snippets. Coordinate is offered only with a body (published spaces).
+  - Overlay, the reader's own NIfTI map, is offered only with a body, and not on a stage narrower than
+    480 px, a phone's, where the other four tools fill one row.
   - A click on the brain places the lesion only while the reader has chosen so in the Lesion popover and it is
     open, and while it does, a press on the stage keeps it open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
@@ -56,6 +58,8 @@
     >;
     /** The Coordinate popover's body; without one the tool is not offered. */
     coordinatePopover?: Snippet<[{ close: () => void }]>;
+    /** The Overlay popover's body, the reader's own map; without one the tool is not offered. */
+    overlayPopover?: Snippet<[{ close: () => void }]>;
     onLesionPlacing: (placing: boolean) => void;
     /** On a phone, the open popover's top edge on the stage host, or null once it closes (`camera.clearPlate`). */
     onPlate: (top: number | null, options: { immediate: boolean }) => void;
@@ -75,14 +79,19 @@
     sectionBar,
     lesionPopover,
     coordinatePopover,
+    overlayPopover,
     onLesionPlacing,
     onPlate,
   }: Props = $props();
 
+  const NARROW_STAGE_PX = 480;
   const uid = $props.id();
   const sectionLabelId = `section-tool-${uid}`;
   const lesionLabelId = `lesion-tool-${uid}`;
   const coordinateLabelId = `coordinate-tool-${uid}`;
+  const overlayLabelId = `overlay-tool-${uid}`;
+  // A stage this narrow fits only the other four tools on one row.
+  const narrow = $derived((stage.visibleRect?.width ?? Infinity) < NARROW_STAGE_PX);
   const displayLabelId = `display-tool-${uid}`;
 
   const copy = $derived(t(lang, 'viewport'));
@@ -97,11 +106,14 @@
   let sectionOpen = $state(false);
   let lesionOpen = $state(false);
   let coordinateOpen = $state(false);
+  let overlayOpen = $state(false);
   let displayOpen = $state(false);
-  const anyOpen = $derived(sectionOpen || lesionOpen || coordinateOpen || displayOpen);
+  const anyOpen = $derived(
+    sectionOpen || lesionOpen || coordinateOpen || overlayOpen || displayOpen,
+  );
   // Which one, so a swap from one tool to another measures the plate that opened.
   const openTool = $derived(
-    [sectionOpen, lesionOpen, coordinateOpen, displayOpen].findIndex(Boolean),
+    [sectionOpen, lesionOpen, coordinateOpen, overlayOpen, displayOpen].findIndex(Boolean),
   );
   // A click places the lesion only while the reader chose so, and only until the Lesion popover closes.
   let placing = $state(false);
@@ -119,7 +131,7 @@
   // no `hashchange`): a popover still open would act on the scene it was opened for.
   $effect(() => {
     const closeAll = () => {
-      sectionOpen = lesionOpen = coordinateOpen = displayOpen = false;
+      sectionOpen = lesionOpen = coordinateOpen = overlayOpen = displayOpen = false;
     };
     addEventListener('hashchange', closeAll);
     return () => removeEventListener('hashchange', closeAll);
@@ -279,6 +291,17 @@
     >
       {#snippet name()}<span id={coordinateLabelId}>{copy.coordinateTool}</span>{/snippet}
       {#snippet body({ close })}{@render coordinatePopover?.({ close })}{/snippet}
+    </StagePopover>
+    <StagePopover
+      bind:open={overlayOpen}
+      hidden={tractReference || !overlayPopover || narrow}
+      {covered}
+      style={popoverStyle}
+      dialogLabelledby={overlayLabelId}
+      {rescueFocus}
+    >
+      {#snippet name()}<span id={overlayLabelId}>{copy.overlayTool}</span>{/snippet}
+      {#snippet body({ close })}{@render overlayPopover?.({ close })}{/snippet}
     </StagePopover>
     <StagePopover
       bind:open={displayOpen}

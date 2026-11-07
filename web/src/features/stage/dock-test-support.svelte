@@ -1,4 +1,4 @@
-<!-- Fixture for the dock tests: the stage host as the Stage region renders it, with the dock, stubs for the Section, Lesion and Coordinate popovers' bodies, and a tab stop each side. Not shipped. -->
+<!-- Fixture for the dock tests: the stage host as the Stage region renders it, with the dock, stubs for the Section, Lesion, Coordinate and Overlay popovers' bodies, and a tab stop each side. Not shipped. -->
 <script lang="ts">
   import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
@@ -18,6 +18,7 @@
       tractReference: boolean;
       hasSpinalCord: boolean;
       coordinates: boolean;
+      overlay: boolean;
       phone: boolean;
       view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
     };
@@ -72,6 +73,7 @@
     onLesionPlacing={(next) => placing.push(next)}
     onPlate={(top, { immediate }) => plates.push({ top, immediate })}
     coordinatePopover={live.coordinates ? coordinates : undefined}
+    overlayPopover={live.overlay ? overlay : undefined}
   >
     {#snippet sectionPopover()}
       <p class="stage-field-label">Cutting plane</p>
@@ -84,6 +86,9 @@
   {#snippet coordinates()}
     <label class="stage-field-label" for="coordinate-field">MNI coordinate</label>
     <input id="coordinate-field" type="text" />
+  {/snippet}
+  {#snippet overlay()}
+    <button type="button" class="stage-command">Choose a NIfTI file…</button>
   {/snippet}
 </main>
 <button type="button">After</button>

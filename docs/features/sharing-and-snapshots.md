@@ -20,9 +20,9 @@ The address bar records the viewer's scene as a fragment that restores it field 
 
 ## What it does
 
-**Sharing.** The address bar records the current view, including selection, display settings, camera and section. Copy the URL to share it. It carries a placed lesion, its colouring and the tract drawn through it, a placed published coordinate, chosen stroke cases, the open circuit and step, and the language. If a setting cannot be applied to the selected subject, a notice explains what was omitted.
+**Sharing.** The address bar records the current view, including selection, display settings, camera and section. Copy the URL to share it. It carries a placed lesion, its colouring and the tract drawn through it, a placed published coordinate, chosen stroke cases, the open circuit and step, and the language. It does not carry an [overlay](overlays.md), because the map is the reader's own file. If a setting cannot be applied to the selected subject, a notice explains what was omitted.
 
-**Save image.** The masthead's **Save image** writes the visible stage as a PNG with its orientation letters, route-landmark labels, scale bar, colour keys, a caption naming subject, labels, colouring and view or section, and the statement "Planum · Not clinical anatomy" (French: "Planum · Pas une anatomie clinique"). The file is named `planum-<atlas>[-<view>][-<plane>].png`, using the atlas, the view while the camera holds it, and the cut's plane; a notice then names the file.
+**Save image.** The masthead's **Save image** writes the visible stage as a PNG with its orientation letters, route-landmark labels, scale bar, colour keys, a caption naming subject, labels, colouring and view or section (and, with an [overlay](overlays.md) shown, its file, template and scale), and the statement "Planum · Not clinical anatomy" (French: "Planum · Pas une anatomie clinique"). The file is named `planum-<atlas>[-<view>][-<plane>].png`, using the atlas, the view while the camera holds it, and the cut's plane; a notice then names the file.
 
 ## How it was built
 

@@ -106,3 +106,26 @@ test('SLICE-14 a size outside 2..2048 or non-integer, a flat field of view or wi
   }
   renderSlice(volumes, frame, { ...display, size: 2 });
 });
+
+test('the reader’s map is drawn over the scan where it passes its threshold, by its opacity', () => {
+  // x + y in the map: 0 at the first pixel's point (0, 3) is 3, the last's (3, 0) is 3 too, so use z.
+  const map = (opacity: number) => ({
+    at: (x: number, y: number) => (x === 0 && y === 3 ? 5 : x === 3 && y === 0 ? -5 : Number.NaN),
+    display: { threshold: 3, max: 7, opacity },
+  });
+  const full = renderSlice({ ...volumes, map: map(1) }, frame, display);
+  // 5 is halfway up the positive scale (red to yellow); −5 halfway up the negative (blue to light blue).
+  assert.deepEqual(Array.from(full.slice(0, 4)), [255, 128, 0, 255]);
+  assert.deepEqual(Array.from(full.slice(-4)), [0, 128, 255, 255]);
+  // Half opacity lets the grey show through: 0.5 * 70 + 0.5 * 255 = 162.5, 0.5 * 70 + 0.5 * 127.5 = 98.75.
+  const half = renderSlice({ ...volumes, map: map(0.5) }, frame, display);
+  assert.deepEqual(Array.from(half.slice(0, 3)), [162, 99, 35]);
+  // Within ±threshold, or without a value, the scan stays as it was.
+  const hidden = renderSlice(
+    { ...volumes, map: { ...map(1), display: { threshold: 6, max: 7, opacity: 1 } } },
+    frame,
+    display,
+  );
+  assert.deepEqual(Array.from(hidden.slice(0, 4)), [70, 70, 70, 255]);
+  assert.deepEqual(Array.from(full.slice(4, 8)), Array.from(hidden.slice(4, 8)));
+});

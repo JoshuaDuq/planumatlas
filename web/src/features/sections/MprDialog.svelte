@@ -26,6 +26,8 @@
   } from '../../lib/core/catalog/segmentation-agreement.ts';
   import { decimal, formatRas, millimetres } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { mapNumber } from '../../lib/core/user-map/display.ts';
+  import type { Statistic } from '../../lib/core/user-map/display.ts';
   import type {
     EngineSections,
     MprPlane,
@@ -80,10 +82,24 @@
     regionName: (id: string) => string;
     /** Takes focus on close when the opener is gone. */
     fallbackFocus?: () => HTMLElement | null;
+    /**
+     * The reader's own map while the stage draws it: what the readout calls it, and a key that changes
+     * whenever how it is drawn does, so the planes are drawn again.
+     */
+    map?: { key: string; title: string; statistic: Statistic | null } | null;
   }
 
-  let { mpr, engine, engineState, lang, anatomy, agreementName, regionName, fallbackFocus }: Props =
-    $props();
+  let {
+    mpr,
+    engine,
+    engineState,
+    lang,
+    anatomy,
+    agreementName,
+    regionName,
+    fallbackFocus,
+    map = null,
+  }: Props = $props();
 
   /** The readout waits for the crosshair to rest, so a drag or a held key is not said per step. */
   const READOUT_QUIET_MS = 250;
@@ -124,16 +140,19 @@
     ) as Record<MprPlane, PlaneFrame>;
   });
   const visible = $derived(PLANES.filter((plane) => !phone.current || plane === mpr.plane));
-  const readout = $derived(
-    reading
-      ? readoutText(
-          formatRas(crosshair, lang),
-          reading.sample,
-          lang,
-          reading.sample.cutRegion && regionName(reading.sample.cutRegion.id),
-        )
-      : '',
-  );
+  const readout = $derived.by(() => {
+    if (!reading) return '';
+    const text = readoutText(
+      formatRas(crosshair, lang),
+      reading.sample,
+      lang,
+      reading.sample.cutRegion && regionName(reading.sample.cutRegion.id),
+    );
+    const value = reading.sample.mapValue;
+    return map && typeof value === 'number' && Number.isFinite(value)
+      ? `${text} · ${t(lang, 'overlay').readout(map.title, map.statistic, mapNumber(value, lang))}`
+      : text;
+  });
 
   // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
   // over the picture, not drawn into it. A plane nobody can see is drawn when it is shown
@@ -152,6 +171,7 @@
         frame.v,
         overlay,
         agreement,
+        map?.key,
         display.windowCenter,
         display.windowWidth,
       ]);

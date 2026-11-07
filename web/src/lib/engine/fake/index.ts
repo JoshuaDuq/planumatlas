@@ -15,6 +15,8 @@ import type {
 import { createFakeCamera } from './camera.ts';
 import { createFakeLesion } from './lesion.ts';
 import { createFakeStrokeCases } from './stroke-cases.ts';
+import { createFakeUserMap } from './user-map.ts';
+import type { FakeUserMap } from './user-map.ts';
 import type { FakeStrokeCases } from './stroke-cases.ts';
 import { createFakeVisualField } from './visual-field.ts';
 import type { FakeVisualField } from './visual-field.ts';
@@ -66,6 +68,7 @@ export interface FakeEngine extends Engine {
   readonly lesion: FakeLesion;
   readonly visualField: FakeVisualField;
   readonly strokeCases: FakeStrokeCases;
+  readonly userMap: FakeUserMap;
   /** Every call into the engine's domains, in order. Events and getters are not recorded. */
   readonly calls: readonly Call[];
   /** What the comparison overlay shows: the highlighted overlap and whether it is visible. */
@@ -181,6 +184,11 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
       calls,
     ),
     strokeCases: recorded('strokeCases', createFakeStrokeCases(options.strokeCases), calls),
+    userMap: recorded(
+      'userMap',
+      createFakeUserMap(Boolean(options.manifest.coordinate_spaces)),
+      calls,
+    ),
     calls,
     get highlighted() {
       return overlayVisible ? highlighted : null;

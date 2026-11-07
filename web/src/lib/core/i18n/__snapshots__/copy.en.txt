@@ -1456,6 +1456,108 @@
   "P": "P",
   "A": "A"
  },
+ "overlay": {
+  "intro": "Draw a statistical map or mask in an MNI template on this brain. The file is read on this computer and never sent.",
+  "space": "Template",
+  "choose": "Choose a NIfTI file…",
+  "another": "Choose another file…",
+  "reading": [
+   "[\"Alpha\"] → \"Reading Alpha…\"",
+   "[\"\"] → \"Reading …\""
+  ],
+  "failed": [
+   "[\"Alpha\"] → \"Alpha could not be shown:\"",
+   "[\"\"] → \" could not be shown:\""
+  ],
+  "shape": [
+   "[\"Alpha\",\"\"] → \"Alpha voxels of \"",
+   "[\"\",\"Alpha\"] → \" voxels of Alpha\""
+  ],
+  "range": [
+   "[\"Alpha\",\"\"] → \"values Alpha to \"",
+   "[\"\",\"Alpha\"] → \"values  to Alpha\""
+  ],
+  "mask": "a mask of 0 and 1",
+  "reach": [
+   "[\"Alpha\"] → \"reaches Alpha of the cortex\"",
+   "[\"\"] → \"reaches  of the cortex\""
+  ],
+  "title": "Title",
+  "titleHint": "Names the map in the key and the saved image.",
+  "statistic": "Statistic",
+  "value": "Value",
+  "threshold": "Threshold",
+  "thresholdHint": "Values whose magnitude is above it are drawn. The map is drawn once a threshold is given; 0 draws every value but zero.",
+  "max": "Colours up to",
+  "invalid": "Give a threshold of 0 or more, below the top of the scale.",
+  "opacity": "Opacity",
+  "minVoxels": "Minimum cluster size, voxels",
+  "minVoxelsHint": "Clusters of fewer of the map’s own voxels are neither drawn nor listed, as nilearn’s cluster_threshold.",
+  "minVoxelsInvalid": "Give a whole number of voxels, 0 or more.",
+  "captionMinVoxels": [
+   "[\"Alpha\"] → \"clusters of Alpha voxels or more\"",
+   "[\"\"] → \"clusters of  voxels or more\""
+  ],
+  "surface": "Cortex surface",
+  "surfaces": {
+   "pial": "Pial",
+   "mid": "Mid-thickness",
+   "white": "White"
+  },
+  "surfaceHint": "This brain’s own surfaces, with the same vertices and values: deeper ones open the sulci. A cut draws the pial.",
+  "captionSurface": [
+   "[\"Alpha\"] → \"on the alpha surface\"",
+   "[\"\"] → \"on the  surface\""
+  ],
+  "show": "Show on the brain",
+  "remove": "Remove",
+  "caveat": "A template-space map carried onto this brain by the template’s registration: its place on this person’s folds, not this person’s data.",
+  "keyRange": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha  to Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"Alpha to \""
+  ],
+  "captionTemplate": [
+   "[\"Alpha\"] → \"from Alpha\"",
+   "[\"\"] → \"from \""
+  ],
+  "captionUnstated": [
+   "[\"Alpha\"] → \"from MNI, template not stated, read as Alpha\"",
+   "[\"\"] → \"from MNI, template not stated, read as \""
+  ],
+  "captionScale": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"|Alpha| > , colours to Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"|| > Alpha, colours to \""
+  ],
+  "captionOpacity": [
+   "[\"Alpha\"] → \"opacity Alpha\"",
+   "[\"\"] → \"opacity \""
+  ],
+  "readout": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha: Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \": Alpha = \""
+  ],
+  "clusters": [
+   "[\"Alpha\"] → \"Clusters and peaks (Alpha)\"",
+   "[\"\"] → \"Clusters and peaks ()\""
+  ],
+  "clustersLoading": "Finding clusters…",
+  "clustersNone": "No value passes the threshold.",
+  "clustersFailed": "The clusters could not be found.",
+  "clustersHint": "As nilearn’s get_clusters_table, in template millimetres. Choose a peak to place it as a coordinate and see the regions around it on this brain.",
+  "peak": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha ·  at Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" · Alpha at \""
+  ],
+  "clusterSize": [
+   "[\"Alpha\"] → \"Alpha mm³\"",
+   "[\"\"] → \" mm³\""
+  ],
+  "morePeaks": [
+   "[\"Alpha\"] → \"Alpha more in the CSV\"",
+   "[\"\"] → \" more in the CSV\""
+  ],
+  "download": "Download CSV"
+ },
  "reasons": {
   "no-mri": "Outside the MRI scan",
   "hemisphere": {
@@ -1838,6 +1940,7 @@
   "sectionTool": "Section",
   "lesionTool": "Lesion",
   "coordinateTool": "Coordinate",
+  "overlayTool": "Overlay",
   "displayTool": "Display",
   "dockLabel": "3D viewer tools",
   "orbitGroup": "Turn the model",

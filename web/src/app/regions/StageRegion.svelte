@@ -16,6 +16,8 @@
   import SectionBar from '../../features/sections/SectionBar.svelte';
   import SectionPopover from '../../features/sections/SectionPopover.svelte';
   import CoordinatePopover from '../../features/lesion/CoordinatePopover.svelte';
+  import { mapCaption, mapKey } from '../../features/user-map/key.ts';
+  import OverlayPopover from '../../features/user-map/OverlayPopover.svelte';
   import LesionPopover from '../../features/lesion/LesionPopover.svelte';
   import { saveSnapshot } from '../../features/snapshot/snapshot.ts';
   import Dock from '../../features/stage/Dock.svelte';
@@ -104,6 +106,9 @@
         reference: reference ? tractCatalog(view.referenceAnatomy).name[view.lang] : null,
         // `current` is null while the cut is off, so its plane is a cut plane.
         section: cut && { ...cut, plane: cut.plane as Exclude<CutMode, 'off'> },
+        overlay: manifest.coordinate_spaces
+          ? mapCaption(world!.userMap, manifest.coordinate_spaces, view.lang)
+          : null,
       },
       { fail: commands.fail, notify: app!.session.notify },
     );
@@ -250,6 +255,16 @@
       view={current}
       {sources}
     />
+    {#snippet overlayPopover({ close }: { close: () => void })}
+      <OverlayPopover
+        map={world.userMap}
+        spaces={model.manifest.coordinate_spaces!}
+        lang={current.lang}
+        onPlace={async (mm) => {
+          if (await world.coordinates!.place(mm, world.userMap.space)) showReport(close);
+        }}
+      />
+    {/snippet}
     {#snippet coordinatePopover({ close }: { close: () => void })}
       <CoordinatePopover
         lesion={world.lesion}
@@ -271,6 +286,9 @@
       onPlate={world.engine.camera.clearPlate}
       {commands}
       coordinatePopover={world.coordinates ? coordinatePopover : undefined}
+      overlayPopover={world.userMap.available && model.manifest.coordinate_spaces
+        ? overlayPopover
+        : undefined}
     >
       {#snippet sectionPopover({ close })}
         <SectionPopover
@@ -330,7 +348,7 @@
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
-      legend={tractReference
+      legend={tractReference || world.userMap.drawn
         ? null
         : legendFor(
             // The paint the session asks for, which the model may not show yet (syncPaint runs in
@@ -353,6 +371,7 @@
       cases={!tractReference && world.strokeCases.cohort.status === 'ready'
         ? casesKey(world.strokeCases.cohort.data, world.strokeCases.chosen, current.lang)
         : null}
+      map={tractReference ? null : mapKey(world.userMap, current.lang)}
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
     />
@@ -385,6 +404,18 @@
     agreementName={agreementName(world)}
     regionName={(id) => world.catalog.label(id).name}
     fallbackFocus={() => sectionToolOrCanvas(engine.canvas)}
+    map={world.userMap.drawn && world.userMap.state.status === 'ready'
+      ? {
+          key: JSON.stringify([
+            world.userMap.state.name,
+            world.userMap.space,
+            world.userMap.settings,
+            world.userMap.placed,
+          ]),
+          title: world.userMap.title,
+          statistic: world.userMap.statistic,
+        }
+      : null}
   />
   <MriNavigator
     bind:open={diffusionMri}

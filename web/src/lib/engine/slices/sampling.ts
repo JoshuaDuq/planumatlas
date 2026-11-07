@@ -1,5 +1,7 @@
 import { AGREEMENT_COLORS, categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type { ComparedStructure } from '../../core/catalog/segmentation-agreement.ts';
+import { mapColour } from '../../core/user-map/display.ts';
+import type { MapDisplay } from '../../core/user-map/display.ts';
 import type { Frame } from './coordinates.ts';
 import type { Volume } from './volume.ts';
 
@@ -16,6 +18,14 @@ export interface SliceVolumes {
     /** NextBrain's compared structures on the segmentation's grid. */
     compared: Volume;
   };
+  /** The reader's own map, drawn over the scan and the segmentation as the cut faces draw it. */
+  map?: SliceMap;
+}
+
+/** The reader's map at a point of this brain (surface RAS mm; NaN for none), and how it is drawn. */
+export interface SliceMap {
+  at(x: number, y: number, z: number): number;
+  display: MapDisplay;
 }
 
 export interface SliceDisplay {
@@ -76,6 +86,14 @@ export function renderSlice(
           : null;
       for (let channel = 0; channel < 3; channel++) {
         pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
+      }
+      const mapped = volumes.map && mapColour(volumes.map.at(...point), volumes.map.display);
+      if (mapped) {
+        const { opacity } = volumes.map!.display;
+        for (let channel = 0; channel < 3; channel++) {
+          pixels[index + channel] =
+            pixels[index + channel]! * (1 - opacity) + mapped[channel]! * 255 * opacity;
+        }
       }
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
       pixels[index + 3] = label || category ? 255 : 0;

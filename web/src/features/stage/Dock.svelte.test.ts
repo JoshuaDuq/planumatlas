@@ -27,6 +27,7 @@ interface Live {
   tractReference: boolean;
   hasSpinalCord: boolean;
   coordinates: boolean;
+  overlay: boolean;
   phone: boolean;
   view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
 }
@@ -51,6 +52,7 @@ function liveState(overrides: Partial<Live>): Live {
     tractReference: false,
     hasSpinalCord: true,
     coordinates: true,
+    overlay: true,
     phone: false,
     view: {
       explorer: 'anatomy',
@@ -145,7 +147,7 @@ afterEach(() => {
 });
 
 describe('the toolbar', () => {
-  test('is a labelled toolbar of four tools with one Tab stop that the arrows walk, wrapping', async () => {
+  test('is a labelled toolbar of five tools with one Tab stop that the arrows walk, wrapping', async () => {
     await mount();
     const bar = page.getByRole('toolbar', { name: '3D viewer tools' }).element();
     const tools = [...bar.querySelectorAll<HTMLElement>('.stage-tool')];
@@ -153,16 +155,17 @@ describe('the toolbar', () => {
       'Section',
       'Lesion',
       'Coordinate',
+      'Overlay',
       'Display',
     ]);
-    expect(tools.map((node) => node.tabIndex)).toEqual([0, -1, -1, -1]);
+    expect(tools.map((node) => node.tabIndex)).toEqual([0, -1, -1, -1, -1]);
 
     tool('Section').focus();
     await userEvent.keyboard('{ArrowRight}');
     expect(active()).toBe(tool('Lesion'));
     await userEvent.keyboard('{ArrowDown}');
     expect(active()).toBe(tool('Coordinate'));
-    await userEvent.keyboard('{ArrowRight}{ArrowRight}');
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
     expect(active()).toBe(tool('Section'));
     await userEvent.keyboard('{ArrowLeft}');
     expect(active()).toBe(tool('Display'));
@@ -189,7 +192,7 @@ describe('the toolbar', () => {
     expect(page.getByRole('button', { name: 'Coordinate' }).elements()).toHaveLength(0);
     tool('Lesion').focus();
     await userEvent.keyboard('{ArrowRight}');
-    expect(active()).toBe(tool('Display'));
+    expect(active()).toBe(tool('Overlay'));
     live.coordinates = true;
     flushSync();
     await userEvent.keyboard('{ArrowLeft}');
@@ -198,7 +201,7 @@ describe('the toolbar', () => {
 
   test('over the tract reference no tool is left and the dock is not drawn; it comes back with them', async () => {
     await mount({ tractReference: true });
-    for (const name of ['Section', 'Lesion', 'Coordinate', 'Display']) {
+    for (const name of ['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display']) {
       expect(page.getByRole('button', { name }).elements(), name).toHaveLength(0);
     }
     expect(getComputedStyle(dock()).visibility).toBe('hidden');
@@ -258,7 +261,7 @@ describe('a tool and its popover', () => {
     }
   });
 
-  test.each(['Section', 'Lesion', 'Coordinate', 'Display'])(
+  test.each(['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display'])(
     'the %s popover is named by its tool',
     async (name) => {
       await mount();
@@ -276,7 +279,7 @@ describe('a tool and its popover', () => {
     expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false');
   });
 
-  test.each(['Display', 'Section', 'Lesion', 'Coordinate'])(
+  test.each(['Display', 'Section', 'Lesion', 'Coordinate', 'Overlay'])(
     'Shift+Tab from the first control of %s returns to its own tool with the popover still open',
     async (name) => {
       await mount();
@@ -524,9 +527,24 @@ describe('placement', () => {
     try {
       await mount({ phone: true, lang }, { width, height: 700 });
       const tools = [...dock().querySelectorAll<HTMLElement>('.stage-tool:not([hidden])')];
+      // Overlay is not offered on a phone this narrow.
+      expect(tools.map((node) => node.textContent!.trim())).not.toContain(
+        lang === 'en' ? 'Overlay' : 'Superposition',
+      );
       expect(tools).toHaveLength(4);
       const rows = new Set(tools.map((node) => Math.round(node.getBoundingClientRect().top)));
       expect(rows.size).toBe(1);
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
+  test('a tablet in portrait, laid out as a phone, still offers Overlay', async () => {
+    await page.viewport(768, 1000);
+    try {
+      await mount({ phone: true }, { width: 768, height: 900 });
+      const tools = [...dock().querySelectorAll<HTMLElement>('.stage-tool:not([hidden])')];
+      expect(tools.map((node) => node.textContent!.trim())).toContain('Overlay');
     } finally {
       await page.viewport(1280, 800);
     }
@@ -705,8 +723,8 @@ describe('accessibility (axe)', () => {
     await mount({ lang });
     const names =
       lang === 'en'
-        ? ['Section', 'Lesion', 'Coordinate', 'Display']
-        : ['Coupe', 'Lésion', 'Coordonnée', 'Affichage'];
+        ? ['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display']
+        : ['Coupe', 'Lésion', 'Coordonnée', 'Superposition', 'Affichage'];
     await expectAxeClean();
     for (const name of names) {
       await open(name);

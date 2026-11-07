@@ -20,6 +20,7 @@ import type {
 import { centeredFrame, clippingPlane } from './coordinates.ts';
 import type { Frame, Ras } from './coordinates.ts';
 import { renderSlice } from './sampling.ts';
+import type { SliceMap } from './sampling.ts';
 import { loadVolume } from './volume.ts';
 import type { Volume, VolumeFile } from './volume.ts';
 import type { SurfaceColor } from '../../types/index.ts';
@@ -104,6 +105,8 @@ export class BrainSections extends EventTarget {
   private comparedVolume: Volume | null = null;
   private agreementRequest = 0;
   display: MriDisplay | null = null;
+  /** The reader's own map while the stage draws it; the linked MRI draws it too. */
+  private userMap: SliceMap | null = null;
   readonly state: SectionsStateRecord;
   private pending: Promise<void> | null = null;
   private disposed = false;
@@ -572,6 +575,7 @@ export class BrainSections extends EventTarget {
         segmentation: volumes.segmentation,
         metadata: { labels: volumes.metadata.labels },
         ...(shown && { agreement: shown }),
+        ...(this.userMap && { map: this.userMap }),
       },
       frame,
       { ...display, overlay: this.state.overlay },
@@ -586,6 +590,7 @@ export class BrainSections extends EventTarget {
     ras: Ras;
     agreement: AgreementCategory | null;
     cutRegion: Region | null;
+    mapValue: number | null;
   } {
     const { volumes } = this;
     if (!volumes) throw new Error('The linked MRI has not loaded.');
@@ -608,7 +613,14 @@ export class BrainSections extends EventTarget {
       ras: point,
       agreement: this.agreementAt(point, labelId),
       cutRegion: (cutId && this.model.regions.get(cutId)) || null,
+      mapValue: this.userMap ? this.userMap.at(...point) : null,
     };
+  }
+
+  /** Draw the reader's map on the linked MRI, or stop; the planes are drawn again by their next change. */
+  setUserMap(map: SliceMap | null): void {
+    this.userMap = map;
+    this.emit();
   }
 
   private agreementAt(point: Ras, labelId: number): AgreementCategory | null {

@@ -48,6 +48,8 @@ export interface CaptionFacts {
   reference?: string | null;
   view?: ViewName | null;
   section?: SnapshotSection | null;
+  /** The reader's own map on the stage: its title, then its file, template and scale, worded. */
+  overlay?: { title: string; details: string[] } | null;
 }
 
 /**
@@ -57,7 +59,7 @@ export interface CaptionFacts {
  */
 export function snapshotCaption(
   lang: Language,
-  { subject, atlas, surfaceColor, detail, reference, view, section }: CaptionFacts,
+  { subject, atlas, surfaceColor, detail, reference, view, section, overlay }: CaptionFacts,
 ): CaptionLine[] {
   const fact = (text: string | null | undefined, style: Omit<Run, 'text'> = {}) => [
     { text: text || '', ...style },
@@ -87,6 +89,12 @@ export function snapshotCaption(
     lines.push(line);
   } else if (view) {
     lines.push([fact(t(lang, 'viewport').namedView(t(lang, 'views')[view]))]);
+  }
+  if (overlay && !reference) {
+    lines.push([
+      fact(overlay.title, { strong: true }),
+      ...overlay.details.map((detail) => fact(detail)),
+    ]);
   }
   return lines
     .map((line) => line.filter((runs) => runs.some((run) => run.text)))
@@ -331,7 +339,11 @@ function drawKey(ctx: Context, { box, fill, edge, swatches, texts }: KeyMark) {
   ctx.fill();
   ctx.stroke();
   for (const swatch of swatches) {
-    ctx.fillStyle = swatch.color;
+    if (swatch.ramp) {
+      const ramp = ctx.createLinearGradient(swatch.x, 0, swatch.x + swatch.width, 0);
+      swatch.ramp.forEach((color, at) => ramp.addColorStop(at / (swatch.ramp!.length - 1), color));
+      ctx.fillStyle = ramp;
+    } else ctx.fillStyle = swatch.color;
     ctx.beginPath();
     ctx.roundRect(swatch.x, swatch.y, swatch.width, swatch.height, swatch.radius);
     ctx.fill();
@@ -510,6 +522,8 @@ export interface SnapshotSubject {
   reference: string | null;
   /** The open section, or null. */
   section: SnapshotSection | null;
+  /** The reader’s own map on the stage, or null. */
+  overlay?: CaptionFacts['overlay'];
 }
 
 /** The markings plan and caption for the visible stage, measured now. */
@@ -528,6 +542,7 @@ export function snapshotPlan(
     reference,
     view: engine.camera.viewHeld ? subject.view : null,
     section: reference ? null : subject.section,
+    overlay: subject.overlay,
   });
   const tokens = getComputedStyle(host);
   const token = (name: string) => tokens.getPropertyValue(name).trim();

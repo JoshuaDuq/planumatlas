@@ -140,6 +140,7 @@ features/linked-mri
 features/dissection-and-display
 features/lesion-report
 features/published-coordinates
+features/overlays
 features/sharing-and-snapshots
 ```
 

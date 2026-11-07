@@ -74,6 +74,14 @@ export function createField(record: FieldRecord, data: Int16Array): Field {
 
 /** Download, verify and decode a template's field, as `loadVolume` does a label volume. */
 export async function loadField(record: FieldRecord, baseUrl: string | URL): Promise<Field> {
+  return createField(record, await loadFieldData(record, baseUrl));
+}
+
+/** A template's field as stored: its int16 node displacements, downloaded and verified. */
+export async function loadFieldData(
+  record: FieldRecord,
+  baseUrl: string | URL,
+): Promise<Int16Array> {
   if (record.compression !== 'gzip') {
     throw new Error(`Unsupported coordinate field compression: ${record.compression}`);
   }
@@ -92,5 +100,5 @@ export async function loadField(record: FieldRecord, baseUrl: string | URL): Pro
   const view = new DataView(buffer);
   const data = new Int16Array(buffer.byteLength / 2);
   for (let i = 0; i < data.length; i++) data[i] = view.getInt16(i * 2, true);
-  return createField(record, data);
+  return data;
 }

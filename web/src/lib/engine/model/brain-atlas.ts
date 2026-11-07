@@ -62,6 +62,7 @@ import {
   stageLegible,
 } from '../render/materials.ts';
 import type { Appearance, AnatomicalUserData, VisualFieldUniforms } from '../render/materials.ts';
+import { addUserMapToSurface, createUserMapUniforms } from '../user-map/overlay.ts';
 import type { SurfaceHit } from '../render/picking.ts';
 import type { VisualFieldDot, VisualFieldReading } from '../api.ts';
 import { GHOST } from '../render/ghost-order.ts';
@@ -470,6 +471,8 @@ export class BrainAtlas extends EventTarget {
   readonly ftract: StimulationFtract | null;
   /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */
   readonly visualField: VisualFieldUniforms | null;
+  /** The reader's own map, shared by every cortical material and every cut face. */
+  readonly userMap = createUserMapUniforms();
   /** A panel's colours for named regions, every other region in tissue colour; null for none. */
   paint: Paint | null = null;
   readonly layers = new Map<string, Layer>();
@@ -661,6 +664,7 @@ export class BrainAtlas extends EventTarget {
           const surfaces = createWhiteMatterSurfaces(scene, this.manifest.appearance);
           for (const mesh of surfaces.meshes) {
             mesh.raycast = raycastWithBvh(bvh);
+            addUserMapToSurface(mesh.material, this.userMap);
             if (this.mriUniforms) addMriAppearance(mesh.material, this.mriUniforms);
           }
           this.whiteMatterSurfaces = surfaces;
@@ -818,6 +822,7 @@ export class BrainAtlas extends EventTarget {
               this.manifest.appearance,
               // Every cortical atlas carries the predicted retinotopy on every vertex.
               this.manifest.atlases.some((atlas) => atlas.id === id) ? this.visualField : null,
+              this.userMap,
             );
             if (this.mriUniforms) addMriAppearance(shown.material, this.mriUniforms);
             this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));

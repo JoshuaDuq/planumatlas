@@ -17,6 +17,7 @@ export const en = {
   sectionTool: 'Section',
   lesionTool: 'Lesion',
   coordinateTool: 'Coordinate',
+  overlayTool: 'Overlay',
   displayTool: 'Display',
   // The stage dock and the orientation gizmo's turn buttons (decision 22 on #4).
   dockLabel: '3D viewer tools',
@@ -63,6 +64,7 @@ export const fr: typeof en = {
   sectionTool: 'Coupe',
   lesionTool: 'Lésion',
   coordinateTool: 'Coordonnée',
+  overlayTool: 'Superposition',
   displayTool: 'Affichage',
   dockLabel: 'Outils du visualiseur 3D',
   orbitGroup: 'Faire pivoter le modèle',
