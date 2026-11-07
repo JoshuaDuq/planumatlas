@@ -182,12 +182,19 @@ test('PANEL-13 the Functions tab brings its own busy and failure text', () => {
   );
 });
 
-test('PANEL-15 the four published corrections are listed with their DOI, link and summary', () => {
+test('PANEL-15 the six published corrections are listed with their DOI, link and summary', () => {
   const data = readRepoYaml<ClinicalData>('data/neuropsychology.yaml');
   const corrected = data.references.filter((reference) => reference.corrections);
   assert.deepEqual(
     corrected.map((reference) => reference.id),
-    ['karnath-2000', 'bouvier-2006', 'woolgar-2010', 'weaver-2021'],
+    [
+      'karnath-2000',
+      'bouvier-2006',
+      'woolgar-2010',
+      'weaver-2021',
+      'barojas-alvarez-2021',
+      'kim-lee-2002',
+    ],
   );
   assert.deepEqual(publishedCorrections(corrected[0], 'en'), [
     {
@@ -216,4 +223,10 @@ test('PANEL-15 the four published corrections are listed with their DOI, link an
     publishedCorrections(corrected[3], 'en')[0].doi,
     'doi:10.1016/s1474-4422(24)00094-2',
   );
+  assert.equal(
+    publishedCorrections(corrected[4], 'en')[0].href,
+    'https://doi.org/10.1016/j.cccb.2022.100130',
+  );
+  assert.match(publishedCorrections(corrected[4], 'en')[0].summary, /consent/);
+  assert.match(publishedCorrections(corrected[4], 'fr')[0].summary, /consentement/);
 });

@@ -33,6 +33,9 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'abulia',
       'acalculia',
       'achromatopsia',
+      'acquired-anxiety',
+      'acquired-mania',
+      'acquired-ocd',
       'action-naming',
       'agnosia',
       'agrammatism',
@@ -62,6 +65,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'central-pain',
       'cerebellar-cognitive',
       'cerebellar-vertigo',
+      'cognitive-estimation',
       'coma',
       'confabulation',
       'constructional-apraxia',
@@ -80,6 +84,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'finger-agnosia',
       'fluid-intelligence',
       'foreign-accent',
+      'fregoli-syndrome',
       'gaze-evoked-nystagmus',
       'gesture-recognition',
       'hand-paresis',
@@ -91,6 +96,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'hypersomnia',
       'insular-cardiac-dysfunction',
       'interval-timing',
+      'kluver-bucy',
       'language-self-awareness',
       'lateropulsion',
       'left-right-disorientation',
@@ -104,6 +110,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'motor-neglect',
       'multitasking',
       'neglect',
+      'object-colour-knowledge',
       'olfactory-recognition',
       'optic-ataxia',
       'pain-asymbolia',
@@ -121,6 +128,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'prospective-memory',
       'pure-sensory-stroke',
       'recollection-familiarity',
+      'reduplicative-paramnesia',
       'reversal-learning',
       'saccadic-dysmetria',
       'semantic-memory',
@@ -134,6 +142,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'sound-localization',
       'source-memory',
       'spasticity',
+      'spatial-relations',
       'speech-apraxia',
       'stuttering',
       'surface-alexia',
@@ -147,6 +156,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'transient-global-amnesia',
       'verbal-fluency',
       'vertical-gaze-palsy',
+      'visual-anosognosia',
       'visual-extinction',
       'visual-verticality',
       'word-deafness',
@@ -166,7 +176,12 @@ function checkAnatomy(catalog: ClinicalCatalog) {
   // studies beside them, so a region can carry more than one association.
   assert.deepEqual(
     catalog.forRegion('destrieux:right:38').map((a) => a.id),
-    ['neglect-allocentric', 'akinetopsia-lateral'],
+    [
+      'neglect-allocentric',
+      'akinetopsia-lateral',
+      'spatial-relations-metric',
+      'acquired-anxiety-temporal-limbic',
+    ],
   );
   assert.deepEqual(
     catalog
@@ -180,6 +195,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'neglect-egocentric',
       'neglect-perceptual',
       'personal-neglect-parietal',
+      'reduplicative-right-mca-case',
       'sound-localization-right-network',
       'tactile-agnosia-persistence',
     ],
@@ -220,6 +236,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'emotional-empathy-inferior-frontal',
       'fluency-letter',
       'gesture-recognition-correctness',
+      'semantic-controlled-retrieval',
       'speech-apraxia-frontal',
       'stuttering-cortico-striatal',
     ],
@@ -237,7 +254,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
   );
   assert.deepEqual(
     catalog.forDeficit('amnesia').map((a) => a.id),
-    ['hippocampal-amnesia', 'amnesia-fornix', 'amnesia-diencephalic'],
+    ['hippocampal-amnesia', 'amnesia-fornix', 'amnesia-diencephalic', 'amnesia-basal-forebrain'],
   );
   assert.ok(catalog.forDeficit('hemichorea')[0].evidence.some((e) => e.role === 'qualifying'));
   assert.deepEqual(
@@ -253,6 +270,7 @@ function checkAnatomy(catalog: ClinicalCatalog) {
       'verbal-fluency',
       'agrammatism',
       'sign-language-aphasia',
+      'acquired-anxiety',
     ],
   );
   // Lobule VI carries motor, speech and cognitive claims side by side; the anterior lobe no cognitive one.
@@ -302,12 +320,12 @@ describe('published clinical content: fixed values', () => {
   const [, manifest] = manifests[0];
   const catalog = createClinicalCatalog(data, manifest, {});
 
-  test('CAT-50 · the published records are the revision of 2026-11-02: 6 groups, 121 deficits, 305 references, 193 associations', () => {
-    assert.equal(catalog.revised, '2026-11-02');
+  test('CAT-50 · the published records are the revision of 2026-11-07: 6 groups, 131 deficits, 339 references, 218 associations', () => {
+    assert.equal(catalog.revised, '2026-11-07');
     assert.equal(data.groups.length, 6);
-    assert.equal(data.deficits.length, 121);
-    assert.equal(data.references.length, 306);
-    assert.equal(data.associations.length, 193);
+    assert.equal(data.deficits.length, 131);
+    assert.equal(data.references.length, 339);
+    assert.equal(data.associations.length, 218);
   });
 
   test('reviewed motor-neglect and aprosodia findings preserve their mapping limits', () => {
@@ -352,7 +370,13 @@ describe('published clinical content: fixed values', () => {
     ]);
     assert.deepEqual(
       catalog.forDeficit('working-memory').map((finding) => finding.id),
-      ['working-memory-manipulation', 'working-memory-spatial-precision'],
+      [
+        'working-memory-manipulation',
+        'working-memory-spatial-precision',
+        'working-memory-frontal-manipulation',
+        'working-memory-distractor-filtering',
+        'working-memory-load-sensitive-retention',
+      ],
     );
   });
 
@@ -593,6 +617,7 @@ describe('published clinical content: fixed values', () => {
     assert.deepEqual(catalog.mappedRegions('semantic-memory'), [
       'destrieux:left:44',
       'destrieux:right:44',
+      'destrieux:left:12',
     ]);
     assert.deepEqual(
       [...catalog.paint('verbal-fluency', 'fluency-superior-medial').paint.colors.keys()],
@@ -825,10 +850,192 @@ describe('published clinical content: fixed values', () => {
     assert.equal(catalog.search('utilisation d’outils', 'fr')[0].id, 'apraxia');
   });
 
+  test('Hart additions keep observed injury separate from connected regions and unresolved subdivisions', () => {
+    const keys = (deficit: string, finding: string) => [
+      ...catalog.paint(deficit, finding).paint.colors.keys(),
+    ];
+    assert.deepEqual(keys('object-colour-knowledge', 'object-colour-knowledge-temporal'), [
+      'destrieux:left:21',
+      'destrieux:left:22',
+    ]);
+    assert.deepEqual(keys('spatial-relations', 'spatial-relations-categorical'), [
+      'destrieux:left:25',
+      'destrieux:left:26',
+    ]);
+    assert.deepEqual(keys('spatial-relations', 'spatial-relations-metric'), ['destrieux:right:38']);
+    assert.deepEqual(keys('acquired-mania', 'mania-right-thalamus'), ['aseg:right:49']);
+    assert.deepEqual(keys('acquired-mania', 'mania-connectivity'), []);
+    assert.deepEqual(keys('visual-anosognosia', 'visual-anosognosia-occipital'), [
+      'destrieux:left:45',
+      'destrieux:right:45',
+    ]);
+    assert.deepEqual(keys('visual-anosognosia', 'visual-anosognosia-disconnection'), []);
+    for (const deficit of ['acquired-mania', 'visual-anosognosia']) {
+      assert.equal(catalog.forDeficit(deficit).length, 2);
+      assert.ok(
+        catalog.forDeficit(deficit).every((a) => a.evidence.some((e) => e.role === 'qualifying')),
+      );
+    }
+  });
+
+  test('Hart additions are searchable in both languages without merging distinct impairments', () => {
+    for (const [query, lang, id] of [
+      ['object color knowledge', 'en', 'object-colour-knowledge'],
+      ['agnosie des couleurs', 'fr', 'object-colour-knowledge'],
+      ['categorical spatial relations', 'en', 'spatial-relations'],
+      ['relations spatiales métriques', 'fr', 'spatial-relations'],
+      ['secondary mania', 'en', 'acquired-mania'],
+      ['manie secondaire', 'fr', 'acquired-mania'],
+      ['Anton syndrome', 'en', 'visual-anosognosia'],
+      ['syndrome d’Anton', 'fr', 'visual-anosognosia'],
+    ] as const)
+      assert.equal(catalog.search(query, lang)[0]?.id, id);
+    assert.equal(catalog.search('achromatopsia', 'en')[0].id, 'achromatopsia');
+    assert.equal(catalog.search('hemianopia', 'en')[0].id, 'hemianopia');
+    assert.equal(catalog.search('disinhibition', 'en')[0].id, 'disinhibition');
+    assert.equal(catalog.get('object-colour-knowledge').group, 'perception');
+    assert.equal(catalog.get('visual-anosognosia').group, 'attention-executive');
+  });
+
+  test('the Anton case retains its consent correction and the network study uses its issue year', () => {
+    const corrected = data.references.find((r) => r.id === 'barojas-alvarez-2021')!;
+    assert.equal(corrected.pmid, '36324705');
+    assert.deepEqual(
+      corrected.corrections?.map((c) => c.doi),
+      ['10.1016/j.cccb.2022.100130'],
+    );
+    assert.equal(data.references.find((r) => r.id === 'monai-2024')!.year, 2024);
+    assert.equal(data.references.find((r) => r.id === 'monai-2024')!.scope, 'full-text');
+  });
+
+  test('further Hart findings distinguish direct injury from broader or connected anatomy', () => {
+    const keys = (deficit: string, finding: string) => [
+      ...catalog.paint(deficit, finding).paint.colors.keys(),
+    ];
+    assert.deepEqual(keys('acquired-ocd', 'acquired-ocd-orbitofrontal'), ['destrieux:left:31']);
+    assert.deepEqual(keys('acquired-ocd', 'acquired-ocd-connectivity'), []);
+    assert.deepEqual(keys('kluver-bucy', 'kluver-bucy-amygdala'), [
+      'aseg:left:18',
+      'aseg:right:54',
+    ]);
+    assert.deepEqual(keys('kluver-bucy', 'kluver-bucy-hippocampus'), [
+      'aseg:left:17',
+      'aseg:right:53',
+    ]);
+    assert.deepEqual(keys('cognitive-estimation', 'estimation-right-temporal-frontal'), [
+      'destrieux:right:44',
+      'destrieux:right:13',
+    ]);
+    assert.deepEqual(keys('cognitive-estimation', 'estimation-frontal'), []);
+    assert.deepEqual(keys('fregoli-syndrome', 'fregoli-right-insula'), ['destrieux:right:18']);
+    assert.deepEqual(keys('fregoli-syndrome', 'fregoli-connectivity'), []);
+    for (const id of ['acquired-ocd', 'kluver-bucy', 'cognitive-estimation', 'fregoli-syndrome'])
+      assert.equal(catalog.forDeficit(id).length, 2);
+  });
+
+  test('further Hart profiles have bilingual searches without replacing related profiles', () => {
+    for (const [query, lang, id] of [
+      ['acquired OCD', 'en', 'acquired-ocd'],
+      ['TOC acquis', 'fr', 'acquired-ocd'],
+      ['Kluver Bucy', 'en', 'kluver-bucy'],
+      ['syndrome de Klüver-Bucy', 'fr', 'kluver-bucy'],
+      ['cognitive estimation', 'en', 'cognitive-estimation'],
+      ['estimation cognitive', 'fr', 'cognitive-estimation'],
+      ['Fregoli syndrome', 'en', 'fregoli-syndrome'],
+      ['syndrome de Frégoli', 'fr', 'fregoli-syndrome'],
+    ] as const)
+      assert.equal(catalog.search(query, lang)[0]?.id, id);
+    assert.equal(catalog.search('acalculia', 'en')[0].id, 'acalculia');
+    assert.equal(catalog.search('somatoparaphrenia', 'en')[0].id, 'somatoparaphrenia');
+    assert.equal(catalog.search('disinhibition', 'en')[0].id, 'disinhibition');
+  });
+
+  test('further Hart references retain the affiliation correction and issue year', () => {
+    const kim = data.references.find((r) => r.id === 'kim-lee-2002')!;
+    assert.deepEqual(
+      kim.corrections?.map((c) => c.doi),
+      ['10.1176/jnp.14.2.242'],
+    );
+    assert.equal(data.references.find((r) => r.id === 'cipolotti-2018')!.year, 2018);
+    assert.equal(data.references.find((r) => r.id === 'cotovio-2026')!.year, 2026);
+  });
+
+  test('memory, anxiety and spatial-delusion additions retain their precise mapping limits', () => {
+    const keys = (deficit: string, finding: string) => [
+      ...catalog.paint(deficit, finding).paint.colors.keys(),
+    ];
+    assert.deepEqual(keys('acquired-anxiety', 'acquired-anxiety-temporal-limbic'), [
+      'aseg:left:17',
+      'destrieux:left:38',
+      'destrieux:right:38',
+    ]);
+    assert.deepEqual(keys('acquired-anxiety', 'acquired-anxiety-thalamic'), ['aseg:left:10']);
+    assert.deepEqual(keys('reduplicative-paramnesia', 'reduplicative-right-mca-case'), [
+      'destrieux:right:29',
+      'destrieux:right:26',
+    ]);
+    assert.deepEqual(keys('reduplicative-paramnesia', 'reduplicative-right-dlpfc'), []);
+    assert.deepEqual(keys('reduplicative-paramnesia', 'reduplicative-stroke-disconnection'), []);
+    assert.deepEqual(keys('working-memory', 'working-memory-frontal-manipulation'), []);
+    assert.deepEqual(keys('working-memory', 'working-memory-distractor-filtering'), [
+      'aseg:left:12',
+    ]);
+    assert.deepEqual(keys('working-memory', 'working-memory-load-sensitive-retention'), [
+      'aseg:right:50',
+      'nextbrain:right:12035',
+    ]);
+    assert.deepEqual(keys('amnesia', 'amnesia-basal-forebrain'), ['nextbrain:right:10111']);
+    assert.deepEqual(keys('semantic-memory', 'semantic-controlled-retrieval'), [
+      'destrieux:left:12',
+    ]);
+    assert.equal(catalog.forDeficit('working-memory').length, 5);
+    assert.equal(catalog.forDeficit('amnesia').length, 4);
+    assert.equal(catalog.forDeficit('semantic-memory').length, 2);
+    assert.equal(catalog.forDeficit('reduplicative-paramnesia').length, 3);
+    assert.ok(
+      catalog
+        .forDeficit('working-memory')
+        .find((a) => a.id === 'working-memory-frontal-manipulation')!
+        .evidence.some((e) => e.reference === 'koenigs-2009' && e.role === 'qualifying'),
+    );
+  });
+
+  test('memory, anxiety and place beliefs have distinct bilingual searches', () => {
+    for (const [query, lang, id] of [
+      ['poststroke anxiety', 'en', 'acquired-anxiety'],
+      ['anxiété acquise', 'fr', 'acquired-anxiety'],
+      ['spatial delusions', 'en', 'reduplicative-paramnesia'],
+      ['paramnésie réduplicative', 'fr', 'reduplicative-paramnesia'],
+      ['semantic control', 'en', 'semantic-memory'],
+      ['contrôle sémantique', 'fr', 'semantic-memory'],
+      ['Filtering simultaneous visual distractors', 'en', 'working-memory'],
+      ['bande diagonale', 'fr', 'amnesia'],
+    ] as const)
+      assert.equal(catalog.search(query, lang)[0]?.id, id);
+    assert.equal(catalog.search('Fregoli syndrome', 'en')[0].id, 'fregoli-syndrome');
+    assert.equal(
+      catalog.search('topographical disorientation', 'en')[0].id,
+      'topographical-disorientation',
+    );
+    assert.equal(data.references.find((r) => r.id === 'alves-2023')!.year, 2023);
+    assert.equal(data.references.find((r) => r.id === 'carlisle-2021')!.method, 'case-report');
+  });
+
+  test('memory, anxiety and spatial-delusion references record the text actually read', () => {
+    const scope = (id: string) => data.references.find((r) => r.id === id)!.scope;
+    // Liebermann's full text was unobtainable; Koenigs and Mugikura now support full-text claims.
+    assert.equal(scope('liebermann-2013'), 'abstract');
+    assert.equal(scope('koenigs-2009'), 'full-text');
+    assert.equal(scope('mugikura-2014'), 'full-text');
+    assert.equal(scope('alves-2021'), 'abstract');
+  });
+
   test('CAT-45 · a published search ignores case and accents and ranks the named deficit first', () => {
     const ids = (query: string, lang: 'en' | 'fr') => catalog.search(query, lang).map((d) => d.id);
+    // 'paramnesia' contains 'amnesia'; ties after an exact name sort alphabetically.
     assert.deepEqual(ids('amnesia', 'en'), [
       'amnesia',
+      'reduplicative-paramnesia',
       'source-memory',
       'transient-global-amnesia',
     ]);
@@ -836,10 +1043,12 @@ describe('published clinical content: fixed values', () => {
       'aphasia',
       'speech-apraxia',
       'language-self-awareness',
+      'semantic-memory',
       'sign-language-aphasia',
     ]);
     assert.deepEqual(ids('AMNÉSIA', 'en'), [
       'amnesia',
+      'reduplicative-paramnesia',
       'source-memory',
       'transient-global-amnesia',
     ]);
@@ -858,7 +1067,7 @@ describe('published clinical content: fixed values', () => {
       'transient-global-amnesia',
       'working-memory',
     ]);
-    assert.equal(ids('', 'fr').length, 121);
+    assert.equal(ids('', 'fr').length, 131);
     assert.deepEqual(ids('unlisted', 'en'), []);
   });
 

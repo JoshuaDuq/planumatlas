@@ -1,4 +1,4 @@
-revised: '2026-11-02'
+revised: '2026-11-07'
 
 groups:
   - id: attention-executive
@@ -812,8 +812,8 @@ deficits:
     domain: {en: Temporary retention and mental manipulation, fr: Maintien temporaire et manipulation mentale}
     group: memory
     summary:
-      en: Difficulty holding or reorganizing information over brief delays. This profile separates impaired manipulation from reduced precision of remembered spatial locations after parietal injury.
-      fr: Difficulté à maintenir ou réorganiser des informations pendant un court délai. Ce profil distingue une manipulation déficitaire d’une précision réduite des positions spatiales mémorisées après lésion pariétale.
+      en: Difficulty holding or reorganizing information over brief delays. This profile distinguishes spatial precision, mental manipulation, distractor filtering and load-sensitive retention; results vary with the task, lesion distribution and time since injury.
+      fr: Difficulté à maintenir ou réorganiser des informations pendant un court délai. Ce profil distingue la précision spatiale, la manipulation mentale, le filtrage des distracteurs et le maintien sensible à la charge; les résultats varient selon la tâche, la distribution lésionnelle et le délai depuis la lésion.
     aliases:
       en: [working memory, spatial working memory, visuospatial working memory, mental manipulation, backward span]
       fr: [mémoire de travail, mémoire de travail spatiale, mémoire de travail visuospatiale, manipulation mentale, empan inverse]
@@ -1076,11 +1076,11 @@ deficits:
     domain: {en: Conceptual knowledge, fr: Connaissances conceptuelles}
     group: memory
     summary:
-      en: Loss of knowledge about the meaning of words, objects, people and places. This profile contrasts mild impairment after removal of one anterior temporal lobe with deficits after herpes simplex encephalitis affecting both.
-      fr: Perte des connaissances sur le sens des mots, des objets, des personnes et des lieux. Ce profil compare l’atteinte légère après l’ablation d’un lobe temporal antérieur aux déficits après une encéphalite herpétique touchant les deux.
+      en: Difficulty using knowledge about the meaning of words, objects, people and places. This profile compares temporal-lobe injury affecting conceptual knowledge with difficulty controlling semantic retrieval after stroke; neither pattern is assumed to explain every semantic deficit.
+      fr: Difficulté à utiliser les connaissances sur le sens des mots, des objets, des personnes et des lieux. Ce profil compare les atteintes temporales touchant les connaissances conceptuelles aux difficultés de contrôle de la récupération sémantique après AVC; aucun de ces tableaux n’est supposé expliquer tous les déficits sémantiques.
     aliases:
-      en: [conceptual knowledge, word meaning, object knowledge, person knowledge, anterior temporal lobe, herpes simplex encephalitis]
-      fr: [connaissances conceptuelles, sens des mots, connaissance des objets, connaissance des personnes, lobe temporal antérieur, encéphalite herpétique]
+      en: [conceptual knowledge, word meaning, object knowledge, person knowledge, anterior temporal lobe, herpes simplex encephalitis, semantic control, controlled semantic retrieval, semantic aphasia]
+      fr: [connaissances conceptuelles, sens des mots, connaissance des objets, connaissance des personnes, lobe temporal antérieur, encéphalite herpétique, contrôle sémantique, récupération sémantique contrôlée, aphasie sémantique]
 
   - id: verbal-fluency
     name: {en: Reduced verbal fluency, fr: Diminution de la fluence verbale}
@@ -1345,6 +1345,116 @@ deficits:
     aliases:
       en: [verb naming, action naming, noun-verb dissociation, verb retrieval, dynamic action naming, verbs]
       fr: [dénomination de verbes, dénomination d’actions, dissociation nom-verbe, récupération des verbes, dénomination d’actions dynamiques, verbes]
+
+  - id: object-colour-knowledge
+    name: {en: Object-colour knowledge impairment, fr: Trouble des connaissances sur la couleur des objets}
+    domain: {en: Object-colour knowledge, fr: Connaissances sur la couleur des objets}
+    group: perception
+    summary:
+      en: Difficulty recalling an object’s typical colour despite preserved colour perception and colour naming. This profile distinguishes colour knowledge from seeing colours and examines cases with broader temporal and occipital injury.
+      fr: Difficulté à rappeler la couleur habituelle d’un objet malgré une perception et une dénomination des couleurs préservées. Ce profil distingue les connaissances sur les couleurs de leur perception et examine des cas de lésions temporales et occipitales plus étendues.
+    aliases:
+      en: [object color knowledge, object colour knowledge, colour agnosia, color agnosia, typical object colours, knowing object colours]
+      fr: [agnosie des couleurs, agnosie chromatique, couleur habituelle des objets, connaissances chromatiques, couleur des objets]
+
+  - id: spatial-relations
+    name: {en: Impaired spatial-relation judgement, fr: Trouble du jugement des relations spatiales}
+    domain: {en: Spatial relations, fr: Relations spatiales}
+    group: perception
+    summary:
+      en: Difficulty judging how objects are positioned relative to each other. Categorical relations such as containment and contact differ from metric distances; the findings concern specific matching and spatial-language tasks.
+      fr: Difficulté à juger la position des objets les uns par rapport aux autres. Les relations catégorielles comme l’inclusion et le contact diffèrent des distances métriques; les résultats concernent des tâches précises d’appariement et de langage spatial.
+    aliases:
+      en: [categorical spatial relations, coordinate spatial relations, metric spatial relations, spatial relation matching, locative prepositions, spatial concepts]
+      fr: [relations spatiales catégorielles, relations spatiales métriques, relations spatiales coordonnées, appariement spatial, prépositions locatives, concepts spatiaux]
+
+  - id: acquired-mania
+    name: {en: Acquired mania, fr: Manie secondaire à une lésion cérébrale}
+    domain: {en: Mood after brain injury, fr: Humeur après une lésion cérébrale}
+    group: social-emotional
+    summary:
+      en: A manic syndrome emerging after brain injury, distinct from behavioral disinhibition alone. This profile compares right thalamic infarct cases with heterogeneous lesion series and their normative connectivity.
+      fr: Syndrome maniaque apparu après une lésion cérébrale, distinct d’une désinhibition comportementale isolée. Ce profil compare des cas d’infarctus thalamique droit à des séries de lésions hétérogènes et à leur connectivité normative.
+    aliases:
+      en: [secondary mania, lesional mania, post-stroke mania, mania after stroke, manic syndrome]
+      fr: [manie secondaire, manie lésionnelle, manie après AVC, manie post-AVC, syndrome maniaque]
+
+  - id: visual-anosognosia
+    name: {en: Visual anosognosia (Anton syndrome), fr: Anosognosie visuelle (syndrome d’Anton)}
+    domain: {en: Visual awareness, fr: Conscience des capacités visuelles}
+    group: attention-executive
+    summary:
+      en: Failure to recognize one’s visual loss, sometimes with confabulated visual reports. This profile concerns Anton syndrome after acquired brain injury; blindness with preserved awareness and homonymous hemianopia are different patterns.
+      fr: Absence de reconnaissance de sa perte visuelle, parfois accompagnée de récits visuels confabulés. Ce profil concerne le syndrome d’Anton après une lésion cérébrale acquise; la cécité avec conscience préservée et l’hémianopsie homonyme sont des tableaux différents.
+    aliases:
+      en: [Anton syndrome, Anton’s syndrome, Anton-Babinski syndrome, visual anosognosia, unawareness of blindness, denial of blindness]
+      fr: [syndrome d’Anton, syndrome d’Anton-Babinski, anosognosie visuelle, méconnaissance de la cécité, déni de cécité]
+
+  - id: acquired-ocd
+    name: {en: Acquired obsessive-compulsive symptoms, fr: Symptômes obsessionnels compulsifs acquis}
+    domain: {en: Obsessions and compulsions after brain injury, fr: Obsessions et compulsions après une lésion cérébrale}
+    group: social-emotional
+    summary:
+      en: New intrusive thoughts and repetitive rituals associated with acquired brain lesions. The evidence distinguishes individual orbitofrontal injuries from normative connections shared by heterogeneous lesions.
+      fr: Pensées intrusives et rituels répétitifs nouveaux associés à des lésions cérébrales acquises. Les données distinguent des lésions orbitofrontales individuelles des connexions normatives communes à des lésions hétérogènes.
+    aliases:
+      en: [acquired OCD, secondary OCD, lesional OCD, post-stroke OCD, obsessive-compulsive symptoms, checking rituals]
+      fr: [TOC acquis, TOC secondaire, TOC lésionnel, TOC après AVC, symptômes obsessionnels compulsifs, rituels de vérification]
+
+  - id: kluver-bucy
+    name: {en: Klüver–Bucy syndrome, fr: Syndrome de Klüver–Bucy}
+    domain: {en: Behavioral and emotional regulation, fr: Régulation comportementale et émotionnelle}
+    group: social-emotional
+    summary:
+      en: Acquired changes in oral exploration, eating, sexual behavior, responses to visual stimuli and emotional responsiveness, sometimes accompanied by recognition or memory impairment. These adult cases illustrate different reported limbic injury patterns rather than a necessary or sufficient lesion site.
+      fr: Changements acquis de l’exploration orale, de l’alimentation, du comportement sexuel, des réactions aux stimuli visuels et de la réactivité émotionnelle, parfois accompagnés de troubles de reconnaissance ou de mémoire. Ces cas adultes illustrent différents profils lésionnels limbiques rapportés, sans définir de site nécessaire ou suffisant.
+    aliases:
+      en: [Kluver-Bucy syndrome, Kluver Bucy, hyperorality, hypermetamorphosis, altered sexual behavior, placidity]
+      fr: [syndrome de Kluver-Bucy, hyperoralité, hypermétamorphose, comportement sexuel modifié, placidité]
+
+  - id: cognitive-estimation
+    name: {en: Impaired cognitive estimation, fr: Trouble de l’estimation cognitive}
+    domain: {en: Everyday numerical judgement, fr: Jugement numérique quotidien}
+    group: attention-executive
+    summary:
+      en: Difficulty giving reasonable numerical estimates of everyday quantities when the exact answer is unknown. These tasks draw on knowledge and strategic monitoring as well as numerical skills; frontal and right temporal lesion findings are compared separately.
+      fr: Difficulté à fournir des estimations numériques plausibles de quantités quotidiennes lorsque la réponse exacte est inconnue. Ces tâches mobilisent les connaissances et le contrôle stratégique ainsi que les habiletés numériques; les résultats lésionnels frontaux et temporaux droits sont comparés séparément.
+    aliases:
+      en: [cognitive estimation, numerical estimates, implausible estimates, magnitude knowledge, CET-A]
+      fr: [estimation cognitive, estimations numériques, estimations invraisemblables, connaissances des grandeurs, CET-A]
+
+  - id: fregoli-syndrome
+    name: {en: Fregoli syndrome, fr: Syndrome de Frégoli}
+    domain: {en: Person identification and belief, fr: Identification des personnes et croyances}
+    group: social-emotional
+    summary:
+      en: Persistent delusional misidentification of unfamiliar people as known individuals; classical descriptions can involve beliefs about disguise. This profile concerns acquired cases after brain injury, keeping a stroke-specific lesion result separate from broader network evidence about delusional misidentification.
+      fr: Fausse identification délirante persistante de personnes inconnues comme des individus connus; les descriptions classiques peuvent impliquer des croyances de déguisement. Ce profil concerne les cas acquis après une lésion cérébrale et distingue un résultat lésionnel après AVC des données de réseau plus générales sur les fausses identifications délirantes.
+    aliases:
+      en: [Fregoli syndrome, hyperidentification, person misidentification, familiar person in disguise]
+      fr: [syndrome de Frégoli, hyperidentification, fausse identification des personnes, personne connue déguisée]
+
+  - id: acquired-anxiety
+    name: {en: Anxiety symptoms after brain injury, fr: Symptômes anxieux après une lésion cérébrale}
+    domain: {en: Anxiety following acquired structural lesions, fr: Anxiété après des lésions structurelles acquises}
+    group: social-emotional
+    summary:
+      en: Anxiety symptoms after acquired brain injury have associations with temporal-limbic and thalamic lesions. Results depend on the symptom measure, injury population and time since injury; they do not identify one necessary or sufficient anxiety site.
+      fr: Les symptômes anxieux après une lésion cérébrale acquise sont associés à des atteintes temporolimbiques et thalamiques. Les résultats dépendent de la mesure, de la population et du délai depuis la lésion; ils ne désignent pas un site nécessaire ou suffisant de l’anxiété.
+    aliases:
+      en: [acquired anxiety, poststroke anxiety, post-stroke anxiety, post-traumatic anxiety, worry, apprehension, restlessness]
+      fr: [anxiété acquise, anxiété après AVC, anxiété post-traumatique, inquiétude, appréhension, agitation anxieuse]
+
+  - id: reduplicative-paramnesia
+    name: {en: Reduplicative paramnesia for places, fr: Paramnésie réduplicative des lieux}
+    domain: {en: Place identification and belief, fr: Identification des lieux et croyances}
+    group: social-emotional
+    summary:
+      en: Acquired conviction that a place has been duplicated, relocated or merged with another location, maintained despite clear counterevidence. This is a delusional misidentification of place, distinct from ordinary navigational disorientation and from misidentification of people.
+      fr: Conviction acquise qu’un lieu a été dupliqué, déplacé ou fusionné avec un autre endroit, maintenue malgré des preuves contraires claires. Cette fausse identification délirante des lieux se distingue d’une désorientation de navigation ordinaire et d’une fausse identification des personnes.
+    aliases:
+      en: [reduplicative paramnesia, spatial delusions, place reduplication, confabulatory mislocation, chimeric assimilation]
+      fr: [paramnésie réduplicative, délires spatiaux, duplication des lieux, fausse localisation confabulatoire, assimilation chimérique]
 
 references:
   - id: dronkers-2004
@@ -3120,7 +3230,7 @@ references:
     doi: 10.1523/JNEUROSCI.3706-09.2009
     pmid: '19940193'
     method: lesion-mapping
-    scope: abstract
+    scope: full-text
     population:
       en: 19 patients with superior parietal lesions, compared with 146 patients with lesions elsewhere and 55 people without brain lesions.
       fr: 19 patients avec lésions pariétales supérieures, comparés à 146 patients avec lésions ailleurs et à 55 personnes sans lésion cérébrale.
@@ -5344,6 +5454,431 @@ references:
     population:
       en: One patient with pure alexia after a small surgical lesion near the visual word form area, with diffusion and functional imaging before, early after and late after surgery.
       fr: Un patient avec alexie pure après une petite lésion chirurgicale proche de l’aire de la forme visuelle des mots, avec imagerie de diffusion et fonctionnelle avant, peu après et longtemps après la chirurgie.
+
+  - id: miceli-2001
+    title: The dissociation of color from form and function knowledge
+    authors: Miceli G, Fouch E, Capasso R, Shelton JR, Tomaiuolo F, Caramazza A
+    year: 2001
+    journal: Nat Neurosci
+    doi: 10.1038/88497
+    pmid: '11369950'
+    method: case-series
+    scope: abstract
+    population:
+      en: Two patients with impaired object-colour knowledge; one also had other perceptual and functional knowledge deficits.
+      fr: Deux patients ayant des connaissances altérées sur la couleur des objets; l’un avait aussi d’autres déficits perceptifs et fonctionnels.
+  - id: stasenko-2014
+    title: 'When concepts lose their color: a case of object-color knowledge impairment'
+    authors: Stasenko A, Garcea FE, Dombovy M, Mahon BZ
+    year: 2014
+    journal: Cortex
+    doi: 10.1016/j.cortex.2014.05.013
+    pmid: '25058612'
+    method: case-report
+    scope: full-text
+    population:
+      en: Adult patient AC after a left occipital hemorrhage with temporal, white-matter and bilateral cingulate-isthmus involvement.
+      fr: Patient adulte AC après une hémorragie occipitale gauche avec atteinte temporale, de la substance blanche et de l’isthme cingulaire bilatéral.
+  - id: amorapanth-2010
+    title: The neural basis for spatial relations
+    authors: Amorapanth PX, Widick P, Chatterjee A
+    year: 2010
+    journal: J Cogn Neurosci
+    doi: 10.1162/jocn.2009.21322
+    pmid: '19642889'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 34 chronic unilateral-lesion patients and 12 older controls in the lesion experiment; a separate healthy fMRI experiment.
+      fr: 34 patients ayant une lésion unilatérale chronique et 12 témoins âgés dans l’expérience lésionnelle; expérience IRMf distincte chez des sujets sains.
+  - id: tranel-kemmerer-2004
+    title: Neuroanatomical correlates of locative prepositions
+    authors: Tranel D, Kemmerer D
+    year: 2004
+    journal: Cogn Neuropsychol
+    doi: 10.1080/02643290342000627
+    pmid: '21038229'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 78 people with focal stable lesions and 60 controls; a focused analysis of six patients with pervasive locative-preposition deficits.
+      fr: 78 personnes ayant des lésions focales stables et 60 témoins; analyse ciblée de six patients ayant des déficits étendus des prépositions locatives.
+  - id: cummings-mendez-1984
+    title: Secondary mania with focal cerebrovascular lesions
+    authors: Cummings JL, Mendez MF
+    year: 1984
+    journal: Am J Psychiatry
+    doi: 10.1176/ajp.141.9.1084
+    pmid: '6465386'
+    method: case-series
+    scope: abstract
+    population:
+      en: Two patients with secondary mania after right thalamic infarction, with additional neurological and cognitive symptoms.
+      fr: Deux patients ayant une manie secondaire après un infarctus thalamique droit, avec d’autres symptômes neurologiques et cognitifs.
+  - id: cotovio-2020
+    title: Mapping mania symptoms based on focal brain damage
+    authors: Cotovio G, Talmasov D, Barahona-Corrêa JB, Hsu J, Senova S, Ribeiro R, Soussand L, Velosa A, Silva VCE, Rost N, Wu O, Cohen AL, Oliveira-Maia AJ, Fox MD
+    year: 2020
+    journal: J Clin Invest
+    doi: 10.1172/jci136096
+    pmid: '32831292'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 41 literature lesions associated with mania, 79 comparison lesions and normative connectivity from 1,000 people; independent clinical cohorts of 15 mania and 490 control lesions.
+      fr: 41 lésions publiées associées à une manie, 79 lésions comparatives et connectivité normative de 1 000 personnes; cohortes cliniques indépendantes de 15 lésions avec manie et 490 lésions témoins.
+  - id: barahona-correa-2020
+    title: 'Right-sided brain lesions predominate among patients with lesional mania: evidence from a systematic review and pooled lesion analysis'
+    authors: Barahona-Corrêa JB, Cotovio G, Costa RM, Ribeiro R, Velosa A, Silva VCE, Sperber C, Karnath HO, Senova S, Oliveira-Maia AJ
+    year: 2020
+    journal: Transl Psychiatry
+    doi: 10.1038/s41398-020-0811-0
+    pmid: '32398699'
+    method: meta-analysis
+    scope: abstract
+    population:
+      en: 211 published lesional-mania cases, including 201 with focal lesions; 56 eligible lesion images analysed.
+      fr: 211 cas publiés de manie lésionnelle, dont 201 avec lésions focales; analyse de 56 images lésionnelles admissibles.
+  - id: chaudhry-2019
+    title: 'Anton''s syndrome: a rare and unusual form of blindness'
+    authors: Chaudhry FB, Raza S, Ahmad U
+    year: 2019
+    journal: BMJ Case Rep
+    doi: 10.1136/bcr-2018-228103
+    pmid: '31801772'
+    method: case-series
+    scope: abstract
+    population:
+      en: Four adults with Anton syndrome and bilateral occipital injury of differing causes and extents.
+      fr: Quatre adultes ayant un syndrome d’Anton et des lésions occipitales bilatérales de causes et d’étendues différentes.
+  - id: barojas-alvarez-2021
+    title: 'Anton syndrome after subarachnoid hemorrhage and delayed cerebral ischemia: A case report'
+    authors: Ricardo BM, Mariana LE, Al SO, Manuel CJ, Jesus RB
+    year: 2021
+    journal: Cereb Circ Cogn Behav
+    doi: 10.1016/j.cccb.2021.100023
+    pmid: '36324705'
+    method: case-report
+    scope: abstract
+    population:
+      en: An adult with visual anosognosia after subarachnoid hemorrhage, right frontal/parietal hemorrhagic injury and delayed bilateral occipital infarction.
+      fr: Adulte ayant une anosognosie visuelle après une hémorragie sous-arachnoïdienne, des lésions hémorragiques frontales et pariétales droites et des infarctus occipitaux bilatéraux retardés.
+    corrections:
+    - doi: 10.1016/j.cccb.2022.100130
+      summary:
+        en: The 2022 erratum supplies an omitted patient-consent/ethical statement. It does not report changes to the clinical findings or lesion localization.
+        fr: L’erratum de 2022 fournit une déclaration de consentement du patient et d’éthique omise. Il ne signale aucun changement des observations cliniques ni de la localisation lésionnelle.
+  - id: monai-2024
+    title: Convergence of Visual and Motor Awareness in Human Parietal Cortex
+    authors: Monai E, Pini L, Palacino F, Bisio M, Bernocchi F, Salvalaggio A, Corbetta M
+    year: 2024
+    journal: Ann Neurol
+    doi: 10.1002/ana.26791
+    pmid: '37706575'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 16 published Anton-syndrome cases compared with 16 visual controls whose unilateral lesions were mirrored to create synthetic bilateral controls; normative structural and functional disconnection analyses.
+      fr: 16 cas publiés de syndrome d’Anton comparés à 16 témoins avec déficit visuel dont les lésions unilatérales ont été reflétées pour créer des témoins bilatéraux synthétiques; analyses normatives des déconnexions structurelles et fonctionnelles.
+
+  - id: kim-lee-2002
+    title: Obsessive-compulsive disorder associated with a left orbitofrontal infarct
+    authors: Kim KW, Lee DY
+    year: 2002
+    journal: J Neuropsychiatry Clin Neurosci
+    doi: 10.1176/jnp.14.1.88
+    pmid: '11884667'
+    method: case-report
+    scope: full-text
+    population:
+      en: A 66-year-old man with new checking rituals and a left medial orbitofrontal infarct.
+      fr: Homme de 66 ans avec nouveaux rituels de vérification et infarctus orbitofrontal médial gauche.
+    corrections:
+      - doi: 10.1176/jnp.14.2.242
+        summary:
+          en: The correction restores the authors' omitted affiliation; it changes no clinical or anatomical findings.
+          fr: La correction rétablit l’affiliation omise des auteurs; elle ne change aucune observation clinique ou anatomique.
+  - id: ogai-2005
+    title: 'A right orbitofrontal region and OCD symptoms: a case report'
+    authors: Ogai M, Iyo M, Mori N, Takei N
+    year: 2005
+    journal: Acta Psychiatr Scand
+    doi: 10.1111/j.1600-0447.2004.00395.x
+    pmid: '15636597'
+    method: case-report
+    scope: abstract
+    population:
+      en: A 59-year-old man with OCD symptoms after head injury, a small right orbitofrontal contusion on MRI and regional hypoperfusion on SPECT.
+      fr: Homme de 59 ans avec symptômes de TOC après traumatisme crânien, petite contusion orbitofrontale droite à l’IRM et hypoperfusion régionale à la TEMP.
+  - id: cotovio-2026
+    title: Dysfunctional Brain Circuits Overlap in Lesional and Idiopathic Obsessive-Compulsive Disorder
+    authors: Cotovio G, Descalço N, Caballero-Insaurriaga J, Martins DR, Faro Viana F, Fonseca C, Ramos J, Santos B, Maia A, Oliveira J, Loução N, Barbour T, Siddiqi SH, Fox MD, Barahona-Corrêa JB, Oliveira-Maia AJ
+    year: 2026
+    journal: Biol Psychiatry
+    doi: 10.1016/j.biopsych.2026.05.001
+    pmid: '42119759'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 129 published lesion-associated cases; 40 traced lesions compared with 608 control lesions, using normative connectivity from 1,000 participants.
+      fr: 129 cas publiés associés à des lésions; 40 lésions tracées comparées à 608 lésions témoins, avec connectivité normative de 1 000 participants.
+
+  - id: hayman-1998
+    title: Klüver-Bucy syndrome after bilateral selective damage of amygdala and its cortical connections
+    authors: Hayman LA, Rexer JL, Pavol MA, Strite D, Meyers CA
+    year: 1998
+    journal: J Neuropsychiatry Clin Neurosci
+    doi: 10.1176/jnp.10.3.354
+    pmid: '9706545'
+    method: case-report
+    scope: full-text
+    population:
+      en: One 43-year-old man with melanoma treatment, corrected severe hyponatremia and subsequent bilateral amygdala, temporal and insular MRI abnormalities; injury etiology uncertain.
+      fr: Homme de 43 ans traité pour un mélanome, avec correction d’une hyponatrémie sévère puis anomalies IRM amygdaliennes, temporales et insulaires bilatérales; étiologie lésionnelle incertaine.
+
+  - id: park-2012-kbs
+    title: Klüver-bucy syndrome with isolated bilateral hippocampal atrophy following status epilepticus
+    authors: Park HK, Kim KJ, Moon HJ, Kim SJ, Yun CH, Park SH
+    year: 2012
+    journal: J Epilepsy Res
+    doi: 10.14581/jer.12003
+    pmid: '24649454'
+    method: case-report
+    scope: full-text
+    population:
+      en: One previously healthy 31-year-old man after encephalitis of unidentified cause and status epilepticus; serial MRI and six-month clinical follow-up.
+      fr: Homme de 31 ans auparavant sain après une encéphalite de cause indéterminée et un état de mal épileptique; IRM successives et suivi clinique de six mois.
+
+  - id: pflugshaupt-2020
+    title: The right anterior temporal lobe critically contributes to magnitude knowledge
+    authors: Pflugshaupt T, Bauer D, Frey J, Vanbellingen T, Kaufmann BC, Bohlhalter S, Nyffeler T
+    year: 2020
+    journal: Brain Communications
+    doi: 10.1093/braincomms/fcaa157
+    pmid: '33225278'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 55 first right-hemisphere stroke patients with left spatial neglect and 55 healthy controls; cognitive estimation and voxel/region-based lesion analyses.
+      fr: 55 patients ayant un premier AVC hémisphérique droit avec négligence spatiale gauche et 55 témoins sains; estimation cognitive et analyses lésionnelles par voxels et régions.
+
+  - id: cipolotti-2018
+    title: 'Cognitive estimation: Performance of patients with focal frontal and posterior lesions'
+    authors: Cipolotti L, MacPherson SE, Gharooni S, van-Harskamp N, Shallice T, Chan E, Nachev P
+    year: 2018
+    journal: Neuropsychologia
+    doi: 10.1016/j.neuropsychologia.2017.08.017
+    pmid: '28811256'
+    method: case-series
+    scope: full-text
+    population:
+      en: Frontal and posterior stroke/tumour patients and 39 healthy controls. Methods and Table 1 report final groups of 34 frontal and 19 posterior patients; the abstract instead reports 38 and 22.
+      fr: Patients ayant un AVC ou une tumeur frontale ou postérieure et 39 témoins sains. Les méthodes et le tableau 1 donnent des groupes finaux de 34 patients frontaux et 19 postérieurs; le résumé indique plutôt 38 et 22.
+
+  - id: kakegawa-2020
+    title: Incidence and lesions causative of delusional misidentification syndrome after stroke
+    authors: Kakegawa Y, Isono O, Hanada K, Nishikawa T
+    year: 2020
+    journal: Brain and Behavior
+    doi: 10.1002/brb3.1829
+    pmid: '32893993'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 874 consecutive first-stroke rehabilitation admissions at two hospitals; 10 Fregoli cases compared with 24 right-stroke/left-neglect controls without delusional misidentification.
+      fr: 874 admissions consécutives en réadaptation après un premier AVC dans deux hôpitaux; 10 cas de Frégoli comparés à 24 témoins avec AVC droit et négligence gauche sans fausse identification délirante.
+
+  - id: darby-2017
+    title: 'Finding the imposter: brain connectivity of lesions causing delusional misidentifications'
+    authors: Darby RR, Laganiere S, Pascual-Leone A, Prasad S, Fox MD
+    year: 2017
+    journal: Brain
+    doi: 10.1093/brain/aww288
+    pmid: '28082298'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 17 published lesion-induced delusional misidentification cases, compared with other lesion syndromes and 15 lesions associated with other delusions; normative functional connectivity and functional-imaging meta-analyses.
+      fr: 17 cas publiés de fausses identifications délirantes après lésion, comparés à d’autres syndromes lésionnels et à 15 lésions associées à d’autres délires; connectivité fonctionnelle normative et méta-analyses d’imagerie fonctionnelle.
+
+  - id: knutson-2013
+    title: Injured brain regions associated with anxiety in Vietnam veterans
+    authors: Knutson KM, Rakowsky ST, Solomon J, Krueger F, Raymont V, Tierney MC, Wassermann EM, Grafman J
+    year: 2013
+    journal: Neuropsychologia
+    doi: 10.1016/j.neuropsychologia.2013.01.003
+    pmid: '23328629'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 182 male Vietnam combat veterans with chronic, mainly penetrating brain injuries and 51 uninjured combat controls; observer, informant and self-report anxiety measures.
+      fr: 182 anciens combattants masculins du Vietnam avec lésions cérébrales chroniques, surtout pénétrantes, et 51 témoins combattants non blessés; mesures d’anxiété par observateur, proche et autoévaluation.
+  - id: ku-2013
+    title: Association between cerebral lesions and emotional changes in acute ischemic stroke patients
+    authors: Ku HL, Chen CH, Yang YT, Hu CJ, Wu D, Chen CC, Chen PC, Chi NF
+    year: 2013
+    journal: J Nerv Ment Dis
+    doi: 10.1097/nmd.0b013e31828e0fe9
+    pmid: '23588227'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 26 patients with acute middle cerebral artery infarction, assessed at one week and one month.
+      fr: 26 patients avec infarctus aigu de l’artère cérébrale moyenne, évalués à une semaine et un mois.
+  - id: scharf-2023
+    title: Depression and anxiety in acute ischemic stroke involving the anterior but not paramedian or inferolateral thalamus
+    authors: Scharf AC, Gronewold J, Eilers A, Todica O, Moenninghoff C, Doeppner TR, de Haan B, Bassetti CL, Hermann DM
+    year: 2023
+    journal: Front Psychol
+    doi: 10.3389/fpsyg.2023.1218526
+    pmid: '37701875'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 37 adults with first-ever isolated ischemic thalamic stroke and 37 matched hospital controls, followed at 1, 6, 12 and 24 months; five anterior strokes.
+      fr: 37 adultes avec premier AVC ischémique thalamique isolé et 37 témoins hospitaliers appariés, suivis à 1, 6, 12 et 24 mois; cinq AVC antérieurs.
+  - id: liebermann-2013
+    title: Subjective cognitive-affective status following thalamic stroke
+    authors: Liebermann D, Ostendorf F, Kopp UA, Kraft A, Bohner G, Nabavi DG, Kathmann N, Ploner CJ
+    year: 2013
+    journal: J Neurol
+    doi: 10.1007/s00415-012-6635-y
+    pmid: '22854887'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: 68 patients with a history of ischemic thalamic stroke (27 left, 37 right, four bilateral), tested a mean 37 months after stroke, and an age-matched group of 34 patients with a history of transient ischemic attack; self-report questionnaires. Eleven lesions involved the posterior region (pulvinar, limitans and posterior nuclei).
+      fr: 68 patients avec antécédent d’AVC ischémique thalamique (27 gauches, 37 droits, quatre bilatéraux), évalués en moyenne 37 mois après l’AVC, et un groupe apparié en âge de 34 patients avec antécédent d’accident ischémique transitoire; questionnaires d’autoévaluation. Onze lésions touchaient la région postérieure (pulvinar, noyaux limitant et postérieur).
+
+  - id: carlisle-2021
+    title: 'Clinical Reasoning: An 81-Year-Old Woman Who Insisted the Hospital Was Her Home'
+    authors: Carlisle TC, Stanley MPH, Singhal AB, Caplan DN
+    year: 2021
+    journal: Neurology
+    doi: 10.1212/wnl.0000000000012392
+    pmid: '34144999'
+    method: case-report
+    scope: full-text
+    population:
+      en: An 81-year-old right-handed woman with acute right middle cerebral artery infarction, place misidentification, neglect, weakness, dysarthria and mild mixed aphasia; no acute or previous left-hemisphere injury on imaging.
+      fr: Une femme droitière de 81 ans avec infarctus aigu de l’artère cérébrale moyenne droite, fausse identification des lieux, négligence, faiblesse, dysarthrie et légère aphasie mixte; aucune lésion hémisphérique gauche aiguë ou ancienne à l’imagerie.
+
+  - id: diamantaras-2023
+    title: The neuropsychology and neuroanatomy of reduplicative paramnesia
+    authors: Diamantaras AA, Blondiaux E, Schumacher R, Müri RM, Blanke O, Heydrich L
+    year: 2023
+    journal: Cortex
+    doi: 10.1016/j.cortex.2023.06.006
+    pmid: '37515831'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: Eleven adults with reduplicative paramnesia after focal brain injury and 11 adults with spatial disorientation without reduplicative paramnesia, selected from clinical records at the Bern and Geneva university hospitals (cases seen 2001–2019); mixed stroke, trauma and tumour etiologies. Normative connectivity used 126 healthy participants.
+      fr: Onze adultes avec paramnésie réduplicative après lésion cérébrale focale et 11 adultes avec désorientation spatiale sans paramnésie réduplicative, sélectionnés à partir des dossiers cliniques des hôpitaux universitaires de Berne et de Genève (cas vus entre 2001 et 2019); étiologies mixtes (AVC, traumatismes et tumeurs). La connectivité normative utilisait 126 participants sains.
+
+  - id: alves-2021
+    title: Unravelling the Neural Basis of Spatial Delusions After Stroke
+    authors: Alves PN, Fonseca AC, Silva DP, Andrade MR, Pinho-E-Melo T, Thiebaut de Schotten M, Martins IP
+    year: 2021
+    journal: Annals of Neurology
+    doi: 10.1002/ana.26079
+    pmid: '33811370'
+    method: lesion-mapping
+    scope: abstract
+    population:
+      en: Prospective cumulative case–control study screening 400 acute right-hemisphere stroke patients; 64 spatial-delusion cases and 233 controls entered lesion and structural/functional disconnection analyses.
+      fr: Étude prospective cumulative cas-témoins avec dépistage de 400 patients ayant un AVC hémisphérique droit aigu; 64 cas de délires spatiaux et 233 témoins inclus dans les analyses lésionnelles et de déconnexion structurelle/fonctionnelle.
+
+  - id: alves-2023
+    title: Clinical presentation and neural correlates of stroke-associated spatial delusions
+    authors: Alves PN, Fonseca AC, Pinho-E-Melo T, Martins IP
+    year: 2023
+    journal: European Journal of Neurology
+    doi: 10.1111/ene.15557
+    pmid: '36086918'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: Sixty fully characterized spatial-delusion cases among 504 screened acute right-stroke patients in Lisbon. Subanalysis of the Alves 2021 recruitment cohort plus 104 additional screened patients; overlapping samples, not independent replication. Dementia, delirium and decreased consciousness were excluded.
+      fr: Soixante cas de délires spatiaux pleinement caractérisés parmi 504 patients dépistés après un AVC droit aigu à Lisbonne. Sous-analyse de la cohorte de recrutement d’Alves 2021 avec 104 patients dépistés supplémentaires; échantillons chevauchants, et non réplication indépendante. Démence, delirium et diminution de la conscience étaient exclus.
+
+  - id: barbey-2013-working-memory
+    title: Dorsolateral prefrontal contributions to human working memory
+    authors: Barbey AK, Koenigs M, Grafman J
+    year: 2013
+    journal: Cortex
+    doi: 10.1016/j.cortex.2012.05.022
+    pmid: '22789779'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: Male Vietnam veterans with chronic penetrating head injuries; 19 with dorsolateral prefrontal lesions, 152 with lesions elsewhere and 54 uninjured controls; focal analyses compared seven left and nine right dorsolateral prefrontal cases with 20 focal non-dorsolateral, mainly ventromedial, prefrontal cases and controls.
+      fr: Vétérans masculins du Vietnam avec traumatismes crâniens pénétrants chroniques; 19 avec lésions préfrontales dorsolatérales, 152 avec lésions ailleurs et 54 témoins sans lésion; les analyses focales comparaient sept cas préfrontaux dorsolatéraux gauches et neuf droits à 20 cas préfrontaux focaux non dorsolatéraux, surtout ventromédians, et aux témoins.
+
+  - id: baier-2010-working-memory
+    title: Keeping memory clear and stable--the contribution of human basal ganglia and prefrontal cortex to working memory
+    authors: Baier B, Karnath HO, Dieterich M, Birklein F, Heinze C, Müller NG
+    year: 2010
+    journal: Journal of Neuroscience
+    doi: 10.1523/JNEUROSCI.1513-10.2010
+    pmid: '20660261'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 61 acute stroke patients, 30 with left and 31 with right lesions, tested on remembering three or five target locations and ignoring two simultaneous distractors; hemispheres were mapped separately.
+      fr: 61 patients après AVC aigu, 30 avec lésions gauches et 31 droites, évalués sur la mémorisation de trois ou cinq positions cibles et l’exclusion de deux distracteurs simultanés; les hémisphères étaient cartographiés séparément.
+
+  - id: abe-1998
+    title: Amnesia after a discrete basal forebrain lesion
+    authors: Abe K, Inokawa M, Kashiwagi A, Yanagihara T
+    year: 1998
+    journal: Journal of Neurology, Neurosurgery and Psychiatry
+    doi: 10.1136/jnnp.65.1.126
+    pmid: '9667575'
+    method: case-report
+    scope: full-text
+    population:
+      en: A 61-year-old man with memory impairment after clipping of an unruptured anterior communicating artery aneurysm; clinical and neuroimaging passages of the publisher-indexed full text were inspected.
+      fr: Homme de 61 ans avec trouble mnésique après clippage d’un anévrisme non rompu de l’artère communicante antérieure; passages cliniques et de neuroimagerie du texte intégral indexé de l’éditeur examinés.
+
+  - id: mugikura-2014
+    title: MR imaging of subcallosal artery infarct causing amnesia after surgery for anterior communicating artery aneurysm
+    authors: Mugikura S, Kikuchi H, Fujii T, Murata T, Takase K, Mori E, Marinković S, Takahashi S
+    year: 2014
+    journal: American Journal of Neuroradiology
+    doi: 10.3174/ajnr.a4057
+    pmid: '25082820'
+    method: case-series
+    scope: full-text
+    population:
+      en: Ten of 14 consecutive patients with amnesia after anterior communicating artery aneurysm surgery, enrolled because their memory quotient was more than 15 points below their IQ; examined with 3D MRI a median of four months after treatment.
+      fr: Dix de 14 patients consécutifs avec amnésie après chirurgie d’un anévrisme de l’artère communicante antérieure, retenus parce que leur quotient mnésique était inférieur de plus de 15 points à leur QI; examinés par IRM 3D à une médiane de quatre mois après traitement.
+
+  - id: souter-2022
+    title: Mapping lesion, structural disconnection, and functional disconnection to symptoms in semantic aphasia
+    authors: Souter NE, Wang X, Thompson H, Krieger-Redwood K, Halai AD, Lambon Ralph MA, Thiebaut de Schotten M, Jefferies E
+    year: 2022
+    journal: Brain Structure and Function
+    doi: 10.1007/s00429-022-02526-6
+    pmid: '35786743'
+    method: lesion-mapping
+    scope: full-text
+    population:
+      en: 23 chronic left-stroke patients selected for multimodal semantic impairment; descriptive lesion coverage and normative disconnection analyses, with symptom mapping in 20 patients.
+      fr: 23 patients avec AVC gauche chronique sélectionnés pour trouble sémantique multimodal; couverture lésionnelle descriptive et analyses de déconnexion normative, avec cartographie des symptômes chez 20 patients.
+
+  - id: thompson-2022-semantic-control
+    title: Damage to temporoparietal cortex is sufficient for impaired semantic control
+    authors: Thompson HE, Noonan KA, Halai AD, Hoffman P, Stampacchia S, Hallam G, Rice GE, De Dios Perez B, Lambon Ralph MA, Jefferies E
+    year: 2022
+    journal: Cortex
+    doi: 10.1016/j.cortex.2022.05.022
+    pmid: '36183573'
+    method: case-series
+    scope: full-text
+    population:
+      en: 30 semantic-aphasia stroke patients, 22 with prefrontal plus often posterior injury and eight with temporoparietal injury sparing prefrontal cortex; comparisons with semantic-dementia data. Much of the sample came from earlier studies.
+      fr: 30 patients avec aphasie sémantique après AVC, 22 avec atteinte préfrontale et souvent postérieure et huit avec atteinte temporopariétale épargnant le cortex préfrontal; comparaisons avec des données de démence sémantique. Une grande partie de l’échantillon provenait d’études antérieures.
 
 associations:
   - id: aphasia-comprehension
@@ -9432,3 +9967,508 @@ associations:
     evidence:
       - {reference: tranel-2008, role: supporting}
       - {reference: piras-2007, role: supporting}
+
+  - id: object-colour-knowledge-temporal
+    deficit: object-colour-knowledge
+    title: {en: Knowing an object’s typical colour, fr: Connaître la couleur habituelle d’un objet}
+    network: {en: Temporal and occipital colour-knowledge systems, fr: Systèmes temporaux et occipitaux des connaissances chromatiques}
+    laterality: bilateral
+    finding:
+      en: Two brain-injured patients had impaired object-colour knowledge despite preserved colour perception and naming; one also retained knowledge of object form, size and function. An independent stroke case, AC, showed the same colour-knowledge dissociation with injury including left lingual and medial fusiform cortex.
+      fr: Deux patients cérébrolésés avaient des connaissances altérées sur la couleur des objets malgré une perception et une dénomination des couleurs préservées; l’un conservait aussi les connaissances sur la forme, la taille et la fonction des objets. Un cas indépendant d’AVC, AC, présentait la même dissociation des connaissances chromatiques avec une lésion comprenant les cortex lingual et fusiforme médial gauches.
+    limitation:
+      en: These are selected cases, not a focal lesion map. The first report gives only a broad left mesial temporal localization in its abstract, and one patient had other knowledge deficits. AC also had white-matter and bilateral cingulate-isthmus injury, alexia, naming problems and visual-field impairment. Neither coloured parcel is established as an isolated colour-knowledge centre.
+      fr: Il s’agit de cas sélectionnés, et non d’une cartographie lésionnelle focale. Le résumé du premier rapport donne seulement une localisation temporale mésiale gauche large, et un patient avait d’autres déficits de connaissances. AC avait aussi une atteinte de la substance blanche et de l’isthme cingulaire bilatéral, une alexie, des difficultés de dénomination et un déficit du champ visuel. Aucune parcelle colorée n’est établie comme centre isolé des connaissances chromatiques.
+    mapping_note:
+      en: The whole left fusiform and lingual parcels mark portions of AC’s larger lesion. Bilateral laterality acknowledges accompanying bilateral cingulate injury; the right homologues are not coloured. The map does not display the complete lesion or a necessary and sufficient substrate for the deficit.
+      fr: Les parcelles fusiforme et linguale gauches entières repèrent des portions de la lésion plus étendue d’AC. La latéralité bilatérale tient compte de l’atteinte cingulaire bilatérale associée; les homologues droits ne sont pas colorés. La carte ne représente ni la lésion complète ni un substrat nécessaire et suffisant du déficit.
+    mappings:
+      - {region: 'destrieux:left:21', source_name: G_oc-temp_lat-fusifor}
+      - {region: 'destrieux:left:22', source_name: G_oc-temp_med-Lingual}
+    evidence:
+      - {reference: miceli-2001, role: supporting}
+      - {reference: stasenko-2014, role: supporting}
+
+  - id: spatial-relations-categorical
+    deficit: spatial-relations
+    title: {en: Matching categorical spatial relations, fr: Apparier des relations spatiales catégorielles}
+    network: {en: Frontoparietal spatial-relation systems, fr: Systèmes frontopariétaux des relations spatiales}
+    laterality: left
+    finding:
+      en: In 34 chronic unilateral-lesion patients, categorical picture-matching deficits were associated with left angular and supramarginal, posterior frontal and subjacent temporal white-matter damage. A separate 78-patient study of locative-preposition knowledge found greatest lesion overlap in the left frontal operculum, supramarginal gyrus and subjacent white matter.
+      fr: Chez 34 patients ayant une lésion unilatérale chronique, les déficits d’appariement catégoriel d’images étaient associés à une atteinte des gyri angulaire et supramarginal gauches, de régions frontales postérieures et de la substance blanche temporale sous-jacente. Une étude distincte de 78 patients portant sur les prépositions locatives trouvait le chevauchement lésionnel maximal dans l’opercule frontal gauche, le gyrus supramarginal et la substance blanche sous-jacente.
+    limitation:
+      en: Nonverbal matching and spatial-language tests are complementary tasks, not exact replications. The first study also found right-sided associations and shared categorical/metric contributions; its residual categorical-only association involved left temporal white matter. The focused six-patient analysis in the preposition study is not an additional independent sample.
+      fr: L’appariement non verbal et les tests de langage spatial sont des tâches complémentaires, pas des réplications exactes. La première étude trouvait aussi des associations droites et des contributions communes aux relations catégorielles et métriques; son association résiduelle propre aux relations catégorielles concernait la substance blanche temporale gauche. L’analyse ciblée de six patients dans l’étude des prépositions n’est pas un échantillon indépendant supplémentaire.
+    mapping_note:
+      en: The whole left angular and supramarginal parcels orient the reader to the categorical-task associations. They are not uniquely categorical centres. Frontal subdivisions and temporal white matter are not coloured; this finding selects left-sided associations without asserting an exclusively left-sided system.
+      fr: Les parcelles angulaire et supramarginale gauches entières servent de repères aux associations de la tâche catégorielle. Ce ne sont pas des centres exclusivement catégoriels. Les subdivisions frontales et la substance blanche temporale ne sont pas colorées; ce résultat sélectionne les associations gauches sans affirmer que le système est exclusivement gauche.
+    mappings:
+      - {region: 'destrieux:left:25', source_name: G_pariet_inf-Angular}
+      - {region: 'destrieux:left:26', source_name: G_pariet_inf-Supramar}
+    evidence:
+      - {reference: amorapanth-2010, role: supporting}
+      - {reference: tranel-kemmerer-2004, role: supporting}
+
+  - id: spatial-relations-metric
+    deficit: spatial-relations
+    title: {en: Matching metric distances between objects, fr: Apparier les distances métriques entre objets}
+    network: {en: Temporal spatial-relation systems, fr: Systèmes temporaux des relations spatiales}
+    laterality: right
+    finding:
+      en: In the same 34-patient lesion experiment, impaired matching of metric distances was associated with right middle temporal damage, including after accounting for categorical-task performance. Left angular and inferior frontal damage also contributed to metric-task deficits.
+      fr: Dans la même expérience lésionnelle de 34 patients, un appariement altéré des distances métriques était associé à une atteinte temporale moyenne droite, y compris après prise en compte de la performance catégorielle. Une atteinte angulaire et frontale inférieure gauche contribuait aussi aux déficits de la tâche métrique.
+    limitation:
+      en: This is a task-specific association from one cohort, not a universal right-hemisphere rule. Tranel and Kemmerer’s patients could have impaired spatial-preposition knowledge without basic spatial-processing impairment; their verbal task does not independently replicate this metric localization.
+      fr: Il s’agit d’une association propre à une tâche dans une seule cohorte, et non d’une règle universelle de l’hémisphère droit. Les patients de Tranel et Kemmerer pouvaient avoir des connaissances altérées des prépositions spatiales sans déficit du traitement spatial élémentaire; leur tâche verbale ne réplique pas indépendamment cette localisation métrique.
+    mapping_note:
+      en: The whole right middle temporal gyrus is a coarse landmark for the reported association, not a lesion mask. Left-sided contributions and white-matter anatomy are not represented by this selected right-sided finding.
+      fr: Le gyrus temporal moyen droit entier est un repère grossier de l’association rapportée, et non un masque lésionnel. Les contributions gauches et l’anatomie de la substance blanche ne sont pas représentées par ce résultat droit sélectionné.
+    mappings:
+      - {region: 'destrieux:right:38', source_name: G_temporal_middle}
+    evidence:
+      - {reference: amorapanth-2010, role: supporting}
+      - {reference: tranel-kemmerer-2004, role: qualifying}
+
+  - id: mania-right-thalamus
+    deficit: acquired-mania
+    title: {en: Mania after right thalamic infarction, fr: Manie après un infarctus thalamique droit}
+    network: {en: Thalamic and distributed mood systems, fr: Systèmes thalamiques et distribués de l’humeur}
+    laterality: right
+    finding:
+      en: Two patients developed secondary mania after right thalamic infarction, with hemisensory loss, denial of illness and amnesia for the manic episode. A pooled analysis of published lesional-mania cases also identified right thalamic involvement among preferential locations.
+      fr: Deux patients ont développé une manie secondaire après un infarctus thalamique droit, avec déficit hémisensitif, déni de la maladie et amnésie de l’épisode maniaque. Une analyse groupée de cas publiés de manie lésionnelle identifiait aussi une atteinte thalamique droite parmi les localisations préférentielles.
+    limitation:
+      en: Selected cases do not establish incidence, a specific thalamic nucleus or that right thalamic injury invariably causes mania. Larger series include heterogeneous right, left and bilateral lesions. The pooled and network literature samples may overlap, and the 2020 studies share investigators; they are not independent replications of the two thalamic cases.
+      fr: Des cas sélectionnés n’établissent ni l’incidence, ni un noyau thalamique précis, ni qu’une lésion thalamique droite cause invariablement une manie. Les grandes séries comprennent des lésions hétérogènes droites, gauches et bilatérales. Les échantillons publiés des analyses groupées et de réseau peuvent se chevaucher, et les études de 2020 partagent des chercheurs; ce ne sont pas des réplications indépendantes des deux cas thalamiques.
+    mapping_note:
+      en: The whole right thalamus marks the infarct location in the two primary cases. No thalamic nucleus is selected, and this landmark is neither a universal mania site nor a map of primary bipolar disorder.
+      fr: Le thalamus droit entier repère la localisation de l’infarctus des deux cas primaires. Aucun noyau thalamique n’est sélectionné, et ce repère n’est ni un site universel de la manie ni une carte du trouble bipolaire primaire.
+    mappings:
+      - {region: 'aseg:right:49', source_name: Right-Thalamus-Proper}
+    evidence:
+      - {reference: cummings-mendez-1984, role: supporting}
+      - {reference: barahona-correa-2020, role: supporting}
+      - {reference: cotovio-2020, role: qualifying}
+
+  - id: mania-connectivity
+    deficit: acquired-mania
+    title: {en: Connectivity shared by mania-associated lesions, fr: Connectivité commune aux lésions associées à une manie}
+    network: {en: Normative mood-related connectivity, fr: Connectivité normative liée à l’humeur}
+    laterality: bilateral
+    finding:
+      en: Forty-one literature lesions associated with mania had heterogeneous locations but a shared normative connectivity pattern involving right orbitofrontal cortex, inferior temporal gyrus and frontal pole. The pattern was reproduced in an independent 15-patient clinical cohort.
+      fr: Quarante et une lésions publiées associées à une manie avaient des localisations hétérogènes mais un profil commun de connectivité normative impliquant le cortex orbitofrontal, le gyrus temporal inférieur et le pôle frontal droits. Le profil était reproduit dans une cohorte clinique indépendante de 15 patients.
+    limitation:
+      en: Connectivity came from healthy participants rather than measurements in each patient. Connected nodes were not necessarily injured. A separate pooled analysis supports right-sided predominance with exceptions, but shares investigators and potentially published cases; its counts must not be added as an independent cohort.
+      fr: La connectivité provenait de sujets sains plutôt que de mesures chez chaque patient. Les nœuds connectés n’étaient pas nécessairement lésés. Une analyse groupée distincte soutient une prédominance droite avec des exceptions, mais partage des chercheurs et potentiellement des cas publiés; ses effectifs ne doivent pas être ajoutés comme une cohorte indépendante.
+    mapping_note:
+      en: No parcel is coloured. The right orbitofrontal, inferior temporal and frontal-pole nodes describe normative connections, not direct lesion sites; the separate thalamic finding supplies the profile’s anatomical landmark.
+      fr: Aucune parcelle n’est colorée. Les nœuds orbitofrontal, temporal inférieur et polaire frontal droits décrivent des connexions normatives, et non des sites directement lésés; le résultat thalamique distinct fournit le repère anatomique du profil.
+    mappings: []
+    evidence:
+      - {reference: cotovio-2020, role: supporting}
+      - {reference: barahona-correa-2020, role: qualifying}
+
+  - id: visual-anosognosia-occipital
+    deficit: visual-anosognosia
+    title: {en: Occipital injury with unawareness of visual loss, fr: Lésion occipitale avec méconnaissance de la perte visuelle}
+    network: {en: Visual systems and deficit awareness, fr: Systèmes visuels et conscience du déficit}
+    laterality: bilateral
+    finding:
+      en: Four adult cases linked Anton syndrome to bilateral occipital injury, sometimes with additional temporal or thalamic damage. Analysis of 16 published cases identified striate and extrastriate occipital injury, usually bilateral. A further case had bilateral occipital infarcts together with right frontal and parietal hemorrhagic lesions.
+      fr: Quatre cas adultes associaient le syndrome d’Anton à des lésions occipitales bilatérales, parfois avec une atteinte temporale ou thalamique supplémentaire. L’analyse de 16 cas publiés identifiait une atteinte occipitale striée et extrastriée, habituellement bilatérale. Un autre cas avait des infarctus occipitaux bilatéraux associés à des lésions hémorragiques frontales et pariétales droites.
+    limitation:
+      en: Blindness can occur with preserved awareness. The literature cases can overlap across reports; one of the 16 had unilateral occipital injury with contralateral hypoperfusion. The lesion comparison used mirrored unilateral visual-control lesions as synthetic bilateral controls. These findings do not isolate a parcel whose injury alone produces visual anosognosia.
+      fr: La cécité peut survenir avec une conscience préservée. Les cas publiés peuvent se chevaucher entre rapports; l’un des 16 avait une lésion occipitale unilatérale avec hypoperfusion controlatérale. La comparaison lésionnelle utilisait des lésions visuelles témoins unilatérales reflétées comme témoins bilatéraux synthétiques. Ces résultats n’isolent pas une parcelle dont la lésion seule produit une anosognosie visuelle.
+    mapping_note:
+      en: The bilateral calcarine sulci are landmarks for the striate component of the described injury. They do not show the full striate/extrastriate lesions, associated white matter or a unique awareness centre. Frontal and parietal lesions in the individual case are not generalized to the whole profile.
+      fr: Les sillons calcarins bilatéraux servent de repères à la composante striée de l’atteinte décrite. Ils ne représentent ni les lésions striées et extrastriées complètes, ni la substance blanche associée, ni un centre unique de la conscience. Les lésions frontales et pariétales du cas individuel ne sont pas généralisées à tout le profil.
+    mappings:
+      - {region: 'destrieux:left:45', source_name: S_calcarine}
+      - {region: 'destrieux:right:45', source_name: S_calcarine}
+    evidence:
+      - {reference: chaudhry-2019, role: supporting}
+      - {reference: monai-2024, role: supporting}
+      - {reference: barojas-alvarez-2021, role: qualifying}
+
+  - id: visual-anosognosia-disconnection
+    deficit: visual-anosognosia
+    title: {en: Predicted disconnection beyond visual cortex, fr: Déconnexion prédite au-delà du cortex visuel}
+    network: {en: Normative visual and frontoparietal connections, fr: Connexions visuelles et frontopariétales normatives}
+    laterality: bilateral
+    finding:
+      en: Embedding the Anton-syndrome lesions in healthy structural and functional atlases predicted greater disconnection toward dorsal frontoparietal attention and control systems than for the synthetic visual controls. Visual and motor anosognosia showed partly shared predicted disconnection despite different direct lesion locations.
+      fr: L’intégration des lésions du syndrome d’Anton dans des atlas structurels et fonctionnels de sujets sains prédisait une déconnexion plus importante vers les systèmes frontopariétaux dorsaux d’attention et de contrôle que chez les témoins visuels synthétiques. Les anosognosies visuelle et motrice présentaient une déconnexion prédite en partie commune malgré des localisations lésionnelles directes différentes.
+    limitation:
+      en: These are atlas-based estimates, not measured disconnections in each patient, and the comparison groups differ in how lesions were obtained. The additional frontal/parietal injury in the individual 2021 case does not prove that direct damage to those regions is universally required.
+      fr: Il s’agit d’estimations fondées sur des atlas, et non de déconnexions mesurées chez chaque patient, et les groupes comparés diffèrent par le mode d’obtention des lésions. L’atteinte frontale et pariétale supplémentaire du cas individuel de 2021 ne prouve pas qu’une lésion directe de ces régions soit toujours nécessaire.
+    mapping_note:
+      en: No parcel is coloured because the frontoparietal results describe predicted remote disconnection. Only the separate direct-injury finding supplies coloured visual landmarks.
+      fr: Aucune parcelle n’est colorée car les résultats frontopariétaux décrivent une déconnexion distante prédite. Seul le résultat distinct d’atteinte directe fournit des repères visuels colorés.
+    mappings: []
+    evidence:
+      - {reference: monai-2024, role: supporting}
+      - {reference: barojas-alvarez-2021, role: qualifying}
+
+  - id: acquired-ocd-orbitofrontal
+    deficit: acquired-ocd
+    title: {en: Checking rituals with a left medial orbitofrontal infarct, fr: Rituels de vérification avec infarctus orbitofrontal médial gauche}
+    network: {en: Medial orbitofrontal region, fr: Région orbitofrontale médiale}
+    laterality: left
+    finding:
+      en: New checking rituals (Y-BOCS 15) accompanied an infarct involving the left gyrus rectus and medial orbital gyrus, with normal cognitive testing. An independent right orbitofrontal contusion case also developed OCD symptoms.
+      fr: De nouveaux rituels de vérification (Y-BOCS 15) accompagnaient un infarctus touchant les gyri rectus et orbital médial gauches, avec tests cognitifs normaux. Un cas indépendant de contusion orbitofrontale droite développait aussi des symptômes de TOC.
+    limitation:
+      en: Infarct timing was uncertain. Two selected cases cannot establish risk or a uniquely left-sided substrate; the right-sided case was reviewed only in abstract.
+      fr: La date de l’infarctus était incertaine. Deux cas sélectionnés n’établissent ni le risque ni un substrat exclusivement gauche; seul le résumé du cas droit a été examiné.
+    mapping_note:
+      en: Left gyrus rectus marks part of Kim's reported lesion, not its full extent or a sufficient OCD site.
+      fr: Le gyrus rectus gauche repère une partie de la lésion de Kim, sans en représenter toute l’étendue ni un site suffisant du TOC.
+    mappings:
+      - {region: 'destrieux:left:31', source_name: G_rectus}
+    evidence:
+      - {reference: kim-lee-2002, role: supporting}
+      - {reference: ogai-2005, role: qualifying}
+
+  - id: acquired-ocd-connectivity
+    deficit: acquired-ocd
+    title: {en: Normative connectivity shared by OCD-associated lesions, fr: Connectivité normative commune aux lésions associées à un TOC}
+    network: {en: Normative orbitofrontal and ventral basal-ganglia connections, fr: Connexions normatives orbitofrontales et des noyaux gris centraux ventraux}
+    laterality: bilateral
+    finding:
+      en: Heterogeneous OCD-associated lesions shared normative connectivity involving orbitofrontal cortex and ventral basal ganglia. Connectivity patterns were more consistent across lesion etiologies and symptom dimensions than lesion topography.
+      fr: Des lésions hétérogènes associées au TOC partageaient une connectivité normative impliquant le cortex orbitofrontal et les noyaux gris centraux ventraux. Ces profils étaient plus constants entre étiologies et dimensions symptomatiques que la topographie lésionnelle.
+    limitation:
+      en: Connectivity was estimated from healthy participants. Published cases and limited scan slices introduce selection and tracing uncertainty; these cases may include the separate reports cited here. Adult-only eligibility was not established from the inspected main text.
+      fr: La connectivité était estimée chez des sujets sains. Les cas publiés et les coupes limitées introduisent des incertitudes de sélection et de traçage; ces cas peuvent inclure les rapports distincts cités ici. Le texte principal examiné n’établissait pas de sélection exclusivement adulte.
+    mapping_note:
+      en: No parcel is coloured; connected nodes are not necessarily injured. The separate gyrus rectus case supplies the anatomical landmark.
+      fr: Aucune parcelle n’est colorée; les nœuds connectés ne sont pas nécessairement lésés. Le cas distinct du gyrus rectus fournit le repère anatomique.
+    mappings: []
+    evidence:
+      - {reference: cotovio-2026, role: supporting}
+
+  - id: kluver-bucy-amygdala
+    deficit: kluver-bucy
+    title: {en: Amygdala involvement with broader cortical injury, fr: Atteinte amygdalienne avec lésions corticales associées}
+    network: {en: Bilateral amygdala and temporal-insular regions, fr: Amygdales bilatérales et régions temporales et insulaires}
+    laterality: bilateral
+    finding:
+      en: Hayman’s patient developed oral exploration, pica, recognition difficulty and altered emotional and sexual behavior with receptive aphasia. MRI implicated the basolateral portions of both amygdalae and temporal-insular cortex.
+      fr: Le patient de Hayman présentait exploration orale, pica, difficultés de reconnaissance et changements émotionnels et sexuels avec aphasie réceptive. L’IRM impliquait les portions basolatérales des deux amygdales et le cortex temporal et insulaire.
+    limitation:
+      en: One case with uncertain injury etiology and substantial cortical involvement. Aphasia and visual impairment limited memory assessment and establishing hypermetamorphosis; this does not isolate amygdala causation. Park’s different MRI pattern qualifies any claim of necessity.
+      fr: Cas unique d’étiologie incertaine avec atteinte corticale importante. L’aphasie et l’atteinte visuelle limitaient l’évaluation mnésique et l’identification de l’hypermétamorphose; une causalité amygdalienne isolée n’est pas établie. Le profil IRM différent de Park nuance toute nécessité anatomique.
+    mapping_note:
+      en: Whole amygdalae are coarse landmarks, not the reported basolateral boundaries or adjacent injury. They establish neither a necessary nor a sufficient lesion pattern.
+      fr: Les amygdales entières sont des repères approximatifs, sans délimiter l’atteinte basolatérale ni les lésions voisines. Elles ne définissent aucun profil lésionnel nécessaire ou suffisant.
+    mappings:
+      - {region: 'aseg:left:18', source_name: Left-Amygdala}
+      - {region: 'aseg:right:54', source_name: Right-Amygdala}
+    evidence:
+      - {reference: hayman-1998, role: supporting}
+      - {reference: park-2012-kbs, role: qualifying}
+
+  - id: kluver-bucy-hippocampus
+    deficit: kluver-bucy
+    title: {en: Hippocampal injury after encephalitis and status epilepticus, fr: Atteinte hippocampique après encéphalite et état de mal épileptique}
+    network: {en: Bilateral hippocampal regions, fr: Régions hippocampiques bilatérales}
+    laterality: bilateral
+    finding:
+      en: Park’s patient developed hyperphagia, altered sexual behavior, hypermetamorphosis and severe memory impairment after seizure recovery. Serial MRI showed bilateral hippocampal swelling followed by atrophy; cognitive dysfunction persisted at six months.
+      fr: Après récupération de l’état de mal, le patient de Park présentait hyperphagie, comportement sexuel modifié, hypermétamorphose et trouble mnésique sévère. Les IRM montraient un gonflement puis une atrophie hippocampique bilatérale; les troubles cognitifs persistaient à six mois.
+    limitation:
+      en: One case of unidentified encephalitis and prolonged seizures. MRI could not exclude microscopic or functional injury elsewhere; FDG-PET was not performed. Hayman’s broader injury pattern also limits generalization. Hippocampal injury alone was not shown necessary or sufficient.
+      fr: Cas unique d’encéphalite indéterminée et de crises prolongées. L’IRM n’excluait pas d’atteinte microscopique ou fonctionnelle ailleurs; aucune TEP-FDG n’a été réalisée. Les lésions plus étendues de Hayman limitent aussi la généralisation. La nécessité ou la suffisance d’une atteinte hippocampique isolée n’est pas démontrée.
+    mapping_note:
+      en: Whole hippocampi mark the reported atrophy without isolating initial CA1-predominant changes. The two findings do not imply that hippocampi and amygdalae must all be damaged together.
+      fr: Les hippocampes entiers repèrent l’atrophie rapportée sans isoler les anomalies initiales prédominant dans CA1. Les deux constats n’impliquent pas une atteinte nécessairement conjointe des hippocampes et des amygdales.
+    mappings:
+      - {region: 'aseg:left:17', source_name: Left-Hippocampus}
+      - {region: 'aseg:right:53', source_name: Right-Hippocampus}
+    evidence:
+      - {reference: park-2012-kbs, role: supporting}
+      - {reference: hayman-1998, role: qualifying}
+
+  - id: estimation-right-temporal-frontal
+    deficit: cognitive-estimation
+    title: {en: Right temporal and frontal estimation associations, fr: Associations temporales et frontales droites de l’estimation}
+    network: {en: Temporal knowledge and frontal monitoring systems, fr: Systèmes temporaux des connaissances et frontaux du contrôle}
+    laterality: right
+    finding:
+      en: Stroke patients with left neglect made less plausible everyday estimates than controls without the predicted general overestimation bias. Voxel mapping implicated right anterior temporal tissue; region-based tests implicated the right superior temporal pole and orbital inferior frontal gyrus, together with two white-matter pathways.
+      fr: Les patients après AVC avec négligence gauche donnaient des estimations quotidiennes moins plausibles que les témoins sans le biais général de surestimation prédit. La cartographie voxel par voxel impliquait le tissu temporal antérieur droit; les tests régionaux impliquaient le pôle temporal supérieur et le gyrus frontal inférieur orbital droits, ainsi que deux voies de substance blanche.
+    limitation:
+      en: Only right-sided strokes with neglect were studied; this cannot establish right-hemisphere exclusivity or isolate semantic knowledge from executive contributions. Coverage favoured middle cerebral artery injury. The separate frontal series supports task impairment, not an independent replication of these regional results.
+      fr: Seuls des AVC droits avec négligence étaient étudiés; cela n’établit ni une exclusivité hémisphérique droite ni une séparation des connaissances sémantiques et des contributions exécutives. La couverture favorisait les lésions de l’artère cérébrale moyenne. La série frontale distincte étaye le déficit à la tâche sans répliquer indépendamment ces résultats régionaux.
+    mapping_note:
+      en: Whole right temporal-pole and orbital inferior frontal parcels mark the reported corrected region-based associations. They do not reproduce the voxel cluster or claim that every part of each parcel is essential. The uncinate fasciculus and anterior commissure remain uncoloured.
+      fr: Les parcelles entières du pôle temporal et du gyrus frontal inférieur orbital droits repèrent les associations régionales corrigées rapportées. Elles ne reproduisent pas l’amas voxelique et n’affirment pas que chaque partie de chaque parcelle est essentielle. Le faisceau unciné et la commissure antérieure restent non colorés.
+    mappings:
+      - {region: 'destrieux:right:44', source_name: Pole_temporal}
+      - {region: 'destrieux:right:13', source_name: G_front_inf-Orbital}
+    evidence:
+      - {reference: pflugshaupt-2020, role: supporting}
+      - {reference: cipolotti-2018, role: qualifying}
+
+  - id: estimation-frontal
+    deficit: cognitive-estimation
+    title: {en: Implausible estimates after frontal lesions, fr: Estimations invraisemblables après des lésions frontales}
+    network: {en: Frontal strategic monitoring, fr: Contrôle stratégique frontal}
+    laterality: bilateral
+    finding:
+      en: The frontal stroke/tumour group made more estimation errors and very extreme responses than posterior-lesion patients and healthy controls. Differences from controls persisted after accounting for arithmetic and fluid-intelligence scores; overall estimation scores did not distinguish left from right frontal groups.
+      fr: Le groupe avec AVC ou tumeur frontale faisait davantage d’erreurs d’estimation et de réponses très extrêmes que les patients avec lésion postérieure et les témoins sains. Les différences avec les témoins persistaient en tenant compte de l’arithmétique et de l’intelligence fluide; les scores globaux d’estimation ne distinguaient pas les groupes frontaux gauche et droit.
+    limitation:
+      en: Mixed etiologies, a small imaging subset and lesion overlap precluded precise frontal localization. The abstract and final methods give different sample counts. The independent right-stroke study shows that this task is not exclusively a test of frontal injury.
+      fr: Les étiologies mixtes, le petit sous-groupe d’imagerie et le chevauchement des lésions empêchaient une localisation frontale précise. Le résumé et les méthodes finales donnent des effectifs différents. L’étude indépendante des AVC droits montre que cette tâche ne mesure pas exclusivement une atteinte frontale.
+    mapping_note:
+      en: No parcel is coloured from a broad frontal group comparison. Bilateral laterality represents separate left- and right-lesion groups, not obligatory bilateral damage. The separate temporal/frontal finding supplies the profile’s specific landmarks.
+      fr: Aucune parcelle n’est colorée à partir d’une comparaison frontale globale. La latéralité bilatérale représente des groupes avec lésion gauche ou droite distincts, et non une atteinte bilatérale obligatoire. Le résultat temporal/frontal distinct fournit les repères précis du profil.
+    mappings: []
+    evidence:
+      - {reference: cipolotti-2018, role: supporting}
+      - {reference: pflugshaupt-2020, role: qualifying}
+
+  - id: fregoli-right-insula
+    deficit: fregoli-syndrome
+    title: {en: Fregoli syndrome in right-stroke rehabilitation, fr: Syndrome de Frégoli en réadaptation après AVC droit}
+    network: {en: Right insular and frontotemporal systems, fr: Systèmes insulaires et frontotemporaux droits}
+    laterality: right
+    finding:
+      en: Ten patients with Fregoli syndrome all had right-hemisphere strokes and left neglect. Compared with 24 patients with right stroke and neglect without misidentification, lesion associations peaked in anterior-inferior right insula and adjacent white matter within a broader frontotemporal and subcortical pattern.
+      fr: Dix patients présentant un syndrome de Frégoli avaient tous un AVC hémisphérique droit et une négligence gauche. Comparées à celles de 24 patients avec AVC droit et négligence sans fausse identification, les associations lésionnelles culminaient dans l’insula antéro-inférieure droite et la substance blanche voisine au sein d’un profil frontotemporal et sous-cortical plus large.
+    limitation:
+      en: Only 10 cases in two rehabilitation hospitals; cases had lower global cognitive scores and more pusher syndrome than controls. Monitoring depended on spontaneous statements, and no Capgras case was detected. These cases involved nonthreatening acquaintance misidentification rather than the full classical disguise presentation. The broader network study concerns mixed misidentification syndromes, not independent replication of this Fregoli-specific insular association.
+      fr: Seulement 10 cas dans deux hôpitaux de réadaptation; les cas avaient des scores cognitifs globaux plus bas et davantage de syndrome de poussée que les témoins. Le repérage dépendait des propos spontanés et aucun cas de Capgras n’était détecté. Ces cas impliquaient une fausse reconnaissance non menaçante de connaissances plutôt que l’ensemble de la présentation classique de déguisement. L’étude de réseau plus générale porte sur divers syndromes de fausse identification et ne réplique pas indépendamment cette association insulaire propre à Frégoli.
+    mapping_note:
+      en: The whole short-insular parcel is a coarse anterior-insular landmark, not the voxel peak or the full lesion pattern. White matter around the uncinate fasciculus and the other implicated regions are not coloured; this map does not apply to all delusional misidentification syndromes.
+      fr: La parcelle insulaire courte entière est un repère antérieur approximatif, et non le pic voxelique ni le profil lésionnel complet. La substance blanche autour du faisceau unciné et les autres régions impliquées ne sont pas colorées; cette carte ne s’applique pas à tous les syndromes de fausse identification délirante.
+    mappings:
+      - {region: 'destrieux:right:18', source_name: G_insular_short}
+    evidence:
+      - {reference: kakegawa-2020, role: supporting}
+      - {reference: darby-2017, role: qualifying}
+
+  - id: fregoli-connectivity
+    deficit: fregoli-syndrome
+    title: {en: Broader delusional-misidentification connectivity, fr: Connectivité plus générale des fausses identifications délirantes}
+    network: {en: Normative familiarity and belief-evaluation connections, fr: Connexions normatives de familiarité et d’évaluation des croyances}
+    laterality: bilateral
+    finding:
+      en: In 17 published lesion-induced misidentification cases, all lesion sites were functionally connected to left retrosplenial cortex and 16 to right frontal cortex using normative connectivity. These connected regions were related to familiarity and expectation violation in functional-imaging meta-analyses.
+      fr: Dans 17 cas publiés de fausse identification après lésion, tous les sites lésionnels étaient fonctionnellement connectés au cortex rétrosplénial gauche et 16 au cortex frontal droit selon la connectivité normative. Ces régions connectées étaient liées à la familiarité et à la violation des attentes dans des méta-analyses d’imagerie fonctionnelle.
+    limitation:
+      en: Mixed misidentification syndromes rather than a Fregoli-only sample; connectivity and task meta-analyses do not measure injury at these remote nodes in each patient. The direct stroke study is more specific to Fregoli but does not independently validate this network model.
+      fr: L’échantillon comprenait divers syndromes de fausse identification plutôt que seulement Frégoli; la connectivité et les méta-analyses de tâches ne mesurent pas une lésion de ces nœuds distants chez chaque patient. L’étude directe après AVC est plus spécifique à Frégoli sans valider indépendamment ce modèle de réseau.
+    mapping_note:
+      en: No parcel is coloured from normative connectivity or healthy task activation. The separate stroke finding supplies an observed-injury landmark without turning the connected retrosplenial or frontal nodes into lesion sites.
+      fr: Aucune parcelle n’est colorée à partir de la connectivité normative ou de l’activation de sujets sains. Le résultat distinct après AVC fournit un repère de lésion observée sans transformer les nœuds rétrospléniaux ou frontaux connectés en sites lésionnels.
+    mappings: []
+    evidence:
+      - {reference: darby-2017, role: supporting}
+      - {reference: kakegawa-2020, role: qualifying}
+
+  - id: acquired-anxiety-temporal-limbic
+    deficit: acquired-anxiety
+    title: {en: Temporal-limbic lesions and observed anxiety, fr: Lésions temporolimbiques et anxiété observée}
+    network: {en: Temporal and limbic regions, fr: Régions temporales et limbiques}
+    laterality: bilateral
+    finding:
+      en: In 182 veterans, higher observer-rated anxiety was associated with predominantly left temporal-limbic lesions, including hippocampal injury, and a small right temporal cluster after correction for multiple comparisons. Informant ratings showed overlapping left-sided associations. An independent 26-patient stroke cohort associated right superior and middle temporal injury with anxiety at one month.
+      fr: Chez 182 anciens combattants, une anxiété évaluée par observateur plus élevée était associée surtout à des lésions temporolimbiques gauches, dont l’hippocampe, et à un petit foyer temporal droit après correction des comparaisons multiples. Les évaluations par les proches montraient des associations gauches communes. Une cohorte indépendante de 26 patients après AVC associait les lésions temporales supérieures et moyennes droites à l’anxiété à un mois.
+    limitation:
+      en: No lesion association appeared for self-reported anxiety in the veterans. Their overall anxiety did not differ from controls; the affected-region versus control comparison was only a trend (p=.059). Veterans with lesions in the associated regions had greater brain-volume loss than those with lesions elsewhere. Ku was reviewed in abstract, limiting assessment of its methods. These findings do not establish new onset or a universal anxiety localization.
+      fr: Aucune association lésionnelle n’apparaissait pour l’anxiété autoévaluée chez les anciens combattants. Leur anxiété globale ne différait pas des témoins; la comparaison du groupe avec régions atteintes aux témoins n’était qu’une tendance (p=0,059). Les anciens combattants avec lésions dans les régions associées avaient une perte de volume cérébral plus importante que ceux avec lésions ailleurs. Seul le résumé de Ku a été examiné, limitant l’évaluation des méthodes. Ces résultats n’établissent ni une apparition nouvelle ni une localisation universelle de l’anxiété.
+    mapping_note:
+      en: Left hippocampus and both middle temporal gyri mark parts of the reported injured regions. These parcels neither reconstruct the lesions nor identify every significant region.
+      fr: L’hippocampe gauche et les deux gyri temporaux moyens repèrent des parties des régions lésées rapportées. Ces parcelles ne reconstruisent pas les lésions et n’identifient pas toutes les régions significatives.
+    mappings:
+      - {region: 'aseg:left:17', source_name: Left-Hippocampus}
+      - {region: 'destrieux:left:38', source_name: G_temporal_middle}
+      - {region: 'destrieux:right:38', source_name: G_temporal_middle}
+    evidence:
+      - {reference: knutson-2013, role: supporting}
+      - {reference: ku-2013, role: supporting}
+
+  - id: acquired-anxiety-thalamic
+    deficit: acquired-anxiety
+    title: {en: Anxiety after focal thalamic infarction, fr: Anxiété après infarctus thalamique focal}
+    network: {en: Thalamic regions, fr: Régions thalamiques}
+    laterality: bilateral
+    finding:
+      en: In a prospective 37-patient cohort, four of five anterior thalamic stroke patients met the HADS anxiety screening threshold at one month. Corrected lesion mapping associated anxiety with left thalamic injury covering ventral lateral and ventral medial nuclei. In a separate 68-patient cohort with past thalamic stroke, the 11 infarctions involving the posterior thalamus were associated with more emotional disturbance and anxiety than more anterior lesions; the authors proposed damage to connections of the medial pulvinar.
+      fr: Dans une cohorte prospective de 37 patients, quatre des cinq patients avec AVC thalamique antérieur atteignaient le seuil de dépistage de l’anxiété de la HADS à un mois. La cartographie lésionnelle corrigée associait l’anxiété à une atteinte thalamique gauche couvrant les noyaux ventral latéral et ventral médial. Dans une cohorte distincte de 68 patients avec antécédent d’AVC thalamique, les 11 infarctus touchant le thalamus postérieur étaient associés à davantage de perturbations émotionnelles et d’anxiété que les lésions plus antérieures; les auteurs proposaient une atteinte des connexions du pulvinar médian.
+    limitation:
+      en: The prospective anterior subgroup was very small and most strokes were left-sided; prestroke anxiety was not formally measured. The thalamic cohort did not differ overall from TIA controls and showed no effect of lesion side; Liebermann’s results were read in the abstract and its methods only in a partial author copy. Different lesion definitions, timing and analyses limit comparison; a screening score does not establish an anxiety diagnosis or direct causation.
+      fr: Le sous-groupe antérieur prospectif était très petit et la plupart des AVC étaient gauches; l’anxiété avant AVC n’était pas mesurée formellement. La cohorte thalamique ne différait pas globalement des témoins avec AIT et ne montrait pas d’effet du côté lésé; les résultats de Liebermann ont été lus dans le résumé et ses méthodes seulement dans une copie partielle des auteurs. Les définitions lésionnelles, délais et analyses différents limitent la comparaison; un score de dépistage n’établit ni un diagnostic anxieux ni une causalité directe.
+    mapping_note:
+      en: The whole left thalamus is a coarse landmark for Scharf’s corrected lesion result; it does not represent the complete lesion or a sufficient anxiety site. The anterior nuclear group is not substituted for the ventral nuclei reported by Scharf. Liebermann’s reviewed text gives no side for the posterior result and offers the medial pulvinar only as a proposed mechanism, so no pulvinar parcel is coloured.
+      fr: Le thalamus gauche entier est un repère grossier du résultat lésionnel corrigé de Scharf; il ne représente ni la lésion complète ni un site suffisant de l’anxiété. Le groupe nucléaire antérieur ne remplace pas les noyaux ventraux rapportés par Scharf. Le texte examiné de Liebermann n’indique aucun côté pour le résultat postérieur et ne propose le pulvinar médian que comme mécanisme; aucune parcelle du pulvinar n’est donc colorée.
+    mappings:
+      - {region: 'aseg:left:10', source_name: Left-Thalamus-Proper}
+    evidence:
+      - {reference: scharf-2023, role: supporting}
+      - {reference: liebermann-2013, role: supporting}
+
+  - id: reduplicative-right-mca-case
+    deficit: reduplicative-paramnesia
+    title: {en: Hospital misidentified as home after right stroke, fr: Hôpital identifié comme domicile après AVC droit}
+    network: {en: Observed right middle cerebral artery injury, fr: Lésion observée dans le territoire sylvien droit}
+    laterality: right
+    finding:
+      en: After right middle cerebral artery infarction, a woman insisted that the hospital was her home in another city despite counterevidence, and pointed out where her kitchen, bathroom, living room and front door were. Diffusion-weighted imaging documented injury including the right precentral and supramarginal gyri, inferior frontal gyrus and insula, and to a lesser extent the internal capsule and lentiform nucleus. Nearly two months later she recognized hospitalization but still reported the wrong city.
+      fr: Après un infarctus sylvien droit, une femme affirmait que l’hôpital était son domicile dans une autre ville malgré les preuves contraires, et indiquait où se trouvaient sa cuisine, sa salle de bains, son salon et sa porte d’entrée. L’imagerie de diffusion documentait une atteinte comprenant les gyri précentral et supramarginal droits, le gyrus frontal inférieur et l’insula, et dans une moindre mesure la capsule interne et le noyau lenticulaire. Près de deux mois plus tard, elle reconnaissait l’hospitalisation mais indiquait encore la mauvaise ville.
+    limitation:
+      en: One patient with a large infarct and several coexisting deficits. The case documents injured anatomy associated with the phenotype; it cannot isolate which region caused the spatial delusion or establish a necessary or sufficient site.
+      fr: Une patiente avec un infarctus étendu et plusieurs troubles coexistants. Le cas documente l’anatomie lésée associée au phénotype; il ne peut isoler la région responsable du délire spatial ni établir un site nécessaire ou suffisant.
+    mapping_note:
+      en: The precentral and supramarginal parcels are selected explicitly named injured gyri in this case’s diffusion-imaging caption. Whole gyri exceed the affected tissue and display neither the full infarct nor selective localization of reduplicative paramnesia. The inferior frontal gyrus and insula are not coloured because the report does not specify which of their atlas subdivisions were injured; the less affected internal capsule and lentiform nucleus are also omitted.
+      fr: Les parcelles précentrale et supramarginale sont des gyri lésés sélectionnés et explicitement nommés dans la légende d’imagerie de diffusion de ce cas. Les gyri entiers dépassent le tissu atteint et ne montrent ni l’infarctus complet ni une localisation sélective de la paramnésie réduplicative. Le gyrus frontal inférieur et l’insula ne sont pas colorés, car le rapport ne précise pas lesquelles de leurs subdivisions de l’atlas étaient atteintes; la capsule interne et le noyau lenticulaire, moins atteints, sont aussi omis.
+    mappings:
+      - {region: 'destrieux:right:29', source_name: G_precentral}
+      - {region: 'destrieux:right:26', source_name: G_pariet_inf-Supramar}
+    evidence:
+      - {reference: carlisle-2021, role: supporting}
+      - {reference: diamantaras-2023, role: qualifying}
+
+  - id: reduplicative-right-dlpfc
+    deficit: reduplicative-paramnesia
+    title: {en: Controlled focal-lesion comparison, fr: Comparaison contrôlée de lésions focales}
+    network: {en: Right dorsolateral prefrontal cortex, fr: Cortex préfrontal dorsolatéral droit}
+    laterality: right
+    finding:
+      en: In 11 cases, direct lesions overlapped right dorsolateral prefrontal cortex in seven patients. A voxelwise comparison with 11 spatial-disorientation controls identified a right prefrontal association near BA46. Moderate-to-severe executive impairment was more frequent in tested cases than controls; memory and visuospatial impairments were common in both groups.
+      fr: Chez 11 cas, les lésions directes se chevauchaient dans le cortex préfrontal dorsolatéral droit chez sept patients. Une comparaison voxelique avec 11 témoins ayant une désorientation spatiale identifiait une association préfrontale droite près de BA46. Une atteinte exécutive modérée à sévère était plus fréquente chez les cas testés que chez les témoins; les troubles mnésiques et visuospatiaux étaient fréquents dans les deux groupes.
+    limitation:
+      en: Small sample selected from clinical records, with mixed etiologies and differing histories of prolonged unconsciousness. The acute-stroke study instead found spared dorsal frontoparietal tissue predictive. Different designs, phenotypes and etiologies limit comparison; these findings do not establish a replicated frontal lesion or a necessary site.
+      fr: Petit échantillon sélectionné à partir de dossiers cliniques, d’étiologies diverses, avec des antécédents différents de perte de conscience prolongée. L’étude après AVC aigu trouvait plutôt le tissu frontopariétal dorsal préservé prédictif. Les différences de plans, de phénotypes et d’étiologies limitent la comparaison; ces résultats n’établissent ni une lésion frontale répliquée ni un site nécessaire.
+    mapping_note:
+      en: The direct DLPFC result reports BA46 and MNI coordinates without naming an atlas gyrus; it remains unmapped rather than assuming equivalence to middle frontal gyrus. Connected insular/cingulate regions are not coloured. The anterior temporal overlap was not specific to cases in the direct comparison and is omitted.
+      fr: Le résultat préfrontal dorsolatéral direct indique BA46 et des coordonnées MNI sans nommer un gyrus de l’atlas; il reste sans carte plutôt que de supposer une équivalence avec le gyrus frontal moyen. Les régions insulaires/cingulaires connectées ne sont pas colorées. Le chevauchement temporal antérieur n’était pas spécifique aux cas dans la comparaison directe et est omis.
+    mappings: []
+    evidence:
+      - {reference: diamantaras-2023, role: supporting}
+      - {reference: alves-2021, role: qualifying}
+
+  - id: reduplicative-stroke-disconnection
+    deficit: reduplicative-paramnesia
+    title: {en: Spatial delusions in acute right stroke, fr: Délires spatiaux après AVC droit aigu}
+    network: {en: Estimated right frontothalamic and occipitotemporal disconnection, fr: Déconnexion frontothalamique et occipitotemporale droite estimée}
+    laterality: right
+    finding:
+      en: In the prospective stroke study, structural disconnection along two distinct right-hemisphere streams, one frontothalamic and one occipitotemporal, was the strongest predictor of spatial delusions. Sparing of dorsal right frontoparietal tissue, age and anosognosia also independently predicted the syndrome. The expanded clinical subanalysis documented persistent beliefs of mislocation, duplication or place fusion after systematic presentation of counterevidence.
+      fr: Dans l’étude prospective après AVC, la déconnexion structurelle le long de deux voies distinctes de l’hémisphère droit, l’une frontothalamique et l’autre occipitotemporale, était le meilleur prédicteur des délires spatiaux. La préservation du tissu frontopariétal dorsal droit, l’âge et l’anosognosie prédisaient aussi indépendamment le syndrome. La sous-analyse clinique élargie documentait des croyances persistantes de fausse localisation, de duplication ou de fusion des lieux après présentation systématique de preuves contraires.
+    limitation:
+      en: Disconnection and remote network estimates do not demonstrate injury at every implicated node. The 2023 clinical study partly reused the 2021 cohort; these reports are not independent replication. Their selected acute-stroke sample differs from the mixed focal-lesion study showing DLPFC injury, limiting a unified anatomical claim.
+      fr: Les estimations de déconnexion et de réseau distant ne démontrent pas une lésion de chaque nœud impliqué. L’étude clinique de 2023 réutilisait une partie de la cohorte de 2021; ces rapports ne constituent pas des réplications indépendantes. Leur échantillon sélectionné après AVC aigu diffère de l’étude de lésions focales mixtes montrant une atteinte préfrontale dorsolatérale, ce qui limite une conclusion anatomique commune.
+    mapping_note:
+      en: No parcel is coloured from spared tissue, structural disconnection or normative functional connectivity. The separate stroke case supplies explicitly named observed-injury landmarks.
+      fr: Aucune parcelle n’est colorée à partir du tissu préservé, de la déconnexion structurelle ou de la connectivité fonctionnelle normative. Le cas distinct d’AVC fournit des repères lésionnels observés et explicitement nommés.
+    mappings: []
+    evidence:
+      - {reference: alves-2021, role: supporting}
+      - {reference: alves-2023, role: supporting}
+      - {reference: diamantaras-2023, role: qualifying}
+
+  - id: working-memory-frontal-manipulation
+    deficit: working-memory
+    title: {en: Reordering letters and numbers after frontal injury, fr: Réorganisation de lettres et de chiffres après lésion frontale}
+    network: {en: Left dorsolateral prefrontal contributions to manipulation, fr: Contributions préfrontales dorsolatérales gauches à la manipulation}
+    laterality: left
+    finding:
+      en: Seven veterans with focal left dorsolateral prefrontal lesions performed worse than healthy controls on Letter–Number Sequencing, which requires recalling digits in numerical order followed by letters alphabetically. Forward spans, monitoring and N-back performance showed no reliable deficits in the focal prefrontal groups.
+      fr: Sept vétérans avec lésions préfrontales dorsolatérales gauches focales réussissaient moins bien que les témoins sains l’épreuve de séquences lettres–chiffres, qui demande de rappeler les chiffres par ordre numérique puis les lettres par ordre alphabétique. Les empans directs, le suivi et les performances N-back ne montraient pas de déficit fiable dans les groupes préfrontaux focaux.
+    limitation:
+      en: Small focal subgroups and multiple task comparisons limit inference, and no multiple-comparison correction was reported. The Letter–Number Sequencing group effect was p=.05, the left group differed from healthy controls but not from the other prefrontal cases, and the spatial-backward result was only a trend. The cohort comes from the same Vietnam Head Injury Study registry as Koenigs’s parietal study and the catalogued intelligence study. Koenigs’s discussion stated, without presenting the analysis, that 21 veterans with dorsolateral prefrontal lesions had no significant working-memory impairment; these reports are not independent replications. Right-sided deficits concerned reasoning tasks.
+      fr: Les petits sous-groupes focaux et les comparaisons entre plusieurs tâches limitent l’interprétation, et aucune correction pour comparaisons multiples n’était rapportée. L’effet de groupe en séquences lettres–chiffres était p=0,05, le groupe gauche différait des témoins sains mais pas des autres cas préfrontaux, et le résultat spatial inverse n’était qu’une tendance. La cohorte provient du même registre de la Vietnam Head Injury Study que l’étude pariétale de Koenigs et l’étude d’intelligence déjà répertoriée. La discussion de Koenigs indiquait, sans présenter l’analyse, que 21 vétérans avec lésions préfrontales dorsolatérales n’avaient pas de déficit significatif de mémoire de travail; ces rapports ne sont pas des réplications indépendantes. Les déficits droits concernaient le raisonnement.
+    mapping_note:
+      en: The study reports dorsolateral prefrontal BA 9/46, with greatest overlap in BA 9, without identifying a specific human frontal gyrus. No parcel is selected. Atlas-based descriptions of adjacent white-matter pathways do not establish selective injury to individual tracts.
+      fr: L’étude rapporte les aires préfrontales dorsolatérales 9/46, avec chevauchement maximal dans l’aire 9, sans identifier de gyrus frontal humain précis. Aucune parcelle n’est sélectionnée. Les descriptions des voies de substance blanche adjacentes fondées sur des atlas n’établissent pas de lésion sélective de faisceaux individuels.
+    mappings: []
+    evidence:
+      - {reference: barbey-2013-working-memory, role: supporting}
+      - {reference: baier-2010-working-memory, role: qualifying}
+      - {reference: koenigs-2009, role: qualifying}
+
+  - id: working-memory-distractor-filtering
+    deficit: working-memory
+    title: {en: Filtering simultaneous visual distractors, fr: Filtrage de distracteurs visuels simultanés}
+    network: {en: Left putamen and adjacent white matter, fr: Putamen gauche et substance blanche adjacente}
+    laterality: left
+    finding:
+      en: In the acute stroke cohort, damage to the left putamen and adjacent white matter was associated with a larger distractor cost after false-discovery-rate correction. Patients remembered three red-dot locations either alone or alongside two irrelevant yellow dots; the outcome was the change in hits minus false alarms.
+      fr: Dans la cohorte d’AVC aigus, l’atteinte du putamen gauche et de la substance blanche adjacente était associée à un coût accru des distracteurs après correction du taux de fausses découvertes. Les patients mémorisaient trois positions de points rouges, seuls ou accompagnés de deux points jaunes non pertinents; la mesure était la variation des réponses correctes moins les fausses alarmes.
+    limitation:
+      en: The retention finding below comes from the same 61 patients, not an independent cohort. Post hoc regional subgroups differed in lesion volume, and structural lesions cannot exclude distant functional effects. This visual filtering contrast differs from the letter–number manipulation task and does not establish a universal left-sided filter.
+      fr: Le résultat de maintien ci-dessous provient des mêmes 61 patients, et non d’une cohorte indépendante. Les sous-groupes régionaux définis a posteriori différaient par le volume lésionnel et les lésions structurelles n’excluent pas des effets fonctionnels à distance. Ce contraste de filtrage visuel diffère de la manipulation de lettres et de chiffres et n’établit pas de filtre universellement gauche.
+    mapping_note:
+      en: The whole left putamen is a coarse landmark for the reported association. It neither reproduces the lesion cluster nor represents the adjacent white-matter contribution; no individual tract is inferred.
+      fr: Le putamen gauche entier est un repère grossier de l’association rapportée. Il ne reproduit pas l’amas lésionnel et ne représente pas la contribution de la substance blanche adjacente; aucun faisceau individuel n’est déduit.
+    mappings:
+      - {region: 'aseg:left:12', source_name: Left-Putamen}
+    evidence:
+      - {reference: baier-2010-working-memory, role: supporting}
+      - {reference: barbey-2013-working-memory, role: qualifying}
+
+  - id: working-memory-load-sensitive-retention
+    deficit: working-memory
+    title: {en: Retaining more visual locations without distractors, fr: Maintien d’un nombre accru de positions visuelles sans distracteurs}
+    network: {en: Right frontal–insular and caudate contributions to retention, fr: Contributions fronto-insulaires et caudées droites au maintien}
+    laterality: right
+    finding:
+      en: In the same stroke cohort, a larger accuracy cost when memory load increased from three to five target locations without distractors was associated with right frontal white matter, inferior frontal gyrus, caudate head and insular damage after false-discovery-rate correction. Excluding patients with neglect or extinction did not change the anatomical result.
+      fr: Dans la même cohorte d’AVC, une baisse accrue de l’exactitude lorsque la charge mnésique passait de trois à cinq positions cibles sans distracteurs était associée à l’atteinte de la substance blanche frontale, du gyrus frontal inférieur, de la tête du caudé et de l’insula droits après correction du taux de fausses découvertes. L’exclusion des patients avec négligence ou extinction ne modifiait pas le résultat anatomique.
+    limitation:
+      en: These are the same 61 acute stroke patients as in the filtering finding. The prefrontal lesions mainly affected subgyral white matter, regional coverage favoured inferior frontal and insular sites, and post hoc subgroups differed in lesion volume. Retention of visual locations differs from the manipulation tasks used in the prefrontal veteran study; the results do not isolate a single cortical storage site.
+      fr: Il s’agit des mêmes 61 patients après AVC aigu que pour le filtrage. Les lésions préfrontales touchaient surtout la substance blanche sous-gyrale, la couverture régionale favorisait les sites frontaux inférieurs et insulaires et les sous-groupes définis a posteriori différaient par le volume lésionnel. Le maintien de positions visuelles diffère des tâches de manipulation de l’étude préfrontale chez les vétérans; ces résultats n’isolent pas un site cortical unique de stockage.
+    mapping_note:
+      en: The whole right caudate and whole right insula are coarse landmarks for the reported caudate-head and insular associations. The paper does not specify an inferior-frontal subdivision, so none is selected. Frontal white matter is not represented, and these parcels do not reconstruct the significant clusters.
+      fr: Le caudé droit entier et l’insula droite entière sont des repères grossiers des associations rapportées à la tête du caudé et à l’insula. L’article ne précise pas de subdivision frontale inférieure; aucune n’est donc sélectionnée. La substance blanche frontale n’est pas représentée et ces parcelles ne reconstruisent pas les amas significatifs.
+    mappings:
+      - {region: 'aseg:right:50', source_name: Right-Caudate}
+      - {region: 'nextbrain:right:12035', source_name: insula}
+    evidence:
+      - {reference: baier-2010-working-memory, role: supporting}
+      - {reference: barbey-2013-working-memory, role: qualifying}
+
+  - id: amnesia-basal-forebrain
+    deficit: amnesia
+    title: {en: Basal-forebrain injury and memory impairment, fr: Atteinte du prosencéphale basal et trouble mnésique}
+    network: {en: Septal–diagonal-band and nearby memory pathways, fr: Région septale et bande diagonale et voies mnésiques voisines}
+    laterality: bilateral
+    finding:
+      en: One patient developed predominantly anterograde amnesia after aneurysm clipping, with injury centred on the right diagonal band and patchy contralateral basal-forebrain damage. A separate ten-patient postoperative series found infarcts across several regions of the subcallosal-artery territory, including the fornix columns in every patient.
+      fr: Un patient développait une amnésie surtout antérograde après clippage d’anévrisme, avec lésion centrée sur la bande diagonale droite et atteinte du prosencéphale basal controlatéral en plages. Une série postopératoire distincte de dix patients trouvait des infarctus de plusieurs régions du territoire de l’artère sous-calleuse, comprenant les colonnes du fornix chez chaque patient.
+    limitation:
+      en: The single case had additional septal/hypothalamic injury and an earlier left external-capsule hemorrhage. The series selected only amnesic patients without a non-amnesic control group; neighboring fornix injury prevents an isolated diagonal-band explanation. Neither study establishes a necessary nucleus or a specific neurotransmitter mechanism.
+      fr: Le cas unique avait d’autres atteintes septales/hypothalamiques et une hémorragie antérieure de la capsule externe gauche. La série ne sélectionnait que des patients amnésiques sans groupe témoin non amnésique; l’atteinte voisine du fornix empêche une explication limitée à la bande diagonale. Aucune étude n’établit de noyau nécessaire ni de mécanisme neurotransmetteur précis.
+    mapping_note:
+      en: The whole right diagonal band is an orientation landmark for the case’s reported lesion centre, not a registered lesion mask. Bilateral laterality acknowledges accompanying left injury, which is not precisely mapped. The minimally affected nucleus basalis is not coloured. In the series, the diagonal band was infarcted in five of ten patients.
+      fr: La bande diagonale droite entière sert de repère au centre lésionnel rapporté du cas, et non de masque lésionnel recalé. La latéralité bilatérale tient compte de l’atteinte gauche associée, qui n’est pas cartographiée précisément. Le noyau basal, peu atteint, n’est pas coloré. Dans la série, la bande diagonale était infarcie chez cinq des dix patients.
+    mappings:
+      - {region: 'nextbrain:right:10111', source_name: diagonal_band}
+    evidence:
+      - {reference: abe-1998, role: supporting}
+      - {reference: mugikura-2014, role: qualifying}
+
+  - id: semantic-controlled-retrieval
+    deficit: semantic-memory
+    title: {en: Controlled retrieval after left-hemisphere stroke, fr: Récupération contrôlée après AVC hémisphérique gauche}
+    network: {en: Frontal and posterior semantic-control systems, fr: Systèmes frontaux et postérieurs de contrôle sémantique}
+    laterality: left
+    finding:
+      en: Patients with semantic aphasia had difficulty selecting context-relevant meaning across verbal and nonverbal tasks. In a 23-patient series, 16 had some opercular inferior frontal injury. A separate comparison found retrieval-control difficulties in both prefrontal and temporoparietal groups, including eight patients whose prefrontal cortex was spared.
+      fr: Les patients avec aphasie sémantique avaient du mal à sélectionner le sens pertinent au contexte dans des tâches verbales et non verbales. Dans une série de 23 patients, 16 présentaient au moins une atteinte partielle de la partie operculaire du gyrus frontal inférieur. Une comparaison distincte trouvait des difficultés de contrôle de la récupération dans les groupes préfrontal et temporopariétal, dont huit patients avec cortex préfrontal préservé.
+    limitation:
+      en: Selected chronic cases do not establish that knowledge is wholly intact or that every semantic impairment reflects poor control. The studies share investigators and reuse earlier cases; independence is not established. The 23-patient study’s symptom composite was not specific to semantic control, and its t>2.6 symptom maps are not used for colouring.
+      fr: Des cas chroniques sélectionnés n’établissent ni une intégrité complète des connaissances ni que tout trouble sémantique relève d’un mauvais contrôle. Les études partagent des chercheurs et réutilisent des cas antérieurs; leur indépendance n’est pas établie. Le score composite de l’étude de 23 patients n’était pas propre au contrôle sémantique et ses cartes de symptômes à t>2,6 ne servent pas à la coloration.
+    mapping_note:
+      en: The whole left opercular inferior frontal parcel is a descriptive landmark for a commonly injured region in the 23-patient cohort, not a control-specific or necessary centre. Posterior cases show that frontal injury is not required. In the exploratory maps, clusters for poorer semantic scores included anterior inferior frontal cortex, whereas posterior inferior frontal clusters were associated with a nonverbal executive test. Normative disconnection nodes and exploratory symptom clusters are not coloured.
+      fr: La parcelle frontale inférieure operculaire gauche entière est un repère descriptif d’une région fréquemment lésée dans la cohorte de 23 patients, et non un centre propre au contrôle ou nécessaire. Les cas postérieurs montrent que l’atteinte frontale n’est pas obligatoire. Dans les cartes exploratoires, les amas associés aux scores sémantiques faibles comprenaient le cortex frontal inférieur antérieur, tandis que les amas frontaux inférieurs postérieurs étaient associés à une épreuve exécutive non verbale. Les nœuds de déconnexion normative et les amas exploratoires de symptômes ne sont pas colorés.
+    mappings:
+      - {region: 'destrieux:left:12', source_name: G_front_inf-Opercular}
+    evidence:
+      - {reference: souter-2022, role: supporting}
+      - {reference: thompson-2022-semantic-control, role: supporting}

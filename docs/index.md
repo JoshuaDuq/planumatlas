@@ -47,7 +47,7 @@ The subject's own T1 in three planes around a shared crosshair, with the label u
 
 **[Map what damage is associated with](features/deficits.md)**
 
-121 acquired deficits, each finding with its population, evidence and limits.
+131 acquired deficits, each finding with its population, evidence and limits.
 :::
 
 :::{container} feature

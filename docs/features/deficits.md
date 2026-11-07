@@ -1,6 +1,6 @@
 # Deficits
 
-The **Deficits** tab colours the atlas regions that published lesion studies associate with 121 acquired adult deficits, one colour per finding, from a hand-curated catalogue in `data/neuropsychology.yaml` whose every citation is checked against PubMed.
+The **Deficits** tab colours the atlas regions that published lesion studies associate with 131 acquired adult deficits, one colour per finding, from a hand-curated catalogue in `data/neuropsychology.yaml` whose every citation is checked against PubMed.
 
 :::{list-table}
 :widths: 22 78
@@ -13,14 +13,14 @@ The **Deficits** tab colours the atlas regions that published lesion studies ass
 * - Configuration
   - [`config/neuropsych-domains.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/neuropsych-domains.yaml) (`lesion_checks` link functions to findings)
 * - Source data
-  - Peer-reviewed primary studies in PubMed (306 references); NCBI E-utilities and Crossref for identity records
+  - Peer-reviewed primary studies in PubMed (339 references); NCBI E-utilities and Crossref for identity records
 * - Checked by
   - `web/src/lib/core/clinical/validate.ts` and its tests (`validate.test.ts`, `data.test.ts`, `catalog.test.ts`), `web/src/lib/core/learning/references.test.ts`, [`tests/test_neuropsych_domains.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_neuropsych_domains.py)
 :::
 
 ## What it does
 
-The 121 profiles describe acquired adult deficits and selected associations with brain regions. Search by name, synonym or function. A profile identifies the evidence, population and limitations for each finding, and links to its regions and relevant function maps. Regions are coloured by finding; the key indicates findings that cannot be coloured in the current view. **Restore previous view** returns to the view before opening a profile, and choosing a colour in the masthead replaces the profile colours.
+The 131 profiles describe acquired adult deficits and selected associations with brain regions. Search by name, synonym or function. A profile identifies the evidence, population and limitations for each finding, and links to its regions and relevant function maps. Regions are coloured by finding; the key indicates findings that cannot be coloured in the current view. **Restore previous view** returns to the view before opening a profile, and choosing a colour in the masthead replaces the profile colours.
 
 ```{figure} ../../.github/assets/readme/deficits.webp
 :alt: Hemispatial neglect on the right hemisphere, each finding in its own colour, with the associations and evidence in the panel
@@ -34,7 +34,7 @@ The literature is selected, not a systematic review. A single case cannot establ
 
 ## Data
 
-`data/neuropsychology.yaml` is the single source. At the revision of 2026-11-02 it holds six groups, 121 deficits, 193 findings (called associations in the file) and 306 references.
+`data/neuropsychology.yaml` is the single source. At the revision of 2026-11-07 it holds six groups, 131 deficits, 218 findings (called associations in the file) and 339 references.
 
 ### Schema
 
@@ -45,7 +45,7 @@ The literature is selected, not a systematic review. A single case cannot establ
 | `associations` | `id`, `deficit`, `title`, `network`, `laterality` (`left`, `right` or `bilateral`), `finding`, `limitation`, `mapping_note` (each in `en` and `fr`), `mappings` (a list of `region` and `source_name`, possibly empty) and `evidence` (a list of `reference` and `role`, `supporting` or `qualifying`) |
 | `references` | `id`, `title`, `authors`, `year`, `journal`, `doi`, `pmid`, `method` (`lesion-mapping`, `meta-analysis`, `case-report`, `case-series`), `scope` (`abstract` or `full-text`), `population` (`en`, `fr`) and optional `corrections` (each a `doi` and a bilingual `summary`) |
 
-`scope` says what was read when the finding was extracted: 241 references are abstract-scope and 65 full-text. It describes the extraction source, not independent specialist approval or numerical reproduction. Methods: 137 case series, 121 lesion-mapping studies, 40 case reports and 8 meta-analyses. The 193 findings carry 386 evidence entries, 279 supporting and 107 qualifying; four references have a published correction recorded. Findings per profile: 64 profiles have one, 50 two, four three, one five, and aphasia and limb apraxia six each (the most the six finding colours allow). Profiles per group: sensorimotor 42, perception 22, attention and executive functions 19, language reading and number 16, memory 11, social and emotional functions 11.
+`scope` says what was read when the finding was extracted: 252 references are abstract-scope and 87 full-text. It describes the extraction source, not independent specialist approval or numerical reproduction. Methods: 143 case series, 139 lesion-mapping studies, 48 case reports and 9 meta-analyses. The 218 findings carry 439 evidence entries, 312 supporting and 127 qualifying; six references have a published correction recorded. Findings per profile: 64 profiles have one, 58 two, four three, one four, two five, and aphasia and limb apraxia six each (the most the six finding colours allow). Profiles per group: sensorimotor 42, perception 24, attention and executive functions 21, language reading and number 16, memory 11, social and emotional functions 17.
 
 ### What a finding states
 
@@ -57,7 +57,7 @@ The literature is selected, not a systematic review. A single case cannot establ
 
 ### Mapping to atlas parcels
 
-A mapping's `region` is a region id of the published manifest, `<atlas>:<hemisphere>:<code>`, and `source_name` is that region's source label. The 420 mappings in the catalogue point to Destrieux parcels (252), teaching-set structures (`learning:`, 83), FreeSurfer `aseg` structures (58) and NextBrain nuclei (27). Sixteen findings have no mapping: their sources locate the deficit only broadly, and the finding is retained, with its citations, uncoloured. Normative-connectivity, uncorrected, white-matter and anatomically unresolved findings are kept out of the paint, and connected-network nodes are not coloured as lesion sites. The wording is deliberate: a parcel is an atlas label mapped onto this brain, not the study's lesion volume.
+A mapping's `region` is a region id of the published manifest, `<atlas>:<hemisphere>:<code>`, and `source_name` is that region's source label. The 447 mappings in the catalogue point to Destrieux parcels (268), teaching-set structures (`learning:`, 83), FreeSurfer `aseg` structures (67) and NextBrain nuclei (29). Twenty-four findings have no mapping: their sources locate the deficit only broadly, and the finding is retained, with its citations, uncoloured. Normative-connectivity, uncorrected, white-matter and anatomically unresolved findings are kept out of the paint, and connected-network nodes are not coloured as lesion sites. The wording is deliberate: a parcel is an atlas label mapped onto this brain, not the study's lesion volume.
 
 ## How it was built
 
@@ -76,7 +76,7 @@ A mapping's `region` is a region id of the published manifest, `<atlas>:<hemisph
 - **Bookshelf** (`esearch`/`esummary`): the title, book, editors, year and publisher of each NBK chapter.
 - **Crossref**: a DOI that PubMed lacks (accepted only if Crossref's title and first-author surname match PubMed's), and the DOI of each correction notice (`filter=updates:<doi>`; a title and ISSN search when Crossref has no update link, which must resolve to exactly one DOI).
 
-Requests are paced (0.5 s for E-utilities, 1.2 s for Crossref) and retried up to three times on HTTP 429 (honouring `Retry-After`). Abstracts are not stored. The year is PubMed's journal-issue year (`PubDate`, or the first year of a `MedlineDate` range), not the online-first year; for a Bookshelf chapter, the book's year. The file holds 386 records (381 PubMed articles and five Bookshelf chapters) fetched on 2026-11-02.
+Requests are paced (0.5 s for E-utilities, 1.2 s for Crossref) and retried up to three times on HTTP 429 (honouring `Retry-After`). Abstracts are not stored. The year is PubMed's journal-issue year (`PubDate`, or the first year of a `MedlineDate` range), not the online-first year; for a Bookshelf chapter, the book's year. The file holds 425 records (420 PubMed articles and five Bookshelf chapters), with 33 new identities checked across the three Hart addition passes on 2026-11-07. Earlier cached records retain their previous retrieval values.
 
 `web/src/lib/core/learning/references.test.ts` reads only that file, with no network, and asserts:
 
@@ -110,7 +110,7 @@ Run it with `npm test --prefix web`. A real but wrong PMID fails, which the cata
 | Findings | `validateAssociation` | unknown deficit or reference; an invalid laterality or role; no supporting evidence; an unknown or `non-region` mapped region; a `source_name` that disagrees with the region (compared canonically, since two reconstructions spell some parcel names differently); a hemisphere that does not match the laterality; a duplicate region within a finding |
 | Coverage | `validateClinicalData` | a profile in which no finding maps a region |
 | Colours | `findingPaint` | more findings than colours; an unknown chosen finding |
-| Published content | `data.test.ts` | fixed counts (6 groups, 121 deficits, 306 references, 193 associations at revision 2026-11-02), exact deficit ids, region resolution on each published anatomy, and the specific mapping limits of reviewed findings (for example, that the callosal alien-hand finding colours anterior subdivisions and leaves the posterior callosum uncoloured, that the amusia connectivity finding stays uncoloured, and that deep praxis lesions stay uncoloured) |
+| Published content | `data.test.ts` | fixed counts (6 groups, 131 deficits, 339 references, 218 associations at revision 2026-11-07), exact deficit ids, region resolution on each published anatomy, and the specific mapping limits of reviewed findings (for example, that the callosal alien-hand finding colours anterior subdivisions and leaves the posterior callosum uncoloured, that the amusia connectivity finding stays uncoloured, and that deep praxis lesions stay uncoloured) |
 | References | `references.test.ts` | see Citation verification |
 | Function bridge | `lesion_checks` (Python) | a function that cites an association that does not exist |
 
@@ -119,7 +119,7 @@ Run it with `npm test --prefix web`. A real but wrong PMID fails, which the cata
 - The literature is selected, not a systematic review; clinical accuracy has not been validated and the catalogue is not a diagnostic or prognostic tool.
 - A single case cannot establish that the same lesion pattern is required in everyone. Network studies may identify connected regions that were not directly injured.
 - Group-level associations on a reference anatomy do not predict an individual patient's deficit.
-- Extraction scope: 241 of the 306 references were read at abstract level. They remain a review backlog; the [full-text review](../reference/full-text-review.md) checked eight articles against every finding that cites them. The [circuit evidence audit](../reference/circuit-evidence.md) records clinical-source provenance for its historical set of tours; the audit and software checks do not establish patient-level validity.
+- Extraction scope: 252 of the 339 references were read at abstract level. They remain a review backlog; the [full-text review](../reference/full-text-review.md) checked eight articles against every finding that cites them. The [circuit evidence audit](../reference/circuit-evidence.md) records clinical-source provenance for its historical set of tours; the audit and software checks do not establish patient-level validity.
 - A parcel is an anatomical guide: the whole parcel can be drawn where a study implicated a portion of it, and a deficit's profile can omit anatomy that has no parcel (white-matter tracts, for example).
 - Sample overlap: consortium, cohort and registry findings can share participants; the reviews flag this where known.
 
@@ -161,6 +161,9 @@ Each pass that changed the catalogue has a review in `docs/reference/`; the revi
 - The [supplementary motor area, recognition memory and action naming review](../reference/deficit-additions-2026-11-01-sma-recognition-verbs.md) adds supplementary motor area syndrome, recollection and familiarity deficits, and impaired action naming. It keeps the dispute over recollection and familiarity explicit with the opposing study as qualifying evidence.
 - The [praxis review](../reference/deficit-additions-2026-11-02-praxis.md) adds pantomime, real tool use and deep lesions to limb apraxia, and a callosal apraxia profile. It keeps the competing frontal and parietotemporal pantomime findings apart and leaves the deep-lesion finding uncoloured because its white matter has no parcel.
 - The [Hart (2016) review](../reference/hart-2016-review-2026-11-02.md) compared the Functions and Deficits wording against a textbook, a targeted comparison and not a systematic review; it corrected the aphasia, memory and praxis introductions, removed two aliases from homonymous hemianopia, and made the distinction between activation consistency, specificity and lesion consequences visible on function profiles.
+- The [7 November Hart additions review](../reference/deficit-additions-2026-11-07-hart.md) adds object-colour knowledge impairment, spatial-relation judgement, acquired mania and visual anosognosia. It preserves task distinctions, records a consent correction and keeps predicted connectivity uncoloured.
+- The [further Hart additions review](../reference/deficit-additions-2026-11-07-hart-further.md) adds acquired obsessive-compulsive symptoms, Klüver–Bucy syndrome, cognitive estimation and Fregoli syndrome. It keeps individual-case landmarks, broad group findings and normative connectivity distinct, and records an affiliation correction and a source sample-count discrepancy.
+- The [memory, anxiety and spatial-delusion Hart review](../reference/deficit-additions-2026-11-07-hart-memory-anxiety-spatial.md) adds anxiety symptoms after brain injury and reduplicative paramnesia for places, and new working-memory, basal-forebrain amnesia and semantic-control findings. It keeps observer, informant and self-report anxiety apart, leaves spared-tissue and disconnection results uncoloured, and narrows claims whose full text could not be read.
 - The [full-text review log](../reference/full-text-review.md) records eight articles read in full against every finding and circuit that cites them.
 
 On 1 November 2026, the 26 profiles whose findings coloured no atlas region were removed rather than given unsupported locations: autotopagnosia, oculomotor apraxia, and 24 profiles from the reviews above, including all five from the reading, writing and remote-memory review. Each review page lists its removed profiles. Their 60 references cited by no remaining finding were dropped from the catalogue and the citation cache, and the catalogue check now refuses a profile that colours no region.

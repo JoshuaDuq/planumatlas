@@ -49,9 +49,9 @@ describe('the list', () => {
       const label = document.getElementById(group.getAttribute('aria-labelledby')!)!;
       expect(label.tagName).toBe('H3');
     }
-    expect(rows()).toHaveLength(121);
+    expect(rows()).toHaveLength(131);
     expect(document.querySelector('.scope-note')!.textContent).toContain(
-      '121 profiles · adult acquired deficits',
+      '131 profiles · adult acquired deficits',
     );
     expect(document.querySelector('[role="group"][aria-label="Deficits"]')).not.toBeNull();
     await expect.element(page.getByRole('searchbox', { name: /search deficits/i })).toBeVisible();
@@ -75,7 +75,7 @@ describe('the list', () => {
     expect(field().value).toBe('');
     expect(document.activeElement).toBe(field());
     expect(calls.at(-1)).toBe('query:');
-    await expect.poll(announced, { timeout: 2000 }).toBe('121 deficits');
+    await expect.poll(announced, { timeout: 2000 }).toBe('131 deficits');
   });
 
   test('an equal sentence for a different query is said again', async () => {
@@ -158,7 +158,7 @@ describe('the list', () => {
       expect(items.length).toBeGreaterThan(0);
       expect(group.querySelectorAll('ul > li > button.row')).toHaveLength(items.length);
     }
-    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(121);
+    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(131);
   });
 
   test('one clear control: the custom button, with the native cancel hidden (D9)', async () => {

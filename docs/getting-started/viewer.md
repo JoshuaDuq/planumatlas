@@ -30,7 +30,7 @@ Five tabs, each starting as a searchable list. Opening an item shows its detail 
 | :--- | :--- | :--- |
 | Anatomy | Regions, systems and the region detail | [Dissection and display](../features/dissection-and-display.md), [Atlas comparison](../features/atlas-comparison.md), [Lesion report](../features/lesion-report.md) |
 | Functions | 70 Neurosynth functions | [Functions](../features/functions.md) |
-| Deficits | 121 acquired-deficit profiles | [Deficits](../features/deficits.md) |
+| Deficits | 131 acquired-deficit profiles | [Deficits](../features/deficits.md) |
 | Circuits | Five guided tours and the visual field map | [Circuits](../features/circuits.md), [Visual field map](../features/visual-field-map.md) |
 | Tracts | 30 diffusion bundles | [Tracts](../features/tracts.md) |
 

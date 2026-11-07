@@ -286,7 +286,7 @@ describe('the published cdmd functions and deficits', () => {
         assert.equal(legend.rows.length, 3, id);
       }
     }
-    assert.equal(data.deficits.length, 121);
+    assert.equal(data.deficits.length, 131);
     for (const deficit of data.deficits) {
       const state: PaintState = {
         explorer: 'deficits',

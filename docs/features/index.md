@@ -52,7 +52,7 @@ Literature and published datasets laid over the anatomy.
 | Feature | What it does | Page |
 | :--- | :--- | :--- |
 | Functions | 70 Neurosynth functions and the 277-term search | [Functions](functions.md) |
-| Deficits | 121 acquired-deficit profiles with their evidence | [Deficits](deficits.md) |
+| Deficits | 131 acquired-deficit profiles with their evidence | [Deficits](deficits.md) |
 | Circuits | Five guided anatomical pathway tours | [Circuits](circuits.md) |
 | Visual field map | A point in the visual field mapped onto V1–V3 | [Visual field map](visual-field-map.md) |
 | Stroke cases | Real lesions and language scores from the Aphasia Recovery Cohort | [Stroke cases](stroke-cases.md) |
