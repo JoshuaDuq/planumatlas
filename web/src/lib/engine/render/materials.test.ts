@@ -153,7 +153,7 @@ test('SHADER-07 a surface built with the network layer has a network mix at 0, o
 
 test('SHADER-35 two materials with different patch sets never share a program key, and equal ones do', () => {
   const first = patchCombinations();
-  assert.equal(first.size, 17);
+  assert.equal(first.size, 19);
   const keys = [...first.values()].map((material) => material.customProgramCacheKey());
   // The plain and solid materials differ by the MRI patch and mark alone, so every set needs its own key.
   assert.equal(new Set(keys).size, keys.length, 'keys are pairwise distinct');
@@ -173,6 +173,30 @@ test('SHADER-06 the surface hands the shader the manifest fold ranges and streng
   assert.deepEqual(uniforms['opennessRange']!.value, [0.5, 0.95]);
   assert.deepEqual(uniforms['foldRange']!.value, [-0.5, 1.8]);
   assert.deepEqual(uniforms['foldStrength']!.value, [0.48, 0.78]);
+});
+
+test('SHADER-36 a structure carrying openness is shaded by it over the manifest span, one without is not', () => {
+  const structure = (openness: boolean) => {
+    const mesh = corticalMesh(false);
+    for (const name of ['_sulc', '_t1', ...(openness ? [] : ['_openness'])]) {
+      mesh.geometry.deleteAttribute(name);
+    }
+    return createAnatomicalMaterial(mesh as never, region({ id: 's', kind: 'structure' }), appearance);
+  };
+  const shaded = compile(structure(true));
+  assert.deepEqual(shaded['opennessDecode']!.value, [
+    appearance.field_ranges!['_OPENNESS']![0],
+    appearance.field_ranges!['_OPENNESS']![1] - appearance.field_ranges!['_OPENNESS']![0],
+  ]);
+  assert.deepEqual(shaded['opennessRange']!.value, [0.5, 0.95]);
+  assert.deepEqual(shaded['foldStrength']!.value, [0.48, 0.78]);
+  assert.equal('opennessDecode' in compile(structure(false)), false);
+  const broken = corticalMesh(false);
+  broken.geometry.setAttribute('_openness', { itemSize: 1, count: 4 } as never);
+  assert.throws(
+    () => createAnatomicalMaterial(broken as never, region({ id: 's', kind: 'structure' }), appearance),
+    { message: 'Missing source shading attribute _openness: s' },
+  );
 });
 
 /** OKLab lightness and hue angle of a linear sRGB colour. */

@@ -3,7 +3,7 @@
 import numpy as np
 import trimesh
 
-from .gltf.encode import published_display_colors
+from .gltf.encode import decode_field, published_display_colors, published_field_ranges
 from .labels import cerebellum, nextbrain
 from .labels.volumes import load_on_grid, resample_nearest
 from .layers import neuropsych_domains
@@ -12,6 +12,7 @@ from .layers.learning import (
     constituents,
     expand_nextbrain,
     family_order,
+    fissures,
     nextbrain_floors,
     read_definition,
     source_grids,
@@ -24,6 +25,7 @@ from .surfaces.geometry import (
     label_boxes,
     misclassified_voxels,
 )
+from .surfaces.shading import joint_openness
 
 
 def on_nextbrain_grid(config, path, grid):
@@ -128,6 +130,19 @@ def expected_metadata(config, nextbrain_source):
     return records, source_grids(grids)
 
 
+def validate_openness(config, manifest, span, shaded):
+    """The lobules' published openness against a recast over their published surfaces together."""
+    if span != manifest["appearance"]["field_ranges"]["_OPENNESS"]:
+        raise ValueError("Lobule openness is not quantized over the cortex's span")
+    recast = joint_openness([mesh for mesh, _ in shaded], **config["appearance"]["occlusion"])
+    difference = np.abs(np.concatenate([field for _, field in shaded]) - np.concatenate(recast))
+    limits = config["validation"]["openness"]
+    outliers = float(np.mean(difference > limits["tolerance"]))
+    if outliers > limits["maximum_outlier_share"]:
+        raise ValueError(f"Lobule openness differs from its surfaces at {outliers:.4f} of vertices")
+    return {"maximum_error": float(difference.max()), "outlier_share": outliers}
+
+
 def validate(config, manifest, nextbrain_source):
     path = config["output_directory"] / "learning.glb"
     scene = trimesh.load_scene(path, process=False)
@@ -136,10 +151,19 @@ def validate(config, manifest, nextbrain_source):
     regions = {region["id"]: region for region in manifest["regions"]}
     maximum = read_definition(config)["smoothing"]["maximum_displacement_mm"]
     tolerance = config["validation"]["coordinate_tolerance_mm"]
+    levels = {level["id"]: level for level in manifest["detail_levels"]}
+    span = published_field_ranges(path)["_OPENNESS"]
     reports = []
+    fissure_record = None
+    openness_report = None
     for source, grid, table, groups in source_groups(config, nextbrain_source):
         volume, affine = grid.labels, grid.voxel_to_surface
+        opened, fissure = fissures(config, source, grid)
+        drawn = volume if opened is None else np.where(opened, 0, volume)
+        if fissure:
+            fissure_record = fissure
         boxes = label_boxes(volume)
+        shaded = []
         for group in groups:
             present = [boxes[label] for label in group["labels"] if label in boxes]
             if not present:
@@ -150,7 +174,8 @@ def validate(config, manifest, nextbrain_source):
                       max(member[axis].stop for member in present))
                 for axis in range(3)
             )
-            mask, local = np.isin(volume[box], group["labels"]), box_affine(affine, box)
+            members = np.isin(volume[box], group["labels"])
+            mask, local = np.isin(drawn[box], group["labels"]), box_affine(affine, box)
             region_id = f"learning:{group['id']}"
             mesh = meshes[region_id]
             record = regions[region_id]
@@ -188,25 +213,40 @@ def validate(config, manifest, nextbrain_source):
                 or not np.isfinite(mesh.vertex_normals).all()
             ):
                 raise ValueError(f"Nonfinite learning display: {region_id}")
-            if record["voxel_count"] != int(mask.sum()):
+            if record["voxel_count"] != int(members.sum()):
                 raise ValueError(f"Learning volume differs from union: {region_id}")
+            published = mesh.vertex_attributes.get("_OPENNESS")
+            if (published is not None) != (source == cerebellum.ATLAS_ID):
+                raise ValueError(f"Openness belongs to the CerebNet lobules alone: {region_id}")
+            if published is not None:
+                shaded.append((
+                    trimesh.Trimesh(vertices=ras, faces=mesh.faces, process=False),
+                    decode_field(published.ravel(), span),
+                ))
             reports.append(
                 {
                     "id": region_id,
                     "source_atlas": source,
-                    "source_voxel_count": int(mask.sum()),
+                    "source_voxel_count": int(members.sum()),
+                    "drawn_voxel_count": int(mask.sum()),
                     "maximum_display_displacement_mm": displacement,
                     "misclassified_voxel_centres": misplaced,
                 }
             )
+        if shaded:
+            openness_report = validate_openness(config, manifest, span, shaded)
     if set(meshes) != {record["id"] for record in reports}:
         raise ValueError("Learning display has unexpected or missing regions")
+    if levels["learning"]["display_geometry"].get("cerebellar_fissures") != fissure_record:
+        raise ValueError("Learning cerebellar fissure record differs from its sources")
     return {
         "file": path.name,
         "sha256": sha256(path),
         "regions": reports,
         "source_volumes_unchanged": True,
         "maximum_allowed_displacement_mm": maximum,
+        "cerebellar_fissures": fissure_record,
+        "lobule_openness": openness_report,
         "cross_source_overlap": validate_source_overlap(config, nextbrain_source),
         "domain_units": validate_domain_units(config, nextbrain_source),
     }

@@ -523,6 +523,7 @@ def cerebellum_limitations(config):
     return [
         *limitations,
         "Learning cerebellar lobules are FastSurfer CerebNet's segmentation of this brain's 1 mm T1 in SUIT nomenclature; vermis I–V is part of lobules I–IV and V, and folia are not resolved.",
+        "Learning lobule surfaces leave out the lobule voxels the T1 reads as mostly fluid and open to the CSF, which shows the wider fissures; their volumes and placements are CerebNet's labels unchanged.",
         "Cerebellar lobules are published as teaching surfaces only; MRI cuts carry no lobule labels.",
         "Learning units come from three segmentations of the same brain (aseg, NextBrain and CerebNet), so surfaces from different sources can overlap slightly where they meet.",
     ]
@@ -596,7 +597,7 @@ def main():
         fine, nuclei = build_nextbrain_structures(config)
         levels[1].update(fine)
         regions.extend(nuclei)
-        overview, learning_regions = learning.build(config)
+        overview, learning_regions = learning.build(config, field_ranges)
         levels.append(overview)
         regions.extend(learning_regions)
         # Whatever earned geometry is published as a structure, so it must not

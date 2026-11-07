@@ -53,7 +53,7 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
 /**
  * One material for each distinct set of patches the app builds (decision 25 on #4), by name: the
  * anatomical surface with and without the network layer, alone, feathered, with the MRI and with
- * both in either order; a plain material with the MRI; the solid material with and without white matter, alone, with the MRI (mark
+ * both in either order; a teaching-set structure with and without baked openness; a plain material with the MRI; the solid material with and without white matter, alone, with the MRI (mark
  * `capLift`) and with cap labels as well.
  */
 export function patchCombinations(): Map<string, Material> {
@@ -100,6 +100,17 @@ export function patchCombinations(): Map<string, Material> {
       addBorderFeather(material, feather());
       addMriAppearance(material, createMriUniforms(anatomy));
       return material;
+    });
+  }
+
+  // A teaching-set structure, and a cerebellar lobule that carries baked openness.
+  for (const shaded of [false, true]) {
+    add(shaded ? 'shaded structure' : 'structure', () => {
+      const mesh = corticalMesh(false);
+      for (const name of ['_sulc', '_t1', ...(shaded ? [] : ['_openness'])]) {
+        mesh.geometry.deleteAttribute(name);
+      }
+      return createAnatomicalMaterial(mesh as never, { id: 's', kind: 'structure' } as Region, appearance);
     });
   }
 

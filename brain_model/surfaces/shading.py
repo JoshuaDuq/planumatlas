@@ -2,6 +2,7 @@
 
 import nibabel as nib
 import numpy as np
+import trimesh
 from scipy.ndimage import map_coordinates
 from trimesh.ray.ray_pyembree import RayMeshIntersector
 
@@ -45,6 +46,15 @@ def cortical_openness(mesh, radius_mm, direction_count):
     open_weight = np.zeros(len(mesh.vertices))
     np.add.at(open_weight, vertex_rows, weights[vertex_rows, direction_columns] * reach)
     return open_weight / weights.sum(axis=1)
+
+
+def joint_openness(meshes, radius_mm, direction_count):
+    """`cortical_openness` of each mesh, its rays blocked by all of them: the whole they make up."""
+    joined = trimesh.util.concatenate(meshes)
+    counts = [len(mesh.vertices) for mesh in meshes]
+    if len(joined.vertices) != sum(counts):
+        raise ValueError("Joining the meshes changed their vertices")
+    return np.split(cortical_openness(joined, radius_mm, direction_count), np.cumsum(counts)[:-1])
 
 
 def ribbon_intensity(data, affine, pial, white):

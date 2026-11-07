@@ -58,6 +58,22 @@ def test_cortical_openness_falls_with_a_nearer_fold_and_ignores_folds_past_the_r
     assert beyond == pytest.approx(1, abs=1e-12)
 
 
+def test_joint_openness_lets_each_surface_shade_its_neighbour():
+    import trimesh
+
+    from brain_model.surfaces.shading import joint_openness
+
+    left = trimesh.creation.icosphere(subdivisions=3, radius=5)
+    right = left.copy()
+    right.apply_translation([11, 0, 0])
+    fields = joint_openness([left, right], 10, 64)
+    assert [len(field) for field in fields] == [len(left.vertices), len(right.vertices)]
+    facing, away = left.vertices[:, 0].argmax(), left.vertices[:, 0].argmin()
+    assert fields[0][facing] < 0.6
+    assert fields[0][away] == pytest.approx(1)
+    assert fields[1][right.vertices[:, 0].argmin()] < 0.6
+
+
 def test_ribbon_intensity_samples_corresponding_surfaces_in_surface_ras():
     from brain_model.surfaces.shading import ribbon_intensity
 

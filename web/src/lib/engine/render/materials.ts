@@ -312,6 +312,43 @@ ${shader.fragmentShader}`
     `source-tissue-relief-v6${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
 }
 
+/**
+ * A structure that carries baked openness (the cerebellar lobules) is darkened in its fissures as the
+ * cortex is in its sulci, by openness alone: a structure has no sulcal depth.
+ */
+function addOpennessShading(
+  material: MeshPhysicalMaterial,
+  { folds, field_ranges: ranges }: Appearance,
+): void {
+  material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
+    shader.uniforms.opennessDecode = { value: fieldDecode(ranges, '_OPENNESS') };
+    shader.uniforms.opennessRange = { value: [folds.openness_low, folds.openness_high] };
+    shader.uniforms.foldStrength = {
+      value: [folds.direct_strength, folds.indirect_strength],
+    };
+    shader.vertexShader = `attribute float _openness;
+uniform vec2 opennessDecode;
+varying float vOpenness;
+${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+vOpenness = _openness * opennessDecode.y + opennessDecode.x;`,
+    );
+    shader.fragmentShader = `varying float vOpenness;
+uniform vec2 opennessRange;
+uniform vec2 foldStrength;
+${shader.fragmentShader}`.replace(
+      '#include <lights_fragment_end>',
+      `#include <lights_fragment_end>
+      float shut = 1.0 - smoothstep(opennessRange.x, opennessRange.y, vOpenness);
+      reflectedLight.directDiffuse *= 1.0 - foldStrength.x * shut;
+      reflectedLight.indirectDiffuse *= 1.0 - foldStrength.y * shut;
+      reflectedLight.indirectSpecular *= 1.0 - foldStrength.y * shut;`,
+    );
+  };
+  material.customProgramCacheKey = () => 'structure-openness-v1';
+}
+
 /*
  * Each vertex's position is weighted by whether it lies in V1–V3, and the fragment divides the
  * weight back out: a triangle reaching past V3 then interpolates only its V1–V3 corners, where a
@@ -401,18 +438,19 @@ export function createAnatomicalMaterial(
   material.ior = appearance.tissue.ior;
   material.specularIntensity = appearance.tissue.specular_intensity;
   const cortical = region.kind === 'cortex' || region.kind === 'non-region';
-  if (cortical) {
-    for (const name of ['_sulc', '_openness', '_t1']) {
-      const attribute = mesh.geometry.getAttribute(name);
-      if (
-        !attribute ||
-        attribute.itemSize !== 1 ||
-        attribute.count !== mesh.geometry.attributes.position!.count
-      ) {
-        material.dispose();
-        throw new Error(`Missing source shading attribute ${name}: ${region.id}`);
-      }
+  const field = (name: string) => {
+    const attribute = mesh.geometry.getAttribute(name);
+    if (
+      !attribute ||
+      attribute.itemSize !== 1 ||
+      attribute.count !== mesh.geometry.attributes.position!.count
+    ) {
+      material.dispose();
+      throw new Error(`Missing source shading attribute ${name}: ${region.id}`);
     }
+  };
+  if (cortical) {
+    for (const name of ['_sulc', '_openness', '_t1']) field(name);
     if (visual) {
       for (const name of ['_field_x', '_field_y', '_prf_sigma', '_visual_area']) {
         if (!mesh.geometry.getAttribute(name)) {
@@ -429,6 +467,12 @@ export function createAnatomicalMaterial(
       visual,
       userMap,
     );
-  } else addUserMapToSurface(material, userMap);
+  } else {
+    if (mesh.geometry.getAttribute('_openness')) {
+      field('_openness');
+      addOpennessShading(material, appearance);
+    }
+    addUserMapToSurface(material, userMap);
+  }
   return material;
 }

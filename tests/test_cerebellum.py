@@ -45,3 +45,30 @@ def test_lobules_replace_the_undivided_mantle_only_where_declared():
     assert not plain["cerebnet"]
     assert not mantle & {unit["id"] for unit in lobed["aseg"]}
     assert {label for unit in lobed["cerebnet"] for label in unit["labels"]} == cerebellum.LOBULES
+
+
+def fissure_case():
+    """A lobule block in fluid, with a fissure from its surface, a sealed dark voxel and a tie."""
+    labels = np.zeros((9, 9, 9), np.int16)
+    labels[1:8, 1:8, 1:8] = 601
+    intensity = np.where(labels, 80, 20).astype(np.uint8)
+    fissure = [(4, 4, 1), (4, 4, 2), (4, 4, 3)]
+    for voxel in fissure:
+        intensity[voxel] = 30
+    intensity[2, 6, 5] = 30  # sealed inside the lobule
+    intensity[6, 6, 1] = 50  # exactly halfway, on the surface
+    return labels, intensity, labels == 0, fissure
+
+
+def test_only_fluid_open_to_the_csf_is_opened():
+    labels, intensity, csf, fissure = fissure_case()
+    opened, record = cerebellum.open_fissures(labels, intensity, csf)
+    assert sorted(map(tuple, np.argwhere(opened).tolist())) == fissure
+    assert record["threshold"] == 50
+    assert record["opened_voxels"] == 3
+
+
+def test_a_csf_reference_as_bright_as_the_lobules_is_refused():
+    labels, intensity, _, _ = fissure_case()
+    with pytest.raises(ValueError, match="not darker"):
+        cerebellum.open_fissures(labels, intensity, labels == 601)

@@ -2830,7 +2830,17 @@
         "method": "Explicit source-label unions; bounded Taubin display smoothing",
         "iterations": 16,
         "maximum_displacement_mm": 0.6,
-        "source_volumes_unchanged": true
+        "source_volumes_unchanged": true,
+        "cerebellar_fissures": {
+          "method": "Lobule voxels below the midpoint of the lobules' and CSF's median T1, face-connected through such voxels to fluid outside the cerebellum",
+          "intensity": "mri/brain.mgz",
+          "lobule_median": 76.0,
+          "csf_median": 22.0,
+          "threshold": 49.0,
+          "opened_voxels": 3906,
+          "lobule_voxels": 92376
+        },
+        "openness": "_OPENNESS on CerebNet lobules: cosine-weighted share of rays from each vertex that clear the intact lobule surfaces together, a hit at d counting d / radius_mm open (appearance.occlusion)"
       }
     }
   ],
@@ -74663,10 +74673,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 2818.0,
-      "display_maximum_displacement_mm": 0.4939677416902838,
-      "vertex_count": 2744,
-      "triangle_count": 5600,
-      "surface_area_mm2": 1751.267021994529,
+      "display_maximum_displacement_mm": 0.4939678563811041,
+      "vertex_count": 2860,
+      "triangle_count": 5848,
+      "surface_area_mm2": 1805.0388079690338,
       "centroid_ras_mm": [
         -11.82611781405252,
         -29.273243435060326,
@@ -74753,10 +74763,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 2579.0,
-      "display_maximum_displacement_mm": 0.5222783943859243,
-      "vertex_count": 2599,
-      "triangle_count": 5290,
-      "surface_area_mm2": 1655.5670291697986,
+      "display_maximum_displacement_mm": 0.5220269526390067,
+      "vertex_count": 2658,
+      "triangle_count": 5424,
+      "surface_area_mm2": 1683.8332673619047,
       "centroid_ras_mm": [
         6.175649476541295,
         -29.148894920511825,
@@ -74835,10 +74845,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 3190.0,
-      "display_maximum_displacement_mm": 0.5164241076950034,
-      "vertex_count": 3251,
-      "triangle_count": 6598,
-      "surface_area_mm2": 2033.125826900419,
+      "display_maximum_displacement_mm": 0.5164241076949911,
+      "vertex_count": 3367,
+      "triangle_count": 6854,
+      "surface_area_mm2": 2096.6641818475623,
       "centroid_ras_mm": [
         -17.802194357366773,
         -33.53072100313479,
@@ -74917,10 +74927,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 3155.0,
-      "display_maximum_displacement_mm": 0.4842922169680645,
-      "vertex_count": 3290,
-      "triangle_count": 6700,
-      "surface_area_mm2": 2060.7598144251497,
+      "display_maximum_displacement_mm": 0.5145736104091515,
+      "vertex_count": 3465,
+      "triangle_count": 7078,
+      "surface_area_mm2": 2148.623202534875,
       "centroid_ras_mm": [
         10.810776545166403,
         -34.70586370839936,
@@ -74991,10 +75001,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 5862.0,
-      "display_maximum_displacement_mm": 0.49551086215698337,
-      "vertex_count": 4653,
-      "triangle_count": 9326,
-      "surface_area_mm2": 2912.075563800582,
+      "display_maximum_displacement_mm": 0.4960897988950348,
+      "vertex_count": 4800,
+      "triangle_count": 9644,
+      "surface_area_mm2": 2976.173319385874,
       "centroid_ras_mm": [
         -25.052712384851585,
         -39.810303650631184,
@@ -75093,10 +75103,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 6033.0,
-      "display_maximum_displacement_mm": 0.48324750043713305,
-      "vertex_count": 4758,
-      "triangle_count": 9492,
-      "surface_area_mm2": 2968.9624677057095,
+      "display_maximum_displacement_mm": 0.4832452749664229,
+      "vertex_count": 4903,
+      "triangle_count": 9802,
+      "surface_area_mm2": 3030.3244885971467,
       "centroid_ras_mm": [
         19.672633847173877,
         -39.4916293717885,
@@ -75191,10 +75201,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 1312.0,
-      "display_maximum_displacement_mm": 0.4810497617089957,
-      "vertex_count": 1124,
-      "triangle_count": 2248,
-      "surface_area_mm2": 776.3347507249534,
+      "display_maximum_displacement_mm": 0.511719255523123,
+      "vertex_count": 1208,
+      "triangle_count": 2428,
+      "surface_area_mm2": 814.8730059154409,
       "centroid_ras_mm": [
         -3.0998475609756095,
         -49.68292682926829,
@@ -75277,10 +75287,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 10728.0,
-      "display_maximum_displacement_mm": 0.4928437120467505,
-      "vertex_count": 7513,
-      "triangle_count": 15130,
-      "surface_area_mm2": 5143.625632002088,
+      "display_maximum_displacement_mm": 0.5081778703438964,
+      "vertex_count": 8020,
+      "triangle_count": 16184,
+      "surface_area_mm2": 5415.35276781557,
       "centroid_ras_mm": [
         -36.8774235645041,
         -43.68549589858315,
@@ -75371,10 +75381,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 10637.0,
-      "display_maximum_displacement_mm": 0.49485200267258617,
-      "vertex_count": 6924,
-      "triangle_count": 13892,
-      "surface_area_mm2": 4699.046528013345,
+      "display_maximum_displacement_mm": 0.4885724681871829,
+      "vertex_count": 7551,
+      "triangle_count": 15234,
+      "surface_area_mm2": 5072.486703344765,
       "centroid_ras_mm": [
         31.34220174861333,
         -44.84948763749178,
@@ -75465,10 +75475,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 6208.0,
-      "display_maximum_displacement_mm": 0.4939934582146962,
-      "vertex_count": 4826,
-      "triangle_count": 9696,
-      "surface_area_mm2": 3263.0049191307594,
+      "display_maximum_displacement_mm": 0.49770685736756837,
+      "vertex_count": 4987,
+      "triangle_count": 10030,
+      "surface_area_mm2": 3299.4170983398794,
       "centroid_ras_mm": [
         -24.15270618556701,
         -51.5757087628866,
@@ -75547,10 +75557,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 6968.0,
-      "display_maximum_displacement_mm": 0.4958867806699114,
-      "vertex_count": 5309,
-      "triangle_count": 10666,
-      "surface_area_mm2": 3505.793194986841,
+      "display_maximum_displacement_mm": 0.4958176067870083,
+      "vertex_count": 5391,
+      "triangle_count": 10842,
+      "surface_area_mm2": 3530.469502852685,
       "centroid_ras_mm": [
         19.89767508610792,
         -50.94359931113662,
@@ -75629,10 +75639,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 3931.0,
-      "display_maximum_displacement_mm": 0.4968044655343244,
-      "vertex_count": 3794,
-      "triangle_count": 7648,
-      "surface_area_mm2": 2439.193127302414,
+      "display_maximum_displacement_mm": 0.4968044373277639,
+      "vertex_count": 3835,
+      "triangle_count": 7734,
+      "surface_area_mm2": 2441.861956330712,
       "centroid_ras_mm": [
         -30.432459933859068,
         -39.15924701093869,
@@ -75719,10 +75729,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 4001.0,
-      "display_maximum_displacement_mm": 0.4786706606641092,
-      "vertex_count": 3816,
-      "triangle_count": 7660,
-      "surface_area_mm2": 2470.0971379287885,
+      "display_maximum_displacement_mm": 0.4870054382319294,
+      "vertex_count": 3836,
+      "triangle_count": 7712,
+      "surface_area_mm2": 2476.8287009344645,
       "centroid_ras_mm": [
         21.140464883779057,
         -40.2701824543864,
@@ -75805,10 +75815,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 665.0,
-      "display_maximum_displacement_mm": 0.4495836135407635,
-      "vertex_count": 706,
-      "triangle_count": 1408,
-      "surface_area_mm2": 469.45690893377997,
+      "display_maximum_displacement_mm": 0.47723456455415425,
+      "vertex_count": 716,
+      "triangle_count": 1436,
+      "surface_area_mm2": 466.4804237843967,
       "centroid_ras_mm": [
         -2.9293233082706767,
         -49.863157894736844,
@@ -75903,10 +75913,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 4732.0,
-      "display_maximum_displacement_mm": 0.513234221474637,
-      "vertex_count": 3757,
-      "triangle_count": 7570,
-      "surface_area_mm2": 2405.8087897455316,
+      "display_maximum_displacement_mm": 0.5001948141986772,
+      "vertex_count": 3796,
+      "triangle_count": 7660,
+      "surface_area_mm2": 2423.053585946644,
       "centroid_ras_mm": [
         -28.195688926458157,
         -32.085798816568044,
@@ -75994,9 +76004,9 @@
       ],
       "segmentation_volume_mm3": 3919.0,
       "display_maximum_displacement_mm": 0.5399797409875126,
-      "vertex_count": 3387,
-      "triangle_count": 6838,
-      "surface_area_mm2": 2249.7976084770617,
+      "vertex_count": 3404,
+      "triangle_count": 6876,
+      "surface_area_mm2": 2245.586697456436,
       "centroid_ras_mm": [
         19.433018627200816,
         -34.13498341413626,
@@ -76083,10 +76093,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 2826.0,
-      "display_maximum_displacement_mm": 0.5327878408349929,
-      "vertex_count": 2656,
-      "triangle_count": 5348,
-      "surface_area_mm2": 1718.087315843958,
+      "display_maximum_displacement_mm": 0.5317100678530291,
+      "vertex_count": 2668,
+      "triangle_count": 5388,
+      "surface_area_mm2": 1711.3237107763339,
       "centroid_ras_mm": [
         -22.296178343949045,
         -24.252653927813164,
@@ -76181,10 +76191,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 2937.0,
-      "display_maximum_displacement_mm": 0.48751150863526604,
-      "vertex_count": 2717,
-      "triangle_count": 5502,
-      "surface_area_mm2": 1754.1604266120582,
+      "display_maximum_displacement_mm": 0.5402158834553349,
+      "vertex_count": 2719,
+      "triangle_count": 5518,
+      "surface_area_mm2": 1751.8618951534067,
       "centroid_ras_mm": [
         14.872659176029963,
         -26.67926455566905,
@@ -76267,10 +76277,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 1808.0,
-      "display_maximum_displacement_mm": 0.47933191208722115,
-      "vertex_count": 1287,
-      "triangle_count": 2574,
-      "surface_area_mm2": 869.9354396060751,
+      "display_maximum_displacement_mm": 0.4878744444357326,
+      "vertex_count": 1370,
+      "triangle_count": 2760,
+      "surface_area_mm2": 901.7378694909387,
       "centroid_ras_mm": [
         -3.5105088495575223,
         -42.65154867256637,
@@ -76397,10 +76407,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 3075.0,
-      "display_maximum_displacement_mm": 0.47633022081078047,
-      "vertex_count": 2263,
-      "triangle_count": 4558,
-      "surface_area_mm2": 1501.9259243150207,
+      "display_maximum_displacement_mm": 0.47290164297872594,
+      "vertex_count": 2267,
+      "triangle_count": 4586,
+      "surface_area_mm2": 1487.5489768918292,
       "centroid_ras_mm": [
         -11.292682926829269,
         -30.253333333333334,
@@ -76499,10 +76509,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 3003.0,
-      "display_maximum_displacement_mm": 0.4845955775166066,
-      "vertex_count": 2225,
-      "triangle_count": 4470,
-      "surface_area_mm2": 1462.765070605603,
+      "display_maximum_displacement_mm": 0.48459567637942585,
+      "vertex_count": 2208,
+      "triangle_count": 4444,
+      "surface_area_mm2": 1447.4047137216685,
       "centroid_ras_mm": [
         4.227106227106227,
         -29.964701964701966,
@@ -76601,10 +76611,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 753.0,
-      "display_maximum_displacement_mm": 0.49996480246003555,
-      "vertex_count": 770,
-      "triangle_count": 1536,
-      "surface_area_mm2": 524.0409547719935,
+      "display_maximum_displacement_mm": 0.5022079707210074,
+      "vertex_count": 769,
+      "triangle_count": 1538,
+      "surface_area_mm2": 510.8841074473384,
       "centroid_ras_mm": [
         -3.038512616201859,
         -35.32536520584329,
@@ -76703,10 +76713,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 405.0,
-      "display_maximum_displacement_mm": 0.46314937043176674,
-      "vertex_count": 496,
-      "triangle_count": 988,
-      "surface_area_mm2": 325.9170496512098,
+      "display_maximum_displacement_mm": 0.49469154223305506,
+      "vertex_count": 537,
+      "triangle_count": 1074,
+      "surface_area_mm2": 338.4277800047395,
       "centroid_ras_mm": [
         -21.817283950617284,
         -16.14320987654321,
@@ -76777,10 +76787,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 504.0,
-      "display_maximum_displacement_mm": 0.5099706884367117,
-      "vertex_count": 584,
-      "triangle_count": 1164,
-      "surface_area_mm2": 387.0951051795856,
+      "display_maximum_displacement_mm": 0.5293850501243103,
+      "vertex_count": 604,
+      "triangle_count": 1204,
+      "surface_area_mm2": 392.3705277864421,
       "centroid_ras_mm": [
         16.904761904761905,
         -17.404761904761905,
@@ -76855,10 +76865,10 @@
         1.0
       ],
       "segmentation_volume_mm3": 327.0,
-      "display_maximum_displacement_mm": 0.47585659589241136,
-      "vertex_count": 394,
-      "triangle_count": 784,
-      "surface_area_mm2": 264.49786995200384,
+      "display_maximum_displacement_mm": 0.45281460952345837,
+      "vertex_count": 389,
+      "triangle_count": 778,
+      "surface_area_mm2": 247.3289890913605,
       "centroid_ras_mm": [
         -2.7553516819571864,
         -30.351681957186543,
@@ -94523,6 +94533,7 @@
     "Learning brainstem territories omit separately displayed nuclei and pathways; they are not complete brainstem subdivisions.",
     "Learning publishes the cerebellar cortex and the deep nuclei, but not cerebellar white matter, which would enclose the nuclei; the nuclei therefore sit in the space it occupies.",
     "Learning cerebellar lobules are FastSurfer CerebNet's segmentation of this brain's 1 mm T1 in SUIT nomenclature; vermis I\u2013V is part of lobules I\u2013IV and V, and folia are not resolved.",
+    "Learning lobule surfaces leave out the lobule voxels the T1 reads as mostly fluid and open to the CSF, which shows the wider fissures; their volumes and placements are CerebNet's labels unchanged.",
     "Cerebellar lobules are published as teaching surfaces only; MRI cuts carry no lobule labels.",
     "Learning units come from three segmentations of the same brain (aseg, NextBrain and CerebNet), so surfaces from different sources can overlap slightly where they meet.",
     "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",

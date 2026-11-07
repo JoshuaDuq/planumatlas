@@ -10,6 +10,7 @@ from ..labels.placement import placements
 from ..labels.volumes import LabelGrid, conformed_grid, load_on_grid
 from ..sources import ROOT, read_color_table
 from ..surfaces.geometry import extract_structure, smooth_display
+from ..surfaces.shading import joint_openness
 
 ATLAS_ID = "learning"
 
@@ -153,6 +154,14 @@ def source_groups(config, nextbrain_source):
         yield "cerebnet", cerebellum.load(config), cerebellum.LOBULES, groups
 
 
+def fissures(config, source, grid):
+    """CerebNet's open fissures, which its surfaces leave out, and their record; no other source has any.
+
+    Measurements stay on the source labels.
+    """
+    return cerebellum.fissures(config, grid) if source == cerebellum.ATLAS_ID else (None, None)
+
+
 def source_grids(grids):
     return {
         source: {
@@ -205,25 +214,38 @@ def region_record(group, source, volume):
     }
 
 
-def build(config):
+def build(config, field_ranges):
+    """The teaching set; its shading fields are quantized over the cortex's `field_ranges`."""
     definition = read_definition(config)
     scene = trimesh.Scene()
     regions = []
     grids = []
+    fissure_record = None
     for source, grid, table, groups in source_groups(config, nextbrain.load(config)):
         grids.append((source, grid))
         volume, affine = grid.labels, grid.voxel_to_surface
         combined = combine_labels(volume, groups)
+        opened, record = fissures(config, source, grid)
+        drawn = combined if opened is None else np.where(opened, 0, combined)
+        if record:
+            fissure_record = record
         present = [code for code in range(1, len(groups) + 1) if np.any(combined == code)]
         placed = placements(combined, affine, present)
+        shown = []
         for code, group in enumerate(groups, 1):
             if code not in placed:
                 continue
-            region = region_record(group, source, volume)
-            original = extract_structure(combined, code, affine)
+            original = extract_structure(drawn, code, affine)
             mesh = smooth_display(
-                original, combined == code, affine, definition["smoothing"]
+                original, drawn == code, affine, definition["smoothing"]
             )
+            shown.append((code, group, original, mesh))
+        openness = (
+            joint_openness([mesh for *_, mesh in shown], **config["appearance"]["occlusion"])
+            if source == cerebellum.ATLAS_ID else [None] * len(shown)
+        )
+        for (code, group, original, mesh), field in zip(shown, openness):
+            region = region_record(group, source, volume)
             region.update(
                 voxel_size_mm=grid.spacing_mm,
                 segmentation_volume_mm3=region["voxel_count"] * grid.voxel_volume_mm3,
@@ -239,6 +261,8 @@ def build(config):
                 region,
                 group["color"],
             )
+            if field is not None:
+                exported.vertex_attributes["_OPENNESS"] = field.astype(np.float32)
             region.update(
                 vertex_count=len(exported.vertices),
                 triangle_count=len(exported.faces),
@@ -247,7 +271,7 @@ def build(config):
                 **placed[code],
             )
             regions.append(region)
-    write_scene(scene, config["output_directory"] / "learning.glb")
+    write_scene(scene, config["output_directory"] / "learning.glb", ranges=field_ranges)
     return {
         "id": ATLAS_ID,
         "label": definition["label"],
@@ -259,5 +283,10 @@ def build(config):
             "method": "Explicit source-label unions; bounded Taubin display smoothing",
             **definition["smoothing"],
             "source_volumes_unchanged": True,
+            **({"cerebellar_fissures": fissure_record} if fissure_record else {}),
+            **({"openness": "_OPENNESS on CerebNet lobules: cosine-weighted share of rays from each "
+                            "vertex that clear the intact lobule surfaces together, a hit at d counting "
+                            "d / radius_mm open (appearance.occlusion)"}
+               if fissure_record else {}),
         },
     }, regions
