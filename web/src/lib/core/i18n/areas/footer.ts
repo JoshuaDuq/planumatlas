@@ -6,6 +6,7 @@ export const en = {
   visibleRegions: (n: number) => `${n} visible ${n === 1 ? 'region' : 'regions'}`,
   provenance: 'Provenance',
   feedback: 'Feedback',
+  feedbackSubject: 'Planum feedback',
   feedbackBody: (view: string) => `What happened, or what would help?\n\n\nView on screen: ${view}`,
   close: 'Close',
   subject: 'Subject',
@@ -41,6 +42,7 @@ export const fr: typeof en = {
   visibleRegions: (n: number) => `${n} ${n === 1 ? 'région visible' : 'régions visibles'}`,
   provenance: 'Provenance',
   feedback: 'Commentaires',
+  feedbackSubject: 'Commentaires sur Planum',
   feedbackBody: (view: string) =>
     `Que s’est-il passé, ou qu’est-ce qui aiderait ?\n\n\nVue à l’écran : ${view}`,
   close: 'Fermer',

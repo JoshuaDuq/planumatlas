@@ -707,6 +707,7 @@
   ],
   "provenance": "Provenance",
   "feedback": "Commentaires",
+  "feedbackSubject": "Commentaires sur Planum",
   "feedbackBody": [
    "[\"Alpha\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : Alpha\"",
    "[\"\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : \""

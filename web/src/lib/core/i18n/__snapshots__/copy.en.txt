@@ -707,6 +707,7 @@
   ],
   "provenance": "Provenance",
   "feedback": "Feedback",
+  "feedbackSubject": "Planum feedback",
   "feedbackBody": [
    "[\"Alpha\"] → \"What happened, or what would help?\\n\\n\\nView on screen: Alpha\"",
    "[\"\"] → \"What happened, or what would help?\\n\\n\\nView on screen: \""

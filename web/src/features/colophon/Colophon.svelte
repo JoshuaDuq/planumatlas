@@ -66,11 +66,9 @@
   <a
     class="colophon-action feedback-link"
     href={feedbackUrl(location.href, lang)}
-    target="_blank"
-    rel="noreferrer"
     onpointerdown={(event) => (event.currentTarget.href = feedbackUrl(location.href, lang))}
     onfocus={(event) => (event.currentTarget.href = feedbackUrl(location.href, lang))}
-    >{t(lang, 'footer').feedback}<span class="visually-hidden"> {t(lang, 'link').newTab}</span></a
+    >{t(lang, 'footer').feedback}</a
   >
   {#if onprovenance}
     <button
