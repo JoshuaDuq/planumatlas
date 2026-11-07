@@ -67,6 +67,30 @@ describe('what the status region holds', () => {
   });
 });
 
+describe('feedback', () => {
+  test('opens a new issue in a new tab, prefilled with the link to the view on screen', async () => {
+    await shell.open();
+    const link = page.getByRole('link', { name: /^Feedback/ }).element() as HTMLAnchorElement;
+    expect(link.target).toBe('_blank');
+    history.replaceState(null, '', '#atlas=hcp-mmp&lang=en');
+    link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    const url = new URL(link.href);
+    expect(`${url.origin}${url.pathname}`).toBe(
+      'https://github.com/JoshuaDuq/planumatlas/issues/new',
+    );
+    expect(url.searchParams.get('body')).toContain(
+      `${location.origin}${location.pathname}#atlas=hcp-mmp&lang=en`,
+    );
+  });
+
+  test('is offered before the engine too, in the reader’s language', async () => {
+    await shell.open({ start: false });
+    shell.app.chooseLanguage('fr');
+    flushSync();
+    await expect.element(page.getByRole('link', { name: /^Commentaires/ })).toBeVisible();
+  });
+});
+
 describe('the count', () => {
   test('a download nothing in the data bar holds is shown here', async () => {
     await shell.open();

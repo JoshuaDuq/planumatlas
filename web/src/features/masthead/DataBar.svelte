@@ -326,6 +326,20 @@
     );
   }
 
+  /**
+   * Whether the masthead's own row fits. A menu open in the header is laid out there too, and in
+   * the frame a new language widens it, before it is moved to fit, it reaches past the edge.
+   */
+  function rowFits(masthead: HTMLElement) {
+    const style = getComputedStyle(masthead);
+    const edge = masthead.getBoundingClientRect().right - parseFloat(style.paddingRight);
+    return [...masthead.children].every(
+      (child) =>
+        getComputedStyle(child).position === 'absolute' ||
+        child.getBoundingClientRect().right <= edge + 0.5,
+    );
+  }
+
   // Measured rather than a breakpoint: subject names, French labels and loading progress change
   // the bar's width.
   function fitBar() {
@@ -336,7 +350,7 @@
       !matchMedia(PHONE_QUERY).matches &&
       !matchMedia(COARSE_POINTER_QUERY).matches &&
       data.scrollWidth <= root.clientWidth &&
-      masthead.scrollWidth <= masthead.clientWidth;
+      rowFits(masthead);
     root.toggleAttribute('data-collapsed', !fits);
     collapsed = !fits;
     if (fits) {

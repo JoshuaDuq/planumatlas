@@ -144,7 +144,7 @@ function fixture({
   });
   scene.setSize();
   let source: {
-    inset: { bottom?: number; right?: number };
+    inset: { top?: number; bottom?: number; right?: number };
     scale: { horizontal: number; vertical: number };
   } = {
     inset: {},
@@ -967,6 +967,31 @@ describe('a dock or sheet change', () => {
     stage.camera.refitDock();
     stage.finish();
     assert.ok(Math.abs(stage.distance() - distance) < 1e-9, `${stage.distance()} vs ${distance}`);
+  });
+
+  it('a linked camera keeps its distance when the key it was written beside arrives', () => {
+    const stage = fixture({ meshes: wholeBrain(), scale: FULL });
+    stage.camera.applyView('left', { immediate: true });
+    const { target } = stage.scene.destination;
+    const mm = target.toArray().map((value) => value * 1000) as [number, number, number];
+    stage.camera.placeOrbit(
+      { position: [mm[0] - 430, mm[1], mm[2]], target: mm },
+      { immediate: true },
+    );
+    const distance = stage.distance();
+    // The function's key is measured after the link has placed its camera.
+    stage.setSource({ inset: { top: 150, right: 120 }, scale: FULL });
+    stage.camera.refitDock();
+    stage.finish();
+    assert.ok(Math.abs(stage.distance() - distance) < 1e-9, `${stage.distance()} vs ${distance}`);
+    // Once the reader has moved, a key that comes or goes refits again, from the new room.
+    stage.camera.dolly(1.2);
+    stage.finish();
+    const zoomed = stage.distance();
+    stage.setSource({ inset: {}, scale: FULL });
+    stage.camera.refitDock();
+    stage.finish();
+    assert.ok(stage.distance() < zoomed - 1e-4, `${stage.distance()} vs ${zoomed}`);
   });
 
   it('FACADE-15 while a gesture is down the refit waits for the lift', () => {

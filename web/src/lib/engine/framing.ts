@@ -178,6 +178,9 @@ export function createFraming({
   let orbiting = false;
   let dockPending = false;
   let fitPending: number | null = null;
+  // A link's camera stands where it was written, beside the keys its scene brings, which are measured
+  // after it is placed: until the camera next moves, a dock change re-reads the magnification instead.
+  let linked = false;
   let shown: CameraView = describeCamera();
 
   function describeCamera(): CameraView {
@@ -201,6 +204,7 @@ export function createFraming({
   // limit set for the last gesture no longer applies.
   function moveCamera(plan: CameraPlan, options?: MoveOptions) {
     controls.maxTargetRadius = Infinity;
+    linked = false;
     scene.moveTo(plan, options);
     emit('cameraSettled', undefined);
   }
@@ -406,6 +410,10 @@ export function createFraming({
     if (!applyFraming(options)) return;
     const fitted = fittedDistance(direction);
     if (!(fitted > 0)) return;
+    if (linked) {
+      zoom = plan.position.distanceTo(plan.target) / fitted;
+      return;
+    }
     // The magnification is the size kept, not the distance: a camera restored while a key was still
     // leaving the stage was placed for the room it lands in, and stays there.
     const distance = fitted * zoom;
@@ -741,6 +749,7 @@ export function createFraming({
   // stage; a target already further out is held there rather than pulled in.
   controls.addEventListener('start', () => {
     orbiting = true;
+    linked = false;
     const drawn = framingBounds().getBoundingSphere(new Sphere());
     controls.cursor.copy(drawn.center);
     controls.maxTargetRadius = Math.max(drawn.radius, controls.target.distanceTo(drawn.center));
@@ -824,11 +833,13 @@ export function createFraming({
     },
 
     orbitBy(turn: OrbitTurn) {
+      linked = false;
       held.release();
       turnFromKeyboard(controls, turn);
       rememberZoom();
     },
     dolly(factor) {
+      linked = false;
       held.release();
       // The same zoom as the wheel's, about the surface in the middle of the view.
       controls.dollyIn(factor);
@@ -872,6 +883,7 @@ export function createFraming({
       camera.up.copy(up ? new Vector3(...up) : upFor(view));
       held.release();
       moveCamera(pose, { immediate });
+      linked = true;
       const fitted = fittedDistance(pose.position.clone().sub(pose.target).normalize());
       if (fitted > 0) zoom = distance / fitted;
     },

@@ -67,13 +67,15 @@ describe('structure', () => {
 
   test('a section names the settings that hide its rows, so a screen reader hears them too', () => {
     mount();
-    expect(row('section:cortex').getAttribute('aria-label')).toBe('Cortex (Hemisphere hidden)');
+    expect(row('section:cortex').getAttribute('aria-label')).toBe(
+      'Cortex (Right hemisphere hidden)',
+    );
     expect(row('section:structure').getAttribute('aria-label')).toBe('Subcortical');
     expect(row('section:tissue').getAttribute('aria-label')).toBe(
       'Cut labels only (Visible in a section)',
     );
     expect(row('section:cortex').querySelector('.section-state')!.textContent).toBe(
-      'Hemisphere hidden',
+      'Right hemisphere hidden',
     );
   });
 
@@ -82,7 +84,7 @@ describe('structure', () => {
     const name = (id: string) => row(id).getAttribute('aria-label');
     expect(name('d:left:1')).toBe('Precentral gyrus, left');
     expect(name('d:right:2')).toBe(
-      'Superior frontal gyrus, right: Hemisphere hidden. Activate to reveal.',
+      'Superior frontal gyrus, right: Right hemisphere hidden. Activate to reveal.',
     );
     expect(name('a:left:2')).toBe('Putamen, left: Hidden. Activate to reveal.');
     expect(name('a:left:3')).toMatch(/^Globus pallidus, left: In .+\. Activate to reveal\.$/);
@@ -603,7 +605,7 @@ describe('rows', () => {
     mount({ open: ALL });
     const tip = (id: string) => row(id).querySelector<HTMLElement>('.row-main')!.dataset.tooltip;
     expect(tip('d:right:2')).toBe(
-      'Superior frontal gyrus, right: Hemisphere hidden. Activate to reveal.',
+      'Superior frontal gyrus, right: Right hemisphere hidden. Activate to reveal.',
     );
     expect(tip('d:left:1')).toBeUndefined();
     expect(document.querySelector('[title]')).toBeNull();

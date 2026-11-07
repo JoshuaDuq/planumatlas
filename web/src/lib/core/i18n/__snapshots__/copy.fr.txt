@@ -490,6 +490,7 @@
    "[183,12345] → \"183 sur 12<NNBSP>345 trajectoires\"",
    "[12345,0] → \"12<NNBSP>345 sur 0 trajectoires\""
   ],
+  "drawnHeading": "Faisceaux tracés",
   "mean": "moyenne",
   "range": "étendue",
   "noShown": "Aucune trajectoire ne satisfait ce filtre de longueur.",
@@ -705,6 +706,11 @@
    "[12345] → \"12345 régions visibles\""
   ],
   "provenance": "Provenance",
+  "feedback": "Commentaires",
+  "feedbackBody": [
+   "[\"Alpha\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : Alpha\"",
+   "[\"\"] → \"Que s’est-il passé, ou qu’est-ce qui aiderait ?\\n\\n\\nVue à l’écran : \""
+  ],
   "close": "Fermer",
   "subject": "Sujet",
   "kind": [
@@ -1448,7 +1454,10 @@
  },
  "reasons": {
   "no-mri": "Hors du volume IRM",
-  "hemisphere": "Hémisphère masqué",
+  "hemisphere": {
+   "left": "Hémisphère gauche masqué",
+   "right": "Hémisphère droit masqué"
+  },
   "cortex-hidden": "Cortex masqué",
   "internal-hidden": "Anatomie interne masquée",
   "spinal-cord-hidden": "Moelle épinière masquée",
@@ -1875,6 +1884,8 @@
   "guided": "Parcours guidés",
   "maps": "Cartes",
   "name": "Carte du champ visuel",
+  "mapHidden": "La vue de la carte n’est pas affichée.",
+  "returnToMap": "Revenir à la vue de la carte",
   "summary": "Champ visuel ↔ V1, V2, V3, prédits",
   "mapCount": [
    "[\"Alpha\"] → \"Alpha carte\"",

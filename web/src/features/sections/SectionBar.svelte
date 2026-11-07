@@ -744,6 +744,18 @@
         font-size: var(--text-title);
       }
     }
+    /*
+     * A landscape phone is short but wide: a line of its own for the slider took half the stage's
+     * height, while one row still leaves it ~200px for the plane's 256 mm.
+     */
+    @media (max-height: 480px) and (orientation: landscape) {
+      .section-bar[data-compact='true'] .section-bar-row:first-child {
+        grid-template-columns: auto auto auto auto minmax(0, 1fr) auto auto auto;
+        grid-template-areas:
+          'name number unit start range end more close'
+          'details details details details details details details details';
+      }
+    }
     @media (pointer: coarse) {
       input[type='range'] {
         height: 44px;

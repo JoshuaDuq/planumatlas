@@ -74,12 +74,12 @@ describe('results', () => {
   test('a row that is not on screen says why in its name and is revealed by Enter, not selected', async () => {
     const calls = mount({ settings: { hemisphere: 'right' } });
     await search('cuneus');
-    const hidden = optionNamed('Cuneus, left: Hemisphere hidden. Activate to reveal.');
+    const hidden = optionNamed('Cuneus, left: Left hemisphere hidden. Activate to reveal.');
     await expect.element(hidden).toBeInTheDocument();
     // Not a native `title`: the reason is in the name, and U5's one tooltip carries it on hover.
     expect(document.querySelectorAll('[role="listbox"] [title]')).toHaveLength(0);
     expect(hidden.element().querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toBe(
-      'Cuneus, left: Hemisphere hidden. Activate to reveal.',
+      'Cuneus, left: Left hemisphere hidden. Activate to reveal.',
     );
     // The side on screen comes first, so Enter on the first result changes nothing unasked.
     expect(armed()).not.toBe(hidden.element());

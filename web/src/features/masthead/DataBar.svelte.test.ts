@@ -579,6 +579,19 @@ describe('DataBar touch and refit', () => {
     await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(false);
   });
 
+  test('a menu open in the header, reaching past its edge, does not collapse the bar', async () => {
+    const view = await wide();
+    // The settings menu, caught in the frame its new language widens it, before it is moved to fit.
+    const menu = document
+      .querySelector('#masthead .masthead-end')!
+      .appendChild(document.createElement('div'));
+    menu.style.cssText = 'position: absolute; top: 100%; left: 0; width: 400px; height: 10px';
+    await view.rerender({ bar: barProps({ lang: 'fr' }) });
+    await settle();
+    expect(bar().hasAttribute('data-collapsed')).toBe(false);
+    menu.remove();
+  });
+
   test('a collapse leaves the popover closed when focus is elsewhere', async () => {
     await wide();
     el(more()).focus();

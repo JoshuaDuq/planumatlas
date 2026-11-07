@@ -42,6 +42,7 @@ export const en = {
     shown === total
       ? `${grouped(total)} ${total === 1 ? 'streamline' : 'streamlines'}`
       : `${grouped(shown)} of ${grouped(total)} streamlines`,
+  drawnHeading: 'Drawn bundles',
   mean: 'mean',
   range: 'range',
   noShown: 'No streamlines meet this length filter.',
@@ -98,6 +99,7 @@ export const fr: typeof en = {
     shown === total
       ? `${grouped(total)} ${total === 1 ? 'trajectoire' : 'trajectoires'}`
       : `${grouped(shown)} sur ${grouped(total)} trajectoires`,
+  drawnHeading: 'Faisceaux tracés',
   mean: 'moyenne',
   range: 'étendue',
   noShown: 'Aucune trajectoire ne satisfait ce filtre de longueur.',

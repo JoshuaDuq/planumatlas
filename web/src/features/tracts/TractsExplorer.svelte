@@ -39,6 +39,7 @@
   import StatusLine from '../../lib/ui/StatusLine.svelte';
   import { announce, createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import { downloadText } from './download.ts';
+  import TractMetrics from './TractMetrics.svelte';
   import TractRow from './TractRow.svelte';
 
   let {
@@ -406,6 +407,14 @@
           </div>
         {/each}
       </div>
+      <!-- The search narrows the rows; the drawn bundles' counts come back when it is cleared. -->
+      <TractMetrics
+        rows={groups.flatMap((group) => group.rows)}
+        {lang}
+        {loaded}
+        {text}
+        hidden={Boolean(needle)}
+      />
       {#if matches === 0}
         <EmptyState title={noMatch} message={noMatchHint} />
       {/if}
@@ -602,7 +611,8 @@
     }
 
     /* The list's caption counts the bundles the search keeps, in the column the keys end on. */
-    .list-heading {
+    .list-heading,
+    .body :global(.drawn-heading) {
       display: flex;
       align-items: baseline;
       justify-content: space-between;

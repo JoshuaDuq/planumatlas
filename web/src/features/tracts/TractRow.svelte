@@ -1,12 +1,11 @@
 <!--
   One tract: its name, then a lettered key per side (or numbered segment). Each key is a native
   checkbox named in full ("Arcuate fasciculus · left"); the row is a group named by the tract.
-  The count and lengths describe the key, so a screen reader reads them after its name, but only
-  while the bundle is drawn (deviations/t1-metrics-only-while-drawn.md).
+  The count and lengths are listed after the rows (`TractMetrics`), so a row never changes height.
 -->
 <script lang="ts">
   import type { TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
-  import { bundleName, isWhole, lengthSummary, tractRowName } from '../../lib/core/tracts.ts';
+  import { bundleName, isWhole, tractRowName } from '../../lib/core/tracts.ts';
   import type { TractRow } from '../../lib/core/tracts.ts';
   import type { Language } from '../../lib/types/index.ts';
 
@@ -27,13 +26,7 @@
     /** Keys asked for whose bundle is still downloading: shown as on, the row marked busy. */
     pending: ReadonlySet<string>;
     glyphs: Readonly<Record<string, string>>;
-    text: {
-      streamlines: (shown: number, total: number) => string;
-      mean: string;
-      range: string;
-      noShown: string;
-      whole: string;
-    };
+    text: { whole: string };
     hidden: boolean;
     /** The key's wish; the owner applies it and the key follows what the engine then holds. */
     ontoggle: (id: string, wanted: boolean) => void;
@@ -70,26 +63,6 @@
         </label>
       {/each}
     </span>
-  </div>
-  <div class="metrics">
-    {#each row.members as { bundle, part } (bundle.id)}
-      {@const metrics = loaded.get(bundle.id)}
-      {#if metrics?.visible}
-        <p class="meta" id="native-diffusion-bundle-{bundle.id}-meta">
-          <span class="side" aria-hidden="true">{isWhole(row) ? '' : keyLabel(part)}</span>
-          <span class="values">
-            {#if bundle.segment}<span class="segment" aria-hidden="true"
-                >{bundle.segment[lang]}</span
-              >{/if}
-            <span class="count">{text.streamlines(metrics.shown, metrics.total)}</span>
-            <span class="length"
-              ><span>{metrics.shown ? lengthSummary(metrics, text, lang) : text.noShown}</span
-              ></span
-            >
-          </span>
-        </p>
-      {/if}
-    {/each}
   </div>
 </section>
 
@@ -200,52 +173,6 @@
         min-width: 44px;
         height: 44px;
       }
-    }
-
-    /* Per-side metrics under the name: the side glyph on the inset, the values on the indent. */
-    .meta {
-      display: grid;
-      grid-template-columns: calc(var(--indent) - var(--panel-inset)) minmax(0, 1fr);
-      align-items: baseline;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-      margin-top: calc(-1 * var(--space-1));
-      padding-bottom: var(--space-2);
-    }
-    .side {
-      font-weight: 600;
-    }
-    .values {
-      display: flex;
-      flex-wrap: wrap;
-      column-gap: var(--space-2);
-      overflow-x: clip;
-    }
-    .values > * {
-      min-width: 0;
-    }
-    .count {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-    .length {
-      display: contents;
-    }
-    .length > span,
-    .segment + .count {
-      position: relative;
-      white-space: normal;
-    }
-    /* The dot is centred in the gap, so one that would start a wrapped line falls outside the clip. */
-    .length > span::before,
-    .segment + .count::before {
-      content: '·';
-      content: '·' / '';
-      position: absolute;
-      left: -5.5px;
-      color: var(--text-tertiary);
     }
   }
 

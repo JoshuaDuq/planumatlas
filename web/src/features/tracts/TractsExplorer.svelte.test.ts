@@ -176,13 +176,31 @@ describe('the list', () => {
     await ready();
     const arcuate = el('Arcuate fasciculus · left');
     const described = document.getElementById(arcuate.getAttribute('aria-describedby')!)!;
-    expect(described.textContent).toContain('L');
+    expect(described.textContent).toContain('Arcuate fasciculus · left');
     expect(described.textContent).toContain('4 streamlines');
     expect(described.textContent).toContain('mean 50.0 mm (range 20.0–80.0)');
     // A bundle that is not drawn has no description at all, not a hidden one.
     const other = el('Arcuate fasciculus · right');
     expect(other.hasAttribute('aria-describedby')).toBe(false);
     expect(document.getElementById('native-diffusion-bundle-af-right-meta')).toBeNull();
+  });
+
+  test('turning a bundle on leaves the rows below where they were, its counts listed after the rows', async () => {
+    await ready();
+    // Measured within the list: the fixture's announcer above it grows when a download is announced.
+    const below = () =>
+      el('Uncinate fasciculus · left').getBoundingClientRect().y -
+      document.querySelector('.list')!.getBoundingClientRect().y;
+    const before = below();
+    el('Cingulum · left').focus();
+    await userEvent.keyboard(' ');
+    await expect.poll(() => el('Cingulum · left').hasAttribute('aria-describedby')).toBe(true);
+    expect(below()).toBe(before);
+    // The drawn bundles, in the list's order, each by its full name.
+    const drawn = [...document.querySelectorAll<HTMLElement>('.drawn .meta-name')].map(
+      (node) => node.textContent,
+    );
+    expect(drawn.slice(0, 2)).toEqual(['Arcuate fasciculus · left', 'Cingulum · left']);
   });
 
   test('Space draws a bundle already loaded and hides it again, and the description follows', async () => {

@@ -392,13 +392,14 @@ export function createStageLayout({
     framing: (): FramingClearance => {
       const reach = dockReach() + guideInset.bottom;
       fitKeys();
+      // The tour's card and the keys both end at the stage's right edge: the wider band holds both.
+      const band = Math.max(keyInset.right, guideInset.right);
       if (!visibleRect?.height) {
         return {
-          inset: { top: keyInset.top, right: keyInset.right + guideInset.right, bottom: reach },
+          inset: { top: keyInset.top, right: band, bottom: reach },
           scale: { horizontal: 1, vertical: 1 },
         };
       }
-      const band = keyInset.right + guideInset.right;
       const room = {
         width: visibleRect.width - band,
         height: visibleRect.height - keyInset.top,

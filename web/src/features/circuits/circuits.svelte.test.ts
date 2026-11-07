@@ -294,6 +294,24 @@ describe('opening a lesson', () => {
     expect(returnButton()).not.toBeNull();
   });
 
+  test('the map covered by both hemispheres offers its view back, and Return shows it again', async () => {
+    mount();
+    await world.explorer.map.openMap();
+    await expect.poll(() => world.view.current.lesson.map).toBe('visual-field');
+    const side = world.view.current.hemisphere;
+    expect(side).not.toBe('both');
+    expect(returnButton()).toBeNull();
+    // Start over, or Display's Both, puts the other hemisphere over the map's medial cortex.
+    world.engine.model.setHemisphere('both');
+    flushSync();
+    expect(document.querySelector('.circuit-return')!.textContent).toContain(
+      'The map’s view is not shown.',
+    );
+    await userEvent.click(returnButton()!);
+    await expect.poll(() => world.view.current.hemisphere).toBe(side);
+    expect(returnButton()).toBeNull();
+  });
+
   test('is French in French', async () => {
     mount('fr');
     await open('vision');

@@ -92,6 +92,18 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
       await excursions.openMap(dot);
     },
 
+    /**
+     * Both hemispheres are drawn, so the other one covers the map's medial cortex: Start over or
+     * Display's Both left the map's view, which `returnToMap` puts back.
+     */
+    get hidden() {
+      return open && view.current.hemisphere === 'both';
+    },
+
+    returnToMap() {
+      return excursions.showMapSide(hemisphereFor(dot) ?? 'left');
+    },
+
     /** The dot moves; crossing the vertical meridian turns the stage to the other hemisphere. */
     moveDot(next: VisualFieldDot) {
       lesson.moveDot(next);

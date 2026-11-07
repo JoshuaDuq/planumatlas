@@ -114,7 +114,7 @@
     const name = row.label.name;
     const side = t(lang, 'sides').words[row.region.hemisphere];
     const eye = !UNREVEALABLE.has(row.reason);
-    const reason = row.visible ? null : reasonText(row.reason, row.region.atlas, lang);
+    const reason = row.visible ? null : reasonText(row.reason, row.region, lang);
     return {
       id: row.region.id,
       label: name,
@@ -132,6 +132,13 @@
       },
     };
   }
+
+  /** A region of the section the reason hides: the hemisphere setting hides one side, which it names. */
+  const hiddenBy = (kind: string, reason: string) =>
+    groups
+      .filter((group) => group.kind === kind)
+      .flatMap((group) => group.rows)
+      .find((row) => !row.visible && row.reason === reason)!.region;
 
   const nodes = $derived.by(() => {
     const copy = t(lang, 'navigator');
@@ -162,7 +169,7 @@
             type: 'section',
             name,
             said: (said.get(section) ?? [])
-              .map((reason) => reasonText(reason, undefined, lang))
+              .map((reason) => reasonText(reason, hiddenBy(section!, reason), lang))
               .join(' · '),
           },
         });

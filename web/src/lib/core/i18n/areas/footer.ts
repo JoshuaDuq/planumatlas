@@ -5,6 +5,8 @@ export const en = {
   statementAlone: 'Not clinical anatomy',
   visibleRegions: (n: number) => `${n} visible ${n === 1 ? 'region' : 'regions'}`,
   provenance: 'Provenance',
+  feedback: 'Feedback',
+  feedbackBody: (view: string) => `What happened, or what would help?\n\n\nView on screen: ${view}`,
   close: 'Close',
   subject: 'Subject',
   kind: (individual: boolean): string =>
@@ -38,6 +40,9 @@ export const fr: typeof en = {
   statementAlone: 'Pas une anatomie clinique',
   visibleRegions: (n: number) => `${n} ${n === 1 ? 'région visible' : 'régions visibles'}`,
   provenance: 'Provenance',
+  feedback: 'Commentaires',
+  feedbackBody: (view: string) =>
+    `Que s’est-il passé, ou qu’est-ce qui aiderait ?\n\n\nVue à l’écran : ${view}`,
   close: 'Fermer',
   subject: 'Sujet',
   kind: (individual: boolean): string =>

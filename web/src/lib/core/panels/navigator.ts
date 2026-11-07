@@ -149,11 +149,21 @@ export function sectionReasons(
 
 /**
  * Why a row is not on screen, as the tree and the search results print it (navigator.js:356-358):
- * a region of another detail set names that set; a reason with no sentence of its own says the fallback.
+ * a region of another detail set names that set, the hemisphere setting the side it hides; a reason
+ * with no sentence of its own says the fallback.
  */
-export function reasonText(reason: string, atlas: string | undefined, lang: Language): string {
+export function reasonText(
+  reason: string,
+  region: Pick<Region, 'atlas' | 'hemisphere'> | undefined,
+  lang: Language,
+): string {
   const reasons = t(lang, 'reasons');
-  if (reason === 'other-detail') return reasons.inDetailSet(atlasSwitchLabel(atlas!, lang));
+  if (reason === 'other-detail') return reasons.inDetailSet(atlasSwitchLabel(region!.atlas!, lang));
+  if (reason === 'hemisphere') {
+    const side = region!.hemisphere;
+    if (side === 'midline') throw new Error('The hemisphere setting never hides a midline region.');
+    return reasons.hemisphere[side];
+  }
   const text = (reasons as Record<string, unknown>)[reason];
   return typeof text === 'string' ? text : reasons.fallback;
 }

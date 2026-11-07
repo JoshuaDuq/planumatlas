@@ -490,6 +490,7 @@
    "[183,12345] → \"183 of 12<NNBSP>345 streamlines\"",
    "[12345,0] → \"12<NNBSP>345 of 0 streamlines\""
   ],
+  "drawnHeading": "Drawn bundles",
   "mean": "mean",
   "range": "range",
   "noShown": "No streamlines meet this length filter.",
@@ -705,6 +706,11 @@
    "[12345] → \"12345 visible regions\""
   ],
   "provenance": "Provenance",
+  "feedback": "Feedback",
+  "feedbackBody": [
+   "[\"Alpha\"] → \"What happened, or what would help?\\n\\n\\nView on screen: Alpha\"",
+   "[\"\"] → \"What happened, or what would help?\\n\\n\\nView on screen: \""
+  ],
   "close": "Close",
   "subject": "Subject",
   "kind": [
@@ -1448,7 +1454,10 @@
  },
  "reasons": {
   "no-mri": "Outside the MRI scan",
-  "hemisphere": "Hemisphere hidden",
+  "hemisphere": {
+   "left": "Left hemisphere hidden",
+   "right": "Right hemisphere hidden"
+  },
   "cortex-hidden": "Cortex hidden",
   "internal-hidden": "Internal anatomy hidden",
   "spinal-cord-hidden": "Spinal cord hidden",
@@ -1875,6 +1884,8 @@
   "guided": "Guided circuits",
   "maps": "Maps",
   "name": "Visual field map",
+  "mapHidden": "The map’s view is not shown.",
+  "returnToMap": "Return to map view",
   "summary": "Visual field ↔ V1, V2, V3, predicted",
   "mapCount": [
    "[\"Alpha\"] → \"Alpha maps\"",

@@ -122,6 +122,14 @@
       {copy.name}
     </h3>
     <p class="intro">{copy.intro}</p>
+    {#if model.hidden}
+      <p class="note circuit-return">
+        {copy.mapHidden}
+        <button type="button" class="link" onclick={() => void model.returnToMap()}>
+          {copy.returnToMap}
+        </button>
+      </p>
+    {/if}
     {#if model.tours.length}
       <p class="note">
         {t(model.lang, 'circuits').inCircuits}:

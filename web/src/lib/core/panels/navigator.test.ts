@@ -36,8 +36,19 @@ test('the first arrow from an empty field lands on the first choosable row', () 
 });
 
 test('a hidden row says its own reason, names the detail set it is in, or falls back', () => {
-  assert.equal(reasonText('hemisphere', 'destrieux', 'en'), 'Hemisphere hidden');
-  assert.equal(reasonText('other-detail', 'learning', 'fr'), 'Dans Ensemble pédagogique');
+  // The hemisphere setting hides the region's own side, which the sentence names.
+  assert.equal(
+    reasonText('hemisphere', { atlas: 'destrieux', hemisphere: 'right' }, 'en'),
+    'Right hemisphere hidden',
+  );
+  assert.equal(
+    reasonText('hemisphere', { atlas: 'destrieux', hemisphere: 'right' }, 'fr'),
+    'Hémisphère droit masqué',
+  );
+  assert.equal(
+    reasonText('other-detail', { atlas: 'learning', hemisphere: 'left' }, 'fr'),
+    'Dans Ensemble pédagogique',
+  );
   assert.equal(reasonText('no-such-reason', undefined, 'en'), 'Hidden');
   // A key of the table that is not a sentence is no reason either.
   assert.equal(reasonText('inDetailSet', undefined, 'fr'), 'Masqué');

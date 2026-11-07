@@ -156,7 +156,7 @@ describe('the dock and the keys tell the camera', () => {
 });
 
 describe('the guided tour’s bands', () => {
-  test('widen the framing’s right inset beside the keys’ band and its bottom over the dock, refitting only on a change', () => {
+  test('take the wider of their right band and the keys’ (both end at the stage’s edge) and the bottom over the dock, refitting only on a change', () => {
     let calls = 0;
     const stage = createStageLayout({ media, storage: null, onDock: () => (calls += 1) });
     stage.setViewport(rect(1000, 600), { width: 1000, height: 600 });
@@ -168,7 +168,13 @@ describe('the guided tour’s bands', () => {
     stage.setGuideInset({ right: 356, bottom: 0 });
     stage.setGuideInset({ right: 356, bottom: 0 });
     expect(calls).toBe(1);
-    expect(stage.framing().inset.right).toBeGreaterThanOrEqual(90 + 356);
+    const beside = stage.framing().inset.right;
+    expect(beside).toBeGreaterThanOrEqual(356);
+    // The card sits against the stage's right edge, as the keys do: the narrower band is inside the wider.
+    stage.setKeys({ top: 0, right: 0 }, { width: 0, height: 0 });
+    expect(stage.framing().inset.right).toBe(beside);
+    stage.setKeys({ top: 0, right: 90 }, { width: 90, height: 200 });
+    calls = 1;
     stage.setGuideInset({ right: 0, bottom: 240 });
     expect(calls).toBe(2);
     expect(stage.framing().inset.right).toBe(without.right);

@@ -1,6 +1,6 @@
 export const en = {
   'no-mri': 'Outside the MRI scan',
-  hemisphere: 'Hemisphere hidden',
+  hemisphere: { left: 'Left hemisphere hidden', right: 'Right hemisphere hidden' },
   'cortex-hidden': 'Cortex hidden',
   'internal-hidden': 'Internal anatomy hidden',
   'spinal-cord-hidden': 'Spinal cord hidden',
@@ -16,7 +16,7 @@ export const en = {
 
 export const fr: typeof en = {
   'no-mri': 'Hors du volume IRM',
-  hemisphere: 'Hémisphère masqué',
+  hemisphere: { left: 'Hémisphère gauche masqué', right: 'Hémisphère droit masqué' },
   'cortex-hidden': 'Cortex masqué',
   'internal-hidden': 'Anatomie interne masquée',
   'spinal-cord-hidden': 'Moelle épinière masquée',

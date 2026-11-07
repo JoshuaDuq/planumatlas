@@ -11,6 +11,8 @@ export const en = {
   guided: 'Guided circuits',
   maps: 'Maps',
   name: 'Visual field map',
+  mapHidden: 'The map’s view is not shown.',
+  returnToMap: 'Return to map view',
   summary: 'Visual field ↔ V1, V2, V3, predicted',
   mapCount: (count: number) => `${count} ${count === 1 ? 'map' : 'maps'}`,
   intro:
@@ -69,6 +71,8 @@ export const fr: typeof en = {
   guided: 'Parcours guidés',
   maps: 'Cartes',
   name: 'Carte du champ visuel',
+  mapHidden: 'La vue de la carte n’est pas affichée.',
+  returnToMap: 'Revenir à la vue de la carte',
   summary: 'Champ visuel ↔ V1, V2, V3, prédits',
   mapCount: (count: number) => `${count} ${count > 1 ? 'cartes' : 'carte'}`,
   intro:
