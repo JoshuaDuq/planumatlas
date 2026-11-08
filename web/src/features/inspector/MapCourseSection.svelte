@@ -5,6 +5,7 @@
   Only a series has the section; it stays mounted so its open state survives a new selection.
 -->
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { MapCourse } from '../../lib/core/user-map/course.ts';
@@ -47,8 +48,12 @@
     map.state.status === 'ready' && map.state.summary.volumes > 1 ? map.state : null,
   );
 
+  // The course is read again for another region or map only: the selection and the store are handed in
+  // again whenever the session changes, as it does for each volume placed, and the plot must stay.
+  const regionId = $derived(region?.id);
+
   $effect(() => {
-    const id = region?.id;
+    const id = regionId;
     const loaded = series;
     const ask = ++request;
     if (!id || !loaded) {
@@ -56,7 +61,7 @@
       return;
     }
     course = { status: 'loading' };
-    map.course(id).then(
+    untrack(() => map.course(id)).then(
       (data) => {
         if (ask === request) course = { status: 'ready', data };
       },

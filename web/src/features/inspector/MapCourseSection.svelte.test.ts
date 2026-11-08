@@ -76,6 +76,26 @@ test('a region without a solid, or where the map has no value, says so instead o
   await expect.element(page.getByRole('slider')).not.toBeInTheDocument();
 });
 
+test('the same region handed in again, as each volume placed hands it, keeps its plot and is not read again', async () => {
+  const engine = createFakeUserMap(true, undefined, (id) => courses[id] ?? null);
+  let reads = 0;
+  const course = engine.course;
+  engine.course = (id) => (reads++, course(id));
+  const map = createUserMapStore({ engine, display: { color: 'atlas', setColor() {} } });
+  const reading = map.open(new File([new Uint8Array(4)], 'fir.nii'));
+  await expect.poll(() => engine.loading).toBe(true);
+  engine.settle(summary);
+  await reading;
+  const label = (id: string) => ({ name: id });
+  const view = await render(MapCourseSection, { region: { id: 'v1' } as Region, lang: 'en', map, label });
+  const plot = page.getByRole('slider');
+  await expect.element(plot).toBeInTheDocument();
+  expect(reads).toBe(1);
+  await view.rerender({ region: { id: 'v1' } as Region, lang: 'en', map, label });
+  await expect.element(plot).toBeInTheDocument();
+  expect(reads).toBe(1);
+});
+
 test('a single map has no course', async () => {
   await shown('v1', 1);
   await expect.element(page.getByText(copy.course)).not.toBeInTheDocument();
