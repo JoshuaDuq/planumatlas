@@ -258,6 +258,7 @@ describe('the toolbar', () => {
           mri: {
             open: () =>
               document.body.insertAdjacentHTML('beforeend', '<section class="mpr-dock"></section>'),
+            openPaint: () => {},
             close: () => document.querySelector('.mpr-dock')?.remove(),
           },
           reserve: () => {},
@@ -276,6 +277,7 @@ describe('the toolbar', () => {
           Section: 'Section',
           Lesion: 'Lesion',
           Coordinate: 'Coordinate',
+          ...(phone ? {} : { Overlay: 'Overlay' }),
           'The medial surface': 'Display',
         });
       } finally {

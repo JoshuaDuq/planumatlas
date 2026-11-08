@@ -166,8 +166,12 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     openFunction: deps.openFunction,
     openDeficit,
     openRegion,
-    /** The Linked MRI at the deficit's first cited region, its paint over the scan; `instant` for a key press. */
-    openMri: (options: { instant: boolean }) => deps.excursions.openDeficitMri(options),
+    /** The Linked MRI at the open deficit's first cited region, its paint over the scan; `instant` for a key press. */
+    openMri(options: { instant: boolean }) {
+      const { selectedDeficit, selectedFinding } = deps.session.state;
+      if (!selectedDeficit) throw new Error('No deficit is open to show in the Linked MRI.');
+      return deps.excursions.openDeficitMri(selectedDeficit, selectedFinding, options);
+    },
     restore,
     focusSearch() {
       refs.search?.focus();

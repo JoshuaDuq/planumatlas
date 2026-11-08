@@ -947,6 +947,11 @@
     "body": "Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
    },
    {
+    "id": "overlay",
+    "title": "Overlay",
+    "body": "Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent."
+   },
+   {
     "id": "medial",
     "title": "The medial surface",
     "body": "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
@@ -959,12 +964,12 @@
    {
     "id": "functions",
     "title": "Functions",
-    "body": "Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language."
+    "body": "Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language. Its Linked MRI shows the same map on the scan."
    },
    {
     "id": "deficits",
     "title": "Deficits",
-    "body": "Deficits paints the regions that lesion studies tie to a deficit: here aphasia."
+    "body": "Deficits paints the regions that lesion studies tie to a deficit: here aphasia. Its Linked MRI shows them on the scan."
    },
    {
     "id": "circuits",

@@ -8,6 +8,7 @@ export interface GuideStop {
     | 'linkedMri'
     | 'lesion'
     | 'coordinate'
+    | 'overlay'
     | 'medial'
     | 'topBar'
     | 'functions'
@@ -62,6 +63,11 @@ export const en = {
       body: 'Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target.',
     },
     {
+      id: 'overlay',
+      title: 'Overlay',
+      body: 'Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent.',
+    },
+    {
       id: 'medial',
       title: 'The medial surface',
       body: 'Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface.',
@@ -74,12 +80,12 @@ export const en = {
     {
       id: 'functions',
       title: 'Functions',
-      body: 'Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language.',
+      body: 'Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language. Its Linked MRI shows the same map on the scan.',
     },
     {
       id: 'deficits',
       title: 'Deficits',
-      body: 'Deficits paints the regions that lesion studies tie to a deficit: here aphasia.',
+      body: 'Deficits paints the regions that lesion studies tie to a deficit: here aphasia. Its Linked MRI shows them on the scan.',
     },
     {
       id: 'circuits',
@@ -142,6 +148,11 @@ export const fr: typeof en = {
       body: 'Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche.',
     },
     {
+      id: 'overlay',
+      title: 'Superposition',
+      body: 'Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé.',
+    },
+    {
       id: 'medial',
       title: 'La face médiale',
       body: 'Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne.',
@@ -154,12 +165,12 @@ export const fr: typeof en = {
     {
       id: 'functions',
       title: 'Fonctions',
-      body: 'Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage.',
+      body: 'Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage. Son IRM liée montre la même carte sur l’examen.',
     },
     {
       id: 'deficits',
       title: 'Déficits',
-      body: 'Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie.',
+      body: 'Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie. Son IRM liée les montre sur l’examen.',
     },
     {
       id: 'circuits',

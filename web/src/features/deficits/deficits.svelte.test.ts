@@ -477,10 +477,10 @@ describe('the Linked MRI', () => {
     await row('aphasia').click();
     const button = page.getByRole('button', { name: 'Linked MRI' });
     await userEvent.click(button);
-    expect(calls.at(-1)).toBe('mri:false');
+    expect(calls.at(-1)).toBe('mri:aphasia:null:false');
     (button.element() as HTMLElement).focus();
     await userEvent.keyboard('{Enter}');
-    expect(calls.at(-1)).toBe('mri:true');
+    expect(calls.at(-1)).toBe('mri:aphasia:null:true');
   });
 });
 

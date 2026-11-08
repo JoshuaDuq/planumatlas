@@ -575,14 +575,15 @@ describe('areas', () => {
 describe('the Linked MRI', () => {
   test("a function's profile opens the Linked MRI on its map, without moving the stage at a key press", async () => {
     mount();
-    await open(few().id);
+    const id = few().id;
+    await open(id);
     const opened = vi.spyOn(world.excursions, 'openFunctionMri').mockResolvedValue();
     const button = page.getByRole('button', { name: 'Linked MRI' });
     await userEvent.click(button);
-    expect(opened).toHaveBeenLastCalledWith({ instant: false });
+    expect(opened).toHaveBeenLastCalledWith(id, { instant: false });
     (button.element() as HTMLElement).focus();
     await userEvent.keyboard('{Enter}');
-    expect(opened).toHaveBeenLastCalledWith({ instant: true });
+    expect(opened).toHaveBeenLastCalledWith(id, { instant: true });
   });
 
   test('the list, with no function open, offers no Linked MRI', () => {

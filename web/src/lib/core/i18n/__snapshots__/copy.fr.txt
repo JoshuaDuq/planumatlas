@@ -947,6 +947,11 @@
     "body": "Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche."
    },
    {
+    "id": "overlay",
+    "title": "Superposition",
+    "body": "Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé."
+   },
+   {
     "id": "medial",
     "title": "La face médiale",
     "body": "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne."
@@ -959,12 +964,12 @@
    {
     "id": "functions",
     "title": "Fonctions",
-    "body": "Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage."
+    "body": "Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage. Son IRM liée montre la même carte sur l’examen."
    },
    {
     "id": "deficits",
     "title": "Déficits",
-    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie."
+    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie. Son IRM liée les montre sur l’examen."
    },
    {
     "id": "circuits",

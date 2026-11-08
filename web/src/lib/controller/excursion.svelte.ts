@@ -402,10 +402,8 @@ export function createExcursions(
     mri.show({ instant });
   }
 
-  /** The open function's Linked MRI, at its strongest area; the overview has no one area. */
-  async function openFunctionMri({ instant }: { instant: boolean }): Promise<void> {
-    const id = session.state.selectedFunction;
-    if (!id) throw new Error('No function is open to show in the Linked MRI.');
+  /** A function's Linked MRI, at its strongest area; the overview has no one area. */
+  async function openFunctionMri(id: string, { instant }: { instant: boolean }): Promise<void> {
     const ranked =
       id === ALL_DOMAINS
         ? []
@@ -415,11 +413,13 @@ export function createExcursions(
     return openPaintMri(ranked, instant);
   }
 
-  /** The open deficit's Linked MRI, at its first finding's first region, or the chosen finding's. */
-  async function openDeficitMri({ instant }: { instant: boolean }): Promise<void> {
-    const id = session.state.selectedDeficit;
-    if (!id) throw new Error('No deficit is open to show in the Linked MRI.');
-    const { colors } = clinical.paint(id, session.state.selectedFinding).paint;
+  /** A deficit's Linked MRI, at its first finding's first region, or `finding`'s. */
+  async function openDeficitMri(
+    id: string,
+    finding: string | null,
+    { instant }: { instant: boolean },
+  ): Promise<void> {
+    const { colors } = clinical.paint(id, finding).paint;
     const detail = model.settings.detail;
     return openPaintMri(
       [...colors.keys()].flatMap((region) => clinical.drawnAs(region, detail)),

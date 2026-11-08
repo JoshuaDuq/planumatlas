@@ -71,10 +71,10 @@ const stageBand = (card: HTMLElement) => card.offsetWidth + 2 * PANEL_GAP;
 const dockTop = () => document.querySelector('.stage-dock')?.getBoundingClientRect().top;
 
 /**
- * On a phone, where the card spans the stage: over the raised sheet under its tabs, so the stage
- * keeps the anatomy, else just above the dock, so the anatomy is framed in the stage's upper part.
+ * Over the raised sheet under its tabs, so the stage keeps the anatomy, else just above the dock and
+ * inside the stage, so the anatomy is framed in the stage's upper part. A phone's card spans the stage.
  */
-function placeOnPhone(card: HTMLElement, at: PhoneSeat, selector?: string) {
+function placeAtSeat(card: HTMLElement, at: Seat, selector?: string) {
   const c = placedBox(card);
   const tabs = at === 'underTabs' && document.querySelector(selector!)?.getBoundingClientRect();
   if (tabs && tabs.bottom + 2 * PANEL_GAP + c.height <= innerHeight) {
@@ -82,7 +82,14 @@ function placeOnPhone(card: HTMLElement, at: PhoneSeat, selector?: string) {
     return;
   }
   const top = dockTop();
-  if (top !== undefined) setAside(card, `0 ${top - PANEL_GAP - c.height - c.top}px`);
+  const stage = document.querySelector(STAGE)?.getBoundingClientRect();
+  if (top === undefined || !stage) return;
+  // A card narrower than the stage is kept inside it; a phone's spans it as driver.js put it.
+  const left =
+    c.width + 2 * PANEL_GAP <= stage.width
+      ? Math.max(stage.left + PANEL_GAP, Math.min(c.left, stage.right - PANEL_GAP - c.width))
+      : c.left;
+  setAside(card, `${left - c.left}px ${top - PANEL_GAP - c.height - c.top}px`);
 }
 
 /**
@@ -109,8 +116,8 @@ function placeInStage(card: HTMLElement) {
   const top = stage.top + (stage.height - c.height) / 2;
   setAside(card, `${left - c.left}px ${top - c.top}px`);
 }
-/** Where a phone's card sits, rather than over the anatomy. */
-type PhoneSeat = 'overDock' | 'underTabs';
+/** Where a card sits rather than over the anatomy: a phone's, or one beside the docked MRI. */
+type Seat = 'overDock' | 'underTabs';
 
 /** The scan's download, when the cut before has not already brought it. */
 const MRI_WAIT_MS = 10_000;
@@ -128,10 +135,12 @@ const STOPS: Record<
     view?: string;
     /** The region the Linked MRI opens on. */
     opensMri?: string;
+    /** The Linked MRI opens beside the stop on the function or deficit its view paints, as the profile's own does. */
+    paintsMri?: true;
     /** The card sits in the stage's dark space, a band the anatomy is framed clear of. */
     inStage?: true;
     /** Where a phone's card sits, rather than over the anatomy. */
-    phone?: PhoneSeat;
+    phone?: Seat;
   }
 > = {
   welcome: { phone: 'overDock' },
@@ -174,6 +183,8 @@ const STOPS: Record<
     align: 'start',
     view: 'coord=-38,44,26&space=mni152nlin2009casym',
   },
+  // A reader's map is their own file and never in a link: the stop points at the tool to try.
+  overlay: { selector: dock('overlay'), side: 'top', align: 'start' },
   medial: { selector: dock('display'), side: 'top', align: 'center', view: 'hemi=left&view=right' },
   topBar: { selector: '#masthead .data-bar', side: 'bottom', align: 'center' },
   functions: {
@@ -182,6 +193,7 @@ const STOPS: Record<
     align: 'start',
     // A function is painted on HCP-MMP; opening one in the app switches the atlas and cuts too.
     view: 'atlas=hcp-mmp&cuts=hcp-mmp&tab=functions&function=language',
+    paintsMri: true,
     inStage: true,
     phone: 'underTabs',
   },
@@ -190,6 +202,7 @@ const STOPS: Record<
     side: 'right',
     align: 'start',
     view: 'tab=deficits&deficit=aphasia',
+    paintsMri: true,
     inStage: true,
     phone: 'underTabs',
   },
@@ -211,6 +224,16 @@ const STOPS: Record<
   },
   settings: { selector: '.masthead-end .popover-host > button', side: 'bottom', align: 'end' },
 };
+
+/** The function or deficit a stop's view paints. */
+export type GuidePaint = { function: string } | { deficit: string };
+
+function paintOf(view: string): GuidePaint {
+  const shown = new Map(parameters(view));
+  const id = shown.get('function') ?? shown.get('deficit');
+  if (!id) throw new Error(`A stop that opens the MRI on its paint paints nothing: ${view}`);
+  return shown.has('function') ? { function: id } : { deficit: id };
+}
 
 /** What the tour keeps of the reader's view: the brain, its atlases and the language. */
 const HOME_PARAMS = ['anatomy', 'atlas', 'cuts', 'detail', 'lang'];
@@ -259,8 +282,11 @@ interface GuideOptions {
   onClose: (closed: { pointer: boolean }) => void;
   /** The settings menu's language choice, offered on the first card. */
   onLanguage: (next: Language) => void;
-  /** The Linked MRI, docked beside the stage, opened on a region it selects. */
-  mri: { open(region: string): unknown; close(): void };
+  /**
+   * The Linked MRI, docked beside the stage: opened on a region it selects, or on a function's or
+   * deficit's paint as its profile opens it.
+   */
+  mri: { open(region: string): unknown; openPaint(paint: GuidePaint): unknown; close(): void };
   /** Keeps bands this wide on the stage's right and above its dock clear of anatomy; 0 gives one back. */
   reserve: (band: { right: number; bottom: number }) => void;
 }
@@ -294,13 +320,13 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     showHash(
       `#${[...new Map([...home, ...parameters(view)])].map((pair) => pair.join('=')).join('&')}`,
     );
-  // Whether the MRI stop opened the panel, so leaving it closes only what the tour opened.
+  // Whether the tour opened the panel, so leaving its stops closes only what the tour opened.
   let openedMri = false;
-  // The link the view writes is applied later; the region is selected now, so the MRI opens on it.
-  const openMri = (view: string, region: string) => {
-    openedMri = !document.querySelector(MRI_DOCK);
+  // The link the view writes is applied later, so the MRI is opened on what the stop names.
+  const openMri = (view: string, open: () => unknown) => {
+    openedMri ||= !document.querySelector(MRI_DOCK);
     show(view);
-    mri.open(region);
+    open();
   };
   const leaveMri = () => {
     if (!openedMri) return;
@@ -316,14 +342,23 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   // Whether a stop's card sits in the stage; a phone's stage is under the sheet, so it keeps its own.
   const inStage: boolean[] = [];
   // Where each stop's card sits on a phone, if not where driver.js puts it.
-  const seats: { at?: PhoneSeat; selector?: string }[] = [];
+  const seats: { at?: Seat; selector?: string }[] = [];
   const phone = matchMedia(PHONE_QUERY).matches;
   const steps: DriveStep[] = copy.stops.flatMap(({ id, title, body }) => {
-    const { selector, side, align, view = '', opensMri } = STOPS[id];
+    const { selector, side, align, view = '', opensMri, paintsMri } = STOPS[id];
     if (opensMri ? !docksMri : selector && !rendered(selector)) return [];
-    enter.push(opensMri ? () => openMri(view, opensMri) : null);
-    inStage.push(Boolean(STOPS[id].inStage) && !phone);
-    seats.push(phone ? { at: STOPS[id].phone, selector } : {});
+    const paintDocked = Boolean(paintsMri) && docksMri;
+    enter.push(
+      opensMri
+        ? () => openMri(view, () => mri.open(opensMri))
+        : paintDocked
+          ? () => openMri(view, () => mri.openPaint(paintOf(view)))
+          : null,
+    );
+    // Beside the docked MRI the stage is too narrow for a band down its right: the card sits over
+    // the dock instead, as a phone's does, and the anatomy is framed above it.
+    inStage.push(Boolean(STOPS[id].inStage) && !phone && !paintDocked);
+    seats.push(phone ? { at: STOPS[id].phone, selector } : paintDocked ? { at: 'overDock' } : {});
     return [
       {
         element: selector,
@@ -353,9 +388,9 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       if (!card?.isConnected) return;
       const index = tour.getActiveIndex() ?? -1;
       if (inStage[index]) placeInStage(card);
-      else if (seats[index]?.at) placeOnPhone(card, seats[index].at, seats[index].selector);
+      else if (seats[index]?.at) placeAtSeat(card, seats[index].at, seats[index].selector);
       else clearPanels(card);
-      if (phone) reserve({ right: 0, bottom: bottomBand(card) });
+      if (phone || seats[index]?.at) reserve({ right: 0, bottom: bottomBand(card) });
     });
   };
   const menus = new MutationObserver(placeCard);

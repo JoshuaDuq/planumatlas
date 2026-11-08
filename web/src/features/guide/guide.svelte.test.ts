@@ -7,6 +7,7 @@ import { page, userEvent } from 'vitest/browser';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
 import { firstLaunch, startGuide } from './tour.ts';
+import type { GuidePaint } from './tour.ts';
 
 const TARGETS = `
   <header id="masthead">
@@ -65,17 +66,20 @@ afterEach(() => {
 
 /** A stand-in for the docked Linked MRI, opened and closed as the app's would be. */
 let mriOpens: string[] = [];
+const dockMri = (on: string) => {
+  mriOpens.push(on);
+  if (document.querySelector('.mpr-dock')) return;
+  document
+    .getElementById('fixture')!
+    .insertAdjacentHTML(
+      'beforeend',
+      '<section class="mpr-dock" aria-label="Linked MRI sections" style="height: 200px"></section>',
+    );
+};
 const mri = {
-  open(region: string) {
-    mriOpens.push(region);
-    if (document.querySelector('.mpr-dock')) return;
-    document
-      .getElementById('fixture')!
-      .insertAdjacentHTML(
-        'beforeend',
-        '<section class="mpr-dock" aria-label="Linked MRI sections" style="height: 200px"></section>',
-      );
-  },
+  open: dockMri,
+  openPaint: (paint: GuidePaint) =>
+    dockMri('function' in paint ? `function:${paint.function}` : `deficit:${paint.deficit}`),
   close() {
     document.querySelector('.mpr-dock')?.remove();
   },
@@ -102,9 +106,9 @@ const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
   return event;
 };
 
-const STOPS = 14;
+const STOPS = 15;
 
-test('fourteen stops in order, in English and French, with focus on Next', async () => {
+test('fifteen stops in order, in English and French, with focus on Next', async () => {
   start();
   const titles = [title()];
   await expect.poll(() => document.activeElement).toBe(next());
@@ -120,6 +124,7 @@ test('fourteen stops in order, in English and French, with focus on Next', async
     'Linked MRI',
     'Lesion',
     'Coordinate',
+    'Overlay',
     'The medial surface',
     'The top bar',
     'Functions',
@@ -138,7 +143,7 @@ test('fourteen stops in order, in English and French, with focus on Next', async
   start('fr');
   expect(title()).toBe('Utiliser Planum');
   expect(card().lang).toBe('fr');
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 14');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 15');
 });
 
 test('each stop opens its feature over the home view, and closing puts the reader’s view back', () => {
@@ -160,6 +165,8 @@ test('each stop opens its feature over the home view, and closing puts the reade
     `${HOME}&cut=coronal&region=destrieux:left:29`,
     `${HOME}&lesion=-35.5,-9.5,63.5,10`,
     `${HOME}&coord=-38,44,26&space=mni152nlin2009casym`,
+    // Overlay: a reader's map is never in a link.
+    HOME,
     `${HOME}&hemi=left&view=right`,
     HOME,
     // The stop's atlas replaces the reader's, as opening a function in the app does.
@@ -241,6 +248,19 @@ test('the Linked MRI stop opens the panel it points at, and leaving closes only 
   expect(document.querySelector('.mpr-dock')).not.toBeNull();
 });
 
+test('the Functions and Deficits stops open the Linked MRI on their paint, closed once the tour moves on', () => {
+  start();
+  while (title() !== 'Functions') next().click();
+  expect(mriOpens.at(-1)).toBe('function:language');
+  expect(document.querySelector('.mpr-dock')).not.toBeNull();
+  next().click();
+  expect([title(), mriOpens.at(-1)]).toEqual(['Deficits', 'deficit:aphasia']);
+  // Opened again over its own panel, it is still the tour's to close.
+  next().click();
+  expect(title()).toBe('Circuits');
+  expect(document.querySelector('.mpr-dock')).toBeNull();
+});
+
 test.each([
   ['a stage tool’s menu', 'popover stage-popover'],
   ['the cut’s section bar', 'section-bar'],
@@ -272,8 +292,8 @@ test.each([
 test('a phone leaves the Linked MRI stop out, as its scan opens over the page', async () => {
   await page.viewport(390, 800);
   start();
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 13');
-  for (let i = 1; i < 13; i++) next().click();
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 14');
+  for (let i = 1; i < 14; i++) next().click();
   expect(mriOpens).toEqual([]);
 });
 
@@ -299,10 +319,31 @@ test('the brain stop’s card sits in the stage’s dark space, in a band the an
 });
 
 test('the panel tabs’ cards sit in the stage’s dark space, off the panel they open', async () => {
+  // The stage lies right of the tabs, as the panel does beside it: a card driver.js puts beside a tab
+  // starts over the panel.
+  Object.assign(document.querySelector<HTMLElement>('#viewport canvas')!.style, {
+    marginLeft: '400px',
+    width: '600px',
+  });
   start();
   while (title() !== 'Functions') next().click();
   const stage = document.querySelector('#viewport canvas')!.getBoundingClientRect();
-  for (const stop of ['Functions', 'Deficits', 'Circuits', 'Tracts']) {
+  // Beside the docked MRI the card sits over the dock, inside the stage, and the anatomy above it.
+  for (const stop of ['Functions', 'Deficits']) {
+    expect(title()).toBe(stop);
+    const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
+    await expect
+      .poll(() => Math.round(card().getBoundingClientRect().bottom), { timeout: 2000 })
+      .toBe(Math.round(dock.top - 8));
+    const box = card().getBoundingClientRect();
+    expect(Math.round(box.left)).toBeGreaterThanOrEqual(Math.round(stage.left + 8));
+    expect(Math.round(box.right)).toBeLessThanOrEqual(Math.round(stage.right - 8));
+    await expect
+      .poll(() => reserved.at(-1))
+      .toEqual({ right: 0, bottom: Math.round(card().offsetHeight) + 16 });
+    next().click();
+  }
+  for (const stop of ['Circuits', 'Tracts']) {
     expect(title()).toBe(stop);
     await expect
       .poll(() => Math.round(card().getBoundingClientRect().right), { timeout: 2000 })
@@ -391,7 +432,7 @@ test('the first launch offers the tour once, and only to a page opened plainly',
 test('a target the layout hides is left out of the stops and the count', () => {
   document.querySelector<HTMLElement>('.orientation-gizmo')!.style.display = 'none';
   start();
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 13');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 14');
 });
 
 test('a target re-rendered after the tour starts is still the one highlighted', () => {

@@ -536,7 +536,7 @@ describe("a function's Linked MRI", () => {
     await scene.excursions.openFunction('language');
     scene.engine.sections.setCrosshair([1, 2, 3]);
     const strongest = domainAreas(scene.domains, 'language')[0]!.region;
-    await scene.excursions.openFunctionMri({ instant: true });
+    await scene.excursions.openFunctionMri('language', { instant: true });
     assert.deepEqual(scene.engine.sections.state.crosshair, scene.engine.model.anchorOf(strongest));
     assert.deepEqual(scene.mri.show.mock.calls.at(-1), [{ instant: true }]);
     const timeline = scene.calls();
@@ -547,7 +547,7 @@ describe("a function's Linked MRI", () => {
     const scene = createScene();
     await scene.excursions.openFunction(ALL_DOMAINS);
     scene.engine.sections.setCrosshair([1, 2, 3]);
-    await scene.excursions.openFunctionMri({ instant: false });
+    await scene.excursions.openFunctionMri(ALL_DOMAINS, { instant: false });
     assert.deepEqual(scene.engine.sections.state.crosshair, [1, 2, 3]);
     assert.deepEqual(scene.mri.show.mock.calls.at(-1), [{ instant: false }]);
   });
@@ -564,7 +564,7 @@ describe("a deficit's Linked MRI", () => {
         [...scene.clinical.paint(DEFICIT, finding).paint.colors.keys()][0]!,
         detail,
       )[0]!;
-    await scene.excursions.openDeficitMri({ instant: true });
+    await scene.excursions.openDeficitMri(DEFICIT, null, { instant: true });
     assert.deepEqual(
       scene.engine.sections.state.crosshair,
       scene.engine.model.anchorOf(first(null)),
@@ -573,13 +573,12 @@ describe("a deficit's Linked MRI", () => {
 
     const findings = scene.clinical.paint(DEFICIT).findings;
     const last = findings.at(-1)!.association.id;
-    scene.session.setFinding(last);
     assert.notDeepEqual(
       first(last),
       first(null),
       'the fixture picks a finding citing another region',
     );
-    await scene.excursions.openDeficitMri({ instant: false });
+    await scene.excursions.openDeficitMri(DEFICIT, last, { instant: false });
     assert.deepEqual(
       scene.engine.sections.state.crosshair,
       scene.engine.model.anchorOf(first(last)),

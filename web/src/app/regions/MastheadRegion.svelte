@@ -100,6 +100,10 @@
           world!.anatomy.selectRegion(region);
           return world!.excursions.openLinkedMri({ atRegion: true, instant: true });
         },
+        openPaint: (paint) =>
+          'function' in paint
+            ? world!.excursions.openFunctionMri(paint.function, { instant: true })
+            : world!.excursions.openDeficitMri(paint.deficit, null, { instant: true }),
         close: () => app.ports.closeMpr(),
       },
     });

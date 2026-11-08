@@ -215,8 +215,12 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
      */
     openFunction,
 
-    /** The Linked MRI at the function's strongest area, its paint over the scan; `instant` for a key press. */
-    openMri: (options: { instant: boolean }) => excursions.openFunctionMri(options),
+    /** The Linked MRI at the open function's strongest area, its paint over the scan; `instant` for a key press. */
+    openMri(options: { instant: boolean }) {
+      const id = selected();
+      if (!id) throw new Error('No function is open to show in the Linked MRI.');
+      return excursions.openFunctionMri(id, options);
+    },
 
     /** An area the profile names: drawn, selected and framed; its name then takes focus. */
     async openArea(region: string): Promise<void> {
