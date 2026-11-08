@@ -1,9 +1,9 @@
 /**
- * Where readers' feedback goes. Planum is a static site, so a form relay (FormSubmit) mails each
- * message on; the first one sent asks the owner, by email, to activate the form once.
+ * Where readers' feedback goes. Planum is a static site, so a Cloudflare Worker of its own
+ * (workers/feedback) mails each message on to this address.
  */
 export const FEEDBACK_ADDRESS = 'joshua.duquette.1@ulaval.ca';
-const RELAY = `https://formsubmit.co/ajax/${FEEDBACK_ADDRESS}`;
+const RELAY = 'https://feedback.planumatlas.com';
 
 export interface Feedback {
   name: string;
@@ -12,15 +12,12 @@ export interface Feedback {
   view: string;
 }
 
-/** Mails the feedback on; rejects with the relay's own reason when it is not accepted. */
-export async function sendFeedback(feedback: Feedback, subject: string): Promise<void> {
+/** Mails the feedback on; rejects when the Worker does not accept it. */
+export async function sendFeedback(feedback: Feedback): Promise<void> {
   const response = await fetch(RELAY, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ ...feedback, _subject: subject, _template: 'table' }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(feedback),
   });
-  const reply = (await response.json()) as { success?: string | boolean; message?: string };
-  if (!response.ok || String(reply.success) !== 'true') {
-    throw new Error(`Feedback not accepted (${response.status}): ${reply.message ?? 'no reason'}`);
-  }
+  if (!response.ok) throw new Error(`Feedback not accepted (${response.status})`);
 }

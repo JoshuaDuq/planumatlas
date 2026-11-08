@@ -74,7 +74,7 @@ describe('feedback', () => {
   test('sends a name and the feedback, with the view on screen, from inside Planum', async () => {
     const fetch = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify({ success: 'true' }), { status: 200 }));
+      .mockResolvedValue(new Response(null, { status: 204 }));
     await shell.open();
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     history.replaceState(null, '', '#atlas=hcp-mmp&lang=en');
@@ -91,7 +91,7 @@ describe('feedback', () => {
     expect(page.getByRole('textbox', { name: 'Your feedback' }).elements()).toHaveLength(0);
     expect(fetch).toHaveBeenCalledOnce();
     const [url, init] = fetch.mock.calls[0]!;
-    expect(url).toBe('https://formsubmit.co/ajax/joshua.duquette.1@ulaval.ca');
+    expect(url).toBe('https://feedback.planumatlas.com');
     expect(init!.method).toBe('POST');
     const sent = JSON.parse(init!.body as string);
     expect(sent).toMatchObject({ name: 'Ada', message: 'The cut is lovely.' });
@@ -100,11 +100,7 @@ describe('feedback', () => {
 
   test('says when it could not send, and offers the address to write to instead', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ success: 'false', message: 'needs activation' }), {
-        status: 200,
-      }),
-    );
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 400 }));
     await shell.open();
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     await userEvent.fill(page.getByRole('textbox', { name: 'Your feedback' }), 'Hello');
@@ -123,10 +119,7 @@ describe('feedback', () => {
     await shell.open();
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     await userEvent.click(page.getByRole('button', { name: 'Send' }));
-    expect(fetch).not.toHaveBeenCalledWith(
-      expect.stringContaining('formsubmit'),
-      expect.anything(),
-    );
+    expect(fetch).not.toHaveBeenCalledWith('https://feedback.planumatlas.com', expect.anything());
   });
 
   test('is offered before the engine too, in the reader’s language', async () => {

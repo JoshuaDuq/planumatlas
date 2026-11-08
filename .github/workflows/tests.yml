@@ -25,6 +25,7 @@ jobs:
       python: ${{ steps.base.outputs.full == 'true' || steps.filter.outputs.python == 'true' }}
       validate: ${{ steps.base.outputs.full == 'true' || steps.filter.outputs.validate == 'true' }}
       web: ${{ steps.base.outputs.full == 'true' || steps.filter.outputs.web == 'true' }}
+      feedback: ${{ steps.base.outputs.full == 'true' || steps.filter.outputs.feedback == 'true' }}
     steps:
       # Commits and trees only: enough to list changed paths without the 400 MB of assets.
       - name: Checkout repository history
@@ -79,6 +80,9 @@ jobs:
               - public/**
               - scripts/published-version.mjs
               - .github/scripts/**
+              - .github/workflows/tests.yml
+            feedback:
+              - workers/feedback/**
               - .github/workflows/tests.yml
 
   python:
@@ -174,6 +178,26 @@ jobs:
         run: |
           node .github/scripts/ui-bundle-budget.mjs | tee ui-budget.log
           cat ui-budget.log >> "$GITHUB_STEP_SUMMARY"
+
+  # The feedback Worker (workers/feedback), with Node's own test runner: it has no dependencies.
+  feedback-worker:
+    needs: changes
+    if: needs.changes.outputs.feedback == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: workers/feedback
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Run the Worker tests
+        run: node --test 'workers/feedback/**/*.test.ts'
 
   # In Playwright's image (Playwright's CI guide): Chromium, its system libraries and Xvfb are
   # already there, so nothing is installed per run. Installing them took 25 s, or 6 to 11 min when

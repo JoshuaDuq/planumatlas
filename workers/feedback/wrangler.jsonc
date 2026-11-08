@@ -1,0 +1,18 @@
+// Deploy from this folder: npx wrangler@4.158.0 deploy
+{
+  "name": "planum-feedback",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "routes": [{ "pattern": "feedback.planumatlas.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  // Locked to one verified Email Routing address, which is free and cannot mail anyone else.
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "joshua.duquette.1@ulaval.ca",
+      "allowed_sender_addresses": ["feedback@planumatlas.com"],
+    },
+  ],
+}

@@ -37,10 +37,11 @@
     if (draft.status === 'sending') return;
     draft.status = 'sending';
     try {
-      await sendFeedback(
-        { name: draft.name.trim(), message: draft.message.trim(), view: location.href },
-        copy.feedbackSubject,
-      );
+      await sendFeedback({
+        name: draft.name.trim(),
+        message: draft.message.trim(),
+        view: location.href,
+      });
       draft.message = '';
       draft.status = 'sent';
       announce(copy.feedbackSent);
