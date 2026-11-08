@@ -75,7 +75,8 @@ export function visibilityOf(region: Region, settings: DisplaySettings): Visibil
   const hidden = (reason: HiddenReason): Visibility => ({ visible: false, reason });
   if (settings.surfaceColor === 'mri' && region.mri_registered === false) return hidden('no-mri');
   // A region can be drawn as geometry, as a cut label, or both. A structure the
-  // inactive detail level owns is still on screen while the cut is painting it.
+  // inactive detail level owns, or a parcel of a cut atlas the surface is not
+  // showing, is still on screen while the cut is painting it.
   const onCut = region.atlas === settings.cutAtlas && settings.cutActive;
   if (isTissue(region)) {
     // Measured in its source grid, but smaller than any block its cut samples.
@@ -85,7 +86,7 @@ export function visibilityOf(region: Region, settings: DisplaySettings): Visibil
     if (!settings.cutActive) return hidden('no-cut');
   } else if (isStructure(region)) {
     if (!belongsToDetail(region, settings.detail) && !onCut) return hidden('other-detail');
-  } else if (isSurface(region) && region.atlas !== settings.atlas) {
+  } else if (isSurface(region) && region.atlas !== settings.atlas && !onCut) {
     return hidden('other-atlas');
   }
   if (!internalSystemAllows(region, settings)) return hidden('other-system');

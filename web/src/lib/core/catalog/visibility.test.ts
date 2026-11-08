@@ -61,6 +61,15 @@ test('cortex belonging to a different atlas is hidden', () => {
   });
 });
 
+test('cortex of the cut atlas is on screen while the cut paints it, whatever the surface atlas', () => {
+  const parcel = region({ atlas: 'b' });
+  assert.equal(visibilityOf(parcel, settings({ cutAtlas: 'b', cutActive: true })).visible, true);
+  assert.equal(
+    visibilityOf(parcel, settings({ cutAtlas: 'b', cutActive: false })).reason,
+    'other-atlas',
+  );
+});
+
 test('the surface atlas never hides a structure, but the detail level does', () => {
   const stem = region({ atlas: 'aseg', hemisphere: 'midline', kind: 'structure' });
   assert.equal(visibilityOf(stem, settings({ atlas: 'b' })).visible, true);
