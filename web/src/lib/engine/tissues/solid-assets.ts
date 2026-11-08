@@ -140,8 +140,9 @@ function envelopeSurface(
   );
   if (!mesh) throw new Error(`Missing the ${hemisphere} ${boundary} envelope.`);
   mesh.updateWorldMatrix(true, false);
-  const baked = mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);
-  return { position: baked.getAttribute('position').array, index: baked.getIndex()!.array };
+  // Only the positions are read, so the normals are neither copied nor transformed.
+  const position = mesh.geometry.getAttribute('position').clone().applyMatrix4(mesh.matrixWorld);
+  return { position: position.array, index: mesh.geometry.getIndex()!.array };
 }
 
 /**

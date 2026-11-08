@@ -264,13 +264,37 @@ function copyGeometry(geometry: BufferGeometry): GeometryCopy {
   };
 }
 
+/** Workers that share each BVH job; feathers have one more of their own. */
+const BVH_WORKERS = 2;
+
+/** Consecutive runs of `geometries` with about equal triangle counts: at most `parts`, none empty. */
+function splitByTriangles(
+  geometries: readonly BufferGeometry[],
+  parts: number,
+): BufferGeometry[][] {
+  const size = (geometry: BufferGeometry) =>
+    (geometry.getIndex() ?? geometry.getAttribute('position')).count;
+  const total = geometries.reduce((sum, geometry) => sum + size(geometry), 0);
+  const runs: BufferGeometry[][] = [[]];
+  let done = 0;
+  for (const geometry of geometries) {
+    if (runs.at(-1)!.length && done >= (total * runs.length) / parts) runs.push([]);
+    runs.at(-1)!.push(geometry);
+    done += size(geometry);
+  }
+  return runs;
+}
+
 /**
- * The model's BVHs and border feathers, computed in a worker so that loading a layer, the envelopes
- * or a cut's wedges keeps every frame short. Where there is no Worker (Node), the same functions
- * run on this thread: what changes is where the work runs, never its result.
+ * The model's BVHs and border feathers, computed in workers so that loading a layer, the envelopes
+ * or a cut's wedges keeps every frame short. A layer's feathers and its detail level's BVHs run side
+ * by side, and the BVHs are split between workers; each tree depends on its geometry alone. Where
+ * there is no Worker (Node), the same functions run on this thread: what changes is where the work
+ * runs, never its result.
  */
 export class GeometryJobs {
-  private worker: Worker | null = null;
+  /** The feather worker, then the BVH workers. */
+  private workers: Worker[] | null = null;
   private failure: Error | null = null;
   private token = 0;
   private readonly pending = new Map<
@@ -282,8 +306,8 @@ export class GeometryJobs {
   async bvhs({ MeshBVH }: Bvh, geometries: readonly BufferGeometry[]): Promise<void> {
     const wanted = geometries.filter((geometry) => !geometry.boundsTree);
     if (!wanted.length) return;
-    const worker = this.ensureWorker();
-    if (!worker) {
+    const workers = this.ensureWorkers();
+    if (!workers) {
       for (const geometry of wanted)
         geometry.boundsTree = new MeshBVH(geometry, { indirect: true });
       return;
@@ -293,10 +317,17 @@ export class GeometryJobs {
       const attribute = geometry.getAttribute('position') as BufferAttribute;
       return { attribute, version: attribute.version };
     });
-    const reply = await this.run(worker, 'bvh', wanted);
-    if (!('bvhs' in reply))
-      throw new Error('The geometry worker answered a BVH job with feathers.');
-    reply.bvhs.forEach((data, at) => {
+    const replies = await Promise.all(
+      splitByTriangles(wanted, BVH_WORKERS).map((part, at) =>
+        this.run(workers[1 + at]!, 'bvh', part),
+      ),
+    );
+    const trees = replies.flatMap((reply) => {
+      if (!('bvhs' in reply))
+        throw new Error('The geometry worker answered a BVH job with feathers.');
+      return reply.bvhs;
+    });
+    trees.forEach((data, at) => {
       const geometry = wanted[at]!;
       const { attribute, version } = positions[at]!;
       const moved =
@@ -312,10 +343,10 @@ export class GeometryJobs {
 
   /** `featherBorders(meshes)`, off this thread. */
   async feather(meshes: readonly Mesh[]): Promise<void> {
-    const worker = this.ensureWorker();
-    if (!worker) return featherBorders(meshes);
+    const workers = this.ensureWorkers();
+    if (!workers) return featherBorders(meshes);
     const reply = await this.run(
-      worker,
+      workers[0]!,
       'feather',
       meshes.map((mesh) => mesh.geometry),
     );
@@ -326,8 +357,8 @@ export class GeometryJobs {
   }
 
   dispose(): void {
-    this.worker?.terminate();
-    this.worker = null;
+    for (const worker of this.workers ?? []) worker.terminate();
+    this.workers = null;
     this.failure = new Error('BrainAtlas was disposed during geometry work.');
     for (const pending of this.pending.values()) pending.reject(this.failure);
     this.pending.clear();
@@ -349,27 +380,32 @@ export class GeometryJobs {
     });
   }
 
-  /** The worker, or null where the platform has none; one that failed fails every later job. */
-  private ensureWorker(): Worker | null {
+  /** The workers, or null where the platform has none; one that failed fails every later job. */
+  private ensureWorkers(): Worker[] | null {
     if (this.failure) throw this.failure;
-    if (this.worker) return this.worker;
+    if (this.workers) return this.workers;
     if (typeof Worker === 'undefined') return null;
-    const worker = new Worker(new URL('./geometry-worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = ({ data }: MessageEvent<GeometryReply>) => {
-      const pending = this.pending.get(data.token)!;
-      this.pending.delete(data.token);
-      if ('error' in data) pending.reject(new Error(data.error));
-      else pending.resolve(data);
-    };
-    worker.onerror = (event) => {
-      this.failure = new Error(event.message || 'Geometry work failed', { cause: event });
-      worker.terminate();
-      this.worker = null;
-      for (const pending of this.pending.values()) pending.reject(this.failure);
-      this.pending.clear();
-    };
-    this.worker = worker;
-    return worker;
+    const workers = Array.from(
+      { length: 1 + BVH_WORKERS },
+      () => new Worker(new URL('./geometry-worker.ts', import.meta.url), { type: 'module' }),
+    );
+    for (const worker of workers) {
+      worker.onmessage = ({ data }: MessageEvent<GeometryReply>) => {
+        const pending = this.pending.get(data.token)!;
+        this.pending.delete(data.token);
+        if ('error' in data) pending.reject(new Error(data.error));
+        else pending.resolve(data);
+      };
+      worker.onerror = (event) => {
+        this.failure = new Error(event.message || 'Geometry work failed', { cause: event });
+        for (const each of workers) each.terminate();
+        this.workers = null;
+        for (const pending of this.pending.values()) pending.reject(this.failure);
+        this.pending.clear();
+      };
+    }
+    this.workers = workers;
+    return workers;
   }
 }
 
