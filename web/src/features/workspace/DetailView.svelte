@@ -182,6 +182,7 @@
         {stimulation}
         {ftract}
         strokeCases={world.strokeCases}
+        userMap={world.userMap}
         territories={manifest.arterial_territories ?? null}
         cerebellarFunctions={manifest.cerebellar_functions ?? null}
         striatalNetworks={manifest.striatal_networks ?? null}

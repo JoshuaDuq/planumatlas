@@ -61,7 +61,11 @@ export interface MapSummary {
   /** What the header says the values are, when it says. */
   intent: number;
   description: string;
-  /** Share of this brain's cortical vertices the map reaches. */
+  /** 1 for a single map; a series' volumes along its fourth axis. */
+  volumes: number;
+  /** A series' spacing in seconds, when its header gives one. */
+  secondsPerVolume: number | null;
+  /** Share of this brain's cortical vertices the map reaches (in any volume, for a series). */
   cortexCovered: number;
 }
 

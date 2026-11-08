@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { test } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
-import { MAX_VOXELS, readNifti } from './nifti.ts';
+import { MAX_VALUES, MAX_VOXELS, readNifti } from './nifti.ts';
 
 const FIXTURES = 'web/src/lib/core/user-map/fixtures/';
 
@@ -33,22 +33,25 @@ function fixture(name: string, patch?: (view: DataView) => void): ArrayBuffer {
 const F32 = 2 ** -24;
 
 async function assertReadsAsNibabel(name: string, buffer = fixture(name)) {
-  const volume = await readNifti(buffer);
+  const image = await readNifti(buffer);
   const wanted = expected[name]!;
-  assert.deepEqual(volume.shape, wanted.shape);
-  assert.equal(volume.intent, wanted.intent);
-  assert.equal(volume.description, wanted.description);
+  assert.deepEqual(image.shape, wanted.shape);
+  assert.equal(image.intent, wanted.intent);
+  assert.equal(image.description, wanted.description);
+  assert.equal(image.secondsPerVolume, null);
   assert.deepEqual(
-    volume.voxelToWorld.map((row) => row.length),
+    image.voxelToWorld.map((row) => row.length),
     [4, 4, 4, 4],
   );
-  volume.voxelToWorld.flat().forEach((value, i) => {
+  image.voxelToWorld.flat().forEach((value, i) => {
     const target = wanted.affine.flat()[i]!;
     assert.ok(Math.abs(value - target) <= F32 * Math.max(1, Math.abs(target)), `affine ${i}`);
   });
-  assert.equal(volume.data.length, wanted.data.length);
+  assert.equal(image.volumes.length, 1);
+  const data = image.volumes[0]!;
+  assert.equal(data.length, wanted.data.length);
   wanted.data.forEach((target, i) => {
-    const value = volume.data[i]!;
+    const value = data[i]!;
     if (typeof target === 'number') {
       assert.ok(
         Math.abs(value - target) <= F32 * Math.abs(target),
@@ -91,7 +94,7 @@ test('the qform takes the fixes nibabel makes on load, and its quaternion thresh
   await assertReadsAsNibabel('qform-fixups.nii');
 });
 
-test('a 4-D file holding one volume reads as 3-D; more volumes are refused with their count', async () => {
+test('a 4-D file holding one volume reads as 3-D; axes past the fourth are refused', async () => {
   const dims = (...dim: number[]) =>
     fixture('float32-sform.nii', (view) => {
       dim.forEach((n, i) => view.setInt16(40 + 2 * i, n, true));
@@ -99,20 +102,65 @@ test('a 4-D file holding one volume reads as 3-D; more volumes are refused with 
   await assertReadsAsNibabel('float32-sform.nii', dims(4, 3, 4, 2, 1));
   // nibabel ignores dims past dim[0], so a 3-D file may leave them 0 or stale.
   await assertReadsAsNibabel('float32-sform.nii', dims(3, 3, 4, 2, 0, 5));
-  await assert.rejects(readNifti(dims(4, 3, 4, 2, 3)), /holds 3 volumes/);
-  await assert.rejects(readNifti(dims(5, 3, 4, 2, 1, 2)), /holds 2 volumes/);
-  await assert.rejects(readNifti(dims(2, 3, 4)), /not a 3-D volume/);
+  await assert.rejects(readNifti(dims(4, 3, 4, 2, 3)), /truncated/);
+  await assert.rejects(readNifti(dims(5, 3, 4, 2, 1, 2)), /dimensions are 3 × 4 × 2 × 1 × 2/);
+  await assert.rejects(readNifti(dims(2, 3, 4)), /neither a 3-D volume nor a series/);
   await assert.rejects(readNifti(dims(3, 3, 0, 2)), /empty axis/);
 });
 
-test('a grid over MAX_VOXELS is refused by its size; one at the limit is not', async () => {
-  const grid = (z: number) =>
+/** float32-sform.nii as a series of `count` volumes, volume n holding its values plus n. */
+function series(count: number, units: number, spacing: number): ArrayBuffer {
+  const file = fixture('float32-sform.nii');
+  const view = new DataView(file);
+  const offset = view.getFloat32(108, true);
+  const voxels = (file.byteLength - offset) / 4;
+  const out = new ArrayBuffer(offset + 4 * voxels * count);
+  new Uint8Array(out).set(new Uint8Array(file, 0, offset));
+  const target = new DataView(out);
+  for (let n = 0; n < count; n++) {
+    for (let i = 0; i < voxels; i++) {
+      target.setFloat32(
+        offset + 4 * (n * voxels + i),
+        view.getFloat32(offset + 4 * i, true) + n,
+        true,
+      );
+    }
+  }
+  target.setInt16(40, 4, true);
+  target.setInt16(48, count, true);
+  target.setUint8(123, units);
+  target.setFloat32(92, spacing, true);
+  return out;
+}
+
+test('a series reads each volume in the file’s order, and its spacing in seconds from the time unit', async () => {
+  const base = (await readNifti(fixture('float32-sform.nii'))).volumes[0]!;
+  // NIFTI_UNITS_MM | NIFTI_UNITS_SEC: fMRIPrep's BOLD header.
+  const image = await readNifti(series(3, 2 | 8, 2));
+  assert.equal(image.volumes.length, 3);
+  image.volumes.forEach((volume, n) => {
+    assert.deepEqual(
+      Array.from(volume, (value) => (Number.isNaN(value) ? null : value)),
+      Array.from(base, (value) => (Number.isNaN(value) ? null : Math.fround(value + n))),
+    );
+  });
+  assert.equal(image.secondsPerVolume, 2);
+  assert.equal((await readNifti(series(3, 2 | 16, 720))).secondsPerVolume, 0.72);
+  // nibabel's own header and concat_imgs leave the unit unknown: no time is guessed.
+  assert.equal((await readNifti(series(3, 2, 1))).secondsPerVolume, null);
+  assert.equal((await readNifti(series(3, 2 | 8, 0))).secondsPerVolume, null);
+});
+
+test('a volume over MAX_VOXELS, or a series over MAX_VALUES, is refused by its size', async () => {
+  const grid = (z: number, volumes = 1) =>
     fixture('float32-sform.nii', (view) => {
-      [512, 512, z].forEach((n, i) => view.setInt16(42 + 2 * i, n, true));
+      [4, 512, 512, z, volumes].forEach((n, i) => view.setInt16(40 + 2 * i, n, true));
     });
   assert.equal(512 * 512 * 128, MAX_VOXELS);
+  assert.equal(2 * MAX_VOXELS, MAX_VALUES);
   await assert.rejects(readNifti(grid(129)), /512 × 512 × 129 voxels, over the limit/);
-  await assert.rejects(readNifti(grid(128)), /truncated/);
+  await assert.rejects(readNifti(grid(128, 3)), /holds 3 volumes; up to 2 of its size/);
+  await assert.rejects(readNifti(grid(128, 2)), /truncated/);
 });
 
 test('files that are not single-file NIfTI-1 are refused, each for its reason', async () => {

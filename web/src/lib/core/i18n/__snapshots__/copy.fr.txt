@@ -1489,6 +1489,55 @@
    "[\"Alpha\"] → \"couvre Alpha du cortex\"",
    "[\"\"] → \"couvre  du cortex\""
   ],
+  "series": [
+   "[\"Alpha\",\"\"] → \"Alpha volumes\"",
+   "[\"\",\"Alpha\"] → \" volumes, un toutes les Alpha\""
+  ],
+  "volume": "Volume",
+  "volumeOf": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha sur  · Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" sur Alpha\""
+  ],
+  "volumeHint": "Chaque volume est affiché au même seuil et à la même échelle de couleurs. Les amas sont listés pendant la pause.",
+  "play": "Lire",
+  "pause": "Pause",
+  "keyVolume": [
+   "[\"Alpha\",\"\"] → \"Alpha · \"",
+   "[\"\",\"Alpha\"] → \" · Alpha\""
+  ],
+  "captionVolume": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"volume Alpha sur  à Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"volume  sur Alpha\""
+  ],
+  "course": "Carte dans le temps",
+  "courseIntro": [
+   "[\"Alpha\"] → \"La moyenne de Alpha dans cette région à chaque volume, avant le seuil. Choisissez un point pour afficher ce volume.\"",
+   "[\"\"] → \"La moyenne de  dans cette région à chaque volume, avant le seuil. Choisissez un point pour afficher ce volume.\""
+  ],
+  "courseCounts": [
+   "[\"Alpha\",\"\"] → \"sur les Alpha de ses  millimètres entiers où la carte a une valeur\"",
+   "[\"\",\"Alpha\"] → \"sur les  de ses Alpha millimètres entiers où la carte a une valeur\""
+  ],
+  "courseLoading": "Lecture des volumes de la région…",
+  "courseFailed": "Le décours de la région n’a pas pu être lu.",
+  "courseNone": "Cette région n’a pas de solide sur la scène où lire la carte.",
+  "courseEmpty": "La carte n’a aucune valeur dans cette région.",
+  "courseLabel": [
+   "[\"Alpha\",\"\"] → \"Alpha dans  au fil du temps\"",
+   "[\"\",\"Alpha\"] → \" dans Alpha au fil du temps\""
+  ],
+  "courseValue": [
+   "[\"Alpha\",\"\"] → \"Alpha : \"",
+   "[\"\",\"Alpha\"] → \" : Alpha\""
+  ],
+  "courseNoValue": "aucune valeur",
+  "courseTime": "Temps",
+  "courseValues": "Valeurs",
+  "courseMean": [
+   "[\"Alpha\"] → \"Alpha moyen\"",
+   "[\"\"] → \" moyenne\""
+  ],
+  "courseValued": "Millimètres avec une valeur",
   "title": "Titre",
   "titleHint": "Nomme la carte dans la légende et l’image enregistrée.",
   "statistic": "Statistique",
@@ -1573,22 +1622,23 @@
    "notNifti": "Ce fichier n’est pas une image NIfTI.",
    "gzip": "Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.",
    "rank": [
-    "[0] → \"Ce fichier n’est pas un volume 3D : il a 0 dimension.\"",
-    "[1] → \"Ce fichier n’est pas un volume 3D : il a 1 dimension.\"",
-    "[2] → \"Ce fichier n’est pas un volume 3D : il a 2 dimensions.\"",
-    "[183] → \"Ce fichier n’est pas un volume 3D : il a 183 dimensions.\"",
-    "[12345] → \"Ce fichier n’est pas un volume 3D : il a 12345 dimensions.\""
+    "[0] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 0 dimension.\"",
+    "[1] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 1 dimension.\"",
+    "[2] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 2 dimensions.\"",
+    "[183] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 183 dimensions.\"",
+    "[12345] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 12345 dimensions.\""
    ],
    "emptyAxis": [
     "[\"Alpha\"] → \"Les dimensions Alpha de ce fichier comprennent un axe vide.\"",
     "[\"\"] → \"Les dimensions  de ce fichier comprennent un axe vide.\""
    ],
-   "volumes": [
-    "[0] → \"Ce fichier contient 0 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
-    "[1] → \"Ce fichier contient 1 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
-    "[2] → \"Ce fichier contient 2 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
-    "[183] → \"Ce fichier contient 183 volumes ; enregistrez celui à afficher dans son propre fichier.\"",
-    "[12345] → \"Ce fichier contient 12<NNBSP>345 volumes ; enregistrez celui à afficher dans son propre fichier.\""
+   "dimensions": [
+    "[\"Alpha\"] → \"Les dimensions de ce fichier sont Alpha ; seule une série de volumes selon la quatrième peut être affichée.\"",
+    "[\"\"] → \"Les dimensions de ce fichier sont  ; seule une série de volumes selon la quatrième peut être affichée.\""
+   ],
+   "tooManyVolumes": [
+    "[\"Alpha\",\"\"] → \"Ce fichier contient Alpha volumes ; jusqu’à  de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\"",
+    "[\"\",\"Alpha\"] → \"Ce fichier contient  volumes ; jusqu’à Alpha de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\""
    ],
    "tooLarge": [
     "[\"Alpha\",1] → \"Ce volume compte Alpha voxels, au-delà de la limite de 1.\"",

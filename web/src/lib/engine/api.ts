@@ -13,6 +13,7 @@
  */
 import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
+import type { MapCourse } from '../core/user-map/course.ts';
 import type { CortexSurface, MapDisplay, MapSummary } from '../core/user-map/display.ts';
 import type { CabNpPartition } from '../core/catalog/networks.ts';
 import type { FunctionalRegions } from '../core/catalog/functional-regions.ts';
@@ -761,21 +762,27 @@ export interface EngineUserMap {
   /** The anatomy publishes template registrations; without them `load` rejects. */
   readonly available: boolean;
   /**
-   * Read a NIfTI map given in a published template space (or `unstated`) and carry it onto this brain,
-   * replacing any map; nothing is drawn until `show`. Rejects with why it cannot be read or placed, or
-   * with an `AbortError` when a newer map was asked for first.
+   * Read a NIfTI map given in a published template space (or `unstated`) and carry its volume `volume`
+   * onto this brain, replacing any map; nothing is drawn until `show`. Rejects with why it cannot be
+   * read or placed, or with an `AbortError` when a newer map was asked for first.
    */
-  load(file: ArrayBuffer, space: string): Promise<MapSummary>;
+  load(file: ArrayBuffer, space: string, volume: number): Promise<MapSummary>;
   /**
-   * The loaded map's clusters and peaks beyond `threshold`, in its own template space, those smaller
-   * than `minVoxels` left out (nilearn's `cluster_threshold`).
+   * A volume's clusters and peaks beyond `threshold`, in its own template space, those smaller than
+   * `minVoxels` left out (nilearn's `cluster_threshold`).
    */
-  clusters(threshold: number, minVoxels: number): Promise<Cluster[]>;
+  clusters(threshold: number, minVoxels: number, volume: number): Promise<Cluster[]>;
   /**
-   * Draw the map without its clusters smaller than `minVoxels` beyond ±threshold; below two voxels, all
-   * of it. Rejects with an `AbortError` when a newer extent or map was asked for first.
+   * Draw a volume of the map without its clusters smaller than `minVoxels` beyond ±threshold; below two
+   * voxels, all of it. Rejects with an `AbortError` when a newer extent or map was asked for first.
    */
-  extent(threshold: number, minVoxels: number): Promise<void>;
+  extent(threshold: number, minVoxels: number, volume: number): Promise<void>;
+  /**
+   * A region's mean in each volume of the loaded map, over its whole millimetres; null for a region
+   * with no solid to read (neither a structure nor a parcel of the shown cortex). Rejects with an
+   * `AbortError` when a newer map was opened first.
+   */
+  course(region: string): Promise<MapCourse | null>;
   /**
    * Draw the cortex on this brain's pial, mid-thickness or white surface while the map is drawn and no
    * cut is open: the same vertices and values, the sulci opened as far as the surface opens them.

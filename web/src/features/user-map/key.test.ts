@@ -19,13 +19,25 @@ function store({
   statistic = 'z' as Statistic | null,
   surface = 'pial',
   minVoxels = 0,
+  volumes = 1,
+  secondsPerVolume = null as number | null,
+  volume = 0,
 } = {}) {
   return {
     state: {
       status: 'ready',
       name: 'zstat1.nii.gz',
-      summary: { shape: [2, 2, 2], voxelMm: [2, 2, 2], range, binary: false, cortexCovered: 1 },
+      summary: {
+        shape: [2, 2, 2],
+        voxelMm: [2, 2, 2],
+        range,
+        binary: false,
+        volumes,
+        secondsPerVolume,
+        cortexCovered: 1,
+      },
     },
+    volume,
     settings,
     space,
     drawn,
@@ -115,4 +127,16 @@ test('the tract reference shown alone carries no map line', () => {
     overlay: mapCaption(store(), spaces, 'en'),
   });
   assert.equal(lines.length, 1);
+});
+
+test('a series names its volume by its time when the header gives one, by its place when not', () => {
+  const timed = store({ volumes: 20, secondsPerVolume: 1.5, volume: 4 });
+  assert.equal(mapKey(timed, 'en')!.title, 'zstat1 · 6\u202fs');
+  assert.equal(mapKey(timed, 'fr')!.title, 'zstat1 · 6\u202fs');
+  const untimed = store({ volumes: 20, volume: 4 });
+  assert.equal(mapKey(untimed, 'en')!.title, 'zstat1 · 5/20');
+  const details = (map: UserMapStore) => mapCaption(map, spaces, 'en')!.details;
+  assert.ok(details(timed).includes('volume 5 of 20 at 6\u202fs'));
+  assert.ok(details(untimed).includes('volume 5 of 20'));
+  assert.ok(!details(store()).some((detail) => detail.startsWith('volume')));
 });

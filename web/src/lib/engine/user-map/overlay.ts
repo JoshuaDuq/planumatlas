@@ -1,10 +1,10 @@
-import { Data3DTexture, FloatType, Matrix4, NearestFilter, RedFormat, Vector3 } from 'three';
+import { Data3DTexture, FloatType, Matrix4, NearestFilter, RGFormat, Vector3 } from 'three';
 import type { IUniform, Material, WebGLProgramParametersWithUniforms, WebGLRenderer } from 'three';
 import { NEGATIVE_RAMP, POSITIVE_RAMP } from '../../core/user-map/display.ts';
 import type { MapDisplay } from '../../core/user-map/display.ts';
 import type { Grid } from '../../core/user-map/sampling.ts';
 
-/** Stored where the map has no value: GLSL cannot be trusted to keep a NaN through a fast-math compile. */
+/** Where the map has no value: GLSL cannot be trusted to keep a NaN through a fast-math compile. */
 export const NO_DATA = -3e38;
 
 /** The reader's map, shared by every cortical material and every cut face. */
@@ -45,19 +45,18 @@ export function setUserMapDisplay(uniforms: UserMapUniforms, display: MapDisplay
   uniforms.userMapOpacity.value = display.opacity;
 }
 
-/** The map on a 1 mm grid of this brain as an R32F texture, read with texelFetch. */
+/** The map's sum and share (`resample`) on a 1 mm grid of this brain as an RG32F texture, read with texelFetch. */
 export function setUserMapVolume(
   uniforms: UserMapUniforms,
   grid: Grid,
   values: Float32Array,
 ): void {
   const [nx, ny, nz] = grid.shape;
-  if (values.length !== nx * ny * nz) throw new Error('The map volume does not fill its grid.');
-  const data = Float32Array.from(values, (value) => (Number.isNaN(value) ? NO_DATA : value));
-  const texture = new Data3DTexture(data, nx, ny, nz);
-  texture.format = RedFormat;
+  if (values.length !== 2 * nx * ny * nz) throw new Error('The map volume does not fill its grid.');
+  const texture = new Data3DTexture(values, nx, ny, nz);
+  texture.format = RGFormat;
   texture.type = FloatType;
-  texture.internalFormat = 'R32F';
+  texture.internalFormat = 'RG32F';
   texture.minFilter = NearestFilter;
   texture.magFilter = NearestFilter;
   texture.unpackAlignment = 1;
@@ -103,7 +102,10 @@ vec4 userMapColour(float value) {
 }
 `;
 
-/** `userMapAt(world)`: the map trilinear between its voxel centres, or NO_DATA where a corner has none. */
+/**
+ * `userMapAt(world)`: sum and share trilinear between the voxel centres, their quotient where the share is
+ * at least half (`valueOf`), NO_DATA elsewhere.
+ */
 const USER_MAP_AT = `
 uniform highp sampler3D userMapVolume;
 uniform mat4 worldToUserMap;
@@ -115,20 +117,19 @@ float userMapAt(vec3 world) {
   }
   ivec3 base = min(ivec3(floor(voxel)), ivec3(userMapShape) - 2);
   vec3 f = voxel - vec3(base);
-  float c000 = texelFetch(userMapVolume, base, 0).r;
-  float c100 = texelFetch(userMapVolume, base + ivec3(1, 0, 0), 0).r;
-  float c010 = texelFetch(userMapVolume, base + ivec3(0, 1, 0), 0).r;
-  float c110 = texelFetch(userMapVolume, base + ivec3(1, 1, 0), 0).r;
-  float c001 = texelFetch(userMapVolume, base + ivec3(0, 0, 1), 0).r;
-  float c101 = texelFetch(userMapVolume, base + ivec3(1, 0, 1), 0).r;
-  float c011 = texelFetch(userMapVolume, base + ivec3(0, 1, 1), 0).r;
-  float c111 = texelFetch(userMapVolume, base + ivec3(1, 1, 1), 0).r;
-  float lowest = min(min(min(c000, c100), min(c010, c110)), min(min(c001, c101), min(c011, c111)));
-  if (lowest < ${NO_DATA.toExponential()} * 0.5) return ${NO_DATA.toExponential()};
-  return mix(
+  vec2 c000 = texelFetch(userMapVolume, base, 0).rg;
+  vec2 c100 = texelFetch(userMapVolume, base + ivec3(1, 0, 0), 0).rg;
+  vec2 c010 = texelFetch(userMapVolume, base + ivec3(0, 1, 0), 0).rg;
+  vec2 c110 = texelFetch(userMapVolume, base + ivec3(1, 1, 0), 0).rg;
+  vec2 c001 = texelFetch(userMapVolume, base + ivec3(0, 0, 1), 0).rg;
+  vec2 c101 = texelFetch(userMapVolume, base + ivec3(1, 0, 1), 0).rg;
+  vec2 c011 = texelFetch(userMapVolume, base + ivec3(0, 1, 1), 0).rg;
+  vec2 c111 = texelFetch(userMapVolume, base + ivec3(1, 1, 1), 0).rg;
+  vec2 m = mix(
     mix(mix(c000, c100, f.x), mix(c010, c110, f.x), f.y),
     mix(mix(c001, c101, f.x), mix(c011, c111, f.x), f.y),
     f.z);
+  return m.y >= 0.5 ? m.x / m.y : ${NO_DATA.toExponential()};
 }
 `;
 
@@ -168,7 +169,7 @@ export function addUserMapToCap(material: Material, uniforms: UserMapUniforms): 
       `,
     );
   };
-  material.customProgramCacheKey = () => `${key}-user-map-v3`;
+  material.customProgramCacheKey = () => `${key}-user-map-v4`;
 }
 
 /**
@@ -205,5 +206,5 @@ ${USER_MAP_COLOUR}${USER_MAP_AT}${shader.fragmentShader}`
       )
       .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
-  material.customProgramCacheKey = () => `${key}-user-map-surface-v3`;
+  material.customProgramCacheKey = () => `${key}-user-map-surface-v4`;
 }

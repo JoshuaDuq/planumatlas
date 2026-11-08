@@ -52,8 +52,10 @@
   import FtractSection from './FtractSection.svelte';
   import StrokeCasesSection from './StrokeCasesSection.svelte';
   import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
+  import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
   import SupplySection from './SupplySection.svelte';
   import CerebellarFunctionsSection from './CerebellarFunctionsSection.svelte';
+  import MapCourseSection from './MapCourseSection.svelte';
   import RegionFacts from './RegionFacts.svelte';
   import './inspector.css';
 
@@ -89,6 +91,8 @@
     ftract: StimulationFtract | null;
     /** The stroke cases on the stage and their cohort; none on an anatomy that publishes no cases. */
     strokeCases?: StrokeCasesStore | null;
+    /** The reader's own map, whose series has a course in the region. */
+    userMap?: UserMapStore | null;
     /** The manifest's arterial territories, for each region's typical supply. */
     territories?: ArterialTerritories | null;
     /** The manifest's functional cerebellar atlas, for each lobule's shares. */
@@ -137,6 +141,7 @@
     stimulation,
     ftract,
     strokeCases = null,
+    userMap = null,
     territories = null,
     cerebellarFunctions = null,
     striatalNetworks = null,
@@ -225,6 +230,9 @@
     {/if}
   {/if}
   {@render comparison?.()}
+  {#if userMap}
+    <MapCourseSection {region} {lang} map={userMap} label={catalog.label} />
+  {/if}
   <BoundarySection {region} {lang} certainty={boundaryCertainty} label={catalog.label} {onselect} />
   <AgreementSection
     {region}

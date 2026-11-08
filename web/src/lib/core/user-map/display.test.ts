@@ -17,6 +17,8 @@ const summary = (range: [number, number], binary = false): MapSummary => ({
   binary,
   intent: 0,
   description: '',
+  volumes: 1,
+  secondsPerVolume: null,
   cortexCovered: 1,
 });
 

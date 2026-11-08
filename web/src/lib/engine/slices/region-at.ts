@@ -24,23 +24,12 @@ const RAY = new Vector3(1, 0.37, 0.21).normalize();
 export function regionAt(solids: readonly Mesh[], point: Ras): string | null {
   const world = rasToWorld(point);
   const raycaster = new Raycaster(world, RAY);
-  const normals = new Matrix3();
-  const normal = new Vector3();
   const size = new Vector3();
   let best: { region: string; volume: number } | null = null;
   for (const solid of solids) {
-    const { geometry, matrixWorld } = solid;
-    geometry.computeBoundingBox();
-    const bounds = new Box3().copy(geometry.boundingBox!).applyMatrix4(matrixWorld);
+    const bounds = worldBounds(solid);
     if (!bounds.containsPoint(world)) continue;
-    const probe = new Mesh(geometry, PROBE);
-    probe.matrixWorld.copy(matrixWorld);
-    probe.raycast = acceleratedRaycast;
-    normals.getNormalMatrix(matrixWorld);
-    let winding = 0;
-    for (const hit of raycaster.intersectObject(probe, false)) {
-      winding += Math.sign(normal.copy(hit.face!.normal).applyNormalMatrix(normals).dot(RAY));
-    }
+    const winding = crossings(solid, raycaster).reduce((sum, { sign }) => sum + sign, 0);
     if (winding === 0) continue;
     const volume = bounds.getSize(size).x * size.y * size.z;
     if (!best || volume < best.volume) {
@@ -48,6 +37,28 @@ export function regionAt(solids: readonly Mesh[], point: Ras): string | null {
     }
   }
   return best?.region ?? null;
+}
+
+export function worldBounds({ geometry, matrixWorld }: Mesh): Box3 {
+  geometry.computeBoundingBox();
+  return new Box3().copy(geometry.boundingBox!).applyMatrix4(matrixWorld);
+}
+
+/**
+ * Where a ray crosses a closed solid, nearest first, each +1 leaving it and −1 entering (the ray
+ * against the face's normal); their sum before a point is its winding count.
+ */
+export function crossings(solid: Mesh, raycaster: Raycaster): { distance: number; sign: number }[] {
+  const probe = new Mesh(solid.geometry, PROBE);
+  probe.matrixWorld.copy(solid.matrixWorld);
+  probe.raycast = acceleratedRaycast;
+  const normals = new Matrix3().getNormalMatrix(solid.matrixWorld);
+  const normal = new Vector3();
+  const { direction } = raycaster.ray;
+  return raycaster.intersectObject(probe, false).map((hit) => ({
+    distance: hit.distance,
+    sign: Math.sign(normal.copy(hit.face!.normal).applyNormalMatrix(normals).dot(direction)),
+  }));
 }
 
 /**

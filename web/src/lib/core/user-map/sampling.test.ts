@@ -19,6 +19,7 @@ import {
   resample,
   sampleCortex,
   sampleThrough,
+  valueAt,
   volumeGrid,
 } from './sampling.ts';
 
@@ -55,7 +56,7 @@ test('a linear map is read back exactly anywhere between its voxel centres, and 
         );
         data.push(linear(x!, y!, z!));
       }
-  const sample = createSampler(volume(data));
+  const sample = valueAt(createSampler(volume(data)));
   const world = (i: number, j: number, k: number) =>
     [0, 1, 2].map((r) =>
       [i, j, k, 1].reduce((sum, v, c) => sum + reference.affine[r]![c]! * v, 0),
@@ -85,7 +86,7 @@ test('each vertex takes nilearn’s vol_to_surf value between its pial and white
   const values = sampleCortex(
     Float32Array.from(reference.pial.flat()),
     Float32Array.from(reference.white.flat()),
-    createSampler(volume(reference.data)),
+    valueAt(createSampler(volume(reference.data))),
   );
   assert.equal(values.length, reference.texture.length);
   for (const [vertex, expected] of reference.texture.entries()) {
@@ -142,7 +143,9 @@ test('a blob around an MNI coordinate peaks on this brain where the Coordinate t
       shape: [13, 13, 13] as [number, number, number],
       spacing: 1,
     };
-    const values = resample(grid, sampleThrough(inverse, createSampler(blob)));
+    const values = resample(grid, sampleThrough(inverse, createSampler(blob))).filter(
+      (_, n) => n % 2 === 0,
+    );
     const peak = values.indexOf(Math.max(...values));
     const at = [peak % 13, Math.floor(peak / 13) % 13, Math.floor(peak / 169)].map(
       (index, axis) => grid.origin[axis]! + index,
@@ -173,7 +176,7 @@ test('a map covering the template reaches nearly every vertex of this brain’s 
     }
     surfaces.set(`${object.userData['hemisphere']}:${object.userData['boundary']}`, ras);
   });
-  const ones = sampleThrough(inverse, createSampler(templateMap(() => 1)));
+  const ones = valueAt(sampleThrough(inverse, createSampler(templateMap(() => 1))));
   for (const hemisphere of ['left', 'right']) {
     const values = sampleCortex(
       surfaces.get(`${hemisphere}:pial`)!,
@@ -197,18 +200,89 @@ test('the cut volume’s grid has its centres on whole millimetres and fills the
   }
 });
 
-test('the cut volume is read back trilinear between its centres, and not past a corner without a value', () => {
+// Voxels of 2 mm at whole even millimetres; the map has a value where `inside` says so.
+function stepMap(inside: (i: number, j: number) => boolean, outside: number): NiftiVolume {
+  const shape: [number, number, number] = [8, 8, 2];
+  const data = new Float32Array(8 * 8 * 2);
+  for (let n = 0; n < data.length; n++) {
+    const [i, j] = [n % 8, Math.floor(n / 8) % 8];
+    data[n] = inside(i, j) ? 2 + 0.1 * i : outside;
+  }
+  const voxelToWorld = [
+    [2, 0, 0, 0],
+    [0, 2, 0, 0],
+    [0, 0, 2, 0],
+    [0, 0, 0, 1],
+  ];
+  return { shape, voxelToWorld, data, intent: 0, description: '' };
+}
+
+test('a map’s edge against voxels without a value lies halfway between centres, its colour from its own voxels', () => {
+  for (const outside of [0, Number.NaN]) {
+    const at = valueAt(createSampler(stepMap((i) => i >= 3, outside)));
+    // Centres x = 4 (empty) and 6 (2.3): the edge at 5, the value between 6 and 8 unweighted by the empty side.
+    assert.ok(Number.isNaN(at(4.98, 7, 1)), `${outside}`);
+    assert.ok(Math.abs(at(5, 7, 1) - 2.3) < 1e-6);
+    assert.ok(Math.abs(at(5.5, 7, 1) - 2.3) < 1e-6);
+    assert.ok(Math.abs(at(7, 7, 1) - 2.35) < 1e-6);
+  }
+  // A corner of the support is rounded: a point a fifth of a voxel off both of its edges has no value.
+  const corner = valueAt(createSampler(stepMap((i, j) => i >= 3 && j >= 3, 0)));
+  assert.ok(Number.isNaN(corner(5.4, 5.4, 1)));
+  assert.ok(Number.isFinite(corner(5.4, 6, 1)));
+});
+
+test('the cut volume keeps the edge where the map has it when read again between its 1 mm centres', () => {
+  const map = stepMap((i, j) => i >= 3 && j >= 3, 0);
+  const direct = valueAt(createSampler(map));
+  const grid = {
+    shape: [15, 15, 3] as [number, number, number],
+    origin: [0, 0, 0] as [number, number, number],
+    spacing: 1,
+  };
+  const cut = gridSampler(grid, resample(grid, createSampler(map)));
+  // Straight along an edge, the share is linear, so the second reading puts the edge at the same place.
+  assert.ok(Number.isNaN(cut(4.98, 12, 1)));
+  assert.ok(Math.abs(cut(5.02, 12, 1) - direct(5.02, 12, 1)) < 1e-6);
+  // Elsewhere both readings agree on where the map is, except within a tenth of a millimetre of its edge.
+  let disagree = 0;
+  for (let x = 0.05; x < 14; x += 0.1) {
+    for (let y = 0.05; y < 14; y += 0.1) {
+      if (Number.isNaN(direct(x, y, 1)) !== Number.isNaN(cut(x, y, 1))) {
+        disagree++;
+        const near = [-0.1, 0.1].some(
+          (d) => Number.isNaN(direct(x + d, y + d, 1)) !== Number.isNaN(direct(x, y, 1)),
+        );
+        assert.ok(near, `${x}, ${y}`);
+      }
+    }
+  }
+  assert.ok(disagree < 20, `${disagree}`);
+});
+
+test('the cut volume is read back from sum and share trilinear between its centres, and not beyond them', () => {
   const grid = {
     shape: [3, 3, 3] as [number, number, number],
     origin: [-1, 0, 2] as [number, number, number],
     spacing: 2,
   };
-  const values = Float32Array.from({ length: 27 }, (_, n) => (n % 3) + 10 * Math.floor(n / 9));
+  const values = new Float32Array(54);
+  for (let n = 0; n < 27; n++) {
+    values[2 * n] = (n % 3) + 10 * Math.floor(n / 9);
+    values[2 * n + 1] = 1;
+  }
   const at = gridSampler(grid, values);
   // x index 0.5, z index 1.25: 0.5 + 10 · 1.25.
   assert.equal(at(0, 1, 4.5), 13);
   assert.ok(Number.isNaN(at(-1.5, 0, 2)));
-  values[26] = Number.NaN;
-  assert.ok(Number.isNaN(gridSampler(grid, values)(1.5, 2.5, 4.5)));
-  assert.equal(gridSampler(grid, values)(-1, 0, 2), 0);
+  // Half the share at every centre: the same mean, then none below half.
+  const halved = gridSampler(
+    grid,
+    values.map((value) => value / 2),
+  );
+  assert.equal(halved(0, 1, 4.5), 13);
+  values.fill(0, 0, 18);
+  // The first z plane without a value: none at a quarter of the way to the next, a value at half.
+  assert.ok(Number.isNaN(gridSampler(grid, values)(0, 1, 2.98)));
+  assert.equal(gridSampler(grid, values)(-1, 0, 3), 10);
 });

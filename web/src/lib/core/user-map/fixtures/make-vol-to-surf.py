@@ -19,9 +19,8 @@ rotation = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(
 affine = np.eye(4)
 affine[:3, :3] = rotation @ np.diag([2.0, 2.5, 3.0])
 affine[:3, 3] = [-10.0, 5.0, 20.0]
+# Every voxel has a value: the viewer departs from nilearn at zero and NaN voxels (sampling.test.ts).
 data = rng.normal(size=shape).astype(np.float32)
-data[3, 4, 5] = np.nan
-data[1, 1, 1] = np.nan
 
 # Voxel-space ends: inside the volume short of its far edge (nilearn extrapolates past the last centre),
 # some lines leaving through the near side, one wholly outside.

@@ -2,6 +2,7 @@ import { UNSTATED } from '../core/coordinates/spaces.ts';
 import { defaultDisplay, fileStatistic, mapTitle, validDisplay } from '../core/user-map/display.ts';
 import type { CortexSurface, MapDisplay, MapSummary, Statistic } from '../core/user-map/display.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
+import type { MapCourse } from '../core/user-map/course.ts';
 import type { EngineUserMap } from '../engine/api.ts';
 import type { SurfaceColor } from '../types/index.ts';
 
@@ -11,14 +12,18 @@ export type UserMapState =
   | { status: 'ready'; name: string; summary: MapSummary }
   | { status: 'error'; name: string; error: unknown };
 
+type ClusterAsk = { threshold: number; minVoxels: number; volume: number };
 export type ClusterState =
   | { status: 'idle' }
-  | { status: 'loading'; threshold: number; minVoxels: number }
-  | { status: 'ready'; threshold: number; minVoxels: number; data: Cluster[] }
-  | { status: 'error'; threshold: number; minVoxels: number; message: string };
+  | ({ status: 'loading' } & ClusterAsk)
+  | ({ status: 'ready'; data: Cluster[] } & ClusterAsk)
+  | ({ status: 'error'; message: string } & ClusterAsk);
 
 /** Colourings the map is drawn over as they are: the tissue's own, and the achromatic scan. */
 const UNDER: readonly SurfaceColor[] = ['tissue', 'mri'];
+
+/** A series plays at most this many volumes a second, slower when a volume takes longer to carry. */
+export const VOLUMES_PER_SECOND = 4;
 
 /**
  * The reader's own map: the file, the template it is in, and how it is drawn. While it is shown, the
@@ -45,6 +50,10 @@ export function createUserMapStore({
   // nilearn's cluster_threshold: clusters of fewer voxels are neither drawn nor listed.
   let minVoxels = $state(0);
   let extentRequest = 0;
+  // The series' volume drawn, from 0, and whether it steps through them.
+  let volume = $state(0);
+  let playing = $state(false);
+  let playRequest = 0;
   // Counts each map the engine has finished placing, carried or trimmed, for what redraws from it.
   let placed = $state(0);
   let heldColor: SurfaceColor | null = null;
@@ -63,41 +72,46 @@ export function createUserMapStore({
     if (color !== null && display.color === 'tissue') display.setColor(color);
   }
 
-  /** The table follows the threshold and minimum size the map is drawn at; a newer request wins. */
+  /**
+   * The table follows the volume, threshold and minimum size the map is drawn at; a newer request
+   * wins. A playing series lists none, so its volumes are not held up by tables nobody reads.
+   */
   function tabulate() {
     const drawn = state.status === 'ready' && shown && validDisplay(settings);
-    if (!drawn) {
+    if (!drawn || playing) {
       clusterRequest++;
       clusters = { status: 'idle' };
       return;
     }
-    const { threshold } = settings;
-    const size = minVoxels;
+    const asked: ClusterAsk = { threshold: settings.threshold, minVoxels, volume };
     if (
       clusters.status !== 'idle' &&
-      clusters.threshold === threshold &&
-      clusters.minVoxels === size
+      clusters.threshold === asked.threshold &&
+      clusters.minVoxels === asked.minVoxels &&
+      clusters.volume === asked.volume
     )
       return;
     const ask = ++clusterRequest;
-    clusters = { status: 'loading', threshold, minVoxels: size };
-    engine.clusters(threshold, size).then(
+    clusters = { status: 'loading', ...asked };
+    engine.clusters(asked.threshold, asked.minVoxels, asked.volume).then(
       (data) => {
-        if (ask === clusterRequest)
-          clusters = { status: 'ready', threshold, minVoxels: size, data };
+        if (ask === clusterRequest) clusters = { status: 'ready', ...asked, data };
       },
       (error: unknown) => {
         if (ask !== clusterRequest) return;
         console.error(error);
-        clusters = { status: 'error', threshold, minVoxels: size, message: String(error) };
+        clusters = { status: 'error', ...asked, message: String(error) };
       },
     );
   }
 
-  /** The drawn map loses its small clusters at the threshold it is drawn at; the engine keeps the last. */
-  function trim() {
+  /**
+   * The drawn volume, its small clusters trimmed at the threshold it is drawn at; the engine keeps the
+   * last. Settles once it is placed or given up.
+   */
+  function trim(): Promise<void> {
     const ask = ++extentRequest;
-    engine.extent(settings.threshold, minVoxels).then(
+    return engine.extent(settings.threshold, minVoxels, volume).then(
       () => {
         if (ask === extentRequest) placed++;
       },
@@ -108,27 +122,48 @@ export function createUserMapStore({
     );
   }
 
-  function draw() {
+  function draw(): Promise<void> {
     const drawn = state.status === 'ready' && shown && validDisplay(settings);
-    if (drawn) trim();
+    if (!drawn) stop();
+    const placing = drawn ? trim() : Promise.resolve();
     engine.show(drawn ? settings : null);
     if (drawn) hold();
     else release();
     tabulate();
+    return placing;
+  }
+
+  function stop() {
+    playRequest++;
+    playing = false;
+  }
+
+  /** Step to the next volume once the last is placed and its share of a second has passed. */
+  async function play(ask: number) {
+    while (ask === playRequest && state.status === 'ready') {
+      const started = performance.now();
+      volume = (volume + 1) % state.summary.volumes;
+      await draw();
+      const left = 1000 / VOLUMES_PER_SECOND - (performance.now() - started);
+      if (left > 0) await new Promise((resolve) => setTimeout(resolve, left));
+    }
   }
 
   /** `keep` is how the map was drawn when it is read again in another template. */
   async function read(next: File, nextSpace: string, keep: MapDisplay | null) {
     const ask = ++request;
+    stop();
+    const at = keep ? volume : 0;
     engine.clear();
     release();
     clusterRequest++;
     clusters = { status: 'idle' };
     state = { status: 'loading', name: next.name };
     try {
-      const summary = await engine.load(await next.arrayBuffer(), nextSpace);
+      const summary = await engine.load(await next.arrayBuffer(), nextSpace, at);
       if (ask !== request) return;
       file = next;
+      volume = at;
       if (!keep) {
         title = mapTitle(next.name);
         statistic = fileStatistic(summary.intent, summary.description, next.name);
@@ -172,6 +207,45 @@ export function createUserMapStore({
     },
     get statistic() {
       return statistic;
+    },
+    /** The volume of a series drawn, from 0; 0 for a single map. */
+    get volume() {
+      return volume;
+    },
+    setVolume(next: number): void {
+      const count = state.status === 'ready' ? state.summary.volumes : 0;
+      if (!(Number.isInteger(next) && next >= 0 && next < count)) {
+        throw new RangeError(`The map has no volume ${next}.`);
+      }
+      volume = next;
+      void draw();
+    },
+    /** A drawn series steps through its volumes, from the one shown, looping until paused. */
+    get playing() {
+      return playing;
+    },
+    setPlaying(next: boolean): void {
+      if (!next) {
+        stop();
+        tabulate();
+        return;
+      }
+      if (playing) return;
+      if (
+        state.status !== 'ready' ||
+        !shown ||
+        !validDisplay(settings) ||
+        state.summary.volumes < 2
+      ) {
+        throw new Error('Only a drawn series of volumes can play.');
+      }
+      playing = true;
+      tabulate();
+      void play(++playRequest);
+    },
+    /** A region's mean in each volume of the map, or null for a region the engine has no solid for. */
+    course(region: string): Promise<MapCourse | null> {
+      return engine.course(region);
     },
     /** An empty title gives the file's own name back. */
     setTitle(next: string): void {
@@ -227,6 +301,7 @@ export function createUserMapStore({
     },
     remove(): void {
       request++;
+      stop();
       clusterRequest++;
       clusters = { status: 'idle' };
       file = null;

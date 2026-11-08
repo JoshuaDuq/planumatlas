@@ -1,10 +1,10 @@
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapSummary } from '../core/user-map/display.ts';
 import { MapFileError } from '../core/user-map/map-file-error.ts';
 import { createFakeUserMap } from '../engine/fake/user-map.ts';
 import type { SurfaceColor } from '../types/index.ts';
-import { createUserMapStore } from './user-map.svelte.ts';
+import { VOLUMES_PER_SECOND, createUserMapStore } from './user-map.svelte.ts';
 
 const summary: MapSummary = {
   shape: [97, 115, 97],
@@ -13,6 +13,8 @@ const summary: MapSummary = {
   binary: false,
   intent: 5,
   description: '',
+  volumes: 1,
+  secondsPerVolume: null,
   cortexCovered: 0.99,
 };
 
@@ -113,10 +115,10 @@ test('a file that cannot be placed is reported by name, and the colour taken for
   const second = store.open(file('b.nii'));
   await loading(engine);
   expect(display.color).toBe('atlas');
-  const volumes = new MapFileError('volumes', [3]);
-  engine.settle(volumes);
+  const refused = new MapFileError('tooManyVolumes', [300, 61]);
+  engine.settle(refused);
   await second;
-  expect(store.state).toEqual({ status: 'error', name: 'b.nii', error: volumes });
+  expect(store.state).toEqual({ status: 'error', name: 'b.nii', error: refused });
   // The last map is not left on the stage under the error.
   expect(engine.loaded).toBeNull();
 });
@@ -174,6 +176,7 @@ test('the cluster table follows the threshold the map is drawn at, not its scale
     status: 'ready',
     threshold: 3.1,
     minVoxels: 0,
+    volume: 0,
     data: peak(3.1),
   });
   store.setSettings({ ...store.settings, max: 6, opacity: 0.5 });
@@ -198,15 +201,99 @@ test('a minimum cluster size trims the drawn map and the table at the threshold 
   await opened;
   store.setSettings({ ...store.settings, threshold: 3.1 });
   store.setMinVoxels(20);
-  expect(engine.extents.at(-1)).toEqual([3.1, 20]);
+  expect(engine.extents.at(-1)).toEqual([3.1, 20, 0]);
   await expect.poll(() => store.clusters.status === 'ready' && store.clusters.minVoxels).toBe(20);
-  expect(engine.clusterSizes.at(-1)).toEqual([3.1, 20]);
+  expect(engine.clusterSizes.at(-1)).toEqual([3.1, 20, 0]);
   store.setSettings({ ...store.settings, threshold: 4 });
-  expect(engine.extents.at(-1)).toEqual([4, 20]);
+  expect(engine.extents.at(-1)).toEqual([4, 20, 0]);
   expect(() => store.setMinVoxels(2.5)).toThrow(RangeError);
   expect(store.minVoxels).toBe(20);
   // Each trimmed map placed says so, for the linked MRI to draw it again.
   const before = store.placed;
   store.setMinVoxels(30);
   await expect.poll(() => store.placed).toBeGreaterThan(before);
+});
+
+const series: MapSummary = { ...summary, volumes: 3, secondsPerVolume: 2 };
+
+async function openSeries(name = 'fir.nii.gz') {
+  const context = setup();
+  const opened = context.store.open(file(name));
+  await loading(context.engine);
+  context.engine.settle(series);
+  await opened;
+  return context;
+}
+
+test('a series draws the volume chosen, and lists that volume’s clusters', async () => {
+  const { engine, store } = await openSeries();
+  expect(engine.loadedVolume).toBe(0);
+  store.setSettings({ ...store.settings, threshold: 3.1 });
+  store.setVolume(2);
+  expect(store.volume).toBe(2);
+  expect(engine.extents.at(-1)).toEqual([3.1, 0, 2]);
+  await expect.poll(() => store.clusters.status === 'ready' && store.clusters.volume).toBe(2);
+  expect(engine.clusterSizes.at(-1)).toEqual([3.1, 0, 2]);
+  expect(() => store.setVolume(3)).toThrow(RangeError);
+  expect(() => store.setVolume(1.5)).toThrow(RangeError);
+  expect(store.volume).toBe(2);
+});
+
+test('a series read again in another template keeps its volume; another file starts at the first', async () => {
+  const { engine, store } = await openSeries();
+  store.setVolume(2);
+  const reread = store.setSpace('spm12');
+  await loading(engine);
+  engine.settle(series);
+  await reread;
+  expect([engine.loadedVolume, store.volume]).toEqual([2, 2]);
+  const next = store.open(file('other.nii.gz'));
+  await loading(engine);
+  engine.settle(series);
+  await next;
+  expect([engine.loadedVolume, store.volume]).toEqual([0, 0]);
+});
+
+test('a drawn series plays volume by volume and loops, listing no clusters until it is paused', async () => {
+  vi.useFakeTimers();
+  try {
+    const { engine, store } = await openSeries();
+    expect(() => store.setPlaying(true)).toThrow(/drawn series/);
+    store.setSettings({ ...store.settings, threshold: 3.1 });
+    store.setVolume(1);
+    store.setPlaying(true);
+    expect(store.clusters).toEqual({ status: 'idle' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(store.volume).toBe(2);
+    await vi.advanceTimersByTimeAsync(1000 / VOLUMES_PER_SECOND);
+    expect(store.volume).toBe(0);
+    expect(engine.extents.map(([, , volume]) => volume)).toEqual([0, 1, 2, 0]);
+    store.setPlaying(false);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(store.volume).toBe(0);
+    await vi.waitFor(() =>
+      expect(store.clusters.status === 'ready' && store.clusters.volume).toBe(0),
+    );
+    // Hiding the map stops it.
+    store.setPlaying(true);
+    store.setShown(false);
+    expect(store.playing).toBe(false);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('a region’s course is the engine’s', async () => {
+  const course = { means: Float32Array.of(1, 2, 3), counts: Uint32Array.of(5, 5, 5), points: 5 };
+  const engine = createFakeUserMap(true, undefined, (region) => (region === 'v1' ? course : null));
+  const store = createUserMapStore({
+    engine,
+    display: { color: 'atlas' as SurfaceColor, setColor() {} },
+  });
+  const opened = store.open(file('fir.nii.gz'));
+  await loading(engine);
+  engine.settle(series);
+  await opened;
+  expect(await store.course('v1')).toBe(course);
+  expect(await store.course('thalamus')).toBeNull();
 });

@@ -1489,6 +1489,55 @@
    "[\"Alpha\"] → \"reaches Alpha of the cortex\"",
    "[\"\"] → \"reaches  of the cortex\""
   ],
+  "series": [
+   "[\"Alpha\",\"\"] → \"Alpha volumes\"",
+   "[\"\",\"Alpha\"] → \" volumes, one every Alpha\""
+  ],
+  "volume": "Volume",
+  "volumeOf": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha of  · Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \" of Alpha\""
+  ],
+  "volumeHint": "Every volume is drawn at the same threshold and colour scale. Clusters are listed while it is paused.",
+  "play": "Play",
+  "pause": "Pause",
+  "keyVolume": [
+   "[\"Alpha\",\"\"] → \"Alpha · \"",
+   "[\"\",\"Alpha\"] → \" · Alpha\""
+  ],
+  "captionVolume": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"volume Alpha of  at Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"volume  of Alpha\""
+  ],
+  "course": "Map over time",
+  "courseIntro": [
+   "[\"Alpha\"] → \"The mean of Alpha in this region at each volume, before the threshold. Choose a point to draw that volume.\"",
+   "[\"\"] → \"The mean of  in this region at each volume, before the threshold. Choose a point to draw that volume.\""
+  ],
+  "courseCounts": [
+   "[\"Alpha\",\"\"] → \"over the Alpha of its  whole millimetres the map has a value at\"",
+   "[\"\",\"Alpha\"] → \"over the  of its Alpha whole millimetres the map has a value at\""
+  ],
+  "courseLoading": "Reading the region’s volumes…",
+  "courseFailed": "The region’s course could not be read.",
+  "courseNone": "This region has no solid on the stage to read the map in.",
+  "courseEmpty": "The map has no value in this region.",
+  "courseLabel": [
+   "[\"Alpha\",\"\"] → \"Alpha in  over time\"",
+   "[\"\",\"Alpha\"] → \" in Alpha over time\""
+  ],
+  "courseValue": [
+   "[\"Alpha\",\"\"] → \"Alpha: \"",
+   "[\"\",\"Alpha\"] → \": Alpha\""
+  ],
+  "courseNoValue": "no value",
+  "courseTime": "Time",
+  "courseValues": "Values",
+  "courseMean": [
+   "[\"Alpha\"] → \"Mean Alpha\"",
+   "[\"\"] → \"Mean \""
+  ],
+  "courseValued": "Millimetres with a value",
   "title": "Title",
   "titleHint": "Names the map in the key and the saved image.",
   "statistic": "Statistic",
@@ -1573,22 +1622,23 @@
    "notNifti": "This file is not a NIfTI image.",
    "gzip": "This .gz file could not be decompressed; it may be truncated or damaged.",
    "rank": [
-    "[0] → \"This file is not a 3-D volume: it has 0 dimensions.\"",
-    "[1] → \"This file is not a 3-D volume: it has 1 dimension.\"",
-    "[2] → \"This file is not a 3-D volume: it has 2 dimensions.\"",
-    "[183] → \"This file is not a 3-D volume: it has 183 dimensions.\"",
-    "[12345] → \"This file is not a 3-D volume: it has 12345 dimensions.\""
+    "[0] → \"This file is neither a 3-D volume nor a series of them: it has 0 dimensions.\"",
+    "[1] → \"This file is neither a 3-D volume nor a series of them: it has 1 dimension.\"",
+    "[2] → \"This file is neither a 3-D volume nor a series of them: it has 2 dimensions.\"",
+    "[183] → \"This file is neither a 3-D volume nor a series of them: it has 183 dimensions.\"",
+    "[12345] → \"This file is neither a 3-D volume nor a series of them: it has 12345 dimensions.\""
    ],
    "emptyAxis": [
     "[\"Alpha\"] → \"This file’s dimensions Alpha include an empty axis.\"",
     "[\"\"] → \"This file’s dimensions  include an empty axis.\""
    ],
-   "volumes": [
-    "[0] → \"This file holds 0 volumes; save the one to show as its own file.\"",
-    "[1] → \"This file holds 1 volumes; save the one to show as its own file.\"",
-    "[2] → \"This file holds 2 volumes; save the one to show as its own file.\"",
-    "[183] → \"This file holds 183 volumes; save the one to show as its own file.\"",
-    "[12345] → \"This file holds 12<NNBSP>345 volumes; save the one to show as its own file.\""
+   "dimensions": [
+    "[\"Alpha\"] → \"This file’s dimensions are Alpha; only a series of volumes along the fourth can be shown.\"",
+    "[\"\"] → \"This file’s dimensions are ; only a series of volumes along the fourth can be shown.\""
+   ],
+   "tooManyVolumes": [
+    "[\"Alpha\",\"\"] → \"This file holds Alpha volumes; up to  of its size can be shown. Save fewer as their own file.\"",
+    "[\"\",\"Alpha\"] → \"This file holds  volumes; up to Alpha of its size can be shown. Save fewer as their own file.\""
    ],
    "tooLarge": [
     "[\"Alpha\",1] → \"This volume is Alpha voxels, over the limit of 1.\"",

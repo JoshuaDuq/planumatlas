@@ -3,21 +3,45 @@ import { MapFileError } from './map-file-error.ts';
 // Not built on nifti-reader-js (in @niivue/niivue): it takes the qform when qform_code > sform_code,
 // where nibabel takes the sform, so a map would land elsewhere than nilearn shows it.
 
-/** The most voxels a map may hold. */
+/** The most voxels one volume may hold. */
 export const MAX_VOXELS = 32 * 2 ** 20;
+/** The most values a series may hold across its volumes: 256 MB as float32. */
+export const MAX_VALUES = 64 * 2 ** 20;
 
-/** A single 3-D NIfTI-1 volume as nibabel reads it. */
-export interface NiftiVolume {
+/** A NIfTI-1 image as nibabel reads it: one 3-D volume, or a series of them along the fourth axis. */
+export interface NiftiImage {
   shape: [number, number, number];
   /** Voxel indices (i, j, k) to world millimetres, row-major 4×4, as nibabel's `img.affine`. */
   voxelToWorld: number[][];
-  /** Scaled values, x fastest (the file's own order), non-finite values as NaN. */
-  data: Float32Array;
+  /** Each volume's scaled values, x fastest (the file's own order), non-finite values as NaN. */
+  volumes: Float32Array[];
+  /**
+   * nibabel's `get_zooms()[3]` in seconds, for a series whose header gives the time axis a unit
+   * (`xyzt_units`) and a positive spacing; null otherwise.
+   */
+  secondsPerVolume: number | null;
   /** `intent_code`: what the values are, when the writer said (NIFTI_INTENT_*). */
   intent: number;
   /** `descrip`, up to its first NUL; SPM names its statistic there. */
   description: string;
 }
+
+/** One volume of an image, as it is sampled and its clusters are found. */
+export interface NiftiVolume extends Omit<NiftiImage, 'volumes' | 'secondsPerVolume'> {
+  data: Float32Array;
+}
+
+export function volumeOf(
+  { shape, voxelToWorld, volumes, intent, description }: NiftiImage,
+  index: number,
+): NiftiVolume {
+  const data = volumes[index];
+  if (!data) throw new RangeError(`The image has no volume ${index}.`);
+  return { shape, voxelToWorld, data, intent, description };
+}
+
+/** `xyzt_units` time codes (NIFTI_UNITS_SEC, _MSEC, _USEC) in seconds. */
+const TIME_UNITS: Readonly<Record<number, number>> = { 8: 1, 16: 1e-3, 24: 1e-6 };
 
 type Read = (view: DataView, offset: number, little: boolean) => number;
 
@@ -47,8 +71,8 @@ const UNSUPPORTED_TYPES: Record<number, string> = {
 /** nibabel's `Nifti1Header.quaternion_threshold`: three float32 epsilons. */
 const QUATERNION_THRESHOLD = 3 * 2 ** -23;
 
-/** Read a single-file NIfTI-1 volume (.nii or .nii.gz) as nibabel's `img.affine` and `get_fdata()`. */
-export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
+/** Read a single-file NIfTI-1 image (.nii or .nii.gz) as nibabel's `img.affine` and `get_fdata()`. */
+export async function readNifti(buffer: ArrayBuffer): Promise<NiftiImage> {
   const head = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
   const bytes = head[0] === 0x1f && head[1] === 0x8b ? await inflate(buffer) : buffer;
   const view = new DataView(bytes);
@@ -63,7 +87,7 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
     throw new MapFileError('magic');
   }
 
-  const shape = volumeShape(view, little);
+  const { shape, count } = imageShape(view, little);
   const voxels = shape[0] * shape[1] * shape[2];
 
   const code = view.getInt16(70, little);
@@ -80,7 +104,7 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
     throw new MapFileError('offset', [voxOffset]);
   }
   const offset = Math.trunc(voxOffset);
-  const end = offset + voxels * type.bytes;
+  const end = offset + voxels * count * type.bytes;
   if (end > view.byteLength) {
     throw new MapFileError('truncated', [end, view.byteLength]);
   }
@@ -95,8 +119,8 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
 
   const voxelToWorld = bestAffine(view, little);
 
-  const data = new Float32Array(voxels);
-  for (let i = 0; i < voxels; i++) {
+  const data = new Float32Array(voxels * count);
+  for (let i = 0; i < data.length; i++) {
     const value = type.read(view, offset + i * type.bytes, little) * slope + inter;
     data[i] = value;
     if (!Number.isFinite(data[i])) {
@@ -109,7 +133,23 @@ export async function readNifti(buffer: ArrayBuffer): Promise<NiftiVolume> {
   const descrip = new Uint8Array(view.buffer, view.byteOffset + 148, 80);
   const nul = descrip.indexOf(0);
   const description = new TextDecoder('latin1').decode(descrip.subarray(0, nul < 0 ? 80 : nul));
-  return { shape, voxelToWorld, data, intent: view.getInt16(68, little), description };
+  const volumes = Array.from({ length: count }, (_, n) =>
+    data.subarray(n * voxels, (n + 1) * voxels),
+  );
+  return {
+    shape,
+    voxelToWorld,
+    volumes,
+    secondsPerVolume: count > 1 ? secondsPerVolume(view, little) : null,
+    intent: view.getInt16(68, little),
+    description,
+  };
+}
+
+function secondsPerVolume(view: DataView, little: boolean): number | null {
+  const unit = TIME_UNITS[view.getUint8(123) & 0x38];
+  const spacing = view.getFloat32(92, little);
+  return unit && Number.isFinite(spacing) && spacing > 0 ? spacing * unit : null;
 }
 
 async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
@@ -132,7 +172,7 @@ function byteOrder(view: DataView): boolean {
   throw new MapFileError('notNifti');
 }
 
-function volumeShape(view: DataView, little: boolean): [number, number, number] {
+function imageShape(view: DataView, little: boolean) {
   const dim = Array.from({ length: 8 }, (_, i) => view.getInt16(40 + 2 * i, little));
   const rank = dim[0];
   if (rank < 3 || rank > 7) {
@@ -142,15 +182,19 @@ function volumeShape(view: DataView, little: boolean): [number, number, number] 
   if (sizes.some((n) => n < 1)) {
     throw new MapFileError('emptyAxis', [sizes.join(' × ')]);
   }
-  const volumes = sizes.slice(3).reduce((product, n) => product * n, 1);
-  if (volumes > 1) {
-    throw new MapFileError('volumes', [volumes]);
+  if (sizes.slice(4).some((n) => n > 1)) {
+    throw new MapFileError('dimensions', [sizes.join(' × ')]);
   }
   const shape = sizes.slice(0, 3) as [number, number, number];
-  if (shape[0] * shape[1] * shape[2] > MAX_VOXELS) {
+  const voxels = shape[0] * shape[1] * shape[2];
+  if (voxels > MAX_VOXELS) {
     throw new MapFileError('tooLarge', [shape.join(' × '), MAX_VOXELS]);
   }
-  return shape;
+  const count = sizes[3] ?? 1;
+  if (voxels * count > MAX_VALUES) {
+    throw new MapFileError('tooManyVolumes', [count, Math.floor(MAX_VALUES / voxels)]);
+  }
+  return { shape, count };
 }
 
 /** nibabel's `get_best_affine()` after the fixes its header check makes on load. */

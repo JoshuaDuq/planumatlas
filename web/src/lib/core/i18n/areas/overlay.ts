@@ -12,6 +12,34 @@ export const en = {
   range: (low: string, high: string) => `values ${low} to ${high}`,
   mask: 'a mask of 0 and 1',
   reach: (share: string) => `reaches ${share} of the cortex`,
+  series: (count: string, every: string | null) =>
+    every ? `${count} volumes, one every ${every}` : `${count} volumes`,
+  volume: 'Volume',
+  volumeOf: (place: string, count: string, time: string | null) =>
+    `${place} of ${count}${time ? ` · ${time}` : ''}`,
+  volumeHint:
+    'Every volume is drawn at the same threshold and colour scale. Clusters are listed while it is paused.',
+  play: 'Play',
+  pause: 'Pause',
+  keyVolume: (title: string, at: string) => `${title} · ${at}`,
+  captionVolume: (place: string, count: string, time: string | null) =>
+    `volume ${place} of ${count}${time ? ` at ${time}` : ''}`,
+  course: 'Map over time',
+  courseIntro: (title: string) =>
+    `The mean of ${title} in this region at each volume, before the threshold. Choose a point to draw that volume.`,
+  courseCounts: (valued: string, total: string) =>
+    `over the ${valued} of its ${total} whole millimetres the map has a value at`,
+  courseLoading: 'Reading the region’s volumes…',
+  courseFailed: 'The region’s course could not be read.',
+  courseNone: 'This region has no solid on the stage to read the map in.',
+  courseEmpty: 'The map has no value in this region.',
+  courseLabel: (title: string, region: string) => `${title} in ${region} over time`,
+  courseValue: (at: string, value: string) => `${at}: ${value}`,
+  courseNoValue: 'no value',
+  courseTime: 'Time',
+  courseValues: 'Values',
+  courseMean: (statistic: string | null) => `Mean ${statistic ?? 'value'}`,
+  courseValued: 'Millimetres with a value',
   title: 'Title',
   titleHint: 'Names the map in the key and the saved image.',
   statistic: 'Statistic',
@@ -65,10 +93,12 @@ export const en = {
     notNifti: 'This file is not a NIfTI image.',
     gzip: 'This .gz file could not be decompressed; it may be truncated or damaged.',
     rank: (rank: number) =>
-      `This file is not a 3-D volume: it has ${rank} ${rank === 1 ? 'dimension' : 'dimensions'}.`,
+      `This file is neither a 3-D volume nor a series of them: it has ${rank} ${rank === 1 ? 'dimension' : 'dimensions'}.`,
     emptyAxis: (dims: string) => `This file’s dimensions ${dims} include an empty axis.`,
-    volumes: (volumes: number) =>
-      `This file holds ${grouped(volumes)} volumes; save the one to show as its own file.`,
+    dimensions: (dims: string) =>
+      `This file’s dimensions are ${dims}; only a series of volumes along the fourth can be shown.`,
+    tooManyVolumes: (volumes: number, limit: number) =>
+      `This file holds ${grouped(volumes)} volumes; up to ${grouped(limit)} of its size can be shown. Save fewer as their own file.`,
     tooLarge: (dims: string, limit: number) =>
       `This volume is ${dims} voxels, over the limit of ${grouped(limit)}.`,
     storedType: (name: string, code: number) =>
@@ -104,6 +134,35 @@ export const fr: typeof en = {
   range: (low: string, high: string) => `valeurs de ${low} à ${high}`,
   mask: 'un masque de 0 et de 1',
   reach: (share: string) => `couvre ${share} du cortex`,
+  series: (count: string, every: string | null) =>
+    every ? `${count} volumes, un toutes les ${every}` : `${count} volumes`,
+  volume: 'Volume',
+  volumeOf: (place: string, count: string, time: string | null) =>
+    `${place} sur ${count}${time ? ` · ${time}` : ''}`,
+  volumeHint:
+    'Chaque volume est affiché au même seuil et à la même échelle de couleurs. Les amas sont listés pendant la pause.',
+  play: 'Lire',
+  pause: 'Pause',
+  keyVolume: (title: string, at: string) => `${title} · ${at}`,
+  captionVolume: (place: string, count: string, time: string | null) =>
+    `volume ${place} sur ${count}${time ? ` à ${time}` : ''}`,
+  course: 'Carte dans le temps',
+  courseIntro: (title: string) =>
+    `La moyenne de ${title} dans cette région à chaque volume, avant le seuil. Choisissez un point pour afficher ce volume.`,
+  courseCounts: (valued: string, total: string) =>
+    `sur les ${valued} de ses ${total} millimètres entiers où la carte a une valeur`,
+  courseLoading: 'Lecture des volumes de la région…',
+  courseFailed: 'Le décours de la région n’a pas pu être lu.',
+  courseNone: 'Cette région n’a pas de solide sur la scène où lire la carte.',
+  courseEmpty: 'La carte n’a aucune valeur dans cette région.',
+  courseLabel: (title: string, region: string) => `${title} dans ${region} au fil du temps`,
+  courseValue: (at: string, value: string) => `${at} : ${value}`,
+  courseNoValue: 'aucune valeur',
+  courseTime: 'Temps',
+  courseValues: 'Valeurs',
+  courseMean: (statistic: string | null) =>
+    `${statistic ?? 'Valeur'} moyen${statistic ? '' : 'ne'}`,
+  courseValued: 'Millimètres avec une valeur',
   title: 'Titre',
   titleHint: 'Nomme la carte dans la légende et l’image enregistrée.',
   statistic: 'Statistique',
@@ -157,10 +216,12 @@ export const fr: typeof en = {
     notNifti: 'Ce fichier n’est pas une image NIfTI.',
     gzip: 'Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.',
     rank: (rank: number) =>
-      `Ce fichier n’est pas un volume 3D : il a ${rank} ${rank < 2 ? 'dimension' : 'dimensions'}.`,
+      `Ce fichier n’est ni un volume 3D ni une série de volumes : il a ${rank} ${rank < 2 ? 'dimension' : 'dimensions'}.`,
     emptyAxis: (dims: string) => `Les dimensions ${dims} de ce fichier comprennent un axe vide.`,
-    volumes: (volumes: number) =>
-      `Ce fichier contient ${grouped(volumes)} volumes ; enregistrez celui à afficher dans son propre fichier.`,
+    dimensions: (dims: string) =>
+      `Les dimensions de ce fichier sont ${dims} ; seule une série de volumes selon la quatrième peut être affichée.`,
+    tooManyVolumes: (volumes: number, limit: number) =>
+      `Ce fichier contient ${grouped(volumes)} volumes ; jusqu’à ${grouped(limit)} de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.`,
     tooLarge: (dims: string, limit: number) =>
       `Ce volume compte ${dims} voxels, au-delà de la limite de ${grouped(limit)}.`,
     storedType: (name: string, code: number) =>

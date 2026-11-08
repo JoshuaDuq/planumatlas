@@ -4,6 +4,7 @@ import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import { loadFieldData } from '../../core/coordinates/field.ts';
 import { readIn } from '../../core/coordinates/spaces.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
+import type { MapCourse } from '../../core/user-map/course.ts';
 import type { CortexSurface, MapDisplay, MapSummary } from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import {
@@ -18,9 +19,11 @@ import type { BrainSections } from '../slices/sections.ts';
 import { greyed } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
 import { clearUserMapVolume, setUserMapDisplay, setUserMapVolume } from './overlay.ts';
+import { regionPoints } from './region-points.ts';
 import type {
   CarryJob,
   ClusterJob,
+  CourseJob,
   ExtentJob,
   UserMapJob,
   UserMapReply,
@@ -44,6 +47,27 @@ interface RibbonLabels {
 export class SupersededError extends Error {
   override name = 'AbortError';
 }
+
+/**
+ * Jobs of one kind run one at a time in the worker; one asked for while another runs is sent only if
+ * it is still the newest when that one is done, so scrubbing a series carries no volume passed over.
+ */
+function newestOnly() {
+  let asked = 0;
+  let running: Promise<unknown> = Promise.resolve();
+  return async <T>(run: () => Promise<T>): Promise<T> => {
+    const ask = ++asked;
+    await running;
+    if (ask !== asked) throw new SupersededError('A newer job was asked for.');
+    const result = run();
+    running = result.catch(() => {});
+    return result;
+  };
+}
+
+/** The map as a volume is drawn: its small clusters are trimmed only above one voxel. */
+const extentKey = (volume: number, threshold: number, minVoxels: number) =>
+  minVoxels > 1 ? `${volume}/${threshold}/${minVoxels}` : `${volume}`;
 
 /**
  * The reader's own map on this brain: read and carried in a worker, drawn per vertex on the cortex
@@ -75,6 +99,8 @@ export function createUserMap({
   let painted: string | null = null;
   let request = 0;
   const ribbons = new Map<string, Promise<Uint16Array>>();
+  // Each region's whole-millimetre points, by atlas and region: the solids do not change.
+  const regions = new Map<string, Float32Array>();
 
   const start = () => {
     if (worker) return worker;
@@ -286,8 +312,10 @@ export function createUserMap({
 
   // How the map is drawn now; a new extent of it is drawn the same way.
   let shown: MapDisplay | null = null;
-  let extentKey = '';
+  let drawnExtent = '';
   let extentRequest = 0;
+  const extents = newestOnly();
+  const tables = newestOnly();
 
   /** Put a carried map on the cut faces, the linked MRI and the cortex. */
   const place = async (map: CarriedMap) => {
@@ -298,6 +326,16 @@ export function createUserMap({
     if (shown) sections.setUserMap({ at, display: shown });
     await paintCortex();
     invalidate();
+  };
+
+  /** A structure's closed solids, or else the shown cortical atlas's ribbon solid for a parcel. */
+  const solidsOf = async (id: string): Promise<Mesh[]> => {
+    const structures = [...atlas.layers.values()]
+      .flatMap((layer) => layer.meshes)
+      .filter(({ userData }) => userData['region_id'] === id && userData['kind'] === 'structure');
+    if (structures.length) return structures;
+    const wedges = await atlas.ensureRibbonWedges(atlas.settings.atlas, baseUrl);
+    return wedges.filter(({ userData }) => userData['region_id'] === id);
   };
 
   const onChange = () => {
@@ -318,12 +356,12 @@ export function createUserMap({
      * Read a NIfTI file given in `space` and carry it onto this brain, replacing any map; nothing is
      * drawn until `show`. Rejects with the reason a file cannot be read or placed.
      */
-    async load(file: ArrayBuffer, space: string): Promise<MapSummary> {
+    async load(file: ArrayBuffer, space: string, volume: number): Promise<MapSummary> {
       const ask = ++request;
       const metadata = atlas.manifest.coordinate_spaces;
       if (!metadata) throw new Error('This anatomy publishes no template registration.');
       const { id, field: record } = readIn(metadata, space);
-      const job: CarryJob = { kind: 'carry', token: ++token, file, space: id };
+      const job: CarryJob = { kind: 'carry', token: ++token, file, space: id, volume };
       const transfer: Transferable[] = [file];
       if (!inverted.has(id)) {
         job.field = { record, data: await loadFieldData(record, baseUrl) };
@@ -335,11 +373,14 @@ export function createUserMap({
           transfer.push(job.cortex[side].pial.buffer, job.cortex[side].white.buffer);
         }
       }
-      const { map } = (await post(job, transfer)) as { map: CarriedMap };
+      const { map, summary } = (await post(job, transfer)) as {
+        map: CarriedMap;
+        summary: MapSummary;
+      };
       inverted.add(id);
       cortexSent = true;
       if (ask !== request) throw new SupersededError('A newer map was opened.');
-      extentKey = '';
+      drawnExtent = extentKey(volume, Number.NaN, 0);
       shown = null;
       sections.setUserMap(null);
       setUserMapDisplay(uniforms, null);
@@ -347,31 +388,54 @@ export function createUserMap({
         greyed(new Color(atlas.manifest.appearance.tissue.cortex)),
       );
       await place(map);
-      return map.summary;
+      return summary;
     },
-    /** The loaded map's clusters and peaks beyond `threshold`, as nilearn's `get_clusters_table`. */
-    async clusters(threshold: number, minVoxels: number): Promise<Cluster[]> {
+    /** A volume's clusters and peaks beyond `threshold`, as nilearn's `get_clusters_table`. */
+    async clusters(threshold: number, minVoxels: number, volume: number): Promise<Cluster[]> {
       if (!carried) throw new Error('No map is loaded.');
-      const job: ClusterJob = { kind: 'clusters', token: ++token, threshold, minVoxels };
-      return ((await post(job, [])) as { clusters: Cluster[] }).clusters;
+      const reply = await tables(() =>
+        post({ kind: 'clusters', token: ++token, volume, threshold, minVoxels } as ClusterJob, []),
+      );
+      return (reply as { clusters: Cluster[] }).clusters;
     },
     /**
-     * Draw the map without its clusters smaller than `minVoxels` beyond ±threshold, as nilearn's
-     * `threshold_img(…, cluster_threshold=minVoxels)`; below two voxels, the whole map.
+     * Draw a volume of the map without its clusters smaller than `minVoxels` beyond ±threshold, as
+     * nilearn's `threshold_img(…, cluster_threshold=minVoxels)`; below two voxels, the whole volume.
      */
-    async extent(threshold: number, minVoxels: number): Promise<void> {
+    async extent(threshold: number, minVoxels: number, volume: number): Promise<void> {
       if (!carried) throw new Error('No map is loaded.');
-      const key = minVoxels > 1 ? `${threshold}/${minVoxels}` : '';
-      if (key === extentKey) return;
+      const key = extentKey(volume, threshold, minVoxels);
+      if (key === drawnExtent) return;
       const ask = ++extentRequest;
       const loaded = request;
-      const job: ExtentJob = { kind: 'extent', token: ++token, threshold, minVoxels };
-      const { map } = (await post(job, [])) as { map: CarriedMap };
+      const { map } = (await extents(() =>
+        post({ kind: 'extent', token: ++token, volume, threshold, minVoxels } as ExtentJob, []),
+      )) as { map: CarriedMap };
       if (ask !== extentRequest || loaded !== request) {
         throw new SupersededError('A newer extent was asked for.');
       }
-      extentKey = key;
+      drawnExtent = key;
       await place(map);
+    },
+    /**
+     * A region's mean in each volume of the loaded map, over its whole millimetres inside the region's
+     * solid; null for a region with none (neither a structure nor a parcel of the shown cortex).
+     */
+    async course(region: string): Promise<MapCourse | null> {
+      if (!carried) throw new Error('No map is loaded.');
+      const loaded = request;
+      const key = `${atlas.settings.atlas}/${region}`;
+      let points = regions.get(key);
+      if (!points) {
+        const solids = await solidsOf(region);
+        if (!solids.length) return null;
+        points = regionPoints(solids);
+        regions.set(key, points);
+      }
+      const job: CourseJob = { kind: 'course', token: ++token, points: points.slice() };
+      const { course } = (await post(job, [job.points.buffer])) as { course: MapCourse };
+      if (loaded !== request) throw new SupersededError('A newer map was opened.');
+      return course;
     },
     /** The cortex's surface while the map is drawn and no cut is open; the pial otherwise. */
     setSurface(surface: CortexSurface): void {

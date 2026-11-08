@@ -20,14 +20,14 @@ test('a file that cannot be read is worded in French from its code, after crossi
 });
 
 test('a reason with values words them in the reader’s language', () => {
-  const posted = structuredClone({ code: 'volumes' as const, params: [3] });
+  const posted = structuredClone({ code: 'tooManyVolumes' as const, params: [300, 1234] });
   assert.equal(
     mapFileReason(fr, frErrors, new MapFileError(posted.code, posted.params)),
-    'Ce fichier contient 3 volumes ; enregistrez celui à afficher dans son propre fichier.',
+    'Ce fichier contient 300 volumes ; jusqu’à 1\u202f234 de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.',
   );
   assert.equal(
-    new MapFileError('volumes', [3]).message,
-    'This file holds 3 volumes; save the one to show as its own file.',
+    new MapFileError('tooManyVolumes', [300, 1234]).message,
+    'This file holds 300 volumes; up to 1\u202f234 of its size can be shown. Save fewer as their own file.',
   );
 });
 
@@ -46,5 +46,5 @@ test('an unexpected error is said to be unexpected, never in another language', 
 });
 
 test('a reason given the wrong number of values fails rather than saying undefined', () => {
-  assert.throws(() => new MapFileError('volumes', []), /takes 1 values, not 0/);
+  assert.throws(() => new MapFileError('dimensions', []), /takes 1 values, not 0/);
 });

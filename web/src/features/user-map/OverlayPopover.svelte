@@ -24,6 +24,7 @@
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import { downloadText } from '../tracts/download.ts';
+  import { volumeParts } from './key.ts';
   import Select from '../../lib/ui/Select.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
 
@@ -158,14 +159,18 @@
 
   function summary(): string {
     if (current.status !== 'ready') return '';
-    const { shape, voxelMm, range, binary, cortexCovered } = current.summary;
+    const { shape, voxelMm, range, binary, cortexCovered, volumes, secondsPerVolume } =
+      current.summary;
     const voxel = withUnit(
       voxelMm.map((edge: number) => mapNumber(edge, lang)).join(' × '),
       'mm',
       lang,
     );
+    const every =
+      secondsPerVolume === null ? null : withUnit(mapNumber(secondsPerVolume, lang), 's', lang);
     return [
       copy.shape(shape.join(' × '), voxel),
+      ...(volumes > 1 ? [copy.series(grouped(volumes), every)] : []),
       binary ? copy.mask : copy.range(mapNumber(range[0], lang), mapNumber(range[1], lang)),
       copy.reach(percent(cortexCovered, lang)),
     ].join(' · ');
@@ -176,6 +181,28 @@
   {#if current.status === 'ready'}
     <p class="name">{current.name}</p>
     <p class="hint">{summary()}</p>
+    {#if current.summary.volumes > 1}
+      {@const series = current.summary}
+      <div class="stage-field">
+        <RangeField
+          label={copy.volume}
+          value={map.volume}
+          min={0}
+          max={series.volumes - 1}
+          format={(volume) => copy.volumeOf(...volumeParts(series, volume, lang))}
+          oninput={(volume) => map.setVolume(volume)}
+        />
+        <button
+          type="button"
+          class="stage-command stage-command-quiet play"
+          disabled={!map.drawn}
+          onclick={() => map.setPlaying(!map.playing)}
+        >
+          {map.playing ? copy.pause : copy.play}
+        </button>
+        <p class="hint">{copy.volumeHint}</p>
+      </div>
+    {/if}
   {:else}
     <p class="hint intro">{copy.intro}</p>
   {/if}
@@ -384,6 +411,9 @@
     }
     .intro {
       margin-top: 0;
+    }
+    .play {
+      margin-top: var(--space-2);
     }
     .error {
       color: var(--danger);

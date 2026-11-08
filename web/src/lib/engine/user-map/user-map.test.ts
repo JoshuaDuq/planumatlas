@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { afterEach, test, vi } from 'vitest';
-import { BufferAttribute, BufferGeometry, Mesh, MeshPhysicalMaterial } from 'three';
+import { BoxGeometry, BufferAttribute, BufferGeometry, Mesh, MeshPhysicalMaterial } from 'three';
+import { computeBoundsTree } from 'three-mesh-bvh';
 import type { CarriedMap } from '../../core/user-map/carry.ts';
+import type { MapSummary } from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import type { BrainAtlas } from '../model/brain-atlas.ts';
 import { createUserMapUniforms } from './overlay.ts';
@@ -23,23 +25,42 @@ vi.mock('../../core/user-map/partition.ts', () => ({
     new Map(parents.map((index) => [index, Float32Array.from(native)])),
 }));
 
-/** Carries every map with its token as the cortex's value, or answers with `refusal`. */
+/**
+ * Carries every map with its token as the cortex's value, gives a region's point count as its course,
+ * or answers with `refusal`; keeps each job.
+ */
 class FakeWorker {
   static refusal: Omit<Extract<UserMapReply, { error: string }>, 'token'> | null = null;
+  static jobs: UserMapJob[] = [];
+  /** Replies kept until the test sends them, while it holds the worker busy. */
+  static held: (() => void)[] | null = null;
   onmessage: ((event: { data: UserMapReply }) => void) | null = null;
-  postMessage({ token }: UserMapJob) {
+  reply(data: UserMapReply) {
+    const send = () => this.onmessage!({ data });
+    if (FakeWorker.held) FakeWorker.held.push(send);
+    else queueMicrotask(send);
+  }
+  postMessage(job: UserMapJob) {
+    FakeWorker.jobs.push(job);
+    const { token } = job;
     const { refusal } = FakeWorker;
     if (refusal) {
-      queueMicrotask(() => this.onmessage!({ data: { token, ...structuredClone(refusal) } }));
+      this.reply({ token, ...structuredClone(refusal) });
+      return;
+    }
+    if (job.kind === 'course') {
+      const points = job.points.length / 3;
+      const course = { means: Float32Array.of(points), counts: Uint32Array.of(points), points };
+      this.reply({ token, course });
       return;
     }
     const map: CarriedMap = {
       grid: { shape: [1, 1, 1], origin: [0, 0, 0], spacing: 1 },
-      volume: new Float32Array(1),
+      volume: new Float32Array(2),
       cortex: { left: new Float32Array([token]), right: new Float32Array([token]) },
-      summary: {} as CarriedMap['summary'],
     };
-    queueMicrotask(() => this.onmessage!({ data: { token, map } }));
+    const summary = { volumes: 3 } as MapSummary;
+    this.reply({ token, map, summary });
   }
   terminate() {}
 }
@@ -68,10 +89,20 @@ function setup() {
       userData: { region_id: region, hemisphere },
     });
   };
-  // Two cortical atlases, each a parcel a hemisphere.
-  const layers = new Map(
-    ['hcp', 'julich'].map((id) => [id, { meshes: [parcel('a', 'left'), parcel('b', 'right')] }]),
-  );
+  // A 3 mm cube of a structure at the origin (glTF metres).
+  const cube = new BoxGeometry(0.003, 0.003, 0.003);
+  cube.boundsTree = computeBoundsTree.call(cube);
+  const structure = Object.assign(new Mesh(cube), {
+    userData: { region_id: 'thalamus', kind: 'structure' },
+  });
+  // Two cortical atlases, each a parcel a hemisphere, and the structures.
+  const layers = new Map<string, { meshes: Mesh[] }>([
+    ...['hcp', 'julich'].map((id): [string, { meshes: Mesh[] }] => [
+      id,
+      { meshes: [parcel('a', 'left'), parcel('b', 'right')] },
+    ]),
+    ['structures', { meshes: [structure] }],
+  ]);
   const envelopes = ['left', 'right'].flatMap((hemisphere) =>
     [
       ['pial', 0.01],
@@ -97,6 +128,7 @@ function setup() {
     },
     settings: { atlas: 'hcp', cutActive: false },
     ensureEnvelopes: async () => envelopes,
+    ensureRibbonWedges: async () => [],
   });
   atlas.addEventListener('loaderror', (event) => {
     throw (event as CustomEvent).detail;
@@ -113,6 +145,8 @@ function setup() {
 afterEach(() => {
   vi.unstubAllGlobals();
   FakeWorker.refusal = null;
+  FakeWorker.jobs = [];
+  FakeWorker.held = null;
 });
 
 const ready = (mesh: Mesh) =>
@@ -120,11 +154,11 @@ const ready = (mesh: Mesh) =>
 
 test('each map and extent is written over the cortex’s own buffer, and a removed map is hidden', async () => {
   const { userMap, mesh } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni');
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
   const drawn = mesh.geometry.getAttribute('_user_map');
   assert.deepEqual([...drawn.array], [1, 1, 1, 1, 1, 1]);
   assert.equal(ready(mesh), true);
-  await userMap.extent(2, 5);
+  await userMap.extent(2, 5, 0);
   assert.equal(mesh.geometry.getAttribute('_user_map'), drawn);
   assert.deepEqual([...drawn.array], [2, 2, 2, 2, 2, 2]);
   assert.equal((drawn as BufferAttribute).version, 1);
@@ -138,7 +172,7 @@ test('the cortex moves between surfaces in its own buffers and comes back to the
   const normal = mesh.geometry.getAttribute('normal');
   const pial = [...position.array];
   const pialNormals = [...normal.array];
-  await userMap.load(new ArrayBuffer(4), 'mni');
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
   userMap.show({ threshold: 1, max: 2, opacity: 1 });
   const x = () => position.array[0]!;
   userMap.setSurface('white');
@@ -162,14 +196,14 @@ test('a file the worker refused rejects with its code, for the overlay to word',
     error: 'This map holds only zeros.',
     file: { code: 'zeros', params: [] },
   };
-  const refused = await userMap.load(new ArrayBuffer(4), 'mni').catch((error: unknown) => error);
+  const refused = await userMap.load(new ArrayBuffer(4), 'mni', 0).catch((error: unknown) => error);
   assert.ok(refused instanceof MapFileError);
   assert.equal(refused.code, 'zeros');
 });
 
 test('an atlas changed while its parcels were being moved is left on the pial', async () => {
   const { userMap, atlas, layers } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni');
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
   userMap.show({ threshold: 1, max: 2, opacity: 1 });
   const [hcp, julich] = ['hcp', 'julich'].map(
     (id) => layers.get(id)!.meshes[0]!.geometry.getAttribute('position').array,
@@ -179,4 +213,64 @@ test('an atlas changed while its parcels were being moved is left on the pial', 
   atlas.dispatchEvent(new Event('change'));
   await vi.waitFor(() => assert.ok(Math.abs(julich![0]! - 0.03) < 1e-7));
   assert.equal(hcp![0], Math.fround(0.01));
+});
+
+test('a volume is carried once for each volume and extent asked for, never again for the one drawn', async () => {
+  const { userMap, mesh } = setup();
+  assert.deepEqual(await userMap.load(new ArrayBuffer(4), 'mni', 1), { volumes: 3 });
+  // Below two voxels nothing is trimmed, so the volume carried at load is the one drawn at any threshold.
+  await userMap.extent(2, 0, 1);
+  await userMap.extent(3, 1, 1);
+  await userMap.extent(2, 0, 2);
+  await userMap.extent(2, 5, 2);
+  await userMap.extent(2, 5, 2);
+  const jobs = FakeWorker.jobs.map((job) =>
+    job.kind === 'carry' || job.kind === 'extent' ? [job.kind, job.volume] : [job.kind],
+  );
+  assert.deepEqual(jobs, [
+    ['carry', 1],
+    ['extent', 2],
+    ['extent', 2],
+  ]);
+  assert.deepEqual([...mesh.geometry.getAttribute('_user_map').array], [3, 3, 3, 3, 3, 3]);
+});
+
+test('a structure’s course is read at its whole millimetres; a region without a solid has none', async () => {
+  const { userMap } = setup();
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  // −1, 0 and 1 mm along each axis of the 3 mm cube.
+  const course = await userMap.course('thalamus');
+  assert.equal(course?.points, 27);
+  assert.equal(await userMap.course('nowhere'), null);
+  // The worker is sent a copy, so the points kept for the region survive the transfer.
+  await userMap.course('thalamus');
+  const sent = FakeWorker.jobs.filter((job) => job.kind === 'course');
+  assert.equal(sent.length, 2);
+  assert.notEqual(sent[0]!.points, sent[1]!.points);
+});
+
+test('volumes asked for while one is carried are sent only if still the newest when it is done', async () => {
+  const { userMap } = setup();
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  const carried = () =>
+    FakeWorker.jobs.flatMap((job) => (job.kind === 'extent' ? [job.volume] : []));
+  const outcome = (volume: number) =>
+    userMap.extent(2, 0, volume).then(
+      () => 'drawn',
+      (error: Error) => error.name,
+    );
+  FakeWorker.held = [];
+  const first = outcome(1);
+  await vi.waitFor(() => assert.deepEqual(carried(), [1]));
+  const later = [2, 3, 4].map(outcome);
+  FakeWorker.held.shift()!();
+  await vi.waitFor(() => assert.deepEqual(carried(), [1, 4]));
+  FakeWorker.held.shift()!();
+  // The first was carried, but is not drawn over the newer one asked for meanwhile.
+  assert.deepEqual(await Promise.all([first, ...later]), [
+    'AbortError',
+    'AbortError',
+    'AbortError',
+    'drawn',
+  ]);
 });

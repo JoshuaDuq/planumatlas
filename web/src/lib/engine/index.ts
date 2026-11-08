@@ -443,6 +443,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         load: userMap.load,
         clusters: userMap.clusters,
         extent: userMap.extent,
+        course: userMap.course,
         setSurface: userMap.setSurface,
         show: userMap.show,
         clear: userMap.clear,
