@@ -1,124 +1,102 @@
 # Receptor fingerprints
 
-Densities of up to 17 neurotransmitter receptors, measured by autoradiography in post-mortem brains and shown in the region detail of the areas and structures they were measured in.
+Region details show the densities of up to 17 neurotransmitter receptors. Each density is a mean ± standard deviation (SD) measured by quantitative in vitro autoradiography in two to six post-mortem brains (Zilles and Palomero-Gallagher, EBRAINS). A fingerprint reaches a region only through the name of the area or structure it was measured in: 30 Julich-Brain areas, the putamen, the globus pallidus, and the mediodorsal and anterior thalamic nuclei. Nothing is measured in the brain shown, and both hemispheres carry the same pooled values.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/receptor-fingerprints-1.webp
+:alt: Left lateral views of a translucent grey brain with Area 44 outlined in the inferior frontal gyrus and, below, the putamen shown in orange; beside each, a panel of receptor densities with bars and mean ± SD values grouped by transmitter.
+:name: fig-receptor-fingerprints-1
 
-* - Where in the viewer
-  - The **Receptor densities** disclosure of the region detail for a region that has a fingerprint (30 Julich-Brain areas, putamen, globus pallidus, mediodorsal and anterior thalamic nuclei); a Dorsal | Ventral choice for Area 44 and hOc2.
-* - Built by
-  - [`scripts/fetch_receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/fetch_receptor_fingerprints.py) (fetch), [`brain_model/layers/receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/receptor_fingerprints.py) (assignment by name, export, validation), called from [`brain_model/build.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/build.py)
-* - Configuration
-  - [`config/receptor-fingerprints.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/receptor-fingerprints.yaml)
-* - Source data
-  - 36 receptor datasets of Zilles and Palomero-Gallagher on EBRAINS (human receptors, bucket `p22717-hbp-d000045_receptors-human-<key>_pub`, `v1.0`); CC BY-NC-SA 4.0
-* - Checked by
-  - [`tests/test_receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_receptor_fingerprints.py); the fetch's own checks; `receptor_fingerprints.validate` in the [validator](../pipeline/validation.md); `web/src/lib/core/learning/references.test.ts` for the DOIs and PMIDs
-:::
-
-## What it does
-
-Densities of up to 17 neurotransmitter receptors, measured by quantitative in vitro autoradiography in two to six post-mortem brains (Zilles et al. 2015; Palomero-Gallagher and Zilles 2018) and published per area on EBRAINS. A fingerprint reaches a region only through the name of what it was measured in: 30 Julich-Brain areas (Area 44 and hOc2 in a dorsal and a ventral part), and the putamen, globus pallidus, mediodorsal and anterior thalamic nuclei on their aseg, NextBrain and teaching-set structures. Both hemispheres show the same pooled values.
-
-Nothing is measured in the brain shown. The layer is carried per region, never per vertex or voxel.
+**A fingerprint is carried to a region by name and its bars compare one receptor across the 36 fingerprints.** **a**, Julich-Brain Area 44 (IFG), left hemisphere, selected under **Focus**. **b**, Its **Receptor densities** section with the ventral part chosen (dataset 44v: 9 hemispheres from 5 brains aged 72–79 years; NMDA 1,129 ± 382 fmol/mg, D<sub>1</sub> 69 ± 32 fmol/mg). **c**, The teaching-set putamen, left hemisphere, under **Focus**. **d**, Its fingerprint (dataset Pu: 3 hemispheres from 2 brains aged 72–77 years). D<sub>1</sub> is 252 fmol/mg, the highest D<sub>1</sub> mean published, so its bar is full, while the D<sub>1</sub> bar of Area 44v is 27% long. CDMD (sub_013), left lateral view; each bar is the region's mean as a share of that receptor's highest mean among the 36 fingerprints.
+```
 
 ## Data
 
-**Sources.** The datasets are documented by Zilles et al. (2015), Cortex 63:79–89 ([doi:10.1016/j.cortex.2014.07.007](https://doi.org/10.1016/j.cortex.2014.07.007), PMID 25243991) and Palomero-Gallagher and Zilles (2018), Handb Clin Neurol 150:355–387 ([doi:10.1016/B978-0-444-63639-3.00024-4](https://doi.org/10.1016/B978-0-444-63639-3.00024-4), PMID 29496153); each dataset has its own EBRAINS DOI (`https://doi.org/10.25493/...`) in the YAML. Unit: fmol/mg. Licence: CC BY-NC-SA 4.0.
+The 36 datasets were published on EBRAINS by Zilles, Palomero-Gallagher and colleagues (bucket `p22717-hbp-d000045_receptors-human-<key>_pub`, version `v1.0`). They are documented by Zilles et al. (2015) and Palomero-Gallagher and Zilles (2018); each dataset also has its own EBRAINS DOI ([receptor datasets](../reference/references.md#receptor-datasets)). Densities are in fmol/mg. Licence: CC BY-NC-SA 4.0.
 
-**Files.** For each of the 36 datasets, three files at `https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000045_receptors-human-<key>_pub/<file>?redirect=true`, each pinned by sha256 in the YAML:
+Each dataset contributes three files pinned by sha256: the fingerprint (`<key>_fp_<date>.tsv`; `density (mean)`, `density (sd)`, `density (unit)`), the donors (`subjects.tsv`) and the tissue samples with their hemisphere (`tissue-samples.tsv`; `tissue-samples_all.csv` for hOc1; the IFS and IFJ files sit in `<key>_fp/` as `*_all.csv`).
 
-- the fingerprint, `v1.0/<key>_fp_<date>.tsv` (columns `density (mean)`, `density (sd)`, `density (unit)`);
-- `v1.0/subjects.tsv` (`subject (ID)`, `sex`, `age (value)`, `age (unit)`);
-- `v1.0/tissue-samples.tsv` (`tissue sample (ID)`, `hemisphere`, `from subject (ID)`, `pathology`; some datasets use `tissue-samples_all.csv`, and the IFS and IFJ sets keep their files in a `v1.0/<key>_fp/` subfolder, as `subjects_all.csv` and `tissue-samples_all.csv`).
-
-The files are cached in `data/cache/receptor-fingerprints/<key>/` and read into `data/receptor-fingerprints.json`.
-
-**Datasets and where they go.** `measured_in` is the dataset's own name for what was sampled; `targets` name regions by atlas and source name (an aseg name is matched with its `Left-` or `Right-` prefix).
-
-| Group | Datasets (keys) | Target regions |
+| Group | Datasets | Target regions |
 | :--- | :--- | :--- |
-| Julich-Brain areas, Zilles et al. 2015 | 3b, 44d and 44v, 45, 4p, 7A, FG1, FG2, PF, PFcm, PFm, PFop, PFt, PGa, PGp, TE1_0, TE2_1, hOc1 | `Area 3b (PostCG)`, `Area 44 (IFG)` (dorsal and ventral parts), `Area 45 (IFG)`, `Area 4p (PreCG)`, `Area 7A (SPL)`, `Area FG1 (FusG)`, `Area FG2 (FusG)`, `Area PF (IPL)`, `Area PFcm (IPL)`, `Area PFm (IPL)`, `Area PFop (IPL)`, `Area PFt (IPL)`, `Area PGa (IPL)`, `Area PGp (IPL)`, `Area Te 1.0 (HESCHL)`, `Area Te 2.1 (STG)`, `Area hOc1 (V1, 17, CalcS)` |
-| Julich-Brain areas, visual and hippocampal | hOc2d and hOc2v, hOc3d, hOc3v, CA1, CA2, CA3, DG | `Area hOc2 (V2, 18)` (dorsal and ventral parts), `Area hOc3d (Cuneus)`, `Area hOc3v (LingG)`, `CA1 (Hippocampus)`, `CA2 (Hippocampus)`, `CA3 (Hippocampus)`, `DG (Hippocampus)` |
-| Julich-Brain areas, Palomero-Gallagher and Zilles 2018 | ifs1 to ifs4, ifj1, ifj2 | `Area IFS1 (IFS)` to `Area IFS4 (IFS)`, `Area IFJ1 (IFS, PreCS)`, `Area IFJ2 (IFS, PreCS)` |
-| Putamen | Pu | aseg `Putamen`; NextBrain `putamen` and `posteroventral_putamen`; the teaching set's `Putamen` |
-| Globus pallidus | GP | aseg `Pallidum`; NextBrain's external and internal segments of the globus pallidus; the teaching set's external and internal Globus pallidus |
-| Mediodorsal thalamic nucleus | ThMD | NextBrain's five divisions of MD (magnocellular, central part of the medial division, parvocellular, densocellular and multiform) |
-| Anterior thalamic nucleus | ThA | NextBrain's anteroventral, anteromedial and anterodorsal nuclei of thalamus |
+| Julich-Brain, Zilles et al. (2015) | 3b, 44d, 44v, 45, 4p, 7A, FG1, FG2, PF, PFcm, PFm, PFop, PFt, PGa, PGp, TE1_0, TE2_1, hOc1 | Area 44 takes 44d and 44v as dorsal and ventral parts; each other key names one area |
+| Julich-Brain, visual and hippocampal | hOc2d, hOc2v, hOc3d, hOc3v, CA1, CA2, CA3, DG | Area hOc2 takes hOc2d and hOc2v as parts |
+| Julich-Brain, Palomero-Gallagher and Zilles (2018) | ifs1–ifs4, ifj1, ifj2 | Areas IFS1–IFS4, IFJ1, IFJ2 |
+| Putamen | Pu | aseg `Putamen`; NextBrain `putamen`, `posteroventral_putamen`; teaching-set putamen |
+| Globus pallidus | GP | aseg `Pallidum`; NextBrain external and internal segments; teaching-set external and internal pallidum |
+| Mediodorsal thalamic nucleus | ThMD | NextBrain's five divisions of MD |
+| Anterior thalamic nucleus | ThA | NextBrain's anteroventral, anteromedial and anterodorsal nuclei |
 
-On CDMD the 36 datasets reach 94 regions: 60 Julich-Brain (30 areas in two hemispheres), 24 NextBrain, 6 teaching-set and 4 aseg. The Julich-Brain areas are the cortical atlas described in [Cortical atlases](cortical-atlases.md).
+The receptors are, in display order: glutamate (AMPA, kainate, NMDA, mGluR2/3), GABA (GABA<sub>A</sub>, GABA<sub>B</sub>, GABA<sub>A</sub>/BZ), acetylcholine (M<sub>1</sub>, M<sub>2</sub>, M<sub>3</sub>, α<sub>4</sub>β<sub>2</sub>), noradrenaline (α<sub>1</sub>, α<sub>2</sub>), serotonin (5-HT<sub>1A</sub>, 5-HT<sub>2</sub>), dopamine (D<sub>1</sub>) and adenosine (A<sub>1</sub>). A fingerprint holds 14 to 17 of them. All 36 hold the 14 others; GABA<sub>A</sub>/BZ is in 32, mGluR2/3 in 17 and A<sub>1</sub> in 6. The donors are AR01 to AR07, aged 61 to 79 years across datasets, with 2 to 6 donors and 3 to 9 sampled hemispheres per dataset.
 
-**Receptors.** 17 in all, in display order: glutamate (AMPA, kainate, NMDA, mGluR2/3), GABA (GABA<sub>A</sub>, GABA<sub>B</sub>, GABA<sub>A</sub>/BZ), acetylcholine (M<sub>1</sub>, M<sub>2</sub>, M<sub>3</sub>, α<sub>4</sub>β<sub>2</sub>), noradrenaline (α<sub>1</sub>, α<sub>2</sub>), serotonin (5-HT<sub>1A</sub>, 5-HT<sub>2</sub>), dopamine (D<sub>1</sub>) and adenosine (A<sub>1</sub>). A fingerprint measures 14 to 17 of them. `aliases` in the YAML list the other spellings the published files use (for example `mGluR2_3` and `mGlu2/3` for mGluR2/3).
+## Method
 
-**Donors.** Two to six post-mortem brains per fingerprint (donor IDs AR01 to AR07, from one pool), aged 61 to 79 years across all datasets, with the hemispheres sampled counted per dataset. The viewer shows each fingerprint's samples, donors and age range.
+### Fetch and parse
 
-## How it was built
+`scripts/fetch_receptor_fingerprints.py` reads `config/receptor-fingerprints.yaml` and processes each dataset in four steps:
 
-### 1. Fetch and read
+1. It downloads the three files into `data/cache/receptor-fingerprints/<key>/`. A file is renamed into the cache only once complete. A sha256 mismatch stops the script.
+2. It reads each table. Lines quoted whole or separated by spaces (the IFS and IFJ files) are split into their columns. Missing columns, or a row with the wrong number of columns, stop the script.
+3. It maps every receptor label to its id through the configured spellings (`aliases`, e.g. `mGluR2_3` and `mGlu2/3`). An unknown receptor, a unit other than fmol/mg, or a receptor listed twice stops the script. A blank SD is stored as no SD (`null`), not as zero.
+4. It reads the donors (id, sex, age) and the samples (id, hemisphere, donor). Ages must be in years. A repeated sample, a sample without a hemisphere, or samples and subjects naming different donors stop the script.
 
-`scripts/fetch_receptor_fingerprints.py` reads `config/receptor-fingerprints.yaml` (`read_definition` checks it first) and, for each dataset:
+The result is `data/receptor-fingerprints.json`; `--record` registers it in `data/sources.json` with every origin URL and sha256. `read_definition` refuses duplicate dataset keys, a key outside the schema (a value cut at a comma in a YAML flow mapping), a part other than dorsal or ventral, and two fingerprints on one region unless they are distinct parts.
 
-1. downloads the three files and refuses a checksum mismatch (the download is renamed into the cache only once complete);
-2. reads each table, tolerating the IFS and IFJ sets, which quote some lines whole and separate others by spaces (`rows`), and fails if the expected columns are absent or a row has the wrong number of columns;
-3. maps every receptor label to its id through the YAML's spellings, and fails on an unknown receptor, a unit other than fmol/mg, or a receptor listed twice. A blank SD is stored as no SD (`null`), not as zero;
-4. reads the donors (ID, sex, age in years; fails on any age unit but years) and the samples (ID, hemisphere, donor), and fails if a sample is listed twice, a sample names no hemisphere, or the samples and subjects name different donors;
-5. applies the withheld values (below).
+### Withheld values
 
-It writes `data/receptor-fingerprints.json` (unit, and for each dataset its receptors' mean and SD, donors and samples), prints the dataset count, and with `--record` adds the file to `data/sources.json` with each origin's URL and sha256, the procedure, the citations and the licence. The definition's own checks (`read_definition`) refuse duplicate dataset keys, unknown keys in a dataset (a value cut at a comma in a flow mapping), a non-DOI, a dataset with no target, an unknown source, a part other than dorsal or ventral, duplicate receptor spellings, and two fingerprints on one region unless they are distinct parts.
+A published value known to be wrong is withheld with its evidence. Only an SD can be withheld, and the fetch fails once the source no longer holds the withheld value. One value is withheld: the D<sub>1</sub> SD of ifs1, published as 863 fmol/mg. It equals the A<sub>1</sub> mean of the same file (863 fmol/mg). In the five neighbouring IFS and IFJ areas, measured in the same brains, the D<sub>1</sub> SD is 27–44 fmol/mg. Separately, PF, PFcm, PFop, PGa and PGp publish no α<sub>2</sub> SD.
 
-### 2. Withheld values
+### Assignment by name
 
-A published value known to be wrong is withheld, with the evidence, and the fetch fails if the file no longer holds the same value, so the exception cannot outlive the error. Only an SD can be withheld. The one withheld value is Area ifs1's D1 SD, published as 863 fmol/mg: it equals the same file's A1 mean (863), while D1's SD is 27 to 44 fmol/mg in the five neighbouring IFS and IFJ areas measured in the same brains. It is stored as no SD and the viewer shows the reason (English and French). Separately, five parietal areas (PF, PFcm, PFop, PGa, PGp) publish no α<sub>2</sub> SD, and none is shown.
+For every target in each hemisphere, `receptor_fingerprints.assign` requires exactly one region of that atlas whose `source_name` equals the target name (aseg names with `Left-` or `Right-`); otherwise the build fails. A target atlas the anatomy does not publish is skipped. A structure named as a whole gives the same values to each subdivision. On CDMD, the 36 datasets reach 94 regions: 60 Julich-Brain (30 areas, two hemispheres), 24 NextBrain, 6 teaching-set and 4 aseg. Areas 9, 46 and 47 are published on EBRAINS but name no Julich-Brain area, so they are left out.
 
-### 3. Assign by name
+### Export
 
-`receptor_fingerprints.assign` (run by the build over the anatomy's regions) looks up, for every target of every dataset and for each hemisphere, the single region of that atlas and hemisphere whose `source_name` equals the target name (with `Left-` or `Right-` added for aseg). It fails unless exactly one region is found, so a renamed area breaks the build rather than losing its fingerprint; an atlas the anatomy does not publish is skipped. Where an area was sampled in two parts (Area 44 and hOc2), the region takes both datasets, one per part. A structure the dataset names as a whole, such as the globus pallidus or the anterior thalamic nucleus, gives the same values to each of its subdivisions. Areas 9, 46 and 47 are also published but name no Julich-Brain area, so they are left out rather than placed in one.
+`export` writes `receptor-fingerprints.json`: the receptors, the withheld values with their reasons, each dataset (what was measured, part, DOI, sources, densities, donors, sampled hemispheres per side) and the region-to-dataset map. Fingerprints are carried per region, never per vertex or voxel.
 
-### 4. Export
+## Display
 
-`export` writes `receptor-fingerprints.json` to the model directory: the unit, sources, transmitters and receptors (with display symbols, English and French names), the withheld values with reasons, each dataset's key, what it was measured in, part, DOI, citing sources, receptors, donors and per-hemisphere sample counts, and the region id to dataset keys assignment. It returns the manifest's `receptor_fingerprints` metadata (id, file, label, unit, licence, DOIs and method). `limitations` adds the statements below to the manifest.
+The **Receptor densities** section of the region detail appears only for a region with a fingerprint. It stays mounted between selections. An area sampled in parts offers a **Dorsal** | **Ventral** choice. Rows are grouped by transmitter in display order. Each row shows the receptor symbol, a bar and the mean ± SD; a missing SD is drawn as "± —". A bar's length is the region's mean divided by the highest mean of that receptor among the 36 fingerprints (`highestMeans`). Bars therefore compare one receptor across regions, not receptors within a region (Fig. 1b,d).
 
-## How the viewer uses it
+Notes name unmeasured receptors, receptors without a published SD, any withheld SD with its published value and reason, the hemispheres, donors and age range, and what was measured, with links to the EBRAINS dataset and its sources. `validateReceptorFingerprints` refuses a loaded file with a non-doi.org DOI, a non-positive mean, a negative SD, a withheld value still present, or a region taking anything but one fingerprint or one dorsal and one ventral part.
 
-- `web/src/lib/core/catalog/receptor-fingerprints.ts` validates the file against the regions it names (every DOI is a doi.org link, every mean positive, every SD absent or non-negative, withheld values have no SD and a reason, a region takes one fingerprint or exactly one dorsal and one ventral) and prepares the display.
-- `web/src/features/inspector/ReceptorSection.svelte` shows a disclosure that stays mounted between selections. Rows are grouped by transmitter in the YAML's order; each row is the receptor's symbol, a bar and the mean ± SD. A region with two parts offers them as a Dorsal | Ventral choice.
-- **Bars.** Each bar is the share of that receptor's highest mean among the 36 published fingerprints (`highestMeans`), so a cortical D1 bar is short beside the putamen's.
-- **Notes.** Receptors the fingerprint did not measure are listed; receptors with no published SD are named; a withheld value is named with its published value and the reason. The note states the unit, the number of hemispheres sampled, the donors, their age range and the number of datasets, then what the fingerprint was measured in, and links the EBRAINS dataset and its sources.
-- `web/src/lib/core/panels/provenance.ts` lists the layer's label, licence and citations in the provenance panel.
+## Validation
 
-## Checks
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| `brain_model.validate` (`receptor_fingerprints.validate`) | Manifest metadata and published file equal those rebuilt from sources | 36 datasets; 94 regions with a fingerprint; no dataset reaching no region |
+| `test_every_dataset_reaches_its_regions_in_both_hemispheres_of_cdmd` | Every dataset reaches a region; identical keys left and right | 30 Julich-Brain areas, including Area 44, IFS1, CA1 and hOc3v |
+| `test_an_area_sampled_in_parts_takes_both_and_aseg_names_carry_their_side` | Area 44 takes 44d and 44v; aseg putamen and pallidum on both sides | passes |
+| `test_an_atlas_the_anatomy_does_not_publish_is_skipped_but_a_missing_name_fails` | Absent atlas skipped; renamed CA2 fails | passes |
+| `test_two_fingerprints_on_one_region_must_be_distinct_parts` | Two parts of one kind, or a lone part, refused | passes |
+| `test_the_published_fingerprints_hold_the_ebrains_values` | Spot values equal EBRAINS | 44v NMDA 1,129 ± 382, D<sub>1</sub> 69 ± 32; PF α<sub>2</sub> 837, no SD; ifs1 D<sub>1</sub> 78, SD withheld; ifs1 A<sub>1</sub> 863 ± 435; Pu donors AR04, AR05 |
+| `test_a_withheld_value_fails_the_fetch_once_the_source_changes`, `test_only_an_sd_can_be_withheld` | Withheld value pinned to its published value; only an SD | passes |
+| Parsing tests (unit, unknown receptor, quoted and space-separated lines, blank SD, repeated sample, value cut at a comma) | Each malformed input refused or read correctly | passes |
+| `web/src/lib/core/catalog/receptor-fingerprints.test.ts` | Bars as share of highest mean; CDMD catalogue validates; invalid assignments refused | passes |
+| `web/src/lib/core/learning/references.test.ts` | Source DOIs and PMIDs match the fetched records | passes |
 
-`receptor_fingerprints.validate`, called by `brain_model.validate` with the other per-area layers (see the [validator](../pipeline/validation.md)), fails unless the manifest's metadata equals the rebuilt metadata and the published file equals the one rebuilt from `data/receptor-fingerprints.json` and the manifest's regions. It reports the number of datasets (36), the regions with a fingerprint (94 on CDMD) and any dataset reaching no region.
+## Limitations
 
-The tests check that every dataset reaches its regions in both hemispheres of CDMD with identical values on both sides (30 Julich-Brain areas, including Area 44, IFS1, CA1 and hOc3v); that an area sampled in parts takes both and aseg names carry their side; that an atlas the anatomy does not publish is skipped but a missing name fails; that two fingerprints on one region must be distinct parts; that the published fingerprints hold the EBRAINS values (for example 44v NMDA 1129 ± 382 and D1 69 ± 32; PF α<sub>2</sub> 837 with no SD; ifs1 D1 mean 78 with its SD withheld and A1 863 ± 435; the putamen's donors AR04 and AR05); that a withheld value fails the fetch once the source changes; that another unit or an unknown receptor is refused; that quoted and space-separated IFS lines read as their columns; that only an SD can be withheld; that a blank SD in a tab row is no SD and a repeated sample is refused; and that a value cut at a comma is refused rather than published.
+- Two to six brains aged 61 to 79 years, not the brain shown. Values are pooled over the sampled hemispheres, so both hemispheres show the same values.
+- A fingerprint reaches a region only by name. Areas 9, 46 and 47 name no Julich-Brain area and are not shown.
+- A structure measured as a whole (globus pallidus, mediodorsal and anterior thalamic nuclei) gives identical values to each subdivision.
+- The ifs1 D<sub>1</sub> SD is withheld; five parietal areas publish no α<sub>2</sub> SD.
+- Some receptors may have been measured in fewer hemispheres than the dataset lists.
+- Bars compare a receptor across fingerprints, not receptors with each other.
+- CC BY-NC-SA 4.0: non-commercial, share-alike ([licence](../reference/references.md#cc-by-nc-sa-40-receptor-fingerprints-f-tract)).
 
-## Limits
+## Code availability
 
-- Two to six brains, aged 61 to 79, and not this brain; densities are pooled over the sampled hemispheres, so both hemispheres show the same values.
-- A fingerprint reaches a region only through the name of the area or structure measured. Areas 9, 46 and 47 are published but name no Julich-Brain area and are left out.
-- A structure a dataset names as a whole gives the same values to each of its subdivisions.
-- Ifs1's D1 SD is withheld, and five parietal areas publish no α<sub>2</sub> SD.
-- Densities are in fmol/mg; bars compare a receptor across areas, not receptors with each other.
-- Licensed CC BY-NC-SA 4.0: non-commercial, shared alike.
-
-### Alternatives considered
-
-Per-area probability maps on the cortical surface were rejected after measurement (EBRAINS survey, 2026-10-28). EBRAINS publishes the maps only as MNI152 and Colin27 volumes, and siibra has only the labelled `fsaverage` map. In a pilot (left hemisphere, RF-ANTs registration, Wu et al. 2018) the projected probability maps' argmax matched the published `fsaverage` maximum-probability map on 60.4% (MNI152) and 51.6% (Colin27) of vertices, with a median per-area Dice of 0.47. As a control, in the volume the argmax equalled the volumetric maximum-probability map on 90.7%, but that map carried by the same warp matched the published `fsaverage` map on only 48.8%, so EBRAINS's surface transfer is not registration fusion and projected probability maps would contradict the shipped parcellation. The probability maps are also smoothed with a 3 mm FWHM Gaussian, so their gradients are not purely inter-subject variability. Fingerprints are therefore carried by name only. BigBrain layer-wise cell densities (one brain) and the siibra connectivity matrices (Julich 2.9) were judged of low value, and the Julich deep-brain volumes are almost all already segmented on CDMD by NextBrain.
-
-## Reproduce
+| | |
+| :--- | :--- |
+| Code | [`scripts/fetch_receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/fetch_receptor_fingerprints.py), [`brain_model/layers/receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/receptor_fingerprints.py), [`web/src/lib/core/catalog/receptor-fingerprints.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/catalog/receptor-fingerprints.ts), [`web/src/features/inspector/ReceptorSection.svelte`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/features/inspector/ReceptorSection.svelte) |
+| Configuration | [`config/receptor-fingerprints.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/receptor-fingerprints.yaml) |
+| Tests | [`tests/test_receptor_fingerprints.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_receptor_fingerprints.py), `web/src/lib/core/catalog/receptor-fingerprints.test.ts`, `web/src/lib/core/learning/references.test.ts` |
 
 ```bash
-# downloads the 108 pinned files into data/cache/receptor-fingerprints/ and writes data/receptor-fingerprints.json
+# downloads the 108 pinned files and writes data/receptor-fingerprints.json
 uv run python scripts/fetch_receptor_fingerprints.py --record
 uv run python -m brain_model.build --anatomy cdmd
 uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_receptor_fingerprints.py
 ```
 
-## See also
-
-- [Cortical atlases](cortical-atlases.md), for the Julich-Brain areas
-- [Internal anatomy](internal-anatomy.md), for the NextBrain and teaching-set structures
-- [References](../reference/references.md) (Zilles et al. 2015; Palomero-Gallagher and Zilles 2018) and the [building guide](../pipeline/building.md)
+Figure state (panels a, b): https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=julich&cuts=julich&region=julich:left:2&view=left&focus=1 (open **Receptor densities**, choose **Ventral**). Panels c, d: https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=julich&cuts=julich&region=learning:left:putamen&view=left&focus=1

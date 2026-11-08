@@ -1,115 +1,92 @@
 # Boundary certainty
 
-For each pair of touching NextBrain labels in one hemisphere, the share of their shared boundary where the model nearly chose the other label, drawn as the selected region's outline on a NextBrain cut and listed in the region detail.
+Boundary certainty rates each boundary between two touching NextBrain labels in one hemisphere. The rating is the share of interface voxels where NextBrain's own posteriors nearly chose the other label of the pair. The posteriors are recorded from this brain's segmentation ([internal anatomy](internal-anatomy.md)) on its 0.4 mm grid. The viewer draws the rating on the selected region's outline on a NextBrain cut and lists it in the region detail. It measures the model's competition between its own labels under one registration, not accuracy and not agreement with another segmentation.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/boundary-certainty-1.webp
+:alt: Three zoomed coronal views of the left deep grey matter with NextBrain labels. The first shows the labels, the second marks near-tie voxels in orange along label boundaries, and the third draws every boundary black, orange or grey by its rating. A histogram of the ratings of all rated boundaries completes the figure.
+:name: fig-boundary-certainty-1
 
-* - Where in the viewer
-  - The selected NextBrain region's outline on a section with NextBrain cut labels (solid where firm, dashed where soft, grey where unrated), and the **Boundary certainty** section of the region detail.
-* - Built by
-  - [`scripts/freesurfer/run_patched.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/freesurfer/run_patched.py), [`scripts/segment_nextbrain.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/segment_nextbrain.py) (`join_near_ties`), [`brain_model/labels/boundary_certainty.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/labels/boundary_certainty.py)
-* - Configuration
-  - [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml): `nextbrain.near_tie_margin` (0.2), `nextbrain.minimum_interface_voxels` (50), `nextbrain.near_ties`
-* - Source data
-  - NextBrain's own posteriors for this brain (the labels of [Internal anatomy](internal-anatomy.md)), recorded as `data/nextbrain-cdmd/nextbrain-cdmd-near-ties.mgz`
-* - Checked by
-  - Validation step 13 ([validation](../pipeline/validation.md)); [`tests/test_boundary_certainty.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_boundary_certainty.py), `tests/test_segment_nextbrain.py`, `web/src/lib/core/catalog/boundary-certainty.test.ts`
-:::
-
-## What it does
-
-NextBrain computes each voxel's winning posterior but does not write it. The build records it, with the runner-up label and posterior, leaving the labels unchanged. A voxel is a **near tie** where the winner leads the runner-up by less than 0.2. For each pair of touching labels in one hemisphere, the interface is the voxels of either label with a face neighbour in the other on the 0.4 mm grid; the pair's rating is the share of them where the two most probable labels were this pair and nearly tied. Pairs with fewer than 50 interface voxels are not rated, nor are pairs across the midline, whose boundary is the hemisphere join's.
-
-A boundary is **soft** when a third or more of it is a near tie. The selected region's outline on a NextBrain cut and its **Boundary certainty** section draw the same rating. Near ties sit in a band about one voxel wide along boundaries, so a per-voxel map would show only edges; rating the boundary keeps that measurement and names the pair.
-
-It is the model's competition between its own labels, conditional on one registration. It is not agreement with another segmentation: CDMD's left amygdala, NextBrain's largest disagreement with aseg, is a confident label (median winning posterior 0.975). A firm boundary can still be misplaced.
+**Near ties form a band about one voxel wide along label boundaries, so the rating is made per boundary rather than per voxel.** **a**, NextBrain labels on the 0.4 mm grid over the T1. **b**, Near-tie voxels (orange), where the winning posterior led the runner-up by less than 0.2. **c**, In-plane label boundaries drawn by the rating of their pair: firm (black, near-tie share < 1/3), soft (orange, ≥ 1/3) or unrated (grey, fewer than 50 interface voxels). **d**, Near-tie shares of all 1,738 rated pairs; 329 are soft (dashed line at 1/3), and the median is 0.194. In **a**–**c** the coronal plane is at surface RAS (right-anterior-superior) y = −2.0 mm, left hemisphere, x from −40 mm (lateral, right edge) to −2 mm (medial, left edge), z from 0 to 36 mm. The panels were rendered from `nextbrain-cdmd.mgz`, `nextbrain-cdmd-near-ties.mgz` and `boundary-certainty.json` by nearest-neighbour sampling, not from the viewer. The scale bar is 10 mm.
+```
 
 ## Data
 
-- **Posteriors.** NextBrain's `segment_fireants.py` keeps each voxel's winning posterior `max_p` in its label loop and discards it. A source patch applied at run time records, beside the label update (which is untouched), `second_p` and `second_seg`: when a label takes a voxel the previous winner moves to second, and a label whose posterior beats only the runner-up replaces it. The hemisphere-wise outputs are `max_p.<side>.nii.gz`, `second_p.<side>.nii.gz` and `second_seg.<side>.nii.gz` beside `seg.<side>.nii.gz`.
-- **Near-tie volume.** `nextbrain-cdmd-near-ties.mgz`, int32 on the same 0.4 mm grid and affine as the NextBrain label volume: the runner-up label (right-hemisphere labels offset by 10,000) wherever the winner led by less than the margin, and 0 elsewhere and where the runner-up is background.
-- **Pinned.** The near-tie volume is recorded in `data/sources.json` with its inputs and a `near_ties` record (margin, rule, the patch's origin, voxel count).
+| Input | Content | Pinned by |
+| :--- | :--- | :--- |
+| NextBrain labels | `nextbrain-cdmd.mgz`, int32, 0.4 mm, surface RAS through `orig.mgz` | `data/sources.json` |
+| Posteriors | `max_p`, `second_p`, `second_seg` per hemisphere, written beside `seg.<side>.nii.gz` by the patched NextBrain run | provenance in `data/sources.json` (`near_ties.posteriors`) |
+| Near-tie volume | `nextbrain-cdmd-near-ties.mgz`, int32, on the label grid and affine: the runner-up label where the winner led by < 0.2; 0 elsewhere and where the runner-up is background. 1,061,305 voxels (7.5% of labelled voxels) on CDMD | `data/sources.json`, with `near_ties.margin` 0.2 |
 
-## How it was built
+## Method
 
-### 1. Record the posteriors
+### Posterior recording
 
-`scripts/freesurfer/run_patched.py` runs FreeSurfer's script as `__main__` with source patches, each required to match exactly once. The patch to `ERC_bayesian_segmentation/scripts/segment_fireants.py` adds `second_p` and `second_seg` arrays, updates them where a label's posterior beats the runner-up but not the winner, moves the previous winner to second where a label takes a voxel, and writes `max_p`, `second_p` and `second_seg` per hemisphere beside the label volume. It leaves the label update unchanged: rerunning reproduces the published labels byte for byte. The patches and workarounds for memory are described in [Internal anatomy](internal-anatomy.md#1-segment-nextbrain-on-this-brain).
+NextBrain's `segment_fireants.py` computes each voxel's winning posterior in its label loop and discards it. `scripts/freesurfer/run_patched.py` runs the script with source patches, each of which must match the source exactly once. The patch adds `second_p` and `second_seg`. A label that takes a voxel moves the previous winner to second place, and a label that beats only the runner-up replaces it. The label update itself is unchanged, and the rerun reproduces the published labels byte for byte.
 
-### 2. Join the near ties onto the label grid
+### Near ties on the label grid
 
-`join_near_ties` in `scripts/segment_nextbrain.py`, for each hemisphere:
+`join_near_ties` (`scripts/segment_nextbrain.py`) does the following for each hemisphere:
 
-1. Reads `max_p`, `second_p`, `second_seg` and `seg`, requiring each on the label volume's grid.
-2. Refuses a hemisphere where any runner-up posterior exceeds its winner's or a runner-up repeats its winner.
-3. Marks a voxel tied where it is labelled, its runner-up is not background, and `winner − second < near_tie_margin` (0.2).
-4. Places the runner-up labels, and the hemisphere's own labels, on the joined grid by the same nearest-neighbour placement as the labels (`resample_nearest`), and keeps a tie only where the joined label is this hemisphere's own label at that voxel. The runner-up takes the right-hemisphere offset on the right.
-5. Records the margin, the rule and the count of near-tie voxels.
+1. Read the posteriors and labels, requiring each on `seg.<side>`'s grid.
+2. Refuse the hemisphere if any runner-up posterior exceeds its winner's or a runner-up repeats its winner.
+3. Mark a voxel tied where it is labelled, its runner-up is not background, and $p_\text{winner} - p_\text{second} < 0.2$ (`nextbrain.near_tie_margin`).
+4. Place the runner-up labels on the joined grid by the same nearest-neighbour placement as the labels. Keep a tie only where the joined label is that hemisphere's own label; right-hemisphere runner-ups take the +10,000 offset.
 
-`nextbrain.near_tie_margin` is a configuration constant; `verify_margin` fails the build if the recorded volume was made with another margin than the configured one.
+`verify_margin` fails the build when the recorded margin differs from the configured one.
 
-### 3. Rate each boundary
+### Boundary rating
 
-`boundary_certainty.rate(labels, near_ties, minimum)` works on the joined 0.4 mm grid:
+`boundary_certainty.rate` works on the joined 0.4 mm grid. Two voxels touching across a face with different, non-background labels in the same hemisphere form an interface. Labels ≥ 10,000 are right; pairs across the midline are not rated, because each hemisphere was segmented separately. For a pair $(A, B)$, the interface $I_{AB}$ is the set of voxels of either label with a face neighbour in the other, each counted once. The near-tie share is
 
-1. Densifies labels, and for each axis compares each voxel with its neighbour ahead. A pair is a face-neighbour pair of two different labels, neither background, in the same hemisphere (`same_hemisphere`: both above or both at or below 10,000). Pairs across the midline are not rated: each hemisphere is segmented separately, so their boundary is the join's.
-2. Each pair is keyed by its two labels; the interface voxels are the voxels of either label touching the other, each counted once (the same voxel is not counted twice for the same pair).
-3. For each interface voxel the runner-up is looked up: it counts as a near tie for this pair where its label is the other label of the pair (so a near tie against a label outside the pair is not this pair's).
-4. A pair is rated where it has at least `minimum_interface_voxels` interface voxels (50, which is 3.2 mm³ at 0.4 mm). `export` writes `boundary-certainty.json` with, for each rated pair, `[region id, region id, interface voxels, near-tie voxels]`, and fails if a rated label has no published region.
+$$s_{AB} = \frac{\lvert \{ v \in I_{AB} : \text{runner-up}(v) \text{ is the other label of the pair} \} \rvert}{\lvert I_{AB} \rvert},$$
 
-The load step (`load`) first checks the near-tie volume against the labels it qualifies: same shape and affine as the label grid, no near tie on an unlabelled voxel, no runner-up equal to its own winner, and none across the midline. `metadata` records `near_tie_margin`, `minimum_interface_voxels`, `voxel_spacing_mm` and the method in the manifest's `boundary_certainty` entry; `boundary_certainty` is published only where NextBrain is a subject segmentation (`is_published`), since a warped atlas has no posteriors.
+so a near tie against a third label does not count. A pair is rated when $\lvert I_{AB} \rvert \ge 50$ voxels (`minimum_interface_voxels`; 3.2 mm³). `export` writes `boundary-certainty.json` with `[region id, region id, interface voxels, near-tie voxels]` per rated pair. It fails if a rated label has no published region. The file is published only for a subject segmentation (`is_published`), since a warped atlas has no posteriors.
 
 ### CDMD
 
-On CDMD, 1,061,305 voxels (7.5% of those labelled) are near ties, and 93.2% of them nearly went to a label that touches them across a face. 1,738 same-hemisphere pairs are rated, covering 99.1% of interface voxels; 2,387 smaller pairs are not. A rated boundary is nearly tied on a median 19% of its interface, 26% weighted by interface.
+On CDMD, 1,738 same-hemisphere pairs are rated and 2,387 smaller pairs are not; the rated pairs hold 99.1% of interface voxels. The median near-tie share of a rated boundary is 0.194, and 0.261 weighted by interface (Fig. 1d). Of all near-tie voxels, 93.2% nearly went to a label that touches them across a face. 1.8% of labelled voxels have a winning posterior below 0.5, and 98.0% of those lie on a label boundary; the uncertain band is therefore about one voxel wide (Fig. 1b). The largest confusion is between the molecular and granular layers of the cerebellar cortex: 14,250 mm³ left and 14,817 mm³ right lie within the margin. The viewer shows CerebNet lobules there instead. The last three measurements were computed from the cached posteriors and near-tie volume; they are not recorded by validation.
 
-Measured when the design was chosen, on the published 0.4 mm grid: posteriors sum to 1 (0.1–99.9th percentiles within $2 \times 10^{-5}$); only 1.8% of brain voxels have `max_p` below 0.5, and 98% of those lie on a label boundary voxel, which is why the uncertain band is about one voxel wide, thinner than the 1 mm scan and the 0.8 mm cut blocks; per region, uncertainty tracks boundary share (Spearman 0.75), and per boundary voxel it spans 0.003 (dentate, red nucleus, periaqueductal grey) to 0.61 (hippocampal strata, small thalamic nuclei, amygdalohippocampal area); the largest confusion is cerebellar molecular against granular layer (about 29,000 mm³ with margin under 0.2), where Planum shows CerebNet's lobules instead.
+## Display
 
-## How the viewer uses it
+`web/src/lib/core/catalog/boundary-certainty.ts` checks the published file against the manifest regions: same atlas and hemisphere, positive counts, and no pair rated twice. It defines `SOFT_SHARE = 1/3`. `boundariesOf` lists a region's rated boundaries, largest interface first; a boundary is soft when $s \ge 1/3$. The **Boundary certainty** section of the region detail lists the eight largest boundaries and gives the rest as a count. Each row has a solid (firm) or dashed (soft) glyph, the neighbour's name, which selects the neighbour, and the share as a bar and a percentage.
 
-- [`web/src/lib/core/catalog/boundary-certainty.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/catalog/boundary-certainty.ts) validates the published file against the manifest regions (the same atlas, the same hemisphere, positive voxel counts, no pair rated twice), defines `SOFT_SHARE = 1/3`, and gives `boundariesOf` (a region's rated boundaries, the largest interface first, `soft` where `near / voxels` is at least a third) and `overallShare` (the near-tie share weighted by interface).
-- `web/src/features/inspector/BoundarySection.svelte` lists the eight largest boundaries (the rest as a count), each with a glyph (solid firm, dashed soft), the neighbour's name, which selects the neighbour without moving the camera, and the share as a bar and percent. A note gives the grid spacing and the margin.
-- [`web/src/lib/engine/tissues/boundary-edges.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/tissues/boundary-edges.ts) draws the outline on a cut in the shader. It builds a symmetric label-code by label-code `DataTexture` (`pairTexture`) holding 0 for an unrated pair and `1 + round(near / voxels × 254)` otherwise; the outline is solid where firm, dashed where the share reaches `SOFT_SHARE`, grey where unrated, at a half-width of 1.5 screen pixels. A label too thin to win any cut block has no code and never meets another on a cut.
+On a cut with NextBrain cut labels (`cuts=nextbrain`), `boundary-edges.ts` outlines the selected region in the fragment shader. A symmetric label-by-label texture holds 0 for an unrated pair and $1 + \operatorname{round}(254\,s)$ otherwise. The outline is solid black where firm, two-tone dashed where soft and grey where unrated, with a half-width of 1.5 screen pixels. A label too small to win any 0.8 mm cut block never meets another on a cut.
 
-## Checks
+## Validation
 
-`validate` (validation step 13) recounts everything from the label volume and the near-tie volume, per voxel and the label it touches rather than per pair, so it does not share the rating's code:
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| Published pairs against a recount per voxel and touching label (`validate`, independent of `rate`) | equal; none rated twice; none missing | equal for all 1,738 rated pairs |
+| Pairs below 50 interface voxels | not rated | 2,387 |
+| Share of interface voxels in rated pairs | reported | 99.1% |
+| Median near-tie share of a rated boundary | reported | 0.194 (interface-weighted 0.261) |
+| Near-tie voxels; share against a face neighbour | reported | 1,061,305; 93.2% |
+| Near-tie volume | on the label grid; runner-up in the winner's hemisphere, never the winner; configured margin | holds |
+| `tests/test_boundary_certainty.py`, `tests/test_segment_nextbrain.py` | interface counted once per side; near ties against a third label excluded; midline and minimum rules; refusal of off-grid or other-margin near-tie volumes and of ratings that differ from the recount | pass |
+| `web/src/lib/core/catalog/boundary-certainty.test.ts` | boundaries listed largest first, soft from a third; a file naming another atlas, crossing the midline, repeating or miscounting a pair is refused | pass |
 
-| Check | Result on CDMD |
+## Limitations
+
+- The rating is the model's own competition under one registration. Registration uncertainty is not included.
+- It is not accuracy and not agreement with aseg. The left amygdala, the Dice exception of [segmentation agreement](segmentation-agreement.md), has a median winning posterior of 0.976 on its hemisphere grid. A firm boundary can still be misplaced.
+- A per-region score would mostly encode thinness (boundary share), so only boundaries are rated.
+- Pairs under 50 interface voxels and all pairs across the midline are unrated.
+- Only subject segmentations have posteriors; a warped atlas has none.
+
+## Code availability
+
+| | |
 | :--- | :--- |
-| Published pair counts equal a recount | Equal for all 1,738 rated pairs; none rated twice; none unpublished |
-| Pairs below 50 interface voxels | 2,387, not rated |
-| Share of interface voxels in rated pairs | 99.1% |
-| Median near-tie share of a rated boundary | 19.4% (interface-weighted 26.1%) |
-| Near ties | 1,061,305 voxels, 93.2% against a face neighbour |
-| Near-tie volume | On the label grid; runner-up in the winner's own hemisphere and never the winner; made with the configured margin |
-| Rerun with the recorded posteriors | Reproduces the published labels byte for byte |
-
-`tests/test_boundary_certainty.py` covers the interface count (both sides once each), a near tie against a label outside the pair, the midline and minimum rules, the recount on any volume, refusal of a near-tie volume off the label grid or made with another margin or that could not come from one hemisphere's posteriors, and validation refusing a rating that differs from the recount.
-
-## Limits
-
-- **The model's own competition.** It rates how close NextBrain came to choosing the neighbouring label, given one registration; posteriors are conditional on one registration, not on registration uncertainty. It is not agreement with aseg and not accuracy: the left amygdala, the Dice exception (0.772), has a median winning posterior of 0.975, and a firm boundary can be misplaced.
-- **Per-region scores encode thinness.** A per-region score mostly reflects boundary share, so only boundaries are shown.
-- **Not rated.** Pairs under 50 interface voxels, and every pair across the midline.
-- **Subject segmentations only.** A warped atlas has no posteriors.
-- **Design alternatives dropped.** Grading every edge and showing soft edges only were rejected for the selected-outline design.
-
-## Reproduce
+| Code | [`scripts/freesurfer/run_patched.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/freesurfer/run_patched.py), [`scripts/segment_nextbrain.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/segment_nextbrain.py) (`join_near_ties`), [`brain_model/labels/boundary_certainty.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/labels/boundary_certainty.py), [`web/src/lib/core/catalog/boundary-certainty.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/catalog/boundary-certainty.ts), [`web/src/lib/engine/tissues/boundary-edges.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/tissues/boundary-edges.ts) |
+| Configuration | [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml): `nextbrain.near_tie_margin` (0.2), `nextbrain.minimum_interface_voxels` (50), the anatomy's `nextbrain.near_ties` |
+| Tests | [`tests/test_boundary_certainty.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_boundary_certainty.py), `tests/test_segment_nextbrain.py`, `web/src/lib/core/catalog/boundary-certainty.test.ts` |
 
 ```bash
-# Rerun NextBrain with the posteriors patch (FreeSurfer 8.2; do not run beside other heavy jobs)
+# Rerun NextBrain with the posterior patch (FreeSurfer 8.2; only to regenerate)
 uv run python scripts/segment_nextbrain.py --anatomy cdmd --record
-
 uv run python -m brain_model.build --anatomy cdmd
 uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_boundary_certainty.py tests/test_segment_nextbrain.py
 ```
 
-## See also
-
-- [Internal anatomy](internal-anatomy.md): the NextBrain segmentation the posteriors come from
-- [Segmentation agreement](segmentation-agreement.md): agreement with aseg, a separate question
-- [Validation](../pipeline/validation.md)
+Viewer state of the figure plane: https://planumatlas.com/#anatomy=cdmd&detail=nextbrain&cuts=nextbrain&cut=coronal&pos=-2&view=anterior&cortex=0

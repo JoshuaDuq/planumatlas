@@ -1,118 +1,107 @@
 # Functional networks
 
-Two resting-state network colourings of the cortex: Yeo's seven networks, carried per vertex from Schaefer 2018, and the twelve networks of CAB-NP, carried per HCP-MMP area.
+Two group resting-state network colourings of the cortex. Yeo's seven networks are carried per vertex from the Schaefer 2018 400-parcel annotation, so they cross the borders of every cortical atlas. The twelve networks of the Cole-Anticevic Brain-wide Network Partition (CAB-NP) are carried per area of HCP-MMP1.0 (Human Connectome Project multi-modal parcellation), so their borders are HCP-MMP's. Both reach this brain through surface registration; neither is its measured function.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/functional-networks-1.webp
+:alt: Four views of the left hemisphere of the CDMD brain. Top row, the lateral surface coloured by Yeo's seven networks and by CAB-NP's twelve networks; bottom row, the medial surface in the same two colourings.
+:name: fig-functional-networks-1
 
-* - Where in the viewer
-  - Colour field of the masthead (**Yeo 7 networks**, **CAB-NP networks**); the **Functional networks** disclosure of the region detail; the stage key; cut faces.
-* - Built by
-  - [`brain_model/layers/networks.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/networks.py), [`brain_model/layers/cab_np.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/cab_np.py), `read_networks` and `build_cortex` in [`brain_model/build.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/build.py), `cortical_network_compositions` in [`brain_model/labels/nextbrain.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/labels/nextbrain.py), `transfer_annotation` in [`scripts/prepare_subject.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/prepare_subject.py)
-* - Configuration
-  - `networks.maximum_color_jitter` and the `schaefer` entry of `atlases` in [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml); the `networks` layer in each anatomy's `layers` list
-* - Source data
-  - Yeo 7: Schaefer et al. (2018) 400-parcel, 7-network annotations on `fsaverage` (ThomasYeoLab/CBIG; MIT), colours from Yeo et al. (2011). CAB-NP: label key v1.1.6 from ColeLab/ColeAnticevicNetPartition at commit `e4ea9fd` (Ji et al. 2019; Rutgers and Yale non-commercial licence)
-* - Checked by
-  - [`tests/test_networks.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_networks.py), [`tests/test_cab_np.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_cab_np.py); `validate_atlas` and `cab_np.validate` in `brain_model/validate.py`; `web/src/lib/core/catalog/networks.test.ts`, `web/src/lib/engine/render/network-colors.test.ts`
-:::
-
-## What it does
-
-- **Yeo 7.** Visual, somatomotor, dorsal and ventral attention, limbic, frontoparietal, default. Every cortical vertex of every cortical atlas takes the network of the Schaefer parcel it lies in, so the colouring crosses atlas borders. Region shares count assigned vertices (or, for NextBrain cortex, voxels); shares under 5% are hidden without rescaling.
-- **CAB-NP** v1.1.6. Each HCP-MMP area takes one of 12 networks by its Glasser name, per hemisphere; the 13 areas assigned differently on each side keep that difference. Because CAB-NP assigns whole areas, its colour borders are HCP-MMP's, and choosing it switches the atlas to HCP-MMP.
-
-Both are group resting-state networks reaching this brain through registration, not its measured function. The striatum has its own network layer, drawn in the same Yeo colours: see [Striatal networks](striatal-networks.md).
+**Yeo 7 is a per-vertex field that ignores area borders; CAB-NP colours whole HCP-MMP areas.** **a**, Yeo 7, lateral left hemisphere. **b**, CAB-NP, same view. **c**, Yeo 7, medial left hemisphere. **d**, CAB-NP, same view. Atlas HCP-MMP1.0 in all panels; Colour **Yeo 7 networks** (a, c) or **CAB-NP networks** (b, d); hemisphere left; internal anatomy hidden. Colours are the published network colours (Yeo et al. 2011; CAB-NP label key v1.1.6). In c and d the medial wall carries no network and keeps its region colour.
+```
 
 ## Data
 
-| Layer | Source | Form in the repository | Licence |
+| Input | Source | Form in the repository | Licence |
 | :--- | :--- | :--- | :--- |
-| Yeo 7 | `lh/rh.Schaefer2018_400Parcels_7Networks_order.annot` on `fsaverage`, and the matching 17-network annotations | `data/fsaverage/label/`, pinned in `data/sources.json` by URL and checksum | MIT |
-| Yeo 7 on the subject | The same annotations after the registered-sphere transfer | `data/<anatomy>/label/` (for example `data/cdmd/label/lh.Schaefer2018_400Parcels_7Networks_order.annot`) | MIT |
-| CAB-NP | `CortexSubcortex_ColeAnticevic_NetPartition_wSubcorGSR_parcels_LR_LabelKey.txt` and `LICENSE`, commit `e4ea9fd` | `data/cab-np/`, pinned in `data/sources.json` | Non-commercial (Rutgers University and Yale University) |
+| Yeo 7 | `lh/rh.Schaefer2018_400Parcels_7Networks_order.annot` and the matching 17-network annotations on `fsaverage` (163,842 vertices per hemisphere), ThomasYeoLab/CBIG | `data/fsaverage/label/`, pinned by URL and sha256 in `data/sources.json` | MIT |
+| Yeo 7 on CDMD | The same annotations after registered-sphere transfer (108,347 left and 108,379 right vertices) | `data/cdmd/label/`, recorded in `data/sources.json` | MIT |
+| CAB-NP v1.1.6 | `CortexSubcortex_ColeAnticevic_NetPartition_wSubcorGSR_parcels_LR_LabelKey.txt` and `LICENSE`, ColeLab/ColeAnticevicNetPartition commit `e4ea9fd` | `data/cab-np/`, pinned in `data/sources.json` | Non-commercial (Rutgers University and Yale University) |
 
-Schaefer 2018 is the published 400-parcel parcellation of 1,489 participants; the parcel names carry the Yeo network in their third underscore-separated field. Its colours are the published Yeo colours jittered per parcel so that parcels stay distinguishable. CAB-NP is a partition of HCP-MMP1.0's 180 areas per hemisphere (and of the subcortex, which Planum does not use: see [Alternatives considered](#alternatives-considered)).
+Schaefer parcel names carry the Yeo network in their third underscore-separated field (`7Networks_LH_Default_pCunPCC_11`). Parcel colours are the published Yeo colours jittered per parcel. CAB-NP assigns each of HCP-MMP1.0's 180 areas per hemisphere to one of 12 networks (Ji et al. 2019); its subcortical assignments are not used.
 
-## How it was built
+## Method
 
-### Yeo 7
+### Transfer to the subject
+`transfer_annotation` (`scripts/prepare_subject.py`) gives each CDMD vertex the label of the nearest `fsaverage` vertex in `sphere.reg` space, without smoothing. It fails if the set of labels changes, and it checks 512 evenly spaced vertices (`annotation_projection.verify_samples`) against a brute-force nearest-vertex search.
 
-1. **Transfer to the subject.** `transfer_annotation` in `scripts/prepare_subject.py` moves the Schaefer annotation from `fsaverage` to the subject by the forward nearest source vertex in `sphere.reg` space, without smoothing, and checks 512 evenly spaced vertices of each annotation (`annotation_projection.verify_samples`) against a brute-force nearest vertex. It fails if label coverage changes. The same step produces the other projected annotations; see [Cortical atlases](cortical-atlases.md).
-2. **Palette check.** `read_networks` reads the subject's annotation and calls `networks.verify_palette`. Each parcel's colour must lie within `networks.maximum_color_jitter` (12 per channel; the widest observed is 8) of its network's published colour in `networks.COLORS`:
+### Palette check
+`read_networks` (`brain_model/build.py`) passes the subject annotation to `networks.verify_palette`. Every parcel colour must lie within `networks.maximum_color_jitter` = 12 per RGB channel of its network's published colour; otherwise the build fails. The widest jitter in both hemispheres, on `fsaverage` and on CDMD, is 8.
 
-   | Network | Key | Published RGB |
-   | :--- | :--- | :--- |
-   | Visual | `Vis` | 120, 18, 134 |
-   | Somatomotor | `SomMot` | 70, 130, 180 |
-   | Dorsal attention | `DorsAttn` | 0, 118, 14 |
-   | Salience / ventral attention | `SalVentAttn` | 196, 58, 250 |
-   | Limbic | `Limbic` | 220, 248, 164 |
-   | Frontoparietal control | `Cont` | 230, 148, 34 |
-   | Default mode | `Default` | 205, 62, 78 |
-
-   A parcel further away fails the build instead of shipping.
-3. **Parcel to network.** `networks.network_of` reads the third field of a name such as `7Networks_LH_Default_pCunPCC_11` and raises on an unknown network or a truncated name; the medial-wall background has no network. `network_indices` turns each vertex's parcel label into an index into `NETWORKS` = `[Vis, SomMot, DorsAttn, SalVentAttn, Limbic, Cont, Default]`, 1 to 7, with 0 (`NONE`) for the medial wall and for the label `-1`. The order is part of the model's contract, since the index is what the vertex field stores.
-4. **Per-vertex field on the atlas mesh.** `build_cortex` runs once for each cortical atlas. `partition_vertex_labels` (`brain_model/surfaces/geometry.py`) carries the indices onto the partitioned mesh: original vertices keep their value, and each vertex the partition adds on a region border (an edge midpoint, a face centre) takes the majority of the values at its edge's ends or its face's corners, a tie going to the lower value. The field is categorical and is never averaged; it is required to be integer. It is written to the glTF as `_NETWORK` (`uint8` in the file; 1 to 7, 0 unassigned).
-5. **Region composition.** For each cortical region, `networks.composition` counts the source vertices of the region in each network, leaves unassigned vertices out of the denominator, and returns the shares largest first (`{"network", "fraction"}`); no minimum is applied in the build. These are shares of source vertices, not of surface area, and are stored as `networks` in `manifest.json`.
-6. **NextBrain cortex.** NextBrain's cortical regions are cut-only tissue labels with no surface. `cortical_network_compositions` in `brain_model/labels/nextbrain.py` gives each of their voxels the network of the nearest pial or white vertex of the subject (a KD-tree over both surfaces' vertices), after the same palette check, and takes shares over those voxels, so a NextBrain cortical region has the same kind of composition as a surface parcel.
-7. **Metadata.** `networks.metadata()` writes the layer's id (`yeo7`), network order, colours, citations (Yeo et al. 2011, Schaefer et al. 2018), the attribute (`_NETWORK`) and the method and composition statements to the manifest.
-
-### CAB-NP
-
-1. **Read the label key.** `cab_np.read_label_key` keeps the rows whose label ends in `-Ctx`, maps each to `(hemisphere, Glasser name)` (for example `left`, `L_V1_ROI`) and its network, and fails if a name is filed under the other hemisphere, is assigned twice, has a network key with two names or colours, if either hemisphere has other than 180 areas, or if the network keys do not run from 1 without gaps. The twelve networks, in key order, are Visual1, Visual2, Somatomotor, Cingulo-Opercular, Dorsal-Attention, Language, Frontoparietal, Auditory, Default, Posterior-Multimodal, Ventral-Multimodal and Orbito-Affective; each carries the colour in the key (Default is 255, 0, 0).
-2. **Assign by name.** `cab_np.assign` gives every HCP-MMP cortical region of the anatomy the network of its published area name and hemisphere. It fails if CAB-NP does not assign an area the anatomy publishes, or assigns areas the anatomy does not publish. The hemispheres are assigned separately, so the 13 areas that CAB-NP puts in a different network on each side keep that difference (for example area 44 is Language on the left and Frontoparietal on the right).
-3. **Export.** `cab_np.export` writes `cab-np.json` (id, atlas `hcp-mmp`, network names, colours, region id to network) to the model directory, and copies the licence and the label key unchanged to `public/models/licenses/CAB-NP.txt` and `CAB-NP-LabelKey.txt`, since the licence permits redistribution only with its terms and the original files. The assignments are per area, never per vertex.
-
-## How the viewer uses it
-
-- **Yeo 7 on the surface.** `attachNetworkColors` in `web/src/lib/engine/render/network-colors.ts` reads the `_network` attribute and writes `_networkColor`, four floats per vertex: the palette colour, and a fourth channel that is 1 where the vertex has a network. The index itself is not interpolated: a triangle spanning Visual (1) and Default (7) would sweep through five networks it never touches, whereas a colour blends only the two that meet there. The material in `lib/engine/render/materials.ts` mixes `vNetworkColor.rgb` into the diffuse colour by `networkMix * vNetworkColor.a`; the medial wall keeps its region colour. `brain-atlas.ts` sets `networkMix` to 1 only under Yeo 7 and with no paint or ghost on the region, and applies the T1 shading only under tissue colour.
-- **CAB-NP on the surface.** Not a per-vertex field: `brain-atlas.ts` gives each HCP-MMP region the published colour of its area's network. `setSurfaceColor('cab-np')` throws unless the model carries the partition and HCP-MMP is the shown atlas. `validateCabNp` (`lib/core/catalog/networks.ts`) checks that every assignment names a region of that atlas and a listed network, that every network has a colour and an English and French name. While CAB-NP colours the atlas, the region list groups areas under their network.
-- **Cut faces.** A cut is sampled from a label volume with one code per parcel, so its Yeo colour is the colour of the network holding most of the parcel (`dominantNetwork`, shares of 5% or more); a parcel split between networks reads as one colour on the cut and as several on the surface, and the cut status line says so. Regions in no network (nuclei, white matter, the medial wall) keep their tissue colour. Under CAB-NP, a cut coloured by HCP-MMP labels shows each area's network; other cut labels have none. The striatum is the exception under Yeo 7: see [Striatal networks](striatal-networks.md#how-the-viewer-uses-it).
-- **Key and hover.** `stage-keys.ts` lists each network with its swatch; `hover-text.ts` names the network under the pointer.
-- **Region detail.** `NetworkSection.svelte` lists a region's Yeo shares (`networksOf`, minimum share `MINIMUM_SHARE` = 0.05, never renormalised, so the shown shares need not total 100%), with a note on the counting basis (`networkBasis`: vertices for the four cortical atlases, voxels for NextBrain cortex). For an HCP-MMP area it adds the one CAB-NP network, as a share of 100%.
-
-## Checks
-
-| Check | Where | Limit |
+| Network | Key | Published RGB |
 | :--- | :--- | :--- |
-| Every parcel's colour near its published network colour | `verify_palette`, at build and in the NextBrain step | within `maximum_color_jitter` (12) |
-| Parcel names read as exactly one network | `network_of` | raises on unknown or truncated names |
-| 17-network names pair the 7-network parcels one to one | `seventeen_network_names` | fails otherwise |
-| Published `_NETWORK` field equals the one rebuilt from the annotation | `validate_atlas` | exact |
-| Published composition equals the one rebuilt | `validate_atlas` | exact |
-| CAB-NP assignments rebuilt from the label key equal the published file; every area assigned; licence and key copied byte for byte | `cab_np.validate`, step 7 of the [validator](../pipeline/validation.md) | exact |
+| Visual | `Vis` | 120, 18, 134 |
+| Somatomotor | `SomMot` | 70, 130, 180 |
+| Dorsal attention | `DorsAttn` | 0, 118, 14 |
+| Salience / ventral attention | `SalVentAttn` | 196, 58, 250 |
+| Limbic | `Limbic` | 220, 248, 164 |
+| Frontoparietal control | `Cont` | 230, 148, 34 |
+| Default mode | `Default` | 205, 62, 78 |
 
-Tests cover the name parsing, the unknown-network and truncated-name errors, label-to-index mapping with the medial wall, composition ordering and thresholds without renormalisation, the categorical majority rule with a two-vertex tie going to the lower value, the palette jitter, and the CAB-NP key rules (180 areas per hemisphere, 13 hemispheric differences, duplicate and misfiled areas rejected).
+### Parcel to network index
+`networks.network_of` reads the third name field and raises on an unknown network or a truncated name. `network_indices` maps each vertex to 1–7 in the order of the table above, and to 0 (`NONE`) for the medial wall and label −1. The index is the stored value and is part of the model's contract.
 
-## Limits
+### Per-vertex field
+`build_cortex` runs once per cortical atlas (Destrieux, HCP-MMP1.0, Julich-Brain, Schaefer). `partition_vertex_labels` (`brain_model/surfaces/geometry.py`) carries the integer index onto the partitioned mesh. Source vertices keep their value. A vertex added on a region border takes the majority of its edge's two ends or its face's three corners; a tie goes to the lower value. The field is never averaged. It is written to each glTF region as `_NETWORK` (`uint8`; 0 unassigned).
 
-- Group resting-state networks, not this brain's measured function. Yeo reaches it through one registration from `fsaverage`; CAB-NP through the HCP-MMP projection, which is two registrations from HCP space.
-- CAB-NP assigns each HCP-MMP area whole to one network, so its colour borders are HCP-MMP's borders, and it colours that atlas's areas only.
-- Network shares count assigned vertices or voxels, not surface area; unassigned samples are excluded.
-- CAB-NP is licensed for non-commercial use only (Rutgers University and Yale University); commercial use needs a licence from the universities. HCP-MMP terms also pass to every recipient of `cab-np.json` (see the [references](../reference/references.md)).
+### Region composition
+For each cortical region, `networks.composition` counts its source vertices per network, excludes unassigned vertices from the denominator and stores the shares, largest first, as `networks` in `manifest.json`. No minimum is applied at build. NextBrain cortical regions have no surface: `cortical_network_compositions` (`brain_model/labels/nextbrain.py`) gives each of their voxels the network of the nearest pial or white vertex (k-d tree over both surfaces) after the same palette check, and composes shares over voxels.
 
-### Alternatives considered
+### CAB-NP assignment
+1. `cab_np.read_label_key` keeps rows whose label ends in `-Ctx` and keys each by hemisphere and Glasser name (e.g. `left`, `L_V1_ROI`). It fails if a name is filed under the other hemisphere or assigned twice, if a network key has two names or colours, if either hemisphere has other than 180 areas, or if network keys do not run from 1 without gaps.
+2. The twelve networks, in key order: Visual1, Visual2, Somatomotor, Cingulo-Opercular, Dorsal-Attention, Language, Frontoparietal, Auditory, Default, Posterior-Multimodal, Ventral-Multimodal, Orbito-Affective. Each keeps its key colour (Default 255, 0, 0).
+3. `cab_np.assign` gives every published HCP-MMP cortical region the network of its area name and hemisphere, and fails on an area missing from either side. Hemispheres are assigned separately, so the 13 areas assigned differently on each side keep that difference (e.g. area 44: Language left, Frontoparietal right).
+4. `cab_np.export` writes `cab-np.json` (360 area-to-network assignments) and copies the licence and label key unchanged to `public/models/licenses/CAB-NP.txt` and `CAB-NP-LabelKey.txt`, as the licence requires.
 
-The CAB-NP subcortex was not adopted for the striatum, pallidum or thalamus; its measured disagreement with Choi et al. (2012) is under [Striatal networks](striatal-networks.md#alternatives-considered).
+## Display
 
-## Reproduce
+Both colourings are options of the masthead **Colour** field (URL `colors=network` or `colors=cab-np`). `attachNetworkColors` (`web/src/lib/engine/render/network-colors.ts`) converts `_NETWORK` to a four-channel per-vertex colour; the fourth channel is 1 only where a network exists. Colours, not indices, are interpolated across a triangle, so a Visual–Default border blends two colours instead of sweeping through five intermediate indices. The cortex material mixes the colour in by `networkMix`, set to 1 only under Yeo 7 on a region with no paint or ghost; the medial wall keeps its region colour.
+
+CAB-NP is not a vertex field: `brain-atlas.ts` gives each HCP-MMP region its network's colour. Choosing it switches the atlas to HCP-MMP1.0 (`requiredAtlas`), and `setSurfaceColor('cab-np')` throws on any other atlas. `validateCabNp` rejects an assignment to an unknown region or network and a network without a colour or name.
+
+A cut face samples one label per parcel. Under Yeo 7 a parcel is painted with its dominant network (`dominantNetwork`, largest share ≥ 5%); a parcel split between networks is one colour on the cut and several on the surface, and the cut status line says so. Regions without a network (nuclei, white matter, medial wall) keep their tissue colour. The striatum is coloured voxel by voxel instead ([striatal networks](striatal-networks.md#display)). The region detail (**Functional networks**) lists Yeo shares ≥ 5% (`MINIMUM_SHARE`), without renormalisation, with the counting basis (vertices or voxels); for an HCP-MMP area it adds its CAB-NP network.
+
+## Validation
+
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| `verify_palette`, at build and in the NextBrain step | Every parcel colour within 12 per channel of its network colour | Widest jitter 8 |
+| `test_the_published_palette_sits_within_the_configured_jitter` | As above, on the published annotations | Passes |
+| `network_of` tests | Unknown network or truncated name raises | Passes |
+| `test_a_two_vertex_tie_goes_to_the_lower_value_and_a_majority_wins` | Categorical field carried by majority, never averaged | Passes |
+| `test_small_shares_can_be_dropped_without_renormalising` | Shares not rescaled | Passes |
+| `test_the_published_orders_pair_every_parcel` | 7- and 17-network orders pair the 400 parcels one to one | Passes |
+| `validate_atlas` (`brain_model/validate.py`) | Published `_NETWORK` field and compositions equal the rebuilt ones | Exact |
+| `test_the_published_key_assigns_every_area_in_each_hemisphere_once` | 180 areas per hemisphere | Passes |
+| `test_the_published_hemispheric_differences_are_kept` | Areas assigned differently per hemisphere | 13 |
+| `cab_np.validate` | Rebuilt assignments equal `cab-np.json`; licence and key byte-identical | Exact; 360 areas assigned |
+| `networks.test.ts`, `network-colors.test.ts` | Display threshold without rescaling; index past the palette draws no network; CAB-NP network without colour rejected | Passes |
+
+## Limitations
+
+- Group resting-state networks, not this brain's measured function.
+- Yeo 7 reaches CDMD through one sphere registration from `fsaverage`; CAB-NP through the HCP-MMP projection.
+- CAB-NP assigns whole areas, so it colours HCP-MMP areas only and its borders are HCP-MMP's.
+- Shares count assigned vertices or voxels, not surface area.
+- A cut face shows one network per parcel.
+- CAB-NP is licensed for non-commercial use only; HCP-MMP terms pass to every recipient of `cab-np.json` ([references](../reference/references.md)).
+
+## Code availability
+
+Code
+: [`brain_model/layers/networks.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/networks.py), [`brain_model/layers/cab_np.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/cab_np.py), `read_networks` and `build_cortex` in [`brain_model/build.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/build.py), `cortical_network_compositions` in [`brain_model/labels/nextbrain.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/labels/nextbrain.py), `transfer_annotation` in [`scripts/prepare_subject.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/prepare_subject.py)
+
+Configuration
+: `networks.maximum_color_jitter`, `annotation_projection.verify_samples` and the `schaefer` atlas entry in [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml)
+
+Tests
+: [`tests/test_networks.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_networks.py), [`tests/test_cab_np.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_cab_np.py), `web/src/lib/core/catalog/networks.test.ts`, `web/src/lib/engine/render/network-colors.test.ts`
 
 ```bash
 uv sync --locked
-# project the published annotations (Schaefer 7- and 17-network sets included) from fsaverage to the anatomy
-uv run python scripts/prepare_subject.py --anatomy cdmd
-# build the models; cab-np.json and the _NETWORK fields are written here
-uv run python -m brain_model.build --anatomy cdmd
-# check them
+uv run python scripts/prepare_subject.py --anatomy cdmd   # project the annotations from fsaverage
+uv run python -m brain_model.build --anatomy cdmd         # writes _NETWORK and cab-np.json
 uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_networks.py tests/test_cab_np.py
 ```
 
-## See also
-
-- [Striatal networks](striatal-networks.md), the same seven networks inside the caudate, putamen and accumbens
-- [Cortical atlases](cortical-atlases.md), for Schaefer 2018 and HCP-MMP1.0
-- [Functional divisions](functional-divisions.md), the other per-area grouping of HCP-MMP
-- [Validation](../pipeline/validation.md) and the [references](../reference/references.md)
+Figure state (panel b): https://planumatlas.com/#anatomy=cdmd&atlas=hcp-mmp&colors=cab-np&view=left&hemi=left&internal=0

@@ -1,117 +1,104 @@
 # Overlays
 
-A researcher's own NIfTI map in an MNI template is read in the browser, carried onto this brain by that template's published registration, and drawn on the cortex, the deep structures and every cut face with a colour scale. Save image writes the key and a caption naming the file, the template and the scale. The file never leaves the reader's computer.
+A reader's own NIfTI-1 map in an MNI template, one volume or a series of them, is read in the browser, carried onto CDMD sub_013 through the inverse of that template's published [coordinate](published-coordinates.md) field, and drawn on the cortex, the deep surfaces and every cut face with a two-sided colour scale. A cluster table is computed on the file's own grid as nilearn's `get_clusters_table` computes it. A series is drawn one volume at a time, chosen with a slider or played, and a selected region's mean at each volume is plotted. The file never leaves the reader's computer, and the result is a template map on one person's folds, not that person's data.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/overlays-1.webp
+:alt: Top left, lateral view of a grey left hemisphere with a red-to-yellow patch on the inferior frontal gyrus, a small red patch on the posterior temporal cortex and a blue patch on the parietal cortex. Bottom left, a coronal section seen from the front with a large red-to-yellow region on the left frontal cut face. Right, the Overlay popover with the file summary, template, threshold 3.1, colours up to 7, and three clusters with their peaks.
+:name: fig-overlays-1
 
-* - Where in the viewer
-  - **Overlay** in the stage dock: a **Template** choice, **Choose a NIfTI file…**, **Title**, **Statistic**, **Threshold**, **Colours up to**, **Minimum cluster size**, **Opacity**, **Cortex surface**, **Show on the brain**, **Clusters and peaks**, **Remove**. The key appears at the stage's top right; the linked MRI draws the map on its planes and gives its value under the crosshair. Not written into a link, because the file is the reader's.
-* - Built by
-  - Viewer only; no build step. [`web/src/lib/core/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/core/user-map) (`nifti.ts`, `inverse-field.ts`, `sampling.ts`, `partition.ts`, `carry.ts`, `display.ts`), [`web/src/lib/engine/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/engine/user-map) (`user-map-worker.ts`, `user-map.ts`, `overlay.ts`), [`web/src/lib/state/user-map.svelte.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/state/user-map.svelte.ts), [`web/src/features/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/user-map)
-* - Configuration
-  - None. `DEPTH_SAMPLES` (10) and `VOLUME_SPACING_MM` (1) are in `sampling.ts`; the colour scales are in `display.ts`.
-* - Source data
-  - The reader's file. The published template fields and their registration ([Published coordinates](published-coordinates.md)); the native pial and white envelopes and each atlas's ribbon labels ([Cortical atlases](cortical-atlases.md)).
-* - Checked by
-  - `nifti.test.ts` against nibabel 5.4.2, `sampling.test.ts` against nilearn 0.12.1, `inverse-field.test.ts`, `partition.test.ts`, `carry.test.ts`, `display.test.ts` in `web/src/lib/core/user-map/`; `user-map.svelte.test.ts` in `web/src/lib/state/`; `key.test.ts` in `web/src/features/user-map/`
-:::
+**A synthetic z map in MNI152NLin2009cAsym carried onto this brain.** **a**, Left lateral view, pial surface; each vertex shows the mean of 10 samples between its pial and white positions. **b**, Coronal section at y = +23.4 mm surface RAS, seen from the front (left hemisphere on the image's right); the cut face shows the 1 mm resampled volume, so the frontal cluster appears whole, including the white matter the cortical sampling does not reach. **c**, The **Overlay** popover: grid, value range (−5.5 to 7) and cortical reach; **Threshold** 3.1, **Colours up to** 7 (the default, $\max\lvert v
+vert$ = 6.995 rounded up to three significant digits), opacity 100%; and the cluster table in template millimetres: peaks z = 7 at (−46, 22, 4), 6.55 at (−48, −60, −8) and −5.5 at (−34, −70, 40), 7,456, 7,048 and 6,288 mm³, as nilearn 0.12.1 `get_clusters_table` gives for the same file. Red–yellow codes z from 3.1 to 7, blue–cyan from −3.1 to −7. The map is $97 \times 115 \times 97$ voxels of 2 mm: Gaussian blobs ($\sigma$ = 10 mm) of z = +7 at (−42, 22, 6), +6 at (−48, −60, −8) and −6 at (−38, −68, 42) MNI, over smoothed Gaussian noise (seed 0), written with `NIFTI_INTENT_ZSCORE` by nibabel. Subject CDMD sub_013; **Colour** Tissue.
+```
 
-## What it does
+## Data
 
-**Overlay** takes a single-volume NIfTI-1 file (`.nii` or `.nii.gz`): a statistical map, a lesion or ROI mask, any map in an MNI template. The reader names the template as for a published coordinate: MNI152NLin2009cAsym (fMRIPrep's default), SPM12's tissue probability maps, or MNI not stated, read as MNI152NLin2009cAsym. The popover then gives the grid, its voxel size, the range of its values and the share of this brain's cortex it reaches.
+| Input | Source | Use |
+| :--- | :--- | :--- |
+| The reader's NIfTI-1 file (`.nii`, `.nii.gz`): one volume of ≤ $32 \times 2^{20}$ voxels, or a series along the fourth axis of ≤ $64 \times 2^{20}$ values | Reader's computer | The map |
+| `coordinates-<space>.field` | [Published coordinates](published-coordinates.md#data): MNI152NLin2009cAsym and SPM12 (TPM), 1.5 mm | Template → surface RAS registration, inverted here |
+| `tissue-envelopes.glb` | Native `lh`/`rh` pial and white surfaces | Cortical sampling |
+| `ribbon-<atlas>.labels`, `cortex-<atlas>.glb` | Four cortical atlases ([cortical atlases](cortical-atlases.md)) | Values on the parcel meshes |
 
-- **Threshold.** Values whose magnitude is above it are drawn; those within ±threshold are not. A statistical map is not drawn until a threshold is typed, and the field takes focus when the map is ready: which threshold is right is the analysis's call, and drawing every value but zero, nilearn's default, shows mostly noise. 0 draws every value but zero. A map whose finite values are all 0 or 1 is a mask and is drawn at once at 0.5, where interpolation puts its edge.
-- **Title and statistic.** The key and the saved image name the map by its title, which starts as the file's name without its extension. The statistic (z, t, F or r) names the key's numbers and the caption's threshold. It starts as the file says: its NIfTI intent code, else SPM's `SPM{T_[df]}` description, else FSL's and SPM's own output names (`zstat1`, `tstat1`, `zfstat1`, `fstat1`, `spmT_0001`, `spmF_0001`). Otherwise the key gives plain values.
-- **Colours up to.** Positive values run from red at the threshold to yellow at this value, and negative values from blue to light blue (FSL's Red-Yellow and Blue-Lightblue). Beyond it a value keeps the end colour. It starts at the largest magnitude in the file, rounded up to three significant digits so the key's number is the scale's.
-- **Minimum cluster size.** nilearn's `cluster_threshold`, in the map's own voxels: a cluster beyond ±threshold with fewer voxels (face-connected, each sign apart) is neither drawn nor listed. The map is carried again without them, so the cortex, the cut faces, the linked MRI and the table always agree. The caption gives the size when it is 2 or more.
-- **Opacity.** From 10% to 100%: below full, the map's colours are mixed with the grey beneath, on the cortex, the cut faces and the linked MRI alike. The key keeps the full colours, and the caption gives the opacity.
-- **While the map is shown,** the cortex is one grey with its fold shading and T1 texture, and the cut faces and deep surfaces are their tissue's own lightness in grey. An atlas colouring changes to Tissue for as long as the map is shown and is given back after, as for stroke cases. T1 MRI colouring is kept, and the map is drawn over the scan.
-- **Another template** reads the same file again and keeps the threshold and scale. **Remove** forgets the file.
-- **Cortex surface.** Pial, mid-thickness or white: this brain's own surfaces, which share their vertices, so the parcels keep their atlas, shading and picking and every vertex its value. Deeper surfaces open the sulci, where most cortical signal lies hidden on the pial. While a cut is open the pial is drawn, because a cut face spans pial to white and must meet the surface it cuts. The caption names a surface other than the pial.
-- **Clusters and peaks.** The map as drawn, tabulated as nilearn's `get_clusters_table` does it, in the map's own template millimetres: each cluster's peak and its sub-peaks, the value and the cluster's size. The table follows the threshold. Choosing a peak places it with the Coordinate tool, so its report gives the regions within 5 mm on this brain. **Download CSV** writes every peak at full precision with the file, template, statistic and threshold.
-- **Linked MRI.** While the map is shown, the three planes draw it over the scan and the segmentation, from the same 1 mm grid the cut faces read, and the readout adds its value under the crosshair (`Faces > Houses: z = 7.55`). **Save PNG** keeps it.
-- **Save image** adds the key and a caption line: the title, the file when the title is not its name, the template it was carried from (or "MNI, template not stated, read as MNI152NLin2009cAsym"), `|z| > threshold, colours to max` (or `|value|` without a statistic), and the opacity when it is below 100%.
+## Method
 
-A file is refused, with the reason, if it is not single-file NIfTI-1, holds more than one volume, has neither sform nor qform, is larger than 32 Mi voxels, holds no finite value or only zeros, or does not reach the brain at all.
+### Reading
+The reader places a file where nibabel does: the sform when `sform_code` ≠ 0, else the qform (`get_best_affine`), with nibabel's quaternion threshold, qfac and pixdim fixes on load; `scl_slope` and `scl_inter` are applied as `get_fdata` applies them; non-finite values become NaN. A file is refused, with its reason, if it is not single-file NIfTI-1, has more than one value along any axis past the fourth, has a single slice on any axis, has neither sform nor qform, exceeds $32 \times 2^{20}$ voxels a volume or $64 \times 2^{20}$ values across its volumes, holds no finite value or only zeros, or reaches neither cortex nor the 1 mm grid in any volume. A series' spacing is nibabel's `get_zooms()[3]` in seconds when `xyzt_units` gives the time axis a unit (s, ms or µs) and the spacing is positive; otherwise its volumes are only numbered. `toffset` is ignored, as nibabel ignores it.
 
-## How a map is carried onto this brain
+### Field inversion
+The published field $F$ maps template mm to surface RAS. For each node $\mathbf{q}$ of a surface RAS grid at the field's 1.5 mm spacing, Newton's method, started from an affine fit of $F$, solves $F(\mathbf{p}) = \mathbf{q}$ to 0.001 mm (at most 20 iterations). A node whose solution needs a field node outside the template's dilated brain has none. Overlay and coordinate placement therefore share one registration.
 
-All of it runs in a worker, on the reader's machine. A 2 mm map loads in about 0.6 s, including the inversion.
+### Sampling
+The map is read by trilinear interpolation between voxel centres over the voxels with a value; a zero or NaN voxel has none. A point carries $(\sum w_i v_i, \sum w_i)$ over its eight voxels with a value and shows $\sum w_i v_i / \sum w_i$ where $\sum w_i \ge \tfrac{1}{2}$, as the parcel meshes below do. The edge of a masked or thresholded map therefore lies halfway between voxel centres with rounded corners, and its colours come from its own voxels; a map with a value everywhere reads as plain trilinear interpolation. A point beyond the outermost centres has no value. Where every voxel has a value this matches nilearn; nilearn instead gives no value next to a NaN and reads zeros as values.
+1. **Cortex.** Each native vertex takes the mean of 10 samples evenly spaced from its pial to its white position, samples without a value excluded, as nilearn `vol_to_surf(…, inner_mesh=…)` does.
+2. **Volume.** The pair is resampled onto a 1 mm surface RAS grid with centres on whole millimetres and interpolated again, sum and share alike, by the cut faces, deep structures and Linked MRI, so the edge stays where the first reading put it.
+3. **Parcel meshes.** Atlas meshes add edge midpoints and triangle centres where a triangle's corners differ in label. Each added vertex carries $(\sum v_i, w)$: the sum over native parents with a missing value as 0, and $w$ the share of parents with a value; the fragment shows $\sum v_i / w$ where $w \ge \tfrac{1}{2}$. Parent order is rebuilt from the envelopes and ribbon labels and every vertex is checked against its position to $10^{-6}$ m.
 
-### 1. Read the file (`nifti.ts`)
+### Colour scale
+With threshold $\tau \ge 0$ and top $m > \tau$, a value $v$ is drawn when $\lvert v\rvert > \tau$, with
 
-A NIfTI-1 reader that places a file where nibabel and nilearn do: the sform when `sform_code` is not 0, else the qform (`get_best_affine`), with nibabel's quaternion threshold, qfac and pixdim fixes, and `scl_slope`/`scl_inter` applied as `get_fdata` applies them. It does not use `nifti-reader-js` (bundled with NiiVue), which prefers the qform when `qform_code > sform_code` and would place such a file elsewhere. Non-finite values become NaN.
+$$\text{colour}(v) = \mathbf{c}_0 + \min\!\left(1, \frac{\lvert v\rvert - \tau}{m - \tau}\right)(\mathbf{c}_1 - \mathbf{c}_0),$$
 
-### 2. Invert the template's field (`inverse-field.ts`)
+where $(\mathbf{c}_0, \mathbf{c}_1)$ is red (1, 0, 0) to yellow (1, 1, 0) for $v > 0$ and blue (0, 0, 1) to cyan (0, 1, 1) for $v < 0$ (FSL Red-Yellow, Blue-Lightblue). A statistical map has no default $\tau$; $m$ defaults to $\max\lvert v\rvert$ rounded up to three significant digits. A map whose finite values are all 0 or 1 is a mask, drawn at $\tau = 0.5$, $m = 1$. The statistic (z, t, F, r) is taken from the intent code, else an SPM `SPM{T_[df]}` description, else FSL or SPM output names (`zstat1`, `tstat1`, `zfstat1`, `fstat1`, `spmT_0001`, `spmF_0001`).
 
-The published field carries template millimetres onto this brain, as a coordinate from a paper is placed. Pulling an image across needs the other direction. Each node of a surface RAS grid as fine as the field's (1.5 mm) is solved for the template point the field carries onto it, by Newton's method from an affine fit of the field, to 0.001 mm. A node whose solution lies beyond the template's dilated brain has none, as a coordinate there is refused. The overlay and a placed coordinate therefore rest on the same registration. The field itself is not changed.
+### Clusters
+The table follows nilearn 0.12.1 two-sided `get_clusters_table` on the file's grid, so its coordinates are template mm: voxels with $\lvert v\rvert > \tau$ compared in float32; face connectivity; positive clusters first, each sign numbered from 1 by its most extreme peak; local maxima over 26 neighbours, a plateau counted once; at most three sub-peaks, each more than 8 mm from the last kept; size = voxels × voxel volume, truncated. A minimum cluster size $k$ (nilearn `cluster_threshold`, in the file's voxels) zeroes smaller clusters as `threshold_img(…, cluster_threshold=k, two_sided=True)` does, and the trimmed map is carried again so surface, cuts and table agree.
 
-### 3. Sample the map
+### Series
+A series' range, mask test and default top are taken over every volume, so every volume is drawn at one threshold and one colour scale; rescaling each volume would make a weak one look as strong as the peak. Its cortical reach is that of the voxels with a value in any volume. One volume is carried at a time, as a single map is, and the cluster table and minimum cluster size apply to it. A volume asked for while another is being carried is carried only if it is still the newest once that one is done. Playing steps through the volumes in order and loops, at most 4 volumes a second, each once the last is placed; no cluster table is computed while it plays.
 
-The map is read by trilinear interpolation between its voxel centres. A point beyond the outermost centres, or with a NaN among its eight voxels, has no value.
+**Region course.** For a selected region, the whole-millimetre surface RAS points inside its closed solid (a structure's mesh, or a cortical parcel's ribbon solid in the shown atlas) are found by the winding count along rows in x, set 0.0013 and 0.0007 mm off the whole millimetre in y and z so no row runs along a marching-cubes lattice edge. Each point is read through the inverse field as a cut face reads the 1 mm grid at that centre. A volume's mean is over the points with a value there, before the threshold, which is voxelwise and says nothing of a mean; a volume where no point has a value has no mean.
 
-- **Cortex** (`sampleCortex`): each native vertex takes the mean of 10 samples from its pial to its white position, the samples without a value left out, as nilearn's `vol_to_surf` does with `inner_mesh`. A vertex none of whose samples has a value has none.
-- **Cut faces** (`resample`): the map on a 1 mm grid of this brain, its centres on whole millimetres as the segmentation's are.
+## Display
+**Overlay** in the stage dock (absent on stages narrower than 480 px) offers **Template** (MNI152NLin2009cAsym, SPM12 (TPM), or MNI not stated, read as MNI152NLin2009cAsym), **Title**, **Statistic**, **Threshold**, **Colours up to**, **Minimum cluster size**, **Opacity** (10–100%), **Cortex surface** (pial, mid-thickness or white; the pial while a cut is open) and **Clusters and peaks**. For a series, **Volume** (a slider named by the volume's place and time) and **Play**/**Pause** sit under the file summary. The map is drawn only once a threshold is given. Values are compared with $\tau$ per fragment. The volume is an RG32F texture (sum, share) read with `texelFetch` and interpolated in the shader. Cut faces are unlit so their colours equal the key's; cortex and deep surfaces are lit. While a map is shown an atlas colouring changes to Tissue and is restored afterwards; T1 MRI colouring is kept. Choosing a peak places it as a published coordinate. **Download CSV** writes every peak at full precision. **Save image** adds the key and a caption line: title, template, `|z| > τ, colours to m`, opacity below 100%, minimum cluster size ≥ 2 and a non-pial surface ([sharing and snapshots](sharing-and-snapshots.md)). For a series the key's title adds the volume's time (its place when the header gives no spacing) and the caption adds `volume k of n at t s`. A selected region's sheet adds **Map over time**: the course against time with the drawn volume marked, the count of the region's points with a value, and a table of values. The plot is one slider: a click, the arrows, Home and End choose the volume drawn. The map is not written into the link.
 
-### 4. Give each parcel mesh its values (`partition.ts`)
+## Validation
 
-The atlas meshes split the native surface where a triangle's corners disagree, adding edge midpoints and triangle centres (`partition_surface`). Each added vertex takes the mean of its native corners, as `_SULC` and `_T1` do. Corners without a value count as 0 and the share of corners with one is kept, and the fragment divides one by the other where that share is at least ½. The viewer repeats the build's vertex order from the envelopes and the atlas's ribbon labels and checks every vertex's position against them to 1 µm, so a mismatch is an error rather than a misplaced value. Switching atlas recomputes it.
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| `nifti.test.ts` | 9 fixtures written by nibabel 5.4.2 (all eight stored types, both byte orders, scaling, sform over qform, qform-only with qfac −1, nibabel's header fixes) and each refusal | passes |
+| `sampling.test.ts`, `vol_to_surf` | 40 vertices on an oblique volume, against nilearn 0.12.1 | equal within $10^{-4}$ |
+| `sampling.test.ts`, edges | A map against zero or NaN voxels: edge halfway between centres, colour from its own voxels, corners rounded; the 1 mm volume puts a straight edge in the same place | passes |
+| `inverse-field.test.ts`, solved nodes | The published field carries each solved node back within 0.002 mm | passes; 352,704 nodes (MNI152NLin2009cAsym), 392,346 (SPM12) |
+| `inverse-field.test.ts`, brain points | 20,000 random points read through the inverse and forward fields | p95 ≤ 0.1 mm, max < 1 mm |
+| `sampling.test.ts`, coverage | A 2 mm map of ones over the whole template reaches > 99.5% of cortical vertices | 99.85% left, 99.98% right (MNI152NLin2009cAsym) |
+| `sampling.test.ts`, blobs | 4 mm Gaussian blobs at (−42, 22, 6), (38, −22, 56), (−24, −4, −20) peak on the 1 mm grid within 0.9 mm of the Coordinate tool's landing | passes |
+| `partition.test.ts` | Every parcel vertex of the four published atlases where the native pial and ribbon labels put it | passes |
+| `clusters.test.ts` | 12 tables on 5 maps from nilearn 0.12.1 (sub-peak distances, NaN holes, edge- and corner-only contacts, bridges equal to the threshold, plateaus, ties, oblique and anisotropic grids, up to 73 clusters, two with `cluster_threshold`) | equal; peak coordinates within $10^{-9}$ mm |
+| `display.test.ts`, `key.test.ts`, `user-map.svelte.test.ts` | Threshold masking, saturating scales, three-digit default top, statistic detection, caption and key; table follows the drawn threshold | passes |
+| `nifti.test.ts`, series | Volumes in the file's order; spacing from `xyzt_units` (s, ms), none without a time unit or a positive spacing; axes past the fourth and series over $64 \times 2^{20}$ values refused | passes |
+| `carry.test.ts`, series | Range over every volume; the volume asked for is carried; reach over any volume; an empty first volume is shown, a series refused only when no volume reaches the brain | passes |
+| `course.test.ts` | A map linear in template x gives the mean of the points' template x; a point reads what the cut faces draw at that centre of the 1 mm grid; points without a value are left out | within $10^{-4}$ and $10^{-5}$ |
+| `region-points.test.ts` | A 10 mm sphere (64 × 48 segments) holds every whole millimetre within 9.95 mm of its centre and none beyond 10 mm; overlapping solids give each point once | passes |
+| `user-map.test.ts`, `user-map.svelte.test.ts`, `MapCourseSection.svelte.test.ts` | A volume is carried once per volume and extent; volumes passed over while one is carried are not carried; the volume is kept across templates; playing steps, loops and lists no clusters until paused; the course plot names each mean and draws the volume chosen | passes |
 
-## How the viewer draws it
+A synthetic 12-volume series in MNI152NLin2009cAsym (2 mm, TR 2 s; canonical-shaped responses of σ = 6 mm at (−8, −92, 2) peaking at 6 s and at (−38, −24, 58) peaking at 10 s) gives a left calcarine sulcus course peaking at 4–6 s and draws the precentral response at 10 s. In headless Chrome on an Apple M5 a volume is carried in 276 ms (median of 17), so playing reaches 3.4 volumes a second; dragging the slider through 12 volumes carries 3 of them and draws the last 0.43 s after the drag ends.
 
-- **Cortex** (`materials.ts`): the per-vertex value arrives as an attribute, `_user_map`. It is compared with the threshold per fragment, so a boundary follows the interpolated value rather than the triangles, and it is lit as tissue is.
-- **Cut faces** (`addUserMapToCap`): the 1 mm volume is an R32F texture read with `texelFetch` and interpolated in the shader, so the face shows the same values the cortex read. No-data voxels are stored as −3×10³⁸, because a fast-math compile cannot be trusted to keep a NaN. A cut face is a section of the map, so it is drawn unlit and its colours are exactly the key's.
-- **Deep structures, the cerebellum and the exposed white surface** (`addUserMapToSurface`): read from the same volume where the surface lies, and lit.
-- **Under T1 MRI colouring**, the scan replaces the surfaces' colour, so the map is drawn again after it, unlit as the scan is.
-- **Linked MRI** (`renderSlice`): each pixel of a plane reads the 1 mm grid trilinear (`gridSampler`), as the cut faces' shader does, and mixes the map's colour over the scan by the opacity.
-- **Other surfaces** (`moveParcels` in `user-map.ts`): a parcel vertex on the mid-thickness (halfway to white) or white surface is the mean of its native parents there, as it is on the pial; its normal is the mean of the native normals there, made unit length. Each parcel's bounds and picking tree are refitted, so a click lands on the surface drawn. The parents are found once from the published pial positions.
-- **A minimum cluster size** (`withoutSmallClusters`) zeroes the voxels of the clusters smaller than it, as nilearn's `threshold_img(…, cluster_threshold=k, two_sided=True)` does, and leaves every other voxel, beneath the threshold too, so the map interpolates as before. The worker keeps the file's map and carries the trimmed copy through the cached inverted field again; the table drops the same clusters before ranking them.
-- **The cluster table** (`clusters.ts`) is computed in the worker on the file's own grid, so its coordinates are the template's and do not pass through the registration. It follows nilearn 0.12.1's two-sided `get_clusters_table`: a voxel counts where `|value| >` the threshold (compared in float32, as numpy compares a float32 map); clusters join through faces only; positive clusters come first, each sign numbered from 1 by its most extreme peak, so a negative cluster is labelled with its sign (−1, −1a); local maxima over 26 neighbours, a plateau counted once at its centre; at most three sub-peaks, each more than 8 mm from the last one kept (nilearn's rule, so a sub-peak can lie nearer the main peak); size as voxels × the voxel volume, truncated. It takes about 7 ms for a 2 mm map at z > 3.1 and 23 ms at 1 mm.
-- **The key** has one row per sign the map reaches beyond its threshold, each with its colour scale. The paint key a Functions or Deficits tab shows is withdrawn while the map is shown, because the map covers the paint.
+Node counts and coverage are the values those tests assert against, measured on the published CDMD fields; SPM12 coverage is 99.98% left and 99.996% right.
 
-## Checks
+## Limitations
+- A template map carried by a registration of the template to CDMD sub_013: its place on these folds, not this person's activity or anatomy.
+- Template space only. A native-space or Talairach map lands in the wrong place, and no NIfTI header states which MNI template a map is in.
+- Interpolation is trilinear: a label atlas with more than two values is blended between labels.
+- Deep surfaces are sampled where they lie, mixing a structure with its surroundings; cut faces show the volume itself.
+- A series holds at most $64 \times 2^{20}$ values, about 60 volumes at 2 mm. A preprocessed BOLD run is usually larger, and is in scanner units rather than activation: it needs a model first.
+- Playing is bounded by carrying a volume, about 3–4 volumes a second; clusters are listed only while paused.
+- The region course is the mean of the map's values in the region, not a statistic of the region. A structure's points come from its mesh at whole millimetres, so a solid thinner than 1 mm may have none; an all-zero volume has no value, not a mean of 0.
+- Not carried in a link; the saved image keeps it.
+- Minimum cluster size is in the file's voxels, so the same $k$ is more tissue in a 2 mm map than in a 1 mm map. Cluster volumes come from the sform's column lengths, not pixdim.
+- Refusal reasons come from the reader in English after a translated lead.
 
-| Check | Measured |
+## Code availability
+
+| | |
 | :--- | :--- |
-| Reader against nibabel | 9 fixtures covering all 8 data types, both byte orders, scaling, sform over qform, qform-only with qfac −1 and nibabel’s header fixes, and each refusal |
-| Cortex sampling against nilearn `vol_to_surf` | 40 vertices on an oblique volume with NaN voxels and lines leaving it: equal within float32 rounding (10⁻⁴) |
-| Inversion, at every solved node | the published field carries it back to within 0.002 mm; 352,704 nodes (MNI152NLin2009cAsym), 392,346 (SPM12) |
-| Inversion at this brain's cortex (10 depths, every 7th vertex) | round trip median 0.03 mm, p95 0.11 mm, max 0.40 mm (MNI152NLin2009cAsym); 0.03, 0.10, 0.34 mm (SPM12) |
-| A map over the whole template | reaches 99.85% (left) and 99.98% (right) of cortical vertices (MNI152NLin2009cAsym); 99.98% and 99.996% (SPM12) |
-| A 4 mm blob around MNI (−42, 22, 6), (38, −22, 56) and (−24, −4, −20) | peaks on the 1 mm grid within 0.9 mm (the nearest voxel centre) of where the Coordinate tool places the coordinate |
-| Parcel meshes | every vertex of all four atlases where the native surface and ribbon labels put it |
-| Minimum cluster size against nilearn | `get_clusters_table(…, cluster_threshold=k)` and the voxels `threshold_img` keeps, equal on smooth noise with k set to one cluster's own size (kept) and on spikes at k = 2 |
-| Cluster table against nilearn `get_clusters_table` | 10 tables on 5 maps (sub-peaks nearer and farther than 8 mm, NaN holes, edge- and corner-only contacts, bridges equal to the threshold, plateaus, ties, oblique and anisotropic grids, up to 73 clusters): equal, coordinates to 10⁻⁹ mm; and every row of realistic 2 mm and 1 mm maps, up to 743 rows |
-
-## Limits
-
-- **It is a template map on one person's brain.** The map is carried by a registration of the template to CDMD sub_013. Where it lands on these folds is that registration's reading, not this person's activity or anatomy. For a published figure, say so: the caption names the subject and the template.
-- **Template space only.** A map in a subject's native space, or in Talairach, will land in the wrong place, and nothing in a NIfTI header says which MNI template a map is in. The reader chooses, and "not stated" reads as MNI152NLin2009cAsym. FSL's MNI152NLin6Asym lands a median 1.6 mm from it at the cortex ([Published coordinates](published-coordinates.md)).
-- **Linear interpolation only.** A label atlas with more than two values is blended between labels and should not be drawn this way. A mask is read at 0.5.
-- **The deep surfaces are read where they lie.** A structure's surface is its boundary, so its value mixes the structure with what surrounds it. The cortex avoids this by sampling between its pial and white surfaces. The cut faces show the volume itself.
-- **One volume.** A 4D file is refused, not split. Save the volume to show as its own file.
-- **Not in a link.** A link opens without the map; the image keeps it.
-- **Not on a narrow stage.** On a stage under 480 px wide, a phone's, the dock keeps its other four tools on one row; a tablet or a wider window has Overlay.
-- **Refusal messages** come from the reader in English, after a translated lead.
-- **The cluster size is in the file's voxels**, as nilearn's is, so the same number means more tissue in a 2 mm map than in a 1 mm one. Where more than 16 peaks or clusters tie exactly, it keeps scipy's label order, where numpy's sort leaves it to the machine; a file whose pixdim disagrees with its sform has its cluster volumes from the sform.
-
-## Reproduce
+| Code | [`web/src/lib/core/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/core/user-map) (`nifti.ts`, `inverse-field.ts`, `sampling.ts`, `partition.ts`, `carry.ts`, `course.ts`, `display.ts`, `clusters.ts`), [`web/src/lib/engine/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/engine/user-map), [`web/src/lib/state/user-map.svelte.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/state/user-map.svelte.ts), [`web/src/features/user-map/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/user-map), [`web/src/features/inspector/MapCourseSection.svelte`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/features/inspector/MapCourseSection.svelte) |
+| Configuration | None; `DEPTH_SAMPLES` (10) and `VOLUME_SPACING_MM` (1) in `sampling.ts`, `MAX_VOXELS` and `MAX_VALUES` in `nifti.ts`, `VOLUMES_PER_SECOND` (4) in `user-map.svelte.ts`, colour scales in `display.ts` |
+| Tests | `web/src/lib/core/user-map/*.test.ts`, `web/src/lib/engine/user-map/*.test.ts`, `web/src/lib/state/user-map.svelte.test.ts`, `web/src/features/user-map/*.test.ts`; fixtures from `fixtures/make-fixtures.py` (nibabel), `make-vol-to-surf.py` and `make-clusters.py` (nilearn 0.12.1) |
 
 ```bash
-cd web && npx vitest run --project unit src/lib/core/user-map src/features/user-map src/lib/engine/slices
+cd web && npx vitest run --project unit src/lib/core/user-map src/features/user-map src/lib/engine/slices src/lib/engine/user-map
+cd web && npx vitest run --project browser src/lib/state/user-map.svelte.test.ts src/features/user-map src/features/inspector/MapCourseSection.svelte.test.ts
+uv run --no-project --with nilearn==0.12.1 python -I web/src/lib/core/user-map/fixtures/make-clusters.py
 ```
 
-```bash
-cd web && npx vitest run --project browser src/lib/state/user-map.svelte.test.ts
-```
-
-The fixtures are written by `web/src/lib/core/user-map/fixtures/make-fixtures.py` (nibabel), and `make-vol-to-surf.py` and `make-clusters.py` (nilearn 0.12.1, run with `uv run --no-project --with nilearn==0.12.1`).
-
-## See also
-
-- [Published coordinates](published-coordinates.md): the template fields the overlay inverts.
-- [Cortical atlases](cortical-atlases.md): the native surfaces and the partition each atlas mesh is cut from.
-- [Sections and cuts](sections-and-cuts.md): the cut faces the volume is drawn on.
-- [Sharing and snapshots](sharing-and-snapshots.md): Save image, its key and caption.
+The figure's map is not part of the repository. It was generated with nibabel 5.4.2 and SciPy 1.18.1: the three blobs above summed with `scipy.ndimage.gaussian_filter` noise ($\sigma$ = 2 voxels, `mode="wrap"`, `numpy.random.default_rng(0)`) scaled to s.d. 0.6, saved as `zstat1.nii.gz` with sform and qform code 4. Figure state (Fig. 1a, c): https://planumatlas.com/#anatomy=cdmd&view=left; (Fig. 1b): https://planumatlas.com/#anatomy=cdmd&cut=coronal&pos=23.4; then **Overlay** → the file, **Template** MNI152NLin2009cAsym, **Threshold** 3.1.

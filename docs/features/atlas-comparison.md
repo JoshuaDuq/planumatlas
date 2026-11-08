@@ -1,64 +1,39 @@
 # Atlas comparison
 
-For a region of one cortical atlas, the area it shares with each region of another, measured on the original pial surface and drawn as an outline on the model.
+For a region of one cortical atlas, the viewer lists the pial area it shares with each region of another atlas, in mm² and as a share of the selected region's whole surface. Six atlas pairs are measured on CDMD's native pial tessellation by barycentric vertex cells, with unassigned cortex kept. Overlap is spatial correspondence only; it carries no measurement from one atlas's region to another's.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/atlas-comparison-1.webp
+:alt: Three lateral views of the left hemisphere and one panel of the region detail. The precentral gyrus is outlined on the Destrieux atlas, area 4 on HCP-MMP, and their shared surface on Destrieux; the panel lists area 4 at 447.8 square millimetres, 20.6 percent of the gyrus, then areas 6d, 55b and 6v.
+:name: fig-atlas-comparison-1
 
-* - Where in the viewer
-  - The Anatomy tab's region detail for a Destrieux, HCP-MMP, Julich-Brain or Schaefer region: **Overlap with**, **Compare with**, and **Download CSV**.
-* - Built by
-  - [`brain_model/layers/comparison.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/comparison.py), [`brain_model/surfaces/geometry.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/surfaces/geometry.py) (`partition_surface`), [`brain_model/gltf/export.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/gltf/export.py)
-* - Configuration
-  - [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml): `atlas_comparison` (`enabled_anatomies: [cdmd]`, `atlases: [destrieux, hcp-mmp, julich, schaefer]`)
-* - Source data
-  - The subject's native `pial` surface and the four annotations of [Cortical atlases](cortical-atlases.md), pinned in `data/sources.json`
-* - Checked by
-  - [`tests/test_comparison.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_comparison.py); `web/src/lib/core/comparison/catalog.test.ts`, `web/src/lib/core/assets/comparison-assets.test.ts`, `web/src/features/inspector/AtlasComparison.svelte.test.ts`
-:::
-
-## What it does
-
-The region detail of a Destrieux, HCP-MMP, Julich-Brain or Schaefer region lists the regions of another cortical atlas it shares pial surface with: the shared area in mm² and its share of the selected region's **whole** surface, with the unassigned remainder shown. **Compare with** chooses that atlas. Each pair is published as its own file and downloads the first time it is shown. Activating a row outlines that intersection on the model; a section turns outlines off. **Download CSV** exports every pair at full precision with checksums and citations, named after both atlases.
-
-The two directions differ, because a share is the pair area over the selected region's whole pial area, unassigned cells included. CDMD's left precentral gyrus shares about 447.8 mm² with HCP-MMP area 4: 20.6% of the gyrus and 31.6% of area 4. Nothing is dropped or renormalised.
-
-Julich-Brain's gap maps and medial masks, and Schaefer's medial wall, count as unassigned, so on CDMD 34 of the 148 Destrieux regions lie mostly in Julich-Brain's unassigned cortex. Overlap is spatial, not functional equivalence: it carries no measurement from one atlas's region to another's. For example, Julich-Brain's receptor fingerprints are not carried to HCP-MMP regions.
+**The surface shared by a Destrieux gyrus and an HCP-MMP area is measured and outlined.** **a**, Destrieux left precentral gyrus (`destrieux:left:29`, 2,170 mm²) selected. **b**, HCP-MMP left area 4 (`hcp-mmp:left:8`, 1,419 mm²) selected. **c**, Region detail of the gyrus, **Overlap with HCP-MMP**: area 4 shares 447.8 mm², 20.6% of the gyrus; 6d, 55b and 6v follow, with 6 more regions under the disclosure. **d**, The activated row outlines the gyrus ∩ area 4 cell on the model. CDMD, left hemisphere, lateral view, internal anatomy hidden; same camera in a, b and d.
+```
 
 ## Data
 
-The comparison reads, for each hemisphere, `surf/<lh|rh>.pial` and `label/<lh|rh>.<annotation>.annot` of the two atlases from the subject's source directory. Before measuring, `verify_comparison_sources` requires each file's path and sha256 to equal an entry of the published manifest's provenance; the build fails otherwise. The per-region areas come from the published region identities: `source_region_index` requires `region.id == "<atlas>:<hemisphere>:<label>"`, kind `cortex` or `non-region` and unique labels, and `load_annotation` requires the annotation's labels, names, annotation values and vertex counts to equal the published regions'.
+For each hemisphere, the subject's `surf/<lh|rh>.pial` and the two atlases' `label/<lh|rh>.<annotation>.annot` ([cortical atlases](cortical-atlases.md#data)). `verify_comparison_sources` requires each file's path and sha256 to match the published manifest's provenance. Region identities come from `manifest.json`: `source_region_index` requires ids `<atlas>:<hemisphere>:<label>`, kind `cortex` or `non-region` and unique labels; `load_annotation` requires the annotation's names, annotation values and vertex counts to equal the published regions'.
 
-## How it was built
+## Method
 
-### 1. Select the pairs
+### Pairs
 
-`atlas_comparison.atlases` lists the four atlases; `export_comparisons` takes every unordered pair with `itertools.combinations`, six in all. `comparison_atlases` refuses an anatomy not in `enabled_anatomies`, a pair that is not two distinct configured atlases, or an atlas with no published cortical surface.
+`atlas_comparison.atlases` lists `destrieux`, `hcp-mmp`, `julich` and `schaefer`; `export_comparisons` takes every unordered pair (`itertools.combinations`), six in all. `comparison_atlases` refuses an anatomy not in `enabled_anatomies` (`[cdmd]`), a pair that is not two distinct configured atlases, and an atlas with no published surface.
 
-### 2. Measure joint cells in float64
+### Joint vertex cells
 
-`compare_surface(vertices, faces, annotations)` takes the pial vertices as float64 and an `(n_vertices, 2)` integer array of the two atlases' labels:
+`compare_surface` (`brain_model/layers/comparison.py`) takes the pial vertices in float64 and an $(n_\text{vertices}, 2)$ array of the two atlases' labels.
 
-1. Triangle areas are $\tfrac12 \lVert (v_1 - v_0) \times (v_2 - v_0) \rVert$; any non-finite or zero-area triangle stops the build.
-2. Each triangle gives one third of its area to each of its three corners (`bincount` of `areas / 3` over the face vertices), the vertex-cell convention the boundaries of [Cortical atlases](cortical-atlases.md) use.
-3. Vertex areas are summed by the unique pair of labels (`np.unique(..., axis=0)`), giving the area of each joint label pair in mm².
+1. Triangle area $A_t = \tfrac12 \lVert (v_1 - v_0) \times (v_2 - v_0) \rVert$; a non-finite or zero area stops the build.
+2. Vertex area $a_i = \sum_{t \ni i} A_t / 3$, the barycentric cell that [cortical atlases](cortical-atlases.md#method) assigns to each vertex's label.
+3. For each label pair $(p, q)$, area $S_{pq} = \sum_{i:\,(\ell^A_i, \ell^B_i) = (p,q)} a_i$ in mm².
 
-Every pair keeps its unassigned cells: Julich-Brain's gap maps and medial masks, and Schaefer's medial wall, are regions of kind `non-region`, so each hemisphere's pair areas sum to its whole pial area.
+Non-region labels (medial walls, Julich-Brain gap maps and medial masks) are kept, so each hemisphere's $S_{pq}$ sum to its whole pial area. The share shown for region $p$ is $S_{pq} / \sum_{q'} S_{pq'}$, the denominator being $p$'s full pial area, unassigned cells included; nothing is renormalised. The two directions therefore differ: the precentral gyrus ∩ area 4 cell (447.8 mm²) is 20.6% of the gyrus and 31.6% of area 4.
 
-### 3. Build the intersection meshes
+### Intersection meshes and files
 
-The same call runs `partition_surface` on the joint code, so each joint cell becomes one mesh on the original pial tessellation, using the barycentric split of [Cortical atlases](cortical-atlases.md#3-partition-the-pial-surface-barycentrically). `export_hemisphere` adds a mesh `overlap:<hemisphere>:<labelA>:<labelB>` (white, mask only) for every pair with area, and records `{region_ids, area_mm2, mesh_id}`.
+`partition_surface` runs on the joint label code, so each joint cell becomes one mesh on the original tessellation. `export_hemisphere` adds a mesh `overlap:<hemisphere>:<labelA>:<labelB>` for every pair with positive area. `export_comparison` writes `atlas-overlaps[-<a>-<b>].glb` and the sidecar `atlas-comparison[-<a>-<b>].json`; the suffix is empty for `destrieux`–`hcp-mmp`. The sidecar records `schema_version: 1`, `surface: "pial"`, `method: "barycentric-vertex-cells"`, `units: "mm2"`, per-region `totals`, the pairs, and sha256 of every source, atlas asset and geometry file. `attach_comparisons` declares all six in `manifest["atlas_comparisons"]`.
 
-### 4. Write the files
-
-`export_comparison` writes, for each pair, the geometry `atlas-overlaps[-<a>-<b>].glb` and the sidecar `atlas-comparison[-<a>-<b>].json`; the suffix is empty for the first pair, `destrieux` with `hcp-mmp`. The sidecar records `schema_version: 1`, `anatomy_id`, the two atlases, `surface: "pial"`, `method: "barycentric-vertex-cells"`, `units: "mm2"`, per-region `totals` (the sum of a region's pair areas, its full pial area), the pairs, the pial and annotation files with sha256 per hemisphere, the two cortical atlas assets with sha256 and citation, and the geometry file with sha256. `attach_comparisons` declares every pair in `manifest["atlas_comparisons"]` and the first pair under the older single-pair key `atlas_comparison`.
-
-`python -m brain_model.layers.comparison --anatomy cdmd` (`publish_comparison`) attaches comparisons to an existing publication without rebuilding anatomy.
-
-### CDMD
-
-| Pair | Positive joint pairs |
+| Pair (CDMD) | Joint cells with area |
 | :--- | ---: |
 | Destrieux × HCP-MMP | 1,202 |
 | Destrieux × Julich-Brain | 1,056 |
@@ -67,33 +42,39 @@ The same call runs `partition_surface` on the joint code, so each joint cell bec
 | HCP-MMP × Schaefer | 1,767 |
 | Julich-Brain × Schaefer | 1,556 |
 
-Every pair file conserves both hemispheres to the same totals: about 85,619.412 mm² left and 85,458.887 mm² right.
+## Display
 
-## How the viewer uses it
+The region detail of a cortical region opens **Overlap with** *atlas*; **Compare with** chooses the partner, and each pair's files load the first time it is shown. `catalog.ts` validates the sidecar against the manifest (schema, anatomy, atlas order, surface, method, units, checksums, totals, unique mesh ids) and builds rows of area and share, with non-region area summed as **Unassigned**. The first 4 rows are listed and the rest sit under a disclosure. Activating a row outlines its mesh: `overlay.ts` keeps every overlap mesh hidden as a mask (`colorWrite: false`, `depthWrite: false`), and the outline pass draws the active one. A section hides the outline. **Download CSV** exports every row at full precision as `<anatomy>-<region id>-<partner>-atlas-comparison.csv`.
 
-- [`web/src/lib/core/comparison/catalog.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/comparison/catalog.ts) validates the sidecar against the manifest (schema, subject, atlas order, `pial`, `barycentric-vertex-cells`, `mm2`, checksums, per-region totals, unique mesh identities) and builds, for a selected region and partner atlas, rows of `areaMm2` and `fraction` of the region's total, with the remainder as the unassigned share. `comparisonPartners` lists which atlases the selected region's atlas is measured against.
-- `web/src/features/inspector/AtlasComparison.svelte` shows the list, **Compare with**, and the CSV export (`<anatomy>-<region id>-<partner>-atlas-comparison.csv`).
-- [`web/src/lib/engine/comparison/overlay.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/comparison/overlay.ts) loads the pair's `atlas-overlaps*.glb` and keeps each mesh as a mask only (`colorWrite: false`, `depthWrite: false`, hidden); the outline pass draws the highlighted pair's mesh, so atlas colours and depth stay intact.
+## Validation
 
-## Checks
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| `test_unequal_triangles_use_area_and_conserve_unassigned_cells` | Overlap equals explicit barycentric subdivision; unassigned cells kept | passes |
+| `test_exact_pair_meshes_have_the_same_area_as_the_common_cells` | Mesh area equals joint-cell area | passes |
+| `test_invalid_surface_state_surfaces_an_error`, `test_export_rejects_inconsistent_identity` | Invalid surfaces, identities, anatomies or checksums refused | passes |
+| `test_real_source_marginals_match_published_float32_surface_areas` | Per-region marginals equal published region areas within the float32 bound | largest difference $1.12 \times 10^{-4}$ mm² |
+| `test_published_geometry_contains_only_the_exact_joint_cells` | Published geometry equals the joint cells | passes |
+| `test_three_atlases_publish_pairwise_comparisons_with_identical_marginals` | Every pair keeps the same per-region totals | passes |
+| Published sidecars (CDMD) | Each pair conserves each hemisphere's pial area | 85,619.412 mm² left, 85,458.887 mm² right, all six pairs |
 
-`tests/test_comparison.py` checks the overlap calculation against explicit barycentric subdivision (unequal triangles use area and conserve unassigned cells; exact pair meshes have the same area as the common cells), refuses invalid surface state and inconsistent identity, checks real source marginals against published float32 surface areas, that exported geometry contains only the exact joint cells, and that three atlases publish pairwise comparisons with identical marginals.
+Front-end checks: `web/src/lib/core/comparison/catalog.test.ts`, `web/src/lib/core/assets/comparison-assets.test.ts`, `web/src/features/inspector/AtlasComparison.svelte.test.ts`.
 
-| Check | CDMD |
+## Limitations
+
+- Overlap is spatial, not functional equivalence; for example, Julich-Brain receptor fingerprints are not carried to overlapping HCP-MMP areas.
+- Shares depend on direction and include unassigned cortex: 34 of the 148 Destrieux regions lie mostly in Julich-Brain's unassigned cortex on CDMD.
+- HCP-MMP, Julich-Brain and Schaefer boundaries are projections onto this brain ([limitations](cortical-atlases.md#limitations)).
+- Computed for `cdmd` only.
+- The checks are numerical; they do not show that projected boundaries are biologically exact.
+
+## Code availability
+
+| | |
 | :--- | :--- |
-| Both hemispheres conserved, every pair file | 85,619.412 mm² left, 85,458.887 mm² right |
-| Largest discrepancy against the cortical meshes | $1.12 \times 10^{-4}$ mm², within the float32 bound |
-
-These are numerical checks, not proof that projected boundaries are biologically exact.
-
-## Limits
-
-- Overlap is spatial. It is not functional equivalence and carries no measurement from one atlas's region to another's.
-- The share depends on direction: it is over the selected region's whole pial area, so a region in unassigned cortex of the other atlas shows a large unassigned remainder.
-- HCP-MMP, Julich-Brain and Schaefer are projected onto this brain; their boundaries are as exact as the projection ([Cortical atlases](cortical-atlases.md#limits)).
-- Enabled for `cdmd` only; the pair loops need two published cortical surfaces.
-
-## Reproduce
+| Code | [`brain_model/layers/comparison.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/comparison.py), [`brain_model/surfaces/geometry.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/surfaces/geometry.py), [`web/src/lib/core/comparison/catalog.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/comparison/catalog.ts), [`web/src/lib/engine/comparison/overlay.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/comparison/overlay.ts) |
+| Configuration | [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml): `atlas_comparison` |
+| Tests | [`tests/test_comparison.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_comparison.py) |
 
 ```bash
 uv run python -m brain_model.build --anatomy cdmd
@@ -101,8 +82,4 @@ uv run python -m brain_model.layers.comparison --anatomy cdmd
 uv run pytest tests/test_comparison.py
 ```
 
-## See also
-
-- [Cortical atlases](cortical-atlases.md)
-- [Receptor fingerprints](receptor-fingerprints.md)
-- [Validation](../pipeline/validation.md)
+Figure state (panel a; open **Overlap with HCP-MMP** and activate the area 4 row for c and d): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&view=left&hemi=left&internal=0&region=destrieux:left:29

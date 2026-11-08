@@ -1,135 +1,42 @@
-# Planum documentation
+# Planum: methods
 
 ```{rst-class} hero-lede
-A real human brain, explored in your browser: cut it, measure it, follow its tracts, and see what each region is known for.
+How each feature of the Planum brain viewer is built, displayed and validated.
 ```
 
-Planum shows MGH CDMD subject `sub_013`, reconstructed from its own T1 scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Every region, cut face and number traces back to that data or to a cited atlas. A Python pipeline builds the assets; a browser viewer displays them, with nothing to install. Planum is for research and education; it is **not clinical anatomy**.
+Planum renders one individual brain, MGH CDMD subject `sub_013`, reconstructed from its own T1-weighted scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Cortical atlases, segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Each page below documents one feature in a fixed order: data, method, display, validation, limitations and code availability. Every parameter and measured value is taken from the repository's code, published files and tests. Planum is for research and education. It is not clinical anatomy.
 
 ```{figure} ../.github/assets/readme/tracts.webp
 :alt: Diffusion tract bundles inside a see-through cortex, with the Tracts panel listing streamline counts and lengths
-:class: hero-figure
-:target: https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=diffusion
+:name: fig-index-1
 
-Tracts from the subject's own diffusion scan inside a see-through cortex. Select the image to open this view.
+**One subject's anatomy, with every layer registered onto it.** Tracts reconstructed from the subject's own diffusion scan, shown inside a see-through cortex.
 ```
 
-## What you can do
+## Common basis
 
-::::{container} feature-grid
+Subject
+: MGH Connectome Diffusion Microstructure Dataset (CDMD) `sub_013`; FreeSurfer 8.2 reconstruction of its T1 ([Tian et al., 2022](reference/references.md#reference-datasets-and-tools)).
 
-:::{container} feature
-[![A coronal section through the hippocampal formation with capped solids](../.github/assets/readme/sections.webp)](features/sections-and-cuts.md)
+Coordinate frame
+: FreeSurfer surface RAS in millimetres ($+R$ right, $+A$ anterior, $+S$ superior), centred on the conformed 256³ volume. Every coordinate, cut position and crosshair in these pages uses this frame unless MNI152 is named.
 
-**[Cut it open](features/sections-and-cuts.md)**
+Build
+: An offline Python compiler (`brain_model`) turns the reconstruction and source atlases into meshes (glTF), gzipped categorical label volumes and JSON layers under `public/models/cdmd/`. A WebGL 2 viewer on Three.js (`web/`) renders them in the browser.
 
-Sagittal, coronal, axial or oblique sections, each solid capped and coloured from the label volume.
-:::
+Validation
+: The compiler writes its measurements to `validation.json`. Each page's Validation table lists the tests that check the feature and the values they measure.
 
-:::{container} feature
-[![Linked MRI in three planes with a shared crosshair](../.github/assets/readme/linked-mri.webp)](features/linked-mri.md)
+## Methods
 
-**[Check it against the scan](features/linked-mri.md)**
+| Section | Feature |
+| :--- | :--- |
+| Stage and tools | [Sections and cuts](features/sections-and-cuts.md) · [Linked MRI](features/linked-mri.md) · [Dissection and display](features/dissection-and-display.md) · [Lesion report](features/lesion-report.md) · [Published coordinates](features/published-coordinates.md) · [Overlays](features/overlays.md) · [Sharing and snapshots](features/sharing-and-snapshots.md) |
+| Anatomy | [Cortical atlases](features/cortical-atlases.md) · [Atlas comparison](features/atlas-comparison.md) · [Internal anatomy](features/internal-anatomy.md) · [Boundary certainty](features/boundary-certainty.md) · [Segmentation agreement](features/segmentation-agreement.md) · [Spinal cord](features/spinal-cord.md) · [Tracts](features/tracts.md) |
+| Functional and vascular layers | [Functional networks](features/functional-networks.md) · [Functional divisions](features/functional-divisions.md) · [Cerebellar functions](features/cerebellar-functions.md) · [Striatal networks](features/striatal-networks.md) · [Arterial territories](features/arterial-territories.md) · [Receptor fingerprints](features/receptor-fingerprints.md) |
+| Evidence and tours | [Functions](features/functions.md) · [Deficits](features/deficits.md) · [Circuits](features/circuits.md) · [Visual field map](features/visual-field-map.md) · [Stroke cases](features/stroke-cases.md) · [Stimulation responses](features/stimulation-responses.md) |
 
-The subject's own T1 in three planes around a shared crosshair, with the label under the cursor.
-:::
-
-:::{container} feature
-[![The Neurosynth map for language on HCP-MMP areas](../.github/assets/readme/functions.webp)](features/functions.md)
-
-**[See where a function is studied](features/functions.md)**
-
-70 curated functions from Neurosynth meta-analyses, each area ranked by its consistency.
-:::
-
-:::{container} feature
-[![Hemispatial neglect on the right hemisphere, one colour per finding](../.github/assets/readme/deficits.webp)](features/deficits.md)
-
-**[Map what damage is associated with](features/deficits.md)**
-
-131 acquired deficits, each finding with its population, evidence and limits.
-:::
-
-:::{container} feature
-[![The memory tour on the left hippocampal formation](../.github/assets/readme/circuits.webp)](features/circuits.md)
-
-**[Take a guided tour](features/circuits.md)**
-
-Five anatomical pathway tours, 25 landmarks in all, from the visual pathway to corticospinal crossing, that reveal and frame each landmark.
-:::
-
-:::{container} feature
-[![A lesion sphere on the left subcentral gyrus with its report](../.github/assets/readme/lesion.webp)](features/lesion-report.md)
-
-**[Ask what a lesion would reach](features/lesion-report.md)**
-
-A 3–30 mm sphere's overlap with functions, deficits, tissue and tracts. It predicts no deficit.
-:::
-
-:::{container} feature
-[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia, one with none](../.github/assets/readme/stroke-cases.webp)](features/stroke-cases.md)
-
-**[Weigh a region against real strokes](features/stroke-cases.md)**
-
-For a region some stroke reached, every Aphasia Recovery Cohort case as lesion volume against language score. Compare two people's own lesions on the brain.
-:::
-
-:::{container} feature
-[![Stimulation responses for the left hippocampal formation: a response-rate bar for each site stimulation could reach](../.github/assets/readme/stimulation.webp)](features/stimulation-responses.md)
-
-**[See what stimulating it evokes](features/stimulation-responses.md)**
-
-From stereo-EEG in people with epilepsy: how often a single pulse here evoked a response elsewhere, same or opposite side.
-:::
-
-:::{container} feature
-[![The visual field map: a dot on the visual field disc and the cortex predicted to represent it](../.github/assets/readme/visual-field.webp)](features/visual-field-map.md)
-
-**[Map the visual field onto the cortex](features/visual-field-map.md)**
-
-Move a point through the visual field and see the V1, V2 and V3 territory predicted to represent it, or click the cortex to read it back.
-:::
-
-::::
-
-Search or browse 148 Destrieux parcels, 360 HCP-MMP areas, 278 Julich-Brain areas, 400 Schaefer parcels and 514 NextBrain labels, down to 32 functional cerebellar regions and a 34-region cervical cord. Compare any two cortical atlases by shared surface, colour the cortex by functional network, and share any view as a link: the address bar holds the selection, camera, section, display and a placed lesion. The viewer works in English and French, by keyboard, and on phones.
-
-## Find your way
-
-[Getting started](getting-started/install.md)
-: Run the viewer locally, take a tour of the [interface](getting-started/viewer.md), or build this documentation.
-
-[Features](features/index.md)
-: One page per feature: what it does, the data it uses, how it was built step by step, the checks it passes and its limits.
-
-[Data and layers](data/index.md)
-: The atlases, segmentations and functional layers, their sources and how each reaches the subject.
-
-[Pipeline](pipeline/architecture.md)
-: The architecture of the compiler and viewer, how to [build an anatomy](pipeline/building.md), and [validation and limits](pipeline/validation.md).
-
-[Developer reference](developer/api/index.md)
-: Browse the Python pipeline API or [embed the viewer components](developer/embedding.md) in a Three.js application.
-
-[References and licensing](reference/references.md)
-: The bibliography, data licences and intended use.
-
-The anatomy represents one individual; its folds and asymmetries are not normative. Atlas projections and segmentations are estimates. See [Data and layers](data/index.md) and [References and licensing](reference/references.md) for provenance and data terms.
-
-```{toctree}
-:hidden:
-:caption: Getting started
-
-getting-started/install
-getting-started/viewer
-```
-
-```{toctree}
-:hidden:
-:caption: Features
-
-features/index
-```
+Sources, citations and data licences are listed in [References](reference/references.md).
 
 ```{toctree}
 :hidden:
@@ -183,39 +90,9 @@ features/stimulation-responses
 
 ```{toctree}
 :hidden:
-:caption: Data
+:caption: References
 
-data/index
 reference/references
-```
-
-```{toctree}
-:hidden:
-:caption: Pipeline
-
-pipeline/architecture
-pipeline/building
-pipeline/validation
-```
-
-```{toctree}
-:hidden:
-:caption: Developer
-
-developer/api/index
-developer/embedding
-```
-
-```{toctree}
-:hidden:
-:caption: Evidence reviews
-:glob:
-
-reference/circuit-evidence
-reference/full-text-review
-reference/deficit-additions-*
-reference/hart-2016-review-2026-11-02
-reference/teaching-set-audit-2026-11-05
 ```
 
 ```{toctree}

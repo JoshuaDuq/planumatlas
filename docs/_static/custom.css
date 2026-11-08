@@ -376,3 +376,7 @@ article table th, article table td { padding: 0.65rem 0.75rem; vertical-align: t
   .feature-grid { grid-template-columns: 1fr; }
   .feature:last-child:nth-child(odd) { width: auto; }
 }
+
+/* Journal-style figure legends: "Fig. 1 | Title." with the number in bold. */
+figcaption .caption-number { font-weight: 600; color: var(--color-foreground-primary); }
+figcaption .caption-text strong:first-child { color: var(--color-foreground-primary); }

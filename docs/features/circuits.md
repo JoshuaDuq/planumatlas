@@ -1,161 +1,85 @@
 # Circuits
 
-The **Circuits** tab steps through five guided pathway and loop-branch tours, 25 landmarks in all, each opening its source atlas, revealing the anatomy and framing it, with literature sources split into deficit evidence and circuit background.
+The **Circuits** tab steps through five anatomical pathway and loop-branch tours, 25 landmarks in all. Each landmark is a labelled region of this brain's atlases; opening it loads that atlas, uncovers the region and frames it from an authored view with 12 mm of surrounding anatomy. Every tour cites circuit background separately from the patient studies behind its linked deficit. Apart from the corticospinal streamlines, the tours teach literature-described connections and measure nothing in this individual.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/circuits-1.webp
+:alt: Three panels of coloured cerebellar and brainstem structures on a dark background. a, the left cerebellar hemisphere from behind with its lobules in different colours and lobule V outlined in white. b, the same view with the left hemispheric lobules removed, exposing the dentate nucleus outlined in white beside the brainstem. c, the right brainstem and thalamus seen from the midline, with the small red nucleus outlined in white below the thalamus.
+:name: fig-circuits-1
 
-* - Where in the viewer
-  - **Circuits** tab: **Guided circuits** (the tours) and **Maps** ([visual field map](visual-field-map.md)); the stepper in the location bar; the region inspector's associated landmarks.
-* - Built by
-  - Authored in [`data/circuits.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/circuits.yaml) and validated at load by [`web/src/lib/core/learning/catalog.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/learning/catalog.ts); framed by [`web/src/lib/engine/framing.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/framing.ts); run by [`web/src/lib/controller/lesson.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/controller/lesson.ts)
-* - Configuration
-  - `data/circuits.yaml` (`context_margin_mm: 12`); withdrawn tours in [`data/archived-circuit-tours.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/archived-circuit-tours.yaml)
-* - Source data
-  - 23 bibliography entries (19 PubMed articles, four NCBI Bookshelf chapters); the anatomy's own atlases and, on three landmarks, its own diffusion tract ([tracts](tracts.md))
-* - Checked by
-  - `web/src/lib/core/learning/catalog.test.ts`, `references.test.ts`, `session.test.ts`, `web/src/lib/controller/lesson.test.ts`, `web/src/features/circuits/*.test.ts`
-:::
-
-## What it does
-
-The Circuits tab contains five anatomical pathway and loop-branch tours, with 25 landmarks. Choose a tour and a landmark, or use the arrows in the location bar to step through it.
-
-| Tour | Anatomical subject | Main qualification |
-| --- | --- | --- |
-| Visual pathway | Optic chiasm, optic tract, lateral geniculate nucleus and V1 | The retinal input, optic nerves and optic radiations are omitted. |
-| Hippocampal–diencephalic pathway | Hippocampal formation, fornix, mammillary bodies, mammillothalamic tract and anteroventral thalamic nucleus | A selected branch within a wider memory network. The anteromedial and anterodorsal nuclei are drawn only on cut faces; this is not a complete or uniquely necessary serial Papez circuit. |
-| Basal ganglia motor loops | Selected direct and indirect motor-loop components | The stepper visits branches, not one continuous linear route. Nigral, dopamine and hyperdirect components are omitted. |
-| Cerebellar output and crossing | A dentate output branch crossing past the opposite red nucleus toward the thalamus and motor cortex | Input and return pathways are omitted. The whole thalamus stands in for its cerebellar-recipient territory. Nonhuman-primate tracing, human histology and human anatomical landmarks retain their separate evidence roles. |
-| Corticospinal descent and crossing | Cortical origin, brainstem descent, medullary crossing and opposite spinal cord, with this brain's tracked left corticospinal tract on the first three landmarks | The streamlines are diffusion-MRI estimates that stop near the caudal medulla, before the crossing. Broad brainstem landmarks do not isolate the fibres. |
-
-```{figure} ../../.github/assets/readme/circuits.webp
-:alt: The memory pathway on its first landmark, the left hippocampal formation, outlined among the structures around it
-
-The hippocampal–diencephalic pathway on its first landmark, revealed and framed with its neighbours.
+**Three landmarks of the cerebellar output tour, each framed with its neighbours.** **a**, Landmark 1, left lobule V (outlined), posterior view. This anatomy publishes cerebellar lobules, so the landmark resolves to its lobule V form. **b**, Landmark 2, left dentate nucleus, same view. Its ten covering regions, the left hemispheric lobules and crura, are hidden. **c**, Landmark 4, right red nucleus, seen from the left (the midline face of the right hemisphere). The right midbrain territory and ventral tegmental area are hidden. Returning to landmark 1 shows both sets again. Subject CDMD sub_013; teaching-set internal anatomy; each landmark's side shown alone; region bounds plus 12 mm, filling 80% of the view.
 ```
-
-Each landmark opens its source atlas, reveals the relevant anatomy and frames it. **Focus** or **Return to landmark** restores that framing. **Linked MRI** centres the sections on the landmark (see below). Region details link back to associated landmarks. A shared URL retains the tour and landmark when its ID is still published.
-
-A landmark can also draw one of this brain's own tracts, alone and coloured by local streamline direction. Stretches hidden behind or inside the anatomy are drawn faint rather than left out. The streamlines go away on any landmark without a tract, and when the tour ends.
-
-The tours teach literature-supported anatomical relationships. Apart from the corticospinal streamlines, they do not measure connectivity in this individual. No tour reconstructs axons or establishes a necessary and sufficient lesion pattern for a deficit. Their notes identify the species, anatomical approximations and omitted components relevant to interpretation.
-
-Every tour's Sources panel distinguishes **Deficit evidence** from **Circuit background**. A patient lesion study can support a region–deficit association without establishing the connections of the pathway taught. Sources retain their study-specific limits. Clinical accuracy has not been validated.
 
 ## Data
 
-`data/circuits.yaml` (revision `2026-10-31`) holds the shared bibliography and the tours.
+[`data/circuits.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/circuits.yaml), revision 2026-10-31, holds the tours, a 23-entry bibliography and the framing margin, `context_margin_mm: 12`.
 
-| Tour id | Landmarks (step ids, regions) | Linked deficit | Deficit-evidence references |
+| Tour | Landmarks (region on CDMD) | Linked deficit | Deficit evidence |
 | :--- | :--- | :--- | :--- |
-| `vision` | `chiasm` (`learning:midline:optic-chiasm`), `tract` (`learning:left:optic-tract`), `lgn` (`learning:left:lateral-geniculate`), `v1` (`hcp-mmp:left:1`) | `hemianopia` | `clinical-zhang-2006` |
-| `memory` | `hippocampus`, `fornix`, `mammillary`, `mammillothalamic` (all `learning:left:*`), `thalamus` (`nextbrain:left:220`, anteroventral nucleus) | `amnesia` | Zola-Morgan 1986, Aggleton 2000, Harding 2000 |
-| `motor` | `cortex` (`destrieux:left:29`, precentral gyrus), `putamen`, `gpi`, `thalamus`, `gpe`, `stn` (`learning:left:*`) | `parkinsonism` | Fearnley and Lees 1991, Bhatia and Marsden 1994 |
-| `cerebellar` | `cortex` (`learning:cerebellar-cortex-left`), `dentate`, `superior-peduncle`, `red-nucleus` (right), `thalamus` (right), `motor-cortex` (`hcp-mmp:right:8`) | `ataxia` | Schoch 2006 |
-| `corticospinal` | `motor-cortex` (`hcp-mmp:left:8`), `midbrain` (`learning:left:midbrain`), `crossing` (`learning:caudal-medulla`), `spinal-tract` (`pam50:right:lateral-corticospinal-tract`) | `hemiparesis` | Frenkel-Toledo 2022 (`motor-weakness`) |
+| `vision` | optic chiasm (midline), optic tract, lateral geniculate nucleus (`learning:`), V1 (`hcp-mmp:left:1`); left | `hemianopia` | Zhang et al. 2006 |
+| `memory` | hippocampal formation, fornix, mammillary nuclei, mammillothalamic tract (`learning:`), anteroventral thalamic nucleus (`nextbrain:left:220`); left | `amnesia` | Zola-Morgan et al. 1986; Aggleton et al. 2000; Harding et al. 2000 |
+| `motor` | precentral gyrus (`destrieux:left:29`), putamen, internal pallidum, thalamus, external pallidum, subthalamic nucleus (`learning:`); left | `parkinsonism` | Fearnley & Lees 1991; Bhatia & Marsden 1994 |
+| `cerebellar` | lobule V, dentate nucleus, superior cerebellar peduncle (left); red nucleus, thalamus (right, `learning:`); area 4 (`hcp-mmp:right:8`) | `ataxia` | Schoch et al. 2006 |
+| `corticospinal` | area 4 (`hcp-mmp:left:8`), midbrain territory (left), caudal medulla (midline) (`learning:`), lateral corticospinal tract (`pam50:right:…`) | `hemiparesis` | Frenkel-Toledo et al. 2022 |
 
-Counts: four, five, six, six and four landmarks (25). The cerebellar tour's route is left cerebellar cortex, left dentate, left superior peduncle, midbrain crossing past the right red nucleus, right motor thalamus, right motor cortex.
+The bibliography has 19 PubMed articles (10 with a PMC full text) and 4 chapters of Purves et al., *Neuroscience*, 2nd edition (NCBI Bookshelf). The corticospinal tour's first three landmarks draw `cst-left`, the left corticospinal bundle tracked in this subject's diffusion MRI ([tracts](tracts.md)). Withdrawn tours are kept, with their 86 references, in [`data/archived-circuit-tours.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/archived-circuit-tours.yaml) (33 tours, 100 landmarks; `hearing`, `touch` and `valuation` withheld pending anatomical rework). The viewer does not load the archive.
 
-### Tour fields
+## Method
 
-Each tour has `id`, `name`, `summary`, `route`, `scope` (what is and is not in the tour) and `clinical` (the clinical sources' content and limits), all in `en` and `fr`; a `deficit` that must be a published profile of the [deficit catalogue](deficits.md); `references` (the bibliography ids it cites); `clinical_references` (the subset that is deficit evidence, which must be distinct and all cited by the tour); and `steps`.
+### Tour content
+A tour is a specified anatomical pathway or loop branch whose stops are labelled regions of the atlases the viewer carries. Each tour states its `route`, its `scope` (what is omitted) and its `clinical` text (what the patient sources show and do not show), in English and French. Each landmark states its `role`, `explanation` and `mapping`; the mapping says how the atlas label approximates the structure. For example, the whole thalamus stands for its cerebellar-recipient territory, the anteroventral nucleus is drawn while the anteromedial and anterodorsal nuclei appear only on cut faces, and projections known from monkey tracing are labelled as such. `references` lists every cited work, and `clinical_references` marks the subset that is deficit evidence. The remainder is circuit background.
 
 ### Landmark fields
+Each landmark names a `region` id and its exact `source_name`, a camera `view` and a Linked MRI `plane`. Optional fields are `covering_regions` (structures hidden to expose it), `tract` (one of the anatomy's bundles, drawn whole), `map` (`visual-field`, offered at V1; [visual field map](visual-field-map.md)) and `alternatives`. Views across the 25 landmarks: anterior 9, left 6, posterior 4, inferior 3, right 2, superior 1. Planes: coronal 13, axial 9, sagittal 3.
 
-| Field | Meaning |
-| :--- | :--- |
-| `id`, `region`, `source_name` | A region id of the published manifest and that region's source label. The kind must be `cortex` or `structure`; a `source_name` mismatch fails |
-| `name`, `role`, `explanation`, `mapping` | Bilingual text; `mapping` says how the atlas label stands for the anatomy and where it falls short |
-| `view` | One of the camera's presets: `oblique`, `left`, `right`, `anterior`, `posterior`, `superior`, `inferior`. The tours use anterior (9 landmarks), left (6), posterior (4), inferior (3), right (2) and superior (1) |
-| `plane` | `axial`, `coronal` or `sagittal`: the Linked MRI plane for this landmark (13 coronal, 9 axial, 3 sagittal) |
-| `tract` | One of the anatomy's own tract bundle ids, drawn whole while the landmark is open. Only the corticospinal tour sets it, `cst-left` on `motor-cortex`, `midbrain` and `crossing`; an anatomy without that bundle (for example another subject's) fails validation |
-| `map` | An interactive map the landmark offers; one is set, `visual-field` on the visual tour's V1 landmark |
-| `covering_regions` | Structures in the same atlas and hemisphere that this landmark hides to expose it (the cerebellar tour's dentate hides the left cerebellar cortex; the right red nucleus hides the right midbrain and VTA) |
-| `alternatives` | Forms of the landmark for anatomies divided differently, each overriding the base fields: the cerebellar cortex whole, or lobule V (`learning:lobule-v-left`) in an anatomy with cerebellar lobules; the dentate's own form lists the ten left hemispheric lobules and crura it covers instead |
+### Resolution on an anatomy
+A landmark with `alternatives` has one form per way an anatomy can be divided; each alternative overrides the base fields. Exactly one form must have its `region` and all `covering_regions` present in the manifest; zero or two throw with the count and region. On CDMD the cerebellar cortex landmark resolves to lobule V (`learning:lobule-v-left`), and the dentate to its form covering ten left lobules and crura (Fig. 1a, b). A landmark's `restores` is every region another landmark of the tour covers but it does not, so arriving at it uncovers what earlier steps hid.
 
-`resolveStep` picks exactly one form per anatomy: the form whose regions (`region` and `covering_regions`) all exist. Zero or two forms is an error that names the count and the region. A landmark's `restores` is every region some other landmark of the tour covers but this one does not, so arriving at the landmark uncovers them again; returning to the lobule V landmark restores the hidden lobules, and the vermis stays in place.
+### Catalogue validation
+`createCircuitCatalog` throws, naming the record, on: an empty or non-positive margin; a duplicate id; a non-HTTPS reference URL; a reference with neither a numeric PMID nor an `NBK` accession; a malformed PMCID or correction DOI; a translation missing in `en` or `fr` or with another key; an unknown deficit; a tour with no references; `clinical_references` empty, repeated or not among the tour's references; an unknown region, covering region, view, plane, tract bundle or map; a source label that differs from the region's; a landmark that is not `cortex` or `structure`; a covering region that is not a different structure in the landmark's atlas and hemisphere. A separate test requires each tour's deficit evidence to include a PMID that the [deficit catalogue](deficits.md#method) records as supporting evidence for that deficit. Every identifier is checked against its fetched PubMed or Bookshelf record (URL form, PMCID, title, first author, year, book, corrections) as described under [deficits](deficits.md#method).
 
-### Bibliography
+### Framing
+`frameLandmark` takes the bounding box of the landmark's meshes and expands it by `context_margin_mm` (12 mm) on every side. If the box's bounding sphere is still under 50 mm in radius, the box is grown evenly until it reaches 50 mm. The camera is placed along the authored view direction with that view's up vector, and the box fills 80% of the view (`FRAME_FILL`). A region with no drawn geometry is refused rather than framed.
 
-`references` entries have `id`, `title`, `citation`, `url`, an identifier (a `pmid`, or an `nbk` Bookshelf accession; four are Bookshelf chapters from Purves et al., *Neuroscience*, 2nd edition), an optional `pmcid` and optional `corrections`. The loader refuses a non-HTTPS URL, a missing PMID or NBK, a malformed PMCID or correction DOI, and a correction without both language summaries. `references.test.ts` checks each identifier against the fetched record (see [deficits](deficits.md#citation-verification)): its URL form, title, first author, year, book and corrections.
+## Display
+A tour opens on its whole route. Nothing is selected, the cut is off, both hemispheres are shown and the cortex is see-through (0.15). The internal anatomy holding the deep landmarks is revealed, the spinal cord is shown if a landmark lies in it, the view is oblique, and a numbered mark sits at each landmark's anchor. **Next** and **Previous** in the location bar, or a row of the landmark list, open a landmark. Opening a landmark loads its atlas and layer and selects it. It shows the regions the landmark restores, hides its covering regions and shows only its hemisphere (both for a midline region). Focus is turned on for a forebrain structure under the cortex, and the landmark is framed (Fig. 1). **Focus** or **Return to landmark** repeats the framing. On a landmark with a `tract`, its bundle is drawn alone; the stretches that anatomy in front hides are drawn at 0.3 opacity with a greater-than depth test. The bundle is removed on any step without one, on the route, and when the tab or tour is left ([tracts](tracts.md)). **Linked MRI** places the crosshair at the landmark's anchor (its own voxel nearest its centroid), turns the overlay on and opens the authored plane ([linked MRI](linked-mri.md)).
 
-## How it was built
+The notes hold four disclosures: **Connections and scope**, **What this atlas shows**, **Clinical context** (with **Open deficit evidence**, which opens the linked deficit) and **Sources**. Sources labels each reference **Deficit evidence** or **Circuit background** and gives the revision date. Outside the Circuits tab, a region's inspector lists the landmarks on it and opens the tour there. Leaving a tour restores the scene from before it. URL state: `tab=circuits&circuit=<id>&step=<n>` (1-based) or `&route=1`. A link to an unknown or withdrawn tour or step reports those parameters as unsupported and applies the rest of the scene.
 
-1. **Choose a pathway, not a function.** A tour is kept only if it is a specified anatomical pathway or loop branch with landmarks that are real, labelled structures of the atlases the viewer carries. On 30 October 2026 the catalogue held 39 tours; [the classification audit](https://github.com/JoshuaDuq/planumatlas/blob/main/docs/reference/circuit-classification-audit-2026-10-30.md) recommended five as qualified pathway or loop-branch tours, moved or redesigned the others and found three needing a more specific anatomical representation. The recommendations were applied on 31 October (see Withdrawn tours).
-2. **Pick landmarks from the atlases that draw them.** Each landmark names a region id (`learning:`, `nextbrain:`, `destrieux:`, `hcp-mmp:` or `pam50:`) and its source label, so the tour opens the atlas that draws that structure.
-3. **Separate evidence by role.** `references` hold the anatomical background; `clinical_references` hold the patient studies that support the linked deficit. A test requires every tour to cite supporting evidence for its deficit that is already recorded as supporting in the clinical catalogue, and distinct clinical references; this verifies provenance, not the strength of the association.
-4. **Write the qualifications.** `scope` states what the tour leaves out; each landmark's `mapping` states how its atlas label approximates the structure (for example, the thalamus standing for the cerebellar-recipient territory, or the putamen shown whole); species (nonhuman-primate tracing) is named where the evidence is not human.
-5. **Add the tract where one exists.** The corticospinal tour's `tract: cst-left` uses the left corticospinal bundle from the subject's own diffusion data; the streamlines stop near the caudal medulla, before the crossing.
-6. **Author both languages.** Every translated field must have English and French and nothing else.
+## Validation
 
-## How the viewer uses it
-
-- **Catalogue.** `createCircuitCatalog` takes the authored data, the manifest's regions, the published deficit ids and the anatomy's tract ids; it throws (naming the circuit, landmark or reference) on an unknown circuit, landmark, reference, clinical target, region, source label, view, plane, tract, map or covering region, and on a margin that is not a positive number of millimetres. A covering region must be a different structure in the landmark's atlas and hemisphere.
-- **Opening a landmark.** `createLessons` (`web/src/lib/controller/lesson.ts`) first remembers the scene it found, so that leaving the tour puts it back. `openLandmark` opens the region (`commands.openRegion`), then `showCircuitLandmark` shows the regions it restores, hides its covering regions and sets the hemisphere to the landmark's side (both for a midline region), then focuses a deep landmark (`beneathCortex`) as a hidden pick would, and frames it.
-- **Framing.** `camera.frameLandmark(region, view, contextMarginMm)` (`web/src/lib/engine/framing.ts`) takes the bounds of the region's meshes, expands them by the context margin, 12 mm (`context_margin_mm`), and plans a camera at the authored view's direction, with the view's up vector. If the region has no geometry `frameLandmark` returns false and the lesson throws that the landmark geometry is unavailable. **Focus** or **Return to landmark** repeats it.
-- **The whole route.** The route view shows the tour at once: nothing selected, no cut, both hemispheres, the cortex see-through (`appearance.see_through_opacity`), the internal anatomy that draws the landmarks revealed, the spinal cord shown if a landmark is in it, an oblique view, and a numbered mark at each landmark's anchor in this brain.
-- **Linked MRI.** `prepareCircuitMri` places the crosshair at the landmark's anchor (`model.anchorOf`: the region's own voxel nearest its centroid, so a landmark that curves round its centroid is still hit), turns the overlay on, and opens the plane the landmark names. Under a lesson, a landmark's Linked MRI opens the prepared plane ahead of the plain one.
-- **Tract.** `syncLessonTract` (`web/src/lib/state/engine-sync.svelte.ts`) draws the open landmark's tract while the Circuits tab shows it, and takes it away however the lesson ends: a step without one, another tab, an excursion or a link. `showLandmarkTract` (`web/src/lib/engine/diffusion/native-viewer.ts`) isolates the bundle, uses the tract's direction colouring and draws the stretches that the anatomy in front hides at 0.3 opacity with a depth test of greater-than, so they are faint rather than left out (see [tracts](tracts.md#how-the-viewer-draws-streamlines)). A failed download is said once, and coming back to the landmark tries again.
-- **Sources panel.** `CircuitNotes.svelte` lists each reference, labelled **Deficit evidence** if it is in `clinical_references` and **Circuit background** otherwise, with its published corrections.
-- **State and links.** The open tour and landmark ride the session and the link; a link to an unknown circuit or step reports unsupported parameters and keeps the other scene fields.
-
-## Checks
-
-| Check | Where | Expected |
+| Test | Criterion | Result |
 | :--- | :--- | :--- |
-| Five tours, 23 references, revision and margin | `CAT-53` | revision `2026-10-31`, margin 12 mm, tours with 4, 5, 6, 6, 4 landmarks and their deficits |
-| Landmarks resolve to the exact source labels on every published anatomy | `catalog.test.ts` | pass |
-| Withdrawn tours cannot be opened as active circuits | `catalog.test.ts` | pass |
-| A landmark's tract is one of the anatomy's own bundles; corticospinal draws it down to the crossing | `catalog.test.ts` | `cst-left, cst-left, cst-left, null`; an anatomy whose tracts are another subject's draws none |
-| Cerebellar output crosses to the right red nucleus and thalamus after the left peduncle | `catalog.test.ts` | pass |
-| Covering geometry is a different structure in the landmark's atlas and hemisphere | `catalog.test.ts` | pass |
-| Zero or two resolving forms fail with the count and the region; published cerebellar landmarks restore what landmarks 2 and 4 cover, except their own | `CAT-52` | pass |
-| A margin of 0.5 mm is accepted; zero or a non-number fails | `CAT-51` | pass |
-| Every tour directly cites supporting evidence for its linked deficit; clinical source roles are declared and distinct | `catalog.test.ts` | pass |
-| An unknown circuit, landmark or reference fails by name | `CAT-54` | pass |
-| Reference identifiers resolve to the works they name; no retraction or expression of concern | `references.test.ts` | pass |
-| Archived tours stay source-checkable | `catalog.test.ts` | their citations and atlas labels remain subject to automated checks, though the viewer never loads the archive |
+| `catalog.test.ts` CAT-53 | Revision 2026-10-31, margin 12 mm, 23 references; tours `vision` 4, `memory` 5, `motor` 6, `cerebellar` 6, `corticospinal` 4 landmarks with their deficits | passes |
+| `catalog.test.ts` | Only the five tours resolve, 25 landmarks with exact source labels, on every published anatomy | passes |
+| `catalog.test.ts` | Cerebellar output: left, left, left, right, right, right; lobule V and 10 left covering lobules where lobules are published; red nucleus covers right midbrain and VTA | passes |
+| `catalog.test.ts` CAT-52 | Zero or two resolving forms throw with count and region; landmarks 1, 3, 5, 6 restore both covering sets, 2 and 4 the other's | passes |
+| `catalog.test.ts` | Corticospinal tracts `cst-left, cst-left, cst-left, null`; an unknown bundle, or an anatomy without `cst-left`, throws | passes |
+| `catalog.test.ts` | Covering regions must be other structures in the landmark's atlas and hemisphere | passes |
+| `catalog.test.ts` CAT-51, CAT-54 | Each catalogue refusal; a 0.5 mm margin is accepted; unknown circuit, landmark or reference throws by name | passes |
+| `catalog.test.ts` | Clinical references are declared and distinct; every active and archived tour cites supporting evidence for its deficit | passes |
+| `catalog.test.ts` | 33 archived tours (125 landmarks with the active ones) resolve but cannot be opened as active circuits | passes |
+| `references.test.ts` | Active and archived circuit references name the works their identifiers resolve to | passes |
+| `lesson.test.ts` | Route first; deep landmark opens focused; ungeometried landmark refused; Linked MRI opens the prepared plane | passes |
 
-## Limits
+## Limitations
+- The tours teach anatomy described in the literature; only the corticospinal streamlines come from this brain.
+- The streamlines are diffusion-MRI estimates. They stop near the caudal medulla, before the crossing, and do not isolate fibres within the broad brainstem landmarks.
+- Atlas labels approximate the structures: a teaching union can be broader than the structure, and a whole nucleus can stand for one territory.
+- Some projections are known from nonhuman-primate tracing.
+- The visual tour omits the retina, optic nerves and optic radiations. The motor-loop tour omits nigral output, dopamine, hyperdirect and nonmotor loops. The memory tour is one branch, not a complete or necessary Papez circuit. The cerebellar tour omits inputs and return pathways.
+- A deficit study supports a region–deficit association, not the pathway's connections; clinical accuracy has not been validated.
 
-- The tours are literature-supported anatomical teaching, not individual connectivity. Apart from the corticospinal streamlines, nothing is measured in this brain.
-- Atlas labels are approximations: a teaching union can be broader than the structure (the hippocampal formation); a nucleus can stand for a territory (the whole thalamus for the cerebellar-recipient part); some projections are described from animal tracing; the anteromedial and anterodorsal thalamic nuclei are labelled but drawn only on cut faces.
-- The corticospinal streamlines are diffusion-MRI estimates, stop near the caudal medulla and do not isolate the fibres of the broad brainstem landmarks.
-- A deficit study supports a region–deficit association, not the pathway's connections. Clinical accuracy has not been validated.
-- The visual tour omits the retina, optic nerves and optic radiations. The motor-loop tour omits nigral output, dopamine modulation, hyperdirect and nonmotor loops. The memory tour is a selected branch, not a complete or uniquely necessary Papez circuit.
+## Code availability
 
-## Withdrawn tours
-
-On 31 October 2026, 31 network/function and clinical landmark tours were removed from this category. Three more (auditory, somatosensory and reward/valuation) were withheld pending anatomical rework.
-
-On 1 November 2026, the archived voluntary gaze control tour was deleted with the oculomotor-apraxia profile it was linked to, which coloured no atlas region. The other 33 withdrawn tours remain in the [source archive](https://github.com/JoshuaDuq/planumatlas/blob/main/data/archived-circuit-tours.yaml), with bilingual descriptions and citations. The archive is not loaded by the viewer. Their associated deficit evidence and functional maps remain in the existing **Deficits** and **Functions** sections. Archived citations and atlas labels remain subject to automated checks.
-
-A link to a withdrawn circuit ID reports unsupported circuit/step parameters and retains the other valid scene fields. It does not open a different tour under the old ID.
-
-The [29-tour evidence audit](../reference/circuit-evidence.md) and [full-text review log](../reference/full-text-review.md) retain their historical scope; their earlier counts do not describe the current active catalogue. The [30 October additions review](https://github.com/JoshuaDuq/planumatlas/blob/main/docs/reference/circuit-additions-2026-10-30.md) is also historical: its four tours were withdrawn on 31 October.
-
-## Reproduce
+| | |
+| :--- | :--- |
+| Code | [`web/src/lib/core/learning/catalog.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/learning/catalog.ts), [`web/src/lib/controller/lesson.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/controller/lesson.ts), [`web/src/lib/controller/navigation/learning.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/controller/navigation/learning.ts), [`web/src/lib/engine/framing.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/framing.ts), [`web/src/features/circuits/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/circuits) |
+| Configuration | [`data/circuits.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/circuits.yaml); [`data/archived-circuit-tours.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/archived-circuit-tours.yaml) |
+| Tests | `web/src/lib/core/learning/*.test.ts`, `web/src/lib/controller/lesson.test.ts`, `web/src/features/circuits/*.test.ts` |
 
 ```bash
-# Tours are authored in data/circuits.yaml; the catalogue and references are checked by the web tests
-npm test --prefix web
-
-# Re-verify every cited work (writes data/reference-records.json; needs network access)
-uv run python scripts/fetch_references.py
-
-# Validate that every landmark region exists in the published anatomy
-uv run python -m brain_model.validate --anatomy cdmd
+npm test --prefix web -- learning lesson
+npm run test:browser --prefix web -- circuits
 ```
 
-Edits to `data/*.yaml` need a dev-server restart.
-
-## See also
-
-- [Tracts](tracts.md): the corticospinal bundle the tour draws.
-- [Visual field map](visual-field-map.md): the map the visual tour's V1 landmark offers.
-- [Deficits](deficits.md): the clinical evidence each tour links to.
-- [Linked MRI](linked-mri.md): the section view each landmark opens.
-- [Internal anatomy](internal-anatomy.md), [cortical atlases](cortical-atlases.md) and [spinal cord](spinal-cord.md): the atlases the landmarks come from.
-- [Evidence audit](../reference/circuit-evidence.md), [full-text review](../reference/full-text-review.md), [classification audit](https://github.com/JoshuaDuq/planumatlas/blob/main/docs/reference/circuit-classification-audit-2026-10-30.md), [References and licensing](../reference/references.md).
+Figure state: https://planumatlas.com/#anatomy=cdmd&tab=circuits&circuit=cerebellar&step=1 (Fig. 1a), `step=2` (b), `step=4` (c).

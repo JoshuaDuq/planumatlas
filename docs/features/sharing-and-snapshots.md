@@ -1,125 +1,116 @@
 # Sharing and snapshots
 
-The address bar records the viewer's scene as a fragment that restores it field by field, and **Save image** writes the stage as a PNG that documents itself: neither needs a server, and both are built in the viewer from the state it already holds.
+The address bar holds the viewer's scene as a URL fragment that restores it field by field, and **Save image** writes the visible stage as an annotated PNG (Portable Network Graphics) file. Both are built in the browser from state the viewer already holds; neither needs a server. A link names ids of one published build and carries state, not data: what a later build renames or drops is refused and named, and the reader's own [overlay](overlays.md) is never written into it.
 
-:::{list-table}
-:widths: 22 78
-:stub-columns: 1
+```{figure} figures/sharing-and-snapshots-1.webp
+:alt: A saved PNG of a coronal section of a brain coloured by region on a black ground, with a three-line caption at the top left, orientation letters at the four edges, a 20 mm scale bar at the bottom right and the statement "Planum · Not clinical anatomy" at the bottom left.
+:name: fig-sharing-and-snapshots-1
 
-* - Where in the viewer
-  - The page URL (copy it to share a view); **Save image** in the masthead
-* - Built by
-  - Viewer only; no build step. [`web/src/lib/core/state/url-state.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/state/url-state.ts), [`link-check.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/state/link-check.ts), [`link-writer.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/core/state/link-writer.ts), [`web/src/lib/controller/links.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/controller/links.ts), [`web/src/lib/state/link.svelte.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/state/link.svelte.ts), [`web/src/features/snapshot/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/snapshot) (`snapshot.ts`, `markings.ts`), `captureSnapshot` in [`web/src/lib/engine/render/scene.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/render/scene.ts)
-* - Configuration
-  - None; `SNAPSHOT_PIXEL_RATIO` and `SNAPSHOT_LAYOUT` are constants in the modules above
-* - Source data
-  - The viewer's own state; the published anatomy for the ids a link may name
-* - Checked by
-  - `url-state.test.ts`, `link-check.test.ts`, `link-writer.test.ts`, `reader-state.test.ts` in `web/src/lib/core/state/`; `snapshot.test.ts`, `snapshot.svelte.test.ts`, `snapshot.drawing.svelte.test.ts` in `web/src/features/snapshot/`; `scale-bar.test.ts`
-:::
+**The PNG that Save image writes, unretouched.** The viewer was opened at `#anatomy=cdmd&cut=coronal&pos=-20` in a 1,400 × 900 px window at a device pixel ratio of 1; its 1,040 × 820 CSS-pixel stage was saved at 2 pixels per CSS pixel, 2,080 × 1,640 px. The caption gives the subject; atlas, colouring and internal-anatomy level; plane and signed offset. The orientation letters, the 20 mm scale bar (exact at the camera target's depth) and the statement are drawn over the rendered frame. The section is seen from the front (right hemisphere on the image's left). The file was named `planum-destrieux-anterior-coronal.png`. Once the scene settled the address bar read `#anatomy=cdmd&atlas=destrieux&cuts=destrieux&detail=learning&view=anterior&cut=coronal&pos=-20&lang=en`: the link, which named no view, faced its cut, and the writer added the atlas, cut labels, level, the view now held and the language.
+```
 
-## What it does
+## Data
+The viewer's own state; the ids a link may name are those the loaded anatomy publishes (`anatomies.json`, the anatomy's `manifest.json`, the function, deficit, circuit and tract catalogues).
 
-**Sharing.** The address bar records the current view, including selection, display settings, camera and section. Copy the URL to share it. It carries a placed lesion, its colouring and the tract drawn through it, a placed published coordinate, chosen stroke cases, the open circuit and step, and the language. It does not carry an [overlay](overlays.md), because the map is the reader's own file. If a setting cannot be applied to the selected subject, a notice explains what was omitted.
+## Method
 
-**Save image.** The masthead's **Save image** writes the visible stage as a PNG with its orientation letters, route-landmark labels, scale bar, colour keys, a caption naming subject, labels, colouring and view or section (and, with an [overlay](overlays.md) shown, its file, template and scale), and the statement "Planum · Not clinical anatomy" (French: "Planum · Pas une anatomie clinique"). The file is named `planum-<atlas>[-<view>][-<plane>].png`, using the atlas, the view while the camera holds it, and the cut's plane; a notice then names the file.
+### Link encoding
+The state travels in the URL hash as `URLSearchParams` (`url-state.ts`). `encodeState` omits every field still at its default (`DEFAULTS`) and un-escapes `%3A` and `%2C`, so ids and coordinates stay readable. `decodeState` reads each parameter with its own typed reader; a parameter that is repeated or does not parse is left out and named in `rejected`, and the fields beside it still decode. A written link always names its subject (`anatomy`), its cortical atlas and its language.
 
-## How it was built
-
-### The link format (`url-state.ts`)
-
-The state travels in the URL hash, as `URLSearchParams`. `encodeState` omits any field still at its default (`DEFAULTS`), and un-escapes colons and commas so ids and coordinates stay readable. `decodeState` reads field by field with a typed reader for each parameter; a parameter that is repeated, or does not parse, is not guessed at: it is left out of the state and named in `rejected`.
-
-| Parameter | State | Format |
+| Parameter | State | Format and range |
 | :--- | :--- | :--- |
-| `anatomy` | Subject | Id of a published anatomy; without it a link opens the published default. Region ids are shared between brains, so a link without it would open the right region on whichever brain loaded |
-| `atlas`, `cuts`, `system`, `detail` | Cortical atlas, cut labels, internal-anatomy system, internal-anatomy level | Ids |
+| `anatomy` | Subject | Published anatomy id; absent, the published default. Region ids are shared between brains, so the subject travels with them |
+| `atlas`, `cuts`, `system`, `detail` | Cortical atlas, cut labels, internal-anatomy system and level | Ids |
 | `region`, `isolate` | Selected and isolated region | Region id |
-| `focus` | Focus | `1` or `0` |
-| `hidden` | Hidden regions | Comma-separated ids, sorted |
-| `view` | Named view | Name |
-| `cam` | Exact camera | `px,py,pz,tx,ty,tz` (position then target) or with a unit up vector as three more numbers; millimetres, written to tenths, the up vector to thousandths; each of the first six within ±100,000 |
-| `cut` | Plane | `sagittal`, `coronal`, `axial` or `oblique` |
-| `pos` | Position along the normal | Millimetres, written to tenths and rounded toward zero (`towardZero`), so the written value lies inside the plane's range whenever the exact one did; read within ±512 mm |
+| `hidden` | Hidden regions | Comma-separated ids, sorted; a repeated id is read once |
+| `focus` | Focus | `1`/`0` |
+| `view` | Named view | `oblique` (default), `left`, `right`, `anterior`, `posterior`, `superior`, `inferior` |
+| `cam` | Exact camera | `px,py,pz,tx,ty,tz` (position, target) in mm to 0.1 mm, optionally three more numbers for the up vector to 0.001; each of the first six within ±100,000 mm |
+| `cut` | Plane | `sagittal`, `coronal`, `axial`, `oblique` |
+| `pos` | Offset along the plane normal | mm, written to 0.1 mm rounded toward zero (`towardZero`); read within ±512 mm |
 | `rev`, `tilt`, `az` | Reversed side, tilt, azimuth | `1`/`0`; whole degrees 0 to 90; whole degrees −180 to 180 |
 | `hemi` | Hemisphere | `both`, `left`, `right` |
 | `cortex`, `internal`, `cord` | Cortex, internal anatomy, spinal cord shown | `1`/`0` |
-| `opacity` | Cortex opacity | 0 to 1, to hundredths |
-| `colors` | Surface colour | One of `tissue`, `mri`, `atlas`, `network`, `cab-np`, `territory` (the older flag `colors=1` still reads as `atlas` and `0` as `tissue`; nothing writes them) |
-| `mri` | Linked MRI window | `centre,width`, centre 0 to 255, width 1 to 256, written only when it differs from the window the build published |
-| `tab` | Panel tab | One of the explorers |
+| `opacity` | Cortex opacity | 0 to 1, written to 0.01 |
+| `colors` | Surface colour | `tissue`, `mri`, `atlas` (default), `network`, `cab-np`, `territory`; the former flag `1`/`0` reads as `atlas`/`tissue` |
+| `mri` | MRI window | `centre,width`, centre 0 to 255, width 1 to 256, written to 0.1; only when it differs from the published window |
+| `tab` | Panel tab | `anatomy`, `functions`, `deficits`, `circuits`, `diffusion` (Tracts) |
 | `function`, `deficit` | Open function or deficit | Id; written only from its own tab |
-| `circuit`, `step` | Guided circuit and step | Id; the step counted from one, as the stepper shows it |
-| `map`, `dot` | Circuit map and its dot | Id; `x,y,radius` in degrees from fixation inside 90°, radius from 0.01 to 90 |
-| `lang` | Language | `en` or `fr` |
-| `lesion` | Placed sphere | `right,anterior,superior,radius`: centre in the volume's range to tenths, radius within the slider's range |
-| `lesionmode`, `lesiontract` | Lesion colouring, drawn tract | Mode name; bundle id |
-| `coord`, `space` | Published coordinate and its template | The three numbers as entered, unrounded, each within ±512; space id |
-| `cases` | Stroke cases | One or two distinct cohort ids such as `M2295,M2294` |
+| `circuit`, `step`, `route` | Guided circuit, step, whole route on screen | Id; step counted from 1; `1`/`0` |
+| `map`, `dot` | Visual field map and its dot | Id; `x,y,radius` in degrees from fixation, $\sqrt{x^2+y^2} \le 90$, radius 0.01 to 90, written to 0.01 |
+| `tracts` | Bundles ticked on the Tracts tab | Comma-separated ids, empty for none; omitted while they are the initial set |
+| `lang` | Language | `en`, `fr` |
+| `lesion` | Placed [lesion](lesion-report.md) sphere | `x,y,z,r`: centre in surface RAS mm to 0.1 mm, each within ±512 mm; $3 \le r \le 30$ mm |
+| `lesionmode`, `lesiontract` | Lesion colouring, drawn tract | `lesion` (default), `functions`, `deficits`; bundle id |
+| `coord`, `space` | [Published coordinate](published-coordinates.md) and its template | The three numbers as entered, unrounded, each within ±512; space id |
+| `cases` | [Stroke cases](stroke-cases.md) | One or two distinct cohort ids, e.g. `M2295,M2294` |
 
-### Writing (`link-writer.ts`, `link.svelte.ts`, `controller/links.ts`)
+### Link writing
+`createLinkWriter` writes 250 ms after a view change and once the camera settles (the engine's `cameraSettled`, itself 250 ms after a reader's move ends). `linkState` adds to the session view the plane (mode; the crosshair's offset $\mathbf{c}\cdot\mathbf{n}$ along the plane normal $\mathbf{n}$; reverse, tilt, azimuth), the exact camera (`orbitLink`, null while a named view is held or the tract reference is shown), the MRI window and the lesion and stroke-case stores. A coordinate's sphere is written as the coordinate, never as a lesion. A function, deficit or circuit is written only from its own tab, stroke cases only with a selected region, bundles only from the Tracts tab. The cortex opacity and colour that drawn streamlines, stroke cases, a painted structure or a whole route impose are written as the reader's own, so the link restores the reader's display. The write is `history.replaceState`, not a push.
 
-`createLinkWriter` debounces: it writes 250 ms after a view change, and when the camera settles (`cameraSettled` fires 250 ms after a reader's move ends). `linkState()` assembles the scene's state, adding the plane (`cutState()`: mode, the crosshair's offset along the plane's normal, reverse, tilt, azimuth), the exact camera (`orbitLink()`), the MRI window (`mriWindowLink()`, null at the published window) and the lesion and stroke-case stores. A coordinate's sphere travels as the coordinate, not as a lesion. Stroke cases are written only with a selected region, since their sheet belongs to it. The see-through cortex that drawn streamlines or stroke cases asked for, and the colour they replaced, are written as the reader's own, so the link restores the display, not the temporary state. The write is `history.replaceState`, not a push: the Back button is not a camera undo stack. The camera is omitted (`orbitLink` returns null) while a held named view or the tract reference is on screen.
+Switching subject rewrites the hash and reloads the page: atlas, cut, view, panel and language are kept; selection, isolation, hidden regions, the exact camera and the MRI window are dropped, since they belong to the previous brain's parcels and intensities.
 
-Switching subject re-enters through the URL: the reader keeps atlas, cut, view, panel and language; selection, dissection, the exact camera and the MRI window belong to the old subject's parcels and intensities and are dropped, and the page reloads.
+### Link restore
+At start-up `decodeState` reads the hash; a subject the site does not publish is added to `rejected` and the default opens. `restore` then:
 
-### Reading (`link-check.ts`, `controller/links.ts`)
+1. Takes a command token (`commands.begin`) and holds the writer, so the address bar keeps the link until the scene settles. A later command overtakes the restore, which then stops.
+2. Checks each id against the loaded anatomy (`checkLink`): atlas, detail, cut atlas, view, colour, tab, selected, isolated and every hidden region, function, deficit, circuit and step, map, bundles. An unknown id is dropped and its parameter added to `rejected`.
+3. Applies cross-field rules: `route` needs `circuit`; `map` is refused beside a `circuit`, and `dot` needs `map`; `cord` needs a published spinal cord; `coord` and `space` need each other and a published space, and a link with both a coordinate and a lesion drops all three; `focus` and `cases` need `region`; `tracts` needs `tab=diffusion`; `lesionmode` needs `lesion`, and `lesiontract` a bundle that lesion reaches.
+4. Applies the scene field by field (`applyReaderState`); a failed step adds its fields to the not-applied list and the rest still applies. A link with a cut but no view faces its cut.
+5. Restores the tab, lesson or map, function or deficit, then the lesion, or the coordinate mapped again through its template's field (keeping the link's own cut and camera), then the stroke cases.
 
-At startup `decodeState` reads the hash and `loadAnatomies` resolves the subject; a subject the site does not publish is named as `anatomy` in the rejected list and the default opens. `restore` then:
+`linkNotice` names what was not applied in the reader's language ("Not applied from this link: section position and language."), each parameter by its name in the `link.fields` table. Editing the hash on the same subject applies the new link as scene commands (`onHashChange`); another subject reloads the page.
 
-1. Takes a command token (`commands.begin`) and holds the writer, so the address bar keeps the link while the scene settles, not the half-built scene its downloads leave on screen. A later command overtakes the restore, which then returns without reporting.
-2. Judges the decoded state against what the loaded anatomy publishes (`checkLink`): atlas, detail, cut atlas, view, colour, tab, selected and isolated region, every hidden region, function, deficit, circuit, circuit step, circuit map. A field naming anything else is dropped and its parameter added to `rejected`.
-3. Applies cross-field rules: a spinal cord needs a published cord; a coordinate needs a published space and the coordinate and a lesion are the one sphere (a link with both drops both coordinate fields and the lesion); Focus needs a selection; stroke cases need a selected region; a lesion colouring and a drawn tract need a lesion, and the tract must be one the lesion reaches; a circuit map and a circuit are exclusive and the map's dot needs the map.
-4. Applies the reader state field by field (`applyReaderState`); a step that fails names its link fields, which are added to the not-applied list. A link without its own view faces its cut, as choosing the cut does.
-5. Restores the explorer, the lesson or map, the function or deficit, the lesion (or maps the coordinate through the registered space and places the sphere), and the stroke cases.
+### Image capture
+`saveSnapshot` runs in order:
 
-`linkNotice` words what was not applied in the reader's language, for example "Not applied from this link: section position and language."; a parameter without a name in the `link.fields` table is listed by its parameter. Editing the hash in place applies the new link as scene commands on the same brain (`onHashChange`); another brain reloads the page.
+1. **Plan** (`snapshotPlan`). The crop is the visible stage's rectangle. The caption has one line per group of facts: the subject; the atlas, the colouring and the internal-anatomy level (the last only when the masthead offers more than one); then the section (plane and signed offset in mm, with tilt and azimuth for an oblique plane) or, while the camera holds one, the named view; then, with an [overlay](overlays.md#display), its title and scale. A tract reference shown alone replaces the first two lines with its label. `snapshotMarkings` measures the orientation letters, route-landmark labels with their dots and leaders, the scale bar and each colour key where the stage draws them, in CSS pixels; a key folded on screen is folded in the image.
+2. **Fonts.** `snapshotFonts` loads the faces and words the marks will draw.
+3. **Capture** (`captureSnapshot`). The settled pipeline is redrawn at $\max(\text{screen ratio}, 2)$ device pixels per CSS pixel (`SNAPSHOT_PIXEL_RATIO` = 2), read in the same task as the render, then returned to the screen's ratio. The screen ratio is capped for interaction at 1 on phones, 1.5 on coarse-pointer (touch) devices and on integrated graphics processors other than Apple silicon, and 2 otherwise, never above the device's. The selection outline's `downSampleRatio` is multiplied by the same factor, so the outline keeps its width relative to the anatomy.
+4. **Annotate** (`annotateSnapshot`). Marks are drawn over the captured pixels, which are not resampled or filtered. Layout follows the stage (`SNAPSHOT_LAYOUT`: gutter 16 px, line 16 px, letter gap 12 px, scale gap 8 px), in CSS pixels scaled by the frame's ratio. The caption keeps left of the top orientation letter; its facts are joined by " · ", a narrow image breaks lines between facts, and a fact that still does not fit is ellipsised. The statement and the scale bar share the bottom line when both fit between the gutters; otherwise the scale bar moves one line up. Labels under the image's own marks are placed again around their dots.
+5. **Save.** The canvas is encoded as a PNG and downloaded as `planum-<atlas>[-<view>][-<plane>].png` through an object URL revoked after 40 s. A second request while one is being made joins it. A failure raises the `snapshot` notice.
 
-### Save image
+### Scale bar
+With vertical field of view $\theta$, camera distance $d$ to its target and viewport height $h$ in pixels, one pixel spans
 
-`saveSnapshot` runs, in order:
+$$s = \frac{2\,d\,\tan(\theta/2)}{h}\ \text{mm}$$
 
-1. **Plan** (`snapshotPlan`). The visible stage's rectangle is the crop. The caption (`snapshotCaption`) is a list of lines of facts: subject; then atlas, colour and internal anatomy (the last only when the masthead offers more than one level); then the section (plane, offset in millimetres, and for an oblique plane tilt and azimuth) or, while the camera holds one, the named view. A tract reference shown alone replaces the first two lines with its label. `snapshotMarkings` measures where the orientation letters, route landmarks' labels with their dots and leaders, the scale bar and each colour-key plate are drawn on the stage, in CSS pixels of the crop; a colour key that is folded on screen is folded in the image, and rows scrolled out of a long list stay out of it.
-2. **Fonts.** `snapshotFonts` loads exactly the faces and words the markings will draw.
-3. **Capture** (`captureSnapshot` in `scene.ts`). The settled pipeline is redrawn at `SNAPSHOT_PIXEL_RATIO` = 2 when the screen's ratio is lower (phones 1, tablets 1.5, standard monitors 1), then restored: a 1080 × 820 stage at a device pixel ratio of 1 exports 2160 × 1640. The screen's ratio cap exists for drag performance, and one saved frame does not need it. To keep the selection outline as wide for the anatomy as on screen, the outline passes' `downSampleRatio` is multiplied by the scale; scaling `edgeThickness` instead looks thinner and fainter, because three.js's separable blur has a fixed 4-tap kernel and a larger radius only spreads the same taps. The canvas is read in the same task as the render, since the drawing buffer is not preserved past it.
-4. **Annotate** (`annotateSnapshot`). Only marks are drawn, over the captured pixels, which are not resampled or filtered. The stage's own layout (gutter 16 px, line 16 px, letter gap 12 px, scale gap 8 px) places everything in CSS pixels, scaled by the frame's ratio. Chrome is laid out first and the route labels are settled clear of it. The caption keeps to the left of the top orientation letter; its facts are joined by " · " and a narrow image breaks a line between facts, ellipsising a fact that still does not fit. The statement and the scale bar share the bottom line when both fit between the gutters, else the scale bar goes one line up.
-5. **Save.** The canvas becomes a PNG blob, downloaded through an object URL that is revoked after 40 seconds (some browsers lose the file if it is revoked sooner). A second request while one is being made joins it. A failure is the scene commands' `snapshot` notice.
+at the target's depth. The bar is the largest length in {0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1,000} mm whose length $L/s$ lies within 60 to 150 px. A viewport or distance of zero (a hidden tab) gives no bar.
 
-The scale bar is a measurement, not a decoration: `scaleBar` takes the camera's field of view, its distance to the target and the viewport height, converts a pixel to millimetres at the focused depth, and picks the largest length from a 1-2-5 sequence (0.1 mm to 1,000 mm) whose bar is 60 to 150 pixels wide. A hidden tab, which measures zero, reports nothing instead of a false length.
+## Display
+The link is the page URL; copying it shares the scene. **Save image** is in the masthead; the statement "Planum · Not clinical anatomy" ("Planum · Pas une anatomie clinique" in French) is drawn on every image, and a notice names the saved file. The Back button does not step through camera moves, since the link is replaced in place. The PNG is the visible stage only, not the side panel; [Linked MRI](linked-mri.md#display) saves its own planes.
 
-## Checks
+## Validation
 
-| Check | What it requires |
+| Test | Criterion | Result |
+| :--- | :--- | :--- |
+| `url-state.test.ts` | Round trip of every non-default field and a fixed link corpus; defaults omitted; repeated, unparsable and out-of-range fields named and left out; cut offset rounded toward zero; up vector only when it differs | passes |
+| `url-state.test.ts`, STATE-13 | A decoded camera within an orbit limit up to `ORBIT_ROUNDING_MM` = $2\sqrt{3 \times 0.05^2}$ beyond it | accepted at 0.17 mm, refused at 0.18 mm |
+| `link-check.test.ts` | Unknown ids and each cross-field rule above | passes |
+| `link-writer.test.ts`, `links.test.ts` | Write after stillness, held during a restore; subject and language always written; subject switch reloads; coordinate written as entered, never as a lesion; failed fields named in link order | passes |
+| `reader-state.test.ts` | Scene applied field by field; a failed layer, region, system or camera reported under its own field; a restore overtaken by a later command stops | passes |
+| `snapshot.test.ts`, `snapshot.svelte.test.ts`, `snapshot.drawing.svelte.test.ts` | Caption facts and packing, ellipsis, bottom-line placement; file name; one file for two requests; URL revoked at 40 s; only marks added to the frame | passes |
+| `index.svelte.test.ts`, `contract.test.ts` | Captured canvas sized to its crop at ≥ 2 pixels per CSS pixel; screen canvas unchanged | passes |
+| `scale-bar.test.ts` | Frustum geometry; 1-2-5 lengths; bar within 60–150 px at every usable distance; no bar for a zero viewport | passes |
+
+## Limitations
+- A link names ids of one published build; a renamed or dropped region, atlas or layer is refused and named.
+- The camera travels to 0.1 mm; a link written at an orbit limit reads back up to 0.17 mm beyond it.
+- A link carries state, not data: a reader's overlay, a dissection's undo history and a lesion's measurements are not in it; the lesion is measured again and a coordinate mapped again on restore.
+- The scale bar is exact only at the depth of the camera's target.
+- The PNG is not clinical anatomy and states so.
+
+## Code availability
+
+| | |
 | :--- | :--- |
-| Round trip | `encodeState` then `decodeState` returns the state; defaults are omitted (`url-state.test.ts`) |
-| Rejection | A repeated or unparsable parameter, and an id the anatomy does not publish, is named in `rejected` and not applied (`url-state.test.ts`, `link-check.test.ts`) |
-| Writer | A write waits for stillness and is held while a link applies (`link-writer.test.ts`) |
-| Snapshot | Caption, packing, ellipsis, bottom-line placement and drawing (`snapshot.test.ts`, `snapshot.svelte.test.ts`, `snapshot.drawing.svelte.test.ts`); the capture's canvas is sized to its crop (`contract.test.ts`) |
-| Resolution | Verified by exporting at 1× in headless Chrome and comparing crops of the outline |
-
-## Limits
-
-- A link names ids of one published build. A region, atlas or layer that a later build renames or drops is rejected and named, and the rest of the link still applies.
-- The camera is exact to a tenth of a millimetre; a link written under one orbit limit is accepted within a rounding allowance (`ORBIT_ROUNDING_MM`).
-- A link carries state, not data: the lesion's measurements, a dissection's history (undo) and loaded volumes are rebuilt from the published files.
-- Fields without a name in the notice table (`coord`, `space`, `cases`, `map`, `dot`) are listed by their parameter name.
-- The PNG is the visible stage, not the panel or the Linked MRI; Linked MRI saves its own planes ([Linked MRI](linked-mri.md#saving)).
-- The caption states that the image is not clinical anatomy; the scale bar is exact only at the depth the camera is focused on.
-
-## Reproduce
+| Code | [`web/src/lib/core/state/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/core/state) (`url-state.ts`, `link-check.ts`, `link-writer.ts`, `reader-state.ts`), [`web/src/lib/controller/links.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/controller/links.ts), [`web/src/lib/state/link.svelte.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/state/link.svelte.ts), [`web/src/features/snapshot/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/snapshot) (`snapshot.ts`, `markings.ts`), `captureSnapshot` in [`web/src/lib/engine/render/scene.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/render/scene.ts), [`web/src/lib/engine/render/scale-bar.ts`](https://github.com/JoshuaDuq/planumatlas/blob/main/web/src/lib/engine/render/scale-bar.ts) |
+| Configuration | None; `SNAPSHOT_PIXEL_RATIO` in `scene.ts`, `SNAPSHOT_LAYOUT` in `markings.ts`, `ORBIT_ROUNDING_MM` in `url-state.ts` |
+| Tests | `web/src/lib/core/state/*.test.ts`, `web/src/lib/controller/links.test.ts`, `web/src/features/snapshot/*.test.ts`, `web/src/lib/engine/render/scale-bar.test.ts`, `web/src/lib/engine/index.svelte.test.ts`, `web/src/lib/engine/contract.test.ts` |
 
 ```bash
-npm test --prefix web -- state snapshot
-npm run build --prefix web
+npm test --prefix web -- src/lib/core/state src/lib/controller/links.test.ts src/features/snapshot src/lib/engine/render/scale-bar.test.ts src/lib/engine/contract.test.ts
+npm run test:browser --prefix web -- src/features/snapshot src/lib/engine/index.svelte.test.ts
 ```
 
-To follow a link from the shell, open `https://planumatlas.com/#hemi=left&cut=coronal&pos=-20` (any parameter above). The address bar of a running viewer is the authority on what it writes.
-
-## See also
-
-- [Sections and cuts](sections-and-cuts.md): the plane parameters
-- [Linked MRI](linked-mri.md): the `mri` window
-- [Dissection and display](dissection-and-display.md): `hidden`, `isolate`, `focus`, `hemi`, `cortex`, `opacity`, `internal`, `cord`, `colors`
-- [Lesion report](lesion-report.md) and [Published coordinates](published-coordinates.md): `lesion`, `lesionmode`, `lesiontract`, `coord`, `space`
-- [Stroke cases](stroke-cases.md), [Circuits](circuits.md), [Visual field map](visual-field-map.md): `cases`, `circuit`, `step`, `map`, `dot`
-- [Architecture](../pipeline/architecture.md): asset versioning, which a link does not carry
+Figure state: https://planumatlas.com/#anatomy=cdmd&cut=coronal&pos=-20, then **Save image**.

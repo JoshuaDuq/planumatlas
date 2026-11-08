@@ -12,9 +12,7 @@ Explore, cut, measure and question one person's MRI-reconstructed brain. Nothing
 
 <p align="center">
   <a href="https://planumatlas.com/"><strong>Open Planum</strong></a> ·
-  <a href="https://planumatlas.com/docs/">Documentation</a> ·
-  <a href="https://planumatlas.com/docs/getting-started/viewer.html">Viewer guide</a> ·
-  <a href="https://planumatlas.com/docs/pipeline/validation.html">Validation and limits</a>
+  <a href="https://planumatlas.com/docs/">Methods documentation</a>
 </p>
 
 <p align="center">
@@ -106,7 +104,7 @@ Under **Circuits › Maps**, move a dot through the visual field and see the V1,
 
 Planum is a reference, so its numbers have to hold. [`brain_model/validate.py`](brain_model/validate.py) reads every published anatomy back against its sources: volumes decode back to the source scans exactly, solids are re-voxelised with no voxel centre misclassified, projected atlases are re-derived, segmentations must agree with the subject's own (Dice 0.8 or more, with documented exceptions), and the spinal cord must match its segmentation (Dice 0.967 measured). CI runs it, the Python tests and the web tests on every pull request and deployment. The viewer's **Provenance** panel lists the subject, reconstruction, atlases, files and sources behind what you see.
 
-The anatomy is one individual, not a population average, and projected atlases, functional maps and tractography each have limits that the docs set out. **Planum is for research and education, not clinical decisions.** See [validation and limits](https://planumatlas.com/docs/pipeline/validation.html).
+The anatomy is one individual, not a population average, and projected atlases, functional maps and tractography each have limits that the docs set out. **Planum is for research and education, not clinical decisions.** Each [methods page](https://planumatlas.com/docs/) states its validation and limitations.
 
 ## Run it yourself
 
@@ -139,11 +137,11 @@ uv sync --locked --group docs
 uv run sphinx-build -W -b html docs docs/_build/html
 ```
 
-See [installation](https://planumatlas.com/docs/getting-started/install.html) and [building an anatomy](https://planumatlas.com/docs/pipeline/building.html) for prerequisites, source preparation and regeneration.
+Each feature's [methods page](https://planumatlas.com/docs/) gives the commands that rebuild and test it under **Code availability**.
 
 ### Embed it
 
-`BrainAtlas` and `BrainSections` work in any Three.js application without the viewer's interface: load an anatomy, pick regions, and cut it with capped sections. The [embedding guide](https://planumatlas.com/docs/developer/embedding.html) shows how.
+`BrainAtlas` and `BrainSections` work in any Three.js application without the viewer's interface: load an anatomy, pick regions, and cut it with capped sections. Their public API is exported from [`web/src/lib/engine/index.ts`](web/src/lib/engine/index.ts).
 
 ## Data and licences
 

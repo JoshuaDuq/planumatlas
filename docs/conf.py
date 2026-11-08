@@ -5,9 +5,7 @@ import tomllib
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-# Autodoc imports brain_model from this checkout, not from an installed copy;
-# the Pygments styles live beside this file.
-sys.path.insert(0, str(PROJECT_ROOT))
+# The Pygments styles live beside this file.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # ---------------------------------------------------------------------------
@@ -25,10 +23,7 @@ with (PROJECT_ROOT / "pyproject.toml").open("rb") as handle:
 # Extensions
 # ---------------------------------------------------------------------------
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    "sphinx.ext.intersphinx",
     "myst_parser",
     "sphinx_copybutton",
 ]
@@ -40,28 +35,12 @@ source_suffix = {".md": "markdown"}
 exclude_patterns = [
     "_build",
     "superpowers",
+    # Local working notes, not part of the site.
     "reference/circuit-additions-2026-10-30.md",
     "reference/circuit-classification-audit-2026-10-30.md",
     "Thumbs.db",
     ".DS_Store",
 ]
-
-# ---------------------------------------------------------------------------
-# Napoleon (docstring style)
-# ---------------------------------------------------------------------------
-napoleon_numpy_docstring = True
-napoleon_google_docstring = True
-napoleon_use_param = True
-napoleon_use_rtype = True
-napoleon_preprocess_types = True
-
-# ---------------------------------------------------------------------------
-# Autodoc
-# ---------------------------------------------------------------------------
-autodoc_typehints = "description"
-autodoc_member_order = "bysource"
-autodoc_preserve_defaults = True
-toc_object_entries_show_parents = "hide"
 
 # ---------------------------------------------------------------------------
 # MyST (Markdown support)
@@ -77,14 +56,10 @@ myst_heading_anchors = 4
 myst_substitutions = {"release": release}
 
 # ---------------------------------------------------------------------------
-# Intersphinx
+# Figures: numbered per page and captioned as in a journal ("Fig. 1 | Title.")
 # ---------------------------------------------------------------------------
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-    "numpy": ("https://numpy.org/doc/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy", None),
-    "nibabel": ("https://nipy.org/nibabel", None),
-}
+numfig = True
+numfig_format = {"figure": "Fig. %s |", "table": "Table %s |"}
 
 # ---------------------------------------------------------------------------
 # HTML output: furo, coloured from the viewer's own tokens (web/src/styles/tokens.css)
@@ -171,11 +146,3 @@ html_theme_options = {
 
 html_context = {"viewer_url": "https://planumatlas.com/"}
 
-
-def _drop_tuple_aliases(app, what, name, obj, options, lines):
-    """Remove the "Alias for field number N" text that NamedTuple fields carry."""
-    lines[:] = [line for line in lines if not line.startswith("Alias for field number")]
-
-
-def setup(app):
-    app.connect("autodoc-process-docstring", _drop_tuple_aliases)
