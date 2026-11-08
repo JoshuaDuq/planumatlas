@@ -36,7 +36,7 @@
     "@vitest/browser-playwright": "5.0.5",
     "axe-core": "4.14.0",
     "meshoptimizer": "1.1.1",
-    "oxlint": "1.90.0",
+    "oxlint": "1.91.0",
     "prettier": "3.9.10",
     "prettier-plugin-svelte": "4.1.1",
     "svelte": "5.57.3",
