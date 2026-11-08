@@ -572,6 +572,25 @@ describe('areas', () => {
   });
 });
 
+describe('the Linked MRI', () => {
+  test("a function's profile opens the Linked MRI on its map, without moving the stage at a key press", async () => {
+    mount();
+    await open(few().id);
+    const opened = vi.spyOn(world.excursions, 'openFunctionMri').mockResolvedValue();
+    const button = page.getByRole('button', { name: 'Linked MRI' });
+    await userEvent.click(button);
+    expect(opened).toHaveBeenLastCalledWith({ instant: false });
+    (button.element() as HTMLElement).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(opened).toHaveBeenLastCalledWith({ instant: true });
+  });
+
+  test('the list, with no function open, offers no Linked MRI', () => {
+    mount();
+    expect(document.querySelector('.profile .linked-mri')).toBeNull();
+  });
+});
+
 describe('runs: latest wins, failures are worded and offer a reload', () => {
   test('a later choice overtakes an earlier one: only the latest speaks', async () => {
     mount();

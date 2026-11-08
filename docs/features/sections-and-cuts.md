@@ -45,7 +45,7 @@ The block edge is `round(cut_label_spacing_mm / 0.4 mm)` = `round(0.8 / 0.4)` = 
 
 ### Closed solids
 
-Three kinds of closed solid are capped, in bands drawn in order envelope (0), ribbon (1), structure (2), so a nucleus caps over the ribbon around it. Within a band, larger solids (`segmentation_volume_mm3`) draw first, each with a tiered polygon offset.
+Three kinds of closed solid are capped, in bands ranked envelope (0), ribbon (1), structure (2), so a nucleus caps over the ribbon around it. Within a band, smaller solids (`segmentation_volume_mm3`) rank above larger ones. All caps lie on the plane with one polygon offset, so depth cannot order them: caps draw from the highest ranked down, and each draws only where the stencil's top bit says no cap has drawn yet, then sets it (`claimPixels`). The lower seven bits count a stencil cap's windings. Ordering by tiered offsets one depth unit apart let the cap below show through in lines along long thin triangles, since rounding at the depth the brain is seen reaches several units.
 
 - **Envelopes.** The four native surfaces, each required to be watertight, winding-consistent and of positive volume.
 - **Ribbon parcels.** Per parcel, the pial patch, the reversed white patch and a wall along each patch boundary edge (`buildRibbonWedges`). A triangle belongs to the parcel holding most of its vertices; a three-way tie goes to the lowest label, as in the build.

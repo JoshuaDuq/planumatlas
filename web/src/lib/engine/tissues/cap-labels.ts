@@ -9,7 +9,6 @@ import type {
 } from 'three';
 import type { DisplaySettings } from '../../types/index.ts';
 import { LABEL_AT } from './label-sampling.ts';
-import { usesPaint } from './palette.ts';
 
 /** The uniforms a cap reads its sampled labels from. */
 export interface CapLabelUniforms {
@@ -61,11 +60,10 @@ export function createCapLabels(): CapLabelUniforms {
 export function updateCapLabels(
   uniforms: CapLabelUniforms,
   layer: CutLayer,
-  state: Pick<DisplaySettings, 'surfaceColor' | 'isolatedRegion' | 'paint'>,
+  state: Pick<DisplaySettings, 'surfaceColor' | 'isolatedRegion'>,
 ): void {
   uniforms.capLabelsEnabled.value = !layer.wedged && state.surfaceColor !== 'tissue';
-  uniforms.capLabelsColour.value =
-    uniforms.capLabelsEnabled.value && (state.surfaceColor !== 'mri' || usesPaint(state));
+  uniforms.capLabelsColour.value = uniforms.capLabelsEnabled.value && state.surfaceColor !== 'mri';
   uniforms.capLabelVolume.value = layer.texture;
   uniforms.capLabelPalette.value = layer.palette;
   uniforms.capWorldToLabels.value = layer.uniforms.worldToVoxel.value;

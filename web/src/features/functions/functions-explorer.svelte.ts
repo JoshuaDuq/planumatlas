@@ -26,6 +26,7 @@ export interface FunctionExplorerDeps {
   excursions: Pick<
     Excursions,
     | 'openFunction'
+    | 'openFunctionMri'
     | 'openListedRegion'
     | 'restoreBeforeExcursion'
     | 'restorable'
@@ -213,6 +214,9 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
      * S3 takes as `panels.openFunction`; `chooseMode` and a paint pick call it too.
      */
     openFunction,
+
+    /** The Linked MRI at the function's strongest area, its paint over the scan; `instant` for a key press. */
+    openMri: (options: { instant: boolean }) => excursions.openFunctionMri(options),
 
     /** An area the profile names: drawn, selected and framed; its name then takes focus. */
     async openArea(region: string): Promise<void> {

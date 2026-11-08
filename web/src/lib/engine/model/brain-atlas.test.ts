@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, test, vi } from 'vitest';
 import {
+  Box3,
   BoxGeometry,
   Color,
   DoubleSide,
@@ -70,7 +71,7 @@ test('MRI preserves picking and shares its scan with later-loaded surface layers
     const shader: Stub = {
       uniforms: {},
       vertexShader: '#include <begin_vertex>',
-      fragmentShader: '#include <opaque_fragment>',
+      fragmentShader: '#include <lights_physical_fragment>\n#include <opaque_fragment>',
     };
     mesh.material.onBeforeCompile(shader as never, undefined as never);
     assert.equal(shader.uniforms.scanEnabled.value, true);
@@ -144,6 +145,8 @@ function fixture(
   functional: Stub | null = null,
   domains: Stub | null = null,
   published: Record<string, Color> = {},
+  // Each cortical parcel's predicted pRF, the same at every vertex: [x°, y°, σ°, visual area].
+  fields: Record<string, readonly [number, number, number, number]> | null = null,
 ) {
   const manifest = {
     schema_version: 1,
@@ -156,6 +159,9 @@ function fixture(
     detail_levels: [{ id: 'aseg', label: 'Coarse', file: 'structures.glb' }],
     solid_envelopes: { file: 'tissue-envelopes.glb' },
     regions,
+    ...(fields
+      ? { retinotopy: { measured_eccentricity_deg: 8, areas: [{ code: 1, name: 'V1' }] } }
+      : {}),
   } as unknown as AtlasManifest;
   const loads: string[] = [];
   const loader: GlbLoader = {
@@ -189,6 +195,20 @@ function fixture(
               1,
             ),
           );
+        }
+        if (fields && atlasId !== 'aseg') {
+          const field = fields[region.id] ?? [0, 0, 1, 0];
+          for (const [k, name] of [
+            '_field_x',
+            '_field_y',
+            '_prf_sigma',
+            '_visual_area',
+          ].entries()) {
+            const values = new Float32Array(mesh.geometry.attributes.position.count).fill(
+              field[k]!,
+            );
+            mesh.geometry.setAttribute(name, new Float32BufferAttribute(values, 1));
+          }
         }
         mesh.position.x = index * 0.03;
         mesh.userData = { ...region, region_id: region.id };
@@ -516,7 +536,7 @@ test('MRI colour attached before the envelopes reaches them when they arrive', a
     const shader: Stub = {
       uniforms: {},
       vertexShader: '#include <begin_vertex>',
-      fragmentShader: '#include <opaque_fragment>',
+      fragmentShader: '#include <lights_physical_fragment>\n#include <opaque_fragment>',
     };
     mesh.material.onBeforeCompile(shader as never, undefined as never);
     assert.equal(shader.uniforms.scanVolume.value, sections.anatomy.texture);
@@ -943,6 +963,55 @@ test('isolation, visibility and reset preserve coordinates and restore the full 
     ['stem'],
   );
   assert.throws(() => atlas.setCortexOpacity(1.1), /opacity/i);
+  atlas.dispose();
+});
+
+test('the visual-field map turns the right cortex half a turn behind the left pole, and gives it back', async () => {
+  const { atlas } = fixture(null, null, null, {}, {});
+  await atlas.initialize('a');
+  const box = (id: string) => new Box3().setFromObject(meshOf(atlas, id)!);
+  const before = box('a-right');
+  const left = box('a-left');
+  const pole = Math.max(box('a-left').max.z, box('a-wall').max.z);
+  atlas.showVisualField({ dot: { x: 2, y: 0, radius: 1 } });
+  assert.equal(atlas.medialPair, true);
+  const turned = box('a-right');
+  for (const [got, want] of [
+    [turned.min.x, -before.max.x],
+    [turned.max.x, -before.min.x],
+    [turned.min.y, before.min.y],
+    [turned.min.z, 2 * pole + 0.01 - before.max.z],
+    [turned.max.z, 2 * pole + 0.01 - before.min.z],
+  ] as const) {
+    assert.ok(Math.abs(got - want) < 1e-12, `${got} ≠ ${want}`);
+  }
+  assert.ok(box('a-left').equals(left), 'the left hemisphere stays where it is');
+  atlas.showVisualField(null);
+  assert.equal(atlas.medialPair, false);
+  assert.ok(box('a-right').equals(before));
+  atlas.dispose();
+});
+
+test('the dot’s activation is the box of the drawn cortex it drives past the threshold', async () => {
+  const { atlas } = fixture(
+    null,
+    null,
+    null,
+    {},
+    {
+      'a-left': [2, 0, 0.5, 1],
+      'a-right': [-5, 0, 0.5, 1],
+    },
+  );
+  await atlas.initialize('a');
+  atlas.showVisualField({ dot: { x: 2, y: 0, radius: 1 } });
+  const driven = atlas.visualFieldActivation({ x: 2, y: 0, radius: 1 })!;
+  const parcel = new Box3().setFromObject(meshOf(atlas, 'a-left')!);
+  assert.ok(driven.min.distanceTo(parcel.min) < 1e-8 && driven.max.distanceTo(parcel.max) < 1e-8);
+  // 2.5° from the pRF centre, five σ beyond the dot's edge: nothing is driven.
+  assert.equal(atlas.visualFieldActivation({ x: 4.5, y: 0, radius: 0.1 }), null);
+  atlas.setHemisphere('left');
+  assert.equal(atlas.visualFieldActivation({ x: -5, y: 0, radius: 1 }), null);
   atlas.dispose();
 });
 

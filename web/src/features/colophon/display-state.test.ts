@@ -19,7 +19,7 @@ const defaults: DisplayView = {
 };
 
 test('nothing is listed at the defaults', () => {
-  assert.deepEqual(displayChanges(defaults, DEFAULT_DISPLAY), []);
+  assert.deepEqual(displayChanges(defaults, DEFAULT_DISPLAY, 'pial'), []);
 });
 
 test('each setting away from its default is named, in order, in the reader’s language', () => {
@@ -32,7 +32,7 @@ test('each setting away from its default is named, in order, in the reader’s l
     isolatedRegion: 'a',
     focused: true,
   };
-  assert.deepEqual(displayChanges(changed, DEFAULT_DISPLAY), [
+  assert.deepEqual(displayChanges(changed, DEFAULT_DISPLAY, 'pial'), [
     'Left hemisphere',
     'Cortex 15%',
     'Internal anatomy hidden',
@@ -41,7 +41,11 @@ test('each setting away from its default is named, in order, in the reader’s l
     'Region focused',
   ]);
   assert.deepEqual(
-    displayChanges({ ...changed, lang: 'fr', hiddenRegions: new Set(['a']) }, DEFAULT_DISPLAY),
+    displayChanges(
+      { ...changed, lang: 'fr', hiddenRegions: new Set(['a']) },
+      DEFAULT_DISPLAY,
+      'pial',
+    ),
     [
       'Hémisphère gauche',
       'Cortex à 15 %',
@@ -53,20 +57,37 @@ test('each setting away from its default is named, in order, in the reader’s l
   );
 });
 
+test('a deeper cortex surface is named, but not while the cortex is hidden', () => {
+  assert.deepEqual(displayChanges(defaults, DEFAULT_DISPLAY, 'white'), [
+    'Cortex on the white surface',
+  ]);
+  assert.deepEqual(displayChanges({ ...defaults, lang: 'fr' }, DEFAULT_DISPLAY, 'mid'), [
+    'Cortex sur la surface mi-épaisseur',
+  ]);
+  assert.deepEqual(
+    displayChanges({ ...defaults, cortexVisible: false }, DEFAULT_DISPLAY, 'white'),
+    ['Cortex hidden'],
+  );
+});
+
 test('a hidden cortex is said once, without its opacity', () => {
   assert.deepEqual(
-    displayChanges({ ...defaults, cortexVisible: false, cortexOpacity: 0.4 }, DEFAULT_DISPLAY),
+    displayChanges(
+      { ...defaults, cortexVisible: false, cortexOpacity: 0.4 },
+      DEFAULT_DISPLAY,
+      'pial',
+    ),
     ['Cortex hidden'],
   );
 });
 
 test('Tracts over its own anatomy opens on a see-through cortex, which is its default there', () => {
   const tracts = { ...defaults, explorer: 'diffusion' as const, cortexOpacity: 0.16 };
-  assert.deepEqual(displayChanges(tracts, DEFAULT_DISPLAY), []);
-  assert.deepEqual(displayChanges({ ...tracts, cortexOpacity: 1 }, DEFAULT_DISPLAY), [
+  assert.deepEqual(displayChanges(tracts, DEFAULT_DISPLAY, 'pial'), []);
+  assert.deepEqual(displayChanges({ ...tracts, cortexOpacity: 1 }, DEFAULT_DISPLAY, 'pial'), [
     'Cortex 100%',
   ]);
-  assert.deepEqual(displayChanges({ ...defaults, cortexOpacity: 0.16 }, DEFAULT_DISPLAY), [
+  assert.deepEqual(displayChanges({ ...defaults, cortexOpacity: 0.16 }, DEFAULT_DISPLAY, 'pial'), [
     'Cortex 16%',
   ]);
 });
@@ -81,7 +102,7 @@ test('under a lesson, what its step prepared is not listed, and the reader’s o
     focused: true,
   };
   const step: DisplayView = { ...defaults, ...prepared, selectedRegion: region };
-  assert.deepEqual(displayChanges(step, prepared), []);
+  assert.deepEqual(displayChanges(step, prepared, 'pial'), []);
   assert.deepEqual(
     displayChanges(
       {
@@ -92,9 +113,13 @@ test('under a lesson, what its step prepared is not listed, and the reader’s o
         focused: false,
       },
       prepared,
+      'pial',
     ),
     ['Both hemispheres', 'Cortex shown', '1 part shown', 'Focus off'],
   );
   // With nothing selected, the step's Focus has ended with the selection: nothing to list.
-  assert.deepEqual(displayChanges({ ...step, focused: false, selectedRegion: null }, prepared), []);
+  assert.deepEqual(
+    displayChanges({ ...step, focused: false, selectedRegion: null }, prepared, 'pial'),
+    [],
+  );
 });

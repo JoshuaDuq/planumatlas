@@ -29,7 +29,7 @@ import {
   withContext,
 } from './render/camera-views.ts';
 import { turnFromKeyboard } from './render/keyboard-orbit.ts';
-import { cameraBasis, edgeLabels } from './render/orientation.ts';
+import { HALF_TURNED, cameraBasis, edgeLabels } from './render/orientation.ts';
 import { scaleBar } from './render/scale-bar.ts';
 import { planFraming } from './render/scene.ts';
 import type { CameraPlan, EngineScene } from './render/scene.ts';
@@ -45,6 +45,8 @@ const CORD_MIN_DISTANCE_M = 0.015;
 /** Vertices past which framing keeps one in `THINNED_STRIDE` (app.js:325). */
 const THINNED_VERTICES = 60000;
 const THINNED_STRIDE = 8;
+// What `follow` keeps the box's centre inside: the middle third of the visible rectangle.
+const FOLLOW_INSET = 1 / 3;
 /** A framing fits the whole brain, so the reader's magnification starts at one. */
 const WHOLE_ZOOM = 1;
 /** Beyond this the up vector differs from the named view's and a link carries it (app.js:821). */
@@ -86,6 +88,8 @@ export type FramingScene = Pick<
 /** What framing reads of the model: the display state, and what is drawn. */
 export interface FramingModel {
   readonly state: ModelState;
+  /** The right hemisphere's cortex is turned beside the left's (`BrainAtlas.medialPair`). */
+  readonly medialPair: boolean;
   readonly visibleMeshes: readonly AtlasMesh[];
   readonly regions: ReadonlyMap<string, Region>;
   /** The nearest drawn surface along a ray. */
@@ -136,6 +140,8 @@ export interface Framing {
   invalidate(): void;
   /** Move the camera onto a point of the surface in world metres: the picker's double click (app.js:1783). */
   focusWorldPoint(point: Vector3): void;
+  /** Pan onto a box of world metres once it leaves the middle of the stage. */
+  follow(box: Box3): void;
   /** Where zooming out leads the orbit target: what is framed, and the distance it fills the stage from. */
   home(direction: Vector3): { center: Vector3; distance: number };
   /** The stage's canvas resized (app.js:115-125). */
@@ -184,8 +190,14 @@ export function createFraming({
   let shown: CameraView = describeCamera();
 
   function describeCamera(): CameraView {
+    const edges = edgeLabels(camera, 'en', controls.target);
+    // Each side edge names the hemisphere drawn on that side: the turned one lies toward +z.
+    if (model.medialPair) {
+      const side = cameraBasis(camera, controls.target).right[2] > 0 ? 'right' : 'left';
+      edges[side] = HALF_TURNED[edges[side]];
+    }
     return {
-      edges: edgeLabels(camera, 'en', controls.target),
+      edges,
       scale: scaleBar(camera.fov, scene.distanceToTarget, scene.viewportHeight),
       basis: cameraBasis(camera, controls.target),
     };
@@ -250,11 +262,12 @@ export function createFraming({
     // One hemisphere, or the cord added beneath the brain, is not the box the page opened with. Fit
     // what is actually drawn, or the picture keeps a hole where the hidden half was and the cord stays
     // below the frame.
-    if (cortexVisible && (hemisphere !== 'both' || spinalCordVisible)) {
+    if (cortexVisible && (hemisphere !== 'both' || spinalCordVisible || model.medialPair)) {
       if (!cachedBounds) {
-        const visible = hemisphere === 'both' ? bounds.clone() : new Box3();
+        const whole = hemisphere === 'both' && !model.medialPair;
+        const visible = whole ? bounds.clone() : new Box3();
         for (const mesh of model.visibleMeshes) {
-          if (hemisphere === 'both' && mesh.userData['atlas'] !== 'pam50') continue;
+          if (whole && mesh.userData['atlas'] !== 'pam50') continue;
           visible.expandByObject(mesh);
         }
         cachedBounds = visible.isEmpty() ? bounds : visible;
@@ -469,12 +482,13 @@ export function createFraming({
   }
 
   function frameLandmark(
-    regionId: string,
+    regionIds: string | readonly string[],
     name: ViewName,
     contextMarginMm: number,
     { immediate = false }: MoveOptions = {},
   ): boolean {
-    const region = boundsOf(meshesOf(regionId));
+    const ids = typeof regionIds === 'string' ? [regionIds] : regionIds;
+    const region = boundsOf(ids.flatMap(meshesOf));
     if (region.isEmpty()) return false;
     view = requireView(name);
     held.release();
@@ -704,6 +718,56 @@ export function createFraming({
     return facing;
   }
 
+  /**
+   * Keep `box` (world metres) in the middle of the stage: once its centre leaves the middle third of
+   * the visible rectangle, or it no longer fits, the camera pans onto it, keeping its heading, and
+   * backs away only as far as the box needs. Releases the held view.
+   */
+  function follow(box: Box3) {
+    const destination = scene.destination;
+    const eye = camera.clone();
+    eye.position.copy(destination.position);
+    eye.up.copy(destination.up);
+    eye.lookAt(destination.target);
+    eye.updateMatrixWorld();
+    const rect = scene.visibleRect;
+    const { width, height } = scene.hostSize;
+    const onStage = (point: Vector3) => {
+      const at = point.clone().project(eye);
+      return { x: ((at.x + 1) / 2) * width, y: ((1 - at.y) / 2) * height, behind: at.z > 1 };
+    };
+    const centre = box.getCenter(new Vector3());
+    const middle = onStage(centre);
+    const corners = [box.min, box.max]
+      .flatMap((low) =>
+        [box.min, box.max].flatMap((mid) =>
+          [box.min, box.max].map((high) => new Vector3(low.x, mid.y, high.z)),
+        ),
+      )
+      .map(onStage);
+    const inside = (p: { x: number; y: number; behind: boolean }, inset: number) =>
+      !p.behind &&
+      p.x >= rect.x + inset * rect.width &&
+      p.x <= rect.x + (1 - inset) * rect.width &&
+      p.y >= rect.y + inset * rect.height &&
+      p.y <= rect.y + (1 - inset) * rect.height;
+    if (inside(middle, FOLLOW_INSET) && corners.every((corner) => inside(corner, 0))) return;
+    held.release();
+    const direction = destination.position.clone().sub(destination.target).normalize();
+    const distance = Math.max(
+      destination.position.distanceTo(destination.target),
+      fitDistance(camera, box, direction, clearedFit()),
+    );
+    moveCamera({
+      position: centre.clone().addScaledVector(direction, distance),
+      target: centre,
+      near: destination.near,
+      far: destination.far,
+      minDistance: destination.minDistance,
+      maxDistance: destination.maxDistance,
+    });
+  }
+
   /** Move the camera onto a surface point, in world metres: the camera keeps its distance and heading. */
   function focusWorldPoint(point: Vector3) {
     held.release();
@@ -901,6 +965,7 @@ export function createFraming({
   return {
     camera: cameraApi,
     focusWorldPoint,
+    follow,
     home: (direction) => ({
       center: framingBounds().getCenter(new Vector3()),
       distance: fittedDistance(direction),

@@ -2,8 +2,9 @@
   The Display popover's body (index.html:473-489, ui/chrome/display.js): how much of the model is drawn.
   - Hemisphere is a radio group (decision 6): arrows move and select. Choosing the side already shown does
     nothing, so a second click never refits the camera and throws away the orbit.
-  - The cortex opacity row is removed, not greyed, while the cortex is hidden; its slider does not take the
-    value back while the reader holds the thumb (U4 `RangeField`). The spoken value is the percentage.
+  - The cortex opacity and surface rows are removed, not greyed, while the cortex is hidden; the slider
+    does not take the value back while the reader holds the thumb (U4 `RangeField`). The spoken value is
+    the percentage. The surface is the Overlay tool's one setting, offered here for the brain alone.
   - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why).
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
   - Last, what is away from its default, Focus and hidden parts included, with Reset display: on a phone the
@@ -14,15 +15,19 @@
   import { tick } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import { percent } from '../../lib/core/format.ts';
+  import { CORTEX_SURFACES } from '../../lib/core/user-map/display.ts';
+  import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Hemisphere, Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
+  import Select from '../../lib/ui/Select.svelte';
 
   interface Props {
     lang: Language;
     hemisphere: Hemisphere;
     cortexVisible: boolean;
     cortexOpacity: number;
+    cortexSurface: CortexSurface;
     internalVisible: boolean;
     spinalCordVisible: boolean;
     /** The subject publishes a spinal cord. */
@@ -34,6 +39,7 @@
     onHemisphere: (hemisphere: Hemisphere) => void;
     onCortexVisible: (visible: boolean) => void;
     onCortexOpacity: (opacity: number) => void;
+    onCortexSurface: (surface: CortexSurface) => void;
     onInternalVisible: (visible: boolean) => void;
     onSpinalCordVisible: (visible: boolean) => void;
     onResetDisplay: () => void;
@@ -44,6 +50,7 @@
     hemisphere,
     cortexVisible,
     cortexOpacity,
+    cortexSurface,
     internalVisible,
     spinalCordVisible,
     hasSpinalCord,
@@ -52,6 +59,7 @@
     onHemisphere,
     onCortexVisible,
     onCortexOpacity,
+    onCortexSurface,
     onInternalVisible,
     onSpinalCordVisible,
     onResetDisplay,
@@ -59,6 +67,8 @@
 
   const uid = $props.id();
   const hemisphereLabelId = `hemisphere-label-${uid}`;
+  const surfaceId = `display-surface-${uid}`;
+  const surfaceHintId = `display-surface-hint-${uid}`;
 
   const copy = $derived(t(lang, 'display'));
   // Held at what the press found until the slider is let go.
@@ -66,6 +76,10 @@
   $effect.pre(() => {
     if (!scrubbing) shown = changes;
   });
+  const surfaceCopy = $derived(t(lang, 'overlay'));
+  const surfaces = $derived(
+    CORTEX_SURFACES.map((value) => ({ value, label: surfaceCopy.surfaces[value] })),
+  );
   const sides = $derived(
     (['both', 'left', 'right'] as const).map((value) => ({ value, label: copy[value] })),
   );
@@ -109,6 +123,14 @@
         format={(fraction) => percent(fraction, lang)}
         oninput={onCortexOpacity}
       />
+      <label class="stage-field-label surface-label" for={surfaceId}>{surfaceCopy.surface}</label>
+      <Select
+        id={surfaceId}
+        options={surfaces}
+        describedby={surfaceHintId}
+        bind:value={() => cortexSurface, (surface) => onCortexSurface(surface as CortexSurface)}
+      />
+      <p id={surfaceHintId} class="hint">{copy.surfaceHint}</p>
     </div>
   {/if}
   <label class="check">
@@ -159,6 +181,15 @@
     /* Indented to the checkbox's words: a 16px box and its 8px gap. */
     .opacity {
       padding: 0 0 var(--space-2) var(--space-6);
+    }
+    .surface-label {
+      margin-top: var(--space-2);
+    }
+    .hint {
+      margin: var(--space-2) 0 0;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--overlay-ink-muted);
     }
     .check {
       display: flex;

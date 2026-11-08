@@ -9,6 +9,7 @@
   import { sharedSide, stageMessage } from '../../lib/core/panels/clinical.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
+  import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
   import ProfileBody from './ProfileBody.svelte';
   import { stageCounts } from './profile-meta.ts';
@@ -73,6 +74,7 @@
     </h2>
     <StatusLine class={explorer.actionError ? 'meta error' : 'meta'} text={meta} />
     {#if deficit}
+      <LinkedMriButton {lang} onopen={explorer.openMri} />
       {#key deficit.id}
         <ProfileBody {explorer} {deficit} {lang} {side} {colours} />
       {/key}

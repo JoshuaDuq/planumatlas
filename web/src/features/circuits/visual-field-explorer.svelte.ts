@@ -16,10 +16,10 @@ import type { Retinotopy } from '../../lib/types/manifest.ts';
 
 export interface VisualFieldExplorerDeps {
   view: Pick<ViewStore, 'current'>;
-  excursions: Pick<Excursions, 'openMap' | 'showMapSide'>;
+  excursions: Pick<Excursions, 'openMap' | 'showMapScene'>;
   lesson: Pick<LessonStore, 'moveDot'>;
   store: VisualFieldMapStore;
-  visualField: Pick<EngineVisualField, 'territories'>;
+  visualField: Pick<EngineVisualField, 'territories' | 'follow'>;
   /** The manifest's record, or null on an anatomy that publishes no retinotopy. */
   retinotopy: Retinotopy | null;
   /** The guided circuits with a landmark that offers this map, and how to open one. */
@@ -38,8 +38,8 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
     view.current.explorer === 'circuits' && view.current.lesson.map === 'visual-field',
   );
   const dot = $derived(view.current.lesson.dot ?? lastDot);
-  // The hemisphere the stage shows; a link may have opened the map on either.
-  const side = $derived<FieldHemisphere>(view.current.hemisphere === 'right' ? 'right' : 'left');
+  // The hemisphere that represents the dot; on the vertical meridian, the left.
+  const side = $derived<FieldHemisphere>(hemisphereFor(dot) ?? 'left');
   const territory = $derived(territories && territoryOf(territories, dot));
 
   /** Downloads the territories on the map's first showing. */
@@ -92,24 +92,20 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
       await excursions.openMap(dot);
     },
 
-    /**
-     * Both hemispheres are drawn, so the other one covers the map's medial cortex: Start over or
-     * Display's Both left the map's view, which `returnToMap` puts back.
-     */
+    /** Display hid a hemisphere, so half the map is gone: `returnToMap` puts both back. */
     get hidden() {
-      return open && view.current.hemisphere === 'both';
+      return open && view.current.hemisphere !== 'both';
     },
 
     returnToMap() {
-      return excursions.showMapSide(hemisphereFor(dot) ?? 'left');
+      return excursions.showMapScene();
     },
 
-    /** The dot moves; crossing the vertical meridian turns the stage to the other hemisphere. */
+    /** The dot moves, and the stage pans onto the cortex it drives once that leaves the middle. */
     moveDot(next: VisualFieldDot) {
       lesson.moveDot(next);
       lastDot = next;
-      const wanted = hemisphereFor(next);
-      if (wanted && wanted !== side) void excursions.showMapSide(wanted);
+      visualField.follow(next);
     },
   };
 }

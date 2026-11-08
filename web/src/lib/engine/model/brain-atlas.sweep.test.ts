@@ -187,6 +187,7 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
     changed: 0,
     hidden: 0,
     isolated: new Set<string>(),
+    paintedScans: 0,
   };
   let previous = displayOf(model, []);
   for (let index = 0; index < 300; index++) {
@@ -204,6 +205,8 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
     if (refused && !command.composite)
       assert.equal(displayOf(model, events), before, `ATLAS-22: ${label} changed the display`);
 
+    // A paint is drawn over the scan: its regions skip the scan, and under the scan only they show a colour.
+    const painted = (mesh: Stub) => Boolean(model.paint?.colors.has(mesh.userData.region_id));
     for (const [id, layer] of model.layers as Map<string, Stub>) {
       for (const mesh of layer.meshes as Stub[]) {
         const region = model.regions.get(mesh.userData.region_id)!;
@@ -212,14 +215,20 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
           visibilityOf(region, model.settings).visible,
           `ATLAS-21: ${id}/${region.id} after ${label}`,
         );
+        assert.equal(
+          mesh.material.userData.scanPainted.value,
+          painted(mesh),
+          `${id}/${region.id} scan after ${label}`,
+        );
       }
       if (layer.featherPalette) {
         const data = layer.featherPalette.image.data as Float32Array;
         (layer.meshes as Stub[]).forEach((mesh, slot) => {
           const { r, g, b } = mesh.material.color;
+          const shows = mesh.visible && (model.surfaceColor !== 'mri' || painted(mesh));
           assert.deepEqual(
             Array.from(data.slice(slot * 4, slot * 4 + 4)),
-            [r, g, b, mesh.visible ? 1 : 0].map(Math.fround),
+            [r, g, b, shows ? 1 : 0].map(Math.fround),
             `ATLAS-33: slot ${slot} after ${label}`,
           );
         });
@@ -238,6 +247,7 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
     seen.hemispheres.add(model.hemisphere);
     seen.hidden = Math.max(seen.hidden, model.state.hiddenRegions.size);
     if (model.settings.isolatedRegion) seen.isolated.add(model.settings.isolatedRegion);
+    if (model.surfaceColor === 'mri' && model.paint?.colors.size) seen.paintedScans += 1;
   }
   // The script has to reach the states it claims to sweep, or agreement proves little.
   assert.deepEqual([...seen.hemispheres].sort(), ['both', 'left', 'right']);
@@ -246,6 +256,7 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
   assert.ok(seen.isolated.size >= 2, `isolated: ${[...seen.isolated]}`);
   assert.ok(seen.changed >= 100, `${seen.changed} commands changed the display`);
   assert.ok(seen.refused >= 10, `${seen.refused} commands were refused`);
+  assert.ok(seen.paintedScans >= 10, `${seen.paintedScans} commands left a paint over the scan`);
   model.dispose();
 });
 
@@ -445,7 +456,7 @@ test('ATLAS-19 reporting the same cut state again changes nothing', async () => 
   model.dispose();
 });
 
-test('ATLAS-32 a scan is attached once, another is refused, and a paint turns the scan off', async () => {
+test('ATLAS-32 a scan is attached once, another is refused, and a paint is drawn over it', async () => {
   const { model } = await opened();
   const scan = () => ({
     mriUniforms: createMriUniforms({
@@ -462,6 +473,22 @@ test('ATLAS-32 a scan is attached once, another is refused, and a paint turns th
   model.setSurfaceColor('mri');
   assert.equal(first.mriUniforms.scanEnabled.value, true);
   model.setPaint({ id: 'function:a', colors: new Map([['a-left', [1, 2, 3]]]) });
-  assert.equal(first.mriUniforms.scanEnabled.value, false);
+  assert.equal(first.mriUniforms.scanEnabled.value, true);
+  const scanPainted = () =>
+    Object.fromEntries(
+      (model.visibleMeshes as Stub[]).map((mesh) => [
+        mesh.userData['region_id'],
+        mesh.material.userData['scanPainted'].value,
+      ]),
+    );
+  const shown = scanPainted();
+  assert.equal(shown['a-left'], true, 'the painted region shows its paint');
+  assert.ok(Object.keys(shown).length > 1);
+  assert.ok(
+    Object.entries(shown).every(([id, painted]) => painted === (id === 'a-left')),
+    'every other region shows the scan',
+  );
+  model.setPaint(null);
+  assert.ok(Object.values(scanPainted()).every((painted) => !painted));
   model.dispose();
 });

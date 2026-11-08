@@ -52,7 +52,7 @@ Each plane is seen from the side the stage faces the cut (the other side when re
 
 ## Display
 
-**Linked MRI** opens from a region's detail, the section bar or the <kbd>M</kbd> key. The crosshair is the cut's: a click on a plane moves the crosshair there, cuts the 3D brain on that plane through the point and selects the smallest shown solid that contains it (`regionAt`); a click on the 3D brain moves the crosshair to the picked surface point. The wheel moves a plane 1 mm a notch; each plane has a 1 mm position slider. **Window** (width 10–256) and **Level** (0–255) apply to the planes and to T1 surface colour alike. The crosshair is drawn at screen resolution in `#4fb6e0` over a `#0e1116` ring; only a plane whose frame, overlay, agreement or window changed is resampled. The readout gives the RAS position, the region the current cut labels name, the aseg structure and label number, and is announced after 250 ms at rest. **Save PNG** writes the 512-pixel plane with crosshair, edge letters, convention and offset as `<subject>-<plane>-<offset>mm.png`.
+**Linked MRI** opens from a region's detail, a function's or deficit's profile, the section bar or the <kbd>M</kbd> key. A function's opens at the anchor of its strongest area, a deficit's at its first finding's first region (the chosen finding's, if one is); the overview of all functions opens where the crosshair is. The crosshair is the cut's: a click on a plane moves the crosshair there, cuts the 3D brain on that plane through the point and selects the smallest shown solid that contains it (`regionAt`); a click on the 3D brain moves the crosshair to the picked surface point. The wheel moves a plane 1 mm a notch; each plane has a 1 mm position slider. **Window** (width 10–256) and **Level** (0–255) apply to the planes and to T1 surface colour alike. The crosshair is drawn at screen resolution in `#4fb6e0` over a `#0e1116` ring; only a plane whose frame, overlay, agreement, paint or window changed is resampled. While a Functions or Deficits paint is shown, each voxel whose label on the cut atlas's own grid is painted takes that colour, opaque over the scan, as the cut faces show it; that grid downloads the first time a paint needs it. The readout gives the RAS position, the region the current cut labels name, the aseg structure and label number, and is announced after 250 ms at rest. **Save PNG** writes the 512-pixel plane with crosshair, edge letters, convention and offset as `<subject>-<plane>-<offset>mm.png`.
 
 On a desktop or tablet the planes dock beside the stage (column 240 px to the width that leaves the stage 360 px; 24 px per arrow key); on a phone or a full-screen stage they open as a modal dialog. URL key: `mri=<level>,<width>`, written only when the window differs from the published one and accepted for level 0–255 and width 1–256.
 
@@ -67,6 +67,7 @@ On a desktop or tablet the planes dock beside the stage (column 240 px to the wi
 | Per-subject window (`test_volumes.py`) | CDMD and `fsaverage` windows differ | passes |
 | Sampling (`sampling.test.ts`, `volume.test.ts`) | Grey is the windowed T1 clamped to 0–255; overlay blends 0.55/0.45; labels never invented; voxel centres keep their label | passes |
 | GPU–CPU labels (`label-sampling.svelte.test.ts`) | `labelAt` names the label `Volume.label` names | passes |
+| Paint (`sampling.test.ts`, `sections.test.ts`) | A painted label is drawn in its colour over the scan; the label grid loads only once the planes have, and a failed load is reported once | passes |
 | Frames and clicks (`coordinates.test.ts`, `mpr-draw.test.ts`) | A click's point marks the crosshair at that click; the coronal panel faced from the front puts the subject's right on the left | passes |
 
 ## Limitations
@@ -74,7 +75,7 @@ On a desktop or tablet the planes dock beside the stage (column 240 px to the wi
 - One individual's 1 mm MRI and segmentation, not the viewer's anatomy.
 - Trilinear interpolation does not increase source resolution.
 - The scan is not intensity-normalised; grey levels do not compare across subjects.
-- The overlay is aseg, whatever atlas the stage shows; cortical surface atlases are not extended into the volume.
+- The overlay is aseg, whatever atlas the stage shows; cortical surface atlases are not extended into the volume. A paint is drawn by the cut atlas's own label grid instead.
 - `volumes.json` describes the segmentation as sampled by nearest neighbour; the viewer samples it by largest trilinear weight.
 - Hidden or isolated regions do not change the planes.
 - Agreement is not accuracy: neither segmentation is the reference.

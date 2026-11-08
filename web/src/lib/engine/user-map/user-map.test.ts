@@ -243,6 +243,19 @@ test('the cortex moves between surfaces in its own buffers and comes back to the
   assert.equal(mesh.geometry.getAttribute('normal'), normal);
 });
 
+test('the cortex takes the chosen surface without a map, and the pial under a cut', async () => {
+  const { userMap, atlas, mesh } = setup();
+  const x = () => mesh.geometry.getAttribute('position').array[0]!;
+  userMap.setSurface('white');
+  await vi.waitFor(() => assert.ok(Math.abs(x() - 0.03) < 1e-7));
+  atlas.settings.cutActive = true;
+  atlas.dispatchEvent(new Event('change'));
+  await vi.waitFor(() => assert.equal(x(), Math.fround(0.01)));
+  atlas.settings.cutActive = false;
+  atlas.dispatchEvent(new Event('change'));
+  await vi.waitFor(() => assert.ok(Math.abs(x() - 0.03) < 1e-7));
+});
+
 test('a file the worker refused rejects with its code, for the overlay to word', async () => {
   const { userMap } = setup();
   FakeWorker.refusal = {

@@ -208,8 +208,9 @@ export function createFakeCamera({
       reframe();
       return true;
     },
-    frameLandmark(regionId, name) {
-      if (!model.isRegionDrawn(regionId)) return false;
+    frameLandmark(regionIds, name) {
+      const ids = typeof regionIds === 'string' ? [regionIds] : regionIds;
+      if (!ids.some((id) => model.isRegionDrawn(id))) return false;
       face(name);
       reframe();
       return true;

@@ -10,7 +10,7 @@ export const NO_DATA = -3e38;
 /** The reader's map, shared by every cortical material and every cut face. */
 export interface UserMapUniforms {
   userMapOn: IUniform<boolean>;
-  /** The scan colours the surfaces (unlit), so the map is drawn over it, unlit as the scan is. */
+  /** The scan colours the surfaces, so the map is drawn over it, in the scan's light. */
   userMapOverScan: IUniform<boolean>;
   userMapThreshold: IUniform<number>;
   userMapMax: IUniform<number>;
@@ -162,11 +162,14 @@ float userMapAt(vec3 world) {
 
 const LUMA = 'vec3(0.2126, 0.7152, 0.0722)';
 
-/** After the scan has written the fragment: the map where it is drawn, unlit, as the scan is. */
+/** After the scan has written the fragment: the map where it is drawn, in the light the scan takes. */
 export const USER_MAP_OVER_SCAN = `
         if (userMapOverScan && userMapMapped.a > 0.0) {
-          gl_FragColor.rgb = mix(
-            gl_FragColor.rgb, sRGBTransferEOTF(vec4(userMapMapped.rgb, 1.0)).rgb, userMapMapped.a);
+          vec3 userMapLight = sRGBTransferEOTF(vec4(userMapMapped.rgb, 1.0)).rgb;
+          #ifdef SCAN_SHADE
+          userMapLight *= scanShade;
+          #endif
+          gl_FragColor.rgb = mix(gl_FragColor.rgb, userMapLight, userMapMapped.a);
         }
         #include <tonemapping_fragment>`;
 

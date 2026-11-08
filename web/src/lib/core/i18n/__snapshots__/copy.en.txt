@@ -429,8 +429,14 @@
   "cutLabels": "Cut labels"
  },
  "deficitKey": {
-  "keyAll": "One colour per finding; a region several findings cite takes the first one’s colour, and tissue-coloured regions are not cited. Choose a finding to show it alone.",
-  "keyOne": "The regions this finding cites; tissue-coloured regions are not cited.",
+  "keyAll": [
+   "[true] → \"One colour per finding; a region several findings cite takes the first one’s colour, and regions where the scan shows are not cited. Choose a finding to show it alone.\"",
+   "[false] → \"One colour per finding; a region several findings cite takes the first one’s colour, and tissue-coloured regions are not cited. Choose a finding to show it alone.\""
+  ],
+  "keyOne": [
+   "[true] → \"The regions this finding cites; regions where the scan shows are not cited.\"",
+   "[false] → \"The regions this finding cites; tissue-coloured regions are not cited.\""
+  ],
   "keyAbsent": "An outlined finding has no region coloured in this view.",
   "keyPicked": "Only this finding’s regions. Choose it again for every finding."
  },
@@ -512,6 +518,7 @@
   "internalAnatomy": "Internal anatomy",
   "showCortex": "Show cortex",
   "cortexOpacity": "Cortex opacity",
+  "surfaceHint": "Deeper surfaces open the sulci. A cut draws the pial.",
   "showInternal": "Show internal anatomy",
   "showSpinalCord": "Show spinal cord",
   "spinalCordUnavailable": "No spinal cord is published for this subject.",
@@ -552,6 +559,10 @@
   "cortexAt": [
    "[\"Alpha\"] → \"Cortex Alpha\"",
    "[\"\"] → \"Cortex \""
+  ],
+  "cortexOn": [
+   "[\"Alpha\"] → \"Cortex on the alpha surface\"",
+   "[\"\"] → \"Cortex on the  surface\""
   ],
   "internalHidden": "Internal anatomy hidden",
   "internalShown": "Internal anatomy shown",
@@ -621,10 +632,22 @@
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>to<NBSP>3.5\"",
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
-  "keyScale": "Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.",
-  "keyScaleTerm": "Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.",
-  "keyAll": "Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.",
-  "keyCompare": "Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Tissue-coloured areas reach neither.",
+  "keyScale": [
+   "[true] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below 3.\"",
+   "[false] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.\""
+  ],
+  "keyScaleTerm": [
+   "[true] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below 3.\"",
+   "[false] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.\""
+  ],
+  "keyAll": [
+   "[true] → \"Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.\"",
+   "[false] → \"Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.\""
+  ],
+  "keyCompare": [
+   "[true] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Areas where the scan shows reach neither.\"",
+   "[false] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Tissue-coloured areas reach neither.\""
+  ],
   "keyShared": "Both",
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha: “”\"",
@@ -2167,7 +2190,7 @@
    "[\"\"] → \"throws value.toFixed is not a function\""
   ],
   "hemisphere": [
-   "[\"Alpha\"] → \"Represented in the Alpha hemisphere, shown from the midline.\"",
+   "[\"Alpha\"] → \"Represented in the Alpha hemisphere.\"",
    "[\"\"] → \"On the vertical meridian: both hemispheres represent it.\""
   ],
   "territory": "Predicted territory",
@@ -2185,8 +2208,11 @@
    "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
    "[\"\"] → \"throws value.toFixed is not a function\""
   ],
-  "legendCore": "Receptive-field centre inside the dot",
-  "legendReach": "Receptive field within one σ of the dot",
+  "pair": "Both hemispheres are seen from the midline, the right one turned to stand beside the left with their occipital poles together: each half of the field is drawn on its own side of the stage, fixation in the middle.",
+  "legendResponse": [
+   "[\"Alpha\"] → \"Predicted response, Alpha (red) to 100% (yellow) of the response to the dot centred on the receptive field\"",
+   "[\"\"] → \"Predicted response,  (red) to 100% (yellow) of the response to the dot centred on the receptive field\""
+  ],
   "legendLine": [
    "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
    "[\"\"] → \"throws value.toFixed is not a function\""

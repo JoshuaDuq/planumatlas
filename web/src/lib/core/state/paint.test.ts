@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { beforeAll, describe, test } from 'vitest';
-import type { Manifest, Paint } from '../../types/index.ts';
+import type { Manifest, Paint, SurfaceColor } from '../../types/index.ts';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { readModel } from '../catalog/test-support.ts';
 import {
@@ -15,6 +15,9 @@ import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import { legendFor, paintFor, paintKind } from './paint.ts';
 import type { PaintState } from './paint.ts';
+
+/** What the key reads: the paint's state and the surface colour under it. */
+type KeyState = PaintState & { surfaceColor: SurfaceColor };
 
 const domains = {
   atlas: 'hcp-mmp',
@@ -56,7 +59,8 @@ const clinical = {
 } as unknown as ClinicalCatalog;
 const drawn = new Set(['destrieux:left:1', 'destrieux:left:2']);
 const sources = { domains, clinical, drawn: (id: string) => drawn.has(id) };
-const base: PaintState = {
+const base: KeyState = {
+  surfaceColor: 'tissue',
   explorer: 'functions',
   atlas: 'hcp-mmp',
   selectedFunction: 'all',
@@ -147,7 +151,7 @@ test('a paint names its tab by its id', () => {
 });
 
 test('a finding none of whose regions is drawn coloured is keyed as absent, and the note says why', () => {
-  const state: PaintState = {
+  const state: KeyState = {
     ...base,
     explorer: 'deficits',
     paint: clinical.paint('aphasia').paint,
@@ -193,7 +197,8 @@ describe('the published cdmd functions and deficits', () => {
     catalog = createClinicalCatalog(data, manifest, published.units);
     both = { domains: published, clinical: catalog };
   });
-  const functionState = (selectedFunction: string, lang: 'en' | 'fr' = 'en'): PaintState => ({
+  const functionState = (selectedFunction: string, lang: 'en' | 'fr' = 'en'): KeyState => ({
+    surfaceColor: 'tissue',
     explorer: 'functions',
     atlas: 'hcp-mmp',
     selectedFunction,
@@ -245,8 +250,24 @@ describe('the published cdmd functions and deficits', () => {
     assert.ok(overview.rows.every((row) => row.pressed === false));
   });
 
+  test('under the T1 colour the key says the scan shows where nothing is painted, in both languages', () => {
+    const state = { ...functionState('all'), surfaceColor: 'mri' as const };
+    const note = (lang: 'en' | 'fr') =>
+      legendFor({ ...state, lang, paint: paintFor(state, both) }, { ...both, drawn: () => true })!
+        .note;
+    assert.equal(
+      note('en'),
+      'Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.',
+    );
+    assert.equal(
+      note('fr'),
+      'Chaque aire montre sa fonction la plus forte\u202f; les aires où l’IRM reste visible n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.',
+    );
+  });
+
   test('a deficit’s FreeSurfer structures are painted and keyed on their teaching-set stand-ins', () => {
-    const state: PaintState = {
+    const state: KeyState = {
+      surfaceColor: 'tissue',
       explorer: 'deficits',
       atlas: 'destrieux',
       selectedFunction: null,
@@ -288,7 +309,8 @@ describe('the published cdmd functions and deficits', () => {
     }
     assert.equal(data.deficits.length, 131);
     for (const deficit of data.deficits) {
-      const state: PaintState = {
+      const state: KeyState = {
+        surfaceColor: 'tissue',
         explorer: 'deficits',
         atlas: 'destrieux',
         selectedFunction: null,
@@ -324,7 +346,7 @@ describe('the lesion', () => {
       { id: 'naming', color: [57, 135, 229] as const, title: { en: 'Naming', fr: 'Dénomination' } },
     ],
   };
-  const anatomy: PaintState = { ...base, explorer: 'anatomy' };
+  const anatomy: KeyState = { ...base, explorer: 'anatomy' };
 
   test('paints the findings near it while Anatomy, where its report is, is in front', () => {
     assert.equal(paintFor(anatomy, { ...sources, lesion })!.id, 'lesion:-45,-25,30:15');

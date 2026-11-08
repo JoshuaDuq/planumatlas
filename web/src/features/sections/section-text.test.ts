@@ -114,6 +114,13 @@ describe('the status sentence', () => {
     );
   });
 
+  test('a paint over the MRI colouring keeps it an MRI cut', () => {
+    const paint = { id: 'function:memory', colors: new Map() } as Paint;
+    expect(sectionSentences(input({ surfaceColor: 'mri', paint })).shown).toBe(
+      'MRI · 1\u202fmm source grid · native Destrieux labels · neuropsychological functions colour HCP-MMP labels only',
+    );
+  });
+
   test('says the anatomy is being prepared, a failure by its code, and the full brain with no cut', () => {
     const loading = { status: 'loading', error: null, cutAtlas: 'destrieux' } as const;
     expect(sectionSentences(input({ state: loading }))).toEqual({

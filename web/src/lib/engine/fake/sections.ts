@@ -102,6 +102,7 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     reverse: false,
     overlay: false,
     agreement: null,
+    paint: null,
     tilt: 30,
     azimuth: 30,
     status: 'idle',

@@ -15,6 +15,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
   import {
     AREAS_SHOWN,
@@ -62,6 +63,9 @@
   {#key model.lang}
     <p class="meta" role="status" data-error={String(model.failed)}>{model.meta}</p>
   {/key}
+  {#if id}
+    <LinkedMriButton {lang} onopen={model.openMri} />
+  {/if}
   {#if comparison}
     <div class="content">
       <p class="note caveat first">

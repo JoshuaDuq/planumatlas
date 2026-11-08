@@ -3,7 +3,6 @@ import type { Circuit, CircuitCatalog, Landmark } from '../core/learning/catalog
 import type { RevealSettings } from '../core/panels/clinical.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
-import { hemisphereFor } from '../core/learning/visual-field.ts';
 import type { Engine, MoveOptions, MprPlane, VisualFieldDot } from '../engine/api.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
 import type { Explorer } from '../types/index.ts';
@@ -34,6 +33,8 @@ export interface MriDialog {
 
 /** How much cortex around V1 the visual-field map frames, in millimetres. */
 const MAP_CONTEXT_MM = 30;
+// Seen from the subject's right, the medial pair shows both medial walls.
+const MAP_VIEW = 'right';
 
 /**
  * Guided lessons (app.js:1298-1411): a lesson opens over the scene it found, draws and frames its
@@ -175,27 +176,37 @@ export function createLessons({
   }
 
   /**
-   * The visual-field map's scene: one hemisphere alone, seen from the midline where V1 lies, uncut,
-   * opaque and with nothing selected, so the map the cortex carries is what shows.
+   * The visual-field map's scene: both hemispheres as the map's medial pair, seen from the subject's
+   * right so both medial walls face the reader, uncut, opaque and with nothing selected, so the map the
+   * cortex carries is what shows.
    */
-  async function showMapSide(hemisphere: 'left' | 'right', current: () => boolean) {
+  async function showMapScene(dot: VisualFieldDot, current: () => boolean) {
     await sections.setMode('off');
     if (!current()) return false;
     model.select(null);
     model.clearIsolation();
-    model.setHemisphere(hemisphere);
+    model.setHemisphere('both');
     model.setCortexVisible(true);
     model.setCortexOpacity(1);
     model.setInternalVisible(false);
-    const view = hemisphere === 'left' ? 'right' : 'left';
-    session.setView(view);
-    // V1 and the V2 and V3 around it, with the occipital lobe for context.
-    const central = visualField.centralRegion(hemisphere);
-    if (!camera.frameLandmark(central, view, MAP_CONTEXT_MM)) {
-      throw new Error(`The map's central region is not drawn: ${central}`);
+    // The stage syncs the map from the lesson; it is drawn here first so the pair stands where it is framed.
+    visualField.show({ dot });
+    session.setView(MAP_VIEW);
+    // Both V1s and the V2 and V3 around them, with the occipital lobes for context.
+    const central = (['left', 'right'] as const).map((side) => visualField.centralRegion(side));
+    if (!camera.frameLandmark(central, MAP_VIEW, MAP_CONTEXT_MM)) {
+      throw new Error(`The map's central regions are not drawn: ${central.join(', ')}`);
     }
     prepare(preparedOf(model.settings));
     return true;
+  }
+
+  /**
+   * The map's medial pair and orbit limit end before another scene is framed or put back: the stage's
+   * sync would end them only once the lesson state had changed, after the camera had moved.
+   */
+  function endMapStage() {
+    if (lesson.state.map) visualField.show(null);
   }
 
   function seeThroughOpacity() {
@@ -226,6 +237,7 @@ export function createLessons({
     changesSaid = false;
     beforeRoute = null;
     prepare(null);
+    endMapStage();
     lesson.close();
     // A deep landmark's Focus is the lesson's; the scene put back has its own.
     if (model.settings.focused) model.setFocused(false);
@@ -336,6 +348,7 @@ export function createLessons({
     async openCircuit(id: string) {
       const current = commands.begin();
       const circuit = circuits.get(id);
+      endMapStage();
       rememberBeforeLesson();
       shell.showDetail();
       if (!(await showRoute(circuit, current))) return;
@@ -351,17 +364,17 @@ export function createLessons({
       const current = commands.begin();
       rememberBeforeLesson();
       shell.showDetail();
-      if (!(await showMapSide(hemisphereFor(dot) ?? 'left', current))) return;
+      if (!(await showMapScene(dot, current))) return;
       lesson.openMap('visual-field', dot);
       render();
       shell.showDetail();
     },
 
-    /** The open map turns to the other hemisphere, as the dot crosses the vertical meridian. */
-    async showMapSide(hemisphere: 'left' | 'right') {
+    /** The open map's scene, put back after the reader left it. */
+    async showMapScene() {
       if (lesson.state.map !== 'visual-field') throw new Error('No visual-field map is open.');
       const current = commands.begin();
-      if (!(await showMapSide(hemisphere, current))) return;
+      if (!(await showMapScene(lesson.state.dot!, current))) return;
       render();
     },
 
@@ -376,6 +389,7 @@ export function createLessons({
     /** A lesson opens on one of its landmarks, from another panel's list of related lessons. */
     async openLandmarkOf(id: string, index: number) {
       const current = commands.begin();
+      endMapStage();
       rememberBeforeLesson();
       chooseExplorer('circuits');
       shell.showDetail();

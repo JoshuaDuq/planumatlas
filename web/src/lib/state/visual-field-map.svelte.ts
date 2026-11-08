@@ -28,24 +28,26 @@ export function createVisualFieldMapStore(lesson: Pick<LessonStore, 'moveDot'>) 
 
 export type VisualFieldMapStore = ReturnType<typeof createVisualFieldMapStore>;
 
+const sameDot = (a: VisualFieldDot | null, b: VisualFieldDot | null) =>
+  a === b || (a !== null && b !== null && a.x === b.x && a.y === b.y && a.radius === b.radius);
+
 /** The stage draws the map, and a click reads the cortex, exactly while the map is open in front. */
 export function syncVisualFieldMap(
   visualField: Pick<EngineVisualField, 'available' | 'show' | 'setProbing'>,
   view: Pick<ViewStore, 'current'>,
 ) {
   if (!visualField.available) return;
-  let shown = false;
+  // The dot last drawn. Only a new dot is drawn: a redraw of the same one would turn the hemispheres
+  // back into the map's pair after a lesson leaving the map has ended it (`lesson.ts`, endMapStage).
+  let drawn: VisualFieldDot | null = null;
   $effect(() => {
     const { explorer, lesson } = view.current;
     const dot = explorer === 'circuits' && lesson.map === 'visual-field' ? lesson.dot! : null;
     untrack(() => {
-      if (dot) {
-        visualField.show({ dot });
-      } else if (shown) {
-        visualField.show(null);
-      }
-      if (Boolean(dot) !== shown) visualField.setProbing(Boolean(dot));
-      shown = Boolean(dot);
+      if (sameDot(dot, drawn)) return;
+      visualField.show(dot && { dot });
+      if (Boolean(dot) !== Boolean(drawn)) visualField.setProbing(Boolean(dot));
+      drawn = dot;
     });
   });
 }

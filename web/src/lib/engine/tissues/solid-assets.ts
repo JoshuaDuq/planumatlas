@@ -10,7 +10,7 @@ import { addBoundaryEdges } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
 import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
-import { addMriAppearance } from '../render/mri-material.ts';
+import { addMriCutAppearance, setScanPainted } from '../render/mri-material.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import {
   ghosted,
@@ -48,7 +48,11 @@ interface CutSourceData {
 
 /** What a cap material carries on `userData`: `createSolidMaterial`'s uniforms and the label-sampling flag. */
 export type CapUserData = Pick<SolidUserData, 'tissueVariation'> &
-  Partial<SolidUserData> & { sampledLabels: { value: boolean }; striatalHere?: { value: boolean } };
+  Partial<SolidUserData> & {
+    sampledLabels: { value: boolean };
+    striatalHere?: { value: boolean };
+    scanPainted?: { value: boolean };
+  };
 
 /** The registered MRI and cut labels the solids' materials read. */
 export interface SolidSourceAnatomy extends SolidAnatomy {
@@ -207,7 +211,7 @@ export function addSolidSources(
     const material = createSolidMaterial(anatomy, appearance, sampled);
     addCapLabels(material, anatomy.capLabels);
     addStriatalOverlay(material, anatomy.striatal);
-    addMriAppearance(material, anatomy.mriUniforms, 'capLift');
+    addMriCutAppearance(material, anatomy.mriUniforms, 'capLift');
     addUserMapToCap(material, anatomy.userMap);
     addBoundaryEdges(material, anatomy.capEdges, {
       volume: 'capLabelVolume',
@@ -352,7 +356,7 @@ export function paintSolids(
     usesCabNpColors(state) ||
     usesPaint(state);
   const variation = published ? 0 : appearance.intensity.cut_strength;
-  const mri = state.surfaceColor === 'mri' && !usesPaint(state);
+  const mri = state.surfaceColor === 'mri';
   const sampledAtlas = !wedged && state.surfaceColor !== 'tissue';
   const sampledIsolation =
     sampledAtlas &&
@@ -395,6 +399,7 @@ export function paintSolids(
           ? visibilityOf(record, { ...capState, detail }).visible
           : tissueVisible(source, capState)) || isolatedWhiteMatter;
       const painted = usesPaint(state) ? state.paint!.colors.get(source.userData.region_id!) : null;
+      setScanPainted(cap.material, Boolean(painted) && !boundary);
       if (boundary) {
         cap.material.color.set(appearance.tissue[boundary === 'pial' ? 'cortex' : 'white']);
       } else if (painted) {
@@ -415,6 +420,10 @@ export function paintSolids(
       continue;
     }
     const { color, visible } = labelAppearance(label, capState, appearance.tissue, lookup);
+    setScanPainted(
+      cap.material,
+      Boolean(label.region_id && state.paint?.colors.has(label.region_id)),
+    );
     const record = lookup?.regions?.get(source.userData.region_id!);
     solid.visible =
       (visible &&

@@ -37,7 +37,7 @@ export const en = {
   radius: (value: number) => `radius ${degrees(value)}`,
   hemisphere: (side: 'left' | 'right' | null) =>
     side
-      ? `Represented in the ${side} hemisphere, shown from the midline.`
+      ? `Represented in the ${side} hemisphere.`
       : 'On the vertical meridian: both hemispheres represent it.',
   territory: 'Predicted territory',
   territoryNote:
@@ -47,8 +47,9 @@ export const en = {
   noTerritory: 'No vertex’s predicted centre lies inside the dot; make it larger.',
   extrapolated: (measured: number) =>
     `Part of the dot lies beyond ${degrees(measured)}, past the HCP stimulus: the template extrapolates there.`,
-  legendCore: 'Receptive-field centre inside the dot',
-  legendReach: 'Receptive field within one σ of the dot',
+  pair: 'Both hemispheres are seen from the midline, the right one turned to stand beside the left with their occipital poles together: each half of the field is drawn on its own side of the stage, fixation in the middle.',
+  legendResponse: (threshold: string) =>
+    `Predicted response, ${threshold} (red) to 100% (yellow) of the response to the dot centred on the receptive field`,
   legendLine: (measured: number) => `${degrees(measured)}: edge of the measured field`,
   legendAreas: 'V1, V2, V3 from lightest to darkest',
   reading: 'Clicked cortex',
@@ -99,7 +100,7 @@ export const fr: typeof en = {
   radius: (value: number) => `rayon ${degrés(value)}`,
   hemisphere: (side: 'left' | 'right' | null) =>
     side
-      ? `Représenté dans l’hémisphère ${side === 'left' ? 'gauche' : 'droit'}, vu depuis la ligne médiane.`
+      ? `Représenté dans l’hémisphère ${side === 'left' ? 'gauche' : 'droit'}.`
       : 'Sur le méridien vertical\u202f: les deux hémisphères le représentent.',
   territory: 'Territoire prédit',
   territoryNote:
@@ -109,8 +110,9 @@ export const fr: typeof en = {
   noTerritory: 'Aucun centre prédit ne se trouve dans le point\u202f; agrandissez-le.',
   extrapolated: (measured: number) =>
     `Une partie du point dépasse ${degrés(measured)}, au-delà du stimulus du HCP\u202f: le gabarit y extrapole.`,
-  legendCore: 'Centre du champ récepteur dans le point',
-  legendReach: 'Champ récepteur à moins d’un σ du point',
+  pair: 'Les deux hémisphères sont vus depuis la ligne médiane, le droit tourné pour se tenir à côté du gauche, pôles occipitaux réunis\u202f: chaque moitié du champ est dessinée de son côté de la scène, la fixation au milieu.',
+  legendResponse: (threshold: string) =>
+    `Réponse prédite, de ${threshold} (rouge) à 100\u202f% (jaune) de la réponse au point centré sur le champ récepteur`,
   legendLine: (measured: number) => `${degrés(measured)}\u202f: limite du champ mesuré`,
   legendAreas: 'V1, V2, V3, du plus clair au plus sombre',
   reading: 'Cortex cliqué',

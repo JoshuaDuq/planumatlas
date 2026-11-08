@@ -121,7 +121,6 @@ test('a cut draws the plane section instead of stencilling the whole solid', () 
     drawnTriangles(solid.back) + drawnTriangles(solid.front) + drawnTriangles(solid.cap);
   assert.equal(solid.back.visible, false);
   assert.equal(solid.front.visible, false);
-  assert.equal(solid.cap.material.stencilWrite, false);
   assert.ok(
     drawn > 0 && drawn < sourceTriangles / 5,
     `drew ${drawn} triangles from a ${sourceTriangles}-triangle solid`,
@@ -271,7 +270,7 @@ test('a cut hit names the region its cap was painted as', () => {
   sections.dispose();
 });
 
-test('nested solids order enclosing first with tiered polygon offsets and bit-identical cap planes', () => {
+test('a nested solid ranks above its enclosure and draws first, on the same offset and cap plane', () => {
   const outer = new Mesh(
     new BoxGeometry(0.2, 0.2, 0.2),
     new MeshBasicMaterial({ side: DoubleSide }),
@@ -290,13 +289,11 @@ test('nested solids order enclosing first with tiered polygon offsets and bit-id
   assert.equal(sections.solids[0].region, 'cord');
   assert.equal(sections.solids[1].region, 'tract');
 
-  assert.equal(sections.solids[0].group.renderOrder, 1);
-  assert.equal(sections.solids[1].group.renderOrder, 2);
-  assert.equal(sections.solids[0].cap.material.polygonOffsetUnits, -1);
-  assert.equal(sections.solids[1].cap.material.polygonOffsetUnits, -2);
-  assert.ok(
-    sections.solids[1].cap.material.polygonOffsetUnits <
-      sections.solids[0].cap.material.polygonOffsetUnits,
+  // Drawn from the highest ranked down; which cap shows is the stencil's claim (solid-sections.svelte.test).
+  assert.ok(sections.solids[1].group.renderOrder < sections.solids[0].group.renderOrder);
+  assert.equal(
+    sections.solids[1].cap.material.polygonOffsetUnits,
+    sections.solids[0].cap.material.polygonOffsetUnits,
   );
 
   sections.update(plane);

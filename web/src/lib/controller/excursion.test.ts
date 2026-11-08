@@ -529,3 +529,60 @@ describe('the cut atlas', () => {
     await expect(scene.excursions.setCutAtlas('aseg')).rejects.toThrow('overtaken');
   });
 });
+
+describe("a function's Linked MRI", () => {
+  test('centres on its strongest area, wherever the crosshair was, once the scan has loaded', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    scene.engine.sections.setCrosshair([1, 2, 3]);
+    const strongest = domainAreas(scene.domains, 'language')[0]!.region;
+    await scene.excursions.openFunctionMri({ instant: true });
+    assert.deepEqual(scene.engine.sections.state.crosshair, scene.engine.model.anchorOf(strongest));
+    assert.deepEqual(scene.mri.show.mock.calls.at(-1), [{ instant: true }]);
+    const timeline = scene.calls();
+    assert.ok(timeline.lastIndexOf('sections.load') < timeline.lastIndexOf('mri.show'));
+  });
+
+  test('the overview has no one area, so it opens where the crosshair is', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction(ALL_DOMAINS);
+    scene.engine.sections.setCrosshair([1, 2, 3]);
+    await scene.excursions.openFunctionMri({ instant: false });
+    assert.deepEqual(scene.engine.sections.state.crosshair, [1, 2, 3]);
+    assert.deepEqual(scene.mri.show.mock.calls.at(-1), [{ instant: false }]);
+  });
+});
+
+describe("a deficit's Linked MRI", () => {
+  test('centres on its first finding’s first region as this detail level draws it, or the chosen finding’s', async () => {
+    const scene = createScene();
+    await scene.excursions.openDeficit(DEFICIT);
+    scene.engine.sections.setCrosshair([1, 2, 3]);
+    const detail = scene.engine.model.settings.detail;
+    const first = (finding: string | null) =>
+      scene.clinical.drawnAs(
+        [...scene.clinical.paint(DEFICIT, finding).paint.colors.keys()][0]!,
+        detail,
+      )[0]!;
+    await scene.excursions.openDeficitMri({ instant: true });
+    assert.deepEqual(
+      scene.engine.sections.state.crosshair,
+      scene.engine.model.anchorOf(first(null)),
+    );
+    assert.deepEqual(scene.mri.show.mock.calls.at(-1), [{ instant: true }]);
+
+    const findings = scene.clinical.paint(DEFICIT).findings;
+    const last = findings.at(-1)!.association.id;
+    scene.session.setFinding(last);
+    assert.notDeepEqual(
+      first(last),
+      first(null),
+      'the fixture picks a finding citing another region',
+    );
+    await scene.excursions.openDeficitMri({ instant: false });
+    assert.deepEqual(
+      scene.engine.sections.state.crosshair,
+      scene.engine.model.anchorOf(first(last)),
+    );
+  });
+});

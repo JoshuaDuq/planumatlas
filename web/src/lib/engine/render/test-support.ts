@@ -22,7 +22,7 @@ import { addBorderFeather } from './border-feather.ts';
 import { isPhone } from './device.ts';
 import { createAnatomicalMaterial } from './materials.ts';
 import type { Appearance } from './materials.ts';
-import { addMriAppearance, createMriUniforms } from './mri-material.ts';
+import { addMriCutAppearance, addMriSurfaceAppearance, createMriUniforms } from './mri-material.ts';
 
 /** The published appearance of the CDMD anatomy. Imported, not read from disk, so browser tests can use it. */
 export const appearance = published as unknown as Appearance;
@@ -85,27 +85,28 @@ export function patchCombinations(): Map<string, Material> {
     });
     add(`${label} + MRI`, () => {
       const material = surface(withNetworks);
-      addMriAppearance(material, createMriUniforms(anatomy));
+      addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'mid-thickness');
       return material;
     });
     // The model adds the MRI first when the scan is already attached, the feather first when it is attached later.
     add(`${label} + MRI + feather`, () => {
       const material = surface(withNetworks);
-      addMriAppearance(material, createMriUniforms(anatomy));
+      addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'mid-thickness');
       addBorderFeather(material, feather());
       return material;
     });
     add(`${label} + feather + MRI`, () => {
       const material = surface(withNetworks);
       addBorderFeather(material, feather());
-      addMriAppearance(material, createMriUniforms(anatomy));
+      addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'mid-thickness');
       return material;
     });
   }
 
   // A teaching-set structure, and a cerebellar lobule that carries baked openness.
   for (const shaded of [false, true]) {
-    add(shaded ? 'shaded structure' : 'structure', () => {
+    const label = shaded ? 'shaded structure' : 'structure';
+    const structure = () => {
       const mesh = corticalMesh(false);
       for (const name of ['_sulc', '_t1', ...(shaded ? [] : ['_openness'])]) {
         mesh.geometry.deleteAttribute(name);
@@ -115,6 +116,12 @@ export function patchCombinations(): Map<string, Material> {
         { id: 's', kind: 'structure' } as Region,
         appearance,
       );
+    };
+    add(label, structure);
+    add(`${label} + MRI`, () => {
+      const material = structure();
+      addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'inside');
+      return material;
     });
   }
 
@@ -125,7 +132,7 @@ export function patchCombinations(): Map<string, Material> {
       side: DoubleSide,
       clearcoat: isPhone() ? 0 : appearance.tissue.clearcoat,
     });
-    addMriAppearance(material, createMriUniforms(anatomy));
+    addMriSurfaceAppearance(material, createMriUniforms(anatomy), 'inside');
     return material;
   });
 
@@ -153,13 +160,13 @@ export function patchCombinations(): Map<string, Material> {
     add(label, solid);
     add(`${label} + MRI`, () => {
       const material = solid();
-      addMriAppearance(material, createMriUniforms(anatomy), 'capLift');
+      addMriCutAppearance(material, createMriUniforms(anatomy), 'capLift');
       return material;
     });
     add(`${label} + cap labels + MRI`, () => {
       const material = solid();
       addCapLabels(material, createCapLabels());
-      addMriAppearance(material, createMriUniforms(anatomy), 'capLift');
+      addMriCutAppearance(material, createMriUniforms(anatomy), 'capLift');
       return material;
     });
   }

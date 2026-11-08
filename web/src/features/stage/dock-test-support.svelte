@@ -2,6 +2,7 @@
 <script lang="ts">
   import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
+  import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
   import type { DisplayView } from '../colophon/display-state.ts';
   import '../../styles/index.css';
@@ -21,6 +22,7 @@
       overlay: boolean;
       phone: boolean;
       view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
+      cortexSurface: CortexSurface;
     };
     commands: Omit<DockCommands, 'chooseView' | 'resetView'>;
     width: number;
@@ -67,6 +69,7 @@
     status={live.status}
     tractReference={live.tractReference}
     view={live.view}
+    cortexSurface={live.cortexSurface}
     prepared={DEFAULT_DISPLAY}
     hasSpinalCord={live.hasSpinalCord}
     {commands}

@@ -445,7 +445,7 @@ test('only the white envelope cap samples gyral white matter', () => {
     const shader = {
       uniforms: {} as Record<string, { value: { isData3DTexture: boolean } }>,
       vertexShader: '#include <begin_vertex>',
-      fragmentShader: '#include <color_fragment>',
+      fragmentShader: '#include <color_fragment>\n#include <opaque_fragment>',
     };
     cap.material.onBeforeCompile(shader as never, undefined as never);
     return shader.uniforms;

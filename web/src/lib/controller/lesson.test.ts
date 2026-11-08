@@ -452,7 +452,7 @@ describe('the visual-field map', () => {
   const LEFT_FIELD = { x: -2, y: 1, radius: 1 };
   const RIGHT_FIELD = { x: 2, y: 1, radius: 1 };
 
-  test('opens over the held scene on one hemisphere, uncut, opaque and seen from the midline', async () => {
+  test('opens over the held scene on both hemispheres as a medial pair, uncut, opaque and framed on both V1s', async () => {
     const scene = createScene();
     scene.session.setExplorer('circuits');
     await scene.engine.sections.setMode('axial');
@@ -472,27 +472,75 @@ describe('the visual-field map', () => {
     const { settings, state } = scene.engine.model;
     assert.deepEqual(
       [settings.hemisphere, settings.cortexOpacity, settings.internalVisible, state.selectedRegion],
-      ['right', 1, false, null],
+      ['both', 1, false, null],
     );
     assert.equal(scene.engine.sections.state.mode, 'off');
-    assert.equal(scene.session.state.view, 'left');
+    assert.equal(scene.session.state.view, 'right');
+    // The pair stands before it is framed.
+    assert.deepEqual(scene.engine.visualField.shown, { dot: LEFT_FIELD });
     const framed = scene.engine.calls
       .slice(mark)
       .find((call) => call.domain === 'camera' && call.method === 'frameLandmark')!;
     assert.deepEqual(framed.args.slice(0, 2), [
-      scene.engine.visualField.centralRegion('right'),
-      'left',
+      [
+        scene.engine.visualField.centralRegion('left'),
+        scene.engine.visualField.centralRegion('right'),
+      ],
+      'right',
     ]);
   });
 
-  test('turns to the other hemisphere when asked, and only while the map is open', async () => {
+  test('puts the map’s scene back when asked, and only while the map is open', async () => {
     const scene = createScene();
     scene.session.setExplorer('circuits');
-    await expect(scene.excursions.showMapSide('left')).rejects.toThrow(/No visual-field map/);
+    await expect(scene.excursions.showMapScene()).rejects.toThrow(/No visual-field map/);
     await scene.excursions.openMap(LEFT_FIELD);
-    await scene.excursions.showMapSide('left');
-    assert.equal(scene.engine.model.settings.hemisphere, 'left');
+    scene.engine.model.setHemisphere('left');
+    scene.session.setView('oblique');
+    await scene.excursions.showMapScene();
+    assert.equal(scene.engine.model.settings.hemisphere, 'both');
     assert.equal(scene.session.state.view, 'right');
+  });
+
+  test('leaving it ends the medial pair before the scene from before it is put back', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.excursions.openMap(RIGHT_FIELD);
+    let pairedAtRestore: unknown = 'not restored';
+    scene.reader.apply.mockImplementationOnce(async () => {
+      pairedAtRestore = scene.engine.visualField.shown;
+      return [];
+    });
+    await scene.excursions.leaveLesson();
+    assert.equal(pairedAtRestore, null);
+  });
+
+  test('a lesson opened from it frames its own scene with the medial pair ended', async () => {
+    for (const open of [
+      (scene: ReturnType<typeof createScene>) => scene.excursions.openCircuit('vision'),
+      (scene: ReturnType<typeof createScene>) => scene.excursions.openLessonLandmark('vision', 3),
+    ]) {
+      const scene = createScene();
+      scene.session.setExplorer('circuits');
+      await scene.excursions.openMap(RIGHT_FIELD);
+      const mark = scene.engine.calls.length;
+      const paired: unknown[] = [];
+      for (const method of ['applyView', 'frameLandmark'] as const) {
+        const frame = scene.engine.camera[method].bind(scene.engine.camera) as (
+          ...args: unknown[]
+        ) => unknown;
+        vi.spyOn(scene.engine.camera, method).mockImplementation((...args: unknown[]) => {
+          paired.push(scene.engine.visualField.shown);
+          return frame(...args) as never;
+        });
+      }
+      await open(scene);
+      assert.ok(scene.engine.calls.length > mark && paired.length > 0, 'the lesson framed');
+      assert.deepEqual(
+        paired,
+        paired.map(() => null),
+      );
+    }
   });
 
   test('leaving it puts back the scene from before it; a lesson opened from it keeps that scene', async () => {

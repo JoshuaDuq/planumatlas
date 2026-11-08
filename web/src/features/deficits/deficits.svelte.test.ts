@@ -470,6 +470,20 @@ describe('opening a region from the profile', () => {
   });
 });
 
+describe('the Linked MRI', () => {
+  test("a deficit's profile opens the Linked MRI on its paint, without motion at a key press", async () => {
+    const { calls } = await mount();
+    expect(document.querySelector('.clinical-profile .linked-mri')).toBeNull();
+    await row('aphasia').click();
+    const button = page.getByRole('button', { name: 'Linked MRI' });
+    await userEvent.click(button);
+    expect(calls.at(-1)).toBe('mri:false');
+    (button.element() as HTMLElement).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(calls.at(-1)).toBe('mri:true');
+  });
+});
+
 describe('the meta line', () => {
   test('a failure belongs to its profile: another language or deficit clears it (clinical.js:521-525)', async () => {
     const { view } = await mount({ failWith: new Error('Unknown clinical region: x') });

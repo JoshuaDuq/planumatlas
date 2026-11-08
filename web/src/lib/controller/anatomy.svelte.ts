@@ -10,6 +10,7 @@ import {
   leaveInternal,
 } from '../core/state/internal-mode.ts';
 import type { InternalEntry } from '../core/state/internal-mode.ts';
+import type { CortexSurface } from '../core/user-map/display.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
 import { publishesSpinalCord } from '../core/state/scene-commands.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
@@ -19,6 +20,7 @@ import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../ui/focus.ts';
 import type { AppContext } from './context.ts';
 import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
 import type { SceneReader } from './lesson.ts';
+import type { UserMapStore } from '../state/user-map.svelte.ts';
 
 /** What choosing a region does to the interface around the stage (app.js:526-532, 718-720). */
 export interface SelectionInterface {
@@ -45,6 +47,7 @@ export function createAnatomyCommands(
     frameLandmark,
     afterReset,
     displayBaseline,
+    cortexSurface,
   }: {
     commands: SceneCommands;
     /** The whole scene, held before a reveal changes the reader's settings and put back by its notice. */
@@ -57,6 +60,8 @@ export function createAnatomyCommands(
     afterReset: () => void;
     /** The display Reset display returns to (`excursions.displayBaseline`). */
     displayBaseline: () => PreparedDisplay;
+    /** The surface the cortex is drawn on, which Overlay also sets; no view prepares any but the pial. */
+    cortexSurface: Pick<UserMapStore, 'surface' | 'setSurface'>;
   },
 ) {
   const { model, sections, camera } = engine;
@@ -67,7 +72,12 @@ export function createAnatomyCommands(
   // or Start over,
   // which its notice's Restore puts back; and the region a reveal opened, for which the location bar
   // offers Restore while it is selected.
-  let beforeReveal = $state.raw<{ scene: ReaderState; region: string | null } | null>(null);
+  // A reset's surface goes with its scene, which links (and so the scene) do not carry.
+  let beforeReveal = $state.raw<{
+    scene: ReaderState;
+    region: string | null;
+    surface?: CortexSurface;
+  } | null>(null);
 
   /** Open the tree branch that holds a region, so a selection is never out of sight. */
   function revealInTree(id: string) {
@@ -271,11 +281,12 @@ export function createAnatomyCommands(
   /** The reveal notice's Restore: the scene from before the reveal, in place of what it said. */
   async function restoreBeforeReveal() {
     if (!beforeReveal) throw new Error('There is no scene from before a reveal to restore.');
-    const { scene } = beforeReveal;
+    const { scene, surface } = beforeReveal;
     beforeReveal = null;
     const current = commands.begin();
     const failures = await reader.apply(scene, current);
     if (!current()) return;
+    if (surface) cortexSurface.setSurface(surface);
     session.notify(null);
     if (failures.length) {
       commands.fail(
@@ -406,9 +417,11 @@ export function createAnatomyCommands(
     session.setQuery('');
     void sections.setMode('off');
     model.reset();
+    const surface = cortexSurface.surface;
+    cortexSurface.setSurface('pial');
     afterReset();
     resetView();
-    beforeReveal = { scene, region: null };
+    beforeReveal = { scene, region: null, surface };
     session.notify({ text: t(session.state.lang, 'display').startedOver, action: 'restore' });
   }
 
@@ -431,8 +444,10 @@ export function createAnatomyCommands(
       model.clearIsolation();
       model.setFocused(prepared.focused && engineState.model.selectedRegion !== null);
     });
+    const surface = cortexSurface.surface;
+    cortexSurface.setSurface('pial');
     afterReset();
-    beforeReveal = { scene, region: null };
+    beforeReveal = { scene, region: null, surface };
     session.notify({ text: t(session.state.lang, 'display').displayReset, action: 'restore' });
   }
 
@@ -462,6 +477,7 @@ export function createAnatomyCommands(
       }),
     setCortexVisible: (value: boolean) => display(() => model.setCortexVisible(value)),
     setCortexOpacity: (value: number) => display(() => model.setCortexOpacity(value)),
+    setCortexSurface: (value: CortexSurface) => display(() => cortexSurface.setSurface(value)),
     setInternalVisible: (value: boolean) => display(() => model.setInternalVisible(value)),
     setSpinalCordVisible,
     resetView,

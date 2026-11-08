@@ -390,6 +390,43 @@ export function createExcursions(
     return true;
   }
 
+  /**
+   * The Linked MRI centred on the first of a paint's `regions` that has an anchor, with the paint drawn
+   * over the scan; with none, it opens where the crosshair is.
+   */
+  async function openPaintMri(regions: readonly string[], instant: boolean): Promise<void> {
+    // The anchor, not the centroid: a curved region's centroid can lie in its neighbour.
+    const anchor = regions.map((region) => model.anchorOf(region)).find(Boolean);
+    if (anchor) sections.setCrosshair(anchor);
+    await sections.load();
+    mri.show({ instant });
+  }
+
+  /** The open function's Linked MRI, at its strongest area; the overview has no one area. */
+  async function openFunctionMri({ instant }: { instant: boolean }): Promise<void> {
+    const id = session.state.selectedFunction;
+    if (!id) throw new Error('No function is open to show in the Linked MRI.');
+    const ranked =
+      id === ALL_DOMAINS
+        ? []
+        : (comparedIds(id) ?? [id]).flatMap((member) =>
+            domainAreas(domains, member).map(({ region }) => region),
+          );
+    return openPaintMri(ranked, instant);
+  }
+
+  /** The open deficit's Linked MRI, at its first finding's first region, or the chosen finding's. */
+  async function openDeficitMri({ instant }: { instant: boolean }): Promise<void> {
+    const id = session.state.selectedDeficit;
+    if (!id) throw new Error('No deficit is open to show in the Linked MRI.');
+    const { colors } = clinical.paint(id, session.state.selectedFinding).paint;
+    const detail = model.settings.detail;
+    return openPaintMri(
+      [...colors.keys()].flatMap((region) => clinical.drawnAs(region, detail)),
+      instant,
+    );
+  }
+
   /** A region a function or deficit names: drawn, selected and framed, as an excursion step. */
   async function openListedRegion(id: string): Promise<boolean> {
     const current = commands.begin();
@@ -475,6 +512,8 @@ export function createExcursions(
     closeFunction,
     openDeficit,
     openFunction,
+    openFunctionMri,
+    openDeficitMri,
     openListedRegion,
     pickPaint,
     offerReload,
@@ -524,7 +563,7 @@ export function createExcursions(
     lessonLandmark: lessons.lessonLandmark,
     openCircuit: lessons.openCircuit,
     openMap: lessons.openMap,
-    showMapSide: lessons.showMapSide,
+    showMapScene: lessons.showMapScene,
     openLessonLandmark: lessons.openLandmarkOf,
     openLessonStep: lessons.openStep,
     openLessonRoute: lessons.openRoute,

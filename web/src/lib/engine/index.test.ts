@@ -284,8 +284,8 @@ describe('the engine facade', () => {
       );
     assert.ok(has(true, cortex), 'Focus sees through the cortex');
     assert.ok(has(true, deep), 'and through what lies under it');
-    assert.ok(has(false, `${cortex}-mri-0.0`), 'the T1 colour scans the cortex');
-    assert.ok(has(false, `${deep}-mri-0.0`), 'and the deep structures');
+    assert.ok(has(false, `${cortex}-mri-surface-mid-thickness`), 'the T1 colour scans the cortex');
+    assert.ok(has(false, `${deep}-mri-surface-inside`), 'and the deep structures');
     assert.equal(compiled.filter((material) => material instanceof LineBasicMaterial).length, 2);
     assert.deepEqual(drawn(), before, 'what is drawn keeps its materials');
     engine.dispose();
@@ -299,7 +299,7 @@ describe('the engine facade', () => {
     assert.equal(stage.model!.disposed, true);
   });
 
-  it('opens with the cut hidden, and shows the scan on the surface only while nothing paints it', async () => {
+  it('opens with the cut hidden, and keeps the scan under a paint, though not under the reference', async () => {
     const engine = await boot();
     const cut = stage.scene!.children.find((child) => child.name === 'GPU labelled brain sections');
     assert.equal(cut?.visible, false, 'no cut is drawn until one is chosen');
@@ -314,9 +314,9 @@ describe('the engine facade', () => {
     assert.equal(stage.mriAppearance.at(-1), true);
     const region = engine.model.manifest.regions.find((candidate) => candidate.kind === 'cortex')!;
     engine.model.setPaint({ id: 'paint', colors: new Map([[region.id, [1, 2, 3] as const]]) });
-    assert.equal(stage.mriAppearance.at(-1), false, 'a paint replaces the scan');
+    assert.equal(stage.mriAppearance.at(-1), true, 'a paint is drawn over the scan');
     engine.present({ lang: 'en', referenceOnly: true });
-    engine.model.setPaint(null);
+    assert.equal(stage.mriAppearance.at(-1), false, 'the reference shows no scan');
     engine.present({ lang: 'en', referenceOnly: false });
     assert.equal(stage.mriAppearance.at(-1), true);
     engine.dispose();

@@ -33,7 +33,6 @@ import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
 import { stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
 import { createScene } from './render/scene.ts';
-import { token } from './render/tokens.ts';
 import type { Appearance as SceneAppearance } from './render/scene.ts';
 import { worldToRas } from './slices/coordinates.ts';
 import { BrainSections } from './slices/sections.ts';
@@ -270,8 +269,14 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     });
     cleanups.push(() => userMap.dispose());
     const showVisualField = (map: typeof visualMap) => {
-      atlas.showVisualField(map, token('--overlay-accent'));
+      atlas.showVisualField(map);
       visualMap = map;
+      // The pair stands side by side only seen from near level; above or below, the half-turned
+      // hemisphere's anterior and posterior would reach the top and bottom edges reversed.
+      const level = atlas.medialPair ? Math.PI / 4 : 0;
+      scene.controls.minPolarAngle = level;
+      scene.controls.maxPolarAngle = Math.PI - level;
+      stage.invalidate();
       scene.invalidate();
     };
 
@@ -301,12 +306,12 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     let shown: Presentation | null = null;
     function refresh() {
       const referenceOnly = shown?.referenceOnly === true;
-      const { surfaceColor, paint } = atlas.settings;
+      const { surfaceColor } = atlas.settings;
       atlas.group.visible = !referenceOnly;
       sections.group.visible = !referenceOnly && sections.active;
       lesionLayer.visible = !referenceOnly;
       if (anatomy === tracts.anatomy) tracts.setClippingPlanes(atlas.clippingPlanes);
-      const scanned = surfaceColor === 'mri' && !paint && !referenceOnly;
+      const scanned = surfaceColor === 'mri' && !referenceOnly;
       scene.setMriAppearance(scanned);
       atlas.userMap.userMapOverScan.value = scanned;
       presentation.outline();
@@ -432,6 +437,10 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         },
         territories: loadTerritories,
         centralRegion: (hemisphere) => atlas.visualFieldRegion(hemisphere),
+        follow(dot) {
+          const box = atlas.visualFieldActivation(dot);
+          if (box) stage.follow(box);
+        },
       },
       strokeCases: {
         available: Boolean(atlas.manifest.stroke_cases),

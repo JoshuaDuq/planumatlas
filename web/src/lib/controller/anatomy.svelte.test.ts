@@ -83,6 +83,7 @@ function build() {
         frameLandmark: parts.frameLandmark,
         afterReset: () => {},
         displayBaseline: () => DEFAULT_DISPLAY,
+        cortexSurface: engine.userMap,
       },
     );
   });
@@ -357,9 +358,11 @@ describe('the display toggles', () => {
     session.setQuery('gyrus');
     anatomy.selectRegion(SULCUS);
     anatomy.setHemisphere('left');
+    anatomy.setCortexSurface('white');
     const logged = engine.calls.length;
     anatomy.startOver();
     expect(engine.model.settings.hemisphere).toBe('both');
+    expect(engine.userMap.surface).toBe('pial');
     expect(engine.model.state.selectedRegion).toBeNull();
     expect(session.state).toMatchObject({
       view: 'oblique',
@@ -369,11 +372,24 @@ describe('the display toggles', () => {
     expect(engine.calls.slice(logged).map((call) => `${call.domain}.${call.method}`)).toEqual([
       'sections.setMode',
       'model.reset',
+      'userMap.setSurface',
       'camera.recenter',
       'camera.applyView',
     ]);
     await anatomy.restoreBeforeReveal();
     expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results.at(-1)!.value);
+    expect(engine.userMap.surface).toBe('white');
+  });
+
+  test('Reset display draws the pial again, and its Restore gives the reader’s surface back', async () => {
+    const { anatomy, session } = build();
+    anatomy.setCortexSurface('mid');
+    expect(engine.userMap.surface).toBe('mid');
+    anatomy.resetDisplay();
+    expect(engine.userMap.surface).toBe('pial');
+    expect(session.state.notice).toMatchObject({ action: 'restore' });
+    await anatomy.restoreBeforeReveal();
+    expect(engine.userMap.surface).toBe('mid');
   });
 
   test('Reset view moves the camera only: the selection, the hemisphere and the hidden parts stay', () => {

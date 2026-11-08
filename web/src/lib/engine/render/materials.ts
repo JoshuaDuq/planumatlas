@@ -8,6 +8,8 @@ import type {
   WebGLProgramParametersWithUniforms,
 } from 'three';
 import type { Region } from '../../types/index.ts';
+import { VISUAL_RESPONSE_THRESHOLD } from '../../core/learning/visual-field.ts';
+import { POSITIVE_RAMP } from '../../core/user-map/display.ts';
 import {
   USER_MAP_COLOUR,
   USER_MAP_OVER_SCAN,
@@ -74,14 +76,12 @@ export interface VisualFieldUniforms {
   visualProbe: IUniform<Vector3>;
   /** The eccentricity the template was fitted to, in degrees; beyond it the map is drawn darker. */
   visualMeasured: IUniform<number>;
-  /** The dot's colour, linear. */
-  visualAccent: IUniform<Color>;
 }
 
 /*
- * The map is achromatic but for the dot: V1, V2 and V3 as three greys, lightest first, on a darker
- * cortex, so the areas' borders read under the stage's light; the measured eccentricity is a light
- * line, and the cortex beyond it darker. Linear values.
+ * The map is achromatic but for the dot's response: V1, V2 and V3 as three greys, lightest first, on a
+ * darker cortex, so the areas' borders read under the stage's light; the measured eccentricity is a
+ * light line, and the cortex beyond it darker. Linear values.
  */
 const VISUAL_TONES = { outside: 0.045, areas: [0.6, 0.27, 0.11], extrapolated: 0.65, line: 0.85 };
 
@@ -378,7 +378,33 @@ varying vec2 vVisualArea;
 uniform float visualMix;
 uniform vec3 visualProbe;
 uniform float visualMeasured;
-uniform vec3 visualAccent;`;
+
+// exp(-x) I0(x), x >= 0 (Abramowitz & Stegun 9.8.1–9.8.2).
+float visualI0e(float x) {
+  if (x < 3.75) {
+    float y = x * x / 14.0625;
+    return (1.0 + y * (3.5156229 + y * (3.0899424 + y * (1.2067492 + y * (0.2659732 + y * (0.0360768
+      + y * 0.0045813)))))) * exp(-x);
+  }
+  float y = 3.75 / x;
+  return (0.39894228 + y * (0.01328592 + y * (0.00225319 + y * (-0.00157565 + y * (0.00916281
+    + y * (-0.02057706 + y * (0.02635537 + y * (-0.01647633 + y * 0.00392377)))))))) / sqrt(x);
+}
+
+// The share of a unit-volume Gaussian pRF inside the dot, as predictedResponse (core/learning/visual-field.ts) computes it.
+float visualCovered(float d, float r, float s) {
+  float a = max(0.0, d - 6.0 * s);
+  float b = min(r, d + 6.0 * s);
+  if (a >= b) return 0.0;
+  float h = (b - a) / 24.0;
+  float total = 0.0;
+  for (int i = 0; i <= 24; i++) {
+    float rho = a + float(i) * h;
+    float weight = i == 0 || i == 24 ? 1.0 : (i % 2 == 1 ? 4.0 : 2.0);
+    total += weight * rho * exp(-(rho - d) * (rho - d) / (2.0 * s * s)) * visualI0e(rho * d / (s * s));
+  }
+  return total * h / (3.0 * s * s);
+}`;
 
 /*
  * While the reader's map is on, the cortex is one grey, keeping its T1 texture and fold shading, and a
@@ -396,9 +422,12 @@ const USER_MAP_COLOUR_FRAGMENT = `
 
 const [V1_TONE, V2_TONE, V3_TONE] = VISUAL_TONES.areas.map((tone) => tone.toFixed(3));
 
+const rampEnd = (rgb: readonly number[]) => `vec3(${rgb.map((c) => c.toFixed(1)).join(', ')})`;
+
 /*
- * The dot's territory is the cortex whose predicted pRF centre lies inside it; its reach, drawn
- * fainter, the cortex whose pRF comes within one sigma of it. The measured eccentricity is a line.
+ * The dot is drawn as the activation it predicts, on FSL's red–yellow scale: each vertex's response
+ * as a share of its response to the dot centred on its pRF, so a small dot lights every area it
+ * reaches. The measured eccentricity is a line.
  */
 const VISUAL_FRAGMENT = `
       if (visualMix > 0.5) {
@@ -413,11 +442,15 @@ const VISUAL_FRAGMENT = `
           float line = 1.0 - smoothstep(0.0, 1.5 * fwidth(eccentricity), abs(eccentricity - visualMeasured));
           tone = mix(tone, vec3(${VISUAL_TONES.line.toFixed(3)}), 0.7 * line);
           if (visualProbe.z >= 0.0) {
-            float d = distance(field.xy, visualProbe.xy);
-            float edge = fwidth(d);
-            float core = 1.0 - smoothstep(visualProbe.z - edge, visualProbe.z + edge, d);
-            float reach = 1.0 - smoothstep(visualProbe.z + field.z - edge, visualProbe.z + field.z + edge, d);
-            tone = mix(tone, visualAccent, max(core, 0.45 * reach));
+            float s = field.z;
+            float q = visualProbe.z * visualProbe.z / (2.0 * s * s);
+            float centred = q < 1e-3 ? q * (1.0 - 0.5 * q) : 1.0 - exp(-q);
+            float response = visualCovered(distance(field.xy, visualProbe.xy), visualProbe.z, s) / centred;
+            float edge = fwidth(response);
+            float drawn = smoothstep(${VISUAL_RESPONSE_THRESHOLD} - edge, ${VISUAL_RESPONSE_THRESHOLD} + edge, response);
+            float share = clamp((response - ${VISUAL_RESPONSE_THRESHOLD}) / ${(1 - VISUAL_RESPONSE_THRESHOLD).toFixed(3)}, 0.0, 1.0);
+            vec3 hot = mix(${rampEnd(POSITIVE_RAMP[0])}, ${rampEnd(POSITIVE_RAMP[1])}, share);
+            tone = mix(tone, sRGBTransferEOTF(vec4(hot, 1.0)).rgb, drawn);
           }
         }
         diffuseColor.rgb = tone;

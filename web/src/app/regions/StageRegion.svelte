@@ -229,6 +229,7 @@
       setHemisphere: world.anatomy.setHemisphere,
       setCortexVisible: world.anatomy.setCortexVisible,
       setCortexOpacity: world.anatomy.setCortexOpacity,
+      setCortexSurface: world.anatomy.setCortexSurface,
       setInternalVisible: world.anatomy.setInternalVisible,
       setSpinalCordVisible: world.anatomy.setSpinalCordVisible,
       chooseView(name) {
@@ -280,6 +281,7 @@
       status={current.status}
       {tractReference}
       view={current}
+      cortexSurface={world.userMap.surface}
       prepared={world.excursions.displayBaseline}
       hasSpinalCord={publishesSpinalCord(model.manifest)}
       onLesionPlacing={world.lesion.setPlacing}

@@ -294,21 +294,20 @@ describe('opening a lesson', () => {
     expect(returnButton()).not.toBeNull();
   });
 
-  test('the map covered by both hemispheres offers its view back, and Return shows it again', async () => {
+  test('the map with a hemisphere hidden offers its view back, and Return shows both again', async () => {
     mount();
     await world.explorer.map.openMap();
     await expect.poll(() => world.view.current.lesson.map).toBe('visual-field');
-    const side = world.view.current.hemisphere;
-    expect(side).not.toBe('both');
+    expect(world.view.current.hemisphere).toBe('both');
     expect(returnButton()).toBeNull();
-    // Start over, or Display's Both, puts the other hemisphere over the map's medial cortex.
-    world.engine.model.setHemisphere('both');
+    // Display's Left hides the half of the map the right hemisphere draws.
+    world.engine.model.setHemisphere('left');
     flushSync();
     expect(document.querySelector('.circuit-return')!.textContent).toContain(
       'The map’s view is not shown.',
     );
     await userEvent.click(returnButton()!);
-    await expect.poll(() => world.view.current.hemisphere).toBe(side);
+    await expect.poll(() => world.view.current.hemisphere).toBe('both');
     expect(returnButton()).toBeNull();
   });
 
@@ -1006,11 +1005,10 @@ describe('the visual-field map', () => {
     await expect.poll(() => document.activeElement?.id).toBe('visual-field-title');
   }
 
-  test('opens from its row on the hemisphere that sees the dot, and lists its predicted territory', async () => {
+  test('opens from its row on both hemispheres, and lists its predicted territory', async () => {
     mount();
     await openMap();
-    // The dot starts in the right half-field, which the left hemisphere represents.
-    expect(world.engine.model.settings.hemisphere).toBe('left');
+    expect(world.engine.model.settings.hemisphere).toBe('both');
     await expect.poll(() => document.querySelector('.territory')).toBeTruthy();
     const rows = [...document.querySelectorAll('.territory tbody tr')];
     expect(rows.map((row) => row.querySelector('th')!.textContent)).toEqual(['V1', 'V2', 'V3']);
@@ -1019,7 +1017,7 @@ describe('the visual-field map', () => {
     await expectAxeClean();
   });
 
-  test('arrow keys move the dot, and crossing the vertical meridian turns the stage to the other hemisphere', async () => {
+  test('arrow keys move the dot across the vertical meridian, the stage following it on both hemispheres', async () => {
     mount();
     await openMap();
     handle().focus();
@@ -1029,8 +1027,9 @@ describe('the visual-field map', () => {
     );
     expect(handle().getAttribute('aria-valuetext')).not.toBe(before);
     expect(world.lesson.state.dot!.x).toBeLessThan(0);
-    await expect.poll(() => world.engine.model.settings.hemisphere).toBe('right');
     expect(handle().getAttribute('aria-valuetext')).toMatch(/upper left$/);
+    expect(world.engine.model.settings.hemisphere).toBe('both');
+    expect(world.engine.visualField.followed.at(-1)).toEqual(world.lesson.state.dot);
   });
 
   test('the dot’s place is spoken by the handle alone, and its sources say they open a new tab', async () => {

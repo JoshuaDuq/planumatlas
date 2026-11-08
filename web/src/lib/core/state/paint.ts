@@ -85,7 +85,7 @@ export interface Legend {
  * deficit's rows are toggles; a scale's bands are not.
  */
 export function legendFor(
-  state: PaintState,
+  state: PaintState & Pick<ModelState, 'surfaceColor'>,
   {
     domains,
     clinical,
@@ -100,6 +100,8 @@ export function legendFor(
 ): Legend | null {
   const kind = paintKind(state.paint);
   const lang: Language = state.lang;
+  // Under the T1 colour what the paint leaves shows the scan, not the tissue colour.
+  const scan = state.surfaceColor === 'mri';
   if (kind === 'lesion') {
     const copy = t(lang, 'lesion');
     const functions = lesion!.kind === 'functions';
@@ -133,7 +135,7 @@ export function legendFor(
         map: 'function',
         title: functionName(domains, state.selectedFunction!, lang),
         pickable: false,
-        note: copy.keyCompare,
+        note: copy.keyCompare(scan),
         rows: [
           ...compared.map((id, index) =>
             row(id, COMPARE_COLORS[index]!, domainName(domainRecord(domains, id)!, lang)),
@@ -161,7 +163,7 @@ export function legendFor(
         map: 'function',
         title: domainName(picked, lang),
         pickable: false,
-        note: isTermId(picked.id) ? copy.keyScaleTerm : copy.keyScale,
+        note: isTermId(picked.id) ? copy.keyScaleTerm(scan) : copy.keyScale(scan),
         rows: bands,
       };
     }
@@ -174,7 +176,7 @@ export function legendFor(
     return {
       map: 'function',
       title: copy.keyTitle,
-      note: copy.keyAll,
+      note: copy.keyAll(scan),
       rows: overviewDomains(domains).map(row),
     };
   }
@@ -200,7 +202,11 @@ export function legendFor(
         !shows(association, color),
     }));
     const note =
-      findings.length === 1 ? copy.keyOne : state.selectedFinding ? copy.keyPicked : copy.keyAll;
+      findings.length === 1
+        ? copy.keyOne(scan)
+        : state.selectedFinding
+          ? copy.keyPicked
+          : copy.keyAll(scan);
     return {
       map: 'deficit',
       title: clinical.get(state.selectedDeficit!).name[lang]!,

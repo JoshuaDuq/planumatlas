@@ -20,6 +20,14 @@ export interface SliceVolumes {
   };
   /** The reader's own map, drawn over the scan and the segmentation as the cut faces draw it. */
   map?: SliceMap;
+  /** A tab's paint, drawn over the scan as its cut faces are: each label of the cut atlas's grid in its colour. */
+  paint?: SlicePaint;
+}
+
+/** The cut atlas's label grid and, by label code, the paint's colour, or null where it paints nothing. */
+export interface SlicePaint {
+  volume: Volume;
+  colors: readonly (Rgb | null)[];
 }
 
 /** The reader's map at a point of this brain (surface RAS mm; NaN for none), and how it is drawn. */
@@ -87,6 +95,9 @@ export function renderSlice(
       for (let channel = 0; channel < 3; channel++) {
         pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
       }
+      const painted = volumes.paint && volumes.paint.colors[volumes.paint.volume.label(point)];
+      if (painted)
+        for (let channel = 0; channel < 3; channel++) pixels[index + channel] = painted[channel]!;
       const mapped = volumes.map && mapColour(volumes.map.at(...point), volumes.map.display);
       if (mapped) {
         const { opacity } = volumes.map!.display;
@@ -96,7 +107,7 @@ export function renderSlice(
         }
       }
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
-      pixels[index + 3] = label || category ? 255 : 0;
+      pixels[index + 3] = label || category || painted ? 255 : 0;
     }
   return pixels;
 }

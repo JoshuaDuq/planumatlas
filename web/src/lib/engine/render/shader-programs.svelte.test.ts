@@ -8,7 +8,7 @@ import { patchCombinations } from './test-support.ts';
 // where the coat is dropped, so a program two combinations share, or that fails to link, shows in
 // the renderer's program list. Every combination differs between the two.
 const COMPILE_TIMEOUT_MS = 120_000;
-const DISTINCT = 19;
+const DISTINCT = 21;
 
 test(
   'SHADER-35 every combination of patches the app uses links under real WebGL, on desktop and on a phone, and gets its own program',

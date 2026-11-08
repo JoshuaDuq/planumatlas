@@ -25,6 +25,7 @@
   import { tick, untrack } from 'svelte';
   import type { Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
+  import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import { displayChanges } from '../colophon/display-state.ts';
   import type { PreparedDisplay } from '../colophon/display-state.ts';
   import type { DisplayView } from '../colophon/display-state.ts';
@@ -48,6 +49,8 @@
     tractReference: boolean;
     /** The display settings the Display popover shows, and what it says is away from its defaults. */
     view: Omit<DisplayView, 'lang'> & Pick<View, 'spinalCordVisible'>;
+    /** The surface the cortex is drawn on, which the Overlay popover also sets. */
+    cortexSurface: CortexSurface;
     /** The display the reader's changes are counted from (`excursions.displayBaseline`). */
     prepared: PreparedDisplay;
     /** The subject publishes a spinal cord. */
@@ -76,6 +79,7 @@
     status,
     tractReference,
     view,
+    cortexSurface,
     prepared,
     hasSpinalCord,
     commands,
@@ -101,7 +105,7 @@
   const displayLabelId = `display-tool-${uid}`;
 
   const copy = $derived(t(lang, 'viewport'));
-  const changes = $derived(displayChanges({ ...view, lang }, prepared));
+  const changes = $derived(displayChanges({ ...view, lang }, prepared, cortexSurface));
   // A phone hides the status bar, which lists the changes.
   const marked = $derived(media.phone && changes.length > 0);
   // The dock is not drawn while the anatomy loads, failed or lost its context (stage.css:315).
@@ -351,6 +355,7 @@
           hemisphere={view.hemisphere}
           cortexVisible={view.cortexVisible}
           cortexOpacity={view.cortexOpacity}
+          {cortexSurface}
           internalVisible={view.internalVisible}
           spinalCordVisible={view.spinalCordVisible}
           {hasSpinalCord}
@@ -359,6 +364,7 @@
           onHemisphere={commands.setHemisphere}
           onCortexVisible={commands.setCortexVisible}
           onCortexOpacity={commands.setCortexOpacity}
+          onCortexSurface={commands.setCortexSurface}
           onInternalVisible={commands.setInternalVisible}
           onSpinalCordVisible={commands.setSpinalCordVisible}
           onResetDisplay={commands.resetDisplay}

@@ -517,8 +517,7 @@ export class TissueSections {
     this.current = layer;
     const state = this.model.state;
     const anatomy = this.anatomy!;
-    const mri = state.surfaceColor === 'mri' && !usesPaint(state);
-    anatomy.mriUniforms.scanEnabled.value = mri;
+    anatomy.mriUniforms.scanEnabled.value = state.surfaceColor === 'mri';
     updateCapLabels(anatomy.capLabels, layer, state);
     const striatal = this.updateStriatal(anatomy.striatal, layer);
     anatomy.capEdges.edgeEnabled.value = layer.edges.edgeEnabled.value;

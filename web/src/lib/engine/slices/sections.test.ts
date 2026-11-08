@@ -581,3 +581,90 @@ test('a sample names the region the loaded cut atlas labels there, and none on a
   code = 0;
   assert.equal(sections.sample([-42, 16, 40]).cutRegion, null);
 });
+
+test("the linked MRI draws the model's paint by the cut atlas's labels, loading them only once its views have", async () => {
+  const { model, tissues, sections } = fixture();
+  const metadata = {
+    shape: [4, 4, 4],
+    order: 'F',
+    voxel_to_surface_ras_mm: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+  };
+  const labels = new Uint16Array(64).map((_, index) => (index % 4 >= 2 ? 1 : 0));
+  const loads: string[] = [];
+  tissues.layers = new Map();
+  tissues.load = async (atlas: string) => {
+    loads.push(atlas);
+    tissues.layers.set(atlas, {
+      volume: new Volume(metadata, labels),
+      metadata: { labels: [{ region_id: null }, { region_id: 'area-a' }] },
+    });
+  };
+  model.state.paint = { id: 'function:a', colors: new Map([['area-a', [10, 200, 30]]]) };
+  model.dispatchEvent(new Event('change'));
+  assert.deepEqual(loads, [], 'nothing loads while the linked MRI has not');
+  sections.volumes = {
+    metadata: { labels: { 0: { name: 'Unknown', color: [0, 0, 0] } } },
+    mri: new Volume(metadata, new Uint8Array(64).fill(100)),
+    segmentation: new Volume(metadata, new Uint16Array(64)),
+  } as never;
+  sections.display = { fieldOfView: 4, size: 4, windowCenter: 127.5, windowWidth: 255 } as never;
+  sections.emit();
+  await vi.waitFor(() => assert.equal(sections.state.paint, 'function:a'));
+  assert.deepEqual(loads, ['destrieux']);
+  // Axial z = 1, the first row x = 0..3: unpainted scan, then the painted half.
+  const pixels = sections.pixels(createFrame('axial', [1.5, 1.5, 1]));
+  assert.deepEqual(Array.from(pixels.slice(0, 3)), [100, 100, 100]);
+  assert.deepEqual(Array.from(pixels.slice(12, 15)), [10, 200, 30]);
+  model.state.paint = null;
+  model.dispatchEvent(new Event('change'));
+  await vi.waitFor(() => assert.equal(sections.state.paint, null));
+  assert.deepEqual(
+    Array.from(sections.pixels(createFrame('axial', [1.5, 1.5, 1])).slice(12, 15)),
+    [100, 100, 100],
+  );
+});
+
+test('a paint whose labels fail to load is reported once, and the next paint tries again', async () => {
+  const { model, tissues, sections } = fixture();
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const metadata = {
+    shape: [1, 1, 1],
+    order: 'F',
+    voxel_to_surface_ras_mm: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+  };
+  let loads = 0;
+  tissues.layers = new Map();
+  // Only the first load fails, so a retry would draw the paint.
+  tissues.load = async (atlas: string) => {
+    loads += 1;
+    if (loads === 1) throw new Error('offline');
+    tissues.layers.set(atlas, {
+      volume: new Volume(metadata, new Uint16Array(1)),
+      metadata: { labels: [{ region_id: null }] },
+    });
+  };
+  sections.volumes = {} as never;
+  model.state.paint = { id: 'function:a', colors: new Map() };
+  model.dispatchEvent(new Event('change'));
+  await vi.waitFor(() => assert.equal(sections.state.status, 'error'));
+  sections.emit();
+  model.dispatchEvent(new Event('change'));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(loads, 1);
+  assert.equal(sections.state.paint, null);
+  model.state.paint = { id: 'function:b', colors: new Map() };
+  model.dispatchEvent(new Event('change'));
+  await vi.waitFor(() => assert.equal(sections.state.paint, 'function:b'));
+  assert.equal(loads, 2);
+  error.mockRestore();
+});

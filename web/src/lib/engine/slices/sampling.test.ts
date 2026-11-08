@@ -129,3 +129,22 @@ test('the reader’s map is drawn over the scan where it passes its threshold, b
   assert.deepEqual(Array.from(hidden.slice(0, 4)), [70, 70, 70, 255]);
   assert.deepEqual(Array.from(full.slice(4, 8)), Array.from(hidden.slice(4, 8)));
 });
+
+test("a paint draws each label of the cut atlas's grid in its own colour over the scan, as its cut faces do", () => {
+  // Label 2 where x >= 2 is painted; label 1 elsewhere paints nothing.
+  const labels = new Uint16Array(64);
+  for (let index = 0; index < 64; index++) labels[index] = index % 4 >= 2 ? 2 : 1;
+  const paint = { volume: new Volume(metadata, labels), colors: [null, null, [10, 200, 30]] };
+  const pixels = renderSlice({ ...volumes, paint }, frame, { ...display, overlay: true });
+  // Axial z = 1, rows from anterior: the first row runs x = 0..3 at y = 3.
+  assert.deepEqual(
+    Array.from(pixels.slice(0, 4)),
+    [153, 38, 38, 255],
+    'unpainted: scan and overlay',
+  );
+  assert.deepEqual(
+    Array.from(pixels.slice(12, 16)),
+    [10, 200, 30, 255],
+    'painted: the paint, opaque',
+  );
+});

@@ -213,20 +213,21 @@ export function featherBorders(meshes: readonly Mesh[], radius = FEATHER_RADIUS)
   });
 }
 
-/** One texel per slot: the linear colour each parcel is drawn in, alpha 0 while it is hidden. */
+/** One texel per slot: the linear colour each parcel is drawn in, alpha 0 where that colour does not show. */
 export function createFeatherPalette(count: number): DataTexture {
   return new DataTexture(new Float32Array(count * 4), count, 1, RGBAFormat, FloatType);
 }
 
-/** Copy each mesh's current colour and visibility into its slot. */
+/** Copy each mesh's current colour into its slot, and whether it shows (by default, while visible). */
 export function writeFeatherPalette(
   texture: DataTexture,
   meshes: readonly Mesh<BufferGeometry, MeshStandardMaterial>[],
+  shows: (mesh: Mesh) => boolean = (mesh) => mesh.visible,
 ): void {
   const data = texture.image.data as Float32Array;
   meshes.forEach((mesh, slot) => {
     const { r, g, b } = mesh.material.color;
-    data.set([r, g, b, mesh.visible ? 1 : 0], slot * 4);
+    data.set([r, g, b, shows(mesh) ? 1 : 0], slot * 4);
   });
   texture.needsUpdate = true;
 }

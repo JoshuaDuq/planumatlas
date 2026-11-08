@@ -13,14 +13,15 @@ export const en = {
   // Numbers arrive formatted (format.js decimal); `to` is null for the open top band.
   band: (from: string, to: string | null) =>
     (to ? `z ${from} to ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
-  keyScale:
-    'Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.',
-  keyScaleTerm:
-    'Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.',
-  keyAll:
-    'Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.',
-  keyCompare:
-    'Areas each function reaches at z\u00a0≥\u00a03, and those both reach. Tissue-coloured areas reach neither.',
+  // `scan` is true while the T1 scan shows where nothing is painted.
+  keyScale: (scan: boolean) =>
+    `Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below 3.`,
+  keyScaleTerm: (scan: boolean) =>
+    `Neurosynth term. Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below 3.`,
+  keyAll: (scan: boolean) =>
+    `Each area shows its strongest function; ${scan ? 'areas where the scan shows' : 'tissue-coloured areas'} reach none. Choose one to see all its areas.`,
+  keyCompare: (scan: boolean) =>
+    `Areas each function reaches at z\u00a0≥\u00a03, and those both reach. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} reach neither.`,
   keyShared: 'Both',
   termOf: (name: string, term: string) => `${name}: “${term}”`,
   lesionCheck: (items: string[]) => `Lesion check: ${items.join('; ')}.`,
@@ -44,14 +45,14 @@ export const fr: typeof en = {
   keyTitle: 'Fonctions neuropsychologiques',
   band: (from: string, to: string | null) =>
     (to ? `z ${from} à ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
-  keyScale:
-    'Constance z moyenne par aire\u202f; plus foncé, plus constant. Les aires couleur tissu sont sous 3.',
-  keyScaleTerm:
-    'Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. Les aires couleur tissu sont sous 3.',
-  keyAll:
-    'Chaque aire montre sa fonction la plus forte\u202f; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.',
-  keyCompare:
-    'Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.',
+  keyScale: (scan: boolean) =>
+    `Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous 3.`,
+  keyScaleTerm: (scan: boolean) =>
+    `Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous 3.`,
+  keyAll: (scan: boolean) =>
+    `Chaque aire montre sa fonction la plus forte\u202f; ${scan ? 'les aires où l’IRM reste visible' : 'les aires couleur tissu'} n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.`,
+  keyCompare: (scan: boolean) =>
+    `Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} n’en atteignent aucune.`,
   keyShared: 'Les deux',
   termOf: (name: string, term: string) => `${name}\u202f: « ${term} »`,
   lesionCheck: (items: string[]) => `Vérification lésionnelle\u202f: ${items.join('\u202f; ')}.`,

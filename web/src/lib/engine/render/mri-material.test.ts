@@ -3,7 +3,8 @@ import { test, vi } from 'vitest';
 import { Data3DTexture, Matrix4, MeshPhysicalMaterial, ShaderLib } from 'three';
 import type { WebGLProgramParametersWithUniforms } from 'three';
 import {
-  addMriAppearance,
+  addMriCutAppearance,
+  addMriSurfaceAppearance,
   createMriUniforms,
   setMriHighlight,
   setMriWindow,
@@ -17,9 +18,9 @@ const anatomy = () =>
     volume: { shape: [2, 2, 2] },
   });
 
-function compiled(uniforms: MriUniforms, highlight = 'lift') {
+function compiled(uniforms: MriUniforms, highlight: string) {
   const material = new MeshPhysicalMaterial();
-  addMriAppearance(material, uniforms, highlight);
+  addMriCutAppearance(material, uniforms, highlight);
   const shader = { ...ShaderLib.physical, uniforms: {} } as WebGLProgramParametersWithUniforms;
   material.onBeforeCompile(shader, undefined as never);
   return { material, shader };
@@ -33,7 +34,7 @@ test('surfaces share a live contrast window without recompiling or changing mate
   const shaders: WebGLProgramParametersWithUniforms[] = [];
   const materials = [new MeshPhysicalMaterial({ color: '#cc6633' }), new MeshPhysicalMaterial()];
   for (const material of materials) {
-    addMriAppearance(material, uniforms);
+    addMriSurfaceAppearance(material, uniforms, 'inside');
     const shader = { ...ShaderLib.physical, uniforms: {} } as WebGLProgramParametersWithUniforms;
     material.onBeforeCompile(shader, undefined as never);
     shaders.push(shader);
@@ -52,6 +53,16 @@ test('surfaces share a live contrast window without recompiling or changing mate
   for (const material of materials) material.dispose();
 });
 
+test('the cortex reads its scan at mid-thickness only where its shading carries the _t1 field', () => {
+  const material = new MeshPhysicalMaterial();
+  addMriSurfaceAppearance(material, anatomy(), 'mid-thickness');
+  const shader = { ...ShaderLib.physical, uniforms: {} } as WebGLProgramParametersWithUniforms;
+  assert.throws(() => material.onBeforeCompile(shader, undefined as never), {
+    message: 'Mid-thickness MRI needs the cortex shading and its _t1 field.',
+  });
+  material.dispose();
+});
+
 test('invalid MRI windows fail without mutating the current contrast', () => {
   const uniforms = anatomy();
   setMriWindow(uniforms, 90, 180);
@@ -68,7 +79,7 @@ test('invalid MRI windows fail without mutating the current contrast', () => {
 
 test('every surface shares one live mark colour without recompiling', () => {
   const uniforms = anatomy();
-  const built = [compiled(uniforms, 'lift'), compiled(uniforms, 'capLift')];
+  const built = [compiled(uniforms, '1.0'), compiled(uniforms, 'capLift')];
   const versions = built.map(({ material }) => material.version);
   setMriHighlight(uniforms, '#4fb6e0');
   for (const { shader } of built) {

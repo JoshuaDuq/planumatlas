@@ -17,6 +17,7 @@ export interface DeficitsDeps {
   excursions: Pick<
     Excursions,
     | 'openDeficit'
+    | 'openDeficitMri'
     | 'openListedRegion'
     | 'restoreBeforeExcursion'
     | 'restorable'
@@ -165,6 +166,8 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     openFunction: deps.openFunction,
     openDeficit,
     openRegion,
+    /** The Linked MRI at the deficit's first cited region, its paint over the scan; `instant` for a key press. */
+    openMri: (options: { instant: boolean }) => deps.excursions.openDeficitMri(options),
     restore,
     focusSearch() {
       refs.search?.focus();

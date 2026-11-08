@@ -4,6 +4,71 @@ export type VisualArea = 'V1' | 'V2' | 'V3';
 export const VISUAL_AREAS: readonly VisualArea[] = ['V1', 'V2', 'V3'];
 export type FieldHemisphere = 'left' | 'right';
 
+/**
+ * The least predicted response the stage draws, as a share of a vertex's response to the dot centred
+ * on its pRF: Φ(−1), what a large dot drives one σ beyond its edge.
+ */
+export const VISUAL_RESPONSE_THRESHOLD = 0.159;
+
+/** exp(−x) I0(x) for x ≥ 0 (Abramowitz & Stegun 9.8.1–9.8.2). */
+function scaledBesselI0(x: number): number {
+  if (x < 3.75) {
+    const y = (x / 3.75) ** 2;
+    return (
+      (1 +
+        y *
+          (3.5156229 +
+            y *
+              (3.0899424 + y * (1.2067492 + y * (0.2659732 + y * (0.0360768 + y * 0.0045813)))))) *
+      Math.exp(-x)
+    );
+  }
+  const y = 3.75 / x;
+  return (
+    (0.39894228 +
+      y *
+        (0.01328592 +
+          y *
+            (0.00225319 +
+              y *
+                (-0.00157565 +
+                  y *
+                    (0.00916281 +
+                      y *
+                        (-0.02057706 + y * (0.02635537 + y * (-0.01647633 + y * 0.00392377)))))))) /
+    Math.sqrt(x)
+  );
+}
+
+/**
+ * The linear pRF model's response to the dot (Dumoulin & Wandell 2008): the share of a unit-volume
+ * Gaussian of width `sigma`, its centre `distance` from the dot's, inside the dot of `radius`, over its
+ * share when centred on the dot. Simpson's rule over the radius from the dot's centre, within 6σ of the
+ * pRF centre. The stage's shader computes the same (`render/materials.ts`).
+ */
+export function predictedResponse(distance: number, radius: number, sigma: number): number {
+  if (!(sigma > 0) || !(radius >= 0)) {
+    throw new RangeError('A pRF needs a width above 0 and the dot a radius of at least 0.');
+  }
+  const intervals = 24;
+  const from = Math.max(0, distance - 6 * sigma);
+  const to = Math.min(radius, distance + 6 * sigma);
+  if (from >= to) return 0;
+  const step = (to - from) / intervals;
+  let total = 0;
+  for (let i = 0; i <= intervals; i += 1) {
+    const rho = from + i * step;
+    const weight = i === 0 || i === intervals ? 1 : i % 2 ? 4 : 2;
+    total +=
+      weight *
+      rho *
+      Math.exp(-((rho - distance) ** 2) / (2 * sigma * sigma)) *
+      scaledBesselI0((rho * distance) / (sigma * sigma));
+  }
+  const q = (radius * radius) / (2 * sigma * sigma);
+  return (total * step) / (3 * sigma * sigma) / -Math.expm1(-q);
+}
+
 /** One hemisphere's V1–V3 vertices: predicted pRF centre (degrees), area code and midthickness mm². */
 export interface HemisphereTerritories {
   x: Float32Array;

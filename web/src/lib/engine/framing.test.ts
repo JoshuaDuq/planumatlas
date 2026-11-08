@@ -104,6 +104,7 @@ function fixture({
   regions = new Map<string, Region>(),
   scale = { horizontal: 1, vertical: 0.45 },
   intersect = (() => null) as FramingModel['intersect'],
+  medialPair = false,
 } = {}) {
   const bounds = new Box3(new Vector3(-0.08, -0.07, -0.1), new Vector3(0.08, 0.11, 0.1));
   let size = { width: 390, height: 792 };
@@ -118,6 +119,7 @@ function fixture({
     visibleMeshes: meshes,
     regions,
     intersect,
+    medialPair,
   };
   const sections = {
     active: false,
@@ -1111,5 +1113,38 @@ describe('the camera as a link carries it', () => {
     );
     assert.deepEqual(stage.scene.destination.position.toArray(), position.toArray());
     assert.equal(stage.camera.viewHeld, true);
+  });
+});
+
+describe('the visual-field map’s medial pair', () => {
+  it('names each side edge for the hemisphere drawn on that side', () => {
+    const plain = fixture({ meshes: wholeBrain(), scale: FULL });
+    plain.camera.applyView('right', { immediate: true });
+    assert.deepEqual(plain.camera.view.edges, { right: 'A', left: 'P', top: 'S', bottom: 'I' });
+    // Seen from the right, the half-turned right hemisphere lies posterior, on the left of the stage.
+    const paired = fixture({ meshes: wholeBrain(), scale: FULL, medialPair: true });
+    paired.camera.applyView('right', { immediate: true });
+    assert.deepEqual(paired.camera.view.edges, { right: 'A', left: 'A', top: 'S', bottom: 'I' });
+    // From the left, both lateral walls: the poles still meet in the middle, the frontal lobes outside.
+    plain.camera.applyView('left', { immediate: true });
+    assert.deepEqual(plain.camera.view.edges, { right: 'P', left: 'A', top: 'S', bottom: 'I' });
+    paired.camera.applyView('left', { immediate: true });
+    assert.deepEqual(paired.camera.view.edges, { right: 'A', left: 'A', top: 'S', bottom: 'I' });
+  });
+
+  it('pans onto a box that leaves the middle of the stage, keeping its heading and distance', () => {
+    const stage = fixture({ meshes: wholeBrain(), scale: FULL });
+    stage.camera.applyView('right', { immediate: true });
+    stage.finish();
+    const heading = headingOf(stage);
+    const distance = stage.distance();
+    const near = new Box3(new Vector3(0, -0.005, -0.005), new Vector3(0.002, 0.005, 0.005));
+    stage.framing.follow(near.clone().translate(stage.scene.destination.target));
+    assert.equal(stage.distance(), distance, 'a box in the middle leaves the camera');
+    const far = near.clone().translate(new Vector3(0, 0, -0.07));
+    stage.framing.follow(far);
+    assert.ok(stage.scene.destination.target.distanceTo(far.getCenter(new Vector3())) < 1e-9);
+    assert.ok(headingOf(stage).distanceTo(heading) < 1e-9);
+    assert.ok(Math.abs(stage.distance() - distance) < 1e-9);
   });
 });

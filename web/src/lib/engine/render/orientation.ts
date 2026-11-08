@@ -88,6 +88,16 @@ export function projectAxes({ right, up, back }: Record<'right' | 'up' | 'back',
   }));
 }
 
+/** A direction's letter on a body turned half a turn about the superior axis. */
+export const HALF_TURNED: Readonly<Record<Letter, Letter>> = {
+  R: 'L',
+  L: 'R',
+  A: 'P',
+  P: 'A',
+  S: 'S',
+  I: 'I',
+};
+
 /** The anatomical letter for the axis most closely aligned with a direction. */
 function letterFor([x, y, z]: Direction): Letter {
   const components = [x, y, z];

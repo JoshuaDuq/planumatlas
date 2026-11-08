@@ -9,6 +9,7 @@ export type DockCommands = Pick<
   | 'setHemisphere'
   | 'setCortexVisible'
   | 'setCortexOpacity'
+  | 'setCortexSurface'
   | 'setInternalVisible'
   | 'setSpinalCordVisible'
 > & {

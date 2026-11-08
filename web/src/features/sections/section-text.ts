@@ -111,7 +111,7 @@ export function sectionSentences(input: SentenceInput): { said: string; shown: s
         : copy.domainsOtherLabels
       : null;
   const note = (colourNote ?? paintNote) ? ` · ${colourNote ?? paintNote}` : '';
-  const mri = input.surfaceColor === 'mri' && !input.paint;
+  const mri = input.surfaceColor === 'mri';
   const spacing = decimal(input.spacing, 2, lang, { trim: true });
   const said =
     state.status === 'loading'

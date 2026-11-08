@@ -1,6 +1,7 @@
 import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
 import { percent } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
+import type { CortexSurface } from '../../lib/core/user-map/display.ts';
 import type { View } from '../../lib/state/view.svelte.ts';
 import type { DisplaySettings } from '../../lib/types/index.ts';
 
@@ -54,9 +55,13 @@ export function defaultCortexOpacity(view: DisplayView, prepared: PreparedDispla
 /**
  * The display settings the reader has changed from the prepared display, in the reader's words; empty
  * when none differ. Data choices (atlas, colour, internal anatomy level), the camera, a cut and a lesion
- * are not display.
+ * are not display. No view prepares a surface other than the pial.
  */
-export function displayChanges(view: DisplayView, prepared: PreparedDisplay): string[] {
+export function displayChanges(
+  view: DisplayView,
+  prepared: PreparedDisplay,
+  surface: CortexSurface,
+): string[] {
   const copy = t(view.lang, 'display');
   const changes: string[] = [];
   if (view.hemisphere !== prepared.hemisphere) changes.push(copy.sideShown[view.hemisphere]);
@@ -64,6 +69,9 @@ export function displayChanges(view: DisplayView, prepared: PreparedDisplay): st
     changes.push(view.cortexVisible ? copy.cortexShown : copy.cortexHidden);
   } else if (view.cortexVisible && view.cortexOpacity !== defaultCortexOpacity(view, prepared)) {
     changes.push(copy.cortexAt(percent(view.cortexOpacity, view.lang)));
+  }
+  if (view.cortexVisible && surface !== 'pial') {
+    changes.push(copy.cortexOn(t(view.lang, 'overlay').surfaces[surface]));
   }
   if (view.internalVisible !== prepared.internalVisible) {
     changes.push(view.internalVisible ? copy.internalShown : copy.internalHidden);

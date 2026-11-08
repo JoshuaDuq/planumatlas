@@ -32,6 +32,7 @@
     setHemisphere() {},
     setCortexVisible() {},
     setCortexOpacity() {},
+    setCortexSurface() {},
     setInternalVisible() {},
     setSpinalCordVisible: async () => {},
     resetDisplay() {},
@@ -71,6 +72,7 @@
     lang={live.lang}
     status="ready"
     tractReference={live.tractReference}
+    cortexSurface="pial"
     view={{
       hemisphere: 'both',
       cortexVisible: true,

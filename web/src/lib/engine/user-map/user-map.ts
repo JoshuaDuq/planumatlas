@@ -265,13 +265,12 @@ export function createUserMap({
     painted = null;
   };
 
-  // The surface the cortex is drawn on: the reader's choice while the map shows and no cut is open (a cut
-  // face spans pial to white, so the surface it meets must be the pial).
+  // The surface the cortex is drawn on: the reader's choice, map or not, while no cut is open (a cut face
+  // spans pial to white, so the surface it meets must be the pial).
   let surfaceChoice: CortexSurface = 'pial';
   let drawnSurface: { atlas: string; surface: CortexSurface } = { atlas: '', surface: 'pial' };
   let surfaceRequest = 0;
-  const wantedSurface = (): CortexSurface =>
-    uniforms.userMapOn.value && !atlas.settings.cutActive ? surfaceChoice : 'pial';
+  const wantedSurface = (): CortexSurface => (atlas.settings.cutActive ? 'pial' : surfaceChoice);
 
   /** Move the drawn atlas's parcels onto the surface wanted, and the last one back to the pial. */
   const placeSurface = async () => {
@@ -503,7 +502,7 @@ export function createUserMap({
       if (loaded !== request) throw new SupersededError('A newer map was opened.');
       return course;
     },
-    /** The cortex's surface while the map is drawn and no cut is open; the pial otherwise. */
+    /** The cortex's surface, with or without a map, while no cut is open; the pial under a cut. */
     setSurface(surface: CortexSurface): void {
       surfaceChoice = surface;
       void placeSurface().catch(report);

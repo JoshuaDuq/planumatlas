@@ -1,15 +1,16 @@
 import {
-  AlwaysStencilFunc,
   BackSide,
   Box3,
   BufferAttribute,
   BufferGeometry,
   DecrementWrapStencilOp,
   DoubleSide,
+  EqualStencilFunc,
   FrontSide,
   Group,
   IncrementWrapStencilOp,
   InterleavedBufferAttribute,
+  KeepStencilOp,
   Matrix3,
   Mesh,
   MeshBasicMaterial,
@@ -81,8 +82,36 @@ const SECTION_POINT = new Vector3();
 const INSIDE_NORMALS = new Matrix3();
 const INSIDE_NORMAL = new Vector3();
 
-function clearStencil(renderer: WebGLRenderer): void {
-  renderer.clearStencil();
+// The stencil's top bit marks a pixel a cap has claimed; the bits below count a stencil cap's windings.
+// Coplanar caps cannot be ordered by depth: rounding across a long thin triangle exceeds any offset
+// between tiers small enough to keep the face on its plane, and the cap below showed through in lines.
+const CLAIMED = 0x80;
+const WINDINGS = 0x7f;
+/** Ahead of the clipped surfaces that meet the plane at the face's edge. */
+const CAP_OFFSET_UNITS = -8;
+
+/** Clear a stencil cap's windings, keeping the claims: `renderer.clearStencil` would clear every bit. */
+function clearWindings(renderer: WebGLRenderer): void {
+  const gl = renderer.getContext();
+  renderer.state.buffers.stencil.setMask(WINDINGS);
+  gl.clear(gl.STENCIL_BUFFER_BIT);
+}
+
+/**
+ * A cap draws only where no higher-ranked cap has drawn, and claims what it draws, hidden or not. A
+ * stencil cap also needs its solid's windings there.
+ */
+function claimPixels(material: CapMaterial, stencilled: boolean): void {
+  Object.assign(material, {
+    stencilWrite: true,
+    stencilRef: CLAIMED,
+    stencilFunc: NotEqualStencilFunc,
+    stencilFuncMask: stencilled ? WINDINGS : CLAIMED,
+    stencilWriteMask: 0xff,
+    stencilFail: KeepStencilOp,
+    stencilZFail: ReplaceStencilOp,
+    stencilZPass: ReplaceStencilOp,
+  });
 }
 
 /** A sphere around the vertices actually drawn, so a spare buffer tail is not part of it. */
@@ -134,8 +163,12 @@ function stencilMaterial(
     depthWrite: false,
     depthTest: false,
     stencilWrite: true,
-    stencilFunc: AlwaysStencilFunc,
-    stencilFail: operation,
+    // Windings are counted only where no cap has claimed the pixel, so a claimed one never draws again.
+    stencilRef: 0,
+    stencilFunc: EqualStencilFunc,
+    stencilFuncMask: CLAIMED,
+    stencilWriteMask: WINDINGS,
+    stencilFail: KeepStencilOp,
     stencilZFail: operation,
     stencilZPass: operation,
   });
@@ -196,20 +229,15 @@ export class SolidSections {
     front.renderOrder = 1;
     Object.assign(material, {
       side: DoubleSide,
-      stencilWrite: true,
-      stencilRef: 0,
-      stencilFunc: NotEqualStencilFunc,
-      stencilFail: ReplaceStencilOp,
-      stencilZFail: ReplaceStencilOp,
-      stencilZPass: ReplaceStencilOp,
       polygonOffset: true,
       polygonOffsetFactor: -1,
-      polygonOffsetUnits: -1,
+      polygonOffsetUnits: CAP_OFFSET_UNITS,
     });
+    claimPixels(material, true);
     const cap = new Mesh(this.geometry, material);
     cap.renderOrder = 2;
     cap.frustumCulled = false;
-    cap.onAfterRender = clearStencil;
+    cap.onAfterRender = clearWindings;
     group.add(back, front, cap);
     this.group.add(group);
     source.geometry.computeBoundingBox();
@@ -233,15 +261,16 @@ export class SolidSections {
   }
 
   /**
-   * Every cap lies on the one plane, so what draws last is what shows.
+   * Every cap lies on the one plane, so where caps overlap one must be chosen: `solids` ranks them, and
+   * the last ranked shows.
    *
    * Bands keep that answer independent of load order: an atlas's parcel solids
    * arrive after the envelopes and a detail level's nuclei can arrive after
    * either, but a nucleus still covers the ribbon reconstructed around it.
    *
-   * Within the same band, larger enclosing solids draw before smaller nested
-   * solids, and each solid receives a tiered polygon offset so co-planar caps
-   * never z-fight.
+   * Within the same band, smaller nested solids rank above larger enclosing
+   * ones. Caps draw from the highest ranked down, each where none has drawn yet
+   * (`claimPixels`), so depth never decides between them.
    */
   reorder(): void {
     this.bounds.makeEmpty();
@@ -253,10 +282,7 @@ export class SolidSections {
       return volumeB - volumeA;
     });
     for (const [at, solid] of this.solids.entries()) {
-      solid.group.renderOrder = at + 1;
-      solid.cap.material.polygonOffset = true;
-      solid.cap.material.polygonOffsetFactor = -1;
-      solid.cap.material.polygonOffsetUnits = -1 - at;
+      solid.group.renderOrder = this.solids.length - at;
     }
   }
 
@@ -492,8 +518,7 @@ export class SolidSections {
     cap.quaternion.identity();
     cap.scale.set(1, 1, 1);
     cap.frustumCulled = true;
-    cap.material.stencilWrite = false;
-    cap.material.stencilFunc = AlwaysStencilFunc;
+    claimPixels(cap.material, false);
     // Null would hide Object3D's empty method and the renderer calls it unconditionally.
     delete (cap as { onAfterRender?: unknown }).onAfterRender;
     cap.updateMatrix();
@@ -512,13 +537,8 @@ export class SolidSections {
     cap.quaternion.copy(PLANE_ROTATION);
     cap.scale.set(this.capDiameter, this.capDiameter, 1);
     cap.frustumCulled = false;
-    cap.material.stencilWrite = true;
-    cap.material.stencilRef = 0;
-    cap.material.stencilFunc = NotEqualStencilFunc;
-    cap.material.stencilFail = ReplaceStencilOp;
-    cap.material.stencilZFail = ReplaceStencilOp;
-    cap.material.stencilZPass = ReplaceStencilOp;
-    cap.onAfterRender = clearStencil;
+    claimPixels(cap.material, true);
+    cap.onAfterRender = clearWindings;
     cap.updateMatrix();
     solid.sectioned = false;
   }

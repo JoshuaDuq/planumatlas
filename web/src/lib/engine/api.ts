@@ -283,6 +283,8 @@ export interface SectionsState {
   readonly overlay: boolean;
   /** The compared structure the linked MRI shows agreement for, by its code; null for none. */
   readonly agreement: number | null;
+  /** The tab's paint the linked MRI draws, by its id, once its labels have loaded; null for none. */
+  readonly paint: string | null;
   readonly tilt: number;
   readonly azimuth: number;
   readonly status: SectionsStatus;
@@ -490,11 +492,11 @@ export interface EngineCamera {
   /** Frame one drawn region from the current heading (app.js:510-524). Releases the view; false when it has no drawn mesh. */
   frameRegion(id: string, options?: FrameRegionOptions): boolean;
   /**
-   * Frame a lesson landmark as authored: its view, with the context margin around it (app.js:457).
-   * Releases the view. False when the region has no drawn mesh.
+   * Frame a lesson landmark as authored, or several together: its view, with the context margin around
+   * it (app.js:457). Releases the view. False when no region has a drawn mesh.
    */
   frameLandmark(
-    regionId: string,
+    regionId: string | readonly string[],
     view: ViewName,
     contextMarginMm: number,
     options?: MoveOptions,
@@ -750,8 +752,14 @@ export interface VisualFieldReading extends VisualFieldPoint {
 export interface EngineVisualField {
   /** The anatomy publishes predicted V1–V3 retinotopy; without it `show` throws. */
   readonly available: boolean;
-  /** Draw the map on the cortex, with a dot or without; null gives the cortex its colours back. */
+  /**
+   * Draw the map on the cortex, with a dot or without; null gives the cortex its colours back. While it
+   * is drawn the right hemisphere's cortex is turned to stand beside the left's, both medial walls
+   * facing the subject's right, occipital poles together; the orbit keeps within 45° of level.
+   */
   show(map: { dot: VisualFieldDot | null } | null): void;
+  /** Pan onto the cortex the dot drives, once it leaves the middle of the stage. */
+  follow(dot: VisualFieldDot): void;
   /** While on, a click on the brain raises `visualFieldPoint` instead of choosing a region. */
   setProbing(probing: boolean): void;
   /** Every V1–V3 vertex's predicted pRF centre and area, to measure territories; downloaded on first call. */
@@ -787,8 +795,8 @@ export interface EngineUserMap {
    */
   course(region: string): Promise<MapCourse | null>;
   /**
-   * Draw the cortex on this brain's pial, mid-thickness or white surface while the map is drawn and no
-   * cut is open: the same vertices and values, the sulci opened as far as the surface opens them.
+   * Draw the cortex on this brain's pial, mid-thickness or white surface, with or without a map, while
+   * no cut is open: the same vertices and values, the sulci opened as far as the surface opens them.
    */
   setSurface(surface: CortexSurface): void;
   /** Draw the loaded map with these settings, or hide it with null. */

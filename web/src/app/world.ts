@@ -194,6 +194,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
       frameLandmark: excursions.focusLandmark,
       afterReset: excursions.afterReset,
       displayBaseline: () => excursions.displayBaseline,
+      cortexSurface: userMap,
     });
     links = createLinks({
       engine,

@@ -429,8 +429,14 @@
   "cutLabels": "Étiquettes de coupe"
  },
  "deficitKey": {
-  "keyAll": "Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions couleur tissu ne sont pas citées. Choisissez un constat pour l’afficher seul.",
-  "keyOne": "Les régions que cite ce constat<NNBSP>; les régions couleur tissu ne sont pas citées.",
+  "keyAll": [
+   "[true] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions où l’IRM reste visible ne sont pas citées. Choisissez un constat pour l’afficher seul.\"",
+   "[false] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions couleur tissu ne sont pas citées. Choisissez un constat pour l’afficher seul.\""
+  ],
+  "keyOne": [
+   "[true] → \"Les régions que cite ce constat<NNBSP>; les régions où l’IRM reste visible ne sont pas citées.\"",
+   "[false] → \"Les régions que cite ce constat<NNBSP>; les régions couleur tissu ne sont pas citées.\""
+  ],
   "keyAbsent": "Un constat cerné n’a aucune région colorée dans cette vue.",
   "keyPicked": "Seulement les régions de ce constat. Choisissez-le de nouveau pour tous les constats."
  },
@@ -512,6 +518,7 @@
   "internalAnatomy": "Anatomie interne",
   "showCortex": "Afficher le cortex",
   "cortexOpacity": "Opacité du cortex",
+  "surfaceHint": "Les surfaces plus profondes ouvrent les sillons. Une coupe affiche la piale.",
   "showInternal": "Afficher l’anatomie interne",
   "showSpinalCord": "Afficher la moelle épinière",
   "spinalCordUnavailable": "Aucune moelle épinière n’est publiée pour ce sujet.",
@@ -552,6 +559,10 @@
   "cortexAt": [
    "[\"Alpha\"] → \"Cortex à Alpha\"",
    "[\"\"] → \"Cortex à \""
+  ],
+  "cortexOn": [
+   "[\"Alpha\"] → \"Cortex sur la surface alpha\"",
+   "[\"\"] → \"Cortex sur la surface \""
   ],
   "internalHidden": "Anatomie interne masquée",
   "internalShown": "Anatomie interne affichée",
@@ -621,10 +632,22 @@
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>à<NBSP>3.5\"",
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
-  "keyScale": "Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.",
-  "keyScaleTerm": "Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.",
-  "keyAll": "Chaque aire montre sa fonction la plus forte<NNBSP>; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.",
-  "keyCompare": "Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.",
+  "keyScale": [
+   "[true] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous 3.\"",
+   "[false] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.\""
+  ],
+  "keyScaleTerm": [
+   "[true] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous 3.\"",
+   "[false] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.\""
+  ],
+  "keyAll": [
+   "[true] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires où l’IRM reste visible n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\"",
+   "[false] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\""
+  ],
+  "keyCompare": [
+   "[true] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires où l’IRM reste visible n’en atteignent aucune.\"",
+   "[false] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.\""
+  ],
   "keyShared": "Les deux",
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: «  »\"",
@@ -2167,7 +2190,7 @@
    "[\"\"] → \"throws value.toFixed is not a function\""
   ],
   "hemisphere": [
-   "[\"Alpha\"] → \"Représenté dans l’hémisphère droit, vu depuis la ligne médiane.\"",
+   "[\"Alpha\"] → \"Représenté dans l’hémisphère droit.\"",
    "[\"\"] → \"Sur le méridien vertical<NNBSP>: les deux hémisphères le représentent.\""
   ],
   "territory": "Territoire prédit",
@@ -2185,8 +2208,11 @@
    "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
    "[\"\"] → \"throws value.toFixed is not a function\""
   ],
-  "legendCore": "Centre du champ récepteur dans le point",
-  "legendReach": "Champ récepteur à moins d’un σ du point",
+  "pair": "Les deux hémisphères sont vus depuis la ligne médiane, le droit tourné pour se tenir à côté du gauche, pôles occipitaux réunis<NNBSP>: chaque moitié du champ est dessinée de son côté de la scène, la fixation au milieu.",
+  "legendResponse": [
+   "[\"Alpha\"] → \"Réponse prédite, de Alpha (rouge) à 100<NNBSP>% (jaune) de la réponse au point centré sur le champ récepteur\"",
+   "[\"\"] → \"Réponse prédite, de  (rouge) à 100<NNBSP>% (jaune) de la réponse au point centré sur le champ récepteur\""
+  ],
   "legendLine": [
    "[\"Alpha\"] → \"throws value.toFixed is not a function\"",
    "[\"\"] → \"throws value.toFixed is not a function\""

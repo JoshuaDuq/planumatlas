@@ -65,6 +65,7 @@ import type { Appearance, AnatomicalUserData, VisualFieldUniforms } from '../ren
 import { addUserMapToSurface, createUserMapUniforms } from '../user-map/overlay.ts';
 import type { SurfaceHit } from '../render/picking.ts';
 import type { VisualFieldDot, VisualFieldReading } from '../api.ts';
+import { VISUAL_RESPONSE_THRESHOLD, predictedResponse } from '../../core/learning/visual-field.ts';
 import { GHOST } from '../render/ghost-order.ts';
 import {
   attachNetworkColors,
@@ -79,8 +80,12 @@ import {
   featherBorders,
   writeFeatherPalette,
 } from '../render/border-feather.ts';
-import { addMriAppearance, createMriUniforms } from '../render/mri-material.ts';
-import type { MriUniforms } from '../render/mri-material.ts';
+import {
+  addMriSurfaceAppearance,
+  createMriUniforms,
+  setScanPainted,
+} from '../render/mri-material.ts';
+import type { MriSurfaceSample, MriUniforms } from '../render/mri-material.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import { loadRibbonSources } from '../tissues/solid-assets.ts';
 import { createWhiteMatterSurfaces, exposedWhiteMatter } from '../tissues/white-matter-surfaces.ts';
@@ -153,6 +158,8 @@ function boxEntry(mesh: Mesh, ray: Ray): number {
 
 const ENVELOPES = 'native-envelopes';
 const SPINAL_CORD = 'spinal-cord';
+// The space left between the medial pair's occipital poles.
+const MEDIAL_PAIR_GAP_M = 0.01;
 
 /** A layer id this manifest does not publish; the app tells it from a failed download by this code. */
 const unknownLayer = (message: string) =>
@@ -386,6 +393,10 @@ function programCopy(material: Material): Material {
   return copy;
 }
 
+/** The cortex carries its scan at mid-thickness (`_t1`); every other region reads it inside itself. */
+const mriSample = (region: Region): MriSurfaceSample =>
+  region.kind === 'cortex' || region.kind === 'non-region' ? 'mid-thickness' : 'inside';
+
 /** Asset-only controller. Add .group to your scene; coordinates remain untouched. */
 export class BrainAtlas extends EventTarget {
   static async load(
@@ -506,6 +517,9 @@ export class BrainAtlas extends EventTarget {
   private internalSystem: string | null = null;
   private internalConstituents = new Set<string>();
   private hemisphere: Hemisphere = 'both';
+  /** While the visual-field map is drawn, the right hemisphere's cortex is turned to face the left's way. */
+  private medialPairOn = false;
+  private pairPlacement: Matrix4 | null = null;
   private cortexVisible = true;
   private cortexOpacity = 1;
   private internalVisible = true;
@@ -557,7 +571,6 @@ export class BrainAtlas extends EventTarget {
           visualMix: { value: 0 },
           visualProbe: { value: new Vector3(0, 0, -1) },
           visualMeasured: { value: manifest.retinotopy.measured_eccentricity_deg },
-          visualAccent: { value: new Color() },
         }
       : null;
     this.dissection = createDissection(this.regions);
@@ -673,7 +686,9 @@ export class BrainAtlas extends EventTarget {
           for (const mesh of surfaces.meshes) {
             mesh.raycast = raycastWithBvh(bvh);
             addUserMapToSurface(mesh.material, this.userMap);
-            if (this.mriUniforms) addMriAppearance(mesh.material, this.mriUniforms);
+            if (this.mriUniforms) {
+              addMriSurfaceAppearance(mesh.material, this.mriUniforms, 'inside');
+            }
           }
           this.whiteMatterSurfaces = surfaces;
           this.envelopes = envelopes;
@@ -832,7 +847,9 @@ export class BrainAtlas extends EventTarget {
               this.manifest.atlases.some((atlas) => atlas.id === id) ? this.visualField : null,
               this.userMap,
             );
-            if (this.mriUniforms) addMriAppearance(shown.material, this.mriUniforms);
+            if (this.mriUniforms) {
+              addMriSurfaceAppearance(shown.material, this.mriUniforms, mriSample(region));
+            }
             this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
             // Region meshes never move after load. Skipping per-frame matrix
             // updates is free on 400+ nuclei.
@@ -1002,16 +1019,22 @@ export class BrainAtlas extends EventTarget {
       ghosts,
     );
     const paint = this.paint;
-    const mri = this.surfaceColor === 'mri' && !paint;
+    // A tab's paint is drawn over the scan, which stays wherever nothing is painted.
+    const mri = this.surfaceColor === 'mri';
     if (this.mriUniforms) this.mriUniforms.scanEnabled.value = mri;
     for (const [id, layer] of this.layers) {
       layer.scene.visible =
         id === this.detailId ||
         id === this.atlasId ||
         (this.manifest.supplemental_layers ?? []).some((entry) => entry.id === id);
+      const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
       for (const mesh of layer.meshes) {
         const region = this.regions.get(mesh.userData['region_id'] as string)!;
         const cortex = region.kind === 'cortex' || region.kind === 'non-region';
+        if (corticalLayer && region.hemisphere === 'right') {
+          mesh.updateMatrix();
+          if (this.medialPairOn) mesh.matrix.premultiply(this.pairPlacement!);
+        }
         // A ghost is grey at the see-through opacity; what it holds in colour is opaque.
         const ghost = ghosted(region.id, ghostState);
         const cabNpNetwork =
@@ -1047,6 +1070,7 @@ export class BrainAtlas extends EventTarget {
         // medial wall keeps the tissue it always had.
         material.color.copy(this.sourceColors.get(mesh)!);
         const painted = paint?.colors.get(region.id);
+        setScanPainted(material, Boolean(painted));
         if (painted) {
           material.color.setRGB(
             painted[0] / 255,
@@ -1090,7 +1114,15 @@ export class BrainAtlas extends EventTarget {
         }
         material.depthWrite = !transparent || mesh.userData['ghost'] === GHOST.deep;
       }
-      if (layer.featherPalette) writeFeatherPalette(layer.featherPalette, layer.meshes);
+      // Under the scan only a painted parcel shows its colour, so only it is blended into.
+      if (layer.featherPalette) {
+        writeFeatherPalette(
+          layer.featherPalette,
+          layer.meshes,
+          (mesh) =>
+            mesh.visible && (!mri || Boolean(paint?.colors.has(mesh.userData['region_id']))),
+        );
+      }
     }
     if (dropped) this.dispatchEvent(new CustomEvent('selectionchange', { detail: null }));
     this.dispatchEvent(new CustomEvent('change', { detail: this.state }));
@@ -1346,9 +1378,10 @@ export class BrainAtlas extends EventTarget {
 
   /**
    * Draw the predicted retinotopy over the cortex, with the dot or without; null gives the cortex its
-   * colours back. `accent` is the dot's CSS colour. Throws without retinotopy or for a bad dot.
+   * colours back. While it is drawn the hemispheres are a medial pair (`medialPair`). Throws without
+   * retinotopy or for a bad dot.
    */
-  showVisualField(map: { dot: VisualFieldDot | null } | null, accent: string): void {
+  showVisualField(map: { dot: VisualFieldDot | null } | null): void {
     const uniforms = this.visualField;
     if (!uniforms) throw new Error('This anatomy publishes no retinotopy.');
     const dot = map?.dot ?? null;
@@ -1357,7 +1390,72 @@ export class BrainAtlas extends EventTarget {
     }
     uniforms.visualMix.value = map ? 1 : 0;
     uniforms.visualProbe.value.set(dot?.x ?? 0, dot?.y ?? 0, dot ? dot.radius : -1);
-    uniforms.visualAccent.value.set(accent);
+    if (Boolean(map) !== this.medialPairOn) {
+      this.pairPlacement ??= this.medialPairPlacement();
+      this.medialPairOn = Boolean(map);
+      this.update();
+    }
+  }
+
+  /**
+   * Both medial walls in sight at once: the right hemisphere's cortex turned half a turn about the
+   * superior axis, set behind the left's occipital pole, the poles 10 mm apart. A rotation, never a
+   * mirror, so each hemisphere keeps its own handedness.
+   */
+  get medialPair(): boolean {
+    return this.medialPairOn;
+  }
+
+  private medialPairPlacement(): Matrix4 {
+    const box = new Box3();
+    for (const atlas of this.manifest.atlases) {
+      for (const mesh of this.layers.get(atlas.id)?.meshes ?? []) {
+        if (this.regions.get(mesh.userData['region_id'] as string)!.hemisphere !== 'left') continue;
+        box.expandByObject(mesh);
+      }
+    }
+    if (box.isEmpty()) throw new Error('No left cortex is loaded to pair the hemispheres on.');
+    const behind = 2 * box.max.z + MEDIAL_PAIR_GAP_M;
+    return new Matrix4().makeRotationY(Math.PI).setPosition(0, 0, behind);
+  }
+
+  /**
+   * The world box of the drawn cortex the dot is predicted to drive at least as strongly as the map
+   * colours (`VISUAL_RESPONSE_THRESHOLD`), each vertex read as the shader reads it; null where it
+   * drives none.
+   */
+  visualFieldActivation(dot: VisualFieldDot): Box3 | null {
+    if (!this.visualField) throw new Error('This anatomy publishes no retinotopy.');
+    const ranges = this.manifest.appearance.field_ranges;
+    const [xLow, xSpan] = fieldDecode(ranges, '_FIELD_X');
+    const [yLow, ySpan] = fieldDecode(ranges, '_FIELD_Y');
+    const [sigmaLow, sigmaSpan] = fieldDecode(ranges, '_PRF_SIGMA');
+    const box = new Box3();
+    const point = new Vector3();
+    for (const mesh of this.visibleMeshes) {
+      const { geometry } = mesh;
+      const area = geometry.getAttribute('_visual_area');
+      if (!area) continue;
+      const [x, y, sigma] = ['_field_x', '_field_y', '_prf_sigma'].map((name) =>
+        geometry.getAttribute(name)!,
+      );
+      const position = geometry.getAttribute('position');
+      mesh.updateWorldMatrix(true, false);
+      for (let vertex = 0; vertex < area.count; vertex += 1) {
+        if (area.getX(vertex) < 0.5) continue;
+        const s = sigma!.getX(vertex) * sigmaSpan + sigmaLow;
+        const distance = Math.hypot(
+          x!.getX(vertex) * xSpan + xLow - dot.x,
+          y!.getX(vertex) * ySpan + yLow - dot.y,
+        );
+        if (distance > dot.radius + 6 * s) continue;
+        if (predictedResponse(distance, dot.radius, s) < VISUAL_RESPONSE_THRESHOLD) continue;
+        box.expandByPoint(
+          point.fromBufferAttribute(position, vertex).applyMatrix4(mesh.matrixWorld),
+        );
+      }
+    }
+    return box.isEmpty() ? null : box;
   }
 
   /**
@@ -1455,10 +1553,12 @@ export class BrainAtlas extends EventTarget {
     this.mriUniforms = anatomy.mriUniforms;
     // Envelopes that load later take it as they arrive.
     for (const mesh of this.whiteMatterSurfaces?.meshes ?? []) {
-      addMriAppearance(mesh.material, this.mriUniforms);
+      addMriSurfaceAppearance(mesh.material, this.mriUniforms, 'inside');
     }
     for (const layer of this.layers.values()) {
-      for (const mesh of layer.meshes) addMriAppearance(mesh.material, this.mriUniforms);
+      for (const mesh of layer.meshes) {
+        addMriSurfaceAppearance(mesh.material, this.mriUniforms, this.mriSampleOf(mesh));
+      }
     }
   }
 
@@ -1474,13 +1574,14 @@ export class BrainAtlas extends EventTarget {
       worldToVoxel: new Matrix4(),
       volume: { shape: [1, 1, 1] },
     });
-    return this.programKinds().flatMap(({ geometry, material }) => {
+    return this.programKinds().flatMap((kind) => {
+      const { geometry, material } = kind;
       const seeThrough = programCopy(material);
       seeThrough.transparent = true;
       const samples = [new Mesh(geometry, seeThrough)];
       if (!this.mriUniforms) {
         const scanned = programCopy(material);
-        addMriAppearance(scanned, scan);
+        addMriSurfaceAppearance(scanned, scan, this.mriSampleOf(kind));
         samples.push(new Mesh(geometry, scanned));
       }
       return samples;
@@ -1501,6 +1602,12 @@ export class BrainAtlas extends EventTarget {
         return new Mesh(geometry, clipped);
       }),
     );
+  }
+
+  /** Exposed white matter carries no region of its own; it reads the white matter inside it. */
+  private mriSampleOf(mesh: Mesh): MriSurfaceSample {
+    if (this.whiteMatterSurfaces?.meshes.includes(mesh as never)) return 'inside';
+    return mriSample(this.regions.get(mesh.userData['region_id'] as string)!);
   }
 
   /**

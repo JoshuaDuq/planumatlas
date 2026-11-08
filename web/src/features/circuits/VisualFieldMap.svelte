@@ -5,9 +5,11 @@
   the same dot on the cortex (`syncVisualFieldMap`).
 -->
 <script lang="ts">
+  import { percent } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import {
     VISUAL_AREAS,
+    VISUAL_RESPONSE_THRESHOLD,
     discRadius,
     dotOutline,
     fromDisc,
@@ -17,6 +19,7 @@
     toDisc,
   } from '../../lib/core/learning/visual-field.ts';
   import type { FieldHemisphere } from '../../lib/core/learning/visual-field.ts';
+  import { POSITIVE_RAMP } from '../../lib/core/user-map/display.ts';
   import type { VisualFieldPoint } from '../../lib/engine/api.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
@@ -29,6 +32,9 @@
   const maximum = $derived(record.maximum_eccentricity_deg);
   const measured = $derived(record.measured_eccentricity_deg);
   const RINGS = [1, 2, 4, 16, 32];
+  const RESPONSE_RAMP = `linear-gradient(90deg, ${POSITIVE_RAMP.map(
+    (rgb) => `rgb(${rgb.map((channel) => channel * 255).join(' ')})`,
+  ).join(', ')})`;
   // The radius control is logarithmic: 0.1° to 10° over its travel.
   const RADIUS = { min: 0.1, decades: 2 };
   const sliderOf = (radius: number) =>
@@ -259,9 +265,12 @@
       {/if}
     </p>
 
+    <p class="note">{copy.pair}</p>
     <ul class="legend">
-      <li><span class="swatch core" aria-hidden="true"></span>{copy.legendCore}</li>
-      <li><span class="swatch reach" aria-hidden="true"></span>{copy.legendReach}</li>
+      <li>
+        <span class="swatch response" style:background={RESPONSE_RAMP} aria-hidden="true"></span>
+        {copy.legendResponse(percent(VISUAL_RESPONSE_THRESHOLD, model.lang))}
+      </li>
       <li><span class="swatch line" aria-hidden="true"></span>{copy.legendLine(measured)}</li>
       <li><span class="swatch areas" aria-hidden="true"></span>{copy.legendAreas}</li>
     </ul>
@@ -411,13 +420,10 @@
       height: 0.875rem;
       border-radius: 50%;
     }
-    .swatch.core {
-      background: var(--overlay-accent);
+    /* The stage's own map colours: the response's scale, the measured edge's light line and V1, V2, V3's greys. */
+    .swatch.response {
+      border-radius: 2px;
     }
-    .swatch.reach {
-      background: color-mix(in srgb, var(--overlay-accent) 45%, #2a2d31);
-    }
-    /* The stage's own map colours: the measured edge's light line and V1, V2, V3's greys. */
     .swatch.line {
       height: 2px;
       border-radius: 0;

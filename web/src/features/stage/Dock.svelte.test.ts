@@ -31,6 +31,7 @@ interface Live {
   overlay: boolean;
   phone: boolean;
   view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
+  cortexSurface: 'pial' | 'mid' | 'white';
 }
 
 let engine: FakeEngine;
@@ -69,6 +70,7 @@ function liveState(overrides: Partial<Live>): Live {
       focused: false,
       selectedRegion: null,
     },
+    cortexSurface: 'pial',
     ...overrides,
   });
   return state;
@@ -89,6 +91,7 @@ async function mount(
     setHemisphere: vi.fn<DockCommands['setHemisphere']>(),
     setCortexVisible: vi.fn<DockCommands['setCortexVisible']>(),
     setCortexOpacity: vi.fn<DockCommands['setCortexOpacity']>(),
+    setCortexSurface: vi.fn<DockCommands['setCortexSurface']>(),
     setInternalVisible: vi.fn<DockCommands['setInternalVisible']>(),
     setSpinalCordVisible: vi.fn<DockCommands['setSpinalCordVisible']>(),
     resetDisplay: vi.fn<DockCommands['resetDisplay']>(),
@@ -114,9 +117,9 @@ async function mount(
   return result;
 }
 
-const locate = (role: 'button' | 'radio' | 'checkbox' | 'slider', name: string) =>
+const locate = (role: 'button' | 'radio' | 'checkbox' | 'slider' | 'combobox', name: string) =>
   page.getByRole(role, { name, exact: true });
-const control = (role: 'button' | 'radio' | 'checkbox' | 'slider', name: string) =>
+const control = (role: 'button' | 'radio' | 'checkbox' | 'slider' | 'combobox', name: string) =>
   locate(role, name).element() as HTMLElement;
 const tool = (name: string) => control('button', name);
 /** A real pointer click, which the controls' pointer handling sees. */
@@ -412,6 +415,22 @@ describe('the Display popover', () => {
     live.view.cortexVisible = false;
     flushSync();
     expect(page.getByRole('slider').elements()).toHaveLength(0);
+  });
+
+  test('the cortex surface is offered with the opacity, chosen at once, and named once deeper', async () => {
+    await mount();
+    await open('Display');
+    const select = control('combobox', 'Cortex surface') as HTMLSelectElement;
+    expect(select.value).toBe('pial');
+    await userEvent.selectOptions(select, 'White');
+    expect(commands.setCortexSurface.mock.calls).toEqual([['white']]);
+
+    live.cortexSurface = 'white';
+    flushSync();
+    expect(page.getByText('Cortex on the white surface').elements()).toHaveLength(1);
+    live.view.cortexVisible = false;
+    flushSync();
+    expect(page.getByRole('combobox').elements()).toHaveLength(0);
   });
 
   test('the percentage follows the language: a narrow space before the sign in French', async () => {
@@ -1015,7 +1034,8 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
   test('the plate is reported once it is placed, follows it as it grows, and is withdrawn on close', async () => {
     await page.viewport(390, 844);
     try {
-      await mount({ phone: true }, { width: 390, height: 700 });
+      // Tall enough that the Display popover grows by its changes before it reaches its cap and scrolls.
+      await mount({ phone: true }, { width: 390, height: 844 });
       await press('button', 'Display');
       await vi.waitFor(() => expect(plates).toHaveLength(1));
       await Promise.all(

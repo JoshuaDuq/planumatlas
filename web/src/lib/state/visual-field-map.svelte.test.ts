@@ -51,6 +51,16 @@ test('the stage draws the map and reads clicks exactly while the map is open in 
   stop();
 });
 
+test('another change of the view redraws nothing while the dot stays where it is', () => {
+  const { calls, set, stop } = fixture();
+  set('circuits', { ...CLOSED, map: 'visual-field', dot });
+  const drawn = calls.length;
+  // A new view state with the same dot, as a display change while the map is open makes.
+  set('circuits', { ...CLOSED, map: 'visual-field', dot: { ...dot } });
+  expect(calls.length).toBe(drawn);
+  stop();
+});
+
 test('a click on V1–V3 makes the dot the predicted receptive field there; a miss leaves it', () => {
   const moved: VisualFieldDot[] = [];
   const map = createVisualFieldMapStore({ moveDot: (next) => moved.push(next) });

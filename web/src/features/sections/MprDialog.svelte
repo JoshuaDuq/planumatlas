@@ -161,7 +161,7 @@
   $effect(() => {
     if (!reading) return;
     const { display } = reading;
-    const { overlay, agreement } = engineState.sections;
+    const { overlay, agreement, paint } = engineState.sections;
     for (const plane of visible) {
       const canvas = canvases[plane]!;
       const frame = frames[plane];
@@ -171,6 +171,7 @@
         frame.v,
         overlay,
         agreement,
+        paint,
         map?.key,
         display.windowCenter,
         display.windowWidth,

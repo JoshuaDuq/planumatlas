@@ -272,7 +272,7 @@ export function createUserMapStore({
       minVoxels = next;
       draw();
     },
-    /** The surface the cortex is drawn on while the map shows; a cut draws the pial. */
+    /** The surface the cortex is drawn on, map or not (Overlay and Display both set it); a cut draws the pial. */
     get surface() {
       return surface;
     },

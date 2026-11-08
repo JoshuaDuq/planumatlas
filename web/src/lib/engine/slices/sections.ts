@@ -20,7 +20,7 @@ import type {
 import { centeredFrame, clippingPlane } from './coordinates.ts';
 import type { Frame, Ras } from './coordinates.ts';
 import { renderSlice } from './sampling.ts';
-import type { SliceMap } from './sampling.ts';
+import type { SliceMap, SlicePaint } from './sampling.ts';
 import { loadVolume } from './volume.ts';
 import type { Volume, VolumeFile } from './volume.ts';
 import type { SurfaceColor } from '../../types/index.ts';
@@ -42,6 +42,7 @@ interface SectionsStateRecord {
   reverse: boolean;
   overlay: boolean;
   agreement: number | null;
+  paint: string | null;
   tilt: number;
   azimuth: number;
   status: SectionsStatus;
@@ -107,6 +108,11 @@ export class BrainSections extends EventTarget {
   display: MriDisplay | null = null;
   /** The reader's own map while the stage draws it; the linked MRI draws it too. */
   private userMap: SliceMap | null = null;
+  /** The model's paint on the cut atlas's label grid, as the linked MRI draws it. */
+  private shownPaint: SlicePaint | null = null;
+  /** The paint and cut atlas last asked for, so each pair loads once. */
+  private paintKey: string | null = null;
+  private paintRequest = 0;
   readonly state: SectionsStateRecord;
   private pending: Promise<void> | null = null;
   private disposed = false;
@@ -137,12 +143,14 @@ export class BrainSections extends EventTarget {
       reverse: false,
       overlay: false,
       agreement: null,
+      paint: null,
       tilt: 30,
       azimuth: 30,
       status: 'idle',
       error: null,
     };
     this.onModelChange = () => {
+      void this.syncPaint();
       const s = model.state;
       const key = JSON.stringify([
         s.hemisphere,
@@ -576,6 +584,7 @@ export class BrainSections extends EventTarget {
         metadata: { labels: volumes.metadata.labels },
         ...(shown && { agreement: shown }),
         ...(this.userMap && { map: this.userMap }),
+        ...(this.shownPaint && { paint: this.shownPaint }),
       },
       frame,
       { ...display, overlay: this.state.overlay },
@@ -620,6 +629,41 @@ export class BrainSections extends EventTarget {
   /** Draw the reader's map on the linked MRI, or stop; the planes are drawn again by their next change. */
   setUserMap(map: SliceMap | null): void {
     this.userMap = map;
+    this.emit();
+  }
+
+  /**
+   * Draw the model's paint on the linked MRI, by the cut atlas's own labels as its cut faces are, once
+   * the views have loaded. The label grid downloads the first time; `state.paint` names the paint once
+   * it is drawn. A failure is reported once, and the next paint or cut atlas tries again.
+   */
+  private async syncPaint(): Promise<void> {
+    if (!this.volumes) return;
+    const paint = this.model.state.paint ?? null;
+    const atlas = this.state.cutAtlas;
+    const key = paint && `${paint.id}|${atlas}`;
+    if (key === this.paintKey) return;
+    this.paintKey = key;
+    const request = ++this.paintRequest;
+    if (paint) {
+      try {
+        await this.tissues.load(atlas);
+      } catch (error) {
+        if (request === this.paintRequest) this.report(error);
+        return;
+      }
+      if (request !== this.paintRequest || this.disposed) return;
+      const { volume, metadata } = this.tissues.layers.get(atlas)!;
+      this.shownPaint = {
+        volume,
+        colors: metadata.labels.map(
+          (label) => (label.region_id && paint.colors.get(label.region_id)) || null,
+        ),
+      };
+    } else {
+      this.shownPaint = null;
+    }
+    this.state.paint = paint?.id ?? null;
     this.emit();
   }
 
@@ -672,6 +716,8 @@ export class BrainSections extends EventTarget {
     // rather than have visibility reach across for it.
     this.model.setCutState({ atlas: this.state.cutAtlas, active: this.active });
     this.dispatchEvent(new Event('change'));
+    // The views loading and the cut atlas changing both come through here.
+    void this.syncPaint();
   }
 
   dispose(): void {

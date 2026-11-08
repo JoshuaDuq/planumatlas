@@ -7,6 +7,7 @@ import {
   hemisphereFor,
   parseVisualFieldTerritories,
   polar,
+  predictedResponse,
   territoryOf,
   toDisc,
 } from './visual-field.ts';
@@ -74,4 +75,26 @@ test('the disc scale is logarithmic, puts the measured 8° near three fifths and
   assert.ok(Math.abs(back.x - 3) < 1e-9 && Math.abs(back.y + 4) < 1e-9);
   // A place past the rim is held at the field's edge.
   assert.ok(Math.abs(polar(fromDisc({ x: 2, y: 0 }, 90)).eccentricity - 90) < 1e-9);
+});
+
+test('the predicted response matches the non-central chi-squared share of the pRF inside the dot', () => {
+  // [distance, radius, sigma, SciPy ncx2.cdf((r/s)², 2, (d/s)²) / ncx2.cdf((r/s)², 2, 0)]
+  const reference = [
+    [0, 1.5, 1, 1],
+    [1.5, 1.5, 1, 0.5275565739578321],
+    [2.5, 1.5, 1, 0.1511086231406696],
+    [0.3, 0.05, 0.4, 0.7556681168964344],
+    [5, 20, 2, 1],
+    [30, 20, 2, 2.320448490633436e-7],
+    [0, 0.0001, 3, 1],
+  ] as const;
+  for (const [distance, radius, sigma, expected] of reference) {
+    const got = predictedResponse(distance, radius, sigma);
+    assert.ok(Math.abs(got - expected) < 1e-4, `${distance}, ${radius}, ${sigma}: ${got}`);
+  }
+});
+
+test('the predicted response refuses a pRF without width or a dot of negative radius', () => {
+  assert.throws(() => predictedResponse(1, 1, 0), RangeError);
+  assert.throws(() => predictedResponse(1, -1, 1), RangeError);
 });

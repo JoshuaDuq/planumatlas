@@ -58,7 +58,9 @@
       visibleCount: world.catalog.visibleCount,
       choosing,
     })}
-    displayChanges={tractReference ? [] : displayChanges(current, world.excursions.displayBaseline)}
+    displayChanges={tractReference
+      ? []
+      : displayChanges(current, world.excursions.displayBaseline, world.userMap.surface)}
     onresetdisplay={world.anatomy.resetDisplay}
     onprovenance={onProvenance}
   />

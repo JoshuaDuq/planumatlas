@@ -112,6 +112,9 @@
     async searchIn(mode: 'functions' | 'deficits', query: string) {
       calls.push(`search-${mode}:${query}`);
     },
+    async openDeficitMri({ instant }: { instant: boolean }) {
+      calls.push(`mri:${instant}`);
+    },
   } satisfies DeficitsDeps['excursions'];
 
   const explorer = createDeficitsExplorer({
