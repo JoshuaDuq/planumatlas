@@ -1,13 +1,15 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import { relative, resolve, sep } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformWithOxc, type Plugin, type ResolvedConfig } from 'vite';
 import {
   PUBLISHED_TREES,
   publishedFiles,
   publishedRecord,
+  recordOf,
 } from '../../scripts/published-version.mjs';
 import type { PublishedRecord } from '../src/lib/core/assets/published-files.ts';
+import { compressGlb, modelLayers } from './meshopt-glb.ts';
 import { ASSET_BASE } from './site.ts';
 
 const webRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -70,6 +72,8 @@ export async function serviceWorkerCode(versions: WorkerVersions): Promise<strin
  */
 export function publishedAssets(): Plugin {
   const published = publishedFiles(publicDirectory) as Published;
+  /** What the site serves in place of each model layer `public/` holds (meshopt-glb.ts). */
+  const compressed = new Map<string, Uint8Array>();
   let outDir: string;
   let building = false;
 
@@ -112,9 +116,24 @@ export function publishedAssets(): Plugin {
       outDir = resolve(config.root, config.build.outDir);
       building = config.command === 'build';
     },
+    // The site serves the model layers meshopt-compressed and versions them by what it serves;
+    // `public/` keeps the files the pipeline wrote and its validators read.
+    async buildStart() {
+      if (!building) return;
+      for (const path of modelLayers(publicDirectory)) {
+        const bytes = await compressGlb(readFileSync(resolve(publicDirectory, path)));
+        compressed.set(path, bytes);
+        published[path] = recordOf(bytes, path);
+      }
+    },
     async closeBundle() {
       // A development server calls this on close, and has no build to write into.
       if (!building) return;
+      for (const [path, bytes] of compressed) {
+        const target = resolve(outDir, path);
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, bytes);
+      }
       writeFileSync(resolve(outDir, 'sw.js'), await serviceWorkerCode(workerVersions(published)));
     },
   };

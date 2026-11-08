@@ -23,6 +23,7 @@ import type {
   Texture,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { HEMISPHERES, SURFACE_COLORS } from '../../types/index.ts';
 import type {
   DisplaySettings,
@@ -482,7 +483,8 @@ export class BrainAtlas extends EventTarget {
         ? readJson<StimulationFtract>(new URL(manifest.stimulation_ftract.file, url))
         : null,
     ]);
-    const gltf = new GLTFLoader();
+    // The site serves the layers meshopt-compressed (web/build/meshopt-glb.ts); public/ does not.
+    const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     const path = new URL('.', url).href;
     const loader: GlbLoader = {
       async loadAsync(file, onProgress) {

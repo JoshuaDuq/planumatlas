@@ -709,3 +709,12 @@ document, `location`, `history` and `window` directly.
 - **Source:** `viewer/main.js:30-41`; `viewer/render/scene.js`
 - **Expected:** `FRAMEBUFFER_COMPLETE`, `NO_ERROR`, `RENDERBUFFER_SAMPLES` = 4.
 - **Covered by:** `src/boot/webgl-probe.svelte.test.ts` (H)
+
+### BUILD-14 · Model layers are served meshopt-compressed and decode to the published bytes
+
+- **Rule:** The build serves every GLB the model loader reads (each anatomy's atlases, detail levels, solid envelopes and supplemental layers) with its positions and triangle indices under a required `EXT_meshopt_compression`, encoded losslessly and in order (`ATTRIBUTES`, `INDICES`), and versions it by the bytes it serves. Every other published file, the atlas comparison geometry included, is served as published.
+- **Kind:** behaviour
+- **Level:** unit; post-build check of `web/dist` (`web-check`)
+- **Source:** `web/build/meshopt-glb.ts`; `web/build/published-files.ts` `buildStart`, `closeBundle`
+- **Expected:** a compressed layer parsed with the decoder gives the published meshes, names, metadata and every attribute and index byte; without the decoder it is refused; every published GLB is a layer or comparison geometry, never both; in `web/dist` each version is the first 16 hex of the served bytes' SHA-256, each layer requires the extension and every other file equals `public/`.
+- **Covered by:** `build/meshopt-glb.test.ts` (H); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job); `src/lib/engine/model/assets.test.ts` "ATLAS-11" (R, the app's loader reads the compressed layers)

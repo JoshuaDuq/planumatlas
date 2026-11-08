@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { afterAll, afterEach, beforeAll, describe, test, vi } from 'vitest';
 import { Color, Plane, Raycaster, Vector3 } from 'three';
 import { tissueColor } from '../render/materials.ts';
@@ -10,6 +11,9 @@ import { readModel } from '../../core/catalog/test-support.ts';
 import { anatomies } from '../../core/catalog/test-support.ts';
 import { BrainAtlas } from './brain-atlas.ts';
 import { modelDirectory, publishedLoader, readManifest } from './test-support.ts';
+import { compressGlb, modelLayers } from '../../../../build/meshopt-glb.ts';
+
+const publicDirectory = fileURLToPath(new URL('../../../../../public/', import.meta.url));
 
 for (const { id: published } of anatomies.anatomies) {
   test(
@@ -259,13 +263,15 @@ describe('the published CDMD model', () => {
   });
 
   test(
-    'ATLAS-11 loading from the published manifest reads its sidecars, reports progress and disposes a model that fails to open',
+    'ATLAS-11 loading from the published manifest reads its sidecars and the layers as the site serves them, reports progress and disposes a model that fails to open',
     { timeout: 120_000 },
     async () => {
+      const layers = new Set(modelLayers(publicDirectory));
       vi.spyOn(assetCache, 'fetchAsset').mockImplementation(async (url, options) => {
-        const bytes = await readFile(
-          new URL(String(url).split('/').pop()!, modelDirectory(published)),
-        );
+        const file = String(url).split('/').pop()!;
+        let bytes: Uint8Array = await readFile(new URL(file, modelDirectory(published)));
+        // The built site serves each model layer meshopt-compressed (BUILD-14).
+        if (layers.has(`models/${published}/${file}`)) bytes = await compressGlb(bytes);
         const buffer = bytes.buffer.slice(
           bytes.byteOffset,
           bytes.byteOffset + bytes.byteLength,

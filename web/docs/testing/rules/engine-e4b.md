@@ -98,7 +98,7 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 
 ### ATLAS-11 · Loading from the published manifest reads its sidecars and cleans up on failure
 
-- **Rule:** `BrainAtlas.load` reads the manifest, then the CAB-NP, functional, domain and term sidecars it names (relative to the manifest), then opens the requested atlas with progress. If opening fails, the half-built model is disposed and the error surfaces.
+- **Rule:** `BrainAtlas.load` reads the manifest, then the CAB-NP, functional, domain and term sidecars it names (relative to the manifest), then opens the requested atlas with progress, from layers served meshopt-compressed as the built site serves them (BUILD-14). If opening fails, the half-built model is disposed and the error surfaces.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/model/brain-atlas.js:130-156`

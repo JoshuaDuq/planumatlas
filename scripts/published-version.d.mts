@@ -8,6 +8,15 @@ export function publishedRecord(
   size: number;
   gunzipped?: { sha256: string; size: number };
 };
+export function recordOf(
+  bytes: Uint8Array,
+  path: string,
+): {
+  version: string;
+  sha256: string;
+  size: number;
+  gunzipped?: { sha256: string; size: number };
+};
 export function publishedFiles(publicDirectory: string): Record<
   string,
   {

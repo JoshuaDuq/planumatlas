@@ -41,6 +41,8 @@ The mesh must be outward-wound (positive volume) or the build fails.
 
 `encode.py` quantises each field to `uint16` over its range, $x = v/65535\,(h - l) + l$; a value outside a supplied range is refused, not clamped. Positions are `float32`; normals are `int16` normalised under `KHR_mesh_quantization`, declared required so a reader without it fails.
 
+The site serves the model layers with their positions and triangle indices under `EXT_meshopt_compression` (`web/build/meshopt-glb.ts`, at build time; `public/` keeps the files `encode.py` wrote). The encoding is lossless and keeps order: `ATTRIBUTES` for positions and `INDICES`, not `TRIANGLES`, which would rotate each triangle's corners. The decoded buffers are the published bytes, and a layer is about 28% smaller over gzip for a detail level, 7% for a cortical atlas. The atlas comparison geometry is served as published, since the app checks it against the SHA-256 its comparison file records.
+
 ### Tissue shading
 
 In the cortical shader (`createAnatomicalMaterial`, `addFoldShading`):

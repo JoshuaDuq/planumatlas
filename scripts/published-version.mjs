@@ -15,7 +15,11 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
  * `Content-Encoding: gzip` (Vite's does), and the browser then hands those over.
  */
 export function publishedRecord(publicDirectory, path) {
-  const bytes = readFileSync(resolve(publicDirectory, path));
+  return recordOf(readFileSync(resolve(publicDirectory, path)), path);
+}
+
+/** `publishedRecord` of these bytes, published at `path`. */
+export function recordOf(bytes, path) {
   const sha256 = digest(bytes);
   const record = { version: sha256.slice(0, 16), sha256, size: bytes.byteLength };
   if (path.endsWith('.gz')) {

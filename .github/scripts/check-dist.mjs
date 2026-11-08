@@ -1,9 +1,12 @@
 // Checks the built site in web/dist (after `npm run build --prefix web`, from the repository
 // root): the published data, the chunks, the page's head and the service worker's version map.
-// BUILD-02 to BUILD-06 in web/docs/testing/rules/boot-and-assets.md. It fails if dist/index.html is absent.
+// BUILD-02 to BUILD-06 and BUILD-14 in web/docs/testing/rules/boot-and-assets.md. It fails if
+// dist/index.html is absent.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
+import { modelLayers } from '../../web/build/meshopt-glb.ts';
 
 const dist = resolve('web/dist');
 const published = resolve('public');
@@ -68,6 +71,25 @@ const walk = (directory) =>
         `${directory}/${relative(resolve(published, directory), resolve(entry.parentPath, entry.name)).split(sep).join('/')}`,
     );
 assert.deepEqual(Object.keys(map.files).sort(), [...walk('models'), ...walk('diffusion')].sort());
+// BUILD-14: each version is that of the bytes the site serves: a model layer's meshopt-compressed
+// GLB, which a reader without the decoder must refuse, and every other file as published.
+const layers = new Set(modelLayers(published));
+assert.ok(layers.size > 0, 'the anatomies publish model layers');
+for (const [path, version] of Object.entries(map.files)) {
+  const served = readFileSync(resolve(dist, path));
+  const sha256 = createHash('sha256').update(served).digest('hex');
+  assert.equal(sha256.slice(0, 16), version, `${path} is served as its version names`);
+  if (layers.has(path)) {
+    const gltf = JSON.parse(served.subarray(20, 20 + served.readUInt32LE(12)).toString('utf8'));
+    assert.ok(
+      gltf.extensionsRequired.includes('EXT_meshopt_compression'),
+      `${path} is compressed`,
+    );
+  } else {
+    const original = readFileSync(resolve(published, path));
+    assert.ok(served.equals(original), `${path} is served as published`);
+  }
+}
 for (const [path, version] of Object.entries(map.gunzipped)) {
   assert.ok(path.endsWith('.gz'), path);
   assert.match(version, /^[0-9a-f]{16}$/, path);
