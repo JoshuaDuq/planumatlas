@@ -6,10 +6,13 @@
  * Needs the Playwright Chromium installed for web/. Each panel is a native capture of the
  * stage (or a linked MRI plane) with the orientation marks, scale bar and controls hidden;
  * panels are cropped to their content, never recoloured, and written as
- * .github/assets/readme/<figure>-light.webp and -dark.webp.
+ * .github/assets/readme/<figure>-light.webp and -dark.webp. The overlay figure loads an HCP
+ * group z map from NeuroVault into the viewer's Overlay tool.
  */
 import { createRequire } from 'node:module';
-import { writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(new URL('../web/package.json', import.meta.url));
@@ -32,9 +35,16 @@ const tracts = (view, ids) => ({ state: { ...base, tab: 'diffusion', view, opaci
 const keyed = (state) => ({ state: { ...base, ...state }, keys: true, viewport: [1000, 760] });
 const mri = (plane, pos, view) => ({ ...cut(base, plane, pos, view), mri: plane });
 
+// HCP motor task, right hand minus the average of all movements: group z, 486 people (NeuroVault image 3161).
+const OVERLAY = {
+  url: 'https://neurovault.org/media/images/457/tfMRI_MOTOR_RH-AVG_zstat1.nii.gz',
+  title: 'Right hand vs average movement', threshold: '10', max: '25',
+};
+const overlay = (state, extra) => ({ state: { ...base, colors: 'mri', ...state }, overlay: true, ...extra });
+
 const FIGURES = [
   {
-    name: 'overview', lead: true, aspect: 1.36,
+    name: 'overview', aspect: 1.36, grid: [[0, 0, 2, 2], [2, 0, 1, 1], [2, 1, 1, 1]],
     panels: [
       cut(nextbrain, 'coronal', '-20', 'anterior'),
       tracts('left', 'af-left,cst-left'),
@@ -79,17 +89,50 @@ const FIGURES = [
       keyed({ region: 'destrieux:left:4', cases: 'M2295,M2272' }),
     ],
   },
+  {
+    name: 'overlay', aspect: 1.15,
+    grid: [[0, 0, 1, 1], [1, 0, 1, 1], [0, 1, 1, 1], [1, 1, 1, 1], [2, 0, 1, 2]],
+    panels: [
+      overlay({ view: 'left' }, { keys: true, viewport: [1200, 760] }),
+      overlay({ cut: 'sagittal', pos: '18', view: 'right' }),
+      overlay({ cut: 'coronal', pos: '-22', view: 'anterior' }),
+      overlay({ cut: 'coronal', pos: '-22', view: 'anterior' }, { mri: 'coronal' }),
+      overlay({ view: 'left' }, { clusters: true, viewport: [1400, 1600] }),
+    ],
+  },
 ];
 
 const hashOf = (state) => new URLSearchParams(state).toString().replaceAll('%2C', ',').replaceAll('%3A', ':');
 
-async function capture(browser, panel) {
+/** Load the overlay map through the Overlay tool, as a reader would; leave its cluster table open if asked. */
+async function openOverlay(page, file, clusters) {
+  await page.getByRole('button', { name: 'Overlay', exact: true }).click();
+  const tool = page.locator('.overlay');
+  // HCP volumes are in FSL's MNI152, which the tool offers only as an unstated MNI template.
+  await tool.locator('select').first().selectOption('unstated');
+  await tool.locator('input[type=file]').setInputFiles(file);
+  await tool.locator('input[id^="overlay-threshold"]').fill(OVERLAY.threshold);
+  await tool.locator('input[id^="overlay-max"]').fill(OVERLAY.max);
+  await tool.getByText('Map settings', { exact: true }).click();
+  const title = tool.locator('input[id^="overlay-title"]');
+  await title.fill(OVERLAY.title);
+  await title.blur();
+  await page.locator('#stage-keys').getByText(OVERLAY.title).waitFor({ state: 'attached' });
+  if (clusters) {
+    await tool.getByText('Map settings', { exact: true }).click();
+    await tool.getByText(/^Clusters and peaks/).click();
+    await tool.locator('.peaks').waitFor();
+  } else {
+    await page.keyboard.press('Escape');
+  }
+}
+
+async function capture(browser, panel, overlayFile) {
   const [width, height] = panel.viewport ?? (panel.mri ? [1600, 1000] : [1400, 1000]);
   const context = await browser.newContext({
-    viewport: { width, height }, deviceScaleFactor: panel.mri ? 3 : 2, colorScheme: 'light',
+    viewport: { width, height }, deviceScaleFactor: panel.mri || panel.clusters ? 3 : 2, colorScheme: 'light',
   });
-  // The dock holds the Linked MRI button, so it stays for MRI panels, which capture only the plane.
-  const hidden = `.orientation,.scale-bar,.orientation-gizmo,${panel.mri ? '.mpr-dock .picture>:not(canvas)' : '.stage-dock'}{visibility:hidden!important}`
+  const hidden = '.orientation,.scale-bar,.orientation-gizmo{visibility:hidden!important}'
     + (panel.keys ? '.stage-key-note{display:none!important}' : '.stage-keys{display:none!important}');
   await context.addInitScript((css) => {
     localStorage.setItem('planum.guide', 'seen');
@@ -100,6 +143,7 @@ async function capture(browser, panel) {
     });
   }, hidden);
   const page = await context.newPage();
+  page.setDefaultTimeout(180_000);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   try {
@@ -114,6 +158,10 @@ async function capture(browser, panel) {
     await page.evaluate(() => document.fonts.ready);
     // The camera eases into place and redraws at full resolution once it rests.
     await page.waitForTimeout(4000);
+    if (panel.overlay) {
+      await openOverlay(page, overlayFile, panel.clusters);
+      await page.waitForTimeout(4000);
+    }
     let target = page.locator('#viewport');
     if (panel.mri) {
       await page.getByRole('button', { name: 'Linked MRI', exact: true }).first().click();
@@ -121,6 +169,9 @@ async function capture(browser, panel) {
       await target.waitFor({ state: 'visible', timeout: 120_000 });
       await page.waitForTimeout(3000);
     }
+    if (panel.clusters) target = page.locator('.overlay .stage-field:has(.peaks)');
+    // The dock carries the Overlay and Linked MRI buttons, so it is hidden only now; it also holds the open tool.
+    if (!panel.clusters) await page.addStyleTag({ content: '.stage-dock,.mpr-dock .picture>:not(canvas){visibility:hidden!important}' });
     await page.mouse.move(0, height - 1);
     if (errors.length) throw new Error(errors.join('\n'));
     return await target.screenshot({ animations: 'disabled', timeout: 240_000 });
@@ -138,6 +189,7 @@ async function compose({ figure, images, width, gutter, band, grounds }) {
     image.src = src;
   });
   const pictures = await Promise.all(images.map(load));
+  const EDGE = 12;
 
   // Content box from the 0.1–99.9 % quantiles of lit pixels, so stray specks do not widen it.
   const contentBox = (image) => {
@@ -175,38 +227,53 @@ async function compose({ figure, images, width, gutter, band, grounds }) {
     return { cx: (left + right) / 2, cy: (top + bottom) / 2, w: right - left, h: bottom - top };
   };
 
-  const { columns = 3, aspect, lead, sameScale, panels } = figure;
+  const { columns = 3, aspect, grid, sameScale, panels } = figure;
   const cell = (width - gutter * (columns - 1)) / columns;
   const cellHeight = Math.round(cell / aspect);
-  // A lead figure gives panel a two columns and two rows, with b and c stacked beside it.
+  // grid places a panel at [column, row, columns spanned, rows spanned]; otherwise panels fill rows.
   const slots = panels.map((_, index) => {
-    if (lead && index === 0) return { x: 0, y: 0, w: Math.round(cell * 2 + gutter), h: cellHeight * 2 + band + gutter };
-    const column = lead ? 2 : index % columns;
-    const row = lead ? index - 1 : Math.floor(index / columns);
-    return { x: Math.round(column * (cell + gutter)), y: row * (band + cellHeight + gutter), w: Math.round(cell), h: cellHeight };
+    const [column, row, across, down] = grid?.[index] ?? [index % columns, Math.floor(index / columns), 1, 1];
+    return {
+      x: Math.round(column * (cell + gutter)), y: row * (band + cellHeight + gutter),
+      w: Math.round(across * cell + (across - 1) * gutter), h: down * cellHeight + (down - 1) * (band + gutter),
+    };
   });
   const height = Math.max(...slots.map((slot) => slot.y + band + slot.h));
 
   const windows = panels.map((panel, index) => {
     const image = pictures[index];
     const slot = slots[index];
-    if (panel.mri) return { cx: image.width / 2, cy: image.height / 2, w: image.width, h: image.height };
-    const box = contentBox(image);
-    let w = box.w * 1.08;
-    let h = box.h * 1.08;
+    // An MRI plane or a table is shown whole, less an EDGE that blends into the page behind it;
+    // a stage capture is cropped to its content with a margin.
+    const box = panel.fit
+      ? { cx: image.width / 2, cy: image.height / 2, w: image.width - 2 * EDGE, h: image.height - 2 * EDGE }
+      : contentBox(image);
+    const margin = panel.fit ? 1 : 1.08;
+    let w = box.w * margin;
+    let h = box.h * margin;
     if (w / h > slot.w / slot.h) h = w * slot.h / slot.w;
     else w = h * slot.w / slot.h;
     return { cx: box.cx, cy: box.cy, w, h };
   });
   // One millimetre spans the same width in every stage panel of the figure.
   if (sameScale) {
-    const stages = panels.flatMap((panel, index) => (panel.mri ? [] : [index]));
+    const stages = panels.flatMap((panel, index) => (panel.fit ? [] : [index]));
     const scale = Math.max(...stages.map((index) => windows[index].w / slots[index].w));
     for (const index of stages) {
       windows[index].w = slots[index].w * scale;
       windows[index].h = slots[index].h * scale;
     }
   }
+
+  // A slot is filled with its picture's own background, so a whole MRI plane or table sits without seams.
+  const fills = panels.map((panel, index) => {
+    if (!panel.fit) return '#000000';
+    const canvas = new OffscreenCanvas(1, 1);
+    const context = canvas.getContext('2d');
+    context.drawImage(pictures[index], EDGE, EDGE, 1, 1, 0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return `rgb(${r}, ${g}, ${b})`;
+  });
 
   const result = {};
   for (const [name, [ground, ink]] of Object.entries(grounds)) {
@@ -220,13 +287,14 @@ async function compose({ figure, images, width, gutter, band, grounds }) {
       const window = windows[index];
       const image = pictures[index];
       const top = slot.y + band;
-      context.fillStyle = '#000000';
+      context.fillStyle = fills[index];
       context.fillRect(slot.x, top, slot.w, slot.h);
-      // Clip the source window to the image; the uncovered part stays stage black.
-      const sx = Math.max(0, window.cx - window.w / 2);
-      const sy = Math.max(0, window.cy - window.h / 2);
-      const ex = Math.min(image.width, window.cx + window.w / 2);
-      const ey = Math.min(image.height, window.cy + window.h / 2);
+      // Clip the source window to the picture (less its edge if fitted); the rest keeps the slot's fill.
+      const edge = panels[index].fit ? EDGE : 0;
+      const sx = Math.max(edge, window.cx - window.w / 2);
+      const sy = Math.max(edge, window.cy - window.h / 2);
+      const ex = Math.min(image.width - edge, window.cx + window.w / 2);
+      const ey = Math.min(image.height - edge, window.cy + window.h / 2);
       const kx = slot.w / window.w;
       const ky = slot.h / window.h;
       context.drawImage(
@@ -248,18 +316,26 @@ async function compose({ figure, images, width, gutter, band, grounds }) {
 
 const chosen = args.length ? FIGURES.filter((figure) => args.includes(figure.name)) : FIGURES;
 if (chosen.length !== (args.length || FIGURES.length)) throw new Error(`Unknown figure in: ${args.join(', ')}`);
+const temporary = await mkdtemp(join(tmpdir(), 'planum-figures-'));
+// The file keeps its name: the Overlay tool reads the statistic from "zstat1".
+const overlayFile = join(temporary, basename(new URL(OVERLAY.url).pathname));
+if (chosen.some((figure) => figure.panels.some((panel) => panel.overlay))) {
+  const response = await fetch(OVERLAY.url);
+  if (!response.ok) throw new Error(`NeuroVault answered ${response.status} for ${OVERLAY.url}`);
+  await writeFile(overlayFile, Buffer.from(await response.arrayBuffer()));
+}
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 try {
   for (const figure of chosen) {
     const images = [];
     for (const [index, panel] of figure.panels.entries()) {
-      images.push(`data:image/png;base64,${(await capture(browser, panel)).toString('base64')}`);
+      images.push(`data:image/png;base64,${(await capture(browser, panel, overlayFile)).toString('base64')}`);
       console.log(`${figure.name} ${String.fromCharCode(97 + index)}`);
     }
     const context = await browser.newContext();
     const page = await context.newPage();
     const files = await page.evaluate(compose, {
-      figure: { ...figure, panels: figure.panels.map(({ mri: plane }) => ({ mri: plane ?? null })) },
+      figure: { ...figure, panels: figure.panels.map((panel) => ({ fit: Boolean(panel.mri || panel.clusters) })) },
       images, width: WIDTH, gutter: GUTTER, band: BAND, grounds: GROUNDS,
     });
     await context.close();
@@ -270,4 +346,5 @@ try {
   }
 } finally {
   await browser.close();
+  await rm(temporary, { recursive: true });
 }

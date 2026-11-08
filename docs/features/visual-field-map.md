@@ -3,10 +3,10 @@
 A dot placed in the visual field lights the cortex of V1, V2 and V3 predicted to represent it, and the area of that cortex is reported in mm². The prediction is the Benson anatomical template (v4.0), fitted to the group average of 181 Human Connectome Project (HCP) 7T retinotopy participants and carried from `fsaverage` onto CDMD through the registered spheres. It is a prediction from folding, not a measurement: no retinotopy was scanned in this brain.
 
 ```{figure} figures/visual-field-map-1.webp
-:alt: Two rows. Each shows the visual-field disc with a dot 5 degrees from fixation and its predicted V1, V2 and V3 territory in square millimetres, beside the medial occipital cortex of one hemisphere with V1 to V3 in greys and the dot's territory in teal. Top, upper-right dot, left hemisphere, 38, 32 and 34 square millimetres. Bottom, lower-left dot, right hemisphere, 85, 37 and 65 square millimetres.
+:alt: Two rows. Each shows the visual-field disc with a dot 5 degrees from fixation, its caption and its predicted V1, V2 and V3 territory in square millimetres, beside the occipital lobes of both hemispheres seen from the midline, the right hemisphere on the left of the image and the left on the right, V1 to V3 in greys and the predicted response in red to yellow. Top, upper-right dot, a red-to-yellow patch below the calcarine sulcus of the left hemisphere; 38, 32 and 34 square millimetres. Bottom, lower-left dot, a patch above the calcarine sulcus of the right hemisphere; 85, 37 and 65 square millimetres.
 :name: fig-visual-field-map-1
 
-**Each quarter of the visual field is predicted in the opposite hemisphere and the opposite bank of the calcarine sulcus.** **a**, Dot at (4°, 3°), radius 1.5°, upper right: left hemisphere, ventral to the calcarine sulcus; predicted territory V1 38 mm², V2 32 mm², V3 34 mm². **b**, Dot at (−4°, −3°), radius 1.5°, lower left: right hemisphere, dorsal (cuneus); V1 85 mm², V2 37 mm², V3 65 mm². Disc: eccentricity on a log scale, dashed ring at the measured 8°. Stage: CDMD, Destrieux atlas, one hemisphere seen from the midline; V1, V2 and V3 in three greys, cortex outside V1–V3 near black, the dot's core in teal and its one-σ reach fainter. Territories agree with a recomputation from `retinotopy.json` to 0.5 mm².
+**Each quarter of the visual field is predicted in the opposite hemisphere and the opposite bank of the calcarine sulcus.** **a**, Dot at (4°, 3°), radius 1.5°, upper right: left hemisphere, ventral to the calcarine sulcus; predicted territory V1 38 mm², V2 32 mm², V3 34 mm². **b**, Dot at (−4°, −3°), radius 1.5°, lower left: right hemisphere, dorsal (cuneus); V1 85 mm², V2 37 mm², V3 65 mm². Disc: eccentricity on a log scale, dashed ring at the measured 8°. Stage: CDMD, Destrieux atlas, both hemispheres as the medial pair seen from the subject's right (right hemisphere on the image's left), cropped to the occipital lobes; V1, V2 and V3 in three greys, cortex outside V1–V3 near black, and the predicted response from 0.159 (red) to 1 (yellow). Territories agree with a recomputation from `retinotopy.json` to 0.5 mm².
 ```
 
 ## Data
@@ -101,4 +101,4 @@ uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_retinotopy.py
 ```
 
-Figure state (panel a; choose **Return to map view** after opening; panel b uses `dot=-4,-3,1.5`): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&tab=circuits&map=visual-field&dot=4,3,1.5
+Figure state (panel a; panel b uses `dot=-4,-3,1.5`): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&tab=circuits&map=visual-field&view=right&internal=0&dot=4,3,1.5

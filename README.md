@@ -60,7 +60,7 @@ It runs in any WebGL 2 browser, in English and French, with keyboard and touch c
 
 <sub><b>Fig. 2 | Six colourings of the same left hemisphere.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left">Destrieux</a>, 148 gyral and sulcal parcels. <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&cuts=hcp-mmp&detail=learning&view=left">HCP-MMP</a>, 360 multimodal areas. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=julich&cuts=julich&detail=learning&view=left">Julich-Brain 3.1</a>, 278 cytoarchitectonic areas. <b>d</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=schaefer&cuts=schaefer&detail=learning&view=left">Schaefer</a>, 400 parcels in seven-network colours. <b>e</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left&colors=cab-np">CAB-NP</a>, 12 networks. <b>f</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left&colors=territory">Arterial territories</a> (Liu et al., 2023). Same camera and scale in every panel.</sub>
 
-Four cortical atlases share one surface, and the cortex can also be coloured by Yeo or CAB-NP networks, arterial territory or the subject’s T1. Beneath it, choose NextBrain’s 514 labels at 0.4 mm (292 meshed structures and 222 more on cut faces), FreeSurfer’s 32 aseg structures or a 106-structure teaching set, down through the brainstem, the cerebellar lobules and the cervical cord. A selected region reports its volume or surface area, centroid and source labels; **Focus**, **Isolate** and **Hide** dissect it in context.
+Four cortical atlases share one surface, and the cortex can also be coloured by Yeo or CAB-NP networks, arterial territory or the subject’s T1, and drawn on the pial, mid-thickness or white surface to open the sulci. Beneath it, choose NextBrain’s 514 labels at 0.4 mm (292 meshed structures and 222 more on cut faces), FreeSurfer’s 32 aseg structures or a 106-structure teaching set, down through the brainstem, the cerebellar lobules and the cervical cord. A selected region reports its volume or surface area, centroid and source labels; **Focus**, **Isolate** and **Hide** dissect it in context.
 
 Methods: [cortical atlases](https://planumatlas.com/docs/features/cortical-atlases.html) · [internal anatomy](https://planumatlas.com/docs/features/internal-anatomy.html) · [spinal cord](https://planumatlas.com/docs/features/spinal-cord.html) · [dissection and display](https://planumatlas.com/docs/features/dissection-and-display.html)
 
@@ -73,7 +73,7 @@ Methods: [cortical atlases](https://planumatlas.com/docs/features/cortical-atlas
 
 <sub><b>Fig. 3 | Capped sections and the subject’s own scan.</b> <b>a–c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=sagittal&pos=-20&view=right">Sagittal</a> (x = −20 mm, from the right), <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=coronal&pos=-20&view=anterior">coronal</a> (y = −20 mm, from the front) and <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=axial&pos=12&view=superior">axial</a> (z = 12 mm, from above) cuts; each structure is capped where the plane meets it, coloured from the Destrieux cut labels. <b>d–f</b>, The T1-weighted scan in the same planes, as <b>Linked MRI</b> shows it. Positions are FreeSurfer surface RAS.</sub>
 
-Cut sagittally, coronally, axially or at any oblique angle. Cap colours come from the chosen label volume, not from the meshes, so the same cut can show Destrieux, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial, cerebellar or striatal labels. **Linked MRI** opens the scan in three planes around a shared crosshair, with window and level, a segmentation overlay, the label at the crosshair and PNG export.
+Cut sagittally, coronally, axially or at any oblique angle. Cap colours come from the chosen label volume, not from the meshes, so the same cut can show Destrieux, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial, cerebellar or striatal labels. **Linked MRI** opens the scan in three planes around a shared crosshair, with window and level, a segmentation overlay, the label at the crosshair and PNG export. It also opens from a function’s or deficit’s profile and draws that paint on the scan.
 
 Methods: [sections and cuts](https://planumatlas.com/docs/features/sections-and-cuts.html) · [linked MRI](https://planumatlas.com/docs/features/linked-mri.html) · [boundary certainty](https://planumatlas.com/docs/features/boundary-certainty.html) · [segmentation agreement](https://planumatlas.com/docs/features/segmentation-agreement.html)
 
@@ -99,7 +99,7 @@ Methods: [tracts](https://planumatlas.com/docs/features/tracts.html)
 
 <sub><b>Fig. 5 | Group evidence on one anatomy.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&cuts=hcp-mmp&detail=learning&tab=functions&function=spatial-attention&view=right">Where studies of healthy groups report activation for spatial attention</a> (Neurosynth, HCP-MMP areas with z ≥ 3). <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=deficits&deficit=neglect&view=right">Regions cited for hemispatial neglect</a>, one colour per published finding. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&region=destrieux:left:4&cases=M2295,M2272">Two Aphasia Recovery Cohort lesions</a> and their overlap, with the left subcentral region outlined.</sub>
 
-These layers place published evidence beside the anatomy with its sources and limits in view. They describe group findings, templates and spatial overlap; they are not measurements of this individual or predictions for a patient.
+These layers place published evidence beside the anatomy with its sources and limits in view. A paint can also be drawn over the subject’s T1, which shows wherever nothing is painted. The layers describe group findings, templates and spatial overlap; they are not measurements of this individual or predictions for a patient.
 
 | Layer | What it shows |
 | :--- | :--- |
@@ -108,12 +108,19 @@ These layers place published evidence beside the anatomy with its sources and li
 | [Circuits](https://planumatlas.com/docs/features/circuits.html) | Five guided pathways with 25 landmarks and notes on the relays they omit. |
 | [Stroke cases](https://planumatlas.com/docs/features/stroke-cases.html) | 228 Aphasia Recovery Cohort lesions, with lesion volume and WAB aphasia quotient. |
 | [Stimulation responses](https://planumatlas.com/docs/features/stimulation-responses.html) | SEEG response rates with their sample counts, from Lyu et al. (27 people) and F-TRACT v2307 (613 people). |
-| [Visual field map](https://planumatlas.com/docs/features/visual-field-map.html) | V1–V3 predicted from this brain’s folding by the Benson template; no retinotopy was measured. |
+| [Visual field map](https://planumatlas.com/docs/features/visual-field-map.html) | The V1–V3 response to a dot in the visual field, predicted from this brain’s folding by the Benson template and a pRF model, on both hemispheres side by side; no retinotopy was measured. |
 | [Functional networks](https://planumatlas.com/docs/features/functional-networks.html) | Yeo 7 and CAB-NP 12 networks, with [cerebellar](https://planumatlas.com/docs/features/cerebellar-functions.html) and [striatal](https://planumatlas.com/docs/features/striatal-networks.html) counterparts and [functional divisions](https://planumatlas.com/docs/features/functional-divisions.html). |
 
 A selected region also opens its [atlas comparison](https://planumatlas.com/docs/features/atlas-comparison.html), [receptor fingerprint](https://planumatlas.com/docs/features/receptor-fingerprints.html) (up to 17 receptors), [arterial territory](https://planumatlas.com/docs/features/arterial-territories.html) and [boundary certainty](https://planumatlas.com/docs/features/boundary-certainty.html).
 
 ## Bring your own data
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/overlay-dark.webp">
+  <img src=".github/assets/readme/overlay-light.webp" alt="Five panels of a motor task map in red and blue on a grey brain. a, the left hemisphere with a red hand area and a blue patch below it, and a colour key. b, a sagittal cut with two red cerebellar clusters. c, a coronal cut with red in the left motor cortex and blue in the right. d, the same coronal plane on the T1-weighted MRI. e, the cluster table with peak values, coordinates and volumes.">
+</picture>
+
+<sub><b>Fig. 6 | A published group map, opened in the Overlay tool.</b> HCP motor task, right hand minus the average of all movements: the group z map of 486 people (<a href="https://neurovault.org/images/3161/">NeuroVault image 3161</a>), in FSL’s MNI152, opened as an MNI map of unstated template and drawn at |z| > 10, colours to 25. <b>a</b>, Left hemisphere, with the key titled in the tool: the hand area of the left motor cortex in red, the precentral cortex below it, where the other movements dominate, in blue. <b>b</b>, Sagittal cut at x = 18 mm, seen from the right: two right cerebellar clusters, the hand representations ipsilateral to the moving hand. <b>c</b>, Coronal cut at y = −22 mm, seen from the front: red in the left motor cortex, blue in the right. <b>d</b>, The same plane on the subject’s T1 in <b>Linked MRI</b>. <b>e</b>, The cluster table, computed as nilearn’s <code>get_clusters_table</code> computes it, in template millimetres. Data: Human Connectome Project, WU-Minn Consortium.</sub>
 
 - **[Published coordinates](https://planumatlas.com/docs/features/published-coordinates.html).** Place a coordinate from MNI152NLin2009cAsym or SPM12 space on this brain and read the regions around it.
 - **[Overlays](https://planumatlas.com/docs/features/overlays.html).** Open an MNI-space NIfTI-1 map or 4D series and draw it on the surfaces, cut faces and MRI, with thresholds, clusters and a region time course. The file is read in the browser and never uploaded.
@@ -195,7 +202,7 @@ Each methods page lists the commands that rebuild and test its feature under **C
 node scripts/readme-figures.mjs
 ```
 
-The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (installed for `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). Pass another origin, such as a local server, as the first argument, or name figures to render only those.
+The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (installed for `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). For Fig. 6 it downloads the HCP map from NeuroVault and opens it in the Overlay tool, as a reader would. Pass another origin, such as a local server, as the first argument, or name figures to render only those.
 
 </details>
 
@@ -235,3 +242,5 @@ The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs
 | BSD-2-Clause | Aphasia Recovery Cohort normalised lesions |
 
 Some terms are non-commercial or require attribution. Consult the [references, licences and acknowledgements](https://planumatlas.com/docs/reference/references.html) before reusing any data.
+
+The map in Fig. 6 is not distributed with Planum; [the figure script](scripts/readme-figures.mjs) downloads it from NeuroVault. Data were provided by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.
