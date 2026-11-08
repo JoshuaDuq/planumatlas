@@ -1,10 +1,11 @@
 import { expect, test, vi } from 'vitest';
 import type { Cluster } from '../core/user-map/clusters.ts';
+import { VOLUMES_PER_SECOND } from '../core/user-map/display.ts';
 import type { MapSummary } from '../core/user-map/display.ts';
 import { MapFileError } from '../core/user-map/map-file-error.ts';
 import { createFakeUserMap } from '../engine/fake/user-map.ts';
 import type { SurfaceColor } from '../types/index.ts';
-import { VOLUMES_PER_SECOND, createUserMapStore } from './user-map.svelte.ts';
+import { createUserMapStore } from './user-map.svelte.ts';
 
 const summary: MapSummary = {
   shape: [97, 115, 97],

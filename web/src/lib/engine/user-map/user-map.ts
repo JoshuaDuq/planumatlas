@@ -5,6 +5,7 @@ import { loadFieldData } from '../../core/coordinates/field.ts';
 import { readIn } from '../../core/coordinates/spaces.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import type { MapCourse } from '../../core/user-map/course.ts';
+import { VOLUMES_PER_SECOND } from '../../core/user-map/display.ts';
 import type { CortexSurface, MapDisplay, MapSummary } from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import {
@@ -18,7 +19,13 @@ import type { BrainAtlas } from '../model/brain-atlas.ts';
 import type { BrainSections } from '../slices/sections.ts';
 import { greyed } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
-import { clearUserMapVolume, setUserMapDisplay, setUserMapVolume } from './overlay.ts';
+import { prefersReducedMotion } from '../render/scene.ts';
+import {
+  clearUserMapVolume,
+  dropPrevious,
+  setUserMapDisplay,
+  setUserMapVolume,
+} from './overlay.ts';
 import { regionPoints } from './region-points.ts';
 import type {
   CarryJob,
@@ -36,6 +43,10 @@ type Hemisphere = (typeof HEMISPHERES)[number];
 /** How far from the pial towards the white surface each lies. */
 const SURFACE_DEPTH: Record<Exclude<CortexSurface, 'pial'>, number> = { mid: 0.5, white: 1 };
 const ATTRIBUTE = '_user_map';
+/** The cortex's values in the volume drawn before, while a series moves on from it. */
+const PREVIOUS = '_user_map_previous';
+/** A volume's share of a second at the fastest playback. */
+const STEP_MS = 1000 / VOLUMES_PER_SECOND;
 
 interface RibbonLabels {
   file: string;
@@ -215,8 +226,11 @@ export function createUserMap({
     return found;
   };
 
-  /** Give each parcel of the drawn cortical atlas its vertices' values, once per map and atlas. */
-  const paintCortex = async () => {
+  /**
+   * Give each parcel of the drawn cortical atlas its vertices' values, once per map and atlas; with
+   * `blend`, each keeps the values drawn until now to move on from.
+   */
+  const paintCortex = async (blend = false) => {
     const id = atlas.settings.atlas;
     const map = carried;
     if (!map || painted === id) return;
@@ -226,6 +240,11 @@ export function createUserMap({
       for (const [index, field] of partitionField(parents, map.cortex[hemisphere])) {
         const mesh = meshes.get(index)!;
         const drawn = mesh.geometry.getAttribute(ATTRIBUTE) as BufferAttribute | undefined;
+        if (blend && drawn) {
+          const kept = mesh.geometry.getAttribute(PREVIOUS) as BufferAttribute | undefined;
+          if (kept) overwrite(checked(kept, drawn.array), drawn.array);
+          else mesh.geometry.setAttribute(PREVIOUS, new BufferAttribute(drawn.array.slice(), 2));
+        }
         // Written over in place: a replaced attribute's GPU buffer is freed only with its geometry.
         if (drawn) overwrite(checked(drawn, field), field);
         else mesh.geometry.setAttribute(ATTRIBUTE, new BufferAttribute(field, 2));
@@ -313,18 +332,61 @@ export function createUserMap({
   // How the map is drawn now; a new extent of it is drawn the same way.
   let shown: MapDisplay | null = null;
   let drawnExtent = '';
+  let drawnVolume = 0;
   let extentRequest = 0;
   const extents = newestOnly();
   const tables = newestOnly();
 
-  /** Put a carried map on the cut faces, the linked MRI and the cortex. */
-  const place = async (map: CarriedMap) => {
+  // A series moving between volumes: the frame request, and when the last volume was placed.
+  let blendFrame = 0;
+  let placedAt = -Infinity;
+
+  const stopBlend = () => {
+    if (blendFrame) cancelAnimationFrame(blendFrame);
+    blendFrame = 0;
+  };
+
+  /** Stop any move between volumes and draw the current one alone. */
+  const settle = () => {
+    stopBlend();
+    dropPrevious(uniforms);
+  };
+
+  /**
+   * Move linearly from the previous volume to this one over as long as the last step took, so a playing
+   * series flows from volume to volume; a step on its own takes one playback step.
+   */
+  const blendIn = (since: number) => {
+    const duration = since < 2 * STEP_MS ? Math.max(since, STEP_MS) : STEP_MS;
+    const start = performance.now();
+    const frame = (now: number) => {
+      const share = Math.min(1, Math.max(0, (now - start) / duration));
+      if (share < 1) {
+        uniforms.userMapBlend.value = share;
+        blendFrame = requestAnimationFrame(frame);
+      } else settle();
+      invalidate();
+    };
+    blendFrame = requestAnimationFrame(frame);
+  };
+
+  /**
+   * Put a carried map on the cut faces, the linked MRI and the cortex; with `blend`, the volume drawn
+   * until now moves into it (never under reduced motion).
+   */
+  const place = async (map: CarriedMap, blend = false) => {
+    const moving = blend && !prefersReducedMotion();
+    stopBlend();
     unpaint();
     carried = map;
     at = gridSampler(map.grid, map.volume);
-    setUserMapVolume(uniforms, map.grid, map.volume);
+    setUserMapVolume(uniforms, map.grid, map.volume, moving);
+    if (moving) uniforms.userMapBlend.value = 0;
     if (shown) sections.setUserMap({ at, display: shown });
-    await paintCortex();
+    await paintCortex(moving);
+    const now = performance.now();
+    if (moving) blendIn(now - placedAt);
+    placedAt = now;
     invalidate();
   };
 
@@ -340,6 +402,7 @@ export function createUserMap({
 
   const onChange = () => {
     if (carried && painted !== atlas.settings.atlas) {
+      settle();
       unpaint();
       paintCortex().catch(report);
     }
@@ -381,6 +444,7 @@ export function createUserMap({
       cortexSent = true;
       if (ask !== request) throw new SupersededError('A newer map was opened.');
       drawnExtent = extentKey(volume, Number.NaN, 0);
+      drawnVolume = volume;
       shown = null;
       sections.setUserMap(null);
       setUserMapDisplay(uniforms, null);
@@ -414,8 +478,10 @@ export function createUserMap({
       if (ask !== extentRequest || loaded !== request) {
         throw new SupersededError('A newer extent was asked for.');
       }
+      const moved = volume !== drawnVolume;
       drawnExtent = key;
-      await place(map);
+      drawnVolume = volume;
+      await place(map, moved);
     },
     /**
      * A region's mean in each volume of the loaded map, over its whole millimetres inside the region's
@@ -454,6 +520,7 @@ export function createUserMap({
     /** Forget the map. */
     clear(): void {
       request++;
+      stopBlend();
       carried = null;
       at = null;
       shown = null;
@@ -469,6 +536,7 @@ export function createUserMap({
       worker = null;
       for (const job of waiting.values()) job.reject(new SupersededError('The engine closed.'));
       waiting.clear();
+      stopBlend();
       clearUserMapVolume(uniforms);
     },
   };

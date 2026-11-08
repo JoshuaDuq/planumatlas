@@ -18,6 +18,10 @@ export interface UserMapUniforms {
   /** The cortex's colour while the map is on, linear. */
   userMapBase: IUniform<Vector3>;
   userMapVolume: IUniform<Data3DTexture | null>;
+  /** The volume drawn before, held while a series moves from it to `userMapVolume`. */
+  userMapPrevious: IUniform<Data3DTexture | null>;
+  /** How far a series has moved from the previous volume to this one: 1 draws this one alone. */
+  userMapBlend: IUniform<number>;
   worldToUserMap: IUniform<Matrix4>;
   userMapShape: IUniform<Vector3>;
   [uniform: string]: IUniform;
@@ -32,6 +36,8 @@ export function createUserMapUniforms(): UserMapUniforms {
     userMapOpacity: { value: 1 },
     userMapBase: { value: new Vector3() },
     userMapVolume: { value: null },
+    userMapPrevious: { value: null },
+    userMapBlend: { value: 1 },
     worldToUserMap: { value: new Matrix4() },
     userMapShape: { value: new Vector3() },
   };
@@ -45,11 +51,15 @@ export function setUserMapDisplay(uniforms: UserMapUniforms, display: MapDisplay
   uniforms.userMapOpacity.value = display.opacity;
 }
 
-/** The map's sum and share (`resample`) on a 1 mm grid of this brain as an RG32F texture, read with texelFetch. */
+/**
+ * The map's sum and share (`resample`) on a 1 mm grid of this brain as an RG32F texture, read with
+ * texelFetch. With `keepPrevious` the volume drawn until now is held to blend from, on the same grid.
+ */
 export function setUserMapVolume(
   uniforms: UserMapUniforms,
   grid: Grid,
   values: Float32Array,
+  keepPrevious = false,
 ): void {
   const [nx, ny, nz] = grid.shape;
   if (values.length !== 2 * nx * ny * nz) throw new Error('The map volume does not fill its grid.');
@@ -61,7 +71,9 @@ export function setUserMapVolume(
   texture.magFilter = NearestFilter;
   texture.unpackAlignment = 1;
   texture.needsUpdate = true;
-  uniforms.userMapVolume.value?.dispose();
+  dropPrevious(uniforms);
+  if (keepPrevious) uniforms.userMapPrevious.value = uniforms.userMapVolume.value;
+  else uniforms.userMapVolume.value?.dispose();
   uniforms.userMapVolume.value = texture;
   uniforms.userMapShape.value.set(nx, ny, nz);
   // World (glTF metres: x right, y superior, z posterior) to the grid's voxels in surface RAS.
@@ -76,7 +88,15 @@ export function setUserMapVolume(
   );
 }
 
+/** Free the volume blended from, once the series has arrived at the next. */
+export function dropPrevious(uniforms: UserMapUniforms): void {
+  uniforms.userMapPrevious.value?.dispose();
+  uniforms.userMapPrevious.value = null;
+  uniforms.userMapBlend.value = 1;
+}
+
 export function clearUserMapVolume(uniforms: UserMapUniforms): void {
+  dropPrevious(uniforms);
   uniforms.userMapVolume.value?.dispose();
   uniforms.userMapVolume.value = null;
   uniforms.userMapOn.value = false;
@@ -104,12 +124,29 @@ vec4 userMapColour(float value) {
 
 /**
  * `userMapAt(world)`: sum and share trilinear between the voxel centres, their quotient where the share is
- * at least half (`valueOf`), NO_DATA elsewhere.
+ * at least half (`valueOf`), NO_DATA elsewhere. While a series moves between volumes, the pairs of both
+ * are mixed first, so the values pass linearly from one volume to the next.
  */
 const USER_MAP_AT = `
 uniform highp sampler3D userMapVolume;
+uniform highp sampler3D userMapPrevious;
+uniform float userMapBlend;
 uniform mat4 worldToUserMap;
 uniform vec3 userMapShape;
+vec2 userMapPair(highp sampler3D volume, ivec3 base, vec3 f) {
+  vec2 c000 = texelFetch(volume, base, 0).rg;
+  vec2 c100 = texelFetch(volume, base + ivec3(1, 0, 0), 0).rg;
+  vec2 c010 = texelFetch(volume, base + ivec3(0, 1, 0), 0).rg;
+  vec2 c110 = texelFetch(volume, base + ivec3(1, 1, 0), 0).rg;
+  vec2 c001 = texelFetch(volume, base + ivec3(0, 0, 1), 0).rg;
+  vec2 c101 = texelFetch(volume, base + ivec3(1, 0, 1), 0).rg;
+  vec2 c011 = texelFetch(volume, base + ivec3(0, 1, 1), 0).rg;
+  vec2 c111 = texelFetch(volume, base + ivec3(1, 1, 1), 0).rg;
+  return mix(
+    mix(mix(c000, c100, f.x), mix(c010, c110, f.x), f.y),
+    mix(mix(c001, c101, f.x), mix(c011, c111, f.x), f.y),
+    f.z);
+}
 float userMapAt(vec3 world) {
   vec3 voxel = (worldToUserMap * vec4(world, 1.0)).xyz;
   if (any(lessThan(voxel, vec3(0.0))) || any(greaterThan(voxel, userMapShape - 1.0))) {
@@ -117,18 +154,8 @@ float userMapAt(vec3 world) {
   }
   ivec3 base = min(ivec3(floor(voxel)), ivec3(userMapShape) - 2);
   vec3 f = voxel - vec3(base);
-  vec2 c000 = texelFetch(userMapVolume, base, 0).rg;
-  vec2 c100 = texelFetch(userMapVolume, base + ivec3(1, 0, 0), 0).rg;
-  vec2 c010 = texelFetch(userMapVolume, base + ivec3(0, 1, 0), 0).rg;
-  vec2 c110 = texelFetch(userMapVolume, base + ivec3(1, 1, 0), 0).rg;
-  vec2 c001 = texelFetch(userMapVolume, base + ivec3(0, 0, 1), 0).rg;
-  vec2 c101 = texelFetch(userMapVolume, base + ivec3(1, 0, 1), 0).rg;
-  vec2 c011 = texelFetch(userMapVolume, base + ivec3(0, 1, 1), 0).rg;
-  vec2 c111 = texelFetch(userMapVolume, base + ivec3(1, 1, 1), 0).rg;
-  vec2 m = mix(
-    mix(mix(c000, c100, f.x), mix(c010, c110, f.x), f.y),
-    mix(mix(c001, c101, f.x), mix(c011, c111, f.x), f.y),
-    f.z);
+  vec2 m = userMapPair(userMapVolume, base, f);
+  if (userMapBlend < 1.0) m = mix(userMapPair(userMapPrevious, base, f), m, userMapBlend);
   return m.y >= 0.5 ? m.x / m.y : ${NO_DATA.toExponential()};
 }
 `;
@@ -169,7 +196,7 @@ export function addUserMapToCap(material: Material, uniforms: UserMapUniforms): 
       `,
     );
   };
-  material.customProgramCacheKey = () => `${key}-user-map-v4`;
+  material.customProgramCacheKey = () => `${key}-user-map-v5`;
 }
 
 /**
@@ -206,5 +233,5 @@ ${USER_MAP_COLOUR}${USER_MAP_AT}${shader.fragmentShader}`
       )
       .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
-  material.customProgramCacheKey = () => `${key}-user-map-surface-v4`;
+  material.customProgramCacheKey = () => `${key}-user-map-surface-v5`;
 }

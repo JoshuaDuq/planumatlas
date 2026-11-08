@@ -236,6 +236,8 @@ uniform vec2 sulcDecode;
 uniform vec2 opennessDecode;
 uniform vec2 t1Decode;
 attribute vec2 _user_map;
+attribute vec2 _user_map_previous;
+uniform float userMapBlend;
 varying float vOpenness;
 varying float vT1;
 varying float vSulcalDepth;
@@ -249,7 +251,7 @@ ${shader.vertexShader}`.replace(
 vSulcalDepth = _sulc * sulcDecode.y + sulcDecode.x;
 vOpenness = _openness * opennessDecode.y + opennessDecode.x;
 vT1 = _t1 * t1Decode.y + t1Decode.x;
-vUserMap = _user_map;
+vUserMap = userMapBlend < 1.0 ? mix(_user_map_previous, _user_map, userMapBlend) : _user_map;
 ${withNetworks ? 'vNetworkColor = _networkColor;' : ''}
 ${withTerritories ? 'vTerritoryColor = _territoryColor;' : ''}
 ${visual ? VISUAL_VERTEX : ''}`,

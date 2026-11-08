@@ -51,7 +51,7 @@ const ARRIVED_PX = 0.5;
 /** Under reduced motion a change of view is a dissolve this long, in milliseconds. */
 const DISSOLVE_MS = 160;
 
-const prefersReducedMotion = (): boolean =>
+export const prefersReducedMotion = (): boolean =>
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
 /**

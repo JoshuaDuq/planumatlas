@@ -80,8 +80,26 @@ const triangle = (x: number) => {
   return geometry;
 };
 
+/** Frames requested and not yet drawn; a test draws them with `drawFrames`. */
+let frames = new Map<number, FrameRequestCallback>();
+let frameId = 0;
+/** Draw the requested frames at `after` ms from now, and the frames they request in turn. */
+function drawFrames(after: number) {
+  for (let left = 100; frames.size && left; left--) {
+    const due = [...frames.values()];
+    frames = new Map();
+    for (const frame of due) frame(performance.now() + after);
+  }
+}
+
 function setup() {
   vi.stubGlobal('Worker', FakeWorker);
+  frames = new Map();
+  vi.stubGlobal('requestAnimationFrame', (frame: FrameRequestCallback) => {
+    frames.set(++frameId, frame);
+    return frameId;
+  });
+  vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
   const parcel = (region: string, hemisphere: string) => {
     const material = new MeshPhysicalMaterial();
     material.userData['userMapReady'] = { value: false };
@@ -164,6 +182,41 @@ test('each map and extent is written over the cortex’s own buffer, and a remov
   assert.equal((drawn as BufferAttribute).version, 1);
   userMap.clear();
   assert.equal(ready(mesh), false);
+});
+
+test('a new volume of a series moves from the last one drawn, on the grid and the cortex', async () => {
+  const { userMap, atlas, mesh } = setup();
+  const uniforms = atlas.userMap;
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  const first = uniforms.userMapVolume.value;
+  assert.ok(first);
+  assert.equal(uniforms.userMapPrevious.value, null);
+  await userMap.extent(1, 0, 1);
+  assert.equal(uniforms.userMapPrevious.value, first);
+  assert.notEqual(uniforms.userMapVolume.value, first);
+  assert.equal(uniforms.userMapBlend.value, 0);
+  assert.deepEqual([...mesh.geometry.getAttribute('_user_map_previous').array], [1, 1, 1, 1, 1, 1]);
+  assert.deepEqual([...mesh.geometry.getAttribute('_user_map').array], [2, 2, 2, 2, 2, 2]);
+  drawFrames(100);
+  assert.ok(uniforms.userMapBlend.value > 0 && uniforms.userMapBlend.value < 1);
+  drawFrames(1000);
+  assert.equal(uniforms.userMapBlend.value, 1);
+  assert.equal(uniforms.userMapPrevious.value, null);
+});
+
+test('a new extent of the same volume, or any volume under reduced motion, is drawn at once', async () => {
+  const { userMap, atlas } = setup();
+  const uniforms = atlas.userMap;
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  await userMap.extent(1, 5, 0);
+  assert.equal(uniforms.userMapPrevious.value, null);
+  assert.equal(uniforms.userMapBlend.value, 1);
+  assert.equal(frames.size, 0);
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('reduce') }));
+  await userMap.extent(1, 5, 1);
+  assert.equal(uniforms.userMapPrevious.value, null);
+  assert.equal(uniforms.userMapBlend.value, 1);
+  assert.equal(frames.size, 0);
 });
 
 test('the cortex moves between surfaces in its own buffers and comes back to the published pial', async () => {

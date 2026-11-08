@@ -1,5 +1,11 @@
 import { UNSTATED } from '../core/coordinates/spaces.ts';
-import { defaultDisplay, fileStatistic, mapTitle, validDisplay } from '../core/user-map/display.ts';
+import {
+  VOLUMES_PER_SECOND,
+  defaultDisplay,
+  fileStatistic,
+  mapTitle,
+  validDisplay,
+} from '../core/user-map/display.ts';
 import type { CortexSurface, MapDisplay, MapSummary, Statistic } from '../core/user-map/display.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapCourse } from '../core/user-map/course.ts';
@@ -21,9 +27,6 @@ export type ClusterState =
 
 /** Colourings the map is drawn over as they are: the tissue's own, and the achromatic scan. */
 const UNDER: readonly SurfaceColor[] = ['tissue', 'mri'];
-
-/** A series plays at most this many volumes a second, slower when a volume takes longer to carry. */
-export const VOLUMES_PER_SECOND = 4;
 
 /**
  * The reader's own map: the file, the template it is in, and how it is drawn. While it is shown, the

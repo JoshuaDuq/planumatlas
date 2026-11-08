@@ -49,6 +49,9 @@ export function mapTitle(name: string): string {
   return name.replace(/\.nii(\.gz)?$/i, '');
 }
 
+/** A series plays at most this many volumes a second, slower when a volume takes longer to carry. */
+export const VOLUMES_PER_SECOND = 4;
+
 /** What the reader is told about a map once it is carried onto this brain. */
 export interface MapSummary {
   shape: [number, number, number];
