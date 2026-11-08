@@ -69,11 +69,21 @@ html_title = "Planum"
 html_baseurl = "https://planumatlas.com/docs/"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_js_files = ["docs.js"]
 html_permalinks_icon = "#"
 html_show_sphinx = False
 html_copy_source = False
 html_favicon = "_static/favicon.svg"
 templates_path = ["_templates"]
+html_sidebars = {
+    "**": [
+        "sidebar/search.html",
+        "sidebar/scroll-start.html",
+        "sidebar/overview.html",
+        "sidebar/navigation.html",
+        "sidebar/scroll-end.html",
+    ],
+}
 highlight_language = "none"
 pygments_style = "planum_style.Light"
 pygments_dark_style = "planum_style.Dark"
@@ -85,50 +95,50 @@ html_theme_options = {
     # Light: --surface-base, --surface-navigation, --text-primary, --accent, ...
     "light_css_variables": {
         "color-background-primary": "#ffffff",
-        "color-background-secondary": "#f8f9fa",
-        "color-background-hover": "#f3f5f6",
-        "color-background-border": "#e2e6e9",
-        "color-foreground-primary": "#20272c",
-        "color-foreground-secondary": "#515b63",
-        "color-foreground-muted": "#667078",
-        "color-foreground-border": "#7f8a94",
-        "color-brand-primary": "#156b6d",
-        "color-brand-content": "#156b6d",
-        "color-brand-visited": "#0d5557",
-        "color-highlight-on-target": "#e8f3f2",
-        "color-highlighted-background": "#e8f3f2",
-        "color-admonition-background": "#f8f9fa",
-        "color-api-name": "#156b6d",
-        "color-api-pre-name": "#667078",
-        "color-api-background": "#f8f9fa",
-        "color-api-background-hover": "#f3f5f6",
-        "color-accent-surface": "#e8f3f2",
+        "color-background-secondary": "#f7f8f9",
+        "color-background-hover": "#f1f4f4",
+        "color-background-border": "#e0e5e7",
+        "color-foreground-primary": "#232a30",
+        "color-foreground-secondary": "#555f68",
+        "color-foreground-muted": "#606a72",
+        "color-foreground-border": "#77828c",
+        "color-brand-primary": "#28615d",
+        "color-brand-content": "#28615d",
+        "color-brand-visited": "#1d4d49",
+        "color-highlight-on-target": "#edf3f1",
+        "color-highlighted-background": "#edf3f1",
+        "color-admonition-background": "#f7f8f9",
+        "color-api-name": "#28615d",
+        "color-api-pre-name": "#606a72",
+        "color-api-background": "#f7f8f9",
+        "color-api-background-hover": "#f1f4f4",
+        "color-accent-surface": "#edf3f1",
         "color-on-accent": "#ffffff",
-        "color-primary-fill": "#156b6d",
-        "color-primary-fill-hover": "#0d5557",
+        "color-primary-fill": "#28615d",
+        "color-primary-fill-hover": "#1d4d49",
         "color-danger": "#a61b1b",
         "font-stack": '"Source Sans 3 Variable", -apple-system, "Segoe UI", sans-serif',
         "font-stack--monospace": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     },
     # Dark: the graphite variant of tokens.css.
     "dark_css_variables": {
-        "color-background-primary": "#1b1d20",
-        "color-background-secondary": "#18191c",
+        "color-background-primary": "#1b1e21",
+        "color-background-secondary": "#191c1f",
         "color-background-hover": "#25272b",
         "color-background-border": "#303338",
         "color-foreground-primary": "#e9ebee",
         "color-foreground-secondary": "#b6bcc3",
-        "color-foreground-muted": "#9ba2aa",
-        "color-foreground-border": "#6d737b",
+        "color-foreground-muted": "#9ca3ab",
+        "color-foreground-border": "#7d848c",
         "color-brand-primary": "#7fd0cc",
         "color-brand-content": "#7fd0cc",
         "color-brand-visited": "#a3e0dc",
         "color-highlight-on-target": "#25272b",
         "color-highlighted-background": "#1f3637",
-        "color-admonition-background": "#18191c",
+        "color-admonition-background": "#191c1f",
         "color-api-name": "#7fd0cc",
-        "color-api-pre-name": "#9ba2aa",
-        "color-api-background": "#18191c",
+        "color-api-pre-name": "#9ca3ab",
+        "color-api-background": "#191c1f",
         "color-api-background-hover": "#25272b",
         "color-accent-surface": "#1f3637",
         "color-on-accent": "#ffffff",

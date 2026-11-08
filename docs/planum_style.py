@@ -36,10 +36,10 @@ def _rules(ink, quiet, accent, string, danger):
 
 
 class Light(Style):
-    background_color = "#f8f9fa"
-    styles = _rules("#20272c", "#667078", "#156b6d", "#3f6285", "#a61b1b")
+    background_color = "#f7f8f9"
+    styles = _rules("#232a30", "#606a72", "#28615d", "#3f6285", "#a61b1b")
 
 
 class Dark(Style):
-    background_color = "#18191c"
-    styles = _rules("#e9ebee", "#9ba2aa", "#7fd0cc", "#9bb7d4", "#f1928f")
+    background_color = "#191c1f"
+    styles = _rules("#e9ebee", "#9ca3ab", "#7fd0cc", "#9bb7d4", "#f1928f")

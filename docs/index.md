@@ -1,13 +1,70 @@
-# Planum: methods
+# Planum methods
 
 ```{rst-class} hero-lede
 How each feature of the Planum brain viewer is built, displayed and validated.
 ```
 
-Planum renders one individual brain, MGH CDMD subject `sub_013`, reconstructed from its own T1-weighted scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Cortical atlases, segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Each page below documents one feature in a fixed order: data, method, display, validation, limitations and code availability. Every parameter and measured value is taken from the repository's code, published files and tests. Planum is for research and education. It is not clinical anatomy.
+Planum renders one individual brain, MGH CDMD subject `sub_013`, reconstructed from its own T1-weighted scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Cortical atlases, segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy.
+
+Each page below documents one feature in a fixed order: data, method, display, validation, limitations and code availability. Every parameter and measured value is taken from the repository's code, published files and tests. Planum is for research and education. It is not clinical anatomy.
+
+(methods)=
+## Methods by feature
+
+::::{container} methods-directory
+
+:::{container}
+<h3 id="stage-and-tools">Stage and tools</h3>
+
+- [Sections and cuts](features/sections-and-cuts.md)
+- [Linked MRI](features/linked-mri.md)
+- [Dissection and display](features/dissection-and-display.md)
+- [Lesion report](features/lesion-report.md)
+- [Published coordinates](features/published-coordinates.md)
+- [Overlays](features/overlays.md)
+- [Sharing and snapshots](features/sharing-and-snapshots.md)
+:::
+
+:::{container}
+<h3 id="anatomy">Anatomy</h3>
+
+- [Cortical atlases](features/cortical-atlases.md)
+- [Atlas comparison](features/atlas-comparison.md)
+- [Internal anatomy](features/internal-anatomy.md)
+- [Boundary certainty](features/boundary-certainty.md)
+- [Segmentation agreement](features/segmentation-agreement.md)
+- [Spinal cord](features/spinal-cord.md)
+- [Tracts](features/tracts.md)
+:::
+
+:::{container}
+<h3 id="functional-and-vascular-layers">Functional and vascular layers</h3>
+
+- [Functional networks](features/functional-networks.md)
+- [Functional divisions](features/functional-divisions.md)
+- [Cerebellar functions](features/cerebellar-functions.md)
+- [Striatal networks](features/striatal-networks.md)
+- [Arterial territories](features/arterial-territories.md)
+- [Receptor fingerprints](features/receptor-fingerprints.md)
+:::
+
+:::{container}
+<h3 id="evidence-and-tours">Evidence and tours</h3>
+
+- [Functions](features/functions.md)
+- [Deficits](features/deficits.md)
+- [Circuits](features/circuits.md)
+- [Visual field map](features/visual-field-map.md)
+- [Stroke cases](features/stroke-cases.md)
+- [Stimulation responses](features/stimulation-responses.md)
+:::
+
+::::
+
+Sources, citations and data licences are listed in [References](reference/references.md).
 
 ```{figure} ../.github/assets/readme/tracts.webp
-:alt: Diffusion tract bundles inside a see-through cortex, with the Tracts panel listing streamline counts and lengths
+:alt: Direction-coloured diffusion tract bundles inside a see-through cortex, with orientation, direction key and scale
 :name: fig-index-1
 
 **One subject's anatomy, with every layer registered onto it.** Tracts reconstructed from the subject's own diffusion scan, shown inside a see-through cortex.
@@ -26,17 +83,6 @@ Build
 
 Validation
 : The compiler writes its measurements to `validation.json`. Each page's Validation table lists the tests that check the feature and the values they measure.
-
-## Methods
-
-| Section | Feature |
-| :--- | :--- |
-| Stage and tools | [Sections and cuts](features/sections-and-cuts.md) · [Linked MRI](features/linked-mri.md) · [Dissection and display](features/dissection-and-display.md) · [Lesion report](features/lesion-report.md) · [Published coordinates](features/published-coordinates.md) · [Overlays](features/overlays.md) · [Sharing and snapshots](features/sharing-and-snapshots.md) |
-| Anatomy | [Cortical atlases](features/cortical-atlases.md) · [Atlas comparison](features/atlas-comparison.md) · [Internal anatomy](features/internal-anatomy.md) · [Boundary certainty](features/boundary-certainty.md) · [Segmentation agreement](features/segmentation-agreement.md) · [Spinal cord](features/spinal-cord.md) · [Tracts](features/tracts.md) |
-| Functional and vascular layers | [Functional networks](features/functional-networks.md) · [Functional divisions](features/functional-divisions.md) · [Cerebellar functions](features/cerebellar-functions.md) · [Striatal networks](features/striatal-networks.md) · [Arterial territories](features/arterial-territories.md) · [Receptor fingerprints](features/receptor-fingerprints.md) |
-| Evidence and tours | [Functions](features/functions.md) · [Deficits](features/deficits.md) · [Circuits](features/circuits.md) · [Visual field map](features/visual-field-map.md) · [Stroke cases](features/stroke-cases.md) · [Stimulation responses](features/stimulation-responses.md) |
-
-Sources, citations and data licences are listed in [References](reference/references.md).
 
 ```{toctree}
 :hidden:

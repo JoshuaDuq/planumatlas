@@ -2,30 +2,49 @@
 
 {% block body %}
 <header class="docs-header">
-  <a class="docs-identity" href="{{ pathto(master_doc) }}">
+  <a class="docs-identity" href="{{ pathto(master_doc) }}" aria-label="{{ project }} documentation">
     {% include "brand-mark.html" %}
     <span class="docs-brand">{{ project }}</span>
-    <span class="docs-label">Docs</span>
+    <span class="docs-label">Documentation</span>
   </a>
+  <button class="docs-icon-button docs-nav-toggle" type="button" aria-label="Browse methods" aria-controls="docs-navigation" aria-expanded="false" hidden>
+    <svg aria-hidden="true"><use href="#svg-menu"></use></svg>
+    <span>Browse methods</span>
+  </button>
   <div class="docs-actions">
-    <a class="docs-link" href="{{ theme_source_repository }}">Source</a>
+    <a class="docs-link" href="{{ theme_source_repository }}">GitHub</a>
     <a class="docs-open" href="{{ viewer_url }}">Open viewer</a>
+    <div class="theme-toggle-container">
+      <button class="theme-toggle docs-icon-button" aria-label="Toggle Light / Dark / Auto color theme" title="Change colour theme">
+        <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+        <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+        <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+        <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+      </button>
+    </div>
+    {% if not furo_hide_toc %}
+    <button class="docs-icon-button docs-toc-toggle" type="button" aria-label="Toggle page contents" aria-controls="docs-page-contents" aria-expanded="false" hidden>
+      <svg aria-hidden="true"><use href="#svg-toc"></use></svg>
+    </button>
+    {% endif %}
   </div>
 </header>
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{%- if parents %}
-<nav class="breadcrumbs" aria-label="Breadcrumb">
-  <a href="{{ pathto(master_doc) }}">Documentation</a>
-  {%- for parent in parents %}
-  <span aria-hidden="true">/</span>
-  <a href="{{ parent.link|e }}">{{ parent.title }}</a>
-  {%- endfor %}
-  <span aria-hidden="true">/</span>
-  <span aria-current="page">{{ title|striptags|e }}</span>
+{% block left_sidebar %}
+<div class="sidebar-sticky" id="docs-navigation">
+  {% for sidebar_section in sidebars %}
+    {% include sidebar_section %}
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block right_sidebar %}
+{% if not furo_hide_toc %}
+<nav class="toc-sticky toc-scroll" id="docs-page-contents" aria-label="On this page">
+  <div class="toc-title-container"><span class="toc-title">On this page</span></div>
+  <div class="toc-tree-container"><div class="toc-tree">{{ toc }}</div></div>
 </nav>
-{%- endif %}
-{{ body }}
+{% endif %}
 {% endblock %}
