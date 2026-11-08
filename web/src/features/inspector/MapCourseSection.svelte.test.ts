@@ -87,7 +87,12 @@ test('the same region handed in again, as each volume placed hands it, keeps its
   engine.settle(summary);
   await reading;
   const label = (id: string) => ({ name: id });
-  const view = await render(MapCourseSection, { region: { id: 'v1' } as Region, lang: 'en', map, label });
+  const view = await render(MapCourseSection, {
+    region: { id: 'v1' } as Region,
+    lang: 'en',
+    map,
+    label,
+  });
   const plot = page.getByRole('slider');
   await expect.element(plot).toBeInTheDocument();
   expect(reads).toBe(1);
