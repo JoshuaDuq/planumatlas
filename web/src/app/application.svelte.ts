@@ -93,7 +93,10 @@ export function createApp() {
   });
   const media = createMedia();
   const { ports, register } = createPorts();
-  const stage = createStageLayout({ media, onDock: () => world?.engine.camera.refitDock() });
+  const stage = createStageLayout({
+    media,
+    onDock: (options) => world?.engine.camera.refitDock(options),
+  });
   cleanups.push(theme.dispose);
 
   return {

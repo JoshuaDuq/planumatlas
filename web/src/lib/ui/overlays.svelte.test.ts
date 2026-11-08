@@ -277,37 +277,36 @@ describe('Popover keys and stage variant', () => {
     }
   });
 
-  test('an outside press fades the stage popover out; Escape closes it at once', async () => {
+  test('a stage popover stays open through a press outside, a menu and a window of its own; Escape closes it at once', async () => {
     render(Fixture);
     await button('Stage').click();
     await expect.element(button('Orbit')).toBeInTheDocument();
-    const popover = document.querySelector('.popover')!;
-    await settled(popover);
-    // The fade is the popover's own opacity transition; its start and the exit duration are what
-    // is observed, so the result does not depend on how loaded the machine is.
-    let faded = false;
-    let fadeDuration = '';
-    popover.addEventListener('transitionrun', (event) => {
-      if ((event as TransitionEvent).propertyName !== 'opacity') return;
-      faded = popover.hasAttribute('data-ending-style');
-      fadeDuration = getComputedStyle(popover).transitionDuration;
-    });
-    const outside = el('Fullscreen');
-    outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' }));
-    outside.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'mouse' }));
-    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await vi.waitFor(() => expect(document.querySelector('.popover')).toBeNull(), {
-      timeout: 5000,
-    });
-    expect(faded).toBe(true);
-    expect(fadeDuration.split(',')[0]).toBe('0.12s');
+    // A press on the picture it adjusts, or anywhere else, is work beside it, not a dismissal.
+    await button('Fullscreen').click();
+    // A menu opens over it and closes again without taking it along.
+    await button('Settings').click();
+    await expect.element(button('Light')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(attr('Settings', 'aria-expanded')).toBe('false'));
+    await tick();
+    await frame();
+    expect(attr('Stage', 'aria-expanded')).toBe('true');
+    expect(document.querySelectorAll('.popover[data-variant="stage"]')).toHaveLength(1);
 
-    await button('Stage').click();
-    await expect.element(button('Orbit')).toBeInTheDocument();
+    el('Orbit').focus();
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() => expect(attr('Stage', 'aria-expanded')).toBe('false'));
+    expect(document.activeElement).toBe(el('Stage'));
     // Bits unmounts it a frame later, after checking that nothing is animating.
     await vi.waitFor(() => expect(document.querySelector('.popover')).toBeNull());
+  });
+
+  test('its own trigger closes it again', async () => {
+    render(Fixture);
+    await button('Stage').click();
+    await expect.element(button('Orbit')).toBeInTheDocument();
+    await button('Stage').click();
+    await vi.waitFor(() => expect(attr('Stage', 'aria-expanded')).toBe('false'));
   });
 });
 
@@ -339,15 +338,16 @@ describe('Stage popover swap', () => {
 });
 
 describe('Stage popover Tab', () => {
-  test('Tab from the last control onto the next stage trigger closes it and focus stays there', async () => {
+  test('Tab from the last control onto the next stage trigger moves focus and leaves it open', async () => {
     render(Fixture);
     await button('Stage').click();
     await expect.element(button('Orbit')).toBeInTheDocument();
     (page.getByRole('checkbox', { name: 'Grid' }).element() as HTMLElement).focus();
     await userEvent.tab();
     await vi.waitFor(() => expect(document.activeElement).toBe(el('Other stage')));
-    await vi.waitFor(() => expect(attr('Stage', 'aria-expanded')).toBe('false'));
-    expect(document.activeElement).toBe(el('Other stage'));
+    await tick();
+    await frame();
+    expect(attr('Stage', 'aria-expanded')).toBe('true');
   });
 });
 

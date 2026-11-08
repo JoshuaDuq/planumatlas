@@ -1515,8 +1515,8 @@
    "[\"\"] → \"La moyenne de  dans cette région à chaque volume, avant le seuil. Choisissez un point pour afficher ce volume.\""
   ],
   "courseCounts": [
-   "[\"Alpha\",\"\"] → \"sur les Alpha de ses  millimètres entiers où la carte a une valeur\"",
-   "[\"\",\"Alpha\"] → \"sur les  de ses Alpha millimètres entiers où la carte a une valeur\""
+   "[\"Alpha\",\"\"] → \"La moyenne porte sur les Alpha des  millimètres entiers de la région où ce volume a une valeur.\"",
+   "[\"\",\"Alpha\"] → \"La moyenne porte sur les  des Alpha millimètres entiers de la région où ce volume a une valeur.\""
   ],
   "courseLoading": "Lecture des volumes de la région…",
   "courseFailed": "Le décours de la région n’a pas pu être lu.",
@@ -1566,6 +1566,12 @@
    "[\"\"] → \"sur la surface \""
   ],
   "show": "Afficher sur le cerveau",
+  "settings": "Réglages de la carte",
+  "everyCluster": "tous les amas",
+  "settingsLine": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha ·  · Alpha · surface \"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" · Alpha ·  · surface alpha\""
+  ],
   "remove": "Retirer",
   "caveat": "Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.",
   "keyRange": [

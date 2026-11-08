@@ -6,16 +6,20 @@
   - U5's popover keeps its trigger and its content together, so the popovers' controls sit inside the toolbar
     element. Only the tools rove (`.stage-tool`); keys inside a popover are the popover's own.
   - The popovers are placed above the whole dock on its start edge, inside the visible stage (place-popover.ts).
+    One stays open while the reader works beside it, until its tool, Escape or another tool closes it.
+  - On a wider screen the open popover takes a band off the stage's left (`stage.setPlateBand`), so the camera
+    frames the anatomy beside it, unless that would leave the anatomy less than 320 px (a 1024 px window keeps 352).
   - Section's popover and the section row above the tools are G4's, the Lesion's and Coordinate's bodies the
     lesion feature's: they come in as snippets. Coordinate is offered only with a body (published spaces).
   - Overlay, the reader's own NIfTI map, is offered only with a body, and not on a stage narrower than
     480 px, a phone's, where the other four tools fill one row.
   - A click on the brain places the lesion only while the reader has chosen so in the Lesion popover and it is
-    open, and while it does, a press on the stage keeps it open.
+    open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
   - On a phone, which hides the status bar, a mark on Display says its settings are away from their defaults.
   - On a phone an open popover's plate covers most of the stage, so the camera frames the anatomy above it
-    (`onPlate`) while it is open, at once when the key that opened, changed or closed it was a key.
+    (`onPlate`) while it is open. On either screen the camera moves at once when the input that opened,
+    changed or closed it was a key.
 -->
 <script lang="ts">
   import { tick, untrack } from 'svelte';
@@ -85,6 +89,8 @@
   }: Props = $props();
 
   const NARROW_STAGE_PX = 480;
+  // The least room a wider screen keeps for the anatomy beside an open popover.
+  const ROOM_BESIDE_PLATE_PX = 320;
   const uid = $props.id();
   const sectionLabelId = `section-tool-${uid}`;
   const lesionLabelId = `lesion-tool-${uid}`;
@@ -231,16 +237,35 @@
       plate = false;
     });
   });
+  // On a wider screen the open plate's band: the visible stage left of its right edge and a gutter.
+  $effect(() => {
+    if (openTool < 0 || media.phone || !spot) return;
+    const { visibleRect } = stage;
+    if (!visibleRect) return;
+    let current = true;
+    tick().then(() => {
+      if (!current) return;
+      const element = dock.querySelector<HTMLElement>('.popover.stage-popover')!;
+      // Laid-out offsets, which the plate's entry scale does not move.
+      const right = dock.offsetLeft + dock.clientLeft + element.offsetLeft + element.offsetWidth;
+      const band = right + stage.gutter - visibleRect.x;
+      const roomy = visibleRect.width - band >= ROOM_BESIDE_PLATE_PX;
+      stage.setPlateBand(roomy ? band : 0, { immediate: keyed });
+    });
+    return () => {
+      current = false;
+    };
+  });
+  $effect(() => {
+    if (anyOpen && !media.phone) return;
+    untrack(() => stage.setPlateBand(0, { immediate: keyed }));
+  });
 
   const popoverStyle = $derived(
     spot
       ? `left: ${spot.left}px; width: ${spot.width}px; max-height: ${spot.maxHeight}px`
       : `width: ${POPOVER_WIDTH}px`,
   );
-
-  /** The stage's own canvas, where a press places the lesion while the reader has chosen so. */
-  const onStage = (node: Node) =>
-    node instanceof HTMLCanvasElement && (dock.offsetParent?.contains(node) ?? false);
 </script>
 
 <div
@@ -276,7 +301,6 @@
       style={popoverStyle}
       dialogLabelledby={lesionLabelId}
       {rescueFocus}
-      holdsOpen={(node) => placing && onStage(node)}
     >
       {#snippet name()}<span id={lesionLabelId}>{copy.lesionTool}</span>{/snippet}
       {#snippet body({ close })}

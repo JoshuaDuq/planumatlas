@@ -185,6 +185,30 @@ describe('the guided tour’s bands', () => {
   });
 });
 
+describe('an open stage popover’s band', () => {
+  test('clears the stage’s left in framing, refitting only on a change and with the move it was given', () => {
+    const calls: unknown[] = [];
+    const stage = createStageLayout({
+      media,
+      storage: null,
+      onDock: (options) => calls.push(options),
+    });
+    stage.setViewport(rect(1000, 600), { width: 1000, height: 600 });
+    stage.setGutter(20);
+    stage.setDock({ width: 300, height: 38 });
+    const without = stage.framing();
+    expect(without.inset.left).toBe(0);
+    stage.setPlateBand(312, { immediate: true });
+    stage.setPlateBand(312, { immediate: false });
+    expect(calls).toEqual([{ immediate: true }]);
+    expect(stage.plateBand).toBe(312);
+    expect(stage.framing()).toEqual({ ...without, inset: { ...without.inset, left: 312 } });
+    stage.setPlateBand(0, { immediate: false });
+    expect(calls).toEqual([{ immediate: true }, { immediate: false }]);
+    expect(stage.framing()).toEqual(without);
+  });
+});
+
 describe('the key fitter and onDock', () => {
   test('framing runs the fitter without ever calling onDock', () => {
     let calls = 0;
@@ -233,7 +257,7 @@ describe('framing', () => {
     stage.setGutter(20);
     stage.setDock({ width: 300, height: 38 });
     expect(stage.framing()).toEqual({
-      inset: { top: 0, right: 0, bottom: 58 },
+      inset: { top: 0, right: 0, bottom: 58, left: 0 },
       scale: { horizontal: 1, vertical: 1 },
     });
   });
@@ -263,7 +287,7 @@ describe('framing', () => {
     const clear = { top: 0, right: 0, bottom: 0, left: 0 };
     const expected = clearFraming({ width: 800, height: 600 }, 58, clear, FRAME_FILL);
     expect(stage.framing()).toEqual({
-      inset: { top: 0, right: 0, bottom: expected.inset },
+      inset: { top: 0, right: 0, bottom: expected.inset, left: 0 },
       scale: expected.scale,
     });
   });
@@ -301,7 +325,7 @@ describe('framing', () => {
     };
     const expected = clearFraming({ width: 800, height: 600 }, 58, clear, FRAME_FILL);
     expect(stage.framing()).toEqual({
-      inset: { top: 0, right: 0, bottom: expected.inset },
+      inset: { top: 0, right: 0, bottom: expected.inset, left: 0 },
       scale: expected.scale,
     });
   });
@@ -326,7 +350,7 @@ describe('framing', () => {
     const clear = { top: 12 + 20 + 8, bottom: 0, left: 12 + 10 + 8, right: 800 - 778 + 8 };
     const expected = clearFraming({ width: 800, height: 600 }, 320, clear, FRAME_FILL);
     expect(stage.framing()).toEqual({
-      inset: { top: 0, right: 0, bottom: expected.inset },
+      inset: { top: 0, right: 0, bottom: expected.inset, left: 0 },
       scale: expected.scale,
     });
   });
@@ -430,7 +454,23 @@ describe('framing', () => {
         top: 0,
         right: room.width - box.left,
         bottom: expect.any(Number),
+        left: 0,
       });
+    });
+
+    test('beside an open popover’s band it frames as a stage that much narrower would', () => {
+      const room = { width: 600, height: 420 };
+      const drawn = { left: 480, top: 16, size: 100 };
+      const narrow = stageOf(room.width, room.height, { width: 340, height: 52 });
+      narrow.registerGizmo(gizmoIn(narrow, room, drawn));
+      const expected = narrow.framing();
+      document.body.replaceChildren();
+      // The letters' frame starts at the band, so the gizmo is measured in the same frame.
+      const wide = stageOf(room.width + 400, room.height, { width: 340, height: 52 });
+      wide.setPlateBand(400, { immediate: true });
+      wide.registerGizmo(gizmoIn(wide, room, drawn));
+      expect(expected.inset.top! + expected.inset.right!).toBeGreaterThan(0);
+      expect(wide.framing()).toEqual({ ...expected, inset: { ...expected.inset, left: 400 } });
     });
 
     test('a gizmo in a corner the picture never reaches changes nothing, nor does a hidden one', () => {
@@ -495,7 +535,7 @@ describe('framing', () => {
     };
     const expected = clearFraming({ width: 800, height: 600 }, reach, clear, FRAME_FILL);
     expect(stage.framing()).toEqual({
-      inset: { top: 0, right: 0, bottom: expected.inset },
+      inset: { top: 0, right: 0, bottom: expected.inset, left: 0 },
       scale: expected.scale,
     });
     stop();

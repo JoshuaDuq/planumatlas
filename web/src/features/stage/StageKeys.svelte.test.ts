@@ -475,6 +475,22 @@ describe('framing', () => {
     expect(setKeys).toHaveBeenCalledTimes(1);
   });
 
+  test('beside an open popover’s band the keys choose in the room that is left', async () => {
+    mount({ legend: DEFICIT });
+    await eventually(() => expect(stage.keyInset.right).toBeGreaterThan(0));
+    const box = host().getBoundingClientRect();
+    const top = Math.round(12 + box.height);
+    const right = Math.round(12 + box.width);
+    // A room this wide keeps more beside a top strip than beside a right column.
+    const room = 800 - top + Math.round(right / 2);
+    stage.setPlateBand(1200 - room, { immediate: true });
+    stage.framing();
+    expect(stage.keyInset).toEqual({ top, right: 0 });
+    stage.setPlateBand(0, { immediate: true });
+    stage.framing();
+    expect(stage.keyInset).toEqual({ top: 0, right });
+  });
+
   test('no plate, no band', async () => {
     mount({ legend: DEFICIT });
     await eventually(() => expect(stage.keyInset.top + stage.keyInset.right).toBeGreaterThan(0));

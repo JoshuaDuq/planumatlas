@@ -50,9 +50,50 @@
     stage.registerOrientation(node);
     return () => stage.registerOrientation(null);
   }
+
+  // On a wide stage the letters stay beside an open popover; one the popover covers would label nothing.
+  function clearPopovers(frame: HTMLElement) {
+    const viewport = frame.closest('#viewport')!;
+    const watched = new Set<Element>();
+    const check = () => {
+      const plates = [...viewport.querySelectorAll('.stage-popover')].map((plate) =>
+        plate.getBoundingClientRect(),
+      );
+      for (const edge of EDGES) {
+        const b = nodes[edge].getBoundingClientRect();
+        const covered = plates.some(
+          (p) => b.left < p.right && b.right > p.left && b.top < p.bottom && b.bottom > p.top,
+        );
+        nodes[edge].toggleAttribute('data-covered', covered);
+      }
+    };
+    const sizes = new ResizeObserver(check);
+    sizes.observe(frame);
+    const plates = new MutationObserver(() => {
+      for (const plate of viewport.querySelectorAll('.stage-popover')) {
+        if (!watched.has(plate)) sizes.observe(plate);
+        watched.add(plate);
+      }
+      check();
+    });
+    plates.observe(viewport, { childList: true, subtree: true });
+    // A popover grows from a 0.97 scale; its box is read again once it has.
+    viewport.addEventListener('transitionend', check);
+    return () => {
+      sizes.disconnect();
+      plates.disconnect();
+      viewport.removeEventListener('transitionend', check);
+    };
+  }
 </script>
 
-<div id="orientation" class="orientation" hidden={!ready} {@attach register}>
+<div
+  id="orientation"
+  class="orientation"
+  hidden={!ready}
+  {@attach register}
+  {@attach clearPopovers}
+>
   {#each EDGES as edge (edge)}
     <span data-edge={edge} {@attach (node) => void (nodes[edge] = node)}></span>
   {/each}
@@ -60,11 +101,11 @@
 
 <style>
   @layer features {
-    /* The letters frame what framing frames: the visible stage less a colour key's band. */
+    /* The letters frame what framing frames: the visible stage less a colour key's and an open popover's bands. */
     .orientation {
       position: absolute;
       inset: calc(var(--vis-top) + var(--key-top)) calc(var(--vis-right) + var(--key-right))
-        var(--vis-bottom) var(--vis-left);
+        var(--vis-bottom) calc(var(--vis-left) + var(--plate-left));
       pointer-events: none;
     }
     /*
@@ -126,6 +167,10 @@
       [data-edge='right'] {
         right: var(--stage-gutter);
       }
+    }
+    /* Set by clearPopovers, so the compiler cannot see it in the markup. */
+    .orientation > :global(span[data-covered]) {
+      visibility: hidden;
     }
     /* Past the middle of a short stage the bottom letter would read as the top one, so it goes. */
     :global(#viewport[data-dock-tall='true']) [data-edge='bottom'] {

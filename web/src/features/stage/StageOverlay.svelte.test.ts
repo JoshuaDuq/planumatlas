@@ -147,7 +147,15 @@ describe('the layer', () => {
     expect(style.getPropertyValue('--vis-right')).toBe('0px');
     expect(style.getPropertyValue('--vis-bottom')).toBe('200px');
     expect(style.getPropertyValue('--key-right')).toBe('90px');
+    expect(style.getPropertyValue('--plate-left')).toBe('0px');
     expect(style.getPropertyValue('--dock-height')).toBe('38px');
+    // An open popover's band: the letters frame what framing frames, beside it.
+    const frameLeft = () => find('#orientation').getBoundingClientRect().left;
+    const before = frameLeft();
+    stage.setPlateBand(312, { immediate: true });
+    flushSync();
+    expect(style.getPropertyValue('--plate-left')).toBe('312px');
+    expect(frameLeft() - before).toBe(312);
     expect(host().dataset.chrome).toBe('wide');
     expect(host().dataset.dockTall).toBe('false');
     stage.setDock({ width: 300, height: 190 });
@@ -220,6 +228,30 @@ describe('orientation', () => {
     live.status = 'switching';
     flushSync();
     expect(find('#orientation').hidden).toBe(false);
+  });
+
+  test('a letter an open popover covers goes, and returns when the popover closes', async () => {
+    await mount();
+    const left = find('[data-edge="left"]');
+    const box = left.getBoundingClientRect();
+    const frame = host().getBoundingClientRect();
+    const plate = document.createElement('div');
+    plate.className = 'stage-popover';
+    Object.assign(plate.style, {
+      position: 'absolute',
+      left: '0',
+      top: `${box.top - frame.top - 20}px`,
+      width: `${box.right - frame.left + 20}px`,
+      height: `${box.height + 40}px`,
+    });
+    host().append(plate);
+    await eventually(() => expect(getComputedStyle(left).visibility).toBe('hidden'));
+    const others = ['top', 'right', 'bottom'].map((edge) => find(`[data-edge="${edge}"]`));
+    expect(others.map((node) => getComputedStyle(node).visibility)).toEqual(
+      Array(3).fill('visible'),
+    );
+    plate.remove();
+    await eventually(() => expect(getComputedStyle(left).visibility).toBe('visible'));
   });
 
   test('keeps only an opacity transition under reduced motion', async () => {

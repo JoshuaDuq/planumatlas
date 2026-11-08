@@ -128,6 +128,16 @@
     if (!sizeInvalid) map.setMinVoxels(Number(sizeText));
   }
 
+  let settingsOpen = $state(false);
+  const settingsLine = $derived(
+    copy.settingsLine(
+      options.find(({ value }) => value === map.space)!.label,
+      map.statistic ?? copy.value,
+      map.minVoxels > 1 ? copy.captionMinVoxels(String(map.minVoxels)) : copy.everyCluster,
+      copy.surfaces[map.surface],
+    ),
+  );
+
   let clustersOpen = $state(false);
   const peaks = $derived(
     map.clusters.status === 'ready'
@@ -177,10 +187,25 @@
   }
 </script>
 
+{#snippet templateField()}
+  <div class="stage-field">
+    <label class="stage-field-label" for={spaceId}>{copy.space}</label>
+    <Select
+      id={spaceId}
+      {options}
+      bind:value={() => map.space, (space) => void map.setSpace(space)}
+      disabled={current.status === 'loading'}
+    />
+  </div>
+{/snippet}
+
 <div class="overlay" aria-busy={current.status === 'loading'}>
   {#if current.status === 'ready'}
     <p class="name">{current.name}</p>
     <p class="hint">{summary()}</p>
+    <div class="stage-field">
+      <Switch label={copy.show} bind:checked={() => map.shown, (shown) => map.setShown(shown)} />
+    </div>
     {#if current.summary.volumes > 1}
       {@const series = current.summary}
       <div class="stage-field">
@@ -203,45 +228,6 @@
         <p class="hint">{copy.volumeHint}</p>
       </div>
     {/if}
-  {:else}
-    <p class="hint intro">{copy.intro}</p>
-  {/if}
-  <div class="stage-field">
-    <label class="stage-field-label" for={spaceId}>{copy.space}</label>
-    <Select
-      id={spaceId}
-      {options}
-      bind:value={() => map.space, (space) => void map.setSpace(space)}
-      disabled={current.status === 'loading'}
-    />
-  </div>
-  {#if current.status === 'ready'}
-    <div class="stage-field">
-      <label class="stage-field-label" for={titleId}>{copy.title}</label>
-      <input
-        id={titleId}
-        type="text"
-        autocomplete="off"
-        aria-describedby={titleHintId}
-        value={map.title}
-        onchange={(event) => {
-          map.setTitle(event.currentTarget.value);
-          event.currentTarget.value = map.title;
-        }}
-      />
-      <p id={titleHintId} class="hint">{copy.titleHint}</p>
-    </div>
-    <div class="stage-field">
-      <label class="stage-field-label" for={statisticId}>{copy.statistic}</label>
-      <Select
-        id={statisticId}
-        options={statistics}
-        bind:value={
-          () => map.statistic ?? '',
-          (value) => map.setStatistic((value || null) as Statistic | null)
-        }
-      />
-    </div>
     <div class="scale">
       <div>
         <label class="stage-field-label" for={thresholdId}>{copy.threshold}</label>
@@ -274,23 +260,6 @@
     <p id={hintId} class="hint">{copy.thresholdHint}</p>
     {#if invalid}<p id={invalidId} class="error" role="alert">{copy.invalid}</p>{/if}
     <div class="stage-field">
-      <label class="stage-field-label" for={sizeId}>{copy.minVoxels}</label>
-      <input
-        id={sizeId}
-        type="text"
-        inputmode="numeric"
-        autocomplete="off"
-        aria-invalid={sizeInvalid}
-        aria-describedby={sizeInvalid ? `${sizeInvalidId} ${sizeHintId}` : sizeHintId}
-        bind:value={sizeText}
-        oninput={applySize}
-      />
-      <p id={sizeHintId} class="hint">{copy.minVoxelsHint}</p>
-      {#if sizeInvalid}
-        <p id={sizeInvalidId} class="error" role="alert">{copy.minVoxelsInvalid}</p>
-      {/if}
-    </div>
-    <div class="stage-field">
       <RangeField
         label={copy.opacity}
         value={map.settings.opacity}
@@ -301,18 +270,65 @@
         oninput={(opacity) => map.setSettings({ ...map.settings, opacity })}
       />
     </div>
+    <!-- Set once for a map, so folded; the closed line still says what each is. -->
     <div class="stage-field">
-      <label class="stage-field-label" for={surfaceId}>{copy.surface}</label>
-      <Select
-        id={surfaceId}
-        options={surfaces}
-        describedby={surfaceHintId}
-        bind:value={() => map.surface, (surface) => map.setSurface(surface as CortexSurface)}
-      />
-      <p id={surfaceHintId} class="hint">{copy.surfaceHint}</p>
-    </div>
-    <div class="stage-field">
-      <Switch label={copy.show} bind:checked={() => map.shown, (shown) => map.setShown(shown)} />
+      <Disclosure summary={copy.settings} bind:open={settingsOpen}>
+        {@render templateField()}
+        <div class="stage-field">
+          <label class="stage-field-label" for={titleId}>{copy.title}</label>
+          <input
+            id={titleId}
+            type="text"
+            autocomplete="off"
+            aria-describedby={titleHintId}
+            value={map.title}
+            onchange={(event) => {
+              map.setTitle(event.currentTarget.value);
+              event.currentTarget.value = map.title;
+            }}
+          />
+          <p id={titleHintId} class="hint">{copy.titleHint}</p>
+        </div>
+        <div class="stage-field">
+          <label class="stage-field-label" for={statisticId}>{copy.statistic}</label>
+          <Select
+            id={statisticId}
+            options={statistics}
+            bind:value={
+              () => map.statistic ?? '',
+              (value) => map.setStatistic((value || null) as Statistic | null)
+            }
+          />
+        </div>
+        <div class="stage-field">
+          <label class="stage-field-label" for={sizeId}>{copy.minVoxels}</label>
+          <input
+            id={sizeId}
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            aria-invalid={sizeInvalid}
+            aria-describedby={sizeInvalid ? `${sizeInvalidId} ${sizeHintId}` : sizeHintId}
+            bind:value={sizeText}
+            oninput={applySize}
+          />
+          <p id={sizeHintId} class="hint">{copy.minVoxelsHint}</p>
+          {#if sizeInvalid}
+            <p id={sizeInvalidId} class="error" role="alert">{copy.minVoxelsInvalid}</p>
+          {/if}
+        </div>
+        <div class="stage-field">
+          <label class="stage-field-label" for={surfaceId}>{copy.surface}</label>
+          <Select
+            id={surfaceId}
+            options={surfaces}
+            describedby={surfaceHintId}
+            bind:value={() => map.surface, (surface) => map.setSurface(surface as CortexSurface)}
+          />
+          <p id={surfaceHintId} class="hint">{copy.surfaceHint}</p>
+        </div>
+      </Disclosure>
+      {#if !settingsOpen}<p class="hint settings-line">{settingsLine}</p>{/if}
     </div>
     {#if map.clusters.status === 'ready'}
       <div class="stage-field">
@@ -354,7 +370,11 @@
       <p class="error">{copy.clustersFailed}</p>
     {/if}
     <p class="hint">{copy.caveat}</p>
-  {:else if current.status === 'loading'}
+  {:else}
+    <p class="hint intro">{copy.intro}</p>
+    {@render templateField()}
+  {/if}
+  {#if current.status === 'loading'}
     <p class="hint" role="status">{copy.reading(current.name)}</p>
   {:else if current.status === 'error'}
     <p class="error" role="alert">
@@ -411,6 +431,11 @@
     }
     .intro {
       margin-top: 0;
+    }
+    /* Under the summary's words, past its chevron's slot and gap. */
+    .settings-line {
+      margin-top: 0;
+      padding-left: calc(12px + var(--space-2));
     }
     .play {
       margin-top: var(--space-2);

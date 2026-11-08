@@ -170,7 +170,10 @@
   function fitting(element: HTMLElement) {
     let size = { width: 0, height: 0 };
     function fit() {
-      const band = keyBand(size, stage.visibleRect, stage.gutter);
+      // Beside an open popover's band, the room left is what the keys weigh their band in.
+      const visible = stage.visibleRect;
+      const room = visible && { width: visible.width - stage.plateBand, height: visible.height };
+      const band = keyBand(size, room, stage.gutter);
       const { keyInset, keySize } = stage;
       if (
         band.top !== keyInset.top ||

@@ -1,4 +1,4 @@
-import type { FramingClearance, Rect, Size } from '../engine/api.ts';
+import type { FramingClearance, MoveOptions, Rect, Size } from '../engine/api.ts';
 import { ANATOMY_ASPECT, FRAME_FILL } from '../engine/render/camera-views.ts';
 import { clearCorner, clearFraming } from '../engine/render/effective-viewport.ts';
 import type { Media } from './media.svelte.ts';
@@ -37,8 +37,11 @@ export function createStageLayout({
   storage = defaultStorage(),
 }: {
   media: Pick<Media, 'phone'>;
-  /** The dock or the colour keys changed size: the camera keeps its fit (`engine.camera.refitDock`, app.js:388). */
-  onDock?: () => void;
+  /**
+   * The dock, the colour keys or an open popover's band changed size: the camera keeps its fit
+   * (`engine.camera.refitDock`, app.js:388), at once when `options` say so.
+   */
+  onDock?: (options?: MoveOptions) => void;
   storage?: Storage | null;
 }) {
   let visibleRect = $state.raw<Rect | null>(null);
@@ -48,6 +51,8 @@ export function createStageLayout({
   let keySize = $state.raw<Size>({ width: 0, height: 0 });
   // The bands on the stage's right and above the dock the guided tour keeps clear of anatomy for its card.
   let guideInset = { right: 0, bottom: 0 };
+  // The band an open stage popover takes off the stage's left on a wider screen.
+  let plateBand = $state(0);
   let sheetFull = $state(false);
   let sectionNeed = $state(0);
   let gutter = $state(0);
@@ -347,6 +352,18 @@ export function createStageLayout({
       if (changed && !fitting) onDock?.();
     },
 
+    /** The band an open stage popover takes off the left of the framing rectangle, in pixels; 0 while none does. */
+    get plateBand() {
+      return plateBand;
+    },
+
+    /** An open stage popover's band, the visible stage left of its right edge and a gutter; 0 gives it back. */
+    setPlateBand(band: number, options: MoveOptions) {
+      if (band === plateBand) return;
+      plateBand = band;
+      onDock?.(options);
+    },
+
     /** The bands the guided tour's card takes off the right and bottom of the framing rectangle; 0 gives one back. */
     setGuideInset(band: { right: number; bottom: number }) {
       if (band.right === guideInset.right && band.bottom === guideInset.bottom) return;
@@ -396,17 +413,17 @@ export function createStageLayout({
       const band = Math.max(keyInset.right, guideInset.right);
       if (!visibleRect?.height) {
         return {
-          inset: { top: keyInset.top, right: band, bottom: reach },
+          inset: { top: keyInset.top, right: band, bottom: reach, left: plateBand },
           scale: { horizontal: 1, vertical: 1 },
         };
       }
       const room = {
-        width: visibleRect.width - band,
+        width: visibleRect.width - band - plateBand,
         height: visibleRect.height - keyInset.top,
       };
       const { inset, scale, top, right } = clearGizmo(room, reach, markingClearance(reach));
       return {
-        inset: { top: keyInset.top + top, right: band + right, bottom: inset },
+        inset: { top: keyInset.top + top, right: band + right, bottom: inset, left: plateBand },
         scale,
       };
     },

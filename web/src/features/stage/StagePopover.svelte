@@ -1,7 +1,7 @@
 <!--
   One tool of the stage dock and the popover it opens (index.html:436-489, stage-tools.js). U5's non-modal
-  `Popover` (stage variant) does the opening: one open at a time, Escape returns focus to the tool, a Tab
-  out or an outside press leaves it where the reader moved it, a keyboard open or close is instant. Its
+  `Popover` (stage variant) does the opening: one open at a time, Escape returns focus to the tool, it stays
+  open through a press on the stage or a Tab out until its tool closes it, a keyboard open or close is instant. Its
   content has no role of its own, so the body is one `role="dialog"` named by `dialogLabelledby`
   (the trigger says `aria-haspopup="dialog"`).
   - The popover is placed by the dock (`style`), above it, on its start edge (place-popover.ts).
@@ -36,8 +36,6 @@
     /** What the tool draws; the chevron follows it. */
     name: Snippet;
     body: Snippet<[{ close: () => void; scrubbing: boolean }]>;
-    /** A press or focus here leaves the popover open (`Popover`). */
-    holdsOpen?: (node: Node) => boolean;
   }
 
   let {
@@ -52,7 +50,6 @@
     rescueFocus,
     name,
     body,
-    holdsOpen,
   }: Props = $props();
 
   let button = $state<HTMLElement | null>(null);
@@ -112,7 +109,7 @@
   }
 </script>
 
-<Popover variant="stage" bind:open class="stage-popover" {style} {holdsOpen}>
+<Popover variant="stage" bind:open class="stage-popover" {style}>
   {#snippet trigger({ props })}
     <button
       {...props}

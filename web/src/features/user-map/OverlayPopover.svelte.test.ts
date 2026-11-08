@@ -90,3 +90,36 @@ test('a single map has no volume control', async () => {
   await opened(summary);
   await expect.element(page.getByRole('slider', { name: fr.volume })).not.toBeInTheDocument();
 });
+
+test('what is adjusted while looking comes first; what is set once folds under a line naming it', async () => {
+  const map = await opened(summary);
+  const at = (locator: { element: () => Element }) => locator.element();
+  const follows = (a: Element, b: Element) =>
+    Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+  const show = at(page.getByRole('switch', { name: fr.show }));
+  const threshold = at(page.getByLabelText(fr.threshold, { exact: true }));
+  const opacity = at(page.getByRole('slider', { name: fr.opacity }));
+  const settings = at(page.getByText(fr.settings, { exact: true })).closest('details')!;
+  expect([
+    follows(show, threshold),
+    follows(threshold, opacity),
+    follows(opacity, settings),
+  ]).toEqual([true, true, true]);
+  expect(settings.open).toBe(false);
+  for (const label of [fr.space, fr.title, fr.statistic, fr.minVoxels, fr.surface]) {
+    expect(settings.contains(at(page.getByLabelText(label, { exact: true }))), label).toBe(true);
+  }
+  const unstated = t('fr', 'coordinate').unstated;
+  // The file's intent says z.
+  const line = page.getByText(fr.settingsLine(unstated, 'z', fr.everyCluster, 'piale'));
+  await expect.element(line).toBeVisible();
+
+  // The line follows what is chosen, and gives way to the fields while they are open.
+  map.setStatistic(null);
+  map.setMinVoxels(10);
+  const changed = fr.settingsLine(unstated, fr.value, fr.captionMinVoxels('10'), 'piale');
+  await expect.element(page.getByText(changed)).toBeVisible();
+  await userEvent.click(page.getByText(fr.settings, { exact: true }));
+  await expect.element(page.getByLabelText(fr.space, { exact: true })).toBeVisible();
+  await expect.element(page.getByText(changed)).not.toBeInTheDocument();
+});

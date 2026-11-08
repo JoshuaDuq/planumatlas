@@ -401,9 +401,9 @@ export interface EngineSections {
 // Camera, framing and presentation (render/scene.js, app.js 249-540, 781-822, 1783)
 // ---------------------------------------------------------------------------
 
-/** How much the framing keeps clear of the dock, colour keys and markings (viewport-chrome.js:263). */
+/** How much the framing keeps clear of the dock, colour keys, markings and an open popover (viewport-chrome.js:263). */
 export interface FramingClearance {
-  inset: { top?: number; right?: number; bottom?: number };
+  inset: { top?: number; right?: number; bottom?: number; left?: number };
   scale: { horizontal: number; vertical: number };
 }
 
@@ -462,8 +462,11 @@ export interface EngineCamera {
   setFramingSource(source: () => FramingClearance): void;
   /** The phone sheet covers part of the canvas; `settle` is the sheet easing to a detent (scene.js:488). */
   setChromeInsets(insets: ChromeInsets, motion: ChromeMotion): void;
-  /** The stage dock grew or shrank: keep the heading and scale the distance to the new room (app.js:388). */
-  refitDock(): void;
+  /**
+   * The stage dock grew or shrank, or an open popover's band changed: keep the heading and scale the distance
+   * to the new room (app.js:388).
+   */
+  refitDock(options?: MoveOptions): void;
   /**
    * A phone popover covers the stage from `top` (host px) down, or no longer does (null): refit clear of
    * it. A new cover that hides none of the drawn anatomy leaves the camera alone.

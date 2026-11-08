@@ -339,13 +339,13 @@ describe('a tool and its popover', () => {
     },
   );
 
-  test('Tab from the last control of a popover leaves the dock', async () => {
+  test('Tab from the last control of a popover leaves the dock, and the popover stays open', async () => {
     await mount();
     await open('Lesion');
     expect(active()).toBe(control('button', 'Place'));
     await userEvent.keyboard('{Tab}');
     expect(active()).toBe(control('button', 'After'));
-    await vi.waitFor(() => expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false'));
+    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
   });
 
   test('from the keyboard it is instant, from the pointer it grows from the dock', async () => {
@@ -780,6 +780,21 @@ describe('accessibility (axe)', () => {
   });
 });
 
+describe('an open popover stays while the reader works beside it', () => {
+  test.each(['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display'])(
+    'a press on the stage or outside it leaves %s open; its tool closes it',
+    async (name) => {
+      await mount();
+      await press('button', name);
+      await userEvent.click(canvas()!);
+      await press('button', 'Before');
+      expect(tool(name).getAttribute('aria-expanded')).toBe('true');
+      await press('button', name);
+      await vi.waitFor(() => expect(tool(name).getAttribute('aria-expanded')).toBe('false'));
+    },
+  );
+});
+
 describe('placing a lesion from the Lesion popover', () => {
   test('places only once chosen there: a press on the stage then keeps it open, and closing ends it', async () => {
     await mount();
@@ -792,7 +807,7 @@ describe('placing a lesion from the Lesion popover', () => {
     await userEvent.click(canvas()!);
     expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
     expect(placing.at(-1)).toBe(true);
-    await press('button', 'After');
+    await press('button', 'Lesion');
     await vi.waitFor(() => expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false'));
     expect(placing.at(-1)).toBe(false);
     // Opened again, the popover starts back on selecting.
@@ -810,19 +825,12 @@ describe('placing a lesion from the Lesion popover', () => {
     await vi.waitFor(() => expect(placing.at(-1)).toBe(false));
   });
 
-  test('a press on the stage closes the popover while a click selects', async () => {
+  test('until the reader chooses to place, a click on the stage selects and the popover stays', async () => {
     await mount();
     await press('button', 'Lesion');
     await userEvent.click(canvas()!);
-    await vi.waitFor(() => expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false'));
+    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
     expect(placing.every((on) => !on)).toBe(true);
-  });
-
-  test('a press on the stage closes the Section popover: only the Lesion popover holds it', async () => {
-    await mount();
-    await press('button', 'Section');
-    await userEvent.click(canvas()!);
-    await vi.waitFor(() => expect(tool('Section').getAttribute('aria-expanded')).toBe('false'));
   });
 
   test('is not offered over the tract reference, so nothing is placed there', async () => {
@@ -918,6 +926,86 @@ describe('scrubbing a slider clears the plate off the picture', () => {
   });
 });
 
+describe('on a wider screen the camera frames the anatomy beside the open popover', () => {
+  const host = () => document.getElementById('viewport')!;
+  /** The band an open plate takes: the stage from its visible left to the plate's right edge and a gutter. */
+  const band = () =>
+    Math.round(
+      popover().offsetLeft +
+        dock().offsetLeft +
+        dock().clientLeft +
+        popover().offsetWidth +
+        20 -
+        engine.camera.visibleRect.x,
+    );
+  let refits: unknown[];
+  beforeEach(() => {
+    refits = [];
+    onDock = () => refits.push(stage.plateBand);
+  });
+
+  test('the band is given once the plate is placed, kept through a swap, and given back on close', async () => {
+    await mount({}, { width: 900, height: 600 });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(stage.plateBand).toBeGreaterThan(0));
+    expect(stage.plateBand).toBe(band());
+    expect(stage.framing().inset.left).toBe(band());
+    expect(host().getBoundingClientRect().left + band()).toBeGreaterThan(
+      popover().getBoundingClientRect().right,
+    );
+    const given = stage.plateBand;
+    // The same width, so the camera is not sent back and forth.
+    refits = [];
+    await press('button', 'Overlay');
+    await vi.waitFor(() => expect(tool('Overlay').getAttribute('aria-expanded')).toBe('true'));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(stage.plateBand).toBe(given);
+    expect(refits).not.toContain(0);
+    await press('button', 'Overlay');
+    await vi.waitFor(() => expect(stage.plateBand).toBe(0));
+    expect(plates).toEqual([]);
+  });
+
+  test('from the keyboard the camera moves at once, both ways; a pointer glides', async () => {
+    const moves: unknown[] = [];
+    await mount({}, { width: 900, height: 600 });
+    const setPlateBand = stage.setPlateBand;
+    stage.setPlateBand = (value, options) => {
+      moves.push({ value, ...options });
+      setPlateBand(value, options);
+    };
+    await open('Display');
+    await vi.waitFor(() => expect(moves.at(-1)).toEqual({ value: band(), immediate: true }));
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(moves.at(-1)).toEqual({ value: 0, immediate: true }));
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(moves.at(-1)).toEqual({ value: band(), immediate: false }));
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(moves.at(-1)).toEqual({ value: 0, immediate: false }));
+  });
+
+  test('a stage that would keep less than 320 px beside the plate leaves the framing alone', async () => {
+    // 20 + 272 + 20 of plate and gutters leave 308 px of a 620 px stage.
+    await mount({}, { width: 620, height: 600 });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(tool('Display').getAttribute('aria-expanded')).toBe('true'));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(stage.plateBand).toBe(0);
+  });
+
+  test('a phone frames above the plate instead, and gives no band', async () => {
+    await page.viewport(390, 844);
+    try {
+      await mount({ phone: true }, { width: 390, height: 700 });
+      await press('button', 'Display');
+      await vi.waitFor(() => expect(plates).toHaveLength(1));
+      expect(stage.plateBand).toBe(0);
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+});
+
 describe('on a phone the camera frames the anatomy above the open popover', () => {
   const host = () => document.getElementById('viewport')!;
   /** The open plate's top edge on the stage host, as laid out (the entry scale aside). */
@@ -953,7 +1041,7 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
     }
   });
 
-  test('from the keyboard the camera moves at once, both ways; a tap that closes it glides', async () => {
+  test('from the keyboard the camera moves at once, both ways; a tap on its tool that closes it glides', async () => {
     await page.viewport(390, 844);
     try {
       await mount({ phone: true }, { width: 390, height: 700 });
@@ -964,7 +1052,7 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
       await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: null, immediate: true }));
       await open('Display');
       await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: plateTop(), immediate: true }));
-      await userEvent.click(host(), { position: { x: 8, y: 8 } });
+      await press('button', 'Display');
       await vi.waitFor(() => expect(plates.at(-1)).toEqual({ top: null, immediate: false }));
     } finally {
       await page.viewport(1280, 800);

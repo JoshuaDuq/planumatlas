@@ -1515,8 +1515,8 @@
    "[\"\"] → \"The mean of  in this region at each volume, before the threshold. Choose a point to draw that volume.\""
   ],
   "courseCounts": [
-   "[\"Alpha\",\"\"] → \"over the Alpha of its  whole millimetres the map has a value at\"",
-   "[\"\",\"Alpha\"] → \"over the  of its Alpha whole millimetres the map has a value at\""
+   "[\"Alpha\",\"\"] → \"The mean is over the Alpha of the region’s  whole millimetres where this volume has a value.\"",
+   "[\"\",\"Alpha\"] → \"The mean is over the  of the region’s Alpha whole millimetres where this volume has a value.\""
   ],
   "courseLoading": "Reading the region’s volumes…",
   "courseFailed": "The region’s course could not be read.",
@@ -1566,6 +1566,12 @@
    "[\"\"] → \"on the  surface\""
   ],
   "show": "Show on the brain",
+  "settings": "Map settings",
+  "everyCluster": "every cluster",
+  "settingsLine": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha ·  · Alpha ·  surface\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" · Alpha ·  · alpha surface\""
+  ],
   "remove": "Remove",
   "caveat": "A template-space map carried onto this brain by the template’s registration: its place on this person’s folds, not this person’s data.",
   "keyRange": [

@@ -1,25 +1,21 @@
 <!--
   A non-modal disclosure (APG Disclosure; decisions 0005 and #4 decision 14): the trigger carries
   aria-expanded and aria-controls, the content is ordinary controls in the tab order.
-  - one popover is open at a time: opening another closes it;
+  - one menu and one stage popover are open at a time: opening another of its variant closes it;
   - the menu variant leaves focus on the trigger (APG Disclosure; Tab enters the content); the
     stage variant moves it to the pressed control (stage-tools.js:66-69);
-  - Escape closes it, is marked handled so the page's Escape does not also clear the selection,
-    and returns focus to the trigger; so does a command (`close` in the content snippet);
-  - Tab or a press elsewhere closes it and focus stays where the user moved it;
+  - Escape inside it closes it, is marked handled so the page's Escape does not also clear the
+    selection, and returns focus to the trigger; so does a command (`close` in the content snippet);
+  - a menu closes on Tab or a press elsewhere, and focus stays where the user moved it; a stage
+    popover stays open while the reader works beside it, and closes by its trigger;
   - a keyboard open or close carries no entry animation (`data-instant`).
   The content is not portaled: it stays right after the trigger, so Tab continues in document
   order (WCAG 2.4.3), and it is drawn inside a fullscreen #viewport.
 -->
 <script lang="ts" module>
-  // The open popover: a second one opening closes it, and a stage popover opening over a stage
-  // popover appears without its entry (stage-tools.js:71-74).
-  // Stage triggers: a press on another one is not an outside press, its click swaps them
-  // (stage-tools.js:105-110).
-  const stageTriggers = new Set<HTMLElement>();
-  // The stage trigger a pointer is pressing, until its click (stage-tools.js:104,116,134).
-  let pressed: HTMLElement | null = null;
-  let current: { variant: string; dismiss: () => void } | null = null;
+  // The open popover of each variant: a second one opening closes it, and a stage popover opening over a
+  // stage popover appears without its entry (stage-tools.js:71-74).
+  const current: Record<'menu' | 'stage', (() => void) | null> = { menu: null, stage: null };
 
   const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 </script>
@@ -40,8 +36,6 @@
     trigger: Snippet<[{ props: Record<string, unknown> }]>;
     /** `close` shuts the popover and returns focus to the trigger, for a command chosen inside. */
     children: Snippet<[{ close: () => void }]>;
-    /** A press or a move of focus onto such a node leaves the popover open: the work it does is there. */
-    holdsOpen?: (node: Node) => boolean;
   }
 
   let {
@@ -52,7 +46,6 @@
     style,
     trigger,
     children,
-    holdsOpen,
   }: Props = $props();
 
   const uid = $props.id();
@@ -72,38 +65,17 @@
 
   $effect(() => {
     if (!open) return;
-    const entry = { variant, dismiss: () => close({ instantly: true }) };
-    if (current !== null) {
-      if (variant === 'stage' && current.variant === 'stage') instant = true;
-      current.dismiss();
+    const dismiss = () => close({ instantly: true });
+    const other = current[variant];
+    if (other !== null) {
+      if (variant === 'stage') instant = true;
+      other();
     }
-    current = entry;
+    current[variant] = dismiss;
     return () => {
-      if (current === entry) current = null;
+      if (current[variant] === dismiss) current[variant] = null;
     };
   });
-
-  $effect(() => {
-    if (variant !== 'stage') return;
-    const element = document.getElementById(triggerId)!;
-    stageTriggers.add(element);
-    const press = (event: PointerEvent) => {
-      pressed =
-        [...stageTriggers].find((trigger) => trigger.contains(event.target as Node)) ?? null;
-    };
-    document.addEventListener('pointerdown', press, { capture: true });
-    return () => {
-      stageTriggers.delete(element);
-      document.removeEventListener('pointerdown', press, { capture: true });
-    };
-  });
-
-  function onInteractOutside(event: Event) {
-    const target = event.target as Element;
-    if ([...stageTriggers].some((trigger) => trigger.contains(target)) || holdsOpen?.(target)) {
-      event.preventDefault();
-    }
-  }
 
   const own = (node: EventTarget | null) =>
     node instanceof Element && node.closest(`[id="${triggerId}"]`) !== null;
@@ -156,19 +128,14 @@
   }
 
   function onfocusout(event: FocusEvent) {
+    if (variant === 'stage') return;
     const next = event.relatedTarget as Node | null;
     // No related target: the window lost focus (a switch to another window); the popover stays.
-    // A pressed stage trigger takes over by its click, which swaps them (stage-tools.js:133-136).
-    const swapping = pressed?.contains(next) ?? false;
-    const held = next !== null && (holdsOpen?.(next) ?? false);
-    if (open && next !== null && !wrapper.contains(next) && !swapping && !held) {
-      close({ instantly: true });
-    }
+    if (open && next !== null && !wrapper.contains(next)) close({ instantly: true });
   }
 
   // A click with no pointer behind it came from Enter or Space.
   function onclickcapture(event: MouseEvent) {
-    pressed = null;
     if (own(event.target)) instant = isKeyboardActivation(event);
   }
 </script>
@@ -195,8 +162,9 @@
         data-instant={instant ? '' : undefined}
         {style}
         trapFocus={false}
+        interactOutsideBehavior="ignore"
+        escapeKeydownBehavior="ignore"
         onOpenAutoFocus={focusStart}
-        {onInteractOutside}
         {onCloseAutoFocus}
       >
         {@render children({ close: () => close({ restoreFocus: true, instantly: instant }) })}

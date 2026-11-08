@@ -98,8 +98,11 @@ export interface ChromeInsets {
   left: number;
 }
 
-/** The bands framing keeps clear: the stage dock's at the bottom, a colour key's at the top or right. */
-export type FramingInset = Pick<ChromeInsets, 'top' | 'right' | 'bottom'>;
+/**
+ * The bands framing keeps clear: the stage dock's at the bottom, a colour key's at the top or right, an open
+ * stage popover's at the left.
+ */
+export type FramingInset = ChromeInsets;
 
 /** The manifest's `appearance.lighting`: the rig's intensities and the environment's. */
 export interface Appearance {
@@ -393,7 +396,7 @@ export function createScene(
   let chromeMove: InsetMove<keyof ChromeInsets> | null = null;
   // Framing also clears the stage dock and any colour key, which `chromeInsets` must not include:
   // they are placed by that rectangle and would push themselves along by their own size.
-  const NO_INSET: FramingInset = Object.freeze({ top: 0, right: 0, bottom: 0 });
+  const NO_INSET: FramingInset = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
   let framingInset = NO_INSET;
   let framingShown = NO_INSET;
   let insetMove: InsetMove<keyof FramingInset> | null = null;
@@ -402,7 +405,7 @@ export function createScene(
       top: chrome.top + inset.top,
       right: chrome.right + inset.right,
       bottom: chrome.bottom + inset.bottom,
-      left: chrome.left,
+      left: chrome.left + inset.left,
     });
 
   /*
@@ -954,11 +957,11 @@ export function createScene(
 
     /**
      * Keep framing clear of bands of the visible rectangle: the dock's at the bottom, a colour
-     * key's at the top or right. The image slides on the camera's spring, or rides a settling
-     * sheet's. Returns whether it changed.
+     * key's at the top or right, an open popover's at the left. The image slides on the camera's
+     * spring, or rides a settling sheet's. Returns whether it changed.
      */
-    setFramingInset({ top = 0, right = 0, bottom = 0 } = {}, { immediate = false } = {}) {
-      const next: FramingInset = { top, right, bottom };
+    setFramingInset({ top = 0, right = 0, bottom = 0, left = 0 } = {}, { immediate = false } = {}) {
+      const next: FramingInset = { top, right, bottom, left };
       const sides = Object.keys(next) as (keyof FramingInset)[];
       if (sides.every((side) => next[side] === framingInset[side])) return false;
       framingInset = next;

@@ -28,7 +28,7 @@ export const en = {
   courseIntro: (title: string) =>
     `The mean of ${title} in this region at each volume, before the threshold. Choose a point to draw that volume.`,
   courseCounts: (valued: string, total: string) =>
-    `over the ${valued} of its ${total} whole millimetres the map has a value at`,
+    `The mean is over the ${valued} of the region’s ${total} whole millimetres where this volume has a value.`,
   courseLoading: 'Reading the region’s volumes…',
   courseFailed: 'The region’s course could not be read.',
   courseNone: 'This region has no solid on the stage to read the map in.',
@@ -61,6 +61,10 @@ export const en = {
     'This brain’s own surfaces, with the same vertices and values: deeper ones open the sulci. A cut draws the pial.',
   captionSurface: (name: string) => `on the ${name.toLowerCase()} surface`,
   show: 'Show on the brain',
+  settings: 'Map settings',
+  everyCluster: 'every cluster',
+  settingsLine: (template: string, statistic: string, clusters: string, surface: string) =>
+    `${template} · ${statistic} · ${clusters} · ${surface.toLowerCase()} surface`,
   remove: 'Remove',
   caveat:
     'A template-space map carried onto this brain by the template’s registration: its place on this person’s folds, not this person’s data.',
@@ -150,7 +154,7 @@ export const fr: typeof en = {
   courseIntro: (title: string) =>
     `La moyenne de ${title} dans cette région à chaque volume, avant le seuil. Choisissez un point pour afficher ce volume.`,
   courseCounts: (valued: string, total: string) =>
-    `sur les ${valued} de ses ${total} millimètres entiers où la carte a une valeur`,
+    `La moyenne porte sur les ${valued} des ${total} millimètres entiers de la région où ce volume a une valeur.`,
   courseLoading: 'Lecture des volumes de la région…',
   courseFailed: 'Le décours de la région n’a pas pu être lu.',
   courseNone: 'Cette région n’a pas de solide sur la scène où lire la carte.',
@@ -184,6 +188,10 @@ export const fr: typeof en = {
     'Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs : les plus profondes ouvrent les sillons. Une coupe affiche la piale.',
   captionSurface: (name: string) => `sur la surface ${name.toLowerCase()}`,
   show: 'Afficher sur le cerveau',
+  settings: 'Réglages de la carte',
+  everyCluster: 'tous les amas',
+  settingsLine: (template: string, statistic: string, clusters: string, surface: string) =>
+    `${template} · ${statistic} · ${clusters} · surface ${surface.toLowerCase()}`,
   remove: 'Retirer',
   caveat:
     'Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.',

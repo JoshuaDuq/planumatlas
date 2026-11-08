@@ -74,6 +74,7 @@
     const style = host().style;
     style.setProperty('--key-top', `${stage.keyInset.top}px`);
     style.setProperty('--key-right', `${stage.keyInset.right}px`);
+    style.setProperty('--plate-left', `${stage.plateBand}px`);
   });
 
   // The dock's height and tallness are written by the store itself, as the dock is measured.
@@ -132,8 +133,9 @@
 <style>
   @layer features {
     /*
-     * The stage host's variables. The --vis-* edges are the rectangle the reader can see and --key-* the band
-     * a colour key takes off it; the script above writes both, and --dock-height, from the store.
+     * The stage host's variables. The --vis-* edges are the rectangle the reader can see, --key-* the band
+     * a colour key takes off it and --plate-left an open popover's; the script above writes them, and
+     * --dock-height, from the store.
      */
     :global(#viewport) {
       --vis-top: 0px;
@@ -142,6 +144,7 @@
       --vis-left: 0px;
       --key-top: 0px;
       --key-right: 0px;
+      --plate-left: 0px;
       --dock-height: 38px;
       /* One edge for every plate on the stage. */
       --stage-edge: color-mix(in srgb, var(--overlay-border) 75%, var(--overlay-plate));

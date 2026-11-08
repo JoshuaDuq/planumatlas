@@ -807,6 +807,12 @@ describe('scene motion', () => {
     assert.equal(stage.viewportFit.horizontal, 1);
     assert.equal(stage.setFramingInset({ bottom: 40 }, { immediate: true }), true);
     assert.equal(stage.camera.view?.offsetY, 20);
+    // An open stage popover's band on the left: the image re-centres in the 700 px beside it.
+    assert.equal(stage.setFramingInset({ left: 100 }, { immediate: true }), true);
+    close(stage.viewportFit.horizontal, 1 - 100 / 800, 1e-12);
+    assert.equal(stage.viewportFit.vertical, 1);
+    assert.equal(stage.camera.view?.offsetX, -50);
+    assert.equal(stage.camera.view?.offsetY, 0);
     stage.dispose();
   });
 
