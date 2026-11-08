@@ -88,9 +88,10 @@
     const expanded = new Set(app.session.state.expanded);
     startGuide(lang, {
       animate: !app.media.reducedMotion,
-      onClose: () => {
+      onClose: ({ pointer }) => {
         app.session.setExpanded(expanded);
-        settingsButton()?.focus();
+        // A tap or click that ended the tour leaves no ring, and so no tooltip, over the stage.
+        settingsButton()?.focus({ focusVisible: !pointer });
       },
       onLanguage: app.chooseLanguage,
       reserve: (band) => app.stage.setGuideInset(band),

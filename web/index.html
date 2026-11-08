@@ -37,7 +37,8 @@
       The reader's theme and language, applied before the first paint so neither flashes the
       other's value (decision 2 on #4). Each rule is the app's own, restated here because the
       app has not loaded: theme is `resolveTheme` (src/lib/state/theme.svelte.ts), language is
-      `startLanguage` with the link's `lang` (src/lib/state/language.svelte.ts), keys are PREF_KEYS
+      `startLanguage` with the link's `lang` and the browser's languages
+      (src/lib/state/language.svelte.ts), keys are PREF_KEYS
       (src/lib/state/prefs.ts) and the two theme-color values are --surface-base in tokens.css.
       src/app/head-script.test.ts holds them equal. Site data can be blocked, which makes reading
       localStorage throw.
@@ -58,7 +59,11 @@
         var values = new URLSearchParams(location.hash.replace(/^#/, '')).getAll('lang');
         var linked = values.length === 1 ? values[0] : null;
         root.dataset.theme = theme;
-        root.lang = linked === 'en' || linked === 'fr' ? linked : saved === 'fr' ? 'fr' : 'en';
+        var lang = linked === 'en' || linked === 'fr' ? linked : saved;
+        for (var i = 0; lang !== 'en' && lang !== 'fr' && i < navigator.languages.length; i++) {
+          lang = navigator.languages[i].toLowerCase().split('-')[0];
+        }
+        root.lang = lang === 'fr' ? 'fr' : 'en';
         document
           .querySelector('meta[name="theme-color"]')
           .setAttribute('content', theme === 'dark' ? '#1b1e21' : '#ffffff');

@@ -42,6 +42,11 @@
   const LETTERS = Object.keys(VIEWS) as Letter[];
   /** A letter's drawn circle is 18 px across, whatever its target. */
   const DRAWN_RADIUS = 9;
+  /**
+   * Closer than this to a nearer mark's centre, a letter pointing away is more than half covered: at the
+   * opening oblique view R sits 10 px from the centre, under the centre's dot and beside L.
+   */
+  const BEHIND_DISTANCE = 1.25 * DRAWN_RADIUS;
   const PAIRS = [
     ['R', 'L'],
     ['S', 'I'],
@@ -101,15 +106,15 @@
         line.setAttribute('y2', String(-y));
       }
     }
-    // A letter pointing away whose centre lies under a facing letter's drawn circle, or the centre's, is
-    // hidden behind it, so it takes no press (the keyboard reaches it). One only overlapped is still
-    // pressed where it is nearer than its neighbours.
+    // A letter pointing away that lies mostly under a facing letter's drawn circle, or the centre's, is
+    // behind it: it is not drawn and takes no press (the keyboard reaches it, and focus shows it). One
+    // only overlapped is still drawn, and pressed where it is nearer than its neighbours.
     const toward = [{ x: 0, y: 0 }, ...drawn.filter(({ depth }) => depth >= 0)];
     for (const { letter, x, y, depth } of drawn) {
       buttons[letter].dataset.behind = String(
         depth < 0 &&
           toward.some(
-            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < DRAWN_RADIUS,
+            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < BEHIND_DISTANCE,
           ),
       );
     }
@@ -400,6 +405,9 @@
     }
     .gizmo-letter[data-behind='true'] {
       pointer-events: none;
+    }
+    .gizmo-letter:global([data-behind='true']:not(:focus-visible)) > span {
+      visibility: hidden;
     }
     .gizmo-centre {
       z-index: 50;

@@ -267,7 +267,7 @@ document, `location`, `history` and `window` directly.
 - **Kind:** behaviour
 - **Level:** browser — computed stage background in the light theme
 - **Source:** `viewer/app.js:118-120`; `viewer/ui/chrome/viewport-chrome.js:763-767`; deviation `h1b-webgl-failure-theme.md` (context lost not covered)
-- **Expected:** "The 3D view was interrupted by the graphics driver. Restoring…"; light theme stage background `rgb(14, 17, 22)`; `webglcontextrestored` → `data-status="ready"`, announcer "Anatomy loaded.".
+- **Expected:** "The 3D view was interrupted by the graphics driver. Restoring…"; light theme stage background `rgb(0, 0, 0)`; `webglcontextrestored` → `data-status="ready"`, announcer "Anatomy loaded.".
 - **Covered by:** `src/features/stage/StageStatus.svelte.test.ts` (R), `src/app/boot.svelte.test.ts` (R)
 
 ### BOOT-26 · Focus around the stage status

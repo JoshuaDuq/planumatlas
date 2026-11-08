@@ -36,6 +36,7 @@ const READER = '#anatomy=cdmd&atlas=destrieux&detail=learning&region=destrieux:l
 const HOME = '#anatomy=cdmd&atlas=destrieux&detail=learning';
 
 let closed = 0;
+let closedBy: { pointer: boolean }[] = [];
 let hashes: string[] = [];
 const recordHash = () => hashes.push(location.hash);
 beforeEach(async () => {
@@ -49,6 +50,7 @@ beforeEach(async () => {
     Object.assign(button.style, { minWidth: '24px', minHeight: '24px', background: 'none' });
   }
   closed = 0;
+  closedBy = [];
   mriOpens = [];
   languages = [];
   reserved = [];
@@ -83,7 +85,10 @@ let reserved: { right: number; bottom: number }[] = [];
 const start = (lang: 'en' | 'fr' = 'en') =>
   startGuide(lang, {
     animate: false,
-    onClose: () => closed++,
+    onClose: (how) => {
+      closed++;
+      closedBy.push(how);
+    },
     onLanguage: (next) => languages.push(next),
     mri,
     reserve: (band) => reserved.push(band),
@@ -187,6 +192,15 @@ test('a stop that points at a control leaves the page live; the welcome alone ho
   await userEvent.click(tab);
   expect(pressed).toEqual(['The brain']);
   expect(title()).toBe('The brain');
+});
+
+test('the close says whether a pointer or the keyboard ended the tour', async () => {
+  start();
+  await userEvent.click(card().querySelector('.driver-popover-close-btn')!);
+  start();
+  next().focus();
+  key(next(), 'keydown', 'Escape');
+  expect(closedBy).toEqual([{ pointer: true }, { pointer: false }]);
 });
 
 test('starting the tour again ends the one under way first, so the reader’s view still comes back', () => {

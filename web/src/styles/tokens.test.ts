@@ -53,7 +53,7 @@ const LIGHT = {
   '--border-subtle': '#e0e5e7',
   '--border-control': '#77828c',
   '--thumb-ring': '#78838d',
-  '--scene-background': '#0e1116',
+  '--scene-background': '#000000',
   '--scene-outline-core': '#0b1114',
   '--scene-outline-halo': '#f2f6fa',
   '--scene-outline-hidden': '#46505e',

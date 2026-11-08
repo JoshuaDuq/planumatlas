@@ -27,11 +27,13 @@ function run(
     systemDark = false,
     hash = '',
     blocked = false,
+    languages = ['en-US'],
   }: {
     stored?: Record<string, string>;
     systemDark?: boolean;
     hash?: string;
     blocked?: boolean;
+    languages?: string[];
   } = {},
 ): Page {
   const page: Page = { lang: 'en', theme: undefined };
@@ -63,6 +65,7 @@ function run(
       return { matches: systemDark };
     },
     location: { hash },
+    navigator: { languages },
     URLSearchParams,
   });
   return page;
@@ -81,7 +84,7 @@ describe('the pre-paint script', () => {
     }
   });
 
-  test('sets <html lang> as startLanguage does, from the link then the saved choice', () => {
+  test('sets <html lang> as startLanguage does, from the link, the saved choice, then the browser', () => {
     const hashes = [
       '',
       '#lang=fr',
@@ -94,15 +97,19 @@ describe('the pre-paint script', () => {
       '#lang=en&lang=en',
       '#lang=de&lang=fr',
     ];
+    const browsers = [[], ['en-US'], ['fr-CA', 'en'], ['de-DE', 'FR'], ['de', 'es']];
     for (const hash of hashes) {
       for (const saved of [null, 'fr', 'en', 'de']) {
-        const page = run(paint!, {
-          hash,
-          stored: saved === null ? {} : { [PREF_KEYS.language]: saved },
-        });
-        expect(page.lang, `${hash} ${saved}`).toBe(
-          startLanguage(decodeState(hash).state.lang, saved),
-        );
+        for (const languages of browsers) {
+          const page = run(paint!, {
+            hash,
+            stored: saved === null ? {} : { [PREF_KEYS.language]: saved },
+            languages,
+          });
+          expect(page.lang, `${hash} ${saved} ${languages}`).toBe(
+            startLanguage(decodeState(hash).state.lang, saved, languages),
+          );
+        }
       }
     }
   });

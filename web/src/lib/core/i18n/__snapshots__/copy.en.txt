@@ -560,7 +560,7 @@
    "[\"\"] → \" parts shown\""
   ],
   "regionIsolated": "Region isolated",
-  "focusOn": "Focus on",
+  "focusOn": "Region focused",
   "focusOff": "Focus off",
   "resetDisplay": "Reset display",
   "displayReset": "Display settings reset.",

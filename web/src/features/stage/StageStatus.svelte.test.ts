@@ -291,7 +291,7 @@ describe('context lost', () => {
     try {
       await render(Fixture, { status: 'context-lost' });
       const stage = getComputedStyle(document.querySelector('.stage-status')!);
-      expect(stage.backgroundColor).toBe('rgb(14, 17, 22)');
+      expect(stage.backgroundColor).toBe('rgb(0, 0, 0)');
     } finally {
       delete document.documentElement.dataset.theme;
     }

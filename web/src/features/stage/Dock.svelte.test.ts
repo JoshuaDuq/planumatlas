@@ -435,7 +435,7 @@ describe('what Display has changed', () => {
     });
     await open('Display');
     expect(popover().querySelector('.changes p')!.textContent).toBe(
-      'Left hemisphere · 3 parts hidden · Focus on',
+      'Left hemisphere · 3 parts hidden · Region focused',
     );
     await press('button', 'Reset display');
     expect(commands.resetDisplay).toHaveBeenCalledOnce();

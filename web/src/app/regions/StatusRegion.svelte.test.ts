@@ -222,7 +222,7 @@ describe('the display settings in effect', () => {
     anatomy.hideRegions(['destrieux:left:31']);
     anatomy.toggleFocus();
     flushSync();
-    expect(readout()).toBe('Left hemisphere · Cortex 50% · 1 part hidden · Focus on');
+    expect(readout()).toBe('Left hemisphere · Cortex 50% · 1 part hidden · Region focused');
     const camera = engine.camera.capture();
     const { atlas, detail, surfaceColor } = engine.model.settings;
 

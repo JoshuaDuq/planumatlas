@@ -16,7 +16,11 @@
   // language the head script of index.html already put on <html>.
   let {
     status = 'loading',
-    lang = startLanguage(decodeState(location.hash).state.lang, readPref(PREF_KEYS.language)),
+    lang = startLanguage(
+      decodeState(location.hash).state.lang,
+      readPref(PREF_KEYS.language),
+      navigator.languages,
+    ),
   }: {
     status?: SessionState['status'];
     lang?: Language;

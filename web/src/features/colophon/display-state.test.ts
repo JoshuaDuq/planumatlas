@@ -38,7 +38,7 @@ test('each setting away from its default is named, in order, in the reader’s l
     'Internal anatomy hidden',
     '3 parts hidden',
     'Region isolated',
-    'Focus on',
+    'Region focused',
   ]);
   assert.deepEqual(
     displayChanges({ ...changed, lang: 'fr', hiddenRegions: new Set(['a']) }, DEFAULT_DISPLAY),

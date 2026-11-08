@@ -6,11 +6,22 @@ import { blockedStorage, fakeStorage } from './test-support.ts';
 
 describe('startLanguage', () => {
   test('STORE-22: the start language is the link’s, else the saved one, else English', () => {
-    expect(startLanguage('fr', 'en')).toBe('fr');
-    expect(startLanguage(undefined, 'fr')).toBe('fr');
-    expect(startLanguage(undefined, null)).toBe('en');
-    expect(startLanguage('en', 'fr')).toBe('en');
-    expect(startLanguage(undefined, 'de')).toBe('en');
+    expect(startLanguage('fr', 'en', [])).toBe('fr');
+    expect(startLanguage(undefined, 'fr', [])).toBe('fr');
+    expect(startLanguage(undefined, null, [])).toBe('en');
+    expect(startLanguage('en', 'fr', [])).toBe('en');
+    expect(startLanguage(undefined, 'de', [])).toBe('en');
+  });
+
+  test('without a link or a saved choice, the browser’s first language the app speaks decides', () => {
+    expect(startLanguage(undefined, null, ['fr-CA', 'en-US'])).toBe('fr');
+    expect(startLanguage(undefined, null, ['FR'])).toBe('fr');
+    expect(startLanguage(undefined, null, ['de-DE', 'fr-FR', 'en'])).toBe('fr');
+    expect(startLanguage(undefined, null, ['en-GB', 'fr'])).toBe('en');
+    expect(startLanguage(undefined, null, ['de-DE', 'es'])).toBe('en');
+    expect(startLanguage(undefined, 'de', ['fr-FR'])).toBe('fr');
+    expect(startLanguage(undefined, 'en', ['fr-FR'])).toBe('en');
+    expect(startLanguage('en', null, ['fr-FR'])).toBe('en');
   });
 });
 
@@ -25,7 +36,7 @@ describe('STORE-22: every saved value with and without a link language', () => {
     ['en', 'fr', 'en'],
     ['en', 'de', 'en'],
   ] as const)('link %j, saved %j starts in %s', (link, saved, expected) => {
-    expect(startLanguage(link, saved)).toBe(expected);
+    expect(startLanguage(link, saved, [])).toBe(expected);
   });
 });
 
@@ -38,7 +49,8 @@ describe('createLanguage', () => {
   afterEach(() => {
     delete (globalThis as Record<string, unknown>).document;
   });
-  const storageOption = (storage: unknown) => ({ storage }) as { storage: Storage };
+  const storageOption = (storage: unknown) =>
+    ({ storage, preferred: ['en-US'] }) as { storage: Storage; preferred: string[] };
 
   test('starts from the saved language and sets <html lang>', () => {
     const language = createLanguage(undefined, storageOption(fakeStorage({ 'planum-lang': 'fr' })));
@@ -77,6 +89,17 @@ describe('createLanguage', () => {
     const language = createLanguage(undefined, storageOption(fakeStorage()));
     expect(() => language.set('de' as never)).toThrow(RangeError);
     expect(language.current).toBe('en');
+  });
+
+  test('a French browser starts in French until the reader chooses', () => {
+    const storage = fakeStorage();
+    const language = createLanguage(undefined, {
+      storage: storage as unknown as Storage,
+      preferred: ['fr-CA', 'en'],
+    });
+    expect(language.current).toBe('fr');
+    expect(root.lang).toBe('fr');
+    expect(storage.store['planum-lang']).toBeUndefined();
   });
 
   test('blocked site data still switches language, without memory', () => {

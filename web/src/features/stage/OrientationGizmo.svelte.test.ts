@@ -245,6 +245,16 @@ describe('choosing a view', () => {
     expect(commands.chooseView.mock.calls.flat()).not.toContain('right');
   });
 
+  test('at the opening view, R lies mostly under the centre and is not drawn', async () => {
+    await mount();
+    expect(letter('R').dataset.behind).toBe('true');
+    expect(getComputedStyle(letter('R').firstElementChild!).visibility).toBe('hidden');
+    for (const shown of ['L', 'S', 'I', 'P', 'A'] as const) {
+      expect(letter(shown).dataset.behind, shown).toBe('false');
+      expect(getComputedStyle(letter(shown).firstElementChild!).visibility, shown).toBe('visible');
+    }
+  });
+
   test('a press on the keyboard frames the focused letter’s view, wherever the pointer is', async () => {
     await mount();
     const target = [...gizmo().querySelectorAll<HTMLElement>('.gizmo-letter')].find(

@@ -48,7 +48,7 @@ export const en = {
   internalShown: 'Internal anatomy shown',
   shownCount: (number: number) => (number === 1 ? '1 part shown' : `${number} parts shown`),
   regionIsolated: 'Region isolated',
-  focusOn: 'Focus on',
+  focusOn: 'Region focused',
   focusOff: 'Focus off',
   // Not the gizmo's Reset view: the camera, the data and the selection stay.
   resetDisplay: 'Reset display',

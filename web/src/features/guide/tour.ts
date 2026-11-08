@@ -255,7 +255,8 @@ const rendered = (selector: string) =>
  */
 interface GuideOptions {
   animate: boolean;
-  onClose: () => void;
+  /** `pointer`: the last press that ended the tour was a pointer's, so focus returns without a ring. */
+  onClose: (closed: { pointer: boolean }) => void;
   /** The settings menu's language choice, offered on the first card. */
   onLanguage: (next: Language) => void;
   /** The Linked MRI, docked beside the stage, opened on a region it selects. */
@@ -263,6 +264,9 @@ interface GuideOptions {
   /** Keeps bands this wide on the stage's right and above its dock clear of anatomy; 0 gives one back. */
   reserve: (band: { right: number; bottom: number }) => void;
 }
+
+/** The presses that say whether the reader is using a pointer or the keyboard. */
+const INPUTS = ['pointerdown', 'keydown'] as const;
 
 /** The languages the first card offers, each named in itself. */
 const LANGUAGES: readonly { value: Language; name: string }[] = [
@@ -359,6 +363,11 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   const settled = ['transitionend', 'animationend'] as const;
   for (const type of settled) document.addEventListener(type, placeCard, true);
   addEventListener('resize', placeCard);
+  // How the reader last acted, so the close hands focus back the way it came (WCAG 2.4.7 asks for a
+  // ring after the keyboard, not after a tap that ended the tour).
+  let pointer = false;
+  const pressed = (event: Event) => (pointer = event.type === 'pointerdown');
+  for (const type of INPUTS) document.addEventListener(type, pressed, true);
   const tour = driver({
     steps,
     animate,
@@ -444,6 +453,7 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       menus.disconnect();
       cancelAnimationFrame(placing);
       for (const type of settled) document.removeEventListener(type, placeCard, true);
+      for (const type of INPUTS) document.removeEventListener(type, pressed, true);
       removeEventListener('resize', placeCard);
       reserve({ right: 0, bottom: 0 });
       leaveMri();
@@ -451,7 +461,7 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       document.documentElement.removeAttribute(SHOWING);
       if (!restore) return;
       showHash(reader);
-      onClose();
+      onClose({ pointer });
     },
   };
   const finish = () => self.finish();

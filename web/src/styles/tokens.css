@@ -32,7 +32,7 @@
     --thumb-ring: #78838d;
 
     /* The stage stays dark in both themes; panel colours change above. */
-    --scene-background: #0e1116;
+    --scene-background: #000000;
     --scene-outline-core: #0b1114;
     --scene-outline-halo: #f2f6fa;
     --scene-outline-hidden: #46505e;
