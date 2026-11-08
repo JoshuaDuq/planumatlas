@@ -39,7 +39,7 @@ import { gpuRendererName, isAppleSilicon, isIntegratedGpu } from './device.ts';
 import { motionRatio, qualityProfile } from './quality.ts';
 import { paintOutlineEdges, sameMeshSet } from './outline-edges.ts';
 import { withOutlineOccluders } from './outline-occluders.ts';
-import { transparentOrder } from './ghost-order.ts';
+import { opaqueOrder, transparentOrder } from './draw-order.ts';
 
 // How long a camera moved by a gesture must rest before the full-resolution frame is drawn.
 const SETTLE_MS = 150;
@@ -352,6 +352,7 @@ export function createScene(
     qualityProfile({ integrated: isIntegratedGpu(gpu), appleSilicon: isAppleSilicon(gpu) });
   const quality = profile();
   renderer.localClippingEnabled = true;
+  renderer.setOpaqueSort(opaqueOrder);
   renderer.setTransparentSort(transparentOrder);
   renderer.setPixelRatio(quality.pixelRatio);
   // Khronos PBR Neutral: a surface lit squarely shows its published colour,

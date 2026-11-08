@@ -20,7 +20,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { frameTo } from './camera-views.ts';
 import * as outlineEdges from './outline-edges.ts';
 import * as outlineOccluders from './outline-occluders.ts';
-import { transparentOrder } from './ghost-order.ts';
+import { opaqueOrder, transparentOrder } from './draw-order.ts';
 import { createPipeline, createScene, planFraming } from './scene.ts';
 import { orbitPath } from './camera-path.ts';
 import { ORBIT_STEP } from './keyboard-orbit.ts';
@@ -37,6 +37,7 @@ const calls = vi.hoisted(() => ({
   order: [] as string[],
   canvas: null as EventTarget | null,
   loop: null as ((now: number) => void) | null,
+  opaqueSort: null as unknown,
   transparentSort: null as unknown,
   after: [] as unknown[],
 }));
@@ -71,6 +72,9 @@ vi.mock('three', async (importOriginal) => {
       this.ratio = ratio;
     };
     getPixelRatio = () => this.ratio;
+    setOpaqueSort(method: unknown) {
+      calls.opaqueSort = method;
+    }
     setTransparentSort(method: unknown) {
       calls.transparentSort = method;
     }
@@ -242,6 +246,12 @@ describe('scene lifecycle', () => {
   it('draws translucent surfaces in the order that keeps focus ghosts from piling into a fog', () => {
     const stage = createScene(host);
     assert.equal(calls.transparentSort, transparentOrder);
+    stage.dispose();
+  });
+
+  it('draws the cortex before the structures it meets, whichever layer loaded first', () => {
+    const stage = createScene(host);
+    assert.equal(calls.opaqueSort, opaqueOrder);
     stage.dispose();
   });
 

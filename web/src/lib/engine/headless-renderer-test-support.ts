@@ -38,6 +38,7 @@ export function withHeadlessRenderer(original: typeof Three, probe: HeadlessProb
       this.ratio = ratio;
     };
     getPixelRatio = () => this.ratio;
+    setOpaqueSort() {}
     setTransparentSort() {}
     // No programs exist without a GL context.
     compileAsync = () => Promise.resolve();

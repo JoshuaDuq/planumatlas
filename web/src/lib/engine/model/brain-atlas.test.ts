@@ -14,12 +14,13 @@ import {
   SRGBColorSpace,
   Vector3,
 } from 'three';
+import type { RenderItem } from 'three';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import type { Region } from '../../types/index.ts';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
 import { Volume } from '../slices/volume.ts';
-import { GHOST } from '../render/ghost-order.ts';
+import { GHOST, opaqueOrder } from '../render/draw-order.ts';
 import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { BrainAtlas, SURFACE_COLORS } from './brain-atlas.ts';
@@ -683,6 +684,36 @@ test('a detail change does not cancel an atlas change still loading', async () =
   assert.equal(atlas.settings.detail, 'aseg');
   atlas.dispose();
 });
+
+test.each([
+  ['the detail level', ['aseg', 'a']],
+  ['the cortex', ['a', 'aseg']],
+] as const)(
+  'the cortex draws before the structures when %s finishes loading first',
+  async (_, order) => {
+    const { atlas } = fixture();
+    const files = { a: 'a.glb', aseg: 'structures.glb' };
+    for (const id of order) await atlas.loadLayer(id, files[id]);
+    const items = [...atlas.layers.values()]
+      .flatMap(({ meshes }) => meshes)
+      .map((object) => ({
+        groupOrder: 0,
+        renderOrder: 0,
+        material: object.material,
+        materialVariant: 0,
+        z: 0,
+        id: object.id,
+        object,
+      }));
+    assert.deepEqual(
+      (items as unknown as RenderItem[])
+        .sort(opaqueOrder)
+        .map(({ object }) => object.userData['atlas']),
+      ['a', 'a', 'a', 'aseg'],
+    );
+    atlas.dispose();
+  },
+);
 
 test('switches one atlas at a time, caches geometry, and keeps shared anatomy', async () => {
   const { atlas, loads } = fixture();

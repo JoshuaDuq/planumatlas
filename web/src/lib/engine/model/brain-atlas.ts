@@ -67,7 +67,7 @@ import { addUserMapToSurface, createUserMapUniforms } from '../user-map/overlay.
 import type { SurfaceHit } from '../render/picking.ts';
 import type { VisualFieldDot, VisualFieldReading } from '../api.ts';
 import { VISUAL_RESPONSE_THRESHOLD, predictedResponse } from '../../core/learning/visual-field.ts';
-import { GHOST } from '../render/ghost-order.ts';
+import { GHOST } from '../render/draw-order.ts';
 import {
   attachNetworkColors,
   attachTerritoryColors,
@@ -845,6 +845,7 @@ export class BrainAtlas extends EventTarget {
           throw new Error('BrainAtlas was disposed during loading.');
         }
         const raycast = raycastWithBvh(bvh);
+        const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
         const meshes: AtlasMesh[] = [];
         const originalMaterials = new Set<Material>();
         try {
@@ -882,9 +883,11 @@ export class BrainAtlas extends EventTarget {
               region,
               this.manifest.appearance,
               // Every cortical atlas carries the predicted retinotopy on every vertex.
-              this.manifest.atlases.some((atlas) => atlas.id === id) ? this.visualField : null,
+              corticalLayer ? this.visualField : null,
               this.userMap,
             );
+            // Drawn before the structures it meets, whichever loaded first (`opaqueOrder`).
+            if (corticalLayer) shown.userData['cortical'] = true;
             if (this.mriUniforms) {
               addMriSurfaceAppearance(shown.material, this.mriUniforms, mriSample(region));
             }

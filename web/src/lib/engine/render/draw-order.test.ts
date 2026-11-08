@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { RenderItem } from 'three';
-import { GHOST, transparentOrder } from './ghost-order.ts';
-import type { Ghost } from './ghost-order.ts';
+import { GHOST, opaqueOrder, transparentOrder } from './draw-order.ts';
+import type { Ghost } from './draw-order.ts';
 
 let id = 0;
 const item = (name: string, z: number, ghost?: Ghost, renderOrder = 0) =>
@@ -44,4 +44,28 @@ test('a render order set on purpose still outranks a ghost', () => {
     'ghost',
     'marking',
   ]);
+});
+
+const opaque = (name: string, material: number, cortical?: true, renderOrder = 0) =>
+  ({
+    id: id++,
+    z: 0,
+    groupOrder: 0,
+    renderOrder,
+    material: { id: material },
+    materialVariant: 0,
+    object: { name, userData: { cortical } },
+  }) as unknown as RenderItem;
+
+test('opaque surfaces keep three.js order, except that a cortical atlas comes first in its order', () => {
+  const items = [
+    opaque('marking', 0, undefined, 1000),
+    opaque('tract', 9),
+    opaque('cortex', 5, true),
+    opaque('nucleus', 1),
+  ];
+  assert.deepEqual(
+    items.sort(opaqueOrder).map((entry) => entry.object.name),
+    ['cortex', 'nucleus', 'tract', 'marking'],
+  );
 });
