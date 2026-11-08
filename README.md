@@ -2,147 +2,236 @@
   <a href="https://planumatlas.com/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/planum-dark.svg">
-      <img src=".github/assets/planum-light.svg" alt="Planum" width="238">
+      <img src=".github/assets/planum-light.svg" alt="Planum" width="216">
     </picture>
   </a>
 </p>
 
-<p align="center"><strong>A real human brain, explored in your browser.</strong><br>
-Explore, cut, measure and question one person's MRI-reconstructed brain. Nothing to install.</p>
+<p align="center"><strong>An interactive atlas of one human brain, traceable to its sources.</strong><br>
+Cut, measure and compare one person’s MRI-reconstructed brain in the browser, with its own white-matter pathways and published evidence registered onto it.</p>
 
 <p align="center">
   <a href="https://planumatlas.com/"><strong>Open Planum</strong></a> ·
-  <a href="https://planumatlas.com/docs/">Methods documentation</a>
+  <a href="https://planumatlas.com/docs/">Methods</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#citation">Citation</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml"><img alt="Deploy status" src="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml/badge.svg"></a>
-  <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-156b6d"></a>
-  <img alt="English and French" src="https://img.shields.io/badge/languages-English%20%C2%B7%20Fran%C3%A7ais-515b63">
+  <a href="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/JoshuaDuq/planumatlas/deploy.yml?branch=main&label=build"></a>
+  <a href="https://planumatlas.com/docs/"><img alt="Methods documentation" src="https://img.shields.io/badge/docs-methods-28615d"></a>
+  <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-28615d"></a>
+  <img alt="Python 3.12 and 3.13" src="https://img.shields.io/badge/python-3.12%20%7C%203.13-555f68">
+  <img alt="English and French" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20FR-555f68">
 </p>
 
-[![Diffusion tract bundles inside a see-through cortex, with the Tracts panel listing streamline counts and lengths](.github/assets/readme/tracts.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=diffusion)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/overview-dark.webp">
+  <img src=".github/assets/readme/overview-light.webp" alt="Three panels. a, a coronal section through the brain seen from the front, with the cortical ribbon in Destrieux colours and the deep structures and cut faces in NextBrain colours. b, the left arcuate fasciculus and corticospinal tract inside a translucent cortex, coloured by direction. c, the left hemisphere with language areas painted in three blues.">
+</picture>
 
-Textbook figures show an idealised brain, and many 3D models are drawn by artists. Planum shows a **real one**: MGH CDMD subject `sub_013`, reconstructed from its own T1 scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Every region, cut face and number in the viewer traces back to that data or to a cited atlas, and the app shows you which.
+<sub><b>Fig. 1 | One brain, with every layer registered onto it.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=nextbrain&detail=nextbrain&cut=coronal&pos=-20&view=anterior">Coronal section at y = −20 mm</a>, seen from the front: cortex in Destrieux colours, deep structures and cut faces in NextBrain colours. <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=diffusion&view=left&opacity=0.16&tracts=af-left,cst-left">Left arcuate fasciculus and corticospinal tract</a> from the subject’s own diffusion MRI, coloured by local direction. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&cuts=hcp-mmp&detail=learning&view=left&tab=functions&function=language">Neurosynth map for language</a> on HCP-MMP areas; darker blue is more consistent (z 3–5, 5–10, ≥ 10).</sub>
 
-It is built for people who need to understand where things are in the brain:
+## Overview
 
-- **Students** learning neuroanatomy on real folds instead of a diagram.
-- **Teachers** who want to show a structure, a section or a pathway with a link that opens the same view for every student.
-- **Researchers** who need to check where an atlas area, a function map or a lesion sits, and export the numbers.
+Planum shows one real brain rather than an average or an illustration: MGH CDMD subject `sub_013`, reconstructed with FreeSurfer 8.2 from its own T1-weighted scan, with 30 tract bundles from the same person’s diffusion MRI. Cortical atlases, subcortical segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Every region, cut face and number in the viewer can be traced to its source, and each feature has a [methods page](https://planumatlas.com/docs/) giving its data, method, validation and limitations.
 
-## What you can do
+It runs in any WebGL 2 browser, in English and French, with keyboard and touch controls. Nothing is installed, and files you open stay on your computer.
 
-### Explore every region, from gyri to nuclei
+> [!IMPORTANT]
+> Planum is for research and education. It is not a medical device and must not inform diagnosis, treatment or any other clinical decision.
 
-Search or browse 148 Destrieux parcels, 360 HCP-MMP areas, 278 Julich-Brain cytoarchitectonic areas or 400 Schaefer parcels on the cortex, and 514 NextBrain labels beneath it, down through the brainstem, 32 functional cerebellar regions and a 34-region cervical spinal cord. Select any region for its volume or surface area, centroid, source label, functional division and typical arterial supply. **Focus**, **Isolate** or **Hide** it to dissect the brain layer by layer.
+| Layer | Contents |
+| :--- | :--- |
+| **Subject** | MGH CDMD `sub_013` (CC0), FreeSurfer 8.2 reconstruction |
+| **Cortex** | Destrieux (148 parcels) · HCP-MMP (360 areas) · Julich-Brain 3.1 (278 areas) · Schaefer (400 parcels) |
+| **Internal anatomy** | NextBrain (514 labels, 0.4 mm) · FreeSurfer aseg (32 structures) · teaching set (106 structures) |
+| **Cerebellum and cord** | CerebNet lobules (25) · Nettekoven functional regions (32) · PAM50 cervical cord, C1–C5 (34 regions) |
+| **White matter** | 30 bundles from the subject’s diffusion MRI: 17 by DIPY RecoBundles, 13 by TractSeg |
+| **Evidence** | 70 Neurosynth maps · 131 deficit profiles · 228 stroke lesions · SEEG responses from 27 and 613 people |
+| **Your data** | MNI coordinates · NIfTI-1 maps and 4D series, read in the browser |
 
-### Cut it open and check it against the scan
+## Anatomy
 
-[![A coronal section through the hippocampal formation, with every solid capped by its labels and the section bar below](.github/assets/readme/sections.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&cut=coronal&pos=-20)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/cortex-dark.webp">
+  <img src=".github/assets/readme/cortex-light.webp" alt="Six lateral views of the same left hemisphere, coloured by Destrieux, HCP-MMP, Julich-Brain, Schaefer, CAB-NP networks and arterial territories.">
+</picture>
 
-Slice sagittally, coronally, axially or at any oblique angle. Each structure is capped where the plane meets it, and the cap is coloured from the label volume, not painted on. Open **Linked MRI** to see the subject's own T1 in three planes around a shared crosshair, with window and level, a segmentation overlay, the label under the cursor and PNG export.
+<sub><b>Fig. 2 | Six colourings of the same left hemisphere.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left">Destrieux</a>, 148 gyral and sulcal parcels. <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&cuts=hcp-mmp&detail=learning&view=left">HCP-MMP</a>, 360 multimodal areas. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=julich&cuts=julich&detail=learning&view=left">Julich-Brain 3.1</a>, 278 cytoarchitectonic areas. <b>d</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=schaefer&cuts=schaefer&detail=learning&view=left">Schaefer</a>, 400 parcels in seven-network colours. <b>e</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left&colors=cab-np">CAB-NP</a>, 12 networks. <b>f</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&view=left&colors=territory">Arterial territories</a> (Liu et al., 2023). Same camera and scale in every panel.</sub>
 
-[![Linked MRI: sagittal, coronal and axial T1 sections with a shared crosshair and the voxel's label](.github/assets/readme/linked-mri.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&cut=coronal&pos=-20)
+Four cortical atlases share one surface, and the cortex can also be coloured by Yeo or CAB-NP networks, arterial territory or the subject’s T1. Beneath it, choose NextBrain’s 514 labels at 0.4 mm (292 meshed structures and 222 more on cut faces), FreeSurfer’s 32 aseg structures or a 106-structure teaching set, down through the brainstem, the cerebellar lobules and the cervical cord. A selected region reports its volume or surface area, centroid and source labels; **Focus**, **Isolate** and **Hide** dissect it in context.
 
-### Follow the white matter
+Methods: [cortical atlases](https://planumatlas.com/docs/features/cortical-atlases.html) · [internal anatomy](https://planumatlas.com/docs/features/internal-anatomy.html) · [spinal cord](https://planumatlas.com/docs/features/spinal-cord.html) · [dissection and display](https://planumatlas.com/docs/features/dissection-and-display.html)
 
-Load any of 30 tract bundles reconstructed from this subject's diffusion MRI: association, projection and seven callosal segments, each with its streamline count and length range. Colour shows local direction, a slider filters short streamlines, and **Export lengths CSV** gives you the numbers. **MRI with tracts** opens the subject's T1 and FA images on linked slices.
+## Sections and linked MRI
 
-### See where a function is studied
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/sections-dark.webp">
+  <img src=".github/assets/readme/sections-light.webp" alt="Top row, sagittal, coronal and axial cuts through the brain with every structure capped in label colours. Bottom row, the subject's T1-weighted MRI in the same three planes.">
+</picture>
 
-[![The Neurosynth map for language on HCP-MMP areas, strongest in left inferior frontal and superior temporal cortex, with a ranked list of areas and their z scores](.github/assets/readme/functions.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=hcp-mmp&cuts=hcp-mmp&tab=functions&function=language)
+<sub><b>Fig. 3 | Capped sections and the subject’s own scan.</b> <b>a–c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=sagittal&pos=-20&view=right">Sagittal</a> (x = −20 mm, from the right), <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=coronal&pos=-20&view=anterior">coronal</a> (y = −20 mm, from the front) and <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&cut=axial&pos=12&view=superior">axial</a> (z = 12 mm, from above) cuts; each structure is capped where the plane meets it, coloured from the Destrieux cut labels. <b>d–f</b>, The T1-weighted scan in the same planes, as <b>Linked MRI</b> shows it. Positions are FreeSurfer surface RAS.</sub>
 
-Paint the cortex and deep structures with 70 curated functions, from working memory to face processing, based on Neurosynth meta-analyses. Each map lists its areas from strongest to weakest, with study counts, and says plainly what it is: where studies of healthy groups report activation, not what this brain does.
+Cut sagittally, coronally, axially or at any oblique angle. Cap colours come from the chosen label volume, not from the meshes, so the same cut can show Destrieux, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial, cerebellar or striatal labels. **Linked MRI** opens the scan in three planes around a shared crosshair, with window and level, a segmentation overlay, the label at the crosshair and PNG export.
 
-### Map what damage is associated with
+Methods: [sections and cuts](https://planumatlas.com/docs/features/sections-and-cuts.html) · [linked MRI](https://planumatlas.com/docs/features/linked-mri.html) · [boundary certainty](https://planumatlas.com/docs/features/boundary-certainty.html) · [segmentation agreement](https://planumatlas.com/docs/features/segmentation-agreement.html)
 
-[![Hemispatial neglect on the right hemisphere, with each finding in its own colour and the evidence listed in the panel](.github/assets/readme/deficits.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=deficits&deficit=neglect&view=right)
+## White matter
 
-131 profiles of acquired adult deficits, from aphasia and amnesia to neglect and ataxia, colour the regions their cited findings name. Every finding carries its population, evidence and limits, so you can see why a region is there and how strong the case is.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/tracts-dark.webp">
+  <img src=".github/assets/readme/tracts-light.webp" alt="Three views of direction-coloured streamlines inside a translucent grey brain: the left superior longitudinal fasciculus from the side, both corticospinal tracts from the front, and the corpus callosum segments from above.">
+</picture>
 
-### Take a guided tour
+<sub><b>Fig. 4 | Association, projection and commissural pathways of the same person.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=diffusion&view=left&opacity=0.16&tracts=slf1-left,slf2-left,slf3-left">Left superior longitudinal fasciculus I–III</a>, from the left. <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=diffusion&view=anterior&opacity=0.16&tracts=cst-left,cst-right">Left and right corticospinal tracts</a>, from the front. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=diffusion&view=superior&opacity=0.16&tracts=callosum-1,callosum-2,callosum-3,callosum-4,callosum-5,callosum-6,callosum-7">Seven corpus callosum segments</a>, from above. Streamlines are coloured by local direction (red left–right, green anterior–posterior, blue superior–inferior) inside a cortex at 16 % opacity.</sub>
 
-[![The memory circuit tour on its first landmark, the left hippocampal formation, outlined among its neighbours](.github/assets/readme/circuits.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=circuits&circuit=memory&step=1)
+Load any of 30 bundles reconstructed from this subject’s diffusion scan, in both hemispheres where paired: the arcuate, uncinate, inferior fronto-occipital, inferior and middle longitudinal fasciculi, cingulum and corticospinal tract; the superior longitudinal fasciculus whole and as SLF I–III; and the corpus callosum whole and as seven segments. Filter streamlines by length, export their lengths as CSV, or inspect them on linked T1 and FA images. Streamline counts are not axon counts, and lengths do not measure connection strength.
 
-Five tours follow established anatomical pathways and loop branches: vision, a hippocampal–diencephalic memory branch, basal ganglia motor loops, cerebellar output and corticospinal descent. Their 25 landmarks open the relevant atlas and frame the anatomy, with explicit notes on omitted relays and coarse boundaries.
+Methods: [tracts](https://planumatlas.com/docs/features/tracts.html)
 
-### Ask what a lesion would reach
+## Functional and clinical evidence
 
-[![A 10 mm lesion sphere on the left subcentral gyrus, with the report listing the functions and deficits it overlaps](.github/assets/readme/lesion.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=anatomy&lesion=-49.2,-1.7,35.6,10)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/evidence-dark.webp">
+  <img src=".github/assets/readme/evidence-light.webp" alt="Three panels with colour keys. a, the right hemisphere with spatial attention areas in blue. b, a see-through right hemisphere with five neglect findings in five colours. c, two stroke lesions in blue and pink with their overlap in green on a see-through left hemisphere.">
+</picture>
 
-Drop a sphere of 3 to 30 mm anywhere on the brain or a cut face. The report lists the functions whose territories it overlaps, the deficits whose cited regions it reaches, the tissue it contains region by region, and the tract streamlines that pass through it. It measures overlap only; it predicts nothing about a patient. [Read the guide](https://planumatlas.com/docs/features/lesion-report.html).
+<sub><b>Fig. 5 | Group evidence on one anatomy.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&cuts=hcp-mmp&detail=learning&tab=functions&function=spatial-attention&view=right">Where studies of healthy groups report activation for spatial attention</a> (Neurosynth, HCP-MMP areas with z ≥ 3). <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&tab=deficits&deficit=neglect&view=right">Regions cited for hemispatial neglect</a>, one colour per published finding. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&cuts=destrieux&detail=learning&region=destrieux:left:4&cases=M2295,M2272">Two Aphasia Recovery Cohort lesions</a> and their overlap, with the left subcentral region outlined.</sub>
 
-### Weigh a region against real strokes
+These layers place published evidence beside the anatomy with its sources and limits in view. They describe group findings, templates and spatial overlap; they are not measurements of this individual or predictions for a patient.
 
-[![Two stroke survivors' lesions compared on the left subcentral gyrus and sulci, one with severe aphasia and one with none, with their language scores](.github/assets/readme/stroke-cases.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=destrieux:left:4&cases=M2295,M2272)
+| Layer | What it shows |
+| :--- | :--- |
+| [Functions](https://planumatlas.com/docs/features/functions.html) | 70 curated Neurosynth consistency maps with ranked regional scores; 277 further terms by search. |
+| [Deficits](https://planumatlas.com/docs/features/deficits.html) | 131 acquired adult deficit profiles citing 339 references, each finding with its regions, population and limits. |
+| [Circuits](https://planumatlas.com/docs/features/circuits.html) | Five guided pathways with 25 landmarks and notes on the relays they omit. |
+| [Stroke cases](https://planumatlas.com/docs/features/stroke-cases.html) | 228 Aphasia Recovery Cohort lesions, with lesion volume and WAB aphasia quotient. |
+| [Stimulation responses](https://planumatlas.com/docs/features/stimulation-responses.html) | SEEG response rates with their sample counts, from Lyu et al. (27 people) and F-TRACT v2307 (613 people). |
+| [Visual field map](https://planumatlas.com/docs/features/visual-field-map.html) | V1–V3 predicted from this brain’s folding by the Benson template; no retinotopy was measured. |
+| [Functional networks](https://planumatlas.com/docs/features/functional-networks.html) | Yeo 7 and CAB-NP 12 networks, with [cerebellar](https://planumatlas.com/docs/features/cerebellar-functions.html) and [striatal](https://planumatlas.com/docs/features/striatal-networks.html) counterparts and [functional divisions](https://planumatlas.com/docs/features/functional-divisions.html). |
 
-For a region that real strokes reached, plot each of 228 people in the Aphasia Recovery Cohort as lesion volume against language score (WAB-AQ), within a test window you choose. Pick two people to draw their own lesions on the brain, each in its own colour with the overlap in a third, or step through pairs of similar lesion size and very different outcome. It is cohort evidence, not a prediction for this brain. [Read the guide](https://planumatlas.com/docs/features/stroke-cases.html).
+A selected region also opens its [atlas comparison](https://planumatlas.com/docs/features/atlas-comparison.html), [receptor fingerprint](https://planumatlas.com/docs/features/receptor-fingerprints.html) (up to 17 receptors), [arterial territory](https://planumatlas.com/docs/features/arterial-territories.html) and [boundary certainty](https://planumatlas.com/docs/features/boundary-certainty.html).
 
-### See what stimulating a region evokes
+## Bring your own data
 
-[![Stimulation responses for the left hippocampal formation, a response-rate bar for each other site with its pair and people counts](.github/assets/readme/stimulation.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&region=learning:left:hippocampus&focus=1)
+- **[Published coordinates](https://planumatlas.com/docs/features/published-coordinates.html).** Place a coordinate from MNI152NLin2009cAsym or SPM12 space on this brain and read the regions around it.
+- **[Overlays](https://planumatlas.com/docs/features/overlays.html).** Open an MNI-space NIfTI-1 map or 4D series and draw it on the surfaces, cut faces and MRI, with thresholds, clusters and a region time course. The file is read in the browser and never uploaded.
+- **[Lesion report](https://planumatlas.com/docs/features/lesion-report.html).** Place a sphere of 3–30 mm radius and measure the tissue, functions, deficits and tracts it reaches.
+- **[Links and images](https://planumatlas.com/docs/features/sharing-and-snapshots.html).** A link restores the selection, camera, section, display and placed lesion. **Save image** exports the stage with its orientation, scale and colour key.
 
-From single-pulse stereo-EEG in 27 people with epilepsy (Lyu et al. 2025): how often stimulating a region evoked a response elsewhere, or recording there caught one, on the same or the opposite side, with the pairs and people each rate rests on. For Julich-Brain areas, the same question at the scale of cytoarchitectonic areas from F-TRACT's 613 people. Rates are pooled across people, not measured in this brain. [Read the guide](https://planumatlas.com/docs/features/stimulation-responses.html).
+## How it is built
 
-### Map the visual field onto the cortex
+```mermaid
+flowchart LR
+  src["Subject T1 and diffusion MRI<br/>published atlases and datasets"]
+  prep["scripts/<br/>reconstruction · segmentation<br/>tractography · registration"]
+  build["brain_model<br/>compiler and validator"]
+  assets["public/<br/>glTF meshes · label volumes<br/>JSON layers · validation.json"]
+  web["web/<br/>Svelte · Three.js · WebGL 2"]
+  src --> prep --> build --> assets --> web
+```
 
-[![The visual field map: a dot 4.5 degrees from fixation on the visual field disc, with the V1, V2 and V3 territory predicted to represent it](.github/assets/readme/visual-field.webp)](https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=destrieux&cuts=destrieux&tab=circuits&map=visual-field&dot=3.2,3.2,1.5&view=right&hemi=left&internal=0)
+Preparation scripts reconstruct, segment, track and register the subject once. The `brain_model` compiler turns the results into meshes, gzipped label volumes and JSON layers, and records its measurements in `validation.json`; its validator checks the published anatomy against the source volumes, surfaces and labels. Deployment is gated on the Python tests, the anatomy validation and the web tests, each rerun when its inputs change. In the viewer, the **Provenance** panel names the subject, reconstruction, atlases and source files behind what is shown.
 
-Under **Circuits › Maps**, move a dot through the visual field and see the V1, V2 and V3 cortex predicted to represent it, with its area in mm², or click the cortex to read back the field position it responds to. The prediction is the Benson template applied to this brain's folding: no retinotopy was measured in this person. [Read the guide](https://planumatlas.com/docs/features/visual-field-map.html).
+| Path | Contents |
+| :--- | :--- |
+| [`brain_model/`](brain_model) | Offline Python compiler and validator |
+| [`config/`](config), [`data/`](data) | Build configuration, the committed reconstruction and curated evidence layers |
+| [`scripts/`](scripts) | Reconstruction, segmentation, tractography, registration and data retrieval |
+| [`public/`](public) | Published models and diffusion data served to the viewer |
+| [`web/`](web) | The viewer and its rendering engine |
+| [`docs/`](docs) | Sphinx methods pages |
+| [`tests/`](tests) | Python tests |
 
-### And more
+## Getting started
 
-- **Compare atlases.** See how a region of any cortical atlas shares its surface with the areas of another, in mm², and download every pair as CSV.
-- **Colour by network.** Yeo 7 or CAB-NP functional networks; Yeo's carry into the striatum voxel by voxel on any cut (Choi et al. 2012).
-- **Go deeper on a region.** Region details add receptor fingerprints (36, from EBRAINS) and typical arterial supply, from territories of 15 branches per hemisphere mapped in 1,298 stroke patients.
-- **Know how sure a boundary is.** NextBrain regions show where the segmentation nearly chose a neighbouring label.
-- **Share exactly what you see.** The address bar holds the selection, camera, section, display and a placed lesion, so a link reopens the same view. **Save image** exports the stage with its orientation letters, scale bar and colour key.
-- **Use it anywhere.** English or French, full keyboard control, and a touch layout for phones and tablets.
-
-## Built to be checked
-
-Planum is a reference, so its numbers have to hold. [`brain_model/validate.py`](brain_model/validate.py) reads every published anatomy back against its sources: volumes decode back to the source scans exactly, solids are re-voxelised with no voxel centre misclassified, projected atlases are re-derived, segmentations must agree with the subject's own (Dice 0.8 or more, with documented exceptions), and the spinal cord must match its segmentation (Dice 0.967 measured). CI runs it, the Python tests and the web tests on every pull request and deployment. The viewer's **Provenance** panel lists the subject, reconstruction, atlases, files and sources behind what you see.
-
-The anatomy is one individual, not a population average, and projected atlases, functional maps and tractography each have limits that the docs set out. **Planum is for research and education, not clinical decisions.** Each [methods page](https://planumatlas.com/docs/) states its validation and limitations.
-
-## Run it yourself
-
-The viewer needs Node.js and a WebGL 2 browser. The repository includes the published assets; no Python build is needed to explore them.
+Open **[planumatlas.com](https://planumatlas.com/)**. To run the viewer locally you need Node.js (CI uses version 24) and a WebGL 2 browser. The published assets are in the repository, about 470 MB, so no Python build is needed to explore them.
 
 ```bash
-cd web
+git clone --depth 1 https://github.com/JoshuaDuq/planumatlas.git
+cd planumatlas/web
 npm ci
 npm run dev
 ```
 
-Open the address printed by Vite (normally `http://127.0.0.1:5173/`). The repository is large because it includes model and diffusion data.
+Vite prints the local address, normally `http://127.0.0.1:5173/`.
 
-### Build and verify an anatomy
+<details>
+<summary><strong>Rebuild, validate and test</strong></summary>
 
-The Python pipeline requires [uv](https://docs.astral.sh/uv/) and Python 3.12 or 3.13. The committed sources are sufficient to rebuild the published anatomy:
+The pipeline uses [uv](https://docs.astral.sh/uv/) and Python 3.12 or 3.13.
 
 ```bash
 uv sync --locked
 uv run python -m brain_model.build --anatomy cdmd
 uv run python -m brain_model.validate --anatomy cdmd
-```
-
-To run tests and build the documentation:
-
-```bash
 uv run pytest
 npm test --prefix web
+```
+
+Build the methods documentation with warnings treated as errors:
+
+```bash
 uv sync --locked --group docs
 uv run sphinx-build -W -b html docs docs/_build/html
 ```
 
-Each feature's [methods page](https://planumatlas.com/docs/) gives the commands that rebuild and test it under **Code availability**.
+Each methods page lists the commands that rebuild and test its feature under **Code availability**.
 
-### Embed it
+</details>
 
-`BrainAtlas` and `BrainSections` work in any Three.js application without the viewer's interface: load an anatomy, pick regions, and cut it with capped sections. Their public API is exported from [`web/src/lib/engine/index.ts`](web/src/lib/engine/index.ts).
+<details>
+<summary><strong>Use the rendering engine</strong></summary>
 
-## Data and licences
+`createEngine`, exported from [`web/src/lib/engine/index.ts`](web/src/lib/engine/index.ts), loads an anatomy into a Three.js scene without the viewer’s interface. Its contract, the `Engine`, `EngineModel` and `EngineSections` types, is in [`web/src/lib/engine/api.ts`](web/src/lib/engine/api.ts).
 
-The code is licensed under the [GNU AGPL 3.0 or later](LICENSE), with the scope set out in [NOTICE](NOTICE): anyone who runs a modified version for others, including as a website, must offer them its source. Data have separate terms. In particular, HCP-MMP data have HCP use terms, CAB-NP is non-commercial, Julich-Brain, the receptor fingerprints and F-TRACT are CC BY-NC-SA, the Nettekoven cerebellar atlas and SUIT template are CC BY-NC 3.0, the arterial territory atlas is CC BY-SA 4.0, Neurosynth-derived databases are ODbL, the visual field template is AGPL-3.0, the SPM12 coordinate field is GPL-2.0-or-later, and the Schaefer parcellation and PAM50 cord atlas are MIT. TractSeg-derived bundles and Lyu et al.'s stimulation data require attribution. See [references and licensing](https://planumatlas.com/docs/reference/references.html) for sources, citations, complete terms and the acknowledgements publications need.
+</details>
+
+<details>
+<summary><strong>Refresh the README figures</strong></summary>
+
+```bash
+node scripts/readme-figures.mjs
+```
+
+The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (installed for `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). Pass another origin, such as a local server, as the first argument, or name figures to render only those.
+
+</details>
+
+## Citation
+
+If you use Planum, cite it and the data behind the views you use; the [references](https://planumatlas.com/docs/reference/references.html) list each source and the acknowledgement it requires. GitHub’s **Cite this repository** menu reads [`CITATION.cff`](CITATION.cff).
+
+```bibtex
+@software{planum,
+  author  = {Duquette, Joshua and Duquette, Andrew},
+  title   = {Planum},
+  year    = {2026},
+  url     = {https://planumatlas.com},
+  license = {AGPL-3.0-or-later}
+}
+```
+
+## Licence and data terms
+
+The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs a modified version for others, including as a website, must offer them its source. [NOTICE](NOTICE) sets out its scope. Neuroimaging data and derived assets under `data/`, `public/models/` and `public/diffusion/` keep the terms of their origin, with full texts in [`public/models/licenses/`](public/models/licenses):
+
+| Terms | Data |
+| :--- | :--- |
+| CC0 1.0 | MGH CDMD subject data |
+| FreeSurfer Software License | FreeSurfer reconstruction and atlases |
+| HCP Open Access Data Use Terms | HCP-MMP |
+| CAB-NP License (non-commercial) | CAB-NP networks |
+| CC BY-NC-SA 4.0 | Julich-Brain, receptor fingerprints, F-TRACT |
+| CC BY-NC 3.0 | Nettekoven cerebellar atlas, SUIT |
+| CC BY-SA 4.0 | Arterial territories |
+| CC BY 4.0 | Lyu et al. stimulation responses, TractSeg weights |
+| ODbL 1.0 | Neurosynth |
+| AGPL-3.0 | Benson visual-field template (neuropythy) |
+| MNI template licence | MNI152NLin2009cAsym |
+| GPL-2.0-or-later | SPM12 tissue probability maps (built from IXI, CC BY-SA 3.0) |
+| MIT | Schaefer parcellation, PAM50 |
+| BSD-2-Clause | Aphasia Recovery Cohort normalised lesions |
+
+Some terms are non-commercial or require attribution. Consult the [references, licences and acknowledgements](https://planumatlas.com/docs/reference/references.html) before reusing any data.

@@ -63,11 +63,11 @@ Each page below documents one feature in a fixed order: data, method, display, v
 
 Sources, citations and data licences are listed in [References](reference/references.md).
 
-```{figure} ../.github/assets/readme/tracts.webp
-:alt: Direction-coloured diffusion tract bundles inside a see-through cortex, with orientation, direction key and scale
+```{figure} ../.github/assets/readme/overview-light.webp
+:alt: Three panels. a, a coronal section seen from the front, with the cortical ribbon in Destrieux colours and the deep structures and cut faces in NextBrain colours. b, the left arcuate fasciculus and corticospinal tract inside a translucent cortex, coloured by direction. c, the left hemisphere with language areas painted in three blues.
 :name: fig-index-1
 
-**One subject's anatomy, with every layer registered onto it.** Tracts reconstructed from the subject's own diffusion scan, shown inside a see-through cortex.
+**One subject's anatomy, with every layer registered onto it.** **a**, Coronal section at y = −20 mm (surface RAS), seen from the front: Destrieux cortex, NextBrain deep structures and cut faces. **b**, Left arcuate fasciculus and corticospinal tract from the subject's own diffusion scan, coloured by local direction inside a see-through cortex. **c**, Neurosynth language map on HCP-MMP areas (z ≥ 3).
 ```
 
 ## Common basis
