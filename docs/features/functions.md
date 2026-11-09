@@ -14,9 +14,9 @@ The **Functions** tab paints where studies of a cognitive function consistently 
 | Input | Detail |
 | :--- | :--- |
 | Neurosynth database | Version 7, abstract terms (Yarkoni et al. 2011; [references](../reference/references.md#bibliography)). Fetched by `nimare.extract.fetch_neurosynth(version="7", source="abstract", vocab="terms")` into `data/cache/neurosynth`. The four files are recorded by sha256 under `derivation.files` of each score table. |
-| Software | NiMARE 0.22.1, Nilearn 0.13.1, NumPy 2.4.6 (curated table). The full term table used NumPy 2.4.2 on the Rorqual cluster. |
-| Surfaces | `data/fsaverage/surf/{lh,rh}.{white,pial}`; `data/fsaverage/label/{lh,rh}.HCPMMP1.annot` (180 areas per hemisphere) |
-| Structures | `data/fsaverage/mri/aseg.mgz`: 19 labels (cerebellar cortex, thalamus, caudate, putamen, pallidum, hippocampus, amygdala, accumbens and ventral diencephalon on each side, plus the brainstem) |
+| Software | NiMARE 0.22.1, Nilearn 0.13.1, NumPy 2.4.6, SciPy 1.18.1 (curated table). The full term table used NumPy 2.4.2 and SciPy 1.18.1 on the Rorqual cluster. |
+| Surfaces | CBIG's RF-ANTs mapping `{lh,rh}.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat` (Wu et al. 2018; MIT; commit `5bdb7f5`, pinned by sha256, cached in `data/cache/registration-fusion`); `data/fsaverage/label/{lh,rh}.HCPMMP1.annot` (180 areas per hemisphere) |
+| Structures | SynthSeg's segmentation of TemplateFlow `MNI152NLin6Asym` (1 mm T1 pinned in `config/coordinate-spaces.yaml`), cached as `data/cache/neurosynth/mni152nlin6asym-synthseg.nii.gz` and recorded by sha256: 19 aseg labels (cerebellar cortex, thalamus, caudate, putamen, pallidum, hippocampus, amygdala, accumbens and ventral diencephalon on each side, plus the brainstem) |
 | Curated scores | `data/neuropsych-domains/area-scores.json` (1.07 MB): 70 terms × 360 areas and 19 structures |
 | Term scores | `data/neurosynth-terms/term-scores.json` (10.2 MB): all 3,228 abstract terms, rounded to 4 decimals |
 | Published (CDMD) | `neuropsych-domains.json` (272 kB); `neurosynth-terms.json` (378 kB), written only by anatomies that declare `neurosynth_terms` in `config/model.yaml` |
@@ -109,8 +109,9 @@ Structures reached on CDMD include the accumbens by reward ($z$ 24.7 left, 24.6 
 - Each function is one abstract term; a study counts when its abstract uses the term, whatever task it ran.
 - Consistency $z$ grows with study count. Large literatures (attention, language, working memory) reach more areas, and areas engaged by most demanding tasks (anterior insula, intraparietal sulcus) reach several functions.
 - Signal-dropout cortex (orbitofrontal, anterior temporal) reaches few functions.
-- Neurosynth's MNI152 maps are sampled in `fsaverage`'s MNI305 space, a few millimetres apart. Whole-area means absorb most, not all, of the offset.
-- Structure scores are weaker evidence than area scores: the 6 mm kernel is large beside small nuclei, the space offset matters more there, and studies report fewer subcortical coordinates. Whole-structure means dilute: the cerebellum and brainstem reach no function.
+- Areas reach `fsaverage` by registration fusion: each vertex is read where 1,490 people's registrations place it in MNI152 on average, so it places group results, not any one person's folds. Areas narrower than the 6 mm kernel share their neighbours' values.
+- Neurosynth's peaks come from papers in several MNI templates. NiMARE converts the 16% of studies reporting Talairach with BrainMap's `tal2icbm_other`; the 13% that state no space are read as MNI.
+- Structure scores are weaker evidence than area scores: the 6 mm kernel is large beside small nuclei, and studies report fewer subcortical coordinates. Whole-structure means dilute: the cerebellum and brainstem reach no function.
 - White matter, the ventral diencephalon's nuclei and NextBrain's nuclei are not scored; lesion checks there are reported as not measured.
 - Searched terms were not checked against their names or against lesion studies. A population map shows where studies of that group report activation.
 - Scores are carried per area, never per vertex.
@@ -124,7 +125,7 @@ Structures reached on CDMD include the accumbens by reward ($z$ 24.7 left, 24.6 
 | Tests | [`tests/test_neuropsych_domains.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_neuropsych_domains.py), [`tests/test_neurosynth_terms.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/tests/test_neurosynth_terms.py), `web/src/lib/core/catalog/neuropsych-domains.test.ts`, `web/src/features/functions/` |
 
 ```bash
-# curated functions (needs the Neurosynth cache and fsaverage)
+# curated functions (needs the Neurosynth cache and fsaverage; the first run segments the template with FreeSurfer 8.2)
 uv run --with nimare==0.22.1 --with nilearn==0.13.1 python scripts/derive_domain_scores.py
 # whole vocabulary, on a Slurm cluster
 bash scripts/derive_term_scores_submit_rorqual.sh <tasks> <cpus-per-task> <gb-per-cpu>

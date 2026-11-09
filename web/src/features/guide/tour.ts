@@ -175,13 +175,14 @@ const STOPS: Record<
     view: 'lesion=-35.5,-9.5,63.5,10',
   },
   // Fox et al. 2012 (Biol Psychiatry, PMID 22658708): the left DLPFC stimulation target that
-  // connectivity with the subgenual cingulate optimises, in MNI. On this brain it lands in
-  // cortex, half its 5 mm sphere in the middle frontal gyrus.
+  // connectivity with the subgenual cingulate optimises, in MNI. The paper names no MNI template,
+  // so the stop reads it as not stated and the report gives the other templates' offsets. On this
+  // brain it lands in cortex, half its 5 mm sphere in the middle frontal gyrus.
   coordinate: {
     selector: dock('coordinate'),
     side: 'top',
     align: 'start',
-    view: 'coord=-38,44,26&space=mni152nlin2009casym',
+    view: 'coord=-38,44,26&space=unstated',
   },
   // A reader's map is their own file and never in a link: the stop points at the tool to try.
   overlay: { selector: dock('overlay'), side: 'top', align: 'start' },

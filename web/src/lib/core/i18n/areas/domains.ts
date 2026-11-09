@@ -4,7 +4,7 @@ export const en = {
   score: (term: string, z: string) => `“${term}” · z\u00a0${z}`,
   none: (threshold: string) => `No function reaches z\u00a0${threshold} here.`,
   noteStructure: (source: string) =>
-    `Mean meta-analytic consistency over this whole structure on fsaverage’s segmentation for each term, from ${source}. Weaker evidence than a cortical area: the 6 mm kernel is large beside a nucleus, and studies report fewer coordinates here. Not what this brain does, and not what damage here would impair.`,
+    `Mean meta-analytic consistency over this whole structure on SynthSeg’s segmentation of the MNI152 template for each term, from ${source}. Weaker evidence than a cortical area: the 6 mm kernel is large beside a nucleus, and studies report fewer coordinates here. Not what this brain does, and not what damage here would impair.`,
   noteUnit:
     'This teaching-set unit takes the score of the FreeSurfer structure most of it lies in on this brain.',
   note: (source: string) =>
@@ -37,7 +37,7 @@ export const fr: typeof en = {
   score: (term: string, z: string) => `« ${term} » · z\u00a0${z}`,
   none: (threshold: string) => `Aucune fonction n’atteint z\u00a0${threshold} ici.`,
   noteStructure: (source: string) =>
-    `Constance méta-analytique moyenne sur toute la structure de la segmentation de fsaverage pour chaque terme, d’après ${source}. Données plus faibles que pour une aire corticale\u202f: le noyau de lissage de 6\u00a0mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.`,
+    `Constance méta-analytique moyenne sur toute la structure de la segmentation SynthSeg du gabarit MNI152 pour chaque terme, d’après ${source}. Données plus faibles que pour une aire corticale\u202f: le noyau de lissage de 6\u00a0mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.`,
   noteUnit:
     'Cette unité de l’ensemble pédagogique reçoit la valeur de la structure FreeSurfer qui en contient la plus grande partie dans ce cerveau.',
   note: (source: string) =>

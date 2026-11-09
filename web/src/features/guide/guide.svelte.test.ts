@@ -165,7 +165,7 @@ test('each stop opens its feature over the home view, and closing puts the reade
     `${HOME}&cut=coronal`,
     `${HOME}&cut=coronal&region=destrieux:left:29`,
     `${HOME}&lesion=-35.5,-9.5,63.5,10`,
-    `${HOME}&coord=-38,44,26&space=mni152nlin2009casym`,
+    `${HOME}&coord=-38,44,26&space=unstated`,
     // Overlay: a reader's map is never in a link.
     HOME,
     `${HOME}&hemi=left&view=right`,

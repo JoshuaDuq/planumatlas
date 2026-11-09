@@ -91,7 +91,7 @@ describe('selected region', () => {
     const facts = root().querySelector('dl.facts')!;
     expect([...facts.querySelectorAll('dt')].map(text)).toEqual([
       'Surface area',
-      'Centroid (RAS)',
+      'Centroid (surface RAS)',
       'Source label',
     ]);
     expect(text(facts.querySelectorAll('dd')[1]!)).toBe('−12.3, +56.8, −9.0 mm');
@@ -473,7 +473,7 @@ describe('evidence sections', () => {
     expect(text(domains())).not.toContain('This teaching-set unit');
     await screen.rerender({ regionId: 'learning:left:amygdala' });
     expect(rows()).toEqual(amygdala);
-    expect(rows()[0]).toBe('Facial emotion recognition “facial expressions” · z 13.2');
+    expect(rows()[0]).toBe('Disgust “disgust” · z 10.7');
     expect(text(domains())).toContain('This teaching-set unit takes the score');
   });
 

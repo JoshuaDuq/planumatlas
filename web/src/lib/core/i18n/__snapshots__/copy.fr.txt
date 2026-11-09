@@ -621,8 +621,8 @@
    "[\"\"] → \"Aucune fonction n’atteint z<NBSP> ici.\""
   ],
   "noteStructure": [
-   "[\"Alpha\"] → \"Constance méta-analytique moyenne sur toute la structure de la segmentation de fsaverage pour chaque terme, d’après Alpha. Données plus faibles que pour une aire corticale<NNBSP>: le noyau de lissage de 6<NBSP>mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.\"",
-   "[\"\"] → \"Constance méta-analytique moyenne sur toute la structure de la segmentation de fsaverage pour chaque terme, d’après . Données plus faibles que pour une aire corticale<NNBSP>: le noyau de lissage de 6<NBSP>mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.\""
+   "[\"Alpha\"] → \"Constance méta-analytique moyenne sur toute la structure de la segmentation SynthSeg du gabarit MNI152 pour chaque terme, d’après Alpha. Données plus faibles que pour une aire corticale<NNBSP>: le noyau de lissage de 6<NBSP>mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.\"",
+   "[\"\"] → \"Constance méta-analytique moyenne sur toute la structure de la segmentation SynthSeg du gabarit MNI152 pour chaque terme, d’après . Données plus faibles que pour une aire corticale<NNBSP>: le noyau de lissage de 6<NBSP>mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.\""
   ],
   "noteUnit": "Cette unité de l’ensemble pédagogique reçoit la valeur de la structure FreeSurfer qui en contient la plus grande partie dans ce cerveau.",
   "note": [
@@ -1085,7 +1085,7 @@
   "group": "Lobe / Système",
   "surfaceArea": "Surface",
   "volume": "Volume",
-  "centroid": "Centroïde (RAS)",
+  "centroid": "Centroïde (RAS de surface)",
   "sourceLabel": "Étiquette source",
   "copyValue": {
    "copy": "Copier",
