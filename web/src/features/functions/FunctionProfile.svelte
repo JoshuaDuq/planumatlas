@@ -15,6 +15,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import MethodsLink from '../deficits/MethodsLink.svelte';
   import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
   import {
@@ -152,6 +153,7 @@
 
       <p class="note method">{comparison.method}</p>
       <p class="note sources">{comparison.citation}</p>
+      <p class="note methods"><MethodsLink page="functions" {lang} /></p>
     </div>
   {/if}
   {#if content && id}
@@ -250,6 +252,7 @@
 
       <p class="note method">{content.method}</p>
       <p class="note sources">{content.citation}</p>
+      <p class="note methods"><MethodsLink page="functions" {lang} /></p>
     </div>
   {/if}
 </div>
@@ -393,6 +396,9 @@
     }
     .content > .sources {
       color: var(--text-tertiary);
+    }
+    .content > .methods {
+      margin-top: var(--space-2);
     }
 
     .section {

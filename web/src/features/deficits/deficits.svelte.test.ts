@@ -412,6 +412,20 @@ describe('evidence', () => {
       document.querySelectorAll('article.publication p.note[lang="en"]').length,
     ).toBeGreaterThan(0);
   });
+
+  test('the profile links the English methods page, said so in French', async () => {
+    const { view } = await mount();
+    await row('aphasia').click();
+    const methods = () =>
+      document.querySelector<HTMLAnchorElement>('.clinical-profile .methods a')!;
+    expect(methods().getAttribute('href')).toBe('/docs/features/deficits.html');
+    expect(methods().hreflang).toBe('en');
+    expect(methods().textContent).toBe('Method and limits (opens in a new tab)');
+    view.lang = 'fr';
+    await expect
+      .poll(() => methods().textContent)
+      .toBe('Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)');
+  });
 });
 
 describe('opening a region from the profile', () => {

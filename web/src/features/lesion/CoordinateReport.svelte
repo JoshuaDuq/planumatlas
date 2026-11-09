@@ -229,8 +229,12 @@
     <ul class="coordinate-alternatives">
       {#each spaces.unstated.alternatives as alternative (alternative.id)}
         {@const offset = alternative.against[space.id]!.cortex_offset_mm}
-        <li title={alternative.description}>
+        <li>
           {copy.alternative(alternative.label, millimetres(offset.median), millimetres(offset.p95))}
+          <!-- The published description is English. -->
+          <span class="alternative-description" lang={lang === 'en' ? undefined : 'en'}
+            >{alternative.description}</span
+          >
         </li>
       {/each}
     </ul>
@@ -313,6 +317,10 @@
       line-height: var(--lh-caption);
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
+    }
+    .alternative-description {
+      display: block;
+      color: var(--text-tertiary);
     }
     /* What no region covers reads apart from the regions. */
     .coordinate-rest .network-row-name {

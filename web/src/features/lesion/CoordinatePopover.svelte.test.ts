@@ -53,6 +53,18 @@ test('offers each published space by its label, then the unstated choice, which 
   );
 });
 
+test('links its English methods page', async () => {
+  mount(async () => true);
+  const methods = page.getByRole('link', {
+    name: 'Method and limits (opens in a new tab)',
+    exact: true,
+  });
+  await expect
+    .element(methods)
+    .toHaveAttribute('href', '/docs/features/published-coordinates.html');
+  await expect.element(methods).toHaveAttribute('hreflang', 'en');
+});
+
 test('places a pasted coordinate in the chosen space', async () => {
   const { spy, field, select, button } = mount(async () => true);
   await userEvent.fill(field, '(−42\t22\t6)');

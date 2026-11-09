@@ -552,6 +552,16 @@ describe('the tract reference', () => {
     expect(subject.surfaceColor).toBe('tissue');
   });
 
+  test('the selected region reaches the snapshot subject, named with its side', async () => {
+    boot();
+    const id = 'destrieux:left:30';
+    engine.model.select(id);
+    flushSync();
+    await (region as never as { saveImage(): Promise<void> }).saveImage();
+    const subject = vi.mocked(snapshot.saveSnapshot).mock.calls.at(-1)![1];
+    expect(subject.selection).toBe(`${app.world!.catalog.label(id).name}, left`);
+  });
+
   test('an open cut reaches the snapshot subject', async () => {
     boot();
     await userEvent.click(page.getByRole('button', { name: 'Section', exact: true }));

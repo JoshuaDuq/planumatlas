@@ -564,6 +564,29 @@ describe('scene motion', () => {
     stage.dispose();
   });
 
+  it('SCENE-36 under reduced motion a drag let go while moving stops where it is released', () => {
+    reduced = true;
+    const { stage } = resting();
+    const offset = () => stage.camera.position.clone().sub(stage.controls.target);
+    const azimuth = () => Math.atan2(offset().x, offset().z);
+    canvas().dispatchEvent(mouse('pointerdown', 400));
+    let x = 400;
+    let t = 0;
+    for (let i = 0; i < 6; i += 1) {
+      t += FRAME_MS;
+      clock = origin + t;
+      x += 10;
+      canvas().ownerDocument.dispatchEvent(mouse('pointermove', x));
+      frame(t);
+    }
+    const atRelease = azimuth();
+    canvas().ownerDocument.dispatchEvent(mouse('pointerup', x));
+    frame(t + FRAME_MS);
+    frame(t + 20 * FRAME_MS);
+    assert.equal(azimuth(), atRelease);
+    stage.dispose();
+  });
+
   it('SCENE-36 a drag turns the camera with the pointer exactly, coasts after a moving release, and rests at full resolution as it stops', () => {
     vi.stubGlobal('devicePixelRatio', 2);
     const { stage, settledRatio } = resting();

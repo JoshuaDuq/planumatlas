@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { vi } from 'vitest';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { repoRoot } from '../../../test/repo.ts';
@@ -46,7 +46,7 @@ export function stubPublishedFetch() {
     const url = new URL(input instanceof Request ? input.url : input);
     const at = url.pathname.search(/\/(models|diffusion)\//);
     if (at < 0) return new Response(null, { status: 404 });
-    const file = fileURLToPath(new URL(`public${url.pathname.slice(at)}`, `file://${repoRoot}`));
+    const file = fileURLToPath(new URL(`public${url.pathname.slice(at)}`, pathToFileURL(repoRoot)));
     try {
       return new Response(await readFile(file));
     } catch (error) {

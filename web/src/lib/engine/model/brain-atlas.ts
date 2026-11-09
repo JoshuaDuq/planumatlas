@@ -93,6 +93,7 @@ import { loadRibbonSources } from '../tissues/solid-assets.ts';
 import { createWhiteMatterSurfaces, exposedWhiteMatter } from '../tissues/white-matter-surfaces.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
 import type { GeometryCopy, GeometryJob, GeometryReply } from './geometry-worker.ts';
+import { workerLoadFailure } from '../worker-load.ts';
 import {
   anatomicalMatrixWorld,
   deepShift,
@@ -423,7 +424,9 @@ export class GeometryJobs {
         else pending.resolve(data);
       };
       worker.onerror = (event) => {
-        this.failure = new Error(event.message || 'Geometry work failed', { cause: event });
+        this.failure =
+          workerLoadFailure(event, 'geometry') ??
+          new Error(event.message || 'Geometry work failed', { cause: event });
         for (const each of workers) each.terminate();
         this.workers = null;
         for (const pending of this.pending.values()) pending.reject(this.failure);

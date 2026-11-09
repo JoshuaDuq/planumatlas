@@ -260,6 +260,12 @@ describe('the Section popover', () => {
     await vi.waitFor(() => expect(locate('toolbar', 'Plan de coupe').element()).toBeTruthy());
     expect(control('button', 'Cerveau entier').getAttribute('aria-pressed')).toBe('true');
     expect(page.getByRole('combobox', { name: 'Étiquettes de coupe' }).element()).toBeTruthy();
+    const methods = page.getByRole('link', {
+      name: 'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',
+      exact: true,
+    });
+    await expect.element(methods).toHaveAttribute('href', '/docs/features/sections-and-cuts.html');
+    await expect.element(methods).toHaveAttribute('hreflang', 'en');
   });
 });
 

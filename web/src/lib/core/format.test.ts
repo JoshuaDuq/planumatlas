@@ -155,7 +155,7 @@ test('I18N-25 · a count takes its noun’s English plural and French word', () 
   assert.equal(count(2, 'box'), '2 boxes');
   assert.equal(count(2, 'branch'), '2 branches');
   assert.equal(count(2, 'bus'), '2 buses');
-  assert.equal(count(0, 'region', 'fr'), '0 régions');
+  assert.equal(count(0, 'region', 'fr'), '0 région');
   assert.equal(count(1, 'région', 'fr'), '1 région');
   assert.equal(count(1, 'correspondance', 'fr'), '1 correspondance');
   assert.equal(count(2, 'label', 'fr'), '2 étiquettes');

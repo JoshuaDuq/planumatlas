@@ -95,6 +95,7 @@
     const { manifest } = engine.model;
     const reference = isIndependentTractReference(view);
     const cut = stage!.sections.current;
+    const region = reference ? null : view.selectedRegion;
     return saveSnapshot(
       { host: host!, stage: app!.stage, keys: keys!, engine },
       {
@@ -108,6 +109,9 @@
         reference: reference ? tractCatalog(view.referenceAnatomy).name[view.lang] : null,
         // `current` is null while the cut is off, so its plane is a cut plane.
         section: cut && { ...cut, plane: cut.plane as Exclude<CutMode, 'off'> },
+        selection:
+          region &&
+          `${world!.catalog.label(region.id).name}, ${t(view.lang, 'sides').words[region.hemisphere]}`,
         overlay: manifest.coordinate_spaces
           ? mapCaption(world!.userMap, manifest.coordinate_spaces, view.lang)
           : null,

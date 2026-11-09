@@ -60,7 +60,7 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 
 ### SCENE-36 · A drag turns the camera with the pointer exactly, and coasts after a moving release
 
-- **Rule:** While a pointer holds the stage, each move turns the camera in full before the next frame: the controls are undamped. Released while moving, the drag coasts on at the speed of its last 64 ms, slowing by time (by e every 100 ms, the same at 60 and 120 Hz) until below 2°/s. A pointer still for its last 50 ms lets go where it is. A grab catches a coast; a wheel step or a framing call does not. The frame on which a coast stops is drawn at full resolution.
+- **Rule:** While a pointer holds the stage, each move turns the camera in full before the next frame: the controls are undamped. Released while moving, the drag coasts on at the speed of its last 64 ms, slowing by time (by e every 100 ms, the same at 60 and 120 Hz) until below 2°/s. A pointer still for its last 50 ms lets go where it is. A grab catches a coast; a wheel step or a framing call does not. Under reduced motion a release never coasts. The frame on which a coast stops is drawn at full resolution.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `orbit-controls.ts` `coastOnRelease`; the 2026-11-02 interface review (damping trailed the pointer by about 80 ms)

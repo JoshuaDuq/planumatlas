@@ -183,6 +183,17 @@ test('a coordinate in no stated template reads as reads_as, beside each alternat
   expect(text()).toContain(
     'MNI152NLin6Asym lands a median 1.6\u202fmm (95%: 3.2\u202fmm) away on this brain',
   );
+  // Each alternative's description is printed under it, never a hover-only native title.
+  const alternative = document.querySelector<HTMLElement>('.coordinate-alternatives li')!;
+  expect(alternative.hasAttribute('title')).toBe(false);
+  const description = alternative.querySelector<HTMLElement>('.alternative-description')!;
+  expect(description.textContent).toBe('FSL');
+  expect(description.checkVisibility()).toBe(true);
+  expect(description.hasAttribute('lang')).toBe(false);
+  cleanup();
+  stop();
+  await mount('fr', 'unstated');
+  expect(document.querySelector('.alternative-description')!.getAttribute('lang')).toBe('en');
 });
 
 test('the CSV leads with how it was placed, then every atlas’s shares of the sphere', async () => {

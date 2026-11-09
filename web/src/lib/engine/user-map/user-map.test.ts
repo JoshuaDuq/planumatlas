@@ -5,6 +5,7 @@ import { computeBoundsTree } from 'three-mesh-bvh';
 import type { CarriedMap } from '../../core/user-map/carry.ts';
 import type { MapSummary } from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
+import { AssetError } from '../../core/assets/published-assets.ts';
 import type { BrainAtlas } from '../model/brain-atlas.ts';
 import { createUserMapUniforms } from './overlay.ts';
 import type { UserMapJob, UserMapReply } from './user-map-worker.ts';
@@ -34,13 +35,24 @@ class FakeWorker {
   static jobs: UserMapJob[] = [];
   /** Replies kept until the test sends them, while it holds the worker busy. */
   static held: (() => void)[] | null = null;
+  /** The worker script is gone, as after a newer deploy: every worker fails to load. */
+  static unloaded = false;
+  static created = 0;
   onmessage: ((event: { data: UserMapReply }) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  constructor() {
+    FakeWorker.created += 1;
+  }
   reply(data: UserMapReply) {
     const send = () => this.onmessage!({ data });
     if (FakeWorker.held) FakeWorker.held.push(send);
     else queueMicrotask(send);
   }
   postMessage(job: UserMapJob) {
+    if (FakeWorker.unloaded) {
+      queueMicrotask(() => this.onerror!(new Event('error')));
+      return;
+    }
     FakeWorker.jobs.push(job);
     const { token } = job;
     const { refusal } = FakeWorker;
@@ -165,6 +177,8 @@ afterEach(() => {
   FakeWorker.refusal = null;
   FakeWorker.jobs = [];
   FakeWorker.held = null;
+  FakeWorker.unloaded = false;
+  FakeWorker.created = 0;
 });
 
 const ready = (mesh: Mesh) =>
@@ -265,6 +279,20 @@ test('a file the worker refused rejects with its code, for the overlay to word',
   const refused = await userMap.load(new ArrayBuffer(4), 'mni', 0).catch((error: unknown) => error);
   assert.ok(refused instanceof MapFileError);
   assert.equal(refused.code, 'zeros');
+});
+
+test('a worker script a newer deploy removed rejects as updated, and the next load tries a new worker', async () => {
+  const { userMap } = setup();
+  vi.stubGlobal('dispatchEvent', () => true);
+  FakeWorker.unloaded = true;
+  for (const attempt of [1, 2]) {
+    const failed = await userMap
+      .load(new ArrayBuffer(4), 'mni', 0)
+      .catch((error: unknown) => error);
+    assert.ok(failed instanceof AssetError);
+    assert.equal(failed.code, 'asset-updated');
+    assert.equal(FakeWorker.created, attempt);
+  }
 });
 
 test('an atlas changed while its parcels were being moved is left on the pial', async () => {

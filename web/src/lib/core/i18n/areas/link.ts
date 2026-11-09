@@ -1,6 +1,9 @@
 export const en = {
   // Said after a link that leaves the app (decision 17 on #4).
   newTab: '(opens in a new tab)',
+  // The methods site (docs/) is in English only; the French names say so.
+  methods: 'Methods',
+  methodsPage: 'Method and limits',
   notApplied: (fields: string) => `Not applied from this link: ${fields}.`,
   fields: {
     anatomy: 'subject',
@@ -48,6 +51,8 @@ export const en = {
 
 export const fr: typeof en = {
   newTab: '(s’ouvre dans un nouvel onglet)',
+  methods: 'Méthodes (en anglais)',
+  methodsPage: 'Méthode et limites (en anglais)',
   notApplied: (fields: string) => `Éléments du lien non appliqués : ${fields}.`,
   fields: {
     anatomy: 'sujet',

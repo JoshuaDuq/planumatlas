@@ -4,7 +4,7 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
-  import { offeredNotice } from '../../lib/core/workspace.ts';
+  import { documentTitle, offeredNotice } from '../../lib/core/workspace.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
@@ -130,6 +130,10 @@
       return { kind: 'lesson', label: t(current.lang, 'visualField').name, clearable: false };
     }
     return {};
+  });
+
+  $effect(() => {
+    document.title = documentTitle(selection);
   });
 
   /** The location bar's place within a mode: a lesson's circuit (app.js:1598-1603). */

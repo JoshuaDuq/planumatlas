@@ -58,9 +58,21 @@
 {:else}
   <form class="feedback" onsubmit={send}>
     <label for="feedback-name-{uid}">{copy.feedbackName}</label>
-    <input id="feedback-name-{uid}" type="text" autocomplete="name" bind:value={draft.name} />
+    <!-- The Worker's limits (workers/feedback). -->
+    <input
+      id="feedback-name-{uid}"
+      type="text"
+      autocomplete="name"
+      maxlength="200"
+      bind:value={draft.name}
+    />
     <label for="feedback-message-{uid}">{copy.feedbackMessage}</label>
-    <textarea id="feedback-message-{uid}" rows="5" required bind:value={draft.message}></textarea>
+    <textarea
+      id="feedback-message-{uid}"
+      rows="5"
+      required
+      maxlength="10000"
+      bind:value={draft.message}></textarea>
     <p class="feedback-note">{copy.feedbackNote}</p>
     {#if draft.status === 'failed'}
       <p class="feedback-failed" role="alert">

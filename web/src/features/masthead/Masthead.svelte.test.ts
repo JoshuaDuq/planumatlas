@@ -351,6 +351,50 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
+  test('Methods opens the English methods site in a new tab, after Keyboard shortcuts', async () => {
+    await render(Fixture);
+    await open();
+    const methods = page
+      .getByRole('link', { name: 'Methods (opens in a new tab)' })
+      .element() as HTMLAnchorElement;
+    expect(methods.getAttribute('href')).toBe('/docs/');
+    expect(methods.hreflang).toBe('en');
+    expect(methods.target).toBe('_blank');
+    el(button('Keyboard shortcuts')).focus();
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(methods);
+    // Its arrows stay in the panel too.
+    let reached = false;
+    const watch = (event: KeyboardEvent) => (reached = !event.defaultPrevented);
+    document.addEventListener('keydown', watch);
+    await userEvent.keyboard('{ArrowDown}');
+    document.removeEventListener('keydown', watch);
+    expect(reached).toBe(false);
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(el(button('Start over')));
+    // The new tab is not opened here; the panel closes as for a command.
+    const stay = (event: MouseEvent) => event.preventDefault();
+    document.addEventListener('click', stay);
+    try {
+      await page.getByRole('link', { name: 'Methods (opens in a new tab)' }).click();
+    } finally {
+      document.removeEventListener('click', stay);
+    }
+    expect(panelOpen()).toBe(false);
+  });
+
+  test('in French, Methods says the site is in English', async () => {
+    await render(Fixture);
+    await open();
+    el(radio('English')).focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await expect
+      .element(
+        page.getByRole('link', { name: 'Méthodes (en anglais) (s’ouvre dans un nouvel onglet)' }),
+      )
+      .toHaveAttribute('hreflang', 'en');
+  });
+
   test('Start over closes the panel and acts', async () => {
     const calls: string[] = [];
     await render(Fixture, { calls });
@@ -401,6 +445,7 @@ describe('Masthead', () => {
         'Provenance',
         'How to use Planum',
         'Keyboard shortcuts ?',
+        'Methods (opens in a new tab)',
         'Start over',
       ]);
       // The masthead's own button is display:none, so only the menu item is in the tree.

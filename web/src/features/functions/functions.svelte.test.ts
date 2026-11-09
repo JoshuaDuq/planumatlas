@@ -52,6 +52,7 @@ const restore = () => document.querySelector<HTMLElement>('.restore');
 const announcer = () => document.getElementById('announcer')!;
 const compareToggle = () => document.querySelector<HTMLElement>('.compare-toggle')!;
 const compareOpen = () => document.querySelector<HTMLElement>('[data-compare-open]');
+const methods = () => [...document.querySelectorAll<HTMLAnchorElement>('.profile .methods a')];
 
 /** Types a query and waits for the list to settle. */
 async function search(text: string) {
@@ -354,6 +355,20 @@ describe('opening a function', () => {
     expect(document.querySelectorAll('[aria-current="true"]').length).toBe(1);
     expect(world.session.state.selectedFunction).toBe(target.id);
     expect(world.excursions.restorable).toBe(true);
+  });
+
+  test('a profile links the English methods page, said so in French', async () => {
+    mount('fr');
+    await open(few().id);
+    expect(
+      methods().map((link) => [link.getAttribute('href'), link.hreflang, link.textContent]),
+    ).toEqual([
+      [
+        '/docs/features/functions.html',
+        'en',
+        'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',
+      ],
+    ]);
   });
 
   test('opens with the profile at the top of the scrolling parent', async () => {
@@ -765,6 +780,7 @@ describe('compare', () => {
     expect(title()!.textContent!.replace(/\s+/g, ' ').trim()).toBe('Working memory · Attention');
     await expect.poll(() => meta().textContent).toMatch(/^Both reach \d+ areas?.* at z\s≥\s3$/);
     expect(world.session.state.selectedFunction).toBe(`compare:${pair.join(',')}`);
+    expect(methods()).toHaveLength(1);
     await expectAxeCleanOnce('light', 1280);
     const shared = document.querySelector('[data-compare-section="shared"]')!;
     const sharedRows = shared.querySelectorAll('[data-function-region]');

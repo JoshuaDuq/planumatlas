@@ -263,11 +263,11 @@ values (I18N-22, I18N-28) hold it today.
 
 ### I18N-25 · A count agrees with its noun
 
-- **Rule:** A count and its noun agree. English adds -es after s, x, z, ch or sh and turns a consonant + y into -ies. French uses its own word for the nouns it knows. Digits group as I18N-23.
+- **Rule:** A count and its noun agree. English adds -es after s, x, z, ch or sh and turns a consonant + y into -ies. French uses its own word for the nouns it knows, singular below 2 (CLDR `fr` plural rules). Digits group as I18N-23.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/format.js:25-49`
-- **Expected:** EN `count(0,'region')` "0 regions", `(1,'region')` "1 region", `(185,'region')` "185 regions", `(1,'study')` "1 study", `(80,'study')` "80 studies", `(2,'day')` "2 days", `(2,'match')` "2 matches", `(2,'box')` "2 boxes", `(2,'branch')` "2 branches", `(2,'bus')` "2 buses", `(21472,'match')` "21NNBSP472 matches". FR `(0,'region')` "0 régions", `(1,'region')` "1 région", `(183,'region')` "183 régions", `(1,'match')` "1 correspondance", `(5,'match')` "5 correspondances", `(1831,'study')` "1831 études"; the French nouns are region, match, label, study (and the keys `région`, `correspondance`). A noun French does not know keeps its English plural: `(2,'day','fr')` "2 days".
+- **Expected:** EN `count(0,'region')` "0 regions", `(1,'region')` "1 region", `(185,'region')` "185 regions", `(1,'study')` "1 study", `(80,'study')` "80 studies", `(2,'day')` "2 days", `(2,'match')` "2 matches", `(2,'box')` "2 boxes", `(2,'branch')` "2 branches", `(2,'bus')` "2 buses", `(21472,'match')` "21NNBSP472 matches". FR `(0,'region')` "0 région", `(1,'region')` "1 région", `(183,'region')` "183 régions", `(1,'match')` "1 correspondance", `(5,'match')` "5 correspondances", `(1831,'study')` "1831 études"; the French nouns are region, match, label, study (and the keys `région`, `correspondance`). A noun French does not know keeps its English plural: `(2,'day','fr')` "2 days".
 - **Covered by:** `src/lib/core/format.test.ts` (R), `src/lib/core/i18n/i18n.test.ts` (R, French)
 
 ### I18N-26 · A measurement has four significant figures and is never a false zero

@@ -92,6 +92,7 @@ async function drawFixture(marks: { region: string; name: string; label: string 
     view: 'left',
     reference: null,
     section: { plane: 'oblique', offset: -12.34, tilt: 30, azimuth: -45 },
+    selection: null,
   });
   const loaded: string[] = [];
   const load = document.fonts.load.bind(document.fonts);

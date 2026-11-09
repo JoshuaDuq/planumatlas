@@ -125,6 +125,15 @@ describe('docked beside the stage', () => {
     expect(document.activeElement).toBe(more());
   });
 
+  test('its width handle says how to use it in the shared tooltip, not a hover-only native title', async () => {
+    await opened();
+    const handle = page.getByRole('separator', { name: 'Linked MRI width' }).element();
+    expect(handle.hasAttribute('title')).toBe(false);
+    expect(handle.getAttribute('data-tooltip')).toBe(
+      'Drag to resize. Double-click for the usual width.',
+    );
+  });
+
   test('takes a column beside the stage at 1280 px, as a 2 × 2 of slices', async () => {
     await opened();
     const stage = document.getElementById('viewport')!;

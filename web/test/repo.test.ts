@@ -1,8 +1,9 @@
+import { sep } from 'node:path';
 import { expect, it } from 'vitest';
 import { readRepoJson, readRepoYaml, repoRoot } from './repo.ts';
 
 it('reads the repository files the data-contract tests check', () => {
-  expect(repoRoot.endsWith('/')).toBe(true);
+  expect(repoRoot.endsWith(sep)).toBe(true);
   const published = readRepoJson<{ default: string; anatomies: { id: string }[] }>(
     'public/models/anatomies.json',
   );

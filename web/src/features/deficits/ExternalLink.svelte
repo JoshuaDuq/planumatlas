@@ -12,16 +12,19 @@
     lang,
     children,
     contentLang,
+    hreflang,
   }: {
     href: string;
     lang: Language;
     children: Snippet;
     /** Set when the link's words are not in the interface language. */
     contentLang?: Language;
+    /** The language of the page it opens. */
+    hreflang?: Language;
   } = $props();
 </script>
 
-<a {href} target="_blank" rel="noreferrer"
+<a {href} {hreflang} target="_blank" rel="noreferrer"
   ><span lang={contentLang}>{@render children()}</span><span class="visually-hidden"
     >{` ${t(lang, 'link').newTab}`}</span
   ><svg

@@ -100,6 +100,7 @@ const subject = (overrides: Partial<SnapshotSubject> = {}): SnapshotSubject => (
   view: 'left',
   reference: null,
   section: null,
+  selection: null,
   ...overrides,
 });
 

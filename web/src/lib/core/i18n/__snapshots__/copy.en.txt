@@ -1232,6 +1232,8 @@
  },
  "link": {
   "newTab": "(opens in a new tab)",
+  "methods": "Methods",
+  "methodsPage": "Method and limits",
   "notApplied": [
    "[\"Alpha\"] → \"Not applied from this link: Alpha.\"",
    "[\"\"] → \"Not applied from this link: .\""
@@ -2148,6 +2150,10 @@
   "snapshotSaved": [
    "[\"Alpha\"] → \"Image saved as Alpha.\"",
    "[\"\"] → \"Image saved as .\""
+  ],
+  "snapshotSelected": [
+   "[\"Alpha\"] → \"Selected: Alpha\"",
+   "[\"\"] → \"Selected: \""
   ],
   "loadingAnatomy": "Loading anatomy…",
   "loadingWithTotal": [

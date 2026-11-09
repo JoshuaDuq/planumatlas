@@ -12,6 +12,7 @@
   import type { Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
+  import MethodsLink from '../deficits/MethodsLink.svelte';
 
   let {
     lesion,
@@ -81,6 +82,7 @@
     </button>
   </div>
 {/if}
+<p class="methods"><MethodsLink page="lesion" {lang} /></p>
 
 <style>
   @layer features {
@@ -113,6 +115,11 @@
       margin-top: var(--space-3);
       padding-top: var(--space-3);
       border-top: 1px solid var(--overlay-border);
+    }
+    .methods {
+      margin: var(--space-3) 0 0;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
     }
   }
 </style>

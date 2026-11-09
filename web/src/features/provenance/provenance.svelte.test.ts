@@ -34,6 +34,8 @@ const title = () => dialog().querySelector('h2') as HTMLElement;
 const inPage = (element: Element | null) =>
   element !== null && element !== document.body && !dialog().contains(element);
 const links = () => [...dialog().querySelectorAll<HTMLAnchorElement>('a')];
+/** The links of the published records, without Methods under them. */
+const rowLinks = () => [...dialog().querySelectorAll<HTMLAnchorElement>('dd a')];
 
 /** Runs `action` and waits for the dialog's `close` event, after which Dialog has returned focus. */
 async function closing(action: () => Promise<unknown>) {
@@ -218,17 +220,17 @@ describe('Provenance dialog', () => {
   test('a reference swap that removes the focused link moves focus to the title', async () => {
     const screen = await render(Fixture, props());
     await openFromKeyboard();
-    links()[0]!.focus();
+    rowLinks()[0]!.focus();
     await screen.rerender(props({ reference }));
     // The same node now holds the reference's first link: focus stays.
     expect(dialog().contains(document.activeElement)).toBe(true);
     expect(dialog().querySelector('dd')!.textContent).toContain('Tract reference subject');
-    expect(links().map((link) => link.href)).toEqual(['https://example.org/tracts']);
+    expect(rowLinks().map((link) => link.href)).toEqual(['https://example.org/tracts']);
 
     // A reference with no source links removes the focused node: focus goes to the title.
-    links()[0]!.focus();
+    rowLinks()[0]!.focus();
     await screen.rerender(props({ reference: { label: 'No sources', links: [] } }));
-    expect(links()).toHaveLength(0);
+    expect(rowLinks()).toHaveLength(0);
     expect(document.activeElement).toBe(title());
   });
 
@@ -286,6 +288,17 @@ describe('Provenance dialog', () => {
       await expectAxeCleanOnce(theme, width);
     },
   );
+
+  test.each([
+    ['en', 'Methods (opens in a new tab)'],
+    ['fr', 'Méthodes (en anglais) (s’ouvre dans un nouvel onglet)'],
+  ] as const)('Methods links the English methods site, in %s', async (lang, name) => {
+    render(Fixture, props({ lang }));
+    await openFromKeyboard();
+    const methods = page.getByRole('link', { name, exact: true });
+    await expect.element(methods).toHaveAttribute('href', '/docs/');
+    await expect.element(methods).toHaveAttribute('hreflang', 'en');
+  });
 
   test('an item that is only a link lists it before its note', async () => {
     render(Fixture, props());

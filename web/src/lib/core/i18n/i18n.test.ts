@@ -12,7 +12,7 @@ const CIRCUIT_TEXT = both('circuits');
 const DIFFUSION_TEXT = both('diffusion');
 
 test('count formats plural nouns in French correctly', () => {
-  assert.equal(count(0, 'region', 'fr'), '0 régions');
+  assert.equal(count(0, 'region', 'fr'), '0 région');
   assert.equal(count(1, 'region', 'fr'), '1 région');
   assert.equal(count(2, 'region', 'fr'), '2 régions');
   assert.equal(count(183, 'region', 'fr'), '183 régions');

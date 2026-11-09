@@ -854,6 +854,11 @@ export function createScene(
     camera.up.set(0, 1, 0).applyQuaternion(camera.quaternion);
   };
   controls.addEventListener('start', onGrab);
+  // Registered after the momentum's own release handler, so it cancels the coast that one starts.
+  const stillOnRelease = () => {
+    if (prefersReducedMotion()) momentum.stop();
+  };
+  controls.addEventListener('end', stillOnRelease);
 
   return {
     scene,
@@ -1078,6 +1083,7 @@ export function createScene(
       pixelRatioQuery?.removeEventListener('change', pixelRatioChanged);
       controls.removeEventListener('change', cameraMoved);
       controls.removeEventListener('start', onGrab);
+      controls.removeEventListener('end', stillOnRelease);
       momentum.dispose();
       fading?.overlay.remove();
       renderer.domElement.removeEventListener('webglcontextlost', handleLost);

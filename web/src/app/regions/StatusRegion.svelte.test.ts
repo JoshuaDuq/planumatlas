@@ -71,6 +71,17 @@ describe('what the status region holds', () => {
 });
 
 describe('feedback', () => {
+  test('holds the name and feedback to the lengths the relay accepts', async () => {
+    await shell.open();
+    await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
+    const name = page.getByRole('textbox', { name: 'Your name (optional)' }).element();
+    const message = page.getByRole('textbox', { name: 'Your feedback' }).element();
+    expect([
+      (name as HTMLInputElement).maxLength,
+      (message as HTMLTextAreaElement).maxLength,
+    ]).toEqual([200, 10_000]);
+  });
+
   test('sends a name and the feedback, with the view on screen, from inside Planum', async () => {
     const fetch = vi
       .spyOn(globalThis, 'fetch')

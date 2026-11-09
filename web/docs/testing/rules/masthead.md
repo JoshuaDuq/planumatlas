@@ -170,6 +170,15 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** click "Keyboard shortcuts" → when `onShortcuts` runs, the focused element is named "More settings", and the panel is closed.
 - **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R, shortcuts only; Provenance and Full screen are uncovered)
 
+### MAST-18a · Methods links the English methods site
+
+- **Rule:** After Keyboard shortcuts the panel offers Methods, a link to the methods site (`docs/`, built into the published site's `docs/`) that opens a new tab and says so. The site is English only: the link carries `hreflang="en"` and its French name says so. A press closes the panel; its arrows stay in the panel, as a command's do (MAST-17).
+- **Kind:** behaviour
+- **Level:** browser: link attributes, Tab order, keyboard dispatch
+- **Source:** review handoff U3 (2026-11-09)
+- **Expected:** link "Methods (opens in a new tab)", `href="/docs/"`, `hreflang="en"`, `target=_blank`; Tab from "Keyboard shortcuts" reaches it, then "Start over"; ArrowDown on it is `defaultPrevented`; a click closes the panel. FR "Méthodes (en anglais) (s’ouvre dans un nouvel onglet)".
+- **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R, 2 cases)
+
 ### MAST-19 · On a phone the panel also carries Full screen and Provenance
 
 - **Rule:** Under the phone query the panel offers Full screen and Provenance before Keyboard shortcuts, and the masthead's own Full screen button is hidden. Provenance is offered once the manifest has loaded, and it opens a dialog. On a wide window only Keyboard shortcuts is drawn.

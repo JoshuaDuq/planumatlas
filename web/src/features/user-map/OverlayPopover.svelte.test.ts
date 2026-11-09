@@ -49,6 +49,16 @@ test('Remove hands focus to the button that chooses another file', async () => {
   await expect.element(page.getByRole('button', { name: fr.choose })).toHaveFocus();
 });
 
+test('links its methods page, which it says is in English', async () => {
+  await opened(summary);
+  const methods = page.getByRole('link', {
+    name: 'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',
+    exact: true,
+  });
+  await expect.element(methods).toHaveAttribute('href', '/docs/features/overlays.html');
+  await expect.element(methods).toHaveAttribute('hreflang', 'en');
+});
+
 test('a file that cannot be read is explained in French', async () => {
   await opened(new MapFileError('tooManyVolumes', [300, 61]));
   await expect

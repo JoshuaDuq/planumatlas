@@ -185,11 +185,11 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 
 ### TRACT-20 · The notes say where the tracts come from, and their links say they open a new tab
 
-- **Rule:** "About this data" opens on the notes: the tracts are in their own T1 reference brain; on the tracts' own anatomy, the linked MRI uses the same scan; on another anatomy, the brain outline is MRI-derived and its provenance is linked. Each link's name ends with "(opens in a new tab)" and it opens in a new tab.
+- **Rule:** "About this data" opens on the notes: the tracts are in their own T1 reference brain; on the tracts' own anatomy, the linked MRI uses the same scan; on another anatomy, the brain outline is MRI-derived and its provenance is linked. The tracts' methods page is linked last, marked `hreflang="en"`. Each link's name ends with "(opens in a new tab)" and it opens in a new tab.
 - **Kind:** behaviour
 - **Level:** browser — link names
 - **Source:** `viewer/diffusion/native-ui.js:60-76`; deviation `t1-new-tab-cue.md`
-- **Expected:** Own anatomy: "Tracts in their own T1 reference brain." visible; link "Dataset source · CC0 (opens in a new tab)" with `target=_blank`; no "Brain outline method" link; "The linked MRI uses the same scan" visible. Other anatomy: "MRI-derived brain outline" and link "Brain outline method and provenance" visible; no linked-MRI note.
+- **Expected:** Own anatomy: "Tracts in their own T1 reference brain." visible; link "Dataset source · CC0 (opens in a new tab)" with `target=_blank`; link "Method and limits (opens in a new tab)" to `/docs/features/tracts.html`; no "Brain outline method" link; "The linked MRI uses the same scan" visible. Other anatomy: "MRI-derived brain outline" and link "Brain outline method and provenance" visible; no linked-MRI note.
 - **Covered by:** `src/features/tracts/TractsExplorer.svelte.test.ts` (R)
 
 ### TRACT-21 · The dock holds one command, "MRI with tracts"

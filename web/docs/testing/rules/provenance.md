@@ -17,7 +17,7 @@ The data values below come from the published `public/models/cdmd/manifest.json`
 
 ### PROV-02 · Every link comes from the published records
 
-- **Rule:** Each link in the sheet is a URL the manifest publishes, or a licence file it publishes beside itself, or the manifest and index URLs themselves.
+- **Rule:** Each link in the sheet's rows is a URL the manifest publishes, or a licence file it publishes beside itself, or the manifest and index URLs themselves. Below the rows, Methods links the app's own English methods site (`/docs/`, `hreflang="en"`; FR "Méthodes (en anglais)"), covered in `src/features/provenance/provenance.svelte.test.ts` (R).
 - **Kind:** data
 - **Level:** unit (view-model over the published manifest)
 - **Source:** `provenance.js:47-58, 89-97`; `provenance.test.js:12-28`
@@ -80,7 +80,7 @@ The data values below come from the published `public/models/cdmd/manifest.json`
 
 ### PROV-09 · The sheet ends with the intended use
 
-- **Rule:** Below the facts, the sheet states that Planum is for research and education, not a medical device.
+- **Rule:** Below the facts and the Methods link, the sheet states that Planum is for research and education, not a medical device.
 - **Kind:** behaviour
 - **Level:** browser: text in the dialog (one fixed string)
 - **Source:** `provenance.js:152`; `index.html:697`

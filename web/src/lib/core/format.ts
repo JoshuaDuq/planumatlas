@@ -39,10 +39,14 @@ const FRENCH_NOUNS: Partial<Record<string, { one: string; other: string }>> = {
   finding: { one: 'constat', other: 'constats' },
 };
 
+// French takes the singular below 2: « 0 région ».
+const FRENCH_PLURAL = new Intl.PluralRules('fr');
+
 /** A count and its noun, in agreement. "1 regions" is how software looks unfinished. */
 export function count(value: number, noun: string, lang: Language = 'en'): string {
   if (lang === 'fr' && FRENCH_NOUNS[noun]) {
-    const form = value === 1 ? FRENCH_NOUNS[noun].one : FRENCH_NOUNS[noun].other;
+    const form =
+      FRENCH_PLURAL.select(value) === 'one' ? FRENCH_NOUNS[noun].one : FRENCH_NOUNS[noun].other;
     return `${grouped(value)} ${form}`;
   }
   return `${grouped(value)} ${value === 1 ? noun : plural(noun)}`;

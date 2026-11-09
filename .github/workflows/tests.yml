@@ -79,6 +79,7 @@ jobs:
               - data/**
               - public/**
               - scripts/published-version.mjs
+              - scripts/published-version.test.mjs
               - .github/scripts/**
               - .github/workflows/tests.yml
             feedback:
@@ -164,6 +165,9 @@ jobs:
 
       - name: Run unit tests
         run: npm test --prefix web
+
+      - name: Run the published-version tests
+        run: node --test scripts/published-version.test.mjs
 
       # What deploy ships, checked once for the chunks, the page's head and the service worker's
       # version map; it also hashes the real public/ tree.

@@ -1,4 +1,4 @@
-// The Lesion popover's body: what Remove leaves the keyboard on.
+// The Lesion popover's body: what Remove leaves the keyboard on, and where its method is.
 import { afterEach, expect, test } from 'vitest';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { page } from 'vitest/browser';
@@ -31,4 +31,21 @@ test('Remove leaves focus on the click chosen, not the page', async () => {
   await expect
     .poll(() => document.activeElement)
     .toBe(page.getByRole('radio', { name: 'Places the lesion' }).element());
+});
+
+test('links its English methods page', async () => {
+  render(LesionPopover, {
+    lesion: { kind: 'lesion', sphere: null, radius: 10 } as unknown as LesionStore,
+    lang: 'en',
+    placing: false,
+    onPlacing() {},
+    onReport() {},
+  });
+  const methods = page.getByRole('link', {
+    name: 'Method and limits (opens in a new tab)',
+    exact: true,
+  });
+  await expect.element(methods).toHaveAttribute('href', '/docs/features/lesion-report.html');
+  await expect.element(methods).toHaveAttribute('hreflang', 'en');
+  await expect.element(methods).toHaveAttribute('target', '_blank');
 });

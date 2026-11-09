@@ -31,6 +31,19 @@ test('the caption names the subject, then atlas, colouring and internal anatomy 
   expect(lines[0]![0]![0]!.strong).toBe(true);
 });
 
+test('a selected region is named on its own line, in each language', () => {
+  const facts = {
+    subject: 'S',
+    atlas: 'destrieux',
+    view: 'left',
+    selection: 'Precentral gyrus, left',
+  } as const;
+  expect(words(snapshotCaption('en', facts)).at(-1)).toBe('Selected: Precentral gyrus, left');
+  expect(words(snapshotCaption('fr', facts)).at(-1)).toBe(
+    'Sélection\u202f: Precentral gyrus, left',
+  );
+});
+
 test('a cut replaces the view with the section and its signed position, kept with its unit', () => {
   const lines = snapshotCaption('fr', {
     subject: 'SNAIL subj_1',

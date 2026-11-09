@@ -22,6 +22,7 @@
     type ProvenanceLink,
     type ProvenanceRow,
   } from '../../lib/core/panels/provenance.ts';
+  import { methodsHref } from '../../lib/core/methods.ts';
   import Dialog from '../../lib/ui/Dialog.svelte';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
 
@@ -131,6 +132,12 @@
       </dd>
     {/each}
   </dl>
+  <p class="provenance-methods">
+    <a class="provenance-link" href={methodsHref()} hreflang="en" target="_blank" rel="noreferrer"
+      >{t(lang, 'link').methods}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
+      >{@render iconGraphic('external-link')}</a
+    >
+  </p>
   <p class="provenance-use">{copy.intendedUse}</p>
 </Dialog>
 
@@ -189,6 +196,12 @@
     .provenance-link :global(.control-icon) {
       margin-left: var(--space-1);
       vertical-align: -1px;
+    }
+    .provenance-methods {
+      margin: var(--space-4) 0 0;
+    }
+    .provenance-methods + .provenance-use {
+      margin-top: var(--space-2);
     }
     .provenance-use {
       margin: var(--space-4) 0 0;

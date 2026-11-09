@@ -1232,6 +1232,8 @@
  },
  "link": {
   "newTab": "(s’ouvre dans un nouvel onglet)",
+  "methods": "Méthodes (en anglais)",
+  "methodsPage": "Méthode et limites (en anglais)",
   "notApplied": [
    "[\"Alpha\"] → \"Éléments du lien non appliqués : Alpha.\"",
    "[\"\"] → \"Éléments du lien non appliqués : .\""
@@ -2148,6 +2150,10 @@
   "snapshotSaved": [
    "[\"Alpha\"] → \"Image enregistrée : Alpha.\"",
    "[\"\"] → \"Image enregistrée : .\""
+  ],
+  "snapshotSelected": [
+   "[\"Alpha\"] → \"Sélection<NNBSP>: Alpha\"",
+   "[\"\"] → \"Sélection<NNBSP>: \""
   ],
   "loadingAnatomy": "Chargement de l’anatomie…",
   "loadingWithTotal": [

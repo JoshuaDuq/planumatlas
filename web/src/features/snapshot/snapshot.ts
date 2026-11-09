@@ -48,6 +48,8 @@ export interface CaptionFacts {
   reference?: string | null;
   view?: ViewName | null;
   section?: SnapshotSection | null;
+  /** The selected region's name, with its side as a word when it has one. */
+  selection?: string | null;
   /** The reader's own map on the stage: its title, then its file, template and scale, worded. */
   overlay?: { title: string; details: string[] } | null;
 }
@@ -59,7 +61,17 @@ export interface CaptionFacts {
  */
 export function snapshotCaption(
   lang: Language,
-  { subject, atlas, surfaceColor, detail, reference, view, section, overlay }: CaptionFacts,
+  {
+    subject,
+    atlas,
+    surfaceColor,
+    detail,
+    reference,
+    view,
+    section,
+    selection,
+    overlay,
+  }: CaptionFacts,
 ): CaptionLine[] {
   const fact = (text: string | null | undefined, style: Omit<Run, 'text'> = {}) => [
     { text: text || '', ...style },
@@ -90,6 +102,7 @@ export function snapshotCaption(
   } else if (view) {
     lines.push([fact(t(lang, 'viewport').namedView(t(lang, 'views')[view]))]);
   }
+  if (selection) lines.push([fact(t(lang, 'viewport').snapshotSelected(selection))]);
   if (overlay && !reference) {
     lines.push([
       fact(overlay.title, { strong: true }),
@@ -522,6 +535,8 @@ export interface SnapshotSubject {
   reference: string | null;
   /** The open section, or null. */
   section: SnapshotSection | null;
+  /** The selected region, named with its side, or null. */
+  selection: string | null;
   /** The reader’s own map on the stage, or null. */
   overlay?: CaptionFacts['overlay'];
 }
@@ -542,6 +557,7 @@ export function snapshotPlan(
     reference,
     view: engine.camera.viewHeld ? subject.view : null,
     section: reference ? null : subject.section,
+    selection: subject.selection,
     overlay: subject.overlay,
   });
   const tokens = getComputedStyle(host);

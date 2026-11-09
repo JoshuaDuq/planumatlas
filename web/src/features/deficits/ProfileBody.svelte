@@ -11,6 +11,7 @@
   import Association from './Association.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
   import LinkRow from './LinkRow.svelte';
+  import MethodsLink from './MethodsLink.svelte';
 
   let {
     explorer,
@@ -74,6 +75,7 @@
   </section>
 {/if}
 <p class="note sources">{text.sources} · {text.revised}: {clinical.revised}</p>
+<p class="note methods"><MethodsLink page="deficits" {lang} /></p>
 
 <style>
   @layer features {
@@ -104,6 +106,9 @@
     .sources {
       margin-top: var(--space-5);
       color: var(--text-tertiary);
+    }
+    .methods {
+      margin-top: var(--space-2);
     }
     .section {
       margin-top: var(--space-6);

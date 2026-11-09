@@ -30,6 +30,7 @@
   } from '../../lib/core/tracts.ts';
   import type { TractRow as TractRowData } from '../../lib/core/tracts.ts';
   import type { Engine, TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
+  import { methodsHref } from '../../lib/core/methods.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
@@ -486,7 +487,7 @@
         <p class="note">{text.metricsScope}</p>
         <p class="note">{dataset.files}</p>
         <a class="source" href={catalog.source} target="_blank" rel="noreferrer">
-          {text.source}<span class="visually-hidden"> {link.newTab}</span>{@render iconGraphic(
+          {text.source}<span class="visually-hidden">{` ${link.newTab}`}</span>{@render iconGraphic(
             'external-link',
           )}
         </a>
@@ -502,6 +503,16 @@
             >{@render iconGraphic('external-link')}
           </a>
         {/if}
+        <a
+          class="source"
+          href={methodsHref('tracts')}
+          hreflang="en"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {link.methodsPage}<span class="visually-hidden">{` ${link.newTab}`}</span
+          >{@render iconGraphic('external-link')}
+        </a>
       </Disclosure>
     </div>
   </div>

@@ -12,11 +12,12 @@
   import { tick } from 'svelte';
   import type { Attachment } from 'svelte/attachments';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { methodsHref } from '../../lib/core/methods.ts';
   import type { ThemeChoice } from '../../lib/state/theme.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
-  import IconButton from '../../lib/ui/IconButton.svelte';
+  import IconButton, { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import Popover from '../../lib/ui/Popover.svelte';
@@ -291,6 +292,22 @@
         <span>{copy.shortcuts}</span>
         <kbd aria-hidden="true">?</kbd>
       </button>
+      <!-- The English methods site, in a new tab so the view stays here. -->
+      <a
+        class="menu-item"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        href={methodsHref()}
+        hreflang="en"
+        target="_blank"
+        rel="noreferrer"
+        onclick={close}
+      >
+        <span
+          >{t(lang, 'link').methods}<span class="visually-hidden"
+            >{` ${t(lang, 'link').newTab}`}</span
+          ></span
+        >{@render iconGraphic('external-link')}
+      </a>
       <button
         type="button"
         class="menu-item"
@@ -370,6 +387,9 @@
       font-size: var(--text-ui);
       text-align: left;
       cursor: pointer;
+    }
+    a.menu-item {
+      text-decoration: none;
     }
     .menu-item:disabled {
       color: var(--text-tertiary);

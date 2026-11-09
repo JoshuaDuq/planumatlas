@@ -194,6 +194,15 @@ document, `location`, `history` and `window` directly.
 - **Expected:** `loadError` with an `asset-fetch` error → notice text contains "Could not show the white matter beneath the hidden cortex."; status stays `ready`. An `asset-updated` error → "Planum was updated. Reload to continue." with action `reload` (wording: core-i18n area).
 - **Covered by:** `src/app/boot.svelte.test.ts` (R, the `asset-fetch` text only); the status and the `asset-updated` case are uncovered at this level
 
+### BOOT-32 · Lazy code a newer deploy removed asks for a reload
+
+- **Rule:** A lazy chunk that fails to load (`vite:preloadError`) or a worker script that fails to load (a plain `error` Event, not an ErrorEvent) is `asset-updated`. The notice says "Planum was updated. Reload to continue." with Reload, the caller's own panel words it as updated, a user-map worker that never loaded is replaced on the next job, and nothing reloads by itself.
+- **Kind:** behaviour
+- **Level:** unit, browser
+- **Source:** the 2026-11-09 review (B2): Pages replaces the whole site on deploy, and the service worker does not store JS
+- **Expected:** a dispatched `vite:preloadError` → notice `{ text: copy.updated, action: 'reload' }`, the error coded `asset-updated`, the event not prevented; a geometry or user-map worker whose script 404s rejects with `asset-updated`; one whose script threw rejects uncoded with no notice.
+- **Covered by:** `src/boot/new-deploy.test.ts` (R); `src/lib/engine/model/brain-atlas.worker-load.test.ts` (R); `src/lib/engine/worker-load.svelte.test.ts` (R); `src/lib/engine/user-map/user-map.test.ts` (R)
+
 ## Page lifecycle
 
 ### BOOT-18 · Back-forward cache keeps the app

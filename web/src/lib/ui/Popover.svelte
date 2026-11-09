@@ -114,7 +114,7 @@
       !event.defaultPrevented &&
       (event.key === 'ArrowUp' || event.key === 'ArrowDown') &&
       content?.contains(event.target as Node) &&
-      (event.target as Element).matches('button, [type="checkbox"]')
+      (event.target as Element).matches('button, a[href], [type="checkbox"]')
     ) {
       event.preventDefault();
       return;

@@ -36,6 +36,7 @@ import type {
   UserMapReply,
 } from './user-map-worker.ts';
 import type { Cluster } from '../../core/user-map/clusters.ts';
+import { workerLoadFailure } from '../worker-load.ts';
 
 const HEMISPHERES = ['left', 'right'] as const;
 type Hemisphere = (typeof HEMISPHERES)[number];
@@ -126,7 +127,11 @@ export function createUserMap({
       } else job?.resolve(data);
     };
     worker.onerror = (event) => {
-      for (const job of waiting.values()) job.reject(new Error(event.message));
+      const failure = workerLoadFailure(event, 'user map');
+      // A worker that never loaded drops every later job silently: the next job starts another.
+      if (failure) worker = null;
+      const error = failure ?? new Error(event.message);
+      for (const job of waiting.values()) job.reject(error);
       waiting.clear();
     };
     return worker;

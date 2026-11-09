@@ -29,6 +29,7 @@ import { liftFor } from './highlight.ts';
 import { sectionTriangles } from './plane-section.ts';
 import type { BvhGeometry, SectionResult } from './plane-section.ts';
 import type { CutJobResult, CutReply, WorkerMessage } from './section-worker.ts';
+import { workerLoadFailure } from '../worker-load.ts';
 
 /** Later bands cap over earlier ones where their solids overlap (`BANDS` in solid-assets). */
 export type Band = 0 | 1 | 2;
@@ -440,7 +441,9 @@ export class SolidSections {
       pending.resolve([...pending.local, ...event.data.results]);
     };
     worker.onerror = (event) => {
-      const error = new Error(event.message || 'Cut build failed', { cause: event });
+      const error =
+        workerLoadFailure(event, 'section') ??
+        new Error(event.message || 'Cut build failed', { cause: event });
       this.workerError = error;
       worker.terminate();
       this.worker = null;

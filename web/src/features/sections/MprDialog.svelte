@@ -538,7 +538,7 @@
       aria-valuemin={DOCK_MIN}
       aria-valuemax={Math.round(dockWidth ? widest() : DOCK_MIN)}
       aria-valuenow={Math.round(dockWidth)}
-      title={copy.resizeHint}
+      data-tooltip={copy.resizeHint}
       onpointerdown={startResize}
       onpointermove={moveResize}
       onpointerup={() => (resizing = null)}

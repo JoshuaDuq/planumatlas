@@ -75,6 +75,12 @@ export function selectionName({ label = '', side, sideWord }: ContextSelection):
   return side && sideWord ? `${label} ${side}, ${sideWord}` : label;
 }
 
+/** The tab title names the selection, so bookmarks and history entries of different views differ. */
+export function documentTitle({ label, sideWord }: ContextSelection): string {
+  if (!label) return 'Planum';
+  return `${sideWord ? `${label}, ${sideWord}` : label} — Planum`;
+}
+
 /** The modes whose list already shows a selection of each kind. */
 const LISTED_IN: Record<NonNullable<ContextSelection['kind']>, readonly Explorer[]> = {
   region: ['anatomy'],

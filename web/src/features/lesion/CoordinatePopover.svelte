@@ -12,6 +12,7 @@
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Select from '../../lib/ui/Select.svelte';
+  import MethodsLink from '../deficits/MethodsLink.svelte';
 
   let {
     lesion,
@@ -121,6 +122,7 @@
     </div>
   {/if}
 </form>
+<p class="methods"><MethodsLink page="coordinate" {lang} /></p>
 
 <style>
   @layer features {
@@ -182,6 +184,11 @@
       margin-top: var(--space-3);
       padding-top: var(--space-3);
       border-top: 1px solid var(--overlay-border);
+    }
+    .methods {
+      margin: var(--space-3) 0 0;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
     }
   }
 </style>

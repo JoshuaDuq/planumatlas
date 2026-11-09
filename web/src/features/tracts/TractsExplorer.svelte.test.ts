@@ -663,6 +663,13 @@ describe('the notes and the command', () => {
     await expect.element(page.getByText('Tracts in their own T1 reference brain.')).toBeVisible();
     const source = page.getByRole('link', { name: 'Dataset source · CC0 (opens in a new tab)' });
     await expect.element(source).toHaveAttribute('target', '_blank');
+    const methods = page.getByRole('link', {
+      name: 'Method and limits (opens in a new tab)',
+      exact: true,
+    });
+    await expect.element(methods).toHaveAttribute('href', '/docs/features/tracts.html');
+    await expect.element(methods).toHaveAttribute('hreflang', 'en');
+    await expect.element(methods).toHaveAttribute('target', '_blank');
     // The outline's provenance belongs to the other-anatomy reference only.
     expect(page.getByRole('link', { name: /Brain outline method/ }).elements()).toHaveLength(0);
     // The linked-MRI note belongs to the tracts' own anatomy.
