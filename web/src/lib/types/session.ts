@@ -11,6 +11,8 @@ export type LoadStatus = 'loading' | 'ready' | 'switching' | 'context-lost' | 'e
 export interface LoadProgress {
   loaded: number;
   total: number;
+  /** The cortex is drawn, and this is the internal anatomy still loading. */
+  internal?: boolean;
 }
 
 /** The reader's session state (`createSession`, state/session.js:49). */

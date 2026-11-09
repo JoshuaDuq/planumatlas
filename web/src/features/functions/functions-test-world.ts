@@ -5,6 +5,7 @@
 import { flushSync } from 'svelte';
 import { vi } from 'vitest';
 import functionalRegionsFile from '../../../../public/models/cdmd/functional-regions.json' with { type: 'json' };
+import clinicalRecords from '../../../../data/neuropsychology.yaml';
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import termsFile from '../../../../public/models/cdmd/neurosynth-terms.json' with { type: 'json' };
@@ -19,7 +20,8 @@ import {
   type NeuropsychDomains,
   type NeurosynthTerms,
 } from '../../lib/core/catalog/neuropsych-domains.ts';
-import { loadClinicalCatalog } from '../../lib/core/clinical/load.ts';
+import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
+import type { ClinicalData } from '../../lib/core/clinical/types.ts';
 import { loadCircuitCatalog } from '../../lib/core/learning/load.ts';
 import type { ReaderFailure, ReaderState } from '../../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../../lib/core/state/scene-commands.ts';
@@ -62,7 +64,7 @@ export function createWorld() {
   });
   const engineSync = createEngineSync(engine);
   const session = createSessionStore({ views: VIEW_NAMES });
-  const clinical = loadClinicalCatalog(manifest, domains.units);
+  const clinical = createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units);
   const circuits = loadCircuitCatalog(manifest, clinical);
   const lesson = createLessonStore(circuits);
   const view = createView({

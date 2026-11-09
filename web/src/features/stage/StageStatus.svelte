@@ -1,7 +1,9 @@
 <!--
   What the stage says while there is no anatomy to draw: the download, a failed start, a lost
-  graphics context (viewport-chrome.js:63-83, 763-781; main.js:43-60). Nothing is rendered once
-  the status is `ready` or `switching`.
+  graphics context (viewport-chrome.js:63-83, 763-781; main.js:43-60). Once the cortex is drawn
+  (`progress.internal`) the screen clears to show it, and only the internal anatomy's download is
+  said, low on the stage, which still takes no pointer. Nothing is rendered once the status is
+  `ready` or `switching`.
 
   The message and bar are not live regions: the progress is reported hundreds of times a load.
   The reader is told only when the load starts, ends or fails, through the page's announcer.
@@ -24,7 +26,7 @@
     status: LoadStatus;
     lang: Language;
     /** The download so far, in bytes; no `total` while it is not yet known. */
-    progress?: { loaded: number; total: number };
+    progress?: { loaded: number; total: number; internal?: boolean };
     /**
      * What a failed start says (`startFailure`) or the capability error's text, which has no
      * `button`. Without it an `error` status says the generic failure, with Retry.
@@ -42,9 +44,13 @@
       ? t(lang, 'errors').contextLost
       : status === 'error'
         ? shown.text
-        : progress?.total
-          ? viewport.loadingWithTotal(progress.loaded, progress.total)
-          : viewport.loadingAnatomy,
+        : progress?.internal
+          ? progress.total
+            ? viewport.loadingInternalWithTotal(progress.loaded, progress.total)
+            : viewport.loadingInternal
+          : progress?.total
+            ? viewport.loadingWithTotal(progress.loaded, progress.total)
+            : viewport.loadingAnatomy,
   );
 
   let messageElement = $state<HTMLElement>();
@@ -103,7 +109,11 @@
 </script>
 
 {#if status === 'loading' || status === 'error' || status === 'context-lost'}
-  <div class="stage-status" data-status={status}>
+  <div
+    class="stage-status"
+    data-status={status}
+    data-cortex={status === 'loading' && progress?.internal ? '' : undefined}
+  >
     <p id="stage-message" bind:this={messageElement} tabindex="-1">
       {message}
     </p>
@@ -135,9 +145,16 @@
       line-height: var(--lh-ui);
     }
     /* The bar's primitive paints from the overlay tokens, which are fixed dark-scene colours. */
-    .stage-status[data-status='loading'] {
+    .stage-status[data-status='loading']:not([data-cortex]) {
       --overlay-border: var(--border-control);
       --overlay-accent: var(--text-primary);
+    }
+    /* Over the drawn cortex the dark scene shows through, in both themes, and the bar keeps its tokens. */
+    .stage-status[data-cortex] {
+      place-content: end center;
+      padding-bottom: var(--space-8);
+      background: none;
+      color: var(--overlay-ink-muted);
     }
     /* A running app whose view was interrupted keeps the dark scene, as legacy does (stage.css:292-310). */
     .stage-status[data-status='context-lost'] {
@@ -184,6 +201,10 @@
       .stage-status {
         place-content: start center;
         padding-top: 20dvh;
+      }
+      .stage-status[data-cortex] {
+        place-content: start center;
+        padding-top: var(--space-8);
       }
     }
   }

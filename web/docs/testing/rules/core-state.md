@@ -582,7 +582,7 @@ is the English interface text.
 - **Level:** unit
 - **Source:** `viewer/state/boot.js:16-19`
 - **Expected:** atlases destrieux, hcp-mmp: shown destrieux → hcp-mmp; shown hcp-mmp on 4g → destrieux. `prefetchLayers: false` → null. `saveData: true` (even on 4g), `slow-2g`, `2g`, `3g` → null. One atlas only → null.
-- **Covered by:** `src/lib/core/state/boot.test.ts` (R); the boot call: BOOT-11 in `boot-and-assets.md`
+- **Covered by:** `src/lib/core/state/boot.test.ts` (R); the intent call: BOOT-11 in `boot-and-assets.md`
 
 ## The link writer
 

@@ -66,6 +66,8 @@
     choosing?: boolean;
     /** S3's `chooseAtlas`. */
     onAtlas: (id: string) => unknown;
+    /** The reader points at or focuses the Atlas control, or the summary that holds it. */
+    onAtlasIntent: () => void;
     /** The composition lifts the paint first (app.js:633-636), then runs the colour command. */
     onSurfaceColor: (colour: SurfaceColor) => unknown;
     onDetail: (id: string) => unknown;
@@ -91,6 +93,7 @@
     settingsOpen = $bindable(false),
     choosing = $bindable(false),
     onAtlas,
+    onAtlasIntent,
     onSurfaceColor,
     onDetail,
     onAnatomy,
@@ -492,6 +495,8 @@
     aria-label={summaryLabel}
     data-tooltip={copy.dataSummary}
     onclick={onToggle}
+    onpointerenter={onAtlasIntent}
+    onfocus={onAtlasIntent}
   >
     <span bind:this={summaryNode} class="data-summary">
       {#each summarySubject as { text } (text)}
@@ -562,6 +567,8 @@
             aria-describedby={notes.atlas ? noteId('atlas') : undefined}
             data-tooltip={tip(notes.atlas)}
             onchange={(event) => choose('atlas', event.currentTarget.value, onAtlas)}
+            onpointerenter={onAtlasIntent}
+            onfocus={onAtlasIntent}
           >
             {#each atlasOptions as option (option.value)}
               <option value={option.value}>{option.label}</option>

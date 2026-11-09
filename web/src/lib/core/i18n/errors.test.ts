@@ -155,13 +155,14 @@ test('I18N-18 · the 18 operations are listed in order, with subject sentences i
     'restore',
   ];
   // fullscreen is G6's addition (decision 33), after the legacy 18; a landmark's streamlines follow,
-  // then the visual-field map.
+  // then the visual-field map and the guided tour, whose code is fetched when it starts.
   for (const lang of ['en', 'fr'] as const) {
     assert.deepEqual(Object.keys(t(lang, 'errors').operations), [
       ...order,
       'fullscreen',
       'streamlines',
       'map',
+      'guide',
     ]);
   }
   assert.equal(

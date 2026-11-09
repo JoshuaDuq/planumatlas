@@ -1,6 +1,6 @@
 import { gzipSync } from 'node:zlib';
-import { describe, expect, it, vi } from 'vitest';
-import { fetchAsset, type AssetProgress } from './asset-cache.ts';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fetchAsset, handOverUnseen, type AssetProgress, type UnseenFile } from './asset-cache.ts';
 import { publish, recordOf, sha256 } from './published-test-support.ts';
 
 const bytesOf = (count: number) => new Uint8Array(count).map((_, i) => i + 1);
@@ -127,5 +127,116 @@ describe('fetchAsset', () => {
       async () => new Response(bytesOf(29), { headers: { 'Content-Encoding': 'gzip' } }),
     );
     await expect(fetchAsset(url)).rejects.toMatchObject({ code: 'asset-updated' });
+  });
+});
+
+describe('handOverUnseen', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  const base = 'https://example.test/neuroatlas/models/bert/';
+  const records = {
+    'models/bert/manifest.json': recordOf(bytesOf(6)),
+    'models/bert/learning.glb': recordOf(bytesOf(4)),
+  };
+  const serve = () =>
+    vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async (url) => responseFor(String(url).includes('manifest') ? 6 : 4));
+
+  it('SW-11 gives the service worker each verified download it did not see, at its versioned URL, before and after it is ready', async () => {
+    vi.stubEnv('PROD', true);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    publish(records);
+    serve();
+    await fetchAsset(`${base}manifest.json`);
+    const handed: UnseenFile[] = [];
+    handOverUnseen((file) => handed.push(file));
+    expect(handed.map(({ url }) => url)).toEqual([
+      `${base}manifest.json?v=${records['models/bert/manifest.json'].version}`,
+    ]);
+    await fetchAsset(`${base}learning.glb`);
+    expect(handed.map(({ url }) => url)).toEqual([
+      `${base}manifest.json?v=${records['models/bert/manifest.json'].version}`,
+      `${base}learning.glb?v=${records['models/bert/learning.glb'].version}`,
+    ]);
+    expect(new Uint8Array(await handed[1]!.body.arrayBuffer())).toEqual(bytesOf(4));
+    expect(handed[1]!.headers).toEqual([['content-length', '4']]);
+  });
+
+  it('SW-11 keeps nothing the worker sees itself, in development, unverified or failing its check', async () => {
+    const handed: UnseenFile[] = [];
+    handOverUnseen((file) => handed.push(file));
+    vi.stubEnv('PROD', true);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    const fetch = serve();
+    // No published map: nothing was verified.
+    await fetchAsset(`${base}manifest.json`);
+    publish(records);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: {} } });
+    await fetchAsset(`${base}manifest.json`);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    vi.stubEnv('PROD', false);
+    await fetchAsset(`${base}learning.glb`);
+    vi.stubEnv('PROD', true);
+    fetch.mockImplementation(async () => responseFor(5));
+    await expect(fetchAsset(`${base}learning.glb`)).rejects.toMatchObject({
+      code: 'asset-updated',
+    });
+    expect(handed).toEqual([]);
+  });
+
+  it('SW-11 drops what it kept, and keeps no more, once no worker will take it', async () => {
+    // A fresh module: releasing is for the life of the page.
+    vi.resetModules();
+    const cache = await import('./asset-cache.ts');
+    const { default: published } = await import('./published-files.ts');
+    Object.assign(published, { base: '/neuroatlas/', files: records });
+    vi.stubEnv('PROD', true);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    serve();
+    await cache.fetchAsset(`${base}manifest.json`);
+    cache.releaseUnseen();
+    await cache.fetchAsset(`${base}learning.glb`);
+    const handed: UnseenFile[] = [];
+    cache.handOverUnseen((file) => handed.push(file));
+    await cache.fetchAsset(`${base}learning.glb`);
+    expect(handed).toEqual([]);
+  });
+
+  it('SW-11 keeps nothing from a download still running when the copies are released', async () => {
+    vi.resetModules();
+    const cache = await import('./asset-cache.ts');
+    const { default: published } = await import('./published-files.ts');
+    Object.assign(published, { base: '/neuroatlas/', files: records });
+    vi.stubEnv('PROD', true);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    let arrive!: (response: Response) => void;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      () => new Promise<Response>((resolve) => (arrive = resolve)),
+    );
+    const loading = cache.fetchAsset(`${base}learning.glb`);
+    await vi.waitFor(() => expect(arrive).toBeDefined());
+    cache.releaseUnseen();
+    arrive(responseFor(4));
+    await loading;
+    const handed: UnseenFile[] = [];
+    cache.handOverUnseen((file) => handed.push(file));
+    expect(handed).toEqual([]);
+  });
+
+  it('SW-11 a hand-over that throws is warned about and the load still succeeds', async () => {
+    vi.resetModules();
+    const cache = await import('./asset-cache.ts');
+    const { default: published } = await import('./published-files.ts');
+    Object.assign(published, { base: '/neuroatlas/', files: records });
+    vi.stubEnv('PROD', true);
+    vi.stubGlobal('navigator', { serviceWorker: { controller: null } });
+    serve();
+    const failure = new DOMException('worker gone', 'InvalidStateError');
+    cache.handOverUnseen(() => {
+      throw failure;
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    expect(new Uint8Array(await cache.fetchAsset(`${base}learning.glb`))).toEqual(bytesOf(4));
+    expect(warn).toHaveBeenCalledWith('Service worker hand-over failed:', failure);
   });
 });

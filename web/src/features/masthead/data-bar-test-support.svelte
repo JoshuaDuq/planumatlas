@@ -10,7 +10,7 @@
 
   type Bar = Omit<
     ComponentProps<typeof DataBar>,
-    'onAtlas' | 'onSurfaceColor' | 'onDetail' | 'onAnatomy' | 'settingsOpen'
+    'onAtlas' | 'onAtlasIntent' | 'onSurfaceColor' | 'onDetail' | 'onAnatomy' | 'settingsOpen'
   >;
 
   let {
@@ -68,6 +68,7 @@
       {...bar}
       bind:settingsOpen
       onAtlas={(id) => command(`atlas:${id}`)}
+      onAtlasIntent={() => calls.push('atlas-intent')}
       onSurfaceColor={(colour) => command(`colour:${colour}`)}
       onDetail={(id) => command(`detail:${id}`)}
       onAnatomy={(id) => command(`anatomy:${id}`)}

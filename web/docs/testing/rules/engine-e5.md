@@ -78,7 +78,7 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 
 ### SCENE-38 · After the cut prefetch, the first cut compiles no program of its own
 
-- **Rule:** `sections.prefetch()` downloads and builds the cut and compiles the programs it draws with, into the composer's target (a canvas compile keys programs by the canvas's colour space and tone mapping, which the scene never draws with); a first cut after it creates no WebGL program.
+- **Rule:** `sections.prefetch()` downloads (at low priority, ASSET-22) and builds the cut and compiles the programs it draws with, into the composer's target (a canvas compile keys programs by the canvas's colour space and tone mapping, which the scene never draws with); a first cut after it creates no WebGL program.
 - **Kind:** behaviour
 - **Level:** browser
 - **Source:** `index.ts` `prefetchCut`; `scene.ts` `compile`; `BrainAtlas.cutProgramSamples`; `SolidSections.programSamples`

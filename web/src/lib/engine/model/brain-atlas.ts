@@ -29,6 +29,7 @@ import { HEMISPHERES, SURFACE_COLORS } from '../../types/index.ts';
 import type {
   DisplaySettings,
   Hemisphere,
+  LoadProgress,
   Manifest,
   ManifestAppearance,
   ModelState,
@@ -120,13 +121,25 @@ export interface AtlasManifest extends Omit<Manifest, 'appearance' | 'networks'>
 
 /** The part of a glTF loader the model uses: one published file, with download progress. */
 export interface GlbLoader {
-  loadAsync(file: string, onProgress?: ProgressCallback): Promise<{ scene: Group }>;
+  loadAsync(
+    file: string,
+    onProgress?: ProgressCallback,
+    priority?: RequestPriority,
+  ): Promise<{ scene: Group }>;
 }
 
 export interface LoadOptions {
+  /**
+   * Both first layers' downloads together until the cortex is shown; from then on the internal
+   * anatomy's alone, marked `internal`.
+   */
   onProgress?: ProgressCallback;
   /** The detail level to open; the published default when absent. */
   detail?: string;
+  /** The cortex is in and shown, its borders not yet blended; the internal anatomy may still be loading. */
+  onCortex?: (model: BrainAtlas) => void;
+  /** The shown cortex now has its border blend; the internal anatomy is not yet shown. */
+  onBlended?: () => void;
 }
 
 /** One loaded GLB: its scene, the region meshes in it, and the colours their borders blend through. */
@@ -377,8 +390,11 @@ export class GeometryJobs {
       meshes.map((mesh) => mesh.geometry),
     );
     if (!('feathers' in reply)) throw new Error('The geometry worker answered feathers with BVHs.');
+    // Into the attribute the layer was first drawn with, so the buffer on the GPU is reused.
     reply.feathers.forEach((values, at) => {
-      meshes[at]!.geometry.setAttribute('_feather', new BufferAttribute(values, FEATHER_ITEM_SIZE));
+      const feather = meshes[at]!.geometry.getAttribute('_feather') as BufferAttribute;
+      feather.copyArray(values);
+      feather.needsUpdate = true;
     });
   }
 
@@ -514,8 +530,8 @@ export class BrainAtlas extends EventTarget {
     const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     const path = new URL('.', url).href;
     const loader: GlbLoader = {
-      async loadAsync(file, onProgress) {
-        const buffer = await fetchAsset(new URL(file, path), { onProgress });
+      async loadAsync(file, onProgress, priority) {
+        const buffer = await fetchAsset(new URL(file, path), { onProgress, priority });
         return gltf.parseAsync(buffer, path);
       },
     };
@@ -570,6 +586,8 @@ export class BrainAtlas extends EventTarget {
   spinalCordLoadError: unknown = null;
   private readonly dissection;
   private readonly pending = new Map<string, Promise<unknown>>();
+  /** Each loading layer once it can be drawn, before a cortex's border blend is in (`loadLayer`). */
+  private readonly parsed = new Map<string, Promise<{ layer: Layer }>>();
   private readonly geometryJobs = new GeometryJobs();
   /** Who hears each pending download, keyed as `pending` is. */
   private readonly listeners = new Map<string, ProgressCallback[]>();
@@ -698,8 +716,9 @@ export class BrainAtlas extends EventTarget {
   }
 
   /**
-   * Load what the first frame draws: one cortical atlas and one detail level.
-   * The envelopes and the cord wait until something needs them.
+   * Load what the first frame draws: one cortical atlas and one detail level. The cortex is shown
+   * as soon as it is in (`onCortex`); this resolves once the internal anatomy and the cortex's
+   * border blend are in too. The envelopes and the cord wait until something needs them.
    */
   async initialize(
     atlasId: string = this.manifest.atlases[0]!.id,
@@ -711,13 +730,27 @@ export class BrainAtlas extends EventTarget {
     const detailId = options.detail === undefined ? this.defaultDetail : options.detail;
     const level = this.manifest.detail_levels.find((entry) => entry.id === detailId);
     if (!level) throw unknownLayer(`Unknown detail level: ${detailId}`);
-    const progress = combineProgress(['detail', 'atlas'], options.onProgress);
-    await Promise.all([
-      this.loadLayer(level.id, level.file, progress.track('detail')),
-      this.loadLayer(atlas.id, atlas.file, progress.track('atlas')),
-    ]);
-    this.detailId = level.id;
-    this.atlasId = atlas.id;
+    const report = options.onProgress;
+    const progress = combineProgress(['detail', 'atlas'], report);
+    const together = progress.track('detail');
+    let internal: LoadProgress = { loaded: 0, total: 0, internal: true };
+    let shown = false;
+    const detail = this.loadLayer(level.id, level.file, (event) => {
+      internal = { ...event, internal: true };
+      if (shown) report?.(internal);
+      else together(event);
+    });
+    const cortex = this.loadLayer(atlas.id, atlas.file, progress.track('atlas'));
+    const show = (this.parsed.get(atlas.id) ?? cortex).then(() => {
+      this.detailId = level.id;
+      this.atlasId = atlas.id;
+      this.update();
+      shown = true;
+      options.onCortex?.(this);
+      report?.(internal);
+    });
+    const blended = Promise.all([cortex, show]).then(() => options.onBlended?.());
+    await Promise.all([detail, cortex, show, blended]);
     this.isolatedId = null;
     this.select(null);
   }
@@ -728,7 +761,10 @@ export class BrainAtlas extends EventTarget {
    * envelope mesh; a failed download is retried by the next call. `onProgress`
    * hears the download, whether this call starts it or joins one under way.
    */
-  async ensureEnvelopes(onProgress?: ProgressCallback): Promise<Mesh[]> {
+  async ensureEnvelopes(
+    onProgress?: ProgressCallback,
+    priority?: RequestPriority,
+  ): Promise<Mesh[]> {
     if (this.isDisposed) throw new Error('BrainAtlas has been disposed.');
     if (this.envelopes) return this.envelopes;
     if (this.pending.has(ENVELOPES)) {
@@ -736,7 +772,11 @@ export class BrainAtlas extends EventTarget {
       return this.pending.get(ENVELOPES) as Promise<Mesh[]>;
     }
     const loading = Promise.all([
-      this.loader.loadAsync(this.manifest.solid_envelopes.file, this.share(ENVELOPES, onProgress)),
+      this.loader.loadAsync(
+        this.manifest.solid_envelopes.file,
+        this.share(ENVELOPES, onProgress),
+        priority,
+      ),
       import('three-mesh-bvh'),
     ])
       .then(async ([{ scene }, bvh]) => {
@@ -790,7 +830,7 @@ export class BrainAtlas extends EventTarget {
    * the cord is shown. A failure clears the request so the next one retries.
    * `onProgress` hears the download, whether this call starts it or joins one under way.
    */
-  async ensureSpinalCord(onProgress?: ProgressCallback): Promise<void> {
+  async ensureSpinalCord(onProgress?: ProgressCallback, priority?: RequestPriority): Promise<void> {
     if (this.isDisposed) throw new Error('BrainAtlas has been disposed.');
     const layers = this.manifest.supplemental_layers ?? [];
     if (!layers.some((layer) => layer.id === 'pam50')) {
@@ -807,7 +847,9 @@ export class BrainAtlas extends EventTarget {
       this.share(SPINAL_CORD, onProgress),
     );
     const loading = Promise.all(
-      layers.map((layer) => this.loadLayer(layer.id, layer.file, progress.track(layer.id))),
+      layers.map((layer) =>
+        this.loadLayer(layer.id, layer.file, progress.track(layer.id), priority),
+      ),
     )
       .then(
         () => {
@@ -830,16 +872,20 @@ export class BrainAtlas extends EventTarget {
    * One closed ribbon solid per parcel of an atlas, cut from the envelopes and
    * kept, geometry and BVH alike, for the next cut.
    */
-  async ensureRibbonWedges(atlas: string, baseUrl: string | URL): Promise<Mesh[]> {
+  async ensureRibbonWedges(
+    atlas: string,
+    baseUrl: string | URL,
+    priority?: RequestPriority,
+  ): Promise<Mesh[]> {
     if (this.isDisposed) throw new Error('BrainAtlas has been disposed.');
     const cached = this.ribbonWedges.get(atlas);
     if (cached) return cached;
     const key = `ribbon:${atlas}`;
     if (this.pending.has(key)) return this.pending.get(key) as Promise<Mesh[]>;
     const loading = (async () => {
-      const envelopes = await this.ensureEnvelopes();
+      const envelopes = await this.ensureEnvelopes(undefined, priority);
       const [wedges, bvh] = await Promise.all([
-        loadRibbonSources(this.manifest, baseUrl, atlas, envelopes),
+        loadRibbonSources(this.manifest, baseUrl, atlas, envelopes, priority),
         import('three-mesh-bvh'),
       ]);
       try {
@@ -860,117 +906,158 @@ export class BrainAtlas extends EventTarget {
     return loading;
   }
 
-  async loadLayer(id: string, file: string, onProgress?: ProgressCallback): Promise<Layer> {
+  /** Whether a layer is whole: loaded, and a cortex's border blend in (not merely drawable). */
+  hasLayer(id: string): boolean {
+    return this.layers.has(id) && !this.pending.has(id);
+  }
+
+  /**
+   * One layer, resolved once it is whole. A cortex is drawable before its border blend is back from
+   * the worker: it is drawn with none until then (`parsed`), and `initialize` redraws it (`onBlended`).
+   */
+  async loadLayer(
+    id: string,
+    file: string,
+    onProgress?: ProgressCallback,
+    priority?: RequestPriority,
+  ): Promise<Layer> {
     if (this.isDisposed) throw new Error('BrainAtlas has been disposed.');
-    const loaded = this.layers.get(id);
-    if (loaded) return loaded;
+    // Pending first: a cortex is among the layers while its blend is still on its way.
     if (this.pending.has(id)) {
       this.join(id, onProgress);
       return this.pending.get(id) as Promise<Layer>;
     }
-    const loading = Promise.all([
-      this.loader.loadAsync(file, this.share(id, onProgress)),
+    const loaded = this.layers.get(id);
+    if (loaded) return loaded;
+    const parsed = Promise.all([
+      this.loader.loadAsync(file, this.share(id, onProgress), priority),
       import('three-mesh-bvh'),
-    ])
-      .then(async ([{ scene }, bvh]) => {
-        if (this.isDisposed) {
-          disposeScene(scene);
-          throw new Error('BrainAtlas was disposed during loading.');
+    ]).then(async ([{ scene }, bvh]) => {
+      if (this.isDisposed) {
+        disposeScene(scene);
+        throw new Error('BrainAtlas was disposed during loading.');
+      }
+      const raycast = raycastWithBvh(bvh);
+      const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
+      const meshes: AtlasMesh[] = [];
+      const originalMaterials = new Set<Material>();
+      try {
+        scene.traverse((object) => {
+          const mesh = object as Mesh<BufferGeometry, MeshStandardMaterial>;
+          if (!mesh.isMesh) return;
+          const region = this.regions.get(mesh.userData['region_id'] as string);
+          if (!region) throw new Error(`Mesh has no manifest region: ${mesh.name}`);
+          for (const field of [
+            'label',
+            'hemisphere',
+            'atlas',
+            'source_label_id',
+            'kind',
+          ] as const) {
+            if (mesh.userData[field] !== region[field]) {
+              throw new Error(`Mesh metadata mismatch: ${region.id}.${field}`);
+            }
+          }
+          if (!mesh.material.isMeshStandardMaterial) {
+            throw new Error(`Expected a standard glTF material: ${region.id}`);
+          }
+          originalMaterials.add(mesh.material);
+          // Indirect indexing preserves the scientific source triangle order.
+          mesh.raycast = raycast;
+          if (this.manifest.networks) {
+            attachNetworkColors(mesh.geometry, this.manifest.networks);
+          }
+          if (this.manifest.arterial_territories) {
+            attachTerritoryColors(mesh.geometry, this.manifest.arterial_territories.territories);
+          }
+          const shown = mesh as unknown as AtlasMesh;
+          shown.material = createAnatomicalMaterial(
+            mesh,
+            region,
+            this.manifest.appearance,
+            // Every cortical atlas carries the predicted retinotopy on every vertex.
+            corticalLayer ? this.visualField : null,
+            this.userMap,
+          );
+          // Drawn before the structures it meets, whichever loaded first (`opaqueOrder`).
+          if (corticalLayer) shown.userData['cortical'] = true;
+          if (this.mriUniforms) {
+            addMriSurfaceAppearance(shown.material, this.mriUniforms, mriSample(region));
+          }
+          this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
+          // Region meshes never move after load. Skipping per-frame matrix
+          // updates is free on 400+ nuclei.
+          shown.matrixAutoUpdate = false;
+          shown.updateMatrix();
+          meshes.push(shown);
+        });
+        if (!meshes.length) throw new Error(`Empty brain model layer: ${id}`);
+      } catch (error) {
+        disposeScene(scene);
+        throw error;
+      } finally {
+        for (const material of originalMaterials) material.dispose();
+      }
+      const geometries = meshes.map((mesh) => mesh.geometry);
+      // A cortical atlas tiles one surface, so its parcels meet at shared borders. Its parcels are
+      // picked, never cut: their BVHs follow the picture, and a ray that arrives first builds its own.
+      const cortical = meshes.every((mesh) =>
+        ['cortex', 'non-region'].includes(mesh.userData['kind']),
+      );
+      let featherPalette: DataTexture | null = null;
+      let feathered = Promise.resolve();
+      if (cortical) {
+        for (const mesh of meshes) {
+          const count = mesh.geometry.getAttribute('position').count;
+          const none = new Float32Array(count * FEATHER_ITEM_SIZE);
+          mesh.geometry.setAttribute('_feather', new BufferAttribute(none, FEATHER_ITEM_SIZE));
         }
-        const raycast = raycastWithBvh(bvh);
-        const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
-        const meshes: AtlasMesh[] = [];
-        const originalMaterials = new Set<Material>();
+        featherPalette = createFeatherPalette(meshes.length);
+        for (const mesh of meshes) addBorderFeather(mesh.material, featherPalette);
+        feathered = this.geometryJobs.feather(meshes);
+        this.geometryJobs.bvhs(bvh, geometries).catch((error: Error) => {
+          if (this.isDisposed) return;
+          console.error(error);
+          this.dispatchEvent(new CustomEvent('loaderror', { detail: error }));
+        });
+      } else {
+        // A detail level's or the cord's structures are cut sources, which the first cut needs whole.
         try {
-          scene.traverse((object) => {
-            const mesh = object as Mesh<BufferGeometry, MeshStandardMaterial>;
-            if (!mesh.isMesh) return;
-            const region = this.regions.get(mesh.userData['region_id'] as string);
-            if (!region) throw new Error(`Mesh has no manifest region: ${mesh.name}`);
-            for (const field of [
-              'label',
-              'hemisphere',
-              'atlas',
-              'source_label_id',
-              'kind',
-            ] as const) {
-              if (mesh.userData[field] !== region[field]) {
-                throw new Error(`Mesh metadata mismatch: ${region.id}.${field}`);
-              }
-            }
-            if (!mesh.material.isMeshStandardMaterial) {
-              throw new Error(`Expected a standard glTF material: ${region.id}`);
-            }
-            originalMaterials.add(mesh.material);
-            // Indirect indexing preserves the scientific source triangle order.
-            mesh.raycast = raycast;
-            if (this.manifest.networks) {
-              attachNetworkColors(mesh.geometry, this.manifest.networks);
-            }
-            if (this.manifest.arterial_territories) {
-              attachTerritoryColors(mesh.geometry, this.manifest.arterial_territories.territories);
-            }
-            const shown = mesh as unknown as AtlasMesh;
-            shown.material = createAnatomicalMaterial(
-              mesh,
-              region,
-              this.manifest.appearance,
-              // Every cortical atlas carries the predicted retinotopy on every vertex.
-              corticalLayer ? this.visualField : null,
-              this.userMap,
-            );
-            // Drawn before the structures it meets, whichever loaded first (`opaqueOrder`).
-            if (corticalLayer) shown.userData['cortical'] = true;
-            if (this.mriUniforms) {
-              addMriSurfaceAppearance(shown.material, this.mriUniforms, mriSample(region));
-            }
-            this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
-            // Region meshes never move after load. Skipping per-frame matrix
-            // updates is free on 400+ nuclei.
-            shown.matrixAutoUpdate = false;
-            shown.updateMatrix();
-            meshes.push(shown);
-          });
-          if (!meshes.length) throw new Error(`Empty brain model layer: ${id}`);
-        } catch (error) {
-          disposeScene(scene);
-          throw error;
-        } finally {
-          for (const material of originalMaterials) material.dispose();
-        }
-        const geometries = meshes.map((mesh) => mesh.geometry);
-        // A cortical atlas tiles one surface, so its parcels meet at shared borders. Its parcels are
-        // picked, never cut: their BVHs follow the picture, and a ray that arrives first builds its own.
-        const cortical = meshes.every((mesh) =>
-          ['cortex', 'non-region'].includes(mesh.userData['kind']),
-        );
-        let featherPalette: DataTexture | null = null;
-        try {
-          if (cortical) await this.geometryJobs.feather(meshes);
-          // A detail level's or the cord's structures are cut sources, which the first cut needs whole.
-          else await this.geometryJobs.bvhs(bvh, geometries);
+          await this.geometryJobs.bvhs(bvh, geometries);
           if (this.isDisposed) throw new Error('BrainAtlas was disposed during loading.');
         } catch (error) {
           disposeScene(scene);
           throw error;
         }
-        if (cortical) {
-          featherPalette = createFeatherPalette(meshes.length);
-          for (const mesh of meshes) addBorderFeather(mesh.material, featherPalette);
-          this.geometryJobs.bvhs(bvh, geometries).catch((error: Error) => {
-            if (this.isDisposed) return;
-            console.error(error);
-            this.dispatchEvent(new CustomEvent('loaderror', { detail: error }));
-          });
+      }
+      const layer: Layer = { scene, meshes, featherPalette };
+      scene.visible = false;
+      this.group.add(scene);
+      this.layers.set(id, layer);
+      return { layer, feathered };
+    });
+    const loading = parsed
+      .then(async ({ layer, feathered }) => {
+        try {
+          await feathered;
+          if (this.isDisposed) throw new Error('BrainAtlas was disposed during loading.');
+        } catch (error) {
+          if (!this.isDisposed) {
+            this.layers.delete(id);
+            layer.scene.removeFromParent();
+            disposeScene(layer.scene);
+            layer.featherPalette?.dispose();
+          }
+          throw error;
         }
-        const layer: Layer = { scene, meshes, featherPalette };
-        scene.visible = false;
-        this.group.add(scene);
-        this.layers.set(id, layer);
         return layer;
       })
-      .finally(() => this.settled(id));
+      .finally(() => {
+        this.settled(id);
+        this.parsed.delete(id);
+      });
     this.pending.set(id, loading);
+    this.parsed.set(id, parsed);
     return loading;
   }
 

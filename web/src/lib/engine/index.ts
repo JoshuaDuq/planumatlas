@@ -32,11 +32,13 @@ import { BrainAtlas } from './model/brain-atlas.ts';
 import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
+import { VIEW_DIRECTIONS, frameTo, upFor } from './render/camera-views.ts';
 import { stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
-import { createScene } from './render/scene.ts';
+import { createScene, planFraming } from './render/scene.ts';
 import type { Appearance as SceneAppearance } from './render/scene.ts';
 import { worldToRas } from './slices/coordinates.ts';
 import { BrainSections } from './slices/sections.ts';
+import type { LoadProgress } from '../types/index.ts';
 
 /** How long the camera must rest before its move counts as settled and the link follows it. */
 const CAMERA_REST_MS = 250;
@@ -94,24 +96,73 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
   });
   cleanups.push(() => scene.dispose());
 
-  try {
-    const atlas = await BrainAtlas.load(manifestUrl, options.atlas, {
-      ...(options.detail !== undefined && { detail: options.detail }),
-      onProgress: (progress) => {
-        if (progress.total) options.onProgress?.(progress);
-      },
-    });
-    cleanups.push(() => atlas.dispose());
-    stepAnatomy = (now) => atlas.stepExplode(now);
-    const anatomy = atlas.manifest.anatomy.id;
-
+  // A start that failed reports nothing more, and stops drawing the cortex at its next step.
+  let stopped = false;
+  cleanups.push(() => (stopped = true));
+  // The internal anatomy's download is reported once the cortex is on screen, not before.
+  let drawn = false;
+  let early: LoadProgress | null = null;
+  const report = (progress: LoadProgress) => {
+    if (stopped) return;
+    if (progress.internal && !drawn) early = progress;
+    else if (progress.total || progress.internal) options.onProgress?.(progress);
+  };
+  /**
+   * Draw the cortex while the internal anatomy downloads, framed on the cortex alone (the start
+   * frames the whole brain once it is in). Its programs, then the outline's, compile off this
+   * thread before anything draws with them.
+   */
+  const drawCortex = async (model: BrainAtlas) => {
     scene.applyTheme();
     scene.setSize();
-    const { lighting } = atlas.manifest.appearance as { lighting?: SceneAppearance['lighting'] };
+    const { lighting } = model.manifest.appearance as { lighting?: SceneAppearance['lighting'] };
     if (!lighting) throw new Error('The manifest publishes no lighting.');
     scene.setAppearance({ lighting });
+    await scene.compile(model.group);
+    if (stopped) return;
+    scene.scene.add(model.group);
+    scene.camera.up.copy(upFor('oblique'));
+    scene.moveTo(
+      planFraming(
+        scene.camera,
+        scene.controls,
+        brainBounds(model),
+        VIEW_DIRECTIONS.oblique,
+        frameTo,
+        scene.viewportFit,
+      ),
+      { immediate: true },
+    );
+    drawn = true;
+    scene.invalidate();
+    if (early) report(early);
+    await scene.warmOutlines(model.group);
+  };
+
+  try {
+    let cortexIn!: (model: BrainAtlas) => void;
+    const cortexDrawn = new Promise<BrainAtlas>((resolve) => (cortexIn = resolve)).then(drawCortex);
+    const [atlas] = await Promise.all([
+      BrainAtlas.load(manifestUrl, options.atlas, {
+        ...(options.detail !== undefined && { detail: options.detail }),
+        onProgress: report,
+        onCortex: (model) => {
+          // A start that fails after this frees the model with the scene.
+          cleanups.push(() => model.dispose());
+          cortexIn(model);
+        },
+        // The cortex is redrawn with its blend; the internal anatomy shows only once compiled.
+        onBlended: () => {
+          if (drawn && !stopped) scene.invalidate();
+        },
+      }),
+      cortexDrawn,
+    ]);
+    stepAnatomy = (now) => atlas.stepExplode(now);
+    const anatomy = atlas.manifest.anatomy.id;
+    // The internal anatomy's programs, before the frame that first draws it.
+    await scene.compile(atlas.group);
     const bounds = brainBounds(atlas);
-    scene.scene.add(atlas.group);
 
     const absoluteManifestUrl = new URL(manifestUrl, globalThis.location.href);
     const sections = new BrainSections(atlas, new URL('volumes.json', absoluteManifestUrl));
@@ -413,7 +464,6 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
 
     // The camera starts inside the brain; frame it before the first layer is asked for more.
     stage.camera.applyView('oblique', { immediate: true });
-    scene.warmOutlines(atlas.group);
     stage.onResize({ canvasChanged: false });
     refresh();
 

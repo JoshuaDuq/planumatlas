@@ -23,7 +23,7 @@ import { Volume } from '../slices/volume.ts';
 import { GHOST, opaqueOrder } from '../render/draw-order.ts';
 import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
-import { BrainAtlas, SURFACE_COLORS } from './brain-atlas.ts';
+import { BrainAtlas, GeometryJobs, SURFACE_COLORS } from './brain-atlas.ts';
 import type { AtlasManifest, GlbLoader } from './brain-atlas.ts';
 
 /* oxlint-disable typescript/no-explicit-any -- fixtures stand in for published JSON and mutate the model freely */
@@ -1260,13 +1260,83 @@ test('mesh visibility agrees with the shared rule for every region', async () =>
 test('load progress is reported while a layer downloads', async () => {
   const seen: Stub[] = [];
   const { atlas } = fixture();
-  await atlas.initialize('a', (event) => seen.push({ loaded: event.loaded, total: event.total }));
+  await atlas.initialize('a', (event) => seen.push({ ...event }));
+  const shown = seen.findIndex((event) => event['internal']);
   assert.deepEqual(
-    seen.at(-1),
+    seen.slice(0, shown).at(-1),
     { loaded: 40, total: 40 },
-    'surface and structure downloads share one bar',
+    'surface and structure downloads share one bar until the cortex is shown',
   );
   assert.ok(seen.some((event) => event.loaded === 10 && event.total === 20));
+  assert.deepEqual(
+    seen.slice(shown),
+    [{ loaded: 20, total: 20, internal: true }],
+    'then the bar is the internal anatomy’s alone',
+  );
+  atlas.dispose();
+});
+
+test('the cortex is shown before the internal anatomy is in, blended at its borders only later', async () => {
+  const { atlas } = fixture();
+  const load = atlas.loader.loadAsync.bind(atlas.loader);
+  let releaseDetail!: () => void;
+  const detailHeld = new Promise<void>((resolve) => (releaseDetail = resolve));
+  atlas.loader.loadAsync = async (file, onProgress) => {
+    if (file === 'structures.glb') {
+      onProgress?.({ loaded: 5, total: 20 });
+      await detailHeld;
+    }
+    return load(file, onProgress);
+  };
+  const feather = GeometryJobs.prototype.feather;
+  let releaseFeathers!: () => void;
+  const feathersHeld = new Promise<void>((resolve) => (releaseFeathers = resolve));
+  vi.spyOn(GeometryJobs.prototype, 'feather').mockImplementation(async function (
+    this: GeometryJobs,
+    meshes,
+  ) {
+    await feathersHeld;
+    return feather.call(this, meshes);
+  });
+  const seen: Stub[] = [];
+  let shown: { ids: string[]; feathers: number[] } | null = null;
+  const told: boolean[] = [];
+  let resolved = false;
+  const opening = atlas
+    .initialize('a', {
+      onProgress: (event) => seen.push({ ...event }),
+      onCortex: (model) => {
+        const meshes = model.visibleMeshes;
+        shown = {
+          ids: meshes.map((mesh) => mesh.userData['region_id'] as string),
+          feathers: meshes.flatMap((mesh) => [...mesh.geometry.getAttribute('_feather').array]),
+        };
+      },
+      onBlended: () => told.push(atlas.layers.get('aseg')!.scene.visible),
+    })
+    .then(() => (resolved = true));
+  await vi.waitFor(() => assert.ok(shown));
+  assert.deepEqual(shown!.ids.sort(), ['a-left', 'a-right']);
+  assert.ok(shown!.feathers.length > 0 && shown!.feathers.every((value) => value === 0));
+  assert.deepEqual(seen.at(-1), { loaded: 5, total: 20, internal: true });
+  releaseDetail();
+  await vi.waitFor(() => assert.ok(atlas.layers.has('aseg')));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(resolved, false, 'the start waits for the border blend');
+  assert.equal(atlas.hasLayer('a'), false, 'a cortex still blending is not whole');
+  assert.equal(atlas.hasLayer('aseg'), true);
+  assert.deepEqual(told, []);
+  releaseFeathers();
+  await opening;
+  assert.deepEqual(told, [false], 'told of the blend once, before the internal anatomy shows');
+  assert.equal(atlas.hasLayer('a'), true);
+  assert.deepEqual(seen.at(-1), { loaded: 20, total: 20, internal: true });
+  const blended = atlas.layers.get('a')!.meshes;
+  assert.ok(blended.some((mesh) => mesh.geometry.getAttribute('_feather').array.some(Boolean)));
+  assert.equal(
+    atlas.visibleMeshes.length,
+    shown!.ids.length + atlas.layers.get('aseg')!.meshes.length,
+  );
   atlas.dispose();
 });
 

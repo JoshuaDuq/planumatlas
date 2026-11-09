@@ -44,12 +44,21 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 
 ### ATLAS-05 · The first frame downloads one atlas and one detail level together, and nothing else
 
-- **Rule:** Opening downloads the chosen cortical atlas and the chosen detail level in parallel. The envelopes, the other atlas, the other detail levels and the cord wait until something needs them.
+- **Rule:** Opening asks for the chosen cortical atlas and the chosen detail level together. The envelopes, the other atlas, the other detail levels and the cord wait until something needs them. (On the served page the head script holds the detail level's request until the cortex has arrived, ASSET-16; the model still asks for both at once.)
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/model/brain-atlas.js:221-243`
 - **Expected:** Fixture `initialize('a')` with gated downloads: both downloads have started before either finishes; files fetched `['a.glb', 'structures.glb']`. `initialize('a', { detail: 'aseg' })` with `nextbrain` also published does not fetch `nextbrain.glb`. Two `initialize('a')` at once fetch each file once.
 - **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R)
+
+### ATLAS-54 · The cortex is shown before the internal anatomy, and blended at its borders once the worker replies
+
+- **Rule:** `initialize` shows the cortex (`onCortex`) as soon as its layer is parsed, without waiting for the detail level or for the border blend, which is drawn with zero weights until the geometry worker returns it. The worker's blend is written into the same attribute, so its GPU buffer is reused, and `onBlended` tells the caller to redraw, before the internal anatomy is shown; the picture is then the one that waited. From `onCortex` on, progress reports the internal anatomy's download alone, marked `internal`. `initialize` resolves only once the detail level (with its BVHs) and the cortex's blend are in. Any other `loadLayer` caller (an atlas switch, a prefetch) still gets the layer only once it is blended, and `hasLayer` is false until then, so a switch onto a layer still blending reports its wait as a download.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `web/src/lib/engine/model/brain-atlas.ts` `initialize`, `loadLayer`, `GeometryJobs.feather`; handoff P1 and P5 (2026-11-09)
+- **Expected:** Fixture with the detail download and the feather job held: `onCortex` runs with `['a-left', 'a-right']` visible and every `_feather` value 0; the last progress is `{5, 20, internal: true}`; releasing the detail leaves `initialize` pending, `hasLayer('a')` false and `hasLayer('aseg')` true until the blend is released; then `onBlended` has run once with the detail still hidden, `hasLayer('a')` is true, some `_feather` value is non-zero and the last progress is `{20, 20, internal: true}`. The engine model's `hasLayer` is the model's, not `layers.has`. A worker reply leaves the drawn attribute object in place with the worker's values and `version` 1.
+- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R), `src/lib/engine/model/brain-atlas.bvh.test.ts` (R), `src/lib/engine/adapters.test.ts` (R)
 
 ### ATLAS-06 · Published meshes must match their regions and keep their geometry
 
@@ -75,7 +84,7 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/model/progress.js:7-27`; `viewer/model/brain-atlas.js:221-243,291-317`
-- **Expected:** Parts a, b: a 10/20 → {10, 20}; b 5/20 → {15, 40}; a 20/20 → {25, 40}. A part reporting 0/0 emits nothing; then 4/8 → {4, 8}. An event missing `loaded` or `total` counts it as 0. Fixture `initialize('a', onProgress)` (each file reports 10/20 then 20/20) ends at {40, 40} and passes through {10, 20}.
+- **Expected:** Parts a, b: a 10/20 → {10, 20}; b 5/20 → {15, 40}; a 20/20 → {25, 40}. A part reporting 0/0 emits nothing; then 4/8 → {4, 8}. An event missing `loaded` or `total` counts it as 0. Fixture `initialize('a', onProgress)` (each file reports 10/20 then 20/20) passes through {10, 20} and reaches {40, 40} before the cortex is shown; from then on the bar is the internal anatomy's alone (ATLAS-54), ending at {20, 20, internal: true}.
 - **Covered by:** `src/lib/engine/model/progress.test.ts` (R), `src/lib/engine/model/brain-atlas.test.ts` (R)
 
 ### ATLAS-09 · A caller who joins a download under way hears its progress

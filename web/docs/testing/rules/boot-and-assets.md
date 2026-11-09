@@ -13,7 +13,7 @@ Failure wording itself (`startFailure`, `failureNotice`) is I18N-16 to I18N-19 (
 link decoding is STATE-01 to STATE-17 (`core-state.md`) and the link notice I18N-20; the keymap is
 KEY- (`controller.md`); the head theme script (`index.html`'s pre-paint script,
 `src/app/head-script.test.ts`) is SHELL-11 to SHELL-14 (`shell.md`).
-The start-sequence rules (BOOT-05 to BOOT-11, BOOT-13 to BOOT-19, BOOT-30, BOOT-31) are plain
+The start-sequence rules (BOOT-05 to BOOT-11, BOOT-13 to BOOT-19, BOOT-30, BOOT-31, BOOT-33) are plain
 logic; today `src/app/boot.svelte.test.ts` checks them in the browser because `startApp` reads the
 document, `location`, `history` and `window` directly.
 
@@ -111,18 +111,27 @@ document, `location`, `history` and `window` directly.
 - **Expected:** progress `{loaded: 1, total: 4}` → status `loading` with that progress; after the failure, `{loaded: 2, total: 4}` leaves status `error`.
 - **Covered by:** `src/app/boot.svelte.test.ts` (R)
 
-### BOOT-11 · The other atlas is fetched ahead
+### BOOT-11 · The other atlas is fetched on intent
 
-- **Rule:** Once the first atlas is on screen, the other cortical atlas is fetched in idle time, when the quality profile and connection allow it; a failed prefetch only warns.
+- **Rule:** The other cortical atlas is not fetched at the start. The first time the reader points at or focuses the masthead's Atlas control (the Atlas field or the summary that holds it, MAST-51), it is fetched once at low priority, when the quality profile and connection allow it; a failed prefetch only warns.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:68-78, 2131`
-- **Expected:** default start on `cdmd` with prefetch allowed → exactly one `prefetchLayer('hcp-mmp')`.
-- **Covered by:** `src/app/boot.svelte.test.ts` (R); the allow/deny decision → STATE-62, `src/lib/core/state/boot.test.ts`
+- **Source:** `viewer/app.js:68-78, 2131`; the 2026-11-09 review (P2), hybrid form chosen by the maintainer 2026-11-09: a first visit that never touches the Atlas control downloads no second atlas
+- **Expected:** default start on `cdmd` with prefetch allowed → no `prefetchLayer` once the start's deferred work has run; two `prefetchOtherAtlas(model)` calls → exactly one `prefetchLayer('hcp-mmp')`.
+- **Covered by:** `src/app/boot.svelte.test.ts` (R); the allow/deny decision → STATE-62, `src/lib/core/state/boot.test.ts`; the priority → ASSET-22
+
+### BOOT-33 · The first cut is prepared once the first brain is drawn
+
+- **Rule:** Where `QualityProfile.prefetchCut` allows it (approved 2026-11-04), the start prepares the first cut (`sections.prefetch()`) after the engine has opened with its first layers in, two animation frames later (so the first brain has been drawn) and at idle; it never competes with the first layers' downloads or their first draw. A failure only warns.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `src/app/boot.ts` `prefetchFirstCut`; `createEngine` resolves only once the cortex and detail layers are in
+- **Expected:** with `requestIdleCallback` immediate, no `prefetch` call when `startApp` resolves; exactly one a few frames later.
+- **Covered by:** `src/app/boot.svelte.test.ts` (R); the priority → ASSET-22
 
 ### BOOT-12 · The page exposes the stage status
 
-- **Rule:** The app root carries the session status (`loading`, `ready`, `error`, `context-lost`) and the shell follows the reader's language.
+- **Rule:** The app root carries the session status (`loading`, `ready`, `error`, `context-lost`) and the shell follows the reader's language. `ready` means the whole start is in: both first layers, their BVHs, the cortex's border blend and the outline programs, with the link applied. The cortex is drawn earlier, while the status is still `loading` (BOOT-34).
 - **Kind:** behaviour
 - **Level:** browser — `data-status` and `aria-label` on the mounted shell
 - **Source:** `viewer/main.js:45`; `viewer/app.js:60-61`
@@ -315,11 +324,20 @@ document, `location`, `history` and `window` directly.
 - **Expected:** zero axe violations.
 - **Covered by:** `src/features/stage/StageStatus.svelte.test.ts` (R)
 
+### BOOT-34 · The cortex shows while the internal anatomy loads
+
+- **Rule:** Once the cortex is drawn, progress arrives marked `internal` and the loading screen clears to show it: the stage shows through in both themes, and the message, "Loading internal anatomy…" with the internal anatomy's own megabytes and bar, sits low on the stage (at the top on a phone, clear of the sheet). The status still covers the stage, so the pointer cannot turn or pick a brain that is not ready. Nothing is announced when the cortex appears; the end of the load is announced as before (BOOT-23). The status stays `loading` until the start is over (BOOT-12).
+- **Kind:** behaviour
+- **Level:** browser — computed style, geometry, hit testing
+- **Source:** handoff P1 (2026-11-09); `src/features/stage/StageStatus.svelte`
+- **Expected:** `{1 MB, 4 MB, internal}` → "Loading internal anatomy · 1.0 MB / 4.0 MB" (fr "Chargement de l’anatomie interne · 1,0 Mo / …"), bar 25; no total → "Loading internal anatomy…", no bar. Background `rgba(0, 0, 0, 0)` in light and dark; message below the stage's middle; the stage's centre hits the status. Text ≥ 4.5:1 and fill ≥ 3:1 against the scene in both themes. No announcer change from loading to internal; ready → "Anatomy loaded.". 375×812: message bottom above the top third.
+- **Covered by:** `src/features/stage/StageStatus.svelte.test.ts` (R)
+
 ## Published assets
 
 ### ASSET-01 · Each published file is fetched at its own version, revalidated
 
-- **Rule:** Every published file is requested as `<path>?v=<its version>`, the first 16 hex digits of its SHA-256, with `cache: 'no-cache'` and high priority, so a deploy re-downloads only what changed and a stale HTTP cache cannot fail the checksum.
+- **Rule:** Every published file is requested as `<path>?v=<its version>`, the first 16 hex digits of its SHA-256, with `cache: 'no-cache'` and high priority (a prefetch asks for low, ASSET-22), so a deploy re-downloads only what changed and a stale HTTP cache cannot fail the checksum.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/model/published-assets.js:15-28`; `scripts/published-version.mjs:10-19`
@@ -456,11 +474,11 @@ document, `location`, `history` and `window` directly.
 
 ### ASSET-16 · The head script starts the first frame's files
 
-- **Rule:** Before the app's code has parsed, the head script starts the index, the brain's manifest, one cortical atlas and one detail level, each from the published root at its published version, revalidated and at high priority.
+- **Rule:** Before the app's code has parsed, the head script starts the index, the brain's manifest, one cortical atlas and one detail level, each from the published root at its published version, revalidated and at high priority. The detail level's request waits until the cortex has fully arrived (read from a copy, so the app still reads the whole cortex), so the cortex, drawn on its own first (BOOT-34), does not share its bandwidth; a failed cortex still lets it start. Changed 2026-11-09 (handoff P1): before, both started at once. The nine catalogue JSON files the model reads before any layer are not prefetched: at 50 Mbit/s with 100 ms latency they did not move the first cortex (3.89 s either way).
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `index.html:34-60`
-- **Expected:** atlas `hcp-mmp` → `cortex-hcp-mmp.glb`, anything else → `cortex-destrieux.glb`; detail `aseg` → `structures.glb`, `nextbrain` → `nextbrain.glb`, else `learning.glb`; `#anatomy=bert&atlas=hcp-mmp&detail=nextbrain` → exactly `…/models/anatomies.json?v=index0000000000a`, `…/bert/cortex-hcp-mmp.glb?v=hcp0000000000000`, `…/bert/manifest.json?v=manifest00000000`, `…/bert/nextbrain.glb?v=fine000000000000`, keyed on `__planumAssets` by the plain URL; all under `/`.
+- **Expected:** atlas `hcp-mmp` → `cortex-hcp-mmp.glb`, anything else → `cortex-destrieux.glb`; detail `aseg` → `structures.glb`, `nextbrain` → `nextbrain.glb`, else `learning.glb`; `#anatomy=bert&atlas=hcp-mmp&detail=nextbrain` → exactly `…/models/anatomies.json?v=index0000000000a`, `…/bert/cortex-hcp-mmp.glb?v=hcp0000000000000`, `…/bert/manifest.json?v=manifest00000000`, `…/bert/nextbrain.glb?v=fine000000000000`, keyed on `__planumAssets` by the plain URL; all under `/`. A cortex body still streaming → no detail request a turn later; once it closes, the detail is requested and the app's copy of the cortex reads all its bytes.
 - **Covered by:** `src/boot/prefetch.test.ts` (R)
 
 ### ASSET-17 · The brain to prefetch
@@ -508,11 +526,20 @@ document, `location`, `history` and `window` directly.
 - **Expected:** for each of `models/anatomies.json`, `models/<default>/manifest.json`, `…/cortex-destrieux.glb`, `…/learning.glb`: exactly `[<root><file>?v=<version>]`.
 - **Covered by:** `e2e/journeys/boot.spec.ts` "a cold start reaches ready, asks for each prefetched file once and versions every request" (R)
 
+### ASSET-22 · A prefetch downloads at low priority
+
+- **Rule:** Every file the first-cut prefetch and the other-atlas prefetch download is requested with `priority: 'low'`, through each loader they reach (tissue metadata, volumes, envelopes, cord, ribbon labels, layers). Every other published request keeps ASSET-01's high priority; a request that joins a prefetch under way waits on that same low-priority request.
+- **Kind:** behaviour
+- **Level:** browser: the real engine on the CDMD manifest
+- **Source:** the 2026-11-09 review (P2); `fetchAsset`'s `priority`; `BrainSections.prefetch`; the engine's `prefetchLayer`
+- **Expected:** `sections.prefetch()` then `model.prefetchLayer('hcp-mmp')` → requests include `tissue-envelopes.glb`, `mri.volume`, `cortex-hcp-mmp.glb`, and none without `priority: 'low'`.
+- **Covered by:** `src/lib/engine/prefetch.svelte.test.ts` (R)
+
 ## Service worker
 
 ### SW-01 · Registration
 
-- **Rule:** In a built site with service-worker support, the app registers `<app base>sw.js` scoped to the app base, only after a successful start; a failed registration is warned about, and development or unsupported browsers register nothing.
+- **Rule:** In a built site with service-worker support, the app registers `<app base>sw.js` scoped to the app base, only after a successful start, and hands the active worker the files downloaded before it took control (SW-11); a failed registration is warned about, and development or unsupported browsers register nothing.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/main.js:62-76, 86-89`
@@ -575,11 +602,11 @@ document, `location`, `history` and `window` directly.
 
 ### SW-08 · Filling the store revalidates
 
-- **Rule:** The worker fetches a file to store with `cache: 'no-cache'`, so the HTTP cache cannot hand it bytes from before the deploy.
+- **Rule:** The worker fetches a file to store with `cache: 'no-cache'`, so the HTTP cache cannot hand it bytes from before the deploy. It rebuilds the page's own request for that fetch, so the request keeps its priority (a `low` prefetch stays low).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/service-worker.js:75-76`
-- **Expected:** first fetch options `cache = 'no-cache'`.
+- **Source:** `viewer/service-worker.js:75-76`; `web/src/service-worker.ts` (Milestone 2: `new Request(request, { cache: 'no-cache' })` in place of `fetch(key, …)`, which reset the priority to high)
+- **Expected:** the fetched `Request` has `cache = 'no-cache'`, the page's URL and the page request's headers (Node's `Request` does not expose `priority`; the carried-over request stands for it).
 - **Covered by:** `src/service-worker.test.ts` (R)
 
 ### SW-09 · The page itself is always revalidated
@@ -599,6 +626,15 @@ document, `location`, `history` and `window` directly.
 - **Source:** `viewer/service-worker.js`; `vite.config.js:84-90`
 - **Expected:** `serviceWorker.ready.scope` = base URL; `planum-models` holds `models/anatomies.json?v=<version>`; after reload that response is `fromServiceWorker()`; controller script `<base>sw.js`.
 - **Covered by:** `e2e/journeys/boot.spec.ts` "the service worker registers in its scope and serves the second visit" (R)
+
+### SW-11 · The first visit's downloads are handed to the worker
+
+- **Rule:** In a built site, a published file the page downloads while no service worker controls it is kept, once verified against the published record, as a copy of its bytes with its versioned URL and response headers. When the worker is ready the page posts it every kept file, and then each such download as it finishes. The worker stores a handed-over file only on its own terms (SW-02 to SW-05): this deploy's version of a published, same-origin file, under the key it would use itself (`<path>?v=<version>`), and only if the bytes hash to its own record; a file it already holds is left as it is. Nothing is kept in development, once the worker controls the page, without a published map, or for bytes that fail the page's check. When no worker will take them (registration rejects, or the start fails: `releaseUnseen`), the kept copies are dropped and nothing more is kept for the life of the page.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Milestone 2 P12 (first half): `web/src/lib/core/assets/asset-cache.ts` `handOverUnseen`, `web/src/boot/keep-cached.ts`, the worker's `message` listener in `web/src/service-worker.ts`
+- **Expected:** page: a verified download before the hand-over and one after → both posted, URLs `…?v=<version>`, body the published bytes, headers as received; controller present, `PROD=false`, no map or `asset-updated` → nothing kept; `releaseUnseen()` → a later hand-over gets neither the kept file nor one downloaded after; registration rejected → `releaseUnseen` called and the warning still logged. Worker: the published bytes → stored, then served with no network fetch and the handed-over headers; another deploy's bytes, an old version, an unpublished path or another origin → nothing stored and nothing fetched; an entry already stored → kept.
+- **Covered by:** `src/lib/core/assets/asset-cache.test.ts` (R), `src/boot/keep-cached.test.ts` (R), `src/service-worker.test.ts` (R)
 
 ## Build output
 
@@ -727,3 +763,12 @@ document, `location`, `history` and `window` directly.
 - **Source:** `web/build/meshopt-glb.ts`; `web/build/published-files.ts` `buildStart`, `closeBundle`
 - **Expected:** a compressed layer parsed with the decoder gives the published meshes, names, metadata and every attribute and index byte; without the decoder it is refused; every published GLB is a layer or comparison geometry, never both; in `web/dist` each version is the first 16 hex of the served bytes' SHA-256, each layer requires the extension and every other file equals `public/`.
 - **Covered by:** `build/meshopt-glb.test.ts` (H); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job); `src/lib/engine/model/assets.test.ts` "ATLAS-11" (R, the app's loader reads the compressed layers)
+
+### BUILD-15 · A first visit stays within its byte ceilings
+
+- **Rule:** The entry chunk and the `three` chunk stay under raw-byte ceilings (what the browser parses and compiles before the app runs), and the cold-start set stays under a gzip-byte ceiling (what the host sends before the brain is drawn). The cold-start set is the entry script, its module preloads and stylesheet in `index.html`, the clinical records chunk the entry requests as it runs, and what the head script fetches on a plain visit (read by running it over the built files). The clinical records (`data/neuropsychology.yaml`) are a chunk of their own, and the guided tour, the snapshot and the Linked MRI dialog are fetched when first used.
+- **Kind:** behaviour
+- **Level:** post-build check of `web/dist` (`web-check`)
+- **Source:** `web/src/lib/core/clinical/load.ts`; `web/src/app/regions/StageRegion.svelte`, `MastheadRegion.svelte`; `web/src/main.ts` (no top-level await, which would turn off Rolldown's merging of shared modules into the entry)
+- **Expected:** entry ≤ 1,250,000 B raw; `three` ≤ 760,000 B raw; cold-start set ≤ 22,600,000 B gzip; a `neuropsychology` chunk that the entry names. Measured 2026-11-09 (Vite 8, gzip level 6): entry 1,170,878 B raw (2,073,028 before the split), `three` 728,790 B, cold-start set 21,691,234 B gzip (21,710,054 before). A ceiling is a regression guard: move code out of the first visit rather than raise it.
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)

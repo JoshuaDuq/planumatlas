@@ -4,6 +4,7 @@ import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import manifestFile from '../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
+import { releaseUnseen } from '../lib/core/assets/asset-cache.ts';
 import { validateNeuropsychDomains } from '../lib/core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../lib/core/catalog/neuropsych-domains.ts';
 import { loadClinicalCatalog } from '../lib/core/clinical/load.ts';
@@ -19,7 +20,7 @@ import { attachAnnouncer } from '../lib/ui/announcer.svelte.ts';
 import { createApp } from './application.svelte.ts';
 import type { App } from './application.svelte.ts';
 import AppShell from './App.svelte';
-import { shellOptions, startApp } from './boot.ts';
+import { prefetchOtherAtlas, shellOptions, startApp } from './boot.ts';
 import type { UiPorts } from './ports.ts';
 
 // The index of published brains is a file of the site, which the test page does not serve.
@@ -29,6 +30,10 @@ vi.mock('../lib/core/assets/published-anatomy.ts', async (importOriginal) => ({
 }));
 
 // The prefetch only runs on a device the quality profile allows; this one decides it.
+vi.mock('../lib/core/assets/asset-cache.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/core/assets/asset-cache.ts')>()),
+  releaseUnseen: vi.fn(),
+}));
 vi.mock('../lib/engine/render/quality.ts', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../lib/engine/render/quality.ts')>()),
   qualityProfile: () => ({ prefetchLayers: true, prefetchCut: true }),
@@ -232,6 +237,9 @@ describe('the start', () => {
       status: 'loading',
       progress: { loaded: 1, total: 4 },
     });
+    // Once the cortex is drawn, the progress is the internal anatomy's, and says so (BOOT-34).
+    report!({ loaded: 2, total: 4, internal: true });
+    expect(app!.session.state.progress).toEqual({ loaded: 2, total: 4, internal: true });
     vi.spyOn(console, 'error').mockImplementation(() => {});
     fail!(assetError);
     await start;
@@ -239,20 +247,28 @@ describe('the start', () => {
     expect(app!.session.state.status).toBe('error');
   });
 
-  test('fetches the other atlas ahead, once the first is shown', async () => {
+  test('prepares the first cut ahead, once the first atlas is shown and drawn', async () => {
     vi.stubGlobal('requestIdleCallback', (run: () => void) => run());
     await boot();
+    const prefetches = () => engine.calls.filter((call) => call.method === 'prefetch');
+    // Not in the frame the ready stage is drawn in.
+    expect(prefetches()).toHaveLength(0);
+    await expect.poll(() => prefetches().length).toBe(1);
     vi.unstubAllGlobals();
-    expect(
-      engine.calls.filter((call) => call.method === 'prefetchLayer').map((c) => c.args),
-    ).toEqual([['hcp-mmp']]);
   });
 
-  test('prepares the first cut ahead, once the first atlas is shown', async () => {
+  test('fetches the other atlas on the first intent only, never at the start', async () => {
     vi.stubGlobal('requestIdleCallback', (run: () => void) => run());
-    await boot();
+    const { app } = await boot();
+    const layers = () =>
+      engine.calls.filter((call) => call.method === 'prefetchLayer').map((c) => c.args);
+    // The start's deferred work has run once the cut prefetch has.
+    await expect.poll(() => engine.calls.some((call) => call.method === 'prefetch')).toBe(true);
     vi.unstubAllGlobals();
-    expect(engine.calls.filter((call) => call.method === 'prefetch')).toHaveLength(1);
+    expect(layers()).toEqual([]);
+    prefetchOtherAtlas(app.world!.engine.model);
+    prefetchOtherAtlas(app.world!.engine.model);
+    expect(layers()).toEqual([['hcp-mmp']]);
   });
 
   test('stays on the link’s address bar until a settled camera writes the scene', async () => {
@@ -402,6 +418,7 @@ describe('a failed start', () => {
 
   test('a failed download says so with Retry, and leaves nothing running', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(releaseUnseen).mockClear();
     const failing = vi.fn<CreateEngine>(async () => {
       throw assetError;
     });
@@ -409,6 +426,8 @@ describe('a failed start', () => {
     // Only an unknown layer is retried with the defaults; any other error fails the start.
     expect(failing).toHaveBeenCalledOnce();
     expect(app.session.state).toMatchObject({ status: 'error', error: assetError });
+    // The page's kept downloads are dropped: no worker will be handed them (SW-11).
+    expect(releaseUnseen).toHaveBeenCalledOnce();
     expect(app.failure).toEqual({
       text: `${t('en', 'errors').operations.start} ${t('en', 'errors').download}`,
       button: t('en', 'viewport').retry,
@@ -525,7 +544,7 @@ describe('the link hooks', () => {
   });
 
   test('leaving a lesson a link opened returns to the scene the link found', async () => {
-    const circuit = loadCircuitCatalog(manifest, loadClinicalCatalog(manifest, domains.units))
+    const circuit = loadCircuitCatalog(manifest, await loadClinicalCatalog(manifest, domains.units))
       .all[0]!.id;
     const { app } = await boot(`#tab=circuits&circuit=${circuit}`);
     expect(engine.model.state.selectedRegion).not.toBeNull();

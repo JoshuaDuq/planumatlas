@@ -1,5 +1,6 @@
 import { Matrix4 } from 'three';
 import { fetchAsset, sha256Hex } from '../../core/assets/asset-cache.ts';
+import { publishedRecord } from '../../core/assets/published-assets.ts';
 
 /** A point in source RAS; a `Vector3` iterates the same three numbers. */
 type Point = Iterable<number>;
@@ -132,17 +133,28 @@ export class Volume {
   }
 }
 
-export async function loadVolume(metadata: VolumeFile, baseUrl: string | URL): Promise<Volume> {
-  const compressed = await fetchAsset(new URL(metadata.file, baseUrl));
-  if ((await sha256Hex(compressed)) !== metadata.sha256) {
+/**
+ * The file is hashed once: by `fetchAsset` against the build's record, which must be the one the
+ * metadata names, or here when there is no record. Its contents are not hashed: gzip carries its own
+ * check, and the publisher verifies `decoded_sha256` (brain_model/validate_volumes.py).
+ */
+export async function loadVolume(
+  metadata: VolumeFile,
+  baseUrl: string | URL,
+  priority?: RequestPriority,
+): Promise<Volume> {
+  const url = new URL(metadata.file, baseUrl);
+  const record = publishedRecord(url);
+  if (record && record.sha256 !== metadata.sha256) {
+    throw new Error('Volume file checksum mismatch.');
+  }
+  const compressed = await fetchAsset(url, { priority });
+  if (!record && (await sha256Hex(compressed)) !== metadata.sha256) {
     throw new Error('Volume file checksum mismatch.');
   }
   const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
   const buffer = await new Response(stream).arrayBuffer();
-  if (
-    buffer.byteLength !== metadata.byte_length ||
-    (await sha256Hex(buffer)) !== metadata.decoded_sha256
-  ) {
+  if (buffer.byteLength !== metadata.byte_length) {
     throw new Error('Decoded volume integrity check failed.');
   }
   let data: VolumeData;

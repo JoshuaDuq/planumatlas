@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
-import { test } from 'vitest';
+import { gunzipSync, gzipSync } from 'node:zlib';
+import { test, vi } from 'vitest';
 import { anatomies, readModel } from '../../core/catalog/test-support.ts';
 import { modelDirectory } from '../model/test-support.ts';
-import { Volume } from './volume.ts';
+import { publish, recordOf, sha256 } from '../../core/assets/published-test-support.ts';
+import { loadVolume, Volume, type VolumeFile } from './volume.ts';
 
 const identity = [
   [1, 0, 0, 0],
@@ -146,4 +147,49 @@ test('SLICE-09 on the published white-matter volume, 400 seeded points take a la
     assert.ok(around.has(label), `label ${label} at ${point} is not among ${[...around]}`);
   }
   assert.ok(labelled > 20, `${labelled} labelled points`);
+});
+
+/** A 4×4×4 ramp published as `models/x/v.volume`, and its header. */
+function publishedRamp() {
+  const raw = ramp().data as Uint8Array;
+  const file = new Uint8Array(gzipSync(raw));
+  const metadata: VolumeFile = {
+    shape: [4, 4, 4],
+    order: 'F',
+    voxel_to_surface_ras_mm: identity,
+    file: 'v.volume',
+    sha256: sha256(file),
+    decoded_sha256: sha256(raw),
+    byte_length: raw.byteLength,
+    dtype: '|u1',
+  };
+  const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(file));
+  return { raw, file, metadata, fetch, base: 'https://example.test/neuroatlas/models/x/' };
+}
+
+test('SLICE-07 a volume is hashed once, by the download when the build published it and here when not', async () => {
+  const { raw, file, metadata, base } = publishedRamp();
+  const digest = vi.spyOn(crypto.subtle, 'digest');
+  assert.deepEqual((await loadVolume(metadata, base)).data, raw);
+  assert.equal(digest.mock.calls.length, 1);
+  publish({ 'models/x/v.volume': recordOf(file) });
+  assert.deepEqual((await loadVolume(metadata, base)).data, raw);
+  assert.equal(digest.mock.calls.length, 2);
+});
+
+test('SLICE-07 a volume whose header names other bytes, or whose bytes or length differ, is refused', async () => {
+  const { file, metadata, fetch, base } = publishedRamp();
+  const other = { ...metadata, sha256: '0'.repeat(64) };
+  await assert.rejects(loadVolume(other, base), { message: 'Volume file checksum mismatch.' });
+  publish({ 'models/x/v.volume': recordOf(file) });
+  fetch.mockClear();
+  // Against the build's record, before any request.
+  await assert.rejects(loadVolume(other, base), { message: 'Volume file checksum mismatch.' });
+  assert.equal(fetch.mock.calls.length, 0);
+  fetch.mockImplementation(async () => new Response(new Uint8Array(gzipSync(new Uint8Array(64)))));
+  await assert.rejects(loadVolume(metadata, base), { code: 'asset-updated' });
+  fetch.mockImplementation(async () => new Response(file));
+  await assert.rejects(loadVolume({ ...metadata, byte_length: 63 }, base), {
+    message: 'Decoded volume integrity check failed.',
+  });
 });

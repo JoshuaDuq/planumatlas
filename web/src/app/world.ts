@@ -47,9 +47,13 @@ import type { App, World } from './application.svelte.ts';
  * The stores over the engine and every controller, built once and shared: the scene commands'
  * intent counter, the excursions' remembered scenes and the link writer are each state that two
  * instances would split. What lives in the regions is reached through `app.ports`. The engine is
- * the world's from here on: disposing the app disposes it, even if this throws.
+ * the world's from here on: disposing the app disposes it, even if this rejects.
  */
-export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): World {
+export async function composeWorld(
+  app: App,
+  engine: Engine,
+  defaultAnatomy: string,
+): Promise<World> {
   app.defer(() => engine.dispose());
   const { session, language, keyPreference, stage, ports } = app;
   const { model, sections, camera } = engine;
@@ -58,7 +62,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
     throw new Error('This build publishes no neuropsychological domains for the Functions tab.');
   }
   const regions = createCatalog(model.manifest, session.state.lang, model.cabNp, domains.units);
-  const clinical = loadClinicalCatalog(model.manifest, domains.units);
+  const clinical = await loadClinicalCatalog(model.manifest, domains.units);
   const circuits = loadCircuitCatalog(model.manifest, clinical);
   // Each space's field is published beside the manifest the engine opened (boot.ts).
   const published = model.manifest.coordinate_spaces;

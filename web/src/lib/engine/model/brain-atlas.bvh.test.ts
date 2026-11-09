@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, test, vi } from 'vitest';
-import { Box3, BoxGeometry, Vector3 } from 'three';
-import type { BufferAttribute } from 'three';
+import { Box3, BoxGeometry, BufferAttribute, Mesh, Vector3 } from 'three';
+import { FEATHER_ITEM_SIZE } from '../render/border-feather.ts';
 import * as bvh from 'three-mesh-bvh';
 import { GeometryJobs } from './brain-atlas.ts';
 import type { GeometryJob, GeometryReply } from './geometry-worker.ts';
@@ -80,4 +80,22 @@ test('a BVH job split between workers gives each geometry the tree of its own ve
       `tree ${at} out of place`,
     );
   });
+});
+
+test('a worker’s border blend is written into the attribute the cortex was first drawn with', async () => {
+  vi.stubGlobal('Worker', FakeWorker);
+  const mesh = new Mesh(new BoxGeometry());
+  const count = mesh.geometry.getAttribute('position').count;
+  const drawn = new BufferAttribute(new Float32Array(count * FEATHER_ITEM_SIZE), FEATHER_ITEM_SIZE);
+  mesh.geometry.setAttribute('_feather', drawn);
+  const blending = new GeometryJobs().feather([mesh]);
+  const [worker] = FakeWorker.busy();
+  const blend = Float32Array.from({ length: count * FEATHER_ITEM_SIZE }, (_, at) => at / 7);
+  worker!.onmessage!({ data: { token: worker!.job!.token, feathers: [blend] } });
+  worker!.job = null;
+  await blending;
+  // The same attribute keeps the buffer already on the GPU; its version uploads the new values.
+  assert.equal(mesh.geometry.getAttribute('_feather'), drawn);
+  assert.deepEqual([...drawn.array], [...blend]);
+  assert.equal(drawn.version, 1);
 });

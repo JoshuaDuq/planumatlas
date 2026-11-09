@@ -12,6 +12,9 @@
  * publishes are deleted, and nothing else. A deploy that changes one file
  * therefore re-downloads that file alone.
  *
+ * The page registers this worker only once it has started, so it hands over
+ * the files it downloaded before then; they are stored on the same terms.
+ *
  * It does not make the site work offline: the page and its scripts are never
  * stored here, and navigations always go to the network first.
  *
@@ -50,6 +53,15 @@ function currentPath(url: URL): string | null {
 async function versionOf(buffer: ArrayBuffer): Promise<string> {
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buffer));
   return [...digest.subarray(0, 8)].map((value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+/** Store `bytes` under `key` only if they hash to the version this deploy publishes for `path`. */
+async function store(key: string, path: string, bytes: ArrayBuffer, headers: HeadersInit) {
+  // A `.gz` file a server sends with Content-Encoding arrives as its contents.
+  const version = await versionOf(bytes);
+  if (version !== PUBLISHED.files[path] && version !== PUBLISHED.gunzipped[path]) return;
+  const cache = await caches.open(CACHE);
+  await cache.put(key, new Response(bytes, { status: 200, headers }));
 }
 
 worker.addEventListener('install', () => worker.skipWaiting());
@@ -94,23 +106,35 @@ worker.addEventListener('fetch', (event) => {
       const cache = await caches.open(CACHE);
       const stored = await cache.match(key);
       if (stored) return stored;
-      // Revalidate: the HTTP cache may still hold bytes from before the deploy.
-      const response = await fetch(key, { cache: 'no-cache' });
+      // Revalidate: the HTTP cache may still hold bytes from before the deploy. Built from the
+      // page's request, so it keeps that request's priority.
+      const response = await fetch(new Request(request, { cache: 'no-cache' }));
       // A partial, failed or mismatched response must not become the copy every
       // later visit gets; the page sees it and reports it.
       if (response.ok && response.status === 200) {
         const copy = response.clone();
-        event.waitUntil(
-          (async () => {
-            const bytes = await copy.arrayBuffer();
-            // A `.gz` file a server sends with Content-Encoding arrives as its contents.
-            const version = await versionOf(bytes);
-            if (version !== PUBLISHED.files[path] && version !== PUBLISHED.gunzipped[path]) return;
-            await cache.put(key, new Response(bytes, { status: 200, headers: copy.headers }));
-          })(),
-        );
+        event.waitUntil(copy.arrayBuffer().then((bytes) => store(key, path, bytes, copy.headers)));
       }
       return response;
+    })(),
+  );
+});
+
+// A file the page downloaded before this worker controlled it (asset-cache.ts `handOverUnseen`).
+worker.addEventListener('message', (event) => {
+  const { url, headers, body } = event.data as {
+    url: string;
+    headers: [string, string][];
+    body: Blob;
+  };
+  const address = new URL(url);
+  const path = currentPath(address);
+  if (path === null) return;
+  const key = address.pathname + address.search;
+  event.waitUntil(
+    (async () => {
+      if (await (await caches.open(CACHE)).match(key)) return;
+      await store(key, path, await body.arrayBuffer(), headers);
     })(),
   );
 });

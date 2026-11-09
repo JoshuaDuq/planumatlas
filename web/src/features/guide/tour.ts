@@ -2,7 +2,8 @@
 import { driver, type DriveStep, type Side, type Alignment } from 'driver.js';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { GuideStop } from '../../lib/core/i18n/areas/guide.ts';
-import { PREF_KEYS, readPref, writePref } from '../../lib/state/prefs.ts';
+import { PREF_KEYS, writePref } from '../../lib/state/prefs.ts';
+import { HOME_PARAMS, SEEN, parameters } from './first-launch.ts';
 import { PHONE_QUERY } from '../../lib/types/index.ts';
 import type { Language } from '../../lib/types/index.ts';
 import './tour.css';
@@ -244,16 +245,6 @@ function paintOf(view: string): GuidePaint {
   return shown.has('function') ? { function: id } : { deficit: id };
 }
 
-/** What the tour keeps of the reader's view: the brain, its atlases and the language. */
-const HOME_PARAMS = ['anatomy', 'atlas', 'cuts', 'detail', 'lang'];
-
-const parameters = (hash: string) =>
-  hash
-    .replace(/^#/, '')
-    .split('&')
-    .filter(Boolean)
-    .map((pair) => pair.split('=') as [string, string]);
-
 /**
  * Shows a view as a link would, without a history entry per stop: the app restores the hash it
  * finds on `hashchange` (links.onHashChange).
@@ -268,7 +259,6 @@ function showHash(hash: string) {
 const CARD_KEYS = new Set(['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
 
 const SHOWING = 'data-guide-showing';
-const SEEN = 'seen';
 
 const HIGHLIGHT_ARIA = ['aria-haspopup', 'aria-expanded', 'aria-controls'];
 
@@ -511,14 +501,4 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   const finish = () => self.finish();
   current = self;
   tour.drive();
-}
-
-/**
- * Whether to start the tour by itself: on a first visit, and only to a page opened plainly, since a
- * link someone shared opens a view the reader came to see. Starting the tour, by hand or not,
- * counts as having seen it.
- */
-export function firstLaunch(hash: string): boolean {
-  if (readPref(PREF_KEYS.guide) === SEEN) return false;
-  return parameters(hash).every(([key]) => HOME_PARAMS.includes(key));
 }

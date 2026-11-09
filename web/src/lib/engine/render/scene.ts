@@ -1,9 +1,13 @@
 import {
+  BufferGeometry,
+  Float32BufferAttribute,
   NeutralToneMapping,
   NoToneMapping,
   Color,
   FrontSide,
+  Group,
   HalfFloatType,
+  Mesh,
   PerspectiveCamera,
   Scene,
   Vector2,
@@ -177,8 +181,6 @@ export interface Pipeline {
   composer: EffectComposer;
   halo: OutlinePass;
   core: OutlinePass;
-  renderHalo: OutlinePass['render'];
-  renderCore: OutlinePass['render'];
 }
 
 export interface PipelineOptions {
@@ -244,7 +246,6 @@ export function createPipeline({
     const render = pass.render.bind(pass);
     pass.render = (...args) => withOutlineOccluders(pass, () => render(...args));
   }
-  const renderHalo = halo.render.bind(halo);
   const renderCore = core.render.bind(core);
   // Selection draws both tones of one silhouette. The second pass would
   // render every mesh again for a mask the halo already built.
@@ -273,7 +274,7 @@ export function createPipeline({
   // would allocate a second full-size MSAA/depth/stencil target next frame.
   output.needsSwap = false;
   composer.addPass(output);
-  return { composer, halo, core, renderHalo, renderCore };
+  return { composer, halo, core };
 }
 
 /** A move between two sets of insets as drawn at `now`, and each side's rate there in pixels per second. */
@@ -304,8 +305,8 @@ export interface EngineScene {
   setOutlined(outlined?: Outlined): void;
   moveTo(plan: CameraPlan, options?: MoveOptions): void;
   invalidate(): void;
-  /** Compile the outline programs before a pointer reaches a region. */
-  warmOutlines(root: Object3D): void;
+  /** Compile the outline programs before a pointer reaches a region, off this thread. */
+  warmOutlines(root: Object3D): Promise<void>;
   /** Compile the programs `root`'s materials need now, off the frame that first draws them. */
   compile(root: Object3D): Promise<void>;
   /** Declare how much of the canvas the interface covers; `settle` is the sheet springing to a detent. */
@@ -420,7 +421,7 @@ export function createScene(
   const settled = createPipeline(pipelineOptions);
   const moving = createPipeline(pipelineOptions);
   const pipelines = [settled, moving];
-  const { halo, core, renderHalo, renderCore } = settled;
+  const { halo, core } = settled;
   let movingRatio: number | null = null;
 
   let dirty = true;
@@ -887,43 +888,47 @@ export function createScene(
     /**
      * Compile the outline programs before a pointer reaches a region.
      *
-     * The first hover otherwise pays for those shaders inside the frame that
-     * draws the ring. One sample mesh is enough: every region shares them.
+     * The first hover otherwise pays for those shaders inside the frame that draws the ring. One
+     * sample mesh is enough: every region shares them. The masks draw the scene's meshes in the
+     * passes' materials, under its lights; the rest are full-screen quads, drawn alone.
      */
     warmOutlines(root) {
-      let sample: Object3D | null = null;
+      let sample: Mesh | null = null;
       root.traverse((object) => {
-        if (!sample && 'isMesh' in object && object.isMesh && object.visible) sample = object;
+        if (!sample && object instanceof Mesh && object.visible) sample = object;
       });
-      if (!sample) return;
-      const mesh: Object3D = sample;
-      const previous = {
-        haloObjects: halo.selectedObjects,
-        coreObjects: core.selectedObjects,
-        haloOn: halo.enabled,
-        coreOn: core.enabled,
-        target: renderer.getRenderTarget(),
-        override: scene.overrideMaterial,
-        background: scene.background,
-        visible: mesh.visible,
-      };
-      halo.selectedObjects = [mesh];
-      core.selectedObjects = [mesh];
-      halo.enabled = true;
-      core.enabled = true;
-      const target = settled.composer.readBuffer;
+      if (!sample) return Promise.resolve();
+      const { geometry } = sample as Mesh;
+      // A full-screen quad carries no normals, which would be in its programs' keys.
+      const quad = new BufferGeometry()
+        .setAttribute('position', new Float32BufferAttribute([-1, 3, 0, -1, -1, 0, 3, -1, 0], 3))
+        .setAttribute('uv', new Float32BufferAttribute([0, 2, 0, 0, 2, 0], 2));
+      const masks = new Group();
+      const quads = new Group();
+      for (const pass of [halo, core]) {
+        masks.add(
+          new Mesh(geometry, pass.depthMaterial),
+          new Mesh(geometry, pass.prepareMaskMaterial),
+        );
+        for (const material of [
+          pass.materialCopy,
+          pass.edgeDetectionMaterial,
+          pass.separableBlurMaterial1,
+          pass.separableBlurMaterial2,
+          pass.overlayMaterial,
+        ]) {
+          quads.add(new Mesh(quad, material));
+        }
+      }
+      const previous = renderer.getRenderTarget();
+      renderer.setRenderTarget(settled.composer.readBuffer);
       try {
-        renderHalo(renderer, target, target, 0, false);
-        renderCore(renderer, target, target, 0, false);
+        return Promise.all([
+          renderer.compileAsync(masks, camera, scene),
+          renderer.compileAsync(quads, camera, new Scene()),
+        ]).then(() => quad.dispose());
       } finally {
-        scene.overrideMaterial = previous.override;
-        scene.background = previous.background;
-        mesh.visible = previous.visible;
-        halo.selectedObjects = previous.haloObjects;
-        core.selectedObjects = previous.coreObjects;
-        halo.enabled = previous.haloOn;
-        core.enabled = previous.coreOn;
-        renderer.setRenderTarget(previous.target);
+        renderer.setRenderTarget(previous);
       }
     },
 

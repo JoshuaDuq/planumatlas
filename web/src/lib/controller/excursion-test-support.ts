@@ -1,10 +1,12 @@
 import { vi } from 'vitest';
+import clinicalRecords from '../../../../data/neuropsychology.yaml';
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import { createCatalog } from '../core/catalog/catalog.ts';
 import { validateNeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
-import { loadClinicalCatalog } from '../core/clinical/load.ts';
+import { createClinicalCatalog } from '../core/clinical/catalog.ts';
+import type { ClinicalData } from '../core/clinical/types.ts';
 import { loadCircuitCatalog } from '../core/learning/load.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
@@ -38,7 +40,10 @@ export function createScene() {
   const engine = createFakeEngine({ manifest, domains: domains as unknown as DomainsData });
   const engineState = createEngineSync(engine);
   const session = createSessionStore({ views: VIEW_NAMES });
-  const circuits = loadCircuitCatalog(manifest, loadClinicalCatalog(manifest, domains.units));
+  const circuits = loadCircuitCatalog(
+    manifest,
+    createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units),
+  );
   const lesson = createLessonStore(circuits);
   const view = createView({
     engine: engineState,
@@ -47,7 +52,7 @@ export function createScene() {
     anatomy: manifest.anatomy.id,
     referenceAnatomy: engine.tracts.anatomy,
   });
-  const clinical = loadClinicalCatalog(manifest, domains.units);
+  const clinical = createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units);
   const anatomy = createCatalog(manifest);
 
   // The collaborators' calls go into the engine's own call log, so one timeline orders them all.

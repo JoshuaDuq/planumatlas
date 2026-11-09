@@ -23,6 +23,7 @@ export interface QualityProfile {
   pixelRatio: number;
   motionPixelRatio: number;
   msaaSamples: 2 | 4;
+  /** Whether to fetch the other atlas once the reader reaches for the Atlas control, about 13 MB. */
   prefetchLayers: boolean;
   /** Whether to download and build the first cut ahead, about 22 MB on the published anatomy. */
   prefetchCut: boolean;

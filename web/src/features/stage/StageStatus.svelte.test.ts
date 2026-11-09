@@ -200,6 +200,103 @@ describe('loading', () => {
   });
 });
 
+describe('once the cortex is drawn', () => {
+  const MB = 1_048_576;
+  const stage = () => document.querySelector('.stage-status') as HTMLElement;
+
+  test('BOOT-34 says the internal anatomy is still loading, with its own bar, and nothing without a total', async () => {
+    const view = await render(Fixture, {
+      status: 'loading',
+      progress: { loaded: 1 * MB, total: 4 * MB, internal: true },
+    });
+    expect(message()!.textContent?.trim()).toBe(
+      'Loading internal anatomy · 1.0\u202fMB / 4.0\u202fMB',
+    );
+    await expect.element(page.getByRole('progressbar', { name: 'Anatomy download' })).toBeVisible();
+    expect(progressbar()!.value).toBe(25);
+    await view.rerender({ progress: { loaded: 0, total: 0, internal: true } });
+    expect(message()!.textContent?.trim()).toBe('Loading internal anatomy…');
+    expect(progressbar()).toBeNull();
+    await view.rerender({
+      lang: 'fr',
+      progress: { loaded: 1 * MB, total: 4 * MB, internal: true },
+    });
+    expect(message()!.textContent).toContain('Chargement de l’anatomie interne · 1,0');
+  });
+
+  test('BOOT-34 shows the stage through it in both themes, low on the stage, and still takes the pointer', async () => {
+    await render(Fixture, { status: 'loading', progress: { loaded: 1, total: 4, internal: true } });
+    const host = document.getElementById('viewport')!.getBoundingClientRect();
+    for (const theme of ['light', 'dark']) {
+      document.documentElement.dataset.theme = theme;
+      expect(getComputedStyle(stage()).backgroundColor, theme).toBe('rgba(0, 0, 0, 0)');
+    }
+    delete document.documentElement.dataset.theme;
+    expect(message()!.getBoundingClientRect().top).toBeGreaterThan(host.top + host.height / 2);
+    const centre = document.elementFromPoint(
+      host.left + host.width / 2,
+      host.top + host.height / 2,
+    );
+    expect(stage().contains(centre)).toBe(true);
+  });
+
+  test('BOOT-34 the message and the bar read against the scene in both themes', async () => {
+    await render(Fixture, { status: 'loading', progress: { loaded: 1, total: 4, internal: true } });
+    const rgb = (value: string) => value.match(/\d+/g)!.slice(0, 3).map(Number);
+    const luminance = (value: string) => {
+      const [r, g, b] = rgb(value).map((c) => {
+        const x = c / 255;
+        return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const ratio = (a: string, b: string) => {
+      const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m);
+      return (x + 0.05) / (y + 0.05);
+    };
+    const colour = (token: string) => {
+      const probe = stage().appendChild(document.createElement('i'));
+      probe.style.color = `var(${token})`;
+      const value = getComputedStyle(probe).color;
+      probe.remove();
+      return value;
+    };
+    for (const theme of ['light', 'dark']) {
+      document.documentElement.dataset.theme = theme;
+      const scene = getComputedStyle(document.getElementById('viewport')!).backgroundColor;
+      const track = colour('--overlay-border');
+      const fill = colour('--overlay-accent');
+      expect(
+        ratio(getComputedStyle(message()!).color, scene),
+        `${theme} text`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(fill, scene), `${theme} fill on scene`).toBeGreaterThanOrEqual(3);
+      expect(ratio(fill, track), `${theme} fill on track`).toBeGreaterThanOrEqual(3);
+    }
+    delete document.documentElement.dataset.theme;
+  });
+
+  test('BOOT-34 says nothing when the cortex appears, and the end of the load as before', async () => {
+    const view = await render(Fixture, { status: 'loading', progress: { loaded: 1, total: 4 } });
+    const seen: string[] = [];
+    new MutationObserver(() => seen.push(announced()!)).observe(
+      document.getElementById('announcer')!,
+      { childList: true, characterData: true, subtree: true },
+    );
+    await view.rerender({ progress: { loaded: 1, total: 4, internal: true } });
+    expect(seen).toEqual([]);
+    await view.rerender({ status: 'ready' });
+    expect(announced()).toBe('Anatomy loaded.');
+  });
+
+  test('BOOT-34 on a phone the message sits at the top of the stage, clear of the sheet', async () => {
+    await page.viewport(375, 812);
+    await render(Fixture, { status: 'loading', progress: { loaded: 1, total: 4, internal: true } });
+    const host = document.getElementById('viewport')!.getBoundingClientRect();
+    expect(message()!.getBoundingClientRect().bottom).toBeLessThan(host.top + host.height / 3);
+  });
+});
+
 describe('error', () => {
   const download = {
     text: 'Could not load the anatomy. A file could not be downloaded. Check the connection and try again.',

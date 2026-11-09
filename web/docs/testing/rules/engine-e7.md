@@ -308,11 +308,20 @@ Shared expectations. "The anatomy fits" means every drawn vertex projects inside
 
 ### FACADE-32 · The engine does not start if it cannot draw an outline
 
-- **Rule:** The outline programs are compiled before the stage reports ready. If they cannot be, the engine fails to start and frees the scene and the model, rather than starting without a way to mark the selection.
+- **Rule:** The outline programs are compiled before the stage reports ready, asynchronously (`compileAsync` into the composer's target, while the internal anatomy downloads), so the first selection or hover compiles none. If they cannot be, the engine fails to start and frees the scene and the model, rather than starting without a way to mark the selection.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:2122-2123`; deviation `e7-warm-outlines-fail-fast.md`
-- **Expected:** With `warmOutlines` throwing, `createEngine` rejects `/outline programs did not compile/`, the renderer is disposed once and `model.disposed === true`.
+- **Expected:** With `warmOutlines` throwing, `createEngine` rejects `/outline programs did not compile/`, the renderer is disposed once and `model.disposed === true`. On real WebGL, selecting a region after the start and drawing two frames calls no `createProgram`.
+- **Covered by:** `src/lib/engine/index.test.ts` (R), `src/lib/engine/index.svelte.test.ts` (R)
+
+### FACADE-40 · The cortex is drawn while the internal anatomy downloads; the engine opens once that is in
+
+- **Rule:** Once the cortex is in (ATLAS-54), `createEngine` compiles its programs off the main thread, only then puts it on the stage and draws it, framed on the cortex alone, and only then reports progress marked `internal`. It redraws for the border blend (`onBlended`) but not for the model's own changes, so the internal anatomy is never drawn before its programs are compiled. A start that fails meanwhile stops there: the cortex is not put on the stage and no progress is reported after the failure. It resolves only once the detail level and its BVHs are in and the internal anatomy's programs are compiled (also off the main thread), so whatever starts after it (the cut prefetch, BOOT-33) never competes with the first layers. The start then frames the whole brain.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `web/src/lib/engine/index.ts` `drawCortex`; handoff P1 and P5 (2026-11-09)
+- **Expected:** With the detail download held: an `internal` progress event arrives, the model's group is on the stage and the first compile saw only `destrieux`; a turn later `createEngine` is still pending and `learning` is not loaded. The first compile ran before the group was on the stage. Released: it resolves, the last compile saw `destrieux` and `learning`, no redraw was asked for while `learning` was shown but not compiled, and every `learning` mesh has its BVH. With the cortex's compile held and the detail failing: `createEngine` rejects; released, the group stays off the stage, no progress follows and the model is disposed.
 - **Covered by:** `src/lib/engine/index.test.ts` (R)
 
 ### FACADE-33 · A snapshot is the settled frame, cropped to the rectangle asked for

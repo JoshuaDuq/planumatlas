@@ -12,7 +12,7 @@
   import type { CutMode, ViewName } from '../../lib/types/index.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { createMprDialog } from '../../features/sections/mpr-dialog.svelte.ts';
-  import MprDialog from '../../features/sections/MprDialog.svelte';
+  import type MprDialog from '../../features/sections/MprDialog.svelte';
   import { createSectionControls } from '../../features/sections/section-controls.svelte.ts';
   import SectionBar from '../../features/sections/SectionBar.svelte';
   import SectionPopover from '../../features/sections/SectionPopover.svelte';
@@ -20,7 +20,6 @@
   import { mapCaption, mapKey } from '../../features/user-map/key.ts';
   import OverlayPopover from '../../features/user-map/OverlayPopover.svelte';
   import LesionPopover from '../../features/lesion/LesionPopover.svelte';
-  import { saveSnapshot } from '../../features/snapshot/snapshot.ts';
   import Dock from '../../features/stage/Dock.svelte';
   import type { DockCommands } from '../../features/stage/dock-commands.ts';
   import { createFullscreen } from '../../features/stage/fullscreen.ts';
@@ -47,6 +46,9 @@
   let host = $state<HTMLElement>();
   let keys = $state<StageKeys>();
   let linkedMri = $state<MprDialog>();
+  // The Linked MRI's code is a chunk of its own, fetched the first time the dialog opens.
+  let LinkedMri = $state<typeof MprDialog>();
+  let fetchingLinkedMri = false;
 
   /** What the stage's controls reach, built once for the world they run in. */
   function controllers({ engine, engineState, session, commands, anatomy, excursions }: World) {
@@ -89,14 +91,23 @@
   }
 
   /** The masthead's Save image: the visible stage as a captioned PNG (G6). */
-  export function saveImage() {
+  export async function saveImage() {
     const { engine, view: store, commands } = world!;
+    // Its drawing code is fetched with the first save; a failed fetch is the save's failure.
+    let snapshot: typeof import('../../features/snapshot/snapshot.ts');
+    try {
+      snapshot = await import('../../features/snapshot/snapshot.ts');
+    } catch (error) {
+      commands.fail('snapshot', error);
+      return;
+    }
+    // Read once the code is in, so the caption names the frame the save captures.
     const view = store.current;
     const { manifest } = engine.model;
     const reference = isIndependentTractReference(view);
     const cut = stage!.sections.current;
     const region = reference ? null : view.selectedRegion;
-    return saveSnapshot(
+    return snapshot.saveSnapshot(
       { host: host!, stage: app!.stage, keys: keys!, engine },
       {
         lang: view.lang,
@@ -191,6 +202,20 @@
     }
   }
 
+  async function fetchLinkedMri({ mpr }: NonNullable<typeof stage>, { commands }: World) {
+    fetchingLinkedMri = true;
+    try {
+      LinkedMri = (await import('../../features/sections/MprDialog.svelte')).default;
+    } catch (error) {
+      fetchingLinkedMri = false;
+      mpr.close({ instant: true });
+      commands.fail('mri', error);
+    }
+  }
+  $effect(() => {
+    if (world && stage?.mpr.open && !fetchingLinkedMri) void fetchLinkedMri(stage, world);
+  });
+
   // The stage's part of the interface the controllers and the keymap reach (ports.ts).
   $effect(() => {
     if (!app || !world || !stage) return;
@@ -209,7 +234,7 @@
         diffusionInstant = options.instant;
         diffusionMri = true;
       },
-      mprOpen: () => linkedMri!.holdsKeys(),
+      mprOpen: () => linkedMri?.holdsKeys() ?? false,
       diffusionMriOpen: () => diffusionMri,
     });
     const offPick = world.engine.on('pick', ({ point }) => {
@@ -407,29 +432,31 @@
 {#if app && world && stage}
   {@const current = world.view.current}
   {@const engine = world.engine}
-  <MprDialog
-    bind:this={linkedMri}
-    mpr={stage.mpr}
-    engine={world.engine}
-    engineState={world.engineState}
-    lang={current.lang}
-    anatomy={world.engine.model.manifest.anatomy}
-    agreementName={agreementName(world)}
-    regionName={(id) => world.catalog.label(id).name}
-    fallbackFocus={() => sectionToolOrCanvas(engine.canvas)}
-    map={world.userMap.drawn && world.userMap.state.status === 'ready'
-      ? {
-          key: JSON.stringify([
-            world.userMap.state.name,
-            world.userMap.space,
-            world.userMap.settings,
-            world.userMap.placed,
-          ]),
-          title: world.userMap.title,
-          statistic: world.userMap.statistic,
-        }
-      : null}
-  />
+  {#if LinkedMri}
+    <LinkedMri
+      bind:this={linkedMri}
+      mpr={stage.mpr}
+      engine={world.engine}
+      engineState={world.engineState}
+      lang={current.lang}
+      anatomy={world.engine.model.manifest.anatomy}
+      agreementName={agreementName(world)}
+      regionName={(id) => world.catalog.label(id).name}
+      fallbackFocus={() => sectionToolOrCanvas(engine.canvas)}
+      map={world.userMap.drawn && world.userMap.state.status === 'ready'
+        ? {
+            key: JSON.stringify([
+              world.userMap.state.name,
+              world.userMap.space,
+              world.userMap.settings,
+              world.userMap.placed,
+            ]),
+            title: world.userMap.title,
+            statistic: world.userMap.statistic,
+          }
+        : null}
+    />
+  {/if}
   <MriNavigator
     bind:open={diffusionMri}
     bind:instant={diffusionInstant}

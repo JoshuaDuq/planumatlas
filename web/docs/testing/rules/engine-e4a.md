@@ -70,12 +70,12 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 
 ### SLICE-07 · Volume download integrity
 
-- **Rule:** A volume file is used only if the SHA-256 of the compressed bytes, the decoded byte length and the SHA-256 of the decoded bytes all match the header, and its dtype is `|u1` or little-endian `<u2`. Anything else is an error, not a partial volume.
+- **Rule:** A volume file is used only if its compressed bytes hash to the header's SHA-256, its decoded byte length matches the header, and its dtype is `|u1` or little-endian `<u2`. The file is hashed once: by the download (ASSET-04) when the build published it, after checking that the build's record names the header's SHA-256, or by `loadVolume` when there is no published map. The decoded bytes are not hashed again: gzip carries its own check and the publisher verifies `decoded_sha256` (`brain_model/validate_volumes.py`). Anything else is an error, not a partial volume.
 - **Kind:** scientific/data
 - **Level:** unit
-- **Source:** `viewer/slices/volume.js:70-86`
-- **Expected:** a one-byte change in the file → "Volume file checksum mismatch."; wrong decoded length or hash → "Decoded volume integrity check failed."; dtype `<f4` → "Unsupported volume data type".
-- **Covered by:** uncovered for every failure. The success path runs on the published files in `src/lib/engine/model/brain-atlas.cut.test.ts` and the contract suite (W: a matching checksum is not a check of the refusal).
+- **Source:** `viewer/slices/volume.js:70-86`; Milestone 2 P16 (the same bytes were hashed three times: twice compressed, once decoded)
+- **Expected:** SHA-256 digests per load: 1 without a map, 1 with one. A header naming other bytes → "Volume file checksum mismatch." (with a map, before any request); other bytes served → `asset-updated`; wrong decoded length → "Decoded volume integrity check failed."; dtype `<f4` → "Unsupported volume data type".
+- **Covered by:** `src/lib/engine/slices/volume.test.ts` (R, digest count by a spy on `crypto.subtle.digest`, and the refusals; the dtype refusal stays uncovered). The success path also runs on the published files in `src/lib/engine/model/brain-atlas.cut.test.ts` and the contract suite.
 
 ### SLICE-08 · MRI intensity is trilinear
 

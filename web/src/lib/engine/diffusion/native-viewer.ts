@@ -289,10 +289,10 @@ export function createNativeTractViewer(
       return new Box3().setFromObject(outline ?? group);
     },
     async load() {
-      await loadOutline();
-      for (const bundle of catalog.bundles.filter((bundle) => bundle.initial)) {
-        await loadBundle(bundle);
-      }
+      const initial = catalog.bundles.filter((bundle) => bundle.initial);
+      // Downloaded and decoded together, then added in catalogue order after the outline, as before.
+      await Promise.all([loadOutline(), ...initial.map(loadTract)]);
+      for (const bundle of initial) await loadBundle(bundle);
     },
     loadBundle,
     async showLesionTract(bundle: TractBundle, sphere: LesionSphere): Promise<void> {

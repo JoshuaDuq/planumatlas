@@ -12,4 +12,4 @@ attachAnnouncer(document.getElementById('announcer')!);
 const app = createApp();
 offerReloadAfterDeploy(app);
 mount(App, { target: document.getElementById('app')!, ...shellOptions(app) });
-await startApp(app);
+void startApp(app);

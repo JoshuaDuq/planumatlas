@@ -202,7 +202,7 @@ values (I18N-22, I18N-28) hold it today.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/i18n/translations.js:500-530, 1026-1055`
-- **Expected:** `errors.operations` keys in both languages, in order: start, link, layer, colour, region, cord, system, internal, whiteMatter, wholeBrain, snapshot, section, deficit, landmark, mri, comparison, overlap, restore. `layer` and `colour` take a subject: EN `colour('CAB-NP')` "Could not show the CAB-NP colouring.", FR "Impossible d’afficher la coloration « CAB-NP »."
+- **Expected:** `errors.operations` keys in both languages, in order: start, link, layer, colour, region, cord, system, internal, whiteMatter, wholeBrain, snapshot, section, deficit, landmark, mri, comparison, overlap, restore, then the later fullscreen, streamlines, map and guide (the tour's code failing to load). `layer` and `colour` take a subject: EN `colour('CAB-NP')` "Could not show the CAB-NP colouring.", FR "Impossible d’afficher la coloration « CAB-NP »."
 - **Covered by:** `src/lib/core/i18n/errors.test.ts` (R) (key lists and I18N-18 for order and the subject sentence)
 
 ### I18N-19 · A failed start keeps the link only for a download or update failure

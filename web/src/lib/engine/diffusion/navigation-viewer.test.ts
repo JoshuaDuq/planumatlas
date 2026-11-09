@@ -8,6 +8,9 @@ import type { LoadedTract } from './tract-file.ts';
 
 const added = vi.hoisted(() => [] as { visible: boolean }[]);
 const viewers = vi.hoisted(() => [] as Record<string, any>[]);
+const loadFromUrl = vi.hoisted(() => vi.fn());
+const readDiffusionAsset = vi.hoisted(() => vi.fn());
+vi.mock('../../core/assets/diffusion-assets.ts', () => ({ readDiffusionAsset }));
 
 vi.mock('@niivue/niivue', () => {
   class Niivue {
@@ -17,8 +20,13 @@ vi.mock('@niivue/niivue', () => {
     constructor() {
       viewers.push(this);
     }
+    opts = { multiplanarLayout: 1 };
     attachToCanvas = async () => {};
     addMesh = (mesh: { visible: boolean }) => added.push(mesh);
+    addVolume = (volume: unknown) => this.volumes.push(volume);
+    sliceScale = () => ({ volScale: [1, 1, 1] });
+    setMultiplanarLayout = () => {};
+    cleanup = () => {};
     drawScene = () => {};
   }
   class NVMesh {
@@ -29,7 +37,7 @@ vi.mock('@niivue/niivue', () => {
   return {
     Niivue,
     NVMesh,
-    NVImage: {},
+    NVImage: { loadFromUrl },
     SHOW_RENDER: { ALWAYS: 1 },
     MULTIPLANAR_TYPE: { GRID: 1 },
     SLICE_TYPE: {},
@@ -121,4 +129,56 @@ test('reports the source voxel and a three-component point, not NiiVue’s mirro
     () => viewer['onLocationChange']({ mm: [50, 0, 0, 1], vox: [0, 0, 0], values }),
     RangeError,
   );
+});
+
+test('DIFF-33 the maps download together and are added in catalogue order', async () => {
+  const maps = tractCatalog('cdmd').maps;
+  assert.ok(maps.length >= 2);
+  const arrivals = new Map<string, (asset: { url: string; buffer: ArrayBuffer }) => void>();
+  readDiffusionAsset.mockImplementation(
+    (file: string) => new Promise((resolve) => arrivals.set(file, resolve)),
+  );
+  const header = {
+    dims: [3, 2, 2, 2, 1, 1, 1, 1],
+    datatypeCode: 16,
+    xyzt_units: 2,
+    sform_code: 1,
+    qform_code: 0,
+    affine: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+    pixDims: [1, 1, 1, 1],
+  };
+  loadFromUrl.mockImplementation(async ({ name }: { name: string }) => ({
+    name,
+    hdr: header,
+    img: new Float32Array(8),
+  }));
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
+  const opening = createMriNavigationViewer(
+    { ...tractCatalog('cdmd'), maps },
+    { clientWidth: 800, clientHeight: 600 } as HTMLCanvasElement,
+    () => {},
+    loadTract,
+  );
+  // Every map is asked for before the first has arrived.
+  await vi.waitFor(() => assert.equal(arrivals.size, maps.length));
+  for (const map of maps.toReversed()) {
+    arrivals.get(map.file)!({ url: map.file, buffer: new ArrayBuffer(8) });
+  }
+  await opening;
+  assert.deepEqual(
+    viewers.at(-1)!['volumes'].map((volume: { name: string }) => volume.name),
+    maps.map((map) => map.file.split('/').at(-1)),
+  );
+  vi.unstubAllGlobals();
 });

@@ -352,6 +352,15 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** `header.notes` has more than 10 characters for `destrieux`, `hcp-mmp`, `learning`, `aseg` and `nextbrain` in `en` and `fr`. `display.surfaceColorTitles` is set for `tissue`, `mri`, `atlas`, `network` and `cab-np`. `header.subject` is "Subject" / "Sujet". No "Specimen" or "Spécimen" in the masthead.
 - **Covered by:** `src/lib/core/i18n/i18n.test.ts` (R, MAST-36)
 
+### MAST-51 · Pointing at or focusing the Atlas control is an intent to switch
+
+- **Rule:** A pointer entering, or focus reaching, the Atlas field or the collapsed summary that holds it calls `onAtlasIntent`; the other fields do not. The app fetches the other atlas on the first one (BOOT-11).
+- **Kind:** behaviour
+- **Level:** browser: pointer and focus
+- **Source:** the 2026-11-09 review (P2)
+- **Expected:** at 1600 px, hovering and focusing Colour → no call; hovering Atlas → one; focusing it → a second. At 390 px, hovering the summary → one; focusing it → a second.
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 2 cases)
+
 ## Data bar: collapse and summary
 
 ### MAST-37 · The bar collapses when it does not fit, and always on phones and touch

@@ -159,11 +159,12 @@ export async function loadRibbonSources(
   baseUrl: string | URL,
   atlas: string,
   envelopes: readonly Mesh[],
+  priority?: RequestPriority,
 ): Promise<Mesh<BufferGeometry>[]> {
   const record = manifest.atlases.find((entry) => entry.id === atlas)?.ribbon_labels as
     RibbonLabelsRecord | undefined;
   if (!record) return [];
-  const bytes = await fetchAsset(new URL(record.file, baseUrl));
+  const bytes = await fetchAsset(new URL(record.file, baseUrl), { priority });
   const expected =
     (record.vertex_counts.left + record.vertex_counts.right) * Uint16Array.BYTES_PER_ELEMENT;
   if (bytes.byteLength !== expected) {

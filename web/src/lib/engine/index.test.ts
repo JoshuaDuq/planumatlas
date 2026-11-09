@@ -6,6 +6,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { readDiffusionAsset } from '../core/assets/diffusion-assets.ts';
 import { tractCatalog } from '../core/diffusion/catalogs.ts';
 import { t } from '../core/i18n/index.ts';
+import type { LoadProgress } from '../types/index.ts';
 import type { Engine } from './api.ts';
 import { createEngine } from './index.ts';
 import { createMriUniforms } from './render/mri-material.ts';
@@ -25,6 +26,16 @@ const stage = vi.hoisted(() => ({
   rendererDisposed: 0,
   model: null as import('./model/brain-atlas.ts').BrainAtlas | null,
   compiled: [] as Object3D[],
+  /** The layers in the model when each compile was asked for. */
+  compiledLayers: [] as string[][],
+  /** Whether each compiled root was on the stage when its compile was asked for. */
+  compiledOnStage: [] as boolean[],
+  /** Holds each compile while set. */
+  compileHeld: null as Promise<void> | null,
+  /** Redraws asked for while the internal anatomy was shown but not yet compiled. */
+  uncompiledDraws: 0,
+  /** Holds the internal anatomy's download while set. */
+  detailHeld: null as Promise<void> | null,
 }));
 
 vi.mock('three', async (importOriginal) => {
@@ -99,11 +110,22 @@ vi.mock('./render/scene.ts', async (importOriginal) => {
           if (key === 'compile') {
             return (root: Object3D) => {
               stage.compiled.push(root);
-              return Promise.resolve();
+              stage.compiledLayers.push([...(stage.model?.layers.keys() ?? [])]);
+              stage.compiledOnStage.push(root.parent !== null);
+              return stage.compileHeld ?? Promise.resolve();
+            };
+          }
+          if (key === 'invalidate') {
+            return () => {
+              const learning = stage.model?.layers.get('learning')?.scene;
+              const compiled = stage.compiledLayers.some((layers) => layers.includes('learning'));
+              if (learning?.visible && stage.model!.group.parent && !compiled)
+                stage.uncompiledDraws++;
+              target.invalidate();
             };
           }
           if (key === 'warmOutlines') {
-            return () => {
+            return async () => {
               if (stage.warmFails) throw new Error('The outline programs did not compile.');
             };
           }
@@ -117,13 +139,22 @@ vi.mock('./render/scene.ts', async (importOriginal) => {
 vi.mock('./model/brain-atlas.ts', async (importOriginal) => {
   const original = await importOriginal<typeof import('./model/brain-atlas.ts')>();
   class FromDisk extends original.BrainAtlas {
-    static override async load(): Promise<InstanceType<typeof original.BrainAtlas>> {
-      const model = new original.BrainAtlas(
-        readManifest('cdmd'),
-        publishedLoader(modelDirectory('cdmd')),
-      );
-      await model.initialize();
+    static override async load(
+      _url: string | URL,
+      atlas?: string,
+      options?: import('./model/brain-atlas.ts').LoadOptions,
+    ): Promise<InstanceType<typeof original.BrainAtlas>> {
+      const published = publishedLoader(modelDirectory('cdmd'));
+      const model = new original.BrainAtlas(readManifest('cdmd'), {
+        async loadAsync(file, onProgress) {
+          if (file === 'learning.glb') await stage.detailHeld;
+          const scene = await published.loadAsync(file);
+          onProgress?.({ loaded: 1, total: 1 });
+          return scene;
+        },
+      });
       stage.model = model;
+      await model.initialize(atlas, options);
       return model;
     }
   }
@@ -169,6 +200,11 @@ beforeEach(() => {
   stage.rendererDisposed = 0;
   stage.model = null;
   stage.compiled = [];
+  stage.compiledLayers = [];
+  stage.compiledOnStage = [];
+  stage.compileHeld = null;
+  stage.uncompiledDraws = 0;
+  stage.detailHeld = null;
   vi.spyOn(EffectComposer.prototype, 'render').mockImplementation(() => {});
   vi.stubGlobal(
     'ResizeObserver',
@@ -189,7 +225,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function boot(): Promise<Engine> {
+async function boot(onProgress?: (progress: LoadProgress) => void): Promise<Engine> {
   const host = Object.assign(new EventTarget(), {
     prepend() {},
     getBoundingClientRect: () => ({ width: 800, height: 600 }),
@@ -198,6 +234,7 @@ async function boot(): Promise<Engine> {
     host: host as unknown as HTMLElement,
     manifestUrl: 'http://localhost/models/cdmd/manifest.json',
     theme: 'light',
+    ...(onProgress && { onProgress }),
   });
 }
 
@@ -273,10 +310,14 @@ describe('the engine facade', () => {
     const drawn = () =>
       meshes.map(({ material }) => [material.transparent, material.customProgramCacheKey()]);
     const before = drawn();
-    assert.equal(stage.compiled.length, 0, 'nothing is compiled until the page is idle');
+    const atStart = stage.compiled.length;
+    assert.ok(
+      stage.compiled.every((root) => root === stage.model!.group),
+      'until the page is idle, only what is drawn is compiled',
+    );
     for (const run of idle.splice(0)) run();
-    assert.equal(stage.compiled.length, 1);
-    const samples = stage.compiled[0]!;
+    assert.equal(stage.compiled.length, atStart + 1);
+    const samples = stage.compiled.at(-1)!;
     assert.equal(samples.parent, null, 'the samples are not on the stage');
     const compiled = samples.children.map((child) => (child as Mesh).material as Material);
     const key = (kind: (region: string) => boolean) =>
@@ -297,6 +338,55 @@ describe('the engine facade', () => {
     assert.equal(compiled.filter((material) => material instanceof LineBasicMaterial).length, 2);
     assert.deepEqual(drawn(), before, 'what is drawn keeps its materials');
     engine.dispose();
+  });
+
+  it('FACADE-40 draws the cortex while the internal anatomy downloads, and starts only once that is in', async () => {
+    let release!: () => void;
+    stage.detailHeld = new Promise((resolve) => (release = resolve));
+    const reported: LoadProgress[] = [];
+    let started = false;
+    const starting = boot((progress) => reported.push(progress)).then((engine) => {
+      started = true;
+      return engine;
+    });
+    await vi.waitFor(() => assert.ok(reported.some((progress) => progress.internal)));
+    assert.equal(
+      stage.scene!.children.includes(stage.model!.group),
+      true,
+      'the cortex is on stage',
+    );
+    assert.deepEqual(stage.compiledLayers[0], ['destrieux'], 'its programs compiled on their own');
+    assert.equal(stage.compiledOnStage[0], false, 'before it is on the stage');
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(started, false, 'the engine is not handed over while the internal anatomy loads');
+    assert.equal(stage.model!.layers.has('learning'), false);
+    release();
+    const engine = await starting;
+    assert.deepEqual(stage.compiledLayers.at(-1)!.sort(), ['destrieux', 'learning']);
+    assert.equal(stage.uncompiledDraws, 0, 'the internal anatomy is not drawn before it compiles');
+    assert.ok(
+      stage.model!.layers.get('learning')!.meshes.every((mesh) => mesh.geometry.boundsTree),
+    );
+    engine.dispose();
+  });
+
+  it('FACADE-40 a start that fails while the cortex compiles draws and reports nothing more', async () => {
+    let fail!: (error: Error) => void;
+    stage.detailHeld = new Promise((_resolve, reject) => (fail = reject));
+    let compiled!: () => void;
+    stage.compileHeld = new Promise((resolve) => (compiled = resolve));
+    const reported: LoadProgress[] = [];
+    const starting = boot((progress) => reported.push(progress));
+    await vi.waitFor(() => assert.equal(stage.compiled.length, 1));
+    fail(new Error('learning.glb: HTTP 404'));
+    await assert.rejects(starting, /HTTP 404/);
+    const heard = reported.length;
+    compiled();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(stage.model!.group.parent, null, 'the cortex is not put on the stage');
+    assert.equal(reported.length, heard, 'no progress after the failure');
+    assert.equal(stage.compiled.length, 1);
+    assert.equal(stage.model!.disposed, true);
   });
 
   // Deviation e7-warm-outlines-fail-fast: legacy logged the failure and started anyway.

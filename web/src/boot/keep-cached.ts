@@ -1,8 +1,11 @@
+import { handOverUnseen, releaseUnseen } from '../lib/core/assets/asset-cache.ts';
+
 /**
  * Keep the published anatomy across visits.
  *
  * Registered after the app has started, so it never competes with the model
- * download it exists to spare. Only in a built site: in development the files
+ * download it exists to spare; the files downloaded before it took control are
+ * handed to it once it is active. Only in a built site: in development the files
  * change under it, and a stale cache there would be a bug hunt rather than a
  * feature. A browser without service workers simply keeps fetching.
  */
@@ -11,5 +14,11 @@ export function keepAnatomyCached(): void {
   navigator.serviceWorker
     .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
     // The atlas works without it, but a missing or broken sw.js should not pass unseen.
-    .catch((error) => console.warn('Service worker registration failed:', error));
+    .catch((error) => {
+      releaseUnseen();
+      console.warn('Service worker registration failed:', error);
+    });
+  void navigator.serviceWorker.ready.then((registration) =>
+    handOverUnseen((file) => registration.active!.postMessage(file)),
+  );
 }

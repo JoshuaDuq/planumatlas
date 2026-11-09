@@ -25,7 +25,7 @@ vi.mock('./render/scene.ts', async (importOriginal) => {
     ...original,
     createScene: (...args: Parameters<typeof original.createScene>) => {
       const scene = original.createScene(...args);
-      scene.warmOutlines = () => {};
+      scene.warmOutlines = async () => {};
       return scene;
     },
   };

@@ -221,6 +221,18 @@ describe('DataBar on the bar', () => {
     expect(calls).toEqual(['atlas:aseg', 'colour:mri', 'detail:nextbrain', 'anatomy:sub_014']);
   });
 
+  test('pointing at or focusing the Atlas field is an intent to switch atlas; other fields are not', async () => {
+    const calls: string[] = [];
+    await wide(barProps(), { calls });
+    await userEvent.hover(field('Colour'));
+    el(field('Colour')).focus();
+    expect(calls).toEqual([]);
+    await userEvent.hover(field('Atlas'));
+    expect(calls).toEqual(['atlas-intent']);
+    el(field('Atlas')).focus();
+    expect(calls).toEqual(['atlas-intent', 'atlas-intent']);
+  });
+
   test('a tab painting the brain shows its name in the hidden paint option', async () => {
     const paint = { id: 'function:memory', colors: new Map() };
     const view = await wide(barProps());
@@ -346,6 +358,15 @@ describe('DataBar collapsed behind its summary', () => {
       expect(toggle.getAttribute('aria-label')).toContain(part.textContent!);
     }
     expect(toggle.dataset.tooltip).toBe('Atlas and display settings');
+  });
+
+  test('pointing at or focusing the summary is an intent to switch atlas', async () => {
+    const calls: string[] = [];
+    await phone(barProps(), { calls });
+    await userEvent.hover(summary());
+    expect(calls).toEqual(['atlas-intent']);
+    el(summary()).focus();
+    expect(calls).toEqual(['atlas-intent', 'atlas-intent']);
   });
 
   test('the popover opens on the summary, keeps focus there, and prints the notes', async () => {

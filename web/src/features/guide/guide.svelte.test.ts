@@ -6,7 +6,8 @@ import { afterEach, beforeEach, expect, test } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
-import { firstLaunch, startGuide } from './tour.ts';
+import { firstLaunch } from './first-launch.ts';
+import { startGuide } from './tour.ts';
 import type { GuidePaint } from './tour.ts';
 
 const TARGETS = `

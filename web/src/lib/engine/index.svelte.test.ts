@@ -63,6 +63,20 @@ test('captures the settled frame, cropped to the stage rectangle asked for, with
   expect(engine.canvas.getAttribute('role')).toBe('application');
 });
 
+test('FACADE-32 the outline programs are compiled before the start ends: a first selection compiles none', async () => {
+  const engine = await boot();
+  onTestFinished(() => engine.dispose());
+  // The engine's own idle warm-up (Focus, T1 colour, Tracts) runs first and is not the outline's.
+  await new Promise((resolve) => requestIdleCallback(resolve));
+  const gl = engine.canvas.getContext('webgl2')!;
+  const created = vi.spyOn(gl, 'createProgram');
+  engine.model.select('destrieux:left:1');
+  expect(engine.model.state.selectedRegion?.id).toBe('destrieux:left:1');
+  for (let frame = 0; frame < 2; frame++) await new Promise(requestAnimationFrame);
+  engine.captureSnapshot();
+  expect(created).not.toHaveBeenCalled();
+});
+
 test('SCENE-38 after the cut prefetch, the first cut compiles no program of its own', async () => {
   const engine = await boot();
   onTestFinished(() => engine.dispose());

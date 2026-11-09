@@ -33,6 +33,7 @@ describe('the service worker', () => {
     const storage = new Map<string, Map<string, Response>>();
     const fetched: string[] = [];
     const fetchOptions: (RequestInit | undefined)[] = [];
+    const fetchedRequests: Request[] = [];
     const responses = new Map<string, { status: number; body: string }>();
 
     const cacheFor = (name: string) => {
@@ -71,6 +72,7 @@ describe('the service worker', () => {
       const address = typeof url === 'string' ? url : url.url;
       fetched.push(address);
       fetchOptions.push(options);
+      if (url instanceof Request) fetchedRequests.push(url);
       const path = new URL(address, ORIGIN).pathname.replace('/neuroatlas/', '');
       const made = responses.get(path) ?? { status: 200, body: bodyOf(path) };
       return new Response(made.body, { status: made.status });
@@ -83,11 +85,13 @@ describe('the service worker', () => {
     );
 
     /** The answer the page gets, after anything the worker kept alive to store has finished. */
-    const request = async (url: string, method = 'GET', mode = 'cors') => {
+    const request = async (url: string, method = 'GET', mode = 'cors', headers?: HeadersInit) => {
       let answered: Promise<Response> | undefined;
       const lifetime: Promise<unknown>[] = [];
       listeners.get('fetch')!({
-        request: { method, url, mode },
+        // A page's request; a navigation cannot be constructed outside a browser.
+        request:
+          mode === 'navigate' ? { method, url, mode } : new Request(url, { method, headers }),
         respondWith: (promise: Promise<Response>) => {
           answered = promise;
         },
@@ -99,6 +103,15 @@ describe('the service worker', () => {
       const response = await answered;
       await Promise.all(lifetime);
       return response;
+    };
+    /** The page hands over a file it downloaded before the worker controlled it. */
+    const handOver = async (url: string, body: string, headers: [string, string][] = []) => {
+      const lifetime: Promise<unknown>[] = [];
+      listeners.get('message')!({
+        data: { url, headers, body: new Blob([body]) },
+        waitUntil: (promise: Promise<unknown>) => lifetime.push(promise),
+      });
+      await Promise.all(lifetime);
     };
     const activate = async () => {
       let finished: Promise<unknown> | undefined;
@@ -113,8 +126,10 @@ describe('the service worker', () => {
       storage,
       fetched,
       fetchOptions,
+      fetchedRequests,
       responses,
       request,
+      handOver,
       activate,
       published,
     };
@@ -213,8 +228,12 @@ describe('the service worker', () => {
 
   it('SW-08 revalidates when filling the cache instead of trusting the HTTP cache', async () => {
     const worker = await bootWorker();
-    await worker.request(urlOf(worker, 'models/bert/structures.glb'));
-    expect(worker.fetchOptions[0]?.cache).toBe('no-cache');
+    const url = urlOf(worker, 'models/bert/structures.glb');
+    await worker.request(url, 'GET', 'cors', { 'X-Page': 'mine' });
+    expect(worker.fetchedRequests[0]?.cache).toBe('no-cache');
+    // The page's own request, rebuilt: a browser carries its priority over as it does its headers.
+    expect(worker.fetchedRequests[0]?.url).toBe(url);
+    expect(worker.fetchedRequests[0]?.headers.get('X-Page')).toBe('mine');
   });
 
   it('SW-09 always revalidates the page itself', async () => {
@@ -232,5 +251,42 @@ describe('the service worker', () => {
     worker.responses.set(path, { status: 200, body: 'decoded tract' });
     await worker.request(urlOf(worker, path));
     expect(stored(worker)).toHaveLength(1);
+  });
+
+  it('SW-11 stores a file the page downloaded before it took control, on its own check, and serves it after', async () => {
+    const worker = await bootWorker();
+    const path = 'models/bert/cortex-destrieux.glb';
+    const url = urlOf(worker, path);
+    await worker.handOver(url, bodyOf(path), [['content-type', 'model/gltf-binary']]);
+    expect(stored(worker)).toEqual([new URL(url).pathname + new URL(url).search]);
+    const served = await worker.request(url);
+    expect(worker.fetched).toEqual([]);
+    expect(await served!.text()).toBe(bodyOf(path));
+    expect(served!.headers.get('content-type')).toBe('model/gltf-binary');
+  });
+
+  it('SW-11 refuses handed-over bytes that are not this deploy’s version of a published file', async () => {
+    const worker = await bootWorker();
+    const path = 'models/bert/structures.glb';
+    await worker.handOver(urlOf(worker, path), 'bytes from another deploy');
+    await worker.handOver(urlOf(worker, path, 'previousdeploy00'), bodyOf(path));
+    await worker.handOver(`${ORIGIN}/neuroatlas/models/bert/unpublished.glb?v=1`, bodyOf(path));
+    await worker.handOver(
+      `https://elsewhere.test/neuroatlas/${path}?v=${worker.published.files[path]}`,
+      bodyOf(path),
+    );
+    expect(stored(worker)).toEqual([]);
+    expect(worker.fetched).toEqual([]);
+  });
+
+  it('SW-11 keeps the copy it already stored rather than a handed-over one', async () => {
+    const worker = await bootWorker();
+    const path = 'models/bert/manifest.json';
+    const url = urlOf(worker, path);
+    await worker.request(url);
+    const key = stored(worker)[0]!;
+    const kept = worker.storage.get('planum-models')!.get(key);
+    await worker.handOver(url, bodyOf(path));
+    expect(worker.storage.get('planum-models')!.get(key)).toBe(kept);
   });
 });

@@ -65,7 +65,7 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
     get disposed() {
       return atlas.disposed;
     },
-    hasLayer: (id) => atlas.layers.has(id),
+    hasLayer: (id) => atlas.hasLayer(id),
     get envelopesLoaded() {
       return atlas.envelopes !== null;
     },
@@ -112,7 +112,8 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
       if (!entry) {
         throw Object.assign(new Error(`Unknown layer: ${id}`), { code: 'unknown-layer' });
       }
-      await atlas.loadLayer(id, entry.file);
+      // A prefetch never outranks a download the reader asked for.
+      await atlas.loadLayer(id, entry.file, undefined, 'low');
     },
   };
 }

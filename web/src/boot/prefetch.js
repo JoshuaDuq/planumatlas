@@ -17,13 +17,13 @@ window.__planumAssets = window.__planumAssets || {};
   // Each file's own content version, written in by the build (build/published-files.ts).
   // Keyed by the plain URL, fetched with that version, as `fetchPublished` does.
   var versions = __PUBLISHED_VERSIONS__;
-  function start(file) {
+  function start(file, after) {
     var url = new URL(root + file, location.origin).href;
+    var request = function () {
+      return fetch(url + '?v=' + versions[file], { cache: 'no-cache', priority: 'high' });
+    };
     if (!window.__planumAssets[url]) {
-      window.__planumAssets[url] = fetch(url + '?v=' + versions[file], {
-        cache: 'no-cache',
-        priority: 'high',
-      });
+      window.__planumAssets[url] = after ? after.then(request, request) : request();
     }
     return window.__planumAssets[url];
   }
@@ -31,9 +31,15 @@ window.__planumAssets = window.__planumAssets || {};
   // before anything of it is worth fetching. A link may name it; if not,
   // the index does, and it is small enough to wait for.
   function warm(brain) {
-    ['manifest.json', atlas, detail].forEach(function (file) {
-      start('models/' + brain + '/' + file);
+    var models = 'models/' + brain + '/';
+    start(models + 'manifest.json');
+    // The cortex is drawn on its own as soon as it is in, so the internal anatomy does not share
+    // its bandwidth: its request waits for the cortex's last byte (read from a copy; the app reads
+    // the original). A failed cortex is the app's to report, and the internal anatomy still starts.
+    var cortex = start(models + atlas).then(function (response) {
+      return response.clone().body.pipeTo(new WritableStream());
     });
+    start(models + detail, cortex);
   }
   var named = params.get('anatomy');
   var index = start('models/anatomies.json');

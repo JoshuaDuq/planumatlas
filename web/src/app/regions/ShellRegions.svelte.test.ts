@@ -163,7 +163,8 @@ describe('the ports', () => {
     const title = () => card()?.querySelector('.driver-popover-title')!.textContent;
     const next = () =>
       card()!.querySelector<HTMLButtonElement>('.driver-popover-next-btn')!.click();
-    expect(title()).toBe('How to use Planum');
+    // The tour's code is fetched as it starts.
+    await vi.waitFor(() => expect(title()).toBe('How to use Planum'));
     // The brain stop opens a region, and with it its group in the tree.
     next();
     await vi.waitFor(() =>

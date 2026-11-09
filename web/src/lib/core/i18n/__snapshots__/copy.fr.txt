@@ -710,7 +710,8 @@
    "restore": "Impossible de rétablir la vue précédente.",
    "fullscreen": "Impossible de passer en plein écran.",
    "streamlines": "Impossible d’afficher les trajectoires de ce repère.",
-   "map": "Impossible d’ouvrir la carte du champ visuel."
+   "map": "Impossible d’ouvrir la carte du champ visuel.",
+   "guide": "Impossible de lancer la visite."
   }
  },
  "footer": {
@@ -2162,6 +2163,11 @@
    "[2,183] → \"Chargement de l’anatomie · 0,0<NNBSP>Mo / 0,0<NNBSP>Mo\"",
    "[183,12345] → \"Chargement de l’anatomie · 0,0<NNBSP>Mo / 0,0<NNBSP>Mo\"",
    "[12345,0] → \"Chargement de l’anatomie · 0,0<NNBSP>Mo / 0,0<NNBSP>Mo\""
+  ],
+  "loadingInternal": "Chargement de l’anatomie interne…",
+  "loadingInternalWithTotal": [
+   "[\"Alpha\",\"\"] → \"Chargement de l’anatomie interne · —<NNBSP>Mo / 0,0<NNBSP>Mo\"",
+   "[\"\",\"Alpha\"] → \"Chargement de l’anatomie interne · 0,0<NNBSP>Mo / —<NNBSP>Mo\""
   ],
   "progressAria": "Téléchargement de l’anatomie",
   "loaded": "Anatomie chargée.",

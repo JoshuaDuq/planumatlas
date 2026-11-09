@@ -46,7 +46,7 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 
 ### REGION-05 · Dialogs are mounted once, as children of the app root
 
-- **Rule:** Each dialog is a native `<dialog>` mounted once, as a direct child of the app root, so stacking and the inert page never depend on region markup (top layer). The masthead region mounts Keyboard shortcuts and Provenance, which follow `#masthead`; the stage region mounts Linked MRI and Diffusion MRI, which follow the stage's `<main>`. The regions render as fragments, so none of them has a wrapper. The Tracts MRI holds no GPU context, volume or navigator while closed (decision 0008); G5's panes are 2D canvases.
+- **Rule:** Each dialog is a native `<dialog>` mounted once, as a direct child of the app root, so stacking and the inert page never depend on region markup (top layer). The masthead region mounts Keyboard shortcuts and Provenance, which follow `#masthead`; the stage region mounts Linked MRI and Diffusion MRI, which follow the stage's `<main>`; the Linked MRI from the first time it opens, when its code is fetched (BUILD-15). The regions render as fragments, so none of them has a wrapper. The Tracts MRI holds no GPU context, volume or navigator while closed (decision 0008); G5's panes are 2D canvases.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine)
 - **Source:** decision record `0008-dialog-mount-points.md`; `index.html:599-697`

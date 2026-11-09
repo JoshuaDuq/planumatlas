@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
+import clinicalRecords from '../../../../data/neuropsychology.yaml';
 import manifest from '../../../../public/models/cdmd/manifest.json';
-import { loadClinicalCatalog } from '../../lib/core/clinical/load.ts';
+import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
+import type { ClinicalData } from '../../lib/core/clinical/types.ts';
 import type { DisplaySettings, Manifest, Region } from '../../lib/types/index.ts';
 import { stageCounts } from './profile-meta.ts';
 
@@ -30,7 +32,11 @@ const settings: DisplaySettings = {
   hiddenRegions: new Set(),
   dissectionCanUndo: false,
 };
-const clinical = loadClinicalCatalog(manifest as unknown as Manifest, {});
+const clinical = createClinicalCatalog(
+  clinicalRecords as ClinicalData,
+  manifest as unknown as Manifest,
+  {},
+);
 
 test('counts what is drawn now of the regions a deficit maps, and says whether they are painted', () => {
   const ids = clinical.mappedRegions('neglect');

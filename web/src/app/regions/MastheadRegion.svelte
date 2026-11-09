@@ -2,18 +2,19 @@
   import { ASSET_BASE } from '../../../build/site.ts';
   import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
+  import { failureNotice } from '../../lib/core/i18n/errors.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Explorer, Language } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
-  import { startGuide } from '../../features/guide/tour.ts';
   import DataBar from '../../features/masthead/DataBar.svelte';
   import Masthead from '../../features/masthead/Masthead.svelte';
   import FeedbackDialog from '../../features/colophon/FeedbackDialog.svelte';
   import ProvenanceDialog from '../../features/provenance/ProvenanceDialog.svelte';
   import ShortcutsDialog from '../../features/shortcuts/ShortcutsDialog.svelte';
   import { getApp } from '../application.svelte.ts';
+  import { prefetchOtherAtlas } from '../boot.ts';
 
   let {
     lang,
@@ -84,10 +85,19 @@
   // as the page unmounts finds the masthead already gone, and with it any button to focus.
   const settingsButton = () => masthead?.settingsButton() ?? null;
 
-  function guide() {
+  async function guide() {
     // The stops open regions, and with them their groups in the tree: closing folds those back.
     const expanded = new Set(app.session.state.expanded);
-    startGuide(lang, {
+    // The tour and driver.js are a chunk of their own, fetched the first time the tour starts.
+    let tour: typeof import('../../features/guide/tour.ts');
+    try {
+      tour = await import('../../features/guide/tour.ts');
+    } catch (error) {
+      console.error(error);
+      app.session.notify(failureNotice(error, lang, 'guide'));
+      return;
+    }
+    tour.startGuide(lang, {
       animate: !app.media.reducedMotion,
       onClose: ({ pointer }) => {
         app.session.setExpanded(expanded);
@@ -201,6 +211,7 @@
         bind:settingsOpen
         bind:choosing
         onAtlas={world.excursions.chooseAtlas}
+        onAtlasIntent={() => prefetchOtherAtlas(model)}
         onSurfaceColor={world.excursions.chooseSurfaceColor}
         onDetail={world.commands.chooseDetail}
         onAnatomy={world.links.switchAnatomy}

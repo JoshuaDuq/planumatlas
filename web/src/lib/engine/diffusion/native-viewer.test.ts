@@ -190,6 +190,37 @@ test('DIFF-23 an outline hidden before loading keeps the catalogue opacity', asy
   viewer.dispose();
 }, 60_000);
 
+test('DIFF-17 the initial bundles download alongside the outline and are added after it, in catalogue order', async () => {
+  const initial = catalog.bundles.filter((bundle) => bundle.initial);
+  assert.ok(initial.length >= 2);
+  // Shared per file, as `createTractLoader` is.
+  const pending = new Map<string, (tract: LoadedTract) => void>();
+  const loads = new Map<string, Promise<LoadedTract>>();
+  const loadTract: TractLoader = (bundle) => {
+    if (!loads.has(bundle.file))
+      loads.set(bundle.file, new Promise((resolve) => pending.set(bundle.file, resolve)));
+    return loads.get(bundle.file)!;
+  };
+  const viewer = createNativeTractViewer(catalog, () => {}, loadTract);
+  const loading = viewer.load();
+  // Every bundle is asked for before any of them, or the outline, has arrived.
+  await vi.waitFor(() => assert.equal(pending.size, initial.length));
+  assert.equal(viewer.ready, false);
+  for (const bundle of initial.toReversed()) pending.get(bundle.file)!(decoded());
+  await loading;
+  assert.deepEqual(
+    viewer.snapshot().map(({ id }) => id),
+    initial.map((bundle) => bundle.id),
+  );
+  // The outline first, as when they were loaded one after another.
+  outlineOf(viewer);
+  assert.deepEqual(
+    viewer.group.children.slice(1).map((child) => child.name),
+    initial.flatMap((bundle) => [bundle.id, `${bundle.id}-hidden`]),
+  );
+  viewer.dispose();
+}, 60_000);
+
 test('DIFF-17 a reference space of another anatomy is refused', async () => {
   const viewer = createNativeTractViewer(
     { ...catalog, anatomy: 'another-anatomy' },

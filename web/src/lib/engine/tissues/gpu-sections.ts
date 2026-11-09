@@ -20,6 +20,7 @@ import type { Region } from '../../types/index.ts';
 import type { Frame } from '../slices/coordinates.ts';
 import { clippingPlane, worldToRas, worldToVoxelMatrix } from '../slices/coordinates.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
+import type { ProgressCallback } from '../model/progress.ts';
 import { loadVolume } from '../slices/volume.ts';
 import type { Volume, VolumeFile } from '../slices/volume.ts';
 import { codeIndex, liftFor } from './highlight.ts';
@@ -144,16 +145,20 @@ export interface CutModel extends EventTarget {
   readonly layers: ReadonlyMap<string, { meshes: Mesh[] }>;
   readonly sourceColors: Pick<ReadonlyMap<Mesh, Color>, 'get'>;
   readonly state: PaletteState;
-  ensureEnvelopes(): Promise<Mesh[]>;
-  ensureSpinalCord(): Promise<unknown>;
-  ensureRibbonWedges(atlas: string, baseUrl: string | URL): Promise<Mesh[]>;
+  ensureEnvelopes(onProgress?: ProgressCallback, priority?: RequestPriority): Promise<Mesh[]>;
+  ensureSpinalCord(onProgress?: ProgressCallback, priority?: RequestPriority): Promise<unknown>;
+  ensureRibbonWedges(
+    atlas: string,
+    baseUrl: string | URL,
+    priority?: RequestPriority,
+  ): Promise<Mesh[]>;
 }
 
 /** A cut hit with the region it names and the label it landed on. */
 export type CutHit = (Intersection | SolidHit) & { region?: Region | null; label?: Label };
 
-const readJson = async <T>(url: URL): Promise<T> =>
-  JSON.parse(new TextDecoder().decode(await fetchAsset(url))) as T;
+const readJson = async <T>(url: URL, priority?: RequestPriority): Promise<T> =>
+  JSON.parse(new TextDecoder().decode(await fetchAsset(url, { priority }))) as T;
 
 /** One persistent GPU plane reads categorical tissue IDs from the native 3D grid. */
 export class TissueSections {
@@ -204,11 +209,14 @@ export class TissueSections {
     };
   }
 
-  async loadMetadata(): Promise<void> {
+  async loadMetadata(priority?: RequestPriority): Promise<void> {
     if (this.metadata) return;
     if (this.metadataLoading) return this.metadataLoading;
     this.metadataLoading = (async () => {
-      const metadata = await readJson<TissueMetadata>(new URL('tissue-labels.json', this.baseUrl));
+      const metadata = await readJson<TissueMetadata>(
+        new URL('tissue-labels.json', this.baseUrl),
+        priority,
+      );
       if (metadata.schema_version !== 1) throw new Error('Unsupported tissue label schema.');
       this.metadata = metadata;
     })().finally(() => {
@@ -218,11 +226,14 @@ export class TissueSections {
   }
 
   /** `volumes.json`: the MRI and segmentation headers and the default MRI window. */
-  async loadVolumeMetadata(): Promise<VolumeMetadata> {
+  async loadVolumeMetadata(priority?: RequestPriority): Promise<VolumeMetadata> {
     if (this.volumeMetadata) return this.volumeMetadata;
     if (this.volumeMetadataLoading) return this.volumeMetadataLoading;
     this.volumeMetadataLoading = (async () => {
-      const metadata = await readJson<VolumeMetadata>(new URL('volumes.json', this.baseUrl));
+      const metadata = await readJson<VolumeMetadata>(
+        new URL('volumes.json', this.baseUrl),
+        priority,
+      );
       if (metadata.schema_version !== 1) throw new Error('Unsupported MRI schema.');
       this.volumeMetadata = metadata;
       return metadata;
@@ -236,12 +247,16 @@ export class TissueSections {
    * The native T1 on the GPU. MRI surface colour needs nothing more, and the
    * linked MRI views read the same volume rather than downloading it again.
    */
-  async loadMri(): Promise<Anatomy> {
+  async loadMri(priority?: RequestPriority): Promise<Anatomy> {
     if (this.anatomy) return this.anatomy;
     if (this.mriLoading) return this.mriLoading;
     this.mriLoading = (async () => {
-      const metadata = await this.loadVolumeMetadata();
-      const volume = await loadVolume(metadata.mri, new URL('volumes.json', this.baseUrl));
+      const metadata = await this.loadVolumeMetadata(priority);
+      const volume = await loadVolume(
+        metadata.mri,
+        new URL('volumes.json', this.baseUrl),
+        priority,
+      );
       if (this.disposed) throw new Error('Tissue sections disposed during MRI loading.');
       this.anatomy = this.createAnatomy(volume);
       this.setWindow(metadata.display.window_center, metadata.display.window_width);
@@ -257,18 +272,18 @@ export class TissueSections {
    * model's own meshes; the first cut is what downloads the envelopes and cord
    * when nothing has yet.
    */
-  async loadAnatomy(): Promise<void> {
+  async loadAnatomy(priority?: RequestPriority): Promise<void> {
     if (this.solidsReady) return;
     if (this.solidsLoading) return this.solidsLoading;
     this.solidsLoading = (async () => {
-      await this.loadMetadata();
+      await this.loadMetadata(priority);
       const parcels = this.metadata!.white_matter;
       const cord = this.model.manifest.supplemental_layers?.some((layer) => layer.id === 'pam50');
       const [, envelopes, parcelVolume] = await Promise.all([
-        this.loadMri(),
-        this.model.ensureEnvelopes(),
-        parcels ? loadVolume(parcels, this.baseUrl) : null,
-        cord ? this.model.ensureSpinalCord() : null,
+        this.loadMri(priority),
+        this.model.ensureEnvelopes(undefined, priority),
+        parcels ? loadVolume(parcels, this.baseUrl, priority) : null,
+        cord ? this.model.ensureSpinalCord(undefined, priority) : null,
       ]);
       if (this.disposed) throw new Error('Tissue sections disposed during MRI loading.');
       const anatomy = this.anatomy!;
@@ -410,8 +425,11 @@ export class TissueSections {
   }
 
   /** The striatal network atlas's confidence classes on the GPU, beside its labels. */
-  private async loadStriatalConfidence(record: NonNullable<TissueAtlasRecord['confidence']>) {
-    const volume = await loadVolume(record, this.baseUrl);
+  private async loadStriatalConfidence(
+    record: NonNullable<TissueAtlasRecord['confidence']>,
+    priority?: RequestPriority,
+  ) {
+    const volume = await loadVolume(record, this.baseUrl, priority);
     if (!(volume.data instanceof Uint8Array)) throw new Error('Expected uint8 confidence classes.');
     const texture = new Data3DTexture(volume.data, ...volume.shape);
     texture.format = RedIntegerFormat;
@@ -428,10 +446,13 @@ export class TissueSections {
     };
   }
 
-  /** Load one named label volume. The caller owns which atlas the cut samples. */
-  async load(atlas: string): Promise<void> {
+  /**
+   * Load one named label volume. The caller owns which atlas the cut samples; a prefetch asks for
+   * `low` priority.
+   */
+  async load(atlas: string, priority?: RequestPriority): Promise<void> {
     if (this.disposed) throw new Error('Tissue sections disposed.');
-    await Promise.all([this.loadMetadata(), this.loadAnatomy()]);
+    await Promise.all([this.loadMetadata(priority), this.loadAnatomy(priority)]);
     this.addDetail(this.model.state.detail);
     if (this.layers.has(atlas)) return;
     const loading = this.pending.get(atlas);
@@ -439,9 +460,9 @@ export class TissueSections {
     const metadata = this.metadata!.atlases[atlas];
     if (!metadata) throw new Error(`Missing tissue atlas: ${atlas}`);
     const pending = Promise.all([
-      loadVolume(metadata, this.baseUrl),
-      this.model.ensureRibbonWedges(atlas, this.baseUrl),
-      metadata.confidence ? this.loadStriatalConfidence(metadata.confidence) : null,
+      loadVolume(metadata, this.baseUrl, priority),
+      this.model.ensureRibbonWedges(atlas, this.baseUrl, priority),
+      metadata.confidence ? this.loadStriatalConfidence(metadata.confidence, priority) : null,
     ])
       .then(([volume, wedges]) => {
         if (this.disposed) throw new Error('Tissue sections disposed during loading.');

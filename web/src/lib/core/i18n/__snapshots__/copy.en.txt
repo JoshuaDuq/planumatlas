@@ -710,7 +710,8 @@
    "restore": "Could not restore the previous view.",
    "fullscreen": "Could not enter full screen.",
    "streamlines": "Could not show this landmark’s streamlines.",
-   "map": "Could not open the visual field map."
+   "map": "Could not open the visual field map.",
+   "guide": "Could not start the tour."
   }
  },
  "footer": {
@@ -2162,6 +2163,11 @@
    "[2,183] → \"Loading anatomy · 0.0<NNBSP>MB / 0.0<NNBSP>MB\"",
    "[183,12345] → \"Loading anatomy · 0.0<NNBSP>MB / 0.0<NNBSP>MB\"",
    "[12345,0] → \"Loading anatomy · 0.0<NNBSP>MB / 0.0<NNBSP>MB\""
+  ],
+  "loadingInternal": "Loading internal anatomy…",
+  "loadingInternalWithTotal": [
+   "[\"Alpha\",\"\"] → \"Loading internal anatomy · —<NNBSP>MB / 0.0<NNBSP>MB\"",
+   "[\"\",\"Alpha\"] → \"Loading internal anatomy · 0.0<NNBSP>MB / —<NNBSP>MB\""
   ],
   "progressAria": "Anatomy download",
   "loaded": "Anatomy loaded.",

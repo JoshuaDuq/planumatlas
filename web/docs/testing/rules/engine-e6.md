@@ -162,11 +162,11 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 
 ### DIFF-17 · Opening the tracts places the outline and the initial bundles on the surface
 
-- **Rule:** Loading reads the outline and the reference space, refuses a reference space of another anatomy, places the whole group by the reference transform, draws the outline translucent without depth writes, then loads the catalogue's initial bundles in order.
+- **Rule:** Loading reads the outline and the reference space, refuses a reference space of another anatomy, places the whole group by the reference transform, draws the outline translucent without depth writes, and loads the catalogue's initial bundles. The bundles download and decode alongside the outline and are added after it in catalogue order, so the scene and the snapshot are as when they loaded one after another.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/diffusion/native-viewer.js:19-46,83-86`
-- **Expected:** CDMD `load()` → `ready === true`; the group matrix is the published transform (DIFF-12) and not auto-updated; outline material colour 0xb3babf, roughness 0.8, transparent, `depthWrite === false`, opacity 0.16 (`brain_outline.opacity`); `snapshot()` ids ['af-left', 'cst-right'] with totals 3,639 and 964. `bounds` = the outline box moved by the published transform, read right after `load()`: min (−0.067971, −0.053958, −0.067933), max (0.065900, 0.091946, 0.085333) m within 1e-6. Legacy read the unplaced box (deviation `e6-reference-bounds-placed.md`). Catalogue anatomy `another-anatomy` → rejects "The tract reference space belongs to a different anatomy.".
+- **Expected:** CDMD `load()` → `ready === true`; the group matrix is the published transform (DIFF-12) and not auto-updated; outline material colour 0xb3babf, roughness 0.8, transparent, `depthWrite === false`, opacity 0.16 (`brain_outline.opacity`); `snapshot()` ids ['af-left', 'cst-right'] with totals 3,639 and 964. `bounds` = the outline box moved by the published transform, read right after `load()`: min (−0.067971, −0.053958, −0.067933), max (0.065900, 0.091946, 0.085333) m within 1e-6. Legacy read the unplaced box (deviation `e6-reference-bounds-placed.md`). Catalogue anatomy `another-anatomy` → rejects "The tract reference space belongs to a different anatomy.". Bundles held back and released in reverse order → every initial bundle requested before any arrives; snapshot ids and the group's children (outline, then each bundle's lines and hidden pass) in catalogue order.
 - **Covered by:** `src/lib/engine/diffusion/tracts.test.ts` (R, only `snapshot().length > 0`), `src/lib/engine/diffusion/native-viewer.test.ts` (R)
 
 ### DIFF-18 · Scanner and surface points convert both ways
@@ -310,12 +310,12 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 
 ### DIFF-33 · The navigator's maps must share one grid, and contrast needs a positive width
 
-- **Rule:** The navigator loads each catalogue map as a validated volume, and all maps must share the reference grid and affine; otherwise it refuses and frees the viewer. The T1 window is set from a finite centre and a positive width. An unknown plane is refused. The FA opacity sets the second map's opacity.
+- **Rule:** The navigator downloads and decodes the catalogue maps together, then adds each in catalogue order as a validated volume, and all maps must share the reference grid and affine; otherwise it refuses and frees the viewer. The T1 window is set from a finite centre and a positive width. An unknown plane is refused. The FA opacity sets the second map's opacity.
 - **Kind:** behaviour
 - **Level:** unit — with NiiVue mocked, as `navigation-viewer.test.ts` does; the contract suite repeats it on real NiiVue in the browser
 - **Source:** `viewer/diffusion/navigation-viewer.js:19-38,51-70`
-- **Expected:** A map whose dims or affine differ by more than 1e-5 → Error "The reference MRI maps must share the same source grid and RAS transform." and `cleanup()` called. `setWindow(c, w)` → `cal_min = c − w/2`, `cal_max = c + w/2`; `setWindow(0, 0)` or a NaN → RangeError "MRI contrast requires a finite center and positive width.". `setPlane('OBLIQUE')` → RangeError "Unknown MRI plane: OBLIQUE".
-- **Covered by:** `src/lib/engine/index.svelte.test.ts` (R, window and plane errors via contract suite); the grid check and the window values are uncovered
+- **Expected:** A map whose dims or affine differ by more than 1e-5 → Error "The reference MRI maps must share the same source grid and RAS transform." and `cleanup()` called. `setWindow(c, w)` → `cal_min = c − w/2`, `cal_max = c + w/2`; `setWindow(0, 0)` or a NaN → RangeError "MRI contrast requires a finite center and positive width.". `setPlane('OBLIQUE')` → RangeError "Unknown MRI plane: OBLIQUE". The maps' downloads held back and released in reverse order → every map requested before any arrives; volumes added T1 then FA. FA is loaded at opening although its opacity starts at 0: the crosshair readout reports its value (TRACT-35).
+- **Covered by:** `src/lib/engine/index.svelte.test.ts` (R, window and plane errors via contract suite); `src/lib/engine/diffusion/navigation-viewer.test.ts` (R, NiiVue mocked: concurrent downloads and order); the grid check and the window values are uncovered
 
 ### DIFF-34 · Closing the navigator frees its GPU context
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { centeredFrame } from './slices/coordinates.ts';
-import { createEngineSections } from './adapters.ts';
+import { createEngineModel, createEngineSections } from './adapters.ts';
 
 /** Only what `mriWindowLink` reads of the sections object. */
 function link(display: object | null, published: object | null) {
@@ -39,5 +39,14 @@ describe('the MRI window link', () => {
       center: 94,
       width: 189,
     });
+  });
+});
+
+describe('the model', () => {
+  it('ATLAS-54 has a layer only once the model calls it whole, not while a cortex is still blending', () => {
+    const atlas = { hasLayer: (id: string) => id === 'a', layers: new Map([['b', {}]]) };
+    const model = createEngineModel(atlas as never);
+    assert.equal(model.hasLayer('a'), true);
+    assert.equal(model.hasLayer('b'), false);
   });
 });

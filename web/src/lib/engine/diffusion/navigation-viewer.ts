@@ -76,18 +76,23 @@ export async function createMriNavigationViewer(
   };
   try {
     await viewer.attachToCanvas(canvas);
-    for (const map of catalog.maps) {
-      const { url, buffer } = await readDiffusionAsset(map.file);
-      const volume = await NVImage.loadFromUrl({
-        url,
-        buffer,
-        name: map.file.split('/').at(-1)!,
-        colormap: map.colormap,
-        opacity: map.opacity,
-        cal_min: map.range[0],
-        cal_max: map.range[1],
-        trustCalMinMax: true,
-      });
+    // Downloaded and decoded together; FA too, though it starts unseen, since the readout reports it.
+    const volumes = await Promise.all(
+      catalog.maps.map(async (map) => {
+        const { url, buffer } = await readDiffusionAsset(map.file);
+        return NVImage.loadFromUrl({
+          url,
+          buffer,
+          name: map.file.split('/').at(-1)!,
+          colormap: map.colormap,
+          opacity: map.opacity,
+          cal_min: map.range[0],
+          cal_max: map.range[1],
+          trustCalMinMax: true,
+        });
+      }),
+    );
+    for (const volume of volumes) {
       // A missing header is what validateVolume reports.
       validateVolume(volume as DiffusionVolume);
       const reference = viewer.volumes[0];

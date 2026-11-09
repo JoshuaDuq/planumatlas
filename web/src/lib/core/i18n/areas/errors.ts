@@ -31,6 +31,7 @@ export const en = {
     fullscreen: 'Could not enter full screen.',
     streamlines: 'Could not show this landmark’s streamlines.',
     map: 'Could not open the visual field map.',
+    guide: 'Could not start the tour.',
   },
 };
 
@@ -67,5 +68,6 @@ export const fr: typeof en = {
     fullscreen: 'Impossible de passer en plein écran.',
     streamlines: 'Impossible d’afficher les trajectoires de ce repère.',
     map: 'Impossible d’ouvrir la carte du champ visuel.',
+    guide: 'Impossible de lancer la visite.',
   },
 };

@@ -1,6 +1,7 @@
 import { flushSync } from 'svelte';
 import { ASSET_BASE } from '../../build/site.ts';
 import { keepAnatomyCached } from '../boot/keep-cached.ts';
+import { releaseUnseen } from '../lib/core/assets/asset-cache.ts';
 import { loadAnatomies, resolveAnatomy } from '../lib/core/assets/published-anatomy.ts';
 import { t } from '../lib/core/i18n/index.ts';
 import { startFailure } from '../lib/core/i18n/errors.ts';
@@ -21,7 +22,7 @@ import type { App } from './application.svelte.ts';
 import { bindAppLifecycle } from './lifecycle.ts';
 import { missingWebgl } from './webgl-check.ts';
 import { composeWorld } from './world.ts';
-import { firstLaunch } from '../features/guide/tour.ts';
+import { firstLaunch } from '../features/guide/first-launch.ts';
 
 /** What `mount` is given for `App.svelte`: its status and language follow the app, and every region can read the app from the context. */
 export function shellOptions(app: App) {
@@ -38,34 +39,42 @@ export function shellOptions(app: App) {
   };
 }
 
-/** How long the idle callback may wait before the other atlas is fetched anyway. */
+/** How long the idle callback may wait before the first cut is prepared anyway. */
 const PREFETCH_FALLBACK_MS = 1500;
 
-/** Once the first atlas is on screen, pull the other cortical atlas in while the reader is looking (app.js:73-82). */
-function prefetchOtherAtlas(model: EngineModel): void {
+const atlasPrefetched = new WeakSet<EngineModel>();
+
+/**
+ * The first time the reader points at or focuses the Atlas control, fetch the other cortical atlas
+ * ahead of a switch (app.js:73-82), where the GPU and connection allow it.
+ */
+export function prefetchOtherAtlas(model: EngineModel): void {
+  if (atlasPrefetched.has(model)) return;
+  atlasPrefetched.add(model);
   const atlas = prefetchAtlas(model.manifest.atlases, model.settings.atlas, {
     prefetchLayers: qualityProfile().prefetchLayers,
     connection: (globalThis.navigator as { connection?: ConnectionHints } | undefined)?.connection,
   });
   if (!atlas) return;
-  const idle =
-    globalThis.requestIdleCallback ?? ((run: () => void) => setTimeout(run, PREFETCH_FALLBACK_MS));
-  idle(() => {
-    model.prefetchLayer(atlas.id).catch((error) => console.warn('Prefetch failed:', error));
-  });
+  model.prefetchLayer(atlas.id).catch((error) => console.warn('Prefetch failed:', error));
 }
 
 /**
  * Once the first atlas is on screen, download, build and compile the first cut, which otherwise
  * waits for all three after the click. The gate reads memory and the connection, not the GPU.
+ * Called once the start's layers are in; two frames on, the first brain has been drawn.
  */
 function prefetchFirstCut(sections: EngineSections): void {
   if (!qualityProfile({ integrated: false }).prefetchCut) return;
   const idle =
     globalThis.requestIdleCallback ?? ((run: () => void) => setTimeout(run, PREFETCH_FALLBACK_MS));
-  idle(() => {
-    sections.prefetch().catch((error) => console.warn('Cut prefetch failed:', error));
-  });
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() =>
+      idle(() => {
+        sections.prefetch().catch((error) => console.warn('Cut prefetch failed:', error));
+      }),
+    ),
+  );
 }
 
 /**
@@ -88,7 +97,7 @@ async function openEngine(
       ...(detail !== undefined && { detail }),
       theme: app.theme.current,
       // The layers download in parallel: once the start has failed, the session drops the other's progress.
-      onProgress: ({ loaded, total }) => app.session.setProgress({ loaded, total }),
+      onProgress: (progress) => app.session.setProgress(progress),
     });
   try {
     return await open(wanted.atlas, wanted.detail);
@@ -136,7 +145,7 @@ export async function startApp(
       wanted,
     );
 
-    const world = composeWorld(app, engine, published.default);
+    const world = await composeWorld(app, engine, published.default);
     // The regions that draw from the engine mount here, and hand over the ports the controllers reach.
     app.attach(world);
     flushSync();
@@ -151,7 +160,6 @@ export async function startApp(
       flushSync();
       app.ports.startGuide();
     }
-    prefetchOtherAtlas(engine.model);
     prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);
     app.defer(() => globalThis.removeEventListener('hashchange', world.links.onHashChange));
@@ -159,6 +167,8 @@ export async function startApp(
     keepAnatomyCached();
   } catch (error) {
     console.error(error);
+    // No worker will take this page's downloads now.
+    releaseUnseen();
     app.dispose();
     const failure = startFailure(
       error,

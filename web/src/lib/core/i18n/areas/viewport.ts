@@ -45,6 +45,9 @@ export const en = {
   loadingAnatomy: 'Loading anatomy…',
   loadingWithTotal: (l: number, t: number) =>
     `Loading anatomy · ${megabytes(l, 'MB', 'en')} / ${megabytes(t, 'MB', 'en')}`,
+  loadingInternal: 'Loading internal anatomy…',
+  loadingInternalWithTotal: (l: number, t: number) =>
+    `Loading internal anatomy · ${megabytes(l, 'MB', 'en')} / ${megabytes(t, 'MB', 'en')}`,
   progressAria: 'Anatomy download',
   loaded: 'Anatomy loaded.',
   canvasRole: '3D anatomy viewer',
@@ -89,6 +92,9 @@ export const fr: typeof en = {
   loadingAnatomy: 'Chargement de l’anatomie…',
   loadingWithTotal: (l: number, t: number) =>
     `Chargement de l’anatomie · ${megabytes(l, 'Mo', 'fr')} / ${megabytes(t, 'Mo', 'fr')}`,
+  loadingInternal: 'Chargement de l’anatomie interne…',
+  loadingInternalWithTotal: (l: number, t: number) =>
+    `Chargement de l’anatomie interne · ${megabytes(l, 'Mo', 'fr')} / ${megabytes(t, 'Mo', 'fr')}`,
   progressAria: 'Téléchargement de l’anatomie',
   loaded: 'Anatomie chargée.',
   canvasRole: 'visionneuse anatomique 3D',

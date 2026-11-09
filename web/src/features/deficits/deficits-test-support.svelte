@@ -2,9 +2,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { View } from '../../lib/state/view.svelte.ts';
+  import clinicalRecords from '../../../../data/neuropsychology.yaml';
   import domains from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
-  import { loadClinicalCatalog } from '../../lib/core/clinical/load.ts';
+  import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
+  import type { ClinicalData } from '../../lib/core/clinical/types.ts';
   import { createInvolvement } from '../../lib/core/panels/related.ts';
   import type { Manifest, Region } from '../../lib/types/index.ts';
   import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
@@ -46,7 +48,7 @@
   // svelte-ignore state_referenced_locally
   const catalog = createCatalog(manifest, 'en');
   // svelte-ignore state_referenced_locally
-  const clinical = loadClinicalCatalog(manifest, domains.units);
+  const clinical = createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units);
   // svelte-ignore state_referenced_locally
   const regions = new Map<string, Region>(manifest.regions.map((region) => [region.id, region]));
   const calls: string[] = [];

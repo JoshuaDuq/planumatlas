@@ -17,7 +17,7 @@
   }: {
     status: LoadStatus;
     lang?: Language;
-    progress?: { loaded: number; total: number };
+    progress?: { loaded: number; total: number; internal?: boolean };
     failure?: { text: string; button?: string; dropLink?: boolean };
   } = $props();
 

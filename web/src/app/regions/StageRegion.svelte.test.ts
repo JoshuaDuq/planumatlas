@@ -44,9 +44,9 @@ let announcer: HTMLElement;
 let detach: () => void;
 
 /** Composes the world over the fake engine and mounts only the stage region, as the shell does. */
-function boot(status: 'ready' | 'loading' = 'ready') {
+async function boot(status: 'ready' | 'loading' = 'ready') {
   app = createApp();
-  app.attach(composeWorld(app, engine, 'cdmd'));
+  app.attach(await composeWorld(app, engine, 'cdmd'));
   if (status === 'ready') app.session.setLoaded();
   region = mount(StageRegion, { target, context: new Map([[APP, app]]) }) as never;
   // In the page the grid sizes the stage.
@@ -87,7 +87,7 @@ afterEach(() => {
 describe('what the stage region holds', () => {
   test('one main landmark holds the overlay, the dock, the gizmo, the keys and the snippet it is given; no stage control is outside it', async () => {
     app = createApp();
-    app.attach(composeWorld(app, engine, 'cdmd'));
+    app.attach(await composeWorld(app, engine, 'cdmd'));
     app.session.setLoaded();
     region = mount(StageRegionFixture, { target, context: new Map([[APP, app]]) }) as never;
     flushSync();
@@ -119,7 +119,7 @@ describe('what the stage region holds', () => {
   });
 
   test('the Tracts MRI dialog and the docked Linked MRI are children of the app root, outside the landmark; the Tracts MRI holds no navigator while closed', async () => {
-    boot();
+    await boot();
     expect(dialogs().map((dialog) => dialog.querySelector('h2')?.textContent)).toEqual([
       'MRI with tracts · MGH CDMD sub_013',
     ]);
@@ -131,13 +131,14 @@ describe('what the stage region holds', () => {
     expect(linkedMri()).toBeNull();
     await engine.sections.load();
     app.ports.showMri({ instant: true });
-    flushSync();
+    // Its code is fetched the first time it opens.
+    await vi.waitFor(() => expect(linkedMri()).not.toBeNull());
     expect(linkedMri()!.parentElement).toBe(target);
     expect(document.getElementById('viewport')!.contains(linkedMri())).toBe(false);
   });
 
   test('the exit control is kept mounted and hidden outside full screen, named by its visible text', async () => {
-    boot();
+    await boot();
     const exit = document.querySelector<HTMLButtonElement>('.exit-fullscreen')!;
     expect(exit.hidden).toBe(true);
     expect(exit.textContent!.trim()).toBe('Exit full screen');
@@ -145,14 +146,14 @@ describe('what the stage region holds', () => {
   });
 
   test('the stage passes axe with the dock and the keys', async () => {
-    boot();
+    await boot();
     await expectAxeClean();
   });
 });
 
 describe('the MRI dialogs', () => {
   test('openMpr docks the Linked MRI beside the stage, not as a modal; mprOpen answers, closeMpr closes it', async () => {
-    boot();
+    await boot();
     expect(app.ports.mprOpen()).toBe(false);
     app.ports.openMpr({ instant: true });
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
@@ -165,15 +166,14 @@ describe('the MRI dialogs', () => {
   });
 
   test('while it is docked the page keeps its keys outside it, and M from the stage closes it', async () => {
-    boot();
+    await boot();
     await engine.sections.load();
     app.ports.showMri({ instant: true });
-    flushSync();
+    await vi.waitFor(() => expect(linkedMri()).not.toBeNull());
     const stage = document.getElementById('viewport')!;
     stage.focus();
     // Open, but the keys are the page's: the stage's own shortcuts still reach the keymap.
     expect(app.ports.mprOpen()).toBe(false);
-    expect(linkedMri()).not.toBeNull();
     press('m');
     flushSync();
     expect(linkedMri()).toBeNull();
@@ -181,12 +181,11 @@ describe('the MRI dialogs', () => {
   });
 
   test('showMri opens it from the controllers, and the M key toggles it', async () => {
-    boot();
+    await boot();
     // The controllers show the dialog once the scan has loaded.
     await engine.sections.load();
     app.ports.showMri({ instant: true });
-    flushSync();
-    expect(app.ports.mprOpen()).toBe(true);
+    await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
     press('m');
     flushSync();
     expect(app.ports.mprOpen()).toBe(false);
@@ -195,7 +194,7 @@ describe('the MRI dialogs', () => {
   });
 
   test('the section row’s opener opens the same dialog', async () => {
-    boot();
+    await boot();
     await userEvent.click(page.getByRole('button', { name: 'Section', exact: true }));
     // A cut is needed before the section row offers the opener.
     await userEvent.click(page.getByRole('button', { name: 'Sagittal', exact: true }));
@@ -204,7 +203,7 @@ describe('the MRI dialogs', () => {
   });
 
   test('openDiffusionMri opens the Tracts MRI, diffusionMriOpen answers, and Escape closes it', async () => {
-    boot();
+    await boot();
     expect(app.ports.diffusionMriOpen()).toBe(false);
     app.ports.openDiffusionMri({ instant: true });
     flushSync();
@@ -216,7 +215,7 @@ describe('the MRI dialogs', () => {
   });
 
   test('the Tracts MRI holds a navigator only while open', async () => {
-    boot();
+    await boot();
     expect(engine.tracts.navigators).toHaveLength(0);
     app.ports.openDiffusionMri({ instant: true });
     flushSync();
@@ -229,7 +228,7 @@ describe('the MRI dialogs', () => {
 
 describe('the stage layout', () => {
   test('a desktop resize reaches the stage store through the engine’s viewport event', async () => {
-    boot();
+    await boot();
     engine.emit('viewport', {
       visibleRect: { x: 0, y: 0, width: 1000, height: 700 },
       hostSize: { width: 1000, height: 700 },
@@ -246,7 +245,7 @@ describe('the stage layout', () => {
   });
 
   test('a full phone sheet hides the dock, the gizmo, the scale bar and the letters', async () => {
-    boot();
+    await boot();
     const dock = document.querySelector<HTMLElement>('.stage-dock')!;
     const gizmo = document.querySelector<HTMLElement>('.orientation-gizmo')!;
     expect(getComputedStyle(dock).visibility).toBe('visible');
@@ -265,7 +264,7 @@ describe('the stage layout', () => {
 
 describe('save image', () => {
   test('saves the visible stage as planum-<atlas>-<view>.png and says so', async () => {
-    boot();
+    await boot();
     engine.emit('viewport', {
       visibleRect: { x: 0, y: 0, width: 1000, height: 700 },
       hostSize: { width: 1000, height: 700 },
@@ -284,7 +283,7 @@ describe('save image', () => {
   });
 
   test('says a second save of the same file again', async () => {
-    boot();
+    await boot();
     engine.emit('viewport', {
       visibleRect: { x: 0, y: 0, width: 1000, height: 700 },
       hostSize: { width: 1000, height: 700 },
@@ -301,6 +300,18 @@ describe('save image', () => {
     await vi.waitFor(() => expect(announcer.textContent).toBe(said));
     expect(app.session.state.notice?.text).toBe(said);
   });
+
+  test('the caption is read once the drawing code is in, so it names the scene the save captures', async () => {
+    await boot();
+    const saving = (region as never as { saveImage(): Promise<void> }).saveImage();
+    // Selected while the snapshot's code is still on its way.
+    const id = 'destrieux:left:30';
+    engine.model.select(id);
+    flushSync();
+    await saving;
+    const subject = vi.mocked(snapshot.saveSnapshot).mock.calls.at(-1)![1];
+    expect(subject.selection).toBe(`${app.world!.catalog.label(id).name}, left`);
+  });
 });
 
 const call = (domain: string, method: string) =>
@@ -308,17 +319,19 @@ const call = (domain: string, method: string) =>
 
 describe('the controllers’ entry points', () => {
   test('openPreparedPlane opens the dialog only while the step still wants it', async () => {
-    boot();
+    await boot();
+    await app.ports.openPreparedPlane('coronal', () => true);
+    await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
+    app.ports.closeMpr();
+    flushSync();
+    // The dialog's code has loaded, so a step that no longer wants it would show at once.
     await app.ports.openPreparedPlane('coronal', () => false);
     flushSync();
     expect(app.ports.mprOpen()).toBe(false);
-    await app.ports.openPreparedPlane('coronal', () => true);
-    flushSync();
-    expect(app.ports.mprOpen()).toBe(true);
   });
 
   test('M twice while the scan loads runs one load, and the opener says it is busy', async () => {
-    boot();
+    await boot();
     await userEvent.click(page.getByRole('button', { name: 'Section', exact: true }));
     await userEvent.click(page.getByRole('button', { name: 'Sagittal', exact: true }));
     await userEvent.keyboard('{Escape}');
@@ -344,7 +357,7 @@ describe('the controllers’ entry points', () => {
   });
 
   test('the Tracts MRI opens with its entry animation unless the opening was a key', async () => {
-    boot();
+    await boot();
     const dialog = dialogNamed('MRI with tracts · MGH CDMD sub_013');
     app.ports.openDiffusionMri({ instant: false });
     await vi.waitFor(() => expect(dialog.open).toBe(true));
@@ -357,7 +370,7 @@ describe('the controllers’ entry points', () => {
   });
 
   test('the Tracts MRI draws with the length the panel set', async () => {
-    boot();
+    await boot();
     const syncs: ReturnType<typeof vi.fn>[] = [];
     const create = engine.tracts.createMriNavigator.bind(engine.tracts);
     vi.spyOn(engine.tracts, 'createMriNavigator').mockImplementation(async (...args) => {
@@ -371,10 +384,10 @@ describe('the controllers’ entry points', () => {
   });
 
   test('a slider frame queued when the region goes is not run afterwards', async () => {
-    boot();
+    await boot();
     await engine.sections.load();
     app.ports.showMri({ instant: true });
-    flushSync();
+    await vi.waitFor(() => expect(linkedMri()).not.toBeNull());
     const slider = linkedMri()!.querySelector<HTMLInputElement>('input[type="range"]')!;
     const before = call('sections', 'setCrosshair').length;
     slider.value = String(Number(slider.value) + 5);
@@ -389,7 +402,7 @@ describe('the controllers’ entry points', () => {
 
 describe('focus and the crosshair', () => {
   test('a Linked MRI opened from a port returns focus to the Section tool, else to the model', async () => {
-    boot();
+    await boot();
     await engine.sections.load();
     (document.activeElement as HTMLElement | null)?.blur();
     app.ports.showMri({ instant: true });
@@ -404,7 +417,7 @@ describe('focus and the crosshair', () => {
 
   test('over the tract reference, where no Section tool is drawn, focus returns to the model', async () => {
     engine = createFakeEngine({ manifest, domains: domains as never, tractAnatomy: 'another' });
-    boot();
+    await boot();
     await engine.sections.load();
     engine.canvas.tabIndex = 0;
     app.session.setExplorer('diffusion');
@@ -417,7 +430,7 @@ describe('focus and the crosshair', () => {
   });
 
   test('the Tracts MRI starts at the atlas crosshair and moves it back', async () => {
-    boot();
+    await boot();
     engine.sections.setCrosshair([10, 20, 30]);
     await engine.tracts.setActive(true);
     const create = engine.tracts.createMriNavigator.bind(engine.tracts);
@@ -437,7 +450,7 @@ describe('focus and the crosshair', () => {
 
 describe('the dock and the keys', () => {
   test('a gizmo letter sets the session’s view and frames it; Reset view resets the camera, not the model', async () => {
-    boot();
+    await boot();
     (
       page.getByRole('button', { name: 'Superior view', exact: true }).element() as HTMLElement
     ).click();
@@ -458,7 +471,7 @@ describe('the dock and the keys', () => {
   });
 
   test('the dock offers Coordinate because the anatomy publishes coordinate spaces, and its popover holds the form', async () => {
-    boot();
+    await boot();
     expect(app.world!.coordinates).not.toBeNull();
     await userEvent.click(page.getByRole('button', { name: 'Coordinate', exact: true }));
     const dialog = page.getByRole('dialog', { name: 'Coordinate', exact: true }).element();
@@ -477,7 +490,7 @@ describe('the dock and the keys', () => {
     'at %i × %i the gizmo sits top right, clear of the top and right letters',
     async (width, height) => {
       await page.viewport(width, height);
-      boot();
+      await boot();
       const viewport = document.getElementById('viewport')!;
       viewport.style.cssText = `width: ${width - 40}px; height: ${height - 100}px`;
       flushSync();
@@ -507,7 +520,7 @@ describe('the dock and the keys', () => {
   }
 
   test('a functions paint draws its key, and a row press opens that function', async () => {
-    boot();
+    await boot();
     const openFunction = vi.fn();
     app.registerPorts({ openFunction });
     await functionsPainted();
@@ -520,7 +533,7 @@ describe('the dock and the keys', () => {
   });
 
   test('streamlines drawn show the direction key', async () => {
-    boot();
+    await boot();
     expect(document.getElementById('direction-key')).toBeNull();
     await engine.tracts.setActive(true);
     engine.tracts.setOverlay(true);
@@ -538,7 +551,7 @@ describe('the tract reference', () => {
       domains: domains as never,
       tractAnatomy: 'reference-brain',
     });
-    boot();
+    await boot();
     engine.model.setSurfaceColor('network');
     flushSync();
     expect(document.getElementById('network-key')).not.toBeNull();
@@ -553,7 +566,7 @@ describe('the tract reference', () => {
   });
 
   test('the selected region reaches the snapshot subject, named with its side', async () => {
-    boot();
+    await boot();
     const id = 'destrieux:left:30';
     engine.model.select(id);
     flushSync();
@@ -563,7 +576,7 @@ describe('the tract reference', () => {
   });
 
   test('an open cut reaches the snapshot subject', async () => {
-    boot();
+    await boot();
     await userEvent.click(page.getByRole('button', { name: 'Section', exact: true }));
     await userEvent.click(page.getByRole('button', { name: 'Sagittal', exact: true }));
     await (region as never as { saveImage(): Promise<void> }).saveImage();
@@ -575,7 +588,7 @@ describe('the tract reference', () => {
 
 describe('the phone', () => {
   test('under a full sheet the scale bar is hidden as well', async () => {
-    boot();
+    await boot();
     app.stage.sheetFull = true;
     flushSync();
     expect(getComputedStyle(document.getElementById('scale-bar')!).visibility).toBe('hidden');
@@ -583,7 +596,7 @@ describe('the phone', () => {
 
   test('an open popover hides the scale bar and the letters, and closing shows them', async () => {
     await page.viewport(390, 844);
-    boot();
+    await boot();
     const bar = document.getElementById('scale-bar')!;
     const letters = document.getElementById('orientation')!;
     expect(getComputedStyle(bar).visibility).toBe('visible');
@@ -596,7 +609,7 @@ describe('the phone', () => {
 
   test('in French at 390 px the exit control starts below the top letter', async () => {
     await page.viewport(390, 844);
-    boot();
+    await boot();
     app.chooseLanguage('fr');
     flushSync();
     const exit = document.querySelector<HTMLElement>('.exit-fullscreen')!;
