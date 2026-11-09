@@ -169,7 +169,8 @@
   /* A quiet ledger at the same 16px; labels recede while measured values align right. */
   .region-detail .facts {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    /* The values take what they need, up to 60%, so a label wraps only when it must. */
+    grid-template-columns: minmax(0, 1fr) fit-content(60%);
     column-gap: var(--space-3);
     align-items: baseline;
     margin-top: var(--space-4);

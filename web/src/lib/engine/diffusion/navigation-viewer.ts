@@ -4,7 +4,12 @@ import type { TractCatalog } from '../../core/diffusion/catalogs.ts';
 import type { DiffusionVolume } from '../../core/diffusion/validation.ts';
 import { validateVolume } from '../../core/diffusion/validation.ts';
 import type { MriLocation, MriNavigator, MriPlaneChoice, Vec3 } from '../api.ts';
-import { configureNavigationTract, scannerVoxel, sourceVoxelPoint } from './navigation-data.ts';
+import {
+  configureNavigationTract,
+  largerPaneLayout,
+  scannerVoxel,
+  sourceVoxelPoint,
+} from './navigation-data.ts';
 import type { TractLoader } from './tract-file.ts';
 
 /** `loadTract` is the decode the 3D lines already hold; the navigator builds its fibers from it. */
@@ -16,6 +21,7 @@ export async function createMriNavigationViewer(
 ): Promise<MriNavigator> {
   const { Niivue, NVImage, NVMesh, SHOW_RENDER, SLICE_TYPE, MULTIPLANAR_TYPE } =
     await import('@niivue/niivue');
+  const PANE_PAD = 16;
   const viewer = new Niivue({
     backColor: [0.035, 0.045, 0.06, 1],
     crosshairColor: [0.47, 0.8, 0.92, 1],
@@ -28,7 +34,7 @@ export async function createMriNavigationViewer(
     isSliceMM: true,
     multiplanarShowRender: SHOW_RENDER.ALWAYS,
     multiplanarLayout: MULTIPLANAR_TYPE.GRID,
-    multiplanarPadPixels: 16,
+    multiplanarPadPixels: PANE_PAD,
     meshXRay: 0.8,
     meshThicknessOn2D: 2,
     dragAndDropEnabled: false,
@@ -36,6 +42,19 @@ export async function createMriNavigationViewer(
   });
   const meshes = new Map<string, NVMesh>();
   let disposed = false;
+  let panes: ResizeObserver | undefined;
+  // One row on a wide canvas, the grid on a narrow one.
+  function fitPanes(): void {
+    const layout =
+      MULTIPLANAR_TYPE[
+        largerPaneLayout(
+          [canvas.clientWidth, canvas.clientHeight],
+          viewer.sliceScale().volScale,
+          PANE_PAD,
+        )
+      ];
+    if (viewer.opts.multiplanarLayout !== layout) viewer.setMultiplanarLayout(layout);
+  }
   // NiiVue reports its own RAS-reordered voxel, which mirrors the source grid of a right-to-left scan.
   // The dialog and `setVoxel` speak source voxels, so the report is rebuilt from the scanner point.
   viewer.onLocationChange = (location) => {
@@ -88,8 +107,14 @@ export async function createMriNavigationViewer(
         );
       }
       viewer.addVolume(volume);
+      if (!reference) {
+        fitPanes();
+        panes = new ResizeObserver(fitPanes);
+        panes.observe(canvas);
+      }
     }
   } catch (error) {
+    panes?.disconnect();
     viewer.cleanup();
     throw error;
   }
@@ -192,6 +217,7 @@ export async function createMriNavigationViewer(
     /** Frees the GPU context and the volumes; a canvas whose context was lost cannot be drawn on again. */
     dispose() {
       disposed = true;
+      panes?.disconnect();
       for (const mesh of meshes.values()) mesh.unloadMesh(viewer.gl);
       meshes.clear();
       viewer.cleanup();

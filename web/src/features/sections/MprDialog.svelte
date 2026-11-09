@@ -377,7 +377,8 @@
           <h3 id="{uid}-{plane}">
             {planeName(plane, lang)}
             <span class="seen-from">{copy.seenFrom[seenFrom(plane, frame.edges)]}</span
-            >{#if convention}{' '}<span class="seen-from"
+            ><!-- The picture carries the convention's mark; the heading says it for those who cannot see it. -->
+            {#if convention}<span class="visually-hidden"
                 >{`· ${copy.conventions[convention]}`}</span
               >{/if}
           </h3>

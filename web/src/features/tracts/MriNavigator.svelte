@@ -709,6 +709,29 @@
         border-color: var(--border-control);
       }
     }
+    @media (max-width: 560px) {
+      /* The three indices share one line under their title; wrapping left k alone on a second. */
+      .position {
+        display: grid;
+        justify-items: start;
+      }
+      .voxels {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 8rem));
+      }
+      .voxel-title {
+        grid-column: 1 / -1;
+      }
+      .voxels label {
+        flex: 1;
+        min-width: 0;
+      }
+      input[type='number'] {
+        flex: 1;
+        width: 0;
+        min-width: 0;
+      }
+    }
   }
 
   @layer a11y {

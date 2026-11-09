@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import {
   configureNavigationTract,
+  largerPaneLayout,
   scannerVoxel,
   sourceVoxelPoint,
   type NavigationTract,
@@ -101,4 +102,18 @@ test('DIFF-28 a voxel and its scanner point are inverse on an oblique grid, for 
     );
     assert.deepEqual(found, voxel);
   }
+});
+
+test('the four MRI panes take the layout that draws them larger', () => {
+  // The CDMD reference grid: 176 x 220 x 220 mm.
+  const extent = [176, 220, 220];
+  // The desktop dialog: a row draws 1.38 px/mm, the grid 1.03.
+  assert.equal(largerPaneLayout([1138, 468], extent, 16), 'ROW');
+  // A phone: the grid draws 0.86 px/mm, a row 0.39.
+  assert.equal(largerPaneLayout([358, 439], extent, 16), 'GRID');
+  // Three panes in a row would beat the grid here, but the row holds four (0.82 against 1.03).
+  assert.equal(largerPaneLayout([700, 468], extent, 16), 'GRID');
+  // The padding between panes counts: a row has three gaps across, the grid one each way.
+  assert.equal(largerPaneLayout([1000, 540], extent, 0), 'ROW');
+  assert.equal(largerPaneLayout([1000, 540], extent, 40), 'GRID');
 });

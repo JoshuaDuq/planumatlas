@@ -63,3 +63,20 @@ export function configureNavigationTract(
   // NiiVue normally stores rounded Uint32 lengths; retain the source precision.
   mesh.fiberLengths = lengths;
 }
+
+/**
+ * The layout that draws the four panes (axial, coronal, sagittal, 3D) larger, by NiiVue's own
+ * arithmetic: each layout scales to the canvas less the padding between its panes. `extent` is
+ * the volume's left-right, anterior-posterior and superior-inferior field of view, in any unit.
+ */
+export function largerPaneLayout(
+  canvas: readonly [width: number, height: number],
+  extent: readonly number[],
+  pad: number,
+): 'ROW' | 'GRID' {
+  const [x, y, z] = extent as [number, number, number];
+  const scale = (width: number, height: number, columns: number, rows: number) =>
+    Math.min((canvas[0] - (columns - 1) * pad) / width, (canvas[1] - (rows - 1) * pad) / height);
+  const row = scale(2 * x + y + Math.max(x, y, z), Math.max(y, z), 4, 1);
+  return row > scale(x + y, y + z, 2, 2) ? 'ROW' : 'GRID';
+}
