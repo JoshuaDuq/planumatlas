@@ -366,14 +366,14 @@ describe('the published cdmd anatomy', () => {
     );
   });
 
-  test('CAT-38: language reaches 96 regions on 1101 studies, strongest hcp-mmp:left:81 then :74', () => {
+  test('CAT-38: language reaches 95 regions on 1101 studies, strongest hcp-mmp:left:74 then :81', () => {
     const areas = domainAreas(domains, 'language');
-    assert.equal(areas.length, 96);
+    assert.equal(areas.length, 95);
     assert.deepEqual(
       areas.slice(0, 2).map((area) => [area.region, Math.round(area.z * 100) / 100]),
       [
-        ['hcp-mmp:left:81', 20.26],
-        ['hcp-mmp:left:74', 18.29],
+        ['hcp-mmp:left:74', 19.74],
+        ['hcp-mmp:left:81', 19.44],
       ],
     );
     assert.equal(domainStudies(domains, 'language'), 1101);
@@ -395,11 +395,11 @@ describe('the published cdmd anatomy', () => {
       assert.equal(zBand(domains, z)!.from, from, String(z));
   });
 
-  test('CAT-39: the overview paints 249 of the 289 regions that reach a domain, and 16 teaching units; an unknown domain throws', () => {
+  test('CAT-39: the overview paints 252 of the 294 regions that reach a domain, and 14 teaching units (no caudate); an unknown domain throws', () => {
     const painted = [...domainPaint(domains, ALL_DOMAINS).colors.keys()];
-    assert.equal(painted.length, 249 + 16);
-    assert.equal(painted.filter((id) => id in domains.units).length, 16);
-    assert.equal(Object.keys(domains.regions).length, 289);
+    assert.equal(painted.length, 252 + 14);
+    assert.equal(painted.filter((id) => id in domains.units).length, 14);
+    assert.equal(Object.keys(domains.regions).length, 294);
     assert.throws(
       () => domainPaint(domains, 'praxis'),
       /Unknown neuropsychological domain: praxis/,

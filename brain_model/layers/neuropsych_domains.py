@@ -10,7 +10,6 @@ from nibabel.freesurfer.io import read_annot
 
 from ..sources import HEMISPHERES, ROOT, write_json
 from .functional_regions import AREA_NAME, AREAS_PER_HEMISPHERE, area_of
-from .learning import ATLAS_ID as UNIT_ATLAS
 
 ATLAS_ID = "neuropsych-domains"
 SURFACE_ATLAS = "hcp-mmp"
@@ -23,8 +22,8 @@ FSAVERAGE = ROOT / "data/fsaverage"
 CHECKED_ATLAS = "destrieux"
 CHECKED_ANNOTATION = "aparc.a2009s"
 SIDES = {"left": "L", "right": "R"}
-# The grey-matter structures of FreeSurfer's aseg each map is also averaged over, on fsaverage's own
-# segmentation: the same template, and so the same MNI305 frame, the cortical areas are sampled in.
+# The grey-matter structures of FreeSurfer's aseg each map is also averaged over, on SynthSeg's
+# segmentation of the MNI152 template the maps are computed on.
 STRUCTURE_ATLAS = "aseg"
 STRUCTURES = {
     8: "Left-Cerebellum-Cortex", 10: "Left-Thalamus-Proper", 11: "Left-Caudate", 12: "Left-Putamen",
@@ -156,6 +155,9 @@ def assign(regions, definition, scores):
 
 def teaching_units(regions, definition):
     """Each teaching-set unit drawn with a scored structure's score, and that structure's region."""
+    # Imported here: the score derivation reads this module where the mesh stack is not installed.
+    from .learning import ATLAS_ID as UNIT_ATLAS
+
     ids = {region["id"] for region in regions}
     if not any(region["atlas"] == UNIT_ATLAS for region in regions):
         return {}
@@ -244,6 +246,8 @@ def lesion_checks(definition, scores):
 
 
 def partition(regions):
+    from .learning import ATLAS_ID as UNIT_ATLAS
+
     definition = read_definition()
     scores = read_scores(definition)
     return {

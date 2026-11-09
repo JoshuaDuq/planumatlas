@@ -12,17 +12,16 @@ import json
 import multiprocessing
 import os
 import sys
-from importlib.metadata import version
 from pathlib import Path
 
 from nimare.extract import fetch_neurosynth
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import derive_domain_scores as derive
-from derive_domain_scores import CACHE, KERNEL_RADIUS_MM, LABEL_THRESHOLD, MAP, NEUROSYNTH_VERSION
+from derive_domain_scores import CACHE, NEUROSYNTH_VERSION
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from brain_model.sources import ROOT, sha256, write_json
+from brain_model.sources import ROOT, write_json
 
 SCORES = ROOT / "data/neurosynth-terms/term-scores.json"
 PREFIX = "terms_abstract_tfidf__"
@@ -42,6 +41,9 @@ def fit(task):
 
 
 def run(out):
+    # Checked once here and inherited by every fork.
+    derive.fusion_coordinates()
+    derive.template_segmentation()
     derive.dataset = fetch_neurosynth(data_dir=CACHE, version=NEUROSYNTH_VERSION, return_type="dataset",
                                       source="abstract", vocab="terms")[0]
     terms = vocabulary(derive.dataset)
@@ -65,16 +67,7 @@ def merge(out):
            for entry in fitted):
         raise ValueError("Every term must be scored on the same areas and structures")
     header = {
-        "derivation": {
-            "database": f"Neurosynth version {NEUROSYNTH_VERSION}, abstract terms",
-            "files": {path.name: sha256(path) for path in sorted((CACHE / "neurosynth").glob("*"))},
-            "selection": f"abstract TF-IDF >= {LABEL_THRESHOLD}",
-            "map": f"MKDAChi2 {MAP}, {KERNEL_RADIUS_MM} mm kernel",
-            "projection": "nilearn vol_to_surf between fsaverage white and pial, mean per HCP-MMP area",
-            "structures": "resampled (continuous) onto fsaverage's aseg, mean per grey-matter structure",
-            "software": {name: version(name) for name in ("nimare", "nilearn", "numpy")},
-            "rounding": f"{DECIMALS} decimals",
-        },
+        "derivation": {**derive.derivation(), "rounding": f"{DECIMALS} decimals"},
         "areas": areas,
         "structures": structures,
     }

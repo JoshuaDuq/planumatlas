@@ -1605,11 +1605,13 @@
     "atlas": "hcp-mmp",
     "label": "Neuropsychological domains (Neurosynth consistency maps on HCP-MMP areas and aseg structures)",
     "citations": [
-      "https://doi.org/10.1038/nmeth.1635"
+      "https://doi.org/10.1038/nmeth.1635",
+      "https://doi.org/10.1002/hbm.24213",
+      "https://doi.org/10.1073/pnas.2216399120"
     ],
     "license": "Open Database License (ODbL) 1.0; derived area scores shared under the same licence",
     "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
-    "method": "Each domain's Neurosynth abstract term (version 7, TF-IDF at least 0.001); MKDA chi-square uniformity z with a 6 mm kernel, sampled between fsaverage's white and pial surfaces and averaged per HCP-MMP area, and resampled onto fsaverage's aseg and averaged per grey-matter structure. An area or structure belongs to every domain whose mean z reaches 3, its strength measured against the domain's cortical maximum; in the overview of the eleven assessment domains it takes the one whose z is the largest share of that domain's cortical maximum. Carried per area, never per vertex"
+    "method": "Each domain's Neurosynth abstract term (version 7, TF-IDF at least 0.001); MKDA chi-square uniformity z with a 6 mm kernel on FSL's MNI152, read at each fsaverage vertex's MNI152 coordinate by registration fusion (RF-ANTs) and averaged per HCP-MMP area, and resampled onto SynthSeg's segmentation of the same MNI152 template and averaged per grey-matter structure. An area or structure belongs to every domain whose mean z reaches 3, its strength measured against the domain's cortical maximum; in the overview of the eleven assessment domains it takes the one whose z is the largest share of that domain's cortical maximum. Carried per area, never per vertex"
   },
   "neurosynth_terms": {
     "id": "neurosynth-terms",
@@ -1621,7 +1623,7 @@
     ],
     "license": "Open Database License (ODbL) 1.0; derived area scores shared under the same licence",
     "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
-    "method": "Neurosynth version 7 abstract terms naming a function, task, stimulus, state, behaviour or clinical population, each derived as the domains are: studies whose abstract uses the term at a TF-IDF of at least 0.001 against every other study, MKDA chi-square uniformity z with a 6 mm kernel, averaged per HCP-MMP area between fsaverage's white and pial surfaces and per aseg grey-matter structure. An area or structure is drawn where its mean z reaches 3. Carried per area, never per vertex"
+    "method": "Neurosynth version 7 abstract terms naming a function, task, stimulus, state, behaviour or clinical population, each derived as the domains are: studies whose abstract uses the term at a TF-IDF of at least 0.001 against every other study, MKDA chi-square uniformity z with a 6 mm kernel, averaged per HCP-MMP area through registration fusion (RF-ANTs) and per aseg grey-matter structure on SynthSeg's segmentation of the MNI152 template. An area or structure is drawn where its mean z reaches 3. Carried per area, never per vertex"
   },
   "receptor_fingerprints": {
     "id": "receptor-fingerprints",
@@ -94559,11 +94561,11 @@
     "Neuropsychological domains are Neurosynth consistency maps of the published activation literature, averaged over each HCP-MMP area on fsaverage and reaching this brain through its HCP-MMP projection. They show where studies using a domain's term report activation in groups of healthy people, not what this brain does, and not what damage to an area would impair.",
     "Most terms are used by at least 100 studies. Eleven clinically pertinent ones rest on fewer, down to 74 (sustained attention, smell, navigation, verbal fluency, taste, interoception, gestures, object recognition, moral reasoning, arithmetic, speech perception); their maps are weaker evidence, and every function names its study count.",
     {
-      "Consciousness (74 studies) was derived and left out": "its map reached one area, MT, at z 3.1, and no structure."
+      "Consciousness (74 studies) was derived and left out": "its map reached two areas, right MT at z 3.3 and the left fusiform face complex at 3.1, and no structure."
     },
     "Each domain is one abstract term chosen to name the clinical domain, and a study counts when its abstract uses the term, whatever task it ran. Consistency z grows with the number of such studies, so domains backed by large literatures (attention, language, working memory) reach more areas than executive function or social cognition; regions engaged by most demanding tasks, such as the anterior insula and intraparietal sulcus, reach several domains.",
-    "Besides the cortex, each map is averaged over FreeSurfer's grey-matter structures (thalamus, caudate, putamen, pallidum, hippocampus, amygdala, accumbens, ventral diencephalon, cerebellar cortex and brainstem), each as a whole on fsaverage's own segmentation. The 6 mm kernel is large beside the smaller nuclei, the few millimetres between MNI305 and MNI152 matter more there, and studies report fewer subcortical coordinates, so these are weaker evidence than the cortical areas. White matter and NextBrain's finer nuclei are not scored, and a lesion check on them is reported as not measured. The teaching set's caudate, putamen, both pallidal segments, accumbens, thalamus, hippocampus and amygdala are drawn with the score of the structure most of each lies in on this brain; its other units, the geniculate bodies among them, which FreeSurfer files under the ventral diencephalon, are not scored.",
-    "Neurosynth's MNI152 maps are sampled on fsaverage's surfaces, whose MNI305 space differs from MNI152 by a few millimetres; whole-area averages absorb most, not all, of that difference.",
+    "Besides the cortex, each map is averaged over FreeSurfer's grey-matter structures (thalamus, caudate, putamen, pallidum, hippocampus, amygdala, accumbens, ventral diencephalon, cerebellar cortex and brainstem), each as a whole on SynthSeg's segmentation of the MNI152 template the maps are computed on. The 6 mm kernel is large beside the smaller nuclei, and studies report fewer subcortical coordinates, so these are weaker evidence than the cortical areas. White matter and NextBrain's finer nuclei are not scored, and a lesion check on them is reported as not measured. The teaching set's caudate, putamen, both pallidal segments, accumbens, thalamus, hippocampus and amygdala are drawn with the score of the structure most of each lies in on this brain; its other units, the geniculate bodies among them, which FreeSurfer files under the ventral diencephalon, are not scored.",
+    "Neurosynth's MNI152 maps reach fsaverage by registration fusion (Wu et al. 2018), each vertex read where 1,490 people's registrations place it in MNI152 on average, at mid-thickness. That mapping places group results, not any one person's folds, and areas narrower than the 6 mm kernel share their neighbours' values.",
     "Searched terms are words chosen from Neurosynth's vocabulary for naming a function, task, stimulus, state or behaviour; unlike the curated functions, no map was checked against what it names or against lesion studies. A term's map shows where studies whose abstract uses it report activation, whatever their task.",
     "A population term (schizophrenia, aphasia, smokers) gathers studies of that group, most comparing it with healthy people. Its map shows where those studies report activation, not where damage causes the condition.",
     "Consistency z grows with study count, so a term with few studies reaches fewer areas, and every term names its study count.",

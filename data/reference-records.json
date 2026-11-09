@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-07",
+ "fetched": "2026-11-09",
  "sources": "PubMed efetch, Bookshelf esummary and Crossref; no abstracts",
  "year": "PubMed's journal-issue publication year (PubDate, or the first year of a MedlineDate range), not the online-first year; for a Bookshelf chapter, the book's publication year",
  "records": {
@@ -7014,6 +7014,30 @@
    "pages": "57-68",
    "corrections": []
   },
+  "pmid:29770530": {
+   "pmid": "29770530",
+   "pmcid": "PMC6239990",
+   "doi": "10.1002/hbm.24213",
+   "doi_source": "pubmed",
+   "title": "Accurate nonlinear mapping between MNI volumetric and FreeSurfer surface coordinate systems",
+   "authors": [
+    "Wu J",
+    "Ngo GH",
+    "Greve D",
+    "Li J",
+    "He T",
+    "Fischl B",
+    "Eickhoff SB",
+    "Yeo BTT"
+   ],
+   "year": 2018,
+   "pubdate": "2018 Sep",
+   "journal": "Hum Brain Mapp",
+   "volume": "39",
+   "issue": "9",
+   "pages": "3793-3808",
+   "corrections": []
+  },
   "pmid:30025851": {
    "pmid": "30025851",
    "pmcid": "PMC6150949",
@@ -8621,6 +8645,28 @@
    "volume": "10",
    "issue": "1",
    "pages": "74",
+   "corrections": []
+  },
+  "pmid:36802420": {
+   "pmid": "36802420",
+   "pmcid": "PMC9992854",
+   "doi": "10.1073/pnas.2216399120",
+   "doi_source": "pubmed",
+   "title": "Robust machine learning segmentation for large-scale analysis of heterogeneous clinical brain MRI datasets",
+   "authors": [
+    "Billot B",
+    "Magdamo C",
+    "Cheng Y",
+    "Arnold SE",
+    "Das S",
+    "Iglesias JE"
+   ],
+   "year": 2023,
+   "pubdate": "2023 Feb 28",
+   "journal": "Proc Natl Acad Sci U S A",
+   "volume": "120",
+   "issue": "9",
+   "pages": "e2216399120",
    "corrections": []
   },
   "pmid:37442623": {

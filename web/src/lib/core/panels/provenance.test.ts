@@ -192,7 +192,7 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
   const text = (label: string) => domainItems.find((item) => item.text === label)!.note;
   assert.equal(
     text('Executive functions: “executive function”'),
-    'Lesion check: Executive dysfunction (Gläscher et al. 2012): G_front_middle (L) 13% coloured, G_front_middle (R) 18% coloured, G_and_S_cingul-Ant (L) 0% coloured, G_and_S_cingul-Ant (R) 8% coloured.',
+    'Lesion check: Executive dysfunction (Gläscher et al. 2012): G_front_middle (L) 0% coloured, G_front_middle (R) 18% coloured, G_and_S_cingul-Ant (L) 0% coloured, G_and_S_cingul-Ant (R) 8% coloured.',
   );
   assert.equal(
     text('Pain: “pain”'),
@@ -207,7 +207,7 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
   const [executive] = domains.lesion_checks.executive as Parameters<typeof checkedParcels>[0][];
   assert.equal(
     checkedParcels(executive, 'fr'),
-    'G_front_middle (G) colorée à 13\u202f%, G_front_middle (D) colorée à 18\u202f%, G_and_S_cingul-Ant (G) colorée à 0\u202f%, G_and_S_cingul-Ant (D) colorée à 8\u202f%',
+    'G_front_middle (G) colorée à 0\u202f%, G_front_middle (D) colorée à 18\u202f%, G_and_S_cingul-Ant (G) colorée à 0\u202f%, G_and_S_cingul-Ant (D) colorée à 8\u202f%',
   );
   const midline = {
     ...executive,

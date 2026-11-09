@@ -100,16 +100,22 @@ def template_images(space, work):
     return readable, moving, mask, [origin for _, origin in files.values()]
 
 
-def register(home, threads, space, fixed, aseg, work):
-    """Register the template, carry SynthSeg's reading of it onto aseg's grid, and score both."""
-    readable, moving, mask, origins = template_images(space, work)
-    freesurfer(home, "mri_synthmorph", "register", "-m", "joint", "-j", threads,
-               "-t", work / "fwd.nii.gz", "-T", work / "inv.nii.gz", moving, fixed)
+def segment_template(home, threads, readable, work):
+    """SynthSeg's reading of a template, on the template's own grid, written to work/seg.nii.gz."""
     freesurfer(home, "mri_synthseg", "--i", readable, "--o", work / "synthseg.nii.gz",
                "--parc", "--robust", "--threads", threads)
     template = nib.load(readable)
     seg = nibabel.processing.resample_from_to(nib.load(work / "synthseg.nii.gz"), template, order=0)
     nib.save(nib.Nifti1Image(np.asarray(seg.dataobj).astype(np.int16), template.affine), work / "seg.nii.gz")
+    return seg, template
+
+
+def register(home, threads, space, fixed, aseg, work):
+    """Register the template, carry SynthSeg's reading of it onto aseg's grid, and score both."""
+    readable, moving, mask, origins = template_images(space, work)
+    freesurfer(home, "mri_synthmorph", "register", "-m", "joint", "-j", threads,
+               "-t", work / "fwd.nii.gz", "-T", work / "inv.nii.gz", moving, fixed)
+    seg, template = segment_template(home, threads, readable, work)
     freesurfer(home, "mri_synthmorph", "apply", "-m", "nearest", work / "fwd.nii.gz", work / "seg.nii.gz",
                work / "carried.nii.gz")
     carried = nib.load(work / "carried.nii.gz")
