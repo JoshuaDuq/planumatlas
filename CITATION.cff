@@ -16,8 +16,6 @@ authors:
   - given-names: Joshua
     family-names: Duquette
     email: joshua.duquette.1@ulaval.ca
-  - given-names: Andrew
-    family-names: Duquette
 repository-code: https://github.com/JoshuaDuq/planumatlas
 url: https://planumatlas.com
 license: AGPL-3.0-or-later

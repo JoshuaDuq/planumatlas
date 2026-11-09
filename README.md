@@ -212,7 +212,7 @@ If you use Planum, cite it and the data behind the views you use; the [reference
 
 ```bibtex
 @software{planum,
-  author  = {Duquette, Joshua and Duquette, Andrew},
+  author  = {Duquette, Joshua},
   title   = {Planum},
   year    = {2026},
   url     = {https://planumatlas.com},
