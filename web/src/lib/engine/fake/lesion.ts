@@ -33,10 +33,13 @@ function requireRadius({ radius }: LesionSphere): void {
 export function createFakeLesion({
   bundles,
   measurement = EMPTY,
+  assemble,
 }: {
   /** The anatomy's own bundles, or null when its tracts are another subject's. */
   bundles: readonly { id: string }[] | null;
   measurement?: LesionMeasurement;
+  /** What is drawn where the anatomy lies puts an exploded brain back together. */
+  assemble: () => void;
 }): FakeLesion {
   let shown: LesionSphere | null = null;
   let placing = false;
@@ -54,9 +57,11 @@ export function createFakeLesion({
     show(sphere) {
       if (sphere) requireRadius(sphere);
       shown = sphere;
+      if (sphere) assemble();
     },
     setPlacing(next) {
       placing = next;
+      if (next) assemble();
     },
     async measure(sphere) {
       requireRadius(sphere);
@@ -79,6 +84,7 @@ export function createFakeLesion({
         throw new RangeError(`Unknown tract bundle: ${id}`);
       }
       shownTract = { id, sphere };
+      assemble();
     },
     clearTract() {
       shownTract = null;

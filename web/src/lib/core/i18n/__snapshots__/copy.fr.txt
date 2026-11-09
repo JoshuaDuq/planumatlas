@@ -522,6 +522,8 @@
   "showInternal": "Afficher l’anatomie interne",
   "showSpinalCord": "Afficher la moelle épinière",
   "spinalCordUnavailable": "Aucune moelle épinière n’est publiée pour ce sujet.",
+  "explode": "Vue éclatée",
+  "explodeHint": "Les structures gardent leur forme mesurée<NNBSP>; seule leur place change.",
   "surfaceColors": {
    "tissue": "Tissu",
    "mri": "IRM T1",
@@ -957,6 +959,11 @@
     "body": "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne."
    },
    {
+    "id": "explode",
+    "title": "La vue éclatée",
+    "body": "Écartez les structures (Affichage, puis Vue éclatée, ou la touche E) : chacune garde sa forme mesurée, et l’anatomie profonde apparaît entre les hémisphères."
+   },
+   {
     "id": "topBar",
     "title": "La barre du haut",
     "body": "Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel."
@@ -1252,6 +1259,7 @@
    "colors": "coloration",
    "function": "fonction",
    "opacity": "opacité du cortex",
+   "explode": "vue éclatée",
    "mri": "fenêtre IRM",
    "tab": "onglet",
    "deficit": "déficit",
@@ -2066,6 +2074,10 @@
      [
       "H",
       "Changer d’hémisphère : les deux, gauche, droite"
+     ],
+     [
+      "E",
+      "Écarter les structures, ou les remettre en place"
      ],
      [
       "M",

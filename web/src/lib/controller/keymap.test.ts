@@ -12,6 +12,8 @@ const STATE: KeymapState = {
   internalVisible: false,
   spinalCordVisible: false,
   hemisphere: 'both',
+  exploded: false,
+  explodable: true,
   singleKeys: true,
   diffusionMriOpen: false,
   mprOpen: false,
@@ -42,6 +44,7 @@ const COMMAND_NAMES = [
   'setInternalVisible',
   'setSpinalCordVisible',
   'setHemisphere',
+  'setExploded',
   'orbitBy',
   'dolly',
   'undoDissection',
@@ -287,7 +290,7 @@ describe('keymap', () => {
 
   it('takes the letters in either case and toggles the display without cancelling the key', () => {
     const { keymap, commands } = host({ selectedRegion: REGION, hemisphere: 'right' });
-    for (const key of ['C', 'U', 'S', 'H']) {
+    for (const key of ['C', 'U', 'S', 'H', 'E']) {
       const event = press(key);
       dispatchKey(event, keymap);
       assert.equal(calls(event.preventDefault), 0, key);
@@ -296,6 +299,10 @@ describe('keymap', () => {
     assert.deepEqual(commands.setInternalVisible.mock.calls, [[true]]);
     assert.deepEqual(commands.setSpinalCordVisible.mock.calls, [[true]]);
     assert.deepEqual(commands.setHemisphere.mock.calls, [['both']]);
+    assert.deepEqual(commands.setExploded.mock.calls, [[true]]);
+    const exploded = host({ exploded: true });
+    dispatchKey(press('e'), exploded.keymap);
+    assert.deepEqual(exploded.commands.setExploded.mock.calls, [[false]]);
     dispatchKey(press('F'), keymap);
     dispatchKey(press('I'), keymap);
     dispatchKey(press('M'), keymap);
@@ -597,9 +604,15 @@ describe('keymap outcomes', () => {
     }
   });
 
-  it('KEY-14 C, U, S and H do nothing under the tract reference', () => {
-    for (const key of ['c', 'u', 's', 'h', 'C', 'U', 'S', 'H']) {
+  it('KEY-14 C, U, S, H and E do nothing under the tract reference', () => {
+    for (const key of ['c', 'u', 's', 'h', 'e', 'C', 'U', 'S', 'H', 'E']) {
       assert.deepEqual(outcome({ tractReferenceActive: true }, key), { log: [], prevented: false });
+    }
+  });
+
+  it('E does nothing while the visual-field map pairs the hemispheres', () => {
+    for (const key of ['e', 'E']) {
+      assert.deepEqual(outcome({ explodable: false }, key), { log: [], prevented: false });
     }
   });
 

@@ -522,6 +522,8 @@
   "showInternal": "Show internal anatomy",
   "showSpinalCord": "Show spinal cord",
   "spinalCordUnavailable": "No spinal cord is published for this subject.",
+  "explode": "Exploded view",
+  "explodeHint": "Structures keep their measured shape; only their places change.",
   "surfaceColors": {
    "tissue": "Tissue",
    "mri": "T1 MRI",
@@ -957,6 +959,11 @@
     "body": "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
    },
    {
+    "id": "explode",
+    "title": "The exploded view",
+    "body": "Pull the structures apart (Display, then Exploded view, or the E key): each keeps its measured shape, and the deep anatomy shows between the hemispheres."
+   },
+   {
     "id": "topBar",
     "title": "The top bar",
     "body": "Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means."
@@ -1252,6 +1259,7 @@
    "colors": "colour",
    "function": "function",
    "opacity": "cortex opacity",
+   "explode": "exploded view",
    "mri": "MRI window",
    "tab": "tab",
    "deficit": "deficit",
@@ -2066,6 +2074,10 @@
      [
       "H",
       "Cycle hemisphere: both, left, right"
+     ],
+     [
+      "E",
+      "Pull the structures apart, or put them back"
      ],
      [
       "M",

@@ -27,6 +27,7 @@
   import type { HoverSources } from '../../features/stage/hover-text.ts';
   import OrientationGizmo from '../../features/stage/OrientationGizmo.svelte';
   import RouteMarks from '../../features/stage/RouteMarks.svelte';
+  import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
   import StageKeys from '../../features/stage/StageKeys.svelte';
   import StageOverlay from '../../features/stage/StageOverlay.svelte';
@@ -229,6 +230,7 @@
       setHemisphere: world.anatomy.setHemisphere,
       setCortexVisible: world.anatomy.setCortexVisible,
       setCortexOpacity: world.anatomy.setCortexOpacity,
+      setExploded: world.anatomy.setExploded,
       setCortexSurface: world.anatomy.setCortexSurface,
       setInternalVisible: world.anatomy.setInternalVisible,
       setSpinalCordVisible: world.anatomy.setSpinalCordVisible,
@@ -284,6 +286,7 @@
       cortexSurface={world.userMap.surface}
       prepared={world.excursions.displayBaseline}
       hasSpinalCord={publishesSpinalCord(model.manifest)}
+      explodable={!visualFieldMapOpen(current)}
       onLesionPlacing={world.lesion.setPlacing}
       onPlate={world.engine.camera.clearPlate}
       {commands}
@@ -322,7 +325,10 @@
     {@const lessonCopy = t(current.lang, 'circuits')}
     <RouteMarks
       engine={world.engine}
-      marks={current.explorer === 'circuits' && current.lesson.circuit && current.lesson.route
+      marks={current.explorer === 'circuits' &&
+      current.lesson.circuit &&
+      current.lesson.route &&
+      !current.exploded
         ? world.circuits.get(current.lesson.circuit).steps.map((step, index) => ({
             region: step.region,
             name: step.name[current.lang],

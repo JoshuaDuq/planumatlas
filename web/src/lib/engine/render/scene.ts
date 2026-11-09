@@ -129,6 +129,8 @@ export interface SceneCallbacks {
   onResize?: (change: { canvasChanged: boolean }) => void;
   /** Before the first frame of a camera move and the full-resolution frame at rest. */
   onMotion?: (moving: boolean) => void;
+  /** Move the anatomy on to the frame's time; true when it moved, which is drawn as motion is. */
+  onFrame?: (now: number) => boolean;
 }
 
 export interface Outlined {
@@ -337,7 +339,7 @@ export interface EngineScene {
  */
 export function createScene(
   host: HTMLElement,
-  { onContextLost, onContextRestored, onResize, onMotion }: SceneCallbacks = {},
+  { onContextLost, onContextRestored, onResize, onMotion, onFrame }: SceneCallbacks = {},
 ): EngineScene {
   const scene = new Scene();
   const camera = new PerspectiveCamera(35, 1, 0.001, 10);
@@ -759,6 +761,11 @@ export function createScene(
   }
 
   function tick(now: number) {
+    const placing = onFrame?.(now) ?? false;
+    if (placing) {
+      lastMotion = now;
+      dirty = true;
+    }
     step(now);
     const coasting = momentum.coasting;
     // Their limits would pull against an orbit in flight; they take over on arrival.

@@ -28,6 +28,7 @@ export const SHORTCUT_KEYS = {
   internal: 'U',
   spinalCord: 'S',
   hemisphere: 'H',
+  explode: 'E',
   linkedMri: 'M',
   /** With Ctrl, or ⌘ on a Mac: not a single-key shortcut. */
   undo: 'Z',
@@ -61,7 +62,10 @@ export type KeymapState = Pick<
   | 'internalVisible'
   | 'spinalCordVisible'
   | 'hemisphere'
+  | 'exploded'
 > & {
+  /** The exploded view can be drawn: the visual-field map is not pairing the hemispheres. */
+  explodable: boolean;
   /** The reader has not turned single-key shortcuts off (WCAG 2.1.4). */
   singleKeys: boolean;
   /** The diffusion MRI navigator is open. */
@@ -107,6 +111,7 @@ export interface KeymapCommands {
   setInternalVisible(visible: boolean): void;
   setSpinalCordVisible(visible: boolean): void;
   setHemisphere(hemisphere: Hemisphere): void;
+  setExploded(exploded: boolean): void;
   orbitBy(turn: OrbitTurn): void;
   dolly(factor: number): void;
   undoDissection(): void;
@@ -214,6 +219,12 @@ const COMMANDS: readonly Command[] = [
       if (state.tractReferenceActive) return;
       const next = (HEMISPHERE_ORDER.indexOf(state.hemisphere) + 1) % HEMISPHERE_ORDER.length;
       commands.setHemisphere(HEMISPHERE_ORDER[next]);
+    },
+  },
+  {
+    keys: letters(SHORTCUT_KEYS.explode),
+    run: (_press, commands, state) => {
+      if (!state.tractReferenceActive && state.explodable) commands.setExploded(!state.exploded);
     },
   },
 ];

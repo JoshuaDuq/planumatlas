@@ -322,6 +322,34 @@ describe('the display toggles', () => {
     expect(cameraMethods()).toEqual(['frameWhole']);
   });
 
+  test('exploding seen along the left–right axis turns to the front; from above it keeps the view', async () => {
+    const { anatomy } = build();
+    await anatomy.setExploded(true);
+    expect(engine.model.settings.exploded).toBe(true);
+    expect(cameraCalls().map(({ method, args }) => [method, args[0]])).toEqual([
+      ['applyView', 'anterior'],
+    ]);
+    await anatomy.setExploded(false);
+    expect(cameraMethods().at(-1)).toBe('frameWhole');
+    engine.camera.applyView('superior');
+    await anatomy.setExploded(true);
+    expect(cameraMethods().at(-1)).toBe('frameWhole');
+  });
+
+  test('exploding closes an open cut first, and the later of two quick choices wins', async () => {
+    const { anatomy } = build();
+    await engine.sections.setMode('coronal');
+    await anatomy.setExploded(true);
+    expect(engine.sections.active).toBe(false);
+    expect(engine.model.settings.exploded).toBe(true);
+    engine.model.setExploded(false);
+    await engine.sections.setMode('coronal');
+    const first = anatomy.setExploded(true);
+    const second = anatomy.setExploded(false);
+    await Promise.all([first, second]);
+    expect(engine.model.settings.exploded).toBe(false);
+  });
+
   test('a toggle that drops the selection says so', () => {
     const { anatomy, session } = build();
     anatomy.selectRegion(SULCUS);

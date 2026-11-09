@@ -2,6 +2,7 @@ import { Box3, DoubleSide, Matrix3, Mesh, MeshBasicMaterial, Raycaster, Vector3 
 import { acceleratedRaycast } from 'three-mesh-bvh';
 import type { Region } from '../../types/index.ts';
 import { rasToWorld } from './coordinates.ts';
+import { anatomicalMatrixWorld } from '../model/explode.ts';
 import type { Ras } from './coordinates.ts';
 
 /** The model's reads behind `drawnRegionAt`. */
@@ -39,9 +40,10 @@ export function regionAt(solids: readonly Mesh[], point: Ras): string | null {
   return best?.region ?? null;
 }
 
-export function worldBounds({ geometry, matrixWorld }: Mesh): Box3 {
-  geometry.computeBoundingBox();
-  return new Box3().copy(geometry.boundingBox!).applyMatrix4(matrixWorld);
+/** A solid's box where the anatomy has it, however the explode draws it. */
+export function worldBounds(solid: Mesh): Box3 {
+  solid.geometry.computeBoundingBox();
+  return new Box3().copy(solid.geometry.boundingBox!).applyMatrix4(anatomicalMatrixWorld(solid));
 }
 
 /**
@@ -50,9 +52,9 @@ export function worldBounds({ geometry, matrixWorld }: Mesh): Box3 {
  */
 export function crossings(solid: Mesh, raycaster: Raycaster): { distance: number; sign: number }[] {
   const probe = new Mesh(solid.geometry, PROBE);
-  probe.matrixWorld.copy(solid.matrixWorld);
+  anatomicalMatrixWorld(solid, probe.matrixWorld);
   probe.raycast = acceleratedRaycast;
-  const normals = new Matrix3().getNormalMatrix(solid.matrixWorld);
+  const normals = new Matrix3().getNormalMatrix(probe.matrixWorld);
   const normal = new Vector3();
   const { direction } = raycaster.ray;
   return raycaster.intersectObject(probe, false).map((hit) => ({

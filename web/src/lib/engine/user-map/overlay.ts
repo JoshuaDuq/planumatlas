@@ -3,6 +3,7 @@ import type { IUniform, Material, WebGLProgramParametersWithUniforms, WebGLRende
 import { NEGATIVE_RAMP, POSITIVE_RAMP } from '../../core/user-map/display.ts';
 import type { MapDisplay } from '../../core/user-map/display.ts';
 import type { Grid } from '../../core/user-map/sampling.ts';
+import { ANATOMICAL_WORLD, EXPLODE_SHIFT_UNIFORM, explodeShift } from '../model/explode.ts';
 
 /** Where the map has no value: GLSL cannot be trusted to keep a NaN through a fast-math compile. */
 export const NO_DATA = -3e38;
@@ -214,12 +215,13 @@ export function addUserMapToSurface(material: Material, uniforms: UserMapUniform
     renderer: WebGLRenderer,
   ) => {
     compile.call(material, shader, renderer);
-    Object.assign(shader.uniforms, uniforms);
-    shader.vertexShader = `varying vec3 userMapWorld;\n${shader.vertexShader}`.replace(
-      '#include <begin_vertex>',
-      `#include <begin_vertex>
-      userMapWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;`,
-    );
+    Object.assign(shader.uniforms, uniforms, { explodeShift: explodeShift(material) });
+    shader.vertexShader =
+      `${EXPLODE_SHIFT_UNIFORM}varying vec3 userMapWorld;\n${shader.vertexShader}`.replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+      userMapWorld = ${ANATOMICAL_WORLD};`,
+      );
     shader.fragmentShader = `varying vec3 userMapWorld;
 ${USER_MAP_COLOUR}${USER_MAP_AT}${shader.fragmentShader}`
       .replace(

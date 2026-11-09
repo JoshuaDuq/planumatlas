@@ -604,6 +604,46 @@ describe('scene motion', () => {
     stage.dispose();
   });
 
+  it('SCENE-38 anatomy a frame moves is moved before that frame draws, drawn as motion, and the loop rests after it', () => {
+    vi.stubGlobal('devicePixelRatio', 2);
+    let moves = 0;
+    const stage = createScene(host, {
+      onFrame: (now) => {
+        if (moves === 0) return false;
+        moves -= 1;
+        drawnLog.push(`step ${now - origin}`);
+        return true;
+      },
+    });
+    stage.setSize();
+    stage.moveTo(plan(), { immediate: true });
+    frame(0);
+    frame(200);
+    const settledRatio = composerRatios.at(-1)!;
+    frame(201);
+    assert.equal(calls.loop, null);
+    origin = clock;
+    moves = 3;
+    drawnLog = [];
+    composerRatios = [];
+    // The model's change asks for a frame; the frames after it step the anatomy themselves.
+    stage.invalidate();
+    for (let i = 1; i <= 3; i += 1) frame(i * FRAME_MS);
+    assert.deepEqual(
+      drawnLog.map((entry) => entry.split(' ')[0]),
+      ['step', 'render', 'step', 'render', 'step', 'render'],
+    );
+    assert.ok(
+      composerRatios.every((ratio) => ratio < settledRatio),
+      'drawn as motion',
+    );
+    const rested = until(3 * FRAME_MS, () => composerRatios.at(-1) === settledRatio);
+    assert.ok(rested < 3 * FRAME_MS + 200, `the full frame came ${rested} ms in`);
+    frame(rested + FRAME_MS);
+    assert.equal(calls.loop, null, 'at rest the loop stops');
+    stage.dispose();
+  });
+
   it('SCENE-02 under reduced motion a move, a settling sheet and a framing slide dissolve instead of moving', () => {
     reduced = true;
     vi.stubGlobal('devicePixelRatio', 2);

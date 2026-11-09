@@ -31,6 +31,7 @@ export interface LinkState {
   hemisphere: Hemisphere;
   cortexVisible: boolean;
   cortexOpacity: number;
+  exploded: boolean;
   internalVisible: boolean;
   spinalCordVisible: boolean;
   surfaceColor: SurfaceColor;

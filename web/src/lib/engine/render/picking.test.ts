@@ -170,14 +170,14 @@ describe('picker', () => {
   it('a click hands over where the ray met the region it chose, or null without a surface', () => {
     const domElement = canvas();
     const chosen: unknown[][] = [];
-    const point = { x: 0.01, y: 0.02, z: 0.03 } as Vector3;
+    const hit = { point: { x: 0.01, y: 0.02, z: 0.03 } as Vector3 };
     let surface = true;
     createPicker<Region>({
       domElement: domElement as unknown as HTMLElement,
       camera: new PerspectiveCamera(),
       model: () => ({
         pick: () => ({ id: 'destrieux:left:1' }),
-        ...(surface && { intersect: () => ({ point }) }),
+        ...(surface && { intersect: () => hit }),
       }),
       onSelect: (...args) => chosen.push(args),
     });
@@ -187,7 +187,7 @@ describe('picker', () => {
     domElement.emit('pointerdown', { button: 0 });
     domElement.emit('pointerup', { button: 0 });
     assert.deepEqual(chosen, [
-      ['destrieux:left:1', point],
+      ['destrieux:left:1', hit],
       ['destrieux:left:1', null],
     ]);
   });

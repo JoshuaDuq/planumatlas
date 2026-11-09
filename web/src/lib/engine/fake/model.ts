@@ -40,6 +40,8 @@ export interface FakeModel extends EngineModel {
   applySurfaceColor(mode: SurfaceColor): void;
   /** brain-atlas.js:466. */
   setCutState(cut: { atlas: string; active: boolean }): void;
+  /** The visual-field map pairs the hemispheres, or lets them go (`BrainAtlas.showVisualField`). */
+  setMedialPair(paired: boolean): void;
   /** Mark a layer downloaded (what `loadLayer` does, brain-atlas.js:364). */
   loadLayer(id: string): void;
   attachMri(): void;
@@ -97,6 +99,7 @@ export function createFakeModel({
     hemisphere: 'both' as Hemisphere,
     cortexVisible: true,
     cortexOpacity: 1,
+    exploded: false,
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas' as SurfaceColor,
@@ -109,6 +112,7 @@ export function createFakeModel({
   layers.add(values.detail);
 
   let spinalCordRequest = 0;
+  let medialPair = false;
   const unknownLayer = (message: string) => coded(message, 'unknown-layer');
   const settings = (): DisplaySettings => ({
     ...values,
@@ -262,6 +266,17 @@ export function createFakeModel({
       values.cortexOpacity = opacity;
       update();
     },
+    setExploded(exploded) {
+      if (typeof exploded !== 'boolean') throw new TypeError('The exploded view must be boolean.');
+      if (exploded && values.cutActive) {
+        throw new Error('A cut shows the anatomy where it lies; close it before exploding.');
+      }
+      if (exploded && medialPair) {
+        throw new Error('The visual-field map pairs the hemispheres; close it before exploding.');
+      }
+      values.exploded = exploded;
+      update();
+    },
     setInternalVisible(visible) {
       requireBoolean(visible, 'Internal anatomy visibility');
       values.internalVisible = visible;
@@ -355,6 +370,7 @@ export function createFakeModel({
       values.hemisphere = 'both';
       values.cortexVisible = true;
       values.cortexOpacity = 1;
+      values.exploded = false;
       values.internalVisible = true;
       values.spinalCordVisible = false;
       values.surfaceColor = 'atlas';
@@ -423,6 +439,13 @@ export function createFakeModel({
       if (atlas === values.cutAtlas && active === values.cutActive) return;
       values.cutAtlas = atlas;
       values.cutActive = active;
+      if (active) values.exploded = false;
+      update();
+    },
+    setMedialPair(paired) {
+      if (paired === medialPair) return;
+      medialPair = paired;
+      if (paired) values.exploded = false;
       update();
     },
     loadLayer(id) {

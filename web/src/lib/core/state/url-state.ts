@@ -20,6 +20,7 @@ type Defaults = Pick<
   | 'hemisphere'
   | 'cortexVisible'
   | 'cortexOpacity'
+  | 'exploded'
   | 'internalVisible'
   | 'spinalCordVisible'
   | 'surfaceColor'
@@ -57,6 +58,7 @@ export const DEFAULTS: Defaults = {
   hemisphere: 'both',
   cortexVisible: true,
   cortexOpacity: 1,
+  exploded: false,
   internalVisible: true,
   spinalCordVisible: false,
   surfaceColor: 'atlas',
@@ -321,6 +323,7 @@ const FIELDS: Field[] = [
     },
     (value) => String(Math.round(value * 100) / 100),
   ),
+  field('exploded', 'explode', flag, writeFlag),
   field('mriWindow', 'mri', mriWindow, ({ center, width }) => `${tenths(center)},${tenths(width)}`),
   field('explorer', 'tab', oneOf(EXPLORERS)),
   field('selectedFunction', 'function', nonempty),

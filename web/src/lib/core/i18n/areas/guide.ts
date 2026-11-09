@@ -10,6 +10,7 @@ export interface GuideStop {
     | 'coordinate'
     | 'overlay'
     | 'medial'
+    | 'explode'
     | 'topBar'
     | 'functions'
     | 'deficits'
@@ -71,6 +72,11 @@ export const en = {
       id: 'medial',
       title: 'The medial surface',
       body: 'Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface.',
+    },
+    {
+      id: 'explode',
+      title: 'The exploded view',
+      body: 'Pull the structures apart (Display, then Exploded view, or the E key): each keeps its measured shape, and the deep anatomy shows between the hemispheres.',
     },
     {
       id: 'topBar',
@@ -156,6 +162,11 @@ export const fr: typeof en = {
       id: 'medial',
       title: 'La face médiale',
       body: 'Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne.',
+    },
+    {
+      id: 'explode',
+      title: 'La vue éclatée',
+      body: 'Écartez les structures (Affichage, puis Vue éclatée, ou la touche E) : chacune garde sa forme mesurée, et l’anatomie profonde apparaît entre les hémisphères.',
     },
     {
       id: 'topBar',

@@ -11,6 +11,7 @@ const defaults: DisplayView = {
   hemisphere: 'both',
   cortexVisible: true,
   cortexOpacity: 1,
+  exploded: false,
   internalVisible: true,
   hiddenRegions: new Set(),
   isolatedRegion: null,
@@ -54,6 +55,16 @@ test('each setting away from its default is named, in order, in the reader’s l
       'Région isolée',
       'Ciblage activé',
     ],
+  );
+});
+
+test('the exploded view is named while it is on, since no view is prepared exploded', () => {
+  assert.deepEqual(displayChanges({ ...defaults, exploded: true }, DEFAULT_DISPLAY, 'pial'), [
+    'Exploded view',
+  ]);
+  assert.deepEqual(
+    displayChanges({ ...defaults, lang: 'fr', exploded: true }, DEFAULT_DISPLAY, 'pial'),
+    ['Vue éclatée'],
   );
 });
 

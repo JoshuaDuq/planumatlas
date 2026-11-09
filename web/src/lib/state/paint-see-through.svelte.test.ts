@@ -24,6 +24,7 @@ function setup(opacity = 1) {
     hemisphere: 'both',
     cortexVisible: true,
     cortexOpacity: opacity,
+    exploded: false,
     internalVisible: true,
     spinalCordVisible: true,
     surfaceColor: 'atlas',

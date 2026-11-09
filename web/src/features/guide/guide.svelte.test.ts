@@ -106,9 +106,9 @@ const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
   return event;
 };
 
-const STOPS = 15;
+const STOPS = 16;
 
-test('fifteen stops in order, in English and French, with focus on Next', async () => {
+test('sixteen stops in order, in English and French, with focus on Next', async () => {
   start();
   const titles = [title()];
   await expect.poll(() => document.activeElement).toBe(next());
@@ -126,6 +126,7 @@ test('fifteen stops in order, in English and French, with focus on Next', async 
     'Coordinate',
     'Overlay',
     'The medial surface',
+    'The exploded view',
     'The top bar',
     'Functions',
     'Deficits',
@@ -143,7 +144,7 @@ test('fifteen stops in order, in English and French, with focus on Next', async 
   start('fr');
   expect(title()).toBe('Utiliser Planum');
   expect(card().lang).toBe('fr');
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 15');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 16');
 });
 
 test('each stop opens its feature over the home view, and closing puts the reader’s view back', () => {
@@ -168,6 +169,7 @@ test('each stop opens its feature over the home view, and closing puts the reade
     // Overlay: a reader's map is never in a link.
     HOME,
     `${HOME}&hemi=left&view=right`,
+    `${HOME}&explode=1&view=anterior`,
     HOME,
     // The stop's atlas replaces the reader's, as opening a function in the app does.
     '#anatomy=cdmd&atlas=hcp-mmp&detail=learning&cuts=hcp-mmp&tab=functions&function=language',
@@ -182,6 +184,28 @@ test('each stop opens its feature over the home view, and closing puts the reade
   expect(hashes.at(-1)).toBe(READER);
   // The stops replace the entry: Back still leaves the page the reader came from.
   expect(history.length).toBe(entries);
+});
+
+test('the exploded view stop pulls the brain apart, and moving on, going back or closing puts it back', () => {
+  const exploded = () => location.hash.includes('explode=1');
+  const previous = () => card().querySelector<HTMLButtonElement>('.driver-popover-prev-btn')!;
+  start();
+  while (title() !== 'The exploded view') next().click();
+  expect(exploded()).toBe(true);
+  expect(document.querySelector('.driver-active-element')).toBe(
+    document.querySelector('.stage-tool[data-tool="display"]'),
+  );
+  next().click();
+  expect(exploded()).toBe(false);
+  previous().click();
+  expect(exploded()).toBe(true);
+  previous().click();
+  expect(title()).toBe('The medial surface');
+  expect(exploded()).toBe(false);
+  next().click();
+  key(next(), 'keydown', 'Escape');
+  expect(closed).toBe(1);
+  expect(location.hash).toBe(READER);
 });
 
 test('a stop that points at a control leaves the page live; the welcome alone holds it back', async () => {
@@ -292,8 +316,8 @@ test.each([
 test('a phone leaves the Linked MRI stop out, as its scan opens over the page', async () => {
   await page.viewport(390, 800);
   start();
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 14');
-  for (let i = 1; i < 14; i++) next().click();
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 15');
+  for (let i = 1; i < 15; i++) next().click();
   expect(mriOpens).toEqual([]);
 });
 
@@ -432,7 +456,7 @@ test('the first launch offers the tour once, and only to a page opened plainly',
 test('a target the layout hides is left out of the stops and the count', () => {
   document.querySelector<HTMLElement>('.orientation-gizmo')!.style.display = 'none';
   start();
-  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 14');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 15');
 });
 
 test('a target re-rendered after the tour starts is still the one highlighted', () => {

@@ -26,6 +26,8 @@ export interface DisplaySettings {
   hemisphere: Hemisphere;
   cortexVisible: boolean;
   cortexOpacity: number;
+  /** The structures drawn pulled apart, each whole: the hemispheres sideways, the deep anatomy by system. */
+  exploded: boolean;
   internalVisible: boolean;
   spinalCordVisible: boolean;
   surfaceColor: SurfaceColor;

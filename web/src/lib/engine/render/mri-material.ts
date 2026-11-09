@@ -8,6 +8,7 @@ import type {
   WebGLRenderer,
 } from 'three';
 import { rasToWorld } from '../slices/coordinates.ts';
+import { ANATOMICAL_WORLD, EXPLODE_SHIFT_UNIFORM, explodeShift } from '../model/explode.ts';
 
 /**
  * How a mark reads where the scan already owns luminance.
@@ -200,11 +201,12 @@ export function addMriSurfaceAppearance(
     }
     if (!midThickness) {
       const depth = rasToWorld([SURFACE_DEPTH_MM, 0, 0]).length();
+      shader.uniforms['explodeShift'] = explodeShift(material);
       shader.vertexShader = replaceOnce(
-        `uniform mat4 worldToScan;\nvarying vec3 scanVoxel;\n${shader.vertexShader}`,
+        `uniform mat4 worldToScan;\n${EXPLODE_SHIFT_UNIFORM}varying vec3 scanVoxel;\n${shader.vertexShader}`,
         '#include <begin_vertex>',
         `#include <begin_vertex>
-      vec3 scanAt = (modelMatrix * vec4(transformed, 1.0)).xyz
+      vec3 scanAt = ${ANATOMICAL_WORLD}
         - normalize(mat3(modelMatrix) * objectNormal) * ${glsl(depth)};
       scanVoxel = (worldToScan * vec4(scanAt, 1.0)).xyz;`,
       );

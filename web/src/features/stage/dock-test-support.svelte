@@ -18,6 +18,8 @@
       status: SessionState['status'];
       tractReference: boolean;
       hasSpinalCord: boolean;
+      /** False while the visual-field map pairs the hemispheres. */
+      explodable?: boolean;
       coordinates: boolean;
       overlay: boolean;
       phone: boolean;
@@ -72,6 +74,7 @@
     cortexSurface={live.cortexSurface}
     prepared={DEFAULT_DISPLAY}
     hasSpinalCord={live.hasSpinalCord}
+    explodable={live.explodable ?? true}
     {commands}
     onLesionPlacing={(next) => placing.push(next)}
     onPlate={(top, { immediate }) => plates.push({ top, immediate })}

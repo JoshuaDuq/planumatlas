@@ -11,6 +11,9 @@ export const en = {
   showInternal: 'Show internal anatomy',
   showSpinalCord: 'Show spinal cord',
   spinalCordUnavailable: 'No spinal cord is published for this subject.',
+  // Also the change list's entry while it is on: no view is prepared exploded.
+  explode: 'Exploded view',
+  explodeHint: 'Structures keep their measured shape; only their places change.',
   // The masthead's Colour options; the field's note gives the full sense.
   surfaceColors: {
     tissue: 'Tissue',
@@ -72,6 +75,8 @@ export const fr: typeof en = {
   showInternal: 'Afficher l’anatomie interne',
   showSpinalCord: 'Afficher la moelle épinière',
   spinalCordUnavailable: 'Aucune moelle épinière n’est publiée pour ce sujet.',
+  explode: 'Vue éclatée',
+  explodeHint: 'Les structures gardent leur forme mesurée\u202f; seule leur place change.',
   surfaceColors: {
     tissue: 'Tissu',
     mri: 'IRM T1',

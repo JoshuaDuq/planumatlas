@@ -15,6 +15,7 @@ export type ReaderModelPort = Pick<
   | 'setCortexVisible'
   | 'setInternalVisible'
   | 'setCortexOpacity'
+  | 'setExploded'
   | 'loadHiddenRegions'
   | 'isolate'
   | 'clearIsolation'

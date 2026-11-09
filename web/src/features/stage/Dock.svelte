@@ -55,6 +55,8 @@
     prepared: PreparedDisplay;
     /** The subject publishes a spinal cord. */
     hasSpinalCord: boolean;
+    /** False while the visual-field map pairs the hemispheres, which the exploded view would pull apart. */
+    explodable?: boolean;
     commands: Omit<DockCommands, 'chooseView' | 'resetView'>;
     /** G4: the body of the Section popover, and the section row above the tools. */
     sectionPopover: Snippet<[{ close: () => void }]>;
@@ -82,6 +84,7 @@
     cortexSurface,
     prepared,
     hasSpinalCord,
+    explodable = true,
     commands,
     sectionPopover,
     sectionBar,
@@ -359,6 +362,8 @@
           internalVisible={view.internalVisible}
           spinalCordVisible={view.spinalCordVisible}
           {hasSpinalCord}
+          exploded={view.exploded}
+          {explodable}
           {changes}
           {scrubbing}
           onHemisphere={commands.setHemisphere}
@@ -367,6 +372,7 @@
           onCortexSurface={commands.setCortexSurface}
           onInternalVisible={commands.setInternalVisible}
           onSpinalCordVisible={commands.setSpinalCordVisible}
+          onExploded={commands.setExploded}
           onResetDisplay={commands.resetDisplay}
         />
       {/snippet}

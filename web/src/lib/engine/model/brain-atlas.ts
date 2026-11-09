@@ -92,6 +92,16 @@ import { loadRibbonSources } from '../tissues/solid-assets.ts';
 import { createWhiteMatterSurfaces, exposedWhiteMatter } from '../tissues/white-matter-surfaces.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
 import type { GeometryCopy, GeometryJob, GeometryReply } from './geometry-worker.ts';
+import {
+  anatomicalMatrixWorld,
+  deepShift,
+  hemisphereShifts,
+  pieceOf,
+  restBox,
+  shiftMesh,
+} from './explode.ts';
+import { CAMERA_RESPONSE, noOvershoot, springAt, springSettled } from '../../core/spring.ts';
+import { prefersReducedMotion } from '../render/scene.ts';
 import { combineProgress } from './progress.ts';
 import type { ProgressCallback } from './progress.ts';
 
@@ -161,6 +171,19 @@ const ENVELOPES = 'native-envelopes';
 const SPINAL_CORD = 'spinal-cord';
 // The space left between the medial pair's occipital poles.
 const MEDIAL_PAIR_GAP_M = 0.01;
+// The explode has arrived within this share of its way, about 0.01 mm of a hemisphere's shift.
+const EXPLODE_ARRIVED = 1e-4;
+
+/** The explode on its way: a spring from `from` to `to`, started at `started` (a `performance.now()`). */
+interface ExplodeMotion {
+  started: number;
+  from: number;
+  to: number;
+  /** The starting rate, in whole moves per second. */
+  velocity: number;
+  /** Under reduced motion it arrives with the next frame, with no way between. */
+  jump: boolean;
+}
 
 /** A layer id this manifest does not publish; the app tells it from a failed download by this code. */
 const unknownLayer = (message: string) =>
@@ -558,6 +581,11 @@ export class BrainAtlas extends EventTarget {
   /** While the visual-field map is drawn, the right hemisphere's cortex is turned to face the left's way. */
   private medialPairOn = false;
   private pairPlacement: Matrix4 | null = null;
+  private exploded = false;
+  /** How far apart the anatomy is drawn now: 0 assembled, 1 exploded. */
+  private explodeShown = 0;
+  private explodeMotion: ExplodeMotion | null = null;
+  private explodeShiftCache: { key: string; shifts: Map<Mesh, Vector3> } | null = null;
   private cortexVisible = true;
   private cortexOpacity = 1;
   private internalVisible = true;
@@ -979,6 +1007,8 @@ export class BrainAtlas extends EventTarget {
     if (atlas === this.cutAtlasId && active === this.cutActive) return;
     this.cutAtlasId = atlas;
     this.cutActive = active;
+    // A cut is drawn where the anatomy lies, so it opens on the brain assembled.
+    if (active) this.assemble();
     this.update();
   }
 
@@ -1000,6 +1030,7 @@ export class BrainAtlas extends EventTarget {
       hemisphere: this.hemisphere,
       cortexVisible: this.cortexVisible,
       cortexOpacity: this.cortexOpacity,
+      exploded: this.exploded,
       internalVisible: this.internalVisible,
       spinalCordVisible: this.spinalCordVisible,
       surfaceColor: this.surfaceColor,
@@ -1063,19 +1094,15 @@ export class BrainAtlas extends EventTarget {
     // A tab's paint is drawn over the scan, which stays wherever nothing is painted.
     const mri = this.surfaceColor === 'mri';
     if (this.mriUniforms) this.mriUniforms.scanEnabled.value = mri;
+    this.place();
     for (const [id, layer] of this.layers) {
       layer.scene.visible =
         id === this.detailId ||
         id === this.atlasId ||
         (this.manifest.supplemental_layers ?? []).some((entry) => entry.id === id);
-      const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
       for (const mesh of layer.meshes) {
         const region = this.regions.get(mesh.userData['region_id'] as string)!;
         const cortex = region.kind === 'cortex' || region.kind === 'non-region';
-        if (corticalLayer && region.hemisphere === 'right') {
-          mesh.updateMatrix();
-          if (this.medialPairOn) mesh.matrix.premultiply(this.pairPlacement!);
-        }
         // A ghost is grey at the see-through opacity; what it holds in colour is opaque.
         const ghost = ghosted(region.id, ghostState);
         const cabNpNetwork =
@@ -1357,6 +1384,46 @@ export class BrainAtlas extends EventTarget {
     this.update();
   }
 
+  /**
+   * Pull the anatomy apart, or put it back together, on the camera's spring; with the next frame under
+   * reduced motion. A change of mind turns the pieces where they are. Throws while a cut or the
+   * visual-field map shows the anatomy where it lies.
+   */
+  setExploded(exploded: boolean): void {
+    if (typeof exploded !== 'boolean') throw new TypeError('The exploded view must be boolean.');
+    if (exploded && this.cutActive) {
+      throw new Error('A cut shows the anatomy where it lies; close it before exploding.');
+    }
+    if (exploded && this.medialPairOn) {
+      throw new Error('The visual-field map pairs the hemispheres; close it before exploding.');
+    }
+    this.exploded = exploded;
+    this.moveExplode(exploded ? 1 : 0);
+    this.update();
+  }
+
+  /** Move the explode on to `now`, a frame's `performance.now()`; true when the anatomy moved. */
+  stepExplode(now: number): boolean {
+    if (!this.explodeMotion) return false;
+    const { value, arrived } = this.explodeAt(now);
+    this.explodeShown = value;
+    if (arrived) this.explodeMotion = null;
+    this.place();
+    return true;
+  }
+
+  /** Where `mesh` is drawn once the explode has arrived: framing fits that, not a frame in flight. */
+  settledMatrixWorld(mesh: Mesh, target = new Matrix4()): Matrix4 {
+    anatomicalMatrixWorld(mesh, target);
+    const shift = this.exploded ? this.explodeShifts().get(mesh) : undefined;
+    if (shift) {
+      target.elements[12] += shift.x;
+      target.elements[13] += shift.y;
+      target.elements[14] += shift.z;
+    }
+    return target;
+  }
+
   setInternalVisible(visible: boolean): void {
     if (typeof visible !== 'boolean') {
       throw new TypeError('Internal anatomy visibility must be boolean.');
@@ -1434,6 +1501,7 @@ export class BrainAtlas extends EventTarget {
     if (Boolean(map) !== this.medialPairOn) {
       this.pairPlacement ??= this.medialPairPlacement();
       this.medialPairOn = Boolean(map);
+      if (map) this.assemble();
       this.update();
     }
   }
@@ -1755,6 +1823,8 @@ export class BrainAtlas extends EventTarget {
     this.hemisphere = 'both';
     this.cortexVisible = true;
     this.cortexOpacity = 1;
+    this.exploded = false;
+    this.moveExplode(0);
     this.internalVisible = true;
     this.spinalCordVisible = false;
     this.surfaceColor = 'atlas';
@@ -1801,6 +1871,139 @@ export class BrainAtlas extends EventTarget {
   private settled(key: string): void {
     this.pending.delete(key);
     this.listeners.delete(key);
+  }
+
+  /** The explode at `now`: how far apart, how fast in shares per second, and whether it has arrived. */
+  private explodeAt(now: number): { value: number; rate: number; arrived: boolean } {
+    const motion = this.explodeMotion;
+    if (!motion) return { value: this.explodeShown, rate: 0, arrived: true };
+    if (motion.jump) return { value: motion.to, rate: 0, arrived: true };
+    const span = motion.to - motion.from;
+    const spring = springAt((now - motion.started) / 1000, CAMERA_RESPONSE, motion.velocity);
+    if (springSettled(spring, Math.abs(span), EXPLODE_ARRIVED)) {
+      return { value: motion.to, rate: 0, arrived: true };
+    }
+    return {
+      value: motion.from + span * spring.value,
+      rate: span * spring.velocity,
+      arrived: false,
+    };
+  }
+
+  /**
+   * Head for `to` from where the anatomy is drawn now. The camera's response, so a refit begun with it
+   * arrives with it; a move under way hands on its speed toward `to`, never past it. Under reduced
+   * motion the anatomy changes with the next frame, after a dissolve has copied the one on screen.
+   */
+  private moveExplode(to: number): void {
+    const now = performance.now();
+    const { value, rate } = this.explodeAt(now);
+    const jump = prefersReducedMotion();
+    this.explodeShown = value;
+    this.explodeMotion =
+      value === to
+        ? null
+        : {
+            started: now,
+            from: value,
+            to,
+            velocity: jump ? 0 : noOvershoot(rate / (to - value), CAMERA_RESPONSE),
+            jump,
+          };
+  }
+
+  /** Put the anatomy back where it lies at once, for a view drawn there. */
+  private assemble(): void {
+    this.exploded = false;
+    this.explodeShown = 0;
+    this.explodeMotion = null;
+  }
+
+  /**
+   * Draw every mesh where it is now: the explode shifts each piece its share of the way, and the
+   * medial pair turns the right cortex.
+   */
+  private place(): void {
+    const shifts = this.explodeShown > 0 ? this.explodeShifts() : null;
+    const shift = new Vector3();
+    const shiftNow = (mesh: Mesh) => {
+      const full = shifts?.get(mesh);
+      if (full) shift.copy(full).multiplyScalar(this.explodeShown);
+      else shift.set(0, 0, 0);
+      shiftMesh(mesh, shift);
+    };
+    for (const [id, layer] of this.layers) {
+      const corticalLayer = this.manifest.atlases.some((atlas) => atlas.id === id);
+      for (const mesh of layer.meshes) {
+        shiftNow(mesh);
+        if (this.medialPairOn && corticalLayer && mesh.userData['hemisphere'] === 'right') {
+          mesh.matrix.premultiply(this.pairPlacement!);
+        }
+      }
+    }
+    for (const mesh of this.whiteMatterSurfaces?.meshes ?? []) shiftNow(mesh);
+  }
+
+  /**
+   * Each drawn mesh's shift when exploded, in world metres. The shown detail level's pieces spread from
+   * their own centre; the shown atlas's hemispheres and their white surfaces go sideways, clear of them;
+   * the cord stays on the brainstem. Meshes of the layers not drawn are left where they lie.
+   */
+  private explodeShifts(): Map<Mesh, Vector3> {
+    const cords = (this.manifest.supplemental_layers ?? [])
+      .map((entry) => this.layers.get(entry.id))
+      .filter((layer) => layer !== undefined);
+    const key = [
+      this.atlasId,
+      this.detailId,
+      cords.length,
+      Boolean(this.whiteMatterSurfaces),
+    ].join();
+    if (this.explodeShiftCache?.key === key) return this.explodeShiftCache.shifts;
+    const shifts = new Map<Mesh, Vector3>();
+    const cortex = this.layers.get(this.atlasId)!.meshes;
+    const halves = { left: new Box3(), right: new Box3() };
+    const sideOf = (mesh: Mesh) => {
+      const side = mesh.userData['hemisphere'];
+      if (side !== 'left' && side !== 'right') {
+        throw new Error(`A cortical surface lies on no hemisphere: ${mesh.name}`);
+      }
+      return side as 'left' | 'right';
+    };
+    for (const mesh of cortex) halves[sideOf(mesh)].union(restBox(mesh));
+    const pieces = new Map<string, { box: Box3; meshes: Mesh[] }>();
+    for (const mesh of this.layers.get(this.detailId)!.meshes) {
+      const region = this.regions.get(mesh.userData['region_id'] as string)!;
+      const label = labelOf(region, 'en');
+      if (!label) throw new Error(`No anatomical system holds ${region.id}.`);
+      const name = pieceOf(label.group, region.hemisphere);
+      const piece = pieces.get(name) ?? { box: new Box3(), meshes: [] };
+      piece.box.union(restBox(mesh));
+      piece.meshes.push(mesh);
+      pieces.set(name, piece);
+    }
+    const centre = [...pieces.values()]
+      .reduce((all, { box }) => all.union(box), new Box3())
+      .getCenter(new Vector3());
+    const spread = new Box3();
+    for (const { box, meshes } of pieces.values()) {
+      const shift = deepShift(box, centre);
+      spread.union(box.clone().translate(shift));
+      for (const mesh of meshes) shifts.set(mesh, shift);
+    }
+    const sideways = hemisphereShifts(halves.left, halves.right, spread);
+    for (const mesh of [...cortex, ...(this.whiteMatterSurfaces?.meshes ?? [])]) {
+      shifts.set(mesh, sideways[sideOf(mesh)]);
+    }
+    if (cords.length) {
+      const brainstem = pieces.get('Brainstem');
+      if (!brainstem)
+        throw new Error(`The ${this.detailId} level has no brainstem to hold the cord.`);
+      const shift = shifts.get(brainstem.meshes[0]!)!;
+      for (const layer of cords) for (const mesh of layer.meshes) shifts.set(mesh, shift);
+    }
+    this.explodeShiftCache = { key, shifts };
+    return shifts;
   }
 
   /** A region that has just been hidden cannot stay isolated: nothing would be left to see. */

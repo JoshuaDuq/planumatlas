@@ -14,6 +14,8 @@ export function createFakeVisualField(
   available: boolean,
   territories: VisualFieldTerritories | undefined,
   centralRegion: (hemisphere: 'left' | 'right') => string,
+  /** The map pairs the hemispheres while it is drawn. */
+  pair: (paired: boolean) => void,
 ): FakeVisualField {
   let shown: FakeVisualField['shown'] = null;
   let probing = false;
@@ -34,6 +36,7 @@ export function createFakeVisualField(
         throw new RangeError('A visual-field dot needs a finite centre and a radius ≥ 0.');
       }
       shown = map;
+      pair(map !== null);
     },
     follow(dot) {
       if (!available) throw new Error('This anatomy publishes no retinotopy.');

@@ -82,6 +82,7 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
     setHemisphere: (hemisphere) => atlas.setHemisphere(hemisphere),
     setCortexVisible: (visible) => atlas.setCortexVisible(visible),
     setCortexOpacity: (opacity) => atlas.setCortexOpacity(opacity),
+    setExploded: (exploded) => atlas.setExploded(exploded),
     setInternalVisible: (visible) => atlas.setInternalVisible(visible),
     setSpinalCordVisible: (visible, onProgress) => atlas.setSpinalCordVisible(visible, onProgress),
     setSurfaceColor: (mode) => atlas.setSurfaceColor(mode),

@@ -120,7 +120,12 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
     emit: events.emit,
   });
 
+  // As the real engine: a mark drawn where the anatomy lies puts an exploded brain back together.
+  const assemble = () => {
+    if (model.settings.exploded) model.setExploded(false);
+  };
   const lesion = createFakeLesion({
+    assemble,
     bundles:
       (options.tractAnatomy ?? options.manifest.anatomy.id) === options.manifest.anatomy.id
         ? (options.tractBundles ?? DEFAULT_BUNDLES)
@@ -180,10 +185,15 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
           if (!region) throw new Error(`No ${hemisphere} cortical region in ${atlas}.`);
           return region.id;
         },
+        (paired) => model.setMedialPair(paired),
       ),
       calls,
     ),
-    strokeCases: recorded('strokeCases', createFakeStrokeCases(options.strokeCases), calls),
+    strokeCases: recorded(
+      'strokeCases',
+      createFakeStrokeCases(options.strokeCases, assemble),
+      calls,
+    ),
     userMap: recorded(
       'userMap',
       createFakeUserMap(Boolean(options.manifest.coordinate_spaces)),

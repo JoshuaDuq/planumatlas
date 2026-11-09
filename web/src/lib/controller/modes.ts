@@ -17,7 +17,7 @@ export function createExplorerChoice({
   anatomy,
   render,
 }: {
-  engine: Pick<Engine, 'model' | 'tracts'>;
+  engine: Pick<Engine, 'model' | 'tracts' | 'camera'>;
   session: Pick<SessionStore, 'state' | 'setExplorer'>;
   /** The lesion's streamlines belong to its report on Anatomy. */
   lesion: Pick<LesionStore, 'selectedTract' | 'clearTract'>;
@@ -59,6 +59,11 @@ export function createExplorerChoice({
         anatomy() === engine.tracts.anatomy
       ) {
         beforeTractsOpacity = engine.model.settings.cortexOpacity;
+        // The streamlines lie where the anatomy does.
+        if (engine.model.settings.exploded) {
+          engine.model.setExploded(false);
+          engine.camera.frameWhole();
+        }
         engine.tracts.setOverlay(true);
         engine.model.ghostAround([]);
         if (engine.model.settings.cortexOpacity === 1) {

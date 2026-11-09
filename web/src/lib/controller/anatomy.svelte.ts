@@ -149,6 +149,28 @@ export function createAnatomyCommands(
     notifyClearedSelection(had);
   }
 
+  let explodeRequest = 0;
+  /**
+   * Pull the structures apart, or put them back, framed whole. The hemispheres part along the left–right
+   * axis: seen within 45° of it, they would part toward and away from the reader, so exploding turns to
+   * the anterior view. A cut shows the anatomy where it lies, so exploding closes it first; a later
+   * choice made while it closes wins.
+   */
+  async function setExploded(value: boolean) {
+    const ask = ++explodeRequest;
+    if (value && sections.active) await sections.setMode('off');
+    if (ask !== explodeRequest) return;
+    display(() => {
+      model.setExploded(value);
+      if (value && Math.abs(camera.view.basis.back[0]) > Math.SQRT1_2) {
+        session.setView('anterior');
+        camera.applyView('anterior');
+      } else {
+        camera.frameWhole();
+      }
+    });
+  }
+
   const hideRegions = (ids: readonly string[]) => display(() => model.hideRegions(ids));
   const showRegions = (ids: readonly string[]) => display(() => model.showRegions(ids));
   const undoDissection = () => display(() => model.undoDissection());
@@ -434,16 +456,20 @@ export function createAnatomyCommands(
     // Hidden parts, Focus and isolation can be many choices: the notice offers them back.
     const scene = reader.capture();
     const prepared = displayBaseline();
+    // No view is prepared exploded; the brain put back together is framed as the toggle frames it.
+    const exploded = model.settings.exploded;
     display(() => {
       model.setHemisphere(prepared.hemisphere);
       model.setCortexVisible(prepared.cortexVisible);
       model.setCortexOpacity(prepared.cortexOpacity);
+      model.setExploded(false);
       model.setInternalVisible(prepared.internalVisible);
       model.restoreHiddenRegions();
       if (prepared.hiddenRegions.size) model.hideRegions([...prepared.hiddenRegions]);
       model.clearIsolation();
       model.setFocused(prepared.focused && engineState.model.selectedRegion !== null);
     });
+    if (exploded) camera.frameWhole();
     const surface = cortexSurface.surface;
     cortexSurface.setSurface('pial');
     afterReset();
@@ -477,6 +503,7 @@ export function createAnatomyCommands(
       }),
     setCortexVisible: (value: boolean) => display(() => model.setCortexVisible(value)),
     setCortexOpacity: (value: number) => display(() => model.setCortexOpacity(value)),
+    setExploded,
     setCortexSurface: (value: CortexSurface) => display(() => cortexSurface.setSurface(value)),
     setInternalVisible: (value: boolean) => display(() => model.setInternalVisible(value)),
     setSpinalCordVisible,

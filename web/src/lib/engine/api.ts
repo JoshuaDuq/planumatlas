@@ -224,6 +224,11 @@ export interface EngineModel {
   setCortexVisible(visible: boolean): void;
   /** Throws a `RangeError` outside 0..1 (brain-atlas.js:761). */
   setCortexOpacity(opacity: number): void;
+  /**
+   * Pull the structures apart, each whole, or put them back; animated unless motion is reduced.
+   * Throws while a cut or the visual-field map is open; opening either puts the brain back at once.
+   */
+  setExploded(exploded: boolean): void;
   setInternalVisible(visible: boolean): void;
   /** Downloads the cord on first showing (brain-atlas.js:776). */
   setSpinalCordVisible(visible: boolean, onProgress?: OnProgress): Promise<void>;

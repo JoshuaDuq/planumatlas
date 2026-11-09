@@ -1,10 +1,14 @@
 import { untrack } from 'svelte';
 import type { EngineVisualField, VisualFieldDot, VisualFieldReading } from '../engine/api.ts';
 import type { LessonStore } from './session.svelte.ts';
-import type { ViewStore } from './view.svelte.ts';
+import type { View, ViewStore } from './view.svelte.ts';
 
 /** Where the dot starts: up and to the right of fixation, inside the measured field. */
 export const START_DOT: VisualFieldDot = { x: 2, y: 2, radius: 1 };
+
+/** The map is drawn, its hemispheres paired, while its lesson is open in front on Circuits. */
+export const visualFieldMapOpen = ({ explorer, lesson }: Pick<View, 'explorer' | 'lesson'>) =>
+  explorer === 'circuits' && lesson.map === 'visual-field';
 
 /** The cortex the reader last clicked on the open map, reactive; the dot itself is the lesson's. */
 export function createVisualFieldMapStore(lesson: Pick<LessonStore, 'moveDot'>) {
@@ -41,8 +45,7 @@ export function syncVisualFieldMap(
   // back into the map's pair after a lesson leaving the map has ended it (`lesson.ts`, endMapStage).
   let drawn: VisualFieldDot | null = null;
   $effect(() => {
-    const { explorer, lesson } = view.current;
-    const dot = explorer === 'circuits' && lesson.map === 'visual-field' ? lesson.dot! : null;
+    const dot = visualFieldMapOpen(view.current) ? view.current.lesson.dot! : null;
     untrack(() => {
       if (sameDot(dot, drawn)) return;
       visualField.show(dot && { dot });

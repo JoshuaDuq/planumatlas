@@ -19,6 +19,7 @@ const settings: DisplaySettings = {
   hemisphere: 'both',
   cortexVisible: true,
   cortexOpacity: 1,
+  exploded: false,
   internalVisible: true,
   spinalCordVisible: true,
   surfaceColor: 'tissue',

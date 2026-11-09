@@ -27,6 +27,7 @@ interface Live {
   status: 'loading' | 'ready' | 'switching' | 'error' | 'context-lost';
   tractReference: boolean;
   hasSpinalCord: boolean;
+  explodable?: boolean;
   coordinates: boolean;
   overlay: boolean;
   phone: boolean;
@@ -63,6 +64,7 @@ function liveState(overrides: Partial<Live>): Live {
       hemisphere: 'both',
       cortexVisible: true,
       cortexOpacity: 1,
+      exploded: false,
       internalVisible: true,
       spinalCordVisible: false,
       hiddenRegions: new Set(),
@@ -91,6 +93,7 @@ async function mount(
     setHemisphere: vi.fn<DockCommands['setHemisphere']>(),
     setCortexVisible: vi.fn<DockCommands['setCortexVisible']>(),
     setCortexOpacity: vi.fn<DockCommands['setCortexOpacity']>(),
+    setExploded: vi.fn<DockCommands['setExploded']>(),
     setCortexSurface: vi.fn<DockCommands['setCortexSurface']>(),
     setInternalVisible: vi.fn<DockCommands['setInternalVisible']>(),
     setSpinalCordVisible: vi.fn<DockCommands['setSpinalCordVisible']>(),
@@ -279,6 +282,7 @@ describe('the toolbar', () => {
           Coordinate: 'Coordinate',
           ...(phone ? {} : { Overlay: 'Overlay' }),
           'The medial surface': 'Display',
+          'The exploded view': 'Display',
         });
       } finally {
         document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
@@ -401,7 +405,27 @@ describe('the Display popover', () => {
     await mount({ hasSpinalCord: false });
     await open('Display');
     expect(page.getByRole('checkbox', { name: 'Show spinal cord' }).elements()).toHaveLength(0);
-    expect(page.getByRole('checkbox').elements()).toHaveLength(2);
+    expect(page.getByRole('checkbox').elements()).toHaveLength(2 + 1);
+  });
+
+  test('the exploded view is a box like the others, described by what it does not change', async () => {
+    await mount({ view: { ...liveState({}).view, exploded: true } });
+    await open('Display');
+    const box = control('checkbox', 'Exploded view') as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    expect(box.getAttribute('aria-describedby')).toBeTruthy();
+    expect(document.getElementById(box.getAttribute('aria-describedby')!)!.textContent).toBe(
+      'Structures keep their measured shape; only their places change.',
+    );
+    await press('checkbox', 'Exploded view');
+    expect(commands.setExploded.mock.calls).toEqual([[false]]);
+    expect(tool('Display').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  test('the exploded view is absent while the visual-field map pairs the hemispheres', async () => {
+    await mount({ explodable: false });
+    await open('Display');
+    expect(page.getByRole('checkbox', { name: 'Exploded view' }).elements()).toHaveLength(0);
   });
 
   test('the opacity slider speaks a percentage, steps by 5 % and goes while the cortex is hidden', async () => {

@@ -5,6 +5,7 @@ import {
   BoxGeometry,
   BufferGeometry,
   Float32BufferAttribute,
+  Matrix4,
   Mesh,
   Sphere,
   Vector3,
@@ -106,6 +107,10 @@ function fixture({
   scale = { horizontal: 1, vertical: 0.45 },
   intersect = (() => null) as FramingModel['intersect'],
   medialPair = false,
+  settledMatrixWorld = (mesh: Mesh, target = new Matrix4()) => {
+    mesh.updateWorldMatrix(true, false);
+    return target.copy(mesh.matrixWorld);
+  },
 } = {}) {
   const bounds = new Box3(new Vector3(-0.08, -0.07, -0.1), new Vector3(0.08, 0.11, 0.1));
   let size = { width: 390, height: 792 };
@@ -119,6 +124,7 @@ function fixture({
     state: { ...STATE, ...state },
     visibleMeshes: meshes,
     regions,
+    settledMatrixWorld,
     intersect,
     medialPair,
   };
@@ -274,6 +280,27 @@ const drawn = () => [
   region('brain', [0.15, 0.17, 0.19], [0, 0.02, 0]),
   region('small', [0.01, 0.01, 0.01], [0.03, 0.02, 0]),
 ];
+
+describe('the exploded view', () => {
+  it('is framed where its pieces are going, not where they are drawn on the way', () => {
+    const meshes = drawn();
+    const spread = new Matrix4().makeTranslation(0.12, 0, 0);
+    const stage = fixture({
+      meshes,
+      state: { exploded: true },
+      settledMatrixWorld: (mesh, target = new Matrix4()) => {
+        mesh.updateWorldMatrix(true, false);
+        return target.copy(mesh.matrixWorld).premultiply(spread);
+      },
+    });
+    const going = meshes
+      .reduce((box, mesh) => box.expandByObject(mesh), new Box3())
+      .applyMatrix4(spread)
+      .getCenter(new Vector3());
+    const { center } = stage.framing.home(VIEW_DIRECTIONS.oblique.clone());
+    assert.ok(center.distanceTo(going) < 1e-12, `${center.toArray()} is not ${going.toArray()}`);
+  });
+});
 
 describe('the magnification after a framing (deviation e7-zoom-after-framing)', () => {
   it('keeps the distance Focus chose when the stage next resizes', () => {

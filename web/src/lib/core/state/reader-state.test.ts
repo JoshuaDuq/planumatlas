@@ -21,6 +21,7 @@ test('an empty link is the default scene on the loaded layers, with nothing left
     hemisphere: 'both',
     cortexVisible: true,
     cortexOpacity: 1,
+    exploded: false,
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas',
@@ -159,6 +160,10 @@ function restorationFixture(): RestorationFixture {
     },
     setCortexOpacity(value) {
       this.settings.cortexOpacity = value;
+    },
+    setExploded(value) {
+      events.push('explode');
+      this.settings.exploded = value;
     },
     loadHiddenRegions(ids) {
       events.push('hidden');

@@ -409,6 +409,11 @@ export function defineEngineContract(
           );
         }
         refuses(
+          () => model.setExploded('yes' as never),
+          TypeError,
+          'The exploded view must be boolean.',
+        );
+        refuses(
           () => model.setSurfaceColor('bogus' as never),
           TypeError,
           'Unknown surface colour: bogus',
@@ -758,6 +763,41 @@ export function defineEngineContract(
         assert.equal(state.selectedRegion, null);
       });
 
+      it('opens assembled, explodes, and a reset puts the brain back', () => {
+        const { model } = world().engine;
+        assert.equal(model.settings.exploded, false);
+        model.setExploded(true);
+        assert.equal(model.settings.exploded, true);
+        model.reset();
+        assert.equal(model.settings.exploded, false);
+      });
+
+      it('puts an exploded brain back once a lesion or the visual-field map is drawn where the anatomy lies', () => {
+        const { model, lesion, visualField } = world().engine;
+        model.setExploded(true);
+        lesion.setPlacing(true);
+        assert.equal(model.settings.exploded, false, 'placing a lesion');
+        lesion.setPlacing(false);
+        model.setExploded(true);
+        lesion.show({ centre: [-30, 0, 20], radius: 5 });
+        assert.equal(model.settings.exploded, false, 'a lesion shown');
+        lesion.show(null);
+        assert.ok(visualField.available, 'the contract anatomy publishes retinotopy');
+        model.setExploded(true);
+        visualField.show({ dot: { x: 2, y: 2, radius: 1 } });
+        assert.equal(model.settings.exploded, false, 'the visual-field map');
+        const before = model.settings;
+        refuses(
+          () => model.setExploded(true),
+          Error,
+          'The visual-field map pairs the hemispheres; close it before exploding.',
+        );
+        assert.deepEqual(model.settings, before);
+        visualField.show(null);
+        model.setExploded(true);
+        assert.equal(model.settings.exploded, true, 'the map closed, the brain explodes again');
+      });
+
       it('resets every setting but the atlas, the detail level and the paint', async () => {
         const { engine, left, cortex, otherAtlas } = world();
         const { model } = engine;
@@ -903,6 +943,23 @@ export function defineEngineContract(
 
       it('cuts, reporting the plane to the model', async () => {
         await cutsReportingThePlane(world());
+      });
+
+      it('opens a cut on the brain assembled, and the brain cannot explode over a cut', async () => {
+        const { sections, model } = world().engine;
+        model.setExploded(true);
+        await sections.setMode('coronal');
+        assert.equal(model.settings.exploded, false);
+        const before = model.settings;
+        refuses(
+          () => model.setExploded(true),
+          Error,
+          'A cut shows the anatomy where it lies; close it before exploding.',
+        );
+        assert.deepEqual(model.settings, before);
+        await sections.setMode('off');
+        model.setExploded(true);
+        assert.equal(model.settings.exploded, true);
       });
 
       it('hands out snapshots, not its live state', () => {

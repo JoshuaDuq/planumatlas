@@ -29,6 +29,7 @@ import { createLesion } from './lesion/lesion.ts';
 import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
 import { createUserMap } from './user-map/user-map.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
+import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
 import { stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
@@ -83,11 +84,13 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
   // Declared before the scene: its resize observer can fire during the model download, which is long.
   let framing: ReturnType<typeof createFraming> | null = null;
   let setTractsMotion: Tracts['setMotion'] | null = null;
+  let stepAnatomy: ((now: number) => boolean) | null = null;
   const scene = createScene(host, {
     onContextLost: () => events.emit('contextLost', undefined),
     onContextRestored: () => events.emit('contextRestored', undefined),
     onResize: (change) => framing?.onResize(change),
     onMotion: (moving) => setTractsMotion?.(moving),
+    onFrame: (now) => stepAnatomy?.(now) ?? false,
   });
   cleanups.push(() => scene.dispose());
 
@@ -99,6 +102,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       },
     });
     cleanups.push(() => atlas.dispose());
+    stepAnatomy = (now) => atlas.stepExplode(now);
     const anatomy = atlas.manifest.anatomy.id;
 
     scene.applyTheme();
@@ -114,9 +118,12 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     cleanups.push(() => sections.dispose());
     scene.scene.add(sections.group);
 
+    // Streamlines lie where the anatomy does, so the exploded view hides them with the lesions.
+    const tractsLayer = new Group();
+    scene.scene.add(tractsLayer);
     const tracts = createTracts({
       anatomy,
-      scene: { add: (object) => scene.scene.add(object), invalidate: scene.invalidate },
+      scene: { add: (object) => tractsLayer.add(object), invalidate: scene.invalidate },
       emit: events.emit as TractsOptions['emit'],
     });
     cleanups.push(() => tracts.dispose());
@@ -196,6 +203,14 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     });
     const stage = framing;
 
+    // A lesion, a stroke case or a lesion's streamlines are drawn where the anatomy lies: once one is
+    // shown, the brain goes back together around it, framed as the exploded view's own toggle frames it.
+    const assemble = () => {
+      if (!atlas.settings.exploded) return;
+      atlas.setExploded(false);
+      stage.camera.frameWhole();
+    };
+
     // While the visual-field map is probed, a click reads the cortex there instead of choosing it.
     let probing = false;
     let visualMap: { dot: VisualFieldDot | null } | null = null;
@@ -258,7 +273,9 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       }
       const data = await loadStrokeCases();
       const masks = await loadStrokeMasks(data);
-      if (ask === strokeRequest) strokeSolids.show(data, masks, ids);
+      if (ask !== strokeRequest) return;
+      strokeSolids.show(data, masks, ids);
+      assemble();
     };
     // Fields and ribbon labels are published beside the manifest.
     const userMap = createUserMap({
@@ -292,13 +309,14 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
               intersect: (ray) => sections.intersect(ray),
             },
       onHover: presentation.hover,
-      onSelect: (id, point) => events.emit('pick', { id, point: point && worldToRas(point) }),
+      onSelect: (id, hit) =>
+        events.emit('pick', { id, point: hit && worldToRas(anatomicalPoint(hit)) }),
       onFocusPoint: stage.focusWorldPoint,
       placing: () => (lesion.placing || probing) && !reference.active,
       onPlace: (hit) =>
         probing
           ? events.emit('visualFieldPoint', { reading: atlas.visualFieldAt(hit) })
-          : events.emit('lesionPoint', { point: worldToRas(hit.point) }),
+          : events.emit('lesionPoint', { point: worldToRas(anatomicalPoint(hit)) }),
     });
     cleanups.push(() => picker.dispose());
 
@@ -306,10 +324,11 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     let shown: Presentation | null = null;
     function refresh() {
       const referenceOnly = shown?.referenceOnly === true;
-      const { surfaceColor } = atlas.settings;
+      const { surfaceColor, exploded } = atlas.settings;
       atlas.group.visible = !referenceOnly;
       sections.group.visible = !referenceOnly && sections.active;
-      lesionLayer.visible = !referenceOnly;
+      lesionLayer.visible = !referenceOnly && !exploded;
+      tractsLayer.visible = referenceOnly || !exploded;
       if (anatomy === tracts.anatomy) tracts.setClippingPlanes(atlas.clippingPlanes);
       const scanned = surfaceColor === 'mri' && !referenceOnly;
       scene.setMriAppearance(scanned);
@@ -328,6 +347,8 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     };
     const engineSections = createEngineSections(sections, prefetchCut);
     const onChange = () => {
+      // A change can set the anatomy moving, which the frame loop steps.
+      scene.invalidate();
       stage.invalidate();
       lesion.refresh();
       strokeSolids.refresh();
@@ -421,12 +442,21 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       comparison,
       tracts,
       lesion: {
-        show: lesion.show,
-        setPlacing: lesion.setPlacing,
+        show(sphere) {
+          lesion.show(sphere);
+          if (sphere) assemble();
+        },
+        setPlacing(placing) {
+          lesion.setPlacing(placing);
+          if (placing) assemble();
+        },
         measure: lesion.measure,
         tractBundles: lesion.tractBundles,
         measureTracts: lesion.measureTracts,
-        showTract: lesion.showTract,
+        async showTract(...args) {
+          await lesion.showTract(...args);
+          assemble();
+        },
         clearTract: lesion.clearTract,
       },
       visualField: {

@@ -5,7 +5,8 @@
   - The cortex opacity and surface rows are removed, not greyed, while the cortex is hidden; the slider
     does not take the value back while the reader holds the thumb (U4 `RangeField`). The spoken value is
     the percentage. The surface is the Overlay tool's one setting, offered here for the brain alone.
-  - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why).
+  - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why). The
+    exploded view is absent while the visual-field map pairs the hemispheres.
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
   - Last, what is away from its default, Focus and hidden parts included, with Reset display: on a phone the
     status bar that also says so is hidden. While the opacity slider is held it waits for the release, so the
@@ -32,6 +33,9 @@
     spinalCordVisible: boolean;
     /** The subject publishes a spinal cord. */
     hasSpinalCord: boolean;
+    exploded: boolean;
+    /** The exploded view can be drawn now. */
+    explodable: boolean;
     /** The display settings away from their defaults (`displayChanges`). */
     changes: readonly string[];
     /** A pointer holds the slider (StagePopover). */
@@ -42,6 +46,7 @@
     onCortexSurface: (surface: CortexSurface) => void;
     onInternalVisible: (visible: boolean) => void;
     onSpinalCordVisible: (visible: boolean) => void;
+    onExploded: (exploded: boolean) => void;
     onResetDisplay: () => void;
   }
 
@@ -54,6 +59,8 @@
     internalVisible,
     spinalCordVisible,
     hasSpinalCord,
+    exploded,
+    explodable,
     changes,
     scrubbing,
     onHemisphere,
@@ -62,6 +69,7 @@
     onCortexSurface,
     onInternalVisible,
     onSpinalCordVisible,
+    onExploded,
     onResetDisplay,
   }: Props = $props();
 
@@ -69,6 +77,7 @@
   const hemisphereLabelId = `hemisphere-label-${uid}`;
   const surfaceId = `display-surface-${uid}`;
   const surfaceHintId = `display-surface-hint-${uid}`;
+  const explodeHintId = `display-explode-hint-${uid}`;
 
   const copy = $derived(t(lang, 'display'));
   // Held at what the press found until the slider is let go.
@@ -151,6 +160,18 @@
       <span>{copy.showSpinalCord}</span>
     </label>
   {/if}
+  {#if explodable}
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={exploded}
+        aria-describedby={explodeHintId}
+        onchange={(event) => onExploded(event.currentTarget.checked)}
+      />
+      <span>{copy.explode}</span>
+    </label>
+    <p id={explodeHintId} class="hint explode-hint">{copy.explodeHint}</p>
+  {/if}
 </div>
 {#if shown.length}
   <div class="changes">
@@ -184,6 +205,11 @@
     }
     .surface-label {
       margin-top: var(--space-2);
+    }
+    /* Under its box's words, as the opacity rows are. */
+    .hint.explode-hint {
+      margin: 0;
+      padding: 0 0 var(--space-2) var(--space-6);
     }
     .hint {
       margin: var(--space-2) 0 0;

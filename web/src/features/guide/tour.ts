@@ -186,6 +186,14 @@ const STOPS: Record<
   // A reader's map is their own file and never in a link: the stop points at the tool to try.
   overlay: { selector: dock('overlay'), side: 'top', align: 'start' },
   medial: { selector: dock('display'), side: 'top', align: 'center', view: 'hemi=left&view=right' },
+  // The brain comes apart as the stop opens, seen from the front; every other stop's view leaves
+  // the explode out, so moving on, going back or closing puts it back together.
+  explode: {
+    selector: dock('display'),
+    side: 'top',
+    align: 'center',
+    view: 'explode=1&view=anterior',
+  },
   topBar: { selector: '#masthead .data-bar', side: 'bottom', align: 'center' },
   functions: {
     selector: tab('functions'),

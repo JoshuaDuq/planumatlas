@@ -14,6 +14,7 @@ export type DisplayView = Pick<
   | 'hemisphere'
   | 'cortexVisible'
   | 'cortexOpacity'
+  | 'exploded'
   | 'internalVisible'
   | 'hiddenRegions'
   | 'isolatedRegion'
@@ -76,6 +77,8 @@ export function displayChanges(
   if (view.internalVisible !== prepared.internalVisible) {
     changes.push(view.internalVisible ? copy.internalShown : copy.internalHidden);
   }
+  // No view is prepared exploded.
+  if (view.exploded) changes.push(copy.explode);
   const hidden = [...view.hiddenRegions].filter((id) => !prepared.hiddenRegions.has(id)).length;
   const shown = [...prepared.hiddenRegions].filter((id) => !view.hiddenRegions.has(id)).length;
   if (hidden) changes.push(t(view.lang, 'dissection').hiddenCount(hidden));

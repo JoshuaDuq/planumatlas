@@ -34,7 +34,7 @@ export interface PickerOptions<Region extends { id: string }> {
   model: () => PickModel<Region>;
   onHover?: (region: Region | null, position: { x: number; y: number } | null) => void;
   /** The region a click chose, and where the ray met its surface when the model can say. */
-  onSelect: (id: string, point: Vector3 | null) => void;
+  onSelect: (id: string, hit: SurfaceHit | null) => void;
   onFocusPoint?: (point: Vector3) => void;
   /** While this holds, a click places at the point it meets rather than choosing a region. */
   placing?: () => boolean;
@@ -139,7 +139,7 @@ export function createPicker<Region extends { id: string }>({
       return;
     }
     const id = regionAt(event)?.id;
-    if (id) onSelect(id, model().intersect?.(raycaster)?.point ?? null);
+    if (id) onSelect(id, model().intersect?.(raycaster) ?? null);
   };
 
   function hoverAt({ clientX, clientY }: { clientX: number; clientY: number }) {

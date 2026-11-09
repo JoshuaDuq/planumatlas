@@ -7,7 +7,11 @@ export interface FakeStrokeCases extends EngineStrokeCases {
 }
 
 /** The cohort without solids: `show` checks what the real engine would and records the ids. */
-export function createFakeStrokeCases(data: StrokeCases | undefined): FakeStrokeCases {
+export function createFakeStrokeCases(
+  data: StrokeCases | undefined,
+  /** Drawn where the anatomy lies, a case puts an exploded brain back together. */
+  assemble: () => void,
+): FakeStrokeCases {
   let shown: readonly string[] = [];
   return {
     available: data !== undefined,
@@ -25,6 +29,7 @@ export function createFakeStrokeCases(data: StrokeCases | undefined): FakeStroke
         if (!data!.cases.some((entry) => entry.id === id)) throw new Error(`No stroke case ${id}.`);
       }
       shown = [...ids];
+      if (ids.length) assemble();
     },
   };
 }

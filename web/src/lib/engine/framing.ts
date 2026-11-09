@@ -1,4 +1,4 @@
-import { Box3, Raycaster, Sphere, Vector3 } from 'three';
+import { Box3, Matrix4, Raycaster, Sphere, Vector3 } from 'three';
 import type { Intersection, Mesh } from 'three';
 import { orbitWithin } from '../core/state/url-state.ts';
 import type { ModelState, Orbit, Region, ViewName } from '../types/index.ts';
@@ -92,6 +92,8 @@ export interface FramingModel {
   readonly medialPair: boolean;
   readonly visibleMeshes: readonly AtlasMesh[];
   readonly regions: ReadonlyMap<string, Region>;
+  /** Where a mesh is drawn once the exploded view has arrived (`BrainAtlas.settledMatrixWorld`). */
+  settledMatrixWorld(mesh: Mesh, target?: Matrix4): Matrix4;
   /** The nearest drawn surface along a ray. */
   intersect(raycaster: Raycaster): Intersection<AtlasMesh> | null;
 }
@@ -233,16 +235,29 @@ export function createFraming({
   const meshesOf = (id: string) =>
     model.visibleMeshes.filter((mesh) => mesh.userData['region_id'] === id);
 
+  // Framing fits where the anatomy is going, so an explode under way is fitted as it will arrive.
+  const placed = new Matrix4();
+  function settledBox(mesh: Mesh): Box3 {
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    return mesh.geometry.boundingBox!.clone().applyMatrix4(model.settledMatrixWorld(mesh, placed));
+  }
+
   function boundsOf(meshes: readonly Mesh[]): Box3 {
     const box = new Box3();
-    for (const mesh of meshes) box.expandByObject(mesh);
+    for (const mesh of meshes) box.union(settledBox(mesh));
     return box;
   }
 
   function framingBounds(): Box3 {
     if (reference.active && reference.bounds) return reference.bounds;
-    const { isolatedRegion, internalSystem, cortexVisible, hemisphere, spinalCordVisible } =
-      model.state;
+    const {
+      isolatedRegion,
+      internalSystem,
+      cortexVisible,
+      hemisphere,
+      spinalCordVisible,
+      exploded,
+    } = model.state;
     if (isolatedRegion) {
       if (!cachedBounds) {
         const visible = boundsOf(model.visibleMeshes);
@@ -259,6 +274,14 @@ export function createFraming({
       }
       return cachedBounds;
     }
+    // Exploded, the anatomy reaches far past the box it opened in: fit what is drawn, where it goes.
+    if (exploded) {
+      if (!cachedBounds) {
+        const visible = boundsOf(model.visibleMeshes);
+        cachedBounds = visible.isEmpty() ? bounds : visible;
+      }
+      return cachedBounds;
+    }
     // One hemisphere, or the cord added beneath the brain, is not the box the page opened with. Fit
     // what is actually drawn, or the picture keeps a hole where the hidden half was and the cord stays
     // below the frame.
@@ -268,7 +291,7 @@ export function createFraming({
         const visible = whole ? bounds.clone() : new Box3();
         for (const mesh of model.visibleMeshes) {
           if (whole && mesh.userData['atlas'] !== 'pam50') continue;
-          visible.expandByObject(mesh);
+          visible.union(settledBox(mesh));
         }
         cachedBounds = visible.isEmpty() ? bounds : visible;
       }
@@ -298,9 +321,7 @@ export function createFraming({
     if (reference.active) return null;
     if (cachedPoints) return cachedPoints;
     const box = framingBounds();
-    const meshes = model.visibleMeshes.filter((mesh) =>
-      box.intersectsBox(new Box3().setFromObject(mesh)),
-    );
+    const meshes = model.visibleMeshes.filter((mesh) => box.intersectsBox(settledBox(mesh)));
     if (!meshes.length) return null;
     const stride = thinned(
       meshes.reduce((total, mesh) => total + mesh.geometry.attributes['position']!.count, 0),
@@ -309,9 +330,9 @@ export function createFraming({
     const point = new Vector3();
     for (const mesh of meshes) {
       const position = mesh.geometry.attributes['position']!;
-      mesh.updateWorldMatrix(true, false);
+      model.settledMatrixWorld(mesh, placed);
       for (let i = 0; i < position.count; i += stride) {
-        point.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+        point.fromBufferAttribute(position, i).applyMatrix4(placed);
         // Only what the box already framed. A long supplemental layer can reach into the box and far
         // past it, and framing it would undo the choice of what to frame.
         if (box.containsPoint(point)) kept.push(point.x, point.y, point.z);

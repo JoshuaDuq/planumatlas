@@ -113,6 +113,8 @@ export function createLessons({
    */
   async function openLandmark(step: Landmark, current: () => boolean): Promise<boolean> {
     if (!(await commands.openRegion(step.region, current))) return false;
+    // The route's marks stand at each landmark's anchor, where the anatomy lies.
+    model.setExploded(false);
     showCircuitLandmark(model, step);
     model.setFocused(beneathCortex(model.regions.get(step.region)!));
     if (!frameLandmark(step)) throw new Error(`Landmark geometry unavailable: ${step.region}`);
@@ -152,6 +154,7 @@ export function createLessons({
     model.select(null);
     model.clearIsolation();
     model.setHemisphere('both');
+    model.setExploded(false);
     model.showRegions(circuit.steps.flatMap((step) => step.covering_regions ?? []));
     model.setCortexVisible(true);
     seeThroughRoute();

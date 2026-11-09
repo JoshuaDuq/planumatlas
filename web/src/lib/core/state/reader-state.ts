@@ -9,6 +9,7 @@ const SCENE_FIELDS = [
   'hemisphere',
   'cortexVisible',
   'cortexOpacity',
+  'exploded',
   'internalVisible',
   'spinalCordVisible',
   'surfaceColor',
@@ -178,6 +179,10 @@ export async function applyReaderState(
   if (planeCut && target.cut !== 'off') {
     await step(['pos'], () => sections.setOffset(target.cutOffset));
   }
+  // After the cut, which the exploded view does not stand beside.
+  await step(['explode'], () => {
+    if (target.exploded !== settings().exploded) model.setExploded(target.exploded);
+  });
 
   await step(['isolate'], () => {
     if (target.isolatedRegion === settings().isolatedRegion) return;

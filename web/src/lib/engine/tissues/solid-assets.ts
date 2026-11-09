@@ -11,6 +11,7 @@ import type { EdgeUniforms } from './boundary-edges.ts';
 import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { addMriCutAppearance, setScanPainted } from '../render/mri-material.ts';
+import { anatomicalMatrixWorld } from '../model/explode.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import {
   ghosted,
@@ -100,21 +101,20 @@ export const BANDS = { envelope: 0, ribbon: 1, structure: 2 } as const satisfies
 >;
 
 /**
- * A cut source for a mesh the model already holds. It shares the mesh's
- * geometry and BVH, which the model owns; `color` is the published colour a
- * nucleus cap takes under atlas colours.
+ * A cut source for a mesh the model already holds, where the anatomy has it however the mesh is
+ * drawn. It shares the mesh's geometry and BVH, which the model owns; `color` is the published
+ * colour a nucleus cap takes under atlas colours.
  */
 export function solidSource(
   mesh: Mesh,
   userData: Record<string, unknown> = { ...mesh.userData },
   color: Color | null = null,
 ): SolidSource {
-  mesh.updateWorldMatrix(true, false);
   const source = new Mesh(mesh.geometry, new MeshBasicMaterial());
   if (color) source.material.color.copy(color);
   source.matrixAutoUpdate = false;
-  source.matrix.copy(mesh.matrixWorld);
-  source.matrixWorld.copy(mesh.matrixWorld);
+  anatomicalMatrixWorld(mesh, source.matrix);
+  source.matrixWorld.copy(source.matrix);
   source.userData = userData;
   return source;
 }
@@ -139,9 +139,11 @@ function envelopeSurface(
       source.userData['hemisphere'] === hemisphere && source.userData['boundary'] === boundary,
   );
   if (!mesh) throw new Error(`Missing the ${hemisphere} ${boundary} envelope.`);
-  mesh.updateWorldMatrix(true, false);
   // Only the positions are read, so the normals are neither copied nor transformed.
-  const position = mesh.geometry.getAttribute('position').clone().applyMatrix4(mesh.matrixWorld);
+  const position = mesh.geometry
+    .getAttribute('position')
+    .clone()
+    .applyMatrix4(anatomicalMatrixWorld(mesh));
   return { position: position.array, index: mesh.geometry.getIndex()!.array };
 }
 

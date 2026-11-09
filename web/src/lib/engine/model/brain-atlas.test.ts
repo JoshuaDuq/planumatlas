@@ -1215,6 +1215,7 @@ test('settings is a cheap snapshot that does not walk the scene graph', async ()
     hemisphere: 'both',
     cortexVisible: true,
     cortexOpacity: 1,
+    exploded: false,
     internalVisible: true,
     spinalCordVisible: false,
     surfaceColor: 'atlas',

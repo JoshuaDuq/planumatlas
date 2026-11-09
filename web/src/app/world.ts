@@ -1,6 +1,7 @@
 import {
   createVisualFieldMapStore,
   syncVisualFieldMap,
+  visualFieldMapOpen,
 } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync } from 'svelte';
 import { ASSET_BASE } from '../../build/site.ts';
@@ -326,6 +327,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           internalVisible,
           spinalCordVisible,
           hemisphere,
+          exploded,
           dissectionCanUndo,
         } = view.current;
         return {
@@ -337,6 +339,8 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
           internalVisible,
           spinalCordVisible,
           hemisphere,
+          exploded,
+          explodable: !visualFieldMapOpen(view.current),
           singleKeys: keyPreference.enabled,
           diffusionMriOpen: ports.diffusionMriOpen(),
           mprOpen: ports.mprOpen(),
@@ -370,6 +374,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
         setInternalVisible: world.anatomy.setInternalVisible,
         setSpinalCordVisible: (visible) => void world.anatomy.setSpinalCordVisible(visible),
         setHemisphere: world.anatomy.setHemisphere,
+        setExploded: (exploded) => void world.anatomy.setExploded(exploded),
         // The engine remembers the zoom after each (E7), as the legacy keys did.
         orbitBy: camera.orbitBy,
         dolly: camera.dolly,
