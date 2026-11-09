@@ -1,34 +1,82 @@
 import { Box3, Matrix4, Vector3 } from 'three';
 import type { IUniform, Material, Mesh, Object3D } from 'three';
+import type { MeshBVH } from 'three-mesh-bvh';
 
 /**
- * The exploded view moves each structure whole and never reshapes it, so every surface stays the
- * measured one; only where it is drawn changes. The deep anatomy moves by system and side, each
- * piece's offset from the deep anatomy's own centre grown by `DEEP_SPREAD`: the arrangement is the
- * real one, scaled. The cerebral hemispheres slide apart along the brain's own left–right axis, which
- * the scan holds a little turned, to stand one gap from the spread anatomy on either side: each moves
- * at least its own width, and the gap is at least `HEMISPHERE_GAP`.
+ * Deep pieces expand radially by one common factor, preserving their anatomical directions.
+ * Interlocking regions travel together. The hemispheres open along the brain's own left–right
+ * axis just far enough to clear them. Every structure keeps its measured shape.
  *
  * Whatever reads the anatomy (a cut, a region lookup, the scan or a map sampled on a surface, a
  * picked coordinate) reads `anatomicalMatrixWorld`, never where the structure is drawn.
  */
 
-/** A deep piece's offset from the deep anatomy's centre grows by this share of itself. */
-export const DEEP_SPREAD = 1;
+/** Clearance, in metres, between an opened hemisphere and the internal anatomy. */
+export const HEMISPHERE_GAP = 0.003;
 
-/** The least room, in metres, between a hemisphere and the spread deep anatomy. */
-export const HEMISPHERE_GAP = 0.01;
+/** Grow distances between internal pieces' centres by 60%, without scaling their surfaces. */
+export const DEEP_SPREAD = 0.6;
 
-/** Systems that are one organ across the midline, moved whole rather than split by side. */
-export const WHOLE_SYSTEMS: ReadonlySet<string> = new Set([
-  'Brainstem',
-  'Cerebellum',
-  'Ventricles and CSF',
-]);
-
-/** The piece a deep structure moves with: its system, and its side unless the system is one organ. */
-export const pieceOf = (system: string, hemisphere: string): string =>
-  WHOLE_SYSTEMS.has(system) ? system : `${system} · ${hemisphere}`;
+/**
+ * Move internal pieces radially. If that would cross or contain another piece, join them and
+ * recompute their common offset. Each pass either reduces the piece count or finishes; no piece
+ * is shuffled onto a different axis, and the caller caches this layout between frames.
+ */
+export function deepShifts(groups: readonly (readonly Mesh[])[]): Map<Mesh, Vector3> {
+  const pieces = groups.map((meshes) => {
+    const entries = meshes.map((mesh) => {
+      const matrix = anatomicalMatrixWorld(mesh);
+      return { mesh, box: restBox(mesh), matrix, inverse: matrix.clone().invert() };
+    });
+    return {
+      entries,
+      box: entries.reduce((box, entry) => box.union(entry.box), new Box3()),
+    };
+  });
+  const centre = pieces
+    .reduce((box, piece) => box.union(piece.box), new Box3())
+    .getCenter(new Vector3());
+  const shifted = new Box3();
+  const relative = new Matrix4();
+  let previousCount: number;
+  do {
+    previousCount = pieces.length;
+    for (let i = 0; i < pieces.length; i++) {
+      const a = pieces[i]!;
+      for (let j = i + 1; j < pieces.length; j++) {
+        const b = pieces[j]!;
+        const delta = b.box
+          .getCenter(new Vector3())
+          .sub(a.box.getCenter(new Vector3()))
+          .multiplyScalar(DEEP_SPREAD);
+        if (!a.box.intersectsBox(shifted.copy(b.box).translate(delta))) continue;
+        const overlap = a.entries.some((m) =>
+          b.entries.some((n) => {
+            shifted.copy(n.box).translate(delta);
+            if (!m.box.intersectsBox(shifted)) return false;
+            // Surface crossings alone miss a solid entirely enclosed by another.
+            if (m.box.containsBox(shifted) || shifted.containsBox(m.box)) return true;
+            relative.makeTranslation(delta).premultiply(m.inverse).multiply(n.matrix);
+            return (m.mesh.geometry.boundsTree as MeshBVH).intersectsGeometry(
+              n.mesh.geometry,
+              relative,
+            );
+          }),
+        );
+        if (!overlap) continue;
+        a.entries.push(...b.entries);
+        a.box.union(b.box);
+        pieces.splice(j--, 1);
+      }
+    }
+  } while (pieces.length < previousCount);
+  const shifts = new Map<Mesh, Vector3>();
+  for (const { box, entries } of pieces) {
+    const shift = box.getCenter(new Vector3()).sub(centre).multiplyScalar(DEEP_SPREAD);
+    for (const { mesh } of entries) shifts.set(mesh, shift);
+  }
+  return shifts;
+}
 
 /**
  * The brain's own left–right axis, a unit vector toward its right: from the left hemisphere's vertex
@@ -75,9 +123,7 @@ function extentAlong(box: Box3, axis: Vector3): [number, number] {
 }
 
 /**
- * The hemispheres' shifts along the brain's left–right `axis`: each stands the same gap from the spread
- * deep anatomy (`deep`, as drawn exploded), the gap at least `HEMISPHERE_GAP` and wide enough that each
- * hemisphere moves at least its own width.
+ * Move each hemisphere outward only as far as needed to leave `HEMISPHERE_GAP` from the deep anatomy.
  */
 export function hemisphereShifts(
   left: Box3,
@@ -85,20 +131,14 @@ export function hemisphereShifts(
   deep: Box3,
   axis: Vector3,
 ): { left: Vector3; right: Vector3 } {
-  const [leftMin, leftMax] = extentAlong(left, axis);
-  const [rightMin, rightMax] = extentAlong(right, axis);
+  const [, leftMax] = extentAlong(left, axis);
+  const [rightMin] = extentAlong(right, axis);
   const [deepMin, deepMax] = extentAlong(deep, axis);
-  // Moved by its own width, a hemisphere's medial edge lands where its lateral edge lay.
-  const gap = Math.max(HEMISPHERE_GAP, deepMin - leftMin, rightMax - deepMax);
   return {
-    left: axis.clone().multiplyScalar(deepMin - gap - leftMax),
-    right: axis.clone().multiplyScalar(deepMax + gap - rightMin),
+    left: axis.clone().multiplyScalar(Math.min(0, deepMin - HEMISPHERE_GAP - leftMax)),
+    right: axis.clone().multiplyScalar(Math.max(0, deepMax + HEMISPHERE_GAP - rightMin)),
   };
 }
-
-/** A deep piece's shift: its offset from the deep anatomy's centre, times `DEEP_SPREAD`. */
-export const deepShift = (piece: Box3, centre: Vector3): Vector3 =>
-  piece.getCenter(new Vector3()).sub(centre).multiplyScalar(DEEP_SPREAD);
 
 /** A mesh's box where the anatomy has it. */
 export function restBox(mesh: Mesh): Box3 {

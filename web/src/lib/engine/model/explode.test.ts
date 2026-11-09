@@ -1,14 +1,13 @@
 import assert from 'node:assert/strict';
 import { afterAll, afterEach, beforeAll, test, vi } from 'vitest';
-import { Box3, Matrix4, Raycaster, Vector3 } from 'three';
-import type { Mesh } from 'three';
-import type { MeshBVH } from 'three-mesh-bvh';
+import { Box3, BoxGeometry, Matrix4, Mesh, Raycaster, Vector3 } from 'three';
+import { MeshBVH } from 'three-mesh-bvh';
 import { labelOf } from '../../core/catalog/labels.ts';
 import { regionAt } from '../slices/region-at.ts';
 import { rasToWorld, worldToRas } from '../slices/coordinates.ts';
 import { solidSource } from '../tissues/solid-assets.ts';
 import { BrainAtlas } from './brain-atlas.ts';
-import { HEMISPHERE_GAP, anatomicalPoint, leftRightAxis, pieceOf, restBox } from './explode.ts';
+import { HEMISPHERE_GAP, anatomicalPoint, deepShifts, leftRightAxis, restBox } from './explode.ts';
 import { modelDirectory, publishedLoader, readManifest } from './test-support.ts';
 
 const ATLAS = 'destrieux';
@@ -20,12 +19,13 @@ beforeAll(async () => {
   await model.initialize(ATLAS);
 }, 120_000);
 
-afterEach(() => {
+afterEach(async () => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   model.setCutState({ atlas: null, active: false });
   model.setExploded(false);
   model.stepExplode(Number.MAX_SAFE_INTEGER);
+  await model.setDetail('learning');
 });
 
 afterAll(() => model.dispose());
@@ -50,6 +50,50 @@ function drawnBox(mesh: Mesh): Box3 {
   return mesh.geometry.boundingBox!.clone().applyMatrix4(mesh.matrixWorld);
 }
 
+/** Independently moving pieces must neither cross surfaces nor contain one another. */
+function assertDeepPiecesClear(list: readonly Mesh[]) {
+  const bounds = list.map(drawnBox);
+  const shifts = list.map(drawnShift);
+  const relative = new Matrix4();
+  for (let i = 0; i < list.length; i++) {
+    const a = list[i]!;
+    for (let j = i + 1; j < list.length; j++) {
+      if (shifts[i]!.distanceTo(shifts[j]!) < 1e-12 || !bounds[i]!.intersectsBox(bounds[j]!))
+        continue;
+      const b = list[j]!;
+      relative.copy(a.matrixWorld).invert().multiply(b.matrixWorld);
+      assert.ok(
+        !bounds[i]!.containsBox(bounds[j]!) &&
+          !bounds[j]!.containsBox(bounds[i]!) &&
+          !(a.geometry.boundsTree as MeshBVH).intersectsGeometry(b.geometry, relative),
+        `${a.userData['region_id']} clips into ${b.userData['region_id']}`,
+      );
+    }
+  }
+}
+
+/** Every moved hemisphere clears the internal anatomy, including a loaded spinal cord. */
+function assertHemispheresClear() {
+  const axis = new Vector3(1, 0, 0).applyQuaternion(model.anatomicalFrame);
+  const deep = new Box3();
+  const internal = [
+    ...meshes(model.settings.detail),
+    ...(model.manifest.supplemental_layers ?? []).flatMap(
+      (layer) => model.layers.get(layer.id)?.meshes ?? [],
+    ),
+  ];
+  for (const mesh of internal) deep.union(drawnBox(mesh));
+  const [deepMin, deepMax] = along(deep, axis);
+  for (const side of ['left', 'right']) {
+    const half = meshes(ATLAS)
+      .filter((mesh) => mesh.userData['hemisphere'] === side)
+      .reduce((box, mesh) => box.union(drawnBox(mesh)), new Box3());
+    const [min, max] = along(half, axis);
+    const gap = side === 'left' ? deepMin - max : min - deepMax;
+    assert.ok(Math.abs(gap - HEMISPHERE_GAP) < 1e-12, `${side}: ${gap} m clearance`);
+  }
+}
+
 /** Explode and let it arrive. */
 function explodeNow() {
   at(1000);
@@ -72,6 +116,56 @@ function along(box: Box3, axis: Vector3): [number, number] {
 
 const degrees = (radians: number) => (radians * 180) / Math.PI;
 
+test.each(['aseg', 'nextbrain', 'learning'])(
+  'the internal anatomy expands compactly in its original directions at %s detail',
+  async (detail) => {
+    await model.setDetail(detail);
+    explodeNow();
+    const pieces = new Map<string, { shift: Vector3; box: Box3 }>();
+    for (const mesh of meshes(detail)) {
+      const shift = drawnShift(mesh);
+      const key = shift.toArray().join();
+      const piece = pieces.get(key) ?? { shift, box: new Box3() };
+      piece.box.union(restBox(mesh));
+      pieces.set(key, piece);
+    }
+    assert.ok(pieces.size >= 6, `${pieces.size} independently moving pieces`);
+    const centre = [...pieces.values()]
+      .reduce((box, piece) => box.union(piece.box), new Box3())
+      .getCenter(new Vector3());
+    for (const { shift, box } of pieces.values()) {
+      const radial = box.getCenter(new Vector3()).sub(centre);
+      assert.ok(shift.length() > 0, 'internal pieces actually move');
+      close(shift, radial.multiplyScalar(0.6), 'a modest common radial expansion', 1e-9);
+    }
+    assertDeepPiecesClear(meshes(detail));
+    assertHemispheresClear();
+  },
+);
+
+test('interlocking and enclosed regions move together instead of being rearranged', () => {
+  const box = (size: number, x: number) => {
+    const geometry = new BoxGeometry(size, size, size);
+    geometry.boundsTree = new MeshBVH(geometry);
+    const mesh = new Mesh(geometry);
+    mesh.position.x = x;
+    return mesh;
+  };
+  const outer = box(0.02, 0);
+  const inner = box(0.005, 0);
+  const crossing = box(0.02, 0.008);
+  const separate = box(0.01, 0.05);
+  const list = [outer, inner, crossing, separate];
+  const shifts = deepShifts(list.map((mesh) => [mesh]));
+  close(shifts.get(outer)!, shifts.get(inner)!, 'an enclosed region');
+  close(shifts.get(outer)!, shifts.get(crossing)!, 'an interlocking region');
+  assert.ok(shifts.get(outer)!.x < 0 && shifts.get(separate)!.x > 0, 'the pieces still expand');
+  for (const mesh of list) {
+    mesh.geometry.dispose();
+    (mesh.material as import('three').Material).dispose();
+  }
+});
+
 test('the brain’s left–right axis is the scan’s x turned as the head lay, and the frame turns x onto it', () => {
   const cortex = meshes(ATLAS);
   const side = (hemisphere: string) =>
@@ -83,74 +177,22 @@ test('the brain’s left–right axis is the scan’s x turned as the head lay, 
   close(new Vector3(1, 0, 0).applyQuaternion(model.anatomicalFrame), axis, 'the frame', 1e-12);
 });
 
-test('each hemisphere slides out along the brain’s own left–right axis, at least its width, both one gap clear of the deep anatomy', () => {
+test('each hemisphere slides whole along the brain’s own axis, only far enough to clear the internal anatomy', () => {
   explodeNow();
   const axis = new Vector3(1, 0, 0).applyQuaternion(model.anatomicalFrame);
-  const cortex = meshes(ATLAS);
-  const boxOf = (list: readonly Mesh[]) =>
-    list.reduce((box, mesh) => box.union(drawnBox(mesh)), new Box3());
-  const extents = { left: [0, 0], right: [0, 0] };
   for (const side of ['left', 'right'] as const) {
-    const halves = cortex.filter((mesh) => mesh.userData['hemisphere'] === side);
+    const halves = meshes(ATLAS).filter((mesh) => mesh.userData['hemisphere'] === side);
     const shift = drawnShift(halves[0]!);
     for (const mesh of halves)
       close(drawnShift(mesh), shift, `${side}: the hemisphere moves whole`);
     assert.ok(shift.clone().cross(axis).length() < 1e-12, `${side} moves along the axis`);
-    const outward = side === 'left' ? -shift.dot(axis) : shift.dot(axis);
-    const [restMin, restMax] = along(boxOf(halves).translate(shift.clone().negate()), axis);
-    assert.ok(outward >= restMax - restMin - 1e-12, `${side} moves ${outward} m`);
-    extents[side] = along(boxOf(halves), axis);
+    assert.ok((side === 'left' ? -1 : 1) * shift.dot(axis) > 0, `${side} moves outward`);
   }
-  const [leftEdge, rightEdge] = [extents.left[1]!, extents.right[0]!];
-  const [deepMin, deepMax] = along(boxOf(meshes(model.settings.detail)), axis);
-  assert.ok(deepMin - leftEdge >= HEMISPHERE_GAP - 1e-12, 'a gap on the left');
-  assert.ok(
-    Math.abs(deepMin - leftEdge - (rightEdge - deepMax)) < 1e-12,
-    'both hemispheres stand one gap from the spread anatomy',
-  );
-});
-
-test('the deep anatomy moves by system about its own centre: a side together, the brainstem and cerebellum whole', () => {
-  explodeNow();
-  const shift = (id: string) => drawnShift(meshOf(`learning:${id}`));
-  close(shift('left:putamen'), shift('left:caudate'), 'the left basal ganglia');
-  close(shift('left:pons'), shift('right:pons'), 'the brainstem');
-  close(shift('crus-i-left'), shift('crus-i-right'), 'the cerebellum');
-  assert.ok(shift('left:putamen').x < 0 && shift('right:putamen').x > 0, 'the sides part');
-  // World y is superior and z posterior: the callosum rises, the cerebellum goes down and back.
-  assert.ok(shift('corpus-callosum').y > 0, 'the corpus callosum');
-  assert.ok(shift('crus-i-left').y < 0 && shift('crus-i-left').z > 0, 'the cerebellum');
-  assert.ok(shift('left:pons').y < 0, 'the brainstem');
-});
-
-test('spread, the systems pass through each other in no more of their pairs than measured', () => {
-  explodeNow();
-  const pieces = new Map<string, Mesh[]>();
-  for (const mesh of meshes(model.settings.detail)) {
-    const region = model.regions.get(mesh.userData['region_id'])!;
-    const name = pieceOf(labelOf(region, 'en')!.group, region.hemisphere);
-    pieces.set(name, [...(pieces.get(name) ?? []), mesh]);
-  }
-  const relative = new Matrix4();
-  const crossing = (a: Mesh, b: Mesh) => {
-    if (!drawnBox(a).intersectsBox(drawnBox(b))) return false;
-    relative.copy(a.matrixWorld).invert().multiply(b.matrixWorld);
-    return (a.geometry.boundsTree as MeshBVH).intersectsGeometry(b.geometry, relative);
-  };
-  const names = [...pieces.keys()];
-  const crossed = names.flatMap((a, i) =>
-    names
-      .slice(i + 1)
-      .filter((b) => pieces.get(a)!.some((m) => pieces.get(b)!.some((n) => crossing(m, n))))
-      .map((b) => `${a} × ${b}`),
-  );
-  // 23 of 91 at the first spread, 0.6 about the cerebrum's centre; the stria terminalis, the fornix,
-  // the claustrum and the fourth ventricle thread between systems at any spread a reader can follow.
-  assert.ok(crossed.length <= 13, crossed.join('\n'));
+  assertHemispheresClear();
 });
 
 test('a structure is moved, never reshaped', () => {
-  const mesh = meshOf('learning:left:thalamus');
+  const mesh = meshes(ATLAS)[0]!;
   const vertices = Array.from(mesh.geometry.attributes['position']!.array);
   explodeNow();
   mesh.updateWorldMatrix(true, false);
@@ -190,7 +232,7 @@ test('a change of mind turns the pieces where they are, and they never pass wher
 });
 
 test('asked again on its way, the explode goes on exactly as it was going', () => {
-  const mesh = meshOf('learning:left:putamen');
+  const mesh = meshes(ATLAS)[0]!;
   const run = (repeatAt: number | null) => {
     model.setExploded(false);
     model.stepExplode(Number.MAX_SAFE_INTEGER);
@@ -216,7 +258,7 @@ test('asked again on its way, the explode goes on exactly as it was going', () =
 
 test('under reduced motion the brain parts with the next frame, with no way between', () => {
   vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('reduce') }));
-  const mesh = meshOf('learning:left:putamen');
+  const mesh = meshes(ATLAS)[0]!;
   at(1000);
   model.setExploded(true);
   // A dissolve copies the frame on screen now, so the anatomy is still where it was drawn.
@@ -231,30 +273,31 @@ test('under reduced motion the brain parts with the next frame, with no way betw
 test('framing reads where the pieces are going before they move', () => {
   at(1000);
   model.setExploded(true);
-  const mesh = meshOf('learning:right:hippocampus');
+  const mesh = meshes(ATLAS)[0]!;
   assert.equal(drawnShift(mesh).length(), 0);
   const settled = new Vector3().setFromMatrixPosition(model.settledMatrixWorld(mesh));
   model.stepExplode(Number.MAX_SAFE_INTEGER);
   close(settled, drawnShift(mesh), 'the settled place is where it arrives');
 });
 
-test('a cut, a region lookup and a pick read the anatomy where it lies, not where it is drawn', () => {
+test('a cut, a region lookup and a pick still read the measured anatomy', () => {
   explodeNow();
-  const id = 'learning:left:putamen';
-  const putamen = meshOf(id);
-  const rest = restBox(putamen);
-  assert.ok(drawnShift(putamen).length() > 0.005, 'the putamen is drawn away from its place');
-  const source = solidSource(putamen);
+  const mesh = meshes(ATLAS)[0]!;
+  const rest = restBox(mesh);
+  assert.ok(drawnShift(mesh).length() > 0.005, 'the cortical parcel moved outward');
+  const source = solidSource(mesh);
   close(new Vector3().setFromMatrixPosition(source.matrixWorld), new Vector3(), 'its cut source');
-  // The dentate goes with the cerebellum, further than its own size: its drawn box misses its anchor.
   const dentate = 'learning:left:dentate';
   const anchor = model.anchorOf(dentate)!;
-  assert.ok(!drawnBox(meshOf(dentate)).containsPoint(rasToWorld(anchor)));
+  assert.ok(restBox(meshOf(dentate)).containsPoint(rasToWorld(anchor)));
   assert.equal(regionAt(meshes(model.settings.detail), anchor), dentate);
-  const centre = drawnBox(putamen).getCenter(new Vector3());
-  const ray = new Raycaster(centre.clone().add(new Vector3(-0.3, 0, 0)), new Vector3(1, 0, 0));
-  const hit = model.nearestHit(ray, [putamen]);
-  assert.ok(hit, 'the drawn putamen is hit');
+  // Aim through a real surface vertex so the test does not assume a parcel contains its box centre.
+  const vertex = new Vector3().fromBufferAttribute(mesh.geometry.getAttribute('position'), 0);
+  const normal = new Vector3().fromBufferAttribute(mesh.geometry.getAttribute('normal'), 0);
+  const drawn = vertex.clone().applyMatrix4(mesh.matrixWorld);
+  const ray = new Raycaster(drawn.clone().addScaledVector(normal, 0.01), normal.negate());
+  const hit = model.nearestHit(ray, [mesh]);
+  assert.ok(hit, 'the drawn cortical parcel is hit');
   assert.ok(!rest.containsPoint(hit.point));
   const point = anatomicalPoint(hit);
   assert.ok(rest.clone().expandByScalar(1e-9).containsPoint(point), `${worldToRas(point)} mm`);
@@ -267,5 +310,23 @@ test('a cut opens on the brain put back at once', () => {
   assert.equal(model.stepExplode(2000), false, 'nothing is left to move');
   for (const mesh of [...meshes(ATLAS), ...meshes(model.settings.detail)]) {
     assert.equal(drawnShift(mesh).length(), 0, mesh.userData['region_id']);
+  }
+});
+
+test('a cord loaded while exploded retains its connection to the brainstem', async () => {
+  explodeNow();
+  await model.ensureSpinalCord();
+  for (const detail of model.manifest.detail_levels) {
+    await model.setDetail(detail.id);
+    assertHemispheresClear();
+    const stem = meshes(detail.id).find(
+      (mesh) =>
+        labelOf(model.regions.get(mesh.userData['region_id'])!, 'en')!.group === 'Brainstem',
+    )!;
+    const cord = model.manifest.supplemental_layers!.flatMap((layer) => meshes(layer.id));
+    assertDeepPiecesClear([...meshes(detail.id), ...cord]);
+    for (const mesh of cord) {
+      close(drawnShift(mesh), drawnShift(stem), 'the cord stays connected to the brainstem');
+    }
   }
 });

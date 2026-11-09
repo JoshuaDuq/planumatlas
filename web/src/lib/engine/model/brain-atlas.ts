@@ -96,10 +96,9 @@ import type { GeometryCopy, GeometryJob, GeometryReply } from './geometry-worker
 import { workerLoadFailure } from '../worker-load.ts';
 import {
   anatomicalMatrixWorld,
-  deepShift,
+  deepShifts,
   hemisphereShifts,
   leftRightAxis,
-  pieceOf,
   restBox,
   shiftMesh,
 } from './explode.ts';
@@ -1969,10 +1968,8 @@ export class BrainAtlas extends EventTarget {
   }
 
   /**
-   * Each drawn mesh's shift when exploded, in world metres. The shown detail level's pieces spread from
-   * their own centre; the shown atlas's hemispheres and their white surfaces go along the brain's
-   * left–right axis, clear of them;
-   * the cord stays on the brainstem. Meshes of the layers not drawn are left where they lie.
+   * Internal pieces expand radially, with interlocking regions kept together. The cord stays on
+   * the brainstem, and the hemispheres open just clear of the resulting internal layout.
    */
   private explodeShifts(): Map<Mesh, Vector3> {
     const cords = (this.manifest.supplemental_layers ?? [])
@@ -1985,7 +1982,6 @@ export class BrainAtlas extends EventTarget {
       Boolean(this.whiteMatterSurfaces),
     ].join();
     if (this.explodeShiftCache?.key === key) return this.explodeShiftCache.shifts;
-    const shifts = new Map<Mesh, Vector3>();
     const cortex = this.layers.get(this.atlasId)!.meshes;
     const halves = { left: new Box3(), right: new Box3() };
     const sideOf = (mesh: Mesh) => {
@@ -1996,37 +1992,30 @@ export class BrainAtlas extends EventTarget {
       return side as 'left' | 'right';
     };
     for (const mesh of cortex) halves[sideOf(mesh)].union(restBox(mesh));
-    const pieces = new Map<string, { box: Box3; meshes: Mesh[] }>();
+    const groups = new Map<string, Mesh[]>();
     for (const mesh of this.layers.get(this.detailId)!.meshes) {
       const region = this.regions.get(mesh.userData['region_id'] as string)!;
       const label = labelOf(region, 'en');
       if (!label) throw new Error(`No anatomical system holds ${region.id}.`);
-      const name = pieceOf(label.group, region.hemisphere);
-      const piece = pieces.get(name) ?? { box: new Box3(), meshes: [] };
-      piece.box.union(restBox(mesh));
-      piece.meshes.push(mesh);
-      pieces.set(name, piece);
-    }
-    const centre = [...pieces.values()]
-      .reduce((all, { box }) => all.union(box), new Box3())
-      .getCenter(new Vector3());
-    const spread = new Box3();
-    for (const { box, meshes } of pieces.values()) {
-      const shift = deepShift(box, centre);
-      spread.union(box.clone().translate(shift));
-      for (const mesh of meshes) shifts.set(mesh, shift);
-    }
-    const across = new Vector3(1, 0, 0).applyQuaternion(this.anatomicalFrame);
-    const sideways = hemisphereShifts(halves.left, halves.right, spread, across);
-    for (const mesh of [...cortex, ...(this.whiteMatterSurfaces?.meshes ?? [])]) {
-      shifts.set(mesh, sideways[sideOf(mesh)]);
+      const name =
+        label.group === 'Brainstem' || label.group === 'Cerebellum' ? label.group : region.id;
+      const group = groups.get(name) ?? [];
+      group.push(mesh);
+      groups.set(name, group);
     }
     if (cords.length) {
-      const brainstem = pieces.get('Brainstem');
+      const brainstem = groups.get('Brainstem');
       if (!brainstem)
         throw new Error(`The ${this.detailId} level has no brainstem to hold the cord.`);
-      const shift = shifts.get(brainstem.meshes[0]!)!;
-      for (const layer of cords) for (const mesh of layer.meshes) shifts.set(mesh, shift);
+      for (const layer of cords) brainstem.push(...layer.meshes);
+    }
+    const shifts = deepShifts([...groups.values()]);
+    const deep = new Box3();
+    for (const [mesh, shift] of shifts) deep.union(restBox(mesh).translate(shift));
+    const across = new Vector3(1, 0, 0).applyQuaternion(this.anatomicalFrame);
+    const sideways = hemisphereShifts(halves.left, halves.right, deep, across);
+    for (const mesh of [...cortex, ...(this.whiteMatterSurfaces?.meshes ?? [])]) {
+      shifts.set(mesh, sideways[sideOf(mesh)]);
     }
     this.explodeShiftCache = { key, shifts };
     return shifts;
