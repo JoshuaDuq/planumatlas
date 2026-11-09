@@ -1,5 +1,5 @@
 import { Box3, Matrix4, Raycaster, Sphere, Vector3 } from 'three';
-import type { Intersection, Mesh } from 'three';
+import type { Intersection, Mesh, Quaternion } from 'three';
 import { orbitWithin } from '../core/state/url-state.ts';
 import type { ModelState, Orbit, Region, ViewName } from '../types/index.ts';
 import type {
@@ -94,6 +94,8 @@ export interface FramingModel {
   readonly regions: ReadonlyMap<string, Region>;
   /** Where a mesh is drawn once the exploded view has arrived (`BrainAtlas.settledMatrixWorld`). */
   settledMatrixWorld(mesh: Mesh, target?: Matrix4): Matrix4;
+  /** World x onto the brain's own left–right axis (`BrainAtlas.anatomicalFrame`). */
+  readonly anatomicalFrame: Quaternion;
   /** The nearest drawn surface along a ray. */
   intersect(raycaster: Raycaster): Intersection<AtlasMesh> | null;
 }
@@ -226,6 +228,13 @@ export function createFraming({
   /** The camera's heading where it is going, so a move in flight is read where it lands. */
   const heading = () =>
     scene.destination.position.clone().sub(scene.destination.target).normalize();
+
+  // Exploded, the anatomy is laid out along the brain's own left–right axis, so a named view squares to
+  // it: left and right then sit level. Assembled, views keep the scan's axes, as cuts and the MRI do.
+  const squared = (vector: Vector3) =>
+    model.state.exploded ? vector.clone().applyQuaternion(model.anatomicalFrame) : vector.clone();
+  const directionOf = (name: ViewName) => squared(VIEW_DIRECTIONS[name]);
+  const upOf = (name: ViewName) => squared(upFor(name));
 
   function requireView(name: ViewName): ViewName {
     if (!Object.hasOwn(VIEW_DIRECTIONS, name)) throw new Error(`Unknown view: ${name}`);
@@ -465,9 +474,9 @@ export function createFraming({
     fitPending = null;
     view = requireView(name);
     const fit = framingFit({ immediate: immediate || !framed });
-    camera.up.copy(upFor(view));
+    camera.up.copy(upOf(view));
     if (isTargetingSpine()) {
-      const direction = VIEW_DIRECTIONS[view];
+      const direction = directionOf(view);
       const target = controls.target.clone();
       const distance =
         scene.distanceToTarget > 0 ? scene.distanceToTarget : fittedDistance(direction);
@@ -490,7 +499,7 @@ export function createFraming({
           camera,
           controls,
           framingBounds(),
-          VIEW_DIRECTIONS[view],
+          directionOf(view),
           frameTo,
           fit,
           framingPoints(),
@@ -513,7 +522,7 @@ export function createFraming({
     if (region.isEmpty()) return false;
     view = requireView(name);
     held.release();
-    camera.up.copy(upFor(view));
+    camera.up.copy(upOf(view));
     // The meshes use metres; authored anatomical distances use millimetres.
     region.expandByScalar(contextMarginMm / MM_PER_M);
     moveCamera(
@@ -521,7 +530,7 @@ export function createFraming({
         camera,
         controls,
         withContext(region),
-        VIEW_DIRECTIONS[view],
+        directionOf(view),
         frameTo,
         framingFit({ immediate }),
       ),
@@ -603,14 +612,14 @@ export function createFraming({
     const up = camera.up.clone();
     for (const name of SIGHT_VIEWS) {
       if (clearlyShown(shares) === cortical.size) break;
-      camera.up.copy(upFor(name));
-      const candidate = plan(VIEW_DIRECTIONS[name].clone());
+      camera.up.copy(upOf(name));
+      const candidate = plan(directionOf(name));
       const candidateShares = sightFrom(candidate.position, cortical);
       if (clearlyShown(candidateShares) > clearlyShown(shares)) {
         chosen = candidate;
         shares = candidateShares;
         turned = true;
-        up.copy(upFor(name));
+        up.copy(upOf(name));
       }
     }
     camera.up.copy(up);
@@ -965,7 +974,7 @@ export function createFraming({
       // A camera written at the limit may read back a rounding past it.
       pose.minDistance = Math.min(plan.minDistance, distance);
       pose.maxDistance = Math.max(plan.maxDistance, distance);
-      camera.up.copy(up ? new Vector3(...up) : upFor(view));
+      camera.up.copy(up ? new Vector3(...up) : upOf(view));
       held.release();
       moveCamera(pose, { immediate });
       linked = true;
@@ -978,7 +987,7 @@ export function createFraming({
       return {
         position: toMillimetres(position),
         target: toMillimetres(target),
-        ...(up.distanceTo(upFor(view)) > UP_DIFFERS ? { up: up.toArray() } : {}),
+        ...(up.distanceTo(upOf(view)) > UP_DIFFERS ? { up: up.toArray() } : {}),
       };
     },
   };

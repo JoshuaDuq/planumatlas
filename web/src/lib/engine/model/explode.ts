@@ -5,8 +5,9 @@ import type { IUniform, Material, Mesh, Object3D } from 'three';
  * The exploded view moves each structure whole and never reshapes it, so every surface stays the
  * measured one; only where it is drawn changes. The deep anatomy moves by system and side, each
  * piece's offset from the deep anatomy's own centre grown by `DEEP_SPREAD`: the arrangement is the
- * real one, scaled. The cerebral hemispheres slide apart sideways to stand one gap from the spread
- * anatomy on either side: each moves at least its own width, and the gap is at least `HEMISPHERE_GAP`.
+ * real one, scaled. The cerebral hemispheres slide apart along the brain's own left–right axis, which
+ * the scan holds a little turned, to stand one gap from the spread anatomy on either side: each moves
+ * at least its own width, and the gap is at least `HEMISPHERE_GAP`.
  *
  * Whatever reads the anatomy (a cut, a region lookup, the scan or a map sampled on a surface, a
  * picked coordinate) reads `anatomicalMatrixWorld`, never where the structure is drawn.
@@ -30,20 +31,68 @@ export const pieceOf = (system: string, hemisphere: string): string =>
   WHOLE_SYSTEMS.has(system) ? system : `${system} · ${hemisphere}`;
 
 /**
- * The hemispheres' shifts along x (world x is anatomical right): each stands the same gap from the
- * spread deep anatomy (`deep`, as drawn exploded), the gap at least `HEMISPHERE_GAP` and wide enough that
- * each hemisphere moves at least its own width.
+ * The brain's own left–right axis, a unit vector toward its right: from the left hemisphere's vertex
+ * centroid to the right's. On CDMD it is world x turned 2.6° of roll and 1.9° of yaw; the head's rotation
+ * in its FreeSurfer MNI305 affine gives 2.6° and 2.4°. Box centres missed that yaw by 2°.
+ */
+export function leftRightAxis(left: readonly Mesh[], right: readonly Mesh[]): Vector3 {
+  const matrix = new Matrix4();
+  const centroid = (meshes: readonly Mesh[]) => {
+    const sum = new Vector3();
+    let count = 0;
+    for (const mesh of meshes) {
+      const position = mesh.geometry.getAttribute('position');
+      const mean = new Vector3();
+      for (let i = 0; i < position.count; i++) {
+        mean.x += position.getX(i);
+        mean.y += position.getY(i);
+        mean.z += position.getZ(i);
+      }
+      mean.divideScalar(position.count).applyMatrix4(anatomicalMatrixWorld(mesh, matrix));
+      sum.addScaledVector(mean, position.count);
+      count += position.count;
+    }
+    if (!count) throw new Error('A hemisphere holds no cortical vertices.');
+    return sum.divideScalar(count);
+  };
+  return centroid(right).sub(centroid(left)).normalize();
+}
+
+/** A box's extent along a unit axis: the least and greatest projections of its corners. */
+function extentAlong(box: Box3, axis: Vector3): [number, number] {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const x of [box.min.x, box.max.x]) {
+    for (const y of [box.min.y, box.max.y]) {
+      for (const z of [box.min.z, box.max.z]) {
+        const along = x * axis.x + y * axis.y + z * axis.z;
+        min = Math.min(min, along);
+        max = Math.max(max, along);
+      }
+    }
+  }
+  return [min, max];
+}
+
+/**
+ * The hemispheres' shifts along the brain's left–right `axis`: each stands the same gap from the spread
+ * deep anatomy (`deep`, as drawn exploded), the gap at least `HEMISPHERE_GAP` and wide enough that each
+ * hemisphere moves at least its own width.
  */
 export function hemisphereShifts(
   left: Box3,
   right: Box3,
   deep: Box3,
+  axis: Vector3,
 ): { left: Vector3; right: Vector3 } {
+  const [leftMin, leftMax] = extentAlong(left, axis);
+  const [rightMin, rightMax] = extentAlong(right, axis);
+  const [deepMin, deepMax] = extentAlong(deep, axis);
   // Moved by its own width, a hemisphere's medial edge lands where its lateral edge lay.
-  const gap = Math.max(HEMISPHERE_GAP, deep.min.x - left.min.x, right.max.x - deep.max.x);
+  const gap = Math.max(HEMISPHERE_GAP, deepMin - leftMin, rightMax - deepMax);
   return {
-    left: new Vector3(deep.min.x - gap - left.max.x, 0, 0),
-    right: new Vector3(deep.max.x + gap - right.min.x, 0, 0),
+    left: axis.clone().multiplyScalar(deepMin - gap - leftMax),
+    right: axis.clone().multiplyScalar(deepMax + gap - rightMin),
   };
 }
 

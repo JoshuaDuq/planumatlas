@@ -8,7 +8,7 @@ import { regionAt } from '../slices/region-at.ts';
 import { rasToWorld, worldToRas } from '../slices/coordinates.ts';
 import { solidSource } from '../tissues/solid-assets.ts';
 import { BrainAtlas } from './brain-atlas.ts';
-import { HEMISPHERE_GAP, anatomicalPoint, pieceOf, restBox } from './explode.ts';
+import { HEMISPHERE_GAP, anatomicalPoint, leftRightAxis, pieceOf, restBox } from './explode.ts';
 import { modelDirectory, publishedLoader, readManifest } from './test-support.ts';
 
 const ATLAS = 'destrieux';
@@ -60,42 +60,54 @@ function explodeNow() {
 const close = (a: Vector3, b: Vector3, what: string, tolerance = 1e-12) =>
   assert.ok(a.distanceTo(b) <= tolerance, `${what}: ${a.toArray()} is not ${b.toArray()}`);
 
-test('each hemisphere slides out by at least its own width, both one gap clear of the deep anatomy', () => {
-  explodeNow();
+/** A box's least and greatest projections onto a unit axis, over its corners. */
+function along(box: Box3, axis: Vector3): [number, number] {
+  const projections = [box.min.x, box.max.x].flatMap((x) =>
+    [box.min.y, box.max.y].flatMap((y) =>
+      [box.min.z, box.max.z].map((z) => new Vector3(x, y, z).dot(axis)),
+    ),
+  );
+  return [Math.min(...projections), Math.max(...projections)];
+}
+
+const degrees = (radians: number) => (radians * 180) / Math.PI;
+
+test('the brain’s left–right axis is the scan’s x turned as the head lay, and the frame turns x onto it', () => {
   const cortex = meshes(ATLAS);
+  const side = (hemisphere: string) =>
+    cortex.filter((mesh) => mesh.userData['hemisphere'] === hemisphere);
+  const axis = leftRightAxis(side('left'), side('right'));
+  // World y is superior and z posterior: the right hemisphere lies lower and further back.
+  assert.ok(Math.abs(degrees(Math.atan2(-axis.y, axis.x)) - 2.61) < 0.05, 'roll');
+  assert.ok(Math.abs(degrees(Math.atan2(axis.z, axis.x)) - 1.87) < 0.05, 'yaw');
+  close(new Vector3(1, 0, 0).applyQuaternion(model.anatomicalFrame), axis, 'the frame', 1e-12);
+});
+
+test('each hemisphere slides out along the brain’s own left–right axis, at least its width, both one gap clear of the deep anatomy', () => {
+  explodeNow();
+  const axis = new Vector3(1, 0, 0).applyQuaternion(model.anatomicalFrame);
+  const cortex = meshes(ATLAS);
+  const boxOf = (list: readonly Mesh[]) =>
+    list.reduce((box, mesh) => box.union(drawnBox(mesh)), new Box3());
+  const extents = { left: [0, 0], right: [0, 0] };
   for (const side of ['left', 'right'] as const) {
     const halves = cortex.filter((mesh) => mesh.userData['hemisphere'] === side);
-    const rest = halves.reduce((box, mesh) => box.union(mesh.geometry.boundingBox!), new Box3());
     const shift = drawnShift(halves[0]!);
     for (const mesh of halves)
       close(drawnShift(mesh), shift, `${side}: the hemisphere moves whole`);
-    assert.equal(shift.y, 0);
-    assert.equal(shift.z, 0);
-    const outward = side === 'left' ? -shift.x : shift.x;
-    assert.ok(outward >= rest.max.x - rest.min.x - 1e-12, `${side} moves ${outward} m`);
+    assert.ok(shift.clone().cross(axis).length() < 1e-12, `${side} moves along the axis`);
+    const outward = side === 'left' ? -shift.dot(axis) : shift.dot(axis);
+    const [restMin, restMax] = along(boxOf(halves).translate(shift.clone().negate()), axis);
+    assert.ok(outward >= restMax - restMin - 1e-12, `${side} moves ${outward} m`);
+    extents[side] = along(boxOf(halves), axis);
   }
-  const edge = (side: string, end: 'min' | 'max') =>
-    cortex
-      .filter((mesh) => mesh.userData['hemisphere'] === side)
-      .map((mesh) => drawnBox(mesh)[end].x)
-      .reduce((a, b) => (end === 'max' ? Math.max(a, b) : Math.min(a, b)));
-  const [leftEdge, rightEdge] = [edge('left', 'max'), edge('right', 'min')];
-  const deep = meshes(model.settings.detail).reduce(
-    (box, mesh) => box.union(drawnBox(mesh)),
-    new Box3(),
-  );
+  const [leftEdge, rightEdge] = [extents.left[1]!, extents.right[0]!];
+  const [deepMin, deepMax] = along(boxOf(meshes(model.settings.detail)), axis);
+  assert.ok(deepMin - leftEdge >= HEMISPHERE_GAP - 1e-12, 'a gap on the left');
   assert.ok(
-    Math.abs(deep.min.x - leftEdge - (rightEdge - deep.max.x)) < 1e-12,
+    Math.abs(deepMin - leftEdge - (rightEdge - deepMax)) < 1e-12,
     'both hemispheres stand one gap from the spread anatomy',
   );
-  for (const mesh of meshes(model.settings.detail)) {
-    const box = drawnBox(mesh);
-    assert.ok(
-      box.min.x >= leftEdge + HEMISPHERE_GAP - 1e-12 &&
-        box.max.x <= rightEdge - HEMISPHERE_GAP + 1e-12,
-      `${mesh.userData['region_id']} (x ${box.min.x}..${box.max.x}) comes within ${HEMISPHERE_GAP} m of a hemisphere`,
-    );
-  }
 });
 
 test('the deep anatomy moves by system about its own centre: a side together, the brainstem and cerebellum whole', () => {

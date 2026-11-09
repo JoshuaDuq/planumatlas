@@ -7,6 +7,7 @@ import {
   Float32BufferAttribute,
   Matrix4,
   Mesh,
+  Quaternion,
   Sphere,
   Vector3,
 } from 'three';
@@ -111,6 +112,7 @@ function fixture({
     mesh.updateWorldMatrix(true, false);
     return target.copy(mesh.matrixWorld);
   },
+  anatomicalFrame = new Quaternion(),
 } = {}) {
   const bounds = new Box3(new Vector3(-0.08, -0.07, -0.1), new Vector3(0.08, 0.11, 0.1));
   let size = { width: 390, height: 792 };
@@ -125,6 +127,7 @@ function fixture({
     visibleMeshes: meshes,
     regions,
     settledMatrixWorld,
+    anatomicalFrame,
     intersect,
     medialPair,
   };
@@ -282,6 +285,30 @@ const drawn = () => [
 ];
 
 describe('the exploded view', () => {
+  it('squares a named view to the brain’s own left–right axis; assembled, views keep the scan’s', () => {
+    // A head turned 3° of roll and 2° of yaw in the scanner, as CDMD's is.
+    const across = new Vector3(1, -Math.tan(0.052), Math.tan(0.035)).normalize();
+    const anatomicalFrame = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), across);
+    for (const exploded of [true, false]) {
+      const stage = fixture({
+        meshes: wholeBrain(),
+        state: { exploded },
+        anatomicalFrame,
+        scale: FULL,
+      });
+      stage.camera.applyView('anterior', { immediate: true });
+      const turn = exploded ? anatomicalFrame : new Quaternion();
+      const heading = VIEW_DIRECTIONS.anterior.clone().applyQuaternion(turn);
+      assert.ok(headingOf(stage).distanceTo(heading) < 1e-9, `exploded ${exploded}`);
+      assert.ok(stage.scene.camera.up.distanceTo(upFor('anterior').applyQuaternion(turn)) < 1e-12);
+      // Let go of the view, as a turn does: the link it writes names no up, the view's being squared.
+      stage.held.release();
+      const link = stage.camera.orbitLink();
+      assert.ok(link, 'a camera off its held view writes its pose');
+      assert.equal(link.up, undefined);
+    }
+  });
+
   it('is framed where its pieces are going, not where they are drawn on the way', () => {
     const meshes = drawn();
     const spread = new Matrix4().makeTranslation(0.12, 0, 0);

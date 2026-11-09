@@ -6,6 +6,7 @@ import {
   Matrix4,
   Mesh,
   Plane,
+  Quaternion,
   SRGBColorSpace,
   Triangle,
   Vector3,
@@ -96,6 +97,7 @@ import {
   anatomicalMatrixWorld,
   deepShift,
   hemisphereShifts,
+  leftRightAxis,
   pieceOf,
   restBox,
   shiftMesh,
@@ -586,6 +588,7 @@ export class BrainAtlas extends EventTarget {
   private explodeShown = 0;
   private explodeMotion: ExplodeMotion | null = null;
   private explodeShiftCache: { key: string; shifts: Map<Mesh, Vector3> } | null = null;
+  private frame: Quaternion | null = null;
   private cortexVisible = true;
   private cortexOpacity = 1;
   private internalVisible = true;
@@ -1412,6 +1415,24 @@ export class BrainAtlas extends EventTarget {
     return true;
   }
 
+  /**
+   * The rotation taking world x onto the brain's own left–right axis (`leftRightAxis`): the scan's roll
+   * and yaw, not its pitch. The exploded view lays out and is framed along it. Every cortical atlas tiles
+   * one pial surface, so the first measured serves for all.
+   */
+  get anatomicalFrame(): Quaternion {
+    if (!this.frame) {
+      const cortex = this.layers.get(this.atlasId)!.meshes;
+      const side = (hemisphere: string) =>
+        cortex.filter((mesh) => mesh.userData['hemisphere'] === hemisphere);
+      this.frame = new Quaternion().setFromUnitVectors(
+        new Vector3(1, 0, 0),
+        leftRightAxis(side('left'), side('right')),
+      );
+    }
+    return this.frame;
+  }
+
   /** Where `mesh` is drawn once the explode has arrived: framing fits that, not a frame in flight. */
   settledMatrixWorld(mesh: Mesh, target = new Matrix4()): Matrix4 {
     anatomicalMatrixWorld(mesh, target);
@@ -1946,7 +1967,8 @@ export class BrainAtlas extends EventTarget {
 
   /**
    * Each drawn mesh's shift when exploded, in world metres. The shown detail level's pieces spread from
-   * their own centre; the shown atlas's hemispheres and their white surfaces go sideways, clear of them;
+   * their own centre; the shown atlas's hemispheres and their white surfaces go along the brain's
+   * left–right axis, clear of them;
    * the cord stays on the brainstem. Meshes of the layers not drawn are left where they lie.
    */
   private explodeShifts(): Map<Mesh, Vector3> {
@@ -1991,7 +2013,8 @@ export class BrainAtlas extends EventTarget {
       spread.union(box.clone().translate(shift));
       for (const mesh of meshes) shifts.set(mesh, shift);
     }
-    const sideways = hemisphereShifts(halves.left, halves.right, spread);
+    const across = new Vector3(1, 0, 0).applyQuaternion(this.anatomicalFrame);
+    const sideways = hemisphereShifts(halves.left, halves.right, spread, across);
     for (const mesh of [...cortex, ...(this.whiteMatterSurfaces?.meshes ?? [])]) {
       shifts.set(mesh, sideways[sideOf(mesh)]);
     }
