@@ -19,7 +19,7 @@ describe('STORE-03: a session command shows at once and keeps the session’s an
     expect(store.state.explorer).toBe('anatomy');
   });
 
-  test('after each of the 22 commands, in a fixed order, the state equals the session’s own assembled state', () => {
+  test('after each of the 23 commands, in a fixed order, the state equals the session’s own assembled state', () => {
     const options = { views: ['oblique', 'left'] };
     const store = createSessionStore(options);
     const core = createSession(options);
@@ -38,9 +38,8 @@ describe('STORE-03: a session command shows at once and keeps the session’s an
       ['setExpanded', [['a', 'b']]],
       ['setTheme', ['dark']],
       ['setLang', ['fr']],
-      ['setStatus', ['ready']],
       ['setProgress', [{ loaded: 1, total: 4 }]],
-      ['setStatus', ['ready']],
+      ['setLoaded', []],
       ['setSwitching', [{ loaded: 2, total: 4 }]],
       ['endSwitching', []],
       ['notify', [{ text: 'One.', action: 'reload' }]],
@@ -48,6 +47,7 @@ describe('STORE-03: a session command shows at once and keeps the session’s an
       ['notify', [{ text: 'Held.' }]],
       ['releaseNotices', [{ text: 'Lead.' }]],
       ['setContextLost', []],
+      ['setContextRestored', []],
       ['setError', [error]],
     ];
     for (const [name, args] of commands) {

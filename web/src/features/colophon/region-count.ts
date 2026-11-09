@@ -1,3 +1,4 @@
+import { modelUsable } from '../../lib/core/state/session.ts';
 import type { Language, LoadProgress, LoadStatus } from '../../lib/types/index.ts';
 import { loadingText } from '../../lib/core/panels/header.ts';
 import { t } from '../../lib/core/i18n/index.ts';
@@ -24,7 +25,6 @@ export function regionCountText(
   },
 ): string {
   if (tracts !== null) return tracts;
-  const switching = status === 'switching';
-  if (switching && !choosing) return loadingText(lang, progress);
-  return status === 'ready' || switching ? t(lang, 'footer').visibleRegions(visibleCount) : '';
+  if (status === 'switching' && !choosing) return loadingText(lang, progress);
+  return modelUsable(status) ? t(lang, 'footer').visibleRegions(visibleCount) : '';
 }

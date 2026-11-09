@@ -12,6 +12,7 @@
   import type { Engine } from '../../lib/engine/api.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
+  import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
   import HoverChip from './HoverChip.svelte';
   import type { HoverSources, HoverView } from './hover-text.ts';
@@ -36,7 +37,7 @@
   let { engine, stage, media, lang, status, tractReference, selectedId, view, sources }: Props =
     $props();
 
-  const ready = $derived(status === 'ready' || status === 'switching');
+  const ready = $derived(modelUsable(status));
 
   /** Keys that move the camera while the canvas has focus (viewport-chrome.js:41). */
   const CAMERA_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', '+', '=', '-']);

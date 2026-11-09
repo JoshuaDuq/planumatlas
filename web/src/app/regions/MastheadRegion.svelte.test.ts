@@ -164,13 +164,14 @@ describe('Full screen and Save image', () => {
         (name) => !(button(name).element() as HTMLButtonElement).disabled,
       );
     expect(enabled()).toEqual([false, false]);
-    for (const [status, expected] of [
-      ['ready', true],
-      ['switching', true],
-      ['context-lost', false],
-      ['error', false],
+    const { session } = shell.app;
+    for (const [step, expected] of [
+      [() => session.setLoaded(), true],
+      [() => session.setSwitching({ loaded: 1, total: 4 }), true],
+      [() => session.setContextLost(), false],
+      [() => session.setError(new Error('boom')), false],
     ] as const) {
-      shell.app.session.setStatus(status);
+      step();
       flushSync();
       expect(enabled()).toEqual([expected, expected]);
     }

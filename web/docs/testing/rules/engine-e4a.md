@@ -252,6 +252,15 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 - **Expected:** cut atlas layer gone, reload rejects → exactly one `console.error`, status `error`.
 - **Covered by:** `src/lib/engine/slices/sections.test.ts` (R)
 
+### SLICE-40 · The status follows the downloads it waits on, and only the cut's own failures
+
+- **Rule:** The status stays `loading` while any download it waits on runs: the linked MRI views, a cut being prepared, the MRI colour. A cut redrawn meanwhile does not end that loading; the last of them to end settles it. The linked MRI's agreement and paint downloads are not the cut's: a failed compared volume rejects to its caller, and a failed paint is logged once while the linked MRI draws without it. Neither sets the cut's `error`.
+- **Kind:** behaviour
+- **Level:** unit — a contract-suite case for the colour, so the fake and the real engine meet it alike
+- **Source:** state-machine audit 2026-11-09 (one status slot written by six independent jobs)
+- **Expected:** axial cut, MRI colour pending, `setCrosshair` → `loading`; the colour lands → `ready`. Linked views pending, `setCrosshair` → `loading`; their metadata rejects → `error`, `cut-failed`. Compared volume HTTP 503 → rejects with `asset-fetch`, status `ready`, `error` null, agreement null. Paint labels fail → one `console.error`, `error` null.
+- **Covered by:** `src/lib/engine/slices/sections.test.ts` (R); the contract suite (R, "stays loading while the MRI colour downloads, even when the cut is redrawn meanwhile", on both engines)
+
 ### SLICE-27 · Picking with a cut open
 
 - **Rule:** The pick is whichever is nearer: the visible surface or the cut face (ties within 1e-9 go to the cut face). A cut face that is not selectable blocks the surface behind it. Picking a cut face never needs the linked MRI.

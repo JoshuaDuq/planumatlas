@@ -47,7 +47,7 @@ let detach: () => void;
 function boot(status: 'ready' | 'loading' = 'ready') {
   app = createApp();
   app.attach(composeWorld(app, engine, 'cdmd'));
-  if (status === 'ready') app.session.setStatus('ready');
+  if (status === 'ready') app.session.setLoaded();
   region = mount(StageRegion, { target, context: new Map([[APP, app]]) }) as never;
   // In the page the grid sizes the stage.
   document.getElementById('viewport')!.style.cssText = 'width: 900px; height: 600px';
@@ -88,7 +88,7 @@ describe('what the stage region holds', () => {
   test('one main landmark holds the overlay, the dock, the gizmo, the keys and the snippet it is given; no stage control is outside it', async () => {
     app = createApp();
     app.attach(composeWorld(app, engine, 'cdmd'));
-    app.session.setStatus('ready');
+    app.session.setLoaded();
     region = mount(StageRegionFixture, { target, context: new Map([[APP, app]]) }) as never;
     flushSync();
     const mains = document.querySelectorAll('main');

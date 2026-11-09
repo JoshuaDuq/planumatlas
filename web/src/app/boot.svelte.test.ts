@@ -562,7 +562,7 @@ describe('the mounted shell', () => {
     const shell = mount(AppShell, { target, ...shellOptions(app) });
     flushSync();
     expect(target.dataset.status).toBe('loading');
-    app.session.setStatus('ready');
+    app.session.setLoaded();
     app.chooseLanguage('fr');
     flushSync();
     expect(target.dataset.status).toBe('ready');

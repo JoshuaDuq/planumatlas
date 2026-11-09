@@ -104,7 +104,7 @@ document, `location`, `history` and `window` directly.
 
 ### BOOT-10 · Download progress during the start
 
-- **Rule:** The stage shows the download's progress while the start runs; once the start has failed, a late progress event does not paint "Loading" back over the error.
+- **Rule:** The stage shows the download's progress while the start runs; once the start has failed, a late progress event does not paint "Loading" back over the error. The session refuses it (STATE-28), so the start keeps no flag of its own.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:161-171, 183-184`

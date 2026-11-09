@@ -80,9 +80,6 @@ async function openEngine(
 ): Promise<Engine> {
   const host = document.getElementById('viewport');
   if (!host) throw new Error('The stage element #viewport is not on the page.');
-  // The layers download in parallel. Once the start has failed, the other's progress must not
-  // paint "Loading" back over the error.
-  let failed = false;
   const open = (atlas?: string, detail?: string) =>
     createEngine({
       host,
@@ -90,21 +87,15 @@ async function openEngine(
       ...(atlas !== undefined && { atlas }),
       ...(detail !== undefined && { detail }),
       theme: app.theme.current,
-      onProgress: ({ loaded, total }) => {
-        if (!failed) app.session.setProgress({ loaded, total });
-      },
+      // The layers download in parallel: once the start has failed, the session drops the other's progress.
+      onProgress: ({ loaded, total }) => app.session.setProgress({ loaded, total }),
     });
   try {
-    try {
-      return await open(wanted.atlas, wanted.detail);
-    } catch (error) {
-      if ((error as EngineError).code !== 'unknown-layer') throw error;
-      console.error(error);
-      return await open();
-    }
+    return await open(wanted.atlas, wanted.detail);
   } catch (error) {
-    failed = true;
-    throw error;
+    if ((error as EngineError).code !== 'unknown-layer') throw error;
+    console.error(error);
+    return await open();
   }
 }
 
@@ -153,7 +144,7 @@ export async function startApp(
     engine.camera.setFramingSource(app.stage.framing);
     engine.camera.applyView('oblique', { immediate: true });
     const notApplied = await world.links.restore(link, { immediate: true });
-    app.session.setStatus('ready');
+    app.session.setLoaded();
     world.links.report(notApplied);
     if (firstLaunch(arrived)) {
       // The controls a ready stage shows are drawn before the tour counts which ones it can point at.

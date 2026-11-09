@@ -14,6 +14,7 @@ import type {
   Explorer,
   Language,
   LoadProgress,
+  LoadStatus,
   Notice,
   SessionState,
   Theme,
@@ -68,6 +69,10 @@ export function shortcutsAllowed(target: ShortcutTarget | null | undefined, key?
 
 const asLanguage = (value: string): Language => (value === 'en' || value === 'fr' ? value : 'en');
 
+/** The model is on screen and takes commands: ready, or ready with a download behind it. */
+export const modelUsable = (status: LoadStatus): boolean =>
+  status === 'ready' || status === 'switching';
+
 export interface SessionOptions {
   views: Iterable<string>;
   theme?: Theme;
@@ -78,6 +83,8 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
   const knownViews = new Set(views);
   let holds = 0;
   let held: Notice[] | null = null;
+  // Where a lost context goes back to: the start it interrupted, or the model on screen.
+  let lostFrom: 'loading' | 'ready' = 'ready';
   // One notice from several, each said once; the first action offered wins.
   const joined = (notices: (Notice | null)[]): Notice => {
     const present = notices.filter((notice): notice is Notice => Boolean(notice));
@@ -151,9 +158,32 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
 
     setLang: (value: string) => act({ lang: asLanguage(value) }),
 
-    setStatus: (status: SessionState['status']) => act({ status, progress: null, error: null }),
+    /*
+     * The load lifecycle. Every status change is one of these events:
+     *
+     *   loading ──loaded──▶ ready ⇄ switching (setSwitching / endSwitching)
+     *   loading | ready | switching ──contextLost──▶ context-lost ──contextRestored──▶ where it was lost
+     *   anything ──error──▶ error, which is final
+     *
+     * An event that arrives where it has no meaning is a race the stage outlives (a late progress
+     * after a failure, a download during a lost context) and changes nothing; one that only a bug
+     * could send throws.
+     */
 
-    setProgress: (progress: LoadProgress | null) => act({ status: 'loading', progress }),
+    /** The start's own download. Only the start shows it: elsewhere it changes nothing. */
+    setProgress(progress: LoadProgress | null) {
+      if (state.status === 'loading') act({ progress });
+    },
+
+    /** The start is over. A context lost meanwhile still stands, and its restoration lands on ready. */
+    setLoaded() {
+      if (state.status === 'context-lost' && lostFrom === 'loading') {
+        lostFrom = 'ready';
+        return;
+      }
+      if (state.status !== 'loading') throw new Error(`The start already ended (${state.status}).`);
+      act({ status: 'ready', progress: null });
+    },
 
     /**
      * A download behind a model that is already on screen: the model stays
@@ -161,9 +191,7 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
      * standing notice stays, and the first load keeps its own status.
      */
     setSwitching(progress: LoadProgress | null) {
-      if (state.status === 'ready' || state.status === 'switching') {
-        state = { ...state, status: 'switching', progress };
-      }
+      if (modelUsable(state.status)) state = { ...state, status: 'switching', progress };
     },
 
     endSwitching() {
@@ -173,7 +201,18 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     setError: (error: Error) => act({ status: 'error', error, progress: null }),
 
     /** The GPU dropped the context. Recoverable; the stage says so in the reader's language. */
-    setContextLost: () => act({ status: 'context-lost', progress: null, error: null }),
+    setContextLost() {
+      if (state.status === 'error') return;
+      lostFrom = state.status === 'loading' ? 'loading' : 'ready';
+      act({ status: 'context-lost', progress: null });
+    },
+
+    /** The GPU gave the context back: the stage returns to where it was lost. */
+    setContextRestored() {
+      if (state.status === 'error') return;
+      if (state.status !== 'context-lost') throw new Error('The GPU context was not lost.');
+      act({ status: lostFrom });
+    },
 
     /**
      * `{ text, action }`; cleared by the next action or by the reader, never by a timer.

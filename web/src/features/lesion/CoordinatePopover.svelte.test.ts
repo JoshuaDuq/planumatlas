@@ -1,5 +1,6 @@
 // The coordinate entry: every published space and the unstated choice are offered, and what cannot
 // be read or lies beyond the template's brain is said under the field instead of being placed.
+import { tick } from 'svelte';
 import { afterEach, expect, test, vi } from 'vitest';
 import { cleanup, render } from 'vitest-browser-svelte';
 import { page, userEvent } from 'vitest/browser';
@@ -77,6 +78,19 @@ test('says when the coordinate lies beyond the template’s brain', async () => 
   await expect
     .poll(alert)
     .toBe('This coordinate lies beyond the template’s brain, so it is not placed.');
+});
+
+test('a late answer does not speak for a coordinate typed since', async () => {
+  let answer!: (inside: boolean) => void;
+  const { spy, field, button } = mount(() => new Promise((resolve) => (answer = resolve)));
+  await userEvent.fill(field, '90, 0, 0');
+  await userEvent.click(button);
+  await userEvent.fill(field, '-42, 22, 6');
+  answer(false);
+  await spy.mock.results[0]!.value;
+  await tick();
+  expect(alert()).toBe(null);
+  expect(button.disabled).toBe(false);
 });
 
 test('Remove leaves focus on the field, not the page', async () => {

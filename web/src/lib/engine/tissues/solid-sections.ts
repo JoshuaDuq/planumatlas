@@ -392,7 +392,8 @@ export class SolidSections {
   /** Copy geometry to the worker ahead of the first drag. */
   warm(): void {
     const run = () => {
-      if (!this.ensureWorker()) return;
+      // A failed worker is the next build's rejection to report; a warm-up has nothing to add.
+      if (this.workerError || !this.ensureWorker()) return;
       for (const solid of this.solids) this.postSolid(solid);
     };
     if (typeof requestIdleCallback === 'function') requestIdleCallback(run);

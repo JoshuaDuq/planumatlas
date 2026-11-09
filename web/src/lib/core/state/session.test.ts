@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { Explorer, Notice } from '../../types/index.ts';
-import { createSession, shortcutsAllowed } from './session.ts';
+import { createSession, modelUsable, shortcutsAllowed } from './session.ts';
 
 const VIEWS = ['oblique', 'left', 'right', 'anterior', 'posterior', 'superior', 'inferior'];
 const modelState = {
@@ -132,7 +132,7 @@ test('a notice survives until the next action, and is never timed out', () => {
 
 test('download progress is not an action: a standing notice outlives it', () => {
   const s = session();
-  s.setStatus('ready');
+  s.setLoaded();
   s.notify({ text: 'Planum was updated. Reload to continue.', action: 'reload' });
   s.setSwitching({ loaded: 1, total: 4 });
   s.endSwitching();
@@ -152,7 +152,7 @@ test('loading progress is carried through to the snapshot', () => {
   const s = session();
   s.setProgress({ loaded: 12_400_000, total: 27_900_000 });
   assert.deepEqual(s.assemble(modelState).progress, { loaded: 12_400_000, total: 27_900_000 });
-  s.setStatus('ready');
+  s.setLoaded();
   assert.equal(s.assemble(modelState).status, 'ready');
   assert.equal(s.assemble(modelState).progress, null);
 });
@@ -208,7 +208,7 @@ test('switching atlas is a distinct status from first load', () => {
   // On first load there is nothing to show, so the stage covers the viewport.
   // Switching atlas must leave the model on screen and usable.
   const s = session();
-  s.setStatus('ready');
+  s.setLoaded();
   s.setSwitching({ loaded: 1, total: 4 });
   const snapshot = s.assemble(modelState);
   assert.equal(snapshot.status, 'switching');
@@ -220,10 +220,69 @@ test('switching atlas is a distinct status from first load', () => {
 
 test('a lost GPU context is said by the stage in the reader’s language, not carried as English text', () => {
   const s = session();
-  s.setStatus('ready');
+  s.setLoaded();
   s.setContextLost();
   assert.equal(s.assemble(modelState).status, 'context-lost');
   assert.equal(s.assemble(modelState).error, null);
+  s.setContextRestored();
+  assert.equal(s.assemble(modelState).status, 'ready');
+});
+
+test('a context lost while the start runs outlasts the start, and its restoration finishes it', () => {
+  const s = session();
+  s.setProgress({ loaded: 1, total: 4 });
+  s.setContextLost();
+  s.setProgress({ loaded: 2, total: 4 });
+  s.setLoaded();
+  assert.equal(s.assemble(modelState).status, 'context-lost');
+  assert.equal(s.assemble(modelState).progress, null);
+  s.setContextRestored();
+  assert.equal(s.assemble(modelState).status, 'ready');
+});
+
+test('a context restored before the start ends goes back to loading', () => {
+  const s = session();
+  s.setContextLost();
+  s.setContextRestored();
+  assert.equal(s.assemble(modelState).status, 'loading');
+  s.setProgress({ loaded: 3, total: 4 });
+  assert.deepEqual(s.assemble(modelState).progress, { loaded: 3, total: 4 });
+});
+
+test('a failed start is final: no later load event paints over it', () => {
+  const s = session();
+  s.setError(new Error('Manifest request failed: HTTP 404'));
+  s.setProgress({ loaded: 2, total: 4 });
+  s.setContextLost();
+  s.setContextRestored();
+  s.setSwitching({ loaded: 1, total: 4 });
+  const snapshot = s.assemble(modelState);
+  assert.equal(snapshot.status, 'error');
+  assert.equal(snapshot.progress, null);
+  assert.equal(snapshot.error!.message, 'Manifest request failed: HTTP 404');
+});
+
+test('first-load progress after the start is not a load, and a ready stage stays ready', () => {
+  const s = session();
+  s.setLoaded();
+  s.notify({ text: 'Planum was updated. Reload to continue.', action: 'reload' });
+  s.setProgress({ loaded: 1, total: 4 });
+  assert.equal(s.assemble(modelState).status, 'ready');
+  assert.equal(s.assemble(modelState).notice!.action, 'reload');
+});
+
+test('the start ends once, and only a lost context is restored', () => {
+  const s = session();
+  s.setLoaded();
+  assert.throws(() => s.setLoaded(), /already/);
+  assert.throws(() => s.setContextRestored(), /not lost/);
+});
+
+test('the model is usable while ready or switching, and nowhere else', () => {
+  assert.deepEqual(
+    (['loading', 'ready', 'switching', 'context-lost', 'error'] as const).filter(modelUsable),
+    ['ready', 'switching'],
+  );
 });
 
 /**
@@ -241,7 +300,7 @@ test('the session exposes its state only through the assembled snapshot', () => 
 
 test('a notice raised while a link is applied outlives the link’s own steps, beside the link’s notice', () => {
   const s = session();
-  s.setStatus('ready');
+  s.setLoaded();
   s.holdNotices();
   s.notify({ text: 'Could not show the white matter.', action: null });
   s.notify({ text: 'Planum was updated.', action: 'reload' });

@@ -32,6 +32,7 @@
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
+  import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
@@ -112,7 +113,7 @@
   // A phone hides the status bar, which lists the changes.
   const marked = $derived(media.phone && changes.length > 0);
   // The dock is not drawn while the anatomy loads, failed or lost its context (stage.css:315).
-  const shown = $derived(status === 'ready' || status === 'switching');
+  const shown = $derived(modelUsable(status));
   // A phone sheet raised over the stage covers it.
   const covered = $derived(!shown || stage.sheetFull);
 

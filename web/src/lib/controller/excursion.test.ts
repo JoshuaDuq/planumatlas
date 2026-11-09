@@ -196,6 +196,23 @@ describe('an excursion into a deficit', () => {
     assert.equal(scene.session.state.selectedDeficit, DEFICIT);
   });
 
+  test('leaving the tab, overtaken, keeps the scene and its stroke cases for Restore', async () => {
+    const scene = createScene();
+    scene.strokeCases.chosen = ['M1'];
+    await scene.excursions.openFunction('language');
+    scene.reader.apply.mockImplementationOnce(async () => {
+      scene.commands.begin();
+      return [];
+    });
+    await scene.excursions.chooseMode('anatomy');
+    expect(scene.strokeCases.show).not.toHaveBeenCalled();
+    assert.equal(scene.excursions.restorable, true);
+
+    await scene.excursions.chooseMode('functions');
+    assert.equal(await scene.excursions.restoreBeforeExcursion(), true);
+    expect(scene.strokeCases.show).toHaveBeenCalledExactlyOnceWith(['M1']);
+  });
+
   test('there is nothing to restore before an excursion', async () => {
     const scene = createScene();
     await expect(scene.excursions.restoreBeforeExcursion()).rejects.toThrow(/no scene/);

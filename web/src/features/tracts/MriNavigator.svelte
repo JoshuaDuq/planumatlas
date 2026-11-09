@@ -329,6 +329,7 @@
     // Also while the first load runs: the load then ends with the failure shown and Retry offered.
     const onLost = () => {
       lost = true;
+      ready = false;
       report(new Error('The WebGL context of the MRI canvas was lost.'));
     };
     target.addEventListener('webglcontextlost', onLost);

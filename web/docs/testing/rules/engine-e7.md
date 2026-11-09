@@ -368,3 +368,12 @@ Shared expectations. "The anatomy fits" means every drawn vertex projects inside
 - **Source:** `web/src/lib/engine/index.ts` (`createEvents`)
 - **Expected:** A `change` listener hears `select(left)`; after its `off()`, `select(null)` adds no event.
 - **Covered by:** `src/lib/engine/index.contract.test.ts` (R, via contract suite)
+
+### FACADE-39 · A lesion tract assembles the brain only while it is still the one asked for
+
+- **Rule:** Showing a lesion's tract assembles an exploded brain once the tract has landed, but not when the tract was cleared or replaced while it downloaded.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** state-machine audit 2026-11-09 (`lesion.showTract` assembled after its await with no request check)
+- **Expected:** exploded, `showTract` held on its bundle's download, `clearTract`, the download lands → still exploded.
+- **Covered by:** `src/lib/engine/index.test.ts` (R)

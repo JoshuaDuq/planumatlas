@@ -143,7 +143,7 @@ function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true } = {}) {
     },
   };
   const session = createSession({ views: ['oblique'] });
-  session.setStatus('ready');
+  session.setLoaded();
   let renders = 0;
   const commands = createSceneCommands({
     model: model as unknown as ModelPort,

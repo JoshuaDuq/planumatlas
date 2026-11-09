@@ -17,7 +17,7 @@ test('whether Restore is offered, and the lesson in front, are reactive', async 
   flushSync();
   await scene.excursions.openCircuit(scene.circuits.all[0]!.id);
   flushSync();
-  scene.excursions.closeDeficit();
+  await scene.excursions.closeDeficit();
   flushSync();
   stop();
   expect(seen.at(0)).toEqual([false, null]);

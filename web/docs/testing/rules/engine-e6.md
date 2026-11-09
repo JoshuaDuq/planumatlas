@@ -325,3 +325,12 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 - **Source:** `viewer/diffusion/navigation-viewer.js:97-107`
 - **Expected:** After `dispose()`: every mesh unloaded, `volumes` empty, `WEBGL_lose_context.loseContext()` called once; a `syncTracts` whose load resolves afterwards adds nothing.
 - **Covered by:** `src/lib/engine/index.contract.test.ts` (R, dispose runs; the context release is not asserted); uncovered
+
+### DIFF-35 · A tract shown alone that fails to download leaves nothing isolated
+
+- **Rule:** When the bundle a lesion or a landmark draws alone fails to download, and no later isolation has replaced it, nothing is isolated any more: the ordinary tracts are drawn again as the overlay has them, and the tracts' group shows only if the overlay does. The failure rejects to the caller.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** state-machine audit 2026-11-09 (`isolate` set the selection before its await)
+- **Expected:** a loaded, visible bundle, then a lesion bundle whose download rejects → rejects with the error, the loaded bundle visible again. Overlay off, a loaded bundle, then a lesion crossing or a landmark whose download rejects → `streamlinesVisible === false`.
+- **Covered by:** `src/lib/engine/diffusion/native-viewer.test.ts` (R), `src/lib/engine/diffusion/tracts.test.ts` (R)

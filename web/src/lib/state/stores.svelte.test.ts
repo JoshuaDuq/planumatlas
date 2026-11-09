@@ -423,14 +423,14 @@ describe('the announcer', () => {
 
   test('says the lost context and its restoration', () => {
     const { session } = build();
-    session.setStatus('ready');
+    session.setLoaded();
     flushSync();
     session.setContextLost();
     flushSync();
     expect(region.textContent).toBe(
       'The 3D view was interrupted by the graphics driver. Restoring…',
     );
-    session.setStatus('ready');
+    session.setContextRestored();
     flushSync();
     expect(region.textContent).toBe('Anatomy loaded.');
   });

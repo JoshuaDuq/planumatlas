@@ -264,11 +264,11 @@ is the English interface text.
 
 ### STATE-28 · The stage status: loading, ready, error and a lost GPU context
 
-- **Rule:** Loading carries its progress; becoming ready clears progress and error; an error is carried as the error, never as a ready viewer; a lost GPU context is a status of its own, said by the stage in the reader's language, with no English error text.
+- **Rule:** Loading carries its progress; becoming ready clears progress and error; an error is carried as the error, never as a ready viewer; a lost GPU context is a status of its own, said by the stage in the reader's language, with no English error text. Every status change is a named event (`setProgress`, `setLoaded`, `setSwitching`, `endSwitching`, `setContextLost`, `setContextRestored`, `setError`): a restored context returns to where it was lost, so a context lost during the start outlasts the start's end; a failed start is final; the start's progress counts only while loading; ending the start twice, or restoring a context that was not lost, throws. The model is usable (`modelUsable`) while `ready` or `switching` only.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/session.js:116-121,134-140`
-- **Expected:** `setProgress({ loaded: 12400000, total: 27900000 })` → status `loading` with that progress; `setStatus('ready')` → `ready`, progress null. `setError(new Error('Manifest request failed: HTTP 404'))` → status `error`, `error.message` that text. `setContextLost()` after ready → `context-lost`, error null.
+- **Expected:** `setProgress({ loaded: 12400000, total: 27900000 })` → status `loading` with that progress; `setLoaded()` → `ready`, progress null. `setError(new Error('Manifest request failed: HTTP 404'))` → status `error`, `error.message` that text. `setContextLost()` after ready → `context-lost`, error null; `setContextRestored()` → `ready`. Progress `1/4`, lost, progress `2/4`, `setLoaded()` → still `context-lost`, progress null; restored → `ready`. Lost and restored before the start ends → `loading`. After `setError`, progress, lost, restored and switching all leave `error`. Ready with a `reload` notice, then `setProgress` → `ready`, notice kept. A second `setLoaded()` throws `/already/`; `setContextRestored()` on a ready stage throws `/not lost/`.
 - **Covered by:** `src/lib/core/state/session.test.ts` (R)
 
 ### STATE-29 · A download behind a model on screen is "switching", and is not an action

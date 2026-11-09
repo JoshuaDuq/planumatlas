@@ -318,6 +318,7 @@ export function createLessons({
       beforeLesson = null;
       changesSaid = false;
       beforeRoute = null;
+      prepare(null);
       return before;
     },
 
@@ -330,6 +331,7 @@ export function createLessons({
     forgetBeforeLesson() {
       beforeLesson = null;
       beforeRoute = null;
+      prepare(null);
     },
 
     /**

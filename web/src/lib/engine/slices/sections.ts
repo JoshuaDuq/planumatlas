@@ -114,6 +114,8 @@ export class BrainSections extends EventTarget {
   private paintKey: string | null = null;
   private paintRequest = 0;
   readonly state: SectionsStateRecord;
+  /** The downloads the status waits on: the linked views, a cut being prepared, the MRI colour. */
+  private readonly loading = new Set<object>();
   private pending: Promise<void> | null = null;
   private disposed = false;
   private requestNumber = 0;
@@ -260,14 +262,17 @@ export class BrainSections extends EventTarget {
     if (this.disposed) throw new Error('BrainSections is disposed.');
     if (this.volumes) return;
     if (this.pending) return this.pending;
-    this.state.status = 'loading';
-    this.emit();
     this.pending = (async () => {
-      const metadata = await this.tissues.loadVolumeMetadata();
-      const [anatomy, segmentation] = await Promise.all([
-        this.tissues.loadMri(),
-        loadVolume(metadata.segmentation, this.metadataUrl),
-      ]);
+      const [metadata, anatomy, segmentation] = await this.whileLoading(async () => {
+        const metadata = await this.tissues.loadVolumeMetadata();
+        return [
+          metadata,
+          ...(await Promise.all([
+            this.tissues.loadMri(),
+            loadVolume(metadata.segmentation, this.metadataUrl),
+          ])),
+        ] as const;
+      });
       if (this.disposed) throw new Error('BrainSections disposed during loading.');
       this.volumes = { metadata, mri: anatomy.volume, segmentation };
       const d = metadata.display;
@@ -278,9 +283,7 @@ export class BrainSections extends EventTarget {
         windowWidth: d.window_width,
       };
       this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
-      this.state.status = 'ready';
-      this.state.error = null;
-      this.emit();
+      this.succeed();
     })()
       .catch((error: unknown) => {
         this.report(error);
@@ -300,14 +303,15 @@ export class BrainSections extends EventTarget {
    * layer that was never loaded. `update` may assume the current layer exists.
    */
   async prepare(): Promise<void> {
-    this.state.status = 'loading';
-    this.emit();
-    let loaded: string | null = null;
-    while (loaded !== this.state.cutAtlas) {
-      loaded = this.state.cutAtlas;
-      await this.tissues.load(loaded);
-    }
-    if (this.tissues.wantsStriatal()) await this.tissues.load(STRIATAL_ATLAS);
+    const loaded = await this.whileLoading(async () => {
+      let loaded: string | null = null;
+      while (loaded !== this.state.cutAtlas) {
+        loaded = this.state.cutAtlas;
+        await this.tissues.load(loaded);
+      }
+      if (this.tissues.wantsStriatal()) await this.tissues.load(STRIATAL_ATLAS);
+      return loaded;
+    });
     this.loadedCutAtlas = loaded;
     if (this.display) this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
   }
@@ -329,31 +333,21 @@ export class BrainSections extends EventTarget {
   async setSurfaceColor(mode: SurfaceColor, current: () => boolean = () => true): Promise<void> {
     const request = ++this.appearanceRequest;
     const live = () => request === this.appearanceRequest && !this.disposed && current();
-    // Overtaken by another command rather than another colour, the loading this began is over.
-    const settle = () => {
-      if (request !== this.appearanceRequest || this.disposed || this.state.status !== 'loading')
-        return;
-      this.state.status = 'ready';
-      this.emit();
-    };
     if (mode === 'mri') {
-      this.state.status = 'loading';
-      this.emit();
       try {
-        await this.tissues.loadMri();
+        await this.whileLoading(() => this.tissues.loadMri());
       } catch (error) {
         if (live()) this.report(error);
-        else settle();
+        else this.settle();
         throw error;
       }
-      if (!live()) return settle();
+      // Overtaken, the download lands without a colour, and only the loading it began is over.
+      if (!live()) return this.settle();
       if (this.display) this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
       this.model.setMriAnatomy(this.tissues.anatomy);
     }
     this.model.setSurfaceColor(mode);
-    this.state.status = 'ready';
-    this.state.error = null;
-    this.emit();
+    this.succeed();
   }
 
   async setMode(mode: CutMode): Promise<void> {
@@ -367,7 +361,7 @@ export class BrainSections extends EventTarget {
         throw error;
       }
     }
-    if (request !== this.requestNumber || this.disposed) return;
+    if (request !== this.requestNumber || this.disposed) return this.settle();
     this.state.mode = mode;
     this.update();
     if (mode !== 'off') this.tissues.solids.warm();
@@ -446,9 +440,7 @@ export class BrainSections extends EventTarget {
     this.clipPlane.copy(plane);
     if (this.model.clippingPlanes[0] !== this.clipPlane)
       this.model.setClippingPlanes([this.clipPlane]);
-    this.state.status = 'ready';
-    this.state.error = null;
-    this.emit();
+    this.succeed();
   }
 
   /**
@@ -472,9 +464,10 @@ export class BrainSections extends EventTarget {
       // returns to an atlas that loaded, not to a choice that never did.
       if (this.state.cutAtlas === atlas) this.state.cutAtlas = this.loadedCutAtlas ?? previous;
       if (request === this.requestNumber) this.report(error);
+      else this.settle();
       throw error;
     }
-    if (request !== this.requestNumber || this.disposed) return;
+    if (request !== this.requestNumber || this.disposed) return this.settle();
     this.update();
   }
 
@@ -519,12 +512,8 @@ export class BrainSections extends EventTarget {
         this.compared = null;
         throw error;
       });
-      try {
-        this.comparedVolume = await this.compared;
-      } catch (error) {
-        if (request === this.agreementRequest) this.report(error);
-        throw error;
-      }
+      // A failed download is the caller's to word: it is not the cut's failure.
+      this.comparedVolume = await this.compared;
       if (request !== this.agreementRequest || this.disposed) return;
     }
     this.state.agreement = code;
@@ -550,7 +539,7 @@ export class BrainSections extends EventTarget {
     if (!this.active) {
       this.group.visible = false;
       this.model.setClippingPlanes([]);
-      this.state.status = 'ready';
+      this.state.status = this.jobStatus;
       this.emit();
       return;
     }
@@ -565,9 +554,7 @@ export class BrainSections extends EventTarget {
       if (this.model.clippingPlanes[0] !== this.clipPlane) {
         this.model.setClippingPlanes([this.clipPlane]);
       }
-      this.state.status = 'ready';
-      this.state.error = null;
-      this.emit();
+      this.succeed();
     } catch (error) {
       this.report(error);
     }
@@ -649,7 +636,8 @@ export class BrainSections extends EventTarget {
       try {
         await this.tissues.load(atlas);
       } catch (error) {
-        if (request === this.paintRequest) this.report(error);
+        // The linked MRI is drawn without the paint; this is not the cut's failure.
+        if (request === this.paintRequest) console.error(error);
         return;
       }
       if (request !== this.paintRequest || this.disposed) return;
@@ -700,13 +688,45 @@ export class BrainSections extends EventTarget {
       : null;
   }
 
+  /** Loading while any download the status waits on runs, else the latest job's failure, else ready. */
+  private get jobStatus(): SectionsStatus {
+    return this.loading.size > 0 ? 'loading' : this.state.error ? 'error' : 'ready';
+  }
+
+  /** Hold the status at loading while `work` downloads; whoever awaits it settles the status. */
+  private async whileLoading<T>(work: () => Promise<T>): Promise<T> {
+    const job = {};
+    this.loading.add(job);
+    this.state.status = 'loading';
+    this.emit();
+    try {
+      return await work();
+    } finally {
+      this.loading.delete(job);
+    }
+  }
+
+  /** A job ended without drawing or failing: report the status only if that changed it. */
+  private settle(): void {
+    const status = this.jobStatus;
+    if (status === this.state.status) return;
+    this.state.status = status;
+    this.emit();
+  }
+
+  private succeed(): void {
+    this.state.error = null;
+    this.state.status = this.jobStatus;
+    this.emit();
+  }
+
   /** The status carries a code for the app to word: `asset-fetch`, `asset-updated` or `cut-failed`. */
   report(error: unknown): void {
-    this.state.status = 'error';
     this.state.error =
       isCode(error) && (error.code === 'asset-fetch' || error.code === 'asset-updated')
         ? error.code
         : 'cut-failed';
+    this.state.status = this.jobStatus;
     console.error(error);
     this.emit();
   }

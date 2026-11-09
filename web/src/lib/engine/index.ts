@@ -433,6 +433,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     }
 
     let disposed = false;
+    let tractRequest = 0;
     return {
       on: events.on,
       canvas: scene.domElement,
@@ -454,10 +455,15 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         tractBundles: lesion.tractBundles,
         measureTracts: lesion.measureTracts,
         async showTract(...args) {
+          const ask = ++tractRequest;
           await lesion.showTract(...args);
-          assemble();
+          // A tract cleared or replaced while it downloaded does not assemble the brain.
+          if (ask === tractRequest) assemble();
         },
-        clearTract: lesion.clearTract,
+        clearTract() {
+          tractRequest++;
+          lesion.clearTract();
+        },
       },
       visualField: {
         available: atlas.visualField !== null,

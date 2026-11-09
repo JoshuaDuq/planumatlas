@@ -111,6 +111,60 @@ test('a colour overtaken by another scene command lands without changing the col
   sections.dispose();
 });
 
+test('a cut redrawn while the MRI colour downloads stays loading until the colour lands', async () => {
+  const { model, tissues, sections } = fixture();
+  await sections.setMode('axial');
+  let finish: (value?: unknown) => void = () => {};
+  tissues.loadMri = () =>
+    new Promise((resolve) => {
+      finish = resolve;
+    });
+  model.setSurfaceColor = () => {};
+  model.setMriAnatomy = () => {};
+  const pending = sections.setSurfaceColor('mri');
+  sections.setCrosshair([0, 0, 5]);
+  assert.equal(sections.state.status, 'loading');
+  finish();
+  await pending;
+  assert.equal(sections.state.status, 'ready');
+  sections.dispose();
+});
+
+test('a cut redrawn while the linked MRI views download stays loading, then shows their failure', async () => {
+  const { tissues, sections } = fixture();
+  await sections.setMode('axial');
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  let fail: (error: Error) => void = () => {};
+  tissues.loadVolumeMetadata = () =>
+    new Promise((_, reject) => {
+      fail = reject;
+    });
+  const pending = assert.rejects(sections.load(), /offline/);
+  sections.setCrosshair([0, 0, 5]);
+  assert.equal(sections.state.status, 'loading');
+  fail(new Error('offline'));
+  await pending;
+  assert.equal(sections.state.status, 'error');
+  assert.equal(sections.state.error, 'cut-failed');
+  sections.dispose();
+});
+
+test("a compared volume that fails to download rejects to its caller and is not the cut's failure", async () => {
+  const { model, sections } = fixture();
+  await sections.setMode('axial');
+  model.segmentationAgreement = { structures: [{ code: 17 }] };
+  model.manifest.segmentation_agreement = { volume: { file: 'compared.volume' } };
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response('', { status: 503 }));
+  await assert.rejects(
+    sections.setAgreement(17),
+    (error: { code: string }) => error.code === 'asset-fetch',
+  );
+  assert.equal(sections.state.status, 'ready');
+  assert.equal(sections.state.error, null);
+  assert.equal(sections.state.agreement, null);
+  sections.dispose();
+});
+
 test('window changes reach the MRI renderer as well as the linked slices', () => {
   const { sections, tissues } = fixture();
   sections.display = { fieldOfView: 256, size: 256, windowCenter: 90, windowWidth: 180 };
@@ -629,7 +683,7 @@ test("the linked MRI draws the model's paint by the cut atlas's labels, loading 
   );
 });
 
-test('a paint whose labels fail to load is reported once, and the next paint tries again', async () => {
+test("a paint whose labels fail to load is logged once, is not the cut's failure, and the next paint tries again", async () => {
   const { model, tissues, sections } = fixture();
   const error = vi.spyOn(console, 'error').mockImplementation(() => {});
   const metadata = {
@@ -656,11 +710,14 @@ test('a paint whose labels fail to load is reported once, and the next paint tri
   sections.volumes = {} as never;
   model.state.paint = { id: 'function:a', colors: new Map() };
   model.dispatchEvent(new Event('change'));
-  await vi.waitFor(() => assert.equal(sections.state.status, 'error'));
+  await vi.waitFor(() => assert.equal(error.mock.calls.length, 1));
+  assert.equal(sections.state.error, null);
+  assert.notEqual(sections.state.status, 'error');
   sections.emit();
   model.dispatchEvent(new Event('change'));
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(loads, 1);
+  assert.equal(error.mock.calls.length, 1);
   assert.equal(sections.state.paint, null);
   model.state.paint = { id: 'function:b', colors: new Map() };
   model.dispatchEvent(new Event('change'));

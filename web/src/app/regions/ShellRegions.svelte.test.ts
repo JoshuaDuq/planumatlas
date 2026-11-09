@@ -34,7 +34,7 @@ describe('the stage status', () => {
     expect(main.querySelector('progress')!.value).toBe(34);
     expect(shell.announcer.textContent).toBe('Loading anatomy…');
 
-    shell.app.session.setStatus('ready');
+    shell.app.session.setLoaded();
     flushSync();
     expect(main.querySelector('progress')).toBeNull();
     await vi.waitFor(() => expect(shell.announcer.textContent).toBe('Anatomy loaded.'));

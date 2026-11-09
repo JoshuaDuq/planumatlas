@@ -300,14 +300,17 @@ export function createAnatomyCommands(
     }
   }
 
-  /** The reveal notice's Restore: the scene from before the reveal, in place of what it said. */
+  /**
+   * The reveal notice's Restore: the scene from before the reveal, in place of what it said. Held until
+   * it lands, so a Restore a later command overtook can be chosen again.
+   */
   async function restoreBeforeReveal() {
     if (!beforeReveal) throw new Error('There is no scene from before a reveal to restore.');
     const { scene, surface } = beforeReveal;
-    beforeReveal = null;
     const current = commands.begin();
     const failures = await reader.apply(scene, current);
     if (!current()) return;
+    beforeReveal = null;
     if (surface) cortexSurface.setSurface(surface);
     session.notify(null);
     if (failures.length) {

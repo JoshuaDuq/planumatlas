@@ -94,6 +94,15 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** `#hemi=left&lang=fr&atlas=missing` → hemisphere left, session `fr`, notice matches `/atlas/i`. `#hemi=left` → `followLanguage` not called; `#lang=fr` → called once with `fr`. With `planum-lang` stored as `en`, `#lang=fr` → `document.documentElement.lang` `fr`, `planum-lang` still `en`.
 - **Covered by:** `src/lib/controller/links.test.ts` (R); `src/lib/controller/links.svelte.test.ts` (R, browser for `<html lang>` and `localStorage`; the decision "follow, do not save" could be checked in unit with a spy, the DOM part is the language store's, see `state.md`)
 
+### LINK-08a · An edited link that throws still ends its notice hold
+
+- **Rule:** Applying an edited link holds notices until it settles (LINK-17). If applying it throws, the error still surfaces, but the hold ends first, so every later notice is said.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** state-machine audit 2026-11-09 (`onHashChange` released the hold only after a successful restore)
+- **Expected:** a `forgetScenes` hook that throws `boom`, `#hemi=left` → `onHashChange()` rejects with `boom`; `notify({ text: 'Later.' })` → notice text `Later.`.
+- **Covered by:** `src/lib/controller/links.test.ts` (R)
+
 ## Restoring a link
 
 ### LINK-09 · A link may name only what this build publishes
@@ -152,11 +161,11 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 
 ### LINK-15 · A lesson linked without its landmark opens on it
 
-- **Rule:** A link that opens a lesson on Circuits and names no region opens the step's landmark, as choosing that step does, after keeping the scene as it now stands to return to when the lesson is left. A landmark that fails reports `step`; one overtaken by a later command ends the restore.
+- **Rule:** A link that opens a lesson on Circuits and names no region opens the step's landmark, as choosing that step does, after keeping the scene as it now stands to return to when the lesson is left. A landmark that fails reports `step`; one overtaken by a later command ends the restore. A link that names the landmark keeps nothing of the display a lesson open before it set: Reset display counts from the defaults, as on a fresh load of the link.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:2051-2063`
-- **Expected:** `tab=circuits&circuit=language&step=2` → `rememberLessonScene` with a scene carrying a camera, then `openLandmark('destrieux:left:2')`. Landmark throws → notApplied ends with `step`. Landmark overtaken → `restore` returns null. With `region=destrieux:left:1` → no landmark opened.
+- **Source:** `viewer/app.js:2051-2063`; changed 2026-11-09 (audit: an earlier lesson's display outlived the link)
+- **Expected:** `tab=circuits&circuit=language&step=2` → `rememberLessonScene` with a scene carrying a camera, then `openLandmark('destrieux:left:2')`. Landmark throws → notApplied ends with `step`. Landmark overtaken → `restore` returns null. With `region=destrieux:left:1` → no landmark opened. Lesson A on a step, then a link to lesson B's step with its region → `displayBaseline` equals `DEFAULT_DISPLAY`.
 - **Covered by:** `src/lib/controller/links.test.ts` (R)
 
 ### LINK-16 · The panel opens on what the link names, without raising the sheet

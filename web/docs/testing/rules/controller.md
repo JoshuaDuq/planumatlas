@@ -187,13 +187,15 @@ checks them in the browser today and could run in the unit project over the fake
   - other system → clear the system filter
   - no cut → CTRL-19
 
-  If the same reason comes back, the reveal fails with a notice and selects nothing.
+  If the same reason comes back, the reveal fails with a notice and selects nothing. The notice's
+  Restore (as Reset display's and Start over's) puts back the scene from before; one a later command
+  overtakes keeps that scene, so the notice's Restore still works.
 
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:569-598`, `675-686`; `viewer/catalog/visibility.js`
-- **Expected:** hemisphere `right`, reveal(`hemisphere`, `destrieux:left:30`) → `both`, selected, framed. Cortex hidden and region removed, reveal(`removed`) → cortex visible, selected. reveal(`hemisphere`, `hcp-mmp:left:1`) under Destrieux → failure notice, nothing selected. One fixed outcome per remaining reason, each ending with the region selected and framed (ids from the published `cdmd` manifest): internal structures hidden, reveal(`internal-hidden`, `aseg:left:17`) on the `aseg` detail → `internalVisible: true`; cord hidden, reveal(`spinal-cord-hidden`, `pam50:left:gracile-fasciculus`) → the cord shown; `destrieux:left:30` isolated, reveal(`isolated`, `destrieux:left:38`) → `isolatedRegion: null`; surface colour `mri`, reveal(`no-mri`, …) → `surfaceColor: 'tissue'`; detail `aseg`, reveal(`other-detail`, `nextbrain:left:48`) → detail `nextbrain` loaded; a system filter that excludes the region, reveal(`other-system`, …) → `internalSystem: null`.
-- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: all reasons but `no-cut`, each one fixed outcome; `no-cut` is CTRL-19)
+- **Expected:** hemisphere `right`, reveal(`hemisphere`, `destrieux:left:30`) → `both`, selected, framed. Cortex hidden and region removed, reveal(`removed`) → cortex visible, selected. reveal(`hemisphere`, `hcp-mmp:left:1`) under Destrieux → failure notice, nothing selected. One fixed outcome per remaining reason, each ending with the region selected and framed (ids from the published `cdmd` manifest): internal structures hidden, reveal(`internal-hidden`, `aseg:left:17`) on the `aseg` detail → `internalVisible: true`; cord hidden, reveal(`spinal-cord-hidden`, `pam50:left:gracile-fasciculus`) → the cord shown; `destrieux:left:30` isolated, reveal(`isolated`, `destrieux:left:38`) → `isolatedRegion: null`; surface colour `mri`, reveal(`no-mri`, …) → `surfaceColor: 'tissue'`; detail `aseg`, reveal(`other-detail`, `nextbrain:left:48`) → detail `nextbrain` loaded; a system filter that excludes the region, reveal(`other-system`, …) → `internalSystem: null`. Reset display, its Restore overtaken → notice action still `restore`; Restore again → the same held scene re-applied, notice "Previous view restored.".
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: all reasons but `no-cut`, each one fixed outcome; `no-cut` is CTRL-19; the overtaken Restore)
 
 ### CTRL-19 · A cut-only region is revealed by a coronal cut through its centre
 
@@ -282,11 +284,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-28 · Closing the deficit or function brings back the scene from before it
 
-- **Rule:** Closing the open deficit or function (Escape, the sheet's clear) ends the excursion as another tab does: the scene from before it, with the reader's own atlas, colour and selection, comes back on the tab's list, and says so. With no excursion held, closing only closes.
+- **Rule:** Closing the open deficit or function (Escape, the sheet's clear) ends the excursion as another tab does: the scene from before it, with the reader's own atlas, colour and selection, comes back on the tab's list, and says so. With no excursion held, closing only closes. One a later command overtakes keeps the scene and its stroke cases held, so Restore still returns there.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:866-877`; changed 2026-11-03 (critique: a closed function stranded the reader on its atlas)
-- **Expected:** open, close → item null, Restore not offered, the first capture re-applied, `render` then `showList`, notice "Previous view restored.". Nothing held → item null, nothing re-applied.
+- **Expected:** open, close → item null, Restore not offered, the first capture re-applied, `render` then `showList`, notice "Previous view restored.". Nothing held → item null, nothing re-applied. Cases `['M1']` shown, `language` opened, Anatomy chosen and overtaken → no cases drawn, Restore offered; back on Functions, Restore → `true`, cases `['M1']` drawn once.
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R)
 
 ### CTRL-29 · An item opened from a lesson ends it and takes over its scene

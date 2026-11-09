@@ -329,11 +329,11 @@ and white), and the Destrieux and HCP-MMP atlases publish `ribbon_labels`. The l
 
 ### TISSUE-34 · A worker failure is an error, not a silent main-thread cut
 
-- **Rule:** A runtime error in the worker terminates it and rejects the pending build and every later one with that error.
+- **Rule:** A runtime error in the worker terminates it and rejects the pending build and every later one with that error. A warm-up that runs after the failure does nothing: it starts no worker and throws nothing, so the error is reported once, by the build.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** deviation `e3-worker-errors.md`; decision 26 on #4
-- **Expected:** a worker whose cut raises "cut failed" → `build(plane)` rejects `/cut failed/`, the worker is terminated, and a second `build(plane)` rejects `/cut failed/`.
+- **Expected:** a worker whose cut raises "cut failed" → `build(plane)` rejects `/cut failed/`, the worker is terminated, and a second `build(plane)` rejects `/cut failed/`. Then `warm()` and its idle callback → no throw, still one worker.
 - **Covered by:** `src/lib/engine/tissues/solid-sections.test.ts` (R)
 
 ### TISSUE-35 · A disposed cut starts no worker and leaves no build waiting

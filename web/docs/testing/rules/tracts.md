@@ -398,11 +398,11 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 
 ### TRACT-43 · A lost WebGL context is shown and retried on a fresh canvas
 
-- **Rule:** When the browser takes the canvas's WebGL context away, the alert says the data could not be displayed and the controls are disabled; "Reload MRI" builds a new engine on a new canvas. A loss during the first load is shown when that load ends, with no "ready". The context that closing the dialog frees on purpose is not reported.
+- **Rule:** When the browser takes the canvas's WebGL context away, the alert says the data could not be displayed and the controls are disabled; "Reload MRI" builds a new engine on a new canvas. A loss on a loaded scan, or during the first load once that load ends, leaves no "ready" said beside the alert. The context that closing the dialog frees on purpose is not reported.
 - **Kind:** behaviour
 - **Level:** browser — real WebGL (`WEBGL_lose_context`)
 - **Source:** deviation `t2-context-lost.md`; decision 41 on #4
-- **Expected:** `loseContext()` → alert "The reference data could not be displayed.", select disabled; "Reload MRI" → enabled, disposed `[true, false]`, canvas 1 ≠ canvas 0, alert "". Loss while held, then release → "Reload MRI" visible, select disabled, status "". Close, then the old canvas loses its context → alert "".
+- **Expected:** status "Reference MRI ready.", `loseContext()` → alert "The reference data could not be displayed.", select disabled, status ""; "Reload MRI" → enabled, disposed `[true, false]`, canvas 1 ≠ canvas 0, alert "". Loss while held, then release → "Reload MRI" visible, select disabled, status "". Close, then the old canvas loses its context → alert "".
 - **Covered by:** `src/features/tracts/MriNavigator.svelte.test.ts` (R)
 
 ## The MRI navigator: language, size and media

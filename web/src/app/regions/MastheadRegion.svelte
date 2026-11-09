@@ -4,6 +4,7 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
+  import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Explorer, Language } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import { startGuide } from '../../features/guide/tour.ts';
@@ -142,7 +143,7 @@
   {lang}
   themeChoice={app.theme.choice}
   {singleKeys}
-  ready={status === 'ready' || status === 'switching'}
+  ready={modelUsable(status)}
   fullscreen={isFullscreen()}
   provenanceReady={world !== null}
   settingsDisabled={app.failure !== undefined}

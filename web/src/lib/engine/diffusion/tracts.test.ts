@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
 import { Group } from 'three';
 import { test, vi } from 'vitest';
+import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
+import { tractCatalog } from '../../core/diffusion/catalogs.ts';
+import type { TractBundle } from '../../core/diffusion/catalogs.ts';
 import { createTracts } from './tracts.ts';
 
 /** The asset reader serves `public/diffusion/` from disk, so the outline and the bundles load in Node. */
 vi.mock('../../core/assets/diffusion-assets.ts', async () => {
   const { readPublishedDiffusion } = await import('./test-support.ts');
-  return { readDiffusionAsset: readPublishedDiffusion };
+  return { readDiffusionAsset: vi.fn(readPublishedDiffusion) };
 });
 
 test('setActive loads once, announces readiness once and the reference on another anatomy', async () => {
@@ -87,4 +90,35 @@ test('a landmark draws its own bundle before the Tracts tab loads; the lesion’
     setup('another-anatomy').tracts.showLandmarkTract('cst-left'),
     /own anatomy/,
   );
+}, 60_000);
+
+test('a lesion crossing whose bundle fails to download no longer draws the tracts without the overlay', async () => {
+  const [failing, shown] = tractCatalog('cdmd').bundles as readonly [TractBundle, TractBundle];
+  const own = setup('cdmd');
+  await own.tracts.loadBundle(shown.id);
+  const { readPublishedDiffusion } = await import('./test-support.ts');
+  vi.mocked(readDiffusionAsset).mockImplementation(async (file) => {
+    if (file === failing.file) throw new Error('offline');
+    return readPublishedDiffusion(file);
+  });
+  await assert.rejects(
+    own.tracts.own!.showCrossing(failing.id, { centre: [0, 0, 0], radius: 100 }),
+    /offline/,
+  );
+  vi.mocked(readDiffusionAsset).mockImplementation(readPublishedDiffusion);
+  assert.equal(own.tracts.streamlinesVisible, false, 'the overlay is off and nothing is isolated');
+}, 60_000);
+
+test('a landmark whose bundle fails to download no longer draws the tracts without the overlay', async () => {
+  const [failing, shown] = tractCatalog('cdmd').bundles as readonly [TractBundle, TractBundle];
+  const own = setup('cdmd');
+  await own.tracts.loadBundle(shown.id);
+  const { readPublishedDiffusion } = await import('./test-support.ts');
+  vi.mocked(readDiffusionAsset).mockImplementation(async (file) => {
+    if (file === failing.file) throw new Error('offline');
+    return readPublishedDiffusion(file);
+  });
+  await assert.rejects(own.tracts.showLandmarkTract(failing.id), /offline/);
+  vi.mocked(readDiffusionAsset).mockImplementation(readPublishedDiffusion);
+  assert.equal(own.tracts.streamlinesVisible, false, 'the overlay is off and nothing is isolated');
 }, 60_000);

@@ -7,6 +7,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { legendFor, paintFor } from '../../lib/core/state/paint.ts';
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
+  import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Vec3 } from '../../lib/engine/api.ts';
   import type { CutMode, ViewName } from '../../lib/types/index.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
@@ -342,7 +343,7 @@
       engine={world.engine}
       stage={app.stage}
       lang={current.lang}
-      ready={current.status === 'ready' || current.status === 'switching'}
+      ready={modelUsable(current.status)}
       viewName={current.view}
       {commands}
     />

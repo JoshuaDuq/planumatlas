@@ -411,6 +411,20 @@ test('a worker failure rejects the build and every later one instead of cutting 
   sections.dispose();
 });
 
+test('a warm-up after a worker failure does nothing, leaving the failure to the next build', async () => {
+  const workers = await installWorkerShim(true);
+  const idle: (() => void)[] = [];
+  vi.stubGlobal('requestIdleCallback', (run: () => void) => idle.push(run));
+  const { sections } = fixture();
+  await assert.rejects(sections.build(plane), /cut failed/);
+  sections.warm();
+  assert.equal(idle.length, 1);
+  assert.doesNotThrow(idle[0]!);
+  assert.equal(workers.length, 1, 'no second worker is started');
+  await assert.rejects(sections.build(plane), /cut failed/);
+  sections.dispose();
+});
+
 test('without a Worker the build declines and the caller cuts on its own thread', async () => {
   const { sections } = fixture();
   assert.equal(await sections.build(plane), null);

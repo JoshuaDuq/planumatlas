@@ -447,3 +447,21 @@ test('a landmark cleared while its bundle downloads keeps the late bundle hidden
   assert.equal(viewer.anyVisible, false);
   viewer.dispose();
 });
+
+test('a lesion bundle that fails to download gives the ordinary tracts back', async () => {
+  const viewer = createNativeTractViewer(
+    catalog,
+    () => {},
+    async (bundle) => {
+      if (bundle.file === first.file) throw new Error('offline');
+      return decoded();
+    },
+  );
+  await viewer.loadBundle(second);
+  await assert.rejects(
+    viewer.showLesionTract(first, { centre: [0, 0, 0], radius: 100 }),
+    /offline/,
+  );
+  assert.equal(viewer.group.getObjectByName(second.id)!.visible, true);
+  viewer.dispose();
+});

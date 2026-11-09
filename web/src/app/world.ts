@@ -292,7 +292,7 @@ export function composeWorld(app: App, engine: Engine, defaultAnatomy: string): 
   const { view } = world;
   app.defer(
     engine.on('contextLost', () => session.setContextLost()),
-    engine.on('contextRestored', () => session.setStatus('ready')),
+    engine.on('contextRestored', () => session.setContextRestored()),
     // A download the model started by itself failed: the white-matter envelopes.
     engine.on('loadError', (error) =>
       session.notify(failureNotice(error, session.state.lang, 'whiteMatter')),

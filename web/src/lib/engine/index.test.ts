@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, it, vi } from 'vitest';
 import { LineBasicMaterial, Matrix4, Mesh } from 'three';
 import type { Material, Object3D } from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { readDiffusionAsset } from '../core/assets/diffusion-assets.ts';
+import { tractCatalog } from '../core/diffusion/catalogs.ts';
 import { t } from '../core/i18n/index.ts';
 import type { Engine } from './api.ts';
 import { createEngine } from './index.ts';
@@ -64,6 +66,11 @@ vi.mock('three', async (importOriginal) => {
 });
 
 // The studio environment is drawn on the GPU.
+vi.mock('../core/assets/diffusion-assets.ts', async () => {
+  const { readPublishedDiffusion } = await import('./diffusion/test-support.ts');
+  return { readDiffusionAsset: vi.fn(readPublishedDiffusion) };
+});
+
 vi.mock('./render/lighting.ts', () => ({
   createAnatomicalLighting: () => ({ texture: null, dispose() {} }),
 }));
@@ -293,6 +300,26 @@ describe('the engine facade', () => {
   });
 
   // Deviation e7-warm-outlines-fail-fast: legacy logged the failure and started anyway.
+  it('leaves the exploded view alone when a lesion tract lands after it was cleared', async () => {
+    const engine = await boot();
+    const [bundle] = tractCatalog('cdmd').bundles;
+    const { readPublishedDiffusion } = await import('./diffusion/test-support.ts');
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    vi.mocked(readDiffusionAsset).mockImplementation(async (file) => {
+      if (file === bundle!.file) await held;
+      return readPublishedDiffusion(file);
+    });
+    engine.model.setExploded(true);
+    const shown = engine.lesion.showTract(bundle!.id, { centre: [0, 0, 0], radius: 10 });
+    engine.lesion.clearTract();
+    release();
+    await shown;
+    vi.mocked(readDiffusionAsset).mockImplementation(readPublishedDiffusion);
+    assert.equal(engine.model.settings.exploded, true);
+    engine.dispose();
+  });
+
   it('rejects when the outline programs cannot be compiled, freeing the scene and the model', async () => {
     stage.warmFails = true;
     await assert.rejects(boot(), /outline programs did not compile/);

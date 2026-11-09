@@ -528,3 +528,14 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:627`; deviation `g6-fullscreen-failure.md`; comment 87 on #4 (`errors.operations.fullscreen`)
 - **Expected:** Host removed from the document, language `fr`, click the opener → one notice `{ text: 'Impossible de passer en plein écran.', action: null }`, `console.error` once, `fullscreenElement === null`, opener "Full screen". English text "Could not enter full screen.".
 - **Covered by:** `src/features/stage/fullscreen.svelte.test.ts` (R)
+
+## Coordinate entry
+
+### STAGE-52 · A placement's answer speaks only for the entry still shown
+
+- **Rule:** The first placement downloads the template's field, and the coordinate field and its template stay editable meanwhile. A late "beyond the template's brain" or failure is said only if the text and template are still the ones submitted; otherwise nothing is said, and Place is offered again.
+- **Kind:** behaviour
+- **Level:** browser: the popover with a held placement
+- **Source:** state-machine audit, 2026-11-09
+- **Expected:** Submit "90, 0, 0", type "-42, 22, 6" before the answer, answer "outside" → no alert, Place enabled.
+- **Covered by:** `src/features/lesion/CoordinatePopover.svelte.test.ts` (R)

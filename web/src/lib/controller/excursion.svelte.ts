@@ -243,14 +243,16 @@ export function createExcursions(
     await putBack();
   }
 
-  /** The scene from before the excursion, back in the tab in front, which opens on its list. */
+  /**
+   * The scene from before the excursion, back in the tab in front, which opens on its list. Held until
+   * it lands, as Restore holds it, so one a later command overtook can still be restored.
+   */
   async function putBack(): Promise<void> {
-    const before = beforeExcursion!;
+    const current = commands.begin();
+    const failures = await reader.apply(beforeExcursion!, current);
+    if (!current()) return;
     beforeExcursion = null;
     excursionOrigin = null;
-    const current = commands.begin();
-    const failures = await reader.apply(before, current);
-    if (!current()) return;
     if (casesBefore.length) strokeCases.show(casesBefore);
     // Drawn first, so the workspace has drilled into the restored selection before the list replaces it.
     render();

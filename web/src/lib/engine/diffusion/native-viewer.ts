@@ -246,7 +246,13 @@ export function createNativeTractViewer(
     selected = { id: bundle.id, ready: false, whole };
     for (const entry of bundles.values()) refresh(entry);
     invalidate();
-    await Promise.all([loadReference(), ensureBundle(bundle)]);
+    try {
+      await Promise.all([loadReference(), ensureBundle(bundle)]);
+    } catch (error) {
+      // Nothing is isolated after all: the ordinary tracts come back.
+      if (ask === isolateRequest) clearIsolated();
+      throw error;
+    }
     return ask === isolateRequest && !disposed ? bundles.get(bundle.id)! : null;
   }
 

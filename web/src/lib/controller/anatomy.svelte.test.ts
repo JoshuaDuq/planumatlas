@@ -420,6 +420,24 @@ describe('the display toggles', () => {
     expect(engine.userMap.surface).toBe('mid');
   });
 
+  test('a Restore a later command overtook leaves its notice’s Restore working', async () => {
+    const { anatomy, session, reader, scene } = build();
+    anatomy.resetDisplay();
+    const held = reader.capture.mock.results.at(-1)!.value;
+    let settle!: () => void;
+    reader.apply.mockImplementationOnce(
+      () => new Promise((resolve) => (settle = () => resolve([]))),
+    );
+    const overtaken = anatomy.restoreBeforeReveal();
+    scene.begin();
+    settle();
+    await overtaken;
+    expect(session.state.notice).toMatchObject({ action: 'restore' });
+    await anatomy.restoreBeforeReveal();
+    expect(reader.apply.mock.calls.map(([target]) => target)).toEqual([held, held]);
+    expect(session.state.notice).toMatchObject({ text: 'Previous view restored.' });
+  });
+
   test('Reset view moves the camera only: the selection, the hemisphere and the hidden parts stay', () => {
     const { anatomy, session } = build();
     session.setView('left');

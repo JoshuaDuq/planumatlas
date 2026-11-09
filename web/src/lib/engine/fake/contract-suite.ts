@@ -1212,6 +1212,18 @@ export function defineEngineContract(
         );
       });
 
+      it('stays loading while the MRI colour downloads, even when the cut is redrawn meanwhile', async () => {
+        const { engine } = await fresh();
+        const { sections } = engine;
+        await sections.setMode('coronal');
+        assert.equal(sections.state.status, 'ready');
+        const colour = sections.setSurfaceColor('mri');
+        sections.setOffset(10);
+        assert.equal(sections.state.status, 'loading');
+        await colour;
+        assert.equal(sections.state.status, 'ready');
+      });
+
       it('shows a published structure’s agreement on the linked MRI, and refuses any other code', async () => {
         const { engine } = await fresh();
         const { sections, model } = engine;

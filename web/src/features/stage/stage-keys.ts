@@ -2,6 +2,7 @@
 import { cabNpName, networkCss, networkName } from '../../lib/core/catalog/networks.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
+import { modelUsable } from '../../lib/core/state/session.ts';
 import type {
   ArterialTerritory,
   Language,
@@ -89,7 +90,7 @@ export const swatchColor = (color: Rgb | string) =>
  */
 export function keyPlates(sources: KeySources): KeyPlate[] {
   const { lang, surfaceColor, legend } = sources;
-  const ready = sources.status === 'ready' || sources.status === 'switching';
+  const ready = modelUsable(sources.status);
   const plates: KeyPlate[] = [];
   if (ready && sources.map) {
     plates.push({

@@ -565,9 +565,12 @@ describe('failure', () => {
   test('a lost WebGL context is shown, and Retry rebuilds the engine on a fresh canvas', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const { base, canvases } = await opened();
+    expect(statusNode().textContent).toBe('Reference MRI ready.');
     loseContext(canvas());
     await expect.poll(alertText).toBe('The reference data could not be displayed.');
     expect((planeSelect().element() as HTMLSelectElement).disabled).toBe(true);
+    // The scan on screen is gone: "ready" is no longer said beside the alert.
+    expect(statusNode().textContent).toBe('');
     await page.getByRole('button', { name: 'Reload MRI' }).click();
     await expect.element(planeSelect()).toBeEnabled();
     expect(base.tracts.navigators.map((navigator) => navigator.disposed)).toEqual([true, false]);

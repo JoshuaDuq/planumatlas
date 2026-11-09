@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, expect, it, vi } from 'vitest';
+import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
 import { createLinkWriter } from '../core/state/link-writer.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
 import { decodeState, encodeState } from '../core/state/url-state.ts';
@@ -243,6 +244,20 @@ describe('a link edited in place', () => {
     page.location.hash = '#lang=fr';
     await links.onHashChange();
     expect(followed).toEqual(['fr']);
+  });
+
+  it('ends its notice hold when the edited link fails to apply, so later notices are still said', async () => {
+    const { links, page, session } = setup({}, undefined, {
+      hooks: {
+        forgetScenes: () => {
+          throw new Error('boom');
+        },
+      },
+    });
+    page.location.hash = '#hemi=left';
+    await expect(links.onHashChange()).rejects.toThrow('boom');
+    session.notify({ text: 'Later.' });
+    expect(session.state.notice?.text).toBe('Later.');
   });
 
   it('reloads for a link without a brain when the page is on another than the default', async () => {
@@ -1026,5 +1041,26 @@ describe('a link written on a whole route', () => {
       engine.model.manifest.appearance.see_through_opacity,
     );
     expect(encodeState(links.linkState())).toBe(written);
+  });
+
+  it('opening another lesson on its picked landmark drops the display the open lesson set', async () => {
+    const { links, excursions, circuits } = routeScene();
+    const [first, second] = circuits.all;
+    excursions.chooseExplorer('circuits');
+    await excursions.openCircuit(second!.id);
+    await excursions.openLessonStep(0);
+    const written = encodeState(links.linkState());
+    expect(decodeState(written).state).toMatchObject({
+      circuit: second!.id,
+      selectedRegion: second!.steps[0]!.region,
+    });
+    await excursions.leaveLesson();
+    await excursions.openCircuit(first!.id);
+    await excursions.openLessonStep(0);
+    expect(excursions.displayBaseline).not.toEqual(DEFAULT_DISPLAY);
+
+    expect(await links.restore(decodeState(written), {})).toEqual([]);
+    // The link's scene stands as a fresh load of it does, counted from the defaults.
+    expect(excursions.displayBaseline).toEqual(DEFAULT_DISPLAY);
   });
 });

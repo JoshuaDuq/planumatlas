@@ -58,6 +58,23 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
   let overlayVisible = false;
   // The lesion's streamlines or a landmark's bundle, drawn alone whether or not the overlay is.
   let isolated: 'lesion' | 'landmark' | null = null;
+  let isolation = 0;
+
+  /** Draw `show`'s bundle alone; if its download fails while it is still the latest, nothing is. */
+  async function isolate(kind: 'lesion' | 'landmark', show: () => Promise<void>): Promise<void> {
+    const ask = ++isolation;
+    isolated = kind;
+    showGroup();
+    try {
+      await show();
+    } catch (error) {
+      if (ask === isolation) {
+        isolated = null;
+        showGroup();
+      }
+      throw error;
+    }
+  }
 
   function showGroup(): void {
     engine.group.visible = matchingAnatomy ? overlayVisible || isolated !== null : active;
@@ -139,12 +156,12 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
           bundles: catalog.bundles,
           crossing,
           async showCrossing(id, sphere) {
-            isolated = 'lesion';
-            showGroup();
-            await engine.showLesionTract(bundleOf(id), sphere);
+            const bundle = bundleOf(id);
+            await isolate('lesion', () => engine.showLesionTract(bundle, sphere));
           },
           clearCrossing() {
             if (isolated !== 'lesion') return;
+            isolation++;
             isolated = null;
             engine.clearLesionTract();
             showGroup();
@@ -169,13 +186,12 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
     async showLandmarkTract(id) {
       if (!matchingAnatomy) throw new Error('A landmark draws only its own anatomy’s tracts.');
       const bundle = bundleOf(id);
-      isolated = 'landmark';
-      showGroup();
-      await engine.showLandmarkTract(bundle);
+      await isolate('landmark', () => engine.showLandmarkTract(bundle));
       emit('tractsVisibility', undefined);
     },
     clearLandmarkTract() {
       if (isolated !== 'landmark') return;
+      isolation++;
       isolated = null;
       engine.clearLandmarkTract();
       showGroup();

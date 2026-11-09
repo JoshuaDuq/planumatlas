@@ -502,7 +502,13 @@ export function createLinks({
       session.setLang(decoded.state.lang);
       followLanguage(decoded.state.lang);
     }
-    report(await restore(decoded, {}));
+    // A restore that throws still ends its hold, or every later notice would wait unseen.
+    let notApplied: string[] | null = null;
+    try {
+      notApplied = await restore(decoded, {});
+    } finally {
+      report(notApplied);
+    }
   }
 
   return {

@@ -58,11 +58,17 @@
     }
     error = null;
     busy = true;
+    // The first placement downloads the field, and the reader may edit meanwhile: an answer only
+    // speaks for the entry still shown.
+    const asked = { text, space };
+    const answer = (next: typeof error) => {
+      if (text === asked.text && space === asked.space) error = next;
+    };
     try {
-      if (!(await placement.place(entered, space))) error = 'outside';
+      if (!(await placement.place(entered, space))) answer('outside');
     } catch (cause) {
       console.error(cause);
-      error = 'failed';
+      answer('failed');
     } finally {
       busy = false;
     }
