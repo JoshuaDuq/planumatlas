@@ -46,7 +46,7 @@ const FIGURES = [
   {
     name: 'overview', aspect: 1.36, grid: [[0, 0, 2, 2], [2, 0, 1, 1], [2, 1, 1, 1]],
     panels: [
-      cut(nextbrain, 'coronal', '-20', 'anterior'),
+      { state: { ...nextbrain, view: 'anterior', explode: '1' } },
       tracts('left', 'af-left,cst-left'),
       surface({ atlas: 'hcp-mmp', cuts: 'hcp-mmp', tab: 'functions', function: 'language' }),
     ],

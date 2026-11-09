@@ -64,10 +64,10 @@ Each page below documents one feature in a fixed order: data, method, display, v
 Sources, citations and data licences are listed in [References](reference/references.md).
 
 ```{figure} ../.github/assets/readme/overview-light.webp
-:alt: Three panels. a, a coronal section seen from the front, with the cortical ribbon in Destrieux colours and the deep structures and cut faces in NextBrain colours. b, the left arcuate fasciculus and corticospinal tract inside a translucent cortex, coloured by direction. c, the left hemisphere with language areas painted in three blues.
+:alt: Three panels. a, the brain seen from the front in an exploded view: the two hemispheres in Destrieux colours pulled apart sideways, with the deep structures in NextBrain colours spread between them and the brainstem below. b, the left arcuate fasciculus and corticospinal tract inside a translucent cortex, coloured by direction. c, the left hemisphere with language areas painted in three blues.
 :name: fig-index-1
 
-**One subject's anatomy, with every layer registered onto it.** **a**, Coronal section at y = −20 mm (surface RAS), seen from the front: Destrieux cortex, NextBrain deep structures and cut faces. **b**, Left arcuate fasciculus and corticospinal tract from the subject's own diffusion scan, coloured by local direction inside a see-through cortex. **c**, Neurosynth language map on HCP-MMP areas (z ≥ 3).
+**One subject's anatomy, with every layer registered onto it.** **a**, Exploded view, seen from the front: Destrieux hemispheres and NextBrain deep structures spread by system, each moved whole and never reshaped ([dissection and display](features/dissection-and-display.md#exploded-view)). NextBrain gives the cerebellar nuclei a surface but not the cerebellar cortex. **b**, Left arcuate fasciculus and corticospinal tract from the subject's own diffusion scan, coloured by local direction inside a see-through cortex. **c**, Neurosynth language map on HCP-MMP areas (z ≥ 3).
 ```
 
 ## Common basis
