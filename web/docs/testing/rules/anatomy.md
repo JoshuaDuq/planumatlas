@@ -1,16 +1,16 @@
 # Anatomy explorer rules
 
-Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the anatomy search and the explorer container with its browse scope) and A3 (#53, the internal-system picker and the dissection bar). The generic treegrid, combobox, radio group and disclosure widgets are in `ui-kit.md`; this catalogue says what the anatomy explorer must show and do with them. The pure helpers behind the rows (`lib/core/panels/navigator.ts`: reasons, group names, eye states, match marking) are C5's and are in `core-panels.md`; the rules here cite them where the reader sees their result. Legacy sources: `viewer/ui/panels/navigator.js`, `viewer/ui/panels/visibility-control.js`, `viewer/ui/panels/dissection.js`, `viewer/ui/panels/internal-anatomy.js`, `viewer/styles/navigator.css`. New code: `web/src/features/anatomy/`. Decision record `0002-anatomy-treegrid.md`; decisions 7, 8, 32, 34 and 36 on #4. Deviations: `a1-drop-title.md`, `a1-eye-announcement.md`, `a1-eye-focus-visible.md`, `a1-partial-state-name.md`, `a1-primitive-limits.md`, `a1-section-reason-name.md`, `a1-treegrid-structure.md`, `a2-active-option-selected.md`, `a2-arrows-focus-field.md`, `a2-expanded-with-options.md`, `a2-focus-stays-in-field.md`, `a2-match-mark-forced-colours.md`, `a2-option-title.md`, `a2-tree-scope-radio-group.md`, `a3-bar-group.md`, `a3-focus-fallback.md`, `a3-initial-count.md`, `a3-picker-switching.md`, `a3-system-value-sync.md`, and U7's `u7-treegrid.md`, `u7-treegrid-keys.md`. Copy quoted below is the English interface text; French is given where a test pins it. "Fixture" means the catalog in `src/features/anatomy/anatomy-tree-test-support.ts` (groups Frontal, Limbic, Basal ganglia, Cut labels) or `anatomy-explorer-test-support.svelte` (a real catalog over nine regions); "published data" means the default CDMD anatomy the e2e specs load.
+Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys), A2 (#52, the anatomy search and the explorer container with its browse scope) and A3 (#53, the internal-system picker and the dissection bar). The generic treegrid, combobox, radio group and disclosure widgets are in `ui-kit.md`; this catalogue says what the anatomy explorer must show and do with them. The pure helpers behind the rows (`lib/core/panels/navigator.ts`: reasons, group names, eye states, match marking) are C5's and are in `core-panels.md`; the rules here cite them where the reader sees their result. Legacy sources: `viewer/ui/panels/navigator.js`, `viewer/ui/panels/visibility-control.js`, `viewer/ui/panels/dissection.js`, `viewer/ui/panels/internal-anatomy.js`, `viewer/styles/navigator.css`. New code: `web/src/features/anatomy/`. Decision record `0002-anatomy-treegrid.md`; decisions 7, 8, 32, 34 and 36 on #4. Deviations: `a1-drop-title.md`, `a1-eye-announcement.md`, `a1-eye-focus-visible.md`, `a1-partial-state-name.md`, `a1-primitive-limits.md`, `a1-section-reason-name.md`, `a1-treegrid-structure.md`, `a2-active-option-selected.md`, `a2-arrows-focus-field.md`, `a2-expanded-with-options.md`, `a2-focus-stays-in-field.md`, `a2-match-mark-forced-colours.md`, `a2-option-title.md`, `a2-tree-scope-radio-group.md`, `a3-bar-group.md`, `a3-focus-fallback.md`, `a3-initial-count.md`, `a3-picker-switching.md`, `a3-system-value-sync.md`, and U7's `u7-treegrid.md`, `u7-treegrid-keys.md`. Copy quoted below is the English interface text; French is given where a test pins it. "Fixture" means the catalog in `src/features/anatomy/anatomy-tree-test-support.ts` (groups Frontal, Limbic, Basal ganglia, Cut labels) or `anatomy-explorer-test-support.svelte` (a real catalog over nine regions); "published data" means the default CDMD anatomy the e2e specs load.
 
 ## The tree
 
-### ANAT-01 · The anatomy is one named treegrid of section headings, groups and regions
+### ANAT-01 · The anatomy is one named treegrid of section headings, groups and structures
 
-- **Rule:** The list is a single treegrid named "Browse anatomy". Each section (Cortex, Subcortical, Cut labels only) is a level-1 heading row with one cell, no expanded state and no selected state; its groups follow it as level-1 rows, collapsed until opened; an open group's regions are level-2 rows with their place in the group. Groups are not selectable; regions are.
+- **Rule:** The list is a single treegrid named "Browse anatomy". Each section (Cortex, Subcortical, Cut labels only) is a level-1 heading row with one cell, no expanded state and no selected state; its groups follow it as level-1 rows, collapsed until opened; an open group's structures are level-2 rows with their place in the group. Groups are not selectable; structures are.
 - **Kind:** accessibility
 - **Level:** browser — ARIA roles, levels and states on the rendered rows
 - **Source:** `viewer/ui/panels/navigator.js:469-567`; decision record `0002-anatomy-treegrid.md`; deviation `a1-treegrid-structure.md`; decision 8 on #4
-- **Expected:** Fixture, nothing open → row ids `section:cortex`, `cortex:Frontal`, `cortex:Limbic`, `section:structure`, `structure:Basal ganglia`, `section:tissue`, `tissue:Cut labels`, all `aria-level="1"`; groups `aria-expanded="false"`; section rows have neither `aria-expanded` nor `aria-selected`. All open → `d:right:1` has `aria-level="2"`, `aria-posinset="2"`, `aria-setsize="3"`, `aria-selected="false"`. Grid name "Browse anatomy" / "Parcourir l’anatomie".
+- **Expected:** Fixture, nothing open → row ids `section:cortex`, `cortex:Frontal`, `cortex:Limbic`, `section:structure`, `structure:Basal ganglia`, `section:tissue`, `tissue:Cut labels`, all `aria-level="1"`; groups `aria-expanded="false"`; section rows have neither `aria-expanded` nor `aria-selected`. All open → `d:right:2` has `aria-level="2"`, `aria-posinset="2"`, `aria-setsize="2"`; `d:left:1` `aria-selected="false"`. Grid name "Browse anatomy" / "Parcourir l’anatomie".
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-02 · Groups are named as the tree names them and sorted within their family
@@ -40,13 +40,13 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Expected:** Fixture: "Cortex (Hemisphere hidden)" with the caption "Hemisphere hidden" drawn; "Subcortical" (no reason); "Cut labels only (Visible in a section)". Published data after `h` (hide a hemisphere): a "Cortex (Hemisphere hidden…" row.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/core/panels/navigator.test.ts` (R)
 
-### ANAT-05 · A region row says its side and, when it is not drawn, why and what a press does
+### ANAT-05 · A structure row says its sides and, when none is drawn, why and what a press does
 
-- **Rule:** A drawn region is named "Name, side". A region that is not drawn but can be revealed is named "Name, side: reason. Activate to reveal." A region nothing can reveal is named "Name, side, not shown: reason." The row prints a reason only when it is the row's own: a setting's reason is on the section heading and a removed part says it with its struck eye.
+- **Rule:** A structure with a side drawn is named "Name, sides", the sides as a list ("left and right"). A structure none of whose sides is drawn, for one reason, is named "Name, sides: reason. Activate to reveal.", or "Name, sides, not shown: reason." when nothing can reveal it. The row prints a reason only when every side gives the same one of its own: a setting's reason is on the section heading and a removed side says it with its struck key. A key is named "Name, side" while its side is drawn and "Name, side: reason. Activate to reveal." otherwise.
 - **Kind:** behaviour
-- **Level:** unit (view-model: `regionNode` with `reasonText`, `rowStatesReason`)
+- **Level:** browser (view-model: `structureNode` with `reasonText`, `rowStatesReason`; the key's name in `SideKey.svelte`)
 - **Source:** `viewer/ui/panels/navigator.js:131-137`, `326-371`
-- **Expected:** Fixture with `a:left:2` hidden: "Precentral gyrus, left"; "Superior frontal gyrus, right: Hemisphere hidden. Activate to reveal." (nothing printed); "Putamen, left: Hidden. Activate to reveal." (nothing printed); "Globus pallidus, left: In <detail set>. Activate to reveal." (prints "In …"); "Small nucleus, left, not shown: Too small for the cut." (prints "Too small for the cut"). Published data with a hemisphere hidden: "Middle frontal gyrus, right: Hemisphere hidden. Activate to reveal."
+- **Expected:** Fixture with `a:left:2` hidden: "Precentral gyrus, left and right"; "Superior frontal gyrus, right: Right hemisphere hidden. Activate to reveal." (nothing printed); "Putamen, left: Hidden. Activate to reveal." (nothing printed); "Globus pallidus, left: In <detail set>. Activate to reveal." (prints "In …"); "Small nucleus, left, not shown: Too small for the cut." (prints "Too small for the cut"). With `d:right:1` removed: the row stays "Precentral gyrus, left and right" and is not dimmed; its R key is "Precentral gyrus, right: Hidden. Activate to reveal.", with the same tooltip. French: "Precentral gyrus, gauche et droite". Published data with a hemisphere hidden: the R key of "Middle frontal gyrus" reads "Middle frontal gyrus, right: Right hemisphere hidden. Activate to reveal."
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R, could move down); `src/lib/core/panels/navigator.test.ts` (R)
 
 ### ANAT-06 · A hidden row names itself in the one tooltip, never in a native title
@@ -58,23 +58,32 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Expected:** `d:right:2` `.row-main[data-tooltip]` = "Superior frontal gyrus, right: Hemisphere hidden. Activate to reveal."; `d:left:1` has none; `document.querySelector('[title]')` is null.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-07 · A region too small for the cut explains itself and does nothing
+### ANAT-07 · A structure too small for the cut explains itself and does nothing
 
-- **Rule:** A region hidden because it is below the cut's resolution has no eye, is `aria-disabled`, has no selected state, takes no hover wash, shows the default cursor, and ignores Enter, Space, a click and V. Its side letter is drawn without an eye. Group eyes leave it out.
+- **Rule:** A structure whose only region is below the cut's resolution has no key, is `aria-disabled`, has no selected state, takes no hover wash, shows the default cursor, and ignores Enter, Space, a click and V. Its side letter is drawn without a key. Group eyes leave it out.
 - **Kind:** behaviour
 - **Level:** browser — `aria-disabled`, cursor and hover style
 - **Source:** `viewer/ui/panels/navigator.js:110-111`, `328`, `360-363`, `372-378`, `536-537`; `viewer/styles/navigator.css:27,33`; deviation `a1-primitive-limits.md`
 - **Expected:** `t:left:1`: `aria-disabled="true"`, no `aria-selected`, no button, computed cursor `default`, background unchanged on hover; Enter and a click on its name call nothing. `t:left:2` (no cut) has no `aria-disabled`.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-08 · Each eye sits in its own cell, in the column of its side
+### ANAT-08 · Each eye and each key sits in its own cell, in the column of its side
 
-- **Rule:** A row's cells are the name, then Mid, L and R. A region's eye is in the column of its hemisphere; a group has one eye per side that holds revealable regions. A section with a midline part reserves the Mid column down its rows, so L and R stay aligned; other sections do not.
+- **Rule:** A row's cells are the name, then Mid, L and R. A structure has a key in the column of each side it has and nothing in the others; a group has one eye per side that holds revealable regions. A group in a section with a midline part reserves the Mid column, so its L and R stay aligned; other sections do not. L and R are two fixed columns down the tree: a structure with one side leaves the other empty, a midline structure's key ends where R does, and a group's eye letters stand over the centres of the key columns.
 - **Kind:** behaviour
 - **Level:** browser — cell structure and layout
 - **Source:** `viewer/ui/panels/navigator.js:478-480`, `533-545`; deviation `a1-treegrid-structure.md`
-- **Expected:** `d:left:1` eye in cell 2, `d:right:1` in cell 3, `a:mid:1` in cell 1; Frontal's eyes sides `left, right`; Basal ganglia's `midline, left`; the `.slot-mid` of `a:left:1` is `display: block`, of `d:left:1` `display: none`. Published data: "Hide Frontal, left", "Hide Frontal, right", "Hide Cerebellum, midline".
+- **Expected:** `d:left:1`: L key in cell 2, R key in cell 3; `d:right:2`: cell 2 empty, R key in cell 3; `a:mid:1`: Mid key in cell 1; Frontal's eyes sides `left, right`; Basal ganglia's `midline, left`; the `.slot-mid` of a structure group with no midline part is `display: block`, of Frontal `display: none`. The R keys of `d:right:2` and `d:left:1` share a centre, as do the L keys of `d:left:3` and `d:left:1`; Frontal's eye letters are within 0.5 px of the key centres; the Mid key's right edge is R's. Published data: "Hide Frontal, left", "Hide Frontal, right", "Hide Cerebellum, midline".
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
+
+### ANAT-58 · A structure is listed once, with a key for each side it has
+
+- **Rule:** Within a group, regions of one name share a row, placed where the name is first met; the row's keys are in Mid, L, R order and its id is its first side's region. A name that one side repeats keeps one row per region.
+- **Kind:** behaviour
+- **Level:** unit (`structureRows` in `lib/core/panels/navigator.ts`); browser for the rows and keys drawn
+- **Source:** new; deviation `a1-structure-rows.md`
+- **Expected:** Precentral L and R, Third ventricle Mid, Superior frontal R → `[[L, R], [Mid], [R]]`. Area A left, Area B left, Area A right, Area A midline → `[[A left, A right, A midline], [B left]]`. Nucleus left twice and right once → three rows. Fixture, all open: Frontal's rows are `d:left:1` (keys `d:left:1`, `d:right:1`, "L" "R") and `d:right:2` (one key, right); `a:mid:1`'s key reads "Mid".
+- **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-09 · A catalog still loading shows a placeholder, never an empty treegrid
 
@@ -93,34 +102,34 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Kind:** behaviour
 - **Level:** browser — keyboard dispatch and real focus
 - **Source:** `viewer/ui/panels/navigator.js:10-22`, `682-689`; decision record `0002-anatomy-treegrid.md`; deviation `a1-treegrid-structure.md`
-- **Expected:** Fixture: Frontal, Down → Limbic; End → `tissue:Cut labels`; Home → `section:cortex`; Up there stays. Published data, Frontal open: from "Frontomarginal gyrus and sulcus, left", Down → "…, right", Up back; End lands on a level-1 row; Home → the Cortex heading.
+- **Expected:** Fixture: Frontal, Down → Limbic; End → `tissue:Cut labels`; Home → `section:cortex`; Up there stays. Published data, Frontal open: from "Frontomarginal gyrus and sulcus, left and right", Down → "Inferior frontal sulcus, left and right", Up back; End lands on a level-1 row; Home → the Cortex heading.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-11 · Right and Left open, close and move between a row and its eyes
+### ANAT-11 · Right and Left open, close and move between a row and its eyes or keys
 
-- **Rule:** On a row: Right expands a collapsed group and keeps focus on it; on an open group or a region it moves to the row's first eye. Left collapses an open group; on a region it goes to its group. From an eye: Right and Left move between the row's eyes (Right stops at the last); Left from the first eye, and Escape, return to the row; Up and Down go to the same column in the adjacent row, or to the row itself when it has no cell there; Ctrl+Home goes to the first row and Ctrl+End to the last row's nearest eye. `*` expands every group among the focused group's siblings.
+- **Rule:** On a row: Right expands a collapsed group and keeps focus on it; on an open group it moves to the row's first eye, on a structure to its first key. Left collapses an open group; on a structure it goes to its group. From an eye or a key: Right and Left move between the row's cells (Right stops at the last); Left from the first, and Escape, return to the row; Up and Down go to the same column in the adjacent row, else its nearest cell, or to the row itself when it has none; Ctrl+Home goes to the first row and Ctrl+End to the last row's nearest key. `*` expands every group among the focused group's siblings.
 - **Kind:** behaviour
 - **Level:** browser — keyboard dispatch and real focus
 - **Source:** `viewer/ui/panels/navigator.js:10-36`, `659-698`; decision record `0002-anatomy-treegrid.md`; deviation `u7-treegrid-keys.md` (Right on an open group goes to its first cell, legacy went to the first child)
-- **Expected:** Fixture: Frontal, Right → expanded, focus on Frontal; Right → first eye; Escape → Frontal; Down, Left → Frontal; Left → collapsed. Basal ganglia: Right → Mid eye, Right → L eye, Right stays, Left Left → row. `d:left:1` eye, Down → `d:right:1`'s eye; Up back. Frontal L eye, Up → `section:cortex`; `d:left:3` eye, Down → `section:structure`; Cut labels L eye, Down → `t:left:1` row; Ctrl+End → `t:left:2`'s eye; Ctrl+Home → `section:cortex`; `*` on Frontal → 4 groups expanded. Published data: Frontal, Right Right → "Hide Frontal, left", Right → "Hide Frontal, right".
+- **Expected:** Fixture: Frontal, Right → expanded, focus on Frontal; Right → first eye; Escape → Frontal; Down, Left → Frontal; Left → collapsed. Basal ganglia: Right → Mid eye, Right → L eye, Right stays, Left Left → row. `d:left:1`: Right → L key, Right → R key, Right stays; Down → `d:right:2`'s R key; Up back; Left Left → row. Frontal L eye, Up → `section:cortex`; `d:left:3` key, Down → `section:structure`; Cut labels L eye, Down → `t:left:1` row; Ctrl+End → `t:left:2`'s key; Ctrl+Home → `section:cortex`; `*` on Frontal → 4 groups expanded. Published data: Frontal, Right Right → "Hide Frontal, left", Right → "Hide Frontal, right".
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-12 · Enter, Space or a click opens a group or chooses a region
+### ANAT-12 · Enter, Space or a click opens a group or chooses a structure; a key chooses its side
 
-- **Rule:** On a group, Enter, Space or a click anywhere on the row opens or closes it. On a drawn region they select it; on a hidden region that can be revealed they reveal it with its reason (undo what hides it, then select); on an unrevealable region nothing happens. A click on an eye does only what the eye does. Selection follows activation, never focus.
+- **Rule:** On a group, Enter, Space or a click anywhere on the row opens or closes it. On a structure they choose one of its sides: the side the selection is already on, else left, right, then midline, taking a drawn side before a hidden one; a drawn side is selected, a hidden one revealed with its reason (undo what hides it, then select); a structure nothing can reveal does nothing. A key chooses its own side the same way, and the chosen side's key is pressed (`aria-pressed`) on the selected row. A click on an eye does only what the eye does. Selection follows activation, never focus.
 - **Kind:** behaviour
 - **Level:** browser — keyboard and pointer dispatch
 - **Source:** `viewer/ui/panels/navigator.js:252-263`, `386`, `547`; decision record `0002-anatomy-treegrid.md`
-- **Expected:** Fixture with `a:left:2` hidden: Enter on `d:left:1`, Space on `d:right:2`, Enter on `a:left:2`, Enter on `t:left:1` → calls `select d:left:1`, `reveal hemisphere d:right:2`, `reveal removed a:left:2` (nothing for `t:left:1`); `d:left:1` then `aria-selected="true"`. A click on a row's empty area → `select d:left:1`; on Limbic → toggles it; on a section heading → nothing; on `d:left:1`'s eye → `hide d:left:1` and no selection. Published data: Enter on "Middle frontal gyrus, left" writes `region=` to the link.
+- **Expected:** Fixture with `a:left:2` hidden: Enter on `d:left:1`, Space on `d:right:2`, Enter on `a:left:2`, Enter on `t:left:1` → calls `select d:left:1`, `reveal hemisphere d:right:2`, `reveal removed a:left:2` (nothing for `t:left:1`); `d:left:1` then `aria-selected="true"`. A click on a row's empty area → `select d:left:1`; on Limbic → toggles it; on a section heading → nothing; on `d:left:1`'s R key → `select d:right:1`, the row selected, R pressed and L not. With `d:right:1` selected: a press on a two-sided row → its right; on Cingulate gyrus (left only) → `select d:left:3`. With `d:right:1` removed: its key → `reveal removed d:right:1`. Selected `d:right:1` on mount → row `d:left:1` selected, keys pressed `false, true`. Published data: Enter on "Middle frontal gyrus, left and right" writes `region=destrieux:left:` to the link.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-13 · V hides or shows from the row
+### ANAT-13 · V hides or shows a side from the row or its key
 
-- **Rule:** V (either case) on a region with an eye presses that eye and leaves focus on the row. On a group with one eye it presses it; on a group with one eye per side it moves focus to the first eye and presses nothing. On a focused eye it presses that eye. On a row with no eye it does nothing.
+- **Rule:** V (either case) on a structure with one side hides or shows that side and leaves focus on the row; on a structure with a key per side it moves focus to the first key and hides nothing; on a focused key it hides or shows that key's side and focus stays on the key. On a group with one eye it presses it; on a group with one eye per side it moves focus to the first eye and presses nothing; on a focused eye it presses that eye. On a row with neither it does nothing.
 - **Kind:** behaviour
 - **Level:** browser — keyboard dispatch and real focus
 - **Source:** `viewer/ui/panels/navigator.js:17`, `694-695`; decision record `0002-anatomy-treegrid.md`
-- **Expected:** Fixture: `d:left:1`, `v` → `hide d:left:1`, focus on the row; `V` → `show d:left:1`. Frontal, `v` → no call, focus on its first eye. Limbic, `v` → `hide d:left:3`. Frontal's R eye focused, `v` → `hide d:right:1,d:right:2`, focus stays on it. `t:left:1` and `section:cortex` → no call. Published data: "Middle frontal gyrus, left", `v` → its eye reads "Show Middle frontal gyrus, left".
+- **Expected:** Fixture: `d:left:3`, `v` → `hide d:left:3`, focus on the row; `V` → `show d:left:3`. `d:left:1`, `v` → no call, focus on its L key; Right, `v` → `hide d:right:1`, focus on the R key; `v` → `show d:right:1`. Frontal, `v` → no call, focus on its first eye. Limbic, `v` → `hide d:left:3`. Frontal's R eye focused, `v` → `hide d:right:1,d:right:2`, focus stays on it. `t:left:1` and `section:cortex` → no call. Published data: the L key of "Middle frontal gyrus" focused, `v` → "Hidden: Middle frontal gyrus, left. 1 part hidden".
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-14 · The page's own shortcut letters pass through a tree row
@@ -172,11 +181,11 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 
 ### ANAT-19 · An eye is named by the action it will take
 
-- **Rule:** A region's or a group side's eye is named "Hide {name}, {side}" while anything under it is drawn and "Show {name}, {side}" when all of it is hidden. The side is a word in the name and a letter on screen (L, R, Mid; French G, D, Méd); the letter is hidden from assistive technology. There is no pressed state.
+- **Rule:** A group side's eye is named "Hide {name}, {side}" while anything under it is drawn and "Show {name}, {side}" when all of it is hidden. The side is a word in the name and a letter on screen (L, R, Mid; French G, D, Méd); the letter is hidden from assistive technology, on an eye and on a key alike. An eye has no pressed state.
 - **Kind:** accessibility
 - **Level:** unit (view-model: the label from `hidePart`/`showPart` and `visibilityStateOf`)
 - **Source:** `viewer/ui/panels/visibility-control.js:125-184`
-- **Expected:** "Hide Precentral gyrus, left" → after a press "Show Precentral gyrus, left"; French "Masquer Precentral gyrus, droite" with letter "D"; letter "L" `aria-hidden="true"`; no `aria-pressed`; the hidden state draws the slash path `m3 3 18 18`. Published data: "Hide Frontal, left", "Masquer Frontal, gauche", "Masquer Frontal, droite".
+- **Expected:** "Hide Limbic, left" → after a press "Show Limbic, left"; French "Masquer Frontal, droite" with letter "D", and keys "G", "D"; letter "L" `aria-hidden="true"` on the eye and on the key; no `aria-pressed` on the eye; the hidden state draws the slash path `m3 3 18 18`. Published data: "Hide Frontal, left", "Masquer Frontal, gauche", "Masquer Frontal, droite".
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R, could move down)
 
 ### ANAT-20 · Pressing an eye changes it in place and keeps focus on it
@@ -185,7 +194,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Kind:** behaviour
 - **Level:** browser — real focus on a patched element
 - **Source:** `viewer/ui/panels/navigator.js:569-598`; `viewer/ui/panels/visibility-control.js:171-184`
-- **Expected:** `d:left:1`'s eye focused, Enter → `hide d:left:1`; the eye element is the same node, still focused, `data-state="hidden"`; Space → `show d:left:1`.
+- **Expected:** Limbic's eye focused, Enter → `hide d:left:3`; the eye element is the same node, still focused, `data-state="hidden"`; Space → `show d:left:3`.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-21 · A group side with some regions hidden reads as partly hidden
@@ -194,16 +203,16 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Kind:** accessibility
 - **Level:** unit (view-model: `visibilityStateOf` and the label)
 - **Source:** `viewer/ui/panels/visibility-control.js:118-123`, `177-181`; deviation `a1-partial-state-name.md`
-- **Expected:** Hide `d:right:1` → Frontal's R eye: `data-partial="true"`, `data-state="shown"`, name "Hide Frontal, right, partially hidden", tooltip "Hide Frontal, right · partially hidden". Press it → "Show Frontal, right", `data-partial="false"`, and `d:right:2`'s eye hidden. Published data: hide "Middle frontal gyrus, left" → "Hide Frontal, left, partially hidden" on next (legacy keeps "Hide Frontal, left"); show it again → not partial.
+- **Expected:** Hide `d:right:1` (V on its key) → Frontal's R eye: `data-partial="true"`, `data-state="shown"`, name "Hide Frontal, right, partially hidden", tooltip "Hide Frontal, right · partially hidden". Press it → "Show Frontal, right", `data-partial="false"`, and the call `hide d:right:1,d:right:2`. Published data: hide "Middle frontal gyrus, left" → "Hide Frontal, left, partially hidden" on next (legacy keeps "Hide Frontal, left"); show it again → not partial.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/core/panels/navigator.test.ts` (R)
 
-### ANAT-22 · An eye press names the part for the one announcement
+### ANAT-22 · A side hidden from the tree names the part for the one announcement
 
-- **Rule:** An eye press hands the announcer the part sentence, which the announcer says ahead of the hidden count in one message. The tree writes nothing to the live region itself.
+- **Rule:** An eye press, and V on a key, hand the announcer the part sentence, which the announcer says ahead of the hidden count in one message. The tree writes nothing to the live region itself.
 - **Kind:** accessibility
 - **Level:** unit (view-model: the sentence) — the joined message is S1's (`controller.md`)
 - **Source:** `viewer/app.js:1670-1676`; deviation `a1-eye-announcement.md`; decisions 32 and 36 on #4
-- **Expected:** Hide then show `d:left:1` → `said` = ["Hidden: Precentral gyrus, left.", "Shown: Precentral gyrus, left."]; French ["Masqué : Precentral gyrus, gauche.", "Affiché : Precentral gyrus, gauche."]; `#announcer` stays "". Whole app, published data: hiding "Middle frontal gyrus, left" announces "Hidden: Middle frontal gyrus, left. 1 part hidden" (legacy: "1 part hidden").
+- **Expected:** V twice on `d:left:1`'s L key → `said` = ["Hidden: Precentral gyrus, left.", "Shown: Precentral gyrus, left."]; French ["Masqué : Precentral gyrus, gauche.", "Affiché : Precentral gyrus, gauche."]; `#announcer` stays "". Whole app, published data: hiding "Middle frontal gyrus, left" announces "Hidden: Middle frontal gyrus, left. 1 part hidden" (legacy: "1 part hidden").
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/controller/speech.test.ts` (R, the join); `src/app/boot.svelte.test.ts` (R, the join)
 
 ### ANAT-23 · Expand all opens every group, then becomes Collapse all
@@ -217,9 +226,9 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 
 ## Tree presentation
 
-### ANAT-24 · An open group stays in view over its regions, without covering a focused one
+### ANAT-24 · An open group stays in view over its structures, without covering a focused one
 
-- **Rule:** An open group row sticks to the top of the list while its own regions scroll under it and leaves with them; its regions keep a scroll margin so the sticky row never covers the one scrolled to.
+- **Rule:** An open group row sticks to the top of the list while its own structures scroll under it and leaves with them; its structures keep a scroll margin so the sticky row never covers the one scrolled to.
 - **Kind:** accessibility
 - **Level:** browser — CSS position and scroll margin
 - **Source:** `viewer/styles/navigator.css:120-135`; deviation `a1-primitive-limits.md`
@@ -235,22 +244,22 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes), A2 (#52, the 
 - **Expected:** `section:cortex` `border-top-width` `0px`; `section:structure` and `section:tissue` `1px`; hovered `section:cortex` background `rgba(0, 0, 0, 0)`.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
-### ANAT-26 · Eyes and counts stay visible where state must not hide
+### ANAT-26 · Eyes, keys and counts stay visible where state must not hide
 
-- **Rule:** On a fine pointer an eye is revealed while its row is hovered or holds focus by any means (`:focus-within`), is selected, or is hidden. Under forced colours and increased contrast every eye and every group count is drawn; in forced colours the chosen row keeps a 1 px solid system-colour outline. A hidden row's side letter is dimmed. Under reduced motion the chevron turns at once.
+- **Rule:** On a fine pointer a group's eye is revealed while its row is hovered or holds focus by any means (`:focus-within`), or a part under it is hidden; a structure's keys are always drawn. A hidden side's key is dimmed and struck on no ground; the chosen side's key takes the base ground, a teal edge and a 600 letter, and the other side's key a ground a step darker than the row's wash. Under forced colours and increased contrast every eye and every group count is drawn; in forced colours the chosen row keeps a 1 px solid system-colour outline and each key an edge, the chosen side's a different one. Under reduced motion the chevron turns at once.
 - **Kind:** accessibility
 - **Level:** browser — media emulation and computed style
 - **Source:** `viewer/styles/navigator.css:205-220`; `viewer/styles/a11y.css:80`; deviation `a1-eye-focus-visible.md`
-- **Expected:** `forced-colors: active`: selected row outline `solid` `1px`; Frontal's and `d:right:1`'s eyes and their SVGs opacity `1`; Frontal's `.group-count` visibility `visible`. `prefers-contrast: more`: same for eyes and count. `prefers-reduced-motion: reduce`: chevron `transition-duration` `0s`. `d:right:2`'s side letter colour ≠ `d:left:1`'s.
-- **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R; the dimmed letter only checks "different", W-ish). The mouse-pressed eye staying visible on a fine pointer is uncovered.
+- **Expected:** `forced-colors: active`: selected row outline `solid` `1px`; Frontal's eyes and their SVGs opacity `1`; Frontal's `.group-count` visibility `visible`; `d:left:1`'s keys have an edge, the chosen one's a different colour. `prefers-contrast: more`: same for eyes and count. `prefers-reduced-motion: reduce`: chevron `transition-duration` `0s`. `d:right:2`'s key: colour ≠ a shown key's, `line-through`, transparent ground. Selected `d:left:1`: L key weight 600 and R 400, different edges, neither ground the row's wash.
+- **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R). The mouse-pressed eye staying visible on a fine pointer is uncovered.
 
-### ANAT-27 · Eyes and rows are big enough to hit
+### ANAT-27 · Eyes, keys and rows are big enough to hit
 
-- **Rule:** On a fine pointer each eye is at least 24 px square and a row at least 32 px tall; on a coarse pointer each eye is at least 44 px square and a row at least 44 px; a landscape phone keeps eyes at 24 px or more with no sideways scroll.
+- **Rule:** On a fine pointer each eye and key is at least 24 px square and a row at least 32 px tall; on a coarse pointer each eye and key is at least 44 px square (a key draws a 28 px face inside it) and a row at least 44 px; a landscape phone keeps keys at 24 px or more with no sideways scroll.
 - **Kind:** accessibility
 - **Level:** browser — geometry
 - **Source:** WCAG 2.2 SC 2.5.8; #4 definition of done (44 px on coarse pointers)
-- **Expected:** Eyes of `d:left:1`, `a:mid:1` and Frontal: ≥ 24 × 24 fine, ≥ 44 × 44 coarse; `d:left:1` row ≥ 32 fine, ≥ 44 coarse; at 812 × 375 eyes ≥ 24 and `scrollWidth ≤ innerWidth`. Published data: "Hide Frontal, left/right", "Hide Middle frontal gyrus, left", "Hide Cerebellum, midline" ≥ 24 (and ≥ 44 with touch).
+- **Expected:** Keys of `d:left:1` and `a:mid:1` and Frontal's eyes (five targets): ≥ 24 × 24 fine, ≥ 44 × 44 coarse; `d:left:1` row ≥ 32 fine, ≥ 44 coarse; at 812 × 375 the two keys ≥ 24 and `scrollWidth ≤ innerWidth`. Published data: "Hide Frontal, left/right", "Middle frontal gyrus, left", "Hide Cerebellum, midline" ≥ 24 (and ≥ 44 with touch).
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-28 · The tree reflows at 320 px, with text spacing and at 200 % text

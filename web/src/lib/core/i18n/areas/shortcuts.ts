@@ -17,10 +17,13 @@ export const en = {
           'In a detail view: back to the list. Elsewhere: clear the search, then the selection, then the function or deficit',
         ],
         ['↑ ↓', 'Move through results or the tree'],
-        ['→ ←', 'In the tree: open or close a group, or reach a region’s eye control'],
+        [
+          '→ ←',
+          'In the tree: open or close a group, or reach a group’s eyes or a structure’s side keys',
+        ],
         ['Home End', 'First or last row of the tree'],
         ['Enter', 'Select the focused region'],
-        ['V', 'Hide or show the focused tree row'],
+        ['V', 'Hide or show the focused side of a tree row'],
       ],
     ],
     [
@@ -73,10 +76,13 @@ export const fr: typeof en = {
           'Dans une vue détaillée : revenir à la liste. Ailleurs : effacer la recherche, puis la sélection, puis la fonction ou le déficit',
         ],
         ['↑ ↓', 'Parcourir les résultats ou l’arborescence'],
-        ['→ ←', 'Dans l’arbre : ouvrir ou fermer un groupe, ou atteindre l’œil d’une région'],
+        [
+          '→ ←',
+          'Dans l’arbre : ouvrir ou fermer un groupe, ou atteindre les yeux d’un groupe ou les touches de côté d’une structure',
+        ],
         ['Début Fin', 'Première ou dernière ligne de l’arbre'],
         ['Entrée', 'Sélectionner la région ciblée'],
-        ['V', 'Masquer ou afficher la ligne ciblée de l’arbre'],
+        ['V', 'Masquer ou afficher le côté ciblé d’une ligne de l’arbre'],
       ],
     ],
     [

@@ -26,6 +26,10 @@ const row = (id: string) => rows().find((r) => r.dataset.id === id)!;
 const eyes = (id: string) => [
   ...row(id).querySelectorAll<HTMLButtonElement>('.visibility-control'),
 ];
+/** A structure row's side keys, in Mid, L, R order. */
+const keys = (id: string) => [...row(id).querySelectorAll<HTMLButtonElement>('.side-key')];
+const key = (id: string, side: 'midline' | 'left' | 'right') =>
+  keys(id).find((entry) => entry.dataset.side === side)!;
 const active = () => document.activeElement as HTMLElement;
 const focus = (id: string) => {
   row(id).focus();
@@ -79,10 +83,39 @@ describe('structure', () => {
     );
   });
 
-  test('regions: names say the side and, when hidden, why; only an own reason is printed', () => {
+  test('a structure is one row for its sides, with a key for each', () => {
+    mount({ open: ALL });
+    expect(ids()).toEqual([
+      'section:cortex',
+      'cortex:Frontal',
+      'd:left:1',
+      'd:right:2',
+      'cortex:Limbic',
+      'd:left:3',
+      'section:structure',
+      'structure:Basal ganglia',
+      'a:mid:1',
+      'a:left:1',
+      'a:left:2',
+      'a:left:3',
+      'section:tissue',
+      'tissue:Cut labels',
+      't:left:1',
+      't:left:2',
+    ]);
+    expect(keys('d:left:1').map((entry) => entry.dataset.region)).toEqual([
+      'd:left:1',
+      'd:right:1',
+    ]);
+    expect(keys('d:left:1').map((entry) => entry.textContent!.trim())).toEqual(['L', 'R']);
+    expect(keys('d:right:2').map((entry) => entry.dataset.side)).toEqual(['right']);
+    expect(keys('a:mid:1').map((entry) => entry.textContent!.trim())).toEqual(['Mid']);
+  });
+
+  test('structures: names say the sides and, when none is drawn, why; only an own reason is printed', () => {
     mount({ open: ALL, hide: ['a:left:2'] });
     const name = (id: string) => row(id).getAttribute('aria-label');
-    expect(name('d:left:1')).toBe('Precentral gyrus, left');
+    expect(name('d:left:1')).toBe('Precentral gyrus, left and right');
     expect(name('d:right:2')).toBe(
       'Superior frontal gyrus, right: Right hemisphere hidden. Activate to reveal.',
     );
@@ -97,32 +130,87 @@ describe('structure', () => {
     for (const r of rows()) expect(r.hasAttribute('title')).toBe(false);
   });
 
-  test('a region under a group is level 2 with its place in the group; an unavailable one is not selectable', () => {
+  test('a key names its region and side; a side that is not drawn says why, struck, and a press reveals it', async () => {
+    const [frontal, ...others] = GROUPS;
+    const hiddenRight = frontal.rows.map((entry) =>
+      entry.region.id === 'd:right:1'
+        ? ({ ...entry, visible: false, reason: 'removed' } as typeof entry)
+        : entry,
+    );
+    const calls = mount({ open: ALL, groups: [{ ...frontal, rows: hiddenRight }, ...others] });
+    const left = key('d:left:1', 'left');
+    const right = key('d:left:1', 'right');
+    expect(left.getAttribute('aria-label')).toBe('Precentral gyrus, left');
+    expect(left.dataset.tooltip).toBeUndefined();
+    expect(left.dataset.state).toBe('shown');
+    expect(right.getAttribute('aria-label')).toBe(
+      'Precentral gyrus, right: Hidden. Activate to reveal.',
+    );
+    expect(right.dataset.tooltip).toBe(right.getAttribute('aria-label'));
+    expect(right.dataset.state).toBe('hidden');
+    expect(getComputedStyle(right).textDecorationLine).toBe('line-through');
+    expect(getComputedStyle(left).textDecorationLine).toBe('none');
+    // One side is drawn, so the row is not a hidden row: its name and its ink say so.
+    expect(row('d:left:1').getAttribute('aria-label')).toBe('Precentral gyrus, left and right');
+    expect(row('d:left:1').querySelector('.row-main')!.hasAttribute('data-hidden')).toBe(false);
+    await userEvent.click(right);
+    await userEvent.click(left);
+    expect(calls).toEqual(['reveal removed d:right:1', 'select d:left:1']);
+  });
+
+  test('a structure under a group is level 2 with its place in the group; an unavailable one is not selectable', () => {
     mount({ open: ALL });
-    expect(row('d:right:1').getAttribute('aria-level')).toBe('2');
-    expect(row('d:right:1').getAttribute('aria-posinset')).toBe('2');
-    expect(row('d:right:1').getAttribute('aria-setsize')).toBe('3');
+    expect(row('d:right:2').getAttribute('aria-level')).toBe('2');
+    expect(row('d:right:2').getAttribute('aria-posinset')).toBe('2');
+    expect(row('d:right:2').getAttribute('aria-setsize')).toBe('2');
     expect(row('d:left:1').getAttribute('aria-selected')).toBe('false');
     expect(row('t:left:1').hasAttribute('aria-selected')).toBe(false);
     expect(row('t:left:1').querySelectorAll('button')).toHaveLength(0);
   });
 
-  test('each eye stands in its own cell, in the column of its side', () => {
-    mount({ open: ALL });
+  test('each eye and each key stands in its own cell, in the column of its side', () => {
+    const thalamus = {
+      ...GROUPS[2],
+      name: 'Thalamus',
+      key: 'structure:Thalamus',
+      rows: [GROUPS[2].rows[1]],
+    };
+    mount({ open: ALL, groups: [...GROUPS, thalamus] });
     const cell = (id: string, column: number) =>
       row(id).querySelectorAll<HTMLElement>('[role="gridcell"]')[column];
-    expect(cell('d:left:1', 2).querySelector('.visibility-control')).not.toBeNull();
-    expect(cell('d:right:1', 3).querySelector('.visibility-control')).not.toBeNull();
-    expect(cell('a:mid:1', 1).querySelector('.visibility-control')).not.toBeNull();
+    expect(cell('d:left:1', 2).querySelector('.side-key')).toBe(key('d:left:1', 'left'));
+    expect(cell('d:left:1', 3).querySelector('.side-key')).toBe(key('d:left:1', 'right'));
+    expect(cell('d:right:2', 2).childElementCount).toBe(0);
+    expect(cell('d:right:2', 3).querySelector('.side-key')).toBe(key('d:right:2', 'right'));
+    expect(cell('a:mid:1', 1).querySelector('.side-key')).toBe(key('a:mid:1', 'midline'));
     expect(
       eyes('cortex:Frontal').map(
         (eye) => eye.closest('[role="gridcell"]')!.parentElement === row('cortex:Frontal'),
       ),
     ).toEqual([true, true]);
-    // The Mid slot is held open only where a section has a midline part.
+    // A group holds the Mid slot open only where its section has a midline part.
     const slot = (id: string) => cell(id, 1).querySelector<HTMLElement>('.slot-mid');
-    expect(getComputedStyle(slot('a:left:1')!).display).toBe('block');
-    expect(getComputedStyle(slot('d:left:1')!).display).toBe('none');
+    expect(getComputedStyle(slot('structure:Thalamus')!).display).toBe('block');
+    expect(getComputedStyle(slot('cortex:Frontal')!).display).toBe('none');
+  });
+
+  test('L and R keep their columns down the tree, under the letters of the group’s eyes', () => {
+    mount({ open: ALL });
+    const middle = (element: Element) => {
+      const box = element.getBoundingClientRect();
+      return box.left + box.width / 2;
+    };
+    // A structure with one side leaves the other column empty rather than moving into it.
+    expect(middle(key('d:right:2', 'right'))).toBe(middle(key('d:left:1', 'right')));
+    expect(middle(key('d:left:3', 'left'))).toBe(middle(key('d:left:1', 'left')));
+    const letter = (side: number) =>
+      eyes('cortex:Frontal')[side].querySelector('.visibility-side')!;
+    expect(Math.abs(middle(letter(0)) - middle(key('d:left:1', 'left')))).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(middle(letter(1)) - middle(key('d:left:1', 'right')))).toBeLessThanOrEqual(0.5);
+    // A midline structure has no L or R to keep a column for: its key ends where R does.
+    expect(key('a:mid:1', 'midline').getBoundingClientRect().right).toBe(
+      key('d:left:1', 'right').getBoundingClientRect().right,
+    );
   });
 
   test('a catalog still loading shows an aria-hidden skeleton, never an empty treegrid', () => {
@@ -184,16 +272,32 @@ describe('APG keys', () => {
     expect(active()).toBe(eyes('cortex:Frontal')[1]);
   });
 
-  test('a region’s Right goes to its eye, and Up or Down from it keeps its side', async () => {
+  test('a structure’s Right goes to its keys in turn, and Up or Down from one keeps its side', async () => {
     mount({ open: ALL });
     focus('d:left:1');
     await press('{ArrowRight}');
-    expect(active()).toBe(eyes('d:left:1')[0]);
+    expect(active()).toBe(key('d:left:1', 'left'));
+    await press('{ArrowRight}');
+    expect(active()).toBe(key('d:left:1', 'right'));
+    await press('{ArrowRight}');
+    expect(active()).toBe(key('d:left:1', 'right'));
     await press('{ArrowDown}');
-    expect(active().closest('[role="row"]')).toBe(row('d:right:1'));
-    expect(active()).toBe(eyes('d:right:1')[0]);
+    expect(active()).toBe(key('d:right:2', 'right'));
     await press('{ArrowUp}');
-    expect(active()).toBe(eyes('d:left:1')[0]);
+    expect(active()).toBe(key('d:left:1', 'right'));
+    await press('{ArrowLeft}{ArrowLeft}');
+    expect(active()).toBe(row('d:left:1'));
+  });
+
+  test('Enter on a key chooses its side, and marks it on the chosen row', async () => {
+    const calls = mount({ open: ALL });
+    focus('d:left:1');
+    await press('{ArrowRight}{ArrowRight}{Enter}');
+    expect(calls).toEqual(['select d:right:1']);
+    expect(row('d:left:1').getAttribute('aria-selected')).toBe('true');
+    expect(key('d:left:1', 'right').getAttribute('aria-pressed')).toBe('true');
+    expect(key('d:left:1', 'left').getAttribute('aria-pressed')).toBe('false');
+    expect(active()).toBe(key('d:left:1', 'right'));
   });
 
   test('Left from a region goes to its group; collapsing it with focus inside lands on the group row', async () => {
@@ -229,27 +333,69 @@ describe('APG keys', () => {
     expect(row('d:left:1').getAttribute('aria-selected')).toBe('true');
   });
 
-  test('a click on a name chooses the region and a click on a group opens it; an eye does neither', async () => {
+  test('a click on a name chooses the structure’s left side and a click on a group opens it; a key chooses its own', async () => {
     const calls = mount({ open: ['cortex:Frontal'] });
-    await userEvent.click(row('d:right:1').querySelector('.row-name')!);
-    expect(calls).toEqual(['select d:right:1']);
+    await userEvent.click(row('d:left:1').querySelector('.row-name')!);
+    expect(calls).toEqual(['select d:left:1']);
+    expect(key('d:left:1', 'left').getAttribute('aria-pressed')).toBe('true');
     await userEvent.click(row('cortex:Limbic').querySelector('.row-name')!);
     expect(row('cortex:Limbic').getAttribute('aria-expanded')).toBe('true');
-    await userEvent.click(eyes('d:left:1')[0]);
-    expect(calls).toEqual(['select d:right:1', 'hide d:left:1']);
-    expect(row('d:left:1').getAttribute('aria-selected')).toBe('false');
+    await userEvent.click(key('d:left:1', 'right'));
+    expect(calls).toEqual(['select d:left:1', 'select d:right:1']);
+    expect(row('d:left:1').getAttribute('aria-selected')).toBe('true');
+    expect(key('d:left:1', 'left').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  test('a press on a row keeps the side the selection is on, and takes a drawn side before a hidden one', async () => {
+    const [frontal, ...others] = GROUPS;
+    const groups = [
+      {
+        ...frontal,
+        rows: [
+          ...frontal.rows,
+          { ...frontal.rows[0], region: { ...frontal.rows[0].region, id: 'd:left:4' } },
+          { ...frontal.rows[1], region: { ...frontal.rows[1].region, id: 'd:right:4' } },
+        ].map((entry, index) =>
+          index < 3 ? entry : { ...entry, label: { ...entry.label, name: 'Middle frontal gyrus' } },
+        ),
+      },
+      ...others,
+    ];
+    const calls = mount({ open: ALL, groups, selected: 'd:right:1' });
+    // The selection is on the right: the next structure is taken on the right too.
+    row('d:left:4').click();
+    expect(calls).toEqual(['select d:right:4']);
+    // Cingulate gyrus has no right side: its left is taken.
+    row('d:left:3').click();
+    expect(calls).toEqual(['select d:right:4', 'select d:left:3']);
+    // Back on the left, a structure whose only side is hidden is revealed.
+    row('d:right:2').click();
+    expect(calls.at(-1)).toBe('reveal hemisphere d:right:2');
   });
 });
 
 describe('V', () => {
-  test('on a region it presses the one eye and focus stays on the row', async () => {
+  test('on a structure with one side it hides that side and focus stays on the row', async () => {
+    const calls = mount({ open: ALL });
+    focus('d:left:3');
+    await press('v');
+    expect(calls).toEqual(['hide d:left:3']);
+    expect(active()).toBe(row('d:left:3'));
+    await press('V');
+    expect(calls).toEqual(['hide d:left:3', 'show d:left:3']);
+  });
+
+  test('on a structure with two sides it goes to the first key and hides nothing; on a key it hides that side', async () => {
     const calls = mount({ open: ALL });
     focus('d:left:1');
     await press('v');
-    expect(calls).toEqual(['hide d:left:1']);
-    expect(active()).toBe(row('d:left:1'));
-    await press('V');
-    expect(calls).toEqual(['hide d:left:1', 'show d:left:1']);
+    expect(calls).toEqual([]);
+    expect(active()).toBe(key('d:left:1', 'left'));
+    await press('{ArrowRight}v');
+    expect(calls).toEqual(['hide d:right:1']);
+    expect(active()).toBe(key('d:left:1', 'right'));
+    await press('v');
+    expect(calls).toEqual(['hide d:right:1', 'show d:right:1']);
   });
 
   test('on a group with several eyes it goes to the first and presses nothing', async () => {
@@ -285,32 +431,33 @@ describe('V', () => {
 describe('visibility eyes', () => {
   test('the name is the action; pressing flips it in place, says so, and keeps focus', async () => {
     const calls = mount({ open: ALL });
-    const eye = eyes('d:left:1')[0];
-    expect(eye.getAttribute('aria-label')).toBe('Hide Precentral gyrus, left');
+    const eye = eyes('cortex:Limbic')[0];
+    expect(eye.getAttribute('aria-label')).toBe('Hide Limbic, left');
     expect(eye.hasAttribute('aria-pressed')).toBe(false);
     expect(eye.dataset.state).toBe('shown');
     expect(eye.querySelector('path[d="m3 3 18 18"]')).toBeNull();
     eye.focus();
     await press('{Enter}');
-    expect(calls).toEqual(['hide d:left:1']);
-    expect(eyes('d:left:1')[0]).toBe(eye);
+    expect(calls).toEqual(['hide d:left:3']);
+    expect(eyes('cortex:Limbic')[0]).toBe(eye);
     expect(active()).toBe(eye);
-    expect(eye.getAttribute('aria-label')).toBe('Show Precentral gyrus, left');
+    expect(eye.getAttribute('aria-label')).toBe('Show Limbic, left');
     expect(eye.dataset.state).toBe('hidden');
     expect(eye.querySelector('path[d="m3 3 18 18"]')).not.toBeNull();
     expect(eye.querySelector('.visibility-side')!.textContent).toBe('L');
     // What a press says is S1's sentence (decision 32); the tree writes none of its own.
     expect(announced()).toBe('');
     await press(' ');
-    expect(calls).toEqual(['hide d:left:1', 'show d:left:1']);
+    expect(calls).toEqual(['hide d:left:3', 'show d:left:3']);
     expect(announced()).toBe('');
   });
 
   test('a group’s side is partly hidden when one of its regions is, and says so in name and tooltip', async () => {
-    mount({ open: ALL });
+    const calls = mount({ open: ALL });
     const side = eyes('cortex:Frontal')[1];
     expect(side.getAttribute('aria-label')).toBe('Hide Frontal, right');
-    await userEvent.click(eyes('d:right:1')[0]);
+    key('d:left:1', 'right').focus();
+    await press('v');
     expect(side.dataset.partial).toBe('true');
     expect(side.dataset.state).toBe('shown');
     expect(side.getAttribute('aria-label')).toBe('Hide Frontal, right, partially hidden');
@@ -319,16 +466,19 @@ describe('visibility eyes', () => {
     expect(side.dataset.state).toBe('hidden');
     expect(side.dataset.partial).toBe('false');
     expect(side.getAttribute('aria-label')).toBe('Show Frontal, right');
-    expect(eyes('d:right:2')[0].dataset.state).toBe('hidden');
+    expect(calls).toEqual(['hide d:right:1', 'hide d:right:1,d:right:2']);
   });
 
   test('French: names, glyphs and the announcement', async () => {
     mount({ open: ALL, lang: 'fr' });
-    const eye = eyes('d:right:1')[0];
-    expect(eye.getAttribute('aria-label')).toBe('Masquer Precentral gyrus, droite');
+    const eye = eyes('cortex:Frontal')[1];
+    expect(eye.getAttribute('aria-label')).toBe('Masquer Frontal, droite');
     expect(eye.querySelector('.visibility-side')!.textContent).toBe('D');
     await userEvent.click(eye);
     expect(announced()).toBe('');
+    expect(row('d:left:1').getAttribute('aria-label')).toBe('Precentral gyrus, gauche et droite');
+    expect(key('d:left:1', 'right').getAttribute('aria-label')).toBe('Precentral gyrus, droite');
+    expect(keys('d:left:1').map((entry) => entry.textContent!.trim())).toEqual(['G', 'D']);
     expect(grid().getAttribute('aria-label')).toBe('Parcourir l’anatomie');
     expect(row('cortex:Frontal').getAttribute('aria-label')).toBe('Frontal, 3 régions');
   });
@@ -337,12 +487,12 @@ describe('visibility eyes', () => {
     ['en', ['Hidden: Precentral gyrus, left.', 'Shown: Precentral gyrus, left.']],
     ['fr', ['Masqué : Precentral gyrus, gauche.', 'Affiché : Precentral gyrus, gauche.']],
   ] as const)(
-    '%s: an eye press hands S1 the part sentence to join with the count',
+    '%s: V on a key hands S1 the part sentence to join with the count',
     async (lang, expected) => {
       const said: string[] = [];
       render(Fixture, { open: ALL, lang, said });
-      await userEvent.click(eyes('d:left:1')[0]);
-      await userEvent.click(eyes('d:left:1')[0]);
+      key('d:left:1', 'left').focus();
+      await press('vv');
       expect(said).toEqual(expected);
       expect(announced()).toBe('');
     },
@@ -350,10 +500,12 @@ describe('visibility eyes', () => {
 
   test('the accessible name carries the visible letter’s meaning (2.5.3: side word, letter hidden from it)', () => {
     mount({ open: ALL });
-    for (const eye of eyes('d:left:1')) {
-      expect(eye.querySelector('.visibility-side')!.getAttribute('aria-hidden')).toBe('true');
-      expect(eye.getAttribute('aria-label')).toContain('left');
-    }
+    const [eye] = eyes('cortex:Limbic');
+    expect(eye.querySelector('.visibility-side')!.getAttribute('aria-hidden')).toBe('true');
+    expect(eye.getAttribute('aria-label')).toContain('left');
+    const [side] = keys('d:left:3');
+    expect(side.querySelector('span')!.getAttribute('aria-hidden')).toBe('true');
+    expect(side.getAttribute('aria-label')).toContain('left');
   });
 });
 
@@ -371,6 +523,17 @@ describe('selection and focus', () => {
     expect(active()).toBe(document.getElementById('after'));
     await press('{Shift>}{Tab}{/Shift}');
     expect(active()).toBe(row('d:left:3'));
+  });
+
+  test('a region chosen on the right marks its structure’s row and its R key, and the row is the stop', () => {
+    mount({ open: ALL, selected: 'd:right:1' });
+    expect(row('d:left:1').getAttribute('aria-selected')).toBe('true');
+    expect(keys('d:left:1').map((entry) => entry.getAttribute('aria-pressed'))).toEqual([
+      'false',
+      'true',
+    ]);
+    expect(currentItem()).toBe(row('d:left:1'));
+    expect(tabStops()).toEqual([row('d:left:1')]);
   });
 
   test('a choice made while the reader is moving through the grid leaves the stop where it is', async () => {
@@ -456,7 +619,7 @@ describe('press', () => {
     return { pressed: backgroundColor, ink: color };
   };
 
-  test('a group row, an eye and Expand all tint at once; an eye leaves its row', async () => {
+  test('a group row, an eye, a key and Expand all tint at once; an eye or a key leaves its row', async () => {
     mount({ open: ALL });
     const { pressed } = resolved();
     const group = row('cortex:Frontal');
@@ -472,12 +635,18 @@ describe('press', () => {
       expect(ground(eye)).toBe(pressed);
       expect(ground(group)).not.toBe(pressed);
     });
+    const side = key('d:left:1', 'left');
+    // A key's hover is already the pressed ground, so a held key eases to it; its row stays untinted.
+    await whilePressed(side, async () => {
+      expect(ground(row('d:left:1'))).not.toBe(pressed);
+      await expect.poll(() => ground(side)).toBe(pressed);
+    });
     const expandAll = page.getByRole('button', { name: /^(Expand|Collapse) all$/ }).element();
     await whilePressed(expandAll, () => expect(ground(expandAll)).toBe(pressed));
   });
 
   // Without hover, nothing else colours them: a finger's press is the only feedback.
-  test('under a coarse pointer a held eye takes the pressed ink, and a caption takes no tint', async () => {
+  test('under a coarse pointer a held eye or key takes the pressed ink, and a caption takes no tint', async () => {
     await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try {
       expect(matchMedia('(hover: hover)').matches).toBe(false);
@@ -488,6 +657,14 @@ describe('press', () => {
       await whilePressed(eye, () => {
         expect(ground(eye)).toBe(pressed);
         expect(getComputedStyle(eye).color).toBe(ink);
+      });
+      // A key's face is its ::before under a finger: the face takes the press, not the 44 px target.
+      const side = key('d:left:1', 'left');
+      expect(getComputedStyle(side, '::before').backgroundColor).not.toBe(pressed);
+      await whilePressed(side, () => {
+        expect(getComputedStyle(side, '::before').backgroundColor).toBe(pressed);
+        expect(ground(side)).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(side).color).toBe(ink);
       });
       const caption = row('section:cortex');
       await whilePressed(caption, () => {
@@ -534,12 +711,12 @@ describe('shortcut keys on a row', () => {
 describe('from a cell, across rows that have no cell', () => {
   const eyeOf = (id: string, side: string) => eyes(id).find((eye) => eye.dataset.side === side)!;
 
-  test('Up from the first group goes to its section heading row; Down from a section’s last eye goes to the next heading', async () => {
+  test('Up from the first group goes to its section heading row; Down from a section’s last key goes to the next heading', async () => {
     mount({ open: ALL });
     eyeOf('cortex:Frontal', 'left').focus();
     await press('{ArrowUp}');
     expect(active()).toBe(row('section:cortex'));
-    eyes('d:left:3')[0].focus();
+    key('d:left:3', 'left').focus();
     await press('{ArrowDown}');
     expect(active()).toBe(row('section:structure'));
   });
@@ -551,11 +728,11 @@ describe('from a cell, across rows that have no cell', () => {
     expect(active()).toBe(row('t:left:1'));
   });
 
-  test('Ctrl+Home goes to the first row and Ctrl+End to the last row’s nearest eye', async () => {
+  test('Ctrl+Home goes to the first row and Ctrl+End to the last row’s nearest key', async () => {
     mount({ open: ALL });
     eyeOf('cortex:Frontal', 'left').focus();
     await press('{Control>}{End}{/Control}');
-    expect(active()).toBe(eyes('t:left:2')[0]);
+    expect(active()).toBe(key('t:left:2', 'left'));
     await press('{Control>}{Home}{/Control}');
     expect(active()).toBe(row('section:cortex'));
   });
@@ -611,11 +788,27 @@ describe('rows', () => {
     expect(document.querySelector('[title]')).toBeNull();
   });
 
-  test('a hidden row’s side letter is dimmed, a shown one’s is not', () => {
+  test('a hidden side’s key is dimmed and struck, on no ground; a shown one’s is neither', () => {
     mount({ open: ALL });
-    const color = (id: string) =>
-      getComputedStyle(row(id).querySelector('.visibility-side')!).color;
-    expect(color('d:right:2')).not.toBe(color('d:left:1'));
+    const hidden = getComputedStyle(key('d:right:2', 'right'));
+    const shown = getComputedStyle(key('d:left:1', 'right'));
+    expect(hidden.color).not.toBe(shown.color);
+    expect(hidden.textDecorationLine).toBe('line-through');
+    expect(shown.textDecorationLine).toBe('none');
+    expect(hidden.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(shown.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  test('the chosen side’s key stands out from the other on the chosen row’s wash', () => {
+    mount({ open: ALL, selected: 'd:left:1' });
+    const wash = getComputedStyle(row('d:left:1')).backgroundColor;
+    const chosen = getComputedStyle(key('d:left:1', 'left'));
+    const other = getComputedStyle(key('d:left:1', 'right'));
+    expect(chosen.borderTopColor).not.toBe(other.borderTopColor);
+    expect(chosen.fontWeight).toBe('600');
+    expect(other.fontWeight).toBe('400');
+    expect(chosen.backgroundColor).not.toBe(wash);
+    expect(other.backgroundColor).not.toBe(wash);
   });
 
   test('a click anywhere on a row acts, even off its name; a button’s click is its own', async () => {
@@ -629,8 +822,8 @@ describe('rows', () => {
     row('t:left:1').querySelector<HTMLElement>('.row-name')!.click();
     row('section:cortex').click();
     expect(calls).toEqual(['select d:left:1']);
-    eyes('d:left:1')[0].click();
-    expect(calls).toEqual(['select d:left:1', 'hide d:left:1']);
+    key('d:left:1', 'right').click();
+    expect(calls).toEqual(['select d:left:1', 'select d:right:1']);
   });
 });
 
@@ -649,10 +842,14 @@ describe('accessibility', () => {
       const selected = getComputedStyle(row('d:left:1'));
       expect(selected.outlineStyle).toBe('solid');
       expect(selected.outlineWidth).toBe('1px');
-      for (const eye of [...eyes('cortex:Frontal'), ...eyes('d:right:1')]) {
+      for (const eye of eyes('cortex:Frontal')) {
         expect(getComputedStyle(eye).opacity).toBe('1');
         expect(getComputedStyle(eye.querySelector('svg')!).opacity).toBe('1');
       }
+      // A key's tonal ground is dropped: each takes an edge, and the chosen side a different one.
+      const [chosen, other] = keys('d:left:1').map((entry) => getComputedStyle(entry));
+      expect(other.borderTopColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(chosen.borderTopColor).not.toBe(other.borderTopColor);
       expect(
         getComputedStyle(row('cortex:Frontal').querySelector('.group-count')!).visibility,
       ).toBe('visible');
@@ -677,9 +874,11 @@ describe('accessibility', () => {
     });
   });
 
-  test('targets: an eye is at least 24 px square, and the row at least the row height', () => {
+  test('targets: an eye or a key is at least 24 px square, and the row at least the row height', () => {
     mount({ open: ALL });
-    for (const eye of [...eyes('d:left:1'), ...eyes('a:mid:1'), ...eyes('cortex:Frontal')]) {
+    const targets = [...keys('d:left:1'), ...keys('a:mid:1'), ...eyes('cortex:Frontal')];
+    expect(targets).toHaveLength(5);
+    for (const eye of targets) {
       const box = eye.getBoundingClientRect();
       expect(box.width, eye.getAttribute('aria-label')!).toBeGreaterThanOrEqual(24);
       expect(box.height, eye.getAttribute('aria-label')!).toBeGreaterThanOrEqual(24);
@@ -720,13 +919,15 @@ describe('accessibility', () => {
     }
   });
 
-  test('coarse pointer: each eye is 44 px square and a row is at least 44 px', async () => {
+  test('coarse pointer: each eye and key is 44 px square and a row is at least 44 px', async () => {
     mount({ open: ALL });
     const session = cdp();
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
     try {
       expect(matchMedia('(pointer: coarse)').matches).toBe(true);
-      for (const eye of [...eyes('d:left:1'), ...eyes('a:mid:1'), ...eyes('cortex:Frontal')]) {
+      const targets = [...keys('d:left:1'), ...keys('a:mid:1'), ...eyes('cortex:Frontal')];
+      expect(targets).toHaveLength(5);
+      for (const eye of targets) {
         const box = eye.getBoundingClientRect();
         expect(box.width, eye.getAttribute('aria-label')!).toBeGreaterThanOrEqual(44);
         expect(box.height, eye.getAttribute('aria-label')!).toBeGreaterThanOrEqual(44);
@@ -756,11 +957,12 @@ describe('accessibility', () => {
     }
   });
 
-  test('a landscape phone (812 x 375): no sideways spill, and the eyes are 24 px or more', async () => {
+  test('a landscape phone (812 x 375): no sideways spill, and the keys are 24 px or more', async () => {
     mount({ open: ALL });
     await page.viewport(812, 375);
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
-    for (const eye of eyes('d:left:1')) {
+    expect(keys('d:left:1')).toHaveLength(2);
+    for (const eye of keys('d:left:1')) {
       const box = eye.getBoundingClientRect();
       expect(box.width).toBeGreaterThanOrEqual(24);
       expect(box.height).toBeGreaterThanOrEqual(24);

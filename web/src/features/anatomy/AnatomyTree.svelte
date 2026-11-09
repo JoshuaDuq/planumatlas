@@ -1,8 +1,9 @@
 <!--
   Browse the anatomy as an APG treegrid (decision 8 on #4; viewer/ui/panels/navigator.js:465-702).
   U7's Treegrid is the grid: this component supplies its rows (a heading per section, a group
-  row, a region row) and its cells (the name, then one visibility eye per side). Selection follows
-  Enter, Space or a click, never focus, so arrowing through 360 areas says one row per key.
+  row, a structure row) and its cells (the name, then one cell per side: a group's visibility eye,
+  a structure's key). A structure is listed once, with a key for each side it has. Selection
+  follows Enter, Space or a click, never focus, so arrowing through 180 areas says one row per key.
 -->
 <script module lang="ts">
   import type { CatalogGroup, CatalogRow } from '../../lib/core/catalog/catalog.ts';
@@ -23,16 +24,20 @@
         eyes: { side: Side; ids: string[] }[];
       }
     | {
-        type: 'region';
-        row: CatalogRow;
-        midline: boolean;
+        type: 'structure';
+        /** The structure's region on each side it has, in Mid, L, R order. */
+        sides: StructureSide[];
         /** The accessible name of the row. */
         name: string;
-        /** The reason printed on the row, when it is the row's own. */
+        /** The reason printed on the row, when every side gives the same one of its own. */
         reason: string | null;
-        /** An eye can reveal it (a region too small for the cut has none). */
-        eye: boolean;
       };
+
+  /** `usable` is false for a region too small for the cut, which nothing can reveal. */
+  interface StructureSide {
+    row: CatalogRow;
+    usable: boolean;
+  }
 
   const SIDES: readonly Side[] = ['midline', 'left', 'right'];
 </script>
@@ -46,6 +51,7 @@
     reasonText,
     rowStatesReason,
     sectionReasons,
+    structureRows,
     UNREVEALABLE,
   } from '../../lib/core/panels/navigator.ts';
   import type { HiddenReason } from '../../lib/core/catalog/visibility.ts';
@@ -55,6 +61,7 @@
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
   import Treegrid from '../../lib/ui/Treegrid.svelte';
   import { visibleRows, type TreegridNode } from '../../lib/ui/treegrid.ts';
+  import SideKey from './SideKey.svelte';
   import TreeGroup from './TreeGroup.svelte';
   import TreeRow from './TreeRow.svelte';
   import VisibilityEye from './VisibilityEye.svelte';
@@ -109,26 +116,36 @@
   let root: HTMLElement;
   let scrolledId: string | null = null;
 
-  function regionNode(row: CatalogRow, midline: boolean): TreegridNode<TreeNodeData> {
+  function structureNode(rows: readonly CatalogRow[]): TreegridNode<TreeNodeData> {
     const copy = t(lang, 'navigator');
-    const name = row.label.name;
-    const side = t(lang, 'sides').words[row.region.hemisphere];
-    const eye = !UNREVEALABLE.has(row.reason);
-    const reason = row.visible ? null : reasonText(row.reason, row.region, lang);
+    const sides = SIDES.flatMap((side) =>
+      rows
+        .filter((row) => row.region.hemisphere === side)
+        .map((row) => ({ row, usable: !UNREVEALABLE.has(row.reason) })),
+    );
+    const name = rows[0].label.name;
+    const said = new Intl.ListFormat(lang, { type: 'conjunction' }).format(
+      sides.map(({ row }) => t(lang, 'sides').words[row.region.hemisphere]),
+    );
+    const hidden = sides.every(({ row }) => !row.visible);
+    const usable = sides.some((side) => side.usable);
+    const reasons = new Set(
+      sides.map(({ row }) => (row.visible ? null : reasonText(row.reason, row.region, lang))),
+    );
+    const reason = reasons.size === 1 ? [...reasons][0] : null;
     return {
-      id: row.region.id,
+      id: sides[0].row.region.id,
       label: name,
-      selectable: eye,
-      disabled: !eye,
+      selectable: usable,
+      disabled: !usable,
       data: {
-        type: 'region',
-        row,
-        midline,
-        eye,
-        reason: row.visible || !rowStatesReason(row) ? null : reason,
-        name: row.visible
-          ? `${name}, ${side}`
-          : (eye ? copy.rowHiddenAria : copy.rowUnavailableAria)(name, side, reason!),
+        type: 'structure',
+        sides,
+        reason: reason !== null && sides.every(({ row }) => rowStatesReason(row)) ? reason : null,
+        name:
+          hidden && reason !== null
+            ? (usable ? copy.rowHiddenAria : copy.rowUnavailableAria)(name, said, reason)
+            : `${name}, ${said}`,
       },
     };
   }
@@ -193,7 +210,7 @@
             return ids.length ? [{ side, ids }] : [];
           }),
         },
-        children: group.rows.map((row) => regionNode(row, midline)),
+        children: structureRows(group.rows).map(structureNode),
       });
     }
     return result;
@@ -203,10 +220,21 @@
     groups.some((group) => group.rows.some((row) => row.region.hemisphere === 'midline')),
   );
   const rows = $derived(visibleRows(nodes, expanded));
+  /** The selected region's row, drawn or not, and its side. */
+  const selected = $derived.by(() => {
+    for (const group of nodes) {
+      for (const node of group.children ?? []) {
+        if (node.data.type !== 'structure') continue;
+        const side = node.data.sides.find(({ row }) => row.region.id === selectedId);
+        if (side) return { rowId: node.id, side: side.row.region.hemisphere };
+      }
+    }
+    return null;
+  });
   // The primitive moves its Tab stop to the chosen row only when the choice changes. A region under
   // a group that opens later gets the stop when it appears, as legacy `markSelection` did.
   const stopId = $derived(
-    selectedId !== null && rows.some((row) => row.node.id === selectedId) ? selectedId : null,
+    selected !== null && rows.some((row) => row.node.id === selected.rowId) ? selected.rowId : null,
   );
 
   const rowOf = (id: string) =>
@@ -221,17 +249,31 @@
     return data.name;
   }
 
-  /** Enter, Space or a click: a group opens or closes; a region is chosen, or revealed first. */
+  /** A side's key, or the row on that side's behalf: the region is chosen, or revealed first. */
+  function choose(row: CatalogRow) {
+    if (row.visible) onSelect(row.region.id);
+    else onReveal(row.reason, row.region.id);
+  }
+
+  /**
+   * Enter, Space or a click: a group opens or closes; a structure is chosen on the side the
+   * selection is already on, else its left, right, then midline, taking a side on screen first.
+   */
   function activate(node: TreegridNode<TreeNodeData>) {
     const { data } = node;
     if (data.type === 'group') {
       const next = new Set(expanded);
       if (!next.delete(node.id)) next.add(node.id);
       onExpandedChange(next);
-    } else if (data.type === 'region') {
-      const { row } = data;
-      if (row.visible) onSelect(row.region.id);
-      else if (!UNREVEALABLE.has(row.reason)) onReveal(row.reason, row.region.id);
+    } else if (data.type === 'structure') {
+      const order = [selected?.side, 'left', 'right', 'midline'];
+      const ranked = data.sides
+        .filter((side) => side.usable)
+        .sort(
+          (a, b) => order.indexOf(a.row.region.hemisphere) - order.indexOf(b.row.region.hemisphere),
+        );
+      const side = ranked.find(({ row }) => row.visible) ?? ranked[0];
+      if (side) choose(side.row);
     }
   }
 
@@ -245,15 +287,32 @@
   }
 
   /**
-   * `V`: a focused eye is pressed; a row with one eye presses it; a group with one per side goes to
-   * them to choose (navigator.js:694-695).
+   * `V`: a focused eye is pressed, a focused key's side is hidden or shown; a row with one of them
+   * acts on it; a row with one per side goes to them to choose (navigator.js:694-695).
    */
   function toggleVisibility(node: TreegridNode<TreeNodeData>) {
-    const eyes = [...(rowOf(node.id)?.querySelectorAll<HTMLElement>('.visibility-control') ?? [])];
-    const focused = eyes.find((eye) => eye === document.activeElement);
-    if (focused) focused.click();
-    else if (eyes.length === 1) eyes[0].click();
-    else eyes[0]?.focus();
+    const controls = [
+      ...(rowOf(node.id)?.querySelectorAll<HTMLElement>('.visibility-control, .side-key') ?? []),
+    ];
+    const control =
+      controls.find((entry) => entry === document.activeElement) ??
+      (controls.length === 1 ? controls[0] : null);
+    if (!control) {
+      controls[0]?.focus();
+      return;
+    }
+    if (node.data.type !== 'structure') {
+      control.click();
+      return;
+    }
+    const { row } = node.data.sides.find((side) => side.row.region.id === control.dataset.region)!;
+    const copy = t(lang, 'dissection');
+    const side = t(lang, 'sides').words[row.region.hemisphere];
+    if (hiddenRegions.has(row.region.id)) {
+      onShow([row.region.id], copy.partShown(row.label.name, side));
+    } else {
+      onHide([row.region.id], copy.partHidden(row.label.name, side));
+    }
   }
 
   /** Moves focus to the next (1) or previous (-1) row, from the one holding focus (navigator.js:652-657). */
@@ -323,12 +382,13 @@
             dimmed={!data.group.rows.some((row) => row.visible)}
           />
         {:else}
+          {@const hidden = data.sides.every(({ row }) => !row.visible)}
           <TreeRow
-            name={data.row.label.name}
+            name={node.label}
             reason={data.reason}
-            tooltip={data.row.visible ? undefined : data.name}
-            hidden={!data.row.visible}
-            unavailable={!data.eye}
+            tooltip={hidden ? data.name : undefined}
+            {hidden}
+            unavailable={node.disabled === true}
           />
         {/if}
       {/snippet}
@@ -349,23 +409,19 @@
           {:else if side === 'midline'}
             <span class="slot-mid" data-section-midline={data.midline} aria-hidden="true"></span>
           {/if}
-        {:else if data.type === 'region'}
-          {#if data.row.region.hemisphere === side && data.eye}
-            <VisibilityEye
+        {:else if data.type === 'structure'}
+          {@const entry = data.sides.find(({ row }) => row.region.hemisphere === side)}
+          {#if entry?.usable}
+            <SideKey
               {lang}
-              ids={[data.row.region.id]}
-              name={data.row.label.name}
-              side={data.row.region.hemisphere}
-              {hiddenRegions}
-              {onHide}
-              {onShow}
+              row={entry.row}
+              selected={entry.row.region.id === selectedId}
+              onpress={choose}
             />
-          {:else if data.row.region.hemisphere === side}
+          {:else if entry}
             <span class="row-side-solo" data-side={side} aria-hidden="true">
-              {t(lang, 'sides').glyphs[side]}
+              {t(lang, 'sides').glyphs[entry.row.region.hemisphere]}
             </span>
-          {:else if side === 'midline'}
-            <span class="slot-mid" data-section-midline={data.midline} aria-hidden="true"></span>
           {/if}
         {/if}
       {/snippet}

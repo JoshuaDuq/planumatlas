@@ -1,5 +1,5 @@
 <!--
-  A reversible visibility action for a region or a group's side (viewer/ui/panels/visibility-control.js).
+  A reversible visibility action for a group's side (viewer/ui/panels/visibility-control.js).
   The name is the action ("Hide X, left"), so there is no aria-pressed, which would read backwards
   against it. It lives in its own treegrid cell and is patched in place, so focus stays on it. What
   a press says is S1's: the part and the hidden count in one sentence (decisions 32 and 36).
@@ -12,9 +12,9 @@
 
   interface Props {
     lang: Language;
-    /** What the eye hides or shows: one region, or every revealable region of a group's side. */
+    /** What the eye hides or shows: every revealable region of a group's side. */
     ids: readonly string[];
-    /** The region's or the group's name. */
+    /** The group's name. */
     name: string;
     side: Region['hemisphere'];
     hiddenRegions: ReadonlySet<string>;

@@ -14,6 +14,7 @@ import {
   rowStatesReason,
   sectionReasons,
   sharedGroupNames,
+  structureRows,
   visibilityStateOf,
   vocabularyOf,
 } from './navigator.ts';
@@ -255,4 +256,43 @@ test('PANEL-01 a step of zero, or an empty list, leaves the armed row where it i
 
 test('PANEL-09 a group with no parts under it shows its eye', () => {
   assert.equal(visibilityStateOf([], new Set(['a', 'b'])), 'shown');
+});
+
+test('the sides of one name share a tree row, in the order the names are first met', () => {
+  const row = (id: string, name: string, hemisphere: Region['hemisphere']) => ({
+    id,
+    region: { hemisphere },
+    label: { name },
+  });
+  const ids = (rows: ReturnType<typeof row>[]) =>
+    structureRows(rows).map((sides) => sides.map((side) => side.id));
+  assert.deepEqual(
+    ids([
+      row('pre-l', 'Precentral gyrus', 'left'),
+      row('pre-r', 'Precentral gyrus', 'right'),
+      row('third', 'Third ventricle', 'midline'),
+      row('sup-r', 'Superior frontal gyrus', 'right'),
+    ]),
+    [['pre-l', 'pre-r'], ['third'], ['sup-r']],
+  );
+  // Sides that are not adjacent in the group still meet, where the first was listed.
+  assert.deepEqual(
+    ids([
+      row('a-l', 'Area A', 'left'),
+      row('b-l', 'Area B', 'left'),
+      row('a-r', 'Area A', 'right'),
+      row('a-m', 'Area A', 'midline'),
+    ]),
+    [['a-l', 'a-r', 'a-m'], ['b-l']],
+  );
+  // Two regions of one name on one side cannot share a row: each would need the same key.
+  assert.deepEqual(
+    ids([
+      row('n-l1', 'Nucleus', 'left'),
+      row('n-l2', 'Nucleus', 'left'),
+      row('n-r', 'Nucleus', 'right'),
+    ]),
+    [['n-l1'], ['n-l2'], ['n-r']],
+  );
+  assert.deepEqual(ids([]), []);
 });

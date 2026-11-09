@@ -2005,7 +2005,7 @@
      ],
      [
       "→ ←",
-      "In the tree: open or close a group, or reach a region’s eye control"
+      "In the tree: open or close a group, or reach a group’s eyes or a structure’s side keys"
      ],
      [
       "Home End",
@@ -2017,7 +2017,7 @@
      ],
      [
       "V",
-      "Hide or show the focused tree row"
+      "Hide or show the focused side of a tree row"
      ]
     ]
    ],

@@ -2005,7 +2005,7 @@
      ],
      [
       "→ ←",
-      "Dans l’arbre : ouvrir ou fermer un groupe, ou atteindre l’œil d’une région"
+      "Dans l’arbre : ouvrir ou fermer un groupe, ou atteindre les yeux d’un groupe ou les touches de côté d’une structure"
      ],
      [
       "Début Fin",
@@ -2017,7 +2017,7 @@
      ],
      [
       "V",
-      "Masquer ou afficher la ligne ciblée de l’arbre"
+      "Masquer ou afficher le côté ciblé d’une ligne de l’arbre"
      ]
     ]
    ],

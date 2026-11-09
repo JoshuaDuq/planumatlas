@@ -115,12 +115,14 @@ test('pick and inspect on the real model, then find a region by search', async (
   await page.getByRole('button', { name: 'Back to Anatomy' }).click();
   const tree = page.getByRole('treegrid', { name: 'Browse anatomy' });
   await expect(tree.locator('[aria-selected="true"]')).toHaveCount(1);
-  await expect(tree.getByRole('row', { name: 'Middle frontal gyrus, left' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
+  await expect(
+    tree.getByRole('row', { name: 'Middle frontal gyrus, left and right', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  const side = tree.getByRole('button', { name: 'Middle frontal gyrus, left', exact: true });
+  await expect(side).toHaveAttribute('aria-pressed', 'true');
 
-  await tree.getByRole('button', { name: 'Hide Middle frontal gyrus, left', exact: true }).click();
+  await side.focus();
+  await page.keyboard.press('v');
   await expect(page.locator('#announcer')).toContainText(
     'Hidden: Middle frontal gyrus, left. 1 part hidden',
   );

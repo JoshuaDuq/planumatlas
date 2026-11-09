@@ -1,7 +1,8 @@
 <!--
-  The first cell of a region row (navigator.js:265-388): the name, and the row's own reason when it
-  has one. A setting's reason (hemisphere, cortex hidden...) is said on the section instead. The
-  row's accessible name says everything printed here; a click anywhere on the row is the tree's own.
+  The first cell of a structure row (navigator.js:265-388): the name, and the row's own reason when
+  every side gives the same one. A setting's reason (hemisphere, cortex hidden...) is said on the
+  section instead. The row's accessible name says everything printed here; a click anywhere on the
+  row is the tree's own.
 -->
 <script lang="ts">
   interface Props {

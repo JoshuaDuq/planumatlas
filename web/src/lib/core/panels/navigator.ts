@@ -176,6 +176,23 @@ export function rowStatesReason(row: StatedRow): boolean {
   return !row.visible && row.reason !== 'removed' && !SETTING_REASONS.has(row.reason);
 }
 
+/**
+ * A group's rows by structure, in the order each name is first met: the sides of one name share a
+ * tree row. A name that one side repeats keeps a row per region, since two keys of one side could
+ * not be told apart.
+ */
+export function structureRows<
+  R extends { region: Pick<Region, 'hemisphere'>; label: Pick<RegionLabel, 'name'> },
+>(rows: readonly R[]): R[][] {
+  const named = new Map<string, R[]>();
+  for (const row of rows) named.set(row.label.name, [...(named.get(row.label.name) ?? []), row]);
+  return [...named.values()].flatMap((sides) =>
+    new Set(sides.map((row) => row.region.hemisphere)).size === sides.length
+      ? [sides]
+      : sides.map((row) => [row]),
+  );
+}
+
 /** Shown, hidden, or partly hidden: a group eye stays in view while anything under it is hidden. */
 export function visibilityStateOf(
   ids: readonly string[],

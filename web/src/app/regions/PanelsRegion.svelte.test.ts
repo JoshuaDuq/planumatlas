@@ -149,7 +149,7 @@ describe('selection', () => {
     expect(engine.model.state.hiddenRegions.has(REGION)).toBe(true);
   });
 
-  test('an eye in the tree says the part it hid with the count it changed', async () => {
+  test('a side hidden from its key in the tree says the part with the count it changed', async () => {
     const world = await boot();
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
@@ -161,7 +161,11 @@ describe('selection', () => {
     )!.rows;
     const other = rows.find((row) => row.region.id !== REGION && row.region.hemisphere === 'left')!;
     const name = nameOf(other.region.id);
-    await userEvent.click(page.getByRole('button', { name: `Hide ${name}, left`, exact: true }));
+    page
+      .getByRole('button', { name: `${name}, left`, exact: true })
+      .element()
+      .focus();
+    await userEvent.keyboard('v');
     await vi.waitFor(() =>
       expect(announcer.textContent).toBe(`Hidden: ${name}, left. 1 part hidden`),
     );
