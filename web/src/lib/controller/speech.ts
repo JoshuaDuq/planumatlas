@@ -1,4 +1,4 @@
-import type { Language, LoadStatus, Notice, Region } from '../types/index.ts';
+import type { Language, LoadStatus, Region, ShownNotice } from '../types/index.ts';
 import { dissectionSaid } from '../core/state/dissection.ts';
 import { t } from '../core/i18n/index.ts';
 
@@ -7,7 +7,7 @@ export interface SpeechView {
   lang: Language;
   selectedRegion: Region | null;
   hiddenRegions: ReadonlySet<string>;
-  notice: Notice | null;
+  notice: ShownNotice | null;
   status: LoadStatus;
 }
 
@@ -22,7 +22,8 @@ export interface SpeechView {
  */
 export function createSpeech(regionName: (region: Region) => string) {
   let announced: string | null = null;
-  let announcedNotice: string | null = null;
+  // The notices on show when last said, by number: each is said once, however the text around it changes.
+  let announcedParts = new Set<number>();
   let announcedStatus: LoadStatus | null = null;
   let counted: number | null = null;
   let part: string | null = null;
@@ -45,14 +46,18 @@ export function createSpeech(regionName: (region: Region) => string) {
             t(lang, 'sides').words[region.hemisphere] ?? region.hemisphere,
           )
         : null;
-      const said = view.notice?.text ?? null;
+      const parts = view.notice?.parts ?? [];
+      const news = parts
+        .filter(({ id }) => !announcedParts.has(id))
+        .map(({ text }) => text)
+        .join(' ');
       const joined = (sentence: string | null) =>
         sentence && dissection
           ? `${sentence.replace(/[^.!?…]$/, '$&.')} ${dissection}`
           : sentence || dissection || '';
 
       const sentences: string[] = [];
-      if (said && said !== announcedNotice) sentences.push(joined(said));
+      if (news) sentences.push(joined(news));
       else if (spoken !== announced) sentences.push(joined(spoken));
       else if (dissection) sentences.push(dissection);
       if (view.status === 'context-lost' && announcedStatus !== 'context-lost') {
@@ -61,7 +66,7 @@ export function createSpeech(regionName: (region: Region) => string) {
         sentences.push(t(lang, 'viewport').loaded);
       }
       announced = spoken;
-      announcedNotice = said;
+      announcedParts = new Set(parts.map(({ id }) => id));
       announcedStatus = view.status;
       return sentences;
     },

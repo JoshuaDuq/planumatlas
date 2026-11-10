@@ -1,12 +1,13 @@
 // Stroke cases: where focus goes when the button pressed goes with what it changed.
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { flushSync } from 'svelte';
 import { cleanup, render } from 'vitest-browser-svelte';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { StrokeCase, StrokeCases } from '../../lib/core/catalog/stroke-cases.ts';
 import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
 import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
 import type { Region } from '../../lib/types/index.ts';
+import '../../styles/index.css';
 import StrokeCasesSection from './StrokeCasesSection.svelte';
 
 const IFG = 'destrieux:left:12';
@@ -53,10 +54,23 @@ const cohort: StrokeCases = {
   ],
 };
 
-function mount(regionId: string, chosen: string[]) {
+function mount(
+  regionId: string,
+  chosen: string[],
+  state: { status: string; data?: StrokeCases; error?: unknown } = {
+    status: 'ready',
+    data: cohort,
+  },
+  lang: 'en' | 'fr' = 'en',
+) {
   const store = $state({
     available: true,
-    cohort: { status: 'ready', data: cohort },
+    cohort: state,
+    retries: 0,
+    retry() {
+      store.retries += 1;
+      store.cohort = { status: 'loading' };
+    },
     chosen,
     drawn: { status: 'idle' },
     load() {},
@@ -66,11 +80,11 @@ function mount(regionId: string, chosen: string[]) {
   });
   render(StrokeCasesSection, {
     region: { id: regionId } as Region,
-    lang: 'en',
+    lang,
     store: store as unknown as StrokeCasesStore,
     label: (id: string) => ({ name: id }),
   });
-  document.querySelector<HTMLElement>('.stroke-cases summary')!.click();
+  document.querySelector<HTMLElement>('.stroke-cases summary')?.click();
   flushSync();
   return store;
 }
@@ -110,3 +124,57 @@ test('Clear hands focus to the region’s title when the section goes with the c
     title.remove();
   }
 });
+
+describe('INSP-45 a cohort that failed says why, and offers what can help', () => {
+  const coded = (code: string) => Object.assign(new Error('x'), { code });
+  const note = () => document.querySelector<HTMLElement>('[role=alert]')!;
+  const title = () => document.getElementById('region-title')!;
+  let unregister = () => {};
+  beforeEach(() => {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<h2 id="region-title" tabindex="-1">Region</h2>',
+    );
+    unregister = registerFocusTarget(FOCUS_TARGETS.regionTitle, title);
+  });
+  afterEach(() => {
+    unregister();
+    title().remove();
+  });
+
+  test('a failed download says what to check and offers Retry, which asks again and keeps focus in the region', async () => {
+    const store = mount(IFG, [], { status: 'error', error: coded('asset-fetch') });
+    expect(note().textContent).toBe(
+      'The cohort could not be loaded. A file could not be downloaded. Check the connection and try again.',
+    );
+    expect(getComputedStyle(note()).color).toBe(dangerInk());
+    expect(dangerInk()).not.toBe(getComputedStyle(document.body).color);
+    const retry = page.getByRole('button', { name: 'Retry' });
+    (retry.element() as HTMLElement).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(store.retries).toBe(1);
+    await expect.poll(() => document.activeElement).toBe(title());
+  });
+
+  test('bytes that no longer match the page ask for a reload, in French too', () => {
+    mount(IFG, [], { status: 'error', error: coded('asset-updated') }, 'fr');
+    expect(note().textContent).toBe(
+      'Un fichier du serveur ne correspond plus à cette page\u202f; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
+    );
+    expect(document.querySelector('.actions button')?.textContent?.trim()).toBe('Recharger');
+  });
+
+  test('any other failure says the cohort could not be loaded, and offers nothing that would fail again', () => {
+    mount(IFG, [], { status: 'error', error: new Error('Invalid stroke cases') });
+    expect(note().textContent).toBe('The cohort could not be loaded.');
+    expect(document.querySelector('.actions')).toBeNull();
+  });
+});
+
+function dangerInk() {
+  const probe = document.body.appendChild(document.createElement('span'));
+  probe.style.color = 'var(--danger)';
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color;
+}

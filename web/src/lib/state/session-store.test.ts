@@ -19,11 +19,12 @@ describe('STORE-03: a session command shows at once and keeps the session’s an
     expect(store.state.explorer).toBe('anatomy');
   });
 
-  test('after each of the 23 commands, in a fixed order, the state equals the session’s own assembled state', () => {
+  test('after each of the 26 commands, in a fixed order, the state equals the session’s own assembled state', () => {
     const options = { views: ['oblique', 'left'] };
     const store = createSessionStore(options);
     const core = createSession(options);
     const error = new Error('boom');
+    const retry = () => {};
     const commands: Array<[string, unknown[]]> = [
       ['setView', ['left']],
       ['setQuery', ['gyrus']],
@@ -42,10 +43,15 @@ describe('STORE-03: a session command shows at once and keeps the session’s an
       ['setLoaded', []],
       ['setSwitching', [{ loaded: 2, total: 4 }]],
       ['endSwitching', []],
-      ['notify', [{ text: 'One.', action: 'reload' }]],
+      ['notify', [{ kind: 'error', text: 'One.', action: 'reload' }]],
       ['holdNotices', []],
-      ['notify', [{ text: 'Held.' }]],
-      ['releaseNotices', [{ text: 'Lead.' }]],
+      ['notify', [{ kind: 'info', text: 'Held.' }]],
+      ['releaseNotices', [{ kind: 'info', text: 'Lead.' }]],
+      ['notify', [{ kind: 'error', text: 'Gone.', key: 'cord' }]],
+      ['resolveNotice', ['cord']],
+      ['dismissNotice', []],
+      ['notify', [{ kind: 'error', text: 'Offline.', action: 'retry', retry }]],
+      ['retryNotice', []],
       ['setContextLost', []],
       ['setContextRestored', []],
       ['setError', [error]],

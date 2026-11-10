@@ -505,7 +505,7 @@
   "settings": "Affichage des faisceaux",
   "errors": {
    "asset-fetch": "Les données de référence n’ont pas pu être téléchargées. Vérifiez la connexion, puis réessayez.",
-   "asset-updated": "Planum a été mis à jour pendant que cette page était ouverte. Rechargez la page pour charger les nouvelles données.",
+   "asset-updated": "Un fichier de données de référence du serveur ne correspond plus à cette page<NNBSP>; Planum a probablement été mis à jour. Rechargez la page pour continuer.",
    "invalid-data": "Les données de référence n’ont pas pu être lues.",
    "failed": "Les données de référence n’ont pas pu être affichées."
   }
@@ -675,7 +675,7 @@
   "noLesionCheck": "Aucune étude lésionnelle des données de déficits de Planum ne vérifie ce domaine."
  },
  "errors": {
-  "updated": "Planum a été mis à jour. Rechargez la page pour continuer.",
+  "updated": "Un fichier du serveur ne correspond plus à cette page<NNBSP>; Planum a probablement été mis à jour. Rechargez la page pour continuer.",
   "download": "Un fichier n’a pas pu être téléchargé. Vérifiez la connexion et réessayez.",
   "reload": "Recharger",
   "dismiss": "Fermer",
@@ -912,6 +912,7 @@
   "previous": "Retour",
   "done": "Terminé",
   "close": "Fermer la visite",
+  "skip": "Passer la visite",
   "progress": "{{current}} sur {{total}}",
   "stops": [
    {
@@ -1097,6 +1098,10 @@
   "focus": "Cibler",
   "isolate": "Isoler",
   "restore": "Rétablir",
+  "focusHint": "Cadrer cette région dans sa couleur, le reste en gris transparent",
+  "isolateHint": "Afficher cette région seule, cadrée",
+  "restoreHint": "Réafficher le reste du cerveau, cadré en entier",
+  "hideHint": "Retirer cette région de la vue<NNBSP>; Annuler la rétablit",
   "constituentsHeading": "Régions constitutives",
   "constituentsNote": "Union de régions sources. Surface lissée<NNBSP>; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.",
   "constituentCutOnly": "Coupe seulement"
@@ -1452,6 +1457,14 @@
    "[\"\",\"Alpha\"] → \" dans Alpha, qui n’étiquette que les coupes. \""
   ],
   "switchCutAtlas": "Changer les étiquettes de coupe",
+  "matchesInTab": [
+   "[\"Alpha\",\"\"] → \"Alpha dans l’onglet . \"",
+   "[\"\",\"Alpha\"] → \" dans l’onglet Alpha. \""
+  ],
+  "showInTab": [
+   "[\"Alpha\"] → \"Afficher dans l’onglet Alpha\"",
+   "[\"\"] → \"Afficher dans l’onglet \""
+  ],
   "includes": [
    "[\"Alpha\"] → \"comprend Alpha\"",
    "[\"\"] → \"comprend \""
@@ -2283,6 +2296,20 @@
   "showInList": [
    "[\"Alpha\"] → \"Alpha, afficher dans la liste\"",
    "[\"\"] → \", afficher dans la liste\""
-  ]
+  ],
+  "bridges": {
+   "anatomy": [
+    "[\"Alpha\",\"\"] → \"Anatomie<NNBSP>: Alpha régions correspondent à «<NBSP><NBSP>»\"",
+    "[\"\",\"Alpha\"] → \"Anatomie<NNBSP>:  régions correspondent à «<NBSP>Alpha<NBSP>»\""
+   ],
+   "circuits": [
+    "[\"Alpha\",\"\"] → \"Circuits<NNBSP>: Alpha circuits guidés correspondent à «<NBSP><NBSP>»\"",
+    "[\"\",\"Alpha\"] → \"Circuits<NNBSP>:  circuits guidés correspondent à «<NBSP>Alpha<NBSP>»\""
+   ],
+   "diffusion": [
+    "[\"Alpha\",\"\"] → \"Faisceaux<NNBSP>: Alpha faisceaux correspondent à «<NBSP><NBSP>»\"",
+    "[\"\",\"Alpha\"] → \"Faisceaux<NNBSP>:  faisceaux correspondent à «<NBSP>Alpha<NBSP>»\""
+   ]
+  }
  }
 }

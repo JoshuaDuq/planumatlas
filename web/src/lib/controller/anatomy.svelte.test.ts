@@ -255,7 +255,8 @@ describe('the dissection', () => {
     const { anatomy, session, reader } = build();
     anatomy.selectRegion(SULCUS);
     await anatomy.hideSelection();
-    expect(session.state.notice).toEqual({
+    expect(session.state.notice).toMatchObject({
+      kind: 'info',
       text: `Hidden: ${createCatalog(published).label(SULCUS).name}, left.`,
       action: 'restore',
     });
@@ -368,6 +369,37 @@ describe('the display toggles', () => {
     expect(engine.model.settings.spinalCordVisible).toBe(true);
     expect(engine.model.isRegionDrawn(CORD)).toBe(true);
     expect(cameraMethods()).toEqual(['frameWhole']);
+  });
+
+  test('a cord whose download failed is an error offering Retry, which shows it', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { anatomy, session } = build();
+    vi.spyOn(engine.model, 'setSpinalCordVisible').mockRejectedValueOnce(
+      Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' }),
+    );
+    await anatomy.setSpinalCordVisible(true);
+    expect(session.state.notice).toMatchObject({ kind: 'error', action: 'retry' });
+    expect(session.state.notice?.text).toMatch(
+      /^Could not show the spinal cord\. A file could not be downloaded\./,
+    );
+    expect(engine.model.settings.spinalCordVisible).toBe(false);
+    session.retryNotice();
+    expect(session.state.notice).toBeNull();
+    await vi.waitFor(() => expect(engine.model.settings.spinalCordVisible).toBe(true));
+    expect(session.state.notice).toBeNull();
+  });
+
+  test('a cord error goes once the cord is shown by another route', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { anatomy, session } = build();
+    vi.spyOn(engine.model, 'setSpinalCordVisible').mockRejectedValueOnce(
+      Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' }),
+    );
+    await anatomy.setSpinalCordVisible(true);
+    expect(session.state.notice?.kind).toBe('error');
+    await anatomy.chooseInternalSystem('Spinal cord');
+    expect(engine.model.settings.spinalCordVisible).toBe(true);
+    expect(session.state.notice).toBeNull();
   });
 
   test('an anatomy without a cord says so', async () => {
@@ -589,12 +621,20 @@ describe('revealing a region', () => {
     const { anatomy, session, reader } = build();
     engine.model.setHemisphere('right');
     await anatomy.revealRegion('hemisphere', SULCUS);
-    expect(session.state.notice).toEqual({ text: 'Both hemispheres shown.', action: 'restore' });
+    expect(session.state.notice).toMatchObject({
+      kind: 'info',
+      text: 'Both hemispheres shown.',
+      action: 'restore',
+    });
     // Held past the notice, for the location bar's Restore while the region is in front.
     expect(anatomy.revealedRegion).toBe(SULCUS);
     await anatomy.restoreBeforeReveal();
     expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results[0]!.value);
-    expect(session.state.notice).toEqual({ text: 'Previous view restored.', action: null });
+    expect(session.state.notice).toMatchObject({
+      kind: 'info',
+      text: 'Previous view restored.',
+      action: null,
+    });
     expect(anatomy.revealedRegion).toBeNull();
   });
 

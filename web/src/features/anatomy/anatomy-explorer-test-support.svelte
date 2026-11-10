@@ -2,6 +2,7 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { createCatalog, type CatalogSettings } from '../../lib/core/catalog/catalog.ts';
+  import type { Elsewhere } from '../../lib/core/elsewhere.ts';
   import type { Region } from '../../lib/types/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { attachAnnouncer } from '../../lib/ui/announcer.svelte.ts';
@@ -14,6 +15,7 @@
     selected = null,
     crowd = 0,
     rejectCutAtlas = false,
+    elsewhere = [],
   }: {
     calls?: string[];
     lang?: Language;
@@ -23,6 +25,8 @@
     /** This many HCP-MMP areas whose names all contain "V1", more than a search lists. */
     crowd?: number;
     rejectCutAtlas?: boolean;
+    /** What the other tabs find, whatever the words. */
+    elsewhere?: Elsewhere[];
   } = $props();
 
   // Fixtures carry only the fields the catalog reads.
@@ -137,6 +141,10 @@
       calls.push(`cut ${id}`);
       cutAtlas = id;
       if (rejectCutAtlas) return Promise.reject(new Error('cut atlas failed'));
+    }}
+    elsewhere={() => elsewhere}
+    onElsewhere={(mode) => {
+      calls.push(`tab ${mode}`);
     }}
   >
     {#snippet systemPicker()}<p id="system-picker">System picker</p>{/snippet}

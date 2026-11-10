@@ -1043,7 +1043,7 @@ describe('legacy cases ported, and the notice', () => {
     const { world } = await mount();
     await rested();
     const bare = span();
-    world.notice = { text: 'The view was restored' };
+    world.notice = { kind: 'info', text: 'The view was restored' };
     await vi.waitFor(() => expect(span()).toBeGreaterThan(bare));
     await rested();
     const notice = document.querySelector('.notice') as HTMLElement;
@@ -1138,7 +1138,7 @@ describe('WCAG 2.4.11 Focus Not Obscured, inside the sheet', () => {
   test.each(['half', 'full'])(
     'at %s every stop is fully on screen and below the grip',
     async (rest) => {
-      await mount(PHONE, { selection: SELECTION, notice: { text: 'A notice' } }, 30);
+      await mount(PHONE, { selection: SELECTION, notice: { kind: 'info', text: 'A notice' } }, 30);
       handle().click();
       if (rest === 'full') handle().click();
       await rested();
@@ -1174,10 +1174,11 @@ describe('WCAG 2.4.11 Focus Not Obscured, inside the sheet', () => {
 
 describe('the notice in the grip, once shown', () => {
   test('a notice that grows taller grows the peek with it', async () => {
-    const { world } = await mount(PHONE, { notice: { text: 'Short' } });
+    const { world } = await mount(PHONE, { notice: { kind: 'info', text: 'Short' } });
     await rested();
     const short = span();
     world.notice = {
+      kind: 'info',
       text: 'A much longer message that has to wrap over several lines here. '.repeat(4),
     };
     await vi.waitFor(() => expect(span()).toBeGreaterThan(short));

@@ -553,7 +553,7 @@ describe('failure', () => {
       instrument({ failures: [Object.assign(new Error('stale'), { code: 'asset-updated' })] }),
     );
     await openFromKeyboard();
-    await expect.poll(alertText).toContain('Planum was updated');
+    await expect.poll(alertText).toContain('Planum has probably been updated');
     await expect.element(page.getByRole('button', { name: 'Reload', exact: true })).toBeVisible();
     expect(page.getByRole('button', { name: 'Reload MRI' }).elements()).toHaveLength(0);
   });

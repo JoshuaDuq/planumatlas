@@ -79,6 +79,7 @@ export async function composeWorld(
     sections,
     session: {
       notify: session.notify,
+      resolveNotice: session.resolveNotice,
       setSwitching: session.setSwitching,
       endSwitching: session.endSwitching,
       assemble: (modelState) => ({ ...modelState, ...session.state }),
@@ -279,13 +280,17 @@ export async function composeWorld(
             },
             sayLesionReplaced() {
               session.notify({
+                kind: 'info',
                 text: t(session.state.lang, 'coordinate').replacedLesion,
                 action: 'restore-lesion',
               });
             },
             sayLesionRestored() {
               session.notify(null);
-              session.notify({ text: t(session.state.lang, 'coordinate').lesionRestored });
+              session.notify({
+                kind: 'info',
+                text: t(session.state.lang, 'coordinate').lesionRestored,
+              });
             },
           },
         }),

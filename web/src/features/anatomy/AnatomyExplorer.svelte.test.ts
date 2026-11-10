@@ -4,6 +4,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
+import type { Elsewhere } from '../../lib/core/elsewhere.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import Fixture from './anatomy-explorer-test-support.svelte';
 
@@ -187,6 +188,38 @@ describe('the sentences after the list', () => {
     expect(document.activeElement).toBe(input());
     // The atlas is HCP-MMP's now: the match is listed.
     await expect.element(optionNamed(/^V1, left/)).toBeInTheDocument();
+  });
+
+  test('other tabs that find the words are reported after the list with a button that carries the search there, and said', async () => {
+    const elsewhere: Elsewhere[] = [
+      { mode: 'deficits', count: 2 },
+      { mode: 'diffusion', count: 1 },
+    ];
+    const calls = mount({ elsewhere });
+    await search('zzzz');
+    await expect.element(page.getByText('No match for “zzzz”')).toBeInTheDocument();
+    // The hint points at Deficits in words; a match there replaces it with the way there.
+    expect(page.getByText(/^Try another spelling/).elements()).toEqual([]);
+    await expect.element(page.getByText('2 matches in Deficits.')).toBeInTheDocument();
+    await expect.element(page.getByText('1 match in Tracts.')).toBeInTheDocument();
+    await expect
+      .poll(() => announced())
+      .toBe('No match for “zzzz”. 2 matches in Deficits. 1 match in Tracts.');
+    await page.getByRole('button', { name: 'Show in Tracts' }).click();
+    expect(calls).toEqual(['tab diffusion']);
+    expect(document.activeElement).toBe(input());
+    cleanup();
+
+    // Beside matches of its own, in French.
+    mount({ lang: 'fr', elsewhere });
+    await search('cuneus');
+    await expect.element(optionNamed(/^Cunéus, gauche/)).toBeInTheDocument();
+    await expect
+      .element(page.getByText('2 correspondances dans l’onglet Déficits.'))
+      .toBeInTheDocument();
+    await expect
+      .element(page.getByRole('button', { name: 'Afficher dans l’onglet Déficits' }))
+      .toBeVisible();
   });
 
   test('matches in another cut atlas have their own button, and a rejection from it is not caught', async () => {

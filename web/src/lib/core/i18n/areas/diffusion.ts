@@ -54,7 +54,7 @@ export const en = {
     'asset-fetch':
       'The reference data could not be downloaded. Check the connection, then try again.',
     'asset-updated':
-      'Planum was updated while this page was open. Reload the page to load the new data.',
+      'A reference data file on the server no longer matches this page; Planum has probably been updated. Reload the page to continue.',
     'invalid-data': 'The reference data could not be read.',
     failed: 'The reference data could not be displayed.',
   },
@@ -110,7 +110,7 @@ export const fr: typeof en = {
     'asset-fetch':
       'Les données de référence n’ont pas pu être téléchargées. Vérifiez la connexion, puis réessayez.',
     'asset-updated':
-      'Planum a été mis à jour pendant que cette page était ouverte. Rechargez la page pour charger les nouvelles données.',
+      'Un fichier de données de référence du serveur ne correspond plus à cette page\u202f; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
     'invalid-data': 'Les données de référence n’ont pas pu être lues.',
     failed: 'Les données de référence n’ont pas pu être affichées.',
   },

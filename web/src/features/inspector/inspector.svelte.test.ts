@@ -272,6 +272,36 @@ describe('commands', () => {
     expect(mri.element().getAttribute('data-tooltip')).toBe('Open linked MRI slices');
   });
 
+  test('Focus, Isolate and Hide say what they do, described without a hover and shown on keyboard focus', async () => {
+    const screen = await render(Fixture, { regionId: V1 });
+    const said = {
+      Focus: 'Frame this region in its colour, with the rest see-through grey',
+      Isolate: 'Show this region alone, framed',
+      Hide: 'Remove this region from view; Undo brings it back',
+    };
+    for (const [name, hint] of Object.entries(said)) {
+      await expect.element(button(name)).toHaveAccessibleDescription(hint);
+      expect(button(name).element().getAttribute('data-tooltip')).toBe(hint);
+    }
+    // The tooltip shown on keyboard focus says it once, not as a second description.
+    // The pointer an earlier test left over a command would show that command's tooltip.
+    await userEvent.hover(page.getByRole('heading', { level: 2 }));
+    (document.querySelector('.selection-clear') as HTMLElement).focus();
+    await userEvent.keyboard('{Tab}');
+    await expect.element(page.getByRole('tooltip')).toHaveTextContent(said.Focus);
+    await expect.element(button('Focus')).toHaveAccessibleDescription(said.Focus);
+    await screen.rerender({ regionId: V1, isolated: true });
+    await expect
+      .element(button('Restore'))
+      .toHaveAccessibleDescription('Show the rest of the brain again, framed whole');
+    await screen.rerender({ regionId: V1, lang: 'fr' });
+    // The accessible description folds the narrow no-break space into a plain one.
+    const hide = button('Masquer').element();
+    expect(document.getElementById(hide.getAttribute('aria-describedby')!)!.textContent).toBe(
+      'Retirer cette région de la vue\u202f; Annuler la rétablit',
+    );
+  });
+
   test('Tab walks Clear, the four commands, the copyable facts and each section, then Enter toggles one', async () => {
     render(Fixture, { regionId: V1 });
     const walked: string[] = [];

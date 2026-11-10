@@ -20,11 +20,13 @@
     type StrokeCase,
   } from '../../lib/core/catalog/stroke-cases.ts';
   import { decimal, grouped, percent } from '../../lib/core/format.ts';
+  import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
+  import { codeOf } from '../../lib/core/i18n/errors.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
-  import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
+  import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../../lib/ui/focus.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
 
   let {
@@ -48,6 +50,29 @@
   });
 
   const copy = $derived(t(lang, 'strokeCases'));
+  // A failed download can be asked for again; bytes that no longer match the page need a reload;
+  // anything else would fail the same way, so it offers nothing.
+  const failedCode = $derived(
+    store.cohort.status === 'error' ? codeOf(store.cohort.error) : undefined,
+  );
+  const failure = $derived.by(() => {
+    const errors = t(lang, 'errors');
+    if (failedCode === 'asset-updated') return { text: errors.updated, button: errors.reload };
+    if (failedCode === 'asset-fetch') {
+      return { text: `${copy.failed} ${errors.download}`, button: t(lang, 'viewport').retry };
+    }
+    return { text: copy.failed, button: null };
+  });
+
+  async function recover() {
+    if (failedCode === 'asset-updated') {
+      await reloadWithoutStoredModels();
+      return;
+    }
+    store.retry();
+    await tick();
+    rescueFocus(FOCUS_TARGETS.regionTitle);
+  }
   const data = $derived(store.cohort.status === 'ready' ? store.cohort.data : null);
   const windows = $derived(data ? [...data.test_windows, Infinity] : []);
   const maxGap = $derived(windows[Number(window)] ?? Infinity);
@@ -415,11 +440,20 @@
     </Disclosure>
   </div>
 {:else if region && store.available && store.cohort.status === 'error'}
-  <p class="detail-note" role="alert">{copy.failed}</p>
+  <p class="detail-note" role="alert">{failure.text}</p>
+  {#if failure.button}
+    <div class="actions">
+      <button type="button" onclick={() => void recover()}>{failure.button}</button>
+    </div>
+  {/if}
 {/if}
 
 <style>
   @layer features {
+    /* A failure is set apart in the danger ink every inline failure uses. */
+    .detail-note[role='alert'] {
+      color: var(--danger);
+    }
     :global(.cases-choice) {
       margin-top: var(--space-2);
     }

@@ -17,6 +17,7 @@ import type {
   LoadStatus,
   Notice,
   SessionState,
+  ShownNotice,
   Theme,
 } from '../../types/index.ts';
 
@@ -85,16 +86,35 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
   let held: Notice[] | null = null;
   // Where a lost context goes back to: the start it interrupted, or the model on screen.
   let lostFrom: 'loading' | 'ready' = 'ready';
-  // One notice from several, each said once; the first action offered wins.
-  const joined = (notices: (Notice | null)[]): Notice => {
-    const present = notices.filter((notice): notice is Notice => Boolean(notice));
+  // Errors stand until the reader dismisses or retries them, or the failed command later succeeds
+  // (`resolveNotice`); information until the next action. Each is numbered once, as it arrives.
+  type Standing = Notice & { id: number };
+  let sequence = 0;
+  let errors: Standing[] = [];
+  let infos: Standing[] = [];
+  // One notice from all that stand, errors first, each text said once. The newer information's
+  // action while it offers one, else the first error's; the first offered of each kind wins.
+  const shown = (): ShownNotice | null => {
+    const standing = [...errors, ...infos];
+    if (!standing.length) return null;
+    // A text that arrives again keeps its place and takes the newer number, so it is news again.
+    const latest = new Map(standing.map(({ id, text }) => [text, id]));
+    const parts = [...latest.keys()].map((text) => ({ id: latest.get(text)!, text }));
+    const offering =
+      infos.find((notice) => notice.action) ?? errors.find((notice) => notice.action);
     return {
-      text: present.reduce(
-        (text, { text: next }) => (text.includes(next) ? text : `${text} ${next}`.trim()),
-        '',
-      ),
-      action: present.find((notice) => notice.action)?.action ?? null,
+      kind: errors.length ? 'error' : 'info',
+      text: parts.map(({ text }) => text).join(' '),
+      action: offering?.action ?? null,
+      ...(offering?.retry && { retry: offering.retry }),
+      parts,
     };
+  };
+  // The same failure again takes the place of the one standing.
+  const add = (notice: Notice) => {
+    const standing = { ...notice, id: ++sequence };
+    if (notice.kind === 'info') infos = [...infos, standing];
+    else errors = [...errors.filter(({ key }) => !key || key !== notice.key), standing];
   };
   let state: SessionState = {
     view: 'oblique',
@@ -117,9 +137,10 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     notice: null,
   };
 
-  /** Any deliberate action supersedes a standing notice. */
+  /** Any deliberate action supersedes standing information; an error stands. */
   const act = (change: Partial<SessionState>) => {
-    state = { ...state, notice: null, ...change };
+    infos = [];
+    state = { ...state, ...change, notice: shown() };
     return true;
   };
 
@@ -156,7 +177,11 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
 
     setTheme: (value: Theme) => act({ theme: value }),
 
-    setLang: (value: string) => act({ lang: asLanguage(value) }),
+    /** An error worded in the language left would stand in the wrong one, so it goes too. */
+    setLang(value: string) {
+      errors = [];
+      return act({ lang: asLanguage(value) });
+    },
 
     /*
      * The load lifecycle. Every status change is one of these events:
@@ -215,15 +240,53 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     },
 
     /**
-     * `{ text, action }`; cleared by the next action or by the reader, never by a timer.
-     * A notice arriving while another stands joins it, so neither goes unread.
+     * `{ kind, text, action }`, never cleared by a timer. Null retires standing information, as an
+     * action does; an error stands. A notice arriving while another stands joins it, so neither
+     * goes unread.
      */
     notify(notice: Notice | null) {
       if (notice !== null && typeof notice?.text !== 'string') {
         throw new TypeError('A notice needs text.');
       }
+      if (notice && notice.kind !== 'error' && notice.kind !== 'info') {
+        throw new TypeError(`Unknown notice kind: ${String(notice.kind)}`);
+      }
+      if (notice?.action === 'retry' && !notice.retry) {
+        throw new TypeError('A notice offering Retry needs the command to retry.');
+      }
       if (notice && held) held.push(notice);
-      else state = { ...state, notice: notice && joined([state.notice, notice]) };
+      else {
+        if (notice) add(notice);
+        else infos = [];
+        state = { ...state, notice: shown() };
+      }
+    },
+
+    /** The reader's dismiss: whatever the notice says, errors included. */
+    dismissNotice() {
+      errors = [];
+      infos = [];
+      state = { ...state, notice: null };
+    },
+
+    /** The command a failure `key` names has since succeeded: its error, shown or held, goes. */
+    resolveNotice(key: string) {
+      errors = errors.filter((notice) => notice.key !== key);
+      held = held && held.filter((notice) => notice.key !== key);
+      state = { ...state, notice: shown() };
+    },
+
+    /**
+     * The notice's Retry: the failed command again, in place of its error. Other errors stand, the
+     * next of them offering its own Retry; information goes, as with any action.
+     */
+    retryNotice() {
+      const retry = state.notice?.action === 'retry' ? state.notice.retry : undefined;
+      if (!retry) throw new Error('The notice offers no retry.');
+      errors = errors.filter((notice) => notice.retry !== retry);
+      infos = [];
+      state = { ...state, notice: shown() };
+      retry();
     },
 
     /**
@@ -235,7 +298,10 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
       held ??= [];
     },
 
-    /** Show what waited, after `lead` (the link's own notice), as one notice; the first action offered wins. */
+    /**
+     * Show what waited as one notice: the errors first, then `lead` (the link's own notice) and the
+     * information that waited, as `shown` joins them.
+     */
     releaseNotices(lead: Notice | null = null) {
       if (!held) throw new Error('No notices are held.');
       if (lead) held.unshift(lead);
@@ -243,7 +309,8 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
       if (holds > 0) return;
       const waiting = held;
       held = null;
-      if (waiting.length) state = { ...state, notice: joined([state.notice, ...waiting]) };
+      waiting.forEach(add);
+      state = { ...state, notice: shown() };
     },
 
     /**

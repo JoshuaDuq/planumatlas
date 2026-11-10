@@ -136,7 +136,7 @@ export function createAnatomyCommands(
   function notifyClearedSelection(had: { id: string } | null) {
     if (had && !engineState.model.selectedRegion) {
       const name = catalog.label(had.id).name;
-      session.notify({ text: t(session.state.lang, 'app').selectionCleared(name) });
+      session.notify({ kind: 'info', text: t(session.state.lang, 'app').selectionCleared(name) });
     }
   }
 
@@ -206,6 +206,7 @@ export function createAnatomyCommands(
     // In place of the cleared-selection notice the hide raised, which would join this one.
     session.notify(null);
     session.notify({
+      kind: 'info',
       text: t(lang, 'dissection').partHidden(
         catalog.label(region.id).name,
         t(lang, 'sides').words[region.hemisphere],
@@ -288,15 +289,18 @@ export function createAnatomyCommands(
     const before = settingsNow();
     try {
       if (!(await reveal(reason, id, current)) || !id) return;
+      commands.succeeded('region');
       // What the reveal changed comes first, so its Restore is the notice's action.
       const said = revealNotice(session.state.lang, before, settingsNow());
       if (said) {
         beforeReveal = { scene, region: id };
-        session.notify({ text: said, action: 'restore' });
+        session.notify({ kind: 'info', text: said, action: 'restore' });
       }
       focusSelection();
     } catch (error) {
-      commands.failIfCurrent(current, 'region', error);
+      commands.failIfCurrent(current, 'region', error, undefined, () => {
+        void revealRegion(reason, id);
+      });
     }
   }
 
@@ -322,7 +326,7 @@ export function createAnatomyCommands(
         ),
       );
     } else {
-      session.notify({ text: t(session.state.lang, 'clinical').stageRestored });
+      session.notify({ kind: 'info', text: t(session.state.lang, 'clinical').stageRestored });
     }
   }
 
@@ -331,9 +335,14 @@ export function createAnatomyCommands(
     const current = commands.begin();
     try {
       model.setInternalSystem(null);
-      if (await commands.openRegion(id, current)) focusSelection();
+      if (await commands.openRegion(id, current)) {
+        commands.succeeded('region');
+        focusSelection();
+      }
     } catch (error) {
-      commands.failIfCurrent(current, 'region', error);
+      commands.failIfCurrent(current, 'region', error, undefined, () => {
+        void openConstituent(id);
+      });
     }
   }
 
@@ -347,12 +356,15 @@ export function createAnatomyCommands(
       await commands.loadDetail(model.defaultDetail, current);
       if (!current()) return;
     } catch (error) {
-      commands.failIfCurrent(current, 'internal', error);
+      commands.failIfCurrent(current, 'internal', error, undefined, () => {
+        void enterInternal();
+      });
       return;
     }
     model.setInternalSystem(null);
     model.setCortexVisible(false);
     model.setSurfaceColor('atlas');
+    commands.succeeded('internal');
     camera.frameInternal();
   }
 
@@ -377,6 +389,7 @@ export function createAnatomyCommands(
     if (changes.colourLost) {
       const { lang } = session.state;
       session.notify({
+        kind: 'info',
         text: t(lang, 'app').cabNpAtlasOnly(atlasSwitchLabel(model.settings.atlas, lang)),
       });
     }
@@ -401,15 +414,21 @@ export function createAnatomyCommands(
       session.setQuery('');
       const group = catalog.groups.find((entry) => entry.kind === 'structure');
       if (system && group && !view.current.expanded.has(group.key)) session.toggleGroup(group.key);
+      commands.succeeded('system');
       camera.frameInternal();
     } catch (error) {
-      commands.failIfCurrent(current, 'system', error);
+      commands.failIfCurrent(current, 'system', error, undefined, () => {
+        void chooseInternalSystem(system);
+      });
     }
   }
 
   async function setSpinalCordVisible(visible: boolean) {
     if (!hasSpinalCord) {
-      session.notify({ text: t(session.state.lang, 'display').spinalCordUnavailable });
+      session.notify({
+        kind: 'info',
+        text: t(session.state.lang, 'display').spinalCordUnavailable,
+      });
       return;
     }
     const current = commands.begin();
@@ -419,7 +438,9 @@ export function createAnatomyCommands(
       notifyClearedSelection(had);
       camera.frameWhole();
     } catch (error) {
-      commands.failIfCurrent(current, 'cord', error);
+      commands.failIfCurrent(current, 'cord', error, undefined, () => {
+        void setSpinalCordVisible(visible);
+      });
     }
   }
 
@@ -447,7 +468,11 @@ export function createAnatomyCommands(
     afterReset();
     resetView();
     beforeReveal = { scene, region: null, surface };
-    session.notify({ text: t(session.state.lang, 'display').startedOver, action: 'restore' });
+    session.notify({
+      kind: 'info',
+      text: t(session.state.lang, 'display').startedOver,
+      action: 'restore',
+    });
   }
 
   /**
@@ -477,7 +502,11 @@ export function createAnatomyCommands(
     cortexSurface.setSurface('pial');
     afterReset();
     beforeReveal = { scene, region: null, surface };
-    session.notify({ text: t(session.state.lang, 'display').displayReset, action: 'restore' });
+    session.notify({
+      kind: 'info',
+      text: t(session.state.lang, 'display').displayReset,
+      action: 'restore',
+    });
   }
 
   return {

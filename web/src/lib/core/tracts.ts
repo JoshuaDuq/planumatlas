@@ -93,6 +93,16 @@ export function tractSearchText(row: TractRow, lang: Language): string {
   );
 }
 
+/** The rows a search keeps: those whose names hold the query, accents and case folded. */
+export function tractsMatching(
+  rows: readonly TractRow[],
+  query: string,
+  lang: Language,
+): TractRow[] {
+  const needle = foldForSearch(query.trim(), lang);
+  return rows.filter((row) => tractSearchText(row, lang).includes(needle));
+}
+
 /** Mean with its range, as a paper writes it, in the reader's notation (decimal comma in French). */
 export function lengthSummary(
   { mean, min, max }: Pick<LoadedBundle, 'mean' | 'min' | 'max'>,

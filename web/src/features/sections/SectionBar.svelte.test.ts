@@ -323,7 +323,7 @@ describe('the section row', () => {
     await cutPlane('axial');
     const before = said();
     position().focus();
-    await userEvent.keyboard('{ArrowRight}{ArrowRight}');
+    await userEvent.keyboard('{ArrowRight}');
     await vi.waitFor(() => expect(controls.offset).toBe(1));
     expect(position().getAttribute('aria-valuetext')).toBe('+1.0 mm');
     expect(exact().value).toBe('1.0');
@@ -470,6 +470,133 @@ describe('the section row', () => {
   });
 });
 
+describe('the sliders’ steps', () => {
+  /** A wheel notch over `target`; true when the slider took it (the page did not). */
+  const wheel = (target: Element, init: WheelEventInit) =>
+    !target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ...init }));
+
+  test('the position slider’s keys step 1 mm, Page Up and Page Down 10 mm, Home and End to its ends', async () => {
+    await mount();
+    await cutPlane('axial');
+    position().focus();
+    const steps: [string, number][] = [
+      ['{ArrowRight}', 1],
+      ['{ArrowUp}', 2],
+      ['{PageUp}', 12],
+      ['{ArrowLeft}', 11],
+      ['{PageDown}', 1],
+      ['{ArrowDown}', 0],
+      ['{Home}', -128],
+      ['{PageDown}', -128],
+      ['{End}', 128],
+    ];
+    for (const [key, offset] of steps) {
+      await userEvent.keyboard(key);
+      await vi.waitFor(() => expect(controls.offset, key).toBe(offset));
+    }
+    expect(position().getAttribute('aria-valuetext')).toBe('+128.0\u202fmm');
+    expect(exact().value).toBe('128.0');
+  });
+
+  test('the angle sliders’ keys step 1°, Page Up and Page Down 10°, Home and End to their ends', async () => {
+    await mount();
+    await cutPlane('oblique');
+    control('slider', 'Tilt').focus();
+    await userEvent.keyboard('{PageUp}{ArrowRight}');
+    await vi.waitFor(() => expect(controls.state.tilt).toBe(41));
+    control('slider', 'Azimuth').focus();
+    await userEvent.keyboard('{PageDown}{PageDown}{ArrowDown}');
+    await vi.waitFor(() => expect(controls.state.azimuth).toBe(9));
+    await userEvent.keyboard('{Home}');
+    await vi.waitFor(() => expect(controls.state.azimuth).toBe(-180));
+    expect(controls.state.tilt).toBe(41);
+  });
+
+  test('a wheel over a slider steps it 1 unit a notch, 10 with Shift, and leaves the page what it cannot use', async () => {
+    await mount();
+    await cutPlane('oblique');
+    // An oblique range is not whole millimetres; the ends are still reached.
+    const [minimum] = controls.offsetRange;
+    expect(wheel(position(), { deltaY: -100 })).toBe(true);
+    await vi.waitFor(() => expect(controls.offset).toBe(1));
+    expect(wheel(position(), { deltaY: 4, shiftKey: true })).toBe(true);
+    await vi.waitFor(() => expect(controls.offset).toBe(-9));
+    // Where Shift turns the wheel sideways.
+    expect(wheel(position(), { deltaX: -100, shiftKey: true })).toBe(true);
+    await vi.waitFor(() => expect(controls.offset).toBe(1));
+    expect(exact().value).toBe('1.0');
+    // Ctrl and Meta are the browser's zoom; a sideways wheel and the end of the range are the page's.
+    for (const init of [
+      { deltaY: -100, ctrlKey: true },
+      { deltaY: -100, metaKey: true },
+      { deltaX: 100 },
+    ]) {
+      expect(wheel(position(), init)).toBe(false);
+    }
+    for (let notch = 0; notch < 16; notch += 1) wheel(position(), { deltaY: 100, shiftKey: true });
+    await vi.waitFor(() => expect(controls.offset).toBe(minimum));
+    expect(wheel(position(), { deltaY: 100 })).toBe(false);
+    // Over the rest of the row the wheel is the page's.
+    expect(wheel(exact(), { deltaY: -100 })).toBe(false);
+    expect(wheel(bar(), { deltaY: -100 })).toBe(false);
+    const tilt = control('slider', 'Tilt');
+    expect(wheel(tilt, { deltaY: -100, shiftKey: true })).toBe(true);
+    await vi.waitFor(() => expect(controls.state.tilt).toBe(40));
+    expect(wheel(control('slider', 'Azimuth'), { deltaY: 100 })).toBe(true);
+    await vi.waitFor(() => expect(controls.state.azimuth).toBe(29));
+    expect(controls.state.tilt).toBe(40);
+  });
+
+  test('a wheel holds the slider like a hand: the cut and the sentence wait until the pointer leaves', async () => {
+    await mount();
+    await cutPlane('axial');
+    const before = said();
+    wheel(position(), { deltaY: -100 });
+    await vi.waitFor(() => expect(controls.offset).toBe(1));
+    controls.setOffset(20);
+    flushSync();
+    expect(position().value).toBe('1');
+    expect(said()).toBe(before);
+    position().dispatchEvent(new PointerEvent('pointerleave'));
+    flushSync();
+    expect(position().value).toBe('20');
+    await vi.waitFor(() => expect(said()).toMatch(/^Tissue cut at \+20\.0/));
+  });
+
+  test('a wheeled slider removed under the pointer lets go: the next slider follows the cut and the sentence is said', async () => {
+    await mount();
+    await cutPlane('axial');
+    wheel(position(), { deltaY: -100 });
+    await vi.waitFor(() => expect(controls.offset).toBe(1));
+    let land!: (kept: boolean) => void;
+    cut.mockImplementationOnce(async (plane) => {
+      const kept = await new Promise<boolean>((resolve) => (land = resolve));
+      await engine.sections.setMode(plane);
+      return kept;
+    });
+    void controls.choose('coronal');
+    flushSync();
+    expect(bar().querySelector('input[type="range"]')).toBeNull();
+    land(true);
+    await vi.waitFor(() => expect(bar().dataset.pending).toBe('false'));
+    controls.setOffset(20);
+    flushSync();
+    expect(position().value).toBe('20');
+    await vi.waitFor(() => expect(said()).toMatch(/^Tissue cut at \+20\.0/));
+  });
+
+  test('a disabled slider ignores the wheel', async () => {
+    await mount();
+    await cutPlane('axial');
+    vi.spyOn(engine.sections, 'active', 'get').mockReturnValue(false);
+    controls.setOffset(5);
+    flushSync();
+    expect(position().disabled).toBe(true);
+    expect(wheel(position(), { deltaY: -100 })).toBe(false);
+    expect(controls.offset).toBe(5);
+  });
+});
+
 describe('the section row’s guards', () => {
   test.each([
     ['on a desktop', false],
@@ -599,20 +726,42 @@ describe('the section row’s guards', () => {
 });
 
 describe('the compact row', () => {
-  test('writes its one-line width to the stage layout, again in French, and nothing once gone', async () => {
+  /**
+   * With exactly the measured width in sight (and the 20 px gutters), the row stays unfolded and its first
+   * line sits on one line inside the dock: a measure that missed a control would push Close out of it.
+   */
+  function expectFirstLineFitsItsNeed() {
+    const need = stage.sectionNeed;
+    const host = stage.hostSize!;
+    stage.setViewport({ x: 0, y: 0, width: need + 40, height: host.height }, host);
+    flushSync();
+    expect(bar().dataset.compact).toBe('false');
+    const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
+    const line = [
+      '.section-bar-name',
+      '.cut-number',
+      'label.check',
+      '.stage-command',
+      '.cut-close',
+    ].map((selector) => bar().querySelector(selector)!.getBoundingClientRect());
+    expect(Math.max(...line.map((box) => box.right))).toBeLessThanOrEqual(dock.right);
+    expect(new Set(line.map((box) => Math.round(box.top + box.height / 2))).size).toBe(1);
+    stage.setViewport({ x: 0, y: 0, width: host.width, height: host.height }, host);
+    flushSync();
+  }
+
+  test('writes its first line’s width to the stage layout, again in French, and nothing once gone', async () => {
     await mount({}, { width: 1280, height: 700 });
     expect(stage.sectionNeed).toBe(0);
     await cutPlane('coronal');
-    const dock = document.querySelector<HTMLElement>('.stage-dock')!;
-    // On a stage with room the dock is the row's own width, which is what was measured.
     await vi.waitFor(() => expect(stage.sectionNeed).toBeGreaterThan(0));
     expect(bar().dataset.compact).toBe('false');
-    expect(stage.sectionNeed).toBe(dock.offsetWidth);
+    expectFirstLineFitsItsNeed();
     const english = stage.sectionNeed;
     live.lang = 'fr';
     flushSync();
     await vi.waitFor(() => expect(stage.sectionNeed).not.toBe(english));
-    expect(stage.sectionNeed).toBe(dock.offsetWidth);
+    expectFirstLineFitsItsNeed();
     await controls.close();
     flushSync();
     expect(stage.sectionNeed).toBe(0);
@@ -620,8 +769,8 @@ describe('the compact row', () => {
 
   test('is measured whole while it is folded, so it unfolds once the stage has room', async () => {
     await mount({}, { width: 1280, height: 600 });
-    // The sheet or a key band leaves 560 px of the stage in sight.
-    stage.setViewport({ x: 0, y: 0, width: 560, height: 600 }, { width: 1280, height: 600 });
+    // The sheet or a key band leaves 400 px of the stage in sight.
+    stage.setViewport({ x: 0, y: 0, width: 400, height: 600 }, { width: 1280, height: 600 });
     await cutPlane('coronal');
     await vi.waitFor(() => expect(bar().dataset.compact).toBe('true'));
     // New words are measured while the row is folded.
@@ -634,15 +783,13 @@ describe('the compact row', () => {
     stage.setViewport({ x: 0, y: 0, width: 1280, height: 600 }, { width: 1280, height: 600 });
     flushSync();
     expect(bar().dataset.compact).toBe('false');
-    // Unfolded, the dock is exactly the width measured while folded.
-    await vi.waitFor(() =>
-      expect(document.querySelector<HTMLElement>('.stage-dock')!.offsetWidth).toBe(folded),
-    );
+    // Unfolded, the first line fits the width measured while folded.
     expect(stage.sectionNeed).toBe(folded);
+    expectFirstLineFitsItsNeed();
   });
 
   test('where one line would not fit, Reverse side and Linked MRI fold behind More', async () => {
-    await mount({}, { width: 560, height: 600 });
+    await mount({}, { width: 400, height: 600 });
     await cutPlane('coronal');
     await vi.waitFor(() => expect(bar().dataset.compact).toBe('true'));
     const more = control('button', 'More section controls');
@@ -657,7 +804,7 @@ describe('the compact row', () => {
     expect(control('checkbox', 'Reverse side').checkVisibility()).toBe(true);
     // The row stays inside the stage.
     const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
-    expect(dock.right).toBeLessThanOrEqual(560);
+    expect(dock.right).toBeLessThanOrEqual(400);
   });
 
   test('a row that folds with focus in its details hands focus to More', async () => {
@@ -665,7 +812,7 @@ describe('the compact row', () => {
     await cutPlane('coronal');
     await vi.waitFor(() => expect(bar().dataset.compact).toBe('false'));
     control('checkbox', 'Reverse side').focus();
-    stage.setViewport({ x: 0, y: 0, width: 500, height: 600 }, { width: 900, height: 600 });
+    stage.setViewport({ x: 0, y: 0, width: 400, height: 600 }, { width: 900, height: 600 });
     flushSync();
     expect(bar().dataset.compact).toBe('true');
     await vi.waitFor(() => expect(active()).toBe(control('button', 'More section controls')));
@@ -683,6 +830,33 @@ describe('the compact row', () => {
     const dock = document.querySelector<HTMLElement>('.stage-dock')!;
     const gutter = parseFloat(getComputedStyle(dock).getPropertyValue('--stage-gutter'));
     expect(dock.getBoundingClientRect().width).toBeCloseTo(390 - 2 * gutter, 0);
+  });
+
+  test('the position slider has a line of its own under the first, a pixel to each 0.5 mm step', async () => {
+    await mount({}, { width: 1280, height: 700 });
+    await cutPlane('coronal');
+    // The thumb's 14 px (the computed style of a slider's thumb reads as the slider's own width).
+    const travel = () => position().getBoundingClientRect().width - 14;
+    expect(position().getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      exact().getBoundingClientRect().bottom,
+    );
+    // 256 mm in 0.5 mm steps; it shared the first line at 160 px, some 1.7 mm a pixel.
+    expect(travel()).toBeGreaterThanOrEqual(512);
+    // A stage too narrow for that length but not for the first line: unfolded, the slider takes what is left.
+    stage.setViewport({ x: 0, y: 0, width: stage.sectionNeed + 60, height: 700 }, stage.hostSize!);
+    flushSync();
+    expect(bar().dataset.compact).toBe('false');
+    const ends = bar().querySelectorAll('.cut-end');
+    const row = bar().getBoundingClientRect();
+    expect(ends[0]!.getBoundingClientRect().left - row.left).toBeLessThan(24);
+    expect(row.right - ends[1]!.getBoundingClientRect().right).toBeLessThan(24);
+    expect(travel()).toBeLessThan(512);
+    // The angle sliders under it keep their own length and do not widen the row (the end letters differ).
+    stage.setViewport({ x: 0, y: 0, width: 1280, height: 700 }, stage.hostSize!);
+    flushSync();
+    const width = bar().offsetWidth;
+    await cutPlane('oblique');
+    expect(Math.abs(bar().offsetWidth - width)).toBeLessThan(8);
   });
 
   test('a phone gives the position slider a line of its own, below the exact field', async () => {

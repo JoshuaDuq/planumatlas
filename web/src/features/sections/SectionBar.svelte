@@ -6,18 +6,23 @@
     range is not applied and is explained under the row (deviation u4-number-field-range-error). Neither
     takes the cut's value back while the reader is on it.
   - Reverse side, Linked MRI (`M`), and Close, which hands focus to the Section tool before the row goes.
-    While compact (G1's `sectionCompact`: always on a phone, elsewhere when one line would not fit),
+    While compact (G1's `sectionCompact`: always on a phone, elsewhere when the first line would not fit),
     Reverse side and Linked MRI fold behind a disclosure.
   - An oblique cut adds tilt and azimuth sliders.
+  - Every slider steps in whole units of its own (mm, degrees): arrows one, Page Up and Page Down ten, Home
+    and End to the ends; a wheel over it one a notch, ten with Shift. A wheel holds a slider as focus does,
+    until the pointer leaves it.
+  - The position slider has a line of its own, under the plane's name, exact field and controls.
   - While the chosen plane's anatomy is prepared the row names the plane and says so, with nothing to move.
   - The status sentence is spoken from a live region that stays when the row goes, so closing the section
     is heard (deviation g4-status-outlives-bar). It waits while a slider is dragged or the position slider
     has focus, and is said once the reader lets go; the shown line leaves out the position.
-  - The row's one-line width is measured into G1's `sectionNeed` whenever its words change.
+  - The first line's width is measured into G1's `sectionNeed` whenever its words change.
 -->
 <script lang="ts">
   import { tick, untrack } from 'svelte';
   import type { Attachment } from 'svelte/attachments';
+  import { on } from 'svelte/events';
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { decimal, millimetres, parseDecimal } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
@@ -72,10 +77,12 @@
   let tilt = $state(0);
   let azimuth = $state(0);
   let angleFocused = $state(false);
+  // The slider a wheel is moving, held until the pointer leaves it: the cut lags a fast wheel.
+  let wheeling = $state<'position' | 'angles' | null>(null);
 
   $effect.pre(() => {
     const offset = controls.offset;
-    if (!untrack(() => rangeFocused)) draft = offset;
+    if (!untrack(() => rangeFocused || wheeling === 'position')) draft = offset;
     if (!untrack(() => numberFocused)) {
       numberText = decimal(offset, 1, lang);
       invalid = false;
@@ -83,7 +90,7 @@
   });
   $effect.pre(() => {
     const { tilt: nextTilt, azimuth: nextAzimuth } = controls.state;
-    if (untrack(() => angleFocused)) return;
+    if (untrack(() => angleFocused || wheeling === 'angles')) return;
     tilt = nextTilt;
     azimuth = nextAzimuth;
   });
@@ -116,7 +123,7 @@
   let said = $state(untrack(() => sentences.said));
   $effect(() => {
     const next = sentences.said;
-    if (!dragging && !rangeFocused) said = next;
+    if (!dragging && !rangeFocused && !wheeling) said = next;
   });
 
   /** A slider's drag lasts from its first input until it is released, cancelled or left (U2 `trackDrag`). */
@@ -124,6 +131,94 @@
     const drag = trackDrag([slider], () => (dragging = false));
     return () => drag.dispose();
   };
+
+  type Range = readonly [number, number];
+  const TILT: Range = [0, 90];
+  const AZIMUTH: Range = [-180, 180];
+  const KEY_STEPS: Record<string, number> = {
+    ArrowRight: 1,
+    ArrowUp: 1,
+    ArrowLeft: -1,
+    ArrowDown: -1,
+    PageUp: 10,
+    PageDown: -10,
+    Home: -Infinity,
+    End: Infinity,
+  };
+  const clamp = (value: number, [low, high]: Range) => Math.min(high, Math.max(low, value));
+
+  /**
+   * A slider's own keys and wheel, in whole units (APG Slider). The native slider steps by its `step` and
+   * pages by a tenth of its range, 25.6 mm or 36°. A wheel notch that cannot move it, or one with Ctrl or
+   * Meta (the browser's zoom), is left to the page (g5-wheel-modifiers, as the linked MRI's wheel).
+   */
+  function stepping(
+    kind: 'position' | 'angles',
+    value: () => number,
+    range: () => Range,
+    move: (value: number) => void,
+  ): Attachment<HTMLInputElement> {
+    return (slider) => {
+      const stops = [
+        on(slider, 'keydown', (event) => {
+          const step = KEY_STEPS[event.key];
+          if (step === undefined || event.altKey || event.ctrlKey || event.metaKey) return;
+          event.preventDefault();
+          const next = clamp(value() + step, range());
+          if (next !== value()) move(next);
+        }),
+        // Not passive: a wheel that moves the slider must not also scroll the page.
+        on(
+          slider,
+          'wheel',
+          (event) => {
+            if (slider.disabled || event.ctrlKey || event.metaKey) return;
+            // Shift turns the wheel horizontal on some platforms.
+            const delta = event.deltaY || (event.shiftKey ? event.deltaX : 0);
+            const next = clamp(value() - Math.sign(delta) * (event.shiftKey ? 10 : 1), range());
+            if (next === value()) return;
+            event.preventDefault();
+            wheeling = kind;
+            move(next);
+          },
+          { passive: false },
+        ),
+        ...(['pointerleave', 'pointercancel', 'blur'] as const).map((type) =>
+          on(slider, type, release),
+        ),
+      ];
+      return () => {
+        stops.forEach((stop) => stop());
+        // A slider removed under the pointer (a plane being prepared, a plane change) gets no pointerleave.
+        if (wheeling === kind) wheeling = null;
+      };
+    };
+
+    function release() {
+      if (wheeling !== kind) return;
+      wheeling = null;
+      if (kind === 'position') leavePosition();
+      else catchUpAngles();
+    }
+  }
+
+  function movePosition(offset: number) {
+    draft = offset;
+    numberText = decimal(offset, 1, lang);
+    invalid = false;
+    controls.slideOffset(offset);
+  }
+
+  function moveAngles(nextTilt: number, nextAzimuth: number) {
+    tilt = nextTilt;
+    azimuth = nextAzimuth;
+    controls.slideAngles(tilt, azimuth);
+  }
+
+  /** The position slider, no longer held, takes the cut's value. */
+  function leavePosition() {
+    if (!rangeFocused && wheeling !== 'position') draft = controls.offset;
+  }
 
   /**
    * The Section tool, or the model when the tract reference hides every tool. Decided by the tract
@@ -143,6 +238,7 @@
   // Before the row goes: focus inside it would otherwise fall to the page (g4-focus-when-bar-hidden).
   $effect.pre(() => {
     if (shown) return;
+    wheeling = null;
     const group = untrack(() => bar?.querySelector('[role="group"]'));
     if (group?.contains(document.activeElement)) focusTool();
   });
@@ -155,7 +251,7 @@
   });
 
   /**
-   * The row's natural width with every control beside the slider, in one forced layout, read again only
+   * The first line's natural width, the slider asking for none, in one forced layout, read again only
    * when its words, its plane or the webfont change (viewport-chrome.js:148-166).
    */
   $effect(() => {
@@ -179,6 +275,11 @@
   /** Leaving a cut angle's slider: both sliders catch up with the cut, as the position slider does. */
   function leaveAngles() {
     angleFocused = false;
+    catchUpAngles();
+  }
+
+  function catchUpAngles() {
+    if (angleFocused || wheeling === 'angles') return;
     // While a slide is building the cut lags the sliders: the cut catches up when it lands.
     if (!controls.sliding) ({ tilt, azimuth } = controls.state);
   }
@@ -234,39 +335,42 @@
               disabled={!controls.active}
               aria-valuetext={millimetres(draft, lang)}
               {@attach tracked}
+              {@attach stepping(
+                'position',
+                () => draft,
+                () => [minimum, maximum],
+                movePosition,
+              )}
               onfocus={() => (rangeFocused = true)}
               onblur={() => {
                 rangeFocused = false;
-                draft = controls.offset;
+                leavePosition();
               }}
               oninput={(event) => {
                 dragging = true;
-                draft = event.currentTarget.valueAsNumber;
-                numberText = decimal(draft, 1, lang);
-                invalid = false;
-                controls.slideOffset(draft);
+                movePosition(event.currentTarget.valueAsNumber);
               }}
             />
             <span class="cut-end" aria-hidden="true">{ends[1]}</span>
-            <input
-              class="cut-number"
-              type="text"
-              inputmode="decimal"
-              autocomplete="off"
-              disabled={!controls.active}
-              aria-label={copy.exactPositionAria}
-              aria-invalid={invalid}
-              aria-describedby={invalid ? errorId : undefined}
-              bind:value={numberText}
-              onfocus={() => (numberFocused = true)}
-              onblur={() => {
-                numberFocused = false;
-                if (!invalid) numberText = decimal(controls.offset, 1, lang);
-              }}
-              onchange={(event) => commitNumber(event.currentTarget)}
-            />
-            <span class="cut-unit" aria-hidden="true">mm</span>
           </div>
+          <input
+            class="cut-number"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            disabled={!controls.active}
+            aria-label={copy.exactPositionAria}
+            aria-invalid={invalid}
+            aria-describedby={invalid ? errorId : undefined}
+            bind:value={numberText}
+            onfocus={() => (numberFocused = true)}
+            onblur={() => {
+              numberFocused = false;
+              if (!invalid) numberText = decimal(controls.offset, 1, lang);
+            }}
+            onchange={(event) => commitNumber(event.currentTarget)}
+          />
+          <span class="cut-unit" aria-hidden="true">mm</span>
           <div bind:this={details} id={detailsId} class="cut-details">
             <label class="check">
               <input
@@ -319,18 +423,23 @@
             <input
               type="range"
               data-tooltip={copy.tilt}
-              min="0"
-              max="90"
+              min={TILT[0]}
+              max={TILT[1]}
               step="1"
               value={tilt}
               aria-valuetext={degrees(tilt, lang)}
               {@attach tracked}
+              {@attach stepping(
+                'angles',
+                () => tilt,
+                () => TILT,
+                (next) => moveAngles(next, azimuth),
+              )}
               onfocus={() => (angleFocused = true)}
               onblur={leaveAngles}
               oninput={(event) => {
                 dragging = true;
-                tilt = event.currentTarget.valueAsNumber;
-                controls.slideAngles(tilt, azimuth);
+                moveAngles(event.currentTarget.valueAsNumber, azimuth);
               }}
             />
             <output aria-hidden="true">{degrees(tilt, lang)}</output>
@@ -340,18 +449,23 @@
             <input
               type="range"
               data-tooltip={copy.azimuth}
-              min="-180"
-              max="180"
+              min={AZIMUTH[0]}
+              max={AZIMUTH[1]}
               step="1"
               value={azimuth}
               aria-valuetext={degrees(azimuth, lang, true)}
               {@attach tracked}
+              {@attach stepping(
+                'angles',
+                () => azimuth,
+                () => AZIMUTH,
+                (next) => moveAngles(tilt, next),
+              )}
               onfocus={() => (angleFocused = true)}
               onblur={leaveAngles}
               oninput={(event) => {
                 dragging = true;
-                azimuth = event.currentTarget.valueAsNumber;
-                controls.slideAngles(tilt, azimuth);
+                moveAngles(tilt, event.currentTarget.valueAsNumber);
               }}
             />
             <output aria-hidden="true">{degrees(azimuth, lang, true)}</output>
@@ -394,7 +508,17 @@
       gap: var(--space-1) var(--space-3);
       min-height: var(--control-height);
     }
+    /* The plane, its exact position and the controls on one line; the slider under them, the row's width. */
+    .section-bar[data-pending='false'] .section-bar-row:first-child {
+      display: grid;
+      grid-template-columns: auto auto auto auto auto minmax(0, 1fr) auto;
+      grid-template-areas:
+        'name number unit reverse mri . close'
+        'position position position position position position position';
+      row-gap: 0;
+    }
     .section-bar-name {
+      grid-area: name;
       flex: none;
       font-size: var(--text-stage);
       font-weight: 600;
@@ -403,11 +527,12 @@
       display: none;
     }
     .cut-position-row {
+      grid-area: position;
       display: flex;
-      flex: 1 1 auto;
       align-items: center;
       gap: var(--space-2);
       min-width: 0;
+      padding-right: var(--space-2);
     }
     .cut-end {
       flex: none;
@@ -419,11 +544,14 @@
       text-align: center;
       color: var(--overlay-ink-muted);
     }
-    /* A 24px hit area around the 2px track; 160px is the slider's natural length in a whole row. */
+    /*
+     * A 24px hit area around the 2px track. The position slider's natural length gives its 14px thumb 512px
+     * of travel: a pixel for each 0.5 mm step of the head's 256 mm. The angle sliders share their row.
+     */
     input[type='range'] {
       appearance: none;
       flex: 1 1 auto;
-      width: 160px;
+      width: calc(512px + 14px);
       min-width: 64px;
       height: 24px;
       margin: 0;
@@ -461,6 +589,7 @@
       cursor: default;
     }
     .cut-number {
+      grid-area: number;
       flex: none;
       width: 4.5rem;
       height: var(--control-height);
@@ -483,7 +612,8 @@
       border-color: var(--overlay-danger);
     }
     .cut-unit {
-      margin-left: calc(-1 * var(--space-1));
+      grid-area: unit;
+      margin-left: calc(var(--space-1) - var(--space-3));
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
       color: var(--overlay-ink-muted);
@@ -495,9 +625,14 @@
       color: var(--overlay-danger);
     }
     .cut-details {
+      grid-area: details;
       display: contents;
     }
+    .cut-details > .stage-command {
+      grid-area: mri;
+    }
     .check {
+      grid-area: reverse;
       display: flex;
       flex: none;
       align-items: center;
@@ -566,9 +701,11 @@
       }
     }
     .cut-more {
+      grid-area: more;
       display: none;
     }
     .section-bar :global(.cut-close) {
+      grid-area: close;
       margin-left: auto;
     }
     .cut-angles {
@@ -583,6 +720,9 @@
       min-width: 0;
       font-size: var(--text-stage);
       color: var(--overlay-ink-muted);
+    }
+    .cut-angle input[type='range'] {
+      width: 160px;
     }
     .cut-angle output {
       min-width: 5ch;
@@ -601,19 +741,19 @@
     }
 
     /*
-     * Compact (G1's `sectionCompact`, where the whole row would wrap): the row keeps the plane, the slider
-     * and the exact position on one line; Reverse side and Linked MRI open from the disclosure.
+     * Compact (G1's `sectionCompact`, where the first line would not fit): it keeps the plane and the exact
+     * position; Reverse side and Linked MRI open from the disclosure, on a line under the slider.
      */
-    .section-bar[data-compact='true'] .section-bar-row:first-child {
-      flex-wrap: nowrap;
-      gap: var(--space-2);
+    .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
+      grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
+      grid-template-areas:
+        'name number unit . more close'
+        'position position position position position position'
+        'details details details details details details';
+      column-gap: var(--space-2);
     }
-    /* From nothing, so an unfolded row never pushes the disclosure and close onto a line of their own. */
-    .section-bar[data-compact='true'] .cut-position-row {
-      flex: 1 1 0;
-    }
-    .section-bar[data-compact='true'] input[type='range'] {
-      min-width: 40px;
+    .section-bar[data-compact='true'] .cut-unit {
+      margin-left: calc(var(--space-1) - var(--space-2));
     }
     .section-bar[data-compact='true'] .cut-number {
       width: 4rem;
@@ -621,19 +761,11 @@
     .section-bar[data-compact='true'] .cut-more {
       display: inline-flex;
     }
-    .section-bar[data-compact='true'] :global(.cut-close) {
-      margin-left: 0;
-    }
     .section-bar[data-compact='true'] .cut-details {
       display: none;
     }
-    .section-bar[data-compact='true'][data-expanded='true'] .section-bar-row:first-child {
-      flex-wrap: wrap;
-    }
     .section-bar[data-compact='true'][data-expanded='true'] .cut-details {
       display: flex;
-      flex-basis: 100%;
-      order: 5;
       align-items: center;
       justify-content: space-between;
       gap: var(--space-3);
@@ -650,6 +782,11 @@
     }
     .section-bar:global([data-measure]) .section-bar-row:first-child {
       flex-wrap: nowrap;
+    }
+    /* The slider fills whatever width the first line leaves; it does not ask for its own. */
+    .section-bar:global([data-measure]) input[type='range'] {
+      width: 0;
+      min-width: 0;
     }
     .section-bar:global([data-measure]) :is(.cut-more, .cut-angles, .cut-error, .cut-status) {
       display: none;
@@ -681,52 +818,6 @@
       input[type='range'] {
         height: 44px;
       }
-      /*
-       * The slider takes a line of its own. Sharing the row left it ~80px for 256 mm, so a finger's
-       * wobble leapt the cut by centimetres and its ends emptied the stage.
-       */
-      .section-bar[data-compact='true'] .section-bar-row:first-child {
-        display: grid;
-        grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
-        grid-template-areas:
-          'name number unit . more close'
-          'start range range range range end'
-          'details details details details details details';
-        column-gap: var(--space-2);
-        row-gap: 0;
-      }
-      .section-bar[data-compact='true'] .cut-position-row {
-        display: contents;
-      }
-      .section-bar-name {
-        grid-area: name;
-      }
-      .cut-end {
-        grid-area: start;
-      }
-      .section-bar[data-compact='true'] input[type='range'] {
-        grid-area: range;
-        width: auto;
-      }
-      input[type='range'] + .cut-end {
-        grid-area: end;
-        padding-right: var(--space-2);
-      }
-      .cut-number {
-        grid-area: number;
-      }
-      .cut-unit {
-        grid-area: unit;
-      }
-      .cut-more {
-        grid-area: more;
-      }
-      .section-bar :global(.cut-close) {
-        grid-area: close;
-      }
-      .cut-details {
-        grid-area: details;
-      }
       /* Folded, the status line still speaks; it is simply not drawn, unless it is a failure. */
       .section-bar:not([data-expanded='true'], [data-failed]) .cut-status {
         position: absolute;
@@ -749,11 +840,10 @@
      * height, while one row still leaves it ~200px for the plane's 256 mm.
      */
     @media (max-height: 480px) and (orientation: landscape) {
-      .section-bar[data-compact='true'] .section-bar-row:first-child {
-        grid-template-columns: auto auto auto auto minmax(0, 1fr) auto auto auto;
+      .section-bar[data-compact='true'][data-pending='false'] .section-bar-row:first-child {
         grid-template-areas:
-          'name number unit start range end more close'
-          'details details details details details details details details';
+          'name number unit position more close'
+          'details details details details details details';
       }
     }
     @media (pointer: coarse) {

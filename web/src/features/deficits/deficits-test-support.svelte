@@ -88,7 +88,6 @@
       deficit === 'aphasia'
         ? [{ id: 'language', name: 'Language', color: [10, 20, 30] as const }]
         : [],
-    functionsMatching: () => functionMatches,
     async openDeficit(id: string) {
       calls.push(`deficit:${id}`);
       view.explorer = 'deficits';
@@ -110,9 +109,6 @@
     },
     offerReload(error: unknown) {
       calls.push(`failure:${(error as Error).message}`);
-    },
-    async searchIn(mode: 'functions' | 'deficits', query: string) {
-      calls.push(`search-${mode}:${query}`);
     },
     async openDeficitMri(id: string, finding: string | null, { instant }: { instant: boolean }) {
       calls.push(`mri:${id}:${finding}:${instant}`);
@@ -150,7 +146,18 @@
 
 <div bind:this={announcer} role="status" class="visually-hidden"></div>
 <div class="panes">
-  <div class="rail" data-testid="list"><DeficitList {explorer} {view} {showShortcut} /></div>
+  <div class="rail" data-testid="list">
+    <DeficitList
+      {explorer}
+      {view}
+      {showShortcut}
+      elsewhere={(query) =>
+        query && functionMatches ? [{ mode: 'functions', count: functionMatches }] : []}
+      onElsewhere={(mode, query) => {
+        calls.push(`search-${mode}:${query}`);
+      }}
+    />
+  </div>
   <div class="rail" data-testid="detail">
     <div class="trailing"><DeficitRestore {explorer} {view} /></div>
     <DeficitProfile {explorer} {view} />

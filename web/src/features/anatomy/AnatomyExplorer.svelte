@@ -9,8 +9,9 @@
   import type { Snippet } from 'svelte';
   import type { CatalogGroup, CatalogRow } from '../../lib/core/catalog/catalog.ts';
   import type { HiddenReason } from '../../lib/core/catalog/visibility.ts';
+  import type { Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t } from '../../lib/core/i18n/index.ts';
-  import type { Language } from '../../lib/types/index.ts';
+  import type { Explorer, Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import AnatomySearch from './AnatomySearch.svelte';
   import AnatomyTree from './AnatomyTree.svelte';
@@ -44,6 +45,9 @@
     /** A rejection is the caller's to report: it is not caught here. */
     onAtlas: (id: string) => void | Promise<void>;
     onCutAtlas: (id: string) => void | Promise<void>;
+    /** The other tabs that find the same words, and the carrying of the query to one. */
+    elsewhere: (query: string) => Elsewhere[];
+    onElsewhere: (mode: Explorer) => void | Promise<void>;
     /** A3's picker of one internal system, shown while inside the anatomy. */
     systemPicker?: Snippet;
   }
@@ -70,6 +74,8 @@
     onShow,
     onAtlas,
     onCutAtlas,
+    elsewhere,
+    onElsewhere,
     systemPicker,
   }: Props = $props();
 
@@ -126,6 +132,8 @@
     {onReveal}
     {onAtlas}
     {onCutAtlas}
+    {elsewhere}
+    {onElsewhere}
   />
   <div class="browse" hidden={searching}>
     <div class="tree-head">

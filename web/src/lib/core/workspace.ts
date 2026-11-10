@@ -134,11 +134,13 @@ export function locationCrumbs({
   return crumbs;
 }
 
-/** What a notice's one action is called (notice.js:36-39): a reload, restoring the view, or undoing. */
+/** What a notice's one action is called (notice.js:36-39): a reload, a retry, restoring the view, or undoing. */
 export function noticeActionLabel(lang: Language, action: NonNullable<Notice['action']>): string {
   switch (action) {
     case 'reload':
       return t(lang, 'errors').reload;
+    case 'retry':
+      return t(lang, 'viewport').retry;
     case 'restore':
       return t(lang, 'clinical').restore;
     case 'restore-lesion':

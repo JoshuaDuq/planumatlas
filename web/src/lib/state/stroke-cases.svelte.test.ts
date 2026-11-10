@@ -128,15 +128,21 @@ test('a draw the reader has moved past cannot report its failure', async () => {
   expect(store.chosen).toEqual(['a', 'b']);
 });
 
-test('a cohort that fails to load is not fetched again', async () => {
+test('a cohort that fails to load is not fetched again by a new region, only by Retry', async () => {
   const { store, engine } = setup();
   vi.mocked(engine.cases).mockRejectedValueOnce(new Error('offline'));
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  expect(() => store.retry()).toThrow(/has not failed/);
   store.load();
   await settle();
   store.load();
   expect(store.cohort.status).toBe('error');
   expect(engine.cases).toHaveBeenCalledOnce();
+  store.retry();
+  expect(store.cohort.status).toBe('loading');
+  await settle();
+  expect(store.cohort.status).toBe('ready');
+  expect(engine.cases).toHaveBeenCalledTimes(2);
 });
 
 test('ids are known only if the cohort holds every one', async () => {

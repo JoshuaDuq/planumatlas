@@ -311,12 +311,22 @@ describe('announcing results', () => {
     expect(announcer().textContent).toBe('');
     await expect
       .poll(() => announcer().textContent, { timeout: 2000 })
-      .toMatch(/^\d+ functions?( and \d+ Neurosynth terms?)?$/);
+      .toMatch(
+        /^\d+ functions?( and \d+ Neurosynth terms?)?(\. Deficits: \d+ lesion profiles? match(es)? “lang”)?$/,
+      );
     const said = announcer().textContent;
     await userEvent.click(page.getByRole('button', { name: 'Clear search' }));
     announcer().textContent = '';
     await search('lang');
     await expect.poll(() => announcer().textContent, { timeout: 2000 }).toBe(said);
+  });
+
+  test('the other tabs that match follow the count (U1)', async () => {
+    mount();
+    await search('aphasia');
+    await expect
+      .poll(() => announcer().textContent, { timeout: 2000 })
+      .toMatch(/^\d+ Neurosynth terms?\. Deficits: \d+ lesion profiles match “aphasia”$/);
   });
 
   test('says "No match" for a query that finds nothing', async () => {

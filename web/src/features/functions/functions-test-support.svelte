@@ -24,7 +24,17 @@
   id="announcer"
 ></div>
 <div class="bar"><FunctionRestore model={world.explorer} /></div>
-<div class="list"><FunctionList model={world.explorer} /></div>
+<!-- The tabs beyond Deficits are the workspace's (ListView), tested with the whole panel. -->
+<div class="list">
+  <FunctionList
+    model={world.explorer}
+    elsewhere={(query) => {
+      const count = query ? world.excursions.deficitsMatching(query, world.explorer.lang) : 0;
+      return count ? [{ mode: 'deficits', count }] : [];
+    }}
+    onElsewhere={(_mode, query) => world.excursions.searchIn('deficits', query)}
+  />
+</div>
 <div class="detail">
   <FunctionProfile model={world.explorer} />
   <h2 bind:this={regionTitle} tabindex="-1" id="selected-name">Region</h2>

@@ -75,6 +75,8 @@ function props(engine: Engine, extra: Record<string, unknown> = {}) {
     cortexOpacity: 0.16,
     onCortexOpacity: () => {},
     onOpenMri: () => {},
+    elsewhere: () => [],
+    onElsewhere: () => {},
     ...extra,
   };
 }
@@ -463,7 +465,9 @@ describe('loading, failure and retry', () => {
     });
     vi.spyOn(console, 'error').mockImplementation(() => {});
     await render(TractsExplorer, props(engine));
-    await expect.poll(() => text(page.getByRole('alert'))).toContain('Planum was updated');
+    await expect
+      .poll(() => text(page.getByRole('alert')))
+      .toContain('Planum has probably been updated');
     await expect.element(page.getByRole('button', { name: 'Reload', exact: true })).toBeVisible();
     expect(page.getByRole('button', { name: 'Try again' }).elements()).toHaveLength(0);
   });

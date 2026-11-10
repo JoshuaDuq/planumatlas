@@ -14,7 +14,12 @@ test('a newer deploy asks for a reload, in either language', () => {
       'layer',
       'HCP-MMP',
     );
-    assert.deepEqual(notice, { text: t(lang, 'errors').updated, action: 'reload' });
+    assert.deepEqual(notice, {
+      kind: 'error',
+      text: t(lang, 'errors').updated,
+      action: 'reload',
+      key: 'layer:HCP-MMP',
+    });
   }
 });
 
@@ -26,17 +31,43 @@ test('a failed layer switch is said in French when the reader reads French', () 
 });
 
 test('a failed download says what could not be done and what to check, never the HTTP detail', () => {
-  const { text, action } = failureNotice(
+  const { kind, text, action } = failureNotice(
     assetError('asset-fetch', 'Asset request failed: HTTP 503'),
     'en',
     'layer',
     'HCP-MMP',
   );
+  assert.equal(kind, 'error');
   assert.equal(
     text,
     'Could not load HCP-MMP. A file could not be downloaded. Check the connection and try again.',
   );
   assert.equal(action, null);
+});
+
+test('I18N-16 · a failed download offers Retry when its command can run again; nothing else does', () => {
+  const retry = () => {};
+  const offline = assetError('asset-fetch', 'Asset request failed: HTTP 503');
+  assert.deepEqual(failureNotice(offline, 'fr', 'layer', 'HCP-MMP', retry), {
+    kind: 'error',
+    text: 'Impossible de charger HCP-MMP. Un fichier n’a pas pu être téléchargé. Vérifiez la connexion et réessayez.',
+    action: 'retry',
+    retry,
+    key: 'layer:HCP-MMP',
+  });
+  assert.deepEqual(
+    failureNotice(new Error('Cannot reveal x: hemisphere'), 'en', 'region', undefined, retry),
+    {
+      kind: 'error',
+      text: 'Could not show the region.',
+      action: null,
+      key: 'region',
+    },
+  );
+  assert.equal(
+    failureNotice(assetError('asset-updated', 'changed'), 'en', 'cord', undefined, retry).action,
+    'reload',
+  );
 });
 
 test('any other failure names the operation, not the parser that gave up', () => {
@@ -113,12 +144,14 @@ test('a failed start keeps the link for a download failure and drops it otherwis
 test('I18N-16 · a newer deploy is worded as an update whatever the operation', () => {
   const updated = assetError('asset-updated', 'changed');
   assert.deepEqual(failureNotice(updated, 'en', 'snapshot'), {
-    text: 'Planum was updated. Reload to continue.',
+    kind: 'error',
+    text: 'A file on the server no longer matches this page; Planum has probably been updated. Reload to continue.',
     action: 'reload',
+    key: 'snapshot',
   });
   assert.equal(
     failureNotice(updated, 'fr', 'snapshot').text,
-    'Planum a été mis à jour. Rechargez la page pour continuer.',
+    'Un fichier du serveur ne correspond plus à cette page ; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
   );
   assert.equal(
     failureNotice(new Error('boom'), 'xx', 'snapshot').text,
@@ -182,7 +215,7 @@ test('I18N-19 · a failed start is worded with its button and whether Retry drop
     dropLink: false,
   });
   assert.deepEqual(startFailure(assetError('asset-updated', 'changed'), 'fr', true), {
-    text: 'Planum a été mis à jour. Rechargez la page pour continuer.',
+    text: 'Un fichier du serveur ne correspond plus à cette page ; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
     button: 'Recharger',
     dropLink: false,
   });
@@ -195,6 +228,7 @@ test('I18N-19 · a failed start is worded with its button and whether Retry drop
 
 test('I18N-20 · the link notice names an unknown field as is and has no action', () => {
   assert.deepEqual(linkNotice(['unknown-field'], 'en'), {
+    kind: 'info',
     text: 'Not applied from this link: unknown-field.',
     action: null,
   });

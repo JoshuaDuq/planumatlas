@@ -308,8 +308,10 @@ describe('loading', () => {
     await render(Fixture, { engine: createEngine(), regionId: V1, lang: 'fr' });
     await open();
     await expect
-      .element(page.getByRole('status'))
-      .toHaveTextContent('Planum a été mis à jour. Rechargez la page pour continuer.');
+      .poll(() => status().textContent)
+      .toBe(
+        'Un fichier du serveur ne correspond plus à cette page\u202f; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
+      );
     await expect
       .element(page.getByRole('button', { name: 'Réessayer la comparaison' }))
       .toBeVisible();

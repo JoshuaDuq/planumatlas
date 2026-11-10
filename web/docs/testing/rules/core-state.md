@@ -280,31 +280,40 @@ is the English interface text.
 - **Expected:** ready, `setSwitching({ loaded: 1, total: 4 })` → `switching` with that progress; `endSwitching()` → `ready`, progress null. Loading, `setSwitching(…)` and `endSwitching()` → still `loading`. A `reload` notice set before stays through both.
 - **Covered by:** `src/lib/core/state/session.test.ts` (R)
 
-### STATE-30 · A notice stands until the reader's next action, never on a timer
+### STATE-30 · Information stands until the reader's next action, an error until it is dismissed; never on a timer
 
-- **Rule:** A notice stays until the next deliberate action (any setter other than progress) or until it is dismissed. A notice must have text.
+- **Rule:** A notice is an `error` or `info`. Information stays until the next deliberate action (any setter other than progress), `notify(null)` or the dismiss. An error stays through actions and `notify(null)` until the reader dismisses or retries it (U9: "errors surface"), or until the command it reports succeeds by any route: a failure carries a `key` (its operation and subject, `failureKey`; a masthead field's failure, the field: `atlas`, `detail` or `colour`, STATE-49), and `resolveNotice(key)` takes that error away, shown or held; the same failure again replaces the one standing. A language change also takes errors, since their words cannot be re-said in the new language. A notice must have text and a known kind, and one offering Retry must carry the command to retry.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/state/session.js:73-77,142-150`
-- **Expected:** `notify({ text: 'Selection cleared — cortex hidden.' })` → notice `{ text, action: null }`; `setQuery('a')` → null. `notify(null)` clears what is shown. `notify('bare text')` and `notify({})` throw `/needs text/`.
+- **Source:** `viewer/state/session.js:73-77,142-150`; the 2026-11-09 review (U9)
+- **Expected:** `notify({ kind: 'info', text: 'Selection cleared — cortex hidden.' })` → notice `{ kind: 'info', text, action: null }`; `setQuery('a')` → null. `notify({ kind: 'error', text: 'Could not load HCP-MMP.' })`, then `setQuery`, `setView`, `setExplorer` and `notify(null)` → the error still shown; `dismissNotice()` → null. An error, then `setLang('fr')` → null. Errors keyed `layer:HCP-MMP`, `cord`, `layer:HCP-MMP` again → "Could not show the spinal cord. Could not load HCP-MMP."; `resolveNotice('layer:HCP-MMP')` → the cord's alone; a held error resolved before release never shows. `notify('bare text')` throws `/needs text/`; `notify({ text })` throws `/Unknown notice kind/`; `{ kind: 'error', action: 'retry' }` without `retry` throws `/needs the command to retry/`.
 - **Covered by:** `src/lib/core/state/session.test.ts` (R)
 
-### STATE-31 · Notices that meet join into one, each said once
+### STATE-31 · Notices that meet join into one, each said once, errors first
 
-- **Rule:** A notice arriving while another stands joins it in one sentence; a text already said is not repeated; the first action offered wins.
+- **Rule:** A notice arriving while another of its kind stands joins it in one sentence; a text already said is not repeated (it keeps its place and takes the newer arrival's number, so the announcer hears it as new, KEY-18); the first action offered wins, with its retry. The shown notice lists its `parts`, each standing notice numbered once as it arrived. Errors and information show as one notice, errors first, of kind `error`; while information beside an error offers an action, that newer action is offered, and the error's comes back when the information goes with the next action.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/state/session.js:44-52`
-- **Expected:** `notify('Not applied from this link: view.')`, `notify('Could not show the white matter.', reload)`, the second again → `{ text: 'Not applied from this link: view. Could not show the white matter.', action: 'reload' }`.
+- **Source:** `viewer/state/session.js:44-52`; the 2026-11-09 review (U9)
+- **Expected:** info "Not applied from this link: view.", info "Both hemispheres shown." (restore), the second again → `{ kind: 'info', text: 'Not applied from this link: view. Both hemispheres shown.', action: 'restore' }`. Errors "Could not save the image.", "Could not load HCP-MMP." (retry A), "Could not show the spinal cord." (retry B) → one error, the three texts, action `retry` with A. Error "Could not load HCP-MMP." (retry) and info "Both hemispheres shown." (restore) → `{ kind: 'error', text: 'Could not load HCP-MMP. Both hemispheres shown.', action: 'restore' }`; `setQuery` → the error alone with its Retry.
 - **Covered by:** `src/lib/core/state/session.test.ts` (R)
 
-### STATE-32 · While a link is applied, notices wait and follow the link's own
+### STATE-32 · While a link is applied, notices wait; errors then lead the link's own
 
-- **Rule:** While a link is being applied its own steps are actions that would clear a notice, so notices are held until the last hold is released, then shown after the link's own notice as one notice. Releasing with nothing to say shows nothing. Releasing when nothing is held is an error that leaves the hold count intact.
+- **Rule:** While a link is being applied its own steps are actions that would clear a notice, so notices are held until the last hold is released, then shown as one notice: the errors first, then the link's own notice and the information that waited. Releasing with nothing to say shows nothing. Releasing when nothing is held is an error that leaves the hold count intact.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/session.js:152-170`; deviation `c4-unbalanced-notice-release.md`
-- **Expected:** hold; notify "Could not show the white matter."; notify "Planum was updated." (reload); `setExplorer('deficits')`, `setDeficit('aphasia')` → notice null; release with "Not applied from this link: language." → `{ text: 'Not applied from this link: language. Could not show the white matter. Planum was updated.', action: 'reload' }`. Two holds: the first release shows nothing; the second shows "Not applied from this link: view. A download failed.". `releaseNotices()` with nothing held throws `/No notices are held/`; a later hold and release still shows "Waits.".
+- **Expected:** hold; info "Cortex hidden." (restore); error "Could not show the white matter."; error "Planum was updated." (reload); `setExplorer('deficits')`, `setDeficit('aphasia')` → notice null; release with "Not applied from this link: language." → `{ kind: 'error', text: 'Could not show the white matter. Planum was updated. Not applied from this link: language. Cortex hidden.', action: 'restore' }`; `setQuery` → the two errors with `reload`. Two holds: the first release shows nothing; the second shows "Not applied from this link: view. A download failed.". `releaseNotices()` with nothing held throws `/No notices are held/`; a later hold and release still shows "Waits.".
+- **Covered by:** `src/lib/core/state/session.test.ts` (R)
+
+### STATE-66 · Retry takes its own error away, then runs the failed command
+
+- **Rule:** The notice's Retry takes away the error whose command it carries, and the information beside it (an action), and then runs that command once; any other error stands, the next offering its own Retry. A failure of the retry is a new notice. Asking to retry a notice that offers no Retry is an error.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** the 2026-11-09 review (U9)
+- **Expected:** error with Retry, info beside it, `retryNotice()` → the command sees notice null, runs once; notice null after; `retryNotice()` again throws `/offers no retry/`. Two errors with Retry (atlas, cord) → the first `retryNotice()` runs atlas only and leaves the cord's error with its Retry; the second runs cord, notice null.
 - **Covered by:** `src/lib/core/state/session.test.ts` (R)
 
 ## Keyboard predicates
@@ -450,11 +459,11 @@ is the English interface text.
 
 ### STATE-49 · Masthead choices retire the standing notice, and a failure leaves one notice
 
-- **Rule:** Choosing an atlas, detail level or colour in the masthead clears the notice an earlier choice left. A failed switch that is still current leaves one notice in the reader's language; an overtaken one says nothing. Leaving HCP-MMP drops CAB-NP to region colours, as its option said.
+- **Rule:** Choosing an atlas, detail level or colour in the masthead clears the information an earlier choice left. Its failure is keyed by the field (`atlas`, `detail`, `colour`; atlas and detail are different fields though both say `layer`): the field's next failure takes the place of its last, and the field's next success, by whatever command, retires it, so a standing error never offers a Retry that would undo a newer choice. Other errors stand (STATE-30). A failed switch that is still current leaves one error notice in the reader's language; an overtaken one says nothing. A failed download offers Retry, which asks for the same atlas, detail level or colour again; any other failure offers none. Once that atlas or detail level is on screen, or that colour shown, by whatever command (the masthead again, a reveal, Retry), its error goes; the cord's goes once the cord is shown. Leaving HCP-MMP drops CAB-NP to region colours, as its option said.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/scene-commands.js:168-218`
-- **Expected:** fr, Destrieux fails with `asset-fetch` HTTP 503 → status ready, notice matches `/^Impossible de charger Destrieux\. Un fichier n’a pas pu être téléchargé/`. Overtaken failure → notice null. CAB-NP shown, choose Destrieux → colour `atlas`, notice null. `chooseDetail('nextbrain')` → notice null at once. Choosing the atlas already shown with nothing on its way changes nothing.
+- **Expected:** fr, Destrieux fails with `asset-fetch` HTTP 503 → status ready, notice matches `/^Impossible de charger Destrieux\. Un fichier n’a pas pu être téléchargé/`. Overtaken failure → notice null. `chooseAtlas('destrieux')`, `chooseDetail('nextbrain')`, `chooseSurfaceColor('mri')` each failing with `asset-fetch` → action `retry`; after `setQuery` still an error; `retryNotice()` → notice null and the layer asked for again, shown once it lands. "Atlas not applied" (uncoded) → action null. A cord error standing, Destrieux fails, chosen again and lands → only the cord's error. NextBrain, Destrieux and the MRI colour fail; Julich-Brain then lands and Tissue is chosen → only "Could not load NextBrain. …" with its Retry; NextBrain fails, then a reveal of a NextBrain region loads it → notice null. CAB-NP shown, choose Destrieux → colour `atlas`, notice null. `chooseDetail('nextbrain')` → notice null at once. Choosing the atlas already shown with nothing on its way changes nothing.
 - **Covered by:** `src/lib/core/state/scene-commands.test.ts` (R)
 
 ### STATE-50 · Cited regions are drawn on the layers that hold most of them, without a cut

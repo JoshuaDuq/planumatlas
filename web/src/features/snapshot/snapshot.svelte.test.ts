@@ -341,7 +341,7 @@ describe('saving', () => {
     // The notice is what a sighted reader sees; the announcer speaks notices, not this module.
     expect(commands.notify.mock.calls).toEqual([
       [null],
-      [{ text: 'Image enregistrée : planum-hcp-mmp-left.png.' }],
+      [{ kind: 'info', text: 'Image enregistrée : planum-hcp-mmp-left.png.' }],
     ]);
     expect(region.textContent).toBe('');
   });
@@ -375,7 +375,7 @@ describe('saving', () => {
     expect(links.map((link) => link.download)).toEqual(['planum-brain-left.png']);
     expect(commands.notify.mock.calls).toEqual([
       [null],
-      [{ text: 'Image saved as planum-brain-left.png.' }],
+      [{ kind: 'info', text: 'Image saved as planum-brain-left.png.' }],
     ]);
     await saveSnapshot(scene(), subject(), commands);
     expect(links).toHaveLength(2);

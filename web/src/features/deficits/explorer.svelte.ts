@@ -22,10 +22,8 @@ export interface DeficitsDeps {
     | 'restoreBeforeExcursion'
     | 'restorable'
     | 'offerReload'
-    | 'searchIn'
     | 'involved'
     | 'checkedMaps'
-    | 'functionsMatching'
   >;
   /** X1's entry point, which opens a function under its own runner. */
   openFunction: (id: string) => unknown;
@@ -159,10 +157,7 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     },
     involved: deps.excursions.involved,
     checkedMaps: deps.excursions.checkedMaps,
-    functionsMatching: deps.excursions.functionsMatching,
     setQuery: (query: string) => deps.session.setClinicalQuery(query),
-    /** A search carried to the Functions tab. */
-    searchFunctions: (query: string) => deps.excursions.searchIn('functions', query),
     openFunction: deps.openFunction,
     openDeficit,
     openRegion,

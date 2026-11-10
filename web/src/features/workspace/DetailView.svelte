@@ -3,9 +3,12 @@
   profile and its action status, the function and deficit profiles, the region, the deficits related to
   it, the lesson's notes and the lessons through it. Each part draws itself only where it applies. The
   legacy sibling rules on the region are its `landmarkSelected` and `underProfile` props.
+
+  Above it stays the search of the tab in front (U2), so a reader who types a name searches instead of
+  pressing single-key shortcuts: typing there carries the words to the list, its results and its field.
 -->
 <script lang="ts">
-  import type { World } from '../../app/application.svelte.ts';
+  import { getApp, type World } from '../../app/application.svelte.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import type { Rgb } from '../../lib/types/index.ts';
@@ -53,6 +56,46 @@
     commands,
   } = $derived(world);
   const current = $derived(view.current);
+
+  const app = getApp();
+  const uid = $props.id();
+  /** The search of the tab in front: Circuits has none, and Tracts keeps its words in its own list. */
+  const search = $derived.by(() => {
+    const { explorer, lang } = current;
+    if (explorer === 'anatomy') {
+      const label = t(lang, 'navigator').searchLabel;
+      return { label, query: current.query, set: session.setQuery };
+    }
+    if (explorer === 'functions') {
+      return {
+        label: t(lang, 'functions').search,
+        query: functions.query,
+        set: functions.setQuery,
+      };
+    }
+    if (explorer === 'deficits') {
+      const label = t(lang, 'clinical').searchLabel;
+      return { label, query: current.clinicalQuery, set: deficits.setQuery };
+    }
+    return null;
+  });
+
+  /** Typing here goes on in the list's own field, where the results are, with the caret at the end. */
+  function searchInList(value: string) {
+    search!.set(value);
+    app.ports.showList();
+    app.ports.focusSearch(current.explorer);
+    const field = document.activeElement as HTMLInputElement;
+    field.setSelectionRange(field.value.length, field.value.length);
+  }
+
+  function onSearchKeydown(event: KeyboardEvent) {
+    // Empty, Escape is the page's: Back to the list.
+    if (event.isComposing || event.key !== 'Escape' || search!.query === '') return;
+    event.preventDefault();
+    search!.set('');
+  }
+
   const {
     manifest,
     cabNp,
@@ -120,6 +163,40 @@
     session.setFinding(finding);
   }
 </script>
+
+{#if search}
+  <div class="detail-search">
+    <label class="search-label" for="{uid}-search">{search.label}</label>
+    <div class="search-box">
+      <svg
+        class="search-affordance"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <input
+        id="{uid}-search"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        value={search.query}
+        oninput={(event) => searchInList(event.currentTarget.value)}
+        onkeydown={onSearchKeydown}
+      />
+      {#if search.query === ''}
+        <kbd class="search-shortcut" aria-hidden="true">/</kbd>
+      {/if}
+    </div>
+  </div>
+{/if}
 
 <div class="detail-body scroll-fade">
   <div class="tab-group">
@@ -242,11 +319,50 @@
       padding-bottom: var(--space-4);
       background: var(--surface-base);
     }
+    /* The list's search head, as it stands over the list (FunctionList, DeficitList). */
+    .detail-search {
+      flex: none;
+      padding: var(--space-3) var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-base);
+    }
+    .detail-search .search-label {
+      margin-bottom: var(--space-2);
+    }
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .search-affordance {
+      position: absolute;
+      left: 10px;
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+    .search-shortcut {
+      position: absolute;
+      right: 6px;
+      padding: 0 6px;
+      pointer-events: none;
+    }
+    :global(:root[data-single-keys='off']) .search-shortcut {
+      display: none;
+    }
+    @media (pointer: coarse) {
+      .search-shortcut {
+        display: none;
+      }
+    }
 
     /* The phone sheet: H6's #inspector carries the home-indicator padding, so there is one rule (phone.css:226-231). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .detail-body {
         -webkit-overflow-scrolling: touch;
+      }
+      .search-shortcut {
+        display: none;
       }
     }
   }

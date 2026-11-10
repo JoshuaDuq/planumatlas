@@ -1,7 +1,7 @@
 <!--
   The Functions tab's list (viewer/ui/panels/functions.js:384-390, 405-456, index.html:258-277,301-304):
   the search field, the functions under their groups, the Neurosynth terms a search finds, the
-  bridge to the Deficits tab and the list's scope. A list of buttons, not a listbox (decision 37 on
+  bridges to the other tabs that find the same words (U1) and the list's scope. A list of buttons, not a listbox (decision 37 on
   #4): each row opens a profile, and every row is a Tab stop. In compare mode each row is a
   checkbox instead, and a bar under the list opens the comparison of the two picked. The field's
   Down and Enter and the rows' Up and Down are `listNav`, which leaves every other key alone.
@@ -17,9 +17,11 @@
     compareId,
     functionName,
   } from '../../lib/core/catalog/neuropsych-domains.ts';
+  import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
+  import type { Explorer } from '../../lib/types/index.ts';
   import { createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import { listNav } from '../../lib/ui/list-nav.ts';
@@ -27,14 +29,24 @@
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
   import { functionList, resultsSentence, type FunctionRow } from './functions-view.ts';
 
-  let { model }: { model: FunctionExplorer } = $props();
+  let {
+    model,
+    elsewhere,
+    onElsewhere,
+  }: {
+    model: FunctionExplorer;
+    /** The other tabs that find the same words. */
+    elsewhere: (query: string) => Elsewhere[];
+    /** Carries the words to another tab. */
+    onElsewhere: (mode: Explorer, query: string) => void | Promise<void>;
+  } = $props();
 
   const uid = $props.id();
   const lang = $derived(model.lang);
   const copy = $derived(t(lang, 'functions'));
   const query = $derived(model.query.trim());
   const content = $derived(functionList(model.domains, query, lang));
-  const deficits = $derived(query ? model.deficitsMatching(query, lang) : 0);
+  const others = $derived(elsewhere(query));
   const empty = $derived(
     query !== '' && content.matches.functions === 0 && content.matches.terms === 0,
   );
@@ -63,7 +75,8 @@
   );
 
   // The count of results is said once typing pauses, from the query and the counts only: a
-  // language switch changes neither, so it says nothing (the sentence is read untracked).
+  // language switch changes neither, so it says nothing (the sentence is read untracked). The
+  // other tabs that match follow it.
   const announcer = createDebouncedAnnouncer();
   $effect(() => () => announcer.dispose());
   const functionCount = $derived(content.matches.functions);
@@ -75,7 +88,14 @@
     }
     void functionCount;
     void termCount;
-    announcer.say(untrack(() => resultsSentence(content.matches, lang)));
+    announcer.say(
+      untrack(() =>
+        [
+          resultsSentence(content.matches, lang),
+          ...others.map((other) => bridgeText(lang, other, query)),
+        ].join('. '),
+      ),
+    );
   });
 
   function onkeydown(event: KeyboardEvent) {
@@ -191,12 +211,12 @@
         />
       {/if}
     {/if}
-    {#if deficits}
+    {#each others as other (other.mode)}
       <SearchBridge
-        text={copy.deficitBridge(deficits, query)}
-        onclick={() => model.searchDeficits(query)}
+        text={bridgeText(lang, other, query)}
+        onclick={() => onElsewhere(other.mode, query)}
       />
-    {/if}
+    {/each}
   </div>
   <!-- The list's scope stands under the whole list; a search says its count instead. -->
   <p class="scope-note" hidden={query !== ''}>

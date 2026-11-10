@@ -37,7 +37,7 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/session.js`; new `session.svelte.ts`
-- **Expected:** Views `['oblique', 'left']`. `setView('left')` → `true`, `state.view === 'left'`; `setView('nowhere')` → `false`, `state.view` stays `'left'`; `setExplorer('nowhere')` throws `Error('Unknown explorer: nowhere')`. A fixed sequence of every command (`setView`, `setQuery`, `setExplorer`, `setFunctionQuery`, `setFunction`, `setClinicalQuery`, `setDeficit`, `setFinding`, `liftPaint`, `toggleGroup`, `setExpanded`, `setTheme`, `setLang`, `setProgress`, `setLoaded`, `setSwitching`, `endSwitching`, `notify`, `holdNotices`, `releaseNotices`, `setContextLost`, `setContextRestored`, `setError`): after each, `store.state` deep-equals the core session's `assemble({})` and the return is the session's; the final state is view `left`, explorer `functions`, theme `dark`, lang `fr`, status `error`. The command semantics themselves are C4 (`core-state.md`).
+- **Expected:** Views `['oblique', 'left']`. `setView('left')` → `true`, `state.view === 'left'`; `setView('nowhere')` → `false`, `state.view` stays `'left'`; `setExplorer('nowhere')` throws `Error('Unknown explorer: nowhere')`. A fixed sequence of every command (`setView`, `setQuery`, `setExplorer`, `setFunctionQuery`, `setFunction`, `setClinicalQuery`, `setDeficit`, `setFinding`, `liftPaint`, `toggleGroup`, `setExpanded`, `setTheme`, `setLang`, `setProgress`, `setLoaded`, `setSwitching`, `endSwitching`, `notify`, `holdNotices`, `releaseNotices`, `resolveNotice`, `dismissNotice`, `retryNotice`, `setContextLost`, `setContextRestored`, `setError`): after each, `store.state` deep-equals the core session's `assemble({})` and the return is the session's; the final state is view `left`, explorer `functions`, theme `dark`, lang `fr`, status `error`. The command semantics themselves are C4 (`core-state.md`).
 - **Covered by:** `src/lib/state/session-store.test.ts` (R) (fixed commands; the state equals the core session's after each); `src/lib/state/stores.svelte.test.ts` (R, three commands)
 
 ### STORE-04 · The lesson store shows each step taken, and refuses a step that does not exist
@@ -55,7 +55,7 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/session.js` (`holdNotices`, `releaseNotices`); deviation `c4-unbalanced-notice-release.md`
-- **Expected:** `holdNotices()`, `notify({ text: 'First.' })`, `notify({ text: 'Second.', action: 'reload' })` → `state.notice === null`; `releaseNotices({ text: 'Link.' })` → `{ text: 'Link. First. Second.', action: 'reload' }`; `setQuery('x')` → `null`. Two holds, `notify({ text: 'Waiting.' })`, one release → `null`; the second release → text `'Waiting.'`.
+- **Expected:** `holdNotices()`, `notify({ kind: 'info', text: 'First.' })`, `notify({ kind: 'info', text: 'Second.', action: 'reload' })` → `state.notice === null`; `releaseNotices({ kind: 'info', text: 'Link.' })` → `{ kind: 'info', text: 'Link. First. Second.', action: 'reload' }`; `setQuery('x')` → `null`. Two holds, `notify({ text: 'Waiting.' })`, one release → `null`; the second release → text `'Waiting.'`.
 - **Covered by:** `src/lib/state/stores.svelte.test.ts` (R)
 
 ## What the view drives

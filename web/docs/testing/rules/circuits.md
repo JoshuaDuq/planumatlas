@@ -184,7 +184,7 @@ The lesson commands are in `controller.md` and are not repeated here: opening a 
 - **Kind:** behaviour
 - **Level:** unit (the explorer's `status` and `failed`) for the wording; browser for the scroll and focus
 - **Source:** `viewer/ui/panels/circuits.js:142-147,269-278`
-- **Expected:** a plain failure → "Could not show this landmark."; `{code: 'asset-updated'}` → "Planum was updated. Reload to continue.", `data-error="true"`, notice action `reload`, focus on Next, step 0; next run → step 1, status '', `data-error="false"`. The status line below a 120 px panel's fold is scrolled to within it. The MRI failure → "Could not open the linked MRI.".
+- **Expected:** a plain failure → "Could not show this landmark."; `{code: 'asset-updated'}` → `errors.updated` ("A file on the server no longer matches this page; Planum has probably been updated. Reload to continue."), `data-error="true"`, notice action `reload`, focus on Next, step 0; next run → step 1, status '', `data-error="false"`. The status line below a 120 px panel's fold is scrolled to within it. The MRI failure → "Could not open the linked MRI.".
 - **Covered by:** `src/features/circuits/circuits.svelte.test.ts` (R)
 
 ### CIRC-20 · The status line is in the page before it speaks, and a language switch does not repeat it

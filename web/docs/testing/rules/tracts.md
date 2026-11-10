@@ -122,7 +122,7 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 - **Kind:** behaviour
 - **Level:** browser — live regions and the fake engine
 - **Source:** `viewer/diffusion/native-ui.js:138-152,176-195`; deviations `t1-status-and-alert.md`, `t1-retry-label.md`
-- **Expected:** First `setActive` rejects `asset-fetch` → alert contains "could not be downloaded", status "", fieldset disabled. "Try again" → no alert, status "Reference dataset ready.", fieldset enabled. `asset-updated` → alert contains "Planum was updated", button "Reload", no "Try again".
+- **Expected:** First `setActive` rejects `asset-fetch` → alert contains "could not be downloaded", status "", fieldset disabled. "Try again" → no alert, status "Reference dataset ready.", fieldset enabled. `asset-updated` → alert contains "Planum has probably been updated", button "Reload", no "Try again".
 - **Covered by:** `src/features/tracts/TractsExplorer.svelte.test.ts` (R); the sentences per error code are I18N-
 
 ### TRACT-14 · After a load, focus that fell to the page goes back where it was, else to Try again, else to the search
@@ -393,7 +393,7 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 - **Kind:** behaviour
 - **Level:** browser — focus and live regions
 - **Source:** `viewer/diffusion/navigation-ui.js:154-157`; deviations `t2-retry-focus.md`, `t2-status-and-alert.md`
-- **Expected:** First creation rejects `asset-fetch` → alert "The reference data could not be downloaded. Check the connection, then try again.", select disabled; "Reload MRI" → select enabled, alert "", focus on `.notes`, no "Reload MRI". `asset-updated` → alert contains "Planum was updated", "Reload" visible, no "Reload MRI".
+- **Expected:** First creation rejects `asset-fetch` → alert "The reference data could not be downloaded. Check the connection, then try again.", select disabled; "Reload MRI" → select enabled, alert "", focus on `.notes`, no "Reload MRI". `asset-updated` → alert contains "Planum has probably been updated", "Reload" visible, no "Reload MRI".
 - **Covered by:** `src/features/tracts/MriNavigator.svelte.test.ts` (R)
 
 ### TRACT-43 · A lost WebGL context is shown and retried on a fresh canvas

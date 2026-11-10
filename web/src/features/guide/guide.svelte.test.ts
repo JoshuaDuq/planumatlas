@@ -450,8 +450,32 @@ test('the first launch offers the tour once, and only to a page opened plainly',
   expect(firstLaunch(HOME)).toBe(true);
   expect(firstLaunch('')).toBe(true);
   expect(firstLaunch(READER)).toBe(false);
+  // Blocked site data cannot remember the tour was seen, which would open it on every visit.
+  expect(firstLaunch(HOME, null)).toBe(false);
   start();
   expect(firstLaunch(HOME)).toBe(false);
+});
+
+test('the first card offers Skip tour, by pointer or keyboard, which closes it for good', async () => {
+  start();
+  const skip = () => card().querySelector<HTMLButtonElement>('.guide-skip');
+  expect(skip()!.textContent).toBe('Skip tour');
+  await userEvent.click(skip()!);
+  expect([closed, closedBy, location.hash]).toEqual([1, [{ pointer: true }], READER]);
+  expect(document.querySelector('.driver-popover')).toBeNull();
+  expect(firstLaunch(HOME)).toBe(false);
+
+  start('fr');
+  await expect.poll(() => document.activeElement).toBe(next());
+  await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+  expect(document.activeElement).toBe(skip());
+  expect(skip()!.textContent).toBe('Passer la visite');
+  await userEvent.keyboard('{Enter}');
+  expect([closed, closedBy[1]]).toEqual([2, { pointer: false }]);
+
+  start();
+  next().click();
+  expect(skip()).toBeNull();
 });
 
 test('a target the layout hides is left out of the stops and the count', () => {
@@ -495,6 +519,8 @@ test('the card answers the arrows and Escape, claimed from the page keymap; else
 
 test('axe: light and dark, desktop and 390 px', async () => {
   start();
+  // The first card, with its languages and Skip tour, then a stop that points at a control.
+  await expectAxeClean();
   next().click();
   await expectAxeClean();
 });

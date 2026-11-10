@@ -256,7 +256,7 @@ describe('a link edited in place', () => {
     });
     page.location.hash = '#hemi=left';
     await expect(links.onHashChange()).rejects.toThrow('boom');
-    session.notify({ text: 'Later.' });
+    session.notify({ kind: 'info', text: 'Later.' });
     expect(session.state.notice?.text).toBe('Later.');
   });
 
@@ -280,7 +280,7 @@ describe('restoring a link', () => {
     expect(hold).toHaveBeenCalledOnce();
     expect(schedule).toHaveBeenCalledOnce();
     expect(notApplied).toEqual(['atlas', 'view']);
-    session.notify({ text: 'Later.' });
+    session.notify({ kind: 'info', text: 'Later.' });
     expect(session.state.notice).toBeNull();
     links.report(notApplied);
     expect(session.state.notice?.text).toContain('Later.');

@@ -5,9 +5,11 @@
 -->
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
+  import type { Explorer } from '../../lib/types/index.ts';
   import { createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import DrillRow from '../../lib/ui/DrillRow.svelte';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
@@ -20,11 +22,17 @@
     explorer,
     view,
     showShortcut,
+    elsewhere,
+    onElsewhere,
   }: {
     explorer: DeficitsExplorer;
     view: View;
     /** Shows the `/` hint; false when single-key shortcuts are off. */
     showShortcut: boolean;
+    /** The other tabs that find the same words (U1). */
+    elsewhere: (query: string) => Elsewhere[];
+    /** Carries the words to another tab. */
+    onElsewhere: (mode: Explorer, query: string) => void | Promise<void>;
   } = $props();
 
   const clinical = $derived(explorer.deps.clinical);
@@ -35,7 +43,7 @@
   const query = $derived(view.clinicalQuery.trim());
   const groups = $derived(clinical.grouped(query, lang));
   const count = $derived(groups.reduce((sum, entry) => sum + entry.deficits.length, 0));
-  const functions = $derived(query ? explorer.functionsMatching(query, lang) : 0);
+  const others = $derived(elsewhere(query));
   const near = $derived(groups.length === 0 ? clinical.nearest(query, lang) : null);
 
   // The count is said after typing pauses, for every settled query, a cleared one included, and
@@ -53,7 +61,14 @@
     if (settled === announcedQuery) return;
     announcedQuery = settled;
     announcer.reset();
-    announcer.say(untrack(() => text.results(count)));
+    // The other tabs that match follow the count.
+    announcer.say(
+      untrack(() =>
+        [text.results(count), ...others.map((other) => bridgeText(lang, other, settled))].join(
+          '. ',
+        ),
+      ),
+    );
   });
 
   let list = $state<HTMLElement>();
@@ -116,12 +131,12 @@
         />
       {/if}
     {/if}
-    {#if functions}
+    {#each others as other (other.mode)}
       <SearchBridge
-        text={text.functionBridge(functions, query)}
-        onclick={() => explorer.searchFunctions(query)}
+        text={bridgeText(lang, other, query)}
+        onclick={() => onElsewhere(other.mode, query)}
       />
-    {/if}
+    {/each}
   </div>
   <!-- The collection's scope stands under the whole list; a search shows no scope. -->
   {#if !query}

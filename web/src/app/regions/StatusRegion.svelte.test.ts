@@ -260,11 +260,12 @@ describe('the display settings in effect', () => {
     await shell.open();
     const { anatomy, session } = shell.app.world!;
     anatomy.setCortexVisible(false);
-    session.notify({ text: 'Cortex shown.', action: 'restore' });
+    session.notify({ kind: 'info', text: 'Cortex shown.', action: 'restore' });
     flushSync();
     await userEvent.click(reset());
     // Its own action: the display from before the reset, which the old notice's Restore was not.
-    expect(session.state.notice).toEqual({
+    expect(session.state.notice).toMatchObject({
+      kind: 'info',
       text: t('en', 'display').displayReset,
       action: 'restore',
     });

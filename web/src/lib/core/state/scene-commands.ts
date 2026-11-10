@@ -1,6 +1,6 @@
 import type { LoadProgress, Manifest, SurfaceColor } from '../../types/index.ts';
 import type { OnProgress } from '../../engine/api.ts';
-import { failureNotice } from '../i18n/errors.ts';
+import { failureKey, failureNotice } from '../i18n/errors.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
 import { clinicalLayers, showClinicalRegions } from './clinical-navigation.ts';
 import type { ModelPort, SectionsPort } from './ports.ts';
@@ -31,7 +31,7 @@ export function createSceneCommands({
 }: {
   model: ModelPort;
   sections: SectionsPort;
-  session: Pick<Session, 'assemble' | 'notify' | 'setSwitching' | 'endSwitching'>;
+  session: Pick<Session, 'assemble' | 'notify' | 'resolveNotice' | 'setSwitching' | 'endSwitching'>;
   render: () => void;
 }) {
   let intent = 0;
@@ -47,10 +47,16 @@ export function createSceneCommands({
 
   const lang = () => session.assemble({}).lang;
 
-  function fail(operation: string, error: unknown, subject?: string) {
+  /** A failure as an error notice; `retry` runs the command again, offered for a failed download. */
+  function fail(operation: string, error: unknown, subject?: string, retry?: () => void) {
     console.error(error);
-    session.notify(failureNotice(error, lang(), operation, subject));
+    session.notify(failureNotice(error, lang(), operation, subject, retry));
     render();
+  }
+
+  /** The command a failure named has now done what it failed to: its error goes, by whichever route. */
+  function succeeded(operation: string, subject?: string) {
+    session.resolveNotice(failureKey(operation, subject));
   }
 
   /** A failure is the reader's to hear only while its command still owns the scene. */
@@ -59,9 +65,27 @@ export function createSceneCommands({
     operation: string,
     error: unknown,
     subject?: string,
+    retry?: () => void,
   ) {
-    if (current()) fail(operation, error, subject);
+    if (current()) fail(operation, error, subject, retry);
     else console.error(error);
+  }
+
+  /**
+   * A masthead field's failure, keyed by the field (atlas, detail, colour) rather than its choice:
+   * the field's next failure takes its place, and its next success, by any route, retires it.
+   */
+  function failChoice(
+    current: () => boolean,
+    field: 'atlas' | 'detail' | 'colour',
+    error: unknown,
+    [operation, subject]: [string, string],
+    retry: () => void,
+  ) {
+    console.error(error);
+    if (!current()) return;
+    session.notify({ ...failureNotice(error, lang(), operation, subject, retry), key: field });
+    render();
   }
 
   function showProgress() {
@@ -112,6 +136,7 @@ export function createSceneCommands({
       if (atlasWanted === id) atlasWanted = null;
     }
     if (current() && model.settings.atlas !== id) throw new Error(`Atlas not applied: ${id}`);
+    if (model.settings.atlas === id) session.resolveNotice('atlas');
   }
 
   async function loadDetail(id: string, current: () => boolean) {
@@ -125,6 +150,7 @@ export function createSceneCommands({
     if (current() && model.settings.detail !== id) {
       throw new Error(`Detail level not applied: ${id}`);
     }
+    if (model.settings.detail === id) session.resolveNotice('detail');
   }
 
   const hasSpinalCord = () => publishesSpinalCord(model.manifest);
@@ -147,6 +173,7 @@ export function createSceneCommands({
     // The scan is a download of its own.
     if (value === 'mri' && value !== model.settings.surfaceColor) await download(colour);
     else await colour();
+    if (model.settings.surfaceColor === value) session.resolveNotice('colour');
     return current();
   }
 
@@ -157,6 +184,7 @@ export function createSceneCommands({
     await (visible && model.spinalCordLoad !== 'ready'
       ? download((progress) => model.setSpinalCordVisible(true, progress))
       : model.setSpinalCordVisible(visible));
+    if (visible && model.spinalCordLoad === 'ready') succeeded('cord');
     return current();
   }
 
@@ -198,7 +226,8 @@ export function createSceneCommands({
 
   /**
    * The masthead's atlas field. A colouring the new atlas cannot carry is dropped; the option
-   * said so before it was chosen. Each masthead choice retires the notice an earlier one left.
+   * said so before it was chosen. Each masthead choice retires the information an earlier one left,
+   * and its success the field's earlier error.
    */
   async function chooseAtlas(id: string) {
     if (id === model.settings.atlas && atlasWanted === null) return;
@@ -207,7 +236,9 @@ export function createSceneCommands({
     try {
       await loadAtlas(id, current);
     } catch (error) {
-      failIfCurrent(current, 'layer', error, atlasSwitchLabel(id, lang()));
+      failChoice(current, 'atlas', error, ['layer', atlasSwitchLabel(id, lang())], () => {
+        void chooseAtlas(id);
+      });
       return;
     }
     if (current()) render();
@@ -220,7 +251,9 @@ export function createSceneCommands({
     try {
       await loadDetail(id, current);
     } catch (error) {
-      failIfCurrent(current, 'layer', error, atlasSwitchLabel(id, lang()));
+      failChoice(current, 'detail', error, ['layer', atlasSwitchLabel(id, lang())], () => {
+        void chooseDetail(id);
+      });
       return;
     }
     if (current()) render();
@@ -233,7 +266,10 @@ export function createSceneCommands({
     try {
       if (!(await applySurfaceColor(value, current))) return;
     } catch (error) {
-      failIfCurrent(current, 'colour', error, t(lang(), 'display').surfaceColors[value]);
+      const said = t(lang(), 'display').surfaceColors[value];
+      failChoice(current, 'colour', error, ['colour', said], () => {
+        void chooseSurfaceColor(value);
+      });
       return;
     }
     render();
@@ -243,6 +279,7 @@ export function createSceneCommands({
     begin,
     fail,
     failIfCurrent,
+    succeeded,
     download,
     loadAtlas,
     loadDetail,

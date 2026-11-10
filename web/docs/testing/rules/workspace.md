@@ -1,6 +1,6 @@
 # Workspace rules
 
-Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes (manual activation), the list and detail views and the focus that follows them, the detail's location bar, the desktop selection strip, and the one notice. The phone sheet that holds the same workspace is in `sheet.md`; the global keys (Escape as Back, `/`, the vertical arrows) are in `controller.md` (KEY-); the permalink's `tab` is in `links.md` (LINK-). Legacy sources: `viewer/ui/chrome/workspace.js` (and its `workspace.test.js`), `viewer/ui/chrome/notice.js` (and `notice.test.js`), `viewer/index.html:204-226,324-337`, `viewer/styles/layout.css:13-201`. New code: `web/src/lib/core/workspace.ts`, `web/src/features/workspace/{Workspace,LocationBar,SelectionStrip,Notice}.svelte`. Deviations: `h5-breadcrumb-current.md`, `h5-clear-focus.md`, `h5-current-item.md`, `h5-single-tablist.md`, `h5-strip-name-side.md`, `h5-tablist-arrows.md`, `h5-tabpanel-semantics.md`. Decision records 0004 (tabs with manual activation) and 0007 (one tablist, nothing moves in the DOM); decisions 1 (the scroll-into-view fix, #4 body), 9, 13 and 19 on #4. Copy quoted is the English interface text.
+Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes (manual activation), the list and detail views and the focus that follows them, the detail's location bar, the desktop selection strip, and the one notice. The phone sheet that holds the same workspace is in `sheet.md`; the global keys (Escape as Back, `/`, the vertical arrows) are in `controller.md` (KEY-); the permalink's `tab` is in `links.md` (LINK-). Legacy sources: `viewer/ui/chrome/workspace.js` (and its `workspace.test.js`), `viewer/ui/chrome/notice.js` (and `notice.test.js`), `viewer/index.html:204-226,324-337`, `viewer/styles/layout.css:13-201`. New code: `web/src/lib/core/workspace.ts`, `web/src/features/workspace/{Workspace,LocationBar,SelectionStrip,Notice}.svelte`; U9 (2026-11-09) gave the notice its two kinds and Retry. Deviations: `h5-breadcrumb-current.md`, `h5-clear-focus.md`, `h5-current-item.md`, `h5-single-tablist.md`, `h5-strip-name-side.md`, `h5-tablist-arrows.md`, `h5-tabpanel-semantics.md`. Decision records 0004 (tabs with manual activation) and 0007 (one tablist, nothing moves in the DOM); decisions 1 (the scroll-into-view fix, #4 body), 9, 13 and 19 on #4. Copy quoted is the English interface text.
 
 ## Mode tabs
 
@@ -185,21 +185,30 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 
 ### WORK-20 · The one notice has its text, at most one action and a dismiss, and is not a live region
 
-- **Rule:** A notice shows its text, one optional action (e.g. "Reload"; FR "Recharger") and a "Dismiss" icon button (FR "Fermer") with that tooltip. It sits after the tablist and before the panels in both shells. The announcer speaks it, so it has no live role. An unknown action is an error.
+- **Rule:** A notice shows its text, one optional action ("Reload", FR "Recharger"; "Retry", FR "Réessayer"; Restore; Undo) and a "Dismiss" icon button (FR "Fermer") with that tooltip. It sits after the tablist and before the panels in both shells. The one polite announcer speaks it, errors included, so it has no live role and no `role=alert`: a live notice would be said twice. An unknown action is an error.
 - **Kind:** behaviour
 - **Level:** browser — DOM order and roles; the action label is unit
 - **Source:** `viewer/ui/chrome/notice.js:1-52`; `viewer/ui/chrome/notice.test.js:50-83`
-- **Expected:** `noticeActionLabel('en', 'reload')` = "Reload"; `('fr', 'reload')` = "Recharger"; `('en', 'fly')` throws "Unknown notice action: fly". DOM order `tablist, notice, tabpanel, tabpanel`; no `aria-live`, `role=alert` or `role=status` in it. Reload → `action:reload`. No action → one button (Dismiss).
+- **Expected:** `noticeActionLabel('en', 'reload')` = "Reload"; `('fr', 'reload')` = "Recharger"; `('en', 'retry')` = "Retry"; `('fr', 'retry')` = "Réessayer"; `('en', 'fly')` throws "Unknown notice action: fly". DOM order `tablist, notice, tabpanel, tabpanel`; no `aria-live`, `role=alert` or `role=status` in it. Reload → `action:reload`. No action → one button (Dismiss).
 - **Covered by:** `src/lib/core/workspace.test.ts` (R); `src/features/workspace/Workspace.svelte.test.ts` (R)
 
 ### WORK-21 · Dismissing the notice gives focus to the tab in front
 
-- **Rule:** The dismiss clears the notice; focus, which was on the vanished button, goes to the selected tab.
+- **Rule:** The dismiss clears the notice, errors included; focus, which was on the vanished button, goes to the selected tab. So does an action that takes the notice away with it (Retry).
 - **Kind:** behaviour
 - **Level:** browser — focus
 - **Source:** `viewer/app.js:1479-1486`; `viewer/ui/chrome/notice.js:15-27`
-- **Expected:** Click "Dismiss" → `dismiss` reported, no `.notice`, focus on Anatomy.
-- **Covered by:** `src/features/workspace/Workspace.svelte.test.ts` (R)
+- **Expected:** Click "Dismiss" → `dismiss` reported, no `.notice`, focus on Anatomy. Retry by keyboard → focus on the active tab (WORK-27).
+- **Covered by:** `src/features/workspace/Workspace.svelte.test.ts` (R); `src/features/workspace/Notice.svelte.test.ts` (R, Retry)
+
+### WORK-27 · An error is set in danger ink and offers Retry where retrying can help
+
+- **Rule:** A notice of kind `error` sets its words in `--danger`, the ink every inline failure already uses (its contrast on the tonal ground is CONTRAST's); information keeps the primary ink. No new hue, border or icon. An error's Retry is a text action like Reload, reached by Tab and pressed with Enter; it hands the notice and the command to the session (STATE-66), and focus goes to the tab in front. axe finds nothing on an error notice in either theme at either width.
+- **Kind:** behaviour, accessibility
+- **Level:** browser — computed colour, keyboard, focus, axe
+- **Source:** the 2026-11-09 review (U9: "failures look like information and offer no retry"); `DESIGN.md` ("Danger is for errors only")
+- **Expected:** error notice: `.notice-text` colour = `--danger` in light and dark, not `--text-primary`; info notice: `--text-primary`. Retry focused, Enter → `retry` reported, notice gone, focus on the active tab. French: "Réessayer", "Fermer". `expectAxeClean()` with no violations.
+- **Covered by:** `src/features/workspace/Notice.svelte.test.ts` (R)
 
 ## Size, layout and media
 
@@ -247,3 +256,23 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 - **Source:** WCAG 2.2 AA
 - **Expected:** `expectAxeClean()` with no violations on the list with a notice and the strip (both themes, 1280 and 390 px); one run each (light, 1280 px) for the detail, the French detail and `prefers-contrast: more` with reduced motion.
 - **Covered by:** `src/features/workspace/Workspace.svelte.test.ts` (R)
+
+## Searching across tabs and from the detail
+
+### WORK-28 · Each search offers the other tabs that find the same words, and carries them there (U1)
+
+- **Rule:** A non-blank query in Anatomy, Functions, Deficits or Tracts is also counted against the other tabs' catalogues: the regions named (not the on-screen regions a hidden match is drawn within), the Functions maps and terms, the deficits, the guided circuits (name or route) and the tract bundles, each as its own tab would list it. Region aliases stay nomenclature: nothing is found through a functional alias. Each tab that finds something is offered in tab order, after the list: in Anatomy as a sentence "<n> matches in <tab>." with "Show in <tab>", said with the other sentences; in the other lists as a bridge row "<Tab>: <n> … match “<query>”", said after the list's count. Pressing it carries the words to that tab's search and puts focus in its field; for Circuits, which has no search, the one circuit named opens. Functions and Deficits carry as CTRL-33 does.
+- **Kind:** behaviour
+- **Level:** unit (`elsewhere`, `circuitsMatching`, `tractsMatching`, `bridgeText`); browser in the composed app
+- **Source:** U1 of the 2026-11-09 review (`PLANUM-HANDOFF.md`); `destrieux-labels.ts:8-10` (aliases)
+- **Expected:** Anatomy "aphasia" → "No match for “aphasia”", "<n> matches in Deficits." (the hint dropped), said "No match for “aphasia”. <n> matches in Deficits."; "Show in Deficits" → Deficits in front, `clinicalQuery` "aphasia", focus in its field. "arcuate" → the hypothalamic nucleus listed and "2 matches in Tracts."; "Show in Tracts" → only the arcuate fasciculus listed, focus in the tracts field. Tracts "arcuate" → "Anatomy: 2 regions match “arcuate”", said "2 tract bundles. Anatomy: 2 regions match “arcuate”."; pressed → the region search holds "arcuate". Deficits "corticospinal" → Anatomy, Circuits, Tracts bridges in that order. "basal ganglia" → Circuits bridge opens `motor`. French "aphasie" → "<n> correspondances dans l’onglet Déficits." with "Afficher dans l’onglet Déficits".
+- **Covered by:** `src/lib/core/elsewhere.test.ts` (R); `src/features/workspace/ListView.svelte.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R, the sentences and their button)
+
+### WORK-29 · The search of the tab in front stays above its detail (U2)
+
+- **Rule:** In Anatomy, Functions and Deficits the detail view starts, under its location bar, with that tab's search field (same label, `/` hint while single-key shortcuts are on). Typing there writes the tab's query, shows the list and moves focus to the list's own field with the caret at the end, so the next keys go on typing and no single-key shortcut fires. Escape there empties words it holds, and with none is Back (KEY-03). `/` still shows the list and focuses its field. Circuits has no search and Tracts keeps its words in its own list, so their details have none.
+- **Kind:** behaviour
+- **Level:** browser in the composed app
+- **Source:** U2 of the 2026-11-09 review; decision record 0007 (nothing moves in the DOM: the field above the detail is the detail's own, bound to the same query)
+- **Expected:** Region picked → searchbox "Search regions" in `#inspector`, before the region's heading; click it, type "broca" → `#navigator` shown, focus on the combobox holding "broca", Broca's areas listed, cortex still shown, selection kept. Query "cun" then a pick → the field holds "cun"; Escape → query "", detail still shown; Escape → list. Single-key shortcuts off → no hint. At 375 × 812 the field is on screen once the sheet rests, and a tap and a letter move to the list. Function profile → "Search functions"; typing "memory" → `functionQuery` "memory". Circuits lesson → no search field. axe clean light and dark.
+- **Covered by:** `src/features/workspace/DetailView.svelte.test.ts` (R)

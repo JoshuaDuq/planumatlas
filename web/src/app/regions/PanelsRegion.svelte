@@ -175,6 +175,7 @@
 
   function noticeAction(action: NonNullable<Notice['action']>) {
     if (action === 'reload') void reloadWithoutStoredModels();
+    else if (action === 'retry') world!.session.retryNotice();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
     else world!.coordinates!.undoReplacement();
   }
@@ -290,7 +291,7 @@
           world.engine.invalidate();
         }}
         onNoticeAction={noticeAction}
-        onDismiss={() => world.session.notify(null)}
+        onDismiss={() => world.session.dismissNotice()}
       >
         {#snippet list()}
           <ListView

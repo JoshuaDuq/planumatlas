@@ -467,7 +467,9 @@ describe('selection strip', () => {
 
 describe('notice', () => {
   test('text, one action and a dismiss, after the tablist and before the panels; not a live region', async () => {
-    const { calls } = await mount({ notice: { text: 'Planum was updated.', action: 'reload' } });
+    const { calls } = await mount({
+      notice: { kind: 'info', text: 'Planum was updated.', action: 'reload' },
+    });
     await expect.element(page.getByText('Planum was updated.')).toBeVisible();
     const notice = document.querySelector('.notice')!;
     expect(notice.hasAttribute('aria-live')).toBe(false);
@@ -486,7 +488,7 @@ describe('notice', () => {
   test('the restore action and French labels', async () => {
     const { calls } = await mount({
       lang: 'fr',
-      notice: { text: 'Amygdale.', action: 'restore' },
+      notice: { kind: 'info', text: 'Amygdale.', action: 'restore' },
     });
     await button('Rétablir la vue précédente').click();
     expect(calls).toEqual(['action:restore']);
@@ -494,13 +496,15 @@ describe('notice', () => {
   });
 
   test('without an action there is no action button', async () => {
-    await mount({ notice: { text: 'Nothing to do.' } });
+    await mount({ notice: { kind: 'info', text: 'Nothing to do.' } });
     await expect.element(page.getByText('Nothing to do.')).toBeVisible();
     expect(document.querySelectorAll('.notice button')).toHaveLength(1);
   });
 
   test('dismiss clears it and hands focus to the tab in front', async () => {
-    const { calls } = await mount({ notice: { text: 'Planum was updated.', action: 'reload' } });
+    const { calls } = await mount({
+      notice: { kind: 'info', text: 'Planum was updated.', action: 'reload' },
+    });
     await button('Dismiss').click();
     expect(calls).toEqual(['dismiss']);
     await expect.poll(() => document.querySelector('.notice')).toBeNull();
@@ -509,7 +513,7 @@ describe('notice', () => {
 
   test('on the rails an open detail’s notice follows its location bar, which holds still; the sheet keeps it after the tablist', async () => {
     const { world, holder } = await mount(
-      { notice: { text: 'Cortex hidden.' } },
+      { notice: { kind: 'info', text: 'Cortex hidden.' } },
       { slots: 'stepper' },
     );
     holder.workspace!.showDetail();
@@ -524,14 +528,16 @@ describe('notice', () => {
     world.notice = null;
     await settle();
     expect(bar()).toBe(held);
-    world.notice = { text: 'Left hemisphere shown alone.' };
+    world.notice = { kind: 'info', text: 'Left hemisphere shown alone.' };
     world.shell = 'sheet';
     await settle();
     expect(order()).toEqual(['tablist', 'notice', 'detail-location']);
   });
 
   test('a shell change keeps focus where it was inside the notice', async () => {
-    const { world } = await mount({ notice: { text: 'Planum was updated.', action: 'reload' } });
+    const { world } = await mount({
+      notice: { kind: 'info', text: 'Planum was updated.', action: 'reload' },
+    });
     el(button('Reload')).focus();
     world.shell = 'sheet';
     await settle();
@@ -554,7 +560,7 @@ describe('sizes and media', () => {
         clearable: true,
       },
       selectedRegion: { id: 'left:1' },
-      notice: { text: 'A notice.', action: 'reload' },
+      notice: { kind: 'info', text: 'A notice.', action: 'reload' },
     });
     await tab('Deficits').click();
     await expect
@@ -618,7 +624,7 @@ describe('large text and spacing', () => {
       clearable: true,
     },
     selectedRegion: { id: 'left:2' },
-    notice: { text: 'Planum a été mis à jour.', action: 'reload' },
+    notice: { kind: 'info', text: 'Planum a été mis à jour.', action: 'reload' },
   } as const;
 
   afterEach(() => {
@@ -660,7 +666,7 @@ describe('large text and spacing', () => {
       explorer: 'deficits',
       ...busy,
       lang: 'en',
-      notice: { text: 'Updated.', action: 'reload' },
+      notice: { kind: 'info', text: 'Updated.', action: 'reload' },
     });
     const style = document.head.appendChild(document.createElement('style'));
     style.id = 'text-spacing';
@@ -677,7 +683,7 @@ describe('large text and spacing', () => {
       explorer: 'deficits',
       ...busy,
       lang: 'en',
-      notice: { text: 'Updated.', action: 'reload' },
+      notice: { kind: 'info', text: 'Updated.', action: 'reload' },
     });
     await tab('Deficits').click();
     await withMedia(
@@ -712,7 +718,7 @@ describe('axe', () => {
         clearable: true,
       },
       selectedRegion: { id: 'left:1' },
-      notice: { text: 'Planum was updated.', action: 'reload' },
+      notice: { kind: 'info', text: 'Planum was updated.', action: 'reload' },
     });
     await tab('Deficits').click();
     await expect

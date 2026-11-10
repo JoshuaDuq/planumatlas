@@ -505,7 +505,7 @@
   "settings": "Tract display",
   "errors": {
    "asset-fetch": "The reference data could not be downloaded. Check the connection, then try again.",
-   "asset-updated": "Planum was updated while this page was open. Reload the page to load the new data.",
+   "asset-updated": "A reference data file on the server no longer matches this page; Planum has probably been updated. Reload the page to continue.",
    "invalid-data": "The reference data could not be read.",
    "failed": "The reference data could not be displayed."
   }
@@ -675,7 +675,7 @@
   "noLesionCheck": "No lesion study in Planum’s deficit evidence checks this domain."
  },
  "errors": {
-  "updated": "Planum was updated. Reload to continue.",
+  "updated": "A file on the server no longer matches this page; Planum has probably been updated. Reload to continue.",
   "download": "A file could not be downloaded. Check the connection and try again.",
   "reload": "Reload",
   "dismiss": "Dismiss",
@@ -912,6 +912,7 @@
   "previous": "Back",
   "done": "Done",
   "close": "Close the tour",
+  "skip": "Skip tour",
   "progress": "{{current}} of {{total}}",
   "stops": [
    {
@@ -1097,6 +1098,10 @@
   "focus": "Focus",
   "isolate": "Isolate",
   "restore": "Restore",
+  "focusHint": "Frame this region in its colour, with the rest see-through grey",
+  "isolateHint": "Show this region alone, framed",
+  "restoreHint": "Show the rest of the brain again, framed whole",
+  "hideHint": "Remove this region from view; Undo brings it back",
   "constituentsHeading": "Constituent regions",
   "constituentsNote": "Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.",
   "constituentCutOnly": "Cut only"
@@ -1452,6 +1457,14 @@
    "[\"\",\"Alpha\"] → \" in Alpha, which labels cuts only. \""
   ],
   "switchCutAtlas": "Switch cut labels",
+  "matchesInTab": [
+   "[\"Alpha\",\"\"] → \"Alpha in . \"",
+   "[\"\",\"Alpha\"] → \" in Alpha. \""
+  ],
+  "showInTab": [
+   "[\"Alpha\"] → \"Show in Alpha\"",
+   "[\"\"] → \"Show in \""
+  ],
   "includes": [
    "[\"Alpha\"] → \"includes Alpha\"",
    "[\"\"] → \"includes \""
@@ -2283,6 +2296,20 @@
   "showInList": [
    "[\"Alpha\"] → \"Alpha, show in the list\"",
    "[\"\"] → \", show in the list\""
-  ]
+  ],
+  "bridges": {
+   "anatomy": [
+    "[\"Alpha\",\"\"] → \"Anatomy: Alpha regions match “”\"",
+    "[\"\",\"Alpha\"] → \"Anatomy:  regions match “Alpha”\""
+   ],
+   "circuits": [
+    "[\"Alpha\",\"\"] → \"Circuits: Alpha guided circuits match “”\"",
+    "[\"\",\"Alpha\"] → \"Circuits:  guided circuits match “Alpha”\""
+   ],
+   "diffusion": [
+    "[\"Alpha\",\"\"] → \"Tracts: Alpha tract bundles match “”\"",
+    "[\"\",\"Alpha\"] → \"Tracts:  tract bundles match “Alpha”\""
+   ]
+  }
  }
 }

@@ -153,11 +153,11 @@ test('PANEL-13 a changed asset says to reload, in the reader’s language', () =
   const updated = Object.assign(new Error('Asset changed'), { code: 'asset-updated' });
   assert.equal(
     stageMessage(CLINICAL_TEXT.en, { ...idle, error: updated }),
-    'Planum was updated. Reload to continue.',
+    'A file on the server no longer matches this page; Planum has probably been updated. Reload to continue.',
   );
   assert.equal(
     stageMessage(CLINICAL_TEXT.fr, { ...idle, lang: 'fr', error: updated, operation: 'region' }),
-    'Planum a été mis à jour. Rechargez la page pour continuer.',
+    'Un fichier du serveur ne correspond plus à cette page ; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
   );
 });
 

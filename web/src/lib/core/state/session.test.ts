@@ -15,6 +15,11 @@ const modelState = {
 };
 
 const session = () => createSession({ views: VIEWS });
+/** The notice shown, without its numbered parts (the announcer's; KEY-18 tests those). */
+const seen = (s: ReturnType<typeof session>) => {
+  const shown = s.assemble(modelState).notice;
+  return shown && Object.fromEntries(Object.entries(shown).filter(([name]) => name !== 'parts'));
+};
 
 test('clinical navigation preserves anatomical search and selection independently', () => {
   const s = session();
@@ -117,26 +122,133 @@ test('groups can be expanded or collapsed in bulk', () => {
   assert.deepEqual([...s.assemble(modelState).expanded], []);
 });
 
-test('a notice survives until the next action, and is never timed out', () => {
+test('STATE-30 information survives until the next action, and is never timed out', () => {
   const s = session();
-  s.notify({ text: 'Selection cleared — cortex hidden.' });
-  assert.deepEqual(s.assemble(modelState).notice, {
+  s.notify({ kind: 'info', text: 'Selection cleared — cortex hidden.' });
+  assert.deepEqual(seen(s), {
+    kind: 'info',
     text: 'Selection cleared — cortex hidden.',
     action: null,
   });
-  assert.equal(s.assemble(modelState).notice!.text, 'Selection cleared — cortex hidden.');
   s.setQuery('a');
   assert.equal(s.assemble(modelState).notice, null);
   assert.throws(() => s.notify('bare text' as unknown as Notice), /needs text/);
+  assert.throws(() => s.notify({ text: 'No kind.' } as Notice), /Unknown notice kind/);
+  assert.throws(
+    () => s.notify({ kind: 'error', text: 'Offline.', action: 'retry' }),
+    /needs the command to retry/,
+  );
+});
+
+test('STATE-30 an error stands through actions and retirements until the reader dismisses it', () => {
+  const s = session();
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.' });
+  s.setQuery('a');
+  s.setView('left');
+  s.setExplorer('deficits');
+  s.notify(null);
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not load HCP-MMP.',
+    action: null,
+  });
+  s.dismissNotice();
+  assert.equal(s.assemble(modelState).notice, null);
+});
+
+test('STATE-30 an error goes once its command succeeds; the same failure again replaces it', () => {
+  const s = session();
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', key: 'layer:HCP-MMP' });
+  s.notify({ kind: 'error', text: 'Could not show the spinal cord.', key: 'cord' });
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', key: 'layer:HCP-MMP' });
+  assert.equal(
+    s.assemble(modelState).notice!.text,
+    'Could not show the spinal cord. Could not load HCP-MMP.',
+  );
+  s.resolveNotice('layer:HCP-MMP');
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not show the spinal cord.',
+    action: null,
+  });
+  s.holdNotices();
+  s.notify({ kind: 'error', text: 'Could not load Destrieux.', key: 'layer:Destrieux' });
+  s.resolveNotice('layer:Destrieux');
+  s.resolveNotice('cord');
+  s.releaseNotices();
+  assert.equal(s.assemble(modelState).notice, null, 'a held error resolved before release');
+});
+
+test('STATE-30 a language change takes an error with it, which would stand in the language left', () => {
+  const s = session();
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.' });
+  s.setLang('fr');
+  assert.equal(s.assemble(modelState).notice, null);
+});
+
+test('STATE-66 Retry clears the notice, then runs the failed command once', () => {
+  const s = session();
+  const seen: (Notice | null)[] = [];
+  const retry = () => seen.push(s.assemble(modelState).notice);
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', action: 'retry', retry });
+  s.notify({ kind: 'info', text: 'Selection cleared.' });
+  s.retryNotice();
+  assert.deepEqual(seen, [null]);
+  assert.equal(s.assemble(modelState).notice, null);
+  assert.throws(() => s.retryNotice(), /offers no retry/);
+});
+
+test('STATE-66 Retry takes only the error it retries; another stands with its own Retry', () => {
+  const s = session();
+  const ran: string[] = [];
+  const atlas = () => ran.push('atlas');
+  const cord = () => ran.push('cord');
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', action: 'retry', retry: atlas });
+  s.notify({
+    kind: 'error',
+    text: 'Could not show the spinal cord.',
+    action: 'retry',
+    retry: cord,
+  });
+  s.retryNotice();
+  assert.deepEqual(ran, ['atlas']);
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not show the spinal cord.',
+    action: 'retry',
+    retry: cord,
+  });
+  s.retryNotice();
+  assert.deepEqual(ran, ['atlas', 'cord']);
+  assert.equal(seen(s), null);
+});
+
+test('STATE-31 information beside an error goes with the next action, and offers its action meanwhile', () => {
+  const s = session();
+  const retry = () => {};
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', action: 'retry', retry });
+  s.notify({ kind: 'info', text: 'Both hemispheres shown.', action: 'restore' });
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not load HCP-MMP. Both hemispheres shown.',
+    action: 'restore',
+  });
+  s.setQuery('a');
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not load HCP-MMP.',
+    action: 'retry',
+    retry,
+  });
 });
 
 test('download progress is not an action: a standing notice outlives it', () => {
   const s = session();
   s.setLoaded();
-  s.notify({ text: 'Planum was updated. Reload to continue.', action: 'reload' });
+  s.notify({ kind: 'info', text: 'Cortex hidden.', action: 'restore' });
   s.setSwitching({ loaded: 1, total: 4 });
   s.endSwitching();
-  assert.equal(s.assemble(modelState).notice!.action, 'reload');
+  assert.equal(s.assemble(modelState).notice!.action, 'restore');
   assert.equal(s.assemble(modelState).status, 'ready');
 });
 
@@ -265,10 +377,10 @@ test('a failed start is final: no later load event paints over it', () => {
 test('first-load progress after the start is not a load, and a ready stage stays ready', () => {
   const s = session();
   s.setLoaded();
-  s.notify({ text: 'Planum was updated. Reload to continue.', action: 'reload' });
+  s.notify({ kind: 'info', text: 'Cortex hidden.', action: 'restore' });
   s.setProgress({ loaded: 1, total: 4 });
   assert.equal(s.assemble(modelState).status, 'ready');
-  assert.equal(s.assemble(modelState).notice!.action, 'reload');
+  assert.equal(s.assemble(modelState).notice!.action, 'restore');
 });
 
 test('the start ends once, and only a lost context is restored', () => {
@@ -302,15 +414,23 @@ test('a notice raised while a link is applied outlives the link’s own steps, b
   const s = session();
   s.setLoaded();
   s.holdNotices();
-  s.notify({ text: 'Could not show the white matter.', action: null });
-  s.notify({ text: 'Planum was updated.', action: 'reload' });
-  // The link's own steps are actions; without the hold they would clear both.
+  s.notify({ kind: 'info', text: 'Cortex hidden.', action: 'restore' });
+  s.notify({ kind: 'error', text: 'Could not show the white matter.', action: null });
+  s.notify({ kind: 'error', text: 'Planum was updated.', action: 'reload' });
+  // The link's own steps are actions; without the hold they would clear the information.
   s.setExplorer('deficits');
   s.setDeficit('aphasia');
   assert.equal(s.assemble(modelState).notice, null, 'nothing shows until the link has settled');
-  s.releaseNotices({ text: 'Not applied from this link: language.' });
-  assert.deepEqual(s.assemble(modelState).notice, {
-    text: 'Not applied from this link: language. Could not show the white matter. Planum was updated.',
+  s.releaseNotices({ kind: 'info', text: 'Not applied from this link: language.' });
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not show the white matter. Planum was updated. Not applied from this link: language. Cortex hidden.',
+    action: 'restore',
+  });
+  s.setQuery('a');
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not show the white matter. Planum was updated.',
     action: 'reload',
   });
 });
@@ -319,10 +439,10 @@ test('overlapping links hold notices until the last settles; with nothing to say
   const s = session();
   s.holdNotices();
   s.holdNotices();
-  s.notify({ text: 'A download failed.' });
+  s.notify({ kind: 'info', text: 'A download failed.' });
   s.releaseNotices();
   assert.equal(s.assemble(modelState).notice, null);
-  s.releaseNotices({ text: 'Not applied from this link: view.' });
+  s.releaseNotices({ kind: 'info', text: 'Not applied from this link: view.' });
   assert.equal(
     s.assemble(modelState).notice!.text,
     'Not applied from this link: view. A download failed.',
@@ -333,7 +453,7 @@ test('overlapping links hold notices until the last settles; with nothing to say
     s.assemble(modelState).notice!.text,
     'Not applied from this link: view. A download failed.',
   );
-  s.notify({ text: 'Later.' });
+  s.notify({ kind: 'info', text: 'Later.' });
   assert.equal(
     s.assemble(modelState).notice!.text,
     'Not applied from this link: view. A download failed. Later.',
@@ -341,20 +461,40 @@ test('overlapping links hold notices until the last settles; with nothing to say
   );
 });
 
-test('a notice arriving while another stands joins it, once, until the next action clears both', () => {
+test('STATE-31 a notice arriving while another stands joins it, once, until the next action clears both', () => {
   const s = session();
-  s.notify({ text: 'Not applied from this link: view.' });
-  s.notify({ text: 'Could not show the white matter.', action: 'reload' });
-  s.notify({ text: 'Could not show the white matter.' });
-  assert.deepEqual(s.assemble(modelState).notice, {
-    text: 'Not applied from this link: view. Could not show the white matter.',
-    action: 'reload',
+  s.notify({ kind: 'info', text: 'Not applied from this link: view.' });
+  s.notify({ kind: 'info', text: 'Both hemispheres shown.', action: 'restore' });
+  s.notify({ kind: 'info', text: 'Both hemispheres shown.' });
+  assert.deepEqual(seen(s), {
+    kind: 'info',
+    text: 'Not applied from this link: view. Both hemispheres shown.',
+    action: 'restore',
   });
   s.setQuery('');
   assert.equal(s.assemble(modelState).notice, null);
-  s.notify({ text: 'Fresh.' });
+  s.notify({ kind: 'info', text: 'Fresh.' });
   s.notify(null);
-  assert.equal(s.assemble(modelState).notice, null, 'dismissing clears everything shown');
+  assert.equal(s.assemble(modelState).notice, null, 'null retires the information shown');
+});
+
+test('STATE-31 errors join each other, the first one offering an action keeping it and its retry', () => {
+  const s = session();
+  const first = () => {};
+  s.notify({ kind: 'error', text: 'Could not save the image.' });
+  s.notify({ kind: 'error', text: 'Could not load HCP-MMP.', action: 'retry', retry: first });
+  s.notify({
+    kind: 'error',
+    text: 'Could not show the spinal cord.',
+    action: 'retry',
+    retry: () => {},
+  });
+  assert.deepEqual(seen(s), {
+    kind: 'error',
+    text: 'Could not save the image. Could not load HCP-MMP. Could not show the spinal cord.',
+    action: 'retry',
+    retry: first,
+  });
 });
 
 // Owed by C1 (i18n.test.js:12).
@@ -370,9 +510,9 @@ test('session accepts and toggles language', () => {
 test('releasing notices that were never held fails and leaves the hold count intact', () => {
   const s = session();
   assert.throws(() => s.releaseNotices(), /No notices are held/);
-  assert.throws(() => s.releaseNotices({ text: 'lead' }), /No notices are held/);
+  assert.throws(() => s.releaseNotices({ kind: 'info', text: 'lead' }), /No notices are held/);
   s.holdNotices();
-  s.notify({ text: 'Waits.' });
+  s.notify({ kind: 'info', text: 'Waits.' });
   assert.equal(s.assemble(modelState).notice, null);
   s.releaseNotices();
   assert.equal(s.assemble(modelState).notice!.text, 'Waits.');
@@ -423,7 +563,7 @@ test('STATE-22 a fresh session starts loading, in English and the dark theme, wi
 
 test('STATE-23 a refused view leaves the standing notice where it was', () => {
   const s = session();
-  s.notify({ text: 'Standing' });
+  s.notify({ kind: 'info', text: 'Standing' });
   assert.equal(s.setView('sideways'), false);
   assert.equal(s.assemble(modelState).notice?.text, 'Standing');
   assert.equal(s.setView('superior'), true);

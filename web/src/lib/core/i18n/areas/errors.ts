@@ -1,5 +1,6 @@
 export const en = {
-  updated: 'Planum was updated. Reload to continue.',
+  updated:
+    'A file on the server no longer matches this page; Planum has probably been updated. Reload to continue.',
   download: 'A file could not be downloaded. Check the connection and try again.',
   reload: 'Reload',
   dismiss: 'Dismiss',
@@ -36,7 +37,8 @@ export const en = {
 };
 
 export const fr: typeof en = {
-  updated: 'Planum a été mis à jour. Rechargez la page pour continuer.',
+  updated:
+    'Un fichier du serveur ne correspond plus à cette page\u202f; Planum a probablement été mis à jour. Rechargez la page pour continuer.',
   download: 'Un fichier n’a pas pu être téléchargé. Vérifiez la connexion et réessayez.',
   reload: 'Recharger',
   dismiss: 'Fermer',

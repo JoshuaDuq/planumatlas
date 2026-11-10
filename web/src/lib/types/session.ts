@@ -1,5 +1,5 @@
 import type { EXPLORERS } from './constants.ts';
-import type { Notice } from './notice.ts';
+import type { ShownNotice } from './notice.ts';
 
 export type Explorer = (typeof EXPLORERS)[number];
 export type Language = 'en' | 'fr';
@@ -34,5 +34,5 @@ export interface SessionState {
   status: LoadStatus;
   progress: LoadProgress | null;
   error: Error | null;
-  notice: Notice | null;
+  notice: ShownNotice | null;
 }

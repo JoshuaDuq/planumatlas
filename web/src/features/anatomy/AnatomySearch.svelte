@@ -1,12 +1,14 @@
 <!--
   Find a region (navigator.js:390-461, 704-732): U6's combobox over the catalog's ranked matches,
   with the sentences that say what else there is, after the list. Matches that another atlas or cut
-  atlas draws are reported with a button that switches to it, not dropped. Choosing a result
+  atlas draws are reported with a button that switches to it, not dropped; so are the other tabs
+  that find the same words, with a button that carries the search there (U1). Choosing a result
   empties the query, so the tree returns around it, then selects the region or reveals it.
 -->
 <script lang="ts">
   import type { CatalogGroup, CatalogRow } from '../../lib/core/catalog/catalog.ts';
   import { cutAtlasesOf, type HiddenReason } from '../../lib/core/catalog/visibility.ts';
+  import type { Elsewhere } from '../../lib/core/elsewhere.ts';
   import { count } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import {
@@ -15,7 +17,7 @@
     sharedGroupNames,
     UNREVEALABLE,
   } from '../../lib/core/panels/navigator.ts';
-  import type { Language } from '../../lib/types/index.ts';
+  import type { Explorer, Language } from '../../lib/types/index.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import SearchCombobox, { type SearchGroup } from '../../lib/ui/SearchCombobox.svelte';
   import SearchResults from './SearchResults.svelte';
@@ -44,6 +46,10 @@
     /** A rejection is the caller's to report: it is not caught here. */
     onAtlas: (id: string) => void | Promise<void>;
     onCutAtlas: (id: string) => void | Promise<void>;
+    /** The other tabs that find the same words. */
+    elsewhere: (query: string) => Elsewhere[];
+    /** Carries the query to another tab. A rejection is the caller's to report. */
+    onElsewhere: (mode: Explorer) => void | Promise<void>;
   }
 
   let {
@@ -60,6 +66,8 @@
     onReveal,
     onAtlas,
     onCutAtlas,
+    elsewhere,
+    onElsewhere,
   }: Props = $props();
 
   interface Note {
@@ -77,6 +85,7 @@
   const here = $derived(
     found.rows.filter((row) => row.reason !== 'other-atlas' && row.reason !== 'other-cut-atlas'),
   );
+  const others = $derived(trimmed ? elsewhere(trimmed) : []);
   const shared = $derived(sharedGroupNames(groups));
   const place = (row: CatalogRow) => groupDisplayName(row.label.group, row.region, shared, lang);
 
@@ -88,7 +97,9 @@
     const result: Note[] = [];
     const capped = found.total - found.rows.length;
     // The hint is for a search that found nothing anywhere; matches elsewhere are the next step.
-    if (here.length === 0 && found.rows.length === 0) result.push({ text: copy.noMatchHint });
+    if (here.length === 0 && found.rows.length === 0 && others.length === 0) {
+      result.push({ text: copy.noMatchHint });
+    }
     if (capped > 0) {
       result.push({ text: copy.showingCapped(here.length, count(found.total, 'match', lang)) });
     }
@@ -112,6 +123,13 @@
       result.push({
         text: copy.matchesInOtherCut(count(rows.length, 'match', lang), named(other)),
         action: { label: copy.switchCutAtlas, run: () => onCutAtlas(other.id) },
+      });
+    }
+    const tabs = t(lang, 'workspace').modes;
+    for (const { mode, count: matches } of others) {
+      result.push({
+        text: copy.matchesInTab(count(matches, 'match', lang), tabs[mode]),
+        action: { label: copy.showInTab(tabs[mode]), run: () => onElsewhere(mode) },
       });
     }
     if (here.length === 0) result[0].title = copy.noMatch(trimmed);

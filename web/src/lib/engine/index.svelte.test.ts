@@ -96,3 +96,20 @@ test('SCENE-38 after the cut prefetch, the first cut compiles no program of its 
   engine.captureSnapshot();
   expect(created).not.toHaveBeenCalled();
 });
+
+test('INSP-45 stroke-case bytes that do not match their checksum fail as asset-updated, for a reload', async () => {
+  const engine = await boot();
+  onTestFinished(() => engine.dispose());
+  const fetching = globalThis.fetch;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+    const response = await fetching(input, init);
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    if (!url.includes('stroke-cases.json')) return response;
+    // One byte more, as a line-ending conversion or a newer deploy would change it.
+    return new Response((await response.text()).replace('"cases"', '"cases" '));
+  });
+  onTestFinished(() => {
+    vi.restoreAllMocks();
+  });
+  await expect(engine.strokeCases.cases()).rejects.toMatchObject({ code: 'asset-updated' });
+});

@@ -116,7 +116,7 @@ a narrow no-break space (U+202F); "−" is U+2212.
 
 ### SECT-11 · The position slider is named by its axis, ends in anatomical letters and speaks millimetres
 
-- **Rule:** The slider is named by the plane's axis, spans the plane's offset range in 0.5 mm steps and speaks its value to one decimal in millimetres. The letters at its ends name the plane's negative end first; an oblique plane shows only − and +. The letters are hidden from assistive technology.
+- **Rule:** The slider is named by the plane's axis, spans the plane's offset range in 0.5 mm steps for a drag (its keys and wheel are SECT-34) and speaks its value to one decimal in millimetres. The letters at its ends name the plane's negative end first; an oblique plane shows only − and +. The letters are hidden from assistive technology.
 - **Kind:** behaviour
 - **Level:** unit for the words (`axisEnds`); browser for the slider's attributes
 - **Source:** `viewer/ui/chrome/sections.js:17-20, 439-452`
@@ -129,16 +129,16 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/chrome/sections.js:138-157, 195`
-- **Expected:** First build held, slides 5, 6, 7 → builds `[[5]]`; the first lands → `[[5], [7]]`, offset 7. A rejected build for 5 → `failure` is the error; slide 6 → failure `null`, offset 6, builds `[[5], [6]]`. Keyboard: two → on the focused slider → offset 1, `aria-valuetext` "+1.0 mm", exact field "1.0".
+- **Expected:** First build held, slides 5, 6, 7 → builds `[[5]]`; the first lands → `[[5], [7]]`, offset 7. A rejected build for 5 → `failure` is the error; slide 6 → failure `null`, offset 6, builds `[[5], [6]]`. Keyboard: one → on the focused slider → offset 1, `aria-valuetext` "+1.0 mm", exact field "1.0".
 - **Covered by:** `src/features/sections/section-controls.test.ts` (R); `src/features/sections/SectionBar.svelte.test.ts` (R)
 
 ### SECT-13 · The spoken sentence waits for the hand to let go, and held sliders keep the reader's value
 
-- **Rule:** While a slider is dragged, or the position slider has focus, the spoken status waits; it is said when the slider is left or released. A focused slider (position, tilt or azimuth) keeps the reader's value against changes from elsewhere and takes the cut's value when left; a still-building slide keeps the reader's angle until the build lands.
+- **Rule:** While a slider is dragged, the position slider has focus, or a wheel has moved a slider and the pointer is still over it (until it leaves, the slider blurs, the pointer is cancelled or the slider is removed), the spoken status waits; it is said when the slider is left or released. A focused slider (position, tilt or azimuth), or one under a wheel, keeps the reader's value against changes from elsewhere and takes the cut's value when left; a still-building slide keeps the reader's angle until the build lands.
 - **Kind:** behaviour
 - **Level:** browser: focus and pointer events
 - **Source:** `viewer/ui/chrome/sections.js:208-211, 447-452, 474, 524-526`; deviation `g4-angle-held-while-focused.md`
-- **Expected:** Axial, focus the slider, → → → said unchanged; Tab → said starts "Tissue cut at +1.0 mm". Focused position slider, `setOffset(20)` → value `0`; blur → `20`. Oblique: tilt `input` 45 then `setOffset(5)` → said unchanged; `pointerup` on tilt → said starts "Tissue cut at +5.0 mm". Tilt focused, `setAngles(60, −90)` → sliders `['30', '30']`; blur → `['60', '-90']`. Tilt 45 building, focus moves to azimuth → tilt still `45`; after it lands, azimuth 40 → builds `[[45, 30], [45, 40]]`, tilt `45`.
+- **Expected:** Axial, focus the slider, → said unchanged; Tab → said starts "Tissue cut at +1.0 mm". Axial, a wheel notch up over the slider → offset 1; `setOffset(20)` → value `1`, said unchanged; `pointerleave` → value `20`, said starts "Tissue cut at +20.0 mm". A wheel's hold also ends on blur, on pointer cancel and when the slider is removed: wheeled to 1, then Coronal chosen (the row prepared, no slider) and landed → `setOffset(20)` → value `20`, said starts "Tissue cut at +20.0 mm". Focused position slider, `setOffset(20)` → value `0`; blur → `20`. Oblique: tilt `input` 45 then `setOffset(5)` → said unchanged; `pointerup` on tilt → said starts "Tissue cut at +5.0 mm". Tilt focused, `setAngles(60, −90)` → sliders `['30', '30']`; blur → `['60', '-90']`. Tilt 45 building, focus moves to azimuth → tilt still `45`; after it lands, azimuth 40 → builds `[[45, 30], [45, 40]]`, tilt `45`.
 - **Covered by:** `src/features/sections/SectionBar.svelte.test.ts` (R)
 
 ### SECT-14 · The status line says where the cut is, on what grid and labels, and what the colours mean
@@ -177,6 +177,15 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Expected:** `degrees(30, 'en')` "30°"; signed "+30°"; `degrees(-45, 'fr', true)` "−45°". Oblique opens at tilt 30, azimuth 30: "Tilt" `aria-valuetext` "30°", "Azimuth" "+30°", descriptions "Tilt from axial" and "Rotation around superior axis"; ends `−`, `+`. End on Azimuth → azimuth 180, "+180°", tilt 30. French names "Inclinaison", "Azimut".
 - **Covered by:** `src/features/sections/section-text.test.ts` (R); `src/features/sections/SectionBar.svelte.test.ts` (R)
 
+### SECT-34 · The sliders step in whole units by key and wheel: 1, or 10 with Page keys or Shift
+
+- **Rule:** Every slider in the row steps in whole units of its own, millimetres for the position and degrees for tilt and azimuth: Right and Up arrows one up, Left and Down one down, Page Up and Page Down ten, Home and End to the slider's ends, clamped to its range. The native slider would step the position by its 0.5 mm drag step and page by a tenth of the range (25.6 mm, 9° or 36°). Keys with Alt, Ctrl or Meta are left to the browser. A wheel over a slider (only while the pointer is over it) moves it one unit a notch, whatever the delta, ten with Shift (also where Shift turns the wheel sideways); scrolling down moves toward the negative end. The wheel listener is not passive: a notch the slider takes is prevented, so the page neither scrolls nor zooms. Ctrl or Meta with the wheel (the browser's zoom), a sideways wheel without Shift, a notch at the end of the range, and a wheel over a disabled slider or over the rest of the row are left to the page, as with the linked MRI's wheel (SECT-27, `g5-wheel-modifiers`). A step moves the cut as a drag does (SECT-12), and the exact field follows.
+- **Kind:** behaviour
+- **Level:** browser: key and wheel events
+- **Source:** WAI-ARIA APG Slider (keyboard interaction); SECT-27 and deviation `g5-wheel-modifiers.md` for the wheel; review handoff 2026-11-09, item U8
+- **Expected:** Axial, focused position slider from 0: → 1, ↑ 2, Page Up 12, ← 11, Page Down 1, ↓ 0, Home −128, Page Down −128, End 128 (`aria-valuetext` "+128.0 mm", field "128.0"). Oblique: Tilt Page Up then → → 41; Azimuth Page Down, Page Down, ↓ → 9, Home → −180, tilt still 41. Oblique position, wheels (taken = prevented): `deltaY` −100 → 1; `deltaY` 4 with Shift → −9; `deltaX` −100 with Shift → 1, field "1.0"; with Ctrl, with Meta, `deltaX` 100 alone → not taken; 16 Shift notches down → the range's minimum, one more → not taken; over the field or the row → not taken. Tilt, Shift notch up → 40; Azimuth notch down → 29, tilt 40. Disabled slider at 5 → not taken, offset 5.
+- **Covered by:** `src/features/sections/SectionBar.svelte.test.ts` (R)
+
 ### SECT-18 · Linked MRI opens at once from the keyboard and ignores presses while it loads
 
 - **Rule:** The row's "Linked MRI" button advertises `M`. It passes on whether it was used from the keyboard (instant) or a pointer. While the scan loads it is `aria-disabled`, stays focusable, and further presses (and `M`) do nothing; it is free again however the opening ends, and a failure is said in the status line.
@@ -201,16 +210,16 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Kind:** accessibility
 - **Level:** browser: focus
 - **Source:** `viewer/ui/chrome/sections.js:433`; deviation `g4-focus-when-bar-hidden.md`
-- **Expected:** Focus on the slider, cut closed elsewhere → no row, focus on Section. Focus on the exact field, tract reference on → no row, focus on the first `.stage-tool`, which is visible. Focus on Reverse side, visible width 900 → 500 → `data-compact="true"`, focus on "More section controls".
+- **Expected:** Focus on the slider, cut closed elsewhere → no row, focus on Section. Focus on the exact field, tract reference on → no row, focus on the first `.stage-tool`, which is visible. Focus on Reverse side, visible width 900 → 400 → `data-compact="true"`, focus on "More section controls".
 - **Covered by:** `src/features/sections/SectionBar.svelte.test.ts` (R)
 
-### SECT-21 · Where one line would not fit, the row folds Reverse side and Linked MRI behind More
+### SECT-21 · Where the first line would not fit, the row folds Reverse side and Linked MRI behind More
 
-- **Rule:** The row keeps everything on one line while its natural width fits the visible stage less the two gutters, and folds Reverse side and Linked MRI behind a disclosure "More section controls" otherwise; a phone always folds it and names the plane by its short name. The width is measured with every control beside the slider, also while folded and again when the words change, so the row unfolds once there is room. The dock stays inside the stage.
+- **Rule:** The row's first line holds the plane, the exact field, Reverse side, Linked MRI and Close; the position slider has a line of its own under it, as on a phone. Its natural length gives the thumb 512 px of travel, a pixel to each 0.5 mm step of the head's 256 mm, and it shrinks to the width the dock is given; the angle sliders keep their own length and do not widen the row. The row keeps its first line whole while that line's natural width fits the visible stage less the two gutters, and folds Reverse side and Linked MRI behind a disclosure "More section controls" otherwise; a phone always folds it and names the plane by its short name. The width is measured from the first line alone (the slider asks for none), also while folded and again when the words change, so the row unfolds once there is room. The dock stays inside the stage.
 - **Kind:** behaviour
 - **Level:** browser: measured widths (the fold decision is STORE-29, `state.md`)
 - **Source:** `viewer/ui/chrome/stage-tools.js:3-9`; `stage-tools.test.js:46-54`; `viewer/ui/chrome/viewport-chrome.js:147-176`
-- **Expected:** `compactSection({ room: 748, need: 700 })` false, `(700, 700)` false, `(488, 700)` true, `need: null` (phone) true. App, 1280 wide: no row → `sectionNeed 0`; Coronal → `data-compact="false"`, `sectionNeed` = dock `offsetWidth`; French → a new width, again the dock's; closed → 0. Visible 560 → folded; French re-measured while folded; visible 1280 → unfolded and the dock's width equals the width measured while folded. 560 px stage: More `aria-expanded="false"`, its panel not visible, no "Reverse side"; Enter → `"true"`, Reverse side visible, dock right ≤ 560. Phone 390: folded, full name hidden, short "Sag", dock width 390 − 2 × gutter. Built site phone: More toggles, then "Linked MRI" visible.
+- **Expected:** `compactSection({ room: 748, need: 700 })` false, `(700, 700)` false, `(488, 700)` true, `need: null` (phone) true. App, 1280 wide: no row → `sectionNeed 0`; Coronal → `data-compact="false"`; with exactly `sectionNeed` + 2 gutters in sight the row stays unfolded, the name, field, Reverse side, Linked MRI and Close share one line and Close ends inside the dock; French → a new width that fits the same way; closed → 0. Visible 400 → folded; French re-measured while folded; visible 1280 → unfolded and the first line fits the width measured while folded. Coronal at 1280: the slider's top ≥ the field's bottom, its width less the 14 px thumb ≥ 512 (on the first line it was 160 px, about 1.7 mm a pixel); visible `sectionNeed` + 60 → unfolded, the end letters within 24 px of the row's edges, travel < 512; Oblique → the row's width within 8 px of the coronal row's. 400 px stage: More `aria-expanded="false"`, its panel not visible, no "Reverse side"; Enter → `"true"`, Reverse side visible, dock right ≤ 400. Phone 390: folded, full name hidden, short "Sag", dock width 390 − 2 × gutter. Built site phone: More toggles, then "Linked MRI" visible.
 - **Covered by:** `src/features/sections/SectionBar.svelte.test.ts` (R; the "writes its one-line width to the stage layout" case also pins the store field); `src/lib/state/stage-layout.svelte.test.ts` (R, the fold decision)
 
 ### SECT-22 · The cut on screen is what the snapshot's caption reports

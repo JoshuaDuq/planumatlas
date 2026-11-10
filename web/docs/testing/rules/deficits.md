@@ -71,7 +71,7 @@ What opening a deficit does to the scene (draw, frame, the reveal notice, the se
 
 ### DEF-08 · A query that names activation maps bridges to the Functions tab
 
-- **Rule:** While the query matches Functions-tab maps, the list ends with a bridge naming how many; pressing it carries the query to the Functions tab (CTRL-33).
+- **Rule:** While the query matches Functions-tab maps, the list ends with a bridge naming how many; pressing it carries the query to the Functions tab (CTRL-33). The other tabs' bridges are WORK-28; the list receives them from the workspace (`elsewhere`, `onElsewhere`).
 - **Kind:** behaviour
 - **Level:** unit (view-model) for the text; browser for the press
 - **Source:** `viewer/ui/panels/clinical.js:511-512,427-428`

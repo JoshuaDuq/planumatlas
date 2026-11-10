@@ -1,10 +1,15 @@
 <!--
   The workspace's list view (index.html:227-322): each mode's list, one always-mounted instance each,
   the one not in front hidden (decision 0007). Anatomy is the tree with the system picker and the
-  dissection bar at its foot; the other lists scroll under their own search.
+  dissection bar at its foot; the other lists scroll under their own search. Each search also offers
+  the other tabs that find the same words, and carries the words to the one chosen (U1).
 -->
 <script lang="ts">
+  import { flushSync } from 'svelte';
   import type { App, World } from '../../app/application.svelte.ts';
+  import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
+  import { circuitsMatching, elsewhere } from '../../lib/core/elsewhere.ts';
+  import { tractRows, tractsMatching } from '../../lib/core/tracts.ts';
   import { sharedGroupNames } from '../../lib/core/panels/navigator.ts';
   import { atlasSwitchLabel } from '../../lib/core/i18n/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
@@ -38,6 +43,7 @@
   const { engine, session, view, catalog, regions, anatomy, excursions, speech } = $derived(world);
   const current = $derived(view.current);
   const manifest = $derived(engine.model.manifest);
+  const bundles = $derived(tractRows(tractCatalog(current.anatomy).bundles));
   // The tree takes a set of its own: the session's is read-only.
   const expanded = $derived(new Set(session.state.expanded));
 
@@ -60,9 +66,60 @@
   async function chooseCutAtlas(id: string) {
     try {
       await excursions.setCutAtlas(id);
+      world.commands.succeeded('layer', atlasSwitchLabel(id, current.lang));
     } catch (error) {
-      world.commands.fail('layer', error, atlasSwitchLabel(id, current.lang));
+      world.commands.fail(
+        'layer',
+        error,
+        atlasSwitchLabel(id, current.lang),
+        () => void chooseCutAtlas(id),
+      );
     }
+  }
+
+  /** What the other tabs find for the words searched in `from`, counted as each would list them. */
+  function othersOf(from: Explorer) {
+    return (query: string) => {
+      const words = query.trim();
+      if (!words) return [];
+      const { lang } = current;
+      return elsewhere(from, {
+        // The regions named, not the on-screen regions a hidden match is drawn within.
+        anatomy: () =>
+          regions.search(words, current, Infinity).rows.filter((row) => !row.via).length,
+        functions: () => excursions.functionsMatching(words, lang),
+        deficits: () => excursions.deficitsMatching(words, lang),
+        circuits: () => circuitsMatching(world.circuits.all, words, lang).length,
+        diffusion: () =>
+          tractsMatching(bundles, words, lang).reduce((sum, row) => sum + row.members.length, 0),
+      });
+    };
+  }
+
+  /**
+   * Carries the words to another tab and puts focus in its search. Circuits has no search: the one
+   * circuit they name opens, and several leave its list in front.
+   */
+  async function carry(mode: Explorer, query: string) {
+    const words = query.trim();
+    if (mode === 'functions' || mode === 'deficits') {
+      await excursions.searchIn(mode, words);
+    } else {
+      if (mode === 'anatomy') session.setQuery(words);
+      if (mode === 'diffusion') tracts!.search(words);
+      await excursions.chooseMode(mode);
+    }
+    // A later tab choice overtook this one.
+    if (view.current.explorer !== mode) return;
+    const named =
+      mode === 'circuits' ? circuitsMatching(world.circuits.all, words, current.lang) : [];
+    if (named.length === 1) {
+      await circuits.openCircuit(named[0]!.id);
+      return;
+    }
+    // The list was hidden a moment ago: its field is focusable once the page shows it.
+    flushSync();
+    focusSearch(mode);
   }
 
   /** The `/` key: the search of the list in front, or its first row where it has none. */
@@ -109,6 +166,8 @@
     onShow={eye(anatomy.showRegions)}
     onAtlas={(id) => excursions.chooseAtlas(id)}
     onCutAtlas={chooseCutAtlas}
+    elsewhere={othersOf('anatomy')}
+    onElsewhere={(mode) => carry(mode, current.query)}
   >
     {#snippet systemPicker()}
       <SystemPicker
@@ -132,11 +191,21 @@
 </div>
 
 <div class="mode functions" hidden={current.explorer !== 'functions'}>
-  <FunctionList model={functions} />
+  <FunctionList
+    model={functions}
+    elsewhere={othersOf('functions')}
+    onElsewhere={(mode, query) => carry(mode, query)}
+  />
 </div>
 
 <div class="mode deficits" hidden={current.explorer !== 'deficits'}>
-  <DeficitList explorer={deficits} view={current} showShortcut={app.keyPreference.enabled} />
+  <DeficitList
+    explorer={deficits}
+    view={current}
+    showShortcut={app.keyPreference.enabled}
+    elsewhere={othersOf('deficits')}
+    onElsewhere={(mode, query) => carry(mode, query)}
+  />
 </div>
 
 <div class="mode circuits" hidden={current.explorer !== 'circuits'}>
@@ -154,6 +223,8 @@
     onCortexOpacity={anatomy.setCortexOpacity}
     bind:minimum={app.tractsMinimum}
     onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
+    elsewhere={othersOf('diffusion')}
+    onElsewhere={(mode, query) => carry(mode, query)}
   />
 </div>
 

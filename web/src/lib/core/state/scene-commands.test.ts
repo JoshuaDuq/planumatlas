@@ -322,10 +322,105 @@ test('a failed atlas switch leaves one translated notice; an overtaken one says 
   assert.equal(quiet.session.assemble({}).notice, null);
 });
 
+test('STATE-49 a failed download offers Retry, which asks for the same atlas, detail or colour again', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const offline = () => Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' });
+  for (const [layer, choose, shown] of [
+    [
+      'destrieux',
+      (scene: Scene) => scene.commands.chooseAtlas('destrieux'),
+      (scene: Scene) => scene.model.atlasId,
+    ],
+    [
+      'nextbrain',
+      (scene: Scene) => scene.commands.chooseDetail('nextbrain'),
+      (scene: Scene) => scene.model.detailId,
+    ],
+    [
+      'mri',
+      (scene: Scene) => scene.commands.chooseSurfaceColor('mri'),
+      (scene: Scene) => scene.model.surfaceColor,
+    ],
+  ] as const) {
+    const scene = fixture();
+    const choosing = choose(scene);
+    await scene.settle();
+    await scene.fail(layer, offline());
+    await choosing;
+    assert.equal(scene.session.assemble({}).notice!.action, 'retry', layer);
+    scene.session.setQuery('a');
+    assert.equal(scene.session.assemble({}).notice!.kind, 'error', 'the error outlasts an action');
+    scene.session.retryNotice();
+    assert.equal(scene.session.assemble({}).notice, null);
+    await scene.settle();
+    await scene.finish(layer);
+    assert.equal(shown(scene), layer);
+  }
+  const broken = fixture();
+  const choosing = broken.commands.chooseAtlas('destrieux');
+  await broken.settle();
+  await broken.fail('destrieux', new Error('Atlas not applied: destrieux'));
+  await choosing;
+  assert.equal(broken.session.assemble({}).notice!.action, null, 'only a download is retried');
+});
+
+test('STATE-49 a later success of the failed switch, by any route, takes its error away; another error stays', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const offline = () => Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' });
+  const scene = fixture();
+  scene.session.notify({ kind: 'error', text: 'Could not show the spinal cord.', key: 'cord' });
+  const failing = scene.commands.chooseAtlas('destrieux');
+  await scene.settle();
+  await scene.fail('destrieux', offline());
+  await failing;
+  assert.match(scene.session.assemble({}).notice!.text, /Could not load Destrieux/);
+  const again = scene.commands.chooseAtlas('destrieux');
+  await scene.settle();
+  await scene.finish('destrieux');
+  await again;
+  assert.equal(scene.session.assemble({}).notice!.text, 'Could not show the spinal cord.');
+
+  const other = fixture();
+  const detail = other.commands.chooseDetail('nextbrain');
+  await other.settle();
+  await other.fail('nextbrain', offline());
+  await detail;
+  const opening = other.commands.revealRegions(['nextbrain:left:458'], other.commands.begin());
+  await other.settle();
+  await other.finish('nextbrain');
+  assert.equal(await opening, true);
+  assert.equal(other.session.assemble({}).notice, null, 'a reveal loaded the same detail level');
+});
+
+test('STATE-49 a newer success of the same masthead field retires that field’s error, and only that field’s', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const offline = () => Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' });
+  const scene = fixture();
+  const failing = async (choice: Promise<void>, layer: string) => {
+    await scene.settle();
+    await scene.fail(layer, offline());
+    await choice;
+  };
+  await failing(scene.commands.chooseDetail('nextbrain'), 'nextbrain');
+  await failing(scene.commands.chooseAtlas('destrieux'), 'destrieux');
+  await failing(scene.commands.chooseSurfaceColor('mri'), 'mri');
+  const julich = scene.commands.chooseAtlas('julich');
+  await scene.settle();
+  await scene.finish('julich');
+  await julich;
+  await scene.commands.chooseSurfaceColor('tissue');
+  const { text, action } = scene.session.assemble({}).notice!;
+  assert.equal(
+    text,
+    'Could not load NextBrain. A file could not be downloaded. Check the connection and try again.',
+  );
+  assert.equal(action, 'retry', 'the detail level’s own Retry, not the atlas the reader left');
+});
+
 test('switching away from HCP-MMP drops CAB-NP, which its option named, and retires the standing notice', async () => {
   const scene = fixture();
   scene.model.surfaceColor = 'cab-np';
-  scene.session.notify({ text: 'An earlier notice.' });
+  scene.session.notify({ kind: 'info', text: 'An earlier notice.' });
   const switching = scene.commands.chooseAtlas('destrieux');
   await scene.settle();
   await scene.finish('destrieux');
@@ -337,6 +432,7 @@ test('switching away from HCP-MMP drops CAB-NP, which its option named, and reti
 test('a colour that switches the atlas retires a notice the screen no longer bears out', async () => {
   const scene = fixture({ atlas: 'destrieux' });
   scene.session.notify({
+    kind: 'info',
     text: 'CAB-NP colours HCP-MMP areas only, so Destrieux shows its own region colours.',
   });
   const choosing = scene.commands.chooseSurfaceColor('cab-np');
@@ -382,7 +478,7 @@ test('a colour still downloading does not land after the reader keeps the one sh
 
 test('a detail choice retires the standing notice', async () => {
   const scene = fixture();
-  scene.session.notify({ text: 'An earlier notice.' });
+  scene.session.notify({ kind: 'info', text: 'An earlier notice.' });
   const choosing = scene.commands.chooseDetail('nextbrain');
   await scene.settle();
   assert.equal(scene.session.assemble({}).notice, null);

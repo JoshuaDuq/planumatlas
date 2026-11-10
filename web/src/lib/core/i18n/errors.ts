@@ -5,23 +5,32 @@ import { t } from './index.ts';
 export const ASSET_CODES: ReadonlySet<unknown> = new Set(['asset-fetch', 'asset-updated']);
 
 /** The `code` of an error that carries one (AssetError). */
-const codeOf = (error: unknown): unknown =>
+export const codeOf = (error: unknown): unknown =>
   typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
 
+/** Which failure a notice reports: its operation and subject, which the same command's success clears. */
+export const failureKey = (operation: string, subject?: string): string =>
+  subject === undefined ? operation : `${operation}:${subject}`;
+
 /**
- * What the reader is told about a failure, as `{ text, action }`. Asset errors
- * say what happened by their code; anything else says which operation failed.
- * `action` is 'reload' when only a reload can help. The raw error belongs in the console.
+ * What the reader is told about a failure: an error notice. Asset errors say what happened by
+ * their code; anything else says which operation failed. `action` is 'reload' when only a reload
+ * can help, and 'retry' for a failed download whose command the caller can run again (`retry`);
+ * a failure of any other kind would only fail again. The raw error belongs in the console.
  */
 export function failureNotice(
   error: unknown,
   lang: string,
   operation: string,
   subject?: string,
+  retry?: () => void,
 ): Notice {
   const copy = t(lang, 'errors');
   const code = codeOf(error);
-  if (code === 'asset-updated') return { text: copy.updated, action: 'reload' };
+  const key = failureKey(operation, subject);
+  if (code === 'asset-updated') {
+    return { kind: 'error', text: copy.updated, action: 'reload', key };
+  }
   const operations: Record<string, string | ((subject: string) => string) | undefined> =
     copy.operations;
   const said = operations[operation];
@@ -33,7 +42,13 @@ export function failureNotice(
   } else {
     text = said;
   }
-  return { text: code === 'asset-fetch' ? `${text} ${copy.download}` : text, action: null };
+  if (code !== 'asset-fetch') return { kind: 'error', text, action: null, key };
+  return {
+    kind: 'error',
+    key,
+    text: `${text} ${copy.download}`,
+    ...(retry ? { action: 'retry', retry } : { action: null }),
+  };
 }
 
 /** The notice for link parameters that were not applied, in the order given. */
@@ -46,6 +61,7 @@ export function linkNotice(params: readonly string[], lang: string): Notice {
     : params;
   const names = [...new Set(said)].map((param) => fields[param] ?? param);
   return {
+    kind: 'info',
     text: copy.notApplied(new Intl.ListFormat(lang, { type: 'conjunction' }).format(names)),
     action: null,
   };

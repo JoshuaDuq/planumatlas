@@ -41,7 +41,14 @@ test('a worker script that did not load fails the job as asset-updated and offer
   await expect(jobs.feather([new Mesh(new BoxGeometry())])).rejects.toMatchObject({
     code: 'asset-updated',
   });
-  expect(notices).toEqual([{ text: 'Planum was updated. Reload to continue.', action: 'reload' }]);
+  expect(notices).toEqual([
+    {
+      kind: 'error',
+      key: 'start',
+      text: 'A file on the server no longer matches this page; Planum has probably been updated. Reload to continue.',
+      action: 'reload',
+    },
+  ]);
 });
 
 test('a worker script that threw stays an uncoded failure with no notice', async () => {

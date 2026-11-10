@@ -153,11 +153,15 @@ describe('the session store', () => {
   test('notices raised while held wait for the release, which joins them after the link’s own', () => {
     const { session } = build();
     session.holdNotices();
-    session.notify({ text: 'First.' });
-    session.notify({ text: 'Second.', action: 'reload' });
+    session.notify({ kind: 'info', text: 'First.' });
+    session.notify({ kind: 'info', text: 'Second.', action: 'reload' });
     expect(session.state.notice).toBeNull();
-    session.releaseNotices({ text: 'Link.' });
-    expect(session.state.notice).toEqual({ text: 'Link. First. Second.', action: 'reload' });
+    session.releaseNotices({ kind: 'info', text: 'Link.' });
+    expect(session.state.notice).toMatchObject({
+      kind: 'info',
+      text: 'Link. First. Second.',
+      action: 'reload',
+    });
     session.setQuery('x');
     expect(session.state.notice).toBeNull();
   });
@@ -166,7 +170,7 @@ describe('the session store', () => {
     const { session } = build();
     session.holdNotices();
     session.holdNotices();
-    session.notify({ text: 'Waiting.' });
+    session.notify({ kind: 'info', text: 'Waiting.' });
     session.releaseNotices();
     expect(session.state.notice).toBeNull();
     session.releaseNotices();
@@ -382,7 +386,7 @@ describe('the announcer', () => {
     flushSync();
     expect(region.textContent).toMatch(new RegExp(`^Selected: ${name}, `));
 
-    session.notify({ text: 'Something changed' });
+    session.notify({ kind: 'info', text: 'Something changed' });
     flushSync();
     expect(region.textContent).toBe('Something changed');
 

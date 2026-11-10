@@ -233,6 +233,20 @@ describe('the anatomy search', () => {
       expect(app.session.state.notice?.text).toBe(t('en', 'errors').operations.layer('NextBrain')),
     );
   });
+  test('a cut-label switch that failed and then succeeds takes its error away', async () => {
+    const cutOnly = 'nextbrain:left:7';
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const setCutAtlas = vi
+      .spyOn(engine.sections, 'setCutAtlas')
+      .mockRejectedValueOnce(new Error('offline'));
+    await boot();
+    await userEvent.fill(page.getByRole('combobox', { name: 'Search regions' }), nameOf(cutOnly));
+    await userEvent.click(page.getByRole('button', { name: 'Switch cut labels' }));
+    await vi.waitFor(() => expect(app.session.state.notice?.kind).toBe('error'));
+    await userEvent.click(page.getByRole('button', { name: 'Switch cut labels' }));
+    expect(setCutAtlas).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(app.session.state.notice).toBeNull());
+  });
 });
 
 describe('the explorers’ entry points', () => {

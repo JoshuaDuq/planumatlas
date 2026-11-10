@@ -622,7 +622,7 @@ async function save(scene: SnapshotStage, subject: SnapshotSubject, ports: Snaps
   // Cleared first: the same file saved again is news again, which an unchanged notice would not say.
   ports.notify(null);
   await tick();
-  ports.notify({ text: t(subject.lang, 'viewport').snapshotSaved(file) });
+  ports.notify({ kind: 'info', text: t(subject.lang, 'viewport').snapshotSaved(file) });
 }
 
 let saving: Promise<void> | null = null;

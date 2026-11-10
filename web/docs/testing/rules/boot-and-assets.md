@@ -169,11 +169,11 @@ document, `location`, `history` and `window` directly.
 
 ### BOOT-15 · A newer deploy asks for a reload
 
-- **Rule:** When a downloaded file no longer matches what the page was built for, the reader is told Planum was updated and offered Reload.
+- **Rule:** When a downloaded file no longer matches what the page was built for, the reader is told so, and that Planum has probably been updated, and offered Reload.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/i18n/errors.js:12-13, 37-39`; `viewer/i18n/translations.js:501-503`
-- **Expected:** `asset-updated` → "Planum was updated. Reload to continue." with button "Reload".
+- **Expected:** `asset-updated` → "A file on the server no longer matches this page; Planum has probably been updated. Reload to continue." with button "Reload".
 - **Covered by:** `src/features/stage/StageStatus.svelte.test.ts` (R, fixture text only); the mapping from the error code → I18N-16 and I18N-19 (`core-i18n.md`). No start-level test drives an `asset-updated` error.
 
 ### BOOT-16 · Retry and Reload drop the stored anatomy
@@ -200,16 +200,16 @@ document, `location`, `history` and `window` directly.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:2097-2103`; `viewer/i18n/translations.js:518`
-- **Expected:** `loadError` with an `asset-fetch` error → notice text contains "Could not show the white matter beneath the hidden cortex."; status stays `ready`. An `asset-updated` error → "Planum was updated. Reload to continue." with action `reload` (wording: core-i18n area).
+- **Expected:** `loadError` with an `asset-fetch` error → notice text contains "Could not show the white matter beneath the hidden cortex."; status stays `ready`. An `asset-updated` error → `errors.updated` with action `reload` (wording: I18N-16). Either is an error notice, which stands until dismissed (STATE-30); it offers no Retry, as the envelopes are only one of the downloads `loadError` reports.
 - **Covered by:** `src/app/boot.svelte.test.ts` (R, the `asset-fetch` text only); the status and the `asset-updated` case are uncovered at this level
 
 ### BOOT-32 · Lazy code a newer deploy removed asks for a reload
 
-- **Rule:** A lazy chunk that fails to load (`vite:preloadError`) or a worker script that fails to load (a plain `error` Event, not an ErrorEvent) is `asset-updated`. The notice says "Planum was updated. Reload to continue." with Reload, the caller's own panel words it as updated, a user-map worker that never loaded is replaced on the next job, and nothing reloads by itself.
+- **Rule:** A lazy chunk that fails to load (`vite:preloadError`) or a worker script that fails to load (a plain `error` Event, not an ErrorEvent) is `asset-updated`. The notice is an error that says `errors.updated` (I18N-16) with Reload, the caller's own panel words it as updated, a user-map worker that never loaded is replaced on the next job, and nothing reloads by itself.
 - **Kind:** behaviour
 - **Level:** unit, browser
 - **Source:** the 2026-11-09 review (B2): Pages replaces the whole site on deploy, and the service worker does not store JS
-- **Expected:** a dispatched `vite:preloadError` → notice `{ text: copy.updated, action: 'reload' }`, the error coded `asset-updated`, the event not prevented; a geometry or user-map worker whose script 404s rejects with `asset-updated`; one whose script threw rejects uncoded with no notice.
+- **Expected:** a dispatched `vite:preloadError` → notice `{ kind: 'error', text: copy.updated, action: 'reload' }`, the error coded `asset-updated`, the event not prevented; a geometry or user-map worker whose script 404s rejects with `asset-updated`; one whose script threw rejects uncoded with no notice.
 - **Covered by:** `src/boot/new-deploy.test.ts` (R); `src/lib/engine/model/brain-atlas.worker-load.test.ts` (R); `src/lib/engine/worker-load.svelte.test.ts` (R); `src/lib/engine/user-map/user-map.test.ts` (R)
 
 ## Page lifecycle

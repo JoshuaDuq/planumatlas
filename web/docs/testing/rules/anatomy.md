@@ -338,7 +338,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ### ANAT-36 · A search that finds nothing says so, with a hint
 
-- **Rule:** A non-blank query with no match anywhere shows the title "No match for “query”" and the hint after the list. A blank or all-space query shows no sentence. When the only matches are in another atlas, the title stays and the hint is dropped.
+- **Rule:** A non-blank query with no match anywhere shows the title "No match for “query”" and the hint after the list. A blank or all-space query shows no sentence. When the only matches are in another atlas or another tab (WORK-28), the title stays and the hint is dropped.
 - **Kind:** behaviour
 - **Level:** unit (view-model: `sentences` in `AnatomySearch.svelte`)
 - **Source:** `viewer/ui/panels/navigator.js:428-436`, `745-755`
@@ -397,6 +397,15 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Level:** browser — layout, media emulation
 - **Source:** WCAG 2.2 SC 1.4.1, 1.4.10, 1.4.12, 2.5.8; deviation `a2-match-mark-forced-colours.md`
 - **Expected:** 320 × 700 with spacing: `scrollWidth ≤ innerWidth`, each option `scrollWidth ≤ clientWidth + 1`, `scrollHeight ≤ clientHeight + 1`. 200 %: first option height > 1.5 × normal. Coarse: "Clear search" ≥ 44 × 44, options ≥ 44, radios ≥ 44. `forced-colors: active`: `mark.query-match` `text-decoration-line: underline`.
+- **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
+
+### ANAT-59 · Matches in another tab follow those in another atlas
+
+- **Rule:** After the atlas sentences, each other tab that finds the words gets a sentence counting its matches and a button "Show in <tab>" (FR "Afficher dans l’onglet <tab>") that moves focus to the field, then carries the search there (WORK-28). The sentences are said with the others.
+- **Kind:** behaviour
+- **Level:** browser — the fixture's tabs are given
+- **Source:** U1 of the 2026-11-09 review
+- **Expected:** Deficits 2 and Tracts 1, "zzzz" → no hint; "2 matches in Deficits.", "1 match in Tracts."; said "No match for “zzzz”. 2 matches in Deficits. 1 match in Tracts."; "Show in Tracts" → `tab diffusion`, focus in the field. French, "cuneus" → options and "2 correspondances dans l’onglet Déficits.".
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-43 · The search has no axe violations

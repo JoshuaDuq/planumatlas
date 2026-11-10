@@ -63,7 +63,7 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-06 · A display change that drops the selection says so
 
-- **Rule:** A display change (hide, show, undo, restore all, isolate, hemisphere, cortex or internal toggle, opacity) first clears the standing notice. If the change leaves the selected region undrawn, the selection is cleared and the reader is told.
+- **Rule:** A display change (hide, show, undo, restore all, isolate, hemisphere, cortex or internal toggle, opacity) first clears the standing information; an error stands until dismissed (STATE-30). If the change leaves the selected region undrawn, the selection is cleared and the reader is told.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:220-236`; `viewer/i18n/translations.js:493`
@@ -108,12 +108,12 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-11 · The spinal cord shows, hides, or says it is not published
 
-- **Rule:** Showing the cord draws it and frames the whole brain. Hiding it while a cord region is selected clears the selection and says so (CTRL-06). An anatomy that publishes no cord says so and changes nothing.
+- **Rule:** Showing the cord draws it and frames the whole brain. Hiding it while a cord region is selected clears the selection and says so (CTRL-06). An anatomy that publishes no cord says so and changes nothing. A cord whose download failed is an error notice offering Retry, which asks for the cord again; so do the other anatomy commands that wait on a download (a reveal, a constituent, entering internal anatomy, an internal system). Leaving internal anatomy offers none: the scene it returns to is spent. Each of those errors goes once the same command succeeds, by any route (STATE-30): the cord once it is shown, a region's once a region is revealed or opened, internal anatomy's once entered, a system's once one is chosen.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:1233-1250`; `viewer/i18n/translations.js:340`
-- **Expected:** show → `spinalCordVisible` true, `pam50:left:gracile-fasciculus` drawn, one whole-brain framing. Select the cord, then hide it → nothing selected, and the "Selection cleared — …" notice. No `pam50` layer → "No spinal cord is published for this subject.", still hidden.
-- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: show, hide drops the selection with the notice, unavailable)
+- **Expected:** show → `spinalCordVisible` true, `pam50:left:gracile-fasciculus` drawn, one whole-brain framing. Select the cord, then hide it → nothing selected, and the "Selection cleared — …" notice. No `pam50` layer → "No spinal cord is published for this subject.", still hidden. The cord download rejects once with `asset-fetch` → `{ kind: 'error', action: 'retry' }`, text "Could not show the spinal cord. A file could not be downloaded. …", still hidden; `retryNotice()` → notice null, then the cord shown. The same failure, then "Spinal cord" chosen as the internal system → the cord shown and notice null.
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: show, hide drops the selection with the notice, unavailable, Retry after a failed download)
 
 ### CTRL-12 · Reset returns to the opening picture
 
@@ -656,11 +656,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### KEY-18 · A notice outranks the selection it accompanies
 
-- **Rule:** When a new notice and a selection arrive together, the notice is said instead of the selection, once. A later change of selection is said again.
+- **Rule:** When a new notice and a selection arrive together, the notice is said instead of the selection, once. A later change of selection is said again. Each notice the session shows is said once, by its number (STATE-31), however the joined text changes: only parts not said before are said, so information joining an error, or an error arriving ahead of standing information, says only itself, and a part resolved or gone says nothing, leaving a selection in the same update to be said. The same failure again is a new part and is said again. Errors are said by the same polite announcer, not `role=alert` (WORK-20).
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:1670-1678`
-- **Expected:** notice "Internal anatomy is hidden" + selection → that notice only; repeated → `[]`; selection moves to the right → "Selected: Precentral gyrus, right".
+- **Expected:** notice "Internal anatomy is hidden" + selection → that notice only; repeated → `[]`; selection moves to the right → "Selected: Precentral gyrus, right". Error "Could not load HCP-MMP." → said; joined by "Both hemispheres shown." → `['Both hemispheres shown.']`; back to the error alone with a selection → only the selection; cleared, then the error again → said again. Through the session: a keyed failure notified twice → said twice; error and info said, the error resolved with a selection → only "Selected: …"; a new error ahead of the standing info → only the new error.
 - **Covered by:** `src/lib/controller/speech.test.ts` (R)
 
 ### KEY-19 · A changed count of hidden parts joins the same sentence

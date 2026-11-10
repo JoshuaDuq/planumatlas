@@ -144,7 +144,7 @@ export function createExcursions(
       // What the lesson said it changed is undone, so the confirmation replaces it rather than joining it.
       sayRestored: () => {
         session.notify(null);
-        session.notify({ text: t(lang(), 'clinical').stageRestored });
+        session.notify({ kind: 'info', text: t(lang(), 'clinical').stageRestored });
       },
     },
   });
@@ -225,7 +225,7 @@ export function createExcursions(
     if (excursion === 'functions') session.setFunction(null);
     else session.setDeficit(null);
     if (casesBefore.length) strokeCases.show(casesBefore);
-    session.notify({ text: t(lang(), 'clinical').stageRestored });
+    session.notify({ kind: 'info', text: t(lang(), 'clinical').stageRestored });
     render();
     return true;
   }
@@ -267,7 +267,7 @@ export function createExcursions(
       );
       return;
     }
-    session.notify({ text: t(lang(), 'clinical').stageRestored });
+    session.notify({ kind: 'info', text: t(lang(), 'clinical').stageRestored });
   }
 
   /**
@@ -308,7 +308,7 @@ export function createExcursions(
   function sayRevealed(before: RevealSettings, unseen: string | null = null): boolean {
     const said = revealNotice(lang(), before, revealSettings());
     if (!said && !unseen) return false;
-    session.notify({ text: [said, unseen].filter(Boolean).join(' '), action: null });
+    session.notify({ kind: 'info', text: [said, unseen].filter(Boolean).join(' '), action: null });
     return true;
   }
 

@@ -199,16 +199,26 @@ test("the current item is the first registered list's item that is on screen", (
 test('a notice offers a reload, in either language; anything else fails', () => {
   assert.equal(noticeActionLabel('en', 'reload'), 'Reload');
   assert.equal(noticeActionLabel('fr', 'reload'), 'Recharger');
+  assert.equal(noticeActionLabel('en', 'retry'), 'Retry');
+  assert.equal(noticeActionLabel('fr', 'retry'), 'Réessayer');
   assert.throws(() => noticeActionLabel('en', 'fly' as 'reload'), /Unknown notice action: fly/);
 });
 
 test('a coordinate’s replacement offers Undo only while the replaced lesion is still waiting', () => {
-  const replaced = { text: 'Lesion replaced.', action: 'restore-lesion' as const };
+  const replaced = {
+    kind: 'info' as const,
+    text: 'Lesion replaced.',
+    action: 'restore-lesion' as const,
+  };
   assert.equal(noticeActionLabel('en', 'restore-lesion'), 'Undo');
   assert.equal(noticeActionLabel('fr', 'restore-lesion'), 'Annuler');
   assert.equal(offeredNotice(replaced, true), replaced);
-  assert.deepEqual(offeredNotice(replaced, false), { text: 'Lesion replaced.', action: null });
-  const reload = { text: 'Offline.', action: 'reload' as const };
+  assert.deepEqual(offeredNotice(replaced, false), {
+    kind: 'info',
+    text: 'Lesion replaced.',
+    action: null,
+  });
+  const reload = { kind: 'error' as const, text: 'Offline.', action: 'reload' as const };
   assert.equal(offeredNotice(reload, false), reload);
   assert.equal(offeredNotice(null, false), null);
 });

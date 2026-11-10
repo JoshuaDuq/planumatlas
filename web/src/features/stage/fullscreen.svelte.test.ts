@@ -85,7 +85,12 @@ describe('entering', () => {
     host.remove();
     await userEvent.click(opener);
     await vi.waitFor(() => expect(notices).toHaveLength(1));
-    expect(notices[0]).toEqual({ text: 'Impossible de passer en plein écran.', action: null });
+    expect(notices[0]).toEqual({
+      kind: 'error',
+      text: 'Impossible de passer en plein écran.',
+      action: null,
+      key: 'fullscreen',
+    });
     expect(error).toHaveBeenCalledOnce();
     expect(document.fullscreenElement).toBeNull();
     expect(opener.textContent).toBe('Full screen');

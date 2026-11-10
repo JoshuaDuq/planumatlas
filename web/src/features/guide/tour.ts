@@ -428,14 +428,24 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       else finish();
     },
     onPrevClick: () => move(tour.getActiveIndex()! - 1),
-    onPopoverRender: ({ wrapper, title, description, nextButton, previousButton }) => {
+    onPopoverRender: ({
+      wrapper,
+      title,
+      description,
+      footerButtons,
+      nextButton,
+      previousButton,
+    }) => {
       wrapper.lang = lang;
       card = wrapper;
       // The anatomy eases out of the band first; the card follows the stage once it has.
       if (!phone)
         reserve({ right: inStage[tour.getActiveIndex()!] ? stageBand(wrapper) : 0, bottom: 0 });
       placeCard();
-      if (tour.getActiveIndex() === 0) description.append(languageChoice());
+      if (tour.getActiveIndex() === 0) {
+        description.append(languageChoice());
+        footerButtons.prepend(skipButton());
+      }
       // driver.js focuses the first control, the close button, right after this hook.
       queueMicrotask(() => nextButton.focus());
       title.setAttribute('role', 'heading');
@@ -457,6 +467,15 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     // stop's first frame.
     onDestroyStarted: () => finish(),
   });
+  /** The first card's way out in words, beside Next: the close button is only a cross. */
+  function skipButton() {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'driver-popover-footer-btn guide-skip';
+    button.textContent = copy.skip;
+    button.addEventListener('click', finish);
+    return button;
+  }
   /** The first card's language choice: the app changes language and the tour starts again in it. */
   function languageChoice() {
     const row = document.createElement('div');

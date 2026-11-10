@@ -1,6 +1,6 @@
 <!--
-  The Tracts panel (native-ui.js, DOM half): a search that filters the tract list, one key per
-  side or segment, the display settings, the notes on the data and the MRI command. The engine
+  The Tracts panel (native-ui.js, DOM half): a search that filters the tract list and offers the
+  other tabs that find the same words (U1), one key per side or segment, the display settings, the notes on the data and the MRI command. The engine
   half is `engine.tracts` (F2 contract); everything below the search is disabled while the
   reference dataset or a bundle downloads.
 
@@ -26,17 +26,19 @@
     settingsReadout,
     tractGroups,
     tractRows,
-    tractSearchText,
+    tractsMatching,
   } from '../../lib/core/tracts.ts';
   import type { TractRow as TractRowData } from '../../lib/core/tracts.ts';
   import type { Engine, TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
+  import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { methodsHref } from '../../lib/core/methods.ts';
-  import type { Language } from '../../lib/types/index.ts';
+  import type { Explorer, Language } from '../../lib/types/index.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
+  import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
   import { announce, createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import { downloadText } from './download.ts';
@@ -53,6 +55,8 @@
     overlay = $bindable(false),
     minimum = $bindable(MINIMUM_LENGTH.min),
     onOpenMri,
+    elsewhere,
+    onElsewhere,
   }: {
     engine: Pick<Engine, 'tracts' | 'on'>;
     /** The anatomy on screen; its own tracts overlay it, any other shows CDMD's as a reference. */
@@ -68,6 +72,10 @@
     /** The length filter in millimetres, as last applied. */
     minimum?: number;
     onOpenMri: (event: MouseEvent) => void;
+    /** The other tabs that find the same words. */
+    elsewhere: (query: string) => Elsewhere[];
+    /** Carries the words to another tab. */
+    onElsewhere: (mode: Explorer, query: string) => void | Promise<void>;
   } = $props();
 
   const tracts = $derived(engine.tracts);
@@ -112,11 +120,8 @@
   const shownMinimum = $derived(minimumDraft ?? minimum);
 
   const needle = $derived(foldForSearch(query.trim(), lang));
-  const kept = $derived(
-    new Set(
-      rows.filter((row) => tractSearchText(row, lang).includes(needle)).map((row) => row.key),
-    ),
-  );
+  const kept = $derived(new Set(tractsMatching(rows, query, lang).map((row) => row.key)));
+  const others = $derived(elsewhere(query));
   const bundlesKept = (list: readonly TractRowData[]) =>
     list.reduce((count, row) => count + (kept.has(row.key) ? row.members.length : 0), 0);
   const matches = $derived(bundlesKept(rows));
@@ -260,8 +265,14 @@
     else await load(failedLoad!);
   }
 
+  /** The count, or what was not found and why; then the other tabs that find the words. */
   function say() {
-    results.say(matches === 0 ? `${noMatch}. ${noMatchHint}` : text.matches(matches));
+    const bridges = others.map((other) => `${bridgeText(lang, other, query.trim())}.`);
+    const found =
+      matches === 0
+        ? `${noMatch}. ${noMatchHint}`
+        : `${text.matches(matches)}${bridges.length ? '.' : ''}`;
+    results.say([found, ...bridges].join(' '));
   }
 
   function clearSearch() {
@@ -290,6 +301,12 @@
       LENGTHS_CSV_TYPE,
     );
     announce(text.exported);
+  }
+
+  /** Filters the list by words carried from another tab's search. */
+  export function search(words: string) {
+    query = words;
+    say();
   }
 
   /** Moves focus to the search field (the global `/` key). */
@@ -419,6 +436,12 @@
       {#if matches === 0}
         <EmptyState title={noMatch} message={noMatchHint} />
       {/if}
+      {#each others as other (other.mode)}
+        <SearchBridge
+          text={bridgeText(lang, other, query.trim())}
+          onclick={() => onElsewhere(other.mode, query)}
+        />
+      {/each}
       {#if !matching}
         <p class="scope">{dataset.otherAnatomy}</p>
       {/if}

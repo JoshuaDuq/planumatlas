@@ -16,6 +16,11 @@ export const en = {
   focus: 'Focus',
   isolate: 'Isolate',
   restore: 'Restore',
+  // One line each on what the command does: the button's tooltip and its description.
+  focusHint: 'Frame this region in its colour, with the rest see-through grey',
+  isolateHint: 'Show this region alone, framed',
+  restoreHint: 'Show the rest of the brain again, framed whole',
+  hideHint: 'Remove this region from view; Undo brings it back',
   constituentsHeading: 'Constituent regions',
   constituentsNote:
     'Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.',
@@ -40,6 +45,10 @@ export const fr: typeof en = {
   focus: 'Cibler',
   isolate: 'Isoler',
   restore: 'Rétablir',
+  focusHint: 'Cadrer cette région dans sa couleur, le reste en gris transparent',
+  isolateHint: 'Afficher cette région seule, cadrée',
+  restoreHint: 'Réafficher le reste du cerveau, cadré en entier',
+  hideHint: 'Retirer cette région de la vue\u202f; Annuler la rétablit',
   constituentsHeading: 'Régions constitutives',
   constituentsNote:
     'Union de régions sources. Surface lissée\u202f; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.',

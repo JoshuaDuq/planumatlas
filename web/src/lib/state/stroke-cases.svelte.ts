@@ -45,9 +45,13 @@ export function createStrokeCasesStore({
   const heldColor = () =>
     heldColorState !== null && display.color === UNDER ? heldColorState : null;
 
-  /** The cohort, downloaded once; a failure stays failed until the page is reloaded. */
+  /** The cohort, downloaded once; a failure stays failed until the reader retries it. */
   function load(): void {
     if (!engine.available || cohort.status !== 'idle') return;
+    fetchCohort();
+  }
+
+  function fetchCohort(): void {
     cohort = { status: 'loading' };
     engine.cases().then(
       (data) => (cohort = { status: 'ready', data }),
@@ -120,6 +124,11 @@ export function createStrokeCasesStore({
       return heldColor();
     },
     load,
+    /** The reader's Retry after a failed download: the cohort asked for again. */
+    retry(): void {
+      if (cohort.status !== 'error') throw new Error('The cohort has not failed.');
+      fetchCohort();
+    },
     /** Whether every id names a case of the cohort; downloads the cohort if need be. */
     async known(ids: readonly string[]): Promise<boolean> {
       const data = await engine.cases();

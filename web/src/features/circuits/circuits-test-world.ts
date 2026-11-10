@@ -88,6 +88,7 @@ export function createWorld() {
     session: {
       assemble: (state) => ({ ...state, ...session.state }),
       notify: session.notify,
+      resolveNotice: session.resolveNotice,
       setSwitching: session.setSwitching,
       endSwitching: session.endSwitching,
     },

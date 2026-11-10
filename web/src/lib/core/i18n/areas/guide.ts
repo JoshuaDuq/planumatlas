@@ -26,6 +26,7 @@ export const en = {
   previous: 'Back',
   done: 'Done',
   close: 'Close the tour',
+  skip: 'Skip tour',
   progress: '{{current}} of {{total}}',
   stops: [
     {
@@ -116,6 +117,7 @@ export const fr: typeof en = {
   previous: 'Retour',
   done: 'Terminé',
   close: 'Fermer la visite',
+  skip: 'Passer la visite',
   progress: '{{current}} sur {{total}}',
   stops: [
     {

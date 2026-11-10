@@ -1,6 +1,7 @@
 import { Box3, Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { fetchAsset, sha256Hex } from '../core/assets/asset-cache.ts';
+import { AssetError } from '../core/assets/published-assets.ts';
 import { validateStrokeCases } from '../core/catalog/stroke-cases.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import { readComparisonGeometry } from '../core/assets/comparison-assets.ts';
@@ -282,8 +283,10 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     let strokeMasks: Promise<Uint32Array> | null = null;
     const verified = async (file: string, sha256: string) => {
       const buffer = await fetchAsset(new URL(file, absoluteManifestUrl));
-      if ((await sha256Hex(buffer)) !== sha256)
-        throw new Error(`${file} does not match its checksum.`);
+      // Bytes from another deploy, or changed on the way: only a reload of the page can match them.
+      if ((await sha256Hex(buffer)) !== sha256) {
+        throw new AssetError('asset-updated', `${file} does not match its checksum.`);
+      }
       return buffer;
     };
     const loadStrokeCases = () => {

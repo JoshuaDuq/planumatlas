@@ -93,7 +93,7 @@ What opening a function does to the scene (draw, frame, hold the scene, the see-
 
 ### FUNC-10 · A query that names lesion profiles bridges to the Deficits tab
 
-- **Rule:** While the query matches deficit profiles, the list ends with a bridge naming how many. Pressing it carries the query to the Deficits tab (CTRL-33).
+- **Rule:** While the query matches deficit profiles, the list ends with a bridge naming how many. Pressing it carries the query to the Deficits tab (CTRL-33) and focuses its field. The other tabs' bridges are WORK-28.
 - **Kind:** behaviour
 - **Level:** unit (view-model) for the text; browser for the press (today the count is read in `FunctionList.svelte`)
 - **Source:** `viewer/ui/panels/functions.js:451-452,364-365`
@@ -111,11 +111,11 @@ What opening a function does to the scene (draw, frame, hold the scene, the see-
 
 ### FUNC-12 · The result count is said once typing pauses, and again after the field is cleared
 
-- **Rule:** 500 ms after typing pauses, the page announcer says how many curated functions and terms match. Nothing is said before the pause. An equal sentence is not said twice while the field keeps text; clearing the field forgets it, so the same query typed again is said.
+- **Rule:** 500 ms after typing pauses, the page announcer says how many curated functions and terms match, then each bridge to another tab that finds the same words (U1). Nothing is said before the pause. An equal sentence is not said twice while the field keeps text; clearing the field forgets it, so the same query typed again is said.
 - **Kind:** accessibility
 - **Level:** unit for the sentence (`resultsSentence`); browser with fake timers for the debounce in the component
 - **Source:** `viewer/ui/panels/functions.js:455`; `viewer/ui/announce.js:7-14`; deviation `x1-result-announcement.md`; decision 37 on #4
-- **Expected:** `resultsSentence({functions: 1, terms: 2}, 'en')` → "1 function and 2 Neurosynth terms"; `{0, 0}` → "No match" (FR "Aucun résultat"). Typing "lang" → announcer '' until 500 ms, then a sentence matching `^\d+ functions?( and \d+ Neurosynth terms?)?$`. Clear, retype "lang" → the same sentence again. "zzzzqqq" → "No match".
+- **Expected:** `resultsSentence({functions: 1, terms: 2}, 'en')` → "1 function and 2 Neurosynth terms"; `{0, 0}` → "No match" (FR "Aucun résultat"). Typing "lang" → announcer '' until 500 ms, then a sentence matching `^\d+ functions?( and \d+ Neurosynth terms?)?` followed by the Deficits bridge when lesion profiles match. Clear, retype "lang" → the same sentence again. "aphasia" → "<n> Neurosynth term(s). Deficits: <n> lesion profiles match “aphasia”". "zzzzqqq" → "No match".
 - **Covered by:** `src/features/functions/functions-view.test.ts` (R: the sentence); `src/features/functions/functions.svelte.test.ts` (R; real 500 ms waits)
 
 ### FUNC-13 · A language switch does not say the count again

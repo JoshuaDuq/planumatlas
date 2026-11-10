@@ -11,6 +11,7 @@
   - the name is the `region-title` focus target; the commands that hide the selection with it
     (Clear ×, Hide) hand focus on through S2's commands, not here;
   - Isolate has no `aria-pressed`: its label says Isolate or Restore (APG toggle button);
+  - Focus, Isolate and Hide carry a one-line tooltip, also their description (U6);
   - the actions are not rendered without a region, instead of hidden and disabled
     (deviations/r1-hidden-actions.md); summaries are plain text (deviations/r1-summary-headings.md).
   I1 mounts it inside the panel landmark, which carries `data-own-keys` (decision 7).
@@ -161,7 +162,13 @@
   let title = $state<HTMLElement>();
   $effect(() => registerFocusTarget(FOCUS_TARGETS.regionTitle, () => title ?? null));
 
+  const uid = $props.id();
   const copy = $derived(t(lang, 'inspector'));
+  const hints = $derived({
+    focus: copy.focusHint,
+    isolate: isolated ? copy.restoreHint : copy.isolateHint,
+    hide: copy.hideHint,
+  });
   const chrome = $derived(inspectorEmptyChrome({ selectedRegion: region, explorer }));
   const label = $derived(region ? catalog.label(region.id) : null);
   // A selected region always names its atlas; the facts and the source label read it.
@@ -200,6 +207,8 @@
         data-active={focused}
         aria-pressed={focused}
         aria-keyshortcuts={ARIA_KEYSHORTCUTS.focusSelection}
+        aria-describedby="{uid}-focus"
+        data-tooltip={hints.focus}
         onclick={onfocus}
       >
         {copy.focus}
@@ -208,11 +217,20 @@
         type="button"
         data-active={isolated}
         aria-keyshortcuts={ARIA_KEYSHORTCUTS.isolate}
+        aria-describedby="{uid}-isolate"
+        data-tooltip={hints.isolate}
         onclick={onisolate}
       >
         {isolated ? copy.restore : copy.isolate}
       </button>
-      <button type="button" onclick={onhide}>{t(lang, 'dissection').hideSelected}</button>
+      <button
+        type="button"
+        aria-describedby="{uid}-hide"
+        data-tooltip={hints.hide}
+        onclick={onhide}
+      >
+        {t(lang, 'dissection').hideSelected}
+      </button>
       <button
         type="button"
         class="linked-mri"
@@ -221,6 +239,10 @@
       >
         {copy.linkedMri}
       </button>
+      <!-- The tooltips' text as descriptions, there without a hover or before the tooltip shows. -->
+      {#each Object.entries(hints) as [command, hint] (command)}
+        <span id="{uid}-{command}" hidden>{hint}</span>
+      {/each}
     </div>
     <RegionFacts region={atlasRegion} {lang} centroid={centroidOf(region.id)} />
   {:else}
