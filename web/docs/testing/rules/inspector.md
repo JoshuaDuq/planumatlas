@@ -270,7 +270,7 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 - **Kind:** behaviour
 - **Level:** unit (view-model over C5's latest runner and the engine port; today browser with a fake engine)
 - **Source:** `viewer/ui/panels/atlas-comparison.js:65-88`
-- **Expected:** V1, press row 1 → `aria-pressed="true"`, engine highlighted `overlap:…`, request geometry `{file: 'atlas-overlaps.glb', sha256: 'c6ebb202fc9ec9852cc75ae8e6023d7efdd85e10e084abc3901e65d397b1d80c'}`; again → unpressed, nothing highlighted. Row 2 → row 2 pressed, row 1 not. Pending outline → status "Loading overlap outline…", unpressed, `[aria-busy=true]`; settled → pressed, status "". Press 1 then 2, settle 2 then 1 → pressed states `false, true, false, false, false`. Rejected → "Could not load the overlap outline.", unpressed. Not applied → status "", unpressed. Published data: press 1 → pressed; 2 → 2 pressed, 1 not; 2 again → unpressed.
+- **Expected:** V1, press row 1 → `aria-pressed="true"`, engine highlighted `overlap:…`, request geometry `{file: 'atlas-overlaps.glb', sha256: '169fadf83680c282fd64fd778e462d9dc38be8dcb5e6f95dc55f5a5dabda7801'}`; again → unpressed, nothing highlighted. Row 2 → row 2 pressed, row 1 not. Pending outline → status "Loading overlap outline…", unpressed, `[aria-busy=true]`; settled → pressed, status "". Press 1 then 2, settle 2 then 1 → pressed states `false, true, false, false, false`. Rejected → "Could not load the overlap outline.", unpressed. Not applied → status "", unpressed. Published data: press 1 → pressed; 2 → 2 pressed, 1 not; 2 again → unpressed.
 - **Covered by:** `src/features/inspector/AtlasComparison.svelte.test.ts` (R)
 
 ### INSP-30 · The outline goes when its context goes

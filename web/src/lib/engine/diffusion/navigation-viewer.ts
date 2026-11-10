@@ -167,8 +167,8 @@ export async function createMriNavigationViewer(
           viewer.gl,
           'inferno',
           null,
-          tract.dps || null,
-          tract.dpv || null,
+          null,
+          null,
         );
         viewer.addMesh(mesh);
         configureNavigationTract(mesh, minimum, tract.lengths);

@@ -18,6 +18,7 @@ interface FileRecord {
   source_sha256: string;
   published_sha256: string;
   resampled_sha256?: string;
+  quantisation?: { scl_slope: number; scl_inter: number; max_abs_error: number };
   shape: number[];
   affine: number[][];
   points: number;
@@ -53,6 +54,10 @@ const catalogs = paths.map((path) => {
     provenance: readRepoJson<Provenance>(`${directory}${catalog.provenance}`),
   };
 });
+// The published T1 is a derivative of the reconstruction's pinned input.
+const T1_SOURCE = readRepoYaml<{
+  anatomies: Record<string, { reconstruction: { input: string } }>;
+}>('config/model.yaml').anatomies.cdmd!.reconstruction.input;
 const BUNDLES: Record<string, number> = { 'cdmd-sub-013': 30 };
 const digest = (buffer: Uint8Array) => createHash('sha256').update(buffer).digest('hex');
 const arrayBuffer = (buffer: Uint8Array) =>
@@ -65,11 +70,10 @@ function near(actual: number, expected: number, tolerance = 0.0001) {
 
 for (const { catalog, provenance } of catalogs) {
   test.each(catalog.maps.map((map) => [map.file, map] as const))(
-    `${catalog.id}: DIFF-13 scalar map %s retains its original NIfTI bytes and declared grid`,
+    `${catalog.id}: DIFF-13 scalar map %s is its source or a display-precision derivative on the source's grid`,
     async (_file, map) => {
       const record = provenance.files.find((file) => map.file.endsWith(`/${file.file}`))!;
       const data = await published(map.file);
-      assert.equal(digest(data), record.source_sha256);
       const image = await NVImage.loadFromUrl({ url: arrayBuffer(data), name: map.file });
       validateVolume(image as DiffusionVolume);
       assert.deepEqual(image.hdr!.dims.slice(1, 4), record.shape);
@@ -78,6 +82,41 @@ for (const { catalog, provenance } of catalogs) {
           near(image.hdr!.affine[row]![column]!, record.affine[row]![column]!);
         }
       }
+      if (!record.quantisation) {
+        assert.equal(digest(data), record.source_sha256);
+        return;
+      }
+      assert.equal(digest(data), record.published_sha256);
+      const sourceData = await readFile(resolve(repoRoot, T1_SOURCE));
+      assert.equal(digest(sourceData), record.source_sha256);
+      const source = await NVImage.loadFromUrl({ url: arrayBuffer(sourceData), name: T1_SOURCE });
+      const [header, original] = [image.hdr!, source.hdr!];
+      for (const key of ['dims', 'pixDims', 'affine', 'qform_code', 'sform_code'] as const) {
+        assert.deepEqual(header[key], original[key], key);
+      }
+      for (const key of [
+        'quatern_b',
+        'quatern_c',
+        'quatern_d',
+        'qoffset_x',
+        'qoffset_y',
+        'qoffset_z',
+      ] as const) {
+        assert.equal(header[key], original[key], key);
+      }
+      assert.equal(header.datatypeCode, 4);
+      assert.equal(header.scl_slope, record.quantisation.scl_slope);
+      assert.equal(header.scl_inter, record.quantisation.scl_inter);
+      // NiiVue holds the float64 source as float32, so its rounding is added to the bound.
+      const bound = record.quantisation.max_abs_error;
+      assert.ok(bound <= header.scl_slope / 2 + 1e-9);
+      const [values, expected] = [image.img!, source.img!];
+      let worst = 0;
+      for (let index = 0; index < expected.length; index++) {
+        const value = values[index]! * header.scl_slope + header.scl_inter;
+        worst = Math.max(worst, Math.abs(value - expected[index]!));
+      }
+      assert.ok(worst <= bound + 3e-5, `${worst} exceeds ${bound}`);
     },
   );
 

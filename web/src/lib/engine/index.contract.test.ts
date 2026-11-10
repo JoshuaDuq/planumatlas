@@ -50,7 +50,7 @@ defineEngineContract('real engine, headless', bootHeadless, {
     id: 'overlap:left:-1:0',
     geometry: {
       file: 'atlas-overlaps.glb',
-      sha256: 'c6ebb202fc9ec9852cc75ae8e6023d7efdd85e10e084abc3901e65d397b1d80c',
+      sha256: '169fadf83680c282fd64fd778e462d9dc38be8dcb5e6f95dc55f5a5dabda7801',
     },
   },
 });

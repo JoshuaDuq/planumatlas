@@ -38,10 +38,10 @@ def add_region(scene, vertices, faces, normals, region, color):
     return mesh
 
 
-def write_scene(scene, path, *, ranges=None):
+def write_scene(scene, path, *, ranges=None, normals=True):
     path.parent.mkdir(parents=True, exist_ok=True)
     scene.units = "meters"
-    data, used = reencode(export_glb(scene, include_normals=True), ranges=ranges)
+    data, used = reencode(export_glb(scene, include_normals=normals), ranges=ranges)
     path.write_bytes(data)
     return used
 

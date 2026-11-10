@@ -90,7 +90,7 @@ $$\mathbf{c}_i = \frac{\lvert \mathbf{p}_{i+1} - \mathbf{p}_{i-1} \rvert}{\lVert
 | A line shorter than the step | Keeps its two ends | passes |
 | `trim` | Drops only the end runs outside the brain; interior crossing kept; < 2 points inside refused | passes |
 | Scanner-to-surface transform (`test_transforms.py`) | Translation equals −`c_ras` (atol $10^{-6}$); recorded matrix and anchors equal the recomputed ones (≤ $10^{-9}$ mm); a 0.001 mm anchor shift refused | 0 mm difference |
-| Published maps (DIFF-13) | Original NIfTI bytes and declared grid | passes |
+| Published maps (DIFF-13) | FA original bytes; T1 int16 display derivative (grid and affine equal to the source, every voxel within half a step) | passes |
 | Published bundles (DIFF-14, DIFF-15, DIFF-06) | Decode in NiBabel's RAS+ space with matching streamline and point counts, RAS samples, float64 lengths at 1, 100 and 200 mm, and bounds | passes, 30 bundles |
 | Catalogue | 30 distinct bundles | passes |
 | Outline (DIFF-16) | Belongs to the tract reference; processing provenance present | passes |

@@ -194,7 +194,12 @@ export function createNativeTractViewer(
   async function addBundle(bundle: TractBundle): Promise<void> {
     const tract = await loadTract(bundle);
     if (disposed) throw new Error('Tract viewer disposed during bundle loading.');
-    const { geometry, lengths } = createTractGeometry(tract.pts, tract.offsetPt0, tract.lengths);
+    const { geometry, lengths } = createTractGeometry(
+      tract.pts,
+      tract.offsetPt0,
+      tract.lengths,
+      tract.colors,
+    );
     filterTractGeometry(geometry, tract.offsetPt0, lengths, minimum);
     const moving = createMotionGeometry(geometry, tract.offsetPt0, lengths, minimum);
     const materials = lineMaterials(clippingPlanes);

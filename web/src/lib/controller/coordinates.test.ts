@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vitest';
 import type { CoordinateSpaces } from '../types/index.ts';
 import { createCoordinatePlacement } from './coordinates.ts';
 
-function setup(landing: [number, number, number] | null, { cut = false } = {}) {
+function setup(landing: [number, number, number] | null, { cut = false, cutFails = false } = {}) {
   let intent = 0;
   const calls: string[] = [];
   const lesion = {
@@ -20,14 +20,29 @@ function setup(landing: [number, number, number] | null, { cut = false } = {}) {
   };
   const engine = {
     sections: { setCrosshair: vi.fn(() => void calls.push('crosshair')), active: cut },
-    camera: {
-      focusPoint: vi.fn(() => void calls.push('focus')),
-      faceCut: vi.fn(() => (calls.push('face cut'), 'anterior' as const)),
-      applyView: vi.fn((view: string) => void calls.push(`view ${view}`)),
-    },
+    camera: { faceCut: vi.fn(() => (calls.push('face cut'), 'anterior' as const)) },
   };
   let settle!: () => void;
   const mapped = new Promise<void>((resolve) => (settle = resolve));
+  let opened!: () => void;
+  const prepared = new Promise<void>((resolve) => (opened = resolve));
+  const failure = new Error('asset-fetch');
+  const commands = {
+    begin() {
+      const mine = ++intent;
+      return () => mine === intent;
+    },
+    cut: vi.fn(async (mode: string, current: () => boolean) => {
+      calls.push(`cut ${mode}`);
+      await prepared;
+      if (cutFails) throw failure;
+      engine.sections.active = true;
+      return current();
+    }),
+    failIfCurrent: vi.fn((current: () => boolean, operation: string) => {
+      if (current()) calls.push(`failed ${operation}`);
+    }),
+  };
   const placement = createCoordinatePlacement({
     coordinates: {
       metadata: { radius_mm: 5 } as CoordinateSpaces,
@@ -38,12 +53,7 @@ function setup(landing: [number, number, number] | null, { cut = false } = {}) {
     },
     lesion: lesion as never,
     engine,
-    commands: {
-      begin() {
-        const mine = ++intent;
-        return () => mine === intent;
-      },
-    },
+    commands: commands as never,
     ui: {
       showAnatomy: () => void calls.push('anatomy'),
       showDetail: () => void calls.push('detail'),
@@ -52,11 +62,14 @@ function setup(landing: [number, number, number] | null, { cut = false } = {}) {
       sayLesionRestored: () => void calls.push('restored'),
     },
   });
-  return { placement, lesion, engine, calls, settle, supersede: () => intent++ };
+  const supersede = () => intent++;
+  return { placement, lesion, engine, commands, calls, settle, opened, failure, supersede };
 }
 
-test('places it at the published radius, then brings the cut to its rounded centre and faces it', async () => {
-  const { placement, lesion, engine, calls, settle } = setup([-40.04, 20, 7], { cut: true });
+test('places it at the published radius, then brings the reader’s cut to its rounded centre and faces it', async () => {
+  const { placement, lesion, engine, commands, calls, settle } = setup([-40.04, 20, 7], {
+    cut: true,
+  });
   const placing = placement.place([-42, 22, 6], 'unstated');
   settle();
   expect(await placing).toBe(true);
@@ -66,36 +79,58 @@ test('places it at the published radius, then brings the cut to its rounded cent
     5,
   );
   expect(engine.sections.setCrosshair).toHaveBeenCalledWith([-40, 20, 7]);
-  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'face cut', 'held anterior', 'detail']);
+  expect(commands.cut).not.toHaveBeenCalled();
+  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'detail', 'face cut', 'held anterior']);
 });
 
-test('with no cut, the camera turns to the side of the brain the point lies in', async () => {
-  for (const [x, side] of [
-    [-40, 'left'],
-    [40, 'right'],
-  ] as const) {
-    const { placement, calls, settle } = setup([x, 20, 7]);
-    const placing = placement.place([x, 22, 6], 'unstated');
-    settle();
-    await placing;
-    expect(calls).toEqual([
-      'anatomy',
-      'place',
-      'crosshair',
-      `held ${side}`,
-      `view ${side}`,
-      'detail',
-    ]);
-  }
-});
-
-test('with no cut, a sphere across the midline is focused from where the camera stands', async () => {
-  const { placement, engine, calls, settle } = setup([-4, 20, 7]);
-  const placing = placement.place([-4, 22, 6], 'unstated');
+test('with no cut, a coronal cut opens through the centre and is faced once it is drawn', async () => {
+  const { placement, engine, calls, settle, opened } = setup([-40, 20, 7]);
+  const placing = placement.place([-42, 22, 6], 'unstated');
   settle();
-  await placing;
-  expect(engine.camera.focusPoint).toHaveBeenCalledWith([-4, 20, 7]);
-  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'focus', 'detail']);
+  await vi.waitFor(() => expect(calls).toContain('cut coronal'));
+  expect(engine.camera.faceCut).not.toHaveBeenCalled();
+  opened();
+  expect(await placing).toBe(true);
+  expect(calls).toEqual([
+    'anatomy',
+    'place',
+    'crosshair',
+    'detail',
+    'cut coronal',
+    'face cut',
+    'held anterior',
+  ]);
+});
+
+test('a later command while the cut opens keeps its camera, and the coordinate stays placed', async () => {
+  const { placement, calls, settle, opened, supersede } = setup([-40, 20, 7]);
+  const placing = placement.place([-42, 22, 6], 'unstated');
+  settle();
+  await vi.waitFor(() => expect(calls).toContain('cut coronal'));
+  supersede();
+  opened();
+  expect(await placing).toBe(true);
+  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'detail', 'cut coronal']);
+});
+
+test('a cut that fails to open is said as the section’s failure, and the coordinate stays placed', async () => {
+  const { placement, engine, commands, calls, settle, opened, failure } = setup([-40, 20, 7], {
+    cutFails: true,
+  });
+  const placing = placement.place([-42, 22, 6], 'unstated');
+  settle();
+  opened();
+  expect(await placing).toBe(true);
+  expect(commands.failIfCurrent).toHaveBeenCalledWith(expect.any(Function), 'section', failure);
+  expect(engine.camera.faceCut).not.toHaveBeenCalled();
+  expect(calls).toEqual([
+    'anatomy',
+    'place',
+    'crosshair',
+    'detail',
+    'cut coronal',
+    'failed section',
+  ]);
 });
 
 test('a coordinate beyond the template’s brain is refused and nothing moves', async () => {
@@ -116,16 +151,24 @@ test('a later command while the field downloads takes over', async () => {
 });
 
 test('a lesion the reader placed is said to be replaced, once the coordinate holds the sphere', async () => {
-  const { placement, lesion, calls, settle } = setup([0, 0, 0]);
+  const { placement, lesion, calls, settle } = setup([0, 0, 0], { cut: true });
   lesion.sphere = { centre: [10, 10, 10], radius: 5 };
   const placing = placement.place([-42, 22, 6], 'unstated');
   settle();
   await placing;
-  expect(calls).toEqual(['anatomy', 'place', 'crosshair', 'focus', 'detail', 'replaced']);
+  expect(calls).toEqual([
+    'anatomy',
+    'place',
+    'crosshair',
+    'detail',
+    'replaced',
+    'face cut',
+    'held anterior',
+  ]);
 });
 
 test('a coordinate placed over another coordinate replaces no lesion', async () => {
-  const { placement, lesion, calls, settle } = setup([0, 0, 0]);
+  const { placement, lesion, calls, settle } = setup([0, 0, 0], { cut: true });
   lesion.sphere = { centre: [10, 10, 10], radius: 5 };
   lesion.coordinate = { entered: [1, 2, 3], space: 'unstated' };
   const placing = placement.place([-42, 22, 6], 'unstated');

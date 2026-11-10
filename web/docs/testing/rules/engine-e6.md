@@ -122,13 +122,13 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 
 ## Published diffusion data
 
-### DIFF-13 · The scalar maps keep their original bytes and grid
+### DIFF-13 · FA keeps its original bytes; the T1 is a display-precision derivative on the source's grid
 
-- **Rule:** The T1 and FA maps are published as the original NIfTI files, read as valid 3D scalar maps on the declared grid.
+- **Rule:** FA is published as its original NIfTI file. The T1 is the reconstruction's pinned float64 input written as int16 with NiBabel's scl_slope/scl_inter, its header, grid and affine unchanged; both read as valid 3D scalar maps on the declared grid. Decided by the maintainer on 2026-11-10 (item P7): the float64 file was 32.9 MB for an 8-bit display and whole-number readout; the derivative is 13.1 MB, off by at most half a step (0.004, 0.002 grey levels at the 0–525 window).
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/diffusion/data.test.js`; `public/diffusion/cdmd-sub-013/provenance.json`
-- **Expected:** For `sub_013_t1w.nii.gz` and `fa.nii.gz`: sha256 = provenance `source_sha256`; `validateVolume` passes; dims 176 × 220 × 220; affine equal to provenance within 1e-4.
+- **Source:** `scripts/prepare_diffusion_cdmd.py` `display_t1`; `public/diffusion/cdmd-sub-013/provenance.json`
+- **Expected:** Both maps: `validateVolume` passes; dims 176 × 220 × 220; affine equal to provenance within 1e-4. `fa.nii.gz`: sha256 = provenance `source_sha256`. `sub_013_t1w.nii.gz`: sha256 = provenance `published_sha256`; `source_sha256` = sha256 of `config/model.yaml`'s cdmd `reconstruction.input`; dims, pixdims, affine, qform/sform codes and quaternion equal the source's; datatype int16 with the recorded slope and intercept; every scaled voxel within the recorded `max_abs_error` (≤ slope / 2) of the source.
 - **Covered by:** `src/lib/engine/diffusion/published-data.test.ts` (S)
 
 ### DIFF-14 · Every published bundle decodes in NiBabel's RAS+ space with its recorded geometry

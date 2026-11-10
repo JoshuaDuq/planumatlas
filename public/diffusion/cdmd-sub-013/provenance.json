@@ -168,13 +168,21 @@
       24
     ]
   },
-  "processing": "Every streamline kept, the runs of points at its ends outside the brain volume (ribbon.mgz, or aseg tissue other than [3, 42, 24]; nearest voxel) dropped, and resampled to 0.5 mm arc-length steps by linear interpolation; the T1 is the reconstruction's pinned input, unchanged, and FA is the tensor FA of the subject's own diffusion scan resampled onto it.",
+  "processing": "Every streamline kept, the runs of points at its ends outside the brain volume (ribbon.mgz, or aseg tissue other than [3, 42, 24]; nearest voxel) dropped, and resampled to 0.5 mm arc-length steps by linear interpolation; the T1 is the reconstruction's pinned input as int16 with scl_slope/scl_inter (header, grid and affine unchanged), and FA is the tensor FA of the subject's own diffusion scan resampled onto it.",
   "spatial_validation": "Map shape and affine agree with every TRK header at absolute tolerance 1e-5.",
   "geometry_validation": "NiBabel RAS+ millimetre samples and float64 polyline lengths provide independent checks of the browser's TRK decoder.",
   "files": [
     {
       "file": "sub_013_t1w.nii.gz",
       "source_sha256": "16e9137160f20c3dfb39fbd04ce1299415c5252ba96e8b0266f5f9402c60730b",
+      "published_sha256": "9ed2d90571aa2e44f7560734fed79f3c9f3acdda33135a11a56c2c47992ec99b",
+      "quantisation": {
+        "method": "NiBabel int16 with scl_slope/scl_inter over the source's full range (rounded), header, grid and affine unchanged",
+        "scl_slope": 0.008076420053839684,
+        "scl_inter": 259.1664123535156,
+        "max_abs_error": 0.004038209095597267,
+        "max_error_relative_to_range": 7.629509109862248e-06
+      },
       "shape": [
         176,
         220,

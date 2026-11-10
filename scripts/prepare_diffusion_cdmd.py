@@ -125,6 +125,36 @@ def deviation(original, resampled):
     return worst
 
 
+def display_t1(source, target):
+    """`source` as int16 with NiBabel's scl_slope/scl_inter on the same header, grid and affine.
+
+    The float64 source is 68 MB raw; the viewer draws 8-bit grey levels and prints whole numbers.
+    """
+    image = validate_image(source)
+    values = np.asarray(image.dataobj)
+    derived = nib.Nifti1Image(values, None, image.header)
+    derived.set_data_dtype(np.int16)
+    with target.open("wb") as compressed, gzip.GzipFile(
+        filename="", fileobj=compressed, mode="wb", compresslevel=9, mtime=0
+    ) as stream:
+        stream.write(derived.to_bytes())
+    published = validate_image(target)
+    for key in image.header:
+        if key not in ("datatype", "bitpix", "scl_slope", "scl_inter", "vox_offset"):
+            np.testing.assert_array_equal(published.header[key], image.header[key], err_msg=key)
+    error = np.abs(np.asarray(published.dataobj) - values)
+    slope, intercept = published.dataobj.slope, published.dataobj.inter
+    if error.max() > slope / 2 * (1 + 1e-6):
+        raise ValueError(f"Quantisation error {error.max()} exceeds half the slope {slope}")
+    return published, {
+        "method": "NiBabel int16 with scl_slope/scl_inter over the source's full range (rounded), "
+                  "header, grid and affine unchanged",
+        "scl_slope": float(slope), "scl_inter": float(intercept),
+        "max_abs_error": float(error.max()),
+        "max_error_relative_to_range": float(error.max() / np.ptp(values)),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pilot", type=Path, help="scripts/cdmd_pilot.py's work directory")
@@ -140,9 +170,9 @@ def main():
     t1_map, fa_map = catalog["maps"]
     target = output / t1_map["file"]
     target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(t1_source, target)
-    reference = validate_image(target)
-    records = [{"file": target.name, "source_sha256": sha256(t1_source),
+    reference, quantisation = display_t1(t1_source, target)
+    records = [{"file": target.name, "source_sha256": sha256(t1_source), "published_sha256": sha256(target),
+                "quantisation": quantisation,
                 "shape": list(reference.shape), "affine": reference.affine.tolist()}]
     fa_source = derived / "fa_t1.nii.gz"
     fa_target = output / fa_map["file"]
@@ -232,7 +262,7 @@ def main():
         },
         "processing": f"Every streamline kept, the runs of points at its ends outside the brain volume "
                       f"(ribbon.mgz, or aseg tissue other than {list(OUTSIDE_LABELS)}; nearest voxel) dropped, "
-                      f"and resampled to {step} mm arc-length steps by linear interpolation; the T1 is the reconstruction's pinned input, unchanged, and FA is the "
+                      f"and resampled to {step} mm arc-length steps by linear interpolation; the T1 is the reconstruction's pinned input as int16 with scl_slope/scl_inter (header, grid and affine unchanged), and FA is the "
                       "tensor FA of the subject's own diffusion scan resampled onto it.",
         "spatial_validation": "Map shape and affine agree with every TRK header at absolute tolerance 1e-5.",
         "geometry_validation": "NiBabel RAS+ millimetre samples and float64 polyline lengths provide "

@@ -233,6 +233,20 @@ def test_export_pins_sources_and_original_assets_without_rebuilding(comparison_s
     )
 
 
+def test_overlap_geometry_is_published_without_normals(comparison_subject):
+    # The viewer draws these meshes only into the outline mask, which reads positions alone.
+    from brain_model.gltf.encode import _read_glb
+    from brain_model.layers.comparison import export_comparison
+
+    config, manifest = comparison_subject
+    export_comparison(config, manifest)
+    gltf, _ = _read_glb((config["output_directory"] / "atlas-overlaps.glb").read_bytes())
+    primitives = [primitive for mesh in gltf["meshes"] for primitive in mesh["primitives"]]
+    assert primitives
+    assert {name for primitive in primitives for name in primitive["attributes"]} == {"POSITION"}
+    assert "KHR_mesh_quantization" not in gltf.get("extensionsRequired", [])
+
+
 @pytest.mark.parametrize(
     "invalid", ["subject", "region", "annotation", "enabled", "source_hash"]
 )

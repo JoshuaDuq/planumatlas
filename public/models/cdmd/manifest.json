@@ -96374,7 +96374,7 @@
         "hcp-mmp"
       ],
       "file": "atlas-comparison.json",
-      "sha256": "aea950acdda8edfb09702d9062ce03c8847618a677746f7c82b6c73061dff00e"
+      "sha256": "8f62b22057febd4fd9b5d9f31b152544642d51944c3b39a21a138379c29d19d2"
     },
     {
       "atlases": [
@@ -96382,7 +96382,7 @@
         "julich"
       ],
       "file": "atlas-comparison-destrieux-julich.json",
-      "sha256": "24498226fe59c7c06bba2f9446e255bc1cfe93d12838da22dabd32b6e89c6dc0"
+      "sha256": "def6026c82da9dcd959b80d0bbcc8bfad93282d1bebbc78a25c1cc42a9e7902e"
     },
     {
       "atlases": [
@@ -96390,7 +96390,7 @@
         "schaefer"
       ],
       "file": "atlas-comparison-destrieux-schaefer.json",
-      "sha256": "dce3cbdd4bdd21f73c3692beb751f64b7759bbce5d150fbd61cde1e2abce77cf"
+      "sha256": "b005480588a903ae952b29c6a1de46bcd4083e5433c3af4b26b190b7dbb81d1c"
     },
     {
       "atlases": [
@@ -96398,7 +96398,7 @@
         "julich"
       ],
       "file": "atlas-comparison-hcp-mmp-julich.json",
-      "sha256": "a21be5ebe6cfb10ff3843360a9d48d841f0dafa1c13da476a76964a58f2527e0"
+      "sha256": "2be68858aa8a5a07202db7fb282ff13f556cd19b0cb3c146bca8aa4780517dc7"
     },
     {
       "atlases": [
@@ -96406,7 +96406,7 @@
         "schaefer"
       ],
       "file": "atlas-comparison-hcp-mmp-schaefer.json",
-      "sha256": "8a0400703ce16a0a169448e1c62cf786e7b46764a26fc5bc82ff7a5f6fe59c46"
+      "sha256": "d1ab31b4ddc509550a72e150f5d68575e14a59bb57cd6fab948d56e61c5e82a2"
     },
     {
       "atlases": [
@@ -96414,11 +96414,11 @@
         "schaefer"
       ],
       "file": "atlas-comparison-julich-schaefer.json",
-      "sha256": "668f4e2a5edd9c7650bb38ec847dca09d03bc7ca69922dd1c854b2dc0a9a44ca"
+      "sha256": "9c82a9498f946f96e0bcdfb1671f1ea869661ec1a90f47f9f5a0598f097d5f25"
     }
   ],
   "atlas_comparison": {
     "file": "atlas-comparison.json",
-    "sha256": "aea950acdda8edfb09702d9062ce03c8847618a677746f7c82b6c73061dff00e"
+    "sha256": "8f62b22057febd4fd9b5d9f31b152544642d51944c3b39a21a138379c29d19d2"
   }
 }

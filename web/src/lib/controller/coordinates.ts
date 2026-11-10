@@ -7,9 +7,9 @@ import type { ViewName } from '../types/index.ts';
 
 /**
  * Placing a published coordinate from the stage: carried onto this brain by its space's field, then
- * marked by the one sphere, with the cut and the camera brought to it and its report as Anatomy's detail.
- * The camera faces the cut the point now lies on, or with no cut, the side of the brain it lies in: the
- * marking is drawn through the brain, so seen from the other side it would sit on the wrong hemisphere.
+ * marked by the one sphere, with its report as Anatomy's detail and a cut through it, faced: most
+ * landings lie in sulci, the insula, the medial wall or beneath the cortex, which the outside does not
+ * show. The reader's own cut moves to it, or a coronal one opens.
  */
 export function createCoordinatePlacement({
   coordinates,
@@ -22,9 +22,9 @@ export function createCoordinatePlacement({
   lesion: Pick<LesionStore, 'placeCoordinate' | 'sphere' | 'replaced' | 'restoreReplaced'>;
   engine: {
     sections: Pick<Engine['sections'], 'setCrosshair' | 'active'>;
-    camera: Pick<Engine['camera'], 'focusPoint' | 'faceCut' | 'applyView'>;
+    camera: Pick<Engine['camera'], 'faceCut'>;
   };
-  commands: Pick<SceneCommands, 'begin'>;
+  commands: Pick<SceneCommands, 'begin' | 'cut' | 'failIfCurrent'>;
   ui: {
     showAnatomy(): void;
     showDetail(): void;
@@ -37,29 +37,28 @@ export function createCoordinatePlacement({
 }) {
   return {
     metadata: coordinates.metadata,
-    /** Place it unless it lies beyond its template's brain; false then. A later command takes over. */
+    /**
+     * Place it unless it lies beyond its template's brain; false then. A later command takes over.
+     * A cut that fails to open is said as the section's failure: the coordinate is placed all the same.
+     */
     async place(entered: Coordinate, space: string): Promise<boolean> {
       const current = commands.begin();
       const landing = await coordinates.map(entered, space);
-      if (landing && current()) {
-        ui.showAnatomy();
-        lesion.placeCoordinate({ entered, space }, landing, coordinates.metadata.radius_mm);
-        const { centre, radius } = lesion.sphere!;
-        engine.sections.setCrosshair(centre);
-        if (engine.sections.active) {
-          const faced = engine.camera.faceCut();
-          if (faced) ui.showView(faced);
-        } else if (Math.abs(centre[0]) >= radius) {
-          const side = centre[0] > 0 ? 'right' : 'left';
-          ui.showView(side);
-          engine.camera.applyView(side);
-        } else {
-          engine.camera.focusPoint(centre);
-        }
-        ui.showDetail();
-        if (lesion.replaced) ui.sayLesionReplaced();
+      if (!landing || !current()) return landing !== null;
+      ui.showAnatomy();
+      lesion.placeCoordinate({ entered, space }, landing, coordinates.metadata.radius_mm);
+      engine.sections.setCrosshair(lesion.sphere!.centre);
+      ui.showDetail();
+      if (lesion.replaced) ui.sayLesionReplaced();
+      try {
+        if (!engine.sections.active && !(await commands.cut('coronal', current))) return true;
+      } catch (error) {
+        commands.failIfCurrent(current, 'section', error);
+        return true;
       }
-      return landing !== null;
+      const faced = engine.camera.faceCut();
+      if (faced) ui.showView(faced);
+      return true;
     },
     /** The replacement's undo: the lesion back as it was, and the coordinate gone. A later command takes over. */
     undoReplacement(): void {

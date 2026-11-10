@@ -208,7 +208,8 @@ def export_comparison(config, manifest, selected=None):
     atlas_ids = [atlas["id"] for atlas in atlases]
     suffix = "" if atlas_ids == ["destrieux", "hcp-mmp"] else "-" + "-".join(atlas_ids)
     geometry = output / f"atlas-overlaps{suffix}.glb"
-    write_scene(scene, geometry)
+    # The viewer draws these meshes only into the outline mask, which reads no normals.
+    write_scene(scene, geometry, normals=False)
     sidecar = output / f"atlas-comparison{suffix}.json"
     write_json(
         sidecar,

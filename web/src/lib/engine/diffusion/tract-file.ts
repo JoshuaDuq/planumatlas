@@ -1,15 +1,61 @@
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import type { TractBundle } from '../../core/diffusion/catalogs.ts';
-import { streamlineLengths } from './streamlines.ts';
+import { DiffusionInputError } from '../../core/diffusion/validation.ts';
+import { workerLoadFailure } from '../worker-load.ts';
+import { decodeTract } from './tract-decode.ts';
+import type { TractJob, TractLines, TractPoints, TractReply } from './tract-decode.ts';
 
-/** What NiiVue's `readTRK` returns, plus the length of every streamline. */
-export type LoadedTract = Awaited<ReturnType<typeof decodeTractAsset>> & { lengths: Float64Array };
+export type LoadedTract = TractLines;
 
 export type TractLoader = (bundle: Pick<TractBundle, 'file'>) => Promise<LoadedTract>;
 
-export async function decodeTractAsset(buffer: ArrayBuffer) {
-  const { NVMeshLoaders } = await import('@niivue/niivue');
-  return NVMeshLoaders.readTRK(buffer);
+let worker: Worker | null = null;
+let token = 0;
+const waiting = new Map<
+  number,
+  { resolve: (reply: TractReply) => void; reject: (error: Error) => void }
+>();
+
+function start(): Worker {
+  if (worker) return worker;
+  worker = new Worker(new URL('./tract-worker.ts', import.meta.url), { type: 'module' });
+  worker.onmessage = ({ data }: MessageEvent<TractReply>) => {
+    const job = waiting.get(data.token)!;
+    waiting.delete(data.token);
+    job.resolve(data);
+  };
+  worker.onerror = (event) => {
+    const failure = workerLoadFailure(event, 'tract');
+    // A worker that never loaded drops every later job silently: the next job starts another.
+    if (failure) worker = null;
+    const error = failure ?? new Error(event.message);
+    for (const job of waiting.values()) job.reject(error);
+    waiting.clear();
+  };
+  return worker;
+}
+
+/**
+ * Inflated and decoded in a worker, or in this thread where the platform has none. The file's
+ * buffer is copied, not transferred: concurrent readers of one published file share it.
+ */
+async function decode(buffer: ArrayBuffer, lines: boolean): Promise<TractPoints | TractLines> {
+  const job: TractJob = { token: ++token, buffer, lines };
+  const reply =
+    typeof Worker === 'undefined'
+      ? (await decodeTract(job)).reply
+      : await new Promise<TractReply>((resolve, reject) => {
+          waiting.set(job.token, { resolve, reject });
+          start().postMessage(job);
+        });
+  if ('error' in reply) {
+    throw reply.code ? new DiffusionInputError(reply.code, reply.error) : new Error(reply.error);
+  }
+  return reply;
+}
+
+export async function decodeTractAsset(buffer: ArrayBuffer): Promise<TractPoints> {
+  return (await decode(buffer, false)) as TractPoints;
 }
 
 /**
@@ -24,10 +70,9 @@ export function createTractLoader(
   return (bundle) => {
     let loading = tracts.get(bundle.file);
     if (!loading) {
-      loading = read(bundle.file).then(async ({ buffer }) => {
-        const tract = await decodeTractAsset(buffer);
-        return { ...tract, lengths: streamlineLengths(tract.pts, tract.offsetPt0) };
-      });
+      loading = read(bundle.file).then(
+        async ({ buffer }) => (await decode(buffer, true)) as LoadedTract,
+      );
       tracts.set(bundle.file, loading);
       loading.catch(() => tracts.delete(bundle.file));
     }
