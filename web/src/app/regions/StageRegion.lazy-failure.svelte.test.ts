@@ -42,6 +42,8 @@ let region: { saveImage(): Promise<void> } | null;
 let detach: () => void;
 
 beforeEach(async () => {
+  // Another file in the same browser may have left a remembered language or tour state.
+  localStorage.clear();
   await page.viewport(1280, 800);
   engine = createFakeEngine({ manifest, domains: domains as never });
   target = document.body.appendChild(document.createElement('div'));
