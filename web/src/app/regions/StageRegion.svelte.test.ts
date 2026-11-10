@@ -406,7 +406,8 @@ describe('focus and the crosshair', () => {
     await engine.sections.load();
     (document.activeElement as HTMLElement | null)?.blur();
     app.ports.showMri({ instant: true });
-    flushSync();
+    // Its code is fetched the first time it opens; Escape before then reaches no dialog.
+    await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() =>
       expect(document.activeElement).toBe(
@@ -424,7 +425,8 @@ describe('focus and the crosshair', () => {
     flushSync();
     (document.activeElement as HTMLElement | null)?.blur();
     app.ports.showMri({ instant: true });
-    flushSync();
+    // Its code is fetched the first time it opens; Escape before then reaches no dialog.
+    await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() => expect(document.activeElement).toBe(engine.canvas));
   });

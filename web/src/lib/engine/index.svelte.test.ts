@@ -64,10 +64,16 @@ test('captures the settled frame, cropped to the stage rectangle asked for, with
 });
 
 test('FACADE-32 the outline programs are compiled before the start ends: a first selection compiles none', async () => {
+  // The engine's own idle warm-up (Focus, T1 colour, Tracts) runs first and is not the outline's. It is
+  // run by hand: a CI runner drawing on SwiftShader can go minutes without an idle period.
+  const idle: (() => void)[] = [];
+  vi.stubGlobal('requestIdleCallback', (callback: () => void) => idle.push(callback));
+  vi.stubGlobal('cancelIdleCallback', () => {});
   const engine = await boot();
   onTestFinished(() => engine.dispose());
-  // The engine's own idle warm-up (Focus, T1 colour, Tracts) runs first and is not the outline's.
-  await new Promise((resolve) => requestIdleCallback(resolve));
+  vi.unstubAllGlobals();
+  expect(idle).not.toHaveLength(0);
+  for (const run of idle.splice(0)) run();
   const gl = engine.canvas.getContext('webgl2')!;
   const created = vi.spyOn(gl, 'createProgram');
   engine.model.select('destrieux:left:1');
