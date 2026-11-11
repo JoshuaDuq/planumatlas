@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import circuitRecords from '../../../../data/circuits.yaml';
 import clinicalRecords from '../../../../data/neuropsychology.yaml';
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
@@ -7,7 +8,8 @@ import { validateNeuropsychDomains } from '../core/catalog/neuropsych-domains.ts
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import { createClinicalCatalog } from '../core/clinical/catalog.ts';
 import type { ClinicalData } from '../core/clinical/types.ts';
-import { loadCircuitCatalog } from '../core/learning/load.ts';
+import type { CircuitData } from '../core/learning/catalog.ts';
+import { circuitCatalog } from '../core/learning/load.ts';
 import type { ReaderFailure, ReaderState } from '../core/state/reader-state.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
 import { createFakeEngine } from '../engine/fake.ts';
@@ -40,7 +42,8 @@ export function createScene() {
   const engine = createFakeEngine({ manifest, domains: domains as unknown as DomainsData });
   const engineState = createEngineSync(engine);
   const session = createSessionStore({ views: VIEW_NAMES });
-  const circuits = loadCircuitCatalog(
+  const circuits = circuitCatalog(
+    circuitRecords as CircuitData,
     manifest,
     createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units),
   );

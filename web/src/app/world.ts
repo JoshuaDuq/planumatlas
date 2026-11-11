@@ -63,7 +63,7 @@ export async function composeWorld(
   }
   const regions = createCatalog(model.manifest, session.state.lang, model.cabNp, domains.units);
   const clinical = await loadClinicalCatalog(model.manifest, domains.units);
-  const circuits = loadCircuitCatalog(model.manifest, clinical);
+  const circuits = await loadCircuitCatalog(model.manifest, clinical);
   // Each space's field is published beside the manifest the engine opened (boot.ts).
   const published = model.manifest.coordinate_spaces;
   const coordinates = published
