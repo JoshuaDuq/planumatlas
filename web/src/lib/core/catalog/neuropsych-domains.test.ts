@@ -226,6 +226,10 @@ test('FUNC-49 · a single function or term paints only the areas at or above the
     [...domainPaint(published, 'term:fear', 'hcp-mmp', 5).colors.keys()],
     ['aseg:left:18', 'learning:left:amygdala'],
   );
+  // The stage replaces a paint only under a new id, so each threshold names its own.
+  assert.equal(domainPaint(published, 'memory', 'hcp-mmp').id, 'function:memory');
+  assert.equal(domainPaint(published, 'memory', 'hcp-mmp', 5).id, 'function:memory:z5');
+  assert.equal(domainPaint(published, 'term:fear', 'hcp-mmp', 5.5).id, 'function:term:fear:z5.5');
   // The overview and a comparison keep the published threshold.
   assert.throws(() => domainPaint(published, ALL_DOMAINS, 'hcp-mmp', 5), /threshold/);
   assert.throws(() => domainPaint(published, 'compare:language,memory', 'hcp-mmp', 5), /threshold/);

@@ -648,5 +648,7 @@ export function domainPaint(
     const color = colors.get(structure);
     if (color) colors.set(unit, color);
   }
-  return { id: `function:${id}`, colors };
+  // The stage replaces a paint only under a new id, so a raised threshold is part of it.
+  const raised = from === partition.threshold_z ? '' : `:z${from}`;
+  return { id: `function:${id}${raised}`, colors };
 }
