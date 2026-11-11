@@ -52,6 +52,8 @@ import { validateReceptorFingerprints } from '../../core/catalog/receptor-finger
 import type { ReceptorFingerprints } from '../../core/catalog/receptor-fingerprints.ts';
 import { validateStimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { validateStimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
+import { validateFunctionalConnectivity } from '../../core/catalog/functional-connectivity.ts';
+import type { FunctionalConnectivity } from '../../core/catalog/functional-connectivity.ts';
 import type { StimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
 import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
@@ -499,6 +501,7 @@ export class BrainAtlas extends EventTarget {
       agreement,
       stimulation,
       ftract,
+      connectivity,
     ] = await Promise.all([
       manifest.cab_np ? readJson<CabNpPartition>(new URL(manifest.cab_np.file, url)) : null,
       manifest.functional_regions
@@ -525,6 +528,9 @@ export class BrainAtlas extends EventTarget {
       manifest.stimulation_ftract
         ? readJson<StimulationFtract>(new URL(manifest.stimulation_ftract.file, url))
         : null,
+      manifest.functional_connectivity
+        ? readJson<FunctionalConnectivity>(new URL(manifest.functional_connectivity.file, url))
+        : null,
     ]);
     // The site serves the layers meshopt-compressed (web/build/meshopt-glb.ts); public/ does not.
     const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
@@ -547,6 +553,7 @@ export class BrainAtlas extends EventTarget {
       agreement,
       stimulation,
       ftract,
+      connectivity,
     );
     try {
       await model.initialize(atlasId, options);
@@ -569,6 +576,7 @@ export class BrainAtlas extends EventTarget {
   readonly segmentationAgreement: SegmentationAgreement | null;
   readonly stimulation: StimulationResponses | null;
   readonly ftract: StimulationFtract | null;
+  readonly connectivity: FunctionalConnectivity | null;
   /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */
   readonly visualField: VisualFieldUniforms | null;
   /** The reader's own map, shared by every cortical material and every cut face. */
@@ -637,6 +645,7 @@ export class BrainAtlas extends EventTarget {
     segmentationAgreement: SegmentationAgreement | null = null,
     stimulation: StimulationResponses | null = null,
     ftract: StimulationFtract | null = null,
+    connectivity: FunctionalConnectivity | null = null,
   ) {
     super();
     validateManifest(manifest);
@@ -655,6 +664,7 @@ export class BrainAtlas extends EventTarget {
       segmentationAgreement && validateSegmentationAgreement(segmentationAgreement, this.regions);
     this.stimulation = stimulation && validateStimulationResponses(stimulation, this.regions);
     this.ftract = ftract && validateStimulationFtract(ftract, this.regions);
+    this.connectivity = connectivity && validateFunctionalConnectivity(connectivity, this.regions);
     this.visualField = manifest.retinotopy
       ? {
           visualMix: { value: 0 },

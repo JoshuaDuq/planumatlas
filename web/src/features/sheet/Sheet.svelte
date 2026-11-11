@@ -278,6 +278,11 @@
     if (say && changed) announce(copy.detent[next]);
   }
 
+  /** A stage tool asked for from the panel must be seen: a full sheet comes down to half. */
+  export function uncover({ instant = false } = {}) {
+    if (media.phone && detent === 'full') setDetent('half', { quick: instant });
+  }
+
   /** Content chosen with the sheet at rest should be seen; a raised sheet stays where it was put. */
   export function raise({ instant = false } = {}) {
     if (media.phone && panelHiddenAt(detent)) setDetent('half', { quick: instant });

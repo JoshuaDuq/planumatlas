@@ -9,6 +9,9 @@ export const en = {
     'This teaching-set unit takes the score of the FreeSurfer structure most of it lies in on this brain.',
   note: (source: string) =>
     `Mean meta-analytic consistency over this whole HCP-MMP area for each term, from ${source}: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
+  // A Julich-Brain or Schaefer area, averaged over its own fsaverage parcel (supervisor review 1.1).
+  noteAtlas: (atlas: string, source: string) =>
+    `Mean meta-analytic consistency over this whole ${atlas} area on fsaverage for each term, from ${source}: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
   keyTitle: 'Neuropsychological functions',
   // Numbers arrive formatted (format.js decimal); `to` is null for the open top band.
   band: (from: string, to: string | null) =>
@@ -42,6 +45,8 @@ export const fr: typeof en = {
     'Cette unité de l’ensemble pédagogique reçoit la valeur de la structure FreeSurfer qui en contient la plus grande partie dans ce cerveau.',
   note: (source: string) =>
     `Constance méta-analytique moyenne sur l’aire HCP-MMP entière pour chaque terme, d’après ${source}\u202f: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.`,
+  noteAtlas: (atlas: string, source: string) =>
+    `Constance méta-analytique moyenne sur l’aire ${atlas} entière, sur fsaverage, pour chaque terme, d’après ${source}\u202f: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.`,
   keyTitle: 'Fonctions neuropsychologiques',
   band: (from: string, to: string | null) =>
     (to ? `z ${from} à ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),

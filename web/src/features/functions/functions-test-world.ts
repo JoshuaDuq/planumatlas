@@ -143,6 +143,7 @@ export function createWorld() {
     anatomy,
     functionalRegions,
     openDeficit,
+    atlas: () => view.current.atlas,
   });
   return {
     engine,

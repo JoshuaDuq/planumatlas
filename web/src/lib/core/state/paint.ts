@@ -6,6 +6,7 @@ import {
   comparedIds,
   domainName,
   domainPaint,
+  paintAtlas,
   domainRecord,
   functionName,
   isTermId,
@@ -14,6 +15,8 @@ import {
 } from '../catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
+import { connectivityPaint } from '../catalog/functional-connectivity.ts';
+import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
 import { decimal } from '../format.ts';
 import { t } from '../i18n/index.ts';
 
@@ -21,7 +24,14 @@ import { t } from '../i18n/index.ts';
 export type PaintState = Pick<ModelState, 'atlas'> &
   Pick<
     SessionState,
-    'explorer' | 'selectedFunction' | 'selectedDeficit' | 'selectedFinding' | 'paintLifted' | 'lang'
+    | 'explorer'
+    | 'selectedFunction'
+    | 'selectedDeficit'
+    | 'selectedFinding'
+    | 'paintLifted'
+    | 'lang'
+    | 'paintFrom'
+    | 'connectivitySeed'
   > & { paint?: Paint | null };
 
 /** The findings near a placed lesion on the brain: its paint and the coloured findings, in rank order. */
@@ -32,14 +42,14 @@ export interface LesionPaint {
   rows: readonly { id: string; color: Rgb; title: Translated }[];
 }
 
-/** Which tab a paint belongs to, by its id: `function:…`, `deficit:…` or `lesion:…`. */
+/** Which tab a paint belongs to, by its id: `function:…`, `deficit:…`, `lesion:…` or `connectivity:…`. */
 export const paintKind = (paint: Paint | null | undefined): string | null =>
   paint?.id.slice(0, paint.id.indexOf(':')) || null;
 
 /**
- * The tab's paint: the open function on its own atlas, the open deficit, or the findings near a
- * lesion, whose report is Anatomy's, while that tab is in front and the reader has not chosen a
- * masthead colour or atlas over it.
+ * The tab's paint: the open function on its own atlas, the open deficit, or in Anatomy the resting
+ * connectivity a region's sheet asked for, else the findings near a lesion, whose report is Anatomy's;
+ * while that tab is in front and the reader has not chosen a masthead colour or atlas over it.
  */
 export function paintFor(
   state: PaintState,
@@ -47,12 +57,36 @@ export function paintFor(
     domains,
     clinical,
     lesion = null,
-  }: { domains: NeuropsychDomains; clinical: ClinicalCatalog; lesion?: LesionPaint | null },
+    connectivity = null,
+  }: {
+    domains: NeuropsychDomains;
+    clinical: ClinicalCatalog;
+    lesion?: LesionPaint | null;
+    connectivity?: FunctionalConnectivity | null;
+  },
 ): Paint | null {
   if (state.paintLifted) return null;
+  if (
+    state.explorer === 'anatomy' &&
+    state.connectivitySeed &&
+    connectivity?.atlases[state.atlas]
+  ) {
+    return connectivityPaint(connectivity, state.connectivitySeed);
+  }
   if (state.explorer === 'anatomy' && lesion) return lesion.paint;
-  if (state.explorer === 'functions' && state.selectedFunction && state.atlas === domains.atlas) {
-    return domainPaint(domains, state.selectedFunction);
+  // On its own atlas where the function was measured there (supervisor review 3.1), else on HCP-MMP.
+  if (
+    state.explorer === 'functions' &&
+    state.selectedFunction &&
+    state.atlas === paintAtlas(domains, state.selectedFunction, state.atlas)
+  ) {
+    const single = state.selectedFunction !== ALL_DOMAINS && !comparedIds(state.selectedFunction);
+    return domainPaint(
+      domains,
+      state.selectedFunction,
+      state.atlas,
+      single ? (state.paintFrom ?? domains.threshold_z) : domains.threshold_z,
+    );
   }
   if (state.explorer === 'deficits' && state.selectedDeficit) {
     return clinical.paint(state.selectedDeficit, state.selectedFinding).paint;
@@ -71,7 +105,7 @@ export interface LegendRow {
 }
 
 export interface Legend {
-  map: 'function' | 'deficit' | 'lesion';
+  map: 'function' | 'deficit' | 'lesion' | 'connectivity';
   title: string;
   note: string;
   /** False for a z scale, whose bands are not toggles. */
@@ -91,17 +125,46 @@ export function legendFor(
     clinical,
     drawn,
     lesion = null,
+    connectivity = null,
+    label = null,
   }: {
     domains: NeuropsychDomains;
     clinical: ClinicalCatalog;
     drawn: (region: string, state: PaintState) => boolean;
     lesion?: LesionPaint | null;
+    connectivity?: FunctionalConnectivity | null;
+    /** A region's name, for the connectivity key's seed. */
+    label?: ((id: string) => string) | null;
   },
 ): Legend | null {
   const kind = paintKind(state.paint);
   const lang: Language = state.lang;
   // Under the T1 colour what the paint leaves shows the scan, not the tissue colour.
   const scan = state.surfaceColor === 'mri';
+  if (kind === 'connectivity') {
+    const copy = t(lang, 'connectivity');
+    const scale = connectivity!.r_scale;
+    // A step no painted area carries is outlined, as a function's band is.
+    const carried = new Set([...state.paint!.colors.values()].map((color) => color.join()));
+    return {
+      map: 'connectivity',
+      title: copy.keyTitle(label!(state.connectivitySeed!)),
+      note: copy.keyNote(decimal(scale[0]!.from, 2, lang), scan),
+      pickable: false,
+      rows: scale
+        .map((step, index) => ({
+          id: `r-${step.from}`,
+          color: step.color,
+          pressed: false,
+          absent: !carried.has(step.color.join()),
+          label: copy.step(
+            decimal(step.from, 2, lang),
+            index + 1 < scale.length ? decimal(scale[index + 1]!.from, 2, lang) : null,
+          ),
+        }))
+        .reverse(),
+    };
+  }
   if (kind === 'lesion') {
     const copy = t(lang, 'lesion');
     const functions = lesion!.kind === 'functions';
@@ -146,11 +209,14 @@ export function legendFor(
     }
     if (state.selectedFunction !== ALL_DOMAINS) {
       const picked = domainRecord(domains, state.selectedFunction!)!;
+      // A band no painted area carries, a raised threshold's below it included, is outlined.
+      const carried = new Set([...state.paint!.colors.values()].map((color) => color.join()));
       const bands = domains.z_scale
         .map((band, index) => ({
           id: `z-${band.from}`,
           color: band.color,
           pressed: false,
+          absent: !carried.has(band.color.join()),
           label: copy.band(
             decimal(band.from, 0, lang),
             index + 1 < domains.z_scale.length

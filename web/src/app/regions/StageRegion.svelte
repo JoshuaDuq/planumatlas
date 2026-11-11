@@ -46,6 +46,7 @@
   let host = $state<HTMLElement>();
   let keys = $state<StageKeys>();
   let linkedMri = $state<MprDialog>();
+  let dock = $state<Dock>();
   // The Linked MRI's code is a chunk of its own, fetched the first time the dialog opens.
   let LinkedMri = $state<typeof MprDialog>();
   let fetchingLinkedMri = false;
@@ -236,6 +237,7 @@
       },
       mprOpen: () => linkedMri?.holdsKeys() ?? false,
       diffusionMriOpen: () => diffusionMri,
+      openStageTool: (tool) => dock!.openFromPanel(tool),
     });
     const offPick = world.engine.on('pick', ({ point }) => {
       if (point) mpr.follow(point);
@@ -307,6 +309,7 @@
       />
     {/snippet}
     <Dock
+      bind:this={dock}
       stage={app.stage}
       media={app.media}
       lang={current.lang}
@@ -397,6 +400,7 @@
                 domains: model.domains!,
                 clinical: world.clinical,
                 lesion: world.lesion.paint,
+                connectivity: model.connectivity,
               }),
             },
             {
@@ -404,6 +408,9 @@
               clinical: world.clinical,
               drawn: (id) => visibilityOf(world.regions.get(id)!.region, current).visible,
               lesion: world.lesion.paint,
+              connectivity: model.connectivity,
+              label: (id) =>
+                `${world.catalog.label(id).name} · ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
             },
           )}
       cases={!tractReference && world.strokeCases.cohort.status === 'ready'

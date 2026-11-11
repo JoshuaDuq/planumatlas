@@ -17,7 +17,9 @@
     glyphs,
     text,
     hidden,
+    current = false,
     ontoggle,
+    onopen,
   }: {
     row: TractRow;
     lang: Language;
@@ -30,6 +32,10 @@
     hidden: boolean;
     /** The key's wish; the owner applies it and the key follows what the engine then holds. */
     ontoggle: (id: string, wanted: boolean) => void;
+    /** The row's profile is the one open. */
+    current?: boolean;
+    /** Opens the tract's profile; without it the name is plain text. */
+    onopen?: (key: string) => void;
   } = $props();
 
   const nameId = $derived(`native-tract-row-${row.key}`);
@@ -40,7 +46,22 @@
 
 <section class="bundle" data-layout={row.members.length > 2 ? 'segments' : 'sides'} {hidden}>
   <div class="head">
-    <span class="name" id={nameId}>{tractRowName(row, lang)}</span>
+    {#if onopen}
+      <!-- The name drills into the profile, as other mode lists' rows do; the keys keep toggling what is drawn. -->
+      <button
+        type="button"
+        class="name drill"
+        id={nameId}
+        aria-current={current ? 'true' : undefined}
+        onclick={() => onopen(row.key)}
+        ><span class="drill-text">{tractRowName(row, lang)}</span><span
+          class="chevron"
+          aria-hidden="true"
+        ></span></button
+      >
+    {:else}
+      <span class="name" id={nameId}>{tractRowName(row, lang)}</span>
+    {/if}
     <span class="parts" role="group" aria-labelledby={nameId} aria-busy={busy || undefined}>
       {#each row.members as { bundle, part } (bundle.id)}
         {@const isDrawn = drawn(bundle.id)}
@@ -101,6 +122,60 @@
     }
     .bundle[data-layout='segments'] .name {
       flex-basis: 100%;
+    }
+    /* The name as a drill row's: plain ink at rest, the chevron on hover or focus, as mode lists show it. */
+    .drill {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: auto;
+      min-height: var(--row-height);
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: var(--text-primary);
+      text-align: left;
+    }
+    .drill-text {
+      min-width: 0;
+    }
+    .drill .chevron {
+      flex: none;
+      width: 6px;
+      height: 6px;
+      margin: 0 3px;
+      color: var(--text-tertiary);
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateX(-1.6px) rotate(-45deg);
+      opacity: 0;
+    }
+    .drill:focus-visible {
+      outline-offset: 2px;
+    }
+    .drill:focus-visible .chevron,
+    .drill[aria-current='true'] .chevron {
+      opacity: 1;
+    }
+    .drill[aria-current='true'] {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .drill:hover .chevron {
+        opacity: 1;
+      }
+      .drill:hover .drill-text {
+        color: var(--accent-hover);
+      }
+    }
+    /* Touch shows the chevron always: a press there has no hover to announce it. */
+    @media not ((hover: hover) and (pointer: fine)) {
+      .drill .chevron {
+        opacity: 1;
+      }
     }
     .bundle[data-layout='segments'] .parts {
       flex-shrink: 1;

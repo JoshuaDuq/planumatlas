@@ -62,7 +62,8 @@ describe('empty state', () => {
 
   test('outside Anatomy there is nothing to say', async () => {
     render(Fixture, { regionId: null, explorer: 'functions' });
-    expect(text(root())).toBe('');
+    // Rendered text: an index caption with nothing under it is in the page but not drawn.
+    expect(root().innerText.trim()).toBe('');
   });
 
   test('French', async () => {
@@ -142,13 +143,11 @@ describe('selected region', () => {
     expect(root().querySelector('.selected-hint')).toBeNull();
   });
 
-  test('the slots follow the sections: comparison first, deficits and circuits after the body', async () => {
+  test('the slots follow About this region: deficits and circuits after its body, the comparison in Research data', async () => {
     render(Fixture, { regionId: V1 });
     const comparison = document.querySelector('[data-slot=comparison]')!;
-    const first = section('Functional division')!;
-    expect(
-      comparison.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    const research = document.querySelector('[data-index=research]')!;
+    expect(research.contains(comparison)).toBe(true);
     expect(root().contains(document.querySelector('[data-slot=deficits]'))).toBe(false);
     expect(
       root().compareDocumentPosition(document.querySelector('[data-slot=circuits]')!) &
@@ -202,11 +201,13 @@ describe('selected region', () => {
     expect(root().querySelector('dl.facts')).toBeNull();
   });
 
-  test('related sections following remove the body bottom padding; alone it keeps 24 px', async () => {
+  test('the research index closes the detail with its bottom inset, even with nothing to list', async () => {
     const screen = await render(Fixture, { regionId: V1 });
+    const research = () => document.querySelector<HTMLElement>('.region-research')!;
     expect(getComputedStyle(root()).paddingBottom).toBe('0px');
-    await screen.rerender({ regionId: V1, slots: false });
-    expect(getComputedStyle(root()).paddingBottom).not.toBe('0px');
+    expect(getComputedStyle(research()).paddingBottom).not.toBe('0px');
+    await screen.rerender({ regionId: 'destrieux:left:-1', slots: false });
+    expect(getComputedStyle(research()).paddingBottom).not.toBe('0px');
   });
 
   test('on a phone the inspector has no Clear button of its own', async () => {
@@ -317,11 +318,7 @@ describe('commands', () => {
       '−12.3, +56.8, −9.0 mm',
       '1',
     ]);
-    expect(walked.slice(8)).toEqual([
-      'Functional division',
-      'Neuropsychological functions',
-      'Functional networks',
-    ]);
+    expect(walked.slice(8)).toEqual(['Functional division']);
     // The next stop, after the networks, is the typical arterial supply.
     await userEvent.keyboard('{Tab}');
     expect(text(document.activeElement!)).toBe('Typical arterial supply');
@@ -406,11 +403,12 @@ describe('evidence sections', () => {
     const sections = [...root().querySelectorAll('details')].filter(
       (details) => !details.closest('.source-labels'),
     );
+    // A summary names its section, then the headline value it holds without a fetch (2.2).
     expect(sections.map((details) => text(details.querySelector('summary')!))).toEqual([
-      'Functional division',
-      'Neuropsychological functions',
-      'Functional networks',
+      'Neuropsychological functions, 32',
+      'Functional networks, Dorsal attention 93%',
       'Typical arterial supply',
+      'Functional division',
     ]);
     for (const details of sections) {
       expect(details.open).toBe(false);
@@ -494,6 +492,26 @@ describe('evidence sections', () => {
     expect(text(domains())).toContain('over this whole structure');
   });
 
+  test('FUNC-41 · a Julich-Brain area says its scores are means over its own parcel, not a structure’s', async () => {
+    render(Fixture, { regionId: 'julich:left:2' });
+    const domains = section('Neuropsychological functions');
+    domains.open = true;
+    expect(text(domains)).toContain('this whole Julich-Brain area on fsaverage');
+    expect(text(domains)).not.toContain('SynthSeg');
+  });
+
+  test('“Show all” in the sheet hands focus to the rows it added', async () => {
+    render(Fixture, { regionId: 'hcp-mmp:left:50' });
+    const domains = section('Neuropsychological functions');
+    domains.open = true;
+    const more = domains.querySelector<HTMLElement>('.show-all')!;
+    more.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect.poll(() => domains.querySelector('.show-all')).toBeNull();
+    expect(domains.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
   test('a teaching unit lists its structure’s functions and says it takes that score', async () => {
     const screen = await render(Fixture, { regionId: 'aseg:left:18' });
     const domains = () => section('Neuropsychological functions');
@@ -503,7 +521,8 @@ describe('evidence sections', () => {
     expect(text(domains())).not.toContain('This teaching-set unit');
     await screen.rerender({ regionId: 'learning:left:amygdala' });
     expect(rows()).toEqual(amygdala);
-    expect(rows()[0]).toBe('Disgust “disgust” · z 10.7');
+    // Highest z first (supervisor review 1.1, D3), where share of peak had put disgust first.
+    expect(rows()[0]).toBe('Emotion “emotion” · z 23.5');
     expect(text(domains())).toContain('This teaching-set unit takes the score');
   });
 
@@ -538,7 +557,7 @@ describe('boundary certainty', () => {
       .map(([a, b, voxels, near]) => ({ id: a === id ? b : a, voxels, share: near / voxels }))
       .sort((x, y) => y.voxels - x.voxels);
 
-  test('a NextBrain region lists its eight largest boundaries after the comparison, collapsed', async () => {
+  test('a NextBrain region lists its eight largest boundaries first under Research data, collapsed', async () => {
     render(Fixture, { regionId: VPL });
     const boundaries = section('Boundary certainty');
     expect(boundaries.open).toBe(false);
@@ -1012,6 +1031,64 @@ describe('stimulation responses', () => {
     responses.open = true;
     expect(page.getByRole('radio', { name: 'Stimulé ici' }).element()).toBeTruthy();
     expect(rows(responses)[0]).toBe('Thalamus moyen 75 % 167 paires sur 223 · 12 personnes');
+  });
+});
+
+describe('Functional connectivity', () => {
+  const AREA_45 = 'julich:left:1';
+  const AREA_44 = 'julich:left:2';
+  const HEADING = 'Functional connectivity (resting fMRI, 200 adults)';
+  const rows = (details: Element) =>
+    [...details.querySelectorAll('[data-connectivity-partners] li')].map(text);
+
+  test('INSP-50 · a Julich-Brain area lists its ten strongest partners; a name selects it; Paint asks for the area', async () => {
+    const calls: unknown[] = [];
+    render(Fixture, { regionId: AREA_45, calls });
+    const details = section(HEADING);
+    expect(details.open).toBe(false);
+    details.open = true;
+    const listed = rows(details);
+    expect(listed).toHaveLength(10);
+    expect(listed.slice(0, 3)).toEqual([
+      'Area 44 (IFG) · left 0.58',
+      'Area IFS3 (IFS) · left 0.49',
+      'Area 45 (IFG) · right 0.48',
+    ]);
+    expect(text(details)).toContain('A correlation is not a connection.');
+    expect(
+      [...details.querySelectorAll('.stimulation-sources a')].map((link) =>
+        link.getAttribute('href'),
+      ),
+    ).toEqual(['https://doi.org/10.25493/3PMM-FPW', 'https://pubmed.ncbi.nlm.nih.gov/34746628/']);
+    await userEvent.click(page.getByRole('button', { name: 'Area 44 (IFG) · left' }));
+    await userEvent.click(page.getByRole('button', { name: 'Paint on the brain' }));
+    expect(calls).toEqual([`select:${AREA_44}`, `paint:${AREA_45}`]);
+    await expectAxeClean();
+  });
+
+  test('INSP-51 · while the stage shows an area’s connectivity a ruled strip says so with Restore, and another area offers its own', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, {
+      regionId: AREA_45,
+      calls,
+      connectivityPainted: AREA_45,
+    });
+    const details = section(HEADING);
+    details.open = true;
+    expect(text(details.querySelector('[role="status"]')!)).toBe(
+      'The brain shows resting connectivity with Area 45 (IFG) · left. Restore previous view',
+    );
+    expect(page.getByRole('button', { name: 'Paint on the brain' }).query()).toBeNull();
+    await userEvent.click(page.getByRole('button', { name: 'Restore previous view' }));
+    expect(calls).toEqual(['restore-connectivity']);
+    await screen.rerender({ regionId: AREA_44 });
+    expect(page.getByRole('button', { name: 'Paint on the brain' }).query()).not.toBeNull();
+    // Another tab cannot show the paint, so it offers none.
+    await screen.rerender({ explorer: 'functions', connectivityPainted: null });
+    expect(page.getByRole('button', { name: 'Paint on the brain' }).query()).toBeNull();
+    // A region of another atlas has no row.
+    await screen.rerender({ regionId: V1, explorer: 'anatomy' });
+    expect(section(HEADING)).toBeUndefined();
   });
 });
 

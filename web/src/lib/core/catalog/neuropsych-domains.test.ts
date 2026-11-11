@@ -9,12 +9,15 @@ import {
   domainPaint,
   domainRecord,
   domainsOf,
+  functionsAt,
+  paintAtlas,
   domainStudies,
   drawnAs,
   functionName,
   groupedDomains,
   matchingTerms,
   nearestName,
+  neurosynthPage,
   overviewDomains,
   revealedRegions,
   scoredRegion,
@@ -35,6 +38,8 @@ const regions = new Map<string, Region>([
   ['hcp-mmp:left:1', asRegion({ atlas: 'hcp-mmp', kind: 'cortex' })],
   ['hcp-mmp:right:1', asRegion({ atlas: 'hcp-mmp', kind: 'cortex' })],
   ['destrieux:left:1', asRegion({ atlas: 'destrieux' })],
+  ['julich:left:2', asRegion({ id: 'julich:left:2', atlas: 'julich', kind: 'cortex' })],
+  ['julich:left:3', asRegion({ id: 'julich:left:3', atlas: 'julich', kind: 'cortex' })],
   ['aseg:left:18', asRegion({ atlas: 'aseg', kind: 'structure', source_name: 'Left-Amygdala' })],
   [
     'aseg:left:4',
@@ -96,6 +101,7 @@ const partition = (): Fixture => ({
     },
   ],
   lesion_checks: { language: [], memory: [], visual: [] },
+  neurosynth_org_missing: ['visual'],
   derivation: { studies: { language: 1101, memory: 332, visual: 3110 } },
   regions: {
     'hcp-mmp:left:1': [
@@ -104,6 +110,15 @@ const partition = (): Fixture => ({
     ],
     'hcp-mmp:right:1': [{ domain: 'language', z: 4.1 }],
     'aseg:left:18': [{ domain: 'memory', z: 3.5 }],
+  },
+  region_atlases: ['julich'],
+  atlas_regions: {
+    julich: {
+      'julich:left:2': [
+        { domain: 'visual', z: 4.5 },
+        { domain: 'language', z: 6.1 },
+      ],
+    },
   },
 });
 
@@ -120,6 +135,121 @@ test('an area lists its domains strongest first and is drawn as the strongest un
   assert.equal(shownDomain(published, 'hcp-mmp:left:1', 'language')!.id, 'language');
   assert.deepEqual(domainsOf(published, 'hcp-mmp:left:2'), []);
   assert.equal(shownDomain(published, 'hcp-mmp:left:2', null), null);
+});
+
+test('FUNC-40 · a region’s functions are listed by raw z, highest first, on HCP-MMP, structures and listed atlases', () => {
+  const published = validateNeuropsychDomains(partition(), regions);
+  // Published by share of peak (memory, language); listed by z.
+  assert.deepEqual(
+    functionsAt(published, 'hcp-mmp:left:1').map((record) => [record.id, record.z]),
+    [
+      ['memory', 7.5],
+      ['language', 3.2],
+    ],
+  );
+  assert.deepEqual(
+    functionsAt(published, 'julich:left:2').map((record) => record.id),
+    ['language', 'visual'],
+  );
+  assert.deepEqual(
+    functionsAt(published, 'learning:left:amygdala').map((record) => record.id),
+    ['memory'],
+  );
+  // A listed atlas's region that reaches nothing is scored, and has no function.
+  assert.equal(scoredRegion(published, regions.get('julich:left:3')), true);
+  assert.deepEqual(functionsAt(published, 'julich:left:3'), []);
+  // An atlas not listed is not scored.
+  assert.equal(scoredRegion(published, regions.get('destrieux:left:1')), false);
+  // The listed atlases add nothing to a function's areas, its paint or its counts.
+  assert.ok(
+    domainAreas(published, 'language').every(({ region }) => !region.startsWith('julich:')),
+  );
+});
+
+test('FUNC-46 · a curated function or the overview paints on a listed atlas’s own areas; terms and comparisons stay on HCP-MMP', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.equal(paintAtlas(published, 'language', 'julich'), 'julich');
+  assert.equal(paintAtlas(published, ALL_DOMAINS, 'julich'), 'julich');
+  assert.equal(paintAtlas(published, 'language', 'destrieux'), 'hcp-mmp');
+  // A searched term paints on its own table there, with the structures it reaches.
+  assert.equal(paintAtlas(published, 'term:fear', 'julich'), 'julich');
+  assert.deepEqual(domainAreas(published, 'term:fear', 'julich'), [
+    { region: 'aseg:left:18', z: 9.1 },
+    { region: 'julich:left:3', z: 5.5 },
+  ]);
+  assert.equal(paintAtlas(published, 'compare:language,memory', 'julich'), 'hcp-mmp');
+  // On Julich-Brain: its own areas, with the structures and the teaching units carrying them.
+  assert.deepEqual(domainAreas(published, 'language', 'julich'), [
+    { region: 'julich:left:2', z: 6.1 },
+  ]);
+  assert.deepEqual(domainAreas(published, 'memory', 'julich'), [
+    { region: 'aseg:left:18', z: 3.5 },
+  ]);
+  assert.deepEqual(
+    [...domainPaint(published, 'memory', 'julich').colors],
+    [
+      ['aseg:left:18', [30, 30, 30]],
+      ['learning:left:amygdala', [30, 30, 30]],
+    ],
+  );
+  // The overview takes each area's first overview function, as on HCP-MMP.
+  assert.deepEqual(
+    domainPaint(published, ALL_DOMAINS, 'julich').colors.get('julich:left:2'),
+    [7, 8, 9],
+  );
+  assert.ok(
+    [...domainPaint(published, ALL_DOMAINS, 'julich').colors.keys()].every(
+      (id) => !id.startsWith('hcp-mmp:'),
+    ),
+  );
+  assert.throws(() => domainPaint(published, 'compare:language,memory', 'julich'), /HCP-MMP/);
+  // Term tables missing, on an unlisted atlas, or naming a term the search does not offer, are refused.
+  for (const change of [
+    (p: Fixture) => (p.atlases = {}),
+    (p: Fixture) => (p.atlases = { schaefer: p.atlases.julich }),
+    (p: Fixture) => (p.atlases.julich.terms.praxis = []),
+    (p: Fixture) => (p.atlases.julich.terms.fear = [[1, 2.5]]),
+  ]) {
+    const broken = terms();
+    change(broken);
+    assert.throws(() => validateNeuropsychDomains(partition(), regions, broken), /Neurosynth term/);
+  }
+});
+
+test('FUNC-49 · a single function or term paints only the areas at or above the reader’s threshold', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.deepEqual(
+    [...domainPaint(published, 'memory', 'hcp-mmp', 5).colors.keys()],
+    ['hcp-mmp:left:1'],
+  );
+  assert.deepEqual(
+    [...domainPaint(published, 'term:fear', 'hcp-mmp', 5).colors.keys()],
+    ['aseg:left:18', 'learning:left:amygdala'],
+  );
+  // The overview and a comparison keep the published threshold.
+  assert.throws(() => domainPaint(published, ALL_DOMAINS, 'hcp-mmp', 5), /threshold/);
+  assert.throws(() => domainPaint(published, 'compare:language,memory', 'hcp-mmp', 5), /threshold/);
+});
+
+test('a listed atlas’s assignment off that atlas, unlisted or below the threshold is rejected', () => {
+  for (const change of [
+    (p: Fixture) => {
+      p.atlas_regions.julich['destrieux:left:1'] = [{ domain: 'memory', z: 4 }];
+    },
+    (p: Fixture) => {
+      p.region_atlases = [];
+    },
+    (p: Fixture) => {
+      p.atlas_regions.julich['julich:left:2'][0].z = 2.5;
+    },
+  ]) {
+    const broken = partition();
+    change(broken);
+    assert.throws(
+      () => validateNeuropsychDomains(broken, regions),
+      /Invalid neuropsychological-domain/,
+    );
+  }
 });
 
 test('a domain assigned below the threshold, off its atlas or unknown is rejected', () => {
@@ -394,6 +524,62 @@ const terms = (): Fixture => ({
     ['interference', 400, 'function', [[2, 3]]],
     ['aphasia', 205, 'population', [[1, 4]]],
   ],
+  neurosynth_org_missing: ['interference'],
+  atlases: {
+    julich: {
+      regions: ['julich:left:2', 'julich:left:3'],
+      terms: {
+        fear: [[1, 5.5]],
+        'fear conditioning': [],
+        'conditioned fear': [],
+        interference: [],
+        aphasia: [[0, 3.2]],
+      },
+    },
+  },
+});
+
+test('FUNC-44 · a function or term links its neurosynth.org page by its Neurosynth term', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.equal(
+    neurosynthPage(published, 'memory'),
+    'https://neurosynth.org/analyses/terms/episodic%20memory/',
+  );
+  assert.equal(
+    neurosynthPage(published, 'term:fear conditioning'),
+    'https://neurosynth.org/analyses/terms/fear%20conditioning/',
+  );
+  assert.throws(() => neurosynthPage(published, 'praxis'), /Unknown neuropsychological domain/);
+});
+
+test('FUNC-45 · a term neurosynth.org has no page for gets no link', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  assert.equal(neurosynthPage(published, 'visual'), null);
+  assert.equal(neurosynthPage(published, 'term:interference'), null);
+});
+
+test('a missing-page list that is absent or names a term its file does not publish is rejected', () => {
+  for (const change of [
+    (p: Fixture) => {
+      delete p.neurosynth_org_missing;
+    },
+    (p: Fixture) => {
+      p.neurosynth_org_missing = ['praxis'];
+    },
+  ]) {
+    const domains = partition();
+    change(domains);
+    assert.throws(
+      () => validateNeuropsychDomains(domains, regions),
+      /Invalid neuropsychological-domain partition/,
+    );
+    const searched = terms();
+    change(searched);
+    assert.throws(
+      () => validateNeuropsychDomains(partition(), regions, searched),
+      /Invalid Neurosynth term search/,
+    );
+  }
 });
 
 test('searched terms paint the regions they reach by z band and keep their kind', () => {

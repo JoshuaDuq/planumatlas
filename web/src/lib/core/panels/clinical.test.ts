@@ -4,6 +4,7 @@ import { readRepoYaml } from '../../../../test/repo.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import { TRANSLATIONS } from '../i18n/index.ts';
 import {
+  deficitsForRegion,
   publishedCorrections,
   relatedRegionVisible,
   revealNotice,
@@ -143,6 +144,20 @@ test('a reference’s published corrections are listed in the reader’s languag
   for (const lang of ['en', 'fr'] as const) assert.ok(CLINICAL_TEXT[lang].correction);
 });
 
+test('DEF-34 · a region’s deficits are those mapped on it or on anatomy it shares, each once', () => {
+  const mapped: Record<string, { deficit: string }[]> = {
+    gyrus: [{ deficit: 'aphasia' }, { deficit: 'apraxia' }],
+    part: [{ deficit: 'aphasia' }, { deficit: 'neglect' }],
+    elsewhere: [{ deficit: 'alexia' }],
+  };
+  const explorer = {
+    involved: (id: string) => new Set(id === 'gyrus' ? ['gyrus', 'part'] : [id]),
+    deps: { clinical: { forRegion: (id: string) => mapped[id]! } },
+  };
+  assert.deepEqual(deficitsForRegion(explorer, 'gyrus'), ['aphasia', 'apraxia', 'neglect']);
+  assert.deepEqual(deficitsForRegion(explorer, 'elsewhere'), ['alexia']);
+});
+
 test('neuropsychology is omitted when the region has no associations', () => {
   assert.equal(relatedRegionVisible(null, 0), false);
   assert.equal(relatedRegionVisible({ id: 'destrieux:left:1' }, 0), false);
@@ -164,8 +179,8 @@ test('PANEL-13 a changed asset says to reload, in the reader’s language', () =
 test('PANEL-13 the Functions tab brings its own busy and failure text', () => {
   const functions = {
     ...CLINICAL_TEXT.en,
-    loading: TRANSLATIONS.en.functions.loading,
-    failed: TRANSLATIONS.en.functions.failed,
+    loading: TRANSLATIONS.en.functions.loading('HCP-MMP'),
+    failed: TRANSLATIONS.en.functions.failed('HCP-MMP'),
   };
   const state = { ...idle, operation: 'colour', error: new Error('x') };
   assert.equal(

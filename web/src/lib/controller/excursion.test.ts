@@ -517,6 +517,17 @@ describe('the stage key', () => {
     assert.equal(scene.session.state.paintLifted, true);
     assert.equal(scene.engine.model.settings.atlas, other.id);
   });
+
+  test('STAGE-62 · another atlas ends a connectivity paint; the same one keeps it', async () => {
+    const scene = createScene();
+    const atlas = scene.engine.model.settings.atlas;
+    scene.session.setConnectivitySeed('julich:left:1');
+    await scene.excursions.chooseAtlas(atlas);
+    assert.equal(scene.session.state.connectivitySeed, 'julich:left:1');
+    const other = scene.engine.model.manifest.atlases.find((entry) => entry.id !== atlas)!;
+    await scene.excursions.chooseAtlas(other.id);
+    assert.equal(scene.session.state.connectivitySeed, null);
+  });
 });
 
 describe('a failure that needs a newer deploy', () => {

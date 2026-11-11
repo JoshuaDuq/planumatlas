@@ -10,4 +10,5 @@ source "$here/venv/bin/activate"
 # of a whole fsaverage surface; each fork keeps a single BLAS thread.
 export FLEXIBLAS=OPENBLAS OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 FLEXIBLAS_NUM_THREADS=1
 export WORKERS=$SLURM_CPUS_PER_TASK
-python "$here/code/scripts/derive_term_scores.py" run "$here/out"
+# The output folder: a fresh one for a changed method, since `run` skips terms already fitted there.
+python "$here/code/scripts/derive_term_scores.py" run "${OUT:?output folder}"

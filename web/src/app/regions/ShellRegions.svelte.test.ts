@@ -170,9 +170,9 @@ describe('the ports', () => {
     await vi.waitFor(() =>
       expect(shell.app.session.state.expanded.size).toBeGreaterThan(expanded.length),
     );
-    // The gizmo, shown once the stage is ready, is one of the stops.
+    // A first visit's short tour: the panel the region opened in is the next stop (GUIDE-03).
     next();
-    expect(title()).toBe('Anatomical directions');
+    expect(title()).toBe('A region’s detail');
     card()!.querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
     expect(card()).toBeNull();
     expect([...shell.app.session.state.expanded]).toEqual(expanded);

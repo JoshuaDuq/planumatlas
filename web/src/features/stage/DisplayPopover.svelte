@@ -20,6 +20,7 @@
   import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Hemisphere, Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
+  import AboutData from '../info/AboutData.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import Select from '../../lib/ui/Select.svelte';
 
@@ -179,6 +180,7 @@
     <button type="button" class="reset-display" onclick={reset}>{copy.resetDisplay}</button>
   </div>
 {/if}
+<AboutData place="display" {lang} host="popover" />
 
 <style>
   @layer features {

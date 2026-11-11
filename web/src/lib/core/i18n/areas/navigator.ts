@@ -22,6 +22,8 @@ export const en = {
   system: 'System',
   allSystems: 'All internal structures',
   noMatch: (q: string) => `No match for “${q}”`,
+  // Under a list that shows its first rows; the count is every row.
+  showAll: (count: number) => `Show all ${count}`,
   noMatchHint:
     'Try another spelling, an abbreviation or a synonym. Symptoms and syndromes are under Deficits.',
   showingCapped: (shown: number, total: string) =>
@@ -65,6 +67,7 @@ export const fr: typeof en = {
   system: 'Système',
   allSystems: 'Toutes les structures internes',
   noMatch: (q: string) => `Aucun résultat pour « ${q} »`,
+  showAll: (count: number) => `Afficher les ${count}`,
   noMatchHint:
     'Essayez une autre orthographe, une abréviation ou un synonyme. Les symptômes et syndromes sont sous Déficits.',
   showingCapped: (shown: number, total: string) =>

@@ -17,20 +17,20 @@ The data values below come from the published `public/models/cdmd/manifest.json`
 
 ### PROV-02 · Every link comes from the published records
 
-- **Rule:** Each link in the sheet's rows is a URL the manifest publishes, or a licence file it publishes beside itself, or the manifest and index URLs themselves. Below the rows, Methods links the app's own English methods site (`/docs/`, `hreflang="en"`; FR "Méthodes (en anglais)"), covered in `src/features/provenance/provenance.svelte.test.ts` (R).
+- **Rule:** Each link in the sheet's rows is a URL the manifest publishes, or a licence file it publishes beside itself, or the manifest and index URLs themselves, or a page of the app's own methods site (the Subject row's “Why one brain”). Below the rows, Methods links the app's own English methods site (`/docs/`, `hreflang="en"`; FR "Méthodes (en anglais)"), covered in `src/features/provenance/provenance.svelte.test.ts` (R).
 - **Kind:** data
 - **Level:** unit (view-model over the published manifest)
 - **Source:** `provenance.js:47-58, 89-97`; `provenance.test.js:12-28`
-- **Expected:** every `href` is in `manifest.json`, or is `/neuroatlas/models/cdmd/` + a published relative path, or is `/neuroatlas/models/cdmd/manifest.json` or `/neuroatlas/models/anatomies.json`. The CAB-NP and HCP-MMP `license_file` links, `anatomy.source_url` and both URLs are present.
+- **Expected:** every `href` is in `manifest.json`, or is `/neuroatlas/models/cdmd/` + a published relative path, or is `/neuroatlas/models/cdmd/manifest.json` or `/neuroatlas/models/anatomies.json`, or starts with `methodsHref()`. The CAB-NP and HCP-MMP `license_file` links, `anatomy.source_url` and both URLs are present.
 - **Covered by:** `src/lib/core/panels/provenance.test.ts` (S)
 
 ### PROV-03 · The sheet names the subject, its reconstruction, every citation and the source files
 
-- **Rule:** The sheet names the subject and its kind, the reconstruction, each atlas with its citation, each functional-division citation, and how many source files the manifest lists and whether each has a checksum.
+- **Rule:** The sheet names the subject and its kind (one individual's note goes on to say that the surface, cuts, MRI and tracts are one person's and that registered atlases and group maps are estimates here, and links “Why one brain” on the methods index; an averaged template says neither), the reconstruction, each atlas with its citation, each functional-division citation, and how many source files the manifest lists and whether each has a checksum.
 - **Kind:** data
 - **Level:** unit (view-model over the published manifest)
 - **Source:** `provenance.js:43-48, 53-58, 65-69, 89-97`; `provenance.test.js:30-39`
-- **Expected:** Subject "MGH CDMD “sub_013”" with the note "One individual’s MRI reconstruction". Reconstruction `freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45`, set in mono. Each `atlases[].citation` and each `functional_regions.citations[]` is linked. Published files: `manifest.json` with the note "45 source files, each with a SHA-256 checksum" (FR "45 fichiers sources, chacun avec une somme SHA-256"), then `anatomies.json` with the note "Index of the published anatomies".
+- **Expected:** Subject "MGH CDMD “sub_013”" with the note "One individual’s MRI reconstruction. Its surface, cuts, MRI and tracts are one person’s, not an average; atlases and group maps are registered onto it, so their borders here are estimates." and the link "Why one brain" to `/docs/#why-one-brain` (FR "Pourquoi un seul cerveau (en anglais)"), an anchor `docs/index.md` labels (`methods.test.ts`); `{display_name:'fsaverage', individual:false}` → the note "Averaged reference template" and no link. Reconstruction `freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45`, set in mono. Each `atlases[].citation` and each `functional_regions.citations[]` is linked. Published files: `manifest.json` with the note "45 source files, each with a SHA-256 checksum" (FR "45 fichiers sources, chacun avec une somme SHA-256"), then `anatomies.json` with the note "Index of the published anatomies".
 - **Covered by:** `src/lib/core/panels/provenance.test.ts` (S; R `PROV-03` pins the subject, reconstruction and the source-file note in both languages)
 
 ### PROV-04 · HCP-MMP says where it was projected from

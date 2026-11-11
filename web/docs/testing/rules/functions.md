@@ -368,3 +368,103 @@ A comparison is a function id of its own, `compare:<a>,<b>`: it rides the select
 - **Level:** browser
 - **Expected:** open a comparison, Restore → `selectedFunction` null, focus on `[data-compare-open]`, picks unchanged.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
+
+## Neurosynth page
+
+### FUNC-44 · A profile links its term's page on neurosynth.org
+
+- **Rule:** A function's or searched term's profile ends, in its source block after the areas, with one sentence on how the site's uniformity-test map differs from Planum's (thresholded at an expected FDR of 0.01, against Planum's unthresholded map averaged per area) and a link "Open “<term>” on Neurosynth". The address is built from the Neurosynth term, never the display name or its French; the term in the link is marked English. A comparison gives one link per function, in order.
+- **Kind:** data
+- **Level:** unit (`neurosynthPage`, `functionProfile`, `comparisonProfile`) and browser
+- **Expected:** `neurosynthPage(p, 'working-memory')` → `https://neurosynth.org/analyses/terms/working%20memory/`; in French the link reads "Ouvrir « working memory » sur Neurosynth (s’ouvre dans un nouvel onglet)" with `[lang="en"]` on the term, and the note follows `.areas`; a comparison of Working memory and Attention → both addresses in order.
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/features/functions/functions-view.test.ts`, `src/features/functions/functions.svelte.test.ts` (R)
+
+### FUNC-45 · A term neurosynth.org has no page for gets no link
+
+- **Rule:** neurosynth.org answers 200 for a term it does not have, so the terms without a page are checked by page title (`scripts/check_neurosynth_pages.py`, by hand), listed in `config/neurosynth-terms.yaml` and published with each file's own terms (`neurosynth_org_missing`). Their profiles, and the overview, show neither the link nor the sentence about the site. A list naming a term its file does not publish is rejected.
+- **Kind:** data
+- **Level:** unit and browser; pytest for the published list
+- **Expected:** `neurosynthPage(p, 'emotion')` and `neurosynthPage(p, 'term:trauma')` → `null`; the profile of Emotion has one methods link, no `.neurosynth a` and no `.neurosynth-note`; `functionProfile(deps, ALL_DOMAINS).neurosynth` → `null`.
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/features/functions/functions-view.test.ts`, `src/features/functions/functions.svelte.test.ts` (R); `tests/test_neurosynth_terms.py`, `tests/test_neuropsych_domains.py`
+
+## The selected region's functions (supervisor review 1.1)
+
+Measured on 2026-11-10 against criteria fixed before the run: raw z put the expected function first in 5 of 7 test regions and in the first three in all 7, the right anterior ventral insula's 8th and 9th rows untied (13.34, 13.18); association z put the left FFC's faces 4th and failed; share of peak managed 2 of 7 and tied 19 rows. Each atlas against the unparcellated map (median area-weighted Dice over the 11 overview functions, bar 0.1 below HCP-MMP's 0.728): Schaefer 0.726 and Julich-Brain 0.648 are listed; Destrieux 0.591 is not (`config/neuropsych-domains.yaml` `region_atlases`).
+
+### FUNC-40 · With a scored region selected, the list opens with its functions, highest z first
+
+- **Rule:** With a region of HCP-MMP, a sampled structure, a teaching unit carrying one, or a listed atlas selected and the search empty, a first group captioned "Reported here" (« Rapportées ici ») lists the 70 curated functions it reaches at z ≥ 3, highest z first (`functionsAt`), as the list's one-line rows with the z under a "z" column head. One 13px note follows the rows: "Studies of these functions report activation here. That does not make the region specific to them."; a teaching unit adds the existing unit note. The caption does not repeat the region's name. Nothing selected: no group. A row opens its function.
+- **Kind:** behaviour
+- **Level:** unit (`functionsAt`, `functionList`) and browser
+- **Expected:** left amygdala → the first `[role=group]` is `[data-region-functions]`, "Reported here z"; unfolded its rows equal `functionsAt(domains, amygdala)`, fear among them, z non-increasing; the note follows the list; pressing fear opens fear; region null → no group.
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/features/functions/functions-view.test.ts`, `src/features/functions/functions.svelte.test.ts` (R)
+
+### FUNC-41 · A Julich-Brain or Schaefer area lists its own atlas's scores; Destrieux lists none
+
+- **Rule:** The listed atlases' areas take their own parcel means (`atlas_regions`), published apart from `regions` so no function's areas, paint or counts change. Destrieux, which failed the gate, has no group and no Neuropsychological functions section.
+- **Kind:** data
+- **Level:** unit; pytest for the published assignment
+- **Expected:** left Julich-Brain Area 44 → language listed, first z equals its largest published member z; `destrieux:left:12` → `atRegion` null; `scoredRegion` counts 379 + 16 + 278 + 400 regions.
+- **Covered by:** `src/features/functions/functions-view.test.ts`, `src/lib/core/catalog/published-catalog.test.ts`; `tests/test_neuropsych_domains.py`
+
+### FUNC-42 · A search hides the group; a scored area reaching nothing says so
+
+- **Rule:** A non-empty query shows the list alone. A scored region reaching no function keeps the caption and says "No function reaches z 3 here." Figures follow the reader's notation.
+- **Kind:** behaviour
+- **Level:** unit and browser
+- **Expected:** query "fear" → no group; an HCP-MMP area with no member → empty rows and that note; French figure "13,3"-style.
+- **Covered by:** `src/features/functions/functions-view.test.ts`, `src/features/functions/functions.svelte.test.ts` (R)
+
+### FUNC-43 · More than eight show eight and "Show all N"; the list stays put when the group comes
+
+- **Rule:** The group shows its first 8 rows and a quiet "Show all N"; pressing it shows all N and moves focus to the ninth row. The region sheet's Neuropsychological functions section uses the same order and cap, its closed summary carrying the count. A scrolled list keeps its first curated group where it was when the group appears or leaves (by script; the browser's own scroll anchoring is off there so no browser moves it twice); a list at its top shows the group.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** right AVI (65 functions) → 8 rows, "Show all 65"; Enter → 65 rows, focus on the ninth; list scrolled 200 px → selecting the amygdala leaves the first curated group's top unchanged.
+- **Covered by:** `src/features/functions/functions.svelte.test.ts`, `src/features/inspector/inspector.svelte.test.ts` (R)
+
+## Painted on the reader's atlas (supervisor review 3.1)
+
+### FUNC-46 · A function, a searched term or the overview paints on a listed atlas's own areas
+
+- **Rule:** Where the reader's atlas passed the gate (`region_atlases`: Julich-Brain, Schaefer), a curated function and the overview paint its own areas from `atlas_regions`, with the structures and the teaching units carrying them, and the atlas is not switched (`paintAtlas`). The overview takes each area's first overview function in the published order. A searched term paints its own table there (`atlases` in the term file, required for every listed atlas). Comparisons have no table there and stay on HCP-MMP, which they borrow as before; asking `domainPaint` for one on another atlas throws. Choosing a listed atlas while a curated function is open keeps its paint.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** `paintAtlas(p, 'language', 'julich')` → julich; `paintAtlas(p, 'term:fear', 'julich')` → julich; on destrieux, or for a comparison → hcp-mmp; term tables missing, on an unlisted atlas or naming an unoffered term are refused; `domainAreas(p, 'language', 'julich')` → the Julich areas; `paintFor({atlas: 'julich', selectedFunction: 'language'})` keys only `julich:` regions.
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/lib/core/state/paint.test.ts`
+
+### FUNC-47 · The profile lists and counts the areas of the atlas it is painted on
+
+- **Rule:** The meta line, the area list and "none" name the atlas the function is painted on ("77 Julich-Brain areas at z ≥ 3"); lesion checks, measured on HCP-MMP, say so.
+- **Kind:** data
+- **Level:** unit (view-model)
+- **Expected:** `functionProfile({atlas: 'julich'}, 'language')` → areas all `julich:`/`aseg:`, `lesionsOn` "Lesion checks are measured on HCP-MMP areas."; on HCP-MMP `lesionsOn` null and "95 HCP-MMP areas…".
+- **Covered by:** `src/features/functions/functions-view.test.ts`
+
+### FUNC-48 · On Julich-Brain a function opened from Reported here keeps the area selected
+
+- **Rule:** The plan's 1.1 check: opening a function from a region's list must not drop the region. On a listed atlas nothing is borrowed, so the selection and its outline stay over the paint and the masthead says nothing of "via Functions".
+- **Kind:** behaviour
+- **Level:** browser (composed app)
+- **Expected:** atlas julich, Area 44 left selected, language opened from its group → atlas julich, selection unchanged, paint `function:language` on julich regions, no "via Functions".
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+## The paint threshold (supervisor review 3.2)
+
+Measured 2026-11-10/11 before building: no fourth band for z < 3 passes the z scale's own checks (lighter than the 3–5 band, blue, OKLab ΔE ≥ 11.8 from the cortex's tissue colour and ≥ 20 from the 3–5 band under normal vision and simulated protanopia and deuteranopia; the check reproduces the config's stated 11.8 and ≥ 20), so the control only raises from 3. A repaint with a cut and the Linked MRI open took about 1.7 ms to apply and fitted inside a frame on an Apple M5 (two frames after a change 33 ms, the same as two idle frames), so the paint follows the thumb.
+
+### FUNC-49 · A raised threshold paints only the areas at or above it, and the key outlines the bands it empties
+
+- **Rule:** For one function or searched term, `domainPaint(…, from)` paints the areas and structures whose z reaches `from`; the overview and a comparison keep the published z 3 (asking them for another throws). The single-function key outlines a band no painted area carries, as the other keys do.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** memory at 5 → only the z 7.5 area; language at 5 → nothing; the key at 5 → "z ≥ 10" and "z 3 to 5" outlined, "z 5 to 10" filled; the overview ignores `paintFrom`.
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/lib/core/state/paint.test.ts`
+
+### FUNC-50 · One function's profile raises its paint threshold in half steps under the stage line
+
+- **Rule:** Directly under the profile's stage line, the kit's `RangeField` "Paint areas from z ≥" (« Peindre les aires à partir de z ≥ ») runs from 3 to the function's strongest area's z, rounded down to a half, in steps of 0.5, its value in the reader's notation. The paint, the key and the stage line's count follow the thumb; the area list and every region's list keep the published z ≥ 3, which a note under the control says once the threshold is above 3 (at 3 the paint and the lists agree, and there is no note). Another function starts at 3. The overview and a comparison have no control.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** working memory → min 3, step 0.5, max ⌊top·2⌋/2, no note; → once → the note, `paintFrom` 3.5, stage line "N HCP-MMP areas … at z ≥ 3.5" with N the areas at 3.5; list length unchanged; attention → back to 3 and `paintFrom` null; in French `aria-valuetext` "3,5"; overview → no control.
+- **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)

@@ -37,6 +37,7 @@ type Defaults = Pick<
   | 'anatomy'
   | 'explorer'
   | 'selectedFunction'
+  | 'paintFrom'
   | 'selectedDeficit'
   | 'circuit'
   | 'circuitStep'
@@ -75,6 +76,7 @@ export const DEFAULTS: Defaults = {
   anatomy: null,
   explorer: 'anatomy',
   selectedFunction: null,
+  paintFrom: null,
   selectedDeficit: null,
   circuit: null,
   circuitStep: 0,
@@ -327,6 +329,11 @@ const FIELDS: Field[] = [
   field('mriWindow', 'mri', mriWindow, ({ center, width }) => `${tenths(center)},${tenths(width)}`),
   field('explorer', 'tab', oneOf(EXPLORERS)),
   field('selectedFunction', 'function', nonempty),
+  // In half steps above the published 3, as the profile's control moves.
+  field('paintFrom', 'zmin', (value) => {
+    const number = numberOf(value);
+    return number > 3 && number <= 100 && Number.isInteger(number * 2) ? number : undefined;
+  }),
   field('selectedDeficit', 'deficit', nonempty),
   field('circuit', 'circuit', nonempty),
   field('circuitStep', 'step', circuitStep, (value) => String(value + 1)),

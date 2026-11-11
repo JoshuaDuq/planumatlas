@@ -48,6 +48,12 @@ export const en = {
   noShown: 'No streamlines meet this length filter.',
   source: 'Dataset source · CC0',
   about: 'About this data',
+  // A tract's profile (supervisor review 4.3). The count is this tracking run's, not a connection strength.
+  profileRun: (part: string, count: string) => `${part}: ${count} in this tracking run`,
+  endsHeading: 'Where its streamlines end',
+  endsNone: (share: string) => `No cortical region holds ${share} of its ends.`,
+  endsNote: (radius: string, share: string) =>
+    `Share of its streamline ends within ${radius} of each cortical region of this brain (Destrieux), regions under ${share} left out; an end near two regions counts for both. A streamline count is this tracking run’s and does not measure connection strength.`,
   settings: 'Tract display',
   // Keyed by the code of a failure (diffusion/translations.js:56).
   errors: {
@@ -105,6 +111,11 @@ export const fr: typeof en = {
   noShown: 'Aucune trajectoire ne satisfait ce filtre de longueur.',
   source: 'Source des données · CC0',
   about: 'À propos de ces données',
+  profileRun: (part: string, count: string) => `${part}\u202f: ${count} dans ce suivi`,
+  endsHeading: 'Où se terminent ses trajectoires',
+  endsNone: (share: string) => `Aucune région corticale ne reçoit ${share} de ses extrémités.`,
+  endsNote: (radius: string, share: string) =>
+    `Part des extrémités de ses trajectoires à moins de ${radius} de chaque région corticale de ce cerveau (Destrieux), régions sous ${share} omises\u202f; une extrémité proche de deux régions compte pour les deux. Le nombre de trajectoires est celui de ce suivi et ne mesure pas la force d’une connexion.`,
   settings: 'Affichage des faisceaux',
   errors: {
     'asset-fetch':

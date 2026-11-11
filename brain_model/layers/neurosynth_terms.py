@@ -1,5 +1,6 @@
 """Chosen Neurosynth abstract terms' consistency maps on HCP-MMP areas and aseg structures, for search."""
 
+import datetime
 import json
 import math
 
@@ -14,6 +15,8 @@ ATLAS_ID = "neurosynth-terms"
 FILENAME = "neurosynth-terms.json"
 DEFINITION = ROOT / "config/neurosynth-terms.yaml"
 SCORES = ROOT / "data/neurosynth-terms/term-scores.json"
+# The chosen terms' means per parcel of each atlas whose regions list functions (supervisor review 3.1).
+ATLAS_SCORES = ROOT / "data/neurosynth-terms/atlas-term-scores.json"
 # Each list in the definition, and the kind its terms are published as.
 KINDS = {"functions": "function", "populations": "population"}
 
@@ -28,7 +31,19 @@ def read_definition(path=DEFINITION):
             raise ValueError(f"Term search {kind} must be sorted and unique")
     if set(definition["functions"]) & set(definition["populations"]):
         raise ValueError("A term is both a function and a population")
+    missing = definition["neurosynth_org_missing"]
+    if not isinstance(missing.get("checked"), datetime.date) or missing["terms"] != sorted(set(missing["terms"])):
+        raise ValueError("Terms without a neurosynth.org page need a check date and a sorted, unique list")
+    known = ({domain["term"] for domain in read_domains()["domains"]}
+             | set(definition["functions"]) | set(definition["populations"]))
+    if set(missing["terms"]) - known:
+        raise ValueError(f"Neither curated nor offered: {sorted(set(missing['terms']) - known)}")
     return definition
+
+
+def org_missing(terms):
+    """Those of `terms` neurosynth.org had no analysis page for when last checked."""
+    return sorted(set(terms) & set(read_definition()["neurosynth_org_missing"]["terms"]))
 
 
 def is_declared(config):
@@ -52,6 +67,45 @@ def read_scores(path=SCORES):
                 and all(math.isfinite(value) for value in area_z + structure_z)):
             raise ValueError(f"{term}: needs a study count and a finite z for every area and structure")
     return scores
+
+
+def read_atlas_scores(domains, path=ATLAS_SCORES):
+    """Each chosen term's mean z per parcel of each listed atlas, parcels in the listed order."""
+    scores = json.loads(path.read_text())
+    if scores["atlases"] != domains["region_atlases"]:
+        raise ValueError(f"Atlas term scores are for {scores['atlases']}, not {domains['region_atlases']}")
+    for term, columns in scores["terms"]:
+        if len(columns) != len(scores["atlases"]) or any(
+                len(values) != len(scores["parcels"][atlas]) or not all(math.isfinite(v) for v in values)
+                for atlas, values in zip(scores["atlases"], columns)):
+            raise ValueError(f"{term}: needs a finite z for every parcel of every listed atlas")
+    return scores
+
+
+def atlas_terms(regions, offered, domains, scores):
+    """On each listed atlas: its regions, and each offered term's regions at the threshold, strongest first."""
+    from .neuropsych_domains import atlas_keys
+
+    threshold = domains["threshold_z"]
+    rows = {term: columns for term, columns in scores["terms"]}
+    missing = sorted(set(offered) - set(rows))
+    if missing:
+        raise ValueError(f"No atlas scores for offered terms {missing}")
+    published = {}
+    for position, atlas in enumerate(scores["atlases"]):
+        keys = atlas_keys(regions, atlas)
+        if set(keys) - set(scores["parcels"][atlas]):
+            raise ValueError(f"{atlas}: regions without a parcel score {sorted(set(keys) - set(scores['parcels'][atlas]))}")
+        ids = sorted(keys.values())
+        index = {region: number for number, region in enumerate(ids)}
+        terms = {}
+        for term in offered:
+            pairs = [(index[keys[key]], round(value, 2))
+                     for key, value in zip(scores["parcels"][atlas], rows[term][position])
+                     if key in keys and value >= threshold]
+            terms[term] = [list(pair) for pair in sorted(pairs, key=lambda pair: -pair[1])]
+        published[atlas] = {"regions": ids, "terms": terms}
+    return published
 
 
 def partition(regions):
@@ -87,6 +141,7 @@ def partition(regions):
         if reached:
             terms.append([term, studies, chosen[term],
                           [list(pair) for pair in sorted(reached, key=lambda pair: -pair[1])]])
+    offered = [term for term, *_ in terms]
     return {
         "id": ATLAS_ID,
         "atlas": SURFACE_ATLAS,
@@ -95,6 +150,8 @@ def partition(regions):
         "derivation": scores["derivation"],
         "regions": [region["id"] for region in scored],
         "terms": terms,
+        "atlases": atlas_terms(regions, offered, domains, read_atlas_scores(domains)),
+        "neurosynth_org_missing": org_missing(term for term, *_ in terms),
     }
 
 

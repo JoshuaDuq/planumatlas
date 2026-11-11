@@ -369,3 +369,25 @@ populations:
   - stroke
   - substance
   - trauma
+# Curated and offered terms neurosynth.org has no analysis page for: the site uses the same
+# version 7 studies but offers 1,334 of its 3,228 terms. A function profile links the site's page
+# for every other term. Written by scripts/check_neurosynth_pages.py, run by hand; the build
+# never calls the site. Kept as the file's last key, which the script rewrites.
+neurosynth_org_missing:
+  checked: 2026-11-10
+  terms:
+    - attribution
+    - distress
+    - emotion
+    - feedback
+    - number
+    - numbers
+    - numerical
+    - scene
+    - scenes
+    - self
+    - skill
+    - threat
+    - tones
+    - tool
+    - trauma

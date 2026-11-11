@@ -1,4 +1,5 @@
 import { untrack } from 'svelte';
+import type { FunctionalConnectivity } from '../core/catalog/functional-connectivity.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { isIndependentTractReference } from '../core/diffusion/presentation.ts';
@@ -51,6 +52,7 @@ export function syncPaint(
     domains: NeuropsychDomains;
     clinical: ClinicalCatalog;
     lesion?: { readonly paint: LesionPaint | null };
+    connectivity?: FunctionalConnectivity | null;
   },
 ) {
   $effect.pre(() =>

@@ -181,7 +181,7 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ## The dock
 
-### STAGE-18 · The dock is one labelled toolbar of four tools
+### STAGE-18 · The dock is one labelled toolbar (rewritten as STAGE-64, 2026-11-11)
 
 - **Rule:** Section, Lesion, Coordinate and Display form a toolbar named "3D viewer tools" with one Tab stop. The arrow keys and Home/End move between the tools shown, wrapping. Tab leaves the toolbar, and Shift+Tab back into it lands on the focused tool, else the first. Coordinate is offered only while the anatomy publishes coordinate spaces; without it the arrows pass from Lesion to Display.
 - **Kind:** accessibility
@@ -539,3 +539,47 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 - **Source:** state-machine audit, 2026-11-09
 - **Expected:** Submit "90, 0, 0", type "-42, 22, 6" before the answer, answer "outside" → no alert, Place enabled.
 - **Covered by:** `src/features/lesion/CoordinatePopover.svelte.test.ts` (R)
+
+## A stage click that replaces what the reader was reading
+
+A click on the model selects and opens a detail every time (`anatomy.pickRegion` → `selectRegion` → `showDetail`). Measured in the controller on 2026-11-10: in Functions and Deficits an open profile stays above the region it adds, and a region's detail sections stay open from one selection to the next, so what a click loses is the region detail in front and the reader's place in it. Supervisor review item 1.3, answer D.
+
+### STAGE-56 · A click that replaces a region the reader opened a section of, or scrolled into, offers Undo
+
+- **Rule:** When a stage click replaces a different selected region while the detail is in front and the reader had opened a section in it, or scrolled it past its first drawn headline, the notice says "A click on the brain replaced <name>." (« Un clic sur le cerveau a remplacé <name>. ») and offers Undo. Undo selects that region again and puts the detail back at its scroll position; its sections were never closed. The offer stands until the next action: the next click takes it away, and once the selection is no longer the click's region the notice offers nothing (`offeredNotice`). No mode, nothing written to links; browser Back is unchanged.
+- **Kind:** behaviour
+- **Level:** browser (composed panels over the fake engine); unit for `offeredNotice`
+- **Expected:** pick `destrieux:left:30`, open a section, scroll the detail → pick `destrieux:left:12` → notice "A click on the brain replaced Precuneus." with Undo; Undo → selection `destrieux:left:30`, the section open, `scrollTop` as before, no notice. A tree choice after the notice → no action offered, `undoPick()` changes nothing.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts`, `src/lib/core/workspace.test.ts` (R)
+
+### STAGE-57 · A click from a detail left at its headline says nothing
+
+- **Rule:** With no section open and the detail at its headline, a stage click replaces the region without a notice; so does a click on the region already selected, which is a request to read it.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** pick, pick another → no `.notice`; open a section, pick the same region → no `.notice`.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+### STAGE-61 · A connectivity paint colours partners by r step and leaves the seed for its outline
+
+- **Rule:** From the floor (`r_scale[0].from`, the median r of all Julich-Brain pairs rounded up to 0.05: 0.15), each partner takes its step's violet; below it, none. The seed is not filled: its selection outline marks it.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** r 0.60 → top step, 0.20 → first, 0.10 → none; the seed has no colour; paint id `connectivity:<seed>`.
+- **Covered by:** `src/lib/core/catalog/functional-connectivity.test.ts`
+
+### STAGE-62 · Anatomy paints the asked-for connectivity over a lesion's findings, on its atlas only
+
+- **Rule:** In Anatomy a connectivity seed paints before a lesion's findings, only while the atlas in front has the table, and not once lifted. Another tab shows its own paint. Choosing another atlas ends the paint; choosing the same one keeps it.
+- **Kind:** state
+- **Level:** unit
+- **Expected:** seed + lesion → `connectivity:…`; no seed or HCP-MMP → `lesion:…`; Functions → `function:all`; lifted → none; `chooseAtlas(other)` → seed null.
+- **Covered by:** `src/lib/core/state/paint.test.ts`, `src/lib/controller/excursion.test.ts`
+
+### STAGE-63 · The connectivity key names the seed and lists the r steps strongest first
+
+- **Rule:** The key's title names the seed with its hemisphere; its rows are the r steps, strongest first, not toggles; a step no painted area carries is outlined; the note gives the floor and says half of all pairs fall below it.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** rows "r ≥ 0.45", "r 0.30 to 0.45" (absent), "r 0.15 to 0.30"; note "… below r 0.15, as half of all pairs do."
+- **Covered by:** `src/lib/core/state/paint.test.ts`

@@ -9,6 +9,7 @@ import {
   drawnAs,
   groupedDomains,
   matchingTerms,
+  paintAtlas,
   revealedRegions,
 } from '../core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
@@ -372,7 +373,13 @@ export function createExcursions(
     render();
     shell.showDetail();
     const before = revealSettings();
-    const regions = revealedRegions(domains, domainPaint(domains, id), model.settings.detail);
+    // The reader's own atlas where the function was measured on it; otherwise HCP-MMP is borrowed.
+    const atlas = paintAtlas(domains, id, model.settings.atlas);
+    const regions = revealedRegions(
+      domains,
+      domainPaint(domains, id, atlas),
+      model.settings.detail,
+    );
     if (!(await commands.revealRegions(regions, current))) return false;
     cutLabelsFollowAtlas();
     // A function's map spans the cortex, so the whole brain is framed, clear of the key it brings,
@@ -382,7 +389,7 @@ export function createExcursions(
       id === ALL_DOMAINS
         ? []
         : (comparedIds(id) ?? [id]).flatMap((member) =>
-            domainAreas(domains, member)
+            domainAreas(domains, member, atlas)
               .slice(0, DEEP_RANKS)
               .map(({ region }) => region),
           ),
@@ -410,7 +417,9 @@ export function createExcursions(
       id === ALL_DOMAINS
         ? []
         : (comparedIds(id) ?? [id]).flatMap((member) =>
-            domainAreas(domains, member).map(({ region }) => region),
+            domainAreas(domains, member, paintAtlas(domains, id, model.settings.atlas)).map(
+              ({ region }) => region,
+            ),
           );
     return openPaintMri(ranked, instant);
   }
@@ -521,11 +530,14 @@ export function createExcursions(
     offerReload,
 
     /**
-     * Another atlas holds none of a function's areas, so choosing one lifts the open paint. The
-     * atlas is then the reader's own: closing the excursion no longer replaces it.
+     * The atlas is then the reader's own: closing the excursion no longer replaces it. An atlas the
+     * open function was measured on takes its paint; any other holds none of its areas, so the paint lifts.
      */
     chooseAtlas(id: string) {
-      session.liftPaint();
+      const open = session.state.explorer === 'functions' ? session.state.selectedFunction : null;
+      if (!open || paintAtlas(domains, open, id) !== id) session.liftPaint();
+      // A connectivity paint names the areas of the atlas it was asked on.
+      if (id !== model.settings.atlas) session.setConnectivitySeed(null);
       beforeExcursion = null;
       excursionOrigin = null;
       render();

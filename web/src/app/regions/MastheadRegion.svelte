@@ -85,7 +85,7 @@
   // as the page unmounts finds the masthead already gone, and with it any button to focus.
   const settingsButton = () => masthead?.settingsButton() ?? null;
 
-  async function guide() {
+  async function guide(short = false) {
     // The stops open regions, and with them their groups in the tree: closing folds those back.
     const expanded = new Set(app.session.state.expanded);
     // The tour and driver.js are a chunk of their own, fetched the first time the tour starts.
@@ -98,6 +98,7 @@
       return;
     }
     tour.startGuide(lang, {
+      short,
       animate: !app.media.reducedMotion,
       onClose: ({ pointer }) => {
         app.session.setExpanded(expanded);
@@ -176,7 +177,7 @@
     feedbackInstant = isKeyboardActivation(event);
     feedbackOpen = true;
   }}
-  onGuide={guide}
+  onGuide={() => guide()}
   onShortcuts={(event) => {
     shortcutsInstant = isKeyboardActivation(event);
     shortcutsOpen = true;

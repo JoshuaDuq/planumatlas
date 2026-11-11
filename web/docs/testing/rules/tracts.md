@@ -460,3 +460,29 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 - **Source:** WCAG 2.2 AA
 - **Expected:** `expectAxeClean()` with no violations in English and in French; `expectAccessible('mri-navigator')` in the app.
 - **Covered by:** `src/features/tracts/MriNavigator.svelte.test.ts` (R)
+
+## A tract's profile (supervisor review 4.3)
+
+### TRACT-50 · A tract's name opens its profile under "‹ Tracts", data first and the method last
+
+- **Rule:** In the Tracts tab of an anatomy with its own tracts, a row's name is a drill button (chevron on hover, focus and touch, as other mode lists show it); its L/R or segment keys keep toggling what is drawn. Pressing the name lets go of any selected region, opens the detail under the workspace's "‹ Tracts" location bar and moves focus to the profile's 24px name. The profile reads: the name; per side or segment, its streamline count "in this tracking run" (half its ends), with its lengths once drawn; "Where its streamlines end": the Destrieux regions of this brain holding at least 5% of the ends within 3 mm, largest first; "MRI with tracts"; then how the ends were counted, saying a streamline count does not measure connection strength. No related-deficits row until `data/neuropsychology.yaml` gains a curated `tracts:` field. Back returns to the list with the row marked current.
+- **Kind:** behaviour
+- **Level:** browser (composed app over the fake engine)
+- **Expected:** corticospinal tract → focus on "Corticospinal tract"; runs "Left: 731 streamlines in this tracking run", "Right: … streamlines in this tracking run"; first end "Precentral gyrus"-named `destrieux:left:29` at 18%; the profile's last three children are the ends, the primary command, the note; Back → list shown, the name `aria-current="true"`.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+### TRACT-51 · A region picked on the stage takes the detail from the profile
+
+- **Rule:** The profile shows only while no region is selected; a stage pick shows that region's detail instead.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** profile of the arcuate open, pick `destrieux:left:30` → no `.tract-profile`, the region's heading shown.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+### TRACT-52 · The published ends cover exactly the catalog's bundles and are the layer run again
+
+- **Rule:** `public/diffusion/cdmd-sub-013/tract-ends.json` (`brain_model/layers/tract_ends.py`, `config/tract-ends.yaml`) holds every bundle of the catalog and no other; each count of ends is even; recomputing it from the committed streamlines and `data/cdmd/mri/aparc.a2009s+aseg.mgz` gives the same file; the left corticospinal tract ends most on the precentral gyrus.
+- **Kind:** data
+- **Level:** unit; pytest
+- **Expected:** `tractEnds(cdmd)` keys = bundle ids; a catalog missing one → throws "do not match its bundles"; `tests/test_tract_ends.py` passes (ball of 123 voxels at 3 mm, shares over all ends, edge refused, published = recomputed).
+- **Covered by:** `src/lib/core/diffusion/ends.test.ts`; `tests/test_tract_ends.py`

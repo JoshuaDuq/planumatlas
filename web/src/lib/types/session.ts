@@ -28,6 +28,15 @@ export interface SessionState {
   selectedFinding: string | null;
   /** The reader chose a masthead colour or atlas over the open function's or deficit's paint. */
   paintLifted: boolean;
+  /** A single function's or term's paint threshold the reader raised, or null for the published z 3. */
+  paintFrom: number | null;
+  /**
+   * The region whose resting functional connectivity Anatomy paints, from its sheet's "Paint on the
+   * brain"; null for none. Not written to links.
+   */
+  connectivitySeed: string | null;
+  /** The Tracts tab's open profile: a tract row's key, or null for the list. Not written to links. */
+  selectedTract: string | null;
   expanded: ReadonlySet<string>;
   theme: Theme;
   lang: Language;

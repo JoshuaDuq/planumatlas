@@ -8,11 +8,14 @@
   import { flushSync } from 'svelte';
   import type { App, World } from '../../app/application.svelte.ts';
   import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
+  import { tractEnds } from '../../lib/core/diffusion/ends.ts';
+  import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { circuitsMatching, elsewhere } from '../../lib/core/elsewhere.ts';
   import { tractRows, tractsMatching } from '../../lib/core/tracts.ts';
   import { sharedGroupNames } from '../../lib/core/panels/navigator.ts';
   import { atlasSwitchLabel } from '../../lib/core/i18n/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
+  import { focusHeading } from '../../lib/ui/focus.ts';
   import { insideInternal } from '../../lib/core/state/internal-mode.ts';
   import type { Explorer } from '../../lib/types/index.ts';
   import AnatomyExplorer from '../anatomy/AnatomyExplorer.svelte';
@@ -44,6 +47,16 @@
   const current = $derived(view.current);
   const manifest = $derived(engine.model.manifest);
   const bundles = $derived(tractRows(tractCatalog(current.anatomy).bundles));
+
+  /** A tract's profile in the detail, under "‹ Tracts"; a region selected meanwhile is let go. */
+  function openTract(key: string) {
+    anatomy.selectRegion(null);
+    session.setTract(key);
+    app.ports.showDetail();
+    flushSync();
+    const heading = document.querySelector<HTMLElement>('.tract-profile .tract-name');
+    if (heading) focusHeading(heading);
+  }
   // The tree takes a set of its own: the session's is read-only.
   const expanded = $derived(new Set(session.state.expanded));
 
@@ -193,6 +206,7 @@
 <div class="mode functions" hidden={current.explorer !== 'functions'}>
   <FunctionList
     model={functions}
+    region={world.view.current.selectedRegion}
     elsewhere={othersOf('functions')}
     onElsewhere={(mode, query) => carry(mode, query)}
   />
@@ -223,6 +237,10 @@
     onCortexOpacity={anatomy.setCortexOpacity}
     bind:minimum={app.tractsMinimum}
     onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
+    openTract={current.selectedTract}
+    onOpenTract={tractEnds(tractCatalog(current.anatomy)) && !isIndependentTractReference(current)
+      ? openTract
+      : undefined}
     elsewhere={othersOf('diffusion')}
     onElsewhere={(mode, query) => carry(mode, query)}
   />

@@ -23,6 +23,14 @@ method: >-
   whose z is the largest share of that domain's cortical maximum. Carried per area,
   never per vertex
 threshold_z: 3
+# The other cortical atlases whose regions list the functions they reach (supervisor review 1.1). A
+# parcel's mean z depends on its size, so each atlas was first measured against the unparcellated map:
+# for each overview function, the area-weighted Dice on the fsaverage pial surface between the atlas's
+# parcels at mean z >= 3 and the vertices whose own z reaches 3. An atlas is listed when its median is
+# no more than 0.1 below HCP-MMP's and every overview function reaches one of its parcels (bar fixed
+# before the run; scripts/measure_region_functions.py). Measured 2026-11-10: HCP-MMP 0.728; Schaefer
+# 0.726 and Julich-Brain 0.648 listed; Destrieux 0.591 not.
+region_atlases: [julich, schaefer]
 # One function or searched term shown alone is drawn on this z scale rather than in its own
 # colour, so that its areas keep the order of strength the profile lists and two maps can be
 # compared. Each band holds the areas from its `from` up to the next band's. One blue ramp: blue

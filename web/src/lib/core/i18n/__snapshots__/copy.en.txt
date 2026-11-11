@@ -34,6 +34,11 @@
    "[\"Alpha\"] → \"Selection cleared — Alpha is no longer shown.\"",
    "[\"\"] → \"Selection cleared —  is no longer shown.\""
   ],
+  "pickReplaced": [
+   "[\"Alpha\"] → \"A click on the brain replaced Alpha.\"",
+   "[\"\"] → \"A click on the brain replaced .\""
+  ],
+  "undoPick": "Undo",
   "cabNpAtlasOnly": [
    "[\"Alpha\"] → \"CAB-NP colours HCP-MMP areas only, so Alpha shows its own region colours.\"",
    "[\"\"] → \"CAB-NP colours HCP-MMP areas only, so  shows its own region colours.\""
@@ -171,6 +176,13 @@
    "[12345] → \"12345 deficits\""
   ],
   "related": "Neuropsychology",
+  "atRegion": "Involving this region",
+  "simulateLesion": "Simulate a lesion",
+  "strokeSelect": "Select a region to see the stroke cases whose lesion reaches it.",
+  "strokeNone": [
+   "[\"Alpha\"] → \"No stroke case in the cohort reaches Alpha.\"",
+   "[\"\"] → \"No stroke case in the cohort reaches .\""
+  ],
   "associations": "Associations",
   "findings": "Evidence",
   "studyFinding": "Reported finding",
@@ -502,6 +514,19 @@
   "noShown": "No streamlines meet this length filter.",
   "source": "Dataset source · CC0",
   "about": "About this data",
+  "profileRun": [
+   "[\"Alpha\",\"\"] → \"Alpha:  in this tracking run\"",
+   "[\"\",\"Alpha\"] → \": Alpha in this tracking run\""
+  ],
+  "endsHeading": "Where its streamlines end",
+  "endsNone": [
+   "[\"Alpha\"] → \"No cortical region holds Alpha of its ends.\"",
+   "[\"\"] → \"No cortical region holds  of its ends.\""
+  ],
+  "endsNote": [
+   "[\"Alpha\",\"\"] → \"Share of its streamline ends within Alpha of each cortical region of this brain (Destrieux), regions under  left out; an end near two regions counts for both. A streamline count is this tracking run’s and does not measure connection strength.\"",
+   "[\"\",\"Alpha\"] → \"Share of its streamline ends within  of each cortical region of this brain (Destrieux), regions under Alpha left out; an end near two regions counts for both. A streamline count is this tracking run’s and does not measure connection strength.\""
+  ],
   "settings": "Tract display",
   "errors": {
    "asset-fetch": "The reference data could not be downloaded. Check the connection, then try again.",
@@ -629,6 +654,10 @@
    "[\"Alpha\"] → \"Mean meta-analytic consistency over this whole HCP-MMP area for each term, from Alpha: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\"",
    "[\"\"] → \"Mean meta-analytic consistency over this whole HCP-MMP area for each term, from : where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\""
   ],
+  "noteAtlas": [
+   "[\"Alpha\",\"\"] → \"Mean meta-analytic consistency over this whole Alpha area on fsaverage for each term, from : where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\"",
+   "[\"\",\"Alpha\"] → \"Mean meta-analytic consistency over this whole  area on fsaverage for each term, from Alpha: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\""
+  ],
   "keyTitle": "Neuropsychological functions",
   "band": [
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>to<NBSP>3.5\"",
@@ -746,6 +775,8 @@
    "[true] → \"One individual’s MRI reconstruction\"",
    "[false] → \"Averaged reference template\""
   ],
+  "oneBrain": "Its surface, cuts, MRI and tracts are one person’s, not an average; atlases and group maps are registered onto it, so their borders here are estimates.",
+  "oneBrainLink": "Why one brain",
   "sourceData": "Source data",
   "reconstruction": "Reconstruction",
   "atlases": "Cortical atlases",
@@ -758,6 +789,7 @@
   "receptors": "Receptor fingerprints",
   "stimulation": "Stimulation responses",
   "stimulationFtract": "Stimulation responses (F-TRACT)",
+  "functionalConnectivity": "Functional connectivity (HCP)",
   "strokeCases": "Stroke cases",
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
@@ -845,9 +877,24 @@
   "overviewHeading": "Functions",
   "lesionHeading": "Deficits that check this map",
   "lesionNote": "Share of each cited parcel the map colours, measured on fsaverage. A check of the map against lesion studies, never tuned to pass.",
-  "loading": "Preparing the HCP-MMP areas…",
-  "failed": "The HCP-MMP areas could not be shown.",
-  "shown": "Shown on the HCP-MMP areas",
+  "loading": [
+   "[\"Alpha\"] → \"Preparing the Alpha areas…\"",
+   "[\"\"] → \"Preparing the  areas…\""
+  ],
+  "failed": [
+   "[\"Alpha\"] → \"The Alpha areas could not be shown.\"",
+   "[\"\"] → \"The  areas could not be shown.\""
+  ],
+  "shown": [
+   "[\"Alpha\"] → \"Shown on the Alpha areas\"",
+   "[\"\"] → \"Shown on the  areas\""
+  ],
+  "lesionsOn": "Lesion checks are measured on HCP-MMP areas.",
+  "paintFrom": "Paint areas from z ≥",
+  "paintFromNote": [
+   "[\"Alpha\"] → \"Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z<NBSP>≥<NBSP>Alpha.\"",
+   "[\"\"] → \"Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z<NBSP>≥<NBSP>.\""
+  ],
   "termsHeading": "Neurosynth terms",
   "populationsHeading": "Neurosynth clinical groups",
   "caveat": "Where studies of healthy groups report activation: not this brain, and not what damage would impair.",
@@ -891,6 +938,17 @@
   ],
   "termCaveat": "A Neurosynth term, not a curated function: chosen for naming a function, task or stimulus, but its map was not checked against what it names or against lesion studies.",
   "populationCaveat": "A clinical group: its studies mostly compare people with the condition with healthy people. The map shows where they report activation, not where damage causes the condition.",
+  "neurosynthOpen": [
+   "[\"Alpha\"] → \"Open “Alpha” on Neurosynth\"",
+   "[\"\"] → \"Open “” on Neurosynth\""
+  ],
+  "neurosynthNote": "Neurosynth.org’s uniformity-test map is the one closest to Planum’s. The site thresholds it at an expected FDR of 0.01; Planum paints the unthresholded map averaged per area, so the two differ.",
+  "reportedHere": "Reported here",
+  "reportedNote": "Studies of these functions report activation here. That does not make the region specific to them.",
+  "noneHere": [
+   "[\"Alpha\"] → \"No function reaches z<NBSP>Alpha here.\"",
+   "[\"\"] → \"No function reaches z<NBSP> here.\""
+  ],
   "lesionBridgeHeading": "Lesion evidence",
   "deficitBridge": [
    "[0,\"\"] → \"Deficits: 0 lesion profiles match “”\"",
@@ -907,6 +965,67 @@
    "[12345,0] → \"12345 functions\""
   ]
  },
+ "info": {
+  "about": "About this data",
+  "shows": "Shows",
+  "source": "Source",
+  "caution": "Caution",
+  "anatomy": {
+   "scope": "One person’s brain and the atlases drawn on it.",
+   "shows": "Four cortical atlases, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on one brain’s own pial surface and on cut faces. The deep anatomy has three levels of detail: a teaching set of 106 solids, FreeSurfer’s aseg and NextBrain.",
+   "source": "The brain is MGH CDMD sub_013, reconstructed with FreeSurfer 8.2. Destrieux is this subject’s own FreeSurfer annotation. HCP-MMP, Julich-Brain and Schaefer are group atlases carried from fsaverage onto this brain through registered spheres.",
+   "caution": "One individual: folds, sizes and asymmetries are not normative. The group atlases’ boundaries are projected estimates, not boundaries measured in this brain. Every segmentation is a model estimate from one 1 mm T1, and clinical accuracy has not been validated."
+  },
+  "functions": {
+   "scope": "Where imaging studies of a function report activation.",
+   "shows": "Each of 70 functions is one Neurosynth term: where studies of it consistently report activation, averaged over each HCP-MMP area and 19 FreeSurfer structures, and over each Julich-Brain and Schaefer area for those regions’ lists. An area belongs to a function when its mean z reaches 3. A search offers 277 further terms.",
+   "source": "Neurosynth version 7, the activation literature of healthy groups. Studies are chosen automatically: a study counts when its abstract uses the term often enough (TF-IDF), whatever task it ran. Each map is fitted on the MNI152 template, averaged per area and painted on this brain’s areas.",
+   "caution": "Activation is neither this brain nor what damage there would impair: lesion evidence is in the Deficits tab. Consistency z grows with the number of studies, so large literatures reach more areas. Signal-dropout cortex (orbitofrontal, anterior temporal) reaches few functions."
+  },
+  "deficits": {
+   "scope": "Lesion evidence: where damage is linked to a deficit.",
+   "shows": "131 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.",
+   "source": "A curated selection of 339 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 252 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.",
+   "caution": "The literature is selected, not systematically reviewed, and the catalogue is not diagnostic or prognostic. Group associations drawn on one reference brain do not predict an individual patient’s deficit. A whole parcel can be drawn where a study implicated part of it; white matter is left uncoloured."
+  },
+  "circuits": {
+   "scope": "Tours of pathways described in the literature.",
+   "shows": "Five tours of anatomical pathways and loop branches, 25 landmarks in all: vision, memory, motor loop, cerebellar output and corticospinal. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.",
+   "source": "Each tour cites circuit background separately from the patient studies behind its linked deficit. The 23 references are 19 PubMed articles and 4 chapters of Purves et al., Neuroscience. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.",
+   "caution": "Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from monkey tracing. A deficit study supports a region–deficit association, not the pathway’s connections."
+  },
+  "tracts": {
+   "scope": "White matter tracked in this brain’s own diffusion scan.",
+   "shows": "30 white-matter bundles reconstructed from the diffusion scan of the same person whose anatomy is shown, so streamlines, MRI and surfaces share one scanner frame without registration. Colour is local direction: red left–right, green front–back, blue up–down.",
+   "source": "MGH CDMD sub_013 (CC0). Seventeen bundles come from DIPY tractography segmented by RecoBundles; thirteen (SLF I–III and seven callosal segments) from TractSeg. Every streamline is trimmed back into the brain at its ends.",
+   "caution": "One individual and one 2 mm diffusion scan: bundles are reconstructions, not observed axons. Streamline counts are not axon counts, and lengths do not measure connection strength. The corticospinal streamlines end near the caudal medulla, above the decussation."
+  },
+  "section": {
+   "shows": "A sagittal, coronal, axial or oblique plane cuts the model, and every closed solid is capped where the plane meets it. Each cap is coloured from a published label volume, chosen independently of the surface atlas.",
+   "source": "The caps are this subject’s own pial, white and structure surfaces. The labels are the subject’s 1 mm FreeSurfer grid or 0.8 mm NextBrain blocks; nothing is re-segmented in the browser.",
+   "caution": "Cut labels are 1 mm (0.8 mm for NextBrain), so thin structures are coarser on a cut than on their surfaces. HCP-MMP, Julich-Brain and Schaefer cut labels are projections of surface labels into the grey-matter ribbon, not volumetric atlases. Shading from the T1 is illustrative."
+  },
+  "lesion": {
+   "shows": "A sphere of 3 to 30 mm radius placed on the brain or a cut face. The report gives the tissue and regions inside it, ranks the functions and deficit findings whose regions it overlaps, and counts the reconstructed streamlines that pass through it.",
+   "source": "Measured in the browser against this subject’s published 1 mm label volumes, the Functions territories, the Deficits findings’ cited regions and this brain’s tracts.",
+   "caution": "It measures overlap on one brain; it predicts no deficit. A sphere ignores the vascular, white-matter and network shape of real lesions. Function territories are activation maps in healthy people, not lesion–deficit maps."
+  },
+  "coordinate": {
+   "shows": "A coordinate reported in a named MNI template, placed on this brain and marked with a 5 mm sphere. The report gives each region’s share of the sphere, never a single cortical parcel.",
+   "source": "Each template was registered to CDMD sub_013 with FreeSurfer’s SynthMorph. The templates are MNI152NLin2009cAsym and SPM12 (TPM); an unstated “MNI” is read as MNI152NLin2009cAsym. Talairach is not accepted.",
+   "caution": "The landing is a template location on one brain, not where this person’s peak would be and not what this brain does there. A single-parcel lookup from template space agreed with this brain’s own parcellation for only about 60% of template cortex."
+  },
+  "overlay": {
+   "shows": "Your own NIfTI map in an MNI template, one volume or a series, drawn on the cortex, the deep surfaces and every cut face with a two-sided colour scale. A cluster table is computed as nilearn’s get_clusters_table computes it.",
+   "source": "Your file, read in the browser; it never leaves your computer. It is carried onto CDMD sub_013 through the inverse of the template’s published registration, the one the Coordinate tool uses.",
+   "caution": "The result is a template map on one person’s folds, not that person’s data. Template space only: a native-space or Talairach map lands in the wrong place, and no NIfTI header states which MNI template a map is in. The map is not carried in a link."
+  },
+  "display": {
+   "shows": "The colour mode, hemisphere, cortex, internal anatomy, spinal cord and exploded view, and the dissection tools: hide, isolate and Focus. Hiding cortical parcels exposes the subject’s own white surface.",
+   "source": "One set of published meshes of this brain. Sulcal depth, cortical openness and ribbon T1 are baked into every cortical vertex at build time and drive fold shading and tissue colour.",
+   "caution": "The shading is illustrative: T1 brightness, fold shading and tissue colours are not measured optical or histological properties. The exploded view moves each structure whole, and some systems still pass through each other where thin structures thread between them."
+  }
+ },
  "guide": {
   "next": "Next",
   "previous": "Back",
@@ -914,6 +1033,27 @@
   "close": "Close the tour",
   "skip": "Skip tour",
   "progress": "{{current}} of {{total}}",
+  "everything": [
+   "[\"Alpha\"] → \"See everything (Alpha stops)\"",
+   "[\"\"] → \"See everything ( stops)\""
+  ],
+  "firstVisit": [
+   {
+    "id": "selectRegion",
+    "title": "A region’s detail",
+    "body": "A region you open is described here: its side and group, then Focus, Isolate, Hide and Linked MRI, what is known about it, and the research data measured on it."
+   },
+   {
+    "id": "tabs",
+    "title": "Five ways in",
+    "body": "Anatomy lists every region. Functions and Deficits paint published evidence, Circuits walks through pathways, and Tracts shows white matter from this brain’s own diffusion scan. Each says what it shows; About this data says where it comes from."
+   },
+   {
+    "id": "dock",
+    "title": "Tools on the picture",
+    "body": "Section cuts the brain and Display sets what is drawn. Lesion, Coordinate and Overlay bring something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map."
+   }
+  ],
   "stops": [
    {
     "id": "welcome",
@@ -1081,6 +1221,8 @@
   "panelLabel": "Selection and display",
   "clearSelection": "Clear selection",
   "noRegionSelected": "No region selected",
+  "aboutIndex": "About this region",
+  "researchIndex": "Research data",
   "hintCortex": "Select a region on the model or in the anatomy list.",
   "hintStructures": "Cortex is hidden — internal structures are selectable.",
   "hemisphere": "Hemisphere",
@@ -1266,6 +1408,7 @@
    "cord": "spinal cord",
    "colors": "colour",
    "function": "function",
+   "zmin": "paint threshold",
    "opacity": "cortex opacity",
    "explode": "exploded view",
    "mri": "MRI window",
@@ -1438,6 +1581,10 @@
   "noMatch": [
    "[\"Alpha\"] → \"No match for “Alpha”\"",
    "[\"\"] → \"No match for “”\""
+  ],
+  "showAll": [
+   "[\"Alpha\"] → \"Show all Alpha\"",
+   "[\"\"] → \"Show all \""
   ],
   "noMatchHint": "Try another spelling, an abbreviation or a synonym. Symptoms and syndromes are under Deficits.",
   "showingCapped": [
@@ -1873,6 +2020,37 @@
   ],
   "ftractDataset": "F-TRACT dataset (EBRAINS)",
   "ftractMethod": "Method (Trebaul et al. 2018)"
+ },
+ "connectivity": {
+  "heading": [
+   "[\"Alpha\"] → \"Functional connectivity (resting fMRI, Alpha adults)\"",
+   "[\"\"] → \"Functional connectivity (resting fMRI,  adults)\""
+  ],
+  "strongest": "Strongest correlations",
+  "paint": "Paint on the brain",
+  "shown": [
+   "[\"Alpha\"] → \"The brain shows resting connectivity with Alpha.\"",
+   "[\"\"] → \"The brain shows resting connectivity with .\""
+  ],
+  "note": [
+   "[\"Alpha\",\"\"] → \"Group average of Alpha healthy adults aged  (Human Connectome Project) at rest: the correlation between each pair of Julich-Brain areas’ BOLD signals. A correlation is not a connection. Values depend on preprocessing; here no global signal was regressed, so nearly every pair correlates positively.\"",
+   "[\"\",\"Alpha\"] → \"Group average of  healthy adults aged Alpha (Human Connectome Project) at rest: the correlation between each pair of Julich-Brain areas’ BOLD signals. A correlation is not a connection. Values depend on preprocessing; here no global signal was regressed, so nearly every pair correlates positively.\""
+  ],
+  "basis": "Measured on Julich-Brain’s volumetric map in MNI152 space, not in this brain; each area takes the parcel of its name.",
+  "dataset": "Dataset (EBRAINS)",
+  "paper": "Paper (Domhof et al. 2021)",
+  "keyTitle": [
+   "[\"Alpha\"] → \"Resting connectivity with Alpha\"",
+   "[\"\"] → \"Resting connectivity with \""
+  ],
+  "step": [
+   "[\"Alpha\",\"\"] → \"r<NBSP>≥<NBSP>Alpha\"",
+   "[\"\",\"Alpha\"] → \"r<NBSP><NBSP>to<NBSP>Alpha\""
+  ],
+  "keyNote": [
+   "[\"Alpha\",\"\"] → \"Group-mean correlation with the outlined area; darker is stronger. Tissue-coloured areas fall below r Alpha, as half of all pairs do.\"",
+   "[\"\",\"Alpha\"] → \"Group-mean correlation with the outlined area; darker is stronger. Areas where the scan shows fall below r , as half of all pairs do.\""
+  ]
  },
  "strokeCases": {
   "heading": "Stroke cases",

@@ -65,6 +65,10 @@ function portStubs() {
     showMri: vi.fn(),
     openPreparedPlane: vi.fn(async () => {}),
     revealOnSelect: vi.fn(),
+    readingPlace: vi.fn(() => null),
+    restoreReadingPlace: vi.fn(),
+    markReadingPlace: vi.fn(),
+    openStageTool: vi.fn(),
     back: vi.fn(),
     focusSearch: vi.fn(),
     walkTree: vi.fn(),
@@ -140,6 +144,8 @@ describe('the start', () => {
   test('starts the guided tour on a first visit to a plain page, not on a shared link or a later visit', async () => {
     const first = await boot('#anatomy=cdmd&lang=en');
     expect(first.ports.startGuide).toHaveBeenCalledTimes(1);
+    // A first visit gets the short tour (GUIDE-03).
+    expect(first.ports.startGuide).toHaveBeenCalledWith(true);
     expect(first.app.session.state.status).toBe('ready');
 
     const shared = await boot('#region=destrieux:left:29');

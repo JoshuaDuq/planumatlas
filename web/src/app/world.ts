@@ -144,7 +144,7 @@ export async function composeWorld(
             .catch((error: unknown) => console.error(error)),
       },
     });
-    syncPaint(model, view, { domains, clinical, lesion });
+    syncPaint(model, view, { domains, clinical, lesion, connectivity: model.connectivity });
     const paintSeeThrough = createPaintSeeThrough({
       view,
       model,
@@ -194,6 +194,9 @@ export async function composeWorld(
         showDetail: ports.showDetail,
         showList: ports.showList,
         revealOnSelect: ports.revealOnSelect,
+        readingPlace: ports.readingPlace,
+        restoreReadingPlace: ports.restoreReadingPlace,
+        markReadingPlace: ports.markReadingPlace,
         dismissHelp: stage.retireHint,
       },
       chooseExplorer: excursions.chooseExplorer,
@@ -306,7 +309,7 @@ export async function composeWorld(
     engine.on('loadError', (error) =>
       session.notify(failureNotice(error, session.state.lang, 'whiteMatter')),
     ),
-    engine.on('pick', ({ id }) => world.anatomy.selectRegion(id)),
+    engine.on('pick', ({ id }) => world.anatomy.pickRegion(id)),
     engine.on('visualFieldPoint', ({ reading }) => world.visualFieldMap.read(reading)),
     // The lesion's report is Anatomy's detail, which shows it once no region is selected. A phone's
     // sheet stays down so the brain stays in reach for the next press; Show the report raises it.

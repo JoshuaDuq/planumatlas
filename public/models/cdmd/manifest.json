@@ -1659,6 +1659,17 @@
     ],
     "method": "F-TRACT's probability that stimulating one Julich-Brain 3.0 area evoked a response in another, with its stimulation\u2013recording pairs and implantations, from 613 people; each Julich-Brain area takes the F-TRACT area of the same name"
   },
+  "functional_connectivity": {
+    "id": "functional-connectivity",
+    "file": "functional-connectivity.json",
+    "label": "Functional connectivity (resting fMRI, HCP young adults, Domhof et al. 2021)",
+    "license": "CC BY 4.0",
+    "citations": [
+      "https://doi.org/10.25493/3PMM-FPW",
+      "https://pubmed.ncbi.nlm.nih.gov/34746628/"
+    ],
+    "method": "The Fisher-z mean of 200 HCP young adults' resting-state Pearson correlations between the parcel-mean BOLD series of Julich-Brain 3.1 areas in MNI152 space; each area takes the parcel of the same name"
+  },
   "boundary_certainty": {
     "id": "boundary-certainty",
     "file": "boundary-certainty.json",
@@ -94576,6 +94587,7 @@
     "A Destrieux parcel takes an author label only when at least 10 cortical channels from 3 people land in it through fs_LR 32k \u2192 fsaverage surface registration and 60% of them carry that label; other parcels, and the HCP-MMP, Julich-Brain and Schaefer atlases, take none (Julich-Brain areas show F-TRACT's rates instead). Deep structures take labels by name, and the thalamus takes the authors' three positional sites, not nuclei.",
     "F-TRACT stimulation responses are rates of stereo-EEG stimulation\u2013recording pairs from 613 people with focal epilepsy, aggregated by F-TRACT over Julich-Brain 3.0 areas in MNI152 space. They are not measured in this brain; each hemisphere shows its own values. A rate is published from 10 pairs and drawn here only from 3 implantations.",
     "A Julich-Brain area takes the F-TRACT area of the same name, not of the same place: F-TRACT placed contacts with Julich-Brain's volumetric map in MNI152, while this surface carries the published fsaverage map. Areas Julich-Brain 3.1 added from 3.0's gap maps, and its subicular complex, take none.",
+    "Functional connectivity is the group mean of 200 healthy young adults (HCP, ages 22\u201335) at rest, measured in MNI152 space on Julich-Brain's volumetric map, not in this brain: an area takes the parcel of its name. A correlation is not a connection, and without global signal regression nearly every pair correlates positively.",
     "Gyral white matter is FreeSurfer's wmparc: each voxel within 5 mm of cortex takes the nearest Desikan cortical label whichever surface atlas is shown, and deeper white matter is unsegmented and belongs to no region.",
     "Arterial territories are typical territories drawn from where acute infarcts fell in 1,298 stroke patients (Liu et al. 2023), registered onto this brain from the atlas's template; they are not this brain's own, and no vessel of it was imaged. Collateral circulation and variants such as a fetal posterior communicating artery move real territories by centimetres.",
     "The atlas's anterior cerebral artery territory rests on 29 cases, and its medial lenticulostriate and anterior thalamoperforating territories on anatomical knowledge rather than lesions. It places the anterior choroidal and thalamoperforating territory under the posterior circulation, as published.",

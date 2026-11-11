@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
-  import { relatedRegionVisible } from '../../lib/core/panels/clinical.ts';
+  import { deficitsForRegion, relatedRegionVisible } from '../../lib/core/panels/clinical.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
   import LinkRow from './LinkRow.svelte';
@@ -15,15 +15,7 @@
   const clinical = $derived(explorer.deps.clinical);
   const lang = $derived(view.lang);
   const deficits = $derived(
-    view.selectedRegion
-      ? [
-          ...new Set(
-            [...explorer.involved(view.selectedRegion.id)].flatMap((id) =>
-              clinical.forRegion(id).map((association) => association.deficit),
-            ),
-          ),
-        ]
-      : [],
+    view.selectedRegion ? deficitsForRegion(explorer, view.selectedRegion.id) : [],
   );
   const visible = $derived(relatedRegionVisible(view.selectedRegion, deficits.length));
 </script>

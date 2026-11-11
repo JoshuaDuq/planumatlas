@@ -14,7 +14,7 @@
   import type { Language } from '../../lib/types/index.ts';
   import Select from '../../lib/ui/Select.svelte';
   import ToggleToolbar from '../../lib/ui/ToggleToolbar.svelte';
-  import MethodsLink from '../deficits/MethodsLink.svelte';
+  import AboutData from '../info/AboutData.svelte';
   import type { SectionControls } from './section-controls.svelte.ts';
 
   interface Props {
@@ -76,7 +76,7 @@
       })}
   />
 </div>
-<p class="methods"><MethodsLink page="section" {lang} /></p>
+<AboutData place="section" {lang} host="popover" />
 
 <style>
   @layer features {
@@ -123,11 +123,6 @@
       :global(.toggle-toolbar.cut-mode button) {
         min-height: 44px;
       }
-    }
-    .methods {
-      margin: var(--space-3) 0 0;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
     }
   }
 </style>

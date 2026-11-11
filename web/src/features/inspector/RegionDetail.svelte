@@ -40,6 +40,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { inspectorEmptyChrome } from '../../lib/core/panels/inspector.ts';
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
+  import Disclosure from '../../lib/ui/Disclosure.svelte';
   import IconButton from '../../lib/ui/IconButton.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import AgreementSection from './AgreementSection.svelte';
@@ -51,6 +52,8 @@
   import ReceptorSection from './ReceptorSection.svelte';
   import StimulationSection from './StimulationSection.svelte';
   import FtractSection from './FtractSection.svelte';
+  import ConnectivitySection from './ConnectivitySection.svelte';
+  import type { FunctionalConnectivity } from '../../lib/core/catalog/functional-connectivity.ts';
   import StrokeCasesSection from './StrokeCasesSection.svelte';
   import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
   import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
@@ -90,6 +93,13 @@
     stimulation: StimulationResponses | null;
     /** F-TRACT's stimulation responses, by the Julich-Brain area a region is. */
     ftract: StimulationFtract | null;
+    /** Resting functional connectivity, by the Julich-Brain area a region is. */
+    connectivity?: FunctionalConnectivity | null;
+    /** The area whose connectivity the stage paints now, or null. */
+    connectivityPainted?: string | null;
+    /** Paints an area's connectivity; null where the stage cannot show it. */
+    paintConnectivity?: ((id: string) => void) | null;
+    restoreConnectivity?: () => void;
     /** The stroke cases on the stage and their cohort; none on an anatomy that publishes no cases. */
     strokeCases?: StrokeCasesStore | null;
     /** The reader's own map, whose series has a course in the region. */
@@ -141,6 +151,10 @@
     receptors,
     stimulation,
     ftract,
+    connectivity = null,
+    connectivityPainted = null,
+    paintConnectivity = null,
+    restoreConnectivity = () => {},
     strokeCases = null,
     userMap = null,
     territories = null,
@@ -251,30 +265,16 @@
       <p class="selected-hint">{cortexVisible ? copy.hintCortex : copy.hintStructures}</p>
     {/if}
   {/if}
-  {@render comparison?.()}
-  {#if userMap}
-    <MapCourseSection {region} {lang} map={userMap} label={catalog.label} />
-  {/if}
-  <BoundarySection {region} {lang} certainty={boundaryCertainty} label={catalog.label} {onselect} />
-  <AgreementSection
-    {region}
-    {lang}
-    agreement={segmentationAgreement}
-    label={catalog.label}
-    onshow={showAgreement}
-  />
-  <ReceptorSection {region} {lang} {receptors} />
-  {#if strokeCases?.available}
-    <StrokeCasesSection {region} {lang} store={strokeCases} label={catalog.label} />
-  {/if}
-  <StimulationSection {region} {lang} {stimulation} />
-  <FtractSection {region} {lang} {ftract} />
-  <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
-  <FunctionalSection {region} {lang} {functionalRegions} />
-  <DomainSection {region} {lang} {domains} />
-  <NetworkSection {region} {lang} colors={networkColors} {cabNp} striatal={striatalNetworks} />
-  <CerebellarFunctionsSection {region} {lang} functions={cerebellarFunctions} />
-  <SupplySection {region} {lang} {territories} />
+  <!-- Two indexes (supervisor review 2.2): what is known about the region, then the research data on it. -->
+  <div class="region-index" data-index="about">
+    <h3 class="index-caption">{copy.aboutIndex}</h3>
+    <DomainSection {region} {lang} {domains} />
+    <NetworkSection {region} {lang} colors={networkColors} {cabNp} striatal={striatalNetworks} />
+    <SupplySection {region} {lang} {territories} />
+    <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
+    <FunctionalSection {region} {lang} {functionalRegions} />
+    <CerebellarFunctionsSection {region} {lang} functions={cerebellarFunctions} />
+  </div>
 </div>
 {@render relatedDeficits?.()}
 {@render relatedCircuits?.()}

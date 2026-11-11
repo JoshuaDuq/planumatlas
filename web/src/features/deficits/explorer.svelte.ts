@@ -27,6 +27,13 @@ export interface DeficitsDeps {
   >;
   /** X1's entry point, which opens a function under its own runner. */
   openFunction: (id: string) => unknown;
+  /** The clinical material kept in reach of the list (supervisor review 4.2); absent where it is not published. */
+  clinicalLinks?: {
+    /** Opens the stage's Lesion tool. */
+    simulateLesion(): void;
+    /** Opens the selected region's stroke cases, or says to select one; null where no cohort is published. */
+    showStrokeCases: (() => void) | null;
+  };
 }
 
 type Busy = 'loading' | 'restoring';
@@ -159,6 +166,7 @@ export function createDeficitsExplorer(deps: DeficitsDeps) {
     checkedMaps: deps.excursions.checkedMaps,
     setQuery: (query: string) => deps.session.setClinicalQuery(query),
     openFunction: deps.openFunction,
+    clinicalLinks: deps.clinicalLinks ?? null,
     openDeficit,
     openRegion,
     /** The Linked MRI at the open deficit's first cited region, its paint over the scan; `instant` for a key press. */

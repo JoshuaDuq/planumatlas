@@ -30,6 +30,7 @@
     type DetailState,
     type WorkspaceView,
   } from '../../lib/core/workspace.ts';
+  import type { ReadingPlace } from '../../lib/controller/anatomy.svelte.ts';
   import type { Explorer, Language, Notice as NoticeState } from '../../lib/types/index.ts';
   import { FOCUS_TARGETS, registerFocusTarget, requestFocus } from '../../lib/ui/focus.ts';
   import LocationBar from './LocationBar.svelte';
@@ -241,6 +242,47 @@
   }
   export function showList() {
     move('list');
+  }
+
+  /** The detail's scroller, while the detail is in front. */
+  const detailBody = () =>
+    view === 'detail' ? (detailPanel?.querySelector<HTMLElement>('.detail-body') ?? null) : null;
+
+  // A section is known by its summary's own words, before any headline value: sections stay open
+  // from one region to the next, and one that leaves and comes back is a new element.
+  const sectionKey = (summary: Element) =>
+    summary.firstChild?.firstChild?.textContent?.trim() ||
+    summary.firstChild?.textContent?.trim() ||
+    '';
+  const openSections = (body: HTMLElement) =>
+    new Set([...body.querySelectorAll('details[open] > summary')].map(sectionKey));
+  // What was open, and where the detail stood, when the selection was made.
+  let marked: { open: Set<string>; scrollTop: number } = { open: new Set(), scrollTop: 0 };
+
+  /** A new selection: what is open now, and the scroll now, are not the reader's doing in it. */
+  export function markReadingPlace() {
+    const body = detailPanel?.querySelector<HTMLElement>('.detail-body');
+    marked = body
+      ? { open: openSections(body), scrollTop: body.scrollTop }
+      : { open: new Set(), scrollTop: 0 };
+  }
+
+  /** Where the reader is in the detail: a section they opened here, or a scroll here past its headline. */
+  export function readingPlace(): ReadingPlace | null {
+    const body = detailBody();
+    if (!body) return null;
+    // The first headline drawn: a profile's above a region, else the region's.
+    const headline = [...body.querySelectorAll('h2')].find((h2) => h2.getClientRects().length);
+    const pastHeadline =
+      headline !== undefined &&
+      headline.getBoundingClientRect().bottom <= body.getBoundingClientRect().top;
+    const opened = [...openSections(body)].some((key) => !marked.open.has(key));
+    const scrolled = pastHeadline && body.scrollTop !== marked.scrollTop;
+    return opened || scrolled ? { scrollTop: body.scrollTop } : null;
+  }
+  export function restoreReadingPlace(place: ReadingPlace) {
+    const body = detailBody();
+    if (body) body.scrollTop = place.scrollTop;
   }
   export function showDetail() {
     if (!reference) move('detail');

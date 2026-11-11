@@ -66,6 +66,18 @@ test('a masthead choice lifts the open paint until a function, a deficit or a ta
   assert.equal(snapshot.selectedFunction, 'all');
 });
 
+test('INSP-49 · a connectivity paint shows a lifted paint again and ends when another tab is chosen', () => {
+  const state = session();
+  state.liftPaint();
+  state.setConnectivitySeed('julich:left:1');
+  assert.equal(state.assemble({}).connectivitySeed, 'julich:left:1');
+  assert.equal(state.assemble({}).paintLifted, false);
+  state.setExplorer('anatomy');
+  assert.equal(state.assemble({}).connectivitySeed, 'julich:left:1');
+  state.setExplorer('functions');
+  assert.equal(state.assemble({}).connectivitySeed, null);
+});
+
 test('assembly merges model state and view state into one snapshot', () => {
   const s = session();
   s.setView('left');

@@ -1,0 +1,16 @@
+# Where each tract's streamlines end on the cortex, for its profile in the Tracts tab (supervisor
+# review 4.3). brain_model/layers/tract_ends.py reads every bundle of the catalog and counts, per
+# Destrieux region of the subject's own aparc.a2009s+aseg, the share of the bundle's streamline ends
+# within `radius_mm` of it; an end near two regions counts for both. Regions below `minimum_share`
+# are not listed. The streamlines and the volume share the scanner frame (checked 2026-11-10: every
+# end of the left arcuate falls inside the brain there, 7.5% outside under the surface frame).
+catalog: data/diffusion-cdmd.yaml
+volume: data/cdmd/mri/aparc.a2009s+aseg.mgz
+annotation: data/cdmd/label/lh.aparc.a2009s.annot
+output: cdmd-sub-013/tract-ends.json
+radius_mm: 3
+minimum_share: 0.05
+method: >-
+  Share of the bundle's streamline ends (first and last points) within 3 mm of each Destrieux region
+  of this subject's FreeSurfer aparc.a2009s+aseg cortical ribbon, regions under 5% left out. Ends are
+  this tracking run's: a streamline count is not a measure of connection strength.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import { readModel } from '../../lib/core/catalog/test-support.ts';
 import {
@@ -11,6 +11,7 @@ import {
   COMPARE_COLORS,
   comparedAreas,
   domainAreas,
+  functionsAt,
   validateNeuropsychDomains,
   type NeuropsychDomains,
   type NeurosynthTerms,
@@ -40,10 +41,70 @@ const functionalRegions = validateFunctionalRegions(
   regions,
 );
 const deps = (found = 0) => ({
+  atlas: domains.atlas,
   domains,
   anatomy: createCatalog(manifest),
   functionalRegions,
   deficitsMatching: () => found,
+});
+
+describe('the selected region’s functions (1.1)', () => {
+  const region = (id: string) => regions.get(id)!;
+  const amygdala = manifest.regions.find((entry) => entry.source_name === 'Left-Amygdala')!;
+
+  test('FUNC-40 · a scored region leads the list with its functions, highest z first; nothing selected, none', () => {
+    const list = functionList(domains, '', 'en', amygdala);
+    const ids = list.atRegion!.rows.map((row) => row.id);
+    expect(ids).toEqual(functionsAt(domains, amygdala.id).map((record) => record.id));
+    expect(ids).toContain('fear');
+    const z = functionsAt(domains, amygdala.id).map((record) => record.z);
+    expect(z).toEqual([...z].sort((a, b) => b - a));
+    expect(list.atRegion!.rows[0]!.figure).toBe(z[0]!.toFixed(1));
+    expect(list.atRegion!.unit).toBe(false);
+    expect(functionList(domains, '', 'en').atRegion).toBeNull();
+    expect(functionList(domains, '', 'en', null).atRegion).toBeNull();
+  });
+
+  test('FUNC-41 · a Julich-Brain or Schaefer area lists its own atlas’s scores; Destrieux lists none', () => {
+    const julich = manifest.regions.find(
+      (entry) =>
+        entry.atlas === 'julich' &&
+        entry.source_name === 'Area 44 (IFG)' &&
+        entry.hemisphere === 'left',
+    )!;
+    const rows = functionList(domains, '', 'en', julich).atRegion!.rows;
+    expect(rows.map((row) => row.id)).toContain('language');
+    expect(rows[0]!.figure).toBe(
+      domains.atlas_regions
+        .julich![julich.id]!.reduce((top, member) => Math.max(top, member.z), 0)
+        .toFixed(1),
+    );
+    expect(functionList(domains, '', 'en', region('destrieux:left:12')).atRegion).toBeNull();
+  });
+
+  test('FUNC-42 · a query hides the group; a scored region reaching nothing has an empty group; French figures', () => {
+    expect(functionList(domains, 'fear', 'en', amygdala).atRegion).toBeNull();
+    const quiet = manifest.regions.find(
+      (entry) => entry.atlas === 'hcp-mmp' && entry.kind === 'cortex' && !domains.regions[entry.id],
+    )!;
+    expect(functionList(domains, '', 'en', quiet).atRegion!.rows).toEqual([]);
+    expect(functionList(domains, '', 'fr', amygdala).atRegion!.rows[0]!.figure).toMatch(/^\d+,\d$/);
+  });
+});
+
+describe('a function painted on the reader’s atlas (3.1)', () => {
+  test('FUNC-47 · on Julich-Brain the profile lists its areas and counts them as Julich-Brain’s; lesion checks say they are HCP-MMP’s', () => {
+    const profile = functionProfile({ ...deps(), atlas: 'julich' }, 'language', 'en');
+    expect(profile.areas.length).toBe(domainAreas(domains, 'language', 'julich').length);
+    expect(profile.areas.every((row) => /^(julich|aseg):/.test(row.region))).toBe(true);
+    expect(profile.lesionsOn).toBe('Lesion checks are measured on HCP-MMP areas.');
+    expect(areaCount(domains, 'language', 'en', 'julich')).toMatch(
+      /^\d+ Julich-Brain areas( and \d+ structures?)? at z\u00a0≥\u00a03$/,
+    );
+    // On HCP-MMP nothing changes.
+    expect(functionProfile(deps(), 'language', 'en').lesionsOn).toBeNull();
+    expect(areaCount(domains, 'language', 'en')).toMatch(/^95 HCP-MMP areas/);
+  });
 });
 
 describe('functionList', () => {
@@ -164,6 +225,17 @@ describe('functionProfile', () => {
     );
   });
 
+  test('FUNC-44, FUNC-45 · a profile carries its Neurosynth page, by term; the overview and a term without a page carry none', () => {
+    assert.deepEqual(functionProfile(deps(), 'working-memory', 'fr').neurosynth, {
+      term: 'working memory',
+      href: 'https://neurosynth.org/analyses/terms/working%20memory/',
+    });
+    assert.equal(functionProfile(deps(), 'term:placebo', 'en').neurosynth?.term, 'placebo');
+    assert.equal(functionProfile(deps(), 'emotion', 'en').neurosynth, null);
+    assert.equal(functionProfile(deps(), 'term:trauma', 'en').neurosynth, null);
+    assert.equal(functionProfile(deps(), ALL_DOMAINS, 'en').neurosynth, null);
+  });
+
   test('an unknown function fails loudly', () => {
     assert.throws(() => functionProfile(deps(), 'no-such-function', 'en'), /Unknown function/);
   });
@@ -185,6 +257,14 @@ describe('comparisonProfile', () => {
       [
         ['working-memory', null, COMPARE_COLORS[0]],
         ['term:action', 'en', COMPARE_COLORS[1]],
+      ],
+    );
+    // One Neurosynth page per compared function.
+    assert.deepEqual(
+      profile.functions.map((entry) => entry.neurosynth?.href),
+      [
+        'https://neurosynth.org/analyses/terms/working%20memory/',
+        'https://neurosynth.org/analyses/terms/action/',
       ],
     );
     assert.deepEqual(

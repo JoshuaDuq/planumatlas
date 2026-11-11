@@ -34,6 +34,8 @@ export interface TermRecord {
   studies: number;
   searchKey: string;
   areas: { region: string; z: number }[];
+  /** Its areas on each listed atlas with a term table (supervisor review 3.1), strongest first. */
+  atlasAreas: Record<string, { region: string; z: number }[]>;
 }
 
 export type DomainRecord = Domain | TermRecord;
@@ -58,12 +60,20 @@ export interface NeurosynthTerms {
   regions: string[];
   /** `[term, studies, kind, [[region index, z], …]]`. */
   terms: [string, number, TermKind, [number, number][]][];
+  /** Those of `terms` neurosynth.org has no analysis page for. */
+  neurosynth_org_missing: string[];
+  /** Each listed atlas's regions, and each term's `[region index, z]` there at the threshold. */
+  atlases: Record<string, { regions: string[]; terms: Record<string, [number, number][]> }>;
 }
 
 /** The validated term search, attached to the partition as `search`. */
 export interface TermSearch {
   terms: Map<string, TermRecord>;
+  /** The listed atlases the terms were measured on, where a term paints. */
+  atlases: string[];
   derivation: Record<string, unknown>;
+  /** The searched terms neurosynth.org has no analysis page for. */
+  missingPages: string[];
 }
 
 /** `neuropsych-domains.json`; `validateNeuropsychDomains` attaches `search`. */
@@ -80,8 +90,14 @@ export interface NeuropsychDomains {
   groups: DomainGroup[];
   domains: Domain[];
   regions: Record<string, DomainMember[]>;
+  /** The other cortical atlases whose regions list functions, each having passed the measured gate. */
+  region_atlases: string[];
+  /** Their regions' domains, from each atlas's own parcel means; none of them is painted. */
+  atlas_regions: Record<string, Record<string, DomainMember[]>>;
   derivation: { studies: Record<string, number>; [field: string]: unknown };
   lesion_checks: Record<string, unknown>;
+  /** The curated functions' terms neurosynth.org has no analysis page for. */
+  neurosynth_org_missing: string[];
   search?: TermSearch | null;
   [field: string]: unknown;
 }
@@ -197,7 +213,13 @@ function validateTerms(
     published.structure_atlas !== partition.structure_atlas ||
     published.threshold_z !== partition.threshold_z ||
     !Array.isArray(published.regions) ||
-    !Array.isArray(published.terms)
+    !Array.isArray(published.terms) ||
+    !Array.isArray(published.neurosynth_org_missing) ||
+    !published.atlases ||
+    Object.keys(published.atlases).join() !== partition.region_atlases.join() ||
+    published.neurosynth_org_missing.some(
+      (term) => !published.terms.some(([name]) => name === term),
+    )
   ) {
     throw new Error('Invalid Neurosynth term search.');
   }
@@ -231,9 +253,39 @@ function validateTerms(
       studies,
       searchKey: normalize(term),
       areas: reached.map(([index, z]) => ({ region: published.regions[index], z })),
+      atlasAreas: {},
     });
   }
-  return { terms, derivation: published.derivation };
+  const atlases = Object.entries(published.atlases);
+  for (const [atlas, table] of atlases) {
+    if (
+      table.regions.some(
+        (id) => regions.get(id)?.atlas !== atlas || regions.get(id)?.kind !== 'cortex',
+      ) ||
+      Object.keys(table.terms).length !== terms.size
+    ) {
+      throw new Error(`Invalid Neurosynth term search on ${atlas}.`);
+    }
+    for (const [term, reached] of Object.entries(table.terms)) {
+      const record = terms.get(`${TERM}${term}`);
+      if (
+        !record ||
+        reached.some(([index, z]) => !table.regions[index] || !(z >= published.threshold_z))
+      ) {
+        throw new Error(`Invalid Neurosynth term on ${atlas}: ${term}`);
+      }
+      record.atlasAreas[atlas] = reached.map(([index, z]) => ({
+        region: table.regions[index]!,
+        z,
+      }));
+    }
+  }
+  return {
+    terms,
+    atlases: atlases.map(([atlas]) => atlas),
+    derivation: published.derivation,
+    missingPages: published.neurosynth_org_missing,
+  };
 }
 
 /** The published partition, checked against the regions it assigns, with the term search where one is published. */
@@ -250,7 +302,11 @@ export function validateNeuropsychDomains(
     !partition.structure_atlas ||
     !Array.isArray(partition.structures) ||
     !partition.unit_atlas ||
-    !partition.units
+    !partition.units ||
+    !Array.isArray(partition.neurosynth_org_missing) ||
+    partition.neurosynth_org_missing.some(
+      (term) => !partition.domains.some((domain) => domain.term === term),
+    )
   ) {
     throw new Error('Invalid neuropsychological-domain partition.');
   }
@@ -303,6 +359,26 @@ export function validateNeuropsychDomains(
     throw new Error('Invalid neuropsychological-domain z scale.');
   }
   partition.search = published && validateTerms(published, partition, regions);
+  if (
+    !Array.isArray(partition.region_atlases) ||
+    !partition.atlas_regions ||
+    Object.keys(partition.atlas_regions).some((atlas) => !partition.region_atlases.includes(atlas))
+  ) {
+    throw new Error('Invalid neuropsychological-domain partition.');
+  }
+  for (const [atlas, assigned] of Object.entries(partition.atlas_regions)) {
+    for (const [id, members] of Object.entries(assigned)) {
+      const region = regions.get(id);
+      if (
+        region?.atlas !== atlas ||
+        region.kind !== 'cortex' ||
+        !members.length ||
+        members.some((member) => !ids.has(member.domain) || !(member.z >= partition.threshold_z))
+      ) {
+        throw new Error(`Invalid neuropsychological-domain assignment: ${id}`);
+      }
+    }
+  }
   for (const [id, members] of Object.entries(partition.regions)) {
     const region = regions.get(id);
     const scored =
@@ -327,6 +403,16 @@ export const domainRecord = (
   (isTermId(id)
     ? partition?.search?.terms.get(id)
     : partition?.domains.find((domain) => domain.id === id)) ?? null;
+
+/** A function's or term's analysis page on neurosynth.org, by its Neurosynth term; null where the site has none. */
+export function neurosynthPage(partition: NeuropsychDomains, id: string): string | null {
+  const record = domainRecord(partition, id);
+  if (!record) throw new Error(`Unknown neuropsychological domain: ${id}`);
+  const missing = isTermId(id) ? partition.search!.missingPages : partition.neurosynth_org_missing;
+  return missing.includes(record.term)
+    ? null
+    : `https://neurosynth.org/analyses/terms/${encodeURIComponent(record.term)}/`;
+}
 
 /** How many studies a function's term rests on. */
 export const domainStudies = (partition: NeuropsychDomains, id: string): number =>
@@ -364,12 +450,28 @@ export const nearestName = (partition: NeuropsychDomains, query: string, lang: L
 export const scoredSource = (partition: NeuropsychDomains, regionId: string) =>
   partition.units[regionId] ?? regionId;
 
-/** An area's domains with their z, strongest first; none where no domain reaches the threshold. */
+/** The published members of a region: on HCP-MMP or a structure, else on a listed atlas. */
+const membersOf = (partition: NeuropsychDomains, regionId: string): DomainMember[] =>
+  partition.regions[scoredSource(partition, regionId)] ??
+  partition.atlas_regions[regionId.slice(0, regionId.indexOf(':'))]?.[regionId] ??
+  [];
+
+/**
+ * An area's domains with their z, in the published order (strongest share of the domain's cortical
+ * peak first, which the overview paint reads); the lists reorder them by z (`functionsAt`).
+ */
 export const domainsOf = (partition: NeuropsychDomains | null | undefined, regionId: string) =>
-  (partition?.regions[scoredSource(partition, regionId)] ?? []).map((member) => ({
+  (partition ? membersOf(partition, regionId) : []).map((member) => ({
     ...(domainRecord(partition, member.domain) as Domain),
     z: member.z,
   }));
+
+/**
+ * The functions a region lists, highest z first: the order measured on 2026-11-10 (supervisor review
+ * 1.1, D3) put the expected function first in 5 of 7 test regions, where share of peak managed 2.
+ */
+export const functionsAt = (partition: NeuropsychDomains, regionId: string) =>
+  domainsOf(partition, regionId).sort((a, b) => b.z - a.z);
 
 /**
  * The domain an area is drawn as: the one picked when the reader picks one and
@@ -416,9 +518,13 @@ const sampledRegion = (partition: NeuropsychDomains, region: Region | undefined)
   (region?.atlas === partition.structure_atlas &&
     partition.structures.includes(region.source_name as string));
 
-/** Whether a region has domains: one they were measured on, or a teaching unit carrying a structure's. */
+/** Whether a region has domains: one they were measured on, a listed atlas's area, or a teaching unit carrying a structure's. */
 export const scoredRegion = (partition: NeuropsychDomains, region: Region | undefined) =>
-  sampledRegion(partition, region) || (region !== undefined && region.id in partition.units);
+  sampledRegion(partition, region) ||
+  (region !== undefined && region.id in partition.units) ||
+  (region !== undefined &&
+    region.kind === 'cortex' &&
+    partition.region_atlases.includes(region.atlas as string));
 
 /** The regions a listed structure is drawn as: the teaching units carrying its score, unless FreeSurfer's segmentation is shown. */
 export function drawnAs(partition: NeuropsychDomains, regionId: string, detail: string): string[] {
@@ -441,13 +547,49 @@ export function revealedRegions(
   return [...paint.colors.keys()].filter((id) => !id.startsWith(`${other}:`));
 }
 
+/**
+ * The atlas a function is painted on (supervisor review 3.1): the reader's own where its regions list
+ * functions, for a curated function or the overview; otherwise HCP-MMP. Searched terms and
+ * comparisons have no table on the other atlases.
+ */
+export function paintAtlas(partition: NeuropsychDomains, id: string, atlas: string): string {
+  return atlas !== partition.atlas &&
+    partition.region_atlases.includes(atlas) &&
+    (!isTermId(id) || Boolean(partition.search?.atlases.includes(atlas))) &&
+    !comparedIds(id)
+    ? atlas
+    : partition.atlas;
+}
+
+/** Each scored region of an atlas, with the structures, and its members. */
+function assignedOn(partition: NeuropsychDomains, atlas: string): Record<string, DomainMember[]> {
+  if (atlas === partition.atlas) return partition.regions;
+  const own = partition.atlas_regions[atlas];
+  if (!own) throw new Error(`No functions are published on ${atlas}.`);
+  const structures = Object.entries(partition.regions).filter(([region]) =>
+    region.startsWith(`${partition.structure_atlas}:`),
+  );
+  return { ...own, ...Object.fromEntries(structures) };
+}
+
 /** Every area or structure that reaches a domain, strongest first; ties keep the published order. */
 export function domainAreas(
   partition: NeuropsychDomains,
   id: string,
+  atlas: string = partition.atlas,
 ): { region: string; z: number }[] {
-  if (isTermId(id)) return (domainRecord(partition, id) as TermRecord).areas;
-  return Object.entries(partition.regions)
+  if (isTermId(id)) {
+    const record = domainRecord(partition, id) as TermRecord;
+    if (atlas === partition.atlas) return record.areas;
+    const own = record.atlasAreas[atlas];
+    if (!own) throw new Error(`No term table on ${atlas}.`);
+    // The atlas's own areas, with the structures the term reaches, strongest first.
+    return [
+      ...own,
+      ...record.areas.filter(({ region }) => region.startsWith(`${partition.structure_atlas}:`)),
+    ].sort((a, b) => b.z - a.z);
+  }
+  return Object.entries(assignedOn(partition, atlas))
     .flatMap(([region, members]) =>
       members.filter((member) => member.domain === id).map((member) => ({ region, z: member.z })),
     )
@@ -469,10 +611,20 @@ export function zBand(partition: NeuropsychDomains, z: number): ZBand | undefine
  * in the colour of the one function reaching it, or the shared colour. Each teaching unit takes its
  * structure's colour.
  */
-export function domainPaint(partition: NeuropsychDomains, id: string): Paint {
+export function domainPaint(
+  partition: NeuropsychDomains,
+  id: string,
+  atlas: string = partition.atlas,
+  from: number = partition.threshold_z,
+): Paint {
   const compared = comparedIds(id);
   if (id !== ALL_DOMAINS && !compared && !domainRecord(partition, id))
     throw new Error(`Unknown neuropsychological domain: ${id}`);
+  if (paintAtlas(partition, id, atlas) !== atlas)
+    throw new Error('Comparisons, and terms without a table there, are painted on HCP-MMP only.');
+  // One function or term alone takes a raised threshold (supervisor review 3.2); the rest keep the published one.
+  if (from !== partition.threshold_z && (id === ALL_DOMAINS || compared))
+    throw new Error('Only a single function or term takes another threshold.');
   const colors = new Map<string, Rgb>();
   if (compared) {
     for (const { region, z, reached } of comparedAreas(partition, id))
@@ -481,12 +633,15 @@ export function domainPaint(partition: NeuropsychDomains, id: string): Paint {
         reached > 1 ? SHARED_COLOR : COMPARE_COLORS[z.findIndex((value) => value !== null)]!,
       );
   } else if (id !== ALL_DOMAINS) {
-    for (const { region, z } of domainAreas(partition, id))
-      colors.set(region, zBand(partition, z)!.color);
+    for (const { region, z } of domainAreas(partition, id, atlas))
+      if (z >= from) colors.set(region, zBand(partition, z)!.color);
   } else {
-    for (const region of Object.keys(partition.regions)) {
-      const shown = shownDomain(partition, region, null);
-      if (shown) colors.set(region, shown.color);
+    // Each region in its first overview function, in the published share-of-peak order.
+    for (const [region, members] of Object.entries(assignedOn(partition, atlas))) {
+      const first = members.find(
+        (member) => (domainRecord(partition, member.domain) as Domain).overview,
+      );
+      if (first) colors.set(region, (domainRecord(partition, first.domain) as Domain).color);
     }
   }
   for (const [unit, structure] of Object.entries(partition.units)) {

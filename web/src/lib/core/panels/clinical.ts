@@ -136,3 +136,23 @@ export function relatedRegionVisible(
 ): boolean {
   return Boolean(selectedRegion) && deficitCount > 0;
 }
+
+/**
+ * The deficits mapped on a region or on anatomy it shares, each once, in the order the mappings give
+ * them. The region inspector's Neuropsychology section and the Deficits list's first group read it.
+ */
+export function deficitsForRegion(
+  explorer: {
+    involved: (id: string) => Iterable<string>;
+    deps: { clinical: { forRegion: (id: string) => readonly { deficit: string }[] } };
+  },
+  regionId: string,
+): string[] {
+  return [
+    ...new Set(
+      [...explorer.involved(regionId)].flatMap((id) =>
+        explorer.deps.clinical.forRegion(id).map((association) => association.deficit),
+      ),
+    ),
+  ];
+}

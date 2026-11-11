@@ -12,11 +12,14 @@ import {
   domainRecord,
   domainStudies,
   functionName,
+  functionsAt,
   groupedDomains,
   isTermId,
   matchingTerms,
   nearestName,
+  neurosynthPage,
   overviewDomains,
+  scoredRegion,
   SHARED_COLOR,
   type Domain,
   type NeuropsychDomains,
@@ -31,6 +34,8 @@ import type { Region, Language, Rgb } from '../../lib/types/index.ts';
 export const AREAS_SHOWN = 12;
 /** Searched terms listed under the curated functions; the rest wait for a narrower query. */
 export const TERMS_SHOWN = 20;
+/** A region's functions listed before "Show all N". */
+export const REGION_ROWS_SHOWN = 8;
 
 /** How many of `regions` are areas and how many structures. */
 function splitCounts(partition: NeuropsychDomains, regions: string[]): [number, number] {
@@ -41,11 +46,22 @@ function splitCounts(partition: NeuropsychDomains, regions: string[]): [number, 
 }
 
 /** How many of the regions a domain reaches are areas and how many structures. */
-const reachedCounts = (partition: NeuropsychDomains, id: string): [number, number] =>
+const reachedCounts = (
+  partition: NeuropsychDomains,
+  id: string,
+  atlas = partition.atlas,
+  from = partition.threshold_z,
+): [number, number] =>
   splitCounts(
     partition,
-    domainAreas(partition, id).map(({ region }) => region),
+    domainAreas(partition, id, atlas)
+      .filter(({ z }) => z >= from)
+      .map(({ region }) => region),
   );
+
+/** An atlas's short name, as the masthead says it. */
+export const atlasName = (atlas: string, lang: Language) =>
+  (t(lang, 'header').atlasShort as Record<string, string>)[atlas] ?? atlas;
 
 /** The areas and structures both compared functions reach, as the comparison's meta line says it. */
 export const sharedCount = (partition: NeuropsychDomains, id: string, lang: Language): string =>
@@ -61,11 +77,18 @@ export const sharedCount = (partition: NeuropsychDomains, id: string, lang: Lang
     decimal(partition.threshold_z, 0, lang),
   );
 
-/** The areas and structures a domain reaches at the threshold, as the profile says it. */
-export const areaCount = (partition: NeuropsychDomains, id: string, lang: Language): string =>
+/** The areas and structures a domain reaches at the threshold on the atlas it is painted on, as the profile says it. */
+export const areaCount = (
+  partition: NeuropsychDomains,
+  id: string,
+  lang: Language,
+  atlas = partition.atlas,
+  from = partition.threshold_z,
+): string =>
   t(lang, 'functions').areas(
-    ...reachedCounts(partition, id),
-    decimal(partition.threshold_z, 0, lang),
+    ...reachedCounts(partition, id, atlas, from),
+    decimal(from, Number.isInteger(from) ? 0 : 1, lang),
+    atlasName(atlas, lang),
   );
 
 /** The same count as a list row says it, beside the row's other facts. */
@@ -75,8 +98,10 @@ export const areaCountShort = (partition: NeuropsychDomains, id: string, lang: L
 export interface FunctionRow {
   id: string;
   name: string;
-  /** Null for the overview row. */
+  /** Null for the overview row and a region's rows. */
   studies: number | null;
+  /** A region's row: its z, as the column shows it. */
+  figure?: string;
   /** Read, not shown: the row's name continues with it. */
   detail: string;
   /** A searched term is English whatever the reader's language. */
@@ -89,7 +114,16 @@ export interface FunctionGroup {
   rows: FunctionRow[];
 }
 
+/** The functions the selected region reaches, highest z first (supervisor review 1.1). */
+export interface RegionFunctions {
+  rows: FunctionRow[];
+  /** A teaching unit, which carries its structure's score. */
+  unit: boolean;
+}
+
 export interface FunctionList {
+  /** The selected region's functions, first; null with no scored region selected or while searching. */
+  atRegion: RegionFunctions | null;
   /** The "All functions" row, which opens the overview; absent while searching. */
   overview: FunctionRow | null;
   groups: FunctionGroup[];
@@ -108,6 +142,7 @@ export function functionList(
   domains: NeuropsychDomains,
   rawQuery: string,
   lang: Language,
+  region: Region | null = null,
 ): FunctionList {
   const copy = t(lang, 'functions');
   const query = rawQuery.trim();
@@ -128,6 +163,23 @@ export function functionList(
   };
   const shown = terms.slice(0, TERMS_SHOWN);
   return {
+    atRegion:
+      query || !region || !scoredRegion(domains, region)
+        ? null
+        : {
+            rows: functionsAt(domains, region.id).map((record) => {
+              const z = decimal(record.z, 1, lang);
+              return {
+                id: record.id,
+                name: domainName(record, lang),
+                studies: null,
+                figure: z,
+                detail: `z ${z}`,
+                lang: null,
+              };
+            }),
+            unit: region.id in domains.units,
+          },
     overview: query
       ? null
       : {
@@ -192,6 +244,17 @@ export interface OverviewLink {
   colour: Rgb;
 }
 
+/** A function's page on neurosynth.org, named by its Neurosynth term, which is English. */
+export interface NeurosynthLink {
+  term: string;
+  href: string;
+}
+
+const neurosynthLink = (domains: NeuropsychDomains, id: string): NeurosynthLink | null => {
+  const href = neurosynthPage(domains, id);
+  return href ? { term: domainRecord(domains, id)!.term, href } : null;
+};
+
 /** What the profile of one function shows, below its name. */
 export interface FunctionProfileContent {
   all: boolean;
@@ -205,10 +268,16 @@ export interface FunctionProfileContent {
   lesionBridge: { text: string; query: string } | null;
   overview: OverviewLink[];
   areas: AreaRow[];
+  /** The strongest area's z, the threshold control's top; 0 for the overview. */
+  top: number;
   noAreas: string;
   lesions: LesionRow[] | null;
+  /** Said with the lesion checks when the function is painted on another atlas than theirs. */
+  lesionsOn: string | null;
   method: string;
   citation: string;
+  /** Null for the overview and for a term neurosynth.org has no page for. */
+  neurosynth: NeurosynthLink | null;
 }
 
 type ProfileSources = Parameters<typeof functionProfile>[0];
@@ -245,8 +314,11 @@ export function functionProfile(
     anatomy,
     functionalRegions,
     deficitsMatching,
+    atlas,
   }: {
     domains: NeuropsychDomains;
+    /** The atlas the function is painted on (`paintAtlas`). */
+    atlas: string;
     anatomy: { get(id: string): { region: Region; label: { name: string } } | null };
     functionalRegions: FunctionalRegions | null;
     deficitsMatching: (query: string, lang: Language) => number;
@@ -266,7 +338,7 @@ export function functionProfile(
 
   const areas = all
     ? []
-    : domainAreas(domains, id).map(({ region, z }) => ({
+    : domainAreas(domains, id, atlas).map(({ region, z }) => ({
         ...placeOf({ anatomy, functionalRegions }, id, region, lang),
         z: decimal(z, 1, lang),
       }));
@@ -306,7 +378,8 @@ export function functionProfile(
         }))
       : [],
     areas,
-    noAreas: copy.none(decimal(domains.threshold_z, 0, lang)),
+    top: all ? 0 : Math.max(0, ...domainAreas(domains, id, atlas).map(({ z }) => z)),
+    noAreas: copy.none(decimal(domains.threshold_z, 0, lang), atlasName(atlas, lang)),
     lesions: checks
       ? checks.map((check) => ({
           association: check.association,
@@ -315,8 +388,10 @@ export function functionProfile(
           detail: `${check.references.join(', ')} · ${checkedParcels(check, lang)}`,
         }))
       : null,
+    lesionsOn: checks && atlas !== domains.atlas ? copy.lesionsOn : null,
     method: domainCopy.note(source.short),
     citation: source.citation,
+    neurosynth: all ? null : neurosynthLink(domains, id),
   };
 }
 
@@ -328,6 +403,7 @@ export interface ComparedFunction {
   lang: Language | null;
   detail: string;
   colour: Rgb;
+  neurosynth: NeurosynthLink | null;
 }
 
 /** An area both compared functions reach, with each one's z in order. */
@@ -347,7 +423,7 @@ export interface ComparisonContent {
 
 /** What the profile of a comparison shows: its functions, the areas both reach, then each one's own. */
 export function comparisonProfile(
-  sources: Pick<ProfileSources, 'domains' | 'anatomy' | 'functionalRegions'>,
+  sources: Pick<ProfileSources, 'domains' | 'anatomy' | 'functionalRegions'> & { atlas?: string },
   id: string,
   lang: Language,
 ): ComparisonContent {
@@ -367,6 +443,7 @@ export function comparisonProfile(
         areaCountShort(domains, member, lang),
       ),
       colour: COMPARE_COLORS[index]!,
+      neurosynth: neurosynthLink(domains, member),
     };
   });
   const source = (domains.sources as Record<string, { short: string; citation: string }>)[

@@ -11,14 +11,14 @@
   - groups are lists (deviations/x1-list-semantics.md).
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import {
     COMPARE_MAX,
     compareId,
     functionName,
   } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
-  import { grouped } from '../../lib/core/format.ts';
+  import { decimal, grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { Explorer } from '../../lib/types/index.ts';
@@ -26,15 +26,27 @@
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import { listNav } from '../../lib/ui/list-nav.ts';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import AboutData from '../info/AboutData.svelte';
+  import ScopeLine from '../info/ScopeLine.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
-  import { functionList, resultsSentence, type FunctionRow } from './functions-view.ts';
+  import {
+    functionList,
+    REGION_ROWS_SHOWN,
+    resultsSentence,
+    type FunctionRow,
+  } from './functions-view.ts';
+  import ShowAll from '../../lib/ui/ShowAll.svelte';
+  import type { Region } from '../../lib/types/index.ts';
 
   let {
     model,
+    region = null,
     elsewhere,
     onElsewhere,
   }: {
     model: FunctionExplorer;
+    /** The selected region, whose functions lead the list. */
+    region?: Region | null;
     /** The other tabs that find the same words. */
     elsewhere: (query: string) => Elsewhere[];
     /** Carries the words to another tab. */
@@ -45,7 +57,40 @@
   const lang = $derived(model.lang);
   const copy = $derived(t(lang, 'functions'));
   const query = $derived(model.query.trim());
-  const content = $derived(functionList(model.domains, query, lang));
+  const content = $derived(functionList(model.domains, query, lang, region));
+  // A region's group starts with its first rows; "Show all N" shows the rest until another region.
+  let unfolded = $state(false);
+  $effect.pre(() => {
+    void region?.id;
+    unfolded = false;
+  });
+  const hereRows = $derived(
+    content.atRegion && !unfolded
+      ? content.atRegion.rows.slice(0, REGION_ROWS_SHOWN)
+      : (content.atRegion?.rows ?? []),
+  );
+  let hereList = $state<HTMLElement | null>(null);
+  async function showAllHere() {
+    unfolded = true;
+    await tick();
+    hereList?.querySelectorAll<HTMLElement>('.function-row')[REGION_ROWS_SHOWN]?.focus();
+  }
+  // The group coming or going keeps a scrolled list where the reader left it: the first of the
+  // curated groups stays put. A list at its top shows the group.
+  let scroller = $state<HTMLElement | null>(null);
+  let anchor: number | null = null;
+  const firstGroup = () => scroller?.querySelector<HTMLElement>('[data-global-group]') ?? null;
+  const hereKey = $derived(content.atRegion ? (region?.id ?? null) : null);
+  $effect.pre(() => {
+    void hereKey;
+    anchor = scroller && scroller.scrollTop > 0 ? (firstGroup()?.offsetTop ?? null) : null;
+  });
+  $effect(() => {
+    void hereKey;
+    const group = firstGroup();
+    if (anchor !== null && scroller && group) scroller.scrollTop += group.offsetTop - anchor;
+    anchor = null;
+  });
   const others = $derived(elsewhere(query));
   const empty = $derived(
     query !== '' && content.matches.functions === 0 && content.matches.terms === 0,
@@ -63,7 +108,7 @@
     if (input && listElement) {
       const navigation = listNav(listElement, {
         field: input,
-        rows: '.function-row, .search-bridge',
+        rows: '.function-row, .search-bridge, .show-all',
       });
       return () => navigation.destroy();
     }
@@ -177,17 +222,47 @@
       <kbd class="search-shortcut" aria-hidden="true">/</kbd>
     {/if}
   </div>
+  <ScopeLine place="functions" {lang} />
 </div>
 
-<div class="browser scroll-fade" hidden={!model.exploring}>
+<div class="browser scroll-fade" hidden={!model.exploring} bind:this={scroller}>
   <div id="{uid}-list" role="group" aria-label={copy.list} bind:this={listElement}>
+    {#if content.atRegion}
+      {@const here = content.atRegion}
+      <div role="group" aria-labelledby="{uid}-here" class="group" data-region-functions>
+        <h3 id="{uid}-here" class="group-heading">
+          <span>{copy.reportedHere}</span>
+          {#if here.rows.length}<span class="column-head" aria-hidden="true">z</span>{/if}
+        </h3>
+        {#if here.rows.length}
+          <ul class="rows" bind:this={hereList}>
+            {#each hereRows as item (item.id)}
+              <li>{@render row(item, false, false)}</li>
+            {/each}
+          </ul>
+          {#if hereRows.length < here.rows.length}
+            <ShowAll label={t(lang, 'navigator').showAll(here.rows.length)} onclick={showAllHere} />
+          {/if}
+          <p class="note here-note">
+            {copy.reportedNote}{#if here.unit}{' '}{t(lang, 'domains').noteUnit}{/if}
+          </p>
+        {:else}
+          <p class="note here-note">{copy.noneHere(decimal(model.domains.threshold_z, 0, lang))}</p>
+        {/if}
+      </div>
+    {/if}
     {#if content.overview && !model.comparing}
       <ul class="rows">
         <li>{@render row(content.overview, true)}</li>
       </ul>
     {/if}
-    {#each [...content.groups, ...content.termGroups] as group (group.id)}
-      <div role="group" aria-labelledby="{uid}-{group.id}" class="group">
+    {#each [...content.groups, ...content.termGroups] as group, index (group.id)}
+      <div
+        role="group"
+        aria-labelledby="{uid}-{group.id}"
+        class="group"
+        data-global-group={index === 0 ? '' : undefined}
+      >
         <h3 id="{uid}-{group.id}" class="group-heading">
           <span>{group.name}</span>
           <span class="column-head" aria-hidden="true">{copy.studiesColumn}</span>
@@ -222,6 +297,7 @@
   <p class="scope-note" hidden={query !== ''}>
     {copy.coverage(model.domains.domains.length, model.domains.search?.terms.size ?? 0)}
   </p>
+  {#if !query}<AboutData place="functions" {lang} host="list" />{/if}
   {#if model.comparing}
     <div class="compare-bar">
       <p class="compare-picked" aria-live="polite">
@@ -244,13 +320,14 @@
 </div>
 
 <!-- The overview is the whole list, not a coloured function: it starts on the inset, like the captions. -->
-{#snippet row(item: FunctionRow, overview = false)}
-  {@const current = !model.comparing && item.id === model.selected}
+{#snippet row(item: FunctionRow, overview = false, own = true)}
+  <!-- A function listed twice (under the region and in its group) is current only in its group. -->
+  {@const current = own && !model.comparing && item.id === model.selected}
   {@const checked = model.comparing && model.picked.includes(item.id)}
   <button
     type="button"
     class="function-row"
-    class:counted={item.studies !== null}
+    class:counted={item.studies !== null || item.figure !== undefined}
     data-function={item.id}
     role={model.comparing ? 'checkbox' : undefined}
     aria-checked={model.comparing ? checked : undefined}
@@ -263,7 +340,9 @@
       <span class="pick" aria-hidden="true"></span>
     {/if}
     <span class="row-name" lang={item.lang ?? undefined}>{item.name}</span>
-    {#if item.studies !== null}
+    {#if item.figure !== undefined}
+      <span class="group-count" aria-hidden="true">{item.figure}</span>
+    {:else if item.studies !== null}
       <span class="group-count" aria-hidden="true">{grouped(item.studies)}</span>
     {/if}
     <span class="visually-hidden">, {item.detail}</span>
@@ -607,6 +686,17 @@
       color: var(--text-secondary);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
+    }
+    /*
+     * The region's group coming or going keeps a scrolled list in place by script (above), the same in
+     * every browser; the browser's own scroll anchoring, where it has one, would move it twice.
+     */
+    .browser {
+      overflow-anchor: none;
+    }
+    /* The region's note follows its rows, not before: data first, then what it does not mean. */
+    .here-note {
+      padding-top: var(--space-2);
     }
     /* A list's scope: one tertiary line at its foot, a count or a caveat. */
     .scope-note {

@@ -501,6 +501,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     mriWindow: 'mri',
     explorer: 'tab',
     selectedFunction: 'function',
+    paintFrom: 'zmin',
     selectedDeficit: 'deficit',
     circuit: 'circuit',
     circuitStep: 'step',
@@ -667,4 +668,16 @@ test('a dot outside the visual field, with no size, or not three numbers is left
   }
   // A clicked receptive field may be smaller or larger than the size control allows.
   assert.deepEqual(decodeState('dot=40,-20,23.8').state.mapDot, { x: 40, y: -20, radius: 23.8 });
+});
+
+test('LINK-23 · a raised paint threshold travels as zmin, in half steps from 3; the published 3 writes nothing', () => {
+  assert.equal(decoded('tab=functions&function=language&zmin=3.5').paintFrom, 3.5);
+  assert.equal(encodeState({ ...DEFAULTS, paintFrom: null }).includes('zmin'), false);
+  assert.match(
+    encodeState({ ...DEFAULTS, selectedFunction: 'language', paintFrom: 4.5 }),
+    /zmin=4\.5/,
+  );
+  for (const value of ['2.5', '3.25', 'x', '-4', '101']) {
+    assert.deepEqual(decodeState(`zmin=${value}`).rejected, ['zmin'], value);
+  }
 });

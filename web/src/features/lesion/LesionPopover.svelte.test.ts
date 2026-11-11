@@ -1,7 +1,7 @@
 // The Lesion popover's body: what Remove leaves the keyboard on, and where its method is.
 import { afterEach, expect, test } from 'vitest';
 import { cleanup, render } from 'vitest-browser-svelte';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
 import LesionPopover from './LesionPopover.svelte';
 
@@ -41,6 +41,7 @@ test('links its English methods page', async () => {
     onPlacing() {},
     onReport() {},
   });
+  await userEvent.click(page.getByText('About this data'));
   const methods = page.getByRole('link', {
     name: 'Method and limits (opens in a new tab)',
     exact: true,

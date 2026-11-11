@@ -34,6 +34,11 @@
    "[\"Alpha\"] → \"Sélection effacée — Alpha n’est plus visible.\"",
    "[\"\"] → \"Sélection effacée —  n’est plus visible.\""
   ],
+  "pickReplaced": [
+   "[\"Alpha\"] → \"Un clic sur le cerveau a remplacé Alpha.\"",
+   "[\"\"] → \"Un clic sur le cerveau a remplacé .\""
+  ],
+  "undoPick": "Annuler",
   "cabNpAtlasOnly": [
    "[\"Alpha\"] → \"CAB-NP ne colore que les aires HCP-MMP : Alpha affiche donc les couleurs de ses régions.\"",
    "[\"\"] → \"CAB-NP ne colore que les aires HCP-MMP :  affiche donc les couleurs de ses régions.\""
@@ -171,6 +176,13 @@
    "[12345] → \"12345 déficits\""
   ],
   "related": "Neuropsychologie",
+  "atRegion": "Touchant cette région",
+  "simulateLesion": "Simuler une lésion",
+  "strokeSelect": "Sélectionnez une région pour voir les cas d’AVC dont la lésion l’atteint.",
+  "strokeNone": [
+   "[\"Alpha\"] → \"Aucun cas d’AVC de la cohorte n’atteint Alpha.\"",
+   "[\"\"] → \"Aucun cas d’AVC de la cohorte n’atteint .\""
+  ],
   "associations": "Associations",
   "findings": "Données probantes",
   "studyFinding": "Résultat rapporté",
@@ -502,6 +514,19 @@
   "noShown": "Aucune trajectoire ne satisfait ce filtre de longueur.",
   "source": "Source des données · CC0",
   "about": "À propos de ces données",
+  "profileRun": [
+   "[\"Alpha\",\"\"] → \"Alpha<NNBSP>:  dans ce suivi\"",
+   "[\"\",\"Alpha\"] → \"<NNBSP>: Alpha dans ce suivi\""
+  ],
+  "endsHeading": "Où se terminent ses trajectoires",
+  "endsNone": [
+   "[\"Alpha\"] → \"Aucune région corticale ne reçoit Alpha de ses extrémités.\"",
+   "[\"\"] → \"Aucune région corticale ne reçoit  de ses extrémités.\""
+  ],
+  "endsNote": [
+   "[\"Alpha\",\"\"] → \"Part des extrémités de ses trajectoires à moins de Alpha de chaque région corticale de ce cerveau (Destrieux), régions sous  omises<NNBSP>; une extrémité proche de deux régions compte pour les deux. Le nombre de trajectoires est celui de ce suivi et ne mesure pas la force d’une connexion.\"",
+   "[\"\",\"Alpha\"] → \"Part des extrémités de ses trajectoires à moins de  de chaque région corticale de ce cerveau (Destrieux), régions sous Alpha omises<NNBSP>; une extrémité proche de deux régions compte pour les deux. Le nombre de trajectoires est celui de ce suivi et ne mesure pas la force d’une connexion.\""
+  ],
   "settings": "Affichage des faisceaux",
   "errors": {
    "asset-fetch": "Les données de référence n’ont pas pu être téléchargées. Vérifiez la connexion, puis réessayez.",
@@ -629,6 +654,10 @@
    "[\"Alpha\"] → \"Constance méta-analytique moyenne sur l’aire HCP-MMP entière pour chaque terme, d’après Alpha<NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\"",
    "[\"\"] → \"Constance méta-analytique moyenne sur l’aire HCP-MMP entière pour chaque terme, d’après <NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\""
   ],
+  "noteAtlas": [
+   "[\"Alpha\",\"\"] → \"Constance méta-analytique moyenne sur l’aire Alpha entière, sur fsaverage, pour chaque terme, d’après <NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\"",
+   "[\"\",\"Alpha\"] → \"Constance méta-analytique moyenne sur l’aire  entière, sur fsaverage, pour chaque terme, d’après Alpha<NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\""
+  ],
   "keyTitle": "Fonctions neuropsychologiques",
   "band": [
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>à<NBSP>3.5\"",
@@ -746,6 +775,8 @@
    "[true] → \"Reconstruction IRM d’un individu\"",
    "[false] → \"Gabarit de référence moyenné\""
   ],
+  "oneBrain": "Sa surface, ses coupes, son IRM et ses faisceaux sont ceux d’une seule personne, et non une moyenne<NNBSP>; les atlas et les cartes de groupe y sont recalés, si bien que leurs limites sont ici des estimations.",
+  "oneBrainLink": "Pourquoi un seul cerveau (en anglais)",
   "sourceData": "Données sources",
   "reconstruction": "Reconstruction",
   "atlases": "Atlas corticaux",
@@ -758,6 +789,7 @@
   "receptors": "Empreintes de récepteurs",
   "stimulation": "Réponses à la stimulation",
   "stimulationFtract": "Réponses à la stimulation (F-TRACT)",
+  "functionalConnectivity": "Connectivité fonctionnelle (HCP)",
   "strokeCases": "Cas d’AVC",
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
@@ -845,9 +877,24 @@
   "overviewHeading": "Fonctions",
   "lesionHeading": "Déficits qui vérifient cette carte",
   "lesionNote": "Part de chaque parcelle citée que la carte colore, mesurée sur fsaverage. Une vérification de la carte par les études lésionnelles, jamais ajustée pour réussir.",
-  "loading": "Préparation des aires HCP-MMP…",
-  "failed": "Les aires HCP-MMP n’ont pas pu être affichées.",
-  "shown": "Affichée sur les aires HCP-MMP",
+  "loading": [
+   "[\"Alpha\"] → \"Préparation des aires Alpha…\"",
+   "[\"\"] → \"Préparation des aires …\""
+  ],
+  "failed": [
+   "[\"Alpha\"] → \"Les aires Alpha n’ont pas pu être affichées.\"",
+   "[\"\"] → \"Les aires  n’ont pas pu être affichées.\""
+  ],
+  "shown": [
+   "[\"Alpha\"] → \"Affichée sur les aires Alpha\"",
+   "[\"\"] → \"Affichée sur les aires \""
+  ],
+  "lesionsOn": "Les vérifications lésionnelles sont mesurées sur les aires HCP-MMP.",
+  "paintFrom": "Peindre les aires à partir de z ≥",
+  "paintFromNote": [
+   "[\"Alpha\"] → \"Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z<NBSP>≥<NBSP>Alpha.\"",
+   "[\"\"] → \"Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z<NBSP>≥<NBSP>.\""
+  ],
   "termsHeading": "Termes Neurosynth",
   "populationsHeading": "Groupes cliniques Neurosynth",
   "caveat": "Là où les études de groupes en bonne santé rapportent une activation<NNBSP>: ni ce cerveau, ni ce qu’une lésion altérerait.",
@@ -891,6 +938,17 @@
   ],
   "termCaveat": "Un terme Neurosynth, et non une fonction retenue<NNBSP>: choisi parce qu’il désigne une fonction, une tâche ou un stimulus, mais sa carte n’a été vérifiée ni par rapport à ce qu’il désigne ni par des études lésionnelles.",
   "populationCaveat": "Un groupe clinique<NNBSP>: ses études comparent surtout des personnes atteintes à des personnes en bonne santé. La carte montre où elles rapportent une activation, et non où une lésion cause l’affection.",
+  "neurosynthOpen": [
+   "[\"Alpha\"] → \"Ouvrir «<NBSP>Alpha<NBSP>» sur Neurosynth\"",
+   "[\"\"] → \"Ouvrir «<NBSP><NBSP>» sur Neurosynth\""
+  ],
+  "neurosynthNote": "La carte du test d’uniformité de Neurosynth.org est la plus proche de celle de Planum. Le site la seuille à un FDR attendu de 0,01<NNBSP>; Planum peint la carte non seuillée, moyennée par aire<NNBSP>: les deux diffèrent.",
+  "reportedHere": "Rapportées ici",
+  "reportedNote": "Les études de ces fonctions rapportent une activation ici. Cela ne signifie pas que la région leur soit propre.",
+  "noneHere": [
+   "[\"Alpha\"] → \"Aucune fonction n’atteint z<NBSP>Alpha ici.\"",
+   "[\"\"] → \"Aucune fonction n’atteint z<NBSP> ici.\""
+  ],
   "lesionBridgeHeading": "Données lésionnelles",
   "deficitBridge": [
    "[0,\"\"] → \"Déficits<NNBSP>: 0 profils lésionnels correspondent à «<NBSP><NBSP>»\"",
@@ -907,6 +965,67 @@
    "[12345,0] → \"12345 fonctions\""
   ]
  },
+ "info": {
+  "about": "À propos de ces données",
+  "shows": "Ce qui est montré",
+  "source": "Source",
+  "caution": "Prudence",
+  "anatomy": {
+   "scope": "Le cerveau d’une seule personne et les atlas tracés dessus.",
+   "shows": "Quatre atlas corticaux, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale propre à un cerveau et sur les faces de coupe. L’anatomie profonde a trois niveaux de détail<NNBSP>: un ensemble pédagogique de 106 solides, l’aseg de FreeSurfer et NextBrain.",
+   "source": "Le cerveau est MGH CDMD sub_013, reconstruit avec FreeSurfer 8.2. Destrieux est l’annotation FreeSurfer propre à ce sujet. HCP-MMP, Julich-Brain et Schaefer sont des atlas de groupe reportés de fsaverage sur ce cerveau par des sphères recalées.",
+   "caution": "Un seul individu<NNBSP>: ses plis, ses tailles et ses asymétries ne sont pas des normes. Les frontières des atlas de groupe sont des estimations projetées, et non des frontières mesurées dans ce cerveau. Chaque segmentation est une estimation de modèle à partir d’une seule IRM T1 de 1<NBSP>mm, et l’exactitude clinique n’a pas été validée."
+  },
+  "functions": {
+   "scope": "Là où les études d’imagerie d’une fonction rapportent une activation.",
+   "shows": "Chacune des 70 fonctions est un terme Neurosynth<NNBSP>: là où ses études rapportent une activation constante, moyennée sur chaque aire HCP-MMP et 19 structures FreeSurfer, et sur chaque aire Julich-Brain et Schaefer pour leurs listes. Une aire appartient à une fonction quand son z moyen atteint 3. La recherche propose 277 autres termes.",
+   "source": "Neurosynth version 7, la littérature d’activation chez des groupes en bonne santé. Les études sont choisies automatiquement<NNBSP>: une étude compte quand son résumé emploie assez souvent le terme (TF-IDF), quelle que soit sa tâche. Chaque carte est calculée sur le gabarit MNI152, moyennée par aire et peinte sur les aires de ce cerveau.",
+   "caution": "Une activation n’est ni ce cerveau ni ce qu’une lésion à cet endroit altérerait<NNBSP>: les données lésionnelles sont dans l’onglet Déficits. Le z de constance croît avec le nombre d’études, si bien que les grandes littératures atteignent plus d’aires. Le cortex à perte de signal (orbitofrontal, temporal antérieur) atteint peu de fonctions."
+  },
+  "deficits": {
+   "scope": "Données lésionnelles<NNBSP>: là où une lésion est liée à un déficit.",
+   "shows": "131 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.",
+   "source": "Une sélection choisie de 339 études indexées dans PubMed<NNBSP>: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 252 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.",
+   "caution": "La littérature est sélectionnée, sans revue systématique, et le catalogue n’est ni diagnostique ni pronostique. Des associations de groupe tracées sur un seul cerveau de référence ne prédisent pas le déficit d’un patient individuel. Une parcelle peut être tracée entière là où une étude n’en impliquait qu’une partie<NNBSP>; la substance blanche reste sans couleur."
+  },
+  "circuits": {
+   "scope": "Des parcours de voies décrites dans la littérature.",
+   "shows": "Cinq parcours de voies anatomiques et de branches de boucles, 25 repères en tout<NNBSP>: vision, mémoire, boucle motrice, sortie cérébelleuse et voie corticospinale. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12<NBSP>mm d’anatomie environnante.",
+   "source": "Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 23 références sont 19 articles PubMed et 4 chapitres de Purves et al., Neuroscience. Le parcours corticospinal trace le faisceau corticospinal gauche suivi dans l’IRM de diffusion de ce sujet.",
+   "caution": "Hormis les trajectoires corticospinales, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie."
+  },
+  "tracts": {
+   "scope": "La substance blanche suivie dans l’IRM de diffusion de ce cerveau.",
+   "shows": "30 faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de la personne dont l’anatomie est montrée<NNBSP>: trajectoires, IRM et surfaces partagent un même repère du scanner, sans recalage. La couleur suit la direction locale<NNBSP>: rouge gauche–droite, vert avant–arrière, bleu haut–bas.",
+   "source": "MGH CDMD sub_013 (CC0). Dix-sept faisceaux viennent d’une tractographie DIPY segmentée par RecoBundles<NNBSP>; treize (SLF I–III et sept segments calleux) de TractSeg. Chaque trajectoire est raccourcie à ses extrémités pour rester dans le cerveau.",
+   "caution": "Un seul individu et une seule IRM de diffusion à 2<NBSP>mm<NNBSP>: les faisceaux sont des reconstructions, et non des axones observés. Le nombre de trajectoires n’est pas un nombre d’axones, et leur longueur ne mesure pas la force d’une connexion. Les trajectoires corticospinales s’arrêtent près de la moelle allongée caudale, au-dessus de la décussation."
+  },
+  "section": {
+   "shows": "Un plan sagittal, coronal, axial ou oblique coupe le modèle, et chaque solide fermé reçoit une face de coupe là où le plan le rencontre. Chaque face est colorée d’après un volume d’étiquettes publié, choisi indépendamment de l’atlas de surface.",
+   "source": "Les faces de coupe sont les surfaces piale, blanche et des structures propres à ce sujet. Les étiquettes sont la grille FreeSurfer de 1<NBSP>mm du sujet ou les blocs NextBrain de 0,8<NBSP>mm<NNBSP>; rien n’est resegmenté dans le navigateur.",
+   "caution": "Les étiquettes de coupe sont à 1<NBSP>mm (0,8<NBSP>mm pour NextBrain)<NNBSP>: les structures fines sont plus grossières sur une coupe que sur leur surface. Les étiquettes de coupe HCP-MMP, Julich-Brain et Schaefer sont des projections d’étiquettes de surface dans le ruban de substance grise, et non des atlas volumiques. L’ombrage tiré de la T1 est illustratif."
+  },
+  "lesion": {
+   "shows": "Une sphère de 3 à 30<NBSP>mm de rayon placée sur le cerveau ou sur une face de coupe. Le rapport donne les tissus et les régions qu’elle contient, classe les fonctions et les observations de déficit dont elle recouvre les régions, et compte les trajectoires reconstruites qui la traversent.",
+   "source": "Mesurée dans le navigateur sur les volumes d’étiquettes de 1<NBSP>mm publiés pour ce sujet, les territoires de l’onglet Fonctions, les régions citées par les observations de l’onglet Déficits et les faisceaux de ce cerveau.",
+   "caution": "Elle mesure un recouvrement sur un seul cerveau<NNBSP>; elle ne prédit aucun déficit. Une sphère ignore la forme vasculaire, de substance blanche et de réseau des lésions réelles. Les territoires des fonctions sont des cartes d’activation chez des personnes en bonne santé, et non des cartes lésion–déficit."
+  },
+  "coordinate": {
+   "shows": "Une coordonnée publiée dans un gabarit MNI nommé, placée sur ce cerveau et marquée d’une sphère de 5<NBSP>mm. Le rapport donne la part de la sphère dans chaque région, jamais une seule parcelle corticale.",
+   "source": "Chaque gabarit a été recalé sur CDMD sub_013 avec SynthMorph de FreeSurfer. Les gabarits sont MNI152NLin2009cAsym et SPM12 (TPM)<NNBSP>; un «<NBSP>MNI<NBSP>» sans précision est lu comme MNI152NLin2009cAsym. Talairach n’est pas accepté.",
+   "caution": "Le point d’arrivée est un emplacement du gabarit sur un seul cerveau, et non l’endroit où se trouverait le pic de cette personne ni ce que ce cerveau fait à cet endroit. Chercher une seule parcelle depuis l’espace du gabarit ne concordait avec la parcellisation propre à ce cerveau que pour environ 60<NBSP>% du cortex du gabarit."
+  },
+  "overlay": {
+   "shows": "Votre propre carte NIfTI dans un gabarit MNI, un volume ou une série, tracée sur le cortex, les surfaces profondes et chaque face de coupe avec une échelle de couleurs à deux côtés. Un tableau des amas est calculé comme le calcule get_clusters_table de nilearn.",
+   "source": "Votre fichier, lu dans le navigateur<NNBSP>; il ne quitte jamais votre ordinateur. Il est reporté sur CDMD sub_013 par l’inverse du recalage publié du gabarit, celui qu’utilise l’outil Coordonnée.",
+   "caution": "Le résultat est une carte de gabarit sur les plis d’une seule personne, et non les données de cette personne. Espace de gabarit seulement<NNBSP>: une carte en espace natif ou Talairach tombe au mauvais endroit, et aucun en-tête NIfTI n’indique dans quel gabarit MNI se trouve une carte. La carte n’est pas conservée dans un lien."
+  },
+  "display": {
+   "shows": "Le mode de couleur, l’hémisphère, le cortex, l’anatomie interne, la moelle épinière et la vue éclatée, et les outils de dissection<NNBSP>: masquer, isoler et cibler. Masquer des parcelles corticales découvre la surface blanche propre au sujet.",
+   "source": "Un seul ensemble de maillages publiés de ce cerveau. La profondeur sulcale, l’ouverture corticale et la T1 du ruban sont précalculées en chaque sommet cortical et règlent l’ombrage des plis et la couleur des tissus.",
+   "caution": "L’ombrage est illustratif<NNBSP>: la luminosité T1, l’ombrage des plis et les couleurs des tissus ne sont pas des propriétés optiques ou histologiques mesurées. La vue éclatée déplace chaque structure d’un bloc, et certains systèmes se traversent encore là où des structures fines passent entre eux."
+  }
+ },
  "guide": {
   "next": "Suivant",
   "previous": "Retour",
@@ -914,6 +1033,27 @@
   "close": "Fermer la visite",
   "skip": "Passer la visite",
   "progress": "{{current}} sur {{total}}",
+  "everything": [
+   "[\"Alpha\"] → \"Tout voir (Alpha étapes)\"",
+   "[\"\"] → \"Tout voir ( étapes)\""
+  ],
+  "firstVisit": [
+   {
+    "id": "selectRegion",
+    "title": "Le détail d’une région",
+    "body": "Une région ouverte est décrite ici<NNBSP>: son côté et son groupe, puis Focus, Isoler, Masquer et IRM liée, ce que l’on sait d’elle et les données de recherche mesurées sur elle."
+   },
+   {
+    "id": "tabs",
+    "title": "Cinq entrées",
+    "body": "Anatomie recense chaque région. Fonctions et Déficits peignent des données publiées, Circuits parcourt des voies, et Faisceaux montre la substance blanche tirée de l’IRM de diffusion de ce cerveau. Chacun dit ce qu’il montre<NNBSP>; À propos de ces données dit d’où elles viennent."
+   },
+   {
+    "id": "dock",
+    "title": "Les outils de l’image",
+    "body": "Coupe tranche le cerveau et Affichage règle ce qui est tracé. Lésion, Coordonnée et Superposition apportent quelque chose sur le cerveau<NNBSP>: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte."
+   }
+  ],
   "stops": [
    {
     "id": "welcome",
@@ -1081,6 +1221,8 @@
   "panelLabel": "Sélection et affichage",
   "clearSelection": "Effacer la sélection",
   "noRegionSelected": "Aucune région sélectionnée",
+  "aboutIndex": "À propos de cette région",
+  "researchIndex": "Données de recherche",
   "hintCortex": "Sélectionnez une région sur le modèle ou dans la liste anatomique.",
   "hintStructures": "Le cortex est masqué — les structures internes sont sélectionnables.",
   "hemisphere": "Hémisphère",
@@ -1266,6 +1408,7 @@
    "cord": "moelle épinière",
    "colors": "coloration",
    "function": "fonction",
+   "zmin": "seuil de peinture",
    "opacity": "opacité du cortex",
    "explode": "vue éclatée",
    "mri": "fenêtre IRM",
@@ -1438,6 +1581,10 @@
   "noMatch": [
    "[\"Alpha\"] → \"Aucun résultat pour « Alpha »\"",
    "[\"\"] → \"Aucun résultat pour «  »\""
+  ],
+  "showAll": [
+   "[\"Alpha\"] → \"Afficher les Alpha\"",
+   "[\"\"] → \"Afficher les \""
   ],
   "noMatchHint": "Essayez une autre orthographe, une abréviation ou un synonyme. Les symptômes et syndromes sont sous Déficits.",
   "showingCapped": [
@@ -1873,6 +2020,37 @@
   ],
   "ftractDataset": "Jeu de données F-TRACT (EBRAINS)",
   "ftractMethod": "Méthode (Trebaul et al. 2018)"
+ },
+ "connectivity": {
+  "heading": [
+   "[\"Alpha\"] → \"Connectivité fonctionnelle (IRMf de repos, Alpha adultes)\"",
+   "[\"\"] → \"Connectivité fonctionnelle (IRMf de repos,  adultes)\""
+  ],
+  "strongest": "Corrélations les plus fortes",
+  "paint": "Peindre sur le cerveau",
+  "shown": [
+   "[\"Alpha\"] → \"Le cerveau montre la connectivité de repos avec Alpha.\"",
+   "[\"\"] → \"Le cerveau montre la connectivité de repos avec .\""
+  ],
+  "note": [
+   "[\"Alpha\",\"\"] → \"Moyenne de groupe de Alpha adultes en bonne santé âgés de  ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\"",
+   "[\"\",\"Alpha\"] → \"Moyenne de groupe de  adultes en bonne santé âgés de Alpha ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\""
+  ],
+  "basis": "Mesurée sur la carte volumique de Julich-Brain dans l’espace MNI152, pas dans ce cerveau ; chaque aire prend la parcelle de son nom.",
+  "dataset": "Jeu de données (EBRAINS)",
+  "paper": "Article (Domhof et al. 2021)",
+  "keyTitle": [
+   "[\"Alpha\"] → \"Connectivité de repos avec Alpha\"",
+   "[\"\"] → \"Connectivité de repos avec \""
+  ],
+  "step": [
+   "[\"Alpha\",\"\"] → \"r<NBSP>≥<NBSP>Alpha\"",
+   "[\"\",\"Alpha\"] → \"r<NBSP>de<NBSP><NBSP>à<NBSP>Alpha\""
+  ],
+  "keyNote": [
+   "[\"Alpha\",\"\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
+   "[\"\",\"Alpha\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\""
+  ]
  },
  "strokeCases": {
   "heading": "Cas d’AVC",

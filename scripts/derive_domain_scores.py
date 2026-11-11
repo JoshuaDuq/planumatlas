@@ -35,8 +35,14 @@ from scipy.io import loadmat
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from brain_model.layers import coordinate_spaces
-from brain_model.layers.neuropsych_domains import FSAVERAGE, SCORES, STRUCTURES, read_definition
-from brain_model.sources import HEMISPHERES, ROOT, read_config, sha256, write_json
+from brain_model.layers.neuropsych_domains import (
+    ATLAS_ANNOTATIONS,
+    FSAVERAGE,
+    SCORES,
+    STRUCTURES,
+    read_definition,
+)
+from brain_model.sources import HEMISPHERES, ROOT, is_cortical_area, read_config, sha256, write_json
 from register_coordinate_spaces import segment_template, template_images
 
 CACHE = ROOT / "data/cache/neurosynth"
@@ -44,6 +50,11 @@ NEUROSYNTH_VERSION = "7"
 LABEL_THRESHOLD = 0.001
 KERNEL_RADIUS_MM = 6
 MAP = "z_desc-uniformity"
+# The same fit's association test, and each overview function's vertex values, are kept beside the
+# cache for measurement (the order of a region's functions, each atlas against the vertex map).
+# Nothing there is published.
+ASSOCIATION_MAP = "z_desc-association"
+MEASUREMENTS = CACHE / "region-functions"
 # Each fsaverage vertex's FSL MNI152 coordinate at mid-thickness, averaged over 1,490 GSP subjects'
 # ANTs registrations (CBIG, MIT licence), at a pinned commit.
 FUSION = ROOT / "data/cache/registration-fusion"
@@ -113,21 +124,51 @@ def segment(home):
         shutil.copyfile(work / "seg.nii.gz", SEGMENTATION)
 
 
-def area_means(image_):
-    """The map at each fsaverage vertex's RF-ANTs coordinate, linearly interpolated, averaged per HCP-MMP area."""
+def vertex_values(image_):
+    """The map at each fsaverage vertex's RF-ANTs coordinate, linearly interpolated, per hemisphere."""
     data = image_.get_fdata()
     to_voxel = np.linalg.inv(image_.affine)
-    means = {}
+    textures = {}
     for prefix, points in fusion_coordinates().items():
         # As CBIG_RF_projectVol2fsaverage_single's linear interpn, NaN off the grid.
         texture = ndimage.map_coordinates(data, nib.affines.apply_affine(to_voxel, points).T,
                                           order=1, mode="constant", cval=np.nan)
-        labels, _, names = read_annot(FSAVERAGE / "label" / f"{prefix}.HCPMMP1.annot")
-        if len(labels) != len(texture) or not np.isfinite(texture).all():
+        if not np.isfinite(texture).all():
             raise ValueError(f"{prefix}: the mapping must place every fsaverage vertex on the map's grid")
-        for index, name in enumerate(name.decode() for name in names):
+        textures[prefix] = texture
+    return textures
+
+
+def read_labels(prefix, annotation, texture):
+    labels, _, names = read_annot(FSAVERAGE / "label" / f"{prefix}.{annotation}.annot")
+    if len(labels) != len(texture):
+        raise ValueError(f"{prefix}.{annotation}: the annotation must label every fsaverage vertex")
+    return labels, [name.decode() for name in names]
+
+
+def area_means(textures):
+    """The vertex values averaged per HCP-MMP area."""
+    means = {}
+    for prefix, texture in textures.items():
+        labels, names = read_labels(prefix, "HCPMMP1", texture)
+        for index, name in enumerate(names):
             if name.endswith("_ROI"):
                 means[name] = float(texture[labels == index].mean())
+    return means
+
+
+def atlas_means(textures):
+    """The same vertex values averaged per parcel of each other cortical atlas, as "<side>:<label index>"."""
+    means = {}
+    for atlas, annotation in ATLAS_ANNOTATIONS.items():
+        means[atlas] = {}
+        for prefix, texture in textures.items():
+            labels, names = read_labels(prefix, annotation, texture)
+            for index, name in enumerate(names):
+                parcel = labels == index
+                # A gap map, a medial mask or the unknown label is no area; a name with no vertex has no mean.
+                if is_cortical_area(name) and parcel.any():
+                    means[atlas][f"{HEMISPHERES[prefix]}:{index}"] = float(texture[parcel].mean())
     return means
 
 
@@ -157,14 +198,50 @@ def derivation():
     }
 
 
-def consistency(term):
-    """The term's study count and its consistency map's mean per area and per structure."""
+def fit(term):
+    """The term's study count and its chi-square fit against every other study."""
     ids = dataset.get_studies_by_label(f"terms_abstract_tfidf__{term}", label_threshold=LABEL_THRESHOLD)
     others = sorted(set(dataset.ids) - set(ids))
     result = MKDAChi2(kernel__r=KERNEL_RADIUS_MM).fit(dataset.slice(ids), dataset.slice(others))
     print(f"{term}: {len(ids)} studies", flush=True)
+    return len(ids), result
+
+
+def consistency(term):
+    """The term's study count and its consistency map's mean per area and per structure."""
+    count, result = fit(term)
     consistency_map = result.get_map(MAP)
-    return len(ids), area_means(consistency_map), structure_means(consistency_map)
+    return count, area_means(vertex_values(consistency_map)), structure_means(consistency_map)
+
+
+def consistency_on_atlases(term):
+    """`consistency`, with the same vertex values averaged per parcel of each other cortical atlas."""
+    count, result = fit(term)
+    consistency_map = result.get_map(MAP)
+    textures = vertex_values(consistency_map)
+    return count, area_means(textures), structure_means(consistency_map), atlas_means(textures)
+
+
+def domain_scores(task):
+    """
+    A curated term's consistency means per area, structure and parcel of each other atlas; the same
+    means of its association map, for measurement; and, for an overview function, its vertex values.
+    """
+    term, keep_vertices = task
+    count, result = fit(term)
+    consistency_map, association_map = result.get_map(MAP), result.get_map(ASSOCIATION_MAP)
+    textures, association = vertex_values(consistency_map), vertex_values(association_map)
+    return {
+        "studies": count,
+        "scores": area_means(textures),
+        "structure_scores": structure_means(consistency_map),
+        "atlas_scores": atlas_means(textures),
+        "association": {"scores": area_means(association),
+                        "structure_scores": structure_means(association_map),
+                        "atlas_scores": atlas_means(association)},
+        "vertices": {prefix: texture.astype(np.float32) for prefix, texture in textures.items()}
+                    if keep_vertices else None,
+    }
 
 
 def main():
@@ -185,18 +262,43 @@ def main():
     missing = [term for term in terms if f"terms_abstract_tfidf__{term}" not in dataset.get_labels()]
     if missing:
         raise ValueError(f"Neurosynth has no terms {missing}")
+    tasks = [(domain["term"], domain.get("overview", False)) for domain in definition["domains"]]
     with multiprocessing.get_context("fork").Pool(WORKERS) as pool:
-        results = pool.map(consistency, terms)
-    ids = [domain["id"] for domain in definition["domains"]]
-    studies = {key: count for key, (count, _, _) in zip(ids, results)}
-    scores = {key: means for key, (_, means, _) in zip(ids, results)}
-    structures = {key: means for key, (_, _, means) in zip(ids, results)}
+        results = dict(zip((domain["id"] for domain in definition["domains"]), pool.map(domain_scores, tasks)))
+
+    def table(name, source=lambda result: result):
+        return {key: dict(sorted(source(result)[name].items())) for key, result in results.items()}
+
+    def atlas_table(source=lambda result: result):
+        return {atlas: {key: dict(sorted(source(result)["atlas_scores"][atlas].items()))
+                        for key, result in results.items()} for atlas in ATLAS_ANNOTATIONS}
+
+    annotations = [FSAVERAGE / "label" / f"{prefix}.{annotation}.annot"
+                   for annotation in ATLAS_ANNOTATIONS.values() for prefix in HEMISPHERES]
+    record = derivation()
+    record["files"].update({path.name: sha256(path) for path in annotations})
+    record["atlases"] = ("the same vertex values, mean per parcel of each fsaverage annotation "
+                         f"({', '.join(ATLAS_ANNOTATIONS.values())}), keyed by side and label index")
     write_json(SCORES, {
         "terms": {domain["id"]: domain["term"] for domain in definition["domains"]},
-        "derivation": {**derivation(), "studies": studies},
-        "scores": {key: dict(sorted(values.items())) for key, values in scores.items()},
-        "structure_scores": {key: dict(sorted(values.items())) for key, values in structures.items()},
+        "derivation": {**record, "studies": {key: result["studies"] for key, result in results.items()}},
+        "scores": table("scores"),
+        "structure_scores": table("structure_scores"),
+        "atlas_scores": atlas_table(),
     })
+
+    def association(result):
+        return result["association"]
+
+    write_json(MEASUREMENTS / "association.json", {
+        "map": ASSOCIATION_MAP,
+        "scores": table("scores", association),
+        "structure_scores": table("structure_scores", association),
+        "atlas_scores": atlas_table(association),
+    })
+    np.savez_compressed(MEASUREMENTS / "overview-vertices.npz", **{
+        f"{key}:{prefix}": texture for key, result in results.items() if result["vertices"]
+        for prefix, texture in result["vertices"].items()})
 
 
 if __name__ == "__main__":

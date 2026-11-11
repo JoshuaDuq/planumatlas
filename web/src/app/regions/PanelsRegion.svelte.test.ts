@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
+import strokeFile from '../../../../public/models/cdmd/stroke-cases.json' with { type: 'json' };
 import {
   domainName,
   domainRecord,
@@ -13,6 +14,7 @@ import {
 } from '../../lib/core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
 import { t } from '../../lib/core/i18n/index.ts';
+import { methodsHref } from '../../lib/core/methods.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
 import type { Manifest } from '../../lib/types/index.ts';
@@ -170,6 +172,265 @@ describe('selection', () => {
       expect(announcer.textContent).toBe(`Hidden: ${name}, left. 1 part hidden`),
     );
     expect(engine.model.state.hiddenRegions.has(other.region.id)).toBe(true);
+  });
+});
+
+describe('what each tab shows (1.4)', () => {
+  test.each([
+    ['Anatomy', 'anatomy'],
+    ['Functions', 'functions'],
+    ['Deficits', 'deficits'],
+    ['Circuits', 'circuits'],
+    ['Tracts', 'tracts'],
+  ] as const)(
+    'the %s list says its scope under its controls and ends with About this data',
+    async (name, place) => {
+      await boot();
+      await userEvent.click(page.getByRole('tab', { name }));
+      flushSync();
+      const copy = t('en', 'info');
+      await expect
+        .poll(() => list().querySelector(`[data-scope="${place}"]`)?.textContent)
+        .toBe(copy[place].scope);
+      const about = list().querySelector<HTMLElement>(`[data-about="${place}"]`)!;
+      const details = about.querySelector('details')!;
+      expect(details.open).toBe(false);
+      await userEvent.click(about.querySelector<HTMLElement>('summary')!);
+      expect(details.open).toBe(true);
+      expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
+        copy.shows,
+        copy.source,
+        copy.caution,
+      ]);
+      const links = [...about.querySelectorAll('a')];
+      expect(links.at(-1)!.getAttribute('href')).toBe(methodsHref(place));
+    },
+  );
+});
+
+describe('clinical material in the Deficits list (4.2)', () => {
+  const links = () => [...list().querySelectorAll<HTMLElement>('.clinical-links .link-row')];
+  const notice = () => document.querySelector('.notice-text')?.textContent ?? null;
+  const deficits = async () => {
+    await userEvent.click(page.getByRole('tab', { name: 'Deficits' }));
+    flushSync();
+  };
+
+  test('DEF-37 · Simulate a lesion stands above the groups and opens the Lesion tool', async () => {
+    await boot();
+    await deficits();
+    // No cohort published: the stroke cases row is not offered.
+    expect(links().map((row) => row.textContent!.trim())).toEqual(['Simulate a lesion']);
+    const first = list().querySelector('.clinical-links')!;
+    // The navigator holds every tab's list: the groups are this one's.
+    const groups = first.parentElement!.querySelector(':scope > [role="group"][aria-labelledby]')!;
+    expect(first.compareDocumentPosition(groups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await userEvent.click(links()[0]!);
+    const lesion = document.querySelector<HTMLElement>('.stage-tool[data-tool="lesion"]')!;
+    await expect.poll(() => lesion.getAttribute('aria-expanded')).toBe('true');
+    // A search shows the list alone.
+    await userEvent.click(page.getByRole('searchbox', { name: /search deficits/i }));
+    await userEvent.keyboard('aphasia');
+    await expect.poll(() => links().length).toBe(0);
+  });
+
+  test('DEF-38 · Stroke cases says to select a region, then opens the selected region’s cases', async () => {
+    engine = createFakeEngine({
+      manifest,
+      domains: domains as never,
+      strokeCases: strokeFile as never,
+    });
+    await boot();
+    await deficits();
+    const stroke = () => links().find((row) => row.textContent!.trim() === 'Stroke cases')!;
+    await userEvent.click(stroke());
+    expect(notice()).toBe('Select a region to see the stroke cases whose lesion reaches it.');
+    // The left supramarginal gyrus: one of the regions most cases reach.
+    engine.emit('pick', { id: 'destrieux:left:26', point: null });
+    flushSync();
+    await deficits();
+    await userEvent.click(stroke());
+    const section = () => detail().querySelector<HTMLDetailsElement>('.stroke-cases details');
+    await expect.poll(() => section()?.open).toBe(true);
+    await expect.poll(() => document.activeElement).toBe(section()!.querySelector('summary'));
+  });
+});
+
+describe('a function on the reader’s own atlas (3.1)', () => {
+  test('FUNC-48 · on Julich-Brain a function opened from Reported here paints there and keeps the area selected', async () => {
+    const area = manifest.regions.find(
+      (entry) =>
+        entry.atlas === 'julich' &&
+        entry.source_name === 'Area 44 (IFG)' &&
+        entry.hemisphere === 'left',
+    )!;
+    const world = await boot('#atlas=julich&lang=en');
+    engine.emit('pick', { id: area.id, point: null });
+    flushSync();
+    await userEvent.click(page.getByRole('tab', { name: 'Functions' }));
+    flushSync();
+    // Back to the list, where the area's functions lead.
+    world.anatomy.selectRegion(area.id);
+    app.ports.showList();
+    flushSync();
+    const row = list().querySelector<HTMLElement>(
+      '[data-region-functions] [data-function="language"]',
+    )!;
+    await userEvent.click(row);
+    await expect.poll(() => world.view.current.selectedFunction).toBe('language');
+    await expect.poll(() => world.view.current.paint?.id).toBe('function:language');
+    expect(world.view.current.atlas).toBe('julich');
+    expect(world.view.current.selectedRegion?.id).toBe(area.id);
+    expect(
+      [...world.view.current.paint!.colors.keys()].every((id) =>
+        /^(julich|aseg|learning):/.test(id),
+      ),
+    ).toBe(true);
+    // Not borrowed: the masthead shows no "via Functions".
+    expect(document.querySelector('#masthead')!.textContent).not.toContain('via Functions');
+  });
+});
+
+describe('a tract’s profile (4.3)', () => {
+  const profile = () => detail().querySelector<HTMLElement>('.tract-profile');
+
+  test('TRACT-50 · a tract’s name opens its profile under ‹ Tracts: data first, the method last', async () => {
+    await boot();
+    await userEvent.click(page.getByRole('tab', { name: 'Tracts' }));
+    flushSync();
+    const name = list().querySelector<HTMLButtonElement>('button.drill#native-tract-row-cst')!;
+    expect(name.textContent!.trim()).toBe('Corticospinal tract');
+    // The keys still toggle what is drawn: they are not inside the name.
+    expect(name.querySelector('input')).toBeNull();
+    await userEvent.click(name);
+    await expect.poll(profile).not.toBeNull();
+    expect(list().hidden).toBe(true);
+    expect(document.activeElement).toBe(profile()!.querySelector('h2'));
+    expect(profile()!.querySelector('h2')!.textContent).toBe('Corticospinal tract');
+    const runs = [...profile()!.querySelectorAll('.runs li')].map((li) => li.textContent!.trim());
+    expect(runs).toEqual([
+      'Left: 731 streamlines in this tracking run',
+      expect.stringMatching(/^Right: [\d,]+ streamlines in this tracking run$/),
+    ]);
+    const first = profile()!.querySelector('.end-list li')!;
+    expect(first.querySelector('.end-name')!.textContent).toBe(nameOf('destrieux:left:29'));
+    expect(first.querySelector('.end-share')!.textContent).toBe('18%');
+    // Data first, then the command, then how it was counted.
+    const children = [...profile()!.children].map((child) => child.className.split(' ')[0]);
+    expect(children.slice(-3)).toEqual(['ends', 'primary', 'note']);
+    // Back returns to the list, with the tract's row marked as the one opened.
+    await userEvent.click(page.getByRole('button', { name: /Tracts/ }).first());
+    await expect.poll(() => list().hidden).toBe(false);
+    expect(name.getAttribute('aria-current')).toBe('true');
+  });
+
+  test('TRACT-51 · a region picked on the stage takes the detail from the profile', async () => {
+    await boot();
+    await userEvent.click(page.getByRole('tab', { name: 'Tracts' }));
+    await userEvent.click(list().querySelector<HTMLButtonElement>('#native-tract-row-af')!);
+    await expect.poll(profile).not.toBeNull();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    expect(profile()).toBeNull();
+    await expect
+      .element(page.getByRole('heading', { level: 2, name: nameOf(REGION) }))
+      .toBeVisible();
+  });
+});
+
+describe('a stage pick that replaces a region being read', () => {
+  const OTHER = 'destrieux:left:12';
+  const selected = () => app.world!.view.current.selectedRegion?.id ?? null;
+  const body = () => detail().querySelector<HTMLElement>('.detail-body')!;
+  const sections = () => [
+    ...detail().querySelectorAll<HTMLDetailsElement>('.region-detail details'),
+  ];
+  const notice = () => document.querySelector<HTMLElement>('.notice');
+
+  test('STAGE-56 · with a section open, a pick says what it replaced, and Undo puts that region back where it was read', async () => {
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    const section = sections().find((element) => !element.open)!;
+    section.querySelector('summary')!.click();
+    flushSync();
+    body().scrollTop = 160;
+    const scrolled = body().scrollTop;
+    expect(scrolled).toBeGreaterThan(0);
+
+    engine.emit('pick', { id: OTHER, point: null });
+    flushSync();
+    expect(selected()).toBe(OTHER);
+    expect(notice()!.querySelector('.notice-text')!.textContent).toBe(
+      `A click on the brain replaced ${nameOf(REGION)}.`,
+    );
+    const undo = notice()!.querySelector<HTMLElement>('.notice-action')!;
+    expect(undo.textContent!.trim()).toBe('Undo');
+
+    await userEvent.click(undo);
+    expect(selected()).toBe(REGION);
+    expect(section.open).toBe(true);
+    await expect.poll(() => body().scrollTop).toBe(scrolled);
+    expect(notice()).toBeNull();
+  });
+
+  test('STAGE-56 · another choice takes the offer away for good; an Undo no longer in reach does nothing', async () => {
+    const THIRD = 'destrieux:left:38';
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    sections()[0]!.querySelector('summary')!.click();
+    flushSync();
+    engine.emit('pick', { id: OTHER, point: null });
+    flushSync();
+    expect(notice()!.querySelector('.notice-action')).not.toBeNull();
+    // The tree's choice is not the stage's: the offer goes.
+    app.world!.anatomy.selectRegion(THIRD);
+    flushSync();
+    expect(notice()?.querySelector('.notice-action') ?? null).toBeNull();
+    // Coming back to the click's region does not bring an old offer back.
+    app.world!.anatomy.selectRegion(OTHER);
+    flushSync();
+    expect(app.world!.anatomy.pickUndoable).toBe(false);
+    expect(notice()?.querySelector('.notice-action') ?? null).toBeNull();
+    app.world!.anatomy.selectRegion(THIRD);
+    app.world!.anatomy.undoPick();
+    expect(selected()).toBe(THIRD);
+  });
+
+  test('STAGE-57 · a section left open from an earlier region is not the reader’s place in this one', async () => {
+    const THIRD = 'destrieux:left:38';
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    sections()[0]!.querySelector('summary')!.click();
+    flushSync();
+    engine.emit('pick', { id: OTHER, point: null });
+    flushSync();
+    expect(notice()).not.toBeNull();
+    // At the new region the section is still open, as sections are, but the reader opened nothing here.
+    engine.emit('pick', { id: THIRD, point: null });
+    flushSync();
+    expect(selected()).toBe(THIRD);
+    expect(notice()).toBeNull();
+  });
+
+  test('STAGE-57 · nothing opened or scrolled: a pick replaces the region and says nothing', async () => {
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    expect(sections().every((element) => !element.open)).toBe(true);
+    expect(body().scrollTop).toBe(0);
+    engine.emit('pick', { id: OTHER, point: null });
+    flushSync();
+    expect(selected()).toBe(OTHER);
+    expect(notice()).toBeNull();
+    // The same region again is a request to read it, not a replacement.
+    sections()[0]!.querySelector('summary')!.click();
+    flushSync();
+    engine.emit('pick', { id: OTHER, point: null });
+    flushSync();
+    expect(notice()).toBeNull();
   });
 });
 

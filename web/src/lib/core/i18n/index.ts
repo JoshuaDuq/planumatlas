@@ -20,6 +20,7 @@ import * as functional from './areas/functional.ts';
 import * as functions from './areas/functions.ts';
 import * as guide from './areas/guide.ts';
 import * as header from './areas/header.ts';
+import * as info from './areas/info.ts';
 import * as inspector from './areas/inspector.ts';
 import * as lesion from './areas/lesion.ts';
 import * as link from './areas/link.ts';
@@ -34,6 +35,7 @@ import * as reasons from './areas/reasons.ts';
 import * as receptors from './areas/receptors.ts';
 import * as sheet from './areas/sheet.ts';
 import * as stimulation from './areas/stimulation.ts';
+import * as connectivity from './areas/connectivity.ts';
 import * as strokeCases from './areas/strokeCases.ts';
 import * as territories from './areas/territories.ts';
 import * as cerebellarFunctions from './areas/cerebellarFunctions.ts';
@@ -64,6 +66,7 @@ export const TRANSLATIONS = {
     footer: footer.en,
     functional: functional.en,
     functions: functions.en,
+    info: info.en,
     guide: guide.en,
     header: header.en,
     inspector: inspector.en,
@@ -80,6 +83,7 @@ export const TRANSLATIONS = {
     receptors: receptors.en,
     sheet: sheet.en,
     stimulation: stimulation.en,
+    connectivity: connectivity.en,
     strokeCases: strokeCases.en,
     territories: territories.en,
     cerebellarFunctions: cerebellarFunctions.en,
@@ -109,6 +113,7 @@ export const TRANSLATIONS = {
     footer: footer.fr,
     functional: functional.fr,
     functions: functions.fr,
+    info: info.fr,
     guide: guide.fr,
     header: header.fr,
     inspector: inspector.fr,
@@ -125,6 +130,7 @@ export const TRANSLATIONS = {
     receptors: receptors.fr,
     sheet: sheet.fr,
     stimulation: stimulation.fr,
+    connectivity: connectivity.fr,
     strokeCases: strokeCases.fr,
     territories: territories.fr,
     cerebellarFunctions: cerebellarFunctions.fr,

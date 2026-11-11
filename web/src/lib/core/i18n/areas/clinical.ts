@@ -14,6 +14,12 @@ export const en = {
   results: (count: number) =>
     count ? `${count} ${count === 1 ? 'deficit' : 'deficits'}` : 'No match',
   related: 'Neuropsychology',
+  // The Deficits list's first group while a region is selected.
+  atRegion: 'Involving this region',
+  // Above the list: the Lesion tool, and the stroke cases of the selected region (4.2).
+  simulateLesion: 'Simulate a lesion',
+  strokeSelect: 'Select a region to see the stroke cases whose lesion reaches it.',
+  strokeNone: (name: string) => `No stroke case in the cohort reaches ${name}.`,
   associations: 'Associations',
   findings: 'Evidence',
   studyFinding: 'Reported finding',
@@ -87,6 +93,10 @@ export const fr: typeof en = {
   results: (count: number) =>
     count ? `${count} ${count === 1 ? 'déficit' : 'déficits'}` : 'Aucun résultat',
   related: 'Neuropsychologie',
+  atRegion: 'Touchant cette région',
+  simulateLesion: 'Simuler une lésion',
+  strokeSelect: 'Sélectionnez une région pour voir les cas d’AVC dont la lésion l’atteint.',
+  strokeNone: (name: string) => `Aucun cas d’AVC de la cohorte n’atteint ${name}.`,
   associations: 'Associations',
   findings: 'Données probantes',
   studyFinding: 'Résultat rapporté',

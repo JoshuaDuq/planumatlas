@@ -665,6 +665,10 @@ describe('the notes and the command', () => {
     await ready();
     await page.getByText('About this data').click();
     await expect.element(page.getByText('Tracts in their own T1 reference brain.')).toBeVisible();
+    // The three parts every place has come first; Tracts' own notes follow them.
+    expect(
+      [...document.querySelectorAll('[data-about="tracts"] dt')].map((dt) => dt.textContent),
+    ).toEqual(['Shows', 'Source', 'Caution']);
     const source = page.getByRole('link', { name: 'Dataset source · CC0 (opens in a new tab)' });
     await expect.element(source).toHaveAttribute('target', '_blank');
     const methods = page.getByRole('link', {

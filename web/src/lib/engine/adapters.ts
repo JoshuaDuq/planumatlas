@@ -52,6 +52,7 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
     receptors: atlas.receptors,
     stimulation: atlas.stimulation,
     ftract: atlas.ftract,
+    connectivity: atlas.connectivity,
     segmentationAgreement: atlas.segmentationAgreement,
     get defaultDetail() {
       return atlas.defaultDetail;

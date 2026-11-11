@@ -9,11 +9,14 @@
 
   let {
     summary,
+    value = null,
     children,
     open = $bindable(false),
     variant = 'inline',
   }: {
     summary: string;
+    /** A section's headline value, read from data already in hand, so a closed summary hints at its content. */
+    value?: string | null;
     children: Snippet;
     open?: boolean;
     variant?: 'inline' | 'section';
@@ -21,7 +24,13 @@
 </script>
 
 <details class={variant} bind:open>
-  <summary>{summary}</summary>
+  <summary
+    >{#if value}<span class="summary-text"
+        >{summary}<span class="visually-hidden">{', '}</span><span class="summary-value"
+          >{value}</span
+        ></span
+      >{:else}{summary}{/if}</summary
+  >
   {@render children()}
 </details>
 
@@ -79,6 +88,20 @@
     }
     .section[open] > summary {
       margin-bottom: var(--space-1);
+    }
+    /* The value follows the name in quieter ink; both wrap, the chevron stays at the end. */
+    .summary-text {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: var(--space-2);
+      min-width: 0;
+    }
+    .summary-value {
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
     }
     .section > summary::before {
       order: 1;

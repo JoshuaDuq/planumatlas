@@ -366,7 +366,8 @@ describe('evidence', () => {
   test('each summary is named by its association and its visible label is contained in the name (x2-evidence-summary-name)', async () => {
     await mount();
     await row('neglect').click();
-    const summaries = [...document.querySelectorAll<HTMLElement>('summary')];
+    // The profile's own summaries: the list ends with its About this data.
+    const summaries = [...document.querySelectorAll<HTMLElement>('.clinical-profile summary')];
     expect(summaries.length).toBeGreaterThan(1);
     const names = summaries.map((summary) => summary.textContent!.trim());
     expect(new Set(names).size).toBe(names.length);
@@ -378,20 +379,26 @@ describe('evidence', () => {
   test('a toggled disclosure stays open across a language change and closes for another deficit', async () => {
     const { view } = await mount();
     await row('neglect').click();
-    const first = document.querySelector<HTMLDetailsElement>('details')!;
+    const first = document.querySelector<HTMLDetailsElement>('.clinical-profile details')!;
     first.querySelector('summary')!.click();
     await expect.poll(() => first.open).toBe(true);
     view.lang = 'fr';
     await expect.poll(() => heading().textContent!.trim()).toBe('Négligence spatiale');
-    expect(document.querySelector<HTMLDetailsElement>('details')!.open).toBe(true);
-    expect(document.querySelector('summary')!.textContent).toMatch(/^Données probantes, /);
+    expect(document.querySelector<HTMLDetailsElement>('.clinical-profile details')!.open).toBe(
+      true,
+    );
+    expect(document.querySelector('.clinical-profile summary')!.textContent).toMatch(
+      /^Données probantes, /,
+    );
     await row('aphasia').click();
     await expect.poll(() => heading().textContent!.trim()).toMatch(/Aphasie/);
     await row('neglect').click();
     await expect.poll(() => heading().textContent!.trim()).toBe('Négligence spatiale');
     // The bound `open` is applied once the page has settled.
     await settled();
-    expect(document.querySelector<HTMLDetailsElement>('details')!.open).toBe(false);
+    expect(document.querySelector<HTMLDetailsElement>('.clinical-profile details')!.open).toBe(
+      false,
+    );
   });
 
   test('publications link out with the new tab said in words, and English titles are marked in French', async () => {
@@ -591,6 +598,78 @@ describe('Restore previous view', () => {
     await mount({ restorable: false });
     await row('aphasia').click();
     expect(document.querySelector('.clinical-restore')).toBeNull();
+  });
+});
+
+describe('the selected region’s deficits', () => {
+  const region = (id: string) =>
+    (manifest as unknown as Manifest).regions.find((entry) => entry.id === id)!;
+  const group = () =>
+    document.querySelector<HTMLElement>('[data-testid="list"] [data-region-deficits]');
+  const ids = (root: ParentNode) =>
+    [...root.querySelectorAll<HTMLElement>('[data-deficit]')].map((item) => item.dataset.deficit);
+  const showAll = () => group()?.querySelector<HTMLElement>('.show-all') ?? null;
+
+  test('DEF-34 · a first group lists the deficits involving the region, in the list’s own order', async () => {
+    const { view, explorer, calls } = await mount();
+    // The left middle temporal gyrus: aphasia and eight more.
+    view.selectedRegion = region('destrieux:left:38');
+    await expect.poll(group).not.toBeNull();
+    const first = document.querySelector('[data-testid="list"] [role="group"][aria-labelledby]')!;
+    expect(first).toBe(group());
+    expect(document.getElementById(first.getAttribute('aria-labelledby')!)!.textContent).toBe(
+      'Involving this region',
+    );
+    showAll()!.click();
+    await expect.poll(() => ids(group()!).length).toBe(9);
+    const involving = new Set(
+      [...explorer.involved('destrieux:left:38')].flatMap((id) =>
+        explorer.deps.clinical.forRegion(id).map((association) => association.deficit),
+      ),
+    );
+    expect(ids(group()!)).toContain('aphasia');
+    await expectAxeClean();
+    // Each keeps its place: the full list's rows, filtered.
+    const listed = ids(document.querySelector('[data-testid="list"]')!).slice(9);
+    expect(listed).toHaveLength(131);
+    expect(ids(group()!)).toEqual(listed.filter((id) => involving.has(id!)));
+    group()!.querySelector<HTMLElement>('[data-deficit="aphasia"] .row')!.click();
+    expect(calls.at(-1)).toBe('deficit:aphasia');
+  });
+
+  test('DEF-35 · nothing selected, a region with no deficit, or a search: no group', async () => {
+    const { view } = await mount();
+    expect(group()).toBeNull();
+    expect(rows()).toHaveLength(131);
+    view.selectedRegion = region('destrieux:left:-1');
+    await settled();
+    expect(group()).toBeNull();
+    view.selectedRegion = region('destrieux:left:12');
+    await expect.poll(group).not.toBeNull();
+    view.clinicalQuery = 'aphasia';
+    await expect.poll(group).toBeNull();
+  });
+
+  test('DEF-36 · more than eight show eight and “Show all N”, which shows the rest and moves focus to the first of them', async () => {
+    const { view } = await mount();
+    // The left opercular inferior frontal gyrus: 12 deficits, the most of any region.
+    view.selectedRegion = region('destrieux:left:12');
+    await expect.poll(() => ids(group()!).length).toBe(8);
+    expect(showAll()!.textContent!.trim()).toBe('Show all 12');
+    showAll()!.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect.poll(() => ids(group()!).length).toBe(12);
+    expect(showAll()).toBeNull();
+    expect(document.activeElement).toBe(group()!.querySelectorAll('.row')[8]);
+    // Exactly eight: all shown, no command. Another region starts folded again.
+    view.selectedRegion = region('destrieux:left:17');
+    await expect.poll(() => ids(group()!).length).toBe(8);
+    expect(showAll()).toBeNull();
+    view.selectedRegion = region('destrieux:left:12');
+    await expect.poll(() => showAll()).not.toBeNull();
+    view.lang = 'fr';
+    await expect.poll(() => showAll()!.textContent!.trim()).toBe('Afficher les 12');
+    expect(group()!.querySelector('h3')!.textContent).toBe('Touchant cette région');
   });
 });
 

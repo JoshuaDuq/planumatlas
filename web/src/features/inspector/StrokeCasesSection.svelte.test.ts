@@ -74,6 +74,10 @@ function mount(
     chosen,
     drawn: { status: 'idle' },
     load() {},
+    // The Deficits list's ask to open the section (4.2); nothing asks here.
+    revealing: false,
+    reveal() {},
+    revealed() {},
     toggle() {},
     show: (ids: readonly string[]) => (store.chosen = [...ids]),
     clear: () => (store.chosen = []),

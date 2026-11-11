@@ -31,11 +31,11 @@
   import type { TractRow as TractRowData } from '../../lib/core/tracts.ts';
   import type { Engine, TractBundle as LoadedBundle } from '../../lib/engine/api.ts';
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
-  import { methodsHref } from '../../lib/core/methods.ts';
   import type { Explorer, Language } from '../../lib/types/index.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
-  import Disclosure from '../../lib/ui/Disclosure.svelte';
+  import AboutData from '../info/AboutData.svelte';
+  import ScopeLine from '../info/ScopeLine.svelte';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
@@ -55,6 +55,8 @@
     overlay = $bindable(false),
     minimum = $bindable(MINIMUM_LENGTH.min),
     onOpenMri,
+    openTract = null,
+    onOpenTract,
     elsewhere,
     onElsewhere,
   }: {
@@ -72,6 +74,9 @@
     /** The length filter in millimetres, as last applied. */
     minimum?: number;
     onOpenMri: (event: MouseEvent) => void;
+    /** The tract whose profile is open, and its opener (supervisor review 4.3); absent for a reference without profiles. */
+    openTract?: string | null;
+    onOpenTract?: (key: string) => void;
     /** The other tabs that find the same words. */
     elsewhere: (query: string) => Elsewhere[];
     /** Carries the words to another tab. */
@@ -379,6 +384,7 @@
         </button>
       {/if}
     </div>
+    <ScopeLine place="tracts" {lang} />
   </div>
 
   <div class="body">
@@ -420,6 +426,8 @@
                 {text}
                 hidden={!kept.has(row.key)}
                 ontoggle={toggle}
+                current={row.key === openTract}
+                onopen={onOpenTract}
               />
             {/each}
           </div>
@@ -502,42 +510,30 @@
       </details>
     </fieldset>
 
-    <div class="about">
-      <Disclosure summary={text.about} variant="section">
-        <p class="note">{text.nativeReference}</p>
-        {#if !matching}<p class="note">{text.outlineLimit}</p>{/if}
-        {#if matching}<p class="note">{text.mriHint}</p>{/if}
-        <p class="note">{text.metricsScope}</p>
-        <p class="note">{dataset.files}</p>
-        <a class="source" href={catalog.source} target="_blank" rel="noreferrer">
-          {text.source}<span class="visually-hidden">{` ${link.newTab}`}</span>{@render iconGraphic(
-            'external-link',
-          )}
-        </a>
-        {#if !matching}
-          <a
-            class="source"
-            href="{ASSET_BASE}diffusion/{catalog.brain_outline.provenance}"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {text.outlineProvenance}<span class="visually-hidden">
-              {link.newTab}</span
-            >{@render iconGraphic('external-link')}
-          </a>
-        {/if}
+    <AboutData place="tracts" {lang} host="list">
+      <p class="note">{text.nativeReference}</p>
+      {#if !matching}<p class="note">{text.outlineLimit}</p>{/if}
+      {#if matching}<p class="note">{text.mriHint}</p>{/if}
+      <p class="note">{text.metricsScope}</p>
+      <p class="note">{dataset.files}</p>
+      <a class="source" href={catalog.source} target="_blank" rel="noreferrer">
+        {text.source}<span class="visually-hidden">{` ${link.newTab}`}</span>{@render iconGraphic(
+          'external-link',
+        )}
+      </a>
+      {#if !matching}
         <a
           class="source"
-          href={methodsHref('tracts')}
-          hreflang="en"
+          href="{ASSET_BASE}diffusion/{catalog.brain_outline.provenance}"
           target="_blank"
           rel="noreferrer"
         >
-          {link.methodsPage}<span class="visually-hidden">{` ${link.newTab}`}</span
+          {text.outlineProvenance}<span class="visually-hidden">
+            {link.newTab}</span
           >{@render iconGraphic('external-link')}
         </a>
-      </Disclosure>
-    </div>
+      {/if}
+    </AboutData>
   </div>
 
   <div class="dock">
@@ -683,19 +679,11 @@
     }
 
     /* Settings and provenance follow the tract list on the shared text column. */
-    .settings,
-    .about {
+    .settings {
       margin-top: var(--space-6);
       margin-inline: var(--panel-inset);
       padding-block: var(--space-1);
       border-top: 1px solid var(--border-subtle);
-    }
-    .about :global(details) {
-      margin-top: 0;
-    }
-    .about :global(summary) {
-      min-height: var(--row-height);
-      font-weight: 500;
     }
     .settings > summary {
       display: flex;
@@ -957,8 +945,7 @@
         display: none;
       }
       .quiet,
-      .settings > summary,
-      .about :global(summary) {
+      .settings > summary {
         min-height: 44px;
       }
     }

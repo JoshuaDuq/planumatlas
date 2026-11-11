@@ -7,6 +7,23 @@ from brain_model.layers import cab_np, neuropsych_domains, neurosynth_terms
 from brain_model.sources import read_config
 
 
+def atlas_table(z=None):
+    """Every chosen term's atlas means, all below threshold unless `z` maps (term, atlas, key) to a value."""
+    definition = neurosynth_terms.read_definition()
+    parcels = {"julich": ["left:2", "left:3"], "schaefer": ["left:1"]}
+    rows = []
+    for term in sorted(definition["functions"] + definition["populations"]):
+        rows.append([term, [[(z or {}).get((term, atlas, key), 0.0) for key in parcels[atlas]]
+                            for atlas in ("julich", "schaefer")]])
+    return {"derivation": {}, "atlases": ["julich", "schaefer"], "parcels": parcels, "terms": rows}
+
+
+@pytest.fixture(autouse=True)
+def no_atlas_regions(monkeypatch):
+    """Partitions read a synthetic atlas table unless a test sets its own."""
+    monkeypatch.setattr(neurosynth_terms, "read_atlas_scores", lambda domains: atlas_table())
+
+
 def scores(terms):
     areas, _ = cab_np.read_label_key()
     return {"derivation": {}, "areas": sorted(name for _, name in areas),
@@ -58,6 +75,16 @@ def test_chosen_terms_reach_the_regions_at_the_domains_threshold_strongest_first
     assert published["threshold_z"] == neuropsych_domains.read_definition()["threshold_z"]
 
 
+def test_a_published_term_without_a_neurosynth_org_page_is_named(monkeypatch):
+    # "trauma" and "tool" have no page; "tool" reaches nothing here, so it is not published.
+    table = scores([])
+    table["terms"] = every_chosen_term(table, {"placebo": {"L_V1_ROI": 3.0}, "trauma": {"L_V1_ROI": 4.0}})
+    monkeypatch.setattr(neurosynth_terms, "read_scores", lambda: table)
+    published = neurosynth_terms.partition(regions())
+    assert [term for term, *_ in published["terms"]] == ["placebo", "trauma"]
+    assert published["neurosynth_org_missing"] == ["trauma"]
+
+
 def test_a_chosen_term_without_derived_scores_is_rejected(monkeypatch):
     table = scores([])
     table["terms"] = [row for row in every_chosen_term(table) if row[0] != "placebo"]
@@ -71,6 +98,9 @@ def test_a_chosen_term_without_derived_scores_is_rejected(monkeypatch):
     lambda definition: definition["functions"].insert(0, "zebra"),
     lambda definition: definition["populations"].append("zz placebo") or definition["functions"].append("zz placebo"),
     lambda definition: definition.pop("method"),
+    lambda definition: definition["neurosynth_org_missing"]["terms"].append("zzz not offered"),
+    lambda definition: definition["neurosynth_org_missing"]["terms"].reverse(),
+    lambda definition: definition["neurosynth_org_missing"].pop("checked"),
 ])
 def test_a_term_list_out_of_order_repeated_shared_or_without_method_is_rejected(tmp_path, change):
     definition = yaml.safe_load(neurosynth_terms.DEFINITION.read_text())
@@ -101,3 +131,19 @@ def test_only_an_anatomy_that_declares_the_layer_publishes_it():
     assert neurosynth_terms.is_declared(read_config("cdmd"))
     assert not neurosynth_terms.is_declared(read_config("fsaverage"))
     assert neurosynth_terms.limitations(read_config("fsaverage")) == []
+
+
+def test_offered_terms_reach_listed_atlas_regions_at_the_threshold_strongest_first(monkeypatch):
+    table = scores([])
+    table["terms"] = every_chosen_term(table, {"placebo": {"L_V1_ROI": 3.0}})
+    monkeypatch.setattr(neurosynth_terms, "read_scores", lambda: table)
+    monkeypatch.setattr(neurosynth_terms, "read_atlas_scores", lambda domains: atlas_table(
+        {("placebo", "julich", "left:2"): 3.5, ("placebo", "julich", "left:3"): 4.25,
+         ("placebo", "schaefer", "left:1"): 2.9}))
+    julich = [{"id": f"julich:left:{label}", "atlas": "julich", "hemisphere": "left", "source_label_id": label,
+               "source_name": name, "kind": "cortex"} for label, name in ((2, "Area 44 (IFG)"), (3, "Area Fo1 (OFC)"))]
+    published = neurosynth_terms.partition(regions() + julich)
+    atlas = published["atlases"]["julich"]
+    assert atlas["regions"] == ["julich:left:2", "julich:left:3"]
+    assert atlas["terms"]["placebo"] == [[1, 4.25], [0, 3.5]]
+    assert published["atlases"]["schaefer"]["terms"]["placebo"] == []

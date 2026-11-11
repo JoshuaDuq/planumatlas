@@ -14,7 +14,9 @@
   import { decimal } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
+  import RangeField from '../../lib/ui/RangeField.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import ExternalLink from '../deficits/ExternalLink.svelte';
   import MethodsLink from '../deficits/MethodsLink.svelte';
   import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
@@ -23,6 +25,7 @@
     comparisonProfile,
     functionProfile,
     type AreaRow,
+    type NeurosynthLink,
     type SharedAreaRow,
   } from './functions-view.ts';
 
@@ -64,6 +67,21 @@
   {#key model.lang}
     <p class="meta" role="status" data-error={String(model.failed)}>{model.meta}</p>
   {/key}
+  {#if content && !content.all && content.areas.length}
+    <!-- What the stage line describes, so directly under it (supervisor review 3.2). -->
+    <div class="paint-from">
+      <RangeField
+        label={copy.paintFrom}
+        value={model.paintFrom}
+        min={model.domains.threshold_z}
+        max={Math.max(model.domains.threshold_z, Math.floor(content.top * 2) / 2)}
+        step={0.5}
+        format={(value) => decimal(value, 1, lang)}
+        oninput={model.setPaintFrom}
+      />
+      <p class="note paint-from-note">{copy.paintFromNote(threshold)}</p>
+    </div>
+  {/if}
   {#if id}
     <LinkedMriButton {lang} onopen={model.openMri} />
   {/if}
@@ -153,6 +171,7 @@
 
       <p class="note method">{comparison.method}</p>
       <p class="note sources">{comparison.citation}</p>
+      {@render neurosynthLinks(comparison.functions.flatMap((entry) => entry.neurosynth ?? []))}
       <p class="note methods"><MethodsLink page="functions" {lang} /></p>
     </div>
   {/if}
@@ -244,7 +263,9 @@
                   </li>
                 {/each}
               </ul>
-              <p class="note lesion-note">{copy.lesionNote}</p>
+              <p class="note lesion-note">
+                {copy.lesionNote}{#if content.lesionsOn}{' '}{content.lesionsOn}{/if}
+              </p>
             {/if}
           </div>
         {/if}
@@ -252,10 +273,27 @@
 
       <p class="note method">{content.method}</p>
       <p class="note sources">{content.citation}</p>
+      {@render neurosynthLinks(content.neurosynth ? [content.neurosynth] : [])}
       <p class="note methods"><MethodsLink page="functions" {lang} /></p>
     </div>
   {/if}
 </div>
+
+<!-- What differs on the site, then each function's page there; nothing for a term it has no page for. -->
+{#snippet neurosynthLinks(links: NeurosynthLink[])}
+  {#if links.length}
+    {@const [before, after] = copy.neurosynthOpen('\u0000').split('\u0000')}
+    <p class="note neurosynth-note">{copy.neurosynthNote}</p>
+    {#each links as link (link.href)}
+      <p class="note neurosynth">
+        <ExternalLink href={link.href} {lang} hreflang="en"
+          >{before}<span lang={lang === 'en' ? undefined : 'en'}>{link.term}</span
+          >{after}</ExternalLink
+        >
+      </p>
+    {/each}
+  {/if}
+{/snippet}
 
 <!-- Twelve rows, the rest under a disclosure that closes on another profile. -->
 {#snippet areaList(areas: (AreaRow | SharedAreaRow)[])}
@@ -362,6 +400,12 @@
     .meta[data-error='true'] {
       color: var(--danger);
     }
+    .paint-from {
+      margin-top: var(--space-3);
+    }
+    .paint-from-note {
+      margin-top: var(--space-1);
+    }
     .content {
       padding-bottom: var(--panel-inset);
     }
@@ -397,8 +441,13 @@
     .content > .sources {
       color: var(--text-tertiary);
     }
-    .content > .methods {
+    .content > .methods,
+    .content > .neurosynth-note {
       margin-top: var(--space-2);
+    }
+    /* The site's page sits with the sentence that says how its map differs. */
+    .content > .neurosynth {
+      margin-top: var(--space-1);
     }
 
     .section {

@@ -38,6 +38,8 @@ export function createStrokeCasesStore({
   >({ status: 'idle' });
   // The surface colour before the cases changed it; null when they left it alone.
   let heldColorState = $state<SurfaceColor | null>(null);
+  // The selected region's cases were asked for from elsewhere (the Deficits list): the section opens them.
+  let revealing = $state(false);
   let request = 0;
 
   // Held only while the display still shows what the cases set; anything else has taken it over.
@@ -124,6 +126,17 @@ export function createStrokeCasesStore({
       return heldColor();
     },
     load,
+    /** Whether the section is asked to open on the selected region's cases, once they can be shown. */
+    get revealing() {
+      return revealing;
+    },
+    /** Ask the section to open; it says when it has, or a new selection withdraws the ask. */
+    reveal(): void {
+      revealing = true;
+    },
+    revealed(): void {
+      revealing = false;
+    },
     /** The reader's Retry after a failed download: the cohort asked for again. */
     retry(): void {
       if (cohort.status !== 'error') throw new Error('The cohort has not failed.');

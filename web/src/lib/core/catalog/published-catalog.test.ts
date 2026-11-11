@@ -453,13 +453,20 @@ describe('the published cdmd anatomy', () => {
     );
     const records = [...domains.search!.terms.values()];
     assert.equal(terms.regions.length, 379);
-    // Every sampled region, and the 16 teaching units that carry a sampled structure's score.
+    // Every sampled region, the 16 teaching units that carry a sampled structure's score, and the
+    // areas of the two atlases that passed the gate (278 Julich-Brain, 400 Schaefer); not Destrieux.
+    assert.deepEqual(domains.region_atlases, ['julich', 'schaefer']);
     assert.equal(
       manifest.regions.filter((region) => scoredRegion(domains, region)).length,
-      379 + 16,
+      379 + 16 + 278 + 400,
     );
     assert.equal(records.length, 277);
     assert.equal(records.filter((record) => record.kind === 'function').length, 232);
     assert.equal(records.filter((record) => record.kind === 'population').length, 45);
+    // Every term is measured on both listed atlases; six reach no area of each at z 3.
+    assert.deepEqual(domains.search!.atlases, ['julich', 'schaefer']);
+    for (const atlas of domains.region_atlases) {
+      assert.equal(records.filter((record) => !record.atlasAreas[atlas]!.length).length, 6);
+    }
   });
 });

@@ -5,6 +5,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
   import { documentTitle, offeredNotice } from '../../lib/core/workspace.ts';
+  import { reaching } from '../../lib/core/catalog/stroke-cases.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
@@ -41,6 +42,7 @@
     excursions,
     lesson,
     visualFieldMap,
+    strokeCases,
   }: World) {
     const { domains, functionalRegions } = engine.model;
     if (!domains)
@@ -53,6 +55,7 @@
       anatomy: regions,
       functionalRegions,
       openDeficit: (id) => deficits.openDeficit(id),
+      atlas: () => view.current.atlas,
     });
     const deficits = createDeficitsExplorer({
       clinical,
@@ -60,6 +63,14 @@
       session,
       excursions,
       openFunction: (id) => functions.openFunction(id),
+      clinicalLinks: {
+        simulateLesion() {
+          sheet?.uncover();
+          flushSync();
+          app!.ports.openStageTool('lesion');
+        },
+        showStrokeCases: strokeCases.available ? showStrokeCases : null,
+      },
     });
     const lessons = createCircuitExplorer({
       view,
@@ -145,6 +156,28 @@
     return lesson.circuit ? world.circuits.get(lesson.circuit).name[language] : null;
   });
 
+  /**
+   * The Deficits list's Stroke cases: the selected region's cases, opened in its detail; without a
+   * selection, or where no case reaches it, the notice says so.
+   */
+  function showStrokeCases() {
+    const { session, view, strokeCases, catalog } = world!;
+    const region = view.current.selectedRegion;
+    const copy = t(view.current.lang, 'clinical');
+    if (!region) {
+      session.notify({ kind: 'info', text: copy.strokeSelect });
+      return;
+    }
+    const { cohort } = strokeCases;
+    if (cohort.status === 'ready' && !reaching(cohort.data, region.id, Infinity).length) {
+      session.notify({ kind: 'info', text: copy.strokeNone(catalog.label(region.id).name) });
+      return;
+    }
+    strokeCases.reveal();
+    workspace!.showDetail();
+    sheet?.raise();
+  }
+
   /** The strip's clear takes the region first, then the function or deficit it sits under (app.js:1563-1569). */
   function clearContext() {
     const { anatomy, excursions, view } = world!;
@@ -177,6 +210,7 @@
     if (action === 'reload') void reloadWithoutStoredModels();
     else if (action === 'retry') world!.session.retryNotice();
     else if (action === 'restore') void world!.anatomy.restoreBeforeReveal();
+    else if (action === 'undo-pick') world!.anatomy.undoPick();
     else world!.coordinates!.undoReplacement();
   }
 
@@ -218,6 +252,17 @@
         raised.raise();
       },
       revealOnSelect: () => raised.raise(),
+      readingPlace: () => shell.readingPlace(),
+      // After the new region's sections are drawn, so one coming back open is not the reader's doing.
+      markReadingPlace() {
+        flushSync();
+        shell.markReadingPlace();
+      },
+      restoreReadingPlace(place) {
+        shell.showDetail();
+        flushSync();
+        shell.restoreReadingPlace(place);
+      },
       back: () => shell.back(),
       focusInDetail: () => shell.focusInDetail(),
       focusSearch(mode) {
@@ -273,7 +318,10 @@
         {selection}
         {place}
         groups={world.catalog.groups}
-        notice={offeredNotice(current.notice, world.lesion.replaced !== null)}
+        notice={offeredNotice(current.notice, {
+          lesionReplaced: world.lesion.replaced !== null,
+          pickUndoable: world.anatomy.pickUndoable,
+        })}
         shell={app.media.phone ? 'sheet' : 'rails'}
         stepper={panels.circuits.exploring && panels.circuits.circuit ? stepper : undefined}
         trailing={(world.excursions.restorable &&

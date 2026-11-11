@@ -27,7 +27,7 @@
   import { volumeParts } from './key.ts';
   import Select from '../../lib/ui/Select.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
-  import MethodsLink from '../deficits/MethodsLink.svelte';
+  import AboutData from '../info/AboutData.svelte';
 
   let {
     map,
@@ -412,7 +412,7 @@
       </button>
     {/if}
   </div>
-  <p class="methods"><MethodsLink page="overlay" {lang} /></p>
+  <AboutData place="overlay" {lang} host="popover" />
 </div>
 
 <style>
@@ -521,11 +521,6 @@
       margin-top: var(--space-3);
       padding-top: var(--space-3);
       border-top: 1px solid var(--overlay-border);
-    }
-    .methods {
-      margin: var(--space-3) 0 0;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
     }
   }
 </style>

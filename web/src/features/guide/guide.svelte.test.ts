@@ -15,7 +15,8 @@ const TARGETS = `
     <div class="data-bar">Destrieux · Regions</div>
     <div class="masthead-end"><span class="popover-host" style="display: contents"><button>⋯</button></span></div>
   </header>
-  <div role="tablist">
+  <aside id="workspace-panel" style="height: 120px">Region detail</aside>
+  <div class="workspace-tabs" role="tablist">
     <button id="workspace-tab-functions" role="tab">Functions</button>
     <button id="workspace-tab-deficits" role="tab">Deficits</button>
     <button id="workspace-tab-circuits" role="tab">Circuits</button>
@@ -87,8 +88,9 @@ const mri = {
 };
 let languages: string[] = [];
 let reserved: { right: number; bottom: number }[] = [];
-const start = (lang: 'en' | 'fr' = 'en') =>
+const start = (lang: 'en' | 'fr' = 'en', short = false) =>
   startGuide(lang, {
+    short,
     animate: false,
     onClose: (how) => {
       closed++;

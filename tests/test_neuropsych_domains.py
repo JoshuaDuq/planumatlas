@@ -180,3 +180,41 @@ def test_deficits_sit_under_the_functions_groups_in_the_same_order_and_words():
     functions = neuropsych_domains.read_definition()["groups"]
     assert [(group["id"], group["name"]["en"], group["name"]["fr"]) for group in deficits] == [
         (group["id"], group["name"], group["name_fr"]) for group in functions]
+
+
+def test_the_partition_names_its_own_terms_without_a_neurosynth_org_page(monkeypatch):
+    from brain_model.layers import neurosynth_terms
+
+    definition = neurosynth_terms.read_definition()
+    # "emotion" is a curated function's term, "trauma" a searched one.
+    monkeypatch.setattr(neurosynth_terms, "read_definition", lambda: {
+        **definition, "neurosynth_org_missing": {"terms": ["emotion", "trauma"]}})
+    assert neuropsych_domains.partition(published_regions())["neurosynth_org_missing"] == ["emotion"]
+
+
+def test_listed_atlases_take_their_own_parcel_means_and_destrieux_takes_none():
+    definition = neuropsych_domains.read_definition()
+    scores = neuropsych_domains.read_scores(definition)
+    assert definition["region_atlases"] == ["julich", "schaefer"]
+    julich = {"id": "julich:left:2", "atlas": "julich", "hemisphere": "left", "source_label_id": 2,
+              "source_name": "Area 44 (IFG)", "kind": "cortex"}
+    gap = {**julich, "id": "julich:left:9", "source_label_id": 9, "kind": "non-region"}
+    destrieux = {"id": "destrieux:left:12", "atlas": "destrieux", "hemisphere": "left",
+                 "source_label_id": 12, "source_name": "G_front_inf-Opercular", "kind": "cortex"}
+    assigned = neuropsych_domains.assign_atlases([julich, gap, destrieux], definition, scores)
+    assert set(assigned) == {"julich", "schaefer"}
+    found = assigned["julich"]["julich:left:2"]
+    language = scores["atlas_scores"]["julich"]["language"]["left:2"]
+    assert language >= definition["threshold_z"]
+    assert {"domain": "language", "z": round(language, 2)} in found
+    assert all(member["z"] >= definition["threshold_z"] for member in found)
+    assert "julich:left:9" not in assigned["julich"]
+
+
+def test_an_atlas_parcel_without_a_score_is_rejected():
+    definition = neuropsych_domains.read_definition()
+    scores = neuropsych_domains.read_scores(definition)
+    missing = {"id": "schaefer:left:999", "atlas": "schaefer", "hemisphere": "left",
+               "source_label_id": 999, "source_name": "x", "kind": "cortex"}
+    with pytest.raises(ValueError, match="schaefer:left:999"):
+        neuropsych_domains.assign_atlases([missing], definition, scores)

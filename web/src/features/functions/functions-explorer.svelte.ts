@@ -10,6 +10,7 @@ import {
   COMPARE_MAX,
   comparedIds,
   compareId,
+  paintAtlas,
   type NeuropsychDomains,
 } from '../../lib/core/catalog/neuropsych-domains.ts';
 import { t } from '../../lib/core/i18n/index.ts';
@@ -18,10 +19,10 @@ import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
 import { FOCUS_TARGETS, focusHeading, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
-import { areaCount, sharedCount } from './functions-view.ts';
+import { areaCount, atlasName, sharedCount } from './functions-view.ts';
 
 export interface FunctionExplorerDeps {
-  session: Pick<SessionStore, 'state' | 'setFunctionQuery'>;
+  session: Pick<SessionStore, 'state' | 'setFunctionQuery' | 'setPaintFrom'>;
   /** The S3 controller's members the tab calls (`createExcursions`). */
   excursions: Pick<
     Excursions,
@@ -39,6 +40,9 @@ export interface FunctionExplorerDeps {
   functionalRegions: FunctionalRegions | null;
   /** X2's entry point, which opens a deficit under its own runner. */
   openDeficit: (id: string) => unknown;
+  /** The atlas the cortex is drawn on now. */
+  atlas: () => string;
+  /** Under the T1 colour what the paint leaves shows the scan, not the tissue colour (paint.ts). */
 }
 
 /** The legacy run options: which busy and failure sentence, and which operation a bare failure names. */
@@ -146,7 +150,12 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
       if (!id) return '';
       const { lang } = session.state;
       const copy = t(lang, 'functions');
-      const text = { ...t(lang, 'clinical'), loading: copy.loading, failed: copy.failed };
+      const shownOn = atlasName(paintAtlas(domains, id, deps.atlas()), lang);
+      const text = {
+        ...t(lang, 'clinical'),
+        loading: copy.loading(shownOn),
+        failed: copy.failed(shownOn),
+      };
       return stageMessage(text, {
         opening,
         busy: run.busy,
@@ -156,16 +165,34 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
         lang,
         status:
           id === ALL_DOMAINS
-            ? copy.shown
+            ? copy.shown(shownOn)
             : comparedIds(id)
               ? sharedCount(domains, id, lang)
-              : areaCount(domains, id, lang),
+              : areaCount(
+                  domains,
+                  id,
+                  lang,
+                  paintAtlas(domains, id, deps.atlas()),
+                  session.state.paintFrom ?? domains.threshold_z,
+                ),
       });
     },
     get failed() {
       return Boolean(error);
     },
     domains,
+    /** The open single function's paint threshold: the reader's raised one, else the published z. */
+    get paintFrom(): number {
+      return session.state.paintFrom ?? domains.threshold_z;
+    },
+    /** Raises or lowers it; the published value is written as none, so a link leaves it out. */
+    setPaintFrom(value: number) {
+      session.setPaintFrom(value === domains.threshold_z ? null : value);
+    },
+    /** The atlas the open function is painted on: the reader's own where it can be, else HCP-MMP. */
+    get atlas() {
+      return paintAtlas(domains, selected() ?? ALL_DOMAINS, deps.atlas());
+    },
     anatomy: deps.anatomy,
     functionalRegions: deps.functionalRegions,
     deficitsMatching: excursions.deficitsMatching,

@@ -2,7 +2,8 @@
 
 The same method as derive_domain_scores.py, over the whole vocabulary. `run` fits one Slurm array
 task's share of the terms and writes one file per term, so a rerun skips what is done; `merge`
-gathers them into one table:
+gathers them into one table, and the chosen terms' means per parcel of each atlas whose regions list
+functions (config/neuropsych-domains.yaml region_atlases) into a second:
 
     python scripts/derive_term_scores.py run OUT
     python scripts/derive_term_scores.py merge OUT
@@ -14,6 +15,7 @@ import os
 import sys
 from pathlib import Path
 
+import yaml
 from nimare.extract import fetch_neurosynth
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -24,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from brain_model.sources import ROOT, write_json
 
 SCORES = ROOT / "data/neurosynth-terms/term-scores.json"
+ATLAS_SCORES = ROOT / "data/neurosynth-terms/atlas-term-scores.json"
 PREFIX = "terms_abstract_tfidf__"
 # Published z is read to two decimals; four keep the table a tenth of full precision's size.
 DECIMALS = 4
@@ -35,9 +38,10 @@ def vocabulary(dataset):
 
 def fit(task):
     term, path = task
-    count, areas, structures = derive.consistency(term)
+    count, areas, structures, atlases = derive.consistency_on_atlases(term)
     write_json(path, {"term": term, "studies": count, "scores": dict(sorted(areas.items())),
-                      "structure_scores": dict(sorted(structures.items()))})
+                      "structure_scores": dict(sorted(structures.items())),
+                      "atlas_scores": {atlas: dict(sorted(means.items())) for atlas, means in atlases.items()}})
 
 
 def run(out):
@@ -80,6 +84,31 @@ def merge(out):
     SCORES.parent.mkdir(parents=True, exist_ok=True)
     SCORES.write_text(json.dumps(header, indent=2)[:-2] + ',\n  "terms": [\n    '
                       + ",\n    ".join(rows) + "\n  ]\n}\n")
+    merge_atlases(fitted, header["derivation"])
+
+
+def merge_atlases(fitted, derivation):
+    """The chosen terms' means per parcel of each listed atlas, one term to a line, parcels in the listed order."""
+    chosen = yaml.safe_load((ROOT / "config/neurosynth-terms.yaml").read_text())
+    chosen = set(chosen["functions"]) | set(chosen["populations"])
+    atlases = yaml.safe_load((ROOT / "config/neuropsych-domains.yaml").read_text())["region_atlases"]
+    parcels = {atlas: sorted(fitted[0]["atlas_scores"][atlas]) for atlas in atlases}
+    kept = [entry for entry in fitted if entry["term"] in chosen]
+    if {entry["term"] for entry in kept} != chosen:
+        raise ValueError(f"Chosen terms without a fit: {sorted(chosen - {entry['term'] for entry in kept})}")
+    if any(sorted(entry["atlas_scores"][atlas]) != parcels[atlas] for entry in kept for atlas in atlases):
+        raise ValueError("Every term must be scored on the same parcels")
+    # The annotations the parcel means were read on, as the domain table records them.
+    annotations = [derive.FSAVERAGE / "label" / f"{prefix}.{derive.ATLAS_ANNOTATIONS[atlas]}.annot"
+                   for atlas in atlases for prefix in ("lh", "rh")]
+    record = {**derivation, "files": {**derivation["files"],
+                                      **{path.name: derive.sha256(path) for path in annotations}}}
+    header = {"derivation": record, "atlases": atlases, "parcels": parcels}
+    rows = [json.dumps([entry["term"], [[round(entry["atlas_scores"][atlas][key], DECIMALS)
+                                         for key in parcels[atlas]] for atlas in atlases]], allow_nan=False)
+            for entry in kept]
+    ATLAS_SCORES.write_text(json.dumps(header, indent=2)[:-2] + ',\n  "terms": [\n    '
+                            + ",\n    ".join(rows) + "\n  ]\n}\n")
 
 
 if __name__ == "__main__":

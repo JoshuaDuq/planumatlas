@@ -16,7 +16,10 @@ export interface GuideStop {
     | 'deficits'
     | 'circuits'
     | 'tracts'
-    | 'settings';
+    | 'settings'
+    | 'selectRegion'
+    | 'tabs'
+    | 'dock';
   title: string;
   body: string;
 }
@@ -28,6 +31,26 @@ export const en = {
   close: 'Close the tour',
   skip: 'Skip tour',
   progress: '{{current}} of {{total}}',
+  // The last card of a first visit's short tour starts the full one.
+  everything: (stops: number) => `See everything (${stops} stops)`,
+  // Stops only the first visit's short tour makes (supervisor review 2.3).
+  firstVisit: [
+    {
+      id: 'selectRegion',
+      title: 'A region’s detail',
+      body: 'A region you open is described here: its side and group, then Focus, Isolate, Hide and Linked MRI, what is known about it, and the research data measured on it.',
+    },
+    {
+      id: 'tabs',
+      title: 'Five ways in',
+      body: 'Anatomy lists every region. Functions and Deficits paint published evidence, Circuits walks through pathways, and Tracts shows white matter from this brain’s own diffusion scan. Each says what it shows; About this data says where it comes from.',
+    },
+    {
+      id: 'dock',
+      title: 'Tools on the picture',
+      body: 'Section cuts the brain and Display sets what is drawn. Lesion, Coordinate and Overlay bring something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map.',
+    },
+  ] as GuideStop[],
   stops: [
     {
       id: 'welcome',
@@ -119,6 +142,24 @@ export const fr: typeof en = {
   close: 'Fermer la visite',
   skip: 'Passer la visite',
   progress: '{{current}} sur {{total}}',
+  everything: (stops: number) => `Tout voir (${stops} étapes)`,
+  firstVisit: [
+    {
+      id: 'selectRegion',
+      title: 'Le détail d’une région',
+      body: 'Une région ouverte est décrite ici\u202f: son côté et son groupe, puis Focus, Isoler, Masquer et IRM liée, ce que l’on sait d’elle et les données de recherche mesurées sur elle.',
+    },
+    {
+      id: 'tabs',
+      title: 'Cinq entrées',
+      body: 'Anatomie recense chaque région. Fonctions et Déficits peignent des données publiées, Circuits parcourt des voies, et Faisceaux montre la substance blanche tirée de l’IRM de diffusion de ce cerveau. Chacun dit ce qu’il montre\u202f; À propos de ces données dit d’où elles viennent.',
+    },
+    {
+      id: 'dock',
+      title: 'Les outils de l’image',
+      body: 'Coupe tranche le cerveau et Affichage règle ce qui est tracé. Lésion, Coordonnée et Superposition apportent quelque chose sur le cerveau\u202f: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte.',
+    },
+  ] as GuideStop[],
   stops: [
     {
       id: 'welcome',

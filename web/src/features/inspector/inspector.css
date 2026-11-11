@@ -308,6 +308,10 @@
     grid-template-columns: minmax(0, 1fr) minmax(32px, 56px) 4.5rem;
     row-gap: 0;
   }
+  /* No swatch: the partner's name, the bar and r. */
+  .region-detail .connectivity-row {
+    grid-template-columns: minmax(0, 1fr) minmax(32px, 56px) 3rem;
+  }
   .region-detail .stimulation-counts {
     grid-column: 1 / -1;
   }

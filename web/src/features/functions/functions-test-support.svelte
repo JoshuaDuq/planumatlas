@@ -8,7 +8,9 @@
   import FunctionRestore from './FunctionRestore.svelte';
   import type { World } from './functions-test-world.ts';
 
-  let { world }: { world: World } = $props();
+  import type { Region } from '../../lib/types/index.ts';
+
+  let { world, region = null }: { world: World; region?: Region | null } = $props();
 
   let announcer: HTMLElement;
   let regionTitle: HTMLElement;
@@ -28,6 +30,7 @@
 <div class="list">
   <FunctionList
     model={world.explorer}
+    {region}
     elsewhere={(query) => {
       const count = query ? world.excursions.deficitsMatching(query, world.explorer.lang) : 0;
       return count ? [{ mode: 'deficits', count }] : [];

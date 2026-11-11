@@ -18,6 +18,13 @@ DEFINITION = ROOT / "config/neuropsych-domains.yaml"
 SCORES = ROOT / "data/neuropsych-domains/area-scores.json"
 NEUROPSYCHOLOGY = ROOT / "data/neuropsychology.yaml"
 FSAVERAGE = ROOT / "data/fsaverage"
+# The other cortical atlases each map is averaged over, by their fsaverage annotation. Their scores
+# are keyed "<side>:<label index>": unlike HCP-MMP's, their names do not say the side.
+ATLAS_ANNOTATIONS = {
+    "destrieux": "aparc.a2009s",
+    "julich": "JulichBrain3.1",
+    "schaefer": "Schaefer2018_400Parcels_7Networks_order",
+}
 # The lesion mappings these checks can read: Destrieux parcels, on fsaverage's own annotation.
 CHECKED_ATLAS = "destrieux"
 CHECKED_ANNOTATION = "aparc.a2009s"
@@ -85,6 +92,8 @@ def read_definition(path=DEFINITION):
         raise ValueError(f"Teaching units name unscored structures {sorted(unknown)}")
     if not definition["threshold_z"] > 0:
         raise ValueError("The membership threshold must be a positive z")
+    if not set(definition["region_atlases"]) <= set(ATLAS_ANNOTATIONS):
+        raise ValueError(f"Unscored region atlases {sorted(set(definition['region_atlases']) - set(ATLAS_ANNOTATIONS))}")
     scale = definition["z_scale"]
     starts = [band["from"] for band in scale]
     if (not scale or starts[0] != definition["threshold_z"] or starts != sorted(set(starts))
@@ -115,25 +124,34 @@ def read_scores(definition, path=SCORES):
             raise ValueError(f"{domain}: every structure score must be finite")
     if any(max(areas.values()) < definition["threshold_z"] for areas in scores["scores"].values()):
         raise ValueError("Every domain must reach the threshold somewhere")
+    for atlas in ATLAS_ANNOTATIONS:
+        parcels = scores["atlas_scores"][atlas]
+        if set(parcels) != set(terms):
+            raise ValueError(f"{atlas}: atlas scores and domains disagree")
+        keys = {frozenset(values) for values in parcels.values()}
+        if len(keys) != 1 or not all(math.isfinite(value) for values in parcels.values()
+                                     for value in values.values()):
+            raise ValueError(f"{atlas}: every domain needs a finite score for the same parcels")
     return scores
 
 
 def members(scores, definition, name, table="scores"):
     """
     The domains an area, or with `table="structure_scores"` a structure, reaches the threshold for,
-    strongest first.
+    strongest first. `table` may also be a mapping of domain to scores, as an atlas's are.
 
     Strength is the z as a share of the domain's own cortical maximum: consistency z grows with a
     term's study count, so raw z would hand every shared area to the largest literature. Structures
     are measured against the same cortical maximum, so adding them changes no area's order.
     """
+    values = scores[table] if isinstance(table, str) else table
     share = {}
     for domain in definition["domains"]:
-        z = scores[table][domain["id"]][name]
+        z = values[domain["id"]][name]
         if z >= definition["threshold_z"]:
             share[domain["id"]] = z / max(scores["scores"][domain["id"]].values())
     return [
-        {"domain": domain, "z": round(scores[table][domain][name], 2)}
+        {"domain": domain, "z": round(values[domain][name], 2)}
         for domain in sorted(share, key=lambda domain: -share[domain])
     ]
 
@@ -150,6 +168,47 @@ def assign(regions, definition, scores):
             continue
         if found:
             assigned[region["id"]] = found
+    return assigned
+
+
+def atlas_keys(regions, atlas):
+    """Each cortical region of a listed atlas by its fsaverage key "<side>:<label index>", its name checked there."""
+    names = {hemisphere: [name.decode() for name in read_annot(
+        FSAVERAGE / "label" / f"{prefix}.{ATLAS_ANNOTATIONS[atlas]}.annot")[2]]
+        for prefix, hemisphere in HEMISPHERES.items()}
+    keys = {}
+    for region in regions:
+        if region["atlas"] != atlas or region["kind"] != "cortex":
+            continue
+        if names[region["hemisphere"]][region["source_label_id"]] != region["source_name"]:
+            raise ValueError(f"{region['id']} is not {region['source_name']} on fsaverage")
+        keys[f"{region['hemisphere']}:{region['source_label_id']}"] = region["id"]
+    return keys
+
+
+def assign_atlases(regions, definition, scores):
+    """
+    Each listed atlas's regions with the domains they reach, by its own parcel means. The scores are
+    keyed by fsaverage label index, so each region's label must name the same parcel there.
+    """
+    assigned = {atlas: {} for atlas in definition["region_atlases"]}
+    names = {
+        (atlas, hemisphere): [name.decode() for name in read_annot(
+            FSAVERAGE / "label" / f"{prefix}.{ATLAS_ANNOTATIONS[atlas]}.annot")[2]]
+        for atlas in assigned for prefix, hemisphere in HEMISPHERES.items()
+    }
+    for region in regions:
+        atlas = region["atlas"]
+        if atlas not in assigned or region["kind"] != "cortex":
+            continue
+        key = f"{region['hemisphere']}:{region['source_label_id']}"
+        if key not in scores["atlas_scores"][atlas][definition["domains"][0]["id"]]:
+            raise ValueError(f"{region['id']} has no {atlas} parcel score")
+        if names[atlas, region["hemisphere"]][region["source_label_id"]] != region["source_name"]:
+            raise ValueError(f"{region['id']} is not {region['source_name']} on fsaverage")
+        found = members(scores, definition, key, scores["atlas_scores"][atlas])
+        if found:
+            assigned[atlas][region["id"]] = found
     return assigned
 
 
@@ -248,6 +307,9 @@ def lesion_checks(definition, scores):
 def partition(regions):
     from .learning import ATLAS_ID as UNIT_ATLAS
 
+    # Imported here: the term search reads this module's definition.
+    from .neurosynth_terms import org_missing
+
     definition = read_definition()
     scores = read_scores(definition)
     return {
@@ -269,7 +331,10 @@ def partition(regions):
             for domain in definition["domains"]
         ],
         "lesion_checks": lesion_checks(definition, scores),
+        "neurosynth_org_missing": org_missing(domain["term"] for domain in definition["domains"]),
         "regions": assign(regions, definition, scores),
+        "region_atlases": definition["region_atlases"],
+        "atlas_regions": assign_atlases(regions, definition, scores),
     }
 
 

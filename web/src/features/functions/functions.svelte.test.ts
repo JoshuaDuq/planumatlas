@@ -6,11 +6,21 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import { ALL_DOMAINS, domainAreas } from '../../lib/core/catalog/neuropsych-domains.ts';
+import {
+  ALL_DOMAINS,
+  domainAreas,
+  functionsAt,
+} from '../../lib/core/catalog/neuropsych-domains.ts';
+import type { Region } from '../../lib/types/index.ts';
+import { manifest } from './functions-test-world.ts';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
-import { AREAS_SHOWN, TERMS_SHOWN } from './functions-view.ts';
+import {
+  AREAS_SHOWN,
+  REGION_ROWS_SHOWN as AREAS_SHOWN_HERE,
+  TERMS_SHOWN,
+} from './functions-view.ts';
 import { createWorld, deferred, type World } from './functions-test-world.ts';
 import Fixture from './functions-test-support.svelte';
 
@@ -25,12 +35,12 @@ const few = () =>
     return n > 0 && n <= AREAS_SHOWN;
   })!;
 
-function mount(lang: 'en' | 'fr' = 'en', explorer = true) {
+function mount(lang: 'en' | 'fr' = 'en', explorer = true, region: Region | null = null) {
   world = createWorld();
   if (explorer) world.session.setExplorer('functions');
   world.session.setLang(lang);
   document.documentElement.lang = lang;
-  return render(Fixture, { world });
+  return render(Fixture, { world, region });
 }
 
 beforeEach(async () => {
@@ -53,6 +63,9 @@ const announcer = () => document.getElementById('announcer')!;
 const compareToggle = () => document.querySelector<HTMLElement>('.compare-toggle')!;
 const compareOpen = () => document.querySelector<HTMLElement>('[data-compare-open]');
 const methods = () => [...document.querySelectorAll<HTMLAnchorElement>('.profile .methods a')];
+const neurosynth = () => [
+  ...document.querySelectorAll<HTMLAnchorElement>('.profile .neurosynth a'),
+];
 
 /** Types a query and waits for the list to settle. */
 async function search(text: string) {
@@ -142,6 +155,92 @@ describe('the list', () => {
     mount('en', false);
     expect(document.querySelector<HTMLElement>('.browser')!.checkVisibility()).toBe(false);
     expect(document.querySelector<HTMLElement>('.head')!.checkVisibility()).toBe(false);
+  });
+});
+
+describe('the selected region’s functions (1.1)', () => {
+  const byName = (name: string) => manifest.regions.find((entry) => entry.source_name === name)!;
+  const here = () => document.querySelector<HTMLElement>('[data-region-functions]');
+  const hereIds = () =>
+    [...here()!.querySelectorAll<HTMLElement>('[data-function]')].map(
+      (row) => row.dataset.function,
+    );
+
+  test('FUNC-40 · the amygdala leads the list with its functions by z, fear among them; nothing selected, no group', async () => {
+    const amygdala = byName('Left-Amygdala');
+    const screen = await mount('en', true, amygdala);
+    await expect.poll(here).not.toBeNull();
+    const first = document.querySelector('[role="group"][aria-labelledby]')!;
+    expect(first).toBe(here());
+    expect(first.querySelector('.group-heading')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+      'Reported here z',
+    );
+    const expected = functionsAt(world.domains, amygdala.id).map((record) => record.id);
+    expect(hereIds()).toEqual(expected.slice(0, AREAS_SHOWN_HERE));
+    if (expected.length > AREAS_SHOWN_HERE)
+      here()!.querySelector<HTMLElement>('.show-all')!.click();
+    await expect.poll(hereIds).toEqual(expected);
+    expect(expected).toContain('fear');
+    await expectAxeCleanOnce('light', 1280);
+    // The note follows the rows: data first.
+    const note = here()!.querySelector('.here-note')!;
+    expect(note.textContent).toContain('That does not make the region specific to them.');
+    expect(
+      here()!.querySelector('ul')!.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // A row opens its function as the list's rows do; only the list's own row is the current one.
+    await userEvent.click(rowOf('fear'));
+    expect(world.session.state.selectedFunction).toBe('fear');
+    await expect.poll(() => document.querySelectorAll('[aria-current="true"]').length).toBe(1);
+    expect(here()!.querySelector('[aria-current="true"]')).toBeNull();
+    await screen.rerender({ world, region: null });
+    expect(here()).toBeNull();
+  });
+
+  test('FUNC-43 · a region with more than eight shows eight and “Show all N”; pressing it shows N', async () => {
+    // The right anterior ventral insula: the most functions of any area.
+    const insula = manifest.regions.find((entry) => entry.source_name === 'R_AVI_ROI')!;
+    const total = functionsAt(world?.domains ?? createWorld().domains, insula.id).length;
+    expect(total).toBe(65);
+    mount('en', true, insula);
+    await expect.poll(() => hereIds().length).toBe(8);
+    const more = here()!.querySelector<HTMLElement>('.show-all')!;
+    expect(more.textContent!.trim()).toBe('Show all 65');
+    more.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect.poll(() => hereIds().length).toBe(65);
+    expect(here()!.querySelector('.show-all')).toBeNull();
+    expect(document.activeElement).toBe(here()!.querySelectorAll('.function-row')[8]);
+  });
+
+  test('a scored area that reaches nothing says so; a search hides the group; French', async () => {
+    const quiet = manifest.regions.find(
+      (entry) =>
+        entry.atlas === 'hcp-mmp' &&
+        entry.kind === 'cortex' &&
+        !createWorld().domains.regions[entry.id],
+    )!;
+    const screen = await mount('en', true, quiet);
+    await expect
+      .poll(() => here()?.querySelector('.here-note')?.textContent)
+      .toBe('No function reaches z\u00a03 here.');
+    await screen.rerender({ world, region: byName('Left-Amygdala') });
+    await search('fear');
+    expect(here()).toBeNull();
+  });
+
+  test('the group arriving keeps a scrolled list where it was', async () => {
+    const screen = await mount('en', true, null);
+    const scroller = document.querySelector<HTMLElement>('.browser')!;
+    // As in the panel: the list scrolls in its own column.
+    Object.assign(scroller.style, { height: '300px', overflowY: 'auto' });
+    scroller.scrollTop = 200;
+    expect(scroller.scrollTop).toBe(200);
+    const group = () => scroller.querySelector<HTMLElement>('[data-global-group]')!;
+    const before = group().getBoundingClientRect().top;
+    await screen.rerender({ world, region: byName('Left-Amygdala') });
+    await expect.poll(here).not.toBeNull();
+    expect(Math.round(group().getBoundingClientRect().top)).toBe(Math.round(before));
   });
 });
 
@@ -381,6 +480,32 @@ describe('opening a function', () => {
     ]);
   });
 
+  test('FUNC-44 · a profile links its term’s page on Neurosynth, after the areas, with what differs there', async () => {
+    mount('fr');
+    await open('working-memory');
+    const links = neurosynth();
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      'https://neurosynth.org/analyses/terms/working%20memory/',
+    ]);
+    expect(links[0]!.textContent).toBe(
+      'Ouvrir «\u00a0working memory\u00a0» sur Neurosynth (s’ouvre dans un nouvel onglet)',
+    );
+    // The term is Neurosynth's English, whatever the reader's language.
+    expect(links[0]!.querySelector('[lang="en"]')!.textContent).toBe('working memory');
+    const note = document.querySelector('.profile .neurosynth-note')!;
+    expect(note.textContent).toContain('FDR attendu de 0,01');
+    const areas = document.querySelector('.profile .areas')!;
+    expect(areas.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  test('FUNC-45 · a term Neurosynth.org has no page for links none and says nothing of the site', async () => {
+    mount();
+    await open('emotion');
+    expect(methods()).toHaveLength(1);
+    expect(neurosynth()).toEqual([]);
+    expect(document.querySelector('.profile .neurosynth-note')).toBeNull();
+  });
+
   test('opens with the profile at the top of the scrolling parent', async () => {
     mount();
     const scroller = document.querySelector<HTMLElement>('.detail')!;
@@ -499,7 +624,7 @@ describe('areas', () => {
     await open(many().id);
     const all = domainAreas(world.domains, many().id);
     expect(document.querySelectorAll('.profile .areas > li').length).toBe(all.length);
-    const details = document.querySelector<HTMLDetailsElement>('details')!;
+    const details = document.querySelector<HTMLDetailsElement>('.profile details')!;
     expect(details.open).toBe(false);
     expect(details.querySelector('summary')!.textContent).toBe(
       `${all.length - AREAS_SHOWN} more areas`,
@@ -791,6 +916,11 @@ describe('compare', () => {
     await expect.poll(() => meta().textContent).toMatch(/^Both reach \d+ areas?.* at z\s≥\s3$/);
     expect(world.session.state.selectedFunction).toBe(`compare:${pair.join(',')}`);
     expect(methods()).toHaveLength(1);
+    // One Neurosynth page per compared function, in order.
+    expect(neurosynth().map((link) => link.getAttribute('href'))).toEqual([
+      'https://neurosynth.org/analyses/terms/working%20memory/',
+      'https://neurosynth.org/analyses/terms/attention/',
+    ]);
     await expectAxeCleanOnce('light', 1280);
     const shared = document.querySelector('[data-compare-section="shared"]')!;
     const sharedRows = shared.querySelectorAll('[data-function-region]');

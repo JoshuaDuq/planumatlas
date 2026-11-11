@@ -51,6 +51,8 @@ export interface LinkState {
   detail: string;
   explorer: Explorer;
   selectedFunction: string | null;
+  /** A raised paint threshold for the open function, or null for the published one. */
+  paintFrom: number | null;
   selectedDeficit: string | null;
   circuit: string | null;
   circuitStep: number;

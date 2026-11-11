@@ -260,6 +260,7 @@ describe('the Section popover', () => {
     await vi.waitFor(() => expect(locate('toolbar', 'Plan de coupe').element()).toBeTruthy());
     expect(control('button', 'Cerveau entier').getAttribute('aria-pressed')).toBe('true');
     expect(page.getByRole('combobox', { name: 'Étiquettes de coupe' }).element()).toBeTruthy();
+    await userEvent.click(page.getByText('À propos de ces données'));
     const methods = page.getByRole('link', {
       name: 'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',
       exact: true,

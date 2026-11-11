@@ -29,6 +29,7 @@ from .layers import (
     cab_np,
     cerebellar_functions,
     coordinate_spaces,
+    functional_connectivity,
     functional_regions,
     networks,
     neuropsych_domains,
@@ -1035,6 +1036,7 @@ def main():
         "receptor_fingerprints": receptor_fingerprints.validate(config, manifest),
         "stimulation_responses": stimulation_responses.validate(config, manifest),
         "stimulation_ftract": stimulation_ftract.validate(config, manifest),
+        "functional_connectivity": functional_connectivity.validate(config, manifest),
         **({"neurosynth_terms": neurosynth_terms.validate(config, manifest)}
            if neurosynth_terms.is_declared(config) else {}),
         **(

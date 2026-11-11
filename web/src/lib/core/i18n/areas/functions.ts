@@ -14,14 +14,16 @@ export const en = {
   // The study count arrives as words (format.js count).
   term: (term: string, studies: string) =>
     `Activation evidence · Neurosynth term “${term}” · ${studies}`,
-  areas: (areas: number, structures: number, threshold: string) =>
-    `${areas} HCP-MMP ${areas === 1 ? 'area' : 'areas'}` +
+  // The atlas arrives as its short name (header.atlasShort): HCP-MMP, or the reader's own where it is painted.
+  areas: (areas: number, structures: number, threshold: string, atlas = 'HCP-MMP') =>
+    `${areas} ${atlas} ${areas === 1 ? 'area' : 'areas'}` +
     (structures ? ` and ${structures} ${structures === 1 ? 'structure' : 'structures'}` : '') +
     ` at z\u00a0≥\u00a0${threshold}`,
   areasShort: (areas: number, structures: number) =>
     `${areas} ${areas === 1 ? 'area' : 'areas'}` +
     (structures ? `, ${structures} ${structures === 1 ? 'structure' : 'structures'}` : ''),
-  none: (threshold: string) => `No HCP-MMP area or structure reaches z\u00a0${threshold}.`,
+  none: (threshold: string, atlas = 'HCP-MMP') =>
+    `No ${atlas} area or structure reaches z\u00a0${threshold}.`,
   areasHeading: 'Areas and structures, strongest first',
   more: (count: number) => `${count} more ${count === 1 ? 'area' : 'areas'}`,
   openArea: 'Show area',
@@ -29,9 +31,14 @@ export const en = {
   lesionHeading: 'Deficits that check this map',
   lesionNote:
     'Share of each cited parcel the map colours, measured on fsaverage. A check of the map against lesion studies, never tuned to pass.',
-  loading: 'Preparing the HCP-MMP areas…',
-  failed: 'The HCP-MMP areas could not be shown.',
-  shown: 'Shown on the HCP-MMP areas',
+  loading: (atlas: string) => `Preparing the ${atlas} areas…`,
+  failed: (atlas: string) => `The ${atlas} areas could not be shown.`,
+  shown: (atlas: string) => `Shown on the ${atlas} areas`,
+  lesionsOn: 'Lesion checks are measured on HCP-MMP areas.',
+  // The profile's paint threshold (supervisor review 3.2): it changes the paint, the key and the count only.
+  paintFrom: 'Paint areas from z ≥',
+  paintFromNote: (threshold: string) =>
+    `Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z\u00a0≥\u00a0${threshold}.`,
   termsHeading: 'Neurosynth terms',
   populationsHeading: 'Neurosynth clinical groups',
   caveat:
@@ -66,6 +73,15 @@ export const en = {
     'A Neurosynth term, not a curated function: chosen for naming a function, task or stimulus, but its map was not checked against what it names or against lesion studies.',
   populationCaveat:
     'A clinical group: its studies mostly compare people with the condition with healthy people. The map shows where they report activation, not where damage causes the condition.',
+  // The term arrives as Neurosynth's English.
+  neurosynthOpen: (term: string) => `Open “${term}” on Neurosynth`,
+  neurosynthNote:
+    'Neurosynth.org’s uniformity-test map is the one closest to Planum’s. The site thresholds it at an expected FDR of 0.01; Planum paints the unthresholded map averaged per area, so the two differ.',
+  // The selected region's functions, first in the list (supervisor review 1.1).
+  reportedHere: 'Reported here',
+  reportedNote:
+    'Studies of these functions report activation here. That does not make the region specific to them.',
+  noneHere: (threshold: string) => `No function reaches z\u00a0${threshold} here.`,
   lesionBridgeHeading: 'Lesion evidence',
   // The query arrives as typed.
   deficitBridge: (count: number, query: string) =>
@@ -96,14 +112,15 @@ export const fr: typeof en = {
     'Cherchez une fonction, une tâche ou un stimulus, comme «\u00a0faces\u00a0» ou «\u00a0reward\u00a0», ou un groupe clinique comme «\u00a0aphasia\u00a0».',
   term: (term: string, studies: string) =>
     `Données d’activation · terme Neurosynth «\u00a0${term}\u00a0» · ${studies}`,
-  areas: (areas: number, structures: number, threshold: string) =>
-    `${areas} ${areas === 1 ? 'aire HCP-MMP' : 'aires HCP-MMP'}` +
+  areas: (areas: number, structures: number, threshold: string, atlas = 'HCP-MMP') =>
+    `${areas} ${areas === 1 ? 'aire' : 'aires'} ${atlas}` +
     (structures ? ` et ${structures} ${structures === 1 ? 'structure' : 'structures'}` : '') +
     ` à z\u00a0≥\u00a0${threshold}`,
   areasShort: (areas: number, structures: number) =>
     `${areas} ${areas === 1 ? 'aire' : 'aires'}` +
     (structures ? `, ${structures} ${structures === 1 ? 'structure' : 'structures'}` : ''),
-  none: (threshold: string) => `Aucune aire HCP-MMP ni structure n’atteint z\u00a0${threshold}.`,
+  none: (threshold: string, atlas = 'HCP-MMP') =>
+    `Aucune aire ${atlas} ni structure n’atteint z\u00a0${threshold}.`,
   areasHeading: 'Aires et structures, de la plus forte à la plus faible',
   more: (count: number) => `${count} ${count === 1 ? 'autre aire' : 'autres aires'}`,
   openArea: 'Afficher l’aire',
@@ -111,9 +128,13 @@ export const fr: typeof en = {
   lesionHeading: 'Déficits qui vérifient cette carte',
   lesionNote:
     'Part de chaque parcelle citée que la carte colore, mesurée sur fsaverage. Une vérification de la carte par les études lésionnelles, jamais ajustée pour réussir.',
-  loading: 'Préparation des aires HCP-MMP…',
-  failed: 'Les aires HCP-MMP n’ont pas pu être affichées.',
-  shown: 'Affichée sur les aires HCP-MMP',
+  loading: (atlas: string) => `Préparation des aires ${atlas}…`,
+  failed: (atlas: string) => `Les aires ${atlas} n’ont pas pu être affichées.`,
+  shown: (atlas: string) => `Affichée sur les aires ${atlas}`,
+  lesionsOn: 'Les vérifications lésionnelles sont mesurées sur les aires HCP-MMP.',
+  paintFrom: 'Peindre les aires à partir de z ≥',
+  paintFromNote: (threshold: string) =>
+    `Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z\u00a0≥\u00a0${threshold}.`,
   termsHeading: 'Termes Neurosynth',
   populationsHeading: 'Groupes cliniques Neurosynth',
   caveat:
@@ -147,6 +168,13 @@ export const fr: typeof en = {
     'Un terme Neurosynth, et non une fonction retenue\u202f: choisi parce qu’il désigne une fonction, une tâche ou un stimulus, mais sa carte n’a été vérifiée ni par rapport à ce qu’il désigne ni par des études lésionnelles.',
   populationCaveat:
     'Un groupe clinique\u202f: ses études comparent surtout des personnes atteintes à des personnes en bonne santé. La carte montre où elles rapportent une activation, et non où une lésion cause l’affection.',
+  neurosynthOpen: (term: string) => `Ouvrir «\u00a0${term}\u00a0» sur Neurosynth`,
+  neurosynthNote:
+    'La carte du test d’uniformité de Neurosynth.org est la plus proche de celle de Planum. Le site la seuille à un FDR attendu de 0,01\u202f; Planum peint la carte non seuillée, moyennée par aire\u202f: les deux diffèrent.',
+  reportedHere: 'Rapportées ici',
+  reportedNote:
+    'Les études de ces fonctions rapportent une activation ici. Cela ne signifie pas que la région leur soit propre.',
+  noneHere: (threshold: string) => `Aucune fonction n’atteint z\u00a0${threshold} ici.`,
   lesionBridgeHeading: 'Données lésionnelles',
   deficitBridge: (count: number, query: string) =>
     `Déficits\u202f: ${count} ${count === 1 ? 'profil lésionnel correspond' : 'profils lésionnels correspondent'} à «\u00a0${query}\u00a0»`,

@@ -124,6 +124,9 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     selectedFunction: null,
     clinicalQuery: '',
     selectedDeficit: null,
+    selectedTract: null,
+    connectivitySeed: null,
+    paintFrom: null,
     // One of the open deficit's findings shown alone, or null for all of them.
     selectedFinding: null,
     // The reader chose a masthead colour or atlas over the open function's or deficit's paint.
@@ -154,15 +157,24 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
 
     setExplorer(explorer: Explorer) {
       if (!EXPLORERS.includes(explorer)) throw new Error(`Unknown explorer: ${explorer}`);
-      return act({ explorer, paintLifted: false });
+      // Another tab ends Anatomy's connectivity paint.
+      const connectivitySeed = explorer === state.explorer ? state.connectivitySeed : null;
+      return act({ explorer, paintLifted: false, connectivitySeed });
     },
 
     setFunctionQuery: (functionQuery: string) => act({ functionQuery }),
-    setFunction: (selectedFunction: string | null) => act({ selectedFunction, paintLifted: false }),
+    // Another function starts at the published threshold.
+    setFunction: (selectedFunction: string | null) =>
+      act({ selectedFunction, paintLifted: false, paintFrom: null }),
+    setPaintFrom: (paintFrom: number | null) => act({ paintFrom }),
     setClinicalQuery: (clinicalQuery: string) => act({ clinicalQuery }),
     setDeficit: (selectedDeficit: string | null) =>
       act({ selectedDeficit, selectedFinding: null, paintLifted: false }),
     setFinding: (selectedFinding: string | null) => act({ selectedFinding, paintLifted: false }),
+    setTract: (selectedTract: string | null) => act({ selectedTract }),
+    // Painting shows a lifted paint again; clearing leaves the reader's lift as it is.
+    setConnectivitySeed: (connectivitySeed: string | null) =>
+      act(connectivitySeed ? { connectivitySeed, paintLifted: false } : { connectivitySeed }),
     liftPaint: () => act({ paintLifted: true }),
     /** The reader asked for a paint again, as the lesion's findings on the brain. */
     showPaint: () => act({ paintLifted: false }),

@@ -4,17 +4,22 @@
   row stays a Tab stop and the arrow keys are a convenience (U6's `listNav`, decision 38 on #4).
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { deficitsForRegion } from '../../lib/core/panels/clinical.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import type { Explorer } from '../../lib/types/index.ts';
   import { createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import DrillRow from '../../lib/ui/DrillRow.svelte';
+  import LinkRow from './LinkRow.svelte';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import { listNav } from '../../lib/ui/list-nav.ts';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
+  import ShowAll from '../../lib/ui/ShowAll.svelte';
+  import AboutData from '../info/AboutData.svelte';
+  import ScopeLine from '../info/ScopeLine.svelte';
   import DeficitSearch from './DeficitSearch.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
 
@@ -45,6 +50,30 @@
   const count = $derived(groups.reduce((sum, entry) => sum + entry.deficits.length, 0));
   const others = $derived(elsewhere(query));
   const near = $derived(groups.length === 0 ? clinical.nearest(query, lang) : null);
+
+  /** Rows of the selected region's group before "Show all N". */
+  const REGION_ROWS_SHOWN = 8;
+  const regionId = $derived(view.selectedRegion?.id ?? null);
+  // The selected region's deficits, each where the list below has it; a search shows the list alone.
+  const atRegion = $derived.by(() => {
+    if (!regionId || query) return [];
+    const involving = new Set(deficitsForRegion(explorer, regionId));
+    return groups.flatMap(({ deficits }) => deficits).filter(({ id }) => involving.has(id));
+  });
+  // Another region's group starts with its first rows again.
+  let unfolded = $state(false);
+  $effect.pre(() => {
+    void regionId;
+    unfolded = false;
+  });
+  const atRegionShown = $derived(unfolded ? atRegion : atRegion.slice(0, REGION_ROWS_SHOWN));
+  let regionRows = $state<HTMLElement>();
+  /** The command leaves once pressed, so focus goes to the first row it added. */
+  async function showAllAtRegion() {
+    unfolded = true;
+    await tick();
+    regionRows?.querySelectorAll<HTMLElement>('.row')[REGION_ROWS_SHOWN]?.focus();
+  }
 
   // The count is said after typing pauses, for every settled query, a cleared one included, and
   // again when a different query settles on the same count (deviation x2-results-announcement).
@@ -84,7 +113,7 @@
   $effect(() => {
     const field = explorer.refs.search;
     if (!list || !field) return;
-    const nav = listNav(list, { field, rows: '.row, .search-bridge' });
+    const nav = listNav(list, { field, rows: '.link-row, .row, .search-bridge, .show-all' });
     return () => nav.destroy();
   });
 </script>
@@ -99,9 +128,40 @@
     controls="{uid}-list"
     onquery={(value) => explorer.setQuery(value)}
   />
+  <ScopeLine place="deficits" {lang} />
 </div>
 <div class="deficit-body scroll-fade">
   <div id="{uid}-list" role="group" aria-label={text.deficits} bind:this={list}>
+    {#if explorer.clinicalLinks && !query}
+      {@const links = explorer.clinicalLinks}
+      <ul class="clinical-links">
+        <li><LinkRow name={text.simulateLesion} onclick={links.simulateLesion} /></li>
+        {#if links.showStrokeCases}
+          <li><LinkRow name={t(lang, 'strokeCases').heading} onclick={links.showStrokeCases} /></li>
+        {/if}
+      </ul>
+    {/if}
+    {#if atRegion.length}
+      <div class="group" role="group" aria-labelledby="{uid}-group-region" data-region-deficits>
+        <h3 id="{uid}-group-region" class="group-heading">{text.atRegion}</h3>
+        <ul class="rows" bind:this={regionRows}>
+          {#each atRegionShown as deficit (deficit.id)}
+            <li data-deficit={deficit.id}>
+              <!-- Current only in its own group further down, where Back returns. -->
+              <DrillRow
+                name={deficit.name[lang]}
+                secondary={deficit.domain[lang]}
+                current={false}
+                onclick={() => explorer.openDeficit(deficit.id)}
+              />
+            </li>
+          {/each}
+        </ul>
+        {#if atRegionShown.length < atRegion.length}
+          <ShowAll label={navigator.showAll(atRegion.length)} onclick={showAllAtRegion} />
+        {/if}
+      </div>
+    {/if}
     {#each groups as { group, deficits } (group.id)}
       <div class="group" role="group" aria-labelledby="{uid}-group-{group.id}">
         <h3 id="{uid}-group-{group.id}" class="group-heading">{group.name[lang]}</h3>
@@ -143,6 +203,7 @@
     <p class="scope-note">
       {text.coverage.replace('{count}', String(clinical.search('', lang).length))}
     </p>
+    <AboutData place="deficits" {lang} host="list" />
   {/if}
 </div>
 
@@ -150,6 +211,9 @@
   @layer features {
     /* The search is the task's starting point: its controls share one rhythm (layout.css:122-130). */
     .deficit-head {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
       flex: none;
       padding: var(--space-3) var(--panel-inset);
       border-bottom: 1px solid var(--border-subtle);
@@ -157,6 +221,12 @@
     }
     .group {
       isolation: isolate;
+    }
+    /* The tab's clinical tools, on the text column above the groups, as a region's related findings are. */
+    .clinical-links {
+      margin: 0;
+      padding: var(--space-2) var(--panel-inset);
+      list-style: none;
     }
     .group + .group {
       margin-top: var(--space-2);

@@ -9,6 +9,8 @@
   import stimulationFile from '../../../../public/models/cdmd/stimulation-responses.json';
   import ftractFile from '../../../../public/models/cdmd/stimulation-ftract.json';
   import agreementFile from '../../../../public/models/cdmd/segmentation-agreement.json';
+  import connectivityFile from '../../../../public/models/cdmd/functional-connectivity.json';
+  import type { FunctionalConnectivity } from '../../lib/core/catalog/functional-connectivity.ts';
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
   import type { FunctionalRegions } from '../../lib/core/catalog/functional-regions.ts';
@@ -41,6 +43,7 @@
     underProfile,
     slots = true,
     calls = [],
+    connectivityPainted = null,
   }: {
     regionId?: string | null;
     lang?: Language;
@@ -52,6 +55,7 @@
     underProfile?: boolean;
     slots?: boolean;
     calls?: unknown[];
+    connectivityPainted?: string | null;
   } = $props();
 
   const regions = manifest.regions as unknown as Region[];
@@ -84,6 +88,10 @@
   receptors={receptorFile as unknown as ReceptorFingerprints}
   stimulation={stimulationFile as unknown as StimulationResponses}
   ftract={ftractFile as unknown as StimulationFtract}
+  connectivity={connectivityFile as unknown as FunctionalConnectivity}
+  {connectivityPainted}
+  paintConnectivity={explorer === 'anatomy' ? (id) => calls.push(`paint:${id}`) : null}
+  restoreConnectivity={() => calls.push('restore-connectivity')}
   territories={manifest.arterial_territories as unknown as ArterialTerritories}
   cerebellarFunctions={manifest.cerebellar_functions as unknown as CerebellarFunctions}
   striatalNetworks={manifest.striatal_networks as unknown as StriatalNetworks}
@@ -96,7 +104,10 @@
   openLinkedMri={(options) => calls.push({ mri: options })}
   showAgreement={(code, options) => calls.push({ agreement: code, ...options })}
 >
-  {#snippet comparison()}<div data-slot="comparison"></div>{/snippet}
+  <!-- As AtlasComparison: one section disclosure for a selected region, nothing without one. -->
+  {#snippet comparison()}{#if regionId}<div class="evidence-section" data-slot="comparison">
+        <details><summary>Atlas overlap</summary></details>
+      </div>{/if}{/snippet}
   {#snippet relatedDeficits()}{#if slots}<div data-slot="deficits"></div>{/if}{/snippet}
   {#snippet relatedCircuits()}{#if slots}<div data-slot="circuits"></div>{/if}{/snippet}
 </RegionDetail>

@@ -45,6 +45,15 @@
   const assigned = $derived(region ? (cabNp?.regions[region.id] ?? null) : null);
   const striatal = $derived(striatalNetworksOf(region));
   const outside = $derived(region?.striatal_networks_unassigned ?? 0);
+  // The closed summary's hint: the largest share the region has, else CAB-NP's one network.
+  const headline = $derived.by(() => {
+    const top = [...shares, ...striatal].reduce<(typeof shares)[number] | null>(
+      (best, share) => (best && best.fraction >= share.fraction ? best : share),
+      null,
+    );
+    if (top) return `${networkName(top.network, lang)} ${percent(top.fraction, lang)}`;
+    return assigned ? cabNpName(assigned, lang) : null;
+  });
 
   function yeoColour(network: string): string {
     const rgb = colors?.[network];
@@ -73,7 +82,7 @@
 
 {#if shares.length || assigned || striatal.length}
   <div class="evidence-section">
-    <Disclosure variant="section" summary={copy.heading} bind:open>
+    <Disclosure variant="section" summary={copy.heading} value={headline} bind:open>
       {#if shares.length}
         <p class="network-map">{copy.yeo}</p>
         <ul class="network-list">

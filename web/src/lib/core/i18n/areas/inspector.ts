@@ -3,6 +3,9 @@ export const en = {
   panelLabel: 'Selection and display',
   clearSelection: 'Clear selection',
   noRegionSelected: 'No region selected',
+  // The region sheet's two indexes: what is known about the region, then research data measured on it.
+  aboutIndex: 'About this region',
+  researchIndex: 'Research data',
   hintCortex: 'Select a region on the model or in the anatomy list.',
   hintStructures: 'Cortex is hidden — internal structures are selectable.',
   hemisphere: 'Hemisphere',
@@ -32,6 +35,8 @@ export const fr: typeof en = {
   panelLabel: 'Sélection et affichage',
   clearSelection: 'Effacer la sélection',
   noRegionSelected: 'Aucune région sélectionnée',
+  aboutIndex: 'À propos de cette région',
+  researchIndex: 'Données de recherche',
   hintCortex: 'Sélectionnez une région sur le modèle ou dans la liste anatomique.',
   hintStructures: 'Le cortex est masqué — les structures internes sont sélectionnables.',
   hemisphere: 'Hémisphère',

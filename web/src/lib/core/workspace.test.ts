@@ -212,13 +212,17 @@ test('a coordinate’s replacement offers Undo only while the replaced lesion is
   };
   assert.equal(noticeActionLabel('en', 'restore-lesion'), 'Undo');
   assert.equal(noticeActionLabel('fr', 'restore-lesion'), 'Annuler');
-  assert.equal(offeredNotice(replaced, true), replaced);
-  assert.deepEqual(offeredNotice(replaced, false), {
+  assert.equal(offeredNotice(replaced, { lesionReplaced: true, pickUndoable: false }), replaced);
+  assert.deepEqual(offeredNotice(replaced, { lesionReplaced: false, pickUndoable: true }), {
     kind: 'info',
     text: 'Lesion replaced.',
     action: null,
   });
   const reload = { kind: 'error' as const, text: 'Offline.', action: 'reload' as const };
-  assert.equal(offeredNotice(reload, false), reload);
-  assert.equal(offeredNotice(null, false), null);
+  assert.equal(offeredNotice(reload, { lesionReplaced: false, pickUndoable: false }), reload);
+  assert.equal(offeredNotice(null, { lesionReplaced: false, pickUndoable: false }), null);
+  // A stage click's Undo, once the selection has moved on, offers nothing.
+  const picked = { kind: 'info' as const, text: 'Replaced.', action: 'undo-pick' as const };
+  assert.equal(offeredNotice(picked, { lesionReplaced: false, pickUndoable: true }), picked);
+  assert.equal(offeredNotice(picked, { lesionReplaced: true, pickUndoable: false })!.action, null);
 });

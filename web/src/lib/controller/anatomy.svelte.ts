@@ -31,6 +31,20 @@ export interface SelectionInterface {
   dismissHelp(): void;
   /** The workspace shows the explorer's list. */
   showList(): void;
+  /**
+   * Where the reader is in the detail in front, when replacing it would lose something: a section
+   * they opened, or the detail scrolled past its headline. Null otherwise.
+   */
+  readingPlace(): ReadingPlace | null;
+  /** The detail in front again, at that place. */
+  restoreReadingPlace(place: ReadingPlace): void;
+  /** A new selection: what is open and the scroll from here on are the reader's doing in it. */
+  markReadingPlace(): void;
+}
+
+/** A place in the detail, put back by a stage click's Undo; open sections keep themselves. */
+export interface ReadingPlace {
+  scrollTop: number;
 }
 
 /**
@@ -79,6 +93,9 @@ export function createAnatomyCommands(
     surface?: CortexSurface;
   } | null>(null);
 
+  // The region a stage click replaced while the reader was in its detail, and where they were.
+  let replaced = $state.raw<{ region: string; by: string; place: ReadingPlace } | null>(null);
+
   /** Open the tree branch that holds a region, so a selection is never out of sight. */
   function revealInTree(id: string) {
     const group = catalog.groups.find((entry) => entry.rows.some((row) => row.region.id === id));
@@ -117,13 +134,50 @@ export function createAnatomyCommands(
    */
   function selectRegion(id: string | null, { frame = false }: { frame?: boolean } = {}) {
     const same = id !== null && id === engineState.model.selectedRegion?.id;
+    // Any other choice ends a stage click's offer for good.
+    if (replaced && id !== replaced.by) replaced = null;
     model.select(id);
+    // What is open and where the detail stands now are not the reader's doing in the new region.
+    if (!same) ui.markReadingPlace();
     if (id === null) return;
     revealInTree(id);
     ui.showDetail();
     ui.revealOnSelect();
     ui.dismissHelp();
     if (frame && !same) focusSelection();
+  }
+
+  /**
+   * A click on the model. When it replaces a region the reader had opened a section of, or scrolled
+   * into, the notice names that region and offers Undo; a click on a region left at its headline
+   * says nothing, since nearly every click replaces a detail.
+   */
+  function pickRegion(id: string) {
+    const previous = engineState.model.selectedRegion?.id ?? null;
+    const place = previous !== null && previous !== id ? ui.readingPlace() : null;
+    // The last click's offer goes with this action.
+    if (replaced) {
+      replaced = null;
+      session.notify(null);
+    }
+    selectRegion(id);
+    if (!place) return;
+    replaced = { region: previous!, by: id, place };
+    session.notify({
+      kind: 'info',
+      text: t(session.state.lang, 'app').pickReplaced(catalog.label(previous!).name),
+      action: 'undo-pick',
+    });
+  }
+
+  /** The notice's Undo: the replaced region back, where it was read, while the click's choice still stands. */
+  function undoPick() {
+    const undo = replaced;
+    replaced = null;
+    session.notify(null);
+    if (!undo || engineState.model.selectedRegion?.id !== undo.by) return;
+    selectRegion(undo.region);
+    ui.restoreReadingPlace(undo.place);
   }
 
   /** Clear the selection; a control that hid itself with it must not leave focus on the page. */
@@ -511,6 +565,12 @@ export function createAnatomyCommands(
 
   return {
     selectRegion,
+    pickRegion,
+    undoPick,
+    /** Whether the notice's Undo of a stage click still applies: the click's region is still the selection. */
+    get pickUndoable(): boolean {
+      return replaced !== null && engineState.model.selectedRegion?.id === replaced.by;
+    },
     clearSelection,
     toggleFocus,
     isolateSelection,

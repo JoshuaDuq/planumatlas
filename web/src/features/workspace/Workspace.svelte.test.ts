@@ -26,7 +26,15 @@ interface Setup {
   world: World;
   calls: string[];
   holder: {
-    workspace?: { focusInDetail(): boolean; showDetail(): void; showList(): void; back(): void };
+    workspace?: {
+      focusInDetail(): boolean;
+      showDetail(): void;
+      showList(): void;
+      back(): void;
+      readingPlace(): { scrollTop: number } | null;
+      restoreReadingPlace(place: { scrollTop: number }): void;
+      markReadingPlace(): void;
+    };
   };
 }
 

@@ -145,16 +145,25 @@ export function noticeActionLabel(lang: Language, action: NonNullable<Notice['ac
       return t(lang, 'clinical').restore;
     case 'restore-lesion':
       return t(lang, 'coordinate').undoReplacement;
+    case 'undo-pick':
+      return t(lang, 'app').undoPick;
     default:
       throw new Error(`Unknown notice action: ${action}`);
   }
 }
 
-/** The notice as offered: an undo of a coordinate's replacement, once the sphere has changed since, offers nothing. */
-export function offeredNotice(notice: Notice | null, lesionReplaced: boolean): Notice | null {
-  return notice?.action === 'restore-lesion' && !lesionReplaced
-    ? { ...notice, action: null }
-    : notice;
+/**
+ * The notice as offered: an undo that can no longer apply offers nothing. That is a coordinate's
+ * replacement once the sphere has changed since, or a stage click's once the selection has.
+ */
+export function offeredNotice(
+  notice: Notice | null,
+  { lesionReplaced, pickUndoable }: { lesionReplaced: boolean; pickUndoable: boolean },
+): Notice | null {
+  const stale =
+    (notice?.action === 'restore-lesion' && !lesionReplaced) ||
+    (notice?.action === 'undo-pick' && !pickUndoable);
+  return stale ? { ...notice!, action: null } : notice;
 }
 
 // ---- the list's current item ---------------------------------------------------------------

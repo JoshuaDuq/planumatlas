@@ -34,6 +34,7 @@
   import type { View } from '../../lib/state/view.svelte.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
+  import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import type { DockCommands } from './dock-commands.ts';
@@ -169,6 +170,13 @@
     };
   }
 
+  /** Opens a tool from elsewhere in the page as its own press would, focus moving into it; an open one keeps it. */
+  export function openFromPanel(tool: 'lesion') {
+    const button = tools.querySelector<HTMLElement>(`.stage-tool[data-tool="${tool}"]`)!;
+    if (button.getAttribute('aria-expanded') === 'true') button.focus();
+    else button.click();
+  }
+
   /** The first tool left, or the model once the tract reference takes them all; runs before they hide. */
   function rescueFocus() {
     const next = tractReference
@@ -225,7 +233,10 @@
     let observer: ResizeObserver | null = null;
     tick().then(() => {
       if (!current) return;
-      const element = dock.querySelector<HTMLElement>('.popover.stage-popover')!;
+      // The open plate: one another tool replaced may still be leaving, earlier in the dock.
+      const element = dock.querySelector<HTMLElement>(
+        '.popover.stage-popover:not([data-ending-style])',
+      )!;
       plate = true;
       // Laid-out offsets, which the plate's entry scale does not move.
       const top = () => dock.offsetTop + dock.clientTop + element.offsetTop;

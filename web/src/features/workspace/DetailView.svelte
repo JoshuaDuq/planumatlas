@@ -29,6 +29,10 @@
   import { clinicalLayers } from '../../lib/core/state/clinical-navigation.ts';
   import type { FunctionExplorer } from '../functions/functions-explorer.svelte.ts';
   import AtlasComparison from '../inspector/AtlasComparison.svelte';
+  import TractProfile from '../tracts/TractProfile.svelte';
+  import { tractEnds } from '../../lib/core/diffusion/ends.ts';
+  import { tractRows } from '../../lib/core/tracts.ts';
+  import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import RegionDetail from '../inspector/RegionDetail.svelte';
 
   let {
@@ -106,7 +110,17 @@
     receptors,
     stimulation,
     ftract,
+    connectivity,
   } = $derived(engine.model);
+  // The area whose resting connectivity Anatomy paints, as paintFor paints it.
+  const connectivityPainted = $derived(
+    current.explorer === 'anatomy' &&
+      !current.paintLifted &&
+      current.connectivitySeed &&
+      connectivity?.atlases[current.atlas]
+      ? current.connectivitySeed
+      : null,
+  );
   // The comparison file is published beside the manifest the engine opened (boot.ts).
   const manifestUrl = $derived(`${ASSET_BASE}models/${manifest.anatomy.id}/manifest.json`);
   // A function's or deficit's profile above makes the region a smaller second subject (clinical.css:172-173, 299-300).
@@ -126,6 +140,19 @@
       .map(({ id }) => ({ id, name: short[id] ?? id }));
   });
   const bundles = $derived(tractCatalog(manifest.anatomy.id).bundles);
+  // The Tracts tab's open tract (supervisor review 4.3); a region selected since takes the detail.
+  const tract = $derived.by(() => {
+    if (current.explorer !== 'diffusion' || !current.selectedTract || current.selectedRegion) {
+      return null;
+    }
+    const catalog = tractCatalog(manifest.anatomy.id);
+    const ends = tractEnds(catalog);
+    const row = tractRows(catalog.bundles).find((entry) => entry.key === current.selectedTract);
+    if (!ends || !row) throw new Error(`No profile for tract ${current.selectedTract}.`);
+    return { row, ends };
+  });
+  let tractProfile = $state<TractProfile>();
+  $effect(() => engine.on('tractsVisibility', () => tractProfile?.refresh()));
   // A coordinate's networks gather the parcels of the atlas the network layer assigns.
   const coordinateNetworks = $derived.by(() => {
     const layer = manifest.networks as
@@ -205,7 +232,17 @@
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />
     <DeficitProfile explorer={deficits} view={current} />
-    {#if circuits.route}
+    {#if tract}
+      <TractProfile
+        bind:this={tractProfile}
+        row={tract.row}
+        ends={tract.ends}
+        lang={current.lang}
+        tracts={engine.tracts}
+        label={(id) => catalog.label(id)}
+        onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
+      />
+    {:else if circuits.route}
       <!-- The whole route selects nothing: its landmarks and the lesson's notes follow it. -->
       <CircuitNotes model={circuits} />
     {:else if lesionShown && lesion.coordinate}
@@ -258,6 +295,10 @@
         {receptors}
         {stimulation}
         {ftract}
+        {connectivity}
+        {connectivityPainted}
+        paintConnectivity={current.explorer === 'anatomy' ? session.setConnectivitySeed : null}
+        restoreConnectivity={() => session.setConnectivitySeed(null)}
         strokeCases={world.strokeCases}
         userMap={world.userMap}
         territories={manifest.arterial_territories ?? null}

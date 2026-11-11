@@ -1,0 +1,55 @@
+# Resting-state functional connectivity of 200 unrelated HCP S1200 young adults (Domhof et al.
+# 2021, EBRAINS "Atlas based HCP connectomes" v1.2): per subject, the Pearson r between parcel-mean
+# BOLD series of ICA-FIX data, four sessions concatenated, no global signal regression. The dataset
+# publishes no group average; scripts/derive_functional_connectivity.py Fisher-z transforms each
+# subject's matrix, averages and transforms back. Of the dataset's 20 parcellations, two are Planum's
+# atlases: Destrieux and Julich-Brain 3.1. It has none for HCP-MMP or Schaefer's 400 parcels.
+label: Functional connectivity (resting fMRI, HCP young adults, Domhof et al. 2021)
+license: CC BY 4.0
+source:
+  short: Domhof et al. 2021
+  citation: Domhof JWM, Jung K, Eickhoff SB, Popovych OV (2021) Parcellation-induced variation of empirical and simulated brain connectomes at group and subject levels. Network Neuroscience 5(3):798–830
+  pmid: 34746628
+  dataset: https://doi.org/10.25493/3PMM-FPW
+  # The data descriptor says HCP's open-access data use terms apply as well.
+  terms: https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
+cohort: {people: 200, ages: "22–35"}
+files:
+  base: https://data-proxy.ebrains.eu/api/v1/buckets/d-2a52e7c3-9aad-49db-bb71-4ed0208ae7cb
+  matrix: EmpCorrFC_concatenated.csv
+atlases:
+  destrieux:
+    archive: [150-Destrieux.zip, fcd4f122ad26e897f65b4537012b851b00f832c8ea0c778e19f7d574b022e812]
+    # FreeSurfer's destrieux.simple.2009-07-29.gcs on its MNI subject (0ImageProcessing/Modifications.sh):
+    # a2009s colour-table indices 1–75 on the left, then the same 75 on the right.
+    order: a2009s
+  julich:
+    archive: [414-Julich-Brain.zip, b9f16eda88dac161aba50821032a630719032df8fb4ad48fdfcb2e054d2040fd]
+    # Region names, "<area> left|right", listed in 0ImageProcessing/Link.txt in matrix order.
+    order: link
+# Written 2026-11-11 before any group value was read (plan 4.1). The derivation stops when one fails.
+validation:
+  destrieux:
+    # The default-mode network: posterior cingulate with medial prefrontal and angular cortex.
+    - {seed: [left, G_cingul-Post-ventral], top: 10, expect_any: [G_and_S_cingul-Ant, G_subcallosal, G_rectus, S_suborbital, G_and_S_transv_frontopol, G_front_sup]}
+    - {seed: [left, G_cingul-Post-ventral], top: 10, expect_any: [G_pariet_inf-Angular]}
+    - {seed: [left, G_precentral], top: 3, expect: [right, G_precentral]}
+  julich:
+    # Julich-Brain 3.1 maps no posterior cingulate area; its medial prefrontal p32 stands in as the seed.
+    - {seed: [left, Area p32 (pACC)], top: 10, expect_any: [Area PGa (IPL), Area PGp (IPL)]}
+    - {seed: [left, Area 4a (PreCG)], top: 3, expect: [right, Area 4a (PreCG)]}
+# A seed's partners skip the parcels bordering it when, on that atlas, the median share of bordering
+# parcels among seeds' ten strongest partners is above this (plan 4.1). The paint still shows every parcel.
+neighbours:
+  top: 10
+  skip_above: 0.5
+# The paint's one-sided scale. Written 2026-11-11 after measuring group r and before the colours were
+# built: over Julich-Brain's 38,503 cortical pairs the median r is 0.14 (95th percentile 0.42, 1.5%
+# negative), so the floor is the median rounded up to 0.05. Half of all pairs stay tissue; the note
+# says so. Steps every 0.15 above it. Violet, apart from the functions' blue: each step differs from
+# the tissue colour by an OKLab ΔE of at least 14.3 and from the others by at least 24.0, under normal
+# vision and simulated protanopia and deuteranopia (Machado 2009, severity 1), the checks z_scale passes.
+r_scale:
+  - {from: 0.15, color: [217, 198, 254]}
+  - {from: 0.30, color: [146, 116, 195]}
+  - {from: 0.45, color: [77, 47, 119]}

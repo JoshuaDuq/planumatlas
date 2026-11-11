@@ -13,6 +13,7 @@ import type { NeuropsychDomains, NeurosynthTerms } from '../catalog/neuropsych-d
 import { createClinicalCatalog, findingPaint } from '../clinical/catalog.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import type { ClinicalData } from '../clinical/types.ts';
+import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
 import { legendFor, paintFor, paintKind } from './paint.ts';
 import type { PaintState } from './paint.ts';
 
@@ -34,6 +35,10 @@ const domains = {
       { domain: 'language', z: 4 },
     ],
   },
+  structure_atlas: 'aseg',
+  threshold_z: 3,
+  region_atlases: ['julich'],
+  atlas_regions: { julich: { 'julich:left:1': [{ domain: 'language', z: 6 }] } },
   z_scale: [
     { from: 3, color: [30, 30, 30] },
     { from: 5, color: [50, 50, 50] },
@@ -67,6 +72,8 @@ const base: KeyState = {
   selectedDeficit: 'aphasia',
   selectedFinding: null,
   paintLifted: false,
+  paintFrom: null,
+  connectivitySeed: null,
   lang: 'en',
 };
 const paintOf = (id: string): Paint => ({ id, colors: new Map() });
@@ -74,6 +81,10 @@ const paintOf = (id: string): Paint => ({ id, colors: new Map() });
 test('a tab paints only while it is in front, on the atlas its map is defined on, and not once lifted', () => {
   assert.equal(paintFor(base, sources)!.id, 'function:all');
   assert.equal(paintFor({ ...base, atlas: 'destrieux' }, sources), null);
+  // FUNC-46: a listed atlas takes the paint on its own areas (supervisor review 3.1).
+  const julich = paintFor({ ...base, atlas: 'julich', selectedFunction: 'language' }, sources)!;
+  assert.deepEqual([...julich.colors.keys()], ['julich:left:1']);
+  assert.equal(paintFor({ ...base, atlas: 'julich' }, sources)!.colors.get('julich:left:1')![0], 1);
   assert.equal(paintFor({ ...base, selectedFunction: null }, sources), null);
   assert.equal(paintFor({ ...base, paintLifted: true }, sources), null);
   assert.equal(paintFor({ ...base, explorer: 'anatomy' }, sources), null);
@@ -86,6 +97,32 @@ test('a tab paints only while it is in front, on the atlas its map is defined on
     'deficit:aphasia:naming',
   );
   assert.equal(paintFor({ ...base, explorer: 'deficits', selectedDeficit: null }, sources), null);
+});
+
+test('FUNC-49 · a raised threshold paints fewer areas, and the key outlines the bands nothing then carries', () => {
+  assert.equal(
+    paintFor({ ...base, selectedFunction: 'memory', paintFrom: 5 }, sources)!.colors.size,
+    1,
+  );
+  assert.equal(
+    paintFor({ ...base, selectedFunction: 'language', paintFrom: 5 }, sources)!.colors.size,
+    0,
+  );
+  const paint = paintFor({ ...base, selectedFunction: 'memory', paintFrom: 5 }, sources)!;
+  const key = legendFor(
+    { ...base, selectedFunction: 'memory', paintFrom: 5, paint, lang: 'en' },
+    sources,
+  )!;
+  assert.deepEqual(
+    key.rows.map((row) => [row.label, Boolean(row.absent)]),
+    [
+      ['z\u00a0≥\u00a010', true],
+      ['z\u00a05\u00a0to\u00a010', false],
+      ['z\u00a03\u00a0to\u00a05', true],
+    ],
+  );
+  // The overview ignores it.
+  assert.equal(paintFor({ ...base, paintFrom: 5 }, sources)!.id, 'function:all');
 });
 
 test('the key lists the overview, or the z scale of the function chosen, or each finding of the open deficit', () => {
@@ -142,6 +179,64 @@ test('a comparison keys each function and the areas both reach, greying a colour
       ['shared', 'Les deux', SHARED_COLOR, false],
     ],
   );
+});
+
+// Pairs once: (1,2) r 0.50, (1,3) r 0.20, (2,3) r 0.10.
+const connectivity: FunctionalConnectivity = {
+  id: 'functional-connectivity',
+  source: { short: 's', citation: 'c', pmid: 1, dataset: 'https://doi.org/10.25493/x', terms: 't' },
+  people: 200,
+  ages: '22–35',
+  r_scale: [
+    { from: 0.15, color: [1, 1, 1] },
+    { from: 0.3, color: [2, 2, 2] },
+    { from: 0.45, color: [3, 3, 3] },
+  ],
+  atlases: {
+    julich: { regions: ['julich:left:1', 'julich:left:2', 'julich:left:3'], r: [50, 20, 10] },
+  },
+};
+
+test('STAGE-62 · Anatomy paints a seed’s connectivity over a lesion’s findings, on its atlas only, until lifted', () => {
+  const seeded: KeyState = {
+    ...base,
+    explorer: 'anatomy',
+    atlas: 'julich',
+    connectivitySeed: 'julich:left:1',
+  };
+  const lesion = { kind: 'functions' as const, paint: paintOf('lesion:x'), rows: [] };
+  const withData = { ...sources, connectivity, lesion };
+  assert.equal(paintFor(seeded, withData)!.id, 'connectivity:julich:left:1');
+  assert.equal(paintFor({ ...seeded, connectivitySeed: null }, withData)!.id, 'lesion:x');
+  assert.equal(paintFor({ ...seeded, atlas: 'hcp-mmp' }, withData)!.id, 'lesion:x');
+  assert.equal(paintFor({ ...seeded, explorer: 'functions' }, withData)!.id, 'function:all');
+  assert.equal(paintFor({ ...seeded, paintLifted: true }, withData), null);
+});
+
+test('STAGE-63 · the connectivity key names the seed and lists the r steps strongest first, outlining any nothing carries', () => {
+  const state: KeyState = {
+    ...base,
+    explorer: 'anatomy',
+    atlas: 'julich',
+    connectivitySeed: 'julich:left:1',
+  };
+  const legend = legendFor(
+    { ...state, paint: paintFor(state, { ...sources, connectivity }) },
+    { ...sources, connectivity, label: (id) => `name of ${id}` },
+  )!;
+  assert.equal(legend.map, 'connectivity');
+  assert.equal(legend.title, 'Resting connectivity with name of julich:left:1');
+  assert.equal(legend.pickable, false);
+  // r 0.50 reaches the top step, 0.20 the first; none falls in 0.30 to 0.45.
+  assert.deepEqual(
+    legend.rows.map(({ label, absent }) => [label, absent]),
+    [
+      ['r\u00a0≥\u00a00.45', false],
+      ['r\u00a00.30\u00a0to\u00a00.45', true],
+      ['r\u00a00.15\u00a0to\u00a00.30', false],
+    ],
+  );
+  assert.match(legend.note, /below r 0\.15, as half of all pairs do/);
 });
 
 test('a paint names its tab by its id', () => {
@@ -205,6 +300,8 @@ describe('the published cdmd functions and deficits', () => {
     selectedDeficit: null,
     selectedFinding: null,
     paintLifted: false,
+    paintFrom: null,
+    connectivitySeed: null,
     lang,
   });
 
@@ -274,6 +371,8 @@ describe('the published cdmd functions and deficits', () => {
       selectedDeficit: 'dystonia',
       selectedFinding: null,
       paintLifted: false,
+      paintFrom: null,
+      connectivitySeed: null,
       lang: 'en',
     };
     const paint = paintFor(state, both)!;
@@ -317,6 +416,8 @@ describe('the published cdmd functions and deficits', () => {
         selectedDeficit: deficit.id,
         selectedFinding: null,
         paintLifted: false,
+        paintFrom: null,
+        connectivitySeed: null,
         lang: 'en',
       };
       const findings = catalog.paint(deficit.id).findings.map(({ association }) => association.id);

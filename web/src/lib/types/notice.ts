@@ -1,8 +1,8 @@
 /**
  * What a notice offers beside its text (ui/chrome/notice.js:36): a reload, the failed command again,
- * the view before a reveal, or the lesion a placed coordinate replaced.
+ * the view before a reveal, the lesion a placed coordinate replaced, or the region a stage click replaced.
  */
-export type NoticeAction = 'reload' | 'retry' | 'restore' | 'restore-lesion';
+export type NoticeAction = 'reload' | 'retry' | 'restore' | 'restore-lesion' | 'undo-pick';
 
 /**
  * One standing message (state/session.js:139). An error stands until the reader dismisses or

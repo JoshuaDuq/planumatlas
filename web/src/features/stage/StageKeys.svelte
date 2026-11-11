@@ -327,14 +327,17 @@
       border-radius: var(--radius-mark);
       forced-color-adjust: none;
     }
+    /* A title naming an area wraps rather than run under the chevron (the Complete Name Rule). */
     .stage-key-toggle {
       display: inline-flex;
-      flex: 1 0 auto;
+      flex: 1 1 auto;
       align-items: center;
       gap: var(--space-2);
+      min-width: 0;
       min-height: 32px;
       margin: 0 calc(-1 * var(--space-3));
-      padding: 0 var(--space-3);
+      padding: var(--space-1) var(--space-3);
+      text-align: start;
       border: 0;
       border-radius: var(--radius-control);
       background: transparent;
@@ -342,7 +345,6 @@
       font-size: var(--text-caption);
       font-weight: 600;
       line-height: var(--lh-caption);
-      white-space: nowrap;
       cursor: pointer;
     }
     .stage-key-toggle:focus-visible,

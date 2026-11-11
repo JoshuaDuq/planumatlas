@@ -13,6 +13,8 @@
   import type { CircuitExplorer } from './circuits-explorer.svelte.ts';
   import { landmarkTotal } from './circuits-view.ts';
   import { neighbourKeys } from './neighbour-keys.ts';
+  import AboutData from '../info/AboutData.svelte';
+  import ScopeLine from '../info/ScopeLine.svelte';
 
   let { model }: { model: CircuitExplorer } = $props();
   const map = $derived(model.map);
@@ -36,6 +38,7 @@
 </script>
 
 <div class="browser scroll-fade" hidden={!model.exploring}>
+  <div class="scope-head"><ScopeLine place="circuits" lang={model.lang} /></div>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
     <div class="group" role="group" aria-labelledby="{uid}-guided">
       <h3 id="{uid}-guided" class="group-heading">{maps.guided}</h3>
@@ -94,6 +97,7 @@
       ? ` · ${maps.mapCount(1)}`
       : ''}
   </p>
+  <AboutData place="circuits" lang={model.lang} host="list" />
 </div>
 
 <style>
@@ -234,6 +238,11 @@
       }
     }
     /* A list's scope: one tertiary line at its foot. */
+    /* Circuits has no search: its scope line heads the list, ruled off as the other tabs' heads are. */
+    .scope-head {
+      padding: var(--space-3) var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
+    }
     .scope-note {
       padding: var(--space-3) var(--panel-inset) var(--space-4);
       border-top: 1px solid var(--border-subtle);

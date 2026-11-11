@@ -72,7 +72,7 @@
 
 {#if fingerprint}
   <div class="evidence-section">
-    <Disclosure variant="section" summary={copy.heading} bind:open>
+    <Disclosure variant="section" summary={copy.heading} value={String(rows.length)} bind:open>
       {#if fingerprints.length > 1}
         <ChoiceGroup
           class="receptor-parts"

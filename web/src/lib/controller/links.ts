@@ -151,6 +151,7 @@ export function createLinks({
     surfaceColors: new Set([
       'tissue',
       'mri',
+      'lobe',
       'atlas',
       ...(model.manifest.networks ? ['network'] : []),
       ...(model.cabNp ? ['cab-np'] : []),
@@ -228,6 +229,7 @@ export function createLinks({
     return {
       ...current,
       selectedFunction: explorer === 'functions' ? current.selectedFunction : null,
+      paintFrom: explorer === 'functions' && current.selectedFunction ? current.paintFrom : null,
       selectedDeficit: explorer === 'deficits' ? current.selectedDeficit : null,
       cutAtlas: current.cutAtlas ?? undefined,
       ...cutState(),
@@ -396,6 +398,7 @@ export function createLinks({
       hooks.forgetScenes();
       hooks.chooseExplorer(valid.explorer ?? 'anatomy');
       session.setFunction(valid.selectedFunction ?? null);
+      session.setPaintFrom(valid.selectedFunction ? (valid.paintFrom ?? null) : null);
       session.setDeficit(valid.selectedDeficit ?? null);
       if (valid.circuit) {
         lesson.start(valid.circuit);

@@ -17,6 +17,10 @@ export const en = {
   subject: 'Subject',
   kind: (individual: boolean): string =>
     individual ? 'One individual’s MRI reconstruction' : 'Averaged reference template',
+  // Follows the kind of an individual's reconstruction in the provenance sheet.
+  oneBrain:
+    'Its surface, cuts, MRI and tracts are one person’s, not an average; atlases and group maps are registered onto it, so their borders here are estimates.',
+  oneBrainLink: 'Why one brain',
   sourceData: 'Source data',
   reconstruction: 'Reconstruction',
   atlases: 'Cortical atlases',
@@ -26,6 +30,7 @@ export const en = {
   receptors: 'Receptor fingerprints',
   stimulation: 'Stimulation responses',
   stimulationFtract: 'Stimulation responses (F-TRACT)',
+  functionalConnectivity: 'Functional connectivity (HCP)',
   strokeCases: 'Stroke cases',
   domains: 'Neuropsychological domains',
   supplemental: 'Supplemental layers',
@@ -58,6 +63,9 @@ export const fr: typeof en = {
   subject: 'Sujet',
   kind: (individual: boolean): string =>
     individual ? 'Reconstruction IRM d’un individu' : 'Gabarit de référence moyenné',
+  oneBrain:
+    'Sa surface, ses coupes, son IRM et ses faisceaux sont ceux d’une seule personne, et non une moyenne\u202f; les atlas et les cartes de groupe y sont recalés, si bien que leurs limites sont ici des estimations.',
+  oneBrainLink: 'Pourquoi un seul cerveau (en anglais)',
   sourceData: 'Données sources',
   reconstruction: 'Reconstruction',
   atlases: 'Atlas corticaux',
@@ -67,6 +75,7 @@ export const fr: typeof en = {
   receptors: 'Empreintes de récepteurs',
   stimulation: 'Réponses à la stimulation',
   stimulationFtract: 'Réponses à la stimulation (F-TRACT)',
+  functionalConnectivity: 'Connectivité fonctionnelle (HCP)',
   strokeCases: 'Cas d’AVC',
   domains: 'Domaines neuropsychologiques',
   supplemental: 'Couches complémentaires',

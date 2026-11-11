@@ -51,6 +51,7 @@ test('Remove hands focus to the button that chooses another file', async () => {
 
 test('links its methods page, which it says is in English', async () => {
   await opened(summary);
+  await userEvent.click(page.getByText('À propos de ces données'));
   const methods = page.getByRole('link', {
     name: 'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',
     exact: true,

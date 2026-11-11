@@ -102,6 +102,10 @@ $$\mathbf{c}_i = \frac{\lvert \mathbf{p}_{i+1} - \mathbf{p}_{i-1} \rvert}{\lVert
 
 The pilot's go/no-go measures (`check` stage, `derived/check.json`), computed identically for CDMD and for the SNAIL tracts Planum first published: no cortex lies outside the diffusion grid and 0.0003% outside its brain mask; the smallest of the 17 bundles has 220 streamlines; the median fraction of points in white matter is 0.933 against SNAIL's 0.847. The corticospinal share of streamlines joining pericentral cortex to the brainstem (ends within 3 mm) is 0.63 left and 0.52 right, against SNAIL's 0.89 and 0.88.
 
+### Tract profiles
+
+Pressing a tract's name in the Tracts tab opens its profile: the streamline count of each side or segment in this tracking run, their lengths once drawn, and the cortical regions its streamlines end in. `brain_model/layers/tract_ends.py` (`config/tract-ends.yaml`) takes the first and last point of every streamline, in the scanner frame the tracts and `aparc.a2009s+aseg.mgz` share, and counts per Destrieux region of this brain the share of ends with a labelled voxel within 3 mm; an end near two regions counts for both, and regions under 5% are left out. On the committed files the left corticospinal tract's ends lie most on the precentral gyrus (18%), then the superior frontal and paracentral gyri; the left arcuate's on the middle temporal (27%) and middle frontal (19%) gyri; the left uncinate's on the temporal pole (34%). The output, `public/diffusion/cdmd-sub-013/tract-ends.json`, is recomputed and compared by `tests/test_tract_ends.py`.
+
 ## Limitations
 - One individual, one diffusion scan at 2 mm; bundles are reconstructions, not observed axons.
 - RecoBundles bundles follow HCP842's definitions, the registration and the thresholds; left and right counts differ (arcuate 3,639 and 2,191; IFOF 440 and 220) although the whole tractogram is near-symmetric (76,652 left and 71,484 right intrahemispheric streamlines).

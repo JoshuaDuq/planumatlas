@@ -129,7 +129,8 @@ const tool = (name: string) => control('button', name);
 const press = (role: 'button' | 'radio' | 'checkbox', name: string) => locate(role, name).click();
 const active = () => document.activeElement;
 const dock = () => document.querySelector<HTMLElement>('.stage-dock')!;
-const popover = () => document.querySelector<HTMLElement>('.popover')!;
+// The open one: a popover another tool replaced may still be leaving.
+const popover = () => document.querySelector<HTMLElement>('.popover:not([data-ending-style])')!;
 const dialogs = () => document.querySelectorAll('[role="dialog"]');
 const canvas = () => document.getElementById('stage-canvas');
 
@@ -169,7 +170,7 @@ describe('the toolbar', () => {
 
     tool('Section').focus();
     await userEvent.keyboard('{ArrowRight}');
-    expect(active()).toBe(tool('Lesion'));
+    expect(active()).toBe(tool('Display'));
     await userEvent.keyboard('{ArrowDown}');
     expect(active()).toBe(tool('Coordinate'));
     await userEvent.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
@@ -1058,10 +1059,11 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
     Math.round(popover().getBoundingClientRect().top - host().getBoundingClientRect().top);
 
   test('the plate is reported once it is placed, follows it as it grows, and is withdrawn on close', async () => {
-    await page.viewport(390, 844);
+    await page.viewport(390, 1000);
     try {
-      // Tall enough that the Display popover grows by its changes before it reaches its cap and scrolls.
-      await mount({ phone: true }, { width: 390, height: 844 });
+      // Tall enough that the Display popover grows by its changes before it reaches its cap and scrolls;
+      // at 844 px it opens at its cap since About this data closed it (1.4).
+      await mount({ phone: true }, { width: 390, height: 1000 });
       await press('button', 'Display');
       await vi.waitFor(() => expect(plates).toHaveLength(1));
       await Promise.all(

@@ -233,7 +233,29 @@ const STOPS: Record<
     phone: 'underTabs',
   },
   settings: { selector: '.masthead-end .popover-host > button', side: 'bottom', align: 'end' },
+  // The first visit's own stops (supervisor review 2.3): the panel a region opens in, the tabs, the dock.
+  selectRegion: {
+    selector: '#workspace-panel',
+    side: 'right',
+    align: 'start',
+    view: `region=${PRECENTRAL}`,
+    inStage: true,
+    phone: 'overDock',
+  },
+  tabs: { selector: '.workspace-tabs', side: 'right', align: 'start', phone: 'underTabs' },
+  dock: { selector: '.stage-toolbar', side: 'top', align: 'start', phone: 'overDock' },
 };
+
+/** A first visit's tour: the welcome, then six stops; its last card offers the full tour. */
+const FIRST_VISIT: readonly GuideStop['id'][] = [
+  'welcome',
+  'brain',
+  'selectRegion',
+  'tabs',
+  'functions',
+  'section',
+  'dock',
+];
 
 /** The function or deficit a stop's view paints. */
 export type GuidePaint = { function: string } | { deficit: string };
@@ -288,6 +310,8 @@ interface GuideOptions {
   mri: { open(region: string): unknown; openPaint(paint: GuidePaint): unknown; close(): void };
   /** Keeps bands this wide on the stage's right and above its dock clear of anatomy; 0 gives one back. */
   reserve: (band: { right: number; bottom: number }) => void;
+  /** A first visit's short tour, rather than every stop. */
+  short?: boolean;
 }
 
 /** The presses that say whether the reader is using a pointer or the keyboard. */
@@ -303,15 +327,27 @@ const LANGUAGES: readonly { value: Language; name: string }[] = [
 const inLanguage = (hash: string, next: Language) =>
   hash.replace(/([#&])lang=[^&]*/, `$1lang=${next}`);
 
+/** The tour, from the settings menu; a first visit passes `short` for its six stops. */
 export function startGuide(lang: Language, options: GuideOptions): void {
   current?.finish();
   writePref(PREF_KEYS.guide, SEEN);
   drive(lang, options, location.hash);
 }
 
+/** The stops a layout can show now: a control it hides is left out, so the count stays true. */
+function shownStops(lang: Language, short: boolean, docksMri: boolean): GuideStop[] {
+  const copy = t(lang, 'guide');
+  const all = [...copy.stops, ...copy.firstVisit];
+  const stops = short ? FIRST_VISIT.map((id) => all.find((stop) => stop.id === id)!) : copy.stops;
+  return stops.filter(({ id }) => {
+    const { selector, opensMri } = STOPS[id];
+    return opensMri ? docksMri : !selector || rendered(selector);
+  });
+}
+
 /** The tour in one language, over the reader's view `reader`, which closing puts back. */
 function drive(lang: Language, options: GuideOptions, reader: string): void {
-  const { animate, onClose, onLanguage, mri, reserve } = options;
+  const { animate, onClose, onLanguage, mri, reserve, short = false } = options;
   const copy = t(lang, 'guide');
   const home = parameters(reader).filter(([key]) => HOME_PARAMS.includes(key));
   // A stop's parameters replace the home view's own.
@@ -343,9 +379,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
   // Where each stop's card sits on a phone, if not where driver.js puts it.
   const seats: { at?: Seat; selector?: string }[] = [];
   const phone = matchMedia(PHONE_QUERY).matches;
-  const steps: DriveStep[] = copy.stops.flatMap(({ id, title, body }) => {
+  const steps: DriveStep[] = shownStops(lang, short, docksMri).map(({ id, title, body }) => {
     const { selector, side, align, view = '', opensMri, paintsMri } = STOPS[id];
-    if (opensMri ? !docksMri : selector && !rendered(selector)) return [];
     const paintDocked = Boolean(paintsMri) && docksMri;
     enter.push(
       opensMri
@@ -358,20 +393,19 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     // the dock instead, as a phone's does, and the anatomy is framed above it.
     inStage.push(Boolean(STOPS[id].inStage) && !phone && !paintDocked);
     seats.push(phone ? { at: STOPS[id].phone, selector } : paintDocked ? { at: 'overDock' } : {});
-    return [
-      {
-        element: selector,
-        ...(opensMri && { waitForElement: MRI_WAIT_MS }),
-        popover: { title, description: body, side, align },
-        onHighlightStarted: () => {
-          show(view);
-          // driver.js's class on the body dims the page and makes it inert around the target.
-          document.documentElement.toggleAttribute(SHOWING, Boolean(selector));
-          document.body.classList.toggle('driver-active', !selector);
-        },
+    return {
+      element: selector,
+      ...(opensMri && { waitForElement: MRI_WAIT_MS }),
+      popover: { title, description: body, side, align },
+      onHighlightStarted: () => {
+        show(view);
+        // driver.js's class on the body dims the page and makes it inert around the target.
+        document.documentElement.toggleAttribute(SHOWING, Boolean(selector));
+        document.body.classList.toggle('driver-active', !selector);
       },
-    ];
+    };
   });
+  const everyStop = shownStops(lang, false, docksMri).length;
   const move = (index: number) => {
     const opening = enter[index];
     if (opening) opening();
@@ -446,6 +480,7 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
         description.append(languageChoice());
         footerButtons.prepend(skipButton());
       }
+      if (short && !tour.hasNextStep()) footerButtons.prepend(everythingButton());
       // driver.js focuses the first control, the close button, right after this hook.
       queueMicrotask(() => nextButton.focus());
       title.setAttribute('role', 'heading');
@@ -474,6 +509,18 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     button.className = 'driver-popover-footer-btn guide-skip';
     button.textContent = copy.skip;
     button.addEventListener('click', finish);
+    return button;
+  }
+  /** The short tour's last card's way on: every stop, over the same reader's view. */
+  function everythingButton() {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'driver-popover-footer-btn guide-everything';
+    button.textContent = copy.everything(everyStop);
+    button.addEventListener('click', () => {
+      self.finish({ restore: false });
+      drive(lang, { ...options, short: false }, reader);
+    });
     return button;
   }
   /** The first card's language choice: the app changes language and the tour starts again in it. */

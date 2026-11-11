@@ -31,7 +31,11 @@ function build() {
   const parts = {} as {
     session: ReturnType<typeof createSessionStore>;
     anatomy: ReturnType<typeof createAnatomyCommands>;
-    ui: Record<'showDetail' | 'revealOnSelect' | 'dismissHelp' | 'showList', () => void>;
+    ui: Record<'showDetail' | 'revealOnSelect' | 'dismissHelp' | 'showList', () => void> & {
+      readingPlace: () => { scrollTop: number } | null;
+      restoreReadingPlace: (place: { scrollTop: number }) => void;
+      markReadingPlace: () => void;
+    };
     chooseExplorer: ReturnType<typeof vi.fn<(explorer: Explorer) => void>>;
     scene: ReturnType<typeof createSceneCommands>;
     frameLandmark: ReturnType<typeof vi.fn<(options: MoveOptions) => boolean>>;
@@ -58,6 +62,9 @@ function build() {
       revealOnSelect: vi.fn(),
       dismissHelp: vi.fn(),
       showList: vi.fn(),
+      readingPlace: vi.fn(() => null),
+      restoreReadingPlace: vi.fn(),
+      markReadingPlace: vi.fn(),
     };
     parts.chooseExplorer = vi.fn<(explorer: Explorer) => void>((explorer) => {
       session.setExplorer(explorer);

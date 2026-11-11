@@ -3,6 +3,7 @@ import type { Translated } from '../clinical/types.ts';
 import { domainName, type NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
 import { percent } from '../format.ts';
 import { t } from '../i18n/index.ts';
+import { oneBrainHref } from '../methods.ts';
 
 export interface ProvenanceLink {
   href: string;
@@ -105,10 +106,17 @@ export function provenanceRows(
     if (kept.length) rows.push({ label, items: kept });
   };
 
+  // One person's brain says why it is one, what that costs, and where the methods site explains it.
   add(copy.subject, [
     anatomy?.display_name && {
       text: anatomy.display_name,
-      note: typeof anatomy.individual === 'boolean' ? copy.kind(anatomy.individual) : null,
+      note:
+        typeof anatomy.individual === 'boolean'
+          ? copy.kind(anatomy.individual) + (anatomy.individual ? `. ${copy.oneBrain}` : '')
+          : null,
+      ...(anatomy.individual === true && {
+        link: { href: oneBrainHref(), text: copy.oneBrainLink },
+      }),
     },
   ]);
   add(copy.sourceData, [anatomy?.source_url && { link: link(anatomy.source_url) }]);
@@ -184,6 +192,16 @@ export function provenanceRows(
       ? [
           { text: ftract.label, note: ftract.license },
           ...ftract.citations!.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
+  const connectivity = manifest.functional_connectivity as Described | undefined;
+  add(
+    copy.functionalConnectivity,
+    connectivity
+      ? [
+          { text: connectivity.label, note: connectivity.license },
+          ...connectivity.citations!.map((citation) => ({ link: link(citation) })),
         ]
       : [],
   );

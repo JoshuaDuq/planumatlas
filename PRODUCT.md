@@ -13,8 +13,10 @@ anatomical research. The real reconstructed anatomy is the primary content.
 
 ## Users
 
-The repository identifies neuroscience learners and researchers as its audience.
-No additional user roles were established for this UI redesign.
+Students and trainees in neuroscience come first; researchers come second.
+Decided 2026-11-10 (supervisor review, D1): researcher tools stay, but where
+ranks or effort must be chosen, what serves a student learning the anatomy and
+its evidence is chosen first.
 
 ## Capabilities and Constraints
 

@@ -10,6 +10,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 HEMISPHERES = {"lh": "left", "rh": "right"}
 
+# Annotation labels that are not cortical areas: Julich-Brain marks its medial wall with two masks,
+# and cortex it has not yet mapped with gap maps; Schaefer names its medial wall a background.
+NON_AREA_NAMES = frozenset({
+    "Unknown", "unknown", "???", "Medial_wall", "CorpusCallosumMask", "BrainStemMask",
+    "Background+FreeSurfer_Defined_Medial_Wall",
+})
+
+
+def is_cortical_area(name):
+    return name not in NON_AREA_NAMES and not name.startswith("GapMap-")
+
 # What an anatomy may publish beside its cortex, aseg structures and volumes.
 LAYERS = ("networks", "nextbrain", "cerebellar_lobules", "white_matter", "spinal_cord",
           "neurosynth_terms", "arterial_territories", "cerebellar_functions", "coordinate_spaces",

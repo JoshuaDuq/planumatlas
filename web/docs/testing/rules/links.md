@@ -234,3 +234,11 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Source:** `viewer/app.js:2111-2132`
 - **Expected:** choose a system, wait for the camera to be idle (link still 750 ms), read the hash, reload → status `ready`, the hash equals the one read, the system select shows the same option. A link with `hidden=<region>` opens with that part hidden, Undo disabled and Restore all enabled. Choosing "By system" option 1 writes `system=` and the checked option is that name; option 0 removes it. `#hidden=destrieux:left:38` → "1 part hidden", Undo disabled, axe clean on the bar; Restore all → the hash has no `hidden=`.
 - **Covered by:** `e2e/journeys/scene.spec.ts` "LINK-21" (R: a system chosen by hand, and a scene with a region, a hidden part, a cut, a hemisphere, a colouring and a function, each reloaded to the same link); writing alone (no reload) is in the browser tests of the Dissection bar, the sections bar, the dock and the stage keys
+
+### LINK-23 · A raised paint threshold travels as zmin
+
+- **Rule:** The open single function's raised threshold is written as `zmin=` in half steps above 3 (supervisor review 3.2); the published 3 writes nothing, and a link without it opens at 3. Values below or at 3, off the half step, or above 100 are not applied. It is written only with the function it belongs to.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** `zmin=3.5` → `paintFrom` 3.5; `paintFrom: null` writes no `zmin`; 4.5 writes `zmin=4.5`; `2.5`, `3.25`, `x`, `-4`, `101` are rejected.
+- **Covered by:** `src/lib/core/state/url-state.test.ts`

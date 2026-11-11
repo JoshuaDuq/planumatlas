@@ -3,6 +3,7 @@ import { test } from 'vitest';
 import { readRepoJson } from '../../../../test/repo.ts';
 import type { Manifest } from '../../types/index.ts';
 import type { NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
+import { methodsHref, oneBrainHref } from '../methods.ts';
 import {
   checkedParcels,
   provenanceRows,
@@ -33,7 +34,11 @@ test('every link in the provenance sheet comes from the published records', () =
     const relative =
       href.startsWith(beside) && published.includes(`"${href.slice(beside.length)}"`);
     assert.ok(
-      published.includes(href) || relative || Object.values(urls).includes(href),
+      published.includes(href) ||
+        relative ||
+        Object.values(urls).includes(href) ||
+        // The app's own methods site.
+        href.startsWith(methodsHref()),
       `${href} is not in the manifest`,
     );
   }
@@ -113,6 +118,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
       'Receptor fingerprints',
       'Stimulation responses',
       'Stimulation responses (F-TRACT)',
+      'Functional connectivity (HCP)',
       'Stroke cases',
       'Neuropsychological domains',
       'Supplemental layers',
@@ -154,9 +160,21 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
 
 test('PROV-03 the subject, its reconstruction and the source files are named in both languages', () => {
   const en = published('en');
+  // One brain's note says why and what it costs, and links the methods site's section on it.
   assert.deepEqual(rowOf(en, 'Subject').items, [
-    { text: 'MGH CDMD “sub_013”', note: 'One individual’s MRI reconstruction' },
+    {
+      text: 'MGH CDMD “sub_013”',
+      note: 'One individual’s MRI reconstruction. Its surface, cuts, MRI and tracts are one person’s, not an average; atlases and group maps are registered onto it, so their borders here are estimates.',
+      link: { href: oneBrainHref(), text: 'Why one brain' },
+    },
   ]);
+  // An averaged template makes no such claim.
+  assert.deepEqual(
+    provenanceRows({ anatomy: { display_name: 'fsaverage', individual: false } } as never, {
+      lang: 'en',
+    })[0]!.items,
+    [{ text: 'fsaverage', note: 'Averaged reference template' }],
+  );
   assert.deepEqual(rowOf(en, 'Reconstruction').items, [
     { text: 'freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45', mono: true },
   ]);
@@ -168,7 +186,11 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
     ],
   );
   const fr = published('fr');
-  assert.equal(rowOf(fr, 'Sujet').items[0].note, 'Reconstruction IRM d’un individu');
+  assert.match(
+    rowOf(fr, 'Sujet').items[0].note!,
+    /^Reconstruction IRM d’un individu\. .+ estimations\.$/,
+  );
+  assert.equal(rowOf(fr, 'Sujet').items[0].link!.text, 'Pourquoi un seul cerveau (en anglais)');
   assert.equal(rowOf(fr, 'Fichiers publiés').items[1].note, 'Index des anatomies publiées');
 });
 

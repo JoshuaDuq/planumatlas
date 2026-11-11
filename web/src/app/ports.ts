@@ -12,7 +12,10 @@ import type { LinkHooks } from '../lib/controller/links.ts';
 export interface UiPorts
   extends
     Shell,
-    Pick<SelectionInterface, 'revealOnSelect'>,
+    Pick<
+      SelectionInterface,
+      'revealOnSelect' | 'readingPlace' | 'restoreReadingPlace' | 'markReadingPlace'
+    >,
     Pick<
       KeymapCommands,
       | 'back'
@@ -34,8 +37,11 @@ export interface UiPorts
   openLessonStep(index: number): unknown;
   /** The Tracts panel's way to draw a link's bundles. */
   showTracts: LinkHooks['showTracts'];
+  /** A stage tool opened from the panel, as its own press would (the Deficits list's Simulate a lesion). */
+  openStageTool(tool: 'lesion'): void;
   /** The guided tour, from the masthead that opens it from the settings menu. */
-  startGuide(): void;
+  /** `short` for a first visit's six stops; the settings menu's is every stop. */
+  startGuide(short?: boolean): void;
   /**
    * Shows the detail without raising a phone's sheet over the camera: a link restores a view,
    * it does not pick (`links.hooks.showDetail`). `showDetail` (a selection) raises it.
@@ -58,6 +64,9 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   showMri: true,
   openPreparedPlane: true,
   revealOnSelect: true,
+  readingPlace: true,
+  restoreReadingPlace: true,
+  markReadingPlace: true,
   back: true,
   focusSearch: true,
   walkTree: true,
@@ -66,6 +75,7 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   closeMpr: true,
   toggleShortcuts: true,
   startGuide: true,
+  openStageTool: true,
   openFunction: true,
   openDeficit: true,
   openLessonMri: true,

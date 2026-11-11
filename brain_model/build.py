@@ -25,6 +25,7 @@ from .layers import (
     cerebellar_functions,
     comparison,
     coordinate_spaces,
+    functional_connectivity,
     functional_regions,
     learning,
     networks,
@@ -40,6 +41,7 @@ from .layers import (
 )
 from .sources import (
     HEMISPHERES,
+    is_cortical_area,
     read_color_table,
     read_config,
     verify_sources,
@@ -59,12 +61,6 @@ from .surfaces.solids import export_solid_envelopes
 
 
 def cortical_region(atlas, hemisphere, label, name):
-    # Julich-Brain marks its medial wall with two masks, and cortex it has not yet
-    # mapped with gap maps; Schaefer names its medial wall a background: none is an area.
-    non_region = name in {
-        "Unknown", "unknown", "???", "Medial_wall", "CorpusCallosumMask", "BrainStemMask",
-        "Background+FreeSurfer_Defined_Medial_Wall",
-    } or name.startswith("GapMap-")
     display = name.replace("_", " ")
     return {
         "id": f"{atlas}:{hemisphere}:{label}",
@@ -73,7 +69,7 @@ def cortical_region(atlas, hemisphere, label, name):
         "atlas": atlas,
         "hemisphere": hemisphere,
         "source_label_id": int(label),
-        "kind": "non-region" if non_region else "cortex",
+        "kind": "cortex" if is_cortical_area(name) else "non-region",
     }
 
 
@@ -99,7 +95,10 @@ def require_layer_inputs(config):
         "cerebellar_lobules": lambda: [cerebellum.path(config)],
         "white_matter": lambda: [white_matter.path(config)],
         "spinal_cord": lambda: list(spinal_cord.paths(config).values()),
-        "neurosynth_terms": lambda: [neurosynth_terms.DEFINITION, neurosynth_terms.SCORES],
+        "functional_connectivity": lambda: [functional_connectivity.DEFINITION, functional_connectivity.DATA],
+        "neurosynth_terms": lambda: [
+            neurosynth_terms.DEFINITION, neurosynth_terms.SCORES, neurosynth_terms.ATLAS_SCORES,
+        ],
         "arterial_territories": lambda: [
             arterial_territories.DEFINITION,
             arterial_territories.volume_path(config),
@@ -664,6 +663,7 @@ def main():
         "receptor_fingerprints": receptor_fingerprints.export(config, regions),
         "stimulation_responses": stimulation_responses.export(config, regions),
         "stimulation_ftract": stimulation_ftract.export(config, regions),
+        "functional_connectivity": functional_connectivity.export(config, regions),
         **(
             {"boundary_certainty": boundary_certainty.export(config, regions)}
             if boundary_certainty.is_published(config)
@@ -726,6 +726,7 @@ def main():
             *receptor_fingerprints.limitations(),
             *stimulation_responses.limitations(),
             *stimulation_ftract.limitations(),
+            *functional_connectivity.limitations(),
             *white_matter.limitations(config),
             *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
             *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),

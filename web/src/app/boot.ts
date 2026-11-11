@@ -158,7 +158,7 @@ export async function startApp(
     if (firstLaunch(arrived)) {
       // The controls a ready stage shows are drawn before the tour counts which ones it can point at.
       flushSync();
-      app.ports.startGuide();
+      app.ports.startGuide(true);
     }
     prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);
