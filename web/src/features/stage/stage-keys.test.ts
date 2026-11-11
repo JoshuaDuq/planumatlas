@@ -5,7 +5,7 @@ import { LOBE_COLORS, lobeRows } from '../../lib/core/catalog/lobes.ts';
 import { anatomies, readModel } from '../../lib/core/catalog/test-support.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
 import type { Region } from '../../lib/types/index.ts';
-import { defaultOpen, keyBand, keyPlates } from './stage-keys.ts';
+import { defaultOpen, keyBand, keyedSurface, keyPlates } from './stage-keys.ts';
 import type { ColoredNetworks, KeySources, StageRoom } from './stage-keys.ts';
 
 const regions = readModel<{ regions: Region[] }>(`${anatomies.default}/manifest.json`).regions;
@@ -105,6 +105,18 @@ describe('keyPlates', () => {
       names(keyPlates(sources({ surfaceColor: 'lobe', lobes: rowsOf('destrieux'), legend }))),
     ).toEqual(['paint']);
     expect(keyPlates(sources({ surfaceColor: 'lobe', lobes: rowsOf('hcp-mmp') }))).toEqual([]);
+  });
+
+  test('a ghost that keeps no region in colour leaves the surface colour nothing to key', () => {
+    const state = { surfaceColor: 'lobe', ghostedAround: null, selectedRegion: null } as const;
+    expect(keyedSurface(state)).toBe('lobe');
+    // The tracts held: every region grey.
+    expect(keyedSurface({ ...state, ghostedAround: new Set() })).toBe('tissue');
+    // The selection, or a route's regions, keep the colour the key explains.
+    expect(keyedSurface({ ...state, ghostedAround: new Set(), selectedRegion: regions[0]! })).toBe(
+      'lobe',
+    );
+    expect(keyedSurface({ ...state, ghostedAround: new Set([regions[0]!.id]) })).toBe('lobe');
   });
 
   test('rows are toggles only for a pickable legend with more than one row', () => {

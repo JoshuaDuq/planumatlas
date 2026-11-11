@@ -7,6 +7,7 @@ import type {
   ArterialTerritory,
   Language,
   LoadStatus,
+  ModelState,
   Rgb,
   SurfaceColor,
 } from '../../lib/types/index.ts';
@@ -85,6 +86,15 @@ const row = (id: string, color: Rgb | string, label: string, pressed = false, ab
 /** The swatch's CSS colour. */
 export const swatchColor = (color: Rgb | string) =>
   typeof color === 'string' ? color : networkCss(color);
+
+/**
+ * The surface colour the key explains: none while a ghost keeps no region in it, as the held tracts
+ * do with nothing selected; the selection and a route's regions keep it.
+ */
+export const keyedSurface = (
+  state: Pick<ModelState, 'surfaceColor' | 'ghostedAround' | 'selectedRegion'>,
+): SurfaceColor =>
+  state.ghostedAround?.size === 0 && !state.selectedRegion ? 'tissue' : state.surfaceColor;
 
 /**
  * The plates the stage shows now, in drawing order. A paint covers the masthead's colour, so that

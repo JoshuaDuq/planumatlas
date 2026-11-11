@@ -28,6 +28,7 @@
   import OrientationGizmo from '../../features/stage/OrientationGizmo.svelte';
   import RouteMarks from '../../features/stage/RouteMarks.svelte';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
+  import { keyedSurface } from '../../features/stage/stage-keys.ts';
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
   import StageKeys from '../../features/stage/StageKeys.svelte';
   import StageOverlay from '../../features/stage/StageOverlay.svelte';
@@ -390,7 +391,7 @@
       media={app.media}
       lang={current.lang}
       status={current.status}
-      surfaceColor={tractReference ? 'tissue' : current.surfaceColor}
+      surfaceColor={tractReference ? 'tissue' : keyedSurface(current)}
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
