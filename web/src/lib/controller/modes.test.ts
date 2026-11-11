@@ -101,6 +101,71 @@ describe('leaving Tracts', () => {
   });
 });
 
+describe('kept tracts', () => {
+  test('stay drawn over a see-through, grey cortex on the other tabs', () => {
+    const scene = createScene();
+    const { excursions, engine } = scene;
+    excursions.chooseExplorer('diffusion');
+    excursions.keepTracts(true);
+    excursions.chooseExplorer('functions');
+    excursions.chooseExplorer('deficits');
+    assert.deepEqual(overlay(scene), [true]);
+    assert.equal(engine.model.settings.cortexOpacity, engine.tracts.defaultOpacity);
+    assert.deepEqual(engine.model.settings.ghostedAround, new Set());
+  });
+
+  test('let go on another tab, give back the opacity from before Tracts opened', () => {
+    const scene = createScene();
+    const { excursions, engine } = scene;
+    engine.model.setCortexOpacity(0.64);
+    excursions.chooseExplorer('diffusion');
+    excursions.keepTracts(true);
+    excursions.chooseExplorer('anatomy');
+    excursions.keepTracts(false);
+    assert.deepEqual(overlay(scene), [true, false]);
+    assert.equal(engine.model.settings.cortexOpacity, 0.64);
+    assert.equal(engine.model.settings.ghostedAround, null);
+  });
+
+  test('let go on Tracts, stay until Tracts is left', () => {
+    const scene = createScene();
+    scene.excursions.chooseExplorer('diffusion');
+    scene.excursions.keepTracts(true);
+    scene.excursions.keepTracts(false);
+    assert.deepEqual(overlay(scene), [true]);
+    scene.excursions.chooseExplorer('functions');
+    assert.deepEqual(overlay(scene), [true, false]);
+  });
+
+  test('kept from another tab, as a link keeps them, are drawn there, and Tracts holds them once', () => {
+    const scene = createScene();
+    const { excursions, engine } = scene;
+    excursions.chooseExplorer('functions');
+    excursions.keepTracts(true);
+    assert.equal(engine.model.settings.cortexOpacity, engine.tracts.defaultOpacity);
+    excursions.chooseExplorer('diffusion');
+    excursions.keepTracts(false);
+    excursions.chooseExplorer('anatomy');
+    assert.deepEqual(overlay(scene), [true, false]);
+    assert.equal(engine.model.settings.cortexOpacity, 1);
+  });
+
+  test('on another subject draw nothing', () => {
+    const scene = createScene();
+    const choice = createExplorerChoice({
+      engine: scene.engine,
+      session: scene.session,
+      lesion: scene.lesion,
+      anatomy: () => 'another-subject',
+      render: scene.render,
+    });
+    choice.keepTracts(true);
+    choice.chooseExplorer('functions');
+    assert.deepEqual(overlay(scene), []);
+    assert.equal(scene.engine.model.settings.cortexOpacity, 1);
+  });
+});
+
 describe('a lesion’s streamlines', () => {
   test('clear before Tracts holds the opacity, so leaving Tracts gives back the reader’s own', () => {
     const scene = createScene();

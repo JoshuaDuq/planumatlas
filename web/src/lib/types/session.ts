@@ -37,6 +37,8 @@ export interface SessionState {
   connectivitySeed: string | null;
   /** The Tracts tab's open profile: a tract row's key, or null for the list. Not written to links. */
   selectedTract: string | null;
+  /** The Tracts tab's streamlines stay drawn on the other tabs, over their own anatomy. */
+  keepTracts: boolean;
   expanded: ReadonlySet<string>;
   theme: Theme;
   lang: Language;

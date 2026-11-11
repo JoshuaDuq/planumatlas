@@ -88,8 +88,8 @@ export function checkLink(
   if (state.focused && !state.selectedRegion) reject('focused');
   // Stroke cases are picked in a region's sheet, and are not shown without one.
   if ('strokeCases' in state && !state.selectedRegion) reject('strokeCases');
-  // Ticked tracts are the Tracts tab's, and are not drawn from another.
-  if ('tracts' in state && state.explorer !== 'diffusion') reject('tracts');
+  // Ticked tracts are the Tracts tab's, and are drawn from another only while kept.
+  if ('tracts' in state && state.explorer !== 'diffusion' && !state.keepTracts) reject('tracts');
   // A lesion's colouring and drawn tract mean nothing without it; the tract must be one it reaches.
   if ('lesionMode' in state && !state.lesion) reject('lesionMode');
   if (

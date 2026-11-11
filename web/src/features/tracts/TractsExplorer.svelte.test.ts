@@ -74,6 +74,8 @@ function props(engine: Engine, extra: Record<string, unknown> = {}) {
     active: true,
     cortexOpacity: 0.16,
     onCortexOpacity: () => {},
+    keep: false,
+    onKeep: () => {},
     onOpenMri: () => {},
     elsewhere: () => [],
     onElsewhere: () => {},
@@ -276,6 +278,21 @@ describe('a link’s bundles', () => {
     const view = await render(TractsExplorer, props(engine, { active: false }));
     await view.component.showTracts(['cg-left']);
     expect(engine.tracts.ready).toBe(false);
+  });
+
+  test('a closed tab draws a link’s kept bundles, on the tracts’ own anatomy only', async () => {
+    const engine = createEngine();
+    const view = await render(TractsExplorer, props(engine, { active: false, keep: true }));
+    await view.component.showTracts(['cg-left']);
+    expect(drawn(engine)).toEqual(['cg-left']);
+    cleanup();
+    const other = createEngine();
+    const reference = await render(
+      TractsExplorer,
+      props(other, { active: false, keep: true, anatomy: 'snail' }),
+    );
+    await reference.component.showTracts(['cg-left']);
+    expect(other.tracts.ready).toBe(false);
   });
 });
 
@@ -551,11 +568,11 @@ describe('settings', () => {
     expect(engine.calls.some((call) => call.method === 'setOutlineOpacity')).toBe(false);
   });
 
-  test('on another anatomy it sets the reference outline opacity and there is no overlay checkbox', async () => {
+  test('on another anatomy it sets the reference outline opacity and there is no keep checkbox', async () => {
     const { engine } = await ready(createEngine(), { anatomy: 'snail' });
     await page.getByText('Tract display').click();
     expect(
-      page.getByRole('checkbox', { name: 'Show tracts with anatomy' }).elements(),
+      page.getByRole('checkbox', { name: 'Keep tracts on other tabs' }).elements(),
     ).toHaveLength(0);
     const opacity = page
       .getByRole('slider', { name: 'Brain outline opacity' })
@@ -598,14 +615,16 @@ describe('settings', () => {
     await expect.element(page.getByText('16 % · ≥1 mm')).toBeVisible();
   });
 
-  test('the overlay checkbox on the tracts’ own anatomy turns the overlay on and off', async () => {
-    const { engine } = await ready();
+  test('the keep checkbox shows the kept state and asks for its change', async () => {
+    const onKeep = vi.fn();
+    const { view } = await ready(createEngine(), { keep: true, onKeep });
     await page.getByText('Tract display').click();
-    const overlay = page.getByRole('checkbox', { name: 'Show tracts with anatomy' });
-    await overlay.click();
-    expect(engine.calls.filter((c) => c.method === 'setOverlay').at(-1)!.args).toEqual([true]);
-    await overlay.click();
-    expect(engine.calls.filter((c) => c.method === 'setOverlay').at(-1)!.args).toEqual([false]);
+    const keep = page.getByRole('checkbox', { name: 'Keep tracts on other tabs' });
+    await expect.element(keep).toBeChecked();
+    await keep.click();
+    expect(onKeep).toHaveBeenCalledExactlyOnceWith(false);
+    await view.rerender({ keep: false });
+    await expect.element(keep).not.toBeChecked();
   });
 
   test('Restore returns the drawn set to the catalog’s initial bundles, announces it, and keeps focus', async () => {
@@ -650,7 +669,7 @@ describe('settings', () => {
       order.push(label.textContent!.trim());
     }
     expect(order).toEqual([
-      'Show tracts with anatomy',
+      'Keep tracts on other tabs',
       'Cortex opacity',
       'Minimum length (mm)',
       'Restore default tracts',

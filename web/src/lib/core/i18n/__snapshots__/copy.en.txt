@@ -477,7 +477,7 @@
   "brainOpacity": "Brain outline opacity",
   "minimum": "Minimum length (mm)",
   "cortexOpacity": "Cortex opacity",
-  "showOverlay": "Show tracts with anatomy",
+  "keepTracts": "Keep tracts on other tabs",
   "mriOpen": "MRI with tracts",
   "nativeReference": "Tracts in their own T1 reference brain.",
   "nativeCanvas": "Reference brain and tracts. Drag or use arrow keys to rotate, scroll or press plus and minus to zoom. Select tract bundles in the side panel.",
@@ -1438,7 +1438,8 @@
    "coord": "MNI coordinate",
    "space": "coordinate template",
    "cases": "stroke cases",
-   "tracts": "tracts"
+   "tracts": "tracts",
+   "keeptracts": "tracts kept on other tabs"
   }
  },
  "menu": {

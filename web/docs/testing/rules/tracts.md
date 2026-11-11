@@ -147,7 +147,7 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 
 ### TRACT-16 · The opacity slider sets the cortex on the tracts' own anatomy, and the reference outline elsewhere
 
-- **Rule:** On the tracts' own anatomy the slider is "Cortex opacity" and sets the page's cortex opacity; there an overlay checkbox "Show tracts with anatomy" draws the tracts over the anatomy. On another anatomy the slider is "Brain outline opacity" and sets the reference brain outline; there is no overlay checkbox and a note says the tracts come from a different subject. Sliders are named by their label alone and carry their value as text.
+- **Rule:** On the tracts' own anatomy the slider is "Cortex opacity" and sets the page's cortex opacity; there a checkbox "Keep tracts on other tabs" keeps the ticked bundles drawn after Tracts is left. On another anatomy the slider is "Brain outline opacity" and sets the reference brain outline; there is no keep checkbox and a note says the tracts come from a different subject. Sliders are named by their label alone and carry their value as text.
 - **Kind:** behaviour
 - **Level:** browser — slider keys and engine calls
 - **Source:** `viewer/diffusion/native-ui.js:228-233`; deviation `u4-slider-readout-not-in-name.md`
@@ -207,7 +207,7 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 - **Kind:** behaviour
 - **Level:** browser — sequential focus
 - **Source:** decision 42 on #4 (the Tab stops are kept as legacy)
-- **Expected:** Tab order from the settings summary: "Show tracts with anatomy", "Cortex opacity", "Minimum length (mm)", "Restore default tracts", "Export lengths CSV", "About this data". Two summaries, each Enter → open, Space → closed, focus on it. "cing" typed, focus on Cingulum · left, switch to French → value "cing", settings open, focus on "Cingulum · gauche", announcer "".
+- **Expected:** Tab order from the settings summary: "Keep tracts on other tabs", "Cortex opacity", "Minimum length (mm)", "Restore default tracts", "Export lengths CSV", "About this data". Two summaries, each Enter → open, Space → closed, focus on it. "cing" typed, focus on Cingulum · left, switch to French → value "cing", settings open, focus on "Cingulum · gauche", announcer "".
 - **Covered by:** `src/features/tracts/TractsExplorer.svelte.test.ts` (R)
 
 ### TRACT-23 · Keys and controls are large enough for the pointer in use

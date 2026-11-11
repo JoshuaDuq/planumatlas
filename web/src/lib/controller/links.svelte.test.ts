@@ -86,6 +86,7 @@ function build({ announce }: { announce: boolean }) {
         hooks: {
           chooseExplorer: (explorer) => session.setExplorer(explorer),
           tractsExcursionOpen: () => false,
+          keepTracts() {},
           forgetScenes() {},
           rememberLessonScene() {},
           openLandmark: async () => true,

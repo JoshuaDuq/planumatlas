@@ -118,6 +118,7 @@ function setup(
     hooks: {
       chooseExplorer: (explorer) => session.setExplorer(explorer),
       tractsExcursionOpen: () => false,
+      keepTracts() {},
       forgetScenes() {},
       rememberLessonScene() {},
       openLandmark: async () => true,
@@ -410,6 +411,39 @@ describe('the ticked tracts in the link', () => {
       'tracts',
     ]);
     expect(showTracts).toHaveBeenCalledOnce();
+  });
+
+  it('carries kept bundles and the keeping from another tab', async () => {
+    const { engine, links } = setup({ explorer: 'functions', keepTracts: true }, undefined, {
+      engineOptions: { tractBundles },
+      hooks: { tractsExcursionOpen: () => true },
+    });
+    await engine.tracts.setActive(true);
+    engine.tracts.setVisible('af-left', false);
+    expect(links.linkState().tracts).toEqual(['cst-right']);
+    expect(encodeState(links.linkState())).toContain('keeptracts=1');
+  });
+
+  it('keeps the linked bundles before opening the tab, and draws them there', async () => {
+    const log: string[] = [];
+    let held = false;
+    const showTracts = vi.fn(async () => {});
+    const { links } = setup({ explorer: 'anatomy' }, undefined, {
+      engineOptions: { tractBundles },
+      hooks: {
+        showTracts,
+        tractsExcursionOpen: () => held,
+        keepTracts: (keep) => {
+          log.push(`keepTracts(${keep})`);
+          held = keep;
+        },
+        chooseExplorer: (explorer) => void log.push(`chooseExplorer(${explorer})`),
+      },
+    });
+    const linked = decodeState('tab=functions&keeptracts=1&tracts=slf-left');
+    expect(await links.restore(linked, {})).toEqual([]);
+    expect(log).toEqual(['keepTracts(true)', 'chooseExplorer(functions)']);
+    expect(showTracts.mock.calls).toEqual([[['slf-left']]]);
   });
 });
 
@@ -995,6 +1029,7 @@ describe('a link written on a whole route', () => {
       hooks: {
         chooseExplorer: excursions.chooseExplorer,
         tractsExcursionOpen: () => excursions.tractsHeld,
+        keepTracts: excursions.keepTracts,
         forgetScenes: excursions.forget,
         rememberLessonScene: () => excursions.holdBeforeLesson(),
         openLandmark: excursions.openLandmark,

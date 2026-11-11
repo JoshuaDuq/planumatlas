@@ -77,6 +77,8 @@ export interface LinkState {
   strokeCases: string[] | null;
   /** The bundles ticked on the Tracts tab, in catalog order; null for the catalog's initial ones. */
   tracts: string[] | null;
+  /** The ticked bundles stay drawn outside the Tracts tab. */
+  keepTracts: boolean;
 }
 
 /**

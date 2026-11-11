@@ -477,7 +477,7 @@
   "brainOpacity": "Opacité du contour cérébral",
   "minimum": "Longueur minimale (mm)",
   "cortexOpacity": "Opacité du cortex",
-  "showOverlay": "Afficher les faisceaux avec l’anatomie",
+  "keepTracts": "Garder les faisceaux sur les autres onglets",
   "mriOpen": "IRM avec faisceaux",
   "nativeReference": "Faisceaux dans leur propre cerveau de référence T1.",
   "nativeCanvas": "Cerveau de référence et faisceaux. Glisser ou utiliser les flèches pour tourner, défiler ou appuyer sur plus et moins pour zoomer. Sélectionner les faisceaux dans le panneau.",
@@ -1438,7 +1438,8 @@
    "coord": "coordonnée MNI",
    "space": "gabarit de la coordonnée",
    "cases": "cas d’AVC",
-   "tracts": "faisceaux"
+   "tracts": "faisceaux",
+   "keeptracts": "faisceaux gardés sur les autres onglets"
   }
  },
  "menu": {

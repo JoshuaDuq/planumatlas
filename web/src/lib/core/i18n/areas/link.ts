@@ -47,6 +47,7 @@ export const en = {
     space: 'coordinate template',
     cases: 'stroke cases',
     tracts: 'tracts',
+    keeptracts: 'tracts kept on other tabs',
   },
 };
 
@@ -97,5 +98,6 @@ export const fr: typeof en = {
     space: 'gabarit de la coordonnée',
     cases: 'cas d’AVC',
     tracts: 'faisceaux',
+    keeptracts: 'faisceaux gardés sur les autres onglets',
   },
 };

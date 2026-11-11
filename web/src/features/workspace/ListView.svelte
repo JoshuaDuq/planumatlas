@@ -235,6 +235,8 @@
     active={current.explorer === 'diffusion'}
     cortexOpacity={current.cortexOpacity}
     onCortexOpacity={anatomy.setCortexOpacity}
+    keep={current.keepTracts}
+    onKeep={excursions.keepTracts}
     bind:minimum={app.tractsMinimum}
     onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
     openTract={current.selectedTract}

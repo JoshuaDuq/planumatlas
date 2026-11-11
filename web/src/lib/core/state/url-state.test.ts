@@ -425,6 +425,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     coordinateSpace: 'unstated',
     strokeCases: ['M2295', 'M2294'],
     tracts: ['af-left', 'slf-left'],
+    keepTracts: true,
   });
   assert.deepEqual(
     written.split('&').map((pair) => pair.split('=')[0]),
@@ -469,11 +470,12 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'space',
       'cases',
       'tracts',
+      'keeptracts',
     ],
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left&keeptracts=1',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
@@ -516,6 +518,7 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     coordinateSpace: 'space',
     strokeCases: 'cases',
     tracts: 'tracts',
+    keepTracts: 'keeptracts',
     hiddenRegions: 'hidden',
   });
 });

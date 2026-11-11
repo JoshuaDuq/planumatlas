@@ -35,8 +35,10 @@ const CUT_LINKS: ReadonlySet<string> = new Set(['sagittal', 'coronal', 'axial', 
 export interface LinkHooks {
   /** Switch the workspace to an explorer, ending or beginning the Tracts excursion (app.js:1047). */
   chooseExplorer(explorer: Explorer): void;
-  /** The Tracts excursion is open: the cortex was made translucent for it (app.js:2021). */
+  /** The tracts are drawn, on Tracts or kept on another tab: the cortex was made translucent for them (app.js:2021). */
   tractsExcursionOpen(): boolean;
+  /** Keep the tracts drawn on the other tabs, or let them go. */
+  keepTracts(keep: boolean): void;
   /** Forget the scenes kept to return to after an excursion and after a lesson (app.js:2043-2044). */
   forgetScenes(): void;
   /** Keep the scene as it now stands (`captureReaderState()`), to return to when the lesson a link opened is left (app.js:2061). */
@@ -260,7 +262,7 @@ export function createLinks({
       // Cases are a region's; a link without the region would not show them.
       strokeCases:
         strokeCases.chosen.length && current.selectedRegion ? [...strokeCases.chosen] : null,
-      tracts: explorer === 'diffusion' ? tractsState() : null,
+      tracts: explorer === 'diffusion' || hooks.tractsExcursionOpen() ? tractsState() : null,
     };
   }
 
@@ -367,6 +369,7 @@ export function createLinks({
       const { state: valid, rejected: unknown } = checkLink(linked, known);
       // End the Tracts excursion before the link applies its own display settings.
       if (hooks.tractsExcursionOpen() && valid.explorer !== 'diffusion') {
+        hooks.keepTracts(false);
         hooks.chooseExplorer(valid.explorer ?? 'anatomy');
       }
       const notApplied = [...rejected, ...unknown];
@@ -396,6 +399,8 @@ export function createLinks({
         notApplied.push(...(named.length ? named : fields.slice(0, 1)));
       }
       hooks.forgetScenes();
+      // Kept first, so the tab the link opens holds them over the link's own display.
+      hooks.keepTracts(valid.keepTracts ?? false);
       hooks.chooseExplorer(valid.explorer ?? 'anatomy');
       session.setFunction(valid.selectedFunction ?? null);
       session.setPaintFrom(valid.selectedFunction ? (valid.paintFrom ?? null) : null);
@@ -410,7 +415,9 @@ export function createLinks({
         lesson.close();
       }
       const { explorer, selectedFunction, selectedDeficit } = session.state;
-      if (explorer === 'diffusion') restoreTracts(valid.tracts ?? initialTracts);
+      if (explorer === 'diffusion' || hooks.tractsExcursionOpen()) {
+        restoreTracts(valid.tracts ?? initialTracts);
+      }
       // The drawn streamlines belong to the lesion's report, on Anatomy.
       const tract = explorer === 'anatomy' ? (valid.lesionTract ?? null) : null;
       if (valid.lesionTract && !tract) notApplied.push(PARAMS.lesionTract!);

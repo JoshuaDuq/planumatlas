@@ -493,10 +493,11 @@ export function createExcursions(
     get heldAtlas() {
       return beforeExcursion?.atlas ?? null;
     },
-    /** The Tracts excursion is open, holding the cortex opacity it will give back. */
+    /** The tracts are drawn, holding the cortex opacity they will give back. */
     get tractsHeld() {
       return explorerChoice.tractsHeld;
     },
+    keepTracts: explorerChoice.keepTracts,
     afterReset: explorerChoice.afterReset,
     /**
      * The display the stage was prepared with, which the reader's changes are counted from and Reset

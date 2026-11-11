@@ -6,9 +6,10 @@ import type { SessionStore } from '../state/session.svelte.ts';
 import type { Explorer } from '../types/index.ts';
 
 /**
- * The tab in front (app.js:1035-1060). Leaving Tracts gives the cortex back the opacity it had when
- * Tracts opened; opening Tracts on the anatomy that owns the tracts draws them over its own cortex,
- * made see-through if it was opaque, and over every region but the selection in grey.
+ * The tab in front (app.js:1035-1060). Opening Tracts on the anatomy that owns the tracts draws them
+ * over its own cortex, made see-through if it was opaque, and over every region but the selection in
+ * grey. Leaving Tracts gives the cortex back the opacity it had when Tracts opened, unless the reader
+ * keeps the tracts on the other tabs; letting them go there gives it back then.
  */
 export function createExplorerChoice({
   engine,
@@ -18,7 +19,7 @@ export function createExplorerChoice({
   render,
 }: {
   engine: Pick<Engine, 'model' | 'tracts' | 'camera'>;
-  session: Pick<SessionStore, 'state' | 'setExplorer'>;
+  session: Pick<SessionStore, 'state' | 'setExplorer' | 'setKeepTracts'>;
   /** The lesion's streamlines belong to its report on Anatomy. */
   lesion: Pick<LesionStore, 'selectedTract' | 'clearTract'>;
   /** The brain on screen. */
@@ -26,14 +27,39 @@ export function createExplorerChoice({
   render: () => void;
 }) {
   let beforeTractsOpacity: number | null = null;
+
+  function holdTracts() {
+    if (beforeTractsOpacity !== null || anatomy() !== engine.tracts.anatomy) return;
+    beforeTractsOpacity = engine.model.settings.cortexOpacity;
+    // The streamlines lie where the anatomy does.
+    if (engine.model.settings.exploded) {
+      engine.model.setExploded(false);
+      engine.camera.frameWhole();
+    }
+    engine.tracts.setOverlay(true);
+    engine.model.ghostAround([]);
+    if (engine.model.settings.cortexOpacity === 1) {
+      engine.model.setCortexOpacity(engine.tracts.defaultOpacity);
+    }
+  }
+
+  function releaseTracts() {
+    if (beforeTractsOpacity === null) return;
+    const opacity = beforeTractsOpacity;
+    beforeTractsOpacity = null;
+    engine.tracts.setOverlay(false);
+    engine.model.ghostAround(null);
+    engine.model.setCortexOpacity(opacity);
+  }
+
   return {
-    /** The Tracts excursion is open: the cortex opacity it will give back is held. */
+    /** The tracts are drawn, holding the cortex opacity they will give back. */
     get tractsHeld() {
       return beforeTractsOpacity !== null;
     },
     /**
-     * A reset gives the opening display, and under Tracts that is the see-through cortex over the
-     * tracts, with the reset's opaque cortex the one to give back.
+     * A reset gives the opening display, and under the tracts that is the see-through cortex over
+     * them, with the reset's opaque cortex the one to give back.
      */
     afterReset() {
       if (beforeTractsOpacity === null) return;
@@ -42,33 +68,19 @@ export function createExplorerChoice({
       engine.model.ghostAround([]);
     },
     chooseExplorer(value: Explorer) {
-      const previous = session.state.explorer;
       // Before Tracts holds the opacity, so it holds the reader's own.
       if (value !== 'anatomy' && lesion.selectedTract !== null) lesion.clearTract();
       session.setExplorer(value);
-      if (previous === 'diffusion' && value !== 'diffusion' && beforeTractsOpacity !== null) {
-        const opacity = beforeTractsOpacity;
-        beforeTractsOpacity = null;
-        engine.tracts.setOverlay(false);
-        engine.model.ghostAround(null);
-        engine.model.setCortexOpacity(opacity);
-      }
-      if (
-        previous !== 'diffusion' &&
-        value === 'diffusion' &&
-        anatomy() === engine.tracts.anatomy
-      ) {
-        beforeTractsOpacity = engine.model.settings.cortexOpacity;
-        // The streamlines lie where the anatomy does.
-        if (engine.model.settings.exploded) {
-          engine.model.setExploded(false);
-          engine.camera.frameWhole();
-        }
-        engine.tracts.setOverlay(true);
-        engine.model.ghostAround([]);
-        if (engine.model.settings.cortexOpacity === 1) {
-          engine.model.setCortexOpacity(engine.tracts.defaultOpacity);
-        }
+      if (value === 'diffusion') holdTracts();
+      else if (!session.state.keepTracts) releaseTracts();
+      render();
+    },
+    /** Keep the tracts drawn on the other tabs, or let them go; on Tracts itself nothing changes yet. */
+    keepTracts(keep: boolean) {
+      session.setKeepTracts(keep);
+      if (session.state.explorer !== 'diffusion') {
+        if (keep) holdTracts();
+        else releaseTracts();
       }
       render();
     },

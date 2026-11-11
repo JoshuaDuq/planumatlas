@@ -13,7 +13,7 @@ export const en = {
   brainOpacity: 'Brain outline opacity',
   minimum: 'Minimum length (mm)',
   cortexOpacity: 'Cortex opacity',
-  showOverlay: 'Show tracts with anatomy',
+  keepTracts: 'Keep tracts on other tabs',
   mriOpen: 'MRI with tracts',
   nativeReference: 'Tracts in their own T1 reference brain.',
   nativeCanvas:
@@ -78,7 +78,7 @@ export const fr: typeof en = {
   brainOpacity: 'Opacité du contour cérébral',
   minimum: 'Longueur minimale (mm)',
   cortexOpacity: 'Opacité du cortex',
-  showOverlay: 'Afficher les faisceaux avec l’anatomie',
+  keepTracts: 'Garder les faisceaux sur les autres onglets',
   mriOpen: 'IRM avec faisceaux',
   nativeReference: 'Faisceaux dans leur propre cerveau de référence T1.',
   nativeCanvas:

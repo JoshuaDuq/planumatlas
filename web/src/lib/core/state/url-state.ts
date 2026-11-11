@@ -53,6 +53,7 @@ type Defaults = Pick<
   | 'coordinateSpace'
   | 'strokeCases'
   | 'tracts'
+  | 'keepTracts'
 >;
 
 export const DEFAULTS: Defaults = {
@@ -92,6 +93,7 @@ export const DEFAULTS: Defaults = {
   coordinateSpace: null,
   strokeCases: null,
   tracts: null,
+  keepTracts: false,
 };
 
 type Reader<T> = (value: string) => T | undefined;
@@ -350,6 +352,7 @@ const FIELDS: Field[] = [
   field('coordinateSpace', 'space', nonempty),
   field('strokeCases', 'cases', strokeCases, (ids) => ids.join(',')),
   field('tracts', 'tracts', bundleIds, (ids) => ids.join(',')),
+  field('keepTracts', 'keeptracts', flag, writeFlag),
 ];
 
 /** The link parameter each state field travels under. */

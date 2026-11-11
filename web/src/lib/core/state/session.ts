@@ -125,6 +125,7 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     clinicalQuery: '',
     selectedDeficit: null,
     selectedTract: null,
+    keepTracts: false,
     connectivitySeed: null,
     paintFrom: null,
     // One of the open deficit's findings shown alone, or null for all of them.
@@ -172,6 +173,7 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
       act({ selectedDeficit, selectedFinding: null, paintLifted: false }),
     setFinding: (selectedFinding: string | null) => act({ selectedFinding, paintLifted: false }),
     setTract: (selectedTract: string | null) => act({ selectedTract }),
+    setKeepTracts: (keepTracts: boolean) => act({ keepTracts }),
     // Painting shows a lifted paint again; clearing leaves the reader's lift as it is.
     setConnectivitySeed: (connectivitySeed: string | null) =>
       act(connectivitySeed ? { connectivitySeed, paintLifted: false } : { connectivitySeed }),

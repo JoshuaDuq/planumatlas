@@ -141,6 +141,9 @@ test('ticked tracts are the Tracts tab’s, and only bundles it lists', () => {
   const offTab = check('tab=anatomy&tracts=slf-left');
   assert.deepEqual(offTab.rejected, ['tracts']);
   assert.deepEqual(offTab.state, { explorer: 'anatomy' });
+  const kept = check('tab=functions&keeptracts=1&tracts=slf-left');
+  assert.deepEqual(kept.rejected, []);
+  assert.deepEqual(kept.state.tracts, ['slf-left']);
 });
 
 test('a coordinate needs a published space, and is never a lesion too', () => {

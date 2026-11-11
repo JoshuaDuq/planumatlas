@@ -221,6 +221,7 @@ export async function composeWorld(
       hooks: {
         chooseExplorer: excursions.chooseExplorer,
         tractsExcursionOpen: () => excursions.tractsHeld,
+        keepTracts: excursions.keepTracts,
         forgetScenes: excursions.forget,
         rememberLessonScene(scene) {
           handedScene = scene;

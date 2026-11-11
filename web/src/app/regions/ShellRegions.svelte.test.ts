@@ -181,16 +181,24 @@ describe('the ports', () => {
     );
   });
 
-  test('the tracts overlay turns on and off with the stage listening to the engine', async () => {
+  test('kept tracts stay drawn on Functions, and letting them go gives the cortex back', async () => {
     await shell.open();
+    const { engine } = shell;
     await page.getByRole('tab', { name: 'Tracts' }).click();
+    await vi.waitFor(() => expect(engine.tracts.streamlinesVisible).toBe(true));
     await page.getByText('Tract display').click();
-    const overlay = page.getByRole('checkbox', { name: 'Show tracts with anatomy' });
-    await expect.element(overlay).not.toBeChecked();
-    await overlay.click();
-    await expect.element(overlay).toBeChecked();
-    await overlay.click();
-    await expect.element(overlay).not.toBeChecked();
+    const keep = page.getByRole('checkbox', { name: 'Keep tracts on other tabs' });
+    await expect.element(keep).not.toBeChecked();
+    await keep.click();
+    await expect.element(keep).toBeChecked();
+    await page.getByRole('tab', { name: 'Functions' }).click();
+    expect(engine.tracts.streamlinesVisible).toBe(true);
+    expect(engine.model.settings.cortexOpacity).toBe(engine.tracts.defaultOpacity);
+    await page.getByRole('tab', { name: 'Tracts' }).click();
+    await keep.click();
+    await page.getByRole('tab', { name: 'Functions' }).click();
+    expect(engine.tracts.streamlinesVisible).toBe(false);
+    expect(engine.model.settings.cortexOpacity).toBe(1);
   });
 
   test('focusInDetail answers true in a region’s detail', async () => {

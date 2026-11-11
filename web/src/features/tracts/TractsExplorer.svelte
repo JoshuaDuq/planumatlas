@@ -52,7 +52,8 @@
     active,
     cortexOpacity,
     onCortexOpacity,
-    overlay = $bindable(false),
+    keep,
+    onKeep,
     minimum = $bindable(MINIMUM_LENGTH.min),
     onOpenMri,
     openTract = null,
@@ -69,8 +70,9 @@
     /** The global cortex opacity, which the opacity slider sets on the tracts' own anatomy. */
     cortexOpacity: number;
     onCortexOpacity: (value: number) => void;
-    /** Draw the streamlines over the anatomy's own brain (the tracts' own anatomy only). */
-    overlay?: boolean;
+    /** The ticked bundles stay drawn on the other tabs (the tracts' own anatomy only). */
+    keep: boolean;
+    onKeep: (keep: boolean) => void;
     /** The length filter in millimetres, as last applied. */
     minimum?: number;
     onOpenMri: (event: MouseEvent) => void;
@@ -146,12 +148,6 @@
   let destroyed = false;
   $effect(() => () => {
     destroyed = true;
-  });
-
-  // Untracked: the engine's synchronous tractsVisibility event lets listeners write state they read.
-  $effect(() => {
-    const next = overlay;
-    untrack(() => tracts.setOverlay(next));
   });
 
   let wasActive = false;
@@ -251,7 +247,8 @@
    */
   export async function showTracts(ids: readonly string[]) {
     while (runner.busy) await running;
-    if (!active || destroyed) return;
+    // Kept bundles are drawn from the other tabs too.
+    if ((!active && !(keep && matching)) || destroyed) return;
     const wanted = new Set(ids);
     const missing = ids.filter((id) => !tracts.hasBundle(id));
     for (const id of missing) pending.add(id);
@@ -463,12 +460,10 @@
           <label class="check">
             <input
               type="checkbox"
-              checked={overlay}
-              onchange={(event) => {
-                overlay = event.currentTarget.checked;
-              }}
+              checked={keep}
+              onchange={(event) => onKeep(event.currentTarget.checked)}
             />
-            <span>{text.showOverlay}</span>
+            <span>{text.keepTracts}</span>
           </label>
         {/if}
         <RangeField
