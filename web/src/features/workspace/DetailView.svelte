@@ -6,6 +6,8 @@
 
   Above it stays the search of the tab in front (U2), so a reader who types a name searches instead of
   pressing single-key shortcuts: typing there carries the words to the list, its results and its field.
+  It is one line here: the label is the field's placeholder, which typing never removes, since the
+  first character moves to the list's own labelled field.
 -->
 <script lang="ts">
   import { getApp, type World } from '../../app/application.svelte.ts';
@@ -193,7 +195,7 @@
 
 {#if search}
   <div class="detail-search">
-    <label class="search-label" for="{uid}-search">{search.label}</label>
+    <label class="visually-hidden" for="{uid}-search">{search.label}</label>
     <div class="search-box">
       <svg
         class="search-affordance"
@@ -214,6 +216,7 @@
         type="search"
         autocomplete="off"
         spellcheck="false"
+        placeholder={search.label}
         value={search.query}
         oninput={(event) => searchInList(event.currentTarget.value)}
         onkeydown={onSearchKeydown}
@@ -363,12 +366,9 @@
     /* The list's search head, as it stands over the list (FunctionList, DeficitList). */
     .detail-search {
       flex: none;
-      padding: var(--space-3) var(--panel-inset);
+      padding: var(--space-2) var(--panel-inset);
       border-bottom: 1px solid var(--border-subtle);
       background: var(--surface-base);
-    }
-    .detail-search .search-label {
-      margin-bottom: var(--space-2);
     }
     .search-box {
       position: relative;

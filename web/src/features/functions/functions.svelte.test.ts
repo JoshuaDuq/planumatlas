@@ -564,6 +564,21 @@ describe('opening a function', () => {
     await expect.poll(() => document.activeElement).toBe(title());
   });
 
+  test("the overview's summary is the stage key's sentence, naming the scan under the T1 colour", async () => {
+    mount();
+    await open('all');
+    const summary = () => document.querySelector('.profile .summary')!.textContent;
+    expect(summary()).toBe(
+      'Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.',
+    );
+    await world.engine.sections.setSurfaceColor('mri');
+    await expect
+      .poll(summary)
+      .toBe(
+        'Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.',
+      );
+  });
+
   test('a searched term opens with its kind line, its caveat and its areas; the term is English', async () => {
     mount('fr');
     await search('aphasia');
@@ -615,6 +630,48 @@ describe('opening a function', () => {
       h.textContent!.trim(),
     );
     expect(headings).toContain('Deficits that check this map');
+  });
+});
+
+describe('the paint threshold (3.2)', () => {
+  const slider = () => document.querySelector<HTMLInputElement>('.profile input[type="range"]');
+
+  test('FUNC-50 · one function’s profile raises its paint threshold in half steps; another function starts at 3', async () => {
+    mount();
+    await open('working-memory');
+    const range = slider()!;
+    expect(range.labels![0]!.textContent).toContain('Paint areas from z ≥');
+    expect([range.min, range.step, range.value]).toEqual(['3', '0.5', '3']);
+    // At the published threshold the paint and the lists agree, so no note stands under it.
+    expect(document.querySelector('.profile .paint-from-note')).toBeNull();
+    const top = domainAreas(world.domains, 'working-memory')[0]!.z;
+    expect(Number(range.max)).toBe(Math.floor(top * 2) / 2);
+    range.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await expect.poll(() => world.session.state.paintFrom).toBe(3.5);
+    await expect.poll(() => meta().textContent).toMatch(/at z\s≥\s3\.5$/);
+    const reached = domainAreas(world.domains, 'working-memory').filter(({ z }) => z >= 3.5);
+    expect(meta().textContent).toMatch(new RegExp(`^${reached.length} HCP-MMP areas?`));
+    // The list keeps the published rule, and says so.
+    expect(document.querySelectorAll('.profile .areas > li').length).toBe(
+      domainAreas(world.domains, 'working-memory').length,
+    );
+    expect(document.querySelector('.profile .paint-from-note')!.textContent).toContain(
+      'z\u00a0≥\u00a03',
+    );
+    await open('attention');
+    await expect.poll(() => slider()!.value).toBe('3');
+    expect(world.session.state.paintFrom).toBeNull();
+  });
+
+  test('the overview and a comparison have no threshold control; French reads a decimal comma', async () => {
+    mount('fr');
+    await open(ALL_DOMAINS);
+    expect(slider()).toBeNull();
+    await open('working-memory');
+    slider()!.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await expect.poll(() => slider()!.getAttribute('aria-valuetext')).toBe('3,5');
   });
 });
 

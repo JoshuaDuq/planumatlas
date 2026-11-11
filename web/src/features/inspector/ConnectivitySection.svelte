@@ -55,7 +55,7 @@
 
 {#if seed}
   <div class="evidence-section">
-    <Disclosure variant="section" summary={copy.heading(connectivity!.people)} bind:open>
+    <Disclosure variant="section" summary={copy.heading} value={copy.headingValue} bind:open>
       <p class="network-map">{copy.strongest}</p>
       <ul class="network-list" data-connectivity-partners>
         {#each partners as partner (partner.region)}

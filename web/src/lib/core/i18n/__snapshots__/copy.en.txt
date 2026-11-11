@@ -221,6 +221,10 @@
    "cutAtlas": [
     "[\"Alpha\"] → \"cut labels set to Alpha\"",
     "[\"\"] → \"cut labels set to \""
+   ],
+   "atlasAndCuts": [
+    "[\"Alpha\"] → \"atlas and cut labels set to Alpha\"",
+    "[\"\"] → \"atlas and cut labels set to \""
    ]
   },
   "restore": "Restore previous view",
@@ -664,12 +668,12 @@
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
   "keyScale": [
-   "[true] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below 3.\"",
-   "[false] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.\""
+   "[true,\"\"] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\"",
+   "[false,\"Alpha\"] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\""
   ],
   "keyScaleTerm": [
-   "[true] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below 3.\"",
-   "[false] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.\""
+   "[true,\"\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\"",
+   "[false,\"Alpha\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\""
   ],
   "keyAll": [
    "[true] → \"Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.\"",
@@ -2022,10 +2026,8 @@
   "ftractMethod": "Method (Trebaul et al. 2018)"
  },
  "connectivity": {
-  "heading": [
-   "[\"Alpha\"] → \"Functional connectivity (resting fMRI, Alpha adults)\"",
-   "[\"\"] → \"Functional connectivity (resting fMRI,  adults)\""
-  ],
+  "heading": "Functional connectivity",
+  "headingValue": "resting fMRI",
   "strongest": "Strongest correlations",
   "paint": "Paint on the brain",
   "shown": [

@@ -81,9 +81,14 @@ export function revealNotice(
   const clauses: string[] = [];
   if (before.cut && !after.cut) clauses.push(said.cut);
   if (before.isolated && !after.isolated) clauses.push(said.isolation);
-  if (before.atlas !== after.atlas) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
-  if (before.cutAtlas !== after.cutAtlas) {
-    clauses.push(said.cutAtlas(atlasSwitchLabel(after.cutAtlas, lang)));
+  const atlasMoved = before.atlas !== after.atlas;
+  const cutsMoved = before.cutAtlas !== after.cutAtlas;
+  if (atlasMoved && cutsMoved && after.atlas === after.cutAtlas) {
+    // Both moved to one atlas: it is named once.
+    clauses.push(said.atlasAndCuts(atlasSwitchLabel(after.atlas, lang)));
+  } else {
+    if (atlasMoved) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
+    if (cutsMoved) clauses.push(said.cutAtlas(atlasSwitchLabel(after.cutAtlas, lang)));
   }
   if (before.colour !== after.colour) {
     clauses.push(said.colour(t(lang, 'display').surfaceColors[after.colour]));

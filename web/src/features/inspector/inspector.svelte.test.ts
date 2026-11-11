@@ -1037,7 +1037,7 @@ describe('stimulation responses', () => {
 describe('Functional connectivity', () => {
   const AREA_45 = 'julich:left:1';
   const AREA_44 = 'julich:left:2';
-  const HEADING = 'Functional connectivity (resting fMRI, 200 adults)';
+  const HEADING = 'Functional connectivity, resting fMRI';
   const rows = (details: Element) =>
     [...details.querySelectorAll('[data-connectivity-partners] li')].map(text);
 

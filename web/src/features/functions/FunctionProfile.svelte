@@ -79,7 +79,10 @@
         format={(value) => decimal(value, 1, lang)}
         oninput={model.setPaintFrom}
       />
-      <p class="note paint-from-note">{copy.paintFromNote(threshold)}</p>
+      <!-- At the published threshold nothing differs from the lists, so there is nothing to say. -->
+      {#if model.paintFrom > model.domains.threshold_z}
+        <p class="note paint-from-note">{copy.paintFromNote(threshold)}</p>
+      {/if}
     </div>
   {/if}
   {#if id}
@@ -178,7 +181,7 @@
   {#if content && id}
     <div class="content">
       {#if content.all}
-        <p class="summary">{t(lang, 'domains').keyAll}</p>
+        <p class="summary">{t(lang, 'domains').keyAll(model.scan)}</p>
       {:else if content.term}
         <p class="kind">
           {content.term.before}<span lang="en">{content.term.term}</span>{content.term.after}

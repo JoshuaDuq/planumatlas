@@ -95,9 +95,6 @@
 
 <style>
   @layer features {
-    .search-label {
-      margin-bottom: var(--space-2);
-    }
     .search-box {
       position: relative;
       display: flex;

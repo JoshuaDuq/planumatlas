@@ -200,6 +200,9 @@
      * that runs edge to edge so results scroll under it, not through it.
      */
     .explorer :global(.search-label) {
+      /* Over the field's ground, which reaches further up than the gap between them. */
+      position: relative;
+      z-index: 3;
       flex: none;
       margin: var(--space-3) var(--panel-inset) 0;
     }

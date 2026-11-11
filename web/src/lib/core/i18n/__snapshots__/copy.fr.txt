@@ -221,6 +221,10 @@
    "cutAtlas": [
     "[\"Alpha\"] → \"étiquettes de coupe réglées sur Alpha\"",
     "[\"\"] → \"étiquettes de coupe réglées sur \""
+   ],
+   "atlasAndCuts": [
+    "[\"Alpha\"] → \"atlas et étiquettes de coupe réglés sur Alpha\"",
+    "[\"\"] → \"atlas et étiquettes de coupe réglés sur \""
    ]
   },
   "restore": "Rétablir la vue précédente",
@@ -664,12 +668,12 @@
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
   "keyScale": [
-   "[true] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous 3.\"",
-   "[false] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.\""
+   "[true,\"\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\"",
+   "[false,\"Alpha\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\""
   ],
   "keyScaleTerm": [
-   "[true] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous 3.\"",
-   "[false] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous 3.\""
+   "[true,\"\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\"",
+   "[false,\"Alpha\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\""
   ],
   "keyAll": [
    "[true] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires où l’IRM reste visible n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\"",
@@ -2022,10 +2026,8 @@
   "ftractMethod": "Méthode (Trebaul et al. 2018)"
  },
  "connectivity": {
-  "heading": [
-   "[\"Alpha\"] → \"Connectivité fonctionnelle (IRMf de repos, Alpha adultes)\"",
-   "[\"\"] → \"Connectivité fonctionnelle (IRMf de repos,  adultes)\""
-  ],
+  "heading": "Connectivité fonctionnelle",
+  "headingValue": "IRMf de repos",
   "strongest": "Corrélations les plus fortes",
   "paint": "Peindre sur le cerveau",
   "shown": [

@@ -56,6 +56,7 @@
       functionalRegions,
       openDeficit: (id) => deficits.openDeficit(id),
       atlas: () => view.current.atlas,
+      scan: () => view.current.surfaceColor === 'mri',
     });
     const deficits = createDeficitsExplorer({
       clinical,

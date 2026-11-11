@@ -229,7 +229,10 @@ export function legendFor(
         map: 'function',
         title: domainName(picked, lang),
         pickable: false,
-        note: isTermId(picked.id) ? copy.keyScaleTerm(scan) : copy.keyScale(scan),
+        note: (isTermId(picked.id) ? copy.keyScaleTerm : copy.keyScale)(
+          scan,
+          decimal(state.paintFrom ?? domains.threshold_z, 1, lang, { trim: true }),
+        ),
         rows: bands,
       };
     }

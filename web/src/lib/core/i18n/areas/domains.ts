@@ -17,10 +17,11 @@ export const en = {
   band: (from: string, to: string | null) =>
     (to ? `z ${from} to ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
   // `scan` is true while the T1 scan shows where nothing is painted.
-  keyScale: (scan: boolean) =>
-    `Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below 3.`,
-  keyScaleTerm: (scan: boolean) =>
-    `Neurosynth term. Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below 3.`,
+  // `floor` is the threshold the paint starts at, formatted: the published 3, or the reader's.
+  keyScale: (scan: boolean, floor: string) =>
+    `Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below ${floor}.`,
+  keyScaleTerm: (scan: boolean, floor: string) =>
+    `Neurosynth term. Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below ${floor}.`,
   keyAll: (scan: boolean) =>
     `Each area shows its strongest function; ${scan ? 'areas where the scan shows' : 'tissue-coloured areas'} reach none. Choose one to see all its areas.`,
   keyCompare: (scan: boolean) =>
@@ -50,10 +51,10 @@ export const fr: typeof en = {
   keyTitle: 'Fonctions neuropsychologiques',
   band: (from: string, to: string | null) =>
     (to ? `z ${from} à ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
-  keyScale: (scan: boolean) =>
-    `Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous 3.`,
-  keyScaleTerm: (scan: boolean) =>
-    `Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous 3.`,
+  keyScale: (scan: boolean, floor: string) =>
+    `Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous ${floor}.`,
+  keyScaleTerm: (scan: boolean, floor: string) =>
+    `Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous ${floor}.`,
   keyAll: (scan: boolean) =>
     `Chaque aire montre sa fonction la plus forte\u202f; ${scan ? 'les aires où l’IRM reste visible' : 'les aires couleur tissu'} n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.`,
   keyCompare: (scan: boolean) =>

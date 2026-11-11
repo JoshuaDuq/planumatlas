@@ -144,6 +144,7 @@ export function createWorld() {
     functionalRegions,
     openDeficit,
     atlas: () => view.current.atlas,
+    scan: () => view.current.surfaceColor === 'mri',
   });
   return {
     engine,

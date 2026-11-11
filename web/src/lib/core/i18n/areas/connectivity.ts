@@ -1,6 +1,8 @@
 // Resting functional connectivity (plan 4.1): the region sheet's section and the stage key.
 export const en = {
-  heading: (people: number) => `Functional connectivity (resting fMRI, ${people} adults)`,
+  heading: 'Functional connectivity',
+  // The closed section's quiet value; the note inside gives the group.
+  headingValue: 'resting fMRI',
   strongest: 'Strongest correlations',
   paint: 'Paint on the brain',
   shown: (name: string) => `The brain shows resting connectivity with ${name}.`,
@@ -19,7 +21,8 @@ export const en = {
 };
 
 export const fr: typeof en = {
-  heading: (people: number) => `Connectivité fonctionnelle (IRMf de repos, ${people} adultes)`,
+  heading: 'Connectivité fonctionnelle',
+  headingValue: 'IRMf de repos',
   strongest: 'Corrélations les plus fortes',
   paint: 'Peindre sur le cerveau',
   shown: (name: string) => `Le cerveau montre la connectivité de repos avec ${name}.`,

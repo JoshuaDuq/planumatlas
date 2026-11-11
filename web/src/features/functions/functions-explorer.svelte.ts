@@ -43,6 +43,7 @@ export interface FunctionExplorerDeps {
   /** The atlas the cortex is drawn on now. */
   atlas: () => string;
   /** Under the T1 colour what the paint leaves shows the scan, not the tissue colour (paint.ts). */
+  scan: () => boolean;
 }
 
 /** The legacy run options: which busy and failure sentence, and which operation a bare failure names. */
@@ -120,6 +121,9 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     },
     get lang() {
       return session.state.lang;
+    },
+    get scan() {
+      return deps.scan();
     },
     /** The Functions tab is in front. */
     get exploring() {

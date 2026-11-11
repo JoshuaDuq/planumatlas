@@ -373,7 +373,7 @@
       flex: none;
       min-height: 24px;
       height: auto;
-      margin: 0;
+      margin: min(0px, calc((var(--lh-caption) - 24px) / 2)) 0;
       padding: 0;
       border: 0;
       background: none;

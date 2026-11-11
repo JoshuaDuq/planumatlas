@@ -270,7 +270,7 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 
 ### WORK-29 · The search of the tab in front stays above its detail (U2)
 
-- **Rule:** In Anatomy, Functions and Deficits the detail view starts, under its location bar, with that tab's search field (same label, `/` hint while single-key shortcuts are on). Typing there writes the tab's query, shows the list and moves focus to the list's own field with the caret at the end, so the next keys go on typing and no single-key shortcut fires. Escape there empties words it holds, and with none is Back (KEY-03). `/` still shows the list and focuses its field. Circuits has no search and Tracts keeps its words in its own list, so their details have none.
+- **Rule:** In Anatomy, Functions and Deficits the detail view starts, under its location bar, with that tab's search field on one line (the tab's search label as its accessible name and its placeholder, `/` hint while single-key shortcuts are on). Typing there writes the tab's query, shows the list and moves focus to the list's own field with the caret at the end, so the next keys go on typing and no single-key shortcut fires. Escape there empties words it holds, and with none is Back (KEY-03). `/` still shows the list and focuses its field. Circuits has no search and Tracts keeps its words in its own list, so their details have none.
 - **Kind:** behaviour
 - **Level:** browser in the composed app
 - **Source:** U2 of the 2026-11-09 review; decision record 0007 (nothing moves in the DOM: the field above the detail is the detail's own, bound to the same query)

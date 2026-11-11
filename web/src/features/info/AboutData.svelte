@@ -60,7 +60,9 @@
     }
     /* In a popover it stands where the methods link stood, under the tool's own controls. */
     .about-data[data-host='popover'] {
-      margin-top: var(--space-2);
+      margin-top: var(--space-3);
+      padding-top: var(--space-1);
+      border-top: 1px solid var(--border-subtle);
     }
     .about-parts {
       display: grid;

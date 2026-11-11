@@ -330,6 +330,18 @@ describe('the published cdmd functions and deficits', () => {
     );
   });
 
+  test('a raised threshold is the floor the key’s note names, in the reader’s notation', () => {
+    const state = { ...functionState('language', 'fr'), paintFrom: 3.5 };
+    const note = (lang: 'en' | 'fr') =>
+      legendFor({ ...state, lang, paint: paintFor(state, both) }, { ...both, drawn: () => true })!
+        .note;
+    assert.equal(
+      note('en'),
+      'Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below 3.5.',
+    );
+    assert.match(note('fr')!, /sont sous 3,5\.$/);
+  });
+
   test('STATE-54 the overview keys the eleven overview functions, none pressed', () => {
     const state = functionState('all');
     const overview = legendFor(
