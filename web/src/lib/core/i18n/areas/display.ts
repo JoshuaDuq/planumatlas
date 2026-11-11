@@ -18,6 +18,7 @@ export const en = {
   surfaceColors: {
     tissue: 'Tissue',
     mri: 'T1 MRI',
+    lobe: 'Lobes',
     atlas: 'Regions',
     network: 'Yeo 7 networks',
     'cab-np': 'CAB-NP networks',
@@ -36,6 +37,7 @@ export const en = {
   surfaceColorTitles: {
     tissue: 'Tissue colours, shaded by T1 brightness',
     mri: 'Registered T1 MRI intensity in greyscale · selected region tinted',
+    lobe: 'One colour per lobe, as the Anatomy list groups this atlas’s regions; a lobe’s border is a convention',
     atlas: 'Atlas region colours',
     network: 'Functional networks (Yeo 7)',
     'cab-np': 'Functional networks (CAB-NP, 12) on HCP-MMP areas',
@@ -80,6 +82,7 @@ export const fr: typeof en = {
   surfaceColors: {
     tissue: 'Tissu',
     mri: 'IRM T1',
+    lobe: 'Lobes',
     atlas: 'Régions',
     network: 'Réseaux Yeo 7',
     'cab-np': 'Réseaux CAB-NP',
@@ -97,6 +100,7 @@ export const fr: typeof en = {
   surfaceColorTitles: {
     tissue: 'Couleurs des tissus, nuancées par la luminosité T1',
     mri: 'Intensité IRM T1 recalée en niveaux de gris · région sélectionnée teintée',
+    lobe: 'Une couleur par lobe, tel que la liste Anatomie regroupe les régions de cet atlas\u202f; la limite d’un lobe est une convention',
     atlas: 'Couleurs des régions de l’atlas',
     network: 'Réseaux fonctionnels (Yeo 7)',
     'cab-np': 'Réseaux fonctionnels (CAB-NP, 12) sur les aires HCP-MMP',

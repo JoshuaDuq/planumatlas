@@ -23,6 +23,7 @@ import { bindAppLifecycle } from './lifecycle.ts';
 import { missingWebgl } from './webgl-check.ts';
 import { composeWorld } from './world.ts';
 import { firstLaunch } from '../features/guide/first-launch.ts';
+import { openingColour } from '../lib/core/catalog/lobes.ts';
 
 /** What `mount` is given for `App.svelte`: its status and language follow the app, and every region can read the app from the context. */
 export function shellOptions(app: App) {
@@ -145,6 +146,10 @@ export async function startApp(
       wanted,
     );
 
+    // A page opened plainly shows the opening picture; a link shows the colour it was written with.
+    if (arrived.replace(/^#/, '') === '') {
+      wanted.surfaceColor = openingColour(engine.model.settings.atlas);
+    }
     const world = await composeWorld(app, engine, published.default);
     // The regions that draw from the engine mount here, and hand over the ports the controllers reach.
     app.attach(world);

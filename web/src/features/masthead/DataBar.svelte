@@ -1,14 +1,13 @@
 <!--
   The masthead's data group (viewer/ui/chrome/header.js:249-559, index.html:106-135,
-  styles/masthead.css:71-307): Subject, Atlas, Colour and Internal anatomy as native selects, a bar
-  where they fit and, behind a summary button, the same fields as a popover where they do not.
+  styles/masthead.css:71-307): one summary button naming the atlas and the colour, which opens
+  Subject, Atlas, Colour and Internal anatomy as native selects in a popover, each with its note. It
+  is one control at every width (2026-11-11): the fields stood inline on a wide bar until then.
   APG Disclosure (decision 14 on #4): the summary keeps focus when it opens, Tab enters the fields,
-  Escape, a press elsewhere or focus leaving closes it. Hand-rolled rather than U5's Popover because
-  the bar and the popover are one set of controls in one place in the DOM.
-  - the bar measures itself (not a breakpoint): `data-collapsed` on the root, always on phones and
-    coarse pointers; the summary drops internal anatomy, then colour, as room shrinks;
-  - `data-reference` on the root: the tract reference shows its name alone;
-  - on the bar, a press on a caption lists every field's choice with its note, under the bar;
+  Escape, a press elsewhere or focus leaving closes it.
+  - the summary names the atlas and the colour; internal anatomy is in its popover and its accessible
+    name, and the colour yields too where the atlas would not fit;
+  - `data-reference` on the root: the tract reference shows its name alone, with no popover;
   - a download started from a field is announced (WCAG 4.1.3, deviation h3-load-announcements).
 -->
 <script lang="ts">
@@ -26,8 +25,6 @@
   import { requiredAtlas } from '../../lib/core/state/scene-commands.ts';
   import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
   import {
-    COARSE_POINTER_QUERY,
-    PHONE_QUERY,
     type Language,
     type LoadProgress,
     type LoadStatus,
@@ -136,7 +133,9 @@
     choosing = Object.values(chosen).some((value) => value !== null);
   });
   const shown = (field: Field) => chosen[field] ?? values[field];
-  const required = (colour: string) => requiredAtlas(colourings, colour as SurfaceColor);
+  // The atlas a colouring would need, were `atlas` the one shown.
+  const required = (colour: string, atlas: string) =>
+    requiredAtlas(colourings, colour as SurfaceColor, atlas);
 
   // The selected option is the field's value, how far it has loaded while it downloads, and the tab
   // that set an atlas; every other option says what else choosing it would change.
@@ -156,7 +155,7 @@
         'atlas',
         id,
         atlasSwitchLabel(id, lang),
-        atlasOption(lang, id, required(shown('colour'))),
+        atlasOption(lang, id, required(shown('colour'), id)),
       ),
     })),
   );
@@ -169,7 +168,10 @@
           'colour',
           mode,
           display.surfaceColors[mode],
-          colourOption(lang, mode, { atlas: shown('atlas'), required: required(mode) }),
+          colourOption(lang, mode, {
+            atlas: shown('atlas'),
+            required: required(mode, shown('atlas')),
+          }),
         ),
       })),
     })),
@@ -209,7 +211,7 @@
     `${copy.dataSummary}: ${summary.map(({ text }) => text).join(' · ')}`,
   );
 
-  // Notes: a field's one-line meaning. A tooltip on the bar; the popover prints them.
+  // Notes: a field's one-line meaning, printed under it in the popover.
   const atlasNote = (id: string) =>
     (copy.notes as Record<string, string | undefined>)[id] ??
     (t(lang, 'atlases') as Record<string, string | undefined>)[id] ??
@@ -232,72 +234,12 @@
       '',
     detail: offersDetail ? atlasNote(shown('detail')) : '',
   });
-  let collapsed = $state(false);
-  const printed = $derived(collapsed && !reference);
-  const tip = (text: string) => (printed || !text ? undefined : text);
-
-  // The notes the popover prints, listed under the bar for a pointer: the keyboard reads each one
-  // as its field's description and tooltip.
-  const notesId = `masthead-notes-${uid}`;
-  let notesOpen = $state(false);
-  const noteRows = $derived(
-    [
-      offerAnatomies
-        ? {
-            field: 'subject',
-            caption: copy.subject,
-            value: subjectName(anatomy),
-            note: notes.subject,
-          }
-        : null,
-      { field: 'atlas', caption: copy.atlas, value: selectedLabel('atlas'), note: notes.atlas },
-      { field: 'colour', caption: copy.colour, value: selectedLabel('colour'), note: notes.colour },
-      offersDetail
-        ? {
-            field: 'detail',
-            caption: display.internalAnatomy,
-            value: selectedLabel('detail'),
-            note: notes.detail,
-          }
-        : null,
-    ].filter(
-      (row): row is { field: string; caption: string; value: string; note: string } =>
-        row !== null && row.note !== '',
-    ),
-  );
-  function showNotes(event: MouseEvent) {
-    if (collapsed) return;
-    // The caption's own press would focus its select; here it opens the list instead.
-    event.preventDefault();
-    notesOpen = !notesOpen;
-    if (notesOpen) settingsOpen = false;
-  }
-  $effect(() => {
-    if (collapsed || settingsOpen || reference) notesOpen = false;
-  });
-  $effect(() => {
-    if (!notesOpen) return;
-    const outside = (event: PointerEvent) => {
-      if (!(event.target as Element).closest?.('.data-label, .data-notes')) notesOpen = false;
-    };
-    // Marked handled, as the popover's: the page's own Escape would go on to clear the selection.
-    const escape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      notesOpen = false;
-    };
-    document.addEventListener('pointerdown', outside);
-    document.addEventListener('keydown', escape);
-    return () => {
-      document.removeEventListener('pointerdown', outside);
-      document.removeEventListener('keydown', escape);
-    };
-  });
+  // The popover prints each note under its field; the reference's name, which has none, carries its own.
+  const tip = (text: string) => (reference && text ? text : undefined);
 
   let open = $state(false);
   let instant = $state(false);
   let root: HTMLDivElement;
-  let data: HTMLDivElement;
   let toggle: HTMLButtonElement;
   let summaryNode: HTMLSpanElement;
   const selects: Partial<Record<'subject' | Field, HTMLSelectElement>> = $state({});
@@ -329,64 +271,19 @@
     );
   }
 
-  /**
-   * Whether the masthead's own row fits. A menu open in the header is laid out there too, and in
-   * the frame a new language widens it, before it is moved to fit, it reaches past the edge.
-   */
-  function rowFits(masthead: HTMLElement) {
-    const style = getComputedStyle(masthead);
-    const edge = masthead.getBoundingClientRect().right - parseFloat(style.paddingRight);
-    return [...masthead.children].every(
-      (child) =>
-        getComputedStyle(child).position === 'absolute' ||
-        child.getBoundingClientRect().right <= edge + 0.5,
-    );
-  }
-
-  // Measured rather than a breakpoint: subject names, French labels and loading progress change
-  // the bar's width.
-  function fitBar() {
-    const summaryFocused = document.activeElement === toggle;
-    const masthead = root.closest('header')!;
-    root.removeAttribute('data-collapsed');
-    const fits =
-      !matchMedia(PHONE_QUERY).matches &&
-      !matchMedia(COARSE_POINTER_QUERY).matches &&
-      data.scrollWidth <= root.clientWidth &&
-      rowFits(masthead);
-    root.toggleAttribute('data-collapsed', !fits);
-    collapsed = !fits;
-    if (fits) {
-      open = false;
-      if (summaryFocused) {
-        const select = Object.values(selects).find((select) => !select.disabled && visible(select));
-        (select ?? nextControl())?.focus();
-      }
-    } else if (data.contains(document.activeElement)) {
-      // A resize or translated label must not hide the control the reader is using.
-      instant = true;
-      open = true;
-    }
-  }
-
-  // Supporting settings yield first; the atlas stays visible and truncates if necessary.
-  function fitSummary() {
+  // The summary names the atlas and the colour: internal anatomy stays in the popover and the name,
+  // and the colour yields where the atlas would not fit. The atlas stays and truncates if it must.
+  function fit() {
     summaryNode.removeAttribute('data-short');
     const context = summaryNode.querySelector<HTMLElement>('.data-summary-context');
-    if (!collapsed || !context) return;
+    if (!context) return;
     const dropped: string[] = [];
-    for (const part of ['detail', 'colour']) {
-      if (context.clientWidth >= context.scrollWidth) return;
-      if (!summaryNode.querySelector(`[data-part="${part}"]`)) continue;
-      dropped.push(part);
-      summaryNode.dataset.short = dropped.join(' ');
-    }
+    if (summaryNode.querySelector('[data-part="detail"]')) dropped.push('detail');
+    summaryNode.dataset.short = dropped.join(' ');
+    if (context.clientWidth >= context.scrollWidth) return;
+    if (summaryNode.querySelector('[data-part="colour"]')) dropped.push('colour');
+    summaryNode.dataset.short = dropped.join(' ');
   }
-
-  const fit = () => {
-    fitBar();
-    fitSummary();
-  };
 
   // A new summary or language changes the width; so do the window, the font and the room.
   $effect(() => {
@@ -429,7 +326,7 @@
     // Marked handled: the page's own Escape would otherwise go on to clear the selection. On the
     // document, as legacy, so it works when a click on a note left focus on the page.
     const escape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || !collapsed) return;
+      if (event.key !== 'Escape') return;
       event.preventDefault();
       instant = true;
       open = false;
@@ -513,7 +410,6 @@
     </span>
   </button>
   <div
-    bind:this={data}
     id={dataId}
     class="masthead-data"
     data-open={open ? '' : undefined}
@@ -522,14 +418,12 @@
     {#if offerAnatomies || reference}
       <div class="data-field">
         {#if offerAnatomies && !reference}
-          <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-          <label class="data-label" for={ids.subject} onclick={showNotes}>{copy.subject}</label>
+          <label class="data-label" for={ids.subject}>{copy.subject}</label>
           <span class="select-box"
             ><select
               bind:this={selects.subject}
               id={ids.subject}
               aria-describedby={notes.subject ? noteId('subject') : undefined}
-              data-tooltip={tip(notes.subject)}
               disabled={switching}
               onchange={(event) => {
                 if (event.currentTarget.value !== anatomy.id) onAnatomy(event.currentTarget.value);
@@ -558,14 +452,12 @@
     {/if}
     {#if !reference}
       <div class="data-field">
-        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-        <label class="data-label" for={ids.atlas} onclick={showNotes}>{copy.atlas}</label>
+        <label class="data-label" for={ids.atlas}>{copy.atlas}</label>
         <span class="select-box"
           ><select
             bind:this={selects.atlas}
             id={ids.atlas}
             aria-describedby={notes.atlas ? noteId('atlas') : undefined}
-            data-tooltip={tip(notes.atlas)}
             onchange={(event) => choose('atlas', event.currentTarget.value, onAtlas)}
             onpointerenter={onAtlasIntent}
             onfocus={onAtlasIntent}
@@ -578,14 +470,12 @@
         {#if notes.atlas}<p class="data-note" id={noteId('atlas')}>{notes.atlas}</p>{/if}
       </div>
       <div class="data-field">
-        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-        <label class="data-label" for={ids.colour} onclick={showNotes}>{copy.colour}</label>
+        <label class="data-label" for={ids.colour}>{copy.colour}</label>
         <span class="select-box"
           ><select
             bind:this={selects.colour}
             id={ids.colour}
             aria-describedby={notes.colour ? noteId('colour') : undefined}
-            data-tooltip={tip(notes.colour)}
             onchange={(event) =>
               choose('colour', event.currentTarget.value, (value) =>
                 onSurfaceColor(value as SurfaceColor),
@@ -613,16 +503,12 @@
       <!-- A build without the optional fine level offers one choice, and so no control. -->
       {#if offersDetail}
         <div class="data-field">
-          <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-          <label class="data-label" for={ids.detail} onclick={showNotes}
-            >{display.internalAnatomy}</label
-          >
+          <label class="data-label" for={ids.detail}>{display.internalAnatomy}</label>
           <span class="select-box"
             ><select
               bind:this={selects.detail}
               id={ids.detail}
               aria-describedby={notes.detail ? noteId('detail') : undefined}
-              data-tooltip={tip(notes.detail)}
               onchange={(event) => choose('detail', event.currentTarget.value, onDetail)}
             >
               {#each detailOptions as option (option.value)}
@@ -635,17 +521,6 @@
       {/if}
     {/if}
   </div>
-  {#if notesOpen}
-    <div id={notesId} class="data-notes">
-      {#each noteRows as row (row.field)}
-        <div class="data-field">
-          <p class="data-label">{row.caption}</p>
-          <p class="notes-value">{row.value}</p>
-          <p class="data-note">{row.note}</p>
-        </div>
-      {/each}
-    </div>
-  {/if}
 </div>
 
 <style>
@@ -664,10 +539,6 @@
     :global(#app:is([data-status='loading'], [data-status='error'])) .data-bar {
       visibility: hidden;
     }
-    .data-toggle {
-      display: none;
-    }
-    /* Inline "Caption Value ⌄" pairs; with the caret's inset, 24px of ink separates one field from the next. */
     .masthead-data {
       display: flex;
       flex: none;
@@ -688,19 +559,6 @@
       line-height: var(--lh-caption);
       color: var(--text-tertiary);
       white-space: nowrap;
-    }
-    /* The tooltip carries the note on the bar; the popover prints it. */
-    .data-note {
-      display: none;
-    }
-    /* A caption on the bar opens the notes: an inquiry, not a press on its select. */
-    .data-bar:not(:global([data-collapsed])) .masthead-data .data-label {
-      cursor: help;
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .data-bar:not(:global([data-collapsed])) .masthead-data .data-label:hover {
-        color: var(--text-secondary);
-      }
     }
     /* One published subject is a name, set where a select's value would sit and on its line. */
     .study-name {
@@ -789,9 +647,9 @@
       }
     }
 
-    /* Where the bar does not fit, a summary opens the same fields as a popover. */
+    /* The summary opens the fields as a popover. */
     /* The full bar height, so the popover drops from the masthead's edge as the settings menu does. */
-    .data-bar:global([data-collapsed]) .data-toggle {
+    .data-bar .data-toggle {
       display: inline-flex;
       flex: 1 1 auto;
       align-items: center;
@@ -811,18 +669,18 @@
         background-color var(--ui-transition) var(--ease-ui),
         transform var(--press-transition) var(--ease-ui);
     }
-    .data-bar:global([data-collapsed]) .data-toggle:active:not(:focus-visible) {
+    .data-bar .data-toggle:active:not(:focus-visible) {
       transform: scale(var(--press-scale));
     }
-    .data-bar:global([data-collapsed]) .data-toggle[aria-expanded='true'] {
+    .data-bar .data-toggle[aria-expanded='true'] {
       background: var(--surface-tonal);
     }
     @media (hover: hover) and (pointer: fine) {
-      .data-bar:global([data-collapsed]) .data-toggle:hover {
+      .data-bar .data-toggle:hover {
         background: var(--surface-tonal);
       }
     }
-    .data-bar:global([data-collapsed]) .data-toggle::after {
+    .data-bar .data-toggle::after {
       content: '';
       flex: none;
       width: 6px;
@@ -833,10 +691,10 @@
       transform: translateY(-2px) rotate(45deg);
       transition: transform var(--ui-transition) var(--ease-ui);
     }
-    .data-bar:global([data-collapsed]) .data-toggle[aria-expanded='true']::after {
+    .data-bar .data-toggle[aria-expanded='true']::after {
       transform: translateY(1px) rotate(225deg);
     }
-    .data-bar:global([data-collapsed]) .data-summary {
+    .data-bar .data-summary {
       display: flex;
       flex: 0 1 auto;
       flex-direction: column;
@@ -845,7 +703,7 @@
       white-space: nowrap;
       text-align: left;
     }
-    .data-bar:global([data-collapsed]) .data-summary > [data-part='subject'] {
+    .data-bar .data-summary > [data-part='subject'] {
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -853,7 +711,7 @@
       font-weight: 600;
       line-height: var(--lh-ui);
     }
-    .data-bar:global([data-collapsed]) .data-summary-context {
+    .data-bar .data-summary-context {
       display: flex;
       align-self: stretch;
       align-items: baseline;
@@ -863,10 +721,10 @@
       font-size: var(--text-ui);
       line-height: var(--lh-ui);
     }
-    .data-bar:global([data-collapsed]) .data-summary-context > * {
+    .data-bar .data-summary-context > * {
       flex: none;
     }
-    .data-bar:global([data-collapsed]) .data-summary-context > [data-part='atlas'] {
+    .data-bar .data-summary-context > [data-part='atlas'] {
       flex: none;
       min-width: 0;
       max-width: 100%;
@@ -875,18 +733,16 @@
       color: var(--text-primary);
       font-weight: 600;
     }
-    .data-bar:global([data-collapsed]) .data-summary-sep {
+    .data-bar .data-summary-sep {
       color: var(--text-tertiary);
     }
-    .data-bar:global([data-collapsed])
-      .data-summary:global([data-short~='detail'] [data-part='detail']),
-    .data-bar:global([data-collapsed])
-      .data-summary:global([data-short~='colour'] [data-part='colour']) {
+    .data-bar .data-summary:global([data-short~='detail'] [data-part='detail']),
+    .data-bar .data-summary:global([data-short~='colour'] [data-part='colour']) {
       display: none;
     }
 
     /* The bar turned on its side: one ruled field per row, caption, value, then what it means. */
-    .data-bar:global([data-collapsed]) .masthead-data {
+    .data-bar .masthead-data {
       position: absolute;
       top: calc(100% + var(--space-1));
       /* The available header room ends before its actions, keeping the popover on screen. */
@@ -905,23 +761,23 @@
       box-shadow: var(--shadow-popover);
       transform-origin: top right;
     }
-    .data-bar:global([data-collapsed]) .masthead-data[data-open] {
+    .data-bar .masthead-data[data-open] {
       display: flex;
     }
     /* A labelled stack: caption, a full-width field, then what the choice means. */
-    .data-bar:global([data-collapsed]) .data-field {
+    .data-bar .data-field {
       flex-direction: column;
       align-items: stretch;
       gap: var(--space-1);
       padding: var(--space-3) var(--space-4) var(--space-4);
     }
-    .data-bar:global([data-collapsed]) .data-field ~ .data-field {
+    .data-bar .data-field ~ .data-field {
       border-top: 1px solid var(--border-subtle);
     }
-    .data-bar:global([data-collapsed]) .select-box {
+    .data-bar .select-box {
       --caret-end: var(--space-3);
     }
-    .data-bar:global([data-collapsed]) select {
+    .data-bar select {
       width: 100%;
       max-width: none;
       field-sizing: fixed;
@@ -929,20 +785,20 @@
       border-color: var(--border-control);
       background-color: var(--surface-base);
     }
-    .data-bar:global([data-collapsed]) select:disabled {
+    .data-bar select:disabled {
       border-color: var(--border-subtle);
       background-color: var(--surface-sunken);
     }
     @media (hover: hover) and (pointer: fine) {
-      .data-bar:global([data-collapsed]) select:hover:not(:disabled) {
+      .data-bar select:hover:not(:disabled) {
         border-color: var(--text-secondary);
         background-color: var(--surface-base);
       }
     }
-    .data-bar:global([data-collapsed]) .study-name {
+    .data-bar .study-name {
       max-width: 100%;
     }
-    .data-bar:global([data-collapsed]) .data-note {
+    .data-bar .data-note {
       display: block;
       margin-top: var(--space-1);
       font-size: var(--text-caption);
@@ -950,57 +806,11 @@
       color: var(--text-secondary);
     }
 
-    /* The notes under the bar: the popover's ruled rows, caption, the choice, then what it means. */
-    .data-notes {
-      position: absolute;
-      top: calc(100% + var(--space-1));
-      left: calc(var(--stage-gutter) - 1px - var(--space-2));
-      z-index: 1;
-      width: min(320px, calc(100vw - var(--space-6)));
-      background: var(--surface-base);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-panel);
-      box-shadow: var(--shadow-popover);
-      transform-origin: top left;
-      transition:
-        opacity var(--popover-transition) var(--ease-ui),
-        transform var(--popover-transition) var(--ease-ui);
-    }
-    @starting-style {
-      .data-notes {
-        opacity: 0;
-        transform: scale(0.97);
-      }
-    }
-    .data-notes .data-field {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-1);
-      padding: var(--space-3) var(--space-4) var(--space-4);
-    }
-    .data-notes .data-field ~ .data-field {
-      border-top: 1px solid var(--border-subtle);
-    }
-    .notes-value {
-      margin: 0;
-      color: var(--text-primary);
-      font-size: var(--text-ui);
-      font-weight: 600;
-      line-height: var(--lh-ui);
-    }
-    .data-notes .data-note {
-      display: block;
-      margin: 0;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-      color: var(--text-secondary);
-    }
-
     /* A tract reference offers no choices: its name sits in the bar, with no popover behind it. */
-    .data-bar:global([data-collapsed])[data-reference] .data-toggle {
+    .data-bar[data-reference] .data-toggle {
       display: none;
     }
-    .data-bar:global([data-collapsed])[data-reference] .masthead-data {
+    .data-bar[data-reference] .masthead-data {
       position: static;
       display: flex;
       width: auto;
@@ -1011,13 +821,13 @@
       border-radius: 0;
       box-shadow: none;
     }
-    .data-bar:global([data-collapsed])[data-reference] .data-field {
+    .data-bar[data-reference] .data-field {
       flex-direction: row;
       align-items: center;
       gap: var(--space-2);
       padding: 0;
     }
-    .data-bar:global([data-collapsed])[data-reference] .data-note {
+    .data-bar[data-reference] .data-note {
       display: none;
     }
 
@@ -1027,11 +837,11 @@
       .data-bar {
         padding-left: var(--stage-gutter);
       }
-      .data-bar:global([data-collapsed]) .data-toggle {
+      .data-bar .data-toggle {
         flex: 0 1 auto;
         margin-left: calc(-1px - var(--space-2));
       }
-      .data-bar:global([data-collapsed]) .masthead-data {
+      .data-bar .masthead-data {
         left: calc(var(--stage-gutter) - 1px - var(--space-2));
         right: auto;
         transform-origin: top left;
@@ -1043,10 +853,10 @@
       .data-bar {
         position: static;
       }
-      .data-bar:global([data-collapsed]) .data-toggle {
+      .data-bar .data-toggle {
         justify-content: flex-start;
       }
-      .data-bar:global([data-collapsed]) .masthead-data {
+      .data-bar .masthead-data {
         left: max(var(--space-3), env(safe-area-inset-left));
         right: max(var(--space-3), env(safe-area-inset-right));
         width: auto;
@@ -1065,7 +875,7 @@
     @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       /* 16px, so focusing a field does not zoom the page on iOS. */
       select,
-      .data-bar:global([data-collapsed]) .data-toggle {
+      .data-bar .data-toggle {
         min-height: 44px;
       }
       select {
@@ -1075,20 +885,20 @@
 
     /* A phone on its side has width but little height: two columns, no scrolling. */
     @media (max-height: 480px) and (orientation: landscape) {
-      .data-bar:global([data-collapsed]) .masthead-data {
+      .data-bar .masthead-data {
         width: min(640px, calc(100vw - 2 * var(--space-3)));
       }
-      .data-bar:global([data-collapsed]) .masthead-data[data-open] {
+      .data-bar .masthead-data[data-open] {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-      .data-bar:global([data-collapsed]) .data-field:nth-child(-n + 2) {
+      .data-bar .data-field:nth-child(-n + 2) {
         border-top: 0;
       }
-      .data-bar:global([data-collapsed]) .data-field:nth-child(even) {
+      .data-bar .data-field:nth-child(even) {
         border-left: 1px solid var(--border-subtle);
       }
-      .data-bar:global([data-collapsed]) .data-field:last-child:nth-child(odd) {
+      .data-bar .data-field:last-child:nth-child(odd) {
         grid-column: 1 / -1;
       }
     }
@@ -1096,20 +906,19 @@
 
   @layer a11y {
     @media (prefers-reduced-motion: reduce) {
-      .masthead-data[data-open],
-      .data-notes {
+      .masthead-data[data-open] {
         transition-property: opacity;
       }
-      .data-bar:global([data-collapsed]) .data-toggle::after {
+      .data-bar .data-toggle::after {
         transition: none;
       }
-      .data-bar:global([data-collapsed]) .data-toggle:active {
+      .data-bar .data-toggle:active {
         transform: none;
       }
     }
     @media (prefers-contrast: more) {
       select,
-      .data-bar:global([data-collapsed]) select:disabled {
+      .data-bar select:disabled {
         border-color: var(--border-control);
       }
     }

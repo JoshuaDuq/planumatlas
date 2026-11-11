@@ -1,9 +1,14 @@
 // Which plates the stage shows, how crowded a stage folds them and where they take their band
 // (viewport-chrome.js:304-320, 326-387, 403-415).
 import { describe, expect, test } from 'vitest';
+import { LOBE_COLORS, lobeRows } from '../../lib/core/catalog/lobes.ts';
+import { anatomies, readModel } from '../../lib/core/catalog/test-support.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
+import type { Region } from '../../lib/types/index.ts';
 import { defaultOpen, keyBand, keyPlates } from './stage-keys.ts';
 import type { ColoredNetworks, KeySources, StageRoom } from './stage-keys.ts';
+
+const regions = readModel<{ regions: Region[] }>(`${anatomies.default}/manifest.json`).regions;
 
 const networks: ColoredNetworks = {
   networks: ['Vis', 'Default'],
@@ -88,6 +93,18 @@ describe('keyPlates', () => {
       ['f1', true, false],
       ['f2', false, true],
     ]);
+  });
+
+  test('the lobe colour keys its lobes under "Lobes"; a paint covers it, and HCP-MMP has none (STAGE-66)', () => {
+    const rowsOf = (atlas: string) => lobeRows(regions, atlas, 'en');
+    const plates = keyPlates(sources({ surfaceColor: 'lobe', lobes: rowsOf('destrieux') }));
+    expect(plates).toHaveLength(1);
+    expect(plates[0]).toMatchObject({ name: 'network', title: 'Lobes', note: '', pickable: false });
+    expect(plates[0]!.rows.map((row) => [row.id, row.color])).toEqual(Object.entries(LOBE_COLORS));
+    expect(
+      names(keyPlates(sources({ surfaceColor: 'lobe', lobes: rowsOf('destrieux'), legend }))),
+    ).toEqual(['paint']);
+    expect(keyPlates(sources({ surfaceColor: 'lobe', lobes: rowsOf('hcp-mmp') }))).toEqual([]);
   });
 
   test('rows are toggles only for a pickable legend with more than one row', () => {

@@ -160,6 +160,7 @@ test('SNAP-05: every colouring has its words in English and French', () => {
     en: {
       tissue: 'Tissue',
       mri: 'T1 MRI',
+      lobe: 'Lobes',
       atlas: 'Regions',
       network: 'Yeo 7 networks',
       'cab-np': 'CAB-NP networks',
@@ -169,6 +170,7 @@ test('SNAP-05: every colouring has its words in English and French', () => {
     fr: {
       tissue: 'Tissu',
       mri: 'IRM T1',
+      lobe: 'Lobes',
       atlas: 'Régions',
       network: 'Réseaux Yeo 7',
       'cab-np': 'Réseaux CAB-NP',

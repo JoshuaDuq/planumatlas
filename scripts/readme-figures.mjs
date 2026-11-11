@@ -106,7 +106,9 @@ const hashOf = (state) => new URLSearchParams(state).toString().replaceAll('%2C'
 
 /** Load the overlay map through the Overlay tool, as a reader would; leave its cluster table open if asked. */
 async function openOverlay(page, file, clusters) {
-  await page.getByRole('button', { name: 'Overlay', exact: true }).click();
+  // Overlay is one of Add's choices, not a tool of its own.
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('radio', { name: 'Overlay', exact: true }).click();
   const tool = page.locator('.overlay');
   // HCP volumes are in FSL's MNI152, which the tool offers only as an unstated MNI template.
   await tool.locator('select').first().selectOption('unstated');
@@ -170,7 +172,7 @@ async function capture(browser, panel, overlayFile) {
       await page.waitForTimeout(3000);
     }
     if (panel.clusters) target = page.locator('.overlay .stage-field:has(.peaks)');
-    // The dock carries the Overlay and Linked MRI buttons, so it is hidden only now; it also holds the open tool.
+    // The dock holds Add, whose Overlay the capture used, and the open tool, so it is hidden only now.
     if (!panel.clusters) await page.addStyleTag({ content: '.stage-dock,.mpr-dock .picture>:not(canvas){visibility:hidden!important}' });
     await page.mouse.move(0, height - 1);
     if (errors.length) throw new Error(errors.join('\n'));

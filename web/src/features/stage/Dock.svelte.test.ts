@@ -8,6 +8,8 @@ import { flushSync } from 'svelte';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import { TRANSLATIONS } from '../../lib/core/i18n/index.ts';
+import { methodsHref } from '../../lib/core/methods.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
 import { createStageLayout } from '../../lib/state/stage-layout.svelte.ts';
@@ -134,11 +136,31 @@ const popover = () => document.querySelector<HTMLElement>('.popover:not([data-en
 const dialogs = () => document.querySelectorAll('[role="dialog"]');
 const canvas = () => document.getElementById('stage-canvas');
 
-/** Opens a tool from the keyboard: focus lands in its popover. */
+/** What Add holds: a choice at the head of its popover, not a tool of its own. */
+const PLACED = ['Lesion', 'Coordinate', 'Overlay'];
+/** The tool whose popover holds a body. */
+const owner = (name: string) => (PLACED.includes(name) ? 'Add' : name);
+/** A pointer press on a tool; for one of Add's choices, on Add and then the choice, or on Add to close it. */
+async function pressTool(name: string) {
+  if (!PLACED.includes(name)) return press('button', name);
+  if (tool('Add').getAttribute('aria-expanded') !== 'true') {
+    await press('button', 'Add');
+    await vi.waitFor(() => expect(tool('Add').getAttribute('aria-expanded')).toBe('true'));
+    if (control('radio', name).ariaChecked !== 'true') await press('radio', name);
+  } else if (control('radio', name).ariaChecked === 'true') {
+    await press('button', 'Add');
+  } else {
+    await press('radio', name);
+  }
+}
+
+/** Opens a tool from the keyboard: focus lands in its popover. One of Add's choices is chosen there. */
 async function open(name: string) {
-  tool(name).focus();
+  tool(owner(name)).focus();
   await userEvent.keyboard('{Enter}');
-  await vi.waitFor(() => expect(tool(name).getAttribute('aria-expanded')).toBe('true'));
+  await vi.waitFor(() => expect(tool(owner(name)).getAttribute('aria-expanded')).toBe('true'));
+  if (PLACED.includes(name) && control('radio', name).ariaChecked !== 'true')
+    await press('radio', name);
 }
 
 beforeEach(async () => {
@@ -155,32 +177,54 @@ afterEach(() => {
 });
 
 describe('the toolbar', () => {
-  test('is a labelled toolbar of five tools with one Tab stop that the arrows walk, wrapping', async () => {
+  test('STAGE-60 · is a labelled toolbar of three tools, one Tab stop, the arrows walking them', async () => {
     await mount();
     const bar = page.getByRole('toolbar', { name: '3D viewer tools' }).element();
     const tools = [...bar.querySelectorAll<HTMLElement>('.stage-tool')];
-    expect(tools.map((node) => node.textContent!.trim())).toEqual([
-      'Section',
-      'Lesion',
-      'Coordinate',
-      'Overlay',
-      'Display',
-    ]);
-    expect(tools.map((node) => node.tabIndex)).toEqual([0, -1, -1, -1, -1]);
+    expect(tools.map((node) => node.textContent!.trim())).toEqual(['Section', 'Display', 'Add']);
+    expect(tools.map((node) => node.tabIndex)).toEqual([0, -1, -1]);
+    // One rank: no rule divides three tools.
+    expect(bar.querySelectorAll('[role="separator"]')).toHaveLength(0);
+    // Lesion, Coordinate and Overlay are Add's choice, not tools.
+    for (const name of PLACED) {
+      expect(page.getByRole('button', { name, exact: true }).elements(), name).toHaveLength(0);
+    }
 
     tool('Section').focus();
     await userEvent.keyboard('{ArrowRight}');
     expect(active()).toBe(tool('Display'));
     await userEvent.keyboard('{ArrowDown}');
-    expect(active()).toBe(tool('Coordinate'));
-    await userEvent.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
+    expect(active()).toBe(tool('Add'));
+    await userEvent.keyboard('{ArrowRight}');
     expect(active()).toBe(tool('Section'));
     await userEvent.keyboard('{ArrowLeft}');
-    expect(active()).toBe(tool('Display'));
+    expect(active()).toBe(tool('Add'));
     await userEvent.keyboard('{Home}');
     expect(active()).toBe(tool('Section'));
     await userEvent.keyboard('{End}');
-    expect(active()).toBe(tool('Display'));
+    expect(active()).toBe(tool('Add'));
+  });
+
+  test('Add opens on Lesion, heads its popover with the choice, and keeps the last one chosen', async () => {
+    await mount();
+    await open('Add');
+    const choice = page.getByRole('radiogroup', { name: 'What to add to the brain' }).element();
+    expect(
+      [...choice.querySelectorAll('[role="radio"]')].map((radio) => radio.textContent!.trim()),
+    ).toEqual(PLACED);
+    expect(control('radio', 'Lesion').ariaChecked).toBe('true');
+    // Focus lands on the checked choice, so the arrows move between the three.
+    expect(active()).toBe(control('radio', 'Lesion'));
+    expect(popover().querySelector('[data-place]')!.getAttribute('data-place')).toBe('lesion');
+    await press('radio', 'Overlay');
+    expect(popover().querySelector('[data-place]')!.getAttribute('data-place')).toBe('overlay');
+    // Closed and opened again, it is where the reader left it.
+    await press('button', 'Add');
+    await vi.waitFor(() => expect(tool('Add').getAttribute('aria-expanded')).toBe('false'));
+    await press('button', 'Add');
+    await vi.waitFor(() => expect(control('radio', 'Overlay').ariaChecked).toBe('true'));
+    // What it holds is what the tour reads, to point only at a choice that is offered.
+    expect(tool('Add').dataset.offers).toBe('lesion coordinate overlay');
   });
 
   test('Tab passes the whole toolbar in one stop, and comes back to its first tool', async () => {
@@ -195,16 +239,20 @@ describe('the toolbar', () => {
     expect(active()).toBe(canvas());
   });
 
-  test('without published coordinate spaces there is no Coordinate tool, and the arrows pass it', async () => {
+  test('without published coordinate spaces Add offers no Coordinate; it comes with them', async () => {
     await mount({ coordinates: false });
-    expect(page.getByRole('button', { name: 'Coordinate' }).elements()).toHaveLength(0);
-    tool('Lesion').focus();
-    await userEvent.keyboard('{ArrowRight}');
-    expect(active()).toBe(tool('Overlay'));
+    await open('Add');
+    const offered = () =>
+      page
+        .getByRole('radio')
+        .elements()
+        .map((radio) => radio.textContent!.trim())
+        .filter((name) => PLACED.includes(name));
+    expect(offered()).toEqual(['Lesion', 'Overlay']);
+    expect(tool('Add').dataset.offers).toBe('lesion overlay');
     live.coordinates = true;
     flushSync();
-    await userEvent.keyboard('{ArrowLeft}');
-    expect(active()).toBe(tool('Coordinate'));
+    expect(offered()).toEqual(PLACED);
   });
 
   test('over the tract reference no tool is left and the dock is not drawn; it comes back with them', async () => {
@@ -225,9 +273,20 @@ describe('the toolbar', () => {
     expect(page.getByRole('toolbar', { name: 'Outils du visualiseur 3D' }).elements()).toHaveLength(
       1,
     );
-    for (const name of ['Coupe', 'Lésion', 'Coordonnée', 'Affichage']) {
+    for (const name of ['Coupe', 'Affichage', 'Ajouter']) {
       expect(tool(name), name).toBeTruthy();
     }
+    await press('button', 'Ajouter');
+    const choice = page.getByRole('radiogroup', { name: 'Quoi ajouter au cerveau' }).element();
+    const radios = [...choice.querySelectorAll<HTMLElement>('[role="radio"]')];
+    expect(radios.map((radio) => radio.textContent!.trim())).toEqual([
+      'Lésion',
+      'Coordonnée',
+      'Superposition',
+    ]);
+    // The longest words are never cut inside the popover's width.
+    for (const radio of radios)
+      expect(radio.scrollWidth, radio.textContent!).toBe(radio.clientWidth);
   });
 
   test('the dock root marks its keys as its own (decision 7), and no control does', async () => {
@@ -250,7 +309,7 @@ describe('the toolbar', () => {
     ['with Overlay', 1280, false],
     ['on a phone without Overlay', 390, true],
   ] as const)(
-    'the guided tour’s dock stops point at their own tools, %s',
+    'the guided tour’s dock stops point at the tool that holds them, %s',
     async (_, width, phone) => {
       await page.viewport(width, 800);
       try {
@@ -279,9 +338,10 @@ describe('the toolbar', () => {
         }
         expect(pointed).toEqual({
           Section: 'Section',
-          Lesion: 'Lesion',
-          Coordinate: 'Coordinate',
-          ...(phone ? {} : { Overlay: 'Overlay' }),
+          Lesion: 'Add',
+          Coordinate: 'Add',
+          // A phone's Add holds no Overlay, so the tour has no Overlay stop there.
+          ...(phone ? {} : { Overlay: 'Add' }),
           'The medial surface': 'Display',
           'The exploded view': 'Display',
         });
@@ -317,12 +377,36 @@ describe('a tool and its popover', () => {
     }
   });
 
-  test.each(['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display'])(
-    'the %s popover is named by its tool',
-    async (name) => {
+  test.each(['Section', 'Display', 'Add'])('the %s popover is named by its tool', async (name) => {
+    await mount();
+    await open(name);
+    expect(page.getByRole('dialog', { name, exact: true }).elements()).toHaveLength(1);
+  });
+
+  // The other four bodies come in as the fixture's snippets; their own tests open their About.
+  test.each([['Display', 'display']] as const)(
+    'the %s popover ends with About this data: closed, then Shows, Source, Caution and its methods page',
+    async (name, place) => {
       await mount();
       await open(name);
-      expect(page.getByRole('dialog', { name, exact: true }).elements()).toHaveLength(1);
+      const about = document.querySelector<HTMLElement>(`[data-about="${place}"]`)!;
+      const details = about.querySelector('details')!;
+      expect(details.open).toBe(false);
+      about.querySelector<HTMLElement>('summary')!.click();
+      await vi.waitFor(() => expect(details.open).toBe(true));
+      const copy = TRANSLATIONS.en.info;
+      expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
+        copy.shows,
+        copy.source,
+        copy.caution,
+      ]);
+      expect([...about.querySelectorAll('dd')].map((dd) => dd.textContent)).toEqual([
+        copy[place].shows,
+        copy[place].source,
+        copy[place].caution,
+      ]);
+      expect(about.querySelector('a')!.getAttribute('href')).toBe(methodsHref(place));
+      await expectAxeClean();
     },
   );
 
@@ -332,7 +416,7 @@ describe('a tool and its popover', () => {
     await open('Display');
     await vi.waitFor(() => expect(tool('Section').getAttribute('aria-expanded')).toBe('false'));
     expect(tool('Display').getAttribute('aria-expanded')).toBe('true');
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('false');
   });
 
   test.each(['Display', 'Section', 'Lesion', 'Coordinate', 'Overlay'])(
@@ -340,11 +424,11 @@ describe('a tool and its popover', () => {
     async (name) => {
       await mount();
       await open(name);
-      const body = page.getByRole('dialog', { name, exact: true });
+      const body = page.getByRole('dialog', { name: owner(name), exact: true });
       expect(body.element().contains(active())).toBe(true);
       await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
-      expect(active()).toBe(tool(name));
-      expect(tool(name).getAttribute('aria-expanded')).toBe('true');
+      expect(active()).toBe(tool(owner(name)));
+      expect(tool(owner(name)).getAttribute('aria-expanded')).toBe('true');
       expect(body.elements()).toHaveLength(1);
     },
   );
@@ -352,10 +436,13 @@ describe('a tool and its popover', () => {
   test('Tab from the last control of a popover leaves the dock, and the popover stays open', async () => {
     await mount();
     await open('Lesion');
+    // The choice, then the chosen body's own controls.
+    expect(active()).toBe(control('radio', 'Lesion'));
+    await userEvent.keyboard('{Tab}');
     expect(active()).toBe(control('button', 'Place'));
     await userEvent.keyboard('{Tab}');
     expect(active()).toBe(control('button', 'After'));
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('true');
   });
 
   test('from the keyboard it is instant, from the pointer it grows from the dock', async () => {
@@ -573,7 +660,15 @@ describe('a tool that goes away', () => {
     await open('Display');
     live.status = 'loading';
     flushSync();
-    await vi.waitFor(() => expect(dialogs()).toHaveLength(0));
+    // The hidden dock leaves the accessibility tree, so the tool is found by its own attribute.
+    expect(dock().querySelector('[data-tool="display"]')!.getAttribute('aria-expanded')).toBe(
+      'false',
+    );
+    // Bits unmounts a closed popover in the next animation frame. Wait for that frame, not a clock:
+    // under a loaded run, other pages' drawing can hold frames back past vi.waitFor's 1 s.
+    await new Promise(requestAnimationFrame);
+    flushSync();
+    expect(dialogs()).toHaveLength(0);
     expect(getComputedStyle(dock()).visibility).toBe('hidden');
     live.status = 'switching';
     flushSync();
@@ -582,12 +677,12 @@ describe('a tool that goes away', () => {
 
   test('a followed link closes the open popover, and the Lesion popover’s placing with it', async () => {
     await mount();
-    await press('button', 'Lesion');
+    await pressTool('Lesion');
     await press('button', 'Place');
     await vi.waitFor(() => expect(placing.at(-1)).toBe(true));
     dispatchEvent(new HashChangeEvent('hashchange'));
     await vi.waitFor(() => expect(dialogs()).toHaveLength(0));
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('false');
     expect(placing.at(-1)).toBe(false);
   });
 });
@@ -614,16 +709,14 @@ describe('placement', () => {
     [375, 'fr'],
     [360, 'en'],
     [360, 'fr'],
-  ] as const)('on a %i px phone in %s the four tools sit on one row', async (width, lang) => {
+  ] as const)('on a %i px phone in %s the three tools sit on one row', async (width, lang) => {
     await page.viewport(width, 800);
     try {
       await mount({ phone: true, lang }, { width, height: 700 });
       const tools = [...dock().querySelectorAll<HTMLElement>('.stage-tool:not([hidden])')];
       // Overlay is not offered on a phone this narrow.
-      expect(tools.map((node) => node.textContent!.trim())).not.toContain(
-        lang === 'en' ? 'Overlay' : 'Superposition',
-      );
-      expect(tools).toHaveLength(4);
+      expect(tools.at(-1)!.dataset.offers).toBe('lesion coordinate');
+      expect(tools).toHaveLength(3);
       const rows = new Set(tools.map((node) => Math.round(node.getBoundingClientRect().top)));
       expect(rows.size).toBe(1);
     } finally {
@@ -635,8 +728,7 @@ describe('placement', () => {
     await page.viewport(768, 1000);
     try {
       await mount({ phone: true }, { width: 768, height: 900 });
-      const tools = [...dock().querySelectorAll<HTMLElement>('.stage-tool:not([hidden])')];
-      expect(tools.map((node) => node.textContent!.trim())).toContain('Overlay');
+      expect(tool('Add').dataset.offers).toBe('lesion coordinate overlay');
     } finally {
       await page.viewport(1280, 800);
     }
@@ -771,7 +863,7 @@ describe('size, reflow and media', () => {
   );
 
   test('at 200 % text on a phone the tools wrap inside the dock, which stays inside the stage', async () => {
-    await mount({ phone: true }, { width: 390, height: 700 });
+    await mount({ phone: true }, { width: 390, height: 960 });
     document.documentElement.style.fontSize = '200%';
     try {
       await vi.waitFor(() => expect(tool('Section').offsetHeight).toBeGreaterThan(0));
@@ -813,15 +905,22 @@ describe('size, reflow and media', () => {
 describe('accessibility (axe)', () => {
   test.each(['en', 'fr'] as const)('%s: clean with each popover open', async (lang) => {
     await mount({ lang });
-    const names =
-      lang === 'en'
-        ? ['Section', 'Lesion', 'Coordinate', 'Overlay', 'Display']
-        : ['Coupe', 'Lésion', 'Coordonnée', 'Superposition', 'Affichage'];
+    const [section, display, add] =
+      lang === 'en' ? ['Section', 'Display', 'Add'] : ['Coupe', 'Affichage', 'Ajouter'];
     await expectAxeClean();
-    for (const name of names) {
+    for (const name of [section!, display!]) {
       await open(name);
       await expectAxeClean();
       await userEvent.keyboard('{Escape}');
+    }
+    // Add, on each thing it holds.
+    await open(add!);
+    const choices = popover().querySelectorAll<HTMLElement>('.place-choice [role="radio"]');
+    expect(choices).toHaveLength(3);
+    for (const choice of choices) {
+      choice.click();
+      flushSync();
+      await expectAxeClean();
     }
   });
 });
@@ -831,12 +930,14 @@ describe('an open popover stays while the reader works beside it', () => {
     'a press on the stage or outside it leaves %s open; its tool closes it',
     async (name) => {
       await mount();
-      await press('button', name);
-      await userEvent.click(canvas()!);
+      await pressTool(name);
+      // Near the stage's top right, clear of a popover that rises from the dock at the bottom left.
+      const { width } = canvas()!.getBoundingClientRect();
+      await userEvent.click(canvas()!, { position: { x: width - 8, y: 8 } });
       await press('button', 'Before');
-      expect(tool(name).getAttribute('aria-expanded')).toBe('true');
-      await press('button', name);
-      await vi.waitFor(() => expect(tool(name).getAttribute('aria-expanded')).toBe('false'));
+      expect(tool(owner(name)).getAttribute('aria-expanded')).toBe('true');
+      await pressTool(name);
+      await vi.waitFor(() => expect(tool(owner(name)).getAttribute('aria-expanded')).toBe('false'));
     },
   );
 });
@@ -844,27 +945,27 @@ describe('an open popover stays while the reader works beside it', () => {
 describe('placing a lesion from the Lesion popover', () => {
   test('places only once chosen there: a press on the stage then keeps it open, and closing ends it', async () => {
     await mount();
-    await press('button', 'Lesion');
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
+    await pressTool('Lesion');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('true');
     // Open, a click on the brain still selects until the reader chooses to place.
     expect(placing.at(-1)).toBe(false);
     await press('button', 'Place');
     await vi.waitFor(() => expect(placing.at(-1)).toBe(true));
     await userEvent.click(canvas()!);
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('true');
     expect(placing.at(-1)).toBe(true);
-    await press('button', 'Lesion');
-    await vi.waitFor(() => expect(tool('Lesion').getAttribute('aria-expanded')).toBe('false'));
+    await pressTool('Lesion');
+    await vi.waitFor(() => expect(tool('Add').getAttribute('aria-expanded')).toBe('false'));
     expect(placing.at(-1)).toBe(false);
     // Opened again, the popover starts back on selecting.
-    await press('button', 'Lesion');
+    await pressTool('Lesion');
     expect(control('button', 'Place').getAttribute('aria-pressed')).toBe('false');
     expect(placing.at(-1)).toBe(false);
   });
 
   test('another tool opened in its place ends placing', async () => {
     await mount();
-    await press('button', 'Lesion');
+    await pressTool('Lesion');
     await press('button', 'Place');
     await vi.waitFor(() => expect(placing.at(-1)).toBe(true));
     await press('button', 'Section');
@@ -873,15 +974,15 @@ describe('placing a lesion from the Lesion popover', () => {
 
   test('until the reader chooses to place, a click on the stage selects and the popover stays', async () => {
     await mount();
-    await press('button', 'Lesion');
+    await pressTool('Lesion');
     await userEvent.click(canvas()!);
-    expect(tool('Lesion').getAttribute('aria-expanded')).toBe('true');
+    expect(tool('Add').getAttribute('aria-expanded')).toBe('true');
     expect(placing.every((on) => !on)).toBe(true);
   });
 
   test('is not offered over the tract reference, so nothing is placed there', async () => {
     await mount({ tractReference: true });
-    expect(page.getByRole('button', { name: 'Lesion' }).elements()).toHaveLength(0);
+    expect(page.getByRole('button', { name: 'Add' }).elements()).toHaveLength(0);
     expect(placing.at(-1)).toBe(false);
   });
 });
@@ -1002,12 +1103,12 @@ describe('on a wider screen the camera frames the anatomy beside the open popove
     const given = stage.plateBand;
     // The same width, so the camera is not sent back and forth.
     refits = [];
-    await press('button', 'Overlay');
-    await vi.waitFor(() => expect(tool('Overlay').getAttribute('aria-expanded')).toBe('true'));
+    await pressTool('Overlay');
+    await vi.waitFor(() => expect(tool('Add').getAttribute('aria-expanded')).toBe('true'));
     await new Promise((resolve) => requestAnimationFrame(resolve));
     expect(stage.plateBand).toBe(given);
     expect(refits).not.toContain(0);
-    await press('button', 'Overlay');
+    await pressTool('Overlay');
     await vi.waitFor(() => expect(stage.plateBand).toBe(0));
     expect(plates).toEqual([]);
   });
@@ -1078,7 +1179,7 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
       expect(plates[1]!.top).toBe(plateTop());
       expect(plates[1]!.top!).toBeLessThan(plates[0]!.top!);
       // Another tool in its place reports its own plate, with no gap between them.
-      await press('button', 'Lesion');
+      await pressTool('Lesion');
       await vi.waitFor(() => expect(plates.at(-1)!.top).toBe(plateTop()));
       expect(plates.some(({ top }) => top === null)).toBe(false);
       // Escape closes the popover at once, and the camera with it.

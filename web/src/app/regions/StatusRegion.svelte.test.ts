@@ -166,6 +166,8 @@ describe('the count', () => {
       await held;
       await setDetail(id);
     });
+    // The data fields are behind the masthead's summary.
+    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
     await userEvent.selectOptions(
       page.getByRole('combobox', { name: 'Internal anatomy' }),
       other.id,

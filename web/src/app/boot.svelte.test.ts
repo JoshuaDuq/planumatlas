@@ -156,6 +156,21 @@ describe('the start', () => {
     expect(later.ports.startGuide).not.toHaveBeenCalled();
   });
 
+  test('opens a plain page on the lobes, and keeps the colour of any link (CAT-03a)', async () => {
+    localStorage.setItem('planum.guide', 'seen');
+    await boot('');
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'lobe' });
+
+    // A link written before the lobes, with no colour of its own, keeps the atlas colours.
+    engine = createFakeEngine({ manifest, domains: domains as never });
+    await boot('#view=left');
+    expect(engine.model.settings.surfaceColor).toBe('atlas');
+
+    engine = createFakeEngine({ manifest, domains: domains as never });
+    await boot('#colors=tissue');
+    expect(engine.model.settings.surfaceColor).toBe('tissue');
+  });
+
   test('frames the opening view with the stage’s own framing, then applies the link, then is ready', async () => {
     // The status each view is framed under: the link's own is applied while loading.
     const statuses: string[] = [];

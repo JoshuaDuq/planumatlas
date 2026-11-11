@@ -136,14 +136,39 @@
   .region-detail .actions button:active:not(:disabled, :focus-visible) {
     transform: scale(var(--press-scale));
   }
-  /* The 320px compact panel keeps all four commands on one line. */
-  @media (min-width: 801px) and (max-width: 1000px) {
-    .region-detail .actions button {
-      padding-inline: var(--space-2);
-    }
-  }
   .region-detail .actions .linked-mri {
     color: var(--accent);
+  }
+  /* More is a quiet word with the one chevron; the dissection commands it opens take their own line. */
+  .region-detail .actions .more-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-inline: var(--space-2);
+    background: transparent;
+    color: var(--text-secondary);
+  }
+  .region-detail .actions .more-chevron {
+    width: 6px;
+    height: 6px;
+    margin: 0 3px;
+    color: var(--text-tertiary);
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-1.6px) rotate(45deg);
+    transition: transform var(--ui-transition) var(--ease-ui);
+  }
+  .region-detail .actions .more-actions[aria-expanded='true'] .more-chevron {
+    transform: translateY(1.6px) rotate(-135deg);
+  }
+  .region-detail .actions .more-row {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .region-detail .actions .more-row[hidden] {
+    display: none;
   }
   /* A latched Focus or Isolate is drawn as a selection, teal wash and edge, so it never reads as the MRI command. */
   .region-detail .actions [data-active='true'] {
@@ -237,6 +262,52 @@
     font-size: var(--text-caption);
     line-height: var(--lh-caption);
     color: var(--text-secondary);
+  }
+  /*
+   * Two captioned indexes (supervisor review 2.2), the tree's caption idiom: 13px/600 over a rule that
+   * opens the index. A caption with no section under it for this region is not drawn.
+   */
+  .region-detail .region-index:not(:has(details)) {
+    display: none;
+  }
+  /* The research data is one closed row holding its sections; with none for this region it is not drawn. */
+  .region-detail
+    .region-index[data-index='research']:not(:has(.evidence-section:not([hidden]) details)) {
+    display: none;
+  }
+  .region-detail .region-index[data-index='research'] {
+    margin-top: var(--space-6);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .region-detail .region-index[data-index='research'] > details {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .region-detail .region-index[data-index='research'] > details > summary {
+    min-height: var(--row-height);
+  }
+  /* Its sections are its rows: set in from the row that holds them, the last one closing on its rule. */
+  .region-detail .region-index[data-index='research'] > details > .evidence-section {
+    margin-left: var(--space-3);
+  }
+  .region-detail .region-index[data-index='research'] > details[open] {
+    border-bottom: 0;
+  }
+  .region-detail .index-caption {
+    margin: var(--space-6) 0 0;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: var(--lh-caption);
+  }
+  /*
+   * The research index closes the detail: its caption's 24px collapses with the related sections' own,
+   * and its bottom inset is the detail's, there even when it has nothing to list.
+   */
+  .region-detail.region-research {
+    padding-top: 0;
   }
   /* Evidence and constituents read as one compact ruled index under the facts. */
   .region-detail .evidence-section,

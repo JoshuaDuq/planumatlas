@@ -35,6 +35,7 @@
   import { APP, getApp } from '../application.svelte.ts';
   import type { World } from '../application.svelte.ts';
   import { casesKey } from '../../lib/core/panels/stroke-cases.ts';
+  import { lobeRows } from '../../lib/core/catalog/lobes.ts';
 
   /** `children` is where I3b mounts the stage status, before and after the engine. */
   let { children }: { children?: Snippet } = $props();
@@ -257,6 +258,10 @@
     {@const current = world.view.current}
     {@const tractReference = isIndependentTractReference(current)}
     {@const { model } = world.engine}
+    {@const lobes =
+      current.surfaceColor === 'lobe'
+        ? lobeRows(model.regions.values(), current.atlas, current.lang)
+        : null}
     {@const commands = {
       resetView: world.anatomy.resetView,
       setHemisphere: world.anatomy.setHemisphere,
@@ -389,6 +394,7 @@
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
+      {lobes}
       legend={tractReference || world.userMap.drawn
         ? null
         : legendFor(

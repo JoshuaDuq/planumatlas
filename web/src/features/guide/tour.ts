@@ -1,5 +1,6 @@
 // How to use Planum, as a driver.js tour over the live interface.
 import { driver, type DriveStep, type Side, type Alignment } from 'driver.js';
+import { groupsByLobe } from '../../lib/core/catalog/lobes.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { GuideStop } from '../../lib/core/i18n/areas/guide.ts';
 import { PREF_KEYS, writePref } from '../../lib/state/prefs.ts';
@@ -9,6 +10,8 @@ import type { Language } from '../../lib/types/index.ts';
 import './tour.css';
 
 const dock = (tool: string) => `.stage-tool[data-tool="${tool}"]`;
+// Add, where it holds this choice: a stage with no Overlay to offer has no Overlay stop.
+const add = (choice: string) => `${dock('place')}[data-offers~="${choice}"]`;
 const STAGE = '#viewport canvas';
 const tab = (id: string) => `#workspace-tab-${id}`;
 const MRI_DOCK = '.mpr-dock';
@@ -170,7 +173,7 @@ const STOPS: Record<
   },
   // The left precentral gyrus's centroid on this brain (its detail view's Centroid, surface RAS).
   lesion: {
-    selector: dock('lesion'),
+    selector: add('lesion'),
     side: 'top',
     align: 'start',
     view: 'lesion=-35.5,-9.5,63.5,10',
@@ -180,13 +183,13 @@ const STOPS: Record<
   // so the stop reads it as not stated and the report gives the other templates' offsets. On this
   // brain it lands in cortex, half its 5 mm sphere in the middle frontal gyrus.
   coordinate: {
-    selector: dock('coordinate'),
+    selector: add('coordinate'),
     side: 'top',
     align: 'start',
     view: 'coord=-38,44,26&space=unstated',
   },
   // A reader's map is their own file and never in a link: the stop points at the tool to try.
-  overlay: { selector: dock('overlay'), side: 'top', align: 'start' },
+  overlay: { selector: add('overlay'), side: 'top', align: 'start' },
   medial: { selector: dock('display'), side: 'top', align: 'center', view: 'hemi=left&view=right' },
   // The brain comes apart as the stop opens, seen from the front; every other stop's view leaves
   // the explode out, so moving on, going back or closing puts it back together.
@@ -349,12 +352,16 @@ function shownStops(lang: Language, short: boolean, docksMri: boolean): GuideSto
 function drive(lang: Language, options: GuideOptions, reader: string): void {
   const { animate, onClose, onLanguage, mri, reserve, short = false } = options;
   const copy = t(lang, 'guide');
-  const home = parameters(reader).filter(([key]) => HOME_PARAMS.includes(key));
-  // A stop's parameters replace the home view's own.
-  const show = (view = '') =>
-    showHash(
-      `#${[...new Map([...home, ...parameters(view)])].map((pair) => pair.join('=')).join('&')}`,
-    );
+  // The opening picture's lobes stay through the tour; any other colour gives way to the stops' own.
+  const home = parameters(reader).filter(
+    ([key, value]) => HOME_PARAMS.includes(key) || (key === 'colors' && value === 'lobe'),
+  );
+  // A stop's parameters replace the home view's own; a stop on an atlas without lobes shows its regions.
+  const show = (view = '') => {
+    const shown = new Map([...home, ...parameters(view)]);
+    if (shown.get('colors') === 'lobe' && !groupsByLobe(shown.get('atlas'))) shown.delete('colors');
+    showHash(`#${[...shown].map((pair) => pair.join('=')).join('&')}`);
+  };
   // Whether the tour opened the panel, so leaving its stops closes only what the tour opened.
   let openedMri = false;
   // The link the view writes is applied later, so the MRI is opened on what the stop names.

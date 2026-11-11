@@ -42,6 +42,10 @@
   "cabNpAtlasOnly": [
    "[\"Alpha\"] → \"CAB-NP colours HCP-MMP areas only, so Alpha shows its own region colours.\"",
    "[\"\"] → \"CAB-NP colours HCP-MMP areas only, so  shows its own region colours.\""
+  ],
+  "lobesAtlasOnly": [
+   "[\"Alpha\"] → \"Alpha groups its areas by network, not by lobe, so it shows its own region colours.\"",
+   "[\"\"] → \" groups its areas by network, not by lobe, so it shows its own region colours.\""
   ]
  },
  "atlases": {
@@ -556,6 +560,7 @@
   "surfaceColors": {
    "tissue": "Tissue",
    "mri": "T1 MRI",
+   "lobe": "Lobes",
    "atlas": "Regions",
    "network": "Yeo 7 networks",
    "cab-np": "CAB-NP networks",
@@ -574,6 +579,7 @@
   "surfaceColorTitles": {
    "tissue": "Tissue colours, shaded by T1 brightness",
    "mri": "Registered T1 MRI intensity in greyscale · selected region tinted",
+   "lobe": "One colour per lobe, as the Anatomy list groups this atlas’s regions; a lobe’s border is a convention",
    "atlas": "Atlas region colours",
    "network": "Functional networks (Yeo 7)",
    "cab-np": "Functional networks (CAB-NP, 12) on HCP-MMP areas",
@@ -1045,7 +1051,7 @@
    {
     "id": "selectRegion",
     "title": "A region’s detail",
-    "body": "A region you open is described here: its side and group, then Focus, Isolate, Hide and Linked MRI, what is known about it, and the research data measured on it."
+    "body": "A region you open is described here: its side and group, then Focus, Linked MRI and More (Isolate, Hide), what is known about it, and the research data measured on it."
    },
    {
     "id": "tabs",
@@ -1055,7 +1061,7 @@
    {
     "id": "dock",
     "title": "Tools on the picture",
-    "body": "Section cuts the brain and Display sets what is drawn. Lesion, Coordinate and Overlay bring something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map."
+    "body": "Section cuts the brain and Display sets what is drawn. Add brings something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map."
    }
   ],
   "stops": [
@@ -1087,17 +1093,17 @@
    {
     "id": "lesion",
     "title": "Lesion",
-    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Lesion, choose Places the lesion, then click the brain."
+    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Add, choose Lesion and Places the lesion, then click the brain."
    },
    {
     "id": "coordinate",
     "title": "Coordinate",
-    "body": "Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
+    "body": "Under Add, Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
    },
    {
     "id": "overlay",
     "title": "Overlay",
-    "body": "Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent."
+    "body": "Under Add, Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent."
    },
    {
     "id": "medial",
@@ -1244,6 +1250,7 @@
   "focus": "Focus",
   "isolate": "Isolate",
   "restore": "Restore",
+  "moreActions": "More",
   "focusHint": "Frame this region in its colour, with the rest see-through grey",
   "isolateHint": "Show this region alone, framed",
   "restoreHint": "Show the rest of the brain again, framed whole",
@@ -2320,6 +2327,8 @@
    "[\"\"] → \" view\""
   ],
   "sectionTool": "Section",
+  "placeTool": "Add",
+  "placeChoice": "What to add to the brain",
   "lesionTool": "Lesion",
   "coordinateTool": "Coordinate",
   "overlayTool": "Overlay",

@@ -71,7 +71,6 @@ async function withTouch(check: () => Promise<void>) {
 
 async function expectAxeClean(
   sizes: (readonly [number, number])[] = [WIDE, PHONE],
-  collapsedAt: (width: number) => boolean = (width) => width === PHONE[0],
   themes: string[] = ['light', 'dark'],
 ) {
   const still = document.head.appendChild(document.createElement('style'));
@@ -89,7 +88,8 @@ async function expectAxeClean(
           await page.viewport(width, height);
           await resized;
         }
-        await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(collapsedAt(width));
+        // The summary refits in the frame after its size changes.
+        await settle();
         const results = await axe.run(document.body, {
           runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'],
           rules: { region: { enabled: false } },
@@ -115,10 +115,18 @@ const settle = async () => {
   await frame();
 };
 
-async function wide(props = barProps(), extra: Record<string, unknown> = {}) {
+/** A wide window, with the summary's popover open on its fields; `fields: false` leaves it closed. */
+async function wide(
+  props = barProps(),
+  { fields = true, ...extra }: Record<string, unknown> & { fields?: boolean } = {},
+) {
   await page.viewport(...WIDE);
   const view = await render(Fixture, { bar: props, ...extra });
   await settle();
+  if (fields && !props.reference) {
+    el(summary()).click();
+    await settle();
+  }
   return view;
 }
 async function phone(props = barProps(), extra: Record<string, unknown> = {}) {
@@ -133,10 +141,9 @@ afterEach(() => {
   cleanup();
 });
 
-describe('DataBar on the bar', () => {
+describe('DataBar fields', () => {
   test('four named fields, each described by its note; subject is a select only with a choice', async () => {
     await wide();
-    expect(bar().hasAttribute('data-collapsed')).toBe(false);
     for (const name of ['Subject', 'Atlas', 'Colour', 'Internal anatomy']) {
       const control = el(field(name));
       const note = document.getElementById(control.getAttribute('aria-describedby')!)!;
@@ -166,6 +173,7 @@ describe('DataBar on the bar', () => {
     expect(texts(el(field('Colour')))).toEqual([
       'Tissue',
       'T1 MRI',
+      'Lobes',
       'Regions',
       'Yeo 7 networks',
       'CAB-NP networks (atlas becomes HCP-MMP)',
@@ -264,7 +272,8 @@ describe('DataBar on the bar', () => {
     expect(note()).toBe(
       'Set by the Functions tab: its maps lie on HCP-MMP areas. Leaving the function brings back Destrieux.',
     );
-    expect(atlas.dataset.tooltip).toBe(note());
+    // The note is printed under its field, so the field carries no tooltip saying it twice.
+    expect(atlas.hasAttribute('data-tooltip')).toBe(false);
   });
 
   test('the subject select is disabled while switching, and focus is not dropped to the page', async () => {
@@ -274,54 +283,6 @@ describe('DataBar on the bar', () => {
     props.status = 'switching';
     await expect.poll(() => (el(field('Subject')) as HTMLSelectElement).disabled).toBe(true);
     expect(document.activeElement).toBe(el(field('Atlas')));
-  });
-
-  test('the note is the tooltip on the bar, never a title', async () => {
-    await wide();
-    for (const name of ['Subject', 'Atlas', 'Colour', 'Internal anatomy']) {
-      const control = el(field(name));
-      expect(control.dataset.tooltip, name).toBe(
-        document.getElementById(control.getAttribute('aria-describedby')!)!.textContent,
-      );
-      expect(control.hasAttribute('title')).toBe(false);
-    }
-  });
-
-  test('a press on a caption lists each choice and its note under the bar; it closes as a popover does', async () => {
-    await wide();
-    const caption = (name: string) =>
-      [...bar().querySelectorAll<HTMLElement>('.masthead-data label')].find(
-        (label) => label.textContent === name,
-      )!;
-    const notes = () => bar().querySelector<HTMLElement>('.data-notes');
-    await userEvent.click(caption('Atlas'));
-    expect(notes()?.checkVisibility()).toBe(true);
-    expect([...notes()!.querySelectorAll('.data-label')].map((node) => node.textContent)).toEqual([
-      'Subject',
-      'Atlas',
-      'Colour',
-      'Internal anatomy',
-    ]);
-    const described = el(field('Atlas')).getAttribute('aria-describedby')!;
-    expect(notes()!.textContent).toContain(document.getElementById(described)!.textContent);
-    // The press opens the list; it does not hand the select focus.
-    expect(document.activeElement).not.toBe(el(field('Atlas')));
-
-    await userEvent.click(caption('Colour'));
-    expect(notes()).toBeNull();
-
-    await userEvent.click(caption('Colour'));
-    let prevented = false;
-    document.addEventListener('keydown', (event) => (prevented = event.defaultPrevented), {
-      once: true,
-    });
-    await userEvent.keyboard('{Escape}');
-    expect(prevented).toBe(true);
-    expect(notes()).toBeNull();
-
-    await userEvent.click(caption('Atlas'));
-    await more().click();
-    expect(notes()).toBeNull();
   });
 
   test('French strings and names', async () => {
@@ -344,10 +305,9 @@ describe('DataBar on the bar', () => {
   });
 });
 
-describe('DataBar collapsed behind its summary', () => {
-  test('a phone is always collapsed; the summary names its parts, label first (WCAG 2.5.3)', async () => {
+describe('DataBar summary and popover', () => {
+  test('the summary names its parts, label first (WCAG 2.5.3)', async () => {
     await phone();
-    expect(bar().hasAttribute('data-collapsed')).toBe(true);
     const toggle = el(summary());
     expect(toggle.getAttribute('aria-label')).toBe(
       'Atlas and display settings: CDMD sub_013 · Destrieux · Tissue · Teaching set',
@@ -471,21 +431,23 @@ describe('DataBar collapsed behind its summary', () => {
     });
   });
 
-  test('the bar collapsing under a focused field opens the popover with focus kept', async () => {
+  test('a window narrowed to a phone’s keeps the open popover and the focus in it', async () => {
     await wide();
     el(field('Atlas')).focus();
     await page.viewport(...PHONE);
-    await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(true);
+    await settle();
     expect(el(summary()).getAttribute('aria-expanded')).toBe('true');
     expect(document.activeElement).toBe(el(field('Atlas')));
   });
 
-  test('widening under the focused summary hands focus to the first enabled field', async () => {
-    await phone();
-    el(summary()).focus();
-    await page.viewport(...WIDE);
-    await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(false);
-    expect(document.activeElement).toBe(el(field('Subject')));
+  test('on a wide window the summary shows the atlas and the colour; internal anatomy is in its name', async () => {
+    await wide(barProps(), { fields: false });
+    const node = bar().querySelector<HTMLElement>('.data-summary')!;
+    const shown = (part: string) =>
+      node.querySelector<HTMLElement>(`.data-summary-part[data-part=${part}]`)!.checkVisibility();
+    expect(node.dataset.short).toBe('detail');
+    expect([shown('atlas'), shown('colour'), shown('detail')]).toEqual([true, true, false]);
+    expect(el(summary()).getAttribute('aria-label')).toContain('Teaching set');
   });
 
   test('the summary drops internal anatomy, then colour, as room shrinks; atlas is never dropped', async () => {
@@ -548,8 +510,7 @@ describe('DataBar touch and refit', () => {
 
   test('touch controls stay in the disclosure on a wide screen, 44 px, anchored under the summary', async () => {
     await withTouch(async () => {
-      await wide();
-      expect(bar().hasAttribute('data-collapsed')).toBe(true);
+      await wide(barProps(), { fields: false });
       expect(el(summary()).offsetHeight).toBeGreaterThanOrEqual(44);
       // As wide as its words, not the whole column.
       expect(box(el(summary())).width).toBeLessThan(500);
@@ -560,13 +521,13 @@ describe('DataBar touch and refit', () => {
       const popover = bar().querySelector('.masthead-data')!;
       expect(Math.abs(box(popover).left - box(el(summary())).left)).toBeLessThan(3);
       expect(parseFloat(getComputedStyle(bar()).paddingLeft)).toBeGreaterThan(0);
-      await expectAxeClean([WIDE], () => true, ['light']);
+      await expectAxeClean([WIDE], ['light']);
     });
   });
 
   test('the desktop bar passes axe in French', async () => {
     await wide(barProps({ lang: 'fr' }));
-    await expectAxeClean([WIDE], () => false, ['light']);
+    await expectAxeClean([WIDE], ['light']);
   });
 
   test('Space opens the summary', async () => {
@@ -588,36 +549,6 @@ describe('DataBar touch and refit', () => {
     });
     await userEvent.keyboard('{Escape}');
     expect(prevented).toBe(true);
-    expect(el(summary()).getAttribute('aria-expanded')).toBe('false');
-  });
-
-  test('a change of the available width alone refits the bar', async () => {
-    await wide();
-    expect(bar().hasAttribute('data-collapsed')).toBe(false);
-    bar().style.width = '300px';
-    await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(true);
-    bar().style.width = '';
-    await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(false);
-  });
-
-  test('a menu open in the header, reaching past its edge, does not collapse the bar', async () => {
-    const view = await wide();
-    // The settings menu, caught in the frame its new language widens it, before it is moved to fit.
-    const menu = document
-      .querySelector('#masthead .masthead-end')!
-      .appendChild(document.createElement('div'));
-    menu.style.cssText = 'position: absolute; top: 100%; left: 0; width: 400px; height: 10px';
-    await view.rerender({ bar: barProps({ lang: 'fr' }) });
-    await settle();
-    expect(bar().hasAttribute('data-collapsed')).toBe(false);
-    menu.remove();
-  });
-
-  test('a collapse leaves the popover closed when focus is elsewhere', async () => {
-    await wide();
-    el(more()).focus();
-    bar().style.width = '300px';
-    await expect.poll(() => bar().hasAttribute('data-collapsed')).toBe(true);
     expect(el(summary()).getAttribute('aria-expanded')).toBe('false');
   });
 
@@ -653,7 +584,6 @@ describe('DataBar tract reference', () => {
 
   test('on a phone the summary is the name alone and there is no popover to open', async () => {
     await phone(barProps({ reference }));
-    expect(bar().hasAttribute('data-collapsed')).toBe(true);
     expect(bar().querySelector<HTMLElement>('.data-toggle')!.checkVisibility()).toBe(false);
     expect(page.getByRole('combobox').elements()).toHaveLength(0);
     expect(bar().querySelector('.study-name')!.checkVisibility()).toBe(true);
@@ -733,7 +663,7 @@ describe('DataBar accessibility', () => {
       await phone(barProps({ lang }));
       await summary().click();
       // English in light, French in dark: the bar's colours are in the first test's matrix.
-      await expectAxeClean([PHONE], undefined, [lang === 'en' ? 'light' : 'dark']);
+      await expectAxeClean([PHONE], [lang === 'en' ? 'light' : 'dark']);
       cleanup();
     }
   });

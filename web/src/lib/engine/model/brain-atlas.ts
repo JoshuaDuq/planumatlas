@@ -38,6 +38,7 @@ import type {
   SurfaceColor,
 } from '../../types/index.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
+import { groupsByLobe, lobeColor } from '../../core/catalog/lobes.ts';
 import { validateCabNp } from '../../core/catalog/networks.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { validateFunctionalRegions } from '../../core/catalog/functional-regions.ts';
@@ -1080,6 +1081,8 @@ export class BrainAtlas extends EventTarget {
     this.atlasId = id;
     // CAB-NP groups one atlas's areas; any other atlas has none to colour.
     if (this.surfaceColor === 'cab-np' && id !== this.cabNp!.atlas) this.surfaceColor = 'atlas';
+    // An atlas grouped by network has no lobes to colour.
+    if (this.surfaceColor === 'lobe' && !groupsByLobe(id)) this.surfaceColor = 'atlas';
     this.isolatedId = null;
     this.select(null);
   }
@@ -1214,6 +1217,8 @@ export class BrainAtlas extends EventTarget {
           this.surfaceColor === 'territory' && !paint && !cortex
             ? majorityTerritoryColor(region, this.manifest.arterial_territories!.territories)
             : null;
+        // A lobe colours its regions whole; what lies in none (deep structures, the medial wall) keeps tissue.
+        const lobe = this.surfaceColor === 'lobe' && !paint ? lobeColor(region) : null;
         mesh.visible = visibilityOf(region, settings).visible;
         const material = mesh.material;
         const userData = material.userData as AnatomicalUserData;
@@ -1261,6 +1266,8 @@ export class BrainAtlas extends EventTarget {
             territory[2] / 255,
             SRGBColorSpace,
           );
+        } else if (lobe) {
+          material.color.setRGB(lobe[0] / 255, lobe[1] / 255, lobe[2] / 255, SRGBColorSpace);
         } else if (this.surfaceColor !== 'atlas' || region.kind === 'non-region') {
           material.color.set(tissueColor(region, appearance.tissue));
         }
@@ -1580,6 +1587,9 @@ export class BrainAtlas extends EventTarget {
     }
     if (mode === 'territory' && !this.manifest.arterial_territories) {
       throw new Error('This model carries no arterial territories.');
+    }
+    if (mode === 'lobe' && !groupsByLobe(this.atlasId)) {
+      throw new Error(`${this.atlasId} groups no regions by lobe; show a lobe atlas first.`);
     }
     if (mode === 'cab-np') {
       if (!this.cabNp) throw new Error('This model carries no CAB-NP partition.');

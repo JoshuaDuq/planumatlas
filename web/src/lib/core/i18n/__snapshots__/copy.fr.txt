@@ -42,6 +42,10 @@
   "cabNpAtlasOnly": [
    "[\"Alpha\"] → \"CAB-NP ne colore que les aires HCP-MMP : Alpha affiche donc les couleurs de ses régions.\"",
    "[\"\"] → \"CAB-NP ne colore que les aires HCP-MMP :  affiche donc les couleurs de ses régions.\""
+  ],
+  "lobesAtlasOnly": [
+   "[\"Alpha\"] → \"Alpha regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.\"",
+   "[\"\"] → \" regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.\""
   ]
  },
  "atlases": {
@@ -556,6 +560,7 @@
   "surfaceColors": {
    "tissue": "Tissu",
    "mri": "IRM T1",
+   "lobe": "Lobes",
    "atlas": "Régions",
    "network": "Réseaux Yeo 7",
    "cab-np": "Réseaux CAB-NP",
@@ -574,6 +579,7 @@
   "surfaceColorTitles": {
    "tissue": "Couleurs des tissus, nuancées par la luminosité T1",
    "mri": "Intensité IRM T1 recalée en niveaux de gris · région sélectionnée teintée",
+   "lobe": "Une couleur par lobe, tel que la liste Anatomie regroupe les régions de cet atlas<NNBSP>; la limite d’un lobe est une convention",
    "atlas": "Couleurs des régions de l’atlas",
    "network": "Réseaux fonctionnels (Yeo 7)",
    "cab-np": "Réseaux fonctionnels (CAB-NP, 12) sur les aires HCP-MMP",
@@ -1045,7 +1051,7 @@
    {
     "id": "selectRegion",
     "title": "Le détail d’une région",
-    "body": "Une région ouverte est décrite ici<NNBSP>: son côté et son groupe, puis Focus, Isoler, Masquer et IRM liée, ce que l’on sait d’elle et les données de recherche mesurées sur elle."
+    "body": "Une région ouverte est décrite ici<NNBSP>: son côté et son groupe, puis Cibler, IRM liée et Plus (Isoler, Masquer), ce que l’on sait d’elle et les données de recherche mesurées sur elle."
    },
    {
     "id": "tabs",
@@ -1055,7 +1061,7 @@
    {
     "id": "dock",
     "title": "Les outils de l’image",
-    "body": "Coupe tranche le cerveau et Affichage règle ce qui est tracé. Lésion, Coordonnée et Superposition apportent quelque chose sur le cerveau<NNBSP>: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte."
+    "body": "Coupe tranche le cerveau et Affichage règle ce qui est tracé. Ajouter apporte quelque chose sur le cerveau<NNBSP>: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte."
    }
   ],
   "stops": [
@@ -1087,17 +1093,17 @@
    {
     "id": "lesion",
     "title": "Lésion",
-    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Lésion, choisissez Place la lésion, puis cliquez sur le cerveau."
+    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Ajouter, choisissez Lésion et Place la lésion, puis cliquez sur le cerveau."
    },
    {
     "id": "coordinate",
     "title": "Coordonnée",
-    "body": "Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche."
+    "body": "Sous Ajouter, Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche."
    },
    {
     "id": "overlay",
     "title": "Superposition",
-    "body": "Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé."
+    "body": "Sous Ajouter, Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé."
    },
    {
     "id": "medial",
@@ -1244,6 +1250,7 @@
   "focus": "Cibler",
   "isolate": "Isoler",
   "restore": "Rétablir",
+  "moreActions": "Plus",
   "focusHint": "Cadrer cette région dans sa couleur, le reste en gris transparent",
   "isolateHint": "Afficher cette région seule, cadrée",
   "restoreHint": "Réafficher le reste du cerveau, cadré en entier",
@@ -2320,6 +2327,8 @@
    "[\"\"] → \"Vue \""
   ],
   "sectionTool": "Coupe",
+  "placeTool": "Ajouter",
+  "placeChoice": "Quoi ajouter au cerveau",
   "lesionTool": "Lésion",
   "coordinateTool": "Coordonnée",
   "overlayTool": "Superposition",

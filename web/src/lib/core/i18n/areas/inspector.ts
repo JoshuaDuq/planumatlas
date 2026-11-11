@@ -19,6 +19,8 @@ export const en = {
   focus: 'Focus',
   isolate: 'Isolate',
   restore: 'Restore',
+  // Opens the row of dissection commands (Isolate, Hide) under Focus and Linked MRI.
+  moreActions: 'More',
   // One line each on what the command does: the button's tooltip and its description.
   focusHint: 'Frame this region in its colour, with the rest see-through grey',
   isolateHint: 'Show this region alone, framed',
@@ -50,6 +52,7 @@ export const fr: typeof en = {
   focus: 'Cibler',
   isolate: 'Isoler',
   restore: 'Rétablir',
+  moreActions: 'Plus',
   focusHint: 'Cadrer cette région dans sa couleur, le reste en gris transparent',
   isolateHint: 'Afficher cette région seule, cadrée',
   restoreHint: 'Réafficher le reste du cerveau, cadré en entier',

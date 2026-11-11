@@ -24,13 +24,13 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 - **Expected:** `hcp-mmp:left:1` → h2 "V1"; context terms "Hemisphere", "Lobe / System"; side "Left" (French "Gauche"); `requestFocus('region-title')` → true, focus on the h2 with `tabindex="-1"`. `learning:left:thalamus` → "Left", then French "Gauche" and a different group text; region cleared → no context and no facts. `pam50:left:gracile-fasciculus` → its notes as the hint
 - **Covered by:** `src/features/inspector/inspector.svelte.test.ts` (R, but the group value is only checked non-empty and the notes only for length > 0: W for those parts)
 
-### INSP-03 · Four commands act on the selection
+### INSP-03 · Focus and Linked MRI act on the selection; More opens Isolate and Hide
 
-- **Rule:** A selected region offers, in order, Focus, Isolate (Restore while isolated), Hide and Linked MRI; without a selection they are not rendered. Isolate has no pressed state: its label says what it will do, and it is drawn as active while isolated. Focus and Isolate announce their shortcuts. Focus, Isolate (or Restore) and Hide each say in one line what they do, as their tooltip and as a description that is there without a hover (`aria-describedby` to a hidden copy, so the tooltip shown on keyboard focus does not say it twice); a native `title` is not used, as it is hover-only. Linked MRI is named by its text, with "Open linked MRI slices" as its tooltip, and opens at the region at once from the keyboard and with an animation from a pointer. Focus, Hide and Clear call their commands.
+- **Rule:** A selected region offers Focus, Linked MRI and More; without a selection they are not rendered. More is a quiet disclosure button (`aria-expanded`, `aria-controls`): pressed, it shows Isolate (Restore while isolated) and Hide on a line of their own, which stays shown for the regions selected next; while a region is isolated the line shows whatever More says, so Restore is always in reach, and Isolate pressed there keeps it shown once the isolation ends (parsimony round 2026-11-11; it was four commands in one row). Isolate has no pressed state: its label says what it will do, and it is drawn as active while isolated. Focus and Isolate announce their shortcuts. Focus, Isolate (or Restore) and Hide each say in one line what they do, as their tooltip and as a description that is there without a hover (`aria-describedby` to a hidden copy, so the tooltip shown on keyboard focus does not say it twice); a native `title` is not used, as it is hover-only. Linked MRI is named by its text, with "Open linked MRI slices" as its tooltip, and opens at the region at once from the keyboard and with an animation from a pointer. Focus, Hide and Clear call their commands.
 - **Kind:** behaviour
 - **Level:** browser — keyboard vs pointer activation, focus kept on Isolate
 - **Source:** `viewer/ui/panels/inspector.js:104-109`, `278-290`, `328-331`; deviation `r1-hidden-actions.md`; conductor decision on #115 (Linked MRI name); review item U6 (the one-line descriptions)
-- **Expected:** Buttons "Focus", "Isolate", "Hide", "Linked MRI" (French "Cibler", "Isoler", "Masquer", "IRM liée"); clicks on Focus, Hide, Clear → `focus`, `hide`, `clear`. Isolate: `data-active="false"`, no `aria-pressed`; click → `isolate`; isolated → text "Restore", `data-active="true"`, no `aria-pressed`, focus still on it. Linked MRI: click → `{atRegion: true, instant: false}`, Enter → `{atRegion: true, instant: true}`; no `aria-keyshortcuts`, no `aria-label`, `data-tooltip` "Open linked MRI slices". Published data: Isolate → "Restore" (`data-active="true"`) → Isolate. Descriptions and tooltips (from `anatomy.svelte.ts`: Focus frames the selection in its colour with the rest a see-through ghost, Isolate hides every other region and frames it, Restore clears the isolation and frames the whole brain, Hide removes it and hands focus to the dissection's Undo): Focus "Frame this region in its colour, with the rest see-through grey"; Isolate "Show this region alone, framed"; Restore "Show the rest of the brain again, framed whole"; Hide "Remove this region from view; Undo brings it back"; French Hide "Retirer cette région de la vue NNBSP; Annuler la rétablit". Tab onto Focus → the tooltip shows its line and the accessible description is still that line once.
+- **Expected:** Buttons in the DOM "Focus", "Linked MRI", "More", "Isolate", "Hide" (French "Cibler", "IRM liée", "Plus", "Isoler", "Masquer"); More `aria-expanded="false"` with its line not drawn and out of the Tab order, then "true" with it drawn; clicks on Focus, Hide, Clear → `focus`, `hide`, `clear`. Isolate: `data-active="false"`, no `aria-pressed`; click → `isolate`; isolated → text "Restore", `data-active="true"`, no `aria-pressed`, focus still on it. Linked MRI: click → `{atRegion: true, instant: false}`, Enter → `{atRegion: true, instant: true}`; no `aria-keyshortcuts`, no `aria-label`, `data-tooltip` "Open linked MRI slices". Published data: Isolate → "Restore" (`data-active="true"`) → Isolate. Descriptions and tooltips (from `anatomy.svelte.ts`: Focus frames the selection in its colour with the rest a see-through ghost, Isolate hides every other region and frames it, Restore clears the isolation and frames the whole brain, Hide removes it and hands focus to the dissection's Undo): Focus "Frame this region in its colour, with the rest see-through grey"; Isolate "Show this region alone, framed"; Restore "Show the rest of the brain again, framed whole"; Hide "Remove this region from view; Undo brings it back"; French Hide "Retirer cette région de la vue NNBSP; Annuler la rétablit". Tab onto Focus → the tooltip shows its line and the accessible description is still that line once.
 - **Covered by:** `src/features/inspector/inspector.svelte.test.ts` (R)
 
 ### INSP-04 · Clearing or hiding the selection keeps focus on the page
@@ -416,3 +416,43 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 - **Source:** the 2026-11-09 review (U9, observed in the B1 run: "The cohort could not be loaded." with no cause and no retry)
 - **Expected:** `asset-fetch` → "The cohort could not be loaded. A file could not be downloaded. Check the connection and try again." in `--danger`, "Retry" by Enter → the store's `retry()` once, focus on the region title. `asset-updated`, French → "Un fichier du serveur ne correspond plus à cette page ; Planum a probablement été mis à jour. Rechargez la page pour continuer." (U+202F), button "Recharger". `Error('Invalid stroke cases')` → "The cohort could not be loaded.", no `.actions`. Store: `retry()` before a failure throws `/has not failed/`; after one, `load()` again fetches nothing, `retry()` fetches and lands `ready`. Real engine: `stroke-cases.json` one byte longer → `cases()` rejects with `code: 'asset-updated'`.
 - **Covered by:** `src/features/inspector/StrokeCasesSection.svelte.test.ts` (R); `src/lib/state/stroke-cases.svelte.test.ts` (R); `src/lib/engine/index.svelte.test.ts` (R)
+
+### INSP-47 · The region sheet has About this region, then one closed Research data row
+
+- **Rule:** Nothing is removed. About this region keeps its 13px/600 caption in the tree's caption idiom over its disclosures; Research data is one closed disclosure row holding its sections, set in 12px (parsimony round 2026-11-11; it was a second caption with its sections open to view). The row opens itself when a section inside opens itself or is asked for (a linked stroke case, the Deficits list's Stroke cases, the reader's map), and is not drawn when the region has no research section. **About this region** (« À propos de cette région »): Neuropsychological functions, Functional networks, Typical arterial supply, Constituent regions, Functional division, Cerebellar functions; then the related deficits and circuits. **Research data** (« Données de recherche »): Boundary certainty, Segmentation agreement, Atlas overlap, Receptor densities, the two stimulation sections, Stroke cases, Map over time. Every disclosure stays closed by default. A closed summary carries its headline value where it is in hand without a fetch: the number of functions, the largest network share (else CAB-NP's network), the number of receptors; atlas overlap and stroke cases load on open, so theirs stay bare. A caption with no section under it for the selected region is not drawn; the research index closes the detail and keeps its bottom inset (supervisor review 2.2).
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** `hcp-mmp:left:50` → caption "About this region" and a closed row "Research data"; About lists "Neuropsychological functions, 32", "Functional networks, Dorsal attention 93%", "Typical arterial supply", "Functional division"; the Research data row holds Atlas overlap; all closed. Left lateral ventricle → About not drawn. Tab order: the About summaries, then the Research data row; its sections take Tab stops once it is open. With no region selected the row is in the page and not drawn.
+- **Covered by:** `src/features/inspector/inspector.svelte.test.ts` (R)
+
+### INSP-48 · A Julich-Brain area's connectivity partners run strongest first
+
+- **Rule:** The published table holds each pair of areas once (upper triangle, r × 100); an area's partners are every other area of its table, read from either side of the pair, strongest first. A region without a row (another atlas, or Destrieux, whose table failed its validation) has none.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** `partnersOf(t, 'julich:right:1')` → left 1 (0.60), right 2 (0.45), left 2 (0.35); on CDMD, left Area 4a's first partner is right Area 4a, and each area has 277.
+- **Covered by:** `src/lib/core/catalog/functional-connectivity.test.ts`; `tests/test_functional_connectivity.py`
+
+### INSP-49 · A connectivity paint shows a lifted paint again and ends with its tab
+
+- **Rule:** Asking to paint an area's connectivity puts back a paint the reader lifted; clearing it leaves the reader's lift alone. Another tab ends it; choosing Anatomy again does not.
+- **Kind:** state
+- **Level:** unit
+- **Expected:** `setConnectivitySeed(id)` → `paintLifted` false; `setExplorer('functions')` → seed null.
+- **Covered by:** `src/lib/core/state/session.test.ts`
+
+### INSP-50 · The connectivity section lists ten partners; a name selects it; Paint asks for this area
+
+- **Rule:** A Julich-Brain area's sheet has a closed "Functional connectivity" section in Research data, its closed line adding "resting fMRI" as the quiet value (the group of 200 adults is in its note): its ten strongest partners as bars with r in the reader's notation, each name with its hemisphere and selecting that area; the note (group average, a correlation is not a connection, no global signal regression), the basis and the dataset and paper links. In Anatomy a tonal "Paint on the brain" asks for this area's paint.
+- **Kind:** behaviour
+- **Level:** browser (component)
+- **Expected:** Area 45 left → "Area 44 (IFG) · left 0.58" first; clicking it selects `julich:left:2`; Paint asks for `julich:left:1`; axe clean.
+- **Covered by:** `src/features/inspector/inspector.svelte.test.ts`
+
+### INSP-51 · While the stage shows an area's connectivity a ruled strip names it with Restore
+
+- **Rule:** The section says which area's connectivity the stage shows, in a ruled status strip with "Restore previous view", which ends the paint. The area painted offers no Paint; another area does, and another tab offers none.
+- **Kind:** behaviour
+- **Level:** browser (component)
+- **Expected:** "The brain shows resting connectivity with Area 45 (IFG) · left." + Restore → restore asked; Area 44 shows Paint; in Functions none.
+- **Covered by:** `src/features/inspector/inspector.svelte.test.ts`

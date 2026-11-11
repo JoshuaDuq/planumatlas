@@ -95,6 +95,8 @@ test('pick and inspect on the real model, then find a region by search', async (
 
   await page.mouse.click(point.x, point.y);
   await expect.poll(() => app.hash()).toContain('region=');
+  // Hide waits behind the region's More.
+  await page.getByRole('button', { name: 'More', exact: true }).click();
   const hide = page.getByRole('button', { name: 'Hide', exact: true });
   await hide.click();
   await expect(bar(page).getByText('1 part hidden')).toBeVisible();

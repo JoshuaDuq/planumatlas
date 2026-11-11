@@ -44,6 +44,27 @@
   let open = $state(false);
   let window = $state<string>('0');
 
+  // Asked from the Deficits list: the section opens on this region's cases, scrolled into view with
+  // focus on its summary. Another region withdraws the ask.
+  $effect(() => {
+    void region?.id;
+    return () => untrack(() => store.revealed());
+  });
+  $effect(() => {
+    if (!store.revealing || !section) return;
+    untrack(() => {
+      store.revealed();
+      open = true;
+      // The row that holds the research sections opens with it, or the summary could not take focus.
+      const holder = section!.parentElement!.closest('details');
+      if (holder) holder.open = true;
+    });
+    void tick().then(() => {
+      section?.scrollIntoView({ block: 'start' });
+      section?.querySelector<HTMLElement>('summary')?.focus();
+    });
+  });
+
   // The cohort is read once a region is selected; reading its state must not re-run this.
   $effect(() => {
     if (region) untrack(() => store.load());

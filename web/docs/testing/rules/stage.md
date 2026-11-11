@@ -183,20 +183,46 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ### STAGE-18 · The dock is one labelled toolbar (rewritten as STAGE-64, 2026-11-11)
 
-- **Rule:** Section, Lesion, Coordinate and Display form a toolbar named "3D viewer tools" with one Tab stop. The arrow keys and Home/End move between the tools shown, wrapping. Tab leaves the toolbar, and Shift+Tab back into it lands on the focused tool, else the first. Coordinate is offered only while the anatomy publishes coordinate spaces; without it the arrows pass from Lesion to Display.
+See STAGE-64. It was five tools in two ranks from 2026-11-10 (STAGE-60) until the parsimony round of 2026-11-11.
+
+### STAGE-60 · The dock is one labelled toolbar of five tools in two ranks (rewritten as STAGE-64, 2026-11-11)
+
+See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
+
+### STAGE-64 · The dock is one labelled toolbar of three tools
+
+- **Rule:** Section, Display and Add form a toolbar named "3D viewer tools" with one Tab stop and no separator. Lesion, Coordinate and Overlay, the three that bring something onto the brain, are not tools: they are the choice at the head of Add's popover (STAGE-65). The arrow keys and Home/End move between the three, wrapping. Tab leaves the toolbar, and Shift+Tab back into it lands on the focused tool, else the first. On a phone the three sit on one row.
 - **Kind:** accessibility
 - **Level:** browser: focus and keyboard
-- **Source:** `viewer/index.html:433-490`; deviation `g2-dock-toolbar.md` (APG Toolbar)
-- **Expected:** Tools "Section", "Lesion", "Coordinate", "Display", `tabIndex` [0, −1, −1, −1]. From Section: → Lesion; ↓ → Coordinate; → twice wraps past Display to Section; ← → Display; Home → Section; End → Display. From Display, Tab → the next control after the dock; Shift+Tab → Section; Shift+Tab → the canvas. No coordinate spaces → no "Coordinate"; → from Lesion → Display; spaces back → ← from Display → Coordinate. French: toolbar "Outils du visualiseur 3D", tools "Coupe", "Lésion", "Coordonnée", "Affichage". Each tool has `aria-haspopup="dialog"`, `aria-expanded="false"`. In the app, Coordinate is offered for CDMD, its dialog holding the coordinate field and template select, and the Lesion dialog the radius slider and no coordinate field.
-- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/app/regions/StageRegion.svelte.test.ts` (R, the app's Coordinate and Lesion dialogs)
+- **Source:** `viewer/index.html:433-490`; deviation `g2-dock-toolbar.md` (APG Toolbar); parsimony round 2026-11-11 (it reverses supervisor review 2.1's two ranks)
+- **Expected:** Tools "Section", "Display", "Add", `tabIndex` [0, −1, −1]; no `role="separator"`; no button named "Lesion", "Coordinate" or "Overlay". From Section: → Display; ↓ → Add; → wraps to Section; ← → Add; Home → Section; End → Add. From Display, Tab → the next control after the dock; Shift+Tab → Section; Shift+Tab → the canvas. French: toolbar "Outils du visualiseur 3D", tools "Coupe", "Affichage", "Ajouter". 375 and 360 px phones, both languages → three tools on one row.
+- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/app/regions/StageRegion.svelte.test.ts` (R, the app's Add dialog)
+
+### STAGE-65 · Add heads its popover with one choice: Lesion, Coordinate, Overlay
+
+- **Rule:** Add's popover starts with a radio group named "What to add to the brain" (« Quoi ajouter au cerveau »), then the chosen one's own body. It opens on Lesion, takes focus on the checked choice, and keeps the reader's last choice while the popover is closed. Coordinate is offered only while the anatomy publishes coordinate spaces, Overlay only with a body and not on a stage narrower than 480 px; with one choice left the group is not drawn. The tool says what it offers in `data-offers`, which the tour reads (GUIDE-04). A choice withdrawn while it is the open one closes the popover and hands focus to the first tool left (STAGE-32). The choices are sized by their words, so the longest French ones are not cut. `openFromPanel('lesion')` (the Deficits list's "Simulate a lesion") opens Add on Lesion whatever it last held.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** `web/src/features/stage/Dock.svelte`; parsimony round 2026-11-11
+- **Expected:** Add open → radios "Lesion", "Coordinate", "Overlay", Lesion checked and focused, body `data-place="lesion"`; Overlay → `data-place="overlay"`; closed and reopened → Overlay checked. `data-offers` "lesion coordinate overlay"; no coordinate spaces → "lesion overlay" and no Coordinate radio; a 375 px phone → "lesion coordinate"; a 768 px tablet laid out as a phone → all three. French radios "Lésion", "Coordonnée", "Superposition", each `scrollWidth` = `clientWidth`. Tab from the Lesion radio → "Place" → the control after the dock, Add still open.
+- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R, DEF-37)
+
+### STAGE-66 · The lobe colouring is keyed by its lobes, front to back
+
+- **Rule:** While the colour is Lobes and no paint covers it, the stage shows one plate titled "Lobes" with a row per lobe the atlas on screen has, in the fixed order Frontal, Central, Parietal, Occipital, Temporal, Lateral fissure, Insula, Cingulate, Limbic, each named as the Anatomy list names its group in the reader's language. It has no note and its rows are not toggles. An atlas grouped by network has no lobes and no plate.
+- **Kind:** behaviour
+- **Level:** unit (`lobeRows`, `keyPlates`)
+- **Source:** `web/src/lib/core/catalog/lobes.ts`; `web/src/features/stage/stage-keys.ts`; parsimony round 2026-11-11
+- **Expected:** Destrieux → the nine rows in that order; Julich-Brain in French → eight rows, no Lateral fissure, "Pariétal", Frontal [136, 204, 238]; HCP-MMP → `[]`.
+- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/features/stage/stage-keys.test.ts` (R, the plate, under a paint and on HCP-MMP)
 
 ### STAGE-19 · Over the tract reference no tool is left and the dock is not drawn
 
-- **Rule:** The tract reference has no sections, lesion or display settings, so all four tools go and the dock is not drawn; the orientation gizmo stays. Showing the anatomy again restores the dock and its toolbar.
+- **Rule:** The tract reference has no sections, lesion or display settings, so every tool goes and the dock is not drawn; the orientation gizmo stays. Showing the anatomy again restores the dock and its toolbar.
 - **Kind:** accessibility
 - **Level:** browser: roles and computed visibility
 - **Source:** `viewer/ui/chrome/display.js:200-203` (`data-anatomy-display`); deviation `g2-dock-toolbar.md`
-- **Expected:** Tract reference on: no "Section", "Lesion", "Coordinate" or "Display" button; dock `visibility: hidden`. Off: dock `visible`, one toolbar "3D viewer tools".
+- **Expected:** Tract reference on: no "Section", "Display" or "Add" button; dock `visibility: hidden`. Off: dock `visible`, one toolbar "3D viewer tools".
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
 ### STAGE-20 · Each tool opens a named, non-modal popover, one at a time
@@ -205,7 +231,7 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 - **Kind:** behaviour
 - **Level:** browser: focus and keyboard (U5's popover mechanics are in `ui-kit.md`)
 - **Source:** `viewer/ui/chrome/stage-tools.js:36-136`; `stage-tools.test.js:87-101`; decision 14 on #4; deviation `g2-dock-toolbar.md`
-- **Expected:** Dialogs "Section", "Lesion", "Coordinate", "Display", each named by its tool; no `aria-modal`. Display opens with focus on the "Both" radio. Open Section then Display → Section `aria-expanded="false"`, Display "true", Lesion "false". Escape → one keydown seen with `defaultPrevented === true`, focus on the tool. Shift+Tab from the first control of each of the four → the tool, popover open. Tab from Lesion's last control → the next control after the dock, Lesion `aria-expanded="false"`.
+- **Expected:** Dialogs "Section", "Display", "Add", each named by its tool; no `aria-modal`. Display opens with focus on the "Both" radio. Open Section then Display → Section `aria-expanded="false"`, Display "true", Lesion "false". Escape → one keydown seen with `defaultPrevented === true`, focus on the tool. Shift+Tab from the first control of each of the four → the tool, popover open. Tab from Lesion's last control → the next control after the dock, Lesion `aria-expanded="false"`.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
 ### STAGE-21 · A popover opened from the keyboard appears at once; from a pointer it grows from the dock
@@ -342,7 +368,7 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ### STAGE-32 · A popover whose tool or dock goes closes, and focus is not lost
 
-- **Rule:** When the tract reference hides every tool, the open popover closes and focus inside it, or on a hidden tool, moves to the model (the canvas). When the coordinate spaces go, the Coordinate popover closes and focus moves to the first tool left. While the dock is not drawn (loading, error, lost context) or the raised phone sheet covers it, any popover closes and nothing in the dock keeps focus.
+- **Rule:** When the tract reference hides every tool, the open popover closes and focus inside it, or on a hidden tool, moves to the model (the canvas). When the coordinate spaces go while Coordinate is Add's open choice, Add closes and focus moves to the first tool left. While the dock is not drawn (loading, error, lost context) or the raised phone sheet covers it, any popover closes and nothing in the dock keeps focus.
 - **Kind:** accessibility
 - **Level:** browser: focus
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:634-640`; deviation `g2-focus-when-tool-hidden.md`
@@ -351,13 +377,13 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ## The Lesion popover
 
-### STAGE-55 · A click on the brain places the lesion only while chosen in the open Lesion popover
+### STAGE-55 · A click on the brain places the lesion only while chosen in Add's open Lesion choice
 
-- **Rule:** The Lesion popover opens on selecting. Once the reader chooses to place, a click on the brain places the lesion and a press on the stage keeps the popover open. Closing it, or opening another tool in its place, returns to selecting. Without that choice a press on the stage closes the popover, as it closes Section's. Over the tract reference nothing is placed.
+- **Rule:** Add's Lesion choice opens on selecting. Once the reader chooses to place, a click on the brain places the lesion and a press on the stage keeps the popover open. Closing it, or opening another tool in its place, returns to selecting. Without that choice a press on the stage closes the popover, as it closes Section's. Over the tract reference nothing is placed.
 - **Kind:** behaviour
 - **Level:** browser: real pointer presses on the canvas (the lesion store is a mock)
 - **Source:** `web/src/features/lesion/LesionPopover.svelte`; `web/src/features/stage/Dock.svelte`
-- **Expected:** Lesion open → placing `false`; "Place" → `true`; a click on the canvas → still open, `true`; a press outside → closed, `false`; reopened → "Place" `aria-pressed="false"`. Placing, then Section → `false`. Lesion open, canvas click → closed, never `true`. Section open, canvas click → closed. Tract reference → no "Lesion", placing `false`.
+- **Expected:** Lesion open → placing `false`; "Place" → `true`; a click on the canvas → still open, `true`; a press outside → closed, `false`; reopened → "Place" `aria-pressed="false"`. Placing, then Section → `false`. Lesion open, canvas click → closed, never `true`. Section open, canvas click → closed. Tract reference → no "Add", placing `false`.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
 ## Size, reflow and media
@@ -391,18 +417,18 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ### STAGE-36 · The dock passes axe with each popover open
 
-- **Rule:** axe finds no violation with the dock alone and with each of the four popovers open, in English and French.
+- **Rule:** axe finds no violation with the dock alone, with Section and Display open, and with Add open on each of its three choices, in English and French.
 - **Kind:** accessibility
 - **Level:** browser: axe
 - **Source:** WCAG 2.2 AA
-- **Expected:** `expectAxeClean()` passes 5 times per language.
+- **Expected:** `expectAxeClean()` passes 6 times per language.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
 ## Colour keys
 
 ### STAGE-37 · The stage shows the key of what is painted, titled as the masthead names it
 
-- **Rule:** While the anatomy is ready (or switching): a network colouring keys its networks (Yeo 7 or CAB-NP); a paint's key replaces the colouring's, which it covers; the direction key, with its three directions, follows the shown streamlines and comes after the others. A colouring with no key, or with no published data, shows none, and nothing shows while loading, after an error or a lost context.
+- **Rule:** While the anatomy is ready (or switching): a network colouring keys its networks (Yeo 7 or CAB-NP) and the lobe colouring its lobes (STAGE-66); a paint's key replaces the colouring's, which it covers; the direction key, with its three directions, follows the shown streamlines and comes after the others. A colouring with no key, or with no published data, shows none, and nothing shows while loading, after an error or a lost context.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:272-387`; `web/src/features/stage/stage-keys.ts`

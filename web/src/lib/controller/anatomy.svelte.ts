@@ -1,5 +1,6 @@
 import { tick } from 'svelte';
 import { beneathCortex } from '../core/catalog/labels.ts';
+import { openingColour } from '../core/catalog/lobes.ts';
 import { visibilityOf } from '../core/catalog/visibility.ts';
 import type { HiddenReason } from '../core/catalog/visibility.ts';
 import { atlasSwitchLabel, t } from '../core/i18n/index.ts';
@@ -12,7 +13,7 @@ import {
 import type { InternalEntry } from '../core/state/internal-mode.ts';
 import type { CortexSurface } from '../core/user-map/display.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
-import { publishesSpinalCord } from '../core/state/scene-commands.ts';
+import { publishesSpinalCord, requiredAtlas } from '../core/state/scene-commands.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { MoveOptions, Vec3 } from '../engine/api.ts';
 import type { Explorer } from '../types/index.ts';
@@ -426,6 +427,7 @@ export function createAnatomyCommands(
     const current = commands.begin();
     const changes = leaveInternal(beforeInternal, model.settings, {
       'cab-np': model.cabNp?.atlas,
+      lobe: requiredAtlas(model, 'lobe', model.settings.atlas),
     });
     beforeInternal = null;
     session.setQuery('');
@@ -444,7 +446,9 @@ export function createAnatomyCommands(
       const { lang } = session.state;
       session.notify({
         kind: 'info',
-        text: t(lang, 'app').cabNpAtlasOnly(atlasSwitchLabel(model.settings.atlas, lang)),
+        text: t(lang, 'app')[changes.colourLost === 'lobe' ? 'lobesAtlasOnly' : 'cabNpAtlasOnly'](
+          atlasSwitchLabel(model.settings.atlas, lang),
+        ),
       });
     }
     camera.frameWhole();
@@ -517,6 +521,7 @@ export function createAnatomyCommands(
     session.setQuery('');
     void sections.setMode('off');
     model.reset();
+    model.setSurfaceColor(openingColour(model.settings.atlas));
     const surface = cortexSurface.surface;
     cortexSurface.setSurface('pial');
     afterReset();

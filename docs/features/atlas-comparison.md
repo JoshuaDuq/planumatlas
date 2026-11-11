@@ -6,7 +6,7 @@ For a region of one cortical atlas, the viewer lists the pial area it shares wit
 :alt: Three lateral views of the left hemisphere and one panel of the region detail. The precentral gyrus is outlined on the Destrieux atlas, area 4 on HCP-MMP, and their shared surface on Destrieux; the panel lists area 4 at 447.8 square millimetres, 20.6 percent of the gyrus, then areas 6d, 55b and 6v.
 :name: fig-atlas-comparison-1
 
-**The surface shared by a Destrieux gyrus and an HCP-MMP area is measured and outlined.** **a**, Destrieux left precentral gyrus (`destrieux:left:29`, 2,170 mm²) selected. **b**, HCP-MMP left area 4 (`hcp-mmp:left:8`, 1,419 mm²) selected. **c**, Region detail of the gyrus, **Overlap with HCP-MMP**: area 4 shares 447.8 mm², 20.6% of the gyrus; 6d, 55b and 6v follow, with 6 more regions under the disclosure. **d**, The activated row outlines the gyrus ∩ area 4 cell on the model. CDMD, left hemisphere, lateral view, internal anatomy hidden; same camera in a, b and d.
+**The surface shared by a Destrieux gyrus and an HCP-MMP area is measured and outlined.** **a**, Destrieux left precentral gyrus (`destrieux:left:29`, 2,170 mm²) selected. **b**, HCP-MMP left area 4 (`hcp-mmp:left:8`, 1,419 mm²) selected. **c**, Region detail of the gyrus, its header and then **Research data** › **Overlap with HCP-MMP** (the dashed rule marks the sections left out between them): area 4 shares 447.8 mm², 20.6% of the gyrus; 6d, 55b and 6v follow, with 6 more regions under the disclosure. **d**, The activated row outlines the gyrus ∩ area 4 cell on the model. CDMD, left hemisphere, lateral view, internal anatomy hidden; same camera in a, b and d.
 ```
 
 ## Data

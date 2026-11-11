@@ -472,17 +472,17 @@ describe('the dock and the keys', () => {
     expect(app.world!.view.current.view).toBe('oblique');
   });
 
-  test('the dock offers Coordinate because the anatomy publishes coordinate spaces, and its popover holds the form', async () => {
+  test('Add offers Coordinate because the anatomy publishes coordinate spaces, and holds each choice’s form', async () => {
     await boot();
     expect(app.world!.coordinates).not.toBeNull();
-    await userEvent.click(page.getByRole('button', { name: 'Coordinate', exact: true }));
-    const dialog = page.getByRole('dialog', { name: 'Coordinate', exact: true }).element();
+    await userEvent.click(page.getByRole('button', { name: 'Add', exact: true }));
+    const dialog = page.getByRole('dialog', { name: 'Add', exact: true }).element();
+    // It opens on Lesion, the first choice.
+    expect(dialog.querySelector('input[type="range"]')).not.toBeNull();
+    await userEvent.click(page.getByRole('radio', { name: 'Coordinate', exact: true }));
     expect(dialog.querySelector('input[type="text"]')).not.toBeNull();
     expect(dialog.querySelector('select')).not.toBeNull();
-    await userEvent.click(page.getByRole('button', { name: 'Lesion', exact: true }));
-    const lesion = page.getByRole('dialog', { name: 'Lesion', exact: true }).element();
-    expect(lesion.querySelector('input[type="range"]')).not.toBeNull();
-    expect(lesion.querySelector('input[type="text"]')).toBeNull();
+    expect(dialog.querySelector('input[type="range"]')).toBeNull();
   });
 
   test.each([

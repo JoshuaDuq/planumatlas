@@ -143,6 +143,8 @@ describe('selection', () => {
     await boot();
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
+    // Isolate and Hide wait behind More.
+    await userEvent.click(page.getByRole('button', { name: 'More', exact: true }));
     await userEvent.click(page.getByRole('button', { name: 'Hide', exact: true }));
     await vi.waitFor(() =>
       expect(document.activeElement).toBe(page.getByRole('button', { name: 'Undo' }).element()),
@@ -226,8 +228,12 @@ describe('clinical material in the Deficits list (4.2)', () => {
     const groups = first.parentElement!.querySelector(':scope > [role="group"][aria-labelledby]')!;
     expect(first.compareDocumentPosition(groups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await userEvent.click(links()[0]!);
-    const lesion = document.querySelector<HTMLElement>('.stage-tool[data-tool="lesion"]')!;
-    await expect.poll(() => lesion.getAttribute('aria-expanded')).toBe('true');
+    // Add opens on Lesion, whatever it last held.
+    const add = document.querySelector<HTMLElement>('.stage-tool[data-tool="place"]')!;
+    await expect.poll(() => add.getAttribute('aria-expanded')).toBe('true');
+    await expect
+      .poll(() => page.getByRole('radio', { name: 'Lesion', exact: true }).element().ariaChecked)
+      .toBe('true');
     // A search shows the list alone.
     await userEvent.click(page.getByRole('searchbox', { name: /search deficits/i }));
     await userEvent.keyboard('aphasia');

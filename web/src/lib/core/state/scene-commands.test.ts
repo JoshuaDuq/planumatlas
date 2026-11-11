@@ -3,7 +3,7 @@ import { test, vi } from 'vitest';
 import type { OnProgress, SpinalCordLoad } from '../../engine/api.ts';
 import type { SurfaceColor } from '../../types/index.ts';
 import type { ModelPort, SectionsPort } from './ports.ts';
-import { createSceneCommands } from './scene-commands.ts';
+import { createSceneCommands, requiredAtlas } from './scene-commands.ts';
 import type { SceneCommands } from './scene-commands.ts';
 import { createSession } from './session.ts';
 
@@ -264,6 +264,27 @@ test('CAB-NP, chosen or restored from a link, first shows the atlas it colours',
   await linked.finish('hcp-mmp');
   assert.equal(await restoring, true);
   assert.deepEqual([linked.model.atlasId, linked.model.surfaceColor], ['hcp-mmp', 'cab-np']);
+});
+
+test('Lobes shows the lobe atlas first on an atlas grouped by network, and keeps one grouped by lobe', async () => {
+  const scene = fixture({ atlas: 'hcp-mmp' });
+  const choosing = scene.commands.chooseSurfaceColor('lobe');
+  await scene.settle();
+  await scene.finish('destrieux');
+  await choosing;
+  assert.deepEqual([scene.model.atlasId, scene.model.surfaceColor], ['destrieux', 'lobe']);
+  const julich = fixture({ atlas: 'julich' });
+  await julich.commands.chooseSurfaceColor('lobe');
+  assert.deepEqual([julich.model.atlasId, julich.model.surfaceColor], ['julich', 'lobe']);
+});
+
+test('the atlas a colouring needs is judged for the atlas it would be shown on', () => {
+  const model = { cabNp: { atlas: 'hcp-mmp' } } as Pick<ModelPort, 'cabNp'>;
+  assert.equal(requiredAtlas(model, 'lobe', 'destrieux'), null);
+  assert.equal(requiredAtlas(model, 'lobe', 'julich'), null);
+  assert.equal(requiredAtlas(model, 'lobe', 'schaefer'), 'destrieux');
+  assert.equal(requiredAtlas(model, 'cab-np', 'destrieux'), 'hcp-mmp');
+  assert.equal(requiredAtlas(model, 'atlas', 'schaefer'), null);
 });
 
 test('the first showing of the cord is a download with progress; an anatomy without one refuses', async () => {

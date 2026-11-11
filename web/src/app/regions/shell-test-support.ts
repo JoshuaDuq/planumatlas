@@ -1,6 +1,6 @@
 // The shell as the app mounts it over the fake engine, for the masthead and status region tests. Not shipped.
 import { flushSync, mount, unmount } from 'svelte';
-import { expect, vi } from 'vitest';
+import { vi } from 'vitest';
 import { page } from 'vitest/browser';
 import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
@@ -97,7 +97,7 @@ export function createShell(): Shell {
 
 /**
  * axe in both themes at desktop and phone width, with the masthead's data bar refitted to each size:
- * it measures itself, a frame after the window changes, and is crammed until then.
+ * its summary measures itself a frame after the window changes.
  */
 export async function expectAxeCleanFitted(): Promise<void> {
   for (const theme of ['light', 'dark'] as const) {
@@ -106,9 +106,9 @@ export async function expectAxeCleanFitted(): Promise<void> {
       [390, 844],
     ] as const) {
       await page.viewport(width, height);
-      await expect
-        .poll(() => document.querySelector('.data-bar')!.hasAttribute('data-collapsed'))
-        .toBe(width === 390);
+      // The summary refits in the frame after its size changes.
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
       await expectAxeCleanOnce(theme, width);
     }
   }

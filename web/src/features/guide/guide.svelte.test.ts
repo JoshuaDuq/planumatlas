@@ -28,10 +28,8 @@ const TARGETS = `
   <div class="orientation-gizmo"><button>S</button></div>
   <div class="stage-dock"><div class="stage-toolbar">
     <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="section">Section</button></span>
-    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="lesion">Lesion</button></span>
-    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="coordinate">Coordinate</button></span>
-    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="overlay">Overlay</button></span>
     <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="display">Display</button></span>
+    <span class="popover-host" style="display: contents"><button class="stage-tool" data-tool="place" data-offers="lesion coordinate overlay">Add</button></span>
   </div></div>`;
 
 /** The reader's own view: a region open in a lateral view, on the Destrieux atlas. */
@@ -150,6 +148,36 @@ test('sixteen stops in order, in English and French, with focus on Next', async 
   expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 sur 16');
 });
 
+test('GUIDE-03 · a first visit runs six stops after the welcome; the last starts the full tour', async () => {
+  start('en', true);
+  const titles = [title()];
+  while (next().textContent !== 'Done') {
+    next().click();
+    titles.push(title());
+  }
+  expect(titles).toEqual([
+    'How to use Planum',
+    'The brain',
+    'A region’s detail',
+    'Five ways in',
+    'Functions',
+    'Section',
+    'Tools on the picture',
+  ]);
+  // The dock card says what Add brings onto the brain.
+  expect(card().textContent).toMatch(/Add brings something onto the brain/);
+  const everything = card().querySelector<HTMLButtonElement>('.guide-everything')!;
+  expect(everything.textContent).toBe(`See everything (${STOPS} stops)`);
+  everything.click();
+  expect(title()).toBe('How to use Planum');
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe(`1 of ${STOPS}`);
+  // Starting the full tour is no close: the reader's view comes back only when it ends.
+  expect(closed).toBe(0);
+  card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
+  expect(closed).toBe(1);
+  expect(location.hash).toBe(READER);
+});
+
 test('each stop opens its feature over the home view, and closing puts the reader’s view back', () => {
   const entries = history.length;
   const showing = () => document.documentElement.hasAttribute('data-guide-showing');
@@ -187,6 +215,28 @@ test('each stop opens its feature over the home view, and closing puts the reade
   expect(hashes.at(-1)).toBe(READER);
   // The stops replace the entry: Back still leaves the page the reader came from.
   expect(history.length).toBe(entries);
+});
+
+test('GUIDE-04 · the opening lobes stay through the stops, except on an atlas without lobes', () => {
+  const walk = (reader: string) => {
+    history.replaceState(history.state, '', reader);
+    start();
+    const shown = [location.hash];
+    for (let i = 1; i < STOPS; i++) {
+      next().click();
+      shown.push(location.hash);
+    }
+    next().click();
+    return shown;
+  };
+  const lobes = walk(`${HOME}&colors=lobe`);
+  const functions = lobes.findIndex((hash) => hash.includes('atlas=hcp-mmp'));
+  expect(lobes).toHaveLength(STOPS);
+  expect(lobes[functions]).not.toContain('colors=');
+  expect(lobes.filter((hash) => hash.includes('&colors=lobe'))).toHaveLength(STOPS - 1);
+  expect(location.hash).toBe(`${HOME}&colors=lobe`);
+  // Any other colour of the reader's gives way to the stops' own.
+  expect(walk(`${HOME}&colors=tissue`).filter((hash) => hash.includes('colors='))).toEqual([]);
 });
 
 test('the exploded view stop pulls the brain apart, and moving on, going back or closing puts it back', () => {
@@ -484,6 +534,20 @@ test('a target the layout hides is left out of the stops and the count', () => {
   document.querySelector<HTMLElement>('.orientation-gizmo')!.style.display = 'none';
   start();
   expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 15');
+});
+
+test('Add without Overlay to offer, as on a phone’s stage, has no Overlay stop', () => {
+  document.querySelector<HTMLElement>('.stage-tool[data-tool="place"]')!.dataset.offers =
+    'lesion coordinate';
+  start();
+  expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe('1 of 15');
+  const titles = [title()];
+  for (let i = 1; i < 15; i++) {
+    next().click();
+    titles.push(title());
+  }
+  expect(titles).toContain('Coordinate');
+  expect(titles).not.toContain('Overlay');
 });
 
 test('a target re-rendered after the tour starts is still the one highlighted', () => {

@@ -62,6 +62,8 @@ export interface KeySources {
   cabNp: ColoredNetworks | null;
   /** The arterial territories' palette, in the atlas's order, when the build publishes them. */
   territories?: readonly ArterialTerritory[] | null;
+  /** The lobes of the atlas on screen, in key order (`lobeRows`); empty for an atlas grouped otherwise. */
+  lobes?: readonly { id: string; color: Rgb; label: string }[] | null;
   /** The key of the paint on show (`legendFor`), or null. */
   legend: Legend | null;
   /** The stroke cases on the stage: each one's colour and name, and the shared colour for two. */
@@ -136,6 +138,17 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       rows: sources.territories.map((territory) =>
         row(territory.id, territory.color, lang === 'fr' ? territory.name_fr : territory.name),
       ),
+      note: '',
+      pickable: false,
+    });
+  }
+
+  if (ready && !legend && surfaceColor === 'lobe' && sources.lobes?.length) {
+    plates.push({
+      name: 'network',
+      map: surfaceColor,
+      title: maps[surfaceColor]!,
+      rows: sources.lobes.map((lobe) => row(lobe.id, lobe.color, lobe.label)),
       note: '',
       pickable: false,
     });

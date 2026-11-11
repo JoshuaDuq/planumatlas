@@ -20,7 +20,9 @@
   interface Props {
     open?: boolean;
     /** Which tool, as `data-tool` on its button: the guided tour points at it by this. */
-    tool: 'section' | 'lesion' | 'coordinate' | 'overlay' | 'display';
+    tool: 'section' | 'display' | 'place';
+    /** What the tool's popover offers to choose between, as `data-offers`: the tour points at Add by what it holds. */
+    offers?: string;
     /** The tool is not offered. */
     hidden: boolean;
     /** The dock is not on screen. */
@@ -41,6 +43,7 @@
   let {
     open = $bindable(false),
     tool,
+    offers,
     hidden,
     covered,
     ariaLabel,
@@ -117,6 +120,7 @@
       type="button"
       class={['stage-tool', className]}
       data-tool={tool}
+      data-offers={offers}
       {hidden}
       aria-label={ariaLabel}
     >

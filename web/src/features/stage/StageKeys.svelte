@@ -43,6 +43,8 @@
     cabNp: ColoredNetworks | null;
     /** The arterial territories' palette, when the build publishes them. */
     territories?: readonly ArterialTerritory[] | null;
+    /** The lobes of the atlas on screen, for the lobe colouring's key. */
+    lobes?: KeySources['lobes'];
     /** The key of the paint on show (`legendFor`), or null. */
     legend: Legend | null;
     /** The stroke cases on the stage, or null. */
@@ -63,6 +65,7 @@
     networks,
     cabNp,
     territories = null,
+    lobes = null,
     legend,
     cases = null,
     map = null,
@@ -78,6 +81,7 @@
       networks,
       cabNp,
       territories,
+      lobes,
       legend,
       cases,
       map,

@@ -35,12 +35,19 @@ const regionIds = (id: string) =>
   )!.source_label_ids!;
 const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
 const root = () => document.querySelector('.region-detail') as HTMLElement;
-const section = (name: RegExp | string) =>
-  [...document.querySelectorAll<HTMLDetailsElement>('details')].find((details) =>
+/** A section by its summary; one of the research data's is reached by opening the row that holds them. */
+const section = (name: RegExp | string) => {
+  const found = [...document.querySelectorAll<HTMLDetailsElement>('details')].find((details) =>
     typeof name === 'string'
       ? text(details.querySelector('summary')!).startsWith(name)
       : name.test(text(details.querySelector('summary')!)),
   )!;
+  const holder = found?.parentElement?.closest('details');
+  if (holder) holder.open = true;
+  return found;
+};
+/** Isolate and Hide wait behind More. */
+const openMore = () => page.getByRole('button', { name: 'More', exact: true }).click();
 const button = (name: RegExp | string) => page.getByRole('button', { name });
 
 describe('empty state', () => {
@@ -50,7 +57,11 @@ describe('empty state', () => {
     await expect
       .element(page.getByText('Select a region on the model or in the anatomy list.'))
       .toBeVisible();
-    expect(document.querySelectorAll('button, dl, details')).toHaveLength(0);
+    expect(document.querySelectorAll('button, dl')).toHaveLength(0);
+    // The research data's row is in the page, with nothing to hold, and not drawn.
+    expect(
+      [...document.querySelectorAll('details')].filter((details) => details.checkVisibility()),
+    ).toHaveLength(0);
   });
 
   test('says the cortex is hidden when it is', async () => {
@@ -85,9 +96,22 @@ describe('selected region', () => {
     expect(text(context.querySelectorAll('dd')[1]!).length).toBeGreaterThan(0);
     expect([...root().querySelectorAll('.actions button')].map(text)).toEqual([
       'Focus',
+      'Linked MRI',
+      'More',
       'Isolate',
       'Hide',
-      'Linked MRI',
+    ]);
+    // Isolate and Hide are drawn once More is pressed, and it says so.
+    const more = page.getByRole('button', { name: 'More', exact: true });
+    const row = document.getElementById(more.element().getAttribute('aria-controls')!)!;
+    expect([more.element().getAttribute('aria-expanded'), row.checkVisibility()]).toEqual([
+      'false',
+      false,
+    ]);
+    await more.click();
+    expect([more.element().getAttribute('aria-expanded'), row.checkVisibility()]).toEqual([
+      'true',
+      true,
     ]);
     const facts = root().querySelector('dl.facts')!;
     expect([...facts.querySelectorAll('dt')].map(text)).toEqual([
@@ -121,7 +145,7 @@ describe('selected region', () => {
     expect(text(context.querySelectorAll('dd')[0]!)).toBe('Gauche');
     expect(
       [...root().querySelectorAll('.actions button')].map((node) => node.textContent!.trim()),
-    ).toEqual(['Cibler', 'Isoler', 'Masquer', 'IRM liée']);
+    ).toEqual(['Cibler', 'IRM liée', 'Plus', 'Isoler', 'Masquer']);
     expect(text(root().querySelectorAll('dl.facts dd')[1]!)).toContain('−12,3');
   });
 
@@ -149,10 +173,47 @@ describe('selected region', () => {
     const research = document.querySelector('[data-index=research]')!;
     expect(research.contains(comparison)).toBe(true);
     expect(root().contains(document.querySelector('[data-slot=deficits]'))).toBe(false);
-    expect(
-      root().compareDocumentPosition(document.querySelector('[data-slot=circuits]')!) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    const after = (a: Element, b: Element) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(after(root(), document.querySelector('[data-slot=deficits]')!)).toBe(true);
+    expect(after(document.querySelector('[data-slot=circuits]')!, research)).toBe(true);
+  });
+
+  test('INSP-47 · an HCP-MMP area lists About this region, then Research data, each over its own sections', async () => {
+    render(Fixture, { regionId: FRONTAL });
+    const indexes = [...document.querySelectorAll<HTMLElement>('.region-index')].filter(
+      (index) => getComputedStyle(index).display !== 'none',
+    );
+    expect(indexes).toHaveLength(2);
+    expect(text(indexes[0]!.querySelector('.index-caption')!)).toBe('About this region');
+    // The research data is one closed row, its sections inside it.
+    const holder = indexes[1]!.querySelector<HTMLDetailsElement>(':scope > details')!;
+    expect(text(holder.querySelector(':scope > summary')!)).toBe('Research data');
+    expect(holder.open).toBe(false);
+    const summaries = (index: Element) =>
+      [...index.querySelectorAll(':scope > * > details > summary, :scope > details > summary')].map(
+        (summary) =>
+          text(summary.querySelector('.summary-text') ?? summary)
+            .split(',')[0]!
+            .trim(),
+      );
+    expect(summaries(indexes[0]!)).toEqual([
+      'Neuropsychological functions',
+      'Functional networks',
+      'Typical arterial supply',
+      'Functional division',
+    ]);
+    expect(summaries(holder)).toEqual(['Atlas overlap']);
+    for (const details of document.querySelectorAll<HTMLDetailsElement>('.region-index details'))
+      expect(details.open).toBe(false);
+  });
+
+  test('a caption with no section under it is not drawn', async () => {
+    // The left lateral ventricle: nothing is known about it; only the overlap stub is research.
+    render(Fixture, { regionId: 'aseg:left:4' });
+    const index = (name: string) => document.querySelector<HTMLElement>(`[data-index=${name}]`)!;
+    expect(getComputedStyle(index('about')).display).toBe('none');
+    expect(getComputedStyle(index('research')).display).not.toBe('none');
   });
 
   test('the title is the region-title focus target and takes focus by request', async () => {
@@ -224,6 +285,7 @@ describe('commands', () => {
     const calls: unknown[] = [];
     render(Fixture, { regionId: V1, calls });
     await button('Focus').click();
+    await openMore();
     await button('Hide').click();
     await button('Clear selection').click();
     expect(calls).toEqual(['focus', 'hide', 'clear']);
@@ -244,7 +306,8 @@ describe('commands', () => {
   test('Isolate becomes Restore, is drawn as selected and never claims to be pressed', async () => {
     const calls: unknown[] = [];
     const screen = await render(Fixture, { regionId: V1, calls });
-    const isolate = () => root().querySelectorAll<HTMLElement>('.actions button')[1]!;
+    const isolate = () => root().querySelector<HTMLElement>('.actions .more-row button')!;
+    await openMore();
     expect(isolate().getAttribute('data-active')).toBe('false');
     expect(isolate().hasAttribute('aria-pressed')).toBe(false);
     await button('Isolate').click();
@@ -280,6 +343,7 @@ describe('commands', () => {
       Isolate: 'Show this region alone, framed',
       Hide: 'Remove this region from view; Undo brings it back',
     };
+    await openMore();
     for (const [name, hint] of Object.entries(said)) {
       await expect.element(button(name)).toHaveAccessibleDescription(hint);
       expect(button(name).element().getAttribute('data-tooltip')).toBe(hint);
@@ -303,7 +367,7 @@ describe('commands', () => {
     );
   });
 
-  test('Tab walks Clear, the four commands, the copyable facts and each section, then Enter toggles one', async () => {
+  test('Tab walks Clear, the commands, the copyable facts and each section, then Enter toggles one', async () => {
     render(Fixture, { regionId: V1 });
     const walked: string[] = [];
     (document.querySelector('.selection-clear') as HTMLElement).focus();
@@ -311,18 +375,24 @@ describe('commands', () => {
       if (step > 0) await userEvent.keyboard('{Tab}');
       walked.push(text(document.activeElement!));
     }
-    expect(walked.slice(0, 5)).toEqual(['', 'Focus', 'Isolate', 'Hide', 'Linked MRI']);
+    // More is closed, so Isolate and Hide take no Tab stop.
+    expect(walked.slice(0, 4)).toEqual(['', 'Focus', 'Linked MRI', 'More']);
     // Area, centroid and source id: each value is its own copy button.
-    expect(walked.slice(5, 8)).toEqual([
+    expect(walked.slice(4, 7)).toEqual([
       text(root().querySelector('dl.facts dd')!),
       '−12.3, +56.8, −9.0 mm',
       '1',
     ]);
-    expect(walked.slice(8)).toEqual(['Functional division']);
-    // The next stop, after the networks, is the typical arterial supply.
+    expect(walked.slice(7)).toEqual([
+      'Neuropsychological functions, 1',
+      'Functional networks, Visual 100%',
+      'Typical arterial supply',
+      'Functional division',
+    ]);
+    // About this region ends with the functional division; the research data's one closed row follows.
     await userEvent.keyboard('{Tab}');
-    expect(text(document.activeElement!)).toBe('Typical arterial supply');
-    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(text(document.activeElement!)).toBe('Research data');
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}{Shift>}{Tab}{/Shift}{Shift>}{Tab}{/Shift}');
     const networks = section('Functional networks');
     expect(networks.open).toBe(false);
     await userEvent.keyboard('{Enter}');
@@ -414,7 +484,10 @@ describe('evidence sections', () => {
       expect(details.open).toBe(false);
       expect(details.querySelector('summary h1, summary h2, summary h3')).toBeNull();
     }
-    expect(document.querySelectorAll('h3')).toHaveLength(0);
+    // The index caption is the only heading: the research data is a row, not a caption.
+    expect([...document.querySelectorAll('h3')].map((h3) => h3.className.split(' ')[0])).toEqual([
+      'index-caption',
+    ]);
   });
 
   test('networks show the Yeo shares with a bar and a percentage, CAB-NP at 100 %, and the caveat', async () => {
@@ -561,10 +634,8 @@ describe('boundary certainty', () => {
     render(Fixture, { regionId: VPL });
     const boundaries = section('Boundary certainty');
     expect(boundaries.open).toBe(false);
-    expect(
-      document.querySelector('[data-slot=comparison]')!.compareDocumentPosition(boundaries) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    const research = document.querySelector('[data-index=research]')!;
+    expect(research.querySelector('details details')).toBe(boundaries);
     boundaries.open = true;
     const expected = rated(VPL);
     expect(expected.length).toBeGreaterThan(8);
@@ -733,6 +804,7 @@ describe('targets, reflow and text spacing', () => {
             ] as const,
         );
       render(Fixture, { regionId });
+      await openMore();
       for (const details of root().querySelectorAll('details')) details.open = true;
       expect(targets().length).toBeGreaterThan(5);
       for (const [name, height] of targets())
@@ -851,7 +923,8 @@ describe('accessibility', () => {
   test('forced colours keep an edge on the commands and on Restore; reduced motion stops the chevron', async () => {
     render(Fixture, { regionId: CHIASM, isolated: true });
     await withMedia([{ name: 'forced-colors', value: 'active' }], () => {
-      const restore = root().querySelectorAll<HTMLElement>('.actions button')[1]!;
+      const restore = root().querySelector<HTMLElement>('.actions [data-active="true"]')!;
+      expect(text(restore)).toBe('Restore');
       expect(getComputedStyle(restore).outlineStyle).toBe('solid');
       expect(getComputedStyle(restore).borderTopColor).not.toBe('rgba(0, 0, 0, 0)');
     });

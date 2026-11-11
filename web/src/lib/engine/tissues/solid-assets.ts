@@ -18,6 +18,7 @@ import {
   labelAppearance,
   usesAtlasColors,
   usesCabNpColors,
+  usesLobeColors,
   usesTerritoryColors,
   usesNetworkColors,
   usesPaint,
@@ -358,6 +359,7 @@ export function paintSolids(
     usesNetworkColors(state) ||
     usesTerritoryColors(state) ||
     usesCabNpColors(state) ||
+    usesLobeColors(state) ||
     usesPaint(state);
   const variation = published ? 0 : appearance.intensity.cut_strength;
   const mri = state.surfaceColor === 'mri';

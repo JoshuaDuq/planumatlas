@@ -10,6 +10,8 @@
   and circuits the region takes part in (X2, X3) follow as slots of their own.
   - the name is the `region-title` focus target; the commands that hide the selection with it
     (Clear ×, Hide) hand focus on through S2's commands, not here;
+  - Focus and Linked MRI stand in the row; Isolate and Hide wait behind More, on a line of their own
+    (2026-11-11), and the research data's sections inside one closed row;
   - Isolate has no `aria-pressed`: its label says Isolate or Restore (APG toggle button);
   - Focus, Isolate and Hide carry a one-line tooltip, also their description (U6);
   - the actions are not rendered without a region, instead of hidden and disabled
@@ -178,6 +180,16 @@
 
   const uid = $props.id();
   const copy = $derived(t(lang, 'inspector'));
+  // Isolate and Hide wait behind More; once shown they stay for the next regions, and Restore always shows.
+  let moreOpen = $state(false);
+  const dissecting = $derived(moreOpen || isolated);
+  // The research data is one closed row; a section inside that opens itself (a linked stroke case, the
+  // reader's map) opens it.
+  let researchOpen = $state(false);
+  function onResearchToggle(event: Event) {
+    const details = event.target as HTMLDetailsElement;
+    if (details.open && details.parentElement?.closest('details')) researchOpen = true;
+  }
   const hints = $derived({
     focus: copy.focusHint,
     isolate: isolated ? copy.restoreHint : copy.isolateHint,
@@ -229,30 +241,45 @@
       </button>
       <button
         type="button"
-        data-active={isolated}
-        aria-keyshortcuts={ARIA_KEYSHORTCUTS.isolate}
-        aria-describedby="{uid}-isolate"
-        data-tooltip={hints.isolate}
-        onclick={onisolate}
-      >
-        {isolated ? copy.restore : copy.isolate}
-      </button>
-      <button
-        type="button"
-        aria-describedby="{uid}-hide"
-        data-tooltip={hints.hide}
-        onclick={onhide}
-      >
-        {t(lang, 'dissection').hideSelected}
-      </button>
-      <button
-        type="button"
         class="linked-mri"
         data-tooltip={t(lang, 'cuts').openMprTitle}
         onclick={(event) => openLinkedMri({ atRegion: true, instant: isKeyboardActivation(event) })}
       >
         {copy.linkedMri}
       </button>
+      <button
+        type="button"
+        class="more-actions"
+        aria-expanded={dissecting}
+        aria-controls="{uid}-more"
+        onclick={() => (moreOpen = !dissecting)}
+      >
+        {copy.moreActions}<span class="more-chevron" aria-hidden="true"></span>
+      </button>
+      <div id="{uid}-more" class="more-row" hidden={!dissecting}>
+        <button
+          type="button"
+          data-active={isolated}
+          aria-keyshortcuts={ARIA_KEYSHORTCUTS.isolate}
+          aria-describedby="{uid}-isolate"
+          data-tooltip={hints.isolate}
+          onclick={() => {
+            // Pressed here, the row stays once the isolation ends.
+            moreOpen = true;
+            onisolate();
+          }}
+        >
+          {isolated ? copy.restore : copy.isolate}
+        </button>
+        <button
+          type="button"
+          aria-describedby="{uid}-hide"
+          data-tooltip={hints.hide}
+          onclick={onhide}
+        >
+          {t(lang, 'dissection').hideSelected}
+        </button>
+      </div>
       <!-- The tooltips' text as descriptions, there without a hover or before the tooltip shows. -->
       {#each Object.entries(hints) as [command, hint] (command)}
         <span id="{uid}-{command}" hidden>{hint}</span>
@@ -278,3 +305,44 @@
 </div>
 {@render relatedDeficits?.()}
 {@render relatedCircuits?.()}
+<div class="region-detail region-research">
+  <!-- `toggle` does not bubble, so a section opening inside is heard on the way down. -->
+  <div class="region-index" data-index="research" ontogglecapture={onResearchToggle}>
+    <Disclosure variant="section" summary={copy.researchIndex} bind:open={researchOpen}>
+      <BoundarySection
+        {region}
+        {lang}
+        certainty={boundaryCertainty}
+        label={catalog.label}
+        {onselect}
+      />
+      <AgreementSection
+        {region}
+        {lang}
+        agreement={segmentationAgreement}
+        label={catalog.label}
+        onshow={showAgreement}
+      />
+      {@render comparison?.()}
+      <ReceptorSection {region} {lang} {receptors} />
+      <StimulationSection {region} {lang} {stimulation} />
+      <FtractSection {region} {lang} {ftract} />
+      <ConnectivitySection
+        {region}
+        {lang}
+        {connectivity}
+        {catalog}
+        painted={connectivityPainted}
+        {onselect}
+        onpaint={paintConnectivity}
+        onrestore={restoreConnectivity}
+      />
+      {#if strokeCases?.available}
+        <StrokeCasesSection {region} {lang} store={strokeCases} label={catalog.label} />
+      {/if}
+      {#if userMap}
+        <MapCourseSection {region} {lang} map={userMap} label={catalog.label} />
+      {/if}
+    </Disclosure>
+  </div>
+</div>

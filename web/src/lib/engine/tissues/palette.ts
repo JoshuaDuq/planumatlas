@@ -6,6 +6,7 @@ import type {
   RegionHemisphere,
   Rgb,
 } from '../../types/index.ts';
+import { lobeColor } from '../../core/catalog/lobes.ts';
 import { dominantNetwork } from '../../core/catalog/networks.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { internalSystemAllows } from '../../core/catalog/visibility.ts';
@@ -98,6 +99,10 @@ export const usesTerritoryColors = (state: Pick<PaletteState, 'surfaceColor'>) =
 export const usesCabNpColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
   state.surfaceColor === 'cab-np';
 
+/** Whether a cut face carries the lobe colours the surface is carrying. */
+export const usesLobeColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
+  state.surfaceColor === 'lobe';
+
 /** Whether a panel's paint is drawn over the surface colour, on a cut face as on the surface. */
 export const usesPaint = (state: Pick<PaletteState, 'paint'>) => Boolean(state.paint);
 
@@ -174,6 +179,12 @@ export function labelAppearance(
     usesCabNpColors(state) && label.region_id ? lookup?.cabNp?.regions[label.region_id] : null;
   if (cabNpNetwork) {
     setPublished(color, lookup!.cabNp!.colors[cabNpNetwork]!);
+  }
+  // A cut label of a lobe atlas takes its region's lobe; any other label keeps its tissue.
+  if (usesLobeColors(state) && label.region_id) {
+    const region = lookup?.regions?.get(label.region_id);
+    const lobe = region ? lobeColor(region) : null;
+    if (lobe) setPublished(color, lobe);
   }
   if (state.paint) {
     const painted = label.region_id ? state.paint.colors.get(label.region_id) : undefined;

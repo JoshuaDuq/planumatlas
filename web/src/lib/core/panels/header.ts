@@ -5,7 +5,7 @@ import { atlasSwitchLabel, t } from '../i18n/index.ts';
 /** The Colour field's groups, in order; the last choices stand on their own. */
 const COLOUR_GROUPS: readonly (readonly [string | null, readonly SurfaceColor[]])[] = [
   ['appearance', ['tissue', 'mri']],
-  ['parcellation', ['atlas']],
+  ['parcellation', ['lobe', 'atlas']],
   ['networks', ['network', 'cab-np']],
   ['vascular', ['territory']],
 ];

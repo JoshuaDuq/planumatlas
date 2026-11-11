@@ -38,7 +38,7 @@ export const en = {
     {
       id: 'selectRegion',
       title: 'A region’s detail',
-      body: 'A region you open is described here: its side and group, then Focus, Isolate, Hide and Linked MRI, what is known about it, and the research data measured on it.',
+      body: 'A region you open is described here: its side and group, then Focus, Linked MRI and More (Isolate, Hide), what is known about it, and the research data measured on it.',
     },
     {
       id: 'tabs',
@@ -48,7 +48,7 @@ export const en = {
     {
       id: 'dock',
       title: 'Tools on the picture',
-      body: 'Section cuts the brain and Display sets what is drawn. Lesion, Coordinate and Overlay bring something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map.',
+      body: 'Section cuts the brain and Display sets what is drawn. Add brings something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map.',
     },
   ] as GuideStop[],
   stops: [
@@ -80,17 +80,17 @@ export const en = {
     {
       id: 'lesion',
       title: 'Lesion',
-      body: 'Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Lesion, choose Places the lesion, then click the brain.',
+      body: 'Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Add, choose Lesion and Places the lesion, then click the brain.',
     },
     {
       id: 'coordinate',
       title: 'Coordinate',
-      body: 'Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target.',
+      body: 'Under Add, Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target.',
     },
     {
       id: 'overlay',
       title: 'Overlay',
-      body: 'Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent.',
+      body: 'Under Add, Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent.',
     },
     {
       id: 'medial',
@@ -147,7 +147,7 @@ export const fr: typeof en = {
     {
       id: 'selectRegion',
       title: 'Le détail d’une région',
-      body: 'Une région ouverte est décrite ici\u202f: son côté et son groupe, puis Focus, Isoler, Masquer et IRM liée, ce que l’on sait d’elle et les données de recherche mesurées sur elle.',
+      body: 'Une région ouverte est décrite ici\u202f: son côté et son groupe, puis Cibler, IRM liée et Plus (Isoler, Masquer), ce que l’on sait d’elle et les données de recherche mesurées sur elle.',
     },
     {
       id: 'tabs',
@@ -157,7 +157,7 @@ export const fr: typeof en = {
     {
       id: 'dock',
       title: 'Les outils de l’image',
-      body: 'Coupe tranche le cerveau et Affichage règle ce qui est tracé. Lésion, Coordonnée et Superposition apportent quelque chose sur le cerveau\u202f: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte.',
+      body: 'Coupe tranche le cerveau et Affichage règle ce qui est tracé. Ajouter apporte quelque chose sur le cerveau\u202f: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte.',
     },
   ] as GuideStop[],
   stops: [
@@ -189,17 +189,17 @@ export const fr: typeof en = {
     {
       id: 'lesion',
       title: 'Lésion',
-      body: 'Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Lésion, choisissez Place la lésion, puis cliquez sur le cerveau.',
+      body: 'Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Ajouter, choisissez Lésion et Place la lésion, puis cliquez sur le cerveau.',
     },
     {
       id: 'coordinate',
       title: 'Coordonnée',
-      body: 'Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche.',
+      body: 'Sous Ajouter, Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche.',
     },
     {
       id: 'overlay',
       title: 'Superposition',
-      body: 'Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé.',
+      body: 'Sous Ajouter, Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé.',
     },
     {
       id: 'medial',

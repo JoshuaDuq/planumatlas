@@ -15,6 +15,9 @@ export const en = {
   // A named view: the orientation gizmo's buttons, and the caption written onto an exported image.
   namedView: (name: string) => `${name} view`,
   sectionTool: 'Section',
+  // Add holds the three that bring something onto the brain; its choice is named for a screen reader.
+  placeTool: 'Add',
+  placeChoice: 'What to add to the brain',
   lesionTool: 'Lesion',
   coordinateTool: 'Coordinate',
   overlayTool: 'Overlay',
@@ -66,6 +69,8 @@ export const fr: typeof en = {
   viewAria: 'Vue anatomique',
   namedView: (name: string) => `Vue ${name.toLowerCase()}`,
   sectionTool: 'Coupe',
+  placeTool: 'Ajouter',
+  placeChoice: 'Quoi ajouter au cerveau',
   lesionTool: 'Lésion',
   coordinateTool: 'Coordonnée',
   overlayTool: 'Superposition',

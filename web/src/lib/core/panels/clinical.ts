@@ -1,3 +1,4 @@
+import { groupsByLobe } from '../catalog/lobes.ts';
 import type {
   DisplaySettings,
   Hemisphere,
@@ -90,7 +91,9 @@ export function revealNotice(
     if (atlasMoved) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
     if (cutsMoved) clauses.push(said.cutAtlas(atlasSwitchLabel(after.cutAtlas, lang)));
   }
-  if (before.colour !== after.colour) {
+  // Lobes that gave way to an atlas without any are that atlas's doing, which its clause has said.
+  const lobesGaveWay = before.colour === 'lobe' && atlasMoved && !groupsByLobe(after.atlas);
+  if (before.colour !== after.colour && !lobesGaveWay) {
     clauses.push(said.colour(t(lang, 'display').surfaceColors[after.colour]));
   }
   if (before.detail !== after.detail) {

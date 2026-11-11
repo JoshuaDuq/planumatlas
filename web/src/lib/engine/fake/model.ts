@@ -20,6 +20,7 @@ import type {
 } from '../api.ts';
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
+import { groupsByLobe } from '../../core/catalog/lobes.ts';
 import { coded, sameSet } from './support.ts';
 
 type FakeFile = { atlas: string; [field: string]: unknown };
@@ -386,6 +387,7 @@ export function createFakeModel({
       layers.add(id);
       values.atlas = id;
       if (values.surfaceColor === 'cab-np' && id !== cabNp?.atlas) values.surfaceColor = 'atlas';
+      if (values.surfaceColor === 'lobe' && !groupsByLobe(id)) values.surfaceColor = 'atlas';
       values.isolatedRegion = null;
       select(null);
     },
@@ -427,6 +429,9 @@ export function createFakeModel({
         throw new Error('This model carries no network layer.');
       if (mode === 'territory' && !manifest.arterial_territories)
         throw new Error('This model carries no arterial territories.');
+      if (mode === 'lobe' && !groupsByLobe(values.atlas)) {
+        throw new Error(`${values.atlas} groups no regions by lobe; show a lobe atlas first.`);
+      }
       if (mode === 'cab-np') {
         if (!cabNp) throw new Error('This model carries no CAB-NP partition.');
         if (values.atlas !== cabNp.atlas) {

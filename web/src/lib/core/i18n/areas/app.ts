@@ -6,6 +6,8 @@ export const en = {
   undoPick: 'Undo',
   cabNpAtlasOnly: (atlas: string) =>
     `CAB-NP colours HCP-MMP areas only, so ${atlas} shows its own region colours.`,
+  lobesAtlasOnly: (atlas: string) =>
+    `${atlas} groups its areas by network, not by lobe, so it shows its own region colours.`,
 };
 
 export const fr: typeof en = {
@@ -15,4 +17,6 @@ export const fr: typeof en = {
   undoPick: 'Annuler',
   cabNpAtlasOnly: (atlas: string) =>
     `CAB-NP ne colore que les aires HCP-MMP : ${atlas} affiche donc les couleurs de ses régions.`,
+  lobesAtlasOnly: (atlas: string) =>
+    `${atlas} regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.`,
 };

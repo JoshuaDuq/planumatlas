@@ -273,11 +273,11 @@ Copy quoted is the English interface text unless marked FR. The published build 
 
 ### MAST-29 · Colour offers only published colourings, in fixed groups
 
-- **Rule:** The Colour field offers only the colourings this build publishes, in the groups Appearance (Tissue, T1 MRI), Parcellation (Regions) and Networks (Yeo 7 networks, CAB-NP networks).
+- **Rule:** The Colour field offers only the colourings this build publishes, in the groups Appearance (Tissue, T1 MRI), Parcellation (Lobes, Regions) and Networks (Yeo 7 networks, CAB-NP networks). Lobes is always offered: on an atlas grouped by network its option names the lobe atlas it switches to (MAST-30).
 - **Kind:** behaviour
 - **Level:** unit (view-model `colourGroups`); browser only for the optgroup labels in the DOM
 - **Source:** `header.js:9-15, 51-57`; `chrome.contract.test.js:317-331`
-- **Expected:** all published → `[['appearance',['tissue','mri']], ['parcellation',['atlas']], ['networks',['network','cab-np']]]`. Networks only → no `cab-np`. Option texts on Destrieux: `''` (the hidden paint option), "Tissue", "T1 MRI", "Regions", "Yeo 7 networks", "CAB-NP networks (atlas becomes HCP-MMP)". Optgroup labels "Appearance", "Parcellation", "Networks" (FR "Apparence", "Parcellisation", "Réseaux").
+- **Expected:** all published → `[['appearance',['tissue','mri']], ['parcellation',['lobe','atlas']], ['networks',['network','cab-np']]]`. Networks only → no `cab-np`. Option texts on Destrieux: `''` (the hidden paint option), "Tissue", "T1 MRI", "Lobes", "Regions", "Yeo 7 networks", "CAB-NP networks (atlas becomes HCP-MMP)". Optgroup labels "Appearance", "Parcellation", "Networks" (FR "Apparence", "Parcellisation", "Réseaux").
 - **Covered by:** `src/lib/core/panels/header.test.ts` (R, `MAST-29`); `src/features/masthead/DataBar.svelte.test.ts` (R, could move down)
 
 ### MAST-30 · An option says what else choosing it changes
@@ -334,14 +334,14 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** choose HCP-MMP → "HCP-MMP: Loading…" (FR "HCP-MMP : Chargement…"). Status `ready` with atlas `hcp-mmp` → "Anatomy loaded." (FR "Anatomie chargée."). Status `ready` with the atlas unchanged → still "HCP-MMP: Loading…". Colour T1 MRI with no download → `''`.
 - **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 4 cases)
 
-### MAST-35 · On the bar a note is a tooltip; in the popover it is printed
+### MAST-35 · A field's note is printed under it, never a tooltip or a title
 
-- **Rule:** On the bar each field's note is its tooltip and never a native `title`. In the popover the notes are printed under the fields, and the tooltips are dropped so nothing is said twice.
+- **Rule:** In the popover each field's note is printed under it and is its description (`aria-describedby`); the field carries no tooltip saying it twice and no native `title`. Only the tract reference's name, which has no popover, carries its description as a tooltip (MAST-47). Until 2026-11-11 the fields also stood inline on a wide bar, where the note was their tooltip.
 - **Kind:** accessibility
 - **Level:** browser: DOM and visibility
-- **Source:** `header.js:342-350`
-- **Expected:** on the bar, each select's `data-tooltip` is its note, and there is no `title`; Atlas → "Sulcal and gyral regions, 74 per hemisphere". In the popover, `.data-note` is visible and Atlas has no `data-tooltip`.
-- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R; the bar case compares the tooltip to the note element it was read from, which is W apart from Atlas)
+- **Source:** `header.js:342-350`; parsimony round 2026-11-11
+- **Expected:** popover open → `.data-note` visible under each field; Atlas → "Sulcal and gyral regions, 74 per hemisphere", no `data-tooltip`, no `title`.
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R)
 
 ### MAST-36 · Every data choice is explained in a line in both languages
 
@@ -363,14 +363,14 @@ Copy quoted is the English interface text unless marked FR. The published build 
 
 ## Data bar: collapse and summary
 
-### MAST-37 · The bar collapses when it does not fit, and always on phones and touch
+### MAST-37 · The data fields are behind one summary button at every width
 
-- **Rule:** The bar measures itself rather than using a breakpoint. When the fields do not fit, they go behind a summary button. A phone and a coarse pointer always get the summary. The bar refits when its own width changes, not only on a window resize.
+- **Rule:** The masthead shows one data control, the summary button, on every screen; the fields are in its popover. Until 2026-11-11 a wide bar with a fine pointer showed the fields inline and collapsed to the summary only where they did not fit: that row, its measuring and its caption notes list are removed.
 - **Kind:** behaviour
-- **Level:** browser: layout and ResizeObserver
-- **Source:** `header.js:351-368, 383-386, 418-421`; `header.test.js:201-222, 320-341`
-- **Expected:** 1600×900, fine pointer → no `data-collapsed`. 390×844 → collapsed. Touch emulation at 1600×900 → collapsed, with a summary ≥ 44 px tall and < 500 px wide, and the popover's left edge within 3 px of the summary's. Bar width 300 px → collapsed; width cleared → not collapsed.
-- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 4 cases)
+- **Level:** browser: layout
+- **Source:** parsimony round 2026-11-11 (it replaces `header.js:351-368, 383-386, 418-421`)
+- **Expected:** 1600×900, fine pointer → the summary is drawn and no select is visible until it is pressed; the banner's controls are the skip link, the brand, the summary named "Atlas and display settings: …", then the icon buttons. Touch emulation at 1600×900 → a summary ≥ 44 px tall and < 500 px wide, the popover's left edge within 3 px of the summary's. 390×844 → the same summary.
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R); `src/app/regions/MastheadRegion.svelte.test.ts` (R)
 
 ### MAST-38 · The summary names its parts, label first
 
@@ -381,14 +381,14 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** "Atlas and display settings: CDMD sub_013 · Destrieux · Tissue · Teaching set"; FR prefix "Réglages de l’atlas et de l’affichage: ". `dataSummary({subject:null, atlas:'Destrieux', colour:'Regions', detail:'Teaching set'})` → parts atlas, colour, detail. With a `reference` → `[{part:'subject', text:<reference>}]`. `aria-controls` = the popover's id; `data-tooltip` "Atlas and display settings". Every printed part is in the name.
 - **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R); `src/lib/core/panels/header.test.ts` (R, `MAST-38`)
 
-### MAST-39 · As room shrinks the summary drops internal anatomy, then colour, never the atlas
+### MAST-39 · The summary shows the atlas and the colour; the colour yields before the atlas
 
-- **Rule:** A summary too long for its line hides Internal anatomy, then Colour. The atlas is never dropped; it truncates. The accessible name keeps every part.
+- **Rule:** The summary shows the atlas and the colour. Internal anatomy is never shown in it: it is in the popover and in the accessible name, which keeps every part. Where the atlas and the colour do not fit, the colour is hidden; the atlas is never dropped and truncates.
 - **Kind:** behaviour
 - **Level:** browser: layout measurement
-- **Source:** `header.js:369-382`; `header.test.js:251-318`
-- **Expected:** 300×800 → `data-short` set; the `detail` part is `display: none`, the `atlas` part is shown, and the name still contains "Teaching set". 250×800 with one detail level → `data-short="colour"`, atlas shown.
-- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 2 cases)
+- **Source:** `header.js:369-382`; parsimony round 2026-11-11 (internal anatomy was shown where it fitted)
+- **Expected:** 1600×900 → `data-short="detail"`, atlas and colour shown, the `detail` part `display: none`, the name contains "Teaching set". 300×800 → `data-short` set, `detail` hidden, atlas shown. 250×800 with one detail level → `data-short="colour"`, atlas shown.
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 3 cases)
 
 ### MAST-40 · The popover is a disclosure: the summary keeps focus and Tab walks the fields
 
@@ -426,14 +426,14 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Expected:** data open, click More settings → data `aria-expanded="false"`, More settings `"true"`; click the summary → the reverse.
 - **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R); `src/features/masthead/Masthead.svelte.test.ts` (R)
 
-### MAST-44 · Focus is never lost when the bar changes shape
+### MAST-44 · A window that narrows keeps the open popover and the focus in it
 
-- **Rule:** When the bar collapses under a focused field, the popover opens and the field keeps focus. When it widens under the focused summary, focus goes to the first visible, enabled field. A collapse with focus elsewhere leaves the popover closed.
+- **Rule:** The bar no longer changes shape (MAST-37), so a resize never moves focus: a popover open with focus in a field stays open, with that field focused, when the window narrows to a phone's.
 - **Kind:** accessibility
 - **Level:** browser: layout and focus
-- **Source:** `header.js:352-368`; `header.test.js:181-236`; deviation `h3-focus-never-lost.md`
-- **Expected:** Atlas focused at 1600 px, resize to 390 px → collapsed, `aria-expanded="true"`, focus on Atlas. Summary focused at 390 px, resize to 1600 px → focus on Subject. Focus on More settings, bar width 300 px → collapsed, `aria-expanded="false"`.
-- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R, 3 cases)
+- **Source:** deviation `h3-focus-never-lost.md`; parsimony round 2026-11-11
+- **Expected:** popover open, Atlas focused at 1600 px, resize to 390 px → `aria-expanded="true"`, focus on Atlas.
+- **Covered by:** `src/features/masthead/DataBar.svelte.test.ts` (R)
 
 ### MAST-45 · The popover fits small and enlarged screens
 

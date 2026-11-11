@@ -1,6 +1,8 @@
 <!--
-  The stage dock: one plate of worded tools, Section, Lesion, Coordinate, Overlay and Display, each opening a popover
-  (index.html:433-490, stage.css:311-440). APG Toolbar (deviation g2-dock-toolbar): the row is a labelled
+  The stage dock: one plate of three worded tools, Section, Display and Add, each opening a popover
+  (index.html:433-490, stage.css:311-440). Add holds the three that bring something onto the brain, Lesion,
+  Coordinate and Overlay, as one segmented choice over the chosen one's body (2026-11-11 parsimony round;
+  they were three tools after a rule since supervisor review 2.1). APG Toolbar (deviation g2-dock-toolbar): the row is a labelled
   `role="toolbar"` with one Tab stop; ← → ↑ ↓ and Home/End move between the visible tools, Enter and Space
   open. The tract reference has none of them, so the dock is not drawn over it.
   - U5's popover keeps its trigger and its content together, so the popovers' controls sit inside the toolbar
@@ -12,7 +14,7 @@
   - Section's popover and the section row above the tools are G4's, the Lesion's and Coordinate's bodies the
     lesion feature's: they come in as snippets. Coordinate is offered only with a body (published spaces).
   - Overlay, the reader's own NIfTI map, is offered only with a body, and not on a stage narrower than
-    480 px, a phone's, where the other four tools fill one row.
+    480 px, a phone's.
   - A click on the brain places the lesion only while the reader has chosen so in the Lesion popover and it is
     open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
@@ -102,10 +104,8 @@
   const ROOM_BESIDE_PLATE_PX = 320;
   const uid = $props.id();
   const sectionLabelId = `section-tool-${uid}`;
-  const lesionLabelId = `lesion-tool-${uid}`;
-  const coordinateLabelId = `coordinate-tool-${uid}`;
-  const overlayLabelId = `overlay-tool-${uid}`;
-  // A stage this narrow fits only the other four tools on one row.
+  const placeLabelId = `place-tool-${uid}`;
+  // A stage this narrow, a phone's, has no room to read a map's controls beside the brain.
   const narrow = $derived((stage.visibleRect?.width ?? Infinity) < NARROW_STAGE_PX);
   const displayLabelId = `display-tool-${uid}`;
 
@@ -118,18 +118,33 @@
   // A phone sheet raised over the stage covers it.
   const covered = $derived(!shown || stage.sheetFull);
 
+  type PlaceTool = 'lesion' | 'coordinate' | 'overlay';
   let sectionOpen = $state(false);
-  let lesionOpen = $state(false);
-  let coordinateOpen = $state(false);
-  let overlayOpen = $state(false);
   let displayOpen = $state(false);
-  const anyOpen = $derived(
-    sectionOpen || lesionOpen || coordinateOpen || overlayOpen || displayOpen,
+  let placeOpen = $state(false);
+  // What Add brings onto the brain: the reader's last choice, while it is still offered.
+  let placeChoice = $state<PlaceTool>('lesion');
+  const placeOptions = $derived([
+    { value: 'lesion' as const, label: copy.lesionTool },
+    ...(coordinatePopover ? [{ value: 'coordinate' as const, label: copy.coordinateTool }] : []),
+    ...(overlayPopover && !narrow ? [{ value: 'overlay' as const, label: copy.overlayTool }] : []),
+  ]);
+  const placeTool = $derived(
+    placeOptions.some(({ value }) => value === placeChoice) ? placeChoice : 'lesion',
   );
+  // The chosen body is no longer offered (the coordinate spaces went with another anatomy): Add closes
+  // as a tool that goes closes its popover, before the focus inside it is dropped to the page.
+  $effect.pre(() => {
+    if (placeChoice === placeTool) return;
+    const hadFocus = placeOpen && dock.contains(document.activeElement);
+    placeChoice = placeTool;
+    placeOpen = false;
+    if (hadFocus) rescueFocus();
+  });
+  const lesionOpen = $derived(placeOpen && placeTool === 'lesion');
+  const anyOpen = $derived(sectionOpen || displayOpen || placeOpen);
   // Which one, so a swap from one tool to another measures the plate that opened.
-  const openTool = $derived(
-    [sectionOpen, lesionOpen, coordinateOpen, overlayOpen, displayOpen].findIndex(Boolean),
-  );
+  const openTool = $derived([sectionOpen, displayOpen, placeOpen].findIndex(Boolean));
   // A click places the lesion only while the reader chose so, and only until the Lesion popover closes.
   let placing = $state(false);
   $effect(() => {
@@ -146,7 +161,7 @@
   // no `hashchange`): a popover still open would act on the scene it was opened for.
   $effect(() => {
     const closeAll = () => {
-      sectionOpen = lesionOpen = coordinateOpen = overlayOpen = displayOpen = false;
+      sectionOpen = displayOpen = placeOpen = false;
     };
     addEventListener('hashchange', closeAll);
     return () => removeEventListener('hashchange', closeAll);
@@ -172,7 +187,8 @@
 
   /** Opens a tool from elsewhere in the page as its own press would, focus moving into it; an open one keeps it. */
   export function openFromPanel(tool: 'lesion') {
-    const button = tools.querySelector<HTMLElement>(`.stage-tool[data-tool="${tool}"]`)!;
+    placeChoice = tool;
+    const button = tools.querySelector<HTMLElement>('.stage-tool[data-tool="place"]')!;
     if (button.getAttribute('aria-expanded') === 'true') button.focus();
     else button.click();
   }
@@ -313,44 +329,6 @@
       {#snippet body({ close })}{@render sectionPopover({ close })}{/snippet}
     </StagePopover>
     <StagePopover
-      bind:open={lesionOpen}
-      tool="lesion"
-      hidden={tractReference}
-      {covered}
-      style={popoverStyle}
-      dialogLabelledby={lesionLabelId}
-      {rescueFocus}
-    >
-      {#snippet name()}<span id={lesionLabelId}>{copy.lesionTool}</span>{/snippet}
-      {#snippet body({ close })}
-        {@render lesionPopover({ close, placing, setPlacing: (next) => (placing = next) })}
-      {/snippet}
-    </StagePopover>
-    <StagePopover
-      bind:open={coordinateOpen}
-      tool="coordinate"
-      hidden={tractReference || !coordinatePopover}
-      {covered}
-      style={popoverStyle}
-      dialogLabelledby={coordinateLabelId}
-      {rescueFocus}
-    >
-      {#snippet name()}<span id={coordinateLabelId}>{copy.coordinateTool}</span>{/snippet}
-      {#snippet body({ close })}{@render coordinatePopover?.({ close })}{/snippet}
-    </StagePopover>
-    <StagePopover
-      bind:open={overlayOpen}
-      tool="overlay"
-      hidden={tractReference || !overlayPopover || narrow}
-      {covered}
-      style={popoverStyle}
-      dialogLabelledby={overlayLabelId}
-      {rescueFocus}
-    >
-      {#snippet name()}<span id={overlayLabelId}>{copy.overlayTool}</span>{/snippet}
-      {#snippet body({ close })}{@render overlayPopover?.({ close })}{/snippet}
-    </StagePopover>
-    <StagePopover
       bind:open={displayOpen}
       tool="display"
       hidden={tractReference}
@@ -387,6 +365,37 @@
           onExploded={commands.setExploded}
           onResetDisplay={commands.resetDisplay}
         />
+      {/snippet}
+    </StagePopover>
+    <StagePopover
+      bind:open={placeOpen}
+      tool="place"
+      offers={placeOptions.map(({ value }) => value).join(' ')}
+      hidden={tractReference}
+      {covered}
+      style={popoverStyle}
+      dialogLabelledby={placeLabelId}
+      {rescueFocus}
+    >
+      {#snippet name()}<span id={placeLabelId}>{copy.placeTool}</span>{/snippet}
+      {#snippet body({ close })}
+        {#if placeOptions.length > 1}
+          <ChoiceGroup
+            class="place-choice"
+            label={copy.placeChoice}
+            options={placeOptions}
+            bind:value={() => placeTool, (next) => (placeChoice = next)}
+          />
+        {/if}
+        <div class="place-body" data-place={placeTool}>
+          {#if placeTool === 'lesion'}
+            {@render lesionPopover({ close, placing, setPlacing: (next) => (placing = next) })}
+          {:else if placeTool === 'coordinate'}
+            {@render coordinatePopover?.({ close })}
+          {:else}
+            {@render overlayPopover?.({ close })}
+          {/if}
+        </div>
       {/snippet}
     </StagePopover>
   </div>
@@ -464,6 +473,18 @@
     }
     :global(.stage-tool[hidden]) {
       display: none;
+    }
+    /* Add's choice heads its popover, the chosen tool's own body under it. */
+    :global(.stage-popover .place-choice) {
+      display: flex;
+      width: 100%;
+      margin-bottom: var(--space-3);
+    }
+    /* Sized by their words, so the longest (Coordonnée, Superposition) is never cut. */
+    :global(.stage-popover .place-choice [role='radio']) {
+      flex: 1 1 auto;
+      padding-inline: 6px;
+      font-size: var(--text-caption);
     }
     .changed-mark {
       flex: none;

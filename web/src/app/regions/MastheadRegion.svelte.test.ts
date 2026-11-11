@@ -49,16 +49,20 @@ describe('what the masthead region holds', () => {
             ? element.labels?.[0]?.textContent
             : element.textContent!.trim()),
       );
-    expect(names.slice(0, 3)).toEqual(['Skip to model', 'Planum', 'Atlas']);
+    // The data bar is its one summary, named with every value it holds.
+    expect(names.slice(0, 2)).toEqual(['Skip to model', 'Planum']);
+    expect(names[2]).toMatch(/^Atlas and display settings: /);
     expect(names.slice(-3)).toEqual([
       'Save image (PNG)',
       'Copy link to this view',
       'More settings',
     ]);
-    // One subject is published, so there is no Subject field.
-    expect(names).toContain('Colour');
-    expect(names).toContain('Internal anatomy');
-    expect(names).not.toContain('Subject');
+    // One subject is published, so the summary's popover has no Subject field.
+    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
+    const fields = [...header.querySelectorAll('select')]
+      .filter((select) => select.checkVisibility())
+      .map((select) => select.labels[0]!.textContent);
+    expect(fields).toEqual(['Atlas', 'Colour', 'Internal anatomy']);
   });
 
   test('before the engine the masthead is there without a data bar, and Save image waits', async () => {
@@ -206,10 +210,15 @@ describe('Full screen and Save image', () => {
 });
 
 describe('the data bar', () => {
+  // The data fields are behind the masthead's one summary, at every width.
+  const openData = () =>
+    userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
+
   test('Colour lifts the paint, then chooses the colouring', async () => {
     await shell.open();
     const { world } = shell.app;
     expect(world!.view.current.paintLifted).toBe(false);
+    await openData();
     await userEvent.selectOptions(page.getByRole('combobox', { name: 'Colour' }), 'mri');
     await vi.waitFor(() => expect(world!.view.current.surfaceColor).toBe('mri'));
     expect(world!.view.current.paintLifted).toBe(true);
@@ -218,6 +227,7 @@ describe('the data bar', () => {
   test('Atlas runs the atlas choice, lifting the paint too', async () => {
     await shell.open();
     const { world } = shell.app;
+    await openData();
     await userEvent.selectOptions(page.getByRole('combobox', { name: 'Atlas' }), 'hcp-mmp');
     await vi.waitFor(() => expect(world!.view.current.atlas).toBe('hcp-mmp'));
     expect(world!.view.current.paintLifted).toBe(true);
@@ -229,6 +239,7 @@ describe('the data bar', () => {
     const other = world!.engine.model.manifest.detail_levels.find(
       ({ id }) => id !== world!.view.current.detail,
     )!;
+    await openData();
     await userEvent.selectOptions(
       page.getByRole('combobox', { name: 'Internal anatomy' }),
       other.id,

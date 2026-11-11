@@ -39,14 +39,23 @@ the expected values change with them in the same commit.
 - **Expected:** `CUTS` = `['off','sagittal','coronal','axial','oblique']`; `HEMISPHERES` = `['both','left','right']`; `FUNCTIONAL_LEVELS` = `['named','sections']`. Probed with off, sagittal, coronal, axial, oblique, both, left, right, named, sections, anatomy, functions, deficits, circuits, diffusion, bogus and "", `cut=` accepts exactly `CUTS`, `hemi=` exactly `HEMISPHERES`.
 - **Covered by:** `src/lib/types/constants.test.ts` (R, the lists); `src/lib/core/state/url-state.test.ts` (R, some values; the decoder's acceptance is STATE-08)
 
-### CAT-03 · Five surface colourings, declared once
+### CAT-03 · Seven surface colourings, declared once
 
-- **Rule:** The cortex can be coloured by tissue, MRI, atlas, network or CAB-NP. There is one list, and a link accepts each of them and nothing else.
+- **Rule:** The cortex can be coloured by tissue, MRI, lobe, atlas, network, CAB-NP or arterial territory. There is one list, and a link accepts each of them and nothing else.
 - **Kind:** data
 - **Level:** unit
 - **Source:** `viewer/model/brain-atlas.js:68`; `viewer/state/url-state.js:36`
-- **Expected:** `SURFACE_COLORS` = `['tissue','mri','atlas','network','cab-np']`; `colors=bogus`, `colors=rgb` and `colors=functional` are rejected.
+- **Expected:** `SURFACE_COLORS` = `['tissue','mri','lobe','atlas','network','cab-np','territory']`; `colors=bogus`, `colors=rgb` and `colors=functional` are rejected.
 - **Covered by:** `src/lib/types/constants.test.ts` (R); `src/lib/engine/model/brain-atlas.test.ts` (W, `includes('mri')` only)
+
+### CAT-03a · Lobes colour the regions of the atlases grouped by lobe, in the interface's nine colours
+
+- **Rule:** A cortical region of Destrieux or Julich-Brain takes the colour of the lobe its label table lists it under (`lobeOf`, `lobeColor`); a structure, the unlabelled medial wall and any region of HCP-MMP or Schaefer, which group by network, take none and keep their own. The nine colours are Paul Tol's "muted" scheme, one per lobe and none shared; a lobe with no colour is an error, not a fallback. A page opened without a link, and Start over, open on Lobes where the atlas has them and on Regions otherwise (`openingColour`); a link's default stays Regions.
+- **Kind:** data
+- **Level:** unit
+- **Source:** `web/src/lib/core/catalog/lobes.ts`; parsimony round 2026-11-11
+- **Expected:** every published cortical region of Destrieux and Julich-Brain has a lobe and its colour; `S_central` → Central, `G_precentral` → Frontal, `S_calcarine` → Occipital; a structure, `destrieux:*:-1`, an HCP-MMP and a Schaefer area → null. `requiredAtlas(model, 'lobe', atlas)` → null on Destrieux and Julich-Brain, `destrieux` on Schaefer. Choosing Lobes on HCP-MMP → atlas Destrieux, colour `lobe`; Start over on Destrieux → `surfaceColor` `lobe`.
+- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/lib/core/state/scene-commands.test.ts` (R); `src/lib/controller/anatomy.svelte.test.ts` (R, Start over); `src/app/boot.svelte.test.ts` (R, "opens a plain page on the lobes…")
 
 ### CAT-04 · Five explorers, which are the workspace modes
 

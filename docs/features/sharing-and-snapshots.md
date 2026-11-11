@@ -32,7 +32,7 @@ The state travels in the URL hash as `URLSearchParams` (`url-state.ts`). `encode
 | `hemi` | Hemisphere | `both`, `left`, `right` |
 | `cortex`, `internal`, `cord` | Cortex, internal anatomy, spinal cord shown | `1`/`0` |
 | `opacity` | Cortex opacity | 0 to 1, written to 0.01 |
-| `colors` | Surface colour | `tissue`, `mri`, `atlas` (default), `network`, `cab-np`, `territory`; the former flag `1`/`0` reads as `atlas`/`tissue` |
+| `colors` | Surface colour | `tissue`, `mri`, `lobe`, `atlas` (the default of a link; a page opened without one shows `lobe`), `network`, `cab-np`, `territory`; the former flag `1`/`0` reads as `atlas`/`tissue` |
 | `mri` | MRI window | `centre,width`, centre 0 to 255, width 1 to 256, written to 0.1; only when it differs from the published window |
 | `tab` | Panel tab | `anatomy`, `functions`, `deficits`, `circuits`, `diffusion` (Tracts) |
 | `function`, `deficit` | Open function or deficit | Id; written only from its own tab |

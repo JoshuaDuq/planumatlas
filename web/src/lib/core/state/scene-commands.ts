@@ -1,5 +1,6 @@
 import type { LoadProgress, Manifest, SurfaceColor } from '../../types/index.ts';
 import type { OnProgress } from '../../engine/api.ts';
+import { LOBE_ATLAS, groupsByLobe } from '../catalog/lobes.ts';
 import { failureKey, failureNotice } from '../i18n/errors.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
 import { clinicalLayers, showClinicalRegions } from './clinical-navigation.ts';
@@ -10,11 +11,20 @@ import type { Session } from './session.ts';
 export const publishesSpinalCord = (manifest: Pick<Manifest, 'supplemental_layers'>): boolean =>
   (manifest.supplemental_layers ?? []).some((layer) => layer.id === 'pam50');
 
-/** Colours that are defined on one atlas's areas, and so need that atlas shown. */
+/**
+ * The atlas a colouring needs shown, were `atlas` the one on screen: CAB-NP is defined on one
+ * atlas's areas, and lobes only on an atlas grouped by lobe, which any such atlas satisfies.
+ */
 export const requiredAtlas = (
   { cabNp }: Pick<ModelPort, 'cabNp'>,
   colour: SurfaceColor,
-): string | null | undefined => (colour === 'cab-np' ? cabNp?.atlas : null);
+  atlas: string,
+): string | null | undefined =>
+  colour === 'cab-np'
+    ? cabNp?.atlas
+    : colour === 'lobe' && !groupsByLobe(atlas)
+      ? LOBE_ATLAS
+      : null;
 
 /**
  * The scene changes that wait on downloads: layer switches, surface colours and
@@ -165,7 +175,7 @@ export function createSceneCommands({
 
   /** Colour the surface, first showing the atlas a network colouring is defined on. */
   async function applySurfaceColor(value: SurfaceColor, current: () => boolean) {
-    const atlas = requiredAtlas(model, value);
+    const atlas = requiredAtlas(model, value, model.settings.atlas);
     if (atlas) await loadAtlas(atlas, current);
     if (!current()) return false;
     // Through the sections even when the colour is already shown, so an older colour still loading is overtaken.

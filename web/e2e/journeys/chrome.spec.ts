@@ -13,22 +13,29 @@ test('data bar, comparison CSV, saved PNG and full screen on one load', async ({
   await app.gotoHash();
   await app.ready();
 
-  // A colouring that needs another atlas switches the atlas.
+  // The data bar's fields are behind its summary. A colouring that needs another atlas switches the atlas.
+  const data = page.getByRole('button', { name: /^Atlas and display settings: / });
+  await data.click();
   await expect(field(page, 'Atlas')).toHaveValue('destrieux');
+  // A page opened plainly shows the lobes.
+  await expect(field(page, 'Colour')).toHaveValue('lobe');
   await field(page, 'Colour').selectOption({ label: 'CAB-NP networks (atlas becomes HCP-MMP)' });
   await expect(field(page, 'Atlas')).toHaveValue('hcp-mmp', { timeout: 60_000 });
   await expect(field(page, 'Colour')).toHaveValue('cab-np');
   expect(app.requestsTo(/cortex-hcp-mmp\.glb/)).not.toHaveLength(0);
   await expect.poll(() => app.hash()).toContain('atlas=hcp-mmp');
+  await data.click();
+  await expect(data).toHaveAttribute('aria-expanded', 'false');
 
-  // The comparison CSV downloads under the subject and region name.
+  // The comparison CSV, under the region's Research data, downloads under the subject and region name.
   await page.evaluate(() => {
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
     params.set('region', 'hcp-mmp:left:1');
     location.hash = params.toString().replaceAll('%3A', ':').replaceAll('%2C', ',');
   });
+  await page.locator('summary', { hasText: /^Research data$/ }).click();
   const summary = page.locator('summary', { hasText: 'Overlap with Destrieux' });
-  const panel = page.locator('details', { has: summary });
+  const panel = summary.locator('xpath=..');
   await summary.click();
   const csv = page.waitForEvent('download');
   await panel.getByRole('button', { name: 'Download CSV' }).click();

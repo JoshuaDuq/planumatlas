@@ -77,11 +77,11 @@ test('the status bar keeps the not-clinical statement in every state', () => {
   }
 });
 
-test('Colour groups appearance, the atlas regions, networks and blood supply', () => {
+test('Colour groups appearance, the lobes and atlas regions, networks and blood supply', () => {
   const all = { networks: {}, cabNp: {}, territories: {} };
   assert.deepEqual(colourGroups(all), [
     ['appearance', ['tissue', 'mri']],
-    ['parcellation', ['atlas']],
+    ['parcellation', ['lobe', 'atlas']],
     ['networks', ['network', 'cab-np']],
     ['vascular', ['territory']],
   ]);
@@ -89,11 +89,19 @@ test('Colour groups appearance, the atlas regions, networks and blood supply', (
     colourGroups({ networks: {} }),
     [
       ['appearance', ['tissue', 'mri']],
-      ['parcellation', ['atlas']],
+      ['parcellation', ['lobe', 'atlas']],
       ['networks', ['network']],
     ],
     'a colouring the build does not publish is not offered',
   );
+});
+
+test('Lobes on an atlas grouped by network names the lobe atlas it switches to', () => {
+  assert.equal(
+    colourOption('en', 'lobe', { atlas: 'hcp-mmp', required: 'destrieux' }),
+    'Lobes (atlas becomes Destrieux)',
+  );
+  assert.equal(colourOption('en', 'lobe', { atlas: 'julich', required: null }), 'Lobes');
 });
 
 test('a colour or atlas option names what choosing it changes', () => {
@@ -129,12 +137,13 @@ test('MAST-28 a name loses its quotation marks and doubled spaces, and may end u
 test('MAST-29 Colour offers each published colouring under its name, in both languages', () => {
   const required = (mode: string) => (mode === 'cab-np' ? 'hcp-mmp' : null);
   const names = (lang: 'en' | 'fr') =>
-    (['tissue', 'mri', 'atlas', 'network', 'cab-np'] as const).map((mode) =>
+    (['tissue', 'mri', 'lobe', 'atlas', 'network', 'cab-np'] as const).map((mode) =>
       colourOption(lang, mode, { atlas: 'destrieux', required: required(mode) }),
     );
   assert.deepEqual(names('en'), [
     'Tissue',
     'T1 MRI',
+    'Lobes',
     'Regions',
     'Yeo 7 networks',
     'CAB-NP networks (atlas becomes HCP-MMP)',
@@ -142,13 +151,14 @@ test('MAST-29 Colour offers each published colouring under its name, in both lan
   assert.deepEqual(names('fr'), [
     'Tissu',
     'IRM T1',
+    'Lobes',
     'Régions',
     'Réseaux Yeo 7',
     'Réseaux CAB-NP (l’atlas devient HCP-MMP)',
   ]);
   assert.deepEqual(colourGroups({}), [
     ['appearance', ['tissue', 'mri']],
-    ['parcellation', ['atlas']],
+    ['parcellation', ['lobe', 'atlas']],
   ]);
   assert.deepEqual(colourGroups({ cabNp: {} }).slice(2), [['networks', ['cab-np']]]);
 });

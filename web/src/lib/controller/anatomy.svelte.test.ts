@@ -429,6 +429,8 @@ describe('the display toggles', () => {
     const logged = engine.calls.length;
     anatomy.startOver();
     expect(engine.model.settings.hemisphere).toBe('both');
+    // The opening colour of an atlas grouped by lobe.
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'lobe' });
     expect(engine.userMap.surface).toBe('pial');
     expect(engine.model.state.selectedRegion).toBeNull();
     expect(session.state).toMatchObject({
@@ -439,6 +441,7 @@ describe('the display toggles', () => {
     expect(engine.calls.slice(logged).map((call) => `${call.domain}.${call.method}`)).toEqual([
       'sections.setMode',
       'model.reset',
+      'model.setSurfaceColor',
       'userMap.setSurface',
       'camera.recenter',
       'camera.applyView',

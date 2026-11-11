@@ -312,3 +312,47 @@ What opening a deficit does to the scene (draw, frame, the reveal notice, the se
 - **Source:** `viewer/styles/a11y.css:55-56,87`; decision 38 on #4
 - **Expected:** `forced-colors: active` → Restore colour = `LinkText`; Shift, focus the heading → `:focus-visible`, `outline-color` = `Highlight`.
 - **Covered by:** `src/features/deficits/deficits.svelte.test.ts` (R)
+
+## The selected region's deficits
+
+### DEF-34 · With a region selected, a first group lists the deficits involving it
+
+- **Rule:** With a region selected and no search, the list opens with a group captioned "Involving this region" (« Touchant cette région »): the deficits mapped on the region or on anatomy it shares (`deficitsForRegion`, which the region inspector's Neuropsychology section also reads), as the list's own two-line rows. They keep the list's own order (its groups, then the order within each), so a deficit sits in the same relative place in both groups. A row opens its profile.
+- **Kind:** behaviour
+- **Level:** unit (`deficitsForRegion`) and browser
+- **Expected:** left middle temporal gyrus (`destrieux:left:38`) → the first `[role="group"]` is `[data-region-deficits]`, labelled "Involving this region"; unfolded it holds 9 deficits, aphasia among them, equal to the full list's rows filtered; pressing Aphasia calls `openDeficit('aphasia')`. No inferior frontal parcel carries the general aphasia profile in `data/neuropsychology.yaml`, so the temporal gyrus is the fixture.
+- **Covered by:** `src/lib/core/panels/clinical.test.ts`, `src/features/deficits/deficits.svelte.test.ts` (R)
+
+### DEF-35 · Nothing selected, a region with no deficit, or a search: no group
+
+- **Rule:** The group is drawn only when it has rows and the search field is empty.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** nothing selected → no `[data-region-deficits]`, 131 rows; the unknown label (`destrieux:left:-1`) → none; with a region selected, the query "aphasia" → none.
+- **Covered by:** `src/features/deficits/deficits.svelte.test.ts` (R)
+
+### DEF-36 · More than eight show eight and "Show all N"
+
+- **Rule:** The group shows its first 8 rows; a quiet "Show all N" text command (the kit's `ShowAll`) under them shows the rest, leaves, and moves focus to the first row it added. With 8 or fewer there is no command. Another region starts with its first rows again. The command is one of the list's arrow-key stops. Measured on the published data: the most deficits on one region is 12 (left opercular inferior frontal gyrus); six regions have exactly 8.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** `destrieux:left:12` → 8 rows and "Show all 12"; Enter on it → 12 rows, no command, focus on the ninth row; `destrieux:left:17` (8 deficits) → 8 rows, no command; back to `destrieux:left:12` → the command again; in French "Afficher les 12" under « Touchant cette région ».
+- **Covered by:** `src/features/deficits/deficits.svelte.test.ts` (R)
+
+## Clinical material in one place
+
+### DEF-37 · Simulate a lesion stands above the groups and opens Add on Lesion
+
+- **Rule:** The Deficits tab keeps its name (D5). Above its groups, in the related-findings row idiom, "Simulate a lesion" (« Simuler une lésion ») opens the stage's Add tool on its Lesion choice, whatever it last held, as its own press would, a full phone sheet first coming down to half so the tool can show. A search shows the list alone (supervisor review 4.2).
+- **Kind:** behaviour
+- **Level:** browser (composed app over the fake engine)
+- **Expected:** Deficits tab → `.clinical-links` rows ["Simulate a lesion"] before the first group (no cohort published, no Stroke cases row); pressing it → the Lesion tool `aria-expanded="true"`; typing "aphasia" → no rows.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+### DEF-38 · Stroke cases opens the selected region's cases, or says to select one
+
+- **Rule:** Where a stroke cohort is published, "Stroke cases" follows. With nothing selected the notice says "Select a region to see the stroke cases whose lesion reaches it."; where the cohort is loaded and no case reaches the selected region it says so by name; otherwise the detail shows the region with its Stroke cases section open, and the Research data row that holds it, scrolled into view, focus on its summary.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** with the published cohort: press with nothing selected → that notice; pick `destrieux:left:26`, press → `.stroke-cases details` open, focus on its summary.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
