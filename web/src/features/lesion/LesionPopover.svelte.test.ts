@@ -67,7 +67,8 @@ test('the two clicks share one line in the dock popover, in English', async () =
   });
   // The popover's 272 px less its two 17 px paddings (Dock.svelte).
   const radio = (name: string) => page.getByRole('radio', { name }).element();
-  radio('Selects a region').closest<HTMLElement>('body > *')!.style.width = `${POPOVER_WIDTH - 34}px`;
+  radio('Selects a region').closest<HTMLElement>('body > *')!.style.width =
+    `${POPOVER_WIDTH - 34}px`;
   // Each label's text lays out on one line, both on the same row.
   const lines = (name: string) => {
     const range = document.createRange();
@@ -82,7 +83,11 @@ test('the two clicks share one line in the dock popover, in English', async () =
 });
 
 test('with the report in the panel in front, it offers neither Show the report nor a second Remove', async () => {
-  const placed = { kind: 'lesion', sphere: { centre: [-35.5, -9.5, 63.5], radius: 10 }, radius: 10 };
+  const placed = {
+    kind: 'lesion',
+    sphere: { centre: [-35.5, -9.5, 63.5], radius: 10 },
+    radius: 10,
+  };
   let shown = $state(true);
   render(LesionPopover, {
     lesion: placed as unknown as LesionStore,

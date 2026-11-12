@@ -92,7 +92,10 @@ test('a group name says which vocabulary it is from only when two vocabularies s
 });
 
 test('the stage key names a lobe as the tree does, only where a system shares its name', () => {
-  const rows = [{ id: 'Frontal', label: 'Frontal' }, { id: 'Limbic', label: 'Limbic' }];
+  const rows = [
+    { id: 'Frontal', label: 'Frontal' },
+    { id: 'Limbic', label: 'Limbic' },
+  ];
   const groups = [group('Frontal', lobe), group('Limbic', lobe), group('Limbic', structure)];
   assert.deepEqual(
     lobeKeyRows(rows, 'destrieux', groups, 'en').map((row) => [row.id, row.label]),

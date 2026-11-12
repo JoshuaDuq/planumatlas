@@ -171,8 +171,9 @@ test('GUIDE-03 · a first visit runs six stops after the welcome; the last start
   // On a line under the words, so the count, Back and Done keep the footer to one line.
   const footer = card().querySelector('.driver-popover-footer')!;
   expect(footer.contains(everything)).toBe(false);
-  const tops = [...footer.querySelectorAll('.driver-popover-progress-text, button')].map((element) =>
-    Math.round(element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2),
+  const tops = [...footer.querySelectorAll('.driver-popover-progress-text, button')].map(
+    (element) =>
+      Math.round(element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2),
   );
   expect(new Set(tops).size).toBe(1);
   everything.click();

@@ -415,7 +415,9 @@ describe('an area opened from a profile', () => {
     const [hidden] = domainAreas(scene.domains, 'language').filter(
       ({ region }) => scene.engine.model.regions.get(region)!.kind === 'cortex',
     );
-    const frameWhole = vi.spyOn(scene.engine.camera, 'frameWhole').mockReturnValue([hidden!.region]);
+    const frameWhole = vi
+      .spyOn(scene.engine.camera, 'frameWhole')
+      .mockReturnValue([hidden!.region]);
     await scene.excursions.openFunction('language');
     expect(scene.session.state.notice?.text).toMatch(/out of sight/i);
     frameWhole.mockRestore();
