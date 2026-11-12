@@ -321,7 +321,7 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-32 · Showing the deep structures hides the cortex and frames them; the cortex comes back framed whole
 
-- **Rule:** Pressing **Show *n* deep structures** hides the cortex and frames the internal anatomy; the button then reads **Show the cortex**, which shows it again and frames the whole brain. The hidden cortex is the reader's change: a link carries it and Reset display undoes it.
+- **Rule:** Pressing **Show _n_ deep structures** hides the cortex and frames the internal anatomy; the button then reads **Show the cortex**, which shows it again and frames the whole brain. The hidden cortex is the reader's change: a link carries it and Reset display undoes it.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `src/lib/controller/excursion.svelte.ts` (`showBeneathCortex`)
