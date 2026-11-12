@@ -1,6 +1,4 @@
 import type { EngineTracts, TractBundle } from '../api.ts';
-import { createFakeMriNavigator } from './mri.ts';
-import type { FakeMriNavigator } from './mri.ts';
 import type { Emit } from './support.ts';
 
 export interface FakeBundle {
@@ -23,8 +21,6 @@ export interface FakeTractsOptions {
 export interface FakeTracts extends EngineTracts {
   /** The tract reference of another anatomy is shown (the `tractsActive` state). */
   readonly referenceActive: boolean;
-  /** The navigators opened so far, newest last. */
-  readonly navigators: readonly FakeMriNavigator[];
   /** The lesson landmark's bundle drawn alone. */
   readonly landmarkTract: string | null;
 }
@@ -52,7 +48,6 @@ export function createFakeTracts({
 }: FakeTractsOptions): FakeTracts {
   const catalog = new Map(bundles.map((bundle) => [bundle.id, bundle]));
   const loaded = new Map<string, boolean>();
-  const navigators: FakeMriNavigator[] = [];
   let ready = false;
   let active = false;
   let referenceActive = false;
@@ -78,6 +73,10 @@ export function createFakeTracts({
     };
   };
 
+  const streamlinesVisible = () =>
+    landmarkTract !== null ||
+    (ready && (anatomy === tractAnatomy ? overlay : active) && [...loaded.values()].some(Boolean));
+
   async function loadBundle(id: string) {
     const bundle = catalog.get(id);
     if (!bundle) throw new RangeError(`Unknown tract bundle: ${id}`);
@@ -94,20 +93,12 @@ export function createFakeTracts({
       return ready;
     },
     get streamlinesVisible() {
-      return (
-        landmarkTract !== null ||
-        (ready &&
-          (anatomy === tractAnatomy ? overlay : active) &&
-          [...loaded.values()].some(Boolean))
-      );
+      return streamlinesVisible();
     },
     get landmarkTract() {
       return landmarkTract;
     },
     defaultOpacity,
-    get navigators() {
-      return navigators;
-    },
     snapshot: () => [...loaded.keys()].map(summary),
     hasBundle: (id) => loaded.has(id),
 
@@ -157,14 +148,30 @@ export function createFakeTracts({
     // The surface sits off the scanner, so a caller that skips the conversion is caught.
     scannerToSurface: ([x, y, z]) => [x + 1, y - 2, z + 3],
     surfaceToScanner: ([x, y, z]) => [x - 1, y + 2, z - 3],
-    async createMriNavigator(_canvas, onLocation) {
-      // The decode the 3D lines share (tract-file.js:12); it changes nothing that is drawn.
-      const decode = async (id: string) => {
-        if (!catalog.has(id)) throw new RangeError(`Unknown MRI tract bundle: ${id}`);
+    // Each drawn bundle crosses a plane within 50 mm of the origin once at its centre, 10 mm either side along `u`, pure red.
+    onPlane({ center, normal }) {
+      if (anatomy !== tractAnatomy) {
+        throw new Error('The linked MRI draws only its own anatomy’s tracts.');
+      }
+      const reached =
+        Math.abs(center[0] * normal[0] + center[1] * normal[1] + center[2] * normal[2]) <= 50;
+      const drawn = !reached
+        ? []
+        : landmarkTract
+          ? [landmarkTract]
+          : streamlinesVisible()
+            ? [...loaded].filter(([, visible]) => visible).map(([id]) => id)
+            : [];
+      return {
+        ends: Float32Array.from(drawn.flatMap(() => [-10, 0, 10, 0])),
+        colors: Uint8Array.from(drawn.flatMap(() => [255, 0, 0])),
       };
-      const navigator = createFakeMriNavigator(onLocation, decode);
-      navigators.push(navigator);
-      return navigator;
+    },
+    // FA rises from 0 at x = -50 mm to 1 at x = 50 mm inside a 100 mm cube about the origin, and has no value beyond.
+    async loadFa() {
+      if (anatomy !== tractAnatomy) throw new Error('FA is drawn only on its own anatomy’s MRI.');
+      return (point) =>
+        point.every((value) => Math.abs(value) <= 50) ? (point[0] + 50) / 100 : NaN;
     },
   };
 }

@@ -484,7 +484,7 @@
   "nativeReference": "Faisceaux dans leur propre cerveau de référence T1.",
   "nativeCanvas": "Cerveau de référence et faisceaux. Glisser ou utiliser les flèches pour tourner, défiler ou appuyer sur plus et moins pour zoomer. Sélectionner les faisceaux dans le panneau.",
   "outlineLimit": "Contour cérébral dérivé de l’IRM, sans étiquettes corticales sur ce contour.",
-  "mriHint": "L’IRM liée utilise la même image, et une coupe tranche les deux couches ensemble.",
+  "mriHint": "L’IRM liée utilise la même image et trace les faisceaux à moins de 2 mm de chaque coupe<NNBSP>; une coupe tranche les deux couches ensemble.",
   "metricsScope": "Les nombres et longueurs utilisent les trajectoires sources complètes après le filtre de longueur. Les coupes modifient seulement la vue.",
   "outlineProvenance": "Méthode et provenance du contour cérébral",
   "search": "Rechercher des faisceaux",
@@ -1495,6 +1495,13 @@
   "contrastWindow": "Fenêtre",
   "windowCenter": "Niveau",
   "segmentationOverlay": "Superposition de segmentation",
+  "faOpacity": "Opacité FA",
+  "faFailed": "La carte FA n’a pas pu être chargée.",
+  "fa": [
+   "[\"Alpha\"] → \"FA<NBSP>Alpha\"",
+   "[\"\"] → \"FA<NBSP>\""
+  ],
+  "tracts": "Faisceaux<NNBSP>: les trajectoires que trace la vue 3D, à moins de 2 mm de chaque coupe, colorées selon leur direction (rouge gauche–droite, vert avant–arrière, bleu haut–bas). FA<NNBSP>: anisotropie fractionnelle de l’image de diffusion de ce même sujet.",
   "labels": {
    "sagittal": "Sagittal",
    "coronal": "Coronal",
@@ -1543,47 +1550,6 @@
   }
  },
  "mri": {
-  "dialog": {
-   "close": "Fermer",
-   "hint": "Cliquer pour placer le réticule. Faire défiler pour changer de coupe<NNBSP>; les flèches le déplacent d’un voxel.",
-   "plane": "Vue",
-   "all": "Coupes liées + 3D",
-   "axial": "Axiale",
-   "coronal": "Coronale",
-   "sagittal": "Sagittale",
-   "voxel": "Voxel source (indices à partir de 0)",
-   "go": "Aller au voxel",
-   "window": "Fenêtre",
-   "center": "Niveau",
-   "faOpacity": "Opacité FA",
-   "loading": "Chargement de l’IRM de référence et des faisceaux sélectionnés…",
-   "retry": "Recharger l’IRM",
-   "outside": "Le réticule de l’atlas est hors du champ de cette image ; l’IRM garde sa position.",
-   "grid": [
-    "[[1,2,3],\"\"] → \"1 × 2 × 3 voxels source · espacement de \"",
-    "[[182,218,182],\"Alpha\"] → \"182 × 218 × 182 voxels source · espacement de Alpha\""
-   ],
-   "ready": "IRM de référence prête.",
-   "viewer": "Visionneuse IRM",
-   "voxelName": [
-    "[\"Alpha\"] → \"Voxel Alpha\"",
-    "[\"\"] → \"Voxel \""
-   ],
-   "range": [
-    "[0] → \"de 0 à 0\"",
-    "[1] → \"de 0 à 1\"",
-    "[2] → \"de 0 à 2\"",
-    "[183] → \"de 0 à 183\"",
-    "[12345] → \"de 0 à 12345\""
-   ],
-   "moved": [
-    "[[1,2,3]] → \"Réticule déplacé au voxel 1, 2, 3.\"",
-    "[[182,218,182]] → \"Réticule déplacé au voxel 182, 218, 182.\""
-   ],
-   "hintKeys": "Page précédente et Page suivante changent de coupe.",
-   "hintClose": "M ferme cette vue.",
-   "hintTouch": "Toucher une coupe pour placer le réticule, ou saisir un voxel ci-dessous."
-  },
   "tissueNames": {
    "Unknown": "Non étiqueté",
    "???": "Non étiqueté",
@@ -2328,7 +2294,7 @@
      ],
      [
       "M",
-      "Ouvrir ou fermer les coupes IRM ; dans Faisceaux, l’IRM avec faisceaux"
+      "Ouvrir ou fermer les coupes IRM ; dans Faisceaux, elles tracent les faisceaux"
      ],
      [
       "?",

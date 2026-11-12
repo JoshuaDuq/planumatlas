@@ -1,12 +1,12 @@
 // Journey 9: tracts on the built site. The first opening downloads a bundle and says so, the
-// lengths CSV downloads, and the MRI navigator opens on the real scan and steps. TRACT-33 (the
-// source voxels) is proved in the browser project on the real engine's navigator.
+// lengths CSV downloads, and MRI with tracts opens the Linked MRI, whose FA downloads from the
+// real scan and joins its readout.
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '../fixtures.ts';
 
 const AF_LEFT = 'Arcuate fasciculus · left';
 
-test('the first check of a bundle downloads and draws it, the lengths CSV downloads, and the MRI navigator steps', async ({
+test('the first check of a bundle downloads and draws it, the lengths CSV downloads, and the Linked MRI shows FA', async ({
   app,
 }) => {
   test.setTimeout(300_000);
@@ -37,21 +37,14 @@ test('the first check of a bundle downloads and draws it, the lengths CSV downlo
   const opener = page.getByRole('button', { name: 'MRI with tracts' });
   await opener.focus();
   await page.keyboard.press('Enter');
-  const dialog = page.getByRole('dialog', { name: 'MRI with tracts · MGH CDMD sub_013' });
-  await expect(dialog.getByRole('combobox', { name: 'View' })).toBeEnabled({ timeout: 240_000 });
-  await expect(dialog).toContainText('source voxels');
-  const readout = dialog.getByText(/^RAS:/);
-  await dialog.getByRole('spinbutton', { name: /^(Voxel )?i$/ }).fill('40');
-  await dialog.getByRole('spinbutton', { name: /^(Voxel )?j$/ }).fill('50');
-  await dialog.getByRole('spinbutton', { name: /^(Voxel )?k$/ }).fill('60');
-  await dialog.getByRole('button', { name: 'Go to voxel' }).click();
-  await expect(readout).toContainText('T1:');
-  const before = await readout.textContent();
-  await dialog.locator('canvas').focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(readout).not.toHaveText(before!);
+  const linked = page.getByRole('region', { name: 'Linked MRI sections' });
+  const fa = linked.getByRole('slider', { name: 'FA opacity' });
+  await expect(fa).toBeVisible({ timeout: 240_000 });
+  await fa.focus();
+  await page.keyboard.press('End');
+  await expect(linked.locator('.where')).toContainText('FA', { timeout: 60_000 });
 
   await page.keyboard.press('Escape');
-  await expect(dialog).toBeHidden();
+  await expect(linked).toBeHidden();
   await expect(opener).toBeFocused();
 });

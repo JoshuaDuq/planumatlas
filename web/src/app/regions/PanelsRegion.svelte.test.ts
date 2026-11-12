@@ -560,25 +560,21 @@ describe('the explorers’ entry points', () => {
 });
 
 describe('the Tracts panel’s MRI', () => {
-  test('opens the navigator with the entry animation for a pointer, and without it for Enter', async () => {
+  test('opens the Linked MRI from a pointer and from Enter, and Escape in it gives focus back', async () => {
     await boot();
     await userEvent.click(page.getByRole('tab', { name: 'Tracts' }));
     const opener = page.getByRole('button', { name: t('en', 'diffusion').mriOpen });
-    const dialog = () =>
-      [...document.querySelectorAll('dialog')].find((candidate) =>
-        candidate.querySelector('h2')?.textContent?.startsWith('MRI with tracts'),
-      )!;
 
     await userEvent.click(opener);
-    await vi.waitFor(() => expect(dialog().open).toBe(true));
-    expect(dialog().hasAttribute('data-instant')).toBe(false);
+    await vi.waitFor(() => expect(app.ports.mriOpen()).toBe(true));
+    // Close takes focus on opening, so Escape is inside the docked MRI.
+    await vi.waitFor(() => expect(document.activeElement?.closest('.mpr-dock')).not.toBeNull());
     await userEvent.keyboard('{Escape}');
-    await vi.waitFor(() => expect(dialog().open).toBe(false));
+    await vi.waitFor(() => expect(app.ports.mriOpen()).toBe(false));
+    expect(document.activeElement).toBe(opener.element());
 
-    (opener.element() as HTMLElement).focus();
     await userEvent.keyboard('{Enter}');
-    await vi.waitFor(() => expect(dialog().open).toBe(true));
-    expect(dialog().hasAttribute('data-instant')).toBe(true);
+    await vi.waitFor(() => expect(app.ports.mriOpen()).toBe(true));
   });
 });
 

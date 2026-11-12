@@ -8,7 +8,6 @@
   import { comparesMap, legendFor, paintFor } from '../../lib/core/state/paint.ts';
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
-  import type { Vec3 } from '../../lib/engine/api.ts';
   import type { CutMode, ViewName } from '../../lib/types/index.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { createMprDialog } from '../../features/sections/mpr-dialog.svelte.ts';
@@ -32,7 +31,6 @@
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
   import StageKeys from '../../features/stage/StageKeys.svelte';
   import StageOverlay from '../../features/stage/StageOverlay.svelte';
-  import MriNavigator from '../../features/tracts/MriNavigator.svelte';
   import { APP, getApp } from '../application.svelte.ts';
   import type { World } from '../application.svelte.ts';
   import { casesKey } from '../../lib/core/panels/stroke-cases.ts';
@@ -184,28 +182,6 @@
     return tool?.checkVisibility() ? tool : canvas;
   }
 
-  // The Tracts MRI navigator, which draws the tracts at the panel's minimum length.
-  let diffusionMri = $state(false);
-  let diffusionInstant = $state(false);
-
-  /** The atlas crosshair as a point of the scan, while the tracts are the anatomy's own. */
-  function scanPoint(): Vec3 | null {
-    const { engine, view } = world!;
-    const { tracts, sections } = engine;
-    const current = view.current;
-    return current.anatomy === current.referenceAnatomy && tracts.ready
-      ? tracts.surfaceToScanner(sections.state.crosshair)
-      : null;
-  }
-  function moveCrosshair(point: Vec3) {
-    const { engine, view } = world!;
-    const { tracts, sections } = engine;
-    const current = view.current;
-    if (current.anatomy === current.referenceAnatomy && tracts.ready) {
-      sections.setCrosshair(tracts.scannerToSurface(point));
-    }
-  }
-
   async function fetchLinkedMri({ mpr }: NonNullable<typeof stage>, { commands }: World) {
     fetchingLinkedMri = true;
     try {
@@ -234,13 +210,9 @@
           ? mpr.close({ instant: true })
           : void sections.openLinkedMri({ instant: true }),
       closeMpr: () => mpr.close({ instant: true }),
-      openDiffusionMri(options) {
-        diffusionInstant = options.instant;
-        diffusionMri = true;
-      },
+      openLinkedMri: (options) => void sections.openLinkedMri(options),
       mprOpen: () => linkedMri?.holdsKeys() ?? false,
       mriOpen: () => mpr.isOpen(),
-      diffusionMriOpen: () => diffusionMri,
       openStageTool: (tool) => void dock!.openFromPanel(tool),
     });
     const offPick = world.engine.on('pick', ({ point }) => {
@@ -494,20 +466,11 @@
             statistic: world.userMap.statistic,
           }
         : null}
+      tracts={current.anatomy === engine.tracts.anatomy
+        ? { key: `${tractsEpoch}|${app.tractsMinimum}` }
+        : null}
     />
   {/if}
-  <MriNavigator
-    bind:open={diffusionMri}
-    bind:instant={diffusionInstant}
-    engine={world.engine}
-    anatomy={current.anatomy}
-    lang={current.lang}
-    minimum={app.tractsMinimum}
-    singleKeys={app.keyPreference.enabled}
-    getPoint={scanPoint}
-    onPoint={moveCrosshair}
-    fallbackFocus={() => engine.canvas}
-  />
 {/if}
 
 <style>

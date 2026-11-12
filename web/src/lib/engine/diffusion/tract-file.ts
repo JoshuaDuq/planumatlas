@@ -59,9 +59,8 @@ export async function decodeTractAsset(buffer: ArrayBuffer): Promise<TractPoints
 }
 
 /**
- * One download and decode per tract file, shared by the 3D lines and the MRI navigator. The decoded
- * points are also the lines' position buffer, so the record is the only copy of them. A failed load
- * is dropped and retried.
+ * One download and decode per tract file. The decoded points are also the lines' position buffer, so
+ * the record is the only copy of them. A failed load is dropped and retried.
  */
 export function createTractLoader(
   read: (file: string) => Promise<{ buffer: ArrayBuffer }> = readDiffusionAsset,

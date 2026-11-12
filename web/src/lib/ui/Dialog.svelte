@@ -7,7 +7,7 @@
   - the opener gets focus back on close, else `fallbackFocus` (ui/chrome/shortcuts.js:271-275);
   - `isolateKeys`: the page's own keys (Escape clears the selection, letters change the view)
     stay out of the dialog (panels/provenance.js:175). A dialog whose canvas needs the arrow
-    keys (the NiiVue viewer) leaves it off.
+    keys leaves it off.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';

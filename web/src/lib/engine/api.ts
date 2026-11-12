@@ -1,8 +1,8 @@
 /**
  * The engine contract: every call the application makes into the imperative
- * Three.js / NiiVue side, and every event it hears back, in plain data.
+ * Three.js side, and every event it hears back, in plain data.
  *
- * Nothing here names a Three.js, NiiVue or DOM-canvas type except the canvas
+ * Nothing here names a Three.js or DOM-canvas type except the canvas
  * element itself. Points are RAS millimetres (`Vec3`), the units the links and
  * the manifest use; the engine converts to its own world metres inside.
  * Legacy call sites are cited as `file:line` against `viewer/` at the commit
@@ -605,34 +605,19 @@ export interface TractBundle {
   max: number | null;
 }
 
-export interface MriLocation {
-  /** The scan's RAS in millimetres: three components, as `setScannerPoint` takes them. */
-  mm: Vec3;
-  /** The zero-based source voxel, the grid `setVoxel` takes and the dialog labels, whatever moved the crosshair. */
-  vox: Vec3;
-  values: { name: string; value: number }[];
+/**
+ * The drawn streamlines where they pass within `TRACT_SLAB_MM` of a plane, each piece clipped to that
+ * slab and laid flat on it.
+ */
+export interface PlaneTracts {
+  /** Per segment, its two ends as (across, up) millimetres from the plane's centre along `u` and `v`. */
+  ends: Float32Array;
+  /** Per segment, its direction colour: |R|, |A|, |S| of the scanner-space step, 0–255. */
+  colors: Uint8Array;
 }
 
-export type MriPlaneChoice = 'MULTIPLANAR' | 'AXIAL' | 'CORONAL' | 'SAGITTAL' | 'RENDER';
-
-/** The MRI navigator's NiiVue engine (diffusion/navigation-viewer.js:49). Dispose it to free the GPU context. */
-export interface MriNavigator {
-  /** NIfTI-style header: `dims[1..3]` is the grid, `pixDims[1..3]` the spacing in mm. */
-  readonly header: { dims: readonly number[]; pixDims: readonly number[] };
-  setPlane(plane: MriPlaneChoice): void;
-  /** Throws a `RangeError` outside the grid. Reports the location. */
-  setVoxel(voxel: Vec3): void;
-  /** Step the crosshair in the display's direction; on a mirrored source axis a positive step lowers the source index. Reports the voxel it lands on. */
-  moveVoxel(delta: Vec3): void;
-  /** False when the point lies outside the scan's grid. */
-  setScannerPoint(point: Vec3): boolean;
-  setWindow(center: number, width: number): void;
-  setFaOpacity(value: number): void;
-  /** Show exactly these bundles, loading new ones, at a minimum length (navigation-viewer.js:71). */
-  syncTracts(enabled: readonly string[], minimum: number): Promise<void>;
-  resize(): void;
-  dispose(): void;
-}
+/** NiiVue's `meshThicknessOn2D` in the tract MRI this replaced: what lies this close to a slice is drawn on it. */
+export const TRACT_SLAB_MM = 2;
 
 export interface EngineTracts {
   /** The anatomy the tracts belong to (native-ui.js:249). */
@@ -674,11 +659,13 @@ export interface EngineTracts {
   scannerToSurface(point: Vec3): Vec3;
   /** The sections' crosshair as a point of the scan, in scanner RAS mm (native-ui.js:107). */
   surfaceToScanner(point: Vec3): Vec3;
-  /** Open the NiiVue navigator on a canvas. The scan, FA and the shared tract decode load with it. */
-  createMriNavigator(
-    canvas: HTMLCanvasElement,
-    onLocation: (location: MriLocation) => void,
-  ): Promise<MriNavigator>;
+  /** The streamlines the stage draws, on a linked MRI plane given in surface RAS mm. */
+  onPlane(frame: Pick<PlaneFrame, 'center' | 'normal' | 'u' | 'v'>): PlaneTracts;
+  /**
+   * The tracts' FA map at a point in surface RAS mm, NaN where it has no value. Downloads once; rejects
+   * on an anatomy whose tracts are another subject's.
+   */
+  loadFa(): Promise<(point: Vec3) => number>;
 }
 
 // ---------------------------------------------------------------------------

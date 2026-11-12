@@ -54,14 +54,7 @@ test('CAT-61 · the CDMD tract catalog: its subject, maps, 30 bundles with two i
   assert.equal(cdmd.overlay_cortex_opacity, 0.16);
   assert.equal(cdmd.resample_step_mm, 0.5);
   for (const lang of ['en', 'fr'] as const) {
-    assert.deepEqual(Object.keys(cdmd.text[lang]).sort(), [
-      'dataset',
-      'files',
-      'mriCanvas',
-      'mriScope',
-      'mriTitle',
-      'otherAnatomy',
-    ]);
+    assert.deepEqual(Object.keys(cdmd.text[lang]).sort(), ['dataset', 'files', 'otherAnatomy']);
   }
 });
 

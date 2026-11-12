@@ -5,7 +5,7 @@
  */
 import { decimal } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
-import type { MprPlane, PlaneFrame, Vec3 } from '../../lib/engine/api.ts';
+import type { MprPlane, PlaneFrame, PlaneTracts, Vec3 } from '../../lib/engine/api.ts';
 import type { Language } from '../../lib/types/index.ts';
 import { sideConvention } from './mpr-words.ts';
 
@@ -34,6 +34,81 @@ export function pointOnPlane(
   return [0, 1, 2].map(
     (axis) => frame.center[axis]! + frame.u[axis]! * across + frame.v[axis]! * up,
   ) as unknown as Vec3;
+}
+
+/** NiiVue's viridis, as the tract MRI drew FA: its four stops, linear between them over 256 levels. */
+const VIRIDIS_STOPS = [
+  [0, 68, 1, 84],
+  [64, 49, 104, 142],
+  [192, 53, 183, 121],
+  [255, 253, 231, 37],
+] as const;
+export const VIRIDIS: readonly (readonly [number, number, number])[] = Array.from(
+  { length: 256 },
+  (_, level) => {
+    const upper = VIRIDIS_STOPS.findIndex(([at]) => at >= level);
+    const high = VIRIDIS_STOPS[upper]!;
+    const low = VIRIDIS_STOPS[Math.max(0, upper - 1)]!;
+    const share = high[0] === low[0] ? 0 : (level - low[0]) / (high[0] - low[0]);
+    return [1, 2, 3].map((channel) =>
+      Math.round(low[channel]! + share * (high[channel]! - low[channel]!)),
+    ) as unknown as [number, number, number];
+  },
+);
+
+/**
+ * FA over a resampled slice, each pixel at its centre as the engine samples the slice: viridis over
+ * 0–1 at `opacity`, nothing where FA has no value.
+ */
+export function blendFa(
+  pixels: Uint8ClampedArray,
+  frame: PlaneFrame,
+  size: number,
+  fieldOfView: number,
+  fa: (point: Vec3) => number,
+  opacity: number,
+): void {
+  const step = fieldOfView / size;
+  const point: [number, number, number] = [0, 0, 0];
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++) {
+      const across = (x + 0.5) * step - fieldOfView / 2;
+      const up = fieldOfView / 2 - (y + 0.5) * step;
+      for (let axis = 0; axis < 3; axis++)
+        point[axis] = frame.center[axis]! + frame.u[axis]! * across + frame.v[axis]! * up;
+      const value = fa(point);
+      if (Number.isNaN(value)) continue;
+      const colour = VIRIDIS[Math.round(255 * Math.max(0, Math.min(1, value)))]!;
+      const index = (y * size + x) * 4;
+      for (let channel = 0; channel < 3; channel++)
+        pixels[index + channel] =
+          pixels[index + channel]! * (1 - opacity) + colour[channel]! * opacity;
+    }
+}
+
+/** The tracts on a slice, one pixel wide in each segment's direction colour. */
+export function drawTracts(
+  pixels: Uint8ClampedArray,
+  size: number,
+  fieldOfView: number,
+  { ends, colors }: PlaneTracts,
+): void {
+  const scale = size / fieldOfView;
+  for (let segment = 0; segment < colors.length / 3; segment++) {
+    const x0 = ends[4 * segment]! * scale + size / 2;
+    const y0 = size / 2 - ends[4 * segment + 1]! * scale;
+    const dx = ends[4 * segment + 2]! * scale + size / 2 - x0;
+    const dy = size / 2 - ends[4 * segment + 3]! * scale - y0;
+    const steps = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy))));
+    for (let s = 0; s <= steps; s++) {
+      const x = Math.floor(x0 + (dx * s) / steps);
+      const y = Math.floor(y0 + (dy * s) / steps);
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      const index = (y * size + x) * 4;
+      for (let channel = 0; channel < 3; channel++)
+        pixels[index + channel] = colors[3 * segment + channel]!;
+    }
+  }
 }
 
 /** The crosshair's ink and the dark ring that holds it off bright tissue, on screen and in a saved picture. */

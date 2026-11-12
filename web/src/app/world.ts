@@ -354,7 +354,6 @@ export async function composeWorld(
           exploded,
           explodable: !visualFieldMapOpen(view.current),
           singleKeys: keyPreference.enabled,
-          diffusionMriOpen: ports.diffusionMriOpen(),
           mprOpen: ports.mprOpen(),
           shortcutsOpen: ports.shortcutsOpen(),
           focusInDetail: ports.focusInDetail(),
@@ -377,7 +376,6 @@ export async function composeWorld(
           if (!session.setView(name)) throw new Error(`Unknown view: ${name}`);
           camera.applyView(name, options);
         },
-        openDiffusionMri: ports.openDiffusionMri,
         openMpr: ports.openMpr,
         closeMpr: ports.closeMpr,
         toggleFocus: world.anatomy.toggleFocus,

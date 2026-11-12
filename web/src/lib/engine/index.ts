@@ -74,7 +74,7 @@ function brainBounds(atlas: BrainAtlas): Box3 {
 /**
  * The real engine: the scene first, then the model, the cut, the tracts and the compiled outline
  * shaders (app.js:118-208, 2122). Everything the application reaches is the contract in `api.ts`; the
- * Three.js, GLTF and NiiVue sides stay behind it.
+ * Three.js and GLTF sides stay behind it.
  */
 export const createEngine: CreateEngine = async (options: EngineOptions): Promise<Engine> => {
   const { host, manifestUrl } = options;

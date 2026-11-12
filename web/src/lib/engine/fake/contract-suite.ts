@@ -1,11 +1,9 @@
 import { assert } from './assert.ts';
 import { afterAll, afterEach, beforeAll, describe, it, onTestFinished, vi } from 'vitest';
 import type { Region } from '../../types/index.ts';
-import type { Engine, EngineEvents, MriLocation, SectionsState, Vec3 } from '../api.ts';
+import type { Engine, EngineEvents, SectionsState, Vec3 } from '../api.ts';
 
 export interface ContractFixtures {
-  /** The canvas `tracts.createMriNavigator` draws on; the fake ignores it. Omit to skip that case. */
-  canvas?: HTMLCanvasElement;
   /** An overlap the atlas comparison can outline, with its geometry file; omit to skip those cases. */
   comparison?: { id: string; geometry: { file: string; sha256: string } };
   /** Draw the next frame, for a stage whose loop does not run on its own (a test without a GPU). */
@@ -157,34 +155,6 @@ async function cutsReportingThePlane({ engine }: World) {
   assert.equal(changes.at(-1)?.sections.mode, 'coronal');
   await sections.setMode('off');
   assert.equal(model.settings.cutActive, false);
-}
-
-async function opensTheMriNavigator({ engine }: World, canvas: HTMLCanvasElement) {
-  const locations: MriLocation[] = [];
-  const navigator = await engine.tracts.createMriNavigator(canvas, (location) =>
-    locations.push(location),
-  );
-  onTestFinished(() => navigator.dispose());
-  const { dims } = navigator.header;
-  // The report is the source voxel asked for, and the last one: a mirrored axis changes nothing.
-  navigator.setVoxel([5, 6, 7]);
-  assert.deepEqual(locations.at(-1)?.vox, [5, 6, 7]);
-  assert.ok(locations.every((location) => location.values.length > 0));
-  assert.throws(() => navigator.setVoxel([dims[1]!, 0, 0]), RangeError);
-  assert.throws(() => navigator.setVoxel([0.5, 0, 0]), RangeError);
-  // A step runs in the display's direction, so a mirrored source axis steps down: one voxel, one axis.
-  navigator.moveVoxel([1, 0, 0]);
-  const [x, y, z] = locations.at(-1)!.vox;
-  assert.deepEqual([Math.abs(x - 5), y, z], [1, 6, 7]);
-  assert.equal(locations.at(-1)?.mm.length, 3);
-  assert.throws(() => navigator.setPlane('OBLIQUE' as never), RangeError);
-  navigator.setPlane('AXIAL');
-  assert.throws(() => navigator.setWindow(0, 0), RangeError);
-  navigator.setWindow(0.5, 1);
-  assert.equal(navigator.setScannerPoint([1e6, 0, 0]), false);
-  await assert.rejects(navigator.syncTracts([], 0), RangeError);
-  await navigator.syncTracts([], 1);
-  navigator.dispose();
 }
 
 /** One engine for the cases of a `describe`, has its model and cut put back to their opening state after each. */
@@ -1538,9 +1508,29 @@ export function defineEngineContract(
         back.forEach((value, axis) => assert.ok(Math.abs(value - scanner[axis]!) < 1e-6));
       });
 
-      it('opens the MRI navigator on a canvas', async (test) => {
-        if (!fixtures.canvas) return test.skip();
-        await opensTheMriNavigator(world(), fixtures.canvas);
+      it('lays the streamlines it draws on a plane through them, and nothing it does not draw', async () => {
+        const { engine } = world();
+        const { tracts } = engine;
+        // An axial plane through the middle of the brain, and one far above it.
+        const plane = { center: [0, 0, 0], normal: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0] } as const;
+        const above = { ...plane, center: [0, 0, 400] } as const;
+        if (engine.model.manifest.anatomy.id !== tracts.anatomy) {
+          assert.throws(() => tracts.onPlane(plane));
+          await assert.rejects(tracts.loadFa());
+          return;
+        }
+        await tracts.setActive(true);
+        tracts.setOverlay(false);
+        assert.equal(tracts.onPlane(plane).colors.length, 0);
+        tracts.setOverlay(true);
+        const { ends, colors } = tracts.onPlane(plane);
+        assert.ok(colors.length > 0);
+        assert.equal(ends.length, (colors.length / 3) * 4);
+        assert.equal(tracts.onPlane(above).colors.length, 0);
+        const fa = await tracts.loadFa();
+        assert.ok(Number.isNaN(fa([0, 0, 400])));
+        const middle = fa([0, 0, 0]);
+        assert.ok(middle >= 0 && middle <= 1, `FA ${middle}`);
       });
     });
 
@@ -1556,14 +1546,10 @@ export function defineEngineContract(
 }
 
 /**
- * What only a real stage on real WebGL shows: that the engine opens, that a cut runs on the cut worker, and
- * that the MRI navigator draws on its canvas. The cases run in order on one engine.
+ * What only a real stage on real WebGL shows: that the engine opens and that a cut runs on the cut
+ * worker. The cases run in order on one engine.
  */
-export function defineStageContract(
-  name: string,
-  create: () => Promise<Engine> | Engine,
-  fixtures: { canvas: HTMLCanvasElement },
-) {
+export function defineStageContract(name: string, create: () => Promise<Engine> | Engine) {
   describe(`stage contract: ${name}`, () => {
     const world = sharedEngine(create);
 
@@ -1573,10 +1559,6 @@ export function defineStageContract(
 
     it('cuts, reporting the plane to the model', async () => {
       await cutsReportingThePlane(world());
-    });
-
-    it('opens the MRI navigator on a canvas', async () => {
-      await opensTheMriNavigator(world(), fixtures.canvas);
     });
   });
 }

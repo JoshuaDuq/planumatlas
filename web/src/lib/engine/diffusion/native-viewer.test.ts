@@ -69,8 +69,8 @@ test('a bundle requested twice while it downloads is added once', async () => {
     viewer.loadBundle(second),
   ]);
   assert.equal(loadTract.mock.calls.length, 2);
-  // Each bundle is its lines and their hidden pass.
-  assert.equal(viewer.group.children.length, 4);
+  // Each bundle is its lines, their hidden pass and their cut face.
+  assert.equal(viewer.group.children.length, 6);
   assert.equal(viewer.snapshot().length, 2);
   viewer.dispose();
 });
@@ -216,7 +216,7 @@ test('DIFF-17 the initial bundles download alongside the outline and are added a
   outlineOf(viewer);
   assert.deepEqual(
     viewer.group.children.slice(1).map((child) => child.name),
-    initial.flatMap((bundle) => [bundle.id, `${bundle.id}-hidden`]),
+    initial.flatMap((bundle) => [bundle.id, `${bundle.id}-hidden`, `${bundle.id}-face`]),
   );
   viewer.dispose();
 }, 60_000);
@@ -271,10 +271,12 @@ test('DIFF-24 the cut planes clip the bundles already loaded and those loaded la
   await viewer.loadBundle(first);
   viewer.setClippingPlanes([plane]);
   await viewer.loadBundle(second);
-  for (const lines of viewer.group.children as LineSegments[]) {
+  const children = viewer.group.children as LineSegments[];
+  assert.equal(children.length, 6);
+  // The faces are clipped to the slab about the cut instead (DIFF-38).
+  for (const lines of children.filter((child) => !child.name.endsWith('-face'))) {
     assert.deepEqual((lines.material as { clippingPlanes: Plane[] }).clippingPlanes, [plane]);
   }
-  assert.equal(viewer.group.children.length, 4);
   viewer.dispose();
 });
 
@@ -379,7 +381,7 @@ test('a lesion shows exactly its counted lines through the scanner transform, th
     [0, 1, 1, 2],
   );
   assert.deepEqual(viewer.group.matrix.elements, transform.elements);
-  assert.equal(viewer.group.children.length, 4, 'does not load the outline or initial bundles');
+  assert.equal(viewer.group.children.length, 6, 'does not load the outline or initial bundles');
   assert.equal(viewer.group.getObjectByName(`${first.id}-hidden`)!.visible, false);
   viewer.setMotion(true);
   assert.deepEqual(

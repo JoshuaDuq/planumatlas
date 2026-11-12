@@ -5,7 +5,8 @@ import type { EngineEvents, EngineTracts, LesionSphere, TractCrossing, Vec3 } fr
 import { streamlinesCrossing } from '../lesion/measure.ts';
 import { rasToWorld, worldToRas } from '../slices/coordinates.ts';
 import { createNativeTractViewer } from './native-viewer.ts';
-import { createMriNavigationViewer } from './navigation-viewer.ts';
+import { createSampler, valueAt } from '../../core/user-map/sampling.ts';
+import { readNifti } from '../../core/user-map/nifti.ts';
 import { createReferenceTransform } from './reference-space.ts';
 import { createTractLoader, decodeTractAsset } from './tract-file.ts';
 
@@ -87,10 +88,10 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
     return bundle;
   }
 
-  // Surface RAS to the scan's, where the streamlines are; read apart from the outline, which only the tab loads.
-  let toScanner: Promise<Matrix4> | null = null;
-  function scannerTransform(): Promise<Matrix4> {
-    toScanner ??= readDiffusionAsset(catalog.reference_space).then(({ buffer }) => {
+  // Scanner RAS to the surface's, in millimetres; read apart from the outline, which only the tab loads.
+  let toSurface: Promise<number[][]> | null = null;
+  function surfaceRows(): Promise<number[][]> {
+    toSurface ??= readDiffusionAsset(catalog.reference_space).then(({ buffer }) => {
       const space = JSON.parse(new TextDecoder().decode(buffer)) as {
         anatomy: string;
         scanner_ras_to_surface_ras: number[][];
@@ -98,10 +99,48 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
       if (space.anatomy !== catalog.anatomy) {
         throw new Error('The tract reference space belongs to a different anatomy.');
       }
-      return createReferenceTransform(space.scanner_ras_to_surface_ras).invert();
+      // Validates the rows: rigid and orientation-preserving.
+      createReferenceTransform(space.scanner_ras_to_surface_ras);
+      return space.scanner_ras_to_surface_ras;
     });
-    toScanner.catch(() => (toScanner = null));
-    return toScanner;
+    toSurface.catch(() => (toSurface = null));
+    return toSurface;
+  }
+  async function scannerTransform(): Promise<Matrix4> {
+    return createReferenceTransform(await surfaceRows()).invert();
+  }
+
+  let fa: Promise<(point: Vec3) => number> | null = null;
+  /** FA read trilinearly in surface RAS: its voxels carried through the rigid scanner-to-surface rows. */
+  function loadFa(): Promise<(point: Vec3) => number> {
+    if (!matchingAnatomy) {
+      return Promise.reject(new Error('FA is drawn only on its own anatomy’s MRI.'));
+    }
+    const map = catalog.maps.find((entry) => entry.id === 'fa');
+    if (!map) return Promise.reject(new Error('The tract catalog publishes no FA map.'));
+    fa ??= Promise.all([readDiffusionAsset(map.file), surfaceRows()]).then(
+      async ([{ buffer }, rows]) => {
+        const image = await readNifti(buffer);
+        if (image.volumes.length !== 1) throw new Error('The FA map must be one volume.');
+        const voxelToSurface = rows.map((row) =>
+          [0, 1, 2, 3].map((column) =>
+            row.reduce((sum, value, k) => sum + value * image.voxelToWorld[k]![column]!, 0),
+          ),
+        );
+        const at = valueAt(
+          createSampler({
+            shape: image.shape,
+            voxelToWorld: voxelToSurface,
+            data: image.volumes[0]!,
+            intent: image.intent,
+            description: image.description,
+          }),
+        );
+        return ([x, y, z]: Vec3) => at(x, y, z);
+      },
+    );
+    fa.catch(() => (fa = null));
+    return fa;
   }
 
   /** Each bundle is downloaded, counted and let go: a lesion keeps no streamlines in memory. */
@@ -158,6 +197,7 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
           async showCrossing(id, sphere) {
             const bundle = bundleOf(id);
             await isolate('lesion', () => engine.showLesionTract(bundle, sphere));
+            emit('tractsVisibility', undefined);
           },
           clearCrossing() {
             if (isolated !== 'lesion') return;
@@ -165,6 +205,7 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
             isolated = null;
             engine.clearLesionTract();
             showGroup();
+            emit('tractsVisibility', undefined);
           },
         }
       : null,
@@ -214,8 +255,11 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
       showGroup();
       emit('tractsVisibility', undefined);
     },
-    createMriNavigator: (canvas, onLocation) =>
-      createMriNavigationViewer(catalog, canvas, onLocation, loadTract),
+    onPlane(frame) {
+      if (!matchingAnatomy) throw new Error('The linked MRI draws only its own anatomy’s tracts.');
+      return engine.onPlane(frame);
+    },
+    loadFa,
     setClippingPlanes: engine.setClippingPlanes,
     setMotion: engine.setMotion,
     scannerToSurface: (point) => engine.scannerToSurface(point) as Vec3,

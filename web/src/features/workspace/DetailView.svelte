@@ -243,7 +243,7 @@
         lang={current.lang}
         tracts={engine.tracts}
         label={(id) => catalog.label(id)}
-        onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
+        onOpenMri={(event) => app.ports.openLinkedMri({ instant: isKeyboardActivation(event) })}
       />
     {:else if circuits.route}
       <!-- The whole route selects nothing: its landmarks and the lesson's notes follow it. -->

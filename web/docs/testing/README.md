@@ -98,8 +98,8 @@ it touches; those rules keep their own unit or browser test.
    page-wide focus walk; 320 px (SHEET-29).
 8. **Snapshot and full screen** (`chrome.spec.ts`): a real PNG from the real WebGL stage, and real full
    screen in and out. The settings menu and single-key shortcuts after a reload (SHORT-13) are there too.
-9. **Tracts** (`tracts.spec.ts`): the first opening downloads and draws, the lengths CSV downloads, and the
-   MRI navigator opens and steps on the built site (TRACT-48). TRACT-33 is proved in the browser project.
+9. **Tracts** (`tracts.spec.ts`): the first opening downloads and draws, the lengths CSV downloads, and MRI
+   with tracts opens the Linked MRI, whose FA downloads and joins the readout (SECT-35).
 10. **Accessibility** (`accessibility.spec.ts`, BUILD-10): axe on the composed app, light and dark, at 1280 px
     and 390 px.
 

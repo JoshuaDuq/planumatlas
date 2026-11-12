@@ -17,6 +17,7 @@
     anatomy,
     agreementName = null,
     regionName = (id: string) => `name of ${id}`,
+    tracts = null,
   }: {
     engine: FakeEngine;
     engineState: EngineSync;
@@ -26,6 +27,7 @@
     anatomy: Pick<ManifestAnatomy, 'subject' | 'individual'>;
     agreementName?: string | null;
     regionName?: (id: string) => string;
+    tracts?: { key: string } | null;
   } = $props();
 
   let more: HTMLButtonElement;
@@ -65,6 +67,7 @@
     {anatomy}
     {agreementName}
     {regionName}
+    {tracts}
     fallbackFocus={() => more}
   />
   <footer></footer>

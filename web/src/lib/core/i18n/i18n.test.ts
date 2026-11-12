@@ -175,19 +175,11 @@ test('the circuits list counts its lessons and their landmarks in both languages
   assert.deepEqual([1, 4].map(CIRCUIT_TEXT.fr.landmarkCount), ['1 repère', '4 repères']);
 });
 
-test('the MRI area names every tissue label in both languages, and its dialog is translated', () => {
-  const { dialog, tissueNames } = TRANSLATIONS.fr.mri;
+test('the MRI area names every tissue label in both languages', () => {
+  const { tissueNames } = TRANSLATIONS.fr.mri;
   assert.deepEqual(Object.keys(tissueNames), Object.keys(TRANSLATIONS.en.mri.tissueNames));
   assert.equal(tissueNames['Left-Cerebral-Cortex'], 'Cortex cérébral gauche');
   assert.equal(TRANSLATIONS.en.mri.tissueNames['Left-Cerebral-Cortex'], 'Left cerebral cortex');
-  assert.equal(
-    dialog.grid([182, 218, 182], '1 mm'),
-    '182 × 218 × 182 voxels source · espacement de 1 mm',
-  );
-  assert.equal(
-    TRANSLATIONS.en.mri.dialog.grid([2, 3], '1 mm'),
-    '2 × 3 source voxels · 1 mm spacing',
-  );
 });
 
 test('both languages explain the actual denominator and the display threshold', () => {
@@ -340,29 +332,6 @@ test('I18N-06 · the loading line gives megabytes at one decimal in the reader�
   );
 });
 
-test('I18N-07 · the MRI dialog reads its strings from the mri area, with the French fixes', () => {
-  const { en, fr } = { en: TRANSLATIONS.en.mri.dialog, fr: TRANSLATIONS.fr.mri.dialog };
-  assert.equal(
-    fr.hint,
-    'Cliquer pour placer le réticule. Faire défiler pour changer de coupe\u202f; les flèches le déplacent d’un voxel.',
-  );
-  assert.equal(fr.voxel, 'Voxel source (indices à partir de 0)');
-  assert.equal(en.ready, 'Reference MRI ready.');
-  assert.equal(en.hintClose, 'M closes this view.');
-  for (const key of [
-    'ready',
-    'viewer',
-    'voxelName',
-    'range',
-    'moved',
-    'hintKeys',
-    'hintClose',
-    'hintTouch',
-  ]) {
-    assert.ok(key in en && key in fr, key);
-  }
-});
-
 test('I18N-08 · the linked MRI names its tissue labels and edge letters in the reader’s language', () => {
   assert.equal(TRANSLATIONS.en.mri.tissueNames.Unknown, 'Unlabelled');
   assert.equal(TRANSLATIONS.fr.mri.tissueNames.Unknown, 'Non étiqueté');
@@ -382,10 +351,10 @@ test('I18N-09 · the shortcut sheet’s Escape and M rows carry the S5b wording'
     'In a detail view: back to the list. Elsewhere: clear the search, then the selection, then the function or deficit',
   );
   assert.match(row('fr', 'Échap'), /puis la sélection, puis la fonction ou le déficit$/);
-  assert.equal(row('en', 'M'), 'Open or close linked MRI slices; in Tracts, the MRI with tracts');
+  assert.equal(row('en', 'M'), 'Open or close linked MRI slices; in Tracts, they draw the tracts');
   assert.equal(
     row('fr', 'M'),
-    'Ouvrir ou fermer les coupes IRM ; dans Faisceaux, l’IRM avec faisceaux',
+    'Ouvrir ou fermer les coupes IRM ; dans Faisceaux, elles tracent les faisceaux',
   );
 });
 

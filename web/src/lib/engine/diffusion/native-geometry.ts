@@ -1,4 +1,6 @@
 import { BufferAttribute, BufferGeometry, Matrix4 } from 'three';
+import { TRACT_SLAB_MM } from '../api.ts';
+import type { PlaneTracts } from '../api.ts';
 import { streamlineLengths } from './streamlines.ts';
 import { directionColors } from './tract-decode.ts';
 
@@ -87,7 +89,7 @@ export function createMotionGeometry(
 
 /**
  * Lines over the source points themselves, in RAS millimeters: draw them with RAS_MM_TO_WORLD as
- * their matrix. The points are shared, never copied, so the MRI navigator can read the same decode.
+ * their matrix. The points are shared, never copied: the linked MRI's planes read the same decode.
  */
 export function createTractGeometry(
   points: Float32Array,
@@ -104,4 +106,59 @@ export function createTractGeometry(
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
   return { geometry, lengths };
+}
+
+const dot = (a: readonly number[], b: readonly number[]) =>
+  a[0]! * b[0]! + a[1]! * b[1]! + a[2]! * b[2]!;
+
+/**
+ * The indexed segments of `points` (RAS mm) within TRACT_SLAB_MM of a plane through `origin`, each
+ * clipped to the slab and given as (across, up) mm along the plane's unit `u` and `v`, with the
+ * direction colour of the whole segment.
+ */
+export function segmentsNearPlane(
+  points: Float32Array,
+  index: Uint32Array,
+  plane: {
+    origin: readonly number[];
+    normal: readonly number[];
+    u: readonly number[];
+    v: readonly number[];
+  },
+): PlaneTracts {
+  const { origin, normal, u, v } = plane;
+  const ends: number[] = [];
+  const colors: number[] = [];
+  for (let k = 0; k < index.length; k += 2) {
+    const i = 3 * index[k]!;
+    const j = 3 * index[k + 1]!;
+    const p = [points[i]! - origin[0]!, points[i + 1]! - origin[1]!, points[i + 2]! - origin[2]!];
+    const step = [
+      points[j]! - points[i]!,
+      points[j + 1]! - points[i + 1]!,
+      points[j + 2]! - points[i + 2]!,
+    ];
+    const length = Math.hypot(step[0]!, step[1]!, step[2]!);
+    if (length === 0) continue;
+    const from = dot(normal, p);
+    const rise = dot(normal, step);
+    // The part of the segment inside the slab, as fractions of it.
+    let start = 0;
+    let end = 1;
+    if (rise === 0) {
+      if (Math.abs(from) > TRACT_SLAB_MM) continue;
+    } else {
+      const low = (-TRACT_SLAB_MM - from) / rise;
+      const high = (TRACT_SLAB_MM - from) / rise;
+      start = Math.max(0, Math.min(low, high));
+      end = Math.min(1, Math.max(low, high));
+      if (start > end) continue;
+    }
+    for (const t of [start, end]) {
+      const q = [p[0]! + t * step[0]!, p[1]! + t * step[1]!, p[2]! + t * step[2]!];
+      ends.push(dot(u, q), dot(v, q));
+    }
+    for (const value of step) colors.push(Math.round((255 * Math.abs(value)) / length));
+  }
+  return { ends: Float32Array.from(ends), colors: Uint8Array.from(colors) };
 }

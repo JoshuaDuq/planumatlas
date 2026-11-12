@@ -30,7 +30,6 @@ One file per fix, named `<chunk>-<slug>.md`: legacy behaviour, new behaviour, st
 | e5-scene-release-context.md                   | fix under the parity policy                                    |
 | e6-concurrent-bundle-load.md                  | fix under the parity policy                                    |
 | e6-minimum-validation.md                      | fix under the parity policy                                    |
-| e6-navigator-minimum-first.md                 | fix under the parity policy                                    |
 | e6-opacity-before-load.md                     | fix under the parity policy                                    |
 | e6-reference-bounds-placed.md                 | fix under the parity policy                                    |
 | u1-overlay-control-contrast.md                | fix (standard cited)                                           |
@@ -75,7 +74,6 @@ One file per fix, named `<chunk>-<slug>.md`: legacy behaviour, new behaviour, st
 | a1-treegrid-structure.md                      | fix (standard cited), follows decision 8 on #4 and u7-treegrid |
 | e7-heading-in-flight.md                       | fix under the parity policy                                    |
 | e7-held-view-modified-keys.md                 | fix under the parity policy                                    |
-| e7-navigator-source-voxel.md                  | fix under the parity policy                                    |
 | e7-warm-outlines-fail-fast.md                 | fix under the parity policy                                    |
 | e7-zoom-after-framing.md                      | fix under the parity policy                                    |
 | g1-hover-chip-dismiss.md                      | fix (standard cited)                                           |
@@ -161,19 +159,6 @@ One file per fix, named `<chunk>-<slug>.md`: legacy behaviour, new behaviour, st
 | r2-retry-focus.md                             | fix (decision 39, B4)                                          |
 | r2-status-live.md                             | fix (decision 39, B2, B2b, B7)                                 |
 | r2-summary-heading.md                         | fix (decision 39, B1)                                          |
-| t2-canvas-application.md                      | fix (D1 (decision 41))                                         |
-| t2-coarse-targets.md                          | fix (T2 decision record on #60, targets)                       |
-| t2-context-lost.md                            | fix (fix 12 (decision 41))                                     |
-| t2-focus-not-obscured.md                      | fix (D9 (decision 41))                                         |
-| t2-hint.md                                    | fix (D10 (decision 41))                                        |
-| t2-key-modifiers.md                           | fix (D7 (decision 41))                                         |
-| t2-location-fail-fast.md                      | fix (fix 10 (decision 41))                                     |
-| t2-readout-not-live.md                        | fix (D3 (decision 41))                                         |
-| t2-retry-focus.md                             | fix (D8 (decision 41))                                         |
-| t2-shortcut-toggle.md                         | fix (D6 (decision 41))                                         |
-| t2-slider-output.md                           | fix (D4 (decision 41))                                         |
-| t2-status-and-alert.md                        | fix (D2 (decision 41))                                         |
-| t2-voxel-group.md                             | fix (D5 and fix 11 (decision 41))                              |
 | x1-area-name.md                               | fix (standard cited)                                           |
 | x1-focusable-while-opening.md                 | fix (standard cited)                                           |
 | x1-list-semantics.md                          | fix (standard cited)                                           |

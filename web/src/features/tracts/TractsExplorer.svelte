@@ -535,9 +535,12 @@
     </AboutData>
   </div>
 
-  <div class="dock">
-    <button type="button" class="primary" onclick={onOpenMri}>{text.mriOpen}</button>
-  </div>
+  <!-- Another subject's tracts cannot be drawn on this brain's MRI. -->
+  {#if matching}
+    <div class="dock">
+      <button type="button" class="primary" onclick={onOpenMri}>{text.mriOpen}</button>
+    </div>
+  {/if}
 </div>
 
 <style>

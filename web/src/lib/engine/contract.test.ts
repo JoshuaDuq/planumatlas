@@ -17,8 +17,7 @@ const segmentationAgreement = agreement as unknown as SegmentationAgreementData;
 const create = () =>
   createFakeEngine({ manifest: published, cabNp, functionalRegions, segmentationAgreement });
 
-// The fake ignores the canvas; a DOM is not needed to run the suite.
-defineEngineContract('fake', create, { canvas: {} as HTMLCanvasElement });
+defineEngineContract('fake', create, {});
 
 describe('the fake engine', () => {
   it('names the per-frame events', () => {

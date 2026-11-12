@@ -88,14 +88,12 @@ describe('the one tooltip, when its trigger goes', () => {
 });
 
 describe('the dialogs', () => {
-  test('four native dialogs are children of the app root, and an open one makes the regions inert', async () => {
+  test('three native dialogs are children of the app root, and an open one makes the regions inert', async () => {
     await shell.open();
     expect(dialogs().map(titleOf).sort()).toEqual(
-      ['Feedback', 'Keyboard shortcuts', 'Provenance', 'MRI with tracts · MGH CDMD sub_013'].sort(),
+      ['Feedback', 'Keyboard shortcuts', 'Provenance'].sort(),
     );
     for (const dialog of dialogs()) expect(dialog.parentElement).toBe(shell.target);
-    // The Tracts MRI holds no navigator while closed.
-    expect(shell.engine.tracts.navigators).toHaveLength(0);
 
     shell.app.ports.toggleShortcuts({ instant: true });
     flushSync();
@@ -132,7 +130,7 @@ describe('the ports', () => {
       ['openPreparedPlane', ['axial', () => true]],
       ['closeMpr', []],
       ['openMpr', [{ instant: true }]],
-      ['openDiffusionMri', [{ instant: true }]],
+      ['openLinkedMri', [{ instant: true }]],
       ['toggleShortcuts', [{ instant: true }]],
     ];
     for (const [name, args] of commands) {
@@ -150,7 +148,6 @@ describe('the ports', () => {
       );
     }
     expect(ports.shortcutsOpen()).toBe(true);
-    expect(ports.diffusionMriOpen()).toBe(true);
     // The docked Linked MRI is open but holds no keys: the shortcuts dialog has focus.
     await vi.waitFor(() => expect(shell.target.querySelector(':scope > .mpr-dock')).not.toBeNull());
     expect(ports.mprOpen()).toBe(false);

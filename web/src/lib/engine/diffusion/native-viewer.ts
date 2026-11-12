@@ -8,13 +8,16 @@ import {
   LineSegments,
   Mesh,
   MeshStandardMaterial,
+  Plane,
+  Vector4,
 } from 'three';
-import type { Object3D, Plane } from 'three';
+import type { Object3D, WebGLProgramParametersWithUniforms } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import type { TractBundle, TractCatalog } from '../../core/diffusion/catalogs.ts';
 import { rasToWorld, worldToRas } from '../slices/coordinates.ts';
-import type { LesionSphere } from '../api.ts';
+import { TRACT_SLAB_MM } from '../api.ts';
+import type { LesionSphere, PlaneFrame, PlaneTracts } from '../api.ts';
 import { streamlineMembership } from '../lesion/measure.ts';
 import type { Ras } from '../slices/coordinates.ts';
 import {
@@ -23,6 +26,7 @@ import {
   createMotionGeometry,
   createTractGeometry,
   filterTractGeometry,
+  segmentsNearPlane,
 } from './native-geometry.ts';
 import { createReferenceTransform } from './reference-space.ts';
 import { summarizeLengths } from './streamlines.ts';
@@ -42,6 +46,9 @@ export type TractSnapshot = LengthSummary & {
 /** How strongly a landmark's bundle shows where the anatomy in front of it hides it. */
 const HIDDEN_OPACITY = 0.3;
 
+/** How far the cut face's tracts sit off it, on the side cut away, so the cap does not hide them. */
+const FACE_LIFT_MM = 0.5;
+
 type TractLines = LineSegments<
   ReturnType<typeof createTractGeometry>['geometry'],
   LineBasicMaterial
@@ -52,6 +59,8 @@ interface LoadedBundle {
   lines: TractLines;
   /** The same lines, drawn faint only where a surface in front hides them. */
   hidden: TractLines;
+  /** The same lines near the cut, laid on its face. */
+  face: TractLines;
   /** Every point, drawn at rest, and the coarser lines drawn while the camera moves. */
   still: BufferGeometry;
   moving: BufferGeometry;
@@ -77,6 +86,8 @@ interface ReferenceSpace {
   scanner_ras_to_surface_ras: number[][];
 }
 
+type PlaneAxes = Pick<PlaneFrame, 'center' | 'normal' | 'u' | 'v'>;
+
 function requireMinimum(value: number): void {
   if (!Number.isFinite(value) || value < 1) {
     throw new RangeError('Minimum streamline length must be at least 1 mm.');
@@ -101,6 +112,43 @@ function lineMaterials(clippingPlanes: Plane[]) {
 }
 
 /**
+ * What the linked MRI draws of the bundles on a slice, laid on the 3D cut's face: the lines within
+ * TRACT_SLAB_MM of the cut (`cut()`, world metres, kept side positive), flattened onto it.
+ * The slab test runs on the real points; only the drawn position is moved onto the face.
+ */
+function cutFaceMaterial(cut: () => Plane) {
+  const slab = [new Plane(), new Plane()];
+  const plane = { value: new Vector4() };
+  const material = new LineBasicMaterial({
+    vertexColors: true,
+    toneMapped: false,
+    clippingPlanes: slab,
+  });
+  material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
+    shader.uniforms.cutPlane = plane;
+    shader.vertexShader = `uniform vec4 cutPlane;
+${shader.vertexShader}`.replace(
+      '#include <clipping_planes_vertex>',
+      `#include <clipping_planes_vertex>
+vec4 onFace = modelMatrix * vec4(transformed, 1.0);
+onFace.xyz -= cutPlane.xyz * (dot(cutPlane.xyz, onFace.xyz) + cutPlane.w + ${FACE_LIFT_MM / 1000});
+gl_Position = projectionMatrix * viewMatrix * onFace;`,
+    );
+  };
+  // Before the renderer reads the clipping planes, so the face follows the cut as it moves.
+  material.onBeforeRender = () => {
+    const { normal, constant } = cut();
+    const half = TRACT_SLAB_MM / 1000;
+    slab[0]!.normal.copy(normal);
+    slab[0]!.constant = constant + half;
+    slab[1]!.normal.copy(normal).negate();
+    slab[1]!.constant = half - constant;
+    plane.value.set(normal.x, normal.y, normal.z, constant);
+  };
+  return material;
+}
+
+/**
  * One segment in each of the bundles' materials, uncut, for compiling their programs before the
  * Tracts tab first draws. Never disposed: disposing a material releases the programs it compiled.
  */
@@ -112,7 +160,7 @@ export function tractProgramSamples(): LineSegments[] {
   return [new LineSegments(geometry, shown), new LineSegments(geometry, hidden)];
 }
 
-/** `loadTract` is the decode this viewer shares with the MRI navigator. */
+/** `loadTract` is the cached decode of each tract file. */
 export function createNativeTractViewer(
   catalog: TractCatalog,
   invalidate: () => void,
@@ -130,6 +178,7 @@ export function createNativeTractViewer(
   let outlineVisible = true;
   let outlineOpacity = catalog.brain_outline.opacity;
   let clippingPlanes: Plane[] = [];
+  const faceMaterial = cutFaceMaterial(() => clippingPlanes[0]!);
   let reference: Promise<void> | null = null;
   let isolateRequest = 0;
   let selected: Isolated | null = null;
@@ -162,6 +211,7 @@ export function createNativeTractViewer(
     );
     entry.lines.visible = selected ? Boolean(mine?.ready) : entry.visible;
     entry.hidden.visible = entry.lines.visible && Boolean(mine?.whole);
+    entry.face.visible = entry.lines.visible && clippingPlanes.length > 0;
   }
 
   async function loadOutline(): Promise<void> {
@@ -215,11 +265,18 @@ export function createNativeTractViewer(
     hidden.matrix.copy(RAS_MM_TO_WORLD);
     hidden.matrixWorldNeedsUpdate = true;
     hidden.visible = false;
-    group.add(lines, hidden);
+    const face = new LineSegments(lines.geometry, faceMaterial);
+    face.name = `${bundle.id}-face`;
+    face.matrixAutoUpdate = false;
+    face.matrix.copy(RAS_MM_TO_WORLD);
+    face.matrixWorldNeedsUpdate = true;
+    face.visible = false;
+    group.add(lines, hidden, face);
     bundles.set(bundle.id, {
       bundle,
       lines,
       hidden,
+      face,
       still: geometry,
       moving,
       lengths,
@@ -284,6 +341,42 @@ export function createNativeTractViewer(
     surfaceToScanner(point: Ras) {
       return worldToRas(rasToWorld(point).applyMatrix4(group.matrix.clone().invert()));
     },
+    /** What `still` draws of each shown bundle, clipped to the slab about a surface-RAS plane. */
+    onPlane({ center, normal, u, v }: PlaneAxes): PlaneTracts {
+      const shown = group.visible
+        ? [...bundles.values()].filter((entry) => entry.lines.visible)
+        : [];
+      if (shown.length === 0) return { ends: new Float32Array(0), colors: new Uint8Array(0) };
+      // loadReference stops the matrix updating once it has placed the group.
+      if (group.matrixAutoUpdate) {
+        throw new Error('The tracts were drawn before their reference space loaded.');
+      }
+      // The plane in scanner RAS, where the points are: the transform is rigid, so its axes stay unit.
+      const toScanner = group.matrix.clone().invert();
+      const scanner = (point: readonly number[]) =>
+        worldToRas(rasToWorld(point as Ras).applyMatrix4(toScanner));
+      const origin = scanner(center);
+      const [n, a, b] = [normal, u, v].map((axis) =>
+        scanner(center.map((value, i) => value + axis[i]!)).map((value, i) => value - origin[i]!),
+      ) as [number[], number[], number[]];
+      const plane = { origin, normal: n, u: a, v: b };
+      const pieces = shown.map(({ still }) =>
+        segmentsNearPlane(
+          still.getAttribute('position').array as Float32Array,
+          (still.index!.array as Uint32Array).subarray(0, still.drawRange.count),
+          plane,
+        ),
+      );
+      const ends = new Float32Array(pieces.reduce((sum, piece) => sum + piece.ends.length, 0));
+      const colors = new Uint8Array(pieces.reduce((sum, piece) => sum + piece.colors.length, 0));
+      let at = 0;
+      for (const piece of pieces) {
+        ends.set(piece.ends, (4 * at) / 3);
+        colors.set(piece.colors, at);
+        at += piece.colors.length;
+      }
+      return { ends, colors };
+    },
     get ready() {
       return Boolean(outline);
     },
@@ -344,11 +437,12 @@ export function createNativeTractViewer(
     setClippingPlanes(planes: Plane[]) {
       if (planes === clippingPlanes) return;
       clippingPlanes = planes;
-      for (const { lines, hidden } of bundles.values()) {
-        for (const { material } of [lines, hidden]) {
+      for (const entry of bundles.values()) {
+        for (const { material } of [entry.lines, entry.hidden]) {
           material.clippingPlanes = planes;
           material.needsUpdate = true;
         }
+        entry.face.visible = entry.lines.visible && planes.length > 0;
       }
       invalidate();
     },
@@ -373,7 +467,10 @@ export function createNativeTractViewer(
     setMotion(moving: boolean) {
       inMotion = moving;
       for (const entry of bundles.values()) {
-        entry.lines.geometry = entry.hidden.geometry = moving ? entry.moving : entry.still;
+        entry.lines.geometry =
+          entry.hidden.geometry =
+          entry.face.geometry =
+            moving ? entry.moving : entry.still;
       }
     },
     snapshot(): TractSnapshot[] {

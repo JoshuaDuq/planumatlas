@@ -596,7 +596,7 @@ the expected values change with them in the same commit.
 - **Kind:** data
 - **Level:** unit
 - **Source:** `viewer/diffusion/catalogs.js`; `viewer/diffusion/catalogs.test.js`
-- **Expected:** `config/model.yaml` `tract_catalogs` = `['data/diffusion-cdmd.yaml']`; `TRACT_CATALOGS` equals that file parsed; catalogue id "cdmd-sub-013", anatomy "cdmd", reference space "cdmd-sub-013/surface-space.json", maps t1 and fa, 30 bundles of which af-left and cst-right are initial, cortex overlay opacity 0.16, resample step 0.5 mm; text keys dataset, files, mriCanvas, mriScope, mriTitle, otherAnatomy in `en` and `fr`. `tractCatalog('cdmd')`, `('aomic')`, `('')`, `('toString')` → the CDMD catalogue.
+- **Expected:** `config/model.yaml` `tract_catalogs` = `['data/diffusion-cdmd.yaml']`; `TRACT_CATALOGS` equals that file parsed; catalogue id "cdmd-sub-013", anatomy "cdmd", reference space "cdmd-sub-013/surface-space.json", maps t1 and fa, 30 bundles of which af-left and cst-right are initial, cortex overlay opacity 0.16, resample step 0.5 mm; text keys dataset, files, otherAnatomy in `en` and `fr`. `tractCatalog('cdmd')`, `('aomic')`, `('')`, `('toString')` → the CDMD catalogue.
 - **Covered by:** `src/lib/core/diffusion/catalogs.test.ts` (H for the config match, R for the fallback and the fixed dataset values)
 
 ### CAT-62 · A diffusion map must be a 3D scalar volume with explicit millimetre space

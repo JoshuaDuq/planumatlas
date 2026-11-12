@@ -117,7 +117,7 @@ values (I18N-22, I18N-28) hold it today.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/i18n/translations.js:382, 912`; deviation `s5b-shortcut-strings.md` (D1 to D3); decision 24 on #4
-- **Expected:** the key column of `shortcuts.groups` contains F, I, M, C, S, H, 0, "1 – 6", "/" and "Esc" (EN) or "Échap" (FR). EN Esc row: "In a detail view: back to the list. Elsewhere: clear the search, then the selection, then the function or deficit". FR Échap row ends "… puis la sélection, puis la fonction ou le déficit". EN M row: "Open or close linked MRI slices; in Tracts, the MRI with tracts"; FR M row: "Ouvrir ou fermer les coupes IRM ; dans Faisceaux, l’IRM avec faisceaux".
+- **Expected:** the key column of `shortcuts.groups` contains F, I, M, C, S, H, 0, "1 – 6", "/" and "Esc" (EN) or "Échap" (FR). EN Esc row: "In a detail view: back to the list. Elsewhere: clear the search, then the selection, then the function or deficit". FR Échap row ends "… puis la sélection, puis la fonction ou le déficit". EN M row: "Open or close linked MRI slices; in Tracts, they draw the tracts"; FR M row: "Ouvrir ou fermer les coupes IRM ; dans Faisceaux, elles tracent les faisceaux".
 - **Covered by:** `src/lib/core/i18n/i18n.test.ts` (R) (keys and the Escape rows; I18N-09 for the M rows)
 
 ### I18N-10 · The atlas switch shows a short name

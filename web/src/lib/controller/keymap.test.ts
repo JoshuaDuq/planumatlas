@@ -15,7 +15,6 @@ const STATE: KeymapState = {
   exploded: false,
   explodable: true,
   singleKeys: true,
-  diffusionMriOpen: false,
   mprOpen: false,
   shortcutsOpen: false,
   focusInDetail: false,
@@ -35,7 +34,6 @@ const COMMAND_NAMES = [
   'focusSearch',
   'walkTree',
   'chooseView',
-  'openDiffusionMri',
   'openMpr',
   'closeMpr',
   'toggleFocus',
@@ -132,12 +130,6 @@ describe('keymap', () => {
     dispatchKey(press('Escape', null, { ctrlKey: true }), keymap);
     dispatchKey(press('Escape', null, { isComposing: true }), keymap);
     assert.equal(calls(commands.clearSelection), 0);
-  });
-
-  it('is inert while the diffusion MRI is open, whatever the key', () => {
-    const { keymap, commands } = host({ diffusionMriOpen: true });
-    for (const key of ['m', '?', 'Escape', '1']) dispatchKey(press(key), keymap);
-    assert.ok(Object.values(commands).every((command) => calls(command) === 0));
   });
 
   it('walks the tree with the arrows from the page but leaves a focused tab its own arrows', () => {
@@ -274,18 +266,6 @@ describe('keymap', () => {
     dispatchKey(press('ArrowDown'), keymap);
     dispatchKey(press('ArrowUp'), keymap);
     assert.deepEqual(commands.walkTree.mock.calls, [[1], [-1]]);
-  });
-
-  it('opens the diffusion MRI with m in the Diffusion explorer, even under the tract reference', () => {
-    const { keymap, commands } = host({ explorer: 'diffusion', tractReferenceActive: true });
-    const event = press('m');
-    dispatchKey(event, keymap);
-    assert.deepEqual(commands.openDiffusionMri.mock.calls, [[{ instant: true }]]);
-    assert.equal(calls(commands.openMpr), 0);
-    assert.equal(calls(event.preventDefault), 1);
-    const reference = host({ explorer: 'anatomy', tractReferenceActive: true });
-    dispatchKey(press('m'), reference.keymap);
-    assert.equal(calls(reference.commands.openMpr), 0);
   });
 
   it('takes the letters in either case and toggles the display without cancelling the key', () => {
@@ -579,9 +559,14 @@ describe('keymap outcomes', () => {
   it('KEY-12 M opens the linked MRI, but not under the tract reference', () => {
     assert.deepEqual(outcome({}, 'm'), { log: ['openMpr([{"instant":true}])'], prevented: true });
     assert.deepEqual(outcome({ tractReferenceActive: true }, 'M'), { log: [], prevented: false });
+    // The Tracts tab's own tracts are drawn on it; another subject's are not, so M stays the page's.
     assert.deepEqual(outcome({ explorer: 'diffusion' }, 'M'), {
-      log: ['openDiffusionMri([{"instant":true}])'],
+      log: ['openMpr([{"instant":true}])'],
       prevented: true,
+    });
+    assert.deepEqual(outcome({ explorer: 'diffusion', tractReferenceActive: true }, 'M'), {
+      log: [],
+      prevented: false,
     });
   });
 

@@ -1,20 +1,9 @@
 import { afterAll, expect, onTestFinished, test, vi } from 'vitest';
 import '../../styles/tokens.css';
-import outlineUrl from '../../../../public/diffusion/cdmd-sub-013/brain-outline.json?url';
 import manifestUrl from '../../../../public/models/cdmd/manifest.json?url';
 import { defineStageContract } from './fake/contract-suite.ts';
 import { createEngine } from './index.ts';
 import { SNAPSHOT_PIXEL_RATIO } from './render/scene.ts';
-
-// The tract data is served from the site's `diffusion/` directory, which this project has no public
-// directory to answer for: its requests are redirected to the repository's files.
-const diffusionRoot = outlineUrl.slice(0, outlineUrl.indexOf('cdmd-sub-013'));
-const fetchSite = globalThis.fetch.bind(globalThis);
-globalThis.fetch = (input, init) => {
-  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-  const at = url.indexOf('/diffusion/');
-  return fetchSite(at < 0 ? input : diffusionRoot + url.slice(at + '/diffusion/'.length), init);
-};
 
 // Booting the engine parses 35 MB of GLB on a software GL context. The rest of the engine contract runs
 // in the unit project (`index.contract.test.ts`); this file keeps what needs real WebGL.
@@ -35,13 +24,7 @@ async function boot() {
   return createEngine({ host, manifestUrl, theme: 'light' });
 }
 
-// The navigator sizes its canvas from the parent it sits in.
-const canvas = document.createElement('canvas');
-const parent = document.createElement('div');
-document.body.append(parent);
-parent.append(canvas);
-
-defineStageContract('real engine', boot, { canvas });
+defineStageContract('real engine', boot);
 
 test('captures the settled frame, cropped to the stage rectangle asked for, with the brain drawn', async () => {
   const engine = await boot();

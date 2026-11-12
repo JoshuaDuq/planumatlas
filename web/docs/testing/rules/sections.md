@@ -331,3 +331,32 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Source:** `viewer/styles/dialogs.css:135-204, 258-288`; G5 decision record on #49 (WCAG 1.4.10, 2.4.11, 2.5.8)
 - **Expected:** As stated; each focused control's box lies below the header's bottom.
 - **Covered by:** uncovered
+
+## The tracts and FA on the linked MRI
+
+### SECT-34 · Where the tracts are this brain's own, each plane draws what the stage draws of them
+
+- **Rule:** While the tracts belong to the anatomy on screen, each plane draws the stage's streamlines within 2 mm of it (DIFF-36) one pixel wide in their direction colour, into the slice itself so Save PNG keeps them, and draws them again when their visibility or the length filter changes. Over another subject's tracts nothing is drawn and FA is not offered.
+- **Kind:** behaviour
+- **Level:** browser: canvas pixels and engine calls through the fake
+- **Source:** this change
+- **Expected:** The fake's red segment 5 mm along `u` from each plane's centre → pixel (66, 64) is (255, 0, 0, 255) on all three planes; length 40 → three more `onPlane` calls; with no tracts → the fake slice's own pixel and no `onPlane` call.
+- **Covered by:** `src/features/sections/MprDialog.svelte.test.ts` "the tracts and FA" (R); `src/app/regions/StageRegion.svelte.test.ts` (R)
+
+### SECT-35 · FA opacity downloads FA once it leaves zero, draws it in viridis and adds it to the readout
+
+- **Rule:** An "FA opacity" slider (0–100 %, default 0) appears with the tracts. Its first move above zero downloads FA; FA is blended over the slice in NiiVue's viridis at that opacity, nothing where it has no value, and the readout ends "· FA 0.50". A failed download is said in an alert and the slider returns to 0.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** this change
+- **Expected:** End on the slider → one `loadFa` call, readout ending "FA\u00a00.50" at the fake's x = 0, and a pixel at full opacity equal to `VIRIDIS[round(255 · FA)]`.
+- **Covered by:** `src/features/sections/MprDialog.svelte.test.ts` (R)
+
+### SECT-36 · MRI with tracts opens the Linked MRI, and M does on the Tracts tab too
+
+- **Rule:** The Tracts panel's and a tract profile's "MRI with tracts" load the scan and open the Linked MRI, leaving an open one open; they are not shown over another subject's tracts. On the Tracts tab M opens it as on any other tab, and does nothing over the tract reference.
+- **Kind:** behaviour
+- **Level:** unit for the key; browser for the port
+- **Source:** this change
+- **Expected:** `openLinkedMri` twice → still open; KEY-12 on `diffusion` → `openMpr`.
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` (R); `src/lib/controller/keymap.test.ts` KEY-12 (R)

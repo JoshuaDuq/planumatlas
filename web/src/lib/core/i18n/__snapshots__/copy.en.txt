@@ -484,7 +484,7 @@
   "nativeReference": "Tracts in their own T1 reference brain.",
   "nativeCanvas": "Reference brain and tracts. Drag or use arrow keys to rotate, scroll or press plus and minus to zoom. Select tract bundles in the side panel.",
   "outlineLimit": "MRI-derived brain outline; no cortical atlas labels on this outline.",
-  "mriHint": "The linked MRI uses the same scan, and a cut slices both layers together.",
+  "mriHint": "The linked MRI uses the same scan and draws the tracts within 2 mm of each slice; a cut slices both layers together.",
   "metricsScope": "Counts and lengths use complete source streamlines after the length filter. Section cuts affect the view only.",
   "outlineProvenance": "Brain outline method and provenance",
   "search": "Search tracts",
@@ -1495,6 +1495,13 @@
   "contrastWindow": "Window",
   "windowCenter": "Level",
   "segmentationOverlay": "Segmentation overlay",
+  "faOpacity": "FA opacity",
+  "faFailed": "The FA map could not be loaded.",
+  "fa": [
+   "[\"Alpha\"] → \"FA<NBSP>Alpha\"",
+   "[\"\"] → \"FA<NBSP>\""
+  ],
+  "tracts": "Tracts: the streamlines the 3D view draws, within 2 mm of each slice, coloured by direction (red left–right, green front–back, blue up–down). FA: fractional anisotropy of this subject’s own diffusion scan.",
   "labels": {
    "sagittal": "Sagittal",
    "coronal": "Coronal",
@@ -1543,47 +1550,6 @@
   }
  },
  "mri": {
-  "dialog": {
-   "close": "Close",
-   "hint": "Click to place the crosshair. Scroll to change slice; arrow keys move one voxel.",
-   "plane": "View",
-   "all": "Linked slices + 3D",
-   "axial": "Axial",
-   "coronal": "Coronal",
-   "sagittal": "Sagittal",
-   "voxel": "Source voxel (0-based)",
-   "go": "Go to voxel",
-   "window": "Window",
-   "center": "Level",
-   "faOpacity": "FA opacity",
-   "loading": "Loading the reference MRI and selected tracts…",
-   "retry": "Reload MRI",
-   "outside": "The atlas crosshair lies outside this scan’s field of view; the MRI keeps its position.",
-   "grid": [
-    "[[1,2,3],\"\"] → \"1 × 2 × 3 source voxels ·  spacing\"",
-    "[[182,218,182],\"Alpha\"] → \"182 × 218 × 182 source voxels · Alpha spacing\""
-   ],
-   "ready": "Reference MRI ready.",
-   "viewer": "MRI viewer",
-   "voxelName": [
-    "[\"Alpha\"] → \"Voxel Alpha\"",
-    "[\"\"] → \"Voxel \""
-   ],
-   "range": [
-    "[0] → \"0 to 0\"",
-    "[1] → \"0 to 1\"",
-    "[2] → \"0 to 2\"",
-    "[183] → \"0 to 183\"",
-    "[12345] → \"0 to 12345\""
-   ],
-   "moved": [
-    "[[1,2,3]] → \"Crosshair moved to voxel 1, 2, 3.\"",
-    "[[182,218,182]] → \"Crosshair moved to voxel 182, 218, 182.\""
-   ],
-   "hintKeys": "Page Up and Page Down step through slices.",
-   "hintClose": "M closes this view.",
-   "hintTouch": "Tap a slice to position the crosshair, or enter a voxel below."
-  },
   "tissueNames": {
    "Unknown": "Unlabelled",
    "???": "Unlabelled",
@@ -2328,7 +2294,7 @@
      ],
      [
       "M",
-      "Open or close linked MRI slices; in Tracts, the MRI with tracts"
+      "Open or close linked MRI slices; in Tracts, they draw the tracts"
      ],
      [
       "?",

@@ -261,70 +261,36 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 - **Expected:** Two `setActive(true)` at once → one `tractsReady`; off and on again → still one. `loadBundle(id)` and `setVisible(id, …)` → `tractsVisibility`. `loadBundle('missing')` → RangeError "Unknown tract bundle: missing".
 - **Covered by:** `src/lib/engine/diffusion/tracts.test.ts` (R); `src/lib/engine/index.contract.test.ts` (R, via contract suite on the real engine)
 
-## MRI navigator
+## The tracts on a plane
 
-### DIFF-28 · A source voxel maps to scanner RAS through the published affine
+DIFF-28 to DIFF-34 described the NiiVue navigator, removed on 2026-11-12; the Linked MRI draws the tracts instead.
 
-- **Rule:** The navigator speaks zero-based source voxels of the published T1 grid. A voxel converts to its scanner RAS point through the file's affine. A voxel outside the grid, fractional, not a number or not three values is refused.
-- **Kind:** scientific
-- **Level:** unit
-- **Source:** `viewer/diffusion/navigation-data.js:4-13`
-- **Expected:** Header dims [3, 256, 256, 150], affine identity with translation (−120.5538330078125, −104.4605712890625, −28.359909057617188): voxel [128, 104, 75] → [7.4461669921875, −0.4605712890625, 46.64009094238281] exactly. [256, 0, 0], [0, −1, 0], [0, 0, 150], [1.5, 0, 0], [NaN, 0, 0], [0, 0] → RangeError "Choose a zero-based source voxel inside the MRI grid.".
-- **Covered by:** `src/lib/engine/diffusion/navigation-data.test.ts` (R)
+### DIFF-36 · A plane takes the drawn segments within 2 mm of it, clipped to the slab and laid flat
 
-### DIFF-29 · A scanner point goes to its nearest source voxel, or none outside the scan
-
-- **Rule:** A scanner RAS point (for example an atlas point converted from the surface) goes to the nearest source voxel, rounding a half voxel up. A point beyond the cropped scan has no voxel. A point that is not three finite numbers is refused.
-- **Kind:** scientific
-- **Level:** unit
-- **Source:** `viewer/diffusion/navigation-data.js:14-20`
-- **Expected:** Same header: [7.4461669921875, −0.4605712890625, 46.64009094238281] → [128, 104, 75]; [7.9, −0.9, 46.2] → [128, 104, 75]; the point of [255, 0, 149] → [255, 0, 149]; z −30 or 121.2 → null. At the grid origin offset along x by −0.5, −0.49, 0.49, 0.5, 0.51 voxels → x = 0, 0, 0, 1, 1. [0, NaN, 0], [Infinity, 0, 0], [0, 0] → RangeError "A scanner point needs three finite RAS values.".
-- **Covered by:** `src/lib/engine/diffusion/navigation-data.test.ts` (R)
-
-### DIFF-30 · The navigator draws every streamline as a line at the current minimum, with exact lengths
-
-- **Rule:** In the MRI navigator, tracts are drawn as plain lines coloured by local direction, every streamline kept (no decimation), filtered at the panel's minimum against full-precision lengths rather than NiiVue's rounded ones. A minimum below 1 mm is refused, since NiiVue would keep the previous filter at 0.
+- **Rule:** `segmentsNearPlane` keeps each indexed segment that reaches within `TRACT_SLAB_MM` (2 mm, NiiVue's `meshThicknessOn2D` in the retired navigator) of the plane, cut where it leaves the slab, its ends as millimetres along the plane's `u` and `v`, coloured by the segment's |R|, |A|, |S| direction. A flat segment is kept whole inside and dropped beyond; a zero-length one is dropped. `tracts.onPlane` gives the segments the stage draws (the length filter and an isolated bundle included), nothing while none is drawn, and throws on another subject's tracts.
 - **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/diffusion/navigation-data.js:21-31`
-- **Expected:** A 17 mm streamline, minimum 16 → `fiberLengths` Float64Array [17], `fiberLength` 16, `fiberRadius` 0, `fiberDither` 0, `fiberDecimationStride` 1, `fiberColor` 'Local'. Minimum 0 or −1 → RangeError "Minimum tract length must be at least 1 mm.".
-- **Covered by:** `src/lib/engine/diffusion/navigation-data.test.ts` (R; I, it pins NiiVue's field names, which are the only observable here)
+- **Level:** unit; the contract suite on the fake and the real headless engine
+- **Source:** NiiVue `meshThicknessOn2D`; this change
+- **Expected:** z 6 → 14, y 0 → 4 through z = 10 seen with u = A, v = R → ends (1, 3) and (3, 3), colour (0, 255·4/√80, 255·8/√80). On CDMD, af.left and cst.right on surface z = 20: 61 275 pieces against nibabel's 61 276 (one ends 0.00005 mm inside the slab, float32), mean end within 0.0002 mm.
+- **Covered by:** `src/lib/engine/diffusion/native-geometry.test.ts` (R); `src/lib/engine/fake/contract-suite.ts` "lays the streamlines it draws on a plane" (R)
 
-### DIFF-31 · The navigator shows exactly the tracts the last call asked for
+### DIFF-37 · FA is read in surface RAS through the rigid scanner-to-surface rows
 
-- **Rule:** `syncTracts(enabled, minimum)` shows exactly the enabled tracts at the minimum. Overlapping calls run one after another, so a tract is added once and the last call decides what shows; a failed call does not block later ones. A bad minimum is refused before anything changes. An unknown tract is an error.
+- **Rule:** `tracts.loadFa` downloads `fa.nii.gz` once, carries its sform through `scanner_ras_to_surface_ras`, and reads it trilinearly where valued voxels hold at least half the weight (FA 0 is no value); it rejects on another subject's tracts.
 - **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/diffusion/navigation-viewer.js:71-96`; deviation `e6-navigator-minimum-first.md`
-- **Expected:** Two concurrent `syncTracts([first], 1)` → 1 mesh, visible. `syncTracts([second], 1)` and `syncTracts([], 1)` at once → 1 mesh, hidden. `syncTracts([first], 0)` → RangeError, 0 meshes; then `syncTracts([first], 1)` → 1 mesh. `syncTracts(['missing'], 1)` → RangeError "Unknown MRI tract bundle: missing". A loaded tract at a new minimum is refiltered, not re-added.
-- **Covered by:** `src/lib/engine/diffusion/navigation-viewer.test.ts` (R, NiiVue mocked; the unknown id and refilter are uncovered); `src/lib/engine/index.svelte.test.ts` (R, real NiiVue via contract suite, minimum 0 rejected)
+- **Level:** contract suite; checked once against nibabel
+- **Source:** this change
+- **Expected:** At six interior voxel centres the value equals nibabel's to 5 decimals; a point 400 mm above the origin has none.
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` (R)
 
-### DIFF-32 · The crosshair is reported as the source voxel and a three-component point
+### DIFF-38 · The 3D cut's face shows the tracts the linked MRI draws on that slice
 
-- **Rule:** Wherever the crosshair moves (a voxel typed, a scanner point, an arrow key, a click), the report gives the scanner point as three values and the source voxel under it, so "Source voxel (0-based)" means one thing, plus the value of every map there. No report is made before the volumes load; a point outside the grid is an error. A step moves one voxel along one axis, in the display's direction.
+- **Rule:** While a cut is open, each drawn bundle is drawn a third time, clipped on the GPU to `TRACT_SLAB_MM` either side of the cut (the real points are tested) and flattened onto the face, 0.5 mm towards the part cut away so the opaque cap does not hide it. The slab follows the cut as it moves, with no CPU pass; it is shown whether the cut or the bundle came first, and goes when the cut closes. The ordinary lines stay clipped to the kept side, under the cap.
 - **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/diffusion/navigation-viewer.js:18,40-60`; deviation `e7-navigator-source-voxel.md`; conductor decision on #4 (2026-10-26 00:47)
-- **Expected:** Grid 176 × 220 × 220, affine x −1 (+87), y +1 (−100), z +1 (−100): NiiVue report `mm [81.54, −87.38, −94.07, 1]`, `vox [166, 20, 30]`, values with extra fields → `{ mm: [81.54, −87.38, −94.07], vox: [5, 13, 6], values: [{ name: 'FA', value: 0.4 }] }`. With no volumes → no report. Grid 2 × 2 × 2, mm (50, 0, 0) → RangeError. `setVoxel([5, 6, 7])` → last report `vox` [5, 6, 7], three-component `mm`; `moveVoxel([1, 0, 0])` → `vox` differs by 1 on x only. `setScannerPoint([1e6, 0, 0])` → false, no move.
-- **Covered by:** `src/lib/engine/diffusion/navigation-viewer.test.ts` (R, NiiVue mocked); `src/lib/engine/index.svelte.test.ts` (R, real NiiVue on the published scan, via contract suite)
-
-### DIFF-33 · The navigator's maps must share one grid, and contrast needs a positive width
-
-- **Rule:** The navigator downloads and decodes the catalogue maps together, then adds each in catalogue order as a validated volume, and all maps must share the reference grid and affine; otherwise it refuses and frees the viewer. The T1 window is set from a finite centre and a positive width. An unknown plane is refused. The FA opacity sets the second map's opacity.
-- **Kind:** behaviour
-- **Level:** unit — with NiiVue mocked, as `navigation-viewer.test.ts` does; the contract suite repeats it on real NiiVue in the browser
-- **Source:** `viewer/diffusion/navigation-viewer.js:19-38,51-70`
-- **Expected:** A map whose dims or affine differ by more than 1e-5 → Error "The reference MRI maps must share the same source grid and RAS transform." and `cleanup()` called. `setWindow(c, w)` → `cal_min = c − w/2`, `cal_max = c + w/2`; `setWindow(0, 0)` or a NaN → RangeError "MRI contrast requires a finite center and positive width.". `setPlane('OBLIQUE')` → RangeError "Unknown MRI plane: OBLIQUE". The maps' downloads held back and released in reverse order → every map requested before any arrives; volumes added T1 then FA. FA is loaded at opening although its opacity starts at 0: the crosshair readout reports its value (TRACT-35).
-- **Covered by:** `src/lib/engine/index.svelte.test.ts` (R, window and plane errors via contract suite); `src/lib/engine/diffusion/navigation-viewer.test.ts` (R, NiiVue mocked: concurrent downloads and order); the grid check and the window values are uncovered
-
-### DIFF-34 · Closing the navigator frees its GPU context
-
-- **Rule:** Disposing the navigator frees its tract meshes and volumes and releases the WebGL context, so reopening it cannot exhaust the browser's context limit. A tract that arrives after disposal is not added.
-- **Kind:** behaviour
-- **Level:** unit — with NiiVue and its `gl` mocked; the release itself is real WebGL only in the browser
-- **Source:** `viewer/diffusion/navigation-viewer.js:97-107`
-- **Expected:** After `dispose()`: every mesh unloaded, `volumes` empty, `WEBGL_lose_context.loseContext()` called once; a `syncTracts` whose load resolves afterwards adds nothing.
-- **Covered by:** `src/lib/engine/index.contract.test.ts` (R, dispose runs; the context release is not asserted); uncovered
+- **Level:** browser (real WebGL, pixels read back)
+- **Source:** this change. The CPU pass `onPlane` takes 33 ms for the two default bundles and 400 ms for all 30 (16.7 M segments), too slow for a cut that moves.
+- **Expected:** A segment crossing S = 0 from A = −10 to 10, seen from below over a grey cap: coloured at A = ±1.5, cap grey at A = 6.5, and a line 15 mm or more from the cut is not on the face. Cut at S = 25 → the other line shows instead. No cut, or a cut closed → the cap grey where the face would be.
+- **Covered by:** `src/lib/engine/diffusion/native-viewer.svelte.test.ts` (R)
 
 ### DIFF-35 · A tract shown alone that fails to download leaves nothing isolated
 

@@ -30,7 +30,6 @@ import { DEFAULT_BUNDLES, createFakeTracts } from './tracts.ts';
 import type { FakeBundle, FakeTracts } from './tracts.ts';
 
 export type { Call } from './support.ts';
-export type { FakeMriNavigator } from './mri.ts';
 export type { FakeBundle, FakeTracts } from './tracts.ts';
 export type { FakeLesion } from './lesion.ts';
 export type { FakeVisualField } from './visual-field.ts';

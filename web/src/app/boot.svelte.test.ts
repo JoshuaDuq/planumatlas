@@ -72,7 +72,7 @@ function portStubs() {
     back: vi.fn(),
     focusSearch: vi.fn(),
     walkTree: vi.fn(),
-    openDiffusionMri: vi.fn(),
+    openLinkedMri: vi.fn(),
     openMpr: vi.fn(),
     closeMpr: vi.fn(),
     toggleShortcuts: vi.fn(),
@@ -87,7 +87,6 @@ function portStubs() {
     detailShown: () => false,
     mriOpen: () => false,
     mprOpen: () => false,
-    diffusionMriOpen: () => false,
     shortcutsOpen: () => false,
   } satisfies UiPorts;
 }

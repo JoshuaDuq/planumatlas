@@ -12,6 +12,7 @@ import { createEngineSync } from '../../lib/state/engine-sync.svelte.ts';
 import type { Language, Manifest } from '../../lib/types/index.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import { createMprDialog } from './mpr-dialog.svelte.ts';
+import { VIRIDIS, pointOnPlane } from './mpr-draw.ts';
 import type { MprDialogController } from './mpr-dialog.svelte.ts';
 import Fixture from './mpr-test-support.svelte';
 
@@ -53,13 +54,14 @@ afterEach(async () => {
 
 let view: { holdsKeys(): boolean };
 
-async function mount() {
+async function mount(tracts: { key: string } | null = null) {
   const result = await render(Fixture, {
     engine,
     engineState: createEngineSync(engine),
     mpr,
     live,
     anatomy,
+    tracts,
   });
   view = result.component as unknown as typeof view;
   return result;
@@ -548,6 +550,63 @@ describe('the pictures', () => {
     await expect
       .poll(() => [mark('coronal'), mark('axial')])
       .toEqual(['Neurologique', 'Neurologique']);
+  });
+});
+
+describe('the tracts and FA', () => {
+  /** The fake draws each shown bundle across a plane's centre, 10 mm either side along `u`, pure red. */
+  async function withTracts() {
+    await engine.tracts.setActive(true);
+    engine.tracts.setOverlay(true);
+    await mount({ key: 'drawn' });
+    await openFromKeyboard();
+    await expect.poll(() => canvas('axial').width).toBe(SIZE);
+  }
+  // 5 mm along `u` from the centre of a 256 mm field drawn at SIZE pixels.
+  const ON_TRACT = [Math.floor(SIZE / 2 + (5 * SIZE) / 256), SIZE / 2] as const;
+
+  test('are drawn into each slice in their direction colour, so a saved PNG keeps them', async () => {
+    await withTracts();
+    for (const plane of ['sagittal', 'coronal', 'axial']) {
+      expect(pixel(canvas(plane), ...ON_TRACT), plane).toEqual([255, 0, 0, 255]);
+    }
+  });
+
+  test('another subject’s tracts are not drawn, and FA is not offered', async () => {
+    await engine.tracts.setActive(true);
+    engine.tracts.setOverlay(true);
+    const onPlane = vi.spyOn(engine.tracts, 'onPlane');
+    await opened();
+    await expect.poll(() => canvas('axial').width).toBe(SIZE);
+    const index = ON_TRACT[1] * SIZE + ON_TRACT[0];
+    expect(pixel(canvas('axial'), ...ON_TRACT)).toEqual([
+      index % 256,
+      (index * 3) % 256,
+      (index * 7) % 256,
+      255,
+    ]);
+    expect(onPlane).not.toHaveBeenCalled();
+    expect(page.getByRole('slider', { name: 'FA opacity' }).query()).toBeNull();
+  });
+
+  test('FA downloads once its opacity leaves zero, is drawn in viridis, and joins the readout', async () => {
+    const loadFa = vi.spyOn(engine.tracts, 'loadFa');
+    await withTracts();
+    expect(loadFa).not.toHaveBeenCalled();
+    sliderElement('FA opacity').focus();
+    await userEvent.keyboard('{End}');
+    // The fake's FA is 0.5 at x = 0.
+    await expect
+      .poll(() => shell().querySelector('.where')!.textContent)
+      .toMatch(/ · FA\u00a00\.50$/);
+    expect(loadFa).toHaveBeenCalledTimes(1);
+    // At full opacity a pixel off the tract is FA's own colour, (x + 50) / 100 at its centre.
+    const [x, y] = [50, 50];
+    const frame = engine.sections.mprFrame('axial');
+    const point = pointOnPlane(frame, (x + 0.5) / SIZE, (y + 0.5) / SIZE, 256);
+    expect(point.every((value) => Math.abs(value) < 50)).toBe(true);
+    const level = Math.round(255 * ((point[0] + 50) / 100));
+    expect(pixel(canvas('axial'), x, y)).toEqual([...VIRIDIS[level]!, 255]);
   });
 });
 

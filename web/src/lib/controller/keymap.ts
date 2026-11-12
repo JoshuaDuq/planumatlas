@@ -68,8 +68,6 @@ export type KeymapState = Pick<
   explodable: boolean;
   /** The reader has not turned single-key shortcuts off (WCAG 2.1.4). */
   singleKeys: boolean;
-  /** The diffusion MRI navigator is open. */
-  diffusionMriOpen: boolean;
   /** The linked MRI holds the keys: focus is in the docked region, or the phone's modal is open. */
   mprOpen: boolean;
   shortcutsOpen: boolean;
@@ -100,8 +98,6 @@ export interface KeymapCommands {
   walkTree(step: 1 | -1): void;
   /** Dismisses the stage hint, then frames the view (app.js:1878-1881). */
   chooseView(view: ViewName, options: { immediate: true }): void;
-  /** Opens the Tracts MRI; `instant` for a keyboard opening. */
-  openDiffusionMri(options: { instant: boolean }): void;
   /** Presses the linked MRI opener; a no-op while it is disabled (sections.js:236). */
   openMpr(options: { instant: true }): void;
   closeMpr(): void;
@@ -170,13 +166,9 @@ const COMMANDS: readonly Command[] = [
   {
     keys: letters(SHORTCUT_KEYS.linkedMri),
     run: (press, commands, state) => {
-      if (state.explorer === 'diffusion') {
-        press.preventDefault();
-        commands.openDiffusionMri({ instant: true });
-      } else if (!state.tractReferenceActive) {
-        press.preventDefault();
-        commands.openMpr({ instant: true });
-      }
+      if (state.tractReferenceActive) return;
+      press.preventDefault();
+      commands.openMpr({ instant: true });
     },
   },
   {
@@ -274,7 +266,6 @@ export function dispatchKey(event: KeyboardEvent, host: KeymapHost): void {
   // A control that handled the key itself, and a composition in progress, are not for the page.
   if (event.defaultPrevented || event.isComposing) return;
   const state = host.state();
-  if (state.diffusionMriOpen) return;
   const press = event as Press;
   const { key } = press;
   if (state.mprOpen) {

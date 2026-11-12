@@ -19,7 +19,8 @@ export const en = {
   nativeCanvas:
     'Reference brain and tracts. Drag or use arrow keys to rotate, scroll or press plus and minus to zoom. Select tract bundles in the side panel.',
   outlineLimit: 'MRI-derived brain outline; no cortical atlas labels on this outline.',
-  mriHint: 'The linked MRI uses the same scan, and a cut slices both layers together.',
+  mriHint:
+    'The linked MRI uses the same scan and draws the tracts within 2 mm of each slice; a cut slices both layers together.',
   metricsScope:
     'Counts and lengths use complete source streamlines after the length filter. Section cuts affect the view only.',
   outlineProvenance: 'Brain outline method and provenance',
@@ -84,7 +85,8 @@ export const fr: typeof en = {
   nativeCanvas:
     'Cerveau de référence et faisceaux. Glisser ou utiliser les flèches pour tourner, défiler ou appuyer sur plus et moins pour zoomer. Sélectionner les faisceaux dans le panneau.',
   outlineLimit: 'Contour cérébral dérivé de l’IRM, sans étiquettes corticales sur ce contour.',
-  mriHint: 'L’IRM liée utilise la même image, et une coupe tranche les deux couches ensemble.',
+  mriHint:
+    'L’IRM liée utilise la même image et trace les faisceaux à moins de 2 mm de chaque coupe\u202f; une coupe tranche les deux couches ensemble.',
   metricsScope:
     'Les nombres et longueurs utilisent les trajectoires sources complètes après le filtre de longueur. Les coupes modifient seulement la vue.',
   outlineProvenance: 'Méthode et provenance du contour cérébral',

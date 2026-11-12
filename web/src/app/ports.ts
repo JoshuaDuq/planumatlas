@@ -18,14 +18,10 @@ export interface UiPorts
     >,
     Pick<
       KeymapCommands,
-      | 'back'
-      | 'focusSearch'
-      | 'walkTree'
-      | 'openDiffusionMri'
-      | 'openMpr'
-      | 'closeMpr'
-      | 'toggleShortcuts'
+      'back' | 'focusSearch' | 'walkTree' | 'openMpr' | 'closeMpr' | 'toggleShortcuts'
     > {
+  /** The Linked MRI opened from a panel's button: loads the scan first, and leaves an open one open. */
+  openLinkedMri(options: { instant: boolean }): void;
   /** The linked MRI dialog (`MriDialog.show`), opened by the controllers. */
   showMri: MriDialog['show'];
   openPreparedPlane: MriDialog['openPreparedPlane'];
@@ -56,19 +52,11 @@ export interface UiPorts
   /** The Linked MRI is open (docked or modal), whether or not it holds the page's keys. */
   mriOpen(): boolean;
   mprOpen(): boolean;
-  diffusionMriOpen(): boolean;
   shortcutsOpen(): boolean;
 }
 
 /** Questions whose honest answer, while nothing has mounted to ask, is no. */
-const QUERIES = [
-  'focusInDetail',
-  'detailShown',
-  'mriOpen',
-  'mprOpen',
-  'diffusionMriOpen',
-  'shortcutsOpen',
-] as const;
+const QUERIES = ['focusInDetail', 'detailShown', 'mriOpen', 'mprOpen', 'shortcutsOpen'] as const;
 
 const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> = {
   showDetail: true,
@@ -83,7 +71,7 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   back: true,
   focusSearch: true,
   walkTree: true,
-  openDiffusionMri: true,
+  openLinkedMri: true,
   openMpr: true,
   closeMpr: true,
   toggleShortcuts: true,

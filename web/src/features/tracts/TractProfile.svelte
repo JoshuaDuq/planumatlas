@@ -26,7 +26,8 @@
     lang: Language;
     tracts: Pick<Engine['tracts'], 'snapshot'>;
     label: (id: string) => { name: string };
-    onOpenMri: (event: MouseEvent) => void;
+    /** Absent where the tracts are another subject's, which this brain's MRI cannot draw. */
+    onOpenMri?: (event: MouseEvent) => void;
   } = $props();
 
   const text = $derived(t(lang, 'diffusion'));
@@ -86,7 +87,9 @@
       {/if}
     {/each}
   </section>
-  <button type="button" class="primary" onclick={onOpenMri}>{text.mriOpen}</button>
+  {#if onOpenMri}
+    <button type="button" class="primary" onclick={onOpenMri}>{text.mriOpen}</button>
+  {/if}
   <p class="note method">
     {text.endsNote(withUnit(decimal(ends.radius_mm, 0, lang), 'mm', lang), floor)}
   </p>

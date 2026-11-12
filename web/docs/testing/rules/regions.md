@@ -46,12 +46,12 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 
 ### REGION-05 · Dialogs are mounted once, as children of the app root
 
-- **Rule:** Each dialog is a native `<dialog>` mounted once, as a direct child of the app root, so stacking and the inert page never depend on region markup (top layer). The masthead region mounts Keyboard shortcuts and Provenance, which follow `#masthead`; the stage region mounts Linked MRI and Diffusion MRI, which follow the stage's `<main>`; the Linked MRI from the first time it opens, when its code is fetched (BUILD-15). The regions render as fragments, so none of them has a wrapper. The Tracts MRI holds no GPU context, volume or navigator while closed (decision 0008); G5's panes are 2D canvases.
+- **Rule:** Each dialog is a native `<dialog>` mounted once, as a direct child of the app root, so stacking and the inert page never depend on region markup (top layer). The masthead region mounts Keyboard shortcuts and Provenance, which follow `#masthead`; the stage region mounts the Linked MRI, which follows the stage's `<main>`, from the first time it opens, when its code is fetched (BUILD-15). The regions render as fragments, so none of them has a wrapper. G5's panes are 2D canvases.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine)
 - **Source:** decision record `0008-dialog-mount-points.md`; `index.html:599-697`
-- **Expected:** four `dialog` elements, one each with the names "Keyboard shortcuts", "Provenance", the Linked MRI and Diffusion MRI titles. Each one's parent is the app root. With one open, it `matches(':modal')` and the regions are inert (a click on a masthead button does nothing). While the Tracts MRI is closed the engine holds no navigator.
-- **Covered by:** `src/app/regions/ShellRegions.svelte.test.ts` (R, all four, their parents, an open one modal and the masthead unfocusable); `src/app/regions/StageRegion.svelte.test.ts` (R, the two MRI dialogs and no navigator while closed)
+- **Expected:** three `dialog` elements, "Keyboard shortcuts", "Provenance" and "Feedback"; the Linked MRI is docked beside the stage on a desktop and a dialog only on a phone or over the full-screen stage. Each one's parent is the app root. With one open, it `matches(':modal')` and the regions are inert (a click on a masthead button does nothing).
+- **Covered by:** `src/app/regions/ShellRegions.svelte.test.ts` (R, all three, their parents, an open one modal and the masthead unfocusable); `src/app/regions/StageRegion.svelte.test.ts` (R, the docked Linked MRI drawn only while open)
 
 ### REGION-06 · One tooltip serves the whole page
 
@@ -70,7 +70,7 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine)
 - **Source:** conductor decision 12 (comment 72 on #4: "I3b adds a test that every port is registered once the shell mounts"); comment 70 (the port list); comment 85 item 1 (the non-raising detail port for links). The unmounted behaviour is BOOT-20.
-- **Expected:** after mount and `attach(world)`, these do not throw "not mounted": `showDetail`, `showList`, `revealOnSelect`, `back`, `focusSearch`, `walkTree`, `openFunction`, `openDeficit`, `openLessonMri` (I1); `showMri`, `openPreparedPlane`, `openMpr`, `closeMpr`, `openDiffusionMri` (I2); `toggleShortcuts` (I3b). Each question answers true in its state: `shortcutsOpen()` after `toggleShortcuts()`, `mprOpen()` after `openMpr()`, `diffusionMriOpen()` after `openDiffusionMri()`, `focusInDetail()` with focus in a region detail. Unmounting the app withdraws them all.
+- **Expected:** after mount and `attach(world)`, these do not throw "not mounted": `showDetail`, `showList`, `revealOnSelect`, `back`, `focusSearch`, `walkTree`, `openFunction`, `openDeficit`, `openLessonMri` (I1); `showMri`, `openPreparedPlane`, `openMpr`, `closeMpr`, `openLinkedMri` (I2); `toggleShortcuts` (I3b). Each question answers true in its state: `shortcutsOpen()` after `toggleShortcuts()`, `mprOpen()` after `openMpr()`, `mriOpen()` after `openLinkedMri()`, `focusInDetail()` with focus in a region detail. Unmounting the app withdraws them all.
 - **Covered by:** `src/app/regions/ShellRegions.svelte.test.ts` "the ports" (R, every command reaches a region, the questions answer, and closing the app withdraws them); `src/app/regions/PanelsRegion.svelte.test.ts` and `StageRegion.svelte.test.ts` (R, what each port does)
 
 ### REGION-08 · Regions share the root's single stateful instances
@@ -194,23 +194,23 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 - **Expected:** status `loading`, progress 34/100 → a progress bar with value 34 inside `main`. Status `ready` → the bar is gone and the announcer has said "Anatomy loaded." once. A failure → its text in `main` and said once.
 - **Covered by:** `src/app/regions/ShellRegions.svelte.test.ts` "the stage status" (R: the progress bar inside `main` and "Anatomy loaded." once ready, a failure in `main` and said); `src/app/boot.svelte.test.ts` (R, BOOT- with H1b's component)
 
-### REGION-21 · The MRI dialogs open from the stage and from the controllers
+### REGION-21 · The Linked MRI opens from the stage, the Tracts panel and the controllers
 
-- **Rule:** The Linked MRI dialog opens from the section bar's opener and from the controllers' `showMri`, `openPreparedPlane` and `openMpr`, and closes with `closeMpr`. The Diffusion MRI dialog opens from the Tracts panel's button and from `openDiffusionMri`. `M` toggles the open one. The question ports answer whether each is open.
+- **Rule:** The Linked MRI opens from the section bar's opener, the Tracts panel's MRI with tracts (`openLinkedMri`, which leaves an open one open) and the controllers' `showMri`, `openPreparedPlane` and `openMpr`, and closes with `closeMpr`. `M` toggles it. The question ports answer whether it is open.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine; the dialogs' own WebGL is not needed)
 - **Source:** #62 scope; comment 70; comment 81 (M also closes the Tracts MRI); comment 83 item 1
-- **Expected:** `openMpr()` → the Linked MRI dialog open, `mprOpen()` true; `closeMpr()` → closed, false. Tracts → Open MRI → the Diffusion MRI dialog open, `diffusionMriOpen()` true; `M` → closed.
-- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` "the MRI dialogs" (R: the ports, `M`, the section row's opener, Escape, and a navigator only while open)
+- **Expected:** `openMpr()` → the Linked MRI open, `mprOpen()` true; `closeMpr()` → closed, false. `openLinkedMri()` twice → open. Tracts → MRI with tracts → open; Escape → closed, focus on the button.
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` (R: the ports, `M`, the section row's opener, Escape); `src/app/regions/PanelsRegion.svelte.test.ts` "the Tracts panel’s MRI" (R)
 
 ### REGION-22 · The Tracts minimum length is one shared value
 
-- **Rule:** The minimum streamline length set in the Tracts panel is the one the Diffusion MRI navigator draws with.
+- **Rule:** The minimum streamline length set in the Tracts panel is the one the Linked MRI draws its tracts with, and a change redraws them.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine)
 - **Source:** comment 83 item 1 on #4 (T1's `minimum` bound to one place in the app)
-- **Expected:** set the Tracts minimum to 40 mm, open the Diffusion MRI → the navigator's minimum is 40; change it to 60 in the panel → the navigator follows.
-- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` "the Tracts MRI draws with the length the panel set" (R, 40 mm; following a later change is uncovered)
+- **Expected:** with the Linked MRI drawn and settled, the minimum set to 40 mm → each plane draws its tracts again (three `onPlane` calls).
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` "the Linked MRI draws the tracts the stage draws, again when the panel’s length changes" (R)
 
 ### REGION-23 · The stage layout follows the panel and the window
 

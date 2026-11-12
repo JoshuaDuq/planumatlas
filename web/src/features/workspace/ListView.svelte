@@ -238,7 +238,7 @@
     keep={current.keepTracts}
     onKeep={excursions.keepTracts}
     bind:minimum={app.tractsMinimum}
-    onOpenMri={(event) => app.ports.openDiffusionMri({ instant: isKeyboardActivation(event) })}
+    onOpenMri={(event) => app.ports.openLinkedMri({ instant: isKeyboardActivation(event) })}
     openTract={current.selectedTract}
     onOpenTract={tractEnds(tractCatalog(current.anatomy)) && !isIndependentTractReference(current)
       ? openTract

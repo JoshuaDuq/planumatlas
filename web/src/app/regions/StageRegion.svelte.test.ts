@@ -57,8 +57,6 @@ async function boot(status: 'ready' | 'loading' = 'ready') {
 }
 
 const dialogs = () => [...document.querySelectorAll<HTMLDialogElement>('dialog')];
-const dialogNamed = (name: string) =>
-  dialogs().find((dialog) => dialog.querySelector('h2')?.textContent === name)!;
 const linkedMri = () => target.querySelector<HTMLElement>(':scope > .mpr-dock');
 const press = (key: string) =>
   document.body.dispatchEvent(
@@ -118,15 +116,9 @@ describe('what the stage region holds', () => {
     expect(dialogs()).toHaveLength(0);
   });
 
-  test('the Tracts MRI dialog and the docked Linked MRI are children of the app root, outside the landmark; the Tracts MRI holds no navigator while closed', async () => {
+  test('the docked Linked MRI is drawn only while open, beside the stage', async () => {
     await boot();
-    expect(dialogs().map((dialog) => dialog.querySelector('h2')?.textContent)).toEqual([
-      'MRI with tracts · MGH CDMD sub_013',
-    ]);
-    expect(dialogs()[0]!.parentElement).toBe(target);
-    expect(dialogs()[0]!.open).toBe(false);
-    // No navigator, so no GPU context or volume, exists while the dialog is closed.
-    expect(engine.tracts.navigators).toHaveLength(0);
+    expect(dialogs()).toHaveLength(0);
     // The Linked MRI is a grid item beside the stage, drawn only while open.
     expect(linkedMri()).toBeNull();
     await engine.sections.load();
@@ -202,27 +194,14 @@ describe('the MRI dialogs', () => {
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
   });
 
-  test('openDiffusionMri opens the Tracts MRI, diffusionMriOpen answers, and Escape closes it', async () => {
+  test('openLinkedMri loads the scan and opens the Linked MRI, and a second press leaves it open', async () => {
     await boot();
-    expect(app.ports.diffusionMriOpen()).toBe(false);
-    app.ports.openDiffusionMri({ instant: true });
-    flushSync();
-    expect(app.ports.diffusionMriOpen()).toBe(true);
-    const dialog = dialogNamed('MRI with tracts · MGH CDMD sub_013');
-    expect(dialog.matches(':modal')).toBe(true);
-    await userEvent.keyboard('{Escape}');
-    await vi.waitFor(() => expect(app.ports.diffusionMriOpen()).toBe(false));
-  });
-
-  test('the Tracts MRI holds a navigator only while open', async () => {
-    await boot();
-    expect(engine.tracts.navigators).toHaveLength(0);
-    app.ports.openDiffusionMri({ instant: true });
-    flushSync();
-    await vi.waitFor(() => expect(engine.tracts.navigators).toHaveLength(1));
-    expect(engine.tracts.navigators[0]!.disposed).toBe(false);
-    await userEvent.keyboard('{Escape}');
-    await vi.waitFor(() => expect(engine.tracts.navigators[0]!.disposed).toBe(true));
+    app.ports.openLinkedMri({ instant: true });
+    await vi.waitFor(() => expect(app.ports.mriOpen()).toBe(true));
+    expect(call('sections', 'load').length).toBeGreaterThan(0);
+    app.ports.openLinkedMri({ instant: true });
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(app.ports.mriOpen()).toBe(true);
   });
 });
 
@@ -356,31 +335,39 @@ describe('the controllers’ entry points', () => {
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
   });
 
-  test('the Tracts MRI opens with its entry animation unless the opening was a key', async () => {
+  test('the Linked MRI draws the tracts the stage draws, again when the panel’s length changes', async () => {
     await boot();
-    const dialog = dialogNamed('MRI with tracts · MGH CDMD sub_013');
-    app.ports.openDiffusionMri({ instant: false });
-    await vi.waitFor(() => expect(dialog.open).toBe(true));
-    expect(dialog.hasAttribute('data-instant')).toBe(false);
-    await userEvent.keyboard('{Escape}');
-    await vi.waitFor(() => expect(dialog.open).toBe(false));
-    app.ports.openDiffusionMri({ instant: true });
-    await vi.waitFor(() => expect(dialog.open).toBe(true));
-    expect(dialog.hasAttribute('data-instant')).toBe(true);
+    await engine.tracts.setActive(true);
+    app.world!.excursions.chooseExplorer('diffusion');
+    await engine.sections.load();
+    const onPlane = vi.spyOn(engine.tracts, 'onPlane');
+    app.ports.showMri({ instant: true });
+    // Once the overlay is on, each plane's last draw holds the stage's streamlines.
+    await vi.waitFor(() => {
+      const last = onPlane.mock.results.slice(-3);
+      expect(last).toHaveLength(3);
+      expect(last.every(({ value }) => value.colors.length > 0)).toBe(true);
+    });
+    // The draws have settled: two frames pass with none.
+    let before = -1;
+    while (before !== onPlane.mock.calls.length) {
+      before = onPlane.mock.calls.length;
+      for (let frame = 0; frame < 2; frame++)
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    app.tractsMinimum = 40;
+    await vi.waitFor(() => expect(onPlane).toHaveBeenCalledTimes(before + 3));
   });
 
-  test('the Tracts MRI draws with the length the panel set', async () => {
+  test('over another subject’s tracts the Linked MRI draws none and offers no FA', async () => {
+    engine = createFakeEngine({ manifest, domains: domains as never, tractAnatomy: 'another' });
     await boot();
-    const syncs: ReturnType<typeof vi.fn>[] = [];
-    const create = engine.tracts.createMriNavigator.bind(engine.tracts);
-    vi.spyOn(engine.tracts, 'createMriNavigator').mockImplementation(async (...args) => {
-      const navigator = await create(...args);
-      syncs.push(vi.spyOn(navigator, 'syncTracts') as never);
-      return navigator;
-    });
-    app.tractsMinimum = 40;
-    app.ports.openDiffusionMri({ instant: true });
-    await vi.waitFor(() => expect(syncs[0]).toHaveBeenCalledWith(expect.any(Array), 40));
+    await engine.sections.load();
+    const onPlane = vi.spyOn(engine.tracts, 'onPlane');
+    app.ports.showMri({ instant: true });
+    await vi.waitFor(() => expect(linkedMri()).not.toBeNull());
+    expect(linkedMri()!.textContent).not.toContain('FA opacity');
+    expect(onPlane).not.toHaveBeenCalled();
   });
 
   test('a slider frame queued when the region goes is not run afterwards', async () => {
@@ -429,24 +416,6 @@ describe('focus and the crosshair', () => {
     await vi.waitFor(() => expect(app.ports.mprOpen()).toBe(true));
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() => expect(document.activeElement).toBe(engine.canvas));
-  });
-
-  test('the Tracts MRI starts at the atlas crosshair and moves it back', async () => {
-    await boot();
-    engine.sections.setCrosshair([10, 20, 30]);
-    await engine.tracts.setActive(true);
-    const create = engine.tracts.createMriNavigator.bind(engine.tracts);
-    const points: ReturnType<typeof vi.fn>[] = [];
-    vi.spyOn(engine.tracts, 'createMriNavigator').mockImplementation(async (...args) => {
-      const navigator = await create(...args);
-      points.push(vi.spyOn(navigator, 'setScannerPoint') as never);
-      return navigator;
-    });
-    app.ports.openDiffusionMri({ instant: true });
-    // The fake's surface sits one, two and three millimetres off the scanner.
-    await vi.waitFor(() => expect(points[0]).toHaveBeenCalledWith([9, 22, 27]));
-    engine.tracts.navigators[0]!.setVoxel([1, 2, 3]);
-    expect(engine.sections.state.crosshair).toEqual([3, 2, 9]);
   });
 });
 

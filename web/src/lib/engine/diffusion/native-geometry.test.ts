@@ -7,6 +7,7 @@ import {
   createMotionGeometry,
   createTractGeometry,
   filterTractGeometry,
+  segmentsNearPlane,
 } from './native-geometry.ts';
 
 const points = new Float32Array([
@@ -122,4 +123,37 @@ test('the motion lines join every third point of the same buffers, ending on eac
   assert.throws(() => filterTractGeometry(motion, ends, lengths, 1), /index/);
   geometry.dispose();
   motion.dispose();
+});
+
+test('a segment crossing a plane is cut where it leaves the 2 mm slab, laid flat on the plane, in its direction colour', () => {
+  // An axial plane through z = 10, seen with u along A and v along R, so the axes are not the identity.
+  const plane = { origin: [0, 0, 10], normal: [0, 0, 1], u: [0, 1, 0], v: [1, 0, 0] };
+  const crossing = new Float32Array([3, 0, 6, 3, 4, 14]); // z 6 → 14, y 0 → 4: rises 2 mm in z per mm of y
+  const { ends, colors } = segmentsNearPlane(crossing, new Uint32Array([0, 1]), plane);
+  // Clipped to z 8 → 12, which is y 1 → 3, at R = 3.
+  assert.deepEqual([...ends], [1, 3, 3, 3]);
+  const length = Math.hypot(4, 8);
+  assert.deepEqual(
+    [...colors],
+    [0, Math.round((255 * 4) / length), Math.round((255 * 8) / length)],
+  );
+});
+
+test('a plane keeps the segments within the slab whole and drops those beyond it, flat or not', () => {
+  const plane = { origin: [0, 0, 0], normal: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0] };
+  // prettier-ignore
+  const points = new Float32Array([
+    0, 0, 1.5, 5, 0, 1.5, // flat, inside: whole
+    0, 0, 2.5, 5, 0, 2.5, // flat, just beyond: dropped
+    0, 0, 3, 0, 1, 9, // rising, wholly above: dropped
+    0, 0, -1, 0, 2, 1, // rising, wholly inside: whole
+    1, 1, 1, 1, 1, 1, // no length: dropped
+  ]);
+  const { ends, colors } = segmentsNearPlane(
+    points,
+    new Uint32Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+    plane,
+  );
+  assert.deepEqual([...ends], [0, 0, 5, 0, 0, 0, 0, 2]);
+  assert.equal(colors.length, 6);
 });

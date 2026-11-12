@@ -601,11 +601,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### KEY-12 · M opens the MRI of the explorer in front
 
-- **Rule:** In Tracts, `m` or `M` opens the diffusion MRI, even under the tract reference. Elsewhere it presses the linked MRI opener at once, except under the tract reference. A disabled opener does nothing.
+- **Rule:** On every tab, Tracts included, `m` or `M` presses the linked MRI opener at once, except under the tract reference (another subject's tracts, which this brain's MRI cannot draw). A disabled opener does nothing.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:1948-1952`, `1982-1986`; `viewer/ui/chrome/sections.js:236`; deviation `g4-linked-mri-busy.md` (an opener busy loading counts as disabled)
-- **Expected:** Diffusion + reference → `openDiffusionMri`, cancelled, no `openMpr`. Anatomy + reference → nothing. Anatomy → `openMpr({instant: true})`.
+- **Expected:** Diffusion → `openMpr({instant: true})`, cancelled. Diffusion + reference and anatomy + reference → nothing. Anatomy → `openMpr({instant: true})`.
 - **Covered by:** `src/lib/controller/keymap.test.ts` (R, "keymap outcomes"); the busy opener refusing a second press: `src/features/sections/section-controls.test.ts` (R, sections area); `M` reaching a disabled or busy opener is uncovered
 
 ### KEY-13 · F focuses and I isolates the selection

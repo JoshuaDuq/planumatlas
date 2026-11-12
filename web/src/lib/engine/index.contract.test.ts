@@ -43,7 +43,6 @@ afterAll(() => {
   vi.unstubAllGlobals();
 });
 
-// The MRI navigator needs a canvas and NiiVue's WebGL: `index.svelte.test.ts` runs that case.
 defineEngineContract('real engine, headless', bootHeadless, {
   drawFrame: () => probe.loop?.(performance.now() + 1000),
   comparison: {

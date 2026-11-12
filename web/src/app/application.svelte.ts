@@ -86,7 +86,7 @@ export function createApp() {
   });
   let world = $state.raw<World | null>(null);
   let failure = $state.raw<StartFailure | undefined>();
-  // The Tracts panel's length filter, which the stage's MRI navigator draws with.
+  // The Tracts panel's length filter, which the Linked MRI redraws its tracts by.
   let tractsMinimum = $state<number>(MINIMUM_LENGTH.min);
   const cleanups: (() => unknown)[] = [];
 

@@ -24,15 +24,17 @@
     AGREEMENT_CATEGORIES,
     AGREEMENT_COLORS,
   } from '../../lib/core/catalog/segmentation-agreement.ts';
-  import { decimal, formatRas, millimetres } from '../../lib/core/format.ts';
+  import { decimal, formatRas, millimetres, percent } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { mapNumber } from '../../lib/core/user-map/display.ts';
   import type { Statistic } from '../../lib/core/user-map/display.ts';
   import type {
     EngineSections,
+    EngineTracts,
     MprPlane,
     PlaneFrame,
     SectionsState,
+    Vec3,
   } from '../../lib/engine/api.ts';
   import { PHONE_QUERY } from '../../lib/types/index.ts';
   import type { Language, ManifestAnatomy } from '../../lib/types/index.ts';
@@ -51,8 +53,10 @@
     CROSSHAIR_RING,
     PLANES,
     annotatedCopy,
+    blendFa,
     crosshairOnPlane,
     drawSlice,
+    drawTracts,
     edgeLetter,
   } from './mpr-draw.ts';
   import {
@@ -71,6 +75,7 @@
     mpr: MprDialogController;
     engine: {
       sections: Pick<EngineSections, 'display' | 'sample' | 'mprFrame' | 'pixels'>;
+      tracts: Pick<EngineTracts, 'onPlane' | 'loadFa'>;
     };
     /** The sections' display snapshot, replaced on every engine `change` (S1's engine sync). */
     engineState: { readonly sections: SectionsState };
@@ -87,6 +92,11 @@
      * whenever how it is drawn does, so the planes are drawn again.
      */
     map?: { key: string; title: string; statistic: Statistic | null } | null;
+    /**
+     * Present while the tracts are this brain's own: a key that changes whenever what the stage draws
+     * of them does. The planes then draw them, and offer FA.
+     */
+    tracts?: { key: string } | null;
   }
 
   let {
@@ -99,6 +109,7 @@
     regionName,
     fallbackFocus,
     map = null,
+    tracts = null,
   }: Props = $props();
 
   /** The readout waits for the crosshair to rest, so a drag or a held key is not said per step. */
@@ -118,6 +129,25 @@
   // The region's one live region: the phone's modal makes the page's announcer inert.
   let said = $state('');
   let quiet: ReturnType<typeof setTimeout> | undefined;
+
+  // FA is the reader's to show, downloaded the first time its opacity leaves zero.
+  let faOpacity = $state(0);
+  let fa = $state.raw<((point: Vec3) => number) | null>(null);
+  let faFailed = $state(false);
+  const faShown = $derived(tracts !== null && fa !== null && faOpacity > 0);
+  function setFaOpacity(value: number) {
+    faOpacity = value;
+    if (value === 0 || fa) return;
+    faFailed = false;
+    engine.tracts.loadFa().then(
+      (loaded) => (fa = loaded),
+      (error: unknown) => {
+        console.error(error);
+        faFailed = true;
+        faOpacity = 0;
+      },
+    );
+  }
 
   let root = $state<HTMLElement>();
   let dock = $state<HTMLElement>();
@@ -149,9 +179,14 @@
       reading.sample.cutRegion && regionName(reading.sample.cutRegion.id),
     );
     const value = reading.sample.mapValue;
-    return map && typeof value === 'number' && Number.isFinite(value)
-      ? `${text} · ${t(lang, 'overlay').readout(map.title, map.statistic, mapNumber(value, lang))}`
-      : text;
+    const mapped =
+      map && typeof value === 'number' && Number.isFinite(value)
+        ? `${text} · ${t(lang, 'overlay').readout(map.title, map.statistic, mapNumber(value, lang))}`
+        : text;
+    const anisotropy = faShown ? fa!(crosshair) : NaN;
+    return Number.isNaN(anisotropy)
+      ? mapped
+      : `${mapped} · ${copy.fa(decimal(anisotropy, 2, lang))}`;
   });
 
   // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
@@ -175,11 +210,20 @@
         map?.key,
         display.windowCenter,
         display.windowWidth,
+        tracts?.key,
+        faShown && faOpacity,
       ]);
       const last = drawn.get(plane);
       if (last?.canvas === canvas && last.key === key) continue;
       drawn.set(plane, { canvas, key });
-      untrack(() => drawSlice(canvas, engine.sections.pixels(frame), display.size));
+      untrack(() => {
+        const pixels = engine.sections.pixels(frame);
+        if (faShown) blendFa(pixels, frame, display.size, display.fieldOfView, fa!, faOpacity);
+        if (tracts) {
+          drawTracts(pixels, display.size, display.fieldOfView, engine.tracts.onPlane(frame));
+        }
+        drawSlice(canvas, pixels, display.size);
+      });
     }
   });
 
@@ -482,6 +526,17 @@
             format={(value) => decimal(value, 0, lang)}
             oninput={(center) => mpr.setWindow({ center })}
           />
+          {#if tracts}
+            <RangeField
+              label={copy.faOpacity}
+              value={faOpacity}
+              min={0}
+              max={1}
+              step={0.05}
+              format={(value) => percent(value, lang)}
+              onchange={setFaOpacity}
+            />
+          {/if}
           <label class="check">
             <input
               type="checkbox"
@@ -492,6 +547,7 @@
             <span>{copy.segmentationOverlay}</span>
           </label>
         </div>
+        {#if faFailed}<p class="alert" role="alert">{copy.faFailed}</p>{/if}
       </div>
     </div>
 
@@ -499,6 +555,7 @@
       <p>{copy.asStage}</p>
       <p>{copy.subtitle}</p>
       <p>{copy.note(anatomy)}</p>
+      {#if tracts}<p>{copy.tracts}</p>{/if}
     </div>
   </div>
 {/snippet}
@@ -848,6 +905,11 @@
     input[type='checkbox']:disabled {
       opacity: 0.5;
       cursor: default;
+    }
+    .alert {
+      margin: 0;
+      color: var(--danger);
+      font-size: var(--text-ui);
     }
     .note {
       padding-top: var(--space-3);
