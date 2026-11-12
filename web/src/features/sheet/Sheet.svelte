@@ -288,6 +288,11 @@
     if (media.phone && panelHiddenAt(detent)) setDetent('half', { quick: instant });
   }
 
+  /** The stage wants its room back (the guided tour, past a region's detail): the sheet rests at peek. */
+  export function lower() {
+    if (media.phone && detent !== 'peek') setDetent('peek');
+  }
+
   // ---- dragging ----------------------------------------------------------------------------
 
   function cancelPress() {

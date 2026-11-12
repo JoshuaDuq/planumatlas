@@ -1073,108 +1073,112 @@
   "done": "Terminé",
   "close": "Fermer la visite",
   "skip": "Passer la visite",
+  "start": "Commencer",
+  "explore": "Explorer",
   "progress": "{{current}} sur {{total}}",
-  "everything": [
-   "[\"Alpha\"] → \"Tout voir (Alpha étapes)\"",
-   "[\"\"] → \"Tout voir ( étapes)\""
+  "rest": [
+   "[\"Alpha\"] → \"Voir la suite (Alpha étapes)\"",
+   "[\"\"] → \"Voir la suite ( étapes)\""
   ],
+  "yourTurn": "Essayez",
+  "didIt": "Fait",
   "firstVisit": [
    {
-    "id": "selectRegion",
-    "title": "Le détail d’une région",
-    "body": "Une région ouverte est décrite ici<NNBSP>: son côté et son groupe, puis Cibler, IRM liée et Plus (Isoler, Masquer), ce que l’on sait d’elle et les données de recherche mesurées sur elle."
-   },
-   {
-    "id": "tabs",
-    "title": "Cinq entrées",
-    "body": "Anatomie recense chaque région. Fonctions et Déficits peignent des données publiées, Circuits parcourt des voies, et Faisceaux montre la substance blanche tirée de l’IRM de diffusion de ce cerveau. Chacun dit ce qu’il montre<NNBSP>; À propos de ces données dit d’où elles viennent."
-   },
-   {
-    "id": "dock",
-    "title": "Les outils de l’image",
-    "body": "Coupe tranche le cerveau et Affichage règle ce qui est tracé. Ajouter apporte quelque chose sur le cerveau<NNBSP>: une lésion de taille donnée, une coordonnée MNI publiée ou votre propre carte."
+    "id": "finish",
+    "title": "À vous",
+    "body": "Chaque onglet est une entrée<NNBSP>: Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche."
    }
   ],
   "stops": [
    {
     "id": "welcome",
-    "title": "Utiliser Planum",
-    "body": "Le cerveau d’une personne, reconstruit par IRM, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique. La visite ouvre chaque fonctionnalité sur le cerveau, puis rétablit votre vue."
+    "title": "Bienvenue dans Planum",
+    "body": "Le cerveau d’une personne, reconstruit à partir de son IRM et cartographié région par région, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique."
    },
    {
-    "id": "brain",
-    "title": "Le cerveau",
-    "body": "Faites glisser pour le tourner, utilisez la molette ou pincez pour zoomer, et cliquez ou touchez une région pour l’ouvrir : ici le gyrus précentral gauche, souligné sur le cerveau et décrit dans le panneau."
+    "id": "turn",
+    "title": "Tourner le cerveau",
+    "body": "Faites-le glisser pour le tourner. Molette ou pincement pour zoomer."
+   },
+   {
+    "id": "openRegion",
+    "title": "Ouvrir une région",
+    "body": "Cliquez ou touchez une région du cerveau."
+   },
+   {
+    "id": "regionDetail",
+    "title": "La région en détail",
+    "body": "Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau."
    },
    {
     "id": "directions",
-    "title": "Directions anatomiques",
-    "body": "Les lettres nomment les directions anatomiques : choisissez-en une pour regarder de ce côté, comme S montre le cerveau d’en haut, ou le centre pour la vue oblique."
+    "title": "Regarder de tous les côtés",
+    "body": "Choisissez une lettre pour regarder de ce côté, ici S pour supérieur. Le centre ramène la vue oblique."
    },
    {
     "id": "section",
-    "title": "Coupe",
-    "body": "Coupe sectionne le cerveau selon un plan, ici coronal. Faites glisser son curseur pour déplacer la coupe."
+    "title": "Couper le cerveau",
+    "body": "Coupe tranche le cerveau selon un plan, ici coronal. Faites glisser le curseur pour le parcourir."
    },
    {
     "id": "linkedMri",
-    "title": "IRM liée",
-    "body": "L’examen d’où ce cerveau a été reconstruit, en trois plans autour d’un même réticule. Cliquez une région du cerveau et le réticule s’y place<NNBSP>; cliquez un point d’une coupe et le cerveau sélectionne la région qui s’y trouve. Faites glisser le bord gauche du panneau pour l’agrandir. M l’ouvre et le ferme."
-   },
-   {
-    "id": "lesion",
-    "title": "Lésion",
-    "body": "Lésion place une sphère et indique ce qu’elle atteint : ici 10 mm au centre du gyrus précentral gauche. Pour l’essayer, ouvrez Ajouter, choisissez Lésion et Place la lésion, puis cliquez sur le cerveau."
-   },
-   {
-    "id": "coordinate",
-    "title": "Coordonnée",
-    "body": "Sous Ajouter, Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve : ici −38, 44, 26, une cible de stimulation préfrontale gauche."
-   },
-   {
-    "id": "overlay",
-    "title": "Superposition",
-    "body": "Sous Ajouter, Superposition affiche sur ce cerveau votre propre carte statistique ou masque, un fichier NIfTI dans un gabarit MNI : sur le cortex, les structures profondes et chaque coupe, avec ses amas et ses pics. Le fichier est lu sur cet ordinateur et n’est jamais envoyé."
+    "title": "L’examen d’origine",
+    "body": "L’IRM d’où ce cerveau a été reconstruit, en trois plans. Cliquez le cerveau et le réticule suit<NNBSP>; cliquez l’examen pour sélectionner ce qui s’y trouve."
    },
    {
     "id": "medial",
-    "title": "La face médiale",
-    "body": "Affichez un seul hémisphère (Affichage, puis Hémisphère, ou la touche H), puis regardez depuis l’autre côté : l’hémisphère gauche vu de la droite montre sa face interne."
+    "title": "La face interne",
+    "body": "Affichez un hémisphère et regardez depuis l’autre côté pour voir sa face interne<NNBSP>: ici le gauche, vu de la droite. Affichage › Hémisphère, ou H."
    },
    {
     "id": "explode",
-    "title": "La vue éclatée",
-    "body": "Écartez les structures (Affichage, puis Vue éclatée, ou la touche E) : chacune garde sa forme mesurée, et l’anatomie profonde apparaît entre les hémisphères."
-   },
-   {
-    "id": "topBar",
-    "title": "La barre du haut",
-    "body": "Atlas, Couleur et Anatomie interne règlent ce qui est dessiné. Cliquez sur un intitulé, ou sur la barre repliée, pour lire ce que signifie chaque choix actuel."
+    "title": "Écarter les structures",
+    "body": "La vue éclatée déplace chaque structure d’un bloc, dans sa forme mesurée, et l’anatomie profonde apparaît. Affichage › Vue éclatée, ou E."
    },
    {
     "id": "functions",
-    "title": "Fonctions",
-    "body": "Fonctions peint sur le cerveau des données publiées pour une fonction, dit ce qu’elle a changé et offre le retour : ici le langage. Son IRM liée montre la même carte sur l’examen."
+    "title": "Cartographier une fonction",
+    "body": "Fonctions peint les régions où des études rapportent une activation pour une fonction, ici le langage<NNBSP>: des données de nombreuses personnes, tracées sur ce cerveau."
    },
    {
     "id": "deficits",
-    "title": "Déficits",
-    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit : ici l’aphasie. Son IRM liée les montre sur l’examen."
+    "title": "Cartographier un déficit",
+    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit, ici l’aphasie."
    },
    {
     "id": "circuits",
-    "title": "Circuits",
-    "body": "Circuits parcourt une voie anatomique, repère par repère : ici la voie visuelle, à partir du chiasma optique."
+    "title": "Suivre une voie",
+    "body": "Circuits parcourt une voie repère par repère<NNBSP>: ici la voie visuelle, à partir du chiasma optique."
    },
    {
     "id": "tracts",
-    "title": "Faisceaux",
-    "body": "Faisceaux montre des faisceaux de substance blanche reconstruits par IRM de diffusion."
+    "title": "La substance blanche",
+    "body": "Faisceaux trace les faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de ce cerveau, colorés selon leur direction."
+   },
+   {
+    "id": "lesion",
+    "title": "Placer une lésion",
+    "body": "Ajouter › Lésion place une sphère et liste ce qu’elle atteint<NNBSP>: ici une sphère de 10 mm de rayon dans le gyrus précentral gauche."
+   },
+   {
+    "id": "coordinate",
+    "title": "Trouver une coordonnée",
+    "body": "Ajouter › Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve<NNBSP>: ici −38, 44, 26, une cible de stimulation préfrontale gauche."
+   },
+   {
+    "id": "overlay",
+    "title": "Apporter votre carte",
+    "body": "Ajouter › Superposition affiche votre propre carte NIfTI, dans l’espace MNI, sur ce cerveau et ses coupes. Le fichier ne quitte jamais votre ordinateur."
+   },
+   {
+    "id": "topBar",
+    "title": "Ce qui est dessiné",
+    "body": "Ceci nomme l’atlas et les couleurs du cerveau. Ouvrez-le pour les changer, ou l’anatomie interne, chacun avec une note sur ce qu’il montre."
    },
    {
     "id": "settings",
     "title": "Réglages",
-    "body": "La langue, le thème et les raccourcis clavier (ou touche<NBSP>?) sont ici, avec Recommencer et cette visite."
+    "body": "La langue, le thème, les raccourcis clavier (touche ?) et Recommencer sont ici, avec cette visite quand vous voulez la revoir."
    }
   ]
  },

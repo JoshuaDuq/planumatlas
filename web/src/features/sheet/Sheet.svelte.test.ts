@@ -9,6 +9,7 @@ import { expectAxeClean, expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y
 import '../../app/layout.css';
 import { SHEET_RESPONSE, angularFrequency, noOvershoot, springAt } from '../../lib/core/spring.ts';
 import { newWorld, type World } from '../workspace/workspace-test-world.ts';
+import type Sheet from './Sheet.svelte';
 import Fixture from './sheet-test-support.svelte';
 import { newRecorded, type Recorded } from './sheet-test-support.ts';
 
@@ -84,12 +85,17 @@ interface Mounted {
   recorded: Recorded;
 }
 
-async function mount(size = PHONE, fields: Partial<World> = {}, rows = 3): Promise<Mounted> {
+async function mount(
+  size = PHONE,
+  fields: Partial<World> = {},
+  rows = 3,
+  holder: { sheet?: Sheet } = {},
+): Promise<Mounted> {
   await resize(...size);
   const world = $state(newWorld(fields));
   const stage = { sheetFull: false };
   const recorded = newRecorded();
-  render(Fixture, { world, stage, recorded, rows });
+  render(Fixture, { world, stage, recorded, rows, holder });
   await expect.element(tab(world.lang === 'fr' ? 'Anatomie' : 'Anatomy')).toBeVisible();
   return { world, stage, recorded };
 }
@@ -659,6 +665,18 @@ describe('the tabs and the panels in the sheet', () => {
     await userEvent.click(handle());
     await userEvent.click(tab('Deficits'));
     expect(span()).toBe(fullSpan());
+  });
+
+  test('lowering gives the stage its room back: a raised sheet comes to peek, a resting one stays', async () => {
+    const holder: { sheet?: Sheet } = {};
+    const { recorded } = await mount(PHONE, {}, 3, holder);
+    holder.sheet!.lower();
+    expect(recorded.detents).toEqual([]);
+    await userEvent.click(tab('Functions'));
+    expect(span()).toBe(halfSpan());
+    holder.sheet!.lower();
+    await vi.waitFor(() => expect(sheet().dataset.detent).toBe('peek'));
+    expect(recorded.detents).toEqual(['half', 'peek']);
   });
 
   test('even the tab already chosen raises a resting sheet', async () => {

@@ -118,6 +118,8 @@
             : world!.excursions.openDeficitMri(paint.deficit, null, { instant: true }),
         close: () => app.ports.closeMpr(),
       },
+      onPick: (listener) => world!.engine.on('pick', ({ id }) => listener(id)),
+      sheet: { raise: () => app.ports.revealOnSelect(), lower: () => app.ports.lowerSheet() },
     });
   }
 

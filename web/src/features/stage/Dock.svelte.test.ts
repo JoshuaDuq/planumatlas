@@ -324,6 +324,8 @@ describe('the toolbar', () => {
             openPaint: () => {},
             close: () => document.querySelector('.mpr-dock')?.remove(),
           },
+          onPick: () => () => {},
+          sheet: { raise: () => {}, lower: () => {} },
           reserve: () => {},
         });
         const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
@@ -337,13 +339,13 @@ describe('the toolbar', () => {
           next.click();
         }
         expect(pointed).toEqual({
-          Section: 'Section',
-          Lesion: 'Add',
-          Coordinate: 'Add',
+          'Cut through it': 'Section',
+          'Place a lesion': 'Add',
+          'Find a coordinate': 'Add',
           // A phone's Add holds no Overlay, so the tour has no Overlay stop there.
-          ...(phone ? {} : { Overlay: 'Add' }),
-          'The medial surface': 'Display',
-          'The exploded view': 'Display',
+          ...(phone ? {} : { 'Bring your own map': 'Add' }),
+          'The inner surface': 'Display',
+          'Pull it apart': 'Display',
         });
       } finally {
         document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();

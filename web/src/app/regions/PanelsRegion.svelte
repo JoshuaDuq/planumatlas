@@ -256,6 +256,7 @@
         raised.raise();
       },
       revealOnSelect: () => raised.raise(),
+      lowerSheet: () => raised.lower(),
       readingPlace: () => shell.readingPlace(),
       // After the new region's sections are drawn, so one coming back open is not the reader's doing.
       markReadingPlace() {

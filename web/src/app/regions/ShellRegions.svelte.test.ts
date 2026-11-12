@@ -156,7 +156,7 @@ describe('the ports', () => {
     expect(ports.mprOpen()).toBe(false);
   });
 
-  test('a first visit to the plain page opens the guided tour over a drawn stage, whose close folds the tree back and hands focus to More settings', async () => {
+  test('a first visit to the plain page opens the guided tour over a drawn stage, follows a pick on the brain, and its close folds the tree back and hands focus to More settings', async () => {
     await shell.open({ hash: '#anatomy=cdmd&lang=en', firstVisit: true });
     const expanded = [...shell.app.session.state.expanded];
     const card = () => document.querySelector<HTMLElement>('.driver-popover');
@@ -164,15 +164,16 @@ describe('the ports', () => {
     const next = () =>
       card()!.querySelector<HTMLButtonElement>('.driver-popover-next-btn')!.click();
     // The tour's code is fetched as it starts.
-    await vi.waitFor(() => expect(title()).toBe('How to use Planum'));
-    // The brain stop opens a region, and with it its group in the tree.
+    await vi.waitFor(() => expect(title()).toBe('Welcome to Planum'));
     next();
-    await vi.waitFor(() =>
-      expect(shell.app.session.state.expanded.size).toBeGreaterThan(expanded.length),
-    );
-    // A first visit's short tour: the panel the region opened in is the next stop (GUIDE-03).
     next();
-    expect(title()).toBe('A region’s detail');
+    expect(title()).toBe('Open a region');
+    // A click on the brain opens the region, and with it its group in the tree; the tour hears the
+    // pick and moves on to the region's detail (GUIDE-07).
+    shell.engine.emit('pick', { id: 'destrieux:left:30', point: null });
+    await vi.waitFor(() => expect(title()).toBe('The region in detail'), { timeout: 3000 });
+    expect(shell.app.session.state.expanded.size).toBeGreaterThan(expanded.length);
+    expect(location.hash).toContain('region=destrieux:left:30');
     card()!.querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
     expect(card()).toBeNull();
     expect([...shell.app.session.state.expanded]).toEqual(expanded);

@@ -75,9 +75,40 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
-  .guide-card .guide-everything {
+  .guide-card .guide-rest {
     display: block;
     margin-top: var(--space-4);
+  }
+  /* Over a card that waits for the reader to act on the brain: an open ring, then a tick once done. */
+  .guide-card .guide-try {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    color: var(--text-secondary);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: var(--lh-ui);
+    transition: color var(--ui-transition) var(--ease-ui);
+  }
+  .guide-card .guide-try::before {
+    content: '';
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+  }
+  .guide-card[data-done] .guide-try {
+    color: var(--accent);
+  }
+  .guide-card[data-done] .guide-try::before {
+    width: 6px;
+    height: 11px;
+    margin: -3px 3px 0;
+    border-width: 0 2px 2px 0;
+    border-radius: 0;
+    rotate: 45deg;
   }
   .guide-card .driver-popover-footer {
     margin-top: var(--space-5);
@@ -159,8 +190,8 @@
     border-bottom-color: var(--surface-base);
   }
 
-  /* A stop that points at a control dims nothing and lets every click through; a ring marks the
-     control instead. The path's opacity and pointer events are driver.js's inline styles. */
+  /* A stop dims nothing and lets every click through; a ring marks the control instead. The path's
+     opacity and pointer events are driver.js's inline styles. */
   .driver-overlay path {
     transition: opacity var(--dialog-transition) var(--ease-ui);
   }
@@ -177,5 +208,9 @@
   }
   :root[data-guide-showing] #viewport .driver-active-element {
     outline-color: var(--overlay-accent);
+  }
+  /* A panel runs to the window's edges, where a ring outside it would be cut off. */
+  :root[data-guide-showing] :is(#workspace-panel, #sheet).driver-active-element {
+    outline-offset: -2px;
   }
 }

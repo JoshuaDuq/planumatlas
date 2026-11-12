@@ -82,6 +82,7 @@ function portStubs() {
     openLessonStep: vi.fn(),
     showTracts: vi.fn(async () => {}),
     startGuide: vi.fn(),
+    lowerSheet: vi.fn(),
     focusInDetail: () => false,
     detailShown: () => false,
     mriOpen: () => false,

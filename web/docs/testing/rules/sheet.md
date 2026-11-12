@@ -212,6 +212,15 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 - **Expected:** Click Functions at peek → span round(0.5·H), `mode:functions`, announcer "". Then the handle → full, then Deficits → still H − 128. Click Anatomy (chosen) at peek → half. Enter on Functions at peek → half with `data-instant`.
 - **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R)
 
+### SHEET-22a · Lowering gives the stage its room back
+
+- **Rule:** `lower()` brings a phone's raised sheet (half or full) to peek, reporting the new rest as any change of rest does; a sheet already at peek, or off the phone, stays where it is. The guided tour lowers the sheet it raised for a region's detail (GUIDE-08) through `ports.lowerSheet`.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** `web/src/features/sheet/Sheet.svelte` (`lower`); guided tour rebuild 2026-11-11
+- **Expected:** At peek, `lower()` → no detent reported. Functions raises to half; `lower()` → `data-detent="peek"`, detents `['half', 'peek']`.
+- **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R)
+
 ### SHEET-23 · At peek the panels take no focus; above it every panel stop is on screen below the grip
 
 - **Rule:** The sheet is a non-modal region with no focus trap. Tab walks the handle, the name, its clear, then the tablist as one stop. Upright at peek the panels are hidden, so nothing in them is reachable. At half and full every Tab stop in the panel, as the list scrolls, lies fully on screen and below the grip (WCAG 2.4.11). In the app the sheet comes before the stage in reading order and no stop outside it lands under it.

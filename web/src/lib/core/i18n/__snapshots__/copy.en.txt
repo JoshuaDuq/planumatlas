@@ -1073,108 +1073,112 @@
   "done": "Done",
   "close": "Close the tour",
   "skip": "Skip tour",
+  "start": "Start tour",
+  "explore": "Start exploring",
   "progress": "{{current}} of {{total}}",
-  "everything": [
-   "[\"Alpha\"] → \"See everything (Alpha stops)\"",
-   "[\"\"] → \"See everything ( stops)\""
+  "rest": [
+   "[\"Alpha\"] → \"See the rest (Alpha stops)\"",
+   "[\"\"] → \"See the rest ( stops)\""
   ],
+  "yourTurn": "Try it",
+  "didIt": "Done",
   "firstVisit": [
    {
-    "id": "selectRegion",
-    "title": "A region’s detail",
-    "body": "A region you open is described here: its side and group, then Focus, Linked MRI and More (Isolate, Hide), what is known about it, and the research data measured on it."
-   },
-   {
-    "id": "tabs",
-    "title": "Five ways in",
-    "body": "Anatomy lists every region. Functions and Deficits paint published evidence, Circuits walks through pathways, and Tracts shows white matter from this brain’s own diffusion scan. Each says what it shows; About this data says where it comes from."
-   },
-   {
-    "id": "dock",
-    "title": "Tools on the picture",
-    "body": "Section cuts the brain and Display sets what is drawn. Add brings something onto the brain: a lesion of a given size, a published MNI coordinate, or your own map."
+    "id": "finish",
+    "title": "Over to you",
+    "body": "Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter."
    }
   ],
   "stops": [
    {
     "id": "welcome",
-    "title": "How to use Planum",
-    "body": "One individual’s brain, reconstructed from MRI, for learning and research. Not clinical anatomy. The tour opens each feature on the brain, then puts your view back."
+    "title": "Welcome to Planum",
+    "body": "One person’s brain, reconstructed from their MRI and mapped region by region, for learning and research. Not clinical anatomy."
    },
    {
-    "id": "brain",
-    "title": "The brain",
-    "body": "Drag to turn it, scroll or pinch to zoom, and click or tap a region to open it: here the left precentral gyrus, outlined on the brain and described in the panel."
+    "id": "turn",
+    "title": "Turn the brain",
+    "body": "Drag to turn it. Scroll or pinch to zoom."
+   },
+   {
+    "id": "openRegion",
+    "title": "Open a region",
+    "body": "Click or tap any region of the brain."
+   },
+   {
+    "id": "regionDetail",
+    "title": "The region in detail",
+    "body": "Where it lies, its size and what is known about it. Focus greys out the rest of the brain."
    },
    {
     "id": "directions",
-    "title": "Anatomical directions",
-    "body": "The letters name the anatomical directions: choose one to look from that side, as S shows the brain from above, or the centre for the oblique view."
+    "title": "Look from any side",
+    "body": "Choose a letter to look from that side, here S for superior. The centre returns to the oblique view."
    },
    {
     "id": "section",
-    "title": "Section",
-    "body": "Section cuts the brain on a plane, here a coronal one. Drag its slider to move the cut."
+    "title": "Cut through it",
+    "body": "Section cuts the brain on a plane, here coronal. Drag the slider to move through it."
    },
    {
     "id": "linkedMri",
-    "title": "Linked MRI",
-    "body": "The scan this brain was reconstructed from, in three planes around one crosshair. Click a region on the brain and the crosshair moves to it; click a point on a scan and the brain selects the region there. Drag the panel’s left edge to enlarge it. M opens and closes it."
-   },
-   {
-    "id": "lesion",
-    "title": "Lesion",
-    "body": "Lesion places a sphere and reports what it reaches: here 10 mm across the centre of the left precentral gyrus. To try it, open Add, choose Lesion and Places the lesion, then click the brain."
-   },
-   {
-    "id": "coordinate",
-    "title": "Coordinate",
-    "body": "Under Add, Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
-   },
-   {
-    "id": "overlay",
-    "title": "Overlay",
-    "body": "Under Add, Overlay draws your own statistical map or mask, a NIfTI file in an MNI template, on this brain: on the cortex, the deep structures and every cut, with its clusters and peaks. The file is read on this computer and never sent."
+    "title": "The scan behind it",
+    "body": "The MRI this brain was reconstructed from, in three planes. Click the brain and the crosshair follows; click the scan to select what lies there."
    },
    {
     "id": "medial",
-    "title": "The medial surface",
-    "body": "Show one hemisphere alone (Display, then Hemisphere, or the H key), then look from the other side: the left hemisphere seen from the right shows its inner surface."
+    "title": "The inner surface",
+    "body": "Show one hemisphere and look from the other side to see its inner surface: here the left, from the right. Display › Hemisphere, or H."
    },
    {
     "id": "explode",
-    "title": "The exploded view",
-    "body": "Pull the structures apart (Display, then Exploded view, or the E key): each keeps its measured shape, and the deep anatomy shows between the hemispheres."
-   },
-   {
-    "id": "topBar",
-    "title": "The top bar",
-    "body": "Atlas, Colour and Internal anatomy set what is drawn. Click a caption, or the folded bar, to read what each current choice means."
+    "title": "Pull it apart",
+    "body": "The exploded view moves each structure out whole, in its measured shape, so the deep anatomy shows. Display › Exploded view, or E."
    },
    {
     "id": "functions",
-    "title": "Functions",
-    "body": "Functions paints published evidence for a function on the brain, says what it changed, and offers the way back: here language. Its Linked MRI shows the same map on the scan."
+    "title": "Map a function",
+    "body": "Functions paints where studies report activation for a function, here language: evidence pooled from many people, drawn on this brain."
    },
    {
     "id": "deficits",
-    "title": "Deficits",
-    "body": "Deficits paints the regions that lesion studies tie to a deficit: here aphasia. Its Linked MRI shows them on the scan."
+    "title": "Map a deficit",
+    "body": "Deficits paints the regions that lesion studies tie to a deficit, here aphasia."
    },
    {
     "id": "circuits",
-    "title": "Circuits",
-    "body": "Circuits walks through an anatomical pathway, landmark by landmark: here the visual pathway, starting at the optic chiasm."
+    "title": "Follow a pathway",
+    "body": "Circuits walks through a pathway one landmark at a time: here the visual pathway, from the optic chiasm."
    },
    {
     "id": "tracts",
-    "title": "Tracts",
-    "body": "Tracts shows white-matter bundles reconstructed from diffusion MRI."
+    "title": "White matter",
+    "body": "Tracts draws white-matter bundles reconstructed from this brain’s own diffusion scan, coloured by direction."
+   },
+   {
+    "id": "lesion",
+    "title": "Place a lesion",
+    "body": "Add › Lesion places a sphere and lists what it reaches: here one of 10 mm radius in the left precentral gyrus."
+   },
+   {
+    "id": "coordinate",
+    "title": "Find a coordinate",
+    "body": "Add › Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
+   },
+   {
+    "id": "overlay",
+    "title": "Bring your own map",
+    "body": "Add › Overlay draws your own NIfTI map, in MNI space, on this brain and its cuts. The file never leaves your computer."
+   },
+   {
+    "id": "topBar",
+    "title": "What is drawn",
+    "body": "This names the atlas and colours on the brain. Open it to change them or the internal anatomy, each with a note on what it shows."
    },
    {
     "id": "settings",
     "title": "Settings",
-    "body": "Language, theme and keyboard shortcuts (or press<NBSP>?) are here, with Start over and this tour."
+    "body": "Language, theme, keyboard shortcuts (press ?) and Start over are here, with this tour whenever you want it again."
    }
   ]
  },

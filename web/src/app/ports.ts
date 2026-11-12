@@ -40,8 +40,10 @@ export interface UiPorts
   /** A stage tool opened from the panel, as its own press would (the Deficits list's Simulate a lesion). */
   openStageTool(tool: 'lesion'): void;
   /** The guided tour, from the masthead that opens it from the settings menu. */
-  /** `short` for a first visit's six stops; the settings menu's is every stop. */
+  /** `short` for a first visit's own stops; the settings menu's is every stop. */
   startGuide(short?: boolean): void;
+  /** A phone's sheet back to peek, so the stage has its room (the guided tour's). */
+  lowerSheet(): void;
   /**
    * Shows the detail without raising a phone's sheet over the camera: a link restores a view,
    * it does not pick (`links.hooks.showDetail`). `showDetail` (a selection) raises it.
@@ -86,6 +88,7 @@ const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> =
   closeMpr: true,
   toggleShortcuts: true,
   startGuide: true,
+  lowerSheet: true,
   openStageTool: true,
   openFunction: true,
   openDeficit: true,
