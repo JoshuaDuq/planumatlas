@@ -209,12 +209,21 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-66 · The lobe colouring is keyed by its lobes, front to back
 
-- **Rule:** While the colour is Lobes and no paint covers it, the stage shows one plate titled "Lobes" with a row per lobe the atlas on screen has, in the fixed order Frontal, Central, Parietal, Occipital, Temporal, Lateral fissure, Insula, Cingulate, Limbic, each named as the Anatomy list names its group in the reader's language. It has no note and its rows are not toggles. An atlas grouped by network has no lobes and no plate.
+- **Rule:** While the colour is Lobes and no paint covers it, the stage shows one plate titled "Lobes" with a row per lobe the atlas on screen has, in the fixed order Frontal, Central, Parietal, Occipital, Temporal, Lateral fissure, Insula, Cingulate, Limbic, each named as the Anatomy list names its group in the reader's language (a lobe whose name a system in the list shares is qualified as the list qualifies it: "Limbic lobe" beside the Limbic system, `lobeKeyRows`). It has no note and its rows are not toggles. An atlas grouped by network has no lobes and no plate.
 - **Kind:** behaviour
-- **Level:** unit (`lobeRows`, `keyPlates`)
+- **Level:** unit (`lobeRows`, `lobeKeyRows`, `keyPlates`)
 - **Source:** `web/src/lib/core/catalog/lobes.ts`; `web/src/features/stage/stage-keys.ts`; parsimony round 2026-11-11
-- **Expected:** Destrieux → the nine rows in that order; Julich-Brain in French → eight rows, no Lateral fissure, "Pariétal", Frontal [136, 204, 238]; HCP-MMP → `[]`.
-- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/features/stage/stage-keys.test.ts` (R, the plate, under a paint and on HCP-MMP)
+- **Expected:** Destrieux → the nine rows in that order; Julich-Brain in French → eight rows, no Lateral fissure, "Pariétal", Frontal [136, 204, 238]; HCP-MMP → `[]`. `lobeKeyRows` with a Limbic system in the groups → "Limbic lobe", Frontal unchanged; without one → "Limbic".
+- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/lib/core/panels/navigator.test.ts` (R, "the stage key names a lobe as the tree does…"); `src/features/stage/stage-keys.test.ts` (R, the plate, under a paint and on HCP-MMP)
+
+### STAGE-67 · A phone popover's room is chosen with the popover in it
+
+- **Rule:** An open phone popover tells the camera how far it covers the stage (`clearPlate`), and the camera passes that cover to the layout's framing (`framing(cover)`), which chooses its room (below, beside or in the corner of the gizmo) above the popover rather than choosing for the dock and having the popover cut off afterwards. The engine still keeps the bottom inset at least the cover.
+- **Kind:** behaviour
+- **Level:** browser (layout); unit (engine contract, fake and real)
+- **Source:** `web/src/lib/state/stage-layout.svelte.ts`; `web/src/lib/engine/framing.ts`; live-site review 2026-11-11
+- **Expected:** 390×790 stage, gizmo at 270,70 (80 px), cover 580 → the framed picture is more than twice what choosing without the cover leaves. `clearPlate(mid-stage)` → the source receives `y + height − top`; `clearPlate(null)` → 0.
+- **Covered by:** `src/lib/state/stage-layout.svelte.test.ts` (R, "above an open phone popover…"); `src/lib/engine/fake/contract-suite.ts` (R, "tells the framing source how far…")
 
 ### STAGE-19 · Over the tract reference no tool is left and the dock is not drawn
 
@@ -386,7 +395,25 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 - **Expected:** Lesion open → placing `false`; "Place" → `true`; a click on the canvas → still open, `true`; a press outside → closed, `false`; reopened → "Place" `aria-pressed="false"`. Placing, then Section → `false`. Lesion open, canvas click → closed, never `true`. Section open, canvas click → closed. Tract reference → no "Add", placing `false`.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
+### STAGE-55a · Add's two lesion clicks share one line in English
+
+- **Rule:** "Selects a region" and "Places the lesion" are sized by their words with the place choice's 6 px padding, so in the 272 px popover each English label is one line and both sit on one row; a longer translation wraps inside its pill.
+- **Kind:** layout
+- **Level:** browser
+- **Source:** `web/src/features/lesion/LesionPopover.svelte`; live-site review 2026-11-11
+- **Expected:** host 238 px wide (272 less two 17 px paddings) → each label's text has one line box, at the same top.
+- **Covered by:** `src/features/lesion/LesionPopover.svelte.test.ts` (R)
+
 ## Size, reflow and media
+
+### STAGE-55b · Beside its report, a placed sphere's popover offers no second Remove
+
+- **Rule:** While a placed lesion's or coordinate's report is the detail in front on a wider screen (Anatomy, no region selected, the panel's detail shown: `ports.detailShown`), its popover still says the centre but drops "Show the report" and Remove, which the report already offers. Elsewhere (another tab, the list in front, a phone's sheet) the popover keeps both.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** `web/src/features/lesion/LesionPopover.svelte`, `CoordinatePopover.svelte`; `web/src/app/regions/StageRegion.svelte`; live-site review 2026-11-11
+- **Expected:** placed lesion, `reportShown` true → centre shown, no "Show the report", no "Remove"; false → both. Workspace: `detailShown()` false on the list, true after `showDetail()`.
+- **Covered by:** `src/features/lesion/LesionPopover.svelte.test.ts` (R); `src/features/workspace/Workspace.svelte.test.ts` (R)
 
 ### STAGE-33 · Dock targets are 24 px, 44 px on a coarse pointer, at the legacy sizes
 

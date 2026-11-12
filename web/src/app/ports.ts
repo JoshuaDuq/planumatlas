@@ -49,13 +49,21 @@ export interface UiPorts
   showDetailInPlace(): void;
   /** Focus is inside a region's detail view, where Escape is Back. */
   focusInDetail(): boolean;
+  /** The panel shows its detail rather than its list. */
+  detailShown(): boolean;
   mprOpen(): boolean;
   diffusionMriOpen(): boolean;
   shortcutsOpen(): boolean;
 }
 
 /** Questions whose honest answer, while nothing has mounted to ask, is no. */
-const QUERIES = ['focusInDetail', 'mprOpen', 'diffusionMriOpen', 'shortcutsOpen'] as const;
+const QUERIES = [
+  'focusInDetail',
+  'detailShown',
+  'mprOpen',
+  'diffusionMriOpen',
+  'shortcutsOpen',
+] as const;
 
 const COMMANDS: Record<Exclude<keyof UiPorts, (typeof QUERIES)[number]>, true> = {
   showDetail: true,

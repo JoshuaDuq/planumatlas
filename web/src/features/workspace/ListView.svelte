@@ -245,6 +245,7 @@
       : undefined}
     elsewhere={othersOf('diffusion')}
     onElsewhere={(mode, query) => carry(mode, query)}
+    onTick={() => session.notify(null)}
   />
 </div>
 

@@ -345,11 +345,12 @@ export function createAnatomyCommands(
     try {
       if (!(await reveal(reason, id, current)) || !id) return;
       commands.succeeded('region');
-      // What the reveal changed comes first, so its Restore is the notice's action.
+      // What the reveal changed is said; its Restore is the location bar's while the region is in
+      // front, so the notice does not offer it a second time.
       const said = revealNotice(session.state.lang, before, settingsNow());
       if (said) {
         beforeReveal = { scene, region: id };
-        session.notify({ kind: 'info', text: said, action: 'restore' });
+        session.notify({ kind: 'info', text: said, action: null });
       }
       focusSelection();
     } catch (error) {

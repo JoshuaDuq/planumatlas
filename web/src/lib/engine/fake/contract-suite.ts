@@ -1423,6 +1423,22 @@ export function defineEngineContract(
         assert.ok(asked > 0);
       });
 
+      it('tells the framing source how far an open phone popover covers the stage', () => {
+        const { camera } = world().engine;
+        const covers: number[] = [];
+        camera.setFramingSource((cover) => {
+          covers.push(cover);
+          return { inset: {}, scale: { horizontal: 1, vertical: 1 } };
+        });
+        const { y, height } = camera.visibleRect;
+        // Over the middle of the stage, where the framed anatomy is drawn.
+        const top = y + height / 2;
+        camera.clearPlate(top);
+        assert.equal(covers.at(-1), y + height - top);
+        camera.clearPlate(null);
+        assert.equal(covers.at(-1), 0);
+      });
+
       it('shrinks the visible rectangle for the sheet, and says so', () => {
         const { engine } = world();
         const { camera } = engine;

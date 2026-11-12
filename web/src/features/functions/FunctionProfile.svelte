@@ -427,7 +427,8 @@
     .kind + .caveat {
       margin-top: var(--space-2);
     }
-    .summary + .caveat {
+    .summary + .caveat,
+    .caveat + .caveat {
       margin-top: var(--space-2);
     }
     .note {

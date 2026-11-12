@@ -5,6 +5,7 @@ import { cutAtlasesOf } from '../catalog/visibility.ts';
 import {
   groupDisplayName,
   labelledGroups,
+  lobeKeyRows,
   matchedAlias,
   matchesElsewhere,
   matchSegments,
@@ -88,6 +89,20 @@ test('a group name says which vocabulary it is from only when two vocabularies s
     groupDisplayName('Limbique', structure, new Set(['Limbique']), 'fr'),
     'Système limbique',
   );
+});
+
+test('the stage key names a lobe as the tree does, only where a system shares its name', () => {
+  const rows = [{ id: 'Frontal', label: 'Frontal' }, { id: 'Limbic', label: 'Limbic' }];
+  const groups = [group('Frontal', lobe), group('Limbic', lobe), group('Limbic', structure)];
+  assert.deepEqual(
+    lobeKeyRows(rows, 'destrieux', groups, 'en').map((row) => [row.id, row.label]),
+    [
+      ['Frontal', 'Frontal'],
+      ['Limbic', 'Limbic lobe'],
+    ],
+  );
+  // With no Limbic system in the tree, the lobe keeps its plain name.
+  assert.equal(lobeKeyRows(rows, 'destrieux', groups.slice(0, 2), 'en')[1]!.label, 'Limbic');
 });
 
 test('two families in one vocabulary keep their names', () => {

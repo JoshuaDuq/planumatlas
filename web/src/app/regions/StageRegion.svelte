@@ -37,6 +37,7 @@
   import type { World } from '../application.svelte.ts';
   import { casesKey } from '../../lib/core/panels/stroke-cases.ts';
   import { lobeRows } from '../../lib/core/catalog/lobes.ts';
+  import { lobeKeyRows } from '../../lib/core/panels/navigator.ts';
 
   /** `children` is where I3b mounts the stage status, before and after the engine. */
   let { children }: { children?: Snippet } = $props();
@@ -261,7 +262,12 @@
     {@const { model } = world.engine}
     {@const lobes =
       current.surfaceColor === 'lobe'
-        ? lobeRows(model.regions.values(), current.atlas, current.lang)
+        ? lobeKeyRows(
+            lobeRows(model.regions.values(), current.atlas, current.lang),
+            current.atlas,
+            world.regions.groups({ ...current, internalSystem: null }),
+            current.lang,
+          )
         : null}
     {@const commands = {
       resetView: world.anatomy.resetView,
@@ -285,6 +291,13 @@
       // The raised sheet leaves a phone's popover no stage to sit on.
       if (app.media.phone) close();
     }}
+    <!-- The report is in the panel beside the stage: its Remove serves, and showing it again would do nothing.
+         A phone's sheet may cover it, so a phone keeps the popover's own. -->
+    {@const reportShown = () =>
+      !app.media.phone &&
+      current.explorer === 'anatomy' &&
+      current.selectedRegion === null &&
+      app.ports.detailShown()}
     <StageOverlay
       engine={world.engine}
       stage={app.stage}
@@ -311,6 +324,7 @@
         lesion={world.lesion}
         placement={world.coordinates!}
         lang={current.lang}
+        {reportShown}
         onReport={() => showReport(close)}
       />
     {/snippet}
@@ -357,6 +371,7 @@
           lang={current.lang}
           {placing}
           onPlacing={setPlacing}
+          {reportShown}
           onReport={() => showReport(close)}
         />
       {/snippet}

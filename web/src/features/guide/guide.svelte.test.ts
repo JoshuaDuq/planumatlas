@@ -168,6 +168,13 @@ test('GUIDE-03 · a first visit runs six stops after the welcome; the last start
   expect(card().textContent).toMatch(/Add brings something onto the brain/);
   const everything = card().querySelector<HTMLButtonElement>('.guide-everything')!;
   expect(everything.textContent).toBe(`See everything (${STOPS} stops)`);
+  // On a line under the words, so the count, Back and Done keep the footer to one line.
+  const footer = card().querySelector('.driver-popover-footer')!;
+  expect(footer.contains(everything)).toBe(false);
+  const tops = [...footer.querySelectorAll('.driver-popover-progress-text, button')].map((element) =>
+    Math.round(element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2),
+  );
+  expect(new Set(tops).size).toBe(1);
   everything.click();
   expect(title()).toBe('How to use Planum');
   expect(card().querySelector('.driver-popover-progress-text')!.textContent).toBe(`1 of ${STOPS}`);
@@ -393,6 +400,19 @@ test('the brain stop’s card sits in the stage’s dark space, in a band the an
   expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
   card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
   expect(reserved.at(-1)).toEqual({ right: 0, bottom: 0 });
+});
+
+test('a new card is hidden until it takes its seat, so it never shows where driver.js put it', async () => {
+  start();
+  next().click();
+  expect(title()).toBe('The brain');
+  // Rendered beside the stage by driver.js, not yet moved into it.
+  expect(getComputedStyle(card()).visibility).toBe('hidden');
+  const stage = document.querySelector('#viewport canvas')!.getBoundingClientRect();
+  await expect.poll(() => getComputedStyle(card()).visibility).toBe('visible');
+  // Shown already at its seat, with no slide from where it was rendered.
+  expect(Math.round(card().getBoundingClientRect().right)).toBe(Math.round(stage.right - 8));
+  expect(document.activeElement).toBe(next());
 });
 
 test('the panel tabs’ cards sit in the stage’s dark space, off the panel they open', async () => {

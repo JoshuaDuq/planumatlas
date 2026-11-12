@@ -450,10 +450,11 @@ export function createExcursions(
         : clinical.drawnAs(id, model.settings.detail);
     if (!(await commands.revealRegions(shown, current))) return false;
     model.select(shown[0]!);
-    sayRevealed(before);
     // With the context around it a deficit's regions get, not filling the stage on its own.
     render();
-    camera.frameRegions(shown);
+    const unseen = camera.frameRegions(shown);
+    // The profile's notice spoke of its own view: this one is said, or that one goes.
+    if (!sayRevealed(before, unseenNotice(unseen))) session.notify(null);
     render();
     return true;
   }

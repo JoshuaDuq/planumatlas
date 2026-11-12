@@ -1055,6 +1055,15 @@ describe('accessibility', () => {
     expect(notes().join(' ')).toContain('The overview combines several term maps.');
   });
 
+  test('the two caveats are separate paragraphs with a gap between them', async () => {
+    mount();
+    await open(few().id);
+    const [caveat, consistency] = [...document.querySelectorAll('.note.caveat')].map((note) =>
+      note.getBoundingClientRect(),
+    );
+    expect(consistency!.top - caveat!.bottom).toBeGreaterThanOrEqual(8);
+  });
+
   test('targets: 24 px or more with a fine pointer', async () => {
     mount();
     await open(many().id);

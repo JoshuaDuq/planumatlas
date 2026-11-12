@@ -18,11 +18,14 @@
     lesion,
     placement,
     lang,
+    reportShown,
     onReport,
   }: {
     lesion: LesionStore;
     placement: Pick<CoordinatePlacement, 'metadata' | 'place'>;
     lang: Language;
+    /** The report is in the panel in front, with its own Remove. */
+    reportShown: () => boolean;
     /** Open the report in the panel. */
     onReport: () => void;
   } = $props();
@@ -112,14 +115,16 @@
   </div>
   {#if placed}
     <p class="centre">{formatRas(placed.centre, lang)}</p>
-    <div class="actions">
-      <button type="button" class="stage-command" onclick={onReport}>
-        {t(lang, 'lesion').showReport}
-      </button>
-      <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
-        {t(lang, 'lesion').remove}
-      </button>
-    </div>
+    {#if !reportShown()}
+      <div class="actions">
+        <button type="button" class="stage-command" onclick={onReport}>
+          {t(lang, 'lesion').showReport}
+        </button>
+        <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
+          {t(lang, 'lesion').remove}
+        </button>
+      </div>
+    {/if}
   {/if}
 </form>
 <AboutData place="coordinate" {lang} host="popover" />

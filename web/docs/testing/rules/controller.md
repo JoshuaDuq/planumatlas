@@ -187,9 +187,10 @@ checks them in the browser today and could run in the unit project over the fake
   - other system → clear the system filter
   - no cut → CTRL-19
 
-  If the same reason comes back, the reveal fails with a notice and selects nothing. The notice's
-  Restore (as Reset display's and Start over's) puts back the scene from before; one a later command
-  overtakes keeps that scene, so the notice's Restore still works.
+  If the same reason comes back, the reveal fails with a notice and selects nothing. A reveal's notice
+  says what it changed without an action: its Restore is the location bar's, shown while the revealed
+  region is in front. Reset display's and Start over's notices offer Restore themselves; it puts back
+  the scene from before, and one a later command overtakes keeps that scene, so Restore still works.
 
 - **Kind:** behaviour
 - **Level:** unit
@@ -266,11 +267,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-26 · A region a function or deficit names is opened as an excursion step
 
-- **Rule:** A region listed by a function or deficit is drawn, selected and framed with context around it. It holds the scene if no excursion holds one yet. On Functions, a structure is opened as the teaching units that carry its score unless aseg is shown; the first is selected and all are framed.
+- **Rule:** A region listed by a function or deficit is drawn, selected and framed with context around it. It holds the scene if no excursion holds one yet. On Functions, a structure is opened as the teaching units that carry its score unless aseg is shown; the first is selected and all are framed. The profile's notice spoke of its own view, so the step replaces it: what the reveal changed and what the new framing cannot show are said, as a deficit's are, and with nothing to say the notice goes.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:1019-1034`
-- **Expected:** `openListedRegion('destrieux:left:25')` → `true`, selected, Restore offered, `frameRegions(['destrieux:left:25'])`. From nextbrain, `motor` open, `aseg:left:13` → detail learning, `learning:left:pallidum-external` selected, both pallidal units framed.
+- **Source:** `viewer/app.js:1019-1034`; live-site review 2026-11-11
+- **Expected:** `openListedRegion('destrieux:left:25')` → `true`, selected, Restore offered, `frameRegions(['destrieux:left:25'])`. From nextbrain, `motor` open, `aseg:left:13` → detail learning, `learning:left:pallidum-external` selected, both pallidal units framed. After a function whose notice says an area is out of sight: the area framed in sight → no notice; framed out of sight → "Out of sight from this view: …".
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R)
 
 ### CTRL-27 · Restore previous view returns to the scene before the excursion

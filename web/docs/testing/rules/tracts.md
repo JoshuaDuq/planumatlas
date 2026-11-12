@@ -486,3 +486,12 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 - **Level:** unit; pytest
 - **Expected:** `tractEnds(cdmd)` keys = bundle ids; a catalog missing one → throws "do not match its bundles"; `tests/test_tract_ends.py` passes (ball of 123 voxels at 3 mm, shares over all ends, edge refused, published = recomputed).
 - **Covered by:** `src/lib/core/diffusion/ends.test.ts`; `tests/test_tract_ends.py`
+
+### TRACT-53 · A tick ends a standing notice
+
+- **Rule:** Ticking or clearing a bundle's key is the reader's next action, so the list tells the page (`onTick`) and a standing notice ("Previous view restored.") goes, as a display change ends one.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** `web/src/features/tracts/TractsExplorer.svelte`; `web/src/features/workspace/ListView.svelte`; live-site review 2026-11-11
+- **Expected:** Space on "Cingulum · left" twice → checked then cleared, `onTick` called twice.
+- **Covered by:** `src/features/tracts/TractsExplorer.svelte.test.ts` (R, "each tick or clear is told…")

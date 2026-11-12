@@ -631,10 +631,11 @@ describe('revealing a region', () => {
     const { anatomy, session, reader } = build();
     engine.model.setHemisphere('right');
     await anatomy.revealRegion('hemisphere', SULCUS);
+    // The location bar offers Restore while the region is in front; the notice does not repeat it.
     expect(session.state.notice).toMatchObject({
       kind: 'info',
       text: 'Both hemispheres shown.',
-      action: 'restore',
+      action: null,
     });
     // Held past the notice, for the location bar's Restore while the region is in front.
     expect(anatomy.revealedRegion).toBe(SULCUS);

@@ -317,10 +317,7 @@
   {#if shown}
     <div role="group" aria-label={copy.sectionNames[plane as keyof typeof copy.sectionNames]}>
       <div class="section-bar-row">
-        <span class="section-bar-name">
-          <span class="section-bar-full">{copy.modes[plane]}</span>
-          <span class="section-bar-short" aria-hidden="true">{copy.modesShort[plane]}</span>
-        </span>
+        <span class="section-bar-name">{copy.modes[plane]}</span>
         {#if !pending}
           <div class="cut-position-row">
             <label class="visually-hidden" for={positionId}>{copy.axes[plane]}</label>
@@ -522,9 +519,6 @@
       flex: none;
       font-size: var(--text-stage);
       font-weight: 600;
-    }
-    .section-bar-short {
-      display: none;
     }
     .cut-position-row {
       grid-area: position;
@@ -798,15 +792,9 @@
       :global(.stage-dock:has(> .section-bar[data-shown])) {
         width: calc(100% - var(--vis-left) - var(--vis-right) - 2 * var(--stage-gutter));
       }
-      /* Always compact here, under the plane's short name, on the tools' words. */
+      /* Always compact here, on the tools' words. */
       .section-bar[data-shown] {
         padding: 0 0 0 var(--space-3);
-      }
-      .section-bar-full {
-        display: none;
-      }
-      .section-bar-short {
-        display: inline;
       }
       .section-bar:not([data-expanded='true']) .cut-angles {
         display: none;

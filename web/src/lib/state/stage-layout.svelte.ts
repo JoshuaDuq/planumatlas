@@ -406,8 +406,9 @@ export function createStageLayout({
      * The insets and scale the camera frames with, keeping the anatomy clear of the dock, the colour keys,
      * the markings and the gizmo (viewport-chrome.js:263-270). Register it with `engine.camera.setFramingSource`.
      */
-    framing: (): FramingClearance => {
-      const reach = dockReach() + guideInset.bottom;
+    framing: (cover = 0): FramingClearance => {
+      // An open phone popover reaches higher than the dock it opens from: the room is chosen above it.
+      const reach = Math.max(dockReach() + guideInset.bottom, cover);
       fitKeys();
       // The tour's card and the keys both end at the stage's right edge: the wider band holds both.
       const band = Math.max(keyInset.right, guideInset.right);

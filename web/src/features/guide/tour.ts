@@ -126,6 +126,9 @@ type Seat = 'overDock' | 'underTabs';
 /** The scan's download, when the cut before has not already brought it. */
 const MRI_WAIT_MS = 10_000;
 
+/** Marks a card rendered but not yet placed (tour.css). */
+const ENTERING = 'data-entering';
+
 /**
  * Where each stop points, the side its card takes, and the view it opens, as link parameters over
  * the tour's own home view: each stop shows its feature on the brain rather than describing it.
@@ -431,6 +434,13 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
       else if (seats[index]?.at) placeAtSeat(card, seats[index].at, seats[index].selector);
       else clearPanels(card);
       if (phone || seats[index]?.at) reserve({ right: 0, bottom: bottomBand(card) });
+      if (card.hasAttribute(ENTERING)) {
+        // Read once so the first seat is taken without the transition, then shown; a hidden card
+        // cannot hold focus, so Next takes it here.
+        void getComputedStyle(card).translate;
+        card.removeAttribute(ENTERING);
+        card.querySelector<HTMLElement>('.driver-popover-next-btn')?.focus();
+      }
     });
   };
   const menus = new MutationObserver(placeCard);
@@ -479,6 +489,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
     }) => {
       wrapper.lang = lang;
       card = wrapper;
+      // A new card waits unseen for its seat, rather than drawing where driver.js put it and sliding over.
+      wrapper.setAttribute(ENTERING, '');
       // The anatomy eases out of the band first; the card follows the stage once it has.
       if (!phone)
         reserve({ right: inStage[tour.getActiveIndex()!] ? stageBand(wrapper) : 0, bottom: 0 });
@@ -487,9 +499,8 @@ function drive(lang: Language, options: GuideOptions, reader: string): void {
         description.append(languageChoice());
         footerButtons.prepend(skipButton());
       }
-      if (short && !tour.hasNextStep()) footerButtons.prepend(everythingButton());
-      // driver.js focuses the first control, the close button, right after this hook.
-      queueMicrotask(() => nextButton.focus());
+      // On a line of its own under the words: beside Back, Done and the count it wrapped the footer.
+      if (short && !tour.hasNextStep()) description.append(everythingButton());
       title.setAttribute('role', 'heading');
       title.setAttribute('aria-level', '2');
       wrapper.addEventListener('keydown', (event) => {

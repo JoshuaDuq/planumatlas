@@ -175,7 +175,7 @@ export function createFraming({
   const { camera, controls } = scene;
   let view: ViewName = 'oblique';
   let framed = false;
-  let framingSource: (() => FramingClearance) | null = null;
+  let framingSource: ((cover: number) => FramingClearance) | null = null;
   // A phone's open stage popover: framing keeps the anatomy above its plate's top edge, on the host.
   let plateTop: number | null = null;
   // The reader's magnification, as a multiple of the distance at which the whole brain just fills the
@@ -375,18 +375,16 @@ export function createFraming({
    * popover's plate reaches higher than the dock it opens from.
    */
   function applyFraming({ immediate = false }: MoveOptions = {}): boolean {
-    const { inset, scale } = framingSource?.() ?? {
+    const { y, height } = scene.visibleRect;
+    const cover = plateTop === null ? 0 : y + height - plateTop;
+    const { inset, scale } = framingSource?.(cover) ?? {
       inset: {},
       scale: { horizontal: 1, vertical: 1 },
     };
     const rescaled =
       scale.horizontal !== framingScale.horizontal || scale.vertical !== framingScale.vertical;
     framingScale = scale;
-    const { y, height } = scene.visibleRect;
-    const cleared =
-      plateTop === null
-        ? inset
-        : { ...inset, bottom: Math.max(inset.bottom ?? 0, y + height - plateTop) };
+    const cleared = { ...inset, bottom: Math.max(inset.bottom ?? 0, cover) };
     return scene.setFramingInset(cleared, { immediate }) || rescaled;
   }
 

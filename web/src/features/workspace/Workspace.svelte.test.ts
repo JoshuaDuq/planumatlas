@@ -28,6 +28,7 @@ interface Setup {
   holder: {
     workspace?: {
       focusInDetail(): boolean;
+      detailShown(): boolean;
       showDetail(): void;
       showList(): void;
       back(): void;
@@ -283,8 +284,10 @@ describe('list and detail', () => {
     world.selectedRegion = null;
     await expect.poll(view).toBe('list');
     expect(calls).not.toContain('return');
+    expect(holder.workspace!.detailShown()).toBe(false);
     holder.workspace!.showDetail();
     await expect.poll(view).toBe('detail');
+    expect(holder.workspace!.detailShown()).toBe(true);
     await settle();
     expect(view()).toBe('detail');
   });

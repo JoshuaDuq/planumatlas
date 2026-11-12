@@ -75,6 +75,20 @@ export function groupDisplayName(
   return shared.has(name) ? t(lang, 'navigator').groupIn[vocabularyOf(region)](name) : name;
 }
 
+/** The stage key's lobes, named as the tree beside it names their groups (a Limbic lobe beside the Limbic system). */
+export function lobeKeyRows<R extends { label: string }>(
+  rows: readonly R[],
+  atlas: string,
+  groups: readonly NamedGroup[],
+  lang: Language,
+): R[] {
+  const shared = sharedGroupNames(groups);
+  return rows.map((row) => ({
+    ...row,
+    label: groupDisplayName(row.label, { kind: 'cortex', atlas }, shared, lang),
+  }));
+}
+
 /** Groups with their shown names, alphabetical by that name within each family, families kept in order. */
 export function labelledGroups<G extends NamedGroup>(
   groups: readonly G[],

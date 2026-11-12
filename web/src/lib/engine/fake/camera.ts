@@ -100,9 +100,11 @@ export function createFakeCamera({
   let view: string = 'oblique';
   let size: Size = { ...hostSize };
   let visibleRect: Rect = { x: 0, y: 0, ...hostSize };
-  let framingSource: (() => FramingClearance) | null = null;
+  let framingSource: ((cover: number) => FramingClearance) | null = null;
   // The fake draws nothing a plate could miss, so any plate it is given covers the anatomy.
   let plateTop: number | null = null;
+  /** How far the open phone popover reaches up from the visible stage's bottom, as the engine passes it. */
+  const cover = () => (plateTop === null ? 0 : visibleRect.y + visibleRect.height - plateTop);
   let current: CameraView = describe();
 
   function describe(): CameraView {
@@ -147,7 +149,7 @@ export function createFakeCamera({
   }
 
   function frameView(name: ViewName) {
-    framingSource?.();
+    framingSource?.(cover());
     face(name);
     hold(true);
     moved();
@@ -186,13 +188,13 @@ export function createFakeCamera({
       emit('viewport', { visibleRect: { ...visibleRect }, hostSize: { ...size } });
     },
     refitDock() {
-      framingSource?.();
+      framingSource?.(cover());
       moved();
     },
     clearPlate(top) {
       if (top === plateTop) return;
       plateTop = top;
-      framingSource?.();
+      framingSource?.(cover());
       moved();
     },
 

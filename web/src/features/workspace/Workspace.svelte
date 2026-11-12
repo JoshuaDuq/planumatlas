@@ -287,6 +287,10 @@
   export function showDetail() {
     if (!reference) move('detail');
   }
+  /** Whether the detail, not the list, is in front. */
+  export function detailShown() {
+    return view === 'detail';
+  }
   /** Back to the list, as the Back button does. */
   export function back() {
     returnToList();

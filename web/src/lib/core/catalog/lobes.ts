@@ -63,7 +63,7 @@ export function lobeColor(region: Region): Rgb | null {
   return lobe === null ? null : LOBE_COLORS[lobe]!;
 }
 
-/** The lobes an atlas's regions fall in, in key order, each named as the list names its group. */
+/** The lobes an atlas's regions fall in, in key order, each by its group's name (lobeKeyRows qualifies a shared one). */
 export function lobeRows(
   regions: Iterable<Region>,
   atlas: string,

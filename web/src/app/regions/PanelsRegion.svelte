@@ -266,6 +266,7 @@
       },
       back: () => shell.back(),
       focusInDetail: () => shell.focusInDetail(),
+      detailShown: () => shell.detailShown(),
       focusSearch(mode) {
         // The list was hidden a moment ago: its field is focusable once the page shows it.
         flushSync();

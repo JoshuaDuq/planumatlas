@@ -469,9 +469,11 @@ export interface EngineCamera {
 
   /**
    * Register the pull the engine measures the dock with, at the moment it frames: the section bar can
-   * change it in the same task (app.js:372-378, viewport-chrome.js:263).
+   * change it in the same task (app.js:372-378, viewport-chrome.js:263). `cover` is how far an open phone
+   * popover reaches up from the visible stage's bottom (`clearPlate`), 0 without one, so the source chooses
+   * its room with the popover in it.
    */
-  setFramingSource(source: () => FramingClearance): void;
+  setFramingSource(source: (cover: number) => FramingClearance): void;
   /** The phone sheet covers part of the canvas; `settle` is the sheet easing to a detent (scene.js:488). */
   setChromeInsets(insets: ChromeInsets, motion: ChromeMotion): void;
   /**

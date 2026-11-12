@@ -79,6 +79,7 @@ function props(engine: Engine, extra: Record<string, unknown> = {}) {
     onOpenMri: () => {},
     elsewhere: () => [],
     onElsewhere: () => {},
+    onTick: () => {},
     ...extra,
   };
 }
@@ -225,6 +226,17 @@ describe('the list', () => {
     await expect.poll(() => engine.tracts.hasBundle('cg-left')).toBe(true);
     await expect.poll(() => el('Cingulum · left').checked).toBe(true);
     await expect.poll(() => region.textContent).toBe('Loaded: Cingulum · left');
+  });
+
+  test('each tick or clear is told, so a standing notice ends with it', async () => {
+    let ticks = 0;
+    await ready(createEngine(), { onTick: () => ticks++ });
+    el('Cingulum · left').focus();
+    await userEvent.keyboard(' ');
+    await expect.poll(() => el('Cingulum · left').checked).toBe(true);
+    await userEvent.keyboard(' ');
+    await expect.poll(() => el('Cingulum · left').checked).toBe(false);
+    expect(ticks).toBe(2);
   });
 
   test('the requested state shows while a bundle downloads, and reverts if the download fails', async () => {

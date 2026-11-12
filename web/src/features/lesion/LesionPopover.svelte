@@ -19,6 +19,7 @@
     lang,
     placing,
     onPlacing,
+    reportShown,
     onReport,
   }: {
     lesion: LesionStore;
@@ -26,6 +27,8 @@
     /** A click on the brain places the lesion. */
     placing: boolean;
     onPlacing: (placing: boolean) => void;
+    /** The report is in the panel in front, with its own Remove. */
+    reportShown: () => boolean;
     /** Open the report in the panel. */
     onReport: () => void;
   } = $props();
@@ -75,20 +78,26 @@
 </div>
 {#if placed}
   <p class="centre">{formatRas(placed.centre, lang)}</p>
-  <div class="actions">
-    <button type="button" class="stage-command" onclick={onReport}>{copy.showReport}</button>
-    <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
-      {copy.remove}
-    </button>
-  </div>
+  {#if !reportShown()}
+    <div class="actions">
+      <button type="button" class="stage-command" onclick={onReport}>{copy.showReport}</button>
+      <button type="button" class="stage-command stage-command-quiet" onclick={remove}>
+        {copy.remove}
+      </button>
+    </div>
+  {/if}
 {/if}
 <AboutData place="lesion" {lang} host="popover" />
 
 <style>
   @layer features {
-    /* The two clicks share the track and wrap, so a longer translation grows the pill instead of leaving it. */
+    /*
+     * The two clicks are sized by their words with the place choice's 6px padding, so English fits one line
+     * in the 272px popover; a longer translation wraps and grows the pill instead of leaving it.
+     */
     :global(.lesion-click [role='radio']) {
-      flex: 1 1 0;
+      flex: 1 1 auto;
+      padding-inline: 6px;
       height: auto;
       min-height: calc(var(--control-height) - 4px);
       padding-block: var(--space-1);

@@ -30,6 +30,7 @@ function mount(place: (entered: number[], space: string) => Promise<boolean>) {
     lesion,
     placement: { metadata, place: spy },
     lang: 'en',
+    reportShown: () => false,
     onReport() {},
   });
   const field = document.querySelector<HTMLInputElement>('input[type="text"]')!;
@@ -117,6 +118,7 @@ test('Remove leaves focus on the field, not the page', async () => {
     lesion: placed as unknown as LesionStore,
     placement: { metadata, place: async () => true },
     lang: 'en',
+    reportShown: () => false,
     onReport() {},
   });
   await page.getByRole('button', { name: 'Remove' }).click();

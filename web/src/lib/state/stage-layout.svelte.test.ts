@@ -473,6 +473,22 @@ describe('framing', () => {
       expect(wide.framing()).toEqual({ ...expected, inset: { ...expected.inset, left: 400 } });
     });
 
+    test('above an open phone popover it chooses its room with the popover in it, beside the gizmo', () => {
+      const room = { width: 390, height: 790 };
+      const stage = stageOf(room.width, room.height, { width: 200, height: 44 });
+      stage.registerGizmo(gizmoIn(stage, room, { left: 270, top: 70, size: 80 }));
+      // The popover reaches from the bottom up to 210 px below the stage's top.
+      const cover = room.height - 210;
+      const extent = ({ inset, scale }: ReturnType<typeof stage.framing>) => {
+        const width = room.width - inset.left! - inset.right!;
+        const height = room.height - inset.top! - Math.max(inset.bottom!, cover);
+        return Math.min(scale.vertical * height, (scale.horizontal * width) / 2);
+      };
+      const told = stage.framing(cover);
+      // Choosing as if only the dock were there, then cutting the popover off, kept far less of the picture.
+      expect(extent(told)).toBeGreaterThan(2 * extent(stage.framing()));
+    });
+
     test('a gizmo in a corner the picture never reaches changes nothing, nor does a hidden one', () => {
       const room = { width: 1080, height: 840 };
       const stage = stageOf(room.width, room.height);

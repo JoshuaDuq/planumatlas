@@ -60,6 +60,7 @@
     onOpenTract,
     elsewhere,
     onElsewhere,
+    onTick,
   }: {
     engine: Pick<Engine, 'tracts' | 'on'>;
     /** The anatomy on screen; its own tracts overlay it, any other shows CDMD's as a reference. */
@@ -83,6 +84,8 @@
     elsewhere: (query: string) => Elsewhere[];
     /** Carries the words to another tab. */
     onElsewhere: (mode: Explorer, query: string) => void | Promise<void>;
+    /** A key ticked or cleared: the reader's next action, which a standing notice lasts until. */
+    onTick: () => void;
   } = $props();
 
   const tracts = $derived(engine.tracts);
@@ -228,6 +231,7 @@
   }
 
   function toggle(id: string, wanted: boolean) {
+    onTick();
     if (tracts.hasBundle(id)) {
       control(() => tracts.setVisible(id, wanted));
       return;

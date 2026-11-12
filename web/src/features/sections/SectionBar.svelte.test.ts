@@ -819,14 +819,14 @@ describe('the compact row', () => {
     await vi.waitFor(() => expect(active()).toBe(control('button', 'More section controls')));
   });
 
-  test('a phone always folds the row, under the plane’s short name', async () => {
+  test('a phone always folds the row, under the plane’s full name', async () => {
     await page.viewport(390, 844);
     await mount({ phone: true }, { width: 390, height: 700 });
     await cutPlane('sagittal');
     expect(bar().dataset.compact).toBe('true');
-    const name = bar().querySelector('.section-bar-name')!;
-    expect(name.querySelector('.section-bar-full')!.checkVisibility()).toBe(false);
-    expect(name.querySelector('.section-bar-short')!.textContent).toBe('Sag');
+    const name = bar().querySelector<HTMLElement>('.section-bar-name')!;
+    expect(name.textContent).toBe('Sagittal');
+    expect(name.checkVisibility()).toBe(true);
     // The dock takes the stage's width less its gutters (stage.css:621).
     const dock = document.querySelector<HTMLElement>('.stage-dock')!;
     const gutter = parseFloat(getComputedStyle(dock).getPropertyValue('--stage-gutter'));
