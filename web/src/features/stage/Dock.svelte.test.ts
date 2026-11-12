@@ -541,7 +541,8 @@ describe('the Display popover', () => {
 
     live.cortexSurface = 'white';
     flushSync();
-    expect(page.getByText('Cortex on the white surface').elements()).toHaveLength(1);
+    // A wider screen's status bar names it; the popover does not say it a second time.
+    expect(page.getByText('Cortex on the white surface').elements()).toHaveLength(0);
     live.view.cortexVisible = false;
     flushSync();
     expect(page.getByRole('combobox').elements()).toHaveLength(0);
@@ -557,21 +558,44 @@ describe('the Display popover', () => {
 describe('what Display has changed', () => {
   const defaults = () => liveState({}).view;
 
-  test('lists the settings away from their defaults, and Reset display asks for them back', async () => {
-    await mount({
-      view: {
-        ...defaults(),
-        hemisphere: 'left',
-        hiddenRegions: new Set(['a', 'b', 'c']),
-        focused: true,
-      },
+  /** A phone, whose status bar is hidden, so Display lists what it changed itself. */
+  async function onPhone(run: () => Promise<void>) {
+    await page.viewport(390, 844);
+    try {
+      await run();
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  }
+
+  test('on a phone it lists the settings away from their defaults, and Reset display asks for them back', async () => {
+    await onPhone(async () => {
+      await mount(
+        {
+          phone: true,
+          view: {
+            ...defaults(),
+            hemisphere: 'left',
+            hiddenRegions: new Set(['a', 'b', 'c']),
+            focused: true,
+          },
+        },
+        { width: 390, height: 700 },
+      );
+      await open('Display, settings changed');
+      expect(popover().querySelector('.changes p')!.textContent).toBe(
+        'Left hemisphere · 3 parts hidden · Region focused',
+      );
+      await press('button', 'Reset display');
+      expect(commands.resetDisplay).toHaveBeenCalledOnce();
     });
+  });
+
+  test('on a wider screen the status bar lists them, so the popover offers no second Reset display', async () => {
+    await mount({ view: { ...defaults(), hemisphere: 'left' } });
     await open('Display');
-    expect(popover().querySelector('.changes p')!.textContent).toBe(
-      'Left hemisphere · 3 parts hidden · Region focused',
-    );
-    await press('button', 'Reset display');
-    expect(commands.resetDisplay).toHaveBeenCalledOnce();
+    expect(popover().querySelector('.changes')).toBeNull();
+    expect(page.getByRole('button', { name: 'Reset display' }).elements()).toHaveLength(0);
   });
 
   test('at the defaults there is nothing to list or reset', async () => {
@@ -582,15 +606,22 @@ describe('what Display has changed', () => {
   });
 
   test('a keyboard reset leaves focus on the hemisphere chosen, not the page', async () => {
-    await mount({ view: { ...defaults(), cortexVisible: false } });
-    commands.resetDisplay.mockImplementation(() => {
-      live.view = defaults();
+    await onPhone(async () => {
+      await mount(
+        { phone: true, view: { ...defaults(), cortexVisible: false } },
+        { width: 390, height: 700 },
+      );
+      commands.resetDisplay.mockImplementation(() => {
+        live.view = defaults();
+      });
+      await open('Display, settings changed');
+      control('button', 'Reset display').focus();
+      await userEvent.keyboard('{Enter}');
+      await vi.waitFor(() => expect(active()).toBe(control('radio', 'Both')));
+      expect(
+        dock().querySelector('.stage-tool[aria-expanded="true"]')!.textContent!.trim(),
+      ).toMatch(/^Display/);
     });
-    await open('Display');
-    control('button', 'Reset display').focus();
-    await userEvent.keyboard('{Enter}');
-    await vi.waitFor(() => expect(active()).toBe(control('radio', 'Both')));
-    expect(tool('Display').getAttribute('aria-expanded')).toBe('true');
   });
 
   test('on a phone, where the status bar is hidden, the Display tool says its settings changed', async () => {
@@ -1038,7 +1069,9 @@ describe('scrubbing a slider clears the plate off the picture', () => {
   });
 
   test('what changed waits for the release, so the plate never grows under the thumb', async () => {
-    await mount();
+    // A phone's popover lists what changed; a wider screen's status bar does.
+    await page.viewport(390, 844);
+    await mount({ phone: true }, { width: 390, height: 700 });
     await press('button', 'Display');
     expect(popover().querySelector('.changes')).toBeNull();
     const height = popover().offsetHeight;
@@ -1050,6 +1083,7 @@ describe('scrubbing a slider clears the plate off the picture', () => {
     hold('pointerup', window);
     flushSync();
     expect(popover().querySelector('.changes p')!.textContent).toBe('Cortex 25%');
+    await page.viewport(1280, 800);
   });
 
   test('a cancelled pointer or a lost capture ends it; another pointer, and the keys, never start it', async () => {

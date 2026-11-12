@@ -5,7 +5,7 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { visibilityOf } from '../../lib/core/catalog/visibility.ts';
   import { t } from '../../lib/core/i18n/index.ts';
-  import { legendFor, paintFor } from '../../lib/core/state/paint.ts';
+  import { comparesMap, legendFor, paintFor } from '../../lib/core/state/paint.ts';
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Vec3 } from '../../lib/engine/api.ts';
@@ -239,8 +239,9 @@
         diffusionMri = true;
       },
       mprOpen: () => linkedMri?.holdsKeys() ?? false,
+      mriOpen: () => mpr.isOpen(),
       diffusionMriOpen: () => diffusionMri,
-      openStageTool: (tool) => dock!.openFromPanel(tool),
+      openStageTool: (tool) => void dock!.openFromPanel(tool),
     });
     const offPick = world.engine.on('pick', ({ point }) => {
       if (point) mpr.follow(point);
@@ -400,6 +401,8 @@
       viewName={current.view}
       {commands}
     />
+    {@const mapDrawn = world.userMap.drawn}
+    {@const againstMap = comparesMap(current, mapDrawn, model.domains!)}
     <StageKeys
       bind:this={keys}
       stage={app.stage}
@@ -411,7 +414,7 @@
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
       {lobes}
-      legend={tractReference || world.userMap.drawn
+      legend={tractReference || (mapDrawn && !againstMap)
         ? null
         : legendFor(
             // The paint the session asks for, which the model may not show yet (syncPaint runs in
@@ -423,6 +426,7 @@
                 clinical: world.clinical,
                 lesion: world.lesion.paint,
                 connectivity: model.connectivity,
+                mapDrawn,
               }),
             },
             {
@@ -433,12 +437,18 @@
               connectivity: model.connectivity,
               label: (id) =>
                 `${world.catalog.label(id).name} · ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
+              map: againstMap
+                ? {
+                    title: mapKey(world.userMap, current.lang)!.title,
+                    threshold: world.userMap.settings.threshold,
+                  }
+                : null,
             },
           )}
       cases={!tractReference && world.strokeCases.cohort.status === 'ready'
         ? casesKey(world.strokeCases.cohort.data, world.strokeCases.chosen, current.lang)
         : null}
-      map={tractReference ? null : mapKey(world.userMap, current.lang)}
+      map={tractReference || againstMap ? null : mapKey(world.userMap, current.lang)}
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
     />

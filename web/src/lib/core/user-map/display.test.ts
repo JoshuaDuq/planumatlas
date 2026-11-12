@@ -43,6 +43,20 @@ test('each sign runs its own scale from the threshold to the top, and saturates 
   assert.deepEqual(mapColour(-60, display), [0, 1, 1]);
 });
 
+test('FUNC-52 · against a paint, a positive value beyond the threshold is one colour off it and another on it', () => {
+  const display = { threshold: 3, max: 7 };
+  const colours = { map: [255, 0, 51], both: [0, 102, 0] } as const;
+  const off = { colours, painted: false };
+  const on = { colours, painted: true };
+  assert.deepEqual(mapColour(3.5, display, off), [1, 0, 0.2]);
+  assert.deepEqual(mapColour(70, display, on), [0, 0.4, 0]);
+  // The threshold itself, negative values and no value are not drawn, painted or not.
+  for (const value of [3, -5, Number.NaN]) {
+    assert.equal(mapColour(value, display, off), null);
+    assert.equal(mapColour(value, display, on), null);
+  }
+});
+
 test('a display needs a threshold of zero or more below a finite top, and some opacity', () => {
   const drawn = { threshold: 0, max: 1, opacity: 1 };
   assert.equal(validDisplay(drawn), true);

@@ -450,12 +450,14 @@
  },
  "deficitKey": {
   "keyAll": [
-   "[true] → \"One colour per finding; a region several findings cite takes the first one’s colour, and regions where the scan shows are not cited. Choose a finding to show it alone.\"",
-   "[false] → \"One colour per finding; a region several findings cite takes the first one’s colour, and tissue-coloured regions are not cited. Choose a finding to show it alone.\""
+   "[\"tissue\"] → \"One colour per finding; a region several findings cite takes the first one’s colour, and tissue-coloured regions are not cited. Choose a finding to show it alone.\"",
+   "[\"scan\"] → \"One colour per finding; a region several findings cite takes the first one’s colour, and regions where the scan shows are not cited. Choose a finding to show it alone.\"",
+   "[\"grey\"] → \"One colour per finding; a region several findings cite takes the first one’s colour, and grey regions are not cited. Choose a finding to show it alone.\""
   ],
   "keyOne": [
-   "[true] → \"The regions this finding cites; regions where the scan shows are not cited.\"",
-   "[false] → \"The regions this finding cites; tissue-coloured regions are not cited.\""
+   "[\"tissue\"] → \"The regions this finding cites; tissue-coloured regions are not cited.\"",
+   "[\"scan\"] → \"The regions this finding cites; regions where the scan shows are not cited.\"",
+   "[\"grey\"] → \"The regions this finding cites; grey regions are not cited.\""
   ],
   "keyAbsent": "An outlined finding has no region coloured in this view.",
   "keyPicked": "Only this finding’s regions. Choose it again for every finding."
@@ -674,22 +676,42 @@
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
   "keyScale": [
-   "[true,\"\"] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\"",
-   "[false,\"Alpha\"] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\""
+   "[\"tissue\",\"\"] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below .\"",
+   "[\"scan\",\"Alpha\"] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below Alpha.\"",
+   "[\"grey\",\"\"] → \"Mean consistency z per area; darker is more consistent. Grey areas fall below .\"",
+   "[\"tissue\",\"Alpha\"] → \"Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\"",
+   "[\"scan\",\"\"] → \"Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\""
   ],
   "keyScaleTerm": [
-   "[true,\"\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\"",
-   "[false,\"Alpha\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\""
+   "[\"tissue\",\"\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below .\"",
+   "[\"scan\",\"Alpha\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below Alpha.\"",
+   "[\"grey\",\"\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Grey areas fall below .\"",
+   "[\"tissue\",\"Alpha\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Tissue-coloured areas fall below Alpha.\"",
+   "[\"scan\",\"\"] → \"Neurosynth term. Mean consistency z per area; darker is more consistent. Areas where the scan shows fall below .\""
   ],
   "keyAll": [
-   "[true] → \"Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.\"",
-   "[false] → \"Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.\""
+   "[\"tissue\"] → \"Each area shows its strongest function; tissue-coloured areas reach none. Choose one to see all its areas.\"",
+   "[\"scan\"] → \"Each area shows its strongest function; areas where the scan shows reach none. Choose one to see all its areas.\"",
+   "[\"grey\"] → \"Each area shows its strongest function; grey areas reach none. Choose one to see all its areas.\""
   ],
   "keyCompare": [
-   "[true] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Areas where the scan shows reach neither.\"",
-   "[false] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Tissue-coloured areas reach neither.\""
+   "[\"tissue\"] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Tissue-coloured areas reach neither.\"",
+   "[\"scan\"] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Areas where the scan shows reach neither.\"",
+   "[\"grey\"] → \"Areas each function reaches at z<NBSP>≥<NBSP>3, and those both reach. Grey areas reach neither.\""
   ],
   "keyShared": "Both",
+  "keyMap": [
+   "[true] → \"Your map’s positive values over the function’s areas: where they overlap on this brain, not a statistical test. The scan shows where neither reaches.\"",
+   "[false] → \"Your map’s positive values over the function’s areas: where they overlap on this brain, not a statistical test. Grey cortex is where neither reaches.\""
+  ],
+  "keyMapFunction": [
+   "[\"Alpha\",\"\"] → \"Alpha, z<NBSP>≥<NBSP>\"",
+   "[\"\",\"Alpha\"] → \", z<NBSP>≥<NBSP>Alpha\""
+  ],
+  "keyMapAbove": [
+   "[\"Alpha\",\"\"] → \"Alpha above \"",
+   "[\"\",\"Alpha\"] → \" above Alpha\""
+  ],
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha: “”\"",
    "[\"\",\"Alpha\"] → \": “Alpha”\""
@@ -905,6 +927,15 @@
    "[\"Alpha\"] → \"Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z<NBSP>≥<NBSP>Alpha.\"",
    "[\"\"] → \"Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z<NBSP>≥<NBSP>.\""
   ],
+  "mapOverlap": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha of the cortex where Alpha is above  lies in these areas, and it covers  of their cortex. By surface area on this brain; deep structures are not counted.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" of the cortex where  is above Alpha lies in these areas, and it covers Alpha of their cortex. By surface area on this brain; deep structures are not counted.\""
+  ],
+  "mapNowhere": [
+   "[\"Alpha\",\"\"] → \"Alpha is above  nowhere on the cortex.\"",
+   "[\"\",\"Alpha\"] → \" is above Alpha nowhere on the cortex.\""
+  ],
+  "mapMeasuring": "Measuring the overlap with your map…",
   "termsHeading": "Neurosynth terms",
   "populationsHeading": "Neurosynth clinical groups",
   "caveat": "Where studies of healthy groups report activation: not this brain, and not what damage would impair.",
@@ -1247,6 +1278,11 @@
    "failed": "Could not copy"
   },
   "linkedMri": "Linked MRI",
+  "showDeep": [
+   "[\"Alpha\"] → \"Show Alpha deep structures\"",
+   "[\"\"] → \"Show  deep structures\""
+  ],
+  "showCortex": "Show the cortex",
   "focus": "Focus",
   "isolate": "Isolate",
   "restore": "Restore",
@@ -2058,8 +2094,11 @@
    "[\"\",\"Alpha\"] → \"r<NBSP><NBSP>to<NBSP>Alpha\""
   ],
   "keyNote": [
-   "[\"Alpha\",\"\"] → \"Group-mean correlation with the outlined area; darker is stronger. Tissue-coloured areas fall below r Alpha, as half of all pairs do.\"",
-   "[\"\",\"Alpha\"] → \"Group-mean correlation with the outlined area; darker is stronger. Areas where the scan shows fall below r , as half of all pairs do.\""
+   "[\"Alpha\",\"scan\"] → \"Group-mean correlation with the outlined area; darker is stronger. Areas where the scan shows fall below r Alpha, as half of all pairs do.\"",
+   "[\"\",\"grey\"] → \"Group-mean correlation with the outlined area; darker is stronger. Grey areas fall below r , as half of all pairs do.\"",
+   "[\"Alpha\",\"tissue\"] → \"Group-mean correlation with the outlined area; darker is stronger. Tissue-coloured areas fall below r Alpha, as half of all pairs do.\"",
+   "[\"\",\"scan\"] → \"Group-mean correlation with the outlined area; darker is stronger. Areas where the scan shows fall below r , as half of all pairs do.\"",
+   "[\"Alpha\",\"grey\"] → \"Group-mean correlation with the outlined area; darker is stronger. Grey areas fall below r Alpha, as half of all pairs do.\""
   ]
  },
  "strokeCases": {

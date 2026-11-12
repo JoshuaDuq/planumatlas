@@ -53,10 +53,18 @@ export function syncPaint(
     clinical: ClinicalCatalog;
     lesion?: { readonly paint: LesionPaint | null };
     connectivity?: FunctionalConnectivity | null;
+    /** The reader's map, which a function is then painted against. */
+    userMap?: { readonly drawn: boolean };
   },
 ) {
   $effect.pre(() =>
-    model.setPaint(paintFor(view.current, { ...sources, lesion: sources.lesion?.paint ?? null })),
+    model.setPaint(
+      paintFor(view.current, {
+        ...sources,
+        lesion: sources.lesion?.paint ?? null,
+        mapDrawn: sources.userMap?.drawn ?? false,
+      }),
+    ),
   );
 }
 

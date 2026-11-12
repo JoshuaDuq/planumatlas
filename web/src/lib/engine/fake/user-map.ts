@@ -1,6 +1,12 @@
 import type { Cluster } from '../../core/user-map/clusters.ts';
 import type { MapCourse } from '../../core/user-map/course.ts';
-import type { CortexSurface, MapDisplay, MapSummary } from '../../core/user-map/display.ts';
+import type {
+  CortexSurface,
+  MapDisplay,
+  MapOverlap,
+  MapSummary,
+} from '../../core/user-map/display.ts';
+import type { OverlapAreas } from '../../core/user-map/overlap.ts';
 import { validDisplay } from '../../core/user-map/display.ts';
 import type { EngineUserMap } from '../api.ts';
 
@@ -17,6 +23,7 @@ export interface FakeUserMap extends EngineUserMap {
   readonly clusterSizes: readonly (readonly [number, number, number])[];
   readonly extents: readonly (readonly [number, number, number])[];
   readonly surface: CortexSurface;
+  readonly overlap: MapOverlap | null;
   /** Settle the pending `load` with this summary, or reject it with this error. */
   settle(result: MapSummary | Error): void;
 }
@@ -26,6 +33,7 @@ export function createFakeUserMap(
   available: boolean,
   table: (threshold: number) => Cluster[] = () => [],
   courses: (region: string) => MapCourse | null = () => null,
+  areas: (regions: readonly string[]) => OverlapAreas = () => ({ map: 0, function: 0, both: 0 }),
 ): FakeUserMap {
   const clusterThresholds: number[] = [];
   const clusterSizes: [number, number, number][] = [];
@@ -34,6 +42,7 @@ export function createFakeUserMap(
   let loadedVolume: number | null = null;
   let surface: CortexSurface = 'pial';
   let shown: MapDisplay | null = null;
+  let overlap: MapOverlap | null = null;
   let pending: {
     space: string;
     volume: number;
@@ -73,6 +82,16 @@ export function createFakeUserMap(
     },
     get surface() {
       return surface;
+    },
+    get overlap() {
+      return overlap;
+    },
+    setOverlap(next) {
+      overlap = next;
+    },
+    async overlapAreas(regions) {
+      if (!loaded || !shown) throw new Error('No map is drawn.');
+      return areas(regions);
     },
     setSurface(next) {
       surface = next;

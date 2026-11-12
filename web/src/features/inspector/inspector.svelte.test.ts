@@ -319,6 +319,18 @@ describe('commands', () => {
     expect(document.activeElement).toBe(isolate());
   });
 
+  test('Linked MRI is latched while the MRI is open, and a press then closes it', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, { regionId: V1, calls });
+    const mri = button('Linked MRI');
+    expect(mri.element().getAttribute('aria-pressed')).toBe('false');
+    await screen.rerender({ regionId: V1, calls, mriOpen: true });
+    expect(mri.element().getAttribute('aria-pressed')).toBe('true');
+    expect(mri.element().getAttribute('data-active')).toBe('true');
+    await mri.click();
+    expect(calls).toEqual(['close mri']);
+  });
+
   test('Linked MRI: a keyboard activation is instant, a pointer click is not', async () => {
     const calls: unknown[] = [];
     render(Fixture, { regionId: V1, calls });

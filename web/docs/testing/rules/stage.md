@@ -415,6 +415,15 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 - **Expected:** placed lesion, `reportShown` true → centre shown, no "Show the report", no "Remove"; false → both. Workspace: `detailShown()` false on the list, true after `showDetail()`.
 - **Covered by:** `src/features/lesion/LesionPopover.svelte.test.ts` (R); `src/features/workspace/Workspace.svelte.test.ts` (R)
 
+### STAGE-55c · Display lists what it changed only on a phone; the exploded view gives the camera back
+
+- **Rule:** A wider screen's status bar lists the display changes with Reset display, so the Display popover lists them only on a phone, whose status bar is hidden. Exploding from a side view turns the camera to the front; putting the brain back together restores the view it turned from (`camera.restore`) while the camera still holds that front view, and otherwise frames the brain as it stands.
+- **Kind:** behaviour
+- **Level:** browser (Dock); unit (controller)
+- **Source:** `web/src/features/stage/Dock.svelte`, `DisplayPopover.svelte`; `web/src/lib/controller/anatomy.svelte.ts`; live-site review 2026-11-11
+- **Expected:** 1280 px, left hemisphere → no `.changes`, no "Reset display" in the popover; 390 px → "Left hemisphere · 3 parts hidden · Region focused" and Reset display. Explode from the opening view → `applyView('anterior')`; un-explode → `restore(<that view>, <its capture>)`, view name back; explode, choose Posterior, un-explode → no restore, `frameWhole`.
+- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/lib/controller/anatomy.svelte.test.ts` (R)
+
 ### STAGE-33 · Dock targets are 24 px, 44 px on a coarse pointer, at the legacy sizes
 
 - **Rule:** Every tool, radio and tick-box label is at least 24 × 24 px, and 44 × 44 px on a coarse pointer. At 100 % text the hemisphere radios are 28 px tall; under the phone query every choice is 44 px; on a coarse pointer the tick box is 20 × 20 px with an 11 × 6 px tick. The gizmo's targets are STAGE-53.

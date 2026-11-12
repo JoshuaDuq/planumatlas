@@ -31,7 +31,7 @@ import {
   createMriUniforms,
   setMriHighlight,
   setMriWindow,
-  setScanPainted,
+  setPainted,
 } from './mri-material.ts';
 import type { MriUniforms } from './mri-material.ts';
 
@@ -244,7 +244,7 @@ function painted(
     color: new Color().setRGB(PAINT[0] / 255, PAINT[1] / 255, PAINT[2] / 255, SRGBColorSpace),
   });
   add(material, uniforms);
-  setScanPainted(material, true);
+  setPainted(material, true);
   const tone = draw(material, light);
   release(material, uniforms);
   return tone;

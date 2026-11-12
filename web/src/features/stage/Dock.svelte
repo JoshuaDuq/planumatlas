@@ -186,11 +186,14 @@
   }
 
   /** Opens a tool from elsewhere in the page as its own press would, focus moving into it; an open one keeps it. */
-  export function openFromPanel(tool: 'lesion') {
+  export async function openFromPanel(tool: 'lesion') {
     placeChoice = tool;
     const button = tools.querySelector<HTMLElement>('.stage-tool[data-tool="place"]')!;
     if (button.getAttribute('aria-expanded') === 'true') button.focus();
     else button.click();
+    // "Simulate a lesion" asks to place one: the next click on the brain does, once the choice is open.
+    await tick();
+    placing = true;
   }
 
   /** The first tool left, or the model once the tract reference takes them all; runs before they hide. */
@@ -354,7 +357,7 @@
           {hasSpinalCord}
           exploded={view.exploded}
           {explodable}
-          {changes}
+          changes={media.phone ? changes : []}
           {scrubbing}
           onHemisphere={commands.setHemisphere}
           onCortexVisible={commands.setCortexVisible}

@@ -14,7 +14,13 @@
 import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapCourse } from '../core/user-map/course.ts';
-import type { CortexSurface, MapDisplay, MapSummary } from '../core/user-map/display.ts';
+import type {
+  CortexSurface,
+  MapDisplay,
+  MapOverlap,
+  MapSummary,
+} from '../core/user-map/display.ts';
+import type { OverlapAreas } from '../core/user-map/overlap.ts';
 import type { CabNpPartition } from '../core/catalog/networks.ts';
 import type { FunctionalRegions } from '../core/catalog/functional-regions.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
@@ -813,6 +819,16 @@ export interface EngineUserMap {
   setSurface(surface: CortexSurface): void;
   /** Draw the loaded map with these settings, or hide it with null. */
   show(display: MapDisplay | null): void;
+  /**
+   * Draw the map against the paint, a function's areas: its positive values above the threshold in
+   * `map`, or `both` where the paint is, the paint kept beneath; null draws it on its own scale.
+   */
+  setOverlap(overlap: MapOverlap | null): void;
+  /**
+   * The drawn map's overlap with these regions over the shown atlas's cortex, in mm² of this brain's
+   * mid-thickness surface: where it is above its threshold, where the regions are, and both.
+   */
+  overlapAreas(regions: readonly string[]): Promise<OverlapAreas>;
   /** Forget the map. */
   clear(): void;
 }

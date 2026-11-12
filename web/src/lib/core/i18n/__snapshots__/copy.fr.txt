@@ -450,12 +450,14 @@
  },
  "deficitKey": {
   "keyAll": [
-   "[true] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions où l’IRM reste visible ne sont pas citées. Choisissez un constat pour l’afficher seul.\"",
-   "[false] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions couleur tissu ne sont pas citées. Choisissez un constat pour l’afficher seul.\""
+   "[\"tissue\"] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions couleur tissu ne sont pas citées. Choisissez un constat pour l’afficher seul.\"",
+   "[\"scan\"] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions où l’IRM reste visible ne sont pas citées. Choisissez un constat pour l’afficher seul.\"",
+   "[\"grey\"] → \"Une couleur par constat<NNBSP>; une région citée par plusieurs constats prend la couleur du premier, et les régions grises ne sont pas citées. Choisissez un constat pour l’afficher seul.\""
   ],
   "keyOne": [
-   "[true] → \"Les régions que cite ce constat<NNBSP>; les régions où l’IRM reste visible ne sont pas citées.\"",
-   "[false] → \"Les régions que cite ce constat<NNBSP>; les régions couleur tissu ne sont pas citées.\""
+   "[\"tissue\"] → \"Les régions que cite ce constat<NNBSP>; les régions couleur tissu ne sont pas citées.\"",
+   "[\"scan\"] → \"Les régions que cite ce constat<NNBSP>; les régions où l’IRM reste visible ne sont pas citées.\"",
+   "[\"grey\"] → \"Les régions que cite ce constat<NNBSP>; les régions grises ne sont pas citées.\""
   ],
   "keyAbsent": "Un constat cerné n’a aucune région colorée dans cette vue.",
   "keyPicked": "Seulement les régions de ce constat. Choisissez-le de nouveau pour tous les constats."
@@ -674,22 +676,42 @@
    "[\"\",null] → \"z<NBSP>≥<NBSP>\""
   ],
   "keyScale": [
-   "[true,\"\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\"",
-   "[false,\"Alpha\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\""
+   "[\"tissue\",\"\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous .\"",
+   "[\"scan\",\"Alpha\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous Alpha.\"",
+   "[\"grey\",\"\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires grises sont sous .\"",
+   "[\"tissue\",\"Alpha\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\"",
+   "[\"scan\",\"\"] → \"Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\""
   ],
   "keyScaleTerm": [
-   "[true,\"\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\"",
-   "[false,\"Alpha\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\""
+   "[\"tissue\",\"\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous .\"",
+   "[\"scan\",\"Alpha\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous Alpha.\"",
+   "[\"grey\",\"\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires grises sont sous .\"",
+   "[\"tissue\",\"Alpha\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires couleur tissu sont sous Alpha.\"",
+   "[\"scan\",\"\"] → \"Terme Neurosynth. Constance z moyenne par aire<NNBSP>; plus foncé, plus constant. Les aires où l’IRM reste visible sont sous .\""
   ],
   "keyAll": [
-   "[true] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires où l’IRM reste visible n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\"",
-   "[false] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\""
+   "[\"tissue\"] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires couleur tissu n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\"",
+   "[\"scan\"] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires où l’IRM reste visible n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\"",
+   "[\"grey\"] → \"Chaque aire montre sa fonction la plus forte<NNBSP>; les aires grises n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.\""
   ],
   "keyCompare": [
-   "[true] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires où l’IRM reste visible n’en atteignent aucune.\"",
-   "[false] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.\""
+   "[\"tissue\"] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires couleur tissu n’en atteignent aucune.\"",
+   "[\"scan\"] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires où l’IRM reste visible n’en atteignent aucune.\"",
+   "[\"grey\"] → \"Les aires que chaque fonction atteint à z<NBSP>≥<NBSP>3, et celles que les deux atteignent. Les aires grises n’en atteignent aucune.\""
   ],
   "keyShared": "Les deux",
+  "keyMap": [
+   "[true] → \"Les valeurs positives de votre carte sur les aires de la fonction<NNBSP>: là où elles se recouvrent sur ce cerveau, et non un test statistique. L’IRM reste visible là où aucune n’atteint.\"",
+   "[false] → \"Les valeurs positives de votre carte sur les aires de la fonction<NNBSP>: là où elles se recouvrent sur ce cerveau, et non un test statistique. Le cortex gris est là où aucune n’atteint.\""
+  ],
+  "keyMapFunction": [
+   "[\"Alpha\",\"\"] → \"Alpha, z<NBSP>≥<NBSP>\"",
+   "[\"\",\"Alpha\"] → \", z<NBSP>≥<NBSP>Alpha\""
+  ],
+  "keyMapAbove": [
+   "[\"Alpha\",\"\"] → \"Alpha au-dessus de \"",
+   "[\"\",\"Alpha\"] → \" au-dessus de Alpha\""
+  ],
   "termOf": [
    "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: «  »\"",
    "[\"\",\"Alpha\"] → \"<NNBSP>: « Alpha »\""
@@ -905,6 +927,15 @@
    "[\"Alpha\"] → \"Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z<NBSP>≥<NBSP>Alpha.\"",
    "[\"\"] → \"Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z<NBSP>≥<NBSP>.\""
   ],
+  "mapOverlap": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Alpha du cortex où Alpha dépasse  se trouve dans ces aires, et la carte couvre  de leur cortex. Par surface sur ce cerveau<NNBSP>; les structures profondes ne sont pas comptées.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" du cortex où  dépasse Alpha se trouve dans ces aires, et la carte couvre Alpha de leur cortex. Par surface sur ce cerveau<NNBSP>; les structures profondes ne sont pas comptées.\""
+  ],
+  "mapNowhere": [
+   "[\"Alpha\",\"\"] → \"Alpha ne dépasse  nulle part sur le cortex.\"",
+   "[\"\",\"Alpha\"] → \" ne dépasse Alpha nulle part sur le cortex.\""
+  ],
+  "mapMeasuring": "Mesure du recouvrement avec votre carte…",
   "termsHeading": "Termes Neurosynth",
   "populationsHeading": "Groupes cliniques Neurosynth",
   "caveat": "Là où les études de groupes en bonne santé rapportent une activation<NNBSP>: ni ce cerveau, ni ce qu’une lésion altérerait.",
@@ -1247,6 +1278,11 @@
    "failed": "Copie impossible"
   },
   "linkedMri": "IRM liée",
+  "showDeep": [
+   "[\"Alpha\"] → \"Afficher Alpha structures profondes\"",
+   "[\"\"] → \"Afficher  structures profondes\""
+  ],
+  "showCortex": "Afficher le cortex",
   "focus": "Cibler",
   "isolate": "Isoler",
   "restore": "Rétablir",
@@ -2058,8 +2094,11 @@
    "[\"\",\"Alpha\"] → \"r<NBSP>de<NBSP><NBSP>à<NBSP>Alpha\""
   ],
   "keyNote": [
-   "[\"Alpha\",\"\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
-   "[\"\",\"Alpha\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\""
+   "[\"Alpha\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r Alpha, comme la moitié de toutes les paires.\"",
+   "[\"\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires grises sont sous r , comme la moitié de toutes les paires.\"",
+   "[\"Alpha\",\"tissue\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
+   "[\"\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\"",
+   "[\"Alpha\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires grises sont sous r Alpha, comme la moitié de toutes les paires.\""
   ]
  },
  "strokeCases": {

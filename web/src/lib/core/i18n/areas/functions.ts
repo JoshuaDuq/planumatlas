@@ -39,6 +39,12 @@ export const en = {
   paintFrom: 'Paint areas from z ≥',
   paintFromNote: (threshold: string) =>
     `Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z\u00a0≥\u00a0${threshold}.`,
+  // The reader's map drawn against this function; numbers arrive formatted.
+  mapOverlap: (title: string, threshold: string, inside: string, covered: string) =>
+    `${inside} of the cortex where ${title} is above ${threshold} lies in these areas, and it covers ${covered} of their cortex. By surface area on this brain; deep structures are not counted.`,
+  mapNowhere: (title: string, threshold: string) =>
+    `${title} is above ${threshold} nowhere on the cortex.`,
+  mapMeasuring: 'Measuring the overlap with your map…',
   termsHeading: 'Neurosynth terms',
   populationsHeading: 'Neurosynth clinical groups',
   caveat:
@@ -135,6 +141,11 @@ export const fr: typeof en = {
   paintFrom: 'Peindre les aires à partir de z ≥',
   paintFromNote: (threshold: string) =>
     `Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z\u00a0≥\u00a0${threshold}.`,
+  mapOverlap: (title: string, threshold: string, inside: string, covered: string) =>
+    `${inside} du cortex où ${title} dépasse ${threshold} se trouve dans ces aires, et la carte couvre ${covered} de leur cortex. Par surface sur ce cerveau\u202f; les structures profondes ne sont pas comptées.`,
+  mapNowhere: (title: string, threshold: string) =>
+    `${title} ne dépasse ${threshold} nulle part sur le cortex.`,
+  mapMeasuring: 'Mesure du recouvrement avec votre carte…',
   termsHeading: 'Termes Neurosynth',
   populationsHeading: 'Groupes cliniques Neurosynth',
   caveat:

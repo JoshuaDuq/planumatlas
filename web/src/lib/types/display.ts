@@ -11,6 +11,8 @@ import type { Region } from './region.ts';
 export type ViewName = (typeof VIEW_NAMES)[number];
 export type CutMode = (typeof CUTS)[number];
 export type SurfaceColor = (typeof SURFACE_COLORS)[number];
+/** What a paint's key says shows where nothing is painted: tissue, the T1 scan, or a ghost's grey. */
+export type KeyGround = 'tissue' | 'scan' | 'grey';
 export type FunctionalLevel = (typeof FUNCTIONAL_LEVELS)[number];
 export type Hemisphere = (typeof HEMISPHERES)[number];
 

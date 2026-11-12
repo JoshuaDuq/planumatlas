@@ -9,6 +9,7 @@
   import { sharedSide, stageMessage } from '../../lib/core/panels/clinical.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
+  import DeepToggle from '../sections/DeepToggle.svelte';
   import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
   import ProfileBody from './ProfileBody.svelte';
@@ -75,6 +76,13 @@
     <StatusLine class={explorer.actionError ? 'meta error' : 'meta'} text={meta} />
     {#if deficit}
       <LinkedMriButton {lang} onopen={explorer.openMri} />
+      {#if explorer.deps.excursions.beneath}
+        <DeepToggle
+          {lang}
+          beneath={explorer.deps.excursions.beneath}
+          ontoggle={explorer.deps.excursions.showBeneathCortex}
+        />
+      {/if}
       {#key deficit.id}
         <ProfileBody {explorer} {deficit} {lang} {side} {colours} />
       {/key}

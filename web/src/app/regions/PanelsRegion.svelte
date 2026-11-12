@@ -3,6 +3,7 @@
   import { ALL_DOMAINS, functionName } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { keyGround } from '../../lib/core/state/paint.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
   import { documentTitle, offeredNotice } from '../../lib/core/workspace.ts';
   import { reaching } from '../../lib/core/catalog/stroke-cases.ts';
@@ -43,6 +44,7 @@
     lesson,
     visualFieldMap,
     strokeCases,
+    mapOverlap,
   }: World) {
     const { domains, functionalRegions } = engine.model;
     if (!domains)
@@ -56,7 +58,8 @@
       functionalRegions,
       openDeficit: (id) => deficits.openDeficit(id),
       atlas: () => view.current.atlas,
-      scan: () => view.current.surfaceColor === 'mri',
+      ground: () => keyGround(view.current),
+      mapOverlap: () => mapOverlap.current,
     });
     const deficits = createDeficitsExplorer({
       clinical,

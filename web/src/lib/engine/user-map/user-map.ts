@@ -6,7 +6,12 @@ import { readIn } from '../../core/coordinates/spaces.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import type { MapCourse } from '../../core/user-map/course.ts';
 import { VOLUMES_PER_SECOND } from '../../core/user-map/display.ts';
-import type { CortexSurface, MapDisplay, MapSummary } from '../../core/user-map/display.ts';
+import type {
+  CortexSurface,
+  MapDisplay,
+  MapOverlap,
+  MapSummary,
+} from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import {
   partitionField,
@@ -14,6 +19,8 @@ import {
   partitionPoints,
 } from '../../core/user-map/partition.ts';
 import type { Parents } from '../../core/user-map/partition.ts';
+import { overlapAreas, vertexAreas } from '../../core/user-map/overlap.ts';
+import type { OverlapAreas } from '../../core/user-map/overlap.ts';
 import { gridSampler } from '../../core/user-map/sampling.ts';
 import type { BrainAtlas } from '../model/brain-atlas.ts';
 import type { BrainSections } from '../slices/sections.ts';
@@ -24,6 +31,7 @@ import {
   clearUserMapVolume,
   dropPrevious,
   setUserMapDisplay,
+  setUserMapOverlap,
   setUserMapVolume,
 } from './overlay.ts';
 import { regionPoints } from './region-points.ts';
@@ -161,6 +169,25 @@ export function createUserMap({
       white: ras(hemisphere, 'white'),
     });
     return { left: of('left'), right: of('right') };
+  };
+
+  // Each native vertex's mid-thickness area in mm², found once: the surfaces do not change.
+  let midAreas: Promise<Record<Hemisphere, Float64Array>> | null = null;
+  const nativeAreas = () => {
+    midAreas ??= Promise.all([atlas.ensureEnvelopes(), cortexSurfaces()]).then(
+      ([envelopes, surfaces]) => {
+        const of = (hemisphere: Hemisphere) => {
+          const { pial, white } = surfaces[hemisphere];
+          return vertexAreas(
+            surface(envelopes, hemisphere, 'pial').getIndex()!.array,
+            pial.map((value, i) => (value + white[i]!) / 2),
+          );
+        };
+        return { left: of('left'), right: of('right') };
+      },
+    );
+    midAreas.catch(() => (midAreas = null));
+    return midAreas;
   };
 
   const ribbon = (record: RibbonLabels) => {
@@ -335,6 +362,7 @@ export function createUserMap({
 
   // How the map is drawn now; a new extent of it is drawn the same way.
   let shown: MapDisplay | null = null;
+  let overlap: MapOverlap | null = null;
   let drawnExtent = '';
   let drawnVolume = 0;
   let extentRequest = 0;
@@ -386,7 +414,7 @@ export function createUserMap({
     at = gridSampler(map.grid, map.volume);
     setUserMapVolume(uniforms, map.grid, map.volume, moving);
     if (moving) uniforms.userMapBlend.value = 0;
-    if (shown) sections.setUserMap({ at, display: shown });
+    if (shown) sections.setUserMap({ at, display: shown, overlap });
     await paintCortex(moving);
     const now = performance.now();
     if (moving) blendIn(now - placedAt);
@@ -517,9 +545,57 @@ export function createUserMap({
       if (display && !carried) throw new Error('No map is loaded.');
       shown = display;
       setUserMapDisplay(uniforms, display);
-      sections.setUserMap(display && { at: at!, display });
+      sections.setUserMap(display && { at: at!, display, overlap });
       void placeSurface().catch(report);
       invalidate();
+    },
+    /** Draw the map against the paint, a function's areas, in these colours; null draws it on its own scale. */
+    setOverlap(next: MapOverlap | null): void {
+      overlap = next;
+      setUserMapOverlap(uniforms, next);
+      if (shown && at) sections.setUserMap({ at, display: shown, overlap });
+      invalidate();
+    },
+    /**
+     * The drawn map's cortical overlap with `regions` on the shown atlas, in mm² of this brain's
+     * mid-thickness surface, counted as the stage draws it against a function: values above the threshold.
+     */
+    async overlapAreas(regions: readonly string[]): Promise<OverlapAreas> {
+      if (!carried || !shown) throw new Error('No map is drawn.');
+      const map = carried;
+      const { threshold } = shown;
+      const id = atlas.settings.atlas;
+      const record = atlas.manifest.atlases.find((entry) => entry.id === id)?.ribbon_labels as
+        RibbonLabels | undefined;
+      if (!record) throw new Error(`No native labels for the ${id} cortex.`);
+      const [labels, areas] = await Promise.all([ribbon(record), nativeAreas()]);
+      const wanted = new Set(regions);
+      const cortex = new Set<number>();
+      const inside = new Set<number>();
+      for (const [index, region] of record.region_ids.entries()) {
+        if (atlas.regions.get(region)?.kind === 'cortex') cortex.add(index);
+        if (wanted.has(region)) inside.add(index);
+      }
+      const total: OverlapAreas = { map: 0, function: 0, both: 0 };
+      let at = 0;
+      for (const hemisphere of HEMISPHERES) {
+        const count = record.vertex_counts[hemisphere];
+        const part = overlapAreas(
+          {
+            values: map.cortex[hemisphere],
+            labels: labels.subarray(at, at + count),
+            areas: areas[hemisphere],
+          },
+          cortex,
+          inside,
+          threshold,
+        );
+        at += count;
+        total.map += part.map;
+        total.function += part.function;
+        total.both += part.both;
+      }
+      return total;
     },
     /** Forget the map. */
     clear(): void {

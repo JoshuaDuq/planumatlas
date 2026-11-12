@@ -1,6 +1,7 @@
 import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_DISPLAY, preparedOf } from '../../features/colophon/display-state.ts';
+import { visibilityOf } from '../core/catalog/visibility.ts';
 import { syncRouteGhost } from './excursion.svelte.ts';
 import { createScene } from './excursion-test-support.ts';
 
@@ -84,16 +85,6 @@ describe('the whole route’s grey context', () => {
   });
 });
 
-test('the see-through cortex a painted structure holds is the reset’s, not a change', () => {
-  const scene = createScene();
-  scene.paintSeeThrough.heldOpacity = 1;
-  expect(scene.excursions.displayBaseline.cortexOpacity).toBe(
-    scene.engine.model.manifest.appearance.see_through_opacity,
-  );
-  scene.paintSeeThrough.heldOpacity = null;
-  expect(scene.excursions.displayBaseline.cortexOpacity).toBe(1);
-});
-
 test('the display a lesion’s drawn bundle sees through is the reset’s, not a change; leaving the lesson drops its own', async () => {
   const scene = createScene();
   const seeThrough = scene.engine.model.manifest.appearance.see_through_opacity;
@@ -116,5 +107,56 @@ test('the display a lesion’s drawn bundle sees through is the reset’s, not a
     internalVisible: true,
     hiddenRegions: new Set(),
     focused: false,
+  });
+});
+
+describe('the structures a paint colours beneath its cortex', () => {
+  /** A scene whose paint colours drawn regions of each kind, `structures` of them beneath the cortex. */
+  function painted(kind: string, cortex: number, structures: number) {
+    const scene = createScene();
+    const { model } = scene.engine;
+    const drawn = (wanted: string) =>
+      [...model.regions.values()].filter(
+        (region) => region.kind === wanted && visibilityOf(region, model.settings).visible,
+      );
+    const ids = [
+      ...drawn('cortex').slice(0, cortex),
+      ...drawn('structure').slice(0, structures),
+    ].map((region) => region.id);
+    model.setPaint({ id: `${kind}:x`, colors: new Map(ids.map((id) => [id, [1, 2, 3] as const])) });
+    flushSync();
+    return scene;
+  }
+
+  test('a function or deficit painting both offers them, counted; a paint of one kind does not', () => {
+    for (const kind of ['function', 'deficit']) {
+      expect(painted(kind, 2, 3).excursions.beneath).toEqual({ count: 3, hidden: false });
+      expect(painted(kind, 2, 0).excursions.beneath).toBeNull();
+      expect(painted(kind, 0, 3).excursions.beneath).toBeNull();
+    }
+    expect(painted('lesion', 2, 3).excursions.beneath).toBeNull();
+  });
+
+  test('a structure that is not drawn is not counted', () => {
+    const scene = painted('function', 2, 3);
+    scene.engine.model.setInternalVisible(false);
+    flushSync();
+    expect(scene.excursions.beneath).toBeNull();
+  });
+
+  test('showing them hides the cortex and frames them; the cortex comes back framed whole', () => {
+    const scene = painted('deficit', 2, 3);
+    const lastFrame = () =>
+      scene.engine.calls.findLast((call) => call.method.startsWith('frame'))?.method;
+    scene.excursions.showBeneathCortex(true);
+    flushSync();
+    expect(scene.engine.model.settings.cortexVisible).toBe(false);
+    expect(scene.excursions.beneath).toEqual({ count: 3, hidden: true });
+    expect(lastFrame()).toBe('frameInternal');
+    scene.excursions.showBeneathCortex(false);
+    flushSync();
+    expect(scene.engine.model.settings.cortexVisible).toBe(true);
+    expect(scene.excursions.beneath).toEqual({ count: 3, hidden: false });
+    expect(lastFrame()).toBe('frameWhole');
   });
 });

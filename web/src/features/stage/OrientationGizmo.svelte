@@ -431,7 +431,10 @@
       font-weight: 600;
       line-height: 18px;
     }
-    /* A drawn circle of 18 px; pointing away, smaller and dimmer. The held view's is the accent. */
+    /*
+     * A drawn circle of 18 px; pointing away, smaller and dimmer. The held view's is the accent. The outer
+     * ring, as the centre dot's, cuts a nearer circle out of one it overlaps, so the overlap reads as depth.
+     */
     .gizmo-letter > span {
       display: grid;
       place-items: center;
@@ -439,7 +442,9 @@
       height: 18px;
       border-radius: 50%;
       background-color: var(--overlay-raised);
-      box-shadow: inset 0 0 0 1px var(--overlay-halo-core);
+      box-shadow:
+        inset 0 0 0 1px var(--overlay-halo-core),
+        0 0 0 1.5px var(--overlay-halo-core);
       scale: calc(0.8 + 0.2 * var(--near, 1));
     }
     .gizmo-letter[data-facing='away'] {

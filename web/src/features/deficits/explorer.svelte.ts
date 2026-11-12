@@ -24,6 +24,8 @@ export interface DeficitsDeps {
     | 'offerReload'
     | 'involved'
     | 'checkedMaps'
+    | 'beneath'
+    | 'showBeneathCortex'
   >;
   /** X1's entry point, which opens a function under its own runner. */
   openFunction: (id: string) => unknown;

@@ -80,13 +80,17 @@ export function setMriHighlight(uniforms: MriUniforms, color: string): void {
   uniforms.scanHighlight.value.setStyle(color.trim(), LinearSRGBColorSpace);
 }
 
-/** Whether a material shows its own colour, a tab's paint, over the scan instead of the scan. */
-export function setScanPainted(
-  material: { userData: { scanPainted?: { value: boolean } } },
+/**
+ * Whether a material shows a tab's paint: over the scan instead of the scan, and as the function's area
+ * the reader's map is drawn against.
+ */
+export function setPainted(
+  material: { userData: { scanPainted?: { value: boolean }; userMapPainted?: { value: boolean } } },
   painted: boolean,
 ): void {
-  const uniform = material.userData.scanPainted;
-  if (uniform) uniform.value = painted;
+  for (const uniform of [material.userData.scanPainted, material.userData.userMapPainted]) {
+    if (uniform) uniform.value = painted;
+  }
 }
 
 // The window maps signal to a display grey, as the linked MRI canvas writes it.

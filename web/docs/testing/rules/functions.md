@@ -2,7 +2,7 @@
 
 Scope: chunk X1 (#56), the Functions tab: the search field, the list of curated Neurosynth functions and searched terms, the profile of one function (or of all at once), its areas and lesion checks, Restore, and the tab's busy and failure states. Legacy sources: `viewer/ui/panels/functions.js` (the Functions half of the clinical panels; the shared helpers it imports from `viewer/ui/panels/clinical.js`), `index.html:258-277,301-304,338`. New code: `web/src/features/functions/` (`functions-view.ts` is the view-model, `functions-explorer.svelte.ts` the state and commands, `FunctionList`, `FunctionProfile`, `FunctionRestore` draw them). Deviations: `x1-area-name.md`, `x1-focusable-while-opening.md`, `x1-list-semantics.md`, `x1-meta-status.md`, `x1-no-landmarks.md`, `x1-restore-focus.md`, `x1-result-announcement.md`, `x1-search-label.md`; decisions 9, 13, 37 and 38 on #4.
 
-What opening a function does to the scene (draw, frame, hold the scene, the see-through cortex, Restore itself) is in `controller.md` (CTRL-24 to CTRL-36); the domain and term data (`groupedDomains`, `matchingTerms`, `nearestName`, `domainAreas`) are in `core-catalogs.md`; `stageMessage`, `checkedParcels` and the runners are in `core-panels.md`; the list keys (`listNav`) and the debounced announcer are in `ui-kit.md` and `state.md`; a link that carries `function=` is in `links.md`. Counts below are from the published cdmd data (`public/models/cdmd/neuropsych-domains.json`, `neurosynth-terms.json`): 70 curated functions in 6 groups, 11 of them in the overview, 277 searchable terms, threshold z 3. Copy quoted is the English interface text (`web/src/lib/core/i18n/areas/functions.ts`).
+What opening a function does to the scene (draw, frame, hold the scene, the deep-structures button, Restore itself) is in `controller.md` (CTRL-24 to CTRL-36); the domain and term data (`groupedDomains`, `matchingTerms`, `nearestName`, `domainAreas`) are in `core-catalogs.md`; `stageMessage`, `checkedParcels` and the runners are in `core-panels.md`; the list keys (`listNav`) and the debounced announcer are in `ui-kit.md` and `state.md`; a link that carries `function=` is in `links.md`. Counts below are from the published cdmd data (`public/models/cdmd/neuropsych-domains.json`, `neurosynth-terms.json`): 70 curated functions in 6 groups, 11 of them in the overview, 277 searchable terms, threshold z 3. Copy quoted is the English interface text (`web/src/lib/core/i18n/areas/functions.ts`).
 
 ## The list
 
@@ -468,3 +468,39 @@ Measured 2026-11-10/11 before building: no fourth band for z < 3 passes the z sc
 - **Level:** browser
 - **Expected:** working memory → min 3, step 0.5, max ⌊top·2⌋/2, no note; → once → the note, `paintFrom` 3.5, stage line "N HCP-MMP areas … at z ≥ 3.5" with N the areas at 3.5; list length unchanged; attention → back to 3 and `paintFrom` null; in French `aria-valuetext` "3,5"; overview → no control.
 - **Covered by:** `src/features/functions/functions.svelte.test.ts` (R)
+
+## Against the reader's map
+
+A function and the reader's Overlay map drawn together, compared point by point (chosen 2026-11-11 over whole-area agreement, which would coarsen the reader's map to the atlas). The three colours are the comparison's, which stay apart from each other and the tissue under colour-blind vision (FUNC-36–39).
+
+### FUNC-51 · Against a drawn map, one function paints its areas in one colour and keys three
+
+- **Rule:** While the Overlay draws a map and one function or term (not the overview or a comparison) is painted in front, unlifted, on its own atlas, `paintFor` paints the same areas all in `COMPARE_COLORS[0]` under the id `function:<id>[:z<from>]:map`. The stage key is titled "<function> · <map>" and reads "<function>, z ≥ <from>", "<map> above <threshold>" and "Both", the function's row greyed when nothing is painted; the map's own colour-scale key is hidden. In every other case the paint and keys are as before.
+- **Kind:** behaviour
+- **Level:** unit
+- **Expected:** memory against a map → `function:memory:map`, the same regions, every colour `COMPARE_COLORS[0]`; French key "Mémoire · zstat1": "Mémoire, z ≥ 3", "zstat1 au-dessus de 3,1", "Les deux"; overview, comparison, no function, lifted, Deficits, another atlas, or no map → not compared.
+- **Covered by:** `src/lib/core/state/paint.test.ts`
+
+### FUNC-52 · The map's positive values take one colour off the paint and another on it
+
+- **Rule:** Against a function, a point is drawn where the map's value is above the threshold: in `MAP_OVERLAP.map` where no paint is, in `MAP_OVERLAP.both` where it is, at the map's opacity. Negative values are not activation and are not drawn. Beneath, a painted surface or face keeps its paint and the rest is grey, as with the map alone. The same rule holds on the 3D surfaces, the cut faces (`setPainted` sets each material's flag with the scan's) and the Linked MRI.
+- **Kind:** behaviour
+- **Level:** unit and browser (WebGL)
+- **Expected:** `mapColour(3.5, {3, 7}, off)` → the map colour; at 70 on the paint → both; 3, −5 and NaN → nothing. A cut face at 0.8 → exactly the map's or both's bytes; at 0.2 painted → the paint's hue, unpainted → grey; −0.8 → grey. Without the comparison a painted face greys under the map as before. The Linked MRI row: map, unchanged, paint, both.
+- **Covered by:** `src/lib/core/user-map/display.test.ts`, `src/lib/engine/slices/sampling.test.ts`, `src/lib/engine/user-map/overlay.svelte.test.ts` (R)
+
+### FUNC-53 · The overlap is measured by surface area over the shown atlas's cortex
+
+- **Rule:** Each native vertex takes a third of the area of each triangle it is a corner of, on this brain's mid-thickness surface (the mean of pial and white). Over vertices whose parcel is a cortical region of the shown atlas, the map's area is where its value (the depth mean `sampleCortex` drew) is above the threshold, the function's where its parcel is painted, and both where both hold. Deep structures and the medial wall are not counted. Arrays of different lengths throw.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** a 3 × 2 rectangle's corners → 2, 1, 2, 1; a unit cube → 6 in all; the fixture → map 5, function 28, both 4 (a value at the threshold, a negative one, NaN and the medial wall left out).
+- **Covered by:** `src/lib/core/user-map/overlap.test.ts`
+
+### FUNC-54 · The profile says how much of each the other covers, for the map drawn now
+
+- **Rule:** Under the paint threshold, the profile says what share of the map's above-threshold cortex lies in the painted areas and what share of their cortex the map covers, by surface area, deep structures not counted. It is measured again for each paint, atlas, drawn extent and threshold; until then it says it is measuring, and an answer for an earlier one, however late, is dropped. With no cortex above the threshold it says so. Without the comparison there is no line.
+- **Kind:** behaviour
+- **Level:** browser
+- **Expected:** areas map 40, function 200, both 10 → "25% of the cortex where zstat1 is above 3.1 lies in these areas, and it covers 5% of their cortex. …"; unmeasured → "Measuring the overlap with your map…"; map 0 → "zstat1 is above 9 nowhere on the cortex."; the store asks again on a raised paint threshold (fewer regions) and a new extent, keeps the newer answer when the older arrives last, and sets the engine's overlap colours, then null once the map is hidden.
+- **Covered by:** `src/lib/state/map-overlap.svelte.test.ts`, `src/features/functions/functions.svelte.test.ts` (R)

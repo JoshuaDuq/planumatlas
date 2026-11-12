@@ -1,7 +1,7 @@
 import { AGREEMENT_COLORS, categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type { ComparedStructure } from '../../core/catalog/segmentation-agreement.ts';
 import { mapColour } from '../../core/user-map/display.ts';
-import type { MapDisplay } from '../../core/user-map/display.ts';
+import type { MapDisplay, MapOverlap } from '../../core/user-map/display.ts';
 import type { Frame } from './coordinates.ts';
 import type { Volume } from './volume.ts';
 
@@ -34,6 +34,8 @@ export interface SlicePaint {
 export interface SliceMap {
   at(x: number, y: number, z: number): number;
   display: MapDisplay;
+  /** Drawn against the paint, a function's areas, instead of on its own scale. */
+  overlap: MapOverlap | null;
 }
 
 export interface SliceDisplay {
@@ -98,7 +100,13 @@ export function renderSlice(
       const painted = volumes.paint && volumes.paint.colors[volumes.paint.volume.label(point)];
       if (painted)
         for (let channel = 0; channel < 3; channel++) pixels[index + channel] = painted[channel]!;
-      const mapped = volumes.map && mapColour(volumes.map.at(...point), volumes.map.display);
+      const mapped =
+        volumes.map &&
+        mapColour(
+          volumes.map.at(...point),
+          volumes.map.display,
+          volumes.map.overlap && { colours: volumes.map.overlap, painted: Boolean(painted) },
+        );
       if (mapped) {
         const { opacity } = volumes.map!.display;
         for (let channel = 0; channel < 3; channel++) {

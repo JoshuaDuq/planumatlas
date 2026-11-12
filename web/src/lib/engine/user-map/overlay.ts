@@ -1,7 +1,7 @@
 import { Data3DTexture, FloatType, Matrix4, NearestFilter, RGFormat, Vector3 } from 'three';
 import type { IUniform, Material, WebGLProgramParametersWithUniforms, WebGLRenderer } from 'three';
 import { NEGATIVE_RAMP, POSITIVE_RAMP } from '../../core/user-map/display.ts';
-import type { MapDisplay } from '../../core/user-map/display.ts';
+import type { MapDisplay, MapOverlap } from '../../core/user-map/display.ts';
 import type { Grid } from '../../core/user-map/sampling.ts';
 import { ANATOMICAL_WORLD, EXPLODE_SHIFT_UNIFORM, explodeShift } from '../model/explode.ts';
 
@@ -25,6 +25,10 @@ export interface UserMapUniforms {
   userMapBlend: IUniform<number>;
   worldToUserMap: IUniform<Matrix4>;
   userMapShape: IUniform<Vector3>;
+  /** Drawn against a painted function (`MapOverlap`): its colours, sRGB. */
+  userMapOverlap: IUniform<boolean>;
+  userMapOverlapMap: IUniform<Vector3>;
+  userMapOverlapBoth: IUniform<Vector3>;
   [uniform: string]: IUniform;
 }
 
@@ -41,7 +45,24 @@ export function createUserMapUniforms(): UserMapUniforms {
     userMapBlend: { value: 1 },
     worldToUserMap: { value: new Matrix4() },
     userMapShape: { value: new Vector3() },
+    userMapOverlap: { value: false },
+    userMapOverlapMap: { value: new Vector3() },
+    userMapOverlapBoth: { value: new Vector3() },
   };
+}
+
+export function setUserMapOverlap(uniforms: UserMapUniforms, overlap: MapOverlap | null): void {
+  uniforms.userMapOverlap.value = overlap !== null;
+  if (!overlap) return;
+  uniforms.userMapOverlapMap.value.set(...overlap.map).divideScalar(255);
+  uniforms.userMapOverlapBoth.value.set(...overlap.both).divideScalar(255);
+}
+
+/** A material's own flag: whether it shows the paint, which the map's overlap colours read. */
+export function addUserMapPainted(material: Material): IUniform<boolean> {
+  const painted = { value: false };
+  material.userData['userMapPainted'] = painted;
+  return painted;
 }
 
 export function setUserMapDisplay(uniforms: UserMapUniforms, display: MapDisplay | null): void {
@@ -105,14 +126,29 @@ export function clearUserMapVolume(uniforms: UserMapUniforms): void {
 
 const vec3 = (rgb: readonly number[]) => `vec3(${rgb.map((c) => c.toFixed(1)).join(', ')})`;
 
-/** `userMapColour(value)`: the sRGB colour of a value and the map's opacity, or 0 alpha where it is not drawn. */
+/**
+ * `userMapColour(value)`: the sRGB colour of a value and the map's opacity, or 0 alpha where it is not
+ * drawn; against a function, as `mapColour` draws it. `userMapGreys()`: whether the surface is grey
+ * where the map is not drawn, which a painted area is not against a function.
+ */
 export const USER_MAP_COLOUR = `
 uniform bool userMapOn;
 uniform bool userMapOverScan;
 uniform float userMapThreshold;
 uniform float userMapMax;
 uniform float userMapOpacity;
+uniform bool userMapOverlap;
+uniform vec3 userMapOverlapMap;
+uniform vec3 userMapOverlapBoth;
+uniform bool userMapPainted;
+bool userMapGreys() {
+  return !(userMapOverlap && userMapPainted);
+}
 vec4 userMapColour(float value) {
+  if (userMapOverlap) {
+    if (!(value > userMapThreshold)) return vec4(0.0);
+    return vec4(userMapPainted ? userMapOverlapBoth : userMapOverlapMap, userMapOpacity);
+  }
   float magnitude = abs(value);
   if (!(magnitude > userMapThreshold) || value < ${NO_DATA.toExponential()} * 0.5) return vec4(0.0);
   float share = min(1.0, (magnitude - userMapThreshold) / (userMapMax - userMapThreshold));
@@ -182,25 +218,28 @@ export const USER_MAP_OVER_SCAN = `
 export function addUserMapToCap(material: Material, uniforms: UserMapUniforms): void {
   const compile = material.onBeforeCompile;
   const key = material.customProgramCacheKey();
+  const painted = addUserMapPainted(material);
   material.onBeforeCompile = (
     shader: WebGLProgramParametersWithUniforms,
     renderer: WebGLRenderer,
   ) => {
     compile.call(material, shader, renderer);
-    Object.assign(shader.uniforms, uniforms);
+    Object.assign(shader.uniforms, uniforms, { userMapPainted: painted });
     shader.fragmentShader = `${USER_MAP_COLOUR}${USER_MAP_AT}${shader.fragmentShader}`.replace(
       '#include <opaque_fragment>',
       `
         if (userMapOn) {
           vec4 mapped = userMapColour(userMapAt(sourceWorld));
           outgoingLight = mix(
-            vec3(dot(outgoingLight, ${LUMA})), sRGBTransferEOTF(vec4(mapped.rgb, 1.0)).rgb, mapped.a);
+            userMapGreys() ? vec3(dot(outgoingLight, ${LUMA})) : outgoingLight,
+            sRGBTransferEOTF(vec4(mapped.rgb, 1.0)).rgb,
+            mapped.a);
         }
         #include <opaque_fragment>
       `,
     );
   };
-  material.customProgramCacheKey = () => `${key}-user-map-v5`;
+  material.customProgramCacheKey = () => `${key}-user-map-v6`;
 }
 
 /**
@@ -210,12 +249,16 @@ export function addUserMapToCap(material: Material, uniforms: UserMapUniforms): 
 export function addUserMapToSurface(material: Material, uniforms: UserMapUniforms): void {
   const compile = material.onBeforeCompile;
   const key = material.customProgramCacheKey();
+  const painted = addUserMapPainted(material);
   material.onBeforeCompile = (
     shader: WebGLProgramParametersWithUniforms,
     renderer: WebGLRenderer,
   ) => {
     compile.call(material, shader, renderer);
-    Object.assign(shader.uniforms, uniforms, { explodeShift: explodeShift(material) });
+    Object.assign(shader.uniforms, uniforms, {
+      explodeShift: explodeShift(material),
+      userMapPainted: painted,
+    });
     shader.vertexShader =
       `${EXPLODE_SHIFT_UNIFORM}varying vec3 userMapWorld;\n${shader.vertexShader}`.replace(
         '#include <begin_vertex>',
@@ -231,12 +274,12 @@ ${USER_MAP_COLOUR}${USER_MAP_AT}${shader.fragmentShader}`
         if (userMapOn) {
           userMapMapped = userMapColour(userMapAt(userMapWorld));
           diffuseColor.rgb = mix(
-            vec3(dot(diffuseColor.rgb, ${LUMA})),
+            userMapGreys() ? vec3(dot(diffuseColor.rgb, ${LUMA})) : diffuseColor.rgb,
             sRGBTransferEOTF(vec4(userMapMapped.rgb, 1.0)).rgb,
             userMapMapped.a);
         }`,
       )
       .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
-  material.customProgramCacheKey = () => `${key}-user-map-surface-v5`;
+  material.customProgramCacheKey = () => `${key}-user-map-surface-v6`;
 }

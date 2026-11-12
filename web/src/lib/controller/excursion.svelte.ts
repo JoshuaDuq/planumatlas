@@ -29,7 +29,8 @@ import { createLessons } from './lesson.ts';
 import type { MriDialog, SceneReader, Shell } from './lesson.ts';
 import type { EngineModel } from '../engine/api.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
-import type { PaintSeeThrough } from '../state/paint-see-through.svelte.ts';
+import { visibilityOf } from '../core/catalog/visibility.ts';
+import { paintKind } from '../core/state/paint.ts';
 import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { ViewStore } from '../state/view.svelte.ts';
 import { createExplorerChoice, createModes } from './modes.ts';
@@ -76,7 +77,6 @@ export interface ExcursionDeps {
   render: () => void;
   lesion: Pick<LesionStore, 'selectedTract' | 'clearTract' | 'heldOpacity'>;
   strokeCases: Pick<StrokeCasesStore, 'chosen' | 'show' | 'clear' | 'heldOpacity' | 'heldColor'>;
-  paintSeeThrough: Pick<PaintSeeThrough, 'heldOpacity'>;
 }
 
 /**
@@ -98,11 +98,25 @@ export function createExcursions(
     render,
     lesion,
     strokeCases,
-    paintSeeThrough,
   }: ExcursionDeps,
 ) {
   const { engine, session, lesson, view } = ctx;
   const { model, sections, camera } = engine;
+
+  /**
+   * How many drawn structures a function or deficit paints beneath the cortical areas it paints; 0
+   * for a paint with only one of them. The profile offers to hide the cortex for them: seen through,
+   * its areas' colours would blend with what lies behind and no longer read as the key says.
+   */
+  const beneath = $derived.by(() => {
+    const state = view.current;
+    if (!state.paint || !['function', 'deficit'].includes(paintKind(state.paint)!)) return 0;
+    const painted = [...state.paint.colors.keys()].map((id) => model.regions.get(id)!);
+    if (!painted.some((region) => region.kind === 'cortex')) return 0;
+    return painted.filter(
+      (region) => region.kind === 'structure' && visibilityOf(region, state).visible,
+    ).length;
+  });
   if (model.domains?.atlas !== domains.atlas) {
     throw new Error('The model publishes no neuropsychological domains for the Functions tab.');
   }
@@ -399,6 +413,15 @@ export function createExcursions(
     return true;
   }
 
+  /** Hides the cortex to frame the structures a paint colours beneath it, or brings it back. */
+  function showBeneathCortex(hidden: boolean) {
+    model.setCortexVisible(!hidden);
+    render();
+    if (hidden) camera.frameInternal();
+    else camera.frameWhole();
+    render();
+  }
+
   /**
    * The Linked MRI centred on the first of a paint's `regions` that has an anchor, with the paint drawn
    * over the scan; with none, it opens where the crosshair is.
@@ -503,12 +526,12 @@ export function createExcursions(
     /**
      * The display the stage was prepared with, which the reader's changes are counted from and Reset
      * display returns to: the open lesson's, else the defaults; a lesion's drawn bundle sees through
-     * the cortex, as does a painted structure. Tracts' own see-through cortex is `afterReset`'s.
+     * the cortex. Tracts' own see-through cortex is `afterReset`'s.
      */
     get displayBaseline(): PreparedDisplay {
       const open = lessonDisplay && lesson.state.circuit && session.state.explorer === 'circuits';
       const prepared = open ? lessonDisplay! : DEFAULT_DISPLAY;
-      const held = lesion.heldOpacity !== null || paintSeeThrough.heldOpacity !== null;
+      const held = lesion.heldOpacity !== null;
       return held && prepared.cortexVisible
         ? { ...prepared, cortexOpacity: seeThroughOpacity() }
         : prepared;
@@ -525,6 +548,11 @@ export function createExcursions(
     closeFunction,
     openDeficit,
     openFunction,
+    /** The structures the paint colours beneath its cortex and whether it is hidden; null for none. */
+    get beneath(): { count: number; hidden: boolean } | null {
+      return beneath ? { count: beneath, hidden: !view.current.cortexVisible } : null;
+    },
+    showBeneathCortex,
     openFunctionMri,
     openDeficitMri,
     openListedRegion,

@@ -212,6 +212,14 @@ export function createStageLayout({
     host.dataset.dockTall = String(dockTall);
   }
 
+  /** The keys' and a popover's bands, written at once for the same reason: the gizmo and markings sit by them. */
+  function writeBands() {
+    if (!host) return;
+    host.style.setProperty('--key-top', `${keyInset.top}px`);
+    host.style.setProperty('--key-right', `${keyInset.right}px`);
+    host.style.setProperty('--plate-left', `${plateBand}px`);
+  }
+
   /** Runs G3's fitting without signalling a refit; true when it changed the key band. */
   function fitKeys(): boolean {
     if (!keyFitter) return false;
@@ -317,6 +325,7 @@ export function createStageLayout({
     attachHost(element: HTMLElement): () => void {
       host = element;
       writeDock();
+      writeBands();
       return () => {
         if (host === element) host = null;
       };
@@ -349,6 +358,7 @@ export function createStageLayout({
       const changed = inset.top !== keyInset.top || inset.right !== keyInset.right;
       keyInset = inset;
       keySize = size;
+      writeBands();
       if (changed && !fitting) onDock?.();
     },
 
@@ -361,6 +371,7 @@ export function createStageLayout({
     setPlateBand(band: number, options: MoveOptions) {
       if (band === plateBand) return;
       plateBand = band;
+      writeBands();
       onDock?.(options);
     },
 

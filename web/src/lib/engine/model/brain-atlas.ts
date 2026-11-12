@@ -86,11 +86,7 @@ import {
   featherBorders,
   writeFeatherPalette,
 } from '../render/border-feather.ts';
-import {
-  addMriSurfaceAppearance,
-  createMriUniforms,
-  setScanPainted,
-} from '../render/mri-material.ts';
+import { addMriSurfaceAppearance, createMriUniforms, setPainted } from '../render/mri-material.ts';
 import type { MriSurfaceSample, MriUniforms } from '../render/mri-material.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import { loadRibbonSources } from '../tissues/solid-assets.ts';
@@ -1245,7 +1241,7 @@ export class BrainAtlas extends EventTarget {
         // medial wall keeps the tissue it always had.
         material.color.copy(this.sourceColors.get(mesh)!);
         const painted = paint?.colors.get(region.id);
-        setScanPainted(material, Boolean(painted));
+        setPainted(material, Boolean(painted));
         if (painted) {
           material.color.setRGB(
             painted[0] / 255,

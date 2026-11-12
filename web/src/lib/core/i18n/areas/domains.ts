@@ -1,3 +1,18 @@
+import type { KeyGround } from '../../../types/index.ts';
+
+const EN_AREAS: Record<KeyGround, string> = {
+  tissue: 'tissue-coloured areas',
+  scan: 'areas where the scan shows',
+  grey: 'grey areas',
+};
+const FR_AREAS: Record<KeyGround, string> = {
+  tissue: 'les aires couleur tissu',
+  scan: 'les aires où l’IRM reste visible',
+  grey: 'les aires grises',
+};
+/** A phrase opening a sentence. */
+const cap = (phrase: string) => phrase[0]!.toUpperCase() + phrase.slice(1);
+
 export const en = {
   heading: 'Neuropsychological functions',
   // Numbers arrive formatted (format.js decimal).
@@ -16,17 +31,22 @@ export const en = {
   // Numbers arrive formatted (format.js decimal); `to` is null for the open top band.
   band: (from: string, to: string | null) =>
     (to ? `z ${from} to ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
-  // `scan` is true while the T1 scan shows where nothing is painted.
+  // `ground` is what shows where nothing is painted.
   // `floor` is the threshold the paint starts at, formatted: the published 3, or the reader's.
-  keyScale: (scan: boolean, floor: string) =>
-    `Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below ${floor}.`,
-  keyScaleTerm: (scan: boolean, floor: string) =>
-    `Neurosynth term. Mean consistency z per area; darker is more consistent. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below ${floor}.`,
-  keyAll: (scan: boolean) =>
-    `Each area shows its strongest function; ${scan ? 'areas where the scan shows' : 'tissue-coloured areas'} reach none. Choose one to see all its areas.`,
-  keyCompare: (scan: boolean) =>
-    `Areas each function reaches at z\u00a0≥\u00a03, and those both reach. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} reach neither.`,
+  keyScale: (ground: KeyGround, floor: string) =>
+    `Mean consistency z per area; darker is more consistent. ${cap(EN_AREAS[ground])} fall below ${floor}.`,
+  keyScaleTerm: (ground: KeyGround, floor: string) =>
+    `Neurosynth term. Mean consistency z per area; darker is more consistent. ${cap(EN_AREAS[ground])} fall below ${floor}.`,
+  keyAll: (ground: KeyGround) =>
+    `Each area shows its strongest function; ${EN_AREAS[ground]} reach none. Choose one to see all its areas.`,
+  keyCompare: (ground: KeyGround) =>
+    `Areas each function reaches at z\u00a0≥\u00a03, and those both reach. ${cap(EN_AREAS[ground])} reach neither.`,
   keyShared: 'Both',
+  // Against the reader's map: `floor` and `threshold` arrive formatted.
+  keyMap: (scan: boolean) =>
+    `Your map’s positive values over the function’s areas: where they overlap on this brain, not a statistical test. ${scan ? 'The scan shows where' : 'Grey cortex is where'} neither reaches.`,
+  keyMapFunction: (name: string, floor: string) => `${name}, z\u00a0≥\u00a0${floor}`,
+  keyMapAbove: (title: string, threshold: string) => `${title} above ${threshold}`,
   termOf: (name: string, term: string) => `${name}: “${term}”`,
   lesionCheck: (items: string[]) => `Lesion check: ${items.join('; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>
@@ -51,15 +71,19 @@ export const fr: typeof en = {
   keyTitle: 'Fonctions neuropsychologiques',
   band: (from: string, to: string | null) =>
     (to ? `z ${from} à ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),
-  keyScale: (scan: boolean, floor: string) =>
-    `Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous ${floor}.`,
-  keyScaleTerm: (scan: boolean, floor: string) =>
-    `Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} sont sous ${floor}.`,
-  keyAll: (scan: boolean) =>
-    `Chaque aire montre sa fonction la plus forte\u202f; ${scan ? 'les aires où l’IRM reste visible' : 'les aires couleur tissu'} n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.`,
-  keyCompare: (scan: boolean) =>
-    `Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. ${scan ? 'Les aires où l’IRM reste visible' : 'Les aires couleur tissu'} n’en atteignent aucune.`,
+  keyScale: (ground: KeyGround, floor: string) =>
+    `Constance z moyenne par aire\u202f; plus foncé, plus constant. ${cap(FR_AREAS[ground])} sont sous ${floor}.`,
+  keyScaleTerm: (ground: KeyGround, floor: string) =>
+    `Terme Neurosynth. Constance z moyenne par aire\u202f; plus foncé, plus constant. ${cap(FR_AREAS[ground])} sont sous ${floor}.`,
+  keyAll: (ground: KeyGround) =>
+    `Chaque aire montre sa fonction la plus forte\u202f; ${FR_AREAS[ground]} n’en atteignent aucune. Choisissez-en une pour voir toutes ses aires.`,
+  keyCompare: (ground: KeyGround) =>
+    `Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. ${cap(FR_AREAS[ground])} n’en atteignent aucune.`,
   keyShared: 'Les deux',
+  keyMap: (scan: boolean) =>
+    `Les valeurs positives de votre carte sur les aires de la fonction\u202f: là où elles se recouvrent sur ce cerveau, et non un test statistique. ${scan ? 'L’IRM reste visible là où' : 'Le cortex gris est là où'} aucune n’atteint.`,
+  keyMapFunction: (name: string, floor: string) => `${name}, z\u00a0≥\u00a0${floor}`,
+  keyMapAbove: (title: string, threshold: string) => `${title} au-dessus de ${threshold}`,
   termOf: (name: string, term: string) => `${name}\u202f: « ${term} »`,
   lesionCheck: (items: string[]) => `Vérification lésionnelle\u202f: ${items.join('\u202f; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>

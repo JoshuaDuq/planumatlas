@@ -310,23 +310,23 @@ checks them in the browser today and could run in the unit project over the fake
 - **Expected:** a reveal that changes the atlas → a notice that names the change. Surface atlas `destrieux`, with `destrieux` in `cut_atlases` → `cutAtlas: 'destrieux'`.
 - **Covered by:** wording is PANEL-12 (`core-panels.md`); in the controller `src/lib/controller/excursion.test.ts` (R: the atlas change is named, the cut is labelled by the atlas)
 
-### CTRL-31 · A function or deficit that paints a structure beneath the cortex sees through it
+### CTRL-31 · A function or deficit painting both cortex and deep structures offers to show the deep ones
 
-- **Rule:** While a function or deficit paints a structure beneath the cortex (`beneathCortex`) that is drawn, and the cortex is shown and fully opaque, the cortex takes the manifest's see-through opacity, so its cortical and deep regions show at once. It shares the one cortex hold with a lesion's streamlines and stroke cases. A cortex-only paint, a lesion's paint, hidden internal anatomy or a hidden cortex keeps the cortex as it is; a cortex already see-through is left alone. No notice offers it.
+- **Rule:** A function's or deficit's paint leaves the cortex opaque: seen through, each area's colour would blend with what lies behind it and no longer read as the key gives it. When the paint colours at least one cortical region and at least one drawn structure, the profile offers a button counting those structures. A paint of one kind only, a lesion's paint, or structures not drawn (hidden internal anatomy, another detail level) offers none.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** replaces the legacy see-through offer (`viewer/app.js:902-972`)
-- **Expected:** paint `deficit:` or `function:` with a drawn structure → `cortexOpacity` = `appearance.see_through_opacity`, `heldOpacity` 1. Paint of `ctx` only, a `lesion:` paint, or `internalVisible: false` → opacity 1. Opacity 0.5 before → stays 0.5, `heldOpacity` null.
-- **Covered by:** `src/lib/state/paint-see-through.svelte.test.ts` (R); booted in `src/app/regions/PanelsRegion.svelte.test.ts` (`neglect`)
+- **Source:** replaces the see-through cortex of 2026-11-05 (design round 2026-11-11)
+- **Expected:** paint `deficit:` or `function:` of 2 cortical regions and 3 drawn structures → `beneath` = `{ count: 3, hidden: false }`. Cortex only, structures only, a `lesion:` paint, or `internalVisible: false` → null. Opening `neglect` → `cortexOpacity` 1.
+- **Covered by:** `src/lib/controller/excursion.svelte.test.ts` (R); booted in `src/app/regions/PanelsRegion.svelte.test.ts` (`neglect`)
 
-### CTRL-32 · The paint's see-through cortex goes with the paint, and is not the reader's change
+### CTRL-32 · Showing the deep structures hides the cortex and frames them; the cortex comes back framed whole
 
-- **Rule:** When the paint goes or no longer draws such a structure, the cortex is given back its opacity, unless the reader set another meanwhile, which is kept. A link carries the reader's own opacity, not the see-through one, and Reset display counts the see-through cortex as the baseline.
+- **Rule:** Pressing **Show *n* deep structures** hides the cortex and frames the internal anatomy; the button then reads **Show the cortex**, which shows it again and frames the whole brain. The hidden cortex is the reader's change: a link carries it and Reset display undoes it.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `src/lib/state/cortex-hold.svelte.ts`
-- **Expected:** paint cleared → opacity 1, `heldOpacity` null. Opacity set to 0.6 while held → `heldOpacity` null, 0.6 kept after the paint goes. `paintSeeThrough.heldOpacity` 1 → `displayBaseline.cortexOpacity` = `see_through_opacity`.
-- **Covered by:** `src/lib/state/paint-see-through.svelte.test.ts`, `src/lib/controller/excursion.svelte.test.ts` (R)
+- **Source:** `src/lib/controller/excursion.svelte.ts` (`showBeneathCortex`)
+- **Expected:** `showBeneathCortex(true)` → `cortexVisible` false, `beneath.hidden` true, last framing `frameInternal`. `showBeneathCortex(false)` → `cortexVisible` true, last framing `frameWhole`.
+- **Covered by:** `src/lib/controller/excursion.svelte.test.ts` (R); booted in `src/app/regions/PanelsRegion.svelte.test.ts` (`neglect`)
 
 ### CTRL-33 · A search carried to the other evidence tab opens that tab's list on the same words
 

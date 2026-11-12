@@ -18,7 +18,6 @@ import { PARAMS, decodeState, encodeState } from '../core/state/url-state.ts';
 import type { Engine, MoveOptions } from '../engine/api.ts';
 import { VIEW_DIRECTIONS, viewForRestoredCut } from '../engine/render/camera-views.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
-import type { PaintSeeThrough } from '../state/paint-see-through.svelte.ts';
 import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { LinkStore } from '../state/link.svelte.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
@@ -80,8 +79,6 @@ export interface LinksOptions {
     StrokeCasesStore,
     'available' | 'chosen' | 'show' | 'clear' | 'known' | 'heldOpacity' | 'heldColor'
   >;
-  /** The see-through cortex a painted structure holds, which the link carries as the reader's own. */
-  paintSeeThrough: Pick<PaintSeeThrough, 'heldOpacity'>;
   /** The anatomy's published coordinate spaces, or null when it publishes none. */
   coordinates: Pick<Coordinates, 'metadata' | 'map'> | null;
   /** The writer from `createLink`: hold, release, schedule and cancel. */
@@ -117,7 +114,6 @@ export function createLinks({
   view,
   lesion,
   strokeCases,
-  paintSeeThrough,
   coordinates,
   link,
   commands,
@@ -242,11 +238,10 @@ export function createLinks({
       mapDot: map ? current.lesson.dot! : null,
       orbit: camera.orbitLink(),
       mriWindow: sections.mriWindowLink(),
-      // The see-through cortex the drawn streamlines, stroke cases, paint or route asked for comes back with them.
+      // The see-through cortex the drawn streamlines, stroke cases or route asked for comes back with them.
       cortexOpacity:
         lesion.heldOpacity ??
         strokeCases.heldOpacity ??
-        paintSeeThrough.heldOpacity ??
         (circuit && current.lesson.route ? hooks.routeOpacity() : null) ??
         current.cortexOpacity,
       surfaceColor: strokeCases.heldColor ?? current.surfaceColor,

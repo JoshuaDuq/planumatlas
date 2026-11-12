@@ -544,6 +544,8 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         course: userMap.course,
         setSurface: userMap.setSurface,
         show: userMap.show,
+        setOverlap: userMap.setOverlap,
+        overlapAreas: userMap.overlapAreas,
         clear: userMap.clear,
       },
 

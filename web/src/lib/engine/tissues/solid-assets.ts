@@ -10,7 +10,7 @@ import { addBoundaryEdges } from './boundary-edges.ts';
 import type { EdgeUniforms } from './boundary-edges.ts';
 import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
-import { addMriCutAppearance, setScanPainted } from '../render/mri-material.ts';
+import { addMriCutAppearance, setPainted } from '../render/mri-material.ts';
 import { anatomicalMatrixWorld } from '../model/explode.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
 import {
@@ -405,7 +405,7 @@ export function paintSolids(
           ? visibilityOf(record, { ...capState, detail }).visible
           : tissueVisible(source, capState)) || isolatedWhiteMatter;
       const painted = usesPaint(state) ? state.paint!.colors.get(source.userData.region_id!) : null;
-      setScanPainted(cap.material, Boolean(painted) && !boundary);
+      setPainted(cap.material, Boolean(painted) && !boundary);
       if (boundary) {
         cap.material.color.set(appearance.tissue[boundary === 'pial' ? 'cortex' : 'white']);
       } else if (painted) {
@@ -426,10 +426,7 @@ export function paintSolids(
       continue;
     }
     const { color, visible } = labelAppearance(label, capState, appearance.tissue, lookup);
-    setScanPainted(
-      cap.material,
-      Boolean(label.region_id && state.paint?.colors.has(label.region_id)),
-    );
+    setPainted(cap.material, Boolean(label.region_id && state.paint?.colors.has(label.region_id)));
     const record = lookup?.regions?.get(source.userData.region_id!);
     solid.visible =
       (visible &&

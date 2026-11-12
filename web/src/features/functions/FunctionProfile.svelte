@@ -11,13 +11,15 @@
 <script lang="ts">
   import { comparedIds, isTermId } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { networkCss } from '../../lib/core/catalog/networks.ts';
-  import { decimal } from '../../lib/core/format.ts';
+  import { decimal, percent } from '../../lib/core/format.ts';
+  import { mapNumber } from '../../lib/core/user-map/display.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import ExternalLink from '../deficits/ExternalLink.svelte';
   import MethodsLink from '../deficits/MethodsLink.svelte';
+  import DeepToggle from '../sections/DeepToggle.svelte';
   import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
   import {
@@ -85,8 +87,29 @@
       {/if}
     </div>
   {/if}
+  {#if model.mapOverlap}
+    {@const { title, areas } = model.mapOverlap}
+    {@const above = mapNumber(model.mapOverlap.threshold, lang)}
+    <p class="note map-overlap" data-map-overlap>
+      {#if !areas}
+        {copy.mapMeasuring}
+      {:else if areas.map === 0}
+        {copy.mapNowhere(title, above)}
+      {:else}
+        {copy.mapOverlap(
+          title,
+          above,
+          percent(areas.both / areas.map, lang),
+          percent(areas.function ? areas.both / areas.function : 0, lang),
+        )}
+      {/if}
+    </p>
+  {/if}
   {#if id}
     <LinkedMriButton {lang} onopen={model.openMri} />
+    {#if model.beneath}
+      <DeepToggle {lang} beneath={model.beneath} ontoggle={model.showBeneathCortex} />
+    {/if}
   {/if}
   {#if comparison}
     <div class="content">
@@ -181,7 +204,7 @@
   {#if content && id}
     <div class="content">
       {#if content.all}
-        <p class="summary">{t(lang, 'domains').keyAll(model.scan)}</p>
+        <p class="summary">{t(lang, 'domains').keyAll(model.ground)}</p>
       {:else if content.term}
         <p class="kind">
           {content.term.before}<span lang="en">{content.term.term}</span>{content.term.after}
@@ -408,6 +431,9 @@
     }
     .paint-from-note {
       margin-top: var(--space-1);
+    }
+    .map-overlap {
+      margin-top: var(--space-3);
     }
     .content {
       padding-bottom: var(--panel-inset);

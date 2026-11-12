@@ -46,7 +46,7 @@ function build() {
   };
   cleanup = $effect.root(() => {
     const engineState = createEngineSync(engine);
-    const session = createSessionStore({ views: ['oblique', 'left'] });
+    const session = createSessionStore({ views: ['oblique', 'left', 'anterior', 'posterior'] });
     const lesson = createLessonStore({ get: () => ({ steps: [{}] }) as never });
     const view = createView({
       engine: engineState,
@@ -334,13 +334,34 @@ describe('the display toggles', () => {
     const { anatomy } = build();
     await anatomy.setExploded(true);
     expect(engine.model.settings.exploded).toBe(true);
-    expect(cameraCalls().map(({ method, args }) => [method, args[0]])).toEqual([
-      ['applyView', 'anterior'],
-    ]);
-    await anatomy.setExploded(false);
-    expect(cameraMethods().at(-1)).toBe('frameWhole');
+    expect(
+      cameraCalls()
+        .filter(({ method }) => method !== 'capture')
+        .map(({ method, args }) => [method, args[0]]),
+    ).toEqual([['applyView', 'anterior']]);
     engine.camera.applyView('superior');
     await anatomy.setExploded(true);
+    expect(cameraMethods().at(-1)).toBe('frameWhole');
+  });
+
+  test('putting the brain back together returns to the view exploding turned from, unless the reader moved it', async () => {
+    const { anatomy, session } = build();
+    const before = engine.camera.capture();
+    const view = session.state.view;
+    await anatomy.setExploded(true);
+    expect(session.state.view).toBe('anterior');
+    await anatomy.setExploded(false);
+    const [restored] = cameraCalls().filter(({ method }) => method === 'restore');
+    expect(restored?.args.slice(0, 2)).toEqual([view, before]);
+    expect(session.state.view).toBe(view);
+
+    // Turned by the reader in between: the view they chose stays.
+    await anatomy.setExploded(true);
+    session.setView('posterior');
+    engine.camera.applyView('posterior');
+    const restores = cameraCalls().filter(({ method }) => method === 'restore').length;
+    await anatomy.setExploded(false);
+    expect(cameraCalls().filter(({ method }) => method === 'restore')).toHaveLength(restores);
     expect(cameraMethods().at(-1)).toBe('frameWhole');
   });
 

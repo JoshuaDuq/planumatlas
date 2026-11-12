@@ -71,14 +71,7 @@
     style.setProperty('--vis-bottom', `${Math.round(size.height - rect.y - rect.height)}px`);
   });
 
-  $effect(() => {
-    const style = host().style;
-    style.setProperty('--key-top', `${stage.keyInset.top}px`);
-    style.setProperty('--key-right', `${stage.keyInset.right}px`);
-    style.setProperty('--plate-left', `${stage.plateBand}px`);
-  });
-
-  // The dock's height and tallness are written by the store itself, as the dock is measured.
+  // The dock's height and the keys' and a popover's bands are written by the store itself, at once.
   $effect(() => untrack(() => stage.attachHost(host())));
 
   $effect(() => {

@@ -16,6 +16,9 @@ export const en = {
   sourceLabel: 'Source label',
   copyValue: { copy: 'Copy', copied: 'Copied', failed: 'Could not copy' },
   linkedMri: 'Linked MRI',
+  // A function's or deficit's structures beneath its opaque cortex, shown by hiding the cortex.
+  showDeep: (count: number) => `Show ${count} deep ${count === 1 ? 'structure' : 'structures'}`,
+  showCortex: 'Show the cortex',
   focus: 'Focus',
   isolate: 'Isolate',
   restore: 'Restore',
@@ -49,6 +52,9 @@ export const fr: typeof en = {
   sourceLabel: 'Étiquette source',
   copyValue: { copy: 'Copier', copied: 'Copié', failed: 'Copie impossible' },
   linkedMri: 'IRM liée',
+  showDeep: (count: number) =>
+    `Afficher ${count} ${count === 1 ? 'structure profonde' : 'structures profondes'}`,
+  showCortex: 'Afficher le cortex',
   focus: 'Cibler',
   isolate: 'Isoler',
   restore: 'Rétablir',

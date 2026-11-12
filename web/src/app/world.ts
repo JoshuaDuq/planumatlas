@@ -32,7 +32,7 @@ import {
   syncPresentation,
 } from '../lib/state/engine-sync.svelte.ts';
 import { createCortexHold } from '../lib/state/cortex-hold.svelte.ts';
-import { createPaintSeeThrough } from '../lib/state/paint-see-through.svelte.ts';
+import { createMapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
 import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import { createUserMapStore } from '../lib/state/user-map.svelte.ts';
@@ -144,14 +144,14 @@ export async function composeWorld(
             .catch((error: unknown) => console.error(error)),
       },
     });
-    syncPaint(model, view, { domains, clinical, lesion, connectivity: model.connectivity });
-    const paintSeeThrough = createPaintSeeThrough({
-      view,
-      model,
-      regions: model.regions,
-      hold: cortexHold,
-      seeThrough,
+    syncPaint(model, view, {
+      domains,
+      clinical,
+      lesion,
+      connectivity: model.connectivity,
+      userMap,
     });
+    const mapOverlap = createMapOverlap({ engine: engine.userMap, view, userMap, domains });
     syncStrokeCases(view, strokeCases);
     syncPresentation(engine, view, engineState);
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
@@ -185,7 +185,6 @@ export async function composeWorld(
       render: flushSync,
       lesion,
       strokeCases,
-      paintSeeThrough,
     });
     const anatomy = createAnatomyCommands(context, {
       commands,
@@ -212,7 +211,6 @@ export async function composeWorld(
       view,
       lesion,
       strokeCases,
-      paintSeeThrough,
       coordinates,
       link,
       commands,
@@ -262,6 +260,7 @@ export async function composeWorld(
       lesion,
       strokeCases,
       userMap,
+      mapOverlap,
       visualFieldMap,
       coordinates:
         coordinates &&

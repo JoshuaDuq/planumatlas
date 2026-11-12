@@ -51,6 +51,8 @@ export interface UiPorts
   focusInDetail(): boolean;
   /** The panel shows its detail rather than its list. */
   detailShown(): boolean;
+  /** The Linked MRI is open (docked or modal), whether or not it holds the page's keys. */
+  mriOpen(): boolean;
   mprOpen(): boolean;
   diffusionMriOpen(): boolean;
   shortcutsOpen(): boolean;
@@ -60,6 +62,7 @@ export interface UiPorts
 const QUERIES = [
   'focusInDetail',
   'detailShown',
+  'mriOpen',
   'mprOpen',
   'diffusionMriOpen',
   'shortcutsOpen',

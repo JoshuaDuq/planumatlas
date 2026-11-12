@@ -97,7 +97,6 @@ function setup(
     lesson,
     lesion,
     strokeCases,
-    paintSeeThrough: { heldOpacity: null },
     coordinates: extras.coordinates ?? null,
     view: {
       get current() {
@@ -1020,7 +1019,6 @@ describe('a link written on a whole route', () => {
         clear: vi.fn(),
         known: vi.fn(),
       },
-      paintSeeThrough: scene.paintSeeThrough,
       coordinates: null,
       link: createLinkWriter(() => {}),
       commands: scene.commands,

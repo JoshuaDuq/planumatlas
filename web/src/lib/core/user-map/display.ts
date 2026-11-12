@@ -1,5 +1,5 @@
 import { decimal } from '../format.ts';
-import type { Language } from '../../types/index.ts';
+import type { Language, Rgb } from '../../types/index.ts';
 
 /** sRGB ends of each sign's scale, threshold first: FSL's Red-Yellow and Blue-Lightblue. */
 export const POSITIVE_RAMP = [
@@ -108,11 +108,26 @@ export function defaultDisplay({ range, binary }: MapSummary): MapDisplay {
   return { threshold: Number.NaN, max, opacity: 1 };
 }
 
+/**
+ * The map drawn against a painted function: its positive values beyond the threshold in `map`, or in
+ * `both` where the paint is. Negative values are not activation, so they are not drawn.
+ */
+export interface MapOverlap {
+  map: Rgb;
+  both: Rgb;
+}
+
 /** A value's sRGB colour, or null where it is not drawn (NaN, or not beyond the threshold). */
 export function mapColour(
   value: number,
   { threshold, max }: Pick<MapDisplay, 'threshold' | 'max'>,
+  overlap: { colours: MapOverlap; painted: boolean } | null = null,
 ): [number, number, number] | null {
+  if (overlap) {
+    if (!(value > threshold)) return null;
+    const rgb = overlap.painted ? overlap.colours.both : overlap.colours.map;
+    return rgb.map((c) => c / 255) as [number, number, number];
+  }
   const magnitude = Math.abs(value);
   if (!(magnitude > threshold)) return null;
   const share = Math.min(1, (magnitude - threshold) / (max - threshold));

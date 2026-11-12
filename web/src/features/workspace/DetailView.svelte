@@ -314,6 +314,8 @@
         onregion={(id) => void anatomy.openConstituent(id)}
         onselect={(id) => anatomy.selectRegion(id)}
         openLinkedMri={excursions.openLinkedMri}
+        mriOpen={app.ports.mriOpen()}
+        closeLinkedMri={app.ports.closeMpr}
         showAgreement={async (code, { instant }) => {
           await engine.sections.setAgreement(code);
           await excursions.openLinkedMri({ atRegion: true, instant });

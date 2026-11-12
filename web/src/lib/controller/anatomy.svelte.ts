@@ -15,8 +15,8 @@ import type { CortexSurface } from '../core/user-map/display.ts';
 import type { ReaderState } from '../core/state/reader-state.ts';
 import { publishesSpinalCord, requiredAtlas } from '../core/state/scene-commands.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
-import type { MoveOptions, Vec3 } from '../engine/api.ts';
-import type { Explorer } from '../types/index.ts';
+import type { CameraSnapshot, MoveOptions, Vec3 } from '../engine/api.ts';
+import type { Explorer, ViewName } from '../types/index.ts';
 import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../ui/focus.ts';
 import type { AppContext } from './context.ts';
 import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
@@ -205,6 +205,8 @@ export function createAnatomyCommands(
   }
 
   let explodeRequest = 0;
+  /** The camera exploding turned from to face the front, put back with the brain while it still faces it. */
+  let explodedFrom: { view: ViewName; camera: CameraSnapshot } | null = null;
   /**
    * Pull the structures apart, or put them back, framed whole. The hemispheres part along the left–right
    * axis: seen within 45° of it, they would part toward and away from the reader, so exploding turns to
@@ -218,9 +220,15 @@ export function createAnatomyCommands(
     display(() => {
       model.setExploded(value);
       if (value && Math.abs(camera.view.basis.back[0]) > Math.SQRT1_2) {
+        explodedFrom = { view: session.state.view as ViewName, camera: camera.capture() };
         session.setView('anterior');
         camera.applyView('anterior');
+      } else if (!value && explodedFrom && camera.viewHeld && session.state.view === 'anterior') {
+        session.setView(explodedFrom.view);
+        camera.restore(explodedFrom.view, explodedFrom.camera);
+        explodedFrom = null;
       } else {
+        explodedFrom = null;
         camera.frameWhole();
       }
     });

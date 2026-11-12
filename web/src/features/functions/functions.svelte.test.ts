@@ -664,6 +664,33 @@ describe('the paint threshold (3.2)', () => {
     expect(world.session.state.paintFrom).toBeNull();
   });
 
+  test('FUNC-54 · against the reader’s map, the profile says how much of each the other covers', async () => {
+    mount();
+    const said = () => document.querySelector('.profile [data-map-overlap]')?.textContent?.trim();
+    world.mapOverlap.current = {
+      title: 'zstat1',
+      threshold: 3.1,
+      areas: { map: 40, function: 200, both: 10 },
+    };
+    await open('working-memory');
+    expect(said()).toBe(
+      '25% of the cortex where zstat1 is above 3.1 lies in these areas, and it covers 5% of their cortex. By surface area on this brain; deep structures are not counted.',
+    );
+    world.mapOverlap.current = { title: 'zstat1', threshold: 3.1, areas: null };
+    await open('attention');
+    expect(said()).toBe('Measuring the overlap with your map…');
+    world.mapOverlap.current = {
+      title: 'zstat1',
+      threshold: 9,
+      areas: { map: 0, function: 200, both: 0 },
+    };
+    await open('working-memory');
+    expect(said()).toBe('zstat1 is above 9 nowhere on the cortex.');
+    world.mapOverlap.current = null;
+    await open('attention');
+    expect(said()).toBeUndefined();
+  });
+
   test('the overview and a comparison have no threshold control; French reads a decimal comma', async () => {
     mount('fr');
     await open(ALL_DOMAINS);
@@ -907,6 +934,19 @@ describe('Restore', () => {
 
 describe('compare', () => {
   const pair = ['working-memory', 'attention'];
+
+  test('a checkbox row under the pointer keeps its study count: it has no chevron to make room for', async () => {
+    mount();
+    await userEvent.click(compareToggle());
+    const [row] = pair.map(rowOf) as [HTMLElement];
+    await userEvent.hover(row);
+    expect(getComputedStyle(row.querySelector('.group-count')!).visibility).toBe('visible');
+    await userEvent.click(compareToggle());
+    await userEvent.hover(rowOf(pair[0]!));
+    expect(getComputedStyle(rowOf(pair[0]!).querySelector('.group-count')!).visibility).toBe(
+      'hidden',
+    );
+  });
 
   test('Compare turns the rows into checkboxes that take two functions, and Cancel forgets them', async () => {
     mount();

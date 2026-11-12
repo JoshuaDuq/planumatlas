@@ -12,7 +12,8 @@
     (Clear ×, Hide) hand focus on through S2's commands, not here;
   - Focus and Linked MRI stand in the row; Isolate and Hide wait behind More, on a line of their own
     (2026-11-11), and the research data's sections inside one closed row;
-  - Isolate has no `aria-pressed`: its label says Isolate or Restore (APG toggle button);
+  - Isolate has no `aria-pressed`: its label says Isolate or Restore (APG toggle button); Linked MRI is
+    pressed while the MRI is open beside the stage, and a press closes it, as `M` does;
   - Focus, Isolate and Hide carry a one-line tooltip, also their description (U6);
   - the actions are not rendered without a region, instead of hidden and disabled
     (deviations/r1-hidden-actions.md); summaries are plain text (deviations/r1-summary-headings.md).
@@ -126,6 +127,9 @@
     onselect: (id: string) => void;
     /** S3's `openLinkedMri`; `instant` is true for a keyboard activation. */
     openLinkedMri: (options: { atRegion: true; instant: boolean }) => unknown;
+    /** The Linked MRI is open beside the stage: its button is latched, and a press closes it, as `M` does. */
+    mriOpen: boolean;
+    closeLinkedMri: () => void;
     /** Shows a compared structure's agreement in the linked MRI, opened at the region. */
     showAgreement: (code: number, options: { instant: boolean }) => unknown;
     comparison?: Snippet;
@@ -169,6 +173,8 @@
     onregion,
     onselect,
     openLinkedMri,
+    mriOpen,
+    closeLinkedMri,
     showAgreement,
     comparison,
     relatedDeficits,
@@ -242,8 +248,13 @@
       <button
         type="button"
         class="linked-mri"
+        data-active={mriOpen}
+        aria-pressed={mriOpen}
         data-tooltip={t(lang, 'cuts').openMprTitle}
-        onclick={(event) => openLinkedMri({ atRegion: true, instant: isKeyboardActivation(event) })}
+        onclick={(event) =>
+          mriOpen
+            ? closeLinkedMri()
+            : openLinkedMri({ atRegion: true, instant: isKeyboardActivation(event) })}
       >
         {copy.linkedMri}
       </button>

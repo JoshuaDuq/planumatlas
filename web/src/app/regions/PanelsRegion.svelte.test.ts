@@ -234,6 +234,10 @@ describe('clinical material in the Deficits list (4.2)', () => {
     await expect
       .poll(() => page.getByRole('radio', { name: 'Lesion', exact: true }).element().ariaChecked)
       .toBe('true');
+    // Simulating asks to place one: the next click on the brain places it.
+    await expect
+      .poll(() => page.getByRole('radio', { name: 'Places the lesion' }).element().ariaChecked)
+      .toBe('true');
     // A search shows the list alone.
     await userEvent.click(page.getByRole('searchbox', { name: /search deficits/i }));
     await userEvent.keyboard('aphasia');
@@ -639,16 +643,17 @@ describe('the location bar and the notice', () => {
     expect(world.view.current.expanded.has(group.key)).toBe(true);
   });
 
-  test('a deficit that paints a deep structure sees through the cortex, and leaving it gives it back', async () => {
+  test('a deficit painting deep structures keeps its cortex opaque, and its profile hides it to show them', async () => {
     const world = await boot();
     await world.excursions.openDeficit('neglect');
     flushSync();
-    expect(engine.model.settings.cortexOpacity).toBe(
-      engine.model.manifest.appearance.see_through_opacity,
-    );
-    await world.excursions.chooseExplorer('anatomy');
-    flushSync();
     expect(engine.model.settings.cortexOpacity).toBe(1);
+    const { count } = world.excursions.beneath!;
+    const copy = t('en', 'inspector');
+    await userEvent.click(page.getByRole('button', { name: copy.showDeep(count) }));
+    expect(engine.model.settings.cortexVisible).toBe(false);
+    await userEvent.click(page.getByRole('button', { name: copy.showCortex }));
+    expect(engine.model.settings.cortexVisible).toBe(true);
   });
 
   test('Restore previous view is offered once a function is opened from a scene, and not before', async () => {

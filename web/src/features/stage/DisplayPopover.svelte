@@ -8,8 +8,8 @@
   - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why). The
     exploded view is absent while the visual-field map pairs the hemispheres.
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
-  - Last, what is away from its default, Focus and hidden parts included, with Reset display: on a phone the
-    status bar that also says so is hidden. While the opacity slider is held it waits for the release, so the
+  - Last, on a phone only, what is away from its default, Focus and hidden parts included, with Reset display:
+    a wider screen's status bar says so already, so the popover does not offer it a second time. While the opacity slider is held it waits for the release, so the
     plate never grows under the thumb (`scrubbing`, StagePopover).
 -->
 <script lang="ts">
@@ -37,7 +37,7 @@
     exploded: boolean;
     /** The exploded view can be drawn now. */
     explodable: boolean;
-    /** The display settings away from their defaults (`displayChanges`). */
+    /** The display settings away from their defaults (`displayChanges`); empty where the status bar lists them. */
     changes: readonly string[];
     /** A pointer holds the slider (StagePopover). */
     scrubbing: boolean;

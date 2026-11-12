@@ -84,6 +84,7 @@ function portStubs() {
     startGuide: vi.fn(),
     focusInDetail: () => false,
     detailShown: () => false,
+    mriOpen: () => false,
     mprOpen: () => false,
     diffusionMriOpen: () => false,
     shortcutsOpen: () => false,

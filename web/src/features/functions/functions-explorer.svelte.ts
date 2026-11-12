@@ -2,6 +2,7 @@
 // the latest-wins run, the busy and failure state of the profile's meta line, the open and restore
 // hand-offs. `FunctionList`, `FunctionProfile` and `FunctionRestore` draw it.
 import { tick } from 'svelte';
+import type { KeyGround } from '../../lib/types/index.ts';
 import { createLatestRunner } from '../../lib/core/async/latest.ts';
 import type { createCatalog } from '../../lib/core/catalog/catalog.ts';
 import type { FunctionalRegions } from '../../lib/core/catalog/functional-regions.ts';
@@ -16,6 +17,7 @@ import {
 import { t } from '../../lib/core/i18n/index.ts';
 import { stageMessage } from '../../lib/core/panels/clinical.ts';
 import type { Excursions } from '../../lib/controller/excursion.svelte.ts';
+import type { MapOverlapFacts } from '../../lib/state/map-overlap.svelte.ts';
 import type { SessionStore } from '../../lib/state/session.svelte.ts';
 import { FOCUS_TARGETS, focusHeading, requestFocus } from '../../lib/ui/focus.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
@@ -34,6 +36,8 @@ export interface FunctionExplorerDeps {
     | 'offerReload'
     | 'searchIn'
     | 'deficitsMatching'
+    | 'beneath'
+    | 'showBeneathCortex'
   >;
   domains: NeuropsychDomains;
   anatomy: Pick<ReturnType<typeof createCatalog>, 'get'>;
@@ -42,8 +46,10 @@ export interface FunctionExplorerDeps {
   openDeficit: (id: string) => unknown;
   /** The atlas the cortex is drawn on now. */
   atlas: () => string;
-  /** Under the T1 colour what the paint leaves shows the scan, not the tissue colour (paint.ts). */
-  scan: () => boolean;
+  /** What shows where the paint leaves an area (paint.ts `keyGround`). */
+  ground: () => KeyGround;
+  /** The reader's map drawn against the open function, or null. */
+  mapOverlap: () => MapOverlapFacts | null;
 }
 
 /** The legacy run options: which busy and failure sentence, and which operation a bare failure names. */
@@ -122,8 +128,8 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     get lang() {
       return session.state.lang;
     },
-    get scan() {
-      return deps.scan();
+    get ground() {
+      return deps.ground();
     },
     /** The Functions tab is in front. */
     get exploring() {
@@ -193,6 +199,9 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     setPaintFrom(value: number) {
       session.setPaintFrom(value === domains.threshold_z ? null : value);
     },
+    get mapOverlap() {
+      return deps.mapOverlap();
+    },
     /** The atlas the open function is painted on: the reader's own where it can be, else HCP-MMP. */
     get atlas() {
       return paintAtlas(domains, selected() ?? ALL_DOMAINS, deps.atlas());
@@ -200,6 +209,10 @@ export function createFunctionExplorer(deps: FunctionExplorerDeps) {
     anatomy: deps.anatomy,
     functionalRegions: deps.functionalRegions,
     deficitsMatching: excursions.deficitsMatching,
+    get beneath() {
+      return excursions.beneath;
+    },
+    showBeneathCortex: excursions.showBeneathCortex,
 
     setQuery: (query: string) => session.setFunctionQuery(query),
     /** A search carried to the Deficits tab. */

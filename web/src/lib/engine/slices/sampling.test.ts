@@ -112,6 +112,7 @@ test('the reader’s map is drawn over the scan where it passes its threshold, b
   const map = (opacity: number) => ({
     at: (x: number, y: number) => (x === 0 && y === 3 ? 5 : x === 3 && y === 0 ? -5 : Number.NaN),
     display: { threshold: 3, max: 7, opacity },
+    overlap: null,
   });
   const full = renderSlice({ ...volumes, map: map(1) }, frame, display);
   // 5 is halfway up the positive scale (red to yellow); −5 halfway up the negative (blue to light blue).
@@ -128,6 +129,25 @@ test('the reader’s map is drawn over the scan where it passes its threshold, b
   );
   assert.deepEqual(Array.from(hidden.slice(0, 4)), [70, 70, 70, 255]);
   assert.deepEqual(Array.from(full.slice(4, 8)), Array.from(hidden.slice(4, 8)));
+});
+
+test('against a paint, the map’s positive values take one colour off the paint and another on it', () => {
+  const labels = new Uint16Array(64);
+  for (let index = 0; index < 64; index++) labels[index] = index % 4 >= 2 ? 2 : 1;
+  const paint = { volume: new Volume(metadata, labels), colors: [null, null, [10, 200, 30]] };
+  const map = {
+    at: (x: number) => (x === 0 || x === 3 ? 5 : x === 1 ? -5 : Number.NaN),
+    display: { threshold: 3, max: 7, opacity: 1 },
+    overlap: { map: [213, 81, 129], both: [0, 131, 0] } as const,
+  };
+  const pixels = renderSlice({ ...volumes, paint, map }, frame, { ...display, overlay: true });
+  const unmapped = renderSlice({ ...volumes, paint }, frame, { ...display, overlay: true });
+  // The first row runs x = 0..3; x >= 2 is painted.
+  const row = (x: number) => Array.from(pixels.slice(4 * x, 4 * x + 4));
+  assert.deepEqual(row(0), [213, 81, 129, 255], 'the map off the paint');
+  assert.deepEqual(row(1), Array.from(unmapped.slice(4, 8)), 'a negative value is not drawn');
+  assert.deepEqual(row(2), [10, 200, 30, 255], 'the paint without the map');
+  assert.deepEqual(row(3), [0, 131, 0, 255], 'both');
 });
 
 test("a paint draws each label of the cut atlas's grid in its own colour over the scan, as its cut faces do", () => {

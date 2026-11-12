@@ -44,6 +44,7 @@
     slots = true,
     calls = [],
     connectivityPainted = null,
+    mriOpen = false,
   }: {
     regionId?: string | null;
     lang?: Language;
@@ -56,6 +57,7 @@
     slots?: boolean;
     calls?: unknown[];
     connectivityPainted?: string | null;
+    mriOpen?: boolean;
   } = $props();
 
   const regions = manifest.regions as unknown as Region[];
@@ -102,6 +104,8 @@
   onregion={(id) => calls.push(`region:${id}`)}
   onselect={(id) => calls.push(`select:${id}`)}
   openLinkedMri={(options) => calls.push({ mri: options })}
+  {mriOpen}
+  closeLinkedMri={() => calls.push('close mri')}
   showAgreement={(code, options) => calls.push({ agreement: code, ...options })}
 >
   <!-- As AtlasComparison: one section disclosure for a selected region, nothing without one. -->

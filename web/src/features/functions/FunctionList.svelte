@@ -603,7 +603,8 @@
       .column-head {
         margin-right: 0;
       }
-      .function-row:is(:hover, :focus-visible) .group-count {
+      /* A comparison's checkbox rows draw no chevron, so their figure stays. */
+      .function-row:not([role='checkbox']):is(:hover, :focus-visible) .group-count {
         visibility: hidden;
       }
     }

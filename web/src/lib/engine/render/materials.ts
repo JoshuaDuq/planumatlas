@@ -13,6 +13,7 @@ import { POSITIVE_RAMP } from '../../core/user-map/display.ts';
 import {
   USER_MAP_COLOUR,
   USER_MAP_OVER_SCAN,
+  addUserMapPainted,
   addUserMapToSurface,
   createUserMapUniforms,
 } from '../user-map/overlay.ts';
@@ -208,6 +209,7 @@ function addFoldShading(
     userMapReady: { value: false },
   };
   Object.assign(material.userData, userData);
+  const painted = addUserMapPainted(material);
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
     shader.uniforms.tissueVariation = variation;
     if (withNetworks) shader.uniforms.networkMix = networkMix;
@@ -220,6 +222,7 @@ function addFoldShading(
     }
     Object.assign(shader.uniforms, userMap);
     shader.uniforms.userMapReady = userData.userMapReady;
+    shader.uniforms.userMapPainted = painted;
     shader.uniforms.sulcDecode = { value: fieldDecode(ranges, '_SULC') };
     shader.uniforms.opennessDecode = { value: fieldDecode(ranges, '_OPENNESS') };
     shader.uniforms.t1Decode = { value: fieldDecode(ranges, '_T1') };
@@ -311,7 +314,7 @@ ${shader.fragmentShader}`
       .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
   material.customProgramCacheKey = () =>
-    `source-tissue-relief-v6${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
+    `source-tissue-relief-v7${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
 }
 
 /**
@@ -409,10 +412,11 @@ float visualCovered(float d, float r, float s) {
 /*
  * While the reader's map is on, the cortex is one grey, keeping its T1 texture and fold shading, and a
  * vertex whose parents mostly have a value takes the map's colour beyond the threshold, lit as tissue is.
+ * Against a function, its painted areas keep the paint.
  */
 const USER_MAP_FRAGMENT = `
       bool userMapDrawn = userMapOn && userMapReady;
-      if (userMapDrawn) diffuseColor.rgb = userMapBase;`;
+      if (userMapDrawn && userMapGreys()) diffuseColor.rgb = userMapBase;`;
 
 const USER_MAP_COLOUR_FRAGMENT = `
       vec4 userMapMapped = vec4(0.0);

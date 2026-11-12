@@ -209,6 +209,30 @@ describe('an open stage popover’s band', () => {
   });
 });
 
+describe('the bands the gizmo and markings sit by', () => {
+  test('are on the host before the refit and the framing that measures them', () => {
+    const host = document.body.appendChild(document.createElement('div'));
+    const seen: string[] = [];
+    const stage = createStageLayout({
+      media,
+      storage: null,
+      onDock: () => seen.push(host.style.getPropertyValue('--plate-left')),
+    });
+    stage.attachHost(host);
+    stage.setViewport(rect(1000, 600), { width: 1000, height: 600 });
+    stage.setGutter(20);
+    stage.setPlateBand(312, { immediate: false });
+    expect(seen).toEqual(['312px']);
+    stage.setKeyFitter(() => {
+      stage.setKeys({ top: 178, right: 0 }, { width: 280, height: 178 });
+      seen.push(host.style.getPropertyValue('--key-top'));
+    });
+    stage.framing();
+    expect(seen).toEqual(['312px', '178px']);
+    expect(host.style.getPropertyValue('--key-right')).toBe('0px');
+  });
+});
+
 describe('the key fitter and onDock', () => {
   test('framing runs the fitter without ever calling onDock', () => {
     let calls = 0;

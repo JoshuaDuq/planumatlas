@@ -1,4 +1,11 @@
-import type { Language, ModelState, Paint, Rgb, SessionState } from '../../types/index.ts';
+import type {
+  KeyGround,
+  Language,
+  ModelState,
+  Paint,
+  Rgb,
+  SessionState,
+} from '../../types/index.ts';
 import type { Translated } from '../clinical/types.ts';
 import {
   ALL_DOMAINS,
@@ -19,6 +26,8 @@ import { connectivityPaint } from '../catalog/functional-connectivity.ts';
 import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
 import { decimal } from '../format.ts';
 import { t } from '../i18n/index.ts';
+import { mapNumber } from '../user-map/display.ts';
+import type { MapOverlap } from '../user-map/display.ts';
 
 /** The state the paint and its key are derived from: the model's with the session's over it. */
 export type PaintState = Pick<ModelState, 'atlas'> &
@@ -46,10 +55,33 @@ export interface LesionPaint {
 export const paintKind = (paint: Paint | null | undefined): string | null =>
   paint?.id.slice(0, paint.id.indexOf(':')) || null;
 
+/** The colours of a function compared with the reader's map: its areas, the map's, and where both are. */
+export const FUNCTION_OVERLAP_COLOR: Rgb = COMPARE_COLORS[0]!;
+export const MAP_OVERLAP: MapOverlap = { map: COMPARE_COLORS[1]!, both: SHARED_COLOR };
+
+/** Whether the reader's drawn map is compared with the open function: one function or term alone, painted. */
+export function comparesMap(
+  state: PaintState,
+  mapDrawn: boolean,
+  domains: NeuropsychDomains,
+): boolean {
+  const id = state.selectedFunction;
+  return (
+    mapDrawn &&
+    !state.paintLifted &&
+    state.explorer === 'functions' &&
+    id !== null &&
+    id !== ALL_DOMAINS &&
+    !comparedIds(id) &&
+    state.atlas === paintAtlas(domains, id, state.atlas)
+  );
+}
+
 /**
  * The tab's paint: the open function on its own atlas, the open deficit, or in Anatomy the resting
  * connectivity a region's sheet asked for, else the findings near a lesion, whose report is Anatomy's;
- * while that tab is in front and the reader has not chosen a masthead colour or atlas over it.
+ * while that tab is in front and the reader has not chosen a masthead colour or atlas over it. Against
+ * the reader's drawn map, a function's areas take one colour, so the map's two colours read against it.
  */
 export function paintFor(
   state: PaintState,
@@ -58,11 +90,13 @@ export function paintFor(
     clinical,
     lesion = null,
     connectivity = null,
+    mapDrawn = false,
   }: {
     domains: NeuropsychDomains;
     clinical: ClinicalCatalog;
     lesion?: LesionPaint | null;
     connectivity?: FunctionalConnectivity | null;
+    mapDrawn?: boolean;
   },
 ): Paint | null {
   if (state.paintLifted) return null;
@@ -81,12 +115,17 @@ export function paintFor(
     state.atlas === paintAtlas(domains, state.selectedFunction, state.atlas)
   ) {
     const single = state.selectedFunction !== ALL_DOMAINS && !comparedIds(state.selectedFunction);
-    return domainPaint(
+    const paint = domainPaint(
       domains,
       state.selectedFunction,
       state.atlas,
       single ? (state.paintFrom ?? domains.threshold_z) : domains.threshold_z,
     );
+    if (!comparesMap(state, mapDrawn, domains)) return paint;
+    return {
+      id: `${paint.id}:map`,
+      colors: new Map([...paint.colors.keys()].map((region) => [region, FUNCTION_OVERLAP_COLOR])),
+    };
   }
   if (state.explorer === 'deficits' && state.selectedDeficit) {
     return clinical.paint(state.selectedDeficit, state.selectedFinding).paint;
@@ -114,12 +153,22 @@ export interface Legend {
 }
 
 /**
+ * What shows where a paint leaves a region: the T1 scan under the scan colour, which draws over a
+ * ghost too; a ghost's grey under Focus, a route, Tracts or a see-through paint (the engine's
+ * `ghosting`); else tissue.
+ */
+export const keyGround = (
+  state: Pick<ModelState, 'surfaceColor' | 'focused' | 'ghostedAround'>,
+): KeyGround =>
+  state.surfaceColor === 'mri' ? 'scan' : state.focused || state.ghostedAround ? 'grey' : 'tissue';
+
+/**
  * The stage key for the paint on show: the overview's functions, or the one function chosen on the z
  * scale, strongest band first, or each of the open deficit's findings. Only the overview's and the
  * deficit's rows are toggles; a scale's bands are not.
  */
 export function legendFor(
-  state: PaintState & Pick<ModelState, 'surfaceColor'>,
+  state: PaintState & Pick<ModelState, 'surfaceColor' | 'focused' | 'ghostedAround'>,
   {
     domains,
     clinical,
@@ -127,6 +176,7 @@ export function legendFor(
     lesion = null,
     connectivity = null,
     label = null,
+    map = null,
   }: {
     domains: NeuropsychDomains;
     clinical: ClinicalCatalog;
@@ -135,12 +185,13 @@ export function legendFor(
     connectivity?: FunctionalConnectivity | null;
     /** A region's name, for the connectivity key's seed. */
     label?: ((id: string) => string) | null;
+    /** The reader's drawn map, which a function's key then reads against. */
+    map?: { title: string; threshold: number } | null;
   },
 ): Legend | null {
   const kind = paintKind(state.paint);
   const lang: Language = state.lang;
-  // Under the T1 colour what the paint leaves shows the scan, not the tissue colour.
-  const scan = state.surfaceColor === 'mri';
+  const ground = keyGround(state);
   if (kind === 'connectivity') {
     const copy = t(lang, 'connectivity');
     const scale = connectivity!.r_scale;
@@ -149,7 +200,7 @@ export function legendFor(
     return {
       map: 'connectivity',
       title: copy.keyTitle(label!(state.connectivitySeed!)),
-      note: copy.keyNote(decimal(scale[0]!.from, 2, lang), scan),
+      note: copy.keyNote(decimal(scale[0]!.from, 2, lang), ground),
       pickable: false,
       rows: scale
         .map((step, index) => ({
@@ -183,6 +234,30 @@ export function legendFor(
   }
   if (kind === 'function') {
     const copy = t(lang, 'domains');
+    if (map && comparesMap(state, true, domains)) {
+      const name = domainName(domainRecord(domains, state.selectedFunction!)!, lang);
+      const floor = decimal(state.paintFrom ?? domains.threshold_z, 1, lang, { trim: true });
+      const row = (id: string, color: Rgb, text: string): LegendRow => ({
+        id,
+        color,
+        label: text,
+        pressed: false,
+      });
+      return {
+        map: 'function',
+        title: `${name} · ${map.title}`,
+        pickable: false,
+        note: copy.keyMap(state.surfaceColor === 'mri'),
+        rows: [
+          {
+            ...row('function', FUNCTION_OVERLAP_COLOR, copy.keyMapFunction(name, floor)),
+            absent: state.paint!.colors.size === 0,
+          },
+          row('map', MAP_OVERLAP.map, copy.keyMapAbove(map.title, mapNumber(map.threshold, lang))),
+          row('shared', MAP_OVERLAP.both, copy.keyShared),
+        ],
+      };
+    }
     const compared = comparedIds(state.selectedFunction);
     if (compared) {
       // A colour no area carries is keyed but greyed, as a deficit's is.
@@ -198,7 +273,7 @@ export function legendFor(
         map: 'function',
         title: functionName(domains, state.selectedFunction!, lang),
         pickable: false,
-        note: copy.keyCompare(scan),
+        note: copy.keyCompare(ground),
         rows: [
           ...compared.map((id, index) =>
             row(id, COMPARE_COLORS[index]!, domainName(domainRecord(domains, id)!, lang)),
@@ -230,7 +305,7 @@ export function legendFor(
         title: domainName(picked, lang),
         pickable: false,
         note: (isTermId(picked.id) ? copy.keyScaleTerm : copy.keyScale)(
-          scan,
+          ground,
           decimal(state.paintFrom ?? domains.threshold_z, 1, lang, { trim: true }),
         ),
         rows: bands,
@@ -245,7 +320,7 @@ export function legendFor(
     return {
       map: 'function',
       title: copy.keyTitle,
-      note: copy.keyAll(scan),
+      note: copy.keyAll(ground),
       rows: overviewDomains(domains).map(row),
     };
   }
@@ -272,10 +347,10 @@ export function legendFor(
     }));
     const note =
       findings.length === 1
-        ? copy.keyOne(scan)
+        ? copy.keyOne(ground)
         : state.selectedFinding
           ? copy.keyPicked
-          : copy.keyAll(scan);
+          : copy.keyAll(ground);
     return {
       map: 'deficit',
       title: clinical.get(state.selectedDeficit!).name[lang]!,

@@ -1,3 +1,16 @@
+import type { KeyGround } from '../../../types/index.ts';
+
+const EN_AREAS: Record<KeyGround, string> = {
+  tissue: 'Tissue-coloured areas',
+  scan: 'Areas where the scan shows',
+  grey: 'Grey areas',
+};
+const FR_AREAS: Record<KeyGround, string> = {
+  tissue: 'Les aires couleur de tissu',
+  scan: 'Les aires où l’examen apparaît',
+  grey: 'Les aires grises',
+};
+
 // Resting functional connectivity (plan 4.1): the region sheet's section and the stage key.
 export const en = {
   heading: 'Functional connectivity',
@@ -16,8 +29,8 @@ export const en = {
   // Numbers arrive formatted; `to` is null for the open top step.
   step: (from: string, to: string | null) =>
     (to ? `r ${from} to ${to}` : `r ≥ ${from}`).replaceAll(' ', ' '),
-  keyNote: (floor: string, scan: boolean) =>
-    `Group-mean correlation with the outlined area; darker is stronger. ${scan ? 'Areas where the scan shows' : 'Tissue-coloured areas'} fall below r ${floor}, as half of all pairs do.`,
+  keyNote: (floor: string, ground: KeyGround) =>
+    `Group-mean correlation with the outlined area; darker is stronger. ${EN_AREAS[ground]} fall below r ${floor}, as half of all pairs do.`,
 };
 
 export const fr: typeof en = {
@@ -35,6 +48,6 @@ export const fr: typeof en = {
   keyTitle: (name: string) => `Connectivité de repos avec ${name}`,
   step: (from: string, to: string | null) =>
     (to ? `r de ${from} à ${to}` : `r ≥ ${from}`).replaceAll(' ', ' '),
-  keyNote: (floor: string, scan: boolean) =>
-    `Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. ${scan ? 'Les aires où l’examen apparaît' : 'Les aires couleur de tissu'} sont sous r ${floor}, comme la moitié de toutes les paires.`,
+  keyNote: (floor: string, ground: KeyGround) =>
+    `Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. ${FR_AREAS[ground]} sont sous r ${floor}, comme la moitié de toutes les paires.`,
 };

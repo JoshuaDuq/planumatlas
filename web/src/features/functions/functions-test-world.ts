@@ -25,6 +25,7 @@ import { createClinicalCatalog } from '../../lib/core/clinical/catalog.ts';
 import type { ClinicalData } from '../../lib/core/clinical/types.ts';
 import type { CircuitData } from '../../lib/core/learning/catalog.ts';
 import { circuitCatalog } from '../../lib/core/learning/load.ts';
+import { keyGround } from '../../lib/core/state/paint.ts';
 import type { ReaderFailure, ReaderState } from '../../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../../lib/core/state/scene-commands.ts';
 import type { DomainsData, FunctionalRegionsData } from '../../lib/engine/api.ts';
@@ -34,6 +35,7 @@ import { createLessonStore, createSessionStore } from '../../lib/state/session.s
 import { createView } from '../../lib/state/view.svelte.ts';
 import { VIEW_NAMES, type Manifest } from '../../lib/types/index.ts';
 import { createFunctionExplorer } from './functions-explorer.svelte.ts';
+import { createOverlapHolder } from './functions-test-overlap.svelte.ts';
 
 export const manifest = manifestFile as unknown as Manifest;
 
@@ -129,7 +131,6 @@ export function createWorld() {
       mri,
       lesion: { selectedTract: null, clearTract() {}, heldOpacity: null },
       strokeCases: { chosen: [], show() {}, clear() {}, heldOpacity: null, heldColor: null },
-      paintSeeThrough: { heldOpacity: null },
       panels: {
         openFunction: (id) => explorer.openFunction(id),
         openDeficit,
@@ -138,6 +139,7 @@ export function createWorld() {
       render: flushSync,
     },
   );
+  const mapOverlap = createOverlapHolder();
   const explorer = createFunctionExplorer({
     session,
     excursions,
@@ -146,10 +148,12 @@ export function createWorld() {
     functionalRegions,
     openDeficit,
     atlas: () => view.current.atlas,
-    scan: () => view.current.surfaceColor === 'mri',
+    ground: () => keyGround(view.current),
+    mapOverlap: () => mapOverlap.current,
   });
   return {
     engine,
+    mapOverlap,
     session,
     domains,
     functionalRegions,

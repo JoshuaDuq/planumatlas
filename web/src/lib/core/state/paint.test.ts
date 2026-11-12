@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { beforeAll, describe, test } from 'vitest';
-import type { Manifest, Paint, SurfaceColor } from '../../types/index.ts';
+import type { Manifest, ModelState, Paint, SurfaceColor } from '../../types/index.ts';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { readModel } from '../catalog/test-support.ts';
 import {
@@ -14,11 +14,21 @@ import { createClinicalCatalog, findingPaint } from '../clinical/catalog.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
-import { legendFor, paintFor, paintKind } from './paint.ts';
+import {
+  comparesMap,
+  FUNCTION_OVERLAP_COLOR,
+  legendFor,
+  MAP_OVERLAP,
+  paintFor,
+  paintKind,
+} from './paint.ts';
 import type { PaintState } from './paint.ts';
 
-/** What the key reads: the paint's state and the surface colour under it. */
-type KeyState = PaintState & { surfaceColor: SurfaceColor };
+/** What the key reads: the paint's state, the surface colour under it and any ghost. */
+type KeyState = PaintState &
+  Pick<ModelState, 'focused' | 'ghostedAround'> & {
+    surfaceColor: SurfaceColor;
+  };
 
 const domains = {
   atlas: 'hcp-mmp',
@@ -66,6 +76,8 @@ const drawn = new Set(['destrieux:left:1', 'destrieux:left:2']);
 const sources = { domains, clinical, drawn: (id: string) => drawn.has(id) };
 const base: KeyState = {
   surfaceColor: 'tissue',
+  focused: false,
+  ghostedAround: null,
   explorer: 'functions',
   atlas: 'hcp-mmp',
   selectedFunction: 'all',
@@ -181,6 +193,62 @@ test('a comparison keys each function and the areas both reach, greying a colour
   );
 });
 
+test('FUNC-51 · against a drawn map, one function paints its areas in one colour and keys three', () => {
+  const state = { ...base, selectedFunction: 'memory' };
+  const plain = paintFor(state, sources)!;
+  const paint = paintFor(state, { ...sources, mapDrawn: true })!;
+  assert.equal(paint.id, 'function:memory:map');
+  assert.deepEqual([...paint.colors.keys()], [...plain.colors.keys()]);
+  assert.ok([...paint.colors.values()].every((color) => color === FUNCTION_OVERLAP_COLOR));
+  assert.deepEqual(
+    [FUNCTION_OVERLAP_COLOR, MAP_OVERLAP.map, MAP_OVERLAP.both],
+    [COMPARE_COLORS[0], COMPARE_COLORS[1], SHARED_COLOR],
+  );
+  const legend = legendFor(
+    { ...state, paint, lang: 'fr' },
+    { ...sources, map: { title: 'zstat1', threshold: 3.1 } },
+  )!;
+  assert.equal(legend.title, 'Mémoire · zstat1');
+  assert.deepEqual(
+    legend.rows.map((row) => [row.id, row.label, row.color]),
+    [
+      ['function', 'Mémoire, z\u00a0≥\u00a03', COMPARE_COLORS[0]],
+      ['map', 'zstat1 au-dessus de 3,1', COMPARE_COLORS[1]],
+      ['shared', 'Les deux', SHARED_COLOR],
+    ],
+  );
+  // A raised threshold that paints nothing greys the function's row.
+  const empty = { ...base, selectedFunction: 'language', paintFrom: 5 };
+  const none = legendFor(
+    { ...empty, paint: paintFor(empty, { ...sources, mapDrawn: true }) },
+    { ...sources, map: { title: 'zstat1', threshold: 3 } },
+  )!;
+  assert.equal(none.rows[0]!.absent, true);
+});
+
+test('FUNC-51 · only one function, painted in front, is drawn against the map', () => {
+  const one = { ...base, selectedFunction: 'memory' };
+  assert.equal(comparesMap(one, true, domains), true);
+  for (const state of [
+    { ...one, selectedFunction: ALL_DOMAINS },
+    { ...one, selectedFunction: 'compare:language,memory' },
+    { ...one, selectedFunction: null },
+    { ...one, paintLifted: true },
+    { ...one, explorer: 'deficits' as const },
+    { ...one, atlas: 'destrieux' },
+  ]) {
+    assert.equal(comparesMap(state, true, domains), false);
+    assert.equal(
+      paintFor(state, { ...sources, mapDrawn: true })?.id.endsWith(':map') ?? false,
+      false,
+    );
+  }
+  assert.equal(comparesMap(one, false, domains), false);
+  // Without a map the key is the z scale, whatever the source says.
+  const plain = legendFor({ ...one, paint: paintFor(one, sources) }, { ...sources, map: null })!;
+  assert.equal(plain.rows.length, domains.z_scale.length);
+});
+
 // Pairs once: (1,2) r 0.50, (1,3) r 0.20, (2,3) r 0.10.
 const connectivity: FunctionalConnectivity = {
   id: 'functional-connectivity',
@@ -294,6 +362,8 @@ describe('the published cdmd functions and deficits', () => {
   });
   const functionState = (selectedFunction: string, lang: 'en' | 'fr' = 'en'): KeyState => ({
     surfaceColor: 'tissue',
+    focused: false,
+    ghostedAround: null,
     explorer: 'functions',
     atlas: 'hcp-mmp',
     selectedFunction,
@@ -374,9 +444,33 @@ describe('the published cdmd functions and deficits', () => {
     );
   });
 
+  test('a see-through paint’s ghost makes the key name grey areas, and the scan still wins', () => {
+    const state = {
+      ...functionState('compare:working-memory,attention'),
+      ghostedAround: new Set<string>(),
+    };
+    const note = (over: Partial<KeyState>) => {
+      const shown = { ...state, ...over };
+      return legendFor({ ...shown, paint: paintFor(shown, both) }, { ...both, drawn: () => true })!
+        .note;
+    };
+    assert.equal(
+      note({}),
+      'Areas each function reaches at z\u00a0≥\u00a03, and those both reach. Grey areas reach neither.',
+    );
+    assert.equal(
+      note({ ghostedAround: null, focused: true, lang: 'fr' }),
+      'Les aires que chaque fonction atteint à z\u00a0≥\u00a03, et celles que les deux atteignent. Les aires grises n’en atteignent aucune.',
+    );
+    assert.match(note({ surfaceColor: 'mri' }), /Areas where the scan shows reach neither/);
+    assert.match(note({ ghostedAround: null }), /Tissue-coloured areas reach neither/);
+  });
+
   test('a deficit’s FreeSurfer structures are painted and keyed on their teaching-set stand-ins', () => {
     const state: KeyState = {
       surfaceColor: 'tissue',
+      focused: false,
+      ghostedAround: null,
       explorer: 'deficits',
       atlas: 'destrieux',
       selectedFunction: null,
@@ -422,6 +516,8 @@ describe('the published cdmd functions and deficits', () => {
     for (const deficit of data.deficits) {
       const state: KeyState = {
         surfaceColor: 'tissue',
+        focused: false,
+        ghostedAround: null,
         explorer: 'deficits',
         atlas: 'destrieux',
         selectedFunction: null,

@@ -113,6 +113,8 @@
     async openDeficitMri(id: string, finding: string | null, { instant }: { instant: boolean }) {
       calls.push(`mri:${id}:${finding}:${instant}`);
     },
+    beneath: null,
+    showBeneathCortex() {},
   } satisfies DeficitsDeps['excursions'];
 
   const explorer = createDeficitsExplorer({
