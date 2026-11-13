@@ -36,6 +36,7 @@
   import { tractRows } from '../../lib/core/tracts.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import RegionDetail from '../inspector/RegionDetail.svelte';
+  import { DISORDER_ATLAS } from '../../lib/core/catalog/disorder-effects.ts';
 
   let {
     world,
@@ -113,6 +114,7 @@
     stimulation,
     ftract,
     connectivity,
+    disorders,
   } = $derived(engine.model);
   // The area whose resting connectivity Anatomy paints, as paintFor paints it.
   const connectivityPainted = $derived(
@@ -121,6 +123,16 @@
       current.connectivitySeed &&
       connectivity?.atlases[current.atlas]
       ? current.connectivitySeed
+      : null,
+  );
+  // The disorder Anatomy paints, as paintFor paints it: on Desikan-Killiany only.
+  const disorderPainted = $derived(
+    current.explorer === 'anatomy' &&
+      !current.paintLifted &&
+      current.disorderShown &&
+      disorders &&
+      current.atlas === DISORDER_ATLAS
+      ? current.disorderShown
       : null,
   );
   // The comparison file is published beside the manifest the engine opened (boot.ts).
@@ -302,6 +314,10 @@
         {connectivityPainted}
         paintConnectivity={current.explorer === 'anatomy' ? session.setConnectivitySeed : null}
         restoreConnectivity={() => session.setConnectivitySeed(null)}
+        {disorders}
+        {disorderPainted}
+        paintDisorder={current.explorer === 'anatomy' ? excursions.showDisorder : null}
+        restoreDisorder={() => session.setDisorderShown(null)}
         strokeCases={world.strokeCases}
         userMap={world.userMap}
         territories={manifest.arterial_territories ?? null}

@@ -149,6 +149,7 @@ export async function composeWorld(
       clinical,
       lesion,
       connectivity: model.connectivity,
+      disorders: model.disorders,
       userMap,
     });
     const mapOverlap = createMapOverlap({ engine: engine.userMap, view, userMap, domains });

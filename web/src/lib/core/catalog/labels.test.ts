@@ -257,3 +257,30 @@ test('the cortex hides the forebrain\u2019s deep structures, not the cerebellum,
   assert.equal(hidden('nextbrain:left:352'), false, 'substantia nigra, a brainstem nucleus');
   assert.equal(hidden('destrieux:left:38'), false);
 });
+
+test('CAT-67 · a Desikan-Killiany region is named in words, in French from NextBrain’s table, under Destrieux’s lobes', () => {
+  const desikan = (source_name: string, lang?: Language) =>
+    labelOf(region({ atlas: 'desikan', source_name }), lang);
+  assert.deepEqual(desikan('parsopercularis'), {
+    name: 'Opercular part of the inferior frontal gyrus',
+    code: null,
+    group: 'Frontal',
+    aliases: ['pars opercularis'],
+  });
+  assert.equal(desikan('superiorfrontal', 'fr').name, 'Gyrus frontal supérieur');
+  assert.equal(desikan('isthmuscingulate', 'fr').group, 'Cingulaire');
+  assert.equal(desikan('parahippocampal').group, 'Limbic');
+  // Every published region resolves, in both languages, under a lobe Destrieux also lists.
+  const manifest = readModel<Manifest>(`${published}/manifest.json`);
+  const regions = manifest.regions.filter((r) => r.atlas === 'desikan' && r.kind === 'cortex');
+  assert.equal(regions.length, 68);
+  const destrieuxLobes = new Set(
+    manifest.regions
+      .filter((r) => r.atlas === 'destrieux' && r.kind === 'cortex')
+      .map((r) => labelOfRegion(r, 'en')!.group),
+  );
+  for (const r of regions) {
+    assert.ok(destrieuxLobes.has(labelOfRegion(r, 'en')!.group), r.id);
+    assert.ok(labelOfRegion(r, 'fr')!.name, r.id);
+  }
+});

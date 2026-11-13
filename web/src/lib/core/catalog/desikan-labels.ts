@@ -48,3 +48,45 @@ export const DESIKAN_REGIONS: Record<string, { structure: string; aliases?: stri
   temporalpole: { structure: 'temporal pole' },
   transversetemporal: { structure: 'transverse temporal gyrus', aliases: ['Heschl'] },
 };
+
+/**
+ * The lobe the Desikan-Killiany atlas's own regions are listed under, the one Destrieux lists the
+ * same gyrus under (destrieux-labels.ts), so the atlases share their groups and lobe colours.
+ */
+const LOBE_REGIONS: Record<string, string[]> = {
+  Frontal: [
+    'superiorfrontal',
+    'rostralmiddlefrontal',
+    'caudalmiddlefrontal',
+    'parsopercularis',
+    'parstriangularis',
+    'parsorbitalis',
+    'lateralorbitofrontal',
+    'medialorbitofrontal',
+    'frontalpole',
+  ],
+  Central: ['precentral', 'postcentral', 'paracentral'],
+  Parietal: ['superiorparietal', 'inferiorparietal', 'supramarginal', 'precuneus'],
+  Occipital: ['lateraloccipital', 'lingual', 'cuneus', 'pericalcarine'],
+  Temporal: [
+    'superiortemporal',
+    'bankssts',
+    'transversetemporal',
+    'middletemporal',
+    'inferiortemporal',
+    'fusiform',
+    'temporalpole',
+  ],
+  Insula: ['insula'],
+  Cingulate: [
+    'rostralanteriorcingulate',
+    'caudalanteriorcingulate',
+    'posteriorcingulate',
+    'isthmuscingulate',
+  ],
+  Limbic: ['parahippocampal', 'entorhinal'],
+};
+
+export const DESIKAN_LOBES: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(LOBE_REGIONS).flatMap(([lobe, names]) => names.map((name) => [name, lobe])),
+);

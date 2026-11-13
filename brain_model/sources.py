@@ -10,6 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 HEMISPHERES = {"lh": "left", "rh": "right"}
 
+# recon-all's own cortical parcellations, Destrieux and Desikan-Killiany: every other surface atlas
+# reaches an individual brain by projection from fsaverage.
+SUBJECT_ANNOTATIONS = ("aparc.a2009s", "aparc")
+
 # Annotation labels that are not cortical areas: Julich-Brain marks its medial wall with two masks,
 # and cortex it has not yet mapped with gap maps; Schaefer names its medial wall a background.
 NON_AREA_NAMES = frozenset({

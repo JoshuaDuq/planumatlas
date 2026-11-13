@@ -78,6 +78,24 @@ test('INSP-49 · a connectivity paint shows a lifted paint again and ends when a
   assert.equal(state.assemble({}).connectivitySeed, null);
 });
 
+test('INSP-53 · a disorder paint shows a lifted paint again, replaces connectivity and ends with its tab', () => {
+  const state = session();
+  state.setConnectivitySeed('julich:left:1');
+  state.liftPaint();
+  state.setDisorderShown('schizophrenia');
+  assert.equal(state.assemble({}).disorderShown, 'schizophrenia');
+  assert.equal(state.assemble({}).connectivitySeed, null);
+  assert.equal(state.assemble({}).paintLifted, false);
+  // Connectivity asked for in turn replaces the disorder.
+  state.setConnectivitySeed('julich:left:1');
+  assert.equal(state.assemble({}).disorderShown, null);
+  state.setDisorderShown('schizophrenia');
+  state.setExplorer('anatomy');
+  assert.equal(state.assemble({}).disorderShown, 'schizophrenia');
+  state.setExplorer('functions');
+  assert.equal(state.assemble({}).disorderShown, null);
+});
+
 test('assembly merges model state and view state into one snapshot', () => {
   const s = session();
   s.setView('left');

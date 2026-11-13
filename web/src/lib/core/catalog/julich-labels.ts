@@ -46,7 +46,7 @@ const LOBE_OF_TAG: Record<string, string> = {
 };
 
 /** The French lobe names Destrieux's French table uses. */
-const LOBE_FR: Record<string, string> = {
+export const LOBE_FR: Record<string, string> = {
   Frontal: 'Frontal',
   Central: 'Central',
   Parietal: 'Pariétal',

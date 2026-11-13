@@ -4,6 +4,7 @@ export const en = {
     'hcp-mmp': 'HCP-MMP',
     julich: 'Julich-Brain',
     schaefer: 'Schaefer',
+    desikan: 'Desikan-Killiany',
     learning: 'Teaching set',
     aseg: 'FreeSurfer aseg',
     nextbrain: 'NextBrain',
@@ -43,6 +44,8 @@ export const en = {
       'Cytoarchitectonic areas from histology, 139 per hemisphere (Amunts 2020); about a quarter of the cortex is not yet mapped',
     schaefer:
       'Resting-state functional parcels, 200 per hemisphere, coloured by Yeo network (Schaefer 2018)',
+    desikan:
+      'Gyral regions, 34 per hemisphere (Desikan 2006), the atlas ENIGMA reports disorders on',
     learning:
       'Overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published',
     aseg: 'FreeSurfer’s standard automatic subcortical segmentation',
@@ -74,6 +77,7 @@ export const fr: typeof en = {
     'hcp-mmp': 'HCP-MMP',
     julich: 'Julich-Brain',
     schaefer: 'Schaefer',
+    desikan: 'Desikan-Killiany',
     learning: 'Ensemble pédagogique',
     aseg: 'FreeSurfer aseg',
     nextbrain: 'NextBrain',
@@ -110,6 +114,8 @@ export const fr: typeof en = {
       'Aires cytoarchitectoniques issues de l’histologie, 139 par hémisphère (Amunts 2020)\u202f; environ un quart du cortex n’est pas encore cartographié',
     schaefer:
       'Parcelles fonctionnelles de connectivité au repos, 200 par hémisphère, colorées par réseau de Yeo (Schaefer 2018)',
+    desikan:
+      'Régions gyrales, 34 par hémisphère (Desikan 2006), l’atlas sur lequel ENIGMA rapporte les troubles',
     learning:
       'Grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés',
     aseg: 'Segmentation sous-corticale automatique standard de FreeSurfer',

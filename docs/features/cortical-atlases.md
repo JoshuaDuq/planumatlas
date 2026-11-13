@@ -1,6 +1,6 @@
 # Cortical atlases
 
-Four parcellations of the cortex, Destrieux, HCP-MMP1.0 (Human Connectome Project multimodal parcellation), Julich-Brain 3.1 and Schaefer 2018, are drawn on one brain's native pial surface, on solid ribbon wedges and on cut faces. Destrieux is the subject's own FreeSurfer annotation; the other three are group atlases carried from `fsaverage` to the subject by nearest vertex on registered spheres. Their boundaries are therefore projected estimates, not boundaries measured in this brain.
+Five parcellations of the cortex, Destrieux, Desikan-Killiany, HCP-MMP1.0 (Human Connectome Project multimodal parcellation), Julich-Brain 3.1 and Schaefer 2018, are drawn on one brain's native pial surface, on solid ribbon wedges and on cut faces. Destrieux and Desikan-Killiany are the subject's own FreeSurfer annotations; the other three are group atlases carried from `fsaverage` to the subject by nearest vertex on registered spheres. Their boundaries are therefore projected estimates, not boundaries measured in this brain.
 
 ```{figure} figures/cortical-atlases-1.webp
 :alt: Four lateral views of the same left hemisphere, each coloured by a different cortical atlas: Destrieux gyri and sulci, HCP-MMP areas, Julich-Brain areas with large beige unmapped patches, and Schaefer parcels in seven network colours.
@@ -14,12 +14,13 @@ Four parcellations of the cortex, Destrieux, HCP-MMP1.0 (Human Connectome Projec
 | Atlas | Input | Pinned by |
 | :--- | :--- | :--- |
 | Destrieux (`aparc.a2009s`) | Subject `label/{lh,rh}.aparc.a2009s.annot` and `mri/aparc.a2009s+aseg.mgz`, FreeSurfer 8.2 `recon-all` | sha256 in `data/sources.json`; `reconstruction.json` |
+| Desikan-Killiany (`aparc`) | Subject `label/{lh,rh}.aparc.annot`, the same `recon-all` run (written before the Destrieux annotation; the run's report predates its copy, so `unreported_outputs` declares it) | sha256 in `data/sources.json` |
 | HCP-MMP1.0 | `fsaverage` `label/{lh,rh}.HCPMMP1.annot`, figshare files 5528816 and 5528819 (DOI 10.6084/m9.figshare.3498446.v2) | sha256 and md5 in `data/sources.json` |
 | Julich-Brain 3.1 | `fsaverage_surface/{lh,rh}.JulichBrainAtlas_3.1.label.gii`, EBRAINS bucket `d-f1fe19e8-99bd-44bc-9616-a52850680777` (DOI 10.25493/KNSN-XB4) | sha256 constants in `scripts/fetch_julich_brain.py` |
 | Schaefer 2018 | `Schaefer2018_400Parcels_{7,17}Networks_order.annot`, CBIG `FreeSurfer5.3/fsaverage/label` | sha256 in `data/sources.json` |
 | Registered spheres | `surf/{lh,rh}.sphere.reg` of `fsaverage` and of the subject | sha256 in `data/sources.json` |
 
-CDMD's pial surfaces have 108,347 (left) and 108,379 (right) vertices and 216,690 and 216,754 triangles. Published region counts (`manifest.json`) are 148 Destrieux parcels, 360 HCP-MMP areas, 278 Julich-Brain areas and 400 Schaefer parcels, plus non-region entries: 2 medial walls each for Destrieux, HCP-MMP and Schaefer, and 18 for Julich-Brain (per hemisphere, 7 gap maps and 2 medial masks). Citations: Destrieux et al. (2010), Glasser et al. (2016), Amunts et al. (2020), Schaefer et al. (2018) ([references](../reference/references.md#cortical-and-subcortical-atlases)).
+CDMD's pial surfaces have 108,347 (left) and 108,379 (right) vertices and 216,690 and 216,754 triangles. Published region counts (`manifest.json`) are 148 Destrieux parcels, 68 Desikan-Killiany regions, 360 HCP-MMP areas, 278 Julich-Brain areas and 400 Schaefer parcels, plus non-region entries: 2 medial walls each for Destrieux, Desikan-Killiany, HCP-MMP and Schaefer, and 18 for Julich-Brain (per hemisphere, 7 gap maps and 2 medial masks). Desikan-Killiany leaves its medial wall outside every table entry (label −1, 8,162 left and 8,254 right vertices); the build and the cut labels read it as entry 0. Citations: Destrieux et al. (2010), Desikan et al. (2006), Glasser et al. (2016), Amunts et al. (2020), Schaefer et al. (2018) ([references](../reference/references.md#cortical-and-subcortical-atlases)).
 
 ## Method
 
@@ -42,7 +43,7 @@ Labels preserved per hemisphere: 181 for HCP-MMP (180 areas and the unlabelled e
 
 `build_cortex` (`brain_model/build.py`) reads the native pial surface, which must be closed and genus zero ($V - E + F = 2$). `partition_surface` (`brain_model/surfaces/geometry.py`) keeps every single-label triangle and divides each mixed-label triangle into six: its three edge midpoints and centroid are added, and each corner owns the two triangles (corner, next midpoint, centroid) and (corner, centroid, previous midpoint). New points are means of their source vertices; normals are normalised means. No original vertex moves, so each region owns exactly one third of every triangle at each of its vertices and the pial area is conserved.
 
-Each region becomes one mesh with id `<atlas>:<hemisphere>:<source label>`. `cortical_region` marks `Unknown`, `unknown`, `???`, `Medial_wall`, `CorpusCallosumMask`, `BrainStemMask`, `Background+FreeSurfer_Defined_Medial_Wall` and every `GapMap-*` as `non-region`. Meshes carry `_SULC` (`sulc`), `_OPENNESS` (baked occlusion), `_T1` (trilinear `orig.mgz` at pial–white midpoints) and categorical fields (`_NETWORK`, `_TERRITORY`) carried by `partition_vertex_labels`, which takes the repeated value of a pair, else the lowest. Exported triangles, left and right: Destrieux 287,890 and 287,044; HCP-MMP 331,760 and 332,874; Julich-Brain 318,815 and 320,309; Schaefer 326,075 and 325,579.
+Each region becomes one mesh with id `<atlas>:<hemisphere>:<source label>`. `cortical_region` marks `Unknown`, `unknown`, `???`, `Medial_wall`, `CorpusCallosumMask`, `BrainStemMask`, `Background+FreeSurfer_Defined_Medial_Wall` and every `GapMap-*` as `non-region`. Meshes carry `_SULC` (`sulc`), `_OPENNESS` (baked occlusion), `_T1` (trilinear `orig.mgz` at pial–white midpoints) and categorical fields (`_NETWORK`, `_TERRITORY`) carried by `partition_vertex_labels`, which takes the repeated value of a pair, else the lowest. Exported triangles, left and right: Destrieux 287,890 and 287,044; Desikan-Killiany 256,695 and 256,734; HCP-MMP 331,760 and 332,874; Julich-Brain 318,815 and 320,309; Schaefer 326,075 and 325,579.
 
 ### Schaefer names and colours
 
@@ -54,7 +55,7 @@ Each region becomes one mesh with id `<atlas>:<hemisphere>:<source label>`. `cor
 
 ### Cut-face labels
 
-`export_tissue_labels` (`brain_model/labels/tissue_labels.py`) starts from `aparc.a2009s+aseg.mgz`; Destrieux cut labels are those source labels. For the projected atlases, `project_surface_atlas`:
+`export_tissue_labels` (`brain_model/labels/tissue_labels.py`) starts from `aparc.a2009s+aseg.mgz`; Destrieux cut labels are those source labels. For every other atlas, Desikan-Killiany included, `project_surface_atlas`:
 
 1. takes voxels with a Destrieux cortical label (11101–11199 left, 12101–12199 right) and sets them to annotation entry 0 (unlabelled);
 2. gives each such voxel inside `ribbon.mgz` cortex (label 3 left, 42 right) the annotation label of its nearest vertex among stacked pial and white vertices (`cKDTree`, index modulo the vertex count);
@@ -64,7 +65,7 @@ The volume is cropped to its label bounding box and written as `tissues-<atlas>.
 
 ## Display
 
-The **Atlas** menu chooses the surface atlas (URL key `atlas`: `destrieux`, `hcp-mmp`, `julich`, `schaefer`); the cut-face atlas is the key `cuts`. `cortex-<atlas>.glb` loads for the chosen atlas and others on demand. The first atlas built measures the shading-field ranges and later atlases are held to them, so one decode serves every file. Region names come from `web/src/lib/core/catalog/`. Julich-Brain areas group by lobe from their first location tag (e.g. `PostCG` → Central), as Destrieux groups. Schaefer parcels show their 17-network name with CBIG's abbreviations spelled out. On a cut, `tissues-<atlas>.volume` is sampled on the GPU and `ribbon-wedges.ts` closes each parcel from `ribbon-<atlas>.labels`. Pairwise overlap is in [atlas comparison](atlas-comparison.md).
+The **Atlas** menu chooses the surface atlas (URL key `atlas`: `destrieux`, `desikan`, `hcp-mmp`, `julich`, `schaefer`); the cut-face atlas is the key `cuts`. `cortex-<atlas>.glb` loads for the chosen atlas and others on demand. The first atlas built measures the shading-field ranges and later atlases are held to them, so one decode serves every file. Region names come from `web/src/lib/core/catalog/`. Julich-Brain areas group by lobe from their first location tag (e.g. `PostCG` → Central), as Destrieux groups; Desikan-Killiany regions take the lobe Destrieux lists the same gyrus under (`desikan-labels.ts`) and their French names from NextBrain's table, whose cortex has the same names. Desikan-Killiany is the atlas [disorder effects](disorder-effects.md) are reported on; it has no atlas comparison. Schaefer parcels show their 17-network name with CBIG's abbreviations spelled out. On a cut, `tissues-<atlas>.volume` is sampled on the GPU and `ribbon-wedges.ts` closes each parcel from `ribbon-<atlas>.labels`. Pairwise overlap is in [atlas comparison](atlas-comparison.md).
 
 ## Validation
 
@@ -74,10 +75,10 @@ The **Atlas** menu chooses the surface atlas (URL key `atlas`: `destrieux`, `hcp
 | `prepare_subject.py` transfer checks | Label set preserved; 512 samples match brute-force nearest vertex | 181, 148, 201 labels per hemisphere |
 | `tests/test_registration.py` | Categorical transfer without averaging; invalid spheres fail | passes |
 | `tests/test_geometry.py`; `brain_model.validate` | Partition preserves area and vertex labels; exported area within relative $10^{-6}$ | largest parent-plane error $6.1 \times 10^{-15}$ mm |
-| `tests/test_ribbons.py`; `brain_model.validate` | Every ribbon wedge closed (0 holes) | pinches: 80 Destrieux, 170 HCP-MMP, 149 Julich-Brain, 231 Schaefer |
+| `tests/test_ribbons.py`; `brain_model.validate` | Every ribbon wedge closed (0 holes) | pinches: 80 Destrieux, 32 Desikan-Killiany, 170 HCP-MMP, 149 Julich-Brain, 231 Schaefer |
 | `tests/test_tissue_labels.py`; `brain_model.validate` | Non-cortical voxels equal Destrieux; ribbon voxels equal nearest-vertex label | passes; 181,550 left and 179,697 right ribbon voxels; 47 and 69 cortical voxels outside the ribbon |
 | `tests/test_networks.py` | 7- and 17-network orders pair one to one; palette within jitter | passes |
-| `brain_model.validate` placements | Anchor inside own label | Julich-Brain 275 of 278; CA2 (left) and CA3 (both sides) placed on surface |
+| `brain_model.validate` placements | Anchor inside own label | Desikan-Killiany 68 of 68; Julich-Brain 275 of 278; CA2 (left) and CA3 (both sides) placed on surface |
 
 ## Limitations
 

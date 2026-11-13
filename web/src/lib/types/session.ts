@@ -35,6 +35,11 @@ export interface SessionState {
    * brain"; null for none. Not written to links.
    */
   connectivitySeed: string | null;
+  /**
+   * The disorder whose case–control differences Anatomy paints on Desikan-Killiany, from a region
+   * sheet's "Paint on the brain"; null for none. Not written to links.
+   */
+  disorderShown: string | null;
   /** The Tracts tab's open profile: a tract row's key, or null for the list. Not written to links. */
   selectedTract: string | null;
   /** The Tracts tab's streamlines stay drawn on the other tabs, over their own anatomy. */

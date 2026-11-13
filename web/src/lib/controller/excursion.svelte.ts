@@ -12,6 +12,7 @@ import {
   paintAtlas,
   revealedRegions,
 } from '../core/catalog/neuropsych-domains.ts';
+import { DISORDER_ATLAS } from '../core/catalog/disorder-effects.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { t } from '../core/i18n/index.ts';
@@ -413,6 +414,22 @@ export function createExcursions(
     return true;
   }
 
+  /**
+   * The atlas is then the reader's own: closing the excursion no longer replaces it. An atlas the
+   * open function was measured on takes its paint; any other holds none of its areas, so the paint lifts.
+   */
+  function chooseAtlas(id: string) {
+    const open = session.state.explorer === 'functions' ? session.state.selectedFunction : null;
+    if (!open || paintAtlas(domains, open, id) !== id) session.liftPaint();
+    // A connectivity paint names the areas of the atlas it was asked on; a disorder's lie on Desikan-Killiany.
+    if (id !== model.settings.atlas) session.setConnectivitySeed(null);
+    if (id !== DISORDER_ATLAS) session.setDisorderShown(null);
+    beforeExcursion = null;
+    excursionOrigin = null;
+    render();
+    return commands.chooseAtlas(id);
+  }
+
   /** Hides the cortex to frame the structures a paint colours beneath it, or brings it back. */
   function showBeneathCortex(hidden: boolean) {
     model.setCortexVisible(!hidden);
@@ -559,19 +576,21 @@ export function createExcursions(
     pickPaint,
     offerReload,
 
+    chooseAtlas,
     /**
-     * The atlas is then the reader's own: closing the excursion no longer replaces it. An atlas the
-     * open function was measured on takes its paint; any other holds none of its areas, so the paint lifts.
+     * Paints a disorder's differences on Desikan-Killiany, the atlas they are reported on, choosing it.
+     * The deep structure it was asked from stays selected across the switch, which clears a selection;
+     * an atlas that fails to load paints nothing.
      */
-    chooseAtlas(id: string) {
-      const open = session.state.explorer === 'functions' ? session.state.selectedFunction : null;
-      if (!open || paintAtlas(domains, open, id) !== id) session.liftPaint();
-      // A connectivity paint names the areas of the atlas it was asked on.
-      if (id !== model.settings.atlas) session.setConnectivitySeed(null);
-      beforeExcursion = null;
-      excursionOrigin = null;
+    async showDisorder(id: string) {
+      if (model.settings.atlas !== DISORDER_ATLAS) {
+        const selected = model.state.selectedRegion?.id ?? null;
+        await chooseAtlas(DISORDER_ATLAS);
+        if (model.settings.atlas !== DISORDER_ATLAS) return;
+        if (selected) model.select(selected);
+      }
+      session.setDisorderShown(id);
       render();
-      return commands.chooseAtlas(id);
     },
     /**
      * The cut's label volume (app.js:564), from the navigator's "switch cut atlas". The cortical surface

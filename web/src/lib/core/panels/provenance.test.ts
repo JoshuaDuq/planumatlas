@@ -119,6 +119,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
       'Stimulation responses',
       'Stimulation responses (F-TRACT)',
       'Functional connectivity (HCP)',
+      'Brain differences in disorders (ENIGMA)',
       'Stroke cases',
       'Neuropsychological domains',
       'Supplemental layers',
@@ -154,6 +155,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
     '/neuroatlas/models/cdmd/../licenses/HCP-Data-Use-Terms.txt',
     '/neuroatlas/models/cdmd/../licenses/Julich-Brain-CC-BY-NC-SA-4.0.pdf',
     '/neuroatlas/models/cdmd/../licenses/CAB-NP.txt',
+    '/neuroatlas/models/cdmd/../licenses/ENIGMA-Toolbox-BSD-3-Clause.txt',
     '/neuroatlas/models/cdmd/../licenses/PAM50.txt',
   ]);
 });
@@ -181,7 +183,7 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
   assert.deepEqual(
     rowOf(en, 'Published files').items.map((item) => [item.link!.text, item.note]),
     [
-      ['manifest.json', '66 source files, each with a SHA-256 checksum'],
+      ['manifest.json', '70 source files, each with a SHA-256 checksum'],
       ['anatomies.json', 'Index of the published anatomies'],
     ],
   );

@@ -190,6 +190,7 @@ export function createFakeModel({
     stimulation: null,
     ftract: null,
     connectivity: null,
+    disorders: null,
     defaultDetail,
     get settings() {
       return settings();

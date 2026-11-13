@@ -57,6 +57,10 @@ anatomies:
       threads: 4
       provenance: reconstruction.json
       completion_marker: scripts/recon-all.done
+      # Desikan-Killiany was read from the same recon-all run (written 7 minutes
+      # before its Destrieux annotation) after the report was, so only
+      # data/sources.json pins it.
+      unreported_outputs: [label/lh.aparc.annot, label/rh.aparc.annot]
       limitations:
         - "The source T1 was defaced before release: facial features were obscured; the brain was not altered."
     statistics: stats/aseg.stats
@@ -282,6 +286,14 @@ atlases:
     annotation: Schaefer2018_400Parcels_7Networks_order
     names_from: Schaefer2018_400Parcels_17Networks_order
     citation: https://doi.org/10.1093/cercor/bhx179
+  # Desikan-Killiany, the subject's own recon-all parcellation like Destrieux: 34
+  # gyral regions per hemisphere, the atlas ENIGMA's disorder effects are
+  # reported on. Its cut labels are projected from its surface, as the group
+  # atlases' are.
+  - id: desikan
+    label: Desikan-Killiany anatomical atlas
+    annotation: aparc
+    citation: https://doi.org/10.1016/j.neuroimage.2006.01.021
 # A cut-label atlas with no cortical surface counterpart, published by the
 # anatomies that declare the `nextbrain` layer. The volume is produced once per
 # brain by scripts/segment_nextbrain.py, which needs FreeSurfer 8.2.

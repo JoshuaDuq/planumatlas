@@ -14,6 +14,7 @@ import { createClinicalCatalog, findingPaint } from '../clinical/catalog.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
+import type { DisorderEffects } from '../catalog/disorder-effects.ts';
 import {
   comparesMap,
   FUNCTION_OVERLAP_COLOR,
@@ -86,6 +87,7 @@ const base: KeyState = {
   paintLifted: false,
   paintFrom: null,
   connectivitySeed: null,
+  disorderShown: null,
   lang: 'en',
 };
 const paintOf = (id: string): Paint => ({ id, colors: new Map() });
@@ -307,6 +309,84 @@ test('STAGE-63 · the connectivity key names the seed and lists the r steps stro
   assert.match(legend.note, /below r 0\.15, as half of all pairs do/);
 });
 
+const measure = { pmid: 1, patients: 10, controls: 12, tested: 2 };
+const disorders: DisorderEffects = {
+  id: 'disorder-effects',
+  source: {
+    short: 's',
+    citation: 'c',
+    pmid: 1,
+    repository: 'https://github.com/x/y',
+    commit: 'abc',
+  },
+  false_discovery_rate: 0.05,
+  d_scale: {
+    split: 0.2,
+    smaller: [
+      [1, 1, 1],
+      [2, 2, 2],
+    ],
+    larger: [
+      [3, 3, 3],
+      [4, 4, 4],
+    ],
+  },
+  regions: ['desikan:left:1', 'desikan:left:2'],
+  disorders: [
+    {
+      id: 'scz',
+      name: { en: 'Schizophrenia', fr: 'Schizophrénie' },
+      measures: { thickness: measure, volume: measure },
+      effects: { 'desikan:left:1': -0.4, 'desikan:left:2': 0.1 },
+    },
+  ],
+};
+
+test('STAGE-65 · Anatomy paints a disorder on Desikan-Killiany only, over connectivity and a lesion, until lifted', () => {
+  const shown: KeyState = {
+    ...base,
+    explorer: 'anatomy',
+    atlas: 'desikan',
+    disorderShown: 'scz',
+    connectivitySeed: 'julich:left:1',
+  };
+  const lesion = { kind: 'functions' as const, paint: paintOf('lesion:x'), rows: [] };
+  const withData = { ...sources, connectivity, disorders, lesion };
+  assert.equal(paintFor(shown, withData)!.id, 'disorder:scz');
+  assert.equal(paintFor({ ...shown, atlas: 'destrieux' }, withData)!.id, 'lesion:x');
+  assert.equal(
+    paintFor({ ...shown, disorderShown: null, atlas: 'julich' }, withData)!.id,
+    'connectivity:julich:left:1',
+  );
+  assert.equal(paintFor({ ...shown, explorer: 'functions' }, withData), null);
+  assert.equal(paintFor({ ...shown, paintLifted: true }, withData), null);
+});
+
+test('STAGE-66 · the disorder key names it and lists four steps from larger to smaller, outlining any nothing carries', () => {
+  const state: KeyState = { ...base, explorer: 'anatomy', atlas: 'desikan', disorderShown: 'scz' };
+  const legend = legendFor(
+    { ...state, paint: paintFor(state, { ...sources, disorders }) },
+    { ...sources, disorders },
+  )!;
+  assert.equal(legend.map, 'disorder');
+  assert.equal(legend.title, 'Schizophrenia: patients minus controls');
+  assert.equal(legend.pickable, false);
+  // d −0.4 is a darker thinning, 0.1 a paler thickening; neither a darker thickening nor a paler thinning.
+  assert.deepEqual(
+    legend.rows.map(({ label, color, absent }) => [label, color, absent]),
+    [
+      ['Thicker or larger, d\u00a0≥\u00a00.2', [4, 4, 4], true],
+      ['Thicker or larger, d\u00a0<\u00a00.2', [3, 3, 3], false],
+      ['Thinner or smaller, d\u00a0>\u00a0−0.2', [1, 1, 1], true],
+      ['Thinner or smaller, d\u00a0≤\u00a0−0.2', [2, 2, 2], false],
+    ],
+  );
+  assert.match(
+    legend.note,
+    /survives a 5% false discovery rate\. Tissue-coloured regions show none/,
+  );
+});
+
 test('a paint names its tab by its id', () => {
   assert.equal(paintKind(paintOf('function:language')), 'function');
   assert.equal(paintKind(paintOf('deficit:aphasia:naming')), 'deficit');
@@ -372,6 +452,7 @@ describe('the published cdmd functions and deficits', () => {
     paintLifted: false,
     paintFrom: null,
     connectivitySeed: null,
+    disorderShown: null,
     lang,
   });
 
@@ -479,6 +560,7 @@ describe('the published cdmd functions and deficits', () => {
       paintLifted: false,
       paintFrom: null,
       connectivitySeed: null,
+      disorderShown: null,
       lang: 'en',
     };
     const paint = paintFor(state, both)!;
@@ -526,6 +608,7 @@ describe('the published cdmd functions and deficits', () => {
         paintLifted: false,
         paintFrom: null,
         connectivitySeed: null,
+        disorderShown: null,
         lang: 'en',
       };
       const findings = catalog.paint(deficit.id).findings.map(({ association }) => association.id);

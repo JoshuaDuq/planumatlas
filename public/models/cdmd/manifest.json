@@ -1516,6 +1516,103 @@
         ],
         "source": "Native lh/rh.Schaefer2018_400Parcels_7Networks_order.annot, one region index per vertex; a triangle belongs to the parcel holding most of its vertices"
       }
+    },
+    {
+      "id": "desikan",
+      "label": "Desikan-Killiany anatomical atlas",
+      "annotation": "aparc",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2006.01.021",
+      "file": "cortex-desikan.glb",
+      "region_count": 68,
+      "surface_shading": {
+        "attribute": "_SULC",
+        "source": "FreeSurfer lh.sulc / rh.sulc",
+        "interpolation": "Linear on barycentric atlas partitions",
+        "meaning": "Sulcal-depth morphometry; positive values mark sulci",
+        "openness": "_OPENNESS: cosine-weighted share of rays from each pial vertex that clear the intact pial hemisphere, a hit at d counting d / radius_mm open (appearance.occlusion)",
+        "intensity": "_T1: trilinear orig.mgz at corresponding pial/white midpoints in tkregister RAS; illustrative brightness, not measured optical albedo"
+      },
+      "ribbon_labels": {
+        "file": "ribbon-desikan.labels",
+        "sha256": "b8cb762fc410213fa80f6fc21e1c968971ab92b04dc68272bf126c44bb33768e",
+        "vertex_counts": {
+          "left": 108347,
+          "right": 108379
+        },
+        "region_ids": [
+          "desikan:left:-1",
+          "desikan:left:1",
+          "desikan:left:2",
+          "desikan:left:3",
+          "desikan:left:5",
+          "desikan:left:6",
+          "desikan:left:7",
+          "desikan:left:8",
+          "desikan:left:9",
+          "desikan:left:10",
+          "desikan:left:11",
+          "desikan:left:12",
+          "desikan:left:13",
+          "desikan:left:14",
+          "desikan:left:15",
+          "desikan:left:16",
+          "desikan:left:17",
+          "desikan:left:18",
+          "desikan:left:19",
+          "desikan:left:20",
+          "desikan:left:21",
+          "desikan:left:22",
+          "desikan:left:23",
+          "desikan:left:24",
+          "desikan:left:25",
+          "desikan:left:26",
+          "desikan:left:27",
+          "desikan:left:28",
+          "desikan:left:29",
+          "desikan:left:30",
+          "desikan:left:31",
+          "desikan:left:32",
+          "desikan:left:33",
+          "desikan:left:34",
+          "desikan:left:35",
+          "desikan:right:-1",
+          "desikan:right:1",
+          "desikan:right:2",
+          "desikan:right:3",
+          "desikan:right:5",
+          "desikan:right:6",
+          "desikan:right:7",
+          "desikan:right:8",
+          "desikan:right:9",
+          "desikan:right:10",
+          "desikan:right:11",
+          "desikan:right:12",
+          "desikan:right:13",
+          "desikan:right:14",
+          "desikan:right:15",
+          "desikan:right:16",
+          "desikan:right:17",
+          "desikan:right:18",
+          "desikan:right:19",
+          "desikan:right:20",
+          "desikan:right:21",
+          "desikan:right:22",
+          "desikan:right:23",
+          "desikan:right:24",
+          "desikan:right:25",
+          "desikan:right:26",
+          "desikan:right:27",
+          "desikan:right:28",
+          "desikan:right:29",
+          "desikan:right:30",
+          "desikan:right:31",
+          "desikan:right:32",
+          "desikan:right:33",
+          "desikan:right:34",
+          "desikan:right:35"
+        ],
+        "source": "Native lh/rh.aparc.annot, one region index per vertex; a triangle belongs to the parcel holding most of its vertices"
+      }
     }
   ],
   "networks": {
@@ -1669,6 +1766,18 @@
       "https://pubmed.ncbi.nlm.nih.gov/34746628/"
     ],
     "method": "The Fisher-z mean of 200 HCP young adults' resting-state Pearson correlations between the parcel-mean BOLD series of Julich-Brain 3.1 areas in MNI152 space; each area takes the parcel of the same name"
+  },
+  "disorder_effects": {
+    "id": "disorder-effects",
+    "file": "disorder-effects.json",
+    "label": "Brain differences in disorders (ENIGMA consortium)",
+    "license": "BSD 3-Clause (ENIGMA Toolbox repository)",
+    "license_file": "../licenses/ENIGMA-Toolbox-BSD-3-Clause.txt",
+    "citations": [
+      "https://github.com/MICA-MNI/ENIGMA/tree/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics",
+      "https://pubmed.ncbi.nlm.nih.gov/34194050/"
+    ],
+    "method": "Each ENIGMA working group's case\u2013control Cohen's d (patients minus controls, adjusted for intracranial volume) per Desikan-Killiany region's cortical thickness and per subcortical volume, as the ENIGMA Toolbox republishes it; a region carries a difference only where its table's false discovery rate stays below 0.05"
   },
   "boundary_certainty": {
     "id": "boundary-certainty",
@@ -2614,6 +2723,12 @@
       "id": "schaefer",
       "label": "Schaefer 2018 functional parcellation",
       "citation": "https://doi.org/10.1093/cercor/bhx179",
+      "surface": true
+    },
+    {
+      "id": "desikan",
+      "label": "Desikan-Killiany anatomical atlas",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2006.01.021",
       "surface": true
     },
     {
@@ -55030,6 +55145,3526 @@
       ]
     },
     {
+      "id": "desikan:left:-1",
+      "label": "Unknown \u00b7 left",
+      "source_name": "Unknown",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": -1,
+      "kind": "non-region",
+      "source_annotation_value": 0,
+      "source_vertex_count": 8162,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.7767857142857143
+        },
+        {
+          "network": "Default",
+          "fraction": 0.12053571428571429
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.09821428571428571
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.004464285714285714
+        }
+      ],
+      "vertex_count": 10021,
+      "triangle_count": 18188,
+      "surface_area_mm2": 5038.629773443506
+    },
+    {
+      "id": "desikan:left:1",
+      "label": "bankssts \u00b7 left",
+      "source_name": "bankssts",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 1,
+      "kind": "cortex",
+      "source_annotation_value": 2647065,
+      "source_vertex_count": 1341,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.6868008948545862
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3131991051454139
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2145,
+      "triangle_count": 3484,
+      "surface_area_mm2": 915.659717706024,
+      "centroid_ras_mm": [
+        -54.01919795221843,
+        -23.66339590443686,
+        19.382679180887372
+      ],
+      "anchor_ras_mm": [
+        -54.0,
+        -24.0,
+        19.0
+      ]
+    },
+    {
+      "id": "desikan:left:2",
+      "label": "caudalanteriorcingulate \u00b7 left",
+      "source_name": "caudalanteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 2,
+      "kind": "cortex",
+      "source_annotation_value": 10511485,
+      "source_vertex_count": 678,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.42232277526395173
+        },
+        {
+          "network": "Default",
+          "fraction": 0.39668174962292607
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.18099547511312217
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.724188790560472
+        },
+        {
+          "territory": "medial-lenticulostriate",
+          "fraction": 0.275811209439528
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1242,
+      "triangle_count": 1918,
+      "surface_area_mm2": 574.388936682141,
+      "centroid_ras_mm": [
+        -1.5121188428459733,
+        12.373729476153244,
+        53.18060985144644
+      ],
+      "anchor_ras_mm": [
+        -2.0,
+        12.0,
+        53.0
+      ]
+    },
+    {
+      "id": "desikan:left:3",
+      "label": "caudalmiddlefrontal \u00b7 left",
+      "source_name": "caudalmiddlefrontal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 3,
+      "kind": "cortex",
+      "source_annotation_value": 6500,
+      "source_vertex_count": 2719,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5744759102611254
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.21552041191614565
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.21000367782272894
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.8734828981243105
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.1265171018756896
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 3794,
+      "triangle_count": 6511,
+      "surface_area_mm2": 2083.591227030158,
+      "centroid_ras_mm": [
+        -28.918463750256727,
+        4.169028547956459,
+        64.22632984185664
+      ],
+      "anchor_ras_mm": [
+        -29.0,
+        4.0,
+        64.0
+      ]
+    },
+    {
+      "id": "desikan:left:5",
+      "label": "cuneus \u00b7 left",
+      "source_name": "cuneus",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 5,
+      "kind": "cortex",
+      "source_annotation_value": 6558940,
+      "source_vertex_count": 1634,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2460,
+      "triangle_count": 4092,
+      "surface_area_mm2": 1285.9091951303462,
+      "centroid_ras_mm": [
+        -9.5413808870599,
+        -59.898033836305444,
+        24.132144490169182
+      ],
+      "anchor_ras_mm": [
+        -10.0,
+        -60.0,
+        24.0
+      ]
+    },
+    {
+      "id": "desikan:left:6",
+      "label": "entorhinal \u00b7 left",
+      "source_name": "entorhinal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 6,
+      "kind": "cortex",
+      "source_annotation_value": 660700,
+      "source_vertex_count": 658,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.7416413373860182
+        },
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.041033434650455926
+        }
+      ],
+      "territory_unassigned": 0.21580547112462006,
+      "vertex_count": 1402,
+      "triangle_count": 2060,
+      "surface_area_mm2": 579.4890146844693,
+      "centroid_ras_mm": [
+        -25.713395638629283,
+        5.400311526479751,
+        -2.8816199376947043
+      ],
+      "anchor_ras_mm": [
+        -25.0,
+        5.0,
+        -3.0
+      ]
+    },
+    {
+      "id": "desikan:left:7",
+      "label": "fusiform \u00b7 left",
+      "source_name": "fusiform",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 7,
+      "kind": "cortex",
+      "source_annotation_value": 9231540,
+      "source_vertex_count": 3501,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.5692659240217081
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.25249928591830906
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.17823479005998286
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.4141673807483576
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.29705798343330475
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.1868037703513282
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.09625821193944588
+        }
+      ],
+      "territory_unassigned": 0.00028563267637817766,
+      "vertex_count": 4884,
+      "triangle_count": 8383,
+      "surface_area_mm2": 2914.37145145145,
+      "centroid_ras_mm": [
+        -36.36479842674533,
+        -23.44922039612305,
+        -0.9454979631970782
+      ],
+      "anchor_ras_mm": [
+        -36.0,
+        -23.0,
+        -1.0
+      ]
+    },
+    {
+      "id": "desikan:left:8",
+      "label": "inferiorparietal \u00b7 left",
+      "source_name": "inferiorparietal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 8,
+      "kind": "cortex",
+      "source_annotation_value": 14433500,
+      "source_vertex_count": 5738,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5392122690833043
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.1903102126176368
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1680027884280237
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.0984663645869641
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.004008365284071105
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.417392819797839
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.4154757755315441
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.14865806901359357
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.018299058905542
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 7205,
+      "triangle_count": 12941,
+      "surface_area_mm2": 4715.249381061693,
+      "centroid_ras_mm": [
+        -39.9097428052395,
+        -55.2877904197342,
+        37.061478152787075
+      ],
+      "anchor_ras_mm": [
+        -40.0,
+        -55.0,
+        37.0
+      ]
+    },
+    {
+      "id": "desikan:left:9",
+      "label": "inferiortemporal \u00b7 left",
+      "source_name": "inferiortemporal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 9,
+      "kind": "cortex",
+      "source_annotation_value": 7874740,
+      "source_vertex_count": 3476,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.475258918296893
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.2945914844649022
+        },
+        {
+          "network": "Default",
+          "fraction": 0.1518987341772152
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.06645569620253164
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.011795166858457998
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.48791714614499426
+        },
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.3624856156501726
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.10097813578826237
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.02474108170310702
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.015535097813578827
+        }
+      ],
+      "territory_unassigned": 0.00028768699654775604,
+      "vertex_count": 4903,
+      "triangle_count": 8377,
+      "surface_area_mm2": 3150.2337597711007,
+      "centroid_ras_mm": [
+        -48.40382438042521,
+        -12.96238520568625,
+        -0.5043401685746635
+      ],
+      "anchor_ras_mm": [
+        -48.0,
+        -13.0,
+        -1.0
+      ]
+    },
+    {
+      "id": "desikan:left:10",
+      "label": "isthmuscingulate \u00b7 left",
+      "source_name": "isthmuscingulate",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 10,
+      "kind": "cortex",
+      "source_annotation_value": 9180300,
+      "source_vertex_count": 1188,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.7697495183044316
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.21772639691714837
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.012524084778420038
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.5631313131313131
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.4225589225589226
+        }
+      ],
+      "territory_unassigned": 0.012626262626262626,
+      "vertex_count": 2074,
+      "triangle_count": 3260,
+      "surface_area_mm2": 997.8486332073446,
+      "centroid_ras_mm": [
+        -7.072996706915477,
+        -37.29967069154775,
+        31.896816684961582
+      ],
+      "anchor_ras_mm": [
+        -7.0,
+        -37.0,
+        32.0
+      ]
+    },
+    {
+      "id": "desikan:left:11",
+      "label": "lateraloccipital \u00b7 left",
+      "source_name": "lateraloccipital",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 11,
+      "kind": "cortex",
+      "source_annotation_value": 9182740,
+      "source_vertex_count": 7378,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.9818378964489022
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.018162103551097857
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.6873136351314719
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.2744646245595012
+        },
+        {
+          "territory": "inferior-cerebellar",
+          "fraction": 0.016400108430468963
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.012605042016806723
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 8869,
+      "triangle_count": 16245,
+      "surface_area_mm2": 5993.622283712136,
+      "centroid_ras_mm": [
+        -32.44677166652923,
+        -63.02894367939309,
+        9.729364228580852
+      ],
+      "anchor_ras_mm": [
+        -32.0,
+        -63.0,
+        9.0
+      ]
+    },
+    {
+      "id": "desikan:left:12",
+      "label": "lateralorbitofrontal \u00b7 left",
+      "source_name": "lateralorbitofrontal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 12,
+      "kind": "cortex",
+      "source_annotation_value": 3296035,
+      "source_vertex_count": 2917,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.6251724137931034
+        },
+        {
+          "network": "Default",
+          "fraction": 0.19724137931034483
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.12241379310344827
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.05517241379310345
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9921151868357901
+        }
+      ],
+      "territory_unassigned": 0.0013712718546451835,
+      "vertex_count": 4079,
+      "triangle_count": 6996,
+      "surface_area_mm2": 2401.698195720049,
+      "centroid_ras_mm": [
+        -19.30841121495327,
+        35.29481733220051,
+        22.296686491079015
+      ],
+      "anchor_ras_mm": [
+        -19.0,
+        35.0,
+        22.0
+      ]
+    },
+    {
+      "id": "desikan:left:13",
+      "label": "lingual \u00b7 left",
+      "source_name": "lingual",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 13,
+      "kind": "cortex",
+      "source_annotation_value": 9211105,
+      "source_vertex_count": 3258,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.7799263351749539
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.2176181706568447
+        }
+      ],
+      "territory_unassigned": 0.001534683855125844,
+      "vertex_count": 4354,
+      "triangle_count": 7610,
+      "surface_area_mm2": 2625.9651539512756,
+      "centroid_ras_mm": [
+        -16.60679196924391,
+        -46.809055958991884,
+        7.16894489534387
+      ],
+      "anchor_ras_mm": [
+        -17.0,
+        -47.0,
+        7.0
+      ]
+    },
+    {
+      "id": "desikan:left:14",
+      "label": "medialorbitofrontal \u00b7 left",
+      "source_name": "medialorbitofrontal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 14,
+      "kind": "cortex",
+      "source_annotation_value": 4924360,
+      "source_vertex_count": 2349,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5213082259663032
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.4786917740336967
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.7943805874840357
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.032354193273733504
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.019582801191996593
+        }
+      ],
+      "territory_unassigned": 0.15368241805023414,
+      "vertex_count": 3704,
+      "triangle_count": 6063,
+      "surface_area_mm2": 2034.0467667922085,
+      "centroid_ras_mm": [
+        -3.7147475752300423,
+        36.72743098731659,
+        24.024620741109178
+      ],
+      "anchor_ras_mm": [
+        -4.0,
+        37.0,
+        24.0
+      ]
+    },
+    {
+      "id": "desikan:left:15",
+      "label": "middletemporal \u00b7 left",
+      "source_name": "middletemporal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 15,
+      "kind": "cortex",
+      "source_annotation_value": 3302560,
+      "source_vertex_count": 3485,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.6559540889526543
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.11707317073170732
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.09842180774748924
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.07776183644189383
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.045050215208034435
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.005738880918220947
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.969583931133429
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.02582496413199426
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 5145,
+      "triangle_count": 8628,
+      "surface_area_mm2": 3163.0387825296234,
+      "centroid_ras_mm": [
+        -54.13576117923944,
+        -11.232998885172798,
+        9.497956150130063
+      ],
+      "anchor_ras_mm": [
+        -54.0,
+        -11.0,
+        8.0
+      ]
+    },
+    {
+      "id": "desikan:left:16",
+      "label": "parahippocampal \u00b7 left",
+      "source_name": "parahippocampal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 16,
+      "kind": "cortex",
+      "source_annotation_value": 3988500,
+      "source_vertex_count": 890,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.6224366706875754
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.3775633293124246
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.3359550561797753
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.3089887640449438
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.13820224719101123
+        },
+        {
+          "territory": "anterior-choroidal-thalamoperforating",
+          "fraction": 0.051685393258426963
+        }
+      ],
+      "territory_unassigned": 0.1651685393258427,
+      "vertex_count": 1621,
+      "triangle_count": 2509,
+      "surface_area_mm2": 787.7111990391635,
+      "centroid_ras_mm": [
+        -24.45263724434876,
+        -16.863832077502693,
+        2.2373519913885898
+      ],
+      "anchor_ras_mm": [
+        -24.0,
+        -17.0,
+        2.0
+      ]
+    },
+    {
+      "id": "desikan:left:17",
+      "label": "paracentral \u00b7 left",
+      "source_name": "paracentral",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 17,
+      "kind": "cortex",
+      "source_annotation_value": 3988540,
+      "source_vertex_count": 1553,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.8267868641339343
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.17321313586606568
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2315,
+      "triangle_count": 3866,
+      "surface_area_mm2": 1091.540478713344,
+      "centroid_ras_mm": [
+        -5.812069663831511,
+        -31.23774807614419,
+        62.12758201701094
+      ],
+      "anchor_ras_mm": [
+        -6.0,
+        -31.0,
+        62.0
+      ]
+    },
+    {
+      "id": "desikan:left:18",
+      "label": "parsopercularis \u00b7 left",
+      "source_name": "parsopercularis",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 18,
+      "kind": "cortex",
+      "source_annotation_value": 9221340,
+      "source_vertex_count": 1901,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.4471330878485008
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2661756970015781
+        },
+        {
+          "network": "Default",
+          "fraction": 0.21620199894792214
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.07048921620199895
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.8995265649658075
+        },
+        {
+          "territory": "mca-insular",
+          "fraction": 0.09310889005786428
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2746,
+      "triangle_count": 4645,
+      "surface_area_mm2": 1680.857776438066,
+      "centroid_ras_mm": [
+        -39.967982924226256,
+        16.685965848452508,
+        43.95570971184632
+      ],
+      "anchor_ras_mm": [
+        -40.0,
+        17.0,
+        44.0
+      ]
+    },
+    {
+      "id": "desikan:left:19",
+      "label": "parsorbitalis \u00b7 left",
+      "source_name": "parsorbitalis",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 19,
+      "kind": "cortex",
+      "source_annotation_value": 3302420,
+      "source_vertex_count": 778,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.6195372750642674
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.38046272493573263
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1296,
+      "triangle_count": 2072,
+      "surface_area_mm2": 873.3750711404565,
+      "centroid_ras_mm": [
+        -37.28436018957346,
+        39.59399684044234,
+        30.61506055818852
+      ],
+      "anchor_ras_mm": [
+        -37.0,
+        40.0,
+        30.0
+      ]
+    },
+    {
+      "id": "desikan:left:20",
+      "label": "parstriangularis \u00b7 left",
+      "source_name": "parstriangularis",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 20,
+      "kind": "cortex",
+      "source_annotation_value": 1326300,
+      "source_vertex_count": 1568,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.492984693877551
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.3227040816326531
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.18431122448979592
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9993622448979592
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2413,
+      "triangle_count": 3979,
+      "surface_area_mm2": 1200.2922039448347,
+      "centroid_ras_mm": [
+        -37.74133949191686,
+        29.66320246343341,
+        40.66243264049269
+      ],
+      "anchor_ras_mm": [
+        -39.0,
+        31.0,
+        41.0
+      ]
+    },
+    {
+      "id": "desikan:left:21",
+      "label": "pericalcarine \u00b7 left",
+      "source_name": "pericalcarine",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 21,
+      "kind": "cortex",
+      "source_annotation_value": 3957880,
+      "source_vertex_count": 1317,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2033,
+      "triangle_count": 3348,
+      "surface_area_mm2": 794.6403299292166,
+      "centroid_ras_mm": [
+        -13.169769173492181,
+        -58.013402829486225,
+        13.819061801935964
+      ],
+      "anchor_ras_mm": [
+        -13.0,
+        -58.0,
+        14.0
+      ]
+    },
+    {
+      "id": "desikan:left:22",
+      "label": "postcentral \u00b7 left",
+      "source_name": "postcentral",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 22,
+      "kind": "cortex",
+      "source_annotation_value": 1316060,
+      "source_vertex_count": 4775,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.932565445026178
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.05654450261780105
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.010890052356020943
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.6959162303664922
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.19518324607329843
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.05256544502617801
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.040837696335078534
+        },
+        {
+          "territory": "mca-insular",
+          "fraction": 0.015497382198952879
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 6398,
+      "triangle_count": 11171,
+      "surface_area_mm2": 3639.8831016449144,
+      "centroid_ras_mm": [
+        -38.568130715035224,
+        -19.0301304152301,
+        54.59091590466197
+      ],
+      "anchor_ras_mm": [
+        -39.0,
+        -18.0,
+        55.0
+      ]
+    },
+    {
+      "id": "desikan:left:23",
+      "label": "posteriorcingulate \u00b7 left",
+      "source_name": "posteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 23,
+      "kind": "cortex",
+      "source_annotation_value": 14464220,
+      "source_vertex_count": 1267,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3627684964200477
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.33571996817820204
+        },
+        {
+          "network": "Default",
+          "fraction": 0.26730310262529833
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.03420843277645187
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.8437253354380426
+        },
+        {
+          "territory": "medial-lenticulostriate",
+          "fraction": 0.15627466456195738
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2021,
+      "triangle_count": 3286,
+      "surface_area_mm2": 979.6864775251928,
+      "centroid_ras_mm": [
+        -3.9763937719738824,
+        -18.595178302360623,
+        50.18332496233049
+      ],
+      "anchor_ras_mm": [
+        -4.0,
+        -19.0,
+        51.0
+      ]
+    },
+    {
+      "id": "desikan:left:24",
+      "label": "precentral \u00b7 left",
+      "source_name": "precentral",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 24,
+      "kind": "cortex",
+      "source_annotation_value": 14423100,
+      "source_vertex_count": 5709,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.6395165528113504
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.2420739183744964
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.08512874408828167
+        },
+        {
+          "network": "Default",
+          "fraction": 0.02767559992993519
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.005605184795936241
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.5937992643194955
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.24978104746890875
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.09633911368015415
+        },
+        {
+          "territory": "mca-insular",
+          "fraction": 0.032404974601506396
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.02767559992993519
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 7589,
+      "triangle_count": 13296,
+      "surface_area_mm2": 4184.512171275503,
+      "centroid_ras_mm": [
+        -33.83741258741259,
+        -8.694878650761003,
+        57.21955985191279
+      ],
+      "anchor_ras_mm": [
+        -34.0,
+        -9.0,
+        57.0
+      ]
+    },
+    {
+      "id": "desikan:left:25",
+      "label": "precuneus \u00b7 left",
+      "source_name": "precuneus",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 25,
+      "kind": "cortex",
+      "source_annotation_value": 11832480,
+      "source_vertex_count": 4435,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.619391206313416
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.12829763246899661
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1012401352874859
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.08703494926719278
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.04509582863585118
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.0189402480270575
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.5269447576099211
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.4730552423900789
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 5880,
+      "triangle_count": 10313,
+      "surface_area_mm2": 3278.3998043470997,
+      "centroid_ras_mm": [
+        -9.39562083503332,
+        -50.993200054399566,
+        44.29443764449884
+      ],
+      "anchor_ras_mm": [
+        -9.0,
+        -51.0,
+        43.0
+      ]
+    },
+    {
+      "id": "desikan:left:26",
+      "label": "rostralanteriorcingulate \u00b7 left",
+      "source_name": "rostralanteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 26,
+      "kind": "cortex",
+      "source_annotation_value": 9180240,
+      "source_vertex_count": 756,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.9285714285714286
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.07142857142857142
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.6970899470899471
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.20634920634920634
+        }
+      ],
+      "territory_unassigned": 0.08994708994708994,
+      "vertex_count": 1566,
+      "triangle_count": 2314,
+      "surface_area_mm2": 731.0218340244845,
+      "centroid_ras_mm": [
+        -1.552757793764988,
+        32.22961630695443,
+        39.062350119904075
+      ],
+      "anchor_ras_mm": [
+        -2.0,
+        32.0,
+        39.0
+      ]
+    },
+    {
+      "id": "desikan:left:27",
+      "label": "rostralmiddlefrontal \u00b7 left",
+      "source_name": "rostralmiddlefrontal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 27,
+      "kind": "cortex",
+      "source_annotation_value": 8204875,
+      "source_vertex_count": 5908,
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.5084631008801624
+        },
+        {
+          "network": "Default",
+          "fraction": 0.2728503723764387
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.11949898442789438
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.0991875423155044
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.8798239675016927
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.12017603249830738
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 7448,
+      "triangle_count": 13354,
+      "surface_area_mm2": 4840.198011268717,
+      "centroid_ras_mm": [
+        -24.288279682873245,
+        38.842582863692805,
+        52.498614958448755
+      ],
+      "anchor_ras_mm": [
+        -24.0,
+        40.0,
+        52.0
+      ]
+    },
+    {
+      "id": "desikan:left:28",
+      "label": "superiorfrontal \u00b7 left",
+      "source_name": "superiorfrontal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 28,
+      "kind": "cortex",
+      "source_annotation_value": 10542100,
+      "source_vertex_count": 7957,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.6318964433831846
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.13648359934648738
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.0809350257634787
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.0799296217167274
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.06007289179338947
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.010682417996732438
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.8930501445268317
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.10694985547316828
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 9836,
+      "triangle_count": 17791,
+      "surface_area_mm2": 6392.531992899741,
+      "centroid_ras_mm": [
+        -6.482371313592408,
+        17.56501892005526,
+        65.70166376358941
+      ],
+      "anchor_ras_mm": [
+        -3.0,
+        18.0,
+        66.0
+      ]
+    },
+    {
+      "id": "desikan:left:29",
+      "label": "superiorparietal \u00b7 left",
+      "source_name": "superiorparietal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 29,
+      "kind": "cortex",
+      "source_annotation_value": 9221140,
+      "source_vertex_count": 6951,
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 0.5629405840886204
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.2552150769673428
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.12818299525248167
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.053661343691555174
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.3634009495036685
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.34541792547834843
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.27276650841605526
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.01827075240972522
+        }
+      ],
+      "territory_unassigned": 0.00014386419220256078,
+      "vertex_count": 8818,
+      "triangle_count": 15767,
+      "surface_area_mm2": 5237.547522951351,
+      "centroid_ras_mm": [
+        -23.486592777976405,
+        -54.27502681444405,
+        51.58106900250268
+      ],
+      "anchor_ras_mm": [
+        -23.0,
+        -54.0,
+        52.0
+      ]
+    },
+    {
+      "id": "desikan:left:30",
+      "label": "superiortemporal \u00b7 left",
+      "source_name": "superiortemporal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 30,
+      "kind": "cortex",
+      "source_annotation_value": 14474380,
+      "source_vertex_count": 4707,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.4297854259613342
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.3418313150626726
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.11790949649458253
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.11047376248141066
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.9976630550244316
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 6584,
+      "triangle_count": 11289,
+      "surface_area_mm2": 3920.2279192309065,
+      "centroid_ras_mm": [
+        -49.621117365019806,
+        -0.33854492391077756,
+        20.239003543881594
+      ],
+      "anchor_ras_mm": [
+        -50.0,
+        0.0,
+        20.0
+      ]
+    },
+    {
+      "id": "desikan:left:31",
+      "label": "supramarginal \u00b7 left",
+      "source_name": "supramarginal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 31,
+      "kind": "cortex",
+      "source_annotation_value": 1351760,
+      "source_vertex_count": 4836,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.31699751861042186
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.29631927212572373
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.15798180314309346
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.13399503722084366
+        },
+        {
+          "network": "Default",
+          "fraction": 0.09470636889991729
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.8461538461538461
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.15384615384615385
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 6178,
+      "triangle_count": 11012,
+      "surface_area_mm2": 3814.7973400451037,
+      "centroid_ras_mm": [
+        -50.4525664527956,
+        -28.476054078826763,
+        44.18148487626031
+      ],
+      "anchor_ras_mm": [
+        -50.0,
+        -28.0,
+        44.0
+      ]
+    },
+    {
+      "id": "desikan:left:32",
+      "label": "frontalpole \u00b7 left",
+      "source_name": "frontalpole",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 32,
+      "kind": "cortex",
+      "source_annotation_value": 6553700,
+      "source_vertex_count": 306,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8529411764705882
+        },
+        {
+          "network": "Default",
+          "fraction": 0.14705882352941177
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 647,
+      "triangle_count": 951,
+      "surface_area_mm2": 388.05160552552763,
+      "centroid_ras_mm": [
+        -3.4452554744525545,
+        60.58515815085158,
+        36.21654501216545
+      ],
+      "anchor_ras_mm": [
+        -3.0,
+        61.0,
+        36.0
+      ]
+    },
+    {
+      "id": "desikan:left:33",
+      "label": "temporalpole \u00b7 left",
+      "source_name": "temporalpole",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 33,
+      "kind": "cortex",
+      "source_annotation_value": 11146310,
+      "source_vertex_count": 550,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1071,
+      "triangle_count": 1620,
+      "surface_area_mm2": 808.6465355901508,
+      "centroid_ras_mm": [
+        -30.0516157989228,
+        23.617594254937163,
+        -1.021543985637343
+      ],
+      "anchor_ras_mm": [
+        -30.0,
+        24.0,
+        -1.0
+      ]
+    },
+    {
+      "id": "desikan:left:34",
+      "label": "transversetemporal \u00b7 left",
+      "source_name": "transversetemporal",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 34,
+      "kind": "cortex",
+      "source_annotation_value": 13145750,
+      "source_vertex_count": 606,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.9884488448844885
+        },
+        {
+          "territory": "mca-insular",
+          "fraction": 0.01155115511551155
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1094,
+      "triangle_count": 1698,
+      "surface_area_mm2": 516.0707346320609,
+      "centroid_ras_mm": [
+        -41.484939759036145,
+        -10.953815261044177,
+        27.237951807228917
+      ],
+      "anchor_ras_mm": [
+        -41.0,
+        -10.0,
+        28.0
+      ]
+    },
+    {
+      "id": "desikan:left:35",
+      "label": "insula \u00b7 left",
+      "source_name": "insula",
+      "atlas": "desikan",
+      "hemisphere": "left",
+      "source_label_id": 35,
+      "kind": "cortex",
+      "source_annotation_value": 2146559,
+      "source_vertex_count": 3095,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.5588117221999197
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.34684865515857083
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.04536330790847049
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.043356081894821354
+        },
+        {
+          "network": "Default",
+          "fraction": 0.005620232838217583
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-insular",
+          "fraction": 0.5033925686591276
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.2533117932148627
+        },
+        {
+          "territory": "lateral-lenticulostriate",
+          "fraction": 0.07075928917609046
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.045234248788368334
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.017770597738287562
+        }
+      ],
+      "territory_unassigned": 0.10953150242326333,
+      "vertex_count": 4568,
+      "triangle_count": 7658,
+      "surface_area_mm2": 1985.6771882430214,
+      "centroid_ras_mm": [
+        -31.67569587147394,
+        7.597608817485522,
+        25.289744068746497
+      ],
+      "anchor_ras_mm": [
+        -33.0,
+        8.0,
+        26.0
+      ]
+    },
+    {
+      "id": "desikan:right:-1",
+      "label": "Unknown \u00b7 right",
+      "source_name": "Unknown",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": -1,
+      "kind": "non-region",
+      "source_annotation_value": 0,
+      "source_vertex_count": 8254,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.48201438848920863
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.3237410071942446
+        },
+        {
+          "network": "Default",
+          "fraction": 0.19424460431654678
+        }
+      ],
+      "vertex_count": 9879,
+      "triangle_count": 18133,
+      "surface_area_mm2": 5147.605864694434
+    },
+    {
+      "id": "desikan:right:1",
+      "label": "bankssts \u00b7 right",
+      "source_name": "bankssts",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 1,
+      "kind": "cortex",
+      "source_annotation_value": 2647065,
+      "source_vertex_count": 1095,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.4511415525114155
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.4155251141552511
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.13333333333333333
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1772,
+      "triangle_count": 2865,
+      "surface_area_mm2": 655.2344410751786,
+      "centroid_ras_mm": [
+        46.73109721432632,
+        -30.955088118249005,
+        21.030130756111426
+      ],
+      "anchor_ras_mm": [
+        47.0,
+        -31.0,
+        21.0
+      ]
+    },
+    {
+      "id": "desikan:right:2",
+      "label": "caudalanteriorcingulate \u00b7 right",
+      "source_name": "caudalanteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 2,
+      "kind": "cortex",
+      "source_annotation_value": 10511485,
+      "source_vertex_count": 851,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.39611178614823817
+        },
+        {
+          "network": "Default",
+          "fraction": 0.37910085054678005
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.22478736330498178
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.8848413631022327
+        },
+        {
+          "territory": "medial-lenticulostriate",
+          "fraction": 0.11515863689776733
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1484,
+      "triangle_count": 2335,
+      "surface_area_mm2": 725.5269659607309,
+      "centroid_ras_mm": [
+        6.403870162297129,
+        14.433832709113608,
+        52.669787765293385
+      ],
+      "anchor_ras_mm": [
+        6.0,
+        15.0,
+        53.0
+      ]
+    },
+    {
+      "id": "desikan:right:3",
+      "label": "caudalmiddlefrontal \u00b7 right",
+      "source_name": "caudalmiddlefrontal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 3,
+      "kind": "cortex",
+      "source_annotation_value": 6500,
+      "source_vertex_count": 2260,
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.7238938053097345
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.13628318584070798
+        },
+        {
+          "network": "Default",
+          "fraction": 0.09557522123893805
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.04424778761061947
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9924778761061946
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 3221,
+      "triangle_count": 5479,
+      "surface_area_mm2": 1671.799088560484,
+      "centroid_ras_mm": [
+        33.38295713923409,
+        1.9348212021303577,
+        61.87141770225716
+      ],
+      "anchor_ras_mm": [
+        33.0,
+        2.0,
+        62.0
+      ]
+    },
+    {
+      "id": "desikan:right:5",
+      "label": "cuneus \u00b7 right",
+      "source_name": "cuneus",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 5,
+      "kind": "cortex",
+      "source_annotation_value": 6558940,
+      "source_vertex_count": 2188,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 3094,
+      "triangle_count": 5280,
+      "surface_area_mm2": 1742.6532290803773,
+      "centroid_ras_mm": [
+        2.6592076302274394,
+        -64.3969185619956,
+        24.855465884079237
+      ],
+      "anchor_ras_mm": [
+        3.0,
+        -64.0,
+        26.0
+      ]
+    },
+    {
+      "id": "desikan:right:6",
+      "label": "entorhinal \u00b7 right",
+      "source_name": "entorhinal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 6,
+      "kind": "cortex",
+      "source_annotation_value": 660700,
+      "source_vertex_count": 631,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.7892234548335975
+        },
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.16957210776545167
+        },
+        {
+          "territory": "anterior-choroidal-thalamoperforating",
+          "fraction": 0.011093502377179081
+        }
+      ],
+      "territory_unassigned": 0.030110935023771792,
+      "vertex_count": 1319,
+      "triangle_count": 1953,
+      "surface_area_mm2": 586.0858911571788,
+      "centroid_ras_mm": [
+        21.467041800643088,
+        2.8882636655948555,
+        -4.411575562700965
+      ],
+      "anchor_ras_mm": [
+        21.0,
+        3.0,
+        -5.0
+      ]
+    },
+    {
+      "id": "desikan:right:7",
+      "label": "fusiform \u00b7 right",
+      "source_name": "fusiform",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 7,
+      "kind": "cortex",
+      "source_annotation_value": 9231540,
+      "source_vertex_count": 3734,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.5262453133369042
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.3103910016068559
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.16336368505623997
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.43867166577396893
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.31065881092662023
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.13711837171933583
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.11114086770219604
+        }
+      ],
+      "territory_unassigned": 0.0018746652383502945,
+      "vertex_count": 5234,
+      "triangle_count": 8966,
+      "surface_area_mm2": 2923.2524695170287,
+      "centroid_ras_mm": [
+        31.10612645450722,
+        -29.13991308005047,
+        -1.9711201458012058
+      ],
+      "anchor_ras_mm": [
+        31.0,
+        -29.0,
+        -2.0
+      ]
+    },
+    {
+      "id": "desikan:right:8",
+      "label": "inferiorparietal \u00b7 right",
+      "source_name": "inferiorparietal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 8,
+      "kind": "cortex",
+      "source_annotation_value": 14433500,
+      "source_vertex_count": 6234,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.3654154635867822
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.26772537696503046
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.1758100737888996
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.17324350336862368
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.0178055822906641
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.542027590632018
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.31809432146294514
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.13650946422842478
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 7597,
+      "triangle_count": 13829,
+      "surface_area_mm2": 4988.998722459599,
+      "centroid_ras_mm": [
+        37.20824332498056,
+        -56.164261643480515,
+        35.61038624384343
+      ],
+      "anchor_ras_mm": [
+        37.0,
+        -57.0,
+        36.0
+      ]
+    },
+    {
+      "id": "desikan:right:9",
+      "label": "inferiortemporal \u00b7 right",
+      "source_name": "inferiortemporal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 9,
+      "kind": "cortex",
+      "source_annotation_value": 7874740,
+      "source_vertex_count": 3923,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.46316594443028297
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.22584756563854194
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.20137649757838388
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.08845271475911293
+        },
+        {
+          "network": "Default",
+          "fraction": 0.021157277593678307
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.6431302574560286
+        },
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.2847310731582972
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.04792250828447617
+        }
+      ],
+      "territory_unassigned": 0.016823859291358653,
+      "vertex_count": 5436,
+      "triangle_count": 9357,
+      "surface_area_mm2": 3549.7315716478265,
+      "centroid_ras_mm": [
+        44.56707105719237,
+        -18.92582322357019,
+        -3.3406123627960715
+      ],
+      "anchor_ras_mm": [
+        43.0,
+        -19.0,
+        -4.0
+      ]
+    },
+    {
+      "id": "desikan:right:10",
+      "label": "isthmuscingulate \u00b7 right",
+      "source_name": "isthmuscingulate",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 10,
+      "kind": "cortex",
+      "source_annotation_value": 9180300,
+      "source_vertex_count": 987,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.6436107854630715
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.2321219226260258
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1242672919109027
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.547112462006079
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.44782168186423504
+        }
+      ],
+      "territory_unassigned": 0.005065856129685917,
+      "vertex_count": 1919,
+      "triangle_count": 2903,
+      "surface_area_mm2": 833.3897909838965,
+      "centroid_ras_mm": [
+        3.8330319469559977,
+        -35.96986136226643,
+        32.00120554550934
+      ],
+      "anchor_ras_mm": [
+        3.0,
+        -36.0,
+        32.0
+      ]
+    },
+    {
+      "id": "desikan:right:11",
+      "label": "lateraloccipital \u00b7 right",
+      "source_name": "lateraloccipital",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 11,
+      "kind": "cortex",
+      "source_annotation_value": 9182740,
+      "source_vertex_count": 6714,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.9946380697050938
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.005361930294906166
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.6751563896336015
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.29028894846589215
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.02100089365504915
+        },
+        {
+          "territory": "inferior-cerebellar",
+          "fraction": 0.010872803098004171
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 8328,
+      "triangle_count": 15040,
+      "surface_area_mm2": 5313.273337170012,
+      "centroid_ras_mm": [
+        23.36893382352941,
+        -65.88538602941176,
+        7.022150735294118
+      ],
+      "anchor_ras_mm": [
+        24.0,
+        -66.0,
+        7.0
+      ]
+    },
+    {
+      "id": "desikan:right:12",
+      "label": "lateralorbitofrontal \u00b7 right",
+      "source_name": "lateralorbitofrontal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 12,
+      "kind": "cortex",
+      "source_annotation_value": 3296035,
+      "source_vertex_count": 3119,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.5786380919460767
+        },
+        {
+          "network": "Default",
+          "fraction": 0.25371586588316625
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1479433114414103
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.0197027307293467
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.887143315165117
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.043603719140750244
+        },
+        {
+          "territory": "mca-insular",
+          "fraction": 0.025008015389547934
+        }
+      ],
+      "territory_unassigned": 0.0442449503045848,
+      "vertex_count": 4565,
+      "triangle_count": 7687,
+      "surface_area_mm2": 2417.7803514670723,
+      "centroid_ras_mm": [
+        20.699652173913044,
+        33.43234782608695,
+        20.338260869565218
+      ],
+      "anchor_ras_mm": [
+        21.0,
+        34.0,
+        21.0
+      ]
+    },
+    {
+      "id": "desikan:right:13",
+      "label": "lingual \u00b7 right",
+      "source_name": "lingual",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 13,
+      "kind": "cortex",
+      "source_annotation_value": 9211105,
+      "source_vertex_count": 3601,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.8575395723410164
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.13051930019439045
+        }
+      ],
+      "territory_unassigned": 0.00027770063871146905,
+      "vertex_count": 4739,
+      "triangle_count": 8338,
+      "surface_area_mm2": 2913.9926216766276,
+      "centroid_ras_mm": [
+        7.541460518503859,
+        -50.08331684148031,
+        6.7235305758955075
+      ],
+      "anchor_ras_mm": [
+        8.0,
+        -50.0,
+        7.0
+      ]
+    },
+    {
+      "id": "desikan:right:14",
+      "label": "medialorbitofrontal \u00b7 right",
+      "source_name": "medialorbitofrontal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 14,
+      "kind": "cortex",
+      "source_annotation_value": 4924360,
+      "source_vertex_count": 2437,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.512972234865726
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.48702776513427404
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.8970045137464095
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.048009848173984404
+        }
+      ],
+      "territory_unassigned": 0.054985638079606075,
+      "vertex_count": 3598,
+      "triangle_count": 6033,
+      "surface_area_mm2": 2299.260336857092,
+      "centroid_ras_mm": [
+        5.855172413793103,
+        38.48631813125695,
+        25.179310344827588
+      ],
+      "anchor_ras_mm": [
+        6.0,
+        39.0,
+        25.0
+      ]
+    },
+    {
+      "id": "desikan:right:15",
+      "label": "middletemporal \u00b7 right",
+      "source_name": "middletemporal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 15,
+      "kind": "cortex",
+      "source_annotation_value": 3302560,
+      "source_vertex_count": 4175,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5681437125748503
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1911377245508982
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.14610778443113773
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.03688622754491018
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.029461077844311376
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.028263473053892214
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.9762874251497006
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.017245508982035928
+        }
+      ],
+      "territory_unassigned": 0.0023952095808383233,
+      "vertex_count": 5892,
+      "triangle_count": 10065,
+      "surface_area_mm2": 3941.576032923208,
+      "centroid_ras_mm": [
+        50.30322381295705,
+        -14.344010711710784,
+        6.874240395509322
+      ],
+      "anchor_ras_mm": [
+        50.0,
+        -15.0,
+        7.0
+      ]
+    },
+    {
+      "id": "desikan:right:16",
+      "label": "parahippocampal \u00b7 right",
+      "source_name": "parahippocampal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 16,
+      "kind": "cortex",
+      "source_annotation_value": 3988500,
+      "source_vertex_count": 862,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 0.5647208121827412
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.4352791878172589
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-temporal",
+          "fraction": 0.4953596287703016
+        },
+        {
+          "territory": "superior-cerebellar",
+          "fraction": 0.2679814385150812
+        },
+        {
+          "territory": "anterior-choroidal-thalamoperforating",
+          "fraction": 0.10440835266821345
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.060324825986078884
+        }
+      ],
+      "territory_unassigned": 0.07076566125290024,
+      "vertex_count": 1600,
+      "triangle_count": 2463,
+      "surface_area_mm2": 746.3097827999617,
+      "centroid_ras_mm": [
+        20.106409458618543,
+        -20.248911014312384,
+        0.8923459863098943
+      ],
+      "anchor_ras_mm": [
+        20.0,
+        -20.0,
+        1.0
+      ]
+    },
+    {
+      "id": "desikan:right:17",
+      "label": "paracentral \u00b7 right",
+      "source_name": "paracentral",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 17,
+      "kind": "cortex",
+      "source_annotation_value": 3988540,
+      "source_vertex_count": 1720,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.7313953488372092
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.2686046511627907
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2503,
+      "triangle_count": 4221,
+      "surface_area_mm2": 1223.680697548679,
+      "centroid_ras_mm": [
+        7.447260529258293,
+        -28.71710771524413,
+        63.56578456951174
+      ],
+      "anchor_ras_mm": [
+        7.0,
+        -30.0,
+        63.0
+      ]
+    },
+    {
+      "id": "desikan:right:18",
+      "label": "parsopercularis \u00b7 right",
+      "source_name": "parsopercularis",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 18,
+      "kind": "cortex",
+      "source_annotation_value": 9221340,
+      "source_vertex_count": 1633,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.5235762400489896
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2859767299448867
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.10165339865278629
+        },
+        {
+          "network": "Default",
+          "fraction": 0.08879363135333741
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9767299448867116
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.020820575627679118
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2466,
+      "triangle_count": 4097,
+      "surface_area_mm2": 1337.3569856756017,
+      "centroid_ras_mm": [
+        43.10753401924992,
+        14.298041818785263,
+        38.41951543312313
+      ],
+      "anchor_ras_mm": [
+        43.0,
+        15.0,
+        38.0
+      ]
+    },
+    {
+      "id": "desikan:right:19",
+      "label": "parsorbitalis \u00b7 right",
+      "source_name": "parsorbitalis",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 19,
+      "kind": "cortex",
+      "source_annotation_value": 3302420,
+      "source_vertex_count": 1005,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5383084577114428
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.4616915422885572
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9990049751243781
+        }
+      ],
+      "territory_unassigned": 0.0009950248756218905,
+      "vertex_count": 1625,
+      "triangle_count": 2628,
+      "surface_area_mm2": 1024.4031500558672,
+      "centroid_ras_mm": [
+        39.06205985915493,
+        36.16725352112676,
+        26.368838028169016
+      ],
+      "anchor_ras_mm": [
+        39.0,
+        36.0,
+        26.0
+      ]
+    },
+    {
+      "id": "desikan:right:20",
+      "label": "parstriangularis \u00b7 right",
+      "source_name": "parstriangularis",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 20,
+      "kind": "cortex",
+      "source_annotation_value": 1326300,
+      "source_vertex_count": 1665,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.4402402402402402
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.3945945945945946
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.16516516516516516
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9981981981981982
+        }
+      ],
+      "territory_unassigned": 0.0018018018018018018,
+      "vertex_count": 2474,
+      "triangle_count": 4137,
+      "surface_area_mm2": 1377.1079482942193,
+      "centroid_ras_mm": [
+        43.16436203645506,
+        27.921118793211818,
+        37.72438717787555
+      ],
+      "anchor_ras_mm": [
+        43.0,
+        27.0,
+        37.0
+      ]
+    },
+    {
+      "id": "desikan:right:21",
+      "label": "pericalcarine \u00b7 right",
+      "source_name": "pericalcarine",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 21,
+      "kind": "cortex",
+      "source_annotation_value": 3957880,
+      "source_vertex_count": 1687,
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 2577,
+      "triangle_count": 4262,
+      "surface_area_mm2": 1095.5483750409264,
+      "centroid_ras_mm": [
+        6.151835093011564,
+        -60.23428858722976,
+        13.499245852187029
+      ],
+      "anchor_ras_mm": [
+        6.0,
+        -60.0,
+        13.0
+      ]
+    },
+    {
+      "id": "desikan:right:22",
+      "label": "postcentral \u00b7 right",
+      "source_name": "postcentral",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 22,
+      "kind": "cortex",
+      "source_annotation_value": 1316060,
+      "source_vertex_count": 5012,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.9455307262569832
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.049680766161213086
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.004788507581803671
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.7150837988826816
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.15522745411013567
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.06264964086193137
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.05965682362330407
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 6706,
+      "triangle_count": 11716,
+      "surface_area_mm2": 3796.090226353092,
+      "centroid_ras_mm": [
+        39.08896234550158,
+        -21.631072147168727,
+        48.629778672032195
+      ],
+      "anchor_ras_mm": [
+        38.0,
+        -21.0,
+        49.0
+      ]
+    },
+    {
+      "id": "desikan:right:23",
+      "label": "posteriorcingulate \u00b7 right",
+      "source_name": "posteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 23,
+      "kind": "cortex",
+      "source_annotation_value": 14464220,
+      "source_vertex_count": 1141,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3418054338299737
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.25766871165644173
+        },
+        {
+          "network": "Default",
+          "fraction": 0.25503943908851884
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.14548641542506574
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.8553900087642419
+        },
+        {
+          "territory": "medial-lenticulostriate",
+          "fraction": 0.1446099912357581
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1894,
+      "triangle_count": 3033,
+      "surface_area_mm2": 875.2448461933151,
+      "centroid_ras_mm": [
+        5.144026186579378,
+        -16.947626841243864,
+        49.91380250954719
+      ],
+      "anchor_ras_mm": [
+        5.0,
+        -17.0,
+        50.0
+      ]
+    },
+    {
+      "id": "desikan:right:24",
+      "label": "precentral \u00b7 right",
+      "source_name": "precentral",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 24,
+      "kind": "cortex",
+      "source_annotation_value": 14423100,
+      "source_vertex_count": 6143,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.6198925606381247
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.19583265505453362
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.18183298062835748
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.0024418036789842098
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.7348201204623148
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.12306690542080417
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.1136252645287319
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.02083672472733192
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 8004,
+      "triangle_count": 14146,
+      "surface_area_mm2": 4415.386697232916,
+      "centroid_ras_mm": [
+        38.899124476589265,
+        -8.357822611343739,
+        50.84316711077275
+      ],
+      "anchor_ras_mm": [
+        39.0,
+        -9.0,
+        51.0
+      ]
+    },
+    {
+      "id": "desikan:right:25",
+      "label": "precuneus \u00b7 right",
+      "source_name": "precuneus",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 25,
+      "kind": "cortex",
+      "source_annotation_value": 11832480,
+      "source_vertex_count": 4690,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.4976545842217484
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.17867803837953092
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.11428571428571428
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.10810234541577825
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.06631130063965884
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.034968017057569294
+        }
+      ],
+      "territories": [
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.6140724946695096
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.3859275053304904
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 6213,
+      "triangle_count": 10901,
+      "surface_area_mm2": 3426.5279779513385,
+      "centroid_ras_mm": [
+        6.451354194057323,
+        -52.28622140415462,
+        42.161582960820404
+      ],
+      "anchor_ras_mm": [
+        6.0,
+        -52.0,
+        42.0
+      ]
+    },
+    {
+      "id": "desikan:right:26",
+      "label": "rostralanteriorcingulate \u00b7 right",
+      "source_name": "rostralanteriorcingulate",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 26,
+      "kind": "cortex",
+      "source_annotation_value": 9180240,
+      "source_vertex_count": 476,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.9665924276169265
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.0334075723830735
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.7478991596638656
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.22478991596638656
+        },
+        {
+          "territory": "medial-lenticulostriate",
+          "fraction": 0.0273109243697479
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1089,
+      "triangle_count": 1567,
+      "surface_area_mm2": 379.8946289109751,
+      "centroid_ras_mm": [
+        6.584845250800427,
+        31.917822838847385,
+        39.55709711846318
+      ],
+      "anchor_ras_mm": [
+        7.0,
+        32.0,
+        40.0
+      ]
+    },
+    {
+      "id": "desikan:right:27",
+      "label": "rostralmiddlefrontal \u00b7 right",
+      "source_name": "rostralmiddlefrontal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 27,
+      "kind": "cortex",
+      "source_annotation_value": 8204875,
+      "source_vertex_count": 5998,
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.7287429143047682
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.13437812604201402
+        },
+        {
+          "network": "Default",
+          "fraction": 0.11737245748582861
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.01950650216738913
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.9594864954984995
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.0405135045015005
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 7600,
+      "triangle_count": 13596,
+      "surface_area_mm2": 5289.436713659163,
+      "centroid_ras_mm": [
+        29.881763527054108,
+        35.085823821556154,
+        51.44645813365862
+      ],
+      "anchor_ras_mm": [
+        30.0,
+        35.0,
+        51.0
+      ]
+    },
+    {
+      "id": "desikan:right:28",
+      "label": "superiorfrontal \u00b7 right",
+      "source_name": "superiorfrontal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 28,
+      "kind": "cortex",
+      "source_annotation_value": 10542100,
+      "source_vertex_count": 6540,
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5909785932721713
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.19250764525993883
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.13226299694189603
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.05091743119266055
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.03333333333333333
+        }
+      ],
+      "territories": [
+        {
+          "territory": "aca",
+          "fraction": 0.8599388379204893
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.1400611620795107
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 8381,
+      "triangle_count": 14919,
+      "surface_area_mm2": 5355.170292251157,
+      "centroid_ras_mm": [
+        12.747917906008329,
+        16.48958953004164,
+        64.06618084473527
+      ],
+      "anchor_ras_mm": [
+        15.0,
+        16.0,
+        64.0
+      ]
+    },
+    {
+      "id": "desikan:right:29",
+      "label": "superiorparietal \u00b7 right",
+      "source_name": "superiorparietal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 29,
+      "kind": "cortex",
+      "source_annotation_value": 9221140,
+      "source_vertex_count": 6889,
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 0.5977645521846422
+        },
+        {
+          "network": "Vis",
+          "fraction": 0.2470605312817535
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.14602990274350414
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.00914501379010016
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.3991871098853244
+        },
+        {
+          "territory": "pca-occipital",
+          "fraction": 0.297430686601829
+        },
+        {
+          "territory": "aca",
+          "fraction": 0.2451734649441138
+        },
+        {
+          "territory": "mca-occipital",
+          "fraction": 0.05777326172158514
+        }
+      ],
+      "territory_unassigned": 0.00043547684714762664,
+      "vertex_count": 8761,
+      "triangle_count": 15648,
+      "surface_area_mm2": 5168.3234241244445,
+      "centroid_ras_mm": [
+        19.77535029498525,
+        -55.75184365781711,
+        51.35084808259587
+      ],
+      "anchor_ras_mm": [
+        20.0,
+        -56.0,
+        51.0
+      ]
+    },
+    {
+      "id": "desikan:right:30",
+      "label": "superiortemporal \u00b7 right",
+      "source_name": "superiortemporal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 30,
+      "kind": "cortex",
+      "source_annotation_value": 14474380,
+      "source_vertex_count": 4456,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 0.5210951526032316
+        },
+        {
+          "network": "Default",
+          "fraction": 0.3518850987432675
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.07271095152603231
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.05430879712746858
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.980475763016158
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.018850987432675045
+        }
+      ],
+      "territory_unassigned": 0.0006732495511669659,
+      "vertex_count": 6095,
+      "triangle_count": 10549,
+      "surface_area_mm2": 3612.2989945872173,
+      "centroid_ras_mm": [
+        47.78841338493057,
+        -2.7316184839517414,
+        15.241634418392898
+      ],
+      "anchor_ras_mm": [
+        49.0,
+        -3.0,
+        14.0
+      ]
+    },
+    {
+      "id": "desikan:right:31",
+      "label": "supramarginal \u00b7 right",
+      "source_name": "supramarginal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 31,
+      "kind": "cortex",
+      "source_annotation_value": 1351760,
+      "source_vertex_count": 4072,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.48428290766208254
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.17779960707269155
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.17092337917485265
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.1529960707269155
+        },
+        {
+          "network": "Default",
+          "fraction": 0.013998035363457761
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.8845776031434185
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.11542239685658154
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 5375,
+      "triangle_count": 9445,
+      "surface_area_mm2": 3045.581826692759,
+      "centroid_ras_mm": [
+        48.828002842928214,
+        -31.00597014925373,
+        41.91769722814499
+      ],
+      "anchor_ras_mm": [
+        49.0,
+        -31.0,
+        42.0
+      ]
+    },
+    {
+      "id": "desikan:right:32",
+      "label": "frontalpole \u00b7 right",
+      "source_name": "frontalpole",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 32,
+      "kind": "cortex",
+      "source_annotation_value": 6553700,
+      "source_vertex_count": 408,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.7671568627450981
+        },
+        {
+          "network": "Default",
+          "fraction": 0.23284313725490197
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-frontal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 809,
+      "triangle_count": 1215,
+      "surface_area_mm2": 523.3337815097325,
+      "centroid_ras_mm": [
+        11.969578017664377,
+        59.58390578999018,
+        37.707556427870465
+      ],
+      "anchor_ras_mm": [
+        12.0,
+        60.0,
+        38.0
+      ]
+    },
+    {
+      "id": "desikan:right:33",
+      "label": "temporalpole \u00b7 right",
+      "source_name": "temporalpole",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 33,
+      "kind": "cortex",
+      "source_annotation_value": 11146310,
+      "source_vertex_count": 555,
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 1086,
+      "triangle_count": 1640,
+      "surface_area_mm2": 724.5342509798417,
+      "centroid_ras_mm": [
+        27.129318394024278,
+        22.093837535014007,
+        -3.514939309056956
+      ],
+      "anchor_ras_mm": [
+        26.0,
+        22.0,
+        -3.0
+      ]
+    },
+    {
+      "id": "desikan:right:34",
+      "label": "transversetemporal \u00b7 right",
+      "source_name": "transversetemporal",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 34,
+      "kind": "cortex",
+      "source_annotation_value": 13145750,
+      "source_vertex_count": 440,
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-temporal",
+          "fraction": 1.0
+        }
+      ],
+      "territory_unassigned": 0.0,
+      "vertex_count": 906,
+      "triangle_count": 1344,
+      "surface_area_mm2": 351.8371131241205,
+      "centroid_ras_mm": [
+        41.07162534435262,
+        -13.022038567493112,
+        21.767217630853995
+      ],
+      "anchor_ras_mm": [
+        41.0,
+        -13.0,
+        22.0
+      ]
+    },
+    {
+      "id": "desikan:right:35",
+      "label": "insula \u00b7 right",
+      "source_name": "insula",
+      "atlas": "desikan",
+      "hemisphere": "right",
+      "source_label_id": 35,
+      "kind": "cortex",
+      "source_annotation_value": 2146559,
+      "source_vertex_count": 2784,
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.5520875557357114
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.3506282934738549
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.05715443858937981
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.03364410214835833
+        },
+        {
+          "network": "Default",
+          "fraction": 0.0064856100526955816
+        }
+      ],
+      "territories": [
+        {
+          "territory": "mca-insular",
+          "fraction": 0.6052442528735632
+        },
+        {
+          "territory": "mca-temporal",
+          "fraction": 0.2927442528735632
+        },
+        {
+          "territory": "mca-frontal",
+          "fraction": 0.05818965517241379
+        },
+        {
+          "territory": "mca-parietal",
+          "fraction": 0.017959770114942528
+        }
+      ],
+      "territory_unassigned": 0.02586206896551724,
+      "vertex_count": 4160,
+      "triangle_count": 6944,
+      "surface_area_mm2": 1980.658853772649,
+      "centroid_ras_mm": [
+        32.53067369213399,
+        5.419269853217915,
+        21.583929243507715
+      ],
+      "anchor_ras_mm": [
+        33.0,
+        4.0,
+        21.0
+      ]
+    },
+    {
       "id": "aseg:left:4",
       "label": "Left Lateral Ventricle",
       "source_name": "Left-Lateral-Ventricle",
@@ -86314,7 +89949,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2074,
       "voxel_size_mm": [
@@ -86354,7 +89990,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1976,
       "voxel_size_mm": [
@@ -86398,7 +90035,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4974,
       "voxel_size_mm": [
@@ -86442,7 +90080,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1671,
       "voxel_size_mm": [
@@ -86482,7 +90121,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 753,
       "voxel_size_mm": [
@@ -86530,7 +90170,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5099,
       "voxel_size_mm": [
@@ -86586,7 +90227,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 7786,
       "voxel_size_mm": [
@@ -86634,7 +90276,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4925,
       "voxel_size_mm": [
@@ -86686,7 +90329,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2885,
       "voxel_size_mm": [
@@ -86730,7 +90374,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 9069,
       "voxel_size_mm": [
@@ -86778,7 +90423,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5344,
       "voxel_size_mm": [
@@ -86818,7 +90464,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 3879,
       "voxel_size_mm": [
@@ -86862,7 +90509,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 3185,
       "voxel_size_mm": [
@@ -86910,7 +90558,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4005,
       "voxel_size_mm": [
@@ -86958,7 +90607,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1346,
       "voxel_size_mm": [
@@ -87010,7 +90660,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2782,
       "voxel_size_mm": [
@@ -87050,7 +90701,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2843,
       "voxel_size_mm": [
@@ -87090,7 +90742,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 751,
       "voxel_size_mm": [
@@ -87130,7 +90783,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2484,
       "voxel_size_mm": [
@@ -87170,7 +90824,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2406,
       "voxel_size_mm": [
@@ -87210,7 +90865,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4999,
       "voxel_size_mm": [
@@ -87262,7 +90918,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 3255,
       "voxel_size_mm": [
@@ -87306,7 +90963,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 9564,
       "voxel_size_mm": [
@@ -87354,7 +91012,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 7006,
       "voxel_size_mm": [
@@ -87398,7 +91057,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1766,
       "voxel_size_mm": [
@@ -87446,7 +91106,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 9092,
       "voxel_size_mm": [
@@ -87490,7 +91151,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 13080,
       "voxel_size_mm": [
@@ -87538,7 +91200,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 9404,
       "voxel_size_mm": [
@@ -87590,7 +91253,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 6150,
       "voxel_size_mm": [
@@ -87634,7 +91298,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 6520,
       "voxel_size_mm": [
@@ -87678,7 +91343,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 240,
       "voxel_size_mm": [
@@ -87718,7 +91384,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 494,
       "voxel_size_mm": [
@@ -87758,7 +91425,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 644,
       "voxel_size_mm": [
@@ -87802,7 +91470,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 7430,
       "voxel_size_mm": [
@@ -87866,7 +91535,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2006,
       "voxel_size_mm": [
@@ -87906,7 +91576,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2373,
       "voxel_size_mm": [
@@ -87950,7 +91621,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4021,
       "voxel_size_mm": [
@@ -87994,7 +91666,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2013,
       "voxel_size_mm": [
@@ -88034,7 +91707,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 690,
       "voxel_size_mm": [
@@ -88082,7 +91756,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5773,
       "voxel_size_mm": [
@@ -88130,7 +91805,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 8770,
       "voxel_size_mm": [
@@ -88178,7 +91854,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4813,
       "voxel_size_mm": [
@@ -88226,7 +91903,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2475,
       "voxel_size_mm": [
@@ -88274,7 +91952,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 7998,
       "voxel_size_mm": [
@@ -88322,7 +92001,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5653,
       "voxel_size_mm": [
@@ -88366,7 +92046,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 3755,
       "voxel_size_mm": [
@@ -88410,7 +92091,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2810,
       "voxel_size_mm": [
@@ -88458,7 +92140,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4689,
       "voxel_size_mm": [
@@ -88498,7 +92181,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1269,
       "voxel_size_mm": [
@@ -88550,7 +92234,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2725,
       "voxel_size_mm": [
@@ -88590,7 +92275,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2375,
       "voxel_size_mm": [
@@ -88630,7 +92316,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1088,
       "voxel_size_mm": [
@@ -88670,7 +92357,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2571,
       "voxel_size_mm": [
@@ -88710,7 +92398,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2684,
       "voxel_size_mm": [
@@ -88750,7 +92439,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5327,
       "voxel_size_mm": [
@@ -88802,7 +92492,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 2922,
       "voxel_size_mm": [
@@ -88850,7 +92541,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 11205,
       "voxel_size_mm": [
@@ -88898,7 +92590,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 8244,
       "voxel_size_mm": [
@@ -88946,7 +92639,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 1558,
       "voxel_size_mm": [
@@ -88994,7 +92688,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 8758,
       "voxel_size_mm": [
@@ -89038,7 +92733,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 10567,
       "voxel_size_mm": [
@@ -89082,7 +92778,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 9039,
       "voxel_size_mm": [
@@ -89134,7 +92831,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 4723,
       "voxel_size_mm": [
@@ -89174,7 +92872,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 5919,
       "voxel_size_mm": [
@@ -89218,7 +92917,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 363,
       "voxel_size_mm": [
@@ -89258,7 +92958,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 637,
       "voxel_size_mm": [
@@ -89298,7 +92999,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 489,
       "voxel_size_mm": [
@@ -89338,7 +93040,8 @@
         "destrieux",
         "hcp-mmp",
         "julich",
-        "schaefer"
+        "schaefer",
+        "desikan"
       ],
       "voxel_count": 7329,
       "voxel_size_mm": [
@@ -94588,6 +98291,7 @@
     "F-TRACT stimulation responses are rates of stereo-EEG stimulation\u2013recording pairs from 613 people with focal epilepsy, aggregated by F-TRACT over Julich-Brain 3.0 areas in MNI152 space. They are not measured in this brain; each hemisphere shows its own values. A rate is published from 10 pairs and drawn here only from 3 implantations.",
     "A Julich-Brain area takes the F-TRACT area of the same name, not of the same place: F-TRACT placed contacts with Julich-Brain's volumetric map in MNI152, while this surface carries the published fsaverage map. Areas Julich-Brain 3.1 added from 3.0's gap maps, and its subicular complex, take none.",
     "Functional connectivity is the group mean of 200 healthy young adults (HCP, ages 22\u201335) at rest, measured in MNI152 space on Julich-Brain's volumetric map, not in this brain: an area takes the parcel of its name. A correlation is not a connection, and without global signal regression nearly every pair correlates positively.",
+    "Disorder effects are group differences between thousands of patients and controls scanned elsewhere, reported per Desikan-Killiany region and FreeSurfer structure, not measured in this brain. Most are small (|d| below 0.2 is common): patients and controls overlap almost entirely, so no difference says anything about one person. Medication, illness duration and site differ between the cohorts and are only partly adjusted for.",
     "Gyral white matter is FreeSurfer's wmparc: each voxel within 5 mm of cortex takes the nearest Desikan cortical label whichever surface atlas is shown, and deeper white matter is unsegmented and belongs to no region.",
     "Arterial territories are typical territories drawn from where acute infarcts fell in 1,298 stroke patients (Liu et al. 2023), registered onto this brain from the atlas's template; they are not this brain's own, and no vessel of it was imaged. Collateral circulation and variants such as a fetal posterior communicating artery move real territories by centimetres.",
     "The atlas's anterior cerebral artery territory rests on 29 cases, and its medial lenticulostriate and anterior thalamoperforating territories on anatomical knowledge rather than lesions. It places the anterior choroidal and thalamoperforating territory under the posterior circulation, as published.",
@@ -95014,292 +98718,6 @@
           "https://doi.org/10.1016/j.neuroimage.2016.10.009"
         ],
         "license": "PAM50: MIT; the Spinal Cord Toolbox that produced these files is LGPL-3.0"
-      },
-      {
-        "path": "data/cdmd/input/sub_013_t1w.nii.gz",
-        "sha256": "16e9137160f20c3dfb39fbd04ce1299415c5252ba96e8b0266f5f9402c60730b",
-        "anatomy": "cdmd",
-        "url": "https://doi.org/10.6084/m9.figshare.c.5315474.v1"
-      },
-      {
-        "path": "data/cdmd/mri/orig.mgz",
-        "sha256": "9e32d45483acf4f992fc987bf6ad31337b5ec1f738c693f1fa80142fd136db81",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/mri/aseg.mgz",
-        "sha256": "d8e1e9fbd8d3cf34ee259ac708147da4c61319faf293dd3671584d655f611cbc",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/mri/aparc.a2009s+aseg.mgz",
-        "sha256": "c859c5b38010b319862f8c3d5deb0828bd73524be27ed1cd483eefc234781d0e",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/mri/ribbon.mgz",
-        "sha256": "42a9d24c0dc202caa7776bc2f10bf3da2279dcacde2e23ce4614e64c1e6db9e7",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/mri/brain.mgz",
-        "sha256": "2d9d847b16bc29ac94dff4960ef1d83ce9282a0075bcb9d9c4d0f50654599abe",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/mri/wmparc.mgz",
-        "sha256": "a080190a2ba6d2b77cddd158786f4ccb99185b8abb9906b550820248ce45131f",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/scripts/build-stamp.txt",
-        "sha256": "05e1fbf2faef4be22a0180c1aaf9a337bfdaccfdcdd7a34adaac27e1578458dd",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/stats/aseg.stats",
-        "sha256": "07001d0adb81bee401752883a1ee84a97fee9aae0535e26c65ed99e075c2ce47",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/lh.pial",
-        "sha256": "75ba707c512c289ad0d6e7aabefbcac854ae5bdf2b3e8ceecddf9834e162cee2",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/lh.white",
-        "sha256": "abd03f82ea7574ec42740d72550d253504cd66fb9420cb793d1556e2d99f732c",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/lh.sulc",
-        "sha256": "7601bb5ce22309153ac8226a952dd0ce14c992a1948c636589ff1753eb09c595",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/lh.sphere.reg",
-        "sha256": "410f20030632c9bfc31684b900a9636464f6e979f343ad9d6f62c63c9418df70",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/label/lh.aparc.a2009s.annot",
-        "sha256": "a0a16110336901d3fa893d64e7dc00df89dd8826020902797d6851416f1716f4",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/rh.pial",
-        "sha256": "bcee0a1346002663e77d9832202d4c04793402c96a3162aefbdb3ff7d7d256f9",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/rh.white",
-        "sha256": "6357b680737a2813b2c9c946525a389087748d13845c4c4d6218e738c1919b93",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/rh.sulc",
-        "sha256": "fcfc9dabbe52462ff9bcfcd09f30a31703212540584d6c7471f5fea71330b3a0",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/surf/rh.sphere.reg",
-        "sha256": "ef0bf345caf85a7f430c612d85ffa7a5d2b9eb44123ce36a1b491129ca33cc8d",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/label/rh.aparc.a2009s.annot",
-        "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/reconstruction.json",
-        "sha256": "fa83e9dc513d548bf7f949d29daff0caf408de4e565b0b47d6cfd15c196f9a1d",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/cdmd/input/sub_013_t1w.nii.gz"
-        ],
-        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-      },
-      {
-        "path": "data/cdmd/label/lh.HCPMMP1.annot",
-        "sha256": "be26cfba13236a274f46da127d0e2776abcae89f10b7f9489bbd8188aebc1386",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/lh.HCPMMP1.annot",
-          "data/fsaverage/surf/lh.sphere.reg",
-          "data/cdmd/surf/lh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/label/rh.HCPMMP1.annot",
-        "sha256": "257aa1f069fee38517686fa1d9f4224a643efb7de4ac7cac278b3d5be2bb8206",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/rh.HCPMMP1.annot",
-          "data/fsaverage/surf/rh.sphere.reg",
-          "data/cdmd/surf/rh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/hcp-registration.json",
-        "sha256": "e5c2ce2b88d0ef4898ea7613cfd55a4581e102efa01bb34a668267d30e74b94f",
-        "anatomy": "cdmd",
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
-      },
-      {
-        "path": "data/cdmd/label/lh.JulichBrain3.1.annot",
-        "sha256": "07898556b5083d731d735717527ae4d5d573647d96f2884b1d359186b97d3fdd",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/lh.JulichBrain3.1.annot",
-          "data/fsaverage/surf/lh.sphere.reg",
-          "data/cdmd/surf/lh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/label/rh.JulichBrain3.1.annot",
-        "sha256": "a2aae43679af4cf16d8617e8ecb6226aec94b8ed649e3ab54ae01ed4e6ef5be2",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/rh.JulichBrain3.1.annot",
-          "data/fsaverage/surf/rh.sphere.reg",
-          "data/cdmd/surf/rh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/julich-registration.json",
-        "sha256": "1f86a5bb8d599c1f927abd6c4c27c45fffb2e2b90becaad6a458b322e29d936c",
-        "anatomy": "cdmd",
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
-      },
-      {
-        "path": "data/cdmd/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
-        "sha256": "c604116e027c27a5ac3b9e302b14c436ac2672fe67c01d7b54f3c896ec4fc6b4",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
-          "data/fsaverage/surf/lh.sphere.reg",
-          "data/cdmd/surf/lh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
-        "sha256": "a099dbed4242930a1f378a98756e62b9649c83fcb2fb667d198a047253718a9f",
-        "anatomy": "cdmd",
-        "derived_from": [
-          "data/fsaverage/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
-          "data/fsaverage/surf/rh.sphere.reg",
-          "data/cdmd/surf/rh.sphere.reg"
-        ],
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-      },
-      {
-        "path": "data/cdmd/network-registration.json",
-        "sha256": "e8eec343ddbe2f5c428bd551e2cc246c540078efb3ae264010efc9fa9afb7e0f",
-        "anatomy": "cdmd",
-        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
       },
       {
         "path": "data/receptor-fingerprints.json",
@@ -96359,13 +99777,422 @@
         "procedure": "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation\u2013recording pair and implantation matrices, every pair tested at least once",
         "citation": "https://doi.org/10.25493/JYVR-WJ7, https://doi.org/10.1016/j.neuroimage.2018.07.039",
         "license": "CC BY-NC-SA 4.0"
+      },
+      {
+        "path": "data/cdmd/input/sub_013_t1w.nii.gz",
+        "sha256": "16e9137160f20c3dfb39fbd04ce1299415c5252ba96e8b0266f5f9402c60730b",
+        "anatomy": "cdmd",
+        "url": "https://doi.org/10.6084/m9.figshare.c.5315474.v1"
+      },
+      {
+        "path": "data/cdmd/mri/orig.mgz",
+        "sha256": "9e32d45483acf4f992fc987bf6ad31337b5ec1f738c693f1fa80142fd136db81",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/mri/aseg.mgz",
+        "sha256": "d8e1e9fbd8d3cf34ee259ac708147da4c61319faf293dd3671584d655f611cbc",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/mri/aparc.a2009s+aseg.mgz",
+        "sha256": "c859c5b38010b319862f8c3d5deb0828bd73524be27ed1cd483eefc234781d0e",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/mri/ribbon.mgz",
+        "sha256": "42a9d24c0dc202caa7776bc2f10bf3da2279dcacde2e23ce4614e64c1e6db9e7",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/mri/brain.mgz",
+        "sha256": "2d9d847b16bc29ac94dff4960ef1d83ce9282a0075bcb9d9c4d0f50654599abe",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/mri/wmparc.mgz",
+        "sha256": "a080190a2ba6d2b77cddd158786f4ccb99185b8abb9906b550820248ce45131f",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/scripts/build-stamp.txt",
+        "sha256": "05e1fbf2faef4be22a0180c1aaf9a337bfdaccfdcdd7a34adaac27e1578458dd",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/stats/aseg.stats",
+        "sha256": "07001d0adb81bee401752883a1ee84a97fee9aae0535e26c65ed99e075c2ce47",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/lh.pial",
+        "sha256": "75ba707c512c289ad0d6e7aabefbcac854ae5bdf2b3e8ceecddf9834e162cee2",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/lh.white",
+        "sha256": "abd03f82ea7574ec42740d72550d253504cd66fb9420cb793d1556e2d99f732c",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/lh.sulc",
+        "sha256": "7601bb5ce22309153ac8226a952dd0ce14c992a1948c636589ff1753eb09c595",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/lh.sphere.reg",
+        "sha256": "410f20030632c9bfc31684b900a9636464f6e979f343ad9d6f62c63c9418df70",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/label/lh.aparc.a2009s.annot",
+        "sha256": "a0a16110336901d3fa893d64e7dc00df89dd8826020902797d6851416f1716f4",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/label/lh.aparc.annot",
+        "sha256": "cd2532ee1d194a0c5178ce00d95ee8da73133a614bb7d887141eab7e142077d5",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/rh.pial",
+        "sha256": "bcee0a1346002663e77d9832202d4c04793402c96a3162aefbdb3ff7d7d256f9",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/rh.white",
+        "sha256": "6357b680737a2813b2c9c946525a389087748d13845c4c4d6218e738c1919b93",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/rh.sulc",
+        "sha256": "fcfc9dabbe52462ff9bcfcd09f30a31703212540584d6c7471f5fea71330b3a0",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/rh.sphere.reg",
+        "sha256": "ef0bf345caf85a7f430c612d85ffa7a5d2b9eb44123ce36a1b491129ca33cc8d",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/label/rh.aparc.a2009s.annot",
+        "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/label/rh.aparc.annot",
+        "sha256": "fb26080b6c14cc60e6dd64558973991e71b3331ac6079ed09aed8cf4583a39e8",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/reconstruction.json",
+        "sha256": "fa83e9dc513d548bf7f949d29daff0caf408de4e565b0b47d6cfd15c196f9a1d",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/label/lh.HCPMMP1.annot",
+        "sha256": "be26cfba13236a274f46da127d0e2776abcae89f10b7f9489bbd8188aebc1386",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/lh.HCPMMP1.annot",
+          "data/fsaverage/surf/lh.sphere.reg",
+          "data/cdmd/surf/lh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/label/rh.HCPMMP1.annot",
+        "sha256": "257aa1f069fee38517686fa1d9f4224a643efb7de4ac7cac278b3d5be2bb8206",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/rh.HCPMMP1.annot",
+          "data/fsaverage/surf/rh.sphere.reg",
+          "data/cdmd/surf/rh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/hcp-registration.json",
+        "sha256": "e5c2ce2b88d0ef4898ea7613cfd55a4581e102efa01bb34a668267d30e74b94f",
+        "anatomy": "cdmd",
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+      },
+      {
+        "path": "data/cdmd/label/lh.JulichBrain3.1.annot",
+        "sha256": "07898556b5083d731d735717527ae4d5d573647d96f2884b1d359186b97d3fdd",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/lh.JulichBrain3.1.annot",
+          "data/fsaverage/surf/lh.sphere.reg",
+          "data/cdmd/surf/lh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/label/rh.JulichBrain3.1.annot",
+        "sha256": "a2aae43679af4cf16d8617e8ecb6226aec94b8ed649e3ab54ae01ed4e6ef5be2",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/rh.JulichBrain3.1.annot",
+          "data/fsaverage/surf/rh.sphere.reg",
+          "data/cdmd/surf/rh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/julich-registration.json",
+        "sha256": "1f86a5bb8d599c1f927abd6c4c27c45fffb2e2b90becaad6a458b322e29d936c",
+        "anatomy": "cdmd",
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+      },
+      {
+        "path": "data/cdmd/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "sha256": "c604116e027c27a5ac3b9e302b14c436ac2672fe67c01d7b54f3c896ec4fc6b4",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+          "data/fsaverage/surf/lh.sphere.reg",
+          "data/cdmd/surf/lh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "sha256": "a099dbed4242930a1f378a98756e62b9649c83fcb2fb667d198a047253718a9f",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/fsaverage/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+          "data/fsaverage/surf/rh.sphere.reg",
+          "data/cdmd/surf/rh.sphere.reg"
+        ],
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+      },
+      {
+        "path": "data/cdmd/network-registration.json",
+        "sha256": "e8eec343ddbe2f5c428bd551e2cc246c540078efb3ae264010efc9fa9afb7e0f",
+        "anatomy": "cdmd",
+        "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+      },
+      {
+        "path": "data/disorder-effects.json",
+        "sha256": "58d73cfe332edc568f3175741e8693695028ec2ad513ac9e4af35f7b973200a8",
+        "derived_from": [
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/scz_case-controls_CortThick.csv",
+            "sha256": "59ff506020b0e66debcc9bb7f7ae0e7167e6f29cdf1987986b64b5082b0db070"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/scz_case-controls_SubVol.csv",
+            "sha256": "91b12a51a0aab819ffb6ceb5f236a29739c1b5f5c902925c80f4e2b02cf6fcc0"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/bd_case-controls_CortThick_adult.csv",
+            "sha256": "1b2b0ab16233e33fccc4291030f73d50fc9310506332115ad6985788f32e6e46"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/bd_case-controls_SubVol_typeI.csv",
+            "sha256": "e155aeb33c774d0c2868f52cb0bf62da232033a381a2196171645f28d15004b3"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/mddadult_case-controls_CortThick.csv",
+            "sha256": "60c03a115de22a2d9db724a0d75634814dd5fdc21bea8be3c3cead126ea678d3"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/mdd_case-controls_SubVol.csv",
+            "sha256": "e5d606b9ee6ef7d43977af21a17979d8e13befa6512871ed17a2ef7fc3c1f11b"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/ocdadults_case-controls_CortThick.csv",
+            "sha256": "e8c57be6d426034ebfa1a1e7ac7e108acf4c3d3ccdbcbae79952ddd2a8d06aa3"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/ocdadult_case-controls_SubVol.csv",
+            "sha256": "8d9a54916bc7050a9a0c4baa2c97a043b7e408f0c49d1a59c86eee7973c034c4"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/adhdallages_case-controls_CortThick.csv",
+            "sha256": "3a29e169af8a97a5e295786cc025faff7f35edb99178f282095ebe412e931a9e"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/adhdallages_case-controls_SubVol.csv",
+            "sha256": "ee893ed1020f995b0e7f167f3dfaca826b941394f802417000c6f617072eb847"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/asd_meta-analysis_case-controls_CortThick.csv",
+            "sha256": "ee076971be6688bc99106fce4a7198a3bd927d183adb245f9810d6f71efe4f29"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/asd_meta-analysis_case-controls_SubVol.csv",
+            "sha256": "b2b0b02c260ec87c6ab22f40e6162ab8a475dab373390be1edd465910ca62066"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/22q_case-controls_CortThick.csv",
+            "sha256": "fe611a2b9aa9753051192e5687a76fc0c6e00312ca7cfbbbee0f9d9d7cbb265f"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/22q_case-controls_SubVol.csv",
+            "sha256": "8ed7d528905d2b88c151c9aa03cb87e19e212f91009a4d29473c64c6e36e1e3a"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsl_case-controls_CortThick.csv",
+            "sha256": "8608e679d0a4be226d7695af28257073273c75e5ce66371cd17ee48dd58877d9"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsl_case-controls_SubVol.csv",
+            "sha256": "fae81fccc7ada7265279478c414a9d783cd9bb67e6783a14819484e6fd04c5c7"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsr_case-controls_CortThick.csv",
+            "sha256": "b888702ca9338ac38dad3d7466f9b7a29ccdeb3ce9f1a78fcb8d70d614a7eca0"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsr_case-controls_SubVol.csv",
+            "sha256": "a8b15b90c05d910913618196c6e5e45848986b4efffdf671cb47bdeda936eb09"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/gge_case-controls_CortThick.csv",
+            "sha256": "d0faaaa85242cae18841c4969f6dc7ed4df1ed7c6141dd0eaa1c214eefe96d33"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/gge_case-controls_SubVol.csv",
+            "sha256": "ee7123fb90367d4dfa0018fb9042150d6d8bf2c95e4e0c416e751850e3d11b35"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/parkinsons_case-controls_CortThick_PDvsCN.csv",
+            "sha256": "89b4942b6d9b7fdbc40ae4102a3f46aed26d030f2fd3477344ccf8d385b79bd0"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/parkinsons_case-controls_Subvol_PDvsCN.csv",
+            "sha256": "ca39b4eff9a24bee00f0af9b558fe05047d3a80f01d63ab63347cefd7ef9911a"
+          }
+        ],
+        "procedure": "scripts/fetch_disorder_effects.py: each pinned ENIGMA Toolbox table's Cohen's d per region, significant where its FDR-corrected p (published, else Benjamini\u2013Hochberg) is below 0.05",
+        "citation": "https://pubmed.ncbi.nlm.nih.gov/34194050/",
+        "license": "BSD 3-Clause (ENIGMA Toolbox repository)"
+      },
+      {
+        "path": "public/models/licenses/ENIGMA-Toolbox-BSD-3-Clause.txt",
+        "sha256": "aecec6f9b8e75153c441e8332d349407df4082aaf367775df49553cb07f424fe",
+        "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/LICENSE",
+        "license": "BSD 3-Clause (ENIGMA Toolbox repository)"
       }
     ]
   },
   "stroke_cases": {
     "id": "stroke_cases",
     "file": "stroke-cases.json",
-    "sha256": "09c91f63910670dc4aa17995d31e9b9300194251ecfd08e9957d790c7f1a7865",
+    "sha256": "e961afb5da4519092abe94b8596a1855da50e948f0b0000f2b7d0d1e9a1c2aaa",
     "masks": {
       "file": "stroke-cases.masks",
       "sha256": "bac63b113cac2a950329c2fea989d3a76939fd58bb23cb53281cb081cd73df65"

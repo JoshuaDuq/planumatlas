@@ -1177,6 +1177,76 @@ describe('Functional connectivity', () => {
   });
 });
 
+describe('Brain differences in disorders', () => {
+  const HIPPOCAMPUS = 'aseg:left:17';
+  const HIPPOCAMPUS_UNIT = 'learning:left:hippocampus';
+  const OPERCULAR = 'desikan:left:18';
+  const rows = (details: Element) =>
+    [...details.querySelectorAll('[data-disorder-effects] li')].map(text);
+
+  test('INSP-54 · a reported region lists its disorders largest first; a row paints its disorder', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, { regionId: HIPPOCAMPUS, calls });
+    const details = section('In disorders');
+    expect(text(details.querySelector('summary')!)).toBe('In disorders, 7 disorders');
+    expect(details.open).toBe(false);
+    details.open = true;
+    expect(rows(details).slice(0, 4)).toEqual([
+      'Left temporal lobe epilepsy with hippocampal sclerosis smaller −1.73',
+      '22q11.2 deletion syndrome smaller −0.79',
+      'Schizophrenia smaller −0.43',
+      'Bipolar disorder smaller · bipolar I disorder −0.20',
+    ]);
+    expect(text(details)).toContain('Volume, patients minus controls (Cohen’s d)');
+    expect(text(details)).toContain('5% false discovery rate');
+    await userEvent.click(page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }));
+    expect(calls).toEqual(['disorder:schizophrenia']);
+    // The teaching set's hippocampus reads its aseg structure's rows.
+    await screen.rerender({ regionId: HIPPOCAMPUS_UNIT });
+    expect(rows(section('In disorders'))[0]).toBe(
+      'Left temporal lobe epilepsy with hippocampal sclerosis smaller −1.73',
+    );
+    // A Desikan-Killiany region reads thickness, in both directions.
+    await screen.rerender({ regionId: OPERCULAR });
+    expect(rows(section('In disorders'))).toEqual([
+      '22q11.2 deletion syndrome thicker 0.57',
+      'Schizophrenia thinner −0.38',
+      'Bipolar disorder thinner · adults −0.29',
+    ]);
+    await expectAxeClean();
+  });
+
+  test('INSP-54 · the painted disorder takes a ruled strip with its cohort, paper and Restore; another tab offers no paint', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, {
+      regionId: HIPPOCAMPUS,
+      calls,
+      disorderPainted: 'schizophrenia',
+    });
+    const details = section('In disorders');
+    details.open = true;
+    const status = details.querySelector('[role="status"]')!;
+    expect(text(status)).toBe(
+      'On the brain: Schizophrenia. Paper (opens in a new tab) Restore previous view',
+    );
+    expect(status.querySelector('a')!.getAttribute('href')).toBe(
+      'https://pubmed.ncbi.nlm.nih.gov/26033243/',
+    );
+    expect(
+      page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }).element(),
+    ).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(page.getByRole('button', { name: 'Restore previous view' }));
+    expect(calls).toEqual(['restore-disorder']);
+    await screen.rerender({ explorer: 'functions', disorderPainted: null });
+    expect(
+      page.getByRole('button', { name: 'Paint Schizophrenia on the brain' }).query(),
+    ).toBeNull();
+    // A region no table reports has no section.
+    await screen.rerender({ regionId: 'destrieux:left:1', explorer: 'anatomy' });
+    expect(section('In disorders')).toBeUndefined();
+  });
+});
+
 describe('F-TRACT stimulation responses', () => {
   const AREA_45 = 'julich:left:1';
   const AREA_6V1 = 'julich:left:117'; // carved by Julich-Brain 3.1 out of a 3.0 gap map

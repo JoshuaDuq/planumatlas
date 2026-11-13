@@ -205,10 +205,9 @@ def validate_projected_volume(config, atlas, record, image, codes, labels, regio
         nearest = cKDTree(np.vstack([pial, white])).query(
             nib.affines.apply_affine(tkr, voxels)
         )[1] % len(pial)
-        if np.any(annotation[0][nearest] < 0):
-            raise ValueError(f"{atlas['id']}: a ribbon voxel's nearest vertex is unlabelled")
         expected[mask] = first
-        expected[tuple(voxels.T)] = first + annotation[0][nearest]
+        # A vertex outside every table entry (-1, Desikan-Killiany's medial wall) takes entry 0.
+        expected[tuple(voxels.T)] = first + np.maximum(annotation[0][nearest], 0)
         cortex |= mask
         counts[hemisphere] = {
             "ribbon_voxels": len(voxels),

@@ -398,6 +398,7 @@
                 clinical: world.clinical,
                 lesion: world.lesion.paint,
                 connectivity: model.connectivity,
+                disorders: model.disorders,
                 mapDrawn,
               }),
             },
@@ -407,6 +408,7 @@
               drawn: (id) => visibilityOf(world.regions.get(id)!.region, current).visible,
               lesion: world.lesion.paint,
               connectivity: model.connectivity,
+              disorders: model.disorders,
               label: (id) =>
                 `${world.catalog.label(id).name} · ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
               map: againstMap

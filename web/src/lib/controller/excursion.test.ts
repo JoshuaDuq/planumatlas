@@ -551,6 +551,22 @@ describe('the stage key', () => {
     await scene.excursions.chooseAtlas(other.id);
     assert.equal(scene.session.state.connectivitySeed, null);
   });
+
+  test('STAGE-65 · showing a disorder chooses Desikan-Killiany; another atlas ends it', async () => {
+    const scene = createScene();
+    assert.notEqual(scene.engine.model.settings.atlas, 'desikan');
+    // The structure it was asked from stays selected, though the switch clears a selection.
+    scene.engine.model.select('learning:left:hippocampus');
+    await scene.excursions.showDisorder('schizophrenia');
+    assert.equal(scene.engine.model.settings.atlas, 'desikan');
+    assert.equal(scene.engine.model.state.selectedRegion?.id, 'learning:left:hippocampus');
+    assert.equal(scene.session.state.disorderShown, 'schizophrenia');
+    assert.equal(scene.session.state.paintLifted, false);
+    await scene.excursions.chooseAtlas('desikan');
+    assert.equal(scene.session.state.disorderShown, 'schizophrenia');
+    await scene.excursions.chooseAtlas('destrieux');
+    assert.equal(scene.session.state.disorderShown, null);
+  });
 });
 
 describe('a failure that needs a newer deploy', () => {

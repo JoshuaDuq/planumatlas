@@ -55,6 +55,8 @@ import { validateStimulationResponses } from '../../core/catalog/stimulation-res
 import { validateStimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
 import { validateFunctionalConnectivity } from '../../core/catalog/functional-connectivity.ts';
 import type { FunctionalConnectivity } from '../../core/catalog/functional-connectivity.ts';
+import { validateDisorderEffects } from '../../core/catalog/disorder-effects.ts';
+import type { DisorderEffects } from '../../core/catalog/disorder-effects.ts';
 import type { StimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
 import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
@@ -499,6 +501,7 @@ export class BrainAtlas extends EventTarget {
       stimulation,
       ftract,
       connectivity,
+      disorders,
     ] = await Promise.all([
       manifest.cab_np ? readJson<CabNpPartition>(new URL(manifest.cab_np.file, url)) : null,
       manifest.functional_regions
@@ -528,6 +531,9 @@ export class BrainAtlas extends EventTarget {
       manifest.functional_connectivity
         ? readJson<FunctionalConnectivity>(new URL(manifest.functional_connectivity.file, url))
         : null,
+      manifest.disorder_effects
+        ? readJson<DisorderEffects>(new URL(manifest.disorder_effects.file, url))
+        : null,
     ]);
     // The site serves the layers meshopt-compressed (web/build/meshopt-glb.ts); public/ does not.
     const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
@@ -551,6 +557,7 @@ export class BrainAtlas extends EventTarget {
       stimulation,
       ftract,
       connectivity,
+      disorders,
     );
     try {
       await model.initialize(atlasId, options);
@@ -574,6 +581,7 @@ export class BrainAtlas extends EventTarget {
   readonly stimulation: StimulationResponses | null;
   readonly ftract: StimulationFtract | null;
   readonly connectivity: FunctionalConnectivity | null;
+  readonly disorders: DisorderEffects | null;
   /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */
   readonly visualField: VisualFieldUniforms | null;
   /** The reader's own map, shared by every cortical material and every cut face. */
@@ -643,6 +651,7 @@ export class BrainAtlas extends EventTarget {
     stimulation: StimulationResponses | null = null,
     ftract: StimulationFtract | null = null,
     connectivity: FunctionalConnectivity | null = null,
+    disorders: DisorderEffects | null = null,
   ) {
     super();
     validateManifest(manifest);
@@ -662,6 +671,7 @@ export class BrainAtlas extends EventTarget {
     this.stimulation = stimulation && validateStimulationResponses(stimulation, this.regions);
     this.ftract = ftract && validateStimulationFtract(ftract, this.regions);
     this.connectivity = connectivity && validateFunctionalConnectivity(connectivity, this.regions);
+    this.disorders = disorders && validateDisorderEffects(disorders, this.regions);
     this.visualField = manifest.retinotopy
       ? {
           visualMix: { value: 0 },

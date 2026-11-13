@@ -2,10 +2,11 @@ import type { Language, Region, Rgb } from '../../types/index.ts';
 import { labelOf } from './labels.ts';
 
 /**
- * The atlases whose regions the list groups by lobe (labels.ts): Destrieux by its own table, and
- * Julich-Brain through each area's location tag. HCP-MMP and Schaefer group by network instead.
+ * The atlases whose regions the list groups by lobe (labels.ts): Destrieux and Desikan-Killiany by
+ * their own tables, and Julich-Brain through each area's location tag. HCP-MMP and Schaefer group by
+ * network instead.
  */
-const LOBE_ATLASES: ReadonlySet<string> = new Set(['destrieux', 'julich']);
+const LOBE_ATLASES: ReadonlySet<string> = new Set(['destrieux', 'desikan', 'julich']);
 
 /** The atlas a lobe colouring shows when the one on screen has no lobes. */
 export const LOBE_ATLAS = 'destrieux';

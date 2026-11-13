@@ -3,6 +3,7 @@ export const en = {
   'hcp-mmp': 'HCP-MMP1.0 multimodal atlas',
   julich: 'Julich-Brain cytoarchitectonic atlas',
   schaefer: 'Schaefer 2018 functional parcellation',
+  desikan: 'Desikan-Killiany anatomical atlas',
   learning:
     'Teaching set: overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published',
   aseg: 'FreeSurfer subcortical segmentation',
@@ -20,6 +21,7 @@ export const fr: typeof en = {
   'hcp-mmp': 'Atlas multimodal HCP-MMP1.0',
   julich: 'Atlas cytoarchitectonique Julich-Brain',
   schaefer: 'Parcellisation fonctionnelle Schaefer 2018',
+  desikan: 'Atlas anatomique de Desikan-Killiany',
   learning:
     'Ensemble pédagogique : grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés',
   aseg: 'Segmentation sous-corticale FreeSurfer',

@@ -276,6 +276,7 @@ test('the cut labels are the manifest’s, and NextBrain is known to be segmente
     'hcp-mmp',
     'julich',
     'schaefer',
+    'desikan',
     'nextbrain',
     'arterial',
     'nettekoven',

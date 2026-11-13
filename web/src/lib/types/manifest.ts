@@ -127,6 +127,7 @@ export interface Manifest {
   stimulation_responses?: ManifestFile & Record<string, unknown>;
   stimulation_ftract?: ManifestFile & Record<string, unknown>;
   functional_connectivity?: ManifestFile & Record<string, unknown>;
+  disorder_effects?: ManifestFile & Record<string, unknown>;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;

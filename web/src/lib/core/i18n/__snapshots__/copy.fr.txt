@@ -53,6 +53,7 @@
   "hcp-mmp": "Atlas multimodal HCP-MMP1.0",
   "julich": "Atlas cytoarchitectonique Julich-Brain",
   "schaefer": "Parcellisation fonctionnelle Schaefer 2018",
+  "desikan": "Atlas anatomique de Desikan-Killiany",
   "learning": "Ensemble pédagogique : grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés",
   "aseg": "Segmentation sous-corticale FreeSurfer",
   "nextbrain": "Atlas histologique NextBrain",
@@ -440,6 +441,7 @@
   "hcpDerived": "HCP dérivées",
   "julichDerived": "Julich-Brain dérivées",
   "schaeferDerived": "Schaefer dérivées",
+  "desikanDerived": "Desikan-Killiany dérivées",
   "destrieuxNative": "Destrieux natives",
   "nextbrainWarped": "NextBrain recalées",
   "nextbrainSegmented": "NextBrain segmentées sur ce cerveau",
@@ -822,6 +824,7 @@
   "stimulation": "Réponses à la stimulation",
   "stimulationFtract": "Réponses à la stimulation (F-TRACT)",
   "functionalConnectivity": "Connectivité fonctionnelle (HCP)",
+  "disorderEffects": "Différences cérébrales dans les troubles (ENIGMA)",
   "strokeCases": "Cas d’AVC",
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
@@ -1013,8 +1016,8 @@
   "caution": "Prudence",
   "anatomy": {
    "scope": "Le cerveau d’une seule personne et les atlas tracés dessus.",
-   "shows": "Quatre atlas corticaux, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale propre à un cerveau et sur les faces de coupe. L’anatomie profonde a trois niveaux de détail<NNBSP>: un ensemble pédagogique de 106 solides, l’aseg de FreeSurfer et NextBrain.",
-   "source": "Le cerveau est MGH CDMD sub_013, reconstruit avec FreeSurfer 8.2. Destrieux est l’annotation FreeSurfer propre à ce sujet. HCP-MMP, Julich-Brain et Schaefer sont des atlas de groupe reportés de fsaverage sur ce cerveau par des sphères recalées.",
+   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale propre à un cerveau et sur les faces de coupe. L’anatomie profonde a trois niveaux de détail<NNBSP>: un ensemble pédagogique de 106 solides, l’aseg de FreeSurfer et NextBrain.",
+   "source": "Le cerveau est MGH CDMD sub_013, reconstruit avec FreeSurfer 8.2. Destrieux et Desikan-Killiany sont les annotations FreeSurfer propres à ce sujet. HCP-MMP, Julich-Brain et Schaefer sont des atlas de groupe reportés de fsaverage sur ce cerveau par des sphères recalées.",
    "caution": "Un seul individu<NNBSP>: ses plis, ses tailles et ses asymétries ne sont pas des normes. Les frontières des atlas de groupe sont des estimations projetées, et non des frontières mesurées dans ce cerveau. Chaque segmentation est une estimation de modèle à partir d’une seule IRM T1 de 1<NBSP>mm, et l’exactitude clinique n’a pas été validée."
   },
   "functions": {
@@ -1188,6 +1191,7 @@
    "hcp-mmp": "HCP-MMP",
    "julich": "Julich-Brain",
    "schaefer": "Schaefer",
+   "desikan": "Desikan-Killiany",
    "learning": "Ensemble pédagogique",
    "aseg": "FreeSurfer aseg",
    "nextbrain": "NextBrain",
@@ -1235,6 +1239,7 @@
    "hcp-mmp": "Aires multimodales, 180 par hémisphère (Glasser 2016)",
    "julich": "Aires cytoarchitectoniques issues de l’histologie, 139 par hémisphère (Amunts 2020)<NNBSP>; environ un quart du cortex n’est pas encore cartographié",
    "schaefer": "Parcelles fonctionnelles de connectivité au repos, 200 par hémisphère, colorées par réseau de Yeo (Schaefer 2018)",
+   "desikan": "Régions gyrales, 34 par hémisphère (Desikan 2006), l’atlas sur lequel ENIGMA rapporte les troubles",
    "learning": "Grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés",
    "aseg": "Segmentation sous-corticale automatique standard de FreeSurfer",
    "nextbrain": "Atlas d’origine histologique, segmenté sur ce sujet à 0,4<NNBSP>mm"
@@ -2069,6 +2074,76 @@
    "[\"Alpha\",\"tissue\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
    "[\"\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\"",
    "[\"Alpha\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires grises sont sous r Alpha, comme la moitié de toutes les paires.\""
+  ]
+ },
+ "disorders": {
+  "heading": "Dans les troubles",
+  "headingValue": [
+   "[\"Alpha\"] → \"Alpha troubles\"",
+   "[\"\"] → \" troubles\""
+  ],
+  "measure": {
+   "thickness": "Épaisseur corticale, patients moins témoins (d<NBSP>de<NBSP>Cohen)",
+   "volume": "Volume, patients moins témoins (d<NBSP>de<NBSP>Cohen)"
+  },
+  "direction": {
+   "thickness": {
+    "smaller": "plus mince",
+    "larger": "plus épais"
+   },
+   "volume": {
+    "smaller": "plus petit",
+    "larger": "plus grand"
+   }
+  },
+  "none": "Aucune différence d’un trouble ne survit ici au taux de fausses découvertes de son tableau.",
+  "paint": [
+   "[\"Alpha\"] → \"Peindre Alpha sur le cerveau\"",
+   "[\"\"] → \"Peindre  sur le cerveau\""
+  ],
+  "shown": [
+   "[\"Alpha\"] → \"Sur le cerveau<NNBSP>: Alpha.\"",
+   "[\"\"] → \"Sur le cerveau<NNBSP>: .\""
+  ],
+  "cohort": [
+   "[\"Alpha\",\"\"] → \"Alpha patients,  témoins\"",
+   "[\"\",\"Alpha\"] → \" patients, Alpha témoins\""
+  ],
+  "note": [
+   "[\"Alpha\"] → \"Différences de groupe issues des groupes de travail du consortium ENIGMA, des milliers de personnes examinées dans de nombreux sites, ajustées pour la taille de la tête<NNBSP>; seules les différences qui survivent au taux de fausses découvertes de Alpha de chaque tableau sont listées. La plupart sont faibles<NNBSP>: patients et témoins se recouvrent presque entièrement, si bien qu’aucune ne dit quoi que ce soit d’une personne.\"",
+   "[\"\"] → \"Différences de groupe issues des groupes de travail du consortium ENIGMA, des milliers de personnes examinées dans de nombreux sites, ajustées pour la taille de la tête<NNBSP>; seules les différences qui survivent au taux de fausses découvertes de  de chaque tableau sont listées. La plupart sont faibles<NNBSP>: patients et témoins se recouvrent presque entièrement, si bien qu’aucune ne dit quoi que ce soit d’une personne.\""
+  ],
+  "basis": {
+   "thickness": "Rapportée par région de Desikan-Killiany, l’atlas sur lequel un trouble peint est montré<NNBSP>; non mesurée dans ce cerveau.",
+   "volume": "Rapporté par structure FreeSurfer<NNBSP>; non mesuré dans ce cerveau."
+  },
+  "paper": "Article",
+  "toolbox": "Données (ENIGMA Toolbox)",
+  "keyTitle": [
+   "[\"Alpha\"] → \"Alpha<NNBSP>: patients moins témoins\"",
+   "[\"\"] → \"<NNBSP>: patients moins témoins\""
+  ],
+  "step": {
+   "smallerStrong": [
+    "[\"Alpha\"] → \"Plus mince ou plus petit, d<NBSP>≤<NBSP>−Alpha\"",
+    "[\"\"] → \"Plus mince ou plus petit, d<NBSP>≤<NBSP>−\""
+   ],
+   "smaller": [
+    "[\"Alpha\"] → \"Plus mince ou plus petit, d<NBSP>><NBSP>−Alpha\"",
+    "[\"\"] → \"Plus mince ou plus petit, d<NBSP>><NBSP>−\""
+   ],
+   "larger": [
+    "[\"Alpha\"] → \"Plus épais ou plus grand, d<NBSP><<NBSP>Alpha\"",
+    "[\"\"] → \"Plus épais ou plus grand, d<NBSP><<NBSP>\""
+   ],
+   "largerStrong": [
+    "[\"Alpha\"] → \"Plus épais ou plus grand, d<NBSP>≥<NBSP>Alpha\"",
+    "[\"\"] → \"Plus épais ou plus grand, d<NBSP>≥<NBSP>\""
+   ]
+  },
+  "keyNote": [
+   "[\"Alpha\",\"\"] → \"d de Cohen là où la différence survit à un taux de fausses découvertes de Alpha. undefined n’en montrent aucune ou ne sont pas rapportées.\"",
+   "[\"\",\"Alpha\"] → \"d de Cohen là où la différence survit à un taux de fausses découvertes de . undefined n’en montrent aucune ou ne sont pas rapportées.\""
   ]
  },
  "strokeCases": {

@@ -139,8 +139,9 @@ export function provenanceRows(
       {
         text: names[atlas.id] ?? atlas.label,
         note:
-          // Destrieux is the subject's own parcellation; every other surface atlas is projected.
-          atlas.id !== 'destrieux' && anatomy?.hcp_projected_from
+          // Destrieux and Desikan-Killiany are the subject's own parcellations; every other surface
+          // atlas is projected.
+          !['destrieux', 'desikan'].includes(atlas.id) && anatomy?.hcp_projected_from
             ? copy.projectedFrom(anatomy.hcp_projected_from)
             : null,
         link: link(atlas.citation),
@@ -202,6 +203,17 @@ export function provenanceRows(
       ? [
           { text: connectivity.label, note: connectivity.license },
           ...connectivity.citations!.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
+  const disorders = manifest.disorder_effects as Described | undefined;
+  add(
+    copy.disorderEffects,
+    disorders
+      ? [
+          { text: disorders.label, note: disorders.license },
+          licence(disorders.license_file),
+          ...disorders.citations!.map((citation) => ({ link: link(citation) })),
         ]
       : [],
   );

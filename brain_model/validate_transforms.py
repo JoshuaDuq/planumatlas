@@ -11,12 +11,13 @@ from nibabel.freesurfer.io import read_annot, read_geometry, write_annot
 from scipy.spatial import cKDTree
 
 from .layers import networks
-from .sources import HEMISPHERES, ROOT, sha256, tract_catalog
+from .sources import HEMISPHERES, ROOT, SUBJECT_ANNOTATIONS, sha256, tract_catalog
 
 
 def projected_annotation_names(config):
-    """Every surface atlas but Destrieux, the subject's own parcellation, then the networks."""
-    return [atlas["annotation"] for atlas in config["atlases"] if atlas["id"] != "destrieux"] + (
+    """Every surface atlas but the subject's own parcellations, then the networks."""
+    return [atlas["annotation"] for atlas in config["atlases"]
+            if atlas["annotation"] not in SUBJECT_ANNOTATIONS] + (
         [networks.ANNOTATION] if networks.is_declared(config) else []
     )
 

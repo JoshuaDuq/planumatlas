@@ -33,6 +33,7 @@ import type { ReceptorFingerprints } from '../core/catalog/receptor-fingerprints
 import type { StimulationResponses } from '../core/catalog/stimulation-responses.ts';
 import type { StimulationFtract } from '../core/catalog/stimulation-ftract.ts';
 import type { FunctionalConnectivity } from '../core/catalog/functional-connectivity.ts';
+import type { DisorderEffects } from '../core/catalog/disorder-effects.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
   CutMode,
@@ -182,6 +183,9 @@ export type StimulationFtractData = StimulationFtract;
 /** Resting functional connectivity between an atlas's areas (`manifest.functional_connectivity` file). */
 export type FunctionalConnectivityData = FunctionalConnectivity;
 
+/** ENIGMA's case–control differences per region (`manifest.disorder_effects` file). */
+export type DisorderEffectsData = DisorderEffects;
+
 /** NextBrain against aseg on aseg's grid (`manifest.segmentation_agreement` file). */
 export type SegmentationAgreementData = SegmentationAgreement;
 
@@ -205,6 +209,7 @@ export interface EngineModel {
   readonly stimulation: StimulationResponsesData | null;
   readonly ftract: StimulationFtractData | null;
   readonly connectivity: FunctionalConnectivityData | null;
+  readonly disorders: DisorderEffectsData | null;
   readonly segmentationAgreement: SegmentationAgreementData | null;
   /** The grouped learning overview when published, else the first level (brain-atlas.js:212). */
   readonly defaultDetail: string;

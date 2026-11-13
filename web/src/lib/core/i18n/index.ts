@@ -36,6 +36,7 @@ import * as receptors from './areas/receptors.ts';
 import * as sheet from './areas/sheet.ts';
 import * as stimulation from './areas/stimulation.ts';
 import * as connectivity from './areas/connectivity.ts';
+import * as disorders from './areas/disorders.ts';
 import * as strokeCases from './areas/strokeCases.ts';
 import * as territories from './areas/territories.ts';
 import * as cerebellarFunctions from './areas/cerebellarFunctions.ts';
@@ -84,6 +85,7 @@ export const TRANSLATIONS = {
     sheet: sheet.en,
     stimulation: stimulation.en,
     connectivity: connectivity.en,
+    disorders: disorders.en,
     strokeCases: strokeCases.en,
     territories: territories.en,
     cerebellarFunctions: cerebellarFunctions.en,
@@ -131,6 +133,7 @@ export const TRANSLATIONS = {
     sheet: sheet.fr,
     stimulation: stimulation.fr,
     connectivity: connectivity.fr,
+    disorders: disorders.fr,
     strokeCases: strokeCases.fr,
     territories: territories.fr,
     cerebellarFunctions: cerebellarFunctions.fr,

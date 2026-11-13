@@ -76,6 +76,7 @@ Limit
 - [Stroke cases](features/stroke-cases.md)
 - [Stimulation responses](features/stimulation-responses.md)
 - [Functional connectivity](features/functional-connectivity.md)
+- [Disorder effects](features/disorder-effects.md)
 :::
 
 ::::
@@ -152,6 +153,7 @@ features/visual-field-map
 features/stroke-cases
 features/stimulation-responses
 features/functional-connectivity
+features/disorder-effects
 ```
 
 ```{toctree}

@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-09",
+ "fetched": "2026-11-12",
  "sources": "PubMed efetch, Bookshelf esummary and Crossref; no abstracts",
  "year": "PubMed's journal-issue publication year (PubDate, or the first year of a MedlineDate range), not the online-first year; for a Bookshelf chapter, the book's publication year",
  "records": {
@@ -2868,6 +2868,34 @@
    "volume": "66",
    "issue": "4",
    "pages": "477-83; discussion 463",
+   "corrections": []
+  },
+  "pmid:16530430": {
+   "pmid": "16530430",
+   "pmcid": null,
+   "doi": "10.1016/j.neuroimage.2006.01.021",
+   "doi_source": "pubmed",
+   "title": "An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest",
+   "authors": [
+    "Desikan RS",
+    "Ségonne F",
+    "Fischl B",
+    "Quinn BT",
+    "Dickerson BC",
+    "Blacker D",
+    "Buckner RL",
+    "Dale AM",
+    "Maguire RP",
+    "Hyman BT",
+    "Albert MS",
+    "Killiany RJ"
+   ],
+   "year": 2006,
+   "pubdate": "2006 Jul 01",
+   "journal": "Neuroimage",
+   "volume": "31",
+   "issue": "3",
+   "pages": "968-80",
    "corrections": []
   },
   "pmid:16566012": {
@@ -7914,6 +7942,38 @@
    "volume": "97",
    "issue": "16",
    "pages": "e1632-e1636",
+   "corrections": []
+  },
+  "pmid:34194050": {
+   "pmid": "34194050",
+   "pmcid": "PMC8983056",
+   "doi": "10.1038/s41592-021-01186-4",
+   "doi_source": "pubmed",
+   "title": "The ENIGMA Toolbox: multiscale neural contextualization of multisite neuroimaging datasets",
+   "authors": [
+    "Larivière S",
+    "Paquola C",
+    "Park BY",
+    "Royer J",
+    "Wang Y",
+    "Benkarim O",
+    "Vos de Wael R",
+    "Valk SL",
+    "Thomopoulos SI",
+    "Kirschner M",
+    "Lewis LB",
+    "Evans AC",
+    "Sisodiya SM",
+    "McDonald CR",
+    "Thompson PM",
+    "Bernhardt BC"
+   ],
+   "year": 2021,
+   "pubdate": "2021 Jul",
+   "journal": "Nat Methods",
+   "volume": "18",
+   "issue": "7",
+   "pages": "698-700",
    "corrections": []
   },
   "pmid:34274379": {

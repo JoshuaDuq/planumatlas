@@ -107,7 +107,7 @@ export function networkBasis(region: {
   atlas?: string;
   kind?: string;
 }): 'vertices' | 'voxels' | 'territory' {
-  if (['destrieux', 'hcp-mmp', 'julich', 'schaefer'].includes(region.atlas ?? ''))
+  if (['destrieux', 'desikan', 'hcp-mmp', 'julich', 'schaefer'].includes(region.atlas ?? ''))
     return 'vertices';
   if (region.atlas === 'nextbrain' && region.kind === 'tissue-region') return 'voxels';
   // A striatal network region is that network's striatal territory, whole.

@@ -78,6 +78,7 @@ export function sectionSentences(input: SentenceInput): { said: string; shown: s
       'hcp-mmp': copy.hcpDerived,
       julich: copy.julichDerived,
       schaefer: copy.schaeferDerived,
+      desikan: copy.desikanDerived,
       destrieux: copy.destrieuxNative,
       nextbrain: input.nextbrainSegmented ? copy.nextbrainSegmented : copy.nextbrainWarped,
       arterial: copy.arterialRegistered,

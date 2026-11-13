@@ -419,7 +419,7 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 
 ### INSP-47 · The region sheet has About this region, then one closed Research data row
 
-- **Rule:** Nothing is removed. About this region keeps its 13px/600 caption in the tree's caption idiom over its disclosures; Research data is one closed disclosure row holding its sections, set in 12px (parsimony round 2026-11-11; it was a second caption with its sections open to view). The row opens itself when a section inside opens itself or is asked for (a linked stroke case, the Deficits list's Stroke cases, the reader's map), and is not drawn when the region has no research section. **About this region** (« À propos de cette région »): Neuropsychological functions, Functional networks, Typical arterial supply, Constituent regions, Functional division, Cerebellar functions; then the related deficits and circuits. **Research data** (« Données de recherche »): Boundary certainty, Segmentation agreement, Atlas overlap, Receptor densities, the two stimulation sections, Stroke cases, Map over time. Every disclosure stays closed by default. A closed summary carries its headline value where it is in hand without a fetch: the number of functions, the largest network share (else CAB-NP's network), the number of receptors; atlas overlap and stroke cases load on open, so theirs stay bare. A caption with no section under it for the selected region is not drawn; the research index closes the detail and keeps its bottom inset (supervisor review 2.2).
+- **Rule:** Nothing is removed. About this region keeps its 13px/600 caption in the tree's caption idiom over its disclosures; Research data is one closed disclosure row holding its sections, set in 12px (parsimony round 2026-11-11; it was a second caption with its sections open to view). The row opens itself when a section inside opens itself or is asked for (a linked stroke case, the Deficits list's Stroke cases, the reader's map), and is not drawn when the region has no research section. **About this region** (« À propos de cette région »): Neuropsychological functions, Functional networks, Typical arterial supply, Constituent regions, Functional division, Cerebellar functions; then the related deficits and circuits. **Research data** (« Données de recherche »): Boundary certainty, Segmentation agreement, Atlas overlap, Receptor densities, the two stimulation sections, Functional connectivity, In disorders, Stroke cases, Map over time. Every disclosure stays closed by default. A closed summary carries its headline value where it is in hand without a fetch: the number of functions, the largest network share (else CAB-NP's network), the number of receptors; atlas overlap and stroke cases load on open, so theirs stay bare. A caption with no section under it for the selected region is not drawn; the research index closes the detail and keeps its bottom inset (supervisor review 2.2).
 - **Kind:** behaviour
 - **Level:** browser
 - **Expected:** `hcp-mmp:left:50` → caption "About this region" and a closed row "Research data"; About lists "Neuropsychological functions, 32", "Functional networks, Dorsal attention 93%", "Typical arterial supply", "Functional division"; the Research data row holds Atlas overlap; all closed. Left lateral ventricle → About not drawn. Tab order: the About summaries, then the Research data row; its sections take Tab stops once it is open. With no region selected the row is in the page and not drawn.
@@ -455,4 +455,28 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 - **Kind:** behaviour
 - **Level:** browser (component)
 - **Expected:** "The brain shows resting connectivity with Area 45 (IFG) · left." + Restore → restore asked; Area 44 shows Paint; in Functions none.
+- **Covered by:** `src/features/inspector/inspector.svelte.test.ts`
+
+### INSP-52 · A region's disorder differences run largest first; a teaching-set unit reads its structure's
+
+- **Rule:** A Desikan-Killiany region reads its cortical-thickness differences and an aseg structure its volume differences, every disorder whose difference survives its table's false discovery rate, largest |d| first. A teaching-set unit reads the aseg structure it stands for (`units`). A region some table reports with no significant difference has no rows but is reported; a region no table reports (another atlas) has none.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** fixture `desikan:left:7` → b 0.45, a −0.10 (thickness); the unit standing for `aseg:left:17` → a −1.7, b 0.2 (volume); `desikan:left:8` → no rows; `destrieux:left:1` → not reported.
+- **Covered by:** `src/lib/core/catalog/disorder-effects.test.ts`; `tests/test_disorder_effects.py`
+
+### INSP-53 · A disorder paint shows a lifted paint again, replaces connectivity and ends with its tab
+
+- **Rule:** Asking to paint a disorder puts back a paint the reader lifted and ends a connectivity paint; asking for connectivity ends the disorder paint. Another tab ends it; choosing Anatomy again does not.
+- **Kind:** state
+- **Level:** unit
+- **Expected:** `setDisorderShown('schizophrenia')` → `paintLifted` false, seed null; `setConnectivitySeed(id)` → disorder null; `setExplorer('functions')` → disorder null.
+- **Covered by:** `src/lib/core/state/session.test.ts`
+
+### INSP-54 · The In disorders section lists a reported region's differences; a row paints its disorder; a strip names the painted one
+
+- **Rule:** **In disorders** (its closed line counts the disorders) sits in Research data for a region some table reports. Each row gives a swatch in the paint's colour, the disorder over a caption line of its direction (thinner/thicker, smaller/larger) and its population where narrower than the name, and d to two places at the row's end; in Anatomy a row is a pressed-state button that paints its disorder. While a disorder is painted a ruled status strip names it, with its cohort where the table gives one, its paper, and "Restore previous view". Another tab offers no paint; a region no table reports has no section.
+- **Kind:** behaviour
+- **Level:** browser (component)
+- **Expected:** left hippocampus: "In disorders, 7 disorders"; first rows "Left temporal lobe epilepsy with hippocampal sclerosis smaller −1.73", "22q11.2 deletion syndrome smaller −0.79", "Schizophrenia smaller −0.43", "Bipolar disorder smaller · bipolar I disorder −0.20"; left pars opercularis: "22q11.2 deletion syndrome thicker 0.57", "Schizophrenia thinner −0.38", "Bipolar disorder thinner · adults −0.29"; schizophrenia painted → "On the brain: Schizophrenia." with paper PMID 26033243.
 - **Covered by:** `src/features/inspector/inspector.svelte.test.ts`

@@ -25,6 +25,7 @@ from .layers import (
     cerebellar_functions,
     comparison,
     coordinate_spaces,
+    disorder_effects,
     functional_connectivity,
     functional_regions,
     learning,
@@ -664,6 +665,7 @@ def main():
         "stimulation_responses": stimulation_responses.export(config, regions),
         "stimulation_ftract": stimulation_ftract.export(config, regions),
         "functional_connectivity": functional_connectivity.export(config, regions),
+        "disorder_effects": disorder_effects.export(config, regions),
         **(
             {"boundary_certainty": boundary_certainty.export(config, regions)}
             if boundary_certainty.is_published(config)
@@ -727,6 +729,7 @@ def main():
             *stimulation_responses.limitations(),
             *stimulation_ftract.limitations(),
             *functional_connectivity.limitations(),
+            *disorder_effects.limitations(),
             *white_matter.limitations(config),
             *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
             *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),

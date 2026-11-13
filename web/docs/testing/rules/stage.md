@@ -645,3 +645,27 @@ A click on the model selects and opens a detail every time (`anatomy.pickRegion`
 - **Level:** unit
 - **Expected:** rows "r ≥ 0.45", "r 0.30 to 0.45" (absent), "r 0.15 to 0.30"; note "… below r 0.15, as half of all pairs do."
 - **Covered by:** `src/lib/core/state/paint.test.ts`
+
+### STAGE-64 · A disorder paint colours each difference by direction and size, its stand-ins too
+
+- **Rule:** Each significant difference takes its direction's paler colour below `d_scale.split` and the darker from it; a structure's teaching-set stand-ins take its colour. The paint id is `disorder:<id>`; an unknown disorder is an error.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** split 0.2: −0.19 → smaller pale, −0.2 → smaller dark, 0.19 → larger pale, 0.2 → larger dark; the hippocampus stand-in takes the hippocampus's colour.
+- **Covered by:** `src/lib/core/catalog/disorder-effects.test.ts`
+
+### STAGE-65 · Anatomy paints a disorder on Desikan-Killiany only; showing it chooses that atlas, another ends it
+
+- **Rule:** In Anatomy a shown disorder paints before connectivity and a lesion's findings, only while Desikan-Killiany is the atlas, and not once lifted. "Paint" from the sheet chooses Desikan-Killiany as the reader's atlas; choosing another atlas ends the paint, the same one keeps it.
+- **Kind:** state
+- **Level:** unit
+- **Expected:** disorder + seed + lesion on Desikan → `disorder:…`; on Destrieux → `lesion:…`; Functions → none; lifted → none; `showDisorder(id)` → atlas `desikan`; `chooseAtlas('destrieux')` → disorder null.
+- **Covered by:** `src/lib/core/state/paint.test.ts`, `src/lib/controller/excursion.test.ts`
+
+### STAGE-66 · The disorder key names it and lists four steps from larger to smaller
+
+- **Rule:** The key's title is the disorder's name with "patients minus controls"; its four rows, larger dark, larger pale, smaller pale, smaller dark, are not toggles, a step no painted region carries outlined; the note gives the false discovery rate and says unpainted regions show none or are not reported.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** "Schizophrenia: patients minus controls"; rows "Thicker or larger, d ≥ 0.2" (absent), "… d < 0.2", "Thinner or smaller, d > −0.2" (absent), "… d ≤ −0.2"; note "… survives a 5% false discovery rate. Tissue-coloured regions show none or are not reported."
+- **Covered by:** `src/lib/core/state/paint.test.ts`

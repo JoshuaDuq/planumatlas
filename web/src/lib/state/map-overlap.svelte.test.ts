@@ -35,6 +35,7 @@ function setup() {
       paintLifted: false,
       paintFrom: null,
       connectivitySeed: null,
+      disorderShown: null,
       lang: 'en',
     },
   });

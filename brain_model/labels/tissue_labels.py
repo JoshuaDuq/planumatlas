@@ -98,6 +98,8 @@ def project_surface_atlas(config, atlas, image, codes, labels, regions):
         if labels[unknown]["region_id"] is not None:
             raise ValueError(f"{atlas['id']}: annotation entry 0 must be its unlabelled one")
         projected[mask] = unknown
+        # A vertex outside every table entry (-1, Desikan-Killiany's medial wall) is unlabelled too.
+        lookup[-1] = unknown
         coordinates = np.argwhere(mask & (ribbon == ribbon_label))
         points = nib.affines.apply_affine(affine, coordinates)
         pial, _ = read_geometry(config["source_directory"] / "surf" / f"{prefix}.pial")

@@ -56,6 +56,8 @@
   import StimulationSection from './StimulationSection.svelte';
   import FtractSection from './FtractSection.svelte';
   import ConnectivitySection from './ConnectivitySection.svelte';
+  import DisorderSection from './DisorderSection.svelte';
+  import type { DisorderEffects } from '../../lib/core/catalog/disorder-effects.ts';
   import type { FunctionalConnectivity } from '../../lib/core/catalog/functional-connectivity.ts';
   import StrokeCasesSection from './StrokeCasesSection.svelte';
   import type { StrokeCasesStore } from '../../lib/state/stroke-cases.svelte.ts';
@@ -103,6 +105,13 @@
     /** Paints an area's connectivity; null where the stage cannot show it. */
     paintConnectivity?: ((id: string) => void) | null;
     restoreConnectivity?: () => void;
+    /** ENIGMA's case–control differences, by the Desikan-Killiany region or aseg structure a region is. */
+    disorders?: DisorderEffects | null;
+    /** The disorder the stage paints now, or null. */
+    disorderPainted?: string | null;
+    /** Paints a disorder; null where the stage cannot show it. */
+    paintDisorder?: ((id: string) => void) | null;
+    restoreDisorder?: () => void;
     /** The stroke cases on the stage and their cohort; none on an anatomy that publishes no cases. */
     strokeCases?: StrokeCasesStore | null;
     /** The reader's own map, whose series has a course in the region. */
@@ -161,6 +170,10 @@
     connectivityPainted = null,
     paintConnectivity = null,
     restoreConnectivity = () => {},
+    disorders = null,
+    disorderPainted = null,
+    paintDisorder = null,
+    restoreDisorder = () => {},
     strokeCases = null,
     userMap = null,
     territories = null,
@@ -347,6 +360,15 @@
         {onselect}
         onpaint={paintConnectivity}
         onrestore={restoreConnectivity}
+      />
+      <DisorderSection
+        {region}
+        {lang}
+        {disorders}
+        units={domains?.units ?? {}}
+        painted={disorderPainted}
+        onpaint={paintDisorder}
+        onrestore={restoreDisorder}
       />
       {#if strokeCases?.available}
         <StrokeCasesSection {region} {lang} store={strokeCases} label={catalog.label} />

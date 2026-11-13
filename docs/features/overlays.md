@@ -16,7 +16,7 @@ A reader's own NIfTI-1 map in an MNI template, one volume or a series of them, i
 | The reader's NIfTI-1 file (`.nii`, `.nii.gz`): one volume of ≤ $32 \times 2^{20}$ voxels, or a series along the fourth axis of ≤ $64 \times 2^{20}$ values | Reader's computer                                                                                   | The map                                            |
 | `coordinates-<space>.field`                                                                                                                                | [Published coordinates](published-coordinates.md#data): MNI152NLin2009cAsym and SPM12 (TPM), 1.5 mm | Template → surface RAS registration, inverted here |
 | `tissue-envelopes.glb`                                                                                                                                     | Native `lh`/`rh` pial and white surfaces                                                            | Cortical sampling                                  |
-| `ribbon-<atlas>.labels`, `cortex-<atlas>.glb`                                                                                                              | Four cortical atlases ([cortical atlases](cortical-atlases.md))                                     | Values on the parcel meshes                        |
+| `ribbon-<atlas>.labels`, `cortex-<atlas>.glb`                                                                                                              | Five cortical atlases ([cortical atlases](cortical-atlases.md))                                     | Values on the parcel meshes                        |
 
 ## Method
 

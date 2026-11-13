@@ -317,7 +317,7 @@ def test_both_hemispheres_white_matter_is_drawn_in_one_colour():
 def test_every_projected_atlas_annotation_is_projected_without_a_declared_layer(monkeypatch):
     # Schaefer is a cortical atlas as well as the networks layer's source, so an
     # anatomy declaring no layers still needs it on its own surface.
-    from brain_model.sources import read_config
+    from brain_model.sources import SUBJECT_ANNOTATIONS, read_config
 
     prepare = load_prepare_subject()
     projected = []
@@ -327,8 +327,9 @@ def test_every_projected_atlas_annotation_is_projected_without_a_declared_layer(
     )
     config = {"anatomy": {"id": "x", "project_hcp_from": "fsaverage", "layers": []}}
     prepare.transfer_annotations(config, {"sources": []})
-    native = {"aparc.a2009s"}
-    assert set(projected) == {a["annotation"] for a in read_config()["atlases"]} - native
+    # Destrieux and Desikan-Killiany are recon-all's own; nothing projects them.
+    assert set(projected) == {a["annotation"] for a in read_config()["atlases"]} - set(SUBJECT_ANNOTATIONS)
+    assert "aparc" not in projected
 
 
 def test_a_projection_whose_source_annotation_is_missing_is_refused(tmp_path):

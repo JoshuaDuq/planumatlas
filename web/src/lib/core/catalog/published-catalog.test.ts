@@ -78,8 +78,8 @@ test('CAT-07: a region without a label stops the catalogue from building', () =>
 });
 
 describe('the published cdmd anatomy', () => {
-  test('CAT-07: all 2040 regions have a non-empty name and group in English and French', () => {
-    assert.equal(manifest.regions.length, 2040);
+  test('CAT-07: all 2110 regions have a non-empty name and group in English and French', () => {
+    assert.equal(manifest.regions.length, 2110);
     for (const region of manifest.regions) {
       for (const lang of ['en', 'fr'] as const) {
         const label = labelOf(region, lang);
@@ -124,8 +124,8 @@ describe('the published cdmd anatomy', () => {
     assert.deepEqual(ids('cunéus', 'fr'), ids('cuneus', 'fr'));
     assert.ok(catalogs.fr.search('cuneus', french).rows.some((r) => r.label.name === 'Cunéus'));
     const english = catalogs.en.search('cuneus', settings());
-    assert.equal(english.total, 36);
-    // Destrieux's, on screen, ahead of NextBrain's exact name, which is not.
+    assert.equal(english.total, 40);
+    // Destrieux's, on screen, ahead of the exact names of atlases that are not, Desikan-Killiany's first.
     assert.deepEqual(
       english.rows.slice(0, 5).map((row) => row.region.id),
       [
@@ -133,7 +133,7 @@ describe('the published cdmd anatomy', () => {
         'destrieux:right:11',
         'destrieux:left:30',
         'destrieux:right:30',
-        'nextbrain:left:2005',
+        'desikan:left:5',
       ],
     );
     assert.equal(catalogs.en.search('V1', settings({ atlas: 'hcp-mmp' })).rows[0].label.code, 'V1');
@@ -142,16 +142,16 @@ describe('the published cdmd anatomy', () => {
   test('CAT-22: the published search totals are fixed', () => {
     const total = (query: string, lang: Language) =>
       catalogs[lang].search(query, settings({ lang })).total;
-    assert.equal(total('s', 'en'), 1370);
+    assert.equal(total('s', 'en'), 1418);
     assert.equal(total('noyau', 'fr'), 235);
     assert.equal(total('zzz', 'en'), 0);
     assert.equal(total('', 'en'), 0);
   });
 
-  test('CAT-24: a search for "s" is capped at 50 rows of 1370', () => {
+  test('CAT-24: a search for "s" is capped at 50 rows of 1418', () => {
     const found = catalogs.en.search('s', settings());
     assert.equal(found.rows.length, 50);
-    assert.equal(found.total, 1370);
+    assert.equal(found.total, 1418);
     assert.equal(catalogs.en.search('s', settings(), 5).rows.length, 5);
   });
 
@@ -293,9 +293,9 @@ describe('the published cdmd anatomy', () => {
     assert.equal(validateCabNp(structuredClone(cabNp), regionsById).id, 'cab-np');
   });
 
-  test('CAT-32: all 1285 regions with network shares have a counting basis', () => {
+  test('CAT-32: all 1355 regions with network shares have a counting basis', () => {
     const withNetworks = manifest.regions.filter((region) => networksOf(region).length > 0);
-    assert.equal(withNetworks.length, 1285);
+    assert.equal(withNetworks.length, 1355);
     for (const region of withNetworks) assert.ok(networkBasis(region), region.id);
   });
 

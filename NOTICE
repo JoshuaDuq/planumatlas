@@ -31,8 +31,8 @@ territories), CC BY 4.0 (Lyu et al. stimulation responses, TractSeg weights),
 ODbL 1.0 (Neurosynth), AGPL-3.0 (Benson visual-field template, neuropythy), the
 MNI template licence (MNI152NLin2009cAsym), GPL-2.0-or-later (SPM12 tissue
 probability maps, built from IXI under CC BY-SA 3.0), MIT (Schaefer, PAM50),
-BSD-2-Clause (the Aphasia Recovery Cohort's normalised lesions, Chris Rorden)
-and CC0 1.0.
+BSD-2-Clause (the Aphasia Recovery Cohort's normalised lesions, Chris Rorden),
+BSD-3-Clause (ENIGMA Toolbox summary statistics) and CC0 1.0.
 
 Planum is for research and education. It is not a medical device and must
 not be used for diagnosis, treatment or any other clinical decision.

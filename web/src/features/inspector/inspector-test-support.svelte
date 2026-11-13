@@ -10,6 +10,8 @@
   import ftractFile from '../../../../public/models/cdmd/stimulation-ftract.json';
   import agreementFile from '../../../../public/models/cdmd/segmentation-agreement.json';
   import connectivityFile from '../../../../public/models/cdmd/functional-connectivity.json';
+  import disordersFile from '../../../../public/models/cdmd/disorder-effects.json';
+  import type { DisorderEffects } from '../../lib/core/catalog/disorder-effects.ts';
   import type { FunctionalConnectivity } from '../../lib/core/catalog/functional-connectivity.ts';
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
@@ -44,6 +46,7 @@
     slots = true,
     calls = [],
     connectivityPainted = null,
+    disorderPainted = null,
     mriOpen = false,
   }: {
     regionId?: string | null;
@@ -57,6 +60,7 @@
     slots?: boolean;
     calls?: unknown[];
     connectivityPainted?: string | null;
+    disorderPainted?: string | null;
     mriOpen?: boolean;
   } = $props();
 
@@ -94,6 +98,10 @@
   {connectivityPainted}
   paintConnectivity={explorer === 'anatomy' ? (id) => calls.push(`paint:${id}`) : null}
   restoreConnectivity={() => calls.push('restore-connectivity')}
+  disorders={disordersFile as unknown as DisorderEffects}
+  {disorderPainted}
+  paintDisorder={explorer === 'anatomy' ? (id) => calls.push(`disorder:${id}`) : null}
+  restoreDisorder={() => calls.push('restore-disorder')}
   territories={manifest.arterial_territories as unknown as ArterialTerritories}
   cerebellarFunctions={manifest.cerebellar_functions as unknown as CerebellarFunctions}
   striatalNetworks={manifest.striatal_networks as unknown as StriatalNetworks}

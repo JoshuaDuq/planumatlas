@@ -1,5 +1,6 @@
 import { untrack } from 'svelte';
 import type { FunctionalConnectivity } from '../core/catalog/functional-connectivity.ts';
+import type { DisorderEffects } from '../core/catalog/disorder-effects.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { isIndependentTractReference } from '../core/diffusion/presentation.ts';
@@ -53,6 +54,7 @@ export function syncPaint(
     clinical: ClinicalCatalog;
     lesion?: { readonly paint: LesionPaint | null };
     connectivity?: FunctionalConnectivity | null;
+    disorders?: DisorderEffects | null;
     /** The reader's map, which a function is then painted against. */
     userMap?: { readonly drawn: boolean };
   },

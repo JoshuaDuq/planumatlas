@@ -3,6 +3,7 @@ window.__planumAssets = window.__planumAssets || {};
   var params = new URLSearchParams(location.hash.replace(/^#/, ''));
   var atlas =
     {
+      desikan: 'cortex-desikan.glb',
       'hcp-mmp': 'cortex-hcp-mmp.glb',
       julich: 'cortex-julich.glb',
       schaefer: 'cortex-schaefer.glb',

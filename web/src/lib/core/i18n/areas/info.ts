@@ -7,9 +7,9 @@ export const en = {
   anatomy: {
     scope: 'One person’s brain and the atlases drawn on it.',
     shows:
-      'Four cortical atlases, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on one brain’s own pial surface and on cut faces. The deep anatomy has three levels of detail: a teaching set of 106 solids, FreeSurfer’s aseg and NextBrain.',
+      'Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on one brain’s own pial surface and on cut faces. The deep anatomy has three levels of detail: a teaching set of 106 solids, FreeSurfer’s aseg and NextBrain.',
     source:
-      'The brain is MGH CDMD sub_013, reconstructed with FreeSurfer 8.2. Destrieux is this subject’s own FreeSurfer annotation. HCP-MMP, Julich-Brain and Schaefer are group atlases carried from fsaverage onto this brain through registered spheres.',
+      'The brain is MGH CDMD sub_013, reconstructed with FreeSurfer 8.2. Destrieux and Desikan-Killiany are this subject’s own FreeSurfer annotations. HCP-MMP, Julich-Brain and Schaefer are group atlases carried from fsaverage onto this brain through registered spheres.',
     caution:
       'One individual: folds, sizes and asymmetries are not normative. The group atlases’ boundaries are projected estimates, not boundaries measured in this brain. Every segmentation is a model estimate from one 1 mm T1, and clinical accuracy has not been validated.',
   },
@@ -99,9 +99,9 @@ export const fr: typeof en = {
   anatomy: {
     scope: 'Le cerveau d’une seule personne et les atlas tracés dessus.',
     shows:
-      'Quatre atlas corticaux, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale propre à un cerveau et sur les faces de coupe. L’anatomie profonde a trois niveaux de détail\u202f: un ensemble pédagogique de 106 solides, l’aseg de FreeSurfer et NextBrain.',
+      'Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale propre à un cerveau et sur les faces de coupe. L’anatomie profonde a trois niveaux de détail\u202f: un ensemble pédagogique de 106 solides, l’aseg de FreeSurfer et NextBrain.',
     source:
-      'Le cerveau est MGH CDMD sub_013, reconstruit avec FreeSurfer 8.2. Destrieux est l’annotation FreeSurfer propre à ce sujet. HCP-MMP, Julich-Brain et Schaefer sont des atlas de groupe reportés de fsaverage sur ce cerveau par des sphères recalées.',
+      'Le cerveau est MGH CDMD sub_013, reconstruit avec FreeSurfer 8.2. Destrieux et Desikan-Killiany sont les annotations FreeSurfer propres à ce sujet. HCP-MMP, Julich-Brain et Schaefer sont des atlas de groupe reportés de fsaverage sur ce cerveau par des sphères recalées.',
     caution:
       'Un seul individu\u202f: ses plis, ses tailles et ses asymétries ne sont pas des normes. Les frontières des atlas de groupe sont des estimations projetées, et non des frontières mesurées dans ce cerveau. Chaque segmentation est une estimation de modèle à partir d’une seule IRM T1 de 1\u00a0mm, et l’exactitude clinique n’a pas été validée.',
   },

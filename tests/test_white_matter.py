@@ -200,5 +200,5 @@ def test_tissue_labels_publish_white_matter_for_the_surface_atlas_cuts(tmp_path)
 
     metadata = export_tissue_labels(config, manifest)
 
-    assert metadata["white_matter"]["applies_to"] == ["destrieux", "hcp-mmp", "julich", "schaefer"]
+    assert metadata["white_matter"]["applies_to"] == ["destrieux", "hcp-mmp", "julich", "schaefer", "desikan"]
     assert (tmp_path / metadata["white_matter"]["file"]).exists()

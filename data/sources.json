@@ -42,12 +42,28 @@
       "archive_member": "fsaverage/label/lh.aparc.a2009s.annot"
     },
     {
+      "path": "data/fsaverage/label/lh.aparc.annot",
+      "sha256": "39b1acde9a32b4227631eb51cbcd8dff84e2138c57bf9f96d74026f2c17f1480",
+      "anatomy": "fsaverage",
+      "url": "https://osf.io/download/3bxqt?version=2",
+      "archive_md5": "5133fe92b7b8f03ae19219d5f46e4177",
+      "archive_member": "fsaverage/label/lh.aparc.annot"
+    },
+    {
       "path": "data/fsaverage/label/rh.aparc.a2009s.annot",
       "sha256": "f0de8093fc336ddea7fdefde91449f552accdb198dd51a559718262adf317aac",
       "anatomy": "fsaverage",
       "url": "https://osf.io/download/3bxqt?version=2",
       "archive_md5": "5133fe92b7b8f03ae19219d5f46e4177",
       "archive_member": "fsaverage/label/rh.aparc.a2009s.annot"
+    },
+    {
+      "path": "data/fsaverage/label/rh.aparc.annot",
+      "sha256": "6a326aed325d313e6e0d10f67630efcd8d3b8343c50d3e108e005f626614badb",
+      "anatomy": "fsaverage",
+      "url": "https://osf.io/download/3bxqt?version=2",
+      "archive_md5": "5133fe92b7b8f03ae19219d5f46e4177",
+      "archive_member": "fsaverage/label/rh.aparc.annot"
     },
     {
       "path": "data/fsaverage/mri/aparc.a2009s+aseg.mgz",
@@ -559,292 +575,6 @@
       "procedure": "scripts/fetch_julich_brain.py: Julich-Brain 3.1's fsaverage maximum-probability map, GIFTI label keys and table written unchanged as a FreeSurfer annotation",
       "citation": "https://doi.org/10.25493/KNSN-XB4",
       "license": "CC BY-NC-SA 4.0"
-    },
-    {
-      "path": "data/cdmd/input/sub_013_t1w.nii.gz",
-      "sha256": "16e9137160f20c3dfb39fbd04ce1299415c5252ba96e8b0266f5f9402c60730b",
-      "anatomy": "cdmd",
-      "url": "https://doi.org/10.6084/m9.figshare.c.5315474.v1"
-    },
-    {
-      "path": "data/cdmd/mri/orig.mgz",
-      "sha256": "9e32d45483acf4f992fc987bf6ad31337b5ec1f738c693f1fa80142fd136db81",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/mri/aseg.mgz",
-      "sha256": "d8e1e9fbd8d3cf34ee259ac708147da4c61319faf293dd3671584d655f611cbc",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/mri/aparc.a2009s+aseg.mgz",
-      "sha256": "c859c5b38010b319862f8c3d5deb0828bd73524be27ed1cd483eefc234781d0e",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/mri/ribbon.mgz",
-      "sha256": "42a9d24c0dc202caa7776bc2f10bf3da2279dcacde2e23ce4614e64c1e6db9e7",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/mri/brain.mgz",
-      "sha256": "2d9d847b16bc29ac94dff4960ef1d83ce9282a0075bcb9d9c4d0f50654599abe",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/mri/wmparc.mgz",
-      "sha256": "a080190a2ba6d2b77cddd158786f4ccb99185b8abb9906b550820248ce45131f",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/scripts/build-stamp.txt",
-      "sha256": "05e1fbf2faef4be22a0180c1aaf9a337bfdaccfdcdd7a34adaac27e1578458dd",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/stats/aseg.stats",
-      "sha256": "07001d0adb81bee401752883a1ee84a97fee9aae0535e26c65ed99e075c2ce47",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/lh.pial",
-      "sha256": "75ba707c512c289ad0d6e7aabefbcac854ae5bdf2b3e8ceecddf9834e162cee2",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/lh.white",
-      "sha256": "abd03f82ea7574ec42740d72550d253504cd66fb9420cb793d1556e2d99f732c",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/lh.sulc",
-      "sha256": "7601bb5ce22309153ac8226a952dd0ce14c992a1948c636589ff1753eb09c595",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/lh.sphere.reg",
-      "sha256": "410f20030632c9bfc31684b900a9636464f6e979f343ad9d6f62c63c9418df70",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/label/lh.aparc.a2009s.annot",
-      "sha256": "a0a16110336901d3fa893d64e7dc00df89dd8826020902797d6851416f1716f4",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/rh.pial",
-      "sha256": "bcee0a1346002663e77d9832202d4c04793402c96a3162aefbdb3ff7d7d256f9",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/rh.white",
-      "sha256": "6357b680737a2813b2c9c946525a389087748d13845c4c4d6218e738c1919b93",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/rh.sulc",
-      "sha256": "fcfc9dabbe52462ff9bcfcd09f30a31703212540584d6c7471f5fea71330b3a0",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/surf/rh.sphere.reg",
-      "sha256": "ef0bf345caf85a7f430c612d85ffa7a5d2b9eb44123ce36a1b491129ca33cc8d",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/label/rh.aparc.a2009s.annot",
-      "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/reconstruction.json",
-      "sha256": "fa83e9dc513d548bf7f949d29daff0caf408de4e565b0b47d6cfd15c196f9a1d",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/cdmd/input/sub_013_t1w.nii.gz"
-      ],
-      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
-    },
-    {
-      "path": "data/cdmd/label/lh.HCPMMP1.annot",
-      "sha256": "be26cfba13236a274f46da127d0e2776abcae89f10b7f9489bbd8188aebc1386",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/lh.HCPMMP1.annot",
-        "data/fsaverage/surf/lh.sphere.reg",
-        "data/cdmd/surf/lh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/label/rh.HCPMMP1.annot",
-      "sha256": "257aa1f069fee38517686fa1d9f4224a643efb7de4ac7cac278b3d5be2bb8206",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/rh.HCPMMP1.annot",
-        "data/fsaverage/surf/rh.sphere.reg",
-        "data/cdmd/surf/rh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/hcp-registration.json",
-      "sha256": "e5c2ce2b88d0ef4898ea7613cfd55a4581e102efa01bb34a668267d30e74b94f",
-      "anatomy": "cdmd",
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
-    },
-    {
-      "path": "data/cdmd/label/lh.JulichBrain3.1.annot",
-      "sha256": "07898556b5083d731d735717527ae4d5d573647d96f2884b1d359186b97d3fdd",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/lh.JulichBrain3.1.annot",
-        "data/fsaverage/surf/lh.sphere.reg",
-        "data/cdmd/surf/lh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/label/rh.JulichBrain3.1.annot",
-      "sha256": "a2aae43679af4cf16d8617e8ecb6226aec94b8ed649e3ab54ae01ed4e6ef5be2",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/rh.JulichBrain3.1.annot",
-        "data/fsaverage/surf/rh.sphere.reg",
-        "data/cdmd/surf/rh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/julich-registration.json",
-      "sha256": "1f86a5bb8d599c1f927abd6c4c27c45fffb2e2b90becaad6a458b322e29d936c",
-      "anatomy": "cdmd",
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
-    },
-    {
-      "path": "data/cdmd/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
-      "sha256": "c604116e027c27a5ac3b9e302b14c436ac2672fe67c01d7b54f3c896ec4fc6b4",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
-        "data/fsaverage/surf/lh.sphere.reg",
-        "data/cdmd/surf/lh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
-      "sha256": "a099dbed4242930a1f378a98756e62b9649c83fcb2fb667d198a047253718a9f",
-      "anatomy": "cdmd",
-      "derived_from": [
-        "data/fsaverage/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
-        "data/fsaverage/surf/rh.sphere.reg",
-        "data/cdmd/surf/rh.sphere.reg"
-      ],
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
-      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
-    },
-    {
-      "path": "data/cdmd/network-registration.json",
-      "sha256": "e8eec343ddbe2f5c428bd551e2cc246c540078efb3ae264010efc9fa9afb7e0f",
-      "anatomy": "cdmd",
-      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
     },
     {
       "path": "data/receptor-fingerprints.json",
@@ -1976,6 +1706,415 @@
       "procedure": "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation\u2013recording pair and implantation matrices, every pair tested at least once",
       "citation": "https://doi.org/10.25493/JYVR-WJ7, https://doi.org/10.1016/j.neuroimage.2018.07.039",
       "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/cdmd/input/sub_013_t1w.nii.gz",
+      "sha256": "16e9137160f20c3dfb39fbd04ce1299415c5252ba96e8b0266f5f9402c60730b",
+      "anatomy": "cdmd",
+      "url": "https://doi.org/10.6084/m9.figshare.c.5315474.v1"
+    },
+    {
+      "path": "data/cdmd/mri/orig.mgz",
+      "sha256": "9e32d45483acf4f992fc987bf6ad31337b5ec1f738c693f1fa80142fd136db81",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/mri/aseg.mgz",
+      "sha256": "d8e1e9fbd8d3cf34ee259ac708147da4c61319faf293dd3671584d655f611cbc",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/mri/aparc.a2009s+aseg.mgz",
+      "sha256": "c859c5b38010b319862f8c3d5deb0828bd73524be27ed1cd483eefc234781d0e",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/mri/ribbon.mgz",
+      "sha256": "42a9d24c0dc202caa7776bc2f10bf3da2279dcacde2e23ce4614e64c1e6db9e7",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/mri/brain.mgz",
+      "sha256": "2d9d847b16bc29ac94dff4960ef1d83ce9282a0075bcb9d9c4d0f50654599abe",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/mri/wmparc.mgz",
+      "sha256": "a080190a2ba6d2b77cddd158786f4ccb99185b8abb9906b550820248ce45131f",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/scripts/build-stamp.txt",
+      "sha256": "05e1fbf2faef4be22a0180c1aaf9a337bfdaccfdcdd7a34adaac27e1578458dd",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/stats/aseg.stats",
+      "sha256": "07001d0adb81bee401752883a1ee84a97fee9aae0535e26c65ed99e075c2ce47",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/lh.pial",
+      "sha256": "75ba707c512c289ad0d6e7aabefbcac854ae5bdf2b3e8ceecddf9834e162cee2",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/lh.white",
+      "sha256": "abd03f82ea7574ec42740d72550d253504cd66fb9420cb793d1556e2d99f732c",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/lh.sulc",
+      "sha256": "7601bb5ce22309153ac8226a952dd0ce14c992a1948c636589ff1753eb09c595",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/lh.sphere.reg",
+      "sha256": "410f20030632c9bfc31684b900a9636464f6e979f343ad9d6f62c63c9418df70",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/lh.aparc.a2009s.annot",
+      "sha256": "a0a16110336901d3fa893d64e7dc00df89dd8826020902797d6851416f1716f4",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/lh.aparc.annot",
+      "sha256": "cd2532ee1d194a0c5178ce00d95ee8da73133a614bb7d887141eab7e142077d5",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/rh.pial",
+      "sha256": "bcee0a1346002663e77d9832202d4c04793402c96a3162aefbdb3ff7d7d256f9",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/rh.white",
+      "sha256": "6357b680737a2813b2c9c946525a389087748d13845c4c4d6218e738c1919b93",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/rh.sulc",
+      "sha256": "fcfc9dabbe52462ff9bcfcd09f30a31703212540584d6c7471f5fea71330b3a0",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/rh.sphere.reg",
+      "sha256": "ef0bf345caf85a7f430c612d85ffa7a5d2b9eb44123ce36a1b491129ca33cc8d",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/rh.aparc.a2009s.annot",
+      "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/rh.aparc.annot",
+      "sha256": "fb26080b6c14cc60e6dd64558973991e71b3331ac6079ed09aed8cf4583a39e8",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/reconstruction.json",
+      "sha256": "fa83e9dc513d548bf7f949d29daff0caf408de4e565b0b47d6cfd15c196f9a1d",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/lh.HCPMMP1.annot",
+      "sha256": "be26cfba13236a274f46da127d0e2776abcae89f10b7f9489bbd8188aebc1386",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/lh.HCPMMP1.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/cdmd/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/label/rh.HCPMMP1.annot",
+      "sha256": "257aa1f069fee38517686fa1d9f4224a643efb7de4ac7cac278b3d5be2bb8206",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/rh.HCPMMP1.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/cdmd/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/hcp-registration.json",
+      "sha256": "e5c2ce2b88d0ef4898ea7613cfd55a4581e102efa01bb34a668267d30e74b94f",
+      "anatomy": "cdmd",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/cdmd/label/lh.JulichBrain3.1.annot",
+      "sha256": "07898556b5083d731d735717527ae4d5d573647d96f2884b1d359186b97d3fdd",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/lh.JulichBrain3.1.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/cdmd/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/label/rh.JulichBrain3.1.annot",
+      "sha256": "a2aae43679af4cf16d8617e8ecb6226aec94b8ed649e3ab54ae01ed4e6ef5be2",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/rh.JulichBrain3.1.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/cdmd/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/julich-registration.json",
+      "sha256": "1f86a5bb8d599c1f927abd6c4c27c45fffb2e2b90becaad6a458b322e29d936c",
+      "anatomy": "cdmd",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/cdmd/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+      "sha256": "c604116e027c27a5ac3b9e302b14c436ac2672fe67c01d7b54f3c896ec4fc6b4",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/cdmd/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+      "sha256": "a099dbed4242930a1f378a98756e62b9649c83fcb2fb667d198a047253718a9f",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/fsaverage/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/cdmd/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/cdmd/network-registration.json",
+      "sha256": "e8eec343ddbe2f5c428bd551e2cc246c540078efb3ae264010efc9fa9afb7e0f",
+      "anatomy": "cdmd",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/disorder-effects.json",
+      "sha256": "58d73cfe332edc568f3175741e8693695028ec2ad513ac9e4af35f7b973200a8",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/scz_case-controls_CortThick.csv",
+          "sha256": "59ff506020b0e66debcc9bb7f7ae0e7167e6f29cdf1987986b64b5082b0db070"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/scz_case-controls_SubVol.csv",
+          "sha256": "91b12a51a0aab819ffb6ceb5f236a29739c1b5f5c902925c80f4e2b02cf6fcc0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/bd_case-controls_CortThick_adult.csv",
+          "sha256": "1b2b0ab16233e33fccc4291030f73d50fc9310506332115ad6985788f32e6e46"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/bd_case-controls_SubVol_typeI.csv",
+          "sha256": "e155aeb33c774d0c2868f52cb0bf62da232033a381a2196171645f28d15004b3"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/mddadult_case-controls_CortThick.csv",
+          "sha256": "60c03a115de22a2d9db724a0d75634814dd5fdc21bea8be3c3cead126ea678d3"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/mdd_case-controls_SubVol.csv",
+          "sha256": "e5d606b9ee6ef7d43977af21a17979d8e13befa6512871ed17a2ef7fc3c1f11b"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/ocdadults_case-controls_CortThick.csv",
+          "sha256": "e8c57be6d426034ebfa1a1e7ac7e108acf4c3d3ccdbcbae79952ddd2a8d06aa3"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/ocdadult_case-controls_SubVol.csv",
+          "sha256": "8d9a54916bc7050a9a0c4baa2c97a043b7e408f0c49d1a59c86eee7973c034c4"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/adhdallages_case-controls_CortThick.csv",
+          "sha256": "3a29e169af8a97a5e295786cc025faff7f35edb99178f282095ebe412e931a9e"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/adhdallages_case-controls_SubVol.csv",
+          "sha256": "ee893ed1020f995b0e7f167f3dfaca826b941394f802417000c6f617072eb847"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/asd_meta-analysis_case-controls_CortThick.csv",
+          "sha256": "ee076971be6688bc99106fce4a7198a3bd927d183adb245f9810d6f71efe4f29"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/asd_meta-analysis_case-controls_SubVol.csv",
+          "sha256": "b2b0b02c260ec87c6ab22f40e6162ab8a475dab373390be1edd465910ca62066"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/22q_case-controls_CortThick.csv",
+          "sha256": "fe611a2b9aa9753051192e5687a76fc0c6e00312ca7cfbbbee0f9d9d7cbb265f"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/22q_case-controls_SubVol.csv",
+          "sha256": "8ed7d528905d2b88c151c9aa03cb87e19e212f91009a4d29473c64c6e36e1e3a"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsl_case-controls_CortThick.csv",
+          "sha256": "8608e679d0a4be226d7695af28257073273c75e5ce66371cd17ee48dd58877d9"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsl_case-controls_SubVol.csv",
+          "sha256": "fae81fccc7ada7265279478c414a9d783cd9bb67e6783a14819484e6fd04c5c7"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsr_case-controls_CortThick.csv",
+          "sha256": "b888702ca9338ac38dad3d7466f9b7a29ccdeb3ce9f1a78fcb8d70d614a7eca0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/tlemtsr_case-controls_SubVol.csv",
+          "sha256": "a8b15b90c05d910913618196c6e5e45848986b4efffdf671cb47bdeda936eb09"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/gge_case-controls_CortThick.csv",
+          "sha256": "d0faaaa85242cae18841c4969f6dc7ed4df1ed7c6141dd0eaa1c214eefe96d33"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/gge_case-controls_SubVol.csv",
+          "sha256": "ee7123fb90367d4dfa0018fb9042150d6d8bf2c95e4e0c416e751850e3d11b35"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/parkinsons_case-controls_CortThick_PDvsCN.csv",
+          "sha256": "89b4942b6d9b7fdbc40ae4102a3f46aed26d030f2fd3477344ccf8d385b79bd0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/enigmatoolbox/datasets/summary_statistics/parkinsons_case-controls_Subvol_PDvsCN.csv",
+          "sha256": "ca39b4eff9a24bee00f0af9b558fe05047d3a80f01d63ab63347cefd7ef9911a"
+        }
+      ],
+      "procedure": "scripts/fetch_disorder_effects.py: each pinned ENIGMA Toolbox table's Cohen's d per region, significant where its FDR-corrected p (published, else Benjamini\u2013Hochberg) is below 0.05",
+      "citation": "https://pubmed.ncbi.nlm.nih.gov/34194050/",
+      "license": "BSD 3-Clause (ENIGMA Toolbox repository)"
+    },
+    {
+      "path": "public/models/licenses/ENIGMA-Toolbox-BSD-3-Clause.txt",
+      "sha256": "aecec6f9b8e75153c441e8332d349407df4082aaf367775df49553cb07f424fe",
+      "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/LICENSE",
+      "license": "BSD 3-Clause (ENIGMA Toolbox repository)"
     }
   ]
 }

@@ -23,8 +23,10 @@ import {
 import type { NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import { connectivityPaint } from '../catalog/functional-connectivity.ts';
+import { DISORDER_ATLAS, disorderPaint } from '../catalog/disorder-effects.ts';
+import type { DisorderEffects } from '../catalog/disorder-effects.ts';
 import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
-import { decimal } from '../format.ts';
+import { decimal, percent } from '../format.ts';
 import { t } from '../i18n/index.ts';
 import { mapNumber } from '../user-map/display.ts';
 import type { MapOverlap } from '../user-map/display.ts';
@@ -41,6 +43,7 @@ export type PaintState = Pick<ModelState, 'atlas'> &
     | 'lang'
     | 'paintFrom'
     | 'connectivitySeed'
+    | 'disorderShown'
   > & { paint?: Paint | null };
 
 /** The findings near a placed lesion on the brain: its paint and the coloured findings, in rank order. */
@@ -51,7 +54,7 @@ export interface LesionPaint {
   rows: readonly { id: string; color: Rgb; title: Translated }[];
 }
 
-/** Which tab a paint belongs to, by its id: `function:…`, `deficit:…`, `lesion:…` or `connectivity:…`. */
+/** Which tab a paint belongs to, by its id: `function:…`, `deficit:…`, `lesion:…`, `connectivity:…` or `disorder:…`. */
 export const paintKind = (paint: Paint | null | undefined): string | null =>
   paint?.id.slice(0, paint.id.indexOf(':')) || null;
 
@@ -79,7 +82,8 @@ export function comparesMap(
 
 /**
  * The tab's paint: the open function on its own atlas, the open deficit, or in Anatomy the resting
- * connectivity a region's sheet asked for, else the findings near a lesion, whose report is Anatomy's;
+ * connectivity or the disorder a region's sheet asked for, a disorder on Desikan-Killiany only, else
+ * the findings near a lesion, whose report is Anatomy's;
  * while that tab is in front and the reader has not chosen a masthead colour or atlas over it. Against
  * the reader's drawn map, a function's areas take one colour, so the map's two colours read against it.
  */
@@ -90,16 +94,26 @@ export function paintFor(
     clinical,
     lesion = null,
     connectivity = null,
+    disorders = null,
     mapDrawn = false,
   }: {
     domains: NeuropsychDomains;
     clinical: ClinicalCatalog;
     lesion?: LesionPaint | null;
     connectivity?: FunctionalConnectivity | null;
+    disorders?: DisorderEffects | null;
     mapDrawn?: boolean;
   },
 ): Paint | null {
   if (state.paintLifted) return null;
+  if (
+    state.explorer === 'anatomy' &&
+    state.disorderShown &&
+    disorders &&
+    state.atlas === DISORDER_ATLAS
+  ) {
+    return disorderPaint(disorders, state.disorderShown, clinical.standIns);
+  }
   if (
     state.explorer === 'anatomy' &&
     state.connectivitySeed &&
@@ -144,7 +158,7 @@ export interface LegendRow {
 }
 
 export interface Legend {
-  map: 'function' | 'deficit' | 'lesion' | 'connectivity';
+  map: 'function' | 'deficit' | 'lesion' | 'connectivity' | 'disorder';
   title: string;
   note: string;
   /** False for a z scale, whose bands are not toggles. */
@@ -175,6 +189,7 @@ export function legendFor(
     drawn,
     lesion = null,
     connectivity = null,
+    disorders = null,
     label = null,
     map = null,
   }: {
@@ -183,6 +198,7 @@ export function legendFor(
     drawn: (region: string, state: PaintState) => boolean;
     lesion?: LesionPaint | null;
     connectivity?: FunctionalConnectivity | null;
+    disorders?: DisorderEffects | null;
     /** A region's name, for the connectivity key's seed. */
     label?: ((id: string) => string) | null;
     /** The reader's drawn map, which a function's key then reads against. */
@@ -192,6 +208,33 @@ export function legendFor(
   const kind = paintKind(state.paint);
   const lang: Language = state.lang;
   const ground = keyGround(state);
+  if (kind === 'disorder') {
+    const copy = t(lang, 'disorders');
+    const { split, smaller, larger } = disorders!.d_scale;
+    const bound = decimal(split, 1, lang);
+    const disorder = disorders!.disorders.find((entry) => entry.id === state.disorderShown)!;
+    // A step no painted region carries is outlined, as a function's band is.
+    const carried = new Set([...state.paint!.colors.values()].map((color) => color.join()));
+    const row = (id: string, color: Rgb, label: string): LegendRow => ({
+      id,
+      color,
+      label,
+      pressed: false,
+      absent: !carried.has(color.join()),
+    });
+    return {
+      map: 'disorder',
+      title: copy.keyTitle(disorder.name[lang]),
+      note: copy.keyNote(percent(disorders!.false_discovery_rate, lang), ground),
+      pickable: false,
+      rows: [
+        row('larger-strong', larger[1], copy.step.largerStrong(bound)),
+        row('larger', larger[0], copy.step.larger(bound)),
+        row('smaller', smaller[0], copy.step.smaller(bound)),
+        row('smaller-strong', smaller[1], copy.step.smallerStrong(bound)),
+      ],
+    };
+  }
   if (kind === 'connectivity') {
     const copy = t(lang, 'connectivity');
     const scale = connectivity!.r_scale;

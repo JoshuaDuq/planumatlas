@@ -1,0 +1,7705 @@
+{
+ "derivation": {
+  "commit": "b08974b55243060cbc1fad12c87048037446e8f7",
+  "false_discovery_rate": 0.05
+ },
+ "disorders": [
+  {
+   "id": "schizophrenia",
+   "measures": {
+    "thickness": {
+     "file": "scz_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 4392,
+     "controls": 5033,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.352,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.119,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.363,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.203,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.203,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.491,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.362,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.449,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.309,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.331,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.398,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.349,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.231,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.444,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.277,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.253,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.375,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.319,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.341,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.077,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.261,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.298,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.343,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.301,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.182,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.362,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.425,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.209,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.44,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.395,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.214,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.246,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.253,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.408,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.355,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.152,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.317,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.226,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.15,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.536,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.348,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.439,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.308,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.342,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.358,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.386,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.244,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.379,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.285,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.216,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.424,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.339,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.373,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.086,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.281,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.31,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.317,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.304,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.313,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.397,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.219,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.438,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.386,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.207,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.236,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.262,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.406,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "scz_case-controls_SubVol.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": null,
+     "controls": null,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.43,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": 0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": 0.05,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.3,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.35,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.25,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.27,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.43,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": 0.21,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": 0.1,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.27,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.34,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "bipolar",
+   "measures": {
+    "thickness": {
+     "file": "bd_case-controls_CortThick_adult.csv",
+     "route": "published FDR",
+     "patients": 1834,
+     "controls": 2574,
+     "fdr_agreement": 0.9264705882352942,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.207,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.095,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.266,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.056,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.036,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.288,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.265,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.25,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.132,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.156,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.216,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.208,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.199,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.252,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.022,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.137,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.293,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.246,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.27,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": 0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.096,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.112,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.211,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.209,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.153,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.276,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.233,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.161,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.209,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.253,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.118,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.116,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.198,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.125,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.208,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.029,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.084,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.267,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.258,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.189,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.183,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.219,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.207,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.197,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.23,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.219,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.086,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.248,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.241,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.231,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": 0.015,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.075,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.166,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.179,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.188,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.087,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.264,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.256,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.158,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.194,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.184,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.102,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.059,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.109,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.168,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "bd_case-controls_SubVol_typeI.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": null,
+     "controls": 2522,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.094,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.117,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.098,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.203,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.067,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.033,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.144,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.251,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.094,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.117,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.098,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.203,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.067,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.033,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.144,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.251,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "depression",
+   "measures": {
+    "thickness": {
+     "file": "mddadult_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 1896,
+     "controls": 7645,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.058,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.042,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.014,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": 0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.041,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.117,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.049,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.104,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.046,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": 0.006,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.134,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.072,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.003,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.073,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.054,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": 0.094,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": 0.036,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.099,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.024,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.13,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.037,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.066,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.005,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": 0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.045,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.011,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": 0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.035,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.111,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.074,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.08,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": 0.006,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": 0.049,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.055,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.116,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.041,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.117,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.071,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": 0.005,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.12,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.131,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.088,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.061,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.006,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.017,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.031,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": 0.081,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": 0.028,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.093,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.022,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": 0.005,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.098,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.038,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.078,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": 0.032,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.031,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.053,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.062,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": 0.013,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.051,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.115,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "mdd_case-controls_SubVol.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": 1682,
+     "controls": 7037,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.019,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.144,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.001,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": 0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.044,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.056,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.019,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.144,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.001,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": 0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.044,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.056,
+       "significant": false
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "ocd",
+   "measures": {
+    "thickness": {
+     "file": "ocdadults_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 1478,
+     "controls": 1420,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.003,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.042,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.062,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.109,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.087,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.068,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.074,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.096,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.084,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.093,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.059,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.013,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.083,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.032,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": 0.011,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.071,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.097,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.074,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.095,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.069,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.062,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.007,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.048,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": 0.034,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.004,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.065,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": 0.005,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.038,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.079,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.033,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": 0.014,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.089,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.059,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.072,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.108,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.044,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.102,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.098,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": 0.009,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.062,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.069,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.056,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": 0.025,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": 0.036,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.057,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.037,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.101,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.005,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.091,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.038,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": 0.014,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": 0.003,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": 0.021,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": 0.015,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.024,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.065,
+       "significant": false
+      }
+     ]
+    },
+    "volume": {
+     "file": "ocdadult_case-controls_SubVol.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": 1442,
+     "controls": 1421,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.041,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.108,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": 0.032,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.135,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": 0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": 0.017,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.079,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.108,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.041,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.108,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": 0.032,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.135,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": 0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": 0.017,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.079,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.108,
+       "significant": false
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "adhd",
+   "measures": {
+    "thickness": {
+     "file": "adhdallages_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 2234,
+     "controls": 1926,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": 0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.1,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": 0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.1,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.05,
+       "significant": false
+      }
+     ]
+    },
+    "volume": {
+     "file": "adhdallages_case-controls_SubVol.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": 1651,
+     "controls": 1471,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.15,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.15,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.03,
+       "significant": false
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "autism",
+   "measures": {
+    "thickness": {
+     "file": "asd_meta-analysis_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 1058,
+     "controls": 976,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": 0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.24,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": 0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": 0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": 0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": 0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.15,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": 0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.24,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": 0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.24,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.0,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": 0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.12,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": 0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": 0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": 0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": 0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.15,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": 0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.14,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.24,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.09,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "asd_meta-analysis_case-controls_SubVol.csv",
+     "route": "published FDR",
+     "patients": 984,
+     "controls": 1070,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.03,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.03,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.09,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.11,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "22q11",
+   "measures": {
+    "thickness": {
+     "file": "22q_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": null,
+     "controls": null,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.21,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": 0.51,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": 0.52,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": 0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": 0.19,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": 0.25,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": 0.28,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": 0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": 0.22,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.47,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": 0.41,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": 0.56,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": 0.37,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.59,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": 0.55,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": 0.57,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": 0.44,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": 0.5,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": 0.72,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": 0.61,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.13,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": 0.42,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": 0.37,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.22,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.7,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": 0.49,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": 0.27,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.5,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": 0.6,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": 0.1,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.07,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.22,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": 0.87,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.03,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": 0.63,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": 0.58,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": 0.29,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": 0.22,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": 0.34,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.09,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": 0.18,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.42,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": 0.55,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": 0.61,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": 0.42,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": 0.56,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": 0.34,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": 0.36,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": 0.44,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": 0.68,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": 0.43,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.13,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": 0.42,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": 0.49,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.16,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.8,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": 0.53,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": 0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.32,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": 0.71,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": 0.14,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": 0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": 0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": 0.63,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "22q_case-controls_SubVol.csv",
+     "route": "published FDR",
+     "patients": 429,
+     "controls": 328,
+     "fdr_agreement": 0.9375,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": 0.37,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": 0.44,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.79,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.11,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.45,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.89,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": 0.73,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.34,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": 0.71,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.9,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.17,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.43,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": 0.11,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.93,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "tle-left",
+   "measures": {
+    "thickness": {
+     "file": "tlemtsl_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 412,
+     "controls": 1344,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.1,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.181,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.403,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.19,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.445,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.359,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.242,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.207,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.021,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.311,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.352,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": 0.041,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.287,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.3,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.426,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.2,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.15,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.282,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.198,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.327,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.012,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.466,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.536,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.061,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.203,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.411,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.472,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.399,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.286,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.315,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.141,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": 0.153,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.113,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.441,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.198,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.094,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.197,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.28,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.007,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.254,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.116,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.156,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.073,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.067,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.126,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.378,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.156,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.139,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.285,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.163,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.333,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.15,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.492,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.473,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.2,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.242,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.365,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.474,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.165,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.303,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.1,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.033,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.161,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": 0.069,
+       "significant": false
+      }
+     ]
+    },
+    "volume": {
+     "file": "tlemtsl_case-controls_SubVol.csv",
+     "route": "published FDR",
+     "patients": 413,
+     "controls": 1409,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.102,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.219,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.182,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -1.728,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.269,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.385,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.843,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.465,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.123,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": 0.266,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.204,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.452,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.285,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.462,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.363,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "tle-right",
+   "measures": {
+    "thickness": {
+     "file": "tlemtsr_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 338,
+     "controls": 1291,
+     "fdr_agreement": 1.0,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.219,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.022,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.301,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.287,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.114,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.161,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.236,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.058,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": 0.081,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.251,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.017,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.384,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": 0.082,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.112,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.015,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.505,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.153,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.189,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.151,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.258,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.333,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.057,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.415,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.383,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.003,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.156,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.355,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.401,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.137,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.36,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.078,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.146,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.312,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.023,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.179,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.305,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.247,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.181,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.169,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.244,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.111,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": 0.144,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.366,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.277,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": 0.148,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.161,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.175,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.421,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.271,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.155,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.165,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.228,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.357,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.087,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.52,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.459,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.254,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.298,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.488,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.226,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.273,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.029,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.281,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.238,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.109,
+       "significant": false
+      }
+     ]
+    },
+    "volume": {
+     "file": "tlemtsr_case-controls_SubVol.csv",
+     "route": "published FDR",
+     "patients": 336,
+     "controls": 1278,
+     "fdr_agreement": 0.875,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": 0.055,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": 0.228,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.196,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.169,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.298,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.302,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.472,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.39,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": 0.027,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.191,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -1.906,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.451,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.47,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.727,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.444,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "gge",
+   "measures": {
+    "thickness": {
+     "file": "gge_case-controls_CortThick.csv",
+     "route": "published FDR",
+     "patients": 297,
+     "controls": 1046,
+     "fdr_agreement": 0.9705882352941176,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.077,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.087,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.202,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.091,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.188,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.108,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.127,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.038,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": 0.004,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.126,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": 0.092,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.003,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.001,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.113,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": 0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.178,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.024,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": 0.002,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.014,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.045,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": 0.055,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": 0.031,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.342,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.036,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.038,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": 0.019,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.014,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.134,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.025,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.144,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.017,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.166,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.101,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.063,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": 0.097,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.053,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.174,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.08,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.153,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": 0.025,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.094,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": 0.021,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.107,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.06,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.106,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.065,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": 0.001,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.133,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.084,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.122,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.021,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.074,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": 0.058,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": 0.082,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.39,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.092,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.046,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.1,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.134,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": 0.042,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.071,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": 0.039,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.276,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.072,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.03,
+       "significant": false
+      }
+     ]
+    },
+    "volume": {
+     "file": "gge_case-controls_SubVol.csv",
+     "route": "published FDR",
+     "patients": 362,
+     "controls": 1204,
+     "fdr_agreement": 0.875,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.131,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.05,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.248,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.319,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.159,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.285,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": -0.401,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.237,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.148,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.122,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.198,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.247,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.349,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.234,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": -0.403,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.265,
+       "significant": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "parkinson",
+   "measures": {
+    "thickness": {
+     "file": "parkinsons_case-controls_CortThick_PDvsCN.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": 2281,
+     "controls": 1164,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "bankssts"
+       ],
+       "d": -0.104,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caudalanteriorcingulate"
+       ],
+       "d": 0.043,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.135,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "cuneus"
+       ],
+       "d": -0.112,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "entorhinal"
+       ],
+       "d": -0.096,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "fusiform"
+       ],
+       "d": -0.198,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiorparietal"
+       ],
+       "d": -0.188,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "inferiortemporal"
+       ],
+       "d": -0.193,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "isthmuscingulate"
+       ],
+       "d": -0.177,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateraloccipital"
+       ],
+       "d": -0.166,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.125,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "lingual"
+       ],
+       "d": -0.111,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "medialorbitofrontal"
+       ],
+       "d": -0.098,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "middletemporal"
+       ],
+       "d": -0.156,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parahippocampal"
+       ],
+       "d": -0.122,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "paracentral"
+       ],
+       "d": -0.109,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parsopercularis"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "parsorbitalis"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "parstriangularis"
+       ],
+       "d": -0.051,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pericalcarine"
+       ],
+       "d": -0.055,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "postcentral"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "posteriorcingulate"
+       ],
+       "d": -0.082,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precentral"
+       ],
+       "d": -0.104,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "precuneus"
+       ],
+       "d": -0.156,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "rostralanteriorcingulate"
+       ],
+       "d": 0.007,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.088,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorfrontal"
+       ],
+       "d": -0.104,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiorparietal"
+       ],
+       "d": -0.145,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "superiortemporal"
+       ],
+       "d": -0.096,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "supramarginal"
+       ],
+       "d": -0.131,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "frontalpole"
+       ],
+       "d": -0.011,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "temporalpole"
+       ],
+       "d": -0.102,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "transversetemporal"
+       ],
+       "d": -0.072,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "insula"
+       ],
+       "d": -0.036,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "bankssts"
+       ],
+       "d": -0.122,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caudalanteriorcingulate"
+       ],
+       "d": -0.027,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "caudalmiddlefrontal"
+       ],
+       "d": -0.04,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "cuneus"
+       ],
+       "d": -0.108,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "entorhinal"
+       ],
+       "d": -0.1,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "fusiform"
+       ],
+       "d": -0.117,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiorparietal"
+       ],
+       "d": -0.194,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "inferiortemporal"
+       ],
+       "d": -0.141,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "isthmuscingulate"
+       ],
+       "d": -0.178,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateraloccipital"
+       ],
+       "d": -0.167,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lateralorbitofrontal"
+       ],
+       "d": -0.141,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "lingual"
+       ],
+       "d": -0.094,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "medialorbitofrontal"
+       ],
+       "d": -0.067,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "middletemporal"
+       ],
+       "d": -0.134,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parahippocampal"
+       ],
+       "d": -0.108,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "paracentral"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsopercularis"
+       ],
+       "d": -0.026,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "parsorbitalis"
+       ],
+       "d": -0.086,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "parstriangularis"
+       ],
+       "d": -0.027,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pericalcarine"
+       ],
+       "d": -0.058,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "postcentral"
+       ],
+       "d": -0.104,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "posteriorcingulate"
+       ],
+       "d": -0.156,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "precentral"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "precuneus"
+       ],
+       "d": -0.193,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "rostralanteriorcingulate"
+       ],
+       "d": -0.01,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "rostralmiddlefrontal"
+       ],
+       "d": -0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "superiorfrontal"
+       ],
+       "d": -0.11,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiorparietal"
+       ],
+       "d": -0.174,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "superiortemporal"
+       ],
+       "d": -0.077,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "supramarginal"
+       ],
+       "d": -0.153,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "frontalpole"
+       ],
+       "d": -0.094,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "temporalpole"
+       ],
+       "d": -0.096,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "transversetemporal"
+       ],
+       "d": -0.068,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "insula"
+       ],
+       "d": -0.077,
+       "significant": true
+      }
+     ]
+    },
+    "volume": {
+     "file": "parkinsons_case-controls_Subvol_PDvsCN.csv",
+     "route": "Benjamini–Hochberg over the published p",
+     "patients": 2272,
+     "controls": 1149,
+     "fdr_agreement": null,
+     "rows": [
+      {
+       "region": [
+        "left",
+        "accumb"
+       ],
+       "d": -0.028,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "amyg"
+       ],
+       "d": -0.13,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "caud"
+       ],
+       "d": -0.071,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "hippo"
+       ],
+       "d": -0.02,
+       "significant": false
+      },
+      {
+       "region": [
+        "left",
+        "pal"
+       ],
+       "d": -0.066,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "put"
+       ],
+       "d": -0.136,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "thal"
+       ],
+       "d": 0.131,
+       "significant": true
+      },
+      {
+       "region": [
+        "left",
+        "LatVent"
+       ],
+       "d": 0.047,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "accumb"
+       ],
+       "d": -0.052,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "amyg"
+       ],
+       "d": -0.077,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "caud"
+       ],
+       "d": -0.033,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "hippo"
+       ],
+       "d": -0.031,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "pal"
+       ],
+       "d": -0.053,
+       "significant": false
+      },
+      {
+       "region": [
+        "right",
+        "put"
+       ],
+       "d": -0.135,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "thal"
+       ],
+       "d": 0.078,
+       "significant": true
+      },
+      {
+       "region": [
+        "right",
+        "LatVent"
+       ],
+       "d": 0.077,
+       "significant": true
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "validation": [
+  {
+   "disorder": "tle-left",
+   "measure": "volume",
+   "most_negative": [
+    "left",
+    "hippo"
+   ],
+   "found": {
+    "most_negative": [
+     "left",
+     "hippo"
+    ]
+   },
+   "passed": true
+  },
+  {
+   "disorder": "tle-right",
+   "measure": "volume",
+   "most_negative": [
+    "right",
+    "hippo"
+   ],
+   "found": {
+    "most_negative": [
+     "right",
+     "hippo"
+    ]
+   },
+   "passed": true
+  },
+  {
+   "disorder": "schizophrenia",
+   "measure": "volume",
+   "negative": [
+    [
+     "left",
+     "hippo"
+    ],
+    [
+     "right",
+     "hippo"
+    ]
+   ],
+   "positive": [
+    [
+     "left",
+     "LatVent"
+    ],
+    [
+     "right",
+     "LatVent"
+    ]
+   ],
+   "found": {
+    "left hippo": -0.43,
+    "right hippo": -0.43,
+    "left LatVent": 0.35,
+    "right LatVent": 0.34
+   },
+   "passed": true
+  },
+  {
+   "fdr_agreement_at_least": 0.85,
+   "found": 0.875,
+   "passed": true
+  }
+ ]
+}

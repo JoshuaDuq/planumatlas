@@ -645,3 +645,11 @@ the expected values change with them in the same commit.
 - **Source:** arterial territories phase 1, 2026-10-28
 - **Expected:** indices [1, 0, 2, 0] with palette red, blue → red, none, blue, none; [1, 3] → "Vertex index 3 has no published territory". Cut: 70% ACA → ACA blue; 45% is no majority → tissue; with arterial cut labels a Destrieux label keeps its tissue colour.
 - **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R); `src/lib/engine/tissues/palette.test.ts` (R)
+
+### CAT-67 · A Desikan-Killiany region is named in words, in French from NextBrain's table, under Destrieux's lobes
+
+- **Rule:** A Desikan-Killiany region's name is its gyrus written out (`desikan-labels.ts`), in French NextBrain's name for the same Desikan-Killiany parcel; it groups under the lobe Destrieux lists the same gyrus under, so the lobe colouring and the list share their groups. Every published region resolves in both languages.
+- **Kind:** data
+- **Level:** unit
+- **Expected:** `parsopercularis` → "Opercular part of the inferior frontal gyrus", Frontal, alias "pars opercularis"; `superiorfrontal` fr → "Gyrus frontal supérieur"; `isthmuscingulate` fr group "Cingulaire"; `parahippocampal` → Limbic; 68 regions on CDMD.
+- **Covered by:** `src/lib/core/catalog/labels.test.ts`

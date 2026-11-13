@@ -8,6 +8,8 @@ Every paper here, and in the clinical and circuit data, is checked by its PMID a
 
 - **Destrieux cortical parcellation (`aparc.a2009s`).**
   Destrieux, C., Fischl, B., Dale, A., & Halgren, E. (2010). Automatic parcellation of human cortical gyri and sulci using standard anatomical nomenclature. *NeuroImage*, 53(1), 1–15. [doi:10.1016/j.neuroimage.2010.06.010](https://doi.org/10.1016/j.neuroimage.2010.06.010). PMID 20547229.
+- **Desikan-Killiany cortical parcellation (`aparc`).**
+  Desikan, R. S., Ségonne, F., Fischl, B., Quinn, B. T., Dickerson, B. C., Blacker, D., … Albert, M. S., & Killiany, R. J. (2006). An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest. *NeuroImage*, 31(3), 968–980. [doi:10.1016/j.neuroimage.2006.01.021](https://doi.org/10.1016/j.neuroimage.2006.01.021). PMID 16530430.
 - **HCP-MMP1.0 multimodal cortical parcellation.**
   Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K., Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., & Van Essen, D. C. (2016). A multi-modal parcellation of human cerebral cortex. *Nature*, 536(7615), 171–178. [doi:10.1038/nature18933](https://doi.org/10.1038/nature18933). PMID 27437579.
 - **Yeo 7 resting-state functional networks.**
@@ -84,6 +86,8 @@ Nothing here was measured in the brain shown. Each source reaches it by an area'
   Benson, N. C., Butt, O. H., Brainard, D. H., & Aguirre, G. K. (2014). Correction of distortion in flattened representations of the cortical surface allows prediction of V1–V3 functional organization from anatomy. *PLoS Computational Biology*, 10(3), e1003538. [doi:10.1371/journal.pcbi.1003538](https://doi.org/10.1371/journal.pcbi.1003538). PMID 24676149. The template is version 4.0, fitted to the HCP 7T group average, from [neuropythy](https://github.com/noahbenson/neuropythy) at commit `a3d240f`.
 - **Aphasia Recovery Cohort.**
   Gibson, M., Newman-Norlund, R., Bonilha, L., Fridriksson, J., Hickok, G., Hillis, A. E., den Ouden, D. B., & Rorden, C. (2024). The Aphasia Recovery Cohort, an open-source chronic stroke repository. *Scientific Data*, 11(1), 981. [doi:10.1038/s41597-024-03819-7](https://doi.org/10.1038/s41597-024-03819-7). PMID 39251640. The dataset is OpenNeuro ds004884 v1.0.2 ([10.18112/openneuro.ds004884.v1.0.2](https://doi.org/10.18112/openneuro.ds004884.v1.0.2)); the normalised lesions and the cohort's mean T1 come from the authors' [demonstration repository](https://github.com/neurolabusc/AphasiaRecoveryCohortDemo) at commit `1d24ad4`.
+- **Disorder effects (ENIGMA).**
+  Larivière, S., Paquola, C., Park, B. Y., Royer, J., Wang, Y., Benkarim, O., … Thompson, P. M., & Bernhardt, B. C. (2021). The ENIGMA Toolbox: multiscale neural contextualization of multisite neuroimaging datasets. *Nature Methods*, 18(7), 698–700. [doi:10.1038/s41592-021-01186-4](https://doi.org/10.1038/s41592-021-01186-4). PMID 34194050. The tables are the toolbox repository's ([MICA-MNI/ENIGMA](https://github.com/MICA-MNI/ENIGMA)) at commit `b08974b`; each working group's paper, with its PMID and the errata three of them carry, is listed on the [disorder effects](../features/disorder-effects.md#data) page.
 - **MNI152NLin2009cAsym template.**
   Fonov, V., Evans, A. C., Botteron, K., Almli, C. R., McKinstry, R. C., Collins, D. L., & Brain Development Cooperative Group (2011). Unbiased average age-appropriate atlases for pediatric studies. *NeuroImage*, 54(1), 313–327. [doi:10.1016/j.neuroimage.2010.07.033](https://doi.org/10.1016/j.neuroimage.2010.07.033). PMID 20656036. The 2009c template was first described in an abstract with no PMID: Fonov, Evans, McKinstry, Almli & Collins (2009), *NeuroImage*, 47, S102 ([10.1016/S1053-8119(09)70884-5](https://doi.org/10.1016/S1053-8119(09)70884-5)). The file is TemplateFlow's.
 - **SPM12 tissue probability maps.**
@@ -150,6 +154,7 @@ Each fingerprint is its own EBRAINS dataset of receptor densities measured by Zi
 | `receptor-fingerprints.json` | Zilles and Palomero-Gallagher receptor datasets (EBRAINS) | CC BY-NC-SA 4.0 |
 | `stimulation-ftract.json` | F-TRACT_P_01_v2307 (EBRAINS) | CC BY-NC-SA 4.0 |
 | `stimulation-responses.json` | Lyu et al. 2025 (Zenodo) | CC BY 4.0 |
+| `disorder-effects.json` | ENIGMA working groups' summary statistics, as the ENIGMA Toolbox republishes them | BSD-3-Clause |
 | `retinotopy.json` | Benson template v4.0 (neuropythy) | AGPL-3.0 |
 | `stroke-cases.json`, `stroke-cases.masks` | Aphasia Recovery Cohort (OpenNeuro) and its authors' normalised lesions | CC0 1.0; BSD-2-Clause |
 | `coordinates-mni152nlin2009casym.field` | MNI152NLin2009cAsym (McConnell Brain Imaging Centre, via TemplateFlow) | MNI template licence |
@@ -223,6 +228,10 @@ neuropythy distributes the Benson template under the [GNU AGPL 3.0](https://www.
 ### CC0 1.0 and BSD-2-Clause (stroke cases)
 
 The Aphasia Recovery Cohort is dedicated to the public domain. The normalised lesion maps and the cohort's mean T1 come from Chris Rorden's demonstration repository under the BSD-2-Clause licence, whose notice ships as [`ARC-normalised-lesions-BSD-2-Clause.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/ARC-normalised-lesions-BSD-2-Clause.txt). The change: each lesion carried onto this brain through a registration of that mean T1, and counted on its regions.
+
+### BSD-3-Clause (disorder effects)
+
+The ENIGMA Toolbox repository distributes its summary statistics under the BSD 3-Clause licence, whose notice ships as [`ENIGMA-Toolbox-BSD-3-Clause.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/ENIGMA-Toolbox-BSD-3-Clause.txt). The change: each table's rows carried to this brain's regions by name, and only those that survive the table's false discovery rate kept.
 
 ### MNI template licence and GPL-2.0 (published coordinates)
 

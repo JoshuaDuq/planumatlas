@@ -3,12 +3,12 @@ import { nextbrainSystem } from './nextbrain-systems.ts';
 import { DESTRIEUX_LABELS } from './destrieux-labels.ts';
 import { dominantNetwork, networkName } from './networks.ts';
 import { DESTRIEUX_LABELS_FR } from './destrieux-labels.fr.ts';
-import { julichLabel } from './julich-labels.ts';
+import { julichLabel, LOBE_FR } from './julich-labels.ts';
 import { schaeferLabel } from './schaefer-labels.ts';
 import { NEXTBRAIN_LABELS_FR } from './nextbrain-labels.fr.ts';
 import { STRUCTURE_LABELS } from './structure-groups.ts';
 import { STRUCTURE_LABELS_FR } from './structure-groups.fr.ts';
-import { DESIKAN_REGIONS } from './desikan-labels.ts';
+import { DESIKAN_LOBES, DESIKAN_REGIONS } from './desikan-labels.ts';
 import { WHITE_MATTER_LABELS } from './white-matter-labels.ts';
 import { WHITE_MATTER_LABELS_FR } from './white-matter-labels.fr.ts';
 import { canonicalSourceName } from './source-names.ts';
@@ -138,6 +138,19 @@ export function labelOf(region: Region, lang: Language = 'en'): RegionLabel | nu
   }
 
   if (region.atlas === 'julich') return julichLabel(sourceName, lang);
+
+  // NextBrain's cortex carries the same Desikan-Killiany names, so its French table serves both.
+  if (region.atlas === 'desikan') {
+    const lobe = DESIKAN_LOBES[sourceName];
+    if (!lobe) return null;
+    const entry = isFr ? NEXTBRAIN_LABELS_FR[sourceName] : undefined;
+    return {
+      name: entry?.name ?? readable(sourceName),
+      code: null,
+      group: isFr ? LOBE_FR[lobe]! : lobe,
+      aliases: entry?.aliases ?? (isFr ? [] : (DESIKAN_REGIONS[sourceName]?.aliases ?? [])),
+    };
+  }
 
   if (region.atlas === 'schaefer') return schaeferLabel(region, lang);
 

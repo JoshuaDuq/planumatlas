@@ -1,0 +1,147 @@
+# Case–control differences in cortical thickness and subcortical volume from the ENIGMA consortium's
+# working groups, as the ENIGMA Toolbox (Larivière et al. 2021) republishes their summary statistics:
+# Cohen's d per Desikan-Killiany region and per FreeSurfer structure, patients minus controls,
+# adjusted for intracranial volume. scripts/fetch_disorder_effects.py reads the tables pinned here
+# into data/disorder-effects.json; the build carries each row to the region of its name.
+label: Brain differences in disorders (ENIGMA consortium)
+license: BSD 3-Clause (ENIGMA Toolbox repository)
+source:
+  short: ENIGMA Toolbox
+  citation: "Larivière S, Paquola C, Park B-y, et al. (2021) The ENIGMA Toolbox: multiscale neural contextualization of multisite neuroimaging datasets. Nature Methods 18:698–700"
+  pmid: 34194050
+  repository: https://github.com/MICA-MNI/ENIGMA
+  commit: b08974b55243060cbc1fad12c87048037446e8f7
+  directory: enigmatoolbox/datasets/summary_statistics
+  license: [LICENSE, aecec6f9b8e75153c441e8332d349407df4082aaf367775df49553cb07f424fe]
+# A region is painted and listed only where its difference survives a false discovery rate of 5%
+# within its table: the table's own FDR-corrected p where every row has one, otherwise
+# Benjamini–Hochberg over the table's uncorrected p ("<0.001" read as 0.001). The tables' SE and CI
+# columns are not used: several give them in millimetres, not in units of d.
+false_discovery_rate: 0.05
+# Two steps each way, split at Cohen's conventional small effect, 0.2: three steps each way cannot
+# stay apart from the cortex, deep grey and ventricle colours under dichromacy. Chosen 2026-11-12
+# after measuring the significant |d| (median 0.24, 90th percentile 0.47, maximum 1.91): every
+# colour differs from those three tissue colours by an OKLab ΔE of at least 13.0 and from the others
+# by at least 28.2, under normal vision and simulated protanopia and deuteranopia (Machado 2009,
+# severity 1).
+d_scale:
+  split: 0.2
+  smaller: [[105, 130, 245], [10, 25, 130]]
+  larger: [[252, 190, 25], [175, 90, 0]]
+# The tables' subcortical names, to FreeSurfer's aseg labels.
+structures:
+  accumb: {left: 26, right: 58}
+  amyg: {left: 18, right: 54}
+  caud: {left: 11, right: 50}
+  hippo: {left: 17, right: 53}
+  pal: {left: 13, right: 52}
+  put: {left: 12, right: 51}
+  thal: {left: 10, right: 49}
+  LatVent: {left: 4, right: 43}
+# One case–control comparison per disorder and measure. `population` says whom a table compares when
+# it is narrower than the disorder's name.
+disorders:
+  - id: schizophrenia
+    name: {en: Schizophrenia, fr: Schizophrénie}
+    thickness:
+      file: [scz_case-controls_CortThick.csv, 59ff506020b0e66debcc9bb7f7ae0e7167e6f29cdf1987986b64b5082b0db070]
+      pmid: 29960671
+    volume:
+      file: [scz_case-controls_SubVol.csv, 91b12a51a0aab819ffb6ceb5f236a29739c1b5f5c902925c80f4e2b02cf6fcc0]
+      pmid: 26033243
+  - id: bipolar
+    name: {en: Bipolar disorder, fr: Trouble bipolaire}
+    thickness:
+      file: [bd_case-controls_CortThick_adult.csv, 1b2b0ab16233e33fccc4291030f73d50fc9310506332115ad6985788f32e6e46]
+      pmid: 28461699
+      population: {en: adults, fr: adultes}
+    volume:
+      file: [bd_case-controls_SubVol_typeI.csv, e155aeb33c774d0c2868f52cb0bf62da232033a381a2196171645f28d15004b3]
+      pmid: 26857596
+      population: {en: bipolar I disorder, fr: trouble bipolaire de type I}
+  - id: depression
+    name: {en: Major depressive disorder, fr: Trouble dépressif caractérisé}
+    thickness:
+      file: [mddadult_case-controls_CortThick.csv, 60c03a115de22a2d9db724a0d75634814dd5fdc21bea8be3c3cead126ea678d3]
+      pmid: 27137745
+      population: {en: adults, fr: adultes}
+    volume:
+      file: [mdd_case-controls_SubVol.csv, e5d606b9ee6ef7d43977af21a17979d8e13befa6512871ed17a2ef7fc3c1f11b]
+      pmid: 26122586
+  - id: ocd
+    name: {en: Obsessive-compulsive disorder, fr: Trouble obsessionnel-compulsif}
+    thickness:
+      file: [ocdadults_case-controls_CortThick.csv, e8c57be6d426034ebfa1a1e7ac7e108acf4c3d3ccdbcbae79952ddd2a8d06aa3]
+      pmid: 29377733
+      population: {en: adults, fr: adultes}
+    volume:
+      file: [ocdadult_case-controls_SubVol.csv, 8d9a54916bc7050a9a0c4baa2c97a043b7e408f0c49d1a59c86eee7973c034c4]
+      pmid: 27609241
+      population: {en: adults, fr: adultes}
+  - id: adhd
+    name: {en: Attention-deficit/hyperactivity disorder, fr: Trouble du déficit de l’attention avec hyperactivité}
+    thickness:
+      file: [adhdallages_case-controls_CortThick.csv, 3a29e169af8a97a5e295786cc025faff7f35edb99178f282095ebe412e931a9e]
+      pmid: 31014101
+    volume:
+      file: [adhdallages_case-controls_SubVol.csv, ee893ed1020f995b0e7f167f3dfaca826b941394f802417000c6f617072eb847]
+      pmid: 28219628
+  - id: autism
+    name: {en: Autism spectrum disorder, fr: Trouble du spectre de l’autisme}
+    thickness:
+      file: [asd_meta-analysis_case-controls_CortThick.csv, ee076971be6688bc99106fce4a7198a3bd927d183adb245f9810d6f71efe4f29]
+      pmid: 29145754
+    volume:
+      file: [asd_meta-analysis_case-controls_SubVol.csv, b2b0b02c260ec87c6ab22f40e6162ab8a475dab373390be1edd465910ca62066]
+      pmid: 29145754
+  - id: 22q11
+    name: {en: 22q11.2 deletion syndrome, fr: Syndrome de délétion 22q11.2}
+    thickness:
+      file: [22q_case-controls_CortThick.csv, fe611a2b9aa9753051192e5687a76fc0c6e00312ca7cfbbbee0f9d9d7cbb265f]
+      pmid: 29895892
+    volume:
+      file: [22q_case-controls_SubVol.csv, 8ed7d528905d2b88c151c9aa03cb87e19e212f91009a4d29473c64c6e36e1e3a]
+      pmid: 32046535
+  - id: tle-left
+    name: {en: Left temporal lobe epilepsy with hippocampal sclerosis, fr: Épilepsie temporale gauche avec sclérose hippocampique}
+    thickness:
+      file: [tlemtsl_case-controls_CortThick.csv, 8608e679d0a4be226d7695af28257073273c75e5ce66371cd17ee48dd58877d9]
+      pmid: 29365066
+    volume:
+      file: [tlemtsl_case-controls_SubVol.csv, fae81fccc7ada7265279478c414a9d783cd9bb67e6783a14819484e6fd04c5c7]
+      pmid: 29365066
+  - id: tle-right
+    name: {en: Right temporal lobe epilepsy with hippocampal sclerosis, fr: Épilepsie temporale droite avec sclérose hippocampique}
+    thickness:
+      file: [tlemtsr_case-controls_CortThick.csv, b888702ca9338ac38dad3d7466f9b7a29ccdeb3ce9f1a78fcb8d70d614a7eca0]
+      pmid: 29365066
+    volume:
+      file: [tlemtsr_case-controls_SubVol.csv, a8b15b90c05d910913618196c6e5e45848986b4efffdf671cb47bdeda936eb09]
+      pmid: 29365066
+  - id: gge
+    name: {en: Genetic generalised epilepsy, fr: Épilepsie généralisée génétique}
+    thickness:
+      file: [gge_case-controls_CortThick.csv, d0faaaa85242cae18841c4969f6dc7ed4df1ed7c6141dd0eaa1c214eefe96d33]
+      pmid: 29365066
+    volume:
+      file: [gge_case-controls_SubVol.csv, ee7123fb90367d4dfa0018fb9042150d6d8bf2c95e4e0c416e751850e3d11b35]
+      pmid: 29365066
+  - id: parkinson
+    name: {en: Parkinson’s disease, fr: Maladie de Parkinson}
+    thickness:
+      file: [parkinsons_case-controls_CortThick_PDvsCN.csv, 89b4942b6d9b7fdbc40ae4102a3f46aed26d030f2fd3477344ccf8d385b79bd0]
+      pmid: 34288137
+    volume:
+      file: [parkinsons_case-controls_Subvol_PDvsCN.csv, ca39b4eff9a24bee00f0af9b558fe05047d3a80f01d63ab63347cefd7ef9911a]
+      pmid: 34288137
+# Fixed before the derivation was written. The epilepsy checks were measured on these tables
+# 2026-11-12 (left −1.73, right −1.91) before any of this was built; the derivation stops when one fails.
+validation:
+  # Whelan et al. 2018: the sclerotic side's hippocampus is the largest volume loss.
+  - {disorder: tle-left, measure: volume, most_negative: [left, hippo]}
+  - {disorder: tle-right, measure: volume, most_negative: [right, hippo]}
+  # van Erp et al. 2016: smaller hippocampi and larger lateral ventricles in schizophrenia.
+  - {disorder: schizophrenia, measure: volume, negative: [[left, hippo], [right, hippo]], positive: [[left, LatVent], [right, LatVent]]}
+  # Where a table publishes both, Benjamini–Hochberg over its uncorrected p must reproduce its own
+  # FDR decisions in at least this share of rows (measured 0.875 to 1).
+  - {fdr_agreement_at_least: 0.85}

@@ -53,6 +53,7 @@
   "hcp-mmp": "HCP-MMP1.0 multimodal atlas",
   "julich": "Julich-Brain cytoarchitectonic atlas",
   "schaefer": "Schaefer 2018 functional parcellation",
+  "desikan": "Desikan-Killiany anatomical atlas",
   "learning": "Teaching set: overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published",
   "aseg": "FreeSurfer subcortical segmentation",
   "nextbrain": "NextBrain histological atlas",
@@ -440,6 +441,7 @@
   "hcpDerived": "derived HCP labels",
   "julichDerived": "derived Julich-Brain labels",
   "schaeferDerived": "derived Schaefer labels",
+  "desikanDerived": "derived Desikan-Killiany labels",
   "destrieuxNative": "native Destrieux labels",
   "nextbrainWarped": "warped NextBrain labels",
   "nextbrainSegmented": "NextBrain labels segmented on this brain",
@@ -822,6 +824,7 @@
   "stimulation": "Stimulation responses",
   "stimulationFtract": "Stimulation responses (F-TRACT)",
   "functionalConnectivity": "Functional connectivity (HCP)",
+  "disorderEffects": "Brain differences in disorders (ENIGMA)",
   "strokeCases": "Stroke cases",
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
@@ -1013,8 +1016,8 @@
   "caution": "Caution",
   "anatomy": {
    "scope": "One person’s brain and the atlases drawn on it.",
-   "shows": "Four cortical atlases, Destrieux, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on one brain’s own pial surface and on cut faces. The deep anatomy has three levels of detail: a teaching set of 106 solids, FreeSurfer’s aseg and NextBrain.",
-   "source": "The brain is MGH CDMD sub_013, reconstructed with FreeSurfer 8.2. Destrieux is this subject’s own FreeSurfer annotation. HCP-MMP, Julich-Brain and Schaefer are group atlases carried from fsaverage onto this brain through registered spheres.",
+   "shows": "Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on one brain’s own pial surface and on cut faces. The deep anatomy has three levels of detail: a teaching set of 106 solids, FreeSurfer’s aseg and NextBrain.",
+   "source": "The brain is MGH CDMD sub_013, reconstructed with FreeSurfer 8.2. Destrieux and Desikan-Killiany are this subject’s own FreeSurfer annotations. HCP-MMP, Julich-Brain and Schaefer are group atlases carried from fsaverage onto this brain through registered spheres.",
    "caution": "One individual: folds, sizes and asymmetries are not normative. The group atlases’ boundaries are projected estimates, not boundaries measured in this brain. Every segmentation is a model estimate from one 1 mm T1, and clinical accuracy has not been validated."
   },
   "functions": {
@@ -1188,6 +1191,7 @@
    "hcp-mmp": "HCP-MMP",
    "julich": "Julich-Brain",
    "schaefer": "Schaefer",
+   "desikan": "Desikan-Killiany",
    "learning": "Teaching set",
    "aseg": "FreeSurfer aseg",
    "nextbrain": "NextBrain",
@@ -1235,6 +1239,7 @@
    "hcp-mmp": "Multimodal areas, 180 per hemisphere (Glasser 2016)",
    "julich": "Cytoarchitectonic areas from histology, 139 per hemisphere (Amunts 2020); about a quarter of the cortex is not yet mapped",
    "schaefer": "Resting-state functional parcels, 200 per hemisphere, coloured by Yeo network (Schaefer 2018)",
+   "desikan": "Gyral regions, 34 per hemisphere (Desikan 2006), the atlas ENIGMA reports disorders on",
    "learning": "Overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published",
    "aseg": "FreeSurfer’s standard automatic subcortical segmentation",
    "nextbrain": "Histology-based atlas, segmented on this subject at 0.4<NNBSP>mm"
@@ -2069,6 +2074,76 @@
    "[\"Alpha\",\"tissue\"] → \"Group-mean correlation with the outlined area; darker is stronger. Tissue-coloured areas fall below r Alpha, as half of all pairs do.\"",
    "[\"\",\"scan\"] → \"Group-mean correlation with the outlined area; darker is stronger. Areas where the scan shows fall below r , as half of all pairs do.\"",
    "[\"Alpha\",\"grey\"] → \"Group-mean correlation with the outlined area; darker is stronger. Grey areas fall below r Alpha, as half of all pairs do.\""
+  ]
+ },
+ "disorders": {
+  "heading": "In disorders",
+  "headingValue": [
+   "[\"Alpha\"] → \"Alpha disorders\"",
+   "[\"\"] → \" disorders\""
+  ],
+  "measure": {
+   "thickness": "Cortical thickness, patients minus controls (Cohen’s<NBSP>d)",
+   "volume": "Volume, patients minus controls (Cohen’s<NBSP>d)"
+  },
+  "direction": {
+   "thickness": {
+    "smaller": "thinner",
+    "larger": "thicker"
+   },
+   "volume": {
+    "smaller": "smaller",
+    "larger": "larger"
+   }
+  },
+  "none": "No disorder’s difference here survives its table’s false discovery rate.",
+  "paint": [
+   "[\"Alpha\"] → \"Paint Alpha on the brain\"",
+   "[\"\"] → \"Paint  on the brain\""
+  ],
+  "shown": [
+   "[\"Alpha\"] → \"On the brain: Alpha.\"",
+   "[\"\"] → \"On the brain: .\""
+  ],
+  "cohort": [
+   "[\"Alpha\",\"\"] → \"Alpha patients,  controls\"",
+   "[\"\",\"Alpha\"] → \" patients, Alpha controls\""
+  ],
+  "note": [
+   "[\"Alpha\"] → \"Group differences from the ENIGMA consortium’s working groups, thousands of people scanned at many sites, adjusted for head size; only differences that survive each table’s Alpha false discovery rate are listed. Most are small: patients and controls overlap almost entirely, so none says anything about one person.\"",
+   "[\"\"] → \"Group differences from the ENIGMA consortium’s working groups, thousands of people scanned at many sites, adjusted for head size; only differences that survive each table’s  false discovery rate are listed. Most are small: patients and controls overlap almost entirely, so none says anything about one person.\""
+  ],
+  "basis": {
+   "thickness": "Reported per Desikan-Killiany region, the atlas a painted disorder is shown on; not measured in this brain.",
+   "volume": "Reported per FreeSurfer structure; not measured in this brain."
+  },
+  "paper": "Paper",
+  "toolbox": "Data (ENIGMA Toolbox)",
+  "keyTitle": [
+   "[\"Alpha\"] → \"Alpha: patients minus controls\"",
+   "[\"\"] → \": patients minus controls\""
+  ],
+  "step": {
+   "smallerStrong": [
+    "[\"Alpha\"] → \"Thinner or smaller, d<NBSP>≤<NBSP>−Alpha\"",
+    "[\"\"] → \"Thinner or smaller, d<NBSP>≤<NBSP>−\""
+   ],
+   "smaller": [
+    "[\"Alpha\"] → \"Thinner or smaller, d<NBSP>><NBSP>−Alpha\"",
+    "[\"\"] → \"Thinner or smaller, d<NBSP>><NBSP>−\""
+   ],
+   "larger": [
+    "[\"Alpha\"] → \"Thicker or larger, d<NBSP><<NBSP>Alpha\"",
+    "[\"\"] → \"Thicker or larger, d<NBSP><<NBSP>\""
+   ],
+   "largerStrong": [
+    "[\"Alpha\"] → \"Thicker or larger, d<NBSP>≥<NBSP>Alpha\"",
+    "[\"\"] → \"Thicker or larger, d<NBSP>≥<NBSP>\""
+   ]
+  },
+  "keyNote": [
+   "[\"Alpha\",\"\"] → \"Cohen’s d where the difference survives a Alpha false discovery rate. undefined show none or are not reported.\"",
+   "[\"\",\"Alpha\"] → \"Cohen’s d where the difference survives a  false discovery rate. undefined show none or are not reported.\""
   ]
  },
  "strokeCases": {
