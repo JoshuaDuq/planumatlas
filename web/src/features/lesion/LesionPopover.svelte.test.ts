@@ -82,6 +82,33 @@ test('the two clicks share one line in the dock popover, in English', async () =
   expect([...select]).toEqual([...place]);
 });
 
+test('in French at 200 % text the clicks stack rather than run into each other', async () => {
+  await document.fonts.ready;
+  render(LesionPopover, {
+    lesion: { kind: 'lesion', sphere: null, radius: 10 } as unknown as LesionStore,
+    lang: 'fr',
+    placing: false,
+    onPlacing() {},
+    reportShown: () => false,
+    onReport() {},
+  });
+  const radio = (name: string) => page.getByRole('radio', { name }).element() as HTMLElement;
+  radio('Sélectionne une région').closest<HTMLElement>('body > *')!.style.width =
+    `${POPOVER_WIDTH - 34}px`;
+  document.documentElement.style.fontSize = '200%';
+  try {
+    const select = radio('Sélectionne une région').getBoundingClientRect();
+    const place = radio('Place la lésion').getBoundingClientRect();
+    // "Sélectionne" no longer fits half the row: each click keeps its words inside its own box.
+    for (const name of ['Sélectionne une région', 'Place la lésion']) {
+      expect(radio(name).scrollWidth, name).toBeLessThanOrEqual(radio(name).clientWidth + 0.5);
+    }
+    expect(select.right <= place.left || select.bottom <= place.top).toBe(true);
+  } finally {
+    document.documentElement.style.fontSize = '';
+  }
+});
+
 test('with the report in the panel in front, it offers neither Show the report nor a second Remove', async () => {
   const placed = {
     kind: 'lesion',

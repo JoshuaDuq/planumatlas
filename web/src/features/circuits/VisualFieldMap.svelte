@@ -76,8 +76,10 @@
 
   let disc = $state<SVGSVGElement | null>(null);
   let title = $state<HTMLElement | null>(null);
-  // The map opened: its title takes focus, as a lesson's does.
-  $effect(() => title?.focus({ preventScroll: true }));
+  // The explorer brings the opened map to its top and focuses this title.
+  $effect(() => {
+    if (title) return model.attachTitle(title);
+  });
   let dragging = false;
 
   function placeAt(event: PointerEvent) {

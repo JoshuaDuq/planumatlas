@@ -5,7 +5,7 @@ import { LOBE_COLORS, lobeRows } from '../../lib/core/catalog/lobes.ts';
 import { anatomies, readModel } from '../../lib/core/catalog/test-support.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
 import type { Region } from '../../lib/types/index.ts';
-import { defaultOpen, keyBand, keyedSurface, keyPlates } from './stage-keys.ts';
+import { defaultOpen, keyBand, keyedSurface, keyHeight, keyPlates } from './stage-keys.ts';
 import type { ColoredNetworks, KeySources, StageRoom } from './stage-keys.ts';
 
 const regions = readModel<{ regions: Region[] }>(`${anatomies.default}/manifest.json`).regions;
@@ -205,6 +205,29 @@ describe('defaultOpen', () => {
     expect(defaultOpen(plate(6, { map: 'deficit' }), phone, wide)).toBe(false);
     expect(defaultOpen(plate(6), phone, wide)).toBe(true);
     expect(defaultOpen(plate(6, { name: 'direction', map: 'direction' }), phone, wide)).toBe(false);
+  });
+
+  test('a key is weighed under the keys stacked above it', () => {
+    const phone = { phone: true, coarse: false };
+    const direction = plate(3, { name: 'direction', map: 'direction' });
+    // Half room (400 - 60 - 40) / 2 = 150 px; the direction key takes 42 + 3 rows of 24 = 114 px,
+    // and 164 px under a key folded to its 42 px title and the 8 px gap.
+    expect(defaultOpen(direction, phone, room({ width: 390, height: 400 }))).toBe(true);
+    expect(defaultOpen(direction, phone, room({ width: 390, height: 400 }), 50)).toBe(false);
+    // A long key's 258 px fit the 300 px above the dock alone, not under 50 px of keys.
+    expect(defaultOpen(plate(9), desktop, room({ height: 400 }))).toBe(true);
+    expect(defaultOpen(plate(9), desktop, room({ height: 400 }), 50)).toBe(false);
+  });
+});
+
+describe('keyHeight', () => {
+  test('an open key is its title and its rows, a folded one its title alone', () => {
+    const phone = { phone: true, coarse: false };
+    const lobes = { name: 'network' as const, map: 'lobe', pickable: false, count: 9 };
+    // A phone runs two rows to a line: 42 + 5 rows of 24.
+    expect(keyHeight(lobes, phone, true)).toBe(162);
+    expect(keyHeight(lobes, { phone: false, coarse: false }, true)).toBe(42 + 9 * 24);
+    expect(keyHeight(lobes, phone, false)).toBe(42);
   });
 });
 

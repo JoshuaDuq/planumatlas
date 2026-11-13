@@ -24,9 +24,11 @@
   import { roving } from '../../lib/ui/Toolbar.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
   import {
+    KEY_GAP_PX,
     KEY_NOTE_MIN_WIDTH_PX,
     defaultOpen,
     keyBand,
+    keyHeight,
     keyPlates,
     swatchColor,
   } from './stage-keys.ts';
@@ -116,11 +118,13 @@
             dockHeight: stage.dock.height,
           }
         : null;
+      // Each plate is weighed under the ones above it, as the reader's folds leave them.
+      let above = 0;
       for (const plate of current) {
-        crowd.set(
-          plate.map,
-          defaultOpen({ ...plate, count: plate.rows.length }, { phone, coarse }, room),
-        );
+        const sized = { ...plate, count: plate.rows.length };
+        const open = defaultOpen(sized, { phone, coarse }, room, above);
+        crowd.set(plate.map, open);
+        above += keyHeight(sized, { phone, coarse }, folds.get(plate.map) ?? open) + KEY_GAP_PX;
       }
       if (!holder || !host?.contains(holder)) return;
       // Focus never falls to the page: a row that went leaves it on its plate's toggle, a plate that

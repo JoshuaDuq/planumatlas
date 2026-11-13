@@ -221,9 +221,12 @@ describe('the Section popover', () => {
     const sagittal = control('button', 'Sagittal');
     expect(sagittal.textContent!.trim()).toBe('Sag');
     expect(sagittal.offsetHeight).toBeGreaterThanOrEqual(44);
-    expect(
-      getComputedStyle(locate('toolbar', 'Cutting plane').element()).gridTemplateColumns.split(' '),
-    ).toHaveLength(5);
+    // One row of five: every plane on the same line.
+    const planes = [...locate('toolbar', 'Cutting plane').element().querySelectorAll('button')];
+    expect(planes).toHaveLength(5);
+    expect(new Set(planes.map((plane) => Math.round(plane.getBoundingClientRect().top))).size).toBe(
+      1,
+    );
   });
 
   test('Cut labels names each published label set; a choice that fails returns to the labels still cut', async () => {
@@ -930,6 +933,33 @@ describe('size and media', () => {
       await userEvent.keyboard('{Enter}');
       await vi.waitFor(() => expect(document.querySelector('.cut-mode')).not.toBeNull());
       await expectAxeClean();
+    },
+  );
+
+  test.each(['en', 'fr'] as const)(
+    '%s: at 200 %% text a plane takes a whole row rather than break its name',
+    async (lang) => {
+      await mount({ lang });
+      document.documentElement.style.fontSize = '200%';
+      try {
+        tool(lang === 'fr' ? 'Coupe' : 'Section').focus();
+        await userEvent.keyboard('{Enter}');
+        await vi.waitFor(() => expect(document.querySelector('.cut-mode')).not.toBeNull());
+        for (const button of document.querySelectorAll<HTMLElement>('.cut-mode button')) {
+          // Each plane name is one word (Sagittal, Coronal…): its text runs on one line.
+          const text =
+            [...button.childNodes].find(
+              (node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim(),
+            ) ?? button.lastElementChild!;
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          const lines = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)));
+          expect(lines.size, button.textContent!.trim()).toBe(1);
+          expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 0.5);
+        }
+      } finally {
+        document.documentElement.style.fontSize = '';
+      }
     },
   );
 

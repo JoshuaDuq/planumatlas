@@ -80,35 +80,35 @@
 
 <style>
   @layer features {
-    /* Full brain across the top, then one pair of planes per row (stage.css:448-459). */
+    /*
+     * Full brain across the top, then one pair of planes per row (stage.css:448-459). A plane whose
+     * name no longer fits half the row, at 200 % text, takes the whole row rather than break its word.
+     */
     :global(.toggle-toolbar.cut-mode) {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: flex;
+      flex-wrap: wrap;
     }
     :global(.toggle-toolbar.cut-mode button) {
+      flex: 1 1 calc(50% - var(--space-1));
       height: auto;
       min-height: var(--control-height);
-      min-width: 0;
+      min-width: min-content;
       justify-content: flex-start;
       padding: 0 var(--space-3);
       font-size: var(--text-stage);
-      /* At 200 % text a name wraps inside its cell instead of crossing into the next. */
       white-space: normal;
-      overflow-wrap: anywhere;
       text-align: left;
     }
     :global(.toggle-toolbar.cut-mode button:first-child) {
-      grid-column: 1 / -1;
+      flex-basis: 100%;
     }
     /* The phone's single row: the icon over the short name, each a full 44 px target (stage.css:681-685). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      :global(.toggle-toolbar.cut-mode) {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-      }
       :global(.toggle-toolbar.cut-mode button:first-child) {
-        grid-column: auto;
+        flex-basis: 0;
       }
       :global(.toggle-toolbar.cut-mode button) {
+        flex-basis: 0;
         flex-direction: column;
         justify-content: center;
         gap: 2px;

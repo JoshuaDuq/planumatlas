@@ -1,5 +1,6 @@
 // The visual-field map's state and commands for the Circuits tab: opening it, the dot the reader
 // moves, the territory it covers and the cortex last clicked. `VisualFieldMap` draws it.
+import { tick } from 'svelte';
 import { hemisphereFor, territoryOf } from '../../lib/core/learning/visual-field.ts';
 import type {
   FieldHemisphere,
@@ -12,6 +13,7 @@ import type { LessonStore } from '../../lib/state/session.svelte.ts';
 import type { ViewStore } from '../../lib/state/view.svelte.ts';
 import { START_DOT } from '../../lib/state/visual-field-map.svelte.ts';
 import type { Translated } from '../../lib/core/clinical/types.ts';
+import { scrollToTop } from '../../lib/ui/scroll.ts';
 import type { Retinotopy } from '../../lib/types/manifest.ts';
 
 export interface VisualFieldExplorerDeps {
@@ -33,6 +35,7 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
   let failed = $state(false);
   // The last dot shown, which the map opens on again.
   let lastDot = START_DOT;
+  let title: HTMLElement | null = null;
 
   const open = $derived(
     view.current.explorer === 'circuits' && view.current.lesson.map === 'visual-field',
@@ -87,9 +90,26 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
 
     loadTerritories,
 
+    /**
+     * Opens the map at its top, its title taking focus, as a lesson's does (`settle`): the detail may
+     * have been scrolled by another tab's profile, and the list's handoff would leave focus on Back.
+     */
     async openMap() {
       store.forgetReading();
       await excursions.openMap(dot);
+      await tick();
+      // A newer scene command overtook the opening: no map, nothing to focus.
+      if (!open) return;
+      if (!title) throw new Error('The visual field map is not mounted.');
+      scrollToTop(title);
+      title.focus({ preventScroll: true });
+    },
+
+    attachTitle(element: HTMLElement) {
+      title = element;
+      return () => {
+        if (title === element) title = null;
+      };
     },
 
     /** Display hid a hemisphere, so half the map is gone: `returnToMap` puts both back. */

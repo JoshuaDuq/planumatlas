@@ -515,6 +515,20 @@ describe('the dock and the keys', () => {
   });
 });
 
+describe('the visual field map', () => {
+  test('draws its own greys, so the stage keys no surface colour while it is open', async () => {
+    await boot();
+    engine.model.setSurfaceColor('network');
+    flushSync();
+    expect(document.getElementById('network-key')).not.toBeNull();
+    app.session.setExplorer('circuits');
+    app.world!.lesson.openMap('visual-field', { x: 2, y: 2, radius: 1 });
+    flushSync();
+    expect(app.world!.view.current.lesson.map).toBe('visual-field');
+    expect(document.getElementById('network-key')).toBeNull();
+  });
+});
+
 describe('the tract reference', () => {
   test('the keys read in tissue colour and the snapshot is captioned with the reference', async () => {
     engine = createFakeEngine({
@@ -563,6 +577,25 @@ describe('the phone', () => {
     app.stage.sheetFull = true;
     flushSync();
     expect(getComputedStyle(document.getElementById('scale-bar')!).visibility).toBe('hidden');
+  });
+
+  test('under a full sheet the keys keep the dock’s room, so a folded title is never cut', async () => {
+    await page.viewport(390, 844);
+    await boot();
+    engine.model.setSurfaceColor('network');
+    flushSync();
+    const viewport = document.getElementById('viewport')!;
+    // A full sheet leaves the picture a 128 px strip, as on a 390 × 844 phone.
+    viewport.style.setProperty('--vis-bottom', `${viewport.clientHeight - 128}px`);
+    viewport.style.setProperty('--dock-height', '54px');
+    app.stage.sheetFull = true;
+    flushSync();
+    // Less the hidden dock's 54 px and a third gutter, the strip would leave the plate shorter than its title.
+    const plate = document.getElementById('network-key')!;
+    const title = plate.querySelector<HTMLElement>('.stage-key-head')!;
+    expect(plate.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+      title.getBoundingClientRect().height,
+    );
   });
 
   test('an open popover hides the scale bar and the letters, and closing shows them', async () => {

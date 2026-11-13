@@ -478,14 +478,17 @@
       display: none;
     }
     /* Add's choice heads its popover, the chosen tool's own body under it. */
+    /* Large reader text wraps the choices onto another row rather than let them run over each other. */
     :global(.stage-popover .place-choice) {
       display: flex;
+      flex-wrap: wrap;
       width: 100%;
       margin-bottom: var(--space-3);
     }
     /* Sized by their words, so the longest (Coordonnée, Superposition) is never cut. */
     :global(.stage-popover .place-choice [role='radio']) {
       flex: 1 1 auto;
+      min-width: min-content;
       padding-inline: 6px;
       font-size: var(--text-caption);
     }

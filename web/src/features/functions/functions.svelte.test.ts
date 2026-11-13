@@ -960,6 +960,9 @@ describe('compare', () => {
     expect(first.getAttribute('role')).toBe('checkbox');
     expect(first.getAttribute('aria-checked')).toBe('false');
     expect(compareOpen()!.getAttribute('aria-disabled')).toBe('true');
+    // A control at the panel's height, its edge drawn while it waits, so it never reads as plain text.
+    expect(compareOpen()!.getBoundingClientRect().height).toBeGreaterThanOrEqual(32);
+    expect(getComputedStyle(compareOpen()!).borderTopWidth).toBe('1px');
     expect(document.querySelector('.compare-picked')!.textContent!.trim()).toBe(
       'Choose two functions or terms to compare',
     );
@@ -1165,7 +1168,8 @@ describe('accessibility', () => {
       for (const element of document.querySelectorAll<HTMLElement>(
         'button, summary, h2, h3, p, label',
       )) {
-        if (!element.checkVisibility()) continue;
+        // Hidden words are read, not drawn: they clip by design.
+        if (!element.checkVisibility() || element.closest('.visually-hidden')) continue;
         expect(element.scrollWidth, element.outerHTML).toBeLessThanOrEqual(element.clientWidth + 1);
         // A name that grows is taller, never cut: no fixed height on any control.
         if (element.matches('button, summary')) {

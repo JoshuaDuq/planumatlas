@@ -115,7 +115,8 @@
         lang: view.lang,
         anatomy: manifest.anatomy,
         atlas: view.atlas,
-        surfaceColor: reference ? 'tissue' : view.surfaceColor,
+        // The tract reference and the visual field map draw their own colours, not the masthead's.
+        surfaceColor: reference || visualFieldMapOpen(view) ? 'tissue' : view.surfaceColor,
         detail: view.detail,
         offersDetail: manifest.detail_levels.length > 1,
         view: view.view as ViewName,
@@ -381,7 +382,9 @@
       media={app.media}
       lang={current.lang}
       status={current.status}
-      surfaceColor={tractReference ? 'tissue' : keyedSurface(current)}
+      surfaceColor={tractReference || visualFieldMapOpen(current)
+        ? 'tissue'
+        : keyedSurface(current)}
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
@@ -554,6 +557,10 @@
         :is(.stage-dock, .scale-bar, .orientation, .orientation-gizmo, .route-marks)
     ) {
       visibility: hidden;
+    }
+    /* The keys stay over that strip; with the dock hidden, they keep the room it took, so a title is never cut. */
+    :global(#viewport[data-sheet-full='true'] .stage-keys) {
+      max-height: calc(100% - var(--vis-top) - var(--vis-bottom) - 2 * var(--stage-gutter));
     }
     /* An open popover covers most of the picture; markings left at its edges would label nothing (stage.css:722-725). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {

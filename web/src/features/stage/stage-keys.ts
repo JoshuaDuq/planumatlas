@@ -21,6 +21,8 @@ const TOUCH_ROW_PX = 44;
 export const KEY_NOTE_MIN_WIDTH_PX = 600;
 /** The title row, foot and edges of a plate. */
 const KEY_HEAD_PX = 42;
+/** The space between stacked plates (`--space-2`). */
+export const KEY_GAP_PX = 8;
 
 export type KeyName = 'map' | 'network' | 'paint' | 'cases' | 'direction';
 
@@ -214,25 +216,36 @@ export interface StageRoom {
   dockHeight: number;
 }
 
+type SizedPlate = Pick<KeyPlate, 'name' | 'map' | 'pickable'> & { count: number };
+type KeyDevice = { phone: boolean; coarse: boolean };
+
+/** The height a plate takes, open or folded to its title. */
+export function keyHeight(plate: SizedPlate, { phone, coarse }: KeyDevice, open: boolean): number {
+  if (!open) return KEY_HEAD_PX;
+  const columns = phone && plate.name !== 'direction' && plate.map !== 'deficit' ? 2 : 1;
+  const rowPx = plate.pickable && (phone || coarse) ? TOUCH_ROW_PX : KEY_ROW_PX;
+  return KEY_HEAD_PX + Math.ceil(plate.count / columns) * rowPx;
+}
+
 /**
  * Whether a plate starts open when the reader has not folded it (viewport-chrome.js:304-320). A long
  * key starts folded to its title where the stage is narrow or its rows would not fit above the dock;
- * on a phone any key does where it would take more than half that room from the picture. `stage` is
+ * on a phone any key does where it would take more than half that room from the picture. Both weigh
+ * the plate where it stands: under the `above` pixels the plates before it and their gaps take. `stage` is
  * null until the stage has a size.
  */
 export function defaultOpen(
-  plate: Pick<KeyPlate, 'name' | 'map' | 'pickable'> & { count: number },
-  { phone, coarse }: { phone: boolean; coarse: boolean },
+  plate: SizedPlate,
+  device: KeyDevice,
   stage: StageRoom | null,
+  above = 0,
 ): boolean {
-  const columns = phone && plate.name !== 'direction' && plate.map !== 'deficit' ? 2 : 1;
-  const rowPx = plate.pickable && (phone || coarse) ? TOUCH_ROW_PX : KEY_ROW_PX;
-  const need = KEY_HEAD_PX + Math.ceil(plate.count / columns) * rowPx;
+  const need = above + keyHeight(plate, device, true);
   const room = stage ? stage.height - 3 * stage.gutter - stage.dockHeight : -Infinity;
   const crowded = Boolean(stage?.width) && (stage!.width < KEY_FOLD_WIDTH_PX || need > room);
   return !(
     (plate.count > KEY_FOLD_ROWS && crowded) ||
-    (phone && Boolean(stage?.height) && need > room / 2)
+    (device.phone && Boolean(stage?.height) && need > room / 2)
   );
 }
 

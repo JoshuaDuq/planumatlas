@@ -435,12 +435,12 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-34 · At 200 % text and with text spacing nothing in the dock is clipped
 
-- **Rule:** With 200 % text and the WCAG 1.4.12 spacing override no tool, button, label or paragraph is clipped and no popover scrolls sideways, in either language. On a phone at 200 % the tools wrap inside the dock, which stays inside the stage.
+- **Rule:** With 200 % text and the WCAG 1.4.12 spacing override no tool, button, label or paragraph is clipped and no popover scrolls sideways, in either language. A one-word choice (hemisphere, cutting plane, Add's Lesion, Coordinate and Overlay) is never broken inside its word: choices that no longer fit side by side wrap onto another row, and a plane whose name no longer fits half the row takes the whole row. On a phone at 200 % the tools wrap inside the dock, which stays inside the stage.
 - **Kind:** accessibility
 - **Level:** browser: layout (WCAG 1.4.4, 1.4.10, 1.4.12)
 - **Source:** deviation `g2-text-reflow.md`
-- **Expected:** Every listed node: `scrollWidth ≤ clientWidth + 0.5` and `scrollHeight ≤ clientHeight + 0.5`, dock and Display popover, EN and FR; popover `scrollWidth ≤ clientWidth`. Phone 390×700: dock right ≤ stage right; each tool's right ≤ dock right.
-- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
+- **Expected:** Every listed node: `scrollWidth ≤ clientWidth + 0.5` and `scrollHeight ≤ clientHeight + 0.5`, dock, Display and Add popovers, EN and FR; every one-word radio's text on one line; popover `scrollWidth ≤ clientWidth`. Section: each plane's name on one line, EN and FR. Lesion, French: "Sélectionne une région" and "Place la lésion" each inside its own box, the two not overlapping. Phone 390×700: dock right ≤ stage right; each tool's right ≤ dock right.
+- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/features/sections/SectionBar.svelte.test.ts` (R, the planes); `src/features/lesion/LesionPopover.svelte.test.ts` (R, the clicks)
 
 ### STAGE-35 · The dock answers forced colours, increased contrast and reduced motion
 
@@ -492,11 +492,11 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-40 · A long or crowded key starts folded to its title
 
-- **Rule:** A key of more than 8 rows starts folded where the stage is narrower than 1000 px or its rows would not fit above the dock. On a phone any key starts folded where it would take more than half that room. Rows count 24 px, or 44 px for toggle rows on a phone or coarse pointer; a phone runs two rows to a line, except a deficit's findings and the direction key; the head takes 42 px; the room is the stage height less three gutters and the dock. Before the stage has a size nothing folds, and a key already drawn is not refolded by a resize.
+- **Rule:** A key of more than 8 rows starts folded where the stage is narrower than 1000 px or its rows would not fit above the dock. On a phone any key starts folded where it would take more than half that room. Each key is weighed where it stands, under the keys drawn above it (open, or folded to the 42 px head) and the 8 px gaps between them. Rows count 24 px, or 44 px for toggle rows on a phone or coarse pointer; a phone runs two rows to a line, except a deficit's findings and the direction key; the head takes 42 px; the room is the stage height less three gutters and the dock. Before the stage has a size nothing folds, and a key already drawn is not refolded by a resize.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:28-45, 304-320`
-- **Expected:** Room 1200×800, gutter 20, dock 40 (desktop): 8 rows on 500×200 → open; 9 rows → open; width 999 → folded; width 1000 → open; height 300 (258 > 200) → folded; height 358 → open; stage null (phone, coarse, 30 rows) → open. Phone: 4 rows on 390×500 → open; 10 rows on 390×320 (162 > 110) → folded. Phone + coarse on 390×400 (half room 150): 8 toggle rows → folded (218), 8 plain → open (138), 6 deficit rows → folded (186), 6 plain → open, 6 direction rows → folded. App: CAB-NP 12 rows unsized → open; stage set to 900 → folded; 1200 → open; drawn open at 1200, resized to 800 → stays open; 9 toggle rows on a 400 px stage → open, coarse pointer → folded. Built site phone: CAB-NP starts folded.
+- **Expected:** Room 1200×800, gutter 20, dock 40 (desktop): 8 rows on 500×200 → open; 9 rows → open; width 999 → folded; width 1000 → open; height 300 (258 > 200) → folded; height 358 → open; stage null (phone, coarse, 30 rows) → open. Phone: 4 rows on 390×500 → open; 10 rows on 390×320 (162 > 110) → folded. Phone + coarse on 390×400 (half room 150): 8 toggle rows → folded (218), 8 plain → open (138), 6 deficit rows → folded (186), 6 plain → open, 6 direction rows → folded. Phone on 390×400 (half room 150): 3 direction rows alone → open (114), under 50 px of keys → folded (164); desktop height 400: 9 rows alone → open (258), under 50 px → folded. App: CAB-NP 12 rows unsized → open; stage set to 900 → folded; 1200 → open; drawn open at 1200, resized to 800 → stays open; 9 toggle rows on a 400 px stage → open, coarse pointer → folded; phone 390×380 (gutter 12, dock 38): the direction key alone → open, under CAB-NP folded → folded. Built site phone: CAB-NP starts folded.
 - **Covered by:** `src/features/stage/stage-keys.test.ts` (R); `src/features/stage/StageKeys.svelte.test.ts` (R; the three crowd-fold cases duplicate the unit cases)
 
 ### STAGE-42 · A paint key's rows are toggles that show one row alone
@@ -669,3 +669,21 @@ A click on the model selects and opens a detail every time (`anatomy.pickRegion`
 - **Level:** unit
 - **Expected:** "Schizophrenia: patients minus controls"; rows "Thicker or larger, d ≥ 0.2" (absent), "… d < 0.2", "Thinner or smaller, d > −0.2" (absent), "… d ≤ −0.2"; note "… survives a 5% false discovery rate. Tissue-coloured regions show none or are not reported."
 - **Covered by:** `src/lib/core/state/paint.test.ts`
+
+### STAGE-68 · Under a full phone sheet the keys keep the dock's room
+
+- **Rule:** While the phone sheet rests at full, the dock is hidden (SHEET-12), so the colour keys are bounded by the visible strip less a gutter above and below, without the dock's height or a third gutter. A folded key's title row is never cut.
+- **Kind:** layout
+- **Level:** browser in the composed stage region
+- **Source:** the 2026-11-12 interface review (at 390 × 844 the 128 px strip left the keys 26 px, cutting the 44 px title)
+- **Expected:** 390 × 844, Yeo 7 key, `--vis-bottom` leaving a 128 px strip, `--dock-height: 54px`, `sheetFull = true` → the plate is at least as tall as its title row.
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` (R)
+
+### STAGE-69 · The visual field map keys no surface colour
+
+- **Rule:** While the visual field map is open in front on Circuits, the stage draws V1–V3 in greys and the predicted response in red to yellow, whatever the masthead's Colour; the map's own key is in the panel. The stage keys and the saved image's caption then read the surface as tissue, as over the tract reference, so no Lobes, Regions or network plate explains colours that are not drawn.
+- **Kind:** behaviour
+- **Level:** browser in the composed stage region
+- **Source:** the 2026-11-12 interface review; `docs/features/visual-field-map.md` (Shader)
+- **Expected:** Yeo 7 colour → `#network-key` shown; Circuits with the lesson's map `visual-field` → no `#network-key`.
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` (R)

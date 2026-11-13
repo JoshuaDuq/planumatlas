@@ -254,9 +254,18 @@ The lesson commands are in `controller.md` and are not repeated here: opening a 
 
 ### CIRC-27 · At 200 % text with WCAG 1.4.12 spacing nothing is clipped or overflows
 
-- **Rule:** At 200 % text with the 1.4.12 spacing in a 320 px viewport, in French on the longest lesson with its notes open, no visible button, summary, heading, paragraph or description overflows sideways, no control clips its text, the page does not scroll sideways, and the stepper's place stays inside its grid. At a phone width with a lesson open the page does not scroll sideways.
+- **Rule:** At 200 % text with the 1.4.12 spacing in a 320 px viewport, in French on the longest lesson with its notes open, no visible button, summary, heading, paragraph or description overflows sideways, no control clips its text, the page does not scroll sideways, and the stepper's place stays inside its grid. At a phone width with a lesson open the page does not scroll sideways. Each landmark's number stays inside its ring, which grows with the text (20 px at default text).
 - **Kind:** accessibility
 - **Level:** browser — layout
 - **Source:** WCAG 2.2 SC 1.4.4, 1.4.10, 1.4.12
 - **Expected:** `cerebellar`, French, three notes open, another region selected → every visible `button, summary, h2, h3, p, dd` `scrollWidth ≤ clientWidth + 1`; `button, summary` `scrollHeight ≤ clientHeight + 1`; root and `.circuit-stepper` `scrollWidth ≤ clientWidth + 1`. 390 px, `cerebellar`, French → page `scrollWidth − clientWidth = 0`.
+- **Covered by:** `src/features/circuits/circuits.svelte.test.ts` (R)
+
+### CIRC-28 · The visual field map opens at its top with its title in focus
+
+- **Rule:** Opening the map from its row or from a landmark brings the detail to its top and focuses the map's title once the map is drawn, as a lesson's landmark does (CIRC-05): the detail is shared, so it may stand where another profile left it, and the list's handoff would otherwise leave focus on Back. A link that opens the map on load moves no focus.
+- **Kind:** behaviour
+- **Level:** browser (component)
+- **Source:** the 2026-11-12 interface review (Stroke cases scrolled 636 px, then the map opened 636 px down, past its title)
+- **Expected:** `vision` at its map landmark, detail scrolled to 40 px, "Explore the visual field map" → `lesson.map` `visual-field`, focus on `#visual-field-title`, detail `scrollTop` 0.
 - **Covered by:** `src/features/circuits/circuits.svelte.test.ts` (R)

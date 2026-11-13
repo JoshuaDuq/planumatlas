@@ -162,6 +162,7 @@
 </script>
 
 <div class="head" hidden={!model.exploring}>
+  <h2 class="visually-hidden">{t(lang, 'workspace').modes.functions}</h2>
   <div class="head-row">
     <label class="search-label" for="{uid}-search">{copy.search}</label>
     <button
@@ -664,8 +665,17 @@
       display: block;
       color: var(--text-tertiary);
     }
+    /* A primary button at the panel's control height, its edge drawn even while it waits for a pick. */
     .compare-open {
       flex: none;
+      min-height: var(--control-height);
+      padding: 0 var(--space-3);
+      border: 1px solid;
+      border-radius: var(--radius-control);
+      font-size: var(--text-ui);
+      font-weight: 500;
+      line-height: var(--lh-ui);
+      cursor: pointer;
       background: var(--primary-fill);
       border-color: var(--primary-fill);
       color: var(--primary-ink);

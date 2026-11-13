@@ -184,18 +184,19 @@
 
 <style>
   @layer features {
+    /* Large reader text wraps the choices onto a second row before it breaks a word ("Righ|t"). */
     :global(.segmented.choice-group.hemisphere) {
+      flex-wrap: wrap;
       width: 100%;
     }
     :global(.segmented.choice-group.hemisphere [role='radio']) {
       flex: 1;
       height: auto;
       min-height: calc(var(--control-height) - 4px);
-      min-width: 0;
+      min-width: min-content;
       padding: 0 var(--space-2);
       font-size: var(--text-stage);
       white-space: normal;
-      overflow-wrap: anywhere;
     }
     /* Spaced, not ruled, like the other popovers' fields; the rows' own padding makes up the field gap. */
     .visibility {

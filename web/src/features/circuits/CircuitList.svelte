@@ -38,6 +38,7 @@
 </script>
 
 <div class="browser scroll-fade" hidden={!model.exploring}>
+  <h2 class="visually-hidden">{t(model.lang, 'workspace').modes.circuits}</h2>
   <div class="scope-head"><ScopeLine place="circuits" lang={model.lang} /></div>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
     <div class="group" role="group" aria-labelledby="{uid}-guided">

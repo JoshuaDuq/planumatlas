@@ -988,6 +988,13 @@ describe('accessibility', () => {
       // The count stays still in the stepper: its grid is three fixed-width columns.
       const group = document.querySelector('.circuit-stepper')!;
       expect(group.scrollWidth).toBeLessThanOrEqual(group.clientWidth + 1);
+      // A landmark's ring grows with the text, so its number stays inside it.
+      const rings = [...document.querySelectorAll<HTMLElement>('.circuit-step-number')];
+      expect(rings.length).toBeGreaterThan(0);
+      for (const ring of rings) {
+        expect(ring.scrollWidth, ring.textContent!).toBeLessThanOrEqual(ring.clientWidth + 1);
+        expect(ring.scrollHeight, ring.textContent!).toBeLessThanOrEqual(ring.clientHeight + 1);
+      }
     } finally {
       style.remove();
       await page.viewport(1280, 800);
@@ -1004,6 +1011,22 @@ describe('the visual-field map', () => {
     await expect.poll(() => world.lesson.state.map).toBe('visual-field');
     await expect.poll(() => document.activeElement?.id).toBe('visual-field-title');
   }
+
+  test('opens at its top with its title in focus, wherever the lesson before it was scrolled', async () => {
+    mount();
+    await open('vision');
+    const steps = world.circuits.get('vision').steps;
+    const mapStep = steps.findIndex((step) => step.map === 'visual-field');
+    await userEvent.click(stepRows()[mapStep]!);
+    await expect.poll(() => world.lesson.state.step).toBe(mapStep);
+    const detail = document.querySelector<HTMLElement>('.detail')!;
+    detail.style.cssText = 'height: 120px; overflow-y: auto';
+    detail.scrollTop = 40;
+    await userEvent.click(page.getByRole('button', { name: 'Explore the visual field map' }));
+    await expect.poll(() => world.lesson.state.map).toBe('visual-field');
+    await expect.poll(() => document.activeElement?.id).toBe('visual-field-title');
+    expect(detail.scrollTop).toBe(0);
+  });
 
   test('opens from its row on both hemispheres, and lists its predicted territory', async () => {
     mount();

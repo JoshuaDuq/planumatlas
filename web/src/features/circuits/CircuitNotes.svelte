@@ -208,8 +208,9 @@
       flex: none;
       display: grid;
       place-content: center;
-      width: 20px;
-      height: 20px;
+      /* 20 px at default text; the ring grows with the reader's text so its number stays inside. */
+      width: max(20px, 1.25rem);
+      height: max(20px, 1.25rem);
       border: 1px solid var(--border-subtle);
       border-radius: 50%;
       color: var(--text-secondary);

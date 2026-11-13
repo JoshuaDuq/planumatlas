@@ -119,6 +119,7 @@
 </script>
 
 <div class="deficit-head">
+  <h2 class="visually-hidden">{t(lang, 'workspace').modes.deficits}</h2>
   <DeficitSearch
     {explorer}
     query={view.clinicalQuery}

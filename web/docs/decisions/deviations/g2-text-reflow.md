@@ -9,7 +9,7 @@ The dock's tools, the presets, the hemisphere buttons and the stage commands hav
 
 ## New behaviour
 
-Tools, presets, hemisphere buttons and commands have a `min-height` (the control height) instead of a `height`, so they grow with their text. The presets, hemisphere buttons and commands wrap inside their cell (`white-space: normal`), and the tool row wraps (`flex-wrap`) inside the dock. Sizes at 100 % text are the legacy ones: tools and presets 32 px, hemisphere buttons 28 px, all 44 px under the phone query, and a 20 px tick box with an 11 × 6 px tick on a coarse pointer.
+Tools, presets, hemisphere buttons and commands have a `min-height` (the control height) instead of a `height`, so they grow with their text. The presets, hemisphere buttons and commands wrap inside their cell (`white-space: normal`), and the tool row wraps (`flex-wrap`) inside the dock. A one-word choice wraps as a whole, never inside its word (2026-11-12): the hemisphere buttons, cutting planes and Add's choices keep a `min-content` width and their row wraps instead ("Righ|t" and the French Add choices running into each other were found at 200 %). Sizes at 100 % text are the legacy ones: tools and presets 32 px, hemisphere buttons 28 px, all 44 px under the phone query, and a 20 px tick box with an 11 × 6 px tick on a coarse pointer.
 
 ## Standard cited
 

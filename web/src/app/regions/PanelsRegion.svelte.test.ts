@@ -1,6 +1,7 @@
 // The panel region as the app mounts it, over the fake engine: the ports it hands the controllers and
 // the keymap, the workspace in the sheet, and the wiring between the explorers and the controllers.
 import '../../styles/index.css'; // The page's styles: a hidden panel takes no focus, as in the app.
+import axe from 'axe-core';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
@@ -451,6 +452,20 @@ describe('accessibility', () => {
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
     await expectAxeCleanFitted();
+  });
+
+  test('every mode’s list keeps its headings in order under the page’s', async () => {
+    await boot();
+    for (const name of ['Anatomy', 'Functions', 'Deficits', 'Circuits', 'Tracts']) {
+      await userEvent.click(page.getByRole('tab', { name }));
+      flushSync();
+      // Best practice, so outside the WCAG tags `expectAxeCleanFitted` runs.
+      const { violations } = await axe.run(document.body, { runOnly: ['heading-order'] });
+      expect(
+        violations.flatMap((v) => v.nodes.map((n) => n.html)),
+        name,
+      ).toEqual([]);
+    }
   });
 
   test('the composed panel passes axe on the list it goes back to', async () => {

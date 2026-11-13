@@ -881,10 +881,24 @@ describe('size, reflow and media', () => {
                 node.scrollHeight > node.clientHeight + 0.5,
             )
             .map((node) => node.textContent!.trim());
+        // A one-word choice (Both, Left, Right; Lesion…) wraps as a whole, never inside its word.
+        const broken = () =>
+          [...document.querySelectorAll<HTMLElement>('.popover [role="radio"]')]
+            .filter((node) => !/\s/.test(node.textContent!.trim()))
+            .filter((node) => {
+              const range = document.createRange();
+              range.selectNodeContents(node);
+              return (
+                new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1
+              );
+            })
+            .map((node) => node.textContent!.trim());
         expect(clipped(), 'the dock').toEqual([]);
-        for (const name of lang === 'en' ? ['Display'] : ['Affichage']) {
+        // Add's three choices too: in French at 200 % they ran over each other.
+        for (const name of lang === 'en' ? ['Display', 'Add'] : ['Affichage', 'Ajouter']) {
           await open(name);
           expect(clipped(), name).toEqual([]);
+          expect(broken(), name).toEqual([]);
           expect(popover().scrollWidth, name).toBeLessThanOrEqual(popover().clientWidth);
           await userEvent.keyboard('{Escape}');
         }

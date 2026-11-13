@@ -326,6 +326,7 @@
 
 <div class="tracts" bind:this={root} hidden={!active}>
   <div class="head">
+    <h2 class="visually-hidden">{t(lang, 'workspace').modes.diffusion}</h2>
     <label class="search-label" for="native-tract-search">{text.search}</label>
     <div class="search-box">
       <svg

@@ -276,3 +276,12 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 - **Source:** U2 of the 2026-11-09 review; decision record 0007 (nothing moves in the DOM: the field above the detail is the detail's own, bound to the same query)
 - **Expected:** Region picked → searchbox "Search regions" in `#inspector`, before the region's heading; click it, type "broca" → `#navigator` shown, focus on the combobox holding "broca", Broca's areas listed, cortex still shown, selection kept. Query "cun" then a pick → the field holds "cun"; Escape → query "", detail still shown; Escape → list. Single-key shortcuts off → no hint. At 375 × 812 the field is on screen once the sheet rests, and a tap and a letter move to the list. Function profile → "Search functions"; typing "memory" → `functionQuery` "memory". Circuits lesson → no search field. axe clean light and dark.
 - **Covered by:** `src/features/workspace/DetailView.svelte.test.ts` (R)
+
+### WORK-30 · Each mode's list is titled under the page's heading
+
+- **Rule:** Every mode's list opens with a visually hidden level-2 heading, so its group headings (level 3, and the Tracts classes at level 4) follow the page's `h1` without a skipped level: Anatomy's "Atlas explorer", and the mode's own name in Functions, Deficits, Circuits and Tracts.
+- **Kind:** accessibility
+- **Level:** browser in the composed app — axe `heading-order` (best practice, outside the WCAG tags WORK-26 runs)
+- **Source:** the 2026-11-12 interface review
+- **Expected:** Clicking each of the five tabs in turn → axe `heading-order` reports no node.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)

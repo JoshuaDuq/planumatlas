@@ -231,6 +231,28 @@ describe('folding', () => {
     expect(model()[0]!.open).toBe(false);
   });
 
+  test('on a phone a key folds where, under the keys above it, it would take more than half the room', async () => {
+    const phone = { phone: true, coarsePointer: false };
+    // Room 380 - 3 × 12 - 38 = 306 px, half 153. The direction key alone takes 42 + 3 × 24 = 114 px.
+    mount(
+      { surfaceColor: 'atlas', directionShown: true, media: phone },
+      { width: 390, height: 380 },
+    );
+    await expect
+      .element(toggle('Local streamline direction'))
+      .toHaveAttribute('aria-expanded', 'true');
+    cleanup();
+    // Under CAB-NP folded to its title and the gap (42 + 8 px) it would reach 164 px.
+    mount(
+      { surfaceColor: 'cab-np', directionShown: true, media: phone },
+      { width: 390, height: 380 },
+    );
+    await expect.element(toggle('CAB-NP networks')).toHaveAttribute('aria-expanded', 'false');
+    await expect
+      .element(toggle('Local streamline direction'))
+      .toHaveAttribute('aria-expanded', 'false');
+  });
+
   test('a resize does not refold a key the stage has already drawn', async () => {
     mount({ surfaceColor: 'cab-np' }, { width: 1200 });
     await expect.element(toggle('CAB-NP networks')).toHaveAttribute('aria-expanded', 'true');

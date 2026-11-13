@@ -95,8 +95,13 @@
      * The two clicks are sized by their words with the place choice's 6px padding, so English fits one line
      * in the 272px popover; a longer translation wraps and grows the pill instead of leaving it.
      */
+    /* A word wider than half the row, at 200 % text, sends the other click to its own row. */
+    :global(.lesion-click) {
+      flex-wrap: wrap;
+    }
     :global(.lesion-click [role='radio']) {
       flex: 1 1 auto;
+      min-width: min-content;
       padding-inline: 6px;
       height: auto;
       min-height: calc(var(--control-height) - 4px);
