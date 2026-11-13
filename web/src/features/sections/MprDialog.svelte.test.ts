@@ -272,14 +272,14 @@ describe('the three planes', () => {
     expect(crosshair()).toEqual([0, 0, 0]);
   });
 
-  test("Tab visits Close, then each plane's slider and Save, then Window, Level and the overlay", async () => {
+  test("Tab visits Close, then each plane's slider and Save, then Window, Level, the overlay and Reset display", async () => {
     await opened();
     const nameOf = (element: HTMLElement) =>
       (element as HTMLInputElement).labels?.[0]?.textContent?.trim() ??
       element.getAttribute('aria-label') ??
       element.textContent!.trim();
     const names: string[] = [];
-    for (let stop = 0; stop < 10; stop++) {
+    for (let stop = 0; stop < 11; stop++) {
       names.push(nameOf(document.activeElement as HTMLElement));
       await userEvent.tab();
     }
@@ -294,6 +294,7 @@ describe('the three planes', () => {
       'Window',
       'Level',
       'Segmentation overlay',
+      'Reset display',
     ]);
   });
 });
@@ -436,6 +437,21 @@ describe('display', () => {
     expect(engine.sections.state.overlay).toBe(true);
     await box.click();
     expect(engine.sections.state.overlay).toBe(false);
+  });
+
+  test("Reset display returns Window and Level to the scan's window and clears the overlay", async () => {
+    await opened();
+    engine.sections.setWindow(60, 40);
+    await page.getByRole('checkbox', { name: 'Segmentation overlay' }).click();
+    // A slider move still waiting for its frame does not undo the reset.
+    mpr.setWindow({ width: 120 });
+    await page.getByRole('button', { name: 'Reset display' }).click();
+    await frame();
+    await frame();
+    expect(engine.sections.display).toMatchObject({ windowWidth: 180, windowCenter: 90 });
+    expect(engine.sections.state.overlay).toBe(false);
+    expect(sliderElement('Window').value).toBe('180');
+    expect(sliderElement('Level').value).toBe('90');
   });
 });
 
@@ -607,6 +623,18 @@ describe('the tracts and FA', () => {
     expect(point.every((value) => Math.abs(value) < 50)).toBe(true);
     const level = Math.round(255 * ((point[0] + 50) / 100));
     expect(pixel(canvas('axial'), x, y)).toEqual([...VIRIDIS[level]!, 255]);
+  });
+
+  test('Reset display returns FA opacity to zero and takes FA out of the readout', async () => {
+    await withTracts();
+    sliderElement('FA opacity').focus();
+    await userEvent.keyboard('{End}');
+    await expect
+      .poll(() => shell().querySelector('.where')!.textContent)
+      .toMatch(/ · FA\u00a00\.50$/);
+    await page.getByRole('button', { name: 'Reset display' }).click();
+    expect(sliderElement('FA opacity').value).toBe('0');
+    await expect.poll(() => shell().querySelector('.where')!.textContent).not.toMatch(/FA/);
   });
 });
 

@@ -1500,6 +1500,7 @@
   "contrastWindow": "Window",
   "windowCenter": "Level",
   "segmentationOverlay": "Segmentation overlay",
+  "resetDisplay": "Reset display",
   "faOpacity": "FA opacity",
   "faFailed": "The FA map could not be loaded.",
   "fa": [

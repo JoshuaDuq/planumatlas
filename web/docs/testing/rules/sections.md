@@ -305,6 +305,15 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Expected:** Defaults Window 180, Level 90, `aria-valuetext` "180" and "90"; Window to 200 → `setWindow(90, 200)` once per frame. Overlay unchecked → `setDisplay({ overlay: false })`. French "Fenêtre", "Niveau", "Superposition de segmentation".
 - **Covered by:** uncovered
 
+### SECT-37 · Reset display returns Window, Level, FA opacity and the overlay to how the scan opens
+
+- **Rule:** A "Reset display" button under the display controls sets Window and Level back to the scan's published window, FA opacity to 0 and the segmentation overlay off, at once; a slider move still waiting for its frame does not undo it. It leaves the crosshair, the plane and a shown agreement alone, and FA once downloaded stays downloaded.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** this change
+- **Expected:** Window 40, Level 60, overlay on, a pending Window 120 → Reset → `windowWidth` 180, `windowCenter` 90 after two frames, overlay false, sliders "180" and "90". FA at 100 % → Reset → FA opacity "0", no "FA" in the readout. French "Réinitialiser l’affichage". It is the last Tab stop after the overlay.
+- **Covered by:** `src/features/sections/MprDialog.svelte.test.ts` "display", "the tracts and FA" (R)
+
 ### SECT-31 · Save PNG downloads the plane under a descriptive file name and says so
 
 - **Rule:** Save PNG downloads that plane's image, letters and annotation included, as `<subject>-<plane>-<position to one decimal>mm.png`, and confirms the save in words.

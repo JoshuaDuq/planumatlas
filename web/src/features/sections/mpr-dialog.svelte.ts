@@ -14,6 +14,7 @@ export interface MprDialogDeps {
       | 'load'
       | 'state'
       | 'display'
+      | 'publishedWindow'
       | 'setCrosshair'
       | 'setWindow'
       | 'setDisplay'
@@ -167,6 +168,14 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
     },
     setOverlay(overlay: boolean) {
       sections.setDisplay({ overlay });
+    },
+    /** The scan's own window and no overlay, at once: a move still waiting for its frame is dropped. */
+    resetDisplay() {
+      const { center, width } = sections.publishedWindow!;
+      waiting.delete('window');
+      windowChange = null;
+      sections.setWindow(center, width);
+      sections.setDisplay({ overlay: false });
     },
     /** Hiding never downloads, so it cannot fail. */
     hideAgreement() {

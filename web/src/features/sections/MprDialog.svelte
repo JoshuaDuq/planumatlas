@@ -149,6 +149,12 @@
     );
   }
 
+  /** Window, Level, FA and the overlay as the scan opens; FA stays downloaded for its next use. */
+  function resetDisplay() {
+    mpr.resetDisplay();
+    faOpacity = 0;
+  }
+
   let root = $state<HTMLElement>();
   let dock = $state<HTMLElement>();
   let canvases = $state<Partial<Record<MprPlane, HTMLCanvasElement>>>({});
@@ -546,6 +552,9 @@
             />
             <span>{copy.segmentationOverlay}</span>
           </label>
+          <button type="button" class="save reset" onclick={resetDisplay}
+            >{copy.resetDisplay}</button
+          >
         </div>
         {#if faFailed}<p class="alert" role="alert">{copy.faFailed}</p>{/if}
       </div>
@@ -905,6 +914,12 @@
     input[type='checkbox']:disabled {
       opacity: 0.5;
       cursor: default;
+    }
+    .display .reset {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      justify-self: start;
+      margin-left: calc(-1 * var(--space-2));
     }
     .alert {
       margin: 0;

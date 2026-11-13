@@ -1500,6 +1500,7 @@
   "contrastWindow": "Fenêtre",
   "windowCenter": "Niveau",
   "segmentationOverlay": "Superposition de segmentation",
+  "resetDisplay": "Réinitialiser l’affichage",
   "faOpacity": "Opacité FA",
   "faFailed": "La carte FA n’a pas pu être chargée.",
   "fa": [
