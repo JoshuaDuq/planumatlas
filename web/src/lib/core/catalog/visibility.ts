@@ -22,6 +22,28 @@ const isMedialWall = (region: Region) => {
   if (!region.source_name) throw new Error(`Non-region ${region.id} has no source name.`);
   return !region.source_name.startsWith('GapMap-');
 };
+/**
+ * The display settings `visibilityOf` reads. No other setting puts a region on screen or takes it
+ * off, so a walk over every region that reads only these need not run again when they hold.
+ */
+export const VISIBILITY_SETTINGS = [
+  'atlas',
+  'detail',
+  'internalSystem',
+  'internalConstituents',
+  'cutAtlas',
+  'cutActive',
+  'hemisphere',
+  'cortexVisible',
+  'cortexOpacity',
+  'internalVisible',
+  'spinalCordVisible',
+  'surfaceColor',
+  'hiddenRegions',
+  'isolatedRegion',
+] as const satisfies readonly (keyof DisplaySettings)[];
+export type VisibilitySettings = Pick<DisplaySettings, (typeof VISIBILITY_SETTINGS)[number]>;
+
 export const belongsToDetail = (region: Region, detail: string) =>
   region.supplemental === true || region.atlas === detail;
 // Gyral white matter is drawn on the white envelope's cut face, which the cortex controls hide.
@@ -31,13 +53,13 @@ const followsCortex = (region: Region) => isSurface(region) || region.atlas === 
 export const cutAtlasesOf = (region: Region): readonly (string | null | undefined)[] =>
   region.cut_atlases ?? [region.atlas];
 
-const hemisphereAllows = (region: Region, settings: DisplaySettings) =>
+const hemisphereAllows = (region: Region, settings: VisibilitySettings) =>
   settings.hemisphere === 'both' ||
   region.hemisphere === 'midline' ||
   region.hemisphere === settings.hemisphere;
 
 /** The overview's source constituents inherit its system, irrespective of atlas taxonomy. */
-export function internalSystemAllows(region: Region, settings: DisplaySettings): boolean {
+export function internalSystemAllows(region: Region, settings: VisibilitySettings): boolean {
   if (!settings.internalSystem || isSurface(region)) return true;
   if (settings.detail === 'learning' && region.atlas !== 'learning' && !region.supplemental) {
     return settings.internalConstituents.has(region.id);
@@ -71,7 +93,7 @@ export type Visibility = { visible: true; reason: null } | { visible: false; rea
  * silently omitting the row. Two implementations would drift, and the drift
  * would be invisible.
  */
-export function visibilityOf(region: Region, settings: DisplaySettings): Visibility {
+export function visibilityOf(region: Region, settings: VisibilitySettings): Visibility {
   const hidden = (reason: HiddenReason): Visibility => ({ visible: false, reason });
   if (settings.surfaceColor === 'mri' && region.mri_registered === false) return hidden('no-mri');
   // A region can be drawn as geometry, as a cut label, or both. A structure the

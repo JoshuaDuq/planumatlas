@@ -96,6 +96,15 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 - **Expected:** Published `cdmd` catalog. The visible count is above 0 and drops when `setCortexVisible(false)`; after `setLang('fr')` the store's `lang` is `'fr'` and its groups carry the French labels. The counts and one group label in each language should be fixed from the published manifest.
 - **Covered by:** `src/lib/state/stores.svelte.test.ts` (W: expectations recomputed with the same `catalog.groups` and `catalog.visibleCount` calls)
 
+### STORE-36 · A camera preset, a selection or a moved cut does not walk the regions again
+
+- **Rule:** Every engine or session change makes a new view, a camera preset, a selection or a moved cut among them, and the catalog's groups and visible count each walk every region (the groups also sort them by name). So the store computes them from what they read: the groups from the view's language and the settings that decide a region's visibility (`VISIBILITY_SETTINGS` in `visibility.ts`: atlas, detail level, internal system and its constituents, cut atlas, whether a cut is drawn, hemisphere, cortex shown and its opacity, internal anatomy, spinal cord, surface colour, hidden regions, isolated region), the count from those settings alone. The hidden regions and the constituents come as new sets with every change and are compared by their members. The list and the count stay what `catalog.groups` and `catalog.visibleCount` give for the view.
+- **Kind:** behaviour
+- **Level:** unit (runes, fake engine)
+- **Source:** review handoff P14
+- **Expected:** Published `cdmd` catalog, axial cut drawn. `setView('left')`, `select(<a selectable region>)` and `setOffset(<the middle of the range>)`, each flushed: the view is a new object each time, the groups are the same array and the count the same number, and neither `catalog.groups` nor `catalog.visibleCount` is called. `setLang('fr')` → one `groups` call, no `visibleCount` call, the count unchanged. `hideRegions([<that region>])` → one call of each, the count one lower; `setView('oblique')` after it → none. `setAtlas('hcp-mmp')` → one call of each. Each list equals `catalog.groups` for the engine's settings in the view's language.
+- **Covered by:** `src/lib/state/stores.svelte.test.ts` "a camera preset, a selection or a moved cut walks no region; a language or an atlas does" (R)
+
 ### STORE-10 · The view's sentences reach the page's live region as the view changes
 
 - **Rule:** Each view change is passed through the speech rules (KEY-17 to KEY-21) and what they return is written to the page's one live region. An eye press's part sentence is said with the hidden count it changes.

@@ -371,6 +371,74 @@ describe('the catalog store', () => {
     expect(catalogStore.lang).toBe('fr');
     expect(catalogStore.groups).toEqual(catalog.groups({ ...engine.model.settings, lang: 'fr' }));
   });
+
+  test('a camera preset, a selection or a moved cut walks no region; a language or an atlas does', async () => {
+    const groups = vi.spyOn(catalog, 'groups');
+    const visibleCount = vi.spyOn(catalog, 'visibleCount');
+    const { catalogStore, session, view } = build();
+    await engine.sections.setMode('axial');
+    flushSync();
+    const listed = catalogStore.groups;
+    const count = catalogStore.visibleCount;
+    /** The store's walks since the last call: the groups', then the count's. */
+    const walks = () => {
+      const made = [groups.mock.calls.length, visibleCount.mock.calls.length];
+      groups.mockClear();
+      visibleCount.mockClear();
+      return made;
+    };
+    walks();
+    const selectable = published.regions.find(
+      (candidate) => candidate.kind !== 'non-region' && engine.model.canSelect(candidate),
+    )!;
+    const [low, high] = engine.sections.offsetRange;
+    const changes: Array<[string, () => void]> = [
+      ['camera preset', () => session.setView('left')],
+      ['selection', () => engine.model.select(selectable.id)],
+      ['cut position', () => engine.sections.setOffset((low + high) / 2)],
+    ];
+    for (const [change, act] of changes) {
+      const previous = view.current;
+      act();
+      flushSync();
+      expect(view.current, change).not.toBe(previous);
+      expect(catalogStore.groups, change).toBe(listed);
+      expect(catalogStore.visibleCount, change).toBe(count);
+      expect(walks(), change).toEqual([0, 0]);
+    }
+    expect(listed).toEqual(catalog.groups({ ...engine.model.settings, lang: 'en' }));
+    expect(count).toBe(catalog.visibleCount(engine.model.settings));
+    walks();
+
+    // A language changes the names and their order, not what is on screen.
+    session.setLang('fr');
+    flushSync();
+    const french = catalogStore.groups;
+    expect(catalogStore.visibleCount).toBe(count);
+    expect(walks()).toEqual([1, 0]);
+    expect(french).toEqual(catalog.groups({ ...engine.model.settings, lang: 'fr' }));
+    walks();
+
+    // The hidden regions arrive as a new set with every change, and are compared by their members.
+    engine.model.hideRegions([selectable.id]);
+    flushSync();
+    const hidden = { groups: catalogStore.groups, count: catalogStore.visibleCount };
+    expect(walks()).toEqual([1, 1]);
+    expect(hidden.count).toBe(count - 1);
+    expect(hidden.groups).toEqual(catalog.groups({ ...engine.model.settings, lang: 'fr' }));
+    walks();
+    session.setView('oblique');
+    flushSync();
+    expect(catalogStore.groups).toBe(hidden.groups);
+    expect(walks()).toEqual([0, 0]);
+
+    await engine.model.setAtlas('hcp-mmp');
+    flushSync();
+    const atlas = { groups: catalogStore.groups, count: catalogStore.visibleCount };
+    expect(walks()).toEqual([1, 1]);
+    expect(atlas.groups).toEqual(catalog.groups({ ...engine.model.settings, lang: 'fr' }));
+    expect(atlas.count).toBe(catalog.visibleCount(engine.model.settings));
+  });
 });
 
 describe('the announcer', () => {

@@ -1,8 +1,14 @@
-import type { DisplaySettings, Language, Manifest, Region } from '../../types/index.ts';
+import type { Language, Manifest, Region } from '../../types/index.ts';
 import { labelOf, type RegionLabel } from './labels.ts';
 import { editDistance } from './nearest.ts';
 import { cabNpName, type CabNpPartition } from './networks.ts';
-import { belongsToDetail, cutAtlasesOf, visibilityOf, type Visibility } from './visibility.ts';
+import {
+  belongsToDetail,
+  cutAtlasesOf,
+  visibilityOf,
+  type Visibility,
+  type VisibilitySettings,
+} from './visibility.ts';
 
 const EXACT = 0,
   PREFIX = 1,
@@ -78,7 +84,7 @@ function typoTier(query: readonly string[]): (words: readonly string[]) => numbe
 }
 
 /** The display settings a catalog reads, plus the language the caller wants the labels in. */
-export type CatalogSettings = DisplaySettings & { lang?: Language };
+export type CatalogSettings = VisibilitySettings & { lang?: Language };
 
 interface Entry {
   region: Region;
