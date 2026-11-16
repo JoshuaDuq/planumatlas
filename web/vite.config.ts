@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
+import { contentSecurityPolicy } from './build/content-security-policy.ts';
 import { publishedAssets } from './build/published-files.ts';
 import { ASSET_BASE } from './build/site.ts';
 import { yamlRecords } from './build/yaml-records.ts';
@@ -28,5 +29,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [svelte(), yamlRecords(), publishedAssets()],
+  plugins: [svelte(), yamlRecords(), publishedAssets(), contentSecurityPolicy()],
 });

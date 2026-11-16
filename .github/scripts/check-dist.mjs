@@ -1,6 +1,6 @@
 // Checks the built site in web/dist (after `npm run build --prefix web`, from the repository
 // root): the published data, the chunks, the page's head and the service worker's version map.
-// BUILD-02 to BUILD-06, BUILD-14 and BUILD-15 in web/docs/testing/rules/boot-and-assets.md. It
+// BUILD-02 to BUILD-06 and BUILD-14 to BUILD-16 in web/docs/testing/rules/boot-and-assets.md. It
 // fails if dist/index.html is absent.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -39,6 +39,38 @@ assert.ok(
 const script = text.indexOf('window.__planumAssets');
 assert.ok(script > -1, 'the prefetch script is inlined');
 assert.ok(script < text.indexOf('rel="stylesheet"'), 'the prefetch script precedes the stylesheet');
+
+// BUILD-16: one Content-Security-Policy meta tag in head ahead of every script, listing each inline
+// script by the hash of its text as shipped, and no source by wildcard.
+const policies = [
+  ...text.matchAll(/<meta http-equiv="Content-Security-Policy" content="([^"]*)" \/>/g),
+];
+assert.equal(policies.length, 1, 'one Content-Security-Policy meta tag');
+assert.ok(policies[0].index < text.indexOf('<script'), 'the policy precedes every script');
+assert.ok(policies[0].index < text.indexOf('</head>'), 'the policy is in head');
+const policy = new Map(
+  policies[0][1].split(';').map((directive) => {
+    const [name, ...sources] = directive.trim().split(/\s+/);
+    return [name, sources];
+  }),
+);
+const scriptSources = policy.get('script-src');
+const inlineHashes = [...text.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(
+  ([, body]) => `'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`,
+);
+assert.ok(inlineHashes.length > 0, 'the page has inline scripts');
+assert.deepEqual(
+  scriptSources.filter((source) => source.startsWith("'sha256-")).sort(),
+  [...inlineHashes].sort(),
+  'script-src lists the hash of every inline script, and no other',
+);
+assert.ok(
+  !scriptSources.includes("'unsafe-inline'") && !scriptSources.includes("'unsafe-eval'"),
+  'script-src allows no inline script or eval but by hash',
+);
+for (const [name, sources] of policy) {
+  for (const source of sources) assert.ok(!source.includes('*'), `${name} allows ${source}`);
+}
 
 // BUILD-07 and BUILD-05: the head map holds models/ versions only.
 const head = JSON.parse(text.match(/var versions = (.*);$/m)[1]);

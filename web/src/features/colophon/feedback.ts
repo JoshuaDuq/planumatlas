@@ -3,7 +3,7 @@
  * (workers/feedback) mails each message on to this address.
  */
 export const FEEDBACK_ADDRESS = 'joshua.duquette.1@ulaval.ca';
-const RELAY = 'https://feedback.planumatlas.com';
+export const RELAY = 'https://feedback.planumatlas.com';
 
 export interface Feedback {
   name: string;

@@ -28,6 +28,17 @@ extensions = [
     "sphinx_copybutton",
 ]
 
+# MathJax is served from _static/mathjax, not from a CDN, so the pages make no third-party request.
+# It is MathJax 4.1.3 (npm `mathjax`) and its New Computer Modern font (npm
+# `@mathjax/mathjax-newcm-font` 4.1.3), both Apache-2.0 (_static/mathjax/LICENSE), cut to what
+# the pages can load: tex-mml-chtml.js, the TeX packages it autoloads (input/tex/extensions), the
+# two accessibility parts its menu loads (a11y), the speech worker with English speech and Nemeth
+# braille (sre), and the font's CHTML files. The menu's SVG renderer and other speech languages
+# are not served. MathJax 4 looks for its fonts on cdn.jsdelivr.net even when self-hosted, hence
+# the fonts path.
+mathjax_path = "mathjax/tex-mml-chtml.js"
+mathjax4_config = {"loader": {"paths": {"fonts": "[mathjax]/fonts"}}}
+
 # ---------------------------------------------------------------------------
 # Source / build
 # ---------------------------------------------------------------------------
