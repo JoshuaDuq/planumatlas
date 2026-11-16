@@ -163,6 +163,8 @@ export async function startApp(
     if (firstLaunch(arrived)) {
       // The controls a ready stage shows are drawn before the tour counts which ones it can point at.
       flushSync();
+      // The tour keeps the opening picture from the link, which the writer has not written yet.
+      world.links.write();
       app.ports.startGuide(true);
     }
     prefetchFirstCut(engine.sections);

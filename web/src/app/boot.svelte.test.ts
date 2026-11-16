@@ -92,11 +92,10 @@ function portStubs() {
 }
 
 /** Starts the app on a link, with regions that mount as soon as the world exists, as they will. */
-async function boot(hash = '', create: CreateEngine = createEngine) {
+async function boot(hash = '', create: CreateEngine = createEngine, ports = portStubs()) {
   history.replaceState(null, '', `${location.pathname}${hash}`);
   const app = createApp();
   apps.push(app);
-  const ports = portStubs();
   let framedBeforeMount = -1;
   stops.push(
     $effect.root(() => {
@@ -156,6 +155,15 @@ describe('the start', () => {
     localStorage.setItem('planum.guide', 'seen');
     const later = await boot('');
     expect(later.ports.startGuide).not.toHaveBeenCalled();
+  });
+
+  test("a plain first visit's tour starts on a link naming the opening picture", async () => {
+    const ports = portStubs();
+    let seen: string | null = null;
+    ports.startGuide.mockImplementation(() => (seen = location.hash));
+    await boot('', createEngine, ports);
+    // The tour keeps the link's lobes through its stops and puts the link back when it ends.
+    expect(seen).toContain('colors=lobe');
   });
 
   test('opens a plain page on the lobes, and keeps the colour of any link (CAT-03a)', async () => {
@@ -296,6 +304,8 @@ describe('the start', () => {
 
   test('stays on the link’s address bar until a settled camera writes the scene', async () => {
     vi.useFakeTimers();
+    // A first visit writes the opening link at once, for the tour.
+    localStorage.setItem('planum.guide', 'seen');
     const { app } = await boot();
     app.world!.anatomy.setHemisphere('left');
     flushSync();
