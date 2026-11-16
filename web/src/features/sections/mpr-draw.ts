@@ -57,17 +57,17 @@ export const VIRIDIS: readonly (readonly [number, number, number])[] = Array.fro
 );
 
 /**
- * FA over a resampled slice, each pixel at its centre as the engine samples the slice: viridis over
- * 0–1 at `opacity`, nothing where FA has no value.
+ * FA on a slice as its viridis level, 0–255 over FA 0–1, each pixel at its centre as the engine samples
+ * the slice; −1 where FA has no value. Kept with the plane, so a new opacity or window does not read FA
+ * again (SECT-38).
  */
-export function blendFa(
-  pixels: Uint8ClampedArray,
+export function faLevels(
   frame: PlaneFrame,
   size: number,
   fieldOfView: number,
   fa: (point: Vec3) => number,
-  opacity: number,
-): void {
+): Int16Array {
+  const levels = new Int16Array(size * size);
   const step = fieldOfView / size;
   const point: [number, number, number] = [0, 0, 0];
   for (let y = 0; y < size; y++)
@@ -77,13 +77,24 @@ export function blendFa(
       for (let axis = 0; axis < 3; axis++)
         point[axis] = frame.center[axis]! + frame.u[axis]! * across + frame.v[axis]! * up;
       const value = fa(point);
-      if (Number.isNaN(value)) continue;
-      const colour = VIRIDIS[Math.round(255 * Math.max(0, Math.min(1, value)))]!;
-      const index = (y * size + x) * 4;
-      for (let channel = 0; channel < 3; channel++)
-        pixels[index + channel] =
-          pixels[index + channel]! * (1 - opacity) + colour[channel]! * opacity;
+      levels[y * size + x] = Number.isNaN(value)
+        ? -1
+        : Math.round(255 * Math.max(0, Math.min(1, value)));
     }
+  return levels;
+}
+
+/** FA's levels over a slice's pixels: viridis at `opacity`, nothing where FA has no value. */
+export function blendFa(pixels: Uint8ClampedArray, levels: Int16Array, opacity: number): void {
+  for (let pixel = 0; pixel < levels.length; pixel++) {
+    const level = levels[pixel]!;
+    if (level < 0) continue;
+    const colour = VIRIDIS[level]!;
+    const index = pixel * 4;
+    for (let channel = 0; channel < 3; channel++)
+      pixels[index + channel] =
+        pixels[index + channel]! * (1 - opacity) + colour[channel]! * opacity;
+  }
 }
 
 /** The tracts on a slice, one pixel wide in each segment's direction colour. */

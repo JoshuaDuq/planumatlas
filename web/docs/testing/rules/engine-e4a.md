@@ -151,6 +151,15 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 - **Expected:** on the published CDMD volumes, fixed points with known aseg labels give fixed `{labelId, name, region.id, intensity}` (to be tabulated from the data); `sample()` before `load()` → Error "The linked MRI has not loaded."
 - **Covered by:** `src/lib/engine/slices/sections.test.ts` (R)
 
+### SLICE-41 · A slice is sampled once and drawn through any window
+
+- **Rule:** Sampling a linked MRI plane keeps, for each pixel, the MRI's trilinear intensity and all that the window does not change: the label's or the agreement's tint, the paint, the reader's map over the pixel and its alpha. Drawing the sample through a window reads no volume, and gives byte for byte the pixels that sampling through that window gave. The intensity is kept as a double: it lies between the 8-bit voxels, so a 256-entry table of grey levels, or a float, would change pixels.
+- **Kind:** scientific/data
+- **Level:** unit
+- **Source:** review handoff P13: every window or level change resampled each 512 × 512 plane
+- **Expected:** Published CDMD scan and aseg, the three linked planes through (−28.3, −8.6, 22.2), 128 px over 64 mm; the scan alone, labels, the left putamen's agreement, a paint with a map, a map against the paint; windows 94/188 (published), 94/10, 127.5/1000, −300/40, 400/40, 93.7/187.3 → no byte differs from `renderSlice` as it was before (`referenceSlice`, `slice-test-support.ts`). A 4×4×4 ramp sampled once at the default window, then `setWindow(60, 100)` → `pixels(slice)` first pixel 153 (from 70), with no `linear` or `label` read.
+- **Covered by:** `src/lib/engine/slices/sampling.test.ts` (S), `src/lib/engine/slices/sections.test.ts` (R)
+
 ## The cut controller
 
 ### SLICE-16 · Cut modes and the latest request

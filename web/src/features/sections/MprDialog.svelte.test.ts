@@ -517,22 +517,83 @@ describe('the pictures', () => {
 
   test('a plane is resampled only when its own slice changes', async () => {
     await opened();
-    await expect.poll(() => calls('pixels').length).toBe(3);
+    await expect.poll(() => calls('slice').length).toBe(3);
     // The cut atlas is not part of the picture.
     await engine.sections.setCutAtlas(engine.sections.state.cutAtlas);
     engine.sections.setDisplay({ reverse: true });
     await frame();
     await frame();
-    expect(calls('pixels')).toHaveLength(3);
+    expect(calls('slice')).toHaveLength(3);
     // Right of the midline moves the sagittal slice; the other two only move their crosshair.
     engine.sections.setCrosshair([3, 0, 0]);
-    await expect.poll(() => calls('pixels').length).toBe(4);
-    expect((calls('pixels').at(-1)!.args[0] as { normal: number[] }).normal).toEqual([1, 0, 0]);
+    await expect.poll(() => calls('slice').length).toBe(4);
+    expect((calls('slice').at(-1)!.args[0] as { normal: number[] }).normal).toEqual([1, 0, 0]);
     expect(section('coronal').querySelector<HTMLElement>('.crosshair-down')!.style.left).not.toBe(
       '50%',
     );
-    engine.sections.setWindow(100, 180);
-    await expect.poll(() => calls('pixels').length).toBe(7);
+  });
+
+  test('SECT-38 Window, Level and FA opacity draw each plane again from what it kept, reading nothing again', async () => {
+    // FA counted as it is read: the readout reads it at the crosshair, a plane at each of its pixels.
+    let faReads = 0;
+    const loadFa = engine.tracts.loadFa;
+    vi.spyOn(engine.tracts, 'loadFa').mockImplementation(async () => {
+      const fa = await loadFa();
+      return (point) => {
+        faReads++;
+        return fa(point);
+      };
+    });
+    const onPlane = vi.spyOn(engine.tracts, 'onPlane');
+    await engine.tracts.setActive(true);
+    engine.tracts.setOverlay(true);
+    await mount({ key: 'drawn' });
+    await openFromKeyboard();
+    sliderElement('FA opacity').focus();
+    await userEvent.keyboard('{End}');
+    await expect.poll(() => faReads).toBeGreaterThanOrEqual(3 * SIZE * SIZE);
+    await frame();
+    await frame();
+    const read = { slice: calls('slice').length, onPlane: onPlane.mock.calls.length, fa: faReads };
+    const drawn = calls('pixels').length;
+    expect(read.slice).toBe(3);
+    engine.sections.setWindow(100, 120);
+    await expect.poll(() => calls('pixels').length).toBe(drawn + 3);
+    sliderElement('Level').focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect.poll(() => calls('pixels').length).toBe(drawn + 6);
+    sliderElement('FA opacity').focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect.poll(() => calls('pixels').length).toBe(drawn + 9);
+    expect(calls('slice')).toHaveLength(read.slice);
+    expect(onPlane).toHaveBeenCalledTimes(read.onPlane);
+    expect(faReads - read.fa).toBeLessThan(SIZE * SIZE);
+    // FA's kept level at 95 % over the fake's slice, where no tract runs.
+    const [x, y] = [50, 50];
+    const point = pointOnPlane(
+      engine.sections.mprFrame('axial'),
+      (x + 0.5) / SIZE,
+      (y + 0.5) / SIZE,
+      256,
+    );
+    const index = y * SIZE + x;
+    const expected = new Uint8ClampedArray(
+      [index % 256, (index * 3) % 256, (index * 7) % 256].map(
+        (value, channel) =>
+          value * (1 - 0.95) + VIRIDIS[Math.round(255 * ((point[0] + 50) / 100))]![channel]! * 0.95,
+      ),
+    );
+    expect(pixel(canvas('axial'), x, y)).toEqual([...expected, 255]);
+  });
+
+  test('SECT-38 only the planes shown keep what they sampled, and only while the MRI is open', async () => {
+    await opened();
+    await expect.poll(() => calls('slice').length).toBe(3);
+    // Opened again, each plane is sampled afresh: nothing was kept while the MRI was closed.
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect.poll(shown).toBe(false);
+    await openFromKeyboard();
+    await expect.poll(() => calls('slice').length).toBe(6);
   });
 
   test('reversing the cut on a plane turns that panel to the side the stage now faces, and redraws it', async () => {
@@ -823,6 +884,21 @@ describe('on a phone', () => {
     expect(section('coronal').hidden).toBe(true);
     await expect.poll(() => canvas('axial').width).toBe(SIZE);
     expect(calls('pixels')).toHaveLength(1);
+  });
+
+  test('SECT-38 a hidden plane keeps nothing: shown again after a new window, it is sampled afresh', async () => {
+    await opened();
+    await expect.poll(() => calls('slice').length).toBe(1);
+    (page.getByRole('radio', { name: 'Axial' }).element() as HTMLElement).focus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect.poll(() => calls('slice').length).toBe(2);
+    const drawn = calls('pixels').length;
+    engine.sections.setWindow(100, 120);
+    await expect.poll(() => calls('pixels').length).toBe(drawn + 1);
+    expect(calls('slice')).toHaveLength(2);
+    await userEvent.keyboard('{ArrowRight}');
+    await expect.element(page.getByRole('radio', { name: 'Axial' })).toBeChecked();
+    await expect.poll(() => calls('slice').length).toBe(3);
   });
 
   test('the arrow keys choose the plane, and the plane chosen is drawn at once', async () => {

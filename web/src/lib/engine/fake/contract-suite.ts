@@ -1210,12 +1210,13 @@ export function defineEngineContract(
       it('resamples the planes and samples the volume only once loaded', async () => {
         const { engine } = await fresh();
         const { sections } = engine;
-        assert.throws(() => sections.pixels(sections.mprFrame('axial')));
+        assert.throws(() => sections.slice(sections.mprFrame('axial')));
         assert.throws(() => sections.sample([0, 0, 0]));
         await sections.load();
         const { size } = sections.display!;
         for (const plane of ['sagittal', 'coronal', 'axial'] as const) {
-          assert.equal(sections.pixels(sections.mprFrame(plane)).length, size * size * 4);
+          const slice = sections.slice(sections.mprFrame(plane));
+          assert.equal(sections.pixels(slice).length, size * size * 4);
         }
         assert.deepEqual(sections.mprFrame('axial').normal, [0, 0, 1]);
         assert.deepEqual(sections.mprFrame('coronal').normal, [0, 1, 0]);

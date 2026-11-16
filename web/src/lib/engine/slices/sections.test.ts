@@ -180,6 +180,41 @@ test('window changes reach the MRI renderer as well as the linked slices', () =>
   sections.dispose();
 });
 
+test('SLICE-41 a sampled plane is drawn through each new window without reading a volume again', () => {
+  const { sections, tissues } = fixture();
+  const metadata = {
+    shape: [4, 4, 4],
+    order: 'F',
+    voxel_to_surface_ras_mm: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+  };
+  const data = new Uint8Array(64).map(
+    (_, index) => (index % 4) + 10 * ((index >> 2) % 4) + 40 * (index >> 4),
+  );
+  const mri = new Volume(metadata, data);
+  const segmentation = new Volume(metadata, new Uint16Array(64));
+  sections.volumes = {
+    metadata: { labels: { 0: { name: 'Unknown', color: [0, 0, 0] } } },
+    mri,
+    segmentation,
+  } as never;
+  sections.display = { fieldOfView: 4, size: 4, windowCenter: 127.5, windowWidth: 255 };
+  tissues.setWindow = () => {};
+  // Axial z = 1 through (1.5, 1.5): the first pixel's MRI value is 70 (SLICE-11).
+  const slice = sections.slice(createFrame('axial', [1.5, 1.5, 1]));
+  const reads = [vi.spyOn(mri, 'linear'), vi.spyOn(segmentation, 'label')];
+  assert.deepEqual(Array.from(sections.pixels(slice).slice(0, 3)), [70, 70, 70]);
+  // (70 − 60 + 50) · 255 / 100 = 153.
+  sections.setWindow(60, 100);
+  assert.deepEqual(Array.from(sections.pixels(slice).slice(0, 3)), [153, 153, 153]);
+  for (const read of reads) assert.equal(read.mock.calls.length, 0);
+  sections.dispose();
+});
+
 test('GPU cut plane preserves fractional coordinates and reverse-side clipping', async () => {
   const { sections, model } = fixture();
   await sections.setMode('coronal');
@@ -566,7 +601,7 @@ test('SLICE-15 sampling before the linked MRI has loaded fails with its own mess
   const { sections } = fixture();
   assert.throws(() => sections.sample([0, 0, 0]), new Error('The linked MRI has not loaded.'));
   assert.throws(
-    () => sections.pixels(createFrame('axial', [0, 0, 0])),
+    () => sections.slice(createFrame('axial', [0, 0, 0])),
     new Error('The linked MRI has not loaded.'),
   );
 });
@@ -671,14 +706,14 @@ test("the linked MRI draws the model's paint by the cut atlas's labels, loading 
   await vi.waitFor(() => assert.equal(sections.state.paint, 'function:a'));
   assert.deepEqual(loads, ['destrieux']);
   // Axial z = 1, the first row x = 0..3: unpainted scan, then the painted half.
-  const pixels = sections.pixels(createFrame('axial', [1.5, 1.5, 1]));
+  const pixels = sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1])));
   assert.deepEqual(Array.from(pixels.slice(0, 3)), [100, 100, 100]);
   assert.deepEqual(Array.from(pixels.slice(12, 15)), [10, 200, 30]);
   model.state.paint = null;
   model.dispatchEvent(new Event('change'));
   await vi.waitFor(() => assert.equal(sections.state.paint, null));
   assert.deepEqual(
-    Array.from(sections.pixels(createFrame('axial', [1.5, 1.5, 1])).slice(12, 15)),
+    Array.from(sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1]))).slice(12, 15)),
     [100, 100, 100],
   );
 });

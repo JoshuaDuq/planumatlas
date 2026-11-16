@@ -332,6 +332,15 @@ a narrow no-break space (U+202F); "−" is U+2212.
 - **Expected:** Crosshair stroke `#4fb6e0` 1 px over `#0e1116` 3 px through the crosshair's pixel; letters at (size/2, 22), (size − 16, size/2), (size/2, size − 14), (16, size/2); annotation "Axial +12.3 mm" at (10, size − 12); alpha 255 everywhere.
 - **Covered by:** uncovered
 
+### SECT-38 · Window, Level and FA opacity redraw each plane from what it kept, and read nothing again
+
+- **Rule:** Each plane shown keeps what its last drawing read, each part by what it was made from: the slice's samples (its place, the overlay, the agreement, the paint and the map), FA's levels (its place) and the tracts on it (its place and what the stage draws of them). A new window, level or FA opacity draws the plane again from these: no volume, FA or streamline is read, and the picture is byte for byte the one that reading them afresh drew. A hidden plane keeps nothing, and closing the MRI lets everything go.
+- **Kind:** behaviour
+- **Level:** unit for the bytes; browser for what is read
+- **Source:** review handoff P13: every window or level change resampled each 512 × 512 plane and read FA and the streamlines again. On the published CDMD scan in Node, a change took 170 to 210 ms for the three planes (780 to 800 ms with FA and the two default bundles), and takes 15 to 20 ms (45 ms).
+- **Expected:** Tracts drawn, FA at 100 %: `setWindow(100, 120)`, Level ← and FA opacity ← → 3 redraws each, still 3 `slice` calls, no more `onPlane`, fewer than 128² FA reads; axial pixel (50, 50) is 0.05 of the fake's slice and 0.95 of FA's viridis. Closed and opened again → 3 more `slice` calls. Phone: Coronal chosen, a new window, Axial again → Axial sampled afresh. Published CDMD, the three planes, windows 94/188, 94/10, 127.5/1000, −300/40, 400/40, 93.7/187.3, overlay off and on, FA 0, 0.35 and 1, tracts off and on → no byte differs from the drawing before (`referenceSlice`, `blendFa` as it was).
+- **Covered by:** `src/features/sections/MprDialog.svelte.test.ts` "the pictures", "on a phone" (R); `src/features/sections/mpr-draw.test.ts` (S)
+
 ### SECT-33 · The dialog meets the size, reflow and focus-visibility rules
 
 - **Rule:** Radios, Save, Close and sliders are at least 24 px, 44 px on a coarse pointer. The sticky header never covers the focused control. The dialog reflows at 320 px and 200 % text, and passes axe in both themes, at 1280 and 390 px, in English and French.

@@ -1,8 +1,18 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { createFrame, pointOnFrame } from './coordinates.ts';
-import { renderSlice } from './sampling.ts';
+import { readRepoJson } from '../../../../test/repo.ts';
+import type { SegmentationAgreement } from '../../core/catalog/segmentation-agreement.ts';
+import { createFrame, pointOnFrame, stagedFrame } from './coordinates.ts';
+import type { Frame } from './coordinates.ts';
+import { sampleSlice, windowSlice } from './sampling.ts';
+import type { SliceDisplay, SliceVolumes, SliceWindow } from './sampling.ts';
+import { publishedSlices, publishedVolume, referenceSlice } from './slice-test-support.ts';
 import { Volume } from './volume.ts';
+import type { VolumeFile } from './volume.ts';
+
+/** Sampled and drawn through its window at once, as a plane is the first time the linked MRI draws it. */
+const renderSlice = (volumes: SliceVolumes, frame: Frame, display: SliceDisplay & SliceWindow) =>
+  windowSlice(sampleSlice(volumes, frame, display), display);
 
 const affine = [
   [1, 0, 0, 0],
@@ -167,4 +177,72 @@ test("a paint draws each label of the cut atlas's grid in its own colour over th
     [10, 200, 30, 255],
     'painted: the paint, opaque',
   );
+});
+
+test('SLICE-41 a slice sampled once draws, through any window, the bytes that sampling it through that window drew', () => {
+  const { volumes, display } = publishedSlices();
+  const structure = readRepoJson<SegmentationAgreement>(
+    'public/models/cdmd/segmentation-agreement.json',
+  ).structures.find((entry) => entry.aseg_label === 12)!;
+  const compared = publishedVolume(
+    readRepoJson<{ segmentation_agreement: { volume: VolumeFile } }>(
+      'public/models/cdmd/manifest.json',
+    ).segmentation_agreement.volume,
+  );
+  // A paint on every third aseg label, and a map of both signs with holes, over and off the paint.
+  const paint = {
+    volume: volumes.segmentation,
+    colors: Array.from({ length: 256 }, (_, label) =>
+      label % 3 ? null : [label, 255 - label, (label * 7) % 256],
+    ),
+  };
+  const map = (overlap: { map: number[]; both: number[] } | null) => ({
+    at: (x: number, y: number, z: number) =>
+      Math.abs(x + 30) < 2 ? Number.NaN : Math.sin(x / 5) * Math.cos(y / 7) + z / 100,
+    display: { threshold: 0.3, max: 1.2, opacity: 0.65 },
+    overlap: overlap as never,
+  });
+  const layers: [string, SliceVolumes, boolean][] = [
+    ['the scan alone', volumes, false],
+    ['labels', volumes, true],
+    ['the left putamen’s agreement', { ...volumes, agreement: { structure, compared } }, true],
+    ['a paint and a map', { ...volumes, paint, map: map(null) }, true],
+    [
+      'a map against the paint',
+      { ...volumes, paint, map: map({ map: [213, 81, 129], both: [0, 131, 0] }) },
+      false,
+    ],
+  ];
+  // The published window, the narrowest the slider gives, a wide one, centres that clamp every pixel
+  // to white and to black, and one between whole numbers.
+  const windows: SliceWindow[] = [
+    [display.window_center, display.window_width],
+    [94, 10],
+    [127.5, 1000],
+    [-300, 40],
+    [400, 40],
+    [93.7, 187.3],
+  ].map(([windowCenter, windowWidth]) => ({
+    windowCenter: windowCenter!,
+    windowWidth: windowWidth!,
+  }));
+  const firstDifference = (a: Uint8ClampedArray, b: Uint8ClampedArray) =>
+    a.length === b.length ? a.findIndex((value, index) => value !== b[index]) : 0;
+  // Through the left putamen, off the voxel grid; the scan's own 0.5 mm pixels over a 64 mm field.
+  const crosshair = [-28.3, -8.6, 22.2] as const;
+  for (const plane of ['sagittal', 'coronal', 'axial'] as const) {
+    const frame = stagedFrame(plane, crosshair, false);
+    for (const [name, shown, overlay] of layers) {
+      const sampled = { size: 128, fieldOfView: 64, overlay };
+      const samples = sampleSlice(shown, frame, sampled);
+      for (const window of windows) {
+        const expected = referenceSlice(shown, frame, { ...sampled, ...window });
+        assert.equal(
+          firstDifference(windowSlice(samples, window), expected),
+          -1,
+          `${plane}, ${name}, window ${window.windowCenter}/${window.windowWidth}`,
+        );
+      }
+    }
+  }
 });

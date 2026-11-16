@@ -338,6 +338,12 @@ export interface MriWindow {
   width: number;
 }
 
+/** A plane as `slice` sampled it: opaque outside the engine, and only given back to `pixels`. */
+declare const planeSlice: unique symbol;
+export interface PlaneSlice {
+  readonly [planeSlice]: true;
+}
+
 /** What a point in the volume is (sections.js:418). */
 export interface VolumeSample {
   labelId: number;
@@ -412,8 +418,13 @@ export interface EngineSections {
 
   /** The plane through the crosshair for an MPR panel (ui/chrome/sections.js:290, 354). */
   mprFrame(plane: MprPlane): PlaneFrame;
-  /** RGBA pixels of a frame at `display.size` square (sections.js:414). Needs the MRI loaded. */
-  pixels(frame: PlaneFrame): Uint8ClampedArray;
+  /**
+   * A frame sampled at `display.size` square (sections.js:414): all of its pixels but the MRI window,
+   * which `pixels` applies. Needs the MRI loaded.
+   */
+  slice(frame: PlaneFrame): PlaneSlice;
+  /** RGBA pixels of a sampled frame through the current MRI window, without sampling it again. */
+  pixels(slice: PlaneSlice): Uint8ClampedArray;
   /** Needs the MRI loaded (sections.js:418). */
   sample(point: Vec3): VolumeSample;
   /** The region whose drawn 3D solid holds a point; null where none does. */

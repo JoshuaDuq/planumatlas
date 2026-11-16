@@ -19,8 +19,8 @@ import type {
 } from '../tissues/gpu-sections.ts';
 import { centeredFrame, clippingPlane } from './coordinates.ts';
 import type { Frame, Ras } from './coordinates.ts';
-import { renderSlice } from './sampling.ts';
-import type { SliceMap, SlicePaint } from './sampling.ts';
+import { sampleSlice, windowSlice } from './sampling.ts';
+import type { SliceMap, SlicePaint, SliceSamples } from './sampling.ts';
 import { loadVolume } from './volume.ts';
 import type { Volume, VolumeFile } from './volume.ts';
 import type { SurfaceColor } from '../../types/index.ts';
@@ -560,11 +560,12 @@ export class BrainSections extends EventTarget {
     }
   }
 
-  pixels(frame: Frame): Uint8ClampedArray {
+  /** A frame sampled at the display's size: all of its pixels but the MRI window, which `pixels` applies. */
+  slice(frame: Frame): SliceSamples {
     const { volumes, display } = this;
     if (!volumes || !display) throw new Error('The linked MRI has not loaded.');
     const shown = this.shownAgreement;
-    return renderSlice(
+    return sampleSlice(
       {
         mri: volumes.mri,
         segmentation: volumes.segmentation,
@@ -574,8 +575,14 @@ export class BrainSections extends EventTarget {
         ...(this.shownPaint && { paint: this.shownPaint }),
       },
       frame,
-      { ...display, overlay: this.state.overlay },
+      { size: display.size, fieldOfView: display.fieldOfView, overlay: this.state.overlay },
     );
+  }
+
+  /** A sampled frame's pixels through the current MRI window, without reading a volume again. */
+  pixels(samples: SliceSamples): Uint8ClampedArray {
+    if (!this.display) throw new Error('The linked MRI has not loaded.');
+    return windowSlice(samples, this.display);
   }
 
   sample(point: Ras): {

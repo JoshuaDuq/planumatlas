@@ -7,6 +7,7 @@ import type {
   MriDisplay,
   MriWindow,
   PlaneFrame,
+  PlaneSlice,
   SectionsState,
   Vec3,
   VolumeSample,
@@ -16,6 +17,7 @@ import type { BrainSections } from './slices/sections.ts';
 import { stagedFrame } from './slices/coordinates.ts';
 import { drawnRegionAt } from './slices/region-at.ts';
 import type { Frame } from './slices/coordinates.ts';
+import type { SliceSamples } from './slices/sampling.ts';
 
 const toTuple = (vector: Vector3): Vec3 => [vector.x, vector.y, vector.z];
 
@@ -193,7 +195,8 @@ export function createEngineSections(
       const { crosshair, mode, reverse } = sections.state;
       return planeFrame(stagedFrame(plane, crosshair, mode === plane && reverse));
     },
-    pixels: (frame) => sections.pixels(frameOf(frame)),
+    slice: (frame) => sections.slice(frameOf(frame)) as unknown as PlaneSlice,
+    pixels: (slice) => sections.pixels(slice as unknown as SliceSamples),
     sample: (point): VolumeSample => sections.sample(point),
     regionAt: (point) => drawnRegionAt(sections.model, sections.metadataUrl, point),
   };

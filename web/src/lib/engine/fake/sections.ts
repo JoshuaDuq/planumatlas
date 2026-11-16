@@ -6,6 +6,7 @@ import type {
   MriDisplay,
   MriWindow,
   PlaneFrame,
+  PlaneSlice,
   SectionsState,
   Vec3,
 } from '../api.ts';
@@ -339,8 +340,13 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
         edges: [...frame.edges],
       };
     },
-    pixels() {
+    slice() {
       const { size } = requireVolumes();
+      return { size } as unknown as PlaneSlice;
+    },
+    pixels(slice) {
+      requireVolumes();
+      const { size } = slice as unknown as { size: number };
       const pixels = new Uint8ClampedArray(size * size * 4);
       for (let index = 0; index < size * size; index++) {
         pixels.set([index % 256, (index * 3) % 256, (index * 7) % 256, 255], index * 4);

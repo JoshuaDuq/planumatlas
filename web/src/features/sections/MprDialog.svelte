@@ -33,6 +33,8 @@
     EngineTracts,
     MprPlane,
     PlaneFrame,
+    PlaneSlice,
+    PlaneTracts,
     SectionsState,
     Vec3,
   } from '../../lib/engine/api.ts';
@@ -58,6 +60,7 @@
     drawSlice,
     drawTracts,
     edgeLetter,
+    faLevels,
   } from './mpr-draw.ts';
   import {
     canvasName,
@@ -74,7 +77,7 @@
   interface Props {
     mpr: MprDialogController;
     engine: {
-      sections: Pick<EngineSections, 'display' | 'sample' | 'mprFrame' | 'pixels'>;
+      sections: Pick<EngineSections, 'display' | 'sample' | 'mprFrame' | 'slice' | 'pixels'>;
       tracts: Pick<EngineTracts, 'onPlane' | 'loadFa'>;
     };
     /** The sections' display snapshot, replaced on every engine `change` (S1's engine sync). */
@@ -196,37 +199,67 @@
   });
 
   // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
-  // over the picture, not drawn into it. A plane nobody can see is drawn when it is shown
-  // (sections.js:315-351), and a canvas that replaced another is drawn afresh.
+  // over the picture, not drawn into it. Window, Level and FA opacity draw it again from what it kept
+  // of its last drawing, each part by what it was made from: the slice's samples, FA's levels and the
+  // tracts on it (SECT-38). A plane nobody can see is drawn when it is shown (sections.js:315-351), and
+  // a canvas that replaced another is drawn afresh. Only the planes shown keep anything, and only while
+  // the MRI is open.
+  interface Made<T> {
+    key: string;
+    value: T;
+  }
+  function reuse<T>(made: Made<T> | undefined, key: string, make: () => T): Made<T> {
+    return made?.key === key ? made : { key, value: make() };
+  }
   const drawn = new Map<MprPlane, { canvas: HTMLCanvasElement; key: string }>();
+  const kept = new Map<
+    MprPlane,
+    {
+      slice: Made<PlaneSlice>;
+      fa: Made<Int16Array> | undefined;
+      tracts: Made<PlaneTracts> | undefined;
+    }
+  >();
   $effect(() => {
-    if (!reading) return;
+    if (!reading) {
+      kept.clear();
+      return;
+    }
     const { display } = reading;
     const { overlay, agreement, paint } = engineState.sections;
+    for (const plane of PLANES) if (!visible.includes(plane)) kept.delete(plane);
     for (const plane of visible) {
       const canvas = canvases[plane]!;
       const frame = frames[plane];
+      const place = JSON.stringify([frame.center, frame.u, frame.v]);
+      const slice = JSON.stringify([place, overlay, agreement, paint, map?.key]);
+      const onPlane = tracts && JSON.stringify([place, tracts.key]);
       const key = JSON.stringify([
-        frame.center,
-        frame.u,
-        frame.v,
-        overlay,
-        agreement,
-        paint,
-        map?.key,
+        slice,
         display.windowCenter,
         display.windowWidth,
-        tracts?.key,
+        onPlane,
         faShown && faOpacity,
       ]);
       const last = drawn.get(plane);
       if (last?.canvas === canvas && last.key === key) continue;
       drawn.set(plane, { canvas, key });
       untrack(() => {
-        const pixels = engine.sections.pixels(frame);
-        if (faShown) blendFa(pixels, frame, display.size, display.fieldOfView, fa!, faOpacity);
-        if (tracts) {
-          drawTracts(pixels, display.size, display.fieldOfView, engine.tracts.onPlane(frame));
+        const held = kept.get(plane);
+        const layers = {
+          slice: reuse(held?.slice, slice, () => engine.sections.slice(frame)),
+          fa: faShown
+            ? reuse(held?.fa, place, () => faLevels(frame, display.size, display.fieldOfView, fa!))
+            : undefined,
+          tracts: onPlane
+            ? reuse(held?.tracts, onPlane, () => engine.tracts.onPlane(frame))
+            : undefined,
+        };
+        kept.set(plane, layers);
+        const pixels = engine.sections.pixels(layers.slice.value);
+        if (layers.fa) blendFa(pixels, layers.fa.value, faOpacity);
+        if (layers.tracts) {
+          drawTracts(pixels, display.size, display.fieldOfView, layers.tracts.value);
         }
         drawSlice(canvas, pixels, display.size);
       });

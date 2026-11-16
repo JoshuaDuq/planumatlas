@@ -41,32 +41,63 @@ export interface SliceMap {
 export interface SliceDisplay {
   size: number;
   fieldOfView: number;
-  windowCenter: number;
-  windowWidth: number;
   overlay: boolean;
 }
 
+/** The MRI window a slice's grey is drawn through. */
+export interface SliceWindow {
+  windowCenter: number;
+  windowWidth: number;
+}
+
+/**
+ * A slice sampled once: each pixel's MRI intensity and all of the pixel that the window does not
+ * change, so a new window draws it again without reading a volume (`windowSlice`).
+ */
+export interface SliceSamples {
+  /**
+   * The MRI's trilinear intensity at each pixel, as a double: it lies between the 8-bit voxels' values,
+   * so neither a 256-entry table of grey levels nor a float would draw the same bytes.
+   */
+  intensity: Float64Array;
+  /** The colour mixed into each pixel's grey: its label's under the overlay, or its agreement's; null for none. */
+  tint: (Rgb | null)[];
+  /** 1 where a paint covers the pixel: its colour then hides the grey, whatever the window. */
+  painted: Uint8Array;
+  /** Every pixel's alpha, and each painted pixel's colour with the map drawn over it. */
+  fixed: Uint8ClampedArray;
+  /**
+   * The reader's map over the unpainted pixels it colours: their indices, and three terms per pixel,
+   * `colour · 255 · opacity`, added to `keep` (1 − opacity) of what the window draws there.
+   */
+  map: { pixels: Uint32Array; terms: Float64Array; keep: number } | null;
+}
+
 /** Canvas rows run from superior/anterior to inferior/posterior. */
-export function renderSlice(
+export function sampleSlice(
   volumes: SliceVolumes,
   frame: Frame,
   display: SliceDisplay,
-): Uint8ClampedArray {
-  const { size, fieldOfView, windowCenter, windowWidth, overlay } = display;
-  const { agreement } = volumes;
+): SliceSamples {
+  const { size, fieldOfView, overlay } = display;
+  const { agreement, paint, map } = volumes;
   if (
     !Number.isInteger(size) ||
     size < 2 ||
     size > 2048 ||
     !Number.isFinite(fieldOfView) ||
-    fieldOfView <= 0 ||
-    !Number.isFinite(windowCenter) ||
-    !Number.isFinite(windowWidth) ||
-    windowWidth <= 0
+    fieldOfView <= 0
   ) {
-    throw new RangeError('Invalid slice resolution or MRI window.');
+    throw new RangeError('Invalid slice resolution.');
   }
-  const pixels = new Uint8ClampedArray(size * size * 4);
+  const count = size * size;
+  const intensity = new Float64Array(count);
+  // Filled in pixel order, so it holds no holes.
+  const tint: (Rgb | null)[] = [];
+  const painted = new Uint8Array(count);
+  const fixed = new Uint8ClampedArray(count * 4);
+  const mapped = map && { pixels: new Uint32Array(count), terms: new Float64Array(count * 3) };
+  let mappedCount = 0;
   const step = fieldOfView / size;
   const origin = frame.center
     .clone()
@@ -78,44 +109,94 @@ export function renderSlice(
       point[0] = origin.x + step * (x * frame.u.x - y * frame.v.x);
       point[1] = origin.y + step * (x * frame.u.y - y * frame.v.y);
       point[2] = origin.z + step * (x * frame.u.z - y * frame.v.z);
+      const pixel = y * size + x;
+      const index = pixel * 4;
       const label = volumes.segmentation.label(point);
-      const gray = Math.max(
-        0,
-        Math.min(
-          255,
-          ((volumes.mri.linear(point) - windowCenter + windowWidth / 2) * 255) / windowWidth,
-        ),
-      );
-      const index = (y * size + x) * 4;
+      intensity[pixel] = volumes.mri.linear(point);
       const category =
         agreement && categoryAt(agreement.structure, label, agreement.compared.label(point));
-      const color = agreement
-        ? category && AGREEMENT_COLORS[category]
-        : overlay && label
-          ? volumes.metadata.labels[label]!.color
-          : null;
-      for (let channel = 0; channel < 3; channel++) {
-        pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
+      tint.push(
+        (agreement
+          ? category && AGREEMENT_COLORS[category]
+          : overlay && label
+            ? volumes.metadata.labels[label]!.color
+            : null) ?? null,
+      );
+      const colour = paint && paint.colors[paint.volume.label(point)];
+      if (colour) {
+        painted[pixel] = 1;
+        for (let channel = 0; channel < 3; channel++) fixed[index + channel] = colour[channel]!;
       }
-      const painted = volumes.paint && volumes.paint.colors[volumes.paint.volume.label(point)];
-      if (painted)
-        for (let channel = 0; channel < 3; channel++) pixels[index + channel] = painted[channel]!;
-      const mapped =
-        volumes.map &&
+      const shown =
+        map &&
         mapColour(
-          volumes.map.at(...point),
-          volumes.map.display,
-          volumes.map.overlap && { colours: volumes.map.overlap, painted: Boolean(painted) },
+          map.at(...point),
+          map.display,
+          map.overlap && { colours: map.overlap, painted: Boolean(colour) },
         );
-      if (mapped) {
-        const { opacity } = volumes.map!.display;
-        for (let channel = 0; channel < 3; channel++) {
-          pixels[index + channel] =
-            pixels[index + channel]! * (1 - opacity) + mapped[channel]! * 255 * opacity;
+      if (shown) {
+        const { opacity } = map!.display;
+        if (colour) {
+          for (let channel = 0; channel < 3; channel++)
+            fixed[index + channel] =
+              fixed[index + channel]! * (1 - opacity) + shown[channel]! * 255 * opacity;
+        } else {
+          mapped!.pixels[mappedCount] = pixel;
+          for (let channel = 0; channel < 3; channel++)
+            mapped!.terms[mappedCount * 3 + channel] = shown[channel]! * 255 * opacity;
+          mappedCount++;
         }
       }
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
-      pixels[index + 3] = label || category || painted ? 255 : 0;
+      fixed[index + 3] = label || category || colour ? 255 : 0;
+    }
+  return {
+    intensity,
+    tint,
+    painted,
+    fixed,
+    map: mapped
+      ? {
+          pixels: mapped.pixels.slice(0, mappedCount),
+          terms: mapped.terms.slice(0, mappedCount * 3),
+          keep: 1 - map!.display.opacity,
+        }
+      : null,
+  };
+}
+
+/**
+ * A sampled slice's RGBA pixels through an MRI window: the grey, mixed 0.55 to 0.45 with a pixel's
+ * tint, then the reader's map over it at its opacity. Each step rounds as the canvas's bytes do, so the
+ * pixels are those that sampling through this window draws.
+ */
+export function windowSlice(
+  samples: SliceSamples,
+  { windowCenter, windowWidth }: SliceWindow,
+): Uint8ClampedArray {
+  if (!Number.isFinite(windowCenter) || !Number.isFinite(windowWidth) || windowWidth <= 0) {
+    throw new RangeError('Invalid MRI window.');
+  }
+  const { intensity, tint, painted, map } = samples;
+  const pixels = samples.fixed.slice();
+  for (let pixel = 0; pixel < intensity.length; pixel++) {
+    if (painted[pixel]) continue;
+    const gray = Math.max(
+      0,
+      Math.min(255, ((intensity[pixel]! - windowCenter + windowWidth / 2) * 255) / windowWidth),
+    );
+    const color = tint[pixel];
+    const index = pixel * 4;
+    for (let channel = 0; channel < 3; channel++) {
+      pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
+    }
+  }
+  if (map)
+    for (let n = 0; n < map.pixels.length; n++) {
+      const index = map.pixels[n]! * 4;
+      for (let channel = 0; channel < 3; channel++) {
+        pixels[index + channel] = pixels[index + channel]! * map.keep + map.terms[n * 3 + channel]!;
+      }
     }
   return pixels;
 }
