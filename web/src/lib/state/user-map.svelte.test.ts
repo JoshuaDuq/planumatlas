@@ -3,6 +3,7 @@ import type { Cluster } from '../core/user-map/clusters.ts';
 import { VOLUMES_PER_SECOND } from '../core/user-map/display.ts';
 import type { MapSummary } from '../core/user-map/display.ts';
 import { MapFileError } from '../core/user-map/map-file-error.ts';
+import { MAX_FILE_BYTES } from '../core/user-map/nifti.ts';
 import { createFakeUserMap } from '../engine/fake/user-map.ts';
 import type { SurfaceColor } from '../types/index.ts';
 import { createUserMapStore } from './user-map.svelte.ts';
@@ -122,6 +123,20 @@ test('a file that cannot be placed is reported by name, and the colour taken for
   expect(store.state).toEqual({ status: 'error', name: 'b.nii', error: refused });
   // The last map is not left on the stage under the error.
   expect(engine.loaded).toBeNull();
+});
+
+test('FUNC-55 · a file larger than any map is reported by name, never read nor handed to the engine', async () => {
+  const { engine, store } = setup();
+  const huge = file('bold.nii.gz');
+  Object.defineProperty(huge, 'size', { value: MAX_FILE_BYTES + 1 });
+  const read = vi.spyOn(huge, 'arrayBuffer');
+  await store.open(huge);
+  expect(store.state).toMatchObject({ status: 'error', name: 'bold.nii.gz' });
+  const { error } = store.state as { error: MapFileError };
+  expect(error).toBeInstanceOf(MapFileError);
+  expect([error.code, error.params]).toEqual(['fileSize', [MAX_FILE_BYTES + 1, MAX_FILE_BYTES]]);
+  expect(read).not.toHaveBeenCalled();
+  expect(engine.loading).toBe(false);
 });
 
 test('a map opened over one still loading replaces it, and the first never lands', async () => {

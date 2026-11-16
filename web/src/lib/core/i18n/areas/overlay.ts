@@ -96,6 +96,12 @@ export const en = {
     nifti2: 'This is a NIfTI-2 file; save it as NIfTI-1 to open it here.',
     notNifti: 'This file is not a NIfTI image.',
     gzip: 'This .gz file could not be decompressed; it may be truncated or damaged.',
+    fileSize: (size: number, limit: number) =>
+      `This file is ${grouped(size)} bytes, over the limit of ${grouped(limit)}.`,
+    declared: (size: number, limit: number) =>
+      `This file’s header describes ${grouped(size)} bytes, over the limit of ${grouped(limit)}.`,
+    inflated: (size: number) =>
+      `Decompressed, this file runs past the ${grouped(size)} bytes its header describes.`,
     rank: (rank: number) =>
       `This file is neither a 3-D volume nor a series of them: it has ${rank} ${rank === 1 ? 'dimension' : 'dimensions'}.`,
     emptyAxis: (dims: string) => `This file’s dimensions ${dims} include an empty axis.`,
@@ -223,6 +229,12 @@ export const fr: typeof en = {
     nifti2: 'Ceci est un fichier NIfTI-2 ; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.',
     notNifti: 'Ce fichier n’est pas une image NIfTI.',
     gzip: 'Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.',
+    fileSize: (size: number, limit: number) =>
+      `Ce fichier fait ${grouped(size)} octets, au-delà de la limite de ${grouped(limit)}.`,
+    declared: (size: number, limit: number) =>
+      `L’en-tête de ce fichier décrit ${grouped(size)} octets, au-delà de la limite de ${grouped(limit)}.`,
+    inflated: (size: number) =>
+      `Décompressé, ce fichier dépasse les ${grouped(size)} octets que décrit son en-tête.`,
     rank: (rank: number) =>
       `Ce fichier n’est ni un volume 3D ni une série de volumes : il a ${rank} ${rank < 2 ? 'dimension' : 'dimensions'}.`,
     emptyAxis: (dims: string) => `Les dimensions ${dims} de ce fichier comprennent un axe vide.`,

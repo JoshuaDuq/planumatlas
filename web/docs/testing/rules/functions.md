@@ -504,3 +504,23 @@ A function and the reader's Overlay map drawn together, compared point by point 
 - **Level:** browser
 - **Expected:** areas map 40, function 200, both 10 → "25% of the cortex where zstat1 is above 3.1 lies in these areas, and it covers 5% of their cortex. …"; unmeasured → "Measuring the overlap with your map…"; map 0 → "zstat1 is above 9 nowhere on the cortex."; the store asks again on a raised paint threshold (fewer regions) and a new extent, keeps the newer answer when the older arrives last, and sets the engine's overlap colours, then null once the map is hidden.
 - **Covered by:** `src/lib/state/map-overlap.svelte.test.ts`, `src/features/functions/functions.svelte.test.ts` (R)
+
+## The reader's map file
+
+What a file given to the Overlay must be before it is read (review item SEC3): the file stays on the reader's computer, so a file too large, or a gzip that inflates without end, would only crash the reader's own tab. The limit follows from the reader's own: the 352 bytes before the earliest data, 16 MiB for header extensions, and `MAX_VALUES` values of float64, the widest type read (`MAX_FILE_BYTES` in `web/src/lib/core/user-map/nifti.ts`).
+
+### FUNC-55 · A map file larger than any map can be is refused before it is read
+
+- **Rule:** `readMapFile` refuses a file of more than `MAX_FILE_BYTES` bytes (352 + 16 MiB + 8 × `MAX_VALUES`) with the `fileSize` reason, which names its size and the limit, without reading it; a smaller file is read whole as it is. The Overlay reports the refusal by the file's name and hands nothing to the engine.
+- **Kind:** behaviour
+- **Level:** unit (the store: browser)
+- **Expected:** `MAX_FILE_BYTES` = 553,648,480; a file of 553,648,481 bytes → "This file is 553 648 481 bytes, over the limit of 553 648 480." (« Ce fichier fait … octets, au-delà de la limite de … »), `arrayBuffer` never called, the store `{ status: 'error', name }` with code `fileSize`, the engine not loading; every fixture → its own bytes.
+- **Covered by:** `src/lib/core/user-map/nifti.test.ts`, `src/lib/core/user-map/map-file-error.test.ts`, `src/lib/state/user-map.svelte.test.ts` (R)
+
+### FUNC-56 · A .nii.gz inflates no further than its header says the file runs
+
+- **Rule:** A gzipped file is inflated a 16 KiB compressed slice at a time. Its first 348 inflated bytes are checked as a header before more is kept, and a header refused for any reason stops the inflation; a header whose data would end past `MAX_FILE_BYTES` is refused (`declared`), compressed or not. The rest fills one buffer of the length the header states (`vox_offset` + voxels × bytes per voxel). Inflated bytes past that length cancel the stream and refuse the file (`inflated`); it is never cut short. A .nii.gz otherwise reads exactly as the .nii inside it.
+- **Kind:** behaviour
+- **Level:** unit
+- **Expected:** each fixture and a 3-volume series, gzipped, read deep-equal to the .nii, with inflated chunks of 1, 100, 348 and 349 bytes; `float32-sform.nii` (448 bytes) plus one byte, gzipped → "Decompressed, this file runs past the 448 bytes its header describes."; plus 64 MiB of zeros (under 128 KB compressed) → the same, with under 1 MiB inflated (16 KiB measured); 64 MiB of zeros under a header without the magic → "no NIfTI magic", under 1 MiB inflated; `vox_offset` 2³⁰ → "This file’s header describes 1 073 741 920 bytes, over the limit of 553 648 480." for the .nii and the .nii.gz.
+- **Covered by:** `src/lib/core/user-map/nifti.test.ts`, `src/lib/core/user-map/map-file-error.test.ts`

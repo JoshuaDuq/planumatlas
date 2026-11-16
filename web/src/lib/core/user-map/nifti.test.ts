@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { test } from 'vitest';
+import { gzipSync } from 'node:zlib';
+import { afterEach, test, vi } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
-import { MAX_VALUES, MAX_VOXELS, readNifti } from './nifti.ts';
+import { MAX_FILE_BYTES, MAX_VALUES, MAX_VOXELS, readMapFile, readNifti } from './nifti.ts';
 
 const FIXTURES = 'web/src/lib/core/user-map/fixtures/';
 
@@ -229,4 +230,118 @@ test('data that cannot be read as stored, or shown as float32, is refused', asyn
     view.setFloat64(view.getFloat32(108, true), 1e300, true);
   });
   await assert.rejects(readNifti(huge), /1e\+300, beyond the float32 range/);
+});
+
+const gzip = (buffer: ArrayBuffer) => {
+  const bytes = gzipSync(new Uint8Array(buffer));
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+};
+
+const Inflater = DecompressionStream;
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+/**
+ * DecompressionStream as the reader meets it, its output cut into chunks of at most `size` bytes;
+ * `bytes` counts what has been pulled from it.
+ */
+function inflatedIn(size: number): { bytes: number } {
+  const pulled = { bytes: 0 };
+  vi.stubGlobal(
+    'DecompressionStream',
+    class {
+      readonly writable: WritableStream<BufferSource>;
+      readonly readable: ReadableStream<Uint8Array>;
+      constructor(format: CompressionFormat) {
+        const inner = new Inflater(format);
+        this.writable = inner.writable;
+        this.readable = inner.readable.pipeThrough(
+          new TransformStream<Uint8Array, Uint8Array>({
+            transform(chunk, controller) {
+              pulled.bytes += chunk.length;
+              for (let at = 0; at < chunk.length; at += size) {
+                controller.enqueue(chunk.subarray(at, at + size));
+              }
+            },
+          }),
+        );
+      }
+    },
+  );
+  return pulled;
+}
+
+/** Every fixture file, by name: expected.json also records the nibabel version. */
+const FIXTURE_NAMES = Object.keys(expected).filter((name) => name.includes('.nii'));
+
+test('FUNC-55 · a file larger than any map file can be is refused before it is read', async () => {
+  // The 352 bytes before the earliest data, 16 MiB for extensions and MAX_VALUES float64 values.
+  assert.equal(MAX_FILE_BYTES, 352 + 16 * 2 ** 20 + 8 * MAX_VALUES);
+  const huge = new File([], 'bold.nii');
+  Object.defineProperty(huge, 'size', { value: MAX_FILE_BYTES + 1 });
+  const read = vi.spyOn(huge, 'arrayBuffer');
+  await assert.rejects(
+    readMapFile(huge),
+    /This file is 553\u202f648\u202f481 bytes, over the limit of 553\u202f648\u202f480\./,
+  );
+  assert.equal(read.mock.calls.length, 0);
+  for (const name of FIXTURE_NAMES) {
+    const bytes = fixture(name);
+    assert.deepEqual(
+      new Uint8Array(await readMapFile(new File([bytes], name))),
+      new Uint8Array(bytes),
+    );
+  }
+});
+
+test('FUNC-56 · a .nii.gz reads as the .nii inside it, however its inflated bytes arrive', async () => {
+  const files = FIXTURE_NAMES.filter((name) => name.endsWith('.nii')).map((name) => fixture(name));
+  for (const nii of [...files, series(3, 2 | 8, 2)]) {
+    const image = await readNifti(nii);
+    assert.deepEqual(await readNifti(gzip(nii)), image);
+    // Chunks that end inside the header, at its end and past it.
+    for (const size of [1, 100, 348, 349]) {
+      inflatedIn(size);
+      assert.deepEqual(await readNifti(gzip(nii)), image);
+      vi.unstubAllGlobals();
+    }
+  }
+});
+
+test('FUNC-56 · a gzip that inflates past its header’s length is refused, having inflated little of it', async () => {
+  // float32-sform.nii states 448 bytes; a byte more, or 64 MiB of zeros (64 KB compressed), follows.
+  const file = new Uint8Array(fixture('float32-sform.nii'));
+  const past = (extra: number) => {
+    const bytes = new Uint8Array(file.length + extra);
+    bytes.set(file);
+    return gzip(bytes.buffer);
+  };
+  await assert.rejects(readNifti(past(1)), /runs past the 448 bytes its header describes/);
+  const bomb = past(64 * 2 ** 20);
+  assert.ok(bomb.byteLength < 2 ** 17);
+  const pulled = inflatedIn(2 ** 14);
+  await assert.rejects(readNifti(bomb), /runs past the 448 bytes its header describes/);
+  assert.ok(pulled.bytes < 2 ** 20, `${pulled.bytes} bytes inflated`);
+});
+
+test('FUNC-56 · a gzip is refused for its header before the rest is inflated', async () => {
+  const zeros = new Uint8Array(64 * 2 ** 20);
+  // 64 MiB of zeros under a header.
+  const under = (header: ArrayBuffer) => {
+    zeros.set(new Uint8Array(header));
+    return gzip(zeros.buffer);
+  };
+  let pulled = inflatedIn(2 ** 14);
+  const magic = fixture('float32-sform.nii', (view) => view.setUint8(345, 0x2d));
+  await assert.rejects(readNifti(under(magic)), /no NIfTI magic/);
+  assert.ok(pulled.bytes < 2 ** 20, `${pulled.bytes} bytes inflated`);
+  // A data offset past every map's size: refused uncompressed too, where it would read as truncated.
+  const offset = fixture('float32-sform.nii', (view) => view.setFloat32(108, 2 ** 30, true));
+  const declared =
+    /header describes 1\u202f073\u202f741\u202f920 bytes, over the limit of 553\u202f648\u202f480/;
+  await assert.rejects(readNifti(offset), declared);
+  pulled = inflatedIn(2 ** 14);
+  await assert.rejects(readNifti(under(offset)), declared);
+  assert.ok(pulled.bytes < 2 ** 20, `${pulled.bytes} bytes inflated`);
 });

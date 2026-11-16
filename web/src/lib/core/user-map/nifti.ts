@@ -56,6 +56,29 @@ const DATA_TYPES: Record<number, { bytes: number; read: Read }> = {
   768: { bytes: 4, read: (view, offset, little) => view.getUint32(offset, little) },
 };
 
+/** `sizeof_hdr`: NIfTI-1's header. NIfTI-2's 540 bytes are refused. */
+const HEADER_BYTES = 348;
+/** Room for header extensions (AFNI's XML, FreeSurfer's tags): writers' metadata takes kilobytes. */
+const EXTENSION_BYTES = 16 * 2 ** 20;
+
+/**
+ * The most bytes a map file may hold, refused before it is read: the 352 bytes before the earliest
+ * data (the header and its four extension-flag bytes), room for extensions, and MAX_VALUES values of
+ * the widest type read, float64. So the largest series that can be shown fits with its extensions.
+ * A .nii.gz is held to it too: gzip grows only incompressible data, by 5 bytes in 65,535 (41 KB
+ * here), which the room for extensions covers.
+ */
+export const MAX_FILE_BYTES =
+  352 + EXTENSION_BYTES + MAX_VALUES * Math.max(...Object.values(DATA_TYPES).map((t) => t.bytes));
+
+/**
+ * A .nii.gz reaches the inflater a slice at a time, and a slice is inflated only once the last one's
+ * bytes have been read. Deflate expands at most 1,032 to 1, so no more than 17 MB is inflated past
+ * the length a header states. In Chromium a 58 MB .nii.gz inflated in about the 0.6 s it took whole;
+ * 4 KiB slices took 1.6 times as long.
+ */
+const SLICE_BYTES = 2 ** 14;
+
 const UNSUPPORTED_TYPES: Record<number, string> = {
   1: 'binary',
   32: 'complex64',
@@ -74,37 +97,9 @@ const QUATERNION_THRESHOLD = 3 * 2 ** -23;
 /** Read a single-file NIfTI-1 image (.nii or .nii.gz) as nibabel's `img.affine` and `get_fdata()`. */
 export async function readNifti(buffer: ArrayBuffer): Promise<NiftiImage> {
   const head = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
-  const bytes = head[0] === 0x1f && head[1] === 0x8b ? await inflate(buffer) : buffer;
-  const view = new DataView(bytes);
-  const little = byteOrder(view);
-  if (view.byteLength < 348) throw new MapFileError('header');
-
-  const magic = String.fromCharCode(...new Uint8Array(bytes, 344, 4));
-  if (magic === 'ni1\0') {
-    throw new MapFileError('pair');
-  }
-  if (magic !== 'n+1\0') {
-    throw new MapFileError('magic');
-  }
-
-  const { shape, count } = imageShape(view, little);
+  const view = head[0] === 0x1f && head[1] === 0x8b ? await inflate(buffer) : new DataView(buffer);
+  const { little, shape, count, type, offset, end } = layout(view);
   const voxels = shape[0] * shape[1] * shape[2];
-
-  const code = view.getInt16(70, little);
-  const type = DATA_TYPES[code];
-  if (!type) {
-    const name = UNSUPPORTED_TYPES[code];
-    throw name
-      ? new MapFileError('storedType', [name, code])
-      : new MapFileError('unknownType', [code]);
-  }
-
-  const voxOffset = view.getFloat32(108, little);
-  if (!(voxOffset >= 352)) {
-    throw new MapFileError('offset', [voxOffset]);
-  }
-  const offset = Math.trunc(voxOffset);
-  const end = offset + voxels * count * type.bytes;
   if (end > view.byteLength) {
     throw new MapFileError('truncated', [end, view.byteLength]);
   }
@@ -152,13 +147,122 @@ function secondsPerVolume(view: DataView, little: boolean): number | null {
   return unit && Number.isFinite(spacing) && spacing > 0 ? spacing * unit : null;
 }
 
-async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
-  const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'));
-  try {
-    return await new Response(stream).arrayBuffer();
-  } catch (cause) {
-    throw new MapFileError('gzip', [], { cause });
+/** The file a reader gave, read whole only when it is no larger than a map file may be. */
+export function readMapFile(file: Blob): Promise<ArrayBuffer> {
+  if (file.size > MAX_FILE_BYTES) {
+    return Promise.reject(new MapFileError('fileSize', [file.size, MAX_FILE_BYTES]));
   }
+  return file.arrayBuffer();
+}
+
+/**
+ * A .nii.gz inflated no further than its header says the file runs: the header is checked first,
+ * then the file fills one buffer of the length it states. A stream that runs past it is cancelled
+ * and refused, never cut short, so a small gzip of zeros cannot fill the tab's memory.
+ */
+async function inflate(buffer: ArrayBuffer): Promise<DataView> {
+  const reader = slices(buffer).pipeThrough(new DecompressionStream('gzip')).getReader();
+  // The stream failing, read or cancelled (the next slice may have failed meanwhile), is a damaged gzip.
+  const damaged = (cause: unknown): never => {
+    throw new MapFileError('gzip', [], { cause });
+  };
+  let file = new Uint8Array(HEADER_BYTES);
+  let length = 0;
+  for (;;) {
+    const { value: chunk } = await reader.read().catch(damaged);
+    if (!chunk) return new DataView(file.buffer, 0, length);
+    try {
+      file = kept(file, length, chunk);
+    } catch (refused) {
+      await reader.cancel().catch(damaged);
+      throw refused;
+    }
+    length += chunk.length;
+  }
+}
+
+/**
+ * `file` with `chunk` written at `length`. Until the header is whole, `file` is the header alone;
+ * then it is checked, and the file grows once to the length it states, which no chunk may pass.
+ */
+function kept(
+  file: Uint8Array<ArrayBuffer>,
+  length: number,
+  chunk: Uint8Array,
+): Uint8Array<ArrayBuffer> {
+  const total = length + chunk.length;
+  if (length >= HEADER_BYTES) {
+    if (total > file.length) throw new MapFileError('inflated', [file.length]);
+    file.set(chunk, length);
+    return file;
+  }
+  const header = Math.min(chunk.length, HEADER_BYTES - length);
+  file.set(chunk.subarray(0, header), length);
+  if (total < HEADER_BYTES) return file;
+  const { end } = layout(new DataView(file.buffer));
+  if (total > end) throw new MapFileError('inflated', [end]);
+  const whole = new Uint8Array(end);
+  whole.set(file);
+  whole.set(chunk.subarray(header), HEADER_BYTES);
+  return whole;
+}
+
+/** `buffer` as a stream of slices, each made when it is asked for. */
+function slices(buffer: ArrayBuffer): ReadableStream<Uint8Array<ArrayBuffer>> {
+  let at = 0;
+  return new ReadableStream(
+    {
+      pull(controller) {
+        if (at === buffer.byteLength) {
+          controller.close();
+          return;
+        }
+        const slice = new Uint8Array(buffer, at, Math.min(SLICE_BYTES, buffer.byteLength - at));
+        at += slice.length;
+        controller.enqueue(slice);
+      },
+    },
+    { highWaterMark: 0 },
+  );
+}
+
+/**
+ * Where a file's values lie, from its header: everything checked before a value is read, so a
+ * .nii.gz is refused for it before it is inflated.
+ */
+function layout(view: DataView) {
+  const little = byteOrder(view);
+  if (view.byteLength < HEADER_BYTES) throw new MapFileError('header');
+
+  const magic = String.fromCharCode(...new Uint8Array(view.buffer, view.byteOffset + 344, 4));
+  if (magic === 'ni1\0') {
+    throw new MapFileError('pair');
+  }
+  if (magic !== 'n+1\0') {
+    throw new MapFileError('magic');
+  }
+
+  const { shape, count } = imageShape(view, little);
+
+  const code = view.getInt16(70, little);
+  const type = DATA_TYPES[code];
+  if (!type) {
+    const name = UNSUPPORTED_TYPES[code];
+    throw name
+      ? new MapFileError('storedType', [name, code])
+      : new MapFileError('unknownType', [code]);
+  }
+
+  const voxOffset = view.getFloat32(108, little);
+  if (!(voxOffset >= 352)) {
+    throw new MapFileError('offset', [voxOffset]);
+  }
+  const offset = Math.trunc(voxOffset);
+  const end = offset + shape[0] * shape[1] * shape[2] * count * type.bytes;
+  if (end > MAX_FILE_BYTES) {
+    throw new MapFileError('declared', [end, MAX_FILE_BYTES]);
+  }
+  return { little, shape, count, type, offset, end };
 }
 
 /** True for little-endian, from `sizeof_hdr`. */

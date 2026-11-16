@@ -9,6 +9,7 @@ import {
 import type { CortexSurface, MapDisplay, MapSummary, Statistic } from '../core/user-map/display.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapCourse } from '../core/user-map/course.ts';
+import { readMapFile } from '../core/user-map/nifti.ts';
 import type { EngineUserMap } from '../engine/api.ts';
 import type { SurfaceColor } from '../types/index.ts';
 
@@ -163,7 +164,7 @@ export function createUserMapStore({
     clusters = { status: 'idle' };
     state = { status: 'loading', name: next.name };
     try {
-      const summary = await engine.load(await next.arrayBuffer(), nextSpace, at);
+      const summary = await engine.load(await readMapFile(next), nextSpace, at);
       if (ask !== request) return;
       file = next;
       volume = at;

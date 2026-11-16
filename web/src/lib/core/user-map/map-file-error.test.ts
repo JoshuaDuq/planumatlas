@@ -31,6 +31,19 @@ test('a reason with values words them in the reader’s language', () => {
   );
 });
 
+test('FUNC-55, FUNC-56 · a file refused for its size says its bytes, grouped, in the reader’s language', () => {
+  assert.equal(
+    mapFileReason(fr, frErrors, new MapFileError('fileSize', [600_000_000, 553_648_480])),
+    'Ce fichier fait 600\u202f000\u202f000 octets, au-delà de la limite de 553\u202f648\u202f480.',
+  );
+  // Refused in the worker: its code and values cross to the page.
+  const posted = structuredClone({ code: 'inflated' as const, params: [34_073_952] });
+  assert.equal(
+    mapFileReason(fr, frErrors, new MapFileError(posted.code, posted.params)),
+    'Décompressé, ce fichier dépasse les 34\u202f073\u202f952 octets que décrit son en-tête.',
+  );
+});
+
 test('a failed download or a newer deploy is said as the app says it elsewhere', () => {
   const fetch = new AssetError('asset-fetch', 'Asset request failed: HTTP 503');
   const updated = new AssetError('asset-updated', 'Published file changed');
