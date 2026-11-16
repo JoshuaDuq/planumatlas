@@ -62,10 +62,50 @@ const BUNDLES: Record<string, number> = { 'cdmd-sub-013': 30 };
 const digest = (buffer: Uint8Array) => createHash('sha256').update(buffer).digest('hex');
 const arrayBuffer = (buffer: Uint8Array) =>
   buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+const bytesOf = (array: ArrayBufferView) =>
+  new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
 const published = (file: string) => readFile(resolve(repoRoot, directory, file));
 
 function near(actual: number, expected: number, tolerance = 0.0001) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
+}
+
+/** The datatypes the T1 and its source are stored in: NIFTI_TYPE_INT16 and _FLOAT64. */
+const VOXELS = { 4: Int16Array, 64: Float64Array } as const;
+
+/**
+ * An inflated NIfTI-1 file's grid and scaling, read at the standard's header offsets, and its voxels
+ * as a view from `vox_offset`.
+ */
+function nifti1(bytes: Uint8Array<ArrayBuffer>) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  assert.equal(view.getInt32(0, true), 348, 'a little-endian NIfTI-1 header');
+  const int16s = (offset: number, count: number) =>
+    Array.from({ length: count }, (_, i) => view.getInt16(offset + 2 * i, true));
+  const float32s = (offset: number, count: number) =>
+    Array.from({ length: count }, (_, i) => view.getFloat32(offset + 4 * i, true));
+  const dims = int16s(40, 8);
+  const datatype = view.getInt16(70, true);
+  const Voxels = VOXELS[datatype as keyof typeof VOXELS];
+  assert.ok(Voxels, `datatype ${datatype}`);
+  return {
+    dims,
+    pixDims: float32s(76, 8),
+    qform_code: view.getInt16(252, true),
+    sform_code: view.getInt16(254, true),
+    /** quatern_b, _c, _d, then qoffset_x, _y, _z. */
+    quaternion: float32s(256, 6),
+    /** srow_x, _y, _z. */
+    srow: float32s(280, 12),
+    datatype,
+    scl_slope: view.getFloat32(112, true),
+    scl_inter: view.getFloat32(116, true),
+    voxels: new Voxels(
+      bytes.buffer,
+      bytes.byteOffset + view.getFloat32(108, true),
+      dims[1]! * dims[2]! * dims[3]!,
+    ),
+  };
 }
 
 for (const { catalog, provenance } of catalogs) {
@@ -74,7 +114,13 @@ for (const { catalog, provenance } of catalogs) {
     async (_file, map) => {
       const record = provenance.files.find((file) => map.file.endsWith(`/${file.file}`))!;
       const data = await published(map.file);
-      const image = await NVImage.loadFromUrl({ url: arrayBuffer(data), name: map.file });
+      // NiiVue inflates through a web stream, a slice at a time: on a loaded machine the T1's float64
+      // source took over 30 s that way. Node's zlib, the inflater under that stream, does it at once.
+      const inflated = gunzipSync(data);
+      const image = await NVImage.loadFromUrl({
+        url: arrayBuffer(inflated),
+        name: map.file.replace(/\.gz$/, ''),
+      });
       validateVolume(image as DiffusionVolume);
       assert.deepEqual(image.hdr!.dims.slice(1, 4), record.shape);
       for (let row = 0; row < 4; row++) {
@@ -89,34 +135,40 @@ for (const { catalog, provenance } of catalogs) {
       assert.equal(digest(data), record.published_sha256);
       const sourceData = await readFile(resolve(repoRoot, T1_SOURCE));
       assert.equal(digest(sourceData), record.source_sha256);
-      const source = await NVImage.loadFromUrl({ url: arrayBuffer(sourceData), name: T1_SOURCE });
-      const [header, original] = [image.hdr!, source.hdr!];
-      for (const key of ['dims', 'pixDims', 'affine', 'qform_code', 'sform_code'] as const) {
-        assert.deepEqual(header[key], original[key], key);
-      }
+      // Both files are compared as their bytes hold them; NiiVue's reading of the derivative is
+      // held to its bytes.
+      const [derivative, source] = [nifti1(inflated), nifti1(gunzipSync(sourceData))];
       for (const key of [
-        'quatern_b',
-        'quatern_c',
-        'quatern_d',
-        'qoffset_x',
-        'qoffset_y',
-        'qoffset_z',
+        'dims',
+        'pixDims',
+        'qform_code',
+        'sform_code',
+        'quaternion',
+        'srow',
       ] as const) {
-        assert.equal(header[key], original[key], key);
+        assert.deepEqual(derivative[key], source[key], key);
       }
-      assert.equal(header.datatypeCode, 4);
-      assert.equal(header.scl_slope, record.quantisation.scl_slope);
-      assert.equal(header.scl_inter, record.quantisation.scl_inter);
-      // NiiVue holds the float64 source as float32, so its rounding is added to the bound.
+      assert.equal(derivative.datatype, 4);
+      assert.equal(derivative.scl_slope, record.quantisation.scl_slope);
+      assert.equal(derivative.scl_inter, record.quantisation.scl_inter);
+      assert.equal(source.datatype, 64);
+      assert.deepEqual([source.scl_slope, source.scl_inter], [1, 0], 'the source is unscaled');
+      const niivue = image.hdr!;
+      assert.deepEqual(
+        [niivue.datatypeCode, niivue.scl_slope, niivue.scl_inter],
+        [derivative.datatype, derivative.scl_slope, derivative.scl_inter],
+      );
+      assert.equal(Buffer.compare(bytesOf(image.img!), bytesOf(derivative.voxels)), 0);
       const bound = record.quantisation.max_abs_error;
-      assert.ok(bound <= header.scl_slope / 2 + 1e-9);
-      const [values, expected] = [image.img!, source.img!];
+      assert.ok(bound <= derivative.scl_slope / 2 + 1e-9);
+      const [values, expected] = [derivative.voxels, source.voxels];
       let worst = 0;
       for (let index = 0; index < expected.length; index++) {
-        const value = values[index]! * header.scl_slope + header.scl_inter;
+        const value = values[index]! * derivative.scl_slope + derivative.scl_inter;
         worst = Math.max(worst, Math.abs(value - expected[index]!));
       }
-      assert.ok(worst <= bound + 3e-5, `${worst} exceeds ${bound}`);
+      // NiBabel's float64 arithmetic on the float64 source, so the recorded bound holds exactly.
+      assert.ok(worst <= bound, `${worst} exceeds ${bound}`);
     },
   );
 

@@ -85,7 +85,8 @@ function fingerprint(model: BrainAtlas): Record<string, Record<string, string>> 
   );
 }
 
-describe('the geometry worker', () => {
+// Each case loads the published model and builds all its BVHs, the first twice: past 30 s under load.
+describe('the geometry worker', { timeout: 120_000 }, () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
