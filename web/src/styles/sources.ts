@@ -12,10 +12,11 @@ export const sheets: Record<string, string> = Object.fromEntries(
     .map((name) => [name, read(new URL(`src/styles/${name}`, webRoot))]),
 );
 
-/** Every Svelte component under src/, keyed by path relative to src/. */
+/** Every Svelte component under src/, keyed by path relative to src/ with `/` on every platform. */
 export const components: Record<string, string> = Object.fromEntries(
   readdirSync(new URL('src/', webRoot), { recursive: true })
-    .map(String)
+    // Windows lists `lib\ui\Dialog.svelte`; the keys the style tests look up are `lib/ui/Dialog.svelte`.
+    .map((path) => String(path).replaceAll('\\', '/'))
     .filter((path) => path.endsWith('.svelte'))
     .map((path) => [path, read(new URL(`src/${path}`, webRoot))]),
 );
