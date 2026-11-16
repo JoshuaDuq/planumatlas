@@ -727,7 +727,7 @@ export interface EngineLesion {
   measure(sphere: LesionSphere): Promise<LesionMeasurement>;
   /** The anatomy's own tract bundles on the sides the lesion reaches, in catalog order; none on an anatomy without tracts of its own. */
   tractBundles(sphere: LesionSphere): string[];
-  /** Download those bundles and count the streamlines crossing the lesion, reporting each bundle as it is counted. */
+  /** Count the streamlines of those bundles crossing the lesion, downloading only what an earlier count no longer keeps, and report each bundle as it is counted. */
   measureTracts(
     sphere: LesionSphere,
     onBundle?: (counted: number, total: number) => void,

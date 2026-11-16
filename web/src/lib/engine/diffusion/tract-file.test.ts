@@ -9,7 +9,7 @@ import { tractCatalog } from '../../core/diffusion/catalogs.ts';
 import { DiffusionInputError } from '../../core/diffusion/validation.ts';
 import { repoRoot } from '../../../../test/repo.ts';
 import { readTrk } from './tract-decode.ts';
-import { createTractLoader, decodeTractAsset } from './tract-file.ts';
+import { countCrossing, createTractLoader } from './tract-file.ts';
 
 const tract = (file: string) => readFile(resolve(repoRoot, 'public/diffusion', file));
 const arrayBuffer = (bytes: Uint8Array) =>
@@ -79,7 +79,9 @@ test('DIFF-05 a tract worker script that does not load rejects as asset-updated'
       }
     },
   );
-  const error = await decodeTractAsset(new ArrayBuffer(8)).catch((caught: unknown) => caught);
+  const error = await createTractLoader(async () => ({ buffer: new ArrayBuffer(8) }))({
+    file: 'never.trk',
+  }).catch((caught: unknown) => caught);
   assert.ok(error instanceof AssetError, String(error));
   assert.equal(error.code, 'asset-updated');
   assert.deepEqual(
@@ -88,10 +90,35 @@ test('DIFF-05 a tract worker script that does not load rejects as asset-updated'
   );
 });
 
+test('DIFF-39 a lesion bundle is counted in the tract worker, and the page receives only the counts', async () => {
+  const jobs: object[] = [];
+  vi.stubGlobal(
+    'Worker',
+    class {
+      onmessage: ((event: { data: object }) => void) | null = null;
+      postMessage({ token, ...job }: { token: number; buffer?: ArrayBuffer }) {
+        jobs.push(job);
+        const reply = job.buffer ? { token, crossing: 3, total: 5 } : { token, missing: true };
+        queueMicrotask(() => this.onmessage?.({ data: reply }));
+      }
+    },
+  );
+  const sphere = { centre: [1, 2, 3] as [number, number, number], radius: 4 };
+  const buffer = new ArrayBuffer(8);
+  assert.equal(await countCrossing('a.trk', sphere), null, 'the worker kept nothing of it');
+  assert.deepEqual(await countCrossing('a.trk', sphere, { buffer }), { crossing: 3, total: 5 });
+  assert.deepEqual(jobs, [
+    { file: 'a.trk', sphere },
+    { file: 'a.trk', sphere, buffer },
+  ]);
+});
+
 test('DIFF-04 TRK decoding accepts original gzip files and HTTP-decompressed response bodies', async () => {
   const compressed = await tract('cdmd-sub-013/af.left.trk.gz');
-  const gzip = await decodeTractAsset(arrayBuffer(compressed));
-  const http = await decodeTractAsset(arrayBuffer(gunzipSync(compressed)));
+  const decode = (bytes: Uint8Array) =>
+    createTractLoader(async () => ({ buffer: arrayBuffer(bytes) }))({ file: 'af.left.trk.gz' });
+  const gzip = await decode(compressed);
+  const http = await decode(gunzipSync(compressed));
   assertSameBits(gzip, http);
   assert.equal(http.offsetPt0.length - 1, 3639);
   assert.equal(http.pts.length / 3, 844916);

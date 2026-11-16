@@ -2,15 +2,20 @@ import type { Box3, Matrix4, Object3D, Plane } from 'three';
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import { tractCatalog } from '../../core/diffusion/catalogs.ts';
 import type { EngineEvents, EngineTracts, LesionSphere, TractCrossing, Vec3 } from '../api.ts';
-import { streamlinesCrossing } from '../lesion/measure.ts';
 import { rasToWorld, worldToRas } from '../slices/coordinates.ts';
 import { createNativeTractViewer } from './native-viewer.ts';
 import { createSampler, valueAt } from '../../core/user-map/sampling.ts';
 import { readNifti } from '../../core/user-map/nifti.ts';
 import { createReferenceTransform } from './reference-space.ts';
-import { createTractLoader, decodeTractAsset } from './tract-file.ts';
+import { countCrossing, createTractLoader } from './tract-file.ts';
 
 type TractEvents = Pick<EngineEvents, 'tractsActive' | 'tractsReady' | 'tractsVisibility'>;
+
+/**
+ * Lesion bundles downloaded and counted at once. The downloads overlap the worker's decoding, and
+ * at most four files of up to 9 MB are on their way to it.
+ */
+const COUNT_CONCURRENCY = 4;
 
 export interface TractsOptions {
   /** The anatomy on screen. */
@@ -143,24 +148,50 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
     return fa;
   }
 
-  /** Each bundle is downloaded, counted and let go: a lesion keeps no streamlines in memory. */
+  /** The points the tract worker needs again: the Tracts tab's decode when it has one, else the file. */
+  async function countSource(file: string) {
+    const started = loadTract.started(file);
+    if (!started) return { buffer: (await readDiffusionAsset(file)).buffer };
+    const { pts, offsetPt0 } = await started;
+    return { points: { pts, offsetPt0 } };
+  }
+
+  /**
+   * Each bundle is counted in the tract worker, COUNT_CONCURRENCY at most at once, and only its
+   * counts come back. The worker keeps every bundle's occupancy and, up to a byte cap, the points
+   * of those near the lesion (tract-count.ts), so a lesion placed again nearby downloads and decodes
+   * nothing. A bundle that fails fails the count, and no progress is reported after it.
+   */
   async function crossing(
     sphere: LesionSphere,
     ids: readonly string[],
     onBundle?: (counted: number, total: number) => void,
   ): Promise<TractCrossing[]> {
     const centre = worldToRas(rasToWorld(sphere.centre).applyMatrix4(await scannerTransform()));
+    const scanner = { centre, radius: sphere.radius };
     const counted: TractCrossing[] = [];
-    for (const id of ids) {
-      const { buffer } = await readDiffusionAsset(bundleOf(id).file);
-      const { pts, offsetPt0 } = await decodeTractAsset(buffer);
-      counted.push({
-        id,
-        crossing: streamlinesCrossing(pts, offsetPt0, { centre, radius: sphere.radius }),
-        total: offsetPt0.length - 1,
-      });
-      onBundle?.(counted.length, ids.length);
+    let next = 0;
+    let done = 0;
+    let failed = false;
+    async function lane(): Promise<void> {
+      while (next < ids.length && !failed) {
+        const index = next++;
+        const id = ids[index]!;
+        try {
+          const { file } = bundleOf(id);
+          const count =
+            (await countCrossing(file, scanner)) ??
+            (await countCrossing(file, scanner, await countSource(file)))!;
+          counted[index] = { id, ...count };
+        } catch (error) {
+          failed = true;
+          throw error;
+        }
+        if (!failed) onBundle?.(++done, ids.length);
+      }
     }
+    const lanes = Math.min(COUNT_CONCURRENCY, ids.length);
+    await Promise.all(Array.from({ length: lanes }, lane));
     return counted;
   }
 

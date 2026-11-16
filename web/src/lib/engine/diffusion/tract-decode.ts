@@ -17,17 +17,20 @@ export interface TractLines extends TractPoints {
 export interface TractJob {
   token: number;
   buffer: ArrayBuffer;
-  /** Whether to build the lengths and colours as well as the points. */
-  lines: boolean;
 }
 
-export type TractReply =
-  | ({ token: number } & (TractPoints | TractLines))
-  | { token: number; error: string; code?: DiffusionInputCode };
+/** A job that failed, relayed to the page, which throws it again there. */
+export interface TractFailure {
+  token: number;
+  error: string;
+  code?: DiffusionInputCode;
+}
+
+export type TractReply = ({ token: number } & TractLines) | TractFailure;
 
 const HEADER = 1000;
 
-async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+export async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
   const bytes = new Uint8Array(buffer);
   if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return buffer;
   const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'));
@@ -175,16 +178,19 @@ export function directionColors(
   return colors;
 }
 
+/** A worker job's error as the page throws it again; a streamline error keeps its class. */
+export function failure(token: number, error: unknown): TractFailure {
+  const code = error instanceof DiffusionInputError ? error.code : undefined;
+  return { token, error: (error as Error).message, code };
+}
+
 /** The worker's job: a published tract file, compressed or not, to the arrays the viewer needs. */
-export async function decodeTract({ token, buffer, lines }: TractJob): Promise<{
+export async function decodeTract({ token, buffer }: TractJob): Promise<{
   reply: TractReply;
   transfer: ArrayBuffer[];
 }> {
   try {
     const tract = readTrk(await inflate(buffer));
-    if (!lines) {
-      return { reply: { token, ...tract }, transfer: [tract.pts.buffer, tract.offsetPt0.buffer] };
-    }
     const lengths = streamlineLengths(tract.pts, tract.offsetPt0) as Float64Array<ArrayBuffer>;
     const colors = directionColors(tract.pts, tract.offsetPt0);
     return {
@@ -192,8 +198,6 @@ export async function decodeTract({ token, buffer, lines }: TractJob): Promise<{
       transfer: [tract.pts.buffer, tract.offsetPt0.buffer, lengths.buffer, colors.buffer],
     };
   } catch (error) {
-    // Relayed to the page, which throws it again there; a streamline error keeps its class.
-    const code = error instanceof DiffusionInputError ? error.code : undefined;
-    return { reply: { token, error: (error as Error).message, code }, transfer: [] };
+    return { reply: failure(token, error), transfer: [] };
   }
 }

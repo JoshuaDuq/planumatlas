@@ -2,24 +2,34 @@ import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import type { TractBundle } from '../../core/diffusion/catalogs.ts';
 import { DiffusionInputError } from '../../core/diffusion/validation.ts';
 import { workerLoadFailure } from '../worker-load.ts';
+import { countTract } from './tract-count.ts';
+import type { CountJob, CountReply, ScannerSphere } from './tract-count.ts';
 import { decodeTract } from './tract-decode.ts';
-import type { TractJob, TractLines, TractPoints, TractReply } from './tract-decode.ts';
+import type {
+  TractFailure,
+  TractJob,
+  TractLines,
+  TractPoints,
+  TractReply,
+} from './tract-decode.ts';
 
 export type LoadedTract = TractLines;
 
 export type TractLoader = (bundle: Pick<TractBundle, 'file'>) => Promise<LoadedTract>;
 
+type Reply = TractReply | CountReply;
+
 let worker: Worker | null = null;
 let token = 0;
 const waiting = new Map<
   number,
-  { resolve: (reply: TractReply) => void; reject: (error: Error) => void }
+  { resolve: (reply: Reply) => void; reject: (error: Error) => void }
 >();
 
 function start(): Worker {
   if (worker) return worker;
   worker = new Worker(new URL('./tract-worker.ts', import.meta.url), { type: 'module' });
-  worker.onmessage = ({ data }: MessageEvent<TractReply>) => {
+  worker.onmessage = ({ data }: MessageEvent<Reply>) => {
     const job = waiting.get(data.token)!;
     waiting.delete(data.token);
     job.resolve(data);
@@ -36,26 +46,37 @@ function start(): Worker {
 }
 
 /**
- * Inflated and decoded in a worker, or in this thread where the platform has none. The file's
- * buffer is copied, not transferred: concurrent readers of one published file share it.
+ * Run in the worker, or in this thread where the platform has none. A file's buffer is copied, not
+ * transferred: concurrent readers of one published file share it.
  */
-async function decode(buffer: ArrayBuffer, lines: boolean): Promise<TractPoints | TractLines> {
-  const job: TractJob = { token: ++token, buffer, lines };
+async function run<R extends Reply>(job: TractJob | CountJob): Promise<Exclude<R, TractFailure>> {
   const reply =
     typeof Worker === 'undefined'
-      ? (await decodeTract(job)).reply
-      : await new Promise<TractReply>((resolve, reject) => {
+      ? 'file' in job
+        ? await countTract(job)
+        : (await decodeTract(job)).reply
+      : await new Promise<Reply>((resolve, reject) => {
           waiting.set(job.token, { resolve, reject });
           start().postMessage(job);
         });
   if ('error' in reply) {
     throw reply.code ? new DiffusionInputError(reply.code, reply.error) : new Error(reply.error);
   }
-  return reply;
+  return reply as Exclude<R, TractFailure>;
 }
 
-export async function decodeTractAsset(buffer: ArrayBuffer): Promise<TractPoints> {
-  return (await decode(buffer, false)) as TractPoints;
+/**
+ * How many of a lesion bundle's streamlines have a point in the sphere, counted in the worker; the
+ * page receives only the counts. Without `source` the worker answers from what it keeps of the
+ * file, or null when it needs the points again: the published file, or the page's own decode.
+ */
+export async function countCrossing(
+  file: string,
+  sphere: ScannerSphere,
+  source?: { buffer: ArrayBuffer } | { points: TractPoints },
+): Promise<{ crossing: number; total: number } | null> {
+  const reply = await run<CountReply>({ token: ++token, file, sphere, ...source });
+  return 'missing' in reply ? null : { crossing: reply.crossing, total: reply.total };
 }
 
 /**
@@ -64,17 +85,19 @@ export async function decodeTractAsset(buffer: ArrayBuffer): Promise<TractPoints
  */
 export function createTractLoader(
   read: (file: string) => Promise<{ buffer: ArrayBuffer }> = readDiffusionAsset,
-): TractLoader {
+) {
   const tracts = new Map<string, Promise<LoadedTract>>();
-  return (bundle) => {
+  const load: TractLoader = (bundle) => {
     let loading = tracts.get(bundle.file);
     if (!loading) {
-      loading = read(bundle.file).then(
-        async ({ buffer }) => (await decode(buffer, true)) as LoadedTract,
-      );
+      loading = read(bundle.file).then(({ buffer }) => run<TractReply>({ token: ++token, buffer }));
       tracts.set(bundle.file, loading);
       loading.catch(() => tracts.delete(bundle.file));
     }
     return loading;
   };
+  return Object.assign(load, {
+    /** The file's load already started, if any: a lesion's count reads it instead of downloading. */
+    started: (file: string): Promise<LoadedTract> | undefined => tracts.get(file),
+  });
 }

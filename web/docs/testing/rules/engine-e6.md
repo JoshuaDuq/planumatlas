@@ -300,3 +300,23 @@ DIFF-28 to DIFF-34 described the NiiVue navigator, removed on 2026-11-12; the Li
 - **Source:** state-machine audit 2026-11-09 (`isolate` set the selection before its await)
 - **Expected:** a loaded, visible bundle, then a lesion bundle whose download rejects → rejects with the error, the loaded bundle visible again. Overlay off, a loaded bundle, then a lesion crossing or a landmark whose download rejects → `streamlinesVisible === false`.
 - **Covered by:** `src/lib/engine/diffusion/native-viewer.test.ts` (R), `src/lib/engine/diffusion/tracts.test.ts` (R)
+
+## The lesion's tract count
+
+### DIFF-39 · A lesion's bundles are counted four at a time in the tract worker, and one that fails fails the count
+
+- **Rule:** `tracts.own.crossing` counts the bundles a lesion reaches in the tract worker, at most four (`COUNT_CONCURRENCY`) downloading or counting at once; the page receives only each bundle's crossing and total, in the order asked, and reports each bundle as it is counted. A bundle that fails to download or decode rejects the whole count with its error; no bundle is reported, and no download started, after it.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** review handoff P9 (the bundles were downloaded one after another and counted on the page)
+- **Expected:** the 29 bundles of a lesion at (−5, −20, 25), radius 10, each download held until released one at a time → four downloads waiting at once, never five; progress 1, 2, … 29 of 29; the counts those of DIFF-40. A lesion's 18 bundles with the sixth download rejecting "offline" → rejects /offline/, progress [1, 2, 3, 4, 5], the three downloads under way decoded and unreported, 9 downloads in all. A stubbed worker: a count job carries the file and the scanner-RAS sphere, and the reply is `{ crossing, total }`, or null while the worker keeps nothing of the file.
+- **Covered by:** `src/lib/engine/diffusion/tracts.test.ts` (R), `src/lib/engine/diffusion/tract-file.test.ts` (R)
+
+### DIFF-40 · A lesion counted again nearby downloads and decodes nothing, and every count stays exact
+
+- **Rule:** The tract worker keeps, for every lesion bundle it has counted, its streamline total and which 2 mm cells hold a point (one byte a cell: 4.8 to 117 KB a CDMD bundle, 1.7 MB for all 29). A sphere that reaches no occupied cell crosses none of the bundle, read without its points; the others are counted by the exact point test (`streamlinesCrossing`). The distance to a cell rounds no further than the distance to any point inside it, so the cells never rule out a streamline the exact test counts. Points the worker decodes are kept while a lesion comes within 5 mm of the bundle, least recently used let go first, 64 MiB at most (CDMD's lesion bundles decode to 126 MB). A bundle the worker no longer holds is read from the Tracts tab's decode when that has one, copied and not kept, and downloaded otherwise.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** review handoff P9 (every measurement downloaded 62 to 109 MB again and decoded it)
+- **Expected:** On CDMD, each count equals, per bundle, the count over every point decoded afresh as it was made before, for lesions at (−45, −25, 30) r 15, 1 mm to the right, 5 mm larger, (−5, −20, 25) r 10, (40, 10, 20) r 3, (30, −40, 10) r 30, (−60, 40, −20) r 8 and back; af-left at the first crosses 3,025 of 3,639. Moved 1 mm after the first count → no download and no decode. With af-left drawn by the Tracts tab → 17 downloads, af-left's not among them. Spheres through one-point streamlines on and 10 µm either side of 2 mm cell edges, nudged by 1e-12 mm → the cells rule out only spheres that cross none. All 29 bundles kept in turn → the latest within 64 MiB kept, adding the one before would pass it. Lent points are not kept.
+- **Covered by:** `src/lib/engine/diffusion/tracts.test.ts` (R, S), `src/lib/engine/diffusion/tract-count.test.ts` (R)
