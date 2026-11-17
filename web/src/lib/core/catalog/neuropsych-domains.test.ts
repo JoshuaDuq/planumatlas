@@ -203,6 +203,11 @@ test('FUNC-46 · a curated function or the overview paints on a listed atlas’s
     ),
   );
   assert.throws(() => domainPaint(published, 'compare:language,memory', 'julich'), /HCP-MMP/);
+  // The stage replaces a paint only under a new id, so a listed atlas names its own.
+  assert.equal(domainPaint(published, 'memory', 'hcp-mmp').id, 'function:memory');
+  assert.equal(domainPaint(published, 'memory', 'julich').id, 'function:memory@julich');
+  assert.equal(domainPaint(published, ALL_DOMAINS, 'julich').id, 'function:all@julich');
+  assert.equal(domainPaint(published, 'term:fear', 'julich', 5).id, 'function:term:fear@julich:z5');
   // Term tables missing, on an unlisted atlas, or naming a term the search does not offer, are refused.
   for (const change of [
     (p: Fixture) => (p.atlases = {}),

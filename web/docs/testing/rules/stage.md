@@ -644,7 +644,7 @@ A click on the model selects and opens a detail every time (`anatomy.pickRegion`
 - **Rule:** In Anatomy a connectivity seed paints before a lesion's findings, only while the atlas in front has the table, and not once lifted. Another tab shows its own paint. Choosing another atlas ends the paint; choosing the same one keeps it.
 - **Kind:** state
 - **Level:** unit
-- **Expected:** seed + lesion → `connectivity:…`; no seed or HCP-MMP → `lesion:…`; Functions → `function:all`; lifted → none; `chooseAtlas(other)` → seed null.
+- **Expected:** seed + lesion → `connectivity:…`; no seed or HCP-MMP → `lesion:…`; Functions → `function:all@julich`; lifted → none; `chooseAtlas(other)` → seed null.
 - **Covered by:** `src/lib/core/state/paint.test.ts`, `src/lib/controller/excursion.test.ts`
 
 ### STAGE-63 · The connectivity key names the seed and lists the r steps strongest first

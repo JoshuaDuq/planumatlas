@@ -304,8 +304,12 @@ export interface SectionsState {
   readonly overlay: boolean;
   /** The compared structure the linked MRI shows agreement for, by its code; null for none. */
   readonly agreement: number | null;
-  /** The tab's paint the linked MRI draws, by its id, once its labels have loaded; null for none. */
-  readonly paint: string | null;
+  /**
+   * The tab's paint the linked MRI draws once its labels have loaded, null for none: its id, which
+   * names its colours (a function's atlas and raised threshold too), and the cut atlas whose labels
+   * draw it.
+   */
+  readonly paint: { readonly id: string; readonly atlas: string } | null;
   readonly tilt: number;
   readonly azimuth: number;
   readonly status: SectionsStatus;

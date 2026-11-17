@@ -42,7 +42,8 @@ interface SectionsStateRecord {
   reverse: boolean;
   overlay: boolean;
   agreement: number | null;
-  paint: string | null;
+  /** The paint the linked MRI draws and the cut atlas whose labels draw it. */
+  paint: { id: string; atlas: string } | null;
   tilt: number;
   azimuth: number;
   status: SectionsStatus;
@@ -629,8 +630,9 @@ export class BrainSections extends EventTarget {
 
   /**
    * Draw the model's paint on the linked MRI, by the cut atlas's own labels as its cut faces are, once
-   * the views have loaded. The label grid downloads the first time; `state.paint` names the paint once
-   * it is drawn. A failure is reported once, and the next paint or cut atlas tries again.
+   * the views have loaded. The label grid downloads the first time; `state.paint` names the paint and
+   * the cut atlas once they are drawn, so the planes are sampled again when either changes (SECT-38).
+   * A failure is reported once, and the next paint or cut atlas tries again.
    */
   private async syncPaint(): Promise<void> {
     if (!this.volumes) return;
@@ -659,7 +661,7 @@ export class BrainSections extends EventTarget {
     } else {
       this.shownPaint = null;
     }
-    this.state.paint = paint?.id ?? null;
+    this.state.paint = paint && { id: paint.id, atlas };
     this.emit();
   }
 

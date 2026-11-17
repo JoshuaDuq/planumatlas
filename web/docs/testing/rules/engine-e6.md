@@ -294,11 +294,11 @@ DIFF-28 to DIFF-34 described the NiiVue navigator, removed on 2026-11-12; the Li
 
 ### DIFF-35 · A tract shown alone that fails to download leaves nothing isolated
 
-- **Rule:** When the bundle a lesion or a landmark draws alone fails to download, and no later isolation has replaced it, nothing is isolated any more: the ordinary tracts are drawn again as the overlay has them, and the tracts' group shows only if the overlay does. The failure rejects to the caller.
+- **Rule:** When the bundle a lesion or a landmark draws alone fails to download, and no later isolation has replaced it, nothing is isolated any more: the ordinary tracts are drawn again as the overlay has them, and the tracts' group shows only if the overlay does. That is said with `tractsVisibility`, as a bundle shown is, so whatever read the bundle alone, the linked MRI's planes among them (SECT-38), reads the tracts again. The failure rejects to the caller.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** state-machine audit 2026-11-09 (`isolate` set the selection before its await)
-- **Expected:** a loaded, visible bundle, then a lesion bundle whose download rejects → rejects with the error, the loaded bundle visible again. Overlay off, a loaded bundle, then a lesion crossing or a landmark whose download rejects → `streamlinesVisible === false`.
+- **Expected:** a loaded, visible bundle, then a lesion bundle whose download rejects → rejects with the error, the loaded bundle visible again. Overlay off, a loaded bundle, then a lesion crossing or a landmark whose download rejects → `streamlinesVisible === false`, and one `tractsVisibility` after the rejection.
 - **Covered by:** `src/lib/engine/diffusion/native-viewer.test.ts` (R), `src/lib/engine/diffusion/tracts.test.ts` (R)
 
 ### DIFF-41 · A bundle no longer drawn is released once another stops being drawn after it

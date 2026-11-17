@@ -289,7 +289,7 @@ describe('a function on the reader’s own atlas (3.1)', () => {
     )!;
     await userEvent.click(row);
     await expect.poll(() => world.view.current.selectedFunction).toBe('language');
-    await expect.poll(() => world.view.current.paint?.id).toBe('function:language');
+    await expect.poll(() => world.view.current.paint?.id).toBe('function:language@julich');
     expect(world.view.current.atlas).toBe('julich');
     expect(world.view.current.selectedRegion?.id).toBe(area.id);
     expect(
@@ -299,6 +299,18 @@ describe('a function on the reader’s own atlas (3.1)', () => {
     ).toBe(true);
     // Not borrowed: the masthead shows no "via Functions".
     expect(document.querySelector('#masthead')!.textContent).not.toContain('via Functions');
+  });
+
+  test('FUNC-46 · choosing Julich-Brain while a function is painted paints it on Julich-Brain’s own areas', async () => {
+    const world = await boot('#atlas=hcp-mmp&tab=functions&function=language&lang=en');
+    await expect.poll(() => world.view.current.paint?.id).toBe('function:language');
+    await world.excursions.chooseAtlas('julich');
+    await expect.poll(() => world.view.current.atlas).toBe('julich');
+    const painted = () => [...world.view.current.paint!.colors.keys()];
+    await expect.poll(() => painted().some((id) => id.startsWith('julich:'))).toBe(true);
+    expect(painted().every((id) => /^(julich|aseg|learning):/.test(id))).toBe(true);
+    // The stage replaces a paint only under a new id: the atlas is part of it.
+    expect(world.view.current.paint!.id).toBe('function:language@julich');
   });
 });
 

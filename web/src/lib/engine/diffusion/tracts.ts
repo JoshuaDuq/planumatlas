@@ -77,6 +77,9 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
       if (ask === isolation) {
         isolated = null;
         showGroup();
+        // The ordinary tracts are drawn again: said as a shown bundle is, so what was read of the
+        // bundle alone, the linked MRI's planes too (SECT-38), is read again.
+        emit('tractsVisibility', undefined);
       }
       throw error;
     }

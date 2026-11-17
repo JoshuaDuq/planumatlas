@@ -39,6 +39,16 @@ const BASES: Record<MprPlane, { normal: Vector; u: Vector; v: Vector; edges: str
   axial: { normal: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0], edges: ['A', 'R', 'P', 'L'] },
 };
 
+/**
+ * The fake's paint on the linked MRI, over the left half of each slice: a colour from what it is drawn
+ * by, so another paint, or the same paint on other labels, draws other bytes.
+ */
+function paintColour(drawn: string): [number, number, number] {
+  let hash = 0;
+  for (const char of drawn) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0;
+  return [hash & 255, (hash >>> 8) & 255, (hash >>> 16) & 255];
+}
+
 /** coordinates.js:36-65: the frame for a mode at a crosshair, centred on the plane's own axis. */
 function centeredFrame(
   mode: CutMode | 'off',
@@ -88,7 +98,8 @@ function projectBounds(
 
 /**
  * In-memory stand-in for `BrainSections`: the plane, crosshair, window and cut atlas are real state with
- * the real validation; the cut itself draws nothing, and the linked MRI is a synthetic gradient.
+ * the real validation; the cut itself draws nothing, and the linked MRI is a synthetic gradient with
+ * the model's paint over half of it.
  */
 export function createFakeSections({ model, changed, mri }: FakeSectionsOptions): EngineSections {
   const manifest = model.manifest;
@@ -96,14 +107,13 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     ...manifest.atlases.map((atlas) => atlas.id),
     ...(manifest.cut_atlases ?? []).map((atlas) => atlas.id),
   ]);
-  const state: { -readonly [K in keyof SectionsState]: SectionsState[K] } = {
+  const state: { -readonly [K in Exclude<keyof SectionsState, 'paint'>]: SectionsState[K] } = {
     mode: 'off',
     cutAtlas: model.state.atlas,
     crosshair: [0, 0, 0],
     reverse: false,
     overlay: false,
     agreement: null,
-    paint: null,
     tilt: 30,
     azimuth: 30,
     status: 'idle',
@@ -153,8 +163,16 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     return [bounds[0][axis]!, bounds[1][axis]!];
   }
 
+  /** The model's paint, as the linked MRI draws it once loaded: by the cut atlas's labels. */
+  const paint = () =>
+    display && model.state.paint ? { id: model.state.paint.id, atlas: state.cutAtlas } : null;
+
   /** A copy, so a listener comparing the last and next state sees a difference (sections.js:55 is live). */
-  const snapshot = (): SectionsState => ({ ...state, crosshair: [...state.crosshair] });
+  const snapshot = (): SectionsState => ({
+    ...state,
+    crosshair: [...state.crosshair],
+    paint: paint(),
+  });
 
   function emit() {
     model.setCutState({ atlas: state.cutAtlas, active: active() });
@@ -340,16 +358,28 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
         edges: [...frame.edges],
       };
     },
+    // The paint is sampled with the slice, by the cut atlas's labels, as the real sections sample it.
     slice() {
       const { size } = requireVolumes();
-      return { size } as unknown as PlaneSlice;
+      const painted = paint();
+      return {
+        size,
+        paint: painted && paintColour(`${painted.id}|${painted.atlas}`),
+      } as unknown as PlaneSlice;
     },
     pixels(slice) {
       requireVolumes();
-      const { size } = slice as unknown as { size: number };
+      const { size, paint: painted } = slice as unknown as {
+        size: number;
+        paint: number[] | null;
+      };
       const pixels = new Uint8ClampedArray(size * size * 4);
       for (let index = 0; index < size * size; index++) {
-        pixels.set([index % 256, (index * 3) % 256, (index * 7) % 256, 255], index * 4);
+        const colour =
+          painted && index % size < size / 2
+            ? painted
+            : [index % 256, (index * 3) % 256, (index * 7) % 256];
+        pixels.set([...colour, 255], index * 4);
       }
       return pixels;
     },

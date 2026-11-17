@@ -648,7 +648,9 @@ export function domainPaint(
     const color = colors.get(structure);
     if (color) colors.set(unit, color);
   }
-  // The stage replaces a paint only under a new id, so a raised threshold is part of it.
+  // The stage replaces a paint only under a new id, so a listed atlas and a raised threshold are part
+  // of it: the same function names other areas there, or fewer.
+  const on = atlas === partition.atlas ? '' : `@${atlas}`;
   const raised = from === partition.threshold_z ? '' : `:z${from}`;
-  return { id: `function:${id}${raised}`, colors };
+  return { id: `function:${id}${on}${raised}`, colors };
 }

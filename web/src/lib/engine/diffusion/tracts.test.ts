@@ -111,7 +111,7 @@ test('a landmark draws its own bundle before the Tracts tab loads; the lesion’
   );
 }, 60_000);
 
-test('a lesion crossing whose bundle fails to download no longer draws the tracts without the overlay', async () => {
+test('DIFF-35 a lesion crossing whose bundle fails to download no longer draws the tracts without the overlay, and says so', async () => {
   const [failing, shown] = tractCatalog('cdmd').bundles as readonly [TractBundle, TractBundle];
   const own = setup('cdmd');
   await own.tracts.loadBundle(shown.id);
@@ -120,15 +120,17 @@ test('a lesion crossing whose bundle fails to download no longer draws the tract
     if (file === failing.file) throw new Error('offline');
     return readPublishedDiffusion(file);
   });
+  const said = own.emit.mock.calls.length;
   await assert.rejects(
     own.tracts.own!.showCrossing(failing.id, { centre: [0, 0, 0], radius: 100 }),
     /offline/,
   );
   vi.mocked(readDiffusionAsset).mockImplementation(readPublishedDiffusion);
   assert.equal(own.tracts.streamlinesVisible, false, 'the overlay is off and nothing is isolated');
+  assert.deepEqual(own.emit.mock.calls.slice(said), [['tractsVisibility', undefined]]);
 }, 60_000);
 
-test('a landmark whose bundle fails to download no longer draws the tracts without the overlay', async () => {
+test('DIFF-35 a landmark whose bundle fails to download no longer draws the tracts without the overlay, and says so', async () => {
   const [failing, shown] = tractCatalog('cdmd').bundles as readonly [TractBundle, TractBundle];
   const own = setup('cdmd');
   await own.tracts.loadBundle(shown.id);
@@ -137,9 +139,11 @@ test('a landmark whose bundle fails to download no longer draws the tracts witho
     if (file === failing.file) throw new Error('offline');
     return readPublishedDiffusion(file);
   });
+  const said = own.emit.mock.calls.length;
   await assert.rejects(own.tracts.showLandmarkTract(failing.id), /offline/);
   vi.mocked(readDiffusionAsset).mockImplementation(readPublishedDiffusion);
   assert.equal(own.tracts.streamlinesVisible, false, 'the overlay is off and nothing is isolated');
+  assert.deepEqual(own.emit.mock.calls.slice(said), [['tractsVisibility', undefined]]);
 }, 60_000);
 
 const catalog = tractCatalog('cdmd');

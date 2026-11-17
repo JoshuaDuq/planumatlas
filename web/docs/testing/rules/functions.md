@@ -427,11 +427,11 @@ Measured on 2026-11-10 against criteria fixed before the run: raw z put the expe
 
 ### FUNC-46 · A function, a searched term or the overview paints on a listed atlas's own areas
 
-- **Rule:** Where the reader's atlas passed the gate (`region_atlases`: Julich-Brain, Schaefer), a curated function and the overview paint its own areas from `atlas_regions`, with the structures and the teaching units carrying them, and the atlas is not switched (`paintAtlas`). The overview takes each area's first overview function in the published order. A searched term paints its own table there (`atlases` in the term file, required for every listed atlas). Comparisons have no table there and stay on HCP-MMP, which they borrow as before; asking `domainPaint` for one on another atlas throws. Choosing a listed atlas while a curated function is open keeps its paint.
+- **Rule:** Where the reader's atlas passed the gate (`region_atlases`: Julich-Brain, Schaefer), a curated function and the overview paint its own areas from `atlas_regions`, with the structures and the teaching units carrying them, and the atlas is not switched (`paintAtlas`). The overview takes each area's first overview function in the published order. A searched term paints its own table there (`atlases` in the term file, required for every listed atlas). Comparisons have no table there and stay on HCP-MMP, which they borrow as before; asking `domainPaint` for one on another atlas throws. Choosing a listed atlas while a curated function is open keeps its paint, painted on that atlas's areas: the stage replaces a paint only under a new id, so the paint's id names a listed atlas (`function:language@julich`), as it names a raised threshold (FUNC-49); on HCP-MMP it names none.
 - **Kind:** data
-- **Level:** unit
-- **Expected:** `paintAtlas(p, 'language', 'julich')` → julich; `paintAtlas(p, 'term:fear', 'julich')` → julich; on destrieux, or for a comparison → hcp-mmp; term tables missing, on an unlisted atlas or naming an unoffered term are refused; `domainAreas(p, 'language', 'julich')` → the Julich areas; `paintFor({atlas: 'julich', selectedFunction: 'language'})` keys only `julich:` regions.
-- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/lib/core/state/paint.test.ts`
+- **Level:** unit; browser (composed app) for choosing the atlas
+- **Expected:** `paintAtlas(p, 'language', 'julich')` → julich; `paintAtlas(p, 'term:fear', 'julich')` → julich; on destrieux, or for a comparison → hcp-mmp; term tables missing, on an unlisted atlas or naming an unoffered term are refused; `domainAreas(p, 'language', 'julich')` → the Julich areas; `paintFor({atlas: 'julich', selectedFunction: 'language'})` keys only `julich:` regions. Ids: memory on hcp-mmp → `function:memory`, on julich → `function:memory@julich`; the overview on julich → `function:all@julich`; term:fear on julich at z 5 → `function:term:fear@julich:z5`. The app on HCP-MMP with language painted, Julich-Brain chosen → paint `function:language@julich`, keying Julich-Brain areas and only `julich:`, `aseg:` or `learning:` regions (it kept HCP-MMP's paint before, so neither the stage nor the linked MRI drew the function on Julich-Brain's areas).
+- **Covered by:** `src/lib/core/catalog/neuropsych-domains.test.ts`, `src/lib/core/state/paint.test.ts`, `src/app/regions/PanelsRegion.svelte.test.ts` (R)
 
 ### FUNC-47 · The profile lists and counts the areas of the atlas it is painted on
 
@@ -446,7 +446,7 @@ Measured on 2026-11-10 against criteria fixed before the run: raw z put the expe
 - **Rule:** The plan's 1.1 check: opening a function from a region's list must not drop the region. On a listed atlas nothing is borrowed, so the selection and its outline stay over the paint and the masthead says nothing of "via Functions".
 - **Kind:** behaviour
 - **Level:** browser (composed app)
-- **Expected:** atlas julich, Area 44 left selected, language opened from its group → atlas julich, selection unchanged, paint `function:language` on julich regions, no "via Functions".
+- **Expected:** atlas julich, Area 44 left selected, language opened from its group → atlas julich, selection unchanged, paint `function:language@julich` on julich regions, no "via Functions".
 - **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
 
 ## The paint threshold (supervisor review 3.2)
@@ -475,7 +475,7 @@ A function and the reader's Overlay map drawn together, compared point by point 
 
 ### FUNC-51 · Against a drawn map, one function paints its areas in one colour and keys three
 
-- **Rule:** While the Overlay draws a map and one function or term (not the overview or a comparison) is painted in front, unlifted, on its own atlas, `paintFor` paints the same areas all in `COMPARE_COLORS[0]` under the id `function:<id>[:z<from>]:map`. The stage key is titled "<function> · <map>" and reads "<function>, z ≥ <from>", "<map> above <threshold>" and "Both", the function's row greyed when nothing is painted; the map's own colour-scale key is hidden. In every other case the paint and keys are as before.
+- **Rule:** While the Overlay draws a map and one function or term (not the overview or a comparison) is painted in front, unlifted, on its own atlas, `paintFor` paints the same areas all in `COMPARE_COLORS[0]` under the id `function:<id>[@<atlas>][:z<from>]:map`. The stage key is titled "<function> · <map>" and reads "<function>, z ≥ <from>", "<map> above <threshold>" and "Both", the function's row greyed when nothing is painted; the map's own colour-scale key is hidden. In every other case the paint and keys are as before.
 - **Kind:** behaviour
 - **Level:** unit
 - **Expected:** memory against a map → `function:memory:map`, the same regions, every colour `COMPARE_COLORS[0]`; French key "Mémoire · zstat1": "Mémoire, z ≥ 3", "zstat1 au-dessus de 3,1", "Les deux"; overview, comparison, no function, lifted, Deficits, another atlas, or no map → not compared.

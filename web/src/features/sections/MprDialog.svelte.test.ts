@@ -518,8 +518,8 @@ describe('the pictures', () => {
   test('a plane is resampled only when its own slice changes', async () => {
     await opened();
     await expect.poll(() => calls('slice').length).toBe(3);
-    // The cut atlas is not part of the picture.
-    await engine.sections.setCutAtlas(engine.sections.state.cutAtlas);
+    // Without a paint, the cut atlas is not part of the picture.
+    await engine.sections.setCutAtlas('julich');
     engine.sections.setDisplay({ reverse: true });
     await frame();
     await frame();
@@ -594,6 +594,57 @@ describe('the pictures', () => {
     await expect.poll(shown).toBe(false);
     await openFromKeyboard();
     await expect.poll(() => calls('slice').length).toBe(6);
+  });
+
+  test('SECT-38 a paint is sampled again when what it draws changes, as a freshly opened MRI draws it', async () => {
+    const pictures = () =>
+      (['sagittal', 'coronal', 'axial'] as const).map((plane) => {
+        const target = canvas(plane);
+        return target.getContext('2d')!.getImageData(0, 0, target.width, target.height).data;
+      });
+    /** The bytes of the planes kept that differ from the planes a closed MRI opened again samples. */
+    async function againstFresh(): Promise<number> {
+      const kept = pictures();
+      const sampled = calls('slice').length;
+      await page.getByRole('button', { name: 'Close' }).click();
+      await expect.poll(shown).toBe(false);
+      await openFromKeyboard();
+      await expect.poll(() => calls('slice').length).toBe(sampled + 3);
+      const fresh = pictures();
+      return kept.reduce(
+        (count, data, plane) =>
+          count + data.filter((value, index) => value !== fresh[plane]![index]).length,
+        0,
+      );
+    }
+    engine.model.setPaint({ id: 'function:language', colors: new Map() });
+    await opened();
+    await expect.poll(() => calls('slice').length).toBe(3);
+    const first = pictures();
+    // Other cut labels: the paint is drawn by them.
+    await engine.sections.setCutAtlas('julich');
+    await expect.poll(() => calls('slice').length).toBe(6);
+    expect(pictures()[2]).not.toEqual(first[2]);
+    expect(await againstFresh()).toBe(0);
+    // A raised threshold is another paint, and so is another tab's.
+    engine.model.setPaint({ id: 'function:language:z5', colors: new Map() });
+    await expect.poll(() => calls('slice').length).toBe(12);
+    expect(await againstFresh()).toBe(0);
+    engine.model.setPaint({ id: 'deficit:aphasia', colors: new Map() });
+    await expect.poll(() => calls('slice').length).toBe(18);
+    expect(await againstFresh()).toBe(0);
+    // Another surface atlas leaves a deficit's paint and the cut labels as they were: nothing is
+    // sampled. (A function's paint takes the atlas into its id, FUNC-46.)
+    await engine.model.setAtlas(engine.model.state.atlas === 'hcp-mmp' ? 'destrieux' : 'hcp-mmp');
+    await frame();
+    await frame();
+    expect(calls('slice')).toHaveLength(21);
+    expect(await againstFresh()).toBe(0);
+    // A window is drawn from the samples kept.
+    const drawn = calls('pixels').length;
+    engine.sections.setWindow(100, 120);
+    await expect.poll(() => calls('pixels').length).toBe(drawn + 3);
+    expect(calls('slice')).toHaveLength(24);
   });
 
   test('reversing the cut on a plane turns that panel to the side the stage now faces, and redraws it', async () => {

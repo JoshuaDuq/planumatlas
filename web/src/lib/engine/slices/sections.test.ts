@@ -672,7 +672,7 @@ test('a sample names the region the loaded cut atlas labels there, and none on a
   assert.equal(sections.sample([-42, 16, 40]).cutRegion, null);
 });
 
-test("the linked MRI draws the model's paint by the cut atlas's labels, loading them only once its views have", async () => {
+test("SLICE-41 the linked MRI draws the model's paint by the cut atlas's labels, loading them only once its views have, and names both", async () => {
   const { model, tissues, sections } = fixture();
   const metadata = {
     shape: [4, 4, 4],
@@ -684,13 +684,17 @@ test("the linked MRI draws the model's paint by the cut atlas's labels, loading 
       [0, 0, 0, 1],
     ],
   };
-  const labels = new Uint16Array(64).map((_, index) => (index % 4 >= 2 ? 1 : 0));
+  // Destrieux labels area A on the right half of each row, Julich-Brain on the first column.
+  const grids: Record<string, Uint16Array> = {
+    destrieux: new Uint16Array(64).map((_, index) => (index % 4 >= 2 ? 1 : 0)),
+    julich: new Uint16Array(64).map((_, index) => (index % 4 === 0 ? 1 : 0)),
+  };
   const loads: string[] = [];
   tissues.layers = new Map();
   tissues.load = async (atlas: string) => {
     loads.push(atlas);
     tissues.layers.set(atlas, {
-      volume: new Volume(metadata, labels),
+      volume: new Volume(metadata, grids[atlas]!),
       metadata: { labels: [{ region_id: null }, { region_id: 'area-a' }] },
     });
   };
@@ -704,19 +708,27 @@ test("the linked MRI draws the model's paint by the cut atlas's labels, loading 
   } as never;
   sections.display = { fieldOfView: 4, size: 4, windowCenter: 127.5, windowWidth: 255 } as never;
   sections.emit();
-  await vi.waitFor(() => assert.equal(sections.state.paint, 'function:a'));
+  await vi.waitFor(() =>
+    assert.deepEqual(sections.state.paint, { id: 'function:a', atlas: 'destrieux' }),
+  );
   assert.deepEqual(loads, ['destrieux']);
   // Axial z = 1, the first row x = 0..3: unpainted scan, then the painted half.
-  const pixels = sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1])));
-  assert.deepEqual(Array.from(pixels.slice(0, 3)), [100, 100, 100]);
-  assert.deepEqual(Array.from(pixels.slice(12, 15)), [10, 200, 30]);
+  const row = () =>
+    Array.from(
+      sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1]))).slice(0, 16),
+    ).filter((_, index) => index % 4 < 3);
+  assert.deepEqual(row(), [100, 100, 100, 100, 100, 100, 10, 200, 30, 10, 200, 30]);
+  // Other cut labels draw the same paint by theirs, and the state names them once they do.
+  await sections.setCutAtlas('julich');
+  await vi.waitFor(() =>
+    assert.deepEqual(sections.state.paint, { id: 'function:a', atlas: 'julich' }),
+  );
+  assert.deepEqual(loads, ['destrieux', 'julich']);
+  assert.deepEqual(row(), [10, 200, 30, 100, 100, 100, 100, 100, 100, 100, 100, 100]);
   model.state.paint = null;
   model.dispatchEvent(new Event('change'));
   await vi.waitFor(() => assert.equal(sections.state.paint, null));
-  assert.deepEqual(
-    Array.from(sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1]))).slice(12, 15)),
-    [100, 100, 100],
-  );
+  assert.deepEqual(row(), Array(12).fill(100));
 });
 
 test("a paint whose labels fail to load is logged once, is not the cut's failure, and the next paint tries again", async () => {
@@ -757,7 +769,9 @@ test("a paint whose labels fail to load is logged once, is not the cut's failure
   assert.equal(sections.state.paint, null);
   model.state.paint = { id: 'function:b', colors: new Map() };
   model.dispatchEvent(new Event('change'));
-  await vi.waitFor(() => assert.equal(sections.state.paint, 'function:b'));
+  await vi.waitFor(() =>
+    assert.deepEqual(sections.state.paint, { id: 'function:b', atlas: 'destrieux' }),
+  );
   assert.equal(loads, 2);
   error.mockRestore();
 });

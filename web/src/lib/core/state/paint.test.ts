@@ -279,7 +279,7 @@ test('STAGE-62 · Anatomy paints a seed’s connectivity over a lesion’s findi
   assert.equal(paintFor(seeded, withData)!.id, 'connectivity:julich:left:1');
   assert.equal(paintFor({ ...seeded, connectivitySeed: null }, withData)!.id, 'lesion:x');
   assert.equal(paintFor({ ...seeded, atlas: 'hcp-mmp' }, withData)!.id, 'lesion:x');
-  assert.equal(paintFor({ ...seeded, explorer: 'functions' }, withData)!.id, 'function:all');
+  assert.equal(paintFor({ ...seeded, explorer: 'functions' }, withData)!.id, 'function:all@julich');
   assert.equal(paintFor({ ...seeded, paintLifted: true }, withData), null);
 });
 

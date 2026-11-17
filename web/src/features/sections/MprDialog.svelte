@@ -201,9 +201,10 @@
   // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
   // over the picture, not drawn into it. Window, Level and FA opacity draw it again from what it kept
   // of its last drawing, each part by what it was made from: the slice's samples, FA's levels and the
-  // tracts on it (SECT-38). A plane nobody can see is drawn when it is shown (sections.js:315-351), and
-  // a canvas that replaced another is drawn afresh. Only the planes shown keep anything, and only while
-  // the MRI is open.
+  // tracts on it (SECT-38). The paint is named by its id and the cut labels that draw it, so other cut
+  // labels sample the slice again. A plane nobody can see is drawn when it is shown
+  // (sections.js:315-351), and a canvas that replaced another is drawn afresh. Only the planes shown
+  // keep anything, and only while the MRI is open.
   interface Made<T> {
     key: string;
     value: T;
