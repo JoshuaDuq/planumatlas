@@ -176,7 +176,8 @@ export class TissueSections {
   private disposed = false;
   private mriLoading: Promise<Anatomy> | null = null;
   private solidsLoading: Promise<void> | null = null;
-  private readonly details = new Map<string, number>();
+  /** Each detail level the cut caps, with the meshes its solids share their geometry with. */
+  private readonly details = new Map<string, readonly Mesh[]>();
   private whiteMatter: WhiteMatter | null = null;
   private paintKey: string | undefined;
   private striatalPalette: DataTexture | null = null;
@@ -342,7 +343,20 @@ export class TissueSections {
       this.model.manifest.appearance,
       BANDS.structure,
     );
-    this.details.set(detail, sources.length);
+    this.details.set(detail, layer.meshes);
+  }
+
+  /**
+   * Let go of the solids of every detail level the model has released (ATLAS-10), which share its
+   * geometry; that level shown again under a cut is capped from the layer loaded anew.
+   */
+  releaseDetails(): void {
+    for (const [detail, meshes] of this.details) {
+      if (this.model.layers.get(detail)?.meshes === meshes) continue;
+      this.solids.remove((source) => source.userData['detail'] === detail);
+      this.details.delete(detail);
+      this.paintKey = undefined;
+    }
   }
 
   createAnatomy(volume: Volume): Anatomy {

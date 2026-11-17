@@ -12,7 +12,7 @@ export interface StoreMessage {
   bvh: SerializedBVH;
 }
 
-/** Cuts every listed solid by one plane. Any message that is not `store` is a cut. */
+/** Cuts every listed solid by one plane. Any message that is not `store` or `drop` is a cut. */
 export interface CutMessage {
   type: 'cut';
   token: number;
@@ -21,7 +21,13 @@ export interface CutMessage {
   jobs: { id: number; matrix: number[] }[];
 }
 
-export type WorkerMessage = StoreMessage | CutMessage;
+/** Forgets solids the page has taken away. */
+export interface DropMessage {
+  type: 'drop';
+  ids: number[];
+}
+
+export type WorkerMessage = StoreMessage | CutMessage | DropMessage;
 
 export interface CutJobResult {
   id: number;
@@ -54,6 +60,10 @@ scope.onmessage = (event) => {
     if (message.bvh.index) geometry.setIndex(new BufferAttribute(message.bvh.index, 1));
     geometry.boundsTree = MeshBVH.deserialize(message.bvh, geometry, { setIndex: false });
     stored.set(message.id, geometry);
+    return;
+  }
+  if (message.type === 'drop') {
+    for (const id of message.ids) stored.delete(id);
     return;
   }
   normal.fromArray(message.normal);

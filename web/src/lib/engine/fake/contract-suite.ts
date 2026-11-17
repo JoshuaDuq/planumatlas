@@ -91,7 +91,8 @@ type Opening = ReturnType<typeof openingOf>;
 /**
  * Put a shared engine's model and cut back to their opening state through the public API alone, and prove
  * the model's settings and the cut are there. The camera, the tracts' settings and the MRI window are not asserted.
- * What a case downloaded stays downloaded: a layer, the volumes, the tracts, the cord.
+ * What a case downloaded stays downloaded: a layer (until two switches of its kind release it,
+ * ATLAS-10), the volumes, the tracts, the cord.
  */
 async function restore(engine: Engine, opening: Opening) {
   const { model, sections, camera, comparison, tracts } = engine;
@@ -831,6 +832,21 @@ export function defineEngineContract(
         assert.equal(model.state.selectedRegion, null);
         assert.equal(model.settings.isolatedRegion, null);
         assert.equal(changes.at(-1)?.model.selectedRegion, null);
+      });
+
+      it('keeps the atlas shown before, releases the one before that and downloads it again when it is shown', async () => {
+        const { engine, atlas, otherAtlas, left } = world();
+        const { model } = engine;
+        const third = model.manifest.atlases.find(({ id }) => id !== atlas && id !== otherAtlas)!;
+        await model.setAtlas(otherAtlas);
+        assert.ok(model.hasLayer(atlas), 'the atlas shown before is kept');
+        await model.setAtlas(third.id);
+        assert.equal(model.hasLayer(atlas), false);
+        assert.ok(model.hasLayer(otherAtlas) && model.hasLayer(third.id));
+        await model.setAtlas(atlas);
+        assert.ok(model.hasLayer(atlas) && model.hasLayer(third.id));
+        assert.equal(model.hasLayer(otherAtlas), false);
+        assert.equal(model.isRegionDrawn(left.id), true);
       });
 
       it('switches detail level, refusing an unpublished one', async () => {

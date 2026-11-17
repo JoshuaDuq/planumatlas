@@ -69,16 +69,22 @@ import {
   fieldDecode,
   stageLegible,
 } from '../render/materials.ts';
-import type { Appearance, AnatomicalUserData, VisualFieldUniforms } from '../render/materials.ts';
+import type {
+  Appearance,
+  AnatomicalUserData,
+  SurfacePalettes,
+  VisualFieldUniforms,
+} from '../render/materials.ts';
 import { addUserMapToSurface, createUserMapUniforms } from '../user-map/overlay.ts';
 import type { SurfaceHit } from '../render/picking.ts';
 import type { VisualFieldDot, VisualFieldReading } from '../api.ts';
 import { VISUAL_RESPONSE_THRESHOLD, predictedResponse } from '../../core/learning/visual-field.ts';
 import { GHOST } from '../render/draw-order.ts';
 import {
-  attachNetworkColors,
-  attachTerritoryColors,
+  checkTerritories,
   majorityTerritoryColor,
+  networkPalette,
+  paletteTexture,
 } from '../render/network-colors.ts';
 import type { NetworkMetadata } from '../render/network-colors.ts';
 import {
@@ -586,6 +592,8 @@ export class BrainAtlas extends EventTarget {
   readonly visualField: VisualFieldUniforms | null;
   /** The reader's own map, shared by every cortical material and every cut face. */
   readonly userMap = createUserMapUniforms();
+  /** The network and territory colours each cortical vertex looks up by its index. */
+  private readonly palettes: SurfacePalettes;
   /** A panel's colours for named regions, every other region in tissue colour; null for none. */
   paint: Paint | null = null;
   readonly layers = new Map<string, Layer>();
@@ -633,6 +641,9 @@ export class BrainAtlas extends EventTarget {
   private isolatedId: string | null = null;
   private focused = false;
   private ghostedAround: ReadonlySet<string> | null = null;
+  /** The atlas and the detail level shown before the ones shown now: kept, the rest released (ATLAS-10). */
+  private previousAtlas: string | null = null;
+  private previousDetail: string | null = null;
   // Separate, so a detail change does not cancel an atlas change still loading, or the reverse.
   private atlasRequest = 0;
   private detailRequest = 0;
@@ -679,6 +690,12 @@ export class BrainAtlas extends EventTarget {
           visualMeasured: { value: manifest.retinotopy.measured_eccentricity_deg },
         }
       : null;
+    this.palettes = {
+      network: manifest.networks ? networkPalette(manifest.networks) : null,
+      territory: manifest.arterial_territories
+        ? paletteTexture(manifest.arterial_territories.territories.map(({ color }) => color))
+        : null,
+    };
     this.dissection = createDissection(this.regions);
     // What `initialize` is asked for by default; nothing is drawn until it has loaded them.
     this.atlasId = manifest.atlases[0]!.id;
@@ -981,11 +998,8 @@ export class BrainAtlas extends EventTarget {
           originalMaterials.add(mesh.material);
           // Indirect indexing preserves the scientific source triangle order.
           mesh.raycast = raycast;
-          if (this.manifest.networks) {
-            attachNetworkColors(mesh.geometry, this.manifest.networks);
-          }
           if (this.manifest.arterial_territories) {
-            attachTerritoryColors(mesh.geometry, this.manifest.arterial_territories.territories);
+            checkTerritories(mesh.geometry, this.manifest.arterial_territories.territories);
           }
           const shown = mesh as unknown as AtlasMesh;
           shown.material = createAnatomicalMaterial(
@@ -995,6 +1009,7 @@ export class BrainAtlas extends EventTarget {
             // Every cortical atlas carries the predicted retinotopy on every vertex.
             corticalLayer ? this.visualField : null,
             this.userMap,
+            this.palettes,
           );
           // Drawn before the structures it meets, whichever loaded first (`opaqueOrder`).
           if (corticalLayer) shown.userData['cortical'] = true;
@@ -1084,7 +1099,9 @@ export class BrainAtlas extends EventTarget {
     const request = ++this.atlasRequest;
     await this.loadLayer(id, atlas.file, onProgress);
     if (request !== this.atlasRequest) return;
+    if (id !== this.atlasId) this.previousAtlas = this.atlasId;
     this.atlasId = id;
+    this.release(this.manifest.atlases, [id, this.previousAtlas]);
     // CAB-NP groups one atlas's areas; any other atlas has none to colour.
     if (this.surfaceColor === 'cab-np' && id !== this.cabNp!.atlas) this.surfaceColor = 'atlas';
     // An atlas grouped by network has no lobes to colour.
@@ -1106,11 +1123,31 @@ export class BrainAtlas extends EventTarget {
     const request = ++this.detailRequest;
     await this.loadLayer(id, level.file, onProgress);
     if (request !== this.detailRequest) return;
+    if (id !== this.detailId) this.previousDetail = this.detailId;
     this.detailId = id;
+    this.release(this.manifest.detail_levels, [id, this.previousDetail]);
     this.internalSystem = null;
     this.internalConstituents = new Set();
     this.isolatedId = null;
     this.update();
+  }
+
+  /**
+   * Free every loaded layer of one kind (the cortical atlases, or the detail levels) but those `kept`:
+   * its geometry and BVHs, materials and border-blend palette, on the GPU and here (ATLAS-10). A
+   * layer still loading is left to finish. Showing a released layer again loads it as the first time
+   * did, from the HTTP cache or the service worker when they hold it.
+   */
+  private release(kind: readonly { id: string }[], kept: readonly (string | null)[]): void {
+    for (const { id } of kind) {
+      const layer = this.layers.get(id);
+      if (!layer || kept.includes(id) || this.pending.has(id)) continue;
+      this.layers.delete(id);
+      disposeScene(layer.scene);
+      layer.featherPalette?.dispose();
+      // The explode's shifts name the meshes they move; a layer loaded again has new ones.
+      this.explodeShiftCache = null;
+    }
   }
 
   /** What the cut is doing, reported by the sections that own the plane. */
@@ -1988,6 +2025,8 @@ export class BrainAtlas extends EventTarget {
     }
     this.ribbonWedges.clear();
     this.layers.clear();
+    this.palettes.network?.dispose();
+    this.palettes.territory?.dispose();
     this.group.removeFromParent();
   }
 

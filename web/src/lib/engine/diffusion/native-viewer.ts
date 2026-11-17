@@ -182,6 +182,8 @@ export function createNativeTractViewer(
   let reference: Promise<void> | null = null;
   let isolateRequest = 0;
   let selected: Isolated | null = null;
+  /** The bundle that stopped being drawn last: kept, with those drawn, when another stops (DIFF-41). */
+  let lastHidden: string | null = null;
 
   function loadReference(): Promise<void> {
     reference ??= readDiffusionAsset(catalog.reference_space).then(({ buffer }) => {
@@ -212,6 +214,36 @@ export function createNativeTractViewer(
     entry.lines.visible = selected ? Boolean(mine?.ready) : entry.visible;
     entry.hidden.visible = entry.lines.visible && Boolean(mine?.whole);
     entry.face.visible = entry.lines.visible && clippingPlanes.length > 0;
+  }
+
+  /**
+   * Free a bundle no longer drawn: its lines' buffers and materials, on the GPU and here, and the
+   * decoded record they were made from. Asking for it again downloads it again, as the first time.
+   */
+  function release(id: string): void {
+    const entry = bundles.get(id);
+    if (!entry || entry.visible || selected?.id === id) return;
+    bundles.delete(id);
+    group.remove(entry.lines, entry.hidden, entry.face);
+    entry.still.dispose();
+    entry.moving.dispose();
+    entry.lines.material.dispose();
+    entry.hidden.material.dispose();
+    loadTract.forget(entry.bundle);
+  }
+
+  /** A bundle has stopped being drawn: the one that stopped before it goes, if it still is not. */
+  function stopped(id: string): void {
+    if (lastHidden === id) return;
+    const before = lastHidden;
+    lastHidden = id;
+    if (before) release(before);
+  }
+
+  /** A bundle drawn alone is no longer: it has stopped being drawn unless the reader shows it. */
+  function undrawn(id: string): void {
+    const entry = bundles.get(id);
+    if (entry && !entry.visible) stopped(id);
   }
 
   async function loadOutline(): Promise<void> {
@@ -305,7 +337,9 @@ export function createNativeTractViewer(
   /** Hide every bundle but the one asked for, until it is downloaded and placed. */
   async function isolate(bundle: TractBundle, whole: boolean): Promise<LoadedBundle | null> {
     const ask = ++isolateRequest;
+    const before = selected?.id;
     selected = { id: bundle.id, ready: false, whole };
+    if (before && before !== bundle.id) undrawn(before);
     for (const entry of bundles.values()) refresh(entry);
     invalidate();
     try {
@@ -315,13 +349,18 @@ export function createNativeTractViewer(
       if (ask === isolateRequest) clearIsolated();
       throw error;
     }
-    return ask === isolateRequest && !disposed ? bundles.get(bundle.id)! : null;
+    if (ask === isolateRequest && !disposed) return bundles.get(bundle.id)!;
+    // Asked for alone, and no longer wanted by the time it arrived.
+    if (!disposed && selected?.id !== bundle.id) undrawn(bundle.id);
+    return null;
   }
 
   function clearIsolated(): void {
     isolateRequest++;
+    const before = selected?.id;
     selected = null;
     for (const entry of bundles.values()) refresh(entry);
+    if (before) undrawn(before);
     invalidate();
   }
 
@@ -330,6 +369,8 @@ export function createNativeTractViewer(
     if (!entry) throw new RangeError(`Unknown tract bundle: ${id}`);
     entry.visible = visible;
     refresh(entry);
+    if (!visible) stopped(id);
+    else if (lastHidden === id) lastHidden = null;
     invalidate();
   }
 

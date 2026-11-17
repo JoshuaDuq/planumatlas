@@ -24,7 +24,7 @@ import { GHOST, opaqueOrder } from '../render/draw-order.ts';
 import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
 import { BrainAtlas, GeometryJobs, SURFACE_COLORS } from './brain-atlas.ts';
-import type { AtlasManifest, GlbLoader } from './brain-atlas.ts';
+import type { AtlasManifest, GlbLoader, Layer } from './brain-atlas.ts';
 
 /* oxlint-disable typescript/no-explicit-any -- fixtures stand in for published JSON and mutate the model freely */
 type Stub = Record<string, any>;
@@ -130,6 +130,23 @@ const regions = [
     source_label_id: 16,
     kind: 'structure',
   },
+  // A third atlas and two more detail levels, which only the release tests (ATLAS-10) show.
+  {
+    id: 'c-left',
+    label: 'C left',
+    hemisphere: 'left',
+    atlas: 'c',
+    source_label_id: 1,
+    kind: 'cortex',
+  },
+  ...(['deep', 'fine'] as const).map((level) => ({
+    id: `${level}-stem`,
+    label: 'Brainstem',
+    hemisphere: 'midline',
+    atlas: level,
+    source_label_id: 16,
+    kind: 'structure',
+  })),
   // Cut-only: it belongs to no GLB, so the loader never makes a mesh for it.
   {
     id: 'n-left',
@@ -156,8 +173,13 @@ function fixture(
     atlases: [
       { id: 'a', label: 'Atlas A', file: 'a.glb' },
       { id: 'b', label: 'Atlas B', file: 'b.glb' },
+      { id: 'c', label: 'Atlas C', file: 'c.glb' },
     ],
-    detail_levels: [{ id: 'aseg', label: 'Coarse', file: 'structures.glb' }],
+    detail_levels: [
+      { id: 'aseg', label: 'Coarse', file: 'structures.glb' },
+      { id: 'deep', label: 'Deep', file: 'deep.glb' },
+      { id: 'fine', label: 'Fine', file: 'fine.glb' },
+    ],
     solid_envelopes: { file: 'tissue-envelopes.glb' },
     regions,
     ...(fields
@@ -180,7 +202,7 @@ function fixture(
         }
         return { scene };
       }
-      const atlasId = file === 'structures.glb' ? 'aseg' : file[0];
+      const atlasId = file === 'structures.glb' ? 'aseg' : file.replace(/\.glb$/, '');
       for (const [index, region] of regions
         .filter((region) => region.atlas === atlasId)
         .entries()) {
@@ -715,7 +737,7 @@ test.each([
   },
 );
 
-test('switches one atlas at a time, caches geometry, and keeps shared anatomy', async () => {
+test('ATLAS-10 switches one atlas at a time, keeps the one shown before, and keeps shared anatomy', async () => {
   const { atlas, loads } = fixture();
   await atlas.initialize('a');
   assert.equal(atlas.state.atlas, 'a');
@@ -728,6 +750,150 @@ test('switches one atlas at a time, caches geometry, and keeps shared anatomy', 
   assert.equal(atlas.group.children.filter((group) => group.visible).length, 2);
   atlas.dispose();
   assert.equal(atlas.group.children.length, 0);
+});
+
+/** Every geometry, material and texture of a layer that has been disposed, by kind. */
+function watchDisposal(layer: Layer) {
+  const disposed = { geometries: 0, materials: 0, palettes: 0 };
+  for (const mesh of layer.meshes) {
+    mesh.geometry.addEventListener('dispose', () => (disposed.geometries += 1));
+    mesh.material.addEventListener('dispose', () => (disposed.materials += 1));
+  }
+  layer.featherPalette?.addEventListener('dispose', () => (disposed.palettes += 1));
+  return disposed;
+}
+
+test('ATLAS-10 an atlas two switches behind is released, and showing it again loads it again', async () => {
+  const { atlas, loads } = fixture();
+  await atlas.initialize('a');
+  const first = atlas.layers.get('a')!;
+  const disposed = watchDisposal(first);
+  await atlas.setAtlas('b');
+  assert.ok(atlas.hasLayer('a'), 'the atlas shown before is kept');
+  await atlas.setAtlas('c');
+  assert.equal(atlas.hasLayer('a'), false);
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['aseg', 'b', 'c']);
+  assert.equal(first.scene.parent, null);
+  assert.deepEqual(disposed, { geometries: 3, materials: 3, palettes: 1 });
+  assert.ok(first.meshes.every((mesh) => mesh.geometry.boundsTree === undefined));
+  const changes: string[] = [];
+  atlas.addEventListener('change', () => changes.push(atlas.settings.atlas));
+  await atlas.setAtlas('a');
+  assert.deepEqual(loads, ['structures.glb', 'a.glb', 'b.glb', 'c.glb', 'a.glb']);
+  assert.notEqual(atlas.layers.get('a'), first);
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['a', 'aseg', 'c']);
+  assert.deepEqual(changes, ['a']);
+  assert.deepEqual(atlas.visibleMeshes.map((mesh) => mesh.userData['region_id']).sort(), [
+    'a-left',
+    'a-right',
+    'stem',
+  ]);
+  // Picked through its new meshes, as the first time.
+  const ray = new Raycaster(new Vector3(0.03, 0, 0.1), new Vector3(0, 0, -1));
+  assert.equal(atlas.pick(ray)!.id, 'a-right');
+  atlas.dispose();
+});
+
+test('ATLAS-10 a detail level two switches behind is released, and showing it again loads it again', async () => {
+  const { atlas, loads } = fixture();
+  await atlas.initialize('a');
+  const coarse = atlas.layers.get('aseg')!;
+  const disposed = watchDisposal(coarse);
+  await atlas.setDetail('deep');
+  await atlas.setDetail('fine');
+  assert.equal(atlas.hasLayer('aseg'), false);
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['a', 'deep', 'fine']);
+  assert.deepEqual(disposed, { geometries: 1, materials: 1, palettes: 0 });
+  await atlas.setDetail('aseg');
+  assert.equal(loads.filter((file) => file === 'structures.glb').length, 2);
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['a', 'aseg', 'fine']);
+  // A cut source needs its tree before the level shows, as the first time.
+  assert.ok(atlas.layers.get('aseg')!.meshes.every((mesh) => mesh.geometry.boundsTree));
+  atlas.dispose();
+});
+
+test('ATLAS-10 a released atlas that fails to download again rejects, leaves what is shown and is retried', async () => {
+  const { atlas } = fixture();
+  await atlas.initialize('a');
+  await atlas.setAtlas('b');
+  await atlas.setAtlas('c');
+  const load = atlas.loader.loadAsync.bind(atlas.loader);
+  atlas.loader.loadAsync = async (file, onProgress) => {
+    if (file === 'a.glb') throw new Error('HTTP 503');
+    return load(file, onProgress);
+  };
+  await assert.rejects(atlas.setAtlas('a'), /HTTP 503/);
+  assert.equal(atlas.settings.atlas, 'c');
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['aseg', 'b', 'c']);
+  atlas.loader.loadAsync = load;
+  await atlas.setAtlas('a');
+  assert.equal(atlas.settings.atlas, 'a');
+  atlas.dispose();
+});
+
+test('ATLAS-10 a layer still blending is not released, and a prefetched one lasts until the next switch', async () => {
+  const { atlas } = fixture();
+  await atlas.initialize('a');
+  await atlas.setAtlas('b');
+  const feather = GeometryJobs.prototype.feather;
+  let releaseFeathers!: () => void;
+  const feathersHeld = new Promise<void>((resolve) => (releaseFeathers = resolve));
+  vi.spyOn(GeometryJobs.prototype, 'feather').mockImplementation(async function (
+    this: GeometryJobs,
+    meshes,
+  ) {
+    await feathersHeld;
+    return feather.call(this, meshes);
+  });
+  const prefetch = atlas.loadLayer('c', 'c.glb');
+  await vi.waitFor(() => assert.ok(atlas.layers.has('c')));
+  await atlas.setAtlas('a');
+  assert.ok(atlas.layers.has('c'), 'drawable but still blending');
+  releaseFeathers();
+  await prefetch;
+  assert.ok(atlas.hasLayer('c'));
+  await atlas.setAtlas('b');
+  assert.deepEqual([...atlas.layers.keys()].sort(), ['a', 'aseg', 'b']);
+  atlas.dispose();
+});
+
+test('ATLAS-10 a released detail level takes the cut solids built on its meshes with it', async () => {
+  const { atlas } = fixture();
+  await atlas.initialize('a');
+  const sections = new TissueSections(atlas, new URL('https://example.invalid/'));
+  sections.anatomy = sections.createAnatomy(
+    new Volume(
+      {
+        shape: [2, 2, 2],
+        order: 'F',
+        voxel_to_surface_ras_mm: [
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+          [0, 0, 1, 0],
+          [0, 0, 0, 1],
+        ],
+      },
+      new Uint8Array(8),
+    ),
+  );
+  sections.addDetail('aseg');
+  const capped = () => sections.solids.solids.map(({ source }) => source.geometry);
+  const [solid] = sections.solids.solids;
+  let released = 0;
+  solid!.cap.material.addEventListener('dispose', () => (released += 1));
+  assert.deepEqual(capped(), [atlas.layers.get('aseg')!.meshes[0]!.geometry]);
+  await atlas.setDetail('deep');
+  await atlas.setDetail('fine');
+  sections.releaseDetails();
+  assert.deepEqual(capped(), []);
+  assert.equal(solid!.group.parent, null);
+  assert.equal(released, 1);
+  assert.equal(sections.hasDetail('aseg'), false);
+  await atlas.setDetail('aseg');
+  sections.addDetail('aseg');
+  assert.deepEqual(capped(), [atlas.layers.get('aseg')!.meshes[0]!.geometry]);
+  sections.dispose();
+  atlas.dispose();
 });
 
 test('selection events carry source metadata; medial wall cannot become a region', async () => {

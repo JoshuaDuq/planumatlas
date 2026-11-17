@@ -5,7 +5,7 @@ import { afterEach, test, vi } from 'vitest';
 import type { Region } from '../../types/index.ts';
 import { createAnatomicalMaterial, stageLegible, tissueColor } from './materials.ts';
 import type { AnatomicalUserData } from './materials.ts';
-import { appearance, corticalMesh, patchCombinations } from './test-support.ts';
+import { appearance, corticalMesh, networkPalettes, patchCombinations } from './test-support.ts';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -146,6 +146,9 @@ test('SHADER-07 a surface built with the network layer has a network mix at 0, o
       corticalMesh(networks) as never,
       region({ id: 'r', kind: 'cortex' }),
       appearance,
+      null,
+      undefined,
+      networkPalettes(),
     );
   assert.deepEqual((build(true).userData as AnatomicalUserData).networkMix, { value: 0 });
   assert.equal((build(false).userData as AnatomicalUserData).networkMix, null);

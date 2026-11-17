@@ -152,6 +152,7 @@ export class BrainSections extends EventTarget {
       error: null,
     };
     this.onModelChange = () => {
+      this.tissues.releaseDetails();
       void this.syncPaint();
       const s = model.state;
       const key = JSON.stringify([

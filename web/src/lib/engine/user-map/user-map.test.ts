@@ -295,6 +295,39 @@ test('a worker script a newer deploy removed rejects as updated, and the next lo
   }
 });
 
+test('ATLAS-10 an atlas released and loaded again is painted and moved on its new meshes', async () => {
+  const { userMap, atlas, layers } = setup();
+  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  userMap.show({ threshold: 1, max: 2, opacity: 1 });
+  userMap.setSurface('white');
+  const released = layers.get('hcp')!.meshes[0]!;
+  await vi.waitFor(() => assert.ok(ready(released)));
+  const show = async (id: string) => {
+    atlas.settings.atlas = id;
+    atlas.dispatchEvent(new Event('change'));
+    await vi.waitFor(() =>
+      assert.ok(layers.get(id)!.meshes.every((mesh) => mesh.geometry.getAttribute('_user_map'))),
+    );
+  };
+  await show('julich');
+  // The model let `hcp` go and loaded it again: new meshes, on the published pial.
+  layers.set('hcp', {
+    meshes: (['left', 'right'] as const).map((hemisphere, at) => {
+      const material = new MeshPhysicalMaterial();
+      material.userData['userMapReady'] = { value: false };
+      return Object.assign(new Mesh(triangle(0.01), material), {
+        userData: { region_id: 'ab'[at], hemisphere },
+      });
+    }),
+  });
+  await show('hcp');
+  const [loaded] = layers.get('hcp')!.meshes;
+  assert.equal(ready(loaded!), true);
+  await vi.waitFor(() =>
+    assert.ok(Math.abs(loaded!.geometry.getAttribute('position').array[0]! - 0.03) < 1e-7),
+  );
+});
+
 test('an atlas changed while its parcels were being moved is left on the pial', async () => {
   const { userMap, atlas, layers } = setup();
   await userMap.load(new ArrayBuffer(4), 'mni', 0);

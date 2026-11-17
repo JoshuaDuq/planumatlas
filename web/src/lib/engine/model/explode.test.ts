@@ -313,6 +313,25 @@ test('a cut opens on the brain put back at once', () => {
   }
 });
 
+test('ATLAS-10 a detail level released and loaded again is exploded on its own meshes', async () => {
+  const thalamus = () =>
+    meshes('learning').find(
+      (mesh) => labelOf(model.regions.get(mesh.userData['region_id'])!)!.group === 'Diencephalon',
+    )!;
+  const before = thalamus();
+  explodeNow();
+  assert.ok(drawnShift(before).length() > 0);
+  model.setExploded(false);
+  model.stepExplode(Number.MAX_SAFE_INTEGER);
+  await model.setDetail('aseg');
+  await model.setDetail('nextbrain');
+  await model.setDetail('learning');
+  assert.notEqual(thalamus(), before, 'released, and loaded again');
+  explodeNow();
+  assert.ok(drawnShift(thalamus()).length() > 0, 'the explode lays out the meshes loaded again');
+  assertHemispheresClear();
+}, 120_000);
+
 test('a cord loaded while exploded retains its connection to the brainstem', async () => {
   explodeNow();
   await model.ensureSpinalCord();

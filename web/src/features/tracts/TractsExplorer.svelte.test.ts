@@ -652,6 +652,19 @@ describe('settings', () => {
     expect(region.textContent).toBe('Default tracts restored.');
   });
 
+  test('TRACT-18 Restore downloads a default bundle released since it was hidden, then says so', async () => {
+    const { engine } = await ready();
+    await page.getByText('Tract display').click();
+    await key('Arcuate fasciculus · left').click();
+    await key('Corticospinal tract · right').click();
+    // Hiding the second released the first (DIFF-41).
+    expect(engine.tracts.hasBundle('af-left')).toBe(false);
+    await page.getByRole('button', { name: 'Restore default tracts' }).click();
+    await expect.poll(() => drawn(engine).sort()).toEqual(['af-left', 'cst-right']);
+    await expect.poll(() => region.textContent).toBe('Default tracts restored.');
+    await expect.element(key('Arcuate fasciculus · left')).toBeChecked();
+  });
+
   test('Export saves the lengths CSV under its name and announces it', async () => {
     await ready();
     await page.getByText('Tract display').click();

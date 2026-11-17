@@ -46,6 +46,42 @@ test('captures the settled frame, cropped to the stage rectangle asked for, with
   expect(engine.canvas.getAttribute('role')).toBe('application');
 });
 
+test('ATLAS-10 an atlas released two switches back draws the same pixels once it is shown again', async () => {
+  // A small stage: the frame is drawn twice on SwiftShader at the snapshot's two pixels per CSS pixel.
+  const host = document.createElement('div');
+  host.style.cssText = 'position:fixed;left:0;top:0;width:360px;height:280px';
+  document.body.append(host);
+  hosts.push(host);
+  const engine = await createEngine({ host, manifestUrl, theme: 'light' });
+  onTestFinished(() => engine.dispose());
+  const { model } = engine;
+  const [first, second, third] = model.manifest.atlases.map(({ id }) => id) as [
+    string,
+    string,
+    string,
+  ];
+  // The network colours too: the palette is looked up again by the meshes loaded again.
+  model.setSurfaceColor('network');
+  const frame = () => {
+    const { canvas } = engine.captureSnapshot();
+    return canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+  };
+  const before = frame();
+  await model.setAtlas(second);
+  await model.setAtlas(third);
+  expect(model.hasLayer(first)).toBe(false);
+  await model.setAtlas(first);
+  expect(model.hasLayer(first)).toBe(true);
+  const after = frame();
+  expect(after.length).toBe(before.length);
+  expect(after.filter((value, at) => value !== before[at]).length).toBe(0);
+  const colours = new Set<number>();
+  for (let at = 0; at < after.length; at += 4 * 31) {
+    colours.add((after[at]! << 16) | (after[at + 1]! << 8) | after[at + 2]!);
+  }
+  expect(colours.size).toBeGreaterThan(8);
+}, 600_000);
+
 test('FACADE-32 the outline programs are compiled before the start ends: a first selection compiles none', async () => {
   // The engine's own idle warm-up (Focus, T1 colour, Tracts) runs first and is not the outline's. It is
   // run by hand: a CI runner drawing on SwiftShader can go minutes without an idle period.

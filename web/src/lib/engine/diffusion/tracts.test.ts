@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { Group } from 'three';
+import type { LineSegments } from 'three';
 import { test, vi } from 'vitest';
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import { tractCatalog } from '../../core/diffusion/catalogs.ts';
@@ -247,6 +248,34 @@ test('DIFF-40 a lesion moved 1 mm downloads and decodes nothing again; a bundle 
   assert.equal(tab.reads().length, 17);
   assert.ok(!tab.reads().includes(fileOf('af-left')));
   assert.equal(tab.decode.mock.calls.length, 17);
+}, 120_000);
+
+test('DIFF-41 a bundle the Tracts tab has released is downloaded again by the count, never read from its lines', async () => {
+  vi.resetModules();
+  const { createTracts: create } = await import('./tracts.ts');
+  const assets = await import('../../core/assets/diffusion-assets.ts');
+  const read = vi.mocked(assets.readDiffusionAsset).mockImplementation(readInflated);
+  const scene = new Group();
+  const tracts = create({
+    anatomy: 'cdmd',
+    scene: { add: (object) => scene.add(object), invalidate() {} },
+    emit() {},
+  });
+  for (const id of ['af-left', 'cst-left', 'uf-left']) await tracts.loadBundle(id);
+  const lines = scene.getObjectByName('af-left') as LineSegments;
+  const points = lines.geometry.getAttribute('position').array as Float32Array;
+  tracts.setVisible('af-left', false);
+  tracts.setVisible('cst-left', false);
+  assert.equal(tracts.hasBundle('af-left'), false, 'released, its record forgotten');
+  assert.equal(lines.parent, null);
+  // What was af-left's is spoiled: a count that read it would fail or count otherwise.
+  points.fill(Number.NaN);
+  read.mockClear();
+  assert.deepEqual(await tracts.own!.crossing(LEFT_TPJ, ['af-left']), [
+    { id: 'af-left', crossing: 3025, total: 3639 },
+  ]);
+  const reads = read.mock.calls.map(([file]) => file).filter((file) => file.endsWith('.trk.gz'));
+  assert.deepEqual(reads, [fileOf('af-left')]);
 }, 120_000);
 
 test('DIFF-39 four bundles at most download at once, each reported as it is counted', async () => {

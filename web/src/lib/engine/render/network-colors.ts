@@ -1,9 +1,9 @@
-import { BufferAttribute, Color, SRGBColorSpace } from 'three';
+import { Color, DataTexture, FloatType, RGBAFormat, SRGBColorSpace } from 'three';
 import type { BufferGeometry } from 'three';
 import type { Region, Rgb } from '../../types/index.ts';
 
-/** Red, green, blue and whether this vertex has a network at all. */
-export const NETWORK_COLOR_ITEM_SIZE = 4;
+/** Texels in a palette: one for every value the published byte index can take. */
+export const PALETTE_SIZE = 256;
 
 /** The slice of the manifest's `networks` the colours read. */
 export interface NetworkMetadata {
@@ -11,84 +11,58 @@ export interface NetworkMetadata {
   colors: Readonly<Record<string, Rgb>>;
 }
 
+/** The network palette, in the manifest's network order: texel k is the k-th network. */
+export function networkPalette({ networks, colors }: NetworkMetadata): DataTexture {
+  return paletteTexture(networks.map((name) => colors[name]!));
+}
+
 /**
- * Per-vertex network colour, from the `_NETWORK` field and the published palette.
+ * One texel per index of a per-vertex field (`_NETWORK`, `_TERRITORY`): texel k (1-based) holds the
+ * k-th published colour decoded from sRGB, with 1 for "this vertex has one"; texel 0 and every texel
+ * past the palette hold four zeros.
  *
- * The index itself cannot be interpolated. A triangle spanning Visual (1) and
- * Default (7) would sweep through five networks it never touches, painting
- * thin bands of unrelated colour along every boundary. A colour can be: such a
- * triangle blends the two colours that actually meet there, across roughly the
- * one millimetre between vertices.
+ * The vertex stage looks each vertex's colour up by its index (materials.ts), and the colour, not the
+ * index, is interpolated. A triangle spanning Visual (1) and Default (7) blends the two colours that
+ * actually meet there, across roughly the one millimetre between vertices; an interpolated index would
+ * sweep through five networks it never touches.
  *
- * The fourth channel says whether a vertex is in a network. The medial wall is
- * in none and keeps whatever colour its region already had, so nothing invents
- * a network where the parcellation declines to put one.
+ * The fourth channel says whether a vertex has a colour at all. The medial wall is in no network and
+ * keeps whatever colour its region already had, so nothing invents a network where the parcellation
+ * declines to put one.
+ *
+ * Float, as the per-vertex attribute this replaced was: a byte per channel would round the linear
+ * colours and move the pixels drawn.
  */
-export function networkColors(
-  indices: ArrayLike<number>,
-  { networks, colors }: NetworkMetadata,
-): Float32Array {
-  return paletteColors(
-    indices,
-    networks.map((name) => colors[name]!),
-  );
-}
-
-/** Per-vertex colour from a 1-based index into `colors`; index 0, or one past the end, carries none. */
-export function paletteColors(indices: ArrayLike<number>, colors: readonly Rgb[]): Float32Array {
-  const palette = colors.map(([red, green, blue]) =>
-    new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace),
-  );
-  const values = new Float32Array(indices.length * NETWORK_COLOR_ITEM_SIZE);
-  for (let vertex = 0; vertex < indices.length; vertex += 1) {
-    const color = palette[Math.round(indices[vertex]!) - 1];
-    if (!color) continue;
-    const at = vertex * NETWORK_COLOR_ITEM_SIZE;
-    values[at] = color.r;
-    values[at + 1] = color.g;
-    values[at + 2] = color.b;
-    values[at + 3] = 1;
+export function paletteTexture(colors: readonly Rgb[]): DataTexture {
+  if (colors.length >= PALETTE_SIZE) {
+    throw new RangeError(`A palette holds at most ${PALETTE_SIZE - 1} colours.`);
   }
-  return values;
+  const data = new Float32Array(PALETTE_SIZE * 4);
+  colors.forEach(([red, green, blue], at) => {
+    const color = new Color().setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace);
+    data.set([color.r, color.g, color.b, 1], (at + 1) * 4);
+  });
+  const texture = new DataTexture(data, PALETTE_SIZE, 1, RGBAFormat, FloatType);
+  texture.needsUpdate = true;
+  return texture;
 }
 
-/** Bind the palette to one geometry's `_NETWORK` field. */
-export function attachNetworkColors(geometry: BufferGeometry, metadata: NetworkMetadata): boolean {
-  const field = geometry.getAttribute('_network');
-  if (!field) return false;
-  geometry.setAttribute(
-    '_networkColor',
-    new BufferAttribute(networkColors(field.array, metadata), NETWORK_COLOR_ITEM_SIZE),
-  );
-  return true;
-}
-
-/** Bind the territory palette to one geometry's `_TERRITORY` field, as `_territoryColor`. */
-export function attachTerritoryColors(
+/**
+ * The build writes one index per published territory; a larger one means the mesh and the manifest
+ * disagree, which drawing it as "no territory" would hide.
+ */
+export function checkTerritories(
   geometry: BufferGeometry,
   territories: readonly { color: Rgb }[],
-): boolean {
+): void {
   const field = geometry.getAttribute('_territory');
-  if (!field) return false;
-  // The build writes one index per published territory; a larger one means the mesh and the
-  // manifest disagree, which drawing it as "no territory" would hide.
+  if (!field) return;
   for (let vertex = 0; vertex < field.count; vertex += 1) {
     const index = field.getX(vertex);
     if (!Number.isInteger(index) || index < 0 || index > territories.length) {
       throw new Error(`Vertex index ${index} has no published territory.`);
     }
   }
-  geometry.setAttribute(
-    '_territoryColor',
-    new BufferAttribute(
-      paletteColors(
-        field.array,
-        territories.map((territory) => territory.color),
-      ),
-      NETWORK_COLOR_ITEM_SIZE,
-    ),
-  );
-  return true;
 }
 
 /**

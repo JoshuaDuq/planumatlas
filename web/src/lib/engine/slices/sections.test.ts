@@ -48,6 +48,7 @@ function fixture() {
     async load() {},
     layers: new Map([['destrieux', {}]]),
     hasDetail: () => true,
+    releaseDetails() {},
     wantsStriatal: () => false,
     solids: { warm() {} },
     update() {},

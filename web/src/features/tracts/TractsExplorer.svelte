@@ -260,7 +260,8 @@
       await tracts.setActive(true);
       for (const id of ids) if (!tracts.hasBundle(id)) await tracts.loadBundle(id);
       for (const bundle of tracts.snapshot()) {
-        tracts.setVisible(bundle.id, wanted.has(bundle.catalogId));
+        // Hiding one bundle can let an earlier hidden one go (DIFF-41).
+        if (tracts.hasBundle(bundle.id)) tracts.setVisible(bundle.id, wanted.has(bundle.catalogId));
       }
     });
     for (const id of missing) pending.delete(id);
@@ -289,12 +290,18 @@
   }
 
   function restore() {
+    const initial = catalog.bundles.filter((bundle) => bundle.initial).map(({ id }) => id);
+    // A default bundle hidden a while ago has been let go (DIFF-41): it downloads again first.
+    if (!initial.every((id) => tracts.hasBundle(id))) {
+      void showTracts(initial).then(() => {
+        if (!failure && !destroyed) announce(text.restored);
+      });
+      return;
+    }
     control(() => {
       for (const bundle of tracts.snapshot()) {
-        tracts.setVisible(
-          bundle.id,
-          Boolean(catalog.bundles.find((b) => b.id === bundle.id)!.initial),
-        );
+        // Hiding one bundle can let an earlier hidden one go.
+        if (tracts.hasBundle(bundle.id)) tracts.setVisible(bundle.id, initial.includes(bundle.id));
       }
     });
     announce(text.restored);

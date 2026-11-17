@@ -168,6 +168,22 @@ test('DIFF-05 the 3D lines and the MRI navigator share one download and one deco
   assert.equal(lines.colors.length, lines.pts.length);
 });
 
+test('DIFF-05 a forgotten tract is downloaded and decoded again by the next request', async () => {
+  const compressed = await tract('cdmd-sub-013/callosum_1.trk.gz');
+  let reads = 0;
+  const loadTract = createTractLoader(async () => {
+    reads += 1;
+    return { buffer: arrayBuffer(compressed) };
+  });
+  const bundle = { file: 'cdmd-sub-013/callosum_1.trk.gz' };
+  const kept = await loadTract(bundle);
+  loadTract.forget(bundle);
+  const again = await loadTract(bundle);
+  assert.equal(reads, 2);
+  assert.notEqual(again, kept);
+  assertSameBits(again, kept);
+});
+
 test('DIFF-05 a failed tract download is not kept, so a retry downloads it again', async () => {
   let reads = 0;
   const loadTract = createTractLoader(async () => {

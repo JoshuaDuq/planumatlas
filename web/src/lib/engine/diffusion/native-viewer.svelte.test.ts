@@ -45,8 +45,15 @@ async function faceAt(superior: number, points: Ras[], steps = showThenCut) {
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () =>
-      ({ pts: pts.slice(), offsetPt0, lengths: streamlineLengths(pts, offsetPt0) }) as LoadedTract,
+    Object.assign(
+      async () =>
+        ({
+          pts: pts.slice(),
+          offsetPt0,
+          lengths: streamlineLengths(pts, offsetPt0),
+        }) as LoadedTract,
+      { forget: () => {} },
+    ),
   );
   viewer.group.visible = true;
   const plane = new Plane(new Vector3(0, 1, 0), -superior / 1000);

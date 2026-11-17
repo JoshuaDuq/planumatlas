@@ -111,6 +111,11 @@ export function createFakeModel({
   };
   layers.add(values.atlas);
   layers.add(values.detail);
+  // What the real model keeps of each kind besides the one shown (brain-atlas.ts `release`, ATLAS-10).
+  const previous = { atlas: null as string | null, detail: null as string | null };
+  const release = (kind: readonly { id: string }[], kept: readonly (string | null)[]) => {
+    for (const { id } of kind) if (!kept.includes(id)) layers.delete(id);
+  };
 
   let spinalCordRequest = 0;
   let medialPair = false;
@@ -386,7 +391,9 @@ export function createFakeModel({
       if (!manifest.atlases.some((atlas) => atlas.id === id))
         throw unknownLayer(`Unknown atlas: ${id}`);
       layers.add(id);
+      if (id !== values.atlas) previous.atlas = values.atlas;
       values.atlas = id;
+      release(manifest.atlases, [id, previous.atlas]);
       if (values.surfaceColor === 'cab-np' && id !== cabNp?.atlas) values.surfaceColor = 'atlas';
       if (values.surfaceColor === 'lobe' && !groupsByLobe(id)) values.surfaceColor = 'atlas';
       values.isolatedRegion = null;
@@ -396,7 +403,9 @@ export function createFakeModel({
       if (!levels.some((level) => level.id === id))
         throw unknownLayer(`Unknown detail level: ${id}`);
       layers.add(id);
+      if (id !== values.detail) previous.detail = values.detail;
       values.detail = id;
+      release(levels, [id, previous.detail]);
       values.internalSystem = null;
       values.internalConstituents = new Set();
       values.isolatedRegion = null;

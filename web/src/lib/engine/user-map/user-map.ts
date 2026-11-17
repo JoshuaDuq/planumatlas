@@ -22,7 +22,7 @@ import type { Parents } from '../../core/user-map/partition.ts';
 import { overlapAreas, vertexAreas } from '../../core/user-map/overlap.ts';
 import type { OverlapAreas } from '../../core/user-map/overlap.ts';
 import { gridSampler } from '../../core/user-map/sampling.ts';
-import type { BrainAtlas } from '../model/brain-atlas.ts';
+import type { BrainAtlas, Layer } from '../model/brain-atlas.ts';
 import type { BrainSections } from '../slices/sections.ts';
 import { greyed } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
@@ -208,17 +208,18 @@ export function createUserMap({
 
   /**
    * Each hemisphere's parcels of an atlas and their native parents, found once from the pial positions the
-   * atlas was published with: a parcel moved onto another surface still has the same parents.
+   * atlas was published with: a parcel moved onto another surface still has the same parents. Kept by
+   * layer, so an atlas released and loaded again (ATLAS-10) is laid out on its new meshes.
    */
-  const layouts = new Map<
-    string,
+  const layouts = new WeakMap<
+    Layer,
     Promise<Map<Hemisphere, { parents: Parents; meshes: Map<number, Mesh> }>>
   >();
   const layout = (id: string) => {
-    let found = layouts.get(id);
+    const layer = atlas.layers.get(id);
+    let found = layer && layouts.get(layer);
     if (!found) {
       found = (async () => {
-        const layer = atlas.layers.get(id);
         const record = atlas.manifest.atlases.find((entry) => entry.id === id)?.ribbon_labels as
           RibbonLabels | undefined;
         if (!layer || !record) throw new Error(`No native labels for the ${id} cortex.`);
@@ -252,8 +253,10 @@ export function createUserMap({
         }
         return result;
       })();
-      layouts.set(id, found);
-      found.catch(() => layouts.delete(id));
+      if (layer) {
+        layouts.set(layer, found);
+        found.catch(() => layouts.delete(layer));
+      }
     }
     return found;
   };
@@ -300,23 +303,30 @@ export function createUserMap({
   // The surface the cortex is drawn on: the reader's choice, map or not, while no cut is open (a cut face
   // spans pial to white, so the surface it meets must be the pial).
   let surfaceChoice: CortexSurface = 'pial';
-  let drawnSurface: { atlas: string; surface: CortexSurface } = { atlas: '', surface: 'pial' };
+  let drawnSurface: { atlas: string; layer: Layer | null; surface: CortexSurface } = {
+    atlas: '',
+    layer: null,
+    surface: 'pial',
+  };
   let surfaceRequest = 0;
   const wantedSurface = (): CortexSurface => (atlas.settings.cutActive ? 'pial' : surfaceChoice);
 
   /** Move the drawn atlas's parcels onto the surface wanted, and the last one back to the pial. */
   const placeSurface = async () => {
     const id = atlas.settings.atlas;
+    const layer = atlas.layers.get(id) ?? null;
     const surface = wantedSurface();
-    if (drawnSurface.atlas === id && drawnSurface.surface === surface) return;
+    if (drawnSurface.layer === layer && drawnSurface.surface === surface) return;
     const ask = ++surfaceRequest;
-    if (drawnSurface.atlas && drawnSurface.surface !== 'pial') {
+    // A released layer took its moved parcels with it.
+    const moved = atlas.layers.get(drawnSurface.atlas) === drawnSurface.layer;
+    if (drawnSurface.layer && moved && drawnSurface.surface !== 'pial') {
       await moveParcels(drawnSurface.atlas, 'pial', ask);
     }
     if (ask !== surfaceRequest) return;
     if (surface !== 'pial') await moveParcels(id, surface, ask);
     if (ask !== surfaceRequest) return;
-    drawnSurface = { atlas: id, surface };
+    drawnSurface = { atlas: id, layer, surface };
     invalidate();
   };
 
@@ -324,7 +334,7 @@ export function createUserMap({
   const moveParcels = async (id: string, target: CortexSurface, ask: number) => {
     const [hemispheres, envelopes] = await Promise.all([layout(id), atlas.ensureEnvelopes()]);
     if (ask !== surfaceRequest) return;
-    drawnSurface = { atlas: id, surface: target };
+    drawnSurface = { atlas: id, layer: atlas.layers.get(id) ?? null, surface: target };
     for (const [hemisphere, { parents, meshes }] of hemispheres) {
       if (target === 'pial') {
         for (const mesh of meshes.values()) restorePial(mesh);

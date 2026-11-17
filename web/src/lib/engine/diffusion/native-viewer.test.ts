@@ -3,11 +3,12 @@ import { GreaterDepth, Group, Plane, Vector3 } from 'three';
 import type { Mesh, MeshStandardMaterial } from 'three';
 import { test, vi } from 'vitest';
 import { tractCatalog } from '../../core/diffusion/catalogs.ts';
+import type { TractBundle } from '../../core/diffusion/catalogs.ts';
 import { createNativeTractViewer } from './native-viewer.ts';
 import { readRepoJson } from '../../../../test/repo.ts';
 import { createReferenceTransform } from './reference-space.ts';
 import { createTractLoader } from './tract-file.ts';
-import type { LineSegments } from 'three';
+import type { BufferGeometry, LineSegments, Material } from 'three';
 import { streamlineLengths } from './streamlines.ts';
 import type { LoadedTract, TractLoader } from './tract-file.ts';
 
@@ -28,11 +29,16 @@ const offsetPt0 = new Uint32Array([0, 3, 5]);
 const decoded = (): LoadedTract =>
   ({ pts: pts.slice(), offsetPt0, lengths: streamlineLengths(pts, offsetPt0) }) as LoadedTract;
 
+type LoadTract = (bundle: Pick<TractBundle, 'file'>) => Promise<LoadedTract>;
+
+/** A loader that keeps nothing: each call is `load`'s, and `forget` has nothing to drop. */
+const loader = (load: LoadTract): TractLoader => Object.assign(load, { forget: () => {} });
+
 test('snapshot summarises each loaded bundle at the minimum length', async () => {
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   await viewer.loadBundle(first);
   assert.equal(viewer.hasBundle(first.id), true);
@@ -52,7 +58,7 @@ test('a minimum below 1 mm is rejected before any bundle is loaded, and keeps th
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   for (const value of [0, -1, NaN]) assert.throws(() => viewer.setMinimum(value), RangeError);
   await viewer.loadBundle(first);
@@ -61,8 +67,8 @@ test('a minimum below 1 mm is rejected before any bundle is loaded, and keeps th
 });
 
 test('a bundle requested twice while it downloads is added once', async () => {
-  const loadTract = vi.fn<TractLoader>(async () => decoded());
-  const viewer = createNativeTractViewer(catalog, () => {}, loadTract);
+  const loadTract = vi.fn<LoadTract>(async () => decoded());
+  const viewer = createNativeTractViewer(catalog, () => {}, loader(loadTract));
   await Promise.all([
     viewer.loadBundle(first),
     viewer.loadBundle(first),
@@ -79,7 +85,7 @@ test('the brain opacity can be set before the outline loads', () => {
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   viewer.setOpacity(0.4);
   assert.throws(() => viewer.setOpacity(2), RangeError);
@@ -89,7 +95,7 @@ test('scanner and surface coordinates are inverse of each other', () => {
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   viewer.group.matrixAutoUpdate = false;
   viewer.group.matrix.makeRotationZ(0.3).setPosition(0.01, -0.02, 0.03);
@@ -154,7 +160,7 @@ test('DIFF-23 an opacity or visibility set before the outline loads applies when
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   viewer.setOpacity(0.5);
   viewer.setOutlineVisible(false);
@@ -181,7 +187,7 @@ test('DIFF-23 an outline hidden before loading keeps the catalogue opacity', asy
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   viewer.setOutlineVisible(false);
   await viewer.load();
@@ -196,11 +202,11 @@ test('DIFF-17 the initial bundles download alongside the outline and are added a
   // Shared per file, as `createTractLoader` is.
   const pending = new Map<string, (tract: LoadedTract) => void>();
   const loads = new Map<string, Promise<LoadedTract>>();
-  const loadTract: TractLoader = (bundle) => {
+  const loadTract = loader((bundle) => {
     if (!loads.has(bundle.file))
       loads.set(bundle.file, new Promise((resolve) => pending.set(bundle.file, resolve)));
     return loads.get(bundle.file)!;
-  };
+  });
   const viewer = createNativeTractViewer(catalog, () => {}, loadTract);
   const loading = viewer.load();
   // Every bundle is asked for before any of them, or the outline, has arrived.
@@ -225,7 +231,7 @@ test('DIFF-17 a reference space of another anatomy is refused', async () => {
   const viewer = createNativeTractViewer(
     { ...catalog, anatomy: 'another-anatomy' },
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   await assert.rejects(viewer.load(), {
     message: 'The tract reference space belongs to a different anatomy.',
@@ -237,7 +243,7 @@ test('DIFF-20 a minimum set before a bundle loads filters it when it arrives', a
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   viewer.setMinimum(20);
   await viewer.loadBundle(first);
@@ -246,8 +252,8 @@ test('DIFF-20 a minimum set before a bundle loads filters it when it arrives', a
 });
 
 test('DIFF-21 a hidden bundle requested again is shown without a new load, and a failed load is forgotten', async () => {
-  const loadTract = vi.fn<TractLoader>(async () => decoded());
-  const viewer = createNativeTractViewer(catalog, () => {}, loadTract);
+  const loadTract = vi.fn<LoadTract>(async () => decoded());
+  const viewer = createNativeTractViewer(catalog, () => {}, loader(loadTract));
   await viewer.loadBundle(first);
   viewer.setVisible(first.id, false);
   await viewer.loadBundle(first);
@@ -261,11 +267,67 @@ test('DIFF-21 a hidden bundle requested again is shown without a new load, and a
   viewer.dispose();
 });
 
+test('DIFF-41 a hidden bundle is released once another is hidden after it, and loads again when asked', async () => {
+  const loadTract = vi.fn<LoadTract>(async () => decoded());
+  const forget = vi.fn();
+  const viewer = createNativeTractViewer(catalog, () => {}, Object.assign(loadTract, { forget }));
+  const third = catalog.bundles[2]!;
+  await Promise.all([first, second, third].map((bundle) => viewer.loadBundle(bundle)));
+  const lines = viewer.group.getObjectByName(first.id) as LineSegments<BufferGeometry, Material>;
+  const disposed: string[] = [];
+  lines.geometry.addEventListener('dispose', () => disposed.push('lines'));
+  lines.material.addEventListener('dispose', () => disposed.push('material'));
+  viewer.setVisible(first.id, false);
+  assert.equal(viewer.hasBundle(first.id), true, 'the last hidden is kept');
+  viewer.setVisible(second.id, false);
+  assert.equal(viewer.hasBundle(first.id), false);
+  assert.equal(viewer.hasBundle(second.id), true);
+  assert.equal(lines.parent, null);
+  assert.equal(viewer.group.children.length, 6);
+  assert.deepEqual(disposed.sort(), ['lines', 'material']);
+  assert.deepEqual(forget.mock.calls, [[first]]);
+  assert.deepEqual(
+    viewer.snapshot().map(({ id, visible }) => [id, visible]),
+    [
+      [second.id, false],
+      [third.id, true],
+    ],
+  );
+  // Shown again, the last hidden stays: only a bundle hidden before it goes.
+  viewer.setVisible(second.id, true);
+  viewer.setVisible(third.id, false);
+  assert.equal(viewer.hasBundle(second.id), true);
+  await viewer.loadBundle(first);
+  assert.equal(loadTract.mock.calls.length, 4);
+  assert.equal(viewer.snapshot().find(({ id }) => id === first.id)!.visible, true);
+  viewer.dispose();
+});
+
+test('DIFF-41 a bundle drawn alone is kept while it is, and released once it is not and another stops', async () => {
+  const forget = vi.fn();
+  const viewer = createNativeTractViewer(
+    catalog,
+    () => {},
+    Object.assign(async () => decoded(), { forget }),
+  );
+  await viewer.loadBundle(second);
+  await viewer.showLandmarkTract(first);
+  viewer.setVisible(second.id, false);
+  viewer.setVisible(second.id, true);
+  assert.equal(viewer.hasBundle(first.id), true, 'drawn alone');
+  viewer.clearLandmarkTract();
+  assert.equal(viewer.hasBundle(first.id), true, 'the last to stop being drawn');
+  viewer.setVisible(second.id, false);
+  assert.equal(viewer.hasBundle(first.id), false);
+  assert.deepEqual(forget.mock.calls, [[first]]);
+  viewer.dispose();
+});
+
 test('DIFF-24 the cut planes clip the bundles already loaded and those loaded later', async () => {
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   const plane = new Plane(new Vector3(1, 0, 0), 0);
   await viewer.loadBundle(first);
@@ -288,10 +350,10 @@ test('DIFF-25 disposal frees what is drawn and refuses a bundle or outline that 
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => {
+    loader(async () => {
       await gate;
       return decoded();
-    },
+    }),
   );
   const late = viewer.loadBundle(first);
   const parent = new Group();
@@ -307,7 +369,7 @@ test('DIFF-18 a scanner point and its surface point are inverse for 100 seeded r
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   let state = 0xe6;
   const random = () => {
@@ -334,7 +396,7 @@ test('a moving camera draws every third point, the length filter included, and r
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   const drawn = (id: string) => {
     const { geometry } = viewer.group.getObjectByName(id) as LineSegments;
@@ -357,8 +419,8 @@ test('a moving camera draws every third point, the length filter included, and r
 });
 
 test('a lesion shows exactly its counted lines through the scanner transform, then restores ordinary tracts', async () => {
-  const loadTract = vi.fn<TractLoader>(async () => decoded());
-  const viewer = createNativeTractViewer(catalog, () => {}, loadTract);
+  const loadTract = vi.fn<LoadTract>(async () => decoded());
+  const viewer = createNativeTractViewer(catalog, () => {}, loader(loadTract));
   await viewer.loadBundle(second);
   viewer.setMinimum(20);
   const transform = createReferenceTransform(
@@ -405,12 +467,13 @@ test('clearing or replacing a lesion selection prevents late bundles becoming vi
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    (bundle) =>
+    loader((bundle) =>
       bundle.file === first.file
         ? new Promise((resolve) => {
             release = resolve;
           })
         : Promise.resolve(decoded()),
+    ),
   );
   const stale = viewer.showLesionTract(first, { centre: [0, 0, 0], radius: 100 });
   await vi.waitFor(() => assert.ok(release));
@@ -428,7 +491,7 @@ test('a landmark draws its whole bundle alone, faint where hidden, and gives the
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async () => decoded(),
+    loader(async () => decoded()),
   );
   await viewer.loadBundle(second);
   viewer.setMinimum(20);
@@ -466,10 +529,12 @@ test('a landmark cleared while its bundle downloads keeps the late bundle hidden
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    () =>
-      new Promise((resolve) => {
-        release = resolve;
-      }),
+    loader(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    ),
   );
   const pending = viewer.showLandmarkTract(first);
   await vi.waitFor(() => assert.ok(release));
@@ -485,10 +550,10 @@ test('a lesion bundle that fails to download gives the ordinary tracts back', as
   const viewer = createNativeTractViewer(
     catalog,
     () => {},
-    async (bundle) => {
+    loader(async (bundle) => {
       if (bundle.file === first.file) throw new Error('offline');
       return decoded();
-    },
+    }),
   );
   await viewer.loadBundle(second);
   await assert.rejects(

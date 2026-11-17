@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { BufferAttribute, BufferGeometry, Color, SRGBColorSpace } from 'three';
+import {
+  BufferAttribute,
+  BufferGeometry,
+  Color,
+  FloatType,
+  RGBAFormat,
+  SRGBColorSpace,
+} from 'three';
 import type { Rgb } from '../../types/index.ts';
 import {
-  NETWORK_COLOR_ITEM_SIZE,
-  attachNetworkColors,
-  attachTerritoryColors,
-  networkColors,
+  PALETTE_SIZE,
+  checkTerritories,
+  networkPalette,
+  paletteTexture,
 } from './network-colors.ts';
 
 const METADATA = {
@@ -22,12 +29,10 @@ const METADATA = {
   } as Record<string, Rgb>,
 };
 
-const rgba = (values: Float32Array, vertex: number) =>
-  Array.from(
-    values.slice(vertex * NETWORK_COLOR_ITEM_SIZE, (vertex + 1) * NETWORK_COLOR_ITEM_SIZE),
-  );
+const texel = (values: Float32Array, index: number) =>
+  Array.from(values.slice(index * 4, index * 4 + 4));
 
-/** The attribute is float32; Color computes in float64, so they differ in the last bits. */
+/** The texture is float32; Color computes in float64, so they differ in the last bits. */
 const assertChannels = (actual: number[], expected: number[]) => {
   expected.forEach((value, channel) => {
     assert.ok(
@@ -43,88 +48,58 @@ const linear = (name: string) => {
   return [color.r, color.g, color.b];
 };
 
-test('a vertex in no network is left transparent, keeping its region colour', () => {
-  assert.deepEqual(rgba(networkColors(new Float32Array([0]), METADATA), 0), [0, 0, 0, 0]);
-});
+const palette = () => networkPalette(METADATA).image.data as Float32Array;
 
-test('the published colour is converted out of sRGB into the working space', () => {
-  const [red, green, blue, present] = rgba(networkColors(new Float32Array([1]), METADATA), 0) as [
-    number,
-    number,
-    number,
-    number,
-  ];
-  assertChannels([red, green, blue], linear('Vis'));
-  assert.equal(present, 1);
-  // sRGB 120/255 is 0.47; linear must be darker, or the palette renders washed out.
-  assert.ok(red < 120 / 255);
-});
-
-test('every network index maps to its own published colour', () => {
-  const values = networkColors(
-    new Float32Array(METADATA.networks.map((_, index) => index + 1)),
-    METADATA,
-  );
+test('SHADER-08 texel k holds the k-th network’s published colour in linear float, present', () => {
+  const texture = networkPalette(METADATA);
+  assert.equal(texture.image.width, PALETTE_SIZE);
+  assert.equal(texture.image.height, 1);
+  assert.equal(texture.format, RGBAFormat);
+  // A byte per channel would round the linear colour the vertices drew with before.
+  assert.equal(texture.type, FloatType);
   METADATA.networks.forEach((name, index) => {
-    const [red, green, blue, present] = rgba(values, index) as [number, number, number, number];
-    assertChannels([red, green, blue], linear(name));
-    assert.equal(present, 1);
+    assertChannels(texel(palette(), index + 1), [...linear(name), 1]);
   });
+  // sRGB 120/255 is 0.47; linear must be darker, or the palette renders washed out.
+  assert.ok(texel(palette(), 1)[0]! < 120 / 255);
+  // Bit for bit the float32 values the per-vertex attribute held.
+  assert.deepEqual(texel(palette(), 7), Array.from(new Float32Array([...linear('Default'), 1])));
 });
 
-test('an index past the palette is treated as no network rather than wrapping', () => {
-  assert.deepEqual(rgba(networkColors(new Float32Array([99]), METADATA), 0), [0, 0, 0, 0]);
+test('SHADER-09 texel 0 and every texel past the palette are transparent, keeping the region colour', () => {
+  const values = palette();
+  assert.deepEqual(texel(values, 0), [0, 0, 0, 0]);
+  for (const index of [8, 99, PALETTE_SIZE - 1])
+    assert.deepEqual(texel(values, index), [0, 0, 0, 0]);
 });
 
-test('geometry carrying the field gets a four-channel attribute', () => {
+test('SHADER-09 a palette holds at most one colour per byte index past 0', () => {
+  const colors = Array.from({ length: PALETTE_SIZE }, (): Rgb => [1, 2, 3]);
+  assert.throws(() => paletteTexture(colors), RangeError);
+  assert.doesNotThrow(() => paletteTexture(colors.slice(1)).dispose());
+});
+
+test('SHADER-10 geometry keeps its byte index and gains no per-vertex colour attribute', () => {
   const geometry = new BufferGeometry();
-  geometry.setAttribute('_network', new BufferAttribute(new Float32Array([1, 0, 7]), 1));
-  assert.equal(attachNetworkColors(geometry, METADATA), true);
-  const attribute = geometry.getAttribute('_networkColor');
-  assert.equal(attribute.itemSize, NETWORK_COLOR_ITEM_SIZE);
-  assert.equal(attribute.count, 3);
-  assert.equal(attribute.getW(0), 1);
-  assert.equal(attribute.getW(1), 0);
-  assert.equal(attribute.getW(2), 1);
-});
-
-test('geometry without the field is left alone rather than given empty colours', () => {
-  const geometry = new BufferGeometry();
-  assert.equal(attachNetworkColors(geometry, METADATA), false);
-  assert.equal(geometry.getAttribute('_networkColor'), undefined);
-});
-
-test('SHADER-09 an index is rounded to the nearest network, never wrapped, and one that names none is transparent', () => {
-  const indices = [0, 99, -1, NaN, 0.4, 7.5, 0.5, 1.5, 6.5, 7.49];
-  const values = networkColors(new Float32Array(indices), METADATA);
-  for (const vertex of [0, 1, 2, 3, 4, 5]) assert.deepEqual(rgba(values, vertex), [0, 0, 0, 0]);
-  for (const [vertex, name] of [
-    [6, 'Vis'],
-    [7, 'SomMot'],
-    [8, 'Default'],
-    [9, 'Default'],
-  ] as const) {
-    assertChannels(rgba(values, vertex), [...linear(name), 1]);
-  }
+  geometry.setAttribute('_territory', new BufferAttribute(new Uint8Array([1, 0, 2, 0]), 1));
+  checkTerritories(geometry, [{ color: [255, 0, 0] }, { color: [0, 0, 255] }]);
+  assert.deepEqual(Object.keys(geometry.attributes), ['_territory']);
 });
 
 test('a territory index takes its branch colour, none keeps the region colour, and one past the palette fails', () => {
   const past = new BufferGeometry();
   past.setAttribute('_territory', new BufferAttribute(new Float32Array([1, 3]), 1));
   assert.throws(
-    () => attachTerritoryColors(past, [{ color: [255, 0, 0] }, { color: [0, 0, 255] }]),
+    () => checkTerritories(past, [{ color: [255, 0, 0] }, { color: [0, 0, 255] }]),
     /Vertex index 3 has no published territory/,
   );
-  const geometry = new BufferGeometry();
-  geometry.setAttribute('_territory', new BufferAttribute(new Float32Array([1, 0, 2, 0]), 1));
-  assert.equal(
-    attachTerritoryColors(geometry, [{ color: [255, 0, 0] }, { color: [0, 0, 255] }]),
-    true,
-  );
-  const values = geometry.getAttribute('_territoryColor')!.array as Float32Array;
-  assertChannels(rgba(values, 0), [1, 0, 0, 1]);
-  assert.deepEqual(rgba(values, 1), [0, 0, 0, 0]);
-  assertChannels(rgba(values, 2), [0, 0, 1, 1]);
-  assert.deepEqual(rgba(values, 3), [0, 0, 0, 0]);
-  assert.equal(attachTerritoryColors(new BufferGeometry(), [{ color: [1, 2, 3] }]), false);
+  const values = paletteTexture([
+    [255, 0, 0],
+    [0, 0, 255],
+  ]).image.data as Float32Array;
+  assertChannels(texel(values, 1), [1, 0, 0, 1]);
+  assert.deepEqual(texel(values, 0), [0, 0, 0, 0]);
+  assertChannels(texel(values, 2), [0, 0, 1, 1]);
+  assert.deepEqual(texel(values, 3), [0, 0, 0, 0]);
+  assert.doesNotThrow(() => checkTerritories(new BufferGeometry(), [{ color: [1, 2, 3] }]));
 });

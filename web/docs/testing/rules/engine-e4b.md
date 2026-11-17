@@ -96,14 +96,14 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Expected:** Prefetch `loadLayer('b', 'b.glb')` with no listener, then `setAtlas('b', onProgress)` before it finishes → `onProgress` hears loaded [10, 20] and the atlas is `b`. Two `ensureEnvelopes(listener)` calls at once → both listeners hear the same non-empty sequence.
 - **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R)
 
-### ATLAS-10 · A layer is downloaded once and kept
+### ATLAS-10 · The layer shown and the one shown before it are kept; the others are released and load again when shown
 
-- **Rule:** A layer already loaded is shown again from memory. A layer still downloading is shared with the next caller. A failed download is forgotten so the next request tries again.
+- **Rule:** Of the cortical atlases the model keeps the one shown and the one shown just before it, and of the detail levels the same; the cord, once loaded, stays. Showing another atlas or detail level releases every other loaded layer of that kind: its geometry and BVHs, materials and border-blend palette, on the GPU and in memory, and what was built on its meshes (the explode's layout, the reader's map layout, the cut's solids of a detail level). A layer still downloading or blending is left to finish, and a prefetched layer that was never shown lasts until the next switch of its kind. A kept layer is shown again from memory. A released one loads again as it did the first time, through the same download (usually answered by the HTTP cache or the service worker), with `hasLayer` false and its progress reported meanwhile; it is drawn with the same pixels, and picking and cutting wait for it as they did then. A layer still downloading is shared with the next caller. A failed download, the first or a later one, rejects the switch, leaves the shown layer and is forgotten, so the next request tries again.
 - **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/model/brain-atlas.js:364-430`
-- **Expected:** Fixture `initialize('a')`, `setAtlas('b')`, `setAtlas('a')` → files fetched `['a.glb', 'b.glb', 'structures.glb']`, each once. A layer whose first download throws loads on the next request.
-- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R); the layer retry is uncovered (the envelope and cord retries are ATLAS-41, ATLAS-48)
+- **Level:** unit; browser for the pixels
+- **Source:** `viewer/model/brain-atlas.js:364-430`; handoff P10 (2026-11-16), which replaced "a layer is downloaded once and kept" (the maintainer's decision for this run)
+- **Expected:** Fixture with atlases a, b, c and detail levels aseg, deep, fine: `initialize('a')`, `setAtlas('b')`, `setAtlas('a')` → files fetched `['a.glb', 'b.glb', 'structures.glb']`, each once. `initialize('a')`, `setAtlas('b')` (a kept), `setAtlas('c')` → `layers` holds `aseg`, `b`, `c`; `a`'s scene is out of the group, its 3 geometries, 3 materials and feather palette are disposed and its BVHs dropped; `setAtlas('a')` → fetched `['structures.glb', 'a.glb', 'b.glb', 'c.glb', 'a.glb']`, one `change`, `layers` holds `a`, `aseg`, `c`, and a pick names `a-right`. `setDetail` over `deep`, `fine` releases `aseg` (1 geometry, 1 material), and back on `aseg` it loads again with its BVHs. A released atlas whose download then fails rejects /HTTP 503/ with `c` still shown, and the next request loads it. A cortex still blending when another atlas is shown stays, and goes at the next switch. CDMD: a learning level released and loaded again is exploded on its new meshes; a released detail level's cut solids are disposed and capped anew from the reloaded layer. Real engine (CDMD, network colours): destrieux, then hcp-mmp, julich (destrieux released), destrieux → the same snapshot bytes. The contract suite: `hasLayer` of the atlas two switches back is false, and true again once it is shown.
+- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R), `src/lib/engine/model/explode.test.ts` (R, explode), `src/lib/engine/index.svelte.test.ts` (R, pixels), the contract suite (R, on the fake and the real engine)
 
 ### ATLAS-11 · Loading from the published manifest reads its sidecars and cleans up on failure
 
@@ -470,7 +470,7 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 
 ### ATLAS-53 · Disposal releases everything and refuses later work
 
-- **Rule:** Disposing removes the model from the scene and frees every layer, the white matter and the ribbon solids. A download that finishes later is released at once. Later loads are refused. The model reports that it is disposed.
+- **Rule:** Disposing removes the model from the scene and frees every layer, the white matter, the ribbon solids and the network and territory palettes. A download that finishes later is released at once. Later loads are refused. The model reports that it is disposed.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/model/brain-atlas.js:907-931`

@@ -46,11 +46,11 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 
 ### DIFF-05 · One download and decode per tract file, shared by the lines and the navigator
 
-- **Rule:** Each tract file is downloaded and decoded once; the 3D lines and the MRI navigator get the same record, which carries one length per streamline. A failed download is not kept, so a retry downloads again.
+- **Rule:** Each tract file is downloaded and decoded once while its record is kept; the 3D lines and the MRI navigator get the same record, which carries one length per streamline. The viewer `forget`s the record of a bundle it releases (DIFF-41), and the next load downloads and decodes the file again. A failed download is not kept, so a retry downloads again.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/diffusion/tract-file.js:14-27`
-- **Expected:** Two concurrent loads of `cdmd-sub-013/callosum_1.trk.gz` → 1 read, the same object; a later load → the same object; `lengths.length === offsetPt0.length − 1` (2,000). A reader throwing "HTTP 503" → two loads reject /503/ and read twice.
+- **Source:** `viewer/diffusion/tract-file.js:14-27`; handoff P10 (2026-11-16) for `forget`
+- **Expected:** Two concurrent loads of `cdmd-sub-013/callosum_1.trk.gz` → 1 read, the same object; a later load → the same object; `lengths.length === offsetPt0.length − 1` (2,000). After `forget`, a load → a second read and a new record with the same points, bit for bit. A reader throwing "HTTP 503" → two loads reject /503/ and read twice.
 - **Covered by:** `src/lib/engine/diffusion/tract-file.test.ts` (R)
 
 ## 3D tract lines
@@ -198,7 +198,7 @@ Conventions: points are RAS millimetres. World coordinates are metres with x = R
 
 ### DIFF-21 · A bundle requested twice at once is added once
 
-- **Rule:** Concurrent requests for one bundle share one load, so its lines are added once. Asking for a bundle already loaded shows it. A failed load is forgotten, so the next request loads again.
+- **Rule:** Concurrent requests for one bundle share one load, so its lines are added once. Asking for a bundle still loaded (DIFF-41) shows it. A failed load is forgotten, so the next request loads again.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/diffusion/native-viewer.js:48-67`; deviation `e6-concurrent-bundle-load.md`
@@ -300,6 +300,15 @@ DIFF-28 to DIFF-34 described the NiiVue navigator, removed on 2026-11-12; the Li
 - **Source:** state-machine audit 2026-11-09 (`isolate` set the selection before its await)
 - **Expected:** a loaded, visible bundle, then a lesion bundle whose download rejects → rejects with the error, the loaded bundle visible again. Overlay off, a loaded bundle, then a lesion crossing or a landmark whose download rejects → `streamlinesVisible === false`.
 - **Covered by:** `src/lib/engine/diffusion/native-viewer.test.ts` (R), `src/lib/engine/diffusion/tracts.test.ts` (R)
+
+### DIFF-41 · A bundle no longer drawn is released once another stops being drawn after it
+
+- **Rule:** The viewer keeps every bundle the reader shows, the bundle drawn alone (a lesion's or a landmark's), and the one bundle that stopped being drawn last. When another bundle stops being drawn (hidden, or no longer drawn alone without being shown), the one that stopped before it is released if it still is not drawn: its lines' buffers and materials go from the GPU and memory, and the loader forgets its decoded record (DIFF-05), so a lesion's count no longer reads it from the Tracts tab and downloads the file instead (DIFF-40). Asking for it again downloads and decodes it again. The snapshot, and so the lengths CSV, lists the bundles kept; "Restore default tracts" downloads a released default bundle again (TRACT-18).
+- **Kind:** behaviour
+- **Level:** unit; the fake engine's tracts do the same
+- **Source:** handoff P10 (2026-11-16)
+- **Expected:** Three bundles loaded and shown; hide the first → kept; hide the second → the first released: `hasBundle` false, its lines out of the group (6 children left), its geometry and material disposed, `forget` called with it, the snapshot `[second hidden, third shown]`. Show the second and hide the third → nothing released. `loadBundle(first)` → a fourth load, shown. A landmark's bundle not shown by the reader: kept while drawn alone and as the last to stop, released when another bundle is hidden after it.
+- **Covered by:** `src/lib/engine/diffusion/native-viewer.test.ts` (R), `src/features/tracts/TractsExplorer.svelte.test.ts` (R, on the fake)
 
 ## The lesion's tract count
 

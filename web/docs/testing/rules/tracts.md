@@ -165,11 +165,11 @@ Scope: chunks T1 (#59), the Tracts panel (the tract list and its keys, the searc
 
 ### TRACT-18 · Restore returns the drawn tracts to the catalog's initial bundles, and says so
 
-- **Rule:** "Restore default tracts" sets every loaded bundle's visibility back to the catalog's initial set and nothing else, says "Default tracts restored.", and keeps focus on the button.
+- **Rule:** "Restore default tracts" sets every loaded bundle's visibility back to the catalog's initial set and nothing else, says "Default tracts restored.", and keeps focus on the button. A default bundle released since it was hidden (DIFF-41) is downloaded again first, as a link's bundles are, and the announcement follows the download.
 - **Kind:** behaviour
 - **Level:** browser — focus and the announcer
 - **Source:** `viewer/diffusion/native-ui.js:240-245`; deviation `t1-restore-export-announced.md`; decision 42 on #4 (Restore resets only tract visibility)
-- **Expected:** Uncheck af-left, check af-right → drawn `['af-right', 'cst-right']`; Restore → `['af-left', 'cst-right']`, focus on Restore, announcer "Default tracts restored.".
+- **Expected:** Uncheck af-left, check af-right → drawn `['af-right', 'cst-right']`; Restore → `['af-left', 'cst-right']`, focus on Restore, announcer "Default tracts restored.". Uncheck af-left, then cst-right (af-left released) → Restore → af-left downloaded again, drawn `['af-left', 'cst-right']`, its key checked, then the announcement.
 - **Covered by:** `src/features/tracts/TractsExplorer.svelte.test.ts` (R)
 
 ### TRACT-19 · The lengths CSV has one quoted, formula-safe row per loaded bundle, in English, with LF line ends

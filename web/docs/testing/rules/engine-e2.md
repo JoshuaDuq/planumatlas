@@ -2,7 +2,7 @@
 
 Scope: chunk E2 (#25). It covers what colour and light every drawn surface gets: the tissue-class
 colours, the cortical surface material with its fold shading and network blend, the per-vertex
-network colours, the MRI appearance and its mark, the sampled cut face and its label lookup, the
+network and territory palette, the MRI appearance and its mark, the sampled cut face and its label lookup, the
 cut-face lift, the cut palette, the solid cap material, gyral white matter on the cap, the cap
 labels of cut-only atlases, the shader half of the border feather, the light rig, and how the nine
 `onBeforeCompile` patches compose (decision 25 on #4). Legacy sources: `viewer/render/materials.js`,
@@ -89,37 +89,37 @@ The legacy comparison file `parity/E2.test.ts` is deleted; a rule that lists no 
 - **Kind:** behaviour
 - **Level:** browser for the drawn colour; unit for `userData`
 - **Source:** `viewer/render/materials.js:36-39, 82-86`; mix set by `viewer/model/brain-atlas.js:548-549`
-- **Expected:** geometry with `_network` → `userData.networkMix` `{ value: 0 }`; without → `null`. Drawn with mix 1: presence 1 → the network colour; presence 0 → the region colour. Mix 0.5, presence 1 → the midpoint ± 1/255.
+- **Expected:** geometry with `_network`, given the network palette → `userData.networkMix` `{ value: 0 }`; without the field → `null`. Drawn with mix 1: presence 1 → the network colour; presence 0 → the region colour. Mix 0.5, presence 1 → the midpoint ± 1/255.
 - **Covered by:** `src/lib/engine/render/materials.test.ts` (R, userData)
 
 ## Network colours
 
 ### SHADER-08 · Each vertex takes its network's published colour, in linear RGB
 
-- **Rule:** A vertex whose `_network` index is k (1 to 7) takes the colour the manifest publishes for the k-th network, decoded from sRGB, with presence 1. Interpolating colours rather than indices means a triangle between two networks blends those two only.
+- **Rule:** A vertex whose `_network` index is k (1 to 7) takes the colour the manifest publishes for the k-th network, decoded from sRGB, with presence 1. The vertex stage looks it up by the index in a palette texture shared by the anatomy (texel k, `texelFetch`), so the colour, not the index, is interpolated and a triangle between two networks blends those two only; the territories (`_territory`) are drawn the same way. The palette holds float32, as the per-vertex colour attribute it replaced did (handoff P10), so every pixel is drawn as before; a byte per channel would round the linear colours and move them.
 - **Kind:** data
-- **Level:** unit
-- **Source:** `viewer/render/network-colors.js:4, 19-36`
-- **Expected:** CDMD networks `Vis, SomMot, DorsAttn, SalVentAttn, Limbic, Cont, Default`. Index 1 (Vis [120, 18, 134]) → [0.187821, 0.006049, 0.238398, 1] ± 1e-6; index 7 (Default [205, 62, 78]) → [0.610496, 0.048172, 0.076185, 1] ± 1e-6. Red 0.1878 < 120/255, so the palette is not drawn washed out.
-- **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R)
+- **Level:** unit; browser for the drawn pixels
+- **Source:** `viewer/render/network-colors.js:4, 19-36`; handoff P10 (2026-11-16)
+- **Expected:** CDMD networks `Vis, SomMot, DorsAttn, SalVentAttn, Limbic, Cont, Default`. A 256 × 1 RGBA float texture; texel 1 (Vis [120, 18, 134]) → [0.187821, 0.006049, 0.238398, 1] ± 1e-6; texel 7 (Default [205, 62, 78]) → [0.610496, 0.048172, 0.076185, 1] ± 1e-6, bit for bit the float32 of the decoded colour. Red 0.1878 < 120/255, so the palette is not drawn washed out. A 24 × 24-vertex patch whose CDMD network and territory indices change from vertex to vertex (0 and indices past the palette included), drawn lit at mix 1 into a float target: the palette and the former per-vertex float attribute give the same pixels exactly, over 100 distinct colours that differ from mix 0; an RGBA8 palette gives different ones.
+- **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R), `src/lib/engine/render/network-colors.svelte.test.ts` (R, pixels)
 
 ### SHADER-09 · A vertex in no network is left transparent
 
-- **Rule:** An index that names no network (0, past the palette, negative or not a number) gives four zeros, so the region keeps its colour. Indices are rounded to the nearest integer first, never wrapped.
+- **Rule:** Index 0, and every index past the palette up to 255 (the published index is one byte), reads a texel of four zeros, so the region keeps its colour; nothing wraps. The vertex stage rounds the index to the nearest integer before the lookup. A palette has room for 255 colours and refuses more.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/network-colors.js:26-35`
-- **Expected:** 0, 99, −1, NaN, 0.4, 7.5 → [0, 0, 0, 0]. 0.5 → Vis; 1.5 → SomMot; 6.5 and 7.49 → Default.
-- **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R, 0 and 99)
-
-### SHADER-10 · Only geometry carrying the network field gets network colours
-
-- **Rule:** A geometry with `_network` gets a four-channel `_networkColor` attribute, one item per vertex, and the call reports true. A geometry without it is left alone and the call reports false.
-- **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/render/network-colors.js:38-46`
-- **Expected:** `_network` [1, 0, 7] → true; itemSize 4, count 3, presence [1, 0, 1]. Empty geometry → false, no `_networkColor`.
+- **Source:** `viewer/render/network-colors.js:26-35`; handoff P10 (2026-11-16)
+- **Expected:** Texels 0, 8, 99 and 255 → [0, 0, 0, 0]. 256 colours → RangeError; 255 → a palette.
 - **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R)
+
+### SHADER-10 · Only geometry carrying the network field gets network colours, and no colour per vertex
+
+- **Rule:** A cortical surface whose geometry carries `_network` (or `_territory`) and whose anatomy publishes the palette looks its colours up; one without either has no mix (SHADER-07). Nothing is derived per vertex: the geometry keeps only its one-byte index, where it used to gain a four-float colour for each layer (32 bytes a vertex, on the GPU and in memory). A territory index past the published territories still fails the load.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `viewer/render/network-colors.js:38-46`; handoff P10 (2026-11-16)
+- **Expected:** a geometry with `_territory` [1, 0, 2, 0] checked against two territories → its attributes are still `['_territory']`; [1, 3] → "Vertex index 3 has no published territory.". A surface with `_network` and the palette → `networkMix` `{ value: 0 }`; without the field → `null`.
+- **Covered by:** `src/lib/engine/render/network-colors.test.ts` (R), `src/lib/engine/render/materials.test.ts` (R, SHADER-07)
 
 ## The MRI appearance
 

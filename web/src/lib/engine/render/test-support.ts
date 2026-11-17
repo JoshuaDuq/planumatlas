@@ -1,4 +1,5 @@
 import {
+  BufferAttribute,
   BufferGeometry,
   DoubleSide,
   Data3DTexture,
@@ -12,7 +13,7 @@ import {
   UnsignedByteType,
 } from 'three';
 import type { Material } from 'three';
-import { appearance as published } from '../../../../../public/models/cdmd/manifest.json';
+import { networks, appearance as published } from '../../../../../public/models/cdmd/manifest.json';
 import type { Region } from '../../types/index.ts';
 import { Volume } from '../slices/volume.ts';
 import { addCapLabels, createCapLabels } from '../tissues/cap-labels.ts';
@@ -21,11 +22,19 @@ import { createWhiteMatter } from '../tissues/white-matter.ts';
 import { addBorderFeather } from './border-feather.ts';
 import { isPhone } from './device.ts';
 import { createAnatomicalMaterial } from './materials.ts';
-import type { Appearance } from './materials.ts';
+import type { Appearance, SurfacePalettes } from './materials.ts';
+import { networkPalette } from './network-colors.ts';
+import type { NetworkMetadata } from './network-colors.ts';
 import { addMriCutAppearance, addMriSurfaceAppearance, createMriUniforms } from './mri-material.ts';
 
 /** The published appearance of the CDMD anatomy. Imported, not read from disk, so browser tests can use it. */
 export const appearance = published as unknown as Appearance;
+
+/** The published network colours, as the model gives a surface built with the network layer. */
+export const networkPalettes = (): SurfacePalettes => ({
+  network: networkPalette(networks as unknown as NetworkMetadata),
+  territory: null,
+});
 
 /** A cortical mesh with the shading fields (and, if asked, the network layer) the model checks for. */
 export function corticalMesh(withNetworks: boolean, count = 5) {
@@ -35,14 +44,7 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
     geometry.setAttribute(name, new Float32BufferAttribute(new Float32Array(count).fill(0.5), 1));
   }
   if (withNetworks) {
-    geometry.setAttribute(
-      '_network',
-      new Float32BufferAttribute(new Float32Array(count).fill(1), 1),
-    );
-    geometry.setAttribute(
-      '_networkColor',
-      new Float32BufferAttribute(new Float32Array(count * 4).fill(1), 4),
-    );
+    geometry.setAttribute('_network', new BufferAttribute(new Uint8Array(count).fill(1), 1));
   }
   return new Mesh(
     geometry,
@@ -73,6 +75,9 @@ export function patchCombinations(): Map<string, Material> {
       corticalMesh(withNetworks) as never,
       { id: 'r', kind: 'cortex' } as Region,
       appearance,
+      null,
+      undefined,
+      withNetworks ? networkPalettes() : undefined,
     );
 
   for (const withNetworks of [false, true]) {

@@ -15,7 +15,12 @@ import type {
 
 export type LoadedTract = TractLines;
 
-export type TractLoader = (bundle: Pick<TractBundle, 'file'>) => Promise<LoadedTract>;
+/** The decoded lines of a tract file, downloaded and decoded once while they are kept. */
+export interface TractLoader {
+  (bundle: Pick<TractBundle, 'file'>): Promise<LoadedTract>;
+  /** Let the file's record go, so its lines can be freed; the next request downloads it again. */
+  forget(bundle: Pick<TractBundle, 'file'>): void;
+}
 
 type Reply = TractReply | CountReply;
 
@@ -80,14 +85,14 @@ export async function countCrossing(
 }
 
 /**
- * One download and decode per tract file. The decoded points are also the lines' position buffer, so
- * the record is the only copy of them. A failed load is dropped and retried.
+ * One download and decode per tract file until it is forgotten. The decoded points are also the
+ * lines' position buffer, so the record is the only copy of them. A failed load is dropped and retried.
  */
 export function createTractLoader(
   read: (file: string) => Promise<{ buffer: ArrayBuffer }> = readDiffusionAsset,
 ) {
   const tracts = new Map<string, Promise<LoadedTract>>();
-  const load: TractLoader = (bundle) => {
+  const load = (bundle: Pick<TractBundle, 'file'>): Promise<LoadedTract> => {
     let loading = tracts.get(bundle.file);
     if (!loading) {
       loading = read(bundle.file).then(({ buffer }) => run<TractReply>({ token: ++token, buffer }));
@@ -97,7 +102,13 @@ export function createTractLoader(
     return loading;
   };
   return Object.assign(load, {
-    /** The file's load already started, if any: a lesion's count reads it instead of downloading. */
+    forget(bundle: Pick<TractBundle, 'file'>) {
+      tracts.delete(bundle.file);
+    },
+    /**
+     * The file's load already started and not forgotten, if any: a lesion's count reads it instead
+     * of downloading, and the worker gets a copy; a forgotten file is downloaded again.
+     */
     started: (file: string): Promise<LoadedTract> | undefined => tracts.get(file),
   });
 }

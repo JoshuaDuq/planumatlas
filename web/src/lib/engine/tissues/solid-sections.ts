@@ -261,6 +261,25 @@ export class SolidSections {
     this.reorder();
   }
 
+  /** Take away the solids whose source `drops` names, with their materials and the worker's copies. */
+  remove(drops: (source: SolidSource) => boolean): void {
+    const removed = new Set(this.solids.filter(({ source }) => drops(source)));
+    if (!removed.size) return;
+    for (const { source, back, front, cap, section, group } of removed) {
+      (source.material as Material).dispose();
+      back.material.dispose();
+      front.material.dispose();
+      cap.material.dispose();
+      section?.dispose();
+      group.removeFromParent();
+    }
+    const ids = [...removed].filter((solid) => solid.workerPosted).map(({ id }) => id);
+    if (ids.length) this.worker?.postMessage({ type: 'drop', ids } satisfies WorkerMessage);
+    const kept = this.solids.filter((solid) => !removed.has(solid));
+    this.solids.splice(0, this.solids.length, ...kept);
+    this.reorder();
+  }
+
   /**
    * Every cap lies on the one plane, so where caps overlap one must be chosen: `solids` ranks them, and
    * the last ranked shows.

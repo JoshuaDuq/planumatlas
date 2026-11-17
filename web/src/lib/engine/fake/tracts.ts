@@ -54,6 +54,8 @@ export function createFakeTracts({
   let minimum = 1;
   let overlay = false;
   let landmarkTract: string | null = null;
+  // The bundle hidden last, kept when another is hidden (native-viewer.ts `stopped`, DIFF-41).
+  let lastHidden: string | null = null;
 
   const summary = (id: string): TractBundle => {
     const bundle = catalog.get(id)!;
@@ -119,6 +121,12 @@ export function createFakeTracts({
     setVisible(id, visible) {
       if (!loaded.has(id)) throw new RangeError(`Unknown tract bundle: ${id}`);
       loaded.set(id, visible);
+      if (visible) {
+        if (lastHidden === id) lastHidden = null;
+      } else if (lastHidden !== id) {
+        if (lastHidden && loaded.get(lastHidden) === false) loaded.delete(lastHidden);
+        lastHidden = id;
+      }
       emit('tractsVisibility', undefined);
     },
     setMinimum(value) {

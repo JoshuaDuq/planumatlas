@@ -2,6 +2,7 @@ import { MeshPhysicalMaterial, MeshStandardMaterial } from 'three';
 import type {
   BufferGeometry,
   Color,
+  DataTexture,
   IUniform,
   Vector3,
   Mesh,
@@ -67,6 +68,15 @@ export interface AnatomicalUserData {
   territoryMix: IUniform<number> | null;
   /** True once this mesh carries the reader's map per vertex (`_user_map`). */
   userMapReady: IUniform<boolean>;
+}
+
+/**
+ * The network and territory colours, one texel per index (network-colors.ts), shared by every
+ * cortical material of an anatomy; null where the manifest publishes none.
+ */
+export interface SurfacePalettes {
+  network: DataTexture | null;
+  territory: DataTexture | null;
 }
 
 /** The visual-field map's uniforms, one set shared by every cortical material of an anatomy. */
@@ -187,18 +197,22 @@ export function fieldDecode(ranges: Appearance['field_ranges'], name: string): [
 /**
  * Source morphometry modulates illumination, independently of atlas colour.
  *
- * `withNetworks` is all-or-nothing across a build — either the network layer
- * was built and every cortical mesh carries it, or none does — so this adds at
- * most one program variant rather than one per mesh.
+ * The network layer is all-or-nothing across a build — either it was built
+ * and every cortical mesh carries it, or none does — so this adds at most one
+ * program variant rather than one per mesh; so is the territory layer. The
+ * vertex stage looks each vertex's colour up in the palette by its index,
+ * because an index cannot be interpolated (network-colors.ts).
  */
 function addFoldShading(
   material: MeshPhysicalMaterial,
   { folds, intensity, field_ranges: ranges }: Appearance,
-  withNetworks: boolean,
-  withTerritories: boolean,
+  networkPalette: DataTexture | null,
+  territoryPalette: DataTexture | null,
   visual: VisualFieldUniforms | null,
   userMap: UserMapUniforms,
 ): void {
+  const withNetworks = networkPalette !== null;
+  const withTerritories = territoryPalette !== null;
   const variation = { value: intensity.surface_strength };
   const networkMix = { value: 0 };
   const territoryMix = { value: 0 };
@@ -212,8 +226,14 @@ function addFoldShading(
   const painted = addUserMapPainted(material);
   material.onBeforeCompile = (shader: WebGLProgramParametersWithUniforms) => {
     shader.uniforms.tissueVariation = variation;
-    if (withNetworks) shader.uniforms.networkMix = networkMix;
-    if (withTerritories) shader.uniforms.territoryMix = territoryMix;
+    if (withNetworks) {
+      shader.uniforms.networkMix = networkMix;
+      shader.uniforms.networkPalette = { value: networkPalette };
+    }
+    if (withTerritories) {
+      shader.uniforms.territoryMix = territoryMix;
+      shader.uniforms.territoryPalette = { value: territoryPalette };
+    }
     if (visual) {
       Object.assign(shader.uniforms, visual);
       shader.uniforms.visualXDecode = { value: fieldDecode(ranges, '_FIELD_X') };
@@ -245,8 +265,8 @@ varying float vOpenness;
 varying float vT1;
 varying float vSulcalDepth;
 varying vec2 vUserMap;
-${withNetworks ? 'attribute vec4 _networkColor;\nvarying vec4 vNetworkColor;' : ''}
-${withTerritories ? 'attribute vec4 _territoryColor;\nvarying vec4 vTerritoryColor;' : ''}
+${withNetworks ? 'attribute float _network;\nuniform highp sampler2D networkPalette;\nvarying vec4 vNetworkColor;' : ''}
+${withTerritories ? 'attribute float _territory;\nuniform highp sampler2D territoryPalette;\nvarying vec4 vTerritoryColor;' : ''}
 ${visual ? VISUAL_VERTEX_DECLARATIONS : ''}
 ${shader.vertexShader}`.replace(
       '#include <begin_vertex>',
@@ -255,8 +275,8 @@ vSulcalDepth = _sulc * sulcDecode.y + sulcDecode.x;
 vOpenness = _openness * opennessDecode.y + opennessDecode.x;
 vT1 = _t1 * t1Decode.y + t1Decode.x;
 vUserMap = userMapBlend < 1.0 ? mix(_user_map_previous, _user_map, userMapBlend) : _user_map;
-${withNetworks ? 'vNetworkColor = _networkColor;' : ''}
-${withTerritories ? 'vTerritoryColor = _territoryColor;' : ''}
+${withNetworks ? 'vNetworkColor = texelFetch(networkPalette, ivec2(int(_network + 0.5), 0), 0);' : ''}
+${withTerritories ? 'vTerritoryColor = texelFetch(territoryPalette, ivec2(int(_territory + 0.5), 0), 0);' : ''}
 ${visual ? VISUAL_VERTEX : ''}`,
     );
     shader.fragmentShader = `varying float vSulcalDepth;
@@ -466,6 +486,7 @@ export function createAnatomicalMaterial(
   appearance: Appearance,
   visual: VisualFieldUniforms | null = null,
   userMap: UserMapUniforms = createUserMapUniforms(),
+  palettes: SurfacePalettes = { network: null, territory: null },
 ): MeshPhysicalMaterial {
   const material = new MeshPhysicalMaterial();
   MeshStandardMaterial.prototype.copy.call(material, mesh.material);
@@ -498,11 +519,14 @@ export function createAnatomicalMaterial(
         }
       }
     }
+    // A palette colours the meshes that carry its index.
+    const palette = (name: string, texture: DataTexture | null) =>
+      texture && mesh.geometry.getAttribute(name) ? texture : null;
     addFoldShading(
       material,
       appearance,
-      Boolean(mesh.geometry.getAttribute('_network')),
-      Boolean(mesh.geometry.getAttribute('_territory')),
+      palette('_network', palettes.network),
+      palette('_territory', palettes.territory),
       visual,
       userMap,
     );
