@@ -52,9 +52,12 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefix web
 
-      - name: Build static site
+      # The checks tests.yml's web-check makes of its own build (BUILD-02 to BUILD-06 and BUILD-14 to
+      # BUILD-16), made again of the build published here before it is copied.
+      - name: Build static site and check it
         run: |
           npm run build --prefix web
+          node .github/scripts/check-dist.mjs
           cp -r web/dist dist
 
       # The Svelte build was previewed at /neuroatlas/next/; links to it now lead to the site.

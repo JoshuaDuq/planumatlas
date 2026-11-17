@@ -651,28 +651,28 @@ document, `location`, `history` and `window` directly.
 
 - **Rule:** The build copies the published models and diffusion data into the site.
 - **Kind:** behaviour
-- **Level:** post-build check of `web/dist` (`web-check`)
+- **Level:** post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** `web/vite.config.ts` `publicDir`
 - **Expected:** every file in the service worker's map exists in `web/dist`.
-- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-03 · The site is indexed
 
 - **Rule:** The built page carries no `noindex`.
 - **Kind:** behaviour
-- **Level:** post-build check of `web/dist` (`web-check`)
+- **Level:** post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** `web/index.html`
 - **Expected:** `web/dist/index.html` does not contain `noindex`.
-- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-04 · Three.js and the BVH index in their own chunks
 
 - **Rule:** Three.js core and `three-mesh-bvh` are built into their own `three` and `bvh` chunks, so a chrome-only deploy does not re-download them.
 - **Kind:** behaviour
-- **Level:** post-build check of `web/dist` (`web-check`)
+- **Level:** post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** `vite.config.js:31-41`
 - **Expected:** chunk `three` contains `WebGLRenderer`; chunk `bvh` contains `MeshBVH`.
-- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-05 · The version maps the build writes
 
@@ -681,16 +681,16 @@ document, `location`, `history` and `window` directly.
 - **Level:** unit
 - **Source:** `vite.config.js:13-24, 63-65, 84-90`; `scripts/published-version.mjs:10-45`
 - **Expected:** keys exactly `base`, `files`, `gunzipped`; `base` = `/`; head map non-empty with every key starting `models/`; `sw.js` contains `planum-models`.
-- **Covered by:** `build/published-files.test.ts` (R, fixed versions of a fixture tree, `.gz` by contents); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `build/published-files.test.ts` (R, fixed versions of a fixture tree, `.gz` by contents); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-06 · Charset first, prefetch before the stylesheet
 
 - **Rule:** The built page declares its charset within the first 1024 bytes, and the prefetch script comes before the stylesheet link.
 - **Kind:** behaviour
-- **Level:** post-build check of `web/dist` (`web-check`)
+- **Level:** post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** HTML Standard 4.2.5.4; `index.html:4, 34`
 - **Expected:** first 1024 bytes contain `<meta charset="UTF-8"`; index of `window.__planumAssets` < index of `rel="stylesheet"`.
-- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-07 · The prefetch script is inlined with its values
 
@@ -759,25 +759,25 @@ document, `location`, `history` and `window` directly.
 
 - **Rule:** The build serves every GLB the model loader reads (each anatomy's atlases, detail levels, solid envelopes and supplemental layers) with its positions and triangle indices under a required `EXT_meshopt_compression`, encoded losslessly and in order (`ATTRIBUTES`, `INDICES`), and versions it by the bytes it serves. Every other published file, the atlas comparison geometry included, is served as published.
 - **Kind:** behaviour
-- **Level:** unit; post-build check of `web/dist` (`web-check`)
+- **Level:** unit; post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** `web/build/meshopt-glb.ts`; `web/build/published-files.ts` `buildStart`, `closeBundle`
 - **Expected:** a compressed layer parsed with the decoder gives the published meshes, names, metadata and every attribute and index byte; without the decoder it is refused; every published GLB is a layer or comparison geometry, never both; in `web/dist` each version is the first 16 hex of the served bytes' SHA-256, each layer requires the extension and every other file equals `public/`.
-- **Covered by:** `build/meshopt-glb.test.ts` (H); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job); `src/lib/engine/model/assets.test.ts` "ATLAS-11" (R, the app's loader reads the compressed layers)
+- **Covered by:** `build/meshopt-glb.test.ts` (H); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job); `src/lib/engine/model/assets.test.ts` "ATLAS-11" (R, the app's loader reads the compressed layers)
 
 ### BUILD-15 · A first visit stays within its byte ceilings
 
 - **Rule:** The entry chunk and the `three` chunk stay under raw-byte ceilings (what the browser parses and compiles before the app runs), and the cold-start set stays under a gzip-byte ceiling (what the host sends before the brain is drawn). The cold-start set is the entry script, its module preloads and stylesheet in `index.html`, the clinical records chunk the entry requests as it runs, and what the head script fetches on a plain visit (read by running it over the built files). The clinical records (`data/neuropsychology.yaml`) are a chunk of their own, and the guided tour, the snapshot and the Linked MRI dialog are fetched when first used.
 - **Kind:** behaviour
-- **Level:** post-build check of `web/dist` (`web-check`)
+- **Level:** post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** `web/src/lib/core/clinical/load.ts`; `web/src/app/regions/StageRegion.svelte`, `MastheadRegion.svelte`; `web/src/main.ts` (no top-level await, which would turn off Rolldown's merging of shared modules into the entry)
 - **Expected:** entry ≤ 1,250,000 B raw; `three` ≤ 760,000 B raw; cold-start set ≤ 22,600,000 B gzip; a `neuropsychology` chunk that the entry names. Measured 2026-11-09 (Vite 8, gzip level 6): entry 1,170,878 B raw (2,073,028 before the split), `three` 728,790 B, cold-start set 21,691,234 B gzip (21,710,054 before). A ceiling is a regression guard: move code out of the first visit rather than raise it.
-- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
 
 ### BUILD-16 · The built page carries a Content-Security-Policy
 
 - **Rule:** GitHub Pages sends no headers, so the built page declares its Content-Security-Policy in one `<meta http-equiv>` tag, right after the charset and ahead of every script. Each source is one the app loads: scripts, module workers and the service worker from the site (`worker-src` falls back to `script-src`), each inline script by the SHA-256 of its text as shipped, and `'wasm-unsafe-eval'` for the meshopt decoder's WebAssembly; styles from the site and inline (the app sets styles through the CSSOM alone, which no policy governs, but a `style` attribute in template markup would otherwise work in development and be refused in the built site only); requests to the site and the feedback relay (`RELAY` in `src/features/colophon/feedback.ts`); fonts and images from the site. No plugin, no `<base>` and no form submission (each form is handled in script). No source is a wildcard, and `script-src` holds neither `'unsafe-inline'` nor `'unsafe-eval'`. The development page has no policy, since Vite's dev server injects inline scripts of its own. A meta policy cannot carry `frame-ancestors`, `report-uri` or `sandbox`, so the page has none. A browser that does not know `'wasm-unsafe-eval'` (before Chrome 97, Firefox 102, Safari 16) refuses to compile the decoder.
 - **Kind:** behaviour
-- **Level:** unit; post-build check of `web/dist` (`web-check`)
+- **Level:** unit; post-build check of `web/dist` (`web-check`; deploy's `build`)
 - **Source:** SEC2 (2026-11 review); `web/build/content-security-policy.ts`
 - **Expected:** `default-src 'self'; script-src 'self' 'sha256-<theme and language script>' 'sha256-<prefetch script>' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://feedback.planumatlas.com; object-src 'none'; base-uri 'none'; form-action 'none'`; in `web/dist/index.html`, one such tag in head before the first `<script`, whose `sha256-` sources are exactly the hashes of the page's inline scripts, and no source containing `*`. Measured 2026-11-16 on the built site (`vite preview`, headless Chromium 156, a `securitypolicyviolation` listener): no violation and no console error over the first view, four stops of the tour, a coronal cut, Linked MRI and its saved PNG (a `data:` download), the Tracts tab with two bundles drawn, Add → Overlay with a 4 mm MNI NIfTI, the saved snapshot (a `blob:` download), the service worker registering and controlling a reload, and the feedback form (its POST answered by the test).
-- **Covered by:** `build/content-security-policy.test.ts` (R); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job)
+- **Covered by:** `build/content-security-policy.test.ts` (R); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)

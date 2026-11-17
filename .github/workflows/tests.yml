@@ -176,8 +176,8 @@ jobs:
       - name: Run the published-version tests
         run: node --test scripts/published-version.test.mjs
 
-      # What deploy ships, checked once for the chunks, the page's head and the service worker's
-      # version map; it also hashes the real public/ tree.
+      # What deploy ships, checked for the chunks, the page's head and the service worker's version
+      # map; it also hashes the real public/ tree. deploy.yml checks the build it publishes again.
       - name: Build the site and check it
         run: |
           npm run build --prefix web
