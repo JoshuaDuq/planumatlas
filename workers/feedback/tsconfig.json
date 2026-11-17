@@ -1,0 +1,21 @@
+// Type-checks the Worker and its tests, from the repository root after npm ci --prefix web:
+// node web/node_modules/typescript/bin/tsc -p workers/feedback
+// The Worker has no dependencies: TypeScript and Node's types (for the tests) are web/'s.
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "webworker"],
+    "types": ["node"],
+    "typeRoots": ["../../web/node_modules/@types"],
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"]
+}

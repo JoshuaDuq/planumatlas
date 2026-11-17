@@ -89,8 +89,11 @@ jobs:
               - scripts/published-version.test.mjs
               - .github/scripts/**
               - .github/workflows/tests.yml
+            # The Worker, its tsconfig included, and web/'s lockfile, which pins the TypeScript and
+            # Node types it is checked with.
             feedback:
               - workers/feedback/**
+              - web/package-lock.json
               - .github/workflows/tests.yml
 
   python:
@@ -190,7 +193,9 @@ jobs:
           node .github/scripts/ui-bundle-budget.mjs | tee ui-budget.log
           cat ui-budget.log >> "$GITHUB_STEP_SUMMARY"
 
-  # The feedback Worker (workers/feedback), with Node's own test runner: it has no dependencies.
+  # The feedback Worker (workers/feedback), which has no dependencies: its tests with Node's own
+  # test runner, which strips their types, then the Worker and its tests type-checked with web/'s
+  # TypeScript and Node types (workers/feedback/tsconfig.json).
   feedback-worker:
     needs: changes
     if: needs.changes.outputs.feedback == 'true'
@@ -200,15 +205,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          sparse-checkout: workers/feedback
+          sparse-checkout: |
+            workers/feedback
+            web
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
 
       - name: Run the Worker tests
         run: node --test 'workers/feedback/**/*.test.ts'
+
+      - name: Install web's dependencies
+        run: npm ci --prefix web
+
+      - name: Type-check the Worker
+        run: node web/node_modules/typescript/bin/tsc -p workers/feedback
 
   # In Playwright's image (Playwright's CI guide): Chromium, its system libraries and Xvfb are
   # already there, so nothing is installed per run. Installing them took 25 s, or 6 to 11 min when

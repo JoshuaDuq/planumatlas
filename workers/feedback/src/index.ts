@@ -71,7 +71,7 @@ function isEmail(text: string): boolean {
 /** The body as text, or null once it passes MAX_BODY bytes; Content-Length can be absent. */
 async function readBody(request: Request): Promise<string | null> {
   if (!request.body) return '';
-  const chunks: Uint8Array[] = [];
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
   let size = 0;
   for await (const chunk of request.body) {
     size += chunk.byteLength;

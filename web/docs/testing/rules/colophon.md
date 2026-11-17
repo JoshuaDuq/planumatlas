@@ -82,7 +82,7 @@ Copy quoted is the English interface text unless marked FR. English sets a perce
 
 ## Feedback
 
-The form in the status bar's Feedback popover and in the phone menu's Feedback dialog (`FeedbackForm.svelte`), and the Worker that mails what it sends to the owner (`workers/feedback`, deployed by hand with `npx wrangler deploy` from that folder). No test posts to the relay: the form's run over a mocked `fetch`, the Worker's under Node's runner (`node --test 'workers/feedback/**/*.test.ts'`).
+The form in the status bar's Feedback popover and in the phone menu's Feedback dialog (`FeedbackForm.svelte`), and the Worker that mails what it sends to the owner (`workers/feedback`, deployed by hand with `npx wrangler deploy` from that folder). No test posts to the relay: the form's run over a mocked `fetch`, the Worker's under Node's runner (`node --test 'workers/feedback/**/*.test.ts'`), which strips their types; CI's `feedback-worker` job then type-checks the Worker and its tests with `web/`'s TypeScript (`node web/node_modules/typescript/bin/tsc -p workers/feedback`).
 
 ### COLO-09 · A message of spaces alone, or an address the relay would refuse, is said at its field
 
