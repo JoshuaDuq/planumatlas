@@ -1,4 +1,4 @@
-/** A heading and its key, description rows. */
+/** A heading and its key, description rows; in `gestures`, gesture, description rows. */
 export type ShortcutGroup = [heading: string, rows: [key: string, description: string][]];
 
 export const en = {
@@ -31,6 +31,7 @@ export const en = {
       [
         ['Tab', 'Move focus to the model'],
         ['← → ↑ ↓', 'Turn the model, once it has focus'],
+        ['Shift ← → ↑ ↓', 'Move the model across the view, once it has focus'],
         ['+ −', 'Zoom the model in or out'],
         ['1 – 6', 'Left, right, anterior, posterior, superior, inferior view'],
         ['0', 'Return to the oblique view'],
@@ -52,6 +53,20 @@ export const en = {
       ],
     ],
   ] as ShortcutGroup[],
+  // What a pointer or finger does on the model, written in words rather than as key caps.
+  gestures: [
+    'Mouse and touch',
+    [
+      ['Drag', 'Turn the model'],
+      [
+        'Right-drag, or drag with Shift',
+        'Move the model across the view; on a touch screen, drag with two fingers',
+      ],
+      ['Scroll or pinch', 'Zoom in toward the spot you point at, or back out'],
+      ['Click or tap', 'Select a region'],
+      ['Double-click or double-tap', 'Centre the view on that spot; the model then turns about it'],
+    ],
+  ] as ShortcutGroup,
   singleKeysNote: (on: boolean): string =>
     on
       ? 'Page-wide single-key shortcuts (letters, numbers, / and ?) can be turned off in the settings menu.'
@@ -90,6 +105,7 @@ export const fr: typeof en = {
       [
         ['Tab', 'Placer le focus sur le modèle'],
         ['← → ↑ ↓', 'Faire tourner le modèle, une fois ciblé'],
+        ['Maj ← → ↑ ↓', 'Déplacer le modèle dans la vue, une fois ciblé'],
         ['+ −', 'Zoomer ou dézoomer le modèle'],
         ['1 – 6', 'Vue gauche, droite, antérieure, postérieure, supérieure, inférieure'],
         ['0', 'Revenir à la vue oblique'],
@@ -111,6 +127,22 @@ export const fr: typeof en = {
       ],
     ],
   ] as ShortcutGroup[],
+  gestures: [
+    'Souris et écran tactile',
+    [
+      ['Glisser', 'Faire tourner le modèle'],
+      [
+        'Glisser avec le bouton droit, ou avec Maj',
+        'Déplacer le modèle dans la vue\u202f; sur un écran tactile, glisser à deux doigts',
+      ],
+      ['Défiler ou pincer', 'Zoomer vers le point visé, ou reculer'],
+      ['Cliquer ou toucher', 'Sélectionner une région'],
+      [
+        'Double-cliquer ou toucher deux fois',
+        'Centrer la vue sur ce point\u202f; le modèle tourne ensuite autour de lui',
+      ],
+    ],
+  ] as ShortcutGroup,
   singleKeysNote: (on: boolean): string =>
     on
       ? 'Les raccourcis à une touche valables sur toute la page (lettres, chiffres, / et ?) peuvent être désactivés dans le menu des réglages.'

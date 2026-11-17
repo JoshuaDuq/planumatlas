@@ -263,6 +263,9 @@ export function createFakeCamera({
     orbitBy() {
       reframe();
     },
+    panBy() {
+      reframe();
+    },
     dolly(factor) {
       const direction = normalize(position.map((value, axis) => value - target[axis]!) as Vector);
       position = target.map(

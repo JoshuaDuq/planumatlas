@@ -2,8 +2,8 @@ import { characterShortcutAllowed, isCharacterKey } from '../core/keyboard.ts';
 import type { OwnKeysTarget } from '../core/keyboard.ts';
 import { shortcutsAllowed } from '../core/state/session.ts';
 import type { ShortcutTarget } from '../core/state/session.ts';
-import type { OrbitTurn } from '../engine/api.ts';
-import { DOLLY_KEYS, ORBIT_KEYS } from '../engine/render/keyboard-orbit.ts';
+import type { OrbitPan, OrbitTurn } from '../engine/api.ts';
+import { DOLLY_KEYS, ORBIT_KEYS, PAN_KEYS } from '../engine/render/keyboard-orbit.ts';
 import type { Hemisphere, ViewName } from '../types/index.ts';
 import type { View } from '../state/view.svelte.ts';
 
@@ -109,12 +109,13 @@ export interface KeymapCommands {
   setHemisphere(hemisphere: Hemisphere): void;
   setExploded(exploded: boolean): void;
   orbitBy(turn: OrbitTurn): void;
+  panBy(pan: OrbitPan): void;
   dolly(factor: number): void;
   undoDissection(): void;
 }
 
 export interface KeymapHost {
-  /** The stage's canvas: the arrows and `+ = -` orbit and zoom only while it holds focus. */
+  /** The stage's canvas: the arrows, Shift with them and `+ = -` orbit, pan and zoom only while it holds focus. */
   canvas: EventTarget;
   state(): KeymapState;
   commands: KeymapCommands;
@@ -249,14 +250,20 @@ function escape(commands: KeymapCommands, state: KeymapState): void {
   }
 }
 
-/** The arrows turn the model and `+ = -` zoom it, while the canvas itself holds focus. */
+/**
+ * The arrows turn the model, with Shift they pan it, and `+ = -` zoom it, while the canvas itself
+ * holds focus. Shift is how `+` is typed on most layouts, so it leaves the zoom keys alone.
+ */
 function orbitFromKeyboard(press: Press, { canvas, commands }: KeymapHost): boolean {
   if (press.target !== canvas) return false;
-  const turn = ORBIT_KEYS[press.key as keyof typeof ORBIT_KEYS] as OrbitTurn | undefined;
+  const arrow = press.key as keyof typeof ORBIT_KEYS;
+  const turn = press.shiftKey ? undefined : (ORBIT_KEYS[arrow] as OrbitTurn | undefined);
+  const pan = press.shiftKey ? (PAN_KEYS[arrow] as OrbitPan | undefined) : undefined;
   const dolly = DOLLY_KEYS[press.key as keyof typeof DOLLY_KEYS] as number | undefined;
-  if (!turn && !dolly) return false;
+  if (!turn && !pan && !dolly) return false;
   press.preventDefault();
   if (turn) commands.orbitBy(turn);
+  else if (pan) commands.panBy(pan);
   else commands.dolly(dolly!);
   return true;
 }

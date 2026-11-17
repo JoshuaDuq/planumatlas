@@ -556,12 +556,12 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### KEY-07 · On the focused canvas the arrows turn the model and + = - zoom it
 
-- **Rule:** While the 3D canvas itself has focus, the arrow keys orbit and `+`, `=` and `-` zoom, even with single keys off. Each such key is cancelled. Elsewhere the arrows keep their other uses (KEY-10).
+- **Rule:** While the 3D canvas itself has focus, the arrow keys orbit and `+`, `=` and `-` zoom, even with single keys off. With Shift the arrows pan instead (KEY-22); `+` is typed with Shift on most layouts, so Shift leaves the zoom keys zooming. Each such key is cancelled. Elsewhere the arrows keep their other uses (KEY-10).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:1859-1876`, `1922`; `viewer/render/keyboard-orbit.js:19-27`
-- **Expected:** single keys off: `+` and `-` → two dolly steps, the first < 1 (zoom in); ArrowLeft → one orbit turn. Step sizes are in the engine area (`keyboard-orbit.test.ts`).
-- **Covered by:** `src/lib/controller/keymap.test.ts` (R, "keymap outcomes": `+ = -` and the four arrows with single keys off), `src/app/boot.svelte.test.ts` (R, ArrowLeft and `=` on the canvas)
+- **Source:** `viewer/app.js:1859-1876`, `1922`; `viewer/render/keyboard-orbit.js:19-27`; review item U12 (Shift)
+- **Expected:** single keys off: `+` and `-` → two dolly steps, the first < 1 (zoom in); ArrowLeft → one orbit turn. Shift with `+` on the canvas → one dolly step of 1/1.1. Step sizes are in the engine area (`keyboard-orbit.test.ts`).
+- **Covered by:** `src/lib/controller/keymap.test.ts` (R, "keymap outcomes": `+ = -` and the four arrows with single keys off; `+` with Shift in the KEY-22 test), `src/app/boot.svelte.test.ts` (R, ArrowLeft and `=` on the canvas)
 
 ### KEY-08 · ? toggles the shortcut sheet, and only ? acts while it is open
 
@@ -643,6 +643,15 @@ checks them in the browser today and could run in the unit project over the fake
 - **Source:** deviation `s5b-shortcut-strings.md`
 - **Expected:** `ARIA_KEYSHORTCUTS.shortcuts === 'Shift+/'`; `cortex === 'C'`.
 - **Covered by:** `src/lib/controller/keymap.test.ts` (R)
+
+### KEY-22 · On the focused canvas Shift with an arrow pans the model
+
+- **Rule:** While the 3D canvas itself has focus, Shift with an arrow key pans the model that way by one step (RENDER-44) and the key is cancelled, even with single keys off: a modified arrow is not a single-character shortcut (WCAG 2.1.4). It acts only on the canvas, so in a text field, a textarea, an editable element or on a slider Shift with an arrow keeps its own use (extending a selection, KEY-05) and is not cancelled, and anywhere else on the page it never pans. Ctrl, Meta or Alt with it leave it to the browser (KEY-01). The pan lets go of the held view as a turn does, and choosing a view puts it back (FACADE-17).
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `web/src/lib/controller/keymap.ts` (`orbitFromKeyboard`); review item U12; the Shift modifier was free on the arrows (deviation `e7-held-view-modified-keys.md`)
+- **Expected:** On the canvas, each arrow with Shift, single keys on or off → `panBy(PAN_KEYS[key])` only, cancelled; the same arrow without Shift → `orbitBy(ORBIT_KEYS[key])` only. Each arrow with Shift in `INPUT type=text`, `TEXTAREA`, a contenteditable `DIV` or `INPUT type=range` → nothing, not cancelled; on the page (no target) → no `panBy`. In the app, Shift+ArrowLeft on the canvas reaches `camera.panBy`.
+- **Covered by:** `src/lib/controller/keymap.test.ts` (R, "keymap outcomes"), `src/app/boot.svelte.test.ts` (R, Shift+ArrowLeft on the canvas)
 
 ## Speech (the announcer)
 

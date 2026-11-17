@@ -467,6 +467,12 @@ export interface OrbitTurn {
   polar?: number;
 }
 
+/** Shares of the canvas height; the pan one Shift+arrow press makes, the model moving right and up. */
+export interface OrbitPan {
+  right?: number;
+  up?: number;
+}
+
 /** The phone sheet's cover of the canvas, in CSS pixels (scene.js:488). */
 export interface ChromeInsets {
   top?: number;
@@ -565,6 +571,8 @@ export interface EngineCamera {
 
   /** One arrow key's turn, applied at once; releases the held view (app.js:1859, decision 22). */
   orbitBy(turn: OrbitTurn): void;
+  /** One Shift+arrow pan, applied at once and kept within what is drawn; releases the held view. */
+  panBy(pan: OrbitPan): void;
   /** One keyboard zoom step: a factor on the distance, about the surface in the middle of the view (app.js:1869). */
   dolly(factor: number): void;
 

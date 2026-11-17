@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { SHORTCUT_KEYS } from '../../lib/controller/keymap.ts';
+import { ORBIT_KEYS, PAN_KEYS } from '../../lib/engine/render/keyboard-orbit.ts';
 import { expectAxeClean, expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
 import Fixture from './shortcuts-test-support.svelte';
@@ -32,7 +33,7 @@ async function openFromKeyboard() {
 }
 
 describe('content', () => {
-  test('a titled dialog of three groups with 23 key rows, the keys as caps', async () => {
+  test('a titled dialog of three groups with 24 key rows, the keys as caps, then five gestures in words', async () => {
     render(Fixture, { lang: 'en' });
     await openFromKeyboard();
     await expect.element(page.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
@@ -43,9 +44,10 @@ describe('content', () => {
       'Panel',
       'Model',
       'Display',
+      'Mouse and touch',
     ]);
-    expect(dialog().querySelectorAll('dt')).toHaveLength(23);
-    expect(dialog().querySelectorAll('dd')).toHaveLength(23);
+    expect(dialog().querySelectorAll('dt')).toHaveLength(29);
+    expect(dialog().querySelectorAll('dd')).toHaveLength(29);
     expect(dialog().querySelectorAll('section')).toHaveLength(0);
     const caps = (row: number) =>
       [...dialog().querySelectorAll('dt')[row]!.children].map((cap) => [
@@ -53,15 +55,33 @@ describe('content', () => {
         cap.className,
         cap.textContent,
       ]);
-    // `← → ↑ ↓` is four caps; `1 – 6` is two caps around a range that reads "to".
+    // `← → ↑ ↓` is four caps, and five with Shift; `1 – 6` is two caps around a range that reads "to".
     expect(caps(9)).toHaveLength(4);
-    expect(dialog().querySelectorAll('dt')[11]!.textContent).toBe('1–to6');
-    expect(caps(11)).toEqual([
+    expect(caps(10).map(([, , text]) => text)).toEqual(['Shift', '←', '→', '↑', '↓']);
+    expect(dialog().querySelectorAll('dt')[12]!.textContent).toBe('1–to6');
+    expect(caps(12)).toEqual([
       ['KBD', '', '1'],
       ['SPAN', 'key-range', '–to'],
       ['KBD', '', '6'],
     ]);
     expect(dialog().querySelector('.key-range [aria-hidden="true"]')!.textContent).toBe('–');
+    // A gesture is not a key to press: its words stand alone, with no caps.
+    const gestures = [...dialog().querySelectorAll('.shortcuts-section')].at(-1)!;
+    expect(gestures.querySelectorAll('kbd')).toHaveLength(0);
+    expect([...gestures.querySelectorAll('dt')].map((term) => term.textContent!.trim())).toEqual([
+      'Drag',
+      'Right-drag, or drag with Shift',
+      'Scroll or pinch',
+      'Click or tap',
+      'Double-click or double-tap',
+    ]);
+    expect([...gestures.querySelectorAll('dd')].map((term) => term.textContent)).toEqual([
+      'Turn the model',
+      'Move the model across the view; on a touch screen, drag with two fingers',
+      'Zoom in toward the spot you point at, or back out',
+      'Select a region',
+      'Centre the view on that spot; the model then turns about it',
+    ]);
   });
 
   test('every key the keymap acts on is listed', async () => {
@@ -75,11 +95,23 @@ describe('content', () => {
       const to = Number(range.nextElementSibling!.textContent);
       for (let digit = from; digit <= to; digit++) listed.add(String(digit));
     }
-    const arrows: Record<string, string> = { ArrowDown: '↓', ArrowUp: '↑' };
+    const arrows: Record<string, string> = {
+      ArrowLeft: '←',
+      ArrowRight: '→',
+      ArrowDown: '↓',
+      ArrowUp: '↑',
+    };
     const { views, ...single } = SHORTCUT_KEYS;
     for (const key of [...Object.values(single), ...Object.values(views)]) {
       expect(listed.has(arrows[key] ?? key), key).toBe(true);
     }
+    // The model's own keys: each row's caps, in order. The arrows turn it, and with Shift pan it.
+    const rows = [...dialog().querySelectorAll('dt')].map((term) =>
+      [...term.querySelectorAll('kbd')].map((cap) => cap.textContent),
+    );
+    const turns = Object.keys(ORBIT_KEYS).map((key) => arrows[key]);
+    expect(rows).toContainEqual(turns);
+    expect(rows).toContainEqual(['Shift', ...Object.keys(PAN_KEYS).map((key) => arrows[key])]);
   });
 
   test('the note follows the single-key preference', async () => {
@@ -101,7 +133,9 @@ describe('content', () => {
       'Panneau',
       'Modèle',
       'Affichage',
+      'Souris et écran tactile',
     ]);
+    expect(dialog().querySelectorAll('dt')[10]!.textContent).toBe('Maj←→↑↓');
   });
 
   test('a language change while open re-labels in place and keeps focus', async () => {

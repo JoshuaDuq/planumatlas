@@ -56,7 +56,7 @@ export const en = {
     {
       id: 'turn',
       title: 'Turn the brain',
-      body: 'Drag to turn it. Scroll or pinch to zoom.',
+      body: 'Drag to turn it. Scroll or pinch to zoom. Drag with Shift, or with two fingers on a touch screen, to move it; double-click or double-tap a spot to centre the view on it.',
     },
     {
       id: 'openRegion',
@@ -169,7 +169,7 @@ export const fr: typeof en = {
     {
       id: 'turn',
       title: 'Tourner le cerveau',
-      body: 'Faites-le glisser pour le tourner. Molette ou pincement pour zoomer.',
+      body: 'Faites-le glisser pour le tourner. Molette ou pincement pour zoomer. Glissez avec Maj, ou à deux doigts sur un écran tactile, pour le déplacer ; double-cliquez ou touchez deux fois un point pour y centrer la vue.',
     },
     {
       id: 'openRegion',

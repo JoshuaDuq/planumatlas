@@ -388,6 +388,7 @@ export async function composeWorld(
         setExploded: (exploded) => void world.anatomy.setExploded(exploded),
         // The engine remembers the zoom after each (E7), as the legacy keys did.
         orbitBy: camera.orbitBy,
+        panBy: camera.panBy,
         dolly: camera.dolly,
         undoDissection: world.anatomy.undoDissection,
       },

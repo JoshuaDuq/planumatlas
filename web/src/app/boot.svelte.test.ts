@@ -420,16 +420,24 @@ describe('the keymap', () => {
     expect(engine.model.state.cortexVisible).toBe(false);
   });
 
-  test('turns and zooms the model from the canvas, whose own keys the engine remembers', async () => {
+  test('turns, pans and zooms the model from the canvas, whose own keys the engine remembers', async () => {
     await boot();
     document.body.append(engine.canvas);
     press('ArrowLeft', engine.canvas);
+    engine.canvas.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'ArrowLeft',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
     press('=', engine.canvas);
     expect(
       cameraCalls()
-        .slice(-2)
+        .slice(-3)
         .map(([method]) => method),
-    ).toEqual(['orbitBy', 'dolly']);
+    ).toEqual(['orbitBy', 'panBy', 'dolly']);
   });
 
   test('is gone with the app', async () => {

@@ -29,6 +29,7 @@ import {
   upFor,
   withContext,
 } from './render/camera-views.ts';
+import { PAN_KEYS } from './render/keyboard-orbit.ts';
 import { createScene } from './render/scene.ts';
 import type { EngineScene } from './render/scene.ts';
 
@@ -1083,6 +1084,25 @@ describe('a dock or sheet change', () => {
       (stage.scene.controls as unknown as { maxTargetRadius: number }).maxTargetRadius,
       Infinity,
     );
+  });
+
+  it('FACADE-17 a pan key is held to the same sphere, lets go of the view, and a named view puts it back', () => {
+    const stage = fixture({ meshes: wholeBrain(), scale: FULL });
+    stage.camera.applyView('left', { immediate: true });
+    const framed = stage.scene.controls.target.clone();
+    const sphere = stage.bounds.getBoundingSphere(new Sphere());
+    // Far more presses than it takes to carry the centre off what is drawn.
+    for (let press = 0; press < 400; press++) stage.camera.panBy(PAN_KEYS.ArrowUp);
+    const { target } = stage.scene.controls;
+    assert.ok(target.distanceTo(framed) > 0.01, 'it moved');
+    assert.ok(
+      target.distanceTo(sphere.center) <= sphere.radius + 1e-12,
+      'it stayed over the brain',
+    );
+    assert.equal(stage.camera.viewHeld, false);
+    stage.camera.applyView('left', { immediate: true });
+    assert.ok(stage.scene.controls.target.distanceTo(framed) < 1e-12);
+    assert.equal(stage.camera.viewHeld, true);
   });
 
   it('FACADE-17 a centre already beyond the sphere is held where it is, not pulled in', () => {

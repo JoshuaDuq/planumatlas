@@ -1,9 +1,9 @@
 <!--
   The keyboard shortcuts sheet (ui/chrome/shortcuts.js, index.html:679-687): the keys grouped by
-  area, then the note on turning single-key shortcuts off. Opened by the settings menu's item and
-  by `?` through `open`; mounted only by I3b (decision 0008). Native modal Dialog: trap, Escape,
-  inert page, `data-instant` and focus return are U5's. It does not isolate keys (decision 7 on
-  #4): `?` must reach the page keymap to close it.
+  area, what a mouse or finger does on the model, then the note on turning single-key shortcuts off.
+  Opened by the settings menu's item and by `?` through `open`; mounted only by I3b (decision 0008).
+  Native modal Dialog: trap, Escape, inert page, `data-instant` and focus return are U5's. It does
+  not isolate keys (decision 7 on #4): `?` must reach the page keymap to close it.
   - the title takes initial focus, not Close (deviations/s5b-initial-focus.md);
   - one <div> per group, not an unnamed <section> (deviations/s5b-group-structure.md);
   - a range's dash is read as "to" (deviations/s5b-shortcut-strings.md).
@@ -11,6 +11,7 @@
 <script lang="ts">
   import type { Language } from '../../lib/types/index.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import type { ShortcutGroup } from '../../lib/core/i18n/areas/shortcuts.ts';
   import Dialog from '../../lib/ui/Dialog.svelte';
 
   interface Props {
@@ -45,6 +46,35 @@
   const caps = (keys: string) => keys.split(' ').filter(Boolean);
 </script>
 
+<!-- A group's terms are keys drawn as caps, or, for the gestures, words that are no key to press. -->
+{#snippet group([title, rows]: ShortcutGroup, keys: boolean)}
+  <div class="shortcuts-section">
+    <h3 class="shortcuts-group">{title}</h3>
+    <dl class="shortcuts-list">
+      {#each rows as [term, description]}
+        <dt>
+          {#if keys}
+            {#each caps(term) as token}
+              {#if isRange(token)}
+                <span class="key-range"
+                  ><span aria-hidden="true">{token}</span><span class="visually-hidden"
+                    >{copy.rangeTo}</span
+                  ></span
+                >
+              {:else}
+                <kbd>{token}</kbd>
+              {/if}
+            {/each}
+          {:else}
+            {term}
+          {/if}
+        </dt>
+        <dd>{description}</dd>
+      {/each}
+    </dl>
+  </div>
+{/snippet}
+
 <Dialog
   bind:open
   bind:instant
@@ -56,29 +86,10 @@
     <!-- svelte-ignore a11y_autofocus -->
     <h2 {id} class="shortcuts-title" tabindex="-1" autofocus>{copy.title}</h2>
   {/snippet}
-  {#each copy.groups as [title, rows]}
-    <div class="shortcuts-section">
-      <h3 class="shortcuts-group">{title}</h3>
-      <dl class="shortcuts-list">
-        {#each rows as [keys, description]}
-          <dt>
-            {#each caps(keys) as token}
-              {#if isRange(token)}
-                <span class="key-range"
-                  ><span aria-hidden="true">{token}</span><span class="visually-hidden"
-                    >{copy.rangeTo}</span
-                  ></span
-                >
-              {:else}
-                <kbd>{token}</kbd>
-              {/if}
-            {/each}
-          </dt>
-          <dd>{description}</dd>
-        {/each}
-      </dl>
-    </div>
+  {#each copy.groups as keys}
+    {@render group(keys, true)}
   {/each}
+  {@render group(copy.gestures, false)}
   <p class="shortcuts-note">{copy.singleKeysNote(singleKeys)}</p>
 </Dialog>
 

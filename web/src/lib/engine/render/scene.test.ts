@@ -23,7 +23,7 @@ import * as outlineOccluders from './outline-occluders.ts';
 import { opaqueOrder, transparentOrder } from './draw-order.ts';
 import { createPipeline, createScene, planFraming } from './scene.ts';
 import { orbitPath } from './camera-path.ts';
-import { ORBIT_STEP } from './keyboard-orbit.ts';
+import { ORBIT_STEP, PAN_KEYS, panFromKeyboard } from './keyboard-orbit.ts';
 import {
   CAMERA_RESPONSE,
   SHEET_RESPONSE,
@@ -563,6 +563,31 @@ describe('scene motion', () => {
     assert.ok(stage.destination.position.distanceTo(drawn) < 1e-12);
     stage.dispose();
   });
+
+  it.each([false, true])(
+    'RENDER-44 a pan key lands whole before the frame and nothing follows it (reduced motion %s)',
+    (motion) => {
+      reduced = motion;
+      const { stage } = resting();
+      const before = stage.controls.target.clone();
+      panFromKeyboard(stage.controls, PAN_KEYS.ArrowRight);
+      const landed = {
+        position: stage.camera.position.clone(),
+        target: stage.controls.target.clone(),
+      };
+      // One step: the height the canvas shows at the target, over 72.
+      const distance = landed.position.distanceTo(landed.target);
+      const shown = 2 * distance * Math.tan((stage.camera.fov * Math.PI) / 360);
+      close(landed.target.distanceTo(before), shown / 72, 1e-12);
+      frame(FRAME_MS);
+      frame(250);
+      frame(251);
+      assert.equal(calls.loop, null, 'it has come to rest');
+      assert.ok(stage.camera.position.equals(landed.position));
+      assert.ok(stage.controls.target.equals(landed.target));
+      stage.dispose();
+    },
+  );
 
   it('SCENE-36 under reduced motion a drag let go while moving stops where it is released', () => {
     reduced = true;

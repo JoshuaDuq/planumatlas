@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it, onTestFinished, vi } from 'vitest';
+import { ORBIT_KEYS, PAN_KEYS } from '../engine/render/keyboard-orbit.ts';
 import { ARIA_KEYSHORTCUTS, SHORTCUT_KEYS, dispatchKey, installKeymap } from './keymap.ts';
 import type { KeymapCommands, KeymapHost, KeymapState } from './keymap.ts';
 
@@ -44,6 +45,7 @@ const COMMAND_NAMES = [
   'setHemisphere',
   'setExploded',
   'orbitBy',
+  'panBy',
   'dolly',
   'undoDissection',
 ] as const;
@@ -544,6 +546,45 @@ describe('keymap outcomes', () => {
     assert.deepEqual(run('-'), { log: ['dolly out'], prevented: true });
     for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']) {
       assert.deepEqual(run(key), { log: ['orbitBy'], prevented: true }, key);
+    }
+  });
+
+  it('KEY-22 on the canvas Shift with an arrow pans, cancelled, with single keys off too', () => {
+    for (const [key, pan] of Object.entries(PAN_KEYS)) {
+      for (const singleKeys of [true, false]) {
+        assert.deepEqual(
+          outcome({ singleKeys }, key, 'canvas', { shiftKey: true }),
+          { log: [`panBy(${JSON.stringify([pan])})`], prevented: true },
+          `${key}, single keys ${singleKeys}`,
+        );
+      }
+      // Without Shift it turns.
+      assert.deepEqual(outcome({}, key, 'canvas').log, [
+        `orbitBy(${JSON.stringify([ORBIT_KEYS[key as keyof typeof ORBIT_KEYS]])})`,
+      ]);
+    }
+    // `+` is typed with Shift on most layouts: it zooms still.
+    assert.deepEqual(outcome({}, '+', 'canvas', { shiftKey: true }).log, [
+      `dolly(${JSON.stringify([1 / 1.1])})`,
+    ]);
+  });
+
+  it('KEY-22 Shift with an arrow in a field or on a slider is the field’s, and elsewhere never pans', () => {
+    for (const key of Object.keys(PAN_KEYS)) {
+      for (const target of [
+        TEXT,
+        { tagName: 'TEXTAREA' },
+        { tagName: 'DIV', isContentEditable: true },
+        RANGE,
+      ]) {
+        // Shift with an arrow in a field extends its selection; nothing is cancelled.
+        assert.deepEqual(outcome({}, key, target, { shiftKey: true }), {
+          log: [],
+          prevented: false,
+        });
+      }
+      const page = outcome({}, key, null, { shiftKey: true });
+      assert.ok(!page.log.some((call) => call.startsWith('panBy')), key);
     }
   });
 

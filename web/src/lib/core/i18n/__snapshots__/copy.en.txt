@@ -1117,7 +1117,7 @@
    {
     "id": "turn",
     "title": "Turn the brain",
-    "body": "Drag to turn it. Scroll or pinch to zoom."
+    "body": "Drag to turn it. Scroll or pinch to zoom. Drag with Shift, or with two fingers on a touch screen, to move it; double-click or double-tap a spot to centre the view on it."
    },
    {
     "id": "openRegion",
@@ -2364,6 +2364,10 @@
       "Turn the model, once it has focus"
      ],
      [
+      "Shift ← → ↑ ↓",
+      "Move the model across the view, once it has focus"
+     ],
+     [
       "+ −",
       "Zoom the model in or out"
      ],
@@ -2420,6 +2424,31 @@
       "?",
       "Open this list"
      ]
+    ]
+   ]
+  ],
+  "gestures": [
+   "Mouse and touch",
+   [
+    [
+     "Drag",
+     "Turn the model"
+    ],
+    [
+     "Right-drag, or drag with Shift",
+     "Move the model across the view; on a touch screen, drag with two fingers"
+    ],
+    [
+     "Scroll or pinch",
+     "Zoom in toward the spot you point at, or back out"
+    ],
+    [
+     "Click or tap",
+     "Select a region"
+    ],
+    [
+     "Double-click or double-tap",
+     "Centre the view on that spot; the model then turns about it"
     ]
    ]
   ],

@@ -1,25 +1,25 @@
 # Keyboard shortcuts dialog rules
 
-Scope: chunk S5b (#37), the keyboard shortcuts dialog: what it lists, how its keys are written and read, how it opens and closes, where focus goes, and its layout. The keys themselves (what `?`, `/`, `M`, the digits and the others do, single-key shortcuts being turned off, the Escape cascade) are the keymap's, in `controller.md` (KEY-01 to KEY-16); the native modal behaviour shared by every dialog (trap, inert page, `data-instant`, focus return) is U5's, in `ui-kit.md` (UI-). The rows' wording is translated in `core-i18n.md` (I18N-). Legacy sources: `viewer/ui/chrome/shortcuts.js`, `viewer/i18n/translations.js` (shortcuts), `viewer/styles/dialogs.css:104-123,289-294`, `viewer/app.js:1927-1928,1948-1953`. New code: `web/src/features/shortcuts/ShortcutsDialog.svelte`, `web/src/lib/core/i18n/areas/shortcuts.ts`, `web/src/lib/controller/keymap.ts` (`SHORTCUT_KEYS`). Deviations: `s5b-group-structure.md`, `s5b-initial-focus.md`, `s5b-shortcut-strings.md`. Decision 24 on #4 (D1 to D4), D2 amended by comment 81 on #4; decision 7 on #4 (the dialog does not isolate keys). Copy quoted is the English interface text.
+Scope: chunk S5b (#37), the keyboard shortcuts dialog: what it lists (since review item U12, also what a mouse or finger does on the model), how its keys are written and read, how it opens and closes, where focus goes, and its layout. The keys themselves (what `?`, `/`, `M`, the digits and the others do, single-key shortcuts being turned off, the Escape cascade) are the keymap's, in `controller.md` (KEY-01 to KEY-16); the native modal behaviour shared by every dialog (trap, inert page, `data-instant`, focus return) is U5's, in `ui-kit.md` (UI-). The rows' wording is translated in `core-i18n.md` (I18N-). Legacy sources: `viewer/ui/chrome/shortcuts.js`, `viewer/i18n/translations.js` (shortcuts), `viewer/styles/dialogs.css:104-123,289-294`, `viewer/app.js:1927-1928,1948-1953`. New code: `web/src/features/shortcuts/ShortcutsDialog.svelte`, `web/src/lib/core/i18n/areas/shortcuts.ts`, `web/src/lib/controller/keymap.ts` (`SHORTCUT_KEYS`). Deviations: `s5b-group-structure.md`, `s5b-initial-focus.md`, `s5b-shortcut-strings.md`. Decision 24 on #4 (D1 to D4), D2 amended by comment 81 on #4; decision 7 on #4 (the dialog does not isolate keys). Copy quoted is the English interface text.
 
 ## What it lists
 
-### SHORT-01 · Three groups of 21 key rows, in the reader's language
+### SHORT-01 · Three groups of 24 key rows, then five gestures, in the reader's language
 
-- **Rule:** The dialog lists the keys in three groups: Panel (8 rows), Model (7 rows) and Display (6 rows), each row a key and what it does, then a note on turning single-key shortcuts off. French: Panneau, Modèle, Affichage.
+- **Rule:** The dialog lists the keys in three groups: Panel (8 rows), Model (9 rows) and Display (7 rows), each row a key and what it does. A fourth group, Mouse and touch (5 rows), says what a pointer or a finger does on the model, as the controls really do it: a drag turns it; a right-drag, or a drag with Shift, moves it, as two fingers do on a touch screen; scrolling or pinching zooms in toward the spot pointed at, or back out; a click or tap selects a region; a double-click or double-tap centres the view on that spot, which the model then turns about. Then a note on turning single-key shortcuts off. French: Panneau, Modèle, Affichage, Souris et écran tactile.
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/ui/chrome/shortcuts.js:85-101`; `viewer/i18n/translations.js` (shortcuts)
-- **Expected:** Group titles EN `['Panel', 'Model', 'Display']`, FR `['Panneau', 'Modèle', 'Affichage']`; 21 rows; the first row is `/`, "Focus the search field"; the Model group holds `1 – 6`, "Left, right, anterior, posterior, superior, inferior view", and `0`, "Return to the oblique view"; the Display group ends with `?`, "Open this list". EN and FR lists contain F, I, M, C, S, H, 0, `1 – 6`, `/` and Esc (FR Échap).
-- **Covered by:** `src/lib/core/i18n/i18n.test.ts` (R, the keys present); `src/features/shortcuts/shortcuts.svelte.test.ts` (R, the titles and 21 `dt`/`dd`, could move down to unit for the data)
+- **Source:** `viewer/ui/chrome/shortcuts.js:85-101`; `viewer/i18n/translations.js` (shortcuts); review item U12 (the Shift row and the gestures). The gestures are OrbitControls' defaults as the scene keeps them (`web/src/lib/engine/render/scene.ts`): the left button turns, and with Shift, Ctrl or ⌘ pans; the right button pans; a mouse wheel, a trackpad's two-finger scroll and its pinch all arrive as wheel steps and zoom about the surface under the pointer (`zoomAboutSurface`); one finger turns; two fingers pinch to zoom about their midpoint and pan together. A click or tap is a press that moves less than 5 px, or 12 px for a finger (`picking.ts`). A double-click moves the orbit centre onto the surface point (`picking.ts`, `focusWorldPoint`); a double-tap fires it too, as the canvas leaves the browser no touch gesture of its own (`touch-action: none`): in Chromium's touch emulation a double tap on the brain gives click, click, dblclick and the camera moves. The middle button's drag also zooms and is not listed.
+- **Expected:** Group titles EN `['Panel', 'Model', 'Display', 'Mouse and touch']`, FR `['Panneau', 'Modèle', 'Affichage', 'Souris et écran tactile']`; 29 rows; the first row is `/`, "Focus the search field"; the Model group holds `← → ↑ ↓`, "Turn the model, once it has focus", then `Shift ← → ↑ ↓` (FR `Maj ← → ↑ ↓`), "Move the model across the view, once it has focus", `1 – 6`, "Left, right, anterior, posterior, superior, inferior view", and `0`, "Return to the oblique view"; the Display group ends with `?`, "Open this list". The gesture terms are "Drag", "Right-drag, or drag with Shift", "Scroll or pinch", "Click or tap" and "Double-click or double-tap", described as "Turn the model", "Move the model across the view; on a touch screen, drag with two fingers", "Zoom in toward the spot you point at, or back out", "Select a region" and "Centre the view on that spot; the model then turns about it". EN and FR lists contain F, I, M, C, S, H, 0, `1 – 6`, `/` and Esc (FR Échap).
+- **Covered by:** `src/lib/core/i18n/i18n.test.ts` (R, the keys present); `src/features/shortcuts/shortcuts.svelte.test.ts` (R, the titles, 29 `dt`/`dd`, the Shift row and the gesture rows; could move down to unit for the data)
 
 ### SHORT-02 · Every key the keymap acts on is in the list
 
-- **Rule:** Each key the page keymap handles (`?`, `/`, the tree arrows, the seven view digits, F, I, C, U, S, H, M) appears in the dialog, a range standing for every digit between its ends and the arrows drawn as ↑ and ↓.
+- **Rule:** Each key the page keymap handles (`?`, `/`, the tree arrows, the seven view digits, F, I, C, U, S, H, M) appears in the dialog, a range standing for every digit between its ends and the arrows drawn as ← → ↑ ↓. So do the canvas's own camera keys: the four arrows that turn the model in one row, and the same four with Shift that pan it in another.
 - **Kind:** data
-- **Level:** unit — `SHORTCUT_KEYS` against the i18n rows
-- **Source:** `web/src/lib/controller/keymap.ts:11-32`; `viewer/app.js:1920-1990`
-- **Expected:** The set of listed caps, with `1 – 6` expanded to 1…6 and `ArrowDown`/`ArrowUp` mapped to ↓/↑, contains every value of `SHORTCUT_KEYS` and of `SHORTCUT_KEYS.views`.
+- **Level:** unit — `SHORTCUT_KEYS`, `ORBIT_KEYS` and `PAN_KEYS` against the i18n rows
+- **Source:** `web/src/lib/controller/keymap.ts:11-32`; `web/src/lib/engine/render/keyboard-orbit.ts`; `viewer/app.js:1920-1990`; review item U12
+- **Expected:** The set of listed caps, with `1 – 6` expanded to 1…6 and the arrows mapped to ← → ↑ ↓, contains every value of `SHORTCUT_KEYS` and of `SHORTCUT_KEYS.views`. One row's caps are the keys of `ORBIT_KEYS` drawn as arrows, in order, and another's are `Shift` followed by the keys of `PAN_KEYS` drawn the same way.
 - **Covered by:** `src/features/shortcuts/shortcuts.svelte.test.ts` (R; reads the caps from the DOM, so it is a browser test for a data rule and could move down to unit)
 
 ### SHORT-03 · The rows say what the keys really do (decision 24, comment 81)
@@ -44,11 +44,11 @@ Scope: chunk S5b (#37), the keyboard shortcuts dialog: what it lists, how its ke
 
 ### SHORT-05 · Each key is a cap, and a dash between two keys is read as "to"
 
-- **Rule:** A row's keys are split on spaces and each is drawn as a key cap (`kbd`). A dash between two caps is a range: the dash is hidden from assistive technology and a visually hidden "to" (FR "à") follows it, so a screen reader says "1 to 6", not "1 6".
+- **Rule:** A row's keys are split on spaces and each is drawn as a key cap (`kbd`). A dash between two caps is a range: the dash is hidden from assistive technology and a visually hidden "to" (FR "à") follows it, so a screen reader says "1 to 6", not "1 6". A gesture in the Mouse and touch group is not a key to press: it is written in words, with no cap.
 - **Kind:** accessibility
 - **Level:** browser — the DOM a screen reader reads; the token split is pure and could be a view-model unit test
 - **Source:** `viewer/ui/chrome/shortcuts.js:12-13,90-94`; deviation `s5b-shortcut-strings.md` (D4)
-- **Expected:** `← → ↑ ↓` → four caps. `1 – 6` → `[kbd "1"] [span.key-range: aria-hidden "–", hidden "to"] [kbd "6"]`, row text "1–to6". French range text "à". In the app, one `.key-range .visually-hidden` (legacy has none).
+- **Expected:** `← → ↑ ↓` → four caps; `Shift ← → ↑ ↓` → five. `1 – 6` → `[kbd "1"] [span.key-range: aria-hidden "–", hidden "to"] [kbd "6"]`, row text "1–to6". French range text "à". In the app, one `.key-range .visually-hidden` (legacy has none). The Mouse and touch group holds no `kbd`.
 - **Covered by:** `src/features/shortcuts/shortcuts.svelte.test.ts` (R)
 
 ### SHORT-06 · A group is a heading and its list, not an unnamed section
@@ -57,7 +57,7 @@ Scope: chunk S5b (#37), the keyboard shortcuts dialog: what it lists, how its ke
 - **Kind:** accessibility
 - **Level:** browser — DOM structure
 - **Source:** `viewer/ui/chrome/shortcuts.js:94-99`; deviation `s5b-group-structure.md`
-- **Expected:** heading level 2 "Keyboard shortcuts"; three `h3`; 21 `dt` and 21 `dd` (roles term and definition); 0 `section` (legacy 3).
+- **Expected:** heading level 2 "Keyboard shortcuts"; four `h3`; 29 `dt` and 29 `dd` (roles term and definition); 0 `section` (legacy 3).
 - **Covered by:** `src/features/shortcuts/shortcuts.svelte.test.ts` (R)
 
 ## Opening, closing and focus

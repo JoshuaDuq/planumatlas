@@ -11,6 +11,7 @@ import type {
   FrameRegionOptions,
   FramingClearance,
   MoveOptions,
+  OrbitPan,
   OrbitTurn,
   Rect,
   Size,
@@ -28,7 +29,7 @@ import {
   upFor,
   withContext,
 } from './render/camera-views.ts';
-import { turnFromKeyboard } from './render/keyboard-orbit.ts';
+import { panFromKeyboard, turnFromKeyboard } from './render/keyboard-orbit.ts';
 import { HALF_TURNED, cameraBasis, edgeLabels } from './render/orientation.ts';
 import { scaleBar } from './render/scale-bar.ts';
 import { planFraming } from './render/scene.ts';
@@ -837,14 +838,17 @@ export function createFraming({
     z * MM_PER_M,
   ];
 
-  // A pan stops where its target would leave what is drawn, so the anatomy cannot be lost off the
-  // stage; a target already further out is held there rather than pulled in.
-  controls.addEventListener('start', () => {
-    orbiting = true;
-    linked = false;
+  // A pan, a drag's or a key's, stops where its target would leave what is drawn, so the anatomy
+  // cannot be lost off the stage; a target already further out is held there rather than pulled in.
+  function limitPan() {
     const drawn = framingBounds().getBoundingSphere(new Sphere());
     controls.cursor.copy(drawn.center);
     controls.maxTargetRadius = Math.max(drawn.radius, controls.target.distanceTo(drawn.center));
+  }
+  controls.addEventListener('start', () => {
+    orbiting = true;
+    linked = false;
+    limitPan();
   });
   // One handler, in the order the work has to run: the zoom the gesture ended on, then the refit it
   // deferred. Legacy registered two and was right only by their order (app.js:1830, 1840).
@@ -928,6 +932,13 @@ export function createFraming({
       linked = false;
       held.release();
       turnFromKeyboard(controls, turn);
+      rememberZoom();
+    },
+    panBy(pan: OrbitPan) {
+      linked = false;
+      held.release();
+      limitPan();
+      panFromKeyboard(controls, pan);
       rememberZoom();
     },
     dolly(factor) {

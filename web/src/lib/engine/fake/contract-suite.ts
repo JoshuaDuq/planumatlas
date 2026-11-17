@@ -1267,6 +1267,10 @@ export function defineEngineContract(
         camera.applyView('oblique');
         camera.dolly(1.1);
         assert.equal(camera.viewHeld, false);
+        camera.applyView('oblique');
+        assert.equal(camera.viewHeld, true);
+        camera.panBy({ right: 0.1 });
+        assert.equal(camera.viewHeld, false);
       });
 
       it('reports the camera per move, outside the change event', async () => {

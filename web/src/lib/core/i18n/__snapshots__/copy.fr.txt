@@ -1117,7 +1117,7 @@
    {
     "id": "turn",
     "title": "Tourner le cerveau",
-    "body": "Faites-le glisser pour le tourner. Molette ou pincement pour zoomer."
+    "body": "Faites-le glisser pour le tourner. Molette ou pincement pour zoomer. Glissez avec Maj, ou à deux doigts sur un écran tactile, pour le déplacer<NNBSP>; double-cliquez ou touchez deux fois un point pour y centrer la vue."
    },
    {
     "id": "openRegion",
@@ -2364,6 +2364,10 @@
       "Faire tourner le modèle, une fois ciblé"
      ],
      [
+      "Maj ← → ↑ ↓",
+      "Déplacer le modèle dans la vue, une fois ciblé"
+     ],
+     [
       "+ −",
       "Zoomer ou dézoomer le modèle"
      ],
@@ -2420,6 +2424,31 @@
       "?",
       "Ouvrir cette liste"
      ]
+    ]
+   ]
+  ],
+  "gestures": [
+   "Souris et écran tactile",
+   [
+    [
+     "Glisser",
+     "Faire tourner le modèle"
+    ],
+    [
+     "Glisser avec le bouton droit, ou avec Maj",
+     "Déplacer le modèle dans la vue<NNBSP>; sur un écran tactile, glisser à deux doigts"
+    ],
+    [
+     "Défiler ou pincer",
+     "Zoomer vers le point visé, ou reculer"
+    ],
+    [
+     "Cliquer ou toucher",
+     "Sélectionner une région"
+    ],
+    [
+     "Double-cliquer ou toucher deux fois",
+     "Centrer la vue sur ce point<NNBSP>; le modèle tourne ensuite autour de lui"
     ]
    ]
   ],

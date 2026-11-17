@@ -51,10 +51,10 @@ interface text; "mm" follows a narrow no-break space (U+202F). Pixel values are 
 
 ### STAGE-04 · The navigation hint names the gestures of the reader's pointer
 
-- **Rule:** The navigation hint tells a mouse user to drag, scroll and click, and a touch user (coarse pointer) to drag, pinch and tap. Over the tract reference alone, which has no regions to click, the last part is left out. The keyboard hint names the arrow and zoom keys.
+- **Rule:** The navigation hint tells a mouse user to drag, scroll and click, and a touch user (coarse pointer) to drag, pinch and tap. Over the tract reference alone, which has no regions to click, the last part is left out. The keyboard hint names the arrow and zoom keys. Neither names panning (a right-drag, a drag with Shift, two fingers, Shift with the arrows) or a double-click to centre a spot: a hint is one line, drawn only where it fits (STAGE-07), and these are in the shortcuts dialog's Mouse and touch group and its Model group (SHORT-01) and on the tour's Turn the brain card (GUIDE-06) instead.
 - **Kind:** behaviour
 - **Level:** unit (view-model): the wording is chosen from language, pointer and tract reference
-- **Source:** `viewer/ui/chrome/viewport-chrome.js:738-742`; deviation `g1-touch-hints.md`; decision 21 on #4
+- **Source:** `viewer/ui/chrome/viewport-chrome.js:738-742`; deviation `g1-touch-hints.md`; decision 21 on #4; review item U12. Measured on the dev build in Chromium: at a 1024 × 768 window the stage is 664 px wide and leaves a hint 308 px before the top letter; the hints measure 251 px (navigation) and 202 px (keyboard), but "Drag to rotate · Right-drag to pan · Scroll to zoom · Click to inspect" measures 353 px and a French keyboard hint naming Maj 327 px, so they would not be drawn there. On a 375 px phone the room is 168 px, which the touch hint (244 px, French 275 px) already exceeds.
 - **Expected:** Fine pointer: "Drag to rotate · Scroll to zoom · Click to inspect"; tract reference "Drag to rotate · Scroll to zoom"; French `viewport.navigationHint` / `navigationHintTracts`. Coarse pointer: "Drag to rotate · Pinch to zoom · Tap to inspect", tract reference "Drag to rotate · Pinch to zoom", French tract reference "Glisser : tourner · Pincer : zoom". Keyboard hint: "3D view · Arrow keys rotate · + − zoom".
 - **Covered by:** `src/features/stage/StageOverlay.svelte.test.ts` (R; could move down)
 

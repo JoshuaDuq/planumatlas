@@ -163,12 +163,12 @@ Shared expectations. "The anatomy fits" means every drawn vertex projects inside
 
 ### FACADE-17 · A pan cannot lose the anatomy
 
-- **Rule:** During a drag, the orbit centre cannot be panned beyond the bounding sphere of what is drawn. A centre already further out is held where it is rather than pulled in. Any framing lifts the limit.
+- **Rule:** During a drag, and at each Shift+arrow press (RENDER-44), the orbit centre cannot be panned beyond the bounding sphere of what is drawn. A centre already further out is held where it is rather than pulled in. Any framing lifts the limit. A key's pan lets go of the held view, as a turn does, and a named view frames the brain again, putting the pan back.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:251-254,1834-1839`
-- **Expected:** On gesture `start`, `controls.cursor` is the sphere centre and `maxTargetRadius = max(radius, |target − centre|)`. After any framing command, `maxTargetRadius === Infinity`.
-- **Covered by:** `src/lib/engine/framing.test.ts` (R)
+- **Source:** `viewer/app.js:251-254,1834-1839`; review item U12 (the key's pan)
+- **Expected:** On gesture `start`, and on `camera.panBy`, `controls.cursor` is the sphere centre and `maxTargetRadius = max(radius, |target − centre|)`. After any framing command, `maxTargetRadius === Infinity`. From the left view, 400 presses of Shift+ArrowUp move the target more than 10 mm and leave it within the sphere (±1e-12), with the view let go; the left view again puts the target back (±1e-12) and holds the view.
+- **Covered by:** `src/lib/engine/framing.test.ts` (R); the held view let go by `panBy` in `src/lib/engine/fake/contract-suite.ts` (R, fake and real engine)
 
 ## The held view
 

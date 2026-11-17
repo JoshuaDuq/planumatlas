@@ -303,6 +303,18 @@ test('GUIDE-06 · Turn the brain waits for a drag, a wheel or a camera key on th
   }
 });
 
+test('GUIDE-06 · Turn the brain also says how to move it and centre a spot, in English and French', () => {
+  const words = () => card().querySelector('.driver-popover-description')!.textContent;
+  startAt(1);
+  expect(words()).toBe(
+    'Drag to turn it. Scroll or pinch to zoom. Drag with Shift, or with two fingers on a touch screen, to move it; double-click or double-tap a spot to centre the view on it.',
+  );
+  startAt(1, 'fr');
+  expect(words()).toBe(
+    'Faites-le glisser pour le tourner. Molette ou pincement pour zoomer. Glissez avec Maj, ou à deux doigts sur un écran tactile, pour le déplacer\u202f; double-cliquez ou touchez deux fois un point pour y centrer la vue.',
+  );
+});
+
 test('GUIDE-07 · Open a region waits for a pick, then details the reader’s own region under their camera', async () => {
   startAt(1);
   // A pick on another card, here Turn the brain, does not move it on; the region is the reader's.

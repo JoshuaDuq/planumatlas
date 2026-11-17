@@ -209,12 +209,21 @@ below are relative to `web/`. `parity/E1.test.ts` was deleted once each rule had
 
 ### RENDER-22 · Zoom keys step by the wheel's proportion
 
-- **Rule:** `+` and `=` (one key on most layouts) zoom in, and `-` zooms out, by a factor of 1.1 per press. Only the four arrows and these three keys are bound.
+- **Rule:** `+` and `=` (one key on most layouts) zoom in, and `-` zooms out, by a factor of 1.1 per press. Only the four arrows, the same four with Shift (RENDER-44) and these three keys are bound.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/keyboard-orbit.js:16, 27`
-- **Expected:** DOLLY_KEYS = {'+': 1/1.1, '=': 1/1.1, '-': 1.1}; ORBIT_KEYS keys = ArrowDown/Left/Right/Up.
+- **Source:** `viewer/render/keyboard-orbit.js:16, 27`; review item U12 (the arrows with Shift)
+- **Expected:** DOLLY_KEYS = {'+': 1/1.1, '=': 1/1.1, '-': 1.1}; ORBIT_KEYS keys and PAN_KEYS keys = ArrowDown/Left/Right/Up.
 - **Covered by:** `src/lib/engine/render/keyboard-orbit.test.ts` (R)
+
+### RENDER-44 · Shift with an arrow slides the model one step, as a right-drag of the same length does
+
+- **Rule:** Each Shift+arrow press pans the camera at once, so the model moves the way the arrow points by PAN_STEP = ORBIT_STEP / 2π = 1/72 of the canvas height: the distance of the drag that turns the model one orbit step, so a turn and a pan press feel alike, and 36 presses cross half the view as 36 turns cross a hemisphere. It goes through the controls' own pan, which a right-drag makes, so the camera keeps its heading and its distance to the target, the surface it stays outside (RENDER-20) and the pan limit (FACADE-17) apply, and a move under way takes it into its destination (SCENE-35). A press lands whole before the next frame and nothing follows it, under reduced motion as without: a key never coasts.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `web/src/lib/engine/render/keyboard-orbit.ts` (`PAN_KEYS`, `panFromKeyboard`); review item U12
+- **Expected:** On a 600 px canvas with the camera 0.2 m from its target: the point it looked at is drawn 8.333 px (600 / 72) right, left, up or down of the centre after ArrowRight, ArrowLeft, ArrowUp or ArrowDown (±1e-9 px); the quaternion is unchanged (±1e-12) and the distance stays 0.2 m. A left-drag of 600 / 72 px turns ORBIT_STEP (±1e-9); a right-drag of that length leaves the camera and target where ArrowRight does (±1e-12). In the scene, with and without reduced motion: the target moves the shown height at the target over 72 (±1e-12) before any frame, and the loop comes to rest with camera and target where the press left them.
+- **Covered by:** `src/lib/engine/render/keyboard-orbit.test.ts` (R); `src/lib/engine/render/scene.test.ts` (R, reduced motion)
 
 ## Orientation markers
 
