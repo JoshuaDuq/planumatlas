@@ -1,16 +1,22 @@
 <!--
-  The feedback form itself: a name, a message and Send, with the link to the view on screen. Its
-  owner keeps the draft, so a panel closed and opened again still holds what was typed. A send that
-  fails keeps the message and offers the address, which is itself the copy button.
+  The feedback form itself: a name, a reply address, a message and Send, with the link to the view
+  on screen. Its owner keeps the draft, so a panel closed and opened again still holds what was
+  typed. A message that is only spaces, or an address the relay would refuse, is said at its field
+  and nothing is sent (COLO-09). A send that fails says why (COLO-11), keeps the message and offers
+  the address, which is itself the copy button. A sent message gives focus to the thanks that
+  replaces the form (COLO-12).
 -->
 <script module lang="ts">
   import { untrack } from 'svelte';
-  import { FEEDBACK_ADDRESS, sendFeedback } from './feedback.ts';
+  import { FEEDBACK_ADDRESS, FeedbackError, MAX_EMAIL, isEmail, sendFeedback } from './feedback.ts';
 
   export class FeedbackDraft {
     name = $state('');
+    email = $state('');
     message = $state('');
-    status = $state<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+    status = $state<'idle' | 'sending' | 'sent'>('idle');
+    /** Why the last send failed, until the next one. */
+    failure = $state<FeedbackError | null>(null);
 
     /** A panel opened again after a send is ready for another message; only opening resets it. */
     reopen() {
@@ -22,6 +28,7 @@
 </script>
 
 <script lang="ts">
+  import { tick } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
@@ -31,32 +38,63 @@
 
   const uid = $props.id();
   const copy = $derived(t(lang, 'footer'));
+  const emailId = `feedback-email-${uid}`;
+  const messageId = `feedback-message-${uid}`;
+
+  // Said at the field from Send until the field is edited.
+  let emailInvalid = $state(false);
+  let messageEmpty = $state(false);
+  let said = $state<HTMLElement | null>(null);
+
+  function failed(failure: FeedbackError): string {
+    const words = copy.feedbackFailed;
+    return failure.reason === 'rateLimited'
+      ? words.rateLimited(failure.retryAfter)
+      : words[failure.reason];
+  }
 
   async function send(event: SubmitEvent) {
     event.preventDefault();
     if (draft.status === 'sending') return;
+    const email = draft.email.trim();
+    const message = draft.message.trim();
+    emailInvalid = email !== '' && !isEmail(email);
+    messageEmpty = message === '';
+    if (emailInvalid || messageEmpty) {
+      document.getElementById(emailInvalid ? emailId : messageId)!.focus();
+      return;
+    }
     draft.status = 'sending';
+    draft.failure = null;
     try {
       await sendFeedback({
         name: draft.name.trim(),
-        message: draft.message.trim(),
+        ...(email !== '' && { email }),
+        message,
         view: location.href,
       });
-      draft.message = '';
-      draft.status = 'sent';
-      announce(copy.feedbackSent);
     } catch (error) {
+      draft.status = 'idle';
+      if (!(error instanceof FeedbackError)) throw error;
       console.error(error);
-      draft.status = 'failed';
-      announce(`${copy.feedbackFailed} ${FEEDBACK_ADDRESS}`);
+      draft.failure = error;
+      announce(`${failed(error)} ${FEEDBACK_ADDRESS}`);
+      return;
     }
+    draft.message = '';
+    draft.status = 'sent';
+    await tick();
+    // Focus reads the thanks; a panel closed while sending has none to focus, so it is said.
+    if (said) said.focus();
+    else announce(copy.feedbackSent);
   }
 </script>
 
 {#if draft.status === 'sent'}
-  <p class="feedback feedback-said">{copy.feedbackSent}</p>
+  <p bind:this={said} class="feedback feedback-said" tabindex="-1">{copy.feedbackSent}</p>
 {:else}
-  <form class="feedback" onsubmit={send}>
+  <!-- Checked here, at the fields, in the reader's language, not by the browser's bubbles. -->
+  <form class="feedback" novalidate onsubmit={send}>
     <label for="feedback-name-{uid}">{copy.feedbackName}</label>
     <!-- The Worker's limits (workers/feedback). -->
     <input
@@ -66,17 +104,41 @@
       maxlength="200"
       bind:value={draft.name}
     />
-    <label for="feedback-message-{uid}">{copy.feedbackMessage}</label>
+    <label for={emailId}>{copy.feedbackEmail}</label>
+    <input
+      id={emailId}
+      type="email"
+      autocomplete="email"
+      maxlength={MAX_EMAIL}
+      aria-invalid={emailInvalid}
+      aria-describedby={emailInvalid
+        ? `feedback-email-error-${uid} feedback-email-note-${uid}`
+        : `feedback-email-note-${uid}`}
+      bind:value={draft.email}
+      oninput={() => (emailInvalid = false)}
+    />
+    <p id="feedback-email-note-{uid}" class="feedback-note">{copy.feedbackEmailNote}</p>
+    {#if emailInvalid}
+      <p id="feedback-email-error-{uid}" class="feedback-error">{copy.feedbackEmailInvalid}</p>
+    {/if}
+    <label for={messageId}>{copy.feedbackMessage}</label>
     <textarea
-      id="feedback-message-{uid}"
+      id={messageId}
       rows="5"
       required
       maxlength="10000"
-      bind:value={draft.message}></textarea>
+      aria-invalid={messageEmpty}
+      aria-describedby={messageEmpty ? `feedback-message-error-${uid}` : undefined}
+      bind:value={draft.message}
+      oninput={() => (messageEmpty = false)}></textarea>
+    {#if messageEmpty}
+      <p id="feedback-message-error-{uid}" class="feedback-error">{copy.feedbackMessageEmpty}</p>
+    {/if}
     <p class="feedback-note">{copy.feedbackNote}</p>
-    {#if draft.status === 'failed'}
-      <p class="feedback-failed" role="alert">
-        {copy.feedbackFailed}
+    {#if draft.failure}
+      <!-- Said by the announcer, which says it again when the same failure repeats. -->
+      <p class="feedback-failed">
+        {failed(draft.failure)}
         <CopyValue value={FEEDBACK_ADDRESS} words={t(lang, 'inspector').copyValue} />
       </p>
     {/if}
@@ -126,12 +188,19 @@
       border-color: var(--accent);
       background: var(--surface-base);
     }
+    .feedback :is(input, textarea)[aria-invalid='true'] {
+      border-color: var(--danger);
+    }
     .feedback-note,
+    .feedback-error,
     .feedback-failed {
       margin: 0;
       color: var(--text-secondary);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
+    }
+    .feedback-error {
+      color: var(--danger);
     }
     .feedback-failed {
       overflow-wrap: anywhere;

@@ -1,3 +1,5 @@
+import { grouped } from '../../format.ts';
+
 export const en = {
   referenceColophon: (name: string) => `${name} · reference data`,
   colophon: (name: string, individual: boolean) =>
@@ -7,12 +9,30 @@ export const en = {
   provenance: 'Provenance',
   feedback: 'Feedback',
   feedbackName: 'Your name (optional)',
+  feedbackEmail: 'Your email (optional)',
+  feedbackEmailNote: 'Sent only to Planum’s maintainer, with your message, for a reply.',
+  feedbackEmailInvalid: 'Enter one address, such as name@example.org, or leave this empty.',
   feedbackMessage: 'Your feedback',
+  feedbackMessageEmpty: 'Write your feedback before sending.',
   feedbackNote: 'Sent with the link to the view on screen.',
   feedbackSend: 'Send',
   feedbackSending: 'Sending…',
   feedbackSent: 'Thank you, your feedback was sent.',
-  feedbackFailed: 'It could not be sent. You can write to',
+  // Each is followed by the address, which is its own copy button (FeedbackForm).
+  feedbackFailed: {
+    invalid: 'The feedback server refused this message. You can send it by email to',
+    tooLarge:
+      'The message is too long for the feedback server. Shorten it and try again, or write to',
+    rateLimited: (seconds: number | null) =>
+      `Too many messages were sent from this connection. Try again ${seconds === null ? 'later' : `in ${grouped(seconds)} ${seconds === 1 ? 'second' : 'seconds'}`}, or write to`,
+    relay: 'The feedback server could not pass the message on. Try again later, or write to',
+    timeout:
+      'The feedback server did not answer in time, so the message may not have arrived. Check the connection and try again, or write to',
+    offline:
+      'This device is offline, so nothing was sent. Try again once it is connected, or write to',
+    network:
+      'The feedback server could not be reached. Check the connection and try again, or write to',
+  },
   close: 'Close',
   subject: 'Subject',
   kind: (individual: boolean): string =>
@@ -54,12 +74,32 @@ export const fr: typeof en = {
   provenance: 'Provenance',
   feedback: 'Commentaires',
   feedbackName: 'Votre nom (facultatif)',
+  feedbackEmail: 'Votre courriel (facultatif)',
+  feedbackEmailNote:
+    'Transmis uniquement au responsable de Planum, avec votre message, pour vous répondre.',
+  feedbackEmailInvalid:
+    'Saisissez une seule adresse, comme nom@example.org, ou laissez ce champ vide.',
   feedbackMessage: 'Vos commentaires',
+  feedbackMessageEmpty: 'Écrivez vos commentaires avant d’envoyer.',
   feedbackNote: 'Envoyés avec le lien de la vue à l’écran.',
   feedbackSend: 'Envoyer',
   feedbackSending: 'Envoi…',
   feedbackSent: 'Merci, vos commentaires ont été envoyés.',
-  feedbackFailed: 'L’envoi a échoué. Vous pouvez écrire à',
+  feedbackFailed: {
+    invalid: 'Le serveur de commentaires a refusé ce message. Vous pouvez l’envoyer par courriel à',
+    tooLarge:
+      'Le message est trop long pour le serveur de commentaires. Raccourcissez-le et réessayez, ou écrivez à',
+    rateLimited: (seconds: number | null) =>
+      `Trop de messages ont été envoyés depuis cette connexion. Réessayez ${seconds === null ? 'plus tard' : `dans ${grouped(seconds)} ${seconds < 2 ? 'seconde' : 'secondes'}`}, ou écrivez à`,
+    relay:
+      'Le serveur de commentaires n’a pas pu transmettre le message. Réessayez plus tard, ou écrivez à',
+    timeout:
+      'Le serveur de commentaires n’a pas répondu à temps\u202f; le message n’est peut-être pas arrivé. Vérifiez la connexion et réessayez, ou écrivez à',
+    offline:
+      'Cet appareil est hors ligne\u202f; rien n’a été envoyé. Réessayez une fois la connexion rétablie, ou écrivez à',
+    network:
+      'Le serveur de commentaires est injoignable. Vérifiez la connexion et réessayez, ou écrivez à',
+  },
   close: 'Fermer',
   subject: 'Sujet',
   kind: (individual: boolean): string =>

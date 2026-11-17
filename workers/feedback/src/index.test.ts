@@ -65,6 +65,89 @@ test('mails the feedback, name and view from planumatlas.com to the owner', asyn
   ]);
 });
 
+test('sets a reply address the reader gave as the mail’s Reply-To, and names it in the text', async () => {
+  const { env, sent } = relay();
+  const email = 'ada.lovelace+planum@example.org';
+  const body = JSON.stringify({ name: 'Ada', email, message: 'Hi', view: VIEW });
+  const response = await worker.fetch(post(body), env);
+  assert.equal(response.status, 204);
+  assert.deepEqual(sent, [
+    {
+      from: { email: 'feedback@planumatlas.com', name: 'Planum' },
+      to: 'joshua.duquette.1@ulaval.ca',
+      replyTo: email,
+      subject: 'Planum feedback from Ada',
+      text: `Hi\n\nAda\nReply to: ${email}\nView: ${VIEW}\n`,
+    },
+  ]);
+});
+
+test('without a reply address the mail has no Reply-To', async () => {
+  const { env, sent } = relay();
+  const body = JSON.stringify({ name: '', message: 'Hi', view: VIEW });
+  assert.equal((await worker.fetch(post(body), env)).status, 204);
+  assert.equal(sent.length, 1);
+  assert.ok(!('replyTo' in (sent[0] as object)));
+  assert.equal((sent[0] as { text: string }).text, `Hi\n\nNo name given\nView: ${VIEW}\n`);
+});
+
+test('mails nothing for a reply address that is not one plain address', async () => {
+  const addresses: unknown[] = [
+    '',
+    'ada',
+    'ada@',
+    '@example.org',
+    'ada@@example.org',
+    'ada@lovelace@example.org',
+    'ada lovelace@example.org',
+    ' ada@example.org',
+    'ada@example.org ',
+    'ada@example..org',
+    'ada@-example.org',
+    '"ada"@example.org',
+    'Ada <ada@example.org>',
+    '(Ada) ada@example.org',
+    'adà@example.org',
+    'ada@exämple.org',
+    // Well formed, at 255 characters one past the longest.
+    `${'a'.repeat(64)}@${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
+    42,
+    null,
+    ['ada@example.org'],
+  ];
+  for (const email of addresses) {
+    const { env, sent } = relay();
+    const body = JSON.stringify({ name: '', email, message: 'Hi', view: VIEW });
+    const response = await worker.fetch(post(body), env);
+    assert.equal(response.status, 400, JSON.stringify(email));
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'), 'https://planumatlas.com');
+    assert.deepEqual(sent, []);
+  }
+});
+
+test('mails nothing for a reply address that would add a header or a recipient', async () => {
+  const addresses = [
+    'ada@example.org\r\nBcc: someone@example.com',
+    'ada@example.org\nBcc: someone@example.com',
+    'ada@example.org\rBcc: someone@example.com',
+    'ada@example.org\r\n\r\nInjected body',
+    'ada@example.org\u0000',
+    'ada@example.org\u2028Bcc: someone@example.com',
+    'ada@example.org, someone@example.com',
+    'ada@example.org,someone@example.com',
+    'ada@example.org;someone@example.com',
+    'someone:ada@example.org;',
+    'ada@example.org>, <someone@example.com',
+  ];
+  for (const email of addresses) {
+    const { env, sent } = relay();
+    const body = JSON.stringify({ name: '', email, message: 'Hi', view: VIEW });
+    const response = await worker.fetch(post(body), env);
+    assert.equal(response.status, 400, JSON.stringify(email));
+    assert.deepEqual(sent, []);
+  }
+});
+
 test('lets the browser post JSON from planumatlas.com', async () => {
   const preflight = new Request('https://feedback.planumatlas.com', {
     method: 'OPTIONS',
@@ -162,7 +245,15 @@ test('refuses a body over 48 KB, whether or not Content-Length says so', async (
 test('mails the longest feedback the form allows, in any script', async () => {
   const { env, sent } = relay();
   const view = VIEW.padEnd(8_000, 'x');
-  const body = JSON.stringify({ name: '名'.repeat(200), message: '脳'.repeat(10_000), view });
+  // The longest reply address: 254 characters.
+  const email = `${'a'.repeat(64)}@${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`;
+  assert.equal(email.length, 254);
+  const body = JSON.stringify({
+    name: '名'.repeat(200),
+    email,
+    message: '脳'.repeat(10_000),
+    view,
+  });
   const response = await worker.fetch(post(body), env);
   assert.equal(response.status, 204);
   assert.equal(sent.length, 1);
@@ -180,6 +271,9 @@ test('mails nothing once an address has sent its share for the minute', async ()
   );
   assert.equal(response.status, 429);
   assert.equal(response.headers.get('Access-Control-Allow-Origin'), 'https://planumatlas.com');
+  // The rate limit's period, readable by the form across origins.
+  assert.equal(response.headers.get('Retry-After'), '60');
+  assert.equal(response.headers.get('Access-Control-Expose-Headers'), 'Retry-After');
   assert.deepEqual(keys, [IP]);
   assert.deepEqual(sent, []);
 });

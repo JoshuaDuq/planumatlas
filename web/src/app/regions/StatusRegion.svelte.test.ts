@@ -71,18 +71,20 @@ describe('what the status region holds', () => {
 });
 
 describe('feedback', () => {
-  test('holds the name and feedback to the lengths the relay accepts', async () => {
+  test('holds the name, reply address and feedback to the lengths the relay accepts', async () => {
     await shell.open();
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     const name = page.getByRole('textbox', { name: 'Your name (optional)' }).element();
+    const email = page.getByRole('textbox', { name: 'Your email (optional)' }).element();
     const message = page.getByRole('textbox', { name: 'Your feedback' }).element();
     expect([
       (name as HTMLInputElement).maxLength,
+      (email as HTMLInputElement).maxLength,
       (message as HTMLTextAreaElement).maxLength,
-    ]).toEqual([200, 10_000]);
+    ]).toEqual([200, 254, 10_000]);
   });
 
-  test('sends a name and the feedback, with the view on screen, from inside Planum', async () => {
+  test('sends a name, a reply address and the feedback, with the view on screen, from inside Planum', async () => {
     const fetch = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(null, { status: 204 }));
@@ -90,6 +92,10 @@ describe('feedback', () => {
     await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
     history.replaceState(null, '', '#atlas=hcp-mmp&lang=en');
     await userEvent.fill(page.getByRole('textbox', { name: 'Your name (optional)' }), 'Ada');
+    await userEvent.fill(
+      page.getByRole('textbox', { name: 'Your email (optional)' }),
+      'ada@example.org',
+    );
     await userEvent.fill(
       page.getByRole('textbox', { name: 'Your feedback' }),
       'The cut is lovely.',
@@ -100,13 +106,29 @@ describe('feedback', () => {
       .poll(() => document.querySelector('.feedback-said')?.textContent)
       .toBe('Thank you, your feedback was sent.');
     expect(page.getByRole('textbox', { name: 'Your feedback' }).elements()).toHaveLength(0);
+    // The thanks takes focus from the Send button it replaced, so it stays in the panel (COLO-12).
+    expect(document.activeElement).toBe(document.querySelector('.feedback-said'));
     expect(fetch).toHaveBeenCalledOnce();
     const [url, init] = fetch.mock.calls[0]!;
     expect(url).toBe('https://feedback.planumatlas.com');
     expect(init!.method).toBe('POST');
     const sent = JSON.parse(init!.body as string);
-    expect(sent).toMatchObject({ name: 'Ada', message: 'The cut is lovely.' });
+    expect(sent).toMatchObject({
+      name: 'Ada',
+      email: 'ada@example.org',
+      message: 'The cut is lovely.',
+    });
     expect(sent.view).toBe(`${location.origin}${location.pathname}#atlas=hcp-mmp&lang=en`);
+    // Opened again, the panel is ready for another message from the same reader.
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(page.getByRole('button', { name: 'Feedback' }));
+    await expect
+      .element(page.getByRole('textbox', { name: 'Your email (optional)' }))
+      .toHaveValue('ada@example.org');
+    await expect
+      .element(page.getByRole('textbox', { name: 'Your name (optional)' }))
+      .toHaveValue('Ada');
+    await expect.element(page.getByRole('textbox', { name: 'Your feedback' })).toHaveValue('');
   });
 
   test('says when it could not send, and offers the address to write to instead', async () => {

@@ -421,6 +421,7 @@ describe('the dialogs', () => {
     await expect
       .poll(() => dialog.querySelector('.feedback-said')?.textContent)
       .toBe('Thank you, your feedback was sent.');
+    expect(document.activeElement).toBe(dialog.querySelector('.feedback-said'));
     expect(JSON.parse(fetch.mock.calls[0]![1]!.body as string).view).toBe(location.href);
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() => expect(dialog.open).toBe(false));

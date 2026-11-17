@@ -797,12 +797,28 @@
   "provenance": "Provenance",
   "feedback": "Commentaires",
   "feedbackName": "Votre nom (facultatif)",
+  "feedbackEmail": "Votre courriel (facultatif)",
+  "feedbackEmailNote": "Transmis uniquement au responsable de Planum, avec votre message, pour vous répondre.",
+  "feedbackEmailInvalid": "Saisissez une seule adresse, comme nom@example.org, ou laissez ce champ vide.",
   "feedbackMessage": "Vos commentaires",
+  "feedbackMessageEmpty": "Écrivez vos commentaires avant d’envoyer.",
   "feedbackNote": "Envoyés avec le lien de la vue à l’écran.",
   "feedbackSend": "Envoyer",
   "feedbackSending": "Envoi…",
   "feedbackSent": "Merci, vos commentaires ont été envoyés.",
-  "feedbackFailed": "L’envoi a échoué. Vous pouvez écrire à",
+  "feedbackFailed": {
+   "invalid": "Le serveur de commentaires a refusé ce message. Vous pouvez l’envoyer par courriel à",
+   "tooLarge": "Le message est trop long pour le serveur de commentaires. Raccourcissez-le et réessayez, ou écrivez à",
+   "rateLimited": [
+    "[null] → \"Trop de messages ont été envoyés depuis cette connexion. Réessayez plus tard, ou écrivez à\"",
+    "[1] → \"Trop de messages ont été envoyés depuis cette connexion. Réessayez dans 1 seconde, ou écrivez à\"",
+    "[60] → \"Trop de messages ont été envoyés depuis cette connexion. Réessayez dans 60 secondes, ou écrivez à\""
+   ],
+   "relay": "Le serveur de commentaires n’a pas pu transmettre le message. Réessayez plus tard, ou écrivez à",
+   "timeout": "Le serveur de commentaires n’a pas répondu à temps<NNBSP>; le message n’est peut-être pas arrivé. Vérifiez la connexion et réessayez, ou écrivez à",
+   "offline": "Cet appareil est hors ligne<NNBSP>; rien n’a été envoyé. Réessayez une fois la connexion rétablie, ou écrivez à",
+   "network": "Le serveur de commentaires est injoignable. Vérifiez la connexion et réessayez, ou écrivez à"
+  },
   "close": "Fermer",
   "subject": "Sujet",
   "kind": [

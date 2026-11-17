@@ -20,6 +20,8 @@ const POOLS = {
     [1, 2, 3],
     [182, 218, 182],
   ],
+  // Seconds to wait, or none given.
+  w: [null, 1, 60],
 } as const;
 
 /** Parameter kinds of every function that takes anything but strings, by `area.leaf`. */
@@ -31,6 +33,7 @@ const KINDS: Record<string, string> = {
   'footer.kind': 'b',
   'footer.sourceFiles': 'nb',
   'footer.visibleRegions': 'n',
+  'footer.feedbackFailed.rateLimited': 'w',
   'boundary.summary': 'snn',
   'boundary.more': 'n',
   'receptors.note': 'snnsn',
