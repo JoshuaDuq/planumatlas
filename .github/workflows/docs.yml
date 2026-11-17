@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+# A newer push to the pull request cancels the check before it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest

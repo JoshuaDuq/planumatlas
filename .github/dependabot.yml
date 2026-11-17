@@ -8,8 +8,23 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-  # The Svelte app in web/.
+  # The Svelte app in web/. Pins that must move together come in one pull request:
+  # @vitest/browser-playwright requires vitest's exact version and vitest-browser-svelte its major,
+  # @types/three describes one three release, and @axe-core/playwright requires axe-core's minor.
+  # @playwright/test also names the container image in tests.yml, whose check says what to set.
   - package-ecosystem: npm
     directory: /web
+    schedule:
+      interval: weekly
+    groups:
+      vitest:
+        patterns: ["vitest", "vitest-browser-svelte", "@vitest/*"]
+      three:
+        patterns: ["three", "@types/three"]
+      axe:
+        patterns: ["axe-core", "@axe-core/*"]
+  # The Python pipeline and the docs build (pyproject.toml and uv.lock).
+  - package-ecosystem: uv
+    directory: /
     schedule:
       interval: weekly

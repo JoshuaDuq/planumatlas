@@ -11,6 +11,13 @@ on:
 permissions:
   contents: read
 
+# A newer push to a pull request cancels the run before it. Every other run is a group of its own
+# and cancels nothing: a called workflow takes its caller's name, event and run id, so a deploy's
+# tests are ordered by deploy.yml's groups alone.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # The Python suite and the anatomy validation take minutes, so they run only
   # when something they read has changed. A job skipped by its `if` reports success.
@@ -205,8 +212,10 @@ jobs:
 
   # In Playwright's image (Playwright's CI guide): Chromium, its system libraries and Xvfb are
   # already there, so nothing is installed per run. Installing them took 25 s, or 6 to 11 min when
-  # an apt mirror was slow (12 runs in 67). The tag must equal the Playwright version in
-  # web/package-lock.json; the first step fails if a dependency update moves one without the other.
+  # an apt mirror was slow (12 runs in 67). The image is pulled by its digest, so its tag alone
+  # changes nothing: the tag must equal the Playwright version in web/package-lock.json and the
+  # digest be the one the registry gives that tag. The check after the install fails if a
+  # dependency update or an edit moves one without the others.
   # Four shards: the browser suite is about 11 min on one runner (Vitest's sharding guide).
   web-browser:
     needs: changes
@@ -214,7 +223,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      # A tag's digest: curl -sI -H 'Accept: application/vnd.oci.image.index.v1+json' https://mcr.microsoft.com/v2/playwright/manifests/<tag> | grep -i docker-content-digest
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
       options: --ipc=host
     strategy:
       fail-fast: false
@@ -234,10 +244,19 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefix web
 
+      # Every Playwright image in this file, web-e2e's included, against the installed Playwright
+      # and the registry's digest for its tag.
       - name: Check the image matches Playwright
+        shell: bash
         run: |
           version=$(node -p "require('./web/node_modules/playwright-core/package.json').version")
-          test "$version" = 1.64.1 || { echo "::error::Playwright is $version; set the container image tag in tests.yml to v$version-noble"; exit 1; }
+          tag="mcr.microsoft.com/playwright:v$version-noble"
+          digest=$(curl -fsSI -H 'Accept: application/vnd.oci.image.index.v1+json' "https://mcr.microsoft.com/v2/playwright/manifests/v$version-noble" | tr -d '\r' | grep -i '^docker-content-digest:' | cut -d' ' -f2) || { echo "::error::The registry gave no digest for v$version-noble"; exit 1; }
+          images=$(sed -n 's/^ *image: \(mcr\.microsoft\.com\/playwright:\)/\1/p' .github/workflows/tests.yml)
+          test -n "$images" || { echo "::error::No Playwright image found in tests.yml"; exit 1; }
+          for image in $images; do
+            test "$image" = "$tag@$digest" || { echo "::error::The container image is $image; for Playwright $version set every image in tests.yml to $tag@$digest"; exit 1; }
+          done
 
       # Headed under Xvfb, so the browser has a mouse: headless Linux has no pointing device and
       # matches (hover: none) and (pointer: none), where a desktop matches hover and a fine pointer.
@@ -273,7 +292,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 50
     container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      # web-browser's image; its check covers this line.
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
       options: --ipc=host
     steps:
       - name: Checkout repository
