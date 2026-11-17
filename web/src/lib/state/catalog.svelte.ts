@@ -8,7 +8,10 @@ const same = (a: unknown, b: unknown) =>
     ? a.size === b.size && [...a].every((id) => b.has(id))
     : a === b;
 
-/** What the view derives from the catalog (app.js:1620-1623): its language, groups and count. */
+/**
+ * What the view derives from the catalog (app.js:1620-1623): its language, groups and count, and the
+ * settings and search the stage's lobe key and the list's system picker and searches read.
+ */
 export function createCatalogStore(catalog: ReturnType<typeof createCatalog>, view: ViewStore) {
   $effect.pre(() => catalog.setLanguage(view.current.lang));
   const lang = $derived(view.current.lang);
@@ -26,19 +29,40 @@ export function createCatalogStore(catalog: ReturnType<typeof createCatalog>, vi
     return kept;
   });
   const groups = $derived(catalog.groups({ ...shown, lang }));
-  const visibleCount = $derived(catalog.visibleCount(shown));
+  // The lobe key and the system picker name a group as the tree does with every system listed
+  // (`sharedGroupNames`): the tree's own groups while no system is chosen.
+  const everySystem = $derived(
+    shown.internalSystem === null
+      ? groups
+      : catalog.groups({ ...shown, internalSystem: null, lang }),
+  );
+  // In an object, so the count's version moves with each walk: a derived run again to an equal
+  // value keeps its version, older than the settings', and Svelte runs it at every later change of
+  // the view. A setting that leaves the count as it was, as the opening's Lobes does, would
+  // otherwise bring the walk back with every camera preset.
+  const counted = $derived({ visible: catalog.visibleCount(shown) });
   return {
     get lang() {
       return lang;
     },
+    /** The settings that decide what is on screen: the same object until one of them changes. */
+    get settings() {
+      return shown;
+    },
     get groups() {
       return groups;
     },
+    /** The groups with no system chosen. */
+    get everySystem() {
+      return everySystem;
+    },
     get visibleCount() {
-      return visibleCount;
+      return counted.visible;
     },
     /** A region's label in the view's language, read reactively. */
     label: (id: string) => catalog.label(id, view.current),
+    /** The catalog's search over what is on screen, in the view's language, read reactively. */
+    search: (query: string, limit?: number) => catalog.search(query, { ...shown, lang }, limit),
   };
 }
 

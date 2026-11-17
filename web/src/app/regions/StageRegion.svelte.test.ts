@@ -20,6 +20,8 @@ import { createApp, APP } from '../application.svelte.ts';
 import type { App } from '../application.svelte.ts';
 import { composeWorld } from '../world.ts';
 import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
+import { lobeRows } from '../../lib/core/catalog/lobes.ts';
+import { lobeKeyRows } from '../../lib/core/panels/navigator.ts';
 import * as snapshot from '../../features/snapshot/snapshot.ts';
 import StageRegion from './StageRegion.svelte';
 import StageRegionFixture from './stage-region-test-support.svelte';
@@ -28,6 +30,11 @@ import StageRegionFixture from './stage-region-test-support.svelte';
 vi.mock('../../features/snapshot/snapshot.ts', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../features/snapshot/snapshot.ts')>();
   return { ...actual, saveSnapshot: vi.fn(actual.saveSnapshot) };
+});
+// The lobe key's walk of the regions, watched (STAGE-70).
+vi.mock('../../lib/core/catalog/lobes.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../lib/core/catalog/lobes.ts')>();
+  return { ...actual, lobeRows: vi.fn(actual.lobeRows) };
 });
 
 const manifest = manifestFile as unknown as Manifest;
@@ -526,6 +533,85 @@ describe('the visual field map', () => {
     flushSync();
     expect(app.world!.view.current.lesson.map).toBe('visual-field');
     expect(document.getElementById('network-key')).toBeNull();
+  });
+});
+
+describe('the lobe key', () => {
+  test('a camera preset, a selection or a moved cut walks no region for it; a hidden region, the language or the atlas does', async () => {
+    await boot();
+    const world = app.world!;
+    engine.model.setSurfaceColor('lobe');
+    await engine.sections.setMode('axial');
+    flushSync();
+    const groups = vi.spyOn(world.regions, 'groups');
+    const lobes = vi.mocked(lobeRows);
+    /** The key's walks since the last call: the groups' and the lobes'. */
+    const walks = () => {
+      const made = [groups.mock.calls.length, lobes.mock.calls.length];
+      groups.mockClear();
+      lobes.mockClear();
+      return made;
+    };
+    const shown = () =>
+      [...document.querySelectorAll('#network-key .stage-key-label')].map((row) => row.textContent);
+    /** The rows as the key built them on every change before, for the engine's settings. */
+    const expected = () => {
+      const { atlas, lang } = world.view.current;
+      const everySystem = world.regions.groups({
+        ...engine.model.settings,
+        internalSystem: null,
+        lang,
+      });
+      const rows = lobeKeyRows(
+        lobeRows(engine.model.regions.values(), atlas, lang),
+        atlas,
+        everySystem,
+        lang,
+      );
+      walks();
+      return rows.map((row) => row.label);
+    };
+    expect(document.querySelector('#network-key')?.getAttribute('data-map')).toBe('lobe');
+    expect(shown()).toEqual(expected());
+    expect(shown()).toHaveLength(9);
+    walks();
+
+    const [one, other] = manifest.regions.filter(
+      (region) => region.atlas === 'destrieux' && engine.model.canSelect(region),
+    );
+    const [low, high] = engine.sections.offsetRange;
+    const changes: Array<[string, () => void]> = [
+      ['camera preset', () => app.session.setView('left')],
+      ['selection', () => engine.model.select(one!.id)],
+      ['cut position', () => engine.sections.setOffset((low + high) / 2)],
+    ];
+    for (const [change, act] of changes) {
+      const [view, before] = [world.view.current, shown()];
+      act();
+      flushSync();
+      expect(world.view.current, change).not.toBe(view);
+      expect(walks(), change).toEqual([0, 0]);
+      expect(shown(), change).toEqual(before);
+    }
+
+    // Each of these is a setting the key reads: it is built again once, as it was built before.
+    const settings: Array<[string, () => void | Promise<void>]> = [
+      ['hidden region', () => engine.model.hideRegions([other!.id])],
+      ['language', () => app.session.setLang('fr')],
+      ['atlas', () => engine.model.setAtlas('julich')],
+    ];
+    for (const [change, act] of settings) {
+      await act();
+      flushSync();
+      expect(walks(), change).toEqual([1, 1]);
+      expect(shown(), change).toEqual(expected());
+      app.session.setView(app.session.state.view === 'left' ? 'oblique' : 'left');
+      flushSync();
+      expect(walks(), `${change}, then a camera preset`).toEqual([0, 0]);
+    }
+    // Julich-Brain in French: eight lobes, no Lateral fissure (STAGE-66).
+    expect(shown()).toHaveLength(8);
+    expect(shown()).toContain('Pariétal');
   });
 });
 

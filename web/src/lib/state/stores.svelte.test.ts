@@ -439,6 +439,98 @@ describe('the catalog store', () => {
     expect(atlas.groups).toEqual(catalog.groups({ ...engine.model.settings, lang: 'fr' }));
     expect(atlas.count).toBe(catalog.visibleCount(engine.model.settings));
   });
+
+  test('after a setting that keeps the count, with every system listed and a search held, a camera preset, a selection or a moved cut walks no region', async () => {
+    const groups = vi.spyOn(catalog, 'groups');
+    const visibleCount = vi.spyOn(catalog, 'visibleCount');
+    const search = vi.spyOn(catalog, 'search');
+    const { catalogStore, session, view } = build();
+    await engine.sections.setMode('axial');
+    // A search held as the list holds it, in a derived.
+    let found!: () => ReturnType<typeof catalogStore.search>;
+    const release = $effect.root(() => {
+      const held = $derived(catalogStore.search('putamen'));
+      found = () => held;
+    });
+    flushSync();
+    /** What the lobe key, the system picker, the footer and the searches read. */
+    const read = () => ({
+      settings: catalogStore.settings,
+      groups: catalogStore.groups,
+      everySystem: catalogStore.everySystem,
+      count: catalogStore.visibleCount,
+      found: found(),
+    });
+    /** The store's walks since the last call: the groups', the count's, the search's. */
+    const walks = () => {
+      const made = [groups, visibleCount, search].map((spy) => spy.mock.calls.length);
+      for (const spy of [groups, visibleCount, search]) spy.mockClear();
+      return made;
+    };
+    const [one, other] = published.regions.filter(
+      (candidate) => candidate.kind !== 'non-region' && engine.model.canSelect(candidate),
+    );
+    const [low, high] = engine.sections.offsetRange;
+    let round = 0;
+    const unchangedBy = (when: string) => {
+      round += 1;
+      const changes: Array<[string, () => void]> = [
+        ['camera preset', () => session.setView(round % 2 ? 'left' : 'oblique')],
+        ['selection', () => engine.model.select((round % 2 ? one : other)!.id)],
+        ['cut position', () => engine.sections.setOffset(low + ((high - low) * round) / 8)],
+      ];
+      for (const [change, act] of changes) {
+        const before = { view: view.current, ...read() };
+        act();
+        flushSync();
+        const after = { view: view.current, ...read() };
+        expect(after.view, `${change}, ${when}`).not.toBe(before.view);
+        for (const key of ['settings', 'groups', 'everySystem', 'count', 'found'] as const) {
+          expect(after[key], `${change}, ${when}: ${key}`).toBe(before[key]);
+        }
+        expect(walks(), `${change}, ${when}`).toEqual([0, 0, 0]);
+      }
+    };
+    read();
+    walks();
+
+    // The colour decides no count (as the opening's Lobes does not): it is counted once, then not again.
+    engine.model.setSurfaceColor('lobe');
+    flushSync();
+    const coloured = read();
+    expect(walks()).toEqual([1, 1, 1]);
+    expect(coloured.everySystem).toBe(coloured.groups);
+    unchangedBy('after a colour');
+
+    // A system chosen: the groups with every system are listed apart.
+    const system = coloured.groups.find((group) => group.kind === 'structure')!.name;
+    engine.model.setInternalSystem(system);
+    flushSync();
+    const chosen = read();
+    expect(walks()).toEqual([2, 1, 1]);
+    expect(chosen.everySystem).not.toBe(chosen.groups);
+    expect(chosen.everySystem).toEqual(
+      catalog.groups({ ...engine.model.settings, internalSystem: null, lang: 'en' }),
+    );
+    walks();
+    unchangedBy('with a system');
+
+    // A language lists both again, and searches again, but counts nothing.
+    session.setLang('fr');
+    flushSync();
+    const french = read();
+    expect(walks()).toEqual([2, 0, 1]);
+    expect(french.everySystem).toEqual(
+      catalog.groups({ ...engine.model.settings, internalSystem: null, lang: 'fr' }),
+    );
+    expect(french.found.rows.length).toBeGreaterThan(0);
+    expect(french.found).toEqual(
+      catalog.search('putamen', { ...engine.model.settings, lang: 'fr' }),
+    );
+    walks();
+    unchangedBy('in French');
+    release();
+  });
 });
 
 describe('the announcer', () => {

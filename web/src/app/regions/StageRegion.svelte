@@ -166,6 +166,21 @@
     };
   });
 
+  // The lobe key walks every region twice, for its lobes and for the names the tree shares, and a
+  // camera preset, a selection or a moved cut makes a new view. So it reads the catalog's language
+  // and the settings that decide what is on screen, which hold through those (STAGE-70).
+  const lobes = $derived.by(() => {
+    if (!world) return null;
+    const { settings, lang } = world.catalog;
+    if (settings.surfaceColor !== 'lobe') return null;
+    return lobeKeyRows(
+      lobeRows(world.engine.model.regions.values(), settings.atlas, lang),
+      settings.atlas,
+      world.catalog.everySystem,
+      lang,
+    );
+  });
+
   /** The structure whose agreement the linked MRI shows, by its union's name and side. */
   function agreementName({ engine, engineState, catalog, view }: World): string | null {
     const code = engineState.sections.agreement;
@@ -234,15 +249,6 @@
     {@const current = world.view.current}
     {@const tractReference = isIndependentTractReference(current)}
     {@const { model } = world.engine}
-    {@const lobes =
-      current.surfaceColor === 'lobe'
-        ? lobeKeyRows(
-            lobeRows(model.regions.values(), current.atlas, current.lang),
-            current.atlas,
-            world.regions.groups({ ...current, internalSystem: null }),
-            current.lang,
-          )
-        : null}
     {@const commands = {
       resetView: world.anatomy.resetView,
       setHemisphere: world.anatomy.setHemisphere,

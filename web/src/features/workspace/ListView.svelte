@@ -43,10 +43,14 @@
     circuits: CircuitExplorer;
   } = $props();
 
-  const { engine, session, view, catalog, regions, anatomy, excursions, speech } = $derived(world);
+  const { engine, session, view, catalog, anatomy, excursions, speech } = $derived(world);
   const current = $derived(view.current);
   const manifest = $derived(engine.model.manifest);
-  const bundles = $derived(tractRows(tractCatalog(current.anatomy).bundles));
+  // A camera preset, a selection or a moved cut makes a new view. What the searches and the system
+  // picker read is the catalog's (its language, settings and search) or read alone, as the brain on
+  // screen is here, so none of them walks the regions or builds its rows again (WORK-31).
+  const brain = $derived(current.anatomy);
+  const bundles = $derived(tractRows(tractCatalog(brain).bundles));
 
   /** A tract's profile in the detail, under "‹ Tracts"; a region selected meanwhile is let go. */
   function openTract(key: string) {
@@ -95,11 +99,10 @@
     return (query: string) => {
       const words = query.trim();
       if (!words) return [];
-      const { lang } = current;
+      const { lang } = catalog;
       return elsewhere(from, {
         // The regions named, not the on-screen regions a hidden match is drawn within.
-        anatomy: () =>
-          regions.search(words, current, Infinity).rows.filter((row) => !row.via).length,
+        anatomy: () => catalog.search(words, Infinity).rows.filter((row) => !row.via).length,
         functions: () => excursions.functionsMatching(words, lang),
         deficits: () => excursions.deficitsMatching(words, lang),
         circuits: () => circuitsMatching(world.circuits.all, words, lang).length,
@@ -160,7 +163,7 @@
     bind:this={tree}
     lang={current.lang}
     bind:query={() => current.query, (query) => session.setQuery(query)}
-    search={(query) => regions.search(query, current)}
+    search={catalog.search}
     groups={catalog.groups}
     hiddenRegions={current.hiddenRegions}
     {expanded}
@@ -183,11 +186,12 @@
     onElsewhere={(mode) => carry(mode, current.query)}
   >
     {#snippet systemPicker()}
+      <!-- Its options walk every region: they read the catalog's language and settings (WORK-31). -->
       <SystemPicker
-        lang={current.lang}
-        detail={current.detail}
+        lang={catalog.lang}
+        detail={catalog.settings.detail}
         regions={manifest.regions}
-        shared={sharedGroupNames(regions.groups({ ...current, internalSystem: null }))}
+        shared={sharedGroupNames(catalog.everySystem)}
         value={current.internalSystem}
         switching={current.status === 'switching'}
         onChoose={anatomy.chooseInternalSystem}

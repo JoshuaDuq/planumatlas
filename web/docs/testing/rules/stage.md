@@ -216,6 +216,15 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 - **Expected:** Destrieux → the nine rows in that order; Julich-Brain in French → eight rows, no Lateral fissure, "Pariétal", Frontal [136, 204, 238]; HCP-MMP → `[]`. `lobeKeyRows` with a Limbic system in the groups → "Limbic lobe", Frontal unchanged; without one → "Limbic".
 - **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/lib/core/panels/navigator.test.ts` (R, "the stage key names a lobe as the tree does…"); `src/features/stage/stage-keys.test.ts` (R, the plate, under a paint and on HCP-MMP)
 
+### STAGE-70 · A camera preset, a selection or a moved cut does not build the lobe key again
+
+- **Rule:** The lobe key's rows walk every region twice: once for the lobes the atlas has (`lobeRows`), once for the group names the tree with every system shares (`lobeKeyRows` over the groups with no system chosen). Lobes is the opening colouring, and every camera preset, selection or moved cut makes a new view. So the key reads only the catalog store's language, its settings that decide visibility, and its groups with no system chosen (STORE-36): a new view that changes none of them walks nothing, and one that does (a hidden region, the language, the atlas) builds the key once, to the rows `lobeKeyRows(lobeRows(…), atlas, catalog.groups({ …settings, internalSystem: null, lang }), lang)` gives.
+- **Kind:** behaviour
+- **Level:** browser in the composed stage region, fake engine
+- **Source:** review handoff P14b
+- **Expected:** Published `cdmd` manifest, Destrieux, colour Lobes, axial cut drawn: nine rows. `setView('left')`, `select(<a Destrieux region>)` and `setOffset(<the middle of the range>)`, each flushed: no `catalog.groups` and no `lobeRows` call, the rows unchanged. `hideRegions([<another>])`, `setLang('fr')`, then `setAtlas('julich')` → one call of each, the rows equal to the expression above for the engine's settings, and a camera preset after each → none. At the end: eight rows, "Pariétal" among them.
+- **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` "a camera preset, a selection or a moved cut walks no region for it; a hidden region, the language or the atlas does" (R)
+
 ### STAGE-67 · A phone popover's room is chosen with the popover in it
 
 - **Rule:** An open phone popover tells the camera how far it covers the stage (`clearPlate`), and the camera passes that cover to the layout's framing (`framing(cover)`), which chooses its room (below, beside or in the corner of the gizmo) above the popover rather than choosing for the dock and having the popover cut off afterwards. The engine still keeps the bottom inset at least the cover.
