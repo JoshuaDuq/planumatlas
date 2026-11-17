@@ -30,7 +30,6 @@ export interface SectionControlsDeps {
       | 'setOffset'
       | 'setOffsetReady'
       | 'setAnglesReady'
-      | 'setCutAtlas'
       | 'setDisplay'
       | 'cutSpacingMm'
     >;
@@ -201,7 +200,6 @@ export function createSectionControls({
     get opening() {
       return opening;
     },
-    cutAtlases,
     nextbrainSegmented:
       cutAtlases.find((atlas) => atlas.id === 'nextbrain')?.procedure === 'subject-segmentation',
     colourAtlases: {
@@ -260,16 +258,6 @@ export function createSectionControls({
       try {
         sections.setDisplay({ reverse });
         face();
-      } catch (error) {
-        report(error);
-      }
-    },
-
-    /** On failure the sections keep the previous labels, and the bar says why. */
-    async setCutAtlas(atlas: string) {
-      act();
-      try {
-        await sections.setCutAtlas(atlas);
       } catch (error) {
         report(error);
       }

@@ -76,7 +76,7 @@ describe('structure', () => {
     );
     expect(row('section:structure').getAttribute('aria-label')).toBe('Subcortical');
     expect(row('section:tissue').getAttribute('aria-label')).toBe(
-      'Cut labels only (Visible in a section)',
+      'On cuts only (Visible in a section)',
     );
     expect(row('section:cortex').querySelector('.section-state')!.textContent).toBe(
       'Right hemisphere hidden',
@@ -217,6 +217,53 @@ describe('structure', () => {
     mount({ groups: [] });
     expect(document.querySelector('[role="treegrid"]')).toBeNull();
     expect(document.querySelector('.tree-skeleton')!.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  test('ANAT-60 a family under its group is a caption row over its own structures, apart from namesakes', () => {
+    const family = 'Arousal nuclei (Harvard atlas)';
+    const structure = (id: string, hemisphere: string, subgroup: string | null = null) => ({
+      region: { id, hemisphere, kind: 'structure', atlas: id.split(':')[0] },
+      label: {
+        name: 'Ventral tegmental area',
+        group: 'Brainstem',
+        subgroup,
+        code: null,
+        aliases: [],
+      },
+      visible: true,
+      reason: null,
+    });
+    mount({
+      groups: [
+        {
+          name: 'Brainstem',
+          kind: 'structure',
+          key: 'structure:Brainstem',
+          rows: [
+            structure('nextbrain:left:435', 'left'),
+            structure('nextbrain:right:10435', 'right'),
+            structure('aan:midline:ventral-tegmental-area', 'midline', family),
+          ],
+        },
+      ] as never,
+      open: ['structure:Brainstem'],
+    });
+    expect(ids()).toEqual([
+      'section:structure',
+      'structure:Brainstem',
+      'nextbrain:left:435',
+      `structure:Brainstem/${family}`,
+      'aan:midline:ventral-tegmental-area',
+    ]);
+    const caption = row(`structure:Brainstem/${family}`);
+    expect(caption.getAttribute('aria-label')).toBe(`${family}, 1 region`);
+    expect(caption.getAttribute('aria-level')).toBe('2');
+    expect(caption.hasAttribute('aria-selected')).toBe(false);
+    expect(caption.querySelectorAll('button')).toHaveLength(0);
+    expect(keys('nextbrain:left:435').map((entry) => entry.dataset.side)).toEqual([
+      'left',
+      'right',
+    ]);
   });
 });
 
@@ -485,7 +532,7 @@ describe('visibility eyes', () => {
 
   test.each([
     ['en', ['Hidden: Precentral gyrus, left.', 'Shown: Precentral gyrus, left.']],
-    ['fr', ['Masqué : Precentral gyrus, gauche.', 'Affiché : Precentral gyrus, gauche.']],
+    ['fr', ['Masqué\u202f: Precentral gyrus, gauche.', 'Affiché\u202f: Precentral gyrus, gauche.']],
   ] as const)(
     '%s: V on a key hands S1 the part sentence to join with the count',
     async (lang, expected) => {
@@ -516,7 +563,8 @@ describe('selection and focus', () => {
     // The reader is outside the grid, like a pointer press on Expand all: the stop follows the choice.
     await userEvent.click(page.getByRole('button', { name: 'Expand all' }));
     expect(tabStops()).toEqual([row('d:left:3')]);
-    page.getByRole('button', { name: 'Collapse all' }).element().focus();
+    // The table download is the header's last control, just before the grid.
+    page.getByRole('button', { name: 'Download table (CSV)' }).element().focus();
     await press('{Tab}');
     expect(active()).toBe(row('d:left:3'));
     await press('{Tab}');

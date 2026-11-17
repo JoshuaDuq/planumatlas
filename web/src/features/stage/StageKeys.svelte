@@ -17,6 +17,7 @@
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type {
     ArterialTerritory,
+    CerebellarFunctionRegion,
     Language,
     LoadStatus,
     SurfaceColor,
@@ -45,6 +46,8 @@
     cabNp: ColoredNetworks | null;
     /** The arterial territories' palette, when the build publishes them. */
     territories?: readonly ArterialTerritory[] | null;
+    /** The cerebellar functional regions, when the build publishes them. */
+    cerebellar?: readonly CerebellarFunctionRegion[] | null;
     /** The lobes of the atlas on screen, for the lobe colouring's key. */
     lobes?: KeySources['lobes'];
     /** The key of the paint on show (`legendFor`), or null. */
@@ -67,6 +70,7 @@
     networks,
     cabNp,
     territories = null,
+    cerebellar = null,
     lobes = null,
     legend,
     cases = null,
@@ -83,6 +87,7 @@
       networks,
       cabNp,
       territories,
+      cerebellar,
       lobes,
       legend,
       cases,
@@ -278,6 +283,8 @@
         {/if}
         {#if plate.name === 'paint'}
           <p class="stage-key-note" hidden={!noteShown}>{plate.note}</p>
+        {:else if plate.note}
+          <p class="stage-key-note">{plate.note}</p>
         {/if}
       </div>
     </div>
@@ -464,8 +471,9 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         column-gap: var(--space-3);
       }
-      /* A finding is a sentence, not a name: one per line, or every one wraps. */
-      .stage-key:is([data-map='deficit'], [data-map='lesion']) .stage-key-list {
+      /* A finding is a sentence, not a name, and a highlighted region a name with its side: one per line, or every one wraps. */
+      .stage-key:is([data-map='deficit'], [data-map='lesion'], [data-map='highlight'])
+        .stage-key-list {
         grid-template-columns: minmax(0, 1fr);
       }
     }

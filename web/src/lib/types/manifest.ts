@@ -70,8 +70,8 @@ export interface ManifestSupplementalLayer {
   attribution: string;
   /** Two opposite corners, `[min, max]` (slices/sections.js:117). */
   bounds_ras_mm: readonly [readonly number[], readonly number[]];
-  /** The vertebral levels the cord reaches, top to bottom. */
-  vertebral_levels: string[];
+  /** The vertebral levels the cord reaches, top to bottom; the cord's layer only. */
+  vertebral_levels?: string[];
 }
 
 export interface ManifestAppearance {
@@ -128,6 +128,7 @@ export interface Manifest {
   stimulation_ftract?: ManifestFile & Record<string, unknown>;
   functional_connectivity?: ManifestFile & Record<string, unknown>;
   disorder_effects?: ManifestFile & Record<string, unknown>;
+  cortical_layers?: ManifestFile & Record<string, unknown>;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
@@ -228,6 +229,15 @@ export interface Retinotopy extends ManifestFile {
   maximum_eccentricity_deg: number;
   hemispheres: Record<'left' | 'right', RetinotopyHemisphere>;
   method: string;
+  /** The 25 areas of Wang et al. (2015), carried per cortical vertex to name the cortex only. */
+  visual_areas: {
+    label: string;
+    citation: string;
+    license: string;
+    attribute: '_WANG_AREA';
+    areas: { code: number; name: string }[];
+    method: string;
+  };
 }
 
 /** A published template's field: each grid node's displacement onto this brain's surface RAS. */

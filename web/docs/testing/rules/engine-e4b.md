@@ -1,6 +1,6 @@
 # Engine E4b rules: the brain atlas model
 
-Scope: chunk E4b (#28). This covers the model that loads the published anatomy and decides what is drawn: the manifest checks, the layers (cortical atlases, detail levels, the native envelopes, the spinal cord), the display settings and their events, the surface colours and the paint, selection, isolation and dissection, the exposed white matter, picking and centroids, the ribbon and glass solids the model holds, and download progress. Legacy sources: `viewer/model/brain-atlas.js`, `viewer/model/progress.js`, the legacy tests `viewer/model/{brain-atlas,assets,spinal-cord,progress}.test.js`, and the model's use of `viewer/tissues/glass-solids.js`. New code: `web/src/lib/engine/model/brain-atlas.ts`, `progress.ts`. Deviations: `e4b-joined-download-progress.md`, `e4b-load-hidden-regions-isolation.md`, `e4b-state-before-load.md`. The shared visibility rule (`core/catalog/visibility.ts`) is CAT-17 to CAT-21 (`core-catalogs.md`) and the dissection stack (`core/state/dissection.ts`) STATE-57 to STATE-59 (`core-state.md`); the cut that drives the model is in `engine-e4a.md`; the material shaders and the border-feather palette writer are in `engine-e1.md`.
+Scope: chunk E4b (#28). This covers the model that loads the published anatomy and decides what is drawn: the manifest checks, the layers (cortical atlases, detail levels, the native envelopes, the spinal cord), the display settings and their events, the surface colours and the paint, selection, isolation and dissection, the exposed white matter, picking and centroids, the ribbon and glass solids the model holds, and download progress. Legacy sources: `viewer/model/brain-atlas.js`, `viewer/model/progress.js`, the legacy tests `viewer/model/{brain-atlas,assets,spinal-cord,progress}.test.js`, and the model's use of `viewer/tissues/glass-solids.js`. New code: `web/src/lib/engine/model/brain-atlas.ts`, `progress.ts`; since plan 2 WP34 `brain-atlas.ts` holds the display state and the API, and its seams are modules beside it: `layers.ts` (loading and release, ATLAS-10), `picking.ts`, `visibility.ts` (what is shown and its colour), `surface-materials.ts` (materials and program samples), `placement.ts` (the exploded view and medial pair), `visual-field.ts`, `manifest.ts` and `geometry-jobs.ts`. Deviations: `e4b-joined-download-progress.md`, `e4b-load-hidden-regions-isolation.md`, `e4b-state-before-load.md`. The shared visibility rule (`core/catalog/visibility.ts`) is CAT-17 to CAT-21 (`core-catalogs.md`) and the dissection stack (`core/state/dissection.ts`) STATE-57 to STATE-59 (`core-state.md`); the cut that drives the model is in `engine-e4a.md`; the material shaders and the border-feather palette writer are in `engine-e1.md`.
 
 Conventions: "the fixture" is the synthetic model of the legacy unit tests (atlases `a` with `a-left`, `a-right` and the medial wall `a-wall`, atlas `b` with `b-left`, the detail level `aseg` with `stem`, the cut-only region `n-left`; 1 cm boxes 3 cm apart on x; `config/model.yaml` appearance). "CDMD" is the published model `public/models/cdmd/`. World coordinates are metres (x = R, y = S, z = −A); centroids are surface RAS millimetres. Colours are sRGB hex.
 
@@ -186,7 +186,7 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Level:** unit
 - **Source:** `viewer/model/brain-atlas.js:466-479,714-730`
 - **Expected:** Fixture `setCutState({ atlas: 'n', active: true })`, `select('n-left')` → selected; `update()` → still selected, no `selectionchange` with null. `setHemisphere('right')` → selection null, and `select('n-left')` → /not visible/. `setCutState({ atlas: 'n', active: false })` → selection null, `select('n-left')` → /not visible/. The same `setCutState` twice → one `change` event.
-- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R), the contract suite (R, "selects a region only the cut shows, while the cut is open on its atlas", on the fake and the real engine; moved from `parity/f2.test.ts`, which compared the fake with the legacy model), `src/lib/engine/model/brain-atlas.sweep.test.ts` (R)
+- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R), the contract suite (R, "selects a region only the cut shows, while the colour puts its map on the cut": an arterial territory, not selectable with an axial cut alone, selectable once Territory colour labels the cut by it; on the fake and the real engine; moved from `parity/f2.test.ts`, which compared the fake with the legacy model), `src/lib/engine/model/brain-atlas.sweep.test.ts` (R)
 
 ### ATLAS-20 · The internal-system filter
 
@@ -410,6 +410,15 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Expected:** Fixture: a-left → [0, 0, 0]; a-right (box at x = 0.03 m) → [30, 0, 0]; the second call returns the same array. `centroidOf('n-left')`, `centroidOf('nonexistent')` and `centroidOf(null)` → null. CDMD with destrieux, hcp-mmp, learning, aseg and nextbrain loaded: at least 400 regions have a centroid; each value is a multiple of 0.1; for every destrieux pair `destrieux:left:N` / `destrieux:right:N`, the right one's R is greater than the left one's.
 - **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (W: asserts only three finite numbers and the cache; an axis swap would pass), `src/lib/engine/model/brain-atlas.sweep.test.ts` (R), `src/lib/engine/model/assets.test.ts` (R)
 
+### ATLAS-58 · A region faces the reader where a ray to its label point meets it first
+
+- **Rule:** `model.facing(ids)` gives, for each region, where its label point stands on the canvas when a ray from the camera to the point, as its mesh draws it (the explode's shift and the medial pair included), meets that region first, at the point or before it, a cut face of it included (`BrainSections.intersect`); null where something else is in front, the point is cut away or behind the camera, or the region is not drawn. A parcel's label point is its `label_point_ras_mm` (its most open pial vertex, ties to the vertex nearest its pial vertices' mean: `brain_model/labels/placement.py` `label_point`, checked by `validate.py` `check_label_point`), a structure's its anchor; any other kind, an unknown id, or a missing label point throws. It also returns where the ray met the region in RAS mm, so the stage carries the name with the camera until it asks again. One ray per region: the stage asks at the camera's rest, never per frame.
+- **Kind:** behaviour
+- **Level:** unit — a contract-suite case, so the fake and the real engine meet it alike
+- **Source:** Planum improvement plan 2, WP21; `engine/model/picking.ts` `facing`
+- **Expected:** From the left view more left than right parcels of the shown atlas face the reader, from the right view the reverse; every point finite; the same camera gives the same points; a hidden region and a region of an atlas not drawn → null; `facing(['no-such-region'])` throws "Unknown region: no-such-region". The fake's rule: a drawn region faces the reader when its anchor lies on the camera's side of the brain's centre.
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "says where each drawn region faces the reader, from the side it lies on, and the same each time" (R, through `contract.test.ts` and `index.contract.test.ts`, which needs a manifest built with label points); the explode and medial-pair placement are uncovered by a test
+
 ## Spinal cord
 
 ### ATLAS-47 · The cord downloads the first time it is shown, once
@@ -476,3 +485,30 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Source:** `viewer/model/brain-atlas.js:907-931`
 - **Expected:** `dispose()` → `group.children.length === 0`, `disposed === true`, `layers.size === 0`. A layer download resolving after `dispose` rejects "BrainAtlas was disposed during loading." and its geometry is disposed. `ensureEnvelopes()`, `ensureSpinalCord()`, `ensureRibbonWedges()`, `loadLayer()` and `setSpinalCordVisible(true)` after dispose reject "BrainAtlas has been disposed.".
 - **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R, children and flag); the late-arrival and refusal parts are uncovered
+
+### ATLAS-55 · Each supplemental layer downloads on its own request; the cord's showing downloads only the cord
+
+- **Rule:** `ensureSupplementalLayer(id)` downloads one published supplemental layer (the arousal nuclei, the cord), shared and retried as any layer is, and resolves at once once it is in; it does not show the cord. An id the anatomy does not publish rejects with an `unknown-layer` error. `ensureSpinalCord` and the cord's first showing download the `pam50` layer alone. The first cut downloads every supplemental layer and caps all of them, whether or not a cord is published.
+- **Kind:** behaviour
+- **Level:** unit — a contract-suite case, so the fake and the real engine meet it alike
+- **Source:** Planum improvement plan 2, WP29; `ModelLayers.ensureSupplemental`, `TissueSections.loadAnatomy`
+- **Expected:** `ensureSupplementalLayer('no-such-layer')` rejects `unknown-layer`; each published layer's id → `hasLayer(id)` true after; `settings.spinalCordVisible` still false.
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "downloads each supplemental layer on request, without showing the cord" (R, through `contract.test.ts` and `index.contract.test.ts`); the cut's capping of a non-cord layer is uncovered until a published anatomy carries one
+
+### ATLAS-56 · The visual field map names its areas while the reader asks, on both hemispheres
+
+- **Rule:** `visualField.showAreas(true)` reads the named areas' anchors from the retinotopy sidecar (once, with the territories) and outlines the areas; `areaNames()` then gives every area of `manifest.retinotopy.visual_areas` on each hemisphere, while the map is drawn and only then. `showAreas(false)` ends both. In the real engine an anchor follows the surface the cortex is drawn on and the medial pair, and its point is null behind the camera, on a hemisphere with no cortex drawn, or where the drawn surface meets the ray more than 1.5 mm before it; larger areas come first.
+- **Kind:** behaviour
+- **Level:** unit — a contract-suite case, so the fake and the real engine meet it alike
+- **Source:** Planum improvement plan 2, WP32; `engine/visual-areas.ts`
+- **Expected:** `showAreas(true)` with no map → `areaNames()` empty; map shown (`dot: null`) → the 25 published names × left and right, each once; `showAreas(false)` → empty.
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "names every visual area of both hemispheres while the map draws them, and none otherwise" (R, through `contract.test.ts` and `index.contract.test.ts`); the occlusion and surface parts are uncovered by a test
+
+### ATLAS-57 · A click names the visual area its point lies in, and the borders separate every pair of areas that meet
+
+- **Rule:** While the map is probed, `visualFieldPoint` carries, beside the V1–V3 reading, the named visual area at the point: the code holding the largest share of the hit triangle's corners, as the shader draws the borders, with the mesh's hemisphere; null outside every area. The shader gives each area a border class 1 to 4, found once from the cortex's triangles so that no two areas that meet share one (no area is a fifth class), and draws a light line where two classes' interpolated shares meet, beneath the dot's response; a map four classes cannot separate is refused.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP32; `engine/model/visual-field.ts`, `engine/render/materials.ts`
+- **Expected:** fixture parcels a-left code 15, a-right code 0 → a ray at x 0 reads `{ name: 'LO1', hemisphere: 'left' }`, at x 0.03 null. `showVisualAreas(true)` → `visualAreasMix` 1, 16 classes, class 0 for no area, LO1's in 1–4; `false` → 0, the classes kept. Areas 1–4 meeting each other and 5 meeting 1 → every meeting pair in different classes, each in 1–4; five areas each meeting every other → refused "meets areas of all four border classes".
+- **Covered by:** `src/lib/engine/model/brain-atlas.test.ts` (R); `src/lib/engine/model/visual-field.test.ts` (R); the drawn line is uncovered by a pixel test

@@ -6,7 +6,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ### ANAT-01 · The anatomy is one named treegrid of section headings, groups and structures
 
-- **Rule:** The list is a single treegrid named "Browse anatomy". Each section (Cortex, Subcortical, Cut labels only) is a level-1 heading row with one cell, no expanded state and no selected state; its groups follow it as level-1 rows, collapsed until opened; an open group's structures are level-2 rows with their place in the group. Groups are not selectable; structures are.
+- **Rule:** The list is a single treegrid named "Browse anatomy". Each section (Cortex, Subcortical, On cuts only) is a level-1 heading row with one cell, no expanded state and no selected state; its groups follow it as level-1 rows, collapsed until opened; an open group's structures are level-2 rows with their place in the group. Groups are not selectable; structures are.
 - **Kind:** accessibility
 - **Level:** browser — ARIA roles, levels and states on the rendered rows
 - **Source:** `viewer/ui/panels/navigator.js:469-567`; decision record `0002-anatomy-treegrid.md`; deviation `a1-treegrid-structure.md`; decision 8 on #4
@@ -37,7 +37,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Kind:** accessibility
 - **Level:** unit (view-model: `sectionReasons`, `reasonText`)
 - **Source:** `viewer/ui/panels/navigator.js:113-129`, `489-509`; deviation `a1-section-reason-name.md`; decision 32 on #4
-- **Expected:** Fixture: "Cortex (Hemisphere hidden)" with the caption "Hemisphere hidden" drawn; "Subcortical" (no reason); "Cut labels only (Visible in a section)". Published data after `h` (hide a hemisphere): a "Cortex (Hemisphere hidden…" row.
+- **Expected:** Fixture: "Cortex (Hemisphere hidden)" with the caption "Hemisphere hidden" drawn; "Subcortical" (no reason); "On cuts only (Visible in a section)" (French « En coupe seulement »). Published data after `h` (hide a hemisphere): a "Cortex (Hemisphere hidden…" row.
 - **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/core/panels/navigator.test.ts` (R)
 
 ### ANAT-05 · A structure row says its sides and, when none is drawn, why and what a press does
@@ -213,7 +213,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Level:** unit (view-model: the sentence) — the joined message is S1's (`controller.md`)
 - **Source:** `viewer/app.js:1670-1676`; deviation `a1-eye-announcement.md`; decisions 32 and 36 on #4
 - **Expected:** V twice on `d:left:1`'s L key → `said` = ["Hidden: Precentral gyrus, left.", "Shown: Precentral gyrus, left."]; French ["Masqué : Precentral gyrus, gauche.", "Affiché : Precentral gyrus, gauche."]; `#announcer` stays "". Whole app, published data: hiding "Middle frontal gyrus, left" announces "Hidden: Middle frontal gyrus, left. 1 part hidden" (legacy: "1 part hidden").
-- **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/controller/speech.test.ts` (R, the join); `src/app/boot.svelte.test.ts` (R, the join)
+- **Covered by:** `src/features/anatomy/AnatomyTree.svelte.test.ts` (R); `src/lib/core/speech.test.ts` (R, the join); `src/app/boot.svelte.test.ts` (R, the join)
 
 ### ANAT-23 · Expand all opens every group, then becomes Collapse all
 
@@ -320,7 +320,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ### ANAT-34 · Choosing a result empties the query and leaves focus in the field
 
-- **Rule:** Enter on the armed result or a click on a result selects it (or reveals it), empties the query, brings the tree back around the region, and leaves focus in the field. Escape and the clear button ("Clear search") empty the field, bring the tree back and keep focus in the field. A note's button ("Switch atlas", "Switch cut labels") moves focus to the field before it acts.
+- **Rule:** Enter on the armed result or a click on a result selects it (or reveals it), empties the query, brings the tree back around the region, and leaves focus in the field. Escape and the clear button ("Clear search") empty the field, bring the tree back and keep focus in the field. A note's button ("Switch atlas", "Show in <tab>") moves focus to the field before it acts.
 - **Kind:** behaviour
 - **Level:** browser — real focus
 - **Source:** `viewer/ui/panels/navigator.js:252-263`, `386`, `401-402`, `421-423`, `704-732`; deviation `a2-focus-stays-in-field.md`
@@ -347,12 +347,12 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ### ANAT-37 · Matches in another atlas are reported, with a switch to that atlas
 
-- **Rule:** Matches that only another surface atlas draws, or only another cut atlas labels, are not dropped: a sentence per atlas counts them and offers a switch to the first atlas in manifest order that draws them. A rejection from the switch is not caught.
+- **Rule:** Matches that only another surface atlas draws are not dropped: a sentence per atlas counts them and offers a switch to that atlas, in manifest order. A rejection from the switch is not caught. A match the colouring or the internal anatomy keeps off the cut is listed with its reason, and choosing it reveals it by that control (CTRL-18): there is no cut-labels switch.
 - **Kind:** behaviour
 - **Level:** unit (view-model: `matchesElsewhere` and the sentences)
-- **Source:** `viewer/ui/panels/navigator.js:92-106`, `393-399`, `439-448`
-- **Expected:** Destrieux shown, "v1" → "No match for “v1”" and "1 match in HCP-MMP1.0 multimodal atlas." with "Switch atlas" → call `atlas hcp-mmp`, then "V1, left" listed. Cut atlas "other", "small" → "1 match in NextBrain histological atlas, which labels cuts only." with "Switch cut labels" → call `cut nextbrain`; its rejection surfaces as `unhandledrejection` "Error: cut atlas failed".
-- **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
+- **Source:** `viewer/ui/panels/navigator.js:92-106`, `393-399`, `439-448`; derived cut labels, 2026-11-17 (the cut-labels note and its switch removed)
+- **Expected:** Destrieux shown, "v1" → "No match for “v1”" and "1 match in HCP-MMP1.0 multimodal atlas." with "Switch atlas" → call `atlas hcp-mmp`, then "V1, left" listed. Cut atlas `destrieux`, "small" → option "Small nucleus, left: In NextBrain. Activate to reveal.", no button named /cut labels/; a click → `reveal other-detail t:left:small`. Published data, a NextBrain cut-only region found by name → no /cut labels/ button; choosing its "…left: In NextBrain." option → detail `nextbrain`, cut atlas `nextbrain`, a cut open, the region selected.
+- **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R, published data); the uncaught rejection: uncovered
 
 ### ANAT-38 · A list cut off says how many matches there are
 
@@ -407,6 +407,15 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Source:** U1 of the 2026-11-09 review
 - **Expected:** Deficits 2 and Tracts 1, "zzzz" → no hint; "2 matches in Deficits.", "1 match in Tracts."; said "No match for “zzzz”. 2 matches in Deficits. 1 match in Tracts."; "Show in Tracts" → `tab diffusion`, focus in the field. French, "cuneus" → options and "2 correspondances dans l’onglet Déficits.".
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
+
+### ANAT-60 · A family within a group is listed under its own caption
+
+- **Rule:** Where a group lists structures of its own and also a family (a region's `family_names`, its catalog subgroup), the family's structures follow the group's own under a caption row naming the family, as the Harvard arousal nuclei follow the segmentation's structures under Brainstem. The caption is a row of the group's level, named with the family and its count, neither selectable nor a control. Each part is grouped by structure on its own (ANAT-58), so a nucleus never shares a row with a namesake from another segmentation. A group that is all families, as the spinal cord is, stays one list.
+- **Kind:** behaviour
+- **Level:** unit (`familyParts` in `lib/core/panels/navigator.ts`); browser for the rows drawn
+- **Source:** Planum improvement plan 2, WP29
+- **Expected:** Brainstem with `nextbrain:left:521`, `aseg:midline:16` and two Harvard nuclei → `[null, [the two]]`, `["Arousal nuclei (Harvard atlas)", [the nuclei]]`; two cord rows in two families → one part. Tree, Brainstem open with NextBrain's VTA left and right and the Harvard VTA → rows `nextbrain:left:435`, caption `structure:Brainstem/Arousal nuclei (Harvard atlas)` ("Arousal nuclei (Harvard atlas), 1 region", `aria-level` 2, no `aria-selected`, no buttons), then `aan:midline:ventral-tegmental-area`; NextBrain's row keeps its L and R keys.
+- **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
 
 ### ANAT-43 · The search has no axe violations
 
@@ -546,3 +555,12 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Source:** WCAG 2.2 SC 1.4.10, 1.4.12, 2.5.8; `viewer/styles/navigator.css:242-248`, `297-320`
 - **Expected:** Buttons ≥ 24 × 24, ≥ 44 tall coarse; select ≥ 24 tall. French bar, 12 hidden, 320 × 700 at 200 % with spacing: `scrollWidth ≤ innerWidth`, group `scrollHeight ≤ clientHeight + 1`, each part inside the bar. Picker at 320: `.system-picker` `scrollWidth ≤ clientWidth + 1`, select within `[0, innerWidth]`, width > 0. `expectAxeClean()` clean for both.
 - **Covered by:** `src/features/anatomy/DissectionBar.svelte.test.ts` (R); `src/features/anatomy/SystemPicker.svelte.test.ts` (R)
+
+### ANAT-58 · Download table saves the shown atlas and level as one CSV file
+
+- **Rule:** The tree header ends in an icon button named "Download table (CSV)" (French "Télécharger le tableau (CSV)"), with that name as its tooltip. A press saves the region table (CAT-69) of the atlas and internal-anatomy level on screen, read at the press, as one file, and the announcer says so.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** plan 2 WP24
+- **Expected:** one download named `planum-regions-cdmd-destrieux-aseg.csv` whose second line starts `destrieux:left:1,destrieux,Frontomarginal gyrus and sulcus,`, three lines with the final CRLF; `#announcer` "Region table CSV downloaded.".
+- **Covered by:** `src/features/anatomy/TreeHeader.svelte.test.ts` (R)

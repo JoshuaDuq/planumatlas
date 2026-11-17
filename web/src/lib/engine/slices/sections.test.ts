@@ -29,7 +29,11 @@ function fixture() {
   const region = { id: 'aseg:left:10', kind: 'structure', source_label_id: 10 };
   const model: Stub = Object.assign(new EventTarget(), {
     clippingPlanes: [],
-    manifest: {},
+    manifest: {
+      cut_atlases: ['destrieux', 'hcp-mmp', 'julich', 'nextbrain', 'arterial'].map((id) => ({
+        id,
+      })),
+    },
     state: { atlas: 'destrieux', hemisphere: 'both', cortexVisible: true, cortexOpacity: 1 },
     regions: new Map([[region.id, region]]),
     setCutState(this: Stub, cut: unknown) {
@@ -47,6 +51,7 @@ function fixture() {
     group: new Group(),
     async load() {},
     layers: new Map([['destrieux', {}]]),
+    ribbonAtlas: (atlas: string) => atlas,
     hasDetail: () => true,
     releaseDetails() {},
     wantsStriatal: () => false,
@@ -510,32 +515,82 @@ test('hiding the internal anatomy repaints an open cut', async () => {
   sections.dispose();
 });
 
-test('a failed older cut atlas does not overwrite a newer choice', async () => {
-  const { tissues, sections } = fixture();
+/** The model's settings changed, as the masthead or a link changes them. */
+function change(model: Stub, state: Record<string, unknown>) {
+  Object.assign(model.state as object, state);
+  model.dispatchEvent(new Event('change'));
+}
+
+test('the cut is labelled by the atlas, the colouring and the internal anatomy the model shows', () => {
+  const { model, sections } = fixture();
+  assert.equal(sections.state.cutAtlas, 'destrieux');
+  assert.deepEqual(model.cut, { atlas: 'destrieux', active: false }, 'the model is told at once');
+  change(model, { atlas: 'hcp-mmp' });
+  assert.equal(sections.state.cutAtlas, 'hcp-mmp');
+  change(model, { detail: 'nextbrain' });
+  assert.equal(sections.state.cutAtlas, 'nextbrain');
+  change(model, { surfaceColor: 'territory' });
+  assert.equal(sections.state.cutAtlas, 'arterial', "the colouring's map wins over the level");
+  change(model, { paint: { id: 'function:a', colors: new Map() } });
+  assert.equal(sections.state.cutAtlas, 'hcp-mmp', "a paint names the surface atlas's regions");
+  assert.deepEqual(model.cut, { atlas: 'hcp-mmp', active: false });
+  sections.dispose();
+});
+
+test('a cut NextBrain labels also loads the surface atlas whose parcels cap its ribbon', async () => {
+  const { model, tissues, sections } = fixture();
+  const loaded: string[] = [];
+  tissues.load = async (atlas: string) => {
+    loaded.push(atlas);
+    tissues.layers.set(atlas, {});
+  };
+  // As the real sections answer: NextBrain has no parcels of its own, so the surface's cap its ribbon.
+  tissues.ribbonAtlas = (atlas: string) => (atlas === 'nextbrain' ? model.state.atlas : atlas);
+  const drawn: string[] = [];
+  tissues.update = (_frame: unknown, atlas: string) => drawn.push(atlas);
+  await sections.setMode('axial');
+  change(model, { atlas: 'hcp-mmp', detail: 'nextbrain' });
+  await vi.waitFor(() => assert.deepEqual(drawn.at(-1), 'nextbrain'));
+  assert.deepEqual(loaded, ['destrieux', 'nextbrain', 'hcp-mmp']);
+  // Another surface atlas under the same level redraws with its parcels once they load.
+  change(model, { atlas: 'julich' });
+  await vi.waitFor(() => assert.deepEqual(loaded.at(-1), 'julich'));
+  sections.dispose();
+});
+
+test('labels an older choice was loading do not overwrite those the model calls for now', async () => {
+  const { model, tissues, sections } = fixture();
   await sections.setMode('axial');
   let fail: (error: Error) => void = () => {};
+  const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
   tissues.load = (atlas: string) =>
     atlas === 'hcp-mmp'
       ? new Promise((_, reject) => {
           fail = reject;
         })
       : Promise.resolve();
-  const failure = assert.rejects(sections.setCutAtlas('hcp-mmp'), /offline/);
-  await sections.setCutAtlas('nextbrain');
+  change(model, { atlas: 'hcp-mmp' });
+  assert.equal(sections.group.visible, false, 'nothing is drawn from labels not yet loaded');
+  tissues.layers.set('julich', {});
+  change(model, { atlas: 'julich' });
   fail(new Error('offline'));
-  await failure;
-  assert.equal(sections.state.cutAtlas, 'nextbrain');
-  assert.equal(sections.state.status, 'ready');
+  await vi.waitFor(() => assert.equal(sections.state.status, 'ready'));
+  assert.equal(sections.state.cutAtlas, 'julich');
+  assert.equal(logged.mock.calls.length, 0, 'the overtaken failure is not reported');
+  logged.mockRestore();
   sections.dispose();
 });
 
-test('the current failed cut atlas is restored and reported', async () => {
-  const { tissues, sections } = fixture();
+test('labels that fail to load are reported, and kept, so the next change tries them again', async () => {
+  const { model, tissues, sections } = fixture();
   await sections.setMode('axial');
+  const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
   tissues.load = () => Promise.reject(new Error('offline'));
-  await assert.rejects(sections.setCutAtlas('hcp-mmp'), /offline/);
-  assert.equal(sections.state.cutAtlas, 'destrieux');
-  assert.equal(sections.state.status, 'error');
+  change(model, { atlas: 'hcp-mmp' });
+  await vi.waitFor(() => assert.equal(sections.state.status, 'error'));
+  assert.equal(sections.state.cutAtlas, 'hcp-mmp');
+  assert.equal(sections.group.visible, false);
+  logged.mockRestore();
   sections.dispose();
 });
 
@@ -559,42 +614,6 @@ test('one failing reload after a model change is reported once', async () => {
   assert.equal(errors.mock.calls.length, 1);
   assert.equal(sections.state.status, 'error');
   errors.mockRestore();
-  sections.dispose();
-});
-
-test('a failed cut atlas is rolled back when a later mode change overtook it', async () => {
-  const { tissues, sections } = fixture();
-  await sections.setMode('axial');
-  let fail: (error: Error) => void = () => {};
-  const failing = new Promise<never>((_, reject) => {
-    fail = reject;
-  });
-  tissues.load = (atlas: string) => (atlas === 'hcp-mmp' ? failing : Promise.resolve());
-  const failure = assert.rejects(sections.setCutAtlas('hcp-mmp'), /offline/);
-  const mode = sections.setMode('coronal').catch(() => {});
-  fail(new Error('offline'));
-  await failure;
-  await mode;
-  assert.equal(sections.state.cutAtlas, 'destrieux');
-  sections.dispose();
-});
-
-test('two failing cut atlas choices end on the last atlas that loaded', async () => {
-  const { tissues, sections } = fixture();
-  await sections.setMode('axial');
-  const fails = new Map<string, (error: Error) => void>();
-  tissues.load = (atlas: string) =>
-    new Promise((_, reject) => {
-      fails.set(atlas, reject);
-    });
-  const older = assert.rejects(sections.setCutAtlas('hcp-mmp'), /first/);
-  const newer = assert.rejects(sections.setCutAtlas('nextbrain'), /second/);
-  fails.get('hcp-mmp')!(new Error('first'));
-  await older;
-  assert.equal(sections.state.cutAtlas, 'nextbrain');
-  fails.get('nextbrain')!(new Error('second'));
-  await newer;
-  assert.equal(sections.state.cutAtlas, 'destrieux');
   sections.dispose();
 });
 
@@ -718,8 +737,9 @@ test("SLICE-41 the linked MRI draws the model's paint by the cut atlas's labels,
       sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1]))).slice(0, 16),
     ).filter((_, index) => index % 4 < 3);
   assert.deepEqual(row(), [100, 100, 100, 100, 100, 100, 10, 200, 30, 10, 200, 30]);
-  // Other cut labels draw the same paint by theirs, and the state names them once they do.
-  await sections.setCutAtlas('julich');
+  // Another atlas's labels draw the same paint by theirs, and the state names them once they do.
+  model.state.atlas = 'julich';
+  model.dispatchEvent(new Event('change'));
   await vi.waitFor(() =>
     assert.deepEqual(sections.state.paint, { id: 'function:a', atlas: 'julich' }),
   );

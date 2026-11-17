@@ -2,7 +2,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { BoxGeometry, Mesh } from 'three';
 import { offerReloadAfterDeploy } from '../../../boot/new-deploy.ts';
 import type { Notice } from '../../types/index.ts';
-import { GeometryJobs } from './brain-atlas.ts';
+import { GeometryJobs } from './geometry-jobs.ts';
 
 /** A geometry worker that answers its first job with `error`, before any message. */
 function failingWorker(error: () => Event) {

@@ -1,5 +1,4 @@
-import type { LoadProgress, Manifest, SurfaceColor } from '../../types/index.ts';
-import type { OnProgress } from '../../engine/api.ts';
+import type { LoadProgress, Manifest, OnProgress, SurfaceColor } from '../../types/index.ts';
 import { LOBE_ATLAS, groupsByLobe } from '../catalog/lobes.ts';
 import { failureKey, failureNotice } from '../i18n/errors.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
@@ -168,10 +167,8 @@ export function createSceneCommands({
   // The model shares each download; asking first, with progress, is what puts it in the status bar.
   const envelopes = () =>
     model.envelopesLoaded ? null : download((progress) => model.ensureEnvelopes(progress));
-  const spinalCord = () =>
-    model.spinalCordLoad === 'ready'
-      ? null
-      : download((progress) => model.ensureSpinalCord(progress));
+  const supplementalLayer = (id: string) =>
+    model.hasLayer(id) ? null : download((progress) => model.ensureSupplementalLayer(id, progress));
 
   /** Colour the surface, first showing the atlas a network colouring is defined on. */
   async function applySurfaceColor(value: SurfaceColor, current: () => boolean) {
@@ -198,10 +195,29 @@ export function createSceneCommands({
     return current();
   }
 
-  /** The first cut downloads the tissue envelopes it caps, and the cord where one is published. */
+  /**
+   * Download the supplemental layers these regions lie in, which draw nothing and cannot be
+   * selected until then. The cord's own regions stay hidden until the cord is shown.
+   */
+  async function loadSupplemental(ids: readonly (string | null)[], current: () => boolean) {
+    const layers = new Set(
+      ids.flatMap((id) => {
+        const region = id === null ? null : model.regions.get(id)!;
+        return region?.supplemental ? [region.atlas!] : [];
+      }),
+    );
+    await Promise.all([...layers].map(supplementalLayer));
+    return current();
+  }
+
+  /** The first cut downloads the tissue envelopes and the supplemental layers it caps. */
   async function prepareCut(current: () => boolean) {
-    if (!sections.solidsReady)
-      await Promise.all([envelopes(), hasSpinalCord() ? spinalCord() : null]);
+    if (!sections.solidsReady) {
+      await Promise.all([
+        envelopes(),
+        ...(model.manifest.supplemental_layers ?? []).map((layer) => supplementalLayer(layer.id)),
+      ]);
+    }
     return current();
   }
 
@@ -218,7 +234,7 @@ export function createSceneCommands({
     await loadAtlas(layers.atlas ?? model.settings.atlas, current);
     if (!current()) return false;
     await loadDetail(layers.detail ?? model.settings.detail, current);
-    if (!current()) return false;
+    if (!(await loadSupplemental(ids, current))) return false;
     await sections.setMode('off');
     if (!current()) return false;
     showClinicalRegions(model, ids);
@@ -295,6 +311,7 @@ export function createSceneCommands({
     loadDetail,
     applySurfaceColor,
     showSpinalCord,
+    loadSupplemental,
     prepareCut,
     cut,
     revealRegions,

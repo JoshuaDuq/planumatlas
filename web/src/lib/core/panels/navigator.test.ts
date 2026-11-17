@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { Region } from '../../types/index.ts';
-import { cutAtlasesOf } from '../catalog/visibility.ts';
 import {
+  familyParts,
   groupDisplayName,
   labelledGroups,
   lobeKeyRows,
@@ -37,20 +37,35 @@ test('the first arrow from an empty field lands on the first choosable row', () 
   assert.equal(nextEnabledIndex([true, false, false], -1, 1), 1);
 });
 
-test('a hidden row says its own reason, names the detail set it is in, or falls back', () => {
+test('a hidden row says its own reason, names the detail set or colour it is in, or falls back', () => {
   // The hemisphere setting hides the region's own side, which the sentence names.
   assert.equal(
-    reasonText('hemisphere', { atlas: 'destrieux', hemisphere: 'right' }, 'en'),
+    reasonText('hemisphere', region({ atlas: 'destrieux', hemisphere: 'right' }), 'en'),
     'Right hemisphere hidden',
   );
   assert.equal(
-    reasonText('hemisphere', { atlas: 'destrieux', hemisphere: 'right' }, 'fr'),
+    reasonText('hemisphere', region({ atlas: 'destrieux', hemisphere: 'right' }), 'fr'),
     'Hémisphère droit masqué',
   );
   assert.equal(
-    reasonText('other-detail', { atlas: 'learning', hemisphere: 'left' }, 'fr'),
+    reasonText('other-detail', region({ atlas: 'learning', hemisphere: 'left' }), 'fr'),
     'Dans Ensemble pédagogique',
   );
+  // A cut-only region names the colouring or the internal anatomy that puts it on the cut.
+  const tissue = (fields: Partial<Region>) => region({ kind: 'tissue-region', ...fields });
+  assert.equal(
+    reasonText('other-colour', tissue({ atlas: 'nettekoven' }), 'en'),
+    'Under Cerebellar functions',
+  );
+  assert.equal(
+    reasonText('other-colour', tissue({ atlas: 'arterial' }), 'fr'),
+    'Sous Territoires artériels',
+  );
+  assert.equal(reasonText('other-detail', tissue({ atlas: 'nextbrain' }), 'en'), 'In NextBrain');
+  // Gyral white matter is on every surface atlas's cut: what hides it is said in general.
+  const gyral = tissue({ atlas: 'wmparc', cut_atlases: ['destrieux', 'hcp-mmp'] });
+  assert.equal(reasonText('other-colour', gyral, 'en'), 'Not under this colour');
+  assert.equal(reasonText('other-detail', gyral, 'en'), 'In another detail level');
   assert.equal(reasonText('no-such-reason', undefined, 'en'), 'Hidden');
   // A key of the table that is not a sentence is no reason either.
   assert.equal(reasonText('inDetailSet', undefined, 'fr'), 'Masqué');
@@ -148,35 +163,16 @@ test("a region's group is the one the tree lists it under, qualified as the tree
   assert.equal(regionGroup(groups, 'elsewhere', 'en'), null);
 });
 
-test('a match in another cut atlas offers the cut atlas that draws it, not merely another one', () => {
-  const cutAtlases = [{ id: 'destrieux' }, { id: 'hcp-mmp' }, { id: 'nextbrain' }];
-  const row = (id: string, fields: Partial<Region>) => ({
-    region: region({ id, kind: 'tissue-region', ...fields }),
-  });
-  const histological = row('nb', { atlas: 'nextbrain' });
-  const gyral = row('wm', { atlas: 'wmparc', cut_atlases: ['destrieux', 'hcp-mmp'] });
-  const offered = (rows: (typeof histological)[], current: string) =>
-    matchesElsewhere(rows, cutAtlases, current, cutAtlasesOf).map(({ atlas, rows: drawn }) => [
-      atlas.id,
-      drawn.map((entry) => entry.region.id),
-    ]);
-  assert.deepEqual(offered([histological], 'destrieux'), [['nextbrain', ['nb']]]);
-  assert.deepEqual(offered([histological], 'hcp-mmp'), [['nextbrain', ['nb']]]);
-  assert.deepEqual(offered([gyral], 'nextbrain'), [['destrieux', ['wm']]]);
-  assert.throws(
-    () => matchesElsewhere([histological], cutAtlases.slice(0, 2), 'destrieux', cutAtlasesOf),
-    /No other atlas draws nb/,
-  );
-});
-
-test('a match in another surface atlas offers that atlas', () => {
-  const atlases = [{ id: 'destrieux' }, { id: 'hcp-mmp' }];
+test('a match in another surface atlas offers that atlas, and only one that draws it', () => {
+  const atlases = [{ id: 'destrieux' }, { id: 'hcp-mmp' }, { id: 'julich' }];
   const rows = [{ region: region({ id: 'v1', atlas: 'hcp-mmp' }) }];
   assert.deepEqual(
-    matchesElsewhere(rows, atlases, 'destrieux', (found) => [found.atlas]).map(
-      ({ atlas }) => atlas.id,
-    ),
+    matchesElsewhere(rows, atlases, 'destrieux').map(({ atlas }) => atlas.id),
     ['hcp-mmp'],
+  );
+  assert.throws(
+    () => matchesElsewhere(rows, atlases.slice(0, 1), 'destrieux'),
+    /No other atlas draws v1/,
   );
 });
 
@@ -313,4 +309,27 @@ test('the sides of one name share a tree row, in the order the names are first m
     [['n-l1'], ['n-l2'], ['n-r']],
   );
   assert.deepEqual(ids([]), []);
+});
+
+test('ANAT-60 a family is set apart under its name only where its group lists structures of its own', () => {
+  const row = (id: string, subgroup: string | null = null) => ({ id, label: { subgroup } });
+  const parts = (rows: ReturnType<typeof row>[]) =>
+    familyParts(rows).map(({ family, rows: part }) => [family, part.map((entry) => entry.id)]);
+  assert.deepEqual(
+    parts([
+      row('nextbrain:left:521'),
+      row('aseg:midline:16'),
+      row('aan:midline:dorsal-raphe', 'Arousal nuclei (Harvard atlas)'),
+      row('aan:left:locus-coeruleus', 'Arousal nuclei (Harvard atlas)'),
+    ]),
+    [
+      [null, ['nextbrain:left:521', 'aseg:midline:16']],
+      ['Arousal nuclei (Harvard atlas)', ['aan:midline:dorsal-raphe', 'aan:left:locus-coeruleus']],
+    ],
+  );
+  // The cord's families make up its whole group, which stays one list.
+  assert.deepEqual(
+    parts([row('pam50:left:a', 'Dorsal columns'), row('pam50:left:b', 'Grey matter')]),
+    [[null, ['pam50:left:a', 'pam50:left:b']]],
+  );
 });

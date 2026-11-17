@@ -1,6 +1,13 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { UnseenFile } from '../lib/core/assets/asset-cache.ts';
 import { keepAnatomyCached } from './keep-cached.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mock, and leave none built on it to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 const handOverUnseen = vi.hoisted(() => vi.fn());
 const releaseUnseen = vi.hoisted(() => vi.fn());

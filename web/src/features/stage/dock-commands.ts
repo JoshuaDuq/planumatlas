@@ -16,4 +16,6 @@ export type DockCommands = Pick<
 > & {
   /** The session names the view and the camera frames it (app.js:443). */
   chooseView(view: ViewName): void;
+  /** Display › Names on the brain: the session keeps it, the stage draws it. */
+  setNamesShown(shown: boolean): void;
 };

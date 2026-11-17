@@ -4,12 +4,14 @@
 // naming subject, labels, colouring and view or section, and the not-clinical statement.
 import { tick } from 'svelte';
 import { decimal, withUnit } from '../../lib/core/format.ts';
+import { codeOf } from '../../lib/core/i18n/errors.ts';
 import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import { subjectName } from '../../lib/core/panels/header.ts';
 import type { SceneCommands } from '../../lib/core/state/scene-commands.ts';
-import type { Engine, EngineCamera, Rect } from '../../lib/engine/api.ts';
+import type { Engine, EngineCamera, Rect, SnapshotOptions } from '../../lib/engine/api.ts';
 import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import type { CutMode, Language, Notice, SurfaceColor, ViewName } from '../../lib/types/index.ts';
+import { highlightCaption } from '../stage/stage-keys.ts';
 import { leaderEnd, placeLabels } from '../stage/stage-labels.ts';
 import { SNAPSHOT_LAYOUT, snapshotMarkings } from './markings.ts';
 import type { KeyMark, LabelMark, Markings, StageKeysModel } from './markings.ts';
@@ -52,6 +54,8 @@ export interface CaptionFacts {
   selection?: string | null;
   /** The reader's own map on the stage: its title, then its file, template and scale, worded. */
   overlay?: { title: string; details: string[] } | null;
+  /** The reader's highlights on the stage: the key's title, that they are the reader's marks, the regions. */
+  highlights?: { title: string; details: string[] } | null;
 }
 
 /**
@@ -71,6 +75,7 @@ export function snapshotCaption(
     section,
     selection,
     overlay,
+    highlights,
   }: CaptionFacts,
 ): CaptionLine[] {
   const fact = (text: string | null | undefined, style: Omit<Run, 'text'> = {}) => [
@@ -107,6 +112,12 @@ export function snapshotCaption(
     lines.push([
       fact(overlay.title, { strong: true }),
       ...overlay.details.map((detail) => fact(detail)),
+    ]);
+  }
+  if (highlights && !reference) {
+    lines.push([
+      fact(highlights.title, { strong: true }),
+      ...highlights.details.map((detail) => fact(detail)),
     ]);
   }
   return lines
@@ -410,8 +421,20 @@ export function annotateSnapshot(
   canvas: HTMLCanvasElement,
   plan: SnapshotPlan & { ratio: number },
 ): HTMLCanvasElement {
-  const { ratio, width, height, letters, labels, caption, statement, scale, keys, font, palette } =
-    plan;
+  const {
+    ratio,
+    width,
+    height,
+    letters,
+    labels,
+    names,
+    caption,
+    statement,
+    scale,
+    keys,
+    font,
+    palette,
+  } = plan;
   const { gutter, line, letterGap } = SNAPSHOT_LAYOUT;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('The snapshot canvas has no 2D context.');
@@ -471,6 +494,16 @@ export function annotateSnapshot(
     drawLabel(ctx, label, palette, ratio);
   }
 
+  // A visual area's name stands on its area: one the image's own chrome would cover is left out, as
+  // the stage leaves it out under its own.
+  ctx.textAlign = 'center';
+  for (const { box, text, color, font: face } of names) {
+    if (chrome.some((other) => meet(box, other))) continue;
+    ctx.font = face;
+    const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
+    haloText(ctx, text, x, y, { ...palette, ink: color }, ratio);
+  }
+
   ctx.textAlign = 'center';
   ctx.font = fontOf({ weight: 600, size: STAGE_TYPE, family: font });
   for (const letter of letters) haloText(ctx, letter.text, letter.x, letter.y, palette, ratio);
@@ -497,6 +530,7 @@ export function snapshotFonts(plan: SnapshotPlan) {
     ...plan.caption.flat(2).map((run) => run.text),
     ...plan.keys.flatMap((key) => key.texts.map((text) => text.text)),
     ...plan.labels.flatMap((label) => label.lines.map((line) => line.text)),
+    ...plan.names.map((name) => name.text),
   ].join(' ');
   const faces = [
     fontOf({ weight: 400, size: 12, family: plan.font }),
@@ -505,6 +539,7 @@ export function snapshotFonts(plan: SnapshotPlan) {
     ...new Set([
       ...plan.keys.flatMap((key) => key.texts.map((text) => text.font)),
       ...plan.labels.flatMap((label) => label.lines.map((line) => line.font)),
+      ...plan.names.map((name) => name.font),
     ]),
   ];
   return Promise.all(faces.map((face) => document.fonts.load(face, words)));
@@ -559,6 +594,8 @@ export function snapshotPlan(
     section: reference ? null : subject.section,
     selection: subject.selection,
     overlay: subject.overlay,
+    // Read from the key the image draws, so the caption names the regions it does.
+    highlights: highlightCaption(keys.model(), lang),
   });
   const tokens = getComputedStyle(host);
   const token = (name: string) => tokens.getPropertyValue(name).trim();
@@ -585,11 +622,22 @@ export function snapshotPlan(
 export async function snapshotImage(
   scene: SnapshotStage,
   subject: SnapshotSubject,
+  options: SnapshotOptions = {},
 ): Promise<HTMLCanvasElement> {
   const { crop, plan } = snapshotPlan(scene, subject);
   await snapshotFonts(plan);
-  const { canvas, ratio } = scene.engine.captureSnapshot(crop);
+  // The marks are drawn at the frame's ratio, so a larger image carries a caption as legible as the screen's.
+  const { canvas, ratio } = scene.engine.captureSnapshot(crop, options);
   return annotateSnapshot(canvas, { ...plan, ratio });
+}
+
+/** The annotated frame as a PNG. */
+export async function snapshotPng(
+  scene: SnapshotStage,
+  subject: SnapshotSubject,
+  options: SnapshotOptions,
+): Promise<Blob> {
+  return pngOf(await snapshotImage(scene, subject, options));
 }
 
 function pngOf(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -606,13 +654,18 @@ export interface SnapshotPorts extends Pick<SceneCommands, 'fail'> {
   notify: (notice: Notice | null) => void;
 }
 
-async function save(scene: SnapshotStage, subject: SnapshotSubject, ports: SnapshotPorts) {
+async function save(
+  scene: SnapshotStage,
+  subject: SnapshotSubject,
+  ports: SnapshotPorts,
+  options: SnapshotOptions,
+) {
   // Named for what it shows, so a set of saves tells itself apart: atlas, the view while the camera
   // holds it (as the caption names it), then the cut's plane.
   const view = scene.engine.camera.viewHeld ? subject.view : null;
   const parts = ['planum', subject.atlas ?? 'brain', view, subject.section?.plane];
   const file = `${[...new Set(parts.filter(Boolean))].join('-')}.png`;
-  const url = URL.createObjectURL(await pngOf(await snapshotImage(scene, subject)));
+  const url = URL.createObjectURL(await snapshotPng(scene, subject, options));
   const link = document.createElement('a');
   link.download = file;
   link.href = url;
@@ -629,15 +682,19 @@ let saving: Promise<void> | null = null;
 
 /**
  * Download the visible stage as `planum-<atlas>-<view>[-<plane>].png` and say so. A failure is the scene commands'
- * `snapshot` notice. While one is being made, asking again joins it rather than saving twice.
+ * `snapshot` notice, or `snapshotSize`, which says why, for a size the device cannot draw. While one is being
+ * made, asking again joins it rather than saving twice.
  */
 export function saveSnapshot(
   scene: SnapshotStage,
   subject: SnapshotSubject,
   ports: SnapshotPorts,
+  options: SnapshotOptions = {},
 ): Promise<void> {
-  saving ??= save(scene, subject, ports)
-    .catch((error: unknown) => ports.fail('snapshot', error))
+  saving ??= save(scene, subject, ports, options)
+    .catch((error: unknown) =>
+      ports.fail(codeOf(error) === 'snapshot-too-large' ? 'snapshotSize' : 'snapshot', error),
+    )
     .finally(() => {
       saving = null;
     });

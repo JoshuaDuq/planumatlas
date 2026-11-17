@@ -6,11 +6,12 @@ import type {
   RegionHemisphere,
   Rgb,
 } from '../../types/index.ts';
+import { MAP_ATLASES } from '../../core/catalog/cut-labels.ts';
 import { lobeColor } from '../../core/catalog/lobes.ts';
 import { dominantNetwork } from '../../core/catalog/networks.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
 import { internalSystemAllows } from '../../core/catalog/visibility.ts';
-import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
+import { ghostColor, greyed, stageLegible, tissueColor } from '../render/materials.ts';
 import type { TissuePalette } from '../render/materials.ts';
 import { majorityTerritoryColor } from '../render/network-colors.ts';
 import type { NetworkMetadata } from '../render/network-colors.ts';
@@ -95,6 +96,14 @@ export const usesNetworkColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
 export const usesTerritoryColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
   state.surfaceColor === 'territory';
 
+/** Whether a cut face carries the striatal networks, voxel by voxel, and nothing else. */
+export const usesStriatalColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
+  state.surfaceColor === 'striatal';
+
+/** Whether a cut face carries the cerebellar functional regions, voxel by voxel, and nothing else. */
+export const usesCerebellarColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
+  state.surfaceColor === 'cerebellar';
+
 /** Whether a cut face carries CAB-NP's colours, which only HCP-MMP's areas have. */
 export const usesCabNpColors = (state: Pick<PaletteState, 'surfaceColor'>) =>
   state.surfaceColor === 'cab-np';
@@ -175,6 +184,11 @@ export function labelAppearance(
     const channels = territoryColor(label, state, lookup);
     if (channels) setPublished(color, channels);
   }
+  // A volumetric map's own labels keep their colour; every other label keeps its tissue.
+  if ((usesStriatalColors(state) || usesCerebellarColors(state)) && label.region_id) {
+    const map = MAP_ATLASES[state.surfaceColor as 'striatal' | 'cerebellar'];
+    if (lookup?.regions?.get(label.region_id)?.atlas === map) setPublished(color, label.color);
+  }
   const cabNpNetwork =
     usesCabNpColors(state) && label.region_id ? lookup?.cabNp?.regions[label.region_id] : null;
   if (cabNpNetwork) {
@@ -198,17 +212,33 @@ export function labelAppearance(
   return { color, visible: labelVisible(label, state, lookup) };
 }
 
-/** Palette is independent of slice position, so dragging never rebuilds it. */
+/**
+ * Whether a label is cerebral cortex in FreeSurfer's naming: Destrieux's parcels, and the
+ * Desikan-Killiany block (`ctx-`) NextBrain reuses for its cortex.
+ */
+export const corticalLabel = (label: Label): boolean =>
+  label.kind === 'cortex' || Boolean(label.name?.includes('ctx-'));
+
+/**
+ * Palette is independent of slice position, so dragging never rebuilds it. Where the surface
+ * atlas's parcels cap the ribbon (`ribbonCapped`), a voxel the sampled atlas calls cortex lies
+ * inside the white surface, which makes it white matter, as the cut's surfaces draw it.
+ */
 export function createPalette(
   labels: readonly Label[],
   state: PaletteState,
   tissuePalette: TissuePalette,
   lookup?: PaletteLookup,
+  ribbonCapped = false,
 ): Float32Array {
   const palette = new Float32Array(labels.length * 4);
   const color = new Color();
   for (const [code, label] of labels.entries()) {
     const { visible } = labelAppearance(label, state, tissuePalette, lookup, color);
+    if (ribbonCapped && corticalLabel(label)) {
+      color.set(tissuePalette.white);
+      if (ghosting(state)) greyed(color);
+    }
     palette.set([color.r, color.g, color.b, Number(visible)], code * 4);
   }
   return palette;

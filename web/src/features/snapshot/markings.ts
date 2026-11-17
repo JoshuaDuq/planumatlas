@@ -54,9 +54,18 @@ export interface LabelMark {
   lines: KeyWords[];
 }
 
+/** A visual area's name on the visual field map's stage, drawn centred in its box. */
+export interface NameMark {
+  box: Rect;
+  text: string;
+  color: string;
+  font: string;
+}
+
 export interface Markings {
   letters: Letter[];
   labels: LabelMark[];
+  names: NameMark[];
   keys: KeyMark[];
   scale: { pixels: number; label: string } | null;
 }
@@ -87,7 +96,7 @@ function wrappedLines(node: HTMLElement, local: (range: Range) => Rect) {
 
 /**
  * The markings as the reader sees them, in CSS pixels of the visible stage `crop`: the letters where
- * they are drawn, the route landmarks' labels, the scale bar's rule and words, and each colour key's plate. What a key says comes
+ * they are drawn, the route landmarks' labels, the visual areas' names, the scale bar's rule and words, and each colour key's plate. What a key says comes
  * from `keys.model()`; only where it is drawn is measured.
  */
 export function snapshotMarkings(
@@ -167,6 +176,18 @@ export function snapshotMarkings(
       };
     });
 
+  const names = [...host.querySelectorAll<HTMLElement>('.area-name')]
+    .filter(shown)
+    .map((node): NameMark => {
+      const style = getComputedStyle(node);
+      return {
+        box: local(node),
+        text: node.textContent,
+        color: style.color,
+        font: `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`,
+      };
+    });
+
   // A key's words; a range measures the text, not the control that holds it.
   const words = (node: HTMLElement, text: string): KeyWords => {
     const range = document.createRange();
@@ -224,6 +245,7 @@ export function snapshotMarkings(
   return {
     letters,
     labels,
+    names,
     keys: keyMarks,
     scale: bar.hidden
       ? null

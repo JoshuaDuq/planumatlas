@@ -147,6 +147,24 @@ document, `location`, `history` and `window` directly.
 - **Expected:** link restore of `{view: 'right'}` started, then `commands.begin()`, `openCircuit(<first circuit>)` or `setSpinalCordVisible(false)` → the restore resolves `null`.
 - **Covered by:** `src/app/boot.svelte.test.ts` (R, three cases)
 
+### BOOT-35 · An embedded page fetches no model until the reader asks
+
+- **Rule:** On a page opened with `embed=1` the start reads the anatomy index, names the subject for the frame's line, and waits: neither the manifest nor any layer is fetched, and the engine is not created, until the reader presses Load the 3D brain. It then opens the link's anatomy, atlas and detail as any start does. A cut the link did not open is not prefetched. A page of its own starts at once.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** Planum improvement plan 2, WP25 ("nothing heavy loads uninvited")
+- **Expected:** `#atlas=hcp-mmp&view=left&lang=en&embed=1`: subject `cdmd` set, no `fetch` of a `models/` URL, `createEngine` not called, status `loading`; after `invite()` → `createEngine` once with `manifestUrl` `<base>models/cdmd/manifest.json` and atlas `hcp-mmp`. Without `embed` → `app.embed` null and `createEngine` called once without waiting.
+- **Covered by:** `src/app/embed.svelte.test.ts` (R)
+
+### BOOT-36 · Focus the stage held while it loaded passes to the canvas
+
+- **Rule:** The stage host (`main#viewport`, `tabindex=-1`) takes focus while there is no canvas: the skip link pressed during the load, and an embedded page's Load the 3D brain, which goes with the poster. Once the start is over and the link applied, focus still on the host passes to the canvas, whose arrows turn the model (KEY-07); focus anywhere else stays where the reader put it. Before, a frame's reader pressed Load, heard the model load, and found the arrows did nothing until a Tab reached the canvas.
+- **Kind:** accessibility
+- **Level:** browser: real focus
+- **Source:** `web/src/app/boot.ts` (`startApp`); WP19 audit (WCAG 2.4.3, 2.1.1)
+- **Expected:** Host focused, start over the fake engine → `document.activeElement` is `engine.canvas`. A button focused instead → still that button. Live (`embed=1`, Tab, Enter on Load): once ready, focus is the `role=application` canvas and ArrowLeft writes a `cam=` to the link; the skip link pressed while loading lands on the host, then on the canvas.
+- **Covered by:** `src/app/boot.svelte.test.ts` (R)
+
 ## Start failures
 
 ### BOOT-13 · A failed download
@@ -535,6 +553,15 @@ document, `location`, `history` and `window` directly.
 - **Expected:** `sections.prefetch()` then `model.prefetchLayer('hcp-mmp')` → requests include `tissue-envelopes.glb`, `mri.volume`, `cortex-hcp-mmp.glb`, and none without `priority: 'low'`.
 - **Covered by:** `src/lib/engine/prefetch.svelte.test.ts` (R)
 
+### ASSET-23 · An embedded link starts no download from the head
+
+- **Rule:** When the link says `embed=1` (once, as `decodeState` reads it), the head script prefetches nothing, not even the anatomy index: a framed page downloads the anatomy only once the reader asks (BOOT-35). `embed=0` or a repeated `embed` is prefetched as any link.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** `#embed=1` and `#anatomy=bert&atlas=hcp-mmp&embed=1` → no request, `__planumAssets` `{}`; `#embed=0` and `#embed=1&embed=1` → the four requests of ASSET-16.
+- **Covered by:** `src/boot/prefetch.test.ts` (R)
+
 ## Service worker
 
 ### SW-01 · Registration
@@ -555,13 +582,13 @@ document, `location`, `history` and `window` directly.
 - **Expected:** two requests for `cortex-destrieux.glb?v=<current>` → 1 network fetch, second body `bytes:models/bert/cortex-destrieux.glb`; manifest and diffusion `.trk.gz` stored too.
 - **Covered by:** `src/service-worker.test.ts` (R)
 
-### SW-03 · Only current published files are intercepted
+### SW-03 · Only current published files and the build's own files are intercepted
 
-- **Rule:** The worker answers only same-origin GET requests for the version of a published file this deploy publishes; the page, scripts, other versions, unpublished files, other origins and non-GET requests pass through untouched.
+- **Rule:** The worker answers same-origin GET requests for the version of a published file this deploy publishes (SW-02), and for the build's hashed files under `<base>assets/` (SW-12), and the page's navigations (SW-09). Other versions, unpublished files, other origins, `assets/` outside the base, the worker script and non-GET requests pass through untouched.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/service-worker.js:22-32, 56-68`
-- **Expected:** unversioned, `?v=previousdeploy00`, `unpublished.glb?v=1`, `assets/index-abc.js`, `elsewhere.test`, POST → not answered, 0 fetches.
+- **Source:** `viewer/service-worker.js:22-32, 56-68`; plan 2 WP37 (handoff P12, second half, 2026-11-17: the build's files are now answered)
+- **Expected:** unversioned, `?v=previousdeploy00`, `unpublished.glb?v=1`, `elsewhere.test` (a published file or `assets/a-1.js`), `/assets/outside-the-base.js` under base `/neuroatlas/`, POST (a published file or an `assets/` file), `sw.js` → not answered, 0 fetches; `assets/index-abc.js` → answered.
 - **Covered by:** `src/service-worker.test.ts` (R)
 
 ### SW-04 · A bad download is never stored
@@ -611,12 +638,12 @@ document, `location`, `history` and `window` directly.
 
 ### SW-09 · The page itself is always revalidated
 
-- **Rule:** Navigations always go to the network with `cache: 'no-cache'`; a redirected answer or a network failure falls back to the browser's own request. The site does not work offline.
+- **Rule:** Navigations always go to the network first, with `cache: 'no-cache'`, and are never stored or answered from storage, whatever build files the worker holds (SW-12); a redirected answer or a network failure falls back to the browser's own request. The page is therefore never older than the deploy, and the site does not work offline: without the network there is no page to load the stored scripts.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/service-worker.js:59-66`
-- **Expected:** navigate `/` → one fetch of that URL with `no-cache`; redirected → second `fetch(request)`; rejected → `fetch(request)`.
-- **Covered by:** `src/service-worker.test.ts` (R, no-cache only); redirect and failure fallbacks uncovered
+- **Source:** `viewer/service-worker.js:59-66`; plan 2 WP37 (handoff P12: worded beside the stored build files)
+- **Expected:** with `assets/index-abc.js` stored, navigate `/` → one fetch of that URL with `no-cache`; a second navigation → a second fetch; redirected → second `fetch(request)`; rejected → `fetch(request)`.
+- **Covered by:** `src/service-worker.test.ts` (R, no-cache and network first); redirect and failure fallbacks uncovered
 
 ### SW-10 · A second visit is served by the worker
 
@@ -635,6 +662,15 @@ document, `location`, `history` and `window` directly.
 - **Source:** Milestone 2 P12 (first half): `web/src/lib/core/assets/asset-cache.ts` `handOverUnseen`, `web/src/boot/keep-cached.ts`, the worker's `message` listener in `web/src/service-worker.ts`
 - **Expected:** page: a verified download before the hand-over and one after → both posted, URLs `…?v=<version>`, body the published bytes, headers as received; controller present, `PROD=false`, no map or `asset-updated` → nothing kept; `releaseUnseen()` → a later hand-over gets neither the kept file nor one downloaded after; registration rejected → `releaseUnseen` called and the warning still logged. Worker: the published bytes → stored, then served with no network fetch and the handed-over headers; another deploy's bytes, an old version, an unpublished path or another origin → nothing stored and nothing fetched; an entry already stored → kept.
 - **Covered by:** `src/lib/core/assets/asset-cache.test.ts` (R), `src/boot/keep-cached.test.ts` (R), `src/service-worker.test.ts` (R)
+
+### SW-12 · The build's hashed files are served from storage first, and at most 100 are kept
+
+- **Rule:** A same-origin GET for a file under `<base>assets/` (scripts, workers, styles, fonts, all named by their content's hash) is answered from the worker's `planum-assets` store when it holds the file. Otherwise the page's own request goes to the network as it was made (no revalidation: the name is the version), and a whole `200` answer that was not redirected is stored, stamped with when it was stored; anything else reaches the page and is not stored. A tab left open across a deploy, which removes the old files from the server, can so still load the lazy code it or an earlier visit loaded; code never loaded gets the reload notice (BOOT-32). Each page load (a navigation) keeps the 100 files stored last and deletes the rest; a page load that finds no store creates none. It is not an offline mode (SW-09).
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** handoff P12, second half; plan 2 WP37 (2026-11-17). Bound: a build is 22 files and 3.7 MB (`web/dist/assets`, 2026-11-16), so 100 files hold about four deploys' worth at most, some 15–20 MB.
+- **Expected:** `assets/tracts-Ab12Cd34.js` twice → one fetch, of the page's own request (`cache` `default`, its headers), both answers its bytes, stored under `/neuroatlas/assets/tracts-Ab12Cd34.js`; the server then answering 404 → still 200 with the stored bytes and no fetch. A 404 or 206 → the page gets that status, nothing stored. 102 files stored one second apart, then a navigation → the 100 newest kept, the first two gone. A navigation with no store → no cache created.
+- **Covered by:** `src/service-worker.test.ts` (R); across a real deploy unmeasured
 
 ## Build output
 
@@ -781,3 +817,48 @@ document, `location`, `history` and `window` directly.
 - **Source:** SEC2 (2026-11 review); `web/build/content-security-policy.ts`
 - **Expected:** `default-src 'self'; script-src 'self' 'sha256-<theme and language script>' 'sha256-<prefetch script>' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://feedback.planumatlas.com; object-src 'none'; base-uri 'none'; form-action 'none'`; in `web/dist/index.html`, one such tag in head before the first `<script`, whose `sha256-` sources are exactly the hashes of the page's inline scripts, and no source containing `*`. Measured 2026-11-16 on the built site (`vite preview`, headless Chromium 156, a `securitypolicyviolation` listener): no violation and no console error over the first view, four stops of the tour, a coronal cut, Linked MRI and its saved PNG (a `data:` download), the Tracts tab with two bundles drawn, Add → Overlay with a 4 mm MNI NIfTI, the saved snapshot (a `blob:` download), the service worker registering and controlling a reload, and the feedback form (its POST answered by the test).
 - **Covered by:** `build/content-security-policy.test.ts` (R); `.github/scripts/check-dist.mjs` (R, over `web/dist` after `npm run build` in the `web-check` job and in deploy's `build` job)
+
+### BUILD-17 · Imports point down the layers
+
+- **Rule:** Every relative import between two files of `src/` that ship goes to a lower layer: `lib/types` and `styles`, then `lib/core`, then `lib/ui`, `lib/engine` and `boot`, then `lib/state`, `lib/controller`, `features/info`, the other features, `app`, and the entry points `main.ts` and `service-worker.ts`. Layers of one tier do not import each other. The allowances are named in the test with their reasons: the core ports onto the engine's interfaces, the workspace mounting the tabs and reading the app's world, the profiles mounting the sections' Linked MRI button and deep toggle, the lesion reports on the inspector's stylesheet, the snapshot redrawing the stage's keys and labels, and the reader's map handing its key and caption to the stage and the snapshot. An allowance nothing uses fails. Tests and their support files are exempt.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** handoff I8; plan 2 WP41
+- **Expected:** no upward import; no unused allowance; the inversions this replaced (a controller on `features/colophon/display-state.ts`, core on `engine/api.ts` and `ui/keys.ts`, state on `controller/speech.ts`, features on each other's logic) refused.
+- **Covered by:** `test/import-direction.test.ts` (R)
+
+### BUILD-18 · Planum starts, picks, cuts and opens its sheet in WebKit on a phone
+
+- **Rule:** In WebKit on an iPhone-sized touch screen, the built site gives the renderer WebGL 2 with `EXT_color_buffer_float` (BOOT-01, BOOT-02) and reaches ready; a tap on the model selects the region under it; a coronal cut opened from a link shows its exact position, and a typed position moves the cut and the link; the sheet rests low over the stage and its handle raises it to half; and no script error escapes the page. It runs nightly and by hand, never on pull requests or the deploy.
+- **Kind:** behaviour
+- **Level:** e2e: Playwright's `webkit-iphone` project (`devices['iPhone 13']`, headless WebKit in Playwright's image), on the built site
+- **Source:** review handoff I1; plan 2 WP40
+- **Expected:** no capability missing; `#app[data-status=ready]` and the title "Planum"; a tap on one of 12 points over the open stage puts `region=` in the link within 30 s; with `cut=coronal&pos=12.5` the "Coronal section" group's "Exact cut position in millimetres" reads "12.5", and "-20" then Tab writes `pos=-20` beside `cut=coronal`; the stage's `--vis-bottom` is above 60 px at rest and within 5 px of half the stage after a tap on "Expand panel"; no `pageerror`. Unconfirmed until the first nightly run: Linux WebKit's WebGL has not been run against `webgl-check.ts`.
+- **Covered by:** `e2e/journeys/phone-smoke.spec.ts` (R)
+
+### BUILD-19 · The live site is the one just deployed
+
+- **Rule:** After Pages reports a deployment, the live page names the entry script the deploy built and the default anatomy's manifest at the version its head map was built with, and the live manifest is served at that version (the first 16 hex of the SHA-256 of the bytes served). Pages' CDN may keep a page for 10 minutes, so each try asks with a query of its own until 10 minutes have passed.
+- **Kind:** behaviour
+- **Level:** post-deploy check of the live site (deploy.yml's `live-check`, after `deploy`)
+- **Source:** review handoff I1; plan 2 WP40
+- **Expected:** `src="<entry>"` and `"models/cdmd/manifest.json":"<version>"` in the page fetched from the deployment's `page_url`; `sha256(manifest.json?v=<version>)[:16]` = `<version>`; otherwise the job fails naming the entry, the version expected and the version served.
+- **Covered by:** `.github/workflows/deploy.yml` `live-check` (R)
+
+### BUILD-20 · No engine source file outgrows its line ceiling
+
+- **Rule:** Every source file under `src/lib/engine/` stays within a line ceiling, so no unit regrows to hold several seams of the engine (handoff I9). Tests, their support files and the fake engine are exempt, as BUILD-17 counts test code. A ceiling is a regression guard: split the unit rather than raise it.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** handoff I9; plan 2 WP34
+- **Expected:** at most 1,100 lines per file, `model/brain-atlas.ts` and `render/scene.ts` among those counted. Measured 2026-11-16 after the split: largest `framing.ts` 1,031, `model/brain-atlas.ts` 903, `render/scene.ts` 460; before it `model/brain-atlas.ts` 2,182 and `render/scene.ts` 1,155.
+- **Covered by:** `test/engine-line-count.test.ts` (R)
+
+### BUILD-21 · The build writes references.json and stops at a cited work with no record
+
+- **Rule:** The build writes `references.json` beside the page: the records (`data/reference-records.json`) of every DOI and PubMed link in a published manifest's citation fields (`citation`, `citations`, `doi`, `source_url`, `*_citation`), each tract catalog's source and each deficit reference, keyed as the records file keys them, with Planum from `CITATION.cff` (names as initials, no contact details) and the HCP acknowledgement quoted from `references.md`. A cited DOI or PMID with no record, or a bibliography without the acknowledgement, stops the build, naming each. The development server checks at start and serves the library read afresh.
+- **Kind:** data
+- **Level:** unit
+- **Source:** plan 2 WP24; handoff F5
+- **Expected:** the published manifests' identifiers (more than 30) all resolve. Fixture: DOI `10.1/ONE` resolves to `pmid:1`; works `['doi:10.2/two', 'pmid:1']`, `['pmid:1']` without the tract and deficit; `10.9/missing` and PubMed 99 → "no record for doi:10.9/missing, pmid:99."; deficit PMID 7 → "no record for pmid:7."; Planum `Doe JQ`, no "@"; no quote → "no HCP acknowledgement". `generateBundle` emits the asset `references.json`.
+- **Covered by:** `build/references.test.ts` (R)

@@ -8,7 +8,6 @@ export const en = {
   fields: {
     anatomy: 'subject',
     atlas: 'atlas',
-    cuts: 'cut labels',
     system: 'system',
     detail: 'internal anatomy',
     region: 'selected region',
@@ -48,6 +47,9 @@ export const en = {
     cases: 'stroke cases',
     tracts: 'tracts',
     keeptracts: 'tracts kept on other tabs',
+    mark: 'your highlights',
+    names: 'names on the brain',
+    embed: 'embedded view',
   },
 };
 
@@ -55,11 +57,10 @@ export const fr: typeof en = {
   newTab: '(s’ouvre dans un nouvel onglet)',
   methods: 'Méthodes (en anglais)',
   methodsPage: 'Méthode et limites (en anglais)',
-  notApplied: (fields: string) => `Éléments du lien non appliqués : ${fields}.`,
+  notApplied: (fields: string) => `Éléments du lien non appliqués : ${fields}.`,
   fields: {
     anatomy: 'sujet',
     atlas: 'atlas',
-    cuts: 'étiquettes de coupe',
     system: 'système',
     detail: 'anatomie interne',
     region: 'région sélectionnée',
@@ -99,5 +100,8 @@ export const fr: typeof en = {
     cases: 'cas d’AVC',
     tracts: 'faisceaux',
     keeptracts: 'faisceaux gardés sur les autres onglets',
+    mark: 'vos surlignages',
+    names: 'noms sur le cerveau',
+    embed: 'vue intégrée',
   },
 };

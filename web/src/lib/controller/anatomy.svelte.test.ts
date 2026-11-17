@@ -1,7 +1,7 @@
-import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
+import { DEFAULT_DISPLAY } from '../state/display-state.ts';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createCatalog } from '../core/catalog/catalog.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
 import { createFakeEngine } from '../engine/fake.ts';
@@ -31,7 +31,10 @@ function build() {
   const parts = {} as {
     session: ReturnType<typeof createSessionStore>;
     anatomy: ReturnType<typeof createAnatomyCommands>;
-    ui: Record<'showDetail' | 'revealOnSelect' | 'dismissHelp' | 'showList', () => void> & {
+    ui: Record<
+      'showDetail' | 'showDetailInPlace' | 'revealOnSelect' | 'dismissHelp' | 'showList',
+      () => void
+    > & {
       readingPlace: () => { scrollTop: number } | null;
       restoreReadingPlace: (place: { scrollTop: number }) => void;
       markReadingPlace: () => void;
@@ -59,6 +62,7 @@ function build() {
     parts.session = session;
     parts.ui = {
       showDetail: vi.fn(),
+      showDetailInPlace: vi.fn(),
       revealOnSelect: vi.fn(),
       dismissHelp: vi.fn(),
       showList: vi.fn(),
@@ -144,6 +148,22 @@ describe('selectRegion', () => {
     expect(cameraMethods()).toEqual(['frameRegion']);
   });
 
+  test('CTRL-01 · a click on the model shows a new region in place; picking it again raises the sheet', () => {
+    const { anatomy, ui } = build();
+    anatomy.pickRegion(SULCUS);
+    expect(engine.model.state.selectedRegion?.id).toBe(SULCUS);
+    expect(ui.showDetailInPlace).toHaveBeenCalledOnce();
+    expect(ui.showDetail).not.toHaveBeenCalled();
+    expect(ui.revealOnSelect).not.toHaveBeenCalled();
+    expect(ui.dismissHelp).toHaveBeenCalledOnce();
+    anatomy.pickRegion(SULCUS);
+    expect(ui.showDetail).toHaveBeenCalledOnce();
+    expect(ui.revealOnSelect).toHaveBeenCalledOnce();
+    anatomy.pickRegion(OTHER);
+    expect(ui.showDetailInPlace).toHaveBeenCalledTimes(2);
+    expect(ui.revealOnSelect).toHaveBeenCalledOnce();
+  });
+
   test('choosing the selection again still opens its detail', () => {
     const { anatomy, ui } = build();
     anatomy.selectRegion(SULCUS);
@@ -163,6 +183,30 @@ describe('selectRegion', () => {
     const { anatomy, ui } = build();
     expect(() => anatomy.selectRegion(HCP)).toThrow('not visible');
     expect(ui.showDetail).not.toHaveBeenCalled();
+  });
+
+  test('CTRL-40 · a region of a supplemental layer is selected once its layer has downloaded, the cord left hidden', async () => {
+    const nucleus = 'aan:midline:dorsal-raphe';
+    const [cord] = published.supplemental_layers!;
+    const template = published.regions.find((region) => region.id === CORD)!;
+    engine = createFakeEngine({
+      manifest: {
+        ...published,
+        supplemental_layers: [cord!, { ...cord!, id: 'aan', file: 'arousal-nuclei.glb' }],
+        regions: [
+          ...published.regions,
+          { ...template, id: nucleus, atlas: 'aan', hemisphere: 'midline', source_label_id: 7201 },
+        ],
+      } as Manifest,
+    });
+    const { anatomy, ui } = build();
+    expect(engine.model.hasLayer('aan')).toBe(false);
+    anatomy.selectRegion(nucleus, { frame: true });
+    await vi.waitFor(() => expect(engine.model.state.selectedRegion?.id).toBe(nucleus));
+    expect(engine.model.hasLayer('aan')).toBe(true);
+    expect(engine.model.settings.spinalCordVisible).toBe(false);
+    expect(ui.showDetail).toHaveBeenCalledOnce();
+    expect(cameraMethods()).toEqual(['frameRegion']);
   });
 });
 
@@ -264,7 +308,7 @@ describe('the dissection', () => {
     await anatomy.hideSelection();
     expect(session.state.notice).toMatchObject({
       kind: 'info',
-      text: `Hidden: ${createCatalog(published).label(SULCUS).name}, left.`,
+      text: 'Hidden: Precuneus, left.',
       action: 'restore',
     });
     await anatomy.restoreBeforeReveal();
@@ -315,6 +359,17 @@ describe('the dissection', () => {
 });
 
 describe('the display toggles', () => {
+  test('CTRL-41 a masthead layer choice says when it dropped the selection, and nothing when it kept it', async () => {
+    const { anatomy, scene, session } = build();
+    anatomy.selectRegion(SULCUS);
+    await anatomy.chooseLayer(() => scene.chooseSurfaceColor('tissue'));
+    expect(engine.model.state.selectedRegion?.id).toBe(SULCUS);
+    expect(session.state.notice).toBeNull();
+    await anatomy.chooseLayer(() => scene.chooseAtlas('hcp-mmp'));
+    expect(engine.model.state.selectedRegion).toBeNull();
+    expect(session.state.notice?.text).toMatch(/^Selection cleared — .+ is no longer shown\.$/);
+  });
+
   test('the hemisphere reframes the whole brain; the cortex and internal toggles do not', () => {
     const { anatomy } = build();
     anatomy.setHemisphere('left');

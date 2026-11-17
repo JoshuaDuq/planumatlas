@@ -4,8 +4,9 @@ import type { Direction, Side } from './stimulation-responses.ts';
 /**
  * F-TRACT's responses to single-pulse stimulation (v2307; `manifest.stimulation_ftract` file):
  * per pair of Julich-Brain 3.0 areas, the probability that stimulating one evoked a response in
- * the other, with the stimulation–recording pairs and implantations it rests on. A Julich-Brain
- * region takes the F-TRACT area of its name; each hemisphere keeps its own values.
+ * the other, with the stimulation–recording pairs and implantations it rests on, and where a rate
+ * is drawn and enough pairs responded, when the response peaked. A Julich-Brain region takes the
+ * F-TRACT area of its name; each hemisphere keeps its own values.
  */
 
 export interface FtractParcel {
@@ -20,6 +21,19 @@ export interface FtractParcel {
 /** Stimulated parcel, recorded parcel, pairs tested, implantations, and the probability (null below `min_pairs`). */
 export type FtractPair = [number, number, number, number, number | null];
 
+/**
+ * Stimulated parcel, recorded parcel, the median peak delay and its median absolute deviation
+ * (ms), and the distance between the two areas' centroids in this brain (mm; null within an area
+ * or where an end takes no region). Published only for a pair whose rate is drawn.
+ */
+export type FtractDelayEntry = [number, number, number, number, number | null];
+
+export interface FtractDelay {
+  peak: number;
+  mad: number;
+  distance: number | null;
+}
+
 export interface StimulationFtract {
   id: 'stimulation-ftract';
   source: { short: string; citation: string; doi: string; pmid: number; dataset: string };
@@ -29,8 +43,13 @@ export interface StimulationFtract {
   min_pairs: number;
   /** A rate is drawn only from pairs recorded in this many implantations. */
   min_implantations: number;
+  /** F-TRACT publishes a peak delay only from this many responding pairs. */
+  min_responses: number;
+  /** Responses later than this many ms after the pulse are not counted, so no delay exceeds it. */
+  window_ms: number;
   parcels: FtractParcel[];
   pairs: FtractPair[];
+  delays: FtractDelayEntry[];
 }
 
 export interface FtractRow {
@@ -38,6 +57,7 @@ export interface FtractRow {
   rate: number;
   tested: number;
   implantations: number;
+  delay: FtractDelay | null;
 }
 
 export interface FtractRows {
@@ -60,8 +80,11 @@ export function validateStimulationFtract(
     !(data.people >= 1 && data.people <= data.implantations) ||
     !(data.min_pairs >= 1) ||
     !(data.min_implantations >= 1) ||
+    !(data.min_responses >= 1 && data.min_responses <= data.min_pairs) ||
+    !(data.window_ms > 0) ||
     !Array.isArray(data.parcels) ||
-    !Array.isArray(data.pairs)
+    !Array.isArray(data.pairs) ||
+    !Array.isArray(data.delays)
   ) {
     throw new Error('Invalid F-TRACT stimulation responses.');
   }
@@ -87,6 +110,7 @@ export function validateStimulationFtract(
     if (parcel.region) taken.add(parcel.region);
   }
   const pairs = new Set<string>();
+  const drawn = new Set<string>();
   for (const [from, to, tested, implantations, probability] of data.pairs) {
     const key = `${from}|${to}`;
     if (
@@ -100,6 +124,23 @@ export function validateStimulationFtract(
       throw new Error(`Invalid F-TRACT pair: ${key}`);
     }
     pairs.add(key);
+    if (probability !== null && implantations >= data.min_implantations) drawn.add(key);
+  }
+  const timed = new Set<string>();
+  for (const [from, to, peak, mad, distance] of data.delays) {
+    const key = `${from}|${to}`;
+    const placed = from !== to && !!data.parcels[from]?.region && !!data.parcels[to]?.region;
+    if (
+      timed.has(key) ||
+      !drawn.has(key) ||
+      !(peak > 0 && peak <= data.window_ms) ||
+      !(mad >= 0 && Number.isFinite(mad)) ||
+      (distance === null) === placed ||
+      (distance !== null && !(distance > 0 && Number.isFinite(distance)))
+    ) {
+      throw new Error(`Invalid F-TRACT delay: ${key}`);
+    }
+    timed.add(key);
   }
   return data;
 }
@@ -116,7 +157,7 @@ export function ftractParcelOf(
 /**
  * The areas on one side stimulated from, or recorded at, `parcel`. A rate is drawn from F-TRACT's
  * probability where the pair was recorded in enough implantations; drawn rows run highest first,
- * the more tested first among equals.
+ * the more tested first among equals, each with its peak delay where one is published.
  */
 export function ftractRows(
   data: StimulationFtract,
@@ -126,6 +167,11 @@ export function ftractRows(
 ): FtractRows {
   const own = data.parcels[parcel]!.hemisphere;
   const hemisphere = side === 'same' ? own : own === 'left' ? 'right' : 'left';
+  const delays = new Map<number, FtractDelay>();
+  for (const [from, to, peak, mad, distance] of data.delays) {
+    if ((direction === 'from' ? from : to) !== parcel) continue;
+    delays.set(direction === 'from' ? to : from, { peak, mad, distance });
+  }
   const drawn: FtractRow[] = [];
   let tooFew = 0;
   for (const [from, to, tested, implantations, probability] of data.pairs) {
@@ -133,7 +179,8 @@ export function ftractRows(
     const other = direction === 'from' ? to : from;
     if (data.parcels[other]!.hemisphere !== hemisphere) continue;
     if (probability !== null && implantations >= data.min_implantations) {
-      drawn.push({ parcel: other, rate: probability, tested, implantations });
+      const delay = delays.get(other) ?? null;
+      drawn.push({ parcel: other, rate: probability, tested, implantations, delay });
     } else {
       tooFew += 1;
     }
@@ -142,6 +189,10 @@ export function ftractRows(
   const areas = data.parcels.filter((candidate) => candidate.hemisphere === hemisphere).length;
   return { drawn, tooFew, untested: areas - drawn.length - tooFew };
 }
+
+/** The longest centroid distance of any delay, so every area's plot of delay by distance shares one scale. */
+export const ftractFarthest = (data: StimulationFtract): number =>
+  data.delays.reduce((farthest, delay) => Math.max(farthest, delay[4] ?? 0), 0);
 
 /** The Julich-Brain 3.1 name a parcel matched, else F-TRACT's; French calls an area "Aire", as the atlas does. */
 export const ftractParcelName = (parcel: FtractParcel, lang: Language): string => {

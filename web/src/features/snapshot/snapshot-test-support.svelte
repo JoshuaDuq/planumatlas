@@ -7,6 +7,7 @@
   import type { FakeEngine } from '../../lib/engine/fake.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { Language, LoadStatus, SurfaceColor } from '../../lib/types/index.ts';
+  import RegionNames from '../stage/RegionNames.svelte';
   import RouteMarks from '../stage/RouteMarks.svelte';
   import StageKeys from '../stage/StageKeys.svelte';
   import StageOverlay from '../stage/StageOverlay.svelte';
@@ -26,6 +27,8 @@
       legend: Legend | null;
       /** The whole route's landmarks, or none. */
       marks: { region: string; name: string; label: string }[];
+      /** Names on the brain. */
+      names?: boolean;
     };
     /** Receives the keys, as the Stage region binds them for the snapshot. */
     handle: { keys?: StageKeysModel };
@@ -64,6 +67,15 @@
     {sources}
   />
   <RouteMarks {engine} marks={live.marks} label="Whole route" onOpen={() => {}} />
+  <RegionNames
+    {engine}
+    shown={live.names ?? false}
+    selected={null}
+    lobes={null}
+    nameOf={(id) => ({ name: engine.model.regions.get(id)!.label, label: id })}
+    label="Names on the brain"
+    onSelect={() => {}}
+  />
   <StageKeys
     bind:this={handle.keys}
     {stage}

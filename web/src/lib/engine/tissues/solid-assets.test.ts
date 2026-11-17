@@ -77,6 +77,7 @@ function paint(
   { detail = 'aseg', ...state }: Record<string, unknown> & { detail?: string } = {},
   wedged = true,
 ): PaintableSolid[] {
+  // A cut atlas with parcel solids caps the ribbon with them; one without samples its volume.
   paintSolids(
     { solids },
     {
@@ -84,7 +85,7 @@ function paint(
       state: asModelState({ ...STATE, ...state }),
       atlas: 'destrieux',
       detail,
-      wedged,
+      ribbon: wedged ? { atlas: 'destrieux', labels: LABELS } : null,
       appearance,
       lookup: LOOKUP,
     },
@@ -122,6 +123,73 @@ test('on a cut-only atlas, a cap samples the label volume where the atlas relabe
   assert.deepEqual(sampled('atlas', true), [false, false, false, false]);
 });
 
+test('a cut atlas without parcels of its own keeps the surface atlas’s in the ribbon', () => {
+  // NextBrain's or a map's labels: none of them is the surface atlas's parcel.
+  const cutLabels = indexLabels([
+    {
+      source_label_id: 11,
+      name: 'Left-Caudate',
+      color: [122, 186, 220],
+      hemisphere: 'left',
+      kind: 'tissue',
+      region_id: 'aseg:left:11',
+    },
+  ]);
+  const paintCut = (atlas: string, ribbon: boolean) => {
+    const solids = [
+      wedge(),
+      solid({ hemisphere: 'left', boundary: 'pial' }),
+      solid({ hemisphere: 'left', kind: 'structure', region_id: 'aseg:left:11' }),
+    ];
+    paintSolids(
+      { solids },
+      {
+        labels: cutLabels,
+        state: asModelState({ ...STATE, surfaceColor: 'atlas' }),
+        atlas,
+        detail: 'aseg',
+        ribbon: ribbon ? { atlas: 'destrieux', labels: LABELS } : null,
+        appearance,
+        lookup: LOOKUP,
+      },
+    );
+    return solids.map(({ visible, region, cap }) => ({
+      visible,
+      region,
+      sampled: cap.material.userData.sampledLabels.value,
+    }));
+  };
+  const [parcel, pial, caudate] = paintCut('nextbrain', true);
+  // The parcel caps the ribbon in its own colour and name, and the pial envelope gives way to it.
+  assert.deepEqual(parcel, { visible: true, region: PARCEL, sampled: false });
+  assert.equal(pial!.visible, false);
+  assert.ok(wedgeColour('nextbrain').equals(published(23, 220, 60)));
+  // A structure the cut atlas labels keeps its own; a map's samples whatever the map holds there.
+  assert.equal(caudate!.sampled, false);
+  assert.equal(paintCut('choi', true)[2]!.sampled, true);
+  // A map of the cortex itself draws no parcels: the pial envelope samples it voxel by voxel.
+  const [cortical, envelope] = paintCut('arterial', false);
+  assert.equal(cortical!.visible, false);
+  assert.deepEqual([envelope!.visible, envelope!.sampled], [true, true]);
+
+  function wedgeColour(atlas: string) {
+    const parcelSolid = wedge();
+    paintSolids(
+      { solids: [parcelSolid] },
+      {
+        labels: cutLabels,
+        state: asModelState({ ...STATE, surfaceColor: 'atlas' }),
+        atlas,
+        detail: 'aseg',
+        ribbon: { atlas: 'destrieux', labels: LABELS },
+        appearance,
+        lookup: LOOKUP,
+      },
+    );
+    return parcelSolid.cap.material.color;
+  }
+});
+
 test('only a striatal structure’s cap takes its voxels’ networks, and only when asked', () => {
   const lookup = {
     ...LOOKUP,
@@ -151,7 +219,7 @@ test('only a striatal structure’s cap takes its voxels’ networks, and only w
         state: asModelState({ ...STATE, surfaceColor: 'network', detail: 'learning' }),
         atlas: 'destrieux',
         detail: 'learning',
-        wedged: true,
+        ribbon: { atlas: 'destrieux', labels: LABELS },
         appearance,
         lookup,
         striatal,
@@ -193,7 +261,7 @@ test('the white envelope stays white matter where a parcel reuses its code', () 
       state: asModelState({ ...STATE, surfaceColor: 'atlas' }),
       atlas: 'hcp-mmp',
       detail: 'aseg',
-      wedged: true,
+      ribbon: { atlas: 'hcp-mmp', labels },
       appearance,
       lookup: LOOKUP,
     },
@@ -409,7 +477,7 @@ test('isolating a white-matter parcel keeps its own hemisphere’s white envelop
       state: asModelState({ ...STATE, isolatedRegion: WHITE_MATTER_PARCEL }),
       atlas: 'destrieux',
       detail: 'aseg',
-      wedged: true,
+      ribbon: { atlas: 'destrieux', labels: LABELS },
       appearance,
       lookup,
       whiteMatter: whiteMatter(),
@@ -471,7 +539,7 @@ test('learning caps obey system filtering and remain visible during isolation', 
     labels: LABELS,
     atlas: 'destrieux',
     detail: 'learning',
-    wedged: true,
+    ribbon: { atlas: 'destrieux', labels: LABELS },
     appearance,
     lookup: { regions: new Map([[id, record]]) } as unknown as PaletteLookup,
   };

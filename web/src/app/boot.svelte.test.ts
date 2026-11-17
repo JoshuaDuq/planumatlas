@@ -2,7 +2,7 @@
 // composition root wires them, and the failures it shows. The engine itself is E7's.
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import manifestFile from '../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifestFile from '../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import { releaseUnseen } from '../lib/core/assets/asset-cache.ts';
 import { validateNeuropsychDomains } from '../lib/core/catalog/neuropsych-domains.ts';
@@ -215,6 +215,32 @@ describe('the start', () => {
     expect(location.hash).toContain('tracts=slf-left');
   });
 
+  describe('BOOT-36 focus on the stage while it loads', () => {
+    /** The stage as the page and the renderer leave it: focusable, its canvas on it. */
+    function stage() {
+      const host = document.getElementById('viewport')!;
+      host.tabIndex = -1;
+      engine.canvas.tabIndex = 0;
+      host.append(engine.canvas);
+      return host;
+    }
+
+    test('passes to the canvas once the model is ready', async () => {
+      stage().focus();
+      await boot();
+      expect(document.activeElement).toBe(engine.canvas);
+    });
+
+    test('stays where the reader moved it', async () => {
+      stage();
+      const elsewhere = document.body.appendChild(document.createElement('button'));
+      elsewhere.focus();
+      await boot();
+      expect(document.activeElement).toBe(elsewhere);
+      elsewhere.remove();
+    });
+  });
+
   test('says what a link restored, because the announcer exists before the restore', async () => {
     await boot(`#hidden=${hiddenRegion}`);
     await vi.waitFor(() => expect(region.textContent).toBe('1 part hidden'));
@@ -349,11 +375,12 @@ describe('the controllers', () => {
     expect(app.session.state.notice!.text).toBe(t('fr', 'errors').operations.landmark);
   });
 
-  test('select the region a click on the model picked, and show its detail', async () => {
+  test('select the region a click on the model picked, and show its detail without raising the sheet', async () => {
     const { ports } = await boot();
     engine.emit('pick', { id: PICKED, point: null });
     expect(engine.model.state.selectedRegion?.id).toBe(PICKED);
-    expect(ports.showDetail).toHaveBeenCalled();
+    expect(ports.showDetailInPlace).toHaveBeenCalled();
+    expect(ports.revealOnSelect).not.toHaveBeenCalled();
   });
 
   test('place a lesion where the model was pressed, its report shown without raising the sheet', async () => {

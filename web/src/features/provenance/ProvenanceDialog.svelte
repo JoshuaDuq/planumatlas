@@ -9,21 +9,35 @@
     (deviations/h4-lang-of-parts.md);
   - a re-render that removes the focused link moves focus to the title, not to the page
     (deviations/h4-rerender-focus.md).
+  Under them, the works behind what is on screen (WP24): read from `references.json` the first time
+  the dialog opens, copied as text or saved as BibTeX and RIS.
 -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import type { Language, Manifest } from '../../lib/types/index.ts';
   import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import {
+    bibtex,
+    referenceText,
+    ris,
+    viewReferences,
+    type ReferenceLibrary,
+    type ViewCitations,
+  } from '../../lib/core/panels/citations.ts';
+  import {
     provenanceRows,
+    referenceListRows,
     referenceRows,
     type ProvenanceItem,
     type ProvenanceLink,
     type ProvenanceRow,
   } from '../../lib/core/panels/provenance.ts';
   import { methodsHref } from '../../lib/core/methods.ts';
+  import { announce } from '../../lib/ui/announcer.svelte.ts';
+  import { createCopier } from '../../lib/ui/clipboard.svelte.ts';
   import Dialog from '../../lib/ui/Dialog.svelte';
+  import { downloadText } from '../../lib/ui/download.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
 
   interface Props {
@@ -38,6 +52,10 @@
     reference: { label: string; links: readonly ProvenanceLink[] } | null;
     /** Takes focus on close when the opener is hidden (the phone menu's item): the ⋯ button. */
     fallbackFocus: () => HTMLElement | null;
+    /** What on screen cites what (`viewCitations`). */
+    citations: ViewCitations;
+    /** The records `references.json` carries; asked for when the dialog first opens. */
+    loadReferences: () => Promise<ReferenceLibrary>;
   }
 
   let {
@@ -50,6 +68,8 @@
     domains,
     reference,
     fallbackFocus,
+    citations,
+    loadReferences,
   }: Props = $props();
 
   const rowsIn = (language: Language): ProvenanceRow[] =>
@@ -58,6 +78,7 @@
       : provenanceRows(manifest, { lang: language, manifestUrl, indexUrl, domains });
   const rows = $derived(rowsIn(lang));
   const copy = $derived(t(lang, 'footer'));
+  const uid = $props.id();
 
   // Rows have the same shape in every language, and a value the sheet does not translate is
   // identical in both: that value is the published English.
@@ -68,11 +89,58 @@
     row: number,
     item: number,
     field: 'text' | 'note',
-  ) => (english && text && english[row]?.items[item]?.[field] === text ? 'en' : undefined);
+    englishRows: ProvenanceRow[] | null,
+  ) => (englishRows && text && englishRows[row]?.items[item]?.[field] === text ? 'en' : undefined);
+
+  // The library is asked for once, on the first opening; a failure waits for Retry.
+  let library = $state.raw<ReferenceLibrary | null>(null);
+  let loading = $state<'idle' | 'loading' | 'failed'>('idle');
+  function load() {
+    loading = 'loading';
+    loadReferences().then(
+      (loaded) => {
+        library = loaded;
+        loading = 'idle';
+      },
+      (error: unknown) => {
+        console.error(error);
+        loading = 'failed';
+      },
+    );
+  }
+  $effect(() => {
+    if (open && !library && untrack(() => loading) === 'idle') load();
+  });
+
+  const listed = $derived(library && viewReferences(citations, library));
+  const acknowledgement = $derived(library && citations.hcp ? library.hcpAcknowledgement : null);
+  const referencesIn = (language: Language) =>
+    listed ? referenceListRows(listed, acknowledgement, language) : [];
+  const references = $derived(referencesIn(lang));
+  const referencesEnglish = $derived(lang === 'en' ? null : referencesIn('en'));
+
+  const copier = createCopier(() => ({
+    copied: copy.referencesCopied,
+    failed: copy.referencesCopyFailed,
+  }));
+  onDestroy(copier.dispose);
+  const copyLabel = $derived(
+    copier.state === 'copied'
+      ? copy.referencesCopied
+      : copier.state === 'failed'
+        ? copy.referencesCopyFailed
+        : copy.copyReferences,
+  );
+  function save(text: string, extension: 'bib' | 'ris', type: string, said: string) {
+    downloadText(text, `planum-references.${extension}`, type);
+    announce(said);
+  }
 
   let title: HTMLElement;
   $effect(() => {
     void rows;
+    void references;
+    void loading;
     // The focused link is gone: its node was replaced by the new rows.
     if (untrack(() => open) && !title.closest('dialog')!.contains(document.activeElement)) {
       title.focus();
@@ -80,9 +148,16 @@
   });
 </script>
 
-{#snippet note(item: ProvenanceItem, row: number, index: number)}
+{#snippet note(
+  item: ProvenanceItem,
+  row: number,
+  index: number,
+  englishRows: ProvenanceRow[] | null,
+)}
   {#if item.note}
-    <p class="provenance-note" lang={dataLang(item.note, row, index, 'note')}>{item.note}</p>
+    <p class="provenance-note" lang={dataLang(item.note, row, index, 'note', englishRows)}>
+      {item.note}
+    </p>
   {/if}
 {/snippet}
 
@@ -99,16 +174,9 @@
   {/if}
 {/snippet}
 
-<Dialog bind:open bind:instant {fallbackFocus} isolateKeys closeLabel={copy.close}>
-  {#snippet heading(id)}
-    <!-- Native modal dialogs focus an `autofocus` descendant on open (HTML standard, dialog focusing steps). -->
-    <!-- svelte-ignore a11y_autofocus -->
-    <h2 {id} class="provenance-title" tabindex="-1" autofocus bind:this={title}>
-      {copy.provenance}
-    </h2>
-  {/snippet}
+{#snippet facts(shown: ProvenanceRow[], englishRows: ProvenanceRow[] | null)}
   <dl class="provenance-facts">
-    {#each rows as row, rowIndex}
+    {#each shown as row, rowIndex}
       <dt>{row.label}</dt>
       <dd>
         {#each row.items as item, itemIndex}
@@ -117,21 +185,70 @@
             {#if item.text}
               <p
                 class={['provenance-value', item.mono && 'code']}
-                lang={dataLang(item.text, rowIndex, itemIndex, 'text')}
+                lang={dataLang(item.text, rowIndex, itemIndex, 'text', englishRows)}
               >
                 {item.text}
               </p>
-              {@render note(item, rowIndex, itemIndex)}
+              {@render note(item, rowIndex, itemIndex, englishRows)}
               {@render link(item)}
             {:else}
               {@render link(item)}
-              {@render note(item, rowIndex, itemIndex)}
+              {@render note(item, rowIndex, itemIndex, englishRows)}
             {/if}
           </div>
         {/each}
       </dd>
     {/each}
   </dl>
+{/snippet}
+
+<Dialog bind:open bind:instant {fallbackFocus} isolateKeys closeLabel={copy.close}>
+  {#snippet heading(id)}
+    <!-- Native modal dialogs focus an `autofocus` descendant on open (HTML standard, dialog focusing steps). -->
+    <!-- svelte-ignore a11y_autofocus -->
+    <h2 {id} class="provenance-title" tabindex="-1" autofocus bind:this={title}>
+      {copy.provenance}
+    </h2>
+  {/snippet}
+  {@render facts(rows, english)}
+  <section class="provenance-references" aria-labelledby="{uid}-references">
+    <h3 id="{uid}-references" class="provenance-subtitle">{copy.references}</h3>
+    {#if listed}
+      {@render facts(references, referencesEnglish)}
+      <div class="provenance-actions">
+        <button type="button" onclick={() => copier.copy(referenceText(listed!, acknowledgement))}
+          >{copyLabel}</button
+        >
+        <button
+          type="button"
+          onclick={() =>
+            save(
+              bibtex(listed!),
+              'bib',
+              'application/x-bibtex;charset=utf-8',
+              copy.bibtexDownloaded,
+            )}>{copy.downloadBibtex}</button
+        >
+        <button
+          type="button"
+          onclick={() =>
+            save(
+              ris(listed!),
+              'ris',
+              'application/x-research-info-systems;charset=utf-8',
+              copy.risDownloaded,
+            )}>{copy.downloadRis}</button
+        >
+      </div>
+    {:else if loading === 'failed'}
+      <p class="provenance-note">{copy.referencesFailed}</p>
+      <div class="provenance-actions">
+        <button type="button" onclick={load}>{copy.referencesRetry}</button>
+      </div>
+    {:else}
+      <p class="provenance-note">{copy.referencesLoading}</p>
+    {/if}
+  </section>
   <p class="provenance-methods">
     <a class="provenance-link" href={methodsHref()} hreflang="en" target="_blank" rel="noreferrer"
       >{t(lang, 'link').methods}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
@@ -196,6 +313,21 @@
     .provenance-link :global(.control-icon) {
       margin-left: var(--space-1);
       vertical-align: -1px;
+    }
+    .provenance-references {
+      margin: var(--space-4) 0 0;
+    }
+    .provenance-subtitle {
+      margin: 0 0 var(--space-1);
+      font-size: var(--text-ui);
+      font-weight: 600;
+      line-height: var(--lh-ui);
+    }
+    .provenance-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
     }
     .provenance-methods {
       margin: var(--space-4) 0 0;

@@ -78,8 +78,8 @@ test('CAT-07: a region without a label stops the catalogue from building', () =>
 });
 
 describe('the published cdmd anatomy', () => {
-  test('CAT-07: all 2110 regions have a non-empty name and group in English and French', () => {
-    assert.equal(manifest.regions.length, 2110);
+  test('CAT-07: all 2126 regions have a non-empty name and group in English and French', () => {
+    assert.equal(manifest.regions.length, 2126);
     for (const region of manifest.regions) {
       for (const lang of ['en', 'fr'] as const) {
         const label = labelOf(region, lang);
@@ -142,16 +142,16 @@ describe('the published cdmd anatomy', () => {
   test('CAT-22: the published search totals are fixed', () => {
     const total = (query: string, lang: Language) =>
       catalogs[lang].search(query, settings({ lang })).total;
-    assert.equal(total('s', 'en'), 1418);
-    assert.equal(total('noyau', 'fr'), 235);
+    assert.equal(total('s', 'en'), 1432);
+    assert.equal(total('noyau', 'fr'), 247);
     assert.equal(total('zzz', 'en'), 0);
     assert.equal(total('', 'en'), 0);
   });
 
-  test('CAT-24: a search for "s" is capped at 50 rows of 1418', () => {
+  test('CAT-24: a search for "s" is capped at 50 rows of 1432', () => {
     const found = catalogs.en.search('s', settings());
     assert.equal(found.rows.length, 50);
-    assert.equal(found.total, 1418);
+    assert.equal(found.total, 1432);
     assert.equal(catalogs.en.search('s', settings(), 5).rows.length, 5);
   });
 
@@ -168,7 +168,7 @@ describe('the published cdmd anatomy', () => {
       'cortex:Parietal': 18,
       'cortex:Temporal': 26,
       'structure:Basal ganglia': 8,
-      'structure:Brainstem': 1,
+      'structure:Brainstem': 17,
       'structure:Cerebellum': 4,
       'structure:Corpus callosum': 5,
       'structure:Diencephalon': 4,
@@ -228,11 +228,11 @@ describe('the published cdmd anatomy', () => {
     });
   });
 
-  test('CAT-27: the visible count is 214 on destrieux, 426 on hcp-mmp and 66 with the cortex hidden', () => {
+  test('CAT-27: the visible count is 230 on destrieux, 442 on hcp-mmp and 82 with the cortex hidden', () => {
     const count = (over: object) => catalogs.en.visibleCount(settings(over));
-    assert.equal(count({}), 214);
-    assert.equal(count({ atlas: 'hcp-mmp' }), 426);
-    assert.equal(count({ cortexVisible: false }), 66);
+    assert.equal(count({}), 230);
+    assert.equal(count({ atlas: 'hcp-mmp' }), 442);
+    assert.equal(count({ cortexVisible: false }), 82);
   });
 
   test('CAT-28: switching en, fr, en, fr gives the lists of a fresh catalogue; an unknown id has no entry', () => {

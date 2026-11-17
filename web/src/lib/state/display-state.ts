@@ -1,9 +1,9 @@
-import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
-import { percent } from '../../lib/core/format.ts';
-import { t } from '../../lib/core/i18n/index.ts';
-import type { CortexSurface } from '../../lib/core/user-map/display.ts';
-import type { View } from '../../lib/state/view.svelte.ts';
-import type { DisplaySettings } from '../../lib/types/index.ts';
+import { tractCatalog } from '../core/diffusion/catalogs.ts';
+import { percent } from '../core/format.ts';
+import { t } from '../core/i18n/index.ts';
+import type { CortexSurface } from '../core/user-map/display.ts';
+import type { DisplaySettings } from '../types/index.ts';
+import type { View } from './view.svelte.ts';
 
 export type DisplayView = Pick<
   View,

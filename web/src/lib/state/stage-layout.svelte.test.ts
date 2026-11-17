@@ -513,6 +513,19 @@ describe('framing', () => {
       expect(extent(told)).toBeGreaterThan(2 * extent(stage.framing()));
     });
 
+    test('STAGE-82 a room too small to keep any picture clear of the gizmo frames as without it', () => {
+      // 400 % zoom on a 1280 × 1024 screen: 320 × 248 px of stage, the key's band all but 32 px of it.
+      const stage = stageOf(320, 248, { width: 280, height: 138 });
+      stage.setKeys({ top: 0, right: 288 }, { width: 288, height: 200 });
+      const gizmo = gizmoIn(stage, { width: 32, height: 248 }, { left: -87, top: 25, size: 94 });
+      const bare = stage.framing();
+      stage.registerGizmo(gizmo);
+      const framed = stage.framing();
+      expect(framed.scale.horizontal).toBeGreaterThan(0);
+      expect(framed.scale.vertical).toBeGreaterThan(0);
+      expect(framed).toEqual(bare);
+    });
+
     test('a gizmo in a corner the picture never reaches changes nothing, nor does a hidden one', () => {
       const room = { width: 1080, height: 840 };
       const stage = stageOf(room.width, room.height);

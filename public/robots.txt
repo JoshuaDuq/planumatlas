@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Sitemap: https://planumatlas.com/sitemap.xml
+Sitemap: https://planumatlas.com/docs/sitemap.xml

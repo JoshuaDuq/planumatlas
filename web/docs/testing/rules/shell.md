@@ -122,12 +122,12 @@ The inline script in `web/index.html` is the theme and language script (decision
 
 ### SHELL-13 · The page language is right before the first paint
 
-- **Rule:** Before any text is painted, `<html lang>` is the link's `lang` when the link names it once as `en` or `fr`. Otherwise it is the saved `planum-lang` when that is `fr`, and otherwise `en`. A `lang` repeated in the link decides nothing, as in link decoding.
+- **Rule:** Before any text is painted, `<html lang>` is the saved `planum-lang` when that is `en` or `fr`. Otherwise it is the link's `lang` when the link names it once as `en` or `fr`, then the browser's first language the app speaks, and otherwise `en` (STORE-22). A `lang` repeated in the link decides nothing, as in link decoding.
 - **Kind:** accessibility
 - **Level:** unit (the script run in a VM); e2e for the built page
-- **Source:** deviation `h1a-html-lang.md`; WCAG 2.2 SC 3.1.1; comment 18 item 2
-- **Expected:** `#lang=fr` → `fr`; `#tab=functions&lang=fr` → `fr`; `#lang=en` with `fr` saved → `en`; `#lang=de` with `fr` saved → `fr`; `#lang=` with nothing saved → `en`; `#lang=fr&lang=en` with nothing saved → `en`, with `fr` saved → `fr`; no hash with `de` saved → `en`. With the app's scripts blocked, `#lang=fr` → `fr`, and no hash with `planum-lang=fr` saved → `fr`.
-- **Covered by:** `src/app/head-script.test.ts` (R; the oracle is `startLanguage(decodeState(hash).state.lang, saved)`)
+- **Source:** deviation `h1a-html-lang.md`; WCAG 2.2 SC 3.1.1; comment 18 item 2; handoff U15 (plan 2 WP36)
+- **Expected:** `#lang=fr` → `fr`; `#tab=functions&lang=fr` → `fr`; `#lang=en` with `fr` saved → `fr`; `#lang=fr` with `en` saved → `en`; `#lang=fr` with `de` saved → `fr`; `#lang=de` with `fr` saved → `fr`; `#lang=` with nothing saved → `en`; `#lang=fr&lang=en` with nothing saved → `en`, with `fr` saved → `fr`; no hash with `de` saved → `en`. With the app's scripts blocked, `#lang=fr` → `fr`, and no hash with `planum-lang=fr` saved → `fr`.
+- **Covered by:** `src/app/head-script.test.ts` (R; the oracle is `startLanguage(decodeState(hash).state.lang, saved)`, and the saved-over-link cases are fixed values)
 
 ### SHELL-14 · Blocked site data does not stop the first paint
 
@@ -175,3 +175,32 @@ The inline script in `web/index.html` is the theme and language script (decision
 - **Source:** #4 parity proof ("`next` must have zero axe violations")
 - **Expected:** zero violations at 1280×800 and 390×844, light and dark.
 - **Covered by:** `src/app/App.svelte.test.ts` (R, English only) and the 8-case theme × width × language matrix (R; `next` since #64)
+
+## Embedded in a course page
+
+### SHELL-19 · embed=1 mounts the stage and one line under it
+
+- **Rule:** A page opened with `embed=1` (`#app[data-embed]`) mounts no masthead, panel, status bar or tour: the stage fills the frame at any width, and one line under it names what is shown (a picked region, then the subject), says "Not clinical anatomy", offers Full screen where the frame allows it, and Open in Planum. Until the reader asks, the stage shows the site's still picture and one control, "Load the 3D brain (about 20 MB)"; pressing it starts the download (BOOT-35) and leaves focus on the stage. The panels' ports answer and do nothing, so a pick or a link in a frame does not throw. The reader can turn, zoom, read names by hover, or by a tap that names the region in the line, and move a section the link opened on the dock's plate, which has no tools.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** Planum improvement plan 2, WP25 (handoff F8); author decision 4
+- **Expected:** no `header`, `aside` or `#colophon`; the footer is the contentinfo, reading "MGH CDMD sub_013 · Not clinical anatomy · Open in Planum"; at 1280 × 800 and 390 × 844 `main` spans the frame and starts at its top, the line under it. Poster `<base>preview.png` with an `alt`; the first Tab stop is the Load control; axe clean; after it, `invited`, focus on `main`, "Loading anatomy…". FR "Charger le cerveau en 3D (environ 20 Mo)", "Pas une anatomie clinique", "Ouvrir dans Planum". `ports.showDetail()` does not throw, `readingPlace()` is null.
+- **Covered by:** `src/app/embed.svelte.test.ts` (R)
+
+### SHELL-20 · Open in Planum opens the view on screen, not embedded, in a tab of its own
+
+- **Rule:** Open in Planum links to the page's address without `embed`, in a new tab (`rel="noreferrer"`), and says so to a screen reader. It is rendered from the address as it stands, read and never written, so the arriving link stays in the address bar and in the link until it has been applied (STATE-64). Its address is rewritten when it is focused, pointed at, clicked or opened from the context menu, so it carries the view as it stands then.
+- **Kind:** behaviour
+- **Level:** unit (the address); browser (the link)
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** `…#atlas=hcp-mmp&view=left&lang=en&embed=1` → `…#atlas=hcp-mmp&view=left&lang=en`, same origin and path, `target="_blank"`; after the address becomes `#atlas=julich&cut=coronal&lang=en&embed=1`, focus → `#atlas=julich&cut=coronal&lang=en`; a pointer entering after a further change follows it too. `#embed=1` alone → the bare page address. An embedded start on `#atlas=destrieux&region=destrieux:left:30&cut=coronal&lang=en&embed=1` over the fake engine: when the start sets the framing source (the world mounted, the link not yet applied), the address is still that hash and the link `…#atlas=destrieux&region=destrieux:left:30&cut=coronal&lang=en`; once ready, the region is selected and the coronal cut open.
+- **Covered by:** `src/lib/core/embed.test.ts` (R); `src/app/embed.svelte.test.ts` (R)
+
+### SHELL-21 · The embed code is one lazy iframe of the view, titled with what it shows
+
+- **Rule:** Copy embed code gives one `<iframe>` whose `src` is the view's address with `embed=1` last (once), `loading="lazy"`, `allow="fullscreen"`, a title "Planum · subject · atlas · section or held view", width 800, height 600 and `style="border: 0; max-width: 100%"`, every attribute escaped.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** the attributes exactly `allow height loading src style title width`; `src` the view plus `&embed=1`; a title with `"`, `<` and `&` reads back unchanged; no raw `&` in the code. Titles: "Planum · MGH CDMD sub_013 · Destrieux · Left view" (FR "… · Vue gauche"), with a coronal cut "… · Coronal section", with no held view "Planum · MGH CDMD sub_013 · Destrieux".
+- **Covered by:** `src/lib/core/embed.test.ts` (R)

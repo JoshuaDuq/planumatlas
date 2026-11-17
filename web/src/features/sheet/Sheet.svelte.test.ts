@@ -1199,7 +1199,8 @@ describe('the notice in the grip, once shown', () => {
       kind: 'info',
       text: 'A much longer message that has to wrap over several lines here. '.repeat(4),
     };
-    await vi.waitFor(() => expect(span()).toBeGreaterThan(short));
+    // The settle allowance `rested` gives: under a full browser run the first frame can come after 1 s.
+    await vi.waitFor(() => expect(span()).toBeGreaterThan(short), { timeout: 2000 });
     await rested();
     expect(innerHeight - box(document.querySelector('.notice')!).bottom).toBeLessThan(3);
   });

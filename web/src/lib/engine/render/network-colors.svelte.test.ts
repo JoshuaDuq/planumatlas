@@ -18,7 +18,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import type { BufferGeometry, Material, WebGLProgramParametersWithUniforms } from 'three';
-import { arterial_territories, networks } from '../../../../../public/models/cdmd/manifest.json';
+import { arterial_territories, networks } from '../../../../test/fixtures/cdmd-manifest.json';
 import type { Region, Rgb } from '../../types/index.ts';
 import { createAnatomicalMaterial } from './materials.ts';
 import type { AnatomicalUserData, SurfacePalettes } from './materials.ts';

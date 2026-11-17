@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
 import { contentSecurityPolicy } from './build/content-security-policy.ts';
 import { publishedAssets } from './build/published-files.ts';
+import { referenceLibrary } from './build/references.ts';
 import { ASSET_BASE } from './build/site.ts';
 import { yamlRecords } from './build/yaml-records.ts';
 
@@ -29,5 +30,11 @@ export default defineConfig({
       },
     },
   },
-  plugins: [svelte(), yamlRecords(), publishedAssets(), contentSecurityPolicy()],
+  plugins: [
+    svelte(),
+    yamlRecords(),
+    publishedAssets(),
+    referenceLibrary(),
+    contentSecurityPolicy(),
+  ],
 });

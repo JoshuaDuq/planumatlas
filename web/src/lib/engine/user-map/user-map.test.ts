@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, test, vi } from 'vitest';
+import { afterAll, afterEach, test, vi } from 'vitest';
 import { BoxGeometry, BufferAttribute, BufferGeometry, Mesh, MeshPhysicalMaterial } from 'three';
 import { computeBoundsTree } from 'three-mesh-bvh';
 import type { CarriedMap } from '../../core/user-map/carry.ts';
@@ -10,6 +10,13 @@ import type { BrainAtlas } from '../model/brain-atlas.ts';
 import { createUserMapUniforms } from './overlay.ts';
 import type { UserMapJob, UserMapReply } from './user-map-worker.ts';
 import { createUserMap } from './user-map.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mocks, and leave none built on them to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 vi.mock('../../core/assets/asset-cache.ts', () => ({
   fetchAsset: async () => new Uint16Array([0, 0]).buffer,

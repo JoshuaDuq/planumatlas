@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, it, vi } from 'vitest';
 import {
   Box3,
   FrontSide,
@@ -11,7 +11,7 @@ import {
   Scene,
   Vector3,
 } from 'three';
-import type { WebGLRenderer } from 'three';
+import type { Material, Object3D, WebGLRenderer, WebGLRenderTarget } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
@@ -21,7 +21,10 @@ import { frameTo } from './camera-views.ts';
 import * as outlineEdges from './outline-edges.ts';
 import * as outlineOccluders from './outline-occluders.ts';
 import { opaqueOrder, transparentOrder } from './draw-order.ts';
-import { createPipeline, createScene, planFraming } from './scene.ts';
+import { warmOutlines } from './outline-passes.ts';
+import { createPipeline, createRenderer } from './renderer.ts';
+import { COARSE_POINTER_QUERY, PHONE_DEVICE_QUERY } from '../../types/constants.ts';
+import { createScene, planFraming } from './scene.ts';
 import { orbitPath } from './camera-path.ts';
 import { ORBIT_STEP, PAN_KEYS, panFromKeyboard } from './keyboard-orbit.ts';
 import {
@@ -32,6 +35,13 @@ import {
   springSettled,
 } from '../../core/spring.ts';
 
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mock, and leave none built on it to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
+
 // Only the renderer is replaced, since it needs a GL context.
 const calls = vi.hoisted(() => ({
   order: [] as string[],
@@ -40,6 +50,9 @@ const calls = vi.hoisted(() => ({
   opaqueSort: null as unknown,
   transparentSort: null as unknown,
   after: [] as unknown[],
+  // The GPU the context names (none by default), and what a one-pixel read back costs the clock.
+  gpu: '',
+  readPixels: () => {},
 }));
 
 vi.mock('three', async (importOriginal) => {
@@ -67,7 +80,17 @@ vi.mock('three', async (importOriginal) => {
     constructor() {
       calls.canvas = this.domElement;
     }
-    getContext = () => null;
+    getContext = () => ({
+      getExtension: (name: string) =>
+        name === 'WEBGL_debug_renderer_info' && calls.gpu ? { UNMASKED_RENDERER_WEBGL: 1 } : null,
+      // The renderer's name, else a 16384 px size limit; the drawing buffer is all the canvas asked.
+      MAX_RENDERBUFFER_SIZE: 2,
+      MAX_TEXTURE_SIZE: 3,
+      getParameter: (name: number) => (name === 1 ? calls.gpu : 16384),
+      drawingBufferWidth: this.domElement.width,
+      drawingBufferHeight: this.domElement.height,
+      readPixels: () => calls.readPixels(),
+    });
     setPixelRatio = (ratio: number) => {
       this.ratio = ratio;
     };
@@ -178,6 +201,129 @@ describe('render pipeline', () => {
     assert.equal(paint.mock.calls[0]![3], read);
     assert.equal(occluders.mock.calls.length, 0);
     vi.restoreAllMocks();
+  });
+
+  it('RENDER-46 the core finds its edges in the halo’s scratch targets and owns only its mask and depth', () => {
+    const { halo, core } = fixture();
+    for (const name of [
+      'renderTargetMaskDownSampleBuffer',
+      'renderTargetBlurBuffer1',
+      'renderTargetEdgeBuffer1',
+      'renderTargetBlurBuffer2',
+      'renderTargetEdgeBuffer2',
+    ] as const) {
+      assert.equal(core[name], halo[name], name);
+    }
+    assert.notEqual(core.renderTargetMaskBuffer, halo.renderTargetMaskBuffer);
+    assert.notEqual(core.renderTargetDepthBuffer, halo.renderTargetDepthBuffer);
+  });
+
+  it('RENDER-46 warming the outline compiles the halo’s programs only', async () => {
+    const { halo, core } = fixture();
+    const compiled: Material[] = [];
+    const renderer = {
+      getRenderTarget: () => null,
+      setRenderTarget() {},
+      compileAsync: async (root: Object3D) => {
+        root.traverse((object) => {
+          if (object instanceof Mesh) compiled.push(object.material as Material);
+        });
+      },
+    } as unknown as WebGLRenderer;
+    await warmOutlines({ halo, core }, new Mesh(new BoxGeometry()), {
+      renderer,
+      target: {} as WebGLRenderTarget,
+      scene: new Scene(),
+      camera: new PerspectiveCamera(),
+    });
+    const materials = (pass: OutlinePass) => [
+      pass.depthMaterial,
+      pass.prepareMaskMaterial,
+      pass.materialCopy,
+      pass.edgeDetectionMaterial,
+      pass.separableBlurMaterial1,
+      pass.separableBlurMaterial2,
+      pass.overlayMaterial,
+    ];
+    assert.equal(compiled.length, 7);
+    assert.ok(materials(halo).every((material) => compiled.includes(material)));
+    assert.ok(materials(core).every((material) => !compiled.includes(material)));
+  });
+});
+
+describe('render targets', () => {
+  afterEach(() => {
+    calls.gpu = '';
+  });
+
+  /** A discrete GPU on a desktop display of `ratio`, sized to a 1512 × 1000 CSS px stage. */
+  function sized(ratio: number) {
+    vi.stubGlobal('devicePixelRatio', ratio);
+    vi.stubGlobal('matchMedia', () => ({ matches: false }));
+    calls.gpu = 'NVIDIA GeForce RTX 4090';
+    const rendering = createRenderer(host, new Scene(), new PerspectiveCamera());
+    rendering.setSize(1512, 1000, false);
+    return rendering;
+  }
+  const size = ({ width, height }: WebGLRenderTarget) => [width, height];
+
+  it('RENDER-46 a 2× frame of 6 M pixels draws 2× MSAA and its outline mask at half resolution; its moving frame keeps 4× and the full mask', () => {
+    const rendering = sized(2);
+    const { settled, moving } = rendering;
+    assert.equal(settled.composer.readBuffer.samples, 2);
+    assert.deepEqual(size(settled.composer.readBuffer), [3024, 2000]);
+    assert.deepEqual(size(settled.halo.renderTargetMaskBuffer), [1512, 1000]);
+    assert.deepEqual(size(settled.halo.renderTargetDepthBuffer), [1512, 1000]);
+    // The edges are found where they were, at half the 3024 × 2000 frame, so the line keeps its width.
+    assert.deepEqual(size(settled.halo.renderTargetEdgeBuffer1), [1512, 1000]);
+    assert.deepEqual(size(settled.halo.renderTargetEdgeBuffer2), [756, 500]);
+    assert.equal(moving.composer.readBuffer.samples, 4);
+    assert.deepEqual(size(moving.halo.renderTargetMaskBuffer), [1512, 1000]);
+    assert.deepEqual(size(moving.halo.renderTargetEdgeBuffer1), [756, 500]);
+    rendering.dispose();
+  });
+
+  it('RENDER-46 the same stage at 1× keeps 4× MSAA and the full-resolution mask', () => {
+    const rendering = sized(1);
+    const { halo, composer } = rendering.settled;
+    assert.equal(composer.readBuffer.samples, 4);
+    assert.deepEqual(size(halo.renderTargetMaskBuffer), [1512, 1000]);
+    assert.deepEqual(size(halo.renderTargetEdgeBuffer1), [756, 500]);
+    rendering.dispose();
+  });
+
+  it('RENDER-46 a larger saved image draws 2× MSAA above 4 M pixels, and the screen gets its own samples back', () => {
+    vi.stubGlobal('devicePixelRatio', 1);
+    vi.stubGlobal('matchMedia', () => ({ matches: false }));
+    vi.stubGlobal('document', {
+      createElement: () => ({ getContext: () => ({ drawImage() {} }) }),
+    });
+    calls.gpu = 'NVIDIA GeForce RTX 4090';
+    const drawn: { samples: number; ratio: number }[] = [];
+    vi.spyOn(EffectComposer.prototype, 'render').mockImplementation(function (
+      this: EffectComposer,
+    ) {
+      const ratio = (this as unknown as { _pixelRatio: number })._pixelRatio;
+      drawn.push({ samples: this.readBuffer.samples, ratio });
+    });
+    const rendering = createRenderer(host, new Scene(), new PerspectiveCamera());
+    const stage = { width: 1000, height: 600 };
+    rendering.setSize(stage.width, stage.height, false);
+    const { composer } = rendering.settled;
+    assert.equal(composer.readBuffer.samples, 4);
+    const invalidate = vi.fn();
+    for (const scale of [2, 3]) {
+      rendering.captureSnapshot({ x: 0, y: 0, ...stage }, stage, invalidate, { scale });
+      assert.equal(composer.readBuffer.samples, 4, `the screen's samples after a ${scale}× image`);
+      assert.equal(composer.renderTarget1.samples, 4);
+    }
+    // 2000 × 1200 is 2.4 M pixels; 3000 × 1800 is 5.4 M.
+    assert.deepEqual(drawn, [
+      { samples: 4, ratio: 2 },
+      { samples: 2, ratio: 3 },
+    ]);
+    assert.equal(invalidate.mock.calls.length, 2);
+    rendering.dispose();
   });
 });
 
@@ -354,6 +500,7 @@ describe('scene motion', () => {
     drawnLog = [];
     calls.loop = null;
     calls.after = [];
+    calls.readPixels = () => {};
     vi.spyOn(performance, 'now').mockImplementation(() => clock);
     vi.spyOn(EffectComposer.prototype, 'render').mockImplementation(function (
       this: EffectComposer,
@@ -961,6 +1108,74 @@ describe('scene motion', () => {
     assert.deepEqual(composerRatios, [], 'a pause in a drag is no rest');
     frame(161);
     assert.deepEqual(composerRatios, [settledRatio]);
+    stage.dispose();
+  });
+
+  /** A phone of display density 3 whose one-pixel read back takes the GPU `gpu.ms` of the clock. */
+  function phoneAtRest() {
+    vi.stubGlobal('devicePixelRatio', 3);
+    vi.stubGlobal('matchMedia', (media: string) => ({
+      matches: media === PHONE_DEVICE_QUERY || media === COARSE_POINTER_QUERY,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    const gpu = { ms: 3, reads: 0 };
+    calls.readPixels = () => {
+      gpu.reads += 1;
+      clock += gpu.ms;
+    };
+    const { stage, settledRatio } = resting();
+    let at = 0;
+    /** The stage redrawn at rest 200 ms after its last frame, so the GPU had nothing else to do. */
+    const quiet = () => {
+      stage.invalidate();
+      at += 200;
+      frame(at);
+      return composerRatios.at(-1)!;
+    };
+    const climbTo = (ratio: number) => {
+      const drawn = [quiet()];
+      while (drawn.at(-1) !== ratio) {
+        assert.ok(drawn.length < 20, `never reached ${ratio}`);
+        drawn.push(quiet());
+      }
+      return drawn;
+    };
+    return { stage, settledRatio, gpu, quiet, climbTo, after: () => at };
+  }
+
+  it('SCENE-39 a phone’s frame at rest steps up toward its display density as quiet frames allow, and its motion stays at one', () => {
+    const { stage, settledRatio, gpu, quiet, climbTo, after } = phoneAtRest();
+    assert.equal(settledRatio, 1);
+    const drawn = climbTo(2);
+    // Three readings at 1.5 (the first is the frame that took it), then 2 on the frame after.
+    assert.equal(drawn.filter((ratio) => ratio === 1.5).length, 3);
+    assert.deepEqual(
+      drawn.filter((ratio) => ratio !== 1),
+      [1.5, 1.5, 1.5, 2],
+    );
+    assert.deepEqual([quiet(), quiet(), quiet(), quiet()], [2, 2, 2, 2], 'its ceiling is 2');
+    // A frame right after another is drawn but not timed: the GPU may still be on the last one.
+    const reads = gpu.reads;
+    stage.invalidate();
+    frame(after() + 16);
+    assert.equal(gpu.reads, reads);
+    assert.equal(composerRatios.at(-1), 2);
+    composerRatios = [];
+    stage.moveTo(turned(1));
+    // 120 ms into the move, as SCENE-08 reads it.
+    frame(after() + 16 + 120);
+    assert.ok(composerRatios.length > 0 && composerRatios.every((ratio) => ratio === 1));
+    stage.dispose();
+  });
+
+  it('SCENE-39 two slow frames at rest step a phone back down, and it stays there', () => {
+    const { stage, gpu, quiet, climbTo } = phoneAtRest();
+    climbTo(1.5);
+    gpu.ms = 20;
+    assert.deepEqual([quiet(), quiet(), quiet()], [1.5, 1.5, 1]);
+    gpu.ms = 3;
+    assert.deepEqual([quiet(), quiet(), quiet(), quiet(), quiet(), quiet()], [1, 1, 1, 1, 1, 1]);
     stage.dispose();
   });
 });

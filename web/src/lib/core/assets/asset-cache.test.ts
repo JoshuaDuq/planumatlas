@@ -1,5 +1,5 @@
 import { gzipSync } from 'node:zlib';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchAsset, handOverUnseen, type AssetProgress, type UnseenFile } from './asset-cache.ts';
 import { publish, recordOf, sha256 } from './published-test-support.ts';
 
@@ -12,6 +12,13 @@ function responseFor(count: number) {
     headers: { 'Content-Length': String(body.byteLength) },
   });
 }
+
+// The unit files share one realm and module cache (isolate: false). The hand-over tests publish into
+// modules they import afresh and stub navigator: leave neither to the next file.
+afterAll(() => {
+  vi.unstubAllGlobals();
+  vi.resetModules();
+});
 
 describe('fetchAsset', () => {
   it('reuses an in-flight request and fans progress out to every listener', async () => {
@@ -34,11 +41,13 @@ describe('fetchAsset', () => {
 
   it('consumes a head-started response instead of opening a second download', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch');
-    globalThis.__planumAssets = { 'https://example.test/b.glb': Promise.resolve(responseFor(4)) };
+    vi.stubGlobal('__planumAssets', {
+      'https://example.test/b.glb': Promise.resolve(responseFor(4)),
+    });
     const buffer = await fetchAsset('https://example.test/b.glb');
     expect(buffer.byteLength).toBe(4);
     expect(fetch).not.toHaveBeenCalled();
-    expect(globalThis.__planumAssets['https://example.test/b.glb']).toBeUndefined();
+    expect(globalThis.__planumAssets!['https://example.test/b.glb']).toBeUndefined();
   });
 
   it('fails bytes that are not the published file as an update, not as data', async () => {

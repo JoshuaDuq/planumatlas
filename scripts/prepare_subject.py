@@ -11,7 +11,13 @@ from nibabel.freesurfer.io import read_annot, read_geometry, write_annot
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from brain_model.layers import networks
-from brain_model.sources import ROOT, SUBJECT_ANNOTATIONS, read_config, sha256, write_json
+from brain_model.sources import (
+    ROOT,
+    SUBJECT_ANNOTATIONS,
+    read_config,
+    sha256,
+    write_json,
+)
 from brain_model.surfaces.registration import resample_surface_labels
 
 PROCEDURE = (

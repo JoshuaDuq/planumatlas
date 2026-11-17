@@ -11,6 +11,8 @@ import type { CoordinateSpaces } from '../../lib/types/index.ts';
 import OverlayPopover from './OverlayPopover.svelte';
 
 const fr = t('fr', 'overlay');
+// toHaveTextContent folds every space, U+202F included, into a plain one; fold the expectation alike.
+const said = (text: string) => text.replace(/\s+/g, ' ');
 const summary: MapSummary = {
   shape: [97, 115, 97],
   voxelMm: [2, 2, 2],
@@ -64,21 +66,21 @@ test('a file that cannot be read is explained in French', async () => {
   await opened(new MapFileError('tooManyVolumes', [300, 61]));
   await expect
     .element(page.getByRole('alert'))
-    .toHaveTextContent(`${fr.failed('zstat1.nii')} ${fr.reasons.tooManyVolumes(300, 61)}`);
+    .toHaveTextContent(said(`${fr.failed('zstat1.nii')} ${fr.reasons.tooManyVolumes(300, 61)}`));
 });
 
 test('an unexpected failure is said in French and left in the console', async () => {
   await opened(new Error('No inverted field or cortex for mni.'));
   await expect
     .element(page.getByRole('alert'))
-    .toHaveTextContent(`${fr.failed('zstat1.nii')} ${fr.unexpected}`);
+    .toHaveTextContent(said(`${fr.failed('zstat1.nii')} ${fr.unexpected}`));
 });
 
 test('a template field that could not be downloaded asks for the connection, in French', async () => {
   await opened(new AssetError('asset-fetch', 'Asset request failed: HTTP 503'));
   await expect
     .element(page.getByRole('alert'))
-    .toHaveTextContent(`${fr.failed('zstat1.nii')} ${t('fr', 'errors').download}`);
+    .toHaveTextContent(said(`${fr.failed('zstat1.nii')} ${t('fr', 'errors').download}`));
 });
 
 test('a series offers its volumes by time, and plays once it is drawn', async () => {

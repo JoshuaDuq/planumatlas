@@ -14,7 +14,7 @@ The **Deficits** tab maps 131 acquired adult deficits onto the atlas regions tha
 | Input | Content |
 | :--- | :--- |
 | [`data/neuropsychology.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/neuropsychology.yaml), revision 2026-11-07 | 6 groups, 131 deficits, 218 findings (`associations`), 339 references |
-| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-07 | 425 identity records (420 PubMed articles, 5 Bookshelf chapters) for every work cited in the repository |
+| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-16 | 455 identity records (427 PubMed articles, 5 Bookshelf chapters, 23 papers, abstracts and datasets recorded by DOI alone) for every work cited in the repository and the published manifests |
 | `public/models/<anatomy>/manifest.json` | The region ids and source labels that mappings must resolve to |
 | `public/models/<anatomy>/neuropsych-domains.json` | Teaching-set stand-ins for FreeSurfer structures (`units`); Functions maps that cite a finding (`lesion_checks`) |
 

@@ -1,4 +1,5 @@
 import type { Language, Region } from '../../types/index.ts';
+import { colourShowing, cutAtlasesOf } from '../catalog/cut-labels.ts';
 import type { RegionLabel } from '../catalog/labels.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
 
@@ -13,8 +14,6 @@ type TreeGroup = NamedGroup & { key: string };
 
 export type Vocabulary = 'system' | 'network' | 'lobe';
 
-/** Reasons that mean "in a different atlas" rather than "hidden here". */
-export const OTHER_ATLAS: ReadonlySet<unknown> = new Set(['other-atlas', 'other-cut-atlas']);
 /** Reasons no control can undo: the row explains, and activating it does nothing. */
 export const UNREVEALABLE: ReadonlySet<unknown> = new Set(['below-cut-resolution']);
 /** Reasons a display setting gives many rows at once: said on the section caption, not on each row. */
@@ -121,18 +120,17 @@ export function regionGroup(
 }
 
 /**
- * Matches another atlas draws, under the first atlas (in manifest order) that draws each, so a
- * switch offered for them is one that shows them. `drawnBy` lists the atlases that draw a region.
+ * Matches another surface atlas draws, under that atlas (in manifest order), so a switch offered for
+ * them is one that shows them.
  */
 export function matchesElsewhere<R extends { region: Region }, A extends { id: string }>(
   rows: readonly R[],
   atlases: readonly A[],
   current: string,
-  drawnBy: (region: Region) => readonly (string | null | undefined)[],
 ): { atlas: A; rows: R[] }[] {
   const others = atlases.filter((atlas) => atlas.id !== current);
   const homes = rows.map((row) => {
-    const home = others.find((atlas) => drawnBy(row.region).includes(atlas.id));
+    const home = others.find((atlas) => row.region.atlas === atlas.id);
     if (!home) throw new Error(`No other atlas draws ${row.region.id}`);
     return home;
   });
@@ -163,16 +161,21 @@ export function sectionReasons(
 
 /**
  * Why a row is not on screen, as the tree and the search results print it (navigator.js:356-358):
- * a region of another detail set names that set, the hemisphere setting the side it hides; a reason
- * with no sentence of its own says the fallback.
+ * a region of another detail set names that set, one of a colouring's map that colouring, the
+ * hemisphere setting the side it hides; a reason with no sentence of its own says the fallback.
  */
-export function reasonText(
-  reason: string,
-  region: Pick<Region, 'atlas' | 'hemisphere'> | undefined,
-  lang: Language,
-): string {
+export function reasonText(reason: string, region: Region | undefined, lang: Language): string {
   const reasons = t(lang, 'reasons');
-  if (reason === 'other-detail') return reasons.inDetailSet(atlasSwitchLabel(region!.atlas!, lang));
+  // Gyral white matter is on every surface atlas's cut: what hides it replaces their labels.
+  const own = region && cutAtlasesOf(region).includes(region.atlas);
+  if (reason === 'other-detail') {
+    return own ? reasons.inDetailSet(atlasSwitchLabel(region.atlas!, lang)) : reasons[reason];
+  }
+  if (reason === 'other-colour') {
+    return own
+      ? reasons.underColour(t(lang, 'display').surfaceColors[colourShowing(region)])
+      : reasons[reason];
+  }
   if (reason === 'hemisphere') {
     const side = region!.hemisphere;
     if (side === 'midline') throw new Error('The hemisphere setting never hides a midline region.');
@@ -205,6 +208,28 @@ export function structureRows<
       ? [sides]
       : sides.map((row) => [row]),
   );
+}
+
+/**
+ * A group's own rows, then each family it holds beside them under the family's name, in the order
+ * met. A family is set apart only where its group also lists structures of its own, as the Harvard
+ * arousal nuclei are under Brainstem; a group that is all families (the cord) stays one list. Each
+ * part is grouped by structure on its own, so a nucleus never shares a row with a namesake outside it.
+ */
+export function familyParts<R extends { label: Pick<RegionLabel, 'subgroup'> }>(
+  rows: readonly R[],
+): { family: string | null; rows: R[] }[] {
+  const own = rows.filter((row) => !row.label.subgroup);
+  if (!own.length) return [{ family: null, rows: [...rows] }];
+  const families = new Map<string, R[]>();
+  for (const row of rows) {
+    const family = row.label.subgroup;
+    if (family) families.set(family, [...(families.get(family) ?? []), row]);
+  }
+  return [
+    { family: null, rows: own },
+    ...[...families].map(([family, part]) => ({ family, rows: part })),
+  ];
 }
 
 /** Shown, hidden, or partly hidden: a group eye stays in view while anything under it is hidden. */

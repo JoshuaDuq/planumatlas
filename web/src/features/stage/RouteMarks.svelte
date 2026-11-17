@@ -7,7 +7,7 @@
 <script lang="ts">
   import type { Engine, ScreenPoint, Size } from '../../lib/engine/api.ts';
   import { PHONE_QUERY } from '../../lib/types/index.ts';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import { labelBounds, leaderEnd, placeLabels, watchChrome } from './stage-labels.ts';
   import type { Placement } from './stage-labels.ts';

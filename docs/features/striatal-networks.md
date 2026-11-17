@@ -3,10 +3,10 @@
 Choi et al.'s (2012) seven-network map of the striatum assigns each striatal voxel of a 1,000-adult resting-state group to the Yeo et al. (2011) cortical network its connectivity most resembles. The map is registered from FSL's MNI152 template onto CDMD's caudate, putamen and nucleus accumbens and drawn in the Yeo 7 colours the [cortex](functional-networks.md) uses. Each voxel carries Choi's confidence. It is a group map, not this brain's measured function.
 
 ```{figure} figures/striatal-networks-1.webp
-:alt: The same coronal cut through the CDMD striatum twice: left, striatal voxels in Yeo network colours among FreeSurfer label colours; right, the whole cut in Yeo network colours.
+:alt: The same coronal cut through the CDMD striatum twice: left, striatal voxels in Yeo network colours, all other tissue in its neutral tissue colour; right, the whole cut in Yeo network colours.
 :name: fig-striatal-networks-1
 
-**The striatum takes the cortical Yeo colours voxel by voxel.** **a**, Coronal cut 12 mm anterior (surface RAS y = 12 mm) through the caudate head, putamen and nucleus accumbens, viewed from the front (subject's right on the left); cut labels **Striatal networks** (`cuts=choi`), Colour **Regions**. Striatal voxels take their network's Yeo colour; the rest of the cut keeps its FreeSurfer (aparc.a2009s+aseg) colours. **b**, Same cut and camera under Colour **Yeo 7 networks** (`colors=network`): cortical parcels take their dominant network, the striatum keeps its own voxels. The caudate is frontoparietal control (orange) and default mode (red), the putamen mostly salience / ventral attention (violet), the accumbens limbic (pale green). Voxels filled from a neighbour or below confidence 0.5 are drawn paler.
+**The striatum takes the cortical Yeo colours voxel by voxel.** **a**, Coronal cut 12 mm anterior (surface RAS y = 12 mm) through the caudate head, putamen and nucleus accumbens, viewed from the front (subject's right on the left); Colour **Striatal networks** (`colors=striatal`). Striatal voxels take their network's Yeo colour; the rest of the cut keeps its tissue colour. **b**, Same cut and camera under Colour **Yeo 7 networks** (`colors=network`): cortical parcels take their dominant network, the striatum keeps its own voxels. The caudate is frontoparietal control (orange) and default mode (red), the putamen mostly salience / ventral attention (violet), the accumbens limbic (pale green). Voxels filled from a neighbour or below confidence 0.5 are drawn paler.
 ```
 
 ## Data
@@ -59,7 +59,7 @@ SynthMorph runs on the CPU; its output is recorded by checksum, not expected to 
 
 ## Display
 
-**Striatal networks** in the Section dock's cut labels (URL `cuts=choi`) reads `tissues-choi.volume`. `striatal-overlay.ts` also binds the Choi volume as a colour-only texture to the cut shader and to the caps of striatal structures. Under Colour **Yeo 7 networks**, a cut therefore colours the striatum voxel by voxel, whatever cut labels are chosen, while other regions take their dominant network; names, selection and visibility stay with the chosen labels. The overlay also runs for the Striatal networks cut labels under Colour **Regions**, and never under a paint (`wantsStriatal`). A voxel below confidence class 3 (`CONFIDENT`) is mixed toward grey by `UNCERTAIN_FADE` = 0.65. Where a teaching-set or NextBrain solid extends past aseg's striatum, the atlas has no voxel and the cap keeps its tissue colour. In the region detail, `NetworkSection.svelte` lists a region's striatal network shares ≥ 5%, the share outside the atlas when ≥ 0.5%, Choi's confidence classes, and, when ≥ 50% of the region is putamen, the putamen caveat.
+Colour **Striatal networks** (group **Subcortical maps** in the masthead; URL `colors=striatal`) labels a cut by `tissues-choi.volume` ([which labels a cut samples](sections-and-cuts.md#which-labels-a-cut-samples)): striatal voxels are named and coloured by their network, every other label keeps its tissue colour, the cortical ribbon keeps the surface atlas's parcels, and the stage key says the map is drawn on cut faces. `striatal-overlay.ts` also binds the Choi volume as a colour-only texture to the cut shader and to the caps of striatal structures. Under Colour **Yeo 7 networks**, a cut keeps the surface atlas's labels and colours the striatum voxel by voxel while other regions take their dominant network; names, selection and visibility stay with those labels. The overlay runs under either colouring and never under a paint (`wantsStriatal`). A voxel below confidence class 3 (`CONFIDENT`) is mixed toward grey by `UNCERTAIN_FADE` = 0.65. Where a teaching-set or NextBrain solid extends past aseg's striatum, the atlas has no voxel and the cap keeps its tissue colour. In the region detail, `NetworkSection.svelte` lists a region's striatal network shares ≥ 5%, the share outside the atlas when ≥ 0.5%, Choi's confidence classes, and, when ≥ 50% of the region is putamen, the putamen caveat.
 
 ## Validation
 
@@ -102,4 +102,4 @@ uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_striatal_networks.py
 ```
 
-Figure state (panel b): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&cuts=choi&colors=network&cut=coronal&pos=12&cam=0,14,-185,0,14,-12
+Figure state (panel a): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&colors=striatal&cut=coronal&pos=12&cam=0,14,-185,0,14,-12; panel b: the same with `colors=network`.

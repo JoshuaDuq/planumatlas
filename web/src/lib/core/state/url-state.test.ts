@@ -106,7 +106,6 @@ test('an invalid field is named and left out, and the valid ones beside it still
   const invalid = {
     anatomy: ['', ' '],
     atlas: [''],
-    cuts: [''],
     system: [''],
     detail: [''],
     region: [''],
@@ -388,7 +387,6 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     hiddenRegions: new Set(['b', 'a']),
     anatomy: 'cdmd',
     atlas: 'destrieux',
-    cutAtlas: 'nextbrain',
     internalSystem: 'limbic',
     detail: 'aseg',
     selectedRegion: 'r',
@@ -426,6 +424,9 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     strokeCases: ['M2295', 'M2294'],
     tracts: ['af-left', 'slf-left'],
     keepTracts: true,
+    namesShown: true,
+    highlights: [{ region: 'r', color: 'blue' }],
+    embed: true,
   });
   assert.deepEqual(
     written.split('&').map((pair) => pair.split('=')[0]),
@@ -433,7 +434,6 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'hidden',
       'anatomy',
       'atlas',
-      'cuts',
       'system',
       'detail',
       'region',
@@ -471,16 +471,18 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
       'cases',
       'tracts',
       'keeptracts',
+      'names',
+      'mark',
+      'embed',
     ],
   );
   assert.equal(
     written,
-    'hidden=a,b&anatomy=cdmd&atlas=destrieux&cuts=nextbrain&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left&keeptracts=1',
+    'hidden=a,b&anatomy=cdmd&atlas=destrieux&system=limbic&detail=aseg&region=r&isolate=i&focus=1&view=left&cam=1,2,3,4,5,6&cut=axial&pos=5&rev=1&tilt=40&az=50&hemi=left&cortex=0&internal=0&cord=1&colors=cab-np&opacity=0.5&explode=1&mri=1,2&tab=functions&function=language&deficit=aphasia&circuit=visual&step=2&route=1&map=visual-field&dot=2,1,1&lang=fr&lesion=1,2,3,4&lesionmode=functions&lesiontract=t&coord=-42,22.5,6&space=unstated&cases=M2295,M2294&tracts=af-left,slf-left&keeptracts=1&names=1&mark=r:blue&embed=1',
   );
   assert.deepEqual(PARAMS, {
     anatomy: 'anatomy',
     atlas: 'atlas',
-    cutAtlas: 'cuts',
     internalSystem: 'system',
     detail: 'detail',
     selectedRegion: 'region',
@@ -519,8 +521,19 @@ test('STATE-02 every field has one parameter, written in a fixed order after the
     strokeCases: 'cases',
     tracts: 'tracts',
     keepTracts: 'keeptracts',
+    namesShown: 'names',
+    highlights: 'mark',
+    embed: 'embed',
     hiddenRegions: 'hidden',
   });
+});
+
+test('STATE-72 names on the brain travel as names=1, off by default and then not written', () => {
+  assert.equal(encodeState({ namesShown: false }), '');
+  assert.equal(encodeState({ namesShown: true }), 'names=1');
+  assert.deepEqual(decodeState('names=1'), { state: { namesShown: true }, rejected: [] });
+  assert.deepEqual(decodeState('names=0'), { state: { namesShown: false }, rejected: [] });
+  assert.deepEqual(decodeState('names=on'), { state: {}, rejected: ['names'] });
 });
 
 test('ticked tracts travel as ids, none as an empty list, a repeat or a blank rejected', () => {
@@ -574,7 +587,7 @@ test('STATE-14 the MRI window has level 0 to 255 and width 1 to 256, written in 
 
 test('STATE-17 a fixed corpus of links reads back as the same scene once written', () => {
   const corpus = [
-    'anatomy=cdmd&atlas=hcp-mmp&cuts=nextbrain&system=limbic&detail=aseg',
+    'anatomy=cdmd&atlas=hcp-mmp&system=limbic&detail=aseg',
     'region=destrieux:left:29&isolate=aseg:left:17&view=superior&hemi=right',
     'hidden=aseg:left:17,destrieux:left:29&cortex=0&internal=0&cord=1',
     'cut=oblique&pos=-12.3&rev=1&tilt=44&az=-45',
@@ -682,5 +695,43 @@ test('LINK-23 · a raised paint threshold travels as zmin, in half steps from 3;
   );
   for (const value of ['2.5', '3.25', 'x', '-4', '101']) {
     assert.deepEqual(decodeState(`zmin=${value}`).rejected, ['zmin'], value);
+  }
+});
+
+test('STATE-67 an embedded view travels as embed=1, last; a page of its own writes nothing', () => {
+  const view = { atlas: 'hcp-mmp', view: 'left', embed: true };
+  assert.equal(encodeState(view), 'atlas=hcp-mmp&view=left&embed=1');
+  assert.deepEqual(decoded(encodeState(view)), view);
+  assert.equal(encodeState({ ...view, embed: false }), 'atlas=hcp-mmp&view=left');
+  assert.deepEqual(decoded('#embed=0'), { embed: false });
+  for (const hash of ['#embed=yes', '#embed=1&embed=1']) {
+    assert.deepEqual(decodeState(hash), { state: {}, rejected: ['embed'] }, hash);
+  }
+});
+
+test('STATE-70 highlights travel as mark=region:colour in the order added, each region once, twelve at most', () => {
+  const marks = [
+    { region: 'destrieux:left:30', color: 'blue' },
+    { region: 'aseg:left:17', color: 'pink' },
+  ] as const;
+  const hash = encodeState({ highlights: [...marks] });
+  assert.equal(hash, 'mark=destrieux:left:30:blue,aseg:left:17:pink');
+  assert.deepEqual(decoded(hash), { highlights: marks });
+  assert.equal(encodeState({ highlights: null }), '');
+  const twelve = Array.from({ length: 12 }, (_, index) => `d:left:${index}:green`).join(',');
+  assert.equal(decoded(`mark=${twelve}`).highlights!.length, 12);
+  for (const value of [
+    '',
+    'destrieux:left:30',
+    'destrieux:left:30:',
+    ':blue',
+    'blue',
+    'destrieux:left:30:teal',
+    'destrieux:left:30:Blue',
+    'destrieux:left:30:blue,destrieux:left:30:pink',
+    'destrieux:left:30:blue,',
+    `${twelve},d:left:12:green`,
+  ]) {
+    assert.deepEqual(decodeState(`mark=${value}`), { state: {}, rejected: ['mark'] }, value);
   }
 });

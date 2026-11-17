@@ -3,8 +3,9 @@
 # of Julich-Brain 3.0 in MNI152 space (F-TRACT_P_01_v2307). A stimulation–
 # recording pair responded when its z-scored signal crossed 5 within 50 ms; the
 # probability is responding pairs over all, published only for at least 10
-# pairs. Rows are stimulated, columns recorded. Nothing is measured in the
-# anatomy shown: a Julich-Brain area takes the F-TRACT area of the same name.
+# pairs; the peak delay, only from 10 responses. Rows are stimulated, columns
+# recorded. Nothing is measured in the anatomy shown: a Julich-Brain area takes
+# the F-TRACT area of the same name.
 # scripts/fetch_stimulation_ftract.py reads the files below, pinned by checksum,
 # into data/stimulation-ftract.json; the build reads that file.
 label: Stimulation responses (F-TRACT v2307)
@@ -23,12 +24,24 @@ files:
   probability: [probability.txt.gz, fd750d3943c249786b2273d55bdb4906bc3e3a94e037d568613a6426bd203110]
   stimulations: [N_stimulations.txt.gz, 617ea6bb616fc9167a17b31e1a1f5586f1b47b22719dd63af1b144bad96ff3da]
   implantations: [N_implantations.txt.gz, 131d76dc7f85dc70280d8e799602696d5d45f15a275956145980e4ff92f3341b]
-# From the data descriptor.
-cohort: {implantations: 625, people: 613, min_pairs: 10}
+  # When the first peak of a response reached its maximum (ms after the pulse): the median over an
+  # area pair's responding stimulation–recording pairs, and their median absolute deviation. Onset
+  # delay is not read: the descriptor defines it two ways.
+  peak_delay: [peak_delay__median.txt.gz, c8710c81fad2c1dc42088b12f772703638ff0fe69aee9560968103a885dedc14]
+  peak_delay_mad: [peak_delay__mad.txt.gz, 36bd9d068b175611b3ea3e2ba8d405f9690c36b958ff8375d5d2c7b37e84b303]
+# From the data descriptor: a feature such as the peak delay needs min_responses responses, and
+# responses later than window_ms are ignored as presumably indirect.
+cohort: {implantations: 625, people: 613, min_pairs: 10, min_responses: 10, window_ms: 50}
 # A rate is drawn only from pairs recorded in this many implantations, as Lyu
 # et al.'s needs three people. Set 2026-11-04 before any area's rows were read.
 rates:
   min_implantations: 3
+# A peak delay is published only for a pair whose rate is drawn. Across those between two areas
+# placed in this brain, the delay must rise with the distance between their centroids (Spearman
+# rho > 0, p < max_p) and its median within a hemisphere must be below that across, or validation
+# stops. Set 2026-11-16 before the delays were compared with distance.
+delays:
+  max_p: 0.001
 # F-TRACT's 3.0 names that Julich-Brain 3.1 spells differently for the same
 # map. 3.0's "Subiculum (Hippocampus)" is left unmatched: 3.1 publishes a
 # "subicular complex" instead, and nothing found states it is the same map.

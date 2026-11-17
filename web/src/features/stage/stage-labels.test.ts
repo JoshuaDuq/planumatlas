@@ -2,7 +2,7 @@
 // it is not, reduced to their number last, and never over each other, a dot, the chrome or a leader.
 import { describe, expect, test } from 'vitest';
 import type { Rect } from '../../lib/engine/api.ts';
-import { leaderEnd, placeLabels } from './stage-labels.ts';
+import { leaderEnd, placeCentred, placeLabels } from './stage-labels.ts';
 
 const bounds = { x: 0, y: 0, width: 800, height: 600 };
 const full = { width: 120, height: 24 };
@@ -25,6 +25,24 @@ describe('placeLabels', () => {
 
   test('a point behind the camera has no place', () => {
     expect(placeLabels([{ point: null, sizes: [full] }], bounds, [])).toEqual([null]);
+  });
+
+  test('an optional label with no clear slot is left out, and the next is placed as if it were not there', () => {
+    // Chrome over the whole stage but a strip to the right of the second dot.
+    const chrome = [{ x: 0, y: 0, width: 600, height: 600 }];
+    const second = { point: { x: 610, y: 300 }, sizes: [full] };
+    const alone = placeLabels([second], bounds, chrome);
+    expect(alone[0]).not.toBeNull();
+    const placed = placeLabels(
+      [{ point: { x: 300, y: 300 }, sizes: [full], optional: true }, second],
+      bounds,
+      chrome,
+    );
+    expect(placed).toEqual([null, alone[0]]);
+    // Not optional, it is placed where it overlaps least.
+    expect(
+      placeLabels([{ point: { x: 300, y: 300 }, sizes: [full] }], bounds, chrome)[0],
+    ).not.toBeNull();
   });
 
   test('crowded dots get labels that cover neither each other nor any dot', () => {
@@ -125,5 +143,52 @@ describe('leaderEnd', () => {
     const box = { x: 100, y: 100, width: 50, height: 20 };
     expect(leaderEnd({ x: 80, y: 110 }, box)).toEqual({ x: 100, y: 110 });
     expect(leaderEnd({ x: 200, y: 50 }, box)).toEqual({ x: 150, y: 100 });
+  });
+});
+
+describe('placeCentred', () => {
+  const size = { width: 40, height: 20 };
+
+  test('a name is centred on its point', () => {
+    expect(placeCentred([{ point: { x: 400, y: 300 }, size }], bounds, [])).toEqual([
+      { x: 380, y: 290, width: 40, height: 20 },
+    ]);
+  });
+
+  test('a point the camera cannot see has no name', () => {
+    expect(placeCentred([{ point: null, size }], bounds, [])).toEqual([null]);
+  });
+
+  test('of two names that would touch, the one listed first is kept and the other left out, not moved', () => {
+    const placed = placeCentred(
+      [
+        { point: { x: 400, y: 300 }, size },
+        { point: { x: 430, y: 305 }, size },
+        // 42 px to the right: clear of the first by the 2 px gap.
+        { point: { x: 442, y: 300 }, size },
+      ],
+      bounds,
+      [],
+    );
+    expect(placed).toEqual([
+      { x: 380, y: 290, width: 40, height: 20 },
+      null,
+      { x: 422, y: 290, width: 40, height: 20 },
+    ]);
+  });
+
+  test('a name that would cross the bounds or cover the chrome is left out', () => {
+    const dock = { x: 600, y: 500, width: 200, height: 100 };
+    expect(
+      placeCentred(
+        [
+          { point: { x: 10, y: 300 }, size },
+          { point: { x: 650, y: 495 }, size },
+          { point: { x: 650, y: 470 }, size },
+        ],
+        bounds,
+        [dock],
+      ),
+    ).toEqual([null, null, { x: 630, y: 460, width: 40, height: 20 }]);
   });
 });

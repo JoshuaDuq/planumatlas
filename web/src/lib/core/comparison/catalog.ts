@@ -1,5 +1,6 @@
 import type { Language, Manifest, Region } from '../../types/index.ts';
 import { labelOf } from '../catalog/labels.ts';
+import { encodeCsv } from '../csv.ts';
 
 const ATLASES = ['destrieux', 'hcp-mmp', 'julich', 'schaefer'] as const;
 
@@ -297,17 +298,6 @@ function indexPairs(
     );
   }
   return rows;
-}
-
-function csvCell(value: unknown) {
-  const text = String(value);
-  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
-}
-
-export function encodeCsv(records: readonly Record<string, unknown>[]) {
-  const columns = Object.keys(records[0]);
-  const lines = [columns, ...records.map((record) => columns.map((column) => record[column]))];
-  return `${lines.map((line) => line.map(csvCell).join(',')).join('\r\n')}\r\n`;
 }
 
 function provenanceOf(data: ComparisonData, manifest: ComparisonManifest) {

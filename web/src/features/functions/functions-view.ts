@@ -34,8 +34,6 @@ import type { Region, Language, Rgb } from '../../lib/types/index.ts';
 export const AREAS_SHOWN = 12;
 /** Searched terms listed under the curated functions; the rest wait for a narrower query. */
 export const TERMS_SHOWN = 20;
-/** A region's functions listed before "Show all N". */
-export const REGION_ROWS_SHOWN = 8;
 
 /** How many of `regions` are areas and how many structures. */
 function splitCounts(partition: NeuropsychDomains, regions: string[]): [number, number] {

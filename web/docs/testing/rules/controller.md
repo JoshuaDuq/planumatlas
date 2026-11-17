@@ -16,12 +16,12 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-01 · Selecting a region shows it in the list and opens its detail
 
-- **Rule:** Selecting a region selects it, expands the tree group that holds it (and leaves an open group alone), opens its detail, raises the phone sheet and dismisses the stage help. Choosing the region already selected opens its detail again.
+- **Rule:** Selecting a region selects it, expands the tree group that holds it (and leaves an open group alone), opens its detail, raises the phone sheet and dismisses the stage help. Choosing the region already selected opens its detail again. A click on the model (`pickRegion`) that picks a region not already selected opens its detail in place (`showDetailInPlace`) and does not raise the sheet; one on the selected region raises it (REGION-25).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:527-546`
-- **Expected:** select `destrieux:left:30` → selected; one group expanded; detail shown, sheet raised, help dismissed once each; camera not moved. Select it again → detail shown a second time. Clear, then select again → the same group stays expanded, no second group.
-- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R), `src/app/boot.svelte.test.ts` (R, a click on the model selects the picked region and shows its detail)
+- **Source:** `viewer/app.js:527-546`; handoff U10 (plan 2 WP36)
+- **Expected:** select `destrieux:left:30` → selected; one group expanded; detail shown, sheet raised, help dismissed once each; camera not moved. Select it again → detail shown a second time. Clear, then select again → the same group stays expanded, no second group. Pick `destrieux:left:30` → selected, `showDetailInPlace` once, `showDetail` and `revealOnSelect` never, help dismissed; pick it again → `showDetail` and `revealOnSelect` once; pick `destrieux:left:31` → `showDetailInPlace` twice, `revealOnSelect` still once.
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R), `src/app/boot.svelte.test.ts` (R, a click on the model selects the picked region and shows its detail in place, the sheet not raised)
 
 ### CTRL-02 · A name chosen from the list is framed; a click on the model is not
 
@@ -183,7 +183,8 @@ checks them in the browser today and could run in the unit project over the fake
   - hemisphere → both hemispheres
   - isolated → release isolation
   - no MRI → tissue colouring
-  - other detail → load the region's detail level
+  - other colour → the colouring whose map puts it on the cut (`colourShowing`), atlas colours for gyral white matter
+  - other detail → load the region's detail level (NextBrain for its cut-only regions), the default level for gyral white matter
   - other system → clear the system filter
   - no cut → CTRL-19
 
@@ -194,9 +195,9 @@ checks them in the browser today and could run in the unit project over the fake
 
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:569-598`, `675-686`; `viewer/catalog/visibility.js`
+- **Source:** `viewer/app.js:569-598`, `675-686`; `viewer/catalog/visibility.js`; derived cut labels, 2026-11-17 (other colour, gyral white matter)
 - **Expected:** hemisphere `right`, reveal(`hemisphere`, `destrieux:left:30`) → `both`, selected, framed. Cortex hidden and region removed, reveal(`removed`) → cortex visible, selected. reveal(`hemisphere`, `hcp-mmp:left:1`) under Destrieux → failure notice, nothing selected. One fixed outcome per remaining reason, each ending with the region selected and framed (ids from the published `cdmd` manifest): internal structures hidden, reveal(`internal-hidden`, `aseg:left:17`) on the `aseg` detail → `internalVisible: true`; cord hidden, reveal(`spinal-cord-hidden`, `pam50:left:gracile-fasciculus`) → the cord shown; `destrieux:left:30` isolated, reveal(`isolated`, `destrieux:left:38`) → `isolatedRegion: null`; surface colour `mri`, reveal(`no-mri`, …) → `surfaceColor: 'tissue'`; detail `aseg`, reveal(`other-detail`, `nextbrain:left:48`) → detail `nextbrain` loaded; a system filter that excludes the region, reveal(`other-system`, …) → `internalSystem: null`. Reset display, its Restore overtaken → notice action still `restore`; Restore again → the same held scene re-applied, notice "Previous view restored.".
-- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: all reasons but `no-cut`, each one fixed outcome; `no-cut` is CTRL-19; the overtaken Restore)
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R: all reasons but `no-cut` and `other-colour`, each one fixed outcome; `no-cut` is CTRL-19; the overtaken Restore); `src/app/regions/PanelsRegion.svelte.test.ts` (R, a NextBrain cut-only region from the search → detail `nextbrain`, cut atlas `nextbrain`, a cut open, selected). `other-colour` and gyral white matter's `other-detail`: uncovered.
 
 ### CTRL-19 · A cut-only region is revealed by a coronal cut through its centre
 
@@ -303,11 +304,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-30 · An opened map says what it changed and labels the cut with its atlas
 
-- **Rule:** After drawing a function's or deficit's regions, the reader is told which of their settings the reveal changed (atlas, cut, isolation, hemisphere, cortex), in one notice. Where a cut atlas with the surface atlas's id is published, the cut is labelled by that atlas too.
+- **Rule:** After drawing a function's or deficit's regions, the reader is told which of their settings the reveal changed (atlas, cut, isolation, hemisphere, cortex), in one notice. The paint keeps the cut on the surface atlas (SLICE-21), so the cut is labelled by the painted atlas with no step and no clause of its own.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:879-900`; `viewer/ui/panels/clinical.js` (`revealNotice`)
-- **Expected:** a reveal that changes the atlas → a notice that names the change. Surface atlas `destrieux`, with `destrieux` in `cut_atlases` → `cutAtlas: 'destrieux'`.
+- **Source:** `viewer/app.js:879-900`; `viewer/ui/panels/clinical.js` (`revealNotice`); derived cut labels, 2026-11-17 (no `cutLabelsFollowAtlas`)
+- **Expected:** from `destrieux`, `openFunction('language')` → atlas `hcp-mmp`, a notice naming HCP-MMP, the sections' `cutAtlas` `hcp-mmp`.
 - **Covered by:** wording is PANEL-12 (`core-panels.md`); in the controller `src/lib/controller/excursion.test.ts` (R: the atlas change is named, the cut is labelled by the atlas)
 
 ### CTRL-31 · A function or deficit painting both cortex and deep structures offers to show the deep ones
@@ -373,14 +374,14 @@ checks them in the browser today and could run in the unit project over the fake
 - **Expected:** deficit open, `forget()` → Restore not offered.
 - **Covered by:** `src/lib/controller/excursion.test.ts` (R), `src/app/boot.svelte.test.ts` (R, through a real link restore); link restore itself is LINK-14 (`links.md`)
 
-### CTRL-38 · A failed cut-atlas change reaches the caller
+### CTRL-38 · The cut atlas follows the internal anatomy and the colouring
 
-- **Rule:** The cut atlas is the sections' own setting. A rejected change reaches the caller instead of being swallowed. Legacy caught it, and the cuts panel reported it (`app.js:564-566`); no deviation file records the change.
+- **Rule:** The cut atlas is no one's setting: the sections derive it from what the model shows (SLICE-21), so the controller has no cut-atlas command and nothing to report for one. NextBrain as internal anatomy labels the cut by NextBrain; a colouring's map labels it while shown, over the level, and gives it back after.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:557-566`
-- **Expected:** `setCutAtlas('destrieux')` → `cutAtlas: 'destrieux'`. A rejection "overtaken" → the promise rejects with it.
-- **Covered by:** `src/lib/controller/excursion.test.ts` (R)
+- **Source:** derived cut labels, 2026-11-17, replacing the navigator's "switch cut atlas" (`viewer/app.js:557-566`) and deviation `i1-cut-atlas-failure.md` (superseded)
+- **Expected:** `cutAtlas` `destrieux`; `setDetail('nextbrain')` → the sections' and the model's `cutAtlas` `nextbrain`; `setSurfaceColor('territory')` → `arterial`; back to `atlas` → `nextbrain`.
+- **Covered by:** `src/lib/controller/excursion.test.ts` (R, "the cut atlas")
 
 ## Linked MRI
 
@@ -392,6 +393,24 @@ checks them in the browser today and could run in the unit project over the fake
 - **Source:** `viewer/ui/chrome/sections.js:219-237`
 - **Expected:** crosshair (1,2,3), region button → crosshair = centroid, `show({instant:true})` after `sections.load`. Bar button at (1,2,3) → stays (1,2,3); at (0,0,0) → centroid, `show({instant:false})`. No selection → (0,0,0), shown once.
 - **Covered by:** `src/lib/controller/lesson.test.ts` (R)
+
+### CTRL-40 · A region of a supplemental layer not yet downloaded is selected once its layer is
+
+- **Rule:** Choosing a region of a supplemental layer that has not downloaded (an arousal nucleus from the tree or a search) downloads that layer first, through the scene commands (STATE-71), then selects it as CTRL-01 says. A reveal does the same before it selects. The cord is not shown by it. A failed download is an error offering Retry.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP29
+- **Expected:** fake engine with an `aan` layer and `aan:midline:dorsal-raphe`: `hasLayer('aan')` false; `selectRegion(id, {frame: true})` → once settled, selected, `hasLayer('aan')` true, `spinalCordVisible` false, detail shown once, camera `frameRegion` once.
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R)
+
+### CTRL-41 · A masthead layer choice that drops the selection says so
+
+- **Rule:** The masthead's Atlas, Colour and Internal anatomy fields run through `anatomy.chooseLayer`, which says what CTRL-06 says of a display change: when the layer the choice shows no longer draws the selected region, the selection is cleared by the engine and the notice "Selection cleared — <name> is no longer shown." is set, so the announcer says it after the load. A choice that keeps the selection says nothing of it. Before, a reader whose focus was in the masthead heard "HCP-MMP: Loading…" and "Anatomy loaded." while the region's sheet disappeared.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** `web/src/lib/controller/anatomy.svelte.ts` (`chooseLayer`), `web/src/app/regions/MastheadRegion.svelte`; WP19 audit (WCAG 4.1.3)
+- **Expected:** `destrieux:left:30` selected; `chooseLayer(() => chooseSurfaceColor('tissue'))` → still selected, notice null; `chooseLayer(() => chooseAtlas('hcp-mmp'))` → selection null, notice matches `/^Selection cleared — .+ is no longer shown\.$/`. Live, Middle temporal gyrus selected, Atlas → HCP-MMP: the announcer says "HCP-MMP: Loading…", "Anatomy loaded.", then "Selection cleared — Middle temporal gyrus is no longer shown.".
+- **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R)
 
 ## Lessons
 
@@ -653,6 +672,15 @@ checks them in the browser today and could run in the unit project over the fake
 - **Expected:** On the canvas, each arrow with Shift, single keys on or off → `panBy(PAN_KEYS[key])` only, cancelled; the same arrow without Shift → `orbitBy(ORBIT_KEYS[key])` only. Each arrow with Shift in `INPUT type=text`, `TEXTAREA`, a contenteditable `DIV` or `INPUT type=range` → nothing, not cancelled; on the page (no target) → no `panBy`. In the app, Shift+ArrowLeft on the canvas reaches `camera.panBy`.
 - **Covered by:** `src/lib/controller/keymap.test.ts` (R, "keymap outcomes"), `src/app/boot.svelte.test.ts` (R, Shift+ArrowLeft on the canvas)
 
+### KEY-23 · N turns names on the brain on or off
+
+- **Rule:** N, in either case, toggles the session's names on the brain (STAGE-81), as C, U, S and H toggle the display: not cancelled, a single-key shortcut that turning single keys off silences, and nothing under the tract reference. The shortcut sheet lists it in Display.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP21; N was free in `SHORTCUT_KEYS` and the sheet
+- **Expected:** `n` with names off → `setNamesShown(true)`, `N` with names on → `setNamesShown(false)`, neither cancelled; `SHORTCUT_KEYS.names === 'N'`; under the tract reference or with single keys off → nothing, not cancelled.
+- **Covered by:** `src/lib/controller/keymap.test.ts` (R)
+
 ## Speech (the announcer)
 
 ### KEY-17 · The selection is said once, with its side
@@ -662,7 +690,7 @@ checks them in the browser today and could run in the unit project over the fake
 - **Level:** unit
 - **Source:** `viewer/app.js:1658-1690`
 - **Expected:** select a left region → `['Selected: Precentral gyrus, left']`; same view again → `[]`; cleared → `['']`.
-- **Covered by:** `src/lib/controller/speech.test.ts` (R)
+- **Covered by:** `src/lib/core/speech.test.ts` (R)
 
 ### KEY-18 · A notice outranks the selection it accompanies
 
@@ -671,7 +699,7 @@ checks them in the browser today and could run in the unit project over the fake
 - **Level:** unit
 - **Source:** `viewer/app.js:1670-1678`
 - **Expected:** notice "Internal anatomy is hidden" + selection → that notice only; repeated → `[]`; selection moves to the right → "Selected: Precentral gyrus, right". Error "Could not load HCP-MMP." → said; joined by "Both hemispheres shown." → `['Both hemispheres shown.']`; back to the error alone with a selection → only the selection; cleared, then the error again → said again. Through the session: a keyed failure notified twice → said twice; error and info said, the error resolved with a selection → only "Selected: …"; a new error ahead of the standing info → only the new error.
-- **Covered by:** `src/lib/controller/speech.test.ts` (R)
+- **Covered by:** `src/lib/core/speech.test.ts` (R)
 
 ### KEY-19 · A changed count of hidden parts joins the same sentence
 
@@ -680,7 +708,7 @@ checks them in the browser today and could run in the unit project over the fake
 - **Level:** unit
 - **Source:** `viewer/app.js:1670-1680`; deviation `s1-announcer-one-sentence.md`; decision 36 on #4
 - **Expected:** 2 hidden → `['2 parts hidden']`. Selection + 1 hidden → `['Selected: Precentral gyrus, left. 1 part hidden']`. Notice "Done." + 0 hidden → `['Done. All parts shown']`. Part "Hidden: Precentral gyrus, left." + 1 hidden → `['Hidden: Precentral gyrus, left. 1 part hidden']`.
-- **Covered by:** `src/lib/controller/speech.test.ts` (R), `src/app/boot.svelte.test.ts` (R, the part sentence and the count in the live region)
+- **Covered by:** `src/lib/core/speech.test.ts` (R), `src/app/boot.svelte.test.ts` (R, the part sentence and the count in the live region)
 
 ### KEY-20 · A lost graphics context is said, and so is its recovery
 
@@ -689,7 +717,7 @@ checks them in the browser today and could run in the unit project over the fake
 - **Level:** unit
 - **Source:** `viewer/app.js:1681-1688`
 - **Expected:** status `context-lost` → `['The 3D view was interrupted by the graphics driver. Restoring…']`, once. Then `ready` → `['Anatomy loaded.']`, once.
-- **Covered by:** `src/lib/controller/speech.test.ts` (R)
+- **Covered by:** `src/lib/core/speech.test.ts` (R)
 
 ### KEY-21 · The announcer speaks the interface language
 
@@ -698,4 +726,4 @@ checks them in the browser today and could run in the unit project over the fake
 - **Level:** unit
 - **Source:** `viewer/app.js:1663-1667`
 - **Expected:** `lang: 'fr'`, a right region → `['Sélectionné : Precentral gyrus, droite']`.
-- **Covered by:** `src/lib/controller/speech.test.ts` (R)
+- **Covered by:** `src/lib/core/speech.test.ts` (R)

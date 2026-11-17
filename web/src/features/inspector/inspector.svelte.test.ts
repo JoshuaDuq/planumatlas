@@ -1,12 +1,11 @@
 // The region inspector in Chromium: the empty hint, the selected panel, the commands and their
-// hand-offs, the disclosure sections and the constituents, against the real CDMD manifest and
-// published partitions. The view-models are C5's (core/panels/inspector.test.ts); the legacy
+// hand-offs, the disclosure sections and the constituents, against the frozen CDMD manifest
+// (web/test/fixtures) and the published partitions. The view-models are C5's (core/panels/inspector.test.ts); the legacy
 // source-text tests (chrome.contract.test.js:34, 200, 392-422) are role and name assertions here.
 import { flushSync, mount } from 'svelte';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json';
 import boundaryFile from '../../../../public/models/cdmd/boundary-certainty.json';
 import type { BoundaryCertainty } from '../../lib/core/catalog/boundary-certainty.ts';
 import agreementFile from '../../../../public/models/cdmd/segmentation-agreement.json';
@@ -29,10 +28,6 @@ const STACKED = 'learning:left:caudate'; // three source labels
 
 beforeEach(() => page.viewport(1280, 800));
 
-const regionIds = (id: string) =>
-  (manifest.regions as unknown as { id: string; source_label_ids?: number[] }[]).find(
-    (region) => region.id === id,
-  )!.source_label_ids!;
 const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
 const root = () => document.querySelector('.region-detail') as HTMLElement;
 /** A section by its summary; one of the research data's is reached by opening the row that holds them. */
@@ -319,6 +314,41 @@ describe('commands', () => {
     expect(document.activeElement).toBe(isolate());
   });
 
+  test('INSP-57 · More holds Highlight, a toggle that says when the set is full and then adds nothing', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, {
+      regionId: V1,
+      calls,
+      highlight: { pressed: false, full: false },
+    });
+    await openMore();
+    const highlight = button('Highlight');
+    expect([...root().querySelectorAll('.more-row button')].map(text)).toEqual([
+      'Isolate',
+      'Hide',
+      'Highlight',
+    ]);
+    expect(highlight.element().getAttribute('aria-pressed')).toBe('false');
+    await highlight.click();
+    expect(calls).toEqual(['highlight']);
+    await screen.rerender({ regionId: V1, calls, highlight: { pressed: true, full: true } });
+    expect(highlight.element().getAttribute('aria-pressed')).toBe('true');
+    expect(highlight.element().getAttribute('data-active')).toBe('true');
+    // A highlighted region can always be taken out of a full set.
+    expect(highlight.element().hasAttribute('aria-disabled')).toBe(false);
+    await highlight.click();
+    expect(calls).toEqual(['highlight', 'highlight']);
+    await screen.rerender({ regionId: V1, calls, highlight: { pressed: false, full: true } });
+    expect(highlight.element().getAttribute('aria-disabled')).toBe('true');
+    const said = document.getElementById(highlight.element().getAttribute('aria-describedby')!)!;
+    expect(text(said)).toBe('At most 12 regions can be highlighted; remove one first');
+    // Playwright will not press an aria-disabled control; the press is dispatched, as a reader's would be.
+    (highlight.element() as HTMLButtonElement).click();
+    expect(calls).toEqual(['highlight', 'highlight']);
+    await screen.rerender({ regionId: V1, calls, highlight: null });
+    expect([...root().querySelectorAll('.more-row button')].map(text)).toEqual(['Isolate', 'Hide']);
+  });
+
   test('Linked MRI is latched while the MRI is open, and a press then closes it', async () => {
     const calls: unknown[] = [];
     const screen = await render(Fixture, { regionId: V1, calls });
@@ -464,14 +494,15 @@ describe('source label', () => {
   test('past eight ids the list is a native disclosure that stays open until the region changes', async () => {
     const screen = await render(Fixture, { regionId: THALAMUS });
     const disclosure = () => root().querySelector<HTMLDetailsElement>('.source-labels details')!;
-    expect(text(disclosure().querySelector('summary')!)).toMatch(/\d+ labels$/);
-    const ids = regionIds(THALAMUS);
-    expect(text(disclosure().querySelector('.code')!)).toBe(ids.join(', '));
+    expect(text(disclosure().querySelector('summary')!)).toMatch(/\b53 labels$/);
+    expect(text(disclosure().querySelector('.code')!)).toBe(
+      '190, 191, 218, 219, 220, 221, 222, 223, 224, 225, 252, 253, 254, 274, 282, 283, 284, 285, 286, 303, 312, 313, 314, 350, 378, 379, 380, 381, 382, 394, 395, 396, 397, 398, 399, 423, 424, 425, 426, 441, 443, 454, 458, 478, 479, 492, 508, 512, 517, 519, 578, 811, 813',
+    );
     disclosure().open = true;
     await screen.rerender({ regionId: THALAMUS, isolated: true, cortexVisible: false });
     expect(disclosure().open).toBe(true);
     await screen.rerender({ regionId: THALAMUS, lang: 'fr' });
-    expect(text(disclosure().querySelector('summary')!)).toMatch(/\d+ étiquettes$/);
+    expect(text(disclosure().querySelector('summary')!)).toMatch(/\b53 étiquettes$/);
     expect(disclosure().open).toBe(false);
     disclosure().open = true;
     await screen.rerender({ regionId: 'learning:right:thalamus' });
@@ -557,7 +588,7 @@ describe('evidence sections', () => {
   });
 
   test('a contested area adds the published disagreement to the note', async () => {
-    const { regions } = (await import('../../../../public/models/cdmd/manifest.json')).default as {
+    const { regions } = (await import('../../../test/fixtures/cdmd-manifest.json')).default as {
       regions: { id: string; source_name?: string }[];
     };
     const contested = regions.find((region) => region.source_name === 'L_23c_ROI')!;
@@ -1258,9 +1289,10 @@ describe('F-TRACT stimulation responses', () => {
     expect(responses.open).toBe(false);
     responses.open = true;
     const outbound = rows(responses);
+    // Peak delays as F-TRACT's matrices give them: 13.086 ms within Area 45, 18 ms to Op9.
     expect(outbound.slice(0, 2)).toEqual([
-      'Within this area 84% 37 pairs · 6 implantations',
-      'Area Op9 (Frontal Operculum) 83% 53 pairs · 18 implantations',
+      'Within this area 84% 37 pairs · 6 implantations · peak 13 ms',
+      'Area Op9 (Frontal Operculum) 83% 53 pairs · 18 implantations · peak 18 ms',
     ]);
     const more = section('71 more areas');
     expect(more.open).toBe(false);
@@ -1306,7 +1338,7 @@ describe('F-TRACT stimulation responses', () => {
     const responses = section('Réponses à la stimulation');
     responses.open = true;
     expect(rows(responses)[1]).toBe(
-      'Aire Op9 (Frontal Operculum) 83 % 53 paires · 18 implantations',
+      'Aire Op9 (Frontal Operculum) 83 % 53 paires · 18 implantations · pic à 18 ms',
     );
   });
 });

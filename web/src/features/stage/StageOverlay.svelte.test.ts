@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import { page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { t } from '../../lib/core/i18n/index.ts';
 import { decimal, withUnit } from '../../lib/core/format.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';

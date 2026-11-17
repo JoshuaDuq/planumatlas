@@ -1,5 +1,5 @@
-import type { VisualFieldTerritories } from '../../core/learning/visual-field.ts';
-import type { EngineVisualField, VisualFieldDot } from '../api.ts';
+import type { VisualAreaAnchor, VisualFieldTerritories } from '../../core/learning/visual-field.ts';
+import type { EngineVisualField, ScreenPoint, Vec3, VisualFieldDot } from '../api.ts';
 
 export interface FakeVisualField extends EngineVisualField {
   /** What the stage draws, and whether a click reads the cortex. */
@@ -7,6 +7,8 @@ export interface FakeVisualField extends EngineVisualField {
   readonly probing: boolean;
   /** Every dot the stage was asked to follow, in order. */
   readonly followed: readonly VisualFieldDot[];
+  /** The named areas' borders are drawn. */
+  readonly areasShown: boolean;
 }
 
 /** The map with no cortex: it keeps the real validation; tests raise `visualFieldPoint` themselves. */
@@ -16,9 +18,13 @@ export function createFakeVisualField(
   centralRegion: (hemisphere: 'left' | 'right') => string,
   /** The map pairs the hemispheres while it is drawn. */
   pair: (paired: boolean) => void,
+  /** The named areas' anchors, which the fake projects where they lie: no pair, nothing hides them. */
+  anchors: readonly VisualAreaAnchor[] | undefined,
+  project: (points: readonly Vec3[]) => (ScreenPoint | null)[],
 ): FakeVisualField {
   let shown: FakeVisualField['shown'] = null;
   let probing = false;
+  let areasShown = false;
   const followed: VisualFieldDot[] = [];
   return {
     available,
@@ -28,7 +34,24 @@ export function createFakeVisualField(
     get probing() {
       return probing;
     },
+    get areasShown() {
+      return areasShown;
+    },
     followed,
+    async showAreas(on) {
+      if (!available) throw new Error('This anatomy publishes no retinotopy.');
+      if (on && !anchors) throw new Error('This fake publishes no visual-area anchors.');
+      areasShown = on;
+    },
+    areaNames() {
+      if (!areasShown || !shown) return [];
+      const points = project(anchors!.map(({ pial }) => pial));
+      return anchors!.map(({ name, hemisphere }, index) => ({
+        name,
+        hemisphere,
+        point: points[index]!,
+      }));
+    },
     show(map) {
       if (!available) throw new Error('This anatomy publishes no retinotopy.');
       const dot = map?.dot;

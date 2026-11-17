@@ -9,11 +9,10 @@
   import { grouped } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { MapCourse } from '../../lib/core/user-map/course.ts';
-  import { mapNumber } from '../../lib/core/user-map/display.ts';
+  import { mapNumber, volumeParts } from '../../lib/core/user-map/display.ts';
   import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
   import type { Language, Region } from '../../lib/types/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
-  import { volumeParts } from '../user-map/key.ts';
 
   let {
     region,

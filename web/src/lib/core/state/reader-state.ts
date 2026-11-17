@@ -1,5 +1,4 @@
-import type { CameraSnapshot } from '../../engine/api.ts';
-import type { LinkState, Region } from '../../types/index.ts';
+import type { CameraSnapshot, LinkState, Region } from '../../types/index.ts';
 import type { ReaderModelPort, ReaderSectionsPort } from './ports.ts';
 import type { SceneCommands } from './scene-commands.ts';
 import { DEFAULTS } from './url-state.ts';
@@ -31,10 +30,7 @@ const SCENE_FIELDS = [
 export type ReaderCamera = 'view' | 'cut' | CameraSnapshot;
 
 /** Everything the scene shows, with nothing left implicit. */
-export type ReaderState = Pick<
-  LinkState,
-  (typeof SCENE_FIELDS)[number] | 'atlas' | 'detail' | 'cutAtlas'
-> & {
+export type ReaderState = Pick<LinkState, (typeof SCENE_FIELDS)[number] | 'atlas' | 'detail'> & {
   hiddenRegions: ReadonlySet<string>;
   camera: ReaderCamera;
 };
@@ -60,7 +56,7 @@ const identifier = (value: Region | string | null | undefined) =>
  */
 export function readerState(
   partial: ReaderPartial,
-  loaded: Pick<LinkState, 'atlas' | 'detail' | 'cutAtlas'>,
+  loaded: Pick<LinkState, 'atlas' | 'detail'>,
 ): ReaderState {
   const state: Record<string, unknown> = {};
   for (const key of SCENE_FIELDS) {
@@ -70,7 +66,7 @@ export function readerState(
         : partial[key];
     state[key] = value ?? DEFAULTS[key as keyof typeof DEFAULTS];
   }
-  for (const key of ['atlas', 'detail', 'cutAtlas'] as const) {
+  for (const key of ['atlas', 'detail'] as const) {
     state[key] = partial[key] ?? loaded[key];
     if (!state[key]) throw new Error(`Reader state has no ${key}.`);
   }
@@ -109,7 +105,12 @@ export async function applyReaderState(
     sections: ReaderSectionsPort;
     commands: Pick<
       SceneCommands,
-      'loadAtlas' | 'loadDetail' | 'showSpinalCord' | 'applySurfaceColor' | 'cut'
+      | 'loadAtlas'
+      | 'loadDetail'
+      | 'showSpinalCord'
+      | 'loadSupplemental'
+      | 'applySurfaceColor'
+      | 'cut'
     >;
     current: () => boolean;
     applyCamera: (target: ReaderState) => void | Promise<void>;
@@ -163,9 +164,6 @@ export async function applyReaderState(
     }
   });
   await step(['colors'], () => commands.applySurfaceColor(target.surfaceColor, current));
-  await step(['cuts'], async () => {
-    if (target.cutAtlas !== sections.state.cutAtlas) await sections.setCutAtlas(target.cutAtlas);
-  });
   // The position is judged against the range of the plane it lies in, so it goes once that plane is cut.
   const planeCut = await step(['cut', 'tilt', 'az', 'rev', 'pos'], async () => {
     if (target.cut === 'off') {
@@ -184,6 +182,10 @@ export async function applyReaderState(
     if (target.exploded !== settings().exploded) model.setExploded(target.exploded);
   });
 
+  // A region of a supplemental layer can be selected once that layer is downloaded.
+  await step(['isolate', 'region'], () =>
+    commands.loadSupplemental([target.isolatedRegion, target.selectedRegion], current),
+  );
   await step(['isolate'], () => {
     if (target.isolatedRegion === settings().isolatedRegion) return;
     if (!target.isolatedRegion) {

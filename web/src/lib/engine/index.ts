@@ -5,8 +5,11 @@ import { AssetError } from '../core/assets/published-assets.ts';
 import { validateStrokeCases } from '../core/catalog/stroke-cases.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import { readComparisonGeometry } from '../core/assets/comparison-assets.ts';
-import { parseVisualFieldTerritories } from '../core/learning/visual-field.ts';
-import type { VisualFieldTerritories } from '../core/learning/visual-field.ts';
+import {
+  parseVisualAreaAnchors,
+  parseVisualFieldTerritories,
+} from '../core/learning/visual-field.ts';
+import type { VisualAreaAnchor, VisualFieldTerritories } from '../core/learning/visual-field.ts';
 import { t } from '../core/i18n/index.ts';
 import type {
   CreateEngine,
@@ -29,6 +32,7 @@ import { createHeldView } from './held-view.ts';
 import { createLesion } from './lesion/lesion.ts';
 import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
 import { createUserMap } from './user-map/user-map.ts';
+import { createVisualAreas } from './visual-areas.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
 import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
@@ -266,18 +270,30 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     // While the visual-field map is probed, a click reads the cortex there instead of choosing it.
     let probing = false;
     let visualMap: { dot: VisualFieldDot | null } | null = null;
-    let territories: Promise<VisualFieldTerritories> | null = null;
-    const loadTerritories = () => {
+    // The retinotopy sidecar holds the territories and the named areas' anchors, read once for both.
+    let sidecar: Promise<{
+      territories: VisualFieldTerritories;
+      anchors: VisualAreaAnchor[];
+    }> | null = null;
+    const loadSidecar = () => {
       const published = atlas.manifest.retinotopy;
       if (!published) return Promise.reject(new Error('This anatomy publishes no retinotopy.'));
-      territories ??= fetchAsset(new URL(published.file, absoluteManifestUrl))
-        .then((buffer) => parseVisualFieldTerritories(JSON.parse(new TextDecoder().decode(buffer))))
+      sidecar ??= fetchAsset(new URL(published.file, absoluteManifestUrl))
+        .then((buffer) => {
+          const document: unknown = JSON.parse(new TextDecoder().decode(buffer));
+          const names = published.visual_areas.areas.map(({ name }) => name);
+          return {
+            territories: parseVisualFieldTerritories(document),
+            anchors: parseVisualAreaAnchors(document, names),
+          };
+        })
         .catch((error: unknown) => {
-          territories = null;
+          sidecar = null;
           throw error;
         });
-      return territories;
+      return sidecar;
     };
+    const loadTerritories = () => loadSidecar().then(({ territories }) => territories);
     // The cohort and its masks, each read once and checked against the checksum published for it.
     let strokeCases: Promise<StrokeCases> | null = null;
     let strokeMasks: Promise<Uint32Array> | null = null;
@@ -339,6 +355,15 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       invalidate: scene.invalidate,
     });
     cleanups.push(() => userMap.dispose());
+    const visualAreas = createVisualAreas({
+      atlas,
+      camera: scene.camera,
+      hostSize: () => scene.hostSize,
+      intersect: (raycaster) => sections.intersect(raycaster),
+      surface: userMap.drawnSurface,
+      anchors: () => loadSidecar().then(({ anchors }) => anchors),
+      invalidate: scene.invalidate,
+    });
     const showVisualField = (map: typeof visualMap) => {
       atlas.showVisualField(map);
       visualMap = map;
@@ -369,7 +394,10 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       placing: () => (lesion.placing || probing) && !reference.active,
       onPlace: (hit) =>
         probing
-          ? events.emit('visualFieldPoint', { reading: atlas.visualFieldAt(hit) })
+          ? events.emit('visualFieldPoint', {
+              reading: atlas.visualFieldAt(hit),
+              visualArea: atlas.visualAreaAt(hit),
+            })
           : events.emit('lesionPoint', { point: worldToRas(anatomicalPoint(hit)) }),
     });
     cleanups.push(() => picker.dispose());
@@ -490,7 +518,13 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     return {
       on: events.on,
       canvas: scene.domElement,
-      model: createEngineModel(atlas),
+      model: createEngineModel(atlas, (ids) =>
+        atlas.facing(ids, {
+          camera: scene.camera,
+          size: scene.hostSize,
+          intersect: (raycaster) => sections.intersect(raycaster),
+        }),
+      ),
       sections: engineSections,
       camera: stage.camera,
       comparison,
@@ -525,6 +559,8 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
           probing = next;
         },
         territories: loadTerritories,
+        showAreas: visualAreas.show,
+        areaNames: visualAreas.names,
         centralRegion: (hemisphere) => atlas.visualFieldRegion(hemisphere),
         follow(dot) {
           const box = atlas.visualFieldActivation(dot);
@@ -577,7 +613,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
         refresh();
       },
       invalidate: scene.invalidate,
-      captureSnapshot: (crop) => scene.captureSnapshot(crop),
+      captureSnapshot: (crop, options) => scene.captureSnapshot(crop, options),
       dispose() {
         if (disposed) return;
         disposed = true;

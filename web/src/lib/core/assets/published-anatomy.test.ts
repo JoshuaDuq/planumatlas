@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { loadAnatomies, resolveAnatomy } from './published-anatomy.ts';
-import './published-test-support.ts';
 
 const published = { default: 'snail', anatomies: [{ id: 'snail' }, { id: 'aomic' }] };
 const indexUrl = 'https://example.invalid/models/anatomies.json';

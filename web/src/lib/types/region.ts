@@ -53,6 +53,8 @@ export interface Region {
   centroid_ras_mm?: [number, number, number];
   /** Its own voxel nearest that centroid, surface RAS mm: inside it, as a centroid may not be. */
   anchor_ras_mm?: [number, number, number];
+  /** A cortical parcel's most open pial vertex, ties to the nearest its middle: where its name stands on the stage. */
+  label_point_ras_mm?: [number, number, number];
   constituent_regions?: string[];
   display_names?: Localised;
   system_names?: Localised;

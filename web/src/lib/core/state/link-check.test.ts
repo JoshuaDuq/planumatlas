@@ -10,7 +10,6 @@ import { publishesSpinalCord } from './scene-commands.ts';
 const known: KnownLinkIds = {
   atlases: new Set(['destrieux', 'hcp-mmp']),
   details: new Set(['aseg', 'nextbrain', 'learning']),
-  cutAtlases: new Set(['destrieux', 'hcp-mmp', 'nextbrain']),
   views: new Set(['oblique', 'left', 'right', 'anterior', 'posterior', 'superior', 'inferior']),
   explorers: new Set(['anatomy', 'functions', 'deficits', 'circuits', 'diffusion']),
   // A build without Yeo 7 networks: `network` decodes but is not published.
@@ -35,7 +34,7 @@ const check = (hash: string) => checkLink(decodeState(hash).state, known);
 
 test('a link naming only what this anatomy publishes passes whole', () => {
   const hash =
-    '#atlas=hcp-mmp&detail=aseg&cuts=nextbrain&view=left&colors=cab-np&region=destrieux:left:29' +
+    '#atlas=hcp-mmp&detail=aseg&view=left&colors=cab-np&region=destrieux:left:29' +
     '&isolate=aseg:left:17&hidden=destrieux:left:medial-wall&tab=circuits&function=language&deficit=aphasia&circuit=visual&step=4';
   const { state, rejected } = check(hash);
   assert.deepEqual(rejected, []);
@@ -44,13 +43,12 @@ test('a link naming only what this anatomy publishes passes whole', () => {
 
 test('each unknown name is dropped and reported under its link parameter', () => {
   const { state, rejected } = check(
-    '#atlas=yeo&detail=fine&cuts=x&view=Left&colors=network&region=nope' +
+    '#atlas=yeo&detail=fine&view=Left&colors=network&region=nope' +
       '&isolate=destrieux:left:medial-wall&hidden=aseg:left:17,nope&tab=diffusion&function=praxis&deficit=x&circuit=y&step=2&hemi=left',
   );
   assert.deepEqual(rejected, [
     'atlas',
     'detail',
-    'cuts',
     'view',
     'colors',
     'region',
@@ -175,4 +173,23 @@ test('a map must be one this anatomy shows, never beside a lesson, and its dot n
   assert.deepEqual(check('#dot=2,1,1').rejected, ['dot']);
   const blind = checkLink(decodeState('#map=visual-field').state, { ...known, maps: new Set() });
   assert.deepEqual(blind.rejected, ['map']);
+});
+
+test('STATE-70 highlights name regions the reader can select, or the whole set is not applied', () => {
+  assert.deepEqual(check('mark=destrieux:left:29:blue,aseg:left:17:amber'), {
+    state: {
+      highlights: [
+        { region: 'destrieux:left:29', color: 'blue' },
+        { region: 'aseg:left:17', color: 'amber' },
+      ],
+    },
+    rejected: [],
+  });
+  for (const unknown of ['destrieux:left:999', 'destrieux:left:medial-wall']) {
+    assert.deepEqual(
+      check(`mark=destrieux:left:29:blue,${unknown}:pink&hemi=left`),
+      { state: { hemisphere: 'left' }, rejected: ['mark'] },
+      unknown,
+    );
+  }
 });

@@ -95,7 +95,7 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 
 ### REGION-10 · A setting chosen in the menu applies to the whole app and is remembered
 
-- **Rule:** A language chosen in the settings panel re-labels every region, sets `<html lang>` and is saved. A theme sets `<html data-theme>`, repaints the scene and is saved. Single keys set `html[data-single-keys]` and turn the single-key shortcuts on or off. A link's language is followed but never saved.
+- **Rule:** A language chosen in the settings panel re-labels every region, sets `<html lang>` and is saved. A theme sets `<html data-theme>`, repaints the scene and is saved. Single keys set `html[data-single-keys]` and turn the single-key shortcuts on or off. A link's language is followed, only while none is saved (STORE-22), but never saved.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine); e2e for the reload journey
 - **Source:** `viewer/app.js:137-148, 606-615`; comment 70 (`onLang` is `app.chooseLanguage`; a link's language goes through `language.follow`); `viewer/state/theme.js`
@@ -232,14 +232,14 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 - **Expected:** with a function open and its region selected → the function profile comes before the region detail, and both before related deficits. With a circuit lesson's landmark → the circuit profile first, then notes, then related circuits.
 - **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R, a deficit's profile above the selected region; the full stacking order is uncovered)
 
-### REGION-25 · A click on the model shows the region; a link's detail does not raise the sheet
+### REGION-25 · A click on the model names the region in the grip; picking it again, or a tap on the grip, raises the sheet
 
-- **Rule:** Clicking a region on the model selects it and shows its detail, and on a phone raises the sheet. A link that opens a detail at start shows it without raising a phone's sheet over the camera.
+- **Rule:** Clicking a region on the model selects it and shows its detail. On a phone whose sheet rests at peek, a new region is only named in the grip and the sheet stays at peek; clicking the selected region again, or tapping its name in the grip, raises the sheet to half. A sheet already raised stays where it is. A link that opens a detail at start shows it without raising a phone's sheet over the camera.
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine: a fake pick); one e2e journey
-- **Source:** `viewer/app.js:527-546, 2065-2068`; decision 12 (interim effect: a click selects and then throws until I1 registers its ports); comment 85 item 1
-- **Expected:** 1280 px: pick `destrieux:left:30` → the detail heading is that region's name. 390 px: pick → the sheet at half. Open `#tab=functions&function=<id>` at 390 px → the detail is open and the sheet stays at peek.
-- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R: a pick opens the detail; a function or lesson link keeps the sheet at peek where a pick raises it); the e2e journey is uncovered
+- **Source:** `viewer/app.js:527-546, 2065-2068`; decision 12 (interim effect: a click selects and then throws until I1 registers its ports); comment 85 item 1; handoff U10 (plan 2 WP36), within decision 0006
+- **Expected:** 1280 px: pick `destrieux:left:30` → the detail heading is that region's name. 390 px: pick → the sheet at peek and the grip's button "<name> L, left" visible; pick it again → half, the detail heading visible. Pick, then tap the grip's name → half, the detail heading visible. Open `#tab=functions&function=<id>` at 390 px → the detail is open and the sheet stays at peek; a pick then → still peek.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R: a pick opens the detail; at 390 px a pick keeps peek, a second pick and a tap on the grip raise; a function or lesson link keeps the sheet at peek); `src/features/workspace/DetailView.svelte.test.ts` (R, the second pick's raised detail takes a tap); the e2e journey is uncovered
 
 ### REGION-26 · The tract reference resets what the old anatomy left on the stage
 

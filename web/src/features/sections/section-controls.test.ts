@@ -269,18 +269,7 @@ test('the caption gives the cut on screen, and nothing while one is prepared', a
   expect(controls.current).toBeNull();
 });
 
-test('the cut labels are the manifest’s, and NextBrain is known to be segmented on this brain', () => {
+test('NextBrain is known to be segmented on this brain', () => {
   const controls = build();
-  expect(controls.cutAtlases.map((atlas) => atlas.id)).toEqual([
-    'destrieux',
-    'hcp-mmp',
-    'julich',
-    'schaefer',
-    'desikan',
-    'nextbrain',
-    'arterial',
-    'nettekoven',
-    'choi',
-  ]);
   expect(controls.nextbrainSegmented).toBe(true);
 });

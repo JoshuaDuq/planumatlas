@@ -40,14 +40,14 @@ export const fr: typeof en = {
   paint: 'Peindre sur le cerveau',
   shown: (name: string) => `Le cerveau montre la connectivité de repos avec ${name}.`,
   note: (people: number, ages: string) =>
-    `Moyenne de groupe de ${people} adultes en bonne santé âgés de ${ages} ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.`,
+    `Moyenne de groupe de ${people} adultes en bonne santé âgés de ${ages} ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.`,
   basis:
-    'Mesurée sur la carte volumique de Julich-Brain dans l’espace MNI152, pas dans ce cerveau ; chaque aire prend la parcelle de son nom.',
+    'Mesurée sur la carte volumique de Julich-Brain dans l’espace MNI152, pas dans ce cerveau ; chaque aire prend la parcelle de son nom.',
   dataset: 'Jeu de données (EBRAINS)',
   paper: 'Article (Domhof et al. 2021)',
   keyTitle: (name: string) => `Connectivité de repos avec ${name}`,
   step: (from: string, to: string | null) =>
     (to ? `r de ${from} à ${to}` : `r ≥ ${from}`).replaceAll(' ', ' '),
   keyNote: (floor: string, ground: KeyGround) =>
-    `Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. ${FR_AREAS[ground]} sont sous r ${floor}, comme la moitié de toutes les paires.`,
+    `Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. ${FR_AREAS[ground]} sont sous r ${floor}, comme la moitié de toutes les paires.`,
 };

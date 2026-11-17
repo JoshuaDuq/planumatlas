@@ -1,12 +1,23 @@
 <script lang="ts">
   import { ASSET_BASE } from '../../../build/site.ts';
+  import { paintedLayerSources } from '../../lib/core/catalog/cortical-layers.ts';
+  import { DISORDER_ATLAS } from '../../lib/core/catalog/disorder-effects.ts';
   import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
+  import { embedCode, embedTitle } from '../../lib/core/embed.ts';
   import { failureNotice } from '../../lib/core/i18n/errors.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import {
+    fetchReferenceLibrary,
+    viewCitations,
+    type OnScreen,
+  } from '../../lib/core/panels/citations.ts';
+  import { subjectName } from '../../lib/core/panels/header.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
+  import type { View } from '../../lib/state/view.svelte.ts';
+  import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
-  import type { Explorer, Language } from '../../lib/types/index.ts';
+  import type { Explorer, Language, ViewName } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import DataBar from '../../features/masthead/DataBar.svelte';
   import Masthead from '../../features/masthead/Masthead.svelte';
@@ -22,6 +33,7 @@
     isFullscreen,
     onFullscreen,
     onSnapshot,
+    onCopyImage,
   }: {
     lang: Language;
     /** A data bar field holds a choice still downloading, so the status bar leaves the download to it. */
@@ -29,11 +41,35 @@
     /** The stage region's, which owns the full-screen state (REGION-12). */
     isFullscreen: () => boolean;
     onFullscreen: () => void;
-    onSnapshot: () => void;
+    /** Save image at `scale` image pixels per CSS pixel of the stage. */
+    onSnapshot: (scale: number) => void;
+    /** The stage as a captioned PNG, for Copy image; without it Copy image is not offered. */
+    onCopyImage?: () => Promise<Blob>;
   } = $props();
 
   const app = getApp();
   const world = $derived(app.world);
+
+  /** The address of the view on screen, written now rather than after the link writer's delay. */
+  function currentLink() {
+    if (world && !world.link.held) world.links.write();
+    return location.href;
+  }
+
+  /** The frame a course page pastes for the view on screen, titled with what it shows. */
+  function currentEmbedCode() {
+    const href = currentLink();
+    if (!world) return embedCode(href, 'Planum');
+    const current = world.view.current;
+    const { mode } = world.engine.sections.state;
+    const title = embedTitle(current.lang, {
+      subject: subjectName(world.engine.model.manifest.anatomy),
+      atlas: current.atlas,
+      view: world.engine.camera.viewHeld ? (current.view as ViewName) : null,
+      section: mode === 'off' ? null : mode,
+    });
+    return embedCode(href, title);
+  }
   const status = $derived(app.session.state.status);
 
   // The preference is a plain store: the masthead's switch follows this copy of it.
@@ -135,6 +171,32 @@
     }),
   );
 
+  /** What on screen the provenance sheet's reference list cites. */
+  function onScreen(current: View): OnScreen {
+    const { clinical, strokeCases, corticalLayers } = world!;
+    const deficit =
+      current.explorer === 'deficits' && current.selectedDeficit
+        ? clinical
+            .forDeficit(current.selectedDeficit)
+            .flatMap((finding) => finding.evidence)
+            .map(({ reference: id }) => `https://doi.org/${clinical.reference(id).doi}`)
+        : null;
+    const tractsDrawn = current.explorer === 'diffusion' || current.keepTracts;
+    return {
+      ...current,
+      deficit,
+      // Each paint is cited only while drawn: not while a masthead choice lifts it, a disorder only
+      // on its atlas, the layers only once their file arrives.
+      connectivitySeed: current.paintLifted ? null : current.connectivitySeed,
+      disorderShown:
+        current.paintLifted || current.atlas !== DISORDER_ATLAS ? null : current.disorderShown,
+      layers: paintedLayerSources(current, corticalLayers.data),
+      tracts: tractsDrawn ? tractCatalog(current.referenceAnatomy).source : null,
+      strokeCases: strokeCases.chosen.length > 0,
+      visualFieldMap: visualFieldMapOpen(current),
+    };
+  }
+
   /** The tract reference alone: another subject, named by the catalog, with the tracts panel's own links. */
   function reference(referenceAnatomy: string) {
     const catalog = tractCatalog(referenceAnatomy);
@@ -170,10 +232,9 @@
   }}
   {onFullscreen}
   {onSnapshot}
-  currentLink={() => {
-    if (world && !world.link.held) world.links.write();
-    return location.href;
-  }}
+  {onCopyImage}
+  {currentLink}
+  {currentEmbedCode}
   onProvenance={openProvenance}
   onFeedback={(event) => {
     feedbackInstant = isKeyboardActivation(event);
@@ -190,6 +251,7 @@
     {#if world}
       {@const current = world.view.current}
       {@const { model } = world.engine}
+      {@const { anatomy, excursions, commands } = world}
       {@const tractReference = isIndependentTractReference(current)}
       <!-- TODO(I3a): `anatomies` is world.anatomies, the published index (#4 issuecomment-6429895842 item 1). Until then no Subject field is offered and `onAnatomy` is unreachable. -->
       <DataBar
@@ -206,6 +268,8 @@
           networks: model.manifest.networks,
           cabNp: model.cabNp,
           territories: model.manifest.arterial_territories,
+          striatal: model.manifest.striatal_networks,
+          cerebellar: model.manifest.cerebellar_functions,
         }}
         anatomy={model.manifest.anatomy}
         anatomies={[model.manifest.anatomy]}
@@ -213,10 +277,11 @@
         borrowed={borrowedAtlas(current)}
         bind:settingsOpen
         bind:choosing
-        onAtlas={world.excursions.chooseAtlas}
+        onAtlas={(id) => anatomy.chooseLayer(() => excursions.chooseAtlas(id))}
         onAtlasIntent={() => prefetchOtherAtlas(model)}
-        onSurfaceColor={world.excursions.chooseSurfaceColor}
-        onDetail={world.commands.chooseDetail}
+        onSurfaceColor={(colour) =>
+          anatomy.chooseLayer(() => excursions.chooseSurfaceColor(colour))}
+        onDetail={(id) => anatomy.chooseLayer(() => commands.chooseDetail(id))}
         onAnatomy={world.links.switchAnatomy}
       />
     {/if}
@@ -250,5 +315,7 @@
     domains={model.domains}
     reference={tractReference ? reference(current.referenceAnatomy) : null}
     fallbackFocus={settingsButton}
+    citations={viewCitations(model.manifest, onScreen(current))}
+    loadReferences={() => fetchReferenceLibrary(ASSET_BASE)}
   />
 {/if}

@@ -1,0 +1,9 @@
+# 0014 Publishing the arousal nuclei with the periaqueductal grey below the containment limit
+
+Status: accepted by the maintainer on 2026-11-17. Made after the results were seen; this record says so.
+
+- **Situation.** Under decision 0013, SegmentAAN passes every check but one: its periaqueductal grey lies 90.7 % inside aseg's Brain-Stem and VentralDC, below the 95 % limit. Of the rest, 9.0 % falls in aseg's 4th-Ventricle label and under 1 % in VentralDC's neighbours and CSF. Its placement is the best of the three nuclei NextBrain also labels: centroid 0.44 mm from NextBrain's, Dice 0.72.
+- **Reading.** The grey surrounds the aqueduct. At aseg's 1 mm grid its inner rim falls in the label aseg gives the aqueduct, so the shortfall comes from where the grey lies, not from a misplacement. The published nuclei are kept to the envelope, so those voxels are removed: nothing published lies in the ventricle; the grey is thinner along the aqueduct by that rim.
+- **Decision.** The arousal nuclei are published from SegmentAAN with one named exception: the periaqueductal grey must lie at least 90 % inside the envelope (`inside_envelope_exceptions` in `config/arousal-nuclei.yaml`). Every other nucleus keeps the 95 % limit, and the centroid check, the selection rule and the all-or-nothing outcome are unchanged.
+- **Cost, stated.** This is the second change to the checks after the results were seen (the first is 0013). Planum's standard is a bar fixed in advance and reported either way; this exception departs from it, so it is disclosed where the reader meets the nucleus (its own region sheet, which gives the measured share), in the manifest's limitations and in the methods page, with every earlier result.
+- **Not a precedent.** An exception for another nucleus, method or anatomy is a new decision.

@@ -101,7 +101,7 @@ export function sectionSentences(input: SentenceInput): { said: string; shown: s
           ? state.cutAtlas === cabNp
             ? copy.cabNpByArea
             : copy.cabNpOtherLabels
-          : input.surfaceColor === 'atlas' && striatal && state.cutAtlas === striatal
+          : input.surfaceColor === 'striatal' && state.cutAtlas === striatal
             ? copy.striatalPaler
             : null;
   // A function's paint, like the HCP-MMP colourings, has areas only on HCP-MMP labels.

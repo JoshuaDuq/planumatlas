@@ -23,7 +23,8 @@ import { Volume } from '../slices/volume.ts';
 import { GHOST, opaqueOrder } from '../render/draw-order.ts';
 import { ghostColor, stageLegible, tissueColor } from '../render/materials.ts';
 import type { Appearance } from '../render/materials.ts';
-import { BrainAtlas, GeometryJobs, SURFACE_COLORS } from './brain-atlas.ts';
+import { BrainAtlas, SURFACE_COLORS } from './brain-atlas.ts';
+import { GeometryJobs } from './geometry-jobs.ts';
 import type { AtlasManifest, GlbLoader, Layer } from './brain-atlas.ts';
 
 /* oxlint-disable typescript/no-explicit-any -- fixtures stand in for published JSON and mutate the model freely */
@@ -163,8 +164,9 @@ function fixture(
   functional: Stub | null = null,
   domains: Stub | null = null,
   published: Record<string, Color> = {},
-  // Each cortical parcel's predicted pRF, the same at every vertex: [x°, y°, σ°, visual area].
-  fields: Record<string, readonly [number, number, number, number]> | null = null,
+  // Each cortical parcel's predicted pRF, the same at every vertex: [x°, y°, σ°, visual area], and its
+  // named visual area's code (V1v 1, LO1 15), 0 when left out.
+  fields: Record<string, readonly [number, number, number, number, number?]> | null = null,
 ) {
   const manifest = {
     schema_version: 1,
@@ -183,7 +185,18 @@ function fixture(
     solid_envelopes: { file: 'tissue-envelopes.glb' },
     regions,
     ...(fields
-      ? { retinotopy: { measured_eccentricity_deg: 8, areas: [{ code: 1, name: 'V1' }] } }
+      ? {
+          retinotopy: {
+            measured_eccentricity_deg: 8,
+            areas: [{ code: 1, name: 'V1' }],
+            visual_areas: {
+              areas: [
+                { code: 1, name: 'V1v' },
+                { code: 15, name: 'LO1' },
+              ],
+            },
+          },
+        }
       : {}),
   } as unknown as AtlasManifest;
   const loads: string[] = [];
@@ -226,9 +239,10 @@ function fixture(
             '_field_y',
             '_prf_sigma',
             '_visual_area',
+            '_wang_area',
           ].entries()) {
             const values = new Float32Array(mesh.geometry.attributes.position.count).fill(
-              field[k]!,
+              field[k] ?? 0,
             );
             mesh.geometry.setAttribute(name, new Float32BufferAttribute(values, 1));
           }
@@ -1209,6 +1223,42 @@ test('the dot’s activation is the box of the drawn cortex it drives past the t
   assert.equal(atlas.visualFieldActivation({ x: 4.5, y: 0, radius: 0.1 }), null);
   atlas.setHemisphere('left');
   assert.equal(atlas.visualFieldActivation({ x: -5, y: 0, radius: 1 }), null);
+  atlas.dispose();
+});
+
+test('a click names the visual area it meets, its hemisphere’s, and outside every area names none', async () => {
+  const { atlas } = fixture(
+    null,
+    null,
+    null,
+    {},
+    {
+      'a-left': [2, 0, 0.5, 1, 15],
+      'a-right': [-5, 0, 0.5, 1, 0],
+    },
+  );
+  await atlas.initialize('a');
+  const hitAt = (x: number) =>
+    atlas.intersect(new Raycaster(new Vector3(x, 0, 0.1), new Vector3(0, 0, -1)))!;
+  assert.deepEqual(atlas.visualAreaAt(hitAt(0)), { name: 'LO1', hemisphere: 'left' });
+  assert.equal(atlas.visualAreaAt(hitAt(0.03)), null);
+  atlas.dispose();
+});
+
+test('the named areas’ borders are drawn while asked, every area given a border class once', async () => {
+  const { atlas } = fixture(null, null, null, {}, { 'a-left': [2, 0, 0.5, 1, 15] });
+  await atlas.initialize('a');
+  const uniforms = atlas.visualField!;
+  assert.equal(uniforms.visualAreasMix.value, 0);
+  atlas.showVisualAreas(true);
+  assert.equal(uniforms.visualAreasMix.value, 1);
+  const classes = uniforms.visualAreaClass.value;
+  assert.equal(classes.length, 16);
+  assert.equal(classes[0], 0);
+  assert.ok(classes[15]! >= 1 && classes[15]! <= 4);
+  atlas.showVisualAreas(false);
+  assert.equal(uniforms.visualAreasMix.value, 0);
+  assert.equal(uniforms.visualAreaClass.value, classes, 'the classes are kept for the next time');
   atlas.dispose();
 });
 

@@ -13,7 +13,7 @@
   import { getApp, type World } from '../../app/application.svelte.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
-  import type { Rgb } from '../../lib/types/index.ts';
+  import type { Region, Rgb } from '../../lib/types/index.ts';
   import CircuitNotes from '../circuits/CircuitNotes.svelte';
   import CircuitProfile from '../circuits/CircuitProfile.svelte';
   import CircuitStatus from '../circuits/CircuitStatus.svelte';
@@ -36,7 +36,10 @@
   import { tractRows } from '../../lib/core/tracts.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import RegionDetail from '../inspector/RegionDetail.svelte';
+  import HighlightStrip from '../highlights/HighlightStrip.svelte';
+  import { announce } from '../../lib/ui/announcer.svelte.ts';
   import { DISORDER_ATLAS } from '../../lib/core/catalog/disorder-effects.ts';
+  import { layersPainted } from '../../lib/core/catalog/cortical-layers.ts';
 
   let {
     world,
@@ -135,6 +138,8 @@
       ? current.disorderShown
       : null,
   );
+  // Layer IV's share, as paintFor paints it: on any cortical atlas.
+  const layersShownNow = $derived(layersPainted(current, world.corticalLayers.data));
   // The comparison file is published beside the manifest the engine opened (boot.ts).
   const manifestUrl = $derived(`${ASSET_BASE}models/${manifest.anatomy.id}/manifest.json`);
   // A function's or deficit's profile above makes the region a smaller second subject (clinical.css:172-173, 299-300).
@@ -203,7 +208,28 @@
     await deficits.openDeficit(deficit);
     session.setFinding(finding);
   }
+
+  /** More's Highlight: the region joins the reader's highlights in the next colour, or leaves them. */
+  function toggleHighlight(region: Region) {
+    const { highlights } = world;
+    const copy = t(current.lang, 'inspector');
+    const label = `${catalog.label(region.id).name}, ${t(current.lang, 'sides').words[region.hemisphere]}`;
+    if (!highlights.toggle(region.id)) {
+      announce(copy.unhighlighted(label));
+      return;
+    }
+    const { color } = highlights.list.find((entry) => entry.region === region.id)!;
+    announce(copy.highlighted(label, copy.highlightColors[color]));
+  }
 </script>
+
+<HighlightStrip
+  lang={current.lang}
+  highlights={world.highlights}
+  regions={world.regions}
+  name={(id) => catalog.label(id).name}
+  settings={current}
+/>
 
 {#if search}
   <div class="detail-search">
@@ -318,6 +344,10 @@
         {disorderPainted}
         paintDisorder={current.explorer === 'anatomy' ? excursions.showDisorder : null}
         restoreDisorder={() => session.setDisorderShown(null)}
+        corticalLayers={world.corticalLayers.available ? world.corticalLayers : null}
+        layersPainted={layersShownNow}
+        paintLayers={current.explorer === 'anatomy' ? () => session.setLayersShown(true) : null}
+        restoreLayers={() => session.setLayersShown(false)}
         strokeCases={world.strokeCases}
         userMap={world.userMap}
         territories={manifest.arterial_territories ?? null}
@@ -326,6 +356,11 @@
         onfocus={() => anatomy.toggleFocus()}
         onisolate={anatomy.isolateSelection}
         onhide={() => void anatomy.hideSelection()}
+        highlight={current.selectedRegion && {
+          pressed: world.highlights.has(current.selectedRegion.id),
+          full: world.highlights.full,
+        }}
+        onhighlight={() => toggleHighlight(current.selectedRegion!)}
         onclear={() => void anatomy.clearSelection()}
         onregion={(id) => void anatomy.openConstituent(id)}
         onselect={(id) => anatomy.selectRegion(id)}

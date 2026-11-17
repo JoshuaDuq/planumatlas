@@ -59,7 +59,8 @@
         var values = new URLSearchParams(location.hash.replace(/^#/, '')).getAll('lang');
         var linked = values.length === 1 ? values[0] : null;
         root.dataset.theme = theme;
-        var lang = linked === 'en' || linked === 'fr' ? linked : saved;
+        // The reader's saved choice wins over a link's.
+        var lang = saved === 'en' || saved === 'fr' ? saved : linked;
         for (var i = 0; lang !== 'en' && lang !== 'fr' && i < navigator.languages.length; i++) {
           lang = navigator.languages[i].toLowerCase().split('-')[0];
         }

@@ -176,6 +176,13 @@
     background: var(--accent-wash);
     color: var(--accent);
   }
+  /* Highlight with the set full stays in reach to say why, drawn as unavailable. */
+  .region-detail .actions button[aria-disabled='true'],
+  .region-detail .actions button[aria-disabled='true']:hover {
+    background: var(--surface-sunken);
+    color: var(--text-tertiary);
+    cursor: default;
+  }
   @media (hover: hover) and (pointer: fine) {
     .region-detail .actions button:hover {
       background: var(--surface-tonal-hover);

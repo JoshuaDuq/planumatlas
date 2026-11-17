@@ -1,6 +1,7 @@
 <!-- Fixture for the anatomy tree tests: a small catalog and the stores I1 composes around the tree. Not shipped. -->
 <script lang="ts">
   import type { CatalogGroup } from '../../lib/core/catalog/catalog.ts';
+  import type { RegionTableScope } from '../../lib/core/catalog/region-table.ts';
   import { GROUPS } from './anatomy-tree-test-support.ts';
   import { onMount, untrack } from 'svelte';
   import type { Language } from '../../lib/types/index.ts';
@@ -16,6 +17,7 @@
     selected: initialSelected = null,
     open = [],
     hide = [],
+    table = { anatomy: 'fixture', atlas: 'destrieux', detail: 'aseg', regions: [] },
   }: {
     calls?: string[];
     said?: string[];
@@ -24,6 +26,8 @@
     selected?: string | null;
     open?: string[];
     hide?: string[];
+    /** What the header's region table covers. */
+    table?: RegionTableScope;
   } = $props();
 
   let expanded = $state(new Set<string>(untrack(() => open)));
@@ -39,7 +43,13 @@
 <button id="before">before</button>
 <!-- The panel's head carries the inset the toggle's negative margin reaches into. -->
 <div class="head">
-  <TreeHeader {lang} {groups} {expanded} onExpandedChange={(next) => (expanded = next)} />
+  <TreeHeader
+    {lang}
+    {groups}
+    {expanded}
+    onExpandedChange={(next) => (expanded = next)}
+    table={() => table}
+  />
 </div>
 <AnatomyTree
   bind:this={tree}

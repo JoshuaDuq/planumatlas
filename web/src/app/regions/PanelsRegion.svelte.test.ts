@@ -5,7 +5,7 @@ import axe from 'axe-core';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
-import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import strokeFile from '../../../../public/models/cdmd/stroke-cases.json' with { type: 'json' };
 import {
@@ -516,34 +516,30 @@ describe('the keymap’s ports', () => {
 });
 
 describe('the anatomy search', () => {
-  test('a cut-label switch that fails is said in the notice, not swallowed', async () => {
-    // No cut has chosen its labels yet, so a NextBrain region is found under another cut atlas.
+  test('a region only NextBrain puts on a cut is found, and revealed by that internal anatomy and a cut', async () => {
     const cutOnly = 'nextbrain:left:7';
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    const setCutAtlas = vi
-      .spyOn(engine.sections, 'setCutAtlas')
-      .mockRejectedValue(new Error('offline'));
     await boot();
     await userEvent.fill(page.getByRole('combobox', { name: 'Search regions' }), nameOf(cutOnly));
-    await userEvent.click(page.getByRole('button', { name: 'Switch cut labels' }));
-    expect(setCutAtlas).toHaveBeenCalledWith('nextbrain');
-    await vi.waitFor(() =>
-      expect(app.session.state.notice?.text).toBe(t('en', 'errors').operations.layer('NextBrain')),
-    );
+    // No cut-labels switch is offered: the region is listed, with the anatomy that draws it.
+    expect(page.getByRole('button', { name: /cut labels/i }).elements()).toEqual([]);
+    await userEvent.click(page.getByRole('option', { name: /left: In NextBrain\./ }).first());
+    await vi.waitFor(() => expect(engine.model.state.selectedRegion?.id).toBe(cutOnly));
+    expect(engine.model.settings.detail).toBe('nextbrain');
+    expect(engine.sections.state.cutAtlas).toBe('nextbrain');
+    expect(engine.sections.active).toBe(true);
   });
-  test('a cut-label switch that failed and then succeeds takes its error away', async () => {
-    const cutOnly = 'nextbrain:left:7';
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    const setCutAtlas = vi
-      .spyOn(engine.sections, 'setCutAtlas')
-      .mockRejectedValueOnce(new Error('offline'));
+
+  test('a region of a subcortical map is found, and revealed by that map’s colour and a cut', async () => {
+    const cutOnly = 'nettekoven:left:m3';
     await boot();
     await userEvent.fill(page.getByRole('combobox', { name: 'Search regions' }), nameOf(cutOnly));
-    await userEvent.click(page.getByRole('button', { name: 'Switch cut labels' }));
-    await vi.waitFor(() => expect(app.session.state.notice?.kind).toBe('error'));
-    await userEvent.click(page.getByRole('button', { name: 'Switch cut labels' }));
-    expect(setCutAtlas).toHaveBeenCalledTimes(2);
-    await vi.waitFor(() => expect(app.session.state.notice).toBeNull());
+    await userEvent.click(
+      page.getByRole('option', { name: /left: Under Cerebellar functions\./ }).first(),
+    );
+    await vi.waitFor(() => expect(engine.model.state.selectedRegion?.id).toBe(cutOnly));
+    expect(engine.model.settings.surfaceColor).toBe('cerebellar');
+    expect(engine.sections.state.cutAtlas).toBe('nettekoven');
+    expect(engine.sections.active).toBe(true);
   });
 });
 
@@ -702,6 +698,7 @@ describe('the keymap’s tree walk', () => {
 
 describe('the phone sheet', () => {
   beforeEach(() => page.viewport(390, 844));
+  const grip = () => page.getByRole('button', { name: `${nameOf(REGION)} L, left`, exact: true });
 
   test('showing the list or the detail raises the sheet from peek, and the stage is told the room it has', async () => {
     const world = await boot();
@@ -757,7 +754,33 @@ describe('the phone sheet', () => {
     });
   });
 
-  test('a function link and a lesson link keep the sheet at peek, where a pick raises it', async () => {
+  test('REGION-25 · a pick at peek names the region in the grip; picking it again raises the sheet', async () => {
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    expect(sheet().dataset.detent).toBe('peek');
+    await expect.element(grip()).toBeVisible();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    expect(sheet().dataset.detent).toBe('half');
+    await expect
+      .element(page.getByRole('heading', { level: 2, name: nameOf(REGION) }))
+      .toBeVisible();
+  });
+
+  test('REGION-25 · a tap on the grip’s name raises the sheet to the region a pick named', async () => {
+    await boot();
+    engine.emit('pick', { id: REGION, point: null });
+    flushSync();
+    expect(sheet().dataset.detent).toBe('peek');
+    await userEvent.click(grip());
+    expect(sheet().dataset.detent).toBe('half');
+    await expect
+      .element(page.getByRole('heading', { level: 2, name: nameOf(REGION) }))
+      .toBeVisible();
+  });
+
+  test('a function link and a lesson link keep the sheet at peek, as a pick does', async () => {
     const circuit = (await boot()).circuits.all[0]!;
     const landmark = circuit.steps[1]!.region;
     const atlas = landmark.split(':')[0];
@@ -773,13 +796,14 @@ describe('the phone sheet', () => {
 
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
-    expect(sheet().dataset.detent).toBe('half');
+    expect(sheet().dataset.detent).toBe('peek');
   });
 
   test('the sheet’s containers carry the home-indicator padding once, not the panels inside them', async () => {
     await boot();
     const bottom = (element: Element) => parseFloat(getComputedStyle(element).paddingBottom);
-    engine.emit('pick', { id: REGION, point: null });
+    // A selection from the panel raises the sheet, which a pick at peek does not.
+    app.world!.anatomy.selectRegion(REGION);
     flushSync();
     expect(bottom(detail())).toBeGreaterThan(0);
     expect(bottom(detailOrList('.detail-body'))).toBe(0);

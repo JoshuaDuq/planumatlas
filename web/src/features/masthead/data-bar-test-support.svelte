@@ -57,6 +57,7 @@
   onFullscreen={() => {}}
   onSnapshot={() => {}}
   currentLink={() => location.href}
+  currentEmbedCode={() => ''}
   onProvenance={() => {}}
   onFeedback={() => {}}
   onGuide={() => {}}

@@ -102,7 +102,7 @@ test('the fields a link could not apply are named in the reader’s words, once 
   );
   assert.equal(
     linkNotice(['pos', 'lang'], 'fr').text,
-    'Éléments du lien non appliqués : position de la coupe et langue.',
+    'Éléments du lien non appliqués\u202f: position de la coupe et langue.',
   );
   assert.deepEqual(Object.keys(t('fr', 'link').fields), Object.keys(t('en', 'link').fields));
 });
@@ -118,7 +118,7 @@ test('a link whose circuit is unknown names the circuit, not its step as well', 
   assert.equal(linkNotice(['circuit', 'step'], 'en').text, 'Not applied from this link: circuit.');
   assert.equal(
     linkNotice(['step', 'circuit'], 'fr').text,
-    'Éléments du lien non appliqués : circuit.',
+    'Éléments du lien non appliqués\u202f: circuit.',
   );
   assert.equal(linkNotice(['step'], 'en').text, 'Not applied from this link: circuit step.');
   assert.equal(linkNotice(['circuit', 'route'], 'en').text, 'Not applied from this link: circuit.');
@@ -188,7 +188,7 @@ test('I18N-18 · the 18 operations are listed in order, with subject sentences i
     'restore',
   ];
   // fullscreen is G6's addition (decision 33), after the legacy 18; a landmark's streamlines follow,
-  // then the visual-field map and the guided tour, whose code is fetched when it starts.
+  // then the visual-field map and the guided tour, whose code is fetched when it starts, and a saved image too large for the device.
   for (const lang of ['en', 'fr'] as const) {
     assert.deepEqual(Object.keys(t(lang, 'errors').operations), [
       ...order,
@@ -196,6 +196,7 @@ test('I18N-18 · the 18 operations are listed in order, with subject sentences i
       'streamlines',
       'map',
       'guide',
+      'snapshotSize',
     ]);
   }
   assert.equal(
@@ -204,7 +205,7 @@ test('I18N-18 · the 18 operations are listed in order, with subject sentences i
   );
   assert.equal(
     t('fr', 'errors').operations.colour('CAB-NP'),
-    'Impossible d’afficher la coloration « CAB-NP ».',
+    'Impossible d’afficher la coloration «\u00a0CAB-NP\u00a0».',
   );
 });
 

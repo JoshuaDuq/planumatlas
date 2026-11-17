@@ -139,7 +139,7 @@ export const fr: typeof en = {
   choose: 'Choisir un fichier NIfTI…',
   another: 'Choisir un autre fichier…',
   reading: (name: string) => `Lecture du fichier ${name}…`,
-  failed: (name: string) => `${name} n’a pas pu être affiché :`,
+  failed: (name: string) => `${name} n’a pas pu être affiché :`,
   shape: (dims: string, voxel: string) => `${dims} voxels de ${voxel}`,
   range: (low: string, high: string) => `valeurs de ${low} à ${high}`,
   mask: 'un masque de 0 et de 1',
@@ -166,7 +166,7 @@ export const fr: typeof en = {
   courseNone: 'Cette région n’a pas de solide sur la scène où lire la carte.',
   courseEmpty: 'La carte n’a aucune valeur dans cette région.',
   courseLabel: (title: string, region: string) => `${title} dans ${region} au fil du temps`,
-  courseValue: (at: string, value: string) => `${at} : ${value}`,
+  courseValue: (at: string, value: string) => `${at} : ${value}`,
   courseNoValue: 'aucune valeur',
   courseTime: 'Temps',
   courseValues: 'Valeurs',
@@ -179,7 +179,7 @@ export const fr: typeof en = {
   value: 'Valeur',
   threshold: 'Seuil',
   thresholdHint:
-    'Les valeurs dont la grandeur le dépasse sont affichées. La carte s’affiche une fois le seuil donné ; 0 affiche toute valeur non nulle.',
+    'Les valeurs dont la grandeur le dépasse sont affichées. La carte s’affiche une fois le seuil donné ; 0 affiche toute valeur non nulle.',
   max: 'Couleurs jusqu’à',
   invalid: 'Donnez un seuil de 0 ou plus, sous le haut de l’échelle.',
   opacity: 'Opacité',
@@ -191,7 +191,7 @@ export const fr: typeof en = {
   surface: 'Surface du cortex',
   surfaces: { pial: 'Piale', mid: 'Mi-épaisseur', white: 'Blanche' },
   surfaceHint:
-    'Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs : les plus profondes ouvrent les sillons. Une coupe affiche la piale.',
+    'Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs : les plus profondes ouvrent les sillons. Une coupe affiche la piale.',
   captionSurface: (name: string) => `sur la surface ${name.toLowerCase()}`,
   show: 'Afficher sur le cerveau',
   settings: 'Réglages de la carte',
@@ -200,7 +200,7 @@ export const fr: typeof en = {
     `${template} · ${statistic} · ${clusters} · surface ${surface.toLowerCase()}`,
   remove: 'Retirer',
   caveat:
-    'Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.',
+    'Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.',
   keyRange: (statistic: string | null, from: string, to: string) =>
     `${statistic ? `${statistic} ` : ''}de ${from} à ${to}`,
   captionTemplate: (label: string) => `depuis ${label}`,
@@ -209,7 +209,7 @@ export const fr: typeof en = {
     `|${statistic ?? 'valeur'}| > ${threshold}, couleurs jusqu’à ${max}`,
   captionOpacity: (share: string) => `opacité ${share}`,
   readout: (title: string, statistic: string | null, value: string) =>
-    `${title} : ${statistic ? `${statistic} = ` : ''}${value}`,
+    `${title} : ${statistic ? `${statistic} = ` : ''}${value}`,
   clusters: (count: number) => `Amas et pics (${count})`,
   clustersLoading: 'Recherche des amas…',
   clustersNone: 'Aucune valeur ne dépasse le seuil.',
@@ -221,14 +221,14 @@ export const fr: typeof en = {
   morePeaks: (count: number) => `${count} de plus dans le CSV`,
   download: 'Télécharger le CSV',
   unexpected:
-    'Une erreur inattendue l’en a empêché ; le détail figure dans la console du navigateur.',
+    'Une erreur inattendue l’en a empêché ; le détail figure dans la console du navigateur.',
   reasons: {
     header: 'Ce fichier s’arrête au milieu de son en-tête NIfTI.',
-    pair: 'Ceci est l’en-tête d’une paire .hdr/.img ; enregistrez la carte en un seul fichier .nii.',
-    magic: 'Ce fichier n’est pas au format NIfTI-1 : son en-tête ne porte pas la signature NIfTI.',
-    nifti2: 'Ceci est un fichier NIfTI-2 ; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.',
+    pair: 'Ceci est l’en-tête d’une paire .hdr/.img ; enregistrez la carte en un seul fichier .nii.',
+    magic: 'Ce fichier n’est pas au format NIfTI-1 : son en-tête ne porte pas la signature NIfTI.',
+    nifti2: 'Ceci est un fichier NIfTI-2 ; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.',
     notNifti: 'Ce fichier n’est pas une image NIfTI.',
-    gzip: 'Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.',
+    gzip: 'Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.',
     fileSize: (size: number, limit: number) =>
       `Ce fichier fait ${grouped(size)} octets, au-delà de la limite de ${grouped(limit)}.`,
     declared: (size: number, limit: number) =>
@@ -236,35 +236,35 @@ export const fr: typeof en = {
     inflated: (size: number) =>
       `Décompressé, ce fichier dépasse les ${grouped(size)} octets que décrit son en-tête.`,
     rank: (rank: number) =>
-      `Ce fichier n’est ni un volume 3D ni une série de volumes : il a ${rank} ${rank < 2 ? 'dimension' : 'dimensions'}.`,
+      `Ce fichier n’est ni un volume 3D ni une série de volumes : il a ${rank} ${rank < 2 ? 'dimension' : 'dimensions'}.`,
     emptyAxis: (dims: string) => `Les dimensions ${dims} de ce fichier comprennent un axe vide.`,
     dimensions: (dims: string) =>
-      `Les dimensions de ce fichier sont ${dims} ; seule une série de volumes selon la quatrième peut être affichée.`,
+      `Les dimensions de ce fichier sont ${dims} ; seule une série de volumes selon la quatrième peut être affichée.`,
     tooManyVolumes: (volumes: number, limit: number) =>
-      `Ce fichier contient ${grouped(volumes)} volumes ; jusqu’à ${grouped(limit)} de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.`,
+      `Ce fichier contient ${grouped(volumes)} volumes ; jusqu’à ${grouped(limit)} de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.`,
     tooLarge: (dims: string, limit: number) =>
       `Ce volume compte ${dims} voxels, au-delà de la limite de ${grouped(limit)}.`,
     storedType: (name: string, code: number) =>
-      `Ce fichier stocke des valeurs ${name} (type de données ${code}) ; enregistrez la carte en float32.`,
+      `Ce fichier stocke des valeurs ${name} (type de données ${code}) ; enregistrez la carte en float32.`,
     unknownType: (code: number) =>
       `Le code de type de données ${code} de ce fichier n’est pas un type NIfTI-1.`,
     offset: (offset: number) =>
       `Le décalage des données de ce fichier (vox_offset ${offset}) tombe dans son en-tête.`,
     truncated: (needed: number, size: number) =>
-      `Ce fichier est tronqué : ses données demandent ${grouped(needed)} octets, mais le fichier en compte ${grouped(size)}.`,
+      `Ce fichier est tronqué : ses données demandent ${grouped(needed)} octets, mais le fichier en compte ${grouped(size)}.`,
     intercept: (intercept: number) =>
       `L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut ${intercept}.`,
     overflow: (value: number) =>
       `Ce fichier contient la valeur ${value}, hors de la plage des float32.`,
     orientation:
-      'Ce fichier n’indique aucune orientation (codes sform et qform à 0) : il ne peut pas être placé.',
+      'Ce fichier n’indique aucune orientation (codes sform et qform à 0) : il ne peut pas être placé.',
     affineFinite: 'La matrice affine de ce fichier contient une valeur non finie.',
     singular:
-      'La matrice affine de ce fichier est singulière : ses axes de voxels n’engendrent pas l’espace 3D.',
+      'La matrice affine de ce fichier est singulière : ses axes de voxels n’engendrent pas l’espace 3D.',
     quaternion: 'Le quaternion qform de ce fichier n’est pas une rotation (b² + c² + d² > 1).',
-    slice: 'Cette carte n’est qu’une seule coupe selon un axe ; il lui faut trois dimensions.',
+    slice: 'Cette carte n’est qu’une seule coupe selon un axe ; il lui faut trois dimensions.',
     noFinite: 'Cette carte ne contient aucune valeur finie.',
     zeros: 'Cette carte ne contient que des zéros.',
-    outside: 'Cette carte n’atteint pas le cerveau ; vérifiez le gabarit dans lequel elle est.',
+    outside: 'Cette carte n’atteint pas le cerveau ; vérifiez le gabarit dans lequel elle est.',
   },
 };

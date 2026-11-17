@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import type { Legend } from '../../lib/core/state/paint.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import { createStageLayout } from '../../lib/state/stage-layout.svelte.ts';
@@ -51,8 +51,14 @@ interface Roundrect {
   fill: string;
 }
 
-/** The plan of the 560×520 fixture, drawn at ratio 2 over a flat frame, with every drawing call recorded. */
-async function drawFixture(marks: { region: string; name: string; label: string }[] = []) {
+/**
+ * The plan of the 560×520 fixture, drawn at ratio 2 over a flat frame, with every drawing call recorded;
+ * `names` stand on the stage as the visual field map's area names do, at their top left.
+ */
+async function drawFixture(
+  marks: { region: string; name: string; label: string }[] = [],
+  names: { text: string; x: number; y: number; hidden?: boolean }[] = [],
+) {
   await page.viewport(1280, 900);
   const [width, height] = [560, 520];
   const engine = createFakeEngine({
@@ -74,6 +80,13 @@ async function drawFixture(marks: { region: string; name: string; label: string 
   const handle: { keys?: StageKeysModel } = {};
   render(Fixture, { engine, stage, live, handle, width, height });
   flushSync();
+  for (const { text, x, y, hidden } of names) {
+    const span = document.createElement('span');
+    span.className = 'area-name stage-label-text';
+    span.textContent = text;
+    span.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; visibility: ${hidden ? 'hidden' : 'visible'}`;
+    document.querySelector('#viewport')!.append(span);
+  }
   await vi.waitFor(() => expect(stage.visibleRect).not.toBeNull(), { timeout: 5000 });
   const scene: SnapshotStage = {
     host: document.querySelector<HTMLElement>('#viewport')!,
@@ -294,6 +307,35 @@ describe('what the snapshot draws', () => {
       ).toEqual([4, 2.5]);
       if (label.leader) expect(lines).toContainEqual([label.leader.x, label.leader.y]);
     }
+  });
+
+  test('SNAP-23 a visual area’s name is drawn centred where it stands; a hidden one, or one under the caption, is not', async () => {
+    const { plan, texts } = await drawFixture(
+      [],
+      [
+        { text: 'LO1', x: 300, y: 300 },
+        { text: 'IPS5', x: 300, y: 340, hidden: true },
+      ],
+    );
+    expect(plan.names.map((name) => name.text)).toEqual(['LO1']);
+    const [name] = plan.names;
+    const drawn = texts.find((call) => call.text === 'LO1');
+    expect(drawn).toMatchObject({
+      x: name!.box.x + name!.box.width / 2,
+      y: name!.box.y + name!.box.height / 2,
+      align: 'center',
+    });
+    // Moved onto the caption's first line, which starts 16 px in and runs from y 16 to 32.
+    const canvas = document.createElement('canvas');
+    canvas.width = plan.width;
+    canvas.height = plan.height;
+    const start = texts.length;
+    annotateSnapshot(canvas, {
+      ...plan,
+      names: [{ ...name!, text: 'V3A', box: { ...name!.box, x: 20, y: 18 } }],
+      ratio: 1,
+    });
+    expect(texts.slice(start).some((call) => call.text === 'V3A')).toBe(false);
   });
 
   test('SNAP-15 a label where the image draws its scale bar is drawn clear of it', async () => {

@@ -29,6 +29,7 @@ export const SHORTCUT_KEYS = {
   spinalCord: 'S',
   hemisphere: 'H',
   explode: 'E',
+  names: 'N',
   linkedMri: 'M',
   /** With Ctrl, or ⌘ on a Mac: not a single-key shortcut. */
   undo: 'Z',
@@ -63,6 +64,7 @@ export type KeymapState = Pick<
   | 'spinalCordVisible'
   | 'hemisphere'
   | 'exploded'
+  | 'namesShown'
 > & {
   /** The exploded view can be drawn: the visual-field map is not pairing the hemispheres. */
   explodable: boolean;
@@ -108,6 +110,7 @@ export interface KeymapCommands {
   setSpinalCordVisible(visible: boolean): void;
   setHemisphere(hemisphere: Hemisphere): void;
   setExploded(exploded: boolean): void;
+  setNamesShown(shown: boolean): void;
   orbitBy(turn: OrbitTurn): void;
   panBy(pan: OrbitPan): void;
   dolly(factor: number): void;
@@ -218,6 +221,12 @@ const COMMANDS: readonly Command[] = [
     keys: letters(SHORTCUT_KEYS.explode),
     run: (_press, commands, state) => {
       if (!state.tractReferenceActive && state.explodable) commands.setExploded(!state.exploded);
+    },
+  },
+  {
+    keys: letters(SHORTCUT_KEYS.names),
+    run: (_press, commands, state) => {
+      if (!state.tractReferenceActive) commands.setNamesShown(!state.namesShown);
     },
   },
 ];

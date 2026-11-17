@@ -1,4 +1,4 @@
-import type { LinkState, Region } from '../../types/index.ts';
+import type { HighlightedRegion, LinkState, Region } from '../../types/index.ts';
 import { PARAMS } from './url-state.ts';
 
 /** What this anatomy publishes: the ids a link may name. */
@@ -6,7 +6,6 @@ export interface KnownLinkIds {
   regions: ReadonlyMap<string, Pick<Region, 'kind'>>;
   atlases: ReadonlySet<string>;
   details: ReadonlySet<string>;
-  cutAtlases: ReadonlySet<string>;
   views: ReadonlySet<string>;
   surfaceColors: ReadonlySet<string>;
   explorers: ReadonlySet<string>;
@@ -48,7 +47,6 @@ export function checkLink(
   const checks: [keyof LinkState, (value: never) => boolean][] = [
     ['atlas', (id: string) => known.atlases.has(id)],
     ['detail', (id: string) => known.details.has(id)],
-    ['cutAtlas', (id: string) => known.cutAtlases.has(id)],
     ['view', (id: string) => known.views.has(id)],
     ['surfaceColor', (id: string) => known.surfaceColors.has(id)],
     ['explorer', (id: string) => known.explorers.has(id)],
@@ -60,6 +58,8 @@ export function checkLink(
     ['circuit', (id: string) => known.circuits.has(id)],
     ['circuitMap', (id: string) => known.maps.has(id)],
     ['tracts', (ids: string[]) => ids.every((id) => known.tracts.has(id))],
+    // The reader highlights regions they can select; one unknown region and the set is not applied.
+    ['highlights', (marks: HighlightedRegion[]) => marks.every(({ region: id }) => region(id))],
   ];
   for (const [key, valid] of checks) {
     if (key in state && !(valid as (value: unknown) => boolean)(state[key])) reject(key);

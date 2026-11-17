@@ -51,11 +51,11 @@ export const en = {
   },
   section: {
     shows:
-      'A sagittal, coronal, axial or oblique plane cuts the model, and every closed solid is capped where the plane meets it. Each cap is coloured from a published label volume, chosen independently of the surface atlas.',
+      'A sagittal, coronal, axial or oblique plane cuts the model, and every closed solid is capped where the plane meets it. The cut shows inside what the brain shows outside: the atlas in the cortical ribbon, the internal anatomy’s structures and, under Arterial territories, Striatal networks or Cerebellar functions, that map voxel by voxel.',
     source:
       'The caps are this subject’s own pial, white and structure surfaces. The labels are the subject’s 1 mm FreeSurfer grid or 0.8 mm NextBrain blocks; nothing is re-segmented in the browser.',
     caution:
-      'Cut labels are 1 mm (0.8 mm for NextBrain), so thin structures are coarser on a cut than on their surfaces. HCP-MMP, Julich-Brain and Schaefer cut labels are projections of surface labels into the grey-matter ribbon, not volumetric atlases. Shading from the T1 is illustrative.',
+      'A cut’s labels are 1 mm (0.8 mm for NextBrain), so thin structures are coarser on a cut than on their surfaces. On a cut, HCP-MMP, Julich-Brain, Schaefer and Desikan-Killiany are projections of surface labels into the grey-matter ribbon, not volumetric atlases. Shading from the T1 is illustrative.',
   },
   lesion: {
     shows:
@@ -143,11 +143,11 @@ export const fr: typeof en = {
   },
   section: {
     shows:
-      'Un plan sagittal, coronal, axial ou oblique coupe le modèle, et chaque solide fermé reçoit une face de coupe là où le plan le rencontre. Chaque face est colorée d’après un volume d’étiquettes publié, choisi indépendamment de l’atlas de surface.',
+      'Un plan sagittal, coronal, axial ou oblique coupe le modèle, et chaque solide fermé reçoit une face de coupe là où le plan le rencontre. La coupe montre au-dedans ce que le cerveau montre\u202f: l’atlas dans le ruban cortical, les structures de l’anatomie interne et, sous Territoires artériels, Réseaux striataux ou Fonctions cérébelleuses, cette carte voxel par voxel.',
     source:
       'Les faces de coupe sont les surfaces piale, blanche et des structures propres à ce sujet. Les étiquettes sont la grille FreeSurfer de 1\u00a0mm du sujet ou les blocs NextBrain de 0,8\u00a0mm\u202f; rien n’est resegmenté dans le navigateur.',
     caution:
-      'Les étiquettes de coupe sont à 1\u00a0mm (0,8\u00a0mm pour NextBrain)\u202f: les structures fines sont plus grossières sur une coupe que sur leur surface. Les étiquettes de coupe HCP-MMP, Julich-Brain et Schaefer sont des projections d’étiquettes de surface dans le ruban de substance grise, et non des atlas volumiques. L’ombrage tiré de la T1 est illustratif.',
+      'Les étiquettes d’une coupe sont à 1\u00a0mm (0,8\u00a0mm pour NextBrain)\u202f: les structures fines sont plus grossières sur une coupe que sur leur surface. En coupe, HCP-MMP, Julich-Brain, Schaefer et Desikan-Killiany sont des projections d’étiquettes de surface dans le ruban de substance grise, et non des atlas volumiques. L’ombrage tiré de la T1 est illustratif.',
   },
   lesion: {
     shows:

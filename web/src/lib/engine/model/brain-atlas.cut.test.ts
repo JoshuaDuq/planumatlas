@@ -32,8 +32,9 @@ test(
     await model.initialize('destrieux');
     const sections = new BrainSections(surface, new URL('volumes.json', base));
     await sections.setMode('coronal');
-    // The first cut brings the envelopes and the cord; nothing already held is fetched again.
+    // The first cut brings the envelopes and the supplemental layers; nothing already held is fetched again.
     assert.deepEqual(parsed.sort(), [
+      'arousal-nuclei.glb',
       'cortex-destrieux.glb',
       'learning.glb',
       'spinal-cord.glb',
@@ -46,13 +47,16 @@ test(
     const solids = sections.tissues.solids.solids;
     const learning = model.layers.get('learning')!.meshes;
     const cord = model.layers.get('pam50')!.meshes;
+    const nuclei = model.layers.get('aan')!.meshes;
     const wedges = model.ribbonWedges.get('destrieux')!;
     const shared = new Set(
-      [...model.envelopes!, ...learning, ...cord, ...wedges].map((mesh) => mesh.geometry),
+      [...model.envelopes!, ...learning, ...cord, ...nuclei, ...wedges].map(
+        (mesh) => mesh.geometry,
+      ),
     );
     assert.equal(
       solids.length,
-      model.envelopes!.length + learning.length + cord.length + wedges.length,
+      model.envelopes!.length + learning.length + cord.length + nuclei.length + wedges.length,
     );
     assert.ok(
       solids.every((solid) => shared.has(solid.source.geometry)),

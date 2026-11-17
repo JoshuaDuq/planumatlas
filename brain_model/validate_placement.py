@@ -10,7 +10,14 @@ import numpy as np
 
 from .labels import nextbrain, white_matter
 from .labels.tissue_labels import describe_source_label
-from .layers import arterial_territories, cerebellar_functions, learning, spinal_cord, striatal_networks
+from .layers import (
+    arousal_nuclei,
+    arterial_territories,
+    cerebellar_functions,
+    learning,
+    spinal_cord,
+    striatal_networks,
+)
 from .sources import read_color_table
 from .validate_volumes import published_codes
 
@@ -95,6 +102,10 @@ def validate_placements(config, manifest, tissues, nextbrain_source):
         grid = spinal_cord.load(config)
         for region in by_atlas.get("pam50", []):
             inside(region, grid.labels, grid.voxel_to_surface, {region["volume_label"]})
+    if arousal_nuclei.is_declared(config):
+        grid = arousal_nuclei.load(config, arousal_nuclei.read_definition())
+        for region in by_atlas.get(arousal_nuclei.ATLAS_ID, []):
+            inside(region, grid.labels, grid.voxel_to_surface, {region["source_label_id"]})
     for module, load in (
         (white_matter, lambda: white_matter.load(config)),
         (arterial_territories, lambda: arterial_territories.load(

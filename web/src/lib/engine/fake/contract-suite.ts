@@ -97,7 +97,6 @@ type Opening = ReturnType<typeof openingOf>;
 async function restore(engine: Engine, opening: Opening) {
   const { model, sections, camera, comparison, tracts } = engine;
   const cut = cutOf(sections.state);
-  if (cut.cutAtlas !== opening.cut.cutAtlas) await sections.setCutAtlas(opening.cut.cutAtlas);
   if (cut.mode !== 'off') await sections.setMode('off');
   sections.setCrosshair(opening.cut.crosshair);
   sections.setAngles(opening.cut.tilt, opening.cut.azimuth);
@@ -259,6 +258,23 @@ export function defineEngineContract(
         assert.equal(model.settings.spinalCordVisible, true);
         await model.setSpinalCordVisible(false);
         assert.equal(model.settings.spinalCordVisible, false);
+      });
+
+      it('downloads each supplemental layer on request, without showing the cord', async () => {
+        const { model } = world().engine;
+        await assert.rejects(
+          model.ensureSupplementalLayer('no-such-layer'),
+          rejectsWith('unknown-layer'),
+        );
+        for (const { id } of model.manifest.supplemental_layers ?? []) {
+          await model.ensureSupplementalLayer(id);
+          assert.ok(model.hasLayer(id), `${id} is downloaded`);
+        }
+        assert.equal(
+          model.settings.spinalCordVisible,
+          false,
+          'downloading the cord does not show it',
+        );
       });
 
       it('serves the linked MRI once loaded', async () => {
@@ -487,6 +503,36 @@ export function defineEngineContract(
           (region) => region.atlas === 'learning' && region.hemisphere === 'midline',
         );
         assert.ok(midline.length > 0 && midline.every((region) => ids.includes(region)));
+      });
+
+      it('says where each drawn region faces the reader, from the side it lies on, and the same each time', () => {
+        const { engine, regions, atlas, cortex, otherAtlas } = world();
+        const { model, camera } = engine;
+        const side = (hemisphere: 'left' | 'right') =>
+          [...regions.values()]
+            .filter(
+              (region) =>
+                region.atlas === atlas &&
+                region.kind === 'cortex' &&
+                region.hemisphere === hemisphere,
+            )
+            .map(({ id }) => id);
+        const faced = (ids: readonly string[]) => model.facing(ids).filter(Boolean).length;
+        camera.applyView('left', { immediate: true });
+        const points = model.facing(side('left'));
+        assert.equal(points.length, side('left').length);
+        for (const point of points) {
+          if (point) assert.ok([point.x, point.y, ...point.drawn].every(Number.isFinite));
+        }
+        assert.ok(faced(side('left')) > faced(side('right')), 'the left view faces the left');
+        camera.applyView('right', { immediate: true });
+        assert.ok(faced(side('right')) > faced(side('left')), 'the right view faces the right');
+        assert.deepEqual(model.facing(side('right')), model.facing(side('right')));
+        // A hidden region and one of an atlas not drawn face no one.
+        const shown = side('right')[model.facing(side('right')).findIndex(Boolean)]!;
+        model.hideRegions([shown]);
+        assert.deepEqual(model.facing([shown, cortex('right', otherAtlas).id]), [null, null]);
+        assert.throws(() => model.facing(['no-such-region']), /Unknown region: no-such-region/);
       });
 
       it('isolates the selection and releases it on a setting change', () => {
@@ -767,6 +813,24 @@ export function defineEngineContract(
         visualField.show(null);
         model.setExploded(true);
         assert.equal(model.settings.exploded, true, 'the map closed, the brain explodes again');
+      });
+
+      it('names every visual area of both hemispheres while the map draws them, and none otherwise', async () => {
+        const { model, visualField } = world().engine;
+        const names = model.manifest.retinotopy!.visual_areas.areas.map(({ name }) => name);
+        await visualField.showAreas(true);
+        assert.deepEqual(visualField.areaNames(), [], 'no map is drawn');
+        visualField.show({ dot: null });
+        assert.deepEqual(
+          visualField
+            .areaNames()
+            .map(({ hemisphere, name }) => `${hemisphere} ${name}`)
+            .sort(),
+          ['left', 'right'].flatMap((side) => names.map((name) => `${side} ${name}`)).sort(),
+        );
+        await visualField.showAreas(false);
+        assert.deepEqual(visualField.areaNames(), [], 'the areas turned off');
+        visualField.show(null);
       });
 
       it('resets every setting but the atlas, the detail level and the paint', async () => {
@@ -1117,30 +1181,48 @@ export function defineEngineContract(
         assert.deepEqual([sections.state.reverse, sections.state.overlay], [true, false]);
       });
 
-      it('chooses the label volume of the cut', async () => {
-        const { engine, otherAtlas } = world();
-        const { sections } = engine;
+      it('labels the cut with the atlas the model shows', async () => {
+        const { engine, atlas, otherAtlas } = world();
+        const { sections, model } = engine;
+        assert.equal(sections.state.cutAtlas, atlas);
         await sections.setMode('axial');
-        await sections.setCutAtlas(otherAtlas);
-        assert.equal(sections.state.cutAtlas, otherAtlas);
-        assert.equal(engine.model.settings.cutAtlas, otherAtlas);
-        const before = sections.state.cutAtlas;
-        await assert.rejects(sections.setCutAtlas('no-such-atlas'));
-        assert.equal(sections.state.cutAtlas, before, 'a failed choice leaves the previous one');
+        await model.setAtlas(otherAtlas);
+        assert.equal(sections.state.cutAtlas, otherAtlas, 'the cut follows the surface atlas');
+        assert.equal(model.settings.cutAtlas, otherAtlas);
       });
 
-      it('selects a region only the cut shows, while the cut is open on its atlas', async () => {
+      it('anchors each cut face once, largest first, on the plane, and none without a cut', async () => {
+        const { engine, regions } = world();
+        const { sections } = engine;
+        assert.deepEqual(sections.capAnchors(), []);
+        await sections.setMode('axial');
+        const anchors = sections.capAnchors();
+        assert.ok(anchors.length > 0, 'an axial cut through the brain has faces');
+        assert.equal(new Set(anchors.map(({ region }) => region)).size, anchors.length);
+        anchors.forEach(({ region, point, areaMm2 }, index) => {
+          assert.ok(regions.has(region), region);
+          assert.ok(areaMm2 > 0 && (index === 0 || anchors[index - 1]!.areaMm2 >= areaMm2));
+          const off = dot(point, sections.frame.normal) - sections.offset;
+          assert.ok(Math.abs(off) <= 0.5, `${region} lies ${off} mm off the plane`);
+        });
+        await sections.setMode('off');
+        assert.deepEqual(sections.capAnchors(), []);
+      });
+
+      it('selects a region only the cut shows, while the colour puts its map on the cut', async () => {
         const { engine } = world();
         const { model, sections } = engine;
         const cutOnly = model.manifest.regions.find(
           (region) =>
             region.kind === 'tissue-region' &&
-            region.atlas === 'nextbrain' &&
+            region.atlas === 'arterial' &&
             region.hemisphere === 'left',
         )!;
         assert.throws(() => model.select(cutOnly.id), /not visible/);
         await sections.setMode('axial');
-        await sections.setCutAtlas('nextbrain');
+        assert.throws(() => model.select(cutOnly.id), /not visible/);
+        await sections.setSurfaceColor('territory');
+        assert.equal(sections.state.cutAtlas, 'arterial');
         model.select(cutOnly.id);
         assert.equal(model.state.selectedRegion?.id, cutOnly.id);
         model.setCortexOpacity(0.5);

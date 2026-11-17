@@ -1,12 +1,12 @@
 # Sections and cuts
 
-The Section tool cuts the model with a sagittal, coronal, axial or oblique plane and caps every closed solid where the plane meets it. Each cap is coloured from a published integer label volume, chosen independently of the surface atlas. Nothing is re-segmented in the browser: the caps are the subject's own pial, white and structure surfaces, and the labels are the subject's 1 mm FreeSurfer grid or 0.8 mm NextBrain blocks. HCP-MMP, Julich-Brain and Schaefer cut labels are projections of surface labels into the grey-matter ribbon, not volumetric atlases.
+The Section tool cuts the model with a sagittal, coronal, axial or oblique plane and caps every closed solid where the plane meets it. Each cap is coloured from a published integer label volume, which is not chosen on its own: a cut shows inside what the stage shows outside, so its labels follow the masthead's **Atlas**, **Colour** and **Internal anatomy** ([Which labels a cut samples](#which-labels-a-cut-samples)). Nothing is re-segmented in the browser: the caps are the subject's own pial, white and structure surfaces, and the labels are the subject's 1 mm FreeSurfer grid or 0.8 mm NextBrain blocks. HCP-MMP, Julich-Brain and Schaefer cut labels are projections of surface labels into the grey-matter ribbon, not volumetric atlases.
 
 ```{figure} figures/sections-and-cuts-1.webp
-:alt: Six cut views of one brain. Top row, sagittal, coronal, axial and oblique cuts with Destrieux-coloured cortical ribbon, white matter and coloured deep structures. Bottom row, the same coronal cut coloured by NextBrain labels and by arterial territories.
+:alt: Six cut views of one brain. Top row, sagittal, coronal, axial and oblique cuts with Destrieux-coloured cortical ribbon, white matter and coloured deep structures. Bottom row, the same coronal cut with NextBrain's deep labels inside the Destrieux ribbon, and coloured by arterial territories.
 :name: fig-sections-and-cuts-1
 
-**One plane, four orientations and three cut-label volumes.** **a**, Sagittal cut at x = −26 mm. **b**, Coronal cut at y = −20 mm. **c**, Axial cut at z = +8 mm. **d**, Oblique cut, tilt 30°, azimuth 30°, through the origin. **e**, The coronal cut of **b** with NextBrain cut labels. **f**, The same cut with Arterial territories cut labels. Subject CDMD sub_013; positions in FreeSurfer surface RAS (right, anterior, superior); **Colour** set to Regions; **a**–**d** sample the Destrieux label volume; the camera faces the cut, the positive half-space removed.
+**One plane, four orientations and three cut-label volumes.** **a**, Sagittal cut at x = −26 mm. **b**, Coronal cut at y = −20 mm. **c**, Axial cut at z = +8 mm. **d**, Oblique cut, tilt 30°, azimuth 30°, through the origin. **e**, The coronal cut of **b** with **Internal anatomy** set to NextBrain (`detail=nextbrain`): NextBrain's labels inside the Destrieux ribbon. **f**, The same cut under **Colour** Arterial territories (`colors=territory`). Subject CDMD sub_013; positions in FreeSurfer surface RAS (right, anterior, superior); **Colour** set to Regions in **a**–**e**; **a**–**d** sample the Destrieux label volume; the camera faces the cut, the positive half-space removed.
 ```
 
 ## Data
@@ -62,9 +62,22 @@ Three kinds of closed solid are capped, in bands ranked envelope (0), ribbon (1)
 
 A section is refused, and the solid is capped by the stencil method instead, for a non-manifold intersection (`branch`), an open loop (`open`, `cycle`), no seed point (`seed`), or an earcut result with no triangles or a deviation above $10^{-3}$ (`earcut`). The stencil method increments on back faces and decrements on front faces clipped by the plane, then fills a plane quad where the count is non-zero. While a plane is dragged, sections are built in a worker that holds each solid's geometry and serialised hierarchy; the last complete cut stays on screen until the next is ready.
 
+### Which labels a cut samples
+
+The label volume a cut samples, its cut atlas, is derived from the display settings on every change of the model (`cutAtlasFor`, `web/src/lib/core/catalog/cut-labels.ts`; `BrainSections`), first rule that applies:
+
+1. A paint (a function, deficit or lesion) names regions of the surface atlas: the surface atlas.
+2. A colouring drawn from a cut-only atlas: **Arterial territories** samples `arterial`, **Striatal networks** `choi`, **Cerebellar functions** `nettekoven`.
+3. An internal-anatomy level with labels of its own: **NextBrain** samples `nextbrain`.
+4. Otherwise the surface atlas.
+
+A rule whose atlas the build does not publish is skipped; a surface atlas with no published labels is an error. The cut's labels therefore never disagree with the surface: switching the atlas relabels an open cut, and the Anatomy list, hover, selection, names on the brain, the Linked MRI readout and its paint all read the same derived atlas. A region the current labels leave off the cut says which control shows it (`other-colour` or `other-detail`), and revealing it from the Anatomy search changes that control.
+
+The cortical ribbon keeps the surface atlas's parcel solids under NextBrain, Striatal networks and Cerebellar functions, so the cut's cortex is the surface's; only the arterial territories, which the surface also draws per vertex, label the ribbon voxel by voxel. Where those parcels cap the ribbon, a voxel the sampled volume calls cortex (Destrieux's `kind: cortex`, NextBrain's reused Desikan-Killiany `ctx-` block) lies inside the white surface, and is drawn and named as white matter.
+
 ### Label sampling
 
-A cap point takes the label with the largest summed trilinear weight over its eight surrounding voxels (`LABEL_AT`, the ANTs genericLabel rule), visiting corners in the same order as the CPU `Volume.label`, so ties break identically. The result is exact at voxel centres and never a label absent from the eight neighbours. Where a region has a parcel solid, the cap is that solid's geometry; atlases with no parcel solids (NextBrain and the layer cut atlases) colour the envelope and structure caps from the label volume beneath them (`tissues/cap-labels.ts`), code 0 keeping the cap's own colour.
+A cap point takes the label with the largest summed trilinear weight over its eight surrounding voxels (`LABEL_AT`, the ANTs genericLabel rule), visiting corners in the same order as the CPU `Volume.label`, so ties break identically. The result is exact at voxel centres and never a label absent from the eight neighbours. Where a region has a parcel solid, the cap is that solid's geometry; cut atlases with no parcel solids (NextBrain and the three maps) colour the envelope and structure caps from the label volume beneath them (`tissues/cap-labels.ts`), code 0 keeping the cap's own colour. A map samples every structure cap it reaches, since a structure's own label (a caudate among the striatal networks) stays in its table where the map relabels its voxels.
 
 ### Plane geometry
 
@@ -76,15 +89,15 @@ for tilt $t \in [0°, 90°]$ and azimuth $a \in [-180°, 180°]$. The offset ran
 
 ## Display
 
-**Section** chooses **Full brain**, **Sagittal**, **Coronal**, **Axial** or **Oblique** and the cut labels. The section bar sets the offset (0.5 mm steps), and for an oblique plane tilt and azimuth (1° steps, default 30° each); **Reverse side** keeps the other half. The camera turns to face the cut.
+**Section** chooses **Full brain**, **Sagittal**, **Coronal**, **Axial** or **Oblique**; it offers no labels of its own, and the section bar names those the stage puts on the cut (for example `1 mm source grid · derived HCP labels`). The section bar sets the offset (0.5 mm steps), and for an oblique plane tilt and azimuth (1° steps, default 30° each); **Reverse side** keeps the other half. The camera turns to face the cut.
 
 Caps follow **Colour** as the surfaces do (`paintSolids`). In Tissue colour only, the T1 modulates the lit face:
 
 $$c' = c\,\bigl(1 + s\,(2I - 1)\bigr), \qquad I = \operatorname{clamp}\!\left(\frac{T_1 - 85}{180 - 85},\,0,\,1\right),$$
 
-with $s$ = `intensity.cut_strength` = 0.5; under a published palette (atlas, network, territory, CAB-NP or paint colours) $s = 0$. Solid caps also tilt their shading normal along the in-plane T1 gradient by `solid_relief_mm` = 1.2 mm; no geometry moves. The face under the pointer is lifted toward white by 0.26, the selection by 0.45 (`HIGHLIGHT_LIFT`). Label textures are `R16UI` (`R8UI` for white matter) with nearest filtering; a hidden label is discarded from the cap. Focus greys every cap except the selection and its constituents ([dissection and display](dissection-and-display.md)).
+with $s$ = `intensity.cut_strength` = 0.5; under a published palette (atlas, lobe, network, CAB-NP, territory, striatal, cerebellar or paint colours) $s = 0$. Under **Striatal networks** and **Cerebellar functions** only the map's own labels take colour on a cut; every other label keeps its tissue, and the stage key says the map is drawn on cut faces. Surfaces keep their tissue colour there: no cerebellar lobule is a majority of one functional region. Solid caps also tilt their shading normal along the in-plane T1 gradient by `solid_relief_mm` = 1.2 mm; no geometry moves. The face under the pointer is lifted toward white by 0.26, the selection by 0.45 (`HIGHLIGHT_LIFT`). Label textures are `R16UI` (`R8UI` for white matter) with nearest filtering; a hidden label is discarded from the cap. Focus greys every cap except the selection and its constituents ([dissection and display](dissection-and-display.md)).
 
-URL keys: `cut` (`sagittal`, `coronal`, `axial`, `oblique`), `pos` (mm, to 0.1), `rev`, `tilt`, `az` and `cuts` (cut atlas).
+URL keys: `cut` (`sagittal`, `coronal`, `axial`, `oblique`), `pos` (mm, to 0.1), `rev`, `tilt` and `az`. The labels need no key: `atlas`, `colors` and `detail` decide them. An older link's `cuts` is ignored.
 
 ## Validation
 
@@ -101,13 +114,17 @@ URL keys: `cut` (`sagittal`, `coronal`, `axial`, `oblique`), `pos` (mm, to 0.1),
 | Sectioner (`plane-section.test.ts`) | Box section has the square's area; holes kept; non-manifold cut reported | passes |
 | Worker (`solid-sections.test.ts`) | Worker caps equal main-thread caps; a failure rejects every build | passes |
 | GPU labels (`label-sampling.svelte.test.ts`, `gpu-sections.test.ts`) | `labelAt` equals `Volume.label`; GPU world-to-voxel equals CPU within $10^{-12}$ | passes |
+| Derived labels (`cut-labels.test.ts`, `sections.test.ts`, engine contract suite) | Atlas, colouring, level and paint give the cut atlas of the rules above; an atlas switch relabels an open cut; a failed load of labels no longer called for is not reported | passes |
+| Ribbon under another volume (`solid-assets.test.ts`, `palette.test.ts`) | The surface atlas's parcels cap the ribbon, unsampled, under NextBrain and the subcortical maps, not under the arterial territories; the volume's cortex inside the white surface is drawn white | passes |
 | Planes (`coordinates.test.ts`, `sections.test.ts`) | Oblique frame orthonormal; every reachable oblique offset is a legal cut | passes |
 
 ## Limitations
 
 - Cut labels are 1 mm (0.8 mm for NextBrain); thin structures are coarser on a cut than on their surfaces.
 - 31 NextBrain labels win no block and appear on no cut.
-- HCP-MMP, Julich-Brain and Schaefer cut labels are ribbon-restricted projections of surface labels.
+- HCP-MMP, Julich-Brain, Schaefer and Desikan-Killiany cut labels are ribbon-restricted projections of surface labels.
+- A cut cannot show one cortical atlas while the surface shows another; [atlas comparison](atlas-comparison.md) lists how a region of one atlas overlaps another's.
+- Under NextBrain or a subcortical map, the ribbon's parcels and the volume's deep labels come from different segmentations; at their boundary a sliver of the volume's cortex is drawn as white matter.
 - Voxel boundaries and the cortical surfaces need not coincide.
 - 116 of 324 structure solids on CDMD touch themselves across voxel corners; their cuts can fall back to the stencil cap.
 - FreeSurfer reported 8 surface defect holes (3 left, 5 right) before repair.

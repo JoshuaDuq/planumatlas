@@ -87,6 +87,13 @@ export interface VisualFieldUniforms {
   visualProbe: IUniform<Vector3>;
   /** The eccentricity the template was fitted to, in degrees; beyond it the map is drawn darker. */
   visualMeasured: IUniform<number>;
+  /** 1 while the named visual areas' borders are drawn on the map. */
+  visualAreasMix: IUniform<number>;
+  /**
+   * Each named area's border class by its code, 1 to 4, no two areas that meet alike; 0 for no area
+   * (`areaBorderClasses`). Filled the first time the borders are drawn.
+   */
+  visualAreaClass: IUniform<Float32Array>;
 }
 
 /*
@@ -94,7 +101,13 @@ export interface VisualFieldUniforms {
  * darker cortex, so the areas' borders read under the stage's light; the measured eccentricity is a
  * light line, and the cortex beyond it darker. Linear values.
  */
-const VISUAL_TONES = { outside: 0.045, areas: [0.6, 0.27, 0.11], extrapolated: 0.65, line: 0.85 };
+const VISUAL_TONES = {
+  outside: 0.045,
+  areas: [0.6, 0.27, 0.11],
+  extrapolated: 0.65,
+  line: 0.85,
+  border: 1,
+};
 
 /** Display colours describe tissue classes, never a measured tissue albedo. */
 export function tissueColor(
@@ -267,7 +280,7 @@ varying float vSulcalDepth;
 varying vec2 vUserMap;
 ${withNetworks ? 'attribute float _network;\nuniform highp sampler2D networkPalette;\nvarying vec4 vNetworkColor;' : ''}
 ${withTerritories ? 'attribute float _territory;\nuniform highp sampler2D territoryPalette;\nvarying vec4 vTerritoryColor;' : ''}
-${visual ? VISUAL_VERTEX_DECLARATIONS : ''}
+${visual ? visualVertexDeclarations(visual.visualAreaClass.value.length) : ''}
 ${shader.vertexShader}`.replace(
       '#include <begin_vertex>',
       `#include <begin_vertex>
@@ -379,25 +392,36 @@ ${shader.fragmentShader}`.replace(
  * weight back out: a triangle reaching past V3 then interpolates only its V1–V3 corners, where a
  * plain average would pull it towards fixation (zero) across the band.
  */
-const VISUAL_VERTEX_DECLARATIONS = `attribute float _field_x;
+const visualVertexDeclarations = (areaCodes: number) => `attribute float _field_x;
 attribute float _field_y;
 attribute float _prf_sigma;
 attribute float _visual_area;
+attribute float _wang_area;
 uniform vec2 visualXDecode;
 uniform vec2 visualYDecode;
 uniform vec2 visualSigmaDecode;
+uniform float visualAreaClass[${areaCodes}];
 varying vec3 vVisualField;
-varying vec2 vVisualArea;`;
+varying vec2 vVisualArea;
+varying vec4 vVisualAreaClass;`;
 
+/*
+ * A named area's code cannot be interpolated, so each vertex carries its area's border class as one of
+ * four channels; across a triangle the channels interpolate to each class's share of the point.
+ */
 const VISUAL_VERTEX = `float visualIn = step(0.5, _visual_area);
 vVisualField = visualIn * vec3(
   _field_x * visualXDecode.y + visualXDecode.x,
   _field_y * visualYDecode.y + visualYDecode.x,
   _prf_sigma * visualSigmaDecode.y + visualSigmaDecode.x);
-vVisualArea = vec2(visualIn * _visual_area, visualIn);`;
+vVisualArea = vec2(visualIn * _visual_area, visualIn);
+int visualBorderClass = int(visualAreaClass[int(_wang_area + 0.5)] + 0.5);
+vVisualAreaClass = vec4(equal(ivec4(visualBorderClass), ivec4(1, 2, 3, 4)));`;
 
 const VISUAL_FRAGMENT_DECLARATIONS = `varying vec3 vVisualField;
 varying vec2 vVisualArea;
+varying vec4 vVisualAreaClass;
+uniform float visualAreasMix;
 uniform float visualMix;
 uniform vec3 visualProbe;
 uniform float visualMeasured;
@@ -451,31 +475,49 @@ const rampEnd = (rgb: readonly number[]) => `vec3(${rgb.map((c) => c.toFixed(1))
 /*
  * The dot is drawn as the activation it predicts, on FSL's red–yellow scale: each vertex's response
  * as a share of its response to the dot centred on its pRF, so a small dot lights every area it
- * reaches. The measured eccentricity is a line.
+ * reaches. The measured eccentricity is a line. The named areas' borders, when shown, are light lines
+ * where the shares of two border classes meet (no area being a fifth), beneath the response.
  */
 const VISUAL_FRAGMENT = `
       if (visualMix > 0.5) {
         vec3 tone = vec3(${VISUAL_TONES.outside.toFixed(3)});
         float share = vVisualArea.y;
+        vec3 field = vVisualField / max(share, 0.5);
         if (share >= 0.5) {
-          vec3 field = vVisualField / share;
           float area = floor(vVisualArea.x / share + 0.5);
           tone = vec3(area < 1.5 ? ${V1_TONE} : area < 2.5 ? ${V2_TONE} : ${V3_TONE});
           float eccentricity = length(field.xy);
           if (eccentricity > visualMeasured) tone *= ${VISUAL_TONES.extrapolated.toFixed(3)};
           float line = 1.0 - smoothstep(0.0, 1.5 * fwidth(eccentricity), abs(eccentricity - visualMeasured));
           tone = mix(tone, vec3(${VISUAL_TONES.line.toFixed(3)}), 0.7 * line);
-          if (visualProbe.z >= 0.0) {
-            float s = field.z;
-            float q = visualProbe.z * visualProbe.z / (2.0 * s * s);
-            float centred = q < 1e-3 ? q * (1.0 - 0.5 * q) : 1.0 - exp(-q);
-            float response = visualCovered(distance(field.xy, visualProbe.xy), visualProbe.z, s) / centred;
-            float edge = fwidth(response);
-            float drawn = smoothstep(${VISUAL_RESPONSE_THRESHOLD} - edge, ${VISUAL_RESPONSE_THRESHOLD} + edge, response);
-            float share = clamp((response - ${VISUAL_RESPONSE_THRESHOLD}) / ${(1 - VISUAL_RESPONSE_THRESHOLD).toFixed(3)}, 0.0, 1.0);
-            vec3 hot = mix(${rampEnd(POSITIVE_RAMP[0])}, ${rampEnd(POSITIVE_RAMP[1])}, share);
-            tone = mix(tone, sRGBTransferEOTF(vec4(hot, 1.0)).rgb, drawn);
+        }
+        if (visualAreasMix > 0.5) {
+          float classes[5] = float[5](vVisualAreaClass.x, vVisualAreaClass.y, vVisualAreaClass.z,
+            vVisualAreaClass.w, 1.0 - dot(vVisualAreaClass, vec4(1.0)));
+          float first = 0.0;
+          float second = 0.0;
+          for (int i = 0; i < 5; i++) {
+            if (classes[i] > first) {
+              second = first;
+              first = classes[i];
+            } else if (classes[i] > second) {
+              second = classes[i];
+            }
           }
+          float gap = first - second;
+          float border = 1.0 - smoothstep(0.0, max(fwidth(gap), 1e-6), gap);
+          tone = mix(tone, vec3(${VISUAL_TONES.border.toFixed(3)}), border);
+        }
+        if (share >= 0.5 && visualProbe.z >= 0.0) {
+          float s = field.z;
+          float q = visualProbe.z * visualProbe.z / (2.0 * s * s);
+          float centred = q < 1e-3 ? q * (1.0 - 0.5 * q) : 1.0 - exp(-q);
+          float response = visualCovered(distance(field.xy, visualProbe.xy), visualProbe.z, s) / centred;
+          float edge = fwidth(response);
+          float drawn = smoothstep(${VISUAL_RESPONSE_THRESHOLD} - edge, ${VISUAL_RESPONSE_THRESHOLD} + edge, response);
+          float share = clamp((response - ${VISUAL_RESPONSE_THRESHOLD}) / ${(1 - VISUAL_RESPONSE_THRESHOLD).toFixed(3)}, 0.0, 1.0);
+          vec3 hot = mix(${rampEnd(POSITIVE_RAMP[0])}, ${rampEnd(POSITIVE_RAMP[1])}, share);
+          tone = mix(tone, sRGBTransferEOTF(vec4(hot, 1.0)).rgb, drawn);
         }
         diffuseColor.rgb = tone;
       }`;
@@ -512,7 +554,7 @@ export function createAnatomicalMaterial(
   if (cortical) {
     for (const name of ['_sulc', '_openness', '_t1']) field(name);
     if (visual) {
-      for (const name of ['_field_x', '_field_y', '_prf_sigma', '_visual_area']) {
+      for (const name of ['_field_x', '_field_y', '_prf_sigma', '_visual_area', '_wang_area']) {
         if (!mesh.geometry.getAttribute(name)) {
           material.dispose();
           throw new Error(`Missing visual-field attribute ${name}: ${region.id}`);

@@ -19,7 +19,7 @@
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import IconButton, { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import Popover from '../../lib/ui/Popover.svelte';
 
   type SingleKeys = 'on' | 'off';
@@ -92,7 +92,7 @@
 
   const copy = $derived(t(lang, 'header'));
   const spoken = (label: string, choice: string) =>
-    `${label}${lang === 'fr' ? ' : ' : ': '}${choice}`;
+    `${label}${lang === 'fr' ? ' : ' : ': '}${choice}`;
 
   const languages = [
     { value: 'en', label: 'EN', name: 'English' },
@@ -111,7 +111,7 @@
   function chooseLanguage(next: Language) {
     // Said in the language just chosen.
     const name = languages.find((option) => option.value === next)!.name;
-    announce(`${t(next, 'header').languageSwitch}${next === 'fr' ? ' : ' : ': '}${name}`);
+    announce(`${t(next, 'header').languageSwitch}${next === 'fr' ? ' : ' : ': '}${name}`);
     onLanguage(next);
   }
   function chooseTheme(next: ThemeChoice) {

@@ -33,5 +33,8 @@
 - Confirm the result matches the expected scientific behavior or the pattern shown in the library’s official examples.
 - Prefer a small validation check, comparison against known outputs, or relevant tests over claiming success without evidence.
 
+## Legacy citations
+- `app.js:NNN` in comments and rule catalogues refers to the deleted legacy viewer at tag `legacy-viewer-final` (7c6202b8); see `web/docs/testing/README.md`.
+
 ## Maintenance
 This file is intentionally short. Add a rule only after the agent repeatedly makes the same mistake. Periodically delete rules that are no longer needed. Longer style or architecture notes belong in a separate document read only when relevant.

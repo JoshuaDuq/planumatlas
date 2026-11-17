@@ -5,11 +5,12 @@ import { createLanguage, startLanguage } from './language.svelte.ts';
 import { blockedStorage, fakeStorage } from './test-support.ts';
 
 describe('startLanguage', () => {
-  test('STORE-22: the start language is the link’s, else the saved one, else English', () => {
-    expect(startLanguage('fr', 'en', [])).toBe('fr');
+  test('STORE-22: the start language is the saved one, else the link’s, else English', () => {
+    expect(startLanguage('fr', 'en', [])).toBe('en');
     expect(startLanguage(undefined, 'fr', [])).toBe('fr');
     expect(startLanguage(undefined, null, [])).toBe('en');
-    expect(startLanguage('en', 'fr', [])).toBe('en');
+    expect(startLanguage('en', 'fr', [])).toBe('fr');
+    expect(startLanguage('fr', null, [])).toBe('fr');
     expect(startLanguage(undefined, 'de', [])).toBe('en');
   });
 
@@ -32,8 +33,9 @@ describe('STORE-22: every saved value with and without a link language', () => {
     [undefined, 'fr', 'fr'],
     [undefined, 'de', 'en'],
     ['fr', null, 'fr'],
-    ['fr', 'en', 'fr'],
-    ['en', 'fr', 'en'],
+    ['fr', 'en', 'en'],
+    ['fr', 'de', 'fr'],
+    ['en', 'fr', 'fr'],
     ['en', 'de', 'en'],
   ] as const)('link %j, saved %j starts in %s', (link, saved, expected) => {
     expect(startLanguage(link, saved, [])).toBe(expected);
@@ -58,11 +60,19 @@ describe('createLanguage', () => {
     expect(root.lang).toBe('fr');
   });
 
-  test('a link wins over the saved language and is not itself remembered', () => {
+  test('the saved language wins over a link’s', () => {
     const storage = fakeStorage({ 'planum-lang': 'fr' });
     const language = createLanguage('en', storageOption(storage));
-    expect(language.current).toBe('en');
-    expect(storage.store['planum-lang']).toBe('fr');
+    expect(language.current).toBe('fr');
+    expect(root.lang).toBe('fr');
+  });
+
+  test('with none saved, a link’s language starts and is not remembered', () => {
+    const storage = fakeStorage();
+    const language = createLanguage('fr', storageOption(storage));
+    expect(language.current).toBe('fr');
+    expect(root.lang).toBe('fr');
+    expect(storage.store['planum-lang']).toBeUndefined();
   });
 
   test('choosing a language persists it and <html lang> follows', () => {
@@ -75,14 +85,25 @@ describe('createLanguage', () => {
     expect(storage.store['planum-lang']).toBe('fr');
   });
 
-  test('following a link’s language changes <html lang> and is not remembered', () => {
-    const storage = fakeStorage({ 'planum-lang': 'en' });
+  test('following a link’s language with none saved changes <html lang> and is not remembered', () => {
+    const storage = fakeStorage();
     const language = createLanguage(undefined, storageOption(storage));
-    language.follow('fr');
+    expect(language.follow('fr')).toBe('fr');
     expect(language.current).toBe('fr');
     expect(root.lang).toBe('fr');
-    expect(storage.store['planum-lang']).toBe('en');
+    expect(storage.store['planum-lang']).toBeUndefined();
     expect(() => language.follow('de' as never)).toThrow(RangeError);
+  });
+
+  test('a link’s language followed later gives way to a saved one, chosen before or during the visit', () => {
+    const storage = fakeStorage({ 'planum-lang': 'en' });
+    const language = createLanguage(undefined, storageOption(storage));
+    expect(language.follow('fr')).toBe('en');
+    expect(language.current).toBe('en');
+    expect(root.lang).toBe('en');
+    language.set('fr');
+    expect(language.follow('en')).toBe('fr');
+    expect(root.lang).toBe('fr');
   });
 
   test('an unknown language is an error', () => {

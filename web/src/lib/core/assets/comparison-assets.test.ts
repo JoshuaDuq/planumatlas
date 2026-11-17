@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
 import { readComparison, readComparisonGeometry } from './comparison-assets.ts';
-import './published-test-support.ts';
 import { sha256 as checksum } from './published-test-support.ts';
 
 const json = new TextEncoder().encode('{"schema_version":1,"anatomy_id":"snail"}');

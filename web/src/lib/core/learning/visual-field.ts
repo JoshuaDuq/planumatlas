@@ -1,4 +1,4 @@
-import type { VisualFieldDot, VisualFieldPoint } from '../../engine/api.ts';
+import type { Vec3, VisualFieldDot, VisualFieldPoint } from '../../types/index.ts';
 
 export type VisualArea = 'V1' | 'V2' | 'V3';
 export const VISUAL_AREAS: readonly VisualArea[] = ['V1', 'V2', 'V3'];
@@ -107,6 +107,64 @@ export function parseVisualFieldTerritories(document: unknown): VisualFieldTerri
     };
   };
   return { left: read('left'), right: read('right') };
+}
+
+/** Where one named visual area's name stands on this brain (`retinotopy.json`, `visual_areas`). */
+export interface VisualAreaAnchor {
+  name: string;
+  hemisphere: FieldHemisphere;
+  /** The area's midthickness area on this hemisphere. */
+  mm2: number;
+  /** The anchor vertex on the pial and white surfaces, in surface RAS millimetres. */
+  pial: Vec3;
+  white: Vec3;
+}
+
+/**
+ * Every named area's anchor on both hemispheres, larger areas first, so a crowded stage names those first.
+ * `names` are the manifest's, in code order; the sidecar must code and anchor exactly them.
+ */
+export function parseVisualAreaAnchors(
+  document: unknown,
+  names: readonly string[],
+): VisualAreaAnchor[] {
+  const published = (document as { visual_areas?: unknown }).visual_areas as
+    | {
+        codes: Record<string, number>;
+        hemispheres: Record<
+          string,
+          Record<string, { mm2: number; pial: number[]; white: number[] }>
+        >;
+      }
+    | undefined;
+  if (!published) throw new Error('The retinotopy sidecar names no visual areas.');
+  const coded = Object.entries(published.codes)
+    .sort(([, a], [, b]) => a - b)
+    .map(([name]) => name);
+  if (JSON.stringify(coded) !== JSON.stringify(names)) {
+    throw new Error('The retinotopy sidecar codes other visual areas than the manifest names.');
+  }
+  const point = (values: number[], where: string): Vec3 => {
+    if (values.length !== 3 || !values.every(Number.isFinite)) {
+      throw new Error(`${where} is not a point.`);
+    }
+    return [values[0]!, values[1]!, values[2]!];
+  };
+  const anchors = (['left', 'right'] as const).flatMap((hemisphere) =>
+    names.map((name) => {
+      const anchor = published.hemispheres[hemisphere]?.[name];
+      if (!anchor) throw new Error(`The ${hemisphere} ${name} has no anchor.`);
+      if (!(anchor.mm2 > 0)) throw new Error(`The ${hemisphere} ${name} has no area.`);
+      return {
+        name,
+        hemisphere,
+        mm2: anchor.mm2,
+        pial: point(anchor.pial, `The ${hemisphere} ${name}’s pial anchor`),
+        white: point(anchor.white, `The ${hemisphere} ${name}’s white anchor`),
+      };
+    }),
+  );
+  return anchors.sort((a, b) => b.mm2 - a.mm2);
 }
 
 /**

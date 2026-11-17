@@ -1,10 +1,10 @@
 import type { Language, Manifest, Region } from '../../types/index.ts';
+import { cutAtlasesOf } from './cut-labels.ts';
 import { labelOf, type RegionLabel } from './labels.ts';
 import { editDistance } from './nearest.ts';
 import { cabNpName, type CabNpPartition } from './networks.ts';
 import {
   belongsToDetail,
-  cutAtlasesOf,
   visibilityOf,
   type Visibility,
   type VisibilitySettings,
@@ -257,11 +257,11 @@ export function createCatalog(
 
     /**
      * Cortical groups of the active atlas, the structures of the active detail
-     * level, then the cut-only regions of the active cut atlas.
+     * level, then the cut-only regions of the cut atlas.
      *
      * Each family is filtered by the control that actually selects it: surfaces
      * by the surface atlas, structures by the detail level, tissue regions by
-     * the cut atlas.
+     * the cut atlas those and the colouring call for.
      */
     groups(settings: CatalogSettings): CatalogGroup[] {
       if (settings?.lang) ensureLang(settings.lang);

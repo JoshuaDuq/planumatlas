@@ -28,9 +28,16 @@ export function createCopier(words: () => { copied: string; failed: string }) {
     get state() {
       return state;
     },
-    async copy(text: string) {
+    /**
+     * Text, or a PNG still being made. The write is asked for before anything is awaited, inside the
+     * press, with the image to follow: Safari refuses a clipboard write begun once the press is over.
+     */
+    async copy(content: string | Promise<Blob>) {
       // Inside the async function, a missing clipboard (an insecure page) rejects like a refusal.
-      const write = async () => navigator.clipboard.writeText(text);
+      const write = async () =>
+        typeof content === 'string'
+          ? navigator.clipboard.writeText(content)
+          : navigator.clipboard.write([new ClipboardItem({ 'image/png': content })]);
       await write().then(
         () => settle('copied'),
         (error: unknown) => {

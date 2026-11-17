@@ -5,7 +5,7 @@
   import '../../styles/index.css';
   import Tooltip from '../../lib/ui/Tooltip.svelte';
   import Dock from '../stage/Dock.svelte';
-  import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
+  import { DEFAULT_DISPLAY } from '../../lib/state/display-state.ts';
   import type { DockCommands } from '../stage/dock-commands.ts';
   import '../stage/stage-vars.css';
   import SectionBar from './SectionBar.svelte';
@@ -37,6 +37,7 @@
     setInternalVisible() {},
     setSpinalCordVisible: async () => {},
     resetDisplay() {},
+    setNamesShown() {},
   };
 
   let host: HTMLElement;
@@ -81,6 +82,7 @@
       exploded: false,
       internalVisible: true,
       spinalCordVisible: false,
+      namesShown: false,
       explorer: 'anatomy',
       anatomy: 'cdmd',
       referenceAnatomy: 'cdmd',

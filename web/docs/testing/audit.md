@@ -129,7 +129,7 @@ Paths are relative to `web/`. Cases are from the CI run (or counted from the sou
 | `src/lib/controller/links.test.ts` | 14 | R (+I: 3 cases count spied `hold`/`schedule`/`release` calls and `restore` calls) | unit | unit | keep (LINK-01–LINK-04, LINK-06–LINK-08, LINK-10, LINK-17, LINK-20) |
 | `src/lib/controller/modes.test.ts` | 13 (3 from a loop) | R (+W: 1; +I: 1 pins fire-and-forget) | unit | unit | keep (CTRL-21–23); fix 'back on Functions on the right atlas', which asserts before the un-awaited re-open could show: await `scene.settled()` first |
 | `src/lib/controller/navigation/learning.test.ts` | 6 | R | unit | unit | keep (LESSON-07, -09); add a right-hemisphere landmark and a 2-element centroid (only S3 has them) |
-| `src/lib/controller/speech.test.ts` | 8 | R | unit | unit | keep (KEY-17–21); its viewer ref is a citation comment |
+| `src/lib/core/speech.test.ts` | 8 | R | unit | unit | keep (KEY-17–21); its viewer ref is a citation comment |
 | `src/lib/core/assets/asset-cache.test.ts` | 8 | R | unit | unit | keep (ASSET-01, -04–09) |
 | `src/lib/core/assets/comparison-assets.test.ts` | 14 (`describe.each` runs 4 cases × 2 readers) | R (+S: 1 case checks the published cdmd files against their SHA-256) | unit | unit | keep (ASSET-06, -12, -13) |
 | `src/lib/core/assets/diffusion-assets.test.ts` | 3 | R | unit | unit | keep (ASSET-01, -06, -10) |
@@ -262,6 +262,7 @@ Paths are relative to `web/`. Cases are from the CI run (or counted from the sou
 | `build/site.test.ts` | 1 | H | unit | unit | keep (BUILD-01); assert the literal `/neuroatlas/` and `/neuroatlas/next/`, not the module's own constants |
 | `test/no-triple-slash.test.ts` | 1 | H | unit | unit | keep (BUILD-11) |
 | `test/repo.test.ts` | 1 | H | unit | unit | keep (BUILD-12; holds ASSET-14 incidentally) |
+| `test/import-direction.test.ts` | 4 | R | unit | unit | keep (BUILD-17) |
 | `e2e/journeys/boot.spec.ts` | 5 | R | e2e | e2e | keep (ASSET-15, -21, SW-10, BOOT screens, SHELL-11, -13) |
 | `e2e/journeys/scene.spec.ts` | 4 | R | e2e | e2e | keep (LINK-21, pick and inspect, find a region) |
 | `e2e/journeys/explorers.spec.ts` | 3 | R | e2e | e2e | keep (a function, a deficit, a circuit) |
@@ -591,7 +592,8 @@ Measured in CI run 40377467496, job 121764433200 (browser shard 4). Cases are th
 | sections › hands out snapshots, not its live state | 4542 | no | no: ends `reverse: false` | share boot |
 | sections › keeps the crosshair and the offset inside the volume | 9888 | yes: opens a sagittal cut | yes: mode, offset and crosshair | share boot + `setMode('off')`, `setCrosshair([0, 0, 0])` |
 | sections › validates the oblique angles and the display options | 4506 | no: mode stays off | yes: angles 10/5, reverse true | share boot + `setAngles(30, 30)`, `setDisplay({ reverse: false, overlay: false })` |
-| sections › chooses the label volume of the cut | 14415 | yes: axial cut on the second atlas's tissue volume | yes: mode and cut atlas | share boot + `setCutAtlas(first)`, `setMode('off')` |
+| sections › labels the cut with the atlas the model shows | not timed (replaced "chooses the label volume of the cut", 14415 ms, on 2026-11-17) | yes: axial cut, then the second atlas and its tissue volume | yes: mode, and the atlas the cut atlas follows | share boot + `setAtlas(first)`, `setMode('off')` |
+| sections › selects a region only the cut shows, while the colour puts its map on the cut | not timed (not in the measured run; renamed from "…while the cut is open on its atlas" on 2026-11-17) | yes: axial cut on the arterial tissue volume | yes: colour `territory`, cortex opacity 0.5 (it ends with the cut off) | share boot + reset |
 | sections › serves the linked MRI once loaded | 9391 | yes: fetches `mri.volume` and `aseg.volume` | yes: asserts "not loaded" first; a load cannot be undone | fresh boot |
 | sections › resamples the planes and samples the volume only once loaded | 13782 | yes: real volumes and CPU resampling | yes: same as above | fresh boot (can share one fresh engine with the case above if merged) |
 | sections › colours the surface, downloading what the colour needs | 14043 | yes: downloads the T1 and the functional colours | no: ends on `atlas` | share boot |

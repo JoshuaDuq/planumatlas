@@ -96,7 +96,7 @@ export const fr: typeof en = {
   retry: 'Recharger les données de référence',
   tryAgain: 'Réessayer',
   matches: (count: number) => `${count} ${count === 1 ? 'faisceau' : 'faisceaux'}`,
-  loaded: (name: string) => `Chargé : ${name}`,
+  loaded: (name: string) => `Chargé : ${name}`,
   restored: 'Faisceaux initiaux rétablis.',
   exported: 'CSV des longueurs exporté.',
   ready: 'Données de référence prêtes.',

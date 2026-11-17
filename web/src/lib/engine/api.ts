@@ -36,75 +36,66 @@ import type { FunctionalConnectivity } from '../core/catalog/functional-connecti
 import type { DisorderEffects } from '../core/catalog/disorder-effects.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
+  CameraSnapshot,
+  CameraView,
+  CapAnchor,
+  ChromeInsets,
+  ChromeMotion,
   CutMode,
+  DisplayChange,
   DisplaySettings,
+  EngineError,
+  FacingPoint,
+  FrameRegionOptions,
+  FramingClearance,
   Hemisphere,
-  Language,
+  HoverEvent,
+  LesionMeasurement,
+  LesionSphere,
   LoadProgress,
   Manifest,
   ModelState,
+  MoveOptions,
+  MprPlane,
+  MriDisplay,
+  MriWindow,
+  NamedVisualArea,
+  OnProgress,
   Orbit,
+  OrbitPan,
+  OrbitTurn,
   Paint,
+  PlaneFrame,
+  PlaneSlice,
+  PlaneTracts,
+  Presentation,
+  Rect,
   Region,
+  ScreenPoint,
+  SectionsState,
+  Size,
+  SnapshotCapture,
+  SnapshotOptions,
+  SpinalCordLoad,
   SurfaceColor,
   Theme,
+  TractBundle,
+  TractCrossing,
+  Vec3,
   ViewName,
+  ViewportEvent,
+  VisualAreaName,
+  VisualFieldDot,
+  VisualFieldReading,
 } from '../types/index.ts';
 
-export type Vec3 = readonly [number, number, number];
-
-export interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface Size {
-  width: number;
-  height: number;
-}
-
-/** An error the engine raises with a machine-readable code (`unknown-layer`, `asset-fetch`, `asset-updated`; brain-atlas.js:50, published-assets.js:8). */
-export type EngineError = Error & { code?: string };
+// The contract's plain data lives in lib/types; it is re-exported here as part of the contract.
+export type * from '../types/engine.ts';
+export type { MriWindow } from '../types/index.ts';
 
 // ---------------------------------------------------------------------------
 // Events
 // ---------------------------------------------------------------------------
-
-/** What the camera shows the stage chrome, derived from the camera (viewport-chrome.js:834). */
-export interface CameraView {
-  /** Anatomical letter at each stage edge (orientation.js:72). */
-  edges: Record<'top' | 'right' | 'bottom' | 'left', 'R' | 'L' | 'S' | 'I' | 'P' | 'A'>;
-  /** The scale bar in true millimetres, or null while the stage has no size (scale-bar.js:28). */
-  scale: { millimetres: number; pixels: number } | null;
-  /** The camera's world basis, unit vectors toward screen right, screen up and out of the screen. */
-  basis: { right: Vec3; up: Vec3; back: Vec3 };
-}
-
-/** A point on the canvas, in CSS pixels from its top left. */
-export interface ScreenPoint {
-  x: number;
-  y: number;
-}
-
-/** Where the pointer is over the stage, in CSS pixels relative to the canvas (picking.js:93). */
-export interface HoverEvent {
-  region: Region | null;
-  position: { x: number; y: number } | null;
-}
-
-/** The stage's measured size and the part of it the interface leaves uncovered (app.js:122). */
-export interface ViewportEvent {
-  visibleRect: Rect;
-  hostSize: Size;
-}
-
-/** The model or the sections changed (app.js:2096-2097: both ran the one render). */
-export interface DisplayChange {
-  model: ModelState;
-  sections: SectionsState;
-}
 
 export interface EngineEvents {
   /** Display snapshot after a model or sections change (app.js:2096-2097). */
@@ -135,8 +126,11 @@ export interface EngineEvents {
   tractsVisibility: undefined;
   /** While the lesion is being placed, a click met the brain or a cut face here, in RAS millimetres. */
   lesionPoint: { point: Vec3 };
-  /** While the visual field is probed, a click met the brain: its predicted reading, or null outside V1–V3. */
-  visualFieldPoint: { reading: VisualFieldReading | null };
+  /**
+   * While the visual field is probed, a click met the brain: its predicted reading, or null outside V1–V3,
+   * and the named visual area there, or null outside all of them.
+   */
+  visualFieldPoint: { reading: VisualFieldReading | null; visualArea: NamedVisualArea | null };
   /** High frequency: every camera move. Never route through reactive state (app.js:1819-1823). */
   camera: CameraView;
   /** High frequency: pointer-over-region, once per frame of a pointer move (app.js:1804). */
@@ -193,11 +187,6 @@ export type SegmentationAgreementData = SegmentationAgreement;
 // Model (BrainAtlas, model/brain-atlas.js)
 // ---------------------------------------------------------------------------
 
-export type SpinalCordLoad = 'unloaded' | 'loading' | 'ready' | 'error';
-
-/** A download's progress callback (brain-atlas.js:221). */
-export type OnProgress = (progress: LoadProgress | undefined) => void;
-
 export interface EngineModel {
   readonly manifest: Manifest;
   readonly regions: ReadonlyMap<string, Region>;
@@ -232,6 +221,13 @@ export interface EngineModel {
   anchorOf(id: string | null): Vec3 | null;
   /** The shared visibility rule for the current settings (brain-atlas.js:714). */
   canSelect(region: Region): boolean;
+  /**
+   * Each region's label point (a parcel's `label_point_ras_mm`, a structure's anchor) where the stage
+   * shows it, when a ray from the camera to it meets that region first, a cut face of it included;
+   * null where something else is in front, the point is cut away or behind the camera, or the region
+   * is not drawn. One ray per region: read it once the camera has settled, never per frame.
+   */
+  facing(ids: readonly string[]): (FacingPoint | null)[];
 
   /** Throws for an unknown, non-region or invisible id (brain-atlas.js:719). */
   select(id: string | null): void;
@@ -276,8 +272,14 @@ export interface EngineModel {
   setDetail(id: string, onProgress?: OnProgress): Promise<void>;
   /** Download the tissue envelopes (brain-atlas.js:245); resolves at once once loaded. */
   ensureEnvelopes(onProgress?: OnProgress): Promise<void>;
-  /** Download the spinal cord layers (brain-atlas.js:291). */
+  /** Download the spinal cord's layer (brain-atlas.js:291). */
   ensureSpinalCord(onProgress?: OnProgress): Promise<void>;
+  /**
+   * Download one supplemental layer, whose regions draw nothing and cannot be selected until then;
+   * resolves at once once loaded. The cord's is `ensureSpinalCord`, and showing it stays the cord
+   * control's. Throws an `unknown-layer` error for a layer this anatomy does not publish.
+   */
+  ensureSupplementalLayer(id: string, onProgress?: OnProgress): Promise<void>;
   /**
    * Fetch an atlas or a detail level ahead of a switch, with no display change (app.js:76). Any other id, a
    * supplemental layer included, rejects with an `unknown-layer` error: those load with their own commands.
@@ -288,65 +290,6 @@ export interface EngineModel {
 // ---------------------------------------------------------------------------
 // Sections (BrainSections, slices/sections.js)
 // ---------------------------------------------------------------------------
-
-export type SectionsStatus = 'idle' | 'loading' | 'ready' | 'error';
-
-/** The code the sections report for a failed cut (sections.js:461). */
-export type SectionsErrorCode = 'asset-fetch' | 'asset-updated' | 'cut-failed';
-
-/** `BrainSections.state` (sections.js:55) as a snapshot: each read or `change` gives a fresh, read-only copy. */
-export interface SectionsState {
-  readonly mode: CutMode;
-  readonly cutAtlas: string;
-  /** RAS millimetres. */
-  readonly crosshair: Vec3;
-  readonly reverse: boolean;
-  readonly overlay: boolean;
-  /** The compared structure the linked MRI shows agreement for, by its code; null for none. */
-  readonly agreement: number | null;
-  /**
-   * The tab's paint the linked MRI draws once its labels have loaded, null for none: its id, which
-   * names its colours (a function's atlas and raised threshold too), and the cut atlas whose labels
-   * draw it.
-   */
-  readonly paint: { readonly id: string; readonly atlas: string } | null;
-  readonly tilt: number;
-  readonly azimuth: number;
-  readonly status: SectionsStatus;
-  readonly error: SectionsErrorCode | null;
-}
-
-/** A plane through the volume, in RAS millimetres (coordinates.js:36). */
-export interface PlaneFrame {
-  center: Vec3;
-  normal: Vec3;
-  u: Vec3;
-  v: Vec3;
-  /** Anatomical letters at top, right, bottom, left; empty for an oblique cut. */
-  edges: readonly string[];
-}
-
-/** The three orthogonal MPR planes (sections.js chrome AXES, ui/chrome/sections.js). */
-export type MprPlane = 'sagittal' | 'coronal' | 'axial';
-
-/** The linked MRI's resolution and window once loaded (sections.js:166). */
-export interface MriDisplay {
-  fieldOfView: number;
-  size: number;
-  windowCenter: number;
-  windowWidth: number;
-}
-
-export interface MriWindow {
-  center: number;
-  width: number;
-}
-
-/** A plane as `slice` sampled it: opaque outside the engine, and only given back to `pixels`. */
-declare const planeSlice: unique symbol;
-export interface PlaneSlice {
-  readonly [planeSlice]: true;
-}
 
 /** What a point in the volume is (sections.js:418). */
 export interface VolumeSample {
@@ -403,8 +346,6 @@ export interface EngineSections {
   setOffsetReady(offset: number): Promise<void>;
   setAngles(tilt: number, azimuth: number): void;
   setAnglesReady(tilt: number, azimuth: number): Promise<void>;
-  /** The label volume the cut samples; on failure the previous choice returns and the promise rejects (sections.js:337). */
-  setCutAtlas(atlas: string): Promise<void>;
   /** Throws a `TypeError` for a non-boolean (sections.js:363). */
   setDisplay(options: { reverse?: boolean; overlay?: boolean }): void;
   /**
@@ -433,62 +374,16 @@ export interface EngineSections {
   sample(point: Vec3): VolumeSample;
   /** The region whose drawn 3D solid holds a point; null where none does. */
   regionAt(point: Vec3): Promise<Region | null>;
+  /**
+   * Each region's cut face as drawn now, ranked caps over the ones they cover, at its own point nearest
+   * its centroid; none without a cut. Measured on a 1 mm grid over the plane when called.
+   */
+  capAnchors(): CapAnchor[];
 }
 
 // ---------------------------------------------------------------------------
 // Camera, framing and presentation (render/scene.js, app.js 249-540, 781-822, 1783)
 // ---------------------------------------------------------------------------
-
-/** How much the framing keeps clear of the dock, colour keys, markings and an open popover (viewport-chrome.js:263). */
-export interface FramingClearance {
-  inset: { top?: number; right?: number; bottom?: number; left?: number };
-  scale: { horizontal: number; vertical: number };
-}
-
-/** The camera pose a reader state keeps and `restoreCamera` puts back. Opaque to everything but the engine (app.js:754-766). */
-declare const cameraSnapshot: unique symbol;
-export interface CameraSnapshot {
-  readonly [cameraSnapshot]: true;
-}
-
-export interface MoveOptions {
-  /** No eased move: the camera is there this frame. */
-  immediate?: boolean;
-}
-
-export interface FrameRegionOptions extends MoveOptions {
-  /** Frame with a hidden structure's wider context, as a deficit's regions are; a small region otherwise sits in a lobe-sized neighbourhood. */
-  context?: boolean;
-}
-
-/** Radians; the turn one arrow key makes (keyboard-orbit.js:19). */
-export interface OrbitTurn {
-  azimuth?: number;
-  polar?: number;
-}
-
-/** Shares of the canvas height; the pan one Shift+arrow press makes, the model moving right and up. */
-export interface OrbitPan {
-  right?: number;
-  up?: number;
-}
-
-/** The phone sheet's cover of the canvas, in CSS pixels (scene.js:488). */
-export interface ChromeInsets {
-  top?: number;
-  right?: number;
-  bottom?: number;
-  left?: number;
-}
-
-/**
- * How the cover changes: `settle` is the sheet springing to a detent rather than under the finger;
- * `velocity` is that spring's start in whole moves per second (core/spring.ts), so the image rides it.
- */
-export interface ChromeMotion {
-  settle?: boolean;
-  velocity?: number;
-}
 
 export interface EngineCamera {
   /** The camera still sits where a named view put it (viewport-chrome.js:792). */
@@ -589,16 +484,6 @@ export interface EngineCamera {
   orbitLink(): Orbit | null;
 }
 
-/**
- * What `render()` pushes to the stage each time the app state changes (app.js:1618-1634). The paint goes
- * through `model.setPaint` (app.js:1613); the engine words the canvas's label and role from `lang` (decision 28).
- */
-export interface Presentation {
-  lang: Language;
-  /** The tract reference is shown alone: the brain and the cut are hidden (app.js:1618-1620). */
-  referenceOnly: boolean;
-}
-
 // ---------------------------------------------------------------------------
 // Comparison overlay (comparison/overlay.js)
 // ---------------------------------------------------------------------------
@@ -617,32 +502,6 @@ export interface EngineComparison {
 // ---------------------------------------------------------------------------
 // Tracts (diffusion/native-viewer.js, native-ui.js)
 // ---------------------------------------------------------------------------
-
-/** One loaded bundle, with its length summary at the current minimum (native-viewer.js:116). */
-export interface TractBundle {
-  id: string;
-  catalogId: string;
-  name: string;
-  label: Readonly<Record<string, string>>;
-  file: string;
-  visible: boolean;
-  total: number;
-  shown: number;
-  mean: number | null;
-  min: number | null;
-  max: number | null;
-}
-
-/**
- * The drawn streamlines where they pass within `TRACT_SLAB_MM` of a plane, each piece clipped to that
- * slab and laid flat on it.
- */
-export interface PlaneTracts {
-  /** Per segment, its two ends as (across, up) millimetres from the plane's centre along `u` and `v`. */
-  ends: Float32Array;
-  /** Per segment, its direction colour: |R|, |A|, |S| of the scanner-space step, 0–255. */
-  colors: Uint8Array;
-}
 
 /** NiiVue's `meshThicknessOn2D` in the tract MRI this replaced: what lies this close to a slice is drawn on it. */
 export const TRACT_SLAB_MM = 2;
@@ -700,36 +559,6 @@ export interface EngineTracts {
 // Lesion (lesion/lesion.ts)
 // ---------------------------------------------------------------------------
 
-/** A spherical lesion: its centre in RAS millimetres and its radius in millimetres. */
-export interface LesionSphere {
-  centre: Vec3;
-  radius: number;
-}
-
-/** What a lesion covers of each tissue, in mm³, on the FreeSurfer segmentation. */
-export type LesionTissue = Record<'cortex' | 'white' | 'deep' | 'fluid' | 'outside', number>;
-
-export interface LesionMeasurement {
-  /** mm³ of the sphere on the label grid. */
-  volume: number;
-  tissue: LesionTissue;
-  /** Every labelled region it reaches, in mm³: how much lies inside and the region's whole size. */
-  regions: ReadonlyMap<string, { inside: number; whole: number }>;
-  /** Every labelled region's whole size in mm³, reached or not: what a function's territory adds up to. */
-  sizes: ReadonlyMap<string, number>;
-  /** The tissue at the centre, and the region labelled there, on the FreeSurfer segmentation. */
-  centre: { tissue: keyof LesionTissue; region: string | null };
-  /** The tissue class of each region it reaches on the FreeSurfer segmentation (aseg and cortex). */
-  tissueOf: ReadonlyMap<string, keyof LesionTissue>;
-}
-
-/** One tract bundle's streamlines, and how many have a point inside the lesion. */
-export interface TractCrossing {
-  id: string;
-  crossing: number;
-  total: number;
-}
-
 export interface EngineLesion {
   /** Draw the lesion on the stage, or take it away with null. Throws a `RangeError` for a radius that is not positive. */
   show(sphere: LesionSphere | null): void;
@@ -763,25 +592,6 @@ export interface EngineStrokeCases {
   show(ids: readonly string[]): Promise<void>;
 }
 
-/** A point of the visual field in degrees from fixation: x to the right, y up. */
-export interface VisualFieldPoint {
-  x: number;
-  y: number;
-}
-
-/** The dot the visual-field map draws: its centre and its radius, in degrees. */
-export interface VisualFieldDot extends VisualFieldPoint {
-  radius: number;
-}
-
-/** What the predicted retinotopy says of one point of the cortex. */
-export interface VisualFieldReading extends VisualFieldPoint {
-  /** The predicted pRF size (Gaussian sigma), in degrees. */
-  sigma: number;
-  area: 'V1' | 'V2' | 'V3';
-  hemisphere: 'left' | 'right';
-}
-
 export interface EngineVisualField {
   /** The anatomy publishes predicted V1–V3 retinotopy; without it `show` throws. */
   readonly available: boolean;
@@ -797,6 +607,17 @@ export interface EngineVisualField {
   setProbing(probing: boolean): void;
   /** Every V1–V3 vertex's predicted pRF centre and area, to measure territories; downloaded on first call. */
   territories(): Promise<VisualFieldTerritories>;
+  /**
+   * Outline the named visual areas on the map's cortex, or stop. Turning them on downloads their anchors
+   * on first call and resolves once both are ready; a later call overrides one still downloading.
+   */
+  showAreas(on: boolean): Promise<void>;
+  /**
+   * Where each named area's name stands as the camera stands now, one per area and hemisphere, larger
+   * areas first; a point is null behind the camera, on a hidden hemisphere or where the cortex hides it.
+   * Empty unless the map is drawn with its areas.
+   */
+  areaNames(): readonly VisualAreaName[];
   /** The drawn cortical region of a hemisphere holding most of its predicted V1, which the map frames. */
   centralRegion(hemisphere: 'left' | 'right'): string;
 }
@@ -852,13 +673,6 @@ export interface EngineUserMap {
 // The engine
 // ---------------------------------------------------------------------------
 
-/** A snapshot of the settled frame, copied to a 2D canvas (scene.js:555). */
-export interface SnapshotCapture {
-  canvas: HTMLCanvasElement;
-  /** Pixels in the copy per CSS pixel. */
-  ratio: number;
-}
-
 export interface Engine extends Emitter<EngineEvents> {
   /** The stage canvas; the settings menu returns focus to it (header.js:169). */
   readonly canvas: HTMLCanvasElement;
@@ -878,8 +692,12 @@ export interface Engine extends Emitter<EngineEvents> {
   present(presentation: Presentation): void;
   /** Ask for a redraw, e.g. when a hidden panel is shown (app.js:1494). */
   invalidate(): void;
-  /** The settled frame, `crop` in CSS pixels of the stage (scene.js:555). */
-  captureSnapshot(crop?: Rect): SnapshotCapture;
+  /**
+   * The settled frame, `crop` in CSS pixels of the stage (scene.js:555), drawn once at `scale`. A frame
+   * wider or taller than the device can render throws an `EngineError` with code `snapshot-too-large`,
+   * before anything is drawn, and the stage is left as it was.
+   */
+  captureSnapshot(crop?: Rect, options?: SnapshotOptions): SnapshotCapture;
   /** Free every GPU resource and listener (app.js:2134). */
   dispose(): void;
 }

@@ -334,7 +334,9 @@ test('ATLAS-10 a detail level released and loaded again is exploded on its own m
 
 test('a cord loaded while exploded retains its connection to the brainstem', async () => {
   explodeNow();
-  await model.ensureSpinalCord();
+  for (const layer of model.manifest.supplemental_layers ?? []) {
+    await model.ensureSupplementalLayer(layer.id);
+  }
   for (const detail of model.manifest.detail_levels) {
     await model.setDetail(detail.id);
     assertHemispheresClear();

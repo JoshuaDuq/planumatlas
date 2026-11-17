@@ -29,6 +29,35 @@ export const en = {
   isolateHint: 'Show this region alone, framed',
   restoreHint: 'Show the rest of the brain again, framed whole',
   hideHint: 'Remove this region from view; Undo brings it back',
+  // The reader's own highlights: More's toggle, and the strip above the panel that lists them.
+  highlight: 'Highlight',
+  highlightHint: 'Mark this region in a colour of your own; the stage keys it as yours',
+  highlightFull: (max: number) => `At most ${max} regions can be highlighted; remove one first`,
+  highlighted: (name: string, color: string) => `Highlighted in ${color.toLowerCase()}: ${name}.`,
+  unhighlighted: (name: string) => `Highlight removed: ${name}.`,
+  highlightColors: {
+    blue: 'Blue',
+    raspberry: 'Raspberry',
+    green: 'Green',
+    amber: 'Amber',
+    violet: 'Violet',
+    pink: 'Pink',
+  },
+  highlightStrip: {
+    title: 'Your highlights',
+    colorOf: (name: string, color: string) => `Colour of ${name}: ${color.toLowerCase()}`,
+    colors: 'Colours',
+    remove: (name: string) => `Remove the highlight of ${name}`,
+    removeHint: 'Remove highlight',
+    elsewhere: {
+      atlas: 'Not drawn on this atlas',
+      detail: 'Not drawn in this internal anatomy',
+      colour: 'Not drawn under this colour',
+    },
+    aside: 'Not drawn while this tab shows its evidence; they come back when you leave it.',
+    lifted: 'Not drawn under the colour you chose.',
+    show: 'Show on the brain',
+  },
   constituentsHeading: 'Constituent regions',
   constituentsNote:
     'Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.',
@@ -63,6 +92,38 @@ export const fr: typeof en = {
   isolateHint: 'Afficher cette région seule, cadrée',
   restoreHint: 'Réafficher le reste du cerveau, cadré en entier',
   hideHint: 'Retirer cette région de la vue\u202f; Annuler la rétablit',
+  highlight: 'Surligner',
+  highlightHint:
+    'Marquer cette région d’une couleur de votre choix ; la légende la présente comme la vôtre',
+  highlightFull: (max: number) =>
+    `${max} régions au plus peuvent être surlignées ; retirez-en une d’abord`,
+  highlighted: (name: string, color: string) =>
+    `Région surlignée en ${color.toLowerCase()} : ${name}.`,
+  unhighlighted: (name: string) => `Surlignage retiré : ${name}.`,
+  highlightColors: {
+    blue: 'Bleu',
+    raspberry: 'Framboise',
+    green: 'Vert',
+    amber: 'Ambre',
+    violet: 'Violet',
+    pink: 'Rose',
+  },
+  highlightStrip: {
+    title: 'Vos surlignages',
+    colorOf: (name: string, color: string) => `Couleur de ${name} : ${color.toLowerCase()}`,
+    colors: 'Couleurs',
+    remove: (name: string) => `Retirer le surlignage de ${name}`,
+    removeHint: 'Retirer le surlignage',
+    elsewhere: {
+      atlas: 'Non affichée sur cet atlas',
+      detail: 'Non affichée dans cette anatomie interne',
+      colour: 'Non affichée sous cette couleur',
+    },
+    aside:
+      'Non affichés tant que cet onglet montre ses données publiées ; ils reviennent quand vous le quittez.',
+    lifted: 'Non affichés sous la couleur choisie.',
+    show: 'Afficher sur le cerveau',
+  },
   constituentsHeading: 'Régions constitutives',
   constituentsNote:
     'Union de régions sources. Surface lissée\u202f; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.',

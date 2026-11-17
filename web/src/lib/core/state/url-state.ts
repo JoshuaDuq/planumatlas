@@ -9,11 +9,19 @@ import {
   CUTS,
   EXPLORERS,
   HEMISPHERES,
+  HIGHLIGHT_COLORS,
   LESION_MODES,
   LESION_RADIUS,
+  MAX_HIGHLIGHTS,
   SURFACE_COLORS,
 } from '../../types/constants.ts';
-import type { LinkInput, LinkLesion, LinkState, Orbit } from '../../types/index.ts';
+import type {
+  HighlightedRegion,
+  LinkInput,
+  LinkLesion,
+  LinkState,
+  Orbit,
+} from '../../types/index.ts';
 
 type Defaults = Pick<
   LinkState,
@@ -54,6 +62,8 @@ type Defaults = Pick<
   | 'strokeCases'
   | 'tracts'
   | 'keepTracts'
+  | 'namesShown'
+  | 'embed'
 >;
 
 export const DEFAULTS: Defaults = {
@@ -94,6 +104,8 @@ export const DEFAULTS: Defaults = {
   strokeCases: null,
   tracts: null,
   keepTracts: false,
+  namesShown: false,
+  embed: false,
 };
 
 type Reader<T> = (value: string) => T | undefined;
@@ -216,6 +228,19 @@ const strokeCases: Reader<string[]> = (value) => {
     : undefined;
 };
 
+/** Highlighted regions as `region:colour`, in the order added: each region once, at most twelve. */
+const highlights: Reader<HighlightedRegion[]> = (value) => {
+  const marks = value.split(',').map((pair) => {
+    // Region ids hold colons themselves; the colour follows the last.
+    const at = pair.lastIndexOf(':');
+    const color = HIGHLIGHT_COLORS.find((name) => name === pair.slice(at + 1));
+    return at > 0 && color ? { region: pair.slice(0, at), color } : null;
+  });
+  if (marks.length > MAX_HIGHLIGHTS || marks.includes(null)) return undefined;
+  const list = marks as HighlightedRegion[];
+  return new Set(list.map(({ region }) => region)).size === list.length ? list : undefined;
+};
+
 /** Tract bundle ids, each once; empty when none is ticked. */
 const bundleIds: Reader<string[]> = (value) => {
   const ids = value === '' ? [] : value.split(',');
@@ -300,7 +325,6 @@ const FIELDS: Field[] = [
    */
   field('anatomy', 'anatomy', nonempty),
   field('atlas', 'atlas', nonempty),
-  field('cutAtlas', 'cuts', nonempty),
   field('internalSystem', 'system', nonempty),
   field('detail', 'detail', nonempty),
   field('selectedRegion', 'region', nonempty, identifier),
@@ -353,6 +377,12 @@ const FIELDS: Field[] = [
   field('strokeCases', 'cases', strokeCases, (ids) => ids.join(',')),
   field('tracts', 'tracts', bundleIds, (ids) => ids.join(',')),
   field('keepTracts', 'keeptracts', flag, writeFlag),
+  field('namesShown', 'names', flag, writeFlag),
+  field('highlights', 'mark', highlights, (list) =>
+    list.map(({ region, color }) => `${region}:${color}`).join(','),
+  ),
+  // Last, so a course page's address ends in what makes it a frame.
+  field('embed', 'embed', flag, writeFlag),
 ];
 
 /** The link parameter each state field travels under. */

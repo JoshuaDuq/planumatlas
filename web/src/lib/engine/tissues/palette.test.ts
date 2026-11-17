@@ -93,6 +93,34 @@ test('neutral cut and surface colours agree for gray matter, white matter and CS
   assert.notDeepEqual(palette.slice(4, 7), palette.slice(8, 11));
 });
 
+test('with the surface atlas’s parcels in the ribbon, the volume’s cortex is drawn as white matter', () => {
+  // NextBrain's cortex reuses the Desikan-Killiany block, named `ctx-`; a nucleus is not cortex.
+  const sampled = [
+    asLabel({
+      source_label_id: 2001,
+      name: 'Left-ctx-rh-bankssts',
+      kind: 'tissue',
+      color: [1, 2, 3],
+    }),
+    asLabel({ source_label_id: 11101, name: 'ctx_lh_G', kind: 'cortex', color: [4, 5, 6] }),
+    asLabel({ source_label_id: 219, name: 'Left-AD', kind: 'tissue', color: [7, 8, 9] }),
+  ].map((label) => ({ ...label, hemisphere: 'left', region_id: null }) as Label);
+  const atlas = asModelState({ ...state, surfaceColor: 'atlas' });
+  const capped = createPalette(sampled, atlas, appearance.tissue, undefined, true);
+  const white = new Color(appearance.tissue.white);
+  assertColor(capped, 0, white);
+  assertColor(capped, 1, white);
+  assertColor(
+    capped,
+    2,
+    stageLegible(new Color().setRGB(7 / 255, 8 / 255, 9 / 255, SRGBColorSpace)),
+  );
+  // Visibility is the label's own, and without the parcels the cortex keeps its colour.
+  assert.deepEqual([capped[3], capped[7]], [1, 1]);
+  const own = createPalette(sampled, atlas, appearance.tissue);
+  assert.notDeepEqual(own.slice(0, 3), capped.slice(0, 3));
+});
+
 test('removed cut labels have zero alpha and cannot be picked', () => {
   const hidden = asModelState({ ...state, hiddenRegions: new Set([labels[1]!.region_id]) });
   assert.equal(labelVisible(labels[1]!, hidden), false);

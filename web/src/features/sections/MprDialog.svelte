@@ -33,8 +33,6 @@
     EngineTracts,
     MprPlane,
     PlaneFrame,
-    PlaneSlice,
-    PlaneTracts,
     SectionsState,
     Vec3,
   } from '../../lib/engine/api.ts';
@@ -55,13 +53,10 @@
     CROSSHAIR_RING,
     PLANES,
     annotatedCopy,
-    blendFa,
     crosshairOnPlane,
-    drawSlice,
-    drawTracts,
     edgeLetter,
-    faLevels,
   } from './mpr-draw.ts';
+  import { createPlaneCache } from './mpr-plane-cache.ts';
   import {
     canvasName,
     planeName,
@@ -198,73 +193,23 @@
       : `${mapped} · ${copy.fa(decimal(anisotropy, 2, lang))}`;
   });
 
-  // A plane is resampled only when its own slice changes: the crosshair moving within it is marked
-  // over the picture, not drawn into it. Window, Level and FA opacity draw it again from what it kept
-  // of its last drawing, each part by what it was made from: the slice's samples, FA's levels and the
-  // tracts on it (SECT-38). The paint is named by its id and the cut labels that draw it, so other cut
-  // labels sample the slice again. A plane nobody can see is drawn when it is shown
-  // (sections.js:315-351), and a canvas that replaced another is drawn afresh. Only the planes shown
-  // keep anything, and only while the MRI is open.
-  interface Made<T> {
-    key: string;
-    value: T;
-  }
-  function reuse<T>(made: Made<T> | undefined, key: string, make: () => T): Made<T> {
-    return made?.key === key ? made : { key, value: make() };
-  }
-  const drawn = new Map<MprPlane, { canvas: HTMLCanvasElement; key: string }>();
-  const kept = new Map<
-    MprPlane,
-    {
-      slice: Made<PlaneSlice>;
-      fa: Made<Int16Array> | undefined;
-      tracts: Made<PlaneTracts> | undefined;
-    }
-  >();
+  // Each plane redrawn only when its picture changes, from what it kept (SECT-38, mpr-plane-cache.ts).
+  const planes = createPlaneCache({ engine: () => engine, fa: () => fa });
   $effect(() => {
     if (!reading) {
-      kept.clear();
+      planes.clear();
       return;
     }
-    const { display } = reading;
-    const { overlay, agreement, paint } = engineState.sections;
-    for (const plane of PLANES) if (!visible.includes(plane)) kept.delete(plane);
-    for (const plane of visible) {
-      const canvas = canvases[plane]!;
-      const frame = frames[plane];
-      const place = JSON.stringify([frame.center, frame.u, frame.v]);
-      const slice = JSON.stringify([place, overlay, agreement, paint, map?.key]);
-      const onPlane = tracts && JSON.stringify([place, tracts.key]);
-      const key = JSON.stringify([
-        slice,
-        display.windowCenter,
-        display.windowWidth,
-        onPlane,
-        faShown && faOpacity,
-      ]);
-      const last = drawn.get(plane);
-      if (last?.canvas === canvas && last.key === key) continue;
-      drawn.set(plane, { canvas, key });
-      untrack(() => {
-        const held = kept.get(plane);
-        const layers = {
-          slice: reuse(held?.slice, slice, () => engine.sections.slice(frame)),
-          fa: faShown
-            ? reuse(held?.fa, place, () => faLevels(frame, display.size, display.fieldOfView, fa!))
-            : undefined,
-          tracts: onPlane
-            ? reuse(held?.tracts, onPlane, () => engine.tracts.onPlane(frame))
-            : undefined,
-        };
-        kept.set(plane, layers);
-        const pixels = engine.sections.pixels(layers.slice.value);
-        if (layers.fa) blendFa(pixels, layers.fa.value, faOpacity);
-        if (layers.tracts) {
-          drawTracts(pixels, display.size, display.fieldOfView, layers.tracts.value);
-        }
-        drawSlice(canvas, pixels, display.size);
-      });
-    }
+    planes.draw({
+      display: reading.display,
+      shown: visible,
+      canvases,
+      frames,
+      sections: engineState.sections,
+      mapKey: map?.key,
+      tractsKey: tracts && tracts.key,
+      faOpacity: faShown ? faOpacity : null,
+    });
   });
 
   // Opening says nothing (the region's name does); a later change of what is under the crosshair is

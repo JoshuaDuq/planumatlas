@@ -109,7 +109,7 @@ def resample(line, step):
     """`line` at equal arc-length spacing as close to `step` as its length allows."""
     points = line.astype(np.float64)
     arc = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))])
-    count = max(2, int(round(arc[-1] / step)) + 1)
+    count = max(2, round(arc[-1] / step) + 1)
     targets = np.linspace(0.0, arc[-1], count)
     return np.column_stack([np.interp(targets, arc, points[:, k]) for k in range(3)]).astype(np.float32)
 

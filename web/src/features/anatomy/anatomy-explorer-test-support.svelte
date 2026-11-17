@@ -14,17 +14,15 @@
     settings: overrides = {},
     selected = null,
     crowd = 0,
-    rejectCutAtlas = false,
     elsewhere = [],
   }: {
     calls?: string[];
     lang?: Language;
-    /** Display settings over the defaults: a hidden hemisphere, the cut off, another cut atlas. */
+    /** Display settings over the defaults: a hidden hemisphere, the cut off, the cut's labels. */
     settings?: Record<string, unknown>;
     selected?: string | null;
     /** This many HCP-MMP areas whose names all contain "V1", more than a search lists. */
     crowd?: number;
-    rejectCutAtlas?: boolean;
     /** What the other tabs find, whatever the words. */
     elsewhere?: Elsewhere[];
   } = $props();
@@ -64,17 +62,11 @@
     { id: 'destrieux', label: 'Destrieux' },
     { id: 'hcp-mmp', label: 'HCP-MMP' },
   ];
-  const cutAtlases = [
-    { id: 'nextbrain', label: 'NextBrain' },
-    { id: 'other', label: 'Other cut atlas' },
-  ];
-
   let query = $state('');
   let expanded = $state(new Set<string>());
   let hiddenRegions = $state(new Set<string>());
   let selectedId = $state<string | null>(untrack(() => selected));
   let atlas = $state(untrack(() => (crowd > 0 ? 'hcp-mmp' : 'destrieux')));
-  let cutAtlas = $state(untrack(() => (overrides.cutAtlas as string | undefined) ?? 'nextbrain'));
   let switching = $state(false);
   let cortexVisible = $state(true);
   const current = $derived(
@@ -89,9 +81,9 @@
       cutActive: true,
       isolatedRegion: null,
       internalSystem: null,
+      cutAtlas: 'nextbrain',
       ...overrides,
       atlas,
-      cutAtlas,
       cortexVisible,
       hiddenRegions,
     }),
@@ -118,8 +110,6 @@
     {selectedId}
     {atlases}
     {atlas}
-    {cutAtlases}
-    {cutAtlas}
     inside={!cortexVisible}
     {switching}
     onScope={() => {
@@ -137,15 +127,11 @@
       calls.push(`atlas ${id}`);
       atlas = id;
     }}
-    onCutAtlas={(id) => {
-      calls.push(`cut ${id}`);
-      cutAtlas = id;
-      if (rejectCutAtlas) return Promise.reject(new Error('cut atlas failed'));
-    }}
     elsewhere={() => elsewhere}
     onElsewhere={(mode) => {
       calls.push(`tab ${mode}`);
     }}
+    table={() => ({ anatomy: 'fixture', atlas, detail: 'aseg', regions })}
   >
     {#snippet systemPicker()}<p id="system-picker">System picker</p>{/snippet}
   </AnatomyExplorer>

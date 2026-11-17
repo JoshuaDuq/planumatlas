@@ -17,8 +17,8 @@
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
-  import ExternalLink from '../deficits/ExternalLink.svelte';
-  import MethodsLink from '../deficits/MethodsLink.svelte';
+  import ExternalLink from '../info/ExternalLink.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
   import DeepToggle from '../sections/DeepToggle.svelte';
   import LinkedMriButton from '../sections/LinkedMriButton.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';

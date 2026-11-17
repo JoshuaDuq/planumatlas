@@ -30,7 +30,6 @@ export type ReaderSectionsPort = Pick<
   | 'display'
   | 'publishedWindow'
   | 'load'
-  | 'setCutAtlas'
   | 'setMode'
   | 'setAngles'
   | 'setDisplay'
@@ -52,7 +51,7 @@ export type ModelPort = Pick<
   | 'setAtlas'
   | 'setDetail'
   | 'ensureEnvelopes'
-  | 'ensureSpinalCord'
+  | 'ensureSupplementalLayer'
   | 'setSpinalCordVisible'
   | 'setInternalVisible'
   | 'select'
@@ -66,3 +65,17 @@ export type ModelPort = Pick<
 
 /** What the scene commands call on the sections. */
 export type SectionsPort = Pick<EngineSections, 'solidsReady' | 'setMode' | 'setSurfaceColor'>;
+
+/** What clinical navigation reads of the model, and the commands it gives. */
+export type NavigationModel = Pick<EngineModel, 'regions' | 'settings'>;
+export type ShowingModel = NavigationModel &
+  Pick<
+    EngineModel,
+    | 'clearIsolation'
+    | 'setInternalSystem'
+    | 'setHemisphere'
+    | 'setCortexVisible'
+    | 'setCortexOpacity'
+    | 'setInternalVisible'
+    | 'showRegions'
+  >;

@@ -59,35 +59,23 @@ test('NextBrain nuclei are grouped anatomically in either language', () => {
 
 // The legacy test 'learning systems filter detailed cut labels through source membership' also
 // asserted `labelVisible` from tissues/palette.js, which an engine chunk ports; this half is the
-// catalog's own: the system filter follows source membership for the overview's constituents.
-test('learning systems filter detailed cut labels through source membership', () => {
-  const nucleus = {
-    id: 'nextbrain:left:219',
-    atlas: 'nextbrain',
-    kind: 'structure',
-    hemisphere: 'left',
-    source_label_id: 219,
-    source_name: 'anterodorsal_nucleus_of_thalamus',
-  };
-  const unrelated = {
-    id: 'nextbrain:left:108',
-    atlas: 'nextbrain',
+// catalog's own: the system filter follows source membership for what else the cut labels.
+test('learning systems filter the cut labels through source membership', () => {
+  const network = (name: string, label: number) => ({
+    id: `choi:left:${name}`,
+    atlas: 'choi',
     kind: 'tissue-region',
     hemisphere: 'left',
-    source_label_id: 108,
-    source_name: 'basal_nucleus_of_meynert',
-  };
+    source_label_id: label,
+    source_name: name,
+  });
   const settings = {
     ...state,
-    cutAtlas: 'nextbrain',
+    cutAtlas: 'choi',
     cutActive: true,
-    internalSystem: 'Diencephalon',
-    internalConstituents: new Set([nucleus.id]),
+    internalSystem: 'Basal ganglia',
+    internalConstituents: new Set(['choi:left:Default']),
   };
-  for (const [item, expected] of [
-    [nucleus, true],
-    [unrelated, false],
-  ] as const) {
-    assert.equal(visibilityOf(item, settings).visible, expected);
-  }
+  assert.equal(visibilityOf(network('Default', 7), settings).visible, true);
+  assert.equal(visibilityOf(network('Vis', 1), settings).reason, 'other-system');
 });

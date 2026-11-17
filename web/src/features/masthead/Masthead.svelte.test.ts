@@ -54,12 +54,7 @@ describe('Masthead', () => {
     await render(Fixture);
     await expect.element(page.getByRole('banner')).toBeVisible();
     await expect.element(page.getByRole('heading', { level: 1, name: 'Planum' })).toBeVisible();
-    for (const name of [
-      'Full screen',
-      'Save image (PNG)',
-      'Copy link to this view',
-      'More settings',
-    ]) {
+    for (const name of ['Full screen', 'Save image (PNG)', 'Share this view', 'More settings']) {
       const control = el(button(name));
       expect(control.dataset.tooltip).toBe(name);
       expect(control.hasAttribute('title')).toBe(false);
@@ -110,12 +105,57 @@ describe('Masthead', () => {
     }
   });
 
-  test('Full screen and Save image only emit', async () => {
+  test('MAST-53 Full screen only emits; Save image is a menu of 2× and 3×, each emitting its scale', async () => {
     const calls: string[] = [];
     await render(Fixture, { calls });
     await button('Full screen').click();
-    await button('Save image (PNG)').click();
-    expect(calls).toEqual(['fullscreen', 'snapshot']);
+    const save = el(button('Save image (PNG)'));
+    await userEvent.click(save);
+    expect(save.getAttribute('aria-expanded')).toBe('true');
+    expect(save.hasAttribute('aria-haspopup')).toBe(false);
+    // Without an image to copy, no Copy image.
+    const items = [...document.querySelectorAll('.masthead-menu .menu-item')].map(nameOf);
+    expect(items).toEqual(['Save at 2×', 'Save at 3×']);
+    await userEvent.click(button('Save at 3×'));
+    expect(calls).toEqual(['fullscreen', 'snapshot:3']);
+    // The command closes the menu and gives focus back to its trigger.
+    await expect.poll(() => save.getAttribute('aria-expanded')).toBe('false');
+    await expect.poll(() => document.activeElement).toBe(save);
+    await userEvent.click(save);
+    await userEvent.click(button('Save at 2×'));
+    expect(calls).toEqual(['fullscreen', 'snapshot:3', 'snapshot:2']);
+  });
+
+  test('MAST-53 Copy image hands the clipboard the PNG inside the press, and shows and says so', async () => {
+    const png = new Blob([new Uint8Array([137, 80, 78, 71])], { type: 'image/png' });
+    let draw!: (image: Blob) => void;
+    const copyImage = vi.fn(() => new Promise<Blob>((drawn) => (draw = drawn)));
+    const items: ClipboardItem[] = [];
+    // As a browser does: the write settles once the image it was handed has.
+    const write = vi
+      .spyOn(navigator.clipboard, 'write')
+      .mockImplementation(async (written: ClipboardItems) => {
+        items.push(...written);
+        await written[0]!.getType('image/png');
+      });
+    const said = () => document.querySelector('.link-said')?.textContent!.trim() ?? null;
+    try {
+      await render(Fixture, { copyImage });
+      await userEvent.click(button('Save image (PNG)'));
+      await userEvent.click(button('Copy image'));
+      // Asked for while the image is still being drawn: Safari takes only a write begun in the press.
+      expect(write).toHaveBeenCalledOnce();
+      expect(items.map((item) => item.types)).toEqual([['image/png']]);
+      expect(said()).toBeNull();
+      draw(png);
+      await expect.poll(said).toBe('Image copied');
+      expect((await items[0]!.getType('image/png')).size).toBe(png.size);
+      expect(announced()).toBe('Image copied');
+      // The Share control's check is for a copied link, not an image.
+      expect(el(button('Share this view')).hasAttribute('data-copied')).toBe(false);
+    } finally {
+      write.mockRestore();
+    }
   });
 
   test('Copy link copies the address and shows and says so; a refusal is shown, not dropped', async () => {
@@ -123,29 +163,56 @@ describe('Masthead', () => {
     const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
     const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
     const said = () => document.querySelector('.link-said')?.textContent!.trim() ?? null;
+    const share = () => el(button('Share this view'));
+    const copyLink = async () => {
+      await userEvent.click(share());
+      await userEvent.click(button('Copy link to this view'));
+    };
     try {
       await render(Fixture);
-      const copy = el(button('Copy link to this view'));
-      expect(copy.dataset.tooltip).toBe('Copy link to this view');
+      expect(share().dataset.tooltip).toBe('Share this view');
       expect(said()).toBeNull();
-      copy.click();
+      await copyLink();
       await expect.poll(said).toBe('Link copied');
       expect(write).toHaveBeenCalledExactlyOnceWith(location.href);
       expect(write.mock.calls[0]![0]).toMatch(/#atlas=aseg&view=left$/);
       expect(announced()).toBe('Link copied');
-      expect(copy.hasAttribute('data-copied')).toBe(true);
+      expect(share().hasAttribute('data-copied')).toBe(true);
 
       const refusal = new DOMException('Write permission denied.', 'NotAllowedError');
       write.mockRejectedValueOnce(refusal);
-      copy.click();
+      await copyLink();
       await expect.poll(said).toBe('Could not copy the link');
       expect(announced()).toBe('Could not copy the link');
-      expect(copy.hasAttribute('data-copied')).toBe(false);
+      expect(share().hasAttribute('data-copied')).toBe(false);
       expect(logged).toHaveBeenCalledExactlyOnceWith(refusal);
     } finally {
       write.mockRestore();
       logged.mockRestore();
       history.replaceState(null, '', location.pathname);
+    }
+  });
+
+  test('MAST-52 Share offers the link and the embed code; Copy embed code copies the frame and says so', async () => {
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const said = () => document.querySelector('.link-said')?.textContent!.trim() ?? null;
+    try {
+      await render(Fixture);
+      const share = el(button('Share this view'));
+      await userEvent.click(share);
+      expect(share.getAttribute('aria-expanded')).toBe('true');
+      expect([...document.querySelectorAll('.masthead-menu .menu-item')].map(nameOf)).toEqual([
+        'Copy link to this view',
+        'Copy embed code',
+      ]);
+      await userEvent.click(button('Copy embed code'));
+      await expect.poll(said).toBe('Embed code copied');
+      expect(write).toHaveBeenCalledExactlyOnceWith(`<iframe src="${location.href}"></iframe>`);
+      expect(announced()).toBe('Embed code copied');
+      expect(share.hasAttribute('data-copied')).toBe(true);
+      await expect.poll(() => document.activeElement).toBe(share);
+    } finally {
+      write.mockRestore();
     }
   });
 
@@ -274,7 +341,7 @@ describe('Masthead', () => {
     expect(document.documentElement.dataset.singleKeys).toBe('off');
     el(radio('English')).focus();
     await userEvent.keyboard('{ArrowRight}');
-    expect(announced()).toBe('Langue : Français');
+    expect(announced()).toBe('Langue : Français');
     expect(document.documentElement.lang).toBe('fr');
     // The panel's own text follows.
     await expect.element(page.getByRole('radiogroup', { name: 'Langue' })).toBeVisible();

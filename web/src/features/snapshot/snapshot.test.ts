@@ -166,6 +166,8 @@ test('SNAP-05: every colouring has its words in English and French', () => {
       'cab-np': 'CAB-NP networks',
       functional: 'Functional divisions',
       territory: 'Arterial territories',
+      striatal: 'Striatal networks',
+      cerebellar: 'Cerebellar functions',
     },
     fr: {
       tissue: 'Tissu',
@@ -176,6 +178,8 @@ test('SNAP-05: every colouring has its words in English and French', () => {
       'cab-np': 'Réseaux CAB-NP',
       functional: 'Divisions fonctionnelles',
       territory: 'Territoires artériels',
+      striatal: 'Réseaux striataux',
+      cerebellar: 'Fonctions cérébelleuses',
     },
   } as const;
   const teaching = { en: 'Teaching set', fr: 'Ensemble pédagogique' };
@@ -353,4 +357,27 @@ test('a label under the image’s scale bar is placed again round its dot, clear
     expect(moved!.leader.x).toBeGreaterThanOrEqual(moved!.box.x);
     expect(moved!.leader.x).toBeLessThanOrEqual(moved!.box.x + moved!.box.width);
   }
+});
+
+test('SNAP-22 the reader’s highlights take a line of their own, titled in bold, and none over the tract reference', () => {
+  const highlights = {
+    title: 'Your highlights',
+    details: ['the reader’s own marks, not data', 'Precentral gyrus, left', 'Cuneus, right'],
+  };
+  const lines = snapshotCaption('en', {
+    subject: 'S',
+    atlas: 'destrieux',
+    view: 'left',
+    selection: 'Cuneus, right',
+    highlights,
+  });
+  expect(words(lines).slice(-2)).toEqual([
+    'Selected: Cuneus, right',
+    'Your highlights · the reader’s own marks, not data · Precentral gyrus, left · Cuneus, right',
+  ]);
+  expect(lines.at(-1)![0]![0]!.strong).toBe(true);
+  expect(lines.at(-1)![1]![0]!.strong).toBeUndefined();
+  expect(words(snapshotCaption('en', { reference: 'HCP842 tracts', highlights }))).toEqual([
+    'HCP842 tracts',
+  ]);
 });

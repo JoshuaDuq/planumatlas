@@ -38,6 +38,10 @@ jobs:
     permissions:
       contents: read
       pages: read
+    outputs:
+      entry: ${{ steps.expected.outputs.entry }}
+      manifest: ${{ steps.expected.outputs.manifest }}
+      version: ${{ steps.expected.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,7 +49,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -59,6 +63,20 @@ jobs:
           npm run build --prefix web
           node .github/scripts/check-dist.mjs
           cp -r web/dist dist
+
+      # What the live site must serve once this build is deployed (BUILD-19): the page's entry script,
+      # whose name carries its content hash, and the default anatomy's manifest at the version the
+      # page's head map names, the first 16 hex of its SHA-256.
+      - name: Record the page and manifest this build publishes
+        id: expected
+        shell: bash
+        run: |
+          manifest="models/$(jq -r .default public/models/anatomies.json)/manifest.json"
+          entry=$(grep -o '<script type="module" crossorigin src="/assets/[^"]*"' web/dist/index.html | cut -d'"' -f4)
+          version=$(grep -o "\"$manifest\":\"[0-9a-f]\{16\}\"" web/dist/index.html | cut -d'"' -f4)
+          test -n "$entry" || { echo "::error::No entry script in web/dist/index.html"; exit 1; }
+          test -n "$version" || { echo "::error::No version for $manifest in web/dist/index.html"; exit 1; }
+          { echo "entry=$entry"; echo "manifest=$manifest"; echo "version=$version"; } >> "$GITHUB_OUTPUT"
 
       # The Svelte build was previewed at /neuroatlas/next/; links to it now lead to the site.
       - name: Redirect the former preview path
@@ -103,7 +121,44 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # BUILD-19: the live site is the one just deployed. The page must name this build's entry script
+  # and manifest version, and the manifest must be served at that version. Pages' CDN may keep a page
+  # for up to 10 minutes, so each try asks with a query of its own, which no cache holds, until a
+  # deadline: the first try normally passes, and a deploy that never shows fails here.
+  live-check:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions: {}
+    steps:
+      - name: Check the live page and manifest are this deploy's
+        shell: bash
+        env:
+          SITE: ${{ needs.deploy.outputs.page_url }}
+          ENTRY: ${{ needs.build.outputs.entry }}
+          MANIFEST: ${{ needs.build.outputs.manifest }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          site="${SITE%/}/"
+          deadline=$((SECONDS + 600))
+          for try in $(seq 1 1000); do
+            page=$(curl -fsS "${site}?deploy=$GITHUB_RUN_ID-$try") || page=''
+            served=$(curl -fsS "${site}${MANIFEST}?v=$VERSION" | sha256sum | cut -c1-16) || served=''
+            if grep -qF "src=\"$ENTRY\"" <<<"$page" && grep -qF "\"$MANIFEST\":\"$VERSION\"" <<<"$page" \
+              && [[ "$served" == "$VERSION" ]]; then
+              echo "$site serves $ENTRY and $MANIFEST at $VERSION (try $try)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if (( SECONDS >= deadline )); then
+              echo "::error::After 10 min $site does not serve this deploy: entry $ENTRY, $MANIFEST at $VERSION (manifest served at ${served:-nothing})"
+              exit 1
+            fi
+            sleep 20
+          done

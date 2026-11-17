@@ -8950,13 +8950,13 @@
     {
       "atlas": "destrieux",
       "file": "cortex-destrieux.glb",
-      "sha256": "fd1fbf406fcd6cf924471c232709588689567417eccd28f9d454d84febbf2de5",
+      "sha256": "24cb38833be575b6918ad277a1ea8531f38cf29f0bf2517f2b678843a0e828e6",
       "citation": "https://doi.org/10.1016/j.neuroimage.2010.06.010"
     },
     {
       "atlas": "julich",
       "file": "cortex-julich.glb",
-      "sha256": "90e6b9eafd7c2e55b5ebc739bf67f168151e71b0a9add385654229cd0331e50e",
+      "sha256": "ae40626927b590c3bdd692806b41490101a3e8f8fd1e457508edb8b99d5a18ce",
       "citation": "https://doi.org/10.1126/science.abb4588"
     }
   ],

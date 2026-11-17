@@ -33,7 +33,7 @@ async function openFromKeyboard() {
 }
 
 describe('content', () => {
-  test('a titled dialog of three groups with 24 key rows, the keys as caps, then five gestures in words', async () => {
+  test('a titled dialog of three groups with 25 key rows, the keys as caps, then five gestures in words', async () => {
     render(Fixture, { lang: 'en' });
     await openFromKeyboard();
     await expect.element(page.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
@@ -46,8 +46,8 @@ describe('content', () => {
       'Display',
       'Mouse and touch',
     ]);
-    expect(dialog().querySelectorAll('dt')).toHaveLength(29);
-    expect(dialog().querySelectorAll('dd')).toHaveLength(29);
+    expect(dialog().querySelectorAll('dt')).toHaveLength(30);
+    expect(dialog().querySelectorAll('dd')).toHaveLength(30);
     expect(dialog().querySelectorAll('section')).toHaveLength(0);
     const caps = (row: number) =>
       [...dialog().querySelectorAll('dt')[row]!.children].map((cap) => [

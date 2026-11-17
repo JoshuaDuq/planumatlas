@@ -1,6 +1,10 @@
 window.__planumAssets = window.__planumAssets || {};
 (function () {
   var params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  // An embedded page downloads nothing until the reader asks for the brain (app/boot.ts). A repeated
+  // `embed` is rejected by decodeState, so it decides nothing here either.
+  var embed = params.getAll('embed');
+  if (embed.length === 1 && embed[0] === '1') return;
   var atlas =
     {
       desikan: 'cortex-desikan.glb',

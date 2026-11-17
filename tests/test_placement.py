@@ -3,7 +3,12 @@
 import numpy as np
 import pytest
 
-from brain_model.labels.placement import placements, surface_placement
+from brain_model.labels.placement import (
+    OPENNESS_TIE,
+    label_point,
+    placements,
+    surface_placement,
+)
 
 # 2 mm voxels, shifted, so the result is in surface RAS millimetres, not voxel indices.
 AFFINE = np.array([[2.0, 0, 0, -10], [0, 2.0, 0, 5], [0, 0, 2.0, 1], [0, 0, 0, 1]])
@@ -44,3 +49,23 @@ def test_a_surface_patch_is_anchored_on_its_own_point_nearest_its_centroid():
     placed = surface_placement(points)
     assert placed["centroid_ras_mm"] == pytest.approx(points.mean(axis=0).tolist())
     assert placed["anchor_ras_mm"] == points[4].tolist()
+
+
+def test_a_parcel_is_named_on_its_most_open_vertex():
+    pial = np.array([[0.0, 0, 0], [1, 0, 0], [2, 0, 0], [9, 0, 0]])
+    # The far vertex is the bare crown, though the others lie nearer the middle.
+    assert label_point(pial, [0.2, 0.4, 0.3, 0.9]) == [9.0, 0.0, 0.0]
+
+
+def test_equally_open_vertices_go_to_the_one_nearest_the_parcel_middle():
+    pial = np.array([[0.0, 0, 0], [4, 0, 0], [5, 0, 0], [10, 0, 0]])
+    # Within the tie the middle wins; just past it, the more open vertex does.
+    tied = [1.0, 1.0 - OPENNESS_TIE / 2, 0.1, 1.0]
+    assert label_point(pial, tied) == [4.0, 0.0, 0.0]
+    apart = [1.0, 1.0 - 2 * OPENNESS_TIE, 0.1, 0.5]
+    assert label_point(pial, apart) == [0.0, 0.0, 0.0]
+
+
+def test_a_label_point_needs_an_openness_for_every_vertex():
+    with pytest.raises(ValueError, match="openness"):
+        label_point(np.zeros((3, 3)), [1.0, 0.5])

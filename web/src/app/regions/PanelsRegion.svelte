@@ -10,7 +10,7 @@
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { createCircuitExplorer } from '../../features/circuits/circuits-explorer.svelte.ts';
   import { createVisualFieldExplorer } from '../../features/circuits/visual-field-explorer.svelte.ts';
   import CircuitStepper from '../../features/circuits/CircuitStepper.svelte';

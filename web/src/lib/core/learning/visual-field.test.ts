@@ -5,6 +5,7 @@ import {
   eccentricityAt,
   fromDisc,
   hemisphereFor,
+  parseVisualAreaAnchors,
   parseVisualFieldTerritories,
   polar,
   predictedResponse,
@@ -97,4 +98,57 @@ test('the predicted response matches the non-central chi-squared share of the pR
 test('the predicted response refuses a pRF without width or a dot of negative radius', () => {
   assert.throws(() => predictedResponse(1, 1, 0), RangeError);
   assert.throws(() => predictedResponse(1, -1, 1), RangeError);
+});
+
+const named = (left: Record<string, { mm2: number; pial: number[]; white: number[] }>) => ({
+  ...sidecar({ x: [], y: [], area: [], mm2: [] }),
+  visual_areas: {
+    codes: { V1v: 1, LO1: 15 },
+    hemispheres: {
+      left,
+      right: {
+        V1v: { mm2: 700, pial: [10, -80, 0], white: [9, -79, 1] },
+        LO1: { mm2: 300, pial: [30, -70, 10], white: [29, -69, 11] },
+      },
+    },
+  },
+});
+const LEFT = {
+  V1v: { mm2: 760, pial: [-10, -80, 0], white: [-9, -79, 1] },
+  LO1: { mm2: 5, pial: [-30, -70, 10], white: [-29, -69, 11] },
+};
+
+test('the named areas’ anchors come larger areas first, each on both surfaces of its hemisphere', () => {
+  const anchors = parseVisualAreaAnchors(named(LEFT), ['V1v', 'LO1']);
+  assert.deepEqual(
+    anchors.map(({ hemisphere, name, mm2 }) => [hemisphere, name, mm2]),
+    [
+      ['left', 'V1v', 760],
+      ['right', 'V1v', 700],
+      ['right', 'LO1', 300],
+      ['left', 'LO1', 5],
+    ],
+  );
+  assert.deepEqual(anchors[0]!.pial, [-10, -80, 0]);
+  assert.deepEqual(anchors[0]!.white, [-9, -79, 1]);
+});
+
+test('a sidecar that names other areas than the manifest, or leaves one without an anchor, is refused', () => {
+  assert.throws(() => parseVisualAreaAnchors(named(LEFT), ['LO1', 'V1v']), /other visual areas/);
+  assert.throws(
+    () => parseVisualAreaAnchors(sidecar({ x: [], y: [], area: [], mm2: [] }), ['V1v']),
+    /names no visual areas/,
+  );
+  assert.throws(
+    () => parseVisualAreaAnchors(named({ V1v: LEFT.V1v } as typeof LEFT), ['V1v', 'LO1']),
+    /left LO1 has no anchor/,
+  );
+  assert.throws(
+    () =>
+      parseVisualAreaAnchors(named({ ...LEFT, LO1: { ...LEFT.LO1, pial: [1, 2] } }), [
+        'V1v',
+        'LO1',
+      ]),
+    /pial anchor is not a point/,
+  );
 });

@@ -4,7 +4,7 @@ import '../layout.css';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { page } from 'vitest/browser';
-import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import { validateNeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';

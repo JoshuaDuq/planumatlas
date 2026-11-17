@@ -8,6 +8,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import type { CatalogGroup, CatalogRow } from '../../lib/core/catalog/catalog.ts';
+  import type { RegionTableScope } from '../../lib/core/catalog/region-table.ts';
   import type { HiddenReason } from '../../lib/core/catalog/visibility.ts';
   import type { Elsewhere } from '../../lib/core/elsewhere.ts';
   import { t } from '../../lib/core/i18n/index.ts';
@@ -32,8 +33,6 @@
     selectedId: string | null;
     atlases: readonly { id: string; label: string }[];
     atlas: string;
-    cutAtlases: readonly { id: string; label: string }[];
-    cutAtlas: string;
     /** Inside the anatomy: the cortex is hidden and the list is of one internal system. */
     inside: boolean;
     /** An atlas or detail level is loading: the scope cannot change meanwhile. */
@@ -46,12 +45,13 @@
     onShow: (ids: readonly string[]) => void;
     /** A rejection is the caller's to report: it is not caught here. */
     onAtlas: (id: string) => void | Promise<void>;
-    onCutAtlas: (id: string) => void | Promise<void>;
     /** The other tabs that find the same words, and the carrying of the query to one. */
     elsewhere: (query: string) => Elsewhere[];
     onElsewhere: (mode: Explorer) => void | Promise<void>;
     /** A3's picker of one internal system, shown while inside the anatomy. */
     systemPicker?: Snippet;
+    /** The shown atlas and level, for the header's region table. */
+    table: () => RegionTableScope;
   }
 
   let {
@@ -65,8 +65,6 @@
     selectedId,
     atlases,
     atlas,
-    cutAtlases,
-    cutAtlas,
     inside,
     switching,
     onScope,
@@ -75,10 +73,10 @@
     onHide,
     onShow,
     onAtlas,
-    onCutAtlas,
     elsewhere,
     onElsewhere,
     systemPicker,
+    table,
   }: Props = $props();
 
   const copy = $derived(t(lang, 'navigator'));
@@ -128,18 +126,15 @@
     {selectedId}
     {atlases}
     {atlas}
-    {cutAtlases}
-    {cutAtlas}
     {onSelect}
     {onReveal}
     {onAtlas}
-    {onCutAtlas}
     {elsewhere}
     {onElsewhere}
   />
   <div class="browse" hidden={searching}>
     <div class="tree-head">
-      <TreeHeader {lang} {groups} {expanded} {onExpandedChange}>
+      <TreeHeader {lang} {groups} {expanded} {onExpandedChange} {table}>
         <ChoiceGroup
           class="tree-scope"
           label={copy.scope}

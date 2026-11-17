@@ -13010,13 +13010,13 @@
     {
       "atlas": "hcp-mmp",
       "file": "cortex-hcp-mmp.glb",
-      "sha256": "e197f376c068abb310fa71c59b834a81e3ef51eb32999e2d865940c79a270c0f",
+      "sha256": "ea26710c172a046040b510ca8cd49c8c0b1e35a46863e9dbe31f527c2295a67a",
       "citation": "https://doi.org/10.1038/nature18933"
     },
     {
       "atlas": "julich",
       "file": "cortex-julich.glb",
-      "sha256": "90e6b9eafd7c2e55b5ebc739bf67f168151e71b0a9add385654229cd0331e50e",
+      "sha256": "ae40626927b590c3bdd692806b41490101a3e8f8fd1e457508edb8b99d5a18ce",
       "citation": "https://doi.org/10.1126/science.abb4588"
     }
   ],

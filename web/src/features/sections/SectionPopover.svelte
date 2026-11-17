@@ -1,18 +1,17 @@
 <!--
   The Section popover's body (index.html:455-469, ui/chrome/sections.js:56-64, 171-194, 418-428, 483-489):
-  the cutting plane and the labels a cut samples. G2's StagePopover is the frame.
+  the cutting plane. G2's StagePopover is the frame. A cut has no labels of its own to choose: it
+  shows the Atlas, Colour and Internal anatomy the masthead shows, and the section bar says which.
   - The planes are U3's toolbar of `aria-pressed` toggles (decision 6): a cut is an expensive choice, so
     the arrows only move. Pressing one chooses it, closes the popover and returns focus to the Section
     tool; it reads as pressed at once, while its anatomy is still being prepared.
   - On a phone the five planes share one row: the icon over the short name, the full name as the
     accessible name. Elsewhere the icon beside the full name, in two columns under Full brain.
-  - Cut labels is a native select. A choice that fails leaves the select on the labels still cut.
 -->
 <script lang="ts">
-  import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
+  import { t } from '../../lib/core/i18n/index.ts';
   import { CUTS } from '../../lib/types/index.ts';
   import type { Language } from '../../lib/types/index.ts';
-  import Select from '../../lib/ui/Select.svelte';
   import ToggleToolbar from '../../lib/ui/ToggleToolbar.svelte';
   import AboutData from '../info/AboutData.svelte';
   import type { SectionControls } from './section-controls.svelte.ts';
@@ -30,7 +29,6 @@
 
   const uid = $props.id();
   const captionId = `cut-mode-label-${uid}`;
-  const atlasId = `cut-atlas-${uid}`;
 
   const copy = $derived(t(lang, 'cuts'));
   const planes = $derived(
@@ -41,16 +39,6 @@
       name: phone ? copy.modes[plane] : undefined,
     })),
   );
-  const atlases = $derived(
-    controls.cutAtlases.map(({ id }) => {
-      const label = atlasSwitchLabel(id, lang);
-      const full: Record<string, string | undefined> = t(lang, 'atlases');
-      return { value: id, label, title: full[id] ?? label };
-    }),
-  );
-
-  // Follows the labels the sections cut; a choice shows at once and gives way to the next snapshot.
-  let cutAtlas = $derived(controls.state.cutAtlas);
 </script>
 
 <p id={captionId} class="stage-field-label">{copy.cuttingPlane}</p>
@@ -64,18 +52,6 @@
     close();
   }}
 />
-<div class="stage-field">
-  <label class="stage-field-label" for={atlasId}>{copy.cutLabels}</label>
-  <Select
-    id={atlasId}
-    options={atlases}
-    bind:value={() => cutAtlas, (id) => (cutAtlas = id)}
-    onchange={(id) =>
-      controls.setCutAtlas(id).then(() => {
-        cutAtlas = controls.state.cutAtlas;
-      })}
-  />
-</div>
 <AboutData place="section" {lang} host="popover" />
 
 <style>

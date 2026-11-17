@@ -1,13 +1,14 @@
 <!--
   Find a region (navigator.js:390-461, 704-732): U6's combobox over the catalog's ranked matches,
-  with the sentences that say what else there is, after the list. Matches that another atlas or cut
-  atlas draws are reported with a button that switches to it, not dropped; so are the other tabs
-  that find the same words, with a button that carries the search there (U1). Choosing a result
-  empties the query, so the tree returns around it, then selects the region or reveals it.
+  with the sentences that say what else there is, after the list. Matches that another atlas draws
+  are reported with a button that switches to it, not dropped; so are the other tabs that find the
+  same words, with a button that carries the search there (U1). A region the colour or the internal
+  anatomy keeps off the cut is listed, and revealed by changing that. Choosing a result empties the
+  query, so the tree returns around it, then selects the region or reveals it.
 -->
 <script lang="ts">
   import type { CatalogGroup, CatalogRow } from '../../lib/core/catalog/catalog.ts';
-  import { cutAtlasesOf, type HiddenReason } from '../../lib/core/catalog/visibility.ts';
+  import type { HiddenReason } from '../../lib/core/catalog/visibility.ts';
   import type { Elsewhere } from '../../lib/core/elsewhere.ts';
   import { count } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
@@ -37,15 +38,12 @@
     selectedId: string | null;
     atlases: readonly Surface[];
     atlas: string;
-    cutAtlases: readonly Surface[];
-    cutAtlas: string;
     /** A region that is on screen was chosen. */
     onSelect: (id: string) => void;
     /** A region that is not on screen was chosen: undo what hides it, then select it. */
     onReveal: (reason: HiddenReason, id: string) => void;
     /** A rejection is the caller's to report: it is not caught here. */
     onAtlas: (id: string) => void | Promise<void>;
-    onCutAtlas: (id: string) => void | Promise<void>;
     /** The other tabs that find the same words. */
     elsewhere: (query: string) => Elsewhere[];
     /** Carries the query to another tab. A rejection is the caller's to report. */
@@ -60,12 +58,9 @@
     selectedId,
     atlases,
     atlas,
-    cutAtlases,
-    cutAtlas,
     onSelect,
     onReveal,
     onAtlas,
-    onCutAtlas,
     elsewhere,
     onElsewhere,
   }: Props = $props();
@@ -80,11 +75,8 @@
   const copy = $derived(t(lang, 'navigator'));
   const trimmed = $derived(query.trim());
   const found = $derived(trimmed ? search(trimmed) : { rows: [], total: 0 });
-  // A row hidden by an atlas mismatch is elsewhere, not absent; switching a surface atlas and
-  // switching the cut labels are different controls, so they are reported apart.
-  const here = $derived(
-    found.rows.filter((row) => row.reason !== 'other-atlas' && row.reason !== 'other-cut-atlas'),
-  );
+  // A row hidden by an atlas mismatch is elsewhere, not absent: it is reported with the switch.
+  const here = $derived(found.rows.filter((row) => row.reason !== 'other-atlas'));
   const others = $derived(trimmed ? elsewhere(trimmed) : []);
   const shared = $derived(sharedGroupNames(groups));
   const place = (row: CatalogRow) => groupDisplayName(row.label.group, row.region, shared, lang);
@@ -107,22 +99,10 @@
       found.rows.filter((row) => row.reason === 'other-atlas'),
       atlases,
       atlas,
-      (region) => [region.atlas],
     )) {
       result.push({
         text: copy.matchesInOther(count(rows.length, 'match', lang), named(other)),
         action: { label: copy.switchAtlas, run: () => onAtlas(other.id) },
-      });
-    }
-    for (const { atlas: other, rows } of matchesElsewhere(
-      found.rows.filter((row) => row.reason === 'other-cut-atlas'),
-      cutAtlases,
-      cutAtlas,
-      cutAtlasesOf,
-    )) {
-      result.push({
-        text: copy.matchesInOtherCut(count(rows.length, 'match', lang), named(other)),
-        action: { label: copy.switchCutAtlas, run: () => onCutAtlas(other.id) },
       });
     }
     const tabs = t(lang, 'workspace').modes;

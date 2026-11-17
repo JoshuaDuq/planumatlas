@@ -78,12 +78,16 @@ Nothing here was measured in the brain shown. Each source reaches it by an area'
   Palomero-Gallagher, N., & Zilles, K. (2018). Cyto- and receptor architectonic mapping of the human brain. *Handbook of Clinical Neurology*, 150, 355–387. [doi:10.1016/B978-0-444-63639-3.00024-4](https://doi.org/10.1016/B978-0-444-63639-3.00024-4). PMID 29496153. Each of the 36 datasets has its own EBRAINS DOI, listed under [Receptor datasets](#receptor-datasets).
 - **F-TRACT stimulation responses.**
   Trebaul, L., Deman, P., Tuyisenge, V., Jedynak, M., Hugues, E., Rudrauf, D., … Kahane, P., & David, O. (2018). Probabilistic functional tractography of the human cortex revisited. *NeuroImage*, 181, 414–429. [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039). PMID 30025851. The data are the parcellation-based atlas F-TRACT_P_01_v2307 (Jedynak, Boyer, Lemaréchal, Trebaul, Tadel, … & F-TRACT Consortium, 2023, EBRAINS, [10.25493/JYVR-WJ7](https://doi.org/10.25493/JYVR-WJ7)), on Julich-Brain 3.0's areas.
+
+  Lemaréchal, J.-D., Jedynak, M., Trebaul, L., Boyer, A., Tadel, F., Bhattacharjee, M., … David, O., & F-TRACT consortium (2022). A brain atlas of axonal and synaptic delays based on modelling of cortico-cortical evoked potentials. *Brain*, 145(5), 1653–1667. [doi:10.1093/brain/awab362](https://doi.org/10.1093/brain/awab362). PMID 35416942. Cited for the lengthening of delays with distance that the peak-delay check tests; its modelled axonal delays are not shown.
 - **Thalamocortical stimulation responses.**
   Lyu, D., Stiger, J. R., Lusk, Z., Buch, V., & Parvizi, J. (2025). Mapping human thalamocortical connectivity with electrical stimulation and recording. *Nature Neuroscience*, 28(8), 1797–1809. [doi:10.1038/s41593-025-02009-x](https://doi.org/10.1038/s41593-025-02009-x). PMID 40664975. The data are the authors' Zenodo record ([10.5281/zenodo.16939708](https://doi.org/10.5281/zenodo.16939708)); contacts reach Destrieux areas through HCP's `fs_LR`-to-`fsaverage` sphere deformations.
 - **Visual field map.**
   Benson, N. C., Jamison, K. W., Arcaro, M. J., Vu, A. T., Glasser, M. F., Coalson, T. S., Van Essen, D. C., Yacoub, E., Ugurbil, K., Winawer, J., & Kay, K. (2018). The Human Connectome Project 7 Tesla retinotopy dataset: Description and population receptive field analysis. *Journal of Vision*, 18(13), 23. [doi:10.1167/18.13.23](https://doi.org/10.1167/18.13.23). PMID 30593068.
 
   Benson, N. C., Butt, O. H., Brainard, D. H., & Aguirre, G. K. (2014). Correction of distortion in flattened representations of the cortical surface allows prediction of V1–V3 functional organization from anatomy. *PLoS Computational Biology*, 10(3), e1003538. [doi:10.1371/journal.pcbi.1003538](https://doi.org/10.1371/journal.pcbi.1003538). PMID 24676149. The template is version 4.0, fitted to the HCP 7T group average, from [neuropythy](https://github.com/noahbenson/neuropythy) at commit `a3d240f`.
+
+  Wang, L., Mruczek, R. E., Arcaro, M. J., & Kastner, S. (2015). Probabilistic maps of visual topography in human cortex. *Cerebral Cortex*, 25(10), 3911–3931. [doi:10.1093/cercor/bhu277](https://doi.org/10.1093/cercor/bhu277). PMID 25452571. The 25 named visual areas: the maximum-probability atlas on `fsaverage` that the HCP 7T retinotopy dataset distributes in `atlasmgz.zip` ([OSF bw9ec](https://osf.io/bw9ec/)).
 - **Aphasia Recovery Cohort.**
   Gibson, M., Newman-Norlund, R., Bonilha, L., Fridriksson, J., Hickok, G., Hillis, A. E., den Ouden, D. B., & Rorden, C. (2024). The Aphasia Recovery Cohort, an open-source chronic stroke repository. *Scientific Data*, 11(1), 981. [doi:10.1038/s41597-024-03819-7](https://doi.org/10.1038/s41597-024-03819-7). PMID 39251640. The dataset is OpenNeuro ds004884 v1.0.2 ([10.18112/openneuro.ds004884.v1.0.2](https://doi.org/10.18112/openneuro.ds004884.v1.0.2)); the normalised lesions and the cohort's mean T1 come from the authors' [demonstration repository](https://github.com/neurolabusc/AphasiaRecoveryCohortDemo) at commit `1d24ad4`.
 - **Disorder effects (ENIGMA).**
@@ -156,6 +160,7 @@ Each fingerprint is its own EBRAINS dataset of receptor densities measured by Zi
 | `stimulation-responses.json` | Lyu et al. 2025 (Zenodo) | CC BY 4.0 |
 | `disorder-effects.json` | ENIGMA working groups' summary statistics, as the ENIGMA Toolbox republishes them | BSD-3-Clause |
 | `retinotopy.json` | Benson template v4.0 (neuropythy) | AGPL-3.0 |
+| `retinotopy.json` `visual_areas`, the cortex meshes' `_WANG_AREA` attribute, the visual areas in `manifest.json` | Wang et al. 2015, as the HCP 7T retinotopy dataset distributes it (OSF) | CC BY 4.0 |
 | `stroke-cases.json`, `stroke-cases.masks` | Aphasia Recovery Cohort (OpenNeuro) and its authors' normalised lesions | CC0 1.0; BSD-2-Clause |
 | `coordinates-mni152nlin2009casym.field` | MNI152NLin2009cAsym (McConnell Brain Imaging Centre, via TemplateFlow) | MNI template licence |
 | `coordinates-spm12.field` | SPM12 tissue probability maps, built from IXI | GPL-2.0-or-later; IXI under CC BY-SA 3.0 |
@@ -215,11 +220,11 @@ PAM50 and its white-matter atlas are distributed through the Spinal Cord Toolbox
 
 ### CC BY-NC-SA 4.0 (receptor fingerprints, F-TRACT)
 
-Non-commercial, and shared alike, as for Julich-Brain. `receptor-fingerprints.json` credits each dataset by its DOI ([Receptor datasets](#receptor-datasets)) and states the change: each fingerprint is given to the region of this brain that shares its area's or structure's name. `stimulation-ftract.json` credits F-TRACT_P_01_v2307 and Trebaul et al. (2018) and states the changes: Julich-Brain 3.0 areas matched to 3.1 by name, and rates drawn only from pairs recorded in at least three implantations.
+Non-commercial, and shared alike, as for Julich-Brain. `receptor-fingerprints.json` credits each dataset by its DOI ([Receptor datasets](#receptor-datasets)) and states the change: each fingerprint is given to the region of this brain that shares its area's or structure's name. `stimulation-ftract.json` credits F-TRACT_P_01_v2307 and Trebaul et al. (2018) and states the changes: Julich-Brain 3.0 areas matched to 3.1 by name, rates drawn only from pairs recorded in at least three implantations, and peak delays kept only where a rate is drawn, each with the distance between the two areas' centroids in this brain.
 
 ### CC BY 4.0 (stimulation responses)
 
-Attribution: `stimulation-responses.json` credits Lyu et al. (2025) and its Zenodo record and states the changes: the authors' per-pair classifications pooled into response rates for each pair of their labels, by side, and contacts assigned to Destrieux areas through HCP's sphere deformations. TractSeg's pretrained weights, behind the SLF I–III and callosal segments, are under the same licence and credited in the bibliography.
+Attribution: `stimulation-responses.json` credits Lyu et al. (2025) and its Zenodo record and states the changes: the authors' per-pair classifications pooled into response rates for each pair of their labels, by side, and contacts assigned to Destrieux areas through HCP's sphere deformations. TractSeg's pretrained weights, behind the SLF I–III and callosal segments, are under the same licence and credited in the bibliography. So are the visual areas of Wang et al. (2015), credited with the HCP 7T retinotopy dataset that distributes them; the change: each area carried from `fsaverage` onto this brain from the nearest vertex of the registered spheres, with a name's anchor chosen in each.
 
 ### AGPL-3.0 (visual field map)
 
@@ -245,7 +250,7 @@ SPM12's tissue probability maps are part of SPM12 (version 7771), Copyright (C) 
 
 ## Acknowledgements
 
-A paper, poster or talk that shows Planum's views cites Planum ([`CITATION.cff`](https://github.com/JoshuaDuq/planumatlas/blob/main/CITATION.cff)) and, from the bibliography, the sources behind the views it shows. Datasets are cited by their DOIs as well as their papers: CDMD, Julich-Brain 3.1, the [receptor datasets](#receptor-datasets), F-TRACT, Lyu et al.'s Zenodo record and the Aphasia Recovery Cohort.
+A paper, poster or talk that shows Planum's views cites Planum ([`CITATION.cff`](https://github.com/JoshuaDuq/planumatlas/blob/main/CITATION.cff)) and, from the bibliography, the sources behind the views it shows. Datasets are cited by their DOIs as well as their papers: CDMD, Julich-Brain 3.1, the [receptor datasets](#receptor-datasets), F-TRACT, Lyu et al.'s Zenodo record and the Aphasia Recovery Cohort. The Provenance sheet's **References for this view** lists the works behind the view on screen, with the acknowledgement below when an HCP-derived layer is shown, to copy as text or save as BibTeX or RIS.
 
 **Human Connectome Project.** The HCP terms require an acknowledgement, in this wording, for HCP-MMP and everything derived from it: the HCP-MMP atlas, the functional divisions and the CAB-NP networks. It is also the right credit for the visual field map, which is fitted to HCP 7T data.
 

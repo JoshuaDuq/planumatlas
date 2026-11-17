@@ -62,7 +62,6 @@ test('failures are said in the reader’s language, never as the developer’s m
 
 const settings: RevealSettings = {
   atlas: 'destrieux',
-  cutAtlas: 'destrieux',
   colour: 'atlas',
   detail: 'learning',
   cut: false,
@@ -92,30 +91,16 @@ test('what opening a deficit changed is said once, as one sentence naming only w
   );
 });
 
-test('cut labels the reveal moved onto the painted atlas are named', () => {
-  const after = { ...settings, cutAtlas: 'hcp-mmp' };
-  assert.equal(revealNotice('en', settings, after), 'Cut labels set to HCP-MMP.');
-  assert.equal(revealNotice('fr', settings, after), 'Étiquettes de coupe réglées sur HCP-MMP.');
-});
-
-test('an atlas and cut labels moved to the same atlas name it once', () => {
-  const after = { ...settings, atlas: 'hcp-mmp', cutAtlas: 'hcp-mmp' };
-  assert.equal(revealNotice('en', settings, after), 'Atlas and cut labels set to HCP-MMP.');
-  assert.equal(
-    revealNotice('fr', settings, after),
-    'Atlas et étiquettes de coupe réglés sur HCP-MMP.',
-  );
-  // Moved to different atlases, each is still named.
-  assert.equal(
-    revealNotice('en', settings, { ...after, cutAtlas: 'julich' }),
-    'Atlas set to HCP-MMP and cut labels set to Julich-Brain.',
-  );
+test('an atlas moved is named once: the cut is labelled by it without a word of its own', () => {
+  const after = { ...settings, atlas: 'hcp-mmp' };
+  assert.equal(revealNotice('en', settings, after), 'Atlas set to HCP-MMP.');
+  assert.equal(revealNotice('fr', settings, after), 'Atlas réglé sur HCP-MMP.');
 });
 
 test('lobes giving way to an atlas that has none are not named beside that atlas', () => {
   const before = { ...settings, colour: 'lobe' } as const;
-  const after = { ...settings, atlas: 'hcp-mmp', cutAtlas: 'hcp-mmp' };
-  assert.equal(revealNotice('en', before, after), 'Atlas and cut labels set to HCP-MMP.');
+  const after = { ...settings, atlas: 'hcp-mmp' };
+  assert.equal(revealNotice('en', before, after), 'Atlas set to HCP-MMP.');
   // On an atlas that keeps its lobes, a colour the reveal changed is still said.
   assert.equal(
     revealNotice('en', before, { ...settings, atlas: 'julich' }),

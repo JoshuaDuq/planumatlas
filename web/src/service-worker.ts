@@ -15,8 +15,15 @@
  * The page registers this worker only once it has started, so it hands over
  * the files it downloaded before then; they are stored on the same terms.
  *
- * It does not make the site work offline: the page and its scripts are never
- * stored here, and navigations always go to the network first.
+ * The build's scripts, styles and fonts under `assets/` are named by their own
+ * hash, so a stored copy never goes stale: they are served from storage first.
+ * A tab left open across a deploy, which replaces them on the server, can then
+ * still load the lazy code it has loaded before (anything else gets the
+ * "Planum was updated" notice). The `ASSET_LIMIT` most recently stored are
+ * kept; each page load drops the rest.
+ *
+ * It does not make the site work offline: the page itself is never stored
+ * here, and navigations always go to the network first.
  *
  * The build type-strips this file to `sw.js` (build/published-files.ts).
  */
@@ -31,6 +38,11 @@ declare const __PUBLISHED_VERSIONS__: PublishedVersions;
 
 const PUBLISHED = __PUBLISHED_VERSIONS__;
 const CACHE = 'planum-models';
+const ASSETS = 'planum-assets';
+// A build is about 22 files and 4 MB, and a visit loads most of them: about four deploys' worth.
+const ASSET_LIMIT = 100;
+// When the worker stored an asset, in milliseconds since the epoch; the oldest are dropped first.
+const STORED_AT = 'x-planum-stored';
 const worker = self as unknown as ServiceWorkerGlobalScope;
 
 /** A same-origin URL's path from the published root, or null. */
@@ -53,6 +65,42 @@ function currentPath(url: URL): string | null {
 async function versionOf(buffer: ArrayBuffer): Promise<string> {
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buffer));
   return [...digest.subarray(0, 8)].map((value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+/** Whether a same-origin URL is one of the build's hashed files. */
+function isBuildAsset(url: URL): boolean {
+  return (
+    url.origin === worker.location.origin && url.pathname.startsWith(`${PUBLISHED.base}assets/`)
+  );
+}
+
+/** A build file from storage, else from the network, stored when it arrives whole. */
+async function buildAsset(event: FetchEvent, key: string): Promise<Response> {
+  const cache = await caches.open(ASSETS);
+  const stored = await cache.match(key);
+  if (stored) return stored;
+  // Its name is its content's hash, so the HTTP cache cannot hold other bytes under it.
+  const response = await fetch(event.request);
+  if (response.status === 200 && !response.redirected) {
+    const headers = new Headers(response.headers);
+    headers.set(STORED_AT, String(Date.now()));
+    event.waitUntil(cache.put(key, new Response(response.clone().body, { status: 200, headers })));
+  }
+  return response;
+}
+
+/** Keep the `ASSET_LIMIT` build files stored last. */
+async function pruneAssets(): Promise<void> {
+  if (!(await caches.has(ASSETS))) return;
+  const cache = await caches.open(ASSETS);
+  const entries = await Promise.all(
+    (await cache.keys()).map(async (request) => ({
+      request,
+      stored: Number((await cache.match(request))?.headers.get(STORED_AT)),
+    })),
+  );
+  entries.sort((a, b) => b.stored - a.stored);
+  for (const { request } of entries.slice(ASSET_LIMIT)) await cache.delete(request);
 }
 
 /** Store `bytes` under `key` only if they hash to the version this deploy publishes for `path`. */
@@ -94,9 +142,14 @@ worker.addEventListener('fetch', (event) => {
         .then((response) => (response.redirected ? fetch(request) : response))
         .catch(() => fetch(request)),
     );
+    event.waitUntil(pruneAssets());
     return;
   }
   const url = new URL(request.url);
+  if (isBuildAsset(url)) {
+    event.respondWith(buildAsset(event, url.pathname));
+    return;
+  }
   const path = currentPath(url);
   if (path === null) return;
 

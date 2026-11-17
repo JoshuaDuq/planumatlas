@@ -1,5 +1,4 @@
-import type { TractBundle as LoadedBundle } from '../engine/api.ts';
-import type { Language } from '../types/index.ts';
+import type { Language, TractBundle as LoadedBundle } from '../types/index.ts';
 import { TRACT_CLASSES } from './diffusion/catalogs.ts';
 import type { TractBundle, TractClass } from './diffusion/catalogs.ts';
 import { decimal, percent, withUnit } from './format.ts';

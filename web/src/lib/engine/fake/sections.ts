@@ -1,3 +1,4 @@
+import { cutAtlasFor } from '../../core/catalog/cut-labels.ts';
 import type { CutMode, SurfaceColor } from '../../types/index.ts';
 import { CUTS } from '../../types/index.ts';
 import type {
@@ -12,7 +13,6 @@ import type {
 } from '../api.ts';
 import type { FakeModel } from './model.ts';
 import { stagedFrame } from '../slices/coordinates.ts';
-import { coded } from './support.ts';
 
 export interface FakeSectionsOptions {
   model: FakeModel;
@@ -99,17 +99,23 @@ function projectBounds(
 /**
  * In-memory stand-in for `BrainSections`: the plane, crosshair, window and cut atlas are real state with
  * the real validation; the cut itself draws nothing, and the linked MRI is a synthetic gradient with
- * the model's paint over half of it.
+ * the model's paint over half of it. `follow` is the real sections' model listener: the engine calls
+ * it on every model change, so the cut atlas follows the model as the real one does.
  */
-export function createFakeSections({ model, changed, mri }: FakeSectionsOptions): EngineSections {
+export function createFakeSections({
+  model,
+  changed,
+  mri,
+}: FakeSectionsOptions): EngineSections & { follow(): void } {
   const manifest = model.manifest;
+  // A fixture may publish no cut atlases: every surface atlas then labels its own cut.
   const cutAtlases = new Set([
     ...manifest.atlases.map((atlas) => atlas.id),
     ...(manifest.cut_atlases ?? []).map((atlas) => atlas.id),
   ]);
   const state: { -readonly [K in Exclude<keyof SectionsState, 'paint'>]: SectionsState[K] } = {
     mode: 'off',
-    cutAtlas: model.state.atlas,
+    cutAtlas: cutAtlasFor(model.state, cutAtlases),
     crosshair: [0, 0, 0],
     reverse: false,
     overlay: false,
@@ -179,6 +185,11 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     changed();
   }
 
+  function follow() {
+    state.cutAtlas = cutAtlasFor(model.state, cutAtlases);
+    model.setCutState({ atlas: state.cutAtlas, active: active() });
+  }
+
   function crosshairFor(offset: number): Vec3 {
     const [minimum, maximum] = offsetRange();
     if (!Number.isFinite(offset) || offset < minimum || offset > maximum) {
@@ -216,7 +227,9 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     return display;
   }
 
+  follow();
   return {
+    follow,
     get state() {
       return snapshot();
     },
@@ -293,17 +306,6 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     async setAnglesReady(tilt, azimuth) {
       centeredFrame('oblique', state.crosshair, tilt, azimuth);
       Object.assign(state, { tilt, azimuth });
-      emit();
-    },
-    async setCutAtlas(atlas) {
-      if (atlas === state.cutAtlas) return;
-      if (active() && !cutAtlases.has(atlas)) {
-        state.status = 'error';
-        state.error = 'asset-fetch';
-        changed();
-        throw coded(`Cut atlas not published: ${atlas}`, 'asset-fetch');
-      }
-      state.cutAtlas = atlas;
       emit();
     },
     setDisplay({ reverse = state.reverse, overlay = state.overlay } = {}) {
@@ -399,6 +401,25 @@ export function createFakeSections({ model, changed, mri }: FakeSectionsOptions)
     // The fake draws no solids, as its sample names no region.
     async regionAt() {
       return null;
+    },
+    // Each drawn region whose anchor lies within 10 mm of the plane has a face there: the anchor moved
+    // onto the plane, as large as that slice of a 10 mm ball, so a face nearer the anchor is larger.
+    capAnchors() {
+      if (!active()) return [];
+      const { normal } = frame();
+      const offset = dot(state.crosshair, normal);
+      return [...model.regions.values()]
+        .filter(
+          ({ id, kind }) => (kind === 'cortex' || kind === 'structure') && model.isRegionDrawn(id),
+        )
+        .flatMap(({ id }) => {
+          const anchor = model.anchorOf(id)!;
+          const distance = dot(anchor, normal) - offset;
+          if (Math.abs(distance) >= 10) return [];
+          const point = anchor.map((value, axis) => value - distance * normal[axis]!) as Vector;
+          return [{ region: id, point, areaMm2: Math.PI * (100 - distance * distance) }];
+        })
+        .sort((a, b) => b.areaMm2 - a.areaMm2 || a.region.localeCompare(b.region));
     },
   };
 }

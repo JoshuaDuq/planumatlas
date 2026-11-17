@@ -51,11 +51,11 @@ are from `public/models/cdmd/` and `data/neuropsychology.yaml`.
 
 ### PANEL-05 · A match in another atlas offers the atlas that draws it
 
-- **Rule:** Search matches drawn by another atlas are offered under the first atlas, in manifest order, that draws each, so the offered switch shows them. A match no other atlas draws is an error.
+- **Rule:** Search matches drawn by another surface atlas are offered under that atlas, in manifest order, so the offered switch shows them. A match no other atlas draws is an error. A cut-only region is no atlas's to offer: the colouring or internal anatomy that labels the cut reveals it (ANAT-37).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/ui/panels/navigator.js:96-117`
-- **Expected:** cut atlases destrieux, hcp-mmp, nextbrain: a NextBrain region from destrieux or hcp-mmp → `[['nextbrain', ['nb']]]`; a wmparc region with cut atlases destrieux, hcp-mmp, from nextbrain → `[['destrieux', ['wm']]]`; without nextbrain on offer → throws "No other atlas draws nb". Surface atlases: an hcp-mmp area from destrieux → `['hcp-mmp']`.
+- **Source:** `viewer/ui/panels/navigator.js:96-117`; derived cut labels, 2026-11-17 (no cut-atlas offer)
+- **Expected:** Surface atlases destrieux, hcp-mmp, julich: an hcp-mmp area `v1` from destrieux → `['hcp-mmp']`; with destrieux alone on offer → throws "No other atlas draws v1".
 - **Covered by:** `src/lib/core/panels/navigator.test.ts` (R)
 
 ### PANEL-06 · A setting that hides rows is said once, on the section caption
@@ -69,20 +69,20 @@ are from `public/models/cdmd/` and `data/neuropsychology.yaml`.
 
 ### PANEL-07 · A hidden row prints only a reason of its own
 
-- **Rule:** A setting's reason is on the caption and a removed part's struck eye says it, so a row prints only a reason of its own. The reason names the detail set a region is in, and an unknown reason falls back to "Hidden".
+- **Rule:** A setting's reason is on the caption and a removed part's struck eye says it, so a row prints only a reason of its own. The reason names the detail set a region is in, and a cut-only region the colouring that puts it on the cut; gyral white matter, on every surface atlas's cut, gets the general sentence. An unknown reason falls back to "Hidden".
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/panels/navigator.js:135-137,356-358`
-- **Expected:** shown → false; hemisphere → false; removed → false; no-mri → true; below-cut-resolution → true. `reasonText('hemisphere', …, 'en')` = "Hemisphere hidden"; `('other-detail', 'learning', 'fr')` = "Dans Ensemble pédagogique"; `('no-such-reason', …, 'en')` = "Hidden"; `('inDetailSet', …, 'fr')` = "Masqué".
+- **Expected:** shown → false; hemisphere → false; removed → false; no-mri → true; below-cut-resolution → true. `reasonText('hemisphere', …, 'en')` = "Hemisphere hidden"; `('other-detail', 'learning', 'fr')` = "Dans Ensemble pédagogique"; a cut-only region: `('other-colour', nettekoven, 'en')` = "Under Cerebellar functions", `('other-colour', arterial, 'fr')` = "Sous Territoires artériels", `('other-detail', nextbrain, 'en')` = "In NextBrain"; gyral white matter: `'other-colour'` = "Not under this colour", `'other-detail'` = "In another detail level"; `('no-such-reason', …, 'en')` = "Hidden"; `('inDetailSet', …, 'fr')` = "Masqué".
 - **Covered by:** `src/lib/core/panels/navigator.test.ts` (R)
 
 ### PANEL-08 · Some reasons offer a switch and one cannot be undone
 
-- **Rule:** A row hidden because it is in another atlas or cut atlas offers the switch that shows it. A row too small for the cut explains itself and does nothing when chosen.
+- **Rule:** A row hidden because it is in another atlas offers the switch that shows it; one another colouring or detail level puts on the cut is revealed by that control (CTRL-18). A row too small for the cut explains itself and does nothing when chosen.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/ui/panels/navigator.js` (reason sets)
-- **Expected:** `OTHER_ATLAS` = {other-atlas, other-cut-atlas}; `UNREVEALABLE` = {below-cut-resolution}.
+- **Source:** `viewer/ui/panels/navigator.js` (reason sets); derived cut labels, 2026-11-17 (`OTHER_ATLAS` removed)
+- **Expected:** `UNREVEALABLE` = {below-cut-resolution}; there is no `OTHER_ATLAS` set: the search reports 'other-atlas' rows with a switch (ANAT-37) and lists 'other-colour' and 'other-detail' rows to reveal.
 - **Covered by:** uncovered at the view-model level (the tree's behaviour belongs to `anatomy.md`)
 
 ### PANEL-09 · A group eye is shown, hidden or partial
@@ -116,11 +116,11 @@ are from `public/models/cdmd/` and `data/neuropsychology.yaml`.
 
 ### PANEL-12 · Opening a deficit says what it changed, in one sentence, and claims nothing else
 
-- **Rule:** After revealing a deficit's regions, the notice names each of the reader's settings the reveal changed, in a fixed order: section closed, isolation cleared, atlas, cut labels, colour, internal anatomy, both hemispheres shown, cortex shown or hidden. A cut or isolation is only ever said when cleared. Nothing changed → no notice. The clauses are joined as a list in the reader's language, capitalised, with a full stop.
+- **Rule:** After revealing a deficit's regions, the notice names each of the reader's settings the reveal changed, in a fixed order: section closed, isolation cleared, atlas, colour, internal anatomy, both hemispheres shown, cortex shown or hidden. The cut's labels follow the atlas (SLICE-21) and are not said. A cut or isolation is only ever said when cleared. Nothing changed → no notice. The clauses are joined as a list in the reader's language, capitalised, with a full stop.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/panels/clinical.js:180-198`
-- **Expected:** detail learning → aseg: "Internal anatomy set to FreeSurfer aseg." / "Anatomie interne réglée sur FreeSurfer aseg." With a cut and isolation before: "Section closed, isolation cleared, and internal anatomy set to FreeSurfer aseg." / "Coupe fermée, isolement retiré et anatomie interne réglée sur FreeSurfer aseg." Cut atlas → hcp-mmp: "Cut labels set to HCP-MMP." Before hcp-mmp, cab-np, left; after destrieux, atlas, both, cortex hidden: "Atlas set to Destrieux, colour set to Regions, both hemispheres shown, and cortex hidden." Same settings, or a cut made after → null.
+- **Expected:** detail learning → aseg: "Internal anatomy set to FreeSurfer aseg." / "Anatomie interne réglée sur FreeSurfer aseg." With a cut and isolation before: "Section closed, isolation cleared, and internal anatomy set to FreeSurfer aseg." / "Coupe fermée, isolement retiré et anatomie interne réglée sur FreeSurfer aseg." Atlas → hcp-mmp: "Atlas set to HCP-MMP." / "Atlas réglé sur HCP-MMP." Before hcp-mmp, cab-np, left; after destrieux, atlas, both, cortex hidden: "Atlas set to Destrieux, colour set to Regions, both hemispheres shown, and cortex hidden." Same settings, or a cut made after → null.
 - **Covered by:** `src/lib/core/panels/clinical.test.ts` (R); the controller's use: CTRL-30 in `controller.md`
 
 ### PANEL-13 · The profile's meta line says the work in progress, the failure, or the stage
@@ -332,3 +332,21 @@ are from `public/models/cdmd/` and `data/neuropsychology.yaml`.
 - **Source:** `viewer/ui/panels/circuits.js:260-278`
 - **Expected:** first pending → `busy` true; a second → false, its action not called, no start or settle; first resolves → true, `busy` false; a later run → true. Events of one run: `start busy=true`, `action busy=true`, `settled busy=false`. A failing run → false, `['error', 'settled busy=false']`, logged once; the next run → true.
 - **Covered by:** `src/lib/core/async/latest.test.ts` (R)
+
+### PANEL-35 · The references for the view are the works behind what is on screen
+
+- **Rule:** The list starts with Planum, then cites, in this order, what the published sections say is behind the view: the subject's dataset, the surface atlas, the colouring (Yeo networks and Schaefer's parcellation, CAB-NP, arterial territories, the striatal networks, the cerebellar functional regions; in Anatomy a connectivity or disorder paint, and the layer IV paint's paper and collection, Wagstyl et al. 2020 and BigBrainWarp), the internal anatomy's segmentations the manifest cites, the cord while shown, an open function (domains, and Neurosynth terms for a term), the open deficit's references, drawn tracts' source, stroke cases on the stage, and the open visual field map (Benson 2018, 2014, Wang 2015). A citation field's DOI and PubMed links name works; other text names none. A work behind several parts is listed once, under each. The cut's labels are no part of their own: they are the atlas's, the colouring's or the internal anatomy's (SLICE-21), cited as such. The HCP acknowledgement goes with HCP-MMP as the atlas, CAB-NP, HCP connectivity and the visual field map. A citation with no record fails.
+- **Kind:** data
+- **Level:** unit
+- **Source:** plan 2 WP24; handoff F5; `docs/reference/references.md` (Acknowledgements); derived cut labels, 2026-11-17
+- **Expected:** fixture manifest, opening view (destrieux, atlas colour, learning built from NextBrain and aseg) → subject, atlas destrieux, internal nextbrain, no acknowledgement; colour `striatal` → colouring choi (`striatal_networks.citation`), `cerebellar` → colouring nettekoven (`cerebellar_functions.citation`); the published opening view → Planum, `doi:10.6084/m9.figshare.c.5315474.v1` (subject), `pmid:20547229` (atlas), `pmid:41193801` (internal). The layer IV paint's two sources → colouring wagstyl, bigbrainwarp in Anatomy, nothing in Functions, no acknowledgement. One DOI cited for the atlas and, as a PubMed link, for a function → one entry under Atlas · Function. `https://doi.org/10.1/none` → "references.json has no record for doi:10.1/none.".
+- **Covered by:** `src/lib/core/panels/citations.test.ts` (R); `build/references.test.ts` (R, the published opening view)
+
+### PANEL-36 · The references leave as text, BibTeX and RIS
+
+- **Rule:** As text each work is "authors (year) title. journal volume(issue):pages." with its DOI link (else PubMed, else its address), six authors before "et al.", a dataset or software marked so, one line each, then the acknowledgement. BibTeX entries are `@article`, `@incollection` or `@misc` (datasets and Planum, with a note), keyed by first surname and year and lettered when repeated, titles double-braced, TeX's specials escaped, DOIs verbatim, names as "Family, Suffix, I. I." and groups braced whole, page ranges with `--`. RIS records use JOUR, CHAP, DATA or COMP, end in `ER  - ` and CRLF.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** plan 2 WP24; handoff F5
+- **Expected:** Destrieux 2010 → "Destrieux C, Fischl B, Dale A, Halgren E (2010) Automatic parcellation … nomenclature. NeuroImage 53(1):1–15." and the exact `@article{destrieux2010,` and RIS records in the test; a title `Pain & touch: 50% of {cases} in #3_a` → `{{Pain \& touch: 50\% of \{cases\} in \#3\_a}}`; "Van Valin RD Jr" → `Van Valin, Jr, R. D.`; keys `vanvalin2010`, `vanvalin2010b`; every entry of the published library passes a narrow grammar (balanced braces, no unescaped special outside `doi` and `url`, unique keys), which refuses an unbalanced brace and a bare `%`.
+- **Covered by:** `src/lib/core/panels/citations.test.ts` (R); `build/references.test.ts` (R, the whole library)

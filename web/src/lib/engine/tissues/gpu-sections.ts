@@ -16,8 +16,10 @@ import {
   Vector3,
 } from 'three';
 import type { Color, Intersection, IUniform, Material, Raycaster } from 'three';
-import type { Region } from '../../types/index.ts';
+import type { CapAnchor, Region } from '../../types/index.ts';
 import type { Frame } from '../slices/coordinates.ts';
+import { capAnchors } from './cap-anchors.ts';
+import { CORTICAL_MAPS } from '../../core/catalog/cut-labels.ts';
 import { clippingPlane, worldToRas, worldToVoxelMatrix } from '../slices/coordinates.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { ProgressCallback } from '../model/progress.ts';
@@ -25,12 +27,13 @@ import { loadVolume } from '../slices/volume.ts';
 import type { Volume, VolumeFile } from '../slices/volume.ts';
 import { codeIndex, liftFor } from './highlight.ts';
 import {
+  corticalLabel,
   createPalette,
   ghostKey,
   labelVisible,
-  usesAtlasColors,
   usesNetworkColors,
   usesPaint,
+  usesStriatalColors,
 } from './palette.ts';
 import type { Label, PaletteLookup, PaletteState } from './palette.ts';
 import { SolidSections } from './solid-sections.ts';
@@ -146,7 +149,11 @@ export interface CutModel extends EventTarget {
   readonly sourceColors: Pick<ReadonlyMap<Mesh, Color>, 'get'>;
   readonly state: PaletteState;
   ensureEnvelopes(onProgress?: ProgressCallback, priority?: RequestPriority): Promise<Mesh[]>;
-  ensureSpinalCord(onProgress?: ProgressCallback, priority?: RequestPriority): Promise<unknown>;
+  ensureSupplementalLayer(
+    id: string,
+    onProgress?: ProgressCallback,
+    priority?: RequestPriority,
+  ): Promise<unknown>;
   ensureRibbonWedges(
     atlas: string,
     baseUrl: string | URL,
@@ -173,6 +180,8 @@ export class TissueSections {
   private volumeMetadata: VolumeMetadata | null = null;
   private volumeMetadataLoading: Promise<VolumeMetadata> | null = null;
   private current: TissueLayer | null = null;
+  /** The last cut drawn has the surface atlas's parcels in a ribbon another atlas's volume labels. */
+  private ribbonCapped = false;
   private disposed = false;
   private mriLoading: Promise<Anatomy> | null = null;
   private solidsLoading: Promise<void> | null = null;
@@ -269,8 +278,8 @@ export class TissueSections {
   }
 
   /**
-   * The MRI, the tissue envelopes every cut caps and the cord, built from the
-   * model's own meshes; the first cut is what downloads the envelopes and cord
+   * The MRI, the tissue envelopes every cut caps and the supplemental layers (the cord, the
+   * arousal nuclei), built from the model's own meshes; the first cut is what downloads them
    * when nothing has yet.
    */
   async loadAnatomy(priority?: RequestPriority): Promise<void> {
@@ -279,12 +288,14 @@ export class TissueSections {
     this.solidsLoading = (async () => {
       await this.loadMetadata(priority);
       const parcels = this.metadata!.white_matter;
-      const cord = this.model.manifest.supplemental_layers?.some((layer) => layer.id === 'pam50');
+      const supplemental = this.model.manifest.supplemental_layers ?? [];
       const [, envelopes, parcelVolume] = await Promise.all([
         this.loadMri(priority),
         this.model.ensureEnvelopes(undefined, priority),
         parcels ? loadVolume(parcels, this.baseUrl, priority) : null,
-        cord ? this.model.ensureSpinalCord(undefined, priority) : null,
+        ...supplemental.map((layer) =>
+          this.model.ensureSupplementalLayer(layer.id, undefined, priority),
+        ),
       ]);
       if (this.disposed) throw new Error('Tissue sections disposed during MRI loading.');
       const anatomy = this.anatomy!;
@@ -297,10 +308,8 @@ export class TissueSections {
         BANDS.envelope,
         this.whiteMatter,
       );
-      if (cord) {
-        const meshes = this.model.manifest.supplemental_layers!.flatMap(
-          (layer) => this.model.layers.get(layer.id)!.meshes,
-        );
+      if (supplemental.length) {
+        const meshes = supplemental.flatMap((layer) => this.model.layers.get(layer.id)!.meshes);
         const sources = enclosingFirst(
           meshes.map((mesh) =>
             solidSource(mesh, { ...mesh.userData }, this.model.sourceColors.get(mesh)),
@@ -402,15 +411,15 @@ export class TissueSections {
 
   /**
    * Whether the cut colours the striatum by its own voxels' networks, and how confidently: under
-   * Yeo colouring, or with the striatal network labels in their own colours, when the anatomy
-   * publishes them. The caller loads that atlas's volume before drawing.
+   * Yeo colouring or the striatal networks' own, when the anatomy publishes them. The caller loads
+   * that atlas's volume before drawing.
    */
   wantsStriatal(): boolean {
     const state = this.model.state;
     return (
       Boolean(this.metadata?.atlases[STRIATAL_ATLAS]) &&
       !usesPaint(state) &&
-      (usesNetworkColors(state) || (state.cutAtlas === STRIATAL_ATLAS && usesAtlasColors(state)))
+      (usesNetworkColors(state) || usesStriatalColors(state))
     );
   }
 
@@ -546,9 +555,31 @@ export class TissueSections {
     };
   }
 
+  /**
+   * The surface atlas whose parcels cap the cortical ribbon on a cut labelled by `atlas`, once that
+   * atlas has loaded: its own where it has them; otherwise the surface atlas the model shows, so the
+   * cut's cortex is the surface's, unless the atlas maps the cortex voxel by voxel; null then.
+   */
+  ribbonAtlas(atlas: string): string | null {
+    const layer = this.layers.get(atlas);
+    if (!layer) throw new Error(`Tissue atlas has not loaded: ${atlas}`);
+    if (layer.wedged) return atlas;
+    return CORTICAL_MAPS.has(atlas) ? null : this.model.state.atlas;
+  }
+
   update(frame: Frame, atlas: string, reverse = false): true {
     const layer = this.layers.get(atlas);
     if (!layer) throw new Error(`Tissue atlas has not loaded: ${atlas}`);
+    const ribbonAtlas = this.ribbonAtlas(atlas);
+    const ribbonLayer = ribbonAtlas === null ? null : this.layers.get(ribbonAtlas);
+    if (ribbonLayer === undefined) throw new Error(`Ribbon atlas has not loaded: ${ribbonAtlas}`);
+    const ribbon =
+      ribbonLayer?.wedged && ribbonAtlas !== null
+        ? { atlas: ribbonAtlas, labels: ribbonLayer.solidLabels }
+        : null;
+    // Another atlas's parcels cap the ribbon of a cut this atlas's volume labels.
+    const ribbonCapped = ribbon !== null && ribbon.atlas !== atlas;
+    this.ribbonCapped = ribbonCapped;
     this.current = layer;
     const state = this.model.state;
     const anatomy = this.anatomy!;
@@ -587,7 +618,7 @@ export class TissueSections {
       state.cutActive,
       constituents,
       atlas,
-      layer.wedged,
+      ribbon?.atlas,
       striatal,
       this.whiteMatter?.active ?? false,
       [...(state.hiddenRegions ?? [])].sort().join(','),
@@ -599,7 +630,7 @@ export class TissueSections {
         state,
         atlas,
         detail: state.detail,
-        wedged: layer.wedged,
+        ribbon,
         appearance: this.model.manifest.appearance,
         lookup: this.paletteLookup,
         whiteMatter: this.whiteMatter?.active ? this.whiteMatter : null,
@@ -618,6 +649,7 @@ export class TissueSections {
       state.internalSystem,
       state.detail,
       [...(state.hiddenRegions ?? [])].sort(),
+      ribbonCapped,
     ]);
     if (key !== layer.paletteKey) {
       layer.palette.image.data = createPalette(
@@ -625,6 +657,7 @@ export class TissueSections {
         state,
         this.model.manifest.appearance.tissue,
         this.paletteLookup,
+        ribbonCapped,
       );
       layer.palette.needsUpdate = true;
       layer.paletteKey = key;
@@ -653,8 +686,7 @@ export class TissueSections {
   }
 
   /** CPU picking uses the label rule the GPU shader draws with. */
-  capVisibleAt(hit: SolidHit): boolean {
-    const state = this.model.state;
+  capVisibleAt(hit: SolidHit, state: PaletteState = this.model.state): boolean {
     const parcel = this.whiteMatterAt(hit);
     if (parcel != null && state.hiddenRegions?.has(parcel)) return false;
     if (
@@ -677,12 +709,20 @@ export class TissueSections {
     if (!this.current) return null;
     this.group.updateMatrixWorld(true);
     const hit = this.solids.intersect(raycaster, (candidate) => this.capVisibleAt(candidate));
-    if (!hit) return null;
+    return hit && this.named(hit);
+  }
+
+  /** A visible cap's hit with the region it names and the label it landed on. */
+  named(hit: SolidHit, state: PaletteState = this.model.state): CutHit {
+    if (!this.current) throw new Error('No cut atlas has loaded.');
     if (((hit.object as Mesh).material as Material).userData.sampledLabels.value) {
       const code = this.current.volume.label(worldToRas(hit.point));
       const label = this.current.metadata.labels[code];
+      // Cortex the volume puts inside the white surface is drawn as white matter, and named as none.
       const visible =
-        label && labelVisible(label, this.model.state, { regions: this.model.regions });
+        label &&
+        labelVisible(label, state, { regions: this.model.regions }) &&
+        !(this.ribbonCapped && corticalLabel(label));
       return {
         ...hit,
         region: visible ? (this.model.regions.get(label.region_id!) ?? null) : null,
@@ -709,6 +749,17 @@ export class TissueSections {
   whiteMatterAt(hit: SolidHit): string | null | undefined {
     if (hit.source.userData['boundary'] !== 'white' || !this.whiteMatter?.active) return undefined;
     return this.whiteMatter.regionAt(new Vector3(...worldToRas(hit.point)));
+  }
+
+  /** See `capAnchors` (`cap-anchors.ts`); none before a cut atlas loads. */
+  capAnchors(): CapAnchor[] {
+    if (!this.current) return [];
+    const state = this.model.state;
+    return capAnchors({
+      solids: this.solids,
+      visibleAt: (hit) => this.capVisibleAt(hit, state),
+      regionAt: (hit) => this.named(hit, state).region?.id ?? null,
+    });
   }
 
   dispose(): void {

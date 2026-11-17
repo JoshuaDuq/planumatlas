@@ -45,14 +45,9 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** coronal at offset 12.34 → `{ cut: 'coronal', cutOffset: <sections.offset> }`, written `cut=coronal&pos=12.3`. Oblique, angles (40, -60), reversed → `{ cut: 'oblique', cutReverse: true, cutTilt: 40, cutAzimuth: -60 }`. `orbit` equals `camera.orbitLink()`; window (50, 60) → `mriWindow: { center: 50, width: 60 }`. Lesson `language` at step 2 → `circuit: 'language', circuitStep: 2`; none → `circuitStep: 0`.
 - **Covered by:** `src/lib/controller/links.test.ts` (R)
 
-### LINK-04 · The cut atlas comes from the sections while the model has none
+### LINK-04 · Retired
 
-- **Rule:** A scene captured before the model has its own cut atlas uses the cut atlas the sections hold.
-- **Kind:** behaviour
-- **Level:** unit
-- **Source:** `viewer/app.js:749-758`
-- **Expected:** after `setAtlas('hcp-mmp')` with `model.state.cutAtlas` null → `captureReaderState().cutAtlas` equals `sections.state.cutAtlas`.
-- **Covered by:** `src/lib/controller/links.test.ts` (R)
+Retired 2026-11-17 by derived cut labels. It required a scene captured before the model had its own cut atlas to take the one the sections held (`viewer/app.js:749-758`). A scene and a link no longer carry a cut atlas: the sections derive it from the atlas, colouring and internal anatomy (SLICE-21), and an old link's `cuts` is ignored (STATE-02).
 
 ### LINK-05 · The link follows the reader about 250 ms after the scene rests
 
@@ -63,6 +58,15 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** fake timers: first write at +250 ms; two view changes then +249 ms → no new write, +1 ms → one. `cameraSettled` then +1 ms → one write. View change then `cameraSettled` → one write, none 250 ms later. Held, view change, +250 ms → no write; released and scheduled, +250 ms → one. Cleaned up, then changes and `cameraSettled`, +1000 ms → none.
 - **Covered by:** `src/lib/state/stores.svelte.test.ts` (R, browser; could move down: the timing is pure once the effect is replaced by a call, see STATE-63 and STATE-64); `src/lib/core/state/link-writer.test.ts` (R, the writer itself)
 
+### LINK-24 · An embedded page keeps embed=1 in the link it writes
+
+- **Rule:** A page opened with `embed=1` writes `embed=1` at the end of every link it writes, so a frame the course page reloads (browsers restore a frame's last address) opens embedded again. Any other page writes no `embed`.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** links created with `embedded: true`, `write()` → one `replaceState` to `#anatomy=cdmd&…&embed=1`; without it → an address with no `embed`.
+- **Covered by:** `src/lib/controller/links.test.ts` (R)
+
 ## Another subject
 
 ### LINK-06 · Choosing another subject reopens the page on its link
@@ -71,7 +75,7 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:636-650`
-- **Expected:** on `snail` with hcp-mmp, view left, Deficits on aphasia, a region selected, a part hidden, fr, coronal at 12.34 and window (50, 60): `switchAnatomy('bert')` → calls `cancel`, `replace`, `reload` in that order; the replaced link decodes to `{ anatomy: 'bert', atlas: 'hcp-mmp', cut: 'coronal', cutAtlas: 'destrieux', detail: 'learning', cutOffset: 12.3, view: 'left', explorer: 'deficits', selectedDeficit: 'aphasia', lang: 'fr' }`. `switchAnatomy('cdmd')` on cdmd → no call. The link is replaced, not pushed (LINK-01), so Back does not return to the brain just left. In the app the Subject field appears only with two published subjects; the published index has one today.
+- **Expected:** on `snail` with hcp-mmp, view left, Deficits on aphasia, a region selected, a part hidden, fr, coronal at 12.34 and window (50, 60): `switchAnatomy('bert')` → calls `cancel`, `replace`, `reload` in that order; the replaced link decodes to `{ anatomy: 'bert', atlas: 'hcp-mmp', cut: 'coronal', detail: 'learning', cutOffset: 12.3, view: 'left', explorer: 'deficits', selectedDeficit: 'aphasia', lang: 'fr' }`. `switchAnatomy('cdmd')` on cdmd → no call. The link is replaced, not pushed (LINK-01), so Back does not return to the brain just left. In the app the Subject field appears only with two published subjects; the published index has one today.
 - **Covered by:** `src/lib/controller/links.test.ts` (R; anatomy ids are opaque strings there)
 
 ## A link edited in place
@@ -85,14 +89,14 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** on cdmd, hash `#anatomy=other&hemi=left` → one reload, hemisphere still `both`. On a non-default subject, `#hemi=left` → one reload.
 - **Covered by:** `src/lib/controller/links.test.ts` (R); the subject test itself: STATE-65
 
-### LINK-08 · A link edited for the same brain is applied, and its language is followed but not saved
+### LINK-08 · A link edited for the same brain is applied, and its language is followed, unless one is saved, and not saved
 
-- **Rule:** The same brain takes an edited link as scene commands. A language in it becomes the session's and the page's (`<html lang>`, WCAG 3.1.1) but is never saved as the reader's preference; a link without one leaves the language alone. What it could not apply is said in one notice.
+- **Rule:** The same brain takes an edited link as scene commands. A language in it becomes the session's and the page's (`<html lang>`, WCAG 3.1.1) only while the reader has saved none; a saved language wins (STORE-22), and the session keeps the language in effect (`followLanguage` returns it). A link's language is never saved as the reader's preference; a link without one leaves the language alone. What it could not apply is said in one notice.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:2082-2093`; decision 8 on #4
-- **Expected:** `#hemi=left&lang=fr&atlas=missing` → hemisphere left, session `fr`, notice matches `/atlas/i`. `#hemi=left` → `followLanguage` not called; `#lang=fr` → called once with `fr`. With `planum-lang` stored as `en`, `#lang=fr` → `document.documentElement.lang` `fr`, `planum-lang` still `en`.
-- **Covered by:** `src/lib/controller/links.test.ts` (R); `src/lib/controller/links.svelte.test.ts` (R, browser for `<html lang>` and `localStorage`; the decision "follow, do not save" could be checked in unit with a spy, the DOM part is the language store's, see `state.md`)
+- **Source:** `viewer/app.js:2082-2093`; decision 8 on #4; handoff U15 (plan 2 WP36)
+- **Expected:** `#hemi=left&lang=fr&atlas=missing` → hemisphere left, session `fr`, notice matches `/atlas/i`. `#hemi=left` → `followLanguage` not called; `#lang=fr` → called once with `fr`. With the real language store: nothing stored, `#lang=fr` → `document.documentElement.lang` `fr`, session `fr`, `planum-lang` still unset; `planum-lang` stored as `en`, `#lang=fr` → `<html lang>` `en`, session `en`, `planum-lang` still `en`.
+- **Covered by:** `src/lib/controller/links.test.ts` (R); `src/lib/controller/links.svelte.test.ts` (R, browser for `<html lang>` and `localStorage` through `createLanguage`'s `follow`; the store's own cases are STORE-22's)
 
 ### LINK-08a · An edited link that throws still ends its notice hold
 
@@ -107,7 +111,7 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 
 ### LINK-09 · A link may name only what this build publishes
 
-- **Rule:** A restore judges the link against what this anatomy and build publish (STATE-18): its atlases, detail levels and cut atlases, the seven views, the explorer tabs, the colourings it publishes (tissue, mri and atlas always; network and cab-np only when published), the functions (all, each domain and each Neurosynth term), the deficits of the clinical catalogue, the circuits with their step counts, and the cord when published. A build without neuropsychological domains cannot restore links at all.
+- **Rule:** A restore judges the link against what this anatomy and build publish (STATE-18): its atlases and detail levels, the seven views, the explorer tabs, the colourings it publishes (tissue, mri, lobe and atlas always; network, cab-np, territory, striatal and cerebellar only when published), the functions (all, each domain and each Neurosynth term), the deficits of the clinical catalogue, the circuits with their step counts, and the cord when published. A build without neuropsychological domains cannot restore links at all.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:1992-2006`
@@ -125,7 +129,7 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 
 ### LINK-11 · A link names only the parts it holds; the rest of the scene goes to the defaults
 
-- **Rule:** A restored link is a whole scene: fields it does not name take their defaults (STATE-35), so a link without a cut turns a cut off and one without isolation clears it. The atlas defaults to the manifest's first, the detail to the anatomy's default level, and the cut atlas to the link's atlas.
+- **Rule:** A restored link is a whole scene: fields it does not name take their defaults (STATE-35), so a link without a cut turns a cut off and one without isolation clears it. The atlas defaults to the manifest's first and the detail to the anatomy's default level; the cut atlas follows from them (SLICE-21).
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:2025-2031`
@@ -213,6 +217,15 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Expected:** after ticking `slf-left` and unticking `af-left` → `tracts: ['cst-right', 'slf-left']`; all unticked → `tracts: []`, written `tracts=`. `tab=diffusion&tracts=slf-left` → `showTracts(['slf-left'])`, the link still `['slf-left']` until it resolves; `tab=diffusion` → `showTracts(['af-left', 'cst-right'])`; `tab=functions&tracts=slf-left` → `['tracts']`. Boot on `#tab=diffusion&tracts=slf-left` → the port is called with `['slf-left']` and the address bar keeps it.
 - **Covered by:** `src/lib/controller/links.test.ts` (R); `src/lib/core/state/url-state.test.ts`, `src/lib/core/state/link-check.test.ts` (R, the field); `src/features/tracts/TractsExplorer.svelte.test.ts` (R, browser: drawing, the download and its failure); `src/app/boot.svelte.test.ts` (R, browser)
 
+### LINK-26 · A link carries names on the brain, and applying one sets them
+
+- **Rule:** While names on the brain are on, the link writes `names=1`; off, it writes nothing. A link is a whole scene: one with `names=1` turns them on, one without turns them off, and an unreadable value is named in the notice.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP21
+- **Expected:** Default scene → no `names=`; `setNamesShown(true)` → the written link contains `&names=1`. Restoring `hemi=left&names=1` → `[]`, names on; `hemi=right` → `[]`, names off; `names=yes` → `['names']`.
+- **Covered by:** `src/lib/controller/links.test.ts` (R)
+
 ## The scene reader
 
 ### LINK-20 · A captured scene is put back with its view and exact camera
@@ -221,7 +234,7 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/app.js:749-779`; decision 8 on #4
-- **Expected:** view left, captured, view right, applied → session view `left`. Hemisphere left, cut atlas hcp-mmp, coronal, window 50/60, view left; captured → `{ cutAtlas: 'hcp-mmp', hemisphere: 'left', cut: 'coronal', mriWindow: { center: 50, width: 60 } }`. After undoing each, apply → failures `[]`, hemisphere left, mode coronal, window 50/60, exactly one camera `restore` call.
+- **Expected:** view left, captured, view right, applied → session view `left`. Hemisphere left, coronal, window 50/60, view left; captured → `{ hemisphere: 'left', cut: 'coronal', mriWindow: { center: 50, width: 60 } }`. After undoing each, apply → failures `[]`, hemisphere left, mode coronal, window 50/60, exactly one camera `restore` call.
 - **Covered by:** `src/lib/controller/links.test.ts` (R; the one-`restore` count is I)
 
 ## End to end
@@ -242,3 +255,12 @@ on the cdmd manifest; "the corpus" below was the fixed scenario table of the del
 - **Level:** unit
 - **Expected:** `zmin=3.5` → `paintFrom` 3.5; `paintFrom: null` writes no `zmin`; 4.5 writes `zmin=4.5`; `2.5`, `3.25`, `x`, `-4`, `101` are rejected.
 - **Covered by:** `src/lib/core/state/url-state.test.ts`
+
+### LINK-25 · A link carries the reader's highlights, and applying one replaces them
+
+- **Rule:** The written link names the reader's highlights (`mark=`) whenever there are any on the stage or set aside by evidence; highlights a masthead colour lifted are left out, so the link opens on the colour its writer saw, with no key for the lift. A link applied, at start or edited in place, is a whole scene: its highlights replace the reader's, and a link without any, or whose `mark` is not applied, clears them; `mark` is then named among the fields not applied.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22
+- **Expected:** Highlights `destrieux:left:29` green, `aseg:left:17` blue → the written hash contains `mark=destrieux:left:29:green,aseg:left:17:blue`. Restoring `hemi=left&mark=aseg:left:17:violet` → `[]` and the set `[aseg:left:17 violet]`; then `hemi=right` → `[]` and none, `linkState().highlights` null. `mark=aseg:left:17:blue,destrieux:left:9999:pink` → `['mark']` and none. Lifted under Lobes → the hash has `colors=lobe` and no `mark=`, `linkState().highlights` null; set aside → written.
+- **Covered by:** `src/lib/controller/links.test.ts`

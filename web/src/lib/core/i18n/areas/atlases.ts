@@ -14,6 +14,7 @@ export const en = {
   arterial: 'Arterial territory atlas (Liu et al. 2023)',
   nettekoven: 'Functional cerebellar atlas (Nettekoven et al. 2024)',
   choi: 'Striatal network atlas (Choi et al. 2012)',
+  aan: 'Harvard Ascending Arousal Network Atlas 2.0',
 };
 
 export const fr: typeof en = {
@@ -23,7 +24,7 @@ export const fr: typeof en = {
   schaefer: 'Parcellisation fonctionnelle Schaefer 2018',
   desikan: 'Atlas anatomique de Desikan-Killiany',
   learning:
-    'Ensemble pédagogique : grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés',
+    'Ensemble pédagogique : grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés',
   aseg: 'Segmentation sous-corticale FreeSurfer',
   nextbrain: 'Atlas histologique NextBrain',
   cerebnet: 'Lobules cérébelleux FastSurfer CerebNet',
@@ -32,4 +33,5 @@ export const fr: typeof en = {
   arterial: 'Atlas des territoires artériels (Liu et al. 2023)',
   nettekoven: 'Atlas fonctionnel du cervelet (Nettekoven et al. 2024)',
   choi: 'Atlas des réseaux striataux (Choi et al. 2012)',
+  aan: 'Atlas du réseau ascendant de l’éveil de Harvard 2.0',
 };

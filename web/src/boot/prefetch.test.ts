@@ -108,6 +108,24 @@ describe('the head prefetch script', () => {
     await vi.waitFor(() => expect(requested).toHaveLength(4));
   });
 
+  it.each(['#embed=1', '#anatomy=bert&atlas=hcp-mmp&embed=1'])(
+    'ASSET-23 an embedded link (%s) starts no download',
+    (hash) => {
+      // Every request the script makes starts in its own run, so none can come later.
+      const { requested, window } = run(hash);
+      expect(requested).toEqual([]);
+      expect(window.__planumAssets).toEqual({});
+    },
+  );
+
+  it.each(['#embed=0', '#embed=1&embed=1'])(
+    'ASSET-23 a link that is not embedded (%s) is prefetched',
+    async (hash) => {
+      const { requested } = run(hash, '{"default":"bert"}');
+      await vi.waitFor(() => expect(requested).toHaveLength(4));
+    },
+  );
+
   it('ASSET-16 asks for the internal anatomy once the cortex has fully arrived, and leaves the cortex whole for the app', async () => {
     let finish!: () => void;
     const cortex = new ReadableStream<Uint8Array>({
@@ -149,12 +167,12 @@ describe('the head prefetch script', () => {
     },
   );
 
-  it('ASSET-19 starts neither the tissue envelopes nor the cord, for any atlas and detail level', async () => {
+  it('ASSET-19 starts neither the tissue envelopes nor a supplemental layer, for any atlas and detail level', async () => {
     const later = [
       manifest.solid_envelopes!.file,
       ...(manifest.supplemental_layers ?? []).map((layer) => layer.file),
     ];
-    expect(later).toEqual(['tissue-envelopes.glb', 'spinal-cord.glb']);
+    expect(later).toEqual(['tissue-envelopes.glb', 'spinal-cord.glb', 'arousal-nuclei.glb']);
     for (const atlas of manifest.atlases) {
       for (const level of manifest.detail_levels) {
         const { requested } = run(`#anatomy=cdmd&atlas=${atlas.id}&detail=${level.id}`);

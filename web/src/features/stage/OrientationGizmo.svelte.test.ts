@@ -5,7 +5,7 @@ import type { Mock } from 'vitest';
 import { flushSync } from 'svelte';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
 import { ORBIT_STEP } from '../../lib/engine/render/keyboard-orbit.ts';

@@ -1,19 +1,5 @@
 import type { Region } from '../../types/index.ts';
-import type { EngineModel } from '../../engine/api.ts';
-
-/** What navigation reads of the model, and the commands it gives. */
-export type NavigationModel = Pick<EngineModel, 'regions' | 'settings'>;
-export type ShowingModel = NavigationModel &
-  Pick<
-    EngineModel,
-    | 'clearIsolation'
-    | 'setInternalSystem'
-    | 'setHemisphere'
-    | 'setCortexVisible'
-    | 'setCortexOpacity'
-    | 'setInternalVisible'
-    | 'showRegions'
-  >;
+import type { NavigationModel, ShowingModel } from './ports.ts';
 
 const commonestAtlas = (regions: readonly Region[]) => {
   const counts = new Map<string, number>();

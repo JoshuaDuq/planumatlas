@@ -19,30 +19,17 @@ from .gltf.encode import (
     published_field_ranges,
 )
 from .gltf.export import compact_region
-from .labels import boundary_certainty, cerebellum, nextbrain, white_matter
-
-# Aliased: validate_segmentation's `segmentation_agreement` scores the same structures on NextBrain's grid.
-from .labels import segmentation_agreement as agreement_map
+from .labels import cerebellum, nextbrain, white_matter
+from .labels.placement import OPENNESS_TIE
 from .labels.volumes import conformed_grid
 from .layers import (
+    arousal_nuclei,
     arterial_territories,
-    cab_np,
-    cerebellar_functions,
-    coordinate_spaces,
-    disorder_effects,
-    functional_connectivity,
-    functional_regions,
     networks,
-    neuropsych_domains,
-    neurosynth_terms,
-    receptor_fingerprints,
     retinotopy,
     spinal_cord,
-    stimulation_ftract,
-    stimulation_responses,
-    striatal_networks,
-    stroke_cases,
 )
+from .registry import LAYERS, Check
 from .sources import read_color_table, read_config, sha256, verify_sources, write_json
 from .surfaces.geometry import (
     box_affine,
@@ -237,6 +224,22 @@ def read_meshes(path):
     return meshes
 
 
+def check_label_point(region, pial, openness, tolerance):
+    """A parcel's name stands on one of its own pial vertices, as open as its most open one.
+
+    `openness` is re-cast here, so the build's choice may sit up to its jitter either side.
+    """
+    point = np.asarray(region["label_point_ras_mm"], dtype=np.float64)
+    at = np.flatnonzero(np.all(np.abs(pial - point) <= 1e-6, axis=1))
+    if not len(at):
+        raise ValueError(f"Label point is not a pial vertex of {region['id']}")
+    shortfall = openness.max() - openness[at].max()
+    if shortfall > OPENNESS_TIE + 2 * tolerance:
+        raise ValueError(
+            f"Label point of {region['id']} is {shortfall:.4f} less open than its most open vertex"
+        )
+
+
 def read_network_field(config, prefix, faces, labels):
     if not networks.is_declared(config):
         return None, None
@@ -341,6 +344,12 @@ def validate_atlas(config, atlas, records):
                 openness_difference > config["validation"]["openness"]["tolerance"]
             ))
             openness_count += openness_difference.size
+            if published[region_id]["kind"] == "cortex":
+                check_label_point(
+                    published[region_id], vertices[labels == label],
+                    openness[:len(vertices)][labels == label],
+                    config["validation"]["openness"]["tolerance"],
+                )
             if network_field is not None:
                 carried = actual.vertex_attributes.get("_NETWORK")
                 if carried is None or carried.size != len(points):
@@ -373,6 +382,11 @@ def validate_atlas(config, atlas, records):
                     carried.ravel(), visual_fields[retinotopy.AREA][indices]
                 ):
                     raise ValueError(f"Visual area field changed: {region_id}")
+                carried = actual.vertex_attributes.get(retinotopy.VISUAL_AREAS)
+                if carried is None or not np.array_equal(
+                    carried.ravel(), visual_fields[retinotopy.VISUAL_AREAS][indices]
+                ):
+                    raise ValueError(f"Named visual area field changed: {region_id}")
                 for name in retinotopy.FIELDS:
                     field = actual.vertex_attributes.get(name)
                     if field is None or field.size != len(points):
@@ -741,10 +755,9 @@ def validate_cut_only_regions(config, regions, nextbrain_source):
     for region_id, region in regions.items():
         if region["kind"] == "tissue-region":
             by_source.setdefault(region["atlas"], {})[region_id] = region
-    # Arterial territory, cerebellar functional and striatal network regions are checked against their
-    # volumes by their layers.
-    unknown = sorted(set(by_source) - {nextbrain.ATLAS_ID, white_matter.ATLAS_ID, arterial_territories.ATLAS_ID,
-                                       cerebellar_functions.ATLAS_ID, striatal_networks.ATLAS_ID})
+    # A registered atlas's regions are checked against its volume by its layer.
+    known = {nextbrain.ATLAS_ID, white_matter.ATLAS_ID, *(layer.atlas for layer in LAYERS if layer.atlas)}
+    unknown = sorted(set(by_source) - known)
     if unknown:
         raise ValueError(f"Cut-only regions from an unknown source: {unknown}")
     white_matter.validate_regions(config, by_source.get(white_matter.ATLAS_ID, {}))
@@ -826,6 +839,10 @@ def validate_manifest(config, manifest, nextbrain_source):
         cord, cord_grid = expected_cord_metadata(config)
         groups["spinal-cord.glb"] = cord
         measured.append((cord, cord_grid))
+    if arousal_nuclei.is_declared(config):
+        nuclei, nuclei_grid = arousal_nuclei.expected_metadata(config)
+        groups[arousal_nuclei.FILE] = nuclei
+        measured.append((nuclei, nuclei_grid))
     if nextbrain.is_declared(config):
         fine, fine_grid = expected_nextbrain_metadata(config, nextbrain_source)
         groups["nextbrain.glb"] = fine
@@ -887,39 +904,27 @@ def validate_layers(config, manifest, tissues):
     declared = config["anatomy"]["layers"]
     cut = [atlas["id"] for atlas in config["atlases"]]
     fine = [nextbrain.ATLAS_ID] if "nextbrain" in declared else []
-    fine += [arterial_territories.ATLAS_ID] if arterial_territories.LAYER in declared else []
-    fine += [cerebellar_functions.ATLAS_ID] if cerebellar_functions.LAYER in declared else []
-    fine += [striatal_networks.ATLAS_ID] if striatal_networks.LAYER in declared else []
+    fine += [layer.atlas for layer in LAYERS if layer.atlas and layer.key in declared]
+    # A layer's metadata where validation can know it without a rebuild, else only its presence.
+    optional = [layer for layer in LAYERS if layer.published and layer.export]
     expected = {
-        "networks": networks.metadata() if "networks" in declared else None,
         "cut_atlases": cut + fine,
         "tissue_atlases": sorted(cut + fine),
         "white_matter": "white_matter" in declared,
         "cerebellar_lobules": "cerebellar_lobules" in declared,
-        "supplemental_layers": [spinal_cord.ATLAS_ID] if "spinal_cord" in declared else [],
-        "neurosynth_terms": neurosynth_terms.metadata() if "neurosynth_terms" in declared else None,
-        "boundary_certainty": (
-            boundary_certainty.metadata(config) if boundary_certainty.is_published(config) else None
-        ),
-        "segmentation_agreement": nextbrain.is_declared(config),
-        "arterial_territories": (
-            arterial_territories.metadata(config, arterial_territories.read_definition())
-            if arterial_territories.LAYER in declared else None
-        ),
-        "cerebellar_functions": (
-            cerebellar_functions.metadata(config, cerebellar_functions.read_definition())
-            if cerebellar_functions.LAYER in declared else None
-        ),
-        "striatal_networks": (
-            striatal_networks.metadata(config, striatal_networks.read_definition())
-            if striatal_networks.LAYER in declared else None
-        ),
-        "coordinate_spaces": coordinate_spaces.LAYER in declared,
-        "retinotopy": retinotopy.LAYER in declared,
-        "stroke_cases": stroke_cases.metadata(config) if stroke_cases.LAYER in declared else None,
+        "supplemental_layers": [
+            *([spinal_cord.ATLAS_ID] if "spinal_cord" in declared else []),
+            *([arousal_nuclei.ATLAS_ID] if "arousal_nuclei" in declared else []),
+        ],
+        **{
+            layer.key: (
+                (layer.metadata(config) if layer.is_published(config) else None)
+                if layer.metadata else layer.is_published(config)
+            )
+            for layer in optional
+        },
     }
     published = {
-        "networks": manifest["networks"],
         "cut_atlases": [atlas["id"] for atlas in manifest["cut_atlases"]],
         "tissue_atlases": sorted(tissues["atlases"]),
         "white_matter": "white_matter" in tissues,
@@ -927,15 +932,14 @@ def validate_layers(config, manifest, tissues):
             region.get("source_atlas") == cerebellum.ATLAS_ID for region in manifest["regions"]
         ),
         "supplemental_layers": [layer["id"] for layer in manifest["supplemental_layers"]],
-        "neurosynth_terms": manifest["neurosynth_terms"],
-        "boundary_certainty": manifest.get("boundary_certainty"),
-        "segmentation_agreement": "segmentation_agreement" in manifest,
-        "arterial_territories": manifest.get("arterial_territories"),
-        "cerebellar_functions": manifest.get("cerebellar_functions"),
-        "striatal_networks": manifest.get("striatal_networks"),
-        "coordinate_spaces": "coordinate_spaces" in manifest,
-        "retinotopy": "retinotopy" in manifest,
-        "stroke_cases": manifest.get("stroke_cases"),
+        **{
+            layer.key: (
+                manifest[layer.key] if layer.keyed
+                else manifest.get(layer.key) if layer.metadata
+                else layer.key in manifest
+            )
+            for layer in optional
+        },
     }
     differ = [key for key in expected if published[key] != expected[key]]
     if differ:
@@ -981,6 +985,27 @@ def validate_published_files(config, manifest):
     return sorted(present)
 
 
+def layer_reports(check):
+    """Validates each published layer once: those named, in that order, or with none named, the rest."""
+    pending = {
+        layer.report_key: layer
+        for layer in LAYERS
+        if layer.validate and layer.is_published(check.config)
+    }
+    known = {layer.report_key for layer in LAYERS if layer.validate}
+
+    def reports(*keys):
+        if set(keys) - known:
+            raise ValueError(f"No layer reports {sorted(set(keys) - known)}")
+        return {
+            key: pending.pop(key).validate(check)
+            for key in (keys or list(pending))
+            if key in pending
+        }
+
+    return reports
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1006,6 +1031,7 @@ def main():
     for atlas in atlases:
         if atlas["field_ranges"] != manifest["appearance"]["field_ranges"]:
             raise ValueError(f"{atlas['file']} field ranges differ from the manifest's")
+    reports = layer_reports(Check(config, manifest, tissues, nextbrain_source))
     report = {
         "status": "passed",
         "scope": "Source-to-asset conversion fidelity",
@@ -1019,28 +1045,13 @@ def main():
         **({"spinal_cord": validate_cord(config, manifest["supplemental_layers"][0])}
            if spinal_cord.is_declared(config) else {}),
         "solid_envelopes": validate_solid_envelopes(config, manifest["solid_envelopes"]),
-        "cab_np": cab_np.validate(config, manifest),
-        "functional_regions": functional_regions.validate(config, manifest),
-        **({"arterial_territories": arterial_territories.validate(config, manifest)}
-           if arterial_territories.is_declared(config) else {}),
-        **({"cerebellar_functions": cerebellar_functions.validate(config, manifest)}
-           if cerebellar_functions.is_declared(config) else {}),
-        **({"striatal_networks": striatal_networks.validate(config, manifest)}
-           if striatal_networks.is_declared(config) else {}),
-        **({"coordinate_spaces": coordinate_spaces.validate(config, manifest)}
-           if coordinate_spaces.is_declared(config) else {}),
-        **({"retinotopy": retinotopy.validate(config, manifest)}
-           if retinotopy.is_declared(config) else {}),
-        **({"stroke_cases": stroke_cases.validate(config, manifest, tissues)}
-           if stroke_cases.is_declared(config) else {}),
-        "neuropsych_domains": neuropsych_domains.validate(config, manifest),
-        "receptor_fingerprints": receptor_fingerprints.validate(config, manifest),
-        "stimulation_responses": stimulation_responses.validate(config, manifest),
-        "stimulation_ftract": stimulation_ftract.validate(config, manifest),
-        "functional_connectivity": functional_connectivity.validate(config, manifest),
-        "disorder_effects": disorder_effects.validate(config, manifest),
-        **({"neurosynth_terms": neurosynth_terms.validate(config, manifest)}
-           if neurosynth_terms.is_declared(config) else {}),
+        # Layers in the order the published reports list them; a layer added since, after them.
+        **reports(
+            "cab_np", "functional_regions", "arterial_territories", "cerebellar_functions",
+            "striatal_networks", "coordinate_spaces", "retinotopy", "stroke_cases",
+            "neuropsych_domains", "receptor_fingerprints", "stimulation_responses",
+            "stimulation_ftract", "functional_connectivity", "disorder_effects", "neurosynth_terms",
+        ),
         **(
             {"nextbrain_structures": validate_nextbrain_structures(config, nextbrain_source),
              "nextbrain_cut_labels": nextbrain.validate_volume(
@@ -1052,25 +1063,8 @@ def main():
             if nextbrain.is_declared(config)
             else {}
         ),
-        **(
-            {"boundary_certainty": boundary_certainty.validate(
-                config, manifest, nextbrain_source
-            )}
-            if boundary_certainty.is_published(config)
-            else {}
-        ),
-        **(
-            {"white_matter": white_matter.validate_volume(config, tissues["white_matter"])}
-            if white_matter.is_declared(config)
-            else {}
-        ),
-        **(
-            {"segmentation_agreement_map": agreement_map.validate(
-                config, manifest, nextbrain_source
-            )}
-            if nextbrain.is_declared(config)
-            else {}
-        ),
+        **reports("boundary_certainty", "white_matter", "segmentation_agreement_map"),
+        **reports(),
         "volumes": validate_volumes(config),
         "tissue_volumes": validate_tissue_volumes(config, manifest, tissues),
         "placements": validate_placements(config, manifest, tissues, nextbrain_source),

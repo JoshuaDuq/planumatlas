@@ -11,6 +11,7 @@ import { HEMISPHERES, SURFACE_COLORS } from '../../types/index.ts';
 import type {
   CabNpData,
   DomainsData,
+  EngineCamera,
   EngineModel,
   FunctionalRegionsData,
   OnProgress,
@@ -33,6 +34,8 @@ export interface FakeModelOptions {
   segmentationAgreement?: SegmentationAgreementData;
   /** Called after every state change, as the real model's `change` event (brain-atlas.js:602). */
   changed: () => void;
+  /** The camera `facing` looks through, made after the model. */
+  camera: () => Pick<EngineCamera, 'view' | 'project'>;
 }
 
 /** The model plus the hooks the fake sections drive; the real model's sections call the same methods. */
@@ -78,6 +81,7 @@ export function createFakeModel({
   domains,
   segmentationAgreement,
   changed,
+  camera,
 }: FakeModelOptions): FakeModel {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const levels = manifest.detail_levels;
@@ -232,6 +236,27 @@ export function createFakeModel({
       return point && [point[0], point[1] + 1, point[2]];
     },
     canSelect,
+    // Nothing is drawn to meet a ray: a drawn region faces the reader when its anchor lies on the
+    // camera's side of the brain's centre.
+    facing(ids) {
+      const { view, project } = camera();
+      return ids.map((id) => {
+        const region = regions.get(id);
+        if (!region) throw new Error(`Unknown region: ${id}`);
+        if (region.kind !== 'cortex' && region.kind !== 'structure') {
+          throw new Error(`A ${region.kind} is not named on the stage: ${id}`);
+        }
+        const anchor = model.anchorOf(id)!;
+        const back = view.basis.back;
+        if (
+          !model.isRegionDrawn(id) ||
+          anchor[0] * back[0] + anchor[1] * back[1] + anchor[2] * back[2] <= 0
+        ) {
+          return null;
+        }
+        return { ...project([anchor])[0]!, drawn: anchor };
+      });
+    },
 
     select,
     setInternalSystem(system) {
@@ -418,8 +443,16 @@ export function createFakeModel({
       if (!(manifest.supplemental_layers ?? []).some((layer) => layer.id === 'pam50')) {
         throw new Error('This anatomy does not publish a spinal cord.');
       }
-      for (const layer of manifest.supplemental_layers ?? []) layers.add(layer.id);
+      layers.add('pam50');
       spinalCord = 'ready';
+      update();
+    },
+    async ensureSupplementalLayer(id) {
+      if (!(manifest.supplemental_layers ?? []).some((layer) => layer.id === id)) {
+        throw unknownLayer(`This anatomy publishes no supplemental layer ${id}.`);
+      }
+      layers.add(id);
+      if (id === 'pam50') spinalCord = 'ready';
       update();
     },
     async prefetchLayer(id) {
@@ -439,6 +472,10 @@ export function createFakeModel({
         throw new Error('This model carries no network layer.');
       if (mode === 'territory' && !manifest.arterial_territories)
         throw new Error('This model carries no arterial territories.');
+      if (mode === 'striatal' && !manifest.striatal_networks)
+        throw new Error('This model carries no striatal networks.');
+      if (mode === 'cerebellar' && !manifest.cerebellar_functions)
+        throw new Error('This model carries no cerebellar functional regions.');
       if (mode === 'lobe' && !groupsByLobe(values.atlas)) {
         throw new Error(`${values.atlas} groups no regions by lobe; show a lobe atlas first.`);
       }

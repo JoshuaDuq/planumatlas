@@ -33,6 +33,8 @@ export const en = {
     streamlines: 'Could not show this landmark’s streamlines.',
     map: 'Could not open the visual field map.',
     guide: 'Could not start the tour.',
+    snapshotSize:
+      'Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller.',
   },
 };
 
@@ -52,7 +54,7 @@ export const fr: typeof en = {
     start: 'Impossible de charger l’anatomie.',
     link: 'Impossible d’ouvrir ce lien.',
     layer: (name: string) => `Impossible de charger ${name}.`,
-    colour: (name: string) => `Impossible d’afficher la coloration « ${name} ».`,
+    colour: (name: string) => `Impossible d’afficher la coloration « ${name} ».`,
     region: 'Impossible d’afficher la région.',
     cord: 'Impossible d’afficher la moelle épinière.',
     system: 'Impossible d’afficher ce système.',
@@ -71,5 +73,7 @@ export const fr: typeof en = {
     streamlines: 'Impossible d’afficher les trajectoires de ce repère.',
     map: 'Impossible d’ouvrir la carte du champ visuel.',
     guide: 'Impossible de lancer la visite.',
+    snapshotSize:
+      'Impossible d’enregistrer l’image à cette taille : elle dépasserait ce que cet appareil peut dessiner. Choisissez une taille plus petite ou réduisez la fenêtre.',
   },
 };

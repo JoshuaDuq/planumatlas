@@ -41,7 +41,7 @@
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
   import { announce, createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
-  import { downloadText } from './download.ts';
+  import { downloadText } from '../../lib/ui/download.ts';
   import TractMetrics from './TractMetrics.svelte';
   import TractRow from './TractRow.svelte';
 

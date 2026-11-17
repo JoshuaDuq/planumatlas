@@ -17,6 +17,8 @@ export interface LabelRequest {
   point: ScreenPoint | null;
   /** The label's sizes, preferred first. */
   sizes: readonly Size[];
+  /** Left out (null) where no slot is clear, rather than placed where it overlaps least: a region's name. */
+  optional?: boolean;
 }
 
 /** Above right (where the route's numbers have always stood), right, below right, the left side, then above and below. */
@@ -100,7 +102,7 @@ function outside(box: Rect, bounds: Rect): number {
 
 /**
  * Each label's place, in order: the first clear slot, trying each size in turn, else its last size where
- * it overlaps least. Null for a point behind the camera.
+ * it overlaps least, or none for an optional one. Null for a point behind the camera.
  */
 export function placeLabels(
   requests: readonly LabelRequest[],
@@ -116,7 +118,7 @@ export function placeLabels(
   // The chrome, then each label as it is placed.
   const blockers = [...obstacles];
   const leaders: [ScreenPoint, ScreenPoint][] = [];
-  return requests.map(({ point, sizes }, index) => {
+  return requests.map(({ point, sizes, optional = false }, index) => {
     if (!point) return null;
     // Its own dot sits at the box's near corner or edge, outside it.
     const others = dots.filter((dot, at): dot is Rect => dot !== null && at !== index);
@@ -143,6 +145,7 @@ export function placeLabels(
         }
       }
     }
+    if (!chosen && optional) return null;
     if (!chosen) {
       const variant = sizes.length - 1;
       let least = Infinity;
@@ -168,6 +171,26 @@ export function leaderEnd(point: ScreenPoint, box: Rect): ScreenPoint {
     x: Math.max(box.x, Math.min(point.x, box.x + box.width)),
     y: Math.max(box.y, Math.min(point.y, box.y + box.height)),
   };
+}
+
+/**
+ * Names that stand on what they name, each centred on its point, in order of priority: one that would leave
+ * `bounds`, cover an obstacle or a name already placed is left out (null), never moved off its point.
+ */
+export function placeCentred(
+  requests: readonly { point: ScreenPoint | null; size: Size }[],
+  bounds: Rect,
+  obstacles: readonly Rect[],
+): (Rect | null)[] {
+  const blockers = [...obstacles];
+  return requests.map(({ point, size: { width, height } }) => {
+    if (!point) return null;
+    const box = { x: point.x - width / 2, y: point.y - height / 2, width, height };
+    if (outside(box, bounds) > 0) return null;
+    if (blockers.some((other) => overlap(box, other, GAP_PX) > 0)) return null;
+    blockers.push(box);
+    return box;
+  });
 }
 
 /** The stage's own chrome a label must not cover. */

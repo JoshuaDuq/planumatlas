@@ -16,30 +16,19 @@ from .labels import (
     segmentation_agreement,
     white_matter,
 )
-from .labels.placement import placements, surface_placement
+from .labels.placement import label_point, placements, surface_placement
 from .labels.tissue_labels import export_tissue_labels
 from .labels.volumes import conformed_grid, export_volumes
 from .layers import (
+    arousal_nuclei,
     arterial_territories,
-    cab_np,
-    cerebellar_functions,
     comparison,
-    coordinate_spaces,
-    disorder_effects,
-    functional_connectivity,
-    functional_regions,
     learning,
     networks,
-    neuropsych_domains,
-    neurosynth_terms,
-    receptor_fingerprints,
     retinotopy,
     spinal_cord,
-    stimulation_ftract,
-    stimulation_responses,
-    striatal_networks,
-    stroke_cases,
 )
+from .registry import LAYERS, Run
 from .sources import (
     HEMISPHERES,
     is_cortical_area,
@@ -85,58 +74,18 @@ def read_native_surface(source, prefix):
 def require_layer_inputs(config):
     """Every input of each declared layer; a declared layer is never left out."""
     inputs = {
-        "networks": lambda: [
-            networks.annotation_path(config["source_directory"], prefix)
-            for prefix in HEMISPHERES
-        ],
-        "nextbrain": lambda: [
+        "nextbrain": lambda config: [
             *nextbrain.paths(config),
             *([boundary_certainty.path(config)] if boundary_certainty.is_published(config) else []),
         ],
-        "cerebellar_lobules": lambda: [cerebellum.path(config)],
-        "white_matter": lambda: [white_matter.path(config)],
-        "spinal_cord": lambda: list(spinal_cord.paths(config).values()),
-        "functional_connectivity": lambda: [functional_connectivity.DEFINITION, functional_connectivity.DATA],
-        "neurosynth_terms": lambda: [
-            neurosynth_terms.DEFINITION, neurosynth_terms.SCORES, neurosynth_terms.ATLAS_SCORES,
-        ],
-        "arterial_territories": lambda: [
-            arterial_territories.DEFINITION,
-            arterial_territories.volume_path(config),
-            arterial_territories.report_path(config),
-        ],
-        "cerebellar_functions": lambda: [
-            cerebellar_functions.DEFINITION,
-            cerebellar_functions.volume_path(config),
-            cerebellar_functions.lobules_path(config),
-            cerebellar_functions.report_path(config),
-        ],
-        "stroke_cases": lambda: [
-            stroke_cases.DEFINITION,
-            stroke_cases.FACTS,
-            stroke_cases.lesions_path(config),
-            stroke_cases.report_path(config),
-        ],
-        "striatal_networks": lambda: [
-            striatal_networks.DEFINITION,
-            striatal_networks.volume_path(config),
-            striatal_networks.carried_path(config),
-            striatal_networks.template_aseg_path(config),
-            striatal_networks.confidence_path(config),
-            striatal_networks.report_path(config),
-        ],
-        "coordinate_spaces": lambda: [
-            coordinate_spaces.DEFINITION,
-            coordinate_spaces.report_path(config),
-            *(coordinate_spaces.field_path(config, space)
-              for space in coordinate_spaces.read_definition()["spaces"]),
-        ],
-        "retinotopy": lambda: retinotopy.inputs(retinotopy.read_definition()),
+        "cerebellar_lobules": lambda config: [cerebellum.path(config)],
+        "spinal_cord": lambda config: list(spinal_cord.paths(config).values()),
+        **{layer.key: layer.inputs for layer in LAYERS if layer.inputs},
     }
     missing = [
         str(path)
         for layer in config["anatomy"]["layers"]
-        for path in inputs[layer]()
+        for path in inputs[layer](config)
         if not path.exists()
     ]
     if missing:
@@ -171,6 +120,7 @@ def retinotopy_fields(faces, labels, projected):
             for name, key in zip(retinotopy.FIELDS, ("x", "y", "sigma"))
         },
         retinotopy.AREA: partition_vertex_labels(faces, labels, projected["area"]),
+        retinotopy.VISUAL_AREAS: partition_vertex_labels(faces, labels, projected["visual_area"]),
     }
 
 
@@ -266,6 +216,10 @@ def build_cortex(config, atlas, field_ranges=None, retinotopic=None):
             if region["kind"] == "cortex":
                 # Mid-ribbon points; the cut volume's ribbon voxels replace this where they label the parcel.
                 region.update(surface_placement((vertices + white)[labels == label] / 2))
+                # The partitioned field keeps each source vertex's value first.
+                region["label_point_ras_mm"] = label_point(
+                    vertices[labels == label], openness[:len(vertices)][labels == label]
+                )
             regions.append(region)
         print(
             f"{atlas['id']} {hemisphere}: {len(vertices):,} source vertices, "
@@ -414,12 +368,9 @@ def cut_atlases(config):
                 "procedure": settings["procedure"],
             }
         )
-    if arterial_territories.is_declared(config):
-        atlases.append(arterial_territories.cut_atlas(arterial_territories.read_definition()))
-    if cerebellar_functions.is_declared(config):
-        atlases.append(cerebellar_functions.cut_atlas(cerebellar_functions.read_definition()))
-    if striatal_networks.is_declared(config):
-        atlases.append(striatal_networks.cut_atlas(striatal_networks.read_definition()))
+    atlases.extend(
+        layer.cut_atlas() for layer in LAYERS if layer.cut_atlas and layer.is_published(config)
+    )
     return atlases
 
 
@@ -529,22 +480,49 @@ def cerebellum_limitations(config):
     ]
 
 
-def network_limitations(config):
-    if not networks.is_declared(config):
-        return []
-    limitations = [
-        "Networks describe group resting-state functional connectivity from 1000 subjects, not a region's measured function in this brain.",
-        "Cortical parcel network shares count assigned source vertices; NextBrain cortical region shares count assigned projected cortical voxels. Unassigned samples are excluded. Neither is a surface-area fraction.",
+def base_limitations(config, supplemental, fine):
+    """The anatomy's own limitations, which the layers' follow."""
+    return [
+        *(spinal_cord.limitations(config)
+          if any(layer["id"] == spinal_cord.ATLAS_ID for layer in supplemental) else []),
+        *anatomy_limitations(config),
+        "Destrieux labels identify gyri and sulci; HCP labels identify multimodal areas.",
+        "Subvertex label boundaries are visualization conventions, not measured boundaries.",
+        *resolution_limitations(config, fine),
+        f"Learning anatomy is a derived overview of explicit label unions, with display smoothing bounded to {learning.read_definition(config)['smoothing']['maximum_displacement_mm']:g} mm. Measurements remain source-voxel counts; smoothness does not add anatomical resolution.",
+        "Learning brainstem territories omit separately displayed nuclei and pathways; they are not complete brainstem subdivisions.",
+        *cerebellum_limitations(config),
+        "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",
+        "Only one internal-anatomy detail level is drawn at a time; the coarse and fine layers segment the same anatomy.",
+        f"Internal solids are marching-cubes surfaces smoothed for display by at most {config['structures']['smoothing']['maximum_displacement_mm']:g} mm and never across a voxel centre; between voxel centres their boundaries are a display convention, not a measurement.",
+        "Where a segmented structure meets itself at a corner its surface pinches there and is not a two-manifold; validation counts those edges, and the volume each surface encloses stays definite.",
+        "NextBrain cortical parcels are published as ctx-rh- names for both hemispheres, an artefact of the reused label block; the hemisphere field is authoritative.",
+        *boundary_certainty_limitations(config),
+        *(segmentation_agreement.limitations() if nextbrain.is_declared(config) else []),
+        "Cortical regions are surface patches; the solids that cap them at a cut are closed by extruding each patch to its corresponding white-surface vertices.",
+        "Each region's centroid is the mean of its voxel centres (a cortical parcel's, of its voxels in the cortical ribbon), and can lie outside a curved region; its anchor, where the linked MRI and a cut go to show it, is its own voxel nearest that centroid. A parcel no ribbon voxel carries is placed by its mid-ribbon surface points instead.",
+        "A cut assigns each source triangle to the parcel holding most of its vertices, so a parcel boundary on a cut can differ from the surface's barycentric boundary by one triangle.",
     ]
-    if config["anatomy"]["individual"]:
-        limitations.append(
-            "Networks are a group average projected onto one person's folds through registered spheres; they are not this individual's measured networks."
-        )
-    else:
-        limitations.append(
-            "Networks are published in this template's space and are not resampled, but they remain a group average of other brains."
-        )
-    return limitations
+
+
+def layer_limitations(config, after_tissues=False):
+    """Each published layer's limitations, by its key, in the manifest's order."""
+    return [
+        (layer.key, layer.limitations(config))
+        for layer in LAYERS
+        if layer.after_tissues == after_tissues and layer.is_published(config)
+    ]
+
+
+def exported(run):
+    """Each layer's manifest value, in the manifest's order; a keyed layer not published is null."""
+    return {
+        layer.key: layer.export(run) if layer.is_published(run.config) else None
+        for layer in LAYERS
+        if layer.export
+        and not layer.after_tissues
+        and (layer.keyed or layer.is_published(run.config))
+    }
 
 
 def write_anatomy_index(config):
@@ -565,18 +543,99 @@ def write_anatomy_index(config):
     return entries
 
 
+def placed(manifest, layer, value):
+    """The manifest with the layer's value where a full build puts it."""
+    if layer.key in manifest:
+        return {**manifest, layer.key: value}
+    stage = [other.key for other in LAYERS if other.after_tissues == layer.after_tissues]
+    following = [
+        *stage[stage.index(layer.key) + 1:],
+        "atlas_comparisons" if layer.after_tissues else "cut_atlases",
+    ]
+    anchor = next((key for key in following if key in manifest), None)
+    result = {}
+    for key, existing in manifest.items():
+        if key == anchor:
+            result[layer.key] = value
+        result[key] = existing
+    result.setdefault(layer.key, value)
+    return result
+
+
+def replaced(published, blocks, key):
+    """The published limitations with one layer's replaced, refused where any other's differ."""
+    index = next(i for i, (owner, _) in enumerate(blocks) if owner == key)
+    before = [text for _, texts in blocks[:index] for text in texts]
+    after = [text for _, texts in blocks[index + 1:] for text in texts]
+    end = len(published) - len(after)
+    if end < len(before) or published[:len(before)] != before or published[end:] != after:
+        raise ValueError(
+            f"The published limitations differ beyond {key}'s own; run a full build"
+        )
+    return [*before, *blocks[index][1], *after]
+
+
+def rebuild_layer(config, key, provenance):
+    """One layer rebuilt into the published manifest; every other published file is left as it is."""
+    layer = next(layer for layer in LAYERS if layer.key == key)
+    if layer.shared:
+        raise ValueError(f"{key} cannot be rebuilt alone: {layer.shared}; run a full build")
+    if not layer.is_published(config):
+        raise ValueError(f"{config['anatomy']['id']} does not publish {key}")
+    path = config["output_directory"] / "manifest.json"
+    manifest = json.loads(path.read_text())
+    fine = next(
+        (level for level in manifest["detail_levels"] if level["id"] == nextbrain.ATLAS_ID), None
+    )
+    limitations = replaced(manifest["limitations"], [
+        (None, base_limitations(config, manifest["supplemental_layers"], fine)),
+        *layer_limitations(config),
+        *layer_limitations(config, after_tissues=True),
+    ], key)
+    tissues = (
+        json.loads((config["output_directory"] / manifest["tissues"]["file"]).read_text())
+        if layer.after_tissues else None
+    )
+    manifest = placed(manifest, layer, layer.export(Run(config, manifest["regions"], tissues)))
+    manifest["limitations"] = limitations
+    manifest["provenance"] = provenance
+    write_json(path, manifest)
+    print(f"Rebuilt {key} into {path}; validate before publishing.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--anatomy", help="build this declared anatomy instead of the selected one"
     )
-    config = read_config(parser.parse_args().anatomy)
+    parser.add_argument(
+        "--only",
+        metavar="LAYER",
+        choices=[layer.key for layer in LAYERS],
+        help=(
+            "rebuild one layer into the published manifest, reading the published regions (and, "
+            "for a layer counted on the cut, the published tissue labels) and leaving every other "
+            "published file as it is. It may rebuild "
+            f"{', '.join(layer.key for layer in LAYERS if not layer.shared)}. It refuses "
+            f"{', '.join(layer.key for layer in LAYERS if layer.shared)}, whose fields are in the "
+            "cortex meshes or which add regions and cut labels, and any rebuild after which "
+            "another layer's limitations would differ from the published ones: run a full build "
+            "for those. The manifest's provenance is rewritten from data/sources.json. Atlas "
+            "comparisons come last in a full build and are republished on their own by "
+            "brain_model.layers.comparison."
+        ),
+    )
+    arguments = parser.parse_args()
+    config = read_config(arguments.anatomy)
     provenance = verify_sources(config)
     require_layer_inputs(config)
     if nextbrain.is_declared(config):
         nextbrain.verify_procedure(config, provenance)
     if boundary_certainty.is_published(config):
         boundary_certainty.verify_margin(config, provenance)
+    if arguments.only:
+        rebuild_layer(config, arguments.only, provenance)
+        return
     atlas_metadata = []
     regions = []
     field_ranges = None
@@ -620,20 +679,21 @@ def main():
         path = config["output_directory"] / built["file"]
         cord_layers = [spinal_cord.layer(config, built, cord_regions, path)]
         regions.extend(cord_regions)
-    if any(layer.is_declared(config) for layer in (arterial_territories, cerebellar_functions, striatal_networks)):
+    if arousal_nuclei.is_declared(config):
+        definition = arousal_nuclei.read_definition()
+        built, arousal = build_structure_layer(
+            config, arousal_nuclei.load(config, definition), arousal_nuclei.codes(definition),
+            arousal_nuclei.describer(config, definition), arousal_nuclei.FILE,
+        )
+        path = config["output_directory"] / built["file"]
+        cord_layers.append(arousal_nuclei.layer(config, definition, built, arousal, path))
+        regions.extend(arousal)
+    run = Run(config, regions, prepared={retinotopy.LAYER: (visual, retinotopic)})
+    composed = [layer for layer in LAYERS if layer.compose and layer.is_published(config)]
+    if composed:
         grids = territory_grids(config)
-    if arterial_territories.is_declared(config):
-        territories = arterial_territories.read_definition()
-        regions.extend(arterial_territories.build_regions(config, territories))
-        arterial_territories.compose(config, territories, regions, *grids)
-    if cerebellar_functions.is_declared(config):
-        cerebellar = cerebellar_functions.read_definition()
-        regions.extend(cerebellar_functions.build_regions(config, cerebellar))
-        cerebellar_functions.compose(config, cerebellar, regions, grids[0])
-    if striatal_networks.is_declared(config):
-        striatal = striatal_networks.read_definition()
-        regions.extend(striatal_networks.build_regions(config, striatal))
-        striatal_networks.compose(config, striatal, regions, *grids)
+    for layer in composed:
+        run.prepared[layer.key] = layer.compose(config, regions, grids)
     manifest = {
         "supplemental_layers": cord_layers,
         "volumes": {"file": "volumes.json"},
@@ -656,97 +716,26 @@ def main():
             ],
         },
         "atlases": atlas_metadata,
-        "networks": networks.metadata() if networks.is_declared(config) else None,
-        "cab_np": cab_np.export(config, regions),
-        "functional_regions": functional_regions.export(config, regions),
-        "neuropsych_domains": neuropsych_domains.export(config, regions),
-        "neurosynth_terms": neurosynth_terms.export(config, regions),
-        "receptor_fingerprints": receptor_fingerprints.export(config, regions),
-        "stimulation_responses": stimulation_responses.export(config, regions),
-        "stimulation_ftract": stimulation_ftract.export(config, regions),
-        "functional_connectivity": functional_connectivity.export(config, regions),
-        "disorder_effects": disorder_effects.export(config, regions),
-        **(
-            {"boundary_certainty": boundary_certainty.export(config, regions)}
-            if boundary_certainty.is_published(config)
-            else {}
-        ),
-        **(
-            {"segmentation_agreement": segmentation_agreement.export(config, regions)}
-            if nextbrain.is_declared(config)
-            else {}
-        ),
-        **(
-            {"arterial_territories": arterial_territories.metadata(config, territories)}
-            if arterial_territories.is_declared(config)
-            else {}
-        ),
-        **(
-            {"cerebellar_functions": cerebellar_functions.metadata(config, cerebellar)}
-            if cerebellar_functions.is_declared(config)
-            else {}
-        ),
-        **(
-            {"striatal_networks": striatal_networks.metadata(config, striatal)}
-            if striatal_networks.is_declared(config)
-            else {}
-        ),
-        **(
-            {"coordinate_spaces": coordinate_spaces.export(config, coordinate_spaces.read_definition())}
-            if coordinate_spaces.is_declared(config)
-            else {}
-        ),
-        **({"retinotopy": retinotopy.export(config, visual, retinotopic)} if visual else {}),
+        **exported(run),
         "cut_atlases": cut_atlases(config),
         "detail_levels": levels,
         "regions": regions,
         "boundary_convention": "Barycentric vertex cells on mixed-label triangles",
         "limitations": [
-            *(spinal_cord.limitations(config) if cord_layers else []),
-            *anatomy_limitations(config),
-            "Destrieux labels identify gyri and sulci; HCP labels identify multimodal areas.",
-            "Subvertex label boundaries are visualization conventions, not measured boundaries.",
-            *resolution_limitations(config, fine),
-            f"Learning anatomy is a derived overview of explicit label unions, with display smoothing bounded to {learning.read_definition(config)['smoothing']['maximum_displacement_mm']:g} mm. Measurements remain source-voxel counts; smoothness does not add anatomical resolution.",
-            "Learning brainstem territories omit separately displayed nuclei and pathways; they are not complete brainstem subdivisions.",
-            *cerebellum_limitations(config),
-            "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",
-            "Only one internal-anatomy detail level is drawn at a time; the coarse and fine layers segment the same anatomy.",
-            f"Internal solids are marching-cubes surfaces smoothed for display by at most {config['structures']['smoothing']['maximum_displacement_mm']:g} mm and never across a voxel centre; between voxel centres their boundaries are a display convention, not a measurement.",
-            "Where a segmented structure meets itself at a corner its surface pinches there and is not a two-manifold; validation counts those edges, and the volume each surface encloses stays definite.",
-            "NextBrain cortical parcels are published as ctx-rh- names for both hemispheres, an artefact of the reused label block; the hemisphere field is authoritative.",
-            *boundary_certainty_limitations(config),
-            *(segmentation_agreement.limitations() if nextbrain.is_declared(config) else []),
-            "Cortical regions are surface patches; the solids that cap them at a cut are closed by extruding each patch to its corresponding white-surface vertices.",
-            "Each region's centroid is the mean of its voxel centres (a cortical parcel's, of its voxels in the cortical ribbon), and can lie outside a curved region; its anchor, where the linked MRI and a cut go to show it, is its own voxel nearest that centroid. A parcel no ribbon voxel carries is placed by its mid-ribbon surface points instead.",
-            "A cut assigns each source triangle to the parcel holding most of its vertices, so a parcel boundary on a cut can differ from the surface's barycentric boundary by one triangle.",
-            *network_limitations(config),
-            *cab_np.limitations(),
-            *functional_regions.limitations(),
-            *neuropsych_domains.limitations(),
-            *neurosynth_terms.limitations(config),
-            *receptor_fingerprints.limitations(),
-            *stimulation_responses.limitations(),
-            *stimulation_ftract.limitations(),
-            *functional_connectivity.limitations(),
-            *disorder_effects.limitations(),
-            *white_matter.limitations(config),
-            *(arterial_territories.limitations() if arterial_territories.is_declared(config) else []),
-            *(cerebellar_functions.limitations() if cerebellar_functions.is_declared(config) else []),
-            *(striatal_networks.limitations(config, striatal) if striatal_networks.is_declared(config) else []),
-            *(coordinate_spaces.limitations(coordinate_spaces.read_definition())
-              if coordinate_spaces.is_declared(config) else []),
-            *(retinotopy.limitations(visual) if visual else []),
+            *base_limitations(config, cord_layers, fine),
+            *(text for _, texts in layer_limitations(config) for text in texts),
         ],
         "provenance": provenance,
     }
     tissues = export_tissue_labels(config, manifest)
     if nextbrain.ATLAS_ID in tissues["atlases"]:
         nextbrain.mark_uncut(manifest["regions"], tissues["atlases"][nextbrain.ATLAS_ID])
-    if stroke_cases.is_declared(config):
-        # Shares are counted on the cut's own labels, so they follow the tissue export.
-        manifest["stroke_cases"] = stroke_cases.export(config, tissues)
-        manifest["limitations"].extend(stroke_cases.limitations())
+    run.tissues = tissues
+    for layer in LAYERS:
+        if layer.after_tissues and layer.is_published(config):
+            # These count on the cut's own labels, or read the placements the tissue export rewrote.
+            manifest[layer.key] = layer.export(run)
+            manifest["limitations"].extend(layer.limitations(config))
     if comparison.is_enabled(config):
         comparison.attach_comparisons(config, manifest)
     write_json(config["output_directory"] / "manifest.json", manifest)

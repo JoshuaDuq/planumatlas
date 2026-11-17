@@ -32,7 +32,7 @@ export const fr: typeof en = {
   },
   tabsAria: 'Explorer l’atlas',
   panelAria: 'Panneau de l’atlas',
-  back: (name: string) => `Retour : ${name}`,
+  back: (name: string) => `Retour : ${name}`,
   path: 'Fil d’Ariane',
   showInList: (name: string) => `${name}, afficher dans la liste`,
   bridges: {

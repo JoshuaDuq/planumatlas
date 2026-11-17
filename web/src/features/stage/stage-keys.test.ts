@@ -5,7 +5,14 @@ import { LOBE_COLORS, lobeRows } from '../../lib/core/catalog/lobes.ts';
 import { anatomies, readModel } from '../../lib/core/catalog/test-support.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
 import type { Region } from '../../lib/types/index.ts';
-import { defaultOpen, keyBand, keyedSurface, keyHeight, keyPlates } from './stage-keys.ts';
+import {
+  defaultOpen,
+  highlightCaption,
+  keyBand,
+  keyedSurface,
+  keyHeight,
+  keyPlates,
+} from './stage-keys.ts';
 import type { ColoredNetworks, KeySources, StageRoom } from './stage-keys.ts';
 
 const regions = readModel<{ regions: Region[] }>(`${anatomies.default}/manifest.json`).regions;
@@ -268,5 +275,37 @@ describe('keyBand', () => {
     const phone = { width: 390, height: 500 };
     expect(keyBand({ width: 350.4, height: 100.6 }, phone, 20)).toEqual({ top: 121, right: 0 });
     expect(keyBand({ width: 100.4, height: 500.6 }, visible, 20)).toEqual({ top: 0, right: 120 });
+  });
+});
+
+describe('the reader’s highlights', () => {
+  const highlights: Legend = {
+    map: 'highlight',
+    title: 'Your highlights',
+    note: 'A note.',
+    pickable: false,
+    rows: [
+      { id: 'a', color: [57, 135, 229], label: 'Precentral gyrus, left', pressed: false },
+      { id: 'b', color: [98, 80, 214], label: 'Cuneus, right', pressed: false, absent: true },
+    ],
+  };
+
+  test('STAGE-72 a phone keys a highlighted region to a line, its whole name with its side', () => {
+    const phone = { phone: true, coarse: false };
+    const sized = { name: 'paint' as const, map: 'highlight', pickable: false, count: 4 };
+    expect(keyHeight(sized, phone, true)).toBe(42 + 4 * 24);
+    expect(keyHeight({ ...sized, map: 'function' }, phone, true)).toBe(42 + 2 * 24);
+  });
+
+  test('SNAP-22 the image’s caption takes the key’s title, says they are the reader’s marks and names the regions drawn', () => {
+    const plates = keyPlates(sources({ surfaceColor: 'lobe', legend: highlights }));
+    expect(highlightCaption(plates, 'en')).toEqual({
+      title: 'Your highlights',
+      details: ['the reader’s own marks, not data', 'Precentral gyrus, left'],
+    });
+    expect(highlightCaption(plates, 'fr')!.details[0]).toBe(
+      'marques personnelles, pas des données',
+    );
+    expect(highlightCaption(keyPlates(sources({ legend })), 'en')).toBeNull();
   });
 });

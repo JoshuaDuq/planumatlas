@@ -7,7 +7,7 @@ import type { Mock } from 'vitest';
 import { flushSync } from 'svelte';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { TRANSLATIONS } from '../../lib/core/i18n/index.ts';
 import { methodsHref } from '../../lib/core/methods.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
@@ -17,7 +17,7 @@ import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import { PREF_KEYS } from '../../lib/state/prefs.ts';
 import type { Manifest } from '../../lib/types/index.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
-import type { DisplayView } from '../colophon/display-state.ts';
+import type { DisplayView } from '../../lib/state/display-state.ts';
 import type { DockCommands } from './dock-commands.ts';
 import { startGuide } from '../guide/tour.ts';
 import Fixture from './dock-test-support.svelte';
@@ -33,7 +33,7 @@ interface Live {
   coordinates: boolean;
   overlay: boolean;
   phone: boolean;
-  view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
+  view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean; namesShown: boolean };
   cortexSurface: 'pial' | 'mid' | 'white';
 }
 
@@ -69,6 +69,7 @@ function liveState(overrides: Partial<Live>): Live {
       exploded: false,
       internalVisible: true,
       spinalCordVisible: false,
+      namesShown: false,
       hiddenRegions: new Set(),
       isolatedRegion: null,
       focused: false,
@@ -100,6 +101,7 @@ async function mount(
     setInternalVisible: vi.fn<DockCommands['setInternalVisible']>(),
     setSpinalCordVisible: vi.fn<DockCommands['setSpinalCordVisible']>(),
     resetDisplay: vi.fn<DockCommands['resetDisplay']>(),
+    setNamesShown: vi.fn<DockCommands['setNamesShown']>(),
   };
   cleanups.push(
     $effect.root(() => {
@@ -495,7 +497,23 @@ describe('the Display popover', () => {
     await mount({ hasSpinalCord: false });
     await open('Display');
     expect(page.getByRole('checkbox', { name: 'Show spinal cord' }).elements()).toHaveLength(0);
-    expect(page.getByRole('checkbox').elements()).toHaveLength(2 + 1);
+    // Cortex and internal anatomy, then the exploded view and names on the brain.
+    expect(page.getByRole('checkbox').elements()).toHaveLength(2 + 2);
+  });
+
+  test('names on the brain are a box off by default, described by what they name, sent to the session', async () => {
+    await mount();
+    await open('Display');
+    const box = control('checkbox', 'Names on the brain') as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    expect(document.getElementById(box.getAttribute('aria-describedby')!)!.textContent).toBe(
+      'The regions facing you, largest first; zoom in to name smaller ones.',
+    );
+    await press('checkbox', 'Names on the brain');
+    expect(commands.setNamesShown.mock.calls).toEqual([[true]]);
+    live.view.namesShown = true;
+    flushSync();
+    expect((control('checkbox', 'Names on the brain') as HTMLInputElement).checked).toBe(true);
   });
 
   test('the exploded view is a box like the others, described by what it does not change', async () => {
@@ -757,11 +775,46 @@ describe('placement', () => {
     }
   });
 
+  test.each([
+    ['en', 'Add', 'Overlay, for your own brain map, needs a wider screen.'],
+    [
+      'fr',
+      'Ajouter',
+      'La superposition, pour votre propre carte cérébrale, demande un écran plus large.',
+    ],
+  ] as const)(
+    'STAGE-65 · on a 375 px phone Add says in %s that Overlay needs a wider screen',
+    async (lang, add, note) => {
+      await page.viewport(375, 800);
+      try {
+        await mount({ phone: true, lang }, { width: 375, height: 700 });
+        await open(add);
+        expect(popover().querySelector('.place-note')?.textContent).toBe(note);
+      } finally {
+        await page.viewport(1280, 800);
+      }
+    },
+  );
+
+  test('STAGE-65 · a phone without an Overlay body says nothing of it', async () => {
+    await page.viewport(375, 800);
+    try {
+      await mount({ phone: true, overlay: false }, { width: 375, height: 700 });
+      await open('Add');
+      expect(tool('Add').dataset.offers).toBe('lesion coordinate');
+      expect(popover().querySelector('.place-note')).toBeNull();
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+
   test('a tablet in portrait, laid out as a phone, still offers Overlay', async () => {
     await page.viewport(768, 1000);
     try {
       await mount({ phone: true }, { width: 768, height: 900 });
       expect(tool('Add').dataset.offers).toBe('lesion coordinate overlay');
+      await open('Add');
+      expect(popover().querySelector('.place-note')).toBeNull();
     } finally {
       await page.viewport(1280, 800);
     }
@@ -1210,11 +1263,12 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
     Math.round(popover().getBoundingClientRect().top - host().getBoundingClientRect().top);
 
   test('the plate is reported once it is placed, follows it as it grows, and is withdrawn on close', async () => {
-    await page.viewport(390, 1000);
+    await page.viewport(390, 1300);
     try {
       // Tall enough that the Display popover grows by its changes before it reaches its cap and scrolls;
-      // at 844 px it opens at its cap since About this data closed it (1.4).
-      await mount({ phone: true }, { width: 390, height: 1000 });
+      // at 844 px it opens at its cap since About this data closed it (1.4), at 1000 px since names on
+      // the brain joined it (WP21).
+      await mount({ phone: true }, { width: 390, height: 1300 });
       await press('button', 'Display');
       await vi.waitFor(() => expect(plates).toHaveLength(1));
       await Promise.all(

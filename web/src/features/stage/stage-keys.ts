@@ -5,6 +5,7 @@ import type { Legend } from '../../lib/core/state/paint.ts';
 import { modelUsable } from '../../lib/core/state/session.ts';
 import type {
   ArterialTerritory,
+  CerebellarFunctionRegion,
   Language,
   LoadStatus,
   ModelState,
@@ -45,7 +46,7 @@ export interface KeyPlate {
   map: string;
   title: string;
   rows: KeyRow[];
-  /** The paint key's sentence under its rows; empty for the others. */
+  /** The sentence under its rows: the paint key's, or where a volumetric map is drawn; empty for the others. */
   note: string;
   /** Each row is a toggle that shows that row alone. */
   pickable: boolean;
@@ -65,6 +66,8 @@ export interface KeySources {
   cabNp: ColoredNetworks | null;
   /** The arterial territories' palette, in the atlas's order, when the build publishes them. */
   territories?: readonly ArterialTerritory[] | null;
+  /** The cerebellar functional regions, in the atlas's order, when the build publishes them. */
+  cerebellar?: readonly CerebellarFunctionRegion[] | null;
   /** The lobes of the atlas on screen, in key order (`lobeRows`); empty for an atlas grouped otherwise. */
   lobes?: readonly { id: string; color: Rgb; label: string }[] | null;
   /** The key of the paint on show (`legendFor`), or null. */
@@ -122,9 +125,11 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
   // A key is titled as the masthead's Colour field names its map.
   const maps: Record<string, string> = t(lang, 'display').surfaceColors;
 
+  // A volumetric map colours only the cut: the structures it reaches keep their tissue whole.
+  const onCuts = t(lang, 'display').mapOnCuts;
   const partition =
     ready && !legend
-      ? surfaceColor === 'network'
+      ? surfaceColor === 'network' || surfaceColor === 'striatal'
         ? sources.networks
         : surfaceColor === 'cab-np'
           ? sources.cabNp
@@ -137,7 +142,20 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       map: surfaceColor,
       title: maps[surfaceColor]!,
       rows: partition.networks.map((key) => row(key, partition.colors[key]!, name(key, lang))),
-      note: '',
+      note: surfaceColor === 'striatal' ? onCuts : '',
+      pickable: false,
+    });
+  }
+
+  if (ready && !legend && surfaceColor === 'cerebellar' && sources.cerebellar) {
+    plates.push({
+      name: 'network',
+      map: surfaceColor,
+      title: maps[surfaceColor]!,
+      rows: sources.cerebellar.map((region) =>
+        row(region.id, region.color, lang === 'fr' ? region.name_fr : region.name),
+      ),
+      note: onCuts,
       pickable: false,
     });
   }
@@ -208,6 +226,25 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
   return plates;
 }
 
+/**
+ * The saved image's caption line for the reader's highlights: the key's title, that they are the
+ * reader's marks, then the regions the image draws, named as the key names them. Null without that key.
+ */
+export function highlightCaption(
+  plates: readonly KeyPlate[],
+  lang: Language,
+): { title: string; details: string[] } | null {
+  const plate = plates.find((entry) => entry.map === 'highlight');
+  if (!plate) return null;
+  return {
+    title: plate.title,
+    details: [
+      t(lang, 'display').highlightKey.marks,
+      ...plate.rows.filter((entry) => !entry.absent).map((entry) => entry.label),
+    ],
+  };
+}
+
 /** What `defaultOpen` weighs: the stage's visible rectangle, its gutter and the dock's height. */
 export interface StageRoom {
   width: number;
@@ -222,7 +259,9 @@ type KeyDevice = { phone: boolean; coarse: boolean };
 /** The height a plate takes, open or folded to its title. */
 export function keyHeight(plate: SizedPlate, { phone, coarse }: KeyDevice, open: boolean): number {
   if (!open) return KEY_HEAD_PX;
-  const columns = phone && plate.name !== 'direction' && plate.map !== 'deficit' ? 2 : 1;
+  // A finding is a sentence and a highlighted region a full name with its side: one to a line.
+  const single = plate.map === 'deficit' || plate.map === 'highlight';
+  const columns = phone && plate.name !== 'direction' && !single ? 2 : 1;
   const rowPx = plate.pickable && (phone || coarse) ? TOUCH_ROW_PX : KEY_ROW_PX;
   return KEY_HEAD_PX + Math.ceil(plate.count / columns) * rowPx;
 }

@@ -17,6 +17,7 @@ import type { SceneCommands } from '../core/state/scene-commands.ts';
 import { PARAMS, decodeState, encodeState } from '../core/state/url-state.ts';
 import type { Engine, MoveOptions } from '../engine/api.ts';
 import { VIEW_DIRECTIONS, viewForRestoredCut } from '../engine/render/camera-views.ts';
+import type { HighlightsStore } from '../state/highlights.svelte.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
 import type { StrokeCasesStore } from '../state/stroke-cases.svelte.ts';
 import type { LinkStore } from '../state/link.svelte.ts';
@@ -79,23 +80,36 @@ export interface LinksOptions {
     StrokeCasesStore,
     'available' | 'chosen' | 'show' | 'clear' | 'known' | 'heldOpacity' | 'heldColor'
   >;
+  /** The reader's highlights, which the link carries and a link replaces. */
+  highlights: Pick<HighlightsStore, 'list' | 'status' | 'replace'>;
   /** The anatomy's published coordinate spaces, or null when it publishes none. */
   coordinates: Pick<Coordinates, 'metadata' | 'map'> | null;
   /** The writer from `createLink`: hold, release, schedule and cancel. */
   link: Pick<LinkStore, 'hold' | 'release' | 'schedule' | 'cancel'>;
   commands: Pick<
     SceneCommands,
-    'begin' | 'loadAtlas' | 'loadDetail' | 'showSpinalCord' | 'applySurfaceColor' | 'cut'
+    | 'begin'
+    | 'loadAtlas'
+    | 'loadDetail'
+    | 'showSpinalCord'
+    | 'loadSupplemental'
+    | 'applySurfaceColor'
+    | 'cut'
   >;
   clinical: Pick<ClinicalCatalog, 'search'>;
   circuits: Pick<CircuitCatalog, 'all' | 'get'>;
   hooks: LinkHooks;
-  /** Make the page's language the link's, without saving it as the reader's choice (`<html lang>`, WCAG 3.1.1). */
-  followLanguage(lang: Language): void;
+  /**
+   * Make the page's language the link's, without saving it as the reader's choice (`<html lang>`,
+   * WCAG 3.1.1); a saved choice wins over it. Returns the language in effect.
+   */
+  followLanguage(lang: Language): Language;
   /** The anatomy a link without one opens (the published default). */
   defaultAnatomy: string;
   /** The page whose address bar carries the link. */
   page: Pick<Window, 'history' | 'location'>;
+  /** The page is a frame in a course page: its link keeps `embed=1`, so a reload stays one. */
+  embedded?: boolean;
 }
 
 /**
@@ -114,6 +128,7 @@ export function createLinks({
   view,
   lesion,
   strokeCases,
+  highlights,
   coordinates,
   link,
   commands,
@@ -123,6 +138,7 @@ export function createLinks({
   followLanguage,
   defaultAnatomy,
   page,
+  embedded = false,
 }: LinksOptions) {
   const { model, sections, camera } = engine;
   const { domains } = model;
@@ -143,7 +159,6 @@ export function createLinks({
   const known: KnownLinkIds = {
     atlases: new Set(model.manifest.atlases.map((entry) => entry.id)),
     details: new Set(model.manifest.detail_levels.map((entry) => entry.id)),
-    cutAtlases: new Set(model.manifest.cut_atlases!.map((entry) => entry.id)),
     views: new Set(Object.keys(VIEW_DIRECTIONS)),
     explorers: new Set(MODES),
     surfaceColors: new Set([
@@ -154,6 +169,8 @@ export function createLinks({
       ...(model.manifest.networks ? ['network'] : []),
       ...(model.cabNp ? ['cab-np'] : []),
       ...(model.manifest.arterial_territories ? ['territory'] : []),
+      ...(model.manifest.striatal_networks ? ['striatal'] : []),
+      ...(model.manifest.cerebellar_functions ? ['cerebellar'] : []),
     ]),
     functions: {
       has: (id: string) => functions.has(id) || validComparison(domains, id),
@@ -229,7 +246,6 @@ export function createLinks({
       selectedFunction: explorer === 'functions' ? current.selectedFunction : null,
       paintFrom: explorer === 'functions' && current.selectedFunction ? current.paintFrom : null,
       selectedDeficit: explorer === 'deficits' ? current.selectedDeficit : null,
-      cutAtlas: current.cutAtlas ?? undefined,
       ...cutState(),
       circuit,
       circuitStep: circuit ? current.lesson.step : 0,
@@ -257,7 +273,11 @@ export function createLinks({
       // Cases are a region's; a link without the region would not show them.
       strokeCases:
         strokeCases.chosen.length && current.selectedRegion ? [...strokeCases.chosen] : null,
+      // Lifted under a masthead colour they are not on the stage, so the link opens on that colour.
+      highlights:
+        highlights.list.length && highlights.status !== 'lifted' ? [...highlights.list] : null,
       tracts: explorer === 'diffusion' || hooks.tractsExcursionOpen() ? tractsState() : null,
+      embed: embedded,
     };
   }
 
@@ -303,7 +323,6 @@ export function createLinks({
   const loadedLayers = () => ({
     atlas: model.settings.atlas,
     detail: model.settings.detail,
-    cutAtlas: sections.state.cutAtlas,
   });
 
   /** The scene as its link carries it, plus the exact camera a link leaves out (app.js:754). */
@@ -311,7 +330,6 @@ export function createLinks({
     return readerState(
       {
         ...view.current,
-        cutAtlas: view.current.cutAtlas ?? undefined,
         ...cutState(),
         mriWindow: sections.mriWindowLink(),
         camera: camera.capture(),
@@ -381,7 +399,7 @@ export function createLinks({
             ? 'cut'
             : 'view',
         },
-        { atlas, detail: model.defaultDetail, cutAtlas: valid.cutAtlas ?? atlas },
+        { atlas, detail: model.defaultDetail },
       );
       // Cases shown now give the display back first, so the link's own display is what lands.
       if (strokeCases.chosen.length) strokeCases.clear();
@@ -396,6 +414,8 @@ export function createLinks({
       hooks.forgetScenes();
       // Kept first, so the tab the link opens holds them over the link's own display.
       hooks.keepTracts(valid.keepTracts ?? false);
+      // A link is a whole scene: one without names takes them off.
+      session.setNamesShown(valid.namesShown ?? false);
       hooks.chooseExplorer(valid.explorer ?? 'anatomy');
       session.setFunction(valid.selectedFunction ?? null);
       session.setPaintFrom(valid.selectedFunction ? (valid.paintFrom ?? null) : null);
@@ -445,6 +465,8 @@ export function createLinks({
         if (known) strokeCases.show(valid.strokeCases);
         else notApplied.push(PARAMS.strokeCases!);
       }
+      // A link is a whole scene: one without highlights clears the reader's.
+      highlights.replace(valid.highlights ?? []);
       // A lesson linked without its landmark opens on it, as choosing that step does; one linked on
       // its whole route holds it over the link's own scene. Leaving either returns to the link.
       if (
@@ -503,10 +525,7 @@ export function createLinks({
       page.location.reload();
       return;
     }
-    if (decoded.state.lang) {
-      session.setLang(decoded.state.lang);
-      followLanguage(decoded.state.lang);
-    }
+    if (decoded.state.lang) session.setLang(followLanguage(decoded.state.lang));
     // A restore that throws still ends its hold, or every later notice would wait unseen.
     let notApplied: string[] | null = null;
     try {

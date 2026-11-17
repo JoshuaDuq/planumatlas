@@ -1,5 +1,6 @@
 import type { LESION_MODES } from './constants.ts';
 import type { CutMode, Hemisphere, SurfaceColor } from './display.ts';
+import type { HighlightedRegion } from './paint.ts';
 import type { Region } from './region.ts';
 import type { Explorer, Language } from './session.ts';
 
@@ -47,7 +48,6 @@ export interface LinkState {
   internalSystem: string | null;
   anatomy: string | null;
   atlas: string;
-  cutAtlas: string;
   detail: string;
   explorer: Explorer;
   selectedFunction: string | null;
@@ -79,6 +79,12 @@ export interface LinkState {
   tracts: string[] | null;
   /** The ticked bundles stay drawn outside the Tracts tab. */
   keepTracts: boolean;
+  /** The regions facing the reader are named on the stage. */
+  namesShown: boolean;
+  /** The page is a frame in someone else's page: the stage alone, its anatomy loaded on request. */
+  embed: boolean;
+  /** The reader's highlighted regions, in the order they were added; null for none. */
+  highlights: HighlightedRegion[] | null;
 }
 
 /**

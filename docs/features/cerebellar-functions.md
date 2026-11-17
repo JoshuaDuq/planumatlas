@@ -1,12 +1,12 @@
 # Cerebellar functions
 
-The symmetric 32-region functional atlas of the cerebellum (Nettekoven et al. 2024), fused from seven task-based functional MRI (fMRI) datasets on the spatially unbiased infratentorial template (SUIT), is registered onto CDMD's cerebellar cortex. It is published as a cut-label atlas, and each cerebellar lobule lists its share in every functional region. It is a group map placed on this brain, not this brain's measured function.
+The symmetric 32-region functional atlas of the cerebellum (Nettekoven et al. 2024), fused from seven task-based functional MRI (fMRI) datasets on the spatially unbiased infratentorial template (SUIT), is registered onto CDMD's cerebellar cortex. It is published as a cut-only atlas, drawn on cut faces under Colour **Cerebellar functions**, and each cerebellar lobule lists its share in every functional region. It is a group map placed on this brain, not this brain's measured function.
 
 ```{figure} figures/cerebellar-functions-1.webp
-:alt: A sagittal and an axial cut face through the CDMD cerebellum with the Cerebellar functions cut labels; cerebellar cortex voxels are coloured by functional region, other tissue by its FreeSurfer label.
+:alt: A sagittal and an axial cut face through the CDMD cerebellum under the Cerebellar functions colour; cerebellar cortex voxels are coloured by functional region, all other tissue in its neutral tissue colour.
 :name: fig-cerebellar-functions-1
 
-**The registered atlas labels only this brain's cerebellar cortex, region by region, mirrored across the midline.** **a**, Sagittal cut 25 mm left of the midline (surface RAS x = −25 mm), viewed from the right, anterior to the right. **b**, Axial cut at surface RAS z = −28 mm, viewed from above, anterior up, left on the left. Cut labels **Cerebellar functions** (`cuts=nettekoven`), camera zoomed onto the cerebellum. Each cerebellar cortex voxel takes the colour of its functional region (atlas colours from `atl-NettekovenSym32.lut`); white matter, brainstem and cerebrum keep their FreeSurfer label colours, and smooth shaded surfaces are internal-anatomy solids exposed by the cut.
+**The registered atlas labels only this brain's cerebellar cortex, region by region, mirrored across the midline.** **a**, Sagittal cut 25 mm left of the midline (surface RAS x = −25 mm), viewed from the right, anterior to the right. **b**, Axial cut at surface RAS z = −28 mm, viewed from above, anterior up, left on the left. Colour **Cerebellar functions** (`colors=cerebellar`), camera zoomed onto the cerebellum. Each cerebellar cortex voxel takes the colour of its functional region (atlas colours from `atl-NettekovenSym32.lut`); white matter, brainstem and cerebrum keep their tissue colour, and smooth shaded surfaces are internal-anatomy solids exposed by the cut.
 ```
 
 ## Data
@@ -63,7 +63,7 @@ SynthMorph (FreeSurfer 8.2, checked against `freesurfer_build` in `config/model.
 
 ## Display
 
-**Cerebellar functions** in the Section dock's cut labels (URL `cuts=nettekoven`) draws the region colours on cut faces; other tissue keeps its FreeSurfer label. S3 (216, 255, 199) and S4 (255, 255, 211) are close in colour to FreeSurfer's cerebellar white matter. `CerebellarFunctionsSection.svelte` (**Functional regions (group atlas)** in the region detail) lists, for a lobule, each region it reaches with swatch, domain, share bar and percentage; the side is added when a vermal lobule reaches both sides. The share in no region is shown when ≥ 0.5%. For a functional region chosen on a cut, it shows the domain and the paper's description. Example: left lobule V is 49.4% M3 (hand), 21.3% M2 and 11.1% A2.
+Colour **Cerebellar functions** (group **Subcortical maps** in the masthead; URL `colors=cerebellar`) labels a cut by `tissues-nettekoven.volume` ([which labels a cut samples](sections-and-cuts.md#which-labels-a-cut-samples)): each cerebellar cortex voxel takes its region's colour, every structure cap the map reaches included, and every other label keeps its tissue colour. The cortical ribbon keeps the surface atlas's parcels, in tissue colour. The stage key lists the 16 regions and says they are drawn on cut faces: surfaces keep their tissue colour, since no lobule is a majority of one region (the largest share is left lobule V's 49.4% in M3). S3 (216, 255, 199) and S4 (255, 255, 211) are close in colour to white matter. `CerebellarFunctionsSection.svelte` (**Functional regions (group atlas)** in the region detail) lists, for a lobule, each region it reaches with swatch, domain, share bar and percentage; the side is added when a vermal lobule reaches both sides. The share in no region is shown when ≥ 0.5%. For a functional region chosen on a cut, it shows the domain and the paper's description. Example: left lobule V is 49.4% M3 (hand), 21.3% M2 and 11.1% A2.
 
 ## Validation
 
@@ -108,4 +108,4 @@ uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_cerebellar_functions.py
 ```
 
-Figure state (panel b): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&cuts=nettekoven&cut=axial&pos=-28&cam=0,110,45,0,-28,45,0,0,-1
+Figure state (panel b): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&colors=cerebellar&cut=axial&pos=-28&cam=0,110,45,0,-28,45,0,0,-1

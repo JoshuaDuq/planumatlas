@@ -1,5 +1,6 @@
 export * from './constants.ts';
 export type * from './display.ts';
+export type * from './engine.ts';
 export type * from './link.ts';
 export type * from './manifest.ts';
 export type * from './notice.ts';

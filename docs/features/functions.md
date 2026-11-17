@@ -145,4 +145,4 @@ uv run pytest tests/test_neuropsych_domains.py tests/test_neurosynth_terms.py
 npm test --prefix web
 ```
 
-Figure state (panels a, b): https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=hcp-mmp&cuts=hcp-mmp&tab=functions&function=language&view=left. Panel c: the same with `function=all`.
+Figure state (panels a, b): https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=hcp-mmp&tab=functions&function=language&view=left. Panel c: the same with `function=all`.

@@ -1,5 +1,6 @@
 import { Mesh, MeshBasicMaterial, SRGBColorSpace } from 'three';
 import type { BufferGeometry, Color } from 'three';
+import { mapColourOf } from '../../core/catalog/cut-labels.ts';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { Manifest } from '../../types/index.ts';
@@ -18,7 +19,9 @@ import {
   labelAppearance,
   usesAtlasColors,
   usesCabNpColors,
+  usesCerebellarColors,
   usesLobeColors,
+  usesStriatalColors,
   usesTerritoryColors,
   usesNetworkColors,
   usesPaint,
@@ -282,16 +285,16 @@ function solidLabel(
 /** Whether this solid belongs to the cut being drawn at all. */
 function partOfCut(
   source: PaintableSolid['source'],
-  { atlas, detail, wedged }: { atlas: string; detail: string; wedged: boolean },
+  { ribbon, detail }: { ribbon: string | null; detail: string },
 ): boolean {
   const { kind, boundary, atlas: owner, detail: level } = source.userData;
-  if (kind === 'ribbon') return owner === atlas;
+  if (kind === 'ribbon') return owner === ribbon;
   // Both detail levels segment the same anatomy, so the cut shows the one the
   // rest of the viewer is showing; two thalami in one place is the alternative.
   if (level) return level === detail;
   // Parcel solids describe the ribbon exactly; the pial envelope is the
-  // one-colour stand-in for an atlas that has no surface to cut them from.
-  if (boundary === 'pial') return !wedged;
+  // one-colour stand-in where no parcels cap it, which the cut's labels then colour.
+  if (boundary === 'pial') return ribbon === null;
   return true;
 }
 
@@ -333,7 +336,7 @@ export function paintSolids(
     state,
     atlas,
     detail,
-    wedged,
+    ribbon,
     appearance,
     lookup,
     whiteMatter,
@@ -343,7 +346,12 @@ export function paintSolids(
     state: SolidPaintState;
     atlas: string;
     detail: string;
-    wedged: boolean;
+    /**
+     * The surface atlas whose parcel solids cap the cortical ribbon, with its labels: the cut
+     * atlas's own, or the surface's where the cut atlas has none; null where the cut atlas's
+     * labels colour the ribbon voxel by voxel.
+     */
+    ribbon: { atlas: string; labels: LabelIndex } | null;
     appearance: Pick<Appearance, 'tissue' | 'intensity'>;
     lookup?: PaletteLookup;
     whiteMatter?: WhiteMatter | null;
@@ -358,12 +366,16 @@ export function paintSolids(
     usesAtlasColors(state) ||
     usesNetworkColors(state) ||
     usesTerritoryColors(state) ||
+    usesStriatalColors(state) ||
+    usesCerebellarColors(state) ||
     usesCabNpColors(state) ||
     usesLobeColors(state) ||
     usesPaint(state);
   const variation = published ? 0 : appearance.intensity.cut_strength;
   const mri = state.surfaceColor === 'mri';
-  const sampledAtlas = !wedged && state.surfaceColor !== 'tissue';
+  // A cut atlas whose labels are its own parcel solids draws from them; any other samples its volume.
+  const sampledAtlas = ribbon?.atlas !== atlas && state.surfaceColor !== 'tissue';
+  const mapped = mapColourOf(atlas) !== null;
   const sampledIsolation =
     sampledAtlas &&
     labels.byRegion.has(state.isolatedRegion!) &&
@@ -373,20 +385,24 @@ export function paintSolids(
       solid.source.userData['mri_registered'] === false ? 0 : variation;
     const { source, cap } = solid;
     if (
-      !partOfCut(source, { atlas, detail, wedged }) ||
+      !partOfCut(source, { ribbon: ribbon?.atlas ?? null, detail }) ||
       (mri && source.userData['mri_registered'] === false)
     ) {
       solid.visible = false;
       continue;
     }
-    const label = solidLabel(source, labels);
+    // A parcel solid of the ribbon is its own atlas's label, whichever atlas labels the rest.
+    const parcel = source.userData['kind'] === 'ribbon';
+    const label = solidLabel(source, parcel ? ribbon!.labels : labels);
     // What a cut face answers for is what it was painted as, which is not
     // always what its mesh was built from: an envelope borrows a tissue label,
     // and a medial wall borrows one carrying no region at all.
     solid.region = (label ? label.region_id : source.userData['region_id']) ?? null;
-    // A structure the atlas relabels, a thalamus inside a territory, shows the atlas's label there;
-    // supplemental anatomy lies outside every cut volume and keeps its own.
-    const relabelled = !mri && !label && source.userData['supplemental'] !== true;
+    // A structure the atlas relabels, a thalamus inside a territory, shows the atlas's label there,
+    // and so does one a map reaches whose own label the map's table still lists (a caudate among
+    // the striatal networks); supplemental anatomy lies outside every cut volume and keeps its own.
+    const relabelled =
+      !mri && !parcel && (!label || mapped) && source.userData['supplemental'] !== true;
     const sampled = sampledAtlas && (!solid.region || sampledIsolation || relabelled);
     solid.cap.material.userData['sampledLabels'].value = sampled;
     const capState = sampledIsolation && sampled ? { ...state, isolatedRegion: null } : state;

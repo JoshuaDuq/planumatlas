@@ -294,3 +294,14 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 - **Source:** the 2026-11-12 interface review
 - **Expected:** Clicking each of the five tabs in turn → axe `heading-order` reports no node.
 - **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
+## The reader's highlights
+
+### WORK-32 · The highlights are listed above the panel, the swatches their only colour
+
+- **Rule:** While the reader has highlights, a strip at the top of the list and of the detail, named "Your highlights", lists them in the order added: a swatch button naming the region, its side and its colour, which opens the six colours as named toggles (the chosen one pressed and ringed in ink) and recolours on a choice, focus returning to it; the name with its side letter (the side said as a word); "Not drawn on this atlas", "Not drawn in this internal anatomy" or "Not drawn under this colour" (a region of a map the colouring on screen does not put on the cut) where the layers on screen do not hold the region; and a remove that is announced and hands focus to the next remove, or with none left to the tab in front. Set aside by evidence, the strip says they are not drawn; lifted by a masthead choice, it says so and offers "Show on the brain". The strip's chrome is the panel's; the swatches are its only colour. Nothing is listed without highlights.
+- **Kind:** accessibility
+- **Level:** browser
+- **Source:** Planum improvement plan 2, WP22; `DESIGN.md` (achromatic chrome, the Parsimony Rule)
+- **Expected:** No highlights → no strip. Precentral gyrus (Destrieux), V1 (HCP-MMP), Hippocampus (aseg, teaching set shown) → rows "Precentral gyrus" L, "V1" R "Not drawn on this atlas", "Hippocampus" L "Not drawn in this internal anatomy"; swatches "Colour of Precentral gyrus, left: blue", "…V1, right: raspberry", "…Hippocampus, left: green", filled rgb(57, 135, 229), rgb(213, 81, 129), rgb(0, 131, 0). The menu: Blue … Pink, only Blue pressed; Violet → the set's colour violet, menu gone, focus on "…: violet". Removing the first → "Highlight removed: Precentral gyrus, left." and focus on V1's remove; removing that → focus on the tab, no strip. Aside → the not-drawn sentence, no Show; lifted → "Not drawn under the colour you chose." and Show, one `showPaint`; drawn → neither. axe clean light and dark at 1280 and 390 px, with the menu open, and lifted.
+- **Covered by:** `src/features/highlights/HighlightStrip.svelte.test.ts` (R; "Not drawn under this colour": uncovered)

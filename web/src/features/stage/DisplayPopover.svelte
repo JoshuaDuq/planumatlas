@@ -7,6 +7,8 @@
     the percentage. The surface is the Overlay tool's one setting, offered here for the brain alone.
   - The spinal cord is absent, not disabled, when the subject publishes none (the S key says why). The
     exploded view is absent while the visual-field map pairs the hemispheres.
+  - Names on the brain is off by default and not counted among the changes: it names the anatomy, it does
+    not change it (RegionNames.svelte).
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
   - Last, on a phone only, what is away from its default, Focus and hidden parts included, with Reset display:
     a wider screen's status bar says so already, so the popover does not offer it a second time. While the opacity slider is held it waits for the release, so the
@@ -37,6 +39,8 @@
     exploded: boolean;
     /** The exploded view can be drawn now. */
     explodable: boolean;
+    /** The regions facing the reader are named on the stage. */
+    namesShown: boolean;
     /** The display settings away from their defaults (`displayChanges`); empty where the status bar lists them. */
     changes: readonly string[];
     /** A pointer holds the slider (StagePopover). */
@@ -48,6 +52,7 @@
     onInternalVisible: (visible: boolean) => void;
     onSpinalCordVisible: (visible: boolean) => void;
     onExploded: (exploded: boolean) => void;
+    onNamesShown: (shown: boolean) => void;
     onResetDisplay: () => void;
   }
 
@@ -62,6 +67,7 @@
     hasSpinalCord,
     exploded,
     explodable,
+    namesShown,
     changes,
     scrubbing,
     onHemisphere,
@@ -71,6 +77,7 @@
     onInternalVisible,
     onSpinalCordVisible,
     onExploded,
+    onNamesShown,
     onResetDisplay,
   }: Props = $props();
 
@@ -79,6 +86,7 @@
   const surfaceId = `display-surface-${uid}`;
   const surfaceHintId = `display-surface-hint-${uid}`;
   const explodeHintId = `display-explode-hint-${uid}`;
+  const namesHintId = `display-names-hint-${uid}`;
 
   const copy = $derived(t(lang, 'display'));
   // Held at what the press found until the slider is let go.
@@ -173,6 +181,16 @@
     </label>
     <p id={explodeHintId} class="hint explode-hint">{copy.explodeHint}</p>
   {/if}
+  <label class="check">
+    <input
+      type="checkbox"
+      checked={namesShown}
+      aria-describedby={namesHintId}
+      onchange={(event) => onNamesShown(event.currentTarget.checked)}
+    />
+    <span>{copy.names}</span>
+  </label>
+  <p id={namesHintId} class="hint explode-hint">{copy.namesHint}</p>
 </div>
 {#if shown.length}
   <div class="changes">

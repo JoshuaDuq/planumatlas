@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, it, vi } from 'vitest';
 import {
   Box3,
   BoxGeometry,
@@ -32,6 +32,13 @@ import {
 import { PAN_KEYS } from './render/keyboard-orbit.ts';
 import { createScene } from './render/scene.ts';
 import type { EngineScene } from './render/scene.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mock, and leave none built on it to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 // Only the renderer is replaced, since it needs a GL context. The animation loop is the test's to turn.
 const fakes = vi.hoisted(() => ({

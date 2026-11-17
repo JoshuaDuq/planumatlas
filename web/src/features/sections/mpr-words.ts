@@ -76,7 +76,7 @@ const NEW = {
     adjective: { sagittal: 'sagittale', coronal: 'coronale', axial: 'axiale' },
     saved: (adjective: string) => `Coupe ${adjective} enregistrée au format PNG.`,
     canvas: (name: string, edges: string) =>
-      `Coupe IRM ${name}. Cliquez pour placer le réticule ; utilisez le curseur de position pour changer de coupe. ${edges}.`,
+      `Coupe IRM ${name}. Cliquez pour placer le réticule ; utilisez le curseur de position pour changer de coupe. ${edges}.`,
     edge: { top: 'en haut', right: 'à droite', bottom: 'en bas', left: 'à gauche' },
     direction: {
       R: 'droite du patient',

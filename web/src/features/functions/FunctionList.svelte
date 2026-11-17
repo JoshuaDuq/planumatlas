@@ -29,12 +29,8 @@
   import AboutData from '../info/AboutData.svelte';
   import ScopeLine from '../info/ScopeLine.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
-  import {
-    functionList,
-    REGION_ROWS_SHOWN,
-    resultsSentence,
-    type FunctionRow,
-  } from './functions-view.ts';
+  import { functionList, resultsSentence, type FunctionRow } from './functions-view.ts';
+  import { REGION_ROWS_SHOWN } from '../../lib/types/constants.ts';
   import ShowAll from '../../lib/ui/ShowAll.svelte';
   import type { Region } from '../../lib/types/index.ts';
 

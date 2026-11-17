@@ -43,18 +43,18 @@ test('data bar, comparison CSV, saved PNG and full screen on one load', async ({
     'cdmd-hcp-mmp-left-1-destrieux-atlas-comparison.csv',
   );
 
-  // Save image downloads a PNG of the real stage.
+  // Save image downloads a PNG of the real stage, at the size chosen from its menu.
   const save = page.getByRole('button', { name: 'Save image (PNG)' });
   const downloading = page.waitForEvent('download');
   await save.click();
+  await page.getByRole('button', { name: 'Save at 2×' }).click();
   const download = await downloading;
   expect(download.suggestedFilename()).toBe('planum-hcp-mmp-oblique.png');
   const bytes = readFileSync(await download.path());
   expect(bytes.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   const stage = (await page.locator('#viewport').boundingBox())!;
-  // A saved image has at least two pixels per CSS pixel (SNAPSHOT_PIXEL_RATIO), whatever the screen's.
-  const ratio = Math.max(2, await page.evaluate(() => devicePixelRatio));
-  expect(Math.abs(bytes.readUInt32BE(16) - stage.width * ratio)).toBeLessThanOrEqual(1);
+  // Two image pixels per CSS pixel of the stage, whatever the screen's.
+  expect(Math.abs(bytes.readUInt32BE(16) - stage.width * 2)).toBeLessThanOrEqual(1);
   await expect(page.locator('#announcer')).toHaveText('Image saved as planum-hcp-mmp-oblique.png.');
 
   // Real full screen in and out.

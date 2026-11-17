@@ -14,6 +14,7 @@ const STATE: KeymapState = {
   spinalCordVisible: false,
   hemisphere: 'both',
   exploded: false,
+  namesShown: false,
   explodable: true,
   singleKeys: true,
   mprOpen: false,
@@ -44,6 +45,7 @@ const COMMAND_NAMES = [
   'setSpinalCordVisible',
   'setHemisphere',
   'setExploded',
+  'setNamesShown',
   'orbitBy',
   'panBy',
   'dolly',
@@ -633,6 +635,24 @@ describe('keymap outcomes', () => {
   it('KEY-14 C, U, S, H and E do nothing under the tract reference', () => {
     for (const key of ['c', 'u', 's', 'h', 'e', 'C', 'U', 'S', 'H', 'E']) {
       assert.deepEqual(outcome({ tractReferenceActive: true }, key), { log: [], prevented: false });
+    }
+  });
+
+  it('N names the brain or stops, in either case, not under the tract reference', () => {
+    for (const [shown, key] of [
+      [false, 'n'],
+      [true, 'N'],
+    ] as const) {
+      const { keymap, commands } = host({ namesShown: shown });
+      const event = press(key);
+      dispatchKey(event, keymap);
+      assert.deepEqual(commands.setNamesShown.mock.calls, [[!shown]]);
+      assert.equal(calls(event.preventDefault), 0);
+    }
+    assert.equal(SHORTCUT_KEYS.names, 'N');
+    for (const key of ['n', 'N']) {
+      assert.deepEqual(outcome({ tractReferenceActive: true }, key), { log: [], prevented: false });
+      assert.deepEqual(outcome({ singleKeys: false }, key), { log: [], prevented: false });
     }
   });
 

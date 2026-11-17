@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "myst_parser",
     "sphinx_copybutton",
+    "sphinx_sitemap",
 ]
 
 # MathJax is served from _static/mathjax, not from a CDN, so the pages make no third-party request.
@@ -78,6 +79,9 @@ numfig_format = {"figure": "Fig. %s |", "table": "Table %s |"}
 html_theme = "furo"
 html_title = "Planum"
 html_baseurl = "https://planumatlas.com/docs/"
+# The pages are neither versioned nor translated, so each sitemap entry is html_baseurl plus the page.
+sitemap_url_scheme = "{link}"
+sitemap_excludes = ["search.html", "genindex.html"]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_js_files = ["docs.js"]

@@ -1,6 +1,6 @@
-<!-- Fixture for the inspector tests: the real CDMD manifest and published partitions behind the panel, as I1 composes them. Not shipped. -->
+<!-- Fixture for the inspector tests: the frozen CDMD manifest (web/test/fixtures) and the published partitions behind the panel, as I1 composes them. Not shipped. -->
 <script lang="ts">
-  import manifest from '../../../../public/models/cdmd/manifest.json';
+  import manifest from '../../../test/fixtures/cdmd-manifest.json';
   import cabNpFile from '../../../../public/models/cdmd/cab-np.json';
   import functionalFile from '../../../../public/models/cdmd/functional-regions.json';
   import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json';
@@ -48,6 +48,7 @@
     connectivityPainted = null,
     disorderPainted = null,
     mriOpen = false,
+    highlight = null,
   }: {
     regionId?: string | null;
     lang?: Language;
@@ -62,6 +63,7 @@
     connectivityPainted?: string | null;
     disorderPainted?: string | null;
     mriOpen?: boolean;
+    highlight?: { pressed: boolean; full: boolean } | null;
   } = $props();
 
   const regions = manifest.regions as unknown as Region[];
@@ -108,6 +110,8 @@
   onfocus={() => calls.push('focus')}
   onisolate={() => calls.push('isolate')}
   onhide={() => calls.push('hide')}
+  {highlight}
+  onhighlight={() => calls.push('highlight')}
   onclear={() => calls.push('clear')}
   onregion={(id) => calls.push(`region:${id}`)}
   onselect={(id) => calls.push(`select:${id}`)}

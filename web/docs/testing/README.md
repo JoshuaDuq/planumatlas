@@ -14,6 +14,23 @@ conversion needs.
 
 > **Status (2026-10-26):** the conversion below is done. K8 to K16 replaced all 27 legacy-comparison files with rule tests and deleted them, and K16 removed `web/parity/`. The counts, order and slow-test figures record the audit as it was taken, as `audit.md` does.
 
+Citations such as `app.js:221-229` or `viewer/app.js:406-446`, in code comments and the catalogues' **Source:**
+fields, point to the deleted legacy viewer as tag `legacy-viewer-final` (7c6202b8) holds it; read one with
+`git show legacy-viewer-final:viewer/app.js`.
+
+## Before pushing
+
+`.githooks/pre-push` runs the fast part of CI's web-check from `web/`: the format check, lint and the unit
+project. Enable it once per clone with `git config core.hooksPath .githooks`. The browser project,
+`npm run check` and `npm run check:ts7` stay with CI or a manual run.
+
+The unit project runs with `isolate: false`: a worker runs its files one after another in one realm and
+module cache. `unstubGlobals` and `restoreMocks` undo stubs and spies before each test, so stub in
+`beforeEach` or the test, never at the top of a file or in `beforeAll` alone. A file that calls `vi.mock`
+starts with `vi.hoisted(() => vi.resetModules())` and resets again in `afterAll`, so its mocks reach the
+modules it imports and no later file gets modules built on them. A test-support module registers no hooks
+when imported: only the first file to import it would get them.
+
 ## Counts
 
 Test files (237: 161 unit and 52 browser Vitest files, 24 Playwright specs), by main class:
@@ -75,7 +92,8 @@ tooltip timers, CSS transitions, viewport churn and real data parsed per case.
 ## End-to-end journeys
 
 `web/e2e/journeys/` runs a few journeys against the built Svelte preview on its real engine, served as Pages
-serves it (`e2e/serve-site.mjs`): one job, about 5 minutes, off pull requests (manual run and deploy). K19
+serves it (`e2e/serve-site.mjs`): tests.yml's `web-e2e` job, about 5 minutes, on a manual run (Actions → Tests →
+Run workflow) and nightly at 03:17 UTC. It is not a gate: pull requests, pushes and the deploy never run it. K19
 deleted the 25 specs of `e2e/parity/` and the `legacy` project; the rules they held are proved by the
 browser tests cited in the catalogues, or by these journeys. A journey is not the level that proves each rule
 it touches; those rules keep their own unit or browser test.
@@ -102,6 +120,9 @@ it touches; those rules keep their own unit or browser test.
    with tracts opens the Linked MRI, whose FA downloads and joins the readout (SECT-35).
 10. **Accessibility** (`accessibility.spec.ts`, BUILD-10): axe on the composed app, light and dark, at 1280 px
     and 390 px.
+11. **Phone smoke in WebKit** (`phone-smoke.spec.ts`, BUILD-18): boot, a tap that picks, a cut moved by its
+    typed position, and the sheet's handle, in Playwright's `webkit-iphone` project (an iPhone 13). The
+    other journeys are the `chromium` project's; each project has its own runner in `web-e2e`.
 
 Two things K19 found while writing them are settled in K20: the phone's selection strip is named by its visible
 words (`deviations/k20-strip-label-in-name.md`), so the accessibility journey runs axe with a selection at both
@@ -109,3 +130,24 @@ widths; and the phone journey checks that the stage's `--vis-bottom` returns to 
 That check waits up to 30 s: on the runners' software WebGL a window resize reaches the page only after a slow
 frame, and a polling probe slows it further (about 10 s measured), so the default 5 s poll timed out although the
 inset did clear.
+
+**WebKit is unconfirmed.** `src/app/webgl-check.ts` refuses a browser without WebGL 2 and
+`EXT_color_buffer_float`, and WebKit takes no launch flag for its GL path, unlike Chromium's SwiftShader
+switches. Linux WebKit from Playwright's image has not yet been run against it, since e2e is not run
+locally: the first nightly run is the confirmation. The smoke's boot test asks for both first and names what is
+missing, rather than waiting out the 90 s ready timeout on the failure screen.
+
+The live site is checked after each deploy (BUILD-19, deploy.yml's `live-check`): the page must name the
+entry script and manifest version the deploy built, and the manifest must be served at that version.
+
+## UI tests read a frozen manifest
+
+The browser tests of the interface read `web/test/fixtures/cdmd-manifest.json`, a cut of the published CDMD
+manifest taken at `a73f75b0`, not `public/models/cdmd/manifest.json`, so a data rebuild cannot change what
+they see (handoff I3). The cut keeps every region and section the app reads, with the published values, and
+drops what only the real engine or nothing reads (CAT-68 lists them); do not feed it to the real engine. It is
+never regenerated: a test that needs a new section adds it there by hand, and its expectations are the fixed
+values written in the test. The published values those tests name are held once, against the published
+manifest, in `test/published-manifest.test.ts` (CAT-68). Tests of the real engine and of published data
+(`engine/index.svelte.test.ts`, `prefetch.svelte.test.ts`, `AtlasComparison.svelte.test.ts`, whose file is
+checked against the manifest's SHA-256, and the unit tests) still read the published files.

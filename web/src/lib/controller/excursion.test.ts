@@ -541,6 +541,23 @@ describe('the stage key', () => {
     assert.equal(scene.engine.model.settings.atlas, other.id);
   });
 
+  test('STATE-68 · another atlas keeps the reader’s highlights and layer IV, which every atlas carries, and lifts any other paint', async () => {
+    const scene = createScene();
+    const atlas = scene.engine.model.settings.atlas;
+    const other = scene.engine.model.manifest.atlases.find((entry) => entry.id !== atlas)!;
+    for (const [id, lifted] of [
+      ['highlight:destrieux:left:30:blue', false],
+      [`layers:${atlas}`, false],
+      ['connectivity:julich:left:1', true],
+    ] as const) {
+      scene.session.showPaint();
+      scene.engine.model.setPaint({ id, colors: new Map() });
+      const next = scene.engine.model.settings.atlas === atlas ? other.id : atlas;
+      await scene.excursions.chooseAtlas(next);
+      assert.equal(scene.session.state.paintLifted, lifted, id);
+    }
+  });
+
   test('STAGE-62 · another atlas ends a connectivity paint; the same one keeps it', async () => {
     const scene = createScene();
     const atlas = scene.engine.model.settings.atlas;
@@ -552,7 +569,7 @@ describe('the stage key', () => {
     assert.equal(scene.session.state.connectivitySeed, null);
   });
 
-  test('STAGE-65 · showing a disorder chooses Desikan-Killiany; another atlas ends it', async () => {
+  test('STAGE-75 · showing a disorder chooses Desikan-Killiany; another atlas ends it', async () => {
     const scene = createScene();
     assert.notEqual(scene.engine.model.settings.atlas, 'desikan');
     // The structure it was asked from stays selected, though the switch clears a selection.
@@ -588,12 +605,17 @@ test('a link’s scene is the new baseline: nothing is left to restore', async (
 });
 
 describe('the cut atlas', () => {
-  test('is the sections’ own, and a rejection reaches the caller', async () => {
+  test('follows the internal anatomy and the colouring, which a colouring’s map overrides', async () => {
     const scene = createScene();
-    await scene.excursions.setCutAtlas('destrieux');
-    assert.equal(scene.engine.sections.state.cutAtlas, 'destrieux');
-    vi.spyOn(scene.engine.sections, 'setCutAtlas').mockRejectedValueOnce(new Error('overtaken'));
-    await expect(scene.excursions.setCutAtlas('aseg')).rejects.toThrow('overtaken');
+    const { model, sections } = scene.engine;
+    assert.equal(sections.state.cutAtlas, 'destrieux');
+    await model.setDetail('nextbrain');
+    assert.equal(sections.state.cutAtlas, 'nextbrain');
+    assert.equal(model.settings.cutAtlas, 'nextbrain');
+    await sections.setSurfaceColor('territory');
+    assert.equal(sections.state.cutAtlas, 'arterial');
+    await sections.setSurfaceColor('atlas');
+    assert.equal(sections.state.cutAtlas, 'nextbrain');
   });
 });
 

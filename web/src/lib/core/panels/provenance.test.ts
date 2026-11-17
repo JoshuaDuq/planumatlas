@@ -116,6 +116,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
       'Functional networks',
       'Functional divisions',
       'Receptor fingerprints',
+      'Cortical layers (BigBrain)',
       'Stimulation responses',
       'Stimulation responses (F-TRACT)',
       'Functional connectivity (HCP)',
@@ -147,6 +148,21 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
         mono: true,
       },
     },
+    {
+      text: 'Harvard Ascending Arousal Network Atlas 2.0',
+      note: "FreeSurfer Software License · Arousal nuclei segmented on this brain with FreeSurfer 8.2's SegmentAAN (Olchanyi et al. 2025)",
+    },
+    doi('10.5061/dryad.zw3r228d2'),
+    doi('10.1097/NEN.0b013e3182588293'),
+    doi('10.1126/scitranslmed.adj4303'),
+    doi('10.1002/hbm.70357'),
+    {
+      link: {
+        href: '/neuroatlas/models/cdmd/../licenses/FreeSurfer.html',
+        text: 'FreeSurfer.html',
+        mono: true,
+      },
+    },
   ]);
   const licences = items(published('en'))
     .filter((item) => item.link?.mono && item.link.href.includes('/licenses/'))
@@ -157,6 +173,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
     '/neuroatlas/models/cdmd/../licenses/CAB-NP.txt',
     '/neuroatlas/models/cdmd/../licenses/ENIGMA-Toolbox-BSD-3-Clause.txt',
     '/neuroatlas/models/cdmd/../licenses/PAM50.txt',
+    '/neuroatlas/models/cdmd/../licenses/FreeSurfer.html',
   ]);
 });
 
@@ -183,7 +200,7 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
   assert.deepEqual(
     rowOf(en, 'Published files').items.map((item) => [item.link!.text, item.note]),
     [
-      ['manifest.json', '70 source files, each with a SHA-256 checksum'],
+      ['manifest.json', '86 source files, each with a SHA-256 checksum'],
       ['anatomies.json', 'Index of the published anatomies'],
     ],
   );
@@ -268,4 +285,32 @@ test('PROV-08 only the http and https schemes and a trailing slash are dropped',
       [true, 'anatomies.json'],
     ],
   );
+});
+
+test('PROV-24 the cortical layers row names the layers, their licence and each citation', () => {
+  const layers = {
+    file: 'cortical-layers.json',
+    label: 'Cortical layers (BigBrain, one histological brain)',
+    license: 'CC BY-NC-SA 4.0',
+    citations: [
+      'https://doi.org/10.1371/journal.pbio.3000678',
+      'https://doi.org/10.25493/the9-vqu',
+    ],
+  };
+  const rows = provenanceRows({ cortical_layers: layers }, { lang: 'fr' });
+  assert.deepEqual(rows, [
+    {
+      label: 'Couches corticales (BigBrain)',
+      items: [
+        { text: 'Cortical layers (BigBrain, one histological brain)', note: 'CC BY-NC-SA 4.0' },
+        {
+          link: {
+            href: 'https://doi.org/10.1371/journal.pbio.3000678',
+            text: 'doi.org/10.1371/journal.pbio.3000678',
+          },
+        },
+        { link: { href: 'https://doi.org/10.25493/the9-vqu', text: 'doi.org/10.25493/the9-vqu' } },
+      ],
+    },
+  ]);
 });

@@ -1,6 +1,7 @@
 import { Group, Plane, Vector3 } from 'three';
 import type { Intersection, Mesh, Raycaster } from 'three';
 import type { CutMode, Region } from '../../types/index.ts';
+import { cutAtlasFor } from '../../core/catalog/cut-labels.ts';
 import { categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type {
   AgreementCategory,
@@ -34,8 +35,8 @@ type SectionsErrorCode = 'asset-fetch' | 'asset-updated' | 'cut-failed';
 interface SectionsStateRecord {
   mode: CutMode;
   /**
-   * Which label volume the cut samples. It starts at the surface atlas and
-   * then moves independently: a cut atlas need not have a surface at all.
+   * Which label volume the cut samples: not a choice of its own, but what the
+   * model's atlas, colouring and detail level call for (`cutAtlasFor`).
    */
   cutAtlas: string;
   crosshair: [number, number, number];
@@ -52,7 +53,10 @@ interface SectionsStateRecord {
 
 /** The model as the sections drive it: the cut's own model plus the display commands it issues. */
 export interface SectionsModel extends CutModel {
-  readonly manifest: CutModel['manifest'] & { segmentation_agreement?: { volume: VolumeFile } };
+  readonly manifest: CutModel['manifest'] & {
+    segmentation_agreement?: { volume: VolumeFile };
+    cut_atlases?: readonly { id: string }[];
+  };
   readonly segmentationAgreement: SegmentationAgreement | null;
   readonly clippingPlanes: readonly Plane[];
   readonly visibleMeshes: readonly Mesh[];
@@ -120,8 +124,8 @@ export class BrainSections extends EventTarget {
   private pending: Promise<void> | null = null;
   private disposed = false;
   private requestNumber = 0;
-  /** The cut atlas whose volume last finished loading: what a failed choice returns to. */
-  private loadedCutAtlas: string | null = null;
+  /** The cut atlases the build publishes, which `cutAtlasFor` chooses among. */
+  private readonly published: ReadonlySet<string>;
   private appearanceRequest = 0;
   private readonly clipPlane = new Plane();
   private visibilityKey = '';
@@ -139,9 +143,10 @@ export class BrainSections extends EventTarget {
     this.group.name = 'GPU labelled brain sections';
     this.group.add(tissues.group);
     this.group.visible = false;
+    this.published = new Set((model.manifest.cut_atlases ?? []).map(({ id }) => id));
     this.state = {
       mode: 'off',
-      cutAtlas: model.state.atlas,
+      cutAtlas: cutAtlasFor(model.state, this.published),
       crosshair: [0, 0, 0],
       reverse: false,
       overlay: false,
@@ -154,9 +159,16 @@ export class BrainSections extends EventTarget {
     };
     this.onModelChange = () => {
       this.tissues.releaseDetails();
-      void this.syncPaint();
       const s = model.state;
+      // The labels follow the atlas, the colouring and the detail level, so the cut never names or
+      // colours by an atlas the stage is not showing.
+      const cutAtlas = cutAtlasFor(s, this.published);
+      this.state.cutAtlas = cutAtlas;
+      void this.syncPaint();
       const key = JSON.stringify([
+        cutAtlas,
+        // The surface atlas caps the ribbon of a cut NextBrain or a map labels.
+        s.atlas,
         s.hemisphere,
         s.cortexVisible,
         s.cortexOpacity,
@@ -172,6 +184,8 @@ export class BrainSections extends EventTarget {
       ]);
       if (key === this.visibilityKey) return;
       this.visibilityKey = key;
+      // The model's visibility reads the cut's labels at once, with no cut on screen or one loading.
+      if (s.cutAtlas !== cutAtlas) this.emit();
       if (this.active) {
         const [minimum, maximum] = this.offsetRange;
         const offset = new Vector3(...this.state.crosshair).dot(this.frame.normal);
@@ -180,8 +194,7 @@ export class BrainSections extends EventTarget {
           return;
         }
         const detailReady = this.tissues.hasDetail(s.detail);
-        if (this.tissues.layers.has(this.state.cutAtlas) && detailReady && this.striatalReady)
-          this.update();
+        if (this.labelsReady && detailReady && this.striatalReady) this.update();
         else {
           this.group.visible = false;
           // `setMode` has already reported the failure before rejecting.
@@ -195,6 +208,14 @@ export class BrainSections extends EventTarget {
 
   get active(): boolean {
     return this.state.mode !== 'off';
+  }
+
+  /** Whether the cut's labels are there, and the surface atlas's parcels its ribbon takes. */
+  private get labelsReady(): boolean {
+    const { cutAtlas } = this.state;
+    if (!this.tissues.layers.has(cutAtlas)) return false;
+    const ribbon = this.tissues.ribbonAtlas(cutAtlas);
+    return ribbon === null || this.tissues.layers.has(ribbon);
   }
 
   /** Whether the striatal network volume the cut's colouring reads is there, if it reads one. */
@@ -300,21 +321,28 @@ export class BrainSections extends EventTarget {
   /**
    * Load whatever the cut currently needs, and only then let it draw.
    *
-   * The chosen atlas can change while a load is in flight, so the choice is
-   * re-read after every await: resuming with a stale one would draw from a
-   * layer that was never loaded. `update` may assume the current layer exists.
+   * The model can call for other labels while a load is in flight, so the
+   * cut atlas is re-read after every await: resuming with a stale one would
+   * draw from a layer that was never loaded. `update` may assume the current
+   * layer exists. Labels the model no longer calls for failing to load is not
+   * the cut's failure.
    */
   async prepare(): Promise<void> {
-    const loaded = await this.whileLoading(async () => {
+    await this.whileLoading(async () => {
       let loaded: string | null = null;
       while (loaded !== this.state.cutAtlas) {
         loaded = this.state.cutAtlas;
-        await this.tissues.load(loaded);
+        try {
+          await this.tissues.load(loaded);
+          // A cut atlas with no parcels of its own caps the ribbon with the surface atlas's.
+          const ribbon = this.tissues.ribbonAtlas(loaded);
+          if (ribbon !== null && ribbon !== loaded) await this.tissues.load(ribbon);
+        } catch (error) {
+          if (loaded === this.state.cutAtlas) throw error;
+        }
       }
       if (this.tissues.wantsStriatal()) await this.tissues.load(STRIATAL_ATLAS);
-      return loaded;
     });
-    this.loadedCutAtlas = loaded;
     if (this.display) this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
   }
 
@@ -359,7 +387,9 @@ export class BrainSections extends EventTarget {
       try {
         await this.prepare();
       } catch (error) {
-        this.report(error);
+        // A load a newer request overtook is not the news: the newer one reports its own outcome.
+        if (request === this.requestNumber) this.report(error);
+        else this.settle();
         throw error;
       }
     }
@@ -443,34 +473,6 @@ export class BrainSections extends EventTarget {
     if (this.model.clippingPlanes[0] !== this.clipPlane)
       this.model.setClippingPlanes([this.clipPlane]);
     this.succeed();
-  }
-
-  /**
-   * Choose the label volume the cut samples, leaving the cortical surface as it
-   * is. On failure the previous choice is restored, because the control renders
-   * from this state and must not show an atlas that did not load.
-   */
-  async setCutAtlas(atlas: string): Promise<void> {
-    if (atlas === this.state.cutAtlas) return;
-    const previous = this.state.cutAtlas;
-    this.state.cutAtlas = atlas;
-    if (!this.active) {
-      this.emit();
-      return;
-    }
-    const request = ++this.requestNumber;
-    try {
-      await this.prepare();
-    } catch (error) {
-      // Only a failure of the atlas the state still names rolls it back, and it
-      // returns to an atlas that loaded, not to a choice that never did.
-      if (this.state.cutAtlas === atlas) this.state.cutAtlas = this.loadedCutAtlas ?? previous;
-      if (request === this.requestNumber) this.report(error);
-      else this.settle();
-      throw error;
-    }
-    if (request !== this.requestNumber || this.disposed) return this.settle();
-    this.update();
   }
 
   setAngles(tilt: number, azimuth: number): void {

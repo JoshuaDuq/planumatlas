@@ -47,3 +47,20 @@ def surface_placement(points):
     centroid = points.mean(axis=0)
     nearest = int(np.argmin(np.sum((points - centroid) ** 2, axis=1)))
     return {"centroid_ras_mm": centroid.tolist(), "anchor_ras_mm": points[nearest].tolist()}
+
+
+# Openness this close to a parcel's greatest counts as a tie: the validation's re-cast tolerance,
+# below which two vertices are equally bare.
+OPENNESS_TIE = 0.001
+
+
+def label_point(pial, openness):
+    """Where a parcel's name stands: its most open pial vertex, ties going to the vertex nearest
+    the mean of its pial vertices, so the name sits on a bare crown near the parcel's middle."""
+    pial = np.asarray(pial, dtype=np.float64)
+    openness = np.asarray(openness, dtype=np.float64)
+    if pial.ndim != 2 or pial.shape[1] != 3 or len(pial) != len(openness) or not len(pial):
+        raise ValueError("A label point needs each pial vertex's openness")
+    tied = np.flatnonzero(openness >= openness.max() - OPENNESS_TIE)
+    distances = np.sum((pial[tied] - pial.mean(axis=0)) ** 2, axis=1)
+    return pial[tied[np.argmin(distances)]].tolist()

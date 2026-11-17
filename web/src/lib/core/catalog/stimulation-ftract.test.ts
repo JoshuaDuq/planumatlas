@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { Manifest, Region } from '../../types/index.ts';
 import {
+  ftractFarthest,
   ftractParcelName,
   ftractParcelOf,
   ftractRows,
   validateStimulationFtract,
+  type FtractDelayEntry,
   type FtractPair,
   type FtractParcel,
   type StimulationFtract,
@@ -23,7 +25,11 @@ const PARCELS = [
   parcel('Area B', 'right'),
 ];
 
-const catalog = (pairs: FtractPair[], parcels: FtractParcel[] = PARCELS) =>
+const catalog = (
+  pairs: FtractPair[],
+  parcels: FtractParcel[] = PARCELS,
+  delays: FtractDelayEntry[] = [],
+) =>
   ({
     id: 'stimulation-ftract',
     source: {
@@ -37,8 +43,11 @@ const catalog = (pairs: FtractPair[], parcels: FtractParcel[] = PARCELS) =>
     people: 18,
     min_pairs: 10,
     min_implantations: 3,
+    min_responses: 10,
+    window_ms: 50,
     parcels,
     pairs,
+    delays,
   }) satisfies StimulationFtract;
 
 const regions = new Map<string, Region>([
@@ -84,6 +93,84 @@ test('equal rates put the more tested pair first', () => {
     ftractRows(data, 0, 'from', 'same').drawn.map((row) => row.parcel),
     [0, 1],
   );
+});
+
+test('a drawn row carries the peak delay of its own direction, with no distance where an end has no region', () => {
+  const data = catalog(
+    [
+      [0, 0, 40, 5, 0.2],
+      [0, 1, 30, 5, 0.6],
+      [1, 0, 50, 9, 0.7],
+      [0, 2, 20, 4, 0.5],
+      [0, 3, 12, 3, 0.1],
+    ],
+    PARCELS,
+    [
+      [0, 0, 13, 4, null],
+      [0, 1, 26, 8, null],
+      [1, 0, 30, 5, null],
+      [0, 2, 35, 6, 92.4],
+    ],
+  );
+  const delays = (direction: 'from' | 'to', side: 'same' | 'opposite') =>
+    ftractRows(data, 0, direction, side).drawn.map((row) => [row.parcel, row.delay]);
+  assert.deepEqual(delays('from', 'same'), [
+    [1, { peak: 26, mad: 8, distance: null }],
+    [0, { peak: 13, mad: 4, distance: null }],
+  ]);
+  assert.deepEqual(delays('to', 'same'), [
+    [1, { peak: 30, mad: 5, distance: null }],
+    [0, { peak: 13, mad: 4, distance: null }],
+  ]);
+  // Ten responses are needed for a delay: the 10% pair has none.
+  assert.deepEqual(delays('from', 'opposite'), [
+    [2, { peak: 35, mad: 6, distance: 92.4 }],
+    [3, null],
+  ]);
+});
+
+test('a delay the file cannot support is refused', () => {
+  const placed: FtractPair = [0, 2, 20, 4, 0.5];
+  assert.doesNotThrow(() =>
+    validateStimulationFtract(catalog([placed], PARCELS, [[0, 2, 20, 3, 92.4]]), regions),
+  );
+  const refused: [FtractPair[], FtractDelayEntry][] = [
+    // Two implantations: no rate is drawn, so no delay is shown.
+    [[[0, 2, 12, 2, 0.9]], [0, 2, 20, 3, 92.4]],
+    // Past F-TRACT's 50 ms window.
+    [[placed], [0, 2, 51, 3, 92.4]],
+    // Two placed areas without a distance, a distance to an area with no region, and one within an area.
+    [[placed], [0, 2, 20, 3, null]],
+    [[[0, 1, 30, 5, 0.6]], [0, 1, 20, 3, 12]],
+    [[[0, 0, 40, 5, 0.2]], [0, 0, 13, 4, 5]],
+  ];
+  for (const [pairs, delay] of refused) {
+    assert.throws(
+      () => validateStimulationFtract(catalog(pairs, PARCELS, [delay]), regions),
+      new RegExp(`delay: ${delay[0]}\\|${delay[1]}`),
+    );
+  }
+  assert.throws(
+    () =>
+      validateStimulationFtract(
+        catalog([placed], PARCELS, [
+          [0, 2, 20, 3, 92.4],
+          [0, 2, 21, 3, 92.4],
+        ]),
+        regions,
+      ),
+    /delay: 0\|2/,
+  );
+});
+
+test('every plot shares the farthest distance of any delay', () => {
+  const delays: FtractDelayEntry[] = [
+    [0, 0, 13, 4, null],
+    [0, 2, 35, 6, 92.4],
+    [1, 0, 30, 5, 40],
+  ];
+  assert.equal(ftractFarthest(catalog([], PARCELS, delays)), 92.4);
+  assert.equal(ftractFarthest(catalog([])), 0);
 });
 
 test('a pair or parcel the file cannot support is refused', () => {
@@ -141,6 +228,12 @@ test('the published file validates against CDMD; each hemisphere keeps its own a
     ['left', 'right'],
   );
   assert.equal(data.parcels[left]!.area, 'Area 45 (IFG)');
+  // Read from F-TRACT's matrices: left Area 45 to left Op9 peaks at 18 ms (MAD 5.859).
+  const op9 = data.parcels.findIndex(
+    (entry) => entry.name === 'Area Op9 (Frontal Operculum)' && entry.hemisphere === 'left',
+  );
+  const row = ftractRows(data, left, 'from', 'same').drawn.find((entry) => entry.parcel === op9)!;
+  assert.deepEqual([row.delay!.peak, row.delay!.mad], [18, 5.859]);
   assert.equal(ftractParcelOf(data, 'destrieux:left:14'), null);
   // 3.1 carved Area 6v1 out of a 3.0 gap map; F-TRACT has no such area.
   assert.equal(ftractParcelOf(data, 'julich:left:117'), null);

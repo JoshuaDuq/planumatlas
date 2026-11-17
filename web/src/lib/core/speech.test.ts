@@ -1,7 +1,7 @@
 // The announcer's sentences for a scripted sequence, read off viewer/app.js:1658-1693.
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { createSession } from '../core/state/session.ts';
+import { createSession } from './state/session.ts';
 import type { Region, ShownNotice } from '../types/index.ts';
 import { createSpeech } from './speech.ts';
 import type { SpeechView } from './speech.ts';
@@ -77,7 +77,7 @@ test('French sentences follow the view’s language', () => {
   const { next } = speech();
   next({ ...base, lang: 'fr' });
   assert.deepEqual(next({ ...base, lang: 'fr', selectedRegion: region('right') }), [
-    'Sélectionné : Precentral gyrus, droite',
+    'Sélectionné\u202f: Precentral gyrus, droite',
   ]);
 });
 

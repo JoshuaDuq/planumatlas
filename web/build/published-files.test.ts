@@ -9,6 +9,13 @@ import { FIXTURE_FILES, FIXTURE_GZ } from './published-fixture.ts';
 import { headVersions, publishedAssets, workerVersions } from './published-files.ts';
 import { ASSET_BASE } from './site.ts';
 
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mock, and leave none built on it to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
+
 // The plugin hashes `public/`; here it hashes the small fixture tree instead, once it has checked
 // that it was asked for the real one.
 const fixture = await vi.hoisted(async () => {

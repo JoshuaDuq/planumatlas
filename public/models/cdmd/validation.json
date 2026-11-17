@@ -5,7 +5,7 @@
   "atlases": [
     {
       "file": "cortex-destrieux.glb",
-      "sha256": "fd1fbf406fcd6cf924471c232709588689567417eccd28f9d454d84febbf2de5",
+      "sha256": "24cb38833be575b6918ad277a1ea8531f38cf29f0bf2517f2b678843a0e828e6",
       "mesh_count": 150,
       "hemispheres": {
         "left": {
@@ -69,7 +69,7 @@
     },
     {
       "file": "cortex-hcp-mmp.glb",
-      "sha256": "e197f376c068abb310fa71c59b834a81e3ef51eb32999e2d865940c79a270c0f",
+      "sha256": "ea26710c172a046040b510ca8cd49c8c0b1e35a46863e9dbe31f527c2295a67a",
       "mesh_count": 362,
       "hemispheres": {
         "left": {
@@ -133,7 +133,7 @@
     },
     {
       "file": "cortex-julich.glb",
-      "sha256": "90e6b9eafd7c2e55b5ebc739bf67f168151e71b0a9add385654229cd0331e50e",
+      "sha256": "ae40626927b590c3bdd692806b41490101a3e8f8fd1e457508edb8b99d5a18ce",
       "mesh_count": 296,
       "hemispheres": {
         "left": {
@@ -197,7 +197,7 @@
     },
     {
       "file": "cortex-schaefer.glb",
-      "sha256": "777b4573289b4eb27a95df907dfa9675f7b2f7e41ec99c653c268ab501e30ec7",
+      "sha256": "74b746850f9a77e10d936e454904458a69dd21e92b4791d16a60ee6f971c5d06",
       "mesh_count": 402,
       "hemispheres": {
         "left": {
@@ -261,7 +261,7 @@
     },
     {
       "file": "cortex-desikan.glb",
-      "sha256": "0629cada963f708d516444016941fa8b4a45b1ec926a952b681a35d3a2fc2bee",
+      "sha256": "591d2f98b138322563e27ceb5d1fa5f67cebbfa8e9f54ecae0708ba144915e13",
       "mesh_count": 70,
       "hemispheres": {
         "left": {
@@ -1134,15 +1134,18 @@
       "agreement_dice": {
         "V1": {
           "hcp-mmp": 0.9,
-          "julich": 0.68
+          "julich": 0.68,
+          "wang": 0.72
         },
         "V2": {
           "hcp-mmp": 0.76,
-          "julich": 0.56
+          "julich": 0.56,
+          "wang": 0.68
         },
         "V3": {
           "hcp-mmp": 0.78,
-          "julich": 0.57
+          "julich": 0.57,
+          "wang": 0.57
         }
       }
     },
@@ -1156,15 +1159,18 @@
       "agreement_dice": {
         "V1": {
           "hcp-mmp": 0.89,
-          "julich": 0.72
+          "julich": 0.72,
+          "wang": 0.72
         },
         "V2": {
           "hcp-mmp": 0.78,
-          "julich": 0.54
+          "julich": 0.54,
+          "wang": 0.66
         },
         "V3": {
           "hcp-mmp": 0.72,
-          "julich": 0.46
+          "julich": 0.46,
+          "wang": 0.6
         }
       }
     }
@@ -1358,7 +1364,14 @@
       "Area SFG4 (SFG)",
       "Subc (Hippocampus, Subicular complex)"
     ],
-    "median_drawn_rate": 0.05
+    "median_drawn_rate": 0.05,
+    "delays": 7248,
+    "delays_placed": 4840,
+    "delay_distance_rho": 0.245,
+    "delay_distance_p": 5.55e-67,
+    "median_delay_within_ms": 25.89,
+    "median_delay_across_ms": 27.37,
+    "delays_across": 99
   },
   "functional_connectivity": {
     "julich": {
@@ -4963,6 +4976,278 @@
       "amygdala right": 0.8497
     }
   },
+  "arousal_nuclei": {
+    "method": "segment-aan",
+    "checks": {
+      "voxel_size_mm": [
+        0.375,
+        0.375,
+        0.375
+      ],
+      "nuclei": {
+        "aan:midline:dorsal-raphe": {
+          "voxels": 2707,
+          "volume_mm3": 142.75,
+          "inside_envelope": 0.9878
+        },
+        "aan:midline:median-raphe": {
+          "voxels": 1409,
+          "volume_mm3": 74.3,
+          "inside_envelope": 1.0
+        },
+        "aan:midline:periaqueductal-grey": {
+          "voxels": 7799,
+          "volume_mm3": 411.28,
+          "inside_envelope": 0.9069
+        },
+        "aan:midline:ventral-tegmental-area": {
+          "voxels": 4571,
+          "volume_mm3": 241.05,
+          "inside_envelope": 0.9915
+        },
+        "aan:left:locus-coeruleus": {
+          "voxels": 408,
+          "volume_mm3": 21.52,
+          "inside_envelope": 1.0
+        },
+        "aan:right:locus-coeruleus": {
+          "voxels": 327,
+          "volume_mm3": 17.24,
+          "inside_envelope": 0.9939
+        },
+        "aan:left:laterodorsal-tegmental-nucleus": {
+          "voxels": 68,
+          "volume_mm3": 3.59,
+          "inside_envelope": 1.0
+        },
+        "aan:right:laterodorsal-tegmental-nucleus": {
+          "voxels": 58,
+          "volume_mm3": 3.06,
+          "inside_envelope": 1.0
+        },
+        "aan:left:mesencephalic-reticular-formation": {
+          "voxels": 4133,
+          "volume_mm3": 217.95,
+          "inside_envelope": 1.0
+        },
+        "aan:right:mesencephalic-reticular-formation": {
+          "voxels": 4064,
+          "volume_mm3": 214.31,
+          "inside_envelope": 1.0
+        },
+        "aan:left:parabrachial-complex": {
+          "voxels": 244,
+          "volume_mm3": 12.87,
+          "inside_envelope": 1.0
+        },
+        "aan:right:parabrachial-complex": {
+          "voxels": 286,
+          "volume_mm3": 15.08,
+          "inside_envelope": 1.0
+        },
+        "aan:left:pontis-oralis": {
+          "voxels": 1263,
+          "volume_mm3": 66.6,
+          "inside_envelope": 1.0
+        },
+        "aan:right:pontis-oralis": {
+          "voxels": 1227,
+          "volume_mm3": 64.71,
+          "inside_envelope": 1.0
+        },
+        "aan:left:pedunculotegmental-nucleus": {
+          "voxels": 933,
+          "volume_mm3": 49.2,
+          "inside_envelope": 1.0
+        },
+        "aan:right:pedunculotegmental-nucleus": {
+          "voxels": 1054,
+          "volume_mm3": 55.58,
+          "inside_envelope": 1.0
+        }
+      },
+      "inside_envelope_min": 0.9069,
+      "nextbrain": {
+        "dorsal-raphe": {
+          "nextbrain": "dorsal_raphe_nucleus",
+          "centroid_distance_mm": 1.23,
+          "dice": 0.2469
+        },
+        "periaqueductal-grey": {
+          "nextbrain": "periaqueductal_gray_substance",
+          "centroid_distance_mm": 0.44,
+          "dice": 0.7153
+        },
+        "ventral-tegmental-area": {
+          "nextbrain": "ventral_tegmental_area",
+          "centroid_distance_mm": 1.2,
+          "dice": 0.1516
+        }
+      },
+      "centroid_distance_max_mm": 1.23,
+      "centroid_distance_mean_mm": 0.96,
+      "dice_mean": 0.3713
+    },
+    "meshes": {
+      "file": "arousal-nuclei.glb",
+      "sha256": "710c707e255400ef2f15d564e1cb580dab09321598507800875619e63a7dff03",
+      "maximum_allowed_displacement_mm": 0.6,
+      "regions": [
+        {
+          "id": "aan:right:pedunculotegmental-nucleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.18679190031682794,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 54.43337743769483
+        },
+        {
+          "id": "aan:right:pontis-oralis",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.17629636430413378,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 63.71405647384766
+        },
+        {
+          "id": "aan:right:parabrachial-complex",
+          "boundary_edges": 0,
+          "pinch_edges": 6,
+          "maximum_display_displacement_mm": 0.30000034722601604,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 12.718476878005998
+        },
+        {
+          "id": "aan:right:mesencephalic-reticular-formation",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1863414362352456,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 212.83342480150782
+        },
+        {
+          "id": "aan:right:laterodorsal-tegmental-nucleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.20249247183516852,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 2.1272009928004625
+        },
+        {
+          "id": "aan:right:locus-coeruleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1806121011933543,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 15.88775733532052
+        },
+        {
+          "id": "aan:left:pedunculotegmental-nucleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.18167829252924494,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 47.75154801719709
+        },
+        {
+          "id": "aan:left:pontis-oralis",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1845850823599439,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 65.62738129995931
+        },
+        {
+          "id": "aan:left:parabrachial-complex",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1882966653112148,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 10.821243065876978
+        },
+        {
+          "id": "aan:left:mesencephalic-reticular-formation",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1773420733796717,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 216.38224017667523
+        },
+        {
+          "id": "aan:left:laterodorsal-tegmental-nucleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1838215960546091,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 2.629169558743575
+        },
+        {
+          "id": "aan:left:locus-coeruleus",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.17483845150894634,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 20.48874802602001
+        },
+        {
+          "id": "aan:midline:ventral-tegmental-area",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.18534487287743734,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 234.7337070265194
+        },
+        {
+          "id": "aan:midline:periaqueductal-grey",
+          "boundary_edges": 0,
+          "pinch_edges": 3,
+          "maximum_display_displacement_mm": 0.30000002788154007,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 369.7392793014176
+        },
+        {
+          "id": "aan:midline:median-raphe",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.18373909026702617,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 73.40077716864894
+        },
+        {
+          "id": "aan:midline:dorsal-raphe",
+          "boundary_edges": 0,
+          "pinch_edges": 0,
+          "maximum_display_displacement_mm": 0.1841126896253628,
+          "misclassified_voxel_centres": 0,
+          "mesh_volume_mm3": 138.0226207354903
+        }
+      ]
+    }
+  },
+  "cortical_layers": {
+    "parcels": 1220,
+    "largest_sum_error": 4.440892098500626e-16,
+    "hcp_mmp_layer_iv": {
+      "left": {
+        "layer_iv_motor": 0.0801,
+        "layer_iv_somatosensory": 0.0986,
+        "layer_iv_visual": 0.2062,
+        "layer_iv_quantile_0.75": 0.0908,
+        "visual_rank": 0.994,
+        "areas": 175
+      },
+      "right": {
+        "layer_iv_motor": 0.0724,
+        "layer_iv_somatosensory": 0.1173,
+        "layer_iv_visual": 0.245,
+        "layer_iv_quantile_0.75": 0.0911,
+        "visual_rank": 0.994,
+        "areas": 177
+      }
+    },
+    "regions": 1220,
+    "cell_regions": 24
+  },
   "volumes": {
     "mri": {
       "file": "mri.volume",
@@ -5094,6 +5379,7 @@
       "nextbrain": 514,
       "learning": 106,
       "pam50": 34,
+      "aan": 16,
       "wmparc": 68,
       "arterial": 30,
       "nettekoven": 32,
@@ -5190,9 +5476,11 @@
     "coordinate_spaces",
     "striatal_networks",
     "retinotopy",
-    "stroke_cases"
+    "stroke_cases",
+    "arousal_nuclei"
   ],
   "published_files": [
+    "arousal-nuclei.glb",
     "aseg.volume",
     "atlas-comparison-destrieux-julich.json",
     "atlas-comparison-destrieux-schaefer.json",
@@ -5215,6 +5503,7 @@
     "cortex-hcp-mmp.glb",
     "cortex-julich.glb",
     "cortex-schaefer.glb",
+    "cortical-layers.json",
     "disorder-effects.json",
     "functional-connectivity.json",
     "functional-regions.json",

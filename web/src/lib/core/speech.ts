@@ -1,6 +1,6 @@
 import type { Language, LoadStatus, Region, ShownNotice } from '../types/index.ts';
-import { dissectionSaid } from '../core/state/dissection.ts';
-import { t } from '../core/i18n/index.ts';
+import { dissectionSaid } from './state/dissection.ts';
+import { t } from './i18n/index.ts';
 
 /** What the announcer reads of the view (app.js:1658-1693). */
 export interface SpeechView {

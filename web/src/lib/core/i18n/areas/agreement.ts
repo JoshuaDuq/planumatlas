@@ -16,7 +16,7 @@ export const en = {
 
 export const fr: typeof en = {
   heading: 'Accord des segmentations',
-  compared: (union: string) => `Comparée au sein de l’ensemble « ${union} » de NextBrain.`,
+  compared: (union: string) => `Comparée au sein de l’ensemble « ${union} » de NextBrain.`,
   category: {
     both: 'Les deux segmentations',
     'aseg-only': 'aseg seule',
@@ -25,7 +25,7 @@ export const fr: typeof en = {
   dice: (value: string) => `Dice ${value}`,
   show: 'Afficher sur l’IRM liée',
   hide: 'Masquer l’accord',
-  legend: (structure: string) => `Accord : ${structure}`,
+  legend: (structure: string) => `Accord : ${structure}`,
   note: (union: string) =>
-    `Sur la grille de 1 mm d’aseg, où l’ensemble « ${union} » de NextBrain est voxelisé : un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode ; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.`,
+    `Sur la grille de 1 mm d’aseg, où l’ensemble « ${union} » de NextBrain est voxelisé : un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode ; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.`,
 };

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchPublished, reloadWithoutStoredModels } from './published-assets.ts';
 import { publish } from './published-test-support.ts';
 
@@ -48,6 +48,7 @@ describe('fetchPublished', () => {
 });
 
 describe('reloadWithoutStoredModels', () => {
+  afterEach(() => vi.unstubAllGlobals());
   const stubReload = () => {
     const reload = vi.fn();
     vi.stubGlobal('location', { href: 'https://example.test/', reload });

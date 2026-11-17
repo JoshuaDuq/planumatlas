@@ -84,7 +84,7 @@ describe('the pre-paint script', () => {
     }
   });
 
-  test('sets <html lang> as startLanguage does, from the link, the saved choice, then the browser', () => {
+  test('sets <html lang> as startLanguage does, from the saved choice, the link, then the browser', () => {
     const hashes = [
       '',
       '#lang=fr',
@@ -112,6 +112,15 @@ describe('the pre-paint script', () => {
         }
       }
     }
+  });
+
+  test('SHELL-13 · the saved language wins over a link’s, which decides only when none is saved', () => {
+    const lang = (hash: string, saved?: string) =>
+      run(paint!, { hash, stored: saved ? { [PREF_KEYS.language]: saved } : {} }).lang;
+    expect(lang('#lang=fr', 'en')).toBe('en');
+    expect(lang('#lang=en', 'fr')).toBe('fr');
+    expect(lang('#lang=fr')).toBe('fr');
+    expect(lang('#lang=fr', 'de')).toBe('fr');
   });
 
   test('colours the browser chrome with each theme’s --surface-base', () => {

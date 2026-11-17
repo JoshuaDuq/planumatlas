@@ -1,4 +1,4 @@
-import { encodeCsv } from '../comparison/catalog.ts';
+import { encodeCsv } from '../csv.ts';
 import type { Cluster } from './clusters.ts';
 
 /**

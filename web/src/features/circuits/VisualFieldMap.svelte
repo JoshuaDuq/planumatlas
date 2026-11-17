@@ -23,6 +23,7 @@
   import type { VisualFieldPoint } from '../../lib/engine/api.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
+  import Switch from '../../lib/ui/Switch.svelte';
   import type { VisualFieldExplorer } from './visual-field-explorer.svelte.ts';
 
   let { model }: { model: VisualFieldExplorer } = $props();
@@ -254,7 +255,7 @@
       {#if reading === undefined}
         {copy.clickHint}
       {:else if reading === null}
-        {copy.readingNone}
+        {model.area ? copy.readingArea(model.area.name, model.area.hemisphere) : copy.readingNone}
       {:else}
         {@const { eccentricity } = polar(reading)}
         {@const { vertical, horizontal } = quadrant(reading)}
@@ -263,9 +264,23 @@
           reading.hemisphere,
           copy.place(eccentricity, vertical, horizontal),
           reading.sigma,
-        )}
+        )}{#if model.area}{copy.readingNamed(model.area.name)}{/if}
       {/if}
     </p>
+
+    <div class="names">
+      <Switch
+        label={copy.nameAreas}
+        bind:checked={() => model.areasNamed, (on) => model.nameAreas(on)}
+      />
+      <p class="note">{copy.areasNote}</p>
+      {#if model.areasNamed}
+        {@const named = record.hemispheres[model.side].agreement_dice}
+        <p class="note">
+          {copy.areasAgreement(model.side, named.V1!.wang!, named.V2!.wang!, named.V3!.wang!)}
+        </p>
+      {/if}
+    </div>
 
     <p class="note">{copy.pair}</p>
     <ul class="legend">
@@ -275,13 +290,16 @@
       </li>
       <li><span class="swatch line" aria-hidden="true"></span>{copy.legendLine(measured)}</li>
       <li><span class="swatch areas" aria-hidden="true"></span>{copy.legendAreas}</li>
+      {#if model.areasNamed}
+        <li><span class="swatch outline" aria-hidden="true"></span>{copy.legendOutlines}</li>
+      {/if}
     </ul>
 
     <p class="note">{copy.provenance}</p>
     <p class="note">{copy.agreement(model.side, agreement['hcp-mmp']!, agreement.julich!)}</p>
     <h4 class="heading">{copy.sources}</h4>
     <ul class="sources">
-      {#each [[record.citation, copy.dataset], [record.method_citation, copy.method]] as [href, name] (href)}
+      {#each [[record.citation, copy.dataset], [record.method_citation, copy.method], [record.visual_areas.citation, copy.areasSource]] as [href, name] (href)}
         <li>
           <a {href} target="_blank" rel="noreferrer"
             >{name}<span class="visually-hidden">{` ${t(model.lang, 'link').newTab}`}</span
@@ -433,6 +451,15 @@
     }
     .swatch.areas {
       background: linear-gradient(90deg, #cbcbcb 0 33%, #8e8e8e 33% 66%, #5d5d5d 66%);
+    }
+    /* An area's border on the near-black cortex outside V1–V3. */
+    .swatch.outline {
+      border: 1px solid #fff;
+      border-radius: 2px;
+      background: #3b3b3b;
+    }
+    .names {
+      margin-top: var(--space-5);
     }
     .sources {
       margin: var(--space-1) 0 0;

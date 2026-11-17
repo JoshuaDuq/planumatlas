@@ -39,13 +39,13 @@ the expected values change with them in the same commit.
 - **Expected:** `CUTS` = `['off','sagittal','coronal','axial','oblique']`; `HEMISPHERES` = `['both','left','right']`; `FUNCTIONAL_LEVELS` = `['named','sections']`. Probed with off, sagittal, coronal, axial, oblique, both, left, right, named, sections, anatomy, functions, deficits, circuits, diffusion, bogus and "", `cut=` accepts exactly `CUTS`, `hemi=` exactly `HEMISPHERES`.
 - **Covered by:** `src/lib/types/constants.test.ts` (R, the lists); `src/lib/core/state/url-state.test.ts` (R, some values; the decoder's acceptance is STATE-08)
 
-### CAT-03 · Seven surface colourings, declared once
+### CAT-03 · Nine surface colourings, declared once
 
-- **Rule:** The cortex can be coloured by tissue, MRI, lobe, atlas, network, CAB-NP or arterial territory. There is one list, and a link accepts each of them and nothing else.
+- **Rule:** The brain can be coloured by tissue, MRI, lobe, atlas, network, CAB-NP, arterial territory, striatal network or cerebellar function; the last two are subcortical maps drawn on the cut faces voxel by voxel, each labelling the cut by its own map (SLICE-21). There is one list, and a link accepts each of them and nothing else.
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/model/brain-atlas.js:68`; `viewer/state/url-state.js:36`
-- **Expected:** `SURFACE_COLORS` = `['tissue','mri','lobe','atlas','network','cab-np','territory']`; `colors=bogus`, `colors=rgb` and `colors=functional` are rejected.
+- **Source:** `viewer/model/brain-atlas.js:68`; `viewer/state/url-state.js:36`; derived cut labels, 2026-11-17 (the striatal and cerebellar colourings)
+- **Expected:** `SURFACE_COLORS` = `['tissue','mri','lobe','atlas','network','cab-np','territory','striatal','cerebellar']`; `colors=bogus`, `colors=rgb` and `colors=functional` are rejected.
 - **Covered by:** `src/lib/types/constants.test.ts` (R); `src/lib/engine/model/brain-atlas.test.ts` (W, `includes('mri')` only)
 
 ### CAT-03a · Lobes colour the regions of the atlases grouped by lobe, in the interface's nine colours
@@ -180,12 +180,12 @@ the expected values change with them in the same commit.
 
 ### CAT-17 · Each family is hidden only by the control that selects it
 
-- **Rule:** A cortical patch is hidden by choosing another surface atlas. A structure is hidden by choosing another detail level, unless the active cut is painting its atlas. A cut-only (tissue) region is shown only on a cut of an atlas that carries it, while a cut is on; one smaller than every cut block says so.
+- **Rule:** A cortical patch is hidden by choosing another surface atlas, and a structure by choosing another detail level, cut or no cut: the cut is labelled by what the stage shows (SLICE-21), so it shows no other atlas or level. A cut-only (tissue) region is shown only on a cut whose atlas carries it, while a cut is on. Off the cut, it names the control that would put it there (`cutLabelsReason`): a map's region the colouring ('other-colour'), a NextBrain region the detail level ('other-detail'), and gyral white matter, on every surface atlas's cut, whichever of the two replaces their labels. One smaller than every cut block says so. With no cut atlas reported yet, there is no cut to show it on.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/catalog/visibility.js:1-21, 45-58`
-- **Expected:** cortex of atlas `b` with atlas `a` → `{visible:false, reason:'other-atlas'}`. Structure `aseg` with atlas `b` → visible; with detail `n` → 'other-detail'. Structure of atlas `n` with detail `aseg`, cut atlas `n`, cut on → visible; cut off → 'other-detail'. Tissue region `n` with cut atlas `n` → visible whatever the surface atlas; cut atlas `a` → 'other-cut-atlas'; `cut_atlases: []` → 'below-cut-resolution'; cut off → 'no-cut'; no cut atlas at all → hidden. wmparc with `cut_atlases ['a','b']` → visible on cut atlas `a` and `b`, 'other-cut-atlas' on `n`.
-- **Covered by:** `src/lib/core/catalog/visibility.test.ts` (R)
+- **Source:** `viewer/catalog/visibility.js:1-21, 45-58`; derived cut labels, 2026-11-17 (`src/lib/core/catalog/cut-labels.ts`)
+- **Expected:** cortex of atlas `b` with atlas `a` → `{visible:false, reason:'other-atlas'}`, an `a` cut open or not. Structure `aseg` with atlas `b` → visible; with detail `n` → 'other-detail'. Structure of atlas `n` with detail `aseg` and an `a` cut open → 'other-detail'. Tissue region `n` with cut atlas `n` → visible whatever the surface atlas; cut atlas `a` → 'other-detail'; `arterial:left:aca` on cut atlas `a` → 'other-colour', on `arterial` → visible; `cut_atlases: []` → 'below-cut-resolution'; cut off → 'no-cut'; no cut atlas at all → 'no-cut'. wmparc with `cut_atlases ['a','b']` → visible on cut atlas `a` and `b`, 'other-detail' on `n`, 'other-colour' on `nettekoven`. `cutLabelsReason`: a `nettekoven` region on `destrieux` → 'other-colour'; a `nextbrain` region on `arterial` → 'other-detail'; gyral white matter on `choi` → 'other-colour', on `nextbrain` → 'other-detail'. `colourShowing`: a `choi` region → `striatal`, gyral white matter → `atlas`.
+- **Covered by:** `src/lib/core/catalog/visibility.test.ts` (R); `src/lib/core/catalog/cut-labels.test.ts` (R, `cutLabelsReason`, `colourShowing`, `mapColourOf`)
 
 ### CAT-18 · Display toggles hide what they name, and say so
 
@@ -211,12 +211,12 @@ the expected values change with them in the same commit.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/catalog/visibility.js:29-43`
-- **Expected:** teaching-set caudate (Basal ganglia), detail `learning`: system "Basal ganglia" → visible; "Brainstem" → 'other-system'; "Basal ganglia" with hemisphere `right` → hidden. Detail `learning`, cut atlas `nextbrain` on, system "Diencephalon", constituents `{nextbrain:left:219}` → `nextbrain:left:219` visible, `nextbrain:left:108` hidden. Cortex is never 'other-system'.
+- **Expected:** teaching-set caudate (Basal ganglia), detail `learning`: system "Basal ganglia" → visible; "Brainstem" → 'other-system'; "Basal ganglia" with hemisphere `right` → hidden. Detail `learning`, cut atlas `choi` on, system "Basal ganglia", constituents `{choi:left:Default}` → `choi:left:Default` visible, `choi:left:Vis` 'other-system'. Cortex is never 'other-system'.
 - **Covered by:** `src/lib/core/catalog/internal-anatomy.test.ts` (R)
 
 ### CAT-21 · Hidden reasons come in a fixed precedence
 
-- **Rule:** When several things hide a region, the reason given is the most fundamental: MRI registration, then the family's own control (cut resolution, cut atlas, cut, detail level or surface atlas), then system, hemisphere, cortex, internal anatomy, spinal cord, removal, isolation.
+- **Rule:** When several things hide a region, the reason given is the most fundamental: MRI registration, then the family's own control (cut resolution, the colouring or detail level that labels the cut, cut, detail level or surface atlas), then system, hemisphere, cortex, internal anatomy, spinal cord, removal, isolation.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/catalog/visibility.js:45-77`
@@ -276,7 +276,7 @@ the expected values change with them in the same commit.
 - **Kind:** data
 - **Level:** unit
 - **Source:** `viewer/catalog/catalog.js:182-188`
-- **Expected:** published, aseg detail, no cut: destrieux surface 214 (148 + 32 + 34), hcp-mmp 426 (360 + 66), cortex hidden 66.
+- **Expected:** published, aseg detail, no cut: destrieux surface 230 (148 + 32 + 34 + 16 arousal nuclei), hcp-mmp 442 (360 + 82), cortex hidden 82.
 - **Covered by:** `src/lib/core/catalog/catalog.test.ts` (S, derived from the manifest's declared counts); `src/lib/core/catalog/published-catalog.test.ts` (S)
 
 ### CAT-28 · The list follows the reader's language
@@ -543,11 +543,11 @@ the expected values change with them in the same commit.
 
 ### CAT-56 · Every citation names the work its identifiers point to
 
-- **Rule:** Each clinical, circuit, functional-region, domain, receptor-fingerprint and bibliography citation matches the record its PMID, DOI or Bookshelf id resolves to: title, authors, PubMed issue year and published corrections. The records file holds exactly the cited works.
+- **Rule:** Each clinical, circuit, functional-region, domain, receptor-fingerprint and bibliography citation matches the record its PMID, DOI or Bookshelf id resolves to: title, authors, PubMed issue year and published corrections. The records file holds exactly the cited works, which since WP24 include what the published manifests' citation fields and the tract catalogs' sources cite: a PubMed link as its PubMed record, a DOI no cited PubMed article carries as a record of its own (`doi:<DOI>`, from Crossref or DataCite).
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/learning/references.test.js`; `data/reference-records.json` (written by `scripts/fetch_references.py`)
-- **Expected:** for every reference: DOI equal (case-insensitive); title equal ignoring case, accents and punctuation; author surnames equal; year = PubDate year (except Bookshelf); corrections' DOIs equal (circuit and source references have none). Circuit URLs: `https://www.ncbi.nlm.nih.gov/books/<NBK>/`, else `https://pmc.ncbi.nlm.nih.gov/articles/<PMCID>/`, else `https://pubmed.ncbi.nlm.nih.gov/<PMID>/`. At least 12 bibliography lines with a DOI, each with a PMID. The cited set equals the keys of `records`.
+- **Source:** `viewer/learning/references.test.js`; `data/reference-records.json` (written by `scripts/fetch_references.py`); plan 2 WP24
+- **Expected:** for every reference: DOI equal (case-insensitive); title equal ignoring case, accents and punctuation; author surnames equal; year = PubDate year (except Bookshelf); corrections' DOIs equal (circuit and source references have none). Circuit URLs: `https://www.ncbi.nlm.nih.gov/books/<NBK>/`, else `https://pmc.ncbi.nlm.nih.gov/articles/<PMCID>/`, else `https://pubmed.ncbi.nlm.nih.gov/<PMID>/`. At least 12 bibliography lines with a DOI, each with a PMID. The cited set, with `pmid:<PMID>` for each PubMed link of a manifest citation field and `doi:<DOI>` for each manifest or tract-catalog DOI no cited PubMed record carries, equals the keys of `records`.
 - **Covered by:** `src/lib/core/learning/references.test.ts` (S)
 
 ## Atlas comparison
@@ -653,3 +653,21 @@ the expected values change with them in the same commit.
 - **Level:** unit
 - **Expected:** `parsopercularis` → "Opercular part of the inferior frontal gyrus", Frontal, alias "pars opercularis"; `superiorfrontal` fr → "Gyrus frontal supérieur"; `isthmuscingulate` fr group "Cingulaire"; `parahippocampal` → Limbic; 68 regions on CDMD.
 - **Covered by:** `src/lib/core/catalog/labels.test.ts`
+
+### CAT-68 · The published CDMD manifest holds the values the UI tests were written against
+
+- **Rule:** The browser tests of the interface read a frozen cut of the CDMD manifest (`web/test/fixtures/cdmd-manifest.json`), not the published file, so a data rebuild cannot break them. The cut keeps every region and every section the app reads, values unchanged, and leaves out what only the real engine or nothing reads (each region's `centroid_ras_mm`, `anchor_ras_mm`, vertex, triangle and voxel counts, `voxel_size_mm`, `display_maximum_displacement_mm`, `source_annotation_value`, `source_published_name`, `volume_label`; the top-level `coordinate_system`, `boundary_convention` and `limitations`). It is never regenerated: a test that needs a new section adds it to the cut by hand. The published values those tests name are held here once, against the published manifest, so a rebuild that changes one fails in one place, where it is updated on purpose.
+- **Kind:** data
+- **Level:** unit
+- **Source:** review handoff I3; plan 2 WP40. Cut from `public/models/cdmd/manifest.json` as of `a73f75b0`.
+- **Expected:** anatomy `cdmd`, subject `sub_013`, display name "MGH CDMD “sub_013”", individual; atlases destrieux, hcp-mmp, julich, schaefer, desikan; detail levels aseg 32, nextbrain 292, learning 106; supplemental pam50 34 and aan 16; cut atlases destrieux, hcp-mmp, julich, schaefer, desikan, nextbrain, arterial, nettekoven, choi; Yeo's seven networks Vis to Default; 15 arterial territories, aca first and inferior-cerebellar last; 2,126 regions in 20 atlas and kind pairs (destrieux 148 cortex and 2 non-region, hcp-mmp 360 and 2, julich 278 and 18, schaefer 400 and 2, desikan 68 and 2, aseg 32, learning 106, nextbrain 292 structures and 222 tissue regions, pam50 34, aan 16, wmparc 68, arterial 30, nettekoven 32, choi 14); the 45 regions the UI tests name, each with its published label and kind (`destrieux:left:30` "G precuneus · left", cortex; `learning:midline:optic-chiasm` "Optic chiasm · midline", structure); source names L_23c_ROI (`hcp-mmp:left:38`), R_AVI_ROI (`hcp-mmp:right:111`) and Area 44 (IFG) (`julich:left:2`); `learning:left:caudate` labels 48, 118, 393 and `learning:left:thalamus` 53 labels from 190 to 813.
+- **Covered by:** `test/published-manifest.test.ts` (R)
+
+### CAT-69 · The region table has one row per region of the shown atlas and level, at full precision
+
+- **Rule:** The region table lists the cortical areas of the shown surface atlas, then the structures of the shown internal-anatomy level (the cord's with every level), in manifest order; unlabelled surface, other atlases, other levels and cut-only regions are not rows. Each row gives the id, the region's own atlas, its name and group in English and French, hemisphere, source label, an area's surface area or a structure's volume, centroid and anchor in surface RAS, and the largest Yeo network and arterial territory with their shares; numbers as the manifest gives them, cells quoted as `encodeCsv` quotes them, CRLF line ends. A region missing its centroid, anchor, area or volume fails rather than writing an empty cell; an unmeasured share is an empty cell. Thickness, neighbour count and the MNI centroid wait for plan 1 (WP10, WP6).
+- **Kind:** data
+- **Level:** unit
+- **Source:** plan 2 WP24
+- **Expected:** header id, atlas, name_en, name_fr, hemisphere, group_en, group_fr, source_label, surface_area_mm2, volume_mm3, centroid_surface_ras_x_mm … z, anchor_surface_ras_x_mm … z, largest_network, largest_network_share, largest_territory, largest_territory_share. Fixture `destrieux:left:1` → "Frontomarginal gyrus and sulcus", "Gyrus et sillon fronto-marginaux", Frontal, area 898.744924840933, centroid −18.193548387096776, Limbic 0.5298988040478381, mca-frontal 0.9981600735970562. A learning unit gives volume 2967.8721326742184 and empty area and shares; `Caudate nucleus, "head"` is written `"Caudate nucleus, ""head"""`. No centroid → "Region destrieux:left:1 has no centroid.". File `planum-regions-<anatomy>-<atlas>-<level>.csv`.
+- **Covered by:** `src/lib/core/catalog/region-table.test.ts` (R)

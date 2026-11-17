@@ -19,7 +19,7 @@
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import ShowAll from '../../lib/ui/ShowAll.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
-  import { REGION_ROWS_SHOWN } from '../functions/functions-view.ts';
+  import { REGION_ROWS_SHOWN } from '../../lib/types/constants.ts';
 
   let {
     region,

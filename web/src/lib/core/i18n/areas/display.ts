@@ -1,3 +1,17 @@
+import type { KeyGround } from '../../../types/index.ts';
+
+// What shows where no highlight is, as the highlight key's note names it.
+const EN_GROUND: Record<KeyGround, string> = {
+  tissue: 'Tissue-coloured regions',
+  scan: 'Regions where the scan shows',
+  grey: 'Grey regions',
+};
+const FR_GROUND: Record<KeyGround, string> = {
+  tissue: 'Les régions couleur tissu',
+  scan: 'Les régions où l’IRM reste visible',
+  grey: 'Les régions grises',
+};
+
 export const en = {
   hemisphere: 'Hemisphere',
   // The region's name arrives capitalized, as the inspector titles it.
@@ -14,6 +28,9 @@ export const en = {
   // Also the change list's entry while it is on: no view is prepared exploded.
   explode: 'Exploded view',
   explodeHint: 'Structures keep their measured shape; only their places change.',
+  // Also the stage's group of names.
+  names: 'Names on the brain',
+  namesHint: 'The regions facing you, largest first; zoom in to name smaller ones.',
   // The masthead's Colour options; the field's note gives the full sense.
   surfaceColors: {
     tissue: 'Tissue',
@@ -23,10 +40,28 @@ export const en = {
     network: 'Yeo 7 networks',
     'cab-np': 'CAB-NP networks',
     territory: 'Arterial territories',
+    striatal: 'Striatal networks',
+    cerebellar: 'Cerebellar functions',
   },
   // The Colour field's value while a tab paints the brain; it is never offered as a choice.
-  paints: { function: 'Functions', deficit: 'Deficit', lesion: 'Lesion' },
+  paints: {
+    function: 'Functions',
+    deficit: 'Deficit',
+    lesion: 'Lesion',
+    highlight: 'Your highlights',
+    connectivity: 'Connectivity',
+    disorder: 'Disorder',
+    layers: 'Layer IV',
+  },
   paintTitles: {
+    highlight:
+      'Set by you: the regions you highlighted, in the colours you chose; your own marks, not data. Choose a colour to replace it.',
+    connectivity:
+      'Set by a region’s sheet: the outlined area’s resting functional connectivity with every other (group mean of 200 adults). Choose a colour to replace it.',
+    disorder:
+      'Set by a region’s sheet: one disorder’s case–control differences (ENIGMA consortium) on Desikan-Killiany. Choose a colour to replace it.',
+    layers:
+      'Set by a region’s sheet: layer IV’s share of the cortex’s thickness in each parcel, from one histological brain (BigBrain). Choose a colour to replace it.',
     function:
       'Set by the Functions tab: functions on the HCP-MMP areas where studies report activation (Neurosynth). Choose a colour to replace it.',
     deficit:
@@ -63,6 +98,16 @@ export const en = {
   startedOver: 'Back to the opening picture.',
   // Spoken after the Display tool's name on a phone, where the status bar is hidden.
   changed: ', settings changed',
+  // The stage key of the reader's highlights, and the saved image's caption line, which say they are the reader's.
+  // Under a volumetric map's key: the brain's surfaces stay in tissue colour until it is cut.
+  mapOnCuts: 'Drawn on cut faces, voxel by voxel.',
+  highlightKey: {
+    title: 'Your highlights',
+    note: (ground: KeyGround) =>
+      `Regions you highlighted, in the colours you chose: your own marks, not data. ${EN_GROUND[ground]} are not highlighted.`,
+    absent: 'An outlined region is not drawn in this view.',
+    marks: 'the reader’s own marks, not data',
+  },
 };
 
 export const fr: typeof en = {
@@ -79,6 +124,9 @@ export const fr: typeof en = {
   spinalCordUnavailable: 'Aucune moelle épinière n’est publiée pour ce sujet.',
   explode: 'Vue éclatée',
   explodeHint: 'Les structures gardent leur forme mesurée\u202f; seule leur place change.',
+  names: 'Noms sur le cerveau',
+  namesHint:
+    'Les régions tournées vers vous, les plus grandes d’abord\u202f; zoomez pour nommer les plus petites.',
   surfaceColors: {
     tissue: 'Tissu',
     mri: 'IRM T1',
@@ -87,9 +135,27 @@ export const fr: typeof en = {
     network: 'Réseaux Yeo 7',
     'cab-np': 'Réseaux CAB-NP',
     territory: 'Territoires artériels',
+    striatal: 'Réseaux striataux',
+    cerebellar: 'Fonctions cérébelleuses',
   },
-  paints: { function: 'Fonctions', deficit: 'Déficit', lesion: 'Lésion' },
+  paints: {
+    function: 'Fonctions',
+    deficit: 'Déficit',
+    lesion: 'Lésion',
+    highlight: 'Vos surlignages',
+    connectivity: 'Connectivité',
+    disorder: 'Trouble',
+    layers: 'Couche IV',
+  },
   paintTitles: {
+    connectivity:
+      'Choisi dans la fiche d’une région : la connectivité fonctionnelle de repos de l’aire entourée avec toutes les autres (moyenne de groupe de 200 adultes). Choisissez une couleur pour la remplacer.',
+    disorder:
+      'Choisi dans la fiche d’une région : les différences patients-témoins d’un trouble (consortium ENIGMA) sur Desikan-Killiany. Choisissez une couleur pour la remplacer.',
+    layers:
+      'Choisi dans la fiche d’une région : la part de la couche IV dans l’épaisseur du cortex de chaque parcelle, d’après un seul cerveau histologique (BigBrain). Choisissez une couleur pour la remplacer.',
+    highlight:
+      'Choisi par vous : les régions que vous avez surlignées, dans les couleurs choisies ; vos marques personnelles, pas des données. Choisissez une couleur pour la remplacer.',
     function:
       'Choisi dans l’onglet Fonctions\u202f: fonctions sur les aires HCP-MMP où les études rapportent une activation (Neurosynth). Choisissez une couleur pour la remplacer.',
     deficit:
@@ -124,4 +190,12 @@ export const fr: typeof en = {
   displayReset: 'Réglages d’affichage réinitialisés.',
   startedOver: 'Retour à l’image de départ.',
   changed: ', réglages modifiés',
+  mapOnCuts: 'Tracées sur les faces de coupe, voxel par voxel.',
+  highlightKey: {
+    title: 'Vos surlignages',
+    note: (ground: KeyGround) =>
+      `Les régions que vous avez surlignées, dans les couleurs choisies : vos marques personnelles, pas des données. ${FR_GROUND[ground]} ne sont pas surlignées.`,
+    absent: 'Une région cernée n’est pas affichée dans cette vue.',
+    marks: 'marques personnelles, pas des données',
+  },
 };

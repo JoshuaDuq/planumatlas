@@ -7,6 +7,7 @@ const COLOUR_GROUPS: readonly (readonly [string | null, readonly SurfaceColor[]]
   ['appearance', ['tissue', 'mri']],
   ['parcellation', ['lobe', 'atlas']],
   ['networks', ['network', 'cab-np']],
+  ['subcortical', ['striatal', 'cerebellar']],
   ['vascular', ['territory']],
 ];
 
@@ -56,15 +57,21 @@ export function colourGroups({
   networks,
   cabNp,
   territories,
+  striatal,
+  cerebellar,
 }: {
   networks?: unknown;
   cabNp?: unknown;
   territories?: unknown;
+  striatal?: unknown;
+  cerebellar?: unknown;
 }): [string | null, SurfaceColor[]][] {
   const published: Partial<Record<SurfaceColor, boolean>> = {
     network: Boolean(networks),
     'cab-np': Boolean(cabNp),
     territory: Boolean(territories),
+    striatal: Boolean(striatal),
+    cerebellar: Boolean(cerebellar),
   };
   return COLOUR_GROUPS.map((entry): [string | null, SurfaceColor[]] => [
     entry[0],

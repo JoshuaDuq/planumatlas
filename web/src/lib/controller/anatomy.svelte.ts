@@ -1,4 +1,5 @@
 import { tick } from 'svelte';
+import { colourShowing, cutAtlasesOf } from '../core/catalog/cut-labels.ts';
 import { beneathCortex } from '../core/catalog/labels.ts';
 import { openingColour } from '../core/catalog/lobes.ts';
 import { visibilityOf } from '../core/catalog/visibility.ts';
@@ -19,7 +20,7 @@ import type { CameraSnapshot, MoveOptions, Vec3 } from '../engine/api.ts';
 import type { Explorer, ViewName } from '../types/index.ts';
 import { FOCUS_TARGETS, requestFocus, rescueFocus } from '../ui/focus.ts';
 import type { AppContext } from './context.ts';
-import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
+import type { PreparedDisplay } from '../state/display-state.ts';
 import type { SceneReader } from './lesson.ts';
 import type { UserMapStore } from '../state/user-map.svelte.ts';
 
@@ -27,6 +28,8 @@ import type { UserMapStore } from '../state/user-map.svelte.ts';
 export interface SelectionInterface {
   /** The workspace shows the region's detail tab. */
   showDetail(): void;
+  /** The same, leaving a phone's sheet where it rests: a click on the model names a new region in the grip. */
+  showDetailInPlace(): void;
   /** The phone sheet rises to show it. */
   revealOnSelect(): void;
   dismissHelp(): void;
@@ -47,6 +50,8 @@ export interface SelectionInterface {
 export interface ReadingPlace {
   scrollTop: number;
 }
+
+type SelectOptions = { frame?: boolean; picked?: boolean };
 
 /**
  * The selection, the dissection and the display commands over the engine and the stores. `commands`
@@ -132,8 +137,30 @@ export function createAnatomyCommands(
    * Choose a region, or none. Choosing the one already selected is also a request to read it. The
    * camera moves only for a new pick from the navigator (`frame`): a click on the model is already
    * where the reader is looking, and moving the camera would throw away the orbit they just made.
+   * A click on the model (`picked`) leaves a phone's sheet at rest unless it picks the selection again.
    */
-  function selectRegion(id: string | null, { frame = false }: { frame?: boolean } = {}) {
+  function selectRegion(id: string | null, options: SelectOptions = {}) {
+    const region = id === null ? null : model.regions.get(id)!;
+    if (region?.supplemental && !model.hasLayer(region.atlas!)) {
+      void selectDownloaded(id!, options);
+      return;
+    }
+    selectNow(id, options);
+  }
+
+  /** A region of a supplemental layer is drawn, and so selected, once its layer has downloaded. */
+  async function selectDownloaded(id: string, options: SelectOptions) {
+    const current = commands.begin();
+    try {
+      if (await commands.loadSupplemental([id], current)) selectNow(id, options);
+    } catch (error) {
+      commands.failIfCurrent(current, 'region', error, undefined, () => {
+        void selectDownloaded(id, options);
+      });
+    }
+  }
+
+  function selectNow(id: string | null, { frame = false, picked = false }: SelectOptions) {
     const same = id !== null && id === engineState.model.selectedRegion?.id;
     // Any other choice ends a stage click's offer for good.
     if (replaced && id !== replaced.by) replaced = null;
@@ -142,8 +169,11 @@ export function createAnatomyCommands(
     if (!same) ui.markReadingPlace();
     if (id === null) return;
     revealInTree(id);
-    ui.showDetail();
-    ui.revealOnSelect();
+    if (picked && !same) ui.showDetailInPlace();
+    else {
+      ui.showDetail();
+      ui.revealOnSelect();
+    }
     ui.dismissHelp();
     if (frame && !same) focusSelection();
   }
@@ -161,7 +191,7 @@ export function createAnatomyCommands(
       replaced = null;
       session.notify(null);
     }
-    selectRegion(id);
+    selectRegion(id, { picked: true });
     if (!place) return;
     replaced = { region: previous!, by: id, place };
     session.notify({
@@ -201,6 +231,13 @@ export function createAnatomyCommands(
     // A display change is the reader's next action, which a standing notice lasts until.
     session.notify(null);
     change();
+    notifyClearedSelection(had);
+  }
+
+  /** A masthead field's choice of atlas, detail or colour: said when the layer it shows dropped the selection. */
+  async function chooseLayer(choose: () => Promise<unknown>) {
+    const had = engineState.model.selectedRegion;
+    await choose();
     notifyClearedSelection(had);
   }
 
@@ -326,10 +363,19 @@ export function createAnatomyCommands(
         );
       }
     }
-    if (reason === 'other-detail')
-      await commands.loadDetail(model.regions.get(id)!.atlas!, current);
+    // A cut's labels follow the colouring and the internal anatomy: a region of a colouring's map
+    // comes with that colouring, NextBrain's with its level, and gyral white matter, which the
+    // surface atlases' cuts share, once neither replaces their labels.
+    if (reason === 'other-colour') {
+      await commands.applySurfaceColor(colourShowing(model.regions.get(id)!), current);
+    }
+    if (reason === 'other-detail') {
+      const region = model.regions.get(id)!;
+      const own = cutAtlasesOf(region).includes(region.atlas);
+      await commands.loadDetail(own ? region.atlas! : model.defaultDetail, current);
+    }
     if (reason === 'other-system') model.setInternalSystem(null);
-    if (!current()) return false;
+    if (!(await commands.loadSupplemental([id], current))) return false;
     const region = model.regions.get(id)!;
     if (!model.canSelect(region)) {
       const next = visibilityOf(region, model.settings).reason;
@@ -340,7 +386,7 @@ export function createAnatomyCommands(
     return true;
   }
 
-  const settingsNow = () => revealSettings(model.settings, sections.state.cutAtlas);
+  const settingsNow = () => revealSettings(model.settings);
 
   /**
    * The navigator's way to show a region that is not on screen, and frame it once it is. What the
@@ -602,6 +648,7 @@ export function createAnatomyCommands(
     openConstituent,
     toggleInternalAnatomy,
     chooseInternalSystem,
+    chooseLayer,
     setHemisphere: (value: Parameters<typeof model.setHemisphere>[0]) =>
       display(() => {
         model.setHemisphere(value);

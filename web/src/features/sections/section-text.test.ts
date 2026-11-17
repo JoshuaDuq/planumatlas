@@ -96,11 +96,14 @@ describe('the status sentence', () => {
     expect(
       sectionSentences(input({ surfaceColor: 'cab-np', colourAtlases: atlases })).shown,
     ).not.toContain('striatum');
-    // The striatal network labels in their own colours are drawn by confidence too.
+    // The striatal networks' own colouring labels the cut by them, drawn by confidence too.
     const choi = { status: 'ready', error: null, cutAtlas: 'choi' } as const;
     expect(
-      sectionSentences(input({ surfaceColor: 'atlas', colourAtlases: atlases, state: choi })).shown,
-    ).toMatch(/· paler where Choi et al\. are less confident$/);
+      sectionSentences(input({ surfaceColor: 'striatal', colourAtlases: atlases, state: choi }))
+        .shown,
+    ).toBe(
+      '1\u202fmm source grid · group striatal networks registered onto this brain · paler where Choi et al. are less confident',
+    );
     expect(
       sectionSentences(input({ surfaceColor: 'atlas', colourAtlases: atlases })).shown,
     ).not.toContain('paler');

@@ -33,7 +33,7 @@ for (const { id: published } of anatomies.anatomies) {
         const [cord] = manifest.supplemental_layers;
         assert.deepEqual(
           manifest.supplemental_layers.map((layer) => layer.id),
-          ['pam50'],
+          ['pam50', 'aan'],
         );
         await atlas.setSpinalCordVisible(true);
         assert.equal(atlas.visibleMeshes.length, 148 + detail.region_count + cord!.region_count);

@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import functionalRegionsFile from '../../../../public/models/cdmd/functional-regions.json' with { type: 'json' };
 import circuitRecords from '../../../../data/circuits.yaml';
 import clinicalRecords from '../../../../data/neuropsychology.yaml';
-import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import termsFile from '../../../../public/models/cdmd/neurosynth-terms.json' with { type: 'json' };
 import { createExcursions } from '../../lib/controller/excursion.svelte.ts';

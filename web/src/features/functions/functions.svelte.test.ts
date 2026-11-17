@@ -16,11 +16,8 @@ import { manifest } from './functions-test-world.ts';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
-import {
-  AREAS_SHOWN,
-  REGION_ROWS_SHOWN as AREAS_SHOWN_HERE,
-  TERMS_SHOWN,
-} from './functions-view.ts';
+import { REGION_ROWS_SHOWN as AREAS_SHOWN_HERE } from '../../lib/types/constants.ts';
+import { AREAS_SHOWN, TERMS_SHOWN } from './functions-view.ts';
 import { createWorld, deferred, type World } from './functions-test-world.ts';
 import Fixture from './functions-test-support.svelte';
 

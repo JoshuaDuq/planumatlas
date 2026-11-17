@@ -7,6 +7,10 @@ on:
   workflow_call:
   # Runs everything, including the end-to-end tests that pull requests skip.
   workflow_dispatch:
+  # The same, nightly on main: e2e is not a gate for pull requests or the deploy, so this is where
+  # it runs unasked. 03:17 UTC, off the hour, when GitHub delays fewer scheduled runs.
+  schedule:
+    - cron: '17 3 * * *'
 
 permissions:
   contents: read
@@ -44,7 +48,7 @@ jobs:
 
       # On main, compare against the last commit that deployed, so a push after a
       # failed run is still checked for everything that has not passed since.
-      # A manual run, or one with no deployed commit to compare against, runs everything.
+      # A manual or nightly run, or one with no deployed commit to compare against, runs everything.
       - name: Find the last deployed commit
         id: base
         if: github.event_name != 'pull_request'
@@ -53,7 +57,7 @@ jobs:
         run: |
           sha=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy.yml --branch main \
             --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
-          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch || -z "$sha" ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch || "$GITHUB_EVENT_NAME" == schedule || -z "$sha" ]]; then
             echo "full=true" >> "$GITHUB_OUTPUT"
           else
             echo "sha=$sha" >> "$GITHUB_OUTPUT"
@@ -75,10 +79,12 @@ jobs:
               - pyproject.toml
               - uv.lock
               - .github/workflows/tests.yml
+            # Every Python file, so its ruff check runs wherever it lives. Quoted: a bare `*` starts
+            # a YAML alias.
             python:
               - *validate
               - tests/**
-              - scripts/**/*.py
+              - '**/*.py'
             # The Svelte app and what it reads.
             web:
               - web/**
@@ -113,6 +119,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
 
+      - name: Lint Python
+        run: uv run ruff check
+
       # One worker per runner core; every test writes only under its own tmp_path.
       # Work stealing keeps the few 10-25 s NextBrain tests from piling onto one worker.
       - name: Run Python tests
@@ -142,9 +151,12 @@ jobs:
       - name: Validate the published anatomy
         run: uv run python -m brain_model.validate --anatomy ${{ matrix.anatomy }}
 
+  # Also on a change to the Worker alone: its unit tests hold the feedback form to the Worker's own
+  # address pattern and length (COLO-10). Adding the Worker to the web filter instead would also
+  # start the four browser shards, which nothing of the Worker's reaches.
   web-check:
     needs: changes
-    if: needs.changes.outputs.web == 'true'
+    if: needs.changes.outputs.web == 'true' || needs.changes.outputs.feedback == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -154,7 +166,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -212,7 +224,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -252,7 +264,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -297,19 +309,25 @@ jobs:
             web/.vitest/attachments/
           if-no-files-found: ignore
 
-  # A few journeys on the built Svelte preview (web/e2e/journeys), on one runner. It runs only when
-  # started by hand (Actions → Tests → Run workflow), not on pull requests or pushes.
+  # The journeys on the built Svelte preview (web/e2e/journeys), one runner per Playwright project
+  # (web/playwright.config.ts): every journey in Chromium, and the phone smoke (boot, pick, cut,
+  # sheet) in WebKit on an iPhone. It runs when started by hand (Actions → Tests → Run workflow) and
+  # nightly, never on pull requests or pushes.
   web-e2e:
     needs: changes
-    # By hand only (Actions → Tests → Run workflow): e2e is not a gate for pull requests or the deploy.
-    # A called workflow sees its caller's event and name, so a hand-started deploy must not run it.
-    if: github.event_name == 'workflow_dispatch' && github.workflow == 'Tests' && needs.changes.outputs.web == 'true'
+    # e2e is not a gate for pull requests or the deploy. A called workflow sees its caller's event
+    # and name, so a hand-started deploy must not run it.
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && github.workflow == 'Tests' && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     container:
-      # web-browser's image; its check covers this line.
+      # web-browser's image, which carries WebKit as well; its check covers this line.
       image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
       options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, webkit-iphone]
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -317,7 +335,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -329,14 +347,14 @@ jobs:
         run: npm run build --prefix web
 
       # Playwright's CI guide: one worker per job. One retry, and a test that needed it fails the job.
-      - name: Run end-to-end tests
-        run: npm run test:e2e --prefix web -- --workers=1 --retries=1 --fail-on-flaky-tests --global-timeout=2400000
+      - name: Run end-to-end tests (${{ matrix.project }})
+        run: npm run test:e2e --prefix web -- --project=${{ matrix.project }} --workers=1 --retries=1 --fail-on-flaky-tests --global-timeout=2400000
 
       - name: Upload failure artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: web-e2e-failures
+          name: web-e2e-failures-${{ matrix.project }}
           path: |
             web/test-results/
           if-no-files-found: ignore

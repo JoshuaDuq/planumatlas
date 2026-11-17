@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
 import agreement from '../../../../public/models/cdmd/segmentation-agreement.json' with { type: 'json' };
+import retinotopy from '../../../../public/models/cdmd/retinotopy.json' with { type: 'json' };
+import { parseVisualAreaAnchors } from '../core/learning/visual-field.ts';
 import type { Manifest } from '../types/index.ts';
 import { HIGH_FREQUENCY_EVENTS } from './api.ts';
 import type { SegmentationAgreementData } from './api.ts';
@@ -13,9 +15,19 @@ const cabNp = { atlas: 'hcp-mmp', regions: {} };
 const functionalRegions = { atlas: 'hcp-mmp' };
 
 const segmentationAgreement = agreement as unknown as SegmentationAgreementData;
+const visualAreaAnchors = parseVisualAreaAnchors(
+  retinotopy,
+  published.retinotopy!.visual_areas.areas.map(({ name }) => name),
+);
 
 const create = () =>
-  createFakeEngine({ manifest: published, cabNp, functionalRegions, segmentationAgreement });
+  createFakeEngine({
+    manifest: published,
+    cabNp,
+    functionalRegions,
+    segmentationAgreement,
+    visualAreaAnchors,
+  });
 
 defineEngineContract('fake', create, {});
 
@@ -86,6 +98,33 @@ describe('the fake engine', () => {
     const { canvas, ratio } = create().captureSnapshot({ x: 0, y: 0, width: 100, height: 80 });
     assert.equal(ratio, 1);
     assert.deepEqual([canvas.width, canvas.height], [100, 80]);
+    vi.unstubAllGlobals();
+  });
+
+  it('SNAP-20 draws a snapshot at the scale asked for: three image pixels per CSS pixel at 3×', () => {
+    vi.stubGlobal('document', { createElement: () => ({ width: 0, height: 0 }) });
+    const crop = { x: 10, y: 20, width: 100, height: 80 };
+    const { canvas, ratio } = create().captureSnapshot(crop, { scale: 3 });
+    assert.equal(ratio, 3);
+    assert.deepEqual([canvas.width, canvas.height], [300, 240]);
+    vi.unstubAllGlobals();
+  });
+
+  it('SNAP-21 refuses a frame past the renderbuffer limit, with its size and the limit', () => {
+    vi.stubGlobal('document', { createElement: () => ({ width: 0, height: 0 }) });
+    const engine = createFakeEngine({
+      manifest: published,
+      hostSize: { width: 1000, height: 700 },
+      renderbufferLimit: 2048,
+    });
+    assert.throws(
+      () => engine.captureSnapshot(undefined, { scale: 3 }),
+      (error: Error & { code?: string }) =>
+        error.code === 'snapshot-too-large' &&
+        /3000 × 2100 px .* 2048 px limit/.test(error.message),
+    );
+    // 2000 × 1400 fits.
+    assert.equal(engine.captureSnapshot(undefined, { scale: 2 }).canvas.width, 2000);
     vi.unstubAllGlobals();
   });
 

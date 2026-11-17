@@ -133,6 +133,15 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 - **Expected:** A 560×520 plan at ratio 2 over a flat `#7a7f86` frame: more than 5000 pixels change, every changed pixel lies within the halo reach (8 px blur) of a drawn letter, caption run, key, statement or bar; pixels farther away keep `#7a7f86`. `document.fonts.load` is awaited for 400 12 px, 400 13 px, 600 13 px and each key font before `captureSnapshot`.
 - **Covered by:** `src/features/snapshot/snapshot.drawing.svelte.test.ts` (R)
 
+### SNAP-24 · Names on the brain are in the saved image where they stand
+
+- **Rule:** Names on the brain (STAGE-76) are stage labels, so the snapshot measures each placed name as it measures a route landmark's label, its dot, its leader and its words line by line, and draws them into the image; a name left out on the stage is not drawn, and with names off there are none.
+- **Kind:** behaviour
+- **Level:** browser (component)
+- **Source:** Planum improvement plan 2, WP21 (handoff F3: "included in the PNG"); `features/snapshot/markings.ts`
+- **Expected:** Over the fake engine at 1000 × 700, names on → one label per placed name, in order, its words the name's, its dot at the drawn dot's centre (to 0.001 px), a leader exactly where the name stands off, font `500 14px`; names off → no labels.
+- **Covered by:** `src/features/snapshot/region-names.svelte.test.ts` (R)
+
 ## Saving
 
 ### SNAP-14 · Save image downloads planum-<atlas>-<view>[-<plane>].png of the visible stage
@@ -141,7 +150,7 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 - **Kind:** behaviour
 - **Level:** browser: real canvas encode; e2e for the real engine and download
 - **Source:** `viewer/app.js:1450-1463`; FACADE-33
-- **Expected:** Host 1000×700, chrome insets `{ bottom: 100 }`, HCP-MMP → one link, `download` "planum-hcp-mmp-left.png" (view left), "planum-hcp-mmp-anterior-coronal.png" with an anterior coronal cut, blob type `image/png`, decoded 1000×600 at ratio 1. Atlas `null` → "planum-brain-left.png". Built site 1280×800, HCP-MMP, oblique → suggested file "planum-hcp-mmp-oblique.png", PNG signature, width = stage width × max(devicePixelRatio, 2) (±1; a saved image is drawn at no fewer than two pixels per CSS pixel since 2026-11-02, its outline found on screen-sized buffers), 0 < height ≤ ceil(stage height × ratio), focus stays on Save image.
+- **Expected:** Host 1000×700, chrome insets `{ bottom: 100 }`, HCP-MMP → one link, `download` "planum-hcp-mmp-left.png" (view left), "planum-hcp-mmp-anterior-coronal.png" with an anterior coronal cut, blob type `image/png`, decoded 1000×600 at ratio 1. Atlas `null` → "planum-brain-left.png". Built site 1280×800, HCP-MMP, oblique → suggested file "planum-hcp-mmp-oblique.png", PNG signature, saved from the menu at 2×, width = stage width × 2 (±1; the size is the menu's since 2026-11-16, SNAP-20, its outline found on screen-sized buffers), 0 < height ≤ ceil(stage height × ratio).
 - **Covered by:** `src/features/snapshot/snapshot.svelte.test.ts` (R)
 
 ### SNAP-15 · The image is handed over as a Blob URL, released 40 s after the click
@@ -188,3 +197,39 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 - **Source:** decision 33 on #4
 - **Expected:** The button "Save image (PNG)" is not a descendant of `#viewport`.
 - **Covered by:** uncovered
+
+### SNAP-20 · A save at 2× or 3× has that many image pixels per CSS pixel, its caption grown with it
+
+- **Rule:** Save image's menu offers 2× and 3×: the engine draws one frame at that many image pixels per CSS pixel of the stage, whatever the screen's ratio, and the marks are drawn at the frame's ratio, so a larger image carries a caption as large against the anatomy as the screen's. Copy image puts the 2× PNG on the clipboard. A save that names no size keeps the screen's ratio, at least two.
+- **Kind:** behaviour
+- **Level:** unit (fake engine); browser (the drawn caption; the real engine's frame)
+- **Source:** Planum improvement plan 2, WP25 (handoff F10)
+- **Expected:** Fake engine, crop 100 × 80 at scale 3 → canvas 300 × 240, ratio 3. A 400 × 300 stage saved at 3× → a 1200 × 900 PNG, at 1× → 400 × 300; the caption's inked box in the image's top left is 2.85 to 3.15 times as tall and as wide at 3× as at 1×. Real engine, 1000 × 700 stage, crop 400 × 300 at scale 3 → canvas 1200 × 900, ratio 3, the screen's canvas unchanged, the brain drawn.
+- **Covered by:** `src/lib/engine/contract.test.ts`; `src/features/snapshot/snapshot-size.svelte.test.ts`; `src/lib/engine/index.svelte.test.ts`
+
+### SNAP-21 · A size the device cannot draw is refused with its reason
+
+- **Rule:** A frame wider or taller than the device's `MAX_RENDERBUFFER_SIZE` or `MAX_TEXTURE_SIZE` is refused before anything is drawn, with an `EngineError` of code `snapshot-too-large` naming the size and the limit; the stage is left as it was. The save says why, as the `snapshotSize` notice, and downloads nothing; any other failure is still the `snapshot` notice.
+- **Kind:** behaviour
+- **Level:** unit (fake engine); browser (the notice; the real engine)
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** Fake engine, 1000 × 700 stage, limit 2048: scale 3 throws `snapshot-too-large`, "A 3000 × 2100 px frame is past this device’s 2048 px limit."; scale 2 gives a 2000-pixel-wide canvas. Saved through `saveSnapshot` → `fail('snapshotSize', error)` once, no link, no notice; EN text "Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller."; FR "Impossible d’enregistrer l’image à cette taille : …" (U+202F). A lost context → `fail('snapshot', error)`. Real engine with the limit read as 1024 → the same code, and the screen's canvas keeps its size.
+- **Covered by:** `src/lib/engine/contract.test.ts`; `src/features/snapshot/snapshot-size.svelte.test.ts`; `src/lib/engine/index.svelte.test.ts`
+
+### SNAP-22 · The caption names the highlights as the reader's marks
+
+- **Rule:** While the reader's highlights are keyed on the stage, the saved image's caption ends with a line of its own: the key's title in bold, that they are the reader's own marks and not data, then each highlighted region the image draws, named as the key names it. Over the tract reference there is no such line.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22 (a saved image's caption says the same as the key)
+- **Expected:** Key rows "Precentral gyrus, left" and "Cuneus, right" (not drawn) → `{ title: 'Your highlights', details: ['the reader’s own marks, not data', 'Precentral gyrus, left'] }`; French first detail "marques personnelles, pas des données"; no highlight key → null. Caption with a selection → last two lines "Selected: Cuneus, right" and "Your highlights · the reader’s own marks, not data · Precentral gyrus, left · Cuneus, right", the title alone bold; with a reference → the reference's line alone.
+- **Covered by:** `src/features/stage/stage-keys.test.ts`; `src/features/snapshot/snapshot.test.ts`
+
+### SNAP-23 · The visual areas' names are in the saved image where they stand
+
+- **Rule:** The visual field map's area names drawn on the stage are measured with the other markings and drawn into the saved image centred where they stand, in their own ink and type with the markings' halo. A name hidden on the stage is not drawn, and one the image's own chrome (the caption, the letters, the statement, the scale bar, a key) would cover is left out, as the stage leaves a name out under its own chrome; it is never moved off its area.
+- **Kind:** behaviour
+- **Level:** browser (component, canvas calls recorded)
+- **Source:** Planum improvement plan 2, WP32; `features/snapshot/markings.ts`, `snapshot.ts`
+- **Expected:** On the 560 × 520 fixture, LO1 standing at (300, 300) and IPS5 hidden → `plan.names` is LO1 alone; LO1 drawn with `textAlign` center at its box's centre. LO1's mark moved onto the caption's first line (box at 20, 18) as V3A → no V3A drawn.
+- **Covered by:** `src/features/snapshot/snapshot.drawing.svelte.test.ts` (R)

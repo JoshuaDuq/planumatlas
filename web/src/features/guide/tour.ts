@@ -451,7 +451,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
   };
   // The region the reader last clicked on the brain during the tour.
   let opened: string | null = null;
-  // Whether a phone's sheet is up for the tour's region stops (the app raises it for a pick too).
+  // Whether a phone's sheet may be up for the tour's region stops (a second pick of a region raises it too).
   let sheetUp = false;
   const lowerSheet = () => {
     if (!sheetUp) return;
@@ -570,7 +570,8 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
   };
   for (const type of TURNS)
     document.addEventListener(type, turning, { capture: true, passive: true });
-  // Any click on a region opens it, and on a phone raises the sheet; Open a region waits for one.
+  // Any click on a region opens it, and on a phone picking it again raises the sheet (lowering one at
+  // peek does nothing); Open a region waits for one.
   const unpick = onPick((region) => {
     opened = region;
     sheetUp ||= phone;
@@ -584,8 +585,8 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
       placing = 0;
       if (!card?.isConnected) return;
       const index = tour.getActiveIndex() ?? -1;
-      // Once picked, a card stays put and gives its band back: on a phone the pick raises the sheet,
-      // which would otherwise carry the card up over the anatomy and squeeze it under the card.
+      // Once picked, a card stays put and gives its band back: on a phone a second pick raises the
+      // sheet, which would otherwise carry the card up over the anatomy and squeeze it under the card.
       const picked = card.hasAttribute(DONE) && tries(index) === 'pick';
       if (!picked) {
         if (inStage[index]) placeInStage(card);

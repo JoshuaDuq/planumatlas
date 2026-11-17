@@ -371,6 +371,7 @@ def test_published_geometry_contains_only_the_exact_joint_cells():
 
 def test_three_atlases_publish_pairwise_comparisons_with_identical_marginals(comparison_subject):
     from copy import deepcopy
+
     from brain_model.layers.comparison import export_comparisons
 
     config, manifest = comparison_subject

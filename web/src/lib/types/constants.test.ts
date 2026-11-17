@@ -30,10 +30,20 @@ describe('the fixed lists', () => {
     assert.deepStrictEqual([...FUNCTIONAL_LEVELS], ['named', 'sections']);
   });
 
-  it('CAT-03: seven surface colourings', () => {
+  it('CAT-03: nine surface colourings', () => {
     assert.deepStrictEqual(
       [...SURFACE_COLORS],
-      ['tissue', 'mri', 'lobe', 'atlas', 'network', 'cab-np', 'territory'],
+      [
+        'tissue',
+        'mri',
+        'lobe',
+        'atlas',
+        'network',
+        'cab-np',
+        'territory',
+        'striatal',
+        'cerebellar',
+      ],
     );
   });
 

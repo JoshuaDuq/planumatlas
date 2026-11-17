@@ -16,13 +16,8 @@ in `core-catalogs.md` (CAT-63); the start screen that shows the failure words is
 Conventions: NNBSP is U+202F (narrow no-break space), NBSP is U+00A0, the minus sign is U+2212, the em
 dash is U+2014. Expected strings below write these characters by name where the difference matters.
 
-Not a rule today: French spacing before `:` and `;` is mixed. Of the 70 places in the French table where
-`:` or `;` ends a phrase, 42 use NNBSP and 28 use an ordinary space (for example `app.spoken`,
-`link.notApplied`, `dissection.partHidden`, `diffusion.loaded`, every shortcut row). Guillemets are mixed
-too (`domains.score`, `domains.termOf`, `errors.operations.colour` and `navigator.noMatch` use ordinary
-spaces inside « », `functions.deficitBridge` uses NBSP). The legacy tables have the same mixture. A rule
-"French sets NNBSP before `: ; ! ?` and NBSP inside « »" needs a decision on #4 first; only the formatted
-values (I18N-22, I18N-28) hold it today.
+French spacing before `: ; ? !` and inside « » is I18N-31 since plan 2's WP38 (2026-11-16), which set the
+whole French table to it; before then it was mixed, as in the legacy tables.
 
 ## Tables and lookup
 
@@ -202,7 +197,7 @@ values (I18N-22, I18N-28) hold it today.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/i18n/translations.js:500-530, 1026-1055`
-- **Expected:** `errors.operations` keys in both languages, in order: start, link, layer, colour, region, cord, system, internal, whiteMatter, wholeBrain, snapshot, section, deficit, landmark, mri, comparison, overlap, restore, then the later fullscreen, streamlines, map and guide (the tour's code failing to load). `layer` and `colour` take a subject: EN `colour('CAB-NP')` "Could not show the CAB-NP colouring.", FR "Impossible d’afficher la coloration « CAB-NP »."
+- **Expected:** `errors.operations` keys in both languages, in order: start, link, layer, colour, region, cord, system, internal, whiteMatter, wholeBrain, snapshot, section, deficit, landmark, mri, comparison, overlap, restore, then the later fullscreen, streamlines, map and guide (the tour’s code failing to load), and snapshotSize (a saved image larger than the device can draw). `layer` and `colour` take a subject: EN `colour('CAB-NP')` "Could not show the CAB-NP colouring.", FR "Impossible d’afficher la coloration « CAB-NP »."
 - **Covered by:** `src/lib/core/i18n/errors.test.ts` (R) (key lists and I18N-18 for order and the subject sentence)
 
 ### I18N-19 · A failed start keeps the link only for a download or update failure
@@ -314,3 +309,12 @@ values (I18N-22, I18N-28) hold it today.
 - **Source:** see INSP-27
 - **Expected:** see INSP-27
 - **Covered by:** see INSP-27
+
+### I18N-31 · French sets NNBSP before `; : ? !` and NBSP inside « »
+
+- **Rule:** In everything the French table says, each `;`, `:`, `?` or `!` that follows a character follows NNBSP, and « is followed and » preceded by NBSP. A mark that begins a string (the `?` key's row) has nothing to space. Text where a mark is not punctuation (a key's name) is kept as written through a named allow-list, each entry saying why; an entry that no longer matches fails the test.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** the French typography the formatted values already held (I18N-22, I18N-28); plan 2's WP38, decided 2026-11-16, which replaced the mixed spacing recorded before it
+- **Expected:** every string and every function's output at I18N-04's fixed arguments passes. The check flags "Accord : a", "Accord: a", "AccordNBSP: a", "« a »" (twice) and "«NNBSPaNNBSP»" (twice), and passes "AccordNNBSP: a", a lone "?" and "«NBSPaNBSP»". Allow-list: `guide.stops.body` "(touche ?)" and `shortcuts.singleKeysNote` "/ et ?)", which name keys.
+- **Covered by:** `src/lib/core/i18n/copy.test.ts` (R)

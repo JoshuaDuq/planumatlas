@@ -24,6 +24,8 @@ export const SURFACE_COLORS = [
   'network',
   'cab-np',
   'territory',
+  'striatal',
+  'cerebellar',
 ] as const;
 
 export const FUNCTIONAL_LEVELS = ['named', 'sections'] as const;
@@ -39,8 +41,17 @@ export const MODES = EXPLORERS;
 /** What colours the brain beside a placed lesion: nothing, its functions' territories, or its findings' regions. */
 export const LESION_MODES = ['lesion', 'functions', 'deficits'] as const;
 
+/** The reader's highlight colours, as links name them: the deficits' six finding colours, in their order. */
+export const HIGHLIGHT_COLORS = ['blue', 'raspberry', 'green', 'amber', 'violet', 'pink'] as const;
+
+/** The most regions a reader can highlight at once. */
+export const MAX_HIGHLIGHTS = 12;
+
 /** A placed lesion's radius slider, in millimetres. */
 export const LESION_RADIUS = { min: 3, max: 30, initial: 10 } as const;
+
+/** A region's functions listed before "Show all N", in the Functions tab and the region inspector. */
+export const REGION_ROWS_SHOWN = 8;
 
 /**
  * The compact interface. CSS cannot share it (custom media is not native), so

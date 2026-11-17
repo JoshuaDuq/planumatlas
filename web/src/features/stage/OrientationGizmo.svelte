@@ -12,7 +12,7 @@
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { Language, ViewName } from '../../lib/types/index.ts';
   import IconButton from '../../lib/ui/IconButton.svelte';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import type { DockCommands } from './dock-commands.ts';
 

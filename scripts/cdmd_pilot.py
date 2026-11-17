@@ -47,7 +47,7 @@ os.environ.setdefault("DIPY_HOME", str(WORK / "dipy_home"))
 # One diffusion time, so every shell in the model shares one response; Δ = 19 ms
 # spans b = 50–6000, Δ = 49 ms reaches 17,800.
 DIFFUSION_TIME_MS = 19
-WORKERS = int(os.environ.get("SLURM_CPUS_PER_TASK", 4))
+WORKERS = int(os.environ.get("SLURM_CPUS_PER_TASK", "4"))
 STEP_MM = 0.2
 TRACKING_SEED = 1
 SLR_SEED = 1984
@@ -239,7 +239,7 @@ def response(_):
     from dipy.core.gradients import gradient_table, unique_bvals_tolerance
     from dipy.reconst.mcsd import mask_for_response_msmt, response_from_mask_msmt
 
-    image, data, gtab = load_shells()
+    _image, data, gtab = load_shells()
     low = gtab.bvals < 1200
     low_gtab = gradient_table(gtab.bvals[low], bvecs=gtab.bvecs[low])
     masks = mask_for_response_msmt(
@@ -412,7 +412,7 @@ def measures(streamlines, aseg, destrieux, affine, voxel_mm, is_cst):
 
     points = np.concatenate(streamlines)
     labels = sample_labels(aseg, affine, points)
-    radius = int(round(ENDPOINT_RADIUS_MM / voxel_mm))
+    radius = round(ENDPOINT_RADIUS_MM / voxel_mm)
     ball = np.linalg.norm(np.mgrid[-radius:radius + 1, -radius:radius + 1, -radius:radius + 1], axis=0) <= radius
     record = {
         "streamlines": len(streamlines),
@@ -485,8 +485,8 @@ def _track_with_status(seeds):
     """
     import random
 
-    from dipy.utils import fast_numpy
     from dipy.tracking.tracker import ParticleFilteringTracking
+    from dipy.utils import fast_numpy
 
     tracker = ParticleFilteringTracking(
         _TRACKING["getter"], _TRACKING["criterion"], seeds, _TRACKING["affine"],
@@ -502,7 +502,7 @@ def _track_with_status(seeds):
         s = inverse[:3, :3] @ world_seed + inverse[:3, 3]
         seed = hash(np.abs(np.sum(s) + tracker.random_seed)) % (np.iinfo(np.uint32).max - 1)
         random.seed(seed)
-        np.random.seed(seed)
+        np.random.seed(seed)  # noqa: NPY002 -- DIPY's tracker seeds the global state this way
         fast_numpy.seed(seed)
         directions = tracker.direction_getter.initial_direction(s)[:1]
         if len(directions) == 0:

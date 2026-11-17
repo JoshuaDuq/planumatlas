@@ -52,11 +52,7 @@ describe('what the masthead region holds', () => {
     // The data bar is its one summary, named with every value it holds.
     expect(names.slice(0, 2)).toEqual(['Skip to model', 'Planum']);
     expect(names[2]).toMatch(/^Atlas and display settings: /);
-    expect(names.slice(-3)).toEqual([
-      'Save image (PNG)',
-      'Copy link to this view',
-      'More settings',
-    ]);
+    expect(names.slice(-3)).toEqual(['Save image (PNG)', 'Share this view', 'More settings']);
     // One subject is published, so the summary's popover has no Subject field.
     await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
     const fields = [...header.querySelectorAll('select')]
@@ -181,13 +177,15 @@ describe('Full screen and Save image', () => {
     }
   });
 
-  test('Save image saves the stage’s picture', async () => {
+  test('Save image saves the stage’s picture at the size chosen', async () => {
     await shell.open();
     await userEvent.click(button('Save image (PNG)'));
-    expect(snapshot.saveSnapshot).toHaveBeenCalledTimes(1);
-    const [stage] = vi.mocked(snapshot.saveSnapshot).mock.calls[0]!;
+    await userEvent.click(button('Save at 3×'));
+    await vi.waitFor(() => expect(snapshot.saveSnapshot).toHaveBeenCalledTimes(1));
+    const [stage, , , options] = vi.mocked(snapshot.saveSnapshot).mock.calls[0]!;
     expect(stage.host).toBe(document.getElementById('viewport'));
     expect(stage.engine).toBe(shell.engine);
+    expect(options).toEqual({ scale: 3 });
   });
 
   test('Full screen asks the stage for full screen, and the labels follow the stage', async () => {
@@ -461,6 +459,7 @@ describe('Copy link to this view', () => {
     // The writer's delayed write has not come yet.
     link.cancel();
     expect(location.hash).not.toContain('opacity');
+    await userEvent.click(button('Share this view'));
     // Synchronous, so no pointer round trip lets the writer's own delayed write come first.
     (button('Copy link to this view').element() as HTMLElement).click();
     expect(write).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('opacity=0.5'));
@@ -474,6 +473,7 @@ describe('Copy link to this view', () => {
     link.hold(() => true);
     anatomy.setHemisphere('left');
     flushSync();
+    await userEvent.click(button('Share this view'));
     await userEvent.click(button('Copy link to this view'));
     expect(write).toHaveBeenCalledExactlyOnceWith(before);
     expect(location.href).toBe(before);

@@ -269,11 +269,11 @@ below are relative to `web/`. `parity/E1.test.ts` was deleted once each rule had
 
 ### RENDER-27 · Presentation quality scales with the device; the anatomy never does
 
-- **Rule:** Pixel ratio, MSAA and prefetching of the other atlas scale with the device. Meshes, labels and coordinates are the same on every device.
+- **Rule:** Pixel ratio, MSAA and prefetching of the other atlas scale with the device. Meshes, labels and coordinates are the same on every device. A phone starts at one pixel per CSS pixel and may raise its frame at rest, as its own measured frames allow (RENDER-45), up to its display's density but never past the desktop's cap of 2; nothing else steps. A render target above 4 M device pixels draws 2× MSAA whatever the device's MSAA, and from a pixel ratio of 2 the outline mask is drawn at half resolution (RENDER-46).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/quality.js:10-35`
-- **Expected:** Cap: phone 1; handheld (coarse pointer) or an integrated GPU that is not Apple silicon 1.5; otherwise 2. pixelRatio = min(device ratio, cap). mriPixelRatio = device ratio (the MRI keeps native pixels; integrated + ratio 2 → pixelRatio 1.5, mriPixelRatio 2). motionPixelRatio = min(pixelRatio, 1). Fill-bound = handheld or Save-Data or deviceMemory ≤ 4 GB or integrated GPU → MSAA 2 and no prefetch; otherwise MSAA 4 and prefetch. Apple silicon Mac at ratio 2 → 2 with MSAA 2; iPad (coarse + Apple) → 1.5.
+- **Source:** `viewer/render/quality.js:10-35`; plan 2 WP37 (handoff P17 and P11, 2026-11-17: the phone's settled ceiling, MSAA by target size, the outline mask scale)
+- **Expected:** Start cap: phone 1; handheld (coarse pointer) or an integrated GPU that is not Apple silicon 1.5; otherwise 2. pixelRatio = min(device ratio, cap). settledCeiling = min(device ratio, 2) on a phone (device 3, 2.625, 2, 1.75, 1 → 2, 2, 2, 1.75, 1), pixelRatio elsewhere (tablet at 3 → 1.5, desktop at 3 → 2). mriPixelRatio = device ratio (the MRI keeps native pixels; integrated + ratio 2 → pixelRatio 1.5, mriPixelRatio 2). motionPixelRatio = min(pixelRatio, 1), so a phone's motion stays at 1 whatever its settled ratio. Fill-bound = handheld or Save-Data or deviceMemory ≤ 4 GB or integrated GPU → MSAA 2 and no prefetch; otherwise MSAA 4 and prefetch. Apple silicon Mac at ratio 2 → 2 with MSAA 2; iPad (coarse + Apple) → 1.5. msaaSamplesFor(4, 6 048 000) = msaaSamplesFor(4, 4 000 001) = 2; (4, 4 000 000) = (4, 1 512 000) = 4; (2, 1 512 000) = 2. outlineMaskScale at 0.8, 1, 1.5, 1.75 → 1; at 2 and 3 → 0.5.
 - **Covered by:** `src/lib/engine/render/quality.test.ts` (R)
 
 ### RENDER-28 · A moving picture keeps to a pixel budget
@@ -287,11 +287,11 @@ below are relative to `web/`. `parity/E1.test.ts` was deleted once each rule had
 
 ### RENDER-29 · Phone layout and phone rendering budget are separate questions
 
-- **Rule:** The compact shell applies at width ≤ 800 px, or height ≤ 480 px in landscape. The phone rendering budget applies only at width ≤ 640 px, or height ≤ 480 px in landscape. Tablets and narrow desktop windows get the compact layout without the phone's lower pixel ratio.
+- **Rule:** The compact shell applies at width ≤ 800 px, or height ≤ 480 px in landscape. The phone rendering budget applies only at width ≤ 640 px, or height ≤ 480 px in landscape: the frame starts at one pixel per CSS pixel, a drag stays there, and the frame at rest steps toward the display's density as measured frames allow (RENDER-45, SCENE-39). Tablets and narrow desktop windows get the compact layout without the phone's budget: they start at their cap and do not step.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/render/device.js:13-21, 79-83`
-- **Expected:** At device ratio 2: 390×844 → compact, phone, cap 1 (also 1 when integrated); 681×900 and 800×900 → compact, not phone, cap 2 (1.5 integrated); 821×900, 1000×900 → not compact, cap 2; 844×390 → compact, phone, cap 1.
+- **Source:** `viewer/render/device.js:13-21, 79-83`; plan 2 WP37 (handoff P17)
+- **Expected:** At device ratio 2: 390×844 → compact, phone, cap 1 (also 1 when integrated), starting ratio 1 and ceiling 2; 681×900 and 800×900 → compact, not phone, cap 2 (1.5 integrated), ratio and ceiling 2; 821×900, 1000×900 → not compact, cap 2, ratio and ceiling 2; 844×390 → compact, phone, cap 1, ratio 1 and ceiling 2.
 - **Covered by:** `src/lib/engine/render/device.test.ts` (R, through a hand-written `matchMedia` fake that parses `max-width`; the real media-query strings are not evaluated)
 
 ### RENDER-30 · Only named discrete GPUs count as discrete
@@ -311,6 +311,39 @@ below are relative to `web/`. `parity/E1.test.ts` was deleted once each rule had
 - **Source:** `viewer/render/device.js:56-66`; deviation `e1-render-primitives.md` #1
 - **Expected:** With a stub reporting "NVIDIA GeForce RTX 4090": returns false and calls loseContext once. A getContext that throws "no context" → the same error is thrown. No `document` → false.
 - **Covered by:** `src/lib/engine/render/device.test.ts` (R)
+
+### RENDER-45 · A phone's frame at rest steps up only while its measured frames leave room
+
+- **Rule:** A phone's settled pixel ratio moves in steps of 0.5 between 1 and its ceiling (RENDER-27), from readings of its own frames at rest: the main thread's submission time and the time until the GPU finished. A reading predicts the frame at another ratio by scaling only its GPU part with the pixel count. The ratio steps up once the last three readings at it all predict at most 12 ms at the next step (room in a 60 Hz refresh); two readings in a row over one 60 Hz refresh (16.7 ms) step it down, never below 1, and lower the ceiling to where it landed, so a ratio that proved too slow is not tried again until the page loads again. A step clears the readings. Motion is not stepped: a drag stays at 1. Measured on no real phone (handoff P17 asks for an iPhone and a mid-range Android): the thresholds are chosen to err low.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** plan 2 WP37 (handoff P17); `src/lib/engine/render/quality.ts` `stepSettledRatio`
+- **Expected:** predicted({cpu 9, total 10}, 1 → 1.5) = 11.25; ({2, 10}, 1 → 1.5) = 20; ({4, 6}, 1.5 → 2) = 4 + 32/9. From 1 with ceiling 2 and readings {2, 4}: two → 1; three → 1.5 with no readings; three more → 2. Readings fast, {2, 8}, fast, fast → 1 with the last three kept; one more fast → 1.5. At 1.5 with ceiling 1.75, three fast → 1.75; at 2 with ceiling 2, four fast → 2 with three readings. At 2: slow {4, 17} then fast → 2; fast, slow, slow → 1.5 with ceiling 1.5, and six fast after it stay at 1.5; two more slow → 1. At 1, three slow → 1, ceiling still 2.
+- **Covered by:** `src/lib/engine/render/quality.test.ts` (R); the wiring is SCENE-39
+
+### RENDER-46 · Render targets fit the frame: 2× MSAA above 4 M pixels, a half-resolution outline mask, one set of outline buffers per pipeline
+
+- **Rule:** Each pipeline's composer target draws 2× MSAA when the frame is above 4 M device pixels, and the device's MSAA otherwise; the moving pipeline is judged by its own, smaller frame. From a pixel ratio of 2, both outline passes draw their mask and depth at half the frame's resolution, while their edges are still found and blurred at half the frame (`downSampleRatio` 1 instead of 2), so the line keeps its width and the two-tone outline its 3:1 design (SCENE-09); below 2 nothing changes. The core finds, blurs and adds its edges through the halo's scratch targets, which the halo has finished with by then, so it owns only a mask and depth, and those are drawn only for a hover beside a selection (RENDER-33 otherwise). Warming the outlines compiles the halo's programs only: the core's materials are the same code, which three.js gives the same programs. The canvas's own drawing buffer has no depth buffer; only the output pass's quad reaches it. A saved image draws its mask as a frame at its own ratio would, and its edges on buffers the screen's size, scaling `downSampleRatio`, never `edgeThickness`; its target takes the same MSAA rule by its own size, and the screen's samples come back after it. No byte budget refuses an image: WebGL reports no memory, so any budget would be a guess; past the device's size limits it is refused (`snapshot-too-large`), and a lost context is reported (SCENE-13).
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** plan 2 WP37 (handoff P11); `createPipeline` and `setSize` in `src/lib/engine/render/renderer.ts`, `src/lib/engine/render/outline-passes.ts`
+- **Expected:** A discrete GPU at device ratio 2, stage 1512 × 1000 CSS px: settled target 3024 × 2000 with 2 samples, halo mask and depth 1512 × 1000, edge buffers 1512 × 1000 and 756 × 500; moving target 4 samples, mask 1512 × 1000, edges 756 × 500. At ratio 1: settled 4 samples, mask 1512 × 1000, edges 756 × 500. The core's five edge targets are the halo's; its mask and depth targets are its own. Warming compiles 7 materials, all the halo's, none of the core's. A 1000 × 600 stage at 1× with 4 samples saves a 2× image at 4 samples (2.4 M pixels) and a 3× image at 2 (5.4 M); after each the settled target has 4 again and the scene is invalidated.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R), `src/lib/engine/render/quality.test.ts` (R); the snapshot's mask scale is uncovered; the drawn outline itself is unmeasured on pixels (no browser was run in WP37)
+- **Notes:** Bytes the scene's render targets hold at 1512 × 1000 CSS px and 2×, computed from three.js r186's allocation (not read from a driver: WebGL does not report VRAM). RGBA16F 8 B, RGBA8 4 B, D24 and D24S8 4 B per sample; an MSAA target holds its multisampled colour and depth-stencil, its resolve texture and a single-sample D24S8 three.js gives the resolve framebuffer; the composer's spare target is never bound and holds nothing; the canvas counts its colour twice for the compositor. MB = 10⁶ B. Discrete GPU (4× MSAA), before → after; Apple silicon (2× already) in brackets.
+
+  | Target                                            | Before        | After         |
+  | ------------------------------------------------- | ------------- | ------------- |
+  | Settled MSAA target, 3024 × 2000                  | 362.9 (217.7) | 217.7 (217.7) |
+  | Settled halo: mask, depth, edges                  | 163.3         | 72.6          |
+  | Settled core, sharing the halo's mask             | 42.3          | 0             |
+  | Settled core, own mask (hover beside a selection) | 163.3         | 30.2          |
+  | Moving MSAA target, 1512 × 1000                   | 90.7 (54.4)   | 90.7 (54.4)   |
+  | Moving halo                                       | 40.8          | 40.8          |
+  | Moving core, sharing / own mask                   | 10.6 / 40.8   | 0 / 30.2      |
+  | Canvas drawing buffer                             | 72.6          | 48.4          |
+  | At start (targets and canvas only)                | 526.2 (344.7) | 356.8 (320.5) |
+  | All drawn, core sharing                           | 783.2 (601.8) | 470.2 (433.9) |
+  | All drawn, core with its own mask                 | 934.4 (753.0) | 530.7 (494.4) |
 
 ## Outline helpers
 

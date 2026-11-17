@@ -25,6 +25,6 @@ export const fr: typeof en = {
   hidePart: (name: string, side: string) => `Masquer ${name}, ${side}`,
   showPart: (name: string, side: string) => `Afficher ${name}, ${side}`,
   partial: 'partiellement masqué',
-  partHidden: (name: string, side: string) => `Masqué : ${name}, ${side}.`,
-  partShown: (name: string, side: string) => `Affiché : ${name}, ${side}.`,
+  partHidden: (name: string, side: string) => `Masqué : ${name}, ${side}.`,
+  partShown: (name: string, side: string) => `Affiché : ${name}, ${side}.`,
 };

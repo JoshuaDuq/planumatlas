@@ -6,7 +6,7 @@ import '../layout.css';
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
-import manifestFile from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import { validateNeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
 import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
@@ -296,7 +296,7 @@ describe('save image', () => {
     flushSync();
     await saving;
     const subject = vi.mocked(snapshot.saveSnapshot).mock.calls.at(-1)![1];
-    expect(subject.selection).toBe(`${app.world!.catalog.label(id).name}, left`);
+    expect(subject.selection).toBe('Precuneus, left');
   });
 });
 
@@ -643,7 +643,7 @@ describe('the tract reference', () => {
     flushSync();
     await (region as never as { saveImage(): Promise<void> }).saveImage();
     const subject = vi.mocked(snapshot.saveSnapshot).mock.calls.at(-1)![1];
-    expect(subject.selection).toBe(`${app.world!.catalog.label(id).name}, left`);
+    expect(subject.selection).toBe('Precuneus, left');
   });
 
   test('an open cut reaches the snapshot subject', async () => {

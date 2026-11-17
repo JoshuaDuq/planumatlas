@@ -11,12 +11,12 @@ export const en = {
 };
 
 export const fr: typeof en = {
-  spoken: (name: string, side: string) => `Sélectionné : ${name}, ${side}`,
+  spoken: (name: string, side: string) => `Sélectionné : ${name}, ${side}`,
   selectionCleared: (name: string) => `Sélection effacée — ${name} n’est plus visible.`,
   pickReplaced: (name: string) => `Un clic sur le cerveau a remplacé ${name}.`,
   undoPick: 'Annuler',
   cabNpAtlasOnly: (atlas: string) =>
-    `CAB-NP ne colore que les aires HCP-MMP : ${atlas} affiche donc les couleurs de ses régions.`,
+    `CAB-NP ne colore que les aires HCP-MMP : ${atlas} affiche donc les couleurs de ses régions.`,
   lobesAtlasOnly: (atlas: string) =>
-    `${atlas} regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.`,
+    `${atlas} regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.`,
 };

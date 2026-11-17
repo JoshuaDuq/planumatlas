@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { serviceWorkerCode } from '../build/published-files.ts';
 import type { WorkerVersions } from '../build/published-files.ts';
 
@@ -40,7 +40,9 @@ describe('the service worker', () => {
       if (!storage.has(name)) storage.set(name, new Map());
       const entries = storage.get(name)!;
       return {
-        match: async (key: string) => entries.get(String(key))?.clone(),
+        // A key as the page's code passes it, or as `keys()` lists it.
+        match: async (key: string | { key: string }) =>
+          entries.get(typeof key === 'string' ? key : key.key)?.clone(),
         put: async (key: string, value: Response) => {
           entries.set(String(key), value);
         },
@@ -51,6 +53,7 @@ describe('the service worker', () => {
     };
     const caches = {
       open: async (name: string) => cacheFor(name),
+      has: async (name: string) => storage.has(name),
       keys: async () => [...storage.keys()],
       delete: async (name: string) => storage.delete(name),
     };
@@ -164,7 +167,7 @@ describe('the service worker', () => {
     expect(stored(worker)).toHaveLength(2);
   });
 
-  it('SW-03 intercepts only a request for this deploy’s version of a published file', async () => {
+  it('SW-03 intercepts only this deploy’s version of a published file and the build’s own files', async () => {
     const worker = await bootWorker();
     const path = 'models/bert/cortex-destrieux.glb';
     expect(await worker.request(urlOf(worker, path, null))).toBeUndefined();
@@ -172,14 +175,18 @@ describe('the service worker', () => {
     expect(
       await worker.request(`${ORIGIN}/neuroatlas/models/bert/unpublished.glb?v=1`),
     ).toBeUndefined();
-    expect(await worker.request(`${ORIGIN}/neuroatlas/assets/index-abc.js`)).toBeUndefined();
     expect(
       await worker.request(
         `https://elsewhere.test/neuroatlas/${path}?v=${worker.published.files[path]}`,
       ),
     ).toBeUndefined();
     expect(await worker.request(urlOf(worker, path), 'POST')).toBeUndefined();
+    expect(await worker.request(`https://elsewhere.test/neuroatlas/assets/a-1.js`)).toBeUndefined();
+    expect(await worker.request(`${ORIGIN}/assets/outside-the-base.js`)).toBeUndefined();
+    expect(await worker.request(`${ORIGIN}/neuroatlas/assets/a-1.js`, 'POST')).toBeUndefined();
+    expect(await worker.request(`${ORIGIN}/neuroatlas/sw.js`)).toBeUndefined();
     expect(worker.fetched).toEqual([]);
+    expect(await worker.request(`${ORIGIN}/neuroatlas/assets/index-abc.js`)).toBeTruthy();
   });
 
   it('SW-04 never stores a failed, partial or mismatched download', async () => {
@@ -236,11 +243,17 @@ describe('the service worker', () => {
     expect(worker.fetchedRequests[0]?.headers.get('X-Page')).toBe('mine');
   });
 
-  it('SW-09 always revalidates the page itself', async () => {
+  it('SW-09 always revalidates the page itself, whatever the build files it holds', async () => {
     const worker = await bootWorker();
+    await worker.request(`${ORIGIN}/neuroatlas/assets/index-abc.js`);
     expect(await worker.request(`${ORIGIN}/neuroatlas/`, 'GET', 'navigate')).toBeTruthy();
-    expect(worker.fetched).toEqual([`${ORIGIN}/neuroatlas/`]);
-    expect(worker.fetchOptions[0]?.cache).toBe('no-cache');
+    expect(worker.fetched).toEqual([
+      `${ORIGIN}/neuroatlas/assets/index-abc.js`,
+      `${ORIGIN}/neuroatlas/`,
+    ]);
+    expect(worker.fetchOptions[1]?.cache).toBe('no-cache');
+    expect(await worker.request(`${ORIGIN}/neuroatlas/`, 'GET', 'navigate')).toBeTruthy();
+    expect(worker.fetched).toHaveLength(3);
   });
 
   it('SW-05 stores a .gz file a server decodes on the way by the hash of its contents', async () => {
@@ -288,5 +301,69 @@ describe('the service worker', () => {
     const kept = worker.storage.get('planum-models')!.get(key);
     await worker.handOver(url, bodyOf(path));
     expect(worker.storage.get('planum-models')!.get(key)).toBe(kept);
+  });
+
+  describe('SW-12 the build’s hashed files', () => {
+    const chunk = 'assets/tracts-Ab12Cd34.js';
+    const builtFiles = (worker: Worker) => [...(worker.storage.get('planum-assets')?.keys() ?? [])];
+
+    it('are fetched once, as the page asked, and served from storage after', async () => {
+      const worker = await bootWorker();
+      const first = await worker.request(`${ORIGIN}/neuroatlas/${chunk}`, 'GET', 'cors', {
+        'X-Page': 'mine',
+      });
+      expect(await first!.text()).toBe(bodyOf(chunk));
+      // The name is the version: no revalidation, and the page's own request with its priority.
+      expect(worker.fetchedRequests[0]?.cache).toBe('default');
+      expect(worker.fetchedRequests[0]?.headers.get('X-Page')).toBe('mine');
+      expect(builtFiles(worker)).toEqual([`/neuroatlas/${chunk}`]);
+      const again = await worker.request(`${ORIGIN}/neuroatlas/${chunk}`);
+      expect(worker.fetched).toHaveLength(1);
+      expect(await again!.text()).toBe(bodyOf(chunk));
+    });
+
+    it('still load in a tab left open across a deploy that removed them from the server', async () => {
+      const worker = await bootWorker();
+      await worker.request(`${ORIGIN}/neuroatlas/${chunk}`);
+      worker.responses.set(chunk, { status: 404, body: 'gone' });
+      const later = await worker.request(`${ORIGIN}/neuroatlas/${chunk}`);
+      expect(later!.status).toBe(200);
+      expect(await later!.text()).toBe(bodyOf(chunk));
+      expect(worker.fetched).toHaveLength(1);
+    });
+
+    it('are never stored from a failed or partial answer, which the page still gets', async () => {
+      const worker = await bootWorker();
+      for (const made of [
+        { status: 404, body: 'gone' },
+        { status: 206, body: 'half' },
+      ]) {
+        worker.responses.set(chunk, made);
+        expect((await worker.request(`${ORIGIN}/neuroatlas/${chunk}`))!.status).toBe(made.status);
+        expect(builtFiles(worker)).toEqual([]);
+      }
+    });
+
+    it('are kept to the 100 stored last, trimmed at each page load', async () => {
+      const worker = await bootWorker();
+      let now = 0;
+      vi.spyOn(Date, 'now').mockImplementation(() => (now += 1000));
+      const names = Array.from({ length: 102 }, (_, index) => `assets/chunk-${index}.js`);
+      for (const name of names) await worker.request(`${ORIGIN}/neuroatlas/${name}`);
+      expect(builtFiles(worker)).toHaveLength(102);
+      await worker.request(`${ORIGIN}/neuroatlas/`, 'GET', 'navigate');
+      expect(builtFiles(worker).sort()).toEqual(
+        names
+          .slice(2)
+          .map((name) => `/neuroatlas/${name}`)
+          .sort(),
+      );
+    });
+
+    it('leave no store behind a page load that found none', async () => {
+      const worker = await bootWorker();
+      await worker.request(`${ORIGIN}/neuroatlas/`, 'GET', 'navigate');
+      expect([...worker.storage.keys()]).toEqual([]);
+    });
   });
 });

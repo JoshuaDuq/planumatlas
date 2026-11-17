@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { Group } from 'three';
 import type { LineSegments } from 'three';
-import { test, vi } from 'vitest';
+import { afterAll, test, vi } from 'vitest';
 import { readDiffusionAsset } from '../../core/assets/diffusion-assets.ts';
 import { tractCatalog } from '../../core/diffusion/catalogs.ts';
 import type { TractBundle } from '../../core/diffusion/catalogs.ts';
@@ -18,6 +18,13 @@ import type * as TractDecode from './tract-decode.ts';
 import type { TractPoints } from './tract-decode.ts';
 import { readPublishedDiffusion } from './test-support.ts';
 import { createTracts } from './tracts.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mocks, and leave none built on them to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 /** The asset reader serves `public/diffusion/` from disk, so the outline and the bundles load in Node. */
 vi.mock('../../core/assets/diffusion-assets.ts', async () => {

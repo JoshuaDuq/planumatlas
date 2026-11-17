@@ -1,10 +1,10 @@
 <!-- Fixture for the dock tests: the stage host as the Stage region renders it, with the dock, stubs for the Section, Lesion, Coordinate and Overlay popovers' bodies, and a tab stop each side. Not shipped. -->
 <script lang="ts">
-  import { DEFAULT_DISPLAY } from '../colophon/display-state.ts';
+  import { DEFAULT_DISPLAY } from '../../lib/state/display-state.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
-  import type { DisplayView } from '../colophon/display-state.ts';
+  import type { DisplayView } from '../../lib/state/display-state.ts';
   import '../../styles/index.css';
   import Dock from './Dock.svelte';
   import type { DockCommands } from './dock-commands.ts';
@@ -23,7 +23,7 @@
       coordinates: boolean;
       overlay: boolean;
       phone: boolean;
-      view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean };
+      view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean; namesShown: boolean };
       cortexSurface: CortexSurface;
     };
     commands: Omit<DockCommands, 'chooseView' | 'resetView'>;

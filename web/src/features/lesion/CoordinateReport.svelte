@@ -25,7 +25,7 @@
   import CopyValue from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
-  import { downloadText } from '../tracts/download.ts';
+  import { downloadText } from '../../lib/ui/download.ts';
   import SphereTracts from './SphereTracts.svelte';
 
   let {

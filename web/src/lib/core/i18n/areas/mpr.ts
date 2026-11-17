@@ -60,7 +60,7 @@ export const fr: typeof en = {
   },
   sliceAria: (name: string) => {
     const adj = { Sagittal: 'sagittale', Coronal: 'coronale', Axial: 'axiale' }[name] ?? name;
-    return `Coupe IRM ${adj}. Cliquez pour placer le réticule ; les touches fléchées changent de coupe.`;
+    return `Coupe IRM ${adj}. Cliquez pour placer le réticule ; les touches fléchées changent de coupe.`;
   },
   sliderAria: (name: string) => {
     const adj = { Sagittal: 'sagittale', Coronal: 'coronale', Axial: 'axiale' }[name] ?? name;

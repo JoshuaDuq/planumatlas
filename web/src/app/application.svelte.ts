@@ -1,5 +1,7 @@
 import type { StrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import type { UserMapStore } from '../lib/state/user-map.svelte.ts';
+import type { HighlightsStore } from '../lib/state/highlights.svelte.ts';
+import type { CorticalLayersStore } from '../lib/state/cortical-layers.svelte.ts';
 import type { MapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
@@ -18,6 +20,7 @@ import { decodeState } from '../lib/core/state/url-state.ts';
 import { VIEW_DIRECTIONS } from '../lib/engine/render/camera-views.ts';
 import { createLanguage } from '../lib/state/language.svelte.ts';
 import { createMedia } from '../lib/state/media.svelte.ts';
+import { createEmbed } from '../lib/state/embed.svelte.ts';
 import { createKeyPreference } from '../lib/state/prefs.ts';
 import { createSessionStore } from '../lib/state/session.svelte.ts';
 import { createStageLayout } from '../lib/state/stage-layout.svelte.ts';
@@ -59,6 +62,10 @@ export interface World extends AppContext {
   strokeCases: StrokeCasesStore;
   /** The reader's own map, read from a file on their machine. */
   userMap: UserMapStore;
+  /** The regions the reader highlighted, in their own colours. */
+  highlights: HighlightsStore;
+  /** BigBrain's cortical layers, downloaded when a cortical region's sheet first asks. */
+  corticalLayers: CorticalLayersStore;
   /** That map drawn against the open function, and the cortex both cover. */
   mapOverlap: MapOverlap;
 }
@@ -79,7 +86,8 @@ export function effectRoot<T>(build: () => T): { value: T; stop: () => void } {
  * read it from the context `mount` is given, and render what needs the engine under `world`.
  */
 export function createApp() {
-  const language = createLanguage(decodeState(location.hash).state.lang);
+  const arrived = decodeState(location.hash).state;
+  const language = createLanguage(arrived.lang);
   const session = createSessionStore({
     views: Object.keys(VIEW_DIRECTIONS),
     lang: language.current,
@@ -106,6 +114,8 @@ export function createApp() {
     language,
     theme,
     keyPreference: createKeyPreference(),
+    /** Set for the life of the page when its link says it is embedded (`embed=1`). */
+    embed: arrived.embed ? createEmbed() : null,
     session,
     media,
     stage,

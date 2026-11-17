@@ -50,7 +50,12 @@
     atlases: readonly string[];
     detailLevels: readonly string[];
     /** What this build publishes: the Colour field offers only these colourings. */
-    colourings: { networks?: unknown; territories?: unknown } & Pick<ModelPort, 'cabNp'>;
+    colourings: {
+      networks?: unknown;
+      territories?: unknown;
+      striatal?: unknown;
+      cerebellar?: unknown;
+    } & Pick<ModelPort, 'cabNp'>;
     anatomy: ManifestAnatomy;
     anatomies: readonly ManifestAnatomy[];
     /** The tract reference, another subject with nothing to choose. */
@@ -353,7 +358,7 @@
 
   // What a screen reader hears of a download started here: that it began, and that it landed.
   let pending: { field: Field; value: string } | null = null;
-  const separator = $derived(lang === 'fr' ? ' : ' : ': ');
+  const separator = $derived(lang === 'fr' ? ' : ' : ': ');
   async function choose(field: Field, value: string, command: (value: string) => unknown) {
     chosen[field] = value;
     command(value);

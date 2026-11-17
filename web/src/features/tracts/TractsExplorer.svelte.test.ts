@@ -4,7 +4,7 @@
 import { afterEach, beforeEach, describe, expect, onTestFinished, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
 import { bundleName, tractGroups, tractRows } from '../../lib/core/tracts.ts';
 import type { Engine } from '../../lib/engine/api.ts';

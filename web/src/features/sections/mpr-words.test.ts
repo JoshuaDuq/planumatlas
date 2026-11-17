@@ -123,7 +123,7 @@ describe("the picture's text alternative", () => {
       'Axial MRI. Click to place the crosshair; use the position slider to change slice. Anterior at the top, patient right at the right, posterior at the bottom, patient left at the left.',
     );
     expect(canvasName('sagittal', ['S', 'P', 'I', 'A'], 'fr')).toBe(
-      'Coupe IRM sagittale. Cliquez pour placer le réticule ; utilisez le curseur de position pour changer de coupe. Supérieur en haut, postérieur à droite, inférieur en bas, antérieur à gauche.',
+      'Coupe IRM sagittale. Cliquez pour placer le réticule ; utilisez le curseur de position pour changer de coupe. Supérieur en haut, postérieur à droite, inférieur en bas, antérieur à gauche.',
     );
   });
 

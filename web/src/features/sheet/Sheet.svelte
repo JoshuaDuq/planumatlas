@@ -46,7 +46,7 @@
   import { FOCUS_TARGETS, requestFocus } from '../../lib/ui/focus.ts';
   import IconButton, { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
 
   type Props = {
     lang: Language;
@@ -719,10 +719,6 @@
         align-self: flex-start;
         margin-top: 7px;
         color: var(--text-secondary);
-      }
-      /* In the detail view the name heads what the panel shows; it no longer leads anywhere. */
-      #sheet[data-view='detail'] .sheet-selection :global(svg) {
-        display: none;
       }
       .sheet-grip-row :global(.sheet-selection-clear) {
         position: relative;

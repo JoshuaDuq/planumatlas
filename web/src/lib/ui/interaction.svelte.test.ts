@@ -13,7 +13,7 @@ import {
   rescueFocus,
 } from './focus.ts';
 import { INSTANT_ATTRIBUTE, isKeyboardActivation, setInstant } from './instant.ts';
-import { OWN_KEYS_ATTRIBUTE, OWN_KEYS_SELECTOR } from './keys.ts';
+import { OWN_KEYS_ATTRIBUTE, OWN_KEYS_SELECTOR } from '../core/keyboard.ts';
 import { bindRoving } from './roving.ts';
 
 let host: HTMLElement;

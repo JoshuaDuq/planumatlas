@@ -1,8 +1,15 @@
 import assert from 'node:assert/strict';
-import { afterEach, test, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, test, vi } from 'vitest';
 import type { NiftiImage, NiftiVolume } from '../../core/user-map/nifti.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import type { CarryJob, UserMapJob, UserMapReply } from './user-map-worker.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mocks, and leave none built on them to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 // Each read waits for the test, so carries can finish out of the order they were asked in.
 const reads = vi.hoisted(() => new Map<string, (result: unknown) => void>());
@@ -29,7 +36,13 @@ vi.mock('../../core/user-map/clusters.ts', () => ({
 }));
 
 const posted: UserMapReply[] = [];
-vi.stubGlobal('postMessage', (reply: UserMapReply) => posted.push(reply));
+// Per case: unstubGlobals undoes a stub before each test.
+beforeEach(() => {
+  vi.stubGlobal('postMessage', (reply: UserMapReply) => posted.push(reply));
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 await import('./user-map-worker.ts');
 const send = (job: UserMapJob) =>
   (globalThis as unknown as { onmessage: (event: { data: UserMapJob }) => void }).onmessage({

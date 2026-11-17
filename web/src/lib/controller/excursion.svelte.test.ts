@@ -1,6 +1,6 @@
 import { flushSync } from 'svelte';
 import { describe, expect, test } from 'vitest';
-import { DEFAULT_DISPLAY, preparedOf } from '../../features/colophon/display-state.ts';
+import { DEFAULT_DISPLAY, preparedOf } from '../state/display-state.ts';
 import { visibilityOf } from '../core/catalog/visibility.ts';
 import { syncRouteGhost } from './excursion.svelte.ts';
 import { createScene } from './excursion-test-support.ts';

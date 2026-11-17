@@ -52,7 +52,7 @@ def p_value(text):
 def count(rows, column):
     """The table's median count over its rows, or None where it publishes none. Some write "1,465"."""
     values = [float(row[column].replace(",", "")) for row in rows if row.get(column, "").strip()]
-    return int(round(float(np.median(values)))) if values else None
+    return round(float(np.median(values))) if values else None
 
 
 def region_of(structure, measure, structures):

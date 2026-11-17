@@ -14,6 +14,8 @@
   /** What a node of the tree carries; the Treegrid hands it back to this component's snippets. */
   export type TreeNodeData =
     | { type: 'section'; name: string; said: string }
+    /** A family's caption within its group, over the rows that follow it; not a control. */
+    | { type: 'family'; name: string; count: number }
     | {
         type: 'group';
         group: CatalogGroup;
@@ -47,6 +49,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { count } from '../../lib/core/format.ts';
   import {
+    familyParts,
     labelledGroups,
     reasonText,
     rowStatesReason,
@@ -210,7 +213,19 @@
             return ids.length ? [{ side, ids }] : [];
           }),
         },
-        children: structureRows(group.rows).map(structureNode),
+        children: familyParts(group.rows).flatMap(({ family, rows }) => [
+          ...(family === null
+            ? []
+            : [
+                {
+                  id: `${group.key}/${family}`,
+                  label: family,
+                  selectable: false,
+                  data: { type: 'family' as const, name: family, count: rows.length },
+                },
+              ]),
+          ...structureRows(rows).map(structureNode),
+        ]),
       });
     }
     return result;
@@ -246,6 +261,7 @@
     if (data.type === 'group') {
       return `${data.label}, ${count(data.group.rows.length, 'region', lang)}`;
     }
+    if (data.type === 'family') return `${data.name}, ${count(data.count, 'region', lang)}`;
     return data.name;
   }
 
@@ -374,6 +390,8 @@
             <span>{data.name}</span>
             {#if data.said}<span class="section-state">{data.said}</span>{/if}
           </div>
+        {:else if data.type === 'family'}
+          <div class="subgroup-label">{data.name}</div>
         {:else if data.type === 'group'}
           <TreeGroup
             name={data.label}

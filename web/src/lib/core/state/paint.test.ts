@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { beforeAll, describe, test } from 'vitest';
-import type { Manifest, ModelState, Paint, SurfaceColor } from '../../types/index.ts';
+import type {
+  HighlightedRegion,
+  Manifest,
+  ModelState,
+  Paint,
+  SurfaceColor,
+} from '../../types/index.ts';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { readModel } from '../catalog/test-support.ts';
 import {
@@ -15,18 +21,21 @@ import type { ClinicalCatalog } from '../clinical/catalog.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import type { FunctionalConnectivity } from '../catalog/functional-connectivity.ts';
 import type { DisorderEffects } from '../catalog/disorder-effects.ts';
+import type { CorticalLayers } from '../catalog/cortical-layers.ts';
 import {
   comparesMap,
   FUNCTION_OVERLAP_COLOR,
+  HIGHLIGHT_RGB,
+  highlightStatus,
   legendFor,
   MAP_OVERLAP,
   paintFor,
   paintKind,
 } from './paint.ts';
-import type { PaintState } from './paint.ts';
+import type { HighlightState } from './paint.ts';
 
 /** What the key reads: the paint's state, the surface colour under it and any ghost. */
-type KeyState = PaintState &
+type KeyState = HighlightState &
   Pick<ModelState, 'focused' | 'ghostedAround'> & {
     surfaceColor: SurfaceColor;
   };
@@ -89,6 +98,7 @@ const base: KeyState = {
   connectivitySeed: null,
   disorderShown: null,
   lang: 'en',
+  lesson: { circuit: null },
 };
 const paintOf = (id: string): Paint => ({ id, colors: new Map() });
 
@@ -342,7 +352,7 @@ const disorders: DisorderEffects = {
   ],
 };
 
-test('STAGE-65 · Anatomy paints a disorder on Desikan-Killiany only, over connectivity and a lesion, until lifted', () => {
+test('STAGE-75 · Anatomy paints a disorder on Desikan-Killiany only, over connectivity and a lesion, until lifted', () => {
   const shown: KeyState = {
     ...base,
     explorer: 'anatomy',
@@ -385,6 +395,80 @@ test('STAGE-66 · the disorder key names it and lists four steps from larger to 
     legend.note,
     /survives a 5% false discovery rate\. Tissue-coloured regions show none/,
   );
+});
+
+// IV shares 7.2%, 11.7% and 6.9%: the second, third and first steps.
+const layers: CorticalLayers = {
+  id: 'cortical-layers',
+  source: { paper: 'https://doi.org/p', collection: 'https://doi.org/c' },
+  layers: ['I', 'II', 'III', 'IV', 'V', 'VI'],
+  layer_iv_scale: [
+    { from: 0, color: [1, 1, 1] },
+    { from: 0.07, color: [2, 2, 2] },
+    { from: 0.09, color: [3, 3, 3] },
+    { from: 0.12, color: [4, 4, 4] },
+  ],
+  regions: {
+    'hcp-mmp:left:8': [100, 100, 330, 72, 200, 198],
+    'hcp-mmp:left:9': [100, 100, 300, 117, 190, 193],
+    'julich:left:1': [100, 100, 300, 69, 200, 231],
+  },
+  cells: { datasets: [], regions: {} },
+};
+
+test('STAGE-73 · Anatomy paints layer IV’s share on the shown atlas, over a lesion and the highlights, until lifted', () => {
+  const shown: KeyState = { ...base, explorer: 'anatomy', atlas: 'hcp-mmp', layersShown: true };
+  const lesion = { kind: 'functions' as const, paint: paintOf('lesion:x'), rows: [] };
+  const withData = { ...sources, layers, lesion };
+  const paint = paintFor(shown, withData)!;
+  assert.equal(paint.id, 'layers:hcp-mmp');
+  assert.deepEqual(
+    [...paint.colors],
+    [
+      ['hcp-mmp:left:8', [2, 2, 2]],
+      ['hcp-mmp:left:9', [3, 3, 3]],
+    ],
+  );
+  assert.deepEqual(
+    [...paintFor({ ...shown, atlas: 'julich' }, withData)!.colors],
+    [['julich:left:1', [1, 1, 1]]],
+  );
+  // Until the file has arrived the lesion's findings stay; another tab paints its own.
+  assert.equal(paintFor(shown, { ...sources, lesion })!.id, 'lesion:x');
+  assert.equal(paintKind(paintFor({ ...shown, explorer: 'functions' }, withData)), 'function');
+  assert.equal(paintFor({ ...shown, paintLifted: true }, withData), null);
+  const marks = [{ region: 'hcp-mmp:left:8', color: 'blue' as const }];
+  assert.equal(highlightStatus(shown, { ...withData, highlights: marks }), 'aside');
+  assert.equal(
+    highlightStatus({ ...shown, layersShown: false }, { ...sources, layers, highlights: marks }),
+    'drawn',
+  );
+});
+
+test('STAGE-74 · the layer key lists the four steps darkest first, outlining any nothing carries', () => {
+  const state: KeyState = { ...base, explorer: 'anatomy', atlas: 'hcp-mmp', layersShown: true };
+  const legend = legendFor(
+    { ...state, paint: paintFor(state, { ...sources, layers }) },
+    { ...sources, layers },
+  )!;
+  assert.equal(legend.map, 'layers');
+  assert.equal(legend.title, 'Layer IV’s share of the cortex’s thickness');
+  assert.equal(legend.pickable, false);
+  assert.deepEqual(
+    legend.rows.map(({ label, color, absent }) => [label, color, absent]),
+    [
+      ['12% or more', [4, 4, 4], true],
+      ['9% to 12%', [3, 3, 3], false],
+      ['7% to 9%', [2, 2, 2], false],
+      ['0% to 7%', [1, 1, 1], true],
+    ],
+  );
+  assert.match(legend.note, /darker is more\. Tissue-coloured areas have no six layers/);
+  const french = legendFor(
+    { ...state, lang: 'fr', paint: paintFor(state, { ...sources, layers }) },
+    { ...sources, layers },
+  )!;
+  assert.equal(french.rows[2]!.label, 'de 7 % à 9 %');
 });
 
 test('a paint names its tab by its id', () => {
@@ -454,6 +538,7 @@ describe('the published cdmd functions and deficits', () => {
     connectivitySeed: null,
     disorderShown: null,
     lang,
+    lesson: { circuit: null },
   });
 
   test('STATE-54 a function keys its z bands, strongest first, in the language of the reader', () => {
@@ -562,6 +647,7 @@ describe('the published cdmd functions and deficits', () => {
       connectivitySeed: null,
       disorderShown: null,
       lang: 'en',
+      lesson: { circuit: null },
     };
     const paint = paintFor(state, both)!;
     for (const structure of catalog.mappedRegions('dystonia')) {
@@ -610,6 +696,7 @@ describe('the published cdmd functions and deficits', () => {
         connectivitySeed: null,
         disorderShown: null,
         lang: 'en',
+        lesson: { circuit: null },
       };
       const findings = catalog.paint(deficit.id).findings.map(({ association }) => association.id);
       for (const finding of [null, ...findings]) {
@@ -658,5 +745,145 @@ describe('the lesion', () => {
     assert.deepEqual(legend!.rows, [
       { id: 'naming', color: [57, 135, 229], label: 'Dénomination', pressed: false },
     ]);
+  });
+});
+
+describe('the reader’s highlights', () => {
+  const marks: HighlightedRegion[] = [
+    { region: 'destrieux:left:1', color: 'blue' },
+    { region: 'destrieux:left:9', color: 'violet' },
+  ];
+  const withMarks = { ...sources, highlights: marks };
+  const anatomy: KeyState = { ...base, explorer: 'anatomy' };
+  const shownId = 'highlight:destrieux:left:1:blue,destrieux:left:9:violet';
+
+  test('STATE-69 · the six highlight colours are the deficits’ finding colours, in their order', () => {
+    assert.deepEqual(HIGHLIGHT_RGB, {
+      blue: [57, 135, 229],
+      raspberry: [213, 81, 129],
+      green: [0, 131, 0],
+      amber: [201, 133, 0],
+      violet: [98, 80, 214],
+      pink: [232, 123, 164],
+    });
+  });
+
+  test('STATE-68 · they are painted alone, each region in its colour, while nothing else is', () => {
+    const paint = paintFor(anatomy, withMarks)!;
+    assert.equal(paint.id, shownId);
+    assert.deepEqual(
+      [...paint.colors],
+      [
+        ['destrieux:left:1', [57, 135, 229]],
+        ['destrieux:left:9', [98, 80, 214]],
+      ],
+    );
+    assert.equal(highlightStatus(anatomy, withMarks), 'drawn');
+    // A tab with nothing open shows them too.
+    assert.equal(paintFor({ ...base, selectedFunction: null }, withMarks)!.id, shownId);
+    assert.equal(paintFor({ ...base, explorer: 'circuits' }, withMarks)!.id, shownId);
+    assert.equal(paintFor(anatomy, sources), null);
+  });
+
+  test('STATE-68 · a function opened sets them aside without a trace, and closing it gives them back', () => {
+    // A highlight on an area the function paints: the function's paint is its own, unchanged.
+    const onArea = {
+      ...sources,
+      highlights: [{ region: 'hcp-mmp:left:1', color: 'pink' as const }],
+    };
+    const opened = { ...base, selectedFunction: 'memory' };
+    const alone = paintFor(opened, sources)!;
+    assert.equal(alone.colors.has('hcp-mmp:left:1'), true);
+    assert.deepEqual(paintFor(opened, onArea), alone);
+    assert.equal(highlightStatus(opened, onArea), 'aside');
+    // Open on an atlas it has no areas on, it paints nothing, and they stay aside.
+    assert.equal(paintFor({ ...opened, atlas: 'destrieux' }, onArea), null);
+    // Closed: the same highlights, painted as before.
+    assert.equal(
+      paintFor({ ...opened, selectedFunction: null }, onArea)!.id,
+      'highlight:hcp-mmp:left:1:pink',
+    );
+  });
+
+  test('STATE-68 · a deficit, a lesson, a map, an Anatomy paint or the reader’s map sets them aside too', () => {
+    assert.equal(paintFor({ ...base, explorer: 'deficits' }, withMarks)!.id, 'deficit:aphasia');
+    assert.equal(
+      paintFor({ ...base, explorer: 'deficits', selectedDeficit: null }, withMarks)!.id,
+      shownId,
+    );
+    assert.equal(
+      paintFor({ ...base, explorer: 'circuits', lesson: { circuit: 'v' } }, withMarks),
+      null,
+    );
+    assert.equal(
+      paintFor(
+        { ...base, explorer: 'circuits', lesson: { circuit: null, map: 'visual-field' } },
+        withMarks,
+      ),
+      null,
+    );
+    const lesion = { kind: 'deficits' as const, paint: paintOf('lesion:x'), rows: [] };
+    assert.equal(paintFor(anatomy, { ...withMarks, lesion })!.id, 'lesion:x');
+    assert.equal(highlightStatus(anatomy, { ...withMarks, lesion }), 'aside');
+    assert.equal(paintFor(anatomy, { ...withMarks, mapDrawn: true }), null);
+  });
+
+  test('STATE-68 · a masthead choice lifts them as it lifts any paint; behind evidence they are aside', () => {
+    assert.equal(paintFor({ ...anatomy, paintLifted: true }, withMarks), null);
+    assert.equal(highlightStatus({ ...anatomy, paintLifted: true }, withMarks), 'lifted');
+    assert.equal(highlightStatus({ ...base, paintLifted: true }, withMarks), 'aside');
+  });
+
+  test('STATE-68 · an Anatomy paint a masthead choice lifted holds them aside no longer: they are lifted with it', () => {
+    const painted: KeyState = { ...anatomy, atlas: 'hcp-mmp', layersShown: true };
+    const both = { ...withMarks, layers };
+    assert.equal(highlightStatus(painted, both), 'aside');
+    assert.equal(highlightStatus({ ...painted, paintLifted: true }, both), 'lifted');
+    const lesion = { kind: 'deficits' as const, paint: paintOf('lesion:x'), rows: [] };
+    assert.equal(
+      highlightStatus({ ...anatomy, paintLifted: true }, { ...withMarks, lesion }),
+      'lifted',
+    );
+  });
+
+  test('STAGE-72 · the key is the reader’s: titled so, every region named, one not drawn outlined', () => {
+    const paint = paintFor(anatomy, withMarks)!;
+    const names: Record<string, string> = {
+      'destrieux:left:1': 'Region one, left',
+      'destrieux:left:9': 'Region nine, left',
+    };
+    const named = (id: string) => names[id]!;
+    // `drawn` holds destrieux:left:1 and :2, so :9 is not drawn in this view.
+    assert.deepEqual(legendFor({ ...anatomy, paint }, { ...sources, named }), {
+      map: 'highlight',
+      title: 'Your highlights',
+      note: 'Regions you highlighted, in the colours you chose: your own marks, not data. Tissue-coloured regions are not highlighted. An outlined region is not drawn in this view.',
+      pickable: false,
+      rows: [
+        {
+          id: 'destrieux:left:1',
+          color: [57, 135, 229],
+          label: 'Region one, left',
+          pressed: false,
+          absent: false,
+        },
+        {
+          id: 'destrieux:left:9',
+          color: [98, 80, 214],
+          label: 'Region nine, left',
+          pressed: false,
+          absent: true,
+        },
+      ],
+    });
+    const french = legendFor(
+      { ...anatomy, lang: 'fr', surfaceColor: 'mri', paint },
+      { ...sources, named, drawn: () => true },
+    )!;
+    assert.equal(french.title, 'Vos surlignages');
+    assert.equal(
+      french.note,
+      'Les régions que vous avez surlignées, dans les couleurs choisies : vos marques personnelles, pas des données. Les régions où l’IRM reste visible ne sont pas surlignées.',
+    );
   });
 });

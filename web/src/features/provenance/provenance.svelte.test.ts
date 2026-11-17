@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json';
+import manifest from '../../../test/fixtures/cdmd-manifest.json';
 import { expectAxeCleanOnce, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import type { Manifest } from '../../lib/types/index.ts';
 import '../../app/layout.css';
@@ -17,6 +17,9 @@ const props = (extra = {}) => ({
   indexUrl: '/neuroatlas/models/anatomies.json',
   domains: null,
   reference: null,
+  // These tests read the sheet's rows; the reference list stays loading (references.svelte.test.ts).
+  citations: { cited: [], hcp: false },
+  loadReferences: () => new Promise<never>(() => {}),
   ...extra,
 });
 const reference = {

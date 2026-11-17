@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { test, vi } from 'vitest';
-import type { OnProgress, SpinalCordLoad } from '../../engine/api.ts';
-import type { SurfaceColor } from '../../types/index.ts';
+import type { OnProgress, SpinalCordLoad, SurfaceColor } from '../../types/index.ts';
 import type { ModelPort, SectionsPort } from './ports.ts';
 import { createSceneCommands, requiredAtlas } from './scene-commands.ts';
 import type { SceneCommands } from './scene-commands.ts';
@@ -12,6 +11,13 @@ const REGIONS = [
   { id: 'hcp-mmp:left:44', atlas: 'hcp-mmp', kind: 'cortex', hemisphere: 'left' },
   { id: 'aseg:left:11', atlas: 'aseg', kind: 'structure', hemisphere: 'left' },
   { id: 'nextbrain:left:458', atlas: 'nextbrain', kind: 'structure', hemisphere: 'left' },
+  {
+    id: 'aan:midline:dorsal-raphe',
+    atlas: 'aan',
+    kind: 'structure',
+    hemisphere: 'midline',
+    supplemental: true,
+  },
 ];
 
 interface Download {
@@ -25,12 +31,17 @@ interface Download {
  * A model with BrainAtlas's own request rule: a layer switch that a later one
  * overtook does not apply when its download lands. Downloads finish on demand.
  */
-function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true } = {}) {
+function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true, nuclei = false } = {}) {
   const downloads = new Map<string, Download>();
   const shown: (readonly string[])[] = [];
   const model = {
     disposed: false,
-    manifest: { supplemental_layers: cord ? [{ id: 'pam50', file: 'spinal-cord.glb' }] : [] },
+    manifest: {
+      supplemental_layers: [
+        ...(cord ? [{ id: 'pam50', file: 'spinal-cord.glb' }] : []),
+        ...(nuclei ? [{ id: 'aan', file: 'arousal-nuclei.glb' }] : []),
+      ],
+    },
     envelopes: null as unknown[] | null,
     spinalCordLoadState: 'unloaded' as SpinalCordLoad,
     spinalCordVisible: false,
@@ -103,6 +114,12 @@ function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true } = {}) {
       await this.loadLayer('pam50', progress);
       this.spinalCordLoadState = 'ready';
     },
+    async ensureSupplementalLayer(id: string, progress?: OnProgress) {
+      if (id === 'pam50') return this.ensureSpinalCord(progress);
+      if (!this.manifest.supplemental_layers.some((layer) => layer.id === id))
+        throw new Error(`No supplemental layer ${id}`);
+      await this.loadLayer(id, progress);
+    },
     async setSpinalCordVisible(visible: boolean, progress?: OnProgress) {
       if (visible) await this.ensureSpinalCord(progress);
       this.spinalCordVisible = visible;
@@ -119,6 +136,11 @@ function fixture({ atlas = 'hcp-mmp', detail = 'aseg', cord = true } = {}) {
       shown.push(ids);
     },
     select(id: string | null) {
+      // BrainAtlas's own rule: a supplemental region is not drawn, so not selectable, until its layer is.
+      const region = id === null ? null : this.regions.get(id);
+      if (region?.supplemental && !this.layers.has(region.atlas)) {
+        throw new Error(`Region is not visible: ${id}`);
+      }
       this.selectedId = id;
     },
   };
@@ -557,4 +579,32 @@ test('STATE-50 revealing regions closes the cut before showing them; an empty se
   const opening = fixture();
   assert.equal(await opening.commands.openRegion('aseg:left:11', opening.commands.begin()), true);
   assert.deepEqual([opening.shown, opening.model.selectedId], [[['aseg:left:11']], 'aseg:left:11']);
+});
+
+test('STATE-71 a region of a supplemental layer is downloaded, without the cord, before it is shown and selected', async () => {
+  const scene = fixture({ nuclei: true });
+  const opening = scene.commands.openRegion('aan:midline:dorsal-raphe', scene.commands.begin());
+  await scene.settle();
+  assert.equal(scene.session.assemble({}).status, 'switching');
+  assert.deepEqual(scene.shown, [], 'nothing is shown before its layer lands');
+  await scene.finish('aan');
+  assert.equal(await opening, true);
+  assert.deepEqual(
+    [
+      scene.shown,
+      scene.model.selectedId,
+      scene.model.hasLayer('pam50'),
+      scene.model.spinalCordVisible,
+    ],
+    [[['aan:midline:dorsal-raphe']], 'aan:midline:dorsal-raphe', false, false],
+  );
+
+  const cutting = fixture({ nuclei: true });
+  const cut = cutting.commands.cut('axial', cutting.commands.begin());
+  await cutting.settle();
+  await cutting.finish('envelopes');
+  await cutting.finish('pam50');
+  await cutting.finish('aan');
+  assert.equal(await cut, true, 'the first cut waits for every supplemental layer it caps');
+  assert.equal(cutting.sections.mode, 'axial');
 });

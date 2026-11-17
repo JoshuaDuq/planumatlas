@@ -222,26 +222,15 @@ describe('the sentences after the list', () => {
       .toBeVisible();
   });
 
-  test('matches in another cut atlas have their own button, and a rejection from it is not caught', async () => {
-    const calls = mount({ settings: { cutAtlas: 'other' }, rejectCutAtlas: true });
-    const rejections: unknown[] = [];
-    const record = (event: PromiseRejectionEvent) => {
-      event.preventDefault();
-      rejections.push(event.reason);
-    };
-    window.addEventListener('unhandledrejection', record);
-    try {
-      await search('small');
-      await expect
-        .element(page.getByText(/^1 match in NextBrain histological atlas, which labels cuts only/))
-        .toBeInTheDocument();
-      await page.getByRole('button', { name: 'Switch cut labels' }).click();
-      expect(calls).toEqual(['cut nextbrain']);
-      expect(document.activeElement).toBe(input());
-      await expect.poll(() => rejections.map(String)).toEqual(['Error: cut atlas failed']);
-    } finally {
-      window.removeEventListener('unhandledrejection', record);
-    }
+  test('a region another internal anatomy puts on the cut is listed, and revealed by that anatomy', async () => {
+    const calls = mount({ settings: { cutAtlas: 'destrieux' } });
+    await search('small');
+    const small = optionNamed('Small nucleus, left: In NextBrain. Activate to reveal.');
+    await expect.element(small).toBeInTheDocument();
+    // There is no cut-labels switch to offer: the internal anatomy is the control.
+    expect(page.getByRole('button', { name: /cut labels/i }).elements()).toEqual([]);
+    (small.element() as HTMLElement).click();
+    expect(calls).toEqual(['reveal other-detail t:left:small']);
   });
 
   test('a list cut off at fifty says how many there are, and the count is not said', async () => {

@@ -10,7 +10,7 @@
   and circuits the region takes part in (X2, X3) follow as slots of their own.
   - the name is the `region-title` focus target; the commands that hide the selection with it
     (Clear ×, Hide) hand focus on through S2's commands, not here;
-  - Focus and Linked MRI stand in the row; Isolate and Hide wait behind More, on a line of their own
+  - Focus and Linked MRI stand in the row; Isolate, Hide and Highlight (a toggle) wait behind More, on a line of their own
     (2026-11-11), and the research data's sections inside one closed row;
   - Isolate has no `aria-pressed`: its label says Isolate or Restore (APG toggle button); Linked MRI is
     pressed while the MRI is open beside the stage, and a press closes it, as `M` does;
@@ -41,6 +41,7 @@
   import type { StimulationFtract } from '../../lib/core/catalog/stimulation-ftract.ts';
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { MAX_HIGHLIGHTS } from '../../lib/types/constants.ts';
   import { inspectorEmptyChrome } from '../../lib/core/panels/inspector.ts';
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
@@ -64,6 +65,8 @@
   import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
   import SupplySection from './SupplySection.svelte';
   import CerebellarFunctionsSection from './CerebellarFunctionsSection.svelte';
+  import LayersSection from './LayersSection.svelte';
+  import type { CorticalLayersStore } from '../../lib/state/cortical-layers.svelte.ts';
   import MapCourseSection from './MapCourseSection.svelte';
   import RegionFacts from './RegionFacts.svelte';
   import './inspector.css';
@@ -122,12 +125,23 @@
     cerebellarFunctions?: CerebellarFunctions | null;
     /** The manifest's striatal network atlas, for its confidence threshold. */
     striatalNetworks?: StriatalNetworks | null;
+    /** BigBrain's cortical layers; none on an anatomy that publishes none. */
+    corticalLayers?: CorticalLayersStore | null;
+    /** The stage paints layer IV's share now. */
+    layersPainted?: boolean;
+    /** Paints layer IV's share; null where the stage cannot show it. */
+    paintLayers?: (() => void) | null;
+    restoreLayers?: () => void;
     /** Takes no arguments: wires `toggleFocus()`, which frames with an animation (only the F key is immediate). */
     onfocus: () => void;
     /** Takes no arguments: I1 wires `isolateSelection`. */
     onisolate: () => void;
     /** S2's `hideSelection`: it hands focus on. */
     onhide: () => void;
+    /** The reader's highlight of the region and whether the set is full; none where it cannot be highlighted. */
+    highlight?: { pressed: boolean; full: boolean } | null;
+    /** Highlights the region, or takes its highlight away. */
+    onhighlight?: () => void;
     /** S2's `clearSelection`: it rescues focus. */
     onclear: () => void;
     /** A constituent structure: opens it, as S2's `openConstituent`. */
@@ -179,9 +193,15 @@
     territories = null,
     cerebellarFunctions = null,
     striatalNetworks = null,
+    corticalLayers = null,
+    layersPainted = false,
+    paintLayers = null,
+    restoreLayers = () => {},
     onfocus,
     onisolate,
     onhide,
+    highlight = null,
+    onhighlight = () => {},
     onclear,
     onregion,
     onselect,
@@ -209,10 +229,15 @@
     const details = event.target as HTMLDetailsElement;
     if (details.open && details.parentElement?.closest('details')) researchOpen = true;
   }
+  // No more than the most a set holds: the toggle stays in reach, says why, and adds nothing.
+  const highlightBlocked = $derived(Boolean(highlight?.full && !highlight.pressed));
   const hints = $derived({
     focus: copy.focusHint,
     isolate: isolated ? copy.restoreHint : copy.isolateHint,
     hide: copy.hideHint,
+    ...(highlight && {
+      highlight: highlightBlocked ? copy.highlightFull(MAX_HIGHLIGHTS) : copy.highlightHint,
+    }),
   });
   const chrome = $derived(inspectorEmptyChrome({ selectedRegion: region, explorer }));
   const label = $derived(region ? catalog.label(region.id) : null);
@@ -303,6 +328,21 @@
         >
           {t(lang, 'dissection').hideSelected}
         </button>
+        {#if highlight}
+          <button
+            type="button"
+            data-active={highlight.pressed}
+            aria-pressed={highlight.pressed}
+            aria-disabled={highlightBlocked ? 'true' : undefined}
+            aria-describedby="{uid}-highlight"
+            data-tooltip={hints.highlight}
+            onclick={() => {
+              if (!highlightBlocked) onhighlight();
+            }}
+          >
+            {copy.highlight}
+          </button>
+        {/if}
       </div>
       <!-- The tooltips' text as descriptions, there without a hover or before the tooltip shows. -->
       {#each Object.entries(hints) as [command, hint] (command)}
@@ -325,6 +365,14 @@
     <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />
     <FunctionalSection {region} {lang} {functionalRegions} />
     <CerebellarFunctionsSection {region} {lang} functions={cerebellarFunctions} />
+    <LayersSection
+      {region}
+      {lang}
+      layers={corticalLayers}
+      painted={layersPainted}
+      onpaint={paintLayers}
+      onrestore={restoreLayers}
+    />
   </div>
 </div>
 {@render relatedDeficits?.()}

@@ -22,6 +22,7 @@ import * as guide from './areas/guide.ts';
 import * as header from './areas/header.ts';
 import * as info from './areas/info.ts';
 import * as inspector from './areas/inspector.ts';
+import * as layers from './areas/layers.ts';
 import * as lesion from './areas/lesion.ts';
 import * as link from './areas/link.ts';
 import * as menu from './areas/menu.ts';
@@ -71,6 +72,7 @@ export const TRANSLATIONS = {
     guide: guide.en,
     header: header.en,
     inspector: inspector.en,
+    layers: layers.en,
     lesion: lesion.en,
     link: link.en,
     menu: menu.en,
@@ -119,6 +121,7 @@ export const TRANSLATIONS = {
     guide: guide.fr,
     header: header.fr,
     inspector: inspector.fr,
+    layers: layers.fr,
     lesion: lesion.fr,
     link: link.fr,
     menu: menu.fr,

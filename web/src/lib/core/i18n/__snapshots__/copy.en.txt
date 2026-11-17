@@ -62,7 +62,8 @@
   "pam50": "PAM50 cord atlas on this spinal cord",
   "arterial": "Arterial territory atlas (Liu et al. 2023)",
   "nettekoven": "Functional cerebellar atlas (Nettekoven et al. 2024)",
-  "choi": "Striatal network atlas (Choi et al. 2012)"
+  "choi": "Striatal network atlas (Choi et al. 2012)",
+  "aan": "Harvard Ascending Arousal Network Atlas 2.0"
  },
  "boundary": {
   "heading": "Boundary certainty",
@@ -222,14 +223,6 @@
    "colour": [
     "[\"Alpha\"] → \"colour set to Alpha\"",
     "[\"\"] → \"colour set to \""
-   ],
-   "cutAtlas": [
-    "[\"Alpha\"] → \"cut labels set to Alpha\"",
-    "[\"\"] → \"cut labels set to \""
-   ],
-   "atlasAndCuts": [
-    "[\"Alpha\"] → \"atlas and cut labels set to Alpha\"",
-    "[\"\"] → \"atlas and cut labels set to \""
    ]
   },
   "restore": "Restore previous view",
@@ -447,8 +440,7 @@
   "nextbrainSegmented": "NextBrain labels segmented on this brain",
   "arterialRegistered": "typical arterial territories registered onto this brain",
   "nettekovenRegistered": "group functional cerebellar regions registered onto this brain",
-  "choiRegistered": "group striatal networks registered onto this brain",
-  "cutLabels": "Cut labels"
+  "choiRegistered": "group striatal networks registered onto this brain"
  },
  "deficitKey": {
   "keyAll": [
@@ -561,6 +553,8 @@
   "spinalCordUnavailable": "No spinal cord is published for this subject.",
   "explode": "Exploded view",
   "explodeHint": "Structures keep their measured shape; only their places change.",
+  "names": "Names on the brain",
+  "namesHint": "The regions facing you, largest first; zoom in to name smaller ones.",
   "surfaceColors": {
    "tissue": "Tissue",
    "mri": "T1 MRI",
@@ -568,14 +562,24 @@
    "atlas": "Regions",
    "network": "Yeo 7 networks",
    "cab-np": "CAB-NP networks",
-   "territory": "Arterial territories"
+   "territory": "Arterial territories",
+   "striatal": "Striatal networks",
+   "cerebellar": "Cerebellar functions"
   },
   "paints": {
    "function": "Functions",
    "deficit": "Deficit",
-   "lesion": "Lesion"
+   "lesion": "Lesion",
+   "highlight": "Your highlights",
+   "connectivity": "Connectivity",
+   "disorder": "Disorder",
+   "layers": "Layer IV"
   },
   "paintTitles": {
+   "highlight": "Set by you: the regions you highlighted, in the colours you chose; your own marks, not data. Choose a colour to replace it.",
+   "connectivity": "Set by a region’s sheet: the outlined area’s resting functional connectivity with every other (group mean of 200 adults). Choose a colour to replace it.",
+   "disorder": "Set by a region’s sheet: one disorder’s case–control differences (ENIGMA consortium) on Desikan-Killiany. Choose a colour to replace it.",
+   "layers": "Set by a region’s sheet: layer IV’s share of the cortex’s thickness in each parcel, from one histological brain (BigBrain). Choose a colour to replace it.",
    "function": "Set by the Functions tab: functions on the HCP-MMP areas where studies report activation (Neurosynth). Choose a colour to replace it.",
    "deficit": "Set by the Deficits tab: the regions the open deficit’s findings cite, one colour per finding. Choose a colour to replace it.",
    "lesion": "Set by the lesion’s report: the territories of the functions it reaches, or the regions its findings cite. Choose a colour to replace it."
@@ -617,7 +621,17 @@
   "resetDisplay": "Reset display",
   "displayReset": "Display settings reset.",
   "startedOver": "Back to the opening picture.",
-  "changed": ", settings changed"
+  "changed": ", settings changed",
+  "mapOnCuts": "Drawn on cut faces, voxel by voxel.",
+  "highlightKey": {
+   "title": "Your highlights",
+   "note": [
+    "[\"Alpha\"] → \"Regions you highlighted, in the colours you chose: your own marks, not data. undefined are not highlighted.\"",
+    "[\"\"] → \"Regions you highlighted, in the colours you chose: your own marks, not data. undefined are not highlighted.\""
+   ],
+   "absent": "An outlined region is not drawn in this view.",
+   "marks": "the reader’s own marks, not data"
+  }
  },
  "dissection": {
   "heading": "Dissection",
@@ -774,7 +788,8 @@
    "fullscreen": "Could not enter full screen.",
    "streamlines": "Could not show this landmark’s streamlines.",
    "map": "Could not open the visual field map.",
-   "guide": "Could not start the tour."
+   "guide": "Could not start the tour.",
+   "snapshotSize": "Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller."
   }
  },
  "footer": {
@@ -837,6 +852,7 @@
   "networks": "Functional networks",
   "functional": "Functional divisions",
   "receptors": "Receptor fingerprints",
+  "corticalLayers": "Cortical layers (BigBrain)",
   "stimulation": "Stimulation responses",
   "stimulationFtract": "Stimulation responses (F-TRACT)",
   "functionalConnectivity": "Functional connectivity (HCP)",
@@ -855,6 +871,31 @@
   "index": "Index of the published anatomies",
   "tractReference": "Tract reference",
   "sources": "Sources",
+  "references": "References for this view",
+  "referencesLoading": "Loading the references…",
+  "referencesFailed": "The references could not be loaded.",
+  "referencesRetry": "Retry",
+  "behind": {
+   "planum": "Planum",
+   "subject": "Subject",
+   "atlas": "Atlas",
+   "colouring": "Colouring",
+   "internal": "Internal anatomy",
+   "spinalCord": "Spinal cord",
+   "function": "Function",
+   "deficit": "Deficit",
+   "tracts": "Tracts",
+   "strokeCases": "Stroke cases",
+   "visualField": "Visual field map"
+  },
+  "acknowledgement": "Acknowledgement",
+  "copyReferences": "Copy as text",
+  "referencesCopied": "References copied",
+  "referencesCopyFailed": "Could not copy the references",
+  "downloadBibtex": "Download .bib",
+  "downloadRis": "Download .ris",
+  "bibtexDownloaded": "BibTeX file downloaded.",
+  "risDownloaded": "RIS file downloaded.",
   "intendedUse": "For research and education. Planum is not a medical device and must not be used for diagnosis, treatment or any other clinical decision."
  },
  "functional": {
@@ -1061,9 +1102,9 @@
    "caution": "One individual and one 2 mm diffusion scan: bundles are reconstructions, not observed axons. Streamline counts are not axon counts, and lengths do not measure connection strength. The corticospinal streamlines end near the caudal medulla, above the decussation."
   },
   "section": {
-   "shows": "A sagittal, coronal, axial or oblique plane cuts the model, and every closed solid is capped where the plane meets it. Each cap is coloured from a published label volume, chosen independently of the surface atlas.",
+   "shows": "A sagittal, coronal, axial or oblique plane cuts the model, and every closed solid is capped where the plane meets it. The cut shows inside what the brain shows outside: the atlas in the cortical ribbon, the internal anatomy’s structures and, under Arterial territories, Striatal networks or Cerebellar functions, that map voxel by voxel.",
    "source": "The caps are this subject’s own pial, white and structure surfaces. The labels are the subject’s 1 mm FreeSurfer grid or 0.8 mm NextBrain blocks; nothing is re-segmented in the browser.",
-   "caution": "Cut labels are 1 mm (0.8 mm for NextBrain), so thin structures are coarser on a cut than on their surfaces. HCP-MMP, Julich-Brain and Schaefer cut labels are projections of surface labels into the grey-matter ribbon, not volumetric atlases. Shading from the T1 is illustrative."
+   "caution": "A cut’s labels are 1 mm (0.8 mm for NextBrain), so thin structures are coarser on a cut than on their surfaces. On a cut, HCP-MMP, Julich-Brain, Schaefer and Desikan-Killiany are projections of surface labels into the grey-matter ribbon, not volumetric atlases. Shading from the T1 is illustrative."
   },
   "lesion": {
    "shows": "A sphere of 3 to 30 mm radius placed on the brain or a cut face. The report gives the tissue and regions inside it, ranks the functions and deficit findings whose regions it overlaps, and counts the reconstructed streamlines that pass through it.",
@@ -1216,7 +1257,8 @@
    "pam50": "PAM50",
    "arterial": "Arterial territories",
    "nettekoven": "Cerebellar functions",
-   "choi": "Striatal networks"
+   "choi": "Striatal networks",
+   "aan": "Harvard arousal nuclei"
   },
   "subject": "Subject",
   "atlas": "Atlas",
@@ -1225,6 +1267,7 @@
    "appearance": "Appearance",
    "parcellation": "Parcellation",
    "networks": "Networks",
+   "subcortical": "Subcortical maps",
    "vascular": "Blood supply"
   },
   "atlasBecomes": [
@@ -1264,6 +1307,10 @@
   "copyLink": "Copy link to this view",
   "linkCopied": "Link copied",
   "linkFailed": "Could not copy the link",
+  "shareView": "Share this view",
+  "copyEmbed": "Copy embed code",
+  "embedCopied": "Embed code copied",
+  "embedFailed": "Could not copy the embed code",
   "languageSwitch": "Language",
   "guide": "How to use Planum",
   "startOver": "Start over",
@@ -1316,9 +1363,87 @@
   "isolateHint": "Show this region alone, framed",
   "restoreHint": "Show the rest of the brain again, framed whole",
   "hideHint": "Remove this region from view; Undo brings it back",
+  "highlight": "Highlight",
+  "highlightHint": "Mark this region in a colour of your own; the stage keys it as yours",
+  "highlightFull": [
+   "[\"Alpha\"] → \"At most Alpha regions can be highlighted; remove one first\"",
+   "[\"\"] → \"At most  regions can be highlighted; remove one first\""
+  ],
+  "highlighted": [
+   "[\"Alpha\",\"\"] → \"Highlighted in : Alpha.\"",
+   "[\"\",\"Alpha\"] → \"Highlighted in alpha: .\""
+  ],
+  "unhighlighted": [
+   "[\"Alpha\"] → \"Highlight removed: Alpha.\"",
+   "[\"\"] → \"Highlight removed: .\""
+  ],
+  "highlightColors": {
+   "blue": "Blue",
+   "raspberry": "Raspberry",
+   "green": "Green",
+   "amber": "Amber",
+   "violet": "Violet",
+   "pink": "Pink"
+  },
+  "highlightStrip": {
+   "title": "Your highlights",
+   "colorOf": [
+    "[\"Alpha\",\"\"] → \"Colour of Alpha: \"",
+    "[\"\",\"Alpha\"] → \"Colour of : alpha\""
+   ],
+   "colors": "Colours",
+   "remove": [
+    "[\"Alpha\"] → \"Remove the highlight of Alpha\"",
+    "[\"\"] → \"Remove the highlight of \""
+   ],
+   "removeHint": "Remove highlight",
+   "elsewhere": {
+    "atlas": "Not drawn on this atlas",
+    "detail": "Not drawn in this internal anatomy",
+    "colour": "Not drawn under this colour"
+   },
+   "aside": "Not drawn while this tab shows its evidence; they come back when you leave it.",
+   "lifted": "Not drawn under the colour you chose.",
+   "show": "Show on the brain"
+  },
   "constituentsHeading": "Constituent regions",
   "constituentsNote": "Union of source regions. Surface smoothed; volume measured from source voxels. Small regions without a surface appear on cuts.",
   "constituentCutOnly": "Cut only"
+ },
+ "layers": {
+  "heading": "Layers (one histological brain)",
+  "headingValue": [
+   "[\"Alpha\"] → \"IV Alpha\"",
+   "[\"\"] → \"IV \""
+  ],
+  "tableCaption": "Each layer’s share of the cortex’s thickness in this parcel, and the cells counted in it where its area was sampled",
+  "columns": {
+   "layer": "Layer",
+   "share": "Share of thickness",
+   "cells": "Cells per (0.1<NNBSP>mm)³"
+  },
+  "patches": [
+   "[\"Alpha\",\"\"] → \"Cells: the mean over Alpha image patches of  cut from the same brain, every cell body counted, not neurons alone.\"",
+   "[\"\",\"Alpha\"] → \"Cells: the mean over  image patches of Alpha cut from the same brain, every cell body counted, not neurons alone.\""
+  ],
+  "paint": "Paint layer IV across the cortex",
+  "shown": "On the brain: layer IV’s share of the cortex’s thickness, from BigBrain.",
+  "note": "BigBrain’s layers: one brain, a man of 65 examined post mortem, whose six layers a neural network segmented, 83% of points in the right layer. They are shown at the matching place, by registration and by this parcel’s name; nothing here is measured in this brain.",
+  "basis": "A share is the layer’s mean thickness over the parcel divided by the six layers’ sum, so the tissue’s shrinkage does not change it.",
+  "failed": "The layers could not be downloaded.",
+  "retry": "Retry",
+  "paper": "Paper (Wagstyl et al. 2020)",
+  "collection": "Layers (BigBrainWarp)",
+  "cellData": "Cells (EBRAINS)",
+  "keyTitle": "Layer IV’s share of the cortex’s thickness",
+  "step": [
+   "[\"Alpha\",\"\"] → \"Alpha or more\"",
+   "[\"\",\"Alpha\"] → \" to Alpha\""
+  ],
+  "keyNote": [
+   "[\"Alpha\"] → \"BigBrain, one histological brain; darker is more. undefined have no six layers or too little data.\"",
+   "[\"\"] → \"BigBrain, one histological brain; darker is more. undefined have no six layers or too little data.\""
+  ]
  },
  "lesion": {
   "radius": "Radius",
@@ -1461,7 +1586,6 @@
   "fields": {
    "anatomy": "subject",
    "atlas": "atlas",
-   "cuts": "cut labels",
    "system": "system",
    "detail": "internal anatomy",
    "region": "selected region",
@@ -1500,7 +1624,10 @@
    "space": "coordinate template",
    "cases": "stroke cases",
    "tracts": "tracts",
-   "keeptracts": "tracts kept on other tabs"
+   "keeptracts": "tracts kept on other tabs",
+   "mark": "your highlights",
+   "names": "names on the brain",
+   "embed": "embedded view"
   }
  },
  "menu": {
@@ -1593,12 +1720,14 @@
   "clearSearch": "Clear search",
   "expandAll": "Expand all",
   "collapseAll": "Collapse all",
+  "downloadTable": "Download table (CSV)",
+  "tableDownloaded": "Region table CSV downloaded.",
   "searchLabel": "Search regions",
   "searchResults": "Search results",
   "browseAnatomy": "Browse anatomy",
   "cortex": "Cortex",
   "subcortical": "Subcortical",
-  "cutOnly": "Cut labels only",
+  "cutOnly": "On cuts only",
   "groupIn": {
    "lobe": [
     "[\"Alpha\"] → \"Alpha lobe\"",
@@ -1639,11 +1768,6 @@
    "[\"\",\"Alpha\"] → \" in Alpha. \""
   ],
   "switchAtlas": "Switch atlas",
-  "matchesInOtherCut": [
-   "[\"Alpha\",\"\"] → \"Alpha in , which labels cuts only. \"",
-   "[\"\",\"Alpha\"] → \" in Alpha, which labels cuts only. \""
-  ],
-  "switchCutAtlas": "Switch cut labels",
   "matchesInTab": [
    "[\"Alpha\",\"\"] → \"Alpha in . \"",
    "[\"\",\"Alpha\"] → \" in Alpha. \""
@@ -1982,6 +2106,11 @@
    "[\"Alpha\"] → \"In Alpha\"",
    "[\"\"] → \"In \""
   ],
+  "other-colour": "Not under this colour",
+  "underColour": [
+   "[\"Alpha\"] → \"Under Alpha\"",
+   "[\"\"] → \"Under \""
+  ],
   "other-system": "In another system",
   "fallback": "Hidden"
  },
@@ -2080,7 +2209,38 @@
    "[\"\"] → \"Matched by name to F-TRACT’s Julich-Brain 3.0 area . F-TRACT placed contacts with Julich-Brain’s volumetric map in MNI152 space, not on this surface.\""
   ],
   "ftractDataset": "F-TRACT dataset (EBRAINS)",
-  "ftractMethod": "Method (Trebaul et al. 2018)"
+  "ftractMethod": "Method (Trebaul et al. 2018)",
+  "ftractPeak": [
+   "[\"Alpha\"] → \"peak Alpha\"",
+   "[\"\"] → \"peak \""
+  ],
+  "delayHeading": "Peak delay by distance",
+  "delayPlot": [
+   "[\"Alpha\"] → \"Peak delay against the distance between centroids, Alpha areas\"",
+   "[\"\"] → \"Peak delay against the distance between centroids,  areas\""
+  ],
+  "distanceAxis": "Distance between centroids, mm",
+  "delayAxis": "Peak delay, ms",
+  "delayNote": [
+   "[\"Alpha\"] → \"Peak delay: when a response’s first peak reached its maximum, the median over the pairs that responded, given where at least Alpha did. Distance: between the two areas’ centroids in this brain, not between the contacts. A response may pass through more than one synapse, so a delay is not a conduction time along one fibre. MAD: median absolute deviation.\"",
+   "[\"\"] → \"Peak delay: when a response’s first peak reached its maximum, the median over the pairs that responded, given where at least  did. Distance: between the two areas’ centroids in this brain, not between the contacts. A response may pass through more than one synapse, so a delay is not a conduction time along one fibre. MAD: median absolute deviation.\""
+  ],
+  "delayUnplotted": [
+   "[\"Alpha\"] → \"Not plotted, with no distance in this brain: Alpha delays within this area or with an area it does not carry.\"",
+   "[\"\"] → \"Not plotted, with no distance in this brain:  delays within this area or with an area it does not carry.\""
+  ],
+  "noDelays": [
+   "[\"Alpha\"] → \"No peak delay on this side: F-TRACT gives one only where at least Alpha pairs responded.\"",
+   "[\"\"] → \"No peak delay on this side: F-TRACT gives one only where at least  pairs responded.\""
+  ],
+  "delayTable": "Delays and distances",
+  "delayTableCaption": "Each area’s peak delay, its median absolute deviation and the distance between centroids",
+  "delayColumns": {
+   "area": "Area",
+   "distance": "Distance, mm",
+   "peak": "Peak, ms",
+   "mad": "MAD, ms"
+  }
  },
  "connectivity": {
   "heading": "Functional connectivity",
@@ -2417,6 +2577,10 @@
       "Pull the structures apart, or put them back"
      ],
      [
+      "N",
+      "Show or hide names on the brain"
+     ],
+     [
       "M",
       "Open or close linked MRI slices; in Tracts, they draw the tracts"
      ],
@@ -2491,6 +2655,7 @@
   "lesionTool": "Lesion",
   "coordinateTool": "Coordinate",
   "overlayTool": "Overlay",
+  "overlayNarrow": "Overlay, for your own brain map, needs a wider screen.",
   "displayTool": "Display",
   "dockLabel": "3D viewer tools",
   "orbitGroup": "Turn the model",
@@ -2517,6 +2682,19 @@
    "[\"Alpha\"] → \"Selected: Alpha\"",
    "[\"\"] → \"Selected: \""
   ],
+  "snapshotAt": [
+   "[\"Alpha\"] → \"Save at Alpha×\"",
+   "[\"\"] → \"Save at ×\""
+  ],
+  "copyImage": "Copy image",
+  "imageCopied": "Image copied",
+  "imageFailed": "Could not copy the image",
+  "posterAlt": "Still picture of this brain, its regions in colour, with its tracts drawn through them",
+  "loadBrain": [
+   "[\"Alpha\"] → \"Load the 3D brain (about Alpha<NNBSP>MB)\"",
+   "[\"\"] → \"Load the 3D brain (about <NNBSP>MB)\""
+  ],
+  "openInPlanum": "Open in Planum",
   "loadingAnatomy": "Loading anatomy…",
   "loadingWithTotal": [
    "[0,1] → \"Loading anatomy · 0.0<NNBSP>MB / 0.0<NNBSP>MB\"",
@@ -2533,7 +2711,7 @@
   "progressAria": "Anatomy download",
   "loaded": "Anatomy loaded.",
   "canvasRole": "3D anatomy viewer",
-  "canvasLabel": "Brain model. Drag or use the arrow keys to rotate, scroll or press plus and minus to zoom, click a region to select.",
+  "canvasLabel": "Brain model. Drag or use the arrow keys to rotate, Shift and an arrow key to move it, scroll or press plus and minus to zoom, click a region to select.",
   "error": "Something went wrong.",
   "retry": "Retry"
  },
@@ -2613,8 +2791,16 @@
    "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\"",
    "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\""
   ],
-  "readingNone": "That point is outside V1–V3, where the template predicts nothing.",
-  "clickHint": "Click V1, V2 or V3 on the brain to read it.",
+  "readingNone": "That point is outside V1–V3 and every named visual area.",
+  "readingArea": [
+   "[\"Alpha\",\"\"] → \"Right Alpha: the template predicts no visual field position here.\"",
+   "[\"\",\"Alpha\"] → \"Right : the template predicts no visual field position here.\""
+  ],
+  "readingNamed": [
+   "[\"Alpha\"] → \" Named area: Alpha.\"",
+   "[\"\"] → \" Named area: .\""
+  ],
+  "clickHint": "Click V1, V2 or V3 on the brain to read it; elsewhere a click names the visual area.",
   "loading": "Loading the territories…",
   "loadFailed": "The territories could not be loaded.",
   "provenance": "Predicted from this brain’s folding by the Benson template (v4.0), fitted to the group average of 181 HCP participants. No retinotopy was measured in this brain, and V1’s size varies about threefold between people.",
@@ -2622,9 +2808,17 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"throws hcp.toFixed is not a function\"",
    "[\"\",\"Alpha\",\"\"] → \"throws hcp.toFixed is not a function\""
   ],
+  "nameAreas": "Name the visual areas",
+  "areasNote": "Outlines and names the 25 areas of a maximum-probability atlas from 53 people (Wang et al. 2015). It names the cortex only: no visual field position is predicted beyond V3, and the small areas vary most between people.",
+  "areasAgreement": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws v1.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws v1.toFixed is not a function\""
+  ],
+  "legendOutlines": "Borders of the named visual areas",
   "sources": "Sources",
   "dataset": "HCP 7T retinotopy (Benson et al. 2018)",
-  "method": "Template method (Benson et al. 2014)"
+  "method": "Template method (Benson et al. 2014)",
+  "areasSource": "Visual areas (Wang et al. 2015)"
  },
  "workspace": {
   "modes": {

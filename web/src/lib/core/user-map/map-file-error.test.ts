@@ -23,7 +23,7 @@ test('a reason with values words them in the reader’s language', () => {
   const posted = structuredClone({ code: 'tooManyVolumes' as const, params: [300, 1234] });
   assert.equal(
     mapFileReason(fr, frErrors, new MapFileError(posted.code, posted.params)),
-    'Ce fichier contient 300 volumes ; jusqu’à 1\u202f234 de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.',
+    'Ce fichier contient 300 volumes\u202f; jusqu’à 1\u202f234 de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.',
   );
   assert.equal(
     new MapFileError('tooManyVolumes', [300, 1234]).message,

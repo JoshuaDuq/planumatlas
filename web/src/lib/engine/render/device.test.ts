@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { onTestFinished, test, vi } from 'vitest';
 import { PHONE_QUERY } from '../../types/constants.ts';
 import { detectIntegratedGpu, isIntegratedGpu, isPhone, pixelRatioCap } from './device.ts';
+import { qualityProfile } from './quality.ts';
 
 for (const { width, height, compact, phone } of [
   { width: 390, height: 844, compact: true, phone: true },
@@ -27,6 +28,9 @@ for (const { width, height, compact, phone } of [
     assert.equal(isPhone(), phone);
     assert.equal(pixelRatioCap(), phone ? 1 : 2);
     assert.equal(pixelRatioCap(true), phone ? 1 : 1.5);
+    // Only a phone starts below its ceiling and steps at rest (RENDER-45).
+    const { pixelRatio, settledCeiling } = qualityProfile({ integrated: false });
+    assert.deepEqual([pixelRatio, settledCeiling], phone ? [1, 2] : [2, 2]);
   });
 }
 

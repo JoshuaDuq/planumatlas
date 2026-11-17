@@ -52,6 +52,7 @@ Limit
 - [Boundary certainty](features/boundary-certainty.md)
 - [Segmentation agreement](features/segmentation-agreement.md)
 - [Spinal cord](features/spinal-cord.md)
+- [Arousal nuclei](features/arousal-nuclei.md)
 - [Tracts](features/tracts.md)
 :::
 
@@ -64,6 +65,7 @@ Limit
 - [Striatal networks](features/striatal-networks.md)
 - [Arterial territories](features/arterial-territories.md)
 - [Receptor fingerprints](features/receptor-fingerprints.md)
+- [Cortical layers](features/cortical-layers.md)
 :::
 
 :::{container}
@@ -127,6 +129,7 @@ features/internal-anatomy
 features/boundary-certainty
 features/segmentation-agreement
 features/spinal-cord
+features/arousal-nuclei
 features/tracts
 ```
 
@@ -140,6 +143,7 @@ features/cerebellar-functions
 features/striatal-networks
 features/arterial-territories
 features/receptor-fingerprints
+features/cortical-layers
 ```
 
 ```{toctree}

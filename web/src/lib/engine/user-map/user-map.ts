@@ -26,7 +26,7 @@ import type { BrainAtlas, Layer } from '../model/brain-atlas.ts';
 import type { BrainSections } from '../slices/sections.ts';
 import { greyed } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
-import { prefersReducedMotion } from '../render/scene.ts';
+import { prefersReducedMotion } from '../render/camera-motion.ts';
 import {
   clearUserMapVolume,
   dropPrevious,
@@ -544,6 +544,13 @@ export function createUserMap({
       const { course } = (await post(job, [job.points.buffer])) as { course: MapCourse };
       if (loaded !== request) throw new SupersededError('A newer map was opened.');
       return course;
+    },
+    /** The surface the shown atlas's cortex is drawn on now. */
+    drawnSurface(): CortexSurface {
+      return drawnSurface.atlas === atlas.settings.atlas &&
+        drawnSurface.layer === atlas.layers.get(drawnSurface.atlas)
+        ? drawnSurface.surface
+        : 'pial';
     },
     /** The cortex's surface, with or without a map, while no cut is open; the pial under a cut. */
     setSurface(surface: CortexSurface): void {

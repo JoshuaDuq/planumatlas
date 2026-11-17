@@ -196,7 +196,8 @@ test('ATLAS-21, ATLAS-22 and ATLAS-33 after each of 300 seeded commands, meshes 
     let refused = false;
     try {
       await run(model, command);
-      while (model.pending.size) await Promise.allSettled(model.pending.values());
+      while (model.layerStore.pending.size)
+        await Promise.allSettled(model.layerStore.pending.values());
     } catch {
       refused = true;
       seen.refused += 1;

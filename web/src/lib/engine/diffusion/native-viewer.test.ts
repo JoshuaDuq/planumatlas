@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { GreaterDepth, Group, Plane, Vector3 } from 'three';
 import type { Mesh, MeshStandardMaterial } from 'three';
-import { test, vi } from 'vitest';
+import { afterAll, test, vi } from 'vitest';
 import { tractCatalog } from '../../core/diffusion/catalogs.ts';
 import type { TractBundle } from '../../core/diffusion/catalogs.ts';
 import { createNativeTractViewer } from './native-viewer.ts';
@@ -11,6 +11,13 @@ import { createTractLoader } from './tract-file.ts';
 import type { BufferGeometry, LineSegments, Material } from 'three';
 import { streamlineLengths } from './streamlines.ts';
 import type { LoadedTract, TractLoader } from './tract-file.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mock, and leave none built on it to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 /** The asset reader serves `public/diffusion/` from disk, so `load()` runs in Node. */
 vi.mock('../../core/assets/diffusion-assets.ts', async () => {

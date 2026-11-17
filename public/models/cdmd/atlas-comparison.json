@@ -10184,13 +10184,13 @@
     {
       "atlas": "destrieux",
       "file": "cortex-destrieux.glb",
-      "sha256": "fd1fbf406fcd6cf924471c232709588689567417eccd28f9d454d84febbf2de5",
+      "sha256": "24cb38833be575b6918ad277a1ea8531f38cf29f0bf2517f2b678843a0e828e6",
       "citation": "https://doi.org/10.1016/j.neuroimage.2010.06.010"
     },
     {
       "atlas": "hcp-mmp",
       "file": "cortex-hcp-mmp.glb",
-      "sha256": "e197f376c068abb310fa71c59b834a81e3ef51eb32999e2d865940c79a270c0f",
+      "sha256": "ea26710c172a046040b510ca8cd49c8c0b1e35a46863e9dbe31f527c2295a67a",
       "citation": "https://doi.org/10.1038/nature18933"
     }
   ],

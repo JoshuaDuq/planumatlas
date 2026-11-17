@@ -1,4 +1,5 @@
 import type { DisplaySettings, Region } from '../../types/index.ts';
+import { cutAtlasesOf, cutLabelsReason } from './cut-labels.ts';
 import { labelOf } from './labels.ts';
 
 /**
@@ -49,10 +50,6 @@ export const belongsToDetail = (region: Region, detail: string) =>
 // Gyral white matter is drawn on the white envelope's cut face, which the cortex controls hide.
 const followsCortex = (region: Region) => isSurface(region) || region.atlas === 'wmparc';
 
-/** The cut atlases whose cuts draw a cut-only region. */
-export const cutAtlasesOf = (region: Region): readonly (string | null | undefined)[] =>
-  region.cut_atlases ?? [region.atlas];
-
 const hemisphereAllows = (region: Region, settings: VisibilitySettings) =>
   settings.hemisphere === 'both' ||
   region.hemisphere === 'midline' ||
@@ -70,7 +67,7 @@ export function internalSystemAllows(region: Region, settings: VisibilitySetting
 export type HiddenReason =
   | 'no-mri'
   | 'below-cut-resolution'
-  | 'other-cut-atlas'
+  | 'other-colour'
   | 'no-cut'
   | 'other-detail'
   | 'other-atlas'
@@ -96,19 +93,18 @@ export type Visibility = { visible: true; reason: null } | { visible: false; rea
 export function visibilityOf(region: Region, settings: VisibilitySettings): Visibility {
   const hidden = (reason: HiddenReason): Visibility => ({ visible: false, reason });
   if (settings.surfaceColor === 'mri' && region.mri_registered === false) return hidden('no-mri');
-  // A region can be drawn as geometry, as a cut label, or both. A structure the
-  // inactive detail level owns, or a parcel of a cut atlas the surface is not
-  // showing, is still on screen while the cut is painting it.
-  const onCut = region.atlas === settings.cutAtlas && settings.cutActive;
+  // The cut's labels follow the surface atlas and the detail level, so a parcel or a structure the
+  // stage does not show is on no cut either.
   if (isTissue(region)) {
     // Measured in its source grid, but smaller than any block its cut samples.
     if (!cutAtlasesOf(region).length) return hidden('below-cut-resolution');
-    // Distinct reasons from 'other-atlas': the remedy is a different control.
-    if (!cutAtlasesOf(region).includes(settings.cutAtlas)) return hidden('other-cut-atlas');
-    if (!settings.cutActive) return hidden('no-cut');
+    // The cut's labels follow the colouring and the internal anatomy, so either can be the remedy.
+    const relabelled = settings.cutAtlas && cutLabelsReason(region, settings.cutAtlas);
+    if (relabelled) return hidden(relabelled);
+    if (!settings.cutActive || !settings.cutAtlas) return hidden('no-cut');
   } else if (isStructure(region)) {
-    if (!belongsToDetail(region, settings.detail) && !onCut) return hidden('other-detail');
-  } else if (isSurface(region) && region.atlas !== settings.atlas && !onCut) {
+    if (!belongsToDetail(region, settings.detail)) return hidden('other-detail');
+  } else if (isSurface(region) && region.atlas !== settings.atlas) {
     return hidden('other-atlas');
   }
   if (!internalSystemAllows(region, settings)) return hidden('other-system');

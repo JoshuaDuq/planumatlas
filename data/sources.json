@@ -1617,6 +1617,24 @@
       "license": "AGPL-3.0"
     },
     {
+      "path": "data/fsaverage/surf/lh.Wang2015.mgz",
+      "sha256": "029d1c3617082abfc1ddc15057cff287eb190e343851e2b7b6cb058708f6f66a",
+      "anatomy": "fsaverage",
+      "url": "https://osf.io/download/rne5b/#atlasmgz/lh.Wang2015.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: extracted unchanged from the pinned atlasmgz.zip of the HCP 7T retinotopy dataset (https://osf.io/bw9ec/)",
+      "citation": "https://doi.org/10.1093/cercor/bhu277",
+      "license": "CC BY 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.Wang2015.mgz",
+      "sha256": "bab9b7497e606218b752dce5c7f300fcc148a7c98770498615c7d641587044da",
+      "anatomy": "fsaverage",
+      "url": "https://osf.io/download/rne5b/#atlasmgz/rh.Wang2015.mgz",
+      "procedure": "scripts/fetch_retinotopy.py: extracted unchanged from the pinned atlasmgz.zip of the HCP 7T retinotopy dataset (https://osf.io/bw9ec/)",
+      "citation": "https://doi.org/10.1093/cercor/bhu277",
+      "license": "CC BY 4.0"
+    },
+    {
       "path": "data/cdmd/stroke-lesions.npz",
       "sha256": "27b0bed1a0238356794147c6cbdd4ac2b21b8611870ebc26179933ffac6a9f12",
       "anatomy": "cdmd",
@@ -1684,7 +1702,7 @@
     },
     {
       "path": "data/stimulation-ftract.json",
-      "sha256": "7914de9e33dae0b261d21983252368c83c6d3e0fc03cc195274c0abafd7f4feb",
+      "sha256": "d80005235d21504b75f31ed62de63d5c0722d4cf804bc0cfee284fa261e1bbc2",
       "derived_from": [
         {
           "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/MNI-JulichBrain-3.0.txt",
@@ -1701,9 +1719,17 @@
         {
           "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/N_implantations.txt.gz",
           "sha256": "131d76dc7f85dc70280d8e799602696d5d45f15a275956145980e4ff92f3341b"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/peak_delay__median.txt.gz",
+          "sha256": "c8710c81fad2c1dc42088b12f772703638ff0fe69aee9560968103a885dedc14"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/d-41db823e-7e1b-44c7-9c69-eaa26e226384/MNI-JulichBrain-3.0/peak_delay__mad.txt.gz",
+          "sha256": "36bd9d068b175611b3ea3e2ba8d405f9690c36b958ff8375d5d2c7b37e84b303"
         }
       ],
-      "procedure": "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation\u2013recording pair and implantation matrices, every pair tested at least once",
+      "procedure": "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation\u2013recording pair and implantation matrices, every pair tested at least once, and every peak delay with its median absolute deviation",
       "citation": "https://doi.org/10.25493/JYVR-WJ7, https://doi.org/10.1016/j.neuroimage.2018.07.039",
       "license": "CC BY-NC-SA 4.0"
     },
@@ -2115,6 +2141,406 @@
       "sha256": "aecec6f9b8e75153c441e8332d349407df4082aaf367775df49553cb07f424fe",
       "url": "https://raw.githubusercontent.com/MICA-MNI/ENIGMA/b08974b55243060cbc1fad12c87048037446e8f7/LICENSE",
       "license": "BSD 3-Clause (ENIGMA Toolbox repository)"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer1.shape.gii",
+      "sha256": "1bad5e8aadbf3eff2583f5a96d439a573a8fd958d197f4db7bb3d65f887e9069",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer1.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer2.shape.gii",
+      "sha256": "339e8eb413ea5d1ebc9d2ea697ef1218db8c503f3222422969449631f7ee16ee",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer2.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer3.shape.gii",
+      "sha256": "b0b648048ed93fc2ef38e60386b842c75b4a5d83d8ed47fca032ea841ebfabc6",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer3.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer4.shape.gii",
+      "sha256": "dfae86007f91903870e5e6b806240c007443ab8a8e27df6bec8fa4ef1f8daad5",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer4.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer5.shape.gii",
+      "sha256": "36d4c1dd76a1591d2fa4793b48499005fea814752e6bace7385fafafa65c67b5",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer5.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-L_den-164k_desc-layer6.shape.gii",
+      "sha256": "1c0d2948aaa590dd55ae3838ce81ae841e0f54de546f5b4bcd3f950ae506a446",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_desc-layer6.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer1.shape.gii",
+      "sha256": "2a2667f45fb0f27b6dc9790440e9b9313671dd1ecdd271671ef1cc717a862771",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer1.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer2.shape.gii",
+      "sha256": "5d9bd9b0048c6708eb478f89742c2db2ca16a70c4e852928195d1b9194ad0f2d",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer2.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer3.shape.gii",
+      "sha256": "fbdaa2092d0e189c59b1bde568a178b3b7a09da7e8ea7c47a6a850835d288648",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer3.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer4.shape.gii",
+      "sha256": "6f6a82b38d4353da4aadc3133c6f4d2cb5dd00cb3669f56416de1952b774283e",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer4.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer5.shape.gii",
+      "sha256": "b42a6f5995e52cf71d821b5e6006a38a4b7ad27ec06e7b99949b391d33f1a210",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer5.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/fsaverage/surf/tpl-fsaverage_hemi-R_den-164k_desc-layer6.shape.gii",
+      "sha256": "542c92092847316af297d5a640d73ee7fdadf0c3edac140dc542d73a2197d9e8",
+      "url": "https://fz-juelich.sciebo.de/public.php/dav/files/HoKucnh8zFpSbKF/spaces/tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_desc-layer6.shape.gii",
+      "procedure": "scripts/fetch_cortical_layers.py: copied unchanged from the BigBrainWarp share",
+      "citation": "https://doi.org/10.7554/eLife.70119",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/cortical-layer-cells.json",
+      "sha256": "8891e30018c22efe395c52ebc90554c07757723312d43cf453a92dd9509c95a0",
+      "derived_from": [
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Broca_44/v1.0/",
+          "doi": "https://doi.org/10.25493/the9-vqu"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/FrontalPole_Fp1/v1.0/",
+          "doi": "https://doi.org/10.25493/yfg8-3r7"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Motor_4a/v1.0/",
+          "doi": "https://doi.org/10.25493/pv5q-sfr"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/SPL_7P/v1.0/",
+          "doi": "https://doi.org/10.25493/35k1-btx"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_FG1/v1.0/",
+          "doi": "https://doi.org/10.25493/e1fy-2c4"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_FG3/v1.0/",
+          "doi": "https://doi.org/10.25493/da0m-gm"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_FG4/v1.0/",
+          "doi": "https://doi.org/10.25493/yvwp-9aq"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_hOc1/v1.0/",
+          "doi": "https://doi.org/10.25493/evpc-mvh"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_hOc2/v1.0/",
+          "doi": "https://doi.org/10.25493/tmfg-6fq"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_hOc3d/v1.0/",
+          "doi": "https://doi.org/10.25493/f781-v5j"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_hOc4d/v1.0/",
+          "doi": "https://doi.org/10.25493/zxqx-jkp"
+        },
+        {
+          "url": "https://data-proxy.ebrains.eu/api/v1/buckets/p22717-hbp-d000061_BB-CorticalCellDistribution_pub/Visual_hOc5/v1.0/",
+          "doi": "https://doi.org/10.25493/j4hz-14x"
+        },
+        "config/cortical-layers.yaml"
+      ],
+      "procedure": "scripts/fetch_cortical_layers.py: each pinned patch's segmented cells counted per layer, and its layer areas, read value for value",
+      "citation": "https://doi.org/10.25493/the9-vqu, https://doi.org/10.25493/yfg8-3r7, https://doi.org/10.25493/pv5q-sfr, https://doi.org/10.25493/35k1-btx, https://doi.org/10.25493/e1fy-2c4, https://doi.org/10.25493/da0m-gm, https://doi.org/10.25493/yvwp-9aq, https://doi.org/10.25493/evpc-mvh, https://doi.org/10.25493/tmfg-6fq, https://doi.org/10.25493/f781-v5j, https://doi.org/10.25493/zxqx-jkp, https://doi.org/10.25493/j4hz-14x",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "path": "data/cdmd/mri/arousal-nuclei.mgz",
+      "sha256": "d3e22877cc4730294ed264554884bdc4dd66c6ed29d4e7b7dd24e254486dcb83",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/cdmd/mri/arousal-nuclei-carried.mgz",
+      "sha256": "bb01f42559156f45fa8ec28b82f4c04dc5b70c471bd40503f497557bc2551ce7",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/cdmd/arousal-registration.json",
+      "sha256": "d05f8e3f16c61c3d8a8b8c94dab884f98174dba1db86c7e69a85d30bef17e875",
+      "anatomy": "cdmd",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
     }
   ]
 }

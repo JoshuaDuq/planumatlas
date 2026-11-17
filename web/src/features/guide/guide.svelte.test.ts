@@ -354,7 +354,7 @@ test('a phone’s sheet rises for the region’s detail and comes down for the n
   expect(sheetCalls).toEqual(['raise', 'lower']);
   card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
   expect(sheetCalls).toEqual(['raise', 'lower']);
-  // A pick raises the sheet too, so a close from the pick's card lowers it.
+  // A second pick of a region raises the sheet, so a close after a pick lowers it (at peek, a no-op).
   startAt(2);
   pick!('destrieux:left:5');
   card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();

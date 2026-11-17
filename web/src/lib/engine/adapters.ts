@@ -40,9 +40,9 @@ const frameOf = ({ center, normal, u, v, edges }: PlaneFrame): Frame => ({
 /**
  * `BrainAtlas` as the contract's model. The class stays a 1-1 port; what the contract adds are reads
  * the application used to make on the model's fields (`layers`, `envelopes`, `visibleMeshes`) and the
- * one prefetch that names its file.
+ * one prefetch that names its file. `facing` is the engine's: it needs the camera and the cut.
  */
-export function createEngineModel(atlas: BrainAtlas): EngineModel {
+export function createEngineModel(atlas: BrainAtlas, facing: EngineModel['facing']): EngineModel {
   return {
     // The model validated the manifest on load; the contract's type is its published shape.
     manifest: atlas.manifest as unknown as Manifest,
@@ -80,6 +80,7 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
     centroidOf: (id) => atlas.centroidOf(id),
     anchorOf: (id) => atlas.anchorOf(id),
     canSelect: (region) => atlas.canSelect(region),
+    facing,
 
     select: (id) => atlas.select(id),
     setInternalSystem: (system) => atlas.setInternalSystem(system),
@@ -108,6 +109,7 @@ export function createEngineModel(atlas: BrainAtlas): EngineModel {
       await atlas.ensureEnvelopes(onProgress);
     },
     ensureSpinalCord: (onProgress) => atlas.ensureSpinalCord(onProgress),
+    ensureSupplementalLayer: (id, onProgress) => atlas.ensureSupplementalLayer(id, onProgress),
     async prefetchLayer(id) {
       // An atlas or a detail level: the supplemental layers load with their own commands.
       const entry =
@@ -185,7 +187,6 @@ export function createEngineSections(
     setOffsetReady: (offset) => sections.setOffsetReady(offset),
     setAngles: (tilt, azimuth) => sections.setAngles(tilt, azimuth),
     setAnglesReady: (tilt, azimuth) => sections.setAnglesReady(tilt, azimuth),
-    setCutAtlas: (atlas) => sections.setCutAtlas(atlas),
     setDisplay: (options) => sections.setDisplay(options),
     setAgreement: (code) => sections.setAgreement(code),
     setWindow: (center, width) => sections.setWindow(center, width),
@@ -199,5 +200,6 @@ export function createEngineSections(
     pixels: (slice) => sections.pixels(slice as unknown as SliceSamples),
     sample: (point): VolumeSample => sections.sample(point),
     regionAt: (point) => drawnRegionAt(sections.model, sections.metadataUrl, point),
+    capAnchors: () => (sections.active ? sections.tissues.capAnchors() : []),
   };
 }

@@ -200,11 +200,11 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-65 · Add heads its popover with one choice: Lesion, Coordinate, Overlay
 
-- **Rule:** Add's popover starts with a radio group named "What to add to the brain" (« Quoi ajouter au cerveau »), then the chosen one's own body. It opens on Lesion, takes focus on the checked choice, and keeps the reader's last choice while the popover is closed. Coordinate is offered only while the anatomy publishes coordinate spaces, Overlay only with a body and not on a stage narrower than 480 px; with one choice left the group is not drawn. The tool says what it offers in `data-offers`, which the tour reads (GUIDE-04). A choice withdrawn while it is the open one closes the popover and hands focus to the first tool left (STAGE-32). The choices are sized by their words, so the longest French ones are not cut. `openFromPanel('lesion')` (the Deficits list's "Simulate a lesion") opens Add on Lesion whatever it last held.
+- **Rule:** Add's popover starts with a radio group named "What to add to the brain" (« Quoi ajouter au cerveau »), then the chosen one's own body. It opens on Lesion, takes focus on the checked choice, and keeps the reader's last choice while the popover is closed. Coordinate is offered only while the anatomy publishes coordinate spaces, Overlay only with a body and not on a stage narrower than 480 px, a phone's, where Add's popover says so in one line under the choices ("Overlay, for your own brain map, needs a wider screen."); without a body it says nothing. With one choice left the group is not drawn. The tool says what it offers in `data-offers`, which the tour reads (GUIDE-04). A choice withdrawn while it is the open one closes the popover and hands focus to the first tool left (STAGE-32). The choices are sized by their words, so the longest French ones are not cut. `openFromPanel('lesion')` (the Deficits list's "Simulate a lesion") opens Add on Lesion whatever it last held.
 - **Kind:** behaviour
 - **Level:** browser
-- **Source:** `web/src/features/stage/Dock.svelte`; parsimony round 2026-11-11
-- **Expected:** Add open → radios "Lesion", "Coordinate", "Overlay", Lesion checked and focused, body `data-place="lesion"`; Overlay → `data-place="overlay"`; closed and reopened → Overlay checked. `data-offers` "lesion coordinate overlay"; no coordinate spaces → "lesion overlay" and no Coordinate radio; a 375 px phone → "lesion coordinate"; a 768 px tablet laid out as a phone → all three. French radios "Lésion", "Coordonnée", "Superposition", each `scrollWidth` = `clientWidth`. Tab from the Lesion radio → "Place" → the control after the dock, Add still open.
+- **Source:** `web/src/features/stage/Dock.svelte`; parsimony round 2026-11-11; handoff U11 (plan 2 WP36)
+- **Expected:** Add open → radios "Lesion", "Coordinate", "Overlay", Lesion checked and focused, body `data-place="lesion"`; Overlay → `data-place="overlay"`; closed and reopened → Overlay checked. `data-offers` "lesion coordinate overlay"; no coordinate spaces → "lesion overlay" and no Coordinate radio; a 375 px phone → "lesion coordinate", and Add's `.place-note` reads "Overlay, for your own brain map, needs a wider screen." (French « La superposition, pour votre propre carte cérébrale, demande un écran plus large. »); a 375 px phone without an Overlay body → "lesion coordinate" and no note; a 768 px tablet laid out as a phone → all three and no note. French radios "Lésion", "Coordonnée", "Superposition", each `scrollWidth` = `clientWidth`. Tab from the Lesion radio → "Place" → the control after the dock, Add still open.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R, DEF-37)
 
 ### STAGE-66 · The lobe colouring is keyed by its lobes, front to back
@@ -469,6 +469,15 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 - **Expected:** `expectAxeClean()` passes 6 times per language.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R)
 
+### STAGE-82 · A stage too small to clear the gizmo frames as if the gizmo were not there
+
+- **Rule:** When none of the gizmo's three ways out (the band below it, the band beside it, its corner) keeps any of the picture, the framing is the one the room has without the gizmo: its scale stays above zero, so the camera's fitted distance stays finite and the gizmo's axes, the orientation letters and the keyboard's turns keep working. Before the fix the corner's empty share (0) won over the bands' negative ones, its zero scale put the camera at an infinite distance, and the camera's basis stayed NaN after the window grew again (the gizmo lost its letters, the edge letters read R and L top and bottom, and the arrows wrote no camera to the link).
+- **Kind:** accessibility
+- **Level:** browser (component): the store measures the real DOM
+- **Source:** `web/src/lib/state/stage-layout.svelte.ts` (`clearGizmo`); WP19 audit, 400 % zoom on a 1280 × 1024 screen (320 × 256 CSS px) and any phone layout 300 px tall or less (WCAG 1.4.10)
+- **Expected:** Stage 320 × 248, dock 280 × 138, key band 288 on the right, gizmo drawn at (−87, 25), 94 px, in a 32 px room → scale horizontal and vertical > 0, and `framing()` equal to the framing before the gizmo was registered. In the app at 320 × 256 and 390 × 300: the gizmo's axis lines have numeric ends and no console error.
+- **Covered by:** `src/lib/state/stage-layout.svelte.test.ts` (R)
+
 ## Colour keys
 
 ### STAGE-37 · The stage shows the key of what is painted, titled as the masthead names it
@@ -571,6 +580,64 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 - **Expected:** Toggle font ≥ 24 px at 200 %; every row and button `scroll ≤ client + 1`; plate `scrollWidth ≤ clientWidth + 1`. Tab from the canvas → the toggle, `outline-color: rgb(127, 208, 204)`, width ≥ 2, offset < 0. Forced colours: Broca swatch background unchanged, plate `border-top-color` = body `color`, Wernicke `box-shadow` contains `inset`. axe clean for a CAB-NP plate with the direction key and for a picked paint key with an absent row and its note; built-site phone run.
 - **Covered by:** `src/features/stage/StageKeys.svelte.test.ts` (R)
 
+## Names on the brain
+
+Planum improvement plan 2, WP21 (handoff F3): `features/stage/RegionNames.svelte` and `region-names.ts`, over the engine's `model.facing` (ATLAS-58) and `sections.capAnchors` (SLICE-42). Off by default; the switch is in the Display popover, the key is N (KEY-23), the link carries `names=1` (STATE-72, LINK-26), and a saved image draws them (SNAP-24). Plan 1's Study mode (WP8) must turn them off in `namesDrawn`.
+
+### STAGE-76 · The regions facing the reader that the camera shows large enough are named, largest first, at most 24
+
+- **Rule:** A drawn cortical region or structure is named when its label point faces the reader and its projected size, half the square root of its surface area (a convex body's mean projection) at the scale bar's pixels per millimetre, is at least 48 px; largest first, up to 24, so zooming in names smaller ones. One ray is cast per region asked, in batches of the names still wanted, and only regions above the threshold are asked: a region turned away gives its place to the next. A point off the visible stage is not named. A cut's faces, while the reader sees its open side, are named at their own points (SLICE-42), sized by the square root of their area times the cosine of the angle they are seen at; a region named on its face is not named again on its surface. The same camera always names the same regions in the same places.
+- **Kind:** behaviour
+- **Level:** unit (choice); browser (placement)
+- **Source:** Planum improvement plan 2, WP21
+- **Expected:** 30 regions above 48 px and 10 below → the 24 largest, asked in one batch of 24, the 10 below never asked. Sides 120, 40 and 30 px at 1 px/mm → `large`; at 1.3 → `large`, `middle`; at 2 → all three. The largest and the fourth turned away → the next two named, batches of 24 then 2. A face of 300² mm² seen squarely names its region at the face's point, its surface not again; seen at cosine 0.01 the face is too small and the surface is named. Over the fake engine, two mounts with the same camera and a `cameraSettled` give identical names and transforms.
+- **Covered by:** `src/features/stage/region-names.test.ts` (R); `src/features/stage/RegionNames.svelte.test.ts` (R, "the same camera names the same regions in the same places")
+
+### STAGE-77 · The selected region is named whenever it faces the reader, even below the size threshold (handoff F3)
+
+- **Rule:** With names on, the selection is a candidate whatever its size and is named first, so it takes the first clear place; turned away from the reader, it is not named. Under Lobes colour it is named as itself beside the lobes.
+- **Kind:** behaviour
+- **Level:** unit; browser
+- **Source:** handoff F3, deferred to Planum improvement plan 2, WP21
+- **Expected:** `large` (200 px) and `tiny` (2 px) → `large` alone; `tiny` selected → `tiny`, `large`; `tiny` selected but turned away → `large`. Over the fake engine, a facing region the full set of names leaves out, selected → it is the first name; from the other side → not named.
+- **Covered by:** `src/features/stage/region-names.test.ts` (R); `src/features/stage/RegionNames.svelte.test.ts` (R)
+
+### STAGE-78 · Under Lobes colour the lobes are named, drawn only
+
+- **Rule:** While the stage colours by lobe (the key's lobe plate, no paint over it), each cortical region is named by its lobe on its side: the lobe's area is its regions', it stands on the label point of the largest of its three largest regions that faces the reader on the stage, and its words are the key's row. A lobe's name is drawn only (hidden from assistive technology, no pointer): the key lists the lobes and a lobe is no region to select. Structures keep their own names.
+- **Kind:** behaviour
+- **Level:** unit; browser
+- **Source:** Planum improvement plan 2, WP21
+- **Expected:** Destrieux at 2 px/mm, a left parcel selected → the parcel first, then more than 8 lobe names, each `lobe:<lobe>:<side>` once, region null; at most three regions asked per lobe; the left frontal lobe stands on its largest left frontal parcel, or on its next largest when the largest is off the stage. Over the fake engine on a 1400 × 1000 stage, at least six left lobes are named, each once, and every lobe name is an `aria-hidden` span whose words are a key row's; every button names a structure.
+- **Covered by:** `src/features/stage/region-names.test.ts` (R); `src/features/stage/RegionNames.svelte.test.ts` (R)
+
+### STAGE-79 · A name stands in the landmarks' idiom, clear of the chrome, or not at all
+
+- **Rule:** A name is the route landmarks' label (`RouteMarks.svelte`, `stage-labels.ts`): haloed type at weight 500, its dot on the point, beside it where clear, else stood off along a leader. It is an optional label: where no slot is clear of the stage's edges, the chrome (dock, keys, gizmo, scale bar, letters, hints, full-screen exit) and the names placed before it, it is left out and blocks nothing; a name whose dot is off the stage or under the chrome is left out too. Between rests the names follow the camera by their drawn points; they are chosen again when the camera settles and when a change of the display or the cut has rested 250 ms.
+- **Kind:** behaviour
+- **Level:** unit; browser
+- **Source:** Planum improvement plan 2, WP21; memory "Stage labels" (the landmark idiom)
+- **Expected:** `placeLabels` with an optional label under chrome covering the stage → null, and the next label placed exactly as alone. Over the fake engine, chrome over the first three names' places → no placed name meets the dock, the key or the gizmo. A named part hidden → its name gone once the change has rested.
+- **Covered by:** `src/features/stage/stage-labels.test.ts` (R); `src/features/stage/RegionNames.svelte.test.ts` (R)
+
+### STAGE-80 · Each region's name is a button in one named toolbar that selects the region
+
+- **Rule:** The names are one toolbar, "Names on the brain", that keeps its own keys: one Tab stop, the arrows walk the names. Each region's name is a button whose accessible name is its name and side; pressing it selects the region as a click on the region does (`pickRegion`). axe finds nothing with names on.
+- **Kind:** accessibility
+- **Level:** browser — axe
+- **Source:** Planum improvement plan 2, WP21; WCAG 2.2 AA
+- **Expected:** role `toolbar`, label "Names on the brain", `data-own-keys`; one button with tab index 0; ArrowRight moves focus to the second; a click calls `onSelect` with its region's id; `expectAxeClean()` clean.
+- **Covered by:** `src/features/stage/RegionNames.svelte.test.ts` (R)
+
+### STAGE-81 · Names are off by default, a box in the Display popover, and drawn only where the stage names nothing of its own
+
+- **Rule:** Display › Names on the brain is a box, off by default, described by what it names; it sets the session's `namesShown`, which is not counted among the display changes. The names are drawn only while it is on and the stage shows the anatomy where it lies without names of its own: not over the exploded view, the tract reference alone, a lesson's whole route or the visual field map.
+- **Kind:** behaviour
+- **Level:** unit; browser
+- **Source:** Planum improvement plan 2, WP21 and section 9 (decision 2: off by default)
+- **Expected:** The box unticked, its description "The regions facing you, largest first; zoom in to name smaller ones."; pressed → `setNamesShown(true)`; the view's `namesShown` true → ticked. `namesDrawn` true only with the switch on and each of exploded, tract reference, route and map off. Without a spinal cord the popover has four boxes.
+- **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/features/stage/region-names.test.ts` (R)
+
 ## Full screen
 
 ### STAGE-49 · Only the stage goes full screen, with a visible way out
@@ -663,7 +730,7 @@ A click on the model selects and opens a detail every time (`anatomy.pickRegion`
 - **Expected:** split 0.2: −0.19 → smaller pale, −0.2 → smaller dark, 0.19 → larger pale, 0.2 → larger dark; the hippocampus stand-in takes the hippocampus's colour.
 - **Covered by:** `src/lib/core/catalog/disorder-effects.test.ts`
 
-### STAGE-65 · Anatomy paints a disorder on Desikan-Killiany only; showing it chooses that atlas, another ends it
+### STAGE-75 · Anatomy paints a disorder on Desikan-Killiany only; showing it chooses that atlas, another ends it
 
 - **Rule:** In Anatomy a shown disorder paints before connectivity and a lesion's findings, only while Desikan-Killiany is the atlas, and not once lifted. "Paint" from the sheet chooses Desikan-Killiany as the reader's atlas; choosing another atlas ends the paint, the same one keeps it.
 - **Kind:** state
@@ -696,3 +763,39 @@ A click on the model selects and opens a detail every time (`anatomy.pickRegion`
 - **Source:** the 2026-11-12 interface review; `docs/features/visual-field-map.md` (Shader)
 - **Expected:** Yeo 7 colour → `#network-key` shown; Circuits with the lesson's map `visual-field` → no `#network-key`.
 - **Covered by:** `src/app/regions/StageRegion.svelte.test.ts` (R)
+
+### STAGE-71 · A visual area's name stands on its area, larger areas first, or not at all
+
+- **Rule:** While the visual field map names its areas (once the engine has drawn their borders), each area's name stands centred on its anchor (`retinotopy.json`, `visual_areas`) as the engine projects it, in haloed type, and follows the camera. Names are placed larger areas first, by the stage's shared `placeCentred` (`stage-labels.ts`); one that would leave the visible stage or cover the chrome or a name already placed is left out, not moved along a leader, since a name off its area would misname the cortex. An anchor behind the camera or hidden by the cortex has no name. The names take no pointer events and are hidden from assistive technology: the map's panel says what the outlines are.
+- **Kind:** behaviour
+- **Level:** unit (anchor order, placement); browser (component)
+- **Source:** plan 2 WP32; `docs/features/visual-field-map.md` (Display)
+- **Expected:** anchors left V1v 760, right V1v 700, right LO1 300, left LO1 5 mm² come in that order; a sidecar coding other areas than the manifest, missing an anchor or with a two-number point is refused. `placeCentred`: a 40 × 20 name at (400, 300) → box (380, 290); a second at (430, 305) → left out, a third at (442, 300) → (422, 290); one at x 10, or one over a dock → left out, one 2 px clear of it kept. `areaNameBoxes`: left and right V1v both placed, keyed `left:V1v` and `right:V1v`, LO1 6 px from the left V1v left out; a name never measured → "No name is drawn for the left FEF.". On a 900 × 600 stage, names at (600, 300), (300, 300) and (300, 150) are centred there to 1 px and follow a camera move to (500, 420); a name 4 px from a larger one, and one with no point, are hidden; the group is `aria-hidden="true"` with `pointer-events: none`, and absent while the areas are not named.
+- **Covered by:** `src/lib/core/learning/visual-field.test.ts` (R); `src/features/stage/stage-labels.test.ts` "placeCentred" (R); `src/features/stage/area-names.test.ts` (R); `src/features/stage/VisualAreaNames.svelte.test.ts` (R); the store's `areasShown`: `src/lib/state/visual-field-map.svelte.test.ts` (R)
+
+### STAGE-72 · The highlights' key is the reader's: titled so, every region named
+
+- **Rule:** While the reader's highlights are painted the paint key is titled "Your highlights" ("Vos surlignages"), names each region with its side as a sentence does ("Cuneus, right"), in the order added, in its colour, and its note says they are the reader's own marks, not data, and what shows where none is (tissue, the scan, a ghost's grey). A highlighted region not drawn in this view is outlined and the note says so. Its rows are not toggles; on a phone they run one to a line, as a deficit's findings do.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22; `docs/features/deficits.md` (the key names each finding beyond the third colour)
+- **Expected:** Two highlights, the second not drawn → `{ map: 'highlight', title: 'Your highlights', pickable: false }`, rows "Region one, left" (57, 135, 229) and "Region nine, left" (98, 80, 214) absent, note "Regions you highlighted, in the colours you chose: your own marks, not data. Tissue-coloured regions are not highlighted. An outlined region is not drawn in this view." French under the scan: "Vos surlignages", note ending "Les régions où l’IRM reste visible ne sont pas surlignées." Phone: four rows → 42 + 4 × 24 px, a function's four → 42 + 2 × 24.
+- **Covered by:** `src/lib/core/state/paint.test.ts`; `src/features/stage/stage-keys.test.ts`
+
+### STAGE-73 · Anatomy paints layer IV's share on whichever cortical atlas is shown
+
+- **Rule:** In Anatomy, once the layers are downloaded and a region's sheet asked for them, every parcel of the shown cortical atlas with shares takes the colour of the step its layer IV share reaches (from 0, 7, 9 and 12%); a parcel without shares keeps its tissue colour. Another atlas paints its own parcels, so the paint needs no atlas of its own. It comes after a disorder and connectivity, which end it in the session (INSP-59), and before a lesion's findings; another tab paints its own; a lifted paint draws nothing. While it shows, the reader's highlights are set aside (`highlightStatus` 'aside') and come back once it ends. What names or cites the paint reads whether it is drawn (`layersPainted`), not the ask alone: the reference list cites the layers' paper and BigBrainWarp only while it is drawn, not once a masthead choice lifts it.
+- **Kind:** state
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP28; scale chosen and measured in `config/cortical-layers.yaml`
+- **Expected:** HCP-MMP shares 7.2% and 11.7% → `layers:hcp-mmp` with the second and third colours; on Julich-Brain 6.9% → the first; not downloaded → the lesion's paint; Functions → a function paint; lifted → none; highlights 'aside', and 'drawn' without the layer paint. Step boundaries: 0.0699 → first, 0.07 → second, 0.09 → third. Sources cited in Anatomy, asked, not lifted, downloaded → [paper, collection]; lifted, Functions, not asked or not downloaded → none.
+- **Covered by:** `src/lib/core/state/paint.test.ts`, `src/lib/core/catalog/cortical-layers.test.ts`
+
+### STAGE-74 · The layer key lists its four steps darkest first
+
+- **Rule:** The key's title is "Layer IV's share of the cortex's thickness"; its rows are the four steps from the open top one down, as percentages in the reader's notation, not toggles, a step no painted parcel carries outlined; the note names BigBrain as one histological brain, says darker is more and that unpainted areas have no six layers or too little data. The masthead's Colour field names it, as it names a tab's paint, in its hidden paint option, its note and the collapsed summary: "Layer IV" (« Couche IV »), and likewise a disorder's ("Disorder") and connectivity's ("Connectivity") paints, each note saying a region's sheet set it.
+- **Kind:** data
+- **Level:** unit; browser (component) for the masthead
+- **Source:** Planum improvement plan 2, WP28; the 2026-11-17 review (the Colour field was empty under Anatomy's paints)
+- **Expected:** rows "12% or more" (absent), "9% to 12%", "7% to 9%", "0% to 7%" (absent); note "… darker is more. Tissue-coloured areas have no six layers or too little data."; French "de 7 % à 9 %" with narrow no-break spaces. Masthead: `layers:hcp-mmp` → Colour "Layer IV", note "Set by a region’s sheet: layer IV’s share…", summary "… · Layer IV"; `disorder:scz` → "Disorder"; `connectivity:…` → "Connectivity"; French → "Couche IV".
+- **Covered by:** `src/lib/core/state/paint.test.ts`, `src/features/masthead/DataBar.svelte.test.ts`

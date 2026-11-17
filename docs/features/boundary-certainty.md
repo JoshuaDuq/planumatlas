@@ -50,7 +50,7 @@ On CDMD, 1,738 same-hemisphere pairs are rated and 2,387 smaller pairs are not; 
 
 `web/src/lib/core/catalog/boundary-certainty.ts` checks the published file against the manifest regions: same atlas and hemisphere, positive counts, and no pair rated twice. It defines `SOFT_SHARE = 1/3`. `boundariesOf` lists a region's rated boundaries, largest interface first; a boundary is soft when $s \ge 1/3$. The **Boundary certainty** section of the region detail lists the eight largest boundaries and gives the rest as a count. Each row has a solid (firm) or dashed (soft) glyph, the neighbour's name, which selects the neighbour, and the share as a bar and a percentage.
 
-On a cut with NextBrain cut labels (`cuts=nextbrain`), `boundary-edges.ts` outlines the selected region in the fragment shader. A symmetric label-by-label texture holds 0 for an unrated pair and $1 + \operatorname{round}(254\,s)$ otherwise. The outline is solid black where firm, two-tone dashed where soft and grey where unrated, with a half-width of 1.5 screen pixels. A label too small to win any 0.8 mm cut block never meets another on a cut.
+On a cut with NextBrain shown (`detail=nextbrain`), which labels the cut by NextBrain, `boundary-edges.ts` outlines the selected region in the fragment shader. A symmetric label-by-label texture holds 0 for an unrated pair and $1 + \operatorname{round}(254\,s)$ otherwise. The outline is solid black where firm, two-tone dashed where soft and grey where unrated, with a half-width of 1.5 screen pixels. A label too small to win any 0.8 mm cut block never meets another on a cut.
 
 ## Validation
 
@@ -89,4 +89,4 @@ uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_boundary_certainty.py tests/test_segment_nextbrain.py
 ```
 
-Viewer state of the figure plane: https://planumatlas.com/#anatomy=cdmd&detail=nextbrain&cuts=nextbrain&cut=coronal&pos=-2&view=anterior&cortex=0
+Viewer state of the figure plane: https://planumatlas.com/#anatomy=cdmd&detail=nextbrain&cut=coronal&pos=-2&view=anterior&cortex=0

@@ -1,14 +1,22 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import type { CameraSnapshot, MriDisplay, MriWindow, SectionsState } from '../../engine/api.ts';
-import type { DisplaySettings, ModelState, Orbit, Region } from '../../types/index.ts';
+import type {
+  CameraSnapshot,
+  DisplaySettings,
+  ModelState,
+  MriDisplay,
+  MriWindow,
+  Orbit,
+  Region,
+  SectionsState,
+} from '../../types/index.ts';
 import type { ReaderModelPort, ReaderSectionsPort } from './ports.ts';
 import type { SceneCommands } from './scene-commands.ts';
 import { applyReaderState as restore, readerState, sameRegions } from './reader-state.ts';
 import type { ReaderState } from './reader-state.ts';
 import { decodeState, encodeState } from './url-state.ts';
 
-const LOADED = { atlas: 'destrieux', detail: 'learning', cutAtlas: 'destrieux' };
+const LOADED = { atlas: 'destrieux', detail: 'learning' };
 
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
 /** Sets a field by name on a fixture, for tests that loop over several. */
@@ -44,10 +52,7 @@ test('an empty link is the default scene on the loaded layers, with nothing left
 });
 
 test('the defaults are exactly what a link leaves out', () => {
-  assert.equal(
-    encodeState(readerState({}, LOADED)),
-    'atlas=destrieux&cuts=destrieux&detail=learning',
-  );
+  assert.equal(encodeState(readerState({}, LOADED)), 'atlas=destrieux&detail=learning');
 });
 
 test('false and zero are kept rather than read as missing', () => {
@@ -76,7 +81,7 @@ test('a live state is captured as identifiers, so it can be compared and applied
 
 test('a captured scene encodes to the same link it was captured from', () => {
   const hash =
-    'atlas=hcp-mmp&cuts=aseg&system=Basal+ganglia&detail=aseg&region=aseg:left:11' +
+    'atlas=hcp-mmp&system=Basal+ganglia&detail=aseg&region=aseg:left:11' +
     '&isolate=aseg:left:11&view=left&cut=coronal&pos=-12.5&rev=1&hemi=left&cortex=0' +
     '&internal=0&cord=1&colors=tissue&opacity=0.4&hidden=aseg:left:12,aseg:left:13';
   const { state: decoded } = decodeState(hash);
@@ -87,7 +92,7 @@ test('a captured scene encodes to the same link it was captured from', () => {
 test('layers a link does not name stay as loaded; a missing layer is an error, not a guess', () => {
   assert.equal(readerState({ atlas: 'hcp-mmp' }, LOADED).atlas, 'hcp-mmp');
   assert.equal(readerState({}, LOADED).detail, 'learning');
-  assert.throws(() => readerState({}, { ...LOADED, cutAtlas: '' }), /no cutAtlas/);
+  assert.throws(() => readerState({}, { ...LOADED, detail: '' }), /no detail/);
 });
 
 test('a link’s exact camera and MRI window ride along as given', () => {
@@ -126,7 +131,15 @@ interface RestorationFixture {
     offsetRange: readonly [number, number];
   };
   commands: Writable<
-    Pick<SceneCommands, 'loadAtlas' | 'loadDetail' | 'showSpinalCord' | 'applySurfaceColor' | 'cut'>
+    Pick<
+      SceneCommands,
+      | 'loadAtlas'
+      | 'loadDetail'
+      | 'showSpinalCord'
+      | 'loadSupplemental'
+      | 'applySurfaceColor'
+      | 'cut'
+    >
   >;
   current: () => boolean;
   applyCamera: () => void;
@@ -209,21 +222,21 @@ function restorationFixture(): RestorationFixture {
       await model.setSpinalCordVisible(visible);
       return true;
     },
+    async loadSupplemental(ids) {
+      if (ids.some((id) => id?.startsWith('aan:'))) events.push('supplemental');
+      return true;
+    },
     async cut(mode) {
       await sections.setMode(mode);
       return true;
     },
   };
   const sections: RestorationFixture['sections'] = {
-    state: { cutAtlas: LOADED.cutAtlas } as Writable<SectionsState>,
+    state: { cutAtlas: LOADED.atlas } as Writable<SectionsState>,
     active: false,
     offsetRange: [-128, 128],
     display: null,
     publishedWindow: null,
-    async setCutAtlas(value) {
-      events.push('cut-atlas');
-      this.state.cutAtlas = value;
-    },
     async setMode(mode) {
       events.push('cut');
       this.active = mode !== 'off';
@@ -267,19 +280,16 @@ function restorationFixture(): RestorationFixture {
 }
 
 test('a failed layer is reported with its field, and the rest of the scene still applies', async () => {
-  for (const key of ['atlas', 'detail', 'cutAtlas'] as const) {
+  for (const key of ['atlas', 'detail'] as const) {
     const fixture = restorationFixture();
     assign(fixture.target, key, 'unavailable');
     const failure = new Error(`Requested ${key} unavailable`);
-    const owner = key === 'cutAtlas' ? fixture.sections : fixture.commands;
-    const method = { atlas: 'loadAtlas', detail: 'loadDetail', cutAtlas: 'setCutAtlas' }[key];
-    assign(owner, method, async () => {
+    const method = { atlas: 'loadAtlas', detail: 'loadDetail' }[key];
+    assign(fixture.commands, method, async () => {
       throw failure;
     });
     const failures = await restore(fixture.target, fixture);
-    assert.deepEqual(failures, [
-      { fields: [{ atlas: 'atlas', detail: 'detail', cutAtlas: 'cuts' }[key]], error: failure },
-    ]);
+    assert.deepEqual(failures, [{ fields: [key], error: failure }]);
     assert.equal(fixture.events.at(-1), 'camera', 'the camera is still framed');
   }
 });
@@ -389,7 +399,6 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     spinalCordVisible: true,
     surfaceColor: 'tissue',
     hiddenRegions: new Set(['hidden']),
-    cutAtlas: 'aseg',
     cut: 'oblique',
     selectedRegion: 'region',
     isolatedRegion: 'region',
@@ -406,7 +415,6 @@ test('startup restoration preserves layer, display, cut, selection and camera or
     'cord',
     'hidden',
     'color',
-    'cut-atlas',
     'angles',
     'cut',
     'cut-display',
@@ -432,4 +440,14 @@ test('a scene without the cord hides it even while an earlier showing is still d
   };
   await restore(fixture.target, fixture);
   assert.deepEqual(asked, [false], 'asked, so the model drops the showing still on its way');
+});
+
+test('STATE-71 a linked selection in a supplemental layer waits for that layer, then is selected', async () => {
+  const fixture = restorationFixture();
+  fixture.target.selectedRegion = 'aan:midline:dorsal-raphe';
+  assert.deepEqual(await restore(fixture.target, fixture), []);
+  assert.deepEqual(
+    fixture.events.filter((event) => event === 'supplemental' || event === 'selection'),
+    ['supplemental', 'selection'],
+  );
 });

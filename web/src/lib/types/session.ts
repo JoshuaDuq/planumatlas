@@ -40,10 +40,14 @@ export interface SessionState {
    * sheet's "Paint on the brain"; null for none. Not written to links.
    */
   disorderShown: string | null;
+  /** Anatomy paints layer IV's share across the cortex, from a region sheet's Layers section. Not written to links. */
+  layersShown: boolean;
   /** The Tracts tab's open profile: a tract row's key, or null for the list. Not written to links. */
   selectedTract: string | null;
   /** The Tracts tab's streamlines stay drawn on the other tabs, over their own anatomy. */
   keepTracts: boolean;
+  /** Display › Names on the brain: the regions facing the reader are named on the stage. */
+  namesShown: boolean;
   expanded: ReadonlySet<string>;
   theme: Theme;
   lang: Language;

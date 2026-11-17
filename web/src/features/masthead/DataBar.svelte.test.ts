@@ -257,6 +257,27 @@ describe('DataBar fields', () => {
     expect([...colour.options].some((option) => option.value === 'paint')).toBe(false);
   });
 
+  test('STAGE-74 · a paint a region’s sheet asks for names itself in the Colour field, its note and the summary', async () => {
+    const view = await wide(barProps());
+    const colour = el(field('Colour')) as HTMLSelectElement;
+    const note = () =>
+      document.getElementById(colour.getAttribute('aria-describedby')!)!.textContent;
+    for (const [id, name, set] of [
+      ['layers:hcp-mmp', 'Layer IV', /^Set by a region’s sheet: layer IV’s share/],
+      ['disorder:scz', 'Disorder', /^Set by a region’s sheet: one disorder’s/],
+      ['connectivity:julich:left:1', 'Connectivity', /^Set by a region’s sheet: the outlined/],
+    ] as const) {
+      await view.rerender({ bar: barProps({ paint: { id, colors: new Map() } }) });
+      expect(colour.selectedOptions[0]!.textContent).toBe(name);
+      expect(note()).toMatch(set);
+      expect(el(summary()).getAttribute('aria-label')).toContain(` · ${name}`);
+    }
+    await view.rerender({
+      bar: barProps({ lang: 'fr', paint: { id: 'layers:hcp-mmp', colors: new Map() } }),
+    });
+    expect(colour.selectedOptions[0]!.textContent).toBe('Couche IV');
+  });
+
   test('an atlas a function set names the tab in its value, and its note the atlas that comes back', async () => {
     const view = await wide(barProps({ atlas: 'hcp-mmp' }));
     const atlas = el(field('Atlas')) as HTMLSelectElement;
@@ -629,7 +650,7 @@ describe('DataBar announcements', () => {
     const props = $state(barProps({ lang: 'fr' }));
     await wide(props, { onCommand: () => Object.assign(props, { status: 'switching' }) });
     await userEvent.selectOptions(field('Atlas'), 'hcp-mmp');
-    await expect.poll(announced).toBe('HCP-MMP : Chargement…');
+    await expect.poll(announced).toBe('HCP-MMP : Chargement…');
     Object.assign(props, { status: 'ready', atlas: 'hcp-mmp' });
     await expect.poll(announced).toBe('Anatomie chargée.');
   });

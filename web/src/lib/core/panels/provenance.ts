@@ -4,6 +4,7 @@ import { domainName, type NeuropsychDomains } from '../catalog/neuropsych-domain
 import { percent } from '../format.ts';
 import { t } from '../i18n/index.ts';
 import { oneBrainHref } from '../methods.ts';
+import { citationOf, linkOf, type ListedWork } from './citations.ts';
 
 export interface ProvenanceLink {
   href: string;
@@ -176,6 +177,16 @@ export function provenanceRows(
         ]
       : [],
   );
+  const layers = manifest.cortical_layers as Described | undefined;
+  add(
+    copy.corticalLayers,
+    layers
+      ? [
+          { text: layers.label, note: layers.license },
+          ...layers.citations!.map((citation) => ({ link: link(citation) })),
+        ]
+      : [],
+  );
   const stimulation = manifest.stimulation_responses as Described | undefined;
   add(
     copy.stimulation,
@@ -267,6 +278,29 @@ export function provenanceRows(
     },
     indexUrl && { link: { href: indexUrl, text: 'anatomies.json', mono: true }, note: copy.index },
   ]);
+  return rows;
+}
+
+/**
+ * The works behind the view as rows: what on screen each is behind, then the work as a reference
+ * list cites it and its link. Works behind the same parts share a row; the HCP acknowledgement ends.
+ */
+export function referenceListRows(
+  listed: readonly ListedWork[],
+  acknowledgement: string | null,
+  lang: Language = 'en',
+): ProvenanceRow[] {
+  const copy = t(lang, 'footer');
+  const rows: ProvenanceRow[] = [];
+  for (const { work, behind } of listed) {
+    const label = behind.map((part) => copy.behind[part]).join(' · ');
+    const item = { text: citationOf(work), link: link(linkOf(work) ?? undefined) };
+    const last = rows.at(-1);
+    if (last?.label === label) last.items.push(item);
+    else rows.push({ label, items: [item] });
+  }
+  if (acknowledgement)
+    rows.push({ label: copy.acknowledgement, items: [{ text: acknowledgement }] });
   return rows;
 }
 

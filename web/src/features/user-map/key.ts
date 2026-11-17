@@ -1,13 +1,13 @@
 import { UNSTATED, readIn } from '../../lib/core/coordinates/spaces.ts';
-import { grouped, percent, withUnit } from '../../lib/core/format.ts';
+import { percent } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import {
   NEGATIVE_RAMP,
   POSITIVE_RAMP,
   mapNumber,
   mapTitle,
+  volumeParts,
 } from '../../lib/core/user-map/display.ts';
-import type { MapSummary } from '../../lib/core/user-map/display.ts';
 import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
 import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
 import type { CaptionFacts } from '../snapshot/snapshot.ts';
@@ -15,19 +15,6 @@ import type { KeySources } from '../stage/stage-keys.ts';
 
 const css = (ramp: readonly (readonly number[])[]) =>
   ramp.map((rgb) => `rgb(${rgb.map((channel) => Math.round(channel * 255)).join(' ')})`);
-
-/** A series volume's place from 1, its count, and its time when the header gives the spacing. */
-export function volumeParts(
-  { volumes, secondsPerVolume }: Pick<MapSummary, 'volumes' | 'secondsPerVolume'>,
-  volume: number,
-  lang: Language,
-): [place: string, count: string, time: string | null] {
-  const time =
-    secondsPerVolume === null
-      ? null
-      : withUnit(mapNumber(volume * secondsPerVolume, lang), 's', lang);
-  return [grouped(volume + 1), grouped(volumes), time];
-}
 
 /**
  * The map's key: its title (with a series' volume, by its time when the header gives one), and a

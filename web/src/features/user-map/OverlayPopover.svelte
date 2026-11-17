@@ -17,14 +17,14 @@
     STATISTICS,
     mapNumber,
     validDisplay,
+    volumeParts,
   } from '../../lib/core/user-map/display.ts';
   import type { CortexSurface, Statistic } from '../../lib/core/user-map/display.ts';
   import type { UserMapStore } from '../../lib/state/user-map.svelte.ts';
   import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
-  import { downloadText } from '../tracts/download.ts';
-  import { volumeParts } from './key.ts';
+  import { downloadText } from '../../lib/ui/download.ts';
   import Select from '../../lib/ui/Select.svelte';
   import Switch from '../../lib/ui/Switch.svelte';
   import AboutData from '../info/AboutData.svelte';

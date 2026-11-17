@@ -14,7 +14,7 @@
   - Section's popover and the section row above the tools are G4's, the Lesion's and Coordinate's bodies the
     lesion feature's: they come in as snippets. Coordinate is offered only with a body (published spaces).
   - Overlay, the reader's own NIfTI map, is offered only with a body, and not on a stage narrower than
-    480 px, a phone's.
+    480 px, a phone's, where Add's popover says so in one line.
   - A click on the brain places the lesion only while the reader has chosen so in the Lesion popover and it is
     open.
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
@@ -28,16 +28,16 @@
   import type { Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { CortexSurface } from '../../lib/core/user-map/display.ts';
-  import { displayChanges } from '../colophon/display-state.ts';
-  import type { PreparedDisplay } from '../colophon/display-state.ts';
-  import type { DisplayView } from '../colophon/display-state.ts';
+  import { displayChanges } from '../../lib/state/display-state.ts';
+  import type { PreparedDisplay } from '../../lib/state/display-state.ts';
+  import type { DisplayView } from '../../lib/state/display-state.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import type { DockCommands } from './dock-commands.ts';
   import DisplayPopover from './DisplayPopover.svelte';
@@ -52,7 +52,7 @@
     /** The tract reference alone is shown: it has no sections, lesion or display settings. */
     tractReference: boolean;
     /** The display settings the Display popover shows, and what it says is away from its defaults. */
-    view: Omit<DisplayView, 'lang'> & Pick<View, 'spinalCordVisible'>;
+    view: Omit<DisplayView, 'lang'> & Pick<View, 'spinalCordVisible' | 'namesShown'>;
     /** The surface the cortex is drawn on, which the Overlay popover also sets. */
     cortexSurface: CortexSurface;
     /** The display the reader's changes are counted from (`excursions.displayBaseline`). */
@@ -132,6 +132,8 @@
   const placeTool = $derived(
     placeOptions.some(({ value }) => value === placeChoice) ? placeChoice : 'lesion',
   );
+  // Overlay withdrawn for want of room, not of a body, is said rather than silently missing.
+  const overlayNarrow = $derived(Boolean(overlayPopover) && narrow);
   // The chosen body is no longer offered (the coordinate spaces went with another anatomy): Add closes
   // as a tool that goes closes its popover, before the focus inside it is dropped to the page.
   $effect.pre(() => {
@@ -356,6 +358,7 @@
           spinalCordVisible={view.spinalCordVisible}
           {hasSpinalCord}
           exploded={view.exploded}
+          namesShown={view.namesShown}
           {explodable}
           changes={media.phone ? changes : []}
           {scrubbing}
@@ -366,6 +369,7 @@
           onInternalVisible={commands.setInternalVisible}
           onSpinalCordVisible={commands.setSpinalCordVisible}
           onExploded={commands.setExploded}
+          onNamesShown={commands.setNamesShown}
           onResetDisplay={commands.resetDisplay}
         />
       {/snippet}
@@ -390,6 +394,7 @@
             bind:value={() => placeTool, (next) => (placeChoice = next)}
           />
         {/if}
+        {#if overlayNarrow}<p class="place-note">{copy.overlayNarrow}</p>{/if}
         <div class="place-body" data-place={placeTool}>
           {#if placeTool === 'lesion'}
             {@render lesionPopover({ close, placing, setPlacing: (next) => (placing = next) })}
@@ -491,6 +496,12 @@
       min-width: min-content;
       padding-inline: 6px;
       font-size: var(--text-caption);
+    }
+    .place-note {
+      margin: 0 0 var(--space-3);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--overlay-ink-muted);
     }
     .changed-mark {
       flex: none;

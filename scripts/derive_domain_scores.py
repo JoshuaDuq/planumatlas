@@ -42,7 +42,14 @@ from brain_model.layers.neuropsych_domains import (
     STRUCTURES,
     read_definition,
 )
-from brain_model.sources import HEMISPHERES, ROOT, is_cortical_area, read_config, sha256, write_json
+from brain_model.sources import (
+    HEMISPHERES,
+    ROOT,
+    is_cortical_area,
+    read_config,
+    sha256,
+    write_json,
+)
 from register_coordinate_spaces import segment_template, template_images
 
 CACHE = ROOT / "data/cache/neurosynth"

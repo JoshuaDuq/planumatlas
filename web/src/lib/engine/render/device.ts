@@ -75,8 +75,9 @@ export function detectIntegratedGpu(): boolean {
  * and this scene costs passes over the geometry — two outlines —
  * before it reaches the screen. 1.5 renders 44% fewer pixels
  * than 2 for a softening that is hard to see at arm's length and easy to
- * feel in the hand. A phone is capped at one: the same softening again,
- * which is what keeps a drag on the refresh.
+ * feel in the hand. A phone starts at one: the same softening again,
+ * which is what keeps a drag on the refresh. Its frame at rest then steps up
+ * as its measured frames allow (`stepSettledRatio`); its drag stays at one.
  */
 export function pixelRatioCap(integrated = false): number {
   const device = globalThis.devicePixelRatio ?? 1;

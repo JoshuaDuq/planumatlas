@@ -1,4 +1,4 @@
-import type { VisualFieldDot } from '../../engine/api.ts';
+import type { VisualFieldDot } from '../../types/index.ts';
 import type { CircuitCatalog } from './catalog.ts';
 
 export interface CircuitSessionState {

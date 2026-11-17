@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from brain_model.layers.networks import (
-    ANNOTATION,
     NETWORKS,
     NONE,
     composition,

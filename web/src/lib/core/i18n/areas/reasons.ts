@@ -10,6 +10,8 @@ export const en = {
   'below-cut-resolution': 'Too small for the cut',
   'other-detail': 'In another detail level',
   inDetailSet: (set: string) => `In ${set}`,
+  'other-colour': 'Not under this colour',
+  underColour: (colour: string) => `Under ${colour}`,
   'other-system': 'In another system',
   fallback: 'Hidden',
 };
@@ -26,6 +28,8 @@ export const fr: typeof en = {
   'below-cut-resolution': 'Trop petit pour la coupe',
   'other-detail': 'Dans un autre niveau de détail',
   inDetailSet: (set: string) => `Dans ${set}`,
+  'other-colour': 'Pas sous cette couleur',
+  underColour: (colour: string) => `Sous ${colour}`,
   'other-system': 'Dans un autre système',
   fallback: 'Masqué',
 };

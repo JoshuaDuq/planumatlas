@@ -21,6 +21,8 @@ export const en = {
   lesionTool: 'Lesion',
   coordinateTool: 'Coordinate',
   overlayTool: 'Overlay',
+  // Add's one line on a phone, whose stage is too narrow for Overlay's controls beside the brain.
+  overlayNarrow: 'Overlay, for your own brain map, needs a wider screen.',
   displayTool: 'Display',
   // The stage dock and the orientation gizmo's turn buttons (decision 22 on #4).
   dockLabel: '3D viewer tools',
@@ -45,6 +47,16 @@ export const en = {
   exitFullscreen: 'Exit full screen',
   snapshotSaved: (file: string) => `Image saved as ${file}.`,
   snapshotSelected: (name: string) => `Selected: ${name}`,
+  // Save image's menu: image pixels per pixel of the stage, then the clipboard.
+  snapshotAt: (scale: number) => `Save at ${scale}×`,
+  copyImage: 'Copy image',
+  imageCopied: 'Image copied',
+  imageFailed: 'Could not copy the image',
+  // An embedded page (embed=1): a still until the reader asks for the brain, and a way out to Planum.
+  posterAlt:
+    'Still picture of this brain, its regions in colour, with its tracts drawn through them',
+  loadBrain: (megabytes: number) => `Load the 3D brain (about ${withUnit(megabytes, 'MB')})`,
+  openInPlanum: 'Open in Planum',
   loadingAnatomy: 'Loading anatomy…',
   loadingWithTotal: (l: number, t: number) =>
     `Loading anatomy · ${megabytes(l, 'MB', 'en')} / ${megabytes(t, 'MB', 'en')}`,
@@ -55,7 +67,7 @@ export const en = {
   loaded: 'Anatomy loaded.',
   canvasRole: '3D anatomy viewer',
   canvasLabel:
-    'Brain model. Drag or use the arrow keys to rotate, scroll or press plus and minus to zoom, click a region to select.',
+    'Brain model. Drag or use the arrow keys to rotate, Shift and an arrow key to move it, scroll or press plus and minus to zoom, click a region to select.',
   error: 'Something went wrong.',
   retry: 'Retry',
 };
@@ -74,6 +86,8 @@ export const fr: typeof en = {
   lesionTool: 'Lésion',
   coordinateTool: 'Coordonnée',
   overlayTool: 'Superposition',
+  overlayNarrow:
+    'La superposition, pour votre propre carte cérébrale, demande un écran plus large.',
   displayTool: 'Affichage',
   dockLabel: 'Outils du visualiseur 3D',
   orbitGroup: 'Faire pivoter le modèle',
@@ -92,7 +106,15 @@ export const fr: typeof en = {
   snapshotStatement: 'Planum · Pas une anatomie clinique',
   fullscreen: 'Plein écran',
   exitFullscreen: 'Quitter le plein écran',
-  snapshotSaved: (file: string) => `Image enregistrée : ${file}.`,
+  snapshotAt: (scale: number) => `Enregistrer en ${scale}×`,
+  copyImage: 'Copier l’image',
+  imageCopied: 'Image copiée',
+  imageFailed: 'Impossible de copier l’image',
+  posterAlt: 'Image fixe de ce cerveau, ses régions en couleur, traversées par ses faisceaux',
+  loadBrain: (megabytes: number) =>
+    `Charger le cerveau en 3D (environ ${withUnit(megabytes, 'Mo', 'fr')})`,
+  openInPlanum: 'Ouvrir dans Planum',
+  snapshotSaved: (file: string) => `Image enregistrée : ${file}.`,
   snapshotSelected: (name: string) => `Sélection : ${name}`,
   loadingAnatomy: 'Chargement de l’anatomie…',
   loadingWithTotal: (l: number, t: number) =>
@@ -104,7 +126,7 @@ export const fr: typeof en = {
   loaded: 'Anatomie chargée.',
   canvasRole: 'visionneuse anatomique 3D',
   canvasLabel:
-    'Modèle du cerveau. Glissez ou utilisez les flèches pour tourner, défilez ou appuyez sur plus et moins pour zoomer, cliquez sur une région pour la sélectionner.',
+    'Modèle du cerveau. Glissez ou utilisez les flèches pour tourner, Maj et une flèche pour le déplacer, défilez ou appuyez sur plus et moins pour zoomer, cliquez sur une région pour la sélectionner.',
   error: 'Une erreur est survenue.',
   retry: 'Réessayer',
 };

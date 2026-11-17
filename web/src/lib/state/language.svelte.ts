@@ -3,9 +3,13 @@ import { PREF_KEYS, defaultStorage, readPref, writePref } from './prefs.ts';
 
 const LANGUAGES: readonly Language[] = ['en', 'fr'];
 
+/** The reader's own choice, if a valid one is saved. */
+const savedLanguage = (saved: string | null): Language | null =>
+  saved === 'fr' || saved === 'en' ? saved : null;
+
 /**
- * The language to start in: the link's, else the reader's saved choice, else the first of the
- * browser's preferred languages that the app speaks, else English (state/boot.js:4).
+ * The language to start in: the reader's saved choice, else the link's, else the first of the
+ * browser's preferred languages that the app speaks, else English (handoff U15).
  * `linkLanguage` is what `decodeState` found in the link; a `lang` the link gets wrong is absent
  * there and reported elsewhere, so it does not decide this. `preferred` is `navigator.languages`.
  */
@@ -14,8 +18,9 @@ export function startLanguage(
   saved: string | null,
   preferred: readonly string[],
 ): Language {
+  const own = savedLanguage(saved);
+  if (own) return own;
   if (linkLanguage) return linkLanguage;
-  if (saved === 'fr' || saved === 'en') return saved;
   const spoken = preferred
     .map((tag) => tag.toLowerCase().split('-')[0])
     .find((primary): primary is Language => LANGUAGES.includes(primary as Language));
@@ -43,11 +48,16 @@ export function createLanguage(
       document.documentElement.lang = next;
       writePref(PREF_KEYS.language, next, storage);
     },
-    /** The language a link carries: shown and announced, never remembered (app.js:612). */
-    follow(next: Language) {
+    /**
+     * The language a link carries: shown and announced, never remembered (app.js:612), and only
+     * while the reader has saved none. Returns the language in effect.
+     */
+    follow(next: Language): Language {
       if (!LANGUAGES.includes(next)) throw new RangeError(`Unknown language: ${next}`);
+      if (savedLanguage(readPref(PREF_KEYS.language, storage))) return language;
       language = next;
       document.documentElement.lang = next;
+      return next;
     },
   };
 }

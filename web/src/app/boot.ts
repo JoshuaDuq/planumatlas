@@ -139,6 +139,11 @@ export async function startApp(
     if (unpublished) link.rejected.push('anatomy');
     // Resolve the requested subject before constructing a scene for it.
     const anatomy = resolveAnatomy(published, unpublished ? undefined : requested);
+    if (app.embed) {
+      // A frame in a course page names its subject from the index, then downloads nothing until asked.
+      app.embed.subject = published.anatomies.find(({ id }) => id === anatomy)!;
+      await app.embed.invitation;
+    }
     const engine = await openEngine(
       app,
       createEngine,
@@ -160,6 +165,8 @@ export async function startApp(
     const notApplied = await world.links.restore(link, { immediate: true });
     app.session.setLoaded();
     world.links.report(notApplied);
+    // The stage took focus while it had no canvas (the skip link, a frame's Load): the keys are the canvas's.
+    if (document.activeElement === document.getElementById('viewport')) engine.canvas.focus();
     if (firstLaunch(arrived)) {
       // The controls a ready stage shows are drawn before the tour counts which ones it can point at.
       flushSync();
@@ -167,7 +174,8 @@ export async function startApp(
       world.links.write();
       app.ports.startGuide(true);
     }
-    prefetchFirstCut(engine.sections);
+    // A frame was asked for the brain alone: a cut it did not open is not fetched ahead.
+    if (!app.embed) prefetchFirstCut(engine.sections);
     globalThis.addEventListener('hashchange', world.links.onHashChange);
     app.defer(() => globalThis.removeEventListener('hashchange', world.links.onHashChange));
     bindAppLifecycle(app);

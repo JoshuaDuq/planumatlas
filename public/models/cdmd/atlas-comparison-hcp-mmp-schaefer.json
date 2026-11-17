@@ -14956,13 +14956,13 @@
     {
       "atlas": "hcp-mmp",
       "file": "cortex-hcp-mmp.glb",
-      "sha256": "e197f376c068abb310fa71c59b834a81e3ef51eb32999e2d865940c79a270c0f",
+      "sha256": "ea26710c172a046040b510ca8cd49c8c0b1e35a46863e9dbe31f527c2295a67a",
       "citation": "https://doi.org/10.1038/nature18933"
     },
     {
       "atlas": "schaefer",
       "file": "cortex-schaefer.glb",
-      "sha256": "777b4573289b4eb27a95df907dfa9675f7b2f7e41ec99c653c268ab501e30ec7",
+      "sha256": "74b746850f9a77e10d936e454904458a69dd21e92b4791d16a60ee6f971c5d06",
       "citation": "https://doi.org/10.1093/cercor/bhx179"
     }
   ],

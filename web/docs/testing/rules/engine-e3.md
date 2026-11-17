@@ -163,11 +163,11 @@ and white), and the Destrieux and HCP-MMP atlases publish `ribbon_labels`. The l
 
 ### TISSUE-16 · A cut shows only the solids that belong to it
 
-- **Rule:** A parcel solid belongs to its own atlas's cut only. A solid of a detail level belongs only while that level is shown. The pial envelope stands in only for an atlas without parcel solids. Under MRI colour, solids not registered to the MRI are left out.
+- **Rule:** A parcel solid belongs to the cut whose ribbon its atlas caps (`ribbon` in `paintSolids`): its own atlas's cut, and, while its atlas is the surface atlas, the cut of an atlas without parcel solids (NextBrain, the striatal and cerebellar maps), where it keeps its own label, colour and name. A solid of a detail level belongs only while that level is shown. The pial envelope stands in only where no parcels cap the ribbon: an atlas without parcel solids of its own and no surface atlas's to borrow, or the arterial territories, which colour the ribbon voxel by voxel. Under MRI colour, solids not registered to the MRI are left out.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/tissues/solid-assets.js:129-140, 164-186`
-- **Expected:** an `hcp-mmp` ribbon solid on a `destrieux` cut → not visible. An `aseg` nucleus with detail `aseg` → visible, with detail `nextbrain` → not. Pial envelope: atlas with parcel solids → not visible; without → visible in cortex colour `#c4a897`. A cord cap with `mri_registered: false` under `surfaceColor: 'mri'` → not visible.
+- **Source:** `viewer/tissues/solid-assets.js:129-140, 164-186`; the composite ribbon with derived cut labels, 2026-11-17
+- **Expected:** an `hcp-mmp` ribbon solid on a `destrieux` cut → not visible. An `aseg` nucleus with detail `aseg` → visible, with detail `nextbrain` → not. Pial envelope: atlas with parcel solids → not visible; without → visible in cortex colour `#c4a897`. A `nextbrain` cut with Destrieux's parcels in the ribbon → the parcel visible, its own region, not sampled, linear [23, 220, 60]; the pial envelope not visible. An `arterial` cut, no parcels in the ribbon → the parcel not visible, the pial envelope visible and sampled. A cord cap with `mri_registered: false` under `surfaceColor: 'mri'` → not visible.
 - **Covered by:** `src/lib/engine/tissues/solid-assets.test.ts` (R)
 
 ### TISSUE-17 · A solid is painted as the cut label it stands for

@@ -1,13 +1,18 @@
 import assert from 'node:assert/strict';
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
+import { DEFAULT_DISPLAY } from '../state/display-state.ts';
 import { createLinkWriter } from '../core/state/link-writer.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
 import { decodeState, encodeState } from '../core/state/url-state.ts';
 import { createFakeEngine } from '../engine/fake.ts';
 import { createLessonStore, createSessionStore } from '../state/session.svelte.ts';
 import { VIEW_NAMES } from '../types/index.ts';
-import type { CoordinateSpaces, Manifest, SurfaceColor } from '../types/index.ts';
+import type {
+  CoordinateSpaces,
+  HighlightedRegion,
+  Manifest,
+  SurfaceColor,
+} from '../types/index.ts';
 import { readRepoJson } from '../../../test/repo.ts';
 import type { PlacedCoordinate } from '../state/lesion.svelte.ts';
 import { createScene } from './excursion-test-support.ts';
@@ -28,6 +33,7 @@ function setup(
     hooks?: Partial<LinkHooks>;
     coordinates?: Parameters<typeof createLinks>[0]['coordinates'];
     strokeCasesAvailable?: boolean;
+    embedded?: boolean;
   } = {},
 ) {
   const followed: string[] = [];
@@ -91,12 +97,21 @@ function setup(
       strokeCases.chosen = [];
     }),
   };
+  // The reader's highlights as links reads and replaces them.
+  const highlights = {
+    list: [] as readonly HighlightedRegion[],
+    status: 'drawn' as 'drawn' | 'aside' | 'lifted',
+    replace: vi.fn((next: readonly HighlightedRegion[]) => {
+      highlights.list = next;
+    }),
+  };
   const links = createLinks({
     engine,
     session,
     lesson,
     lesion,
     strokeCases,
+    highlights,
     coordinates: extras.coordinates ?? null,
     view: {
       get current() {
@@ -131,8 +146,12 @@ function setup(
       ...extras.hooks,
     },
     defaultAnatomy: 'cdmd',
-    followLanguage: (lang) => followed.push(lang),
+    followLanguage: (lang) => {
+      followed.push(lang);
+      return lang;
+    },
     page: page as never,
+    embedded: extras.embedded ?? false,
   });
   return {
     followed,
@@ -146,6 +165,7 @@ function setup(
     commands,
     lesion,
     strokeCases,
+    highlights,
   };
 }
 
@@ -170,6 +190,17 @@ describe('writing the link', () => {
     engine.sections.setOffset(12.34);
     expect(links.linkState()).toMatchObject({ cut: 'coronal', cutOffset: engine.sections.offset });
     expect(links.linkState().orbit).toEqual(engine.camera.orbitLink());
+  });
+
+  it('LINK-24 an embedded page keeps embed=1, last, so a reloaded frame stays one; another page writes none', () => {
+    const embedded = setup({}, published.anatomy.id, { embedded: true });
+    embedded.links.write();
+    expect(embedded.calls).toEqual([
+      ['replace', expect.stringMatching(/^#anatomy=cdmd&.*&embed=1$/)],
+    ]);
+    const plain = setup();
+    plain.links.write();
+    expect(plain.calls).toEqual([['replace', expect.not.stringContaining('embed')]]);
   });
 });
 
@@ -201,7 +232,6 @@ describe('another subject', () => {
       anatomy: 'bert',
       atlas: 'hcp-mmp',
       cut: 'coronal',
-      cutAtlas: 'destrieux',
       detail: 'learning',
       cutOffset: 12.3,
       view: 'left',
@@ -514,13 +544,6 @@ describe('the scene as a link carries it', () => {
     });
   });
 
-  it('keeps the sections’ cut atlas when the model has none yet', async () => {
-    const { engine, links } = setup();
-    await engine.model.setAtlas('hcp-mmp');
-    expect(engine.model.state.cutAtlas).toBeNull();
-    expect(links.captureReaderState().cutAtlas).toBe(engine.sections.state.cutAtlas);
-  });
-
   it('puts back the session view of the captured scene with its exact camera pose', async () => {
     const { links, session, commands } = setup();
     session.setView('left');
@@ -533,14 +556,12 @@ describe('the scene as a link carries it', () => {
   it('puts back a captured scene: layers, display, cut, window and the exact camera pose', async () => {
     const { engine, links, commands } = setup();
     engine.model.setHemisphere('left');
-    await engine.sections.setCutAtlas('hcp-mmp');
     await engine.sections.setMode('coronal');
     await engine.sections.load();
     engine.sections.setWindow(50, 60);
     engine.camera.applyView('left');
     const scene = links.captureReaderState();
     expect(scene).toMatchObject({
-      cutAtlas: 'hcp-mmp',
       hemisphere: 'left',
       cut: 'coronal',
       mriWindow: { center: 50, width: 60 },
@@ -1019,6 +1040,7 @@ describe('a link written on a whole route', () => {
         clear: vi.fn(),
         known: vi.fn(),
       },
+      highlights: { list: [], status: 'drawn', replace: vi.fn() },
       coordinates: null,
       link: createLinkWriter(() => {}),
       commands: scene.commands,
@@ -1040,7 +1062,7 @@ describe('a link written on a whole route', () => {
         showTracts: async () => {},
       },
       defaultAnatomy: 'cdmd',
-      followLanguage() {},
+      followLanguage: (lang) => lang,
       page: { history: { replaceState() {} }, location: { pathname: '/', search: '' } } as never,
     });
     return { ...scene, links };
@@ -1095,5 +1117,60 @@ describe('a link written on a whole route', () => {
     expect(await links.restore(decodeState(written), {})).toEqual([]);
     // The link's scene stands as a fresh load of it does, counted from the defaults.
     expect(excursions.displayBaseline).toEqual(DEFAULT_DISPLAY);
+  });
+});
+
+describe('highlights in the link', () => {
+  it('LINK-25 carries the reader’s highlights in order; a link replaces them, and one without any clears them', async () => {
+    const { links, highlights, calls } = setup();
+    highlights.list = [
+      { region: 'destrieux:left:29', color: 'green' },
+      { region: 'aseg:left:17', color: 'blue' },
+    ];
+    links.write();
+    expect(calls.at(-1)![1]).toContain('mark=destrieux:left:29:green,aseg:left:17:blue');
+    expect(await links.restore(decodeState('hemi=left&mark=aseg:left:17:violet'), {})).toEqual([]);
+    expect(highlights.list).toEqual([{ region: 'aseg:left:17', color: 'violet' }]);
+    expect(await links.restore(decodeState('hemi=right'), {})).toEqual([]);
+    expect(highlights.list).toEqual([]);
+    expect(links.linkState().highlights).toBeNull();
+  });
+
+  it('LINK-25 names mark when a region is not this anatomy’s, and applies none of the set', async () => {
+    const { links, highlights } = setup();
+    highlights.list = [{ region: 'destrieux:left:29', color: 'green' }];
+    expect(
+      await links.restore(decodeState('mark=aseg:left:17:blue,destrieux:left:9999:pink'), {}),
+    ).toEqual(['mark']);
+    expect(highlights.list).toEqual([]);
+  });
+
+  it('LINK-25 leaves out highlights a masthead colour lifted, so the link opens on that colour; set aside, they travel', () => {
+    const { links, highlights, calls } = setup({ surfaceColor: 'lobe' });
+    highlights.list = [{ region: 'destrieux:left:29', color: 'green' }];
+    highlights.status = 'lifted';
+    links.write();
+    expect(calls.at(-1)![1]).toContain('colors=lobe');
+    expect(calls.at(-1)![1]).not.toContain('mark=');
+    expect(links.linkState().highlights).toBeNull();
+    highlights.status = 'aside';
+    expect(links.linkState().highlights).toEqual([{ region: 'destrieux:left:29', color: 'green' }]);
+  });
+});
+
+describe('names on the brain in the link', () => {
+  it('LINK-26 carries names=1 while the names are on; a link turns them on, and one without them off', async () => {
+    const { links, session, calls } = setup();
+    links.write();
+    expect(calls.at(-1)![1]).not.toContain('names=');
+    session.setNamesShown(true);
+    links.write();
+    expect(calls.at(-1)![1]).toContain('&names=1');
+    session.setNamesShown(false);
+    expect(await links.restore(decodeState('hemi=left&names=1'), {})).toEqual([]);
+    expect(session.state.namesShown).toBe(true);
+    expect(await links.restore(decodeState('hemi=right'), {})).toEqual([]);
+    expect(session.state.namesShown).toBe(false);
+    expect(await links.restore(decodeState('names=yes'), {})).toEqual(['names']);
   });
 });

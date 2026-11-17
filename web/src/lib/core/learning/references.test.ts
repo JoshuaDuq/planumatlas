@@ -1,9 +1,10 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import { readRepoJson, readRepoYaml, repoRoot } from '../../../../test/repo.ts';
 import type { ClinicalData } from '../clinical/types.ts';
+import { citationFields, identifiersOf } from '../panels/citations.ts';
 import type { CircuitData } from './catalog.ts';
 
 interface Work {
@@ -47,6 +48,17 @@ const { source: stimulation } = readRepoYaml<{ source: Source }>(
 );
 const { source: ftract } = readRepoYaml<{ source: Source }>('config/stimulation-ftract.yaml');
 const bibliography = readFileSync(resolve(repoRoot, 'docs/reference/references.md'), 'utf8');
+// What the published manifests' citation fields and the tract catalogs' sources cite (WP24).
+const published = [
+  ...readRepoJson<{ anatomies: { id: string }[] }>(
+    'public/models/anatomies.json',
+  ).anatomies.flatMap(({ id }) =>
+    citationFields(readRepoJson(`public/models/${id}/manifest.json`)),
+  ),
+  ...readdirSync(resolve(repoRoot, 'data'))
+    .filter((file) => /^diffusion-.+\.yaml$/.test(file))
+    .map((file) => readRepoYaml<{ source: string }>(`data/${file}`).source),
+].map(identifiersOf);
 
 /** Case, accents and punctuation are ignored; any other difference is a different work. */
 const plain = (value: string) =>
@@ -198,6 +210,12 @@ test('the records file holds exactly the cited works', () => {
     `pmid:${stimulation.pmid}`,
     `pmid:${ftract.pmid}`,
     ...bibliographyEntries.map((line) => `pmid:${line.match(/\bPMID (\d+)\b/)?.[1]}`),
+    ...published.flatMap(({ pmids }) => pmids.map((pmid) => `pmid:${pmid}`)),
   ]);
+  // A DOI the manifests or tract catalogs cite that no cited PubMed article carries is recorded alone.
+  const carried = new Set([...cited].map((key) => records[key]?.doi));
+  for (const doi of published.flatMap(({ dois }) => dois)) {
+    if (!carried.has(doi)) cited.add(`doi:${doi}`);
+  }
   assert.deepEqual([...cited].sort(), Object.keys(records).sort());
 });

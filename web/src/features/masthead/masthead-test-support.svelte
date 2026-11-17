@@ -13,11 +13,14 @@
     fullscreen = false,
     provenanceReady = true,
     calls = [],
+    copyImage,
   }: {
     ready?: boolean;
     fullscreen?: boolean;
     provenanceReady?: boolean;
     calls?: string[];
+    /** The stage's PNG for Copy image; without it the item is not offered. */
+    copyImage?: () => Promise<Blob>;
   } = $props();
 
   let lang = $state<Language>('en');
@@ -55,8 +58,10 @@
   onTheme={(next) => ((themeChoice = next), calls.push(`theme:${next}`))}
   onSingleKeys={(on) => ((singleKeys = on), calls.push(`keys:${on}`))}
   onFullscreen={() => calls.push('fullscreen')}
-  onSnapshot={() => calls.push('snapshot')}
+  onSnapshot={(scale) => calls.push(`snapshot:${scale}`)}
+  onCopyImage={copyImage}
   currentLink={() => location.href}
+  currentEmbedCode={() => `<iframe src="${location.href}"></iframe>`}
   onProvenance={() => calls.push('provenance')}
   onFeedback={() => calls.push('feedback')}
   onGuide={() => calls.push(`guide:${document.activeElement?.getAttribute('aria-label')}`)}

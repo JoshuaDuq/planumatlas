@@ -1,10 +1,12 @@
 """Fetch the F-TRACT stimulation responses config/stimulation-ftract.yaml lists.
 
 F-TRACT (v2307) publishes, per parcellation, one matrix per measure over its
-areas: rows stimulated, columns recorded. Three are read for Julich-Brain 3.0,
-the probability of a response, the stimulation–recording pairs it rests on and
-the implantations they come from, with the area list, each pinned by checksum.
-data/stimulation-ftract.json holds the areas and every pair tested at least once.
+areas: rows stimulated, columns recorded. Five are read for Julich-Brain 3.0,
+the probability of a response, the stimulation–recording pairs it rests on, the
+implantations they come from, and the peak delay with its median absolute
+deviation, with the area list, each pinned by checksum.
+data/stimulation-ftract.json holds the areas, every pair tested at least once and
+every peak delay published.
 """
 
 import argparse
@@ -80,11 +82,33 @@ def read_pairs(paths, size, min_pairs):
     ]
 
 
+def read_delays(paths, size, cohort):
+    """Each peak delay F-TRACT publishes, with its median absolute deviation, in ms."""
+    peak = read_matrix(paths["peak_delay"], size)
+    mad = read_matrix(paths["peak_delay_mad"], size)
+    probability = read_matrix(paths["probability"], size)
+    tested = read_matrix(paths["stimulations"], size)
+    if (np.isnan(peak) != np.isnan(mad)).any():
+        raise SystemExit("A peak delay without its deviation, or a deviation without its delay")
+    published = ~np.isnan(peak)
+    window = cohort["window_ms"]
+    if not ((peak[published] > 0) & (peak[published] <= window) & (mad[published] >= 0)).all():
+        raise SystemExit(f"A peak delay outside (0, {window}] ms, or a negative deviation")
+    # The probability is written to three decimals, so a pair's responses are known to ±0.0005 × its pairs.
+    responses = np.where(published, (probability + 0.0005) * tested, np.inf)
+    if (np.isnan(responses) | (responses < cohort["min_responses"])).any():
+        raise SystemExit(f"A peak delay is published below {cohort['min_responses']} responses")
+    sources, targets = np.nonzero(published)
+    return [[int(i), int(j), float(peak[i, j]), float(mad[i, j])] for i, j in zip(sources, targets)]
+
+
 def write(data):
-    # One pair per line, so a new release diffs pair by pair.
+    # One pair or delay per line, so a new release diffs pair by pair.
     pairs = ",\n".join(f"  {json.dumps(pair)}" for pair in data["pairs"])
+    delays = ",\n".join(f"  {json.dumps(delay)}" for delay in data["delays"])
     DATA.write_text(
-        f'{{\n "parcels": {json.dumps(data["parcels"], ensure_ascii=False)},\n "pairs": [\n{pairs}\n ]\n}}\n'
+        f'{{\n "parcels": {json.dumps(data["parcels"], ensure_ascii=False)},\n "pairs": [\n{pairs}\n ],\n'
+        f' "delays": [\n{delays}\n ]\n}}\n'
     )
 
 
@@ -96,8 +120,12 @@ def main():
     paths = fetch(definition)
     parcels = read_parcels(paths["parcels"])
     pairs = read_pairs(paths, len(parcels), definition["cohort"]["min_pairs"])
-    write({"parcels": parcels, "pairs": pairs})
-    print(f"{DATA.relative_to(ROOT)}: {len(parcels)} parcels, {len(pairs)} pairs tested at least once")
+    delays = read_delays(paths, len(parcels), definition["cohort"])
+    write({"parcels": parcels, "pairs": pairs, "delays": delays})
+    print(
+        f"{DATA.relative_to(ROOT)}: {len(parcels)} parcels, {len(pairs)} pairs tested at least once, "
+        f"{len(delays)} peak delays"
+    )
     if args.record:
         record(definition)
     else:
@@ -115,7 +143,8 @@ def record(definition):
         "derived_from": [{"url": f"{files['base']}/{files[key][0]}", "sha256": files[key][1]} for key in FILES],
         "procedure": (
             "scripts/fetch_stimulation_ftract.py: F-TRACT's Julich-Brain 3.0 probability, stimulation–recording "
-            "pair and implantation matrices, every pair tested at least once"
+            "pair and implantation matrices, every pair tested at least once, and every peak delay with its "
+            "median absolute deviation"
         ),
         "citation": f"{definition['source']['dataset']}, {definition['source']['doi']}",
         "license": definition["license"],

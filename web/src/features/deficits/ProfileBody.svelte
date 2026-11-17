@@ -11,7 +11,7 @@
   import Association from './Association.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
   import LinkRow from './LinkRow.svelte';
-  import MethodsLink from './MethodsLink.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
 
   let {
     explorer,

@@ -26,6 +26,11 @@ export default defineConfig({
           testTimeout: 30_000,
           include: ['src/**/*.test.ts', 'build/**/*.test.ts', 'test/**/*.test.ts'],
           exclude: ['src/**/*.svelte.test.ts'],
+          // A worker runs its files in one realm and module cache, without a fresh one per file. Stubs
+          // and spies are undone before each test; a file that mocks a module resets the cache itself.
+          isolate: false,
+          unstubGlobals: true,
+          restoreMocks: true,
         },
       },
       {

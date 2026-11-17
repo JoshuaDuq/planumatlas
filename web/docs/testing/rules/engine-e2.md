@@ -228,11 +228,11 @@ The legacy comparison file `parity/E2.test.ts` is deleted; a rule that lists no 
 
 ### SHADER-22 · Under atlas colours a cut label has the published colour its surface has
 
-- **Rule:** Under atlas colours a cut label takes its published sRGB table colour, decoded the way the surfaces' glTF colours are, so a parcel is one colour on the cut and on the surface. A cut-only label carries its table colour unchanged. A cortex label with no region is unlabelled.
+- **Rule:** Under atlas colours a cut label takes its published sRGB table colour, decoded the way the surfaces' glTF colours are, so a parcel is one colour on the cut and on the surface. A cut-only label carries its table colour unchanged. A cortex label with no region is unlabelled. Where the surface atlas's parcels cap the ribbon of another atlas's cut (`ribbonCapped`, SLICE-29), a cortical label of the sampled volume (kind `cortex`, or the `ctx-` block NextBrain reuses) lies inside the white surface and takes the tissue white; its visibility stays its own.
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/tissues/palette.js:65-67, 90, 95-103`
-- **Expected:** [23, 220, 60] → linear [0.008568, 0.715694, 0.045186] ± 1e-6, alpha 1; background code 0 → alpha 0. Every CDMD label with a mesh (`cortex-destrieux.glb`, `cortex-hcp-mmp.glb`, `structures.glb`, `nextbrain.glb` where published) equals that mesh's material colour ± 1e-6; every NextBrain cut-only label equals its table colour ± 1e-6.
+- **Source:** `viewer/tissues/palette.js:65-67, 90, 95-103`; the composite ribbon with derived cut labels, 2026-11-17
+- **Expected:** [23, 220, 60] → linear [0.008568, 0.715694, 0.045186] ± 1e-6, alpha 1; background code 0 → alpha 0. Every CDMD label with a mesh (`cortex-destrieux.glb`, `cortex-hcp-mmp.glb`, `structures.glb`, `nextbrain.glb` where published) equals that mesh's material colour ± 1e-6; every NextBrain cut-only label equals its table colour ± 1e-6. `createPalette(…, ribbonCapped)` under atlas colours: `Left-ctx-rh-bankssts` and `ctx_lh_G` → tissue white, `Left-AD` its own colour, all alpha 1; without `ribbonCapped` the cortex keeps its colour.
 - **Covered by:** `src/lib/engine/tissues/palette.test.ts` (R), `src/lib/engine/tissues/assets.test.ts` (S, every published label)
 
 ### SHADER-23 · Network and CAB-NP colours reach the cut as they reach the surface
@@ -306,12 +306,12 @@ The legacy comparison file `parity/E2.test.ts` is deleted; a rule that lists no 
 
 ### SHADER-30 · Caps of an atlas without parcel solids sample its labels
 
-- **Rule:** Cap labels are on whenever the cut atlas has no parcel solids, except under tissue colour, and give the cap its label's colour except under MRI colour without a paint. They read the cut layer's label volume, palette, world-to-voxel matrix and highlight codes and lifts as they stand, and know whether a region is isolated. A cap samples where it has no region of its own, where the isolated label exists only in the cut atlas, or, outside MRI colour, where the atlas relabels the structure it was drawn from (a thalamus inside a territory); supplemental anatomy never samples.
+- **Rule:** Cap labels are on whenever the cut atlas has no parcel solids, except under tissue colour, and give the cap its label's colour except under MRI colour without a paint. They read the cut layer's label volume, palette, world-to-voxel matrix and highlight codes and lifts as they stand, and know whether a region is isolated. A cap samples where it has no region of its own, where the isolated label exists only in the cut atlas, or, outside MRI colour, where the atlas relabels the structure it was drawn from (a thalamus inside a territory); on a map's cut (`mapped`: the arterial, striatal or cerebellar map) every structure cap it reaches samples, one whose label the map's table also lists included (a caudate among the striatal networks). A parcel solid in the ribbon and supplemental anatomy never sample.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `src/lib/engine/tissues/cap-labels.ts`, `src/lib/engine/tissues/solid-assets.ts` (`paintSolids`)
-- **Expected:** new → off, colour off, no volume or palette, highlight codes (−1, −1), lifts (0, 0), not isolated. Not wedged: `mri` → on, colour off; `atlas`, `network`, `territory` → on, colour on; `tissue` → off. Wedged → off in every mode. Volume, palette, matrix, codes and lifts are the layer's own objects; `isolatedRegion` set → isolated true. Painting under atlas colour: relabelled thalamus and envelope sample, the labelled caudate and the cord do not; under MRI only the envelope.
-- **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R, enabled and volume, SLICE-36), `src/lib/engine/tissues/cap-labels.test.ts` (R)
+- **Expected:** new → off, colour off, no volume or palette, highlight codes (−1, −1), lifts (0, 0), not isolated. Not wedged: `mri` → on, colour off; `atlas`, `network`, `territory` → on, colour on; `tissue` → off. Wedged → off in every mode. Volume, palette, matrix, codes and lifts are the layer's own objects; `isolatedRegion` set → isolated true. Painting under atlas colour: relabelled thalamus and envelope sample, the labelled caudate and the cord do not; under MRI only the envelope. A caudate the cut's labels list: on `nextbrain` → no sample; on `choi` → samples.
+- **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R, enabled and volume, SLICE-36), `src/lib/engine/tissues/cap-labels.test.ts` (R), `src/lib/engine/tissues/solid-assets.test.ts` (R, painting)
 
 ### SHADER-31 · A sampled cap hides removed labels and lifts the marked one
 

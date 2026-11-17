@@ -15,7 +15,6 @@ export interface RevealSettings {
   cut: boolean;
   isolated: boolean;
   atlas: string;
-  cutAtlas: string;
   colour: SurfaceColor;
   detail: string;
   hemisphere: Hemisphere;
@@ -23,12 +22,11 @@ export interface RevealSettings {
 }
 
 /** The reader's own settings a reveal can change, read before and after it to say which it did. */
-export function revealSettings(settings: DisplaySettings, cutAtlas: string): RevealSettings {
+export function revealSettings(settings: DisplaySettings): RevealSettings {
   const { atlas, surfaceColor, detail, cutActive, isolatedRegion, hemisphere, cortexVisible } =
     settings;
   return {
     atlas,
-    cutAtlas,
     colour: surfaceColor,
     detail,
     cut: cutActive,
@@ -83,14 +81,7 @@ export function revealNotice(
   if (before.cut && !after.cut) clauses.push(said.cut);
   if (before.isolated && !after.isolated) clauses.push(said.isolation);
   const atlasMoved = before.atlas !== after.atlas;
-  const cutsMoved = before.cutAtlas !== after.cutAtlas;
-  if (atlasMoved && cutsMoved && after.atlas === after.cutAtlas) {
-    // Both moved to one atlas: it is named once.
-    clauses.push(said.atlasAndCuts(atlasSwitchLabel(after.atlas, lang)));
-  } else {
-    if (atlasMoved) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
-    if (cutsMoved) clauses.push(said.cutAtlas(atlasSwitchLabel(after.cutAtlas, lang)));
-  }
+  if (atlasMoved) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
   // Lobes that gave way to an atlas without any are that atlas's doing, which its clause has said.
   const lobesGaveWay = before.colour === 'lobe' && atlasMoved && !groupsByLobe(after.atlas);
   if (before.colour !== after.colour && !lobesGaveWay) {

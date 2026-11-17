@@ -2,8 +2,8 @@
  "agreement": {
   "heading": "Accord des segmentations",
   "compared": [
-   "[\"Alpha\"] → \"Comparée au sein de l’ensemble « Alpha » de NextBrain.\"",
-   "[\"\"] → \"Comparée au sein de l’ensemble «  » de NextBrain.\""
+   "[\"Alpha\"] → \"Comparée au sein de l’ensemble «<NBSP>Alpha<NBSP>» de NextBrain.\"",
+   "[\"\"] → \"Comparée au sein de l’ensemble «<NBSP><NBSP>» de NextBrain.\""
   ],
   "category": {
    "both": "Les deux segmentations",
@@ -17,18 +17,18 @@
   "show": "Afficher sur l’IRM liée",
   "hide": "Masquer l’accord",
   "legend": [
-   "[\"Alpha\"] → \"Accord : Alpha\"",
-   "[\"\"] → \"Accord : \""
+   "[\"Alpha\"] → \"Accord<NNBSP>: Alpha\"",
+   "[\"\"] → \"Accord<NNBSP>: \""
   ],
   "note": [
-   "[\"Alpha\"] → \"Sur la grille de 1 mm d’aseg, où l’ensemble « Alpha » de NextBrain est voxelisé : un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode ; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.\"",
-   "[\"\"] → \"Sur la grille de 1 mm d’aseg, où l’ensemble «  » de NextBrain est voxelisé : un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode ; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.\""
+   "[\"Alpha\"] → \"Sur la grille de 1 mm d’aseg, où l’ensemble «<NBSP>Alpha<NBSP>» de NextBrain est voxelisé<NNBSP>: un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode<NNBSP>; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.\"",
+   "[\"\"] → \"Sur la grille de 1 mm d’aseg, où l’ensemble «<NBSP><NBSP>» de NextBrain est voxelisé<NNBSP>: un voxel en fait partie quand plus de la moitié des voxels de 0,4 mm qui y tombent en font partie. L’accord entre deux segmentations d’un même examen montre à quel point une limite dépend de la méthode<NNBSP>; ce n’est pas une mesure d’exactitude, et aucune des deux n’est la référence. La validation évalue les mêmes structures sur la grille de 0,4 mm de NextBrain.\""
   ]
  },
  "app": {
   "spoken": [
-   "[\"Alpha\",\"\"] → \"Sélectionné : Alpha, \"",
-   "[\"\",\"Alpha\"] → \"Sélectionné : , Alpha\""
+   "[\"Alpha\",\"\"] → \"Sélectionné<NNBSP>: Alpha, \"",
+   "[\"\",\"Alpha\"] → \"Sélectionné<NNBSP>: , Alpha\""
   ],
   "selectionCleared": [
    "[\"Alpha\"] → \"Sélection effacée — Alpha n’est plus visible.\"",
@@ -40,12 +40,12 @@
   ],
   "undoPick": "Annuler",
   "cabNpAtlasOnly": [
-   "[\"Alpha\"] → \"CAB-NP ne colore que les aires HCP-MMP : Alpha affiche donc les couleurs de ses régions.\"",
-   "[\"\"] → \"CAB-NP ne colore que les aires HCP-MMP :  affiche donc les couleurs de ses régions.\""
+   "[\"Alpha\"] → \"CAB-NP ne colore que les aires HCP-MMP<NNBSP>: Alpha affiche donc les couleurs de ses régions.\"",
+   "[\"\"] → \"CAB-NP ne colore que les aires HCP-MMP<NNBSP>:  affiche donc les couleurs de ses régions.\""
   ],
   "lobesAtlasOnly": [
-   "[\"Alpha\"] → \"Alpha regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.\"",
-   "[\"\"] → \" regroupe ses aires par réseau, non par lobe : il affiche donc les couleurs de ses régions.\""
+   "[\"Alpha\"] → \"Alpha regroupe ses aires par réseau, non par lobe<NNBSP>: il affiche donc les couleurs de ses régions.\"",
+   "[\"\"] → \" regroupe ses aires par réseau, non par lobe<NNBSP>: il affiche donc les couleurs de ses régions.\""
   ]
  },
  "atlases": {
@@ -54,7 +54,7 @@
   "julich": "Atlas cytoarchitectonique Julich-Brain",
   "schaefer": "Parcellisation fonctionnelle Schaefer 2018",
   "desikan": "Atlas anatomique de Desikan-Killiany",
-  "learning": "Ensemble pédagogique : grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés",
+  "learning": "Ensemble pédagogique<NNBSP>: grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés",
   "aseg": "Segmentation sous-corticale FreeSurfer",
   "nextbrain": "Atlas histologique NextBrain",
   "cerebnet": "Lobules cérébelleux FastSurfer CerebNet",
@@ -62,7 +62,8 @@
   "pam50": "Atlas médullaire PAM50 sur cette moelle",
   "arterial": "Atlas des territoires artériels (Liu et al. 2023)",
   "nettekoven": "Atlas fonctionnel du cervelet (Nettekoven et al. 2024)",
-  "choi": "Atlas des réseaux striataux (Choi et al. 2012)"
+  "choi": "Atlas des réseaux striataux (Choi et al. 2012)",
+  "aan": "Atlas du réseau ascendant de l’éveil de Harvard 2.0"
  },
  "boundary": {
   "heading": "Certitude des limites",
@@ -116,7 +117,7 @@
   "mapping": "Ce que montre cet atlas",
   "clinical": "Contexte clinique",
   "clinicalLink": "Ouvrir les données sur le déficit",
-  "clinicalNote": "Anatomie de référence. L’exactitude clinique n’a pas été validée ; ces associations ne prédisent pas le déficit d’un patient individuel.",
+  "clinicalNote": "Anatomie de référence. L’exactitude clinique n’a pas été validée<NNBSP>; ces associations ne prédisent pas le déficit d’un patient individuel.",
   "deficitEvidence": "Données sur le déficit",
   "background": "Contexte du parcours",
   "evidence": "Sources",
@@ -222,14 +223,6 @@
    "colour": [
     "[\"Alpha\"] → \"coloration réglée sur Alpha\"",
     "[\"\"] → \"coloration réglée sur \""
-   ],
-   "cutAtlas": [
-    "[\"Alpha\"] → \"étiquettes de coupe réglées sur Alpha\"",
-    "[\"\"] → \"étiquettes de coupe réglées sur \""
-   ],
-   "atlasAndCuts": [
-    "[\"Alpha\"] → \"atlas et étiquettes de coupe réglés sur Alpha\"",
-    "[\"\"] → \"atlas et étiquettes de coupe réglés sur \""
    ]
   },
   "restore": "Rétablir la vue précédente",
@@ -240,12 +233,12 @@
   "supporting": "Étude à l’appui",
   "qualifying": "Données contradictoires",
   "population": "Population étudiée",
-  "abstract": "Source consultée : résumé",
+  "abstract": "Source consultée<NNBSP>: résumé",
   "correction": "Correction publiée",
-  "full-text": "Source consultée : texte intégral",
+  "full-text": "Source consultée<NNBSP>: texte intégral",
   "sources": "Sélection de publications · pas une revue systématique",
   "revised": "Contenu vérifié",
-  "referenceOnly": "Anatomie de référence. L’exactitude clinique n’a pas été validée ; les associations ne prédisent pas le déficit d’un patient individuel.",
+  "referenceOnly": "Anatomie de référence. L’exactitude clinique n’a pas été validée<NNBSP>; les associations ne prédisent pas le déficit d’un patient individuel.",
   "mappingEmpty": "Aucune correspondance disponible dans l’atlas.",
   "loading": "Ouverture de l’anatomie…",
   "methods": {
@@ -390,9 +383,9 @@
   },
   "axes": {
    "off": "Position (mm)",
-   "sagittal": "Coordonnée D (mm) : − gauche / + droite",
-   "coronal": "Coordonnée A (mm) : − postérieur / + antérieur",
-   "axial": "Coordonnée S (mm) : − inférieur / + supérieur",
+   "sagittal": "Coordonnée D (mm)<NNBSP>: − gauche / + droite",
+   "coronal": "Coordonnée A (mm)<NNBSP>: − postérieur / + antérieur",
+   "axial": "Coordonnée S (mm)<NNBSP>: − inférieur / + supérieur",
    "oblique": "Décalage normal depuis l’origine (mm)"
   },
   "exactPositionAria": "Position exacte de coupe en millimètres",
@@ -447,8 +440,7 @@
   "nextbrainSegmented": "NextBrain segmentées sur ce cerveau",
   "arterialRegistered": "territoires artériels typiques recalés sur ce cerveau",
   "nettekovenRegistered": "régions fonctionnelles cérébelleuses de groupe recalées sur ce cerveau",
-  "choiRegistered": "réseaux striataux de groupe recalés sur ce cerveau",
-  "cutLabels": "Étiquettes de coupe"
+  "choiRegistered": "réseaux striataux de groupe recalés sur ce cerveau"
  },
  "deficitKey": {
   "keyAll": [
@@ -504,8 +496,8 @@
    "[12345] → \"12345 faisceaux\""
   ],
   "loaded": [
-   "[\"Alpha\"] → \"Chargé : Alpha\"",
-   "[\"\"] → \"Chargé : \""
+   "[\"Alpha\"] → \"Chargé<NNBSP>: Alpha\"",
+   "[\"\"] → \"Chargé<NNBSP>: \""
   ],
   "restored": "Faisceaux initiaux rétablis.",
   "exported": "CSV des longueurs exporté.",
@@ -561,6 +553,8 @@
   "spinalCordUnavailable": "Aucune moelle épinière n’est publiée pour ce sujet.",
   "explode": "Vue éclatée",
   "explodeHint": "Les structures gardent leur forme mesurée<NNBSP>; seule leur place change.",
+  "names": "Noms sur le cerveau",
+  "namesHint": "Les régions tournées vers vous, les plus grandes d’abord<NNBSP>; zoomez pour nommer les plus petites.",
   "surfaceColors": {
    "tissue": "Tissu",
    "mri": "IRM T1",
@@ -568,14 +562,24 @@
    "atlas": "Régions",
    "network": "Réseaux Yeo 7",
    "cab-np": "Réseaux CAB-NP",
-   "territory": "Territoires artériels"
+   "territory": "Territoires artériels",
+   "striatal": "Réseaux striataux",
+   "cerebellar": "Fonctions cérébelleuses"
   },
   "paints": {
    "function": "Fonctions",
    "deficit": "Déficit",
-   "lesion": "Lésion"
+   "lesion": "Lésion",
+   "highlight": "Vos surlignages",
+   "connectivity": "Connectivité",
+   "disorder": "Trouble",
+   "layers": "Couche IV"
   },
   "paintTitles": {
+   "connectivity": "Choisi dans la fiche d’une région<NNBSP>: la connectivité fonctionnelle de repos de l’aire entourée avec toutes les autres (moyenne de groupe de 200 adultes). Choisissez une couleur pour la remplacer.",
+   "disorder": "Choisi dans la fiche d’une région<NNBSP>: les différences patients-témoins d’un trouble (consortium ENIGMA) sur Desikan-Killiany. Choisissez une couleur pour la remplacer.",
+   "layers": "Choisi dans la fiche d’une région<NNBSP>: la part de la couche IV dans l’épaisseur du cortex de chaque parcelle, d’après un seul cerveau histologique (BigBrain). Choisissez une couleur pour la remplacer.",
+   "highlight": "Choisi par vous<NNBSP>: les régions que vous avez surlignées, dans les couleurs choisies<NNBSP>; vos marques personnelles, pas des données. Choisissez une couleur pour la remplacer.",
    "function": "Choisi dans l’onglet Fonctions<NNBSP>: fonctions sur les aires HCP-MMP où les études rapportent une activation (Neurosynth). Choisissez une couleur pour la remplacer.",
    "deficit": "Choisi dans l’onglet Déficits<NNBSP>: les régions citées par les constats du déficit ouvert, une couleur par constat. Choisissez une couleur pour la remplacer.",
    "lesion": "Choisi dans le rapport de la lésion<NNBSP>: les territoires des fonctions qu’elle atteint, ou les régions citées par ses constats. Choisissez une couleur pour la remplacer."
@@ -617,7 +621,17 @@
   "resetDisplay": "Réinitialiser l’affichage",
   "displayReset": "Réglages d’affichage réinitialisés.",
   "startedOver": "Retour à l’image de départ.",
-  "changed": ", réglages modifiés"
+  "changed": ", réglages modifiés",
+  "mapOnCuts": "Tracées sur les faces de coupe, voxel par voxel.",
+  "highlightKey": {
+   "title": "Vos surlignages",
+   "note": [
+    "[\"Alpha\"] → \"Les régions que vous avez surlignées, dans les couleurs choisies<NNBSP>: vos marques personnelles, pas des données. undefined ne sont pas surlignées.\"",
+    "[\"\"] → \"Les régions que vous avez surlignées, dans les couleurs choisies<NNBSP>: vos marques personnelles, pas des données. undefined ne sont pas surlignées.\""
+   ],
+   "absent": "Une région cernée n’est pas affichée dans cette vue.",
+   "marks": "marques personnelles, pas des données"
+  }
  },
  "dissection": {
   "heading": "Dissection",
@@ -641,19 +655,19 @@
   ],
   "partial": "partiellement masqué",
   "partHidden": [
-   "[\"Alpha\",\"\"] → \"Masqué : Alpha, .\"",
-   "[\"\",\"Alpha\"] → \"Masqué : , Alpha.\""
+   "[\"Alpha\",\"\"] → \"Masqué<NNBSP>: Alpha, .\"",
+   "[\"\",\"Alpha\"] → \"Masqué<NNBSP>: , Alpha.\""
   ],
   "partShown": [
-   "[\"Alpha\",\"\"] → \"Affiché : Alpha, .\"",
-   "[\"\",\"Alpha\"] → \"Affiché : , Alpha.\""
+   "[\"Alpha\",\"\"] → \"Affiché<NNBSP>: Alpha, .\"",
+   "[\"\",\"Alpha\"] → \"Affiché<NNBSP>: , Alpha.\""
   ]
  },
  "domains": {
   "heading": "Fonctions neuropsychologiques",
   "score": [
-   "[\"Alpha\",\"\"] → \"« Alpha » · z<NBSP>\"",
-   "[\"\",\"Alpha\"] → \"«  » · z<NBSP>Alpha\""
+   "[\"Alpha\",\"\"] → \"«<NBSP>Alpha<NBSP>» · z<NBSP>\"",
+   "[\"\",\"Alpha\"] → \"«<NBSP><NBSP>» · z<NBSP>Alpha\""
   ],
   "none": [
    "[\"Alpha\"] → \"Aucune fonction n’atteint z<NBSP>Alpha ici.\"",
@@ -715,8 +729,8 @@
    "[\"\",\"Alpha\"] → \" au-dessus de Alpha\""
   ],
   "termOf": [
-   "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: «  »\"",
-   "[\"\",\"Alpha\"] → \"<NNBSP>: « Alpha »\""
+   "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: «<NBSP><NBSP>»\"",
+   "[\"\",\"Alpha\"] → \"<NNBSP>: «<NBSP>Alpha<NBSP>»\""
   ],
   "lesionCheck": [
    "[[\"a\",\"b\"]] → \"Vérification lésionnelle<NNBSP>: a<NNBSP>; b.\"",
@@ -754,8 +768,8 @@
     "[\"\"] → \"Impossible de charger .\""
    ],
    "colour": [
-    "[\"Alpha\"] → \"Impossible d’afficher la coloration « Alpha ».\"",
-    "[\"\"] → \"Impossible d’afficher la coloration «  ».\""
+    "[\"Alpha\"] → \"Impossible d’afficher la coloration «<NBSP>Alpha<NBSP>».\"",
+    "[\"\"] → \"Impossible d’afficher la coloration «<NBSP><NBSP>».\""
    ],
    "region": "Impossible d’afficher la région.",
    "cord": "Impossible d’afficher la moelle épinière.",
@@ -774,7 +788,8 @@
    "fullscreen": "Impossible de passer en plein écran.",
    "streamlines": "Impossible d’afficher les trajectoires de ce repère.",
    "map": "Impossible d’ouvrir la carte du champ visuel.",
-   "guide": "Impossible de lancer la visite."
+   "guide": "Impossible de lancer la visite.",
+   "snapshotSize": "Impossible d’enregistrer l’image à cette taille<NNBSP>: elle dépasserait ce que cet appareil peut dessiner. Choisissez une taille plus petite ou réduisez la fenêtre."
   }
  },
  "footer": {
@@ -837,6 +852,7 @@
   "networks": "Réseaux fonctionnels",
   "functional": "Divisions fonctionnelles",
   "receptors": "Empreintes de récepteurs",
+  "corticalLayers": "Couches corticales (BigBrain)",
   "stimulation": "Réponses à la stimulation",
   "stimulationFtract": "Réponses à la stimulation (F-TRACT)",
   "functionalConnectivity": "Connectivité fonctionnelle (HCP)",
@@ -855,6 +871,31 @@
   "index": "Index des anatomies publiées",
   "tractReference": "Référence des faisceaux",
   "sources": "Sources",
+  "references": "Références de cette vue",
+  "referencesLoading": "Chargement des références…",
+  "referencesFailed": "Les références n’ont pas pu être chargées.",
+  "referencesRetry": "Réessayer",
+  "behind": {
+   "planum": "Planum",
+   "subject": "Sujet",
+   "atlas": "Atlas",
+   "colouring": "Coloration",
+   "internal": "Anatomie interne",
+   "spinalCord": "Moelle épinière",
+   "function": "Fonction",
+   "deficit": "Déficit",
+   "tracts": "Faisceaux",
+   "strokeCases": "Cas d’AVC",
+   "visualField": "Carte du champ visuel"
+  },
+  "acknowledgement": "Remerciements",
+  "copyReferences": "Copier en texte",
+  "referencesCopied": "Références copiées",
+  "referencesCopyFailed": "Impossible de copier les références",
+  "downloadBibtex": "Télécharger le .bib",
+  "downloadRis": "Télécharger le .ris",
+  "bibtexDownloaded": "Fichier BibTeX téléchargé.",
+  "risDownloaded": "Fichier RIS téléchargé.",
   "intendedUse": "Pour la recherche et l’enseignement. Planum n’est pas un dispositif médical et ne doit pas servir au diagnostic, au traitement ni à aucune autre décision clinique."
  },
  "functional": {
@@ -1061,9 +1102,9 @@
    "caution": "Un seul individu et une seule IRM de diffusion à 2<NBSP>mm<NNBSP>: les faisceaux sont des reconstructions, et non des axones observés. Le nombre de trajectoires n’est pas un nombre d’axones, et leur longueur ne mesure pas la force d’une connexion. Les trajectoires corticospinales s’arrêtent près de la moelle allongée caudale, au-dessus de la décussation."
   },
   "section": {
-   "shows": "Un plan sagittal, coronal, axial ou oblique coupe le modèle, et chaque solide fermé reçoit une face de coupe là où le plan le rencontre. Chaque face est colorée d’après un volume d’étiquettes publié, choisi indépendamment de l’atlas de surface.",
+   "shows": "Un plan sagittal, coronal, axial ou oblique coupe le modèle, et chaque solide fermé reçoit une face de coupe là où le plan le rencontre. La coupe montre au-dedans ce que le cerveau montre<NNBSP>: l’atlas dans le ruban cortical, les structures de l’anatomie interne et, sous Territoires artériels, Réseaux striataux ou Fonctions cérébelleuses, cette carte voxel par voxel.",
    "source": "Les faces de coupe sont les surfaces piale, blanche et des structures propres à ce sujet. Les étiquettes sont la grille FreeSurfer de 1<NBSP>mm du sujet ou les blocs NextBrain de 0,8<NBSP>mm<NNBSP>; rien n’est resegmenté dans le navigateur.",
-   "caution": "Les étiquettes de coupe sont à 1<NBSP>mm (0,8<NBSP>mm pour NextBrain)<NNBSP>: les structures fines sont plus grossières sur une coupe que sur leur surface. Les étiquettes de coupe HCP-MMP, Julich-Brain et Schaefer sont des projections d’étiquettes de surface dans le ruban de substance grise, et non des atlas volumiques. L’ombrage tiré de la T1 est illustratif."
+   "caution": "Les étiquettes d’une coupe sont à 1<NBSP>mm (0,8<NBSP>mm pour NextBrain)<NNBSP>: les structures fines sont plus grossières sur une coupe que sur leur surface. En coupe, HCP-MMP, Julich-Brain, Schaefer et Desikan-Killiany sont des projections d’étiquettes de surface dans le ruban de substance grise, et non des atlas volumiques. L’ombrage tiré de la T1 est illustratif."
   },
   "lesion": {
    "shows": "Une sphère de 3 à 30<NBSP>mm de rayon placée sur le cerveau ou sur une face de coupe. Le rapport donne les tissus et les régions qu’elle contient, classe les fonctions et les observations de déficit dont elle recouvre les régions, et compte les trajectoires reconstruites qui la traversent.",
@@ -1216,7 +1257,8 @@
    "pam50": "PAM50",
    "arterial": "Territoires artériels",
    "nettekoven": "Fonctions cérébelleuses",
-   "choi": "Réseaux striataux"
+   "choi": "Réseaux striataux",
+   "aan": "Noyaux de l’éveil de Harvard"
   },
   "subject": "Sujet",
   "atlas": "Atlas",
@@ -1225,6 +1267,7 @@
    "appearance": "Apparence",
    "parcellation": "Parcellisation",
    "networks": "Réseaux",
+   "subcortical": "Cartes sous-corticales",
    "vascular": "Vascularisation"
   },
   "atlasBecomes": [
@@ -1264,6 +1307,10 @@
   "copyLink": "Copier le lien de cette vue",
   "linkCopied": "Lien copié",
   "linkFailed": "Impossible de copier le lien",
+  "shareView": "Partager cette vue",
+  "copyEmbed": "Copier le code d’intégration",
+  "embedCopied": "Code d’intégration copié",
+  "embedFailed": "Impossible de copier le code d’intégration",
   "languageSwitch": "Langue",
   "guide": "Utiliser Planum",
   "startOver": "Recommencer",
@@ -1316,9 +1363,87 @@
   "isolateHint": "Afficher cette région seule, cadrée",
   "restoreHint": "Réafficher le reste du cerveau, cadré en entier",
   "hideHint": "Retirer cette région de la vue<NNBSP>; Annuler la rétablit",
+  "highlight": "Surligner",
+  "highlightHint": "Marquer cette région d’une couleur de votre choix<NNBSP>; la légende la présente comme la vôtre",
+  "highlightFull": [
+   "[\"Alpha\"] → \"Alpha régions au plus peuvent être surlignées<NNBSP>; retirez-en une d’abord\"",
+   "[\"\"] → \" régions au plus peuvent être surlignées<NNBSP>; retirez-en une d’abord\""
+  ],
+  "highlighted": [
+   "[\"Alpha\",\"\"] → \"Région surlignée en <NNBSP>: Alpha.\"",
+   "[\"\",\"Alpha\"] → \"Région surlignée en alpha<NNBSP>: .\""
+  ],
+  "unhighlighted": [
+   "[\"Alpha\"] → \"Surlignage retiré<NNBSP>: Alpha.\"",
+   "[\"\"] → \"Surlignage retiré<NNBSP>: .\""
+  ],
+  "highlightColors": {
+   "blue": "Bleu",
+   "raspberry": "Framboise",
+   "green": "Vert",
+   "amber": "Ambre",
+   "violet": "Violet",
+   "pink": "Rose"
+  },
+  "highlightStrip": {
+   "title": "Vos surlignages",
+   "colorOf": [
+    "[\"Alpha\",\"\"] → \"Couleur de Alpha<NNBSP>: \"",
+    "[\"\",\"Alpha\"] → \"Couleur de <NNBSP>: alpha\""
+   ],
+   "colors": "Couleurs",
+   "remove": [
+    "[\"Alpha\"] → \"Retirer le surlignage de Alpha\"",
+    "[\"\"] → \"Retirer le surlignage de \""
+   ],
+   "removeHint": "Retirer le surlignage",
+   "elsewhere": {
+    "atlas": "Non affichée sur cet atlas",
+    "detail": "Non affichée dans cette anatomie interne",
+    "colour": "Non affichée sous cette couleur"
+   },
+   "aside": "Non affichés tant que cet onglet montre ses données publiées<NNBSP>; ils reviennent quand vous le quittez.",
+   "lifted": "Non affichés sous la couleur choisie.",
+   "show": "Afficher sur le cerveau"
+  },
   "constituentsHeading": "Régions constitutives",
   "constituentsNote": "Union de régions sources. Surface lissée<NNBSP>; volume mesuré sur les voxels sources. Les petites régions sans surface apparaissent en coupe.",
   "constituentCutOnly": "Coupe seulement"
+ },
+ "layers": {
+  "heading": "Couches (un cerveau histologique)",
+  "headingValue": [
+   "[\"Alpha\"] → \"IV Alpha\"",
+   "[\"\"] → \"IV \""
+  ],
+  "tableCaption": "La part de chaque couche dans l’épaisseur du cortex de cette parcelle, et les cellules qui y sont comptées là où son aire a été échantillonnée",
+  "columns": {
+   "layer": "Couche",
+   "share": "Part de l’épaisseur",
+   "cells": "Cellules par (0,1<NNBSP>mm)³"
+  },
+  "patches": [
+   "[\"Alpha\",\"\"] → \"Cellules<NNBSP>: la moyenne de Alpha images de  découpées dans le même cerveau, chaque corps cellulaire compté, pas seulement les neurones.\"",
+   "[\"\",\"Alpha\"] → \"Cellules<NNBSP>: la moyenne de  images de Alpha découpées dans le même cerveau, chaque corps cellulaire compté, pas seulement les neurones.\""
+  ],
+  "paint": "Peindre la couche IV sur tout le cortex",
+  "shown": "Sur le cerveau<NNBSP>: la part de la couche IV dans l’épaisseur du cortex, d’après BigBrain.",
+  "note": "Les couches de BigBrain<NNBSP>: un seul cerveau, celui d’un homme de 65 ans examiné après la mort, dont un réseau de neurones a segmenté les six couches, 83<NNBSP>% des points dans la bonne couche. Elles sont montrées à l’endroit correspondant, par recalage et par le nom de cette parcelle<NNBSP>; rien ici n’est mesuré dans ce cerveau.",
+  "basis": "Une part est l’épaisseur moyenne de la couche sur la parcelle divisée par la somme des six couches, si bien que la rétraction du tissu ne la change pas.",
+  "failed": "Les couches n’ont pas pu être téléchargées.",
+  "retry": "Réessayer",
+  "paper": "Article (Wagstyl et al. 2020)",
+  "collection": "Couches (BigBrainWarp)",
+  "cellData": "Cellules (EBRAINS)",
+  "keyTitle": "Part de la couche IV dans l’épaisseur du cortex",
+  "step": [
+   "[\"Alpha\",\"\"] → \"Alpha ou plus\"",
+   "[\"\",\"Alpha\"] → \"de  à Alpha\""
+  ],
+  "keyNote": [
+   "[\"Alpha\"] → \"BigBrain, un seul cerveau histologique<NNBSP>; plus foncé, plus grande. undefined n’ont pas six couches ou trop peu de données.\"",
+   "[\"\"] → \"BigBrain, un seul cerveau histologique<NNBSP>; plus foncé, plus grande. undefined n’ont pas six couches ou trop peu de données.\""
+  ]
  },
  "lesion": {
   "radius": "Rayon",
@@ -1455,13 +1580,12 @@
   "methods": "Méthodes (en anglais)",
   "methodsPage": "Méthode et limites (en anglais)",
   "notApplied": [
-   "[\"Alpha\"] → \"Éléments du lien non appliqués : Alpha.\"",
-   "[\"\"] → \"Éléments du lien non appliqués : .\""
+   "[\"Alpha\"] → \"Éléments du lien non appliqués<NNBSP>: Alpha.\"",
+   "[\"\"] → \"Éléments du lien non appliqués<NNBSP>: .\""
   ],
   "fields": {
    "anatomy": "sujet",
    "atlas": "atlas",
-   "cuts": "étiquettes de coupe",
    "system": "système",
    "detail": "anatomie interne",
    "region": "région sélectionnée",
@@ -1500,7 +1624,10 @@
    "space": "gabarit de la coordonnée",
    "cases": "cas d’AVC",
    "tracts": "faisceaux",
-   "keeptracts": "faisceaux gardés sur les autres onglets"
+   "keeptracts": "faisceaux gardés sur les autres onglets",
+   "mark": "vos surlignages",
+   "names": "noms sur le cerveau",
+   "embed": "vue intégrée"
   }
  },
  "menu": {
@@ -1535,8 +1662,8 @@
    "[\"\"] → \"Position \""
   ],
   "sliceAria": [
-   "[\"Alpha\"] → \"Coupe IRM Alpha. Cliquez pour placer le réticule ; les touches fléchées changent de coupe.\"",
-   "[\"\"] → \"Coupe IRM . Cliquez pour placer le réticule ; les touches fléchées changent de coupe.\""
+   "[\"Alpha\"] → \"Coupe IRM Alpha. Cliquez pour placer le réticule<NNBSP>; les touches fléchées changent de coupe.\"",
+   "[\"\"] → \"Coupe IRM . Cliquez pour placer le réticule<NNBSP>; les touches fléchées changent de coupe.\""
   ],
   "sliderAria": [
    "[\"Alpha\"] → \"Position IRM Alpha\"",
@@ -1593,12 +1720,14 @@
   "clearSearch": "Effacer la recherche",
   "expandAll": "Tout déplier",
   "collapseAll": "Tout replier",
+  "downloadTable": "Télécharger le tableau (CSV)",
+  "tableDownloaded": "Fichier CSV du tableau des régions téléchargé.",
   "searchLabel": "Rechercher des régions",
   "searchResults": "Résultats de recherche",
   "browseAnatomy": "Parcourir l’anatomie",
   "cortex": "Cortex",
   "subcortical": "Sous-cortical",
-  "cutOnly": "Étiquettes de coupe seulement",
+  "cutOnly": "En coupe seulement",
   "groupIn": {
    "lobe": [
     "[\"Alpha\"] → \"Lobe alpha\"",
@@ -1619,8 +1748,8 @@
   "system": "Système",
   "allSystems": "Toutes les structures internes",
   "noMatch": [
-   "[\"Alpha\"] → \"Aucun résultat pour « Alpha »\"",
-   "[\"\"] → \"Aucun résultat pour «  »\""
+   "[\"Alpha\"] → \"Aucun résultat pour «<NBSP>Alpha<NBSP>»\"",
+   "[\"\"] → \"Aucun résultat pour «<NBSP><NBSP>»\""
   ],
   "showAll": [
    "[\"Alpha\"] → \"Afficher les Alpha\"",
@@ -1639,11 +1768,6 @@
    "[\"\",\"Alpha\"] → \" dans Alpha. \""
   ],
   "switchAtlas": "Changer d’atlas",
-  "matchesInOtherCut": [
-   "[\"Alpha\",\"\"] → \"Alpha dans , qui n’étiquette que les coupes. \"",
-   "[\"\",\"Alpha\"] → \" dans Alpha, qui n’étiquette que les coupes. \""
-  ],
-  "switchCutAtlas": "Changer les étiquettes de coupe",
   "matchesInTab": [
    "[\"Alpha\",\"\"] → \"Alpha dans l’onglet . \"",
    "[\"\",\"Alpha\"] → \" dans l’onglet Alpha. \""
@@ -1657,12 +1781,12 @@
    "[\"\"] → \"comprend \""
   ],
   "rowHiddenAria": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha,  : Alpha. Activer pour afficher.\"",
-   "[\"\",\"Alpha\",\"\"] → \", Alpha : . Activer pour afficher.\""
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, <NNBSP>: Alpha. Activer pour afficher.\"",
+   "[\"\",\"Alpha\",\"\"] → \", Alpha<NNBSP>: . Activer pour afficher.\""
   ],
   "rowUnavailableAria": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, , non affiché : Alpha.\"",
-   "[\"\",\"Alpha\",\"\"] → \", Alpha, non affiché : .\""
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, , non affiché<NNBSP>: Alpha.\"",
+   "[\"\",\"Alpha\",\"\"] → \", Alpha, non affiché<NNBSP>: .\""
   ]
  },
  "networks": {
@@ -1711,8 +1835,8 @@
    "[\"\"] → \"Lecture du fichier …\""
   ],
   "failed": [
-   "[\"Alpha\"] → \"Alpha n’a pas pu être affiché :\"",
-   "[\"\"] → \" n’a pas pu être affiché :\""
+   "[\"Alpha\"] → \"Alpha n’a pas pu être affiché<NNBSP>:\"",
+   "[\"\"] → \" n’a pas pu être affiché<NNBSP>:\""
   ],
   "shape": [
    "[\"Alpha\",\"\"] → \"Alpha voxels de \"",
@@ -1765,8 +1889,8 @@
    "[\"\",\"Alpha\"] → \" dans Alpha au fil du temps\""
   ],
   "courseValue": [
-   "[\"Alpha\",\"\"] → \"Alpha : \"",
-   "[\"\",\"Alpha\"] → \" : Alpha\""
+   "[\"Alpha\",\"\"] → \"Alpha<NNBSP>: \"",
+   "[\"\",\"Alpha\"] → \"<NNBSP>: Alpha\""
   ],
   "courseNoValue": "aucune valeur",
   "courseTime": "Temps",
@@ -1781,7 +1905,7 @@
   "statistic": "Statistique",
   "value": "Valeur",
   "threshold": "Seuil",
-  "thresholdHint": "Les valeurs dont la grandeur le dépasse sont affichées. La carte s’affiche une fois le seuil donné ; 0 affiche toute valeur non nulle.",
+  "thresholdHint": "Les valeurs dont la grandeur le dépasse sont affichées. La carte s’affiche une fois le seuil donné<NNBSP>; 0 affiche toute valeur non nulle.",
   "max": "Couleurs jusqu’à",
   "invalid": "Donnez un seuil de 0 ou plus, sous le haut de l’échelle.",
   "opacity": "Opacité",
@@ -1798,7 +1922,7 @@
    "mid": "Mi-épaisseur",
    "white": "Blanche"
   },
-  "surfaceHint": "Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs : les plus profondes ouvrent les sillons. Une coupe affiche la piale.",
+  "surfaceHint": "Les surfaces propres à ce cerveau, aux mêmes sommets et valeurs<NNBSP>: les plus profondes ouvrent les sillons. Une coupe affiche la piale.",
   "captionSurface": [
    "[\"Alpha\"] → \"sur la surface alpha\"",
    "[\"\"] → \"sur la surface \""
@@ -1811,7 +1935,7 @@
    "[\"\",\"Alpha\",\"\",\"Alpha\"] → \" · Alpha ·  · surface alpha\""
   ],
   "remove": "Retirer",
-  "caveat": "Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit : sa place sur les plis de cette personne, pas des données de cette personne.",
+  "caveat": "Une carte dans l’espace du gabarit, portée sur ce cerveau par le recalage du gabarit<NNBSP>: sa place sur les plis de cette personne, pas des données de cette personne.",
   "keyRange": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha de  à Alpha\"",
    "[\"\",\"Alpha\",\"\"] → \"de Alpha à \""
@@ -1833,8 +1957,8 @@
    "[\"\"] → \"opacité \""
   ],
   "readout": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha : Alpha\"",
-   "[\"\",\"Alpha\",\"\"] → \" : Alpha = \""
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha<NNBSP>: Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"<NNBSP>: Alpha = \""
   ],
   "clusters": [
    "[\"Alpha\"] → \"Amas et pics (Alpha)\"",
@@ -1857,14 +1981,14 @@
    "[\"\"] → \" de plus dans le CSV\""
   ],
   "download": "Télécharger le CSV",
-  "unexpected": "Une erreur inattendue l’en a empêché ; le détail figure dans la console du navigateur.",
+  "unexpected": "Une erreur inattendue l’en a empêché<NNBSP>; le détail figure dans la console du navigateur.",
   "reasons": {
    "header": "Ce fichier s’arrête au milieu de son en-tête NIfTI.",
-   "pair": "Ceci est l’en-tête d’une paire .hdr/.img ; enregistrez la carte en un seul fichier .nii.",
-   "magic": "Ce fichier n’est pas au format NIfTI-1 : son en-tête ne porte pas la signature NIfTI.",
-   "nifti2": "Ceci est un fichier NIfTI-2 ; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.",
+   "pair": "Ceci est l’en-tête d’une paire .hdr/.img<NNBSP>; enregistrez la carte en un seul fichier .nii.",
+   "magic": "Ce fichier n’est pas au format NIfTI-1<NNBSP>: son en-tête ne porte pas la signature NIfTI.",
+   "nifti2": "Ceci est un fichier NIfTI-2<NNBSP>; enregistrez-le au format NIfTI-1 pour l’ouvrir ici.",
    "notNifti": "Ce fichier n’est pas une image NIfTI.",
-   "gzip": "Ce fichier .gz n’a pas pu être décompressé ; il est peut-être tronqué ou endommagé.",
+   "gzip": "Ce fichier .gz n’a pas pu être décompressé<NNBSP>; il est peut-être tronqué ou endommagé.",
    "fileSize": [
     "[0,1] → \"Ce fichier fait 0 octets, au-delà de la limite de 1.\"",
     "[1,2] → \"Ce fichier fait 1 octets, au-delà de la limite de 2.\"",
@@ -1887,23 +2011,23 @@
     "[12345] → \"Décompressé, ce fichier dépasse les 12<NNBSP>345 octets que décrit son en-tête.\""
    ],
    "rank": [
-    "[0] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 0 dimension.\"",
-    "[1] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 1 dimension.\"",
-    "[2] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 2 dimensions.\"",
-    "[183] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 183 dimensions.\"",
-    "[12345] → \"Ce fichier n’est ni un volume 3D ni une série de volumes : il a 12345 dimensions.\""
+    "[0] → \"Ce fichier n’est ni un volume 3D ni une série de volumes<NNBSP>: il a 0 dimension.\"",
+    "[1] → \"Ce fichier n’est ni un volume 3D ni une série de volumes<NNBSP>: il a 1 dimension.\"",
+    "[2] → \"Ce fichier n’est ni un volume 3D ni une série de volumes<NNBSP>: il a 2 dimensions.\"",
+    "[183] → \"Ce fichier n’est ni un volume 3D ni une série de volumes<NNBSP>: il a 183 dimensions.\"",
+    "[12345] → \"Ce fichier n’est ni un volume 3D ni une série de volumes<NNBSP>: il a 12345 dimensions.\""
    ],
    "emptyAxis": [
     "[\"Alpha\"] → \"Les dimensions Alpha de ce fichier comprennent un axe vide.\"",
     "[\"\"] → \"Les dimensions  de ce fichier comprennent un axe vide.\""
    ],
    "dimensions": [
-    "[\"Alpha\"] → \"Les dimensions de ce fichier sont Alpha ; seule une série de volumes selon la quatrième peut être affichée.\"",
-    "[\"\"] → \"Les dimensions de ce fichier sont  ; seule une série de volumes selon la quatrième peut être affichée.\""
+    "[\"Alpha\"] → \"Les dimensions de ce fichier sont Alpha<NNBSP>; seule une série de volumes selon la quatrième peut être affichée.\"",
+    "[\"\"] → \"Les dimensions de ce fichier sont <NNBSP>; seule une série de volumes selon la quatrième peut être affichée.\""
    ],
    "tooManyVolumes": [
-    "[\"Alpha\",\"\"] → \"Ce fichier contient Alpha volumes ; jusqu’à  de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\"",
-    "[\"\",\"Alpha\"] → \"Ce fichier contient  volumes ; jusqu’à Alpha de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\""
+    "[\"Alpha\",\"\"] → \"Ce fichier contient Alpha volumes<NNBSP>; jusqu’à  de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\"",
+    "[\"\",\"Alpha\"] → \"Ce fichier contient  volumes<NNBSP>; jusqu’à Alpha de cette taille peuvent être affichés. Enregistrez-en moins dans leur propre fichier.\""
    ],
    "tooLarge": [
     "[\"Alpha\",1] → \"Ce volume compte Alpha voxels, au-delà de la limite de 1.\"",
@@ -1913,11 +2037,11 @@
     "[\"Alpha\",0] → \"Ce volume compte Alpha voxels, au-delà de la limite de 0.\""
    ],
    "storedType": [
-    "[\"Alpha\",1] → \"Ce fichier stocke des valeurs Alpha (type de données 1) ; enregistrez la carte en float32.\"",
-    "[\"\",2] → \"Ce fichier stocke des valeurs  (type de données 2) ; enregistrez la carte en float32.\"",
-    "[\"Alpha\",183] → \"Ce fichier stocke des valeurs Alpha (type de données 183) ; enregistrez la carte en float32.\"",
-    "[\"\",12345] → \"Ce fichier stocke des valeurs  (type de données 12345) ; enregistrez la carte en float32.\"",
-    "[\"Alpha\",0] → \"Ce fichier stocke des valeurs Alpha (type de données 0) ; enregistrez la carte en float32.\""
+    "[\"Alpha\",1] → \"Ce fichier stocke des valeurs Alpha (type de données 1)<NNBSP>; enregistrez la carte en float32.\"",
+    "[\"\",2] → \"Ce fichier stocke des valeurs  (type de données 2)<NNBSP>; enregistrez la carte en float32.\"",
+    "[\"Alpha\",183] → \"Ce fichier stocke des valeurs Alpha (type de données 183)<NNBSP>; enregistrez la carte en float32.\"",
+    "[\"\",12345] → \"Ce fichier stocke des valeurs  (type de données 12345)<NNBSP>; enregistrez la carte en float32.\"",
+    "[\"Alpha\",0] → \"Ce fichier stocke des valeurs Alpha (type de données 0)<NNBSP>; enregistrez la carte en float32.\""
    ],
    "unknownType": [
     "[0] → \"Le code de type de données 0 de ce fichier n’est pas un type NIfTI-1.\"",
@@ -1934,11 +2058,11 @@
     "[12345] → \"Le décalage des données de ce fichier (vox_offset 12345) tombe dans son en-tête.\""
    ],
    "truncated": [
-    "[0,1] → \"Ce fichier est tronqué : ses données demandent 0 octets, mais le fichier en compte 1.\"",
-    "[1,2] → \"Ce fichier est tronqué : ses données demandent 1 octets, mais le fichier en compte 2.\"",
-    "[2,183] → \"Ce fichier est tronqué : ses données demandent 2 octets, mais le fichier en compte 183.\"",
-    "[183,12345] → \"Ce fichier est tronqué : ses données demandent 183 octets, mais le fichier en compte 12<NNBSP>345.\"",
-    "[12345,0] → \"Ce fichier est tronqué : ses données demandent 12<NNBSP>345 octets, mais le fichier en compte 0.\""
+    "[0,1] → \"Ce fichier est tronqué<NNBSP>: ses données demandent 0 octets, mais le fichier en compte 1.\"",
+    "[1,2] → \"Ce fichier est tronqué<NNBSP>: ses données demandent 1 octets, mais le fichier en compte 2.\"",
+    "[2,183] → \"Ce fichier est tronqué<NNBSP>: ses données demandent 2 octets, mais le fichier en compte 183.\"",
+    "[183,12345] → \"Ce fichier est tronqué<NNBSP>: ses données demandent 183 octets, mais le fichier en compte 12<NNBSP>345.\"",
+    "[12345,0] → \"Ce fichier est tronqué<NNBSP>: ses données demandent 12<NNBSP>345 octets, mais le fichier en compte 0.\""
    ],
    "intercept": [
     "[0] → \"L’ordonnée à l’origine de la mise à l’échelle (scl_inter) de ce fichier vaut 0.\"",
@@ -1954,14 +2078,14 @@
     "[183] → \"Ce fichier contient la valeur 183, hors de la plage des float32.\"",
     "[12345] → \"Ce fichier contient la valeur 12345, hors de la plage des float32.\""
    ],
-   "orientation": "Ce fichier n’indique aucune orientation (codes sform et qform à 0) : il ne peut pas être placé.",
+   "orientation": "Ce fichier n’indique aucune orientation (codes sform et qform à 0)<NNBSP>: il ne peut pas être placé.",
    "affineFinite": "La matrice affine de ce fichier contient une valeur non finie.",
-   "singular": "La matrice affine de ce fichier est singulière : ses axes de voxels n’engendrent pas l’espace 3D.",
+   "singular": "La matrice affine de ce fichier est singulière<NNBSP>: ses axes de voxels n’engendrent pas l’espace 3D.",
    "quaternion": "Le quaternion qform de ce fichier n’est pas une rotation (b² + c² + d² > 1).",
-   "slice": "Cette carte n’est qu’une seule coupe selon un axe ; il lui faut trois dimensions.",
+   "slice": "Cette carte n’est qu’une seule coupe selon un axe<NNBSP>; il lui faut trois dimensions.",
    "noFinite": "Cette carte ne contient aucune valeur finie.",
    "zeros": "Cette carte ne contient que des zéros.",
-   "outside": "Cette carte n’atteint pas le cerveau ; vérifiez le gabarit dans lequel elle est."
+   "outside": "Cette carte n’atteint pas le cerveau<NNBSP>; vérifiez le gabarit dans lequel elle est."
   }
  },
  "reasons": {
@@ -1981,6 +2105,11 @@
   "inDetailSet": [
    "[\"Alpha\"] → \"Dans Alpha\"",
    "[\"\"] → \"Dans \""
+  ],
+  "other-colour": "Pas sous cette couleur",
+  "underColour": [
+   "[\"Alpha\"] → \"Sous Alpha\"",
+   "[\"\"] → \"Sous \""
   ],
   "other-system": "Dans un autre système",
   "fallback": "Masqué"
@@ -2068,19 +2197,50 @@
    "[\"\"] → \" aires de plus\""
   ],
   "ftractRest": [
-   "[\"Alpha\",\"\"] → \"Trop peu de paires ou d’implantations pour un taux : Alpha aires. Jamais testées :  aires.\"",
-   "[\"\",\"Alpha\"] → \"Trop peu de paires ou d’implantations pour un taux :  aires. Jamais testées : Alpha aires.\""
+   "[\"Alpha\",\"\"] → \"Trop peu de paires ou d’implantations pour un taux<NNBSP>: Alpha aires. Jamais testées<NNBSP>:  aires.\"",
+   "[\"\",\"Alpha\"] → \"Trop peu de paires ou d’implantations pour un taux<NNBSP>:  aires. Jamais testées<NNBSP>: Alpha aires.\""
   ],
   "ftractNote": [
-   "[\"Alpha\",\"\",\"Alpha\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur Alpha personnes épileptiques ; un taux exige  paires issues de Alpha implantations. Non mesuré dans ce cerveau ; chaque hémisphère montre ses propres valeurs.\"",
-   "[\"\",\"Alpha\",\"\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur  personnes épileptiques ; un taux exige Alpha paires issues de  implantations. Non mesuré dans ce cerveau ; chaque hémisphère montre ses propres valeurs.\""
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur Alpha personnes épileptiques<NNBSP>; un taux exige  paires issues de Alpha implantations. Non mesuré dans ce cerveau<NNBSP>; chaque hémisphère montre ses propres valeurs.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Part des paires stimulation–enregistrement où une impulsion unique a évoqué une réponse (signal en z supérieur à 5 en moins de 50 ms), agrégée par F-TRACT sur  personnes épileptiques<NNBSP>; un taux exige Alpha paires issues de  implantations. Non mesuré dans ce cerveau<NNBSP>; chaque hémisphère montre ses propres valeurs.\""
   ],
   "ftractBasis": [
    "[\"Alpha\"] → \"Associée par son nom à l’aire Alpha de Julich-Brain 3.0 dans F-TRACT. F-TRACT a situé les contacts avec la carte volumique de Julich-Brain dans l’espace MNI152, pas sur cette surface.\"",
    "[\"\"] → \"Associée par son nom à l’aire  de Julich-Brain 3.0 dans F-TRACT. F-TRACT a situé les contacts avec la carte volumique de Julich-Brain dans l’espace MNI152, pas sur cette surface.\""
   ],
   "ftractDataset": "Jeu de données F-TRACT (EBRAINS)",
-  "ftractMethod": "Méthode (Trebaul et al. 2018)"
+  "ftractMethod": "Méthode (Trebaul et al. 2018)",
+  "ftractPeak": [
+   "[\"Alpha\"] → \"pic à Alpha\"",
+   "[\"\"] → \"pic à \""
+  ],
+  "delayHeading": "Délai du pic selon la distance",
+  "delayPlot": [
+   "[\"Alpha\"] → \"Délai du pic selon la distance entre centroïdes, Alpha aires\"",
+   "[\"\"] → \"Délai du pic selon la distance entre centroïdes,  aires\""
+  ],
+  "distanceAxis": "Distance entre centroïdes, mm",
+  "delayAxis": "Délai du pic, ms",
+  "delayNote": [
+   "[\"Alpha\"] → \"Délai du pic<NNBSP>: le moment où le premier pic d’une réponse a atteint son maximum, médiane des paires qui ont répondu, donnée là où au moins Alpha l’ont fait. Distance<NNBSP>: entre les centroïdes des deux aires dans ce cerveau, pas entre les contacts. Une réponse peut passer par plus d’une synapse<NNBSP>; un délai n’est donc pas un temps de conduction le long d’une seule fibre. MAD<NNBSP>: écart absolu médian.\"",
+   "[\"\"] → \"Délai du pic<NNBSP>: le moment où le premier pic d’une réponse a atteint son maximum, médiane des paires qui ont répondu, donnée là où au moins  l’ont fait. Distance<NNBSP>: entre les centroïdes des deux aires dans ce cerveau, pas entre les contacts. Une réponse peut passer par plus d’une synapse<NNBSP>; un délai n’est donc pas un temps de conduction le long d’une seule fibre. MAD<NNBSP>: écart absolu médian.\""
+  ],
+  "delayUnplotted": [
+   "[\"Alpha\"] → \"Non tracés, faute de distance dans ce cerveau<NNBSP>: Alpha délais dans cette aire ou avec une aire qu’il ne porte pas.\"",
+   "[\"\"] → \"Non tracés, faute de distance dans ce cerveau<NNBSP>:  délais dans cette aire ou avec une aire qu’il ne porte pas.\""
+  ],
+  "noDelays": [
+   "[\"Alpha\"] → \"Aucun délai de pic de ce côté<NNBSP>: F-TRACT n’en donne que là où au moins Alpha paires ont répondu.\"",
+   "[\"\"] → \"Aucun délai de pic de ce côté<NNBSP>: F-TRACT n’en donne que là où au moins  paires ont répondu.\""
+  ],
+  "delayTable": "Délais et distances",
+  "delayTableCaption": "Le délai du pic de chaque aire, son écart absolu médian et la distance entre centroïdes",
+  "delayColumns": {
+   "area": "Aire",
+   "distance": "Distance, mm",
+   "peak": "Pic, ms",
+   "mad": "MAD, ms"
+  }
  },
  "connectivity": {
   "heading": "Connectivité fonctionnelle",
@@ -2092,10 +2252,10 @@
    "[\"\"] → \"Le cerveau montre la connectivité de repos avec .\""
   ],
   "note": [
-   "[\"Alpha\",\"\"] → \"Moyenne de groupe de Alpha adultes en bonne santé âgés de  ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\"",
-   "[\"\",\"Alpha\"] → \"Moyenne de groupe de  adultes en bonne santé âgés de Alpha ans (Human Connectome Project), au repos : la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement ; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\""
+   "[\"Alpha\",\"\"] → \"Moyenne de groupe de Alpha adultes en bonne santé âgés de  ans (Human Connectome Project), au repos<NNBSP>: la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement<NNBSP>; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\"",
+   "[\"\",\"Alpha\"] → \"Moyenne de groupe de  adultes en bonne santé âgés de Alpha ans (Human Connectome Project), au repos<NNBSP>: la corrélation entre les signaux BOLD de chaque paire d’aires de Julich-Brain. Une corrélation n’est pas une connexion. Les valeurs dépendent du prétraitement<NNBSP>; ici, aucun signal global n’a été régressé, si bien que presque toutes les paires sont corrélées positivement.\""
   ],
-  "basis": "Mesurée sur la carte volumique de Julich-Brain dans l’espace MNI152, pas dans ce cerveau ; chaque aire prend la parcelle de son nom.",
+  "basis": "Mesurée sur la carte volumique de Julich-Brain dans l’espace MNI152, pas dans ce cerveau<NNBSP>; chaque aire prend la parcelle de son nom.",
   "dataset": "Jeu de données (EBRAINS)",
   "paper": "Article (Domhof et al. 2021)",
   "keyTitle": [
@@ -2107,11 +2267,11 @@
    "[\"\",\"Alpha\"] → \"r<NBSP>de<NBSP><NBSP>à<NBSP>Alpha\""
   ],
   "keyNote": [
-   "[\"Alpha\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r Alpha, comme la moitié de toutes les paires.\"",
-   "[\"\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires grises sont sous r , comme la moitié de toutes les paires.\"",
-   "[\"Alpha\",\"tissue\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
-   "[\"\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\"",
-   "[\"Alpha\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée ; plus foncé, plus forte. Les aires grises sont sous r Alpha, comme la moitié de toutes les paires.\""
+   "[\"Alpha\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée<NNBSP>; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r Alpha, comme la moitié de toutes les paires.\"",
+   "[\"\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée<NNBSP>; plus foncé, plus forte. Les aires grises sont sous r , comme la moitié de toutes les paires.\"",
+   "[\"Alpha\",\"tissue\"] → \"Corrélation moyenne de groupe avec l’aire entourée<NNBSP>; plus foncé, plus forte. Les aires couleur de tissu sont sous r Alpha, comme la moitié de toutes les paires.\"",
+   "[\"\",\"scan\"] → \"Corrélation moyenne de groupe avec l’aire entourée<NNBSP>; plus foncé, plus forte. Les aires où l’examen apparaît sont sous r , comme la moitié de toutes les paires.\"",
+   "[\"Alpha\",\"grey\"] → \"Corrélation moyenne de groupe avec l’aire entourée<NNBSP>; plus foncé, plus forte. Les aires grises sont sous r Alpha, comme la moitié de toutes les paires.\""
   ]
  },
  "disorders": {
@@ -2219,7 +2379,7 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha,  cm³, Alpha de cette région\"",
    "[\"\",\"Alpha\",\"\"] → \", Alpha cm³,  de cette région\""
   ],
-  "plotHint": "Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.",
+  "plotHint": "Chaque point est une personne. Choisissez-en deux à comparer<NNBSP>; le cerveau montre leurs lésions.",
   "table": "Tableau des cas",
   "tableCaption": "Chaque cas du graphique. Chaque en-tête de colonne trie le tableau.",
   "columns": {
@@ -2231,8 +2391,8 @@
   "showPair": "Montrer une paire",
   "nextPair": "Paire suivante",
   "pairOf": [
-   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Paire Alpha sur  : lésions de taille égale à Alpha près, scores séparés de  points.\"",
-   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Paire  sur Alpha : lésions de taille égale à  près, scores séparés de Alpha points.\""
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"Paire Alpha sur <NNBSP>: lésions de taille égale à Alpha près, scores séparés de  points.\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"Paire  sur Alpha<NNBSP>: lésions de taille égale à  près, scores séparés de Alpha points.\""
   ],
   "exceptions": "Très atteinte, aphasie légère ou absente",
   "title": [
@@ -2267,8 +2427,8 @@
   "failed": "La cohorte n’a pas pu être chargée.",
   "drawFailed": "Les lésions n’ont pas pu être dessinées.",
   "note": [
-   "[\"Alpha\"] → \"Aphasia Recovery Cohort : Alpha personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\"",
-   "[\"\"] → \"Aphasia Recovery Cohort :  personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\""
+   "[\"Alpha\"] → \"Aphasia Recovery Cohort<NNBSP>: Alpha personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100<NNBSP>; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\"",
+   "[\"\"] → \"Aphasia Recovery Cohort<NNBSP>:  personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100<NNBSP>; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.\""
   ],
   "dataset": "Jeu de données OpenNeuro",
   "types": {
@@ -2324,11 +2484,11 @@
      ],
      [
       "← →",
-      "Sur les onglets de mode : passer entre Anatomie, Fonctions, Déficits, Circuits et Faisceaux"
+      "Sur les onglets de mode<NNBSP>: passer entre Anatomie, Fonctions, Déficits, Circuits et Faisceaux"
      ],
      [
       "Échap",
-      "Dans une vue détaillée : revenir à la liste. Ailleurs : effacer la recherche, puis la sélection, puis la fonction ou le déficit"
+      "Dans une vue détaillée<NNBSP>: revenir à la liste. Ailleurs<NNBSP>: effacer la recherche, puis la sélection, puis la fonction ou le déficit"
      ],
      [
       "↑ ↓",
@@ -2336,7 +2496,7 @@
      ],
      [
       "→ ←",
-      "Dans l’arbre : ouvrir ou fermer un groupe, ou atteindre les yeux d’un groupe ou les touches de côté d’une structure"
+      "Dans l’arbre<NNBSP>: ouvrir ou fermer un groupe, ou atteindre les yeux d’un groupe ou les touches de côté d’une structure"
      ],
      [
       "Début Fin",
@@ -2410,15 +2570,19 @@
      ],
      [
       "H",
-      "Changer d’hémisphère : les deux, gauche, droite"
+      "Changer d’hémisphère<NNBSP>: les deux, gauche, droite"
      ],
      [
       "E",
       "Écarter les structures, ou les remettre en place"
      ],
      [
+      "N",
+      "Afficher ou masquer les noms sur le cerveau"
+     ],
+     [
       "M",
-      "Ouvrir ou fermer les coupes IRM ; dans Faisceaux, elles tracent les faisceaux"
+      "Ouvrir ou fermer les coupes IRM<NNBSP>; dans Faisceaux, elles tracent les faisceaux"
      ],
      [
       "?",
@@ -2491,6 +2655,7 @@
   "lesionTool": "Lésion",
   "coordinateTool": "Coordonnée",
   "overlayTool": "Superposition",
+  "overlayNarrow": "La superposition, pour votre propre carte cérébrale, demande un écran plus large.",
   "displayTool": "Affichage",
   "dockLabel": "Outils du visualiseur 3D",
   "orbitGroup": "Faire pivoter le modèle",
@@ -2509,9 +2674,22 @@
   "snapshotStatement": "Planum · Pas une anatomie clinique",
   "fullscreen": "Plein écran",
   "exitFullscreen": "Quitter le plein écran",
+  "snapshotAt": [
+   "[\"Alpha\"] → \"Enregistrer en Alpha×\"",
+   "[\"\"] → \"Enregistrer en ×\""
+  ],
+  "copyImage": "Copier l’image",
+  "imageCopied": "Image copiée",
+  "imageFailed": "Impossible de copier l’image",
+  "posterAlt": "Image fixe de ce cerveau, ses régions en couleur, traversées par ses faisceaux",
+  "loadBrain": [
+   "[\"Alpha\"] → \"Charger le cerveau en 3D (environ Alpha<NNBSP>Mo)\"",
+   "[\"\"] → \"Charger le cerveau en 3D (environ <NNBSP>Mo)\""
+  ],
+  "openInPlanum": "Ouvrir dans Planum",
   "snapshotSaved": [
-   "[\"Alpha\"] → \"Image enregistrée : Alpha.\"",
-   "[\"\"] → \"Image enregistrée : .\""
+   "[\"Alpha\"] → \"Image enregistrée<NNBSP>: Alpha.\"",
+   "[\"\"] → \"Image enregistrée<NNBSP>: .\""
   ],
   "snapshotSelected": [
    "[\"Alpha\"] → \"Sélection<NNBSP>: Alpha\"",
@@ -2533,7 +2711,7 @@
   "progressAria": "Téléchargement de l’anatomie",
   "loaded": "Anatomie chargée.",
   "canvasRole": "visionneuse anatomique 3D",
-  "canvasLabel": "Modèle du cerveau. Glissez ou utilisez les flèches pour tourner, défilez ou appuyez sur plus et moins pour zoomer, cliquez sur une région pour la sélectionner.",
+  "canvasLabel": "Modèle du cerveau. Glissez ou utilisez les flèches pour tourner, Maj et une flèche pour le déplacer, défilez ou appuyez sur plus et moins pour zoomer, cliquez sur une région pour la sélectionner.",
   "error": "Une erreur est survenue.",
   "retry": "Réessayer"
  },
@@ -2613,8 +2791,16 @@
    "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\"",
    "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\""
   ],
-  "readingNone": "Ce point est hors de V1–V3, où le gabarit ne prédit rien.",
-  "clickHint": "Cliquez sur V1, V2 ou V3 sur le cerveau pour le lire.",
+  "readingNone": "Ce point est hors de V1–V3 et de toute aire visuelle nommée.",
+  "readingArea": [
+   "[\"Alpha\",\"\"] → \"Alpha droit<NNBSP>: le gabarit ne prédit ici aucune position dans le champ visuel.\"",
+   "[\"\",\"Alpha\"] → \" droit<NNBSP>: le gabarit ne prédit ici aucune position dans le champ visuel.\""
+  ],
+  "readingNamed": [
+   "[\"Alpha\"] → \" Aire nommée<NNBSP>: Alpha.\"",
+   "[\"\"] → \" Aire nommée<NNBSP>: .\""
+  ],
+  "clickHint": "Cliquez sur V1, V2 ou V3 sur le cerveau pour le lire<NNBSP>; ailleurs, un clic nomme l’aire visuelle.",
   "loading": "Chargement des territoires…",
   "loadFailed": "Les territoires n’ont pas pu être chargés.",
   "provenance": "Prédit à partir des plissements de ce cerveau par le gabarit de Benson (v4.0), ajusté sur la moyenne de 181 participants du HCP. Aucune rétinotopie n’a été mesurée dans ce cerveau, et la taille de V1 varie d’environ un facteur trois d’une personne à l’autre.",
@@ -2622,9 +2808,17 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"throws hcp.toFixed is not a function\"",
    "[\"\",\"Alpha\",\"\"] → \"throws hcp.toFixed is not a function\""
   ],
+  "nameAreas": "Nommer les aires visuelles",
+  "areasNote": "Délimite et nomme les 25 aires d’un atlas de probabilité maximale établi chez 53 personnes (Wang et al. 2015). Il nomme seulement le cortex<NNBSP>: aucune position dans le champ visuel n’est prédite au-delà de V3, et les petites aires varient le plus d’une personne à l’autre.",
+  "areasAgreement": [
+   "[\"Alpha\",\"\",\"Alpha\",\"\"] → \"throws value.toFixed is not a function\"",
+   "[\"\",\"Alpha\",\"\",\"Alpha\"] → \"throws value.toFixed is not a function\""
+  ],
+  "legendOutlines": "Limites des aires visuelles nommées",
   "sources": "Sources",
   "dataset": "Rétinotopie 7T du HCP (Benson et al. 2018)",
-  "method": "Méthode du gabarit (Benson et al. 2014)"
+  "method": "Méthode du gabarit (Benson et al. 2014)",
+  "areasSource": "Aires visuelles (Wang et al. 2015)"
  },
  "workspace": {
   "modes": {
@@ -2637,8 +2831,8 @@
   "tabsAria": "Explorer l’atlas",
   "panelAria": "Panneau de l’atlas",
   "back": [
-   "[\"Alpha\"] → \"Retour : Alpha\"",
-   "[\"\"] → \"Retour : \""
+   "[\"Alpha\"] → \"Retour<NNBSP>: Alpha\"",
+   "[\"\"] → \"Retour<NNBSP>: \""
   ],
   "path": "Fil d’Ariane",
   "showInList": [

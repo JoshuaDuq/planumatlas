@@ -126,8 +126,11 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     selectedDeficit: null,
     selectedTract: null,
     keepTracts: false,
+    // Off by default: a standing name is read, not recalled.
+    namesShown: false,
     connectivitySeed: null,
     disorderShown: null,
+    layersShown: false,
     paintFrom: null,
     // One of the open deficit's findings shown alone, or null for all of them.
     selectedFinding: null,
@@ -159,13 +162,14 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
 
     setExplorer(explorer: Explorer) {
       if (!EXPLORERS.includes(explorer)) throw new Error(`Unknown explorer: ${explorer}`);
-      // Another tab ends Anatomy's connectivity or disorder paint.
+      // Another tab ends Anatomy's connectivity, disorder or layer paint.
       const same = explorer === state.explorer;
       return act({
         explorer,
         paintLifted: false,
         connectivitySeed: same ? state.connectivitySeed : null,
         disorderShown: same ? state.disorderShown : null,
+        layersShown: same && state.layersShown,
       });
     },
 
@@ -180,19 +184,26 @@ export function createSession({ views, theme = 'dark', lang = 'en' }: SessionOpt
     setFinding: (selectedFinding: string | null) => act({ selectedFinding, paintLifted: false }),
     setTract: (selectedTract: string | null) => act({ selectedTract }),
     setKeepTracts: (keepTracts: boolean) => act({ keepTracts }),
+    setNamesShown: (namesShown: boolean) => act({ namesShown }),
     // Painting shows a lifted paint again and replaces Anatomy's other paint; clearing leaves the
     // reader's lift as it is.
     setConnectivitySeed: (connectivitySeed: string | null) =>
       act(
         connectivitySeed
-          ? { connectivitySeed, disorderShown: null, paintLifted: false }
+          ? { connectivitySeed, disorderShown: null, layersShown: false, paintLifted: false }
           : { connectivitySeed },
       ),
     setDisorderShown: (disorderShown: string | null) =>
       act(
         disorderShown
-          ? { disorderShown, connectivitySeed: null, paintLifted: false }
+          ? { disorderShown, connectivitySeed: null, layersShown: false, paintLifted: false }
           : { disorderShown },
+      ),
+    setLayersShown: (layersShown: boolean) =>
+      act(
+        layersShown
+          ? { layersShown, connectivitySeed: null, disorderShown: null, paintLifted: false }
+          : { layersShown },
       ),
     liftPaint: () => act({ paintLifted: true }),
     /** The reader asked for a paint again, as the lesion's findings on the brain. */

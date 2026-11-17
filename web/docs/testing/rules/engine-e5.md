@@ -1,6 +1,6 @@
 # Engine E5 rules: scene, picking and comparison overlay
 
-Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera moves and the visible rectangle (`viewer/render/scene.js` → `web/src/lib/engine/render/scene.ts`), turning pointer events into hover, selection and focus (`viewer/render/picking.js` → `render/picking.ts`), and the atlas-comparison overlap outline (`viewer/comparison/overlay.js` → `comparison/overlay.ts`). The framing plans, held view and presentation that use the scene are in `engine-e7.md`. Named-view geometry, the visible-rectangle arithmetic and the camera path (`camera-views`, `effective-viewport`, `camera-path`) are in `engine-e1.md` (RENDER-01–RENDER-16). "Via contract suite" means a case of `src/lib/engine/fake/contract-suite.ts`, run on the real engine by `src/lib/engine/index.contract.test.ts` and on the fake by `src/lib/engine/contract.test.ts`.
+Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera moves and the visible rectangle (`viewer/render/scene.js` → `web/src/lib/engine/render/scene.ts`, which since plan 2 WP34 keeps the frame loop and composes `renderer.ts` (renderer and render targets), `camera-motion.ts` (controls and camera motion) and `outline-passes.ts`), turning pointer events into hover, selection and focus (`viewer/render/picking.js` → `render/picking.ts`), and the atlas-comparison overlap outline (`viewer/comparison/overlay.js` → `comparison/overlay.ts`). The framing plans, held view and presentation that use the scene are in `engine-e7.md`. Named-view geometry, the visible-rectangle arithmetic and the camera path (`camera-views`, `effective-viewport`, `camera-path`) are in `engine-e1.md` (RENDER-01–RENDER-16). "Via contract suite" means a case of `src/lib/engine/fake/contract-suite.ts`, run on the real engine by `src/lib/engine/index.contract.test.ts` and on the fake by `src/lib/engine/contract.test.ts`.
 
 ## Camera moves
 
@@ -124,6 +124,15 @@ Scope: chunk E5 (#29). This covers the render scene and its loop, eased camera m
 - **Source:** `viewer/render/scene.js:21-22,183-206,381-405` (then full resolution 150 ms after every move)
 - **Expected:** During a move the composer renders at the motion pixel ratio; the arrival frame renders at the settled ratio, then `setAnimationLoop(null)`. Any `invalidate()` restarts the loop. A drag paused under 150 ms renders nothing more; at 150 ms one render at the settled ratio.
 - **Covered by:** `src/lib/engine/render/scene.test.ts` (R)
+
+### SCENE-39 · A phone times its quiet frames at rest and takes a step on the next one
+
+- **Rule:** On a phone (RENDER-29), a frame at rest drawn at least 100 ms after the last frame of any kind, outside the MRI's own ratio, is timed: its submission, then a one-pixel read back that waits for the GPU to finish it. The reading feeds RENDER-45. A frame drawn sooner after another is drawn but not timed, since the GPU may still be on the last one; a moving frame is never timed. A new ratio is taken by the next frame at rest, which resizes the canvas and draws it in one task, so no cleared canvas is shown. A move still draws at 1. Nothing else is timed or read back.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** plan 2 WP37 (handoff P17); `renderSettled` in `src/lib/engine/render/renderer.ts`, the frame loop in `src/lib/engine/render/scene.ts`
+- **Expected:** A phone at density 3 whose read back takes 3 ms, redrawn at rest every 200 ms: it rests at 1, draws three frames at 1.5 (the first is the one that took it) and then 2, and four more at 2. A redraw 16 ms after the last is drawn at 2 without a read back. A move then draws at 1. Climbed to 1.5, two 20 ms reads put the next frame at 1, and six 3 ms frames after it stay at 1.
+- **Covered by:** `src/lib/engine/render/scene.test.ts` (R, a fake renderer whose read back advances the mocked clock); unmeasured on a real phone
 
 ## Outlines and theme
 

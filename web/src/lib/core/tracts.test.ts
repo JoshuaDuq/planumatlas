@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import { readRepoYaml } from '../../../test/repo.ts';
-import type { TractBundle as LoadedBundle } from '../engine/api.ts';
+import type { TractBundle as LoadedBundle } from '../types/index.ts';
 import { TRACT_CATALOGS } from './diffusion/catalogs.ts';
 import type { TractCatalog, TractClass } from './diffusion/catalogs.ts';
 import { t } from './i18n/index.ts';

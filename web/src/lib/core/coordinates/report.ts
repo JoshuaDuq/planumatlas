@@ -1,4 +1,4 @@
-import { encodeCsv } from '../comparison/catalog.ts';
+import { encodeCsv } from '../csv.ts';
 import { SLIGHT_SHARE } from '../lesion/findings.ts';
 
 type Shares = ReadonlyMap<string, { inside: number; whole: number }>;

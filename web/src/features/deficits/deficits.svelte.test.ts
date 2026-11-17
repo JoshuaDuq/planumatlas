@@ -4,7 +4,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json';
+import manifest from '../../../test/fixtures/cdmd-manifest.json';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import type { Manifest } from '../../lib/types/index.ts';

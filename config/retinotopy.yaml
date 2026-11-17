@@ -25,10 +25,40 @@ source:
     rh.benson14_eccen.v4_0.mgz: 2b737c23f9a3e93dce5765411124107f07b9492fd5b0ea5c947cd446db777913
     rh.benson14_sigma.v4_0.mgz: 05032e3941967558cf224174311ed1dd9a1bd7403a055b2f760f48afa988c3f0
     rh.benson14_varea.v4_0.mgz: afe8c07267cc2e4bc00695f475817f36835f6ad26be26e2bc975393d44492dd0
-# The template's visual-area codes this layer publishes; it predicts nine more
-# areas, left out as less certain.
+# The template's visual-area codes whose positions this layer publishes; it
+# predicts nine more areas, left out as less certain.
 areas: {V1: 1, V2: 2, V3: 3}
 # The HCP stimulus reached 8° (Benson et al. 2018); the template runs to 90°,
 # so beyond 8° it extrapolates.
 measured_eccentricity_deg: 8
 maximum_eccentricity_deg: 90
+# Named visual areas, V1 to FEF: the maximum-probability atlas of 25 topographic areas mapped in 53 people,
+# as the HCP 7T retinotopy dataset distributes it on fsaverage (the authors' own page states no licence).
+# The build takes each vertex's label from its nearest registered template vertex, as it does the
+# template's area code. They name the cortex only: no visual-field position is predicted beyond V3.
+visual_areas:
+  label: Visual areas (Wang et al. 2015 maximum-probability atlas)
+  citation: Wang L, Mruczek RE, Arcaro MJ, Kastner S (2015) Probabilistic maps of visual topography in human cortex. Cereb Cortex 25:3911–3931
+  doi: https://doi.org/10.1093/cercor/bhu277
+  pmid: 25452571
+  license: CC BY 4.0
+  source:
+    node: https://osf.io/bw9ec/
+    url: https://osf.io/download/rne5b/
+    archive: atlasmgz.zip
+    size: 113908
+    sha256: 025e60cd646028f28c79c8606d6b47395509db612232137270bbe65713fd0e91
+    directory: atlasmgz
+    colour_table: Wang2015.mgz.ctab
+    files:
+      lh.Wang2015.mgz: 029d1c3617082abfc1ddc15057cff287eb190e343851e2b7b6cb058708f6f66a
+      rh.Wang2015.mgz: bab9b7497e606218b752dce5c7f300fcc148a7c98770498615c7d641587044da
+  # The archive's colour table, code by code.
+  areas: {V1v: 1, V1d: 2, V2v: 3, V2d: 4, V3v: 5, V3d: 6, hV4: 7, VO1: 8, VO2: 9, PHC1: 10, PHC2: 11, TO2: 12, TO1: 13, LO2: 14, LO1: 15, V3B: 16, V3A: 17, IPS0: 18, IPS1: 19, IPS2: 20, IPS3: 21, IPS4: 22, IPS5: 23, SPL1: 24, FEF: 25}
+  # Fixed before the first build: the atlas's V1, V2 and V3, each its ventral and dorsal halves, must
+  # overlap the template's on this brain at least this well (Dice of midthickness area, each hemisphere),
+  # or the areas are not published.
+  agreement:
+    V1: {areas: [V1v, V1d], minimum_dice: 0.7}
+    V2: {areas: [V2v, V2d], minimum_dice: 0.6}
+    V3: {areas: [V3v, V3d], minimum_dice: 0.5}

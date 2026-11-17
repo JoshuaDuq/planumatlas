@@ -6809,8 +6809,8 @@ associations:
       en: Retrospective MRI charting in nine coma cases. Four developed fatal hyperthermia, so the sample partly reflects the most severe strokes.
       fr: Report rétrospectif des IRM chez neuf cas de coma. Quatre ont développé une hyperthermie fatale; l’échantillon reflète donc en partie les AVC les plus sévères.
     mapping_note:
-      en: The pontine and midbrain territories are whole brainstem segments; the dorsal raphe nucleus is the only listed arousal nucleus available. Lesions were mostly bilateral.
-      fr: Les territoires pontique et mésencéphalique sont des segments entiers du tronc; le noyau dorsal du raphé est le seul noyau d’éveil cité disponible. Les lésions étaient le plus souvent bilatérales.
+      en: The pontine and midbrain territories are whole brainstem segments. The other named nuclei are the Harvard arousal atlas's masks placed on this brain by SegmentAAN, with their own limitations; the dorsal raphe nucleus is NextBrain's. Lesions were mostly bilateral.
+      fr: Les territoires pontique et mésencéphalique sont des segments entiers du tronc. Les autres noyaux cités sont les masques de l’atlas de l’éveil de Harvard placés sur ce cerveau par SegmentAAN, avec leurs propres limites ; le noyau dorsal du raphé est celui de NextBrain. Les lésions étaient le plus souvent bilatérales.
     mappings:
       - {region: 'learning:left:pons', source_name: Pontine territory}
       - {region: 'learning:right:pons', source_name: Pontine territory}
@@ -6818,6 +6818,15 @@ associations:
       - {region: 'learning:right:midbrain', source_name: Midbrain territory}
       - {region: 'nextbrain:left:521', source_name: dorsal_raphe_nucleus}
       - {region: 'nextbrain:right:10521', source_name: dorsal_raphe_nucleus}
+      - {region: 'aan:midline:median-raphe', source_name: MnR}
+      - {region: 'aan:left:locus-coeruleus', source_name: LC}
+      - {region: 'aan:right:locus-coeruleus', source_name: LC}
+      - {region: 'aan:left:laterodorsal-tegmental-nucleus', source_name: LDTg}
+      - {region: 'aan:right:laterodorsal-tegmental-nucleus', source_name: LDTg}
+      - {region: 'aan:left:pontis-oralis', source_name: PnO}
+      - {region: 'aan:right:pontis-oralis', source_name: PnO}
+      - {region: 'aan:left:parabrachial-complex', source_name: PBC}
+      - {region: 'aan:right:parabrachial-complex', source_name: PBC}
     evidence:
       - {reference: parvizi-2003, role: supporting}
 

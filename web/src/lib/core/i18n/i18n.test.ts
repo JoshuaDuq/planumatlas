@@ -306,11 +306,11 @@ test('I18N-05 · the strings later chunks asked for read as approved, in both la
   const call = (lang: 'en' | 'fr', path: string, ...args: unknown[]) =>
     (at(lang, path) as (...a: unknown[]) => string)(...args);
   assert.equal(call('en', 'dissection.partHidden', 'X', 'Y'), 'Hidden: X, Y.');
-  assert.equal(call('fr', 'dissection.partHidden', 'X', 'Y'), 'Masqué : X, Y.');
+  assert.equal(call('fr', 'dissection.partHidden', 'X', 'Y'), 'Masqué\u202f: X, Y.');
   assert.equal(call('en', 'dissection.partShown', 'X', 'Y'), 'Shown: X, Y.');
-  assert.equal(call('fr', 'dissection.partShown', 'X', 'Y'), 'Affiché : X, Y.');
+  assert.equal(call('fr', 'dissection.partShown', 'X', 'Y'), 'Affiché\u202f: X, Y.');
   assert.equal(call('en', 'diffusion.loaded', 'X'), 'Loaded: X');
-  assert.equal(call('fr', 'diffusion.loaded', 'X'), 'Chargé : X');
+  assert.equal(call('fr', 'diffusion.loaded', 'X'), 'Chargé\u202f: X');
   const detent = (lang: 'en' | 'fr') => Object.values(TRANSLATIONS[lang].sheet.detent);
   assert.deepEqual(detent('en'), ['Panel collapsed', 'Panel half open', 'Panel fully open']);
   assert.deepEqual(detent('fr'), [
@@ -354,7 +354,7 @@ test('I18N-09 · the shortcut sheet’s Escape and M rows carry the S5b wording'
   assert.equal(row('en', 'M'), 'Open or close linked MRI slices; in Tracts, they draw the tracts');
   assert.equal(
     row('fr', 'M'),
-    'Ouvrir ou fermer les coupes IRM ; dans Faisceaux, elles tracent les faisceaux',
+    'Ouvrir ou fermer les coupes IRM\u202f; dans Faisceaux, elles tracent les faisceaux',
   );
 });
 

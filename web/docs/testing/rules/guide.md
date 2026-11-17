@@ -72,7 +72,7 @@ Scope: the guided tour ("How to use Planum"), a driver.js tour over the live int
 
 ### GUIDE-08 · A phone's sheet rises for the region's detail and comes down after it
 
-- **Rule:** On a phone, The region in detail raises the sheet (`sheet.raise`, as a selection does) and its card sits at the stage's top, clear of the detail. The next stop, or closing the tour, lowers the sheet the tour or a pick raised (`sheet.lower`, SHEET-22a), so the later stops have the stage back. Once picked, Open a region's card stays where it is and gives back its band above the dock, so the rising sheet does not carry it over the anatomy. A desktop's panel is beside the stage: nothing is raised or lowered.
+- **Rule:** On a phone, The region in detail raises the sheet itself (`sheet.raise`, as a selection does), since the pick on Open a region leaves it at peek with the region named in the grip (REGION-25), and its card sits at the stage's top, clear of the detail. The next stop, or closing the tour, lowers the sheet the tour or a second pick of a region raised (`sheet.lower`, SHEET-22a; a sheet at peek stays), so the later stops have the stage back. Once picked, Open a region's card stays where it is and gives back its band above the dock, so the rising sheet does not carry it over the anatomy. A desktop's panel is beside the stage: nothing is raised or lowered.
 - **Kind:** behaviour
 - **Level:** browser
 - **Source:** `web/src/features/guide/tour.ts` (`raisesSheet`, `lowerSheet`, `stageTop`); guided tour rebuild 2026-11-11

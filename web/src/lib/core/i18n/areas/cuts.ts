@@ -69,7 +69,6 @@ export const en = {
   arterialRegistered: 'typical arterial territories registered onto this brain',
   nettekovenRegistered: 'group functional cerebellar regions registered onto this brain',
   choiRegistered: 'group striatal networks registered onto this brain',
-  cutLabels: 'Cut labels',
 };
 
 export const fr: typeof en = {
@@ -90,9 +89,9 @@ export const fr: typeof en = {
   },
   axes: {
     off: 'Position (mm)',
-    sagittal: 'Coordonnée D (mm) : − gauche / + droite',
-    coronal: 'Coordonnée A (mm) : − postérieur / + antérieur',
-    axial: 'Coordonnée S (mm) : − inférieur / + supérieur',
+    sagittal: 'Coordonnée D (mm) : − gauche / + droite',
+    coronal: 'Coordonnée A (mm) : − postérieur / + antérieur',
+    axial: 'Coordonnée S (mm) : − inférieur / + supérieur',
     oblique: 'Décalage normal depuis l’origine (mm)',
   },
   exactPositionAria: 'Position exacte de coupe en millimètres',
@@ -138,5 +137,4 @@ export const fr: typeof en = {
   arterialRegistered: 'territoires artériels typiques recalés sur ce cerveau',
   nettekovenRegistered: 'régions fonctionnelles cérébelleuses de groupe recalées sur ce cerveau',
   choiRegistered: 'réseaux striataux de groupe recalés sur ce cerveau',
-  cutLabels: 'Étiquettes de coupe',
 };

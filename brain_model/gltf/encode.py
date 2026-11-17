@@ -214,7 +214,7 @@ def reencode(data, *, ranges=None, normals=True, fields=True):
                         packed.ravel(), INT16, "VEC3", normalized=True, target=34962
                     )
                     quantized_normals = True
-                elif name in ("_NETWORK", "_TERRITORY", "_VISUAL_AREA"):
+                elif name in ("_NETWORK", "_TERRITORY", "_VISUAL_AREA", "_WANG_AREA"):
                     codes = np.rint(values).astype(np.uint8)
                     if not np.array_equal(codes.astype(np.float32), values):
                         raise ValueError(f"{name} is not an integer index")

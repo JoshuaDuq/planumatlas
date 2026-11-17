@@ -35,7 +35,10 @@ import { createCortexHold } from '../lib/state/cortex-hold.svelte.ts';
 import { createMapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
 import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
+import { createCorticalLayersStore } from '../lib/state/cortical-layers.svelte.ts';
 import { createUserMapStore } from '../lib/state/user-map.svelte.ts';
+import { createHighlights, showOverLift } from '../lib/state/highlights.svelte.ts';
+import { highlightStatus } from '../lib/core/state/paint.ts';
 import { createLink } from '../lib/state/link.svelte.ts';
 import { createLessonStore } from '../lib/state/session.svelte.ts';
 import { announceView, createView } from '../lib/state/view.svelte.ts';
@@ -144,13 +147,40 @@ export async function composeWorld(
             .catch((error: unknown) => console.error(error)),
       },
     });
+    // Published beside the manifest; downloaded when a cortical region's sheet first asks.
+    const layersFile = model.manifest.cortical_layers?.file;
+    const corticalLayers = createCorticalLayersStore({
+      url: layersFile
+        ? new URL(
+            layersFile,
+            new URL(`${ASSET_BASE}models/${model.manifest.anatomy.id}/`, globalThis.location.href),
+          )
+        : null,
+      regions: model.regions,
+    });
+    // Drawn by the same sources as the paint, so they are set aside exactly when evidence is shown.
+    const highlights = createHighlights({
+      status: () =>
+        highlightStatus(view.current, {
+          domains,
+          clinical,
+          lesion: lesion.paint,
+          connectivity: model.connectivity,
+          disorders: model.disorders,
+          layers: corticalLayers.data,
+          mapDrawn: userMap.drawn,
+        }),
+      showPaint: () => showOverLift(session, lesion),
+    });
     syncPaint(model, view, {
       domains,
       clinical,
       lesion,
       connectivity: model.connectivity,
       disorders: model.disorders,
+      layers: corticalLayers,
       userMap,
+      highlights,
     });
     const mapOverlap = createMapOverlap({ engine: engine.userMap, view, userMap, domains });
     syncStrokeCases(view, strokeCases);
@@ -158,11 +188,18 @@ export async function composeWorld(
     syncLessonTract(engine.tracts, view, circuits, (error) => commands.fail('streamlines', error));
     syncRouteGhost(model, view, circuits);
     const visualFieldMap = createVisualFieldMapStore(lesson);
-    syncVisualFieldMap(engine.visualField, view);
+    syncVisualFieldMap(engine.visualField, view, visualFieldMap);
     const catalog = createCatalogStore(regions, view);
     // Before the first restore: a link that loads hidden regions then says their count once.
     const speech = announceView(view, (region, current) => regions.label(region.id, current).name);
-    const link = createLink({ engine, view, lesion, strokeCases, write: () => links.write() });
+    const link = createLink({
+      engine,
+      view,
+      lesion,
+      strokeCases,
+      highlights,
+      write: () => links.write(),
+    });
     const context: AppContext = { engine, engineState, session, lesson, view, catalog, link };
 
     const reader: SceneReader = {
@@ -192,6 +229,7 @@ export async function composeWorld(
       reader,
       ui: {
         showDetail: ports.showDetail,
+        showDetailInPlace: ports.showDetailInPlace,
         showList: ports.showList,
         revealOnSelect: ports.revealOnSelect,
         readingPlace: ports.readingPlace,
@@ -212,6 +250,7 @@ export async function composeWorld(
       view,
       lesion,
       strokeCases,
+      highlights,
       coordinates,
       link,
       commands,
@@ -247,6 +286,7 @@ export async function composeWorld(
       followLanguage: language.follow,
       defaultAnatomy,
       page: globalThis,
+      embedded: app.embed !== null,
     });
     return {
       ...context,
@@ -261,6 +301,8 @@ export async function composeWorld(
       lesion,
       strokeCases,
       userMap,
+      highlights,
+      corticalLayers,
       mapOverlap,
       visualFieldMap,
       coordinates:
@@ -311,7 +353,9 @@ export async function composeWorld(
       session.notify(failureNotice(error, session.state.lang, 'whiteMatter')),
     ),
     engine.on('pick', ({ id }) => world.anatomy.pickRegion(id)),
-    engine.on('visualFieldPoint', ({ reading }) => world.visualFieldMap.read(reading)),
+    engine.on('visualFieldPoint', ({ reading, visualArea }) =>
+      world.visualFieldMap.read(reading, visualArea),
+    ),
     // The lesion's report is Anatomy's detail, which shows it once no region is selected. A phone's
     // sheet stays down so the brain stays in reach for the next press; Show the report raises it.
     // A lesson stays open over its lesion, which Show the report reaches.
@@ -341,6 +385,7 @@ export async function composeWorld(
           spinalCordVisible,
           hemisphere,
           exploded,
+          namesShown,
           dissectionCanUndo,
         } = view.current;
         return {
@@ -353,6 +398,7 @@ export async function composeWorld(
           spinalCordVisible,
           hemisphere,
           exploded,
+          namesShown,
           explodable: !visualFieldMapOpen(view.current),
           singleKeys: keyPreference.enabled,
           mprOpen: ports.mprOpen(),
@@ -386,6 +432,7 @@ export async function composeWorld(
         setSpinalCordVisible: (visible) => void world.anatomy.setSpinalCordVisible(visible),
         setHemisphere: world.anatomy.setHemisphere,
         setExploded: (exploded) => void world.anatomy.setExploded(exploded),
+        setNamesShown: session.setNamesShown,
         // The engine remembers the zoom after each (E7), as the legacy keys did.
         orbitBy: camera.orbitBy,
         panBy: camera.panBy,

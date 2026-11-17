@@ -1,6 +1,7 @@
 # A failed cut-atlas switch from the anatomy search is reported
 
 Chunk: I1
+Status: superseded 2026-11-17 by derived cut labels. The search offers no cut-labels switch and `excursions.setCutAtlas` is gone: a region another colouring or internal anatomy puts on the cut is listed and revealed by that control (ANAT-37, CTRL-18), and a failed load of the labels is the cut's own report (SLICE-21).
 
 ## Legacy behaviour
 

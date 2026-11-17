@@ -6,8 +6,8 @@ import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { Engine, MoveOptions, MprPlane, VisualFieldDot } from '../engine/api.ts';
 import type { LessonStore, SessionStore } from '../state/session.svelte.ts';
 import type { Explorer } from '../types/index.ts';
-import { preparedOf } from '../../features/colophon/display-state.ts';
-import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
+import { preparedOf } from '../state/display-state.ts';
+import type { PreparedDisplay } from '../state/display-state.ts';
 import { prepareCircuitMri, showCircuitLandmark } from './navigation/learning.ts';
 
 /** Captures and puts back a whole scene (app.js:754-779), which the link restore owns. */

@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createCatalog } from '../core/catalog/catalog.ts';
 import { createSceneCommands } from '../core/state/scene-commands.ts';
 import { decodeState } from '../core/state/url-state.ts';
 import { createFakeEngine } from '../engine/fake.ts';
 import type { FakeEngine } from '../engine/fake.ts';
 import { createEngineSync } from '../state/engine-sync.svelte.ts';
+import { createLanguage } from '../state/language.svelte.ts';
 import { createLink } from '../state/link.svelte.ts';
 import { createLessonStore, createSessionStore } from '../state/session.svelte.ts';
 import { announceView, createView } from '../state/view.svelte.ts';
@@ -26,11 +27,15 @@ const page = { hash: '', pathname: '/', search: '', reload() {} };
 
 /** The stores a page builds, in an effect root as a component would; `announce` says the view's changes. */
 function build({ announce }: { announce: boolean }) {
-  const parts = {} as { links: ReturnType<typeof createLinks> };
+  const parts = {} as {
+    links: ReturnType<typeof createLinks>;
+    session: ReturnType<typeof createSessionStore>;
+  };
   cleanups.push(
     $effect.root(() => {
       const engineState = createEngineSync(engine);
       const session = createSessionStore({ views: ['oblique', 'left'] });
+      parts.session = session;
       const lesson = createLessonStore({ get: () => ({ steps: [{}] }) as never });
       const view = createView({
         engine: engineState,
@@ -68,6 +73,7 @@ function build({ announce }: { announce: boolean }) {
         view,
         lesion,
         strokeCases,
+        highlights: { list: [], status: 'drawn', replace() {} },
         coordinates: null,
         link: createLink({ engine, view, lesion, strokeCases, write: () => {} }),
         commands: createSceneCommands({
@@ -97,9 +103,7 @@ function build({ announce }: { announce: boolean }) {
           openFunction() {},
           openDeficit() {},
         },
-        followLanguage: (lang) => {
-          document.documentElement.lang = lang;
-        },
+        followLanguage: createLanguage(undefined).follow,
         defaultAnatomy: published.anatomy.id,
         page: { history: window.history, location: page } as never,
       });
@@ -123,15 +127,29 @@ afterEach(() => {
 });
 
 describe('a link-edited language', () => {
-  test('is followed by <html lang> and never saved as the reader’s choice', async () => {
-    localStorage.setItem('planum-lang', 'en');
+  afterEach(() => {
+    localStorage.removeItem('planum-lang');
     document.documentElement.lang = 'en';
-    const { links } = build({ announce: false });
+  });
+
+  test('LINK-08 · with none saved, is followed by <html lang> and the session, and never saved', async () => {
+    localStorage.removeItem('planum-lang');
+    const { links, session } = build({ announce: false });
     page.hash = '#lang=fr';
     await links.onHashChange();
     expect(document.documentElement.lang).toBe('fr');
+    expect(session.state.lang).toBe('fr');
+    expect(localStorage.getItem('planum-lang')).toBeNull();
+  });
+
+  test('LINK-08 · gives way to the reader’s saved language', async () => {
+    localStorage.setItem('planum-lang', 'en');
+    const { links, session } = build({ announce: false });
+    page.hash = '#lang=fr';
+    await links.onHashChange();
+    expect(document.documentElement.lang).toBe('en');
+    expect(session.state.lang).toBe('en');
     expect(localStorage.getItem('planum-lang')).toBe('en');
-    document.documentElement.lang = 'en';
   });
 });
 

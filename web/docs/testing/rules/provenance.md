@@ -2,7 +2,7 @@
 
 Scope: chunk H4 (#42), the Provenance sheet: what the loaded anatomy's own published records say about where it came from, shown in a native modal dialog opened from the colophon (COLO-05) or, on a phone, from the ⋯ menu (MAST-19). It covers the rows the sheet builds (the C5 view-model `provenanceRows`/`referenceRows`, here because they are what the reader reads) and the dialog's behaviour. Mounting it, and passing the manifest, the domains and the tract reference, is I3b's (`regions.md`, REGION-05 and REGION-18). Legacy sources: `viewer/ui/panels/provenance.js`, `viewer/ui/panels/provenance.test.js`, the root `index.html:689-697`, `viewer/styles/dialogs.css:112-133`, `viewer/ui/chrome/header.js:423-425, 543-549`. New code: `web/src/features/provenance/ProvenanceDialog.svelte`, `web/src/lib/core/panels/provenance.ts`, U5's `web/src/lib/ui/Dialog.svelte`. Deviations: `h4-initial-focus.md`, `h4-lang-of-parts.md`, `h4-rerender-focus.md`. Decision 17 on #4 (external links), decision record `0008-dialog-mount-points.md`.
 
-The data values below come from the published `public/models/cdmd/manifest.json`: subject "MGH CDMD “sub_013”", `individual: true`, source `https://doi.org/10.6084/m9.figshare.c.5315474.v1`, reconstruction `freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45`, HCP-MMP projected from `fsaverage`, atlases `destrieux` and `hcp-mmp`, networks, CAB-NP, functional divisions, neuropsychological domains, one supplemental layer (`pam50`), and 45 source files, all with a SHA-256. Domain checks come from `public/models/cdmd/neuropsych-domains.json`. Copy quoted is the English interface text unless marked FR.
+The data values below come from the published `public/models/cdmd/manifest.json`: subject "MGH CDMD “sub_013”", `individual: true`, source `https://doi.org/10.6084/m9.figshare.c.5315474.v1`, reconstruction `freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45`, HCP-MMP projected from `fsaverage`, atlases `destrieux` and `hcp-mmp`, networks, CAB-NP, functional divisions, neuropsychological domains, one supplemental layer (`pam50`), and 45 source files, all with a SHA-256. The browser tests read them from the frozen cut of that manifest, `web/test/fixtures/cdmd-manifest.json` (CAT-68), which holds the same values. Domain checks come from `public/models/cdmd/neuropsych-domains.json`. Copy quoted is the English interface text unless marked FR.
 
 ## What the sheet says
 
@@ -205,3 +205,21 @@ The data values below come from the published `public/models/cdmd/manifest.json`
 - **Source:** #4 parity proof
 - **Expected:** zero violations (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`).
 - **Covered by:** `src/features/provenance/provenance.svelte.test.ts` (R, a 3-state × 2-theme × 2-width matrix: 12 axe runs)
+
+### PROV-23 · References for this view: read on the first opening, copied or saved
+
+- **Rule:** Under the facts, "References for this view" lists the works of PANEL-35 as term and definition rows: what each is behind, then the work, its link opening in a new tab. The library is asked for the first time the dialog opens and kept; while it loads the section says so, and a failure says so with Retry, which asks again. Copy as text puts the text list on the clipboard and says "References copied"; Download .bib and Download .ris save `planum-references.bib` and `.ris` and say so. Published text keeps `lang="en"` in French; an HCP-derived layer ends the list with the acknowledgement.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** plan 2 WP24; handoff F5
+- **Expected:** loader not called before opening, once after two openings; labels Planum, Atlas; values "Duquette J. Planum [software]." and the Destrieux line; links `https://planumatlas.com/`, the DOI. Clipboard text the two lines with links and a final newline. Downloads in order `.bib` (starts `@misc{planum,`) and `.ris` (starts `TY  - COMP`). A rejected load → "The references could not be loaded.", Retry → the list, two calls. French with HCP → labels end "Remerciements", the acknowledgement and the work `lang="en"`.
+- **Covered by:** `src/features/provenance/references.svelte.test.ts` (R)
+
+### PROV-24 · The cortical layers have a row: their label, licence and every citation
+
+- **Rule:** An anatomy that publishes `cortical_layers` gets a "Cortical layers (BigBrain)" row (French "Couches corticales (BigBrain)"), after Receptor fingerprints: the published label with its licence under it, then each citation as a link (Wagstyl et al. 2020, BigBrainWarp, BigBrain, the cell-segmentation method and the twelve EBRAINS cell datasets).
+- **Kind:** data
+- **Level:** unit (view-model)
+- **Source:** plan 2 WP24, WP28
+- **Expected:** fixture `{cortical_layers: {label, license 'CC BY-NC-SA 4.0', citations: [pbio.3000678, 25493/the9-vqu]}}` in French → one row, label "Couches corticales (BigBrain)", items the label with note "CC BY-NC-SA 4.0", then `doi.org/10.1371/journal.pbio.3000678` and `doi.org/10.25493/the9-vqu`. The published `cdmd` row order has it between Receptor fingerprints and Stimulation responses (after the WP28 rebuild).
+- **Covered by:** `src/lib/core/panels/provenance.test.ts` (R)

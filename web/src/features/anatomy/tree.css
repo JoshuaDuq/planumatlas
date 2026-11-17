@@ -181,6 +181,17 @@
     font-weight: 400;
     color: var(--text-tertiary);
   }
+  /* A family listed within its group (the Harvard nuclei under Brainstem): a caption, not a control. */
+  .anatomy-tree .row:has(.subgroup-label) {
+    cursor: default;
+  }
+  .subgroup-label {
+    padding-block: var(--space-2) 0;
+    overflow-wrap: anywhere;
+    font-size: var(--text-caption);
+    line-height: var(--lh-caption);
+    color: var(--text-secondary);
+  }
 
   /* The Mid slot: held open where the section has a midline part, so L and R stay anchored right. */
   .slot-mid {
@@ -287,7 +298,7 @@
     background: var(--surface-pressed);
     transition-duration: 0s;
   }
-  .anatomy-tree .row:has(.section-label):active {
+  .anatomy-tree .row:has(.section-label, .subgroup-label):active {
     background: transparent;
   }
   .anatomy-tree .row[data-selected='true'] .visibility-control,
@@ -322,7 +333,7 @@
       background: var(--surface-hover);
     }
     /* A section's caption is not a control: no wash. */
-    .anatomy-tree .row:has(.section-label):hover {
+    .anatomy-tree .row:has(.section-label, .subgroup-label):hover {
       background: transparent;
     }
     .visibility-control:hover:not(:disabled) {
@@ -469,12 +480,17 @@
     color: var(--text-secondary);
     cursor: pointer;
     min-height: var(--control-height);
-    margin-inline: auto calc(-1 * var(--space-2));
+    margin-inline-start: auto;
     padding: 0 var(--space-2);
     font-size: var(--text-caption);
     font-weight: 400;
     line-height: var(--lh-caption);
     white-space: nowrap;
+  }
+  /* The table download ends the row, reaching into the inset as the toggle did alone. */
+  .tree-download {
+    flex: none;
+    margin-inline: calc(-1 * var(--space-2));
   }
 }
 

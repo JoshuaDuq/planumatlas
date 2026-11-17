@@ -11,7 +11,7 @@ Status: fix, standard cited. Follows decision 8 on #4 (approved) and `u7-treegri
 
 One `role="treegrid"` named "Browse anatomy". Rows are `role="row"` with `aria-level` 1 (group) and 2 (region), `aria-posinset`/`aria-setsize`, `aria-expanded` on groups and `aria-selected` on regions. Each row's cells are `role="gridcell"`: the name, then one cell per side (Mid, L, R) that holds the visibility eye. Each eye is a native button in its own cell.
 
-U7's `Treegrid` is a flat list of rows with no `rowgroup`, so a section heading ("Cortex", "Subcortical", "Cut labels only") becomes a level-1 row of its own: one cell, no `aria-expanded`, no `aria-selected`. It is a stop for Up and Down, which a legacy `aria-hidden` heading was not. Its `aria-posinset`/`aria-setsize` count the headings among the level-1 siblings. The legacy visual layout is kept.
+U7's `Treegrid` is a flat list of rows with no `rowgroup`, so a section heading ("Cortex", "Subcortical", "On cuts only") becomes a level-1 row of its own: one cell, no `aria-expanded`, no `aria-selected`. It is a stop for Up and Down, which a legacy `aria-hidden` heading was not. Its `aria-posinset`/`aria-setsize` count the headings among the level-1 siblings. The legacy visual layout is kept.
 
 ## Standard cited
 

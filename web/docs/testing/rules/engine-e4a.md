@@ -7,7 +7,7 @@ range, crosshair, cut atlas, status) and the GPU cut faces (`TissueSections`: ca
 plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `viewer/slices/sampling.js`,
 `viewer/slices/volume.js`, `viewer/slices/sections.js`, `viewer/tissues/gpu-sections.js`. New code:
 `web/src/lib/engine/slices/*.ts`, `web/src/lib/engine/tissues/gpu-sections.ts`. Deviations:
-`e4a-cut-atlas-rollback.md`, `e4a-fail-fast-sections.md`, `e4a-model-change-single-report.md`,
+`e4a-cut-atlas-rollback.md` (superseded 2026-11-17 by derived cut labels), `e4a-fail-fast-sections.md`, `e4a-model-change-single-report.md`,
 `e4a-offset-ready-while-off.md`. RAS is the source surface RAS in millimetres throughout. SLICE-01–SLICE-05 restate the coordinate rules that `engine-e1.md` owns as RENDER-38–RENDER-42; they keep their IDs, but each is tested once, under the RENDER ID. "The contract suite" below is `src/lib/engine/fake/contract-suite.ts`, run on the real engine by `src/lib/engine/index.contract.test.ts` and on the fake by `src/lib/engine/contract.test.ts`.
 
 ## Coordinates and frames
@@ -157,19 +157,19 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 - **Kind:** scientific/data
 - **Level:** unit
 - **Source:** review handoff P13: every window or level change resampled each 512 × 512 plane; P13b: the state named the paint by its id alone, not the cut labels that draw it
-- **Expected:** Published CDMD scan and aseg, the three linked planes through (−28.3, −8.6, 22.2), 128 px over 64 mm; the scan alone, labels, the left putamen's agreement, a paint with a map, a map against the paint; windows 94/188 (published), 94/10, 127.5/1000, −300/40, 400/40, 93.7/187.3 → no byte differs from `renderSlice` as it was before (`referenceSlice`, `slice-test-support.ts`). A 4×4×4 ramp sampled once at the default window, then `setWindow(60, 100)` → `pixels(slice)` first pixel 153 (from 70), with no `linear` or `label` read. Paint `function:a` on area A, Destrieux labelling it at x 2 and 3, Julich-Brain at x 0: `state.paint` `{ id: 'function:a', atlas: 'destrieux' }` and the axial row at z = 1 painted at x 2 and 3; cut atlas Julich-Brain → `{ id: 'function:a', atlas: 'julich' }`, painted at x 0 only.
+- **Expected:** Published CDMD scan and aseg, the three linked planes through (−28.3, −8.6, 22.2), 128 px over 64 mm; the scan alone, labels, the left putamen's agreement, a paint with a map, a map against the paint; windows 94/188 (published), 94/10, 127.5/1000, −300/40, 400/40, 93.7/187.3 → no byte differs from `renderSlice` as it was before (`referenceSlice`, `slice-test-support.ts`). A 4×4×4 ramp sampled once at the default window, then `setWindow(60, 100)` → `pixels(slice)` first pixel 153 (from 70), with no `linear` or `label` read. Paint `function:a` on area A, Destrieux labelling it at x 2 and 3, Julich-Brain at x 0: `state.paint` `{ id: 'function:a', atlas: 'destrieux' }` and the axial row at z = 1 painted at x 2 and 3; surface atlas Julich-Brain, which then labels the cut → `{ id: 'function:a', atlas: 'julich' }`, painted at x 0 only.
 - **Covered by:** `src/lib/engine/slices/sampling.test.ts` (S), `src/lib/engine/slices/sections.test.ts` (R)
 
 ## The cut controller
 
 ### SLICE-16 · Cut modes and the latest request
 
-- **Rule:** The cut is off, sagittal, coronal, axial or oblique, and any other mode is an error. When modes are chosen while a load is pending, the last choice wins. The model is told whether a cut is active and which atlas it shows, so cut-only regions follow it (see ATLAS-19).
+- **Rule:** The cut is off, sagittal, coronal, axial or oblique, and any other mode is an error. When modes are chosen while a load is pending, the last choice wins, and only the latest request reports a failed load; an overtaken one settles the status without a report. The model is told whether a cut is active and which atlas it shows, so cut-only regions follow it (see ATLAS-19).
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/slices/sections.js:7`, `:241-256`, `:467-472`
 - **Expected:** `setMode('coronal')` pending, then `setMode('off')` → mode `off`; `setMode('diagonal')` → "Unknown cut mode: diagonal".
-- **Covered by:** `src/lib/engine/slices/sections.test.ts` (R, latest mode wins); the contract suite (R, "Unknown cut mode", cut reported to the model); the contract suite (R, "chooses the latest of the modes it is asked for, and words an unknown one", on both engines)
+- **Covered by:** `src/lib/engine/slices/sections.test.ts` (R, latest mode wins); the contract suite (R, "Unknown cut mode", cut reported to the model); the contract suite (R, "chooses the latest of the modes it is asked for, and words an unknown one", on both engines). An overtaken `setMode` failure left unreported: uncovered.
 
 ### SLICE-17 · Coordinate bounds
 
@@ -207,14 +207,14 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 - **Expected:** axial at z −500 with the cord shown; hide the cord → range `[-128, 128]`, crosshair z −128.
 - **Covered by:** `src/lib/engine/slices/sections.test.ts` (R)
 
-### SLICE-21 · Choosing the cut atlas
+### SLICE-21 · The cut is labelled by the atlas, colouring and internal anatomy the model shows
 
-- **Rule:** The cut samples its own atlas, which starts at the surface atlas and then changes independently. If a cut atlas fails to load, the choice goes back to the last cut atlas that finished loading, but only while the state still names the one that failed. Only the latest request reports the failure.
+- **Rule:** The cut atlas is derived, never chosen (`cutAtlasFor`, `core/catalog/cut-labels.ts`). A paint keeps the surface atlas, whose regions it names. Otherwise a colouring that is a cut-only atlas's own map labels the cut by it (`territory` → `arterial`, `striatal` → `choi`, `cerebellar` → `nettekoven`), over the detail level; then a detail level that is itself a published cut atlas (NextBrain); else the surface atlas. A map or level the build does not publish is skipped; a surface atlas with no published labels is an error. The sections recompute it on every model change and report it to the model at once, cut or no cut. Preparing a cut loads the cut atlas and, where it has no parcel solids of its own, the surface atlas whose parcels cap its ribbon (`TissueSections.ribbonAtlas`, SLICE-29). Nothing is drawn from labels still loading. Labels that fail are reported and kept, so the next change tries them again; a failure of labels the model no longer calls for is not reported. Nothing is rolled back.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/slices/sections.js:332-355`; deviation `e4a-cut-atlas-rollback.md`
-- **Expected:** a failing `hcp-mmp`, overtaken by `nextbrain` which loads → cut atlas `nextbrain`, status `ready`; a lone failing `hcp-mmp` → `destrieux`, status `error`; two failures, older first → `nextbrain` after the first, `destrieux` after the second; failure overtaken by `setMode` → `destrieux`.
-- **Covered by:** `src/lib/engine/slices/sections.test.ts` (R); the contract suite (R, a failed `setCutAtlas('no-such-atlas')` leaves the previous cut atlas)
+- **Source:** derived cut labels, 2026-11-17 (`src/lib/core/catalog/cut-labels.ts`), replacing the chosen cut atlas of `viewer/slices/sections.js:332-355` and its rollback (deviation `e4a-cut-atlas-rollback.md`, superseded)
+- **Expected:** `cutAtlasFor` on destrieux, learning, atlas colour → `destrieux`; atlas hcp-mmp → `hcp-mmp`; detail aseg → `destrieux`, nextbrain → `nextbrain`; tissue, mri, lobe, network, cab-np → `destrieux`; territory → `arterial`, striatal → `choi`, cerebellar over nextbrain → `nettekoven`; territory with only destrieux published → `destrieux`; a paint on hcp-mmp over nextbrain → `hcp-mmp`, a paint under territory → `destrieux`; atlas `yeo` → "No cut labels are published for the yeo atlas.". Sections: `destrieux`, and the model told `{ atlas: 'destrieux', active: false }`, before any cut; then atlas hcp-mmp → `hcp-mmp`, detail nextbrain → `nextbrain`, colour territory → `arterial`, a paint → `hcp-mmp`. Axial cut, hcp-mmp over nextbrain → loads `destrieux`, `nextbrain`, `hcp-mmp`, draws `nextbrain`; julich then → loads `julich`. hcp-mmp loading → group hidden; julich, then hcp-mmp fails → cut atlas `julich`, status `ready`, no `console.error`. A lone failing hcp-mmp → cut atlas `hcp-mmp`, status `error`, group hidden.
+- **Covered by:** `src/lib/core/catalog/cut-labels.test.ts` (R); `src/lib/engine/slices/sections.test.ts` (R); the contract suite (R, "labels the cut with the atlas the model shows", on both engines); the controller's side is CTRL-38
 
 ### SLICE-22 · Surface colour chosen through the cut
 
@@ -281,7 +281,7 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 
 ### SLICE-28 · An open cut follows the display
 
-- **Rule:** An open cut redraws when hemisphere, cortex visibility or opacity, isolation, internal system or visibility, surface colour, paint, detail, cord visibility or the hidden set changes. If the cut atlas or the detail level's caps are not loaded, it hides and reloads first.
+- **Rule:** An open cut redraws when the atlas, hemisphere, cortex visibility or opacity, isolation, internal system or visibility, surface colour, paint, detail, cord visibility or the hidden set changes. If the cut atlas, the surface atlas whose parcels cap its ribbon, or the detail level's caps are not loaded, it hides and reloads first.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/slices/sections.js:57-93`
@@ -299,14 +299,23 @@ plane, picking, highlight). Legacy sources: `viewer/slices/coordinates.js`, `vie
 
 ## GPU cut faces
 
+### SLICE-42 · Each cut face is anchored once, where the plane shows it, largest first
+
+- **Rule:** `sections.capAnchors()` measures the cut as drawn: the caps rasterised on a 1 mm grid over the plane, each cell taken by the highest-ranked cap that draws there (the last of `solids`, as the stencil claims draw them), a cap whose label the display hides leaving the cell to the cap below, and the cell naming the region that cap names there (`TissueSections.named`, the pick's rule, sampled labels included). Each region's face is its cells: its area in mm², and its own cell nearest their centroid, on the plane, so a curved face's anchor lies on it. Largest first; none without a cut.
+- **Kind:** behaviour
+- **Level:** unit — a contract-suite case, so the fake and the real engine meet it alike
+- **Source:** Planum improvement plan 2, WP21; `engine/tissues/cap-anchors.ts`
+- **Expected:** No cut → `[]`. An axial cut → at least one anchor, each region once, each a known region, areas positive and not increasing, each point within 0.5 mm of the plane; the cut closed → `[]`. The fake's rule: a drawn region whose anchor lies within 10 mm of the plane has a face at its anchor moved onto the plane, of area π(100 − d²).
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "anchors each cut face once, largest first, on the plane, and none without a cut" (R, through `contract.test.ts` and `index.contract.test.ts`); the rank and hidden-label rules are uncovered by a fixture test
+
 ### SLICE-29 · Every cut is capped by solids
 
-- **Rule:** The cut is always capped by solids: an atlas's parcel solids where it has them, otherwise the envelopes and structures, whose caps take their colours from the atlas's label volume (SHADER-30). No flat label plane is drawn, so the outline is the reconstruction's and fluid outside the pial surface is not shown. Supplemental anatomy (the cord) is always capped and keeps its own identity.
+- **Rule:** The cut is always capped by solids: an atlas's parcel solids where it has them, otherwise the envelopes and structures, whose caps take their colours from the atlas's label volume (SHADER-30). A cut atlas without parcel solids (NextBrain, the striatal and cerebellar maps) keeps the surface atlas's parcels in the cortical ribbon (TISSUE-16), and the cortex its volume puts inside the white surface is drawn white (SHADER-22) and named as no region; only the arterial territories (`CORTICAL_MAPS`), a map of the cortex itself, leave the ribbon to the pial envelope, sampled voxel by voxel. No flat label plane is drawn, so the outline is the reconstruction's and fluid outside the pial surface is not shown. Supplemental anatomy (the cord) is always capped and keeps its own identity.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `src/lib/engine/tissues/gpu-sections.ts` (`update`); 2026-11-05, replacing the sampled label plane, whose 1 mm steps and grey CSF band read as broken
-- **Expected:** a surfaceless atlas in tissue, atlas or network colour → solids drawn, cap labels on its volume, colour from it except under tissue; a wedged atlas → caps in every mode and under isolation, no cap samples; the cord cap visible and pickable in tissue, atlas and network.
-- **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R)
+- **Source:** `src/lib/engine/tissues/gpu-sections.ts` (`update`, `ribbonAtlas`); 2026-11-05, replacing the sampled label plane, whose 1 mm steps and grey CSF band read as broken; the composite ribbon with derived cut labels, 2026-11-17
+- **Expected:** a surfaceless atlas in tissue, atlas or network colour → solids drawn, cap labels on its volume, colour from it except under tissue; a wedged atlas → caps in every mode and under isolation, no cap samples; the cord cap visible and pickable in tissue, atlas and network. The composite ribbon's values are TISSUE-16 and SHADER-22.
+- **Covered by:** `src/lib/engine/tissues/gpu-sections.test.ts` (R); `src/lib/engine/tissues/solid-assets.test.ts` and `palette.test.ts` (R, the composite ribbon); a sampled cortical voxel named as no region under the surface's parcels: uncovered
 
 ### SLICE-30 · The cut shows only what the display shows
 

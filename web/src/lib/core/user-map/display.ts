@@ -1,4 +1,4 @@
-import { decimal } from '../format.ts';
+import { decimal, grouped, withUnit } from '../format.ts';
 import type { Language, Rgb } from '../../types/index.ts';
 
 /** sRGB ends of each sign's scale, threshold first: FSL's Red-Yellow and Blue-Lightblue. */
@@ -92,6 +92,19 @@ export function mapNumber(value: number, lang: Language): string {
   const digits =
     value === 0 ? 0 : Math.max(0, DIGITS - 1 - Math.floor(Math.log10(Math.abs(value))));
   return decimal(value, digits, lang, { trim: true });
+}
+
+/** A series volume's place from 1, its count, and its time when the header gives the spacing. */
+export function volumeParts(
+  { volumes, secondsPerVolume }: Pick<MapSummary, 'volumes' | 'secondsPerVolume'>,
+  volume: number,
+  lang: Language,
+): [place: string, count: string, time: string | null] {
+  const time =
+    secondsPerVolume === null
+      ? null
+      : withUnit(mapNumber(volume * secondsPerVolume, lang), 's', lang);
+  return [grouped(volume + 1), grouped(volumes), time];
 }
 
 /**

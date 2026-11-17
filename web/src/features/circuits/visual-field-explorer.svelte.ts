@@ -77,6 +77,17 @@ export function createVisualFieldExplorer(deps: VisualFieldExplorerDeps) {
     get reading() {
       return store.reading;
     },
+    /** The named visual area last clicked; null outside them all. */
+    get area() {
+      return store.area;
+    },
+    /** The visual areas are outlined and named on the stage. */
+    get areasNamed() {
+      return store.areasNamed;
+    },
+    nameAreas(on: boolean) {
+      store.nameAreas(on);
+    },
     get side() {
       return side;
     },

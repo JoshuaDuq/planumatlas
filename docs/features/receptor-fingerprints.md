@@ -99,4 +99,4 @@ uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_receptor_fingerprints.py
 ```
 
-Figure state (panels a, b): https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=julich&cuts=julich&region=julich:left:2&view=left&focus=1 (open **Receptor densities**, choose **Ventral**). Panels c, d: https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=julich&cuts=julich&region=learning:left:putamen&view=left&focus=1
+Figure state (panels a, b): https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=julich&region=julich:left:2&view=left&focus=1 (open **Receptor densities**, choose **Ventral**). Panels c, d: https://planumatlas.com/#anatomy=cdmd&lang=en&detail=learning&atlas=julich&region=learning:left:putamen&view=left&focus=1

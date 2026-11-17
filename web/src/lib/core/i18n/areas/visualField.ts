@@ -3,6 +3,7 @@ const degrees = (value: number) =>
 const degrés = (value: number) => degrees(value).replace('.', ',');
 const area = (value: number) => `${value < 10 ? value.toFixed(1) : Math.round(value)} mm²`;
 const aire = (value: number) => area(value).replace('.', ',');
+const dice = (value: number) => value.toFixed(2).replace('.', ',');
 
 type Vertical = 'upper' | 'lower' | null;
 type Horizontal = 'left' | 'right' | null;
@@ -55,17 +56,27 @@ export const en = {
   reading: 'Clicked cortex',
   readingValue: (name: string, side: 'left' | 'right', place: string, sigma: number) =>
     `${side === 'left' ? 'Left' : 'Right'} ${name}: ${place.charAt(0).toLowerCase()}${place.slice(1)}, receptive field σ ${degrees(sigma)}. The dot now shows it.`,
-  readingNone: 'That point is outside V1–V3, where the template predicts nothing.',
-  clickHint: 'Click V1, V2 or V3 on the brain to read it.',
+  readingNone: 'That point is outside V1–V3 and every named visual area.',
+  readingArea: (name: string, side: 'left' | 'right') =>
+    `${side === 'left' ? 'Left' : 'Right'} ${name}: the template predicts no visual field position here.`,
+  readingNamed: (name: string) => ` Named area: ${name}.`,
+  clickHint: 'Click V1, V2 or V3 on the brain to read it; elsewhere a click names the visual area.',
   loading: 'Loading the territories…',
   loadFailed: 'The territories could not be loaded.',
   provenance:
     'Predicted from this brain’s folding by the Benson template (v4.0), fitted to the group average of 181 HCP participants. No retinotopy was measured in this brain, and V1’s size varies about threefold between people.',
   agreement: (side: 'left' | 'right', hcp: number, julich: number) =>
     `In the ${side} hemisphere, predicted V1 overlaps HCP-MMP’s V1 at Dice ${hcp.toFixed(2)} and Julich-Brain’s hOc1 at ${julich.toFixed(2)}. HCP-MMP was drawn from HCP data too, so the first agreement is not independent.`,
+  nameAreas: 'Name the visual areas',
+  areasNote:
+    'Outlines and names the 25 areas of a maximum-probability atlas from 53 people (Wang et al. 2015). It names the cortex only: no visual field position is predicted beyond V3, and the small areas vary most between people.',
+  areasAgreement: (side: 'left' | 'right', v1: number, v2: number, v3: number) =>
+    `In the ${side} hemisphere, the atlas’s V1, V2 and V3 overlap the predicted ones at Dice ${v1.toFixed(2)}, ${v2.toFixed(2)} and ${v3.toFixed(2)}.`,
+  legendOutlines: 'Borders of the named visual areas',
   sources: 'Sources',
   dataset: 'HCP 7T retinotopy (Benson et al. 2018)',
   method: 'Template method (Benson et al. 2014)',
+  areasSource: 'Visual areas (Wang et al. 2015)',
 };
 
 export const fr: typeof en = {
@@ -118,15 +129,26 @@ export const fr: typeof en = {
   reading: 'Cortex cliqué',
   readingValue: (name: string, side: 'left' | 'right', place: string, sigma: number) =>
     `${name} ${side === 'left' ? 'gauche' : 'droit'}\u202f: ${place.charAt(0).toLowerCase()}${place.slice(1)}, champ récepteur σ ${degrés(sigma)}. Le point le montre maintenant.`,
-  readingNone: 'Ce point est hors de V1–V3, où le gabarit ne prédit rien.',
-  clickHint: 'Cliquez sur V1, V2 ou V3 sur le cerveau pour le lire.',
+  readingNone: 'Ce point est hors de V1–V3 et de toute aire visuelle nommée.',
+  readingArea: (name: string, side: 'left' | 'right') =>
+    `${name} ${side === 'left' ? 'gauche' : 'droit'} : le gabarit ne prédit ici aucune position dans le champ visuel.`,
+  readingNamed: (name: string) => ` Aire nommée : ${name}.`,
+  clickHint:
+    'Cliquez sur V1, V2 ou V3 sur le cerveau pour le lire ; ailleurs, un clic nomme l’aire visuelle.',
   loading: 'Chargement des territoires…',
   loadFailed: 'Les territoires n’ont pas pu être chargés.',
   provenance:
     'Prédit à partir des plissements de ce cerveau par le gabarit de Benson (v4.0), ajusté sur la moyenne de 181 participants du HCP. Aucune rétinotopie n’a été mesurée dans ce cerveau, et la taille de V1 varie d’environ un facteur trois d’une personne à l’autre.',
   agreement: (side: 'left' | 'right', hcp: number, julich: number) =>
     `Dans l’hémisphère ${side === 'left' ? 'gauche' : 'droit'}, V1 prédit recouvre le V1 de HCP-MMP avec un Dice de ${hcp.toFixed(2).replace('.', ',')} et l’hOc1 de Julich-Brain avec ${julich.toFixed(2).replace('.', ',')}. HCP-MMP provient lui aussi des données du HCP\u202f: le premier accord n’est pas indépendant.`,
+  nameAreas: 'Nommer les aires visuelles',
+  areasNote:
+    'Délimite et nomme les 25 aires d’un atlas de probabilité maximale établi chez 53 personnes (Wang et al. 2015). Il nomme seulement le cortex : aucune position dans le champ visuel n’est prédite au-delà de V3, et les petites aires varient le plus d’une personne à l’autre.',
+  areasAgreement: (side: 'left' | 'right', v1: number, v2: number, v3: number) =>
+    `Dans l’hémisphère ${side === 'left' ? 'gauche' : 'droit'}, les V1, V2 et V3 de l’atlas recouvrent ceux prédits avec un Dice de ${dice(v1)}, ${dice(v2)} et ${dice(v3)}.`,
+  legendOutlines: 'Limites des aires visuelles nommées',
   sources: 'Sources',
   dataset: 'Rétinotopie 7T du HCP (Benson et al. 2018)',
   method: 'Méthode du gabarit (Benson et al. 2014)',
+  areasSource: 'Aires visuelles (Wang et al. 2015)',
 };

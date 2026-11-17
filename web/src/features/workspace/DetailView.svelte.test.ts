@@ -130,10 +130,12 @@ describe('the phone sheet', () => {
   test('the field is on screen and takes a tap', async () => {
     await shell.open();
     await page.viewport(375, 812);
+    // A pick at peek names the region in the grip; picking it again raises the sheet (REGION-25).
+    await pick();
     await pick();
     const field = detailField();
     await expect.poll(() => field.checkVisibility()).toBe(true);
-    // Once the sheet the pick raised has come to rest.
+    // Once the sheet the second pick raised has come to rest.
     await expect.poll(() => field.getBoundingClientRect().bottom).toBeLessThanOrEqual(812);
     expect(field.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
     await userEvent.click(field);

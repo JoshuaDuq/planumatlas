@@ -51,6 +51,8 @@ export const ICONS = {
   // A link that opens a new tab (T1, decision 17 on #4).
   'external-link': { shapes: [path('M14 4h6v6m0-6-9 9M18 14v5H5V6h5')], size: 12 },
   reset: { shapes: [path('M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5')] },
+  // A table saved as a file.
+  download: { shapes: [path('M12 4v11m-5-5 5 5 5-5M5 20h14')] },
 
   // The circuit stepper.
   previous: { shapes: [path('m15 6-6 6 6 6')] },

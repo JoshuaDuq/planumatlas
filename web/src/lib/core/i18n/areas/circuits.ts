@@ -56,7 +56,7 @@ export const fr: typeof en = {
   clinical: 'Contexte clinique',
   clinicalLink: 'Ouvrir les données sur le déficit',
   clinicalNote:
-    'Anatomie de référence. L’exactitude clinique n’a pas été validée ; ces associations ne prédisent pas le déficit d’un patient individuel.',
+    'Anatomie de référence. L’exactitude clinique n’a pas été validée ; ces associations ne prédisent pas le déficit d’un patient individuel.',
   deficitEvidence: 'Données sur le déficit',
   background: 'Contexte du parcours',
   evidence: 'Sources',

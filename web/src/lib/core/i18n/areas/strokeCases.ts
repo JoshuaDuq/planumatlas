@@ -93,7 +93,7 @@ export const fr: typeof en = {
   dot: (title: string, volume: string, share: string) =>
     `${title}, ${volume} cm³, ${share} de cette région`,
   plotHint:
-    'Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.',
+    'Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.',
   table: 'Tableau des cas',
   tableCaption: 'Chaque cas du graphique. Chaque en-tête de colonne trie le tableau.',
   columns: { id: 'Cas', volume: 'Volume de la lésion, cm³', aq: 'QA-WAB' },
@@ -101,7 +101,7 @@ export const fr: typeof en = {
   showPair: 'Montrer une paire',
   nextPair: 'Paire suivante',
   pairOf: (index: number, total: number, ratio: string, points: string) =>
-    `Paire ${index} sur ${total} : lésions de taille égale à ${ratio} près, scores séparés de ${points} points.`,
+    `Paire ${index} sur ${total} : lésions de taille égale à ${ratio} près, scores séparés de ${points} points.`,
   exceptions: 'Très atteinte, aphasie légère ou absente',
   title: (type: string, aq: string) => `${type} · QA-WAB ${aq}`,
   facts: (volume: string, share: string, band: string) =>
@@ -123,7 +123,7 @@ export const fr: typeof en = {
   failed: 'La cohorte n’a pas pu être chargée.',
   drawFailed: 'Les lésions n’ont pas pu être dessinées.',
   note: (total: number) =>
-    `Aphasia Recovery Cohort : ${total} personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.`,
+    `Aphasia Recovery Cohort : ${total} personnes ayant subi un AVC chronique de l’hémisphère gauche, recrutées pour des études sur l’aphasie. Les personnes ayant une lésion ici sans aphasie sont sous-représentées, et aucun cas ne prédit le rétablissement de quelqu’un d’autre. Chaque personne a un seul score à la Western Aphasia Battery (QA-WAB, de 0 à 100 ; 93,8 et plus est dans les limites de la normale). Les lésions ont été tracées sur l’IRM de chaque personne, puis reportées sur ce cerveau.`,
   dataset: 'Jeu de données OpenNeuro',
   types: {
     Global: 'Aphasie globale',

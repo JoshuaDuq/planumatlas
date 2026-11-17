@@ -41,8 +41,9 @@ export interface UiPorts
   /** A phone's sheet back to peek, so the stage has its room (the guided tour's). */
   lowerSheet(): void;
   /**
-   * Shows the detail without raising a phone's sheet over the camera: a link restores a view,
-   * it does not pick (`links.hooks.showDetail`). `showDetail` (a selection) raises it.
+   * Shows the detail without raising a phone's sheet over the camera: a link restores a view
+   * (`links.hooks.showDetail`), and a new pick on the model is named in the grip (REGION-25).
+   * `showDetail` (a selection) raises it.
    */
   showDetailInPlace(): void;
   /** Focus is inside a region's detail view, where Escape is Back. */

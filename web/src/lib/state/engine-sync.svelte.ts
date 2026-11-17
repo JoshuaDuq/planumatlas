@@ -1,6 +1,7 @@
 import { untrack } from 'svelte';
 import type { FunctionalConnectivity } from '../core/catalog/functional-connectivity.ts';
 import type { DisorderEffects } from '../core/catalog/disorder-effects.ts';
+import type { CorticalLayers } from '../core/catalog/cortical-layers.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { isIndependentTractReference } from '../core/diffusion/presentation.ts';
@@ -8,7 +9,7 @@ import type { CircuitCatalog } from '../core/learning/catalog.ts';
 import { paintFor } from '../core/state/paint.ts';
 import type { LesionPaint } from '../core/state/paint.ts';
 import type { Engine, EngineModel, EngineTracts, SectionsState } from '../engine/api.ts';
-import type { ModelState } from '../types/index.ts';
+import type { HighlightedRegion, ModelState } from '../types/index.ts';
 import type { StrokeCasesStore } from './stroke-cases.svelte.ts';
 import type { ViewStore } from './view.svelte.ts';
 
@@ -55,8 +56,12 @@ export function syncPaint(
     lesion?: { readonly paint: LesionPaint | null };
     connectivity?: FunctionalConnectivity | null;
     disorders?: DisorderEffects | null;
+    /** BigBrain's cortical layers, downloaded when a region's sheet first asks. */
+    layers?: { readonly data: CorticalLayers | null };
     /** The reader's map, which a function is then painted against. */
     userMap?: { readonly drawn: boolean };
+    /** The reader's highlights, painted while nothing else is. */
+    highlights?: { readonly list: readonly HighlightedRegion[] };
   },
 ) {
   $effect.pre(() =>
@@ -64,7 +69,9 @@ export function syncPaint(
       paintFor(view.current, {
         ...sources,
         lesion: sources.lesion?.paint ?? null,
+        layers: sources.layers?.data ?? null,
         mapDrawn: sources.userMap?.drawn ?? false,
+        highlights: sources.highlights?.list ?? [],
       }),
     ),
   );

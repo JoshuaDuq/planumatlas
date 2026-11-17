@@ -1,4 +1,4 @@
-import { createSpeech } from '../controller/speech.ts';
+import { createSpeech } from '../core/speech.ts';
 import type { CircuitSessionState } from '../core/learning/session.ts';
 import type { ModelState, Region, SessionState } from '../types/index.ts';
 import { announce } from '../ui/announcer.svelte.ts';

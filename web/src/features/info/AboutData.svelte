@@ -9,7 +9,7 @@
   import type { MethodsPage } from '../../lib/core/methods.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
-  import MethodsLink from '../deficits/MethodsLink.svelte';
+  import MethodsLink from './MethodsLink.svelte';
 
   let {
     place,

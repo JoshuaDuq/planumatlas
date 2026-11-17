@@ -1,5 +1,5 @@
 import type { StrokeCases } from '../../core/catalog/stroke-cases.ts';
-import type { VisualFieldTerritories } from '../../core/learning/visual-field.ts';
+import type { VisualAreaAnchor, VisualFieldTerritories } from '../../core/learning/visual-field.ts';
 import type { Manifest } from '../../types/index.ts';
 import type {
   Engine,
@@ -11,6 +11,7 @@ import type {
   Rect,
   SegmentationAgreementData,
   Size,
+  SnapshotOptions,
 } from '../api.ts';
 import { createFakeCamera } from './camera.ts';
 import { createFakeLesion } from './lesion.ts';
@@ -24,7 +25,7 @@ import type { FakeLesion } from './lesion.ts';
 import { createFakeModel } from './model.ts';
 import type { FakeModel } from './model.ts';
 import { createFakeSections } from './sections.ts';
-import { canvasElement, createEvents, recorded } from './support.ts';
+import { canvasElement, coded, createEvents, recorded } from './support.ts';
 import type { Call } from './support.ts';
 import { DEFAULT_BUNDLES, createFakeTracts } from './tracts.ts';
 import type { FakeBundle, FakeTracts } from './tracts.ts';
@@ -36,6 +37,9 @@ export type { FakeVisualField } from './visual-field.ts';
 export type { FakeStrokeCases } from './stroke-cases.ts';
 
 type FakeFile = { atlas: string; [field: string]: unknown };
+
+/** A common desktop GPU's MAX_RENDERBUFFER_SIZE. */
+const DEFAULT_RENDERBUFFER_LIMIT = 16_384;
 
 export interface FakeEngineOptions {
   /** The published manifest to serve, e.g. `public/models/cdmd/manifest.json`. */
@@ -49,6 +53,8 @@ export interface FakeEngineOptions {
   /** The stage canvas; without one, `canvas` and `captureSnapshot` need a DOM to create it. */
   canvas?: HTMLCanvasElement;
   hostSize?: Size;
+  /** The widest and tallest frame the device renders, in pixels; a larger snapshot is refused. */
+  renderbufferLimit?: number;
   mri?: MriDisplay;
   /** The anatomy the tracts belong to, when it is not the manifest's own. */
   tractAnatomy?: string;
@@ -57,6 +63,8 @@ export interface FakeEngineOptions {
   lesionMeasurement?: LesionMeasurement;
   /** What the visual-field map measures territories on. */
   visualFieldTerritories?: VisualFieldTerritories;
+  /** Where the visual-field map names its areas. */
+  visualAreaAnchors?: readonly VisualAreaAnchor[];
   /** The published cohort the stroke cases read. */
   strokeCases?: StrokeCases;
 }
@@ -101,8 +109,10 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
     functionalRegions: options.functionalRegions,
     domains: options.domains,
     segmentationAgreement: options.segmentationAgreement,
+    camera: () => camera,
     changed: () => {
       if (disposed || !sectionsRef.current) return;
+      sectionsRef.current.follow();
       events.emit('change', { model: model.state, sections: sectionsRef.current.state });
     },
   });
@@ -185,6 +195,8 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
           return region.id;
         },
         (paired) => model.setMedialPair(paired),
+        options.visualAreaAnchors,
+        (points) => camera.project(points),
       ),
       calls,
     ),
@@ -216,13 +228,25 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
     invalidate() {
       calls.push({ domain: 'engine', method: 'invalidate', args: [] });
     },
-    captureSnapshot(crop?: Rect) {
-      calls.push({ domain: 'engine', method: 'captureSnapshot', args: [crop] });
+    captureSnapshot(crop?: Rect, snapshot?: SnapshotOptions) {
+      calls.push({ domain: 'engine', method: 'captureSnapshot', args: [crop, snapshot] });
+      // As the real engine: the whole stage is drawn at the scale, then cropped.
+      const ratio = snapshot?.scale ?? 1;
+      const limit = options.renderbufferLimit ?? DEFAULT_RENDERBUFFER_LIMIT;
+      const [width, height] = [camera.hostSize.width, camera.hostSize.height].map((side) =>
+        Math.round(side * ratio),
+      ) as [number, number];
+      if (width > limit || height > limit) {
+        throw coded(
+          `A ${width} × ${height} px frame is past this device’s ${limit} px limit.`,
+          'snapshot-too-large',
+        );
+      }
       const canvas = canvasElement();
       const rect = crop ?? { x: 0, y: 0, ...camera.hostSize };
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      return { canvas, ratio: 1 };
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      return { canvas, ratio };
     },
     dispose() {
       if (disposed) return;

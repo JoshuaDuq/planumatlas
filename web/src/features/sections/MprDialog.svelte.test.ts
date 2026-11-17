@@ -5,7 +5,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
 import { createEngineSync } from '../../lib/state/engine-sync.svelte.ts';
@@ -518,8 +518,8 @@ describe('the pictures', () => {
   test('a plane is resampled only when its own slice changes', async () => {
     await opened();
     await expect.poll(() => calls('slice').length).toBe(3);
-    // Without a paint, the cut atlas is not part of the picture.
-    await engine.sections.setCutAtlas('julich');
+    // Without a paint, the cut's labels are not part of the picture.
+    await engine.model.setAtlas('julich');
     engine.sections.setDisplay({ reverse: true });
     await frame();
     await frame();
@@ -621,8 +621,8 @@ describe('the pictures', () => {
     await opened();
     await expect.poll(() => calls('slice').length).toBe(3);
     const first = pictures();
-    // Other cut labels: the paint is drawn by them.
-    await engine.sections.setCutAtlas('julich');
+    // Another atlas labels the cut, and the paint is drawn by its labels.
+    await engine.model.setAtlas('julich');
     await expect.poll(() => calls('slice').length).toBe(6);
     expect(pictures()[2]).not.toEqual(first[2]);
     expect(await againstFresh()).toBe(0);
@@ -633,18 +633,16 @@ describe('the pictures', () => {
     engine.model.setPaint({ id: 'deficit:aphasia', colors: new Map() });
     await expect.poll(() => calls('slice').length).toBe(18);
     expect(await againstFresh()).toBe(0);
-    // Another surface atlas leaves a deficit's paint and the cut labels as they were: nothing is
-    // sampled. (A function's paint takes the atlas into its id, FUNC-46.)
+    // Another surface atlas labels the cut by its own regions, so a deficit's paint is drawn by
+    // them. (A function's paint takes the atlas into its id, FUNC-46.)
     await engine.model.setAtlas(engine.model.state.atlas === 'hcp-mmp' ? 'destrieux' : 'hcp-mmp');
-    await frame();
-    await frame();
-    expect(calls('slice')).toHaveLength(21);
+    await expect.poll(() => calls('slice').length).toBe(24);
     expect(await againstFresh()).toBe(0);
     // A window is drawn from the samples kept.
     const drawn = calls('pixels').length;
     engine.sections.setWindow(100, 120);
     await expect.poll(() => calls('pixels').length).toBe(drawn + 3);
-    expect(calls('slice')).toHaveLength(24);
+    expect(calls('slice')).toHaveLength(27);
   });
 
   test('reversing the cut on a plane turns that panel to the side the stage now faces, and redraws it', async () => {

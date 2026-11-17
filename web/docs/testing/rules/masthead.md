@@ -26,11 +26,11 @@ Copy quoted is the English interface text unless marked FR. The published build 
 
 ### MAST-03 · The icon buttons are named, with the same tooltip and no native title
 
-- **Rule:** Full screen, Save image and More settings are icon buttons named by `aria-label`. Each carries the same text as its tooltip, has no native `title` and an `aria-hidden` icon.
+- **Rule:** Full screen, Save image, Share and More settings are icon buttons named by `aria-label`. Each carries the same text as its tooltip, has no native `title` and an `aria-hidden` icon.
 - **Kind:** accessibility
 - **Level:** browser: accessible names
-- **Source:** `index.html:137-151`; `chrome.contract.test.js:362-370`; `header.js:202-206`
-- **Expected:** names and `data-tooltip` "Full screen", "Save image (PNG)", "More settings" (FR "Plein écran", "Enregistrer l’image (PNG)", "Plus de réglages"); no `title`; `svg[aria-hidden="true"]`.
+- **Source:** `index.html:137-151`; `chrome.contract.test.js:362-370`; `header.js:202-206`; Planum improvement plan 2, WP25 (Share)
+- **Expected:** names and `data-tooltip` "Full screen", "Save image (PNG)", "Share this view", "More settings" (FR "Plein écran", "Enregistrer l’image (PNG)", "Partager cette vue", "Plus de réglages"); no `title`; `svg[aria-hidden="true"]`.
 - **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R, English)
 
 ### MAST-04 · Full screen and Save image wait for the anatomy; More settings does not
@@ -59,6 +59,24 @@ Copy quoted is the English interface text unless marked FR. The published build 
 - **Source:** deviation `h2-fullscreen-label.md`; decision 4 on #4
 - **Expected:** `fullscreen=true` → button and `data-tooltip` "Exit full screen" (FR "Quitter le plein écran"); `false` → "Full screen".
 - **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R, button and tooltip; the phone menu item's label is uncovered)
+
+### MAST-52 · Share copies the link to the view, or the embed code
+
+- **Rule:** The link control is Share, a disclosure as More settings is (no `aria-haspopup`): Copy link to this view copies the address, Copy embed code the `<iframe>` of the view on screen (SHELL-21). Each closes the menu with focus back on Share; the copy is shown under the masthead and said, and Share shows its check while a link or embed code stands copied. A phone keeps Copy link in the ⋯ menu and offers no embed code.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** Planum improvement plan 2, WP25
+- **Expected:** items "Copy link to this view", "Copy embed code"; Copy embed code → `writeText` once with the fixture's code, "Embed code copied" shown and announced, `data-copied` on Share, focus on Share. Copy link → `writeText(location.href)`, "Link copied"; a refusal → "Could not copy the link", logged.
+- **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R); `src/app/regions/MastheadRegion.svelte.test.ts` (R, the view written at once)
+
+### MAST-53 · Save image is a menu of 2×, 3× and Copy image
+
+- **Rule:** Save image opens a disclosure offering Save at 2× and Save at 3× (image pixels per CSS pixel, SNAP-20), and Copy image where the browser has `ClipboardItem` and the owner can make the image. A size closes the menu, focus back on Save image, and emits its scale. Copy image hands the clipboard the PNG still being drawn, inside the press (Safari takes no write begun later), then says "Image copied" or "Could not copy the image"; Share's check is not shown for an image.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** Planum improvement plan 2, WP25 (handoff F10)
+- **Expected:** items "Save at 2×", "Save at 3×" without an image source; Save at 3× → `snapshot:3`, menu closed, focus on Save image; Save at 2× → `snapshot:2`. With one: `clipboard.write` called once while the image is pending, one `image/png` item; "Image copied" once it is drawn.
+- **Covered by:** `src/features/masthead/Masthead.svelte.test.ts` (R); `src/app/regions/MastheadRegion.svelte.test.ts` (R, `{ scale: 3 }` reaches the save)
 
 ## The settings panel
 

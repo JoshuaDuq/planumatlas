@@ -46,7 +46,7 @@ One file per fix, named `<chunk>-<slug>.md`: legacy behaviour, new behaviour, st
 | u6-list-nav-modifier-keys.md                  | fix under the parity policy                                    |
 | u7-treegrid-keys.md                           | fix, standard cited (follows the approved u7-treegrid)         |
 | c5-match-highlight-offsets.md                 | fix (standard cited; the record states no status line)         |
-| e4a-cut-atlas-rollback.md                     | fix under the parity policy                                    |
+| e4a-cut-atlas-rollback.md                     | superseded 2026-11-17 (cut labels derived)                     |
 | e4a-fail-fast-sections.md                     | fix under the parity policy                                    |
 | e4a-model-change-single-report.md             | fix under the parity policy                                    |
 | e4a-offset-ready-while-off.md                 | fix under the parity policy                                    |

@@ -16,13 +16,14 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8,<10", "pytest-xdist>=3.8,<4", "ruff>=0.12"]
+dev = ["pytest>=8,<10", "pytest-xdist>=3.8,<4", "ruff==0.16.7"]
 docs = [
   "sphinx>=8.1,<10",
   "furo>=2024.8.6",
   "myst-parser>=4.0,<6",
   "sphinx-design>=0.6",
   "sphinx-copybutton>=0.5.2",
+  "sphinx-sitemap>=2.9.0",
 ]
 
 [tool.pytest.ini_options]
@@ -31,3 +32,12 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
+# The scripts' own modules (prepare_subject, register_coordinate_spaces) sort as first-party.
+src = [".", "scripts"]
+
+[tool.ruff.lint]
+# Ruff's default rules, which the pinned version fixes, and NumPy's: deprecated aliases and
+# functions, NumPy 2 removals and the legacy global random state.
+extend-select = ["NPY"]
+# Definition checks raise ValueError for a misparsed YAML value, whatever its type.
+ignore = ["TRY004"]

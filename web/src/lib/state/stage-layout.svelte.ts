@@ -195,7 +195,11 @@ export function createStageLayout({
     const below = band(box.y + box.height, 0);
     const beside = band(0, room.width - box.x);
     const corner = clearCorner(room, framed, box, FRAME_FILL);
-    const { inset, scale, top, right } = [below, beside, corner].reduce((best, option) =>
+    // A room too small to keep any picture clear of the gizmo keeps the plain framing: a zero scale
+    // would put the camera at an infinite distance.
+    const kept = [below, beside, corner].filter((option) => option.size > 0);
+    if (!kept.length) return plain;
+    const { inset, scale, top, right } = kept.reduce((best, option) =>
       option.size > best.size ? option : best,
     );
     return { inset, scale, top, right };

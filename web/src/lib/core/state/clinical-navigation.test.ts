@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { Region } from '../../types/index.ts';
 import { clinicalLayers, showClinicalRegions } from './clinical-navigation.ts';
-import type { ShowingModel } from './clinical-navigation.ts';
+import type { ShowingModel } from './ports.ts';
 
 function scene(...regions: Pick<Region, 'id' | 'atlas' | 'kind'>[]) {
   const calls: unknown[][] = [];

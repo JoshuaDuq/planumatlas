@@ -1,5 +1,12 @@
 # E4a deviation: a failed older cut-atlas request does not roll back a newer choice
 
+Superseded 2026-11-17 by derived cut labels. The cut atlas is no longer chosen: the sections derive
+it from the model's atlas, colouring and internal anatomy (`cutAtlasFor`), so `setCutAtlas`,
+`loadedCutAtlas` and the rollback below are gone. Labels that fail stay named and are tried again
+on the next change; a failure of labels the model no longer calls for is not reported (SLICE-21,
+`sections.test.ts`: "labels an older choice was loading do not overwrite those the model calls for
+now"). Kept as the record of the E4a fix.
+
 Chunk E4a (#27). A fix under the parity policy. Pinned by `sections.test.ts` ("a failed older cut
 atlas does not overwrite a newer choice").
 

@@ -8,7 +8,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { publishedCorrections } from '../../lib/core/panels/clinical.ts';
   import type { Language } from '../../lib/types/index.ts';
-  import ExternalLink from './ExternalLink.svelte';
+  import ExternalLink from '../info/ExternalLink.svelte';
 
   let {
     reference,

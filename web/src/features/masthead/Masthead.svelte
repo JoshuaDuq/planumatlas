@@ -1,8 +1,10 @@
 <!--
   The masthead (index.html:96-153, viewer/ui/chrome/header.js:96-243, styles/masthead.css:1-70,
   308-364, 365-452): the skip link, the brand, the data group H3 supplies as `data`, then
-  Full screen, Save image, Copy link and the ⋯ settings panel. Full screen and Save image only
-  emit; G6 owns what they do. Copy link copies the address, whose hash holds the whole view. The page mounts one Tooltip (U5) for the `data-tooltip` triggers.
+  Full screen, Save image, Share and the ⋯ settings panel. Full screen and Save image only
+  emit; G6 owns what they do. Save image and Share are menus (APG Disclosure, as ⋯ is): Save image
+  offers 2× and 3× and Copy image, Share copies the address, whose hash holds the whole view, or
+  the frame a course page pastes. The page mounts one Tooltip (U5) for the `data-tooltip` triggers.
 -->
 <script lang="ts">
   import { onDestroy, type Snippet } from 'svelte';
@@ -11,7 +13,8 @@
   import type { Language } from '../../lib/types/index.ts';
   import { createCopier } from '../../lib/ui/clipboard.svelte.ts';
   import IconButton, { iconGraphic } from '../../lib/ui/IconButton.svelte';
-  import { OWN_KEYS_ATTRIBUTE } from '../../lib/ui/keys.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
+  import Popover from '../../lib/ui/Popover.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
 
   interface Props {
@@ -34,9 +37,14 @@
     onTheme: (choice: ThemeChoice) => void;
     onSingleKeys: (on: boolean) => void;
     onFullscreen: () => void;
-    onSnapshot: () => void;
+    /** Save image at `scale` image pixels per CSS pixel of the stage. */
+    onSnapshot: (scale: number) => void;
+    /** The stage as a captioned PNG, for Copy image; without it Copy image is not offered. */
+    onCopyImage?: (() => Promise<Blob>) | undefined;
     /** The address of the view on screen, written now rather than after the link writer's delay. */
     currentLink: () => string;
+    /** The `<iframe>` a course page pastes for the view on screen. */
+    currentEmbedCode: () => string;
     /** Given the click, so the dialog opens without its entry animation from the keyboard. */
     onProvenance: (event: MouseEvent) => void;
     onFeedback: (event: MouseEvent) => void;
@@ -61,7 +69,9 @@
     onSingleKeys,
     onFullscreen,
     onSnapshot,
+    onCopyImage,
     currentLink,
+    currentEmbedCode,
     onProvenance,
     onFeedback,
     onGuide,
@@ -77,6 +87,13 @@
 
   // Asked once, as legacy does (header.js:192).
   const fullscreenAvailable = document.fullscreenEnabled;
+  // Firefox before 127 has no ClipboardItem, so no way to copy an image.
+  const imageCopyable = typeof ClipboardItem === 'function';
+
+  /** Image pixels per CSS pixel of the stage that Save image offers. */
+  const SCALES = [2, 3] as const;
+  let saveOpen = $state(false);
+  let shareOpen = $state(false);
 
   const viewport = $derived(t(lang, 'viewport'));
   const header = $derived(t(lang, 'header'));
@@ -86,9 +103,23 @@
     document.documentElement.dataset.singleKeys = singleKeys ? 'on' : 'off';
   });
 
-  const link = createCopier(() => ({ copied: header.linkCopied, failed: header.linkFailed }));
-  onDestroy(link.dispose);
-  const copyLink = () => link.copy(currentLink());
+  // One copier for the link, the embed code and the image: what it says is the last one asked for.
+  type Copying = 'link' | 'embed' | 'image';
+  let copying = $state<Copying>('link');
+  const said = $derived({
+    link: { copied: header.linkCopied, failed: header.linkFailed },
+    embed: { copied: header.embedCopied, failed: header.embedFailed },
+    image: { copied: viewport.imageCopied, failed: viewport.imageFailed },
+  });
+  const copier = createCopier(() => said[copying]);
+  onDestroy(copier.dispose);
+  function copy(kind: Copying, content: string | Promise<Blob>) {
+    copying = kind;
+    void copier.copy(content);
+  }
+  const copyLink = () => copy('link', currentLink());
+  // The Share trigger shows the check for what it copied, not for an image.
+  const linkCopied = $derived(copier.state === 'copied' && copying !== 'image');
 
   // The href works without script; the model's canvas is the better target (header.js:167-170).
   function skip(event: MouseEvent) {
@@ -117,23 +148,88 @@
         onclick={onFullscreen}
       />
     {/if}
-    <IconButton
-      icon="camera"
-      label={viewport.snapshot}
-      data-tooltip={viewport.snapshot}
-      disabled={!ready}
-      {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-      onclick={onSnapshot}
-    />
-    <IconButton
-      class="copy-link-button"
-      icon={link.state === 'copied' ? 'check' : 'link'}
-      data-copied={link.state === 'copied' || undefined}
-      label={header.copyLink}
-      data-tooltip={header.copyLink}
-      {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-      onclick={copyLink}
-    />
+    <Popover bind:open={saveOpen} class="masthead-menu">
+      {#snippet trigger({ props })}
+        <!-- Bits adds aria-haspopup="dialog"; this is a disclosure of plain commands, as ⋯ is. -->
+        <IconButton
+          {...props}
+          aria-haspopup={undefined}
+          icon="camera"
+          label={viewport.snapshot}
+          data-tooltip={viewport.snapshot}
+          disabled={!ready}
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        />
+      {/snippet}
+      {#snippet children({ close })}
+        {#each SCALES as scale (scale)}
+          <button
+            type="button"
+            class="menu-item"
+            {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+            onclick={() => {
+              close();
+              onSnapshot(scale);
+            }}
+          >
+            {viewport.snapshotAt(scale)}
+          </button>
+        {/each}
+        {#if onCopyImage && imageCopyable}
+          {@const png = onCopyImage}
+          <!-- The clipboard is asked inside the press (createCopier), then the menu closes. -->
+          <button
+            type="button"
+            class="menu-item"
+            {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+            onclick={() => {
+              copy('image', png());
+              close();
+            }}
+          >
+            {viewport.copyImage}
+          </button>
+        {/if}
+      {/snippet}
+    </Popover>
+    <Popover bind:open={shareOpen} class="masthead-menu">
+      {#snippet trigger({ props })}
+        <IconButton
+          {...props}
+          aria-haspopup={undefined}
+          class="copy-link-button"
+          icon={linkCopied ? 'check' : 'link'}
+          data-copied={linkCopied || undefined}
+          label={header.shareView}
+          data-tooltip={header.shareView}
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        />
+      {/snippet}
+      {#snippet children({ close })}
+        <button
+          type="button"
+          class="menu-item"
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+          onclick={() => {
+            copyLink();
+            close();
+          }}
+        >
+          {header.copyLink}
+        </button>
+        <button
+          type="button"
+          class="menu-item"
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+          onclick={() => {
+            copy('embed', currentEmbedCode());
+            close();
+          }}
+        >
+          {header.copyEmbed}
+        </button>
+      {/snippet}
+    </Popover>
     <SettingsMenu
       bind:this={menu}
       disabled={settingsDisabled}
@@ -156,9 +252,9 @@
       {onShortcuts}
       {onStartOver}
     />
-    {#if link.state !== 'idle'}
+    {#if copier.state !== 'idle'}
       <span class="link-said" aria-hidden="true">
-        {link.state === 'copied' ? header.linkCopied : header.linkFailed}
+        {said[copying][copier.state]}
       </span>
     {/if}
   </div>
@@ -245,6 +341,40 @@
     }
     .masthead-end :global(.copy-link-button[data-copied]) {
       color: var(--accent);
+    }
+    /* Save image's and Share's commands, on the ⋯ panel's rows (SettingsMenu.svelte). */
+    :global(.popover.masthead-menu) {
+      display: flex;
+      flex-direction: column;
+      width: max-content;
+      min-width: 12rem;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: calc(var(--control-height) + 2 * var(--space-1));
+      padding: var(--space-1) var(--space-3);
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: var(--text-primary);
+      font: inherit;
+      font-size: var(--text-ui);
+      text-align: left;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .menu-item:not(:last-child) {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .menu-item:focus-visible {
+      outline-offset: -2px;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .menu-item:hover {
+        background: var(--surface-hover);
+      }
     }
     /* One ground for everything pointed at in the bar: the selects', the summary's and the icons'. */
     @media (hover: hover) and (pointer: fine) {

@@ -3,7 +3,7 @@ import { afterEach, test, vi } from 'vitest';
 import { Box3, BoxGeometry, BufferAttribute, Mesh, Vector3 } from 'three';
 import { FEATHER_ITEM_SIZE } from '../render/border-feather.ts';
 import * as bvh from 'three-mesh-bvh';
-import { GeometryJobs } from './brain-atlas.ts';
+import { GeometryJobs } from './geometry-jobs.ts';
 import type { GeometryJob, GeometryReply } from './geometry-worker.ts';
 
 /** Holds each job until the test answers it with a tree built from the copy the job carried. */

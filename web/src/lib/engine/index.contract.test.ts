@@ -1,7 +1,14 @@
-import { afterAll, beforeAll, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, vi } from 'vitest';
 import { defineEngineContract } from './fake/contract-suite.ts';
 import { bootHeadless, stubHeadlessGlobals, stubPublishedFetch } from './headless-test-support.ts';
 import type { HeadlessProbe } from './headless-renderer-test-support.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mocks, and leave none built on them to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 const probe = vi.hoisted((): HeadlessProbe => ({
   attributes: new Map(),
@@ -34,10 +41,14 @@ vi.mock('./render/scene.ts', async (importOriginal) => {
 // Booting parses 35 MB of GLB, and a shared machine is slow.
 vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 });
 
-beforeAll(() => {
+const stubHeadless = () => {
   stubHeadlessGlobals();
   stubPublishedFetch();
-});
+};
+// A group's engine boots in its beforeAll; unstubGlobals and restoreMocks then undo the stubs before
+// each case, so each case puts them back.
+beforeAll(stubHeadless);
+beforeEach(stubHeadless);
 afterAll(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();

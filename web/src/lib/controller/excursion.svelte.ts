@@ -24,8 +24,8 @@ import type { ReaderState } from '../core/state/reader-state.ts';
 import { clinicalLayers } from '../core/state/clinical-navigation.ts';
 import type { SceneCommands } from '../core/state/scene-commands.ts';
 import type { AppContext } from './context.ts';
-import { DEFAULT_DISPLAY } from '../../features/colophon/display-state.ts';
-import type { PreparedDisplay } from '../../features/colophon/display-state.ts';
+import { DEFAULT_DISPLAY } from '../state/display-state.ts';
+import type { PreparedDisplay } from '../state/display-state.ts';
 import { createLessons } from './lesson.ts';
 import type { MriDialog, SceneReader, Shell } from './lesson.ts';
 import type { EngineModel } from '../engine/api.ts';
@@ -303,18 +303,7 @@ export function createExcursions(
   }
 
   function revealSettings(): RevealSettings {
-    return settingsOf(model.settings, sections.state.cutAtlas);
-  }
-
-  /**
-   * A paint names regions of the surface atlas, and a cut face can only take a colour its own labels
-   * carry, so the cut is labelled by that atlas too where one is published. The reveal has closed
-   * any cut, so this downloads nothing.
-   */
-  function cutLabelsFollowAtlas() {
-    const { atlas } = model.settings;
-    if (!model.manifest.cut_atlases?.some((entry) => entry.id === atlas)) return;
-    void sections.setCutAtlas(atlas);
+    return settingsOf(model.settings);
   }
 
   /**
@@ -367,7 +356,6 @@ export function createExcursions(
     shell.showDetail();
     const before = revealSettings();
     if (!(await commands.revealRegions(regions, current))) return false;
-    cutLabelsFollowAtlas();
     // Drawn first, so the framing measures the key this paint brings.
     render();
     const unseen = camera.frameRegions(regions);
@@ -396,7 +384,6 @@ export function createExcursions(
       model.settings.detail,
     );
     if (!(await commands.revealRegions(regions, current))) return false;
-    cutLabelsFollowAtlas();
     // A function's map spans the cortex, so the whole brain is framed, clear of the key it brings,
     // from a view that shows its strongest areas; those no view shows are said, as a deficit's are.
     render();
@@ -417,10 +404,16 @@ export function createExcursions(
   /**
    * The atlas is then the reader's own: closing the excursion no longer replaces it. An atlas the
    * open function was measured on takes its paint; any other holds none of its areas, so the paint lifts.
+   * The reader's highlights and layer IV's share stay, as neither has an atlas of its own: each is
+   * drawn on whatever the new atlas holds.
    */
   function chooseAtlas(id: string) {
     const open = session.state.explorer === 'functions' ? session.state.selectedFunction : null;
-    if (!open || paintAtlas(domains, open, id) !== id) session.liftPaint();
+    const kind = paintKind(model.state.paint);
+    const kept = open
+      ? paintAtlas(domains, open, id) === id
+      : kind === 'highlight' || kind === 'layers';
+    if (!kept) session.liftPaint();
     // A connectivity paint names the areas of the atlas it was asked on; a disorder's lie on Desikan-Killiany.
     if (id !== model.settings.atlas) session.setConnectivitySeed(null);
     if (id !== DISORDER_ATLAS) session.setDisorderShown(null);
@@ -592,12 +585,6 @@ export function createExcursions(
       session.setDisorderShown(id);
       render();
     },
-    /**
-     * The cut's label volume (app.js:564), from the navigator's "switch cut atlas". The cortical surface
-     * is untouched. A download can be overtaken by closing the cut, so the rejection reaches the caller,
-     * which reports it.
-     */
-    setCutAtlas: (id: string) => sections.setCutAtlas(id),
     chooseSurfaceColor(value: Parameters<typeof commands.chooseSurfaceColor>[0]) {
       session.liftPaint();
       return commands.chooseSurfaceColor(value);

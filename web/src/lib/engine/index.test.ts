@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, it, vi } from 'vitest';
 import { LineBasicMaterial, Matrix4, Mesh } from 'three';
 import type { Material, Object3D } from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -12,6 +12,13 @@ import { createEngine } from './index.ts';
 import { createMriUniforms } from './render/mri-material.ts';
 import { modelDirectory, publishedLoader, readManifest } from './model/test-support.ts';
 import type { Outlined } from './render/scene.ts';
+
+// The unit files share one module cache (isolate: false): import this file's modules afresh under its
+// mocks, and leave none built on them to the next file.
+vi.hoisted(() => vi.resetModules());
+afterAll(() => {
+  vi.resetModules();
+});
 
 // The renderer needs a GL context, the model's files come from disk, and the scene and the overlay's
 // geometry are spied on: this is the facade's wiring, not the drawing.

@@ -99,8 +99,8 @@ def verify_runtime():
 
 def template():
     return Path(subprocess.run(
-        [VENV / "python", "-c", "import importlib.resources as r; "
-         "print(r.files('tractseg.resources').joinpath('MNI_FA_template.nii.gz'))"],
+        [VENV / "python", "-c", ("import importlib.resources as r; "
+         "print(r.files('tractseg.resources').joinpath('MNI_FA_template.nii.gz'))")],
         check=True, capture_output=True, text=True).stdout.strip())
 
 

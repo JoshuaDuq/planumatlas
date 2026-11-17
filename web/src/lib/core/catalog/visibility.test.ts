@@ -61,11 +61,10 @@ test('cortex belonging to a different atlas is hidden', () => {
   });
 });
 
-test('cortex of the cut atlas is on screen while the cut paints it, whatever the surface atlas', () => {
+test('a cut shows no other atlas: cortex of another atlas stays off screen with a cut open', () => {
   const parcel = region({ atlas: 'b' });
-  assert.equal(visibilityOf(parcel, settings({ cutAtlas: 'b', cutActive: true })).visible, true);
   assert.equal(
-    visibilityOf(parcel, settings({ cutAtlas: 'b', cutActive: false })).reason,
+    visibilityOf(parcel, settings({ cutAtlas: 'a', cutActive: true })).reason,
     'other-atlas',
   );
 });
@@ -79,16 +78,11 @@ test('the surface atlas never hides a structure, but the detail level does', () 
   });
 });
 
-test('a structure of the inactive detail level is on screen while the cut paints it', () => {
-  // Two segmentations of one anatomy: only one is drawn as geometry, but a
-  // label the cut is sampling is visible whichever level that is.
+test('a structure of the inactive detail level stays off screen with a cut open', () => {
+  // Two segmentations of one anatomy: the cut is labelled by the level drawn, never the other.
   const nucleus = region({ atlas: 'n', hemisphere: 'left', kind: 'structure' });
   assert.equal(
-    visibilityOf(nucleus, settings({ detail: 'aseg', cutAtlas: 'n', cutActive: true })).visible,
-    true,
-  );
-  assert.equal(
-    visibilityOf(nucleus, settings({ detail: 'aseg', cutAtlas: 'n', cutActive: false })).reason,
+    visibilityOf(nucleus, settings({ detail: 'aseg', cutAtlas: 'a', cutActive: true })).reason,
     'other-detail',
   );
 });
@@ -244,11 +238,18 @@ test('the surface atlas never hides a cut-only region', () => {
   assert.equal(visibilityOf(tissue(), settings({ atlas: 'a', cutAtlas: 'n' })).visible, true);
 });
 
-test('a cut-only region of another cut atlas reports its own reason', () => {
+test('a cut-only region another level or colouring labels says which control shows it', () => {
+  // NextBrain's labels come with its level, a map's with its colouring.
   assert.deepEqual(visibilityOf(tissue(), settings({ cutAtlas: 'a' })), {
     visible: false,
-    reason: 'other-cut-atlas',
+    reason: 'other-detail',
   });
+  const territory = tissue({ id: 'arterial:left:aca', atlas: 'arterial' });
+  assert.deepEqual(visibilityOf(territory, settings({ cutAtlas: 'a' })), {
+    visible: false,
+    reason: 'other-colour',
+  });
+  assert.equal(visibilityOf(territory, settings({ cutAtlas: 'arterial' })).visible, true);
 });
 
 test('a region smaller than every block of its cut says so rather than naming another atlas', () => {
@@ -279,8 +280,11 @@ test('hemisphere and isolation still apply to cut-only regions', () => {
 });
 
 test('a missing cut atlas hides cut-only regions rather than showing them', () => {
-  // An older caller that assembles no cut state must not leak them on screen.
-  assert.equal(visibilityOf(tissue(), { ...base, cutAtlas: undefined }).visible, false);
+  // Before the sections report their labels there is no cut to show them on.
+  assert.deepEqual(visibilityOf(tissue(), { ...base, cutAtlas: undefined }), {
+    visible: false,
+    reason: 'no-cut',
+  });
 });
 
 const whiteMatter = () =>
@@ -289,9 +293,14 @@ const whiteMatter = () =>
 test('white matter is on the cut of every atlas it lists', () => {
   assert.equal(visibilityOf(whiteMatter(), settings({ cutAtlas: 'a' })).visible, true);
   assert.equal(visibilityOf(whiteMatter(), settings({ cutAtlas: 'b' })).visible, true);
+  // A level or a colouring that labels the cut by its own volume replaces the parcels.
   assert.deepEqual(visibilityOf(whiteMatter(), settings({ cutAtlas: 'n' })), {
     visible: false,
-    reason: 'other-cut-atlas',
+    reason: 'other-detail',
+  });
+  assert.deepEqual(visibilityOf(whiteMatter(), settings({ cutAtlas: 'nettekoven' })), {
+    visible: false,
+    reason: 'other-colour',
   });
 });
 

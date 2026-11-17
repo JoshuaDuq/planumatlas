@@ -17,7 +17,7 @@ is the English interface text.
 
 ### STATE-01 · A link carries only what differs from the default scene
 
-- **Rule:** Writing a scene leaves out every field still at its default, so a default view is a bare link. Atlas, detail, cut atlas and language have no default and are written whenever given.
+- **Rule:** Writing a scene leaves out every field still at its default, so a default view is a bare link. Atlas, detail and language have no default and are written whenever given.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/url-state.js:8-33,201-218`
@@ -26,11 +26,11 @@ is the English interface text.
 
 ### STATE-02 · Each field travels under one short parameter, in a fixed order
 
-- **Rule:** Every scene field has one link parameter. The hidden parts come first, then the other fields in a fixed order, so the same scene always writes the same link.
+- **Rule:** Every scene field has one link parameter. The hidden parts come first, then the other fields in a fixed order, so the same scene always writes the same link. The cut's labels have none: they follow the atlas, colouring and internal anatomy (SLICE-21), and an old link's `cuts` is no parameter and is ignored.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/url-state.js:145-218`
-- **Expected:** Order and names: `hidden`, `anatomy`, `atlas`, `cuts` (cut atlas), `system`, `detail`, `region`, `isolate`, `view`, `cam`, `cut`, `pos`, `rev`, `tilt`, `az`, `hemi`, `cortex`, `internal`, `cord`, `colors`, `opacity`, `mri`, `tab`, `function`, `deficit`, `circuit`, `step`, `lang`. `{ explorer: 'circuits', selectedDeficit: 'aphasia', circuit: 'visual', circuitStep: 2 }` → `tab=circuits&deficit=aphasia&circuit=visual&step=3`.
+- **Expected:** Order and names: `hidden`, `anatomy`, `atlas`, `system`, `detail`, `region`, `isolate`, `view`, `cam`, `cut`, `pos`, `rev`, `tilt`, `az`, `hemi`, `cortex`, `internal`, `cord`, `colors`, `opacity`, `mri`, `tab`, `function`, `deficit`, `circuit`, `step`, `lang`. `{ explorer: 'circuits', selectedDeficit: 'aphasia', circuit: 'visual', circuitStep: 2 }` → `tab=circuits&deficit=aphasia&circuit=visual&step=3`.
 - **Covered by:** `src/lib/core/state/url-state.test.ts` (R, by examples; `STATE-02`: the whole name table and order)
 
 ### STATE-03 · Names pass through as readable, opaque strings
@@ -168,6 +168,24 @@ is the English interface text.
 - **Expected:** `{ atlas: 'hcp-mmp', hemisphere: 'left', cortexVisible: false, cortexOpacity: 0.35, surfaceColor: 'network', view: 'superior', selectedRegion: 'aseg:left:11', isolatedRegion: 'aseg:left:11' }` round trips exactly. `{ atlas: 'destrieux', cut: 'sagittal', cutOffset: 12.5, cutReverse: true }` round trips. For the C4 corpus (every parameter of STATE-02 with its readable, near-miss and nonsense values, plus 80 seeded hashes, seeds 1-40 and 101-140), `decodeState(encodeState(decodeState(h).state)).state` equals `decodeState(h).state` without default-valued fields and with the written rounding.
 - **Covered by:** `src/lib/core/state/url-state.test.ts` (R, single scenes; `STATE-17`: a fixed corpus of eleven links)
 
+### STATE-67 · An embedded view travels as embed=1, last
+
+- **Rule:** `embed` is a flag, written `embed=1` as the link's last parameter and left out when false. It reads `1` and `0`; another value or a repeat is rejected.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP25 (handoff F8)
+- **Expected:** `{ atlas: 'hcp-mmp', view: 'left', embed: true }` → `atlas=hcp-mmp&view=left&embed=1`, which reads back as the same state; with `embed: false` → `atlas=hcp-mmp&view=left`; `#embed=0` → `{ embed: false }`; `#embed=yes` and `#embed=1&embed=1` → state `{}`, rejected `['embed']`.
+- **Covered by:** `src/lib/core/state/url-state.test.ts` (R)
+
+### STATE-72 · Names on the brain travel as names=1
+
+- **Rule:** The session's `namesShown` travels under `names`, after `keeptracts` and before `mark`, as a flag: written only when on, since off is the default.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP21
+- **Expected:** `{ namesShown: false }` → `''`; `{ namesShown: true }` → `names=1`; `names=1` and `names=0` read back; `names=on` → rejected `['names']`.
+- **Covered by:** `src/lib/core/state/url-state.test.ts` (R; STATE-02's table holds its place)
+
 ## Checking a link against the anatomy
 
 ### STATE-18 · A link may name only what this anatomy publishes
@@ -176,7 +194,7 @@ is the English interface text.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/link-check.js:8-41`
-- **Expected:** Known: atlases destrieux, hcp-mmp; details aseg, nextbrain, learning; cut atlases destrieux, hcp-mmp, nextbrain; the seven views; colours tissue, mri, atlas, network, cab-np; functions all, language; deficit aphasia; circuit visual with 4 steps. `atlas=yeo&detail=fine&cuts=x&view=Left&colors=functional&region=nope&isolate=destrieux:left:medial-wall&hidden=aseg:left:17,nope&tab=diffusion&function=praxis&deficit=x&circuit=y&step=2&hemi=left` → rejected `['atlas','detail','cuts','view','colors','region','isolate','hidden','function','deficit','circuit','step']`, state `{ explorer: 'diffusion', hemisphere: 'left' }`. A link naming only known ids passes whole.
+- **Expected:** Known: atlases destrieux, hcp-mmp; details aseg, nextbrain, learning; the seven views; colours tissue, mri, atlas, network, cab-np; functions all, language; deficit aphasia; circuit visual with 4 steps. `atlas=yeo&detail=fine&view=Left&colors=functional&region=nope&isolate=destrieux:left:medial-wall&hidden=aseg:left:17,nope&tab=diffusion&function=praxis&deficit=x&circuit=y&step=2&hemi=left` → rejected `['atlas','detail','view','colors','region','isolate','hidden','function','deficit','circuit','step']`, state `{ explorer: 'diffusion', hemisphere: 'left' }`. A link naming only known ids passes whole.
 - **Covered by:** `src/lib/core/state/link-check.test.ts` (R)
 
 ### STATE-19 · A non-region can be hidden but not selected or isolated
@@ -344,7 +362,7 @@ is the English interface text.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/reader-state.js:1-33`
-- **Expected:** `readerState({}, { atlas: 'destrieux', detail: 'learning', cutAtlas: 'destrieux' })` → the STATE-01 defaults on those layers, `hiddenRegions` empty set, `camera: 'view'`; it encodes to `atlas=destrieux&cuts=destrieux&detail=learning`. `{ cortexVisible: false, cortexOpacity: 0, cutOffset: 0 }` keeps them. `selectedRegion: { id: 'aseg:left:17' }` → `'aseg:left:17'`. Loaded cut atlas `''` → throws `/no cutAtlas/`. `camera: 'cut'` and an exact pose pass through by identity.
+- **Expected:** `readerState({}, { atlas: 'destrieux', detail: 'learning' })` → the STATE-01 defaults on those layers, `hiddenRegions` empty set, `camera: 'view'`; it encodes to `atlas=destrieux&detail=learning`. `{ cortexVisible: false, cortexOpacity: 0, cutOffset: 0 }` keeps them. `selectedRegion: { id: 'aseg:left:17' }` → `'aseg:left:17'`. Loaded detail `''` → throws `/no detail/`. `camera: 'cut'` and an exact pose pass through by identity.
 - **Covered by:** `src/lib/core/state/reader-state.test.ts` (R)
 
 ### STATE-36 · A captured scene writes the link it was captured from
@@ -353,16 +371,16 @@ is the English interface text.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/reader-state.js:19-33`; `viewer/state/url-state.js`
-- **Expected:** `atlas=hcp-mmp&cuts=aseg&system=Basal+ganglia&detail=aseg&region=aseg:left:11&isolate=aseg:left:11&view=left&cut=coronal&pos=-12.5&rev=1&hemi=left&cortex=0&internal=0&cord=1&colors=tissue&opacity=0.4&hidden=aseg:left:12,aseg:left:13` → decode, `readerState`, encode, decode equals the first decode.
+- **Expected:** `atlas=hcp-mmp&system=Basal+ganglia&detail=aseg&region=aseg:left:11&isolate=aseg:left:11&view=left&cut=coronal&pos=-12.5&rev=1&hemi=left&cortex=0&internal=0&cord=1&colors=tissue&opacity=0.4&hidden=aseg:left:12,aseg:left:13` → decode, `readerState`, encode, decode equals the first decode.
 - **Covered by:** `src/lib/core/state/reader-state.test.ts` (R)
 
 ### STATE-37 · A scene is applied layers first, the camera last
 
-- **Rule:** Restoring applies the atlas and detail level first, then system, hemisphere, cortex, internal anatomy, cord, opacity, hidden parts and colour, then the cut atlas and the cut (angles, plane, side, then position), then isolation, selection (opening its tree branch), the MRI window, the named view, and last the exact camera. A setting already as wanted is not touched, except the cord and the colour, which are always asked so a showing still downloading is overtaken. The cord is awaited before selection and framing. Hidden parts compare by membership.
+- **Rule:** Restoring applies the atlas and detail level first, then system, hemisphere, cortex, internal anatomy, cord, opacity, hidden parts and colour, then the cut (angles, plane, side, then position; its labels follow from the layers and the colour, SLICE-21), then isolation, selection (opening its tree branch), the MRI window, the named view, and last the exact camera. A setting already as wanted is not touched, except the cord and the colour, which are always asked so a showing still downloading is overtaken. The cord is awaited before selection and framing. Hidden parts compare by membership.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/reader-state.js:42-128`
-- **Expected:** A scene changing every field → events `atlas, detail, system, hemisphere, cord, hidden, color, cut-atlas, angles, cut, cut-display, cut-position, selection, isolation, tree, mri-load, mri-window, camera, orbit`. A scene without the cord asks `showSpinalCord(false)` once. With the cord download pending, no selection, tree or camera event happens until it lands. `sameRegions({a,b},{b,a})` true; `({a},{a,b})` false.
+- **Expected:** A scene changing every field → events `atlas, detail, system, hemisphere, cord, hidden, color, angles, cut, cut-display, cut-position, selection, isolation, tree, mri-load, mri-window, camera, orbit`. A scene without the cord asks `showSpinalCord(false)` once. With the cord download pending, no selection, tree or camera event happens until it lands. `sameRegions({a,b},{b,a})` true; `({a},{a,b})` false.
 - **Covered by:** `src/lib/core/state/reader-state.test.ts` (R)
 
 ### STATE-38 · A failed step is reported with its link fields and the rest still apply
@@ -371,7 +389,7 @@ is the English interface text.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/reader-state.js:44-55`
-- **Expected:** atlas, detail and cut atlas failures → `[{ fields: ['atlas'] }]`, `['detail']`, `['cuts']` with the thrown error, and the camera is still framed last. Selection → `['region']`; system → `['system']`; framing → `['view']`. Step fields: atlas `atlas`, detail `detail`, system, hemi, cortex, internal, cord, opacity, hidden, colors, cuts, cut `cut, tilt, az, rev, pos`, position `pos`, isolate, region, mri, view, cam.
+- **Expected:** atlas and detail failures → `[{ fields: ['atlas'] }]`, `['detail']` with the thrown error, and the camera is still framed last. Selection → `['region']`; system → `['system']`; framing → `['view']`. Step fields: atlas `atlas`, detail `detail`, system, hemi, cortex, internal, cord, opacity, hidden, colors, cut `cut, tilt, az, rev, pos`, position `pos`, isolate, region, mri, view, cam.
 - **Covered by:** `src/lib/core/state/reader-state.test.ts` (R)
 
 ### STATE-39 · A cut position the plane cannot hold is the one field lost; a plane that cannot be cut takes its settings with it
@@ -450,7 +468,7 @@ is the English interface text.
 
 ### STATE-48 · The first cut fetches what it caps, and can be overtaken
 
-- **Rule:** The first cut downloads the tissue envelopes it caps, and the cord where one is published. A cut overtaken while it downloads returns false, so the caller does not face it.
+- **Rule:** The first cut downloads the tissue envelopes it caps, and every supplemental layer (the cord, the arousal nuclei) the anatomy publishes. A cut overtaken while it downloads returns false, so the caller does not face it.
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/state/scene-commands.js:133-143`
@@ -621,3 +639,41 @@ is the English interface text.
 - **Source:** `viewer/state/link-writer.js:26`
 - **Expected:** default `cdmd`: `{}` on cdmd → true; `{}` on `other` → false; `{ anatomy: 'other' }` on other → true; `{ anatomy: 'other' }` on cdmd → false; `{ anatomy: null }` on cdmd → true.
 - **Covered by:** `src/lib/core/state/link-writer.test.ts` (R, with retired anatomy ids as opaque strings)
+
+## The reader's highlights
+
+### STATE-68 · Highlights are painted while nothing else is, set aside by evidence and lifted by a masthead choice
+
+- **Rule:** The reader's highlighted regions are a paint of their own (`highlight:…`): each region in its colour, every other region in its tissue colour. They are painted only while the tab in front shows no evidence: an open function (painted or not on this atlas), an open deficit, an open lesson or map in Circuits, one of Anatomy's paints (a disorder, a seed's connectivity, a lesion's findings) or the reader's own drawn map sets them aside, so a highlight never replaces or mixes with an evidence paint; closing that evidence gives them back unchanged. A masthead colour chosen over them lifts them as it lifts any paint (`paintLifted`); an Anatomy paint it lifted with them no longer holds them aside, and drawing them again (Show on the brain, or a region added or recoloured) ends that paint and puts the lesion's colouring back to the lesion alone, so it cannot take the stage back. An atlas chosen over them keeps them, each region drawn wherever the new atlas holds it, and so it keeps layer IV's share, which every cortical atlas carries; any other paint lifts.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22 (scientific guard); decision 3 of its section 9 (reader content labelled as the reader's)
+- **Expected:** Highlights `destrieux:left:1` blue and `destrieux:left:9` violet on Anatomy → paint `highlight:destrieux:left:1:blue,destrieux:left:9:violet` with those two colours, status `drawn`; the same on Functions with nothing open and on Circuits with no lesson. A highlight on `hcp-mmp:left:1` with Memory open → exactly Memory's paint without highlights, status `aside`; Memory open on Destrieux → no paint; Memory closed → `highlight:hcp-mmp:left:1:pink`. Aphasia open → `deficit:aphasia`; a lesson or the visual field map open → no paint; a lesion's findings → `lesion:x`, status `aside`; the reader's map drawn → no paint. `paintLifted` on Anatomy → no paint, status `lifted`; with a function open → `aside`; with layer IV painted on HCP-MMP → `aside`, lifted → `lifted`, and a lesion's findings lifted → `lifted`. `showOverLift` after a lifted layers, connectivity or disorder paint → that paint ended, `paintLifted` false, the lesion's mode `lesion`. On Anatomy, another atlas with a `highlight:` or `layers:` paint → not lifted; with `connectivity:` → lifted.
+- **Covered by:** `src/lib/core/state/paint.test.ts`; `src/lib/state/highlights.svelte.test.ts` (`showOverLift`); `src/lib/controller/excursion.test.ts` (another atlas)
+
+### STATE-69 · The highlight colours are the deficits' six finding colours
+
+- **Rule:** A highlight takes one of six colours, named in links `blue`, `raspberry`, `green`, `amber`, `violet`, `pink`: the deficits' finding colours in their order, of which only the first three stay apart under colour-vision deficiency (`docs/features/deficits.md`), so the key names every region.
+- **Kind:** data
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22; `FINDING_COLORS` (`core/clinical/catalog.ts`)
+- **Expected:** `HIGHLIGHT_RGB` = blue (57, 135, 229), raspberry (213, 81, 129), green (0, 131, 0), amber (201, 133, 0), violet (98, 80, 214), pink (232, 123, 164).
+- **Covered by:** `src/lib/core/state/paint.test.ts`
+
+### STATE-70 · Highlights travel as mark=region:colour, each region once, twelve at most
+
+- **Rule:** The highlights are written as `mark=` pairs of region id and colour name, joined by commas, in the order they were added, after `keeptracts`; the colour follows the id's last colon. A pair without a known colour or region, a region named twice or more than twelve pairs is not applied, and none of the set is. Checked against the anatomy, a region that is not published or is a `non-region` rejects the whole `mark`.
+- **Kind:** data
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22
+- **Expected:** `[destrieux:left:30 blue, aseg:left:17 pink]` ↔ `mark=destrieux:left:30:blue,aseg:left:17:pink`; `null` writes nothing; twelve pairs decode. Rejected: empty, no colour, empty colour, no region, `teal`, `Blue`, a repeated region, a trailing comma, thirteen pairs. `checkLink`: known cortex and structure kept; `destrieux:left:999` or `destrieux:left:medial-wall` → `rejected: ['mark']`, the rest of the link kept.
+- **Covered by:** `src/lib/core/state/url-state.test.ts`; `src/lib/core/state/link-check.test.ts`
+
+### STATE-71 · A region of a supplemental layer waits for that layer's download
+
+- **Rule:** A supplemental region (an arousal nucleus, a cord tract) draws nothing and cannot be selected until its own layer has downloaded. Opening or revealing it, and a link that selects or isolates it, first download that layer with progress, then show and select it; the cord is downloaded only for a cord region, and showing it stays the cord control's (STATE-47). The first cut downloads every supplemental layer it caps (STATE-48).
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP29
+- **Expected:** `openRegion('aan:midline:dorsal-raphe')` → status switching, nothing shown; `aan` lands → true, shown `[['aan:midline:dorsal-raphe']]`, selected, `pam50` not downloaded, cord hidden. First `cut('axial')` with both layers → envelopes, `pam50` and `aan` each asked for, true. A link selecting `aan:midline:dorsal-raphe` → the layer is asked for before the selection.
+- **Covered by:** `src/lib/core/state/scene-commands.test.ts` (R); `src/lib/core/state/reader-state.test.ts` (R)

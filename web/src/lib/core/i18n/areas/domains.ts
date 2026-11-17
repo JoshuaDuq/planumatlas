@@ -58,7 +58,7 @@ export const en = {
 
 export const fr: typeof en = {
   heading: 'Fonctions neuropsychologiques',
-  score: (term: string, z: string) => `« ${term} » · z\u00a0${z}`,
+  score: (term: string, z: string) => `« ${term} » · z\u00a0${z}`,
   none: (threshold: string) => `Aucune fonction n’atteint z\u00a0${threshold} ici.`,
   noteStructure: (source: string) =>
     `Constance méta-analytique moyenne sur toute la structure de la segmentation SynthSeg du gabarit MNI152 pour chaque terme, d’après ${source}. Données plus faibles que pour une aire corticale\u202f: le noyau de lissage de 6\u00a0mm est grand à côté d’un noyau, et les études y rapportent moins de coordonnées. Ni ce que fait ce cerveau, ni ce qu’une lésion ici altérerait.`,
@@ -84,7 +84,7 @@ export const fr: typeof en = {
     `Les valeurs positives de votre carte sur les aires de la fonction\u202f: là où elles se recouvrent sur ce cerveau, et non un test statistique. ${scan ? 'L’IRM reste visible là où' : 'Le cortex gris est là où'} aucune n’atteint.`,
   keyMapFunction: (name: string, floor: string) => `${name}, z\u00a0≥\u00a0${floor}`,
   keyMapAbove: (title: string, threshold: string) => `${title} au-dessus de ${threshold}`,
-  termOf: (name: string, term: string) => `${name}\u202f: « ${term} »`,
+  termOf: (name: string, term: string) => `${name}\u202f: « ${term} »`,
   lesionCheck: (items: string[]) => `Vérification lésionnelle\u202f: ${items.join('\u202f; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>
     `${deficit} (${references})\u202f: ${parcels}`,

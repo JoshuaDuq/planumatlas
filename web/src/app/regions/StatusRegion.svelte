@@ -4,7 +4,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Colophon from '../../features/colophon/Colophon.svelte';
-  import { displayChanges } from '../../features/colophon/display-state.ts';
+  import { displayChanges } from '../../lib/state/display-state.ts';
   import { regionCountText } from '../../features/colophon/region-count.ts';
   import { getApp } from '../application.svelte.ts';
 

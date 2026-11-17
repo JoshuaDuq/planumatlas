@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import { page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import type { Legend } from '../../lib/core/state/paint.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
@@ -341,7 +341,7 @@ describe('saving', () => {
     // The notice is what a sighted reader sees; the announcer speaks notices, not this module.
     expect(commands.notify.mock.calls).toEqual([
       [null],
-      [{ kind: 'info', text: 'Image enregistrée : planum-hcp-mmp-left.png.' }],
+      [{ kind: 'info', text: 'Image enregistrée\u202f: planum-hcp-mmp-left.png.' }],
     ]);
     expect(region.textContent).toBe('');
   });

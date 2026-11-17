@@ -7,7 +7,7 @@ import { userEvent } from 'vitest/browser';
 import type { ScreenPoint } from '../../lib/engine/api.ts';
 import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { Manifest } from '../../lib/types/index.ts';
 import { expectAxeClean } from '../../lib/ui/a11y-test-support.ts';

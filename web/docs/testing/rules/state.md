@@ -219,22 +219,22 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 
 ## Language
 
-### STORE-22 · The start language is the link's, else the saved French, else English
+### STORE-22 · The start language is the saved one, else the link's, else English
 
-- **Rule:** A link's language wins. Without one, a saved `fr` starts in French; anything else starts in English. A `lang` the link gets wrong (unknown, repeated) carries no language (decoding is S4's).
+- **Rule:** The reader's saved language (`en` or `fr`) wins. Without one, a link's language decides; without either, English (or the browser's first language the app speaks). A saved value that is neither counts as none. A link's language followed later in the visit also gives way to a saved one, and is never itself saved. A `lang` the link gets wrong (unknown, repeated) carries no language (decoding is S4's).
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/state/boot.js:4-7`
-- **Expected:** `('fr', 'en') → 'fr'`; `(none, 'fr') → 'fr'`; `(none, null) → 'en'`; `('en', 'fr') → 'en'`; `(none, 'de') → 'en'`. Links `#lang=de` and `#lang=en&lang=fr` decode to no language, so the saved value decides.
+- **Source:** `viewer/state/boot.js:4-7`; handoff U15 (plan 2 WP36)
+- **Expected:** `('fr', 'en') → 'en'`; `(none, 'fr') → 'fr'`; `(none, null) → 'en'`; `('en', 'fr') → 'fr'`; `('fr', null) → 'fr'`; `('fr', 'de') → 'fr'`; `(none, 'de') → 'en'`. `createLanguage('en')` with `fr` saved → `fr`; `createLanguage('fr')` with none saved → `fr`, nothing written. `follow('fr')` with none saved → `fr`; with `en` saved → returns `en`, `<html lang>` stays `en`. Links `#lang=de` and `#lang=en&lang=fr` decode to no language, so the saved value decides.
 - **Covered by:** `src/lib/state/language.test.ts` (R, every saved value with and without a link language; the link column is S4's)
 
 ### STORE-23 · A chosen language is remembered and sets the page language; a link's is not remembered
 
-- **Rule:** The language at start and every change set `<html lang>`. The reader's choice is stored; a language that arrives with a link is shown and announced but not stored. A language other than English or French is an error. Blocked site data still switches.
+- **Rule:** The language at start and every change set `<html lang>`. The reader's choice is stored; a language that arrives with a link is shown and announced but not stored, and gives way to a stored one (STORE-22). A language other than English or French is an error. Blocked site data still switches.
 - **Kind:** behaviour
 - **Level:** unit (fake document)
-- **Source:** `viewer/app.js:95, 612`; deviation `h1a-html-lang.md`
-- **Expected:** Saved `fr` → `current 'fr'`, `lang="fr"`. Link `en` over saved `fr` → `current 'en'`, storage still `fr`. Nothing saved → `lang="en"`; `set('fr')` → `current 'fr'`, `lang="fr"`, stored `planum-lang = 'fr'`. Saved `en`, `follow('fr')` → `lang="fr"`, storage still `en`. `set('de')` and `follow('de')` throw `RangeError`; `current` unchanged.
+- **Source:** `viewer/app.js:95, 612`; deviation `h1a-html-lang.md`; handoff U15 (plan 2 WP36)
+- **Expected:** Saved `fr` → `current 'fr'`, `lang="fr"`. Link `en` over saved `fr` → `current 'fr'`, `lang="fr"`. Link `fr`, nothing saved → `current 'fr'`, nothing stored. Nothing saved → `lang="en"`; `set('fr')` → `current 'fr'`, `lang="fr"`, stored `planum-lang = 'fr'`. Nothing saved, `follow('fr')` → `lang="fr"`, nothing stored; saved `en`, `follow('fr')` → returns `en`, `lang="en"`; after `set('fr')`, `follow('en')` → returns `fr`. `set('de')` and `follow('de')` throw `RangeError`; `current` unchanged.
 - **Covered by:** `src/lib/state/language.test.ts` (R)
 
 ## Device
@@ -348,3 +348,12 @@ The announcer's sentences are KEY-17 to KEY-21 in `controller.md`; the session's
 - **Source:** `viewer/ui/chrome/viewport-chrome.js:53-60, 603`
 - **Expected:** `hintRetired === false`; `retireHint()` → `true`, stored `planum.stage-hint = 'retired'`; a new store on that storage → `true`. Storage holding `'retired'` at load → `true`. No storage, `retireHint()` → `true`.
 - **Covered by:** `src/lib/state/stage-layout.svelte.test.ts` (R, could move down); the hint's text and display are in `stage.md`
+
+### STORE-37 · The highlights store: the colour the fewest hold, twelve at most
+
+- **Rule:** The reader's highlights are kept in the order added. A new region takes the colour the fewest regions hold, the first in order on a tie, so the first three take the colours that stay apart under colour-vision deficiency; a second press takes it away. A thirteenth throws and changes nothing. Adding or recolouring draws again highlights a masthead choice lifted (`showPaint`), never while evidence sets them aside; removing never does. A link's set replaces the reader's whole; a repeated region, more than twelve, or recolouring or removing a region not highlighted throws.
+- **Kind:** behaviour
+- **Level:** unit
+- **Source:** Planum improvement plan 2, WP22
+- **Expected:** Seven regions → blue, raspberry, green, amber, violet, pink, blue; the raspberry one removed, the next → raspberry. Twelve → `full`, the thirteenth throws `RangeError`. Lifted: an add → one `showPaint`; aside or drawn: adds, recolours and removes → none; `show()` when not lifted throws. `replace` keeps the given order.
+- **Covered by:** `src/lib/state/highlights.svelte.test.ts`

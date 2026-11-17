@@ -96,6 +96,34 @@ test('INSP-53 · a disorder paint shows a lifted paint again, replaces connectiv
   assert.equal(state.assemble({}).disorderShown, null);
 });
 
+test('INSP-59 · the layer paint shows a lifted paint again, replaces connectivity and a disorder, and ends with its tab', () => {
+  const state = session();
+  state.setDisorderShown('schizophrenia');
+  state.liftPaint();
+  state.setLayersShown(true);
+  let shown = state.assemble({});
+  assert.deepEqual(
+    [shown.layersShown, shown.disorderShown, shown.paintLifted],
+    [true, null, false],
+  );
+  state.setConnectivitySeed('julich:left:1');
+  assert.equal(state.assemble({}).layersShown, false);
+  state.setLayersShown(true);
+  assert.equal(state.assemble({}).connectivitySeed, null);
+  state.setDisorderShown('schizophrenia');
+  assert.equal(state.assemble({}).layersShown, false);
+  state.setLayersShown(true);
+  state.setExplorer('anatomy');
+  assert.equal(state.assemble({}).layersShown, true);
+  state.setExplorer('functions');
+  shown = state.assemble({});
+  assert.equal(shown.layersShown, false);
+  state.setExplorer('anatomy');
+  state.setLayersShown(true);
+  state.setLayersShown(false);
+  assert.equal(state.assemble({}).layersShown, false);
+});
+
 test('assembly merges model state and view state into one snapshot', () => {
   const s = session();
   s.setView('left');

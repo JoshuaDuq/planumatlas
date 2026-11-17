@@ -7,7 +7,7 @@ import type { Mock } from 'vitest';
 import { flushSync } from 'svelte';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
 import { createEngineSync } from '../../lib/state/engine-sync.svelte.ts';
@@ -229,32 +229,14 @@ describe('the Section popover', () => {
     );
   });
 
-  test('Cut labels names each published label set; a choice that fails returns to the labels still cut', async () => {
+  test('offers no cut labels: the bar names those the atlas puts on the cut', async () => {
     await mount();
     await cutPlane('axial');
     await openSection();
-    const select = page.getByRole('combobox', { name: 'Cut labels' });
-    const element = select.element() as HTMLSelectElement;
-    expect([...element.options].map((option) => option.value)).toEqual([
-      'destrieux',
-      'hcp-mmp',
-      'julich',
-      'schaefer',
-      'desikan',
-      'nextbrain',
-      'arterial',
-      'nettekoven',
-      'choi',
-    ]);
-    expect(element.value).toBe('destrieux');
-    await select.selectOptions('hcp-mmp');
+    expect(page.getByRole('combobox', { name: 'Cut labels' }).elements()).toEqual([]);
+    await engine.model.setAtlas('hcp-mmp');
     await vi.waitFor(() => expect(controls.state.cutAtlas).toBe('hcp-mmp'));
-
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(engine.sections, 'setCutAtlas').mockRejectedValueOnce(new Error('offline'));
-    await select.selectOptions('nextbrain');
-    await vi.waitFor(() => expect(element.value).toBe('hcp-mmp'));
-    expect(said()).toBe('Could not prepare the section.');
+    await expect.element(page.getByText(/derived HCP labels/).first()).toBeInTheDocument();
   });
 
   test('is French in French', async () => {
@@ -263,7 +245,7 @@ describe('the Section popover', () => {
     await userEvent.keyboard('{Enter}');
     await vi.waitFor(() => expect(locate('toolbar', 'Plan de coupe').element()).toBeTruthy());
     expect(control('button', 'Cerveau entier').getAttribute('aria-pressed')).toBe('true');
-    expect(page.getByRole('combobox', { name: 'Étiquettes de coupe' }).element()).toBeTruthy();
+    expect(page.getByRole('combobox').elements()).toEqual([]);
     await userEvent.click(page.getByText('À propos de ces données'));
     const methods = page.getByRole('link', {
       name: 'Méthode et limites (en anglais) (s’ouvre dans un nouvel onglet)',

@@ -1,0 +1,163 @@
+# Harvard Ascending Arousal Network Atlas, version 2.0 (Edlow and Kinney 2023):
+# ten brainstem nuclei traced by hand in FSL's MNI152 at 1 mm from histology and
+# ex-vivo MRI of other brains. scripts/register_arousal_nuclei.py places them on
+# this brain, by template registration or by FreeSurfer's SegmentAAN, whichever
+# passes the checks below; the build meshes each as a supplemental structure.
+label: Harvard Ascending Arousal Network Atlas 2.0
+citations:
+  - https://doi.org/10.5061/dryad.zw3r228d2
+  - https://doi.org/10.1097/NEN.0b013e3182588293
+  - https://doi.org/10.1126/scitranslmed.adj4303
+# Edlow et al. 2012 (version 1.0) and 2024 (version 2.0), checked through E-utilities.
+pmids: [22592840, 38691619]
+# What the published nuclei are distributed under and credited to, by the method that placed them.
+methods:
+  synthmorph:
+    license: CC0 1.0
+    license_file: Harvard-AAN-Atlas-CC0-1.0.txt
+    attribution: Harvard Ascending Arousal Network Atlas 2.0 (Edlow and Kinney 2023, Dryad), registered to this brain with SynthMorph
+    citations: [https://doi.org/10.1162/imag_a_00197]
+  segment-aan:
+    # Olchanyi et al. 2025, PMID 41074651, checked through E-utilities.
+    license: FreeSurfer Software License
+    license_file: FreeSurfer.html
+    attribution: Arousal nuclei segmented on this brain with FreeSurfer 8.2's SegmentAAN (Olchanyi et al. 2025)
+    citations: [https://doi.org/10.1002/hbm.70357]
+source:
+  doi: https://doi.org/10.5061/dryad.zw3r228d2
+  # Dryad's API serves files only with a bearer token, and its download links only
+  # to a browser, so the archive is downloaded by hand and checked here.
+  manual: >-
+    Open https://datadryad.org/dataset/doi:10.5061/dryad.zw3r228d2 in a browser,
+    choose "Download dataset", and unzip the archive into data/cache/arousal-nuclei/.
+  directory: data/cache/arousal-nuclei
+  archive: [doi_10_5061_dryad_zw3r228d2__v20230718.zip, 289ffa726dfca2eca4353dbce0fd72ded4354dbd409997c080a9ff8ac1962a9a, 187763635]
+  # Each file used, as Dryad's API lists it (version 245119, 2023-07-18), with its SHA-256;
+  # the API's listing of all 25 is kept beside them as dryad-file-list.json.
+  files:
+    combined: [AAN_Brainstem_MNI152_1mm_v2p0.nii, e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47]
+    lut: [AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt, b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88]
+    DR: [AAN_DR_MNI152_1mm_v2p0.nii, 7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00]
+    MnR: [AAN_MnR_MNI152_1mm_v2p0.nii, 483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4]
+    PAG: [AAN_PAG_MNI152_1mm_v2p0.nii, fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde]
+    VTA: [AAN_VTA_MNI152_1mm_v2p0.nii, 3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa]
+    LC_L: [AAN_LC_L_MNI152_1mm_v2p0.nii, 0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977]
+    LC_R: [AAN_LC_R_MNI152_1mm_v2p0.nii, 103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475]
+    LDTg_L: [AAN_LDTg_L_MNI152_1mm_v2p0.nii, 692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b]
+    LDTg_R: [AAN_LDTg_R_MNI152_1mm_v2p0.nii, 7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e]
+    mRt_L: [AAN_mRt_L_MNI152_1mm_v2p0.nii, 93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba]
+    mRt_R: [AAN_mRt_R_MNI152_1mm_v2p0.nii, 11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9]
+    PBC_L: [AAN_PBC_L_MNI152_1mm_v2p0.nii, 2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5]
+    PBC_R: [AAN_PBC_R_MNI152_1mm_v2p0.nii, 41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f]
+    PnO_L: [AAN_PnO_L_MNI152_1mm_v2p0.nii, b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0]
+    PnO_R: [AAN_PnO_R_MNI152_1mm_v2p0.nii, f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368]
+    # The release's left PTg file holds both sides, byte for byte the same as its
+    # bilateral PTg file; the left nucleus is it less the right file.
+    PTg_L: [AAN_PTg_L_MNI152_1mm_v2p0.nii, 0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d]
+    PTg_R: [AAN_PTg_R_MNI152_1mm_v2p0.nii, 2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7]
+# FSL's MNI152 (MNI152NLin6Asym), pinned and cached as config/striatal-networks.yaml has it.
+template:
+  base: https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym
+  directory: data/cache/striatal-networks
+  files:
+    t1: [tpl-MNI152NLin6Asym_res-01_T1w.nii.gz, f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258]
+    mask: [tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz, 6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428]
+# What the carried nuclei must lie in, and are then kept to: aseg's Brain-Stem and
+# left and right VentralDC, where aseg puts the ventral midbrain (decision 0013,
+# 2026-11-17; the first runs used Brain-Stem alone).
+envelope_labels: [16, 28, 60]
+# Fixed before the run (2026-11-16). Three nuclei are labelled on this brain by its
+# own NextBrain segmentation, each side apart, so both sides are taken together.
+# Each carried nucleus must have its centroid within the distance of NextBrain's,
+# and every nucleus must lie mostly inside the envelope before it is kept to it.
+acceptance:
+  centroid_distance_max_mm: 3
+  inside_envelope_min: 0.95
+  # Decision 0014 (2026-11-17), made after the results: the periaqueductal grey's rim
+  # falls in aseg's label for the aqueduct it surrounds. Disclosed as a limitation.
+  inside_envelope_exceptions:
+    aan:midline:periaqueductal-grey: 0.90
+  nextbrain:
+    dorsal-raphe: dorsal_raphe_nucleus
+    ventral-tegmental-area: ventral_tegmental_area
+    periaqueductal-grey: periaqueductal_gray_substance
+# Between methods that pass: the smaller mean centroid distance over the three; a
+# difference under the tie margin goes to the higher mean Dice over the three.
+selection:
+  tie_margin_mm: 0.25
+# Catalog subgroup under Brainstem.
+family: {en: Arousal nuclei (Harvard atlas), fr: Noyaux de l’éveil (atlas de Harvard)}
+# The ten nuclei: the release's file stems, its combined-volume codes and
+# FreeSurfer SegmentAAN's labels, [left, right] for the paired ones. Colours are the
+# release's own colour table.
+nuclei:
+  - id: dorsal-raphe
+    files: [DR]
+    codes: [7201]
+    segment_aan: [1001]
+    color: [121, 255, 250]
+    names: {en: Dorsal raphe, fr: Raphé dorsal}
+    aliases: {en: [Dorsal raphe nucleus, DR], fr: [Noyau du raphé dorsal]}
+  - id: median-raphe
+    files: [MnR]
+    codes: [7202]
+    segment_aan: [1006]
+    color: [0, 255, 0]
+    names: {en: Median raphe, fr: Raphé médian}
+    aliases: {en: [Median raphe nucleus, MnR], fr: [Noyau du raphé médian]}
+  - id: periaqueductal-grey
+    files: [PAG]
+    codes: [7203]
+    segment_aan: [1009]
+    color: [153, 153, 255]
+    names: {en: Periaqueductal grey, fr: Substance grise périaqueducale}
+    aliases: {en: [Periaqueductal gray, PAG], fr: [SGPA]}
+  - id: ventral-tegmental-area
+    files: [VTA]
+    codes: [7204]
+    segment_aan: [1016]
+    color: [255, 0, 255]
+    names: {en: Ventral tegmental area, fr: Aire tegmentale ventrale}
+    aliases: {en: [VTA], fr: [ATV]}
+  - id: locus-coeruleus
+    files: [LC_L, LC_R]
+    codes: [7301, 7401]
+    segment_aan: [1002, 1003]
+    color: [0, 0, 255]
+    names: {en: Locus coeruleus, fr: Locus cœruleus}
+    aliases: {en: [LC], fr: [Locus coeruleus]}
+  - id: laterodorsal-tegmental-nucleus
+    files: [LDTg_L, LDTg_R]
+    codes: [7302, 7402]
+    segment_aan: [1004, 1005]
+    color: [255, 127, 0]
+    names: {en: Laterodorsal tegmental nucleus, fr: Noyau tegmental latérodorsal}
+    aliases: {en: [LDTg], fr: []}
+  - id: mesencephalic-reticular-formation
+    files: [mRt_L, mRt_R]
+    codes: [7303, 7403]
+    segment_aan: [1007, 1008]
+    color: [255, 0, 0]
+    names: {en: Mesencephalic reticular formation, fr: Formation réticulée mésencéphalique}
+    aliases: {en: [mRt, Cuneiform nucleus], fr: [Noyau cunéiforme]}
+  - id: parabrachial-complex
+    files: [PBC_L, PBC_R]
+    codes: [7304, 7404]
+    segment_aan: [1010, 1011]
+    color: [255, 255, 0]
+    names: {en: Parabrachial complex, fr: Complexe parabrachial}
+    aliases: {en: [PBC, Parabrachial nucleus], fr: [Noyau parabrachial]}
+  - id: pontis-oralis
+    files: [PnO_L, PnO_R]
+    codes: [7305, 7405]
+    segment_aan: [1012, 1013]
+    color: [0, 127, 255]
+    names: {en: Pontis oralis, fr: Noyau réticulaire pontique oral}
+    aliases: {en: [PnO, Pontine reticular formation, Oral pontine reticular nucleus], fr: [Formation réticulée pontique]}
+  - id: pedunculotegmental-nucleus
+    files: [PTg_L, PTg_R]
+    codes: [7306, 7406]
+    segment_aan: [1014, 1015]
+    color: [127, 0, 255]
+    names: {en: Pedunculotegmental nucleus, fr: Noyau pédonculotegmental}
+    aliases: {en: [PTg, Pedunculopontine nucleus, PPN], fr: [Noyau tegmental pédonculopontin, Noyau pédonculopontin]}

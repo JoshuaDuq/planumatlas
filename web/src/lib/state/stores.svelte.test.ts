@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import manifest from '../../../../public/models/cdmd/manifest.json' with { type: 'json' };
+import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import type { createCatalog } from '../core/catalog/catalog.ts';
 import { createCatalog as buildCatalog } from '../core/catalog/catalog.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
@@ -100,7 +100,7 @@ afterEach(() => {
 describe('the view', () => {
   test('is the engine’s display state with the session’s over it, the lesson and the anatomies', () => {
     const { view, session, lesson } = build();
-    expect(view.current.anatomy).toBe(published.anatomy.id);
+    expect(view.current.anatomy).toBe('cdmd');
     expect(view.current.referenceAnatomy).toBe(engine.tracts.anatomy);
     expect(view.current.atlas).toBe(engine.model.settings.atlas);
     expect(view.current.lang).toBe('en');

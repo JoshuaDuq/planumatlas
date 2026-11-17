@@ -44,6 +44,27 @@
     touch-action: none;
   }
 
+  /* A frame in a course page (embed=1): the stage, and its one line under it, at any width. */
+  #app[data-embed] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  #app[data-embed] > #viewport {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #app[data-embed] > footer {
+    grid-row: 2;
+  }
+  /* The linked MRI docks beside the stage, as it does beside the panel's. */
+  #app[data-embed]:has(> .mpr-dock) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  #app[data-embed] > .mpr-dock {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
   /*
    * Until the anatomy arrives there is nothing to inspect, cut or set. The panel
    * shows the explorer alone over a skeleton list, under a band the tabs will

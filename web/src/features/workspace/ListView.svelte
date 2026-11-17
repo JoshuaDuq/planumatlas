@@ -13,7 +13,6 @@
   import { circuitsMatching, elsewhere } from '../../lib/core/elsewhere.ts';
   import { tractRows, tractsMatching } from '../../lib/core/tracts.ts';
   import { sharedGroupNames } from '../../lib/core/panels/navigator.ts';
-  import { atlasSwitchLabel } from '../../lib/core/i18n/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import { focusHeading } from '../../lib/ui/focus.ts';
   import { insideInternal } from '../../lib/core/state/internal-mode.ts';
@@ -28,6 +27,7 @@
   import FunctionList from '../functions/FunctionList.svelte';
   import type { FunctionExplorer } from '../functions/functions-explorer.svelte.ts';
   import TractsExplorer from '../tracts/TractsExplorer.svelte';
+  import HighlightStrip from '../highlights/HighlightStrip.svelte';
 
   let {
     app,
@@ -74,24 +74,6 @@
       change(ids);
       speech.part(said);
     };
-  }
-
-  /**
-   * The navigator's "switch cut atlas" (app.js:564). The cut panel reports a failure of the atlas it
-   * still shows; one overtaken by closing the cut is reported nowhere else, so it is reported here.
-   */
-  async function chooseCutAtlas(id: string) {
-    try {
-      await excursions.setCutAtlas(id);
-      world.commands.succeeded('layer', atlasSwitchLabel(id, current.lang));
-    } catch (error) {
-      world.commands.fail(
-        'layer',
-        error,
-        atlasSwitchLabel(id, current.lang),
-        () => void chooseCutAtlas(id),
-      );
-    }
   }
 
   /** What the other tabs find for the words searched in `from`, counted as each would list them. */
@@ -158,6 +140,14 @@
   }
 </script>
 
+<HighlightStrip
+  lang={current.lang}
+  highlights={world.highlights}
+  regions={world.regions}
+  name={(id) => catalog.label(id).name}
+  settings={current}
+/>
+
 <div class="mode" hidden={current.explorer !== 'anatomy'}>
   <AnatomyExplorer
     bind:this={tree}
@@ -171,8 +161,6 @@
     selectedId={current.selectedRegion?.id ?? null}
     atlases={manifest.atlases}
     atlas={current.atlas}
-    cutAtlases={manifest.cut_atlases ?? []}
-    cutAtlas={current.cutAtlas ?? ''}
     inside={insideInternal(current)}
     switching={current.status === 'switching'}
     onScope={() => void anatomy.toggleInternalAnatomy()}
@@ -181,9 +169,14 @@
     onHide={eye(anatomy.hideRegions)}
     onShow={eye(anatomy.showRegions)}
     onAtlas={(id) => excursions.chooseAtlas(id)}
-    onCutAtlas={chooseCutAtlas}
     elsewhere={othersOf('anatomy')}
     onElsewhere={(mode) => carry(mode, current.query)}
+    table={() => ({
+      anatomy: brain,
+      atlas: current.atlas,
+      detail: current.detail,
+      regions: manifest.regions,
+    })}
   >
     {#snippet systemPicker()}
       <!-- Its options walk every region: they read the catalog's language and settings (WORK-31). -->

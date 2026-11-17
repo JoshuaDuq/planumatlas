@@ -9,11 +9,13 @@
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { CutMode, ViewName } from '../../lib/types/index.ts';
+  import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { createMprDialog } from '../../features/sections/mpr-dialog.svelte.ts';
   import type MprDialog from '../../features/sections/MprDialog.svelte';
   import { createSectionControls } from '../../features/sections/section-controls.svelte.ts';
   import SectionBar from '../../features/sections/SectionBar.svelte';
+  import type { SnapshotStage, SnapshotSubject } from '../../features/snapshot/snapshot.ts';
   import SectionPopover from '../../features/sections/SectionPopover.svelte';
   import CoordinatePopover from '../../features/lesion/CoordinatePopover.svelte';
   import { mapCaption, mapKey } from '../../features/user-map/key.ts';
@@ -26,6 +28,9 @@
   import type { HoverSources } from '../../features/stage/hover-text.ts';
   import OrientationGizmo from '../../features/stage/OrientationGizmo.svelte';
   import RouteMarks from '../../features/stage/RouteMarks.svelte';
+  import RegionNames from '../../features/stage/RegionNames.svelte';
+  import { namesDrawn } from '../../features/stage/region-names.ts';
+  import VisualAreaNames from '../../features/stage/VisualAreaNames.svelte';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
   import { keyedSurface } from '../../features/stage/stage-keys.ts';
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
@@ -92,24 +97,46 @@
     return fullscreen?.active ?? false;
   }
 
-  /** The masthead's Save image: the visible stage as a captioned PNG (G6). */
-  export async function saveImage() {
-    const { engine, view: store, commands } = world!;
-    // Its drawing code is fetched with the first save; a failed fetch is the save's failure.
-    let snapshot: typeof import('../../features/snapshot/snapshot.ts');
+  /** Image pixels per CSS pixel of a save that names no size, and of Copy image. */
+  const DEFAULT_SCALE = 2;
+
+  // The drawing code is fetched with the first save or copy.
+  const snapshotCode = () => import('../../features/snapshot/snapshot.ts');
+
+  /** The masthead's Save image: the visible stage as a captioned PNG (G6), `scale` image pixels per CSS pixel. */
+  export async function saveImage(scale = DEFAULT_SCALE) {
+    const { commands } = world!;
+    // A failed fetch of the drawing code is the save's failure.
+    let snapshot: Awaited<ReturnType<typeof snapshotCode>>;
     try {
-      snapshot = await import('../../features/snapshot/snapshot.ts');
+      snapshot = await snapshotCode();
     } catch (error) {
       commands.fail('snapshot', error);
       return;
     }
     // Read once the code is in, so the caption names the frame the save captures.
+    return snapshot.saveSnapshot(
+      ...snapshotScene(),
+      { fail: commands.fail, notify: app!.session.notify },
+      { scale },
+    );
+  }
+
+  /** The masthead's Copy image: the same PNG at the default size. A failure is the clipboard's to say. */
+  export async function imagePng(): Promise<Blob> {
+    const snapshot = await snapshotCode();
+    return snapshot.snapshotPng(...snapshotScene(), { scale: DEFAULT_SCALE });
+  }
+
+  /** The stage a snapshot is taken of, and what its caption says, as they stand now. */
+  function snapshotScene(): [SnapshotStage, SnapshotSubject] {
+    const { engine, view: store } = world!;
     const view = store.current;
     const { manifest } = engine.model;
     const reference = isIndependentTractReference(view);
     const cut = stage!.sections.current;
     const region = reference ? null : view.selectedRegion;
-    return snapshot.saveSnapshot(
+    return [
       { host: host!, stage: app!.stage, keys: keys!, engine },
       {
         lang: view.lang,
@@ -130,8 +157,7 @@
           ? mapCaption(world!.userMap, manifest.coordinate_spaces, view.lang)
           : null,
       },
-      { fail: commands.fail, notify: app!.session.notify },
-    );
+    ];
   }
 
   // The tracts' streamline direction is an engine getter: it is read again when the tracts say it changed.
@@ -263,6 +289,7 @@
         world.engine.camera.applyView(name);
       },
       resetDisplay: world.anatomy.resetDisplay,
+      setNamesShown: app.session.setNamesShown,
     } satisfies DockCommands}
     {@const showReport = (close: () => void) => {
       world.excursions.chooseExplorer('anatomy');
@@ -308,35 +335,13 @@
         onReport={() => showReport(close)}
       />
     {/snippet}
-    <Dock
-      bind:this={dock}
-      stage={app.stage}
-      media={app.media}
-      lang={current.lang}
-      status={current.status}
-      {tractReference}
-      view={current}
-      cortexSurface={world.userMap.surface}
-      prepared={world.excursions.displayBaseline}
-      hasSpinalCord={publishesSpinalCord(model.manifest)}
-      explodable={!visualFieldMapOpen(current)}
-      onLesionPlacing={world.lesion.setPlacing}
-      onPlate={world.engine.camera.clearPlate}
-      {commands}
-      coordinatePopover={world.coordinates ? coordinatePopover : undefined}
-      overlayPopover={world.userMap.available && model.manifest.coordinate_spaces
-        ? overlayPopover
-        : undefined}
-    >
-      {#snippet sectionPopover({ close })}
-        <SectionPopover
-          controls={stage.sections}
-          lang={current.lang}
-          phone={app.media.phone}
-          {close}
-        />
-      {/snippet}
-      {#snippet sectionBar()}
+    {#if app.embed}
+      <!-- A frame has no tools: the row of a section its link opened, on the dock's plate and in its place. -->
+      <div
+        class="embed-dock"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        {@attach (node) => app.stage.observeDock(node)}
+      >
         <SectionBar
           controls={stage.sections}
           stage={app.stage}
@@ -344,18 +349,76 @@
           view={current}
           {tractReference}
         />
-      {/snippet}
-      {#snippet lesionPopover({ close, placing, setPlacing })}
-        <LesionPopover
-          lesion={world.lesion}
-          lang={current.lang}
-          {placing}
-          onPlacing={setPlacing}
-          {reportShown}
-          onReport={() => showReport(close)}
-        />
-      {/snippet}
-    </Dock>
+      </div>
+    {:else}
+      <Dock
+        bind:this={dock}
+        stage={app.stage}
+        media={app.media}
+        lang={current.lang}
+        status={current.status}
+        {tractReference}
+        view={current}
+        cortexSurface={world.userMap.surface}
+        prepared={world.excursions.displayBaseline}
+        hasSpinalCord={publishesSpinalCord(model.manifest)}
+        explodable={!visualFieldMapOpen(current)}
+        onLesionPlacing={world.lesion.setPlacing}
+        onPlate={world.engine.camera.clearPlate}
+        {commands}
+        coordinatePopover={world.coordinates ? coordinatePopover : undefined}
+        overlayPopover={world.userMap.available && model.manifest.coordinate_spaces
+          ? overlayPopover
+          : undefined}
+      >
+        {#snippet sectionPopover({ close })}
+          <SectionPopover
+            controls={stage.sections}
+            lang={current.lang}
+            phone={app.media.phone}
+            {close}
+          />
+        {/snippet}
+        {#snippet sectionBar()}
+          <SectionBar
+            controls={stage.sections}
+            stage={app.stage}
+            lang={current.lang}
+            view={current}
+            {tractReference}
+          />
+        {/snippet}
+        {#snippet lesionPopover({ close, placing, setPlacing })}
+          <LesionPopover
+            lesion={world.lesion}
+            lang={current.lang}
+            {placing}
+            onPlacing={setPlacing}
+            {reportShown}
+            onReport={() => showReport(close)}
+          />
+        {/snippet}
+      </Dock>
+    {/if}
+    <RegionNames
+      engine={world.engine}
+      shown={namesDrawn({
+        namesShown: current.namesShown,
+        exploded: current.exploded,
+        tractReference,
+        routeShown: current.explorer === 'circuits' && Boolean(current.lesson.route),
+        mapOpen: visualFieldMapOpen(current),
+      })}
+      selected={current.selectedRegion?.id ?? null}
+      lobes={keyedSurface(current) === 'lobe' && !current.paint ? lobes : null}
+      nameOf={(id) => {
+        const name = world.catalog.label(id).name;
+        const side = t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere];
+        return { name, label: `${name}, ${side}` };
+      }}
+      label={t(current.lang, 'display').names}
+      onSelect={world.anatomy.pickRegion}
+    />
     {@const lessonCopy = t(current.lang, 'circuits')}
     <RouteMarks
       engine={world.engine}
@@ -372,6 +435,13 @@
       label={lessonCopy.wholeRoute}
       onOpen={(index) => app.ports.openLessonStep(index)}
     />
+    {#if world.engine.model.manifest.retinotopy}
+      <VisualAreaNames
+        engine={world.engine}
+        shown={world.visualFieldMap.areasShown && visualFieldMapOpen(current)}
+        names={world.engine.model.manifest.retinotopy.visual_areas.areas.map(({ name }) => name)}
+      />
+    {/if}
     <OrientationGizmo
       engine={world.engine}
       stage={app.stage}
@@ -394,6 +464,7 @@
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
+      cerebellar={model.manifest.cerebellar_functions?.regions ?? null}
       {lobes}
       legend={tractReference || (mapDrawn && !againstMap)
         ? null
@@ -408,7 +479,9 @@
                 lesion: world.lesion.paint,
                 connectivity: model.connectivity,
                 disorders: model.disorders,
+                layers: world.corticalLayers.data,
                 mapDrawn,
+                highlights: world.highlights.list,
               }),
             },
             {
@@ -418,8 +491,11 @@
               lesion: world.lesion.paint,
               connectivity: model.connectivity,
               disorders: model.disorders,
+              layers: world.corticalLayers.data,
               label: (id) =>
                 `${world.catalog.label(id).name} · ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
+              named: (id) =>
+                `${world.catalog.label(id).name}, ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
               map: againstMap
                 ? {
                     title: mapKey(world.userMap, current.lang)!.title,
@@ -495,6 +571,30 @@
         --exit-top: calc(
           var(--stage-gutter) + 2 * var(--lh-caption) + var(--space-1) + var(--space-2)
         );
+      }
+    }
+    /* A frame's section row stands where the dock would, on its plate, drawn only while a plane is cut. */
+    .embed-dock {
+      position: absolute;
+      z-index: 3;
+      left: calc(var(--vis-left) + var(--stage-gutter));
+      bottom: calc(var(--vis-bottom) + var(--stage-gutter));
+      width: max-content;
+      max-width: calc(100% - var(--vis-left) - var(--vis-right) - 2 * var(--stage-gutter));
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+    }
+    .embed-dock:has(> :global(.section-bar:is([data-shown], [data-failed]))) {
+      border-color: var(--stage-edge);
+      background: var(--overlay-plate);
+    }
+    /* No tools under it to be ruled off from. */
+    .embed-dock > :global(.section-bar) {
+      border-bottom: 0;
+    }
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .embed-dock:has(> :global(.section-bar[data-shown])) {
+        width: calc(100% - var(--vis-left) - var(--vis-right) - 2 * var(--stage-gutter));
       }
     }
     /* The exit control: top end of the stage, on an opaque plate, clear of the keys (pushed below it), the letters and the dock (WCAG 2.4.11). */
