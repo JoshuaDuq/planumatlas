@@ -23,6 +23,9 @@ export const en = {
   dot: (title: string, volume: string, share: string) =>
     `${title}, ${volume} cm³, ${share} of this region`,
   plotHint: 'Each dot is one person. Pick two to compare; the brain shows their lesions.',
+  table: 'Table of cases',
+  tableCaption: 'Every case in the plot. Each column heading sorts the table.',
+  columns: { id: 'Case', volume: 'Lesion volume, cm³', aq: 'WAB-AQ' },
   pairs: 'Similar size, different score',
   showPair: 'Show a pair',
   nextPair: 'Next pair',
@@ -91,6 +94,9 @@ export const fr: typeof en = {
     `${title}, ${volume} cm³, ${share} de cette région`,
   plotHint:
     'Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.',
+  table: 'Tableau des cas',
+  tableCaption: 'Chaque cas du graphique. Chaque en-tête de colonne trie le tableau.',
+  columns: { id: 'Cas', volume: 'Volume de la lésion, cm³', aq: 'QA-WAB' },
   pairs: 'Taille semblable, score différent',
   showPair: 'Montrer une paire',
   nextPair: 'Paire suivante',

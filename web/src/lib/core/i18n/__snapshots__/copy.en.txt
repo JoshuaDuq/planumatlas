@@ -2204,6 +2204,13 @@
    "[\"\",\"Alpha\",\"\"] → \", Alpha cm³,  of this region\""
   ],
   "plotHint": "Each dot is one person. Pick two to compare; the brain shows their lesions.",
+  "table": "Table of cases",
+  "tableCaption": "Every case in the plot. Each column heading sorts the table.",
+  "columns": {
+   "id": "Case",
+   "volume": "Lesion volume, cm³",
+   "aq": "WAB-AQ"
+  },
   "pairs": "Similar size, different score",
   "showPair": "Show a pair",
   "nextPair": "Next pair",

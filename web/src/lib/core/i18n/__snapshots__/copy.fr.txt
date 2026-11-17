@@ -2204,6 +2204,13 @@
    "[\"\",\"Alpha\",\"\"] → \", Alpha cm³,  de cette région\""
   ],
   "plotHint": "Chaque point est une personne. Choisissez-en deux à comparer ; le cerveau montre leurs lésions.",
+  "table": "Tableau des cas",
+  "tableCaption": "Chaque cas du graphique. Chaque en-tête de colonne trie le tableau.",
+  "columns": {
+   "id": "Cas",
+   "volume": "Volume de la lésion, cm³",
+   "aq": "QA-WAB"
+  },
   "pairs": "Taille semblable, score différent",
   "showPair": "Montrer une paire",
   "nextPair": "Paire suivante",
