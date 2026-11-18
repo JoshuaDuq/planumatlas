@@ -1,7 +1,6 @@
 import { tick } from 'svelte';
 import { colourShowing, cutAtlasesOf } from '../core/catalog/cut-labels.ts';
 import { beneathCortex } from '../core/catalog/labels.ts';
-import { openingColour } from '../core/catalog/lobes.ts';
 import { visibilityOf } from '../core/catalog/visibility.ts';
 import type { HiddenReason } from '../core/catalog/visibility.ts';
 import { atlasSwitchLabel, t } from '../core/i18n/index.ts';
@@ -565,18 +564,27 @@ export function createAnatomyCommands(
   }
 
   /**
-   * Start over, from the settings menu: the opening picture (display, cut, camera, and the list),
-   * with the scene before it held for the notice's Restore. Not wrapped in `display`, which would
-   * announce the cleared selection as a mishap. A command still loading would land over it, so it
-   * is overtaken.
+   * Start over, from the settings menu: the opening picture (the atlas a plain page opens on, display,
+   * cut, camera, and the list), with the scene before it held for the notice's Restore. Not wrapped in
+   * `display`, which would announce the cleared selection as a mishap. A command still loading would
+   * land over it, so it is overtaken. The atlas loads first, so a failed load resets nothing.
    */
-  function startOver() {
-    commands.begin();
+  async function startOver() {
+    const current = commands.begin();
     const scene = reader.capture();
+    const atlas = model.manifest.atlases[0]!.id;
+    const label = atlasSwitchLabel(atlas, session.state.lang);
+    try {
+      await commands.loadAtlas(atlas, current);
+    } catch (error) {
+      commands.failIfCurrent(current, 'layer', error, label, () => void startOver());
+      return;
+    }
+    if (!current()) return;
+    commands.succeeded('layer', label);
     session.setQuery('');
     void sections.setMode('off');
     model.reset();
-    model.setSurfaceColor(openingColour(model.settings.atlas));
     const surface = cortexSurface.surface;
     cortexSurface.setSurface('pial');
     afterReset();

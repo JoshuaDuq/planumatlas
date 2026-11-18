@@ -38,7 +38,7 @@ export function createCatalogStore(catalog: ReturnType<typeof createCatalog>, vi
   );
   // In an object, so the count's version moves with each walk: a derived run again to an equal
   // value keeps its version, older than the settings', and Svelte runs it at every later change of
-  // the view. A setting that leaves the count as it was, as the opening's Lobes does, would
+  // the view. A setting that leaves the count as it was, as a surface colour does, would
   // otherwise bring the walk back with every camera preset.
   const counted = $derived({ visible: catalog.visibleCount(shown) });
   return {

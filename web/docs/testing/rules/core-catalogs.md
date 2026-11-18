@@ -50,12 +50,12 @@ the expected values change with them in the same commit.
 
 ### CAT-03a · Lobes colour the regions of the atlases grouped by lobe, in the interface's nine colours
 
-- **Rule:** A cortical region of Destrieux or Julich-Brain takes the colour of the lobe its label table lists it under (`lobeOf`, `lobeColor`); a structure, the unlabelled medial wall and any region of HCP-MMP or Schaefer, which group by network, take none and keep their own. The nine colours are Paul Tol's "muted" scheme, one per lobe and none shared; a lobe with no colour is an error, not a fallback. A page opened without a link, and Start over, open on Lobes where the atlas has them and on Regions otherwise (`openingColour`); a link's default stays Regions.
+- **Rule:** A cortical region of Destrieux or Julich-Brain takes the colour of the lobe its label table lists it under (`lobeOf`, `lobeColor`); a structure, the unlabelled medial wall and any region of HCP-MMP or Schaefer, which group by network, take none and keep their own. The nine colours are Paul Tol's "muted" scheme, one per lobe and none shared; a lobe with no colour is an error, not a fallback. Lobes is never the opening colour: a page opened without a link shows Destrieux in Regions, Start over returns to Destrieux in Regions from any atlas (loading the atlas first, so a failed load resets nothing), and a link with no `colors` means Regions.
 - **Kind:** data
 - **Level:** unit
-- **Source:** `web/src/lib/core/catalog/lobes.ts`; parsimony round 2026-11-11
-- **Expected:** every published cortical region of Destrieux and Julich-Brain has a lobe and its colour; `S_central` → Central, `G_precentral` → Frontal, `S_calcarine` → Occipital; a structure, `destrieux:*:-1`, an HCP-MMP and a Schaefer area → null. `requiredAtlas(model, 'lobe', atlas)` → null on Destrieux and Julich-Brain, `destrieux` on Schaefer. Choosing Lobes on HCP-MMP → atlas Destrieux, colour `lobe`; Start over on Destrieux → `surfaceColor` `lobe`.
-- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/lib/core/state/scene-commands.test.ts` (R); `src/lib/controller/anatomy.svelte.test.ts` (R, Start over); `src/app/boot.svelte.test.ts` (R, "opens a plain page on the lobes…")
+- **Source:** `web/src/lib/core/catalog/lobes.ts`; parsimony round 2026-11-11; opening back to Destrieux in Regions 2026-11-18
+- **Expected:** every published cortical region of Destrieux and Julich-Brain has a lobe and its colour; `S_central` → Central, `G_precentral` → Frontal, `S_calcarine` → Occipital; a structure, `destrieux:*:-1`, an HCP-MMP and a Schaefer area → null. `requiredAtlas(model, 'lobe', atlas)` → null on Destrieux and Julich-Brain, `destrieux` on Schaefer. Choosing Lobes on HCP-MMP → atlas Destrieux, colour `lobe`; Start over from Lobes → `surfaceColor` `atlas`; Start over from HCP-MMP → atlas `destrieux`, and a failed load leaves HCP-MMP and the display as they were with Retry; a plain page → atlas `destrieux`, colour `atlas`; `#colors=lobe` → `lobe`.
+- **Covered by:** `src/lib/core/catalog/lobes.test.ts` (R); `src/lib/core/state/scene-commands.test.ts` (R); `src/lib/controller/anatomy.svelte.test.ts` (R, Start over); `src/app/boot.svelte.test.ts` (R, "opens a plain page on Destrieux's regions…")
 
 ### CAT-04 · Five explorers, which are the workspace modes
 

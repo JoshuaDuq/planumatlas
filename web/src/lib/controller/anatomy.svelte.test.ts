@@ -502,11 +502,11 @@ describe('the display toggles', () => {
     anatomy.selectRegion(SULCUS);
     anatomy.setHemisphere('left');
     anatomy.setCortexSurface('white');
+    engine.model.setSurfaceColor('lobe');
     const logged = engine.calls.length;
-    anatomy.startOver();
+    await anatomy.startOver();
     expect(engine.model.settings.hemisphere).toBe('both');
-    // The opening colour of an atlas grouped by lobe.
-    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'lobe' });
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'atlas' });
     expect(engine.userMap.surface).toBe('pial');
     expect(engine.model.state.selectedRegion).toBeNull();
     expect(session.state).toMatchObject({
@@ -517,7 +517,6 @@ describe('the display toggles', () => {
     expect(engine.calls.slice(logged).map((call) => `${call.domain}.${call.method}`)).toEqual([
       'sections.setMode',
       'model.reset',
-      'model.setSurfaceColor',
       'userMap.setSurface',
       'camera.recenter',
       'camera.applyView',
@@ -525,6 +524,32 @@ describe('the display toggles', () => {
     await anatomy.restoreBeforeReveal();
     expect(reader.apply.mock.calls[0]![0]).toBe(reader.capture.mock.results.at(-1)!.value);
     expect(engine.userMap.surface).toBe('white');
+  });
+
+  test('Start over returns from another atlas to the one a plain page opens on', async () => {
+    const { anatomy, session } = build();
+    await engine.model.setAtlas('hcp-mmp');
+    engine.model.setSurfaceColor('tissue');
+    await anatomy.startOver();
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'atlas' });
+    expect(session.state.notice).toMatchObject({ text: 'Back to the opening picture.' });
+  });
+
+  test('Start over whose atlas fails to load resets nothing, and offers to try again', async () => {
+    const { anatomy, session } = build();
+    await engine.model.setAtlas('hcp-mmp');
+    anatomy.setHemisphere('left');
+    const offline = Object.assign(new Error('offline'), { code: 'asset-fetch' });
+    vi.spyOn(engine.model, 'setAtlas').mockRejectedValueOnce(offline);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await anatomy.startOver();
+    expect(engine.model.settings).toMatchObject({ atlas: 'hcp-mmp', hemisphere: 'left' });
+    expect(session.state.notice).toMatchObject({ kind: 'error', action: 'retry' });
+    session.state.notice!.retry!();
+    await vi.waitFor(() =>
+      expect(session.state.notice).toMatchObject({ text: 'Back to the opening picture.' }),
+    );
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', hemisphere: 'both' });
   });
 
   test('Reset display draws the pial again, and its Restore gives the reader’s surface back', async () => {

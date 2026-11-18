@@ -218,7 +218,7 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-70 · A camera preset, a selection or a moved cut does not build the lobe key again
 
-- **Rule:** The lobe key's rows walk every region twice: once for the lobes the atlas has (`lobeRows`), once for the group names the tree with every system shares (`lobeKeyRows` over the groups with no system chosen). Lobes is the opening colouring, and every camera preset, selection or moved cut makes a new view. So the key reads only the catalog store's language, its settings that decide visibility, and its groups with no system chosen (STORE-36): a new view that changes none of them walks nothing, and one that does (a hidden region, the language, the atlas) builds the key once, to the rows `lobeKeyRows(lobeRows(…), atlas, catalog.groups({ …settings, internalSystem: null, lang }), lang)` gives.
+- **Rule:** The lobe key's rows walk every region twice: once for the lobes the atlas has (`lobeRows`), once for the group names the tree with every system shares (`lobeKeyRows` over the groups with no system chosen). While Lobes is on, every camera preset, selection or moved cut makes a new view. So the key reads only the catalog store's language, its settings that decide visibility, and its groups with no system chosen (STORE-36): a new view that changes none of them walks nothing, and one that does (a hidden region, the language, the atlas) builds the key once, to the rows `lobeKeyRows(lobeRows(…), atlas, catalog.groups({ …settings, internalSystem: null, lang }), lang)` gives.
 - **Kind:** behaviour
 - **Level:** browser in the composed stage region, fake engine
 - **Source:** review handoff P14b

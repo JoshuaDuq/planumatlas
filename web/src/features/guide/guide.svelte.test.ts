@@ -367,26 +367,18 @@ test('a phone’s sheet rises for the region’s detail and comes down for the n
   expect(sheetCalls).toEqual([]);
 });
 
-test('GUIDE-04 · the opening lobes stay through the stops, except on an atlas without lobes', () => {
-  const walk = (reader: string) => {
-    history.replaceState(history.state, '', reader);
-    start();
-    const shown = [location.hash];
-    for (let i = 1; i < STOPS; i++) {
-      next().click();
-      shown.push(location.hash);
-    }
+test("GUIDE-04 · the reader's colour gives way to the stops' own, and comes back when the tour ends", () => {
+  history.replaceState(history.state, '', `${HOME}&colors=lobe`);
+  start();
+  const shown = [location.hash];
+  for (let i = 1; i < STOPS; i++) {
     next().click();
-    return shown;
-  };
-  const lobes = walk(`${HOME}&colors=lobe`);
-  const functions = lobes.findIndex((hash) => hash.includes('atlas=hcp-mmp'));
-  expect(lobes).toHaveLength(STOPS);
-  expect(lobes[functions]).not.toContain('colors=');
-  expect(lobes.filter((hash) => hash.includes('&colors=lobe'))).toHaveLength(STOPS - 1);
+    shown.push(location.hash);
+  }
+  next().click();
+  expect(shown).toHaveLength(STOPS);
+  expect(shown.filter((hash) => hash.includes('colors='))).toEqual([]);
   expect(location.hash).toBe(`${HOME}&colors=lobe`);
-  // Any other colour of the reader's gives way to the stops' own.
-  expect(walk(`${HOME}&colors=tissue`).filter((hash) => hash.includes('colors='))).toEqual([]);
 });
 
 test('the exploded view stop pulls the brain apart, and moving on, going back or closing puts it back', () => {

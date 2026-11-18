@@ -494,7 +494,7 @@ describe('the catalog store', () => {
     read();
     walks();
 
-    // The colour decides no count (as the opening's Lobes does not): it is counted once, then not again.
+    // The colour decides no count: it is counted once, then not again.
     engine.model.setSurfaceColor('lobe');
     flushSync();
     const coloured = read();

@@ -32,6 +32,9 @@ releases yet: the live site is deployed from `main`.
 
 ### Changed
 
+- Planum opens on Destrieux in its **Regions** colours, not **Lobes**, and **Start over** returns to
+  Destrieux in Regions from any atlas. Lobes stays one choice under **Colour**; a link keeps the colour
+  it was written with.
 - A cut shows what the brain shows: its labels follow **Atlas**, **Colour** and **Internal anatomy**
   instead of a **Cut labels** choice of their own, which is gone, with its `cuts` link key. Switching the
   atlas relabels an open cut; NextBrain puts its labels on the cut inside the atlas's cortex; the arterial

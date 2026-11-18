@@ -15,14 +15,6 @@ export const groupsByLobe = (atlas: string | null | undefined): boolean =>
   LOBE_ATLASES.has(atlas ?? '');
 
 /**
- * The colouring a page opened plainly, and Start over, show: the lobes, which the stage can key in
- * nine rows, where the atlas has them; an atlas's own region colours otherwise. A link's own colour
- * is never replaced by it.
- */
-export const openingColour = (atlas: string): 'lobe' | 'atlas' =>
-  groupsByLobe(atlas) ? 'lobe' : 'atlas';
-
-/**
  * One colour per lobe, in the order the key lists them: front to back over the convexity, then the
  * cortex the convexity hides. The nine colours of Paul Tol's "muted" qualitative scheme
  * (https://sronpersonalpages.nl/~pault/, Fig. 4; values checked against that page 2026-11-11),

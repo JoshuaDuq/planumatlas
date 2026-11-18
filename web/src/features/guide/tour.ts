@@ -1,6 +1,5 @@
 // How to use Planum, as a driver.js tour over the live interface.
 import { driver, type DriveStep, type Side, type Alignment } from 'driver.js';
-import { groupsByLobe } from '../../lib/core/catalog/lobes.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { GuideStop } from '../../lib/core/i18n/areas/guide.ts';
 import { CAMERA_KEYS } from '../../lib/engine/held-view.ts';
@@ -437,16 +436,12 @@ function shownStops(lang: Language, kind: Kind, docksMri: boolean, phone: boolea
 function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind): void {
   const { animate, onClose, onLanguage, mri, onPick, sheet, reserve } = options;
   const copy = t(lang, 'guide');
-  // The opening picture's lobes stay through the tour; any other colour gives way to the stops' own.
-  const home = parameters(reader).filter(
-    ([key, value]) => HOME_PARAMS.includes(key) || (key === 'colors' && value === 'lobe'),
-  );
-  // A stop's parameters replace the home view's own, over those of the reader's it keeps; a stop on
-  // an atlas without lobes shows its regions.
+  // The reader's colour gives way to the stops' own.
+  const home = parameters(reader).filter(([key]) => HOME_PARAMS.includes(key));
+  // A stop's parameters replace the home view's own, over those of the reader's it keeps.
   const show = (view = '', keeps: readonly string[] = []) => {
     const own = parameters(location.hash).filter(([key]) => keeps.includes(key));
     const shown = new Map([...home, ...own, ...parameters(view)]);
-    if (shown.get('colors') === 'lobe' && !groupsByLobe(shown.get('atlas'))) shown.delete('colors');
     showHash(`#${[...shown].map((pair) => pair.join('=')).join('&')}`);
   };
   // The region the reader last clicked on the brain during the tour.

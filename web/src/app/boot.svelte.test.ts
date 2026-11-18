@@ -162,23 +162,19 @@ describe('the start', () => {
     let seen: string | null = null;
     ports.startGuide.mockImplementation(() => (seen = location.hash));
     await boot('', createEngine, ports);
-    // The tour keeps the link's lobes through its stops and puts the link back when it ends.
-    expect(seen).toContain('colors=lobe');
+    // The tour puts the link back when it ends, so it must be written before the tour starts.
+    expect(seen).toContain('atlas=destrieux');
+    expect(seen).not.toContain('colors=');
   });
 
-  test('opens a plain page on the lobes, and keeps the colour of any link (CAT-03a)', async () => {
+  test("opens a plain page on Destrieux's regions, and keeps the colour of any link (CAT-03a)", async () => {
     localStorage.setItem('planum.guide', 'seen');
     await boot('');
-    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'lobe' });
-
-    // A link written before the lobes, with no colour of its own, keeps the atlas colours.
-    engine = createFakeEngine({ manifest, domains: domains as never });
-    await boot('#view=left');
-    expect(engine.model.settings.surfaceColor).toBe('atlas');
+    expect(engine.model.settings).toMatchObject({ atlas: 'destrieux', surfaceColor: 'atlas' });
 
     engine = createFakeEngine({ manifest, domains: domains as never });
-    await boot('#colors=tissue');
-    expect(engine.model.settings.surfaceColor).toBe('tissue');
+    await boot('#colors=lobe');
+    expect(engine.model.settings.surfaceColor).toBe('lobe');
   });
 
   test('frames the opening view with the stage’s own framing, then applies the link, then is ready', async () => {

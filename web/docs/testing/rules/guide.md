@@ -34,12 +34,12 @@ Scope: the guided tour ("How to use Planum"), a driver.js tour over the live int
 
 ### GUIDE-04 · The Lesion, Coordinate and Overlay stops point at Add, and only at a choice it offers
 
-- **Rule:** Lesion, Coordinate and Overlay are Add's choice (STAGE-65), so their stops point at the Add tool, each through what it says it offers (`.stage-tool[data-tool="place"][data-offers~="…"]`). A stage whose Add offers no Overlay (a phone's) or no Coordinate has no stop for it, and the count follows. The opening picture's lobes stay through the tour (`colors=lobe` is kept in the tour's home view); a stop on an atlas without lobes shows that atlas's regions, and any other colour of the reader's gives way to the stops' own.
+- **Rule:** Lesion, Coordinate and Overlay are Add's choice (STAGE-65), so their stops point at the Add tool, each through what it says it offers (`.stage-tool[data-tool="place"][data-offers~="…"]`). A stage whose Add offers no Overlay (a phone's) or no Coordinate has no stop for it, and the count follows. The reader's colour, Lobes included, gives way to the stops' own (the tour's home view keeps no `colors`), and closing the tour puts it back.
 - **Kind:** behaviour
 - **Level:** browser
 - **Source:** `web/src/features/guide/tour.ts`; parsimony round 2026-11-11
 - **Expected:** full dock → "Place a lesion", "Find a coordinate" and "Bring your own map" each point at "Add"; a 390 px phone → the first two point at "Add" and there is no "Bring your own map" card. Fixture with `data-offers="lesion coordinate"` → "1 of 17", a "Find a coordinate" card, no "Bring your own map" card.
-- **Covered by:** `src/features/guide/guide.svelte.test.ts` (R, with "GUIDE-04 · the opening lobes stay…"); `src/features/stage/Dock.svelte.test.ts` (R, "the guided tour's dock stops…")
+- **Covered by:** `src/features/guide/guide.svelte.test.ts` (R, with "GUIDE-04 · the reader's colour gives way…"); `src/features/stage/Dock.svelte.test.ts` (R, "the guided tour's dock stops…")
 
 ### GUIDE-05 · A card is first seen at its seat
 
