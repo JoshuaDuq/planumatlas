@@ -259,6 +259,16 @@ describe('the list', () => {
   });
 });
 
+test('TRACT-50 · a tract’s name opens its profile with both its sides drawn, beside what was ticked', async () => {
+  const opened: string[] = [];
+  const { engine } = await ready(undefined, { onOpenTract: (key: string) => opened.push(key) });
+  expect(drawn(engine)).toEqual(['af-left', 'cst-right']);
+  await userEvent.click(document.querySelector<HTMLButtonElement>('#native-tract-row-uf')!);
+  expect(opened).toEqual(['uf']);
+  await expect.poll(() => drawn(engine)).toEqual(['af-left', 'cst-right', 'uf-left', 'uf-right']);
+  expect(el('Uncinate fasciculus · right').checked).toBe(true);
+});
+
 describe('a link’s bundles', () => {
   test('showTracts draws exactly the linked bundles, after the first load in flight', async () => {
     const engine = createEngine();

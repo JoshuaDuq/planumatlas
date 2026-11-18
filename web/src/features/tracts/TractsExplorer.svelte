@@ -245,6 +245,16 @@
     });
   }
 
+  /** A tract's profile opens with the tract drawn, beside what is already ticked. */
+  function openRow(key: string) {
+    const members = rows.find((row) => row.key === key)!.members.map(({ bundle }) => bundle.id);
+    if (members.some((id) => !loaded.get(id)?.visible)) {
+      const drawn = snapshot.filter((bundle) => bundle.visible).map((bundle) => bundle.catalogId);
+      void showTracts([...new Set([...drawn, ...members])]);
+    }
+    onOpenTract!(key);
+  }
+
   /**
    * Draw exactly these bundles, as a link names them: after any load in flight, the tab's first
    * load and the missing bundles download as one, their keys shown on and busy meanwhile.
@@ -436,7 +446,7 @@
                 hidden={!kept.has(row.key)}
                 ontoggle={toggle}
                 current={row.key === openTract}
-                onopen={onOpenTract}
+                onopen={onOpenTract && openRow}
               />
             {/each}
           </div>
