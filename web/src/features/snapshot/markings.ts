@@ -2,7 +2,8 @@
 import type { Rect } from '../../lib/engine/api.ts';
 import type { Edge, StageLayout } from '../../lib/state/stage-layout.svelte.ts';
 import type { KeyPlate } from '../stage/stage-keys.ts';
-import { leaderEnd } from '../stage/stage-labels.ts';
+import { calloutEnd, leaderEnd } from '../stage/stage-labels.ts';
+import type { Side } from '../stage/stage-labels.ts';
 
 /** Stage geometry in CSS pixels, matching the stage styles: gutter, marking line height, caption gaps. */
 export const SNAPSHOT_LAYOUT = Object.freeze({ gutter: 16, line: 16, letterGap: 12, scaleGap: 8 });
@@ -149,8 +150,9 @@ export function snapshotMarkings(
       });
 
   const shown = (node: Element) => node.checkVisibility({ visibilityProperty: true });
+  // A name fading out of sight is inert: it is no longer on the stage.
   const labels = [...host.querySelectorAll<HTMLElement>('.stage-label')]
-    .filter(shown)
+    .filter((label) => !label.inert && shown(label))
     .map((label): LabelMark => {
       const dotNode = find(label, '.stage-label-dot');
       const dotBox = local(dotNode);
@@ -164,7 +166,12 @@ export function snapshotMarkings(
       return {
         box,
         dot,
-        leader: shown(leader) ? leaderEnd(dot, box) : null,
+        // A name in a column beside the anatomy meets its leader at its middle, as the stage draws it.
+        leader: shown(leader)
+          ? label.dataset.side
+            ? calloutEnd(box, label.dataset.side as Side)
+            : leaderEnd(dot, box)
+          : null,
         leaderColor: getComputedStyle(leader).backgroundColor,
         lines: [...label.querySelectorAll<HTMLElement>('.stage-label-text')]
           .filter(shown)

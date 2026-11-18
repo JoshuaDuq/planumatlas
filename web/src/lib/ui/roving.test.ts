@@ -28,6 +28,8 @@ describe('roving', () => {
     expect(tabStop(members(off))).toBeNull();
     const { items: hidden } = fakeGroup([{ hidden: true, pressed: true }, {}]);
     expect(tabStop(members(hidden))).toBe(hidden[1]);
+    const { items: inert } = fakeGroup([{ inert: true, pressed: true }, {}]);
+    expect(tabStop(members(inert))).toBe(inert[1]);
   });
 
   test('a bound group is one Tab stop on its chosen button', () => {

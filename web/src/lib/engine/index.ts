@@ -34,6 +34,7 @@ import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
 import { createUserMap } from './user-map/user-map.ts';
 import { createVisualAreas } from './visual-areas.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
+import type { FacingScene } from './model/picking.ts';
 import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
@@ -513,18 +514,22 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       cleanups.push(() => clearTimeout(idle));
     }
 
+    // A name's ray: from the camera, through the canvas, to the nearest surface or cut face.
+    const rays = (): Omit<FacingScene, 'regions' | 'meshes'> => ({
+      camera: scene.camera,
+      size: scene.hostSize,
+      intersect: (raycaster) => sections.intersect(raycaster),
+    });
     let disposed = false;
     let tractRequest = 0;
     return {
       on: events.on,
       canvas: scene.domElement,
-      model: createEngineModel(atlas, (ids) =>
-        atlas.facing(ids, {
-          camera: scene.camera,
-          size: scene.hostSize,
-          intersect: (raycaster) => sections.intersect(raycaster),
-        }),
-      ),
+      model: createEngineModel(atlas, {
+        facing: (ids) => atlas.facing(ids, rays()),
+        facingArea: (ids) => atlas.facingArea(ids, rays()),
+        inSight: (targets) => atlas.inSight(targets, rays()),
+      }),
       sections: engineSections,
       camera: stage.camera,
       comparison,

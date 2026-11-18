@@ -222,12 +222,23 @@ export interface EngineModel {
   /** The shared visibility rule for the current settings (brain-atlas.js:714). */
   canSelect(region: Region): boolean;
   /**
-   * Each region's label point (a parcel's `label_point_ras_mm`, a structure's anchor) where the stage
-   * shows it, when a ray from the camera to it meets that region first, a cut face of it included;
-   * null where something else is in front, the point is cut away or behind the camera, or the region
-   * is not drawn. One ray per region: read it once the camera has settled, never per frame.
+   * Where each region shows on the stage: a point of its surface (the middle of its side in view first, its
+   * label point last) that a ray from the camera meets that region at first, a cut face of it included;
+   * null where nothing of it is met, it is cut away or behind the camera, or it is not drawn. A few rays
+   * per region: read it once the camera has settled, never per frame.
    */
   facing(ids: readonly string[]): (FacingPoint | null)[];
+  /**
+   * How much of each region's surface is turned toward the camera, in mm² as the camera sees it, whatever
+   * stands in front; 0 for a region not drawn. No rays: a stage of hundreds of regions can ask all of them.
+   */
+  facingArea(ids: readonly string[]): number[];
+  /**
+   * Whether each point a name stands on (`facing`'s drawn point, or a cut face's anchor) is still in
+   * sight: a ray from the camera to it meets that region first, at the point or before it. One ray each:
+   * a moving camera asks a few a frame.
+   */
+  inSight(targets: readonly { id: string; point: Vec3 }[]): boolean[];
 
   /** Throws for an unknown, non-region or invisible id (brain-atlas.js:719). */
   select(id: string | null): void;
@@ -393,6 +404,11 @@ export interface EngineCamera {
   readonly hostSize: Size;
   /** The camera as the camera event last reported it (viewport-chrome.js:834). */
   readonly view: CameraView;
+  /**
+   * The drawn anatomy's extent on the canvas as the camera stands now, in CSS px, measured on a sample of
+   * the vertices framing fits (a cut's removed side included); null where framing fits no vertices.
+   */
+  anatomyRect(): Rect | null;
 
   /**
    * Register the pull the engine measures the dock with, at the moment it frames: the section bar can

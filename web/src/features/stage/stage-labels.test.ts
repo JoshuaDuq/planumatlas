@@ -23,6 +23,20 @@ describe('placeLabels', () => {
     });
   });
 
+  test('a moving label keeps the side it stood on while that is clear, and moves only off a collision', () => {
+    const point = { x: 400, y: 300 };
+    // Above left: slot 3.
+    const [kept] = placeLabels([{ point, sizes: [full], slot: 3 }], bounds, []);
+    expect(kept).toMatchObject({ slot: 3, leader: false });
+    expect(kept!.box.x + kept!.box.width).toBeLessThan(point.x);
+    // Its side covered, it takes the first clear side beside its dot, not a leader.
+    const [moved] = placeLabels([{ point, sizes: [full], slot: 3 }], bounds, [kept!.box]);
+    expect(moved).toMatchObject({ slot: 0, leader: false });
+    // Stood off along a leader last, it comes back beside its dot, on its own side, once that is clear.
+    const [back] = placeLabels([{ point, sizes: [full], slot: 8 + 3 }], bounds, []);
+    expect(back).toMatchObject({ slot: 3, leader: false });
+  });
+
   test('a point behind the camera has no place', () => {
     expect(placeLabels([{ point: null, sizes: [full] }], bounds, [])).toEqual([null]);
   });

@@ -46,6 +46,9 @@ const CORD_MIN_DISTANCE_M = 0.015;
 /** Vertices past which framing keeps one in `THINNED_STRIDE` (app.js:325). */
 const THINNED_VERTICES = 60000;
 const THINNED_STRIDE = 8;
+/** At most this many framed vertices are projected a frame for the anatomy's extent on the stage. */
+const EXTENT_SAMPLES = 8000;
+const projectionView = new Matrix4();
 // What `follow` keeps the box's centre inside: the middle third of the visible rectangle.
 const FOLLOW_INSET = 1 / 3;
 /** A framing fits the whole brain, so the reader's magnification starts at one. */
@@ -917,6 +920,33 @@ export function createFraming({
       else refit(before);
     },
     focusPoint: (point: Vec3) => focusWorldPoint(rasToWorld(point)),
+    anatomyRect() {
+      const points = framingPoints();
+      if (!points) return null;
+      camera.updateMatrixWorld();
+      const m = projectionView.multiplyMatrices(
+        camera.projectionMatrix,
+        camera.matrixWorldInverse,
+      ).elements;
+      const { width, height } = scene.hostSize;
+      const step = 3 * Math.ceil(points.length / 3 / EXTENT_SAMPLES);
+      let [left, top, right, bottom] = [Infinity, Infinity, -Infinity, -Infinity];
+      for (let i = 0; i < points.length; i += step) {
+        const [x, y, z] = [points[i]!, points[i + 1]!, points[i + 2]!];
+        const w = m[3]! * x + m[7]! * y + m[11]! * z + m[15]!;
+        // Behind the camera.
+        if (w <= 0) continue;
+        const at = {
+          x: (((m[0]! * x + m[4]! * y + m[8]! * z + m[12]!) / w + 1) / 2) * width,
+          y: ((1 - (m[1]! * x + m[5]! * y + m[9]! * z + m[13]!) / w) / 2) * height,
+        };
+        [left, right] = [Math.min(left, at.x), Math.max(right, at.x)];
+        [top, bottom] = [Math.min(top, at.y), Math.max(bottom, at.y)];
+      }
+      return left === Infinity
+        ? null
+        : { x: left, y: top, width: right - left, height: bottom - top };
+    },
     project(points: readonly Vec3[]) {
       camera.updateMatrixWorld();
       const { width, height } = scene.hostSize;

@@ -1,6 +1,10 @@
 // Which regions the stage names, and where: those facing the reader that the camera shows large enough
-// to label, largest first, up to 24, so zooming in names smaller ones; the selection whenever it faces
-// the reader (handoff F3). Under Lobes colour a cortical region is named by its lobe.
+// to label, by how much of each is turned toward it, largest first, up to 24, so zooming in names smaller
+// ones and turning names what comes into view; the selection whenever it faces
+// the reader (handoff F3). Under Lobes colour a cortical region is named by its lobe. A name already
+// shown keeps its place while it is still in sight and not much smaller, so a small move renames nothing.
+// A name is written once: of two that read the same, as the two sides' frontal lobes do, the first is drawn;
+// and no two dots stand closer than 14 px.
 import { lobeOf } from '../../lib/core/catalog/lobes.ts';
 import type {
   CapAnchor,
@@ -14,8 +18,12 @@ import type {
 export const MAX_NAMES = 24;
 /** A region is named once it would span this many CSS pixels on the stage. */
 export const NAMED_SIZE_PX = 48;
+/** A name already shown is kept until its region spans less than this: a zoom back and forth renames nothing. */
+export const KEPT_SIZE_PX = 36;
 /** Of a lobe's regions, the largest this many are asked whether they face the reader. */
 const LOBE_PROBES = 3;
+/** Two names' dots stand at least this far apart, so neither reads as the other's. */
+export const DOT_APART_PX = 14;
 
 /** A name the stage draws. */
 export interface Named {
@@ -24,9 +32,19 @@ export interface Named {
   region: string | null;
   /** The lobe it names; null for a region. */
   lobe: string | null;
+  /** The region whose surface or cut face holds the point: the region itself, or one of the lobe's. */
+  on: string;
+  /** The point is on a cut face, which a moved cut carries. */
+  face: boolean;
   point: ScreenPoint;
   /** Where the point is drawn, in RAS mm, which a camera move carries until the next choice. */
   drawn: Vec3;
+}
+
+/** A name the stage shows now, which the next choice keeps where it can. */
+export interface Kept extends Pick<Named, 'key' | 'on' | 'face'> {
+  /** Where it stands now while that is still in sight (`EngineModel.inSight`); null once it is not. */
+  drawn: Vec3 | null;
 }
 
 export interface NameSources {
@@ -46,6 +64,15 @@ export interface NameSources {
   faceCosine: number;
   /** The visible stage: a point outside it is not named. */
   bounds: Rect;
+  /**
+   * The names shown now: each is named again first, where it stands while that is in sight, else at a
+   * point it is found at again.
+   */
+  kept: readonly Kept[];
+  /** The words a name is drawn with: of two names that read the same, only the first in priority order is drawn. */
+  words(name: Pick<Named, 'region' | 'lobe'>): string;
+  /** How much of each region is turned toward the camera, in mm² seen (`EngineModel.facingArea`). */
+  facingArea(ids: readonly string[]): number[];
   facing(ids: readonly string[]): (FacingPoint | null)[];
   project(points: readonly Vec3[]): (ScreenPoint | null)[];
 }
@@ -57,29 +84,26 @@ interface Candidate {
   areaMm2: number;
   /** Surface regions asked whether they face the reader, largest first; empty for a cut face. */
   members: { id: string; areaMm2: number }[];
-  /** A cut face's point, the largest face's where several share the key. */
-  face: { point: Vec3; areaMm2: number } | null;
+  /** A cut face, the largest where several share the key. */
+  face: CapAnchor | null;
 }
 
 /**
  * The cortex, its lobes and the structures facing the reader, named in priority order: the selection
- * first, then by size. One ray is cast per region asked, in batches of the names still wanted, so a
- * stage of hundreds of parcels asks only the largest.
+ * first, then the names kept, then by size. One ray is cast per region asked, in batches of the names
+ * still wanted, so a stage of hundreds of parcels asks only the largest.
  */
 export function chooseNames(sources: NameSources): Named[] {
   const { regions, drawn, scale, selected, byLobe, faces, faceCosine, bounds } = sources;
+  const kept = new Map(sources.kept.map((name) => [name.key, name]));
   const groupOf = (region: Region) => {
     const lobe = byLobe ? lobeOf(region) : null;
     return lobe
       ? { key: `lobe:${lobe}:${region.hemisphere}`, region: null, lobe }
       : { key: region.id, region: region.id, lobe: null };
   };
-  const areaOf = (region: Region) => {
-    if (region.surface_area_mm2 === undefined) {
-      throw new Error(`The manifest gives no surface area for ${region.id}.`);
-    }
-    return region.surface_area_mm2;
-  };
+  // How much of each region the camera sees turned toward it, whatever stands in front.
+  const turned = sources.facingArea(drawn.map(({ id }) => id));
 
   const surface = new Map<string, Candidate>();
   const cut = new Map<string, Candidate>();
@@ -96,8 +120,9 @@ export function chooseNames(sources: NameSources): Named[] {
     if (face && (!candidate.face || face.areaMm2 > candidate.face.areaMm2)) candidate.face = face;
     into.set(group.key, candidate);
   };
-  for (const region of drawn) {
-    const areaMm2 = areaOf(region);
+  drawn.forEach((region, index) => {
+    const areaMm2 = turned[index]!;
+    if (!areaMm2) return;
     add(surface, groupOf(region), areaMm2, { id: region.id, areaMm2 }, null);
     // Under Lobes colour the selection is named as itself too.
     if (region.id === selected && groupOf(region).key !== region.id) {
@@ -109,68 +134,98 @@ export function chooseNames(sources: NameSources): Named[] {
         null,
       );
     }
-  }
+  });
   for (const face of faces) {
     const region = regions.get(face.region);
     if (!region) throw new Error(`Unknown region: ${face.region}`);
     add(cut, groupOf(region), face.areaMm2, null, face);
   }
 
-  // A convex body's mean projected area is a quarter of its surface's (Cauchy), a flat face's its own.
+  // A surface's area turned toward the camera is its size seen; a flat face's is its area foreshortened.
   const sizeOf = (candidate: Candidate) =>
     candidate.face
       ? Math.sqrt(candidate.areaMm2 * faceCosine) * scale
-      : (Math.sqrt(candidate.areaMm2) / 2) * scale;
+      : Math.sqrt(candidate.areaMm2) * scale;
+  // Kept on the same kind of point: a name on a cut face is not kept by its surface, nor the reverse.
+  const keptAs = (candidate: Candidate) =>
+    kept.get(candidate.key)?.face === (candidate.face !== null) ? kept.get(candidate.key)! : null;
   const ordered = [...surface.values(), ...cut.values()]
-    .map((candidate) => ({ candidate, size: sizeOf(candidate) }))
-    .filter(({ candidate, size }) => size >= NAMED_SIZE_PX || candidate.key === selected)
+    .map((candidate) => ({ candidate, size: sizeOf(candidate), kept: keptAs(candidate) !== null }))
+    .filter(
+      ({ candidate, size, kept }) =>
+        size >= (kept ? KEPT_SIZE_PX : NAMED_SIZE_PX) || candidate.key === selected,
+    )
     .sort(
       (a, b) =>
         Number(b.candidate.key === selected) - Number(a.candidate.key === selected) ||
+        Number(b.kept) - Number(a.kept) ||
         b.size - a.size ||
         a.candidate.key.localeCompare(b.candidate.key),
     )
     .map(({ candidate }) => candidate);
-  for (const candidate of ordered) candidate.members.sort((a, b) => b.areaMm2 - a.areaMm2);
+  for (const candidate of ordered) {
+    candidate.members.sort((a, b) => b.areaMm2 - a.areaMm2);
+    // A kept lobe is asked first about the region its name stood on, so its dot stays there.
+    const at = candidate.members.findIndex(({ id }) => id === keptAs(candidate)?.on);
+    if (at > 0) candidate.members.unshift(...candidate.members.splice(at, 1));
+  }
 
   const inside = ({ x, y }: ScreenPoint) =>
     x >= bounds.x && x <= bounds.x + bounds.width && y >= bounds.y && y <= bounds.y + bounds.height;
   const named: Named[] = [];
   const done = new Set<string>();
+  const written = new Set<string>();
   let next = 0;
   while (named.length < MAX_NAMES && next < ordered.length) {
     const batch: Candidate[] = [];
     while (batch.length < MAX_NAMES - named.length && next < ordered.length) {
       const candidate = ordered[next++]!;
-      if (!done.has(candidate.key)) batch.push(candidate);
+      if (!done.has(candidate.key) && !written.has(sources.words(candidate))) batch.push(candidate);
     }
-    const asked = batch.flatMap(({ members }) => members.slice(0, LOBE_PROBES).map(({ id }) => id));
+    // A kept name still in sight stands where it is, and a cut face at its anchor: no ray asks for either.
+    const held = (candidate: Candidate) => keptAs(candidate)?.drawn ?? null;
+    const pinned = batch.filter((candidate) => held(candidate) || candidate.face);
+    const asked = batch
+      .filter((candidate) => !pinned.includes(candidate))
+      .flatMap(({ members }) => members.slice(0, LOBE_PROBES).map(({ id }) => id));
     const answers = asked.length ? sources.facing(asked) : [];
     const answer = new Map(asked.map((id, index) => [id, answers[index] ?? null]));
-    const withFaces = batch.filter(({ face }) => face);
-    const projected = sources.project(withFaces.map(({ face }) => face!.point));
+    const projected = sources.project(
+      pinned.map((candidate) => held(candidate) ?? candidate.face!.point),
+    );
     for (const candidate of batch) {
       if (named.length === MAX_NAMES) break;
-      if (done.has(candidate.key)) continue;
+      const words = sources.words(candidate);
+      if (done.has(candidate.key) || written.has(words)) continue;
       let point: FacingPoint | null = null;
-      if (candidate.face) {
-        const onScreen = projected[withFaces.indexOf(candidate)];
-        point = onScreen ? { ...onScreen, drawn: candidate.face.point } : null;
+      let on: string | null = null;
+      if (pinned.includes(candidate)) {
+        const onScreen = projected[pinned.indexOf(candidate)];
+        point = onScreen ? { ...onScreen, drawn: held(candidate) ?? candidate.face!.point } : null;
+        on = held(candidate) ? keptAs(candidate)!.on : candidate.face!.region;
       } else {
         // A lobe stands on its largest region that faces the reader on the stage, not one off its edge.
-        point =
-          candidate.members
-            .slice(0, LOBE_PROBES)
-            .map(({ id }) => answer.get(id))
-            .find((found): found is FacingPoint => Boolean(found) && inside(found!)) ?? null;
+        on =
+          candidate.members.slice(0, LOBE_PROBES).find(({ id }) => {
+            const found = answer.get(id);
+            return found && inside(found);
+          })?.id ?? null;
+        point = on === null ? null : answer.get(on)!;
       }
-      if (!point || !inside(point)) continue;
+      if (!point || on === null || !inside(point)) continue;
+      const crowds = named.some(
+        (other) => Math.hypot(other.point.x - point!.x, other.point.y - point!.y) < DOT_APART_PX,
+      );
+      if (crowds) continue;
       done.add(candidate.key);
+      written.add(words);
       const { x, y, drawn: at } = point;
       named.push({
         key: candidate.key,
         region: candidate.region,
         lobe: candidate.lobe,
+        on,
+        face: candidate.face !== null,
         point: { x, y },
         drawn: at,
       });

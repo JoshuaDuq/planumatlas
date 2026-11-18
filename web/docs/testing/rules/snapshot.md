@@ -135,7 +135,7 @@ letter gap 12, scale gap 8); "mm" follows a narrow no-break space (U+202F).
 
 ### SNAP-24 · Names on the brain are in the saved image where they stand
 
-- **Rule:** Names on the brain (STAGE-76) are stage labels, so the snapshot measures each placed name as it measures a route landmark's label, its dot, its leader and its words line by line, and draws them into the image; a name left out on the stage is not drawn, and with names off there are none.
+- **Rule:** Names on the brain (STAGE-76) are stage labels, so the snapshot measures each placed name as it measures a route landmark's label, its dot, its leader and its words line by line, and draws them into the image, a column name's leader to the middle of its edge toward the anatomy as the stage draws it (STAGE-84); a name left out on the stage, or fading out of sight (inert), is not drawn, and with names off there are none.
 - **Kind:** behaviour
 - **Level:** browser (component)
 - **Source:** Planum improvement plan 2, WP21 (handoff F3: "included in the PNG"); `features/snapshot/markings.ts`

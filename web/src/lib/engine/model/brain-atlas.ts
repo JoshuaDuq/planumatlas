@@ -11,6 +11,7 @@ import type {
   Paint,
   Region,
   SurfaceColor,
+  Vec3,
 } from '../../types/index.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
 import { validateCabNp } from '../../core/catalog/networks.ts';
@@ -47,7 +48,7 @@ import { ModelLayers, unknownLayer } from './layers.ts';
 import type { AtlasMesh, GlbLoader, Layer } from './layers.ts';
 import { fetchManifest, validateManifest } from './manifest.ts';
 import type { AtlasManifest } from './manifest.ts';
-import { facing, nearestHit, regionOf } from './picking.ts';
+import { facing, facingArea, inSight, nearestHit, regionOf } from './picking.ts';
 import type { FacingScene } from './picking.ts';
 import { Placement } from './placement.ts';
 import { combineProgress } from './progress.ts';
@@ -550,6 +551,19 @@ export class BrainAtlas extends EventTarget {
   /** See `facing` (`picking.ts`). */
   facing(ids: readonly string[], view: Omit<FacingScene, 'regions' | 'meshes'>) {
     return facing(ids, { ...view, regions: this.regions, meshes: this.visibleMeshes });
+  }
+
+  /** See `facingArea` (`picking.ts`). */
+  facingArea(ids: readonly string[], view: Omit<FacingScene, 'regions' | 'meshes'>) {
+    return facingArea(ids, { ...view, regions: this.regions, meshes: this.visibleMeshes });
+  }
+
+  /** See `inSight` (`picking.ts`). */
+  inSight(
+    targets: readonly { id: string; point: Vec3 }[],
+    view: Omit<FacingScene, 'regions' | 'meshes'>,
+  ) {
+    return inSight(targets, { ...view, regions: this.regions, meshes: this.visibleMeshes });
   }
 
   /**

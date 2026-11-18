@@ -535,6 +535,84 @@ export function defineEngineContract(
         assert.throws(() => model.facing(['no-such-region']), /Unknown region: no-such-region/);
       });
 
+      it('measures the anatomy’s extent on the stage round where it faces the reader', () => {
+        const { engine, regions, atlas } = world();
+        const { model, camera } = engine;
+        camera.applyView('left', { immediate: true });
+        const rect = camera.anatomyRect()!;
+        assert.ok(rect.width > 0 && rect.height > 0);
+        const ids = [...regions.values()]
+          .filter((region) => region.atlas === atlas && region.kind === 'cortex')
+          .map(({ id }) => id);
+        const points = model.facing(ids).filter((point) => point !== null);
+        assert.ok(points.length > 0);
+        // Measured on a sample of the vertices: a few pixels of slack.
+        for (const { x, y } of points) {
+          assert.ok(x >= rect.x - 8 && x <= rect.x + rect.width + 8, `x ${x} within the extent`);
+          assert.ok(y >= rect.y - 8 && y <= rect.y + rect.height + 8, `y ${y} within the extent`);
+        }
+      });
+
+      it('measures more of each side’s surface turned toward a view of that side, and none of a hidden region', () => {
+        const { engine, regions, atlas } = world();
+        const { model, camera } = engine;
+        const side = (hemisphere: 'left' | 'right') =>
+          [...regions.values()]
+            .filter(
+              (region) =>
+                region.atlas === atlas &&
+                region.kind === 'cortex' &&
+                region.hemisphere === hemisphere,
+            )
+            .map(({ id }) => id);
+        const total = (ids: readonly string[]) =>
+          model.facingArea(ids).reduce((sum, area) => sum + area, 0);
+        camera.applyView('left', { immediate: true });
+        // What stands in front is not counted out: the far side's medial wall faces the camera too.
+        assert.ok(
+          total(side('left')) > total(side('right')),
+          'the left view sees more of the left',
+        );
+        camera.applyView('right', { immediate: true });
+        assert.ok(
+          total(side('right')) > total(side('left')),
+          'the right view sees more of the right',
+        );
+        const [shown] = side('right').filter((id) => model.facingArea([id])[0]! > 0);
+        model.hideRegions([shown!]);
+        assert.deepEqual(model.facingArea([shown!]), [0]);
+        assert.throws(() => model.facingArea(['no-such-region']), /Unknown region: no-such-region/);
+      });
+
+      it('keeps a facing point in sight from where it was found, not from the other side or once hidden', () => {
+        const { engine, regions, atlas } = world();
+        const { model, camera } = engine;
+        const left = [...regions.values()]
+          .filter(
+            (region) =>
+              region.atlas === atlas && region.kind === 'cortex' && region.hemisphere === 'left',
+          )
+          .map(({ id }) => id);
+        camera.applyView('left', { immediate: true });
+        const targets = model
+          .facing(left)
+          .flatMap((point, index) => (point ? [{ id: left[index]!, point: point.drawn }] : []));
+        assert.ok(targets.length > 0);
+        assert.ok(model.inSight(targets).every(Boolean), 'each found point is in sight');
+        camera.applyView('right', { immediate: true });
+        assert.ok(
+          model.inSight(targets).filter(Boolean).length < targets.length / 2,
+          'from the right, most of the left’s points are out of sight',
+        );
+        camera.applyView('left', { immediate: true });
+        model.hideRegions([targets[0]!.id]);
+        assert.equal(model.inSight([targets[0]!])[0], false);
+        assert.throws(
+          () => model.inSight([{ id: 'no-such-region', point: [0, 0, 0] }]),
+          /Unknown region: no-such-region/,
+        );
+      });
+
       it('isolates the selection and releases it on a setting change', () => {
         const { engine, left } = world();
         assert.throws(() => engine.model.isolate(), /Select a region/);

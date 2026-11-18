@@ -257,6 +257,32 @@ export function createFakeModel({
         return { ...project([anchor])[0]!, drawn: anchor };
       });
     },
+    // As `facing`: a quarter of a drawn region's surface, a convex body's mean, on the camera's side.
+    facingArea(ids) {
+      const back = camera().view.basis.back;
+      return ids.map((id) => {
+        const region = regions.get(id);
+        if (!region) throw new Error(`Unknown region: ${id}`);
+        const anchor = model.anchorOf(id);
+        if (!model.isRegionDrawn(id) || !anchor) return 0;
+        const toward = anchor[0] * back[0] + anchor[1] * back[1] + anchor[2] * back[2] > 0;
+        if (region.surface_area_mm2 === undefined) {
+          throw new Error(`The manifest gives no surface area for ${id}.`);
+        }
+        return toward ? region.surface_area_mm2 / 4 : 0;
+      });
+    },
+    // As `facing`: a drawn region's point is in sight on the camera's side of the brain's centre.
+    inSight(targets) {
+      const back = camera().view.basis.back;
+      return targets.map(({ id, point }) => {
+        if (!regions.has(id)) throw new Error(`Unknown region: ${id}`);
+        return (
+          model.isRegionDrawn(id) &&
+          point[0] * back[0] + point[1] * back[1] + point[2] * back[2] > 0
+        );
+      });
+    },
 
     select,
     setInternalSystem(system) {

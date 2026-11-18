@@ -1,6 +1,8 @@
 // Names on the brain over the fake engine in a real browser: the same camera names the same regions in the
 // same places, no name covers the stage's chrome, each name selects its region, the selection is named
 // whenever it faces the reader (handoff F3), lobes are drawn only, and a change is named once it rests.
+// With room beside the anatomy the names stand in columns there; a turn keeps the names still in sight,
+// and a name whose point leaves sight, or whose cut closes, fades at once rather than at the rest.
 import { afterEach, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import type { ComponentProps } from 'svelte';
@@ -18,6 +20,7 @@ import RegionNames from './RegionNames.svelte';
 type Props = ComponentProps<typeof RegionNames>;
 
 afterEach(async () => {
+  vi.useRealTimers();
   cleanup();
   await page.viewport(1280, 800);
 });
@@ -73,6 +76,16 @@ const placed = () =>
 const drawn = () =>
   placed().map((node) => ({ text: node.textContent!.trim(), box: node.style.transform }));
 const settled = () => vi.waitFor(() => expect(placed().length).toBeGreaterThan(2));
+/** Each region name's region, by its accessible name: the placed ones, or all chosen. */
+const namedRegions = (engine: FakeEngine, nodes = placed()) =>
+  nodes.map((node) => {
+    const label = node.getAttribute('aria-label');
+    return [...engine.model.regions.values()].find((region) => `${region.label}, named` === label)!
+      .id;
+  });
+const frames = async (count = 2) => {
+  for (let at = 0; at < count; at++) await new Promise((done) => requestAnimationFrame(done));
+};
 const meet = (a: DOMRect, b: DOMRect) =>
   Math.min(a.right, b.right) > Math.max(a.left, b.left) &&
   Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
@@ -216,4 +229,92 @@ test('a hidden part loses its name once the display has rested', async () => {
 test('names nothing while not shown', () => {
   mount(engineOf(), { shown: false });
   expect(document.querySelector('.region-names')).toBeNull();
+});
+
+test('with room beside the anatomy, the names stand in columns outside it, a leader to each dot', async () => {
+  const size = { width: 1800, height: 700 };
+  await page.viewport(1840, 740);
+  const engine = engineOf(size);
+  const stage = host([], size);
+  mount(engine, {}, stage);
+  await settled();
+  const anatomy = engine.camera.anatomyRect()!;
+  expect(anatomy.width).toBeLessThan(size.width - 400);
+  const origin = stage.getBoundingClientRect();
+  for (const node of placed()) {
+    const box = node.getBoundingClientRect();
+    const [left, right] = [box.left - origin.left, box.right - origin.left];
+    expect(right <= anatomy.x || left >= anatomy.x + anatomy.width).toBe(true);
+    expect(node.dataset.leader).toBe('true');
+  }
+});
+
+test('names already shown keep their places when larger parts come back into view', async () => {
+  // A stage wide enough that the names are full: a newcomer could only push one out.
+  const size = { width: 1800, height: 700 };
+  await page.viewport(1840, 740);
+  const engine = engineOf(size);
+  mount(engine, {}, host([], size));
+  await settled();
+  const chosen = () =>
+    namedRegions(engine, [...document.querySelectorAll<HTMLElement>('button.region-name')]);
+  const first = chosen();
+  expect(first).toHaveLength(24);
+  // The eight largest hidden, others fill their places once the display rests.
+  const largest = first.slice(0, 8);
+  engine.model.hideRegions(largest);
+  await vi.waitFor(() => {
+    expect(chosen()).toHaveLength(24);
+    expect(chosen()).not.toEqual(expect.arrayContaining([largest[0]]));
+  });
+  const filled = chosen();
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  engine.model.showRegions(largest);
+  vi.advanceTimersByTime(250);
+  flushSync();
+  // Chosen again at the rest: the names shown stay, the larger ones back in view wait for room.
+  expect(new Set(chosen())).toEqual(new Set(filled));
+});
+
+test('a name whose region is hidden fades at once, and leaves once the display has rested', async () => {
+  const engine = engineOf();
+  mount(engine);
+  await settled();
+  const node = placed()[0]!;
+  const id = namedRegions(engine)[0]!;
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  engine.model.hideRegions([id]);
+  await frames();
+  // Looked at on the next frame, not chosen again: the rest has not come.
+  expect(node.isConnected).toBe(true);
+  expect(node.dataset.placed).toBe('false');
+  expect(node.inert).toBe(true);
+  vi.advanceTimersByTime(250);
+  flushSync();
+  expect(node.isConnected).toBe(true);
+  vi.advanceTimersByTime(160);
+  flushSync();
+  expect(node.isConnected).toBe(false);
+});
+
+test('closing the cut fades the names on its faces at once, and they stay out of sight until the rest', async () => {
+  // Wide enough that every name chosen stands in a column, the faces' among them.
+  const size = { width: 1800, height: 700 };
+  await page.viewport(1840, 740);
+  const engine = engineOf(size);
+  // Open before the names are first chosen: the fake keeps the surface's points in sight through a cut.
+  await engine.sections.setMode('coronal');
+  engine.camera.faceCut();
+  mount(engine, {}, host([], size));
+  await settled();
+  const shown = placed().length;
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  await engine.sections.setMode('off');
+  await frames(4);
+  const left = placed().length;
+  expect(left).toBeGreaterThan(0);
+  expect(left).toBeLessThan(shown);
+  vi.advanceTimersByTime(250);
+  flushSync();
+  await vi.waitFor(() => expect(placed().length).toBeGreaterThanOrEqual(left));
 });

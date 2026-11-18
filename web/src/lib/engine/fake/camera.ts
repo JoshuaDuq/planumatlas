@@ -161,6 +161,17 @@ export function createFakeCamera({
     moved();
   }
 
+  function project(points: readonly Vec3[]) {
+    const { right, up: top } = current.basis;
+    return points.map((point) => {
+      const offset = point.map((value, axis) => value - target[axis]!);
+      return {
+        x: size.width / 2 + dot(offset, right) * 10,
+        y: size.height / 2 - dot(offset, top) * 10,
+      };
+    });
+  }
+
   return {
     get viewHeld() {
       return held;
@@ -249,15 +260,19 @@ export function createFakeCamera({
       reframe();
     },
     // Orthographic at the scale bar's 10 px per millimetre, about the target at the canvas centre.
-    project(points) {
-      const { right, up: top } = current.basis;
-      return points.map((point) => {
-        const offset = point.map((value, axis) => value - target[axis]!);
-        return {
-          x: size.width / 2 + dot(offset, right) * 10,
-          y: size.height / 2 - dot(offset, top) * 10,
-        };
-      });
+    project,
+    // The drawn regions' anchors, which are all the fake draws.
+    anatomyRect() {
+      const points = project(
+        [...model.regions.keys()]
+          .filter((id) => model.isRegionDrawn(id))
+          .map((id) => model.anchorOf(id)!),
+      );
+      if (!points.length) return null;
+      const xs = points.map(({ x }) => x);
+      const ys = points.map(({ y }) => y);
+      const [x, y] = [Math.min(...xs), Math.min(...ys)];
+      return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
     },
 
     orbitBy() {

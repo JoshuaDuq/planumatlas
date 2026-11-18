@@ -4,6 +4,7 @@ export interface FakeItem {
   index: number;
   disabled: boolean;
   hidden: boolean;
+  inert: boolean;
   tabIndex: number;
   pressed: boolean;
   getAttribute(name: string): string | null;
@@ -14,16 +15,18 @@ export interface Spec {
   pressed?: boolean;
   disabled?: boolean;
   hidden?: boolean;
+  inert?: boolean;
 }
 
 export function fakeGroup(specs: Spec[]) {
   const doc: { activeElement: FakeItem | null } = { activeElement: null };
   const listeners: Record<string, ((event: unknown) => void) | undefined> = {};
   const items: FakeItem[] = specs.map(
-    ({ pressed = false, disabled = false, hidden = false }, index) => ({
+    ({ pressed = false, disabled = false, hidden = false, inert = false }, index) => ({
       index,
       disabled,
       hidden,
+      inert,
       tabIndex: 0,
       pressed,
       getAttribute(name) {

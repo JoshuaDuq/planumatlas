@@ -19,7 +19,8 @@ export function rovingStep(key: string, index: number, count: number): number | 
 
 type Member = HTMLButtonElement;
 
-const usable = (item: Member) => !item.disabled && !item.hidden;
+// An inert member is on its way out of sight, as a stage name fading out is.
+const usable = (item: Member) => !item.disabled && !item.hidden && !item.inert;
 const pressed = (item: Member) => item.getAttribute('aria-pressed') === 'true';
 
 /** The member holding the group's Tab stop: the focused one, else the chosen one, else the first usable. */

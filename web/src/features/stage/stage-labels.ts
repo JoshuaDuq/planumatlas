@@ -19,6 +19,8 @@ export interface LabelRequest {
   sizes: readonly Size[];
   /** Left out (null) where no slot is clear, rather than placed where it overlaps least: a region's name. */
   optional?: boolean;
+  /** The slot it stood in last: its side is tried first at each distance, so a moving label keeps its side. */
+  slot?: number;
 }
 
 /** Above right (where the route's numbers have always stood), right, below right, the left side, then above and below. */
@@ -40,6 +42,14 @@ const DOT_PX = 8;
 const GAP_PX = 2;
 
 const SLOTS = SIDES.length * STEPS.length;
+
+/** The slots in the order they are tried: nearest first, and at each distance the side it stood on first. */
+function slotOrder(last: number | undefined): number[] {
+  const side = last === undefined ? 0 : last % SIDES.length;
+  return STEPS.flatMap((_, step) =>
+    SIDES.map((__, at) => step * SIDES.length + (at === 0 ? side : at <= side ? at - 1 : at)),
+  );
+}
 
 /** A label's box in `slot` round `point`: diagonal sides put the dot at the box's near corner, as before. */
 function slotBox(point: ScreenPoint, { width, height }: Size, slot: number): Rect {
@@ -118,7 +128,7 @@ export function placeLabels(
   // The chrome, then each label as it is placed.
   const blockers = [...obstacles];
   const leaders: [ScreenPoint, ScreenPoint][] = [];
-  return requests.map(({ point, sizes, optional = false }, index) => {
+  return requests.map(({ point, sizes, optional = false, slot: last }, index) => {
     if (!point) return null;
     // Its own dot sits at the box's near corner or edge, outside it.
     const others = dots.filter((dot, at): dot is Rect => dot !== null && at !== index);
@@ -135,8 +145,9 @@ export function placeLabels(
       return spent;
     };
     let chosen: Placement | null = null;
+    const order = slotOrder(last);
     for (let variant = 0; variant < sizes.length && !chosen; variant++) {
-      for (let slot = 0; slot < SLOTS; slot++) {
+      for (const slot of order) {
         const box = slotBox(point, sizes[variant]!, slot);
         // Under a square pixel: rounding, not a collision.
         if (cost(box, slot) < 1) {
@@ -171,6 +182,14 @@ export function leaderEnd(point: ScreenPoint, box: Rect): ScreenPoint {
     x: Math.max(box.x, Math.min(point.x, box.x + box.width)),
     y: Math.max(box.y, Math.min(point.y, box.y + box.height)),
   };
+}
+
+/** Which side of the anatomy a column of names stands on (`name-columns.ts`). */
+export type Side = 'left' | 'right';
+
+/** Where a column name's leader meets it: the middle of its edge toward the anatomy. */
+export function calloutEnd(box: Rect, side: Side): ScreenPoint {
+  return { x: side === 'left' ? box.x + box.width : box.x, y: box.y + box.height / 2 };
 }
 
 /**

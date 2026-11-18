@@ -8,8 +8,10 @@ releases yet: the live site is deployed from `main`.
 
 ### Added
 
-- **Names on the brain** (Display) names the regions facing the reader, largest first; zooming in names
-  smaller ones.
+- **Names on the brain** (Display) names the regions facing the reader, largest first, in columns beside
+  the brain with a leader to each, as an atlas plate does; zooming in names smaller ones. Names hold
+  still as the view turns or zooms and as a cut moves, fade where their region goes out of sight, and
+  each is written once.
 - **Highlight** marks a region in a colour of the reader's own; the stage keys them as **Your highlights**.
 - **References for this view**: the sources behind what is shown, copied as text or downloaded as .bib or
   .ris; the region table of the whole atlas downloads as CSV.

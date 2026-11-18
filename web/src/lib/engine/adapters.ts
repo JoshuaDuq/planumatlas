@@ -40,9 +40,13 @@ const frameOf = ({ center, normal, u, v, edges }: PlaneFrame): Frame => ({
 /**
  * `BrainAtlas` as the contract's model. The class stays a 1-1 port; what the contract adds are reads
  * the application used to make on the model's fields (`layers`, `envelopes`, `visibleMeshes`) and the
- * one prefetch that names its file. `facing` is the engine's: it needs the camera and the cut.
+ * one prefetch that names its file. `facing`, `facingArea` and `inSight` are the engine's: they need the camera and
+ * the cut.
  */
-export function createEngineModel(atlas: BrainAtlas, facing: EngineModel['facing']): EngineModel {
+export function createEngineModel(
+  atlas: BrainAtlas,
+  { facing, facingArea, inSight }: Pick<EngineModel, 'facing' | 'facingArea' | 'inSight'>,
+): EngineModel {
   return {
     // The model validated the manifest on load; the contract's type is its published shape.
     manifest: atlas.manifest as unknown as Manifest,
@@ -81,6 +85,8 @@ export function createEngineModel(atlas: BrainAtlas, facing: EngineModel['facing
     anchorOf: (id) => atlas.anchorOf(id),
     canSelect: (region) => atlas.canSelect(region),
     facing,
+    facingArea,
+    inSight,
 
     select: (id) => atlas.select(id),
     setInternalSystem: (system) => atlas.setInternalSystem(system),
