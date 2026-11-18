@@ -5,8 +5,8 @@ by legacy code equivalence: a test states what the app must do for the reader, o
 result, and checks it against fixed values without importing `viewer/`. This folder holds what the
 conversion needs.
 
-- `rules/<area>.md`: 34 catalogues, 1,324 entries (1,302 rules plus 22 that point to the one place a
-  duplicated rule is stated). Each rule has an ID, the rule, its kind, the **cheapest level that proves it**,
+- `rules/<area>.md`: 35 catalogues, 1,492 entries (1,466 rules, 22 that point to the one place a
+  duplicated rule is stated, and 4 retired or rewritten entries that name their successor). Each rule has an ID, the rule, its kind, the **cheapest level that proves it**,
   its legacy source, fixed expected values and the tests that cover it today, with their class.
 - `audit.md`: every test file in one table, the rule IDs hiding in each legacy-comparison file, the slow
   tests ranked by seconds saved, and the findings outside the classification (bugs, changes from legacy with

@@ -104,7 +104,7 @@ Colours are not a published palette. They were chosen so that regions sharing a 
 
 ## Display
 
-The region detail of an HCP-MMP area has a **Functional division** disclosure (`FunctionalSection.svelte`): one row for the named region, where a source lists one, and one for the section, each with its colour swatch, source and member areas (Fig. 1c). A note gives the Table 1 and section-text placements of a contested area and says the groupings are not measured function. The Functions tab names each listed area's named region, else its section (`functions-view.ts`). The provenance panel lists the layer and its DOIs. No surface colour mode or cut label draws the divisions: the surface colour modes are `tissue`, `mri`, `atlas`, `network`, `cab-np` and `territory`.
+The region detail of an HCP-MMP area has a **Functional division** disclosure (`FunctionalSection.svelte`): one row for the named region, where a source lists one, and one for the section, each with its colour swatch, source and member areas (Fig. 1c). A note gives the Table 1 and section-text placements of a contested area and says the groupings are not measured function. The Functions tab names each listed area's named region, else its section (`functions-view.ts`). The provenance panel lists the layer and its DOIs. No surface colour mode or cut label draws the divisions: the surface colour modes are `tissue`, `mri`, `lobe`, `atlas`, `network`, `cab-np`, `territory`, `striatal` and `cerebellar`.
 
 ## Validation
 

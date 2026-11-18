@@ -36,7 +36,7 @@ It ran once, alone: 7.6 minutes on the CPU, peak resident memory 6.48 GB.
 ### FreeSurfer SegmentAAN
 FreeSurfer 8.2's `SegmentAAN.sh` (Olchanyi et al. 2025, [doi:10.1002/hbm.70357](https://doi.org/10.1002/hbm.70357)) segments the same ten nuclei, with the same 16 sided labels, from this brain's own recon by Bayesian inference against a histology-derived probabilistic atlas, at 0.375 mm. It reads `norm.mgz`, `wmparc.mgz`, `aseg.mgz` and `talairach.xfm` from the full FreeSurfer 8.2 recon of CDMD (`data/cache/freesurfer-subjects/cdmd`), copied so that its outputs never land in the recon; its labels are mapped to the release's codes. FreeSurfer ships it as an x86_64 program compiled against the MATLAB Runtime R2019b (9.7), which a full MATLAB of another version cannot stand in for. Its segmentation of a CC0 subject may be published under the FreeSurfer Software License (Part B: use, derivative works and distribution allowed with the licence, attributions kept, no endorsement implied), which Planum already publishes beside the model.
 
-It ran once, alone, on 2026-11-17: under 2 minutes of the coordinator's wall clock, peak resident memory 3.02 GB.
+It ran once, alone, on 2026-11-17: 17.5 minutes, peak resident memory 3.02 GB.
 
 ### Checks, fixed before the run (2026-11-16)
 Measured by `arousal_nuclei.checks` on each method's nuclei before they are kept to the brainstem:
@@ -45,7 +45,7 @@ Measured by `arousal_nuclei.checks` on each method's nuclei before they are kept
 - **Containment.** At least 95% of every one of the 16 sided nuclei must lie in aseg's Brain-Stem (label 16), sampled at each voxel centre. Revised on 2026-11-17, after both methods failed it and before it was applied again, to Brain-Stem and Left- and Right-VentralDC (labels 16, 28, 60): aseg labels the ventral midbrain, where the VTA lies, VentralDC (decision 0013, `web/docs/decisions/0013-arousal-nuclei-containment.md`). Ventricles stay outside.
 - **Choice.** Among methods that pass both, the smaller mean centroid distance over the three wins; a difference under 0.25 mm goes to the higher mean Dice. If none passes, nothing is published.
 
-A passing method's nuclei are then kept to aseg's Brain-Stem and VentralDC (`keep`; the grey loses the rim that lay in the aqueduct's label), meshed as the other structures are (marching cubes, bounded Taubin smoothing that moves no voxel centre across the surface) and published as the supplemental layer `aan` (`arousal-nuclei.glb`), each nucleus a selectable structure with its own cut label.
+A passing method's nuclei are then kept to aseg's Brain-Stem and VentralDC (`keep`; the grey loses the rim that lay in the aqueduct's label), meshed as the other structures are (marching cubes, bounded Taubin smoothing that moves no voxel centre across the surface) and published as the supplemental layer `aan` (`arousal-nuclei.glb`), each nucleus a selectable structure that caps its own cut face.
 
 ## Validation
 
@@ -56,9 +56,9 @@ A passing method's nuclei are then kept to aseg's Brain-Stem and VentralDC (`kee
 | Ventral tegmental area, centroid to NextBrain | ≤ 3 mm | **5.00 mm** (Dice 0.03) | 1.20 mm (Dice 0.15) |
 | Least share of a nucleus inside the brainstem | ≥ 95% | **28.9%** (VTA); PAG 82.7%, DR 96.8%, left PTg 98.4%, the other 12 100% | **3.0%** (VTA); right PTg 53.6%, left PTg 65.0%, PAG 89.6%, the other 12 at least 98.6% |
 | Passes | | no | no |
-| *Revised (decision 0013):* least share inside Brain-Stem and VentralDC | ≥ 95% | **82.7%** (PAG, 17.3% in 4th-Ventricle); DR 96.8% | **90.7%** (PAG, 9.0% in 4th-Ventricle); every other nucleus at least 98.8% |
+| *Revised (decision 0013):* least share inside Brain-Stem and VentralDC | ≥ 95% | **82.7%** (PAG, 17.3% in 4th-Ventricle); DR 96.8% | **90.7%** (PAG, 9.0% in 4th-Ventricle); every other nucleus at least 98.7% |
 | Passes, revised | | no | no |
-| *With the periaqueductal grey's exception (decision 0014):* grey ≥ 90 %, every other nucleus ≥ 95 % | | no (centroids) | **yes: published** |
+| *With the periaqueductal grey's exception (decision 0014):* grey ≥ 90 %, every other nucleus ≥ 95 % | | no (centroids; grey 82.7% < 90%) | **yes: published** |
 
 Where SynthMorph's placement falls short:
 
@@ -66,13 +66,13 @@ Where SynthMorph's placement falls short:
 - **PAG.** 51 of 294 voxels lie in the aqueduct, which aseg labels 4th-Ventricle.
 - **DR.** The offset is almost wholly inferior (3.67 mm): the Harvard dorsal raphe (221 mm³ here) runs further caudally than NextBrain's (92 mm³).
 
-SegmentAAN's centroids are the closer (mean 0.96 mm against 3.32 mm; mean Dice 0.37 against 0.26), but containment fails for a reason it shares with the registration: aseg labels most of the ventral midbrain, where the VTA and the pedunculotegmental nuclei lie, VentralDC, and the aqueduct inside the PAG 4th-Ventricle. The check was fixed before either run and is not changed after it; whether a containment check against aseg's Brain-Stem alone suits nuclei at the midbrain's ventral edge is a question for the maintainer, to be fixed before any new run.
+SegmentAAN's centroids are the closer (mean 0.96 mm against 3.32 mm; mean Dice 0.37 against 0.26), but containment fails for a reason it shares with the registration: aseg labels most of the ventral midbrain, where the VTA and the pedunculotegmental nuclei lie, VentralDC, and the aqueduct inside the PAG 4th-Ventricle. The check was then revised to Brain-Stem and VentralDC (decision 0013), and the periaqueductal grey was given an exception (decision 0014); both changes were made after these results were seen.
 
 The registered volumes are smaller than the template's (the DR 221 of 324 voxels, the VTA 322 of 488), as expected of a brain smaller than MNI152.
 
 ## Display
 
-Once a method passes, each nucleus is a supplemental structure (`aan:<side>:<nucleus>`), drawn at every detail level and listed in the Anatomy tree under Brainstem below a caption row **Arousal nuclei (Harvard atlas)** (French **Noyaux de l’éveil (atlas de Harvard)**; ANAT-60), apart from NextBrain's namesakes. Its layer downloads the first time a nucleus is chosen, opened or linked, or a cut is made (STATE-71, CTRL-40, ATLAS-55), and each nucleus caps its own cut face. The Coma profile's tegmental finding, whose overlap covered the raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial nucleus, then maps to those nuclei. The lesson walking the ten (plan 1's WP9) does not exist yet.
+Each nucleus is a supplemental structure (`aan:<side>:<nucleus>`), drawn at every detail level and listed in the Anatomy tree under Brainstem below a caption row **Arousal nuclei (Harvard atlas)** (French **Noyaux de l’éveil (atlas de Harvard)**; ANAT-60), apart from NextBrain's namesakes. Its layer downloads the first time a nucleus is chosen, opened or linked, or a cut is made (STATE-71, CTRL-40, ATLAS-55), and each nucleus caps its own cut face. The Coma profile's tegmental finding, whose overlap covered the raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial nucleus, maps to the Harvard median raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial complex, and to NextBrain's dorsal raphe. The lesson walking the ten (plan 1's WP9) does not exist yet.
 
 ## Limitations
 
@@ -89,7 +89,7 @@ Code
 : [`scripts/register_arousal_nuclei.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/scripts/register_arousal_nuclei.py) (source check, both methods, choice), [`brain_model/layers/arousal_nuclei.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/layers/arousal_nuclei.py) (checks, keep, regions, layer record, validation)
 
 Configuration
-: [`config/arousal-nuclei.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/arousal-nuclei.yaml) (pins, nuclei, checks, choice rule); the `arousal_nuclei` layer in the anatomy's `layers` list in `config/model.yaml` once a method passes
+: [`config/arousal-nuclei.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/arousal-nuclei.yaml) (pins, nuclei, checks, choice rule); the `arousal_nuclei` layer in the anatomy's `layers` list in `config/model.yaml`
 
 ```bash
 uv run python scripts/register_arousal_nuclei.py check

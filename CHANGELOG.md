@@ -48,6 +48,11 @@ releases yet: the live site is deployed from `main`.
 
 ### Fixed
 
+- Picking a nucleus inside the brainstem or cerebellum (an arousal nucleus, the red nucleus, the substantia
+  nigra, the dentate) opens it focused, as a deep forebrain structure opens; before, it was framed behind
+  the opaque temporal lobe and nothing of it showed.
+- **Copy as text**, **Download .bib** and **Download .ris** in Provenance take the app's button style
+  instead of the browser's grey default.
 - With a function painted, changing the atlas now repaints the stage, the cut and the Linked MRI; before,
   the previous atlas's colours stayed until the page was loaded again.
 - A cut no longer keeps the previous atlas's labels after the atlas changes, which left the cut face, the

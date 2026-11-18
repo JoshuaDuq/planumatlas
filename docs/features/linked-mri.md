@@ -16,6 +16,7 @@ Linked MRI shows the subject's own T1-weighted scan in three orthogonal planes a
 | `mri.volume` | `orig.mgz`, `uint8`, the full $256^3$ grid at 1 mm (16,777,216 bytes decoded); not cropped |
 | `aseg.volume` | `aseg.mgz` labels, `<u2`, cropped to $135 \times 141 \times 152$ from corner (62, 39, 43) (5,786,640 bytes decoded) |
 | `volumes.json` | `coordinate_system` ("FreeSurfer surface RAS (tkregister), millimeters"), both volume records, the 39 labels present (`name`, `color`), `display` and `limitations` |
+| `fa.nii.gz` ([tracts](tracts.md#data); CDMD only) | FA on the diffusion T1's grid, placed in surface RAS by `surface-space.json`; downloaded the first time **FA opacity** leaves 0 |
 
 Each volume record carries `shape`, `dtype`, `order: "F"`, `compression: "gzip"`, `byte_length`, `sha256` (file), `decoded_sha256` (payload), `voxel_to_surface_ras_mm` and `voxel_spacing_mm`; the cropped record adds `source_shape` and `crop_corner_voxel`. `display` holds `field_of_view_mm` = 256, `texture_size` = 512 and the measured window, level 94 and width 188 on CDMD. The T1 is `orig.mgz`, conformed to $256^3$ at 1 mm but not intensity-normalised.
 
@@ -37,14 +38,16 @@ so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displa
 
 ### Plane resampling
 
-`renderSlice` draws one plane as a $512 \times 512$ image over a 256 mm square, one sample at each pixel centre $\mathbf{p}$:
+`sampleSlice` samples one plane as a $512 \times 512$ image over a 256 mm square, one sample at each pixel centre $\mathbf{p}$, and keeps all that the window does not change; `windowSlice` draws those samples through the window without reading a volume again:
 
-- **T1.** `Volume.linear`, trilinear over the eight surrounding voxels and 0 outside the grid, mapped through level $c$ and width $w$:
+- **T1.** `Volume.linear`, trilinear over the eight surrounding voxels and 0 outside the grid, kept as a double and mapped through level $c$ and width $w$:
   $$g = \operatorname{clamp}\bigl((T_1(\mathbf{p}) - c + w/2)\,255/w,\ 0,\ 255\bigr).$$
 - **Label.** `Volume.label`, the label with the largest summed trilinear weight over the eight voxels (the ANTs genericLabel rule): exact at voxel centres and never a label absent from the eight. It is the CPU twin of the cut faces' `LABEL_AT` ([sections and cuts](sections-and-cuts.md#method)).
 - **Overlay.** A labelled pixel is $0.55\,g + 0.45\,\text{colour}$. With a [segmentation agreement](segmentation-agreement.md) shown, one structure is inked instead by category: both segmentations (236, 236, 236), aseg only (235, 70, 210), NextBrain only (255, 150, 30).
+- **Paint.** A pixel whose label on the cut atlas's grid is painted takes the paint's colour, whatever the window.
+- **Map.** The reader's [overlay](overlays.md) map is drawn over the result at its opacity, as the cut faces draw it.
 
-Every pixel is then drawn opaque, so voxels no label covers keep their T1 grey.
+On the tracts' own anatomy, FA (viridis over 0–1, sampled at each pixel centre) is then blended over the pixels at **FA opacity**, and the drawn tracts within 2 mm of the plane (`TRACT_SLAB_MM`), clipped to that slab and laid flat on it, are drawn one pixel wide in their direction colours ([tracts](tracts.md#display)). Every pixel is drawn opaque, so voxels no label covers keep their T1 grey.
 
 ### Plane frames
 
@@ -52,9 +55,9 @@ Each plane is seen from the side the stage faces the cut (the other side when re
 
 ## Display
 
-**Linked MRI** opens from a region's detail, a function's or deficit's profile, the section bar or the <kbd>M</kbd> key. A function's opens at the anchor of its strongest area, a deficit's at its first finding's first region (the chosen finding's, if one is); the overview of all functions opens where the crosshair is. The crosshair is the cut's: a click on a plane moves the crosshair there, cuts the 3D brain on that plane through the point and selects the smallest shown solid that contains it (`regionAt`); a click on the 3D brain moves the crosshair to the picked surface point. The wheel moves a plane 1 mm a notch; each plane has a 1 mm position slider. **Window** (width 10–256) and **Level** (0–255) apply to the planes and to T1 surface colour alike. The crosshair is drawn at screen resolution in `#4fb6e0` over a `#0e1116` ring; only a plane whose frame, overlay, agreement, paint or window changed is resampled. While a Functions or Deficits paint is shown, each voxel whose label on the cut atlas's own grid (the surface atlas's, which a paint keeps on the cut) is painted takes that colour, opaque over the scan, as the cut faces show it; that grid downloads the first time a paint needs it. The readout gives the RAS position, the region the current cut labels name, the aseg structure and label number, and is announced after 250 ms at rest. **Save PNG** writes the 512-pixel plane with crosshair, edge letters, convention and offset as `<subject>-<plane>-<offset>mm.png`.
+**Linked MRI** opens from a region's detail, a function's or deficit's profile, the section bar, the Tracts tab's **MRI with tracts** or the <kbd>M</kbd> key. A function's opens at the anchor of its strongest area, a deficit's at its first finding's first region (the chosen finding's, if one is); the overview of all functions opens where the crosshair is. The crosshair is the cut's: a click on a plane moves the crosshair there, cuts the 3D brain on that plane through the point and selects the smallest shown solid that contains it (`regionAt`); a click on the 3D brain moves the crosshair to the picked surface point. The wheel moves a plane 1 mm a notch; each plane has a 1 mm position slider, whose arrow keys move the crosshair 1 mm. **Window** (width 10–256) and **Level** (0–255) apply to the planes and to T1 surface colour alike. The crosshair is drawn at screen resolution in `#4fb6e0` over a `#0e1116` ring; only a plane whose frame, overlay, agreement, paint, map or tracts changed is resampled, and **Window**, **Level** and **FA opacity** draw it again from the samples it kept (`mpr-plane-cache.ts`). While the model shows any paint, each voxel whose label on the cut atlas's own grid (the surface atlas's, which a paint keeps on the cut) is painted takes that colour, opaque over the scan, as the cut faces show it; that grid downloads the first time a paint needs it. The readout gives the RAS position, the region the current cut labels name, the aseg structure and label number, the agreement category while one is shown, the reader's map value where it has one and FA while it is shown, and is announced after 250 ms at rest. **Reset display** returns **Window** and **Level** to the published window, clears **Segmentation overlay** and sets **FA opacity** to 0. With a segmentation agreement shown, a legend names the structure (`Agreement: <structure>`) and its three categories, the overlay box is disabled, and **Hide agreement** returns to the segmentation. On the tracts' own anatomy the planes draw the tracts the stage draws and offer **FA opacity** (0–100%, step 5%, default 0); FA downloads the first time it leaves 0, and a note says what the tracts and FA are. **Save PNG** writes the 512-pixel plane with crosshair, edge letters, convention and offset as `<subject>-<plane>-<offset>mm.png`.
 
-On a desktop or tablet the planes dock beside the stage (column 240 px to the width that leaves the stage 360 px; 24 px per arrow key); on a phone or a full-screen stage they open as a modal dialog. URL key: `mri=<level>,<width>`, written only when the window differs from the published one and accepted for level 0–255 and width 1–256.
+On a desktop or tablet the planes dock beside the stage (column 240 px to the width that leaves the stage 360 px; 24 px per arrow key; a double click on the edge restores the default width); on a phone or a full-screen stage they open as a modal dialog. URL key: `mri=<level>,<width>`, written only when the window differs from the published one and accepted for level 0–255 and width 1–256.
 
 ## Validation
 
@@ -65,8 +68,10 @@ On a desktop or tablet the planes dock beside the stage (column 240 px to the wi
 | Window ceiling (`test_volumes.py`) | Fewer than 0.5% of segmented T1 voxels at or above the ceiling | passes |
 | Window floor (`test_volumes.py`) | $\text{level} - \text{width}/2 = 0$ | passes |
 | Per-subject window (`test_volumes.py`) | CDMD and `fsaverage` windows differ | passes |
-| Sampling (`sampling.test.ts`, `volume.test.ts`) | Grey is the windowed T1 clamped to 0–255; overlay blends 0.55/0.45; labels never invented; voxel centres keep their label | passes |
+| Sampling (`sampling.test.ts`, `volume.test.ts`) | Grey is the windowed T1 clamped to 0–255; overlay blends 0.55/0.45; labels never invented; voxel centres keep their label; the reader's map is drawn by its opacity where it passes its threshold | passes |
 | GPU–CPU labels (`label-sampling.svelte.test.ts`) | `labelAt` names the label `Volume.label` names | passes |
+| Kept samples (`sampling.test.ts`, `MprDialog.svelte.test.ts`; SLICE-41, SECT-38) | A new window draws the pixels sampling through it draws; **Window**, **Level** and **FA opacity** redraw each plane without reading a volume, FA or the tracts again | passes |
+| Tracts and FA (`MprDialog.svelte.test.ts`, `native-geometry.test.ts`) | Segments are cut where they leave the 2 mm slab and laid flat on the plane; FA downloads once its opacity leaves zero and joins the readout; another subject's tracts are not drawn and FA is not offered; **Reset display** returns FA opacity to zero | passes |
 | Paint (`sampling.test.ts`, `sections.test.ts`) | A painted label is drawn in its colour over the scan; the label grid loads only once the planes have, and a failed load is reported once | passes |
 | Frames and clicks (`coordinates.test.ts`, `mpr-draw.test.ts`) | A click's point marks the crosshair at that click; the coronal panel faced from the front puts the subject's right on the left | passes |
 
@@ -86,13 +91,14 @@ On a desktop or tablet the planes dock beside the stage (column 240 px to the wi
 | :--- | :--- |
 | Code | [`brain_model/labels/volumes.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/labels/volumes.py), [`brain_model/validate_volumes.py`](https://github.com/JoshuaDuq/planumatlas/blob/main/brain_model/validate_volumes.py); [`web/src/lib/engine/slices/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/lib/engine/slices), [`web/src/features/sections/`](https://github.com/JoshuaDuq/planumatlas/tree/main/web/src/features/sections) |
 | Configuration | [`config/model.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/config/model.yaml): `sections.field_of_view_mm`, `sections.texture_size` (the window is measured, not configured) |
-| Tests | `tests/test_volumes.py`; `web/src/lib/engine/slices/*.test.ts`, `web/src/features/sections/mpr-*.test.ts`, `web/src/lib/engine/tissues/label-sampling.svelte.test.ts` |
+| Tests | `tests/test_volumes.py`; `web/src/lib/engine/slices/*.test.ts`, `web/src/features/sections/mpr-*.test.ts`, `web/src/features/sections/MprDialog.svelte.test.ts`, `web/src/lib/engine/diffusion/native-geometry.test.ts`, `web/src/lib/engine/tissues/label-sampling.svelte.test.ts` |
 
 ```bash
 uv run python -m brain_model.labels.volumes
 uv run python -m brain_model.validate --anatomy cdmd
 uv run pytest tests/test_volumes.py
-npm test --prefix web -- slices sections
+npm test --prefix web -- slices sections native-geometry
+npm run test:browser --prefix web -- MprDialog label-sampling
 ```
 
 Figure state (Fig. 1a, then <kbd>M</kbd>): https://planumatlas.com/#anatomy=cdmd&atlas=destrieux&colors=atlas&cut=coronal&pos=-10

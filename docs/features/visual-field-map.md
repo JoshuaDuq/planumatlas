@@ -79,7 +79,7 @@ The map opens under **Circuits › Maps** and from the V1 landmark of the Visual
 | `test_vertex_areas_sum_to_the_surface_area` | Vertex areas sum to surface area (relative 10⁻⁹) | passes |
 | `test_the_sidecar_holds_exactly_the_published_areas_territory` | Sidecar `mm2` sums equal the recorded area totals (±1 mm²) | passes |
 | `retinotopy.validate` | Sidecar and record equal a fresh projection | passes |
-| `brain_model.validate` | Quantised vertex attributes against the projection, all four atlases | max error 0.0014° (x, y), 0.0002° (σ); area code exact |
+| `brain_model.validate` | Quantised vertex attributes against the projection, all five atlases | max error 0.0014° (x, y), 0.0002° (σ); area code exact |
 | Manifest `retinotopy`, area on midthickness | V1 / V2 / V3 | left 2,235 / 2,230 / 1,745 mm²; right 2,570 / 2,389 / 1,929 mm² |
 | Manifest, share of V1–V3 area beyond 8° | — | left 40.8%, right 44.1% |
 | Manifest, Dice with HCP-MMP (left / right) | V1, V2, V3 | 0.90 / 0.89, 0.76 / 0.78, 0.78 / 0.72 |

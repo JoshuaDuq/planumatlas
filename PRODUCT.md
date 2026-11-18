@@ -23,8 +23,11 @@ its evidence is chosen first.
 - Explore and search cortical and internal anatomical regions.
 - Inspect source labels, measurements, functional networks, and documented
   neuropsychological associations.
-- Compare the Destrieux and HCP-MMP atlases by pial surface area, outline
-  exact intersections, and export every contribution in CSV at full precision.
+- Compare any two of the Destrieux, HCP-MMP, Julich-Brain and Schaefer atlases
+  by pial surface area, outline exact intersections, and export every
+  contribution in CSV at full precision.
+- Name regions on the brain, highlight regions in the reader's own colours, and
+  share a view as a link, an embed, an image, or its references (.bib, .ris).
 - Switch anatomies, cortical atlases, surface appearances, and hemispheres.
 - Hide and restore anatomical parts, create anatomical cuts, and inspect linked
   MRI sections.
@@ -32,7 +35,7 @@ its evidence is chosen first.
   and the existing statement that this is not clinical anatomy.
 - Preserve English and French, keyboard interaction, both UI themes, and the
   responsive phone sheet.
-- Existing stack: JavaScript, Three.js, Vite, and self-hosted Source Sans 3.
+- Existing stack: TypeScript, Svelte 5, Three.js, Vite, and self-hosted Source Sans 3.
 - Errors surface; do not add compatibility layers or hidden fallbacks.
 
 ## Brand Commitments

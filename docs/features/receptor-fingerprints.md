@@ -81,7 +81,7 @@ Notes name unmeasured receptors, receptors without a published SD, any withheld 
 - The ifs1 D<sub>1</sub> SD is withheld; five parietal areas publish no α<sub>2</sub> SD.
 - Some receptors may have been measured in fewer hemispheres than the dataset lists.
 - Bars compare a receptor across fingerprints, not receptors with each other.
-- CC BY-NC-SA 4.0: non-commercial, share-alike ([licence](../reference/references.md#cc-by-nc-sa-40-receptor-fingerprints-f-tract)).
+- CC BY-NC-SA 4.0: non-commercial, share-alike ([licence](../reference/references.md#cc-by-nc-sa-40-receptor-fingerprints-f-tract-cortical-layers)).
 
 ## Code availability
 

@@ -64,7 +64,7 @@ excluded:
     - TrS (Hippocampus, Transsubiculum)
 # Layer IV's share painted across the cortex in four rising steps, lilac to deep crimson, away from
 # the functions' blue, connectivity's violet and the disorders' blue and orange. Chosen 2026-11-16
-# from the published shares (median 7.6%, 90th percentile 10.3%, V1 20–25%) so that area 4 (7–8%),
+# from the published shares (per parcel: median 8.0%, 90th percentile 10.3%, V1 20–25%) so that area 4 (7–8%),
 # area 3b (10–12%) and V1 fall in different steps. Measured: every colour differs from the cortex,
 # deep grey and ventricle colours by an OKLab ΔE of at least 14.5 under normal vision (12.7
 # simulated protanopia, 7.8 deuteranopia, against the ventricle) and from the others by at least

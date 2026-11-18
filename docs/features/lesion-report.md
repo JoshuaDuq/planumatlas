@@ -1,6 +1,6 @@
 # Lesion report
 
-A sphere of 3 to 30 mm radius placed on the brain or a cut face is measured in the browser against the subject's published 1 mm label volumes. The report gives the tissue and regions inside it, ranks the functions and deficit findings whose regions it overlaps, and counts the reconstructed streamlines that pass through it. It measures overlap on one brain; it predicts no deficit.
+A sphere of 3 to 30 mm radius placed on the brain or a cut face is measured in the browser against the subject's published 1 mm label volumes. The report gives the tissue and regions inside it, ranks the functions and deficit findings whose regions it overlaps, and, when asked, counts the reconstructed streamlines that pass through it. It measures overlap on one brain; it predicts no deficit.
 
 ```{figure} figures/lesion-report-1.webp
 :alt: Top left, lateral view of a grey left hemisphere with a dashed black ring and centre dot over the temporoparietal junction and white patches of cortex inside the ring. Bottom left, a coronal section coloured by region with the same ring over the left hemisphere. Right, the report panel listing the lesion's size, centre, three functions with bars and percentages, and three deficits.
@@ -15,11 +15,11 @@ The lesion publishes no file. It reads, from `public/models/<anatomy>/` and `pub
 
 | Input | Used for |
 | :--- | :--- |
-| `tissues-<atlas>.volume` for the eight atlases in `tissue-labels.json` (Destrieux, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial territories, Nettekoven cerebellar functions, Choi striatal networks) | Region volumes; each label's `region_id`, `name` and `kind` |
+| `tissues-<atlas>.volume` for the nine atlases in `tissue-labels.json` (Destrieux, HCP-MMP, Julich-Brain, Schaefer, Desikan-Killiany, NextBrain, arterial territories, Nettekoven cerebellar functions, Choi striatal networks) | Region volumes; each label's `region_id`, `name` and `kind` |
 | `white-matter.volume` | FreeSurfer `wmparc` gyral white matter (within 5 mm of cortex) |
 | `neuropsych-domains.json` | Each function's group and its territory: HCP-MMP areas and aseg structures with mean consistency z ≥ 3 (`threshold_z` in `config/neuropsych-domains.yaml`) |
 | `data/neuropsychology.yaml` | Each deficit finding's laterality and cited regions (`mappings`) |
-| `*.trk.gz`, `surface-space.json` | TractSeg streamlines (30 bundle files on CDMD) and the scanner-to-surface transform |
+| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (30 bundle files on CDMD, 29 counted) and the scanner-to-surface transform |
 | Visible cortical meshes | The footprint |
 
 Label grids are described in [sections and cuts](sections-and-cuts.md#data); bundles in [tracts](tracts.md).
@@ -52,7 +52,7 @@ Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, p
 Every triangle of the visible cortical meshes whose centroid lies within $r$ is drawn with the surface's own normals in the overlay ink, with polygon offset −2. A dashed ring of 128 segments (dash $0.11\,r$, gap $0.077\,r$) and a centre dot, on halos of 2 px and 1.5 px CSS, mark the extent.
 
 ## Display
-**Lesion**, under **Add** in the stage dock, places the sphere (radius slider 3–30 mm, initial 10 mm; `LESION_RADIUS`). The centre is rounded to 0.1 mm. The radius previews while dragged and is measured on release; a request overtaken by a later placement is dropped. The report is Anatomy's detail while no region is selected. **On the brain** paints the lesion alone, the leading functions' whole territories or the cited regions of the leading findings, in six colours by rank (`FINDING_COLORS`), each region taking the colour of the first item that claims it. **Anatomy measured** lists tissue volumes, cortical regions on Destrieux or HCP-MMP, deep structures, gyral white matter and arterial territories; shares are shown to whole percent above 10% and to 0.1% below. Activating a counted bundle draws only its crossing streamlines over a see-through cortex. A coordinate from [published coordinates](published-coordinates.md) uses the same sphere; placing either replaces the other. URL state: `lesion=<x>,<y>,<z>,<r>`, `lesionmode=lesion|functions|deficits`, `lesiontract=<bundle>` ([sharing and snapshots](sharing-and-snapshots.md)).
+**Lesion**, under **Add** in the stage dock, places the sphere (radius slider 3–30 mm, initial 10 mm; `LESION_RADIUS`). The centre is rounded to 0.1 mm. The radius previews while dragged and is measured on release; a request overtaken by a later placement is dropped. The report is Anatomy's detail while no region is selected. **On the brain** paints the lesion alone, the leading functions' whole territories or the cited regions of the leading findings, in six colours by rank (`FINDING_COLORS`), each region taking the colour of the first item that claims it. **Anatomy measured** lists tissue volumes, cortical regions on each cortical atlas (the one on screen first), deep structures, gyral white matter and arterial territories; shares are shown to whole percent above 10% and to 0.1% below. Streamlines are counted only after **Count *n* bundles** is pressed (the bundles on the sides the sphere reaches) ("Downloads each bundle’s streamlines: tens of megabytes."); the lesion is then counted again wherever it is placed, until it is removed, and a link with `lesiontract` counts on restore. Activating a counted bundle draws only its crossing streamlines over a see-through cortex. A coordinate from [published coordinates](published-coordinates.md) uses the same sphere; placing either replaces the other. URL state: `lesion=<x>,<y>,<z>,<r>`, `lesionmode=lesion|functions|deficits`, `lesiontract=<bundle>` ([sharing and snapshots](sharing-and-snapshots.md)).
 
 ## Validation
 

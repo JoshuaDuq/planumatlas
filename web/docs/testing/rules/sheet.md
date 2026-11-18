@@ -28,8 +28,8 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 - **Kind:** behaviour
 - **Level:** unit
 - **Source:** `viewer/ui/chrome/detents.js:43-47`; `viewer/ui/chrome/sheet.js:66-79`
-- **Expected:** `detentHeights(812, SIDEWAYS_DETENTS)` = `{216, 406, 503}` (upright 812 is `{132, 406, 684}`). With the French tab row as peek: 844 and 346 → `{346, 422, 523}`; 844 and 299 → `{299, 422, 523}`; 667 and 299 → `{299, 334, 414}`. In the browser at 844 × 390 the English sheet's peek is the tab row, 368 ± 1 px.
-- **Covered by:** `src/lib/core/detents.test.ts` (R for the halves; W for the rest: only inequalities); `src/features/sheet/Sheet.svelte.test.ts` (R, "held sideways the one row of tabs is 368 px")
+- **Expected:** `detentHeights(812, SIDEWAYS_DETENTS)` = `{216, 406, 503}` (upright 812 is `{132, 406, 684}`). With the French tab row as peek: 844 and 346 → `{346, 422, 523}`; 844 and 299 → `{299, 422, 523}`; 667 and 299 → `{299, 334, 414}`. In the browser at 844 × 390 the English sheet's peek is the tab row, 352 ± 1 px.
+- **Covered by:** `src/lib/core/detents.test.ts` (R for the halves; W for the rest: only inequalities); `src/features/sheet/Sheet.svelte.test.ts` (R, "held sideways the one row of tabs is 352 px from the label column, and a label never wraps")
 
 ### SHEET-04 · A slow drag settles on the nearest rest, ties going down toward the anatomy
 

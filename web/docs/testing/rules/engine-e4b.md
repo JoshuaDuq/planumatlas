@@ -493,7 +493,7 @@ Conventions: "the fixture" is the synthetic model of the legacy unit tests (atla
 - **Level:** unit — a contract-suite case, so the fake and the real engine meet it alike
 - **Source:** Planum improvement plan 2, WP29; `ModelLayers.ensureSupplemental`, `TissueSections.loadAnatomy`
 - **Expected:** `ensureSupplementalLayer('no-such-layer')` rejects `unknown-layer`; each published layer's id → `hasLayer(id)` true after; `settings.spinalCordVisible` still false.
-- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "downloads each supplemental layer on request, without showing the cord" (R, through `contract.test.ts` and `index.contract.test.ts`); the cut's capping of a non-cord layer is uncovered until a published anatomy carries one
+- **Covered by:** `src/lib/engine/fake/contract-suite.ts` "downloads each supplemental layer on request, without showing the cord" (R, through `contract.test.ts` and `index.contract.test.ts`); `src/lib/engine/model/brain-atlas.cut.test.ts` (S, on the published CDMD: the first cut downloads `arousal-nuclei.glb` and `spinal-cord.glb` and caps every `aan` and `pam50` mesh)
 
 ### ATLAS-56 · The visual field map names its areas while the reader asks, on both hemispheres
 
