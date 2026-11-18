@@ -167,14 +167,14 @@ the expected values change with them in the same commit.
 - **Expected:** a `non-region` → EN `{name:'Unlabelled', group:'Unlabelled', code:null}`, FR "Non étiqueté". `search('unlabelled')` → no rows; no group row is a non-region; `visibleCount` excludes it.
 - **Covered by:** `src/lib/core/catalog/labels.test.ts` (R), `labels.fr.test.ts` (R), `catalog.test.ts` (R)
 
-### CAT-16 · The cerebral cortex hides the forebrain's deep structures only
+### CAT-16 · The picture hides deep structures and the insides of the brainstem and cerebellum
 
-- **Rule:** A structure counts as beneath the cortex when it is a deep forebrain structure; cerebellar and brainstem structures, and the cortex itself, do not.
+- **Rule:** A structure counts as hidden (a pick of it opens focused) when it is a deep forebrain structure, or lies inside the brainstem or cerebellum: their nuclei, peduncles and white matter. Their outer parts (aseg's brainstem and cerebellar cortex, NextBrain's midbrain, pons and medulla, the teaching set's territories built on them, CerebNet's lobules) and the cortex itself do not. Before Focus ghosted everything (2026-11-01) a see-through cerebral cortex could reveal nothing of the brainstem, so the legacy rule left all of it out; a pick of a midbrain nucleus then framed only the temporal lobe in front of it.
 - **Kind:** data
 - **Level:** unit
-- **Source:** `viewer/catalog/labels.js:47-53`
-- **Expected:** on `cdmd`: `aseg:left:17` (hippocampus), `aseg:left:12` (putamen), `aseg:midline:253` (corpus callosum), `learning:left:fornix`, `learning:left:subthalamic` → true; `aseg:left:8` (cerebellar cortex), `learning:left:pons`, `learning:left:dentate`, `nextbrain:left:352` (substantia nigra), `destrieux:left:38` → false.
-- **Covered by:** `src/lib/core/catalog/labels.test.ts` (S); `src/lib/core/catalog/published-catalog.test.ts` (S, eight ids and every cortical region; the ten ids of `labels.test.ts` repeat it)
+- **Source:** `viewer/catalog/labels.js:47-53` (narrowed 2026-11-18)
+- **Expected:** on `cdmd`: `aseg:left:17` (hippocampus), `aseg:left:12` (putamen), `aseg:midline:253` (corpus callosum), `learning:left:fornix`, `learning:left:subthalamic`, `learning:left:dentate`, `aseg:left:7` (cerebellar white matter), `nextbrain:left:352` (substantia nigra), `learning:left:red-nucleus`, `aan:midline:dorsal-raphe` → true; `aseg:left:8` (cerebellar cortex), `aseg:midline:16` (brainstem), `learning:left:pons`, `learning:caudal-medulla`, `learning:lobule-v-left`, `nextbrain:left:580` (pons), `destrieux:left:38` → false.
+- **Covered by:** `src/lib/core/catalog/labels.test.ts` (S); `src/lib/core/catalog/published-catalog.test.ts` (S, eleven ids and every cortical region)
 
 ## Visibility
 

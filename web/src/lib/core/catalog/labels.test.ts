@@ -242,7 +242,7 @@ test('the aseg optic chiasm is grouped with the diencephalon, not the brainstem'
   assert.equal(labelOf(chiasm, 'fr').group, 'Diencéphale');
 });
 
-test('the cortex hides the forebrain\u2019s deep structures, not the cerebellum, brainstem or cortex itself', () => {
+test('the picture hides deep structures and what lies inside the brainstem and cerebellum, not their outer parts', () => {
   const manifest = readModel<Manifest>('cdmd/manifest.json');
   const regions = new Map<string, Region>(manifest.regions.map((region) => [region.id, region]));
   const hidden = (id: string) => beneathCortex(regions.get(id)!);
@@ -252,9 +252,16 @@ test('the cortex hides the forebrain\u2019s deep structures, not the cerebellum,
   assert.equal(hidden('learning:left:fornix'), true);
   assert.equal(hidden('learning:left:subthalamic'), true);
   assert.equal(hidden('aseg:left:8'), false, 'cerebellar cortex');
+  assert.equal(hidden('aseg:midline:16'), false, 'brainstem');
   assert.equal(hidden('learning:left:pons'), false);
-  assert.equal(hidden('learning:left:dentate'), false, 'inside the cerebellum, not the cerebrum');
-  assert.equal(hidden('nextbrain:left:352'), false, 'substantia nigra, a brainstem nucleus');
+  assert.equal(hidden('learning:caudal-medulla'), false);
+  assert.equal(hidden('learning:lobule-v-left'), false);
+  assert.equal(hidden('nextbrain:left:580'), false, 'pons');
+  assert.equal(hidden('learning:left:dentate'), true, 'inside the cerebellum');
+  assert.equal(hidden('aseg:left:7'), true, 'cerebellar white matter');
+  assert.equal(hidden('nextbrain:left:352'), true, 'substantia nigra, inside the midbrain');
+  assert.equal(hidden('learning:left:red-nucleus'), true);
+  assert.equal(hidden('aan:midline:dorsal-raphe'), true);
   assert.equal(hidden('destrieux:left:38'), false);
 });
 

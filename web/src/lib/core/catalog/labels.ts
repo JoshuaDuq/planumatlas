@@ -49,15 +49,34 @@ function alphabeticalBucket(code: string): string {
   return BUCKETS[index] ?? BUCKETS.at(-1)!;
 }
 
-/** Systems outside the cerebral hemispheres: a see-through cerebral cortex reveals nothing of them. */
+/** Systems outside the cerebral hemispheres, whose outer parts the picture shows. */
 const OUTSIDE_CEREBRUM = new Set(['Cerebellum', 'Brainstem']);
 
 /**
- * Whether the cerebral cortex hides a region: a structure of the forebrain's deep systems (basal
- * ganglia, thalamus, limbic structures, fornix, corpus callosum), not one of the cerebellum or brainstem.
+ * The source labels of those outer parts: aseg's brainstem and cerebellar cortex, NextBrain's midbrain,
+ * pons and medulla, and every CerebNet lobule. A teaching structure built on one of them is outer too.
+ */
+const OUTER_LABELS: Readonly<Record<string, ReadonlySet<number> | 'all'>> = {
+  aseg: new Set([8, 16, 47]),
+  nextbrain: new Set([384, 580, 662]),
+  cerebnet: 'all',
+};
+
+function outerPart(region: Region): boolean {
+  const outer = OUTER_LABELS[region.source_atlas ?? region.atlas ?? ''];
+  if (outer === 'all') return true;
+  const labels = region.source_label_ids ?? [region.source_label_id];
+  return Boolean(outer && labels.some((label) => label != null && outer.has(label)));
+}
+
+/**
+ * Whether the opaque picture hides a region: a structure of the forebrain's deep systems (basal
+ * ganglia, thalamus, limbic structures, fornix, corpus callosum), or one inside the brainstem or
+ * cerebellum (its nuclei, peduncles and white matter), not their outer parts.
  */
 export const beneathCortex = (region: Region) =>
-  region.kind === 'structure' && !OUTSIDE_CEREBRUM.has(labelOf(region, 'en')!.group);
+  region.kind === 'structure' &&
+  (!OUTSIDE_CEREBRUM.has(labelOf(region, 'en')!.group) || !outerPart(region));
 
 /**
  * A region's display name, short code, navigation group and search aliases.

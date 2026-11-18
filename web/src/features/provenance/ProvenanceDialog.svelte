@@ -329,6 +329,34 @@
       gap: var(--space-2);
       margin-top: var(--space-3);
     }
+    .provenance-actions button {
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-3);
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+      background: var(--surface-tonal);
+      color: var(--text-primary);
+      font-size: var(--text-ui);
+      font-weight: 500;
+      line-height: var(--lh-ui);
+      cursor: pointer;
+      transition:
+        background-color var(--ui-transition) var(--ease-ui),
+        transform var(--press-transition) var(--ease-ui);
+    }
+    .provenance-actions button:active:not(:focus-visible) {
+      transform: scale(var(--press-scale));
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .provenance-actions button:hover {
+        background: var(--surface-tonal-hover);
+      }
+    }
+    @media (pointer: coarse) {
+      .provenance-actions button {
+        min-height: 44px;
+      }
+    }
     .provenance-methods {
       margin: var(--space-4) 0 0;
     }

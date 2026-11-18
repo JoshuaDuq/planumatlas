@@ -88,14 +88,22 @@ describe('the published cdmd anatomy', () => {
     }
   });
 
-  test('CAT-16: exactly the deep forebrain structures lie beneath the cortex', () => {
+  test('CAT-16: deep forebrain structures and the insides of the brainstem and cerebellum lie hidden', () => {
     const beneath = manifest.regions.filter(beneathCortex).map((region) => region.id);
-    for (const id of ['aseg:left:17', 'aseg:left:12', 'aseg:midline:253', 'learning:left:fornix'])
+    for (const id of [
+      'aseg:left:17',
+      'aseg:left:12',
+      'aseg:midline:253',
+      'learning:left:fornix',
+      'nextbrain:left:352',
+      'learning:left:dentate',
+    ])
       assert.ok(beneath.includes(id), id);
     for (const id of [
       'aseg:left:8',
+      'aseg:midline:16',
       'learning:left:pons',
-      'nextbrain:left:352',
+      'learning:lobule-v-left',
       'destrieux:left:38',
     ])
       assert.ok(!beneath.includes(id), id);
