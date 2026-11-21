@@ -48,6 +48,12 @@ export function publishedRecord(url: string | URL): PublishedRecord | null {
  */
 export const versionOf = (record: PublishedRecord): string => record.sha256.slice(0, 16);
 
+/** Adds the published files of the anatomies other than the default, before one of them is opened. */
+export async function loadOtherAnatomyFiles(): Promise<void> {
+  if (!PUBLISHED.files) return;
+  Object.assign(PUBLISHED.files, (await import('./published-elsewhere.ts')).default);
+}
+
 /** Each file carries its own content version, so a deploy re-downloads only what changed. */
 function versioned(url: string | URL): string {
   const record = publishedRecord(url);

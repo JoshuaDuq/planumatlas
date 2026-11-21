@@ -15,6 +15,7 @@ import { ASSET_BASE } from './site.ts';
 const webRoot = fileURLToPath(new URL('../', import.meta.url));
 const publicDirectory = resolve(webRoot, '../public');
 const publishedModule = resolve(webRoot, 'src/lib/core/assets/published-files.ts');
+const elsewhereModule = resolve(webRoot, 'src/lib/core/assets/published-elsewhere.ts');
 const serviceWorkerSource = resolve(webRoot, 'src/service-worker.ts');
 const prefetchSource = resolve(webRoot, 'src/boot/prefetch.js');
 
@@ -82,12 +83,25 @@ export function publishedAssets(): Plugin {
     name: 'published-files',
     enforce: 'pre',
     load(id) {
-      if (id.split('?')[0] !== publishedModule) return null;
-      // The app derives each version from the sha256 (`versionOf`), so the entry does not carry it.
+      const file = id.split('?')[0];
+      if (file !== publishedModule && file !== elsewhereModule) return null;
+      // The anatomies other than the default go to their own chunk, off the first visit's entry.
+      const index = JSON.parse(
+        readFileSync(resolve(publicDirectory, 'models/anatomies.json'), 'utf8'),
+      ) as { default: string; anatomies?: { id: string }[] };
+      const others = (index.anatomies ?? [])
+        .map(({ id }) => `models/${id}/`)
+        .filter((prefix) => prefix !== `models/${index.default}/`);
+      const elsewhere = (path: string) => others.some((prefix) => path.startsWith(prefix));
+      // The app derives each version from the sha256 (`versionOf`), so neither map carries it.
       const files = Object.fromEntries(
-        Object.entries(published).map(([path, { version: _version, ...record }]) => [path, record]),
+        Object.entries(published)
+          .filter(([path]) => elsewhere(path) === (file === elsewhereModule))
+          .map(([path, { version: _version, ...record }]) => [path, record]),
       );
-      return `export default ${JSON.stringify({ base: ASSET_BASE, files })};`;
+      return file === publishedModule
+        ? `export default ${JSON.stringify({ base: ASSET_BASE, files })};`
+        : `export default ${JSON.stringify(files)};`;
     },
     // Appended to <head> before Vite adds the stylesheet link, so the script still starts
     // ahead of the CSS while <meta charset> stays within the first 1024 bytes (HTML Standard 4.2.5.4).
@@ -111,8 +125,10 @@ export function publishedAssets(): Plugin {
           published[path] = publishedRecord(publicDirectory, path);
         else if (event === 'unlink') delete published[path];
         else return;
-        const module = server.moduleGraph.getModuleById(publishedModule);
-        if (module) server.moduleGraph.invalidateModule(module);
+        for (const id of [publishedModule, elsewhereModule]) {
+          const module = server.moduleGraph.getModuleById(id);
+          if (module) server.moduleGraph.invalidateModule(module);
+        }
         server.ws.send({ type: 'full-reload' });
       });
     },

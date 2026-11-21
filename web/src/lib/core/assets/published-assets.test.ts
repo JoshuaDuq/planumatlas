@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchPublished, reloadWithoutStoredModels } from './published-assets.ts';
+import {
+  fetchPublished,
+  loadOtherAnatomyFiles,
+  reloadWithoutStoredModels,
+} from './published-assets.ts';
 import { publish } from './published-test-support.ts';
 
 const record = (fill: string) => ({ sha256: fill.repeat(64), size: 1 });
@@ -87,5 +91,21 @@ describe('reloadWithoutStoredModels', () => {
     });
     await expect(reloadWithoutStoredModels()).rejects.toThrow('broken');
     expect(reload).not.toHaveBeenCalled();
+  });
+});
+
+describe('loadOtherAnatomyFiles', () => {
+  it('adds the other anatomies’ files to the map, so one of them can then be fetched', async () => {
+    publish({ 'models/cdmd/manifest.json': record('a') });
+    vi.doMock('./published-elsewhere.ts', () => ({
+      default: { 'models/mni152/manifest.json': record('c') },
+    }));
+    const fetch = recordFetches();
+    const url = 'https://example.test/neuroatlas/models/mni152/manifest.json';
+    expect(() => fetchPublished(url)).toThrow(expect.objectContaining({ code: 'asset-fetch' }));
+    await loadOtherAnatomyFiles();
+    await fetchPublished(url);
+    expect(fetch.mock.calls[0][0]).toBe(`${url}?v=cccccccccccccccc`);
+    vi.doUnmock('./published-elsewhere.ts');
   });
 });

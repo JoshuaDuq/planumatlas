@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,6 +42,7 @@ vi.mock('../../scripts/published-version.mjs', async (importActual) => {
 const webRoot = fileURLToPath(new URL('../', import.meta.url));
 const publicDirectory = resolve(webRoot, '../public');
 const publishedModule = resolve(webRoot, 'src/lib/core/assets/published-files.ts');
+const elsewhereModule = resolve(webRoot, 'src/lib/core/assets/published-elsewhere.ts');
 
 /** A plugin hook, whether written as a function or as `{ handler }`. */
 function hook(plugin: Plugin, name: keyof Plugin): (...args: unknown[]) => unknown {
@@ -150,6 +151,26 @@ describe('the dev server watcher', () => {
     JSON.parse(
       (hook(plugin, 'load')(publishedModule) as string).replace(/^export default |;$/g, ''),
     ).files as Record<string, unknown>;
+
+  it('BUILD-16 gives the entry the default anatomy and leaves another anatomy to its own chunk', () => {
+    // The published index lists mni152 beside the default; its files stay off the first visit.
+    const path = 'models/mni152/manifest.json';
+    mkdirSync(resolve(fixture, 'models/mni152'), { recursive: true });
+    writeFileSync(resolve(fixture, path), '{"atlases":[]}');
+    try {
+      const { plugin, server } = startServer();
+      server.watcher.emit('all', 'add', resolve(publicDirectory, path));
+      const elsewhere = JSON.parse(
+        (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
+      ) as Record<string, unknown>;
+      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(elsewhere[path]).not.toHaveProperty('version');
+      expect(loadedFiles(plugin)).not.toHaveProperty(path);
+      expect(loadedFiles(plugin)).toHaveProperty('models/bert/manifest.json');
+    } finally {
+      rmSync(resolve(fixture, 'models/mni152'), { recursive: true, force: true });
+    }
+  });
 
   it('BUILD-08 watches the published trees, which lie outside the app root', () => {
     const { server } = startServer();
