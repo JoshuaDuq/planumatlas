@@ -131,11 +131,11 @@ That check waits up to 30 s: on the runners' software WebGL a window resize reac
 frame, and a polling probe slows it further (about 10 s measured), so the default 5 s poll timed out although the
 inset did clear.
 
-**WebKit is unconfirmed.** `src/app/webgl-check.ts` refuses a browser without WebGL 2 and
-`EXT_color_buffer_float`, and WebKit takes no launch flag for its GL path, unlike Chromium's SwiftShader
-switches. Linux WebKit from Playwright's image has not yet been run against it, since e2e is not run
-locally: the first nightly run is the confirmation. The smoke's boot test asks for both first and names what is
-missing, rather than waiting out the 90 s ready timeout on the failure screen.
+`src/app/webgl-check.ts` refuses a browser without WebGL 2 and `EXT_color_buffer_float`, and WebKit
+takes no launch flag for its GL path, unlike Chromium's SwiftShader switches. Linux WebKit from
+Playwright's image passes the nightly `webkit-iphone` smoke (~45 s); the boot test still checks both
+capabilities first so any future image regression names what is missing rather than waiting out the
+90 s ready timeout on the failure screen.
 
 The live site is checked after each deploy (BUILD-19, deploy.yml's `live-check`): the page must name the
 entry script and manifest version the deploy built, and the manifest must be served at that version.

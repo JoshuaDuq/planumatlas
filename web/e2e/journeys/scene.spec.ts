@@ -84,11 +84,14 @@ test('pick and inspect on the real model, then find a region by search', async (
   let probed = 0;
   let point = points[0]!;
   await expect
-    .poll(async () => {
-      point = points[probed++ % points.length]!;
-      await page.mouse.move(point.x, point.y, { steps: 3 });
-      return chip.isVisible();
-    })
+    .poll(
+      async () => {
+        point = points[probed++ % points.length]!;
+        await page.mouse.move(point.x, point.y, { steps: 3 });
+        return chip.isVisible();
+      },
+      { timeout: 30_000 },
+    )
     .toBe(true);
   const name = (await chip.textContent())!.trim();
   expect(name).not.toBe('');
@@ -105,7 +108,8 @@ test('pick and inspect on the real model, then find a region by search', async (
   await expect(bar(page)).toHaveCount(0);
   await expect.poll(() => app.hash()).not.toContain('hidden=');
 
-  // Find a region.
+  // Find a region: open search from the region detail's header.
+  await page.getByRole('button', { name: 'Search regions' }).click();
   const field = page.getByRole('combobox', { name: 'Search regions' });
   await field.fill('middle frontal gyrus');
   await expect(

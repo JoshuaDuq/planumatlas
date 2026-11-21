@@ -2,7 +2,7 @@ name: Tests
 
 on:
   pull_request:
-    branches: [main, svelte-rebuild]
+    branches: [main]
   # Called by the deploy workflow, which publishes nothing unless this passes.
   workflow_call:
   # Runs everything, including the end-to-end tests that pull requests skip.
@@ -91,6 +91,8 @@ jobs:
               - config/**
               - data/**
               - public/**
+              - CITATION.cff
+              - docs/reference/references.md
               - scripts/published-version.mjs
               - scripts/published-version.test.mjs
               - .github/scripts/**
@@ -134,6 +136,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
+        # mni152 is held out until the midline septal cross-source overlap (0.574 vs 0.50) is resolved.
         anatomy: [cdmd]
     steps:
       - name: Checkout repository
@@ -160,8 +163,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Skip data/*/ neuroimaging subdirectories (~235 MB); web only reads top-level data/* catalogs.
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/data/*/
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -260,6 +269,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/data/*/
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -272,8 +286,9 @@ jobs:
         run: npm ci --prefix web
 
       # Every Playwright image in this file, web-e2e's included, against the installed Playwright
-      # and the registry's digest for its tag.
+      # and the registry's digest for its tag. Run once on shard 1 instead of hitting MCR 4x.
       - name: Check the image matches Playwright
+        if: matrix.shard == 1
         shell: bash
         run: |
           version=$(node -p "require('./web/node_modules/playwright-core/package.json').version")
@@ -331,6 +346,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/data/*/
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -351,7 +371,7 @@ jobs:
         run: npm run test:e2e --prefix web -- --project=${{ matrix.project }} --workers=1 --retries=1 --fail-on-flaky-tests --global-timeout=2400000
 
       - name: Upload failure artifacts
-        if: ${{ !cancelled() }}
+        if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: web-e2e-failures-${{ matrix.project }}

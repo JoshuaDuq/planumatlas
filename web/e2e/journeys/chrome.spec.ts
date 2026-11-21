@@ -17,8 +17,8 @@ test('data bar, comparison CSV, saved PNG and full screen on one load', async ({
   const data = page.getByRole('button', { name: /^Atlas and display settings: / });
   await data.click();
   await expect(field(page, 'Atlas')).toHaveValue('destrieux');
-  // A page opened plainly shows the lobes.
-  await expect(field(page, 'Colour')).toHaveValue('lobe');
+  // A page opened plainly shows the atlas regions.
+  await expect(field(page, 'Colour')).toHaveValue('atlas');
   await field(page, 'Colour').selectOption({ label: 'CAB-NP networks (atlas becomes HCP-MMP)' });
   await expect(field(page, 'Atlas')).toHaveValue('hcp-mmp', { timeout: 60_000 });
   await expect(field(page, 'Colour')).toHaveValue('cab-np');

@@ -172,7 +172,7 @@ def displayed_signal(config):
     return mri[labels != 0]
 
 
-@pytest.mark.parametrize("anatomy", ["cdmd"])
+@pytest.mark.parametrize("anatomy", ["cdmd", "mni152"])
 def test_published_window_does_not_clip_the_measured_signal(anatomy, published):
     config, records = published(anatomy)
     display = records["display"]
@@ -180,7 +180,7 @@ def test_published_window_does_not_clip_the_measured_signal(anatomy, published):
     assert (displayed_signal(config) >= high).mean() < 0.005
 
 
-@pytest.mark.parametrize("anatomy", ["cdmd"])
+@pytest.mark.parametrize("anatomy", ["cdmd", "mni152"])
 def test_published_window_maps_signal_to_grey_proportionally(anatomy, published):
     # Floor at zero, so a tissue twice as bright on T1 is twice as bright on
     # screen. A raised floor would add an offset and break that on every

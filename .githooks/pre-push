@@ -1,7 +1,36 @@
 #!/bin/sh
-# The fast part of CI's web-check, run before a push. Enable once with: git config core.hooksPath .githooks
+# Fast pre-push checks scoped to what changed since upstream (or origin/main).
+# Enable once per clone with: git config core.hooksPath .githooks
 set -eu
-cd "$(git rev-parse --show-toplevel)/web"
-npm run --silent format -- --check
-npm run --silent lint
-npm test
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+if base="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)"; then
+  changed="$(git diff --name-only "$base...HEAD")"
+elif git rev-parse --verify --quiet origin/main >/dev/null; then
+  changed="$(git diff --name-only "origin/main...HEAD")"
+else
+  changed="$(git diff --name-only HEAD~1..HEAD 2>/dev/null || true)"
+fi
+
+if [ -z "$changed" ]; then
+  exit 0
+fi
+
+if printf '%s\n' "$changed" | grep -qE '(^brain_model/|^tests/|^scripts/.*\.py$|^pyproject\.toml$|\.py$)'; then
+  uv run ruff check
+fi
+
+if printf '%s\n' "$changed" | grep -qE '(^web/|^config/|^data/[^/]+\.(yaml|json)$|^scripts/published-version)'; then
+  (
+    cd "$root/web"
+    npm run --silent format -- --check
+    npm run --silent lint
+    npm test
+  )
+fi
+
+if printf '%s\n' "$changed" | grep -qE '^workers/feedback/'; then
+  node --test 'workers/feedback/**/*.test.ts'
+fi

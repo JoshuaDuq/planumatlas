@@ -15,9 +15,12 @@ const prefetched = [
 
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, (char) => `\\${char}`);
 
-/** The URL a published file is requested under: its path and its own content version. */
+/** The built site served by e2e/serve-site.mjs: model layers are meshopt-compressed (BUILD-14). */
+const servedRoot = `${repoRoot}web/dist`;
+
+/** The URL a published file is requested under: its path and its served content version. */
 const versioned = (base: string, file: string) =>
-  `${base}${file}?v=${publishedRecord(`${repoRoot}public`, file).version}`;
+  `${base}${file}?v=${publishedRecord(servedRoot, file).version}`;
 
 /** The page's WebGL 2 context is missing. */
 const lackWebgl2 = (page: Page) =>
@@ -47,7 +50,7 @@ test('a cold start reaches ready, asks for each prefetched file once and version
   for (const { url } of app.requestsTo(/\/(models|diffusion)\//)) {
     const [path, version] = url.slice(root.length).split('?v=');
     expect(version, `${path} is requested without a version`).toBe(
-      publishedRecord(`${repoRoot}public`, path!).version,
+      publishedRecord(servedRoot, path!).version,
     );
   }
 });

@@ -17,8 +17,6 @@ let errors: Error[];
 test.beforeEach(async ({ page }) => {
   errors = [];
   page.on('pageerror', (error) => errors.push(error));
-  // The guided tour has its own tests; here it would only cover the stage.
-  await page.addInitScript(() => localStorage.setItem('planum.guide', 'seen'));
 });
 
 test.afterEach(() => {

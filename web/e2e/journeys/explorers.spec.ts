@@ -21,7 +21,7 @@ test('open a function and Restore, open a deficit and a mapped region, step a ci
   await expect(page.getByRole('status').filter({ hasText: /HCP-MMP areas?/ })).toBeVisible({
     timeout: 60_000,
   });
-  await expect.poll(() => app.hash()).toContain('function=language');
+  await expect.poll(() => app.hash(), { timeout: 30_000 }).toContain('function=language');
   await page.getByRole('button', { name: 'Restore previous view' }).click();
   await expect(row).toBeFocused();
   await expect.poll(() => app.hash()).not.toContain('function=');
@@ -45,6 +45,8 @@ test('open a function and Restore, open a deficit and a mapped region, step a ci
   await page.getByRole('tab', { name: 'Circuits', exact: true }).click();
   await page.getByRole('button', { name: /^Visual pathway/ }).click();
   const stepper = page.getByRole('group', { name: 'Landmarks' });
+  await expect(page.locator('[data-circuit-title]')).toHaveText('Visual pathway');
+  await page.getByRole('button', { name: 'Next landmark' }).click();
   await expect(page.locator('[data-circuit-title]')).toHaveText('Optic chiasm');
   await expect(stepper).toContainText('1 of 4');
   await page.getByRole('button', { name: 'Next landmark' }).click();

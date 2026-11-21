@@ -25,8 +25,10 @@ test('the phone: the sheet tells the stage, focus survives the resize, the focus
   await page.setViewportSize(PHONE);
   await expect(handle).toBeVisible();
   await expect(tab).toBeFocused();
-  await expect.poll(covered).toBeGreaterThan(60);
-  await handle.click();
+  // The resize reaches the page after a slow software-WebGL frame, and polling slows it: see docs/testing.
+  await expect.poll(covered, { timeout: 30_000 }).toBeGreaterThan(60);
+  // The handle sits behind the grip row (which also holds the search button), so click the visible bar.
+  await handle.locator('.sheet-handle-bar').click();
   const stage = (await page.locator('#viewport').boundingBox())!;
   await expect.poll(covered).toBeCloseTo(Math.round(stage.height * 0.5), -1);
 
@@ -40,7 +42,11 @@ test('the phone: the sheet tells the stage, focus survives the resize, the focus
       if (focused.closest('#sheet')) return false;
       const rect = focused.getBoundingClientRect();
       const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
-      return !(hit && (hit === focused || focused.contains(hit) || hit.contains(focused)));
+      if (!hit) return true;
+      if (hit === focused || focused.contains(hit) || hit.contains(focused)) return false;
+      // Within the 3D orientation gizmo, front-facing axis letters intentionally z-sort ahead of the centre dot.
+      const gizmo = focused.closest('.orientation-gizmo');
+      return !(gizmo && gizmo.contains(hit));
     });
     expect(obscured, `Tab ${step + 1}`).toBe(false);
   }

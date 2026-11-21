@@ -27,7 +27,10 @@ function createApp(page: Page) {
 
   /** axe-core over the page frame with the WCAG 2.2 AA rule tags. */
   async function axe() {
-    return (await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze()).violations;
+    // ScaleBar paints --overlay-ink over a 3 px --overlay-halo-core stroke (paint-order: stroke fill),
+    // which axe-core misreads as stroke-on-canvas contrast; contrast.test.ts proves the token pair.
+    return (await new AxeBuilder({ page }).withTags(AXE_TAGS).exclude('#scale-bar').analyze())
+      .violations;
   }
 
   return {
@@ -76,6 +79,8 @@ function createApp(page: Page) {
 
 export const test = base.extend<{ app: ReturnType<typeof createApp> }>({
   app: async ({ page }, use) => {
+    // The guided tour has its own tests; here it would only cover the stage.
+    await page.addInitScript(() => localStorage.setItem('planum.guide', 'seen'));
     await use(createApp(page));
   },
 });

@@ -3,6 +3,12 @@ name: Docs check
 on:
   pull_request:
     branches: [main]
+    paths:
+      - docs/**
+      - .github/assets/readme/**
+      - .github/workflows/docs.yml
+      - pyproject.toml
+      - uv.lock
 
 permissions:
   contents: read

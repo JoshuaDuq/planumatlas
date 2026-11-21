@@ -4,12 +4,18 @@ on:
   push:
     branches: [main]
     # Agent, design and repository notes are not part of the site or its checks.
+    # CITATION.cff and docs/reference/references.md are read by web/build/references.ts, so stay watched.
     paths-ignore:
       - deliverables/**
       - AGENTS.md
       - CLAUDE.md
+      - CHANGELOG.md
+      - LICENSE
+      - NOTICE
       - PRODUCT.md
       - README.md
+      - SECURITY.md
+      - .github/dependabot.yml
   workflow_dispatch:
 
 permissions:
@@ -43,8 +49,14 @@ jobs:
       manifest: ${{ steps.expected.outputs.manifest }}
       version: ${{ steps.expected.outputs.version }}
     steps:
+      # Skip data/*/ neuroimaging subdirectories (~235 MB); web and docs only read top-level data/* files.
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/data/*/
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
