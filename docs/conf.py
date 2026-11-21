@@ -27,6 +27,7 @@ extensions = [
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_sitemap",
+    "sphinxext.opengraph",
 ]
 
 # MathJax is served from _static/mathjax, not from a CDN, so the pages make no third-party request.
@@ -82,6 +83,12 @@ html_baseurl = "https://planumatlas.com/docs/"
 # The pages are neither versioned nor translated, so each sitemap entry is html_baseurl plus the page.
 sitemap_url_scheme = "{link}"
 sitemap_excludes = ["search.html", "genindex.html"]
+# Each page's description and share preview, from its opening paragraph (sphinxext-opengraph).
+ogp_site_url = html_baseurl
+ogp_site_name = "Planum"
+ogp_image = "https://planumatlas.com/preview.png"
+ogp_description_length = 160
+ogp_social_cards = {"enable": False}
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_js_files = ["docs.js"]
