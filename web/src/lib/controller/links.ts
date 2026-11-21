@@ -493,8 +493,10 @@ export function createLinks({
         (explorer === 'functions' && selectedFunction) ||
         (explorer === 'deficits' && selectedDeficit) ||
         (explorer === 'circuits' && (valid.circuit || valid.circuitMap)) ||
-        // The lesion's report is Anatomy's detail while no region is selected.
-        (explorer === 'anatomy' && (valid.lesion || lesion.coordinate) && !valid.selectedRegion)
+        // The lesion's report is Anatomy's detail while no region is selected, and Deficits' while no
+        // deficit is open either.
+        (explorer === 'anatomy' && (valid.lesion || lesion.coordinate) && !valid.selectedRegion) ||
+        (explorer === 'deficits' && valid.lesion && !lesion.coordinate && !valid.selectedRegion)
       ) {
         hooks.showDetail();
       }

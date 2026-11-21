@@ -200,6 +200,20 @@ describe('functionProfile', () => {
     assert.equal(profile.lesionBridge, null);
   });
 
+  test('FUNC-21 · a lesion check names its parcels as the regions they are, not by source name', () => {
+    const anatomy = createCatalog(manifest);
+    const [first, , third] = functionProfile({ ...deps(), anatomy }, 'language', 'en').lesions!;
+    assert.equal(first!.detail, 'Dronkers et al. 2004 · Middle temporal gyrus (L) 76% coloured');
+    assert.doesNotMatch(third!.detail, /G_|_and_|&/);
+    anatomy.setLanguage('fr');
+    const [french] = functionProfile({ ...deps(), anatomy }, 'language', 'fr').lesions!;
+    assert.match(
+      french!.detail,
+      /^Dronkers et al\. 2004 · Gyrus temporal moyen \(G\), part colorée 76\u202f%$/,
+    );
+    assert.doesNotMatch(french!.detail, /G_temporal_middle/);
+  });
+
   test('a searched term has no lesion section; a population term bridges only where Deficits match', () => {
     const population = [...domains.search!.terms.values()].find((r) => r.kind === 'population')!;
     const withMatches = functionProfile(deps(3), population.id, 'en');

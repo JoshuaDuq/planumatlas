@@ -109,7 +109,7 @@ test('pick and inspect on the real model, then find a region by search', async (
   const field = page.getByRole('combobox', { name: 'Search regions' });
   await field.fill('middle frontal gyrus');
   await expect(
-    page.getByRole('option', { name: /^Middle frontal gyrus, left, Frontal$/ }),
+    page.getByRole('option', { name: /^Middle frontal gyrus, left and right, Frontal$/ }),
   ).toBeVisible();
   await field.press('Enter');
   await expect.poll(() => app.hash()).toContain('region=destrieux:left:');

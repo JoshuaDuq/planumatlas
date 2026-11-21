@@ -1,11 +1,10 @@
-// The whole route's labels over the fake engine in a real browser: where each dot, number and name sits, that
-// they follow the camera and keep clear of each other and the chrome, what they are named, and what they open.
+// The whole route's labels over the fake engine in a real browser: where each dot and number sits, that they
+// follow the camera and keep clear of each other and the chrome, what they are named, and what they open.
 import { afterEach, expect, test, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import type { ComponentProps } from 'svelte';
 import { userEvent } from 'vitest/browser';
 import type { ScreenPoint } from '../../lib/engine/api.ts';
-import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import { createFakeEngine } from '../../lib/engine/fake.ts';
@@ -18,14 +17,10 @@ const REGIONS = ['learning:midline:optic-chiasm', 'learning:left:lateral-genicul
 const NAMES = ['Optic chiasm', 'Left lateral geniculate nucleus'];
 const marks = REGIONS.map((region, index) => ({
   region,
-  name: NAMES[index]!,
   label: `Landmark ${index + 1}: ${NAMES[index]}`,
 }));
 
-afterEach(async () => {
-  cleanup();
-  await page.viewport(1280, 800);
-});
+afterEach(() => cleanup());
 
 /** The stage the marks stand on: 900 × 600 at the page's corner, on the scene's ground, as the stage host is. */
 function host() {
@@ -51,15 +46,15 @@ function mount(
   return { engine, onOpen };
 }
 
-/** An engine whose camera projects every landmark to the given points, on a visible stage of `height`. */
-function projecting(points: ScreenPoint[], height = 600) {
+/** An engine whose camera projects every landmark to the given points, on the whole 900 × 600 stage. */
+function projecting(points: ScreenPoint[]) {
   const fake = createFakeEngine({ manifest: manifest as unknown as Manifest });
   return {
     on: fake.on,
     model: fake.model,
     camera: {
       project: () => points,
-      visibleRect: { x: 0, y: 0, width: 900, height },
+      visibleRect: { x: 0, y: 0, width: 900, height: 600 },
     },
   } satisfies ComponentProps<typeof RouteMarks>['engine'];
 }
@@ -73,7 +68,7 @@ const meet = (a: DOMRect, b: DOMRect) =>
   Math.min(a.right, b.right) > Math.max(a.left, b.left) &&
   Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
 
-test('each dot sits on its landmark’s anchor as the camera projects it, its number and name beside it, and follows the camera', () => {
+test('each dot sits on its landmark’s anchor as the camera projects it, its number alone beside it, and follows the camera', () => {
   const engine = createFakeEngine({
     manifest: manifest as unknown as Manifest,
     hostSize: { width: 900, height: 600 },
@@ -88,12 +83,12 @@ test('each dot sits on its landmark’s anchor as the camera projects it, its nu
     });
   const before = engine.camera.project(anchors);
   expectDotsAt(before);
-  expect(buttons().map((button) => button.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
-    '1 Optic chiasm',
-    '2 Left lateral geniculate nucleus',
-  ]);
-  // Its name drawn, a label needs no tooltip.
-  expect(buttons().map((button) => button.dataset.tooltip)).toEqual([undefined, undefined]);
+  // The sheet lists the names; each number's tooltip and accessible name give its own.
+  expect(buttons().map((button) => button.textContent!.trim())).toEqual(['1', '2']);
+  expect(buttons().map((button) => button.dataset.tooltip)).toEqual(
+    marks.map((mark) => mark.label),
+  );
+  expect(buttons()[0]!.getAttribute('aria-label')).toBe('Landmark 1: Optic chiasm');
 
   engine.camera.applyView('left');
   const after = engine.camera.project(anchors);
@@ -170,29 +165,19 @@ test('following the camera reads no layout; a chrome resize measures the chrome 
   );
 });
 
-test('on a phone’s short stage the numbers stand alone, and each one’s tooltip names it', async () => {
-  await page.viewport(375, 812);
+test('each number stands centred on its own 24 px target', () => {
   mount(
     marks,
-    projecting(
-      [
-        { x: 100, y: 200 },
-        { x: 250, y: 300 },
-      ],
-      380,
-    ),
+    projecting([
+      { x: 100, y: 200 },
+      { x: 600, y: 300 },
+    ]),
   );
-  expect(buttons().map((button) => button.dataset.short)).toEqual(['true', 'true']);
-  expect(
-    buttons().map(
-      (button) => getComputedStyle(button.querySelector('.stage-label-name')!).visibility,
-    ),
-  ).toEqual(['hidden', 'hidden']);
-  expect(buttons().map((button) => button.dataset.tooltip)).toEqual(
-    marks.map((mark) => mark.label),
-  );
-  // The accessible name stays whole.
-  expect(buttons()[0]!.getAttribute('aria-label')).toBe('Landmark 1: Optic chiasm');
+  for (const button of buttons()) {
+    const box = button.getBoundingClientRect();
+    expect([box.width, box.height]).toEqual([24, 24]);
+    expect(centre(button.querySelector('.stage-label-number')!).x).toBeCloseTo(centre(button).x, 0);
+  }
 });
 
 test('a named toolbar of buttons, one Tab stop the arrows walk, each opening its landmark', async () => {

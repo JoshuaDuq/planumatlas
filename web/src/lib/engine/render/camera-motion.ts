@@ -14,7 +14,14 @@ import { fitScale, viewOffset, visibleRect } from './effective-viewport.ts';
 import type { Rect, Size } from './effective-viewport.ts';
 import { orbitPath } from './camera-path.ts';
 import type { OrbitPath } from './camera-path.ts';
-import { coastOnRelease, grabbed, levelOnOrbit, takePending, turnGoal } from './orbit-controls.ts';
+import {
+  coastOnRelease,
+  grabbed,
+  levelOnOrbit,
+  superiorOf,
+  takePending,
+  turnGoal,
+} from './orbit-controls.ts';
 import type {
   CameraDestination,
   CameraPlan,
@@ -315,7 +322,7 @@ export function createCameraMotion(
       target: plan.target.clone().add(pan),
       up: plan.up.clone(),
     };
-    turnGoal(next, theta, phi);
+    turnGoal(next, theta, phi, superiorOf(controls));
     const offset = next.position.clone().sub(next.target);
     const distance = Math.min(Math.max(offset.length() * zoom, plan.minDistance), plan.maxDistance);
     next.position.copy(next.target).addScaledVector(offset.normalize(), distance);

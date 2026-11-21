@@ -129,6 +129,15 @@ What opening a function does to the scene (draw, frame, hold the scene, the deep
 
 ## Opening a function
 
+### FUNC-57 · The tab entered from the opening picture lands on All functions
+
+- **Rule:** Choosing Functions from another tab, with no function open, no words in its search and no region selected, opens All functions through the panel's entry point (FUNC-14), so the brain is painted with the overview at once: on HCP-MMP unless the shown atlas lists functions, and the reader's atlas comes back when the tab is left (CTRL-25). Its profile's eleven overview functions are the list in front; the full list is behind Back. Choosing the tab already in front, carrying words from another tab's search, or entering with a region selected opens nothing: the list shows, led by the region's functions where its atlas has them. A link with `tab=functions` and no `function` shows the list as written.
+- **Kind:** behaviour
+- **Level:** unit (controller); browser in the composed app
+- **Source:** 2026-11-20 interface review, P1 "Functions and Deficits change the panel but not the brain"
+- **Expected:** `chooseMode('functions')` on a fresh scene → `openFunction('all')` once; again → none; `searchIn('functions', 'memory')` → none; with a region of the shown atlas selected → none. In the app: click Functions → `h2` "All functions" shown, `selectedFunction` "all", atlas `hcp-mmp`, 11 `.function-link`s; click Anatomy → atlas `destrieux`.
+- **Covered by:** `src/lib/controller/modes.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
 ### FUNC-14 · Opening a function focuses its heading at once and marks its row
 
 - **Rule:** Pressing a row (click, Enter or Space) opens the function's profile at once: its name, an `h2` that takes focus before the areas are drawn, and the profile scrolled to its top. The row becomes the one `aria-current="true"` row and is handed to the workspace as its current item. Pressing the open function again focuses its heading again.
@@ -196,12 +205,12 @@ What opening a function does to the scene (draw, frame, hold the scene, the deep
 
 ### FUNC-21 · Every lesion check is listed, one row per check
 
-- **Rule:** The lesion section lists each check of the map, even when several checks cite the same deficit (one per association), each with its own references and parcels. Pressing one opens its deficit through the Deficits tab's entry point.
+- **Rule:** The lesion section lists each check of the map, even when several checks cite the same deficit (one per association), each with its own references and parcels. A parcel is called by its region's name in the reader's language, as Deficits calls it, never by the atlas's source name (the Provenance record keeps those, PROV-05). Pressing one opens its deficit through the Deficits tab's entry point.
 - **Kind:** data
 - **Level:** unit (view-model) for the rows; browser for the hand-off and the keyed render
 - **Source:** `viewer/ui/panels/functions.js:222-249,383-384`
-- **Expected:** `language` → 6 rows named "Aphasia" (associations `aphasia-comprehension`, `aphasia-repetition`, …), the first reading "Dronkers et al. 2004 · <parcels>". Pressing a row → the Deficits entry point called with `aphasia`. Seven published domains have repeated deficits (`language`, `attention`, `social-cognition`, `spatial-attention`, `speech-production`, `recall`, `gestures`).
-- **Covered by:** `src/features/functions/functions.svelte.test.ts` (R: the hand-off, on a domain whose checks are distinct). Repeated deficits are uncovered, and likely broken: `FunctionProfile.svelte` keys the rows by `check.deficit`, which repeats for these seven domains (Svelte's keyed each rejects duplicate keys); no browser test opens one of them.
+- **Expected:** `language` → 6 rows named "Aphasia" (associations `aphasia-comprehension`, `aphasia-repetition`, …), the first reading "Dronkers et al. 2004 · Middle temporal gyrus (L) 76% coloured", none with a source name such as `G_Ins_lg_and_S_cent_ins`; in French the first ends "Gyrus temporal moyen (G), part colorée 76 %" (the participle agrees with « part », whatever the region's gender). Pressing a row → the Deficits entry point called with `aphasia`. Seven published domains have repeated deficits (`language`, `attention`, `social-cognition`, `spatial-attention`, `speech-production`, `recall`, `gestures`).
+- **Covered by:** `src/features/functions/functions-view.test.ts` (R: the parcels' names); `src/features/functions/functions.svelte.test.ts` (R: the hand-off, on a domain whose checks are distinct). Repeated deficits are uncovered, and likely broken: `FunctionProfile.svelte` keys the rows by `check.deficit`, which repeats for these seven domains (Svelte's keyed each rejects duplicate keys); no browser test opens one of them.
 
 ### FUNC-22 · A searched term's profile is in English, with its own caveat and no lesion checks
 

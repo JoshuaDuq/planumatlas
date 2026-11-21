@@ -1,4 +1,5 @@
 import type { Language, Region, Rgb } from '../../types/index.ts';
+import { percent } from '../format.ts';
 import { CAB_NP_NAMES_FR, NETWORK_NAMES_FR } from './networks.fr.ts';
 
 /** The published CAB-NP partition (`cab-np.json`). */
@@ -99,6 +100,25 @@ export function striatalNetworksOf(
   minimum = MINIMUM_SHARE,
 ) {
   return (region?.striatal_networks ?? []).filter((share) => share.fraction >= minimum);
+}
+
+/**
+ * A region's network in a few words: its largest cortical or striatal share with its percentage, else
+ * the one CAB-NP network that assigns the whole HCP-MMP area; null for a region in none.
+ */
+export function networkHeadline(
+  region: Region | null,
+  cabNp: CabNpPartition | null,
+  lang: Language,
+): string | null {
+  type Share = NonNullable<Region['networks']>[number];
+  const top = [...networksOf(region), ...striatalNetworksOf(region)].reduce<Share | null>(
+    (best, share) => (best && best.fraction >= share.fraction ? best : share),
+    null,
+  );
+  if (top) return `${networkName(top.network, lang)} ${percent(top.fraction, lang)}`;
+  const assigned = region ? (cabNp?.regions[region.id] ?? null) : null;
+  return assigned ? cabNpName(assigned, lang) : null;
 }
 
 /** The samples counted by the build, excluding samples assigned to no network. */

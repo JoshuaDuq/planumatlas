@@ -65,6 +65,11 @@ const button = (name: string) =>
   page.getByRole('button', { name, exact: true }).element() as HTMLElement;
 const letter = (code: string) =>
   document.querySelector<HTMLElement>(`.gizmo-letter[data-letter="${code}"]`)!;
+/** A finger on the gizmo's centre: down, not lifted, so no view is chosen. */
+const touchGizmo = () =>
+  gizmo()
+    .querySelector('.gizmo-centre')!
+    .dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', bubbles: true }));
 const centreOf = (node: Element) => {
   const box = node.getBoundingClientRect();
   return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
@@ -580,6 +585,9 @@ describe('size', () => {
     const session = cdp();
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
     try {
+      // The chevrons come with a touch on the gizmo.
+      touchGizmo();
+      flushSync();
       const up = button('Turn up');
       const glyph = centreOf(up.querySelector('svg')!);
       const s = letter('S').getBoundingClientRect();
@@ -589,6 +597,38 @@ describe('size', () => {
     } finally {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
     }
+  });
+
+  test('on a touch screen the chevrons wait for a touch on the gizmo or a key, and let touches through', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    await mount();
+    const turns = () => [...gizmo().querySelectorAll<HTMLElement>('.gizmo-turn')];
+    const shown = () => turns().map((node) => getComputedStyle(node).opacity === '1');
+    const session = cdp();
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+    try {
+      expect(shown()).toEqual([false, false, false, false]);
+      expect(turns().map((node) => getComputedStyle(node).pointerEvents)).toEqual(
+        Array(4).fill('none'),
+      );
+      // Still named for assistive technology.
+      expect(button('Turn up').getAttribute('aria-label')).toBe('Turn up');
+      touchGizmo();
+      flushSync();
+      await expect.poll(shown).toEqual([true, true, true, true]);
+      vi.advanceTimersByTime(4000);
+      flushSync();
+      await expect.poll(shown).toEqual([false, false, false, false]);
+      // A key's focus brings them too.
+      button('Turn up').focus();
+      await expect.poll(shown).toEqual([true, true, true, true]);
+    } finally {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+      vi.useRealTimers();
+    }
+    // A mouse sees them at rest.
+    (document.activeElement as HTMLElement).blur();
+    expect(shown()).toEqual([true, true, true, true]);
   });
 
   test('draws no plate: only the letters, the axes and the glyphs are painted', async () => {

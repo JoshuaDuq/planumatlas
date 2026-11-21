@@ -51,14 +51,21 @@ export const shortUrl = (url: unknown): string =>
 
 const link = (href: string | undefined) => (href ? { href, text: shortUrl(href) } : null);
 
-/** How much of each parcel one lesion check maps a domain's coloured areas cover. */
-export function checkedParcels(check: LesionCheck, lang: Language): string {
+/**
+ * How much of each parcel one lesion check maps a domain's coloured areas cover, each parcel called
+ * what `name` gives it: its source name in the provenance record, the region's name in a panel.
+ */
+export function checkedParcels(
+  check: LesionCheck,
+  lang: Language,
+  name: (mapping: LesionCheck['mappings'][number]) => string,
+): string {
   const copy = t(lang, 'domains');
   const glyphs: Record<string, string | undefined> = t(lang, 'sides').glyphs;
   return check.mappings
     .map((mapping) => {
       // Bilateral findings name one parcel twice; the side tells them apart.
-      const parcel = `${mapping.source_name} (${glyphs[mapping.region.split(':')[1]]})`;
+      const parcel = `${name(mapping)} (${glyphs[mapping.region.split(':')[1]]})`;
       return mapping.coverage === null
         ? copy.parcelOffSurface(parcel)
         : copy.parcelCoverage(parcel, percent(mapping.coverage, lang));
@@ -75,7 +82,7 @@ function lesionCheck(checks: readonly LesionCheck[], lang: Language): string {
       copy.lesionItem(
         check.deficit_name[lang],
         check.references.join(', '),
-        checkedParcels(check, lang),
+        checkedParcels(check, lang, (mapping) => mapping.source_name),
       ),
     ),
   );

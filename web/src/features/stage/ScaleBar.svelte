@@ -113,6 +113,18 @@
         var(--vis-bottom) + var(--stage-gutter) + var(--dock-height) + 2 * var(--space-2) + 16px
       );
     }
+    /*
+     * Above the dock the bar stands where an open popover's plate opens, and a rule cut short by the plate
+     * would misstate the scale: it steps aside until the popover closes, as on phones. A saved image keeps it.
+     */
+    :global(
+        #viewport:is([data-chrome='tight'], [data-chrome='stacked']):has(
+            .stage-popover:not([hidden])
+          )
+      )
+      .scale-bar {
+      visibility: hidden;
+    }
     /* Phones: the dock owns the bottom line, so the bar takes the top left, under any key, at 13px. */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .scale-bar,

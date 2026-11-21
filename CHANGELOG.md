@@ -51,6 +51,11 @@ releases yet: the live site is deployed from `main`.
   (such as amnesia after fornix or diencephalic injury) no longer colour a region.
 - The visual tour's optic tract and lateral geniculate nucleus are NextBrain's own labels, and the memory
   tour's stops are NextBrain's except the mammillary nuclei.
+- A circuit's whole route marks each landmark on the brain with its number alone: the landmark list names
+  them, and a number's tooltip names its landmark.
+- The brain sits level: named views, the opening view, turning the model and the orientation letters
+  even out the head's slight sideways lean in the scanner (2.6° of roll, 1.9° of yaw), as the exploded
+  view already did. Front to back it stays as scanned, and cuts and Linked MRI keep the scan's planes.
 - Planum opens on Destrieux in its **Regions** colours, not **Lobes**, and **Start over** returns to
   Destrieux in Regions from any atlas. Lobes stays one choice under **Colour**; a link keeps the colour
   it was written with.
@@ -67,9 +72,32 @@ releases yet: the live site is deployed from `main`.
   memory. One shown again is downloaded again.
 - Moving the view no longer walks every region again for the region list, the lobe key, the system picker
   or a search.
+- A region's sheet opens with one plain line: its main network, its leading functions and its linked
+  deficits. Area, centroid and source fold under **Measurements and source**, and the search above the
+  sheet is an icon in its location bar.
+- **Functions** opens on **All functions**, its 11 domains as the list, when no function, search or region
+  is open.
+- On a phone the sheet at rest offers the tab's search, with "Not clinical anatomy" under it; a tap opens
+  the list full with the field ready. The orientation gizmo's turn arrows show only while it is touched.
+- Anatomy search lists each structure once, with the tree's L and R keys (a press on a key picks that
+  side). Matches in another structure set follow under **Also in …** instead of each saying "In
+  FreeSurfer aseg".
+- A cortical region chosen by name in the Anatomy list is focused, so it stands out from the atlas's
+  colours.
+- **Stroke cases** in Deficits, with nothing selected, opens on the region shown that the most lesions in
+  the cohort reach, and says so.
+- A lesion simulated from Deficits shows its report there instead of switching to Anatomy.
+- **Add** in the stage dock says in its tooltip what it adds.
+- Just wider than a phone (an upright tablet at 820 px), **Linked MRI** opens over the page, as on a phone,
+  instead of squeezing the stage to about 260 px beside it.
 
 ### Fixed
 
+- On the NextBrain detail level the spinal cord now meets the medulla. NextBrain labels no medulla in
+  the 12 mm above the cord, and the cord stood apart from the brainstem, as in the rubrospinal tour;
+  that stretch is now drawn from FreeSurfer's brainstem label, as the teaching set already drew it.
+- A circuit's whole route is headed by the circuit's name, which the location bar truncates, instead of
+  "The whole route".
 - Picking a nucleus inside the brainstem or cerebellum (an arousal nucleus, the red nucleus, the substantia
   nigra, the dentate) opens it focused, as a deep forebrain structure opens; before, it was framed behind
   the opaque temporal lobe and nothing of it showed.
@@ -88,8 +116,3 @@ releases yet: the live site is deployed from `main`.
   header states.
 
 [Unreleased]: https://github.com/JoshuaDuq/planumatlas/commits/main
-- On the NextBrain detail level the spinal cord now meets the medulla. NextBrain labels no medulla in
-  the 12 mm above the cord, and the cord stood apart from the brainstem, as in the rubrospinal tour;
-  that stretch is now drawn from FreeSurfer's brainstem label, as the teaching set already drew it.
-- A circuit's whole route is headed by the circuit's name, which the location bar truncates, instead of
-  "The whole route".

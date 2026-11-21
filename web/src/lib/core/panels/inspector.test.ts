@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import type { Region } from '../../types/index.ts';
-import { inspectorEmptyChrome, sourceLabel } from './inspector.ts';
+import { inspectorEmptyChrome, regionLead, sourceLabel } from './inspector.ts';
 
 test('a source label names its atlas and keeps the ids apart, in the code voice', () => {
   assert.deepEqual(sourceLabel({ atlas: 'destrieux', source_label_id: 16 }, 'en'), {
@@ -99,4 +99,23 @@ test('PANEL-18 eight ids are listed, nine are counted and the full list is kept'
     stacked: false,
     all: '1, 2, 3, 4, 5, 6, 7, 8, 9',
   });
+});
+
+test('INSP-61 the lead names the network, two functions and two deficits, each only where known', () => {
+  assert.equal(
+    regionLead(
+      {
+        network: 'Somatomotor 69%',
+        functions: ['Action execution', 'Pain', 'Touch'],
+        deficits: ['Hemiparesis', 'Apraxia', 'Dysarthria'],
+      },
+      'en',
+    ),
+    'Network: Somatomotor 69%. Functions: Action execution, Pain. Linked deficits: Hemiparesis, Apraxia.',
+  );
+  assert.equal(
+    regionLead({ network: null, functions: [], deficits: ['Aphasie'] }, 'fr'),
+    'Déficits associés\u202f: Aphasie.',
+  );
+  assert.equal(regionLead({ network: null, functions: [], deficits: [] }, 'en'), null);
 });

@@ -32,7 +32,7 @@
     color: var(--overlay-ink);
   }
 
-  /* A route landmark's number and name: haloed type like the orientation letters, never a plate. */
+  /* A route landmark's number or a region's name: haloed type like the orientation letters, never a plate. */
   .stage-label {
     --label-dot: var(--overlay-ink);
     position: absolute;
@@ -70,16 +70,6 @@
   .stage-label-name {
     max-width: 20em;
     white-space: normal;
-  }
-  /* The number alone, centred on its target; the name keeps its measured size out of sight. */
-  .stage-label[data-short='true'] {
-    justify-content: center;
-  }
-  .stage-label[data-short='true'] .stage-label-name {
-    position: absolute;
-    left: 100%;
-    width: max-content;
-    visibility: hidden;
   }
   .stage-label-dot,
   .stage-label-leader {

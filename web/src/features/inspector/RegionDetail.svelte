@@ -1,6 +1,8 @@
 <!--
   The selected region (ui/panels/inspector.js, index.html:340-414): its name and where it sits,
-  the commands that act on it, its measurements, then the collapsed sections that qualify it.
+  what it is in one plain line (its network, strongest functions and deficits, read from the sections
+  below), the commands that act on it, its measurements folded into one row, then the collapsed
+  sections that qualify it.
   Without a selection it is one hint line. The sections keep legacy's order (decision 35 on #4):
   the comparison slot (R2), constituents, functional division, domains, networks, with NextBrain's
   boundary certainty and segmentation agreement after the comparison, all being about the labels'
@@ -42,7 +44,13 @@
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { MAX_HIGHLIGHTS } from '../../lib/types/constants.ts';
-  import { inspectorEmptyChrome } from '../../lib/core/panels/inspector.ts';
+  import { inspectorEmptyChrome, regionLead } from '../../lib/core/panels/inspector.ts';
+  import { networkHeadline } from '../../lib/core/catalog/networks.ts';
+  import {
+    domainName,
+    functionsAt,
+    scoredRegion,
+  } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { FOCUS_TARGETS, registerFocusTarget } from '../../lib/ui/focus.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import IconButton from '../../lib/ui/IconButton.svelte';
@@ -155,6 +163,8 @@
     closeLinkedMri: () => void;
     /** Shows a compared structure's agreement in the linked MRI, opened at the region. */
     showAgreement: (code: number, options: { instant: boolean }) => unknown;
+    /** The names of the deficits mapped on the region, as its Neuropsychology section lists them. */
+    deficits?: readonly string[];
     comparison?: Snippet;
     relatedDeficits?: Snippet;
     relatedCircuits?: Snippet;
@@ -209,6 +219,7 @@
     mriOpen,
     closeLinkedMri,
     showAgreement,
+    deficits = [],
     comparison,
     relatedDeficits,
     relatedCircuits,
@@ -241,6 +252,21 @@
   });
   const chrome = $derived(inspectorEmptyChrome({ selectedRegion: region, explorer }));
   const label = $derived(region ? catalog.label(region.id) : null);
+  // What the region is, in one line, before the commands and the measurements.
+  const lead = $derived(
+    region &&
+      regionLead(
+        {
+          network: networkHeadline(region, cabNp, lang),
+          functions:
+            domains && scoredRegion(domains, region)
+              ? functionsAt(domains, region.id).map((record) => domainName(record, lang))
+              : [],
+          deficits,
+        },
+        lang,
+      ),
+  );
   // A selected region always names its atlas; the facts and the source label read it.
   const atlasRegion = $derived.by(() => {
     if (region && !region.atlas) throw new Error(`Selected region has no atlas: ${region.id}`);
@@ -270,6 +296,7 @@
       <dt class="visually-hidden">{copy.group}</dt>
       <dd class="context-group">{label.group ?? '—'}</dd>
     </dl>
+    {#if lead}<p class="region-lead">{lead}</p>{/if}
     {#if region.notes}<p class="selected-hint">{region.notes[lang]}</p>{/if}
     <div class="actions">
       <button

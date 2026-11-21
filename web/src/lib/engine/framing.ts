@@ -30,7 +30,7 @@ import {
   withContext,
 } from './render/camera-views.ts';
 import { panFromKeyboard, turnFromKeyboard } from './render/keyboard-orbit.ts';
-import { HALF_TURNED, cameraBasis, edgeLabels } from './render/orientation.ts';
+import { HALF_TURNED, anatomicalBasis, cameraBasis, edgeLabels } from './render/orientation.ts';
 import { scaleBar } from './render/scale-bar.ts';
 import { planFraming } from './render/scene.ts';
 import type { CameraPlan, EngineScene } from './render/scene.ts';
@@ -198,16 +198,17 @@ export function createFraming({
   let shown: CameraView = describeCamera();
 
   function describeCamera(): CameraView {
-    const edges = edgeLabels(camera, 'en', controls.target);
+    const basis = anatomicalBasis(cameraBasis(camera, controls.target), model.anatomicalFrame);
+    const edges = edgeLabels(basis, 'en');
     // Each side edge names the hemisphere drawn on that side: the turned one lies toward +z.
     if (model.medialPair) {
-      const side = cameraBasis(camera, controls.target).right[2] > 0 ? 'right' : 'left';
+      const side = basis.right[2] > 0 ? 'right' : 'left';
       edges[side] = HALF_TURNED[edges[side]];
     }
     return {
       edges,
       scale: scaleBar(camera.fov, scene.distanceToTarget, scene.viewportHeight),
-      basis: cameraBasis(camera, controls.target),
+      basis,
     };
   }
 
@@ -233,10 +234,10 @@ export function createFraming({
   const heading = () =>
     scene.destination.position.clone().sub(scene.destination.target).normalize();
 
-  // Exploded, the anatomy is laid out along the brain's own left–right axis, so a named view squares to
-  // it: left and right then sit level. Assembled, views keep the scan's axes, as cuts and the MRI do.
-  const squared = (vector: Vector3) =>
-    model.state.exploded ? vector.clone().applyQuaternion(model.anatomicalFrame) : vector.clone();
+  // A named view squares to the brain's own left–right axis, assembled or exploded, so the head's lean in
+  // the scanner does not tilt it: left and right sit level. The scan's pitch is kept, as cuts and the MRI
+  // keep the scan's planes.
+  const squared = (vector: Vector3) => vector.clone().applyQuaternion(model.anatomicalFrame);
   const directionOf = (name: ViewName) => squared(VIEW_DIRECTIONS[name]);
   const upOf = (name: ViewName) => squared(upFor(name));
 
@@ -420,15 +421,20 @@ export function createFraming({
     if (fitted > 0) zoom = plan.position.distanceTo(plan.target) / fitted;
   }
 
+  /** Keep refitted cameras inside the plan's own orbit limits so URL links never serialize out-of-range orbits. */
+  const clampedDistance = (plan: CameraPlan, distance: number) =>
+    Math.min(plan.maxDistance, Math.max(plan.minDistance, distance));
+
   function refitViewport() {
     if (!framed) return;
     const plan = scene.destination;
     const direction = plan.position.clone().sub(plan.target).normalize();
     const fitted = fittedDistance(direction);
     if (!(fitted > 0)) return;
+    const distance = clampedDistance(plan, fitted * zoom);
     // Commit through the scene so an in-flight frame cannot restore its old viewport's endpoint.
     scene.moveTo(
-      { ...plan, position: plan.target.clone().addScaledVector(direction, fitted * zoom) },
+      { ...plan, position: plan.target.clone().addScaledVector(direction, distance) },
       { immediate: true },
     );
   }
@@ -440,7 +446,10 @@ export function createFraming({
     const after = fittedDistance(direction);
     if (!(before > 0 && after > 0) || after === before) return;
     const plan = scene.destination;
-    const distance = (plan.position.distanceTo(plan.target) * after) / before;
+    const distance = clampedDistance(
+      plan,
+      (plan.position.distanceTo(plan.target) * after) / before,
+    );
     moveCamera({ ...plan, position: plan.target.clone().addScaledVector(direction, distance) });
   }
 
@@ -461,7 +470,7 @@ export function createFraming({
     }
     // The magnification is the size kept, not the distance: a camera restored while a key was still
     // leaving the stage was placed for the room it lands in, and stays there.
-    const distance = fitted * zoom;
+    const distance = clampedDistance(plan, fitted * zoom);
     moveCamera(
       { ...plan, position: plan.target.clone().addScaledVector(direction, distance) },
       options,

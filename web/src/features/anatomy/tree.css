@@ -229,7 +229,9 @@
     cursor: pointer;
     transition: background-color var(--ui-transition) var(--ease-ui);
   }
-  .side-key[aria-pressed='true'] {
+  /* A search result's key for the selected side is drawn as the pressed key of the tree. */
+  .side-key[aria-pressed='true'],
+  .side-key[data-selected] {
     border-color: var(--accent);
     background: var(--surface-base);
     color: var(--accent);
@@ -433,10 +435,12 @@
     .anatomy-tree .row[data-selected='true'] .side-key::before {
       background: var(--surface-tonal-hover);
     }
-    .side-key[aria-pressed='true'] {
+    .side-key[aria-pressed='true'],
+    .side-key[data-selected] {
       background: transparent;
     }
-    .anatomy-tree .row .side-key[aria-pressed='true']::before {
+    .anatomy-tree .row .side-key[aria-pressed='true']::before,
+    .side-key[data-selected]::before {
       border-color: var(--accent);
       background: var(--surface-base);
     }
@@ -471,6 +475,14 @@
     align-items: center;
     gap: var(--space-2);
   }
+  /* Expand all and the table download, at the row's end or together under the scope. */
+  .tree-commands {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    margin-inline-start: auto;
+  }
   .tree-toggle-all {
     flex: none;
     height: auto;
@@ -480,7 +492,6 @@
     color: var(--text-secondary);
     cursor: pointer;
     min-height: var(--control-height);
-    margin-inline-start: auto;
     padding: 0 var(--space-2);
     font-size: var(--text-caption);
     font-weight: 400;
@@ -536,7 +547,8 @@
     .side-key {
       border-color: ButtonText;
     }
-    .side-key[aria-pressed='true'] {
+    .side-key[aria-pressed='true'],
+    .side-key[data-selected] {
       border-color: Highlight;
       background: Highlight;
       color: HighlightText;

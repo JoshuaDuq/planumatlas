@@ -692,12 +692,26 @@ describe('focusing a structure beneath the cortex', () => {
     expect(session.state.notice).toBeNull();
   });
 
-  test('a cortical region is framed alone and nothing is said', () => {
+  test('a cortical region chosen by name is framed alone and focused, so it stands out of the colours; nothing is said', () => {
     const { anatomy, session } = build();
     anatomy.selectRegion(SULCUS, { frame: true });
     expect(framing()).toEqual([[SULCUS, { immediate: false, context: false }]]);
-    expect(engine.model.settings.focused).toBe(false);
+    expect(engine.model.settings.focused).toBe(true);
     expect(session.state.notice).toBeNull();
+  });
+
+  test('a cortical region picked on the model, or isolated, is not focused; one revealed from the list is', async () => {
+    const { anatomy } = build();
+    anatomy.pickRegion(SULCUS);
+    expect(engine.model.settings.focused).toBe(false);
+    anatomy.selectRegion(null);
+    engine.model.setHemisphere('right');
+    await anatomy.revealRegion('hemisphere', SULCUS);
+    // Revealed from the list, it is a choice by name.
+    expect(engine.model.settings.focused).toBe(true);
+    anatomy.toggleFocus();
+    anatomy.isolateSelection();
+    expect(engine.model.settings.focused).toBe(false);
   });
 });
 

@@ -381,6 +381,31 @@ describe('location bar', () => {
     await expect.element(button('Restore previous view')).toBeVisible();
   });
 
+  test('WORK-16 · on a short row the restore action wraps and the place keeps a readable share', async () => {
+    // French's long restore once left the place a letter ("A.") at the panel's 360 px.
+    await page.viewport(320, 800);
+    await mount(
+      {
+        lang: 'fr',
+        explorer: 'functions',
+        selectedRegion: { id: 'left:2' },
+        place: 'Mémoire à long terme',
+      },
+      { slots: 'trailing' },
+    );
+    await expect.poll(view).toBe('detail');
+    const crumb = el(
+      page.getByRole('button', { name: /afficher dans la liste/ }),
+    ).getBoundingClientRect();
+    const restore = el(
+      page.getByRole('button', { name: 'Rétablir la vue précédente' }),
+    ).getBoundingClientRect();
+    expect(crumb.width).toBeGreaterThanOrEqual(64);
+    expect(crumb.right).toBeLessThanOrEqual(restore.left + 1);
+    expect(restore.right).toBeLessThanOrEqual(320);
+    expect(restore.height).toBe(44);
+  });
+
   test('French names', async () => {
     await mount({ lang: 'fr', selectedRegion: { id: 'left:2' } });
     await expect.element(page.getByRole('navigation', { name: 'Fil d’Ariane' })).toBeVisible();

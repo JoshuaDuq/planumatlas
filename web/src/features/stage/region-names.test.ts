@@ -348,12 +348,23 @@ describe('namesDrawn', () => {
     namesShown: true,
     exploded: false,
     tractReference: false,
-    routeShown: false,
+    lessonOpen: false,
     mapOpen: false,
+    focused: false,
+    painted: false,
+    tracts: false,
   };
-  test('draws the names only while the switch is on and the stage names nothing of its own', () => {
+  test('draws the names only while the switch is on and no focused/mode overlay is directing attention', () => {
     expect(namesDrawn(on)).toBe(true);
-    for (const key of ['exploded', 'tractReference', 'routeShown', 'mapOpen'] as const) {
+    for (const key of [
+      'exploded',
+      'tractReference',
+      'lessonOpen',
+      'mapOpen',
+      'focused',
+      'painted',
+      'tracts',
+    ] as const) {
       expect(namesDrawn({ ...on, [key]: true }), key).toBe(false);
     }
     expect(namesDrawn({ ...on, namesShown: false })).toBe(false);

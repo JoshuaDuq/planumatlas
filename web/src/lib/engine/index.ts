@@ -1,4 +1,4 @@
-import { Box3, Group } from 'three';
+import { Box3, Group, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { fetchAsset, sha256Hex } from '../core/assets/asset-cache.ts';
 import { AssetError } from '../core/assets/published-assets.ts';
@@ -39,7 +39,7 @@ import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
 import { createPicker } from './render/picking.ts';
 import { VIEW_DIRECTIONS, frameTo, upFor } from './render/camera-views.ts';
-import { stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
+import { orbitAbout, stayOutside, zoomAboutSurface } from './render/orbit-controls.ts';
 import { createScene, planFraming } from './render/scene.ts';
 import type { Appearance as SceneAppearance } from './render/scene.ts';
 import { worldToRas } from './slices/coordinates.ts';
@@ -127,13 +127,16 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
     await scene.compile(model.group);
     if (stopped) return;
     scene.scene.add(model.group);
-    scene.camera.up.copy(upFor('oblique'));
+    // The brain turns on, and opens squared to, its own left–right axis rather than the scanner's.
+    const frame = model.anatomicalFrame;
+    orbitAbout(scene.controls, new Vector3(0, 1, 0).applyQuaternion(frame));
+    scene.camera.up.copy(upFor('oblique').applyQuaternion(frame));
     scene.moveTo(
       planFraming(
         scene.camera,
         scene.controls,
         brainBounds(model),
-        VIEW_DIRECTIONS.oblique,
+        VIEW_DIRECTIONS.oblique.clone().applyQuaternion(frame),
         frameTo,
         scene.viewportFit,
       ),

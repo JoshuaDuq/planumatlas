@@ -227,6 +227,8 @@ describe('the toolbar', () => {
     await vi.waitFor(() => expect(control('radio', 'Overlay').ariaChecked).toBe('true'));
     // What it holds is what the tour reads, to point only at a choice that is offered.
     expect(tool('Add').dataset.offers).toBe('lesion coordinate overlay');
+    // Its one word does not say what it adds: its tooltip does.
+    expect(tool('Add').dataset.tooltip).toBe('Add to the brain: Lesion · Coordinate · Overlay');
   });
 
   test('Tab passes the whole toolbar in one stop, and comes back to its first tool', async () => {
@@ -252,6 +254,7 @@ describe('the toolbar', () => {
         .filter((name) => PLACED.includes(name));
     expect(offered()).toEqual(['Lesion', 'Overlay']);
     expect(tool('Add').dataset.offers).toBe('lesion overlay');
+    expect(tool('Add').dataset.tooltip).toBe('Add to the brain: Lesion · Overlay');
     live.coordinates = true;
     flushSync();
     expect(offered()).toEqual(PLACED);
@@ -561,8 +564,8 @@ describe('the Display popover', () => {
 
     live.cortexSurface = 'white';
     flushSync();
-    // A wider screen's status bar names it; the popover does not say it a second time.
-    expect(page.getByText('Cortex on the white surface').elements()).toHaveLength(0);
+    // The Display popover lists the changed surface at every width alongside Reset display.
+    expect(page.getByText('Cortex on the white surface').elements()).toHaveLength(1);
     live.view.cortexVisible = false;
     flushSync();
     expect(page.getByRole('combobox').elements()).toHaveLength(0);
@@ -611,11 +614,12 @@ describe('what Display has changed', () => {
     });
   });
 
-  test('on a wider screen the status bar lists them, so the popover offers no second Reset display', async () => {
+  test('on a wider screen the Display popover also lists changed settings and offers Reset display', async () => {
     await mount({ view: { ...defaults(), hemisphere: 'left' } });
     await open('Display');
-    expect(popover().querySelector('.changes')).toBeNull();
-    expect(page.getByRole('button', { name: 'Reset display' }).elements()).toHaveLength(0);
+    expect(popover().querySelector('.changes p')!.textContent).toBe('Left hemisphere');
+    await press('button', 'Reset display');
+    expect(commands.resetDisplay).toHaveBeenCalledOnce();
   });
 
   test('at the defaults there is nothing to list or reset', async () => {
@@ -660,8 +664,12 @@ describe('what Display has changed', () => {
     }
   });
 
-  test('on a wider screen the status bar says so, and the tool keeps its name', async () => {
+  test('on a wider screen the Display tool also marks changed settings and clears when reset', async () => {
     await mount({ view: { ...defaults(), isolatedRegion: 'a' } });
+    expect(locate('button', 'Display').elements()).toHaveLength(1);
+    expect(dock().querySelector('.changed-mark')).not.toBeNull();
+    live.view = defaults();
+    flushSync();
     expect(locate('button', 'Display').elements()).toHaveLength(1);
     expect(dock().querySelector('.changed-mark')).toBeNull();
   });

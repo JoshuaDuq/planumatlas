@@ -24,6 +24,7 @@
     MODES,
     onScreen,
     revealSelected,
+    searchLabel,
     stripVisible,
     viewAfterUpdate,
     type ContextSelection,
@@ -56,6 +57,8 @@
     stepper?: Snippet;
     /** The restore action (S3), in the location bar. */
     trailing?: Snippet;
+    /** The location bar's search icon: shows the list with its search field in focus. */
+    onSearch?: () => void;
     onMode: (mode: Explorer) => void;
     onClear: () => void;
     /** The reader stepped back to the list, as opposed to the list shown because the context went away. */
@@ -80,6 +83,7 @@
     detail,
     stepper,
     trailing,
+    onSearch,
     onMode,
     onClear,
     onReturn,
@@ -91,6 +95,8 @@
 
   const copy = $derived(t(lang, 'workspace'));
   const mode = $derived(snapshot.explorer);
+  // The search of the tab in front, an icon above its detail.
+  const search = $derived(searchLabel(mode, lang));
   const reference = $derived(isIndependentTractReference(snapshot));
   const available = $derived(detailAvailable(snapshot));
   const selectedId = $derived(snapshot.selectedRegion?.id ?? null);
@@ -360,6 +366,7 @@
       bind:back={backButton}
       {stepper}
       {trailing}
+      search={search && onSearch ? { label: search, onclick: onSearch } : undefined}
     />
     {#if noticeInDetail}
       <NoticeBar {lang} {notice} onAction={onNoticeAction} {onDismiss} />
@@ -454,7 +461,8 @@
       justify-content: center;
       min-width: 0;
       min-height: var(--tab-height);
-      margin: 0 calc(-1 * var(--space-1)) -1px;
+      /* No pull past the bar's rule: the bar scrolls, so it would clip the underline and scroll a pixel. */
+      margin: 0 calc(-1 * var(--space-1));
       padding: var(--space-2) var(--space-1);
       border: 0;
       border-radius: 0;

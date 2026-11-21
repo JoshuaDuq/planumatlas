@@ -1,5 +1,6 @@
 // The detail view as the app mounts it, over the fake engine and the published catalogues: the search
-// of the tab in front stays above it (U2), so typing a name searches instead of pressing shortcuts.
+// of the tab in front is an icon in its location bar (WORK-29), so the subject's title follows the
+// navigation, and the region's sheet leads with what the region is (INSP-61).
 import '../../styles/index.css'; // The page's styles: a hidden panel takes no focus, as in the app.
 import { flushSync } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -19,9 +20,9 @@ afterEach(() => shell.close());
 const state = () => shell.app.world!.view.current;
 const list = () => document.getElementById('navigator')!;
 const detail = () => document.getElementById('inspector')!;
-/** The field above the detail: a plain search box, where the list's is a combobox. */
-const detailField = (name = 'Search regions') =>
-  page.getByRole('searchbox', { name }).element() as HTMLInputElement;
+/** The location bar's search icon. */
+const searchIcon = (name = 'Search regions') =>
+  page.getByRole('button', { name, exact: true }).element() as HTMLButtonElement;
 const listField = () => page.getByRole('combobox', { name: 'Search regions' }).element();
 
 async function pick(id = REGION) {
@@ -31,49 +32,30 @@ async function pick(id = REGION) {
 }
 
 describe('a region’s detail', () => {
-  test('keeps the region search above it; typing there shows the list with results, and no shortcut fires', async () => {
+  test('the region search is an icon in the location bar; it shows the list with its field in focus', async () => {
     await shell.open();
     await pick();
-    const field = detailField();
-    expect(detail().contains(field)).toBe(true);
-    expect(field.checkVisibility()).toBe(true);
-    // Above the region's own heading.
-    const heading = page.getByRole('heading', { level: 2, name: /./ }).first().element();
-    expect(field.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(detail().querySelector('input[type="search"]')).toBeNull();
+    const icon = searchIcon();
+    expect(detail().querySelector('.detail-location')!.contains(icon)).toBe(true);
+    expect(icon.getAttribute('aria-keyshortcuts')).toBe('/');
+    // The region's title comes right after the navigation.
+    const bar = detail().querySelector('.detail-location')!.getBoundingClientRect();
+    const title = page.getByRole('heading', { level: 2, name: /./ }).first().element();
+    expect(title.getBoundingClientRect().top - bar.bottom).toBeLessThan(40);
 
-    await userEvent.click(field);
-    // `c` is Cortex and `a` nothing; in a field they are letters.
-    await userEvent.keyboard('broca');
+    await userEvent.click(icon);
     expect(list().hidden).toBe(false);
     expect(detail().hidden).toBe(true);
     expect(document.activeElement).toBe(listField());
-    expect((listField() as HTMLInputElement).value).toBe('broca');
+    // `c` is Cortex and `a` nothing; in the field they are letters.
+    await userEvent.keyboard('broca');
     expect(state().query).toBe('broca');
     expect(state().cortexVisible).toBe(true);
     expect(state().selectedRegion?.id).toBe(REGION);
-    await expect
-      .element(
-        page.getByRole('option', { name: /^Opercular part of the inferior frontal gyrus/ }).first(),
-      )
-      .toBeVisible();
   });
 
-  test('Escape in the field clears words it holds, then is Back to the list', async () => {
-    await shell.open();
-    shell.app.world!.session.setQuery('cun');
-    await pick();
-    const field = detailField();
-    expect(field.value).toBe('cun');
-    field.focus();
-    await userEvent.keyboard('{Escape}');
-    expect(state().query).toBe('');
-    expect(detail().hidden).toBe(false);
-    await userEvent.keyboard('{Escape}');
-    await expect.poll(() => detail().hidden).toBe(true);
-    expect(state().selectedRegion?.id).toBe(REGION);
-  });
-
-  test('`/` from the field’s detail still focuses the list’s own search', async () => {
+  test('`/` from the detail still focuses the list’s own search', async () => {
     await shell.open();
     await pick();
     document.body.dispatchEvent(
@@ -82,20 +64,18 @@ describe('a region’s detail', () => {
     expect(document.activeElement).toBe(listField());
   });
 
-  test('the `/` hint goes with single-key shortcuts', async () => {
+  test('leads with what the region is: its network and the deficits mapped on it', async () => {
     await shell.open();
-    await pick();
-    const hint = () => detail().querySelector<HTMLElement>('.search-shortcut')!;
-    expect(hint().checkVisibility()).toBe(true);
-    document.documentElement.dataset.singleKeys = 'off';
-    try {
-      expect(hint().checkVisibility()).toBe(false);
-    } finally {
-      delete document.documentElement.dataset.singleKeys;
-    }
+    // The left precentral gyrus.
+    await pick('destrieux:left:29');
+    const lead = detail().querySelector('.region-lead')!;
+    expect(lead.textContent).toMatch(/^Network: Somatomotor 69\s?%\. Linked deficits: .+\.$/);
+    // Before the commands and the folded measurements.
+    const focus = page.getByRole('button', { name: 'Focus', exact: true }).element();
+    expect(lead.compareDocumentPosition(focus) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  test('axe is clean with the field above the detail, in both themes', async () => {
+  test('axe is clean with the search icon above the detail, in both themes', async () => {
     await shell.open();
     await pick();
     await expectAxeCleanOnce('light', 1280);
@@ -104,13 +84,12 @@ describe('a region’s detail', () => {
 });
 
 describe('other tabs', () => {
-  test('a function’s profile keeps the Functions search above it', async () => {
+  test('a function’s profile has the Functions search icon', async () => {
     await shell.open({ hash: '#tab=functions&function=language' });
     await expect.poll(() => detail().hidden).toBe(false);
-    const field = detailField('Search functions');
-    await userEvent.click(field);
-    await userEvent.keyboard('memory');
+    await userEvent.click(searchIcon('Search functions'));
     expect(list().hidden).toBe(false);
+    await userEvent.keyboard('memory');
     expect(state().functionQuery).toBe('memory');
     expect((document.activeElement as HTMLInputElement).value).toBe('memory');
   });
@@ -122,24 +101,23 @@ describe('other tabs', () => {
     await world.excursions.openCircuit(world.circuits.all[0]!.id);
     flushSync();
     await expect.poll(() => detail().hidden).toBe(false);
-    expect(detail().querySelector('input[type="search"]')).toBeNull();
+    expect(detail().querySelector('.detail-search')).toBeNull();
   });
 });
 
 describe('the phone sheet', () => {
-  test('the field is on screen and takes a tap', async () => {
+  test('the search icon is on screen and takes a tap', async () => {
     await shell.open();
     await page.viewport(375, 812);
     // A pick at peek names the region in the grip; picking it again raises the sheet (REGION-25).
     await pick();
     await pick();
-    const field = detailField();
-    await expect.poll(() => field.checkVisibility()).toBe(true);
+    const icon = searchIcon();
+    await expect.poll(() => icon.checkVisibility()).toBe(true);
     // Once the sheet the second pick raised has come to rest.
-    await expect.poll(() => field.getBoundingClientRect().bottom).toBeLessThanOrEqual(812);
-    expect(field.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
-    await userEvent.click(field);
-    await userEvent.keyboard('b');
+    await expect.poll(() => icon.getBoundingClientRect().bottom).toBeLessThanOrEqual(812);
+    expect(icon.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+    await userEvent.click(icon);
     expect(document.activeElement).toBe(listField());
     expect(list().hidden).toBe(false);
   });

@@ -443,6 +443,13 @@
         display: flex;
       }
     }
+    /* Upright phones: keep the scrolling settings menu clear of the bottom sheet tabs. */
+    @media (max-width: 800px) and (min-height: 481px),
+      (max-width: 800px) and (orientation: portrait) {
+      :global(.popover.settings-menu) {
+        max-height: calc(100dvh - var(--header-height) - 120px - var(--space-4));
+      }
+    }
     @media (max-width: 360px) {
       .menu-label {
         flex-basis: 100%;

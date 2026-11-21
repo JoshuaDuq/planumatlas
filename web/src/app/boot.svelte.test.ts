@@ -2,6 +2,7 @@
 // composition root wires them, and the failures it shows. The engine itself is E7's.
 import { flushSync, mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { page } from 'vitest/browser';
 import manifestFile from '../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import { releaseUnseen } from '../lib/core/assets/asset-cache.ts';
@@ -175,6 +176,22 @@ describe('the start', () => {
     engine = createFakeEngine({ manifest, domains: domains as never });
     await boot('#colors=lobe');
     expect(engine.model.settings.surfaceColor).toBe('lobe');
+  });
+
+  test('leaves region names off on a plain page, and turns them on only when a link asks for them (STAGE-85)', async () => {
+    localStorage.setItem('planum.guide', 'seen');
+    await page.viewport(1280, 800);
+    const plain = await boot('');
+    expect(plain.app.session.state.namesShown).toBe(false);
+    // A link requesting names turns them on.
+    const named = await boot('#names=1');
+    expect(named.app.session.state.namesShown).toBe(true);
+    // A link without `names` leaves them off.
+    const linked = await boot('#view=left');
+    expect(linked.app.session.state.namesShown).toBe(false);
+    await page.viewport(414, 896);
+    const phone = await boot('');
+    expect(phone.app.session.state.namesShown).toBe(false);
   });
 
   test('frames the opening view with the stage’s own framing, then applies the link, then is ready', async () => {

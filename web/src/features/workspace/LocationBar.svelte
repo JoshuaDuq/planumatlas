@@ -4,13 +4,16 @@
   The first item is a Back button (the list/detail view is not a URL, so it is not a link); the
   last is the place, a button that shows it in the list, so it keeps aria-current="location" while
   shown (deviations/h5-breadcrumb-current.md). `stepper` (X3) and `trailing` (S3's restore) are
-  the slots to the right.
+  the slots to the right, then the tab's search as an icon, which shows the list with its search field
+  in focus, as `/` does (2026-11-20 review: the detail's own search line took 48 px above its title).
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Crumb } from '../../lib/core/workspace.ts';
   import type { Language } from '../../lib/types/index.ts';
+  import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
+  import IconButton from '../../lib/ui/IconButton.svelte';
 
   type Props = {
     lang: Language;
@@ -21,6 +24,8 @@
     back?: HTMLButtonElement | null;
     stepper?: Snippet;
     trailing?: Snippet;
+    /** The tab's search, named by its label; none where the tab has no search. */
+    search?: { label: string; onclick: () => void };
   };
 
   let {
@@ -31,6 +36,7 @@
     back = $bindable(null),
     stepper,
     trailing,
+    search,
   }: Props = $props();
 
   const copy = $derived(t(lang, 'workspace'));
@@ -76,6 +82,16 @@
   {#if trailing}
     <div class="detail-trailing">{@render trailing()}</div>
   {/if}
+  {#if search}
+    <IconButton
+      class="detail-search"
+      icon="search"
+      label={search.label}
+      data-tooltip={search.label}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.search}
+      onclick={search.onclick}
+    />
+  {/if}
 </div>
 
 <style>
@@ -94,8 +110,13 @@
       box-shadow: inset 0 -1px var(--border-subtle);
       background: var(--surface-navigation);
     }
+    /*
+     * The path starts from its own width, so on a short row the place and the trailing action give way
+     * together: the action wraps to a second line rather than leave the place a letter (French's
+     * "Rétablir la vue précédente" left "A." of a region's group).
+     */
     .detail-path {
-      flex: 1;
+      flex: 1 1 auto;
       align-self: stretch;
       min-width: 0;
     }
@@ -176,9 +197,21 @@
     .detail-stepper {
       display: contents;
     }
+    /* The bar's full height, its glyph on the panel's inset. */
+    .detail-location > :global(.detail-search) {
+      flex: none;
+      align-self: stretch;
+      width: auto;
+      height: auto;
+      padding: 0 var(--panel-inset) 0 var(--space-2);
+      border-radius: 0;
+    }
+    .detail-location > :global(.detail-search:focus-visible) {
+      outline-offset: -2px;
+    }
     .detail-trailing {
       display: flex;
-      flex: none;
+      flex: 0 1 auto;
       align-self: stretch;
     }
     .detail-trailing > :global(button) {
@@ -190,7 +223,8 @@
       color: var(--accent);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
-      white-space: nowrap;
+      text-align: start;
+      text-wrap: balance;
     }
     @media (hover: hover) and (pointer: fine) {
       .detail-back:hover,

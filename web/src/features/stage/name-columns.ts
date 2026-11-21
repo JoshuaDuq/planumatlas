@@ -53,6 +53,11 @@ export const OPEN_COLUMN_PX = 112;
 export const KEEP_COLUMN_PX = 80;
 /** Clear space between two names in a column, and between a name and a chrome box. */
 const ROW_GAP_PX = 2;
+/**
+ * A strip narrower than this between chrome and the stage's top or bottom edge is that chrome's gutter, not
+ * room for a name: a name under the scale bar or over the gizmo stands outside the picture.
+ */
+const EDGE_STRIP_PX = 48;
 /** What a leader's run across the anatomy costs a name, per pixel, against a pixel it is pushed off its dot's level. */
 const ACROSS_COST = 0.5;
 /** What a name pays to change column: a small gain does not move it while the camera moves. */
@@ -87,7 +92,8 @@ function boxIn({ side, near }: Column, { width, height }: Size, top: number): Re
 
 /**
  * The spans down the stage a column leaves free for names as wide as `reach`: the stage less each chrome
- * box that reaches into it so far from the anatomy.
+ * box that reaches into it so far from the anatomy, and less the gutter strip between such a box and the
+ * stage's top or bottom edge (`EDGE_STRIP_PX`).
  */
 function freeSpans(
   column: Column,
@@ -109,8 +115,12 @@ function freeSpans(
     if (low > from) spans.push([from, Math.min(low, bounds.y + bounds.height)]);
     from = Math.max(from, high);
   }
-  if (from < bounds.y + bounds.height) spans.push([from, bounds.y + bounds.height]);
-  return spans.filter(([low, high]) => high > low);
+  const bottom = bounds.y + bounds.height;
+  if (from < bottom) spans.push([from, bottom]);
+  return spans.filter(([low, high]) => {
+    const edges = Number(low === bounds.y) + Number(high === bottom);
+    return high > low && (edges !== 1 || high - low >= EDGE_STRIP_PX);
+  });
 }
 
 /**

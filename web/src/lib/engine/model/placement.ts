@@ -113,8 +113,9 @@ export class Placement {
 
   /**
    * The rotation taking world x onto the brain's own left–right axis (`leftRightAxis`): the scan's roll
-   * and yaw, not its pitch. The exploded view lays out and is framed along it. Every cortical atlas tiles
-   * one pial surface, so the first measured serves for all.
+   * and yaw, not its pitch. Named views, the orbit and the orientation letters are squared to it, and the
+   * exploded view lays out along it. Every cortical atlas tiles one pial surface, so the first measured
+   * serves for all.
    */
   get anatomicalFrame(): Quaternion {
     if (!this.frame) {

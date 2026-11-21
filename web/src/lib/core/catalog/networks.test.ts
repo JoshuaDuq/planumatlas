@@ -6,6 +6,7 @@ import {
   type CabNpPartition,
   cabNpName,
   dominantNetwork,
+  networkHeadline,
   networkName,
   networksOf,
   validateCabNp,
@@ -134,4 +135,25 @@ test('a CAB-NP network without a colour is rejected', () => {
   assert.equal(validateCabNp(partition, regions), partition);
   partition.regions['hcp-mmp:left:1'] = 'Visual1';
   assert.throws(() => validateCabNp(partition, regions), /Invalid CAB-NP assignment/);
+});
+
+test('the headline is the largest cortical or striatal share, else the CAB-NP network, else none', () => {
+  const cortex = asRegion({
+    id: 'destrieux:left:29',
+    networks: [
+      { network: 'DorsAttn', fraction: 0.24 },
+      { network: 'SomMot', fraction: 0.69 },
+    ],
+  });
+  assert.equal(networkHeadline(cortex, null, 'en'), 'Somatomotor 69%');
+  const striatum = asRegion({
+    id: 'aseg:left:12',
+    striatal_networks: [{ network: 'Default', fraction: 0.5 }],
+  });
+  assert.equal(networkHeadline(striatum, null, 'fr'), 'Mode par défaut 50\u202f%');
+  const area = asRegion({ id: 'hcp-mmp:left:1' });
+  const cabNp = { regions: { 'hcp-mmp:left:1': 'Visual1' } } as unknown as CabNpPartition;
+  assert.equal(networkHeadline(area, cabNp, 'en'), cabNpName('Visual1'));
+  assert.equal(networkHeadline(asRegion({ id: 'aseg:left:4' }), cabNp, 'en'), null);
+  assert.equal(networkHeadline(null, cabNp, 'en'), null);
 });

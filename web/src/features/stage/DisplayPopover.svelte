@@ -10,8 +10,8 @@
   - Names on the brain is off by default and not counted among the changes: it names the anatomy, it does
     not change it (RegionNames.svelte).
   Every change goes through the controller's commands, which say so when a hidden selection was cleared.
-  - Last, on a phone only, what is away from its default, Focus and hidden parts included, with Reset display:
-    a wider screen's status bar says so already, so the popover does not offer it a second time. While the opacity slider is held it waits for the release, so the
+  - Last, at every width, what is away from its default, Focus and hidden parts included, with Reset display
+    (matching DESIGN.md). While the opacity slider is held it waits for the release, so the
     plate never grows under the thumb (`scrubbing`, StagePopover).
 -->
 <script lang="ts">
@@ -122,6 +122,7 @@
   bind:value={() => hemisphere, onHemisphere}
 />
 <div class="visibility">
+  <p class="stage-field-label section-label">{copy.visibilitySection}</p>
   <label class="check">
     <input
       type="checkbox"
@@ -169,6 +170,9 @@
       <span>{copy.showSpinalCord}</span>
     </label>
   {/if}
+</div>
+<div class="view-aids">
+  <p class="stage-field-label section-label">{copy.viewAidsSection}</p>
   {#if explodable}
     <label class="check">
       <input
@@ -216,9 +220,15 @@
       font-size: var(--text-stage);
       white-space: normal;
     }
-    /* Spaced, not ruled, like the other popovers' fields; the rows' own padding makes up the field gap. */
-    .visibility {
+    /* Two small sections (visibility and view aids), each within working-memory limits. */
+    .visibility,
+    .view-aids {
       margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--overlay-border);
+    }
+    .section-label {
+      margin-bottom: var(--space-1);
     }
     /* Indented to the checkbox's words: a 16px box and its 8px gap. */
     .opacity {

@@ -35,6 +35,7 @@
   import type { PublishedAnatomy } from '../../lib/core/assets/published-anatomy.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
+  import Select from '../../lib/ui/Select.svelte';
 
   type Field = 'atlas' | 'colour' | 'detail';
 
@@ -191,6 +192,17 @@
       label: label('detail', id, atlasSwitchLabel(id, lang), atlasSwitchLabel(id, lang)),
     })),
   );
+
+  const subjectOptions = $derived(
+    anatomies.map((entry) => ({ value: entry.id, label: subjectName(entry) })),
+  );
+  const colourSelectGroups = $derived(
+    colourOptions.map(({ group, options }) => ({
+      label: group ? copy.colourGroups[group as keyof typeof copy.colourGroups] : undefined,
+      options,
+    })),
+  );
+  const paintHiddenOption = $derived(painted ? { value: PAINT, label: paintLabel } : undefined);
 
   const selectedLabel = (field: Field): string =>
     shown(field) === PAINT
@@ -429,21 +441,20 @@
       <div class="data-field">
         {#if offerAnatomies && !reference}
           <label class="data-label" for={ids.subject}>{copy.subject}</label>
-          <span class="select-box"
-            ><select
-              bind:this={selects.subject}
-              id={ids.subject}
-              aria-describedby={notes.subject ? noteId('subject') : undefined}
-              disabled={switching}
-              onchange={(event) => {
-                if (event.currentTarget.value !== anatomy.id) onAnatomy(event.currentTarget.value);
-              }}
-            >
-              {#each anatomies as entry (entry.id)}
-                <option value={entry.id}>{subjectName(entry)}</option>
-              {/each}
-            </select></span
-          >
+          <Select
+            bind:select={selects.subject}
+            id={ids.subject}
+            class="data-select subject-select"
+            describedby={notes.subject ? noteId('subject') : undefined}
+            options={subjectOptions}
+            disabled={switching}
+            bind:value={
+              () => anatomy.id,
+              (value) => {
+                if (value !== anatomy.id) onAnatomy(value);
+              }
+            }
+          />
         {:else if reference}
           <span class="data-label">{copy.subject}</span>
           <!-- A tooltip trigger is reachable by keyboard (WCAG 1.4.13, 2.1.1: deviation h3-name-description-reachable). -->
@@ -463,69 +474,46 @@
     {#if !reference}
       <div class="data-field">
         <label class="data-label" for={ids.atlas}>{copy.atlas}</label>
-        <span class="select-box"
-          ><select
-            bind:this={selects.atlas}
-            id={ids.atlas}
-            aria-describedby={notes.atlas ? noteId('atlas') : undefined}
-            onchange={(event) => choose('atlas', event.currentTarget.value, onAtlas)}
-            onpointerenter={onAtlasIntent}
-            onfocus={onAtlasIntent}
-          >
-            {#each atlasOptions as option (option.value)}
-              <option value={option.value}>{option.label}</option>
-            {/each}
-          </select></span
-        >
+        <Select
+          bind:select={selects.atlas}
+          id={ids.atlas}
+          class="data-select"
+          describedby={notes.atlas ? noteId('atlas') : undefined}
+          options={atlasOptions}
+          bind:value={() => shown('atlas'), (value) => choose('atlas', value, onAtlas)}
+          onpointerenter={onAtlasIntent}
+          onfocus={onAtlasIntent}
+        />
         {#if notes.atlas}<p class="data-note" id={noteId('atlas')}>{notes.atlas}</p>{/if}
       </div>
       <div class="data-field">
         <label class="data-label" for={ids.colour}>{copy.colour}</label>
-        <span class="select-box"
-          ><select
-            bind:this={selects.colour}
-            id={ids.colour}
-            aria-describedby={notes.colour ? noteId('colour') : undefined}
-            onchange={(event) =>
-              choose('colour', event.currentTarget.value, (value) =>
-                onSurfaceColor(value as SurfaceColor),
-              )}
-          >
-            <!-- Present only while a tab paints, so no empty choice reaches assistive technology. -->
-            {#if painted}<option value={PAINT} hidden>{paintLabel}</option>{/if}
-            {#each colourOptions as { group, options } (group ?? options[0].value)}
-              {#if group}
-                <optgroup label={copy.colourGroups[group as keyof typeof copy.colourGroups]}>
-                  {#each options as option (option.value)}
-                    <option value={option.value}>{option.label}</option>
-                  {/each}
-                </optgroup>
-              {:else}
-                {#each options as option (option.value)}
-                  <option value={option.value}>{option.label}</option>
-                {/each}
-              {/if}
-            {/each}
-          </select></span
-        >
+        <Select
+          bind:select={selects.colour}
+          id={ids.colour}
+          class="data-select"
+          describedby={notes.colour ? noteId('colour') : undefined}
+          groups={colourSelectGroups}
+          hiddenOption={paintHiddenOption}
+          bind:value={
+            () => shown('colour'),
+            (value) => choose('colour', value, (next) => onSurfaceColor(next as SurfaceColor))
+          }
+        />
         {#if notes.colour}<p class="data-note" id={noteId('colour')}>{notes.colour}</p>{/if}
       </div>
       <!-- A build without the optional fine level offers one choice, and so no control. -->
       {#if offersDetail}
         <div class="data-field">
           <label class="data-label" for={ids.detail}>{display.internalAnatomy}</label>
-          <span class="select-box"
-            ><select
-              bind:this={selects.detail}
-              id={ids.detail}
-              aria-describedby={notes.detail ? noteId('detail') : undefined}
-              onchange={(event) => choose('detail', event.currentTarget.value, onDetail)}
-            >
-              {#each detailOptions as option (option.value)}
-                <option value={option.value}>{option.label}</option>
-              {/each}
-            </select></span
-          >
+          <Select
+            bind:select={selects.detail}
+            id={ids.detail}
+            class="data-select"
+            describedby={notes.detail ? noteId('detail') : undefined}
+            options={detailOptions}
+            bind:value={() => shown('detail'), (value) => choose('detail', value, onDetail)}
+          />
           {#if notes.detail}<p class="data-note" id={noteId('detail')}>{notes.detail}</p>{/if}
         </div>
       {/if}
@@ -582,63 +570,14 @@
       color: var(--text-primary);
     }
 
-    /* The chevron is two borders, not a background image: forced colours drop images and keep border colours. */
-    .select-box {
-      --caret-end: var(--space-2);
-      position: relative;
-      display: flex;
-      min-width: 0;
-    }
-    .select-box::after {
-      content: '';
-      position: absolute;
-      top: calc(50% - 4.5px);
-      right: calc(var(--caret-end) + 2px);
-      width: 6px;
-      height: 6px;
-      border-right: 1.5px solid var(--text-secondary);
-      border-bottom: 1.5px solid var(--text-secondary);
-      transform: rotate(45deg);
-      pointer-events: none;
-    }
-    select {
-      appearance: none;
-      width: auto;
-      max-width: 320px;
-      height: auto;
-      min-height: var(--control-height);
-      field-sizing: content;
-      padding: var(--space-1) calc(var(--caret-end) + var(--space-4)) var(--space-1) var(--space-2);
-      border: 1px solid transparent;
-      border-radius: var(--radius-control);
-      background-color: transparent;
-      color: var(--text-primary);
-      cursor: pointer;
-      font-size: var(--text-ui);
-      /* Subject identity is the anchor; atlas and rendering remain supporting settings. */
+    /* Selects reuse Select.svelte; only typographic emphasis is specific to the masthead fields. */
+    .data-bar :global(.data-select) {
       font-weight: 500;
-      line-height: var(--lh-ui);
       /* Loading progress counts up inside the value without shaking it. */
       font-variant-numeric: tabular-nums;
-      transition: background-color var(--ui-transition) var(--ease-ui);
     }
-    select:is(:focus-visible, :open):not(:disabled) {
-      background-color: var(--surface-tonal);
-    }
-    select:disabled {
-      border-color: transparent;
-      background-color: transparent;
-      color: var(--text-tertiary);
-      cursor: default;
-    }
-    select[id^='anatomy-switch'] {
+    .data-bar :global(.subject-select) {
       font-weight: 600;
-    }
-    @media (hover: hover) and (pointer: fine) {
-      select:hover:not(:disabled) {
-        border-color: transparent;
-        background-color: var(--surface-tonal);
-      }
     }
 
     /* Popovers grow from their trigger; closing is immediate. */
@@ -784,27 +723,6 @@
     .data-bar .data-field ~ .data-field {
       border-top: 1px solid var(--border-subtle);
     }
-    .data-bar .select-box {
-      --caret-end: var(--space-3);
-    }
-    .data-bar select {
-      width: 100%;
-      max-width: none;
-      field-sizing: fixed;
-      padding: 0 calc(var(--caret-end) + var(--space-5)) 0 var(--space-3);
-      border-color: var(--border-control);
-      background-color: var(--surface-base);
-    }
-    .data-bar select:disabled {
-      border-color: var(--border-subtle);
-      background-color: var(--surface-sunken);
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .data-bar select:hover:not(:disabled) {
-        border-color: var(--text-secondary);
-        background-color: var(--surface-base);
-      }
-    }
     .data-bar .study-name {
       max-width: 100%;
     }
@@ -881,15 +799,10 @@
       }
     }
 
-    /* Touch targets: 44px fields and summary, whatever --control-height is. */
+    /* Touch targets: 44px summary, whatever --control-height is (Select handles fields). */
     @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      /* 16px, so focusing a field does not zoom the page on iOS. */
-      select,
       .data-bar .data-toggle {
         min-height: 44px;
-      }
-      select {
-        font-size: var(--text-title);
       }
     }
 
@@ -924,12 +837,6 @@
       }
       .data-bar .data-toggle:active {
         transform: none;
-      }
-    }
-    @media (prefers-contrast: more) {
-      select,
-      .data-bar select:disabled {
-        border-color: var(--border-control);
       }
     }
   }

@@ -118,5 +118,16 @@
     :global(#viewport:has(> canvas:focus-visible)) #viewport-help {
       opacity: 0;
     }
+    /* On phones and compact viewports ScaleBar takes the top-left corner; keep the hint off it. */
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      #viewport-help {
+        visibility: hidden;
+      }
+      .viewport-focus-hint {
+        top: calc(
+          var(--vis-top) + var(--key-top) + var(--stage-gutter) + var(--lh-caption) + var(--space-1)
+        );
+      }
+    }
   }
 </style>

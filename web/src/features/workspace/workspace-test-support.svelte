@@ -123,7 +123,9 @@
   </div>
 {/snippet}
 {#snippet trailing()}
-  <button type="button">Restore previous view</button>
+  <button type="button"
+    >{world.lang === 'fr' ? 'Rétablir la vue précédente' : 'Restore previous view'}</button
+  >
 {/snippet}
 
 <style>

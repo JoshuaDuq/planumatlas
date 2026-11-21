@@ -5,11 +5,11 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import { keyGround } from '../../lib/core/state/paint.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
-  import { documentTitle, offeredNotice } from '../../lib/core/workspace.ts';
-  import { reaching } from '../../lib/core/catalog/stroke-cases.ts';
+  import { documentTitle, offeredNotice, searchLabel } from '../../lib/core/workspace.ts';
+  import { mostReached, reaching } from '../../lib/core/catalog/stroke-cases.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
-  import type { Language, Notice, ViewName } from '../../lib/types/index.ts';
+  import type { Explorer, Language, Notice, ViewName } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { createCircuitExplorer } from '../../features/circuits/circuits-explorer.svelte.ts';
   import { createVisualFieldExplorer } from '../../features/circuits/visual-field-explorer.svelte.ts';
@@ -160,21 +160,52 @@
     return lesson.circuit ? world.circuits.get(lesson.circuit).name[language] : null;
   });
 
+  /** Stroke cases was pressed with nothing selected while the cohort downloaded: it goes on once read. */
+  let strokeCasesAsked = $state(false);
+  $effect(() => {
+    const status = world?.strokeCases.cohort.status;
+    if (!strokeCasesAsked || status === 'idle' || status === 'loading') return;
+    untrack(() => {
+      strokeCasesAsked = false;
+      // Leaving the Deficits tab meanwhile withdrew the ask.
+      if (world!.view.current.explorer === 'deficits') showStrokeCases();
+    });
+  });
+
   /**
-   * The Deficits list's Stroke cases: the selected region's cases, opened in its detail; without a
-   * selection, or where no case reaches it, the notice says so.
+   * The Deficits list's Stroke cases: the selected region's cases, opened in its detail. With nothing
+   * selected, they open on the region shown that the most lesions reach, and the notice says why
+   * (2026-11-20 review); where no case reaches the selection, the notice says so.
    */
   function showStrokeCases() {
-    const { session, view, strokeCases, catalog } = world!;
-    const region = view.current.selectedRegion;
+    const { session, view, strokeCases, catalog, anatomy } = world!;
     const copy = t(view.current.lang, 'clinical');
-    if (!region) {
-      session.notify({ kind: 'info', text: copy.strokeSelect });
-      return;
-    }
     const { cohort } = strokeCases;
-    if (cohort.status === 'ready' && !reaching(cohort.data, region.id, Infinity).length) {
-      session.notify({ kind: 'info', text: copy.strokeNone(catalog.label(region.id).name) });
+    const selected = view.current.selectedRegion?.id;
+    if (!selected) {
+      if (cohort.status === 'idle' || cohort.status === 'loading') {
+        strokeCasesAsked = true;
+        strokeCases.load();
+        return;
+      }
+      const shown = catalog.groups.flatMap((group) => group.rows).filter((row) => row.visible);
+      const region =
+        cohort.status === 'ready'
+          ? mostReached(
+              cohort.data,
+              shown.map((row) => row.region.id),
+            )
+          : null;
+      if (region === null) {
+        session.notify({ kind: 'info', text: copy.strokeSelect });
+        return;
+      }
+      anatomy.selectRegion(region);
+      // The section withdraws an ask made under another region: it sees this one first.
+      flushSync();
+      session.notify({ kind: 'info', text: copy.strokeMost(catalog.label(region).name) });
+    } else if (cohort.status === 'ready' && !reaching(cohort.data, selected, Infinity).length) {
+      session.notify({ kind: 'info', text: copy.strokeNone(catalog.label(selected).name) });
       return;
     }
     strokeCases.reveal();
@@ -285,6 +316,12 @@
     });
   });
 
+  /** The tab's search, from the location bar's icon or the sheet at rest: its list, its field in focus. */
+  function openSearch(mode: Explorer) {
+    app!.ports.showList();
+    app!.ports.focusSearch(mode);
+  }
+
   const viewport = () => {
     const host = document.getElementById('viewport');
     if (!host) throw new Error('The stage element #viewport is not on the page.');
@@ -311,6 +348,9 @@
     {onDetent}
     onSelection={() => workspace!.showDetail()}
     onClear={clearContext}
+    search={searchLabel(current.explorer, lang) === null
+      ? null
+      : { label: searchLabel(current.explorer, lang)!, onopen: () => openSearch(current.explorer) }}
   >
     <aside
       id="workspace-panel"
@@ -320,7 +360,11 @@
       <Workspace
         bind:this={workspace}
         {lang}
-        snapshot={{ ...current, lesion: world.lesion.sphere !== null }}
+        snapshot={{
+          ...current,
+          lesion: world.lesion.sphere !== null,
+          coordinate: world.lesion.coordinate !== null,
+        }}
         {selection}
         {place}
         groups={world.catalog.groups}
@@ -336,6 +380,7 @@
         anatomyRestorable(current)
           ? trailing
           : undefined}
+        onSearch={() => openSearch(current.explorer)}
         onMode={(mode) => void world.excursions.chooseMode(mode)}
         onClear={clearContext}
         onReturn={() => void world.excursions.leaveLesson()}

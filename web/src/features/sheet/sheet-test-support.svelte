@@ -19,9 +19,12 @@
     holder?: { sheet?: Sheet };
     /** How many rows the list holds; more than fit make it scroll. */
     rows?: number;
+    /** The label of the search offered at rest; none when absent. */
+    search?: string;
   };
 
-  let { world, stage, recorded, holder = {}, rows = 3 }: Props = $props();
+  let { world, stage, recorded, holder = {}, rows = 3, search }: Props = $props();
+  let field: HTMLInputElement | undefined = $state();
   const ids = $derived(
     rows === 3 ? REGIONS : Array.from({ length: rows }, (_, i) => `left:${i + 1}`),
   );
@@ -70,6 +73,15 @@
     {stage}
     {view}
     selection={world.selection}
+    search={search
+      ? {
+          label: search,
+          onopen: () => {
+            recorded.calls.push('search');
+            field?.focus();
+          },
+        }
+      : null}
     viewport={() => viewport}
     onInsets={(insets, motion) => recorded.insets.push({ insets, ...motion })}
     onDetent={(detent) => recorded.detents.push(detent)}
@@ -111,7 +123,7 @@
         }}
       >
         {#snippet list()}
-          <input aria-label="Search regions" />
+          <input aria-label="Search regions" bind:this={field} />
           <div style="overflow: auto; flex: 1">
             {#each ids as id (id)}
               <button

@@ -50,7 +50,7 @@ State on 2026-10-26, after #64 (I3b): all four regions are integrated. `src/app/
 - **Kind:** behaviour
 - **Level:** browser (regions + fake engine)
 - **Source:** decision record `0008-dialog-mount-points.md`; `index.html:599-697`
-- **Expected:** three `dialog` elements, "Keyboard shortcuts", "Provenance" and "Feedback"; the Linked MRI is docked beside the stage on a desktop and a dialog only on a phone or over the full-screen stage. Each one's parent is the app root. With one open, it `matches(':modal')` and the regions are inert (a click on a masthead button does nothing).
+- **Expected:** three `dialog` elements, "Keyboard shortcuts", "Provenance" and "Feedback"; the Linked MRI is docked beside the stage on a desktop and a dialog only on a phone, over the full-screen stage, or where docking would leave the stage under 360 px (SECT-25). Each one's parent is the app root. With one open, it `matches(':modal')` and the regions are inert (a click on a masthead button does nothing).
 - **Covered by:** `src/app/regions/ShellRegions.svelte.test.ts` (R, all three, their parents, an open one modal and the masthead unfocusable); `src/app/regions/StageRegion.svelte.test.ts` (R, the docked Linked MRI drawn only while open)
 
 ### REGION-06 · One tooltip serves the whole page

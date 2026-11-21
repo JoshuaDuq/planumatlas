@@ -111,8 +111,8 @@
 
   const copy = $derived(t(lang, 'viewport'));
   const changes = $derived(displayChanges({ ...view, lang }, prepared, cortexSurface));
-  // A phone hides the status bar, which lists the changes.
-  const marked = $derived(media.phone && changes.length > 0);
+  // The Display tool marks active overrides at every width, matching Reset display inside the popover.
+  const marked = $derived(changes.length > 0);
   // The dock is not drawn while the anatomy loads, failed or lost its context (stage.css:315).
   const shown = $derived(modelUsable(status));
   // A phone sheet raised over the stage covers it.
@@ -340,7 +340,9 @@
       {covered}
       style={popoverStyle}
       dialogLabelledby={displayLabelId}
-      ariaLabel={marked ? `${copy.displayTool}${t(lang, 'display').changed}` : undefined}
+      ariaLabel={media.phone && marked
+        ? `${copy.displayTool}${t(lang, 'display').changed}`
+        : undefined}
       {rescueFocus}
     >
       {#snippet name()}
@@ -360,7 +362,7 @@
           exploded={view.exploded}
           namesShown={view.namesShown}
           {explodable}
-          changes={media.phone ? changes : []}
+          {changes}
           {scrubbing}
           onHemisphere={commands.setHemisphere}
           onCortexVisible={commands.setCortexVisible}
@@ -382,6 +384,7 @@
       {covered}
       style={popoverStyle}
       dialogLabelledby={placeLabelId}
+      tooltip={copy.placeHint(placeOptions.map(({ label }) => label).join(' · '))}
       {rescueFocus}
     >
       {#snippet name()}<span id={placeLabelId}>{copy.placeTool}</span>{/snippet}
@@ -467,16 +470,19 @@
       }
     }
     /*
-     * A phone's stage holds the four tools on one row, in French too, down to a 360px screen. A tool has
-     * no ground until it opens, so the targets can meet.
+     * A phone's stage holds the three tools on one row, in French too, down to a 360px screen, while
+     * keeping a 4px gap and inset focus rings so adjacent focus outlines never collide.
      */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .stage-toolbar {
-        gap: 0;
+        gap: var(--space-1);
       }
       :global(.stage-tool) {
         gap: var(--space-1);
         padding: 0 var(--space-2);
+      }
+      :global(.stage-tool:focus-visible) {
+        outline-offset: -2px;
       }
     }
     :global(.stage-tool[hidden]) {

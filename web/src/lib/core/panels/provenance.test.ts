@@ -249,8 +249,8 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
   assert.equal(unchecked.length, 26);
   const [executive] = domains.lesion_checks.executive as Parameters<typeof checkedParcels>[0][];
   assert.equal(
-    checkedParcels(executive, 'fr'),
-    'G_front_middle (G) colorée à 0\u202f%, G_front_middle (D) colorée à 18\u202f%, G_and_S_cingul-Ant (G) colorée à 0\u202f%, G_and_S_cingul-Ant (D) colorée à 8\u202f%',
+    checkedParcels(executive, 'fr', (mapping) => mapping.source_name),
+    'G_front_middle (G), part colorée 0\u202f%, G_front_middle (D), part colorée 18\u202f%, G_and_S_cingul-Ant (G), part colorée 0\u202f%, G_and_S_cingul-Ant (D), part colorée 8\u202f%',
   );
   const midline = {
     ...executive,
@@ -259,7 +259,10 @@ test('PROV-05 each domain lists how much of every lesion-mapped parcel its areas
       { region: 'destrieux:left:1', source_name: 'N', coverage: null },
     ],
   };
-  assert.equal(checkedParcels(midline, 'fr'), 'M (Méd) colorée à 50\u202f%, N (G), non mesurée');
+  assert.equal(
+    checkedParcels(midline, 'fr', (mapping) => mapping.source_name),
+    'M (Méd), part colorée 50\u202f%, N (G), part non mesurée',
+  );
 });
 
 test('PROV-07 a tract reference with no source links has no Sources row, in either language', () => {

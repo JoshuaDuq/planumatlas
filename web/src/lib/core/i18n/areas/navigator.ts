@@ -37,6 +37,8 @@ export const en = {
   showInTab: (tab: string) => `Show in ${tab}`,
   // An on-screen region found through a part it holds, or a structure it stands in for.
   includes: (name: string) => `includes ${name}`,
+  // The heading over the matches another structure set holds, after those on screen.
+  alsoIn: (set: string) => `Also in ${set}`,
   rowHiddenAria: (name: string, side: string, reason: string) =>
     `${name}, ${side}: ${reason}. Activate to reveal.`,
   rowUnavailableAria: (name: string, side: string, reason: string) =>
@@ -78,6 +80,7 @@ export const fr: typeof en = {
   matchesInTab: (countText: string, tab: string) => `${countText} dans l’onglet ${tab}. `,
   showInTab: (tab: string) => `Afficher dans l’onglet ${tab}`,
   includes: (name: string) => `comprend ${name}`,
+  alsoIn: (set: string) => `Aussi dans ${set}`,
   rowHiddenAria: (name: string, side: string, reason: string) =>
     `${name}, ${side} : ${reason}. Activer pour afficher.`,
   rowUnavailableAria: (name: string, side: string, reason: string) =>

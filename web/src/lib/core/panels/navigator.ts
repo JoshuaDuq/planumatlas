@@ -200,14 +200,51 @@ export function rowStatesReason(row: StatedRow): boolean {
  */
 export function structureRows<
   R extends { region: Pick<Region, 'hemisphere'>; label: Pick<RegionLabel, 'name'> },
->(rows: readonly R[]): R[][] {
+>(rows: readonly R[], keyOf: (row: R) => string = (row) => row.label.name): R[][] {
   const named = new Map<string, R[]>();
-  for (const row of rows) named.set(row.label.name, [...(named.get(row.label.name) ?? []), row]);
+  for (const row of rows) named.set(keyOf(row), [...(named.get(keyOf(row)) ?? []), row]);
   return [...named.values()].flatMap((sides) =>
     new Set(sides.map((row) => row.region.hemisphere)).size === sides.length
       ? [sides]
       : sides.map((row) => [row]),
   );
+}
+
+const SIDE_ORDER: readonly string[] = ['left', 'right', 'midline'];
+
+type SearchRow = { region: Region; label: Pick<RegionLabel, 'name'>; reason: string | null };
+
+/**
+ * A search's rows by structure, in the order each ranks first: the sides of one name in one atlas
+ * share a result, as they share a tree row, left before right before midline.
+ */
+export function searchStructures<R extends SearchRow>(rows: readonly R[]): R[][] {
+  const key = (row: R) => [row.region.atlas, row.region.kind, row.label.name].join('\u0000');
+  return structureRows(rows, key).map((sides) =>
+    sides.toSorted(
+      (a, b) => SIDE_ORDER.indexOf(a.region.hemisphere) - SIDE_ORDER.indexOf(b.region.hemisphere),
+    ),
+  );
+}
+
+/**
+ * The search's structures as the list sets them out (2026-11-20 review): what the shown structure set
+ * and atlas hold first, then each other structure set under its own heading, in the order first met,
+ * so a namesake there never pushes down a name on screen. `set` is the atlas a set's results come
+ * from, '' for regions another structure set puts on the cut, and null for the shown ones.
+ */
+export function searchSections<R extends SearchRow>(
+  rows: readonly R[],
+): { set: string | null; structures: R[][] }[] {
+  const sets = new Map<string | null, R[]>([[null, []]]);
+  for (const row of rows) {
+    const own = cutAtlasesOf(row.region).includes(row.region.atlas);
+    const set = row.reason !== 'other-detail' ? null : own ? row.region.atlas! : '';
+    sets.set(set, [...(sets.get(set) ?? []), row]);
+  }
+  return [...sets]
+    .map(([set, part]) => ({ set, structures: searchStructures(part) }))
+    .filter(({ structures }) => structures.length);
 }
 
 /**

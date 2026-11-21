@@ -5,10 +5,10 @@
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import { visibilityOf } from '../../lib/core/catalog/visibility.ts';
   import { t } from '../../lib/core/i18n/index.ts';
-  import { comparesMap, legendFor, paintFor } from '../../lib/core/state/paint.ts';
+  import { comparesMap, legendFor, paintFor, paintKind } from '../../lib/core/state/paint.ts';
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
-  import type { CutMode, ViewName } from '../../lib/types/index.ts';
+  import type { CutMode, Explorer, ViewName } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { createMprDialog } from '../../features/sections/mpr-dialog.svelte.ts';
@@ -217,6 +217,16 @@
   }
 
   /** Takes focus when a dialog's opener is gone: the Section tool, else the model. */
+  /**
+   * The tab whose detail reads a placed sphere's report: Deficits keeps a lesion simulated there while
+   * no deficit is open (2026-11-20 review); a coordinate's, and any other, is Anatomy's.
+   */
+  function reportTab(): Explorer {
+    const { explorer, selectedDeficit } = world!.view.current;
+    const keeps = explorer === 'deficits' && !selectedDeficit && !world!.lesion.coordinate;
+    return keeps ? 'deficits' : 'anatomy';
+  }
+
   function sectionToolOrCanvas(canvas: HTMLElement): HTMLElement {
     const tool = [...document.querySelectorAll<HTMLElement>('#viewport .stage-tool')].find(
       (candidate) => candidate.querySelector('[id^="section-tool-"]'),
@@ -292,7 +302,7 @@
       setNamesShown: app.session.setNamesShown,
     } satisfies DockCommands}
     {@const showReport = (close: () => void) => {
-      world.excursions.chooseExplorer('anatomy');
+      world.excursions.chooseExplorer(reportTab());
       world.anatomy.selectRegion(null);
       app.ports.showDetail();
       // The raised sheet leaves a phone's popover no stage to sit on.
@@ -302,7 +312,7 @@
          A phone's sheet may cover it, so a phone keeps the popover's own. -->
     {@const reportShown = () =>
       !app.media.phone &&
-      current.explorer === 'anatomy' &&
+      (current.explorer === 'anatomy' || reportTab() === 'deficits') &&
       current.selectedRegion === null &&
       app.ports.detailShown()}
     <StageOverlay
@@ -406,8 +416,14 @@
         namesShown: current.namesShown,
         exploded: current.exploded,
         tractReference,
-        routeShown: current.explorer === 'circuits' && Boolean(current.lesson.route),
+        lessonOpen: current.explorer === 'circuits' && Boolean(current.lesson.circuit),
         mapOpen: visualFieldMapOpen(current),
+        focused: current.focused,
+        painted:
+          current.explorer === 'functions' ||
+          current.explorer === 'deficits' ||
+          (Boolean(current.paint) && paintKind(current.paint) !== 'highlight'),
+        tracts: current.explorer === 'diffusion',
       })}
       selected={current.selectedRegion?.id ?? null}
       lobes={keyedSurface(current) === 'lobe' && !current.paint ? lobes : null}
@@ -428,7 +444,6 @@
       !current.exploded
         ? world.circuits.get(current.lesson.circuit).steps.map((step, index) => ({
             region: step.region,
-            name: step.name[current.lang],
             label: lessonCopy.routeMark(index, step.name[current.lang]),
           }))
         : []}

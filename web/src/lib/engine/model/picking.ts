@@ -369,20 +369,30 @@ const sampledWorld = new Vector3();
 /**
  * Whether each point a name stands on (where `facing` met its region, or its cut face's anchor) is
  * still in sight: the first thing a ray from the camera meets on its way there is that region, at the
- * point or before it. One ray each.
+ * point or before it, or, while the region is drawn, anything at the point itself: a point `facing` met
+ * on the edge two regions share can meet the neighbour's triangle there. One ray each.
  */
 export function inSight(
   targets: readonly { id: string; point: Vec3 }[],
   scene: FacingScene,
 ): boolean[] {
-  const { regions, camera } = scene;
+  const { regions, meshes, camera, intersect } = scene;
   camera.updateMatrixWorld();
   camera.getWorldPosition(eye);
   return targets.map(({ id, point }) => {
     if (!regions.has(id)) throw new Error(`Unknown region: ${id}`);
     const world = rasToWorld(point);
     onScreen.copy(world).project(camera);
-    return onScreen.z <= 1 && meetsFirst(id, world, scene) !== null;
+    if (onScreen.z > 1) return false;
+    const reach = world.distanceTo(eye);
+    facingRay.set(eye, world.sub(eye).normalize());
+    const hit = intersect(facingRay);
+    if (!hit || hit.distance > reach + FACING_SLACK_M) return false;
+    if (hitRegion(hit, regions)?.id === id) return true;
+    return (
+      hit.distance >= reach - FACING_SLACK_M &&
+      meshes.some((mesh) => mesh.userData['region_id'] === id)
+    );
   });
 }
 

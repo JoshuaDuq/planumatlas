@@ -158,6 +158,23 @@ describe('docked beside the stage', () => {
     expect(box(canvas('coronal')).left).toBe(box(canvas('sagittal')).left);
   });
 
+  test('just wider than a phone, where docking would leave the stage under 360 px, it is the modal instead', async () => {
+    await page.viewport(820, 1180);
+    await mount();
+    const whole = box(document.getElementById('viewport')!).width;
+    await engine.sections.load();
+    mpr.show({ instant: true });
+    await expect.poll(() => dialog()?.open).toBe(true);
+    expect(dialog().matches(':modal')).toBe(true);
+    expect(dock()).toBeNull();
+    // The stage keeps its width under it, and its tools their row.
+    expect(box(document.getElementById('viewport')!).width).toBe(whole);
+    // Wide enough again, it docks beside the stage.
+    await page.viewport(1024, 768);
+    await expect.poll(dock).not.toBeNull();
+    expect(box(document.getElementById('viewport')!).width).toBeGreaterThanOrEqual(360);
+  });
+
   test('the stage gets its room back when it closes', async () => {
     await mount();
     const stage = document.getElementById('viewport')!;

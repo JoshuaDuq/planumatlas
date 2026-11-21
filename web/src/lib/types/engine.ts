@@ -30,7 +30,10 @@ export interface CameraView {
   edges: Record<'top' | 'right' | 'bottom' | 'left', 'R' | 'L' | 'S' | 'I' | 'P' | 'A'>;
   /** The scale bar in true millimetres, or null while the stage has no size (scale-bar.js:28). */
   scale: { millimetres: number; pixels: number } | null;
-  /** The camera's world basis, unit vectors toward screen right, screen up and out of the screen. */
+  /**
+   * The camera's basis squared to the brain's own left–right axis (`anatomicalBasis`): unit vectors toward
+   * screen right, screen up and out of the screen.
+   */
   basis: { right: Vec3; up: Vec3; back: Vec3 };
 }
 

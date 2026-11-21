@@ -182,6 +182,18 @@ describe('placeColumns', () => {
     ]);
   });
 
+  test('a name never stands in the gutter between chrome and the stage’s edge', () => {
+    // A scale bar 32 px over the stage's foot: its strip would hold the name, level with the dot below it.
+    const scale = { x: 760, y: 550, width: 230, height: 18 };
+    const [placed] = placeColumns([name(650, 590)], anatomy, bounds, [scale])!;
+    expect(placed!.side).toBe('right');
+    expect(placed!.box.y + placed!.box.height).toBeLessThanOrEqual(scale.y);
+    // Chrome standing well off the edge leaves room under it.
+    const high = { ...scale, y: 480 };
+    const [under] = placeColumns([name(650, 570)], anatomy, bounds, [high])!;
+    expect(middleOf(under!.box)).toBe(570);
+  });
+
   test('a chrome box blocks only names wide enough to reach it', () => {
     // A key at the stage's right edge, level with the dot.
     const key = { x: 900, y: 150, width: 100, height: 100 };

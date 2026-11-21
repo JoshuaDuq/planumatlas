@@ -47,7 +47,7 @@ interface Live {
   surfaceColor: 'atlas';
   networks: null;
   legend: Legend | null;
-  marks: { region: string; name: string; label: string }[];
+  marks: { region: string; label: string }[];
 }
 
 let engine: FakeEngine;
@@ -232,13 +232,12 @@ describe('the letters and the scale bar', () => {
 });
 
 describe('the route’s landmarks', () => {
-  const LONG = 'A landmark whose name is long enough to wrap onto a second line on the stage';
   const marks = [
-    { region: 'learning:midline:optic-chiasm', name: 'Optic chiasm', label: 'Landmark 1' },
-    { region: 'learning:left:lateral-geniculate', name: LONG, label: 'Landmark 2' },
+    { region: 'learning:midline:optic-chiasm', label: 'Landmark 1' },
+    { region: 'learning:left:lateral-geniculate', label: 'Landmark 2' },
   ];
 
-  test('each label’s dot, leader and words where the stage draws them, a long name line by line', async () => {
+  test('each label’s dot, leader and number where the stage draws them, and no route draws no labels', async () => {
     await mount({ marks });
     const { labels } = markings();
     const origin = host().getBoundingClientRect();
@@ -250,29 +249,31 @@ describe('the route’s landmarks', () => {
       expect(label.dot.x).toBeCloseTo(dot.left + dot.width / 2 - origin.left, 3);
       expect(label.dot.y).toBeCloseTo(dot.top + dot.height / 2 - origin.top, 3);
       expect(label.leader === null).toBe(button.dataset.leader !== 'true');
-      expect(label.lines[0]!.text).toBe(String(index + 1));
+      expect(label.lines.map((line) => line.text)).toEqual([String(index + 1)]);
       expect(label.lines[0]!.font).toMatch(/^600 14px/);
     });
-    const name = (index: number) => labels[index]!.lines.slice(1);
-    expect(name(0).map((line) => line.text)).toEqual(['Optic chiasm']);
-    // The long name wraps as the stage wraps it: its lines in order, together the whole name.
-    expect(name(1).length).toBeGreaterThan(1);
-    expect(
-      name(1)
-        .map((line) => line.text)
-        .join(' '),
-    ).toBe(LONG);
-    expect(new Set(name(1).map((line) => line.x)).size).toBe(1);
-    expect(name(1)[1]!.y).toBeGreaterThan(name(1)[0]!.y);
-  });
-
-  test('a label reduced to its number draws the number alone, and no route draws no labels', async () => {
-    await mount({ marks });
-    host().querySelector<HTMLElement>('.route-mark')!.dataset.short = 'true';
-    expect(markings().labels[0]!.lines.map((line) => line.text)).toEqual(['1']);
     live.marks = [];
     flushSync();
     expect(markings().labels).toEqual([]);
+  });
+
+  test('a stage label’s long name is drawn line by line, as the stage wraps it', async () => {
+    await mount();
+    const LONG = 'A region whose name is long enough to wrap onto a second line on the stage';
+    const label = host().appendChild(document.createElement('div'));
+    label.className = 'stage-label';
+    label.style.transform = 'translate(100px, 100px)';
+    for (const part of ['stage-label-leader', 'stage-label-dot']) {
+      label.appendChild(document.createElement('span')).className = part;
+    }
+    const name = label.appendChild(document.createElement('span'));
+    name.className = 'stage-label-text stage-label-name';
+    name.textContent = LONG;
+    const [lines] = markings().labels.map((mark) => mark.lines);
+    expect(lines!.length).toBeGreaterThan(1);
+    expect(lines!.map((line) => line.text).join(' ')).toBe(LONG);
+    expect(new Set(lines!.map((line) => line.x)).size).toBe(1);
+    expect(lines![1]!.y).toBeGreaterThan(lines![0]!.y);
   });
 });
 

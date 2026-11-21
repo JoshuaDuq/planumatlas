@@ -8,6 +8,7 @@ import { page, userEvent } from 'vitest/browser';
 import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import strokeFile from '../../../../public/models/cdmd/stroke-cases.json' with { type: 'json' };
+import { reaching, type StrokeCases } from '../../lib/core/catalog/stroke-cases.ts';
 import {
   domainName,
   domainRecord,
@@ -123,6 +124,7 @@ describe('selection', () => {
       .element(page.getByRole('heading', { level: 2, name: nameOf(REGION) }))
       .toBeVisible();
 
+    // With a region selected, Functions opens on its list.
     await userEvent.click(page.getByRole('tab', { name: 'Functions' }));
     await expect
       .element(page.getByRole('button', { name: `${nameOf(REGION)} L, left` }))
@@ -196,6 +198,23 @@ describe('a brain without retinotopy (the MNI template)', () => {
   });
 });
 
+describe('the Functions tab', () => {
+  test('entered from the opening picture, lands on All functions and paints the brain with it', async () => {
+    const world = await boot();
+    await userEvent.click(page.getByRole('tab', { name: 'Functions' }));
+    await expect
+      .element(page.getByRole('heading', { level: 2, name: 'All functions' }))
+      .toBeVisible();
+    expect(world.view.current.selectedFunction).toBe('all');
+    await expect.poll(() => engine.model.settings.atlas).toBe('hcp-mmp');
+    // Its domains are the list in front, each opening its own map.
+    expect(detail().querySelectorAll('.function-link')).toHaveLength(11);
+    // Leaving the tab gives the opening atlas back.
+    await userEvent.click(page.getByRole('tab', { name: 'Anatomy' }));
+    await expect.poll(() => engine.model.settings.atlas).toBe('destrieux');
+  });
+});
+
 describe('what each tab shows (1.4)', () => {
   test.each([
     ['Anatomy', 'anatomy'],
@@ -209,6 +228,10 @@ describe('what each tab shows (1.4)', () => {
       await boot();
       await userEvent.click(page.getByRole('tab', { name }));
       flushSync();
+      // Functions lands on All functions; its list is one step back.
+      if (place === 'functions') {
+        await userEvent.click(page.getByRole('button', { name: 'Back to Functions' }));
+      }
       const copy = t('en', 'info');
       await expect
         .poll(() => list().querySelector(`[data-scope="${place}"]`)?.textContent)
@@ -263,25 +286,56 @@ describe('clinical material in the Deficits list (4.2)', () => {
     await expect.poll(() => links().length).toBe(0);
   });
 
-  test('DEF-38 · Stroke cases says to select a region, then opens the selected region’s cases', async () => {
+  test('DEF-39 · a lesion simulated from Deficits shows its report there, until a deficit is opened over it', async () => {
+    const world = await boot();
+    await deficits();
+    await userEvent.click(links()[0]!);
+    world.lesion.place([-40, 10, 20]);
+    flushSync();
+    await userEvent.click(page.getByRole('button', { name: 'Show the report' }));
+    expect(world.view.current.explorer).toBe('deficits');
+    await expect.poll(() => detail().querySelector('h2.region-name')?.textContent).toBe('Lesion');
+    expect(detail().hidden).toBe(false);
+    // In front, the report's own Remove serves: the popover offers no second way to it.
+    expect(page.getByRole('button', { name: 'Show the report' }).elements()).toEqual([]);
+    // A deficit opened over it takes the detail.
+    const deficit = world.clinical.grouped('', 'en')[0]!.deficits[0]!;
+    await app.ports.openDeficit(deficit.id);
+    flushSync();
+    expect(detail().querySelector('.clinical-profile')).not.toBeNull();
+  });
+
+  test('DEF-38 · Stroke cases opens on the region shown most lesions reach, then on the selected region’s', async () => {
     engine = createFakeEngine({
       manifest,
       domains: domains as never,
       strokeCases: strokeFile as never,
     });
-    await boot();
+    const world = await boot();
     await deficits();
     const stroke = () => links().find((row) => row.textContent!.trim() === 'Stroke cases')!;
+    const section = () => detail().querySelector<HTMLDetailsElement>('.stroke-cases details');
+    // Nothing selected: once the cohort is read, the region shown that the most lesions reach.
     await userEvent.click(stroke());
-    expect(notice()).toBe('Select a region to see the stroke cases whose lesion reaches it.');
-    // The left supramarginal gyrus: one of the regions most cases reach.
+    await expect.poll(() => world.view.current.selectedRegion?.id).toBeTruthy();
+    const chosen = world.view.current.selectedRegion!.id;
+    const cases = strokeFile as unknown as StrokeCases;
+    const reached = (id: string) => reaching(cases, id, Infinity).length;
+    const shown = world.catalog.groups.flatMap((group) => group.rows).filter((row) => row.visible);
+    expect(Math.max(...shown.map((row) => reached(row.region.id)))).toBe(reached(chosen));
+    expect(notice()).toBe(
+      `Of the regions shown, the most lesions in the cohort reach ${nameOf(chosen)}. Select another region to see its cases.`,
+    );
+    await expect.poll(() => section()?.open).toBe(true);
+    await expect.poll(() => document.activeElement).toBe(section()!.querySelector('summary'));
+    // The left supramarginal gyrus, selected by the reader: its own cases.
     engine.emit('pick', { id: 'destrieux:left:26', point: null });
     flushSync();
     await deficits();
     await userEvent.click(stroke());
-    const section = () => detail().querySelector<HTMLDetailsElement>('.stroke-cases details');
     await expect.poll(() => section()?.open).toBe(true);
     await expect.poll(() => document.activeElement).toBe(section()!.querySelector('summary'));
+    expect(world.view.current.selectedRegion?.id).toBe('destrieux:left:26');
   });
 });
 
@@ -540,7 +594,9 @@ describe('the anatomy search', () => {
     await userEvent.fill(page.getByRole('combobox', { name: 'Search regions' }), nameOf(cutOnly));
     // No cut-labels switch is offered: the region is listed, with the anatomy that draws it.
     expect(page.getByRole('button', { name: /cut labels/i }).elements()).toEqual([]);
-    await userEvent.click(page.getByRole('option', { name: /left: In NextBrain\./ }).first());
+    // One option for both sides, under NextBrain's own heading; its press chooses the left.
+    const nextbrain = page.getByRole('group', { name: 'Also in NextBrain' });
+    await userEvent.click(nextbrain.getByRole('option', { name: /right: In NextBrain\./ }).first());
     await vi.waitFor(() => expect(engine.model.state.selectedRegion?.id).toBe(cutOnly));
     expect(engine.model.settings.detail).toBe('nextbrain');
     expect(engine.sections.state.cutAtlas).toBe('nextbrain');
@@ -552,7 +608,7 @@ describe('the anatomy search', () => {
     await boot();
     await userEvent.fill(page.getByRole('combobox', { name: 'Search regions' }), nameOf(cutOnly));
     await userEvent.click(
-      page.getByRole('option', { name: /left: Under Cerebellar functions\./ }).first(),
+      page.getByRole('option', { name: /right: Under Cerebellar functions\./ }).first(),
     );
     await vi.waitFor(() => expect(engine.model.state.selectedRegion?.id).toBe(cutOnly));
     expect(engine.model.settings.surfaceColor).toBe('cerebellar');
@@ -717,6 +773,11 @@ describe('the keymap’s tree walk', () => {
 describe('the phone sheet', () => {
   beforeEach(() => page.viewport(390, 844));
   const grip = () => page.getByRole('button', { name: `${nameOf(REGION)} L, left`, exact: true });
+  /** The handle's own top line: the search at rest covers the middle of the grip below it. */
+  const pressHandle = () =>
+    userEvent.click(page.getByRole('button', { name: t('en', 'sheet').expand }), {
+      position: { x: 195, y: 12 },
+    });
 
   test('showing the list or the detail raises the sheet from peek, and the stage is told the room it has', async () => {
     const world = await boot();
@@ -728,11 +789,29 @@ describe('the phone sheet', () => {
     expect(visibleRect).toEqual(world.engine.camera.visibleRect);
   });
 
+  test('at rest the sheet offers the search of the tab in front: a tap opens its list full, field in focus', async () => {
+    await boot();
+    const atRest = () => document.querySelector<HTMLButtonElement>('.sheet-search');
+    await expect
+      .element(page.getByRole('button', { name: 'Search regions', exact: true }))
+      .toBeVisible();
+    await userEvent.click(atRest()!);
+    expect(sheet().dataset.detent).toBe('full');
+    expect(list().hidden).toBe(false);
+    expect(document.activeElement).toBe(
+      page.getByRole('combobox', { name: 'Search regions' }).element(),
+    );
+    // Circuits has no search, so nothing waits in its grip.
+    await userEvent.click(page.getByRole('tab', { name: 'Circuits' }));
+    flushSync();
+    expect(atRest()).toBeNull();
+  });
+
   test('a held view is reframed where the sheet comes to rest', async () => {
     await boot();
     expect(app.world!.engine.camera.viewHeld).toBe(true);
     const before = cameraCalls('frameCurrent').length;
-    await userEvent.click(page.getByRole('button', { name: t('en', 'sheet').expand }));
+    await pressHandle();
     expect(cameraCalls('frameCurrent')).toHaveLength(before + 1);
   });
 
@@ -758,7 +837,7 @@ describe('the phone sheet', () => {
 
   test('leaving the phone layout clears the sheet’s inset from the stage and the camera', async () => {
     await boot();
-    await userEvent.click(page.getByRole('button', { name: t('en', 'sheet').expand }));
+    await pressHandle();
     const stage = () => document.getElementById('viewport')!;
     await expect.poll(() => stage().style.getPropertyValue('--vis-bottom')).not.toBe('0px');
     await page.viewport(1280, 800);

@@ -19,6 +19,9 @@ export type Intersect = (raycaster: Raycaster) => Pick<Intersection, 'point'> | 
 /** OrbitControls state that exists at runtime but that `@types/three` does not declare. */
 interface OrbitInternals {
   _sphericalDelta: Spherical;
+  /** Turns the up the controls orbit about onto y, and back. */
+  _quat: Quaternion;
+  _quatInverse: Quaternion;
   _panOffset: Vector3;
   _scale: number;
   _performCursorZoom: boolean;
@@ -55,6 +58,26 @@ const LEVELLED = 1e-3;
 /** A turn smaller than this per update is the last of a coast, not the reader turning. */
 const TURNING = 1e-4;
 
+/**
+ * Orbit about `superior`, a world unit vector, rather than world y: the controls' own turns and polar
+ * limits, the levelling and `superiorOf` all follow it. A head lies turned in the scanner, so the brain's
+ * own superior axis is the turntable's.
+ */
+export function orbitAbout(controls: OrbitControls, superior: Vector3): void {
+  requirePrivate(controls, ['_quat', '_quatInverse']);
+  controls._quat.setFromUnitVectors(superior, Y_UP);
+  controls._quatInverse.copy(controls._quat).invert();
+}
+
+/** The world axis the controls orbit about (`orbitAbout`). */
+export function superiorOf(controls: OrbitControls): Vector3 {
+  requirePrivate(controls, ['_quatInverse']);
+  return Y_UP.clone().applyQuaternion(controls._quatInverse);
+}
+
+/** Whether an up is the superior axis: a named view's and the controls' come by different rotations. */
+const upright = (up: Vector3, superior: Vector3) => up.distanceToSquared(superior) < 1e-12;
+
 /** A pointer holds the controls: a drag, pan or pinch, not a wheel step or a call. */
 export function grabbed(controls: OrbitControls): boolean {
   requirePrivate(controls, ['state']);
@@ -73,7 +96,7 @@ export function grabbed(controls: OrbitControls): boolean {
  * picture, so a sideways drag spins the view.
  */
 export function levelOnOrbit(controls: OrbitControls): void {
-  requirePrivate(controls, ['_sphericalDelta']);
+  requirePrivate(controls, ['_sphericalDelta', '_quatInverse']);
   const camera = controls.object;
   const offset = new Vector3();
   const sight = new Vector3();
@@ -86,29 +109,32 @@ export function levelOnOrbit(controls: OrbitControls): void {
   let levelling = false;
   let updated = -Infinity;
 
+  const superior = new Vector3();
+
   function levelStep(elapsed: number): void {
     offset.subVectors(camera.position, controls.target);
     const length = offset.length();
     shown.copy(Y_UP).applyQuaternion(camera.quaternion);
-    if (Math.hypot(offset.x, offset.z) < length * POLE_OFFSET) {
+    const height = offset.dot(superior);
+    if (Math.sqrt(Math.max(length * length - height * height, 0)) < length * POLE_OFFSET) {
       // Looking along the axis, superior up reads as the horizontal away from the camera's offset
       // from above, and toward it from below.
-      const side = Math.sign(offset.y);
-      shown.setY(0).normalize();
+      const side = Math.sign(height);
+      shown.projectOnPlane(superior).normalize();
       camera.position
         .copy(controls.target)
-        .addScaledVector(Y_UP, side * length * Math.cos(POLE_OFFSET))
+        .addScaledVector(superior, side * length * Math.cos(POLE_OFFSET))
         .addScaledVector(shown, -side * length * Math.sin(POLE_OFFSET));
-      camera.up.copy(Y_UP);
+      camera.up.copy(superior);
       levelling = false;
       return;
     }
     sight.copy(offset).divideScalar(-length);
-    level.copy(Y_UP).addScaledVector(sight, -sight.y).normalize();
+    level.copy(superior).addScaledVector(sight, -sight.dot(superior)).normalize();
     // Both lie across the line of sight, so the roll between them is a turn about it.
     const angle = Math.atan2(sight.dot(axis.crossVectors(shown, level)), shown.dot(level));
     if (Math.abs(angle) < LEVELLED) {
-      camera.up.copy(Y_UP);
+      camera.up.copy(superior);
       levelling = false;
       return;
     }
@@ -124,8 +150,9 @@ export function levelOnOrbit(controls: OrbitControls): void {
     updated = now;
     if (levelling && !camera.up.equals(written)) levelling = false;
     const { theta, phi } = controls._sphericalDelta;
+    superior.copy(Y_UP).applyQuaternion(controls._quatInverse);
     const turning = Math.max(Math.abs(theta), Math.abs(phi)) > TURNING;
-    if (turning && !camera.up.equals(Y_UP)) levelling = true;
+    if (turning && !upright(camera.up, superior)) levelling = true;
     if (levelling) levelStep(elapsed);
     return update(deltaTime);
   };
@@ -255,34 +282,38 @@ export function takePending(controls: OrbitControls): {
 }
 
 /**
- * Turn a destination as the controls turn the camera: `theta` about the superior axis, `phi` toward
- * the inferior pole and never across either. Its up turns with it unless it is superior already, so a
- * top or bottom view spins in place as it does under `levelOnOrbit`.
+ * Turn a destination as the controls turn the camera: `theta` about `superior` (`superiorOf`), `phi`
+ * toward the inferior pole and never across either. Its up turns with it unless it is superior already,
+ * so a top or bottom view spins in place as it does under `levelOnOrbit`.
  */
 export function turnGoal(
   goal: { position: Vector3; target: Vector3; up: Vector3 },
   theta: number,
   phi: number,
+  superior: Vector3,
 ): void {
   const offset = goal.position.clone().sub(goal.target);
   const length = offset.length();
-  const superior = goal.up.equals(Y_UP);
-  const spin = new Quaternion().setFromAxisAngle(Y_UP, theta);
+  const level = upright(goal.up, superior);
+  const spin = new Quaternion().setFromAxisAngle(superior, theta);
   offset.applyQuaternion(spin);
-  if (!superior) goal.up.applyQuaternion(spin);
+  if (!level) goal.up.applyQuaternion(spin);
   if (phi) {
     const before = offset.clone().divideScalar(length);
-    if (Math.hypot(offset.x, offset.z) < length * POLE_OFFSET) {
+    const height = offset.dot(superior);
+    if (Math.sqrt(Math.max(length * length - height * height, 0)) < length * POLE_OFFSET) {
       // On the axis the up chooses the side, as `levelOnOrbit` steps off it.
-      const side = Math.sign(offset.y);
-      const toward = goal.up.clone().setY(0).normalize();
+      const side = Math.sign(height);
+      const toward = goal.up.clone().projectOnPlane(superior).normalize();
       offset.addScaledVector(toward, -side * length * Math.sin(POLE_OFFSET));
     }
-    const spherical = new Spherical().setFromVector3(offset);
+    // Polar angles are measured from the superior axis, as the controls measure them.
+    const toY = new Quaternion().setFromUnitVectors(superior, Y_UP);
+    const spherical = new Spherical().setFromVector3(offset.applyQuaternion(toY));
     spherical.phi = Math.min(Math.max(spherical.phi + phi, 0), Math.PI);
     spherical.makeSafe();
-    offset.setFromSpherical(spherical);
-    if (!superior) {
+    offset.setFromSpherical(spherical).applyQuaternion(toY.invert());
+    if (!level) {
       goal.up.applyQuaternion(
         new Quaternion().setFromUnitVectors(before, offset.clone().normalize()),
       );

@@ -10,6 +10,11 @@
     label: string;
     title?: string;
   }
+
+  export interface SelectOptionGroup {
+    label?: string;
+    options: readonly SelectOption[];
+  }
 </script>
 
 <script lang="ts">
@@ -17,10 +22,16 @@
     id,
     label,
     describedby,
-    options,
+    class: className,
+    options = [],
+    groups,
+    hiddenOption,
     value = $bindable(),
+    select = $bindable(),
     disabled = false,
     onchange,
+    onpointerenter,
+    onfocus,
   }: {
     /** Lets a visible `<label for={id}>` name the select and focus it on click. */
     id?: string;
@@ -28,24 +39,56 @@
     label?: string;
     /** The id of the note that describes the select. */
     describedby?: string;
-    options: readonly SelectOption[];
-    value: string;
+    class?: string;
+    options?: readonly SelectOption[];
+    /** Grouped options (`<optgroup>` when `label` is set, plain options otherwise). */
+    groups?: readonly SelectOptionGroup[];
+    /** A hidden value shown only while externally active (e.g. a tab paint over Colour). */
+    hiddenOption?: SelectOption;
+    value?: string;
+    /** Underlying element reference for focus rescue or imperative synchronization. */
+    select?: HTMLSelectElement;
     disabled?: boolean;
     onchange?: (value: string) => void;
+    onpointerenter?: () => void;
+    onfocus?: () => void;
   } = $props();
 </script>
 
 <select
+  bind:this={select}
   {id}
+  class={className}
   aria-label={label}
   aria-describedby={describedby}
   {disabled}
   bind:value
-  onchange={() => onchange?.(value)}
+  onchange={(event) => onchange?.(event.currentTarget.value)}
+  {onpointerenter}
+  {onfocus}
 >
-  {#each options as option (option.value)}
-    <option value={option.value} title={option.title}>{option.label}</option>
-  {/each}
+  {#if hiddenOption}
+    <option value={hiddenOption.value} hidden>{hiddenOption.label}</option>
+  {/if}
+  {#if groups}
+    {#each groups as group (group.label ?? group.options[0]?.value)}
+      {#if group.label}
+        <optgroup label={group.label}>
+          {#each group.options as option (option.value)}
+            <option value={option.value} title={option.title}>{option.label}</option>
+          {/each}
+        </optgroup>
+      {:else}
+        {#each group.options as option (option.value)}
+          <option value={option.value} title={option.title}>{option.label}</option>
+        {/each}
+      {/if}
+    {/each}
+  {:else}
+    {#each options as option (option.value)}
+      <option value={option.value} title={option.title}>{option.label}</option>
+    {/each}
+  {/if}
 </select>
 
 <style>
@@ -53,6 +96,7 @@
     select {
       /* The caret's ink ends this far inside the control, as far as the value starts from the other edge. */
       --caret-end: var(--space-3);
+      -webkit-appearance: none;
       appearance: none;
       width: 100%;
       height: var(--control-height);
@@ -63,6 +107,7 @@
       color: var(--text-primary);
       box-shadow: none;
       font-size: var(--text-ui);
+      line-height: var(--lh-ui);
       cursor: pointer;
       background-image:
         linear-gradient(
@@ -120,9 +165,14 @@
         background: var(--surface-base);
         padding: var(--space-1);
       }
+      optgroup {
+        color: var(--text-secondary);
+        font-size: var(--text-caption);
+      }
       option {
         min-height: var(--control-height);
         padding: 0 var(--space-3);
+        color: var(--text-primary);
         font-size: var(--text-ui);
       }
       option:checked {
@@ -137,11 +187,23 @@
         background: var(--surface-tonal);
       }
     }
+    @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      select {
+        height: auto;
+        min-height: 44px;
+        font-size: var(--text-title);
+      }
+    }
   }
   @layer a11y {
     @media (prefers-reduced-motion: reduce) {
       select::picker-icon {
         transition: none;
+      }
+    }
+    @media (prefers-contrast: more) {
+      select:disabled {
+        border-color: var(--border-control);
       }
     }
     @media (forced-colors: active) {

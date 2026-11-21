@@ -409,23 +409,21 @@ describe('commands', () => {
     );
   });
 
-  test('Tab walks Clear, the commands, the copyable facts and each section, then Enter toggles one', async () => {
+  test('Tab walks Clear, the commands, the measurements row and each section, then Enter toggles one', async () => {
     render(Fixture, { regionId: V1 });
     const walked: string[] = [];
     (document.querySelector('.selection-clear') as HTMLElement).focus();
-    for (let step = 0; step < 11; step++) {
+    for (let step = 0; step < 9; step++) {
       if (step > 0) await userEvent.keyboard('{Tab}');
       walked.push(text(document.activeElement!));
     }
     // More is closed, so Isolate and Hide take no Tab stop.
     expect(walked.slice(0, 4)).toEqual(['', 'Focus', 'Linked MRI', 'More']);
-    // Area, centroid and source id: each value is its own copy button.
-    expect(walked.slice(4, 7)).toEqual([
-      text(root().querySelector('dl.facts dd')!),
-      '−12.3, +56.8, −9.0 mm',
-      '1',
-    ]);
-    expect(walked.slice(7)).toEqual([
+    // The measurements are one closed row whose summary gives the area (INSP-62).
+    expect(walked[4]).toBe(
+      `Measurements and source, ${text(root().querySelector('dl.facts dd')!)}`,
+    );
+    expect(walked.slice(5)).toEqual([
       'Neuropsychological functions, 1',
       'Functional networks, Visual 100%',
       'Typical arterial supply',
@@ -452,6 +450,8 @@ describe('copying facts', () => {
     try {
       const screen = await render(Fixture, { regionId: V1 });
       const facts = () => root().querySelector('dl.facts')!;
+      // Opened, the row stays open for the next region.
+      root().querySelector<HTMLElement>('.measurements summary')!.click();
       const copies = () =>
         [...facts().querySelectorAll<HTMLButtonElement>('button.copy-value')].map((node) =>
           node.getAttribute('aria-label'),
@@ -518,6 +518,7 @@ describe('evidence sections', () => {
     );
     // A summary names its section, then the headline value it holds without a fetch (2.2).
     expect(sections.map((details) => text(details.querySelector('summary')!))).toEqual([
+      expect.stringMatching(/^Measurements and source, \d\S*\smm²$/),
       'Neuropsychological functions, 32',
       'Functional networks, Dorsal attention 93%',
       'Typical arterial supply',

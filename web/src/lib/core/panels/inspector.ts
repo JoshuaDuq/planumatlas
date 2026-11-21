@@ -63,3 +63,28 @@ export function sourceLabel(
   }
   return { atlas: sourceAtlas, ids: ids.join(', '), stacked: ids.length > 2 };
 }
+
+/** How many functions and deficits the lead line names; the sections below list them all. */
+const LEAD_NAMES = 2;
+
+/**
+ * The region in one plain line for a reader new to it (2026-11-20 review): its network, its
+ * strongest functions and the deficits mapped on it, each as its section has it. Null with none.
+ */
+export function regionLead(
+  {
+    network,
+    functions,
+    deficits,
+  }: { network: string | null; functions: readonly string[]; deficits: readonly string[] },
+  lang: Language,
+): string | null {
+  const copy = t(lang, 'inspector').lead;
+  const named = (names: readonly string[]) => names.slice(0, LEAD_NAMES).join(', ');
+  const parts = [
+    network && copy.network(network),
+    functions.length > 0 && copy.functions(named(functions)),
+    deficits.length > 0 && copy.deficits(named(deficits)),
+  ].filter((part) => typeof part === 'string');
+  return parts.length ? parts.join(' ') : null;
+}

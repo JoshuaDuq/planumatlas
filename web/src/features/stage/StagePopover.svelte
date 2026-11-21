@@ -29,6 +29,8 @@
     covered: boolean;
     /** The tool's accessible name, where its drawn text is not it. */
     ariaLabel?: string;
+    /** What the tool holds, where its name does not say: U5's tooltip. */
+    tooltip?: string;
     class?: string;
     /** Left, width and maximum height from `placePopover`. */
     style: string;
@@ -47,6 +49,7 @@
     hidden,
     covered,
     ariaLabel,
+    tooltip,
     class: className,
     style,
     dialogLabelledby,
@@ -123,6 +126,7 @@
       data-offers={offers}
       {hidden}
       aria-label={ariaLabel}
+      data-tooltip={tooltip}
     >
       {@render name()}
       <span class="stage-tool-chevron" aria-hidden="true"></span>

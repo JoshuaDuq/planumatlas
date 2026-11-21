@@ -26,7 +26,7 @@
       networks: ColoredNetworks | null;
       legend: Legend | null;
       /** The whole route's landmarks, or none. */
-      marks: { region: string; name: string; label: string }[];
+      marks: { region: string; label: string }[];
       /** Names on the brain. */
       names?: boolean;
     };

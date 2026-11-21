@@ -45,7 +45,8 @@
     status: string;
     /** Shows the `/` hint; false when single-key shortcuts are off. */
     showShortcut: boolean;
-    onselect: (value: string) => void;
+    /** An option was chosen: by Enter, or by a click on `from` inside it. */
+    onselect: (value: string, from?: Element) => void;
     /** What an option shows. */
     option: Snippet<[SearchOption]>;
     /** Sentences and their buttons. They sit after the listbox, which holds only options (navigator.js:412). */
@@ -219,7 +220,7 @@
     aria-current={item.current ? 'true' : undefined}
     data-active={armed === item.value ? 'true' : undefined}
     onpointerdown={(event) => event.preventDefault()}
-    onclick={() => !item.disabled && onselect(item.value)}
+    onclick={(event) => !item.disabled && onselect(item.value, event.target as Element)}
   >
     {@render option(item)}
   </div>

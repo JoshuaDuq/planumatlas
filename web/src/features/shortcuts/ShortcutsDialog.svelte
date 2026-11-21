@@ -111,9 +111,10 @@
     .shortcuts-section:first-of-type .shortcuts-group {
       padding-top: var(--space-4);
     }
+    /* The key column holds its longest row, Shift and the four arrows, on one line. */
     .shortcuts-list {
       display: grid;
-      grid-template-columns: 148px minmax(0, 1fr);
+      grid-template-columns: 164px minmax(0, 1fr);
       margin: 0;
       padding-top: var(--space-1);
       font-size: var(--text-ui);

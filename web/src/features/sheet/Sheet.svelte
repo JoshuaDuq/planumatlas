@@ -70,6 +70,11 @@
     /** The strip was activated: show the selection's detail. */
     onSelection: () => void;
     onClear: () => void;
+    /**
+     * The search of the tab in front, offered at rest (2026-11-20 review); `onopen` shows its list and
+     * focuses its field once the sheet has risen. None on a tab without a search.
+     */
+    search?: { label: string; onopen: () => void } | null;
     /** The panel `<aside>` with the workspace in it. */
     children: Snippet;
   };
@@ -85,6 +90,7 @@
     onDetent,
     onSelection,
     onClear,
+    search = null,
     children,
   }: Props = $props();
 
@@ -388,6 +394,12 @@
     });
   }
 
+  /** The search at rest: the sheet rises full, clear of the keyboard, and the list's field takes focus. */
+  function openSearch(event: MouseEvent) {
+    setDetent('full', { quick: isKeyboardActivation(event), say: true });
+    search!.onopen();
+  }
+
   async function openSelection(event: MouseEvent) {
     const focused = event.currentTarget === document.activeElement;
     raise({ instant: isKeyboardActivation(event) });
@@ -546,6 +558,12 @@
           onclick={clear}
         />
       {/if}
+    {/if}
+    {#if search}
+      <button type="button" class="sheet-search" onclick={openSearch}>
+        {@render iconGraphic('search')}
+        <span class="sheet-search-label">{search.label}</span>
+      </button>
     {/if}
     <p class="sheet-disclaimer">{t(lang, 'footer').statementAlone}</p>
   </div>
@@ -745,6 +763,86 @@
         align-self: start;
         padding: 0 var(--space-2) 0 var(--panel-inset);
         text-align: left;
+      }
+
+      /*
+       * At rest the tab's search waits in the grip, set as its field is, with the statement as its
+       * caption (2026-11-20 review); risen, the panel's own search takes over. A selection keeps its
+       * line above it, the clear beside the name.
+       */
+      .sheet-search {
+        display: none;
+      }
+      #sheet[data-panel='hidden'] .sheet-search {
+        position: relative;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        height: auto;
+        min-height: 44px;
+        margin: 0 var(--panel-inset) var(--space-2);
+        padding: 0 var(--space-3) 0 10px;
+        border: 1px solid var(--border-control);
+        border-radius: var(--radius-control);
+        background: var(--surface-navigation);
+        color: var(--text-tertiary);
+        font-size: max(16px, 1rem);
+        font-weight: 400;
+        text-align: left;
+        cursor: text;
+      }
+      .sheet-search :global(svg) {
+        flex: none;
+        width: 14px;
+        height: 14px;
+      }
+      .sheet-search-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .sheet-search:focus-visible {
+        outline-offset: 2px;
+      }
+      #sheet[data-panel='hidden'] .sheet-grip-row:has(.sheet-search) {
+        grid-template-rows: var(--handle-row) auto auto;
+      }
+      #sheet[data-panel='hidden'] .sheet-grip-row:has(.sheet-search) .sheet-disclaimer {
+        grid-row: 3;
+      }
+      #sheet[data-panel='hidden'] .sheet-grip-row[data-selection='true']:has(.sheet-search) {
+        grid-template-rows: var(--handle-row) auto auto auto;
+      }
+      #sheet[data-panel='hidden']
+        .sheet-grip-row[data-selection='true']:has(.sheet-search)
+        :is(.sheet-selection, :global(.sheet-selection-clear)) {
+        grid-row: 2;
+        margin-bottom: var(--space-2);
+      }
+      /* The name on the clear's centre line: one 44px row, set as the side sheet sets it. */
+      #sheet[data-panel='hidden']
+        .sheet-grip-row[data-selection='true']:has(.sheet-search)
+        .sheet-selection {
+        align-items: center;
+      }
+      #sheet[data-panel='hidden']
+        .sheet-grip-row[data-selection='true']:has(.sheet-search)
+        .sheet-selection
+        :global(svg) {
+        align-self: center;
+        margin-top: 0;
+      }
+      #sheet[data-panel='hidden'] .sheet-grip-row[data-selection='true'] .sheet-search {
+        grid-row: 3;
+      }
+      #sheet[data-panel='hidden']
+        .sheet-grip-row[data-selection='true']:has(.sheet-search)
+        .sheet-disclaimer {
+        grid-row: 4;
+        padding-bottom: var(--space-2);
       }
 
       /* The detail owns its complete title; the grip keeps the statement, and the clear beside it. */

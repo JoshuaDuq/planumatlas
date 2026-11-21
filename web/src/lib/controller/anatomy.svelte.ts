@@ -110,15 +110,21 @@ export function createAnatomyCommands(
   /**
    * Frame the selected region from where the camera already is (app.js:516-524). A structure the opaque
    * cortex hides is framed with its surroundings and focused, so it shows in its colour through
-   * everything ghosted around it.
+   * everything ghosted around it. A cortical region chosen by name (`named`) is focused too: among the
+   * atlas's colours its outline alone is hard to find (2026-11-20 review).
    */
-  function focusSelection({ immediate = false }: MoveOptions = {}) {
+  function focusSelection({
+    immediate = false,
+    named = false,
+  }: MoveOptions & { named?: boolean } = {}) {
     if (frameLandmark({ immediate })) return;
     const id = engineState.model.selectedRegion?.id;
     if (!id) return;
+    const region = model.regions.get(id)!;
     const { cortexVisible, cortexOpacity, isolatedRegion } = model.settings;
-    const hidden = beneathCortex(model.regions.get(id)!) && cortexVisible && cortexOpacity >= 1;
-    if (hidden && !isolatedRegion && !model.settings.focused) model.setFocused(true);
+    const hidden = beneathCortex(region) && cortexVisible && cortexOpacity >= 1;
+    const lost = named && region.kind === 'cortex';
+    if ((hidden || lost) && !isolatedRegion && !model.settings.focused) model.setFocused(true);
     camera.frameRegion(id, { immediate, context: hidden });
   }
 
@@ -174,7 +180,7 @@ export function createAnatomyCommands(
       ui.revealOnSelect();
     }
     ui.dismissHelp();
-    if (frame && !same) focusSelection();
+    if (frame && !same) focusSelection({ named: true });
   }
 
   /**
@@ -405,7 +411,7 @@ export function createAnatomyCommands(
         beforeReveal = { scene, region: id };
         session.notify({ kind: 'info', text: said, action: null });
       }
-      focusSelection();
+      focusSelection({ named: true });
     } catch (error) {
       commands.failIfCurrent(current, 'region', error, undefined, () => {
         void revealRegion(reason, id);

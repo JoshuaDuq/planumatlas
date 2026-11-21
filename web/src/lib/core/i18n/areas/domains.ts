@@ -88,8 +88,9 @@ export const fr: typeof en = {
   lesionCheck: (items: string[]) => `Vérification lésionnelle\u202f: ${items.join('\u202f; ')}.`,
   lesionItem: (deficit: string, references: string, parcels: string) =>
     `${deficit} (${references})\u202f: ${parcels}`,
-  parcelCoverage: (parcel: string, share: string) => `${parcel} colorée à ${share}`,
-  parcelOffSurface: (parcel: string) => `${parcel}, non mesurée`,
+  // « part », not the parcel, takes the participle: a region's own name may be masculine (« gyrus »).
+  parcelCoverage: (parcel: string, share: string) => `${parcel}, part colorée ${share}`,
+  parcelOffSurface: (parcel: string) => `${parcel}, part non mesurée`,
   noLesionCheck:
     'Aucune étude lésionnelle des données de déficits de Planum ne vérifie ce domaine.',
 };

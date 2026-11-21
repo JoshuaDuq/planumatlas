@@ -247,19 +247,33 @@ export function cutCosine(back: Vec3, normal: Vec3, reverse: boolean): number {
 
 /**
  * Whether the names are drawn: the switch is on and the stage shows the anatomy where it lies, without
- * names of its own. Plan 1's Study mode (WP8) must add itself here: names are always off while studying.
+ * a focused ghost, mode paint, tracts, circuit lesson, or visual-field map already directing attention.
+ * Plan 1's Study mode (WP8) must add itself here: names are always off while studying.
  */
 export function namesDrawn(view: {
   namesShown: boolean;
   exploded: boolean;
   /** The tract reference is shown alone. */
   tractReference: boolean;
-  /** A lesson's whole route is on the stage, with its landmarks named. */
-  routeShown: boolean;
+  /** A circuit lesson (whole route or landmark step) is open on the stage. */
+  lessonOpen: boolean;
   /** The visual-field map is open, naming its own areas. */
   mapOpen: boolean;
+  /** Focus is active: one region stands out against a grey ghost cortex. */
+  focused: boolean;
+  /** Functions, Deficits, or another data paint is active on the stage. */
+  painted: boolean;
+  /** The Tracts explorer is active over a grey ghost cortex. */
+  tracts: boolean;
 }): boolean {
   return (
-    view.namesShown && !view.exploded && !view.tractReference && !view.routeShown && !view.mapOpen
+    view.namesShown &&
+    !view.exploded &&
+    !view.tractReference &&
+    !view.lessonOpen &&
+    !view.mapOpen &&
+    !view.focused &&
+    !view.painted &&
+    !view.tracts
   );
 }

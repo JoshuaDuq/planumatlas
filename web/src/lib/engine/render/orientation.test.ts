@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { PerspectiveCamera, Vector3 } from 'three';
-import { cameraBasis, edgeLabels, localizeEdges, projectAxes } from './orientation.ts';
+import { PerspectiveCamera, Quaternion, Vector3 } from 'three';
+import {
+  anatomicalBasis,
+  cameraBasis,
+  edgeLabels,
+  localizeEdges,
+  projectAxes,
+} from './orientation.ts';
 
 // manifest coordinate_system: x = right, y = superior, z = posterior.
 const VIEWS = {
@@ -26,33 +32,38 @@ function cameraFor(view: keyof typeof VIEWS) {
 }
 
 test('the six canonical views label their edges by anatomical convention', () => {
-  assert.deepEqual(edgeLabels(cameraFor('left')), { right: 'P', left: 'A', top: 'S', bottom: 'I' });
-  assert.deepEqual(edgeLabels(cameraFor('right')), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('left'))), {
+    right: 'P',
+    left: 'A',
+    top: 'S',
+    bottom: 'I',
+  });
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('right'))), {
     right: 'A',
     left: 'P',
     top: 'S',
     bottom: 'I',
   });
   // Facing the subject, their left is on the viewer's right.
-  assert.deepEqual(edgeLabels(cameraFor('anterior')), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('anterior'))), {
     right: 'L',
     left: 'R',
     top: 'S',
     bottom: 'I',
   });
-  assert.deepEqual(edgeLabels(cameraFor('posterior')), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('posterior'))), {
     right: 'R',
     left: 'L',
     top: 'S',
     bottom: 'I',
   });
-  assert.deepEqual(edgeLabels(cameraFor('superior')), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('superior'))), {
     right: 'R',
     left: 'L',
     top: 'A',
     bottom: 'P',
   });
-  assert.deepEqual(edgeLabels(cameraFor('inferior')), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('inferior'))), {
     right: 'R',
     left: 'L',
     top: 'P',
@@ -62,7 +73,7 @@ test('the six canonical views label their edges by anatomical convention', () =>
 
 test('left and right are never both on the same side', () => {
   for (const view of Object.keys(VIEWS) as (keyof typeof VIEWS)[]) {
-    const { left, right } = edgeLabels(cameraFor(view));
+    const { left, right } = edgeLabels(cameraBasis(cameraFor(view)));
     assert.notEqual(left, right, `${view} put the same letter on both sides`);
   }
 });
@@ -73,7 +84,7 @@ test('opposing edges always carry opposing anatomical directions', () => {
   camera.position.copy(new Vector3(-1, 0.3, -0.45).normalize().multiplyScalar(0.5));
   camera.lookAt(0, 0, 0);
   camera.updateMatrixWorld(true);
-  const edges = edgeLabels(camera);
+  const edges = edgeLabels(cameraBasis(camera));
   assert.equal(edges.left, opposite[edges.right]);
   assert.equal(edges.bottom, opposite[edges.top]);
   assert.equal(new Set(Object.values(edges)).size, 4);
@@ -84,7 +95,7 @@ test('the oblique default view keeps superior at the top', () => {
   camera.position.copy(new Vector3(-1, 0.3, -0.45).normalize().multiplyScalar(0.5));
   camera.lookAt(0, 0, 0);
   camera.updateMatrixWorld(true);
-  assert.equal(edgeLabels(camera).top, 'S');
+  assert.equal(edgeLabels(cameraBasis(camera)).top, 'S');
 });
 
 test('letters follow the camera inside its own change event, before anything redraws', async () => {
@@ -96,7 +107,7 @@ test('letters follow the camera inside its own change event, before anything red
   controls.update();
   let seen = null;
   controls.addEventListener('change', () => {
-    seen = edgeLabels(camera);
+    seen = edgeLabels(cameraBasis(camera));
   });
   camera.position.set(0, 0, -0.5);
   controls.update();
@@ -104,7 +115,7 @@ test('letters follow the camera inside its own change event, before anything red
 });
 
 test('stored letters are translated without asking the camera again', () => {
-  const raw = edgeLabels(cameraFor('anterior'));
+  const raw = edgeLabels(cameraBasis(cameraFor('anterior')));
   assert.deepEqual(localizeEdges(raw, 'fr'), { right: 'G', left: 'D', top: 'S', bottom: 'I' });
   assert.deepEqual(localizeEdges(raw, 'en'), raw);
 });
@@ -116,13 +127,13 @@ test('with a target, letters follow where the camera stands, not a rotation a fr
   const planned = cameraFor('anterior');
   camera.quaternion.copy(planned.quaternion);
   camera.updateMatrixWorld(true);
-  assert.deepEqual(edgeLabels(camera, 'en', new Vector3(0, 0, 0)), {
+  assert.deepEqual(edgeLabels(cameraBasis(camera, new Vector3(0, 0, 0)), 'en'), {
     right: 'P',
     left: 'A',
     top: 'S',
     bottom: 'I',
   });
-  assert.deepEqual(edgeLabels(cameraFor('superior'), 'fr', new Vector3(0, 0, 0)), {
+  assert.deepEqual(edgeLabels(cameraBasis(cameraFor('superior'), new Vector3(0, 0, 0)), 'fr'), {
     right: 'D',
     left: 'G',
     top: 'A',
@@ -167,4 +178,22 @@ test('the gizmo puts R right of the centre and S above it, and the axis toward t
   const anterior = at(cameraBasis(cameraFor('anterior')));
   assert.ok(anterior.R!.x < -0.99 && anterior.L!.x > 0.99);
   assert.ok(anterior.A!.depth > 0.99);
+});
+
+test('a camera on a leaning head’s own front view reads along its frame, level and square', () => {
+  // A head rolled and turned in the scanner, its left–right axis off world x.
+  const across = new Vector3(1, -Math.tan(0.2), Math.tan(0.15)).normalize();
+  const frame = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), across);
+  const camera = new PerspectiveCamera(35, 1.6, 0.001, 10);
+  camera.up.copy(new Vector3(0, 1, 0).applyQuaternion(frame));
+  camera.position.copy(new Vector3(0, 0, -0.5).applyQuaternion(frame));
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
+  const basis = anatomicalBasis(cameraBasis(camera), frame);
+  close(basis.right, [-1, 0, 0]);
+  close(basis.up, [0, 1, 0]);
+  close(basis.back, [0, 0, -1]);
+  assert.deepEqual(edgeLabels(basis), { right: 'L', left: 'R', top: 'S', bottom: 'I' });
+  // Read along the scanner's axes, the same camera's right leans with the head.
+  assert.ok(Math.abs(cameraBasis(camera).right[1]) > 0.1);
 });

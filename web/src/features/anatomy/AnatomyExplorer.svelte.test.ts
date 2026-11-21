@@ -22,6 +22,8 @@ const input = () => field().element() as HTMLInputElement;
 const grid = () => document.querySelector<HTMLElement>('[role="treegrid"]')!;
 const options = () => [...document.querySelectorAll<HTMLElement>('[role="option"]')];
 const optionNamed = (name: string | RegExp) => page.getByRole('option', { name });
+/** A result's side keys, in their order. */
+const keysOf = (option: Element) => [...option.querySelectorAll<HTMLElement>('.side-key')];
 const armed = () => document.getElementById(input().getAttribute('aria-activedescendant') ?? '');
 const announced = () => document.getElementById('announcer')!.textContent;
 const visible = (element: Element) => element.checkVisibility();
@@ -37,18 +39,19 @@ beforeEach(async () => {
 afterEach(() => cleanup());
 
 describe('results', () => {
-  test('a query lists its matches as options named name, side and group, arms the first and takes the place of the tree', async () => {
+  test('a query lists one option per structure, named name, sides and group, arms the first and takes the place of the tree', async () => {
     mount();
     expect(visible(grid())).toBe(true);
     await search('cuneus');
-    await expect.element(optionNamed('Cuneus, left, Occipital')).toBeInTheDocument();
-    await expect.element(optionNamed('Cuneus, right, Occipital')).toBeInTheDocument();
+    const cuneus = optionNamed('Cuneus, left and right, Occipital');
+    await expect.element(cuneus).toBeInTheDocument();
+    expect(options()).toHaveLength(1);
+    // Its sides are the tree's keys, left before right.
+    expect(keysOf(cuneus.element()).map((key) => key.textContent)).toEqual(['L', 'R']);
     expect(input().getAttribute('aria-expanded')).toBe('true');
-    expect(armed()?.textContent).toContain('Cuneus, left');
+    expect(armed()).toBe(cuneus.element());
     expect(visible(grid())).toBe(false);
-    // Down walks to the other one, and Escape empties the field and brings the tree back.
-    await userEvent.keyboard('{ArrowDown}');
-    expect(armed()?.textContent).toContain('Cuneus, right');
+    // Escape empties the field and brings the tree back.
     await userEvent.keyboard('{Escape}');
     expect(input().value).toBe('');
     expect(visible(grid())).toBe(true);
@@ -61,7 +64,6 @@ describe('results', () => {
     await expect.element(optionNamed(/^Cunéus, gauche/)).toBeInTheDocument();
     expect([...document.querySelectorAll('mark.query-match')].map((m) => m.textContent)).toEqual([
       'Cunéus',
-      'Cunéus',
     ]);
     cleanup();
 
@@ -73,23 +75,61 @@ describe('results', () => {
     expect(row.element().textContent).toContain('(IFG)');
   });
 
-  test('a row that is not on screen says why in its name and is revealed by Enter, not selected', async () => {
-    const calls = mount({ settings: { hemisphere: 'right' } });
-    await search('cuneus');
-    const hidden = optionNamed('Cuneus, left: Left hemisphere hidden. Activate to reveal.');
+  test('a structure not on screen says why in its name and is revealed by Enter, not selected', async () => {
+    const calls = mount({ settings: { internalVisible: false } });
+    await search('putamen');
+    const hidden = optionNamed(
+      'Putamen, left and right: Internal anatomy hidden. Activate to reveal.',
+    );
     await expect.element(hidden).toBeInTheDocument();
     // Not a native `title`: the reason is in the name, and U5's one tooltip carries it on hover.
     expect(document.querySelectorAll('[role="listbox"] [title]')).toHaveLength(0);
     expect(hidden.element().querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toBe(
-      'Cuneus, left: Left hemisphere hidden. Activate to reveal.',
+      'Putamen, left and right: Internal anatomy hidden. Activate to reveal.',
     );
-    // The side on screen comes first, so Enter on the first result changes nothing unasked.
-    expect(armed()).not.toBe(hidden.element());
-    await userEvent.keyboard('{ArrowDown}');
+    expect(hidden.element().textContent).toContain('Internal anatomy hidden');
     expect(armed()).toBe(hidden.element());
     await userEvent.keyboard('{Enter}');
-    expect(calls).toEqual(['reveal hemisphere d:left:cuneus']);
+    expect(calls).toEqual(['reveal internal-hidden a:left:putamen']);
     expect(input().value).toBe('');
+  });
+
+  test('a structure with one side on screen names that side; Enter chooses it, the other side’s key reveals it', async () => {
+    const calls = mount({ settings: { hemisphere: 'right' } });
+    await search('cuneus');
+    const cuneus = optionNamed('Cuneus, right, Occipital');
+    await expect.element(cuneus).toBeInTheDocument();
+    expect(keysOf(cuneus.element()).map((key) => [key.textContent, key.dataset.state])).toEqual([
+      ['L', 'hidden'],
+      ['R', 'shown'],
+    ]);
+    // The side on screen is chosen, so Enter changes nothing unasked.
+    await userEvent.keyboard('{Enter}');
+    expect(calls).toEqual(['select d:right:cuneus']);
+    await search('cuneus');
+    await expect.element(cuneus).toBeInTheDocument();
+    keysOf(cuneus.element())[0]!.click();
+    expect(calls).toEqual(['select d:right:cuneus', 'reveal hemisphere d:left:cuneus']);
+  });
+
+  test('another structure set’s namesakes follow under its name, with no reason on each row', async () => {
+    const calls = mount();
+    await search('putamen');
+    await expect.element(optionNamed('Putamen, left and right, Basal ganglia')).toBeInTheDocument();
+    const group = page.getByRole('group', { name: 'Also in Teaching set' });
+    await expect.element(group).toBeInTheDocument();
+    const other = group.getByRole('option');
+    expect(other.element().querySelector('.second')?.textContent).toBe('Basal ganglia');
+    // Its name still says why it is not on screen and what a press does.
+    expect(other.element().getAttribute('aria-labelledby') ?? '').toBe('');
+    await expect
+      .element(other)
+      .toHaveAccessibleName('Putamen, left and right: In Teaching set. Activate to reveal.');
+    // The shown set's own comes first.
+    expect(options()[0]!.textContent).toContain('Basal ganglia');
+    expect(options()[0]!.closest('[role="group"]')).toBeNull();
+    keysOf(other.element())[1]!.click();
+    expect(calls).toEqual(['reveal other-detail l:right:putamen']);
   });
 
   test('a row too small for the cut is disabled: named as not shown, skipped by the arrows, and does nothing', async () => {
@@ -119,30 +159,46 @@ describe('results', () => {
     expect(document.activeElement).toBe(input());
   });
 
-  test('a click chooses a region and leaves focus in the field rather than on the removed row', async () => {
+  test('a click on the row chooses the left, on a side’s key that side; focus stays in the field', async () => {
     const calls = mount();
     await search('cuneus');
-    await optionNamed(/^Cuneus, right/).click();
-    expect(calls).toEqual(['select d:right:cuneus']);
+    await optionNamed(/^Cuneus/).click({ position: { x: 8, y: 8 } });
+    expect(calls).toEqual(['select d:left:cuneus']);
     expect(visible(grid())).toBe(true);
+    expect(document.activeElement).toBe(input());
+    await search('cuneus');
+    await userEvent.click(keysOf(optionNamed(/^Cuneus/).element())[1]!);
+    expect(calls).toEqual(['select d:left:cuneus', 'select d:right:cuneus']);
     expect(document.activeElement).toBe(input());
   });
 
-  test('aria-selected marks the armed option only; the selected region is aria-current', async () => {
+  test('a structure’s own press keeps the selected region’s side, as the tree’s row does', async () => {
+    const calls = mount({ selected: 'd:right:cuneus' });
+    await search('putamen');
+    await expect.element(optionNamed(/^Putamen, left and right, Basal/)).toBeInTheDocument();
+    await userEvent.keyboard('{Enter}');
+    expect(calls).toEqual(['select a:right:putamen']);
+  });
+
+  test('aria-selected marks the armed option only; the selected region’s structure is aria-current, its side’s key marked', async () => {
     mount({ selected: 'd:right:cuneus' });
-    await search('cuneus');
-    await expect.element(optionNamed(/^Cuneus, right/)).toBeInTheDocument();
+    // Central sulcus ranks before Cuneus, so the armed option is not the selected one.
+    await search('c');
+    const cuneus = optionNamed(/^Cuneus, left and right/);
+    await expect.element(cuneus).toBeInTheDocument();
     expect(
       options()
         .filter((option) => option.getAttribute('aria-selected') === 'true')
         .map((option) => option.textContent),
     ).toEqual([armed()!.textContent]);
-    expect(armed()!.textContent).toContain('left');
-    expect(
-      options()
-        .filter((option) => option.getAttribute('aria-current') === 'true')
-        .map((option) => option.textContent),
-    ).toEqual([expect.stringContaining('Cuneus, right')]);
+    expect(armed()).not.toBe(cuneus.element());
+    expect(options().filter((option) => option.getAttribute('aria-current') === 'true')).toEqual([
+      cuneus.element(),
+    ]);
+    expect(keysOf(cuneus.element()).map((key) => key.dataset.selected)).toEqual([
+      undefined,
+      'true',
+    ]);
   });
 });
 
@@ -189,7 +245,7 @@ describe('the sentences after the list', () => {
   test('the count is said after typing pauses, and only for a list that is complete', async () => {
     mount();
     await search('cuneus');
-    await expect.poll(() => announced()).toBe('2 matches.');
+    await expect.poll(() => announced()).toBe('1 match.');
   });
 
   test('matches in another atlas are reported with a button that switches to it, and focus goes back to the field', async () => {
@@ -366,9 +422,9 @@ describe('layout and accessibility', () => {
   });
 
   test('reflow at 320 px under WCAG 1.4.12 text spacing: results wrap, nothing spills or is clipped', async () => {
-    mount({ settings: { hemisphere: 'right' } });
-    await search('cuneus');
-    await expect.element(optionNamed(/^Cuneus, left/)).toBeInTheDocument();
+    mount({ settings: { internalVisible: false } });
+    await search('putamen');
+    await expect.element(optionNamed(/^Putamen, left and right: Internal/)).toBeInTheDocument();
     await page.viewport(320, 700);
     const spacing = document.head.appendChild(document.createElement('style'));
     spacing.textContent =
@@ -511,7 +567,7 @@ describe('scroll edges', () => {
   test('a list with nothing to scroll has neither the fade nor the rule', async () => {
     mount();
     await search('cuneus');
-    await expect.element(optionNamed('Cuneus, left, Occipital')).toBeInTheDocument();
+    await expect.element(optionNamed('Cuneus, left and right, Occipital')).toBeInTheDocument();
     const explorer = document.querySelector<HTMLElement>('.explorer')!;
     expect(explorer.scrollHeight).toBeLessThanOrEqual(explorer.clientHeight);
     expect(getComputedStyle(explorer).maskImage).toBe('none');

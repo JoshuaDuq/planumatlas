@@ -201,6 +201,17 @@ Scope: chunk H6 (#45), the phone bottom sheet with three rests (peek, half, full
 - **Expected:** Click "Clear selection" → `onClear` called once, focus on the Anatomy tab, no strip.
 - **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R)
 
+## The search at rest
+
+### SHEET-31 · At peek the grip offers the search of the tab in front, the statement as its caption
+
+- **Rule:** Upright at peek, when the tab in front has a search (Anatomy, Functions, Deficits), the grip shows it as a button drawn like a field and named with the search's own label, at least 44 px tall, under the handle's 24 px line and under the selection's name when there is one; the statement "Not clinical anatomy" sits below it as its caption, and peek grows so the tabs stay whole. A tap or Enter raises the sheet full (announced as a press of the handle is), shows the tab's list and focuses its field. Raised, or on a sideways sheet whose panels show at rest, it is not drawn; a tab without a search (Circuits, Tracts) has none.
+- **Kind:** behaviour
+- **Level:** browser — layout from CSS, focus
+- **Source:** 2026-11-20 interface review, P2 "on a phone the search is two gestures away"
+- **Expected:** 390 × 844, search "Search regions": the button visible, height ≥ 44, top ≥ handle top + 24, statement top ≥ its bottom, tab row ≤ 3 px from the bottom. With a selection: the name and the clear above it. Click → `data-detent="full"`, `sheetFull`, "Panel fully open", the field focused, the button `display: none`. 844 × 390 → `display: none`. No search → no button. axe clean with it at rest. In the app: Anatomy offers "Search regions", a tap shows the list full with the regions' combobox focused; Circuits offers none.
+- **Covered by:** `src/features/sheet/Sheet.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+
 ## Tabs, panels and focus
 
 ### SHEET-22 · Choosing a tab raises a resting sheet, silently, and never lowers a raised one

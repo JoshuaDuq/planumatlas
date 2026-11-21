@@ -4,9 +4,10 @@
   Opened by G4's Linked MRI button, `M` and the region inspector through S3's `openLinkedMri` (which
   loads the scan), or by a lesson; StageRegion mounts it.
   - on a desktop it is a region docked beside the live stage, with no focus trap;
-  - on a phone or over the full-screen stage it is the modal Dialog (U5), and a phone shows one plane
-    at a time, chosen by a radio group (deviations/g5-plane-radio.md, g5-plane-layout.md); each plane
-    is a named section whose heading stays for assistive technology (g5-panel-names.md);
+  - on a phone, over the full-screen stage, or where docking would leave the stage under 360 px, it
+    is the modal Dialog (U5), and a phone shows one plane at a time, chosen by a radio group
+    (deviations/g5-plane-radio.md, g5-plane-layout.md); each plane is a named section whose heading
+    stays for assistive technology (g5-panel-names.md);
   - the pictures are `canvas role=img`, not focusable and without key handlers; the plane's slider is
     the keyboard route (deviations/g5-canvas-not-interactive.md). The crosshair, letters and an axial
     or coronal panel's convention are marked over the slice, and drawn into the bitmap only when it is
@@ -119,10 +120,27 @@
   const agreementCopy = $derived(t(lang, 'agreement'));
   const phone = new MediaQuery(PHONE_QUERY);
   const fullscreenChange = createSubscriber((update) => on(document, 'fullscreenchange', update));
+  const resized = createSubscriber((update) => on(window, 'resize', update));
+  // The dock may be dragged between its narrowest useful width and leaving the stage this much.
+  const DOCK_MIN = 240;
+  const STAGE_MIN = 360;
+  /**
+   * Beside the rail, the dock at its narrowest would leave the stage less than its minimum, as a window
+   * just wider than a phone's does (820 px leaves 260 px and wraps the stage's tools; 2026-11-20
+   * review): the MRI opens as the phone's modal does instead.
+   */
+  const cramped = $derived.by(() => {
+    resized();
+    // A phone's width is the phone query's, whose change comes after the resize: it decides alone, so
+    // the focus handed between its layouts moves once.
+    if (matchMedia(PHONE_QUERY).matches) return false;
+    const rail = document.getElementById('workspace-panel')?.getBoundingClientRect().width ?? 0;
+    return innerWidth - rail - DOCK_MIN < STAGE_MIN;
+  });
   // Only the stage goes full screen, so a docked sibling would not be drawn; the modal's top layer is.
   const modal = $derived.by(() => {
     fullscreenChange();
-    return phone.current || document.fullscreenElement !== null;
+    return phone.current || cramped || document.fullscreenElement !== null;
   });
   // The region's one live region: the phone's modal makes the page's announcer inert.
   let said = $state('');
@@ -296,9 +314,6 @@
     };
   }
 
-  // The dock may be dragged between its narrowest useful width and leaving the stage this much.
-  const DOCK_MIN = 240;
-  const STAGE_MIN = 360;
   const RESIZE_STEP = 24;
   let dockWidth = $state(0);
   let resizing: { x: number; width: number; max: number } | null = null;

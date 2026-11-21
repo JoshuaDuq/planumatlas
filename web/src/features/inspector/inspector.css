@@ -66,6 +66,14 @@
     margin-inline-end: var(--space-2);
     color: var(--text-tertiary);
   }
+  /* What the region is, in plain words: the first thing read under its name. */
+  .region-detail .region-lead {
+    margin-top: var(--space-2);
+    color: var(--text-primary);
+    font-size: var(--text-ui);
+    line-height: var(--lh-prose);
+    text-wrap: pretty;
+  }
   .region-detail .selected-hint {
     margin-top: var(--space-2);
     font-size: var(--text-ui);
@@ -198,6 +206,12 @@
   }
 
   /* Facts -------------------------------------------------------------- */
+  /* One closed row under the commands, ruled like the sections; the ledger opens inside it.
+     Qualified past `.evidence-section`, whose zero margin follows below. */
+  .region-detail .evidence-section.measurements {
+    margin-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+  }
   /* A quiet ledger at the same 16px; labels recede while measured values align right. */
   .region-detail .facts {
     display: grid;
@@ -205,9 +219,6 @@
     grid-template-columns: minmax(0, 1fr) fit-content(60%);
     column-gap: var(--space-3);
     align-items: baseline;
-    margin-top: var(--space-4);
-    border-top: 1px solid var(--border-subtle);
-    border-bottom: 1px solid var(--border-subtle);
     line-height: var(--lh-ui);
   }
   .region-detail .facts dt,
@@ -536,7 +547,7 @@
       text-underline-offset: 3px;
     }
   }
-  @media (pointer: coarse) {
+  @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
     .region-detail .evidence-section > details > summary,
     .region-detail .constituents > summary,
     .region-detail .constituents-list button {

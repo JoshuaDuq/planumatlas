@@ -90,12 +90,13 @@ async function mount(
   fields: Partial<World> = {},
   rows = 3,
   holder: { sheet?: Sheet } = {},
+  search?: string,
 ): Promise<Mounted> {
   await resize(...size);
   const world = $state(newWorld(fields));
   const stage = { sheetFull: false };
   const recorded = newRecorded();
-  render(Fixture, { world, stage, recorded, rows, holder });
+  render(Fixture, { world, stage, recorded, rows, holder, search });
   await expect.element(tab(world.lang === 'fr' ? 'Anatomie' : 'Anatomy')).toBeVisible();
   return { world, stage, recorded };
 }
@@ -652,6 +653,59 @@ describe('the selection in the grip', () => {
     await mount(PHONE, { lang: 'fr', selection: SELECTION });
     await expect.element(page.getByRole('button', { name: 'Insula L, left' })).toBeVisible();
     await expect.element(page.getByRole('button', { name: 'Effacer la sélection' })).toBeVisible();
+  });
+});
+
+describe('the search at rest', () => {
+  const SEARCH = 'Search regions';
+  const searchAtRest = () => document.querySelector('.sheet-search') as HTMLButtonElement;
+  const statement = () => document.querySelector('.sheet-disclaimer') as HTMLElement;
+
+  test('upright at peek it is a field-like button under the handle line, the statement its caption', async () => {
+    await mount(PHONE, {}, 3, {}, SEARCH);
+    await rested();
+    await expect.element(page.getByRole('button', { name: SEARCH, exact: true })).toBeVisible();
+    const field = box(searchAtRest());
+    expect(field.height).toBeGreaterThanOrEqual(44);
+    expect(field.top).toBeGreaterThanOrEqual(box(handle()).top + 24 - 0.5);
+    expect(box(statement()).top).toBeGreaterThanOrEqual(field.bottom - 0.5);
+    // The peek grows to hold it, so the tabs are still whole.
+    expect(innerHeight - box(tablist()).bottom).toBeLessThan(3);
+  });
+
+  test('with a selection the name keeps its line above it, the clear beside the name', async () => {
+    await mount(PHONE, { selection: SELECTION }, 3, {}, SEARCH);
+    await rested();
+    const field = box(searchAtRest());
+    expect(box(strip()).bottom).toBeLessThanOrEqual(field.top + 0.5);
+    expect(box(clearButton()).bottom).toBeLessThanOrEqual(field.top + 0.5);
+    expect(box(statement()).top).toBeGreaterThanOrEqual(field.bottom - 0.5);
+  });
+
+  test('a tap raises the sheet full, says so, and the list’s field takes focus; raised, it is gone', async () => {
+    const { recorded, stage } = await mount(PHONE, {}, 3, {}, SEARCH);
+    await userEvent.click(searchAtRest());
+    expect(sheet().dataset.detent).toBe('full');
+    expect(stage.sheetFull).toBe(true);
+    expect(announced()).toBe('Panel fully open');
+    expect(recorded.calls).toContain('search');
+    expect(focused()).toBe(page.getByRole('textbox', { name: SEARCH }).element());
+    expect(getComputedStyle(searchAtRest()).display).toBe('none');
+  });
+
+  test('a sideways sheet, which shows its panels at rest, does not offer it; nor does a tab without a search', async () => {
+    await mount(SIDEWAYS, {}, 3, {}, SEARCH);
+    expect(getComputedStyle(searchAtRest()).display).toBe('none');
+    cleanup();
+    await mount(PHONE);
+    expect(searchAtRest()).toBeNull();
+  });
+
+  test('axe finds nothing with it at rest', async () => {
+    await mount(PHONE, { selection: SELECTION }, 3, {}, SEARCH);
+    await expectAxeCleanOnce('light', 390);
+    // expectAxeCleanOnce leaves the window at 1280 px.
+    requested = null;
   });
 });
 

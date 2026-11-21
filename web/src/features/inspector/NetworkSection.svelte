@@ -12,6 +12,7 @@
     cabNpName,
     networkBasis,
     networkCss,
+    networkHeadline,
     networkName,
     networksOf,
     striatalNetworksOf,
@@ -52,14 +53,7 @@
     withUnit(decimal(atlas?.small.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
   );
   // The closed summary's hint: the largest share the region has, else CAB-NP's one network.
-  const headline = $derived.by(() => {
-    const top = [...shares, ...striatal].reduce<(typeof shares)[number] | null>(
-      (best, share) => (best && best.fraction >= share.fraction ? best : share),
-      null,
-    );
-    if (top) return `${networkName(top.network, lang)} ${percent(top.fraction, lang)}`;
-    return assigned ? cabNpName(assigned, lang) : null;
-  });
+  const headline = $derived(networkHeadline(region, cabNp, lang));
 
   function yeoColour(network: string): string {
     const rgb = colors?.[network];

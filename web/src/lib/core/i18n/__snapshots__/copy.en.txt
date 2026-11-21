@@ -188,6 +188,10 @@
    "[\"Alpha\"] → \"No stroke case in the cohort reaches Alpha.\"",
    "[\"\"] → \"No stroke case in the cohort reaches .\""
   ],
+  "strokeMost": [
+   "[\"Alpha\"] → \"Of the regions shown, the most lesions in the cohort reach Alpha. Select another region to see its cases.\"",
+   "[\"\"] → \"Of the regions shown, the most lesions in the cohort reach . Select another region to see its cases.\""
+  ],
   "associations": "Associations",
   "findings": "Evidence",
   "studyFinding": "Reported finding",
@@ -544,6 +548,8 @@
   "left": "Left",
   "right": "Right",
   "internalAnatomy": "Internal anatomy",
+  "visibilitySection": "Anatomy visibility",
+  "viewAidsSection": "View aids",
   "showCortex": "Show cortex",
   "cortexOpacity": "Cortex opacity",
   "surfaceHint": "Deeper surfaces open the sulci. A cut draws the pial.",
@@ -1382,6 +1388,21 @@
   "volume": "Volume",
   "centroid": "Centroid (surface RAS)",
   "sourceLabel": "Source label",
+  "measurements": "Measurements and source",
+  "lead": {
+   "network": [
+    "[\"Alpha\"] → \"Network: Alpha.\"",
+    "[\"\"] → \"Network: .\""
+   ],
+   "functions": [
+    "[\"Alpha\"] → \"Functions: Alpha.\"",
+    "[\"\"] → \"Functions: .\""
+   ],
+   "deficits": [
+    "[\"Alpha\"] → \"Linked deficits: Alpha.\"",
+    "[\"\"] → \"Linked deficits: .\""
+   ]
+  },
   "copyValue": {
    "copy": "Copy",
    "copied": "Copied",
@@ -1817,6 +1838,10 @@
   "includes": [
    "[\"Alpha\"] → \"includes Alpha\"",
    "[\"\"] → \"includes \""
+  ],
+  "alsoIn": [
+   "[\"Alpha\"] → \"Also in Alpha\"",
+   "[\"\"] → \"Also in \""
   ],
   "rowHiddenAria": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, : Alpha. Activate to reveal.\"",
@@ -2714,6 +2739,10 @@
   "sectionTool": "Section",
   "placeTool": "Add",
   "placeChoice": "What to add to the brain",
+  "placeHint": [
+   "[\"Alpha\"] → \"Add to the brain: Alpha\"",
+   "[\"\"] → \"Add to the brain: \""
+  ],
   "lesionTool": "Lesion",
   "coordinateTool": "Coordinate",
   "overlayTool": "Overlay",

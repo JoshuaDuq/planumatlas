@@ -398,7 +398,8 @@
       margin-top: var(--space-3);
     }
     .heading {
-      margin-top: var(--space-5);
+      /* All four sides: an h4 keeps the browser's 1.33em below it, which outweighs what follows. */
+      margin: var(--space-5) 0 0;
       font-size: var(--text-ui);
       font-weight: 600;
     }
@@ -444,10 +445,12 @@
     .swatch.response {
       border-radius: 2px;
     }
+    /* The light line across V2's grey, as on the stage: alone it vanishes on a light panel. */
     .swatch.line {
-      height: 2px;
-      border-radius: 0;
-      background: #eee;
+      border-radius: 2px;
+      background:
+        linear-gradient(#eee, #eee) center / 100% 2px no-repeat,
+        #8e8e8e;
     }
     .swatch.areas {
       background: linear-gradient(90deg, #cbcbcb 0 33%, #8e8e8e 33% 66%, #5d5d5d 66%);

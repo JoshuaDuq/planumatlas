@@ -15,11 +15,24 @@ export interface DetailState {
   lesson?: { circuit: string | null };
   anatomy?: string | null;
   referenceAnatomy?: string | null;
-  /** A lesion is placed: its report is Anatomy's detail. */
+  /** A lesion is placed: its report is Anatomy's detail, and Deficits' while no deficit is open. */
   lesion?: boolean;
+  /** The placed sphere is a coordinate's landing, whose report is Anatomy's alone. */
+  coordinate?: boolean;
 }
 
 export type WorkspaceView = 'list' | 'detail';
+
+/**
+ * The search of the tab in front, by its label: Circuits has none, and Tracts keeps its words in its own
+ * list. The detail's location bar and the phone sheet at rest offer it as one control.
+ */
+export function searchLabel(mode: Explorer, lang: Language): string | null {
+  if (mode === 'anatomy') return t(lang, 'navigator').searchLabel;
+  if (mode === 'functions') return t(lang, 'functions').search;
+  if (mode === 'deficits') return t(lang, 'clinical').searchLabel;
+  return null;
+}
 
 /** Whether the current mode has anything for the detail view to show. */
 export function detailAvailable(state: DetailState): boolean {
@@ -27,7 +40,9 @@ export function detailAvailable(state: DetailState): boolean {
   if (state.selectedRegion) return true;
   if (state.explorer === 'anatomy') return Boolean(state.lesion);
   if (state.explorer === 'functions') return Boolean(state.selectedFunction);
-  if (state.explorer === 'deficits') return Boolean(state.selectedDeficit);
+  if (state.explorer === 'deficits') {
+    return Boolean(state.selectedDeficit) || (Boolean(state.lesion) && !state.coordinate);
+  }
   if (state.explorer === 'circuits') return Boolean(state.lesson?.circuit);
   return false;
 }

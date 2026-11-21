@@ -382,6 +382,12 @@
     .compare-toggle:focus-visible {
       outline-offset: 2px;
     }
+    @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .compare-toggle {
+        min-height: 44px;
+        margin: min(0px, calc((var(--lh-caption) - 44px) / 2)) 0;
+      }
+    }
     .search-box {
       position: relative;
       display: flex;

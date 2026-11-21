@@ -293,7 +293,7 @@ const drawn = () => [
 ];
 
 describe('the exploded view', () => {
-  it('squares a named view to the brain’s own left–right axis; assembled, views keep the scan’s', () => {
+  it('squares a named view and its letters to the brain’s own left–right axis, assembled or exploded', () => {
     // A head turned 3° of roll and 2° of yaw in the scanner, as CDMD's is.
     const across = new Vector3(1, -Math.tan(0.052), Math.tan(0.035)).normalize();
     const anatomicalFrame = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), across);
@@ -305,10 +305,17 @@ describe('the exploded view', () => {
         scale: FULL,
       });
       stage.camera.applyView('anterior', { immediate: true });
-      const turn = exploded ? anatomicalFrame : new Quaternion();
-      const heading = VIEW_DIRECTIONS.anterior.clone().applyQuaternion(turn);
+      const heading = VIEW_DIRECTIONS.anterior.clone().applyQuaternion(anatomicalFrame);
       assert.ok(headingOf(stage).distanceTo(heading) < 1e-9, `exploded ${exploded}`);
-      assert.ok(stage.scene.camera.up.distanceTo(upFor('anterior').applyQuaternion(turn)) < 1e-12);
+      assert.ok(
+        stage.scene.camera.up.distanceTo(upFor('anterior').applyQuaternion(anatomicalFrame)) <
+          1e-12,
+      );
+      assert.deepEqual(stage.camera.view.edges, { right: 'L', left: 'R', top: 'S', bottom: 'I' });
+      assert.ok(
+        Math.abs(stage.camera.view.basis.back[2] + 1) < 1e-9,
+        'the basis reads the brain’s',
+      );
       // Let go of the view, as a turn does: the link it writes names no up, the view's being squared.
       stage.held.release();
       const link = stage.camera.orbitLink();
@@ -1195,6 +1202,18 @@ describe('the camera as a link carries it', () => {
     );
     assert.deepEqual(stage.scene.destination.position.toArray(), position.toArray());
     assert.equal(stage.camera.viewHeld, true);
+  });
+
+  it('a tightly covered viewport (phone sheet + paint key) clamps framed distance inside maxDistance so orbitLink round-trips', () => {
+    const stage = fixture({ meshes: wholeBrain(), scale: { horizontal: 0.2, vertical: 0.02 } });
+    stage.camera.applyView('left', { immediate: true });
+    const { position, target, maxDistance } = stage.scene.destination;
+    assert.ok(position.distanceTo(target) <= maxDistance + 1e-9);
+    // Simulate orbiting slightly so orbitLink() emits a coordinate pair, then verify placeOrbit accepts it.
+    stage.camera.orbitBy({ azimuth: 0.05, polar: 0 });
+    const orbit = stage.camera.orbitLink()!;
+    assert.ok(orbit);
+    assert.doesNotThrow(() => stage.camera.placeOrbit(orbit, { immediate: true }));
   });
 });
 

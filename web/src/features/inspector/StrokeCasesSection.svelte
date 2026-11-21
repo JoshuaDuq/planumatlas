@@ -47,9 +47,10 @@
   let window = $state<string>('0');
 
   // Asked from the Deficits list: the section opens on this region's cases, scrolled into view with
-  // focus on its summary. Another region withdraws the ask.
+  // focus on its summary. Another region withdraws the ask; the same one redrawn does not.
+  const regionId = $derived(region?.id);
   $effect(() => {
-    void region?.id;
+    void regionId;
     return () => untrack(() => store.revealed());
   });
   $effect(() => {

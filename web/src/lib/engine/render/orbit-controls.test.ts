@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { test, vi } from 'vitest';
-import { PerspectiveCamera, Plane, type Raycaster, Sphere, Vector2, Vector3 } from 'three';
+import {
+  PerspectiveCamera,
+  Plane,
+  Quaternion,
+  type Raycaster,
+  Sphere,
+  Vector2,
+  Vector3,
+} from 'three';
 import type { ViewName } from '../../types/index.ts';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VIEW_DIRECTIONS, upFor } from './camera-views.ts';
@@ -10,7 +18,9 @@ import {
   coastOnRelease,
   homeward,
   levelOnOrbit,
+  orbitAbout,
   stayOutside,
+  superiorOf,
   takePending,
   turnGoal,
   zoomAbout,
@@ -636,7 +646,7 @@ test('a turn made during a move turns the destination as the controls turn the c
       controls.rotateLeft(-theta);
       controls.rotateUp(-phi);
       const goal = goalOn(view);
-      turnGoal(goal, theta, phi);
+      turnGoal(goal, theta, phi, new Vector3(0, 1, 0));
       assert.ok(goal.position.distanceTo(camera.position) < 1e-9, `${view} ${theta} ${phi}`);
       assert.ok(goal.up.equals(new Vector3(0, 1, 0)), `${view}: superior up stays superior`);
       const drawn = frameOf(goal.position, goal.target, goal.up);
@@ -658,10 +668,63 @@ test('turned during a move, a top or bottom view spins in place or tips as the c
       controls.rotateLeft(-theta);
       controls.rotateUp(-phi);
       const goal = goalOn(view);
-      turnGoal(goal, theta, phi);
+      turnGoal(goal, theta, phi, new Vector3(0, 1, 0));
       assert.ok(goal.position.distanceTo(camera.position) < 1e-4, `${view} ${theta} ${phi}: place`);
       const drawn = frameOf(goal.position, goal.target, goal.up);
       assert.ok(drawn.angleTo(camera.quaternion) < 1e-3, `${view} ${theta} ${phi}: picture`);
     }
+  }
+});
+
+test('on a leaning head the turntable, its levelling and a turned destination follow its own superior axis', () => {
+  // Tilted well past CDMD's 2.6° roll, so a turn about world y would show.
+  const rotation = new Quaternion().setFromUnitVectors(
+    new Vector3(1, 0, 0),
+    new Vector3(1, -Math.tan(0.3), 0.1).normalize(),
+  );
+  const superior = new Vector3(0, 1, 0).applyQuaternion(rotation);
+  const camera = new PerspectiveCamera(35, 1.4, 0.001, 10);
+  const controls = new OrbitControls(camera);
+  Object.assign(controls, LIMITS);
+  orbitAbout(controls, superior);
+  levelOnOrbit(controls);
+  assert.ok(superiorOf(controls).distanceTo(superior) < 1e-12);
+  const left = VIEW_DIRECTIONS.left.clone().applyQuaternion(rotation);
+  camera.up.copy(superior);
+  camera.position.copy(target).addScaledVector(left, DISTANCE);
+  controls.target.copy(target);
+  controls.update();
+  const height = () => camera.position.clone().sub(target).dot(superior);
+  const before = height();
+  controls.rotateLeft(0.7);
+  controls.update();
+  // A sideways turn keeps the camera's height along the brain's superior axis, not the scanner's.
+  assert.ok(Math.abs(height() - before) < 1e-9);
+  assert.ok(Math.abs(camera.position.y - target.y) > 1e-3, 'the scanner height changed');
+  assert.ok(camera.up.distanceTo(superior) < 1e-9, 'level on the brain’s superior axis');
+  const goal = {
+    position: target.clone().addScaledVector(left, DISTANCE),
+    target: target.clone(),
+    up: superior.clone(),
+  };
+  const turned = settledFrom(goal);
+  turned.controls.rotateLeft(-0.4);
+  turned.controls.rotateUp(0.3);
+  turned.controls.update();
+  turnGoal(goal, 0.4, -0.3, superior);
+  assert.ok(goal.position.distanceTo(turned.camera.position) < 1e-9);
+  assert.ok(goal.up.distanceTo(superior) < 1e-9);
+
+  function settledFrom({ position, up }: { position: Vector3; up: Vector3 }) {
+    const camera = new PerspectiveCamera(35, 1.4, 0.001, 10);
+    const controls = new OrbitControls(camera);
+    Object.assign(controls, LIMITS);
+    orbitAbout(controls, superior);
+    levelOnOrbit(controls);
+    camera.up.copy(up);
+    camera.position.copy(position);
+    controls.target.copy(target);
+    controls.update();
+    return { camera, controls };
   }
 });

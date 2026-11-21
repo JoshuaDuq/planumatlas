@@ -104,7 +104,7 @@
       grid-column: 2;
       grid-row: 1;
     }
-    @media (pointer: coarse) {
+    @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .notice-action {
         min-height: 44px;
         margin: calc(-1 * var(--space-2)) 0 calc(-1 * var(--space-1));

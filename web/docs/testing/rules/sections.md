@@ -253,12 +253,12 @@ a narrow no-break space (U+202F); "−" is U+2212.
 
 ### SECT-25 · The linked MRI is a modal dialog that opens on Close and gives focus back
 
-- **Rule:** The dialog "Linked MRI sections" is modal and opens after the scan has loaded, with focus on Close. Close, Escape and `M` close it, instantly when done from the keyboard; there is no backdrop dismiss. Focus returns to the opener, else to the Section tool, then the canvas. It keeps the dark imaging palette in both themes.
+- **Rule:** The dialog "Linked MRI sections" is modal and opens after the scan has loaded, with focus on Close. Close, Escape and `M` close it, instantly when done from the keyboard; there is no backdrop dismiss. Focus returns to the opener, else to the Section tool, then the canvas. It keeps the dark imaging palette in both themes. On a desktop it is instead a region docked beside the stage; it is the modal on a phone, over the full-screen stage, and where the dock at its narrowest (240 px) beside the rail would leave the stage under 360 px, as a window just wider than a phone's would (820 px left the stage 260 px and wrapped its tools; 2026-11-20 review). That last test is left to the phone query at a phone's width, whose change follows the resize.
 - **Kind:** accessibility
 - **Level:** browser: native `showModal`, focus
 - **Source:** `viewer/ui/chrome/sections.js:212-252`; `sections.test.js:64-86`; G5 decision record on #49; KEY-02 for `M`
-- **Expected:** Dialog named "Linked MRI sections" (French "Coupes IRM liées"), `aria-modal` semantics, first focus on the button "Close" ("Fermer"). Escape → closed with `data-instant`; Close by Enter → instant, by click → animated; focus back on "Linked MRI" (or the region's "Linked MRI"), else the Section tool, else the canvas. Clicking the backdrop leaves it open.
-- **Covered by:** uncovered
+- **Expected:** Dialog named "Linked MRI sections" (French "Coupes IRM liées"), `aria-modal` semantics, first focus on the button "Close" ("Fermer"). Escape → closed with `data-instant`; Close by Enter → instant, by click → animated; focus back on "Linked MRI" (or the region's "Linked MRI"), else the Section tool, else the canvas. Clicking the backdrop leaves it open. 820 × 1180 → the dialog `:modal`, no dock, the stage as wide as before it opened; widened to 1024 × 768 → docked, the stage ≥ 360 px.
+- **Covered by:** `src/features/sections/MprDialog.svelte.test.ts` "docked beside the stage" (R, the narrow window); the rest uncovered
 
 ### SECT-26 · Three linked planes, each a named section with an image, a slider and Save PNG
 

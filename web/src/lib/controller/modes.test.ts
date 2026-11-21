@@ -182,10 +182,11 @@ describe('a lesion’s streamlines', () => {
     assert.equal(scene.engine.model.settings.cortexOpacity, 1);
   });
 
-  test('stay drawn while Anatomy is chosen again', () => {
+  test('stay drawn while Anatomy or Deficits, where the report is read, is chosen', () => {
     const scene = createScene();
     scene.lesion.selectedTract = 'af-left';
     scene.excursions.chooseExplorer('anatomy');
+    scene.excursions.chooseExplorer('deficits');
     expect(scene.lesion.clearTract).not.toHaveBeenCalled();
   });
 });
@@ -303,6 +304,30 @@ describe('choosing a tab', () => {
     await scene.excursions.chooseMode('deficits');
     expect(scene.reader.apply).not.toHaveBeenCalled();
     assert.equal(scene.excursions.restorable, true);
+  });
+
+  test('Functions entered with nothing open lands on All functions; chosen again, searched or with a region selected, it does not', async () => {
+    const scene = createScene();
+    await scene.excursions.chooseMode('functions');
+    expect(scene.panels.openFunction).toHaveBeenCalledExactlyOnceWith('all');
+    scene.panels.openFunction.mockClear();
+    await scene.excursions.chooseMode('functions');
+    expect(scene.panels.openFunction).not.toHaveBeenCalled();
+    // Words carried from another tab show the list's results.
+    await scene.excursions.chooseMode('anatomy');
+    await scene.excursions.searchIn('functions', 'memory');
+    expect(scene.panels.openFunction).not.toHaveBeenCalled();
+    // A selected region stays, its functions leading the list.
+    scene.session.setFunctionQuery('');
+    await scene.excursions.chooseMode('anatomy');
+    const { model } = scene.engine;
+    model.select(
+      [...model.regions.values()].find(
+        (region) => region.atlas === model.settings.atlas && region.kind === 'cortex',
+      )!.id,
+    );
+    await scene.excursions.chooseMode('functions');
+    expect(scene.panels.openFunction).not.toHaveBeenCalled();
   });
 
   test('back on Functions after its scene was put back, opens the function again', async () => {

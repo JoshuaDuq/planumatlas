@@ -41,6 +41,15 @@
     region('d:left:ifg', 'left', 'cortex', 'destrieux', 'G_front_inf-Opercular'),
     region('d:left:central', 'left', 'cortex', 'destrieux', 'S_central'),
     region('a:left:putamen', 'left', 'structure', 'aseg', 'Left-Putamen'),
+    region('a:right:putamen', 'right', 'structure', 'aseg', 'Right-Putamen'),
+    // The teaching set's putamen, another structure set than the one shown.
+    ...(['left', 'right'] as const).map((side) =>
+      asRegion({
+        ...region(`l:${side}:putamen`, side, 'structure', 'learning', 'putamen'),
+        display_names: { en: 'Putamen', fr: 'Putamen' },
+        system_names: { en: 'Basal ganglia', fr: 'Noyaux gris centraux' },
+      }),
+    ),
     region('a:left:cerebellum', 'left', 'structure', 'aseg', 'Left-Cerebellum-Cortex'),
     region('h:left:v1', 'left', 'cortex', 'hcp-mmp', 'L_V1_ROI'),
     asRegion({
@@ -106,7 +115,7 @@
     {lang}
     {template}
     bind:query
-    search={(text) => catalog.search(text, current)}
+    search={(text, limit) => catalog.search(text, current, limit)}
     {groups}
     {hiddenRegions}
     {expanded}

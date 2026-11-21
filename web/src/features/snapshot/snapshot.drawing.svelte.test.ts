@@ -56,7 +56,7 @@ interface Roundrect {
  * `names` stand on the stage as the visual field map's area names do, at their top left.
  */
 async function drawFixture(
-  marks: { region: string; name: string; label: string }[] = [],
+  marks: { region: string; label: string }[] = [],
   names: { text: string; x: number; y: number; hidden?: boolean }[] = [],
 ) {
   await page.viewport(1280, 900);
@@ -173,8 +173,8 @@ async function drawFixture(
 }
 
 const ROUTE = [
-  { region: 'learning:midline:optic-chiasm', name: 'Optic chiasm', label: 'Landmark 1' },
-  { region: 'learning:left:lateral-geniculate', name: 'Lateral geniculate', label: 'Landmark 2' },
+  { region: 'learning:midline:optic-chiasm', label: 'Landmark 1' },
+  { region: 'learning:left:lateral-geniculate', label: 'Landmark 2' },
 ];
 
 const measure = (font: string, text: string) => {

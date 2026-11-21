@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import type { Region } from '../../types/index.ts';
+import type { Manifest, Region } from '../../types/index.ts';
+import { createCatalog } from '../catalog/catalog.ts';
+import { anatomies, asSettings, readModel } from '../catalog/test-support.ts';
 import {
   familyParts,
   groupDisplayName,
@@ -13,6 +15,8 @@ import {
   reasonText,
   regionGroup,
   rowStatesReason,
+  searchSections,
+  searchStructures,
   sectionReasons,
   sharedGroupNames,
   structureRows,
@@ -309,6 +313,111 @@ test('the sides of one name share a tree row, in the order the names are first m
     [['n-l1'], ['n-l2'], ['n-r']],
   );
   assert.deepEqual(ids([]), []);
+});
+
+test('ANAT-30 a search result is a structure: one name in one atlas and kind, its sides left, right, midline', () => {
+  const row = (
+    id: string,
+    name: string,
+    hemisphere: Region['hemisphere'],
+    atlas = 'destrieux',
+    kind: Region['kind'] = 'cortex',
+  ) => ({ id, region: region({ id, hemisphere, atlas, kind }), label: { name }, reason: null });
+  const ids = (rows: ReturnType<typeof row>[]) =>
+    searchStructures(rows).map((sides) => sides.map((side) => side.id));
+  assert.deepEqual(
+    ids([
+      row('cun-r', 'Cuneus', 'right'),
+      row('phg-l', 'Parahippocampal gyrus', 'left'),
+      row('cun-l', 'Cuneus', 'left'),
+      // The same name in another atlas, or drawn only on a cut, is another structure.
+      row('nb-phg-l', 'Parahippocampal gyrus', 'left', 'nextbrain', 'tissue-region'),
+      row('phg-r', 'Parahippocampal gyrus', 'right'),
+    ]),
+    [['cun-l', 'cun-r'], ['phg-l', 'phg-r'], ['nb-phg-l']],
+  );
+});
+
+test('ANAT-61 the shown set’s structures come first, then each other set’s, under its atlas', () => {
+  const row = (id: string, name: string, atlas: string, reason: string | null = null) => ({
+    id,
+    region: region({ id, hemisphere: 'left', atlas, kind: 'structure' }),
+    label: { name },
+    reason,
+  });
+  const sections = (rows: ReturnType<typeof row>[]) =>
+    searchSections(rows).map(({ set, structures }) => [
+      set,
+      structures.map((sides) => sides[0]!.id),
+    ]);
+  assert.deepEqual(
+    sections([
+      row('aseg-hip', 'Hippocampus', 'aseg', 'other-detail'),
+      row('learn-hip', 'Hippocampal formation', 'learning'),
+      row('nb-hip', 'Hippocampal tail', 'nextbrain', 'other-detail'),
+      row('aseg-amy', 'Amygdala', 'aseg', 'other-detail'),
+      row('learn-amy', 'Amygdala', 'learning', 'internal-hidden'),
+    ]),
+    [
+      [null, ['learn-hip', 'learn-amy']],
+      ['aseg', ['aseg-hip', 'aseg-amy']],
+      ['nextbrain', ['nb-hip']],
+    ],
+  );
+  // A region another set puts on the cut without being its own is under no set's name.
+  const borrowed = {
+    ...row('wm', 'White matter of the cuneus', 'wmparc', 'other-detail'),
+    region: region({
+      id: 'wm',
+      hemisphere: 'left',
+      atlas: 'wmparc',
+      kind: 'tissue-region',
+      cut_atlases: ['destrieux'],
+    }),
+  };
+  assert.deepEqual(sections([borrowed]), [['', ['wm']]]);
+  assert.deepEqual(sections([]), []);
+});
+
+test('ANAT-61 published data: "hippo" lists the teaching set’s formation first, FreeSurfer’s Hippocampus once below', () => {
+  const published = anatomies.default;
+  const real = readModel<Manifest>(`${published}/manifest.json`);
+  const { units } = readModel<{ units: Record<string, string> }>(
+    `${published}/neuropsych-domains.json`,
+  );
+  const found = createCatalog(real, 'en', null, units).search(
+    'hippo',
+    asSettings({
+      atlas: 'destrieux',
+      detail: 'learning',
+      hemisphere: 'both',
+      cortexVisible: true,
+      cortexOpacity: 1,
+      isolatedRegion: null,
+    }),
+    Infinity,
+  );
+  const sections = searchSections(found.rows.filter((row) => row.reason !== 'other-atlas'));
+  const [shown, ...others] = sections;
+  assert.equal(shown!.set, null);
+  assert.deepEqual(
+    shown!.structures[0]!.map((side) => side.region.id),
+    ['learning:left:hippocampus', 'learning:right:hippocampus'],
+  );
+  const aseg = others.find(({ set }) => set === 'aseg')!;
+  assert.deepEqual(
+    aseg.structures
+      .filter((sides) => sides[0]!.label.name === 'Hippocampus')
+      .map((sides) => sides.map((side) => side.region.id)),
+    [['aseg:left:17', 'aseg:right:53']],
+  );
+  // Every name is listed once per atlas and kind: no side repeats.
+  for (const { structures } of sections) {
+    for (const sides of structures) {
+      const hemispheres = sides.map((side) => side.region.hemisphere);
+      assert.equal(new Set(hemispheres).size, hemispheres.length);
+    }
+  }
 });
 
 test('ANAT-60 a family is set apart under its name only where its group lists structures of its own', () => {

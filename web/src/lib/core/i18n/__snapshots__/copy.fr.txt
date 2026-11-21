@@ -188,6 +188,10 @@
    "[\"Alpha\"] → \"Aucun cas d’AVC de la cohorte n’atteint Alpha.\"",
    "[\"\"] → \"Aucun cas d’AVC de la cohorte n’atteint .\""
   ],
+  "strokeMost": [
+   "[\"Alpha\"] → \"Des régions affichées, Alpha est celle qu’atteignent le plus de lésions de la cohorte. Sélectionnez une autre région pour voir ses cas.\"",
+   "[\"\"] → \"Des régions affichées,  est celle qu’atteignent le plus de lésions de la cohorte. Sélectionnez une autre région pour voir ses cas.\""
+  ],
   "associations": "Associations",
   "findings": "Données probantes",
   "studyFinding": "Résultat rapporté",
@@ -544,6 +548,8 @@
   "left": "Gauche",
   "right": "Droite",
   "internalAnatomy": "Anatomie interne",
+  "visibilitySection": "Anatomie affichée",
+  "viewAidsSection": "Aides visuelles",
   "showCortex": "Afficher le cortex",
   "cortexOpacity": "Opacité du cortex",
   "surfaceHint": "Les surfaces plus profondes ouvrent les sillons. Une coupe affiche la piale.",
@@ -741,12 +747,12 @@
    "[\"\",\"Alpha\",\"\"] → \" (Alpha)<NNBSP>: \""
   ],
   "parcelCoverage": [
-   "[\"Alpha\",\"\"] → \"Alpha colorée à \"",
-   "[\"\",\"Alpha\"] → \" colorée à Alpha\""
+   "[\"Alpha\",\"\"] → \"Alpha, part colorée \"",
+   "[\"\",\"Alpha\"] → \", part colorée Alpha\""
   ],
   "parcelOffSurface": [
-   "[\"Alpha\"] → \"Alpha, non mesurée\"",
-   "[\"\"] → \", non mesurée\""
+   "[\"Alpha\"] → \"Alpha, part non mesurée\"",
+   "[\"\"] → \", part non mesurée\""
   ],
   "noLesionCheck": "Aucune étude lésionnelle des données de déficits de Planum ne vérifie ce domaine."
  },
@@ -1382,6 +1388,21 @@
   "volume": "Volume",
   "centroid": "Centroïde (RAS de surface)",
   "sourceLabel": "Étiquette source",
+  "measurements": "Mesures et source",
+  "lead": {
+   "network": [
+    "[\"Alpha\"] → \"Réseau<NNBSP>: Alpha.\"",
+    "[\"\"] → \"Réseau<NNBSP>: .\""
+   ],
+   "functions": [
+    "[\"Alpha\"] → \"Fonctions<NNBSP>: Alpha.\"",
+    "[\"\"] → \"Fonctions<NNBSP>: .\""
+   ],
+   "deficits": [
+    "[\"Alpha\"] → \"Déficits associés<NNBSP>: Alpha.\"",
+    "[\"\"] → \"Déficits associés<NNBSP>: .\""
+   ]
+  },
   "copyValue": {
    "copy": "Copier",
    "copied": "Copié",
@@ -1817,6 +1838,10 @@
   "includes": [
    "[\"Alpha\"] → \"comprend Alpha\"",
    "[\"\"] → \"comprend \""
+  ],
+  "alsoIn": [
+   "[\"Alpha\"] → \"Aussi dans Alpha\"",
+   "[\"\"] → \"Aussi dans \""
   ],
   "rowHiddenAria": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Alpha, <NNBSP>: Alpha. Activer pour afficher.\"",
@@ -2714,6 +2739,10 @@
   "sectionTool": "Coupe",
   "placeTool": "Ajouter",
   "placeChoice": "Quoi ajouter au cerveau",
+  "placeHint": [
+   "[\"Alpha\"] → \"Ajouter au cerveau<NNBSP>: Alpha\"",
+   "[\"\"] → \"Ajouter au cerveau<NNBSP>: \""
+  ],
   "lesionTool": "Lésion",
   "coordinateTool": "Coordonnée",
   "overlayTool": "Superposition",

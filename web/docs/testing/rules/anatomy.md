@@ -1,6 +1,6 @@
 # Anatomy explorer rules
 
-Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys), A2 (#52, the anatomy search and the explorer container with its browse scope) and A3 (#53, the internal-system picker and the dissection bar). The generic treegrid, combobox, radio group and disclosure widgets are in `ui-kit.md`; this catalogue says what the anatomy explorer must show and do with them. The pure helpers behind the rows (`lib/core/panels/navigator.ts`: reasons, group names, eye states, match marking) are C5's and are in `core-panels.md`; the rules here cite them where the reader sees their result. Legacy sources: `viewer/ui/panels/navigator.js`, `viewer/ui/panels/visibility-control.js`, `viewer/ui/panels/dissection.js`, `viewer/ui/panels/internal-anatomy.js`, `viewer/styles/navigator.css`. New code: `web/src/features/anatomy/`. Decision record `0002-anatomy-treegrid.md`; decisions 7, 8, 32, 34 and 36 on #4. Deviations: `a1-drop-title.md`, `a1-eye-announcement.md`, `a1-eye-focus-visible.md`, `a1-partial-state-name.md`, `a1-primitive-limits.md`, `a1-section-reason-name.md`, `a1-treegrid-structure.md`, `a2-active-option-selected.md`, `a2-arrows-focus-field.md`, `a2-expanded-with-options.md`, `a2-focus-stays-in-field.md`, `a2-match-mark-forced-colours.md`, `a2-option-title.md`, `a2-tree-scope-radio-group.md`, `a3-bar-group.md`, `a3-focus-fallback.md`, `a3-initial-count.md`, `a3-picker-switching.md`, `a3-system-value-sync.md`, and U7's `u7-treegrid.md`, `u7-treegrid-keys.md`. Copy quoted below is the English interface text; French is given where a test pins it. "Fixture" means the catalog in `src/features/anatomy/anatomy-tree-test-support.ts` (groups Frontal, Limbic, Basal ganglia, Cut labels) or `anatomy-explorer-test-support.svelte` (a real catalog over nine regions); "published data" means the default CDMD anatomy the e2e specs load.
+Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys), A2 (#52, the anatomy search and the explorer container with its browse scope) and A3 (#53, the internal-system picker and the dissection bar). The generic treegrid, combobox, radio group and disclosure widgets are in `ui-kit.md`; this catalogue says what the anatomy explorer must show and do with them. The pure helpers behind the rows (`lib/core/panels/navigator.ts`: reasons, group names, eye states, match marking) are C5's and are in `core-panels.md`; the rules here cite them where the reader sees their result. Legacy sources: `viewer/ui/panels/navigator.js`, `viewer/ui/panels/visibility-control.js`, `viewer/ui/panels/dissection.js`, `viewer/ui/panels/internal-anatomy.js`, `viewer/styles/navigator.css`. New code: `web/src/features/anatomy/`. Decision record `0002-anatomy-treegrid.md`; decisions 7, 8, 32, 34 and 36 on #4. Deviations: `a1-drop-title.md`, `a1-eye-announcement.md`, `a1-eye-focus-visible.md`, `a1-partial-state-name.md`, `a1-primitive-limits.md`, `a1-section-reason-name.md`, `a1-treegrid-structure.md`, `a2-active-option-selected.md`, `a2-arrows-focus-field.md`, `a2-expanded-with-options.md`, `a2-focus-stays-in-field.md`, `a2-match-mark-forced-colours.md`, `a2-option-title.md`, `a2-tree-scope-radio-group.md`, `a3-bar-group.md`, `a3-focus-fallback.md`, `a3-initial-count.md`, `a3-picker-switching.md`, `a3-system-value-sync.md`, and U7's `u7-treegrid.md`, `u7-treegrid-keys.md`. Copy quoted below is the English interface text; French is given where a test pins it. "Fixture" means the catalog in `src/features/anatomy/anatomy-tree-test-support.ts` (groups Frontal, Limbic, Basal ganglia, Cut labels) or `anatomy-explorer-test-support.svelte` (a real catalog over twelve regions); "published data" means the default CDMD anatomy the e2e specs load.
 
 ## The tree
 
@@ -282,13 +282,13 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ## Search
 
-### ANAT-30 · A query lists its matches in place of the tree, and arms the first
+### ANAT-30 · A query lists its matches in place of the tree, one option per structure, and arms the first
 
-- **Rule:** A non-blank query lists the catalog's ranked matches as options named "Name, side, Group" (the group as the tree names it), arms the first one that can be chosen, and hides the tree with its header and scope. The field is expanded only while the list holds an option. The tree stays mounted, so its open groups and Tab stop survive the search.
+- **Rule:** A non-blank query lists the catalog's ranked matches, one option per structure as one tree row is (the sides of one name in one atlas, in the order its first side ranks), named "Name, sides, Group" (the sides on screen, the group as the tree names it), with the tree's L, R and Mid keys at its end. It arms the first one that can be chosen, and hides the tree with its header and scope. The field is expanded only while the list holds an option. The tree stays mounted, so its open groups and Tab stop survive the search.
 - **Kind:** behaviour
-- **Level:** browser — combobox state and visibility
-- **Source:** `viewer/ui/panels/navigator.js:326-345`, `390-461`, `742-767`; deviation `a2-expanded-with-options.md`; decision 34 on #4
-- **Expected:** Fixture, "cuneus" → options "Cuneus, left, Occipital" and "Cuneus, right, Occipital"; `aria-expanded="true"`; the armed option is "Cuneus, left"; the treegrid is not visible; Down arms "Cuneus, right". Published data, "middle frontal gyrus" → "Middle frontal gyrus, left, Frontal" armed (`aria-activedescendant` = its id), "…, right, Frontal" listed, the first `mark.query-match` reads "Middle frontal gyrus".
+- **Level:** unit (`searchStructures` in `lib/core/panels/navigator.ts`); browser — combobox state and visibility
+- **Source:** `viewer/ui/panels/navigator.js:326-345`, `390-461`, `742-767`; deviation `a2-expanded-with-options.md`; decision 34 on #4; 2026-11-20 interface review, P2 "search doubles every name"
+- **Expected:** Fixture, "cuneus" → one option "Cuneus, left and right, Occipital", its keys "L", "R"; `aria-expanded="true"`; it is armed; the treegrid is not visible. Rows of one name in two atlases, or a name one side repeats, stay apart. Published data, "middle frontal gyrus" → "Middle frontal gyrus, left and right, Frontal" armed (`aria-activedescendant` = its id), the first `mark.query-match` reads "Middle frontal gyrus".
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-31 · The match is marked, and an alias says why a name matched
@@ -297,16 +297,16 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Kind:** behaviour
 - **Level:** unit (view-model: `matchSegments`, `matchedAlias`)
 - **Source:** `viewer/ui/panels/navigator.js:154-178`, `283-327`
-- **Expected:** French, "CUNEUS" → two marks "Cunéus"; "ifg" → option "Opercular part of the inferior frontal gyrus, IFG, left, Frontal", its mark "IFG", its text contains "(IFG)".
+- **Expected:** French, "CUNEUS" → one mark "Cunéus"; "ifg" → option "Opercular part of the inferior frontal gyrus, IFG, left, Frontal", its mark "IFG", its text contains "(IFG)".
 - **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R, could move down)
 
 ### ANAT-32 · A result that is not drawn says why, and choosing it reveals it
 
-- **Rule:** A match that is not drawn is listed with the same name a tree row has ("Name, side: reason. Activate to reveal."), its reason on the second line and as its U5 tooltip, and no native title. Enter or a click reveals it with its reason and empties the query.
+- **Rule:** A structure none of whose sides is drawn is listed with the same name a tree row has ("Name, sides: reason. Activate to reveal."), its reason on the second line (unless a structure set's heading says it, ANAT-61) and as its U5 tooltip, and no native title. Enter or a click reveals the side it chooses (ANAT-34) with its reason and empties the query. A structure with a side drawn is named for the sides drawn, a press on the row chooses one of them, and the key of a side not drawn is struck; a press on that key reveals that side.
 - **Kind:** behaviour
 - **Level:** browser — combobox choice
 - **Source:** `viewer/ui/panels/navigator.js:252-263`, `346-368`; deviation `a2-option-title.md`
-- **Expected:** Fixture, hemisphere `right`, "cuneus" → option "Cuneus, left: Hemisphere hidden. Activate to reveal.", armed; its `[data-tooltip]` the same text; no `[title]` in the listbox; Enter → `reveal hemisphere d:left:cuneus`, field "". Published data after `h`: option "Middle frontal gyrus, right: Hemisphere hidden. Activate to reveal." containing "Hemisphere hidden".
+- **Expected:** Fixture, internal anatomy hidden, "putamen" → option "Putamen, left and right: Internal anatomy hidden. Activate to reveal.", armed, its text containing "Internal anatomy hidden"; its `[data-tooltip]` the same name; no `[title]` in the listbox; Enter → `reveal internal-hidden a:left:putamen`, field "". Hemisphere `right`, "cuneus" → "Cuneus, right, Occipital", keys L `hidden` and R `shown`; Enter → `select d:right:cuneus`; the L key → `reveal hemisphere d:left:cuneus`.
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-33 · A result too small for the cut is disabled and never armed
@@ -320,20 +320,20 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 
 ### ANAT-34 · Choosing a result empties the query and leaves focus in the field
 
-- **Rule:** Enter on the armed result or a click on a result selects it (or reveals it), empties the query, brings the tree back around the region, and leaves focus in the field. Escape and the clear button ("Clear search") empty the field, bring the tree back and keep focus in the field. A note's button ("Switch atlas", "Show in <tab>") moves focus to the field before it acts.
+- **Rule:** Enter on the armed result or a click on a result selects one of its sides (or reveals it), empties the query, brings the tree back around the region, and leaves focus in the field. A click on a side's key chooses that side; Enter or a click elsewhere on the row chooses as the tree's row does: the selected region's side, then left, right and midline, a side drawn first. Escape and the clear button ("Clear search") empty the field, bring the tree back and keep focus in the field. A note's button ("Switch atlas", "Show in <tab>") moves focus to the field before it acts.
 - **Kind:** behaviour
 - **Level:** browser — real focus
 - **Source:** `viewer/ui/panels/navigator.js:252-263`, `386`, `401-402`, `421-423`, `704-732`; deviation `a2-focus-stays-in-field.md`
-- **Expected:** Fixture, "cuneus", Enter → `select d:left:cuneus`, field "", tree visible, focus in the field; a click on "Cuneus, right" → `select d:right:cuneus`, focus in the field; Escape → field "", tree visible, focus in the field. Published data: Enter or a click writes `region=`; the clear button → field "", focus in field, tree visible.
+- **Expected:** Fixture, "cuneus", Enter → `select d:left:cuneus`, field "", tree visible, focus in the field; a click on the row's name → `select d:left:cuneus`; a click on its R key → `select d:right:cuneus`, focus in the field; with `d:right:cuneus` selected, "putamen", Enter → `select a:right:putamen`; Escape → field "", tree visible, focus in the field. Published data: Enter or a click writes `region=`; the clear button → field "", focus in field, tree visible.
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-35 · The armed option is the selected one; the chosen region is current
 
-- **Rule:** In the result list only the armed option is `aria-selected="true"`; the option of the region already selected is `aria-current="true"` and is drawn heavier.
+- **Rule:** In the result list only the armed option is `aria-selected="true"`; the option of the structure whose side is selected is `aria-current="true"` and is drawn heavier, its selected side's key drawn as the tree's pressed key.
 - **Kind:** accessibility
 - **Level:** browser — ARIA states in the listbox
 - **Source:** `viewer/ui/panels/navigator.js:279`, `600-619`; deviation `a2-active-option-selected.md`; decisions 34 and 40 on #4
-- **Expected:** `selected: d:right:cuneus`, "cuneus" → the one `aria-selected="true"` option is the armed "Cuneus, left"; the one `aria-current="true"` option is "Cuneus, right". Published data, after choosing the right one and coming back: left `aria-selected="true"`, right `false`.
+- **Expected:** `selected: d:right:cuneus`, "c" → the one `aria-selected="true"` option is the armed one, which is not Cuneus; the one `aria-current="true"` option is "Cuneus, left and right…", its R key `data-selected`, its L key not. Published data, after choosing the right one and coming back: left `aria-selected="true"`, right `false`.
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-36 · A search that finds nothing says so, with a hint
@@ -351,14 +351,14 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Kind:** behaviour
 - **Level:** unit (view-model: `matchesElsewhere` and the sentences)
 - **Source:** `viewer/ui/panels/navigator.js:92-106`, `393-399`, `439-448`; derived cut labels, 2026-11-17 (the cut-labels note and its switch removed)
-- **Expected:** Destrieux shown, "v1" → "No match for “v1”" and "1 match in HCP-MMP1.0 multimodal atlas." with "Switch atlas" → call `atlas hcp-mmp`, then "V1, left" listed. Cut atlas `destrieux`, "small" → option "Small nucleus, left: In NextBrain. Activate to reveal.", no button named /cut labels/; a click → `reveal other-detail t:left:small`. Published data, a NextBrain cut-only region found by name → no /cut labels/ button; choosing its "…left: In NextBrain." option → detail `nextbrain`, cut atlas `nextbrain`, a cut open, the region selected.
+- **Expected:** Destrieux shown, "v1" → "No match for “v1”" and "1 match in HCP-MMP1.0 multimodal atlas." with "Switch atlas" → call `atlas hcp-mmp`, then "V1, left" listed. Cut atlas `destrieux`, "small" → option "Small nucleus, left: In NextBrain. Activate to reveal.", no button named /cut labels/; a click → `reveal other-detail t:left:small`. Published data, a NextBrain cut-only region found by name → no /cut labels/ button; choosing its "…right: In NextBrain." option under "Also in NextBrain" → detail `nextbrain`, cut atlas `nextbrain`, a cut open, the left region selected.
 - **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R, published data); the uncaught rejection: uncovered
 
 ### ANAT-38 · A list cut off says how many matches there are
 
-- **Rule:** When the catalog caps the list, the sentence after it gives the shown and total counts and asks for a narrower search.
+- **Rule:** The list shows at most 50 structures. Past that, the sentence after it gives the shown and total counts of structures and asks for a narrower search. The atlas sentences (ANAT-37) count structures too.
 - **Kind:** behaviour
-- **Level:** unit (view-model) — the cap of 50 is the catalog's (`core-catalogs.md`)
+- **Level:** unit (view-model) — the search asks the catalog for every match and caps the structures
 - **Source:** `viewer/ui/panels/navigator.js:400`, `437`
 - **Expected:** 61 HCP-MMP areas containing "V1", "v1" → 50 options and "Showing 50 of 61 matches. Refine the search to narrow it."
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
@@ -369,7 +369,7 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Kind:** accessibility
 - **Level:** unit (view-model: the status sentence) — the 500 ms pause is U6's (`ui-kit.md`)
 - **Source:** `viewer/ui/panels/navigator.js:242-250`, `411-412`, `449`
-- **Expected:** "cuneus" → "2 matches."; "zzzz" → starts "No match for “zzzz”. Try another spelling, an abbreviation or a synonym"; Destrieux, "v1" → "No match for “v1”. 1 match in HCP-MMP1.0 multimodal atlas."; capped → "Showing 50 of 61 matches. Refine the search to narrow it." (no count). Published data: "zzzzqq" → contains "No match for “zzzzqq”".
+- **Expected:** "cuneus" → "1 match." (one structure); "zzzz" → starts "No match for “zzzz”. Try another spelling, an abbreviation or a synonym"; Destrieux, "v1" → "No match for “v1”. 1 match in HCP-MMP1.0 multimodal atlas."; capped → "Showing 50 of 61 matches. Refine the search to narrow it." (no count). Published data: "zzzzqq" → contains "No match for “zzzzqq”".
 - **Covered by:** `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R, real 500 ms waits)
 
 ### ANAT-40 · `/` and the page's arrows reach the search
@@ -416,6 +416,15 @@ Scope: chunks A1 (#51, the anatomy tree with its visibility eyes and side keys),
 - **Source:** Planum improvement plan 2, WP29
 - **Expected:** Brainstem with `nextbrain:left:521`, `aseg:midline:16` and two Harvard nuclei → `[null, [the two]]`, `["Arousal nuclei (Harvard atlas)", [the nuclei]]`; two cord rows in two families → one part. Tree, Brainstem open with NextBrain's VTA left and right and the Harvard VTA → rows `nextbrain:left:435`, caption `structure:Brainstem/Arousal nuclei (Harvard atlas)` ("Arousal nuclei (Harvard atlas), 1 region", `aria-level` 2, no `aria-selected`, no buttons), then `aan:midline:ventral-tegmental-area`; NextBrain's row keeps its L and R keys.
 - **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyTree.svelte.test.ts` (R)
+
+### ANAT-61 · Another structure set's matches follow under its name
+
+- **Rule:** Matches that only another structure set draws (reason `other-detail`) follow those of the shown set and atlas, one group per set in the order first met, under a heading "Also in <set>" (FR "Aussi dans <set>"), the set as the atlas menu names it; regions another set puts on the cut but that set does not own are under "In another detail level". Their second line names their group rather than the reason, which the heading says; their name still says it (ANAT-32). A press reveals the side chosen, loading that set (CTRL-18).
+- **Kind:** behaviour
+- **Level:** unit (`searchSections` in `lib/core/panels/navigator.ts`); browser
+- **Source:** 2026-11-20 interface review, P2 "plain Hippocampus is row 7, greyed, subtitled In FreeSurfer aseg"
+- **Expected:** Fixture (aseg shown), "putamen" → first "Putamen, left and right, Basal ganglia" outside any group; a group "Also in Teaching set" holding "Putamen, left and right: In Teaching set. Activate to reveal.", its second line "Basal ganglia"; its R key → `reveal other-detail l:right:putamen`. Published data, teaching set shown, "hippo" → "Hippocampal formation" first, FreeSurfer's "Hippocampus" one option under "Also in FreeSurfer aseg".
+- **Covered by:** `src/lib/core/panels/navigator.test.ts` (R); `src/features/anatomy/AnatomyExplorer.svelte.test.ts` (R)
 
 ### ANAT-43 · The search has no axe violations
 

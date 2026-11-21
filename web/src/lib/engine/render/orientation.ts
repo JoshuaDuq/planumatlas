@@ -1,4 +1,4 @@
-import { Matrix4, type Object3D, type Vector3 } from 'three';
+import { Matrix4, type Object3D, type Quaternion, Vector3 } from 'three';
 import { t } from '../../core/i18n/index.ts';
 import type { Language } from '../../types/index.ts';
 
@@ -58,11 +58,10 @@ function basis(camera: Object3D, column: number, target: Vector3 | null): Direct
   return [x / length, y / length, z / length];
 }
 
+export type CameraBasis = Record<'right' | 'up' | 'back', Direction>;
+
 /** The camera's world basis; pass the orbit target for the basis of the frame about to be drawn. */
-export function cameraBasis(
-  camera: Object3D,
-  target: Vector3 | null = null,
-): Record<'right' | 'up' | 'back', Direction> {
+export function cameraBasis(camera: Object3D, target: Vector3 | null = null): CameraBasis {
   return {
     right: basis(camera, 0, target),
     up: basis(camera, 1, target),
@@ -71,10 +70,21 @@ export function cameraBasis(
 }
 
 /**
+ * A world basis read along the brain's own axes: each direction turned back by `rotation`
+ * (`BrainAtlas.anatomicalRotation`), so x, y and z are the brain's right, superior and posterior.
+ */
+export function anatomicalBasis(world: CameraBasis, rotation: Quaternion): CameraBasis {
+  const inverse = rotation.clone().invert();
+  const turned = (direction: Direction): Direction =>
+    new Vector3(...direction).applyQuaternion(inverse).toArray();
+  return { right: turned(world.right), up: turned(world.up), back: turned(world.back) };
+}
+
+/**
  * Where each anatomical direction lands on a gizmo drawn from a camera basis: x right and y down,
  * -1 to 1, and `depth` from -1 (away from the viewer) to 1 (toward the viewer).
  */
-export function projectAxes({ right, up, back }: Record<'right' | 'up' | 'back', Direction>): {
+export function projectAxes({ right, up, back }: CameraBasis): {
   letter: Letter;
   x: number;
   y: number;
@@ -124,23 +134,11 @@ export function localizeEdges(
   ) as Record<Edge, string>;
 }
 
-/** Edge letters for a camera; pass the orbit target for the letters of the frame about to be drawn. */
-export function edgeLabels(
-  camera: Object3D,
-  lang?: 'en',
-  target?: Vector3 | null,
-): Record<Edge, Letter>;
-export function edgeLabels(
-  camera: Object3D,
-  lang: Language,
-  target?: Vector3 | null,
-): Record<Edge, string>;
-export function edgeLabels(
-  camera: Object3D,
-  lang: Language = 'en',
-  target: Vector3 | null = null,
-): Record<Edge, string> {
-  const right = letterFor(basis(camera, 0, target));
-  const top = letterFor(basis(camera, 1, target));
+/** Edge letters for a camera basis read along the brain's axes (`anatomicalBasis`). */
+export function edgeLabels(basis: CameraBasis, lang?: 'en'): Record<Edge, Letter>;
+export function edgeLabels(basis: CameraBasis, lang: Language): Record<Edge, string>;
+export function edgeLabels(basis: CameraBasis, lang: Language = 'en'): Record<Edge, string> {
+  const right = letterFor(basis.right);
+  const top = letterFor(basis.up);
   return localizeEdges({ right, left: OPPOSITE[right], top, bottom: OPPOSITE[top] }, lang);
 }

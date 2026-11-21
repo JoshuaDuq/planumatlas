@@ -42,19 +42,22 @@
 
 <div class="tree-header">
   {@render children?.()}
-  <button
-    type="button"
-    class="tree-toggle-all"
-    onclick={() =>
-      onExpandedChange(allExpanded ? new Set() : new Set(groups.map(({ key }) => key)))}
-  >
-    {allExpanded ? copy.collapseAll : copy.expandAll}
-  </button>
-  <IconButton
-    class="tree-download"
-    icon="download"
-    label={copy.downloadTable}
-    data-tooltip={copy.downloadTable}
-    onclick={downloadTable}
-  />
+  <!-- The two commands wrap as one, so the download never stands alone under the scope. -->
+  <div class="tree-commands">
+    <button
+      type="button"
+      class="tree-toggle-all"
+      onclick={() =>
+        onExpandedChange(allExpanded ? new Set() : new Set(groups.map(({ key }) => key)))}
+    >
+      {allExpanded ? copy.collapseAll : copy.expandAll}
+    </button>
+    <IconButton
+      class="tree-download"
+      icon="download"
+      label={copy.downloadTable}
+      data-tooltip={copy.downloadTable}
+      onclick={downloadTable}
+    />
+  </div>
 </div>

@@ -220,6 +220,14 @@ export function frameTo(
   controls.minDistance = minDistance;
   controls.maxDistance = maxDistance;
   const center = frameBounds(camera, bounds, direction, fit, points);
+  // A covered phone stage (sheet + tall paint key) can produce a fit past maxDistance; keep the
+  // planned camera inside its own orbit limits so serialized links always round-trip cleanly.
+  const distance = camera.position.distanceTo(center);
+  if (distance > maxDistance) {
+    camera.position.copy(center).addScaledVector(direction, maxDistance);
+    camera.lookAt(center);
+    camera.updateMatrixWorld();
+  }
   camera.updateProjectionMatrix();
   controls.target.copy(center);
   return center;

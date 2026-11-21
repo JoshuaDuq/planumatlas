@@ -345,6 +345,12 @@ export function functionProfile(
   const found = searched && population ? deficitsMatching((record as TermRecord).term, lang) : 0;
   const checks =
     !all && !searched ? (domains.lesion_checks as Record<string, LesionCheck[]>)[id] : null;
+  // A lesion-mapped parcel goes by its region's name, as in Deficits, not the atlas's source name.
+  const parcelName = ({ region }: { region: string }) => {
+    const entry = anatomy.get(region);
+    if (!entry) throw new Error(`Unknown region in a lesion check of ${id}: ${region}`);
+    return entry.label.name;
+  };
 
   let term: FunctionProfileContent['term'] = null;
   if (record) {
@@ -383,7 +389,7 @@ export function functionProfile(
           association: check.association,
           deficit: check.deficit,
           name: check.deficit_name[lang],
-          detail: `${check.references.join(', ')} · ${checkedParcels(check, lang)}`,
+          detail: `${check.references.join(', ')} · ${checkedParcels(check, lang, parcelName)}`,
         }))
       : null,
     lesionsOn: checks && atlas !== domains.atlas ? copy.lesionsOn : null,

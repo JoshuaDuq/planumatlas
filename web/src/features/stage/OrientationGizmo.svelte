@@ -1,7 +1,10 @@
 <!--
   The orientation gizmo, top right of the visible stage, after Blender's: each anatomical direction as the
   camera sees it frames its view, the centre the oblique one. Positions follow the per-frame `camera` event
-  straight into the DOM. The chevrons are the single-pointer alternative to dragging (WCAG 2.5.7).
+  straight into the DOM. The chevrons are the single-pointer alternative to dragging (WCAG 2.5.7). On a
+  touch screen they wait unseen, letting touches through to the model, until a finger touches the gizmo
+  or a key focuses it, and stay `TOUCH_SHOWN_MS` past the last touch (2026-11-20 review: they were 4 of
+  the phone's 24 first-screen controls). They stay named and reachable to assistive technology.
 -->
 <script lang="ts">
   import { t } from '../../lib/core/i18n/index.ts';
@@ -254,6 +257,22 @@
   $effect(() => () => {
     if (holding) cancelAnimationFrame(holding.frame);
   });
+
+  /** How long the chevrons stay after a touch on the gizmo, unless one is still held. */
+  const TOUCH_SHOWN_MS = 4000;
+  let touched = $state(false);
+  let untouch = 0;
+  function onTouch(event: PointerEvent) {
+    if (event.pointerType === 'mouse') return;
+    touched = true;
+    clearTimeout(untouch);
+    const fade = () => {
+      if (holding) untouch = window.setTimeout(fade, TOUCH_SHOWN_MS);
+      else touched = false;
+    };
+    untouch = window.setTimeout(fade, TOUCH_SHOWN_MS);
+  }
+  $effect(() => () => clearTimeout(untouch));
 </script>
 
 <div
@@ -261,6 +280,8 @@
   role="toolbar"
   aria-label={copy.viewAria}
   hidden={!ready}
+  data-touched={touched || undefined}
+  onpointerdowncapture={onTouch}
   {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
   {@attach rove}
   {@attach measure}
@@ -512,6 +533,14 @@
     /* A finger held on a chevron turns the model; it must not start a pan that cancels the press. */
     .orientation-gizmo :global(.gizmo-turn) {
       touch-action: none;
+      transition: opacity var(--ui-transition) var(--ease-ui);
+    }
+    /* On a touch screen the chevrons wait for a touch on the gizmo, or a key's focus in it. */
+    @media (pointer: coarse) {
+      .orientation-gizmo:not([data-touched], :focus-within) :global(.gizmo-turn) {
+        opacity: 0;
+        pointer-events: none;
+      }
     }
     /* Each chevron's target starts at the ring and grows outward; its glyph keeps to the ring. */
     .orientation-gizmo :global(.gizmo-turn[data-side='right']) {

@@ -349,10 +349,20 @@ What opening a deficit does to the scene (draw, frame, the reveal notice, the de
 - **Expected:** Deficits tab → `.clinical-links` rows ["Simulate a lesion"] before the first group (no cohort published, no Stroke cases row); pressing it → the Lesion tool `aria-expanded="true"`, "Places the lesion" checked; typing "aphasia" → no rows.
 - **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
 
-### DEF-38 · Stroke cases opens the selected region's cases, or says to select one
+### DEF-39 · A lesion simulated from Deficits shows its report there
 
-- **Rule:** Where a stroke cohort is published, "Stroke cases" follows. With nothing selected the notice says "Select a region to see the stroke cases whose lesion reaches it."; where the cohort is loaded and no case reaches the selected region it says so by name; otherwise the detail shows the region with its Stroke cases section open, and the Research data row that holds it, scrolled into view, focus on its summary.
+- **Rule:** A lesion's report is the Deficits tab's detail as well as Anatomy's, while no region is selected and no deficit is open there, so one placed after "Simulate a lesion" is read where it was asked for: the Lesion popover's "Show the report" keeps the Deficits tab in front. A deficit opened takes the detail. A coordinate's report (Add › Coordinate or Overlay) stays Anatomy's, which "Show the report" brings to the front. The lesion's streamlines stay drawn on either tab. A link to the Deficits tab with a lesion and nothing selected opens on the report.
 - **Kind:** behaviour
-- **Level:** browser
-- **Expected:** with the published cohort: press with nothing selected → that notice; pick `destrieux:left:26`, press → `.stroke-cases details` open, focus on its summary.
-- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R)
+- **Level:** unit (`detailAvailable`, the mode change); browser
+- **Source:** 2026-11-20 interface review ("a lesion started from Deficits opens under the Anatomy tab")
+- **Expected:** `detailAvailable({ explorer: 'deficits', lesion: true })` → true; with `coordinate: true` → false; Functions with a lesion → false. Choosing Anatomy then Deficits with a lesion tract selected → `clearTract` not called. App: Deficits, "Simulate a lesion", a lesion placed, "Show the report" → explorer still `deficits`, the detail shown headed "Lesion", no "Show the report" left; a deficit opened → its profile.
+- **Covered by:** `src/lib/core/workspace.test.ts` (R); `src/lib/controller/modes.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R); the link restore: uncovered
+
+### DEF-38 · Stroke cases opens the selected region's cases, or the region shown most lesions reach
+
+- **Rule:** Where a stroke cohort is published, "Stroke cases" follows. With nothing selected, once the cohort is read (downloaded if need be, and only if the Deficits tab is still in front), the region shown that the most lesions reach in any test window (`mostReached`, the first of a tie in the tree's order) is selected, and the notice says "Of the regions shown, the most lesions in the cohort reach <name>. Select another region to see its cases."; if the cohort failed or reaches nothing shown, it says "Select a region to see the stroke cases whose lesion reaches it.". Where the cohort is loaded and no case reaches the selected region it says so by name. Otherwise the detail shows the region with its Stroke cases section open, and the Research data row that holds it, scrolled into view, focus on its summary. The section withdraws the ask only for another region, not for the same region redrawn.
+- **Kind:** behaviour
+- **Level:** unit (`mostReached`); browser
+- **Source:** 2026-11-20 interface review ("Deficits › Stroke cases with no region selected only raises a notice")
+- **Expected:** with the published cohort: press with nothing selected → a region selected whose reaching count is the largest among the visible rows, that notice naming it, `.stroke-cases details` open, focus on its summary; pick `destrieux:left:26`, press → `.stroke-cases details` open, focus on its summary, `destrieux:left:26` still selected. Unit: two of three cases reach STG, one IFG → STG; a tie → the first listed; none reached → null.
+- **Covered by:** `src/app/regions/PanelsRegion.svelte.test.ts` (R); `src/lib/core/catalog/stroke-cases.test.ts` (R)

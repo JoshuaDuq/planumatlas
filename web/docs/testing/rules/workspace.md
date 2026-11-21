@@ -145,11 +145,11 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 
 ### WORK-16 · The bar holds the circuit stepper and the restore action, and stays on one line at 200 % text
 
-- **Rule:** The circuit stepper (X3) and the restore action (S3) sit to the right of the path. At 200 % text in French, at 1280 and 320 px, the place crumb ends before the stepper starts.
+- **Rule:** The circuit stepper (X3) and the restore action (S3) sit to the right of the path. At 200 % text in French, at 1280 and 320 px, the place crumb ends before the stepper starts. On a row too short for both, the place and the restore action give way together: the action wraps to a second line within the bar, so the place keeps a readable share rather than a letter.
 - **Kind:** behaviour
 - **Level:** browser — layout
 - **Source:** `viewer/index.html:324-337`; `viewer/styles/layout.css:58-122`
-- **Expected:** With both slots: group "Steps" and "Restore previous view" visible. At 200 % text, FR circuits with place "Voie motrice": crumb right ≤ "Précédent" left + 1.
+- **Expected:** With both slots: group "Steps" and "Restore previous view" visible. At 200 % text, FR circuits with place "Voie motrice": crumb right ≤ "Précédent" left + 1. At 320 px, FR place "Mémoire à long terme" with "Rétablir la vue précédente": crumb ≥ 64 px wide (27.5 px when the action held one line), ending before the action, which stays 44 px tall and inside 320 px.
 - **Covered by:** `src/features/workspace/Workspace.svelte.test.ts` (R)
 
 ## Selection strip
@@ -277,13 +277,13 @@ Scope: chunk H5 (#43), the task panel's frame: the one tablist of the five modes
 - **Expected:** Inside the internal anatomy, axial cut drawn: the picker's systems equal `systemOptions(<the manifest's regions>, detail, lang, sharedGroupNames(catalog.groups({ …settings, internalSystem: null, lang })))`. A camera preset, a selection and a moved cut, each flushed: the view is new, the picker still in the page, no `catalog.groups` and no `systemOptions` call, the systems unchanged. `hideRegions([<a structure>])` → one call of each, the same systems; `setLang('fr')` → one call of each, the French systems as the expression gives them; a camera preset after it → none. Anatomy holding "putamen", then Functions holding "aphasia" (its last `catalog.search` call: "aphasia", English, no limit): the three changes call `catalog.search` in neither; `setLang('fr')` → one search each for "aphasia" and "putamen".
 - **Covered by:** `src/features/workspace/ListView.svelte.test.ts` "the system picker walks no region…", "a search held in Anatomy or counted for another tab…" (R)
 
-### WORK-29 · The search of the tab in front stays above its detail (U2)
+### WORK-29 · The search of the tab in front is an icon in the detail's location bar (U2)
 
-- **Rule:** In Anatomy, Functions and Deficits the detail view starts, under its location bar, with that tab's search field on one line (the tab's search label as its accessible name and its placeholder, `/` hint while single-key shortcuts are on). Typing there writes the tab's query, shows the list and moves focus to the list's own field with the caret at the end, so the next keys go on typing and no single-key shortcut fires. Escape there empties words it holds, and with none is Back (KEY-03). `/` still shows the list and focuses its field. Circuits has no search and Tracts keeps its words in its own list, so their details have none.
+- **Rule:** In Anatomy, Functions and Deficits the detail view's location bar ends with that tab's search as an icon button, named by the tab's search label, with its tooltip and `aria-keyshortcuts="/"`; the detail has no search field of its own, so its subject's title follows the navigation. Pressing it shows the list and moves focus to the list's own search field, so the next keys type there and no single-key shortcut fires. `/` still shows the list and focuses its field. Circuits has no search and Tracts keeps its words in its own list, so their details have no icon. On a coarse pointer the button is 44 px tall.
 - **Kind:** behaviour
 - **Level:** browser in the composed app
-- **Source:** U2 of the 2026-11-09 review; decision record 0007 (nothing moves in the DOM: the field above the detail is the detail's own, bound to the same query)
-- **Expected:** Region picked → searchbox "Search regions" in `#inspector`, before the region's heading; click it, type "broca" → `#navigator` shown, focus on the combobox holding "broca", Broca's areas listed, cortex still shown, selection kept. Query "cun" then a pick → the field holds "cun"; Escape → query "", detail still shown; Escape → list. Single-key shortcuts off → no hint. At 375 × 812 the field is on screen once the sheet rests, and a tap and a letter move to the list. Function profile → "Search functions"; typing "memory" → `functionQuery` "memory". Circuits lesson → no search field. axe clean light and dark.
+- **Source:** U2 of the 2026-11-09 review; 2026-11-20 interface review, P1 (the search line put 136 px of navigation above the title; collapse it to an icon while a profile is open)
+- **Expected:** Region picked → no `input[type=search]` in `#inspector`; button "Search regions" inside `.detail-location`, `aria-keyshortcuts` "/"; the region's heading starts less than 40 px under the bar. Press it → `#navigator` shown, focus on the combobox "Search regions"; typing "broca" → query "broca", cortex still shown, selection kept. `/` → focus on the list's combobox. Function profile → "Search functions"; pressing it and typing "memory" → `functionQuery` "memory". Circuits lesson → no `.detail-search`. At 375 × 812 the icon is on screen once the sheet rests, at least 44 px tall, and a tap focuses the list's field. axe clean light and dark.
 - **Covered by:** `src/features/workspace/DetailView.svelte.test.ts` (R)
 
 ### WORK-30 · Each mode's list is titled under the page's heading

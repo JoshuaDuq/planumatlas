@@ -240,6 +240,11 @@
       padding-block: var(--space-1);
       border-bottom: 1px solid var(--border-subtle);
     }
+    /* The notes are a ruled index, as the region's sections: the first opens on a rule, clear of the sequence. */
+    .landmarks + .note {
+      margin-top: var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+    }
     .note :global(details.section) {
       margin-top: 0;
     }

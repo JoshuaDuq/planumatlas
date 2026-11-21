@@ -25,11 +25,11 @@ checks them in the browser today and could run in the unit project over the fake
 
 ### CTRL-02 · A name chosen from the list is framed; a click on the model is not
 
-- **Rule:** A region picked from the navigator is framed. Re-picking the region already selected, or selecting by clicking the model, keeps the reader's orbit.
+- **Rule:** A region picked from the navigator is framed. Re-picking the region already selected, or selecting by clicking the model, keeps the reader's orbit. A cortical region chosen by name (picked or revealed from the navigator), with nothing isolated, is also focused, drawn in its colour among the others ghosted, since its outline alone is hard to find among the atlas's colours; one clicked on the model is not. A structure beneath opaque cortex is focused however it is framed.
 - **Kind:** behaviour
 - **Level:** unit
-- **Source:** `viewer/app.js:657-665`
-- **Expected:** `selectRegion(A, {frame:true})` → one framing on A; again with A → no new framing; `selectRegion(B)` without `frame` → no framing.
+- **Source:** `viewer/app.js:657-665`; 2026-11-20 interface review ("a selected cortical region is still only a thin white outline")
+- **Expected:** `selectRegion(A, {frame:true})` → one framing on A; again with A → no new framing; `selectRegion(B)` without `frame` → no framing. Destrieux sulcus by name → framed with `context: false`, `focused` true, no notice; `pickRegion` of it → `focused` false; `revealRegion('hemisphere', it)` → `focused` true; isolated → `focused` false.
 - **Covered by:** `src/lib/controller/anatomy.svelte.test.ts` (R)
 
 ### CTRL-03 · A region that cannot be selected is refused

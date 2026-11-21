@@ -48,7 +48,7 @@ The data values below come from the published `public/models/cdmd/manifest.json`
 - **Kind:** scientific
 - **Level:** unit (view-model over `neuropsych-domains.json`)
 - **Source:** `provenance.js:10-27, 70-82`
-- **Expected:** `executive` → text "Executive functions: “executive function”" and a note starting "Lesion check: Executive dysfunction (Gläscher et al. 2012): G_front_middle (L) 13% coloured, G_front_middle (R) 18% coloured" (coverages 0.127 and 0.183, rounded to whole percents). A mapping with `coverage: null` → "<parcel> (<side>), not measured". A domain with no checks → "No lesion study in Planum’s deficit evidence checks this domain." Pain's NextBrain parcels → "caudal_division_of_ventral_posterior_lateral_nucleus (L), not measured". French uses the side glyphs G/D/Méd and "colorée à 13 %". 26 of the 70 published domains have no check.
+- **Expected:** `executive` → text "Executive functions: “executive function”" and a note starting "Lesion check: Executive dysfunction (Gläscher et al. 2012): G_front_middle (L) 13% coloured, G_front_middle (R) 18% coloured" (coverages 0.127 and 0.183, rounded to whole percents). A mapping with `coverage: null` → "<parcel> (<side>), not measured". A domain with no checks → "No lesion study in Planum’s deficit evidence checks this domain." Pain's NextBrain parcels → "caudal_division_of_ventral_posterior_lateral_nucleus (L), not measured". French uses the side glyphs G/D/Méd and ", part colorée 13 %" (", part non mesurée" off the surface). 26 of the 70 published domains have no check.
 - **Covered by:** `src/lib/core/panels/provenance.test.ts` (R, `PROV-05`, over the published `neuropsych-domains.json`)
 
 ### PROV-06 · Labels are translated; the published data is not

@@ -89,7 +89,7 @@ information is missing or the way is unexpected; **Low**, friction or noise.
   focus to More settings, where the tour is restarted. The phone sheet keeps focus on its handle across
   detents, and the panel's focus moves to the handle before the sheet hides it (decision 0006).
 - **Route marks and stage keys.** A circuit's marks are one toolbar "Whole route", buttons named
-  "Landmark 1: Optic chiasm" (visible "1", "Optic chiasm"); a colour key is a button with
+  "Landmark 1: Optic chiasm" (visible "1", its name in the tooltip); a colour key is a button with
   `aria-expanded` opening its rows. Both are reachable and named.
 
 ## Findings

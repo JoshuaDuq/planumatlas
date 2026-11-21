@@ -4,10 +4,8 @@
   it, the lesson's notes and the lessons through it. Each part draws itself only where it applies. The
   legacy sibling rules on the region are its `landmarkSelected` and `underProfile` props.
 
-  Above it stays the search of the tab in front (U2), so a reader who types a name searches instead of
-  pressing single-key shortcuts: typing there carries the words to the list, its results and its field.
-  It is one line here: the label is the field's placeholder, which typing never removes, since the
-  first character moves to the list's own labelled field.
+  The search of the tab in front is an icon in the location bar above it (`LocationBar`), so the
+  subject's title comes right after the navigation (2026-11-20 review).
 -->
 <script lang="ts">
   import { getApp, type World } from '../../app/application.svelte.ts';
@@ -29,6 +27,7 @@
   import CoordinateReport from '../lesion/CoordinateReport.svelte';
   import LesionReport from '../lesion/LesionReport.svelte';
   import { clinicalLayers } from '../../lib/core/state/clinical-navigation.ts';
+  import { deficitsForRegion } from '../../lib/core/panels/clinical.ts';
   import type { FunctionExplorer } from '../functions/functions-explorer.svelte.ts';
   import AtlasComparison from '../inspector/AtlasComparison.svelte';
   import TractProfile from '../tracts/TractProfile.svelte';
@@ -68,44 +67,6 @@
   const current = $derived(view.current);
 
   const app = getApp();
-  const uid = $props.id();
-  /** The search of the tab in front: Circuits has none, and Tracts keeps its words in its own list. */
-  const search = $derived.by(() => {
-    const { explorer, lang } = current;
-    if (explorer === 'anatomy') {
-      const label = t(lang, 'navigator').searchLabel;
-      return { label, query: current.query, set: session.setQuery };
-    }
-    if (explorer === 'functions') {
-      return {
-        label: t(lang, 'functions').search,
-        query: functions.query,
-        set: functions.setQuery,
-      };
-    }
-    if (explorer === 'deficits') {
-      const label = t(lang, 'clinical').searchLabel;
-      return { label, query: current.clinicalQuery, set: deficits.setQuery };
-    }
-    return null;
-  });
-
-  /** Typing here goes on in the list's own field, where the results are, with the caret at the end. */
-  function searchInList(value: string) {
-    search!.set(value);
-    app.ports.showList();
-    app.ports.focusSearch(current.explorer);
-    const field = document.activeElement as HTMLInputElement;
-    field.setSelectionRange(field.value.length, field.value.length);
-  }
-
-  function onSearchKeydown(event: KeyboardEvent) {
-    // Empty, Escape is the page's: Back to the list.
-    if (event.isComposing || event.key !== 'Escape' || search!.query === '') return;
-    event.preventDefault();
-    search!.set('');
-  }
-
   const {
     manifest,
     cabNp,
@@ -147,9 +108,13 @@
     (current.explorer === 'functions' && current.selectedFunction !== null) ||
       (current.explorer === 'deficits' && current.selectedDeficit !== null),
   );
-  // A placed lesion is Anatomy's detail once no region is selected.
+  // A placed lesion is Anatomy's detail once no region is selected, and Deficits' while no deficit is
+  // open, so one simulated from there stays there (2026-11-20 review); a coordinate's is Anatomy's.
   const lesionShown = $derived(
-    current.explorer === 'anatomy' && !current.selectedRegion && lesion.sphere !== null,
+    !current.selectedRegion &&
+      lesion.sphere !== null &&
+      (current.explorer === 'anatomy' ||
+        (current.explorer === 'deficits' && !current.selectedDeficit && !lesion.coordinate)),
   );
   // The cortex is listed on the atlas on screen first, then the other.
   const lesionAtlases = $derived.by(() => {
@@ -231,41 +196,6 @@
   settings={current}
 />
 
-{#if search}
-  <div class="detail-search">
-    <label class="visually-hidden" for="{uid}-search">{search.label}</label>
-    <div class="search-box">
-      <svg
-        class="search-affordance"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        aria-hidden="true"
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
-      </svg>
-      <input
-        id="{uid}-search"
-        type="search"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder={search.label}
-        value={search.query}
-        oninput={(event) => searchInList(event.currentTarget.value)}
-        onkeydown={onSearchKeydown}
-      />
-      {#if search.query === ''}
-        <kbd class="search-shortcut" aria-hidden="true">/</kbd>
-      {/if}
-    </div>
-  </div>
-{/if}
-
 <div class="detail-body scroll-fade">
   <div class="tab-group">
     <CircuitProfile model={circuits} />
@@ -321,6 +251,11 @@
       <RegionDetail
         lang={current.lang}
         region={current.selectedRegion}
+        deficits={current.selectedRegion
+          ? deficitsForRegion(deficits, current.selectedRegion.id).map(
+              (id) => clinical.get(id).name[current.lang],
+            )
+          : []}
         explorer={current.explorer}
         cortexVisible={current.cortexVisible}
         focused={current.focused}
@@ -418,47 +353,10 @@
       padding-bottom: var(--space-4);
       background: var(--surface-base);
     }
-    /* The list's search head, as it stands over the list (FunctionList, DeficitList). */
-    .detail-search {
-      flex: none;
-      padding: var(--space-2) var(--panel-inset);
-      border-bottom: 1px solid var(--border-subtle);
-      background: var(--surface-base);
-    }
-    .search-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-    .search-affordance {
-      position: absolute;
-      left: 10px;
-      color: var(--text-tertiary);
-      pointer-events: none;
-    }
-    .search-shortcut {
-      position: absolute;
-      right: 6px;
-      padding: 0 6px;
-      pointer-events: none;
-    }
-    :global(:root[data-single-keys='off']) .search-shortcut {
-      display: none;
-    }
-    @media (pointer: coarse) {
-      .search-shortcut {
-        display: none;
-      }
-    }
-
     /* The phone sheet: H6's #inspector carries the home-indicator padding, so there is one rule (phone.css:226-231). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .detail-body {
         -webkit-overflow-scrolling: touch;
-      }
-      .search-shortcut {
-        display: none;
       }
     }
   }

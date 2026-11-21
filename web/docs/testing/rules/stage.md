@@ -200,11 +200,11 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-65 · Add heads its popover with one choice: Lesion, Coordinate, Overlay
 
-- **Rule:** Add's popover starts with a radio group named "What to add to the brain" (« Quoi ajouter au cerveau »), then the chosen one's own body. It opens on Lesion, takes focus on the checked choice, and keeps the reader's last choice while the popover is closed. Coordinate is offered only while the anatomy publishes coordinate spaces, Overlay only with a body and not on a stage narrower than 480 px, a phone's, where Add's popover says so in one line under the choices ("Overlay, for your own brain map, needs a wider screen."); without a body it says nothing. With one choice left the group is not drawn. The tool says what it offers in `data-offers`, which the tour reads (GUIDE-04). A choice withdrawn while it is the open one closes the popover and hands focus to the first tool left (STAGE-32). The choices are sized by their words, so the longest French ones are not cut. `openFromPanel('lesion')` (the Deficits list's "Simulate a lesion") opens Add on Lesion whatever it last held.
+- **Rule:** Add's popover starts with a radio group named "What to add to the brain" (« Quoi ajouter au cerveau »), then the chosen one's own body. It opens on Lesion, takes focus on the checked choice, and keeps the reader's last choice while the popover is closed. Coordinate is offered only while the anatomy publishes coordinate spaces, Overlay only with a body and not on a stage narrower than 480 px, a phone's, where Add's popover says so in one line under the choices ("Overlay, for your own brain map, needs a wider screen."); without a body it says nothing. With one choice left the group is not drawn. The tool says what it offers in `data-offers`, which the tour reads (GUIDE-04), and in its tooltip, "Add to the brain: Lesion · Coordinate · Overlay" (« Ajouter au cerveau : … »), the offered choices only, since its one word does not say what it adds (2026-11-20 review). A choice withdrawn while it is the open one closes the popover and hands focus to the first tool left (STAGE-32). The choices are sized by their words, so the longest French ones are not cut. `openFromPanel('lesion')` (the Deficits list's "Simulate a lesion") opens Add on Lesion whatever it last held.
 - **Kind:** behaviour
 - **Level:** browser
 - **Source:** `web/src/features/stage/Dock.svelte`; parsimony round 2026-11-11; handoff U11 (plan 2 WP36)
-- **Expected:** Add open → radios "Lesion", "Coordinate", "Overlay", Lesion checked and focused, body `data-place="lesion"`; Overlay → `data-place="overlay"`; closed and reopened → Overlay checked. `data-offers` "lesion coordinate overlay"; no coordinate spaces → "lesion overlay" and no Coordinate radio; a 375 px phone → "lesion coordinate", and Add's `.place-note` reads "Overlay, for your own brain map, needs a wider screen." (French « La superposition, pour votre propre carte cérébrale, demande un écran plus large. »); a 375 px phone without an Overlay body → "lesion coordinate" and no note; a 768 px tablet laid out as a phone → all three and no note. French radios "Lésion", "Coordonnée", "Superposition", each `scrollWidth` = `clientWidth`. Tab from the Lesion radio → "Place" → the control after the dock, Add still open.
+- **Expected:** Add open → radios "Lesion", "Coordinate", "Overlay", Lesion checked and focused, body `data-place="lesion"`; Overlay → `data-place="overlay"`; closed and reopened → Overlay checked. `data-offers` "lesion coordinate overlay", tooltip "Add to the brain: Lesion · Coordinate · Overlay"; no coordinate spaces → "lesion overlay", tooltip "Add to the brain: Lesion · Overlay", and no Coordinate radio; a 375 px phone → "lesion coordinate", and Add's `.place-note` reads "Overlay, for your own brain map, needs a wider screen." (French « La superposition, pour votre propre carte cérébrale, demande un écran plus large. »); a 375 px phone without an Overlay body → "lesion coordinate" and no note; a 768 px tablet laid out as a phone → all three and no note. French radios "Lésion", "Coordonnée", "Superposition", each `scrollWidth` = `clientWidth`. Tab from the Lesion radio → "Place" → the control after the dock, Add still open.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/app/regions/PanelsRegion.svelte.test.ts` (R, DEF-37)
 
 ### STAGE-66 · The lobe colouring is keyed by its lobes, front to back
@@ -310,11 +310,11 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ### STAGE-27 · Four chevrons on the ring orbit the model one step without dragging
 
-- **Rule:** A group "Turn the model" of four chevrons sits on the gizmo's ring, one on each side. Each press turns the camera one keyboard-arrow step in that direction, leaves the held view and retires the hint. They are quiet (muted ink, brighter on hover and focus) and always shown. Nothing is announced.
+- **Rule:** A group "Turn the model" of four chevrons sits on the gizmo's ring, one on each side. Each press turns the camera one keyboard-arrow step in that direction, leaves the held view and retires the hint. They are quiet (muted ink, brighter on hover and focus). With a mouse they are always shown; on a touch screen (`pointer: coarse`) they wait unseen, letting touches through to the stage, until a finger touches the gizmo (they stay 4 s after the last touch) or a key focuses one of its controls, and they stay named for assistive technology. Nothing is announced.
 - **Kind:** accessibility
 - **Level:** browser (the step mapping is RENDER-21)
-- **Source:** deviation `g2-orbit-step-buttons.md` (WCAG 2.5.7); decisions 10a, 10b and 22 on #4
-- **Expected:** "Turn left" → `orbitBy({ azimuth: π/36 })`, "Turn right" → `{ azimuth: −π/36 }`, "Turn up" → `{ polar: π/36 }`, "Turn down" → `{ polar: −π/36 }`, one call per press, each with its name as tooltip; then nothing pressed, hint retired. Each chevron's centre lies more than 30 px from the gizmo's centre on its own side.
+- **Source:** deviation `g2-orbit-step-buttons.md` (WCAG 2.5.7); decisions 10a, 10b and 22 on #4; 2026-11-20 interface review, P2 "the phone's gizmo is busy at rest"
+- **Expected:** "Turn left" → `orbitBy({ azimuth: π/36 })`, "Turn right" → `{ azimuth: −π/36 }`, "Turn up" → `{ polar: π/36 }`, "Turn down" → `{ polar: −π/36 }`, one call per press, each with its name as tooltip; then nothing pressed, hint retired. Each chevron's centre lies more than 30 px from the gizmo's centre on its own side. Touch emulated: the four at opacity 0 with `pointer-events: none`, still named; a touch on the centre → all four shown; 4 s later → hidden; focus on "Turn up" → shown; with a mouse, shown at rest.
 - **Covered by:** `src/features/stage/OrientationGizmo.svelte.test.ts` (R)
 
 ### STAGE-28 · Reset view resets through the controller
@@ -582,7 +582,7 @@ See STAGE-64: Lesion, Coordinate and Overlay are Add's choice now, not tools.
 
 ## Names on the brain
 
-Planum improvement plan 2, WP21 (handoff F3): `features/stage/RegionNames.svelte`, `region-names.ts` and `name-columns.ts`, over the engine's `model.facing` (ATLAS-58), `model.inSight`, `camera.anatomyRect` and `sections.capAnchors` (SLICE-42); reworked 2026-11-18 so the names hold still and stand in columns beside the anatomy. Off by default; the switch is in the Display popover, the key is N (KEY-23), the link carries `names=1` (STATE-72, LINK-26), and a saved image draws them (SNAP-24). Plan 1's Study mode (WP8) must turn them off in `namesDrawn`.
+Planum improvement plan 2, WP21 (handoff F3): `features/stage/RegionNames.svelte`, `region-names.ts` and `name-columns.ts`, over the engine's `model.facing` (ATLAS-58), `model.inSight`, `camera.anatomyRect` and `sections.capAnchors` (SLICE-42); reworked 2026-11-18 so the names hold still and stand in columns beside the anatomy. Off by default, a page opened plainly included (STAGE-85); the switch is in the Display popover, the key is N (KEY-23), the link carries `names=1` (STATE-72, LINK-26), and a saved image draws them (SNAP-24). Plan 1's Study mode (WP8) must turn them off in `namesDrawn`.
 
 ### STAGE-76 · The regions facing the reader that the camera shows large enough are named, largest first, at most 24
 
@@ -613,7 +613,7 @@ Planum improvement plan 2, WP21 (handoff F3): `features/stage/RegionNames.svelte
 
 ### STAGE-79 · Zoomed in past the room beside the anatomy, a name stands beside its dot in the landmarks' idiom, clear of the chrome, or not at all
 
-- **Rule:** Where no column beside the anatomy is open (STAGE-84), a name is the route landmarks' label (`RouteMarks.svelte`, `stage-labels.ts`): haloed type at weight 500, its dot on the point, beside it where clear, else stood off along a leader, trying the side it stood on last first at each distance, so a moving label keeps its side. It is an optional label: where no slot is clear of the stage's edges, the chrome (dock, keys, gizmo, scale bar, letters, hints, full-screen exit) and the names placed before it, it is left out and blocks nothing; a name whose dot is off the stage or under the chrome is left out too. Between rests the names follow the camera by their drawn points; they are chosen again when the camera settles and when a change of the display or the cut has rested 250 ms.
+- **Rule:** Where no column beside the anatomy is open (STAGE-84), a name is a stage label as the route landmarks' numbers are (`stage-labels.ts`): haloed type at weight 500, its dot on the point, beside it where clear, else stood off along a leader, trying the side it stood on last first at each distance, so a moving label keeps its side. It is an optional label: where no slot is clear of the stage's edges, the chrome (dock, keys, gizmo, scale bar, letters, hints, full-screen exit) and the names placed before it, it is left out and blocks nothing; a name whose dot is off the stage or under the chrome is left out too. Between rests the names follow the camera by their drawn points; they are chosen again when the camera settles and when a change of the display or the cut has rested 250 ms.
 - **Kind:** behaviour
 - **Level:** unit; browser
 - **Source:** Planum improvement plan 2, WP21; memory "Stage labels" (the landmark idiom)
@@ -655,6 +655,15 @@ Planum improvement plan 2, WP21 (handoff F3): `features/stage/RegionNames.svelte
 - **Source:** Planum improvement plan 2, WP21 and section 9 (decision 2: off by default)
 - **Expected:** The box unticked, its description "The regions facing you, largest first; zoom in to name smaller ones."; pressed → `setNamesShown(true)`; the view's `namesShown` true → ticked. `namesDrawn` true only with the switch on and each of exploded, tract reference, route and map off. Without a spinal cord the popover has four boxes.
 - **Covered by:** `src/features/stage/Dock.svelte.test.ts` (R); `src/features/stage/region-names.test.ts` (R)
+
+### STAGE-85 · A page opened plainly opens without names
+
+- **Rule:** Names on the brain stay off on a page opened with no link, at every width; only a link that says `names=1` opens with them (LINK-26). The reader's switch (Display or N) lasts for the page and is not stored. Start over leaves it as the reader set it.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** 2026-11-20 interface review, P1 "the opening picture has no names", declined the same day (Joshua's decision): names stay off by default, as STAGE-81 has it
+- **Expected:** At 1280 × 800, `''` → `namesShown` false; `#names=1` → true; `#view=left` → false; at 414 × 896, `''` → false.
+- **Covered by:** `src/app/boot.svelte.test.ts` (R)
 
 ## Full screen
 

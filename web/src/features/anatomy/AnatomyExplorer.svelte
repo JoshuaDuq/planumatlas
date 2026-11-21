@@ -26,7 +26,7 @@
     template: boolean;
     /** The field's text; it is the session's and is not in the link. */
     query: string;
-    search: (query: string) => { rows: CatalogRow[]; total: number };
+    search: (query: string, limit?: number) => { rows: CatalogRow[]; total: number };
     /** The catalog's groups for the current display (`catalog.groups`). */
     groups: readonly CatalogGroup[];
     hiddenRegions: ReadonlySet<string>;
@@ -219,9 +219,15 @@
       inset: calc(-1 * var(--space-3)) calc(-1 * var(--panel-inset)) calc(-1 * var(--space-2));
       background: var(--surface-base);
     }
-    /* Results start below the ground, which reaches this far under the field. */
+    /*
+     * Results start below the ground, which reaches this far under the field. The label stands as far
+     * above it, clear of the ground, and scrolls away under it rather than over it.
+     */
+    .explorer[data-searching] :global(.search-label) {
+      z-index: auto;
+    }
     .explorer[data-searching] :global(.search-box) {
-      margin-block-end: var(--space-3);
+      margin-block: var(--space-3);
     }
     .explorer[data-searching] :global(.search-box)::before {
       inset-block-end: calc(-1 * var(--space-3));
@@ -238,6 +244,22 @@
       font-size: var(--text-ui);
       color: var(--text-primary);
       cursor: pointer;
+    }
+    /* Another structure set's matches: a caption ruled off from those above, as the tree's sections. */
+    .explorer :global(.search-group-heading) {
+      margin-top: var(--space-2);
+      padding: var(--space-4) var(--panel-inset) var(--space-1);
+      border-top: 1px solid var(--border-subtle);
+      overflow-wrap: anywhere;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .explorer :global(.search-list > [role='group']:first-child .search-group-heading) {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
     }
     .explorer :global(.search-option:has(.result[data-selected])) {
       background: var(--accent-wash);

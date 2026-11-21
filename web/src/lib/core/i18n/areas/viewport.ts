@@ -18,6 +18,8 @@ export const en = {
   // Add holds the three that bring something onto the brain; its choice is named for a screen reader.
   placeTool: 'Add',
   placeChoice: 'What to add to the brain',
+  // Add's tooltip: what it holds, since its one word does not say (2026-11-20 review).
+  placeHint: (things: string) => `Add to the brain: ${things}`,
   lesionTool: 'Lesion',
   coordinateTool: 'Coordinate',
   overlayTool: 'Overlay',
@@ -83,6 +85,7 @@ export const fr: typeof en = {
   sectionTool: 'Coupe',
   placeTool: 'Ajouter',
   placeChoice: 'Quoi ajouter au cerveau',
+  placeHint: (things: string) => `Ajouter au cerveau\u202f: ${things}`,
   lesionTool: 'Lésion',
   coordinateTool: 'Coordonnée',
   overlayTool: 'Superposition',

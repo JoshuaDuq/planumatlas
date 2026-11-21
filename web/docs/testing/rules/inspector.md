@@ -44,7 +44,7 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 
 ### INSP-05 · The datasheet gives the measurement by kind, the centroid and the source
 
-- **Rule:** The datasheet lists the measurement, the centroid and the source label. A structure or a cut region is measured by its segmentation volume, a cortical area by its surface area, each at four significant figures with grouped digits and the unit held to the number. The centroid is in RAS millimetres, each axis signed at one decimal, with a true minus; a region without a centroid shows a dash.
+- **Rule:** The datasheet, inside the closed row "Measurements and source" (INSP-62), lists the measurement, the centroid and the source label. A structure or a cut region is measured by its segmentation volume, a cortical area by its surface area, each at four significant figures with grouped digits and the unit held to the number. The centroid is in RAS millimetres, each axis signed at one decimal, with a true minus; a region without a centroid shows a dash.
 - **Kind:** scientific
 - **Level:** unit (view-model: metric choice by kind; `quantity` and `formatRas` are C1's, `core-i18n.md`)
 - **Source:** `viewer/ui/panels/inspector.js:314-320`
@@ -534,3 +534,21 @@ Scope: chunks R1 (#54, the region inspector: the empty hint, the selected region
 - **Source:** Planum improvement plan 2, WP28
 - **Expected:** Paint → one paint call; painted → the strip's text and no Paint; Restore → one restore call; `onpaint: null` → no Paint.
 - **Covered by:** `src/features/inspector/LayersSection.svelte.test.ts`
+
+### INSP-61 · The sheet leads with what the region is, in one plain line
+
+- **Rule:** Under the region's name and side, before its commands, one line says what it is from the data its sections hold: its network (the Networks section's headline: the largest Yeo or striatal share with its percentage, else its CAB-NP network), its two strongest functions (highest z, as Neuropsychological functions lists them) and the first two deficits mapped on it (as Neuropsychology lists them). Each part is there only where the region has it; a region with none has no line. The parts are labelled, so no name is recased: English "Network: …. Functions: …, …. Linked deficits: …, ….", French "Réseau : …. Fonctions : …. Déficits associés : …." with a narrow no-break space before each colon.
+- **Kind:** behaviour
+- **Level:** unit (`regionLead`, `networkHeadline`); browser in the composed app
+- **Source:** 2026-11-20 interface review, P1 "the region sheet answers the researcher before the student"
+- **Expected:** Network "Somatomotor 69%", three functions and three deficits → "Network: Somatomotor 69%. Functions: Action execution, Pain. Linked deficits: Hemiparesis, Apraxia."; French with a deficit alone → "Déficits associés : Aphasie."; nothing → null. `networkHeadline`: shares 0.24 and 0.69 → "Somatomotor 69%"; a striatal share alone → its network; none with a CAB-NP area → the CAB-NP name; neither → null. The left precentral gyrus (`destrieux:left:29`) in the app → "Network: Somatomotor 69 %. Linked deficits: …", before Focus.
+- **Covered by:** `src/lib/core/panels/inspector.test.ts` (R); `src/lib/core/catalog/networks.test.ts` (R); `src/features/workspace/DetailView.svelte.test.ts` (R)
+
+### INSP-62 · The measurements are one closed row whose summary gives the area or volume
+
+- **Rule:** The datasheet (INSP-05) sits in one closed section row, "Measurements and source" (French "Mesures et source"), after the commands; its summary carries the area or volume as its headline value, and a region with neither has none. Opened, it stays open from one region to the next while a region is selected. Its values stay copyable inside it.
+- **Kind:** behaviour
+- **Level:** browser
+- **Source:** 2026-11-20 interface review, P1 (fold the three measurements into one row)
+- **Expected:** V1 → Tab after More reaches "Measurements and source, 2 783 mm²", closed; the frontal area's sections start "Measurements and source, 206.8 mm²", all closed. Opened, then another region → the copy buttons of the new region's values.
+- **Covered by:** `src/features/inspector/inspector.svelte.test.ts` (R)
