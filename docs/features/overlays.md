@@ -93,7 +93,7 @@ Node counts and coverage are the values those tests assert against, measured on 
 
 ## Limitations
 
-- A template map carried by a registration of the template to CDMD sub_013: its place on these folds, not this person's activity or anatomy.
+- A template map carried by a registration of the template to this brain: its place on these folds, not this person's activity or anatomy.
 - Template space only. A native-space or Talairach map lands in the wrong place, and no NIfTI header states which MNI template a map is in.
 - Interpolation is trilinear: a label atlas with more than two values is blended between labels.
 - Deep surfaces are sampled where they lie, mixing a structure with its surroundings; cut faces show the volume itself.
