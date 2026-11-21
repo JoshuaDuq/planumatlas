@@ -131,6 +131,8 @@
    */
   const cramped = $derived.by(() => {
     resized();
+    // Measured again as the MRI opens or closes: the rail may not be in the document when this first runs.
+    void mpr.open;
     // A phone's width is the phone query's, whose change comes after the resize: it decides alone, so
     // the focus handed between its layouts moves once.
     if (matchMedia(PHONE_QUERY).matches) return false;

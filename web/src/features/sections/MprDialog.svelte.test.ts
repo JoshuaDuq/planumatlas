@@ -159,7 +159,10 @@ describe('docked beside the stage', () => {
   });
 
   test('just wider than a phone, where docking would leave the stage under 360 px, it is the modal instead', async () => {
+    // The resize lands before the mount, so the layout is the one measured as the MRI opens.
+    const resized = new Promise((resolve) => addEventListener('resize', resolve, { once: true }));
     await page.viewport(820, 1180);
+    await resized;
     await mount();
     const whole = box(document.getElementById('viewport')!).width;
     await engine.sections.load();
