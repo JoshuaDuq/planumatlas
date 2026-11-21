@@ -13,6 +13,8 @@ deliverables/*.png
 # completion marker and log stay local too.
 data/cdmd/scripts/*
 !data/cdmd/scripts/build-stamp.txt
+data/mni152/scripts/*
+!data/mni152/scripts/build-stamp.txt
 docs/_build/
 data/nextbrain/
 # Agent tooling, design-review records and working notes stay local.

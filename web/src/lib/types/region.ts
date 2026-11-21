@@ -30,6 +30,11 @@ export interface Region {
   territories?: { territory: string; fraction: number }[];
   /** The share of the region in no territory, counted, so slivers left out of `territories` are not in it. */
   territory_unassigned?: number;
+  /**
+   * A structure too small for shares: the territories found within the registration's landing error
+   * of it, the one holding most of that neighbourhood first. One name: no border passes that close.
+   */
+  territories_near?: string[];
   /** A cerebellar lobule's shares in each functional region of the registered group atlas, largest first. */
   cerebellar_functions?: { region: string; fraction: number }[];
   /** The share of the lobule in no functional region, counted rather than inferred. */
@@ -42,6 +47,8 @@ export interface Region {
   striatal_networks_confidence?: { filled: number; low: number; confident: number };
   /** The share of its labelled striatal voxels that lie in the putamen. */
   striatal_networks_putamen?: number;
+  /** A striatal structure too small for shares: the networks within the landing error of it, as `territories_near`. */
+  striatal_networks_near?: string[];
   vertex_count?: number;
   triangle_count?: number;
   surface_area_mm2?: number;

@@ -411,7 +411,11 @@ export function paintSolids(
     const striatalRegion = striatalId ? lookup?.regions?.get(striatalId) : undefined;
     if (cap.material.userData.striatalHere)
       cap.material.userData.striatalHere.value =
-        striatal && Boolean(striatalRegion?.striatal_networks?.length);
+        striatal &&
+        Boolean(
+          striatalRegion?.striatal_networks?.length ||
+          striatalRegion?.striatal_networks_near?.length,
+        );
     const isolatedWhiteMatter = holdsIsolatedWhiteMatter(source, state, lookup, whiteMatter);
     if (!label) {
       const { boundary } = source.userData;

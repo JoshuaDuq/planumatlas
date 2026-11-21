@@ -12,6 +12,7 @@ import type { Rgb } from '../../types/index.ts';
 import {
   PALETTE_SIZE,
   checkTerritories,
+  majorityTerritoryColor,
   networkPalette,
   paletteTexture,
 } from './network-colors.ts';
@@ -102,4 +103,25 @@ test('a territory index takes its branch colour, none keeps the region colour, a
   assertChannels(texel(values, 2), [0, 0, 1, 1]);
   assert.deepEqual(texel(values, 3), [0, 0, 0, 0]);
   assert.doesNotThrow(() => checkTerritories(new BufferGeometry(), [{ color: [1, 2, 3] }]));
+});
+
+test('a structure drawn whole takes a majority territory, or the one territory round a small one', () => {
+  const territories = [
+    { id: 'aca', color: [59, 111, 182] as Rgb },
+    { id: 'mca-frontal', color: [47, 143, 91] as Rgb },
+  ];
+  const shares = (fraction: number) => ({ territories: [{ territory: 'aca', fraction }] });
+  assert.deepEqual(majorityTerritoryColor(shares(0.5), territories), [59, 111, 182]);
+  assert.equal(majorityTerritoryColor(shares(0.49), territories), null);
+  // Too small for shares: coloured only where no border passes near it.
+  assert.deepEqual(
+    majorityTerritoryColor({ territories_near: ['mca-frontal'] }, territories),
+    [47, 143, 91],
+  );
+  assert.equal(
+    majorityTerritoryColor({ territories_near: ['aca', 'mca-frontal'] }, territories),
+    null,
+  );
+  assert.equal(majorityTerritoryColor({}, territories), null);
+  assert.throws(() => majorityTerritoryColor({ territories_near: ['pca'] }, territories), /pca/);
 });

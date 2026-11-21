@@ -141,7 +141,7 @@ def validate_regions(config, regions):
         )
     for region_id, region in regions.items():
         # Territory shares are another layer's, checked by arterial_territories.validate.
-        if {k: v for k, v in region.items() if k not in ("territories", "territory_unassigned")} != expected[region_id]:
+        if {k: v for k, v in region.items() if k not in ("territories", "territory_unassigned", "territories_near")} != expected[region_id]:
             raise ValueError(
                 f"White-matter region disagrees with wmparc.mgz: {region_id}"
             )

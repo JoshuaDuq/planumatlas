@@ -374,7 +374,7 @@ def validate_atlas(config, atlas, records):
                 ) or {}
                 record = published[region_id]
                 if any(record.get(field) != composed.get(field)
-                       for field in ("territories", "territory_unassigned")):
+                       for field in ("territories", "territory_unassigned", "territories_near")):
                     raise ValueError(f"Territory composition changed: {region_id}")
             if visual_fields is not None:
                 carried = actual.vertex_attributes.get(retinotopy.AREA)

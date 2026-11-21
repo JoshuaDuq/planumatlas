@@ -21,7 +21,7 @@ Why not an average
 : A template's sulci are an average, which blurs where people differ, and its tracts come from other people's diffusion scans. Here the surface, the cuts, the MRI and the tracts are one person's.
 
 What it costs
-: Group data must be registered onto this brain. Surface atlases arrive through `fsaverage` sphere registration ([cortical atlases](features/cortical-atlases.md)). Group volumes arrive through SynthMorph: across the two MNI templates, deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74. A single cortical parcel looked up from template space agrees with this brain's own parcellation for about 60% of cortex; a miss lies a median 2.2 mm away (90th percentile 5.9 mm). That is why Coordinate reports each region's share of a 5 mm sphere ([published coordinates](features/published-coordinates.md)).
+: Group data must be registered onto this brain. Surface atlases arrive through `fsaverage` sphere registration ([cortical atlases](features/cortical-atlases.md)). Group volumes arrive through SynthMorph: across the two MNI templates, deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74. A single cortical parcel looked up from template space agrees with this brain's own parcellation for about 60% of cortex; a miss lies a median 2.2 mm away (90th percentile 5.9 mm). That is why Coordinate reports each region's share of a 5 mm sphere ([published coordinates](features/published-coordinates.md)). Fine structures land a median 1.2 mm from this brain's own and overlap poorly below about 100 mm³, so a structure that small takes no shares from a registered map ([registration landing](features/registration-landing.md)).
 
 Limit
 : One person's folding is not typical everywhere.
@@ -51,6 +51,7 @@ Limit
 - [Internal anatomy](features/internal-anatomy.md)
 - [Boundary certainty](features/boundary-certainty.md)
 - [Segmentation agreement](features/segmentation-agreement.md)
+- [Registration landing](features/registration-landing.md)
 - [Spinal cord](features/spinal-cord.md)
 - [Arousal nuclei](features/arousal-nuclei.md)
 - [Tracts](features/tracts.md)
@@ -128,6 +129,7 @@ features/atlas-comparison
 features/internal-anatomy
 features/boundary-certainty
 features/segmentation-agreement
+features/registration-landing
 features/spinal-cord
 features/arousal-nuclei
 features/tracts

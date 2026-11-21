@@ -55,6 +55,27 @@ export const en = {
   functionalConnectivity: 'Functional connectivity (HCP)',
   disorderEffects: 'Brain differences in disorders (ENIGMA)',
   strokeCases: 'Stroke cases',
+  // Every group map carried onto this brain by a volume registration, with what was measured of it.
+  registered: 'Registered group maps',
+  landing: (space: string) => `Fine structures through registration (${space})`,
+  landingNote: (structures: string, median: string, p90: string) =>
+    `The template’s own ${structures} fine structures, carried by the published registration, land a median ${median} from this brain’s own, nine in ten within ${p90}. An upper bound: it includes the disagreement between two segmentations.`,
+  landingOverlap: (classes: readonly string[]) =>
+    `Median overlap (Dice) by the structure’s volume: ${classes.join(', ')}.`,
+  landingClass: (dice: string, under: string | null) =>
+    under === null ? `${dice} above` : `${dice} under ${under}`,
+  landingRule: (floor: string, radius: string) =>
+    `A structure under ${floor} takes no shares from a registered map: it names what lies within ${radius} of it.`,
+  registeredChecks: {
+    ventricles: (left: string, right: string) =>
+      `Overlap (Dice) of the atlas’s ventricles with this brain’s: ${left} left, ${right} right.`,
+    lobules: (mean: string) =>
+      `Overlap (Dice) of the template’s lobules with this brain’s: ${mean} on average.`,
+    striatum: (mean: string) =>
+      `Overlap (Dice) of the template’s striatum with this brain’s: ${mean} on average.`,
+    deep: (median: string, cortex: string) =>
+      `Overlap (Dice) of the template’s structures with this brain’s: deep structures ${median} (median), cortex ${cortex}.`,
+  },
   domains: 'Neuropsychological domains',
   supplemental: 'Supplemental layers',
   files: 'Published files',
@@ -148,6 +169,26 @@ export const fr: typeof en = {
   functionalConnectivity: 'Connectivité fonctionnelle (HCP)',
   disorderEffects: 'Différences cérébrales dans les troubles (ENIGMA)',
   strokeCases: 'Cas d’AVC',
+  registered: 'Cartes de groupe recalées',
+  landing: (space: string) => `Structures fines à travers le recalage (${space})`,
+  landingNote: (structures: string, median: string, p90: string) =>
+    `Les ${structures} structures fines du gabarit, portées par le recalage publié, tombent à une distance médiane de ${median} de celles de ce cerveau, neuf sur dix à moins de ${p90}. Une borne supérieure\u202f: elle comprend le désaccord entre deux segmentations.`,
+  landingOverlap: (classes: readonly string[]) =>
+    `Recouvrement médian (Dice) selon le volume de la structure\u202f: ${classes.join(', ')}.`,
+  landingClass: (dice: string, under: string | null) =>
+    under === null ? `${dice} au-delà` : `${dice} sous ${under}`,
+  landingRule: (floor: string, radius: string) =>
+    `Une structure de moins de ${floor} ne reçoit aucune part d’une carte recalée\u202f: elle nomme ce qui se trouve à moins de ${radius} d’elle.`,
+  registeredChecks: {
+    ventricles: (left: string, right: string) =>
+      `Recouvrement (Dice) des ventricules de l’atlas avec ceux de ce cerveau\u202f: ${left} à gauche, ${right} à droite.`,
+    lobules: (mean: string) =>
+      `Recouvrement (Dice) des lobules du gabarit avec ceux de ce cerveau\u202f: ${mean} en moyenne.`,
+    striatum: (mean: string) =>
+      `Recouvrement (Dice) du striatum du gabarit avec celui de ce cerveau\u202f: ${mean} en moyenne.`,
+    deep: (median: string, cortex: string) =>
+      `Recouvrement (Dice) des structures du gabarit avec celles de ce cerveau\u202f: structures profondes ${median} (médiane), cortex ${cortex}.`,
+  },
   domains: 'Domaines neuropsychologiques',
   supplemental: 'Couches complémentaires',
   files: 'Fichiers publiés',

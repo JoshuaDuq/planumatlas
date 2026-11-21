@@ -2109,7 +2109,11 @@
       "cerebral_tissue_unassigned": 0.0122,
       "hemisphere_agreement": 0.996
     },
-    "method": "The atlas's template b0 registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable), the atlas carried across by nearest neighbour; cortical vertices take the territory at the midpoint of their pial and white positions, and each region's shares count its own voxels or vertices"
+    "small": {
+      "under_mm3": 100,
+      "radius_mm": 3.0
+    },
+    "method": "The atlas's template b0 registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable), the atlas carried across by nearest neighbour; cortical vertices take the territory at the midpoint of their pial and white positions, and each region's shares count its own voxels or vertices. A structure under the small volume takes no shares: it names the territories found within the registration's measured landing error of it"
   },
   "cerebellar_functions": {
     "id": "nettekoven",
@@ -2433,7 +2437,11 @@
       },
       "structure_covered_min": 0.8281
     },
-    "method": "FSL's MNI152 template (MNI152NLin6Asym), skull-stripped, registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable); the atlas's loose mask carried across by nearest neighbour and kept to this brain's caudate, putamen and accumbens. A voxel the atlas does not reach takes the network of the nearest voxel it reaches in the same structure. Each region's shares count its own voxels"
+    "small": {
+      "under_mm3": 100,
+      "radius_mm": 3.0
+    },
+    "method": "FSL's MNI152 template (MNI152NLin6Asym), skull-stripped, registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable); the atlas's loose mask carried across by nearest neighbour and kept to this brain's caudate, putamen and accumbens. A voxel the atlas does not reach takes the network of the nearest voxel it reaches in the same structure. Each region's shares count its own voxels. A structure under the small volume takes no shares: it names the networks found within the registration's measured landing error of it"
   },
   "coordinate_spaces": {
     "label": "Published coordinates",
@@ -2678,6 +2686,45 @@
       ]
     },
     "method": "mri_synthmorph register -m joint (skull-stripped template \u2192 brain.mgz); SynthSeg --parc --robust reads the template, carried by apply -m nearest onto aseg's grid and scored against aseg. A published field samples the inverse warp every 1.5 mm over the template's brain dilated 4 mm. Offsets read the same numbers as each template at the first published template's own cortex and deep grey, with 5 mm sphere overlap of this brain's Schaefer-400 parcels."
+  },
+  "landing": {
+    "space": "mni152nlin2009casym",
+    "structures": 510,
+    "centroid_mm": {
+      "median": 1.16,
+      "p90": 2.93
+    },
+    "dice_median": 0.37,
+    "by_volume": [
+      {
+        "under_mm3": 20,
+        "structures": 191,
+        "dice_median": 0.12
+      },
+      {
+        "under_mm3": 100,
+        "structures": 130,
+        "dice_median": 0.36
+      },
+      {
+        "under_mm3": 500,
+        "structures": 83,
+        "dice_median": 0.53
+      },
+      {
+        "under_mm3": 2000,
+        "structures": 40,
+        "dice_median": 0.67
+      },
+      {
+        "under_mm3": null,
+        "structures": 66,
+        "dice_median": 0.64
+      }
+    ],
+    "under_mm3": 100,
+    "radius_mm": 3.0,
+    "method": "Every labelled voxel of the template's own NextBrain segmentation carried through the published field and painted on this brain's NextBrain grid; each structure scored against this brain's structure of the same label by Dice and by the distance between centres. An upper bound on registration error: it includes the disagreement between two segmentations"
   },
   "retinotopy": {
     "file": "retinotopy.json",
@@ -66909,17 +66956,11 @@
         12.800002932548523,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.26022304832713755
-        },
-        {
-          "territory": "mca-frontal",
-          "fraction": 0.10037174721189591
-        }
-      ],
-      "territory_unassigned": 0.6394052044609665
+      "territories_near": [
+        "mca-frontal",
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:101",
@@ -67064,13 +67105,10 @@
         7.20000284910202,
         26.800001829862595
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.01834862385321101
-        }
-      ],
-      "territory_unassigned": 0.9809960681520314
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:111",
@@ -67102,13 +67140,10 @@
         8.800002872943878,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.011299435028248588
-        }
-      ],
-      "territory_unassigned": 0.9887005649717514
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:left:117",
@@ -67140,17 +67175,10 @@
         6.000002831220627,
         25.6000018119812
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.302275960170697
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.19772403982930298
-        }
-      ],
-      "territory_unassigned": 0.5
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:118",
@@ -67283,13 +67311,11 @@
         8.400002866983414,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.0111731843575419
-        }
-      ],
-      "territory_unassigned": 0.9888268156424581
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:left:125",
@@ -67321,17 +67347,11 @@
         9.600002884864807,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.6528028933092225
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.023508137432188065
-        }
-      ],
-      "territory_unassigned": 0.32368896925858953
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:left:128",
@@ -67446,6 +67466,11 @@
         -2.8000005781650543,
         6.800002843141556,
         18.800001710653305
+      ],
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating",
+        "mca-frontal"
       ]
     },
     {
@@ -67477,6 +67502,11 @@
         -5.200000613927841,
         7.20000284910202,
         18.800001710653305
+      ],
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating",
+        "mca-frontal"
       ]
     },
     {
@@ -67577,6 +67607,10 @@
         -3.6000005900859833,
         8.00000286102295,
         13.600001633167267
+      ],
+      "territories_near": [
+        "mca-frontal",
+        "lateral-lenticulostriate"
       ]
     },
     {
@@ -67609,21 +67643,12 @@
         -3.999997317790985,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.4694767441860465
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2688953488372093
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.18604651162790697
-        }
-      ],
-      "territory_unassigned": 0.0755813953488372
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:190",
@@ -67655,17 +67680,10 @@
         2.000002771615982,
         26.000001817941666
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7575757575757576
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.23905723905723905
-        }
-      ],
-      "territory_unassigned": 0.003367003367003367
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:191",
@@ -67697,17 +67715,10 @@
         2.4000027775764465,
         25.6000018119812
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5222551928783383
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.4540059347181009
-        }
-      ],
-      "territory_unassigned": 0.02373887240356083
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:194",
@@ -67739,13 +67750,9 @@
         4.400002807378769,
         20.0000017285347
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.11934156378600823
-        }
-      ],
-      "territory_unassigned": 0.8806584362139918
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:196",
@@ -67777,13 +67784,10 @@
         7.20000284910202,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.07883817427385892
-        }
-      ],
-      "territory_unassigned": 0.921161825726141
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:199",
@@ -67857,13 +67861,9 @@
         -6.399997353553772,
         31.200001895427704
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.27461139896373055
-        }
-      ],
-      "territory_unassigned": 0.7253886010362695
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:206",
@@ -67987,13 +67987,12 @@
         5.600002825260162,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9357512953367876
-        }
-      ],
-      "territory_unassigned": 0.06217616580310881
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:215",
@@ -68025,13 +68024,10 @@
         8.800002872943878,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9988662131519275
-        }
-      ],
-      "territory_unassigned": 0.0011337868480725624
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:216",
@@ -68181,13 +68177,10 @@
         -3.5999973118305206,
         32.4000019133091
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7966101694915254
-        }
-      ],
-      "territory_unassigned": 0.2033898305084746
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:222",
@@ -68257,13 +68250,10 @@
         1.200002759695053,
         22.80000177025795
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7121951219512195
-        }
-      ],
-      "territory_unassigned": 0.28780487804878047
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:225",
@@ -68295,13 +68285,9 @@
         -5.599997341632843,
         24.000001788139343
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8946587537091988
-        }
-      ],
-      "territory_unassigned": 0.10534124629080119
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:226",
@@ -68375,13 +68361,11 @@
         5.600002825260162,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.014285714285714285
-        }
-      ],
-      "territory_unassigned": 0.9857142857142858
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:232",
@@ -68413,13 +68397,12 @@
         5.600002825260162,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.05346820809248555
-        }
-      ],
-      "territory_unassigned": 0.9450867052023122
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:238",
@@ -68451,17 +68434,11 @@
         2.800002783536911,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9222797927461139
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.07772020725388601
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:242",
@@ -68530,6 +68507,10 @@
         -2.8000005781650543,
         4.800002813339233,
         10.000001579523087
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
       ]
     },
     {
@@ -68562,13 +68543,9 @@
         -1.9999972879886627,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.3072289156626506
-        }
-      ],
-      "territory_unassigned": 0.6927710843373494
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:254",
@@ -68645,6 +68622,9 @@
         -3.200000584125519,
         4.800002813339233,
         12.800001621246338
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -68677,13 +68657,11 @@
         3.60000279545784,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.26022304832713755
-        }
-      ],
-      "territory_unassigned": 0.7397769516728625
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:275",
@@ -68715,13 +68693,9 @@
         0.8000027537345886,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1172093023255814
-        }
-      ],
-      "territory_unassigned": 0.8827906976744186
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:276",
@@ -68753,13 +68727,9 @@
         -1.5999972820281982,
         22.00000175833702
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8594470046082949
-        }
-      ],
-      "territory_unassigned": 0.14055299539170507
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:277",
@@ -68791,13 +68761,12 @@
         1.200002759695053,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9844559585492227
-        }
-      ],
-      "territory_unassigned": 0.015544041450777202
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:279",
@@ -68829,17 +68798,12 @@
         0.40000274777412415,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.8485576923076923
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.01201923076923077
-        }
-      ],
-      "territory_unassigned": 0.13942307692307693
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:282",
@@ -68947,13 +68911,9 @@
         -6.7999973595142365,
         25.6000018119812
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9899598393574297
-        }
-      ],
-      "territory_unassigned": 0.010040160642570281
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:295",
@@ -68985,17 +68945,11 @@
         2.7418136596679688e-06,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.6435643564356436
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3564356435643564
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:297",
@@ -69027,13 +68981,11 @@
         2.7418136596679688e-06,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6281512605042017
-        }
-      ],
-      "territory_unassigned": 0.37184873949579833
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:298",
@@ -69065,17 +69017,10 @@
         1.200002759695053,
         11.20000159740448
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.13574660633484162
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.013574660633484163
-        }
-      ],
-      "territory_unassigned": 0.8506787330316742
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:301",
@@ -69107,21 +69052,12 @@
         2.4000027775764465,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.8936170212765957
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.09042553191489362
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.015957446808510637
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:306",
@@ -69153,13 +69089,10 @@
         0.40000274777412415,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.04891304347826087
-        }
-      ],
-      "territory_unassigned": 0.9510869565217391
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:309",
@@ -69191,13 +69124,10 @@
         2.7418136596679688e-06,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9590361445783132
-        }
-      ],
-      "territory_unassigned": 0.04096385542168675
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:310",
@@ -69271,13 +69201,9 @@
         -9.199997395277023,
         25.200001806020737
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9988023952095808
-        }
-      ],
-      "territory_unassigned": 0.0011976047904191617
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:313",
@@ -69385,13 +69311,9 @@
         -1.5999972820281982,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:316",
@@ -69461,13 +69383,9 @@
         -3.199997305870056,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:326",
@@ -69499,17 +69417,12 @@
         2.4000027775764465,
         6.400001525878906
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.8798842257597684
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.11143270622286541
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:339",
@@ -69587,17 +69500,12 @@
         0.40000274777412415,
         5.600001513957977
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8347457627118644
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.1652542372881356
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:341",
@@ -69675,17 +69583,12 @@
         2.7418136596679688e-06,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8597560975609756
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.1402439024390244
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:343",
@@ -69763,21 +69666,12 @@
         -11.199997425079346,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7368073878627969
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.24274406332453827
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.020448548812664908
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:345",
@@ -69855,21 +69749,11 @@
         -7.99999737739563,
         4.800001502037048
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.55470737913486
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.3333333333333333
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.10941475826972011
-        }
-      ],
-      "territory_unassigned": 0.002544529262086514
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:347",
@@ -69947,17 +69831,11 @@
         2.7418136596679688e-06,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.7158836689038032
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.2841163310961969
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:350",
@@ -70027,17 +69905,10 @@
         -4.799997329711914,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9264305177111717
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.07356948228882834
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:354",
@@ -70119,21 +69990,12 @@
         -4.799997329711914,
         7.200001537799835
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.875
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.11217948717948718
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.01282051282051282
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:367",
@@ -70165,21 +70027,12 @@
         -5.9999973475933075,
         7.200001537799835
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.84
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.14857142857142858
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.011428571428571429
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:368",
@@ -70211,25 +70064,12 @@
         -3.199997305870056,
         8.400001555681229
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6315028901734104
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.31647398843930635
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.03901734104046243
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.01300578034682081
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:370",
@@ -70261,25 +70101,12 @@
         -3.5999973118305206,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6914556962025317
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.14082278481012658
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.10917721518987342
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.058544303797468354
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:372",
@@ -70311,21 +70138,12 @@
         -5.1999973356723785,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8348623853211009
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.15137614678899083
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.013761467889908258
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:374",
@@ -70357,21 +70175,11 @@
         -5.599997341632843,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8217270194986073
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.14206128133704735
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.036211699164345405
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:375",
@@ -70403,17 +70211,12 @@
         -6.399997353553772,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9318181818181818
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.06818181818181818
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:377",
@@ -70487,13 +70290,11 @@
         -15.19999748468399,
         32.00000190734863
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9837209302325581
-        }
-      ],
-      "territory_unassigned": 0.01627906976744186
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "aca"
+      ]
     },
     {
       "id": "nextbrain:left:379",
@@ -70525,13 +70326,9 @@
         -10.799997419118881,
         30.80000188946724
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9791505791505791
-        }
-      ],
-      "territory_unassigned": 0.02084942084942085
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:380",
@@ -70757,21 +70554,11 @@
         -17.199997514486313,
         15.60000166296959
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8967642526964561
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.05084745762711865
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.01078582434514638
-        }
-      ],
-      "territory_unassigned": 0.04160246533127889
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:394",
@@ -70841,13 +70628,9 @@
         -12.39999744296074,
         19.600001722574234
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:397",
@@ -70917,13 +70700,9 @@
         -10.799997419118881,
         17.200001686811447
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8968655207280081
-        }
-      ],
-      "territory_unassigned": 0.10313447927199192
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:399",
@@ -70955,13 +70734,9 @@
         -9.599997401237488,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.31976744186046513
-        }
-      ],
-      "territory_unassigned": 0.6802325581395349
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:404",
@@ -71077,21 +70852,12 @@
         -13.999997466802597,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9467680608365019
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.04182509505703422
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.011406844106463879
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:414",
@@ -71161,13 +70927,11 @@
         -8.399997383356094,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:420",
@@ -71199,13 +70963,13 @@
         -12.799997448921204,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9976958525345622
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:421",
@@ -71237,13 +71001,13 @@
         -10.399997413158417,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9911111111111112
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:423",
@@ -71275,13 +71039,9 @@
         -13.999997466802597,
         20.0000017285347
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:424",
@@ -71313,13 +71073,9 @@
         -11.199997425079346,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:425",
@@ -71351,13 +71107,9 @@
         -13.999997466802597,
         27.600001841783524
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:426",
@@ -71389,13 +71141,9 @@
         -7.599997371435165,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:430",
@@ -71427,13 +71175,9 @@
         -15.99999749660492,
         20.400001734495163
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7761904761904762
-        }
-      ],
-      "territory_unassigned": 0.22380952380952382
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:432",
@@ -71465,17 +71209,11 @@
         -14.399997472763062,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9434546862896979
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.051897753679318356
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:435",
@@ -71507,17 +71245,10 @@
         -4.39999732375145,
         10.000001579523087
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7656458055925432
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.13648468708388814
-        }
-      ],
-      "territory_unassigned": 0.09786950732356857
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:441",
@@ -71663,17 +71394,12 @@
         -16.399997502565384,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.925638179800222
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.07103218645948946
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:465",
@@ -71743,13 +71469,10 @@
         -15.19999748468399,
         15.60000166296959
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:484",
@@ -71781,17 +71504,11 @@
         -10.799997419118881,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.5850220264317181
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.30837004405286345
-        }
-      ],
-      "territory_unassigned": 0.1066079295154185
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:492",
@@ -71823,13 +71540,10 @@
         -16.79999750852585,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:496",
@@ -71861,13 +71575,9 @@
         -17.199997514486313,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8388429752066116
-        }
-      ],
-      "territory_unassigned": 0.16115702479338842
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:504",
@@ -71899,17 +71609,10 @@
         -13.999997466802597,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.723342939481268
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.2420749279538905
-        }
-      ],
-      "territory_unassigned": 0.0345821325648415
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:508",
@@ -72025,17 +71728,11 @@
         -15.99999749660492,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6961206896551724
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.30387931034482757
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:521",
@@ -72067,17 +71764,11 @@
         -19.999997556209564,
         3.2000014781951904
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5945945945945946
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.15647226173541964
-        }
-      ],
-      "territory_unassigned": 0.24893314366998578
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "superior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:left:531",
@@ -72151,17 +71842,11 @@
         -23.599997609853745,
         4.800001502037048
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8185053380782918
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.014234875444839857
-        }
-      ],
-      "territory_unassigned": 0.16281138790035588
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "superior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:558",
@@ -72193,25 +71878,12 @@
         -25.599997639656067,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.5664739884393064
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.3882466281310212
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.028901734104046242
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.01348747591522158
-        }
-      ],
-      "territory_unassigned": 0.002890173410404624
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:561",
@@ -72243,21 +71915,12 @@
         -25.99999764561653,
         18.800001710653305
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.4581005586592179
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.45251396648044695
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.08659217877094973
-        }
-      ],
-      "territory_unassigned": 0.002793296089385475
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:562",
@@ -72289,21 +71952,12 @@
         -27.999997675418854,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.8958031837916064
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.08104196816208394
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.013024602026049204
-        }
-      ],
-      "territory_unassigned": 0.001447178002894356
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:563",
@@ -72335,17 +71989,12 @@
         -27.199997663497925,
         15.60000166296959
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.788235294117647
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.2
-        }
-      ],
-      "territory_unassigned": 0.011764705882352941
+      "territories_near": [
+        "pca-occipital",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:564",
@@ -72377,21 +72026,12 @@
         -26.79999765753746,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.6974921630094044
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.28056426332288403
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.013322884012539185
-        }
-      ],
-      "territory_unassigned": 0.007053291536050157
+      "territories_near": [
+        "pca-occipital",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:575",
@@ -72423,21 +72063,12 @@
         -25.599997639656067,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.6368876080691642
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.1988472622478386
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1642651296829971
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:576",
@@ -72515,25 +72146,12 @@
         -23.99999761581421,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.757847533632287
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.1905829596412556
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.033632286995515695
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.017937219730941704
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:580",
@@ -72641,13 +72259,10 @@
         -20.39999756217003,
         -18.799998849630356
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:left:715",
@@ -72679,17 +72294,10 @@
         -33.99999776482582,
         -9.999998718500137
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.6975308641975309
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.30246913580246915
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:left:721",
@@ -72767,17 +72375,10 @@
         -37.59999781847,
         -14.399998784065247
       ],
-      "territories": [
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.9899665551839465
-        },
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.010033444816053512
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "inferior-cerebellar",
+        "superior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:left:752",
@@ -72809,21 +72410,11 @@
         -33.599997758865356,
         -10.399998724460602
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.5890257558790594
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.3997760358342665
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.011198208286674132
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:843",
@@ -73032,17 +72623,11 @@
         12.400002926588058,
         12.400001615285873
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.4840764331210191
-        },
-        {
-          "territory": "mca-frontal",
-          "fraction": 0.09235668789808917
-        }
-      ],
-      "territory_unassigned": 0.42356687898089174
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10101",
@@ -73179,17 +72764,12 @@
         7.20000284910202,
         25.6000018119812
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.07339449541284404
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.019054340155257588
-        }
-      ],
-      "territory_unassigned": 0.9075511644318984
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating",
+        "mca-frontal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10111",
@@ -73221,13 +72801,10 @@
         8.800002872943878,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.05917159763313609
-        }
-      ],
-      "territory_unassigned": 0.9408284023668639
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10117",
@@ -73259,17 +72836,10 @@
         6.000002831220627,
         24.800001800060272
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.8695970695970696
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.03076923076923077
-        }
-      ],
-      "territory_unassigned": 0.09963369963369964
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10118",
@@ -73406,13 +72976,11 @@
         8.400002866983414,
         16.800001680850983
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.08626198083067092
-        }
-      ],
-      "territory_unassigned": 0.9137380191693291
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10125",
@@ -73444,17 +73012,12 @@
         9.200002878904343,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.5138632162661737
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.06561922365988909
-        }
-      ],
-      "territory_unassigned": 0.42051756007393715
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "mca-insular",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10128",
@@ -73569,6 +73132,11 @@
         1.9999994933605194,
         6.800002843141556,
         18.40000170469284
+      ],
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-frontal",
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -73601,8 +73169,12 @@
         7.20000284910202,
         18.40000170469284
       ],
-      "territories": [],
-      "territory_unassigned": 0.9910313901345291
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10161",
@@ -73633,6 +73205,10 @@
         3.199999511241913,
         11.60000291466713,
         10.000001579523087
+      ],
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
       ]
     },
     {
@@ -73706,6 +73282,12 @@
         2.7999995052814484,
         8.00000286102295,
         13.200001627206802
+      ],
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal",
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -73738,25 +73320,12 @@
         -5.1999973356723785,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3222106360792492
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.29822732012513037
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2116788321167883
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.16371220020855057
-        }
-      ],
-      "territory_unassigned": 0.004171011470281543
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10190",
@@ -73788,13 +73357,10 @@
         2.000002771615982,
         25.200001806020737
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.9933554817275747
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10191",
@@ -73826,13 +73392,10 @@
         1.6000027656555176,
         25.200001806020737
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.9686192468619247
-        }
-      ],
-      "territory_unassigned": 0.03138075313807531
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10194",
@@ -73864,13 +73427,10 @@
         4.400002807378769,
         18.800001710653305
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1
-        }
-      ],
-      "territory_unassigned": 0.9
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10196",
@@ -73902,13 +73462,11 @@
         6.800002843141556,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.32751091703056767
-        }
-      ],
-      "territory_unassigned": 0.6724890829694323
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10199",
@@ -73982,13 +73540,10 @@
         -4.799997329711914,
         31.60000190138817
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6653306613226453
-        }
-      ],
-      "territory_unassigned": 0.3346693386773547
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10206",
@@ -74104,13 +73659,11 @@
         4.800002813339233,
         11.20000159740448
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9882246376811594
-        }
-      ],
-      "territory_unassigned": 0.01177536231884058
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10215",
@@ -74302,13 +73855,10 @@
         -3.999997317790985,
         31.60000190138817
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9776328052190121
-        }
-      ],
-      "territory_unassigned": 0.017707362534948742
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10222",
@@ -74382,17 +73932,10 @@
         0.8000027537345886,
         21.600001752376556
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6891495601173021
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.18181818181818182
-        }
-      ],
-      "territory_unassigned": 0.12903225806451613
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10225",
@@ -74504,17 +74047,11 @@
         5.600002825260162,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.026243093922651933
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.023480662983425413
-        }
-      ],
-      "territory_unassigned": 0.9502762430939227
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10232",
@@ -74546,17 +74083,11 @@
         5.600002825260162,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2127659574468085
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.03868471953578337
-        }
-      ],
-      "territory_unassigned": 0.7485493230174082
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10238",
@@ -74588,13 +74119,11 @@
         2.000002771615982,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10242",
@@ -74664,17 +74193,11 @@
         5.200002819299698,
         10.000001579523087
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 0.02727272727272727
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.01818181818181818
-        }
-      ],
-      "territory_unassigned": 0.9545454545454546
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10246",
@@ -74706,17 +74229,10 @@
         1.6000027656555176,
         20.400001734495163
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.3006134969325153
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.27607361963190186
-        }
-      ],
-      "territory_unassigned": 0.4233128834355828
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10253",
@@ -74748,13 +74264,10 @@
         -1.9999972879886627,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6768867924528302
-        }
-      ],
-      "territory_unassigned": 0.3231132075471698
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10254",
@@ -74831,6 +74344,10 @@
         1.9999994933605194,
         4.800002813339233,
         12.400001615285873
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
       ]
     },
     {
@@ -74863,17 +74380,11 @@
         3.60000279545784,
         12.400001615285873
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.25757575757575757
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.09307359307359307
-        }
-      ],
-      "territory_unassigned": 0.6493506493506493
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10275",
@@ -74905,13 +74416,11 @@
         0.8000027537345886,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6676798378926039
-        }
-      ],
-      "territory_unassigned": 0.3323201621073962
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10276",
@@ -74943,13 +74452,10 @@
         -2.399997293949127,
         21.600001752376556
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9941860465116279
-        }
-      ],
-      "territory_unassigned": 0.005813953488372093
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10277",
@@ -74981,13 +74487,11 @@
         -0.3999972641468048,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10279",
@@ -75019,13 +74523,11 @@
         -0.3999972641468048,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9973474801061007
-        }
-      ],
-      "territory_unassigned": 0.002652519893899204
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10282",
@@ -75137,13 +74639,9 @@
         -7.599997371435165,
         24.800001800060272
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10295",
@@ -75175,17 +74673,11 @@
         -2.399997293949127,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9348659003831418
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.06130268199233716
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10297",
@@ -75217,13 +74709,11 @@
         2.7418136596679688e-06,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9563218390804598
-        }
-      ],
-      "territory_unassigned": 0.0367816091954023
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10298",
@@ -75255,17 +74745,10 @@
         1.200002759695053,
         11.20000159740448
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.42857142857142855
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.011583011583011582
-        }
-      ],
-      "territory_unassigned": 0.5598455598455598
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10301",
@@ -75297,21 +74780,11 @@
         1.6000027656555176,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9675925925925926
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.018518518518518517
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.013888888888888888
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10306",
@@ -75343,17 +74816,10 @@
         0.40000274777412415,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.553763440860215
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.021505376344086023
-        }
-      ],
-      "territory_unassigned": 0.42473118279569894
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10310",
@@ -75427,13 +74893,9 @@
         -9.199997395277023,
         24.800001800060272
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10313",
@@ -75545,13 +75007,10 @@
         -2.7999972999095917,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10316",
@@ -75621,13 +75080,10 @@
         -4.799997329711914,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10322",
@@ -75659,17 +75115,10 @@
         -2.399997293949127,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9709302325581395
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.029069767441860465
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10326",
@@ -75701,17 +75150,12 @@
         1.6000027656555176,
         4.800001502037048
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.6585695006747638
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.34143049932523617
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10339",
@@ -75785,17 +75229,10 @@
         -1.5999972820281982,
         2.800001472234726
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9173913043478261
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.08260869565217391
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10341",
@@ -75915,17 +75352,11 @@
         -14.399997472763062,
         3.600001484155655
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8130523453433038
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.17743031951053706
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10345",
@@ -76003,21 +75434,11 @@
         -10.799997419118881,
         3.600001484155655
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.4591194968553459
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.449685534591195
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.09119496855345911
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10347",
@@ -76095,38 +75516,19 @@
         -2.399997293949127,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.8974358974358975
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.10256410256410256
-        }
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
       ],
-      "territory_unassigned": 0.0,
-      "striatal_networks": [
-        {
-          "network": "Limbic",
-          "fraction": 0.3498168498168498
-        },
-        {
-          "network": "Cont",
-          "fraction": 0.14285714285714285
-        },
-        {
-          "network": "Default",
-          "fraction": 0.06593406593406594
-        }
-      ],
-      "striatal_networks_unassigned": 0.4413919413919414,
-      "striatal_networks_confidence": {
-        "filled": 0.006557377049180328,
-        "low": 0.006557377049180328,
-        "confident": 0.9868852459016394
-      },
-      "striatal_networks_putamen": 1.0
+      "striatal_networks_near": [
+        "Cont",
+        "Limbic",
+        "SomMot",
+        "DorsAttn",
+        "Default",
+        "Vis"
+      ]
     },
     {
       "id": "nextbrain:right:10350",
@@ -76288,17 +75690,11 @@
         -5.9999973475933075,
         5.600001513957977
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9105058365758755
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.08949416342412451
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10368",
@@ -76330,25 +75726,12 @@
         -4.39999732375145,
         6.800001531839371
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7431506849315068
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2363013698630137
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.010273972602739725
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.010273972602739725
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10370",
@@ -76380,17 +75763,12 @@
         -4.39999732375145,
         8.000001549720764
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7490974729241877
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2509025270758123
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10372",
@@ -76422,17 +75800,11 @@
         -6.399997353553772,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8930817610062893
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.1069182389937107
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10374",
@@ -76464,17 +75836,11 @@
         -7.199997365474701,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9015384615384615
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.09846153846153846
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10377",
@@ -76548,13 +75914,9 @@
         -16.399997502565384,
         30.400001883506775
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10379",
@@ -76586,13 +75948,9 @@
         -11.59999743103981,
         29.600001871585846
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9974554707379135
-        }
-      ],
-      "territory_unassigned": 0.002544529262086514
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10380",
@@ -76818,17 +76176,12 @@
         -18.399997532367706,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8551724137931035
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.13379310344827586
-        }
-      ],
-      "territory_unassigned": 0.011034482758620689
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10394",
@@ -76898,13 +76251,9 @@
         -12.799997448921204,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10397",
@@ -76974,13 +76323,9 @@
         -10.799997419118881,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10399",
@@ -77012,13 +76357,9 @@
         -9.999997407197952,
         16.800001680850983
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9912739965095986
-        }
-      ],
-      "territory_unassigned": 0.008726003490401396
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10404",
@@ -77134,17 +76475,11 @@
         -15.599997490644455,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9651567944250871
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.03484320557491289
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10414",
@@ -77214,13 +76549,11 @@
         -10.399997413158417,
         8.400001555681229
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10420",
@@ -77252,13 +76585,11 @@
         -15.599997490644455,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9960707269155207
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10421",
@@ -77290,13 +76621,11 @@
         -13.999997466802597,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10423",
@@ -77328,13 +76657,9 @@
         -15.19999748468399,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10424",
@@ -77366,13 +76691,10 @@
         -12.799997448921204,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10425",
@@ -77404,13 +76726,9 @@
         -15.19999748468399,
         26.40000182390213
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10426",
@@ -77442,13 +76760,9 @@
         -8.799997389316559,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10432",
@@ -77480,17 +76794,11 @@
         -15.99999749660492,
         8.000001549720764
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9888378200919238
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.011162179908076166
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10435",
@@ -77522,17 +76830,10 @@
         -4.799997329711914,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8309754281459419
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.1690245718540581
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10441",
@@ -77678,17 +76979,12 @@
         -18.79999753832817,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9790836653386454
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.02091633466135458
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10465",
@@ -77762,13 +77058,10 @@
         -16.399997502565384,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9964221824686941
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10484",
@@ -77800,21 +77093,12 @@
         -13.599997460842133,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9008264462809917
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.04855371900826446
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.038223140495867766
-        }
-      ],
-      "territory_unassigned": 0.012396694214876033
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10492",
@@ -77846,13 +77130,10 @@
         -17.199997514486313,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9957081545064378
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10496",
@@ -77884,13 +77165,10 @@
         -17.599997520446777,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.998109640831758
-        }
-      ],
-      "territory_unassigned": 0.001890359168241966
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10504",
@@ -77922,17 +77200,10 @@
         -15.99999749660492,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6435045317220544
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3564954682779456
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10508",
@@ -78048,17 +77319,11 @@
         -18.399997532367706,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8387096774193549
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.15770609318996415
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10521",
@@ -78090,17 +77355,11 @@
         -20.39999756217003,
         2.800001472234726
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5324324324324324
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.46756756756756757
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "superior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10531",
@@ -78178,21 +77437,12 @@
         -24.399997621774673,
         4.400001496076584
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.3940578577013292
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.28225175918686474
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.04143862392494136
-        }
-      ],
-      "territory_unassigned": 0.28225175918686474
+      "territories_near": [
+        "superior-cerebellar",
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:right:10558",
@@ -78224,25 +77474,12 @@
         -27.59999766945839,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.4485514485514486
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3676323676323676
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.12987012987012986
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.053946053946053944
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10561",
@@ -78274,25 +77511,12 @@
         -27.199997663497925,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.46368715083798884
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.388268156424581
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.12569832402234637
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.0223463687150838
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10562",
@@ -78324,25 +77548,12 @@
         -29.199997693300247,
         15.60000166296959
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.3525423728813559
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.2858757062146893
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.18305084745762712
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.17853107344632768
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10563",
@@ -78374,25 +77585,12 @@
         -30.39999771118164,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.3425414364640884
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.2983425414364641
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2430939226519337
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.11602209944751381
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10564",
@@ -78424,25 +77622,12 @@
         -29.199997693300247,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.39048894842598797
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.38513060951105155
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.12860013395847286
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.09310113864701942
-        }
-      ],
-      "territory_unassigned": 0.0026791694574681848
+      "territories_near": [
+        "pca-occipital",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10575",
@@ -78474,21 +77659,12 @@
         -27.999997675418854,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8125
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.13858695652173914
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.04076086956521739
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10576",
@@ -78570,17 +77746,12 @@
         -25.599997639656067,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6858513189448441
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.31414868105515587
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10580",
@@ -78692,17 +77863,10 @@
         -20.39999756217003,
         -19.19999885559082
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 0.8819095477386935
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.11809045226130653
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10721",
@@ -78776,17 +77940,10 @@
         -37.19999781250954,
         -14.399998784065247
       ],
-      "territories": [
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.963855421686747
-        },
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.03614457831325301
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "inferior-cerebellar",
+        "superior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10752",
@@ -78818,17 +77975,11 @@
         -33.99999776482582,
         -11.19999873638153
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.6219512195121951
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.3713968957871397
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10843",
@@ -78859,6 +78010,9 @@
         1.9999994933605194,
         11.60000291466713,
         9.600001573562622
+      ],
+      "territories_near": [
+        "mca-frontal"
       ]
     },
     {
@@ -80144,13 +79298,11 @@
         8.400002866983414,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.0111731843575419
-        }
-      ],
-      "territory_unassigned": 0.9888268156424581
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "learning:right:ventral-pallidum",
@@ -80201,13 +79353,11 @@
         8.400002866983414,
         16.800001680850983
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.08626198083067092
-        }
-      ],
-      "territory_unassigned": 0.9137380191693291
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "learning:left:septal",
@@ -81088,13 +80238,10 @@
         0.40000274777412415,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.08921161825726141
-        }
-      ],
-      "territory_unassigned": 0.9107883817427386
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "learning:right:mammillary",
@@ -81155,17 +80302,11 @@
         0.40000274777412415,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6394422310756972
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.03386454183266932
-        }
-      ],
-      "territory_unassigned": 0.32669322709163345
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "mca-temporal"
+      ]
     },
     {
       "id": "learning:left:zona-incerta",
@@ -81342,17 +80483,11 @@
         -10.799997419118881,
         13.600001633167267
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.5850220264317181
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.30837004405286345
-        }
-      ],
-      "territory_unassigned": 0.1066079295154185
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "learning:right:lateral-geniculate",
@@ -81407,21 +80542,12 @@
         -13.599997460842133,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9008264462809917
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.04855371900826446
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.038223140495867766
-        }
-      ],
-      "territory_unassigned": 0.012396694214876033
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "learning:left:medial-geniculate",
@@ -81476,17 +80602,10 @@
         -13.999997466802597,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.723342939481268
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.2420749279538905
-        }
-      ],
-      "territory_unassigned": 0.0345821325648415
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "learning:right:medial-geniculate",
@@ -81541,17 +80660,10 @@
         -15.99999749660492,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.6435045317220544
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3564954682779456
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "learning:left:hippocampus",
@@ -82142,17 +81254,10 @@
         6.000002831220627,
         25.6000018119812
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.302275960170697
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.19772403982930298
-        }
-      ],
-      "territory_unassigned": 0.5
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "learning:right:bnST",
@@ -82203,17 +81308,10 @@
         6.000002831220627,
         24.800001800060272
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.8695970695970696
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.03076923076923077
-        }
-      ],
-      "territory_unassigned": 0.09963369963369964
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "learning:left:fornix",
@@ -82394,17 +81492,12 @@
         -16.399997502565384,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.925638179800222
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.07103218645948946
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "learning:right:fimbria",
@@ -82455,17 +81548,12 @@
         -18.79999753832817,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9790836653386454
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.02091633466135458
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "learning:left:anterior-commissure",
@@ -82769,6 +81857,10 @@
         -0.40000054240226746,
         11.200002908706665,
         10.000001579523087
+      ],
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
       ]
     },
     {
@@ -82820,21 +81912,12 @@
         -3.999997317790985,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.4694767441860465
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2688953488372093
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.18604651162790697
-        }
-      ],
-      "territory_unassigned": 0.0755813953488372
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "learning:right:stria-terminalis",
@@ -82885,25 +81968,12 @@
         -5.1999973356723785,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3222106360792492
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.29822732012513037
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2116788321167883
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.16371220020855057
-        }
-      ],
-      "territory_unassigned": 0.004171011470281543
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "learning:left:mammillothalamic",
@@ -82954,13 +82024,9 @@
         -1.5999972820281982,
         22.00000175833702
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8594470046082949
-        }
-      ],
-      "territory_unassigned": 0.14055299539170507
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "learning:right:mammillothalamic",
@@ -83011,13 +82077,10 @@
         -2.399997293949127,
         21.600001752376556
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9941860465116279
-        }
-      ],
-      "territory_unassigned": 0.005813953488372093
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "learning:left:superior-cerebellar-peduncle",
@@ -83194,13 +82257,10 @@
         -20.39999756217003,
         -18.799998849630356
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "learning:right:inferior-cerebellar-peduncle",
@@ -83251,17 +82311,10 @@
         -20.39999756217003,
         -19.19999885559082
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 0.8819095477386935
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.11809045226130653
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "learning:left:midbrain",
@@ -83832,17 +82885,10 @@
         -4.39999732375145,
         10.000001579523087
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7656458055925432
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.13648468708388814
-        }
-      ],
-      "territory_unassigned": 0.09786950732356857
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "learning:right:vta",
@@ -83893,17 +82939,10 @@
         -4.799997329711914,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8309754281459419
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.1690245718540581
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "learning:left:inferior-colliculus",
@@ -83958,17 +82997,11 @@
         -23.599997609853745,
         4.800001502037048
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8185053380782918
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.014234875444839857
-        }
-      ],
-      "territory_unassigned": 0.16281138790035588
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "superior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "learning:right:inferior-colliculus",
@@ -84023,21 +83056,12 @@
         -24.399997621774673,
         4.400001496076584
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.3940578577013292
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.28225175918686474
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.04143862392494136
-        }
-      ],
-      "territory_unassigned": 0.28225175918686474
+      "territories_near": [
+        "superior-cerebellar",
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "pca-occipital"
+      ]
     },
     {
       "id": "learning:left:dentate",
@@ -84220,17 +83244,11 @@
         -34.79999777674675,
         -11.599998742341995
       ],
-      "territories": [
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.5478187919463087
-        },
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.4437919463087248
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "inferior-cerebellar",
+        "superior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "learning:right:interposed",
@@ -84287,17 +83305,11 @@
         -34.79999777674675,
         -11.99999874830246
       ],
-      "territories": [
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.5307941653160454
-        },
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.46434359805510533
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "inferior-cerebellar",
+        "superior-cerebellar",
+        "basilar"
+      ]
     },
     {
       "id": "learning:left:fastigial",
@@ -84348,17 +83360,10 @@
         -33.99999776482582,
         -9.999998718500137
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.6975308641975309
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.30246913580246915
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "learning:right:fastigial",
@@ -84409,17 +83414,10 @@
         -33.599997758865356,
         -9.999998718500137
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.9366197183098591
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.06338028169014084
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "learning:caudal-medulla",
@@ -87156,6 +86154,10 @@
         -5.364418029785156e-07,
         9.200002878904343,
         30.80000188946724
+      ],
+      "territories_near": [
+        "medial-lenticulostriate",
+        "mca-frontal"
       ]
     },
     {
@@ -87184,19 +86186,13 @@
         10.400002896785736,
         18.800001710653305
       ],
-      "striatal_networks": [
-        {
-          "network": "Limbic",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "mca-frontal"
       ],
-      "striatal_networks_unassigned": 0.0,
-      "striatal_networks_confidence": {
-        "filled": 0.0,
-        "low": 0.0,
-        "confident": 1.0
-      },
-      "striatal_networks_putamen": 0.0,
+      "striatal_networks_near": [
+        "Limbic",
+        "Default"
+      ],
       "cut_atlases": []
     },
     {
@@ -87225,17 +86221,11 @@
         7.20000284910202,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.4154929577464789
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.04225352112676056
-        }
-      ],
-      "territory_unassigned": 0.5422535211267606
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:113",
@@ -87263,17 +86253,10 @@
         14.000002950429916,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.23076923076923078
-        },
-        {
-          "territory": "mca-frontal",
-          "fraction": 0.06153846153846154
-        }
-      ],
-      "territory_unassigned": 0.7076923076923077
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:left:150",
@@ -87328,13 +86311,9 @@
         8.400002866983414,
         12.800001621246338
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:160",
@@ -87389,6 +86368,9 @@
         -3.6000005900859833,
         7.600002855062485,
         18.40000170469284
+      ],
+      "territories_near": [
+        "lateral-lenticulostriate"
       ]
     },
     {
@@ -87471,6 +86453,10 @@
         5.600002825260162,
         13.600001633167267
       ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ],
       "cut_atlases": []
     },
     {
@@ -87499,13 +86485,9 @@
         -3.199997305870056,
         31.60000190138817
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.42105263157894735
-        }
-      ],
-      "territory_unassigned": 0.5789473684210527
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:221",
@@ -87533,13 +86515,9 @@
         -2.7999972999095917,
         30.400001883506775
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8421052631578947
-        }
-      ],
-      "territory_unassigned": 0.15789473684210525
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:224",
@@ -87567,13 +86545,9 @@
         2.7418136596679688e-06,
         23.200001776218414
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.813953488372093
-        }
-      ],
-      "territory_unassigned": 0.18604651162790697
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:227",
@@ -87628,13 +86602,10 @@
         3.2000027894973755,
         20.800001740455627
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.23880597014925373
-        }
-      ],
-      "territory_unassigned": 0.7611940298507462
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:229",
@@ -87661,6 +86632,9 @@
         -2.40000057220459,
         5.600002825260162,
         17.60000169277191
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -87689,13 +86663,10 @@
         3.2000027894973755,
         22.80000177025795
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7
-        }
-      ],
-      "territory_unassigned": 0.3
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:240",
@@ -87723,13 +86694,10 @@
         6.800002843141556,
         3.600001484155655
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:243",
@@ -87756,6 +86724,9 @@
         -2.8000005781650543,
         4.800002813339233,
         14.80000165104866
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -87783,6 +86754,9 @@
         -3.200000584125519,
         5.200002819299698,
         11.20000159740448
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -87811,17 +86785,10 @@
         2.000002771615982,
         21.200001746416092
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5526315789473685
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.07236842105263158
-        }
-      ],
-      "territory_unassigned": 0.375
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:left:252",
@@ -87849,13 +86816,9 @@
         -1.9999972879886627,
         27.600001841783524
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9895833333333334
-        }
-      ],
-      "territory_unassigned": 0.010416666666666666
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:268",
@@ -87883,13 +86846,10 @@
         4.000002801418304,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1411764705882353
-        }
-      ],
-      "territory_unassigned": 0.8588235294117647
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:274",
@@ -87917,13 +86877,9 @@
         -1.9999972879886627,
         20.0000017285347
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7548387096774194
-        }
-      ],
-      "territory_unassigned": 0.24516129032258063
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:278",
@@ -87951,13 +86907,12 @@
         1.200002759695053,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:284",
@@ -87985,13 +86940,9 @@
         -3.199997305870056,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2261904761904762
-        }
-      ],
-      "territory_unassigned": 0.7738095238095238
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:286",
@@ -88019,13 +86970,9 @@
         -3.199997305870056,
         21.600001752376556
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5945945945945946
-        }
-      ],
-      "territory_unassigned": 0.40540540540540543
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:303",
@@ -88053,13 +87000,9 @@
         -8.399997383356094,
         32.00000190734863
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:304",
@@ -88086,6 +87029,9 @@
         -1.6000005602836609,
         2.4000027775764465,
         11.600001603364944
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
       "cut_atlases": []
     },
@@ -88115,13 +87061,10 @@
         0.40000274777412415,
         11.20000159740448
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.14393939393939395
-        }
-      ],
-      "territory_unassigned": 0.8560606060606061
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:307",
@@ -88148,6 +87091,10 @@
         -2.40000057220459,
         0.40000274777412415,
         9.600001573562622
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
       ]
     },
     {
@@ -88176,13 +87123,10 @@
         0.8000027537345886,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5357142857142857
-        }
-      ],
-      "territory_unassigned": 0.4642857142857143
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:320",
@@ -88210,25 +87154,12 @@
         2.7418136596679688e-06,
         9.600001573562622
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.5234375
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.234375
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.21875
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.0234375
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:322",
@@ -88256,13 +87187,9 @@
         -2.399997293949127,
         21.200001746416092
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9855072463768116
-        }
-      ],
-      "territory_unassigned": 0.014492753623188406
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:365",
@@ -88290,17 +87217,11 @@
         -6.399997353553772,
         6.400001525878906
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:369",
@@ -88328,25 +87249,12 @@
         -3.5999973118305206,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.5037037037037037
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.4074074074074074
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.05925925925925926
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.02962962962962963
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:371",
@@ -88374,21 +87282,12 @@
         -2.7999972999095917,
         10.000001579523087
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7619047619047619
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.22448979591836735
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.013605442176870748
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:373",
@@ -88416,21 +87315,12 @@
         -5.1999973356723785,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7380952380952381
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.19047619047619047
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.07142857142857142
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:395",
@@ -88458,13 +87348,9 @@
         -11.59999743103981,
         17.200001686811447
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:400",
@@ -88492,13 +87378,9 @@
         -4.39999732375145,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -88527,25 +87409,13 @@
         -11.199997425079346,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8813559322033898
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.05084745762711865
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.03389830508474576
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.03389830508474576
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -88574,13 +87444,10 @@
         -8.399997383356094,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -88609,13 +87476,12 @@
         -12.799997448921204,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:411",
@@ -88643,13 +87509,12 @@
         -5.599997341632843,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal",
+        "pca-occipital"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -88678,13 +87543,9 @@
         -11.999997437000275,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:419",
@@ -88712,13 +87573,11 @@
         -10.799997419118881,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:left:422",
@@ -88746,13 +87605,10 @@
         -5.1999973356723785,
         6.400001525878906
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:442",
@@ -88780,13 +87636,9 @@
         -11.199997425079346,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:443",
@@ -88814,13 +87666,9 @@
         -15.99999749660492,
         31.200001895427704
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -88849,13 +87697,9 @@
         -15.99999749660492,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.34782608695652173
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.6521739130434783,
       "cut_atlases": []
     },
     {
@@ -88884,13 +87728,9 @@
         -15.99999749660492,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:493",
@@ -88918,13 +87758,9 @@
         -16.399997502565384,
         17.200001686811447
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1111111111111111
-        }
-      ],
-      "territory_unassigned": 0.8888888888888888
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:498",
@@ -88952,13 +87788,10 @@
         -13.199997454881668,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:510",
@@ -88986,17 +87819,10 @@
         -15.19999748468399,
         14.000001639127731
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.896551724137931
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.10344827586206896
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:512",
@@ -89024,17 +87850,11 @@
         -6.399997353553772,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7777777777777778
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.2222222222222222
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -89063,21 +87883,12 @@
         -25.199997633695602,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.5675675675675675
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.3783783783783784
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.05405405405405406
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:565",
@@ -89105,21 +87916,12 @@
         -26.79999765753746,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.7571428571428571
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.22857142857142856
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.014285714285714285
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:566",
@@ -89147,17 +87949,12 @@
         -26.79999765753746,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.527027027027027
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.47297297297297297
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:567",
@@ -89185,17 +87982,11 @@
         -25.599997639656067,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.6666666666666666
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.3333333333333333
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -89224,17 +88015,11 @@
         -26.399997651576996,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7575757575757576
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.18181818181818182
-        }
-      ],
-      "territory_unassigned": 0.06060606060606061
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:left:569",
@@ -89262,17 +88047,11 @@
         -27.199997663497925,
         18.000001698732376
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.5
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.5
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -89301,21 +88080,11 @@
         -26.79999765753746,
         19.600001722574234
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.48148148148148145
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.43209876543209874
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.08641975308641975
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:572",
@@ -89343,21 +88112,11 @@
         -26.399997651576996,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.75
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.16666666666666666
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.08333333333333333
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:573",
@@ -89385,21 +88144,11 @@
         -25.99999764561653,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6049382716049383
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.30864197530864196
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.07407407407407407
-        }
-      ],
-      "territory_unassigned": 0.012345679012345678
+      "territories_near": [
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:574",
@@ -89427,21 +88176,11 @@
         -25.99999764561653,
         21.200001746416092
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.631578947368421
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.18421052631578946
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.18421052631578946
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:left:595",
@@ -89595,13 +88334,9 @@
         -16.79999750852585,
         -29.99999901652336
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:left:765",
@@ -89629,17 +88364,10 @@
         -23.19999760389328,
         -25.599998950958252
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 0.9452054794520548
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.0547945205479452
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:left:811",
@@ -89667,13 +88395,11 @@
         -21.199997574090958,
         28.800001859664917
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "aca"
+      ]
     },
     {
       "id": "nextbrain:left:813",
@@ -89701,17 +88427,12 @@
         -22.799997597932816,
         19.600001722574234
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.4090909090909091
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.045454545454545456
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.5454545454545454,
       "cut_atlases": []
     },
     {
@@ -91784,6 +90505,9 @@
         6.000002831220627,
         41.60000205039978
       ],
+      "territories_near": [
+        "medial-lenticulostriate"
+      ],
       "cut_atlases": []
     },
     {
@@ -91812,19 +90536,14 @@
         10.8000029027462,
         18.000001698732376
       ],
-      "striatal_networks": [
-        {
-          "network": "Limbic",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "mca-frontal",
+        "lateral-lenticulostriate"
       ],
-      "striatal_networks_unassigned": 0.0,
-      "striatal_networks_confidence": {
-        "filled": 0.4,
-        "low": 0.6,
-        "confident": 0.0
-      },
-      "striatal_networks_putamen": 0.0,
+      "striatal_networks_near": [
+        "Limbic",
+        "Default"
+      ],
       "cut_atlases": []
     },
     {
@@ -91853,17 +90572,11 @@
         6.400002837181091,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.7734375
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.0625
-        }
-      ],
-      "territory_unassigned": 0.1640625
+      "territories_near": [
+        "mca-temporal",
+        "lateral-lenticulostriate",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10113",
@@ -91891,17 +90604,10 @@
         13.600002944469452,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.7833333333333333
-        },
-        {
-          "territory": "mca-frontal",
-          "fraction": 0.08333333333333333
-        }
-      ],
-      "territory_unassigned": 0.13333333333333333
+      "territories_near": [
+        "mca-temporal",
+        "mca-frontal"
+      ]
     },
     {
       "id": "nextbrain:right:10150",
@@ -91928,6 +90634,9 @@
         0.799999475479126,
         8.00000286102295,
         17.60000169277191
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -91956,13 +90665,9 @@
         8.00000286102295,
         10.800001591444016
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10160",
@@ -91989,6 +90694,9 @@
         3.199999511241913,
         8.400002866983414,
         12.000001609325409
+      ],
+      "territories_near": [
+        "mca-temporal"
       ],
       "cut_atlases": []
     },
@@ -92017,6 +90725,11 @@
         2.7999995052814484,
         7.600002855062485,
         18.000001698732376
+      ],
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "mca-frontal",
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -92044,6 +90757,9 @@
         2.399999499320984,
         7.600002855062485,
         14.80000165104866
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -92071,6 +90787,9 @@
         1.1999994814395905,
         6.800002843141556,
         12.800001621246338
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -92099,13 +90818,10 @@
         4.800002813339233,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.6
-        }
+      "territories_near": [
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.4,
       "cut_atlases": []
     },
     {
@@ -92134,13 +90850,10 @@
         -2.7999972999095917,
         30.00000187754631
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.96
-        }
-      ],
-      "territory_unassigned": 0.04
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10221",
@@ -92168,13 +90881,10 @@
         -3.199997305870056,
         28.400001853704453
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10224",
@@ -92202,17 +90912,10 @@
         2.7418136596679688e-06,
         23.60000178217888
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7868852459016393
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.08196721311475409
-        }
-      ],
-      "territory_unassigned": 0.13114754098360656
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10227",
@@ -92239,6 +90942,10 @@
         0.799999475479126,
         4.400002807378769,
         13.200001627206802
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
       ]
     },
     {
@@ -92267,17 +90974,10 @@
         3.2000027894973755,
         20.800001740455627
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.1732283464566929
-        },
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.10236220472440945
-        }
-      ],
-      "territory_unassigned": 0.7244094488188977
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10229",
@@ -92304,6 +91004,9 @@
         1.599999487400055,
         5.600002825260162,
         17.60000169277191
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -92332,17 +91035,10 @@
         3.2000027894973755,
         23.60000178217888
       ],
-      "territories": [
-        {
-          "territory": "lateral-lenticulostriate",
-          "fraction": 0.875
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.125
-        }
+      "territories_near": [
+        "lateral-lenticulostriate",
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -92371,17 +91067,10 @@
         6.800002843141556,
         1.6000014543533325
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9444444444444444
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.05555555555555555
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10243",
@@ -92408,6 +91097,9 @@
         1.9999994933605194,
         4.800002813339233,
         14.80000165104866
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ]
     },
     {
@@ -92435,6 +91127,11 @@
         2.399999499320984,
         5.200002819299698,
         10.800001591444016
+      ],
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "mca-temporal"
       ]
     },
     {
@@ -92463,13 +91160,10 @@
         -2.399997293949127,
         26.40000182390213
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10268",
@@ -92497,17 +91191,10 @@
         3.60000279545784,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.16883116883116883
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.11688311688311688
-        }
-      ],
-      "territory_unassigned": 0.7142857142857143
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10274",
@@ -92535,13 +91222,10 @@
         -3.999997317790985,
         18.800001710653305
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9851851851851852
-        }
-      ],
-      "territory_unassigned": 0.014814814814814815
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10278",
@@ -92569,13 +91253,10 @@
         -1.1999972760677338,
         11.600001603364944
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10284",
@@ -92603,13 +91284,9 @@
         -3.5999973118305206,
         18.800001710653305
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7407407407407407
-        }
-      ],
-      "territory_unassigned": 0.25925925925925924
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10286",
@@ -92637,13 +91314,10 @@
         -3.199997305870056,
         21.200001746416092
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8549618320610687
-        }
-      ],
-      "territory_unassigned": 0.1450381679389313
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "lateral-lenticulostriate"
+      ]
     },
     {
       "id": "nextbrain:right:10303",
@@ -92671,13 +91345,9 @@
         -8.799997389316559,
         30.80000188946724
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10305",
@@ -92705,17 +91375,10 @@
         0.40000274777412415,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.8273381294964028
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.02158273381294964
-        }
-      ],
-      "territory_unassigned": 0.1510791366906475
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10307",
@@ -92743,17 +91406,10 @@
         2.7418136596679688e-06,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.5231788079470199
-        },
-        {
-          "territory": "basilar",
-          "fraction": 0.06622516556291391
-        }
-      ],
-      "territory_unassigned": 0.4105960264900662
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10308",
@@ -92781,13 +91437,11 @@
         1.200002759695053,
         10.400001585483551
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9230769230769231
-        }
-      ],
-      "territory_unassigned": 0.07692307692307693
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "basilar",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10309",
@@ -92815,13 +91469,9 @@
         2.7418136596679688e-06,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.989010989010989
-        }
-      ],
-      "territory_unassigned": 0.01098901098901099
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10320",
@@ -92849,17 +91499,12 @@
         -1.1999972760677338,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.9369369369369369
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.06306306306306306
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "mca-temporal",
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10342",
@@ -92887,17 +91532,10 @@
         -1.5999972820281982,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.8412698412698413
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.15873015873015872
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10365",
@@ -92925,17 +91563,11 @@
         -4.799997329711914,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7777777777777778
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.2222222222222222
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10367",
@@ -92963,17 +91595,11 @@
         -6.399997353553772,
         6.000001519918442
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9724137931034482
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.027586206896551724
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10369",
@@ -93001,17 +91627,12 @@
         -3.999997317790985,
         8.400001555681229
       ],
-      "territories": [
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.5042016806722689
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.4957983193277311
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating",
+        "basilar"
+      ]
     },
     {
       "id": "nextbrain:right:10371",
@@ -93039,17 +91660,11 @@
         -3.999997317790985,
         8.000001549720764
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7333333333333333
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.26666666666666666
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10373",
@@ -93077,17 +91692,11 @@
         -6.399997353553772,
         8.400001555681229
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7627118644067796
-        },
-        {
-          "territory": "mca-temporal",
-          "fraction": 0.23728813559322035
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10375",
@@ -93115,13 +91724,11 @@
         -8.399997383356094,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10395",
@@ -93149,13 +91756,9 @@
         -12.39999744296074,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10400",
@@ -93183,13 +91786,9 @@
         -4.799997329711914,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93218,21 +91817,11 @@
         -14.799997478723526,
         8.000001549720764
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.9259259259259259
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.06172839506172839
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.012345679012345678
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93261,13 +91850,11 @@
         -9.199997395277023,
         7.6000015437603
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93296,13 +91883,11 @@
         -12.39999744296074,
         8.800001561641693
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10411",
@@ -93330,13 +91915,10 @@
         -7.199997365474701,
         8.000001549720764
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "mca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93365,13 +91947,9 @@
         -9.999997407197952,
         12.400001615285873
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93400,13 +91978,11 @@
         -15.99999749660492,
         9.200001567602158
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "mca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10422",
@@ -93434,13 +92010,9 @@
         -5.9999973475933075,
         4.800001502037048
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10430",
@@ -93468,13 +92040,9 @@
         -16.79999750852585,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10442",
@@ -93502,13 +92070,9 @@
         -12.39999744296074,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10443",
@@ -93536,13 +92100,9 @@
         -15.99999749660492,
         30.00000187754631
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93571,13 +92131,9 @@
         -16.79999750852585,
         18.40000170469284
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10479",
@@ -93605,13 +92161,9 @@
         -16.399997502565384,
         16.800001680850983
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10493",
@@ -93639,13 +92191,9 @@
         -17.199997514486313,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9230769230769231
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
       ],
-      "territory_unassigned": 0.07692307692307693,
       "cut_atlases": []
     },
     {
@@ -93674,13 +92222,10 @@
         -14.799997478723526,
         10.000001579523087
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10506",
@@ -93708,13 +92253,9 @@
         -17.599997520446777,
         16.800001680850983
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10510",
@@ -93742,17 +92283,10 @@
         -17.599997520446777,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.9615384615384616
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.038461538461538464
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10559",
@@ -93780,25 +92314,12 @@
         -28.39999768137932,
         15.200001657009125
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.4666666666666667
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.26666666666666666
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.23333333333333334
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.03333333333333333
-        }
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93827,25 +92348,12 @@
         -30.799997717142105,
         12.000001609325409
       ],
-      "territories": [
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.4244604316546763
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.37410071942446044
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.07913669064748201
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.05755395683453238
-        }
-      ],
-      "territory_unassigned": 0.06474820143884892
+      "territories_near": [
+        "pca-temporal",
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10566",
@@ -93873,25 +92381,12 @@
         -29.59999769926071,
         15.60000166296959
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6823529411764706
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.25882352941176473
-        },
-        {
-          "territory": "pca-occipital",
-          "fraction": 0.047058823529411764
-        },
-        {
-          "territory": "pca-temporal",
-          "fraction": 0.011764705882352941
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "posterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10567",
@@ -93919,13 +92414,11 @@
         -29.59999769926071,
         14.80000165104866
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -93954,13 +92447,11 @@
         -28.799997687339783,
         14.400001645088196
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:right:10569",
@@ -93988,13 +92479,11 @@
         -27.999997675418854,
         13.200001627206802
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-temporal",
+        "pca-occipital"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -94023,17 +92512,12 @@
         -29.199997693300247,
         17.60000169277191
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.6403508771929824
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.35964912280701755
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10572",
@@ -94061,13 +92545,12 @@
         -28.799997687339783,
         16.000001668930054
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "posterior-choroidal-thalamoperforating",
+        "pca-temporal"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -94096,17 +92579,12 @@
         -28.39999768137932,
         16.400001674890518
       ],
-      "territories": [
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.7980769230769231
-        },
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.19230769230769232
-        }
-      ],
-      "territory_unassigned": 0.009615384615384616
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital",
+        "pca-temporal"
+      ]
     },
     {
       "id": "nextbrain:right:10574",
@@ -94134,17 +92612,11 @@
         -27.199997663497925,
         19.600001722574234
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 0.7608695652173914
-        },
-        {
-          "territory": "anterior-choroidal-thalamoperforating",
-          "fraction": 0.2391304347826087
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:right:10595",
@@ -94294,17 +92766,10 @@
         -14.399997472763062,
         -23.59999892115593
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 0.8780487804878049
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.07317073170731707
-        }
-      ],
-      "territory_unassigned": 0.04878048780487805
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10666",
@@ -94332,13 +92797,9 @@
         -17.999997526407242,
         -20.399998873472214
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 1.0
-        }
+      "territories_near": [
+        "basilar"
       ],
-      "territory_unassigned": 0.0,
       "cut_atlases": []
     },
     {
@@ -94367,17 +92828,10 @@
         -33.599997758865356,
         -9.999998718500137
       ],
-      "territories": [
-        {
-          "territory": "superior-cerebellar",
-          "fraction": 0.9366197183098591
-        },
-        {
-          "territory": "inferior-cerebellar",
-          "fraction": 0.06338028169014084
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "superior-cerebellar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10765",
@@ -94405,13 +92859,10 @@
         -22.39999759197235,
         -25.599998950958252
       ],
-      "territories": [
-        {
-          "territory": "basilar",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "basilar",
+        "inferior-cerebellar"
+      ]
     },
     {
       "id": "nextbrain:right:10811",
@@ -94439,13 +92890,9 @@
         -20.799997568130493,
         28.000001847743988
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating"
+      ]
     },
     {
       "id": "nextbrain:right:10813",
@@ -94473,13 +92920,11 @@
         -22.799997597932816,
         19.20000171661377
       ],
-      "territories": [
-        {
-          "territory": "posterior-choroidal-thalamoperforating",
-          "fraction": 1.0
-        }
-      ],
-      "territory_unassigned": 0.0
+      "territories_near": [
+        "posterior-choroidal-thalamoperforating",
+        "anterior-choroidal-thalamoperforating",
+        "pca-occipital"
+      ]
     },
     {
       "id": "nextbrain:right:10846",
@@ -108076,6 +106521,30 @@
       "https://doi.org/10.1038/s41597-024-03819-7",
       "https://doi.org/10.18112/openneuro.ds004884.v1.0.2"
     ],
+    "registration": {
+      "hemisphere_agreement": 0.9979,
+      "subcortical_dice": {
+        "thalamus-left": 0.8616,
+        "thalamus-right": 0.8771,
+        "caudate-left": 0.8504,
+        "caudate-right": 0.8542,
+        "putamen-left": 0.8795,
+        "putamen-right": 0.9114,
+        "pallidum-left": 0.7389,
+        "pallidum-right": 0.8797,
+        "hippocampus-left": 0.8452,
+        "hippocampus-right": 0.8619,
+        "amygdala-left": 0.8611,
+        "amygdala-right": 0.9004,
+        "lateral-ventricle-left": 0.8734,
+        "lateral-ventricle-right": 0.8969
+      },
+      "cortex_dice": 0.7206,
+      "round_trip_mm": {
+        "median": 0.0449,
+        "p95": 0.1807
+      }
+    },
     "method": "The authors' SPM12-normalised lesions, carried onto this brain through a SynthMorph registration of the cohort's mean healed T1 (linear, kept at 0.5); each region's share is its cut voxels the lesion covers"
   },
   "atlas_comparisons": [

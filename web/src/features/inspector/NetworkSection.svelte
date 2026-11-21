@@ -1,7 +1,8 @@
 <!--
   Functional networks (inspector.js:139-160): the region's Yeo shares with a bar and a percentage,
   the CAB-NP network that assigns the whole HCP-MMP area, and a striatal structure's shares in each
-  network's striatal territory (Choi et al. 2012). Nothing selected leaves the section out: a chart
+  network's striatal territory (Choi et al. 2012), or the networks round a striatal structure too
+  small for shares. Nothing selected leaves the section out: a chart
   of the whole cortex is not a selection. The section stays mounted so its open state survives from
   one selection to the next.
 -->
@@ -16,7 +17,7 @@
     striatalNetworksOf,
   } from '../../lib/core/catalog/networks.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
-  import { decimal, percent } from '../../lib/core/format.ts';
+  import { decimal, grouped, percent, withUnit } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import Swatch from '../../lib/ui/Swatch.svelte';
@@ -45,6 +46,11 @@
   const assigned = $derived(region ? (cabNp?.regions[region.id] ?? null) : null);
   const striatal = $derived(striatalNetworksOf(region));
   const outside = $derived(region?.striatal_networks_unassigned ?? 0);
+  // A striatal structure too small for shares names the networks round it.
+  const near = $derived(atlas ? (region?.striatal_networks_near ?? []) : []);
+  const radius = $derived(
+    withUnit(decimal(atlas?.small.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
+  );
   // The closed summary's hint: the largest share the region has, else CAB-NP's one network.
   const headline = $derived.by(() => {
     const top = [...shares, ...striatal].reduce<(typeof shares)[number] | null>(
@@ -80,7 +86,7 @@
   {/if}
 {/snippet}
 
-{#if shares.length || assigned || striatal.length}
+{#if shares.length || assigned || striatal.length || near.length}
   <div class="evidence-section">
     <Disclosure variant="section" summary={copy.heading} value={headline} bind:open>
       {#if shares.length}
@@ -133,6 +139,21 @@
           {#if outside >= 0.005}{copy.striatalUnassigned(percent(outside, lang))}{/if}
         </p>
         {@render confidenceNotes()}
+        <p class="detail-note">{copy.striatalCaveat}</p>
+      {:else if near.length}
+        <p class="network-map">{copy.striatal}</p>
+        <ul class="network-list">
+          {#each near as network (network)}
+            <li class="network-row">
+              <Swatch colour={yeoColour(network)} />
+              <span class="network-row-name unshared">{networkName(network, lang)}</span>
+            </li>
+          {/each}
+        </ul>
+        <p class="detail-note">
+          {near.length === 1 ? copy.striatalWithin(radius) : copy.striatalBorder(radius)}
+          {copy.striatalSmall(withUnit(grouped(atlas!.small.under_mm3), 'mm³', lang), radius)}
+        </p>
         <p class="detail-note">{copy.striatalCaveat}</p>
       {/if}
       <p class="detail-note">{copy.caveat}</p>

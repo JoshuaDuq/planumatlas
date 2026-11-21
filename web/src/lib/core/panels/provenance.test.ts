@@ -122,6 +122,7 @@ test('PROV-01 the published cdmd manifest gives one row per record, in order', (
       'Functional connectivity (HCP)',
       'Brain differences in disorders (ENIGMA)',
       'Stroke cases',
+      'Registered group maps',
       'Neuropsychological domains',
       'Supplemental layers',
       'Published files',
@@ -313,4 +314,84 @@ test('PROV-24 the cortical layers row names the layers, their licence and each c
       ],
     },
   ]);
+});
+
+test('PROV-25 registered maps lead with the landing benchmark and its rule, then each map’s own check', () => {
+  const checks = {
+    subcortical_dice: { 'thalamus-left': 0.8, 'thalamus-right': 0.9, 'caudate-left': 0.86 },
+    cortex_dice: 0.7373,
+  };
+  const registered = {
+    landing: {
+      space: 'mni152nlin2009casym',
+      structures: 1510,
+      centroid_mm: { median: 1.16, p90: 2.93 },
+      dice_median: 0.37,
+      by_volume: [
+        { under_mm3: 100, structures: 900, dice_median: 0.2 },
+        { under_mm3: 2000, structures: 500, dice_median: 0.6 },
+        { under_mm3: null, structures: 110, dice_median: 0.64 },
+      ],
+      under_mm3: 100,
+      radius_mm: 3,
+      method: 'm',
+    },
+    coordinate_spaces: {
+      label: 'Published coordinates',
+      spaces: [{ id: 'mni152nlin2009casym', label: 'MNI152NLin2009cAsym', registration: checks }],
+    },
+    arterial_territories: {
+      label: 'Arterial territories (Liu et al. 2023)',
+      registration: { ventricle_dice: { left: 0.6824, right: 0.7351 } },
+    },
+    striatal_networks: {
+      label: 'Striatal networks (Choi et al. 2012)',
+      registration: { striatum_dice_mean: 0.8764 },
+    },
+    cerebellar_functions: {
+      label: 'Functional cerebellar regions (Nettekoven et al. 2024)',
+      registration: { lobule_dice_mean: 0.6506 },
+    },
+  } as unknown as Partial<Manifest>;
+  assert.deepEqual(provenanceRows(registered, { lang: 'en' }), [
+    {
+      label: 'Registered group maps',
+      items: [
+        {
+          text: 'Fine structures through registration (MNI152NLin2009cAsym)',
+          note:
+            'The template’s own 1\u202f510 fine structures, carried by the published registration, land a median 1.2\u202fmm from this brain’s own, nine in ten within 2.9\u202fmm. An upper bound: it includes the disagreement between two segmentations. ' +
+            'Median overlap (Dice) by the structure’s volume: 0.20 under 100\u202fmm³, 0.60 under 2\u202f000\u202fmm³, 0.64 above. ' +
+            'A structure under 100\u202fmm³ takes no shares from a registered map: it names what lies within 3\u202fmm of it.',
+        },
+        {
+          text: 'Arterial territories (Liu et al. 2023)',
+          note: 'Overlap (Dice) of the atlas’s ventricles with this brain’s: 0.68 left, 0.74 right.',
+        },
+        {
+          text: 'Functional cerebellar regions (Nettekoven et al. 2024)',
+          note: 'Overlap (Dice) of the template’s lobules with this brain’s: 0.65 on average.',
+        },
+        {
+          text: 'Striatal networks (Choi et al. 2012)',
+          note: 'Overlap (Dice) of the template’s striatum with this brain’s: 0.88 on average.',
+        },
+        {
+          text: 'Published coordinates · MNI152NLin2009cAsym',
+          note: 'Overlap (Dice) of the template’s structures with this brain’s: deep structures 0.86 (median), cortex 0.74.',
+        },
+      ],
+    },
+  ]);
+  const french = provenanceRows(registered, { lang: 'fr' })[0]!;
+  assert.equal(french.label, 'Cartes de groupe recalées');
+  assert.match(
+    french.items[0]!.note!,
+    /médiane de 1,2\u202fmm .* neuf sur dix à moins de 2,9\u202fmm/,
+  );
+  // A benchmark measured in a space the manifest does not publish names nothing to read it against.
+  assert.throws(
+    () => provenanceRows({ landing: registered.landing! }, { lang: 'en' }),
+    /mni152nlin2009casym is not published/,
+  );
 });

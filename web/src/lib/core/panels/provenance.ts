@@ -1,7 +1,7 @@
 import type { Language, Manifest } from '../../types/index.ts';
 import type { Translated } from '../clinical/types.ts';
 import { domainName, type NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
-import { percent } from '../format.ts';
+import { decimal, grouped, percent, withUnit } from '../format.ts';
 import { t } from '../i18n/index.ts';
 import { oneBrainHref } from '../methods.ts';
 import { citationOf, linkOf, type ListedWork } from './citations.ts';
@@ -78,6 +78,94 @@ function lesionCheck(checks: readonly LesionCheck[], lang: Language): string {
       ),
     ),
   );
+}
+
+/** The deep-structure and cortex overlaps a template registration was scored by. */
+interface TemplateChecks {
+  subcortical_dice: Record<string, number>;
+  cortex_dice: number;
+}
+
+const median = (values: readonly number[]) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = sorted.length >> 1;
+  return sorted.length % 2 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
+};
+
+/**
+ * Every group map a volume registration carries onto this brain, each with what was measured of
+ * its own registration, after the benchmark that sets what a small structure may take from one.
+ */
+function registeredMaps(manifest: Partial<Manifest>, lang: Language): ProvenanceItem[] {
+  const copy = t(lang, 'footer');
+  const dice = (value: number) => decimal(value, 2, lang);
+  const mm = (value: number) => withUnit(decimal(value, 1, lang, { trim: true }), 'mm', lang);
+  const mm3 = (value: number) => withUnit(grouped(value), 'mm³', lang);
+  const deep = (checks: Record<string, unknown>) => {
+    const { subcortical_dice, cortex_dice } = checks as unknown as TemplateChecks;
+    return copy.registeredChecks.deep(
+      dice(median(Object.values(subcortical_dice))),
+      dice(cortex_dice),
+    );
+  };
+  const items: ProvenanceItem[] = [];
+  const landing = manifest.landing;
+  const spaces = manifest.coordinate_spaces;
+  if (landing) {
+    const space = spaces?.spaces.find((entry) => entry.id === landing.space);
+    if (!space) throw new Error(`The landing benchmark's space ${landing.space} is not published.`);
+    items.push({
+      text: copy.landing(space.label),
+      note: [
+        copy.landingNote(
+          grouped(landing.structures),
+          mm(landing.centroid_mm.median),
+          mm(landing.centroid_mm.p90),
+        ),
+        copy.landingOverlap(
+          landing.by_volume.map((group) =>
+            copy.landingClass(
+              dice(group.dice_median),
+              group.under_mm3 === null ? null : mm3(group.under_mm3),
+            ),
+          ),
+        ),
+        copy.landingRule(mm3(landing.under_mm3), mm(landing.radius_mm)),
+      ].join(' '),
+    });
+  }
+  const arterial = manifest.arterial_territories;
+  if (arterial) {
+    const { ventricle_dice } = arterial.registration as { ventricle_dice: Record<string, number> };
+    items.push({
+      text: arterial.label,
+      note: copy.registeredChecks.ventricles(
+        dice(ventricle_dice['left']!),
+        dice(ventricle_dice['right']!),
+      ),
+    });
+  }
+  const cerebellar = manifest.cerebellar_functions;
+  if (cerebellar)
+    items.push({
+      text: cerebellar.label,
+      note: copy.registeredChecks.lobules(
+        dice((cerebellar.registration as { lobule_dice_mean: number }).lobule_dice_mean),
+      ),
+    });
+  const striatal = manifest.striatal_networks;
+  if (striatal)
+    items.push({
+      text: striatal.label,
+      note: copy.registeredChecks.striatum(
+        dice((striatal.registration as { striatum_dice_mean: number }).striatum_dice_mean),
+      ),
+    });
+  for (const space of spaces?.spaces ?? [])
+    items.push({ text: `${spaces!.label} · ${space.label}`, note: deep(space.registration) });
+  const strokeCases = manifest.stroke_cases;
+  if (strokeCases) items.push({ text: strokeCases.label, note: deep(strokeCases.registration) });
+  return items;
 }
 
 /**
@@ -238,6 +326,7 @@ export function provenanceRows(
         ]
       : [],
   );
+  add(copy.registered, registeredMaps(manifest, lang));
   const domainCopy = t(lang, 'domains');
   const published = manifest.neuropsych_domains as Described | undefined;
   add(

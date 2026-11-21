@@ -38,6 +38,10 @@ releases yet: the live site is deployed from `main`.
 
 ### Changed
 
+- A deep structure under 100 mm³ no longer shows percentage shares of arterial territories or striatal
+  networks. It names the territories or networks within 3 mm of it, and says when a border passes that
+  close: registered group maps land fine structures a median 1.2 mm off, too coarse to share out one
+  that small. **Provenance** lists every registered map with what was measured of its registration.
 - Deficit findings were re-read against their sources, 59 references now from the full text rather than
   the abstract. Findings whose lesions lie in white matter or cannot be placed on a labelled structure
   (such as amnesia after fornix or diencephalic injury) no longer colour a region.

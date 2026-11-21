@@ -858,6 +858,45 @@
   "functionalConnectivity": "Connectivité fonctionnelle (HCP)",
   "disorderEffects": "Différences cérébrales dans les troubles (ENIGMA)",
   "strokeCases": "Cas d’AVC",
+  "registered": "Cartes de groupe recalées",
+  "landing": [
+   "[\"Alpha\"] → \"Structures fines à travers le recalage (Alpha)\"",
+   "[\"\"] → \"Structures fines à travers le recalage ()\""
+  ],
+  "landingNote": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"Les Alpha structures fines du gabarit, portées par le recalage publié, tombent à une distance médiane de  de celles de ce cerveau, neuf sur dix à moins de Alpha. Une borne supérieure<NNBSP>: elle comprend le désaccord entre deux segmentations.\"",
+   "[\"\",\"Alpha\",\"\"] → \"Les  structures fines du gabarit, portées par le recalage publié, tombent à une distance médiane de Alpha de celles de ce cerveau, neuf sur dix à moins de . Une borne supérieure<NNBSP>: elle comprend le désaccord entre deux segmentations.\""
+  ],
+  "landingOverlap": [
+   "[\"Alpha\"] → \"throws classes.join is not a function\"",
+   "[\"\"] → \"throws classes.join is not a function\""
+  ],
+  "landingClass": [
+   "[\"Alpha\",\"\"] → \"Alpha sous \"",
+   "[\"\",\"Alpha\"] → \" sous Alpha\""
+  ],
+  "landingRule": [
+   "[\"Alpha\",\"\"] → \"Une structure de moins de Alpha ne reçoit aucune part d’une carte recalée<NNBSP>: elle nomme ce qui se trouve à moins de  d’elle.\"",
+   "[\"\",\"Alpha\"] → \"Une structure de moins de  ne reçoit aucune part d’une carte recalée<NNBSP>: elle nomme ce qui se trouve à moins de Alpha d’elle.\""
+  ],
+  "registeredChecks": {
+   "ventricles": [
+    "[\"Alpha\",\"\"] → \"Recouvrement (Dice) des ventricules de l’atlas avec ceux de ce cerveau<NNBSP>: Alpha à gauche,  à droite.\"",
+    "[\"\",\"Alpha\"] → \"Recouvrement (Dice) des ventricules de l’atlas avec ceux de ce cerveau<NNBSP>:  à gauche, Alpha à droite.\""
+   ],
+   "lobules": [
+    "[\"Alpha\"] → \"Recouvrement (Dice) des lobules du gabarit avec ceux de ce cerveau<NNBSP>: Alpha en moyenne.\"",
+    "[\"\"] → \"Recouvrement (Dice) des lobules du gabarit avec ceux de ce cerveau<NNBSP>:  en moyenne.\""
+   ],
+   "striatum": [
+    "[\"Alpha\"] → \"Recouvrement (Dice) du striatum du gabarit avec celui de ce cerveau<NNBSP>: Alpha en moyenne.\"",
+    "[\"\"] → \"Recouvrement (Dice) du striatum du gabarit avec celui de ce cerveau<NNBSP>:  en moyenne.\""
+   ],
+   "deep": [
+    "[\"Alpha\",\"\"] → \"Recouvrement (Dice) des structures du gabarit avec celles de ce cerveau<NNBSP>: structures profondes Alpha (médiane), cortex .\"",
+    "[\"\",\"Alpha\"] → \"Recouvrement (Dice) des structures du gabarit avec celles de ce cerveau<NNBSP>: structures profondes  (médiane), cortex Alpha.\""
+   ]
+  },
   "domains": "Domaines neuropsychologiques",
   "supplemental": "Couches complémentaires",
   "files": "Fichiers publiés",
@@ -1805,6 +1844,18 @@
    "[\"Alpha\"] → \"Alpha se trouve hors du striatum que l’atlas étiquette.\"",
    "[\"\"] → \" se trouve hors du striatum que l’atlas étiquette.\""
   ],
+  "striatalWithin": [
+   "[\"Alpha\"] → \"Tous les voxels du striatum à moins de Alpha de cette structure se trouvent dans le territoire striatal de ce réseau.\"",
+   "[\"\"] → \"Tous les voxels du striatum à moins de  de cette structure se trouvent dans le territoire striatal de ce réseau.\""
+  ],
+  "striatalBorder": [
+   "[\"Alpha\"] → \"Une limite entre réseaux passe à moins de Alpha de cette structure<NNBSP>; le réseau qui occupe la plus grande part de ce voisinage vient en premier.\"",
+   "[\"\"] → \"Une limite entre réseaux passe à moins de  de cette structure<NNBSP>; le réseau qui occupe la plus grande part de ce voisinage vient en premier.\""
+  ],
+  "striatalSmall": [
+   "[\"Alpha\",\"\"] → \"Une structure de moins de Alpha ne reçoit aucune part<NNBSP>: le recalage place une structure sur dix à plus de  de sa position.\"",
+   "[\"\",\"Alpha\"] → \"Une structure de moins de  ne reçoit aucune part<NNBSP>: le recalage place une structure sur dix à plus de Alpha de sa position.\""
+  ],
   "striatalCaveat": "Un atlas de groupe recalé sur ce cerveau depuis le gabarit MNI152 de FSL<NNBSP>: les limites sont décalées de quelques millimètres, et chaque voxel ne montre que le réseau auquel sa connectivité ressemble le plus.",
   "confidence": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Confiance de Choi<NNBSP>: Alpha de ses voxels étiquetés confiants,  faibles, Alpha comblés.\"",
@@ -2458,6 +2509,18 @@
   "unassigned": [
    "[\"Alpha\"] → \"Alpha ne se trouve dans aucun territoire de l’atlas.\"",
    "[\"\"] → \" ne se trouve dans aucun territoire de l’atlas.\""
+  ],
+  "within": [
+   "[\"Alpha\"] → \"Tous les voxels étiquetés à moins de Alpha de cette structure se trouvent dans ce territoire.\"",
+   "[\"\"] → \"Tous les voxels étiquetés à moins de  de cette structure se trouvent dans ce territoire.\""
+  ],
+  "border": [
+   "[\"Alpha\"] → \"Une limite de territoire passe à moins de Alpha de cette structure<NNBSP>; le territoire qui occupe la plus grande part de ce voisinage vient en premier.\"",
+   "[\"\"] → \"Une limite de territoire passe à moins de  de cette structure<NNBSP>; le territoire qui occupe la plus grande part de ce voisinage vient en premier.\""
+  ],
+  "small": [
+   "[\"Alpha\",\"\"] → \"Une structure de moins de Alpha ne reçoit aucune part<NNBSP>: le recalage place une structure sur dix à plus de  de sa position.\"",
+   "[\"\",\"Alpha\"] → \"Une structure de moins de  ne reçoit aucune part<NNBSP>: le recalage place une structure sur dix à plus de Alpha de sa position.\""
   ],
   "caveat": "Territoires typiques, d’après la localisation des infarctus de 1<NNBSP>298 patients victimes d’AVC (Liu et al. 2023), recalés sur ce cerveau<NNBSP>: pas ses propres vaisseaux. La circulation collatérale et les variantes anatomiques déplacent les territoires réels de plusieurs centimètres."
  },

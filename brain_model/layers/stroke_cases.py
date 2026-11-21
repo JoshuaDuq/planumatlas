@@ -256,6 +256,7 @@ def metadata(config):
         "label": definition["label"],
         "license": definition["license"],
         "citations": [definition["source"]["doi"], definition["source"]["dataset"]],
+        "registration": json.loads(report_path(config).read_text())["checks"],
         "method": (
             "The authors' SPM12-normalised lesions, carried onto this brain through a SynthMorph registration of "
             "the cohort's mean healed T1 (linear, kept at "
