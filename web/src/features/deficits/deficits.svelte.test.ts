@@ -231,11 +231,13 @@ describe('the list', () => {
 test('the default brain places every profile, so the list says none is elsewhere', async () => {
   await mount();
   expect(document.querySelector('[data-deficit="coma"]')).not.toBeNull();
-  expect(document.querySelector('[data-not-here]')).toBeNull();
+  expect(document.querySelector('.scope-note')!.textContent!.trim()).toBe(
+    '149 profiles · adult acquired deficits',
+  );
 });
 
 test('on a brain without arousal nuclei, the list leaves coma out and says one profile is on CDMD only', async () => {
-  const note = () => document.querySelector('[data-not-here]');
+  const note = () => document.querySelector('.scope-note');
   await loadTemplateCopy();
   let fixture: Fixture | undefined;
   const full = manifest as unknown as Manifest;
@@ -245,8 +247,8 @@ test('on a brain without arousal nuclei, the list leaves coma out and says one p
     onready: (ready: Fixture) => (fixture = ready),
   } as never);
   await expect.poll(() => fixture).toBeDefined();
-  expect(note()!.textContent).toBe(
-    '1 more profile maps structures this template does not have, and is on CDMD sub_013 only.',
+  expect(note()!.textContent!.trim()).toBe(
+    '148 profiles · adult acquired deficits · 1 more profile maps structures this template does not have, and is on CDMD sub_013 only.',
   );
   expect(document.querySelector('[data-deficit="coma"]')).toBeNull();
 });

@@ -202,13 +202,11 @@
   <!-- The collection's scope stands under the whole list; a search shows no scope. -->
   {#if !query}
     <p class="scope-note">
-      {text.coverage.replace('{count}', String(clinical.search('', lang).length))}
+      {text.coverage.replace('{count}', String(clinical.search('', lang).length))}{clinical
+        .unavailable.length
+        ? ` · ${templateCopy(lang).deficitsElsewhere(clinical.unavailable.length)}`
+        : ''}
     </p>
-    {#if clinical.unavailable.length}
-      <p class="scope-note" data-not-here>
-        {templateCopy(lang).deficitsElsewhere(clinical.unavailable.length)}
-      </p>
-    {/if}
     <AboutData place="deficits" {lang} host="list" />
   {/if}
 </div>

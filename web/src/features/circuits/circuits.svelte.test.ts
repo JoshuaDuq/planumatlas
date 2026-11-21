@@ -47,19 +47,19 @@ const returnButton = () =>
 test('every tour is on the default brain, so the list says none is elsewhere', async () => {
   mount();
   await expect.poll(() => rows().length).toBe(45);
-  expect(document.querySelector('[data-not-here]')).toBeNull();
+  expect(document.querySelector('.scope-note')!.textContent).not.toContain('CDMD sub_013 only');
 });
 
 test('a brain without a cord leaves the cord tours out and says how many are on CDMD only', async () => {
-  const note = () => document.querySelector('[data-not-here]');
+  const note = () => document.querySelector('.scope-note');
   await loadTemplateCopy();
   mount('en', true, ['pam50']);
   const left = world.circuits.unavailable.map(({ id }) => id);
   expect(left).toContain('spinothalamic');
   await expect.poll(() => rows().length).toBe(45 - left.length);
   expect(rowOf('spinothalamic')).toBeNull();
-  expect(note()!.textContent).toBe(
-    `${left.length} more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.`,
+  expect(note()!.textContent).toContain(
+    ` · ${left.length} more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.`,
   );
 });
 

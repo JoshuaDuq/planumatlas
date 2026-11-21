@@ -96,13 +96,10 @@
   <p class="scope-note">
     {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{map.available
       ? ` · ${maps.mapCount(1)}`
+      : ''}{model.unavailable
+      ? ` · ${templateCopy(model.lang).circuitsElsewhere(model.unavailable)}`
       : ''}
   </p>
-  {#if model.unavailable}
-    <p class="scope-note" data-not-here>
-      {templateCopy(model.lang).circuitsElsewhere(model.unavailable)}
-    </p>
-  {/if}
   <AboutData place="circuits" lang={model.lang} host="list" />
 </div>
 
