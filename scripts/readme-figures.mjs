@@ -27,8 +27,8 @@ const GUTTER = 24;
 const BAND = 64;
 const GROUNDS = { light: ['#ffffff', '#000000'], dark: ['#0d1117', '#e6edf3'] };
 
-const base = { anatomy: 'cdmd', lang: 'en', atlas: 'destrieux', cuts: 'destrieux', detail: 'learning' };
-const nextbrain = { ...base, detail: 'nextbrain', cuts: 'nextbrain' };
+const base = { anatomy: 'cdmd', lang: 'en', atlas: 'destrieux', detail: 'learning' };
+const nextbrain = { ...base, detail: 'nextbrain' };
 const cut = (state, plane, pos, view) => ({ state: { ...state, cut: plane, pos, view } });
 const surface = (state) => ({ state: { ...base, view: 'left', ...state } });
 const tracts = (view, ids) => ({ state: { ...base, tab: 'diffusion', view, opacity: '0.16', tracts: ids } });
@@ -48,17 +48,17 @@ const FIGURES = [
     panels: [
       { state: { ...nextbrain, view: 'anterior', explode: '1' } },
       tracts('left', 'af-left,cst-left'),
-      surface({ atlas: 'hcp-mmp', cuts: 'hcp-mmp', tab: 'functions', function: 'language' }),
+      surface({ atlas: 'hcp-mmp', tab: 'functions', function: 'language' }),
     ],
   },
   {
     name: 'cortex', columns: 3, aspect: 1.3, sameScale: true,
     panels: [
       surface({}),
-      surface({ atlas: 'hcp-mmp', cuts: 'hcp-mmp' }),
-      surface({ atlas: 'julich', cuts: 'julich' }),
-      surface({ atlas: 'schaefer', cuts: 'schaefer' }),
-      surface({ colors: 'cab-np' }),
+      surface({ atlas: 'hcp-mmp' }),
+      surface({ atlas: 'julich' }),
+      surface({ atlas: 'schaefer' }),
+      surface({ atlas: 'hcp-mmp', colors: 'cab-np' }),
       surface({ colors: 'territory' }),
     ],
   },
@@ -84,7 +84,7 @@ const FIGURES = [
   {
     name: 'evidence', columns: 3, aspect: 1.05,
     panels: [
-      keyed({ atlas: 'hcp-mmp', cuts: 'hcp-mmp', tab: 'functions', function: 'spatial-attention', view: 'right' }),
+      keyed({ atlas: 'hcp-mmp', tab: 'functions', function: 'spatial-attention', view: 'right' }),
       keyed({ tab: 'deficits', deficit: 'neglect', view: 'right' }),
       keyed({ region: 'destrieux:left:4', cases: 'M2295,M2272' }),
     ],

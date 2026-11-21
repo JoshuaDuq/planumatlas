@@ -31,6 +31,7 @@ releases yet: the live site is deployed from `main`.
 - Stroke cases: a sortable **Table of cases** under the plot; each dot takes a press anywhere nearer it
   than any other dot, and the plot's labels grow with the reader's text size.
 - The feedback form takes an optional reply address and says why a send failed.
+- The settings menu (⋯) links the source code on GitHub, after **Methods**.
 - Colour **Striatal networks** and **Cerebellar functions** (group **Subcortical maps**): each draws its
   map voxel by voxel on cut faces, everything else in tissue colour, with a key.
 - **Circuits** has 45 tours and 124 landmarks, up from five tours and 25: 35 new pathway tours across
@@ -42,6 +43,10 @@ releases yet: the live site is deployed from `main`.
 
 ### Changed
 
+- The data control under the masthead reads as one line, "Subject Individual Atlas Destrieux Colour
+  Regions", and opens each choice as a list in which one press chooses and the popover stays open. Each
+  atlas and level says what it is in a few words, and a colouring with colours of its own shows them. On
+  a wider screen the open popover takes a band off the stage's left, so the brain stays framed beside it.
 - A deep structure under 100 mm³ no longer shows percentage shares of arterial territories or striatal
   networks. It names the territories or networks within 3 mm of it, and says when a border passes that
   close: registered group maps land fine structures a median 1.2 mm off, too coarse to share out one
@@ -93,6 +98,9 @@ releases yet: the live site is deployed from `main`.
 
 ### Fixed
 
+- In the exploded view both sides of the brain part alike: a structure that had to stay joined to its
+  neighbour on one side no longer leaves its counterpart on the other side to fly off alone, as the right
+  amygdala and the left fornix did on the MNI template.
 - On the NextBrain detail level the spinal cord now meets the medulla. NextBrain labels no medulla in
   the 12 mm above the cord, and the cord stood apart from the brainstem, as in the rubrospinal tour;
   that stretch is now drawn from FreeSurfer's brainstem label, as the teaching set already drew it.
