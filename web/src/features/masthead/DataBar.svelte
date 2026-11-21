@@ -1,24 +1,25 @@
 <!--
-  The masthead's data group (viewer/ui/chrome/header.js:249-559, index.html:106-135,
-  styles/masthead.css:71-307): one summary button naming the atlas and the colour, which opens
-  Subject, Atlas, Colour and Internal anatomy as native selects in a popover, each with its note. It
-  is one control at every width (2026-11-11): the fields stood inline on a wide bar until then.
-  APG Disclosure (decision 14 on #4): the summary keeps focus when it opens, Tab enters the fields,
-  Escape, a press elsewhere or focus leaving closes it.
-  - the summary names the atlas and the colour; internal anatomy is in its popover and its accessible
-    name, and the colour yields too where the atlas would not fit;
+  The masthead's data group: one button reading "Atlas <atlas> Colour <colour>", which opens every
+  choice of Atlas, Colour, Internal anatomy and Subject as lists, each with the chosen option's note.
+  APG Disclosure (decision 14 on #4): the summary keeps focus when it opens, Tab enters the lists,
+  Escape, a press elsewhere or focus leaving closes it. Each list is an APG Toolbar of `aria-pressed`
+  buttons (decision 0003: a choice that downloads is not applied by arrowing past it).
+  - the colour yields where the atlas would not fit; internal anatomy and subject are in the name only;
   - `data-reference` on the root: the tract reference shows its name alone, with no popover;
-  - a download started from a field is announced (WCAG 4.1.3, deviation h3-load-announcements).
+  - a download started from a list is announced (WCAG 4.1.3, deviation h3-load-announcements).
 -->
 <script lang="ts">
   import { tick, untrack } from 'svelte';
   import {
-    atlasOption,
+    atlasAside,
+    colourAside,
     colourGroups,
-    colourOption,
+    colourPalette,
     dataSummary,
     loadingText,
     subjectName,
+    type PaletteSources,
+    type SummaryPart,
   } from '../../lib/core/panels/header.ts';
   import { paintKind } from '../../lib/core/state/paint.ts';
   import type { ModelPort } from '../../lib/core/state/ports.ts';
@@ -30,14 +31,32 @@
     type LoadStatus,
     type ManifestAnatomy,
     type Paint,
+    type Rgb,
     type SurfaceColor,
   } from '../../lib/types/index.ts';
   import type { PublishedAnatomy } from '../../lib/core/assets/published-anatomy.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
+  import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
-  import Select from '../../lib/ui/Select.svelte';
+  import { roving } from '../../lib/ui/Toolbar.svelte';
 
   type Field = 'atlas' | 'colour' | 'detail';
+
+  interface Choice {
+    value: string;
+    name: string;
+    /** What else choosing it changes, or how far the chosen one has loaded. */
+    aside: string | null;
+    /** What it is: the chosen one's note, another's few words, or nothing. */
+    note: string | null;
+    /** A colouring's own colours, drawn beside its name. */
+    palette?: readonly Rgb[] | null;
+  }
+
+  interface ChoiceGroup {
+    label?: string;
+    options: readonly Choice[];
+  }
 
   interface Props {
     lang: Language;
@@ -51,13 +70,8 @@
     paint: Paint | null;
     atlases: readonly string[];
     detailLevels: readonly string[];
-    /** What this build publishes: the Colour field offers only these colourings. */
-    colourings: {
-      networks?: unknown;
-      territories?: unknown;
-      striatal?: unknown;
-      cerebellar?: unknown;
-    } & Pick<ModelPort, 'cabNp'>;
+    /** What this build publishes: the Colour list offers only these colourings, each with its palette. */
+    colourings: PaletteSources & { striatal?: unknown } & Pick<ModelPort, 'cabNp'>;
     anatomy: ManifestAnatomy;
     anatomies: readonly PublishedAnatomy[];
     /** The tract reference, another subject with nothing to choose. */
@@ -66,17 +80,19 @@
     borrowed: { own: string; by: 'functions' | 'deficits' } | null;
     /** The settings panel; opening this popover closes it, and it opening closes this. */
     settingsOpen?: boolean;
-    /** A field holds a choice still downloading: the status bar leaves that download to the bar (header.js:538). */
+    /** A list holds a choice still downloading: the status bar leaves that download to the bar (header.js:538). */
     choosing?: boolean;
     /** S3's `chooseAtlas`. */
     onAtlas: (id: string) => unknown;
-    /** The reader points at or focuses the Atlas control, or the summary that holds it. */
+    /** The reader points at or focuses the Atlas list, or the summary that holds it. */
     onAtlasIntent: () => void;
     /** The composition lifts the paint first (app.js:633-636), then runs the colour command. */
     onSurfaceColor: (colour: SurfaceColor) => unknown;
     onDetail: (id: string) => unknown;
     /** Another subject is another page: the link is rewritten and the page reloads (S4). */
     onAnatomy: (id: string) => void;
+    /** The open popover's right edge in the window, so the stage can frame the anatomy beside it; null once closed. */
+    onPanel?: (right: number | null, immediate: boolean) => void;
   }
 
   let {
@@ -101,6 +117,7 @@
     onSurfaceColor,
     onDetail,
     onAnatomy,
+    onPanel,
   }: Props = $props();
 
   /** The Colour value while a tab paints; it is never offered. */
@@ -108,12 +125,7 @@
 
   const uid = $props.id();
   const dataId = `masthead-data-${uid}`;
-  const ids = {
-    subject: `anatomy-switch-${uid}`,
-    atlas: `atlas-switch-${uid}`,
-    colour: `surface-switch-${uid}`,
-    detail: `detail-${uid}`,
-  };
+  const captionId = (name: string) => `${name}-caption-${uid}`;
   const noteId = (name: string) => `${name}-note-${uid}`;
 
   const copy = $derived(t(lang, 'header'));
@@ -128,14 +140,12 @@
     detail: detail ?? detailLevels[0],
   });
 
-  // What the reader just chose in a field, held in its select while it downloads: once it lands,
-  // fails or is overtaken, the select shows the state again.
+  // What the reader just chose in a list, held as pressed until its command settles: the status
+  // turns to switching only once the download starts, so it cannot say when the choice is over.
   let chosen = $state<Record<Field, string | null>>({ atlas: null, colour: null, detail: null });
   $effect.pre(() => {
     for (const field of Object.keys(chosen) as Field[]) {
-      if (chosen[field] !== null && (!switching || chosen[field] === values[field])) {
-        chosen[field] = null;
-      }
+      if (chosen[field] !== null && chosen[field] === values[field]) chosen[field] = null;
     }
     choosing = Object.values(chosen).some((value) => value !== null);
   });
@@ -144,92 +154,7 @@
   const required = (colour: string, atlas: string) =>
     requiredAtlas(colourings, colour as SurfaceColor, atlas);
 
-  // The selected option is the field's value, how far it has loaded while it downloads, and the tab
-  // that set an atlas; every other option says what else choosing it would change.
-  const label = (field: Field, value: string, name: string, other: string) =>
-    value !== shown(field)
-      ? other
-      : chosen[field]
-        ? `${name} · ${loadingText(lang, progress)}`
-        : field === 'atlas' && borrowed
-          ? `${name} · ${copy.borrowedBy[borrowed.by]}`
-          : name;
-
-  const atlasOptions = $derived(
-    atlases.map((id) => ({
-      value: id,
-      label: label(
-        'atlas',
-        id,
-        atlasSwitchLabel(id, lang),
-        atlasOption(lang, id, required(shown('colour'), id)),
-      ),
-    })),
-  );
-  const colourOptions = $derived(
-    colourGroups(colourings).map(([group, modes]) => ({
-      group,
-      options: modes.map((mode) => ({
-        value: mode,
-        label: label(
-          'colour',
-          mode,
-          display.surfaceColors[mode],
-          colourOption(lang, mode, {
-            atlas: shown('atlas'),
-            required: required(mode, shown('atlas')),
-          }),
-        ),
-      })),
-    })),
-  );
-  const paintLabel = $derived(
-    painted ? display.paints[painted as keyof typeof display.paints] : '',
-  );
-  const detailOptions = $derived(
-    detailLevels.map((id) => ({
-      value: id,
-      label: label('detail', id, atlasSwitchLabel(id, lang), atlasSwitchLabel(id, lang)),
-    })),
-  );
-
-  const subjectOptions = $derived(
-    anatomies.map((entry) => ({ value: entry.id, label: subjectName(entry) })),
-  );
-  const colourSelectGroups = $derived(
-    colourOptions.map(({ group, options }) => ({
-      label: group ? copy.colourGroups[group as keyof typeof copy.colourGroups] : undefined,
-      options,
-    })),
-  );
-  const paintHiddenOption = $derived(painted ? { value: PAINT, label: paintLabel } : undefined);
-
-  const selectedLabel = (field: Field): string =>
-    shown(field) === PAINT
-      ? paintLabel
-      : ((field === 'atlas'
-          ? atlasOptions
-          : field === 'detail'
-            ? detailOptions
-            : colourOptions.flatMap(({ options }) => options)
-        ).find(({ value }) => value === shown(field))?.label ?? '');
-
-  const summary = $derived(
-    dataSummary({
-      subject: offerAnatomies ? subjectName(anatomy) : null,
-      atlas: selectedLabel('atlas'),
-      colour: selectedLabel('colour'),
-      detail: offersDetail ? selectedLabel('detail') : null,
-      reference: reference?.label,
-    }),
-  );
-  const summarySubject = $derived(summary.filter(({ part }) => part === 'subject'));
-  const summarySettings = $derived(summary.filter(({ part }) => part !== 'subject'));
-  const summaryLabel = $derived(
-    `${copy.dataSummary}: ${summary.map(({ text }) => text).join(' · ')}`,
-  );
-
-  // Notes: a field's one-line meaning, printed under it in the popover.
+  // Notes: what the chosen option is, printed under its name; the other atlases and levels say it in a few words.
   const atlasNote = (id: string) =>
     (copy.notes as Record<string, string | undefined>)[id] ??
     (t(lang, 'atlases') as Record<string, string | undefined>)[id] ??
@@ -256,26 +181,115 @@
       '',
     detail: offersDetail ? atlasNote(shown('detail')) : '',
   });
-  // The popover prints each note under its field; the reference's name, which has none, carries its own.
+  const brief = (id: string) => (copy.briefs as Record<string, string | undefined>)[id] ?? null;
+  const line = (field: 'subject' | Field, value: string, pressed: string, other: string | null) =>
+    value === pressed ? notes[field] || null : other;
+
+  // The pressed option says how far it has loaded, or the tab that set an atlas; every other
+  // option says what else choosing it would change.
+  const aside = (field: Field, value: string, other: string | null) =>
+    value !== shown(field)
+      ? other
+      : chosen[field]
+        ? loadingText(lang, progress)
+        : field === 'atlas' && borrowed
+          ? copy.borrowedBy[borrowed.by]
+          : null;
+
+  const atlasOptions = $derived<Choice[]>(
+    atlases.map((id) => ({
+      value: id,
+      name: atlasSwitchLabel(id, lang),
+      aside: aside('atlas', id, atlasAside(lang, id, required(shown('colour'), id))),
+      note: line('atlas', id, shown('atlas'), brief(id)),
+    })),
+  );
+  const paintLabel = $derived(
+    painted ? display.paints[painted as keyof typeof display.paints] : '',
+  );
+  const colourOptions = $derived<ChoiceGroup[]>([
+    ...(painted
+      ? [{ options: [{ value: PAINT, name: paintLabel, aside: null, note: notes.colour || null }] }]
+      : []),
+    ...colourGroups(colourings).map(([group, modes]) => ({
+      label: group ? copy.colourGroups[group as keyof typeof copy.colourGroups] : undefined,
+      options: modes.map((mode) => ({
+        value: mode,
+        name: display.surfaceColors[mode],
+        aside: aside(
+          'colour',
+          mode,
+          colourAside(lang, { atlas: shown('atlas'), required: required(mode, shown('atlas')) }),
+        ),
+        note: line('colour', mode, shown('colour'), null),
+        palette: colourPalette(mode, colourings),
+      })),
+    })),
+  ]);
+  const detailOptions = $derived<Choice[]>(
+    detailLevels.map((id) => ({
+      value: id,
+      name: atlasSwitchLabel(id, lang),
+      aside: aside('detail', id, null),
+      note: line('detail', id, shown('detail'), brief(id)),
+    })),
+  );
+  const subjectOptions = $derived<Choice[]>(
+    anatomies.map((entry) => ({
+      value: entry.id,
+      name: subjectName(entry),
+      aside: null,
+      note: line('subject', entry.id, anatomy.id, null),
+    })),
+  );
+
+  const selectedText = (field: Field): string => {
+    const options =
+      field === 'atlas'
+        ? atlasOptions
+        : field === 'detail'
+          ? detailOptions
+          : colourOptions.flatMap(({ options }) => options);
+    const option = options.find(({ value }) => value === shown(field));
+    return option ? [option.name, option.aside].filter(Boolean).join(' · ') : '';
+  };
+
+  const captions = $derived<Record<SummaryPart, string>>({
+    atlas: copy.atlas,
+    colour: copy.colour,
+    detail: display.internalAnatomy,
+    subject: copy.subject,
+  });
+  // The summary draws what the brain is, the atlas and the colour, which come first in its name.
+  const subjectKind = $derived(
+    typeof anatomy.individual === 'boolean'
+      ? copy.subjectKind[anatomy.individual ? 'individual' : 'template']
+      : null,
+  );
+  const summary = $derived(
+    dataSummary({
+      subject: subjectKind,
+      atlas: selectedText('atlas'),
+      colour: selectedText('colour'),
+      detail: offersDetail ? selectedText('detail') : null,
+      reference: reference?.label,
+    }),
+  );
+  const summaryShown = $derived(summary.filter(({ part }) => part !== 'detail'));
+  const summaryLabel = $derived(
+    summary.map(({ part, text }) => `${captions[part]} ${text}`).join(', '),
+  );
+
+  // The popover prints each note under its option; the reference's name, which has none, carries its own.
   const tip = (text: string) => (reference && text ? text : undefined);
 
   let open = $state(false);
   let instant = $state(false);
+  // The same, unreactive: an effect's cleanup reads state as it was when the effect ran.
+  let keyed = false;
   let root: HTMLDivElement;
   let toggle: HTMLButtonElement;
-  let summaryNode: HTMLSpanElement;
-  const selects: Partial<Record<'subject' | Field, HTMLSelectElement>> = $state({});
-
-  // The selects show the state, or the choice being downloaded. Writing the value is also what
-  // reverts one that was chosen and did not land.
-  function syncSelects() {
-    if (selects.subject) selects.subject.value = anatomy.id;
-    for (const field of ['atlas', 'colour', 'detail'] as const) {
-      const select = selects[field];
-      if (select) select.value = shown(field);
-    }
-  }
-  $effect(syncSelects);
+  let summaryNode = $state<HTMLSpanElement>();
 
   const visible = (element: HTMLElement) => element.checkVisibility();
 
@@ -293,18 +307,17 @@
     );
   }
 
-  // The summary names the atlas and the colour: internal anatomy stays in the popover and the name,
-  // and the colour yields where the atlas would not fit. The atlas stays and truncates if it must.
+  // The first arrangement that leaves the atlas whole: all three, without the colour, without the
+  // subject, then the atlas alone. The atlas is never dropped.
+  const ARRANGEMENTS = [[], ['colour'], ['subject'], ['colour', 'subject']] as const;
   function fit() {
-    summaryNode.removeAttribute('data-short');
-    const context = summaryNode.querySelector<HTMLElement>('.data-summary-context');
-    if (!context) return;
-    const dropped: string[] = [];
-    if (summaryNode.querySelector('[data-part="detail"]')) dropped.push('detail');
-    summaryNode.dataset.short = dropped.join(' ');
-    if (context.clientWidth >= context.scrollWidth) return;
-    if (summaryNode.querySelector('[data-part="colour"]')) dropped.push('colour');
-    summaryNode.dataset.short = dropped.join(' ');
+    if (!summaryNode) return;
+    const atlas = summaryNode.querySelector<HTMLElement>('[data-part="atlas"] .data-summary-value');
+    for (const dropped of ARRANGEMENTS) {
+      if (dropped.length) summaryNode.dataset.short = dropped.join(' ');
+      else summaryNode.removeAttribute('data-short');
+      if (!atlas || atlas.clientWidth >= atlas.scrollWidth) return;
+    }
   }
 
   // A new summary or language changes the width; so do the window, the font and the room.
@@ -330,11 +343,6 @@
   $effect.pre(() => {
     if (isReference && root?.contains(document.activeElement)) untrack(nextControl)?.focus();
   });
-  // A select that becomes disabled drops focus to the page; the subject waits for a download.
-  $effect.pre(() => {
-    if (switching && document.activeElement === selects.subject)
-      untrack(() => selects.atlas?.focus());
-  });
 
   // The settings panel and this popover are never open together (header.js:174, 398).
   $effect(() => {
@@ -343,14 +351,16 @@
   $effect(() => {
     if (!open) return;
     const outside = (event: PointerEvent) => {
-      if (!root.contains(event.target as Node)) open = false;
+      if (root.contains(event.target as Node)) return;
+      instant = keyed = false;
+      open = false;
     };
     // Marked handled: the page's own Escape would otherwise go on to clear the selection. On the
     // document, as legacy, so it works when a click on a note left focus on the page.
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
-      instant = true;
+      instant = keyed = true;
       open = false;
       toggle.focus();
     };
@@ -362,41 +372,141 @@
     };
   });
 
+  // The open popover's right edge, from layout offsets, which its entry scale does not move.
+  $effect(() => {
+    if (!open || reference || !onPanel) return;
+    const report = onPanel;
+    const panel = root.querySelector<HTMLElement>('.masthead-data')!;
+    const measure = () =>
+      report(
+        (panel.offsetParent as HTMLElement).getBoundingClientRect().left +
+          panel.offsetLeft +
+          panel.offsetWidth,
+        keyed,
+      );
+    const observer = new ResizeObserver(measure);
+    observer.observe(panel);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+      report(null, keyed);
+    };
+  });
+
   function onToggle(event: MouseEvent) {
-    instant = isKeyboardActivation(event);
+    instant = keyed = isKeyboardActivation(event);
     open = !open;
     if (open) settingsOpen = false;
   }
   // Tabbing past the last control leaves the popover. No related target means the window lost focus.
   function onfocusout(event: FocusEvent) {
     const next = event.relatedTarget as Node | null;
-    if (open && next !== null && !root.contains(next)) open = false;
+    if (!open || next === null || root.contains(next)) return;
+    instant = keyed = true;
+    open = false;
   }
 
   // What a screen reader hears of a download started here: that it began, and that it landed.
-  let pending: { field: Field; value: string } | null = null;
-  const separator = $derived(lang === 'fr' ? ' : ' : ': ');
-  async function choose(field: Field, value: string, command: (value: string) => unknown) {
-    chosen[field] = value;
-    command(value);
-    await tick();
-    syncSelects();
-    if (!switching) return;
-    pending = { field, value };
+  let pending: { field: Field; value: string; begun: boolean } | null = null;
+  const separator = $derived(lang === 'fr' ? ' : ' : ': ');
+  function begin() {
+    if (!pending || pending.begun || !switching) return;
+    pending.begun = true;
+    const { field, value } = pending;
     const name =
       field === 'colour'
         ? display.surfaceColors[value as SurfaceColor]
         : atlasSwitchLabel(value, lang);
     announce(`${name}${separator}${copy.loading}`);
   }
+  async function choose(field: Field, value: string, command: (value: string) => unknown) {
+    chosen[field] = value;
+    const asked = { field, value, begun: false };
+    pending = asked;
+    const done = command(value);
+    await tick();
+    begin();
+    try {
+      await done;
+    } finally {
+      if (chosen[field] === value) chosen[field] = null;
+      if (pending === asked && !asked.begun) pending = null;
+    }
+  }
   $effect(() => {
     const busy = switching;
     const current = values;
-    if (!pending || busy) return;
+    if (!pending) return;
+    if (busy) return untrack(begin);
+    if (!pending.begun) return;
     if (current[pending.field] === pending.value) announce(t(lang, 'viewport').loaded);
     pending = null;
   });
 </script>
+
+{#snippet list(
+  name: 'subject' | Field,
+  caption: string,
+  groups: readonly ChoiceGroup[],
+  pressed: string,
+  onpress: (value: string) => void,
+  unavailable = false,
+)}
+  <div class="data-field" data-field={name}>
+    <p class="data-label" id={captionId(name)}>{caption}</p>
+    <div
+      role="toolbar"
+      aria-orientation="vertical"
+      aria-labelledby={captionId(name)}
+      class="data-options"
+      {@attach roving}
+    >
+      {#each groups as group, index (group.label ?? index)}
+        <div
+          class="data-option-group"
+          role={group.label ? 'group' : undefined}
+          aria-label={group.label}
+        >
+          {#each group.options as option (option.value)}
+            {@const id = `${name}-${option.value}-${uid}`}
+            <button
+              type="button"
+              class="data-option"
+              aria-labelledby={option.aside ? `${id}-name ${id}-aside` : `${id}-name`}
+              aria-describedby={option.note ? `${id}-note` : undefined}
+              aria-pressed={option.value === pressed}
+              aria-disabled={unavailable || undefined}
+              onpointerenter={name === 'atlas' ? onAtlasIntent : undefined}
+              onfocus={name === 'atlas' ? onAtlasIntent : undefined}
+              onclick={() => {
+                if (!unavailable && option.value !== pressed) onpress(option.value);
+              }}
+            >
+              <span class="data-option-check">
+                {#if option.value === pressed}{@render iconGraphic('check')}{/if}
+              </span>
+              <span class="data-option-name" id="{id}-name">{option.name}</span>
+              {#if option.palette}
+                <span class="data-option-palette" aria-hidden="true">
+                  {#each option.palette as [r, g, b], index (index)}
+                    <span style:background="rgb({r} {g} {b})"></span>
+                  {/each}
+                </span>
+              {/if}
+              {#if option.aside}
+                <span class="data-option-aside" id="{id}-aside">{option.aside}</span>
+              {/if}
+              {#if option.note}
+                <span class="data-option-note" id="{id}-note">{option.note}</span>
+              {/if}
+            </button>
+          {/each}
+        </div>
+      {/each}
+    </div>
+  </div>
+{/snippet}
 
 <div
   bind:this={root}
@@ -418,17 +528,12 @@
     onfocus={onAtlasIntent}
   >
     <span bind:this={summaryNode} class="data-summary">
-      {#each summarySubject as { text } (text)}
-        <span class="data-summary-part" data-part="subject">{text}</span>
+      {#each summaryShown as { part, text } (part)}
+        <span class="data-summary-part" data-part={part}>
+          <span class="data-summary-caption">{captions[part]}</span>
+          <span class="data-summary-value">{text}</span>
+        </span>
       {/each}
-      <span class="data-summary-context">
-        {#each summarySettings as { part, text }, index (part)}
-          {#if index}
-            <span class="data-summary-sep" data-part={part} aria-hidden="true">·</span>
-          {/if}
-          <span class="data-summary-part" data-part={part}>{text}</span>
-        {/each}
-      </span>
     </span>
   </button>
   <div
@@ -437,85 +542,47 @@
     data-open={open ? '' : undefined}
     data-instant={instant ? '' : undefined}
   >
-    {#if offerAnatomies || reference}
+    {#if reference}
       <div class="data-field">
-        {#if offerAnatomies && !reference}
-          <label class="data-label" for={ids.subject}>{copy.subject}</label>
-          <Select
-            bind:select={selects.subject}
-            id={ids.subject}
-            class="data-select subject-select"
-            describedby={notes.subject ? noteId('subject') : undefined}
-            options={subjectOptions}
-            disabled={switching}
-            bind:value={
-              () => anatomy.id,
-              (value) => {
-                if (value !== anatomy.id) onAnatomy(value);
-              }
-            }
-          />
-        {:else if reference}
-          <span class="data-label">{copy.subject}</span>
-          <!-- A tooltip trigger is reachable by keyboard (WCAG 1.4.13, 2.1.1: deviation h3-name-description-reachable). -->
-          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-          <p
-            class="study-name"
-            tabindex={tip(notes.subject) ? 0 : undefined}
-            aria-describedby={notes.subject ? noteId('subject') : undefined}
-            data-tooltip={tip(notes.subject)}
-          >
-            {reference.label}
-          </p>
-        {/if}
+        <span class="data-label">{copy.subject}</span>
+        <!-- A tooltip trigger is reachable by keyboard (WCAG 1.4.13, 2.1.1: deviation h3-name-description-reachable). -->
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <p
+          class="study-name"
+          tabindex={tip(notes.subject) ? 0 : undefined}
+          aria-describedby={notes.subject ? noteId('subject') : undefined}
+          data-tooltip={tip(notes.subject)}
+        >
+          {reference.label}
+        </p>
         {#if notes.subject}<p class="data-note" id={noteId('subject')}>{notes.subject}</p>{/if}
       </div>
-    {/if}
-    {#if !reference}
-      <div class="data-field">
-        <label class="data-label" for={ids.atlas}>{copy.atlas}</label>
-        <Select
-          bind:select={selects.atlas}
-          id={ids.atlas}
-          class="data-select"
-          describedby={notes.atlas ? noteId('atlas') : undefined}
-          options={atlasOptions}
-          bind:value={() => shown('atlas'), (value) => choose('atlas', value, onAtlas)}
-          onpointerenter={onAtlasIntent}
-          onfocus={onAtlasIntent}
-        />
-        {#if notes.atlas}<p class="data-note" id={noteId('atlas')}>{notes.atlas}</p>{/if}
-      </div>
-      <div class="data-field">
-        <label class="data-label" for={ids.colour}>{copy.colour}</label>
-        <Select
-          bind:select={selects.colour}
-          id={ids.colour}
-          class="data-select"
-          describedby={notes.colour ? noteId('colour') : undefined}
-          groups={colourSelectGroups}
-          hiddenOption={paintHiddenOption}
-          bind:value={
-            () => shown('colour'),
-            (value) => choose('colour', value, (next) => onSurfaceColor(next as SurfaceColor))
-          }
-        />
-        {#if notes.colour}<p class="data-note" id={noteId('colour')}>{notes.colour}</p>{/if}
-      </div>
-      <!-- A build without the optional fine level offers one choice, and so no control. -->
+    {:else}
+      {@render list('atlas', copy.atlas, [{ options: atlasOptions }], shown('atlas'), (value) =>
+        choose('atlas', value, onAtlas),
+      )}
+      {@render list('colour', copy.colour, colourOptions, shown('colour'), (value) =>
+        choose('colour', value, (next) => onSurfaceColor(next as SurfaceColor)),
+      )}
       {#if offersDetail}
-        <div class="data-field">
-          <label class="data-label" for={ids.detail}>{display.internalAnatomy}</label>
-          <Select
-            bind:select={selects.detail}
-            id={ids.detail}
-            class="data-select"
-            describedby={notes.detail ? noteId('detail') : undefined}
-            options={detailOptions}
-            bind:value={() => shown('detail'), (value) => choose('detail', value, onDetail)}
-          />
-          {#if notes.detail}<p class="data-note" id={noteId('detail')}>{notes.detail}</p>{/if}
-        </div>
+        {@render list(
+          'detail',
+          display.internalAnatomy,
+          [{ options: detailOptions }],
+          shown('detail'),
+          (value) => choose('detail', value, onDetail),
+        )}
+      {/if}
+      <!-- Another subject reloads the page, so it waits for a download to land. -->
+      {#if offerAnatomies}
+        {@render list(
+          'subject',
+          copy.subject,
+          [{ options: subjectOptions }],
+          anatomy.id,
+          onAnatomy,
+          switching,
+        )}
       {/if}
     {/if}
   </div>
@@ -523,7 +590,6 @@
 
 <style>
   @layer features {
-    /* Only settings with a real choice occupy the instrument bar. */
     .data-bar {
       grid-column: 2;
       grid-row: 1;
@@ -537,67 +603,8 @@
     :global(#app:is([data-status='loading'], [data-status='error'])) .data-bar {
       visibility: hidden;
     }
-    .masthead-data {
-      display: flex;
-      flex: none;
-      align-items: center;
-      gap: var(--space-4);
-      min-width: 0;
-    }
-    .data-field {
-      display: flex;
-      flex: none;
-      align-items: baseline;
-      gap: var(--space-1);
-      min-width: 0;
-    }
-    .data-label {
-      margin: 0;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-      color: var(--text-tertiary);
-      white-space: nowrap;
-    }
-    /* One published subject is a name, set where a select's value would sit and on its line. */
-    .study-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: var(--text-ui);
-      font-weight: 600;
-      line-height: var(--lh-ui);
-      color: var(--text-primary);
-    }
 
-    /* Selects reuse Select.svelte; only typographic emphasis is specific to the masthead fields. */
-    .data-bar :global(.data-select) {
-      font-weight: 500;
-      /* Loading progress counts up inside the value without shaking it. */
-      font-variant-numeric: tabular-nums;
-    }
-    .data-bar :global(.subject-select) {
-      font-weight: 600;
-    }
-
-    /* Popovers grow from their trigger; closing is immediate. */
-    .masthead-data[data-open] {
-      transition:
-        opacity var(--popover-transition) var(--ease-ui),
-        transform var(--popover-transition) var(--ease-ui);
-    }
-    .masthead-data[data-instant] {
-      transition: none;
-    }
-    @starting-style {
-      .masthead-data[data-open] {
-        opacity: 0;
-        transform: scale(0.97);
-      }
-    }
-
-    /* The summary opens the fields as a popover. */
-    /* The full bar height, so the popover drops from the masthead's edge as the settings menu does. */
+    /* The summary: caption and value for the subject, the atlas and the colour, on one line. */
     .data-bar .data-toggle {
       display: inline-flex;
       flex: 1 1 auto;
@@ -643,95 +650,202 @@
     .data-bar .data-toggle[aria-expanded='true']::after {
       transform: translateY(1px) rotate(225deg);
     }
-    .data-bar .data-summary {
+    .data-summary {
       display: flex;
       flex: 0 1 auto;
-      flex-direction: column;
-      align-items: flex-start;
-      min-width: 0;
-      white-space: nowrap;
-      text-align: left;
-    }
-    .data-bar .data-summary > [data-part='subject'] {
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--text-primary);
-      font-weight: 600;
-      line-height: var(--lh-ui);
-    }
-    .data-bar .data-summary-context {
-      display: flex;
-      align-self: stretch;
       align-items: baseline;
-      gap: var(--space-2);
+      gap: var(--space-4);
       min-width: 0;
       overflow: hidden;
+      white-space: nowrap;
       font-size: var(--text-ui);
       line-height: var(--lh-ui);
     }
-    .data-bar .data-summary-context > * {
+    .data-summary-part {
+      display: flex;
       flex: none;
-    }
-    .data-bar .data-summary-context > [data-part='atlas'] {
-      flex: none;
+      align-items: baseline;
+      gap: var(--space-2);
       min-width: 0;
-      max-width: 100%;
+    }
+    .data-summary-part[data-part='atlas'] {
+      flex: 0 1 auto;
+    }
+    .data-summary-caption {
+      flex: none;
+      font-size: var(--text-caption);
+      color: var(--text-tertiary);
+    }
+    .data-summary-value {
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--text-primary);
       font-weight: 600;
+      /* Loading progress counts up inside the value without shaking it. */
+      font-variant-numeric: tabular-nums;
     }
-    .data-bar .data-summary-sep {
-      color: var(--text-tertiary);
-    }
-    .data-bar .data-summary:global([data-short~='detail'] [data-part='detail']),
-    .data-bar .data-summary:global([data-short~='colour'] [data-part='colour']) {
+    .data-summary:global([data-short~='colour'] [data-part='colour']),
+    .data-summary:global([data-short~='subject'] [data-part='subject']) {
       display: none;
     }
 
-    /* The bar turned on its side: one ruled field per row, caption, value, then what it means. */
-    .data-bar .masthead-data {
+    /* The popover: the lists side by side, each a caption, its options and the chosen one's note. */
+    .masthead-data {
+      --data-width: min(34rem, calc(100vw - 2 * var(--space-3)));
       position: absolute;
       top: calc(100% + var(--space-1));
-      /* The available header room ends before its actions, keeping the popover on screen. */
       right: 0;
-      left: auto;
       display: none;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
-      width: min(320px, calc(100vw - var(--space-6)));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: var(--data-width);
       max-height: calc(100dvh - var(--header-height) - var(--space-4));
       overflow-y: auto;
+      overscroll-behavior: contain;
       background: var(--surface-base);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-panel);
       box-shadow: var(--shadow-popover);
       transform-origin: top right;
     }
-    .data-bar .masthead-data[data-open] {
-      display: flex;
+    .masthead-data[data-open] {
+      display: grid;
+      transition:
+        opacity var(--popover-transition) var(--ease-ui),
+        transform var(--popover-transition) var(--ease-ui);
     }
-    /* A labelled stack: caption, a full-width field, then what the choice means. */
-    .data-bar .data-field {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-1);
-      padding: var(--space-3) var(--space-4) var(--space-4);
+    .masthead-data[data-instant] {
+      transition: none;
     }
-    .data-bar .data-field ~ .data-field {
+    @starting-style {
+      .masthead-data[data-open] {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+    }
+    /* Atlas, internal anatomy and subject down the left; the colour beside them, as tall as they are. */
+    .masthead-data {
+      grid-template-rows: auto auto 1fr;
+    }
+    .data-field {
+      grid-column: 1;
+      min-width: 0;
+      padding: var(--space-3) var(--space-2);
+    }
+    .data-field + .data-field {
       border-top: 1px solid var(--border-subtle);
     }
-    .data-bar .study-name {
-      max-width: 100%;
+    .data-field[data-field='colour'] {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      border-top: 0;
+      border-left: 1px solid var(--border-subtle);
     }
-    .data-bar .data-note {
-      display: block;
+    .data-label {
+      margin: 0 0 var(--space-1);
+      padding: 0 var(--space-2);
+      font-size: var(--text-caption);
+      font-weight: 500;
+      line-height: var(--lh-caption);
+      color: var(--text-secondary);
+    }
+    .data-options {
+      display: flex;
+      flex-direction: column;
+    }
+    .data-option-group + .data-option-group {
       margin-top: var(--space-1);
+      padding-top: var(--space-1);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .data-option {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: var(--space-2);
+      width: 100%;
+      min-height: 30px;
+      padding: var(--space-1) var(--space-2);
+      border: 0;
+      border-radius: var(--radius-small);
+      background: none;
+      color: var(--text-primary);
+      font: inherit;
+      font-size: var(--text-ui);
+      line-height: var(--lh-ui);
+      text-align: left;
+      cursor: pointer;
+    }
+    .data-option[aria-pressed='true'] {
+      cursor: default;
+    }
+    .data-option[aria-pressed='true'] .data-option-name {
+      font-weight: 600;
+    }
+    .data-option[aria-disabled='true'] {
+      color: var(--text-tertiary);
+      cursor: default;
+    }
+    .data-option:focus-visible {
+      outline-offset: -2px;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .data-option:hover:not([aria-pressed='true'], [aria-disabled='true']) {
+        background: var(--surface-hover);
+      }
+    }
+    .data-option-check {
+      display: flex;
+      grid-row: 1;
+    }
+    .data-option-name {
+      min-width: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    /* The colouring's own colours, as its key draws them, beside its name. */
+    .data-option-palette {
+      display: flex;
+      grid-column: 3;
+      grid-row: 1;
+      width: 48px;
+      height: 8px;
+      border-radius: var(--radius-mark);
+      overflow: hidden;
+    }
+    .data-option-palette > span {
+      flex: 1;
+    }
+    .data-option-aside {
+      grid-column: 2 / -1;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+    .data-option-note {
+      grid-column: 2 / -1;
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
       color: var(--text-secondary);
+    }
+    /* Under the option names: a 16px check and its gap in from the row's edge. */
+    .data-note {
+      margin: var(--space-1) 0 0;
+      padding: 0 var(--space-2) 0 calc(2 * var(--space-2) + 16px);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--text-secondary);
+    }
+    /* One published subject is a name, set where a value would sit. */
+    .study-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--text-ui);
+      font-weight: 600;
+      line-height: var(--lh-ui);
+      color: var(--text-primary);
     }
 
     /* A tract reference offers no choices: its name sits in the bar, with no popover behind it. */
@@ -750,16 +864,23 @@
       box-shadow: none;
     }
     .data-bar[data-reference] .data-field {
-      flex-direction: row;
+      display: flex;
       align-items: center;
       gap: var(--space-2);
+      min-width: 0;
       padding: 0;
+    }
+    .data-bar[data-reference] .data-label {
+      margin: 0;
+      padding: 0;
+      color: var(--text-tertiary);
+      white-space: nowrap;
     }
     .data-bar[data-reference] .data-note {
       display: none;
     }
 
-    /* The first caption stands on the stage gutter; the summary is as wide as its words, and its popover drops from its edge. */
+    /* The summary's first caption stands on the stage gutter; the popover drops from its edge and stays on screen. */
     @media (min-width: 801px) and (min-height: 481px),
       (min-width: 801px) and (orientation: portrait) {
       .data-bar {
@@ -769,24 +890,25 @@
         flex: 0 1 auto;
         margin-left: calc(-1px - var(--space-2));
       }
-      .data-bar .masthead-data {
-        left: calc(var(--stage-gutter) - 1px - var(--space-2));
+      .masthead-data {
         right: auto;
+        left: min(
+          calc(var(--stage-gutter) - 1px - var(--space-2)),
+          calc(100vw - var(--rail-width) - var(--data-width) - var(--space-3))
+        );
         transform-origin: top left;
       }
     }
 
-    /* Phones: the popover is inset from both screen edges like the settings panel, so the two drop as one width. */
+    /* Phones: one list under another, inset from both screen edges like the settings panel. */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .data-bar {
         position: static;
       }
-      .data-bar .data-toggle {
-        justify-content: flex-start;
-      }
-      .data-bar .masthead-data {
+      .masthead-data {
         left: max(var(--space-3), env(safe-area-inset-left));
         right: max(var(--space-3), env(safe-area-inset-right));
+        grid-template-columns: minmax(0, 1fr);
         width: auto;
         /* Below the text-aware bar, its rule, and a gutter. */
         max-height: calc(
@@ -794,35 +916,44 @@
             var(--space-3)
         );
       }
+      /* One list, in the order it is read. */
+      .masthead-data {
+        grid-template-rows: none;
+      }
+      .data-field[data-field='colour'] {
+        grid-column: 1;
+        grid-row: auto;
+        border-top: 1px solid var(--border-subtle);
+        border-left: 0;
+      }
       .data-bar[data-reference] .data-label {
         display: none;
       }
     }
 
-    /* Touch targets: 44px summary, whatever --control-height is (Select handles fields). */
+    /* Touch targets: 44px summary and options, whatever --control-height is. */
     @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      .data-bar .data-toggle {
+      .data-bar .data-toggle,
+      .data-option {
         min-height: 44px;
       }
     }
 
-    /* A phone on its side has width but little height: two columns, no scrolling. */
+    /* A phone on its side has width but little height: the two columns again. */
     @media (max-height: 480px) and (orientation: landscape) {
-      .data-bar .masthead-data {
+      .masthead-data {
+        right: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         width: min(640px, calc(100vw - 2 * var(--space-3)));
       }
-      .data-bar .masthead-data[data-open] {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .masthead-data {
+        grid-template-rows: auto auto 1fr;
       }
-      .data-bar .data-field:nth-child(-n + 2) {
+      .data-field[data-field='colour'] {
+        grid-column: 2;
+        grid-row: 1 / span 3;
         border-top: 0;
-      }
-      .data-bar .data-field:nth-child(even) {
         border-left: 1px solid var(--border-subtle);
-      }
-      .data-bar .data-field:last-child:nth-child(odd) {
-        grid-column: 1 / -1;
       }
     }
   }
@@ -837,6 +968,13 @@
       }
       .data-bar .data-toggle:active {
         transform: none;
+      }
+    }
+    @media (forced-colors: active) {
+      /* A forced background would paint the strip in one colour; a colouring's colours are data. */
+      .data-option-palette {
+        forced-color-adjust: none;
+        outline: 1px solid CanvasText;
       }
     }
   }

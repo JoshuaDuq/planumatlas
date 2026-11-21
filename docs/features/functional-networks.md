@@ -54,7 +54,7 @@ For each cortical region, `networks.composition` counts its source vertices per 
 
 ## Display
 
-Both colourings are options of the masthead **Colour** field (URL `colors=network` or `colors=cab-np`). `attachNetworkColors` (`web/src/lib/engine/render/network-colors.ts`) converts `_NETWORK` to a four-channel per-vertex colour; the fourth channel is 1 only where a network exists. Colours, not indices, are interpolated across a triangle, so a Visual–Default border blends two colours instead of sweeping through five intermediate indices. The cortex material mixes the colour in by `networkMix`, set to 1 only under Yeo 7 on a region with no paint or ghost; the medial wall keeps its region colour.
+Both colourings are options of the masthead's **Colour** list (URL `colors=network` or `colors=cab-np`). `attachNetworkColors` (`web/src/lib/engine/render/network-colors.ts`) converts `_NETWORK` to a four-channel per-vertex colour; the fourth channel is 1 only where a network exists. Colours, not indices, are interpolated across a triangle, so a Visual–Default border blends two colours instead of sweeping through five intermediate indices. The cortex material mixes the colour in by `networkMix`, set to 1 only under Yeo 7 on a region with no paint or ghost; the medial wall keeps its region colour.
 
 CAB-NP is not a vertex field: `brain-atlas.ts` gives each HCP-MMP region its network's colour. Choosing it switches the atlas to HCP-MMP1.0 (`requiredAtlas`), and `setSurfaceColor('cab-np')` throws on any other atlas. `validateCabNp` rejects an assignment to an unknown region or network and a network without a colour or name.
 

@@ -1,4 +1,12 @@
-import type { Language, LoadProgress, SurfaceColor } from '../../types/index.ts';
+import type {
+  ArterialTerritories,
+  CerebellarFunctions,
+  Language,
+  LoadProgress,
+  Rgb,
+  SurfaceColor,
+} from '../../types/index.ts';
+import { LOBE_COLORS } from '../catalog/lobes.ts';
 import { percent } from '../format.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
 
@@ -28,7 +36,7 @@ export function subjectName(entry: NamedEntry | null | undefined): string {
 
 export type SummaryPart = 'subject' | 'atlas' | 'colour' | 'detail';
 
-/** What the collapsed masthead names, part by part: subject, atlas, colouring, internal anatomy, or the tract reference alone. */
+/** What the masthead's summary names, part by part: subject, atlas, colouring, internal anatomy, or the tract reference alone. */
 export function dataSummary({
   subject,
   atlas,
@@ -79,24 +87,59 @@ export function colourGroups({
   ]).filter(([, modes]) => modes.length);
 }
 
-/** A Colour option names the atlas it switches to when it is defined on another atlas's areas. */
-export function colourOption(
-  lang: Language,
-  mode: SurfaceColor,
-  { atlas, required }: { atlas: string; required?: string | null },
-): string {
-  const name = t(lang, 'display').surfaceColors[mode];
-  return required && required !== atlas
-    ? t(lang, 'header').atlasBecomes(name, atlasSwitchLabel(required, lang))
-    : name;
+/** A partition with named colours: Yeo's networks, and CAB-NP's. */
+interface NamedColours {
+  networks: readonly string[];
+  colors: Readonly<Record<string, Rgb>>;
 }
 
-/** An Atlas option names the colouring it drops when the one shown is defined on another atlas. */
-export function atlasOption(lang: Language, id: string, required?: string | null): string {
-  const name = atlasSwitchLabel(id, lang);
+/** Where each colouring's palette comes from: what the stage key draws from (stage-keys.ts). */
+export interface PaletteSources {
+  networks?: NamedColours | null;
+  cabNp?: NamedColours | null;
+  territories?: Pick<ArterialTerritories, 'territories'> | null;
+  cerebellar?: Pick<CerebellarFunctions, 'regions'> | null;
+}
+
+/**
+ * A colouring's colours in its key's order, drawn beside its option; null for one with no palette of
+ * its own (tissue, T1, an atlas's region colours). The striatal map's networks are Yeo's.
+ */
+export function colourPalette(mode: SurfaceColor, sources: PaletteSources): readonly Rgb[] | null {
+  const named = (partition?: NamedColours | null) =>
+    partition ? partition.networks.map((key) => partition.colors[key]!) : null;
+  switch (mode) {
+    case 'lobe':
+      return Object.values(LOBE_COLORS);
+    case 'network':
+    case 'striatal':
+      return named(sources.networks);
+    case 'cab-np':
+      return named(sources.cabNp);
+    case 'territory':
+      return sources.territories?.territories.map(({ color }) => color) ?? null;
+    case 'cerebellar':
+      return sources.cerebellar?.regions.map(({ color }) => color) ?? null;
+    default:
+      return null;
+  }
+}
+
+/** What else a Colour option changes: the atlas it is defined on, when another is shown. */
+export function colourAside(
+  lang: Language,
+  { atlas, required }: { atlas: string; required?: string | null },
+): string | null {
+  return required && required !== atlas
+    ? t(lang, 'header').atlasBecomes(atlasSwitchLabel(required, lang))
+    : null;
+}
+
+/** What else an Atlas option changes: the colouring it drops when the one shown is defined on another atlas. */
+export function atlasAside(lang: Language, id: string, required?: string | null): string | null {
   return required && required !== id
-    ? t(lang, 'header').colourBecomes(name, t(lang, 'display').surfaceColors.atlas)
-    : name;
+    ? t(lang, 'header').colourBecomes(t(lang, 'display').surfaceColors.atlas)
+    : null;
 }
 
 /** How far a download has come, or that it has started. */

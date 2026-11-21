@@ -207,6 +207,26 @@ describe('an open stage popover’s band', () => {
     expect(calls).toEqual([{ immediate: true }, { immediate: false }]);
     expect(stage.framing()).toEqual(without);
   });
+
+  test('the data popover’s band is held apart: the wider band frames, and either closing leaves the other', () => {
+    const host = document.body.appendChild(document.createElement('div'));
+    const stage = createStageLayout({ media, storage: null });
+    stage.attachHost(host);
+    stage.setViewport(rect(1000, 600), { width: 1000, height: 600 });
+    stage.setGutter(20);
+    stage.setDock({ width: 300, height: 38 });
+    const left = () => [stage.framing().inset.left, host.style.getPropertyValue('--plate-left')];
+    stage.setPlateBand(312, { immediate: true });
+    stage.setDataBand(575, { immediate: true });
+    expect(stage.plateBand).toBe(575);
+    expect(left()).toEqual([575, '575px']);
+    stage.setDataBand(0, { immediate: true });
+    expect(left()).toEqual([312, '312px']);
+    stage.setDataBand(575, { immediate: true });
+    stage.setPlateBand(0, { immediate: true });
+    expect(left()).toEqual([575, '575px']);
+    host.remove();
+  });
 });
 
 describe('the bands the gizmo and markings sit by', () => {

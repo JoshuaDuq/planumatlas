@@ -10,4 +10,4 @@ Status: decided under the delegation on #4 (standards-based; #4 decisions 14 and
   - `onCloseAutoFocus` is prevented when the close came from focus-out, so focus stays where the user moved it. Escape closes and returns focus to the trigger (the consumed Escape of `header.js:141`, so the app's Escape does not also clear the selection).
 - One popover open at a time. Outside press also closes.
 - Choosing a setting (#4 decision 15, APG Radio Group): a **keyboard** radio choice keeps the panel open, so arrows can walk the options; a **pointer** choice or a command (Full screen, Provenance, Shortcuts) closes it. Legacy closes after any choice (`header.js:126`); that would close the panel on the first arrow press.
-- Data summary (`#masthead-data-toggle`): same disclosure when the bar is collapsed; the fields stay native `<select>` with visible labels.
+- Data summary (`.data-toggle`): the same disclosure at every width. Since 2026-11-21 its choices are lists, each a vertical Toolbar of `aria-pressed` buttons named by its visible caption (decision 0003: arrows move, Enter or a press chooses), not native `<select>`s; a choice keeps the popover open.

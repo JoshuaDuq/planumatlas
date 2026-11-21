@@ -1305,6 +1305,10 @@
    "aan": "Harvard arousal nuclei"
   },
   "subject": "Subject",
+  "subjectKind": {
+   "individual": "Individual",
+   "template": "Template"
+  },
   "atlas": "Atlas",
   "colour": "Colour",
   "colourGroups": {
@@ -1315,12 +1319,12 @@
    "vascular": "Blood supply"
   },
   "atlasBecomes": [
-   "[\"Alpha\",\"\"] → \"Alpha (atlas becomes )\"",
-   "[\"\",\"Alpha\"] → \" (atlas becomes Alpha)\""
+   "[\"Alpha\"] → \"Atlas becomes Alpha\"",
+   "[\"\"] → \"Atlas becomes \""
   ],
   "colourBecomes": [
-   "[\"Alpha\",\"\"] → \"Alpha (colour becomes )\"",
-   "[\"\",\"Alpha\"] → \" (colour becomes Alpha)\""
+   "[\"Alpha\"] → \"Colour becomes Alpha\"",
+   "[\"\"] → \"Colour becomes \""
   ],
   "dataSummary": "Atlas and display settings",
   "borrowedBy": {
@@ -1346,6 +1350,16 @@
    "learning": "Overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published",
    "aseg": "FreeSurfer’s standard automatic subcortical segmentation",
    "nextbrain": "Histology-based atlas, segmented on this subject at 0.4<NNBSP>mm"
+  },
+  "briefs": {
+   "destrieux": "Sulcal and gyral regions, 74 per hemisphere",
+   "hcp-mmp": "Multimodal areas, 180 per hemisphere",
+   "julich": "Cytoarchitectonic areas, 139 per hemisphere",
+   "schaefer": "Resting-state parcels, 200 per hemisphere",
+   "desikan": "Gyral regions, 34 per hemisphere",
+   "learning": "Overview structures for teaching",
+   "aseg": "FreeSurfer’s standard subcortical segmentation",
+   "nextbrain": "Histology-based atlas at 0.4<NNBSP>mm"
   },
   "skipToModel": "Skip to model",
   "copyLink": "Copy link to this view",

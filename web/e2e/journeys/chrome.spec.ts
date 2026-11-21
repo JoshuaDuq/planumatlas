@@ -3,8 +3,10 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '../fixtures.ts';
 
-const field = (page: import('@playwright/test').Page, name: string) =>
-  page.getByRole('combobox', { name, exact: true });
+const list = (page: import('@playwright/test').Page, name: string) =>
+  page.getByRole('toolbar', { name, exact: true });
+const chosen = (page: import('@playwright/test').Page, name: string) =>
+  list(page, name).locator('[aria-pressed="true"] .data-option-name');
 
 test.use({ viewport: { width: 1280, height: 800 } });
 
@@ -13,15 +15,22 @@ test('data bar, comparison CSV, saved PNG and full screen on one load', async ({
   await app.gotoHash();
   await app.ready();
 
-  // The data bar's fields are behind its summary. A colouring that needs another atlas switches the atlas.
-  const data = page.getByRole('button', { name: /^Atlas and display settings: / });
+  // The data bar's lists are behind its summary. A colouring that needs another atlas switches the atlas.
+  const data = page.getByRole('button', { name: /^Subject / });
   await data.click();
-  await expect(field(page, 'Atlas')).toHaveValue('destrieux');
+  await expect(chosen(page, 'Atlas')).toHaveText('Destrieux');
   // A page opened plainly shows the atlas regions.
-  await expect(field(page, 'Colour')).toHaveValue('atlas');
-  await field(page, 'Colour').selectOption({ label: 'CAB-NP networks (atlas becomes HCP-MMP)' });
-  await expect(field(page, 'Atlas')).toHaveValue('hcp-mmp', { timeout: 60_000 });
-  await expect(field(page, 'Colour')).toHaveValue('cab-np');
+  await expect(chosen(page, 'Colour')).toHaveText('Regions');
+  await list(page, 'Colour')
+    .getByRole('button', { name: /^CAB-NP networks/ })
+    .click();
+  // The choice is pressed while it downloads, saying how far it has come; landed, it says nothing more.
+  await expect(chosen(page, 'Atlas')).toHaveText('HCP-MMP');
+  await expect(list(page, 'Atlas').locator('[aria-pressed="true"] .data-option-aside')).toHaveCount(
+    0,
+    { timeout: 60_000 },
+  );
+  await expect(chosen(page, 'Colour')).toHaveText('CAB-NP networks');
   expect(app.requestsTo(/cortex-hcp-mmp\.glb/)).not.toHaveLength(0);
   await expect.poll(() => app.hash()).toContain('atlas=hcp-mmp');
   await data.click();

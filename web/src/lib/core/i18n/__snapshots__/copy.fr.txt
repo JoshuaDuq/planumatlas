@@ -1305,6 +1305,10 @@
    "aan": "Noyaux de l’éveil de Harvard"
   },
   "subject": "Sujet",
+  "subjectKind": {
+   "individual": "Individuel",
+   "template": "Modèle"
+  },
   "atlas": "Atlas",
   "colour": "Couleur",
   "colourGroups": {
@@ -1315,12 +1319,12 @@
    "vascular": "Vascularisation"
   },
   "atlasBecomes": [
-   "[\"Alpha\",\"\"] → \"Alpha (l’atlas devient )\"",
-   "[\"\",\"Alpha\"] → \" (l’atlas devient Alpha)\""
+   "[\"Alpha\"] → \"L’atlas devient Alpha\"",
+   "[\"\"] → \"L’atlas devient \""
   ],
   "colourBecomes": [
-   "[\"Alpha\",\"\"] → \"Alpha (la couleur devient )\"",
-   "[\"\",\"Alpha\"] → \" (la couleur devient Alpha)\""
+   "[\"Alpha\"] → \"La couleur devient Alpha\"",
+   "[\"\"] → \"La couleur devient \""
   ],
   "dataSummary": "Réglages de l’atlas et de l’affichage",
   "borrowedBy": {
@@ -1346,6 +1350,16 @@
    "learning": "Grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés",
    "aseg": "Segmentation sous-corticale automatique standard de FreeSurfer",
    "nextbrain": "Atlas d’origine histologique, segmenté sur ce sujet à 0,4<NNBSP>mm"
+  },
+  "briefs": {
+   "destrieux": "Régions des sillons et des gyrus, 74 par hémisphère",
+   "hcp-mmp": "Aires multimodales, 180 par hémisphère",
+   "julich": "Aires cytoarchitectoniques, 139 par hémisphère",
+   "schaefer": "Parcelles de connectivité au repos, 200 par hémisphère",
+   "desikan": "Régions gyrales, 34 par hémisphère",
+   "learning": "Grandes structures pour l’enseignement",
+   "aseg": "Segmentation sous-corticale standard de FreeSurfer",
+   "nextbrain": "Atlas d’origine histologique à 0,4<NNBSP>mm"
   },
   "skipToModel": "Aller au modèle",
   "copyLink": "Copier le lien de cette vue",

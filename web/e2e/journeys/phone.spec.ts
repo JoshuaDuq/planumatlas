@@ -53,9 +53,12 @@ test('the phone: the sheet tells the stage, focus survives the resize, the focus
 
   // Escape in the data popover closes it onto the summary and keeps the selection.
   await page.evaluate(() => (location.hash = 'region=destrieux:left:38'));
-  const summary = page.getByRole('button', { name: /^Atlas and display settings: / });
+  const summary = page.getByRole('button', { name: /^Subject / });
   await summary.click();
-  await page.getByRole('combobox', { name: 'Colour', exact: true }).focus();
+  await page
+    .getByRole('toolbar', { name: 'Colour', exact: true })
+    .locator('[aria-pressed="true"]')
+    .focus();
   await page.keyboard.press('Escape');
   await expect(summary).toHaveAttribute('aria-expanded', 'false');
   await expect(summary).toBeFocused();

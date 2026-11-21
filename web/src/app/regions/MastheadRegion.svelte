@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { ASSET_BASE } from '../../../build/site.ts';
   import { paintedLayerSources } from '../../lib/core/catalog/cortical-layers.ts';
   import { DISORDER_ATLAS } from '../../lib/core/catalog/disorder-effects.ts';
@@ -12,7 +13,7 @@
     viewCitations,
     type OnScreen,
   } from '../../lib/core/panels/citations.ts';
-  import { subjectName } from '../../lib/core/panels/header.ts';
+  import { subjectName, type PaletteSources } from '../../lib/core/panels/header.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
@@ -24,6 +25,7 @@
   import FeedbackDialog from '../../features/colophon/FeedbackDialog.svelte';
   import ProvenanceDialog from '../../features/provenance/ProvenanceDialog.svelte';
   import ShortcutsDialog from '../../features/shortcuts/ShortcutsDialog.svelte';
+  import { ROOM_BESIDE_PLATE_PX } from '../../lib/state/stage-layout.svelte.ts';
   import { getApp } from '../application.svelte.ts';
   import { prefetchOtherAtlas } from '../boot.ts';
 
@@ -71,6 +73,25 @@
     return embedCode(href, title);
   }
   const status = $derived(app.session.state.status);
+
+  // The open data popover takes a band off the stage's left, as a stage popover does, so the camera
+  // frames the anatomy beside it; not on a phone, nor where that would leave the anatomy too little room.
+  let dataPanel = $state<{ right: number | null; immediate: boolean }>({
+    right: null,
+    immediate: false,
+  });
+  $effect(() => {
+    const { right, immediate } = dataPanel;
+    const { stage, media } = app;
+    const visible = stage.visibleRect;
+    const host = document.getElementById('viewport');
+    let band = 0;
+    if (right !== null && !media.phone && visible && host) {
+      const wanted = right - host.getBoundingClientRect().left + stage.gutter - visible.x;
+      if (visible.width - wanted >= ROOM_BESIDE_PLATE_PX) band = wanted;
+    }
+    untrack(() => stage.setDataBand(band, { immediate }));
+  });
 
   // The preference is a plain store: the masthead's switch follows this copy of it.
   let singleKeys = $state(app.keyPreference.enabled);
@@ -264,7 +285,8 @@
         atlases={model.manifest.atlases.map(({ id }) => id)}
         detailLevels={model.manifest.detail_levels.map(({ id }) => id)}
         colourings={{
-          networks: model.manifest.networks,
+          // The stage key reads it so too (StageRegion.svelte).
+          networks: model.manifest.networks as PaletteSources['networks'],
           cabNp: model.cabNp,
           territories: model.manifest.arterial_territories,
           striatal: model.manifest.striatal_networks,
@@ -282,6 +304,7 @@
           anatomy.chooseLayer(() => excursions.chooseSurfaceColor(colour))}
         onDetail={(id) => anatomy.chooseLayer(() => commands.chooseDetail(id))}
         onAnatomy={world.links.switchAnatomy}
+        onPanel={(right, immediate) => (dataPanel = { right, immediate })}
       />
     {/if}
   {/snippet}

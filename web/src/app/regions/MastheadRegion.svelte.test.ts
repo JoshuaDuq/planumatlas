@@ -6,7 +6,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
 import { domainName } from '../../lib/core/catalog/neuropsych-domains.ts';
-import { t } from '../../lib/core/i18n/index.ts';
+import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import { ASSET_BASE } from '../../../build/site.ts';
 import * as snapshot from '../../features/snapshot/snapshot.ts';
 import { createShell, expectAxeCleanFitted } from './shell-test-support.ts';
@@ -56,14 +56,14 @@ describe('what the masthead region holds', () => {
       );
     // The data bar is its one summary, named with every value it holds.
     expect(names.slice(0, 2)).toEqual(['Skip to model', 'Planum']);
-    expect(names[2]).toMatch(/^Atlas and display settings: /);
+    expect(names[2]).toMatch(/^Subject Individual, Atlas \S.*, Colour \S/);
     expect(names.slice(-3)).toEqual(['Save image (PNG)', 'Share this view', 'More settings']);
-    // One subject is published, so the summary's popover has no Subject field.
-    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
-    const fields = [...header.querySelectorAll('select')]
-      .filter((select) => select.checkVisibility())
-      .map((select) => select.labels[0]!.textContent);
-    expect(fields).toEqual(['Atlas', 'Colour', 'Internal anatomy']);
+    // One subject is published, so the summary's popover has no Subject list.
+    await userEvent.click(page.getByRole('button', { name: /^Subject / }));
+    const lists = [...header.querySelectorAll('[role=toolbar]')]
+      .filter((list) => list.checkVisibility())
+      .map((list) => document.getElementById(list.getAttribute('aria-labelledby')!)!.textContent);
+    expect(lists).toEqual(['Atlas', 'Colour', 'Internal anatomy']);
   });
 
   test('with the template published, the popover offers every published brain as its Subject', async () => {
@@ -72,15 +72,19 @@ describe('what the masthead region holds', () => {
       { id: 'mni152', display_name: 'MNI template (ICBM 152 2009c)', label: '', individual: false },
     ];
     await shell.open();
-    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
-    const subject = page.getByRole('combobox', { name: 'Subject', exact: true });
+    await userEvent.click(page.getByRole('button', { name: /^Subject / }));
+    const subject = page.getByRole('toolbar', { name: 'Subject', exact: true });
     await expect.element(subject).toBeVisible();
-    const select = subject.element() as HTMLSelectElement;
-    expect([...select.options].map(({ value, text }) => [value, text])).toEqual([
-      ['cdmd', 'MGH CDMD sub_013'],
-      ['mni152', 'MNI template (ICBM 152 2009c)'],
+    const options = [...subject.element().querySelectorAll('button')];
+    expect(
+      options.map((button) => [
+        button.querySelector('.data-option-name')!.textContent,
+        button.getAttribute('aria-pressed'),
+      ]),
+    ).toEqual([
+      ['MGH CDMD sub_013', 'true'],
+      ['MNI template (ICBM 152 2009c)', 'false'],
     ]);
-    expect(select.value).toBe('cdmd');
   });
 
   test('before the engine the masthead is there without a data bar, and Save image waits', async () => {
@@ -230,16 +234,19 @@ describe('Full screen and Save image', () => {
 });
 
 describe('the data bar', () => {
-  // The data fields are behind the masthead's one summary, at every width.
-  const openData = () =>
-    userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
+  // The data lists are behind the masthead's one summary, at every width.
+  const openData = () => userEvent.click(page.getByRole('button', { name: /^Subject / }));
+  const choose = (list: string, name: string) =>
+    userEvent.click(
+      page.getByRole('toolbar', { name: list, exact: true }).getByRole('button', { name }),
+    );
 
   test('Colour lifts the paint, then chooses the colouring', async () => {
     await shell.open();
     const { world } = shell.app;
     expect(world!.view.current.paintLifted).toBe(false);
     await openData();
-    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Colour' }), 'mri');
+    await choose('Colour', 'T1 MRI');
     await vi.waitFor(() => expect(world!.view.current.surfaceColor).toBe('mri'));
     expect(world!.view.current.paintLifted).toBe(true);
   });
@@ -248,7 +255,7 @@ describe('the data bar', () => {
     await shell.open();
     const { world } = shell.app;
     await openData();
-    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Atlas' }), 'hcp-mmp');
+    await choose('Atlas', 'HCP-MMP');
     await vi.waitFor(() => expect(world!.view.current.atlas).toBe('hcp-mmp'));
     expect(world!.view.current.paintLifted).toBe(true);
   });
@@ -260,17 +267,34 @@ describe('the data bar', () => {
       ({ id }) => id !== world!.view.current.detail,
     )!;
     await openData();
-    await userEvent.selectOptions(
-      page.getByRole('combobox', { name: 'Internal anatomy' }),
-      other.id,
-    );
+    await choose('Internal anatomy', atlasSwitchLabel(other.id, 'en'));
     await vi.waitFor(() => expect(world!.view.current.detail).toBe(other.id));
+  });
+
+  test('the open data popover frames the anatomy beside it, as a stage popover does; not on a phone', async () => {
+    await shell.open();
+    const { stage } = shell.app;
+    const summary = page.getByRole('button', { name: /^Subject / });
+    await vi.waitFor(() => expect(stage.visibleRect).not.toBeNull());
+    expect(stage.plateBand).toBe(0);
+    await userEvent.click(summary);
+    const popover = document.querySelector<HTMLElement>('.masthead-data')!;
+    await Promise.all(popover.getAnimations().map((animation) => animation.finished));
+    const host = document.getElementById('viewport')!.getBoundingClientRect();
+    const band = popover.getBoundingClientRect().right - host.left + stage.gutter;
+    await vi.waitFor(() => expect(Math.abs(stage.plateBand - band)).toBeLessThan(1));
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(stage.plateBand).toBe(0));
+    await page.viewport(390, 844);
+    await userEvent.click(summary);
+    await expect.element(summary).toHaveAttribute('aria-expanded', 'true');
+    expect(stage.plateBand).toBe(0);
   });
 
   test('the data popover and the settings panel are never open together', async () => {
     await shell.open();
     await page.viewport(390, 844);
-    const summary = page.getByRole('button', { name: /^Atlas and display settings/ });
+    const summary = page.getByRole('button', { name: /^Subject / });
     await expect.element(summary).toBeVisible();
     await userEvent.click(summary);
     await expect.element(summary).toHaveAttribute('aria-expanded', 'true');
@@ -283,14 +307,14 @@ describe('the data bar', () => {
     await expect.element(summary).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('the tract reference replaces the subject: its name alone, and no fields', async () => {
+  test('the tract reference replaces the subject: its name alone, and no lists', async () => {
     await shell.open({ tractAnatomy: 'reference-subject' });
     shell.app.world!.excursions.chooseExplorer('diffusion');
     flushSync();
     const bar = document.querySelector<HTMLElement>('.data-bar')!;
     expect(bar.hasAttribute('data-reference')).toBe(true);
     expect(bar.textContent).toContain(tractCatalog('reference-subject').name.en);
-    expect(page.getByRole('combobox', { name: 'Atlas' }).elements()).toHaveLength(0);
+    expect(page.getByRole('toolbar', { name: 'Atlas' }).elements()).toHaveLength(0);
   });
 });
 

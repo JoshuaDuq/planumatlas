@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
+import { LOBE_COLORS } from '../catalog/lobes.ts';
 import { t } from '../i18n/index.ts';
 import {
-  atlasOption,
+  atlasAside,
   colophonParts,
+  colourAside,
   colourGroups,
-  colourOption,
+  colourPalette,
   dataSummary,
   loadingText,
   subjectName,
@@ -98,25 +100,22 @@ test('Colour groups appearance, the lobes and atlas regions, networks and blood 
 
 test('Lobes on an atlas grouped by network names the lobe atlas it switches to', () => {
   assert.equal(
-    colourOption('en', 'lobe', { atlas: 'hcp-mmp', required: 'destrieux' }),
-    'Lobes (atlas becomes Destrieux)',
+    colourAside('en', { atlas: 'hcp-mmp', required: 'destrieux' }),
+    'Atlas becomes Destrieux',
   );
-  assert.equal(colourOption('en', 'lobe', { atlas: 'julich', required: null }), 'Lobes');
+  assert.equal(colourAside('en', { atlas: 'julich', required: null }), null);
 });
 
-test('a colour or atlas option names what choosing it changes', () => {
+test('a colour or atlas option says what else choosing it changes, and nothing when it changes nothing else', () => {
   assert.equal(
-    colourOption('en', 'cab-np', { atlas: 'destrieux', required: 'hcp-mmp' }),
-    'CAB-NP networks (atlas becomes HCP-MMP)',
+    colourAside('en', { atlas: 'destrieux', required: 'hcp-mmp' }),
+    'Atlas becomes HCP-MMP',
   );
-  assert.equal(
-    colourOption('en', 'cab-np', { atlas: 'hcp-mmp', required: 'hcp-mmp' }),
-    'CAB-NP networks',
-  );
-  assert.equal(colourOption('en', 'tissue', { atlas: 'destrieux', required: null }), 'Tissue');
-  assert.equal(atlasOption('en', 'destrieux', 'hcp-mmp'), 'Destrieux (colour becomes Regions)');
-  assert.equal(atlasOption('en', 'hcp-mmp', 'hcp-mmp'), 'HCP-MMP');
-  assert.equal(atlasOption('en', 'destrieux', undefined), 'Destrieux');
+  assert.equal(colourAside('en', { atlas: 'hcp-mmp', required: 'hcp-mmp' }), null);
+  assert.equal(colourAside('en', { atlas: 'destrieux', required: null }), null);
+  assert.equal(atlasAside('en', 'destrieux', 'hcp-mmp'), 'Colour becomes Regions');
+  assert.equal(atlasAside('en', 'hcp-mmp', 'hcp-mmp'), null);
+  assert.equal(atlasAside('en', 'destrieux', undefined), null);
 });
 
 test('a download says how far it has come, or that it has started', () => {
@@ -134,28 +133,7 @@ test('MAST-28 a name loses its quotation marks and doubled spaces, and may end u
   assert.equal(subjectName({ id: 'y', subject: 'sub' }), 'sub', 'the subject before the entry id');
 });
 
-test('MAST-29 Colour offers each published colouring under its name, in both languages', () => {
-  const required = (mode: string) => (mode === 'cab-np' ? 'hcp-mmp' : null);
-  const names = (lang: 'en' | 'fr') =>
-    (['tissue', 'mri', 'lobe', 'atlas', 'network', 'cab-np'] as const).map((mode) =>
-      colourOption(lang, mode, { atlas: 'destrieux', required: required(mode) }),
-    );
-  assert.deepEqual(names('en'), [
-    'Tissue',
-    'T1 MRI',
-    'Lobes',
-    'Regions',
-    'Yeo 7 networks',
-    'CAB-NP networks (atlas becomes HCP-MMP)',
-  ]);
-  assert.deepEqual(names('fr'), [
-    'Tissu',
-    'IRM T1',
-    'Lobes',
-    'Régions',
-    'Réseaux Yeo 7',
-    'Réseaux CAB-NP (l’atlas devient HCP-MMP)',
-  ]);
+test('MAST-29 Colour offers only the published colourings, in fixed groups', () => {
   assert.deepEqual(colourGroups({}), [
     ['appearance', ['tissue', 'mri']],
     ['parcellation', ['lobe', 'atlas']],
@@ -163,23 +141,42 @@ test('MAST-29 Colour offers each published colouring under its name, in both lan
   assert.deepEqual(colourGroups({ cabNp: {} }).slice(2), [['networks', ['cab-np']]]);
 });
 
-test('MAST-30 an atlas option names the colouring it falls back to, in both languages', () => {
-  const options = (lang: 'en' | 'fr') =>
-    ['destrieux', 'hcp-mmp', 'aseg'].map((id) => atlasOption(lang, id, 'hcp-mmp'));
-  assert.deepEqual(options('en'), [
-    'Destrieux (colour becomes Regions)',
-    'HCP-MMP',
-    'FreeSurfer aseg (colour becomes Regions)',
-  ]);
-  assert.deepEqual(options('fr'), [
-    'Destrieux (la couleur devient Régions)',
-    'HCP-MMP',
-    'FreeSurfer aseg (la couleur devient Régions)',
-  ]);
+test('MAST-30 an option names the atlas or colouring it switches to, in both languages', () => {
   assert.equal(
-    colourOption('fr', 'cab-np', { atlas: 'hcp-mmp', required: 'hcp-mmp' }),
-    'Réseaux CAB-NP',
+    colourAside('fr', { atlas: 'destrieux', required: 'hcp-mmp' }),
+    'L’atlas devient HCP-MMP',
   );
+  assert.equal(colourAside('fr', { atlas: 'hcp-mmp', required: 'hcp-mmp' }), null);
+  const asides = (lang: 'en' | 'fr') =>
+    ['destrieux', 'hcp-mmp', 'aseg'].map((id) => atlasAside(lang, id, 'hcp-mmp'));
+  assert.deepEqual(asides('en'), ['Colour becomes Regions', null, 'Colour becomes Regions']);
+  assert.deepEqual(asides('fr'), [
+    'La couleur devient Régions',
+    null,
+    'La couleur devient Régions',
+  ]);
+});
+
+test('MAST-56 a colouring’s palette is its key’s colours, in its key’s order, and none for the rest', () => {
+  const vis = [120, 18, 134] as const;
+  const dmn = [205, 62, 78] as const;
+  const sources = {
+    networks: { networks: ['Vis', 'Default'], colors: { Default: dmn, Vis: vis } },
+    cabNp: { networks: ['Default'], colors: { Default: [1, 2, 3] as const } },
+    territories: { territories: [{ color: [4, 5, 6] as const }] as never },
+    cerebellar: { regions: [{ color: [7, 8, 9] as const }] as never },
+  };
+  assert.deepEqual(colourPalette('lobe', {}), Object.values(LOBE_COLORS));
+  assert.deepEqual(colourPalette('network', sources), [vis, dmn]);
+  // The striatal map's networks are Yeo's own.
+  assert.deepEqual(colourPalette('striatal', sources), [vis, dmn]);
+  assert.deepEqual(colourPalette('cab-np', sources), [[1, 2, 3]]);
+  assert.deepEqual(colourPalette('territory', sources), [[4, 5, 6]]);
+  assert.deepEqual(colourPalette('cerebellar', sources), [[7, 8, 9]]);
+  for (const mode of ['tissue', 'mri', 'atlas'] as const) {
+    assert.equal(colourPalette(mode, sources), null, mode);
+  }
+  assert.equal(colourPalette('network', {}), null, 'a build without the networks');
 });
 
 test('MAST-32 a download shows its percentage, or that it has started', () => {

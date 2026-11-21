@@ -5,7 +5,7 @@ import { flushSync } from 'svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
-import { t } from '../../lib/core/i18n/index.ts';
+import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
 import { createShell } from './shell-test-support.ts';
 
 vi.mock('../../lib/core/assets/published-anatomy.ts', async (importOriginal) => ({
@@ -188,22 +188,16 @@ describe('the count', () => {
       await held;
       await setDetail(id);
     });
-    // The data fields are behind the masthead's summary.
-    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
-    await userEvent.selectOptions(
-      page.getByRole('combobox', { name: 'Internal anatomy' }),
-      other.id,
-    );
-    const detailOptions = () =>
-      [
-        ...page
-          .getByRole('combobox', { name: 'Internal anatomy' })
-          .element()
-          .querySelectorAll('option'),
-      ].map((option) => option.textContent);
-    await expect
-      .poll(() => detailOptions().filter((text) => text?.endsWith(' · Loading 34%')))
-      .toHaveLength(1);
+    // The data lists are behind the masthead's summary.
+    await userEvent.click(page.getByRole('button', { name: /^Subject / }));
+    const detail = page.getByRole('toolbar', { name: 'Internal anatomy', exact: true });
+    await userEvent.click(detail.getByRole('button', { name: atlasSwitchLabel(other.id, 'en') }));
+    // Each option's line under its name: how far the held choice has loaded.
+    const asides = () =>
+      [...detail.element().querySelectorAll('.data-option-aside')].map(
+        (aside) => aside.textContent,
+      );
+    await expect.poll(asides).toEqual(['Loading 34%']);
     expect(count()).toBe(footer.visibleRegions(world!.catalog.visibleCount));
     finish();
     await vi.waitFor(() => expect(shell.app.session.state.status).toBe('ready'));

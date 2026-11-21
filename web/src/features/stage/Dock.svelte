@@ -32,7 +32,7 @@
   import type { PreparedDisplay } from '../../lib/state/display-state.ts';
   import type { DisplayView } from '../../lib/state/display-state.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
-  import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
+  import { ROOM_BESIDE_PLATE_PX, type StageLayout } from '../../lib/state/stage-layout.svelte.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Language, SessionState } from '../../lib/types/index.ts';
@@ -100,8 +100,6 @@
   }: Props = $props();
 
   const NARROW_STAGE_PX = 480;
-  // The least room a wider screen keeps for the anatomy beside an open popover.
-  const ROOM_BESIDE_PLATE_PX = 320;
   const uid = $props.id();
   const sectionLabelId = `section-tool-${uid}`;
   const placeLabelId = `place-tool-${uid}`;

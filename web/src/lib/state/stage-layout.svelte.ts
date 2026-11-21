@@ -4,6 +4,9 @@ import { clearCorner, clearFraming } from '../engine/render/effective-viewport.t
 import type { Media } from './media.svelte.ts';
 import { PREF_KEYS, defaultStorage, readPref, writePref } from './prefs.ts';
 
+/** The least room a wider screen keeps for the anatomy beside an open popover. */
+export const ROOM_BESIDE_PLATE_PX = 320;
+
 export type Edge = 'top' | 'right' | 'bottom' | 'left';
 
 /** How the dock and the scale bar share the stage's bottom line (viewport-chrome.js:188-195). */
@@ -51,8 +54,11 @@ export function createStageLayout({
   let keySize = $state.raw<Size>({ width: 0, height: 0 });
   // The bands on the stage's right and above the dock the guided tour keeps clear of anatomy for its card.
   let guideInset = { right: 0, bottom: 0 };
-  // The band an open stage popover takes off the stage's left on a wider screen.
+  // The bands an open stage popover and the masthead's data panel take off the stage's left on a wider
+  // screen. Held apart, as either can close while the other stays open; the stage frames beside the wider.
   let plateBand = $state(0);
+  let dataBand = $state(0);
+  const leftBand = () => Math.max(plateBand, dataBand);
   let sheetFull = $state(false);
   let sectionNeed = $state(0);
   let gutter = $state(0);
@@ -221,7 +227,7 @@ export function createStageLayout({
     if (!host) return;
     host.style.setProperty('--key-top', `${keyInset.top}px`);
     host.style.setProperty('--key-right', `${keyInset.right}px`);
-    host.style.setProperty('--plate-left', `${plateBand}px`);
+    host.style.setProperty('--plate-left', `${leftBand()}px`);
   }
 
   /** Runs G3's fitting without signalling a refit; true when it changed the key band. */
@@ -366,15 +372,23 @@ export function createStageLayout({
       if (changed && !fitting) onDock?.();
     },
 
-    /** The band an open stage popover takes off the left of the framing rectangle, in pixels; 0 while none does. */
+    /** The band open popovers take off the left of the framing rectangle, in pixels; 0 while none does. */
     get plateBand() {
-      return plateBand;
+      return leftBand();
     },
 
     /** An open stage popover's band, the visible stage left of its right edge and a gutter; 0 gives it back. */
     setPlateBand(band: number, options: MoveOptions) {
       if (band === plateBand) return;
       plateBand = band;
+      writeBands();
+      onDock?.(options);
+    },
+
+    /** The masthead's open data panel's band, measured as a stage popover's; 0 gives it back. */
+    setDataBand(band: number, options: MoveOptions) {
+      if (band === dataBand) return;
+      dataBand = band;
       writeBands();
       onDock?.(options);
     },
@@ -429,17 +443,17 @@ export function createStageLayout({
       const band = Math.max(keyInset.right, guideInset.right);
       if (!visibleRect?.height) {
         return {
-          inset: { top: keyInset.top, right: band, bottom: reach, left: plateBand },
+          inset: { top: keyInset.top, right: band, bottom: reach, left: leftBand() },
           scale: { horizontal: 1, vertical: 1 },
         };
       }
       const room = {
-        width: visibleRect.width - band - plateBand,
+        width: visibleRect.width - band - leftBand(),
         height: visibleRect.height - keyInset.top,
       };
       const { inset, scale, top, right } = clearGizmo(room, reach, markingClearance(reach));
       return {
-        inset: { top: keyInset.top + top, right: band + right, bottom: inset, left: plateBand },
+        inset: { top: keyInset.top + top, right: band + right, bottom: inset, left: leftBand() },
         scale,
       };
     },

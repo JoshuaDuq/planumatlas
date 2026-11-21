@@ -10,17 +10,31 @@
 
   type Bar = Omit<
     ComponentProps<typeof DataBar>,
-    'onAtlas' | 'onAtlasIntent' | 'onSurfaceColor' | 'onDetail' | 'onAnatomy' | 'settingsOpen'
+    | 'onAtlas'
+    | 'onAtlasIntent'
+    | 'onSurfaceColor'
+    | 'onDetail'
+    | 'onAnatomy'
+    | 'onPanel'
+    | 'settingsOpen'
   >;
 
   let {
     bar,
     calls = [],
     onCommand,
-  }: { bar: Bar; calls?: string[]; onCommand?: (command: string) => void } = $props();
+    panels = [],
+  }: {
+    bar: Bar;
+    calls?: string[];
+    onCommand?: (command: string) => unknown;
+    /** Each right edge the open popover reported, and whether a key moved it. */
+    panels?: [number | null, boolean][];
+  } = $props();
+  // What the command returns is what the bar waits on, as it waits on the app's own commands.
   const command = (name: string) => {
     calls.push(name);
-    onCommand?.(name);
+    return onCommand?.(name);
   };
 
   let themeChoice = $state<ThemeChoice>('system');
@@ -73,6 +87,7 @@
       onSurfaceColor={(colour) => command(`colour:${colour}`)}
       onDetail={(id) => command(`detail:${id}`)}
       onAnatomy={(id) => command(`anatomy:${id}`)}
+      onPanel={(right, immediate) => panels.push([right, immediate])}
     />
   {/snippet}
 </Masthead>

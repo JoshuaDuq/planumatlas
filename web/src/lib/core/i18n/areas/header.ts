@@ -17,6 +17,8 @@ export const en = {
     aan: 'Harvard arousal nuclei',
   },
   subject: 'Subject',
+  // What the brain on screen is, read first in the masthead's summary.
+  subjectKind: { individual: 'Individual', template: 'Template' },
   atlas: 'Atlas',
   colour: 'Colour',
   colourGroups: {
@@ -26,9 +28,9 @@ export const en = {
     subcortical: 'Subcortical maps',
     vascular: 'Blood supply',
   },
-  // Said in the option, before it is chosen: what else choosing it changes.
-  atlasBecomes: (colour: string, atlas: string) => `${colour} (atlas becomes ${atlas})`,
-  colourBecomes: (atlas: string, colour: string) => `${atlas} (colour becomes ${colour})`,
+  // Said under the option, before it is chosen: what else choosing it changes.
+  atlasBecomes: (atlas: string) => `Atlas becomes ${atlas}`,
+  colourBecomes: (colour: string) => `Colour becomes ${colour}`,
   dataSummary: 'Atlas and display settings',
   // While a function or deficit shows its regions on another atlas than the reader's own.
   borrowedBy: { functions: 'via Functions', deficits: 'via Deficits' },
@@ -52,6 +54,17 @@ export const en = {
       'Overview structures grouped from NextBrain and aseg labels, with CerebNet cerebellar lobules where published',
     aseg: 'FreeSurfer’s standard automatic subcortical segmentation',
     nextbrain: 'Histology-based atlas, segmented on this subject at 0.4\u202fmm',
+  },
+  // Each atlas and detail level in a few words, under its option, so they can be compared before choosing.
+  briefs: {
+    destrieux: 'Sulcal and gyral regions, 74 per hemisphere',
+    'hcp-mmp': 'Multimodal areas, 180 per hemisphere',
+    julich: 'Cytoarchitectonic areas, 139 per hemisphere',
+    schaefer: 'Resting-state parcels, 200 per hemisphere',
+    desikan: 'Gyral regions, 34 per hemisphere',
+    learning: 'Overview structures for teaching',
+    aseg: 'FreeSurfer’s standard subcortical segmentation',
+    nextbrain: 'Histology-based atlas at 0.4\u202fmm',
   },
   skipToModel: 'Skip to model',
   copyLink: 'Copy link to this view',
@@ -97,6 +110,7 @@ export const fr: typeof en = {
     aan: 'Noyaux de l’éveil de Harvard',
   },
   subject: 'Sujet',
+  subjectKind: { individual: 'Individuel', template: 'Modèle' },
   atlas: 'Atlas',
   colour: 'Couleur',
   colourGroups: {
@@ -106,8 +120,8 @@ export const fr: typeof en = {
     subcortical: 'Cartes sous-corticales',
     vascular: 'Vascularisation',
   },
-  atlasBecomes: (colour: string, atlas: string) => `${colour} (l’atlas devient ${atlas})`,
-  colourBecomes: (atlas: string, colour: string) => `${atlas} (la couleur devient ${colour})`,
+  atlasBecomes: (atlas: string) => `L’atlas devient ${atlas}`,
+  colourBecomes: (colour: string) => `La couleur devient ${colour}`,
   dataSummary: 'Réglages de l’atlas et de l’affichage',
   borrowedBy: { functions: 'via Fonctions', deficits: 'via Déficits' },
   borrowedNote: {
@@ -129,6 +143,16 @@ export const fr: typeof en = {
       'Grandes structures regroupant des étiquettes NextBrain et aseg, avec les lobules cérébelleux CerebNet là où ils sont publiés',
     aseg: 'Segmentation sous-corticale automatique standard de FreeSurfer',
     nextbrain: 'Atlas d’origine histologique, segmenté sur ce sujet à 0,4\u202fmm',
+  },
+  briefs: {
+    destrieux: 'Régions des sillons et des gyrus, 74 par hémisphère',
+    'hcp-mmp': 'Aires multimodales, 180 par hémisphère',
+    julich: 'Aires cytoarchitectoniques, 139 par hémisphère',
+    schaefer: 'Parcelles de connectivité au repos, 200 par hémisphère',
+    desikan: 'Régions gyrales, 34 par hémisphère',
+    learning: 'Grandes structures pour l’enseignement',
+    aseg: 'Segmentation sous-corticale standard de FreeSurfer',
+    nextbrain: 'Atlas d’origine histologique à 0,4\u202fmm',
   },
   skipToModel: 'Aller au modèle',
   copyLink: 'Copier le lien de cette vue',
