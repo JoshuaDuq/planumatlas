@@ -121,7 +121,7 @@ Structures reached on CDMD include the accumbens by reward ($z$ 24.7 left, 24.6 
 - Signal-dropout cortex (orbitofrontal, anterior temporal) reaches few functions.
 - Areas reach `fsaverage` by registration fusion: each vertex is read where 1,490 people's registrations place it in MNI152 on average, so it places group results, not any one person's folds. Areas narrower than the 6 mm kernel share their neighbours' values.
 - Neurosynth's peaks come from papers in several MNI templates. NiMARE converts the 16% of studies reporting Talairach with BrainMap's `tal2icbm_other`; the 13% that state no space are read as MNI.
-- Structure scores are weaker evidence than area scores: the 6 mm kernel is large beside small nuclei, and studies report fewer subcortical coordinates. Whole-structure means dilute: the cerebellum and brainstem reach no function.
+- Structure scores are weaker evidence than area scores: the 6 mm kernel is large beside small nuclei, and studies report fewer subcortical coordinates. Averaging over a whole structure dilutes the signal, and the cerebellum and brainstem reach no function.
 - White matter, the ventral diencephalon's nuclei and NextBrain's nuclei are not scored; lesion checks there are reported as not measured.
 - Searched terms were not checked against their names or against lesion studies. A population map shows where studies of that group report activation.
 - Scores are carried per area, never per vertex.

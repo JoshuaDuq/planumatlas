@@ -41,7 +41,7 @@ The scale (`r_scale`) is one-sided: without global signal regression nearly ever
 
 - A group average of healthy young adults at rest, not this brain, and not a person with a lesion.
 - A correlation is not a connection: two areas can correlate through a third, or through shared noise.
-- Values depend on preprocessing. Without global signal regression nearly every pair is positive, so the floor, not zero, separates the stronger half.
+- Values depend on preprocessing. Without global signal regression nearly every pair is positive, so the floor separates the stronger half where zero would not.
 - An area takes the parcel of its name: the dataset placed Julich-Brain's volumetric map on a 2 mm MNI152 grid, whereas this surface carries the `fsaverage` map.
 - Destrieux failed its posterior cingulate check and is not published; whether a different seed should be accepted is an open decision.
 

@@ -1,6 +1,6 @@
 # Arterial territories
 
-The typical territories of the cerebral arteries (Liu et al. 2023), drawn from where acute infarcts of each artery fell in 1,298 stroke patients on the Johns Hopkins University (JHU) single-subject template, are registered onto CDMD. They are shown as a per-vertex cortex colouring, a cut-label atlas, a supply list for every region and a territory table in the [lesion report](lesion-report.md). They are typical territories, not this brain's own: no vessel of CDMD was imaged.
+The typical territories of the cerebral arteries (Liu et al. 2023), drawn from where acute infarcts of each artery fell in 1,298 stroke patients on the Johns Hopkins University (JHU) single-subject template, are registered onto CDMD. They are shown as a per-vertex cortex colouring, a cut-label atlas, a supply list for every region and a territory table in the [lesion report](lesion-report.md). They are typical territories; no vessel of this brain was imaged.
 
 ```{figure} figures/arterial-territories-1.webp
 :alt: The left hemisphere of the CDMD brain coloured by arterial territory in lateral and medial views, and two cut faces through the deep grey matter coloured by arterial territory.
@@ -54,7 +54,7 @@ The output grid is checked against aseg's, values are rounded to int16 and writt
 ### Acceptance
 `arterial_territories.checks` scores the registered atlas against aseg; `accept` stops the script if any limit fails.
 
-- Lateral ventricle Dice, aseg 4 and 43 against atlas 31 and 32: ≥ 0.6 per side. The atlas's ventricle label spills into periventricular white matter, so this is a floor, not a target.
+- Lateral ventricle Dice, aseg 4 and 43 against atlas 31 and 32: ≥ 0.6 per side. The atlas's ventricle label spills into periventricular white matter, so the threshold is a lower bound.
 - aseg cerebellar cortex (8, 47) in the superior or inferior cerebellar territories: ≥ 95%.
 - aseg cerebral cortex and white matter (2, 3, 41, 42) in no territory, counting ventricle labels as none: ≤ 2%.
 - Lateralised tissue (left 2, 3, 8, 10–13, 17, 18; right 41, 42, 47, 49–54) in a territory of its own side, by value parity: ≥ 98%.

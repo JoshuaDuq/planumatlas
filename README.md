@@ -35,7 +35,7 @@ Cut, measure and compare one person’s MRI-reconstructed brain in the browser, 
 
 ## Overview
 
-Planum shows one real brain rather than an average or an illustration: MGH CDMD subject `sub_013`, reconstructed with FreeSurfer 8.2 from its own T1-weighted scan, with 30 tract bundles from the same person’s diffusion MRI. Cortical atlases, subcortical segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Every region, cut face and number in the viewer can be traced to its source, and each feature has a [methods page](https://planumatlas.com/docs/) giving its data, method, validation and limitations.
+Planum shows the brain of one person, MGH CDMD subject `sub_013`, reconstructed with FreeSurfer 8.2 from its own T1-weighted scan, with 30 tract bundles from the same person’s diffusion MRI. Cortical atlases, subcortical segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Regions, cut faces and numbers in the viewer are traced to their sources, and each feature has a [methods page](https://planumatlas.com/docs/) giving its data, method, validation and limitations.
 
 It runs in any WebGL 2 browser, in English and French, with keyboard and touch controls. Nothing is installed, and files you open stay on your computer.
 
@@ -75,7 +75,7 @@ Methods: [cortical atlases](https://planumatlas.com/docs/features/cortical-atlas
 
 <sub><b>Fig. 3 | Capped sections and the subject’s own scan.</b> <b>a–c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&cut=sagittal&pos=-20&view=right">Sagittal</a> (x = −20 mm, from the right), <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&cut=coronal&pos=-20&view=anterior">coronal</a> (y = −20 mm, from the front) and <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&cut=axial&pos=12&view=superior">axial</a> (z = 12 mm, from above) cuts; each structure is capped where the plane meets it, coloured from the Destrieux label volume. <b>d–f</b>, The T1-weighted scan in the same planes, as <b>Linked MRI</b> shows it. Positions are FreeSurfer surface RAS.</sub>
 
-Cut sagittally, coronally, axially or at any oblique angle. Cap colours come from label volumes, not from the meshes, and follow what the brain shows: the **Atlas**, **Colour** and **Internal anatomy** choices put Destrieux, Desikan-Killiany, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial, cerebellar or striatal labels on the same cut. **Linked MRI** opens the scan in three planes around a shared crosshair, with window and level, a segmentation overlay, the label at the crosshair and PNG export. It also opens from a function’s or deficit’s profile and draws that paint on the scan.
+Cut sagittally, coronally, axially or at any oblique angle. Cap colours come from the label volumes and follow the display: the **Atlas**, **Colour** and **Internal anatomy** choices put Destrieux, Desikan-Killiany, HCP-MMP, Julich-Brain, Schaefer, NextBrain, arterial, cerebellar or striatal labels on the same cut. **Linked MRI** opens the scan in three planes around a shared crosshair, with window and level, a segmentation overlay, the label at the crosshair and PNG export. It also opens from a function’s or deficit’s profile and draws that paint on the scan.
 
 Methods: [sections and cuts](https://planumatlas.com/docs/features/sections-and-cuts.html) · [linked MRI](https://planumatlas.com/docs/features/linked-mri.html) · [boundary certainty](https://planumatlas.com/docs/features/boundary-certainty.html) · [segmentation agreement](https://planumatlas.com/docs/features/segmentation-agreement.html)
 
@@ -101,7 +101,7 @@ Methods: [tracts](https://planumatlas.com/docs/features/tracts.html)
 
 <sub><b>Fig. 5 | Group evidence on one anatomy.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=hcp-mmp&detail=learning&tab=functions&function=spatial-attention&view=right">Where studies of healthy groups report activation for spatial attention</a> (Neurosynth, HCP-MMP areas with z ≥ 3). <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&tab=deficits&deficit=neglect&view=right">Regions cited for hemispatial neglect</a>, one colour per published finding. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&region=destrieux:left:4&cases=M2295,M2272">Two Aphasia Recovery Cohort lesions</a> and their overlap, with the left subcentral region outlined.</sub>
 
-These layers place published evidence beside the anatomy with its sources and limits in view. A paint can also be drawn over the subject’s T1, which shows wherever nothing is painted. The layers describe group findings, templates and spatial overlap; they are not measurements of this individual or predictions for a patient.
+These layers show published evidence on the anatomy, with its sources and limits. A paint can also be drawn over the subject’s T1, which shows wherever nothing is painted. The layers describe group findings, templates and spatial overlap; they are not measurements of this individual or predictions for a patient.
 
 | Layer | What it shows |
 | :--- | :--- |
@@ -207,7 +207,7 @@ Each methods page lists the commands that rebuild and test its feature under **C
 node scripts/readme-figures.mjs
 ```
 
-The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (`npx playwright install chromium` in `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). For Fig. 6 it downloads the HCP map from NeuroVault and opens it in the Overlay tool, as a reader would. Pass another origin, such as a local server, as the first argument, or name figures to render only those.
+The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (`npx playwright install chromium` in `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). For Fig. 6 it downloads the HCP map from NeuroVault and opens it in the Overlay tool. Pass another origin, such as a local server, as the first argument, or name figures to render only those.
 
 </details>
 
