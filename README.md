@@ -21,6 +21,7 @@ Cut, measure and compare one person’s MRI-reconstructed brain in the browser, 
   <a href="https://github.com/JoshuaDuq/planumatlas/actions/workflows/deploy.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/JoshuaDuq/planumatlas/deploy.yml?branch=main&label=build"></a>
   <a href="https://planumatlas.com/docs/"><img alt="Methods documentation" src="https://img.shields.io/badge/docs-methods-28615d"></a>
   <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-28615d"></a>
+  <a href="https://doi.org/10.5281/zenodo.24428325"><img alt="DOI: 10.5281/zenodo.24428325" src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24428325-28615d"></a>
   <img alt="Python 3.12 and 3.13" src="https://img.shields.io/badge/python-3.12%20%7C%203.13-555f68">
   <img alt="English and French" src="https://img.shields.io/badge/languages-EN%20%C2%B7%20FR-555f68">
 </p>
@@ -214,12 +215,15 @@ The [figure script](scripts/readme-figures.mjs) captures each panel from [planum
 
 If you use Planum, cite it and the data behind the views you use; the [references](https://planumatlas.com/docs/reference/references.html) list each source and the acknowledgement it requires. GitHub’s **Cite this repository** menu reads [`CITATION.cff`](CITATION.cff).
 
+Each release is archived on Zenodo. [10.5281/zenodo.24428326](https://doi.org/10.5281/zenodo.24428326) is version 0.1.0; [10.5281/zenodo.24428325](https://doi.org/10.5281/zenodo.24428325) always resolves to the latest release.
+
 ```bibtex
 @software{planum,
   author  = {Duquette, Joshua},
   title   = {Planum},
   version = {0.1.0},
   year    = {2026},
+  doi     = {10.5281/zenodo.24428326},
   url     = {https://planumatlas.com},
   license = {AGPL-3.0-or-later}
 }
