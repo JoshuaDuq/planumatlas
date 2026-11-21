@@ -15,7 +15,7 @@ Who
 : MGH CDMD `sub_013` ([Tian et al., 2022](reference/references.md#reference-datasets-and-tools); CC0). The dataset does not publish each participant's age or sex, so only the cohort can be stated: 26 healthy adults aged 22 to 72, 17 women and 9 men, scanned with 300 mT/m gradients.
 
 Why this person
-: Among the 33 published FreeSurfer 6 reconstructions, `sub_013` has the fewest surface defect holes (14). Its field of view reaches the cervical cord, its diffusion scan has eight shells at each of two diffusion times, and its licence is public domain. Planum reconstructed it again from the same T1 with FreeSurfer 8.2 (8 holes before repair; [internal anatomy](features/internal-anatomy.md), [tracts](features/tracts.md)).
+: Among the 33 published FreeSurfer 6 reconstructions (the 26 participants and seven rescans), `sub_013` has the fewest surface defect holes (14). Its field of view reaches the cervical cord, its diffusion scan has eight shells at each of two diffusion times, and its licence is public domain. Planum reconstructed it again from the same T1 with FreeSurfer 8.2 (8 holes before repair; [internal anatomy](features/internal-anatomy.md), [tracts](features/tracts.md)).
 
 Why not an average
 : A template's sulci are an average, which blurs where people differ, and its tracts come from other people's diffusion scans. Here the surface, the cuts, the MRI and the tracts are one person's.

@@ -18,7 +18,7 @@ Planum draws the deep anatomy of one brain, MGH CDMD `sub_013`, at three exclusi
 | NextBrain labels | [NextBrain](../reference/references.md#cortical-and-subcortical-atlases) (Casamitjana et al. 2025) `atlas_simplified.zip`, run through SuperSynth (`SuperSynth_August_2025.pth`) | zip sha256 `8ea7c5aa…8f19`, extracted tree `20d9c58f…35e2`, model `7f759267…fd1d` |
 | Cerebellar lobules | [CerebNet](../reference/references.md#reference-datasets-and-tools), FastSurfer v2.6.0 (commit `1dc02473…6f21`; Apache-2.0) | commit and six checkpoint sha256 values in `scripts/segment_cerebellum.py` |
 
-CDMD was chosen from the 33 published FreeSurfer 6 reconstructions for the fewest surface defect holes (14). It was reconstructed again with FreeSurfer 8.2 from the same T1. With the FreeSurfer 6 aseg, NextBrain's left amygdala met aseg at Dice 0.793, below the 0.8 floor. The FreeSurfer 8.2 reconstruction has 8 defect holes before repair (3 left, 5 right; `stats/aseg.stats`).
+CDMD was chosen from the 33 published FreeSurfer 6 reconstructions (26 participants and seven rescans) for the fewest surface defect holes (14). It was reconstructed again with FreeSurfer 8.2 from the same T1. With the FreeSurfer 6 aseg, NextBrain's left amygdala met aseg at Dice 0.793, below the 0.8 floor. The FreeSurfer 8.2 reconstruction has 8 defect holes before repair (3 left, 5 right; `stats/aseg.stats`).
 
 ## Method
 
