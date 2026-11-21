@@ -209,8 +209,9 @@
   :root[data-guide-showing] #viewport .driver-active-element {
     outline-color: var(--overlay-accent);
   }
-  /* A panel runs to the window's edges, where a ring outside it would be cut off. */
-  :root[data-guide-showing] :is(#workspace-panel, #sheet).driver-active-element {
+  /* A panel, and the tab strip across its width, run to the window's edges, where a ring outside
+     them would be cut off: only one edge of the tabs' ring showed, as a stray rule. */
+  :root[data-guide-showing] :is(#workspace-panel, #sheet, .workspace-tabs).driver-active-element {
     outline-offset: -2px;
   }
 }
