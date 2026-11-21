@@ -245,6 +245,8 @@ export class Placement {
     };
     for (const mesh of cortex) halves[sideOf(mesh)].union(restBox(mesh));
     const groups = new Map<string, Mesh[]>();
+    // A lateral structure's group under its side-free name and side, to find its mirror image.
+    const sided = new Map<string, string>();
     for (const mesh of layers.get(detailId)!.meshes) {
       const region = regions.get(mesh.userData['region_id'] as string)!;
       const label = labelOf(region, 'en');
@@ -254,13 +256,29 @@ export class Placement {
       const group = groups.get(name) ?? [];
       group.push(mesh);
       groups.set(name, group);
+      if (name !== region.id || (region.hemisphere !== 'left' && region.hemisphere !== 'right')) {
+        continue;
+      }
+      const key = `${label.name}|${region.hemisphere}`;
+      if (sided.has(key)) throw new Error(`Two ${region.hemisphere} structures are ${label.name}.`);
+      sided.set(key, name);
     }
+    const names = [...groups.keys()];
+    const mirrorOf = (name: string) => {
+      const region = regions.get(name);
+      if (region?.hemisphere !== 'left' && region?.hemisphere !== 'right') return name;
+      const other = region.hemisphere === 'left' ? 'right' : 'left';
+      return sided.get(`${labelOf(region, 'en')!.name}|${other}`) ?? name;
+    };
     if (cords.length) {
       const brainstem = groups.get('Brainstem');
       if (!brainstem) throw new Error(`The ${detailId} level has no brainstem to hold the cord.`);
       for (const layer of cords) brainstem.push(...layer.meshes);
     }
-    const shifts = deepShifts([...groups.values()]);
+    const shifts = deepShifts(
+      [...groups.values()],
+      names.map((name) => names.indexOf(mirrorOf(name))),
+    );
     const deep = new Box3();
     for (const [mesh, shift] of shifts) deep.union(restBox(mesh).translate(shift));
     const across = new Vector3(1, 0, 0).applyQuaternion(this.anatomicalFrame);

@@ -156,7 +156,10 @@ test('interlocking and enclosed regions move together instead of being rearrange
   const crossing = box(0.02, 0.008);
   const separate = box(0.01, 0.05);
   const list = [outer, inner, crossing, separate];
-  const shifts = deepShifts(list.map((mesh) => [mesh]));
+  const shifts = deepShifts(
+    list.map((mesh) => [mesh]),
+    list.map((_, index) => index),
+  );
   close(shifts.get(outer)!, shifts.get(inner)!, 'an enclosed region');
   close(shifts.get(outer)!, shifts.get(crossing)!, 'an interlocking region');
   assert.ok(shifts.get(outer)!.x < 0 && shifts.get(separate)!.x > 0, 'the pieces still expand');
@@ -165,6 +168,46 @@ test('interlocking and enclosed regions move together instead of being rearrange
     (mesh.material as import('three').Material).dispose();
   }
 });
+
+test.each(['cdmd', 'mni152'])(
+  'on %s, what travels together on one side travels together on the other',
+  async (anatomy) => {
+    const brain = new BrainAtlas(readManifest(anatomy), publishedLoader(modelDirectory(anatomy)));
+    await brain.initialize(ATLAS);
+    for (const detail of ['aseg', 'nextbrain', 'learning']) {
+      await brain.setDetail(detail);
+      at(1000);
+      brain.setExploded(true);
+      brain.stepExplode(Number.MAX_SAFE_INTEGER);
+      const lateral = new Map<string, Mesh>();
+      for (const mesh of brain.layers.get(detail)!.meshes) {
+        const region = brain.regions.get(mesh.userData['region_id'] as string)!;
+        if (region.hemisphere !== 'left' && region.hemisphere !== 'right') continue;
+        lateral.set(`${labelOf(region)!.name}|${region.hemisphere}`, mesh);
+      }
+      const pairs = [...lateral].flatMap(([key, mesh]) => {
+        const [name, side] = key.split('|');
+        const mirror = lateral.get(`${name}|${side === 'left' ? 'right' : 'left'}`);
+        return mirror ? [[mesh, mirror] as const] : [];
+      });
+      assert.ok(pairs.length >= 20, `${detail}: ${pairs.length} paired structures`);
+      const together = (a: Mesh, b: Mesh) => drawnShift(a).distanceTo(drawnShift(b)) < 1e-12;
+      for (const [a, mirrorA] of pairs) {
+        for (const [b, mirrorB] of pairs) {
+          assert.equal(
+            together(a, b),
+            together(mirrorA, mirrorB),
+            `${detail}: ${a.userData['region_id']} and ${b.userData['region_id']}`,
+          );
+        }
+      }
+      brain.setExploded(false);
+      brain.stepExplode(Number.MAX_SAFE_INTEGER);
+    }
+    brain.dispose();
+  },
+  120_000,
+);
 
 test('the brain’s left–right axis is the scan’s x turned as the head lay, and the frame turns x onto it', () => {
   const cortex = meshes(ATLAS);

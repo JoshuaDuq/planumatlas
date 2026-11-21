@@ -19,20 +19,38 @@ export const DEEP_SPREAD = 0.6;
 
 /**
  * Move internal pieces radially. If that would cross or contain another piece, join them and
- * recompute their common offset. Each pass either reduces the piece count or finishes; no piece
- * is shuffled onto a different axis, and the caller caches this layout between frames.
+ * recompute their common offset; their mirror images join too (`mirrors[i]` is group i's
+ * counterpart on the other side, or i itself), since one side's narrower clearance would otherwise
+ * send a structure off alone while its counterpart stays put. Each pass either reduces the piece
+ * count or finishes; no piece is shuffled onto a different axis, and the caller caches this layout
+ * between frames.
  */
-export function deepShifts(groups: readonly (readonly Mesh[])[]): Map<Mesh, Vector3> {
-  const pieces = groups.map((meshes) => {
+export function deepShifts(
+  groups: readonly (readonly Mesh[])[],
+  mirrors: readonly number[],
+): Map<Mesh, Vector3> {
+  if (mirrors.length !== groups.length || mirrors.some((m, i) => mirrors[m] !== i)) {
+    throw new Error('Every group needs one mirror image, and that image must mirror it back.');
+  }
+  const pieces = groups.map((meshes, index) => {
     const entries = meshes.map((mesh) => {
       const matrix = anatomicalMatrixWorld(mesh);
       return { mesh, box: restBox(mesh), matrix, inverse: matrix.clone().invert() };
     });
     return {
+      groups: [index],
       entries,
       box: entries.reduce((box, entry) => box.union(entry.box), new Box3()),
     };
   });
+  type Piece = (typeof pieces)[number];
+  const join = (a: Piece, b: Piece) => {
+    a.groups.push(...b.groups);
+    a.entries.push(...b.entries);
+    a.box.union(b.box);
+    pieces.splice(pieces.indexOf(b), 1);
+  };
+  const pieceOf = (group: number) => pieces.find((piece) => piece.groups.includes(group))!;
   const centre = pieces
     .reduce((box, piece) => box.union(piece.box), new Box3())
     .getCenter(new Vector3());
@@ -64,10 +82,14 @@ export function deepShifts(groups: readonly (readonly Mesh[])[]): Map<Mesh, Vect
           }),
         );
         if (!overlap) continue;
-        a.entries.push(...b.entries);
-        a.box.union(b.box);
-        pieces.splice(j--, 1);
+        join(a, b);
+        j--;
       }
+    }
+    for (const piece of pieces.slice()) {
+      if (!pieces.includes(piece)) continue;
+      const [first, ...rest] = new Set(piece.groups.map((group) => pieceOf(mirrors[group]!)));
+      for (const other of rest) join(first!, other);
     }
   } while (pieces.length < previousCount);
   const shifts = new Map<Mesh, Vector3>();
