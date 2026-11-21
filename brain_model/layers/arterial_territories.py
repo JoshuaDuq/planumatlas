@@ -9,6 +9,7 @@ import yaml
 from ..labels.placement import placements
 from ..labels.volumes import validate_same_grid
 from ..sources import ROOT, declares
+from . import landing
 
 ATLAS_ID = "arterial"
 LAYER = "arterial_territories"
@@ -260,18 +261,32 @@ def compose(config, definition, regions, grids, unit_grids):
               for atlas, (labels, matrix) in grids.items()}
     unit_counts = {source: grid_counts(labels, matrix, index, surface_to_voxel)
                    for source, (labels, matrix) in unit_grids.items()}
+    radius = landing.radius_mm(landing.read(config))
+    names = [territory["id"] for territory in definition["territories"]]
+    boxes = {}
     for region in regions:
         if is_fluid(region):
             continue
         if region["atlas"] in counts and region["kind"] != "cortex" and region.get("source_label_id") is not None:
-            table, labels = counts[region["atlas"]], [region["source_label_id"]]
+            key, table, labels = region["atlas"], counts[region["atlas"]], [region["source_label_id"]]
+            grid = grids[key]
         elif region["atlas"] == "learning" and region.get("source_atlas") in unit_counts:
-            table, labels = unit_counts[region["source_atlas"]], region["source_label_ids"]
+            key, table, labels = (region["source_atlas"], "unit"), unit_counts[region["source_atlas"]], region["source_label_ids"]
+            grid = unit_grids[region["source_atlas"]]
         else:
             continue
         missing = [label for label in labels if label >= len(table)]
         if missing:
             raise ValueError(f"{region['id']}: labels {missing} are not on its grid")
+        if landing.is_small(region):
+            # Too small for its own voxels' shares to survive the registration's landing error.
+            if key not in boxes:
+                boxes[key] = landing.boxes_of(grid[0])
+            near = landing.near(landing.neighbourhood_counts(
+                *grid, labels, boxes[key], index, surface_to_voxel, radius), names)
+            if near:
+                region["territories_near"] = near
+            continue
         composed = composition_of_counts(table[labels].sum(axis=0), definition)
         if composed:
             region.update(composed)
@@ -341,11 +356,14 @@ def metadata(config, definition):
             for territory in definition["territories"]
         ],
         "registration": report["checks"],
+        "small": landing.rule(landing.read(config)),
         "method": (
             "The atlas's template b0 registered to this brain's skull-stripped T1 with SynthMorph "
             "(joint affine and deformable), the atlas carried across by nearest neighbour; cortical "
             "vertices take the territory at the midpoint of their pial and white positions, and each "
-            "region's shares count its own voxels or vertices"
+            "region's shares count its own voxels or vertices. A structure under the small volume "
+            "takes no shares: it names the territories found within the registration's measured "
+            "landing error of it"
         ),
     }
 
@@ -374,7 +392,7 @@ def validate(config, manifest):
     published = [region for region in manifest["regions"] if region["atlas"] == ATLAS_ID]
     if published != build_regions(config, definition):
         raise ValueError("Arterial territory regions changed")
-    fields = ("territories", "territory_unassigned")
+    fields = ("territories", "territory_unassigned", "territories_near")
     volumetric = [
         {key: value for key, value in region.items() if key not in fields}
         for region in manifest["regions"] if region.get("kind") != "cortex"
@@ -389,4 +407,5 @@ def validate(config, manifest):
     return {
         "checks": measured,
         "regions_with_shares": sum(1 for region in manifest["regions"] if region.get("territories")),
+        "small_structures_named": sum(1 for region in manifest["regions"] if region.get("territories_near")),
     }

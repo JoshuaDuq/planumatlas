@@ -12,7 +12,7 @@ from scipy import ndimage
 from ..labels.placement import placements
 from ..labels.volumes import label_box, validate_same_grid
 from ..sources import ROOT, declares
-from . import networks
+from . import landing, networks
 from .arterial_territories import grid_counts
 
 ATLAS_ID = "choi"
@@ -296,11 +296,14 @@ def compose(config, definition, regions, grids, unit_grids):
             padded = np.zeros((table.shape[0], width), np.int64)
             padded[:, :table.shape[1]] = table
             tables.setdefault(key, []).append(padded)
+    radius = landing.radius_mm(landing.read(config))
+    boxes = {}
     for region in regions:
         if region["atlas"] in grids and region["kind"] != "cortex" and region.get("source_label_id") is not None:
-            key, labels = region["atlas"], [region["source_label_id"]]
+            key, labels, grid = region["atlas"], [region["source_label_id"]], grids[region["atlas"]]
         elif region["atlas"] == "learning" and region.get("source_atlas") in unit_grids:
             key, labels = (region["source_atlas"], "unit"), region["source_label_ids"]
+            grid = unit_grids[region["source_atlas"]]
         else:
             continue
         networks_table, quality_table = tables[key]
@@ -308,8 +311,16 @@ def compose(config, definition, regions, grids, unit_grids):
         if missing:
             raise ValueError(f"{region['id']}: labels {missing} are not on its grid")
         composed = composition_of_counts(networks_table[labels].sum(axis=0))
-        if composed:
-            region.update(composed, **quality_of_counts(quality_table[labels].sum(axis=0)))
+        if not composed:
+            continue
+        if landing.is_small(region):
+            # Too small for its own voxels' shares to survive the registration's landing error.
+            if key not in boxes:
+                boxes[key] = landing.boxes_of(grid[0])
+            region["striatal_networks_near"] = landing.near(landing.neighbourhood_counts(
+                *grid, labels, boxes[key], values, surface_to_voxel, radius), 2 * networks.NETWORKS)
+            continue
+        region.update(composed, **quality_of_counts(quality_table[labels].sum(axis=0)))
 
 
 def export_cut_atlas(config, definition, image, codes, labels, regions):
@@ -374,12 +385,15 @@ def metadata(config, definition):
         "networks": definition["networks"],
         "minimum_confidence": definition["minimum_confidence"],
         "registration": report["checks"],
+        "small": landing.rule(landing.read(config)),
         "method": (
             "FSL's MNI152 template (MNI152NLin6Asym), skull-stripped, registered to this brain's "
             "skull-stripped T1 with SynthMorph (joint affine and deformable); the atlas's loose mask "
             "carried across by nearest neighbour and kept to this brain's caudate, putamen and "
             "accumbens. A voxel the atlas does not reach takes the network of the nearest voxel it "
-            "reaches in the same structure. Each region's shares count its own voxels"
+            "reaches in the same structure. Each region's shares count its own voxels. A structure "
+            "under the small volume takes no shares: it names the networks found within the "
+            "registration's measured landing error of it"
         ),
     }
 
@@ -426,7 +440,7 @@ def validate(config, manifest):
     if published != build_regions(config, definition):
         raise ValueError("Striatal network regions changed")
     fields = ("striatal_networks", "striatal_networks_unassigned", "striatal_networks_confidence",
-              "striatal_networks_putamen")
+              "striatal_networks_putamen", "striatal_networks_near")
     # The atlas's own regions carry their confidence from build_regions, compared above.
     composed = [region for region in manifest["regions"] if region["atlas"] != ATLAS_ID]
     regions = [{key: value for key, value in region.items() if key not in fields} for region in composed]

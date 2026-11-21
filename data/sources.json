@@ -2541,6 +2541,288 @@
       "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
       "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
       "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/mni152/label/lh.HCPMMP1.annot",
+      "sha256": "c575daa8eb3b1a66b130a50c5549b6ac73ff44b2a78537418f7b8245a988e98b",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/lh.HCPMMP1.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/mni152/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/label/rh.HCPMMP1.annot",
+      "sha256": "f8c15d88d77510d54725ec8b815b99d172a3b29669cdb9b66f26e34d79dc8cb5",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/rh.HCPMMP1.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/mni152/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/hcp-registration.json",
+      "sha256": "22b39a89c107628d9b853759e1e3bc539584a5504556a440ef17762592de7477",
+      "anatomy": "mni152",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/mni152/label/lh.JulichBrain3.1.annot",
+      "sha256": "258b1633757a105ded1ddade0ec540cb42cf3307265cc51cfb8e568117f03451",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/lh.JulichBrain3.1.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/mni152/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/label/rh.JulichBrain3.1.annot",
+      "sha256": "1945e830f3722ef411295d2902046cd1549d144bcb7a76f5020cea26330d294d",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/rh.JulichBrain3.1.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/mni152/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/julich-registration.json",
+      "sha256": "e8588dfc63f2db57461c25fcbda562fc8d527c95aa765c79b5c519974473691f",
+      "anatomy": "mni152",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/mni152/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+      "sha256": "57b597981dda47e7fedf7568845d95c74e8f9ba42b0f8d2578415a2952964b01",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/lh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "data/fsaverage/surf/lh.sphere.reg",
+        "data/mni152/surf/lh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+      "sha256": "3ad5bd641c8e988e222d84ce792643b4ef039e428bc1599ff44a8154898e3edb",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/fsaverage/label/rh.Schaefer2018_400Parcels_7Networks_order.annot",
+        "data/fsaverage/surf/rh.sphere.reg",
+        "data/mni152/surf/rh.sphere.reg"
+      ],
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/mri_surf2surf"
+    },
+    {
+      "path": "data/mni152/network-registration.json",
+      "sha256": "bf866f94a3f03db9fff435708cd6cb40e69aa958c2b3b8315cd1493bc378f9dd",
+      "anatomy": "mni152",
+      "procedure": "scripts/prepare_subject.py: forward nearest-neighbour sphere.reg transfer"
+    },
+    {
+      "path": "data/nextbrain-mni152/nextbrain-mni152.mgz",
+      "sha256": "75af070440a4c04700c4089816166e00c872c4468534a2dffbcebf456034273e",
+      "anatomy": "mni152",
+      "optional": true,
+      "derived_from": [
+        {
+          "path": "data/mni152/mri/orig.mgz",
+          "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/SuperSynth_Iglesias_2025/SuperSynth_August_2025.pth",
+          "sha256": "7f75926757070f53e1e43c4bf31dafe2e599ef56438ce60347f12e9133bffd1d"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/Histo_Atlas_Iglesias_2023/atlas_simplified.zip",
+          "sha256": "8ea7c5aa8f162007e2405f6bdbb4a74013e2e296bc4790ba21344ffa37e78f19",
+          "extracted_tree_sha256": "20d9c58f370755a9b9fb8c137274d76e150f29be6966c10965f13082133235e2"
+        }
+      ],
+      "procedure": "scripts/segment_nextbrain.py: SuperSynth, then NextBrain Bayesian segmentation (segment_fireants.py --mode invivo --device cpu) of each hemisphere at 0.4 mm, joined on one 0.4 mm surface-RAS grid",
+      "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+      "crop": {
+        "source": "orig.mgz",
+        "rule": "bounding box of brain.mgz > 0, plus 20 voxels, within the grid",
+        "corner_voxel": [
+          42,
+          46,
+          25
+        ],
+        "shape": [
+          175,
+          187,
+          209
+        ]
+      },
+      "hemisphere_join": {
+        "spacing_mm": 0.4,
+        "method": "nearest neighbour from each hemisphere's own grid onto one surface-RAS grid",
+        "maximum_nearest_neighbour_shift_mm": {
+          "left": 0.1717,
+          "right": 0.2431
+        },
+        "voxels_labelled_by_both_sides": 0,
+        "overlap_rule": "sign of SuperSynth's MNI x coordinate at the voxel centre, the rule FreeSurfer splits hemispheres by",
+        "right_hemisphere_label_offset": 10000
+      },
+      "near_ties": {
+        "margin": 0.2,
+        "rule": "the runner-up label wherever NextBrain's winning posterior led it by less than the margin; 0 elsewhere and where the runner-up is background",
+        "posteriors": "written by scripts/freesurfer/run_patched.py from segment_fireants.py's label loop, beside a label update it leaves unchanged",
+        "near_tie_voxels": 1341206
+      },
+      "nextbrain_cpu_threads": [
+        16
+      ],
+      "runtime_workarounds": {
+        "conv3d_slices": "FreeSurfer 8.2's arm64 torch 2.1.2 has no oneDNN, so CPU conv3d builds a whole-volume im2col buffer (about 90 GB for SuperSynth). scripts/freesurfer/conv3d_slices.py computes the same stride-1 convolution as a sum over kernel depth of 2D convolutions of shifted slices: the same products in a different summation order, matching torch conv3d to 1e-5 relative. Only a convolution whose im2col buffer would reach 1 GiB is sliced; smaller ones run in torch itself, so NextBrain's bias field fit keeps the exact zeros it takes logs of. FireANTs keeps the builtin F.conv3d, which its TorchScript functions bind when they compile.",
+        "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
+        "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
+      },
+      "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+      "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
+    },
+    {
+      "path": "data/nextbrain-mni152/nextbrain-lut.txt",
+      "sha256": "c821820c543e14c9fe11cb059d7eefeeee4a1e35540fd2fdc45b02f5fe79dd07",
+      "anatomy": "mni152",
+      "optional": true,
+      "derived_from": [
+        {
+          "path": "data/mni152/mri/orig.mgz",
+          "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/SuperSynth_Iglesias_2025/SuperSynth_August_2025.pth",
+          "sha256": "7f75926757070f53e1e43c4bf31dafe2e599ef56438ce60347f12e9133bffd1d"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/Histo_Atlas_Iglesias_2023/atlas_simplified.zip",
+          "sha256": "8ea7c5aa8f162007e2405f6bdbb4a74013e2e296bc4790ba21344ffa37e78f19",
+          "extracted_tree_sha256": "20d9c58f370755a9b9fb8c137274d76e150f29be6966c10965f13082133235e2"
+        }
+      ],
+      "procedure": "scripts/segment_nextbrain.py: SuperSynth, then NextBrain Bayesian segmentation (segment_fireants.py --mode invivo --device cpu) of each hemisphere at 0.4 mm, joined on one 0.4 mm surface-RAS grid",
+      "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+      "crop": {
+        "source": "orig.mgz",
+        "rule": "bounding box of brain.mgz > 0, plus 20 voxels, within the grid",
+        "corner_voxel": [
+          42,
+          46,
+          25
+        ],
+        "shape": [
+          175,
+          187,
+          209
+        ]
+      },
+      "hemisphere_join": {
+        "spacing_mm": 0.4,
+        "method": "nearest neighbour from each hemisphere's own grid onto one surface-RAS grid",
+        "maximum_nearest_neighbour_shift_mm": {
+          "left": 0.1717,
+          "right": 0.2431
+        },
+        "voxels_labelled_by_both_sides": 0,
+        "overlap_rule": "sign of SuperSynth's MNI x coordinate at the voxel centre, the rule FreeSurfer splits hemispheres by",
+        "right_hemisphere_label_offset": 10000
+      },
+      "near_ties": {
+        "margin": 0.2,
+        "rule": "the runner-up label wherever NextBrain's winning posterior led it by less than the margin; 0 elsewhere and where the runner-up is background",
+        "posteriors": "written by scripts/freesurfer/run_patched.py from segment_fireants.py's label loop, beside a label update it leaves unchanged",
+        "near_tie_voxels": 1341206
+      },
+      "nextbrain_cpu_threads": [
+        16
+      ],
+      "runtime_workarounds": {
+        "conv3d_slices": "FreeSurfer 8.2's arm64 torch 2.1.2 has no oneDNN, so CPU conv3d builds a whole-volume im2col buffer (about 90 GB for SuperSynth). scripts/freesurfer/conv3d_slices.py computes the same stride-1 convolution as a sum over kernel depth of 2D convolutions of shifted slices: the same products in a different summation order, matching torch conv3d to 1e-5 relative. Only a convolution whose im2col buffer would reach 1 GiB is sliced; smaller ones run in torch itself, so NextBrain's bias field fit keeps the exact zeros it takes logs of. FireANTs keeps the builtin F.conv3d, which its TorchScript functions bind when they compile.",
+        "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
+        "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
+      },
+      "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+      "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
+    },
+    {
+      "path": "data/nextbrain-mni152/nextbrain-mni152-near-ties.mgz",
+      "sha256": "4d9679c051a2a2ccaeb4447cd9a79057f37f024c95f988b64c515c525381165e",
+      "anatomy": "mni152",
+      "optional": true,
+      "derived_from": [
+        {
+          "path": "data/mni152/mri/orig.mgz",
+          "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/SuperSynth_Iglesias_2025/SuperSynth_August_2025.pth",
+          "sha256": "7f75926757070f53e1e43c4bf31dafe2e599ef56438ce60347f12e9133bffd1d"
+        },
+        {
+          "url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/Histo_Atlas_Iglesias_2023/atlas_simplified.zip",
+          "sha256": "8ea7c5aa8f162007e2405f6bdbb4a74013e2e296bc4790ba21344ffa37e78f19",
+          "extracted_tree_sha256": "20d9c58f370755a9b9fb8c137274d76e150f29be6966c10965f13082133235e2"
+        }
+      ],
+      "procedure": "scripts/segment_nextbrain.py: SuperSynth, then NextBrain Bayesian segmentation (segment_fireants.py --mode invivo --device cpu) of each hemisphere at 0.4 mm, joined on one 0.4 mm surface-RAS grid",
+      "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+      "crop": {
+        "source": "orig.mgz",
+        "rule": "bounding box of brain.mgz > 0, plus 20 voxels, within the grid",
+        "corner_voxel": [
+          42,
+          46,
+          25
+        ],
+        "shape": [
+          175,
+          187,
+          209
+        ]
+      },
+      "hemisphere_join": {
+        "spacing_mm": 0.4,
+        "method": "nearest neighbour from each hemisphere's own grid onto one surface-RAS grid",
+        "maximum_nearest_neighbour_shift_mm": {
+          "left": 0.1717,
+          "right": 0.2431
+        },
+        "voxels_labelled_by_both_sides": 0,
+        "overlap_rule": "sign of SuperSynth's MNI x coordinate at the voxel centre, the rule FreeSurfer splits hemispheres by",
+        "right_hemisphere_label_offset": 10000
+      },
+      "near_ties": {
+        "margin": 0.2,
+        "rule": "the runner-up label wherever NextBrain's winning posterior led it by less than the margin; 0 elsewhere and where the runner-up is background",
+        "posteriors": "written by scripts/freesurfer/run_patched.py from segment_fireants.py's label loop, beside a label update it leaves unchanged",
+        "near_tie_voxels": 1341206
+      },
+      "nextbrain_cpu_threads": [
+        16
+      ],
+      "runtime_workarounds": {
+        "conv3d_slices": "FreeSurfer 8.2's arm64 torch 2.1.2 has no oneDNN, so CPU conv3d builds a whole-volume im2col buffer (about 90 GB for SuperSynth). scripts/freesurfer/conv3d_slices.py computes the same stride-1 convolution as a sum over kernel depth of 2D convolutions of shifted slices: the same products in a different summation order, matching torch conv3d to 1e-5 relative. Only a convolution whose im2col buffer would reach 1 GiB is sliced; smaller ones run in torch itself, so NextBrain's bias field fit keeps the exact zeros it takes logs of. FireANTs keeps the builtin F.conv3d, which its TorchScript functions bind when they compile.",
+        "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
+        "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
+      },
+      "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+      "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
     }
   ]
 }

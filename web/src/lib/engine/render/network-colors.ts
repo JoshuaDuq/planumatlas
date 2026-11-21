@@ -70,12 +70,16 @@ export function checkTerritories(
  * whole, as a deep structure's surface or a cut voxel is, has one code, so it can only show that.
  */
 export function majorityTerritoryColor(
-  region: Pick<Region, 'territories'> | undefined,
+  region: Pick<Region, 'territories' | 'territories_near'> | undefined,
   territories: readonly { id: string; color: Rgb }[],
 ): Rgb | null {
   const largest = region?.territories?.[0];
-  if (!largest || largest.fraction < 0.5) return null;
-  const entry = territories.find((candidate) => candidate.id === largest.territory);
-  if (!entry) throw new Error(`No arterial territory ${largest.territory} is published.`);
+  // A structure too small for shares has a colour only where one territory surrounds it.
+  const near = region?.territories_near;
+  const id =
+    largest && largest.fraction >= 0.5 ? largest.territory : near?.length === 1 ? near[0]! : null;
+  if (id === null) return null;
+  const entry = territories.find((candidate) => candidate.id === id);
+  if (!entry) throw new Error(`No arterial territory ${id} is published.`);
   return entry.color;
 }

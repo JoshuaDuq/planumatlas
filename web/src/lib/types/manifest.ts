@@ -120,6 +120,7 @@ export interface Manifest {
   segmentation_agreement?: ManifestFile & { volume: ManifestVolume } & Record<string, unknown>;
   arterial_territories?: ArterialTerritories;
   coordinate_spaces?: CoordinateSpaces;
+  landing?: Landing;
   cerebellar_functions?: CerebellarFunctions;
   striatal_networks?: StriatalNetworks;
   retinotopy?: Retinotopy;
@@ -162,6 +163,26 @@ export interface CerebellarFunctions {
   method: string;
 }
 
+/** The rule a registered map follows: under this volume a structure takes no shares, only what lies within the radius. */
+export interface SmallStructureRule {
+  under_mm3: number;
+  radius_mm: number;
+}
+
+/**
+ * `manifest.landing`: how the template's own fine structures, carried by the published registration,
+ * meet this brain's. An upper bound on registration error, since two segmentations also disagree.
+ */
+export interface Landing extends SmallStructureRule {
+  space: string;
+  structures: number;
+  centroid_mm: { median: number; p90: number };
+  dice_median: number;
+  /** Median Dice by the structure's volume on this brain; the last class has no upper bound. */
+  by_volume: { under_mm3: number | null; structures: number; dice_median: number }[];
+  method: string;
+}
+
 /** `manifest.striatal_networks`: the registered Choi et al. (2012) striatal network atlas. */
 export interface StriatalNetworks {
   id: 'choi';
@@ -172,6 +193,7 @@ export interface StriatalNetworks {
   /** Below this confidence a voxel's network holds a plurality, not a majority, of its 25 cortical vertices. */
   minimum_confidence: number;
   registration: Record<string, unknown>;
+  small: SmallStructureRule;
   method: string;
 }
 
@@ -194,6 +216,7 @@ export interface ArterialTerritories {
   major: Record<string, { name: string; name_fr: string; short: string }>;
   territories: ArterialTerritory[];
   registration: Record<string, unknown>;
+  small: SmallStructureRule;
   method: string;
 }
 
@@ -214,6 +237,7 @@ export interface StrokeCasesRecord extends ManifestFile {
   label: string;
   license: string;
   citations: string[];
+  registration: Record<string, unknown>;
   method: string;
 }
 

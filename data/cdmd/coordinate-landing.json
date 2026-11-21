@@ -1,0 +1,3619 @@
+{
+  "space": "mni152nlin2009casym",
+  "reference": {
+    "anatomy": "mni152",
+    "scale": 0.9,
+    "nextbrain_sha256": "75af070440a4c04700c4089816166e00c872c4468534a2dffbcebf456034273e"
+  },
+  "field_sha256": "2c20d8cbcdc31bb41e2acb875fef6f11bb5fb402af3f6000a03d4baf4d9104db",
+  "nextbrain_sha256": "960e602c4c8aa885c5c3421928c9edc7198905706958ce0441d331b881bdd673",
+  "method": "Every labelled voxel of the template's own NextBrain segmentation carried through the published field and painted on this brain's NextBrain grid; each structure scored against this brain's structure of the same label by Dice and by the distance between centres. An upper bound on registration error: it includes the disagreement between two segmentations",
+  "template_voxels_outside_field": 742,
+  "summary": {
+    "structures": 510,
+    "centroid_mm": {
+      "median": 1.16,
+      "p90": 2.93
+    },
+    "dice_median": 0.37,
+    "by_volume": [
+      {
+        "under_mm3": 20,
+        "structures": 191,
+        "dice_median": 0.12
+      },
+      {
+        "under_mm3": 100,
+        "structures": 130,
+        "dice_median": 0.36
+      },
+      {
+        "under_mm3": 500,
+        "structures": 83,
+        "dice_median": 0.53
+      },
+      {
+        "under_mm3": 2000,
+        "structures": 40,
+        "dice_median": 0.67
+      },
+      {
+        "under_mm3": null,
+        "structures": 66,
+        "dice_median": 0.64
+      }
+    ]
+  },
+  "structures": [
+    {
+      "index": 7,
+      "name": "Left-white_matter_of_forebrain",
+      "volume_mm3": 167801.1,
+      "dice": 0.8212,
+      "centroid_mm": 1.024
+    },
+    {
+      "index": 48,
+      "name": "Left-head_of_caudate",
+      "volume_mm3": 2333.18,
+      "dice": 0.8687,
+      "centroid_mm": 1.057
+    },
+    {
+      "index": 68,
+      "name": "Left-septum_pellucidum",
+      "volume_mm3": 1.79,
+      "dice": 0.0,
+      "centroid_mm": 10.845
+    },
+    {
+      "index": 79,
+      "name": "Left-putamen",
+      "volume_mm3": 4230.59,
+      "dice": 0.8941,
+      "centroid_mm": 0.195
+    },
+    {
+      "index": 99,
+      "name": "Left-anterior_olfactory_nucleus",
+      "volume_mm3": 17.22,
+      "dice": 0.0558,
+      "centroid_mm": 3.211
+    },
+    {
+      "index": 100,
+      "name": "Left-olfactory_tubercle",
+      "volume_mm3": 0.19,
+      "dice": 0.0,
+      "centroid_mm": 0.863
+    },
+    {
+      "index": 101,
+      "name": "Left-core_of_nucleus_accumbens",
+      "volume_mm3": 549.95,
+      "dice": 0.7252,
+      "centroid_mm": 1.071
+    },
+    {
+      "index": 102,
+      "name": "Left-claustrum",
+      "volume_mm3": 475.58,
+      "dice": 0.4651,
+      "centroid_mm": 2.949
+    },
+    {
+      "index": 103,
+      "name": "Left-medial_septal_nucleus",
+      "volume_mm3": 97.66,
+      "dice": 0.5681,
+      "centroid_mm": 1.037
+    },
+    {
+      "index": 108,
+      "name": "Left-basal_nucleus_of_meynert",
+      "volume_mm3": 9.09,
+      "dice": 0.1095,
+      "centroid_mm": 1.082
+    },
+    {
+      "index": 111,
+      "name": "Left-diagonal_band",
+      "volume_mm3": 11.33,
+      "dice": 0.2704,
+      "centroid_mm": 0.838
+    },
+    {
+      "index": 113,
+      "name": "Left-lateral_olfactory_stria",
+      "volume_mm3": 4.16,
+      "dice": 0.0256,
+      "centroid_mm": 3.655
+    },
+    {
+      "index": 117,
+      "name": "Left-bed_nucleus_of_stria_terminalis",
+      "volume_mm3": 89.98,
+      "dice": 0.615,
+      "centroid_mm": 0.716
+    },
+    {
+      "index": 118,
+      "name": "Left-body_of_caudate",
+      "volume_mm3": 593.15,
+      "dice": 0.7311,
+      "centroid_mm": 0.089
+    },
+    {
+      "index": 119,
+      "name": "Left-external_segment_of_globus_pallidus",
+      "volume_mm3": 946.05,
+      "dice": 0.8225,
+      "centroid_mm": 0.892
+    },
+    {
+      "index": 120,
+      "name": "Left-ventral_pallidus",
+      "volume_mm3": 34.37,
+      "dice": 0.1715,
+      "centroid_mm": 1.199
+    },
+    {
+      "index": 125,
+      "name": "Left-lateral_olfactory_area",
+      "volume_mm3": 35.39,
+      "dice": 0.0963,
+      "centroid_mm": 3.085
+    },
+    {
+      "index": 128,
+      "name": "Left-substantia_innominata",
+      "volume_mm3": 193.15,
+      "dice": 0.4323,
+      "centroid_mm": 0.783
+    },
+    {
+      "index": 130,
+      "name": "Left-anterior_commissure",
+      "volume_mm3": 120.45,
+      "dice": 0.4745,
+      "centroid_mm": 1.07
+    },
+    {
+      "index": 147,
+      "name": "Left-preoptic_region_of_hth",
+      "volume_mm3": 26.3,
+      "dice": 0.2295,
+      "centroid_mm": 0.83
+    },
+    {
+      "index": 149,
+      "name": "Left-lateral_preoptic_area",
+      "volume_mm3": 34.05,
+      "dice": 0.3216,
+      "centroid_mm": 1.173
+    },
+    {
+      "index": 150,
+      "name": "Left-median_preoptic_nucleus",
+      "volume_mm3": 2.69,
+      "dice": 0.0,
+      "centroid_mm": 0.759
+    },
+    {
+      "index": 157,
+      "name": "Left-layer_iii_of_piriform_cortex",
+      "volume_mm3": 3.52,
+      "dice": 0.0,
+      "centroid_mm": 2.729
+    },
+    {
+      "index": 160,
+      "name": "Left-suprachiasmatic_nucleus",
+      "volume_mm3": 0.19,
+      "dice": 0.0,
+      "centroid_mm": 1.436
+    },
+    {
+      "index": 161,
+      "name": "Left-optic_chiasm",
+      "volume_mm3": 21.5,
+      "dice": 0.3151,
+      "centroid_mm": 0.888
+    },
+    {
+      "index": 174,
+      "name": "Left-temporal_claustrum",
+      "volume_mm3": 107.46,
+      "dice": 0.4213,
+      "centroid_mm": 1.194
+    },
+    {
+      "index": 181,
+      "name": "Left-supraoptic_region_of_hth",
+      "volume_mm3": 54.78,
+      "dice": 0.5118,
+      "centroid_mm": 0.644
+    },
+    {
+      "index": 184,
+      "name": "Left-stria_terminalis",
+      "volume_mm3": 44.03,
+      "dice": 0.2204,
+      "centroid_mm": 4.236
+    },
+    {
+      "index": 190,
+      "name": "Left-magnocellular_division_of_reticular_nucleus",
+      "volume_mm3": 19.01,
+      "dice": 0.2168,
+      "centroid_mm": 0.898
+    },
+    {
+      "index": 191,
+      "name": "Left-parvocellular_division_of_reticular_nucleus_(perireticular_nucleus)",
+      "volume_mm3": 21.57,
+      "dice": 0.048,
+      "centroid_mm": 2.136
+    },
+    {
+      "index": 192,
+      "name": "Left-medial_preoptic_nucleus",
+      "volume_mm3": 8.38,
+      "dice": 0.2361,
+      "centroid_mm": 0.925
+    },
+    {
+      "index": 193,
+      "name": "Left-anterior_hypothalamic_nucleus",
+      "volume_mm3": 3.52,
+      "dice": 0.0545,
+      "centroid_mm": 0.856
+    },
+    {
+      "index": 194,
+      "name": "Left-paraventricular_nucleus_of_hypothalamus",
+      "volume_mm3": 15.55,
+      "dice": 0.1127,
+      "centroid_mm": 2.107
+    },
+    {
+      "index": 196,
+      "name": "Left-supraoptic_nucleus",
+      "volume_mm3": 15.42,
+      "dice": 0.4381,
+      "centroid_mm": 0.738
+    },
+    {
+      "index": 199,
+      "name": "Left-fornix",
+      "volume_mm3": 190.98,
+      "dice": 0.4872,
+      "centroid_mm": 0.954
+    },
+    {
+      "index": 201,
+      "name": "Left-stria_medullaris_of_thalamus",
+      "volume_mm3": 24.7,
+      "dice": 0.1956,
+      "centroid_mm": 2.564
+    },
+    {
+      "index": 206,
+      "name": "Left-internal_segment_of_globus_pallidus",
+      "volume_mm3": 498.82,
+      "dice": 0.8068,
+      "centroid_mm": 0.511
+    },
+    {
+      "index": 207,
+      "name": "Left-periventricular_nucleus__supraoptic_portion",
+      "volume_mm3": 4.8,
+      "dice": 0.2383,
+      "centroid_mm": 0.643
+    },
+    {
+      "index": 208,
+      "name": "Left-optic_tract",
+      "volume_mm3": 190.78,
+      "dice": 0.6432,
+      "centroid_mm": 0.674
+    },
+    {
+      "index": 209,
+      "name": "Left-supraoptic_dicussation",
+      "volume_mm3": 0.26,
+      "dice": 0.0,
+      "centroid_mm": 6.806
+    },
+    {
+      "index": 214,
+      "name": "Left-amygdaloid_complex",
+      "volume_mm3": 61.76,
+      "dice": 0.5993,
+      "centroid_mm": 0.782
+    },
+    {
+      "index": 215,
+      "name": "Left-anterior_amygdaloid_area",
+      "volume_mm3": 56.45,
+      "dice": 0.505,
+      "centroid_mm": 1.134
+    },
+    {
+      "index": 216,
+      "name": "Left-basolateral_nucleus_(basal_nucleus)",
+      "volume_mm3": 324.74,
+      "dice": 0.7193,
+      "centroid_mm": 1.234
+    },
+    {
+      "index": 217,
+      "name": "Left-ventral_division_of_basomedial_nucleus",
+      "volume_mm3": 226.18,
+      "dice": 0.7441,
+      "centroid_mm": 1.396
+    },
+    {
+      "index": 218,
+      "name": "Left-thalamus",
+      "volume_mm3": 535.49,
+      "dice": 0.2947,
+      "centroid_mm": 0.813
+    },
+    {
+      "index": 219,
+      "name": "Left-anterodorsal_nucleus_of_thalamus",
+      "volume_mm3": 2.43,
+      "dice": 0.1,
+      "centroid_mm": 0.541
+    },
+    {
+      "index": 220,
+      "name": "Left-anteroventral_nucleus_of_thalamus",
+      "volume_mm3": 56.64,
+      "dice": 0.5548,
+      "centroid_mm": 0.867
+    },
+    {
+      "index": 221,
+      "name": "Left-parataenial_nucleus_of_thalamus",
+      "volume_mm3": 1.22,
+      "dice": 0.0,
+      "centroid_mm": 2.916
+    },
+    {
+      "index": 222,
+      "name": "Left-parvocellular_division_of_va",
+      "volume_mm3": 511.23,
+      "dice": 0.7585,
+      "centroid_mm": 1.141
+    },
+    {
+      "index": 223,
+      "name": "Left-fasciculosus_nucleus_of_thalamus",
+      "volume_mm3": 13.12,
+      "dice": 0.1172,
+      "centroid_mm": 0.942
+    },
+    {
+      "index": 224,
+      "name": "Left-rhomboid_(central)_nucleus_of_thalamus",
+      "volume_mm3": 2.75,
+      "dice": 0.0,
+      "centroid_mm": 1.563
+    },
+    {
+      "index": 225,
+      "name": "Left-paraventricular_nucleus",
+      "volume_mm3": 86.27,
+      "dice": 0.4481,
+      "centroid_mm": 0.704
+    },
+    {
+      "index": 226,
+      "name": "Left-zona_incerta",
+      "volume_mm3": 137.41,
+      "dice": 0.075,
+      "centroid_mm": 2.51
+    },
+    {
+      "index": 227,
+      "name": "Left-periventricular_nucleus__tuberal_portion",
+      "volume_mm3": 6.53,
+      "dice": 0.1545,
+      "centroid_mm": 0.546
+    },
+    {
+      "index": 228,
+      "name": "Left-juxtaparaventricular_lateral_hypothalamic_area",
+      "volume_mm3": 8.58,
+      "dice": 0.2534,
+      "centroid_mm": 1.457
+    },
+    {
+      "index": 229,
+      "name": "Left-dorsomedial_hypothalamic_nucleus",
+      "volume_mm3": 3.97,
+      "dice": 0.0164,
+      "centroid_mm": 0.754
+    },
+    {
+      "index": 230,
+      "name": "Left-lateral_hypothalamic_area__tuberal_part",
+      "volume_mm3": 49.28,
+      "dice": 0.4284,
+      "centroid_mm": 0.548
+    },
+    {
+      "index": 232,
+      "name": "Left-pallidohypothalamic_area",
+      "volume_mm3": 44.29,
+      "dice": 0.2775,
+      "centroid_mm": 1.02
+    },
+    {
+      "index": 234,
+      "name": "Left-medial_corticohypothalamic_tract",
+      "volume_mm3": 0.64,
+      "dice": 0.25,
+      "centroid_mm": 0.624
+    },
+    {
+      "index": 238,
+      "name": "Left-ventral_subdivision_of_coa",
+      "volume_mm3": 12.35,
+      "dice": 0.396,
+      "centroid_mm": 0.75
+    },
+    {
+      "index": 240,
+      "name": "Left-paralaminar_nucleus",
+      "volume_mm3": 4.16,
+      "dice": 0.1829,
+      "centroid_mm": 1.6
+    },
+    {
+      "index": 242,
+      "name": "Left-amygdalocortical_(corticoamygdaloid)_transition_area",
+      "volume_mm3": 102.85,
+      "dice": 0.4479,
+      "centroid_mm": 2.189
+    },
+    {
+      "index": 243,
+      "name": "Left-dorsal_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 8.7,
+      "dice": 0.2041,
+      "centroid_mm": 0.892
+    },
+    {
+      "index": 244,
+      "name": "Left-ventral_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 8.77,
+      "dice": 0.4846,
+      "centroid_mm": 0.663
+    },
+    {
+      "index": 245,
+      "name": "Left-arcuate_nucleus_of_hypothalamus",
+      "volume_mm3": 14.02,
+      "dice": 0.5063,
+      "centroid_mm": 0.617
+    },
+    {
+      "index": 246,
+      "name": "Left-inferior_thalamic_peduncle",
+      "volume_mm3": 9.73,
+      "dice": 0.1562,
+      "centroid_mm": 1.562
+    },
+    {
+      "index": 252,
+      "name": "Left-anteromedial_nucleus_of_thalamus",
+      "volume_mm3": 6.14,
+      "dice": 0.2255,
+      "centroid_mm": 1.578
+    },
+    {
+      "index": 253,
+      "name": "Left-reuniens_nucleus_(medioventral_nucleus)_of_thalamus",
+      "volume_mm3": 21.25,
+      "dice": 0.508,
+      "centroid_mm": 0.52
+    },
+    {
+      "index": 254,
+      "name": "Left-reticular_nucleus_of_thalamus",
+      "volume_mm3": 370.37,
+      "dice": 0.2415,
+      "centroid_mm": 2.498
+    },
+    {
+      "index": 255,
+      "name": "Left-central_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 12.67,
+      "dice": 0.5576,
+      "centroid_mm": 0.616
+    },
+    {
+      "index": 256,
+      "name": "Left-tuberomammillary_nucleus",
+      "volume_mm3": 34.43,
+      "dice": 0.5377,
+      "centroid_mm": 0.599
+    },
+    {
+      "index": 268,
+      "name": "Left-lateral_tuberal_nuclei",
+      "volume_mm3": 5.44,
+      "dice": 0.3567,
+      "centroid_mm": 1.178
+    },
+    {
+      "index": 274,
+      "name": "Left-ventral_medial_nucleus_of_thalamus",
+      "volume_mm3": 9.92,
+      "dice": 0.1739,
+      "centroid_mm": 1.254
+    },
+    {
+      "index": 275,
+      "name": "Left-posterior_hypothalamic_nucleus",
+      "volume_mm3": 68.8,
+      "dice": 0.6115,
+      "centroid_mm": 0.753
+    },
+    {
+      "index": 276,
+      "name": "Left-mammillothalamic_tract",
+      "volume_mm3": 27.78,
+      "dice": 0.254,
+      "centroid_mm": 1.22
+    },
+    {
+      "index": 277,
+      "name": "Left-medial_subdivision_of_central_nucleus",
+      "volume_mm3": 24.7,
+      "dice": 0.6737,
+      "centroid_mm": 0.455
+    },
+    {
+      "index": 278,
+      "name": "Left-lateral_subdivision_of_central_nucleus",
+      "volume_mm3": 5.25,
+      "dice": 0.2012,
+      "centroid_mm": 0.812
+    },
+    {
+      "index": 279,
+      "name": "Left-rostral_subdivision_of_medial_nucleus",
+      "volume_mm3": 26.62,
+      "dice": 0.5877,
+      "centroid_mm": 0.213
+    },
+    {
+      "index": 282,
+      "name": "Left-magnocellular_(medial)_division_of_md",
+      "volume_mm3": 334.08,
+      "dice": 0.6866,
+      "centroid_mm": 0.866
+    },
+    {
+      "index": 283,
+      "name": "Left-magnocellular_division_of_va",
+      "volume_mm3": 318.91,
+      "dice": 0.6735,
+      "centroid_mm": 1.229
+    },
+    {
+      "index": 284,
+      "name": "Left-central_medial_nucleus_of_thalamus",
+      "volume_mm3": 5.38,
+      "dice": 0.1346,
+      "centroid_mm": 0.825
+    },
+    {
+      "index": 285,
+      "name": "Left-paracentral_nucleus_of_thalamus",
+      "volume_mm3": 95.62,
+      "dice": 0.3901,
+      "centroid_mm": 1.096
+    },
+    {
+      "index": 286,
+      "name": "Left-intermediodorsal__nucleus_of_thalamus",
+      "volume_mm3": 7.1,
+      "dice": 0.3125,
+      "centroid_mm": 0.622
+    },
+    {
+      "index": 295,
+      "name": "Left-amygdalostriatal_transition_area",
+      "volume_mm3": 12.93,
+      "dice": 0.232,
+      "centroid_mm": 0.759
+    },
+    {
+      "index": 297,
+      "name": "Left-lateral__hypothalamic_area__posterior_part",
+      "volume_mm3": 30.46,
+      "dice": 0.3839,
+      "centroid_mm": 0.544
+    },
+    {
+      "index": 298,
+      "name": "Left-mammillary_peduncle",
+      "volume_mm3": 14.14,
+      "dice": 0.2762,
+      "centroid_mm": 0.358
+    },
+    {
+      "index": 301,
+      "name": "Left-amygdalohippocampal_area",
+      "volume_mm3": 12.03,
+      "dice": 0.3762,
+      "centroid_mm": 0.725
+    },
+    {
+      "index": 303,
+      "name": "Left-central_dorsal_nucleus_of_thalamus",
+      "volume_mm3": 1.92,
+      "dice": 0.0,
+      "centroid_mm": 1.462
+    },
+    {
+      "index": 304,
+      "name": "Left-supramammillary_nucleus",
+      "volume_mm3": 0.19,
+      "dice": 0.0,
+      "centroid_mm": 1.103
+    },
+    {
+      "index": 305,
+      "name": "Left-lateral_part_of_medial_mammillary_nucleus",
+      "volume_mm3": 8.45,
+      "dice": 0.3385,
+      "centroid_mm": 0.399
+    },
+    {
+      "index": 306,
+      "name": "Left-medial_part_of_medial_mammillary_nucleus",
+      "volume_mm3": 11.78,
+      "dice": 0.4113,
+      "centroid_mm": 0.707
+    },
+    {
+      "index": 307,
+      "name": "Left-basal_division_of_medial_mammillary_nucleus",
+      "volume_mm3": 8.83,
+      "dice": 0.4812,
+      "centroid_mm": 0.479
+    },
+    {
+      "index": 308,
+      "name": "Left-lateral_mammillary_nucleus",
+      "volume_mm3": 1.79,
+      "dice": 0.2791,
+      "centroid_mm": 0.481
+    },
+    {
+      "index": 309,
+      "name": "Left-lenticular_fasciculus",
+      "volume_mm3": 26.56,
+      "dice": 0.3473,
+      "centroid_mm": 2.436
+    },
+    {
+      "index": 310,
+      "name": "Left-substantia_nigra__reticular_part",
+      "volume_mm3": 131.65,
+      "dice": 0.3082,
+      "centroid_mm": 1.768
+    },
+    {
+      "index": 312,
+      "name": "Left-central_part_of_medial_division_of_md",
+      "volume_mm3": 53.44,
+      "dice": 0.2633,
+      "centroid_mm": 1.015
+    },
+    {
+      "index": 313,
+      "name": "Left-parvocellular_(central)_division_of_md",
+      "volume_mm3": 457.47,
+      "dice": 0.7241,
+      "centroid_mm": 0.254
+    },
+    {
+      "index": 314,
+      "name": "Left-rostral_division_of_vl",
+      "volume_mm3": 194.05,
+      "dice": 0.463,
+      "centroid_mm": 2.082
+    },
+    {
+      "index": 315,
+      "name": "Left-medial_portion_of_sth",
+      "volume_mm3": 25.6,
+      "dice": 0.2197,
+      "centroid_mm": 1.486
+    },
+    {
+      "index": 316,
+      "name": "Left-laterodorsal_portion_of_sth",
+      "volume_mm3": 110.02,
+      "dice": 0.008,
+      "centroid_mm": 3.138
+    },
+    {
+      "index": 320,
+      "name": "Left-amygdalohippocampal_transition_area",
+      "volume_mm3": 8.19,
+      "dice": 0.4735,
+      "centroid_mm": 1.055
+    },
+    {
+      "index": 321,
+      "name": "Left-lateroventral_portion_of_sth",
+      "volume_mm3": 91.78,
+      "dice": 0.0602,
+      "centroid_mm": 2.461
+    },
+    {
+      "index": 322,
+      "name": "Left-thalamic_fasciculus",
+      "volume_mm3": 8.83,
+      "dice": 0.0969,
+      "centroid_mm": 2.46
+    },
+    {
+      "index": 326,
+      "name": "Left-uncal_subiculum",
+      "volume_mm3": 44.22,
+      "dice": 0.5118,
+      "centroid_mm": 0.954
+    },
+    {
+      "index": 339,
+      "name": "Left-stratum_lacunosum-moleculare_of_uncal_ca1",
+      "volume_mm3": 107.65,
+      "dice": 0.5071,
+      "centroid_mm": 0.872
+    },
+    {
+      "index": 340,
+      "name": "Left-stratum_radiatum_of_uncal_ca1",
+      "volume_mm3": 15.1,
+      "dice": 0.0537,
+      "centroid_mm": 0.823
+    },
+    {
+      "index": 341,
+      "name": "Left-stratum_pyramidale_of_uncal_ca1",
+      "volume_mm3": 154.94,
+      "dice": 0.6121,
+      "centroid_mm": 0.652
+    },
+    {
+      "index": 342,
+      "name": "Left-stratum_oriens_of_uncal_ca1",
+      "volume_mm3": 10.5,
+      "dice": 0.1203,
+      "centroid_mm": 1.044
+    },
+    {
+      "index": 343,
+      "name": "Left-stratum_lacunosum-moleculare_of_rostral_ca1",
+      "volume_mm3": 343.36,
+      "dice": 0.4579,
+      "centroid_mm": 1.612
+    },
+    {
+      "index": 344,
+      "name": "Left-stratum_radiatum_of_rostral_ca1",
+      "volume_mm3": 97.02,
+      "dice": 0.1121,
+      "centroid_mm": 1.167
+    },
+    {
+      "index": 345,
+      "name": "Left-stratum_pyramidale_of_rostral_ca1",
+      "volume_mm3": 459.14,
+      "dice": 0.5167,
+      "centroid_mm": 1.43
+    },
+    {
+      "index": 346,
+      "name": "Left-stratum_oriens_of_rostral_ca1",
+      "volume_mm3": 25.15,
+      "dice": 0.035,
+      "centroid_mm": 3.269
+    },
+    {
+      "index": 347,
+      "name": "Left-rostral_subiculum",
+      "volume_mm3": 552.19,
+      "dice": 0.7148,
+      "centroid_mm": 0.517
+    },
+    {
+      "index": 349,
+      "name": "Left-posteroventral_putamen",
+      "volume_mm3": 28.61,
+      "dice": 0.2301,
+      "centroid_mm": 1.743
+    },
+    {
+      "index": 350,
+      "name": "Left-dorsal_subdivision_of_vlc",
+      "volume_mm3": 134.46,
+      "dice": 0.5995,
+      "centroid_mm": 0.801
+    },
+    {
+      "index": 352,
+      "name": "Left-substantia_nigra__compact_part",
+      "volume_mm3": 93.95,
+      "dice": 0.5245,
+      "centroid_mm": 0.773
+    },
+    {
+      "index": 354,
+      "name": "Left-alveus",
+      "volume_mm3": 337.41,
+      "dice": 0.1667,
+      "centroid_mm": 3.358
+    },
+    {
+      "index": 364,
+      "name": "Left-molecular_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 19.97,
+      "dice": 0.1689,
+      "centroid_mm": 1.452
+    },
+    {
+      "index": 365,
+      "name": "Left-granular_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 0.64,
+      "dice": 0.0,
+      "centroid_mm": 1.496
+    },
+    {
+      "index": 367,
+      "name": "Left-polyform_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 11.2,
+      "dice": 0.095,
+      "centroid_mm": 1.144
+    },
+    {
+      "index": 368,
+      "name": "Left-stratum_lacunosum-moleculare_of_uncal_ca2",
+      "volume_mm3": 44.29,
+      "dice": 0.2375,
+      "centroid_mm": 1.054
+    },
+    {
+      "index": 369,
+      "name": "Left-stratum_radiatum_of_uncal_ca2",
+      "volume_mm3": 8.64,
+      "dice": 0.0783,
+      "centroid_mm": 1.485
+    },
+    {
+      "index": 370,
+      "name": "Left-stratum_pyramidale_of_uncal_ca2",
+      "volume_mm3": 40.45,
+      "dice": 0.2235,
+      "centroid_mm": 1.116
+    },
+    {
+      "index": 371,
+      "name": "Left-stratum_oriens_of_uncal_ca2",
+      "volume_mm3": 9.41,
+      "dice": 0.0541,
+      "centroid_mm": 1.037
+    },
+    {
+      "index": 372,
+      "name": "Left-stratum_lacunosum-moleculare_of_uncal_ca3",
+      "volume_mm3": 13.95,
+      "dice": 0.1547,
+      "centroid_mm": 1.771
+    },
+    {
+      "index": 373,
+      "name": "Left-stratum_lucidum__of_uncal_ca3",
+      "volume_mm3": 2.69,
+      "dice": 0.0488,
+      "centroid_mm": 1.388
+    },
+    {
+      "index": 374,
+      "name": "Left-stratum_pyramidale_of_uncal_ca3",
+      "volume_mm3": 22.98,
+      "dice": 0.1705,
+      "centroid_mm": 0.925
+    },
+    {
+      "index": 375,
+      "name": "Left-stratum_oriens_of_uncal_ca3",
+      "volume_mm3": 11.26,
+      "dice": 0.0741,
+      "centroid_mm": 1.273
+    },
+    {
+      "index": 377,
+      "name": "Left-lateral_nucleus",
+      "volume_mm3": 387.33,
+      "dice": 0.7695,
+      "centroid_mm": 0.738
+    },
+    {
+      "index": 378,
+      "name": "Left-lateral_dorsal_nucleus_of_thalamus",
+      "volume_mm3": 82.56,
+      "dice": 0.5784,
+      "centroid_mm": 3.054
+    },
+    {
+      "index": 379,
+      "name": "Left-densocelllular_(paralamellar)_division_of_md",
+      "volume_mm3": 82.88,
+      "dice": 0.5975,
+      "centroid_mm": 1.545
+    },
+    {
+      "index": 380,
+      "name": "Left-multiform_(lateral)_division_of_md",
+      "volume_mm3": 229.57,
+      "dice": 0.6137,
+      "centroid_mm": 1.586
+    },
+    {
+      "index": 381,
+      "name": "Left-ventral_subdivision_of_vlc",
+      "volume_mm3": 173.25,
+      "dice": 0.3898,
+      "centroid_mm": 2.874
+    },
+    {
+      "index": 382,
+      "name": "Left-medial_subdivision_of_vlc_(area_x)",
+      "volume_mm3": 128.58,
+      "dice": 0.0199,
+      "centroid_mm": 4.12
+    },
+    {
+      "index": 384,
+      "name": "Left-midbrain_(mesencephalon)",
+      "volume_mm3": 1865.34,
+      "dice": 0.7937,
+      "centroid_mm": 0.796
+    },
+    {
+      "index": 385,
+      "name": "Left-red_nucleus",
+      "volume_mm3": 124.48,
+      "dice": 0.7412,
+      "centroid_mm": 0.822
+    },
+    {
+      "index": 393,
+      "name": "Left-tail_of_caudate",
+      "volume_mm3": 41.54,
+      "dice": 0.1069,
+      "centroid_mm": 1.605
+    },
+    {
+      "index": 394,
+      "name": "Left-rostral_division_of_ventral_posterior_lateral_nucleus",
+      "volume_mm3": 217.02,
+      "dice": 0.3626,
+      "centroid_mm": 2.359
+    },
+    {
+      "index": 395,
+      "name": "Left-parvocellular_division_of_vpm",
+      "volume_mm3": 8.06,
+      "dice": 0.0,
+      "centroid_mm": 1.759
+    },
+    {
+      "index": 396,
+      "name": "Left-lateral_division_of_centromedian_nucleus_of_thalamus",
+      "volume_mm3": 41.73,
+      "dice": 0.2966,
+      "centroid_mm": 1.026
+    },
+    {
+      "index": 397,
+      "name": "Left-medial_division_of_centromedian_nucleus_of_thalamus",
+      "volume_mm3": 134.27,
+      "dice": 0.6589,
+      "centroid_mm": 0.555
+    },
+    {
+      "index": 398,
+      "name": "Left-parafascicular_nucleus_of_thalamus",
+      "volume_mm3": 63.3,
+      "dice": 0.5772,
+      "centroid_mm": 0.252
+    },
+    {
+      "index": 399,
+      "name": "Left-periventricular_area_of_thalamus",
+      "volume_mm3": 33.02,
+      "dice": 0.4656,
+      "centroid_mm": 0.937
+    },
+    {
+      "index": 400,
+      "name": "Left-nucleus_of_the_field_of_forel",
+      "volume_mm3": 0.32,
+      "dice": 0.0,
+      "centroid_mm": 3.453
+    },
+    {
+      "index": 404,
+      "name": "Left-molecular_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 285.63,
+      "dice": 0.2969,
+      "centroid_mm": 1.13
+    },
+    {
+      "index": 405,
+      "name": "Left-granular_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 3.78,
+      "dice": 0.0,
+      "centroid_mm": 1.398
+    },
+    {
+      "index": 407,
+      "name": "Left-polyform_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 159.42,
+      "dice": 0.3347,
+      "centroid_mm": 1.09
+    },
+    {
+      "index": 408,
+      "name": "Left-stratum_lacunosum-moleculare_of_rostral_ca2",
+      "volume_mm3": 16.83,
+      "dice": 0.1501,
+      "centroid_mm": 5.25
+    },
+    {
+      "index": 409,
+      "name": "Left-stratum_radiatum_of_rostral_ca2",
+      "volume_mm3": 1.22,
+      "dice": 0.0,
+      "centroid_mm": 0.727
+    },
+    {
+      "index": 410,
+      "name": "Left-stratum_pyramidale_of_rostral_ca2",
+      "volume_mm3": 5.82,
+      "dice": 0.0,
+      "centroid_mm": 5.209
+    },
+    {
+      "index": 411,
+      "name": "Left-stratum_oriens_of_rostral_ca2",
+      "volume_mm3": 0.51,
+      "dice": 0.0,
+      "centroid_mm": 4.452
+    },
+    {
+      "index": 412,
+      "name": "Left-fasciculus_retroflexus_(habenuno-interpeduncular_tract)",
+      "volume_mm3": 4.42,
+      "dice": 0.3353,
+      "centroid_mm": 0.834
+    },
+    {
+      "index": 414,
+      "name": "Left-pontine_nucleus",
+      "volume_mm3": 666.24,
+      "dice": 0.4066,
+      "centroid_mm": 0.93
+    },
+    {
+      "index": 418,
+      "name": "Left-stratum_lacunosum-moleculare_of_rostral_ca3",
+      "volume_mm3": 26.5,
+      "dice": 0.0921,
+      "centroid_mm": 2.313
+    },
+    {
+      "index": 419,
+      "name": "Left-stratum_lucidum__of_rostral_ca3",
+      "volume_mm3": 3.78,
+      "dice": 0.0805,
+      "centroid_mm": 1.679
+    },
+    {
+      "index": 420,
+      "name": "Left-stratum_pyramidale_of_rostral_ca3",
+      "volume_mm3": 27.78,
+      "dice": 0.2795,
+      "centroid_mm": 1.499
+    },
+    {
+      "index": 421,
+      "name": "Left-stratum_oriens_of_rostral_ca3",
+      "volume_mm3": 14.4,
+      "dice": 0.1879,
+      "centroid_mm": 0.546
+    },
+    {
+      "index": 422,
+      "name": "Left-pyramidal_cells_of_uncal_ca4",
+      "volume_mm3": 3.71,
+      "dice": 0.0342,
+      "centroid_mm": 1.417
+    },
+    {
+      "index": 423,
+      "name": "Left-ventral_posterior_medial_nucleus",
+      "volume_mm3": 29.18,
+      "dice": 0.1293,
+      "centroid_mm": 2.761
+    },
+    {
+      "index": 424,
+      "name": "Left-ventral_posterior_inferior_nucleus",
+      "volume_mm3": 76.29,
+      "dice": 0.3148,
+      "centroid_mm": 1.432
+    },
+    {
+      "index": 425,
+      "name": "Left-lateral_division_of_central_lateral_nucleus",
+      "volume_mm3": 48.06,
+      "dice": 0.2297,
+      "centroid_mm": 2.077
+    },
+    {
+      "index": 426,
+      "name": "Left-subparafascicular_nucleus_of_thalamus",
+      "volume_mm3": 10.56,
+      "dice": 0.1373,
+      "centroid_mm": 1.387
+    },
+    {
+      "index": 430,
+      "name": "Left-lateral_habenular_nucleus",
+      "volume_mm3": 13.44,
+      "dice": 0.5028,
+      "centroid_mm": 0.824
+    },
+    {
+      "index": 432,
+      "name": "Left-pyramidal_cells_of_rostral_ca4",
+      "volume_mm3": 82.62,
+      "dice": 0.4087,
+      "centroid_mm": 2.66
+    },
+    {
+      "index": 435,
+      "name": "Left-ventral_tegmental_area",
+      "volume_mm3": 96.13,
+      "dice": 0.5785,
+      "centroid_mm": 0.241
+    },
+    {
+      "index": 441,
+      "name": "Left-lateral_posterior_nucleus_of_thalamus",
+      "volume_mm3": 414.4,
+      "dice": 0.6871,
+      "centroid_mm": 2.262
+    },
+    {
+      "index": 442,
+      "name": "Left-basal_ventral_medial_nucleus",
+      "volume_mm3": 1.92,
+      "dice": 0.0,
+      "centroid_mm": 1.524
+    },
+    {
+      "index": 443,
+      "name": "Left-dorsal_division_of_central_lateral_nucleus",
+      "volume_mm3": 0.58,
+      "dice": 0.125,
+      "centroid_mm": 1.331
+    },
+    {
+      "index": 444,
+      "name": "Left-medial_habenular_nucleus",
+      "volume_mm3": 1.47,
+      "dice": 0.1739,
+      "centroid_mm": 0.363
+    },
+    {
+      "index": 454,
+      "name": "Left-anterior_nucleus_of_pulvinar",
+      "volume_mm3": 218.94,
+      "dice": 0.6906,
+      "centroid_mm": 1.255
+    },
+    {
+      "index": 458,
+      "name": "Left-caudal_division_of_ventral_posterior_lateral_nucleus",
+      "volume_mm3": 347.01,
+      "dice": 0.5854,
+      "centroid_mm": 1.749
+    },
+    {
+      "index": 461,
+      "name": "Left-fimbria",
+      "volume_mm3": 57.66,
+      "dice": 0.2428,
+      "centroid_mm": 1.21
+    },
+    {
+      "index": 465,
+      "name": "Left-periaqueductal_gray_substance",
+      "volume_mm3": 235.46,
+      "dice": 0.7475,
+      "centroid_mm": 0.511
+    },
+    {
+      "index": 478,
+      "name": "Left-posterior_nucleus_of_thalamus",
+      "volume_mm3": 65.28,
+      "dice": 0.5462,
+      "centroid_mm": 1.041
+    },
+    {
+      "index": 479,
+      "name": "Left-centromedian_nucleus_of_thalamus",
+      "volume_mm3": 5.18,
+      "dice": 0.2884,
+      "centroid_mm": 0.587
+    },
+    {
+      "index": 484,
+      "name": "Left-dorsal_lateral_geniculate_nucleus",
+      "volume_mm3": 72.64,
+      "dice": 0.5963,
+      "centroid_mm": 0.411
+    },
+    {
+      "index": 492,
+      "name": "Left-limitans_nucleus",
+      "volume_mm3": 14.46,
+      "dice": 0.4454,
+      "centroid_mm": 0.663
+    },
+    {
+      "index": 493,
+      "name": "Left-habenular_commissure",
+      "volume_mm3": 1.15,
+      "dice": 0.1132,
+      "centroid_mm": 0.63
+    },
+    {
+      "index": 496,
+      "name": "Left-pretectal_region",
+      "volume_mm3": 30.98,
+      "dice": 0.4908,
+      "centroid_mm": 0.675
+    },
+    {
+      "index": 498,
+      "name": "Left-peripeduncular_nucleus",
+      "volume_mm3": 1.79,
+      "dice": 0.0921,
+      "centroid_mm": 1.754
+    },
+    {
+      "index": 504,
+      "name": "Left-dorsal_medial_geniculate_nucleus",
+      "volume_mm3": 22.21,
+      "dice": 0.2875,
+      "centroid_mm": 1.307
+    },
+    {
+      "index": 508,
+      "name": "Left-medial_nucleus_of_pulvinar",
+      "volume_mm3": 679.81,
+      "dice": 0.7864,
+      "centroid_mm": 1.803
+    },
+    {
+      "index": 510,
+      "name": "Left-magnocellular_(medial)_nucleus",
+      "volume_mm3": 1.86,
+      "dice": 0.0,
+      "centroid_mm": 2.002
+    },
+    {
+      "index": 512,
+      "name": "Left-suprageniculate_nucleus_of_thalamus",
+      "volume_mm3": 0.58,
+      "dice": 0.0,
+      "centroid_mm": 1.912
+    },
+    {
+      "index": 517,
+      "name": "Left-lateral_nucleus_of_pulvinar",
+      "volume_mm3": 213.5,
+      "dice": 0.5048,
+      "centroid_mm": 1.862
+    },
+    {
+      "index": 519,
+      "name": "Left-inferior_nucleus_of_pulvinar",
+      "volume_mm3": 29.7,
+      "dice": 0.3316,
+      "centroid_mm": 1.341
+    },
+    {
+      "index": 521,
+      "name": "Left-dorsal_raphe_nucleus",
+      "volume_mm3": 44.99,
+      "dice": 0.2938,
+      "centroid_mm": 0.439
+    },
+    {
+      "index": 531,
+      "name": "Left-superior_cerebellar_peduncle_(brachium_conjunctivum)",
+      "volume_mm3": 154.24,
+      "dice": 0.5781,
+      "centroid_mm": 1.334
+    },
+    {
+      "index": 541,
+      "name": "Left-central_nucleus_of_inferior_colliculus",
+      "volume_mm3": 71.94,
+      "dice": 0.5791,
+      "centroid_mm": 1.447
+    },
+    {
+      "index": 558,
+      "name": "Left-molecular_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 66.43,
+      "dice": 0.3368,
+      "centroid_mm": 0.807
+    },
+    {
+      "index": 559,
+      "name": "Left-granular_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 2.37,
+      "dice": 0.1053,
+      "centroid_mm": 0.841
+    },
+    {
+      "index": 561,
+      "name": "Left-polyform_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 22.91,
+      "dice": 0.2177,
+      "centroid_mm": 0.819
+    },
+    {
+      "index": 562,
+      "name": "Left-stratum_lacunosum-moleculare_of_caudal_ca1",
+      "volume_mm3": 44.22,
+      "dice": 0.3592,
+      "centroid_mm": 1.003
+    },
+    {
+      "index": 563,
+      "name": "Left-stratum_radiatum_of_caudal_ca1",
+      "volume_mm3": 10.88,
+      "dice": 0.1141,
+      "centroid_mm": 0.749
+    },
+    {
+      "index": 564,
+      "name": "Left-stratum_pyramidale_of_caudal_ca1",
+      "volume_mm3": 81.66,
+      "dice": 0.4076,
+      "centroid_mm": 0.888
+    },
+    {
+      "index": 565,
+      "name": "Left-stratum_oriens_of_caudal_ca1",
+      "volume_mm3": 4.48,
+      "dice": 0.0216,
+      "centroid_mm": 0.395
+    },
+    {
+      "index": 566,
+      "name": "Left-stratum_lacunosum-moleculare_of_caudal_ca2",
+      "volume_mm3": 4.74,
+      "dice": 0.2471,
+      "centroid_mm": 1.197
+    },
+    {
+      "index": 567,
+      "name": "Left-stratum_radiatum_of_caudal_ca2",
+      "volume_mm3": 0.38,
+      "dice": 0.0909,
+      "centroid_mm": 2.518
+    },
+    {
+      "index": 568,
+      "name": "Left-stratum_pyramidale_of_caudal_ca2",
+      "volume_mm3": 2.11,
+      "dice": 0.093,
+      "centroid_mm": 2.768
+    },
+    {
+      "index": 569,
+      "name": "Left-stratum_oriens_of_caudal_ca2",
+      "volume_mm3": 0.26,
+      "dice": 0.0,
+      "centroid_mm": 6.364
+    },
+    {
+      "index": 571,
+      "name": "Left-stratum_lacunosum-moleculare_of_caudal_ca3",
+      "volume_mm3": 5.18,
+      "dice": 0.093,
+      "centroid_mm": 2.494
+    },
+    {
+      "index": 572,
+      "name": "Left-stratum_lucidum__of_caudal_ca3",
+      "volume_mm3": 0.77,
+      "dice": 0.0,
+      "centroid_mm": 0.935
+    },
+    {
+      "index": 573,
+      "name": "Left-stratum_pyramidale_of_caudal_ca3",
+      "volume_mm3": 5.18,
+      "dice": 0.1275,
+      "centroid_mm": 0.915
+    },
+    {
+      "index": 574,
+      "name": "Left-stratum_oriens_of_caudal_ca3",
+      "volume_mm3": 2.43,
+      "dice": 0.084,
+      "centroid_mm": 3.022
+    },
+    {
+      "index": 575,
+      "name": "Left-pyramidal_cells_of_caudal_ca4",
+      "volume_mm3": 22.21,
+      "dice": 0.2765,
+      "centroid_mm": 0.734
+    },
+    {
+      "index": 576,
+      "name": "Left-caudal_subiculum",
+      "volume_mm3": 144.83,
+      "dice": 0.6712,
+      "centroid_mm": 0.896
+    },
+    {
+      "index": 578,
+      "name": "Left-pulvinar_of_thalamus",
+      "volume_mm3": 28.54,
+      "dice": 0.1795,
+      "centroid_mm": 1.299
+    },
+    {
+      "index": 580,
+      "name": "Left-pons",
+      "volume_mm3": 3768.19,
+      "dice": 0.8268,
+      "centroid_mm": 1.197
+    },
+    {
+      "index": 595,
+      "name": "Left-molecular_layer_of_pva",
+      "volume_mm3": 22801.09,
+      "dice": 0.4618,
+      "centroid_mm": 0.514
+    },
+    {
+      "index": 597,
+      "name": "Left-granular_cell_layer_of_pva",
+      "volume_mm3": 21809.98,
+      "dice": 0.4262,
+      "centroid_mm": 0.738
+    },
+    {
+      "index": 611,
+      "name": "Left-white_matter_of_hindbrain",
+      "volume_mm3": 2272.45,
+      "dice": 0.6925,
+      "centroid_mm": 0.808
+    },
+    {
+      "index": 654,
+      "name": "Left-inferior_olive__principal_nucleus",
+      "volume_mm3": 4.61,
+      "dice": 0.0,
+      "centroid_mm": 2.058
+    },
+    {
+      "index": 662,
+      "name": "Left-myelencephalon_(medulla_oblongata)",
+      "volume_mm3": 1046.72,
+      "dice": 0.753,
+      "centroid_mm": 1.49
+    },
+    {
+      "index": 697,
+      "name": "Left-inferior_cerebellar_peduncle",
+      "volume_mm3": 61.06,
+      "dice": 0.1285,
+      "centroid_mm": 2.387
+    },
+    {
+      "index": 715,
+      "name": "Left-fastigial_(medial)_nucleus",
+      "volume_mm3": 10.37,
+      "dice": 0.0175,
+      "centroid_mm": 1.186
+    },
+    {
+      "index": 721,
+      "name": "Left-dentate_(lateral)_nucleus",
+      "volume_mm3": 646.08,
+      "dice": 0.2422,
+      "centroid_mm": 2.482
+    },
+    {
+      "index": 751,
+      "name": "Left-medial_interpositus_(globose)_nucleus",
+      "volume_mm3": 19.14,
+      "dice": 0.3246,
+      "centroid_mm": 1.045
+    },
+    {
+      "index": 752,
+      "name": "Left-lateral_interpositus_(emboliform)_nucleus",
+      "volume_mm3": 57.15,
+      "dice": 0.4762,
+      "centroid_mm": 1.363
+    },
+    {
+      "index": 765,
+      "name": "Left-central_gray_of_medulla_oblongata",
+      "volume_mm3": 4.67,
+      "dice": 0.0556,
+      "centroid_mm": 2.176
+    },
+    {
+      "index": 811,
+      "name": "Left-superficial_pulvinar_nucleus",
+      "volume_mm3": 2.37,
+      "dice": 0.0194,
+      "centroid_mm": 1.156
+    },
+    {
+      "index": 813,
+      "name": "Left-diffuse_pulvinar_nucleus",
+      "volume_mm3": 2.82,
+      "dice": 0.1184,
+      "centroid_mm": 0.556
+    },
+    {
+      "index": 843,
+      "name": "Left-infundibular_stalk",
+      "volume_mm3": 14.21,
+      "dice": 0.0645,
+      "centroid_mm": 1.155
+    },
+    {
+      "index": 846,
+      "name": "Left-white_matter_of_the_cerebellum",
+      "volume_mm3": 14212.35,
+      "dice": 0.7421,
+      "centroid_mm": 0.532
+    },
+    {
+      "index": 2001,
+      "name": "Left-ctx-rh-bankssts",
+      "volume_mm3": 2560.58,
+      "dice": 0.6997,
+      "centroid_mm": 1.627
+    },
+    {
+      "index": 2002,
+      "name": "Left-ctx-rh-caudalanteriorcingulate",
+      "volume_mm3": 1846.53,
+      "dice": 0.6822,
+      "centroid_mm": 3.315
+    },
+    {
+      "index": 2003,
+      "name": "Left-ctx-rh-caudalmiddlefrontal",
+      "volume_mm3": 4071.42,
+      "dice": 0.5698,
+      "centroid_mm": 2.113
+    },
+    {
+      "index": 2005,
+      "name": "Left-ctx-rh-cuneus",
+      "volume_mm3": 2719.42,
+      "dice": 0.5943,
+      "centroid_mm": 1.666
+    },
+    {
+      "index": 2006,
+      "name": "Left-ctx-rh-entorhinal",
+      "volume_mm3": 1358.08,
+      "dice": 0.587,
+      "centroid_mm": 2.931
+    },
+    {
+      "index": 2007,
+      "name": "Left-ctx-rh-fusiform",
+      "volume_mm3": 8792.83,
+      "dice": 0.6599,
+      "centroid_mm": 6.112
+    },
+    {
+      "index": 2008,
+      "name": "Left-ctx-rh-inferiorparietal",
+      "volume_mm3": 10622.14,
+      "dice": 0.6375,
+      "centroid_mm": 1.298
+    },
+    {
+      "index": 2009,
+      "name": "Left-ctx-rh-inferiortemporal",
+      "volume_mm3": 9628.03,
+      "dice": 0.6044,
+      "centroid_mm": 1.304
+    },
+    {
+      "index": 2010,
+      "name": "Left-ctx-rh-isthmuscingulate",
+      "volume_mm3": 1499.84,
+      "dice": 0.6202,
+      "centroid_mm": 3.537
+    },
+    {
+      "index": 2011,
+      "name": "Left-ctx-rh-lateraloccipital",
+      "volume_mm3": 9429.06,
+      "dice": 0.5404,
+      "centroid_mm": 4.639
+    },
+    {
+      "index": 2012,
+      "name": "Left-ctx-rh-lateralorbitofrontal",
+      "volume_mm3": 6666.11,
+      "dice": 0.671,
+      "centroid_mm": 1.29
+    },
+    {
+      "index": 2013,
+      "name": "Left-ctx-rh-lingual",
+      "volume_mm3": 5445.25,
+      "dice": 0.6113,
+      "centroid_mm": 0.701
+    },
+    {
+      "index": 2014,
+      "name": "Left-ctx-rh-medialorbitofrontal",
+      "volume_mm3": 4489.54,
+      "dice": 0.6443,
+      "centroid_mm": 1.223
+    },
+    {
+      "index": 2015,
+      "name": "Left-ctx-rh-middletemporal",
+      "volume_mm3": 11229.7,
+      "dice": 0.5646,
+      "centroid_mm": 5.105
+    },
+    {
+      "index": 2016,
+      "name": "Left-ctx-rh-parahippocampal",
+      "volume_mm3": 2150.91,
+      "dice": 0.6079,
+      "centroid_mm": 2.034
+    },
+    {
+      "index": 2017,
+      "name": "Left-ctx-rh-paracentral",
+      "volume_mm3": 3245.18,
+      "dice": 0.6983,
+      "centroid_mm": 0.663
+    },
+    {
+      "index": 2018,
+      "name": "Left-ctx-rh-parsopercularis",
+      "volume_mm3": 4038.53,
+      "dice": 0.6521,
+      "centroid_mm": 2.187
+    },
+    {
+      "index": 2019,
+      "name": "Left-ctx-rh-parsorbitalis",
+      "volume_mm3": 1837.89,
+      "dice": 0.43,
+      "centroid_mm": 4.537
+    },
+    {
+      "index": 2020,
+      "name": "Left-ctx-rh-parstriangularis",
+      "volume_mm3": 2819.78,
+      "dice": 0.5403,
+      "centroid_mm": 2.401
+    },
+    {
+      "index": 2021,
+      "name": "Left-ctx-rh-pericalcarine",
+      "volume_mm3": 2009.54,
+      "dice": 0.5895,
+      "centroid_mm": 1.348
+    },
+    {
+      "index": 2022,
+      "name": "Left-ctx-rh-postcentral",
+      "volume_mm3": 7106.69,
+      "dice": 0.6596,
+      "centroid_mm": 0.863
+    },
+    {
+      "index": 2023,
+      "name": "Left-ctx-rh-posteriorcingulate",
+      "volume_mm3": 1902.14,
+      "dice": 0.6805,
+      "centroid_mm": 2.784
+    },
+    {
+      "index": 2024,
+      "name": "Left-ctx-rh-precentral",
+      "volume_mm3": 9635.46,
+      "dice": 0.7391,
+      "centroid_mm": 0.967
+    },
+    {
+      "index": 2025,
+      "name": "Left-ctx-rh-precuneus",
+      "volume_mm3": 7181.31,
+      "dice": 0.6841,
+      "centroid_mm": 1.918
+    },
+    {
+      "index": 2026,
+      "name": "Left-ctx-rh-rostralanteriorcingulate",
+      "volume_mm3": 1537.47,
+      "dice": 0.654,
+      "centroid_mm": 3.511
+    },
+    {
+      "index": 2027,
+      "name": "Left-ctx-rh-rostralmiddlefrontal",
+      "volume_mm3": 13785.15,
+      "dice": 0.6207,
+      "centroid_mm": 1.436
+    },
+    {
+      "index": 2028,
+      "name": "Left-ctx-rh-superiorfrontal",
+      "volume_mm3": 15054.4,
+      "dice": 0.7226,
+      "centroid_mm": 1.096
+    },
+    {
+      "index": 2029,
+      "name": "Left-ctx-rh-superiorparietal",
+      "volume_mm3": 12932.35,
+      "dice": 0.5371,
+      "centroid_mm": 2.273
+    },
+    {
+      "index": 2030,
+      "name": "Left-ctx-rh-superiortemporal",
+      "volume_mm3": 8635.65,
+      "dice": 0.689,
+      "centroid_mm": 1.399
+    },
+    {
+      "index": 2031,
+      "name": "Left-ctx-rh-supramarginal",
+      "volume_mm3": 9572.86,
+      "dice": 0.6315,
+      "centroid_mm": 2.121
+    },
+    {
+      "index": 2032,
+      "name": "Left-ctx-rh-frontalpole",
+      "volume_mm3": 977.98,
+      "dice": 0.6084,
+      "centroid_mm": 1.99
+    },
+    {
+      "index": 2033,
+      "name": "Left-ctx-rh-temporalpole",
+      "volume_mm3": 1498.11,
+      "dice": 0.5005,
+      "centroid_mm": 2.71
+    },
+    {
+      "index": 2034,
+      "name": "Left-ctx-rh-transversetemporal",
+      "volume_mm3": 565.5,
+      "dice": 0.7091,
+      "centroid_mm": 1.909
+    },
+    {
+      "index": 2035,
+      "name": "Left-ctx-rh-insula",
+      "volume_mm3": 4848.45,
+      "dice": 0.7896,
+      "centroid_mm": 1.269
+    },
+    {
+      "index": 10007,
+      "name": "Right-white_matter_of_forebrain",
+      "volume_mm3": 166392.97,
+      "dice": 0.8183,
+      "centroid_mm": 1.4
+    },
+    {
+      "index": 10048,
+      "name": "Right-head_of_caudate",
+      "volume_mm3": 2374.78,
+      "dice": 0.886,
+      "centroid_mm": 0.835
+    },
+    {
+      "index": 10068,
+      "name": "Right-septum_pellucidum",
+      "volume_mm3": 0.13,
+      "dice": 0.0,
+      "centroid_mm": 11.19
+    },
+    {
+      "index": 10079,
+      "name": "Right-putamen",
+      "volume_mm3": 4266.37,
+      "dice": 0.8789,
+      "centroid_mm": 0.364
+    },
+    {
+      "index": 10099,
+      "name": "Right-anterior_olfactory_nucleus",
+      "volume_mm3": 20.1,
+      "dice": 0.0345,
+      "centroid_mm": 3.143
+    },
+    {
+      "index": 10100,
+      "name": "Right-olfactory_tubercle",
+      "volume_mm3": 0.32,
+      "dice": 0.0,
+      "centroid_mm": 0.645
+    },
+    {
+      "index": 10101,
+      "name": "Right-core_of_nucleus_accumbens",
+      "volume_mm3": 563.78,
+      "dice": 0.7231,
+      "centroid_mm": 1.707
+    },
+    {
+      "index": 10102,
+      "name": "Right-claustrum",
+      "volume_mm3": 390.59,
+      "dice": 0.5289,
+      "centroid_mm": 2.856
+    },
+    {
+      "index": 10103,
+      "name": "Right-medial_septal_nucleus",
+      "volume_mm3": 90.69,
+      "dice": 0.5328,
+      "centroid_mm": 1.413
+    },
+    {
+      "index": 10108,
+      "name": "Right-basal_nucleus_of_meynert",
+      "volume_mm3": 8.19,
+      "dice": 0.0382,
+      "centroid_mm": 1.004
+    },
+    {
+      "index": 10111,
+      "name": "Right-diagonal_band",
+      "volume_mm3": 10.82,
+      "dice": 0.4316,
+      "centroid_mm": 0.503
+    },
+    {
+      "index": 10113,
+      "name": "Right-lateral_olfactory_stria",
+      "volume_mm3": 3.84,
+      "dice": 0.0,
+      "centroid_mm": 2.711
+    },
+    {
+      "index": 10117,
+      "name": "Right-bed_nucleus_of_stria_terminalis",
+      "volume_mm3": 87.36,
+      "dice": 0.6856,
+      "centroid_mm": 0.333
+    },
+    {
+      "index": 10118,
+      "name": "Right-body_of_caudate",
+      "volume_mm3": 616.32,
+      "dice": 0.7252,
+      "centroid_mm": 0.568
+    },
+    {
+      "index": 10119,
+      "name": "Right-external_segment_of_globus_pallidus",
+      "volume_mm3": 918.91,
+      "dice": 0.7571,
+      "centroid_mm": 0.523
+    },
+    {
+      "index": 10120,
+      "name": "Right-ventral_pallidus",
+      "volume_mm3": 40.06,
+      "dice": 0.2789,
+      "centroid_mm": 1.419
+    },
+    {
+      "index": 10125,
+      "name": "Right-lateral_olfactory_area",
+      "volume_mm3": 69.25,
+      "dice": 0.4513,
+      "centroid_mm": 1.68
+    },
+    {
+      "index": 10128,
+      "name": "Right-substantia_innominata",
+      "volume_mm3": 176.0,
+      "dice": 0.4105,
+      "centroid_mm": 1.679
+    },
+    {
+      "index": 10130,
+      "name": "Right-anterior_commissure",
+      "volume_mm3": 132.22,
+      "dice": 0.5268,
+      "centroid_mm": 1.607
+    },
+    {
+      "index": 10147,
+      "name": "Right-preoptic_region_of_hth",
+      "volume_mm3": 24.13,
+      "dice": 0.5121,
+      "centroid_mm": 0.287
+    },
+    {
+      "index": 10149,
+      "name": "Right-lateral_preoptic_area",
+      "volume_mm3": 28.54,
+      "dice": 0.6222,
+      "centroid_mm": 0.113
+    },
+    {
+      "index": 10150,
+      "name": "Right-median_preoptic_nucleus",
+      "volume_mm3": 3.33,
+      "dice": 0.0926,
+      "centroid_mm": 0.8
+    },
+    {
+      "index": 10157,
+      "name": "Right-layer_iii_of_piriform_cortex",
+      "volume_mm3": 8.51,
+      "dice": 0.1246,
+      "centroid_mm": 1.57
+    },
+    {
+      "index": 10161,
+      "name": "Right-optic_chiasm",
+      "volume_mm3": 20.42,
+      "dice": 0.2286,
+      "centroid_mm": 0.757
+    },
+    {
+      "index": 10174,
+      "name": "Right-temporal_claustrum",
+      "volume_mm3": 148.16,
+      "dice": 0.5625,
+      "centroid_mm": 0.501
+    },
+    {
+      "index": 10181,
+      "name": "Right-supraoptic_region_of_hth",
+      "volume_mm3": 60.1,
+      "dice": 0.5815,
+      "centroid_mm": 0.346
+    },
+    {
+      "index": 10184,
+      "name": "Right-stria_terminalis",
+      "volume_mm3": 61.38,
+      "dice": 0.33,
+      "centroid_mm": 4.397
+    },
+    {
+      "index": 10190,
+      "name": "Right-magnocellular_division_of_reticular_nucleus",
+      "volume_mm3": 19.26,
+      "dice": 0.2796,
+      "centroid_mm": 0.598
+    },
+    {
+      "index": 10191,
+      "name": "Right-parvocellular_division_of_reticular_nucleus_(perireticular_nucleus)",
+      "volume_mm3": 30.59,
+      "dice": 0.1263,
+      "centroid_mm": 0.956
+    },
+    {
+      "index": 10192,
+      "name": "Right-medial_preoptic_nucleus",
+      "volume_mm3": 9.79,
+      "dice": 0.6127,
+      "centroid_mm": 0.314
+    },
+    {
+      "index": 10193,
+      "name": "Right-anterior_hypothalamic_nucleus",
+      "volume_mm3": 3.84,
+      "dice": 0.3019,
+      "centroid_mm": 0.588
+    },
+    {
+      "index": 10194,
+      "name": "Right-paraventricular_nucleus_of_hypothalamus",
+      "volume_mm3": 16.64,
+      "dice": 0.3495,
+      "centroid_mm": 0.585
+    },
+    {
+      "index": 10196,
+      "name": "Right-supraoptic_nucleus",
+      "volume_mm3": 14.66,
+      "dice": 0.4502,
+      "centroid_mm": 0.607
+    },
+    {
+      "index": 10199,
+      "name": "Right-fornix",
+      "volume_mm3": 209.6,
+      "dice": 0.4735,
+      "centroid_mm": 0.259
+    },
+    {
+      "index": 10201,
+      "name": "Right-stria_medullaris_of_thalamus",
+      "volume_mm3": 31.94,
+      "dice": 0.1315,
+      "centroid_mm": 1.582
+    },
+    {
+      "index": 10206,
+      "name": "Right-internal_segment_of_globus_pallidus",
+      "volume_mm3": 527.1,
+      "dice": 0.7779,
+      "centroid_mm": 0.559
+    },
+    {
+      "index": 10207,
+      "name": "Right-periventricular_nucleus__supraoptic_portion",
+      "volume_mm3": 7.87,
+      "dice": 0.3143,
+      "centroid_mm": 0.978
+    },
+    {
+      "index": 10208,
+      "name": "Right-optic_tract",
+      "volume_mm3": 189.38,
+      "dice": 0.6047,
+      "centroid_mm": 1.23
+    },
+    {
+      "index": 10209,
+      "name": "Right-supraoptic_dicussation",
+      "volume_mm3": 0.64,
+      "dice": 0.0667,
+      "centroid_mm": 5.061
+    },
+    {
+      "index": 10214,
+      "name": "Right-amygdaloid_complex",
+      "volume_mm3": 70.66,
+      "dice": 0.3354,
+      "centroid_mm": 0.887
+    },
+    {
+      "index": 10215,
+      "name": "Right-anterior_amygdaloid_area",
+      "volume_mm3": 111.17,
+      "dice": 0.5,
+      "centroid_mm": 0.84
+    },
+    {
+      "index": 10216,
+      "name": "Right-basolateral_nucleus_(basal_nucleus)",
+      "volume_mm3": 361.22,
+      "dice": 0.7165,
+      "centroid_mm": 1.04
+    },
+    {
+      "index": 10217,
+      "name": "Right-ventral_division_of_basomedial_nucleus",
+      "volume_mm3": 224.0,
+      "dice": 0.714,
+      "centroid_mm": 1.117
+    },
+    {
+      "index": 10218,
+      "name": "Right-thalamus",
+      "volume_mm3": 610.69,
+      "dice": 0.321,
+      "centroid_mm": 1.652
+    },
+    {
+      "index": 10219,
+      "name": "Right-anterodorsal_nucleus_of_thalamus",
+      "volume_mm3": 1.6,
+      "dice": 0.0455,
+      "centroid_mm": 1.135
+    },
+    {
+      "index": 10220,
+      "name": "Right-anteroventral_nucleus_of_thalamus",
+      "volume_mm3": 68.67,
+      "dice": 0.44,
+      "centroid_mm": 1.566
+    },
+    {
+      "index": 10221,
+      "name": "Right-parataenial_nucleus_of_thalamus",
+      "volume_mm3": 5.31,
+      "dice": 0.0333,
+      "centroid_mm": 2.268
+    },
+    {
+      "index": 10222,
+      "name": "Right-parvocellular_division_of_va",
+      "volume_mm3": 611.39,
+      "dice": 0.7503,
+      "centroid_mm": 1.067
+    },
+    {
+      "index": 10223,
+      "name": "Right-fasciculosus_nucleus_of_thalamus",
+      "volume_mm3": 21.82,
+      "dice": 0.3713,
+      "centroid_mm": 0.767
+    },
+    {
+      "index": 10224,
+      "name": "Right-rhomboid_(central)_nucleus_of_thalamus",
+      "volume_mm3": 3.9,
+      "dice": 0.18,
+      "centroid_mm": 1.051
+    },
+    {
+      "index": 10225,
+      "name": "Right-paraventricular_nucleus",
+      "volume_mm3": 105.86,
+      "dice": 0.4131,
+      "centroid_mm": 0.478
+    },
+    {
+      "index": 10226,
+      "name": "Right-zona_incerta",
+      "volume_mm3": 198.21,
+      "dice": 0.4096,
+      "centroid_mm": 0.745
+    },
+    {
+      "index": 10227,
+      "name": "Right-periventricular_nucleus__tuberal_portion",
+      "volume_mm3": 9.47,
+      "dice": 0.4398,
+      "centroid_mm": 0.45
+    },
+    {
+      "index": 10228,
+      "name": "Right-juxtaparaventricular_lateral_hypothalamic_area",
+      "volume_mm3": 8.13,
+      "dice": 0.374,
+      "centroid_mm": 1.597
+    },
+    {
+      "index": 10229,
+      "name": "Right-dorsomedial_hypothalamic_nucleus",
+      "volume_mm3": 3.26,
+      "dice": 0.44,
+      "centroid_mm": 0.228
+    },
+    {
+      "index": 10230,
+      "name": "Right-lateral_hypothalamic_area__tuberal_part",
+      "volume_mm3": 46.34,
+      "dice": 0.4698,
+      "centroid_mm": 0.397
+    },
+    {
+      "index": 10232,
+      "name": "Right-pallidohypothalamic_area",
+      "volume_mm3": 33.09,
+      "dice": 0.414,
+      "centroid_mm": 0.795
+    },
+    {
+      "index": 10234,
+      "name": "Right-medial_corticohypothalamic_tract",
+      "volume_mm3": 0.51,
+      "dice": 0.1176,
+      "centroid_mm": 1.706
+    },
+    {
+      "index": 10238,
+      "name": "Right-ventral_subdivision_of_coa",
+      "volume_mm3": 12.93,
+      "dice": 0.1562,
+      "centroid_mm": 1.388
+    },
+    {
+      "index": 10240,
+      "name": "Right-paralaminar_nucleus",
+      "volume_mm3": 4.61,
+      "dice": 0.1088,
+      "centroid_mm": 1.164
+    },
+    {
+      "index": 10242,
+      "name": "Right-amygdalocortical_(corticoamygdaloid)_transition_area",
+      "volume_mm3": 130.94,
+      "dice": 0.3951,
+      "centroid_mm": 1.106
+    },
+    {
+      "index": 10243,
+      "name": "Right-dorsal_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 9.73,
+      "dice": 0.6246,
+      "centroid_mm": 0.474
+    },
+    {
+      "index": 10244,
+      "name": "Right-ventral_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 7.3,
+      "dice": 0.5421,
+      "centroid_mm": 0.715
+    },
+    {
+      "index": 10245,
+      "name": "Right-arcuate_nucleus_of_hypothalamus",
+      "volume_mm3": 14.08,
+      "dice": 0.3504,
+      "centroid_mm": 0.538
+    },
+    {
+      "index": 10246,
+      "name": "Right-inferior_thalamic_peduncle",
+      "volume_mm3": 10.43,
+      "dice": 0.3567,
+      "centroid_mm": 0.629
+    },
+    {
+      "index": 10252,
+      "name": "Right-anteromedial_nucleus_of_thalamus",
+      "volume_mm3": 8.58,
+      "dice": 0.186,
+      "centroid_mm": 1.569
+    },
+    {
+      "index": 10253,
+      "name": "Right-reuniens_nucleus_(medioventral_nucleus)_of_thalamus",
+      "volume_mm3": 27.14,
+      "dice": 0.4639,
+      "centroid_mm": 0.475
+    },
+    {
+      "index": 10254,
+      "name": "Right-reticular_nucleus_of_thalamus",
+      "volume_mm3": 360.64,
+      "dice": 0.4424,
+      "centroid_mm": 2.26
+    },
+    {
+      "index": 10255,
+      "name": "Right-central_part_of_ventromedial_hypothalamic_nucleus",
+      "volume_mm3": 13.57,
+      "dice": 0.6383,
+      "centroid_mm": 0.404
+    },
+    {
+      "index": 10256,
+      "name": "Right-tuberomammillary_nucleus",
+      "volume_mm3": 29.57,
+      "dice": 0.4703,
+      "centroid_mm": 0.599
+    },
+    {
+      "index": 10268,
+      "name": "Right-lateral_tuberal_nuclei",
+      "volume_mm3": 4.93,
+      "dice": 0.2642,
+      "centroid_mm": 0.727
+    },
+    {
+      "index": 10274,
+      "name": "Right-ventral_medial_nucleus_of_thalamus",
+      "volume_mm3": 8.64,
+      "dice": 0.0766,
+      "centroid_mm": 1.515
+    },
+    {
+      "index": 10275,
+      "name": "Right-posterior_hypothalamic_nucleus",
+      "volume_mm3": 63.17,
+      "dice": 0.7354,
+      "centroid_mm": 0.257
+    },
+    {
+      "index": 10276,
+      "name": "Right-mammillothalamic_tract",
+      "volume_mm3": 33.02,
+      "dice": 0.3554,
+      "centroid_mm": 1.17
+    },
+    {
+      "index": 10277,
+      "name": "Right-medial_subdivision_of_central_nucleus",
+      "volume_mm3": 22.72,
+      "dice": 0.3989,
+      "centroid_mm": 0.808
+    },
+    {
+      "index": 10278,
+      "name": "Right-lateral_subdivision_of_central_nucleus",
+      "volume_mm3": 3.78,
+      "dice": 0.1486,
+      "centroid_mm": 1.198
+    },
+    {
+      "index": 10279,
+      "name": "Right-rostral_subdivision_of_medial_nucleus",
+      "volume_mm3": 24.13,
+      "dice": 0.4408,
+      "centroid_mm": 1.332
+    },
+    {
+      "index": 10282,
+      "name": "Right-magnocellular_(medial)_division_of_md",
+      "volume_mm3": 330.05,
+      "dice": 0.6833,
+      "centroid_mm": 0.786
+    },
+    {
+      "index": 10283,
+      "name": "Right-magnocellular_division_of_va",
+      "volume_mm3": 351.55,
+      "dice": 0.6439,
+      "centroid_mm": 0.814
+    },
+    {
+      "index": 10284,
+      "name": "Right-central_medial_nucleus_of_thalamus",
+      "volume_mm3": 3.46,
+      "dice": 0.0,
+      "centroid_mm": 2.155
+    },
+    {
+      "index": 10285,
+      "name": "Right-paracentral_nucleus_of_thalamus",
+      "volume_mm3": 97.02,
+      "dice": 0.0589,
+      "centroid_mm": 1.602
+    },
+    {
+      "index": 10286,
+      "name": "Right-intermediodorsal__nucleus_of_thalamus",
+      "volume_mm3": 8.38,
+      "dice": 0.21,
+      "centroid_mm": 1.141
+    },
+    {
+      "index": 10295,
+      "name": "Right-amygdalostriatal_transition_area",
+      "volume_mm3": 16.7,
+      "dice": 0.4326,
+      "centroid_mm": 1.146
+    },
+    {
+      "index": 10297,
+      "name": "Right-lateral__hypothalamic_area__posterior_part",
+      "volume_mm3": 27.84,
+      "dice": 0.4375,
+      "centroid_mm": 0.721
+    },
+    {
+      "index": 10298,
+      "name": "Right-mammillary_peduncle",
+      "volume_mm3": 16.58,
+      "dice": 0.3711,
+      "centroid_mm": 0.623
+    },
+    {
+      "index": 10301,
+      "name": "Right-amygdalohippocampal_area",
+      "volume_mm3": 13.82,
+      "dice": 0.2165,
+      "centroid_mm": 1.324
+    },
+    {
+      "index": 10303,
+      "name": "Right-central_dorsal_nucleus_of_thalamus",
+      "volume_mm3": 2.5,
+      "dice": 0.0,
+      "centroid_mm": 1.533
+    },
+    {
+      "index": 10305,
+      "name": "Right-lateral_part_of_medial_mammillary_nucleus",
+      "volume_mm3": 8.9,
+      "dice": 0.529,
+      "centroid_mm": 0.47
+    },
+    {
+      "index": 10306,
+      "name": "Right-medial_part_of_medial_mammillary_nucleus",
+      "volume_mm3": 11.9,
+      "dice": 0.5866,
+      "centroid_mm": 0.418
+    },
+    {
+      "index": 10307,
+      "name": "Right-basal_division_of_medial_mammillary_nucleus",
+      "volume_mm3": 9.66,
+      "dice": 0.3643,
+      "centroid_mm": 0.573
+    },
+    {
+      "index": 10308,
+      "name": "Right-lateral_mammillary_nucleus",
+      "volume_mm3": 1.66,
+      "dice": 0.0,
+      "centroid_mm": 0.816
+    },
+    {
+      "index": 10309,
+      "name": "Right-lenticular_fasciculus",
+      "volume_mm3": 5.82,
+      "dice": 0.2007,
+      "centroid_mm": 1.889
+    },
+    {
+      "index": 10310,
+      "name": "Right-substantia_nigra__reticular_part",
+      "volume_mm3": 150.59,
+      "dice": 0.3485,
+      "centroid_mm": 1.359
+    },
+    {
+      "index": 10312,
+      "name": "Right-central_part_of_medial_division_of_md",
+      "volume_mm3": 40.51,
+      "dice": 0.2818,
+      "centroid_mm": 1.687
+    },
+    {
+      "index": 10313,
+      "name": "Right-parvocellular_(central)_division_of_md",
+      "volume_mm3": 442.05,
+      "dice": 0.578,
+      "centroid_mm": 1.388
+    },
+    {
+      "index": 10314,
+      "name": "Right-rostral_division_of_vl",
+      "volume_mm3": 222.21,
+      "dice": 0.5356,
+      "centroid_mm": 1.177
+    },
+    {
+      "index": 10315,
+      "name": "Right-medial_portion_of_sth",
+      "volume_mm3": 19.97,
+      "dice": 0.2629,
+      "centroid_mm": 1.072
+    },
+    {
+      "index": 10316,
+      "name": "Right-laterodorsal_portion_of_sth",
+      "volume_mm3": 109.5,
+      "dice": 0.1885,
+      "centroid_mm": 2.182
+    },
+    {
+      "index": 10320,
+      "name": "Right-amygdalohippocampal_transition_area",
+      "volume_mm3": 7.1,
+      "dice": 0.1408,
+      "centroid_mm": 1.016
+    },
+    {
+      "index": 10321,
+      "name": "Right-lateroventral_portion_of_sth",
+      "volume_mm3": 83.14,
+      "dice": 0.2231,
+      "centroid_mm": 1.57
+    },
+    {
+      "index": 10322,
+      "name": "Right-thalamic_fasciculus",
+      "volume_mm3": 11.01,
+      "dice": 0.1697,
+      "centroid_mm": 0.614
+    },
+    {
+      "index": 10326,
+      "name": "Right-uncal_subiculum",
+      "volume_mm3": 47.42,
+      "dice": 0.359,
+      "centroid_mm": 0.948
+    },
+    {
+      "index": 10339,
+      "name": "Right-stratum_lacunosum-moleculare_of_uncal_ca1",
+      "volume_mm3": 118.53,
+      "dice": 0.5272,
+      "centroid_mm": 0.832
+    },
+    {
+      "index": 10340,
+      "name": "Right-stratum_radiatum_of_uncal_ca1",
+      "volume_mm3": 14.72,
+      "dice": 0.0642,
+      "centroid_mm": 0.783
+    },
+    {
+      "index": 10341,
+      "name": "Right-stratum_pyramidale_of_uncal_ca1",
+      "volume_mm3": 167.74,
+      "dice": 0.62,
+      "centroid_mm": 0.736
+    },
+    {
+      "index": 10342,
+      "name": "Right-stratum_oriens_of_uncal_ca1",
+      "volume_mm3": 8.06,
+      "dice": 0.1629,
+      "centroid_mm": 0.603
+    },
+    {
+      "index": 10343,
+      "name": "Right-stratum_lacunosum-moleculare_of_rostral_ca1",
+      "volume_mm3": 345.66,
+      "dice": 0.3859,
+      "centroid_mm": 1.975
+    },
+    {
+      "index": 10344,
+      "name": "Right-stratum_radiatum_of_rostral_ca1",
+      "volume_mm3": 94.14,
+      "dice": 0.0755,
+      "centroid_mm": 1.24
+    },
+    {
+      "index": 10345,
+      "name": "Right-stratum_pyramidale_of_rostral_ca1",
+      "volume_mm3": 418.37,
+      "dice": 0.4822,
+      "centroid_mm": 1.136
+    },
+    {
+      "index": 10346,
+      "name": "Right-stratum_oriens_of_rostral_ca1",
+      "volume_mm3": 20.35,
+      "dice": 0.0534,
+      "centroid_mm": 2.329
+    },
+    {
+      "index": 10347,
+      "name": "Right-rostral_subiculum",
+      "volume_mm3": 615.3,
+      "dice": 0.7119,
+      "centroid_mm": 0.611
+    },
+    {
+      "index": 10349,
+      "name": "Right-posteroventral_putamen",
+      "volume_mm3": 34.94,
+      "dice": 0.3379,
+      "centroid_mm": 1.604
+    },
+    {
+      "index": 10350,
+      "name": "Right-dorsal_subdivision_of_vlc",
+      "volume_mm3": 155.2,
+      "dice": 0.5815,
+      "centroid_mm": 0.792
+    },
+    {
+      "index": 10352,
+      "name": "Right-substantia_nigra__compact_part",
+      "volume_mm3": 102.02,
+      "dice": 0.5027,
+      "centroid_mm": 0.953
+    },
+    {
+      "index": 10354,
+      "name": "Right-alveus",
+      "volume_mm3": 382.46,
+      "dice": 0.1445,
+      "centroid_mm": 3.362
+    },
+    {
+      "index": 10364,
+      "name": "Right-molecular_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 16.45,
+      "dice": 0.2198,
+      "centroid_mm": 0.388
+    },
+    {
+      "index": 10365,
+      "name": "Right-granular_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 0.58,
+      "dice": 0.0,
+      "centroid_mm": 1.603
+    },
+    {
+      "index": 10367,
+      "name": "Right-polyform_layer_of_uncal_dentate_gyrus",
+      "volume_mm3": 9.28,
+      "dice": 0.2507,
+      "centroid_mm": 0.328
+    },
+    {
+      "index": 10368,
+      "name": "Right-stratum_lacunosum-moleculare_of_uncal_ca2",
+      "volume_mm3": 37.38,
+      "dice": 0.3253,
+      "centroid_mm": 0.357
+    },
+    {
+      "index": 10369,
+      "name": "Right-stratum_radiatum_of_uncal_ca2",
+      "volume_mm3": 7.62,
+      "dice": 0.0867,
+      "centroid_mm": 1.597
+    },
+    {
+      "index": 10370,
+      "name": "Right-stratum_pyramidale_of_uncal_ca2",
+      "volume_mm3": 35.46,
+      "dice": 0.4187,
+      "centroid_mm": 0.764
+    },
+    {
+      "index": 10371,
+      "name": "Right-stratum_oriens_of_uncal_ca2",
+      "volume_mm3": 6.72,
+      "dice": 0.1056,
+      "centroid_mm": 0.974
+    },
+    {
+      "index": 10372,
+      "name": "Right-stratum_lacunosum-moleculare_of_uncal_ca3",
+      "volume_mm3": 10.18,
+      "dice": 0.0587,
+      "centroid_mm": 0.973
+    },
+    {
+      "index": 10373,
+      "name": "Right-stratum_lucidum__of_uncal_ca3",
+      "volume_mm3": 3.78,
+      "dice": 0.0272,
+      "centroid_mm": 0.719
+    },
+    {
+      "index": 10374,
+      "name": "Right-stratum_pyramidale_of_uncal_ca3",
+      "volume_mm3": 20.8,
+      "dice": 0.2601,
+      "centroid_mm": 0.302
+    },
+    {
+      "index": 10375,
+      "name": "Right-stratum_oriens_of_uncal_ca3",
+      "volume_mm3": 9.98,
+      "dice": 0.2733,
+      "centroid_mm": 0.333
+    },
+    {
+      "index": 10377,
+      "name": "Right-lateral_nucleus",
+      "volume_mm3": 389.57,
+      "dice": 0.7688,
+      "centroid_mm": 0.799
+    },
+    {
+      "index": 10378,
+      "name": "Right-lateral_dorsal_nucleus_of_thalamus",
+      "volume_mm3": 86.02,
+      "dice": 0.3717,
+      "centroid_mm": 2.654
+    },
+    {
+      "index": 10379,
+      "name": "Right-densocelllular_(paralamellar)_division_of_md",
+      "volume_mm3": 75.46,
+      "dice": 0.4701,
+      "centroid_mm": 1.525
+    },
+    {
+      "index": 10380,
+      "name": "Right-multiform_(lateral)_division_of_md",
+      "volume_mm3": 233.86,
+      "dice": 0.3955,
+      "centroid_mm": 1.445
+    },
+    {
+      "index": 10381,
+      "name": "Right-ventral_subdivision_of_vlc",
+      "volume_mm3": 194.56,
+      "dice": 0.6356,
+      "centroid_mm": 1.281
+    },
+    {
+      "index": 10382,
+      "name": "Right-medial_subdivision_of_vlc_(area_x)",
+      "volume_mm3": 125.31,
+      "dice": 0.2098,
+      "centroid_mm": 2.777
+    },
+    {
+      "index": 10384,
+      "name": "Right-midbrain_(mesencephalon)",
+      "volume_mm3": 1613.95,
+      "dice": 0.7628,
+      "centroid_mm": 0.503
+    },
+    {
+      "index": 10385,
+      "name": "Right-red_nucleus",
+      "volume_mm3": 134.27,
+      "dice": 0.6467,
+      "centroid_mm": 1.13
+    },
+    {
+      "index": 10393,
+      "name": "Right-tail_of_caudate",
+      "volume_mm3": 46.4,
+      "dice": 0.3923,
+      "centroid_mm": 2.246
+    },
+    {
+      "index": 10394,
+      "name": "Right-rostral_division_of_ventral_posterior_lateral_nucleus",
+      "volume_mm3": 232.51,
+      "dice": 0.4164,
+      "centroid_mm": 1.475
+    },
+    {
+      "index": 10395,
+      "name": "Right-parvocellular_division_of_vpm",
+      "volume_mm3": 9.6,
+      "dice": 0.1951,
+      "centroid_mm": 1.144
+    },
+    {
+      "index": 10396,
+      "name": "Right-lateral_division_of_centromedian_nucleus_of_thalamus",
+      "volume_mm3": 36.48,
+      "dice": 0.2388,
+      "centroid_mm": 1.37
+    },
+    {
+      "index": 10397,
+      "name": "Right-medial_division_of_centromedian_nucleus_of_thalamus",
+      "volume_mm3": 120.77,
+      "dice": 0.5821,
+      "centroid_mm": 1.454
+    },
+    {
+      "index": 10398,
+      "name": "Right-parafascicular_nucleus_of_thalamus",
+      "volume_mm3": 54.98,
+      "dice": 0.5478,
+      "centroid_mm": 1.152
+    },
+    {
+      "index": 10399,
+      "name": "Right-periventricular_area_of_thalamus",
+      "volume_mm3": 36.67,
+      "dice": 0.3689,
+      "centroid_mm": 0.641
+    },
+    {
+      "index": 10404,
+      "name": "Right-molecular_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 288.13,
+      "dice": 0.296,
+      "centroid_mm": 0.719
+    },
+    {
+      "index": 10405,
+      "name": "Right-granular_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 5.18,
+      "dice": 0.0137,
+      "centroid_mm": 1.006
+    },
+    {
+      "index": 10407,
+      "name": "Right-polyform_layer_of_rostral_dentate_gyrus",
+      "volume_mm3": 161.66,
+      "dice": 0.3754,
+      "centroid_mm": 0.865
+    },
+    {
+      "index": 10408,
+      "name": "Right-stratum_lacunosum-moleculare_of_rostral_ca2",
+      "volume_mm3": 18.37,
+      "dice": 0.1244,
+      "centroid_mm": 4.026
+    },
+    {
+      "index": 10409,
+      "name": "Right-stratum_radiatum_of_rostral_ca2",
+      "volume_mm3": 1.02,
+      "dice": 0.0714,
+      "centroid_mm": 1.74
+    },
+    {
+      "index": 10410,
+      "name": "Right-stratum_pyramidale_of_rostral_ca2",
+      "volume_mm3": 5.63,
+      "dice": 0.1506,
+      "centroid_mm": 0.59
+    },
+    {
+      "index": 10411,
+      "name": "Right-stratum_oriens_of_rostral_ca2",
+      "volume_mm3": 0.58,
+      "dice": 0.0,
+      "centroid_mm": 0.961
+    },
+    {
+      "index": 10412,
+      "name": "Right-fasciculus_retroflexus_(habenuno-interpeduncular_tract)",
+      "volume_mm3": 0.32,
+      "dice": 0.0,
+      "centroid_mm": 4.405
+    },
+    {
+      "index": 10414,
+      "name": "Right-pontine_nucleus",
+      "volume_mm3": 668.48,
+      "dice": 0.3663,
+      "centroid_mm": 1.918
+    },
+    {
+      "index": 10418,
+      "name": "Right-stratum_lacunosum-moleculare_of_rostral_ca3",
+      "volume_mm3": 24.13,
+      "dice": 0.1884,
+      "centroid_mm": 1.811
+    },
+    {
+      "index": 10419,
+      "name": "Right-stratum_lucidum__of_rostral_ca3",
+      "volume_mm3": 5.44,
+      "dice": 0.0663,
+      "centroid_mm": 0.131
+    },
+    {
+      "index": 10420,
+      "name": "Right-stratum_pyramidale_of_rostral_ca3",
+      "volume_mm3": 32.58,
+      "dice": 0.2857,
+      "centroid_mm": 1.391
+    },
+    {
+      "index": 10421,
+      "name": "Right-stratum_oriens_of_rostral_ca3",
+      "volume_mm3": 15.94,
+      "dice": 0.1667,
+      "centroid_mm": 0.27
+    },
+    {
+      "index": 10422,
+      "name": "Right-pyramidal_cells_of_uncal_ca4",
+      "volume_mm3": 2.69,
+      "dice": 0.2362,
+      "centroid_mm": 0.542
+    },
+    {
+      "index": 10423,
+      "name": "Right-ventral_posterior_medial_nucleus",
+      "volume_mm3": 27.01,
+      "dice": 0.0752,
+      "centroid_mm": 1.943
+    },
+    {
+      "index": 10424,
+      "name": "Right-ventral_posterior_inferior_nucleus",
+      "volume_mm3": 90.3,
+      "dice": 0.583,
+      "centroid_mm": 0.366
+    },
+    {
+      "index": 10425,
+      "name": "Right-lateral_division_of_central_lateral_nucleus",
+      "volume_mm3": 45.25,
+      "dice": 0.0387,
+      "centroid_mm": 2.041
+    },
+    {
+      "index": 10426,
+      "name": "Right-subparafascicular_nucleus_of_thalamus",
+      "volume_mm3": 14.98,
+      "dice": 0.0889,
+      "centroid_mm": 1.28
+    },
+    {
+      "index": 10430,
+      "name": "Right-lateral_habenular_nucleus",
+      "volume_mm3": 8.64,
+      "dice": 0.5848,
+      "centroid_mm": 0.213
+    },
+    {
+      "index": 10432,
+      "name": "Right-pyramidal_cells_of_rostral_ca4",
+      "volume_mm3": 97.47,
+      "dice": 0.3623,
+      "centroid_mm": 1.522
+    },
+    {
+      "index": 10435,
+      "name": "Right-ventral_tegmental_area",
+      "volume_mm3": 85.95,
+      "dice": 0.4329,
+      "centroid_mm": 0.781
+    },
+    {
+      "index": 10441,
+      "name": "Right-lateral_posterior_nucleus_of_thalamus",
+      "volume_mm3": 411.71,
+      "dice": 0.6126,
+      "centroid_mm": 1.471
+    },
+    {
+      "index": 10442,
+      "name": "Right-basal_ventral_medial_nucleus",
+      "volume_mm3": 1.66,
+      "dice": 0.0,
+      "centroid_mm": 1.136
+    },
+    {
+      "index": 10443,
+      "name": "Right-dorsal_division_of_central_lateral_nucleus",
+      "volume_mm3": 0.7,
+      "dice": 0.0,
+      "centroid_mm": 0.659
+    },
+    {
+      "index": 10444,
+      "name": "Right-medial_habenular_nucleus",
+      "volume_mm3": 1.92,
+      "dice": 0.5263,
+      "centroid_mm": 0.115
+    },
+    {
+      "index": 10454,
+      "name": "Right-anterior_nucleus_of_pulvinar",
+      "volume_mm3": 227.52,
+      "dice": 0.6633,
+      "centroid_mm": 1.306
+    },
+    {
+      "index": 10458,
+      "name": "Right-caudal_division_of_ventral_posterior_lateral_nucleus",
+      "volume_mm3": 338.24,
+      "dice": 0.7163,
+      "centroid_mm": 0.787
+    },
+    {
+      "index": 10461,
+      "name": "Right-fimbria",
+      "volume_mm3": 64.26,
+      "dice": 0.2107,
+      "centroid_mm": 1.019
+    },
+    {
+      "index": 10465,
+      "name": "Right-periaqueductal_gray_substance",
+      "volume_mm3": 260.8,
+      "dice": 0.6885,
+      "centroid_mm": 0.954
+    },
+    {
+      "index": 10478,
+      "name": "Right-posterior_nucleus_of_thalamus",
+      "volume_mm3": 71.55,
+      "dice": 0.5764,
+      "centroid_mm": 1.073
+    },
+    {
+      "index": 10479,
+      "name": "Right-centromedian_nucleus_of_thalamus",
+      "volume_mm3": 6.85,
+      "dice": 0.3053,
+      "centroid_mm": 1.281
+    },
+    {
+      "index": 10484,
+      "name": "Right-dorsal_lateral_geniculate_nucleus",
+      "volume_mm3": 61.95,
+      "dice": 0.4695,
+      "centroid_mm": 0.903
+    },
+    {
+      "index": 10492,
+      "name": "Right-limitans_nucleus",
+      "volume_mm3": 14.91,
+      "dice": 0.099,
+      "centroid_mm": 1.648
+    },
+    {
+      "index": 10493,
+      "name": "Right-habenular_commissure",
+      "volume_mm3": 0.83,
+      "dice": 0.2667,
+      "centroid_mm": 0.169
+    },
+    {
+      "index": 10496,
+      "name": "Right-pretectal_region",
+      "volume_mm3": 33.86,
+      "dice": 0.426,
+      "centroid_mm": 0.662
+    },
+    {
+      "index": 10498,
+      "name": "Right-peripeduncular_nucleus",
+      "volume_mm3": 1.66,
+      "dice": 0.0241,
+      "centroid_mm": 1.664
+    },
+    {
+      "index": 10504,
+      "name": "Right-dorsal_medial_geniculate_nucleus",
+      "volume_mm3": 21.18,
+      "dice": 0.2588,
+      "centroid_mm": 2.229
+    },
+    {
+      "index": 10508,
+      "name": "Right-medial_nucleus_of_pulvinar",
+      "volume_mm3": 727.49,
+      "dice": 0.7593,
+      "centroid_mm": 1.654
+    },
+    {
+      "index": 10510,
+      "name": "Right-magnocellular_(medial)_nucleus",
+      "volume_mm3": 1.66,
+      "dice": 0.0,
+      "centroid_mm": 2.928
+    },
+    {
+      "index": 10517,
+      "name": "Right-lateral_nucleus_of_pulvinar",
+      "volume_mm3": 129.34,
+      "dice": 0.3755,
+      "centroid_mm": 2.524
+    },
+    {
+      "index": 10519,
+      "name": "Right-inferior_nucleus_of_pulvinar",
+      "volume_mm3": 17.86,
+      "dice": 0.1939,
+      "centroid_mm": 1.205
+    },
+    {
+      "index": 10521,
+      "name": "Right-dorsal_raphe_nucleus",
+      "volume_mm3": 47.36,
+      "dice": 0.3118,
+      "centroid_mm": 0.479
+    },
+    {
+      "index": 10531,
+      "name": "Right-superior_cerebellar_peduncle_(brachium_conjunctivum)",
+      "volume_mm3": 172.22,
+      "dice": 0.5239,
+      "centroid_mm": 1.407
+    },
+    {
+      "index": 10541,
+      "name": "Right-central_nucleus_of_inferior_colliculus",
+      "volume_mm3": 81.86,
+      "dice": 0.636,
+      "centroid_mm": 1.151
+    },
+    {
+      "index": 10558,
+      "name": "Right-molecular_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 64.06,
+      "dice": 0.4,
+      "centroid_mm": 0.542
+    },
+    {
+      "index": 10559,
+      "name": "Right-granular_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 1.92,
+      "dice": 0.0357,
+      "centroid_mm": 1.187
+    },
+    {
+      "index": 10561,
+      "name": "Right-polyform_layer_of_caudal_dentate_gyrus",
+      "volume_mm3": 22.91,
+      "dice": 0.2646,
+      "centroid_mm": 0.526
+    },
+    {
+      "index": 10562,
+      "name": "Right-stratum_lacunosum-moleculare_of_caudal_ca1",
+      "volume_mm3": 56.64,
+      "dice": 0.3611,
+      "centroid_mm": 2.0
+    },
+    {
+      "index": 10563,
+      "name": "Right-stratum_radiatum_of_caudal_ca1",
+      "volume_mm3": 11.58,
+      "dice": 0.0423,
+      "centroid_mm": 1.012
+    },
+    {
+      "index": 10564,
+      "name": "Right-stratum_pyramidale_of_caudal_ca1",
+      "volume_mm3": 95.55,
+      "dice": 0.3648,
+      "centroid_mm": 0.759
+    },
+    {
+      "index": 10565,
+      "name": "Right-stratum_oriens_of_caudal_ca1",
+      "volume_mm3": 8.9,
+      "dice": 0.0268,
+      "centroid_mm": 0.755
+    },
+    {
+      "index": 10566,
+      "name": "Right-stratum_lacunosum-moleculare_of_caudal_ca2",
+      "volume_mm3": 5.44,
+      "dice": 0.1327,
+      "centroid_mm": 0.754
+    },
+    {
+      "index": 10567,
+      "name": "Right-stratum_radiatum_of_caudal_ca2",
+      "volume_mm3": 0.58,
+      "dice": 0.0,
+      "centroid_mm": 1.225
+    },
+    {
+      "index": 10568,
+      "name": "Right-stratum_pyramidale_of_caudal_ca2",
+      "volume_mm3": 2.5,
+      "dice": 0.0,
+      "centroid_mm": 3.008
+    },
+    {
+      "index": 10569,
+      "name": "Right-stratum_oriens_of_caudal_ca2",
+      "volume_mm3": 0.19,
+      "dice": 0.0,
+      "centroid_mm": 8.619
+    },
+    {
+      "index": 10571,
+      "name": "Right-stratum_lacunosum-moleculare_of_caudal_ca3",
+      "volume_mm3": 7.3,
+      "dice": 0.0241,
+      "centroid_mm": 1.14
+    },
+    {
+      "index": 10572,
+      "name": "Right-stratum_lucidum__of_caudal_ca3",
+      "volume_mm3": 0.77,
+      "dice": 0.1231,
+      "centroid_mm": 1.318
+    },
+    {
+      "index": 10573,
+      "name": "Right-stratum_pyramidale_of_caudal_ca3",
+      "volume_mm3": 6.66,
+      "dice": 0.1931,
+      "centroid_mm": 0.969
+    },
+    {
+      "index": 10574,
+      "name": "Right-stratum_oriens_of_caudal_ca3",
+      "volume_mm3": 2.94,
+      "dice": 0.0685,
+      "centroid_mm": 2.413
+    },
+    {
+      "index": 10575,
+      "name": "Right-pyramidal_cells_of_caudal_ca4",
+      "volume_mm3": 23.55,
+      "dice": 0.5061,
+      "centroid_mm": 0.531
+    },
+    {
+      "index": 10576,
+      "name": "Right-caudal_subiculum",
+      "volume_mm3": 156.42,
+      "dice": 0.6855,
+      "centroid_mm": 0.797
+    },
+    {
+      "index": 10578,
+      "name": "Right-pulvinar_of_thalamus",
+      "volume_mm3": 26.69,
+      "dice": 0.091,
+      "centroid_mm": 0.963
+    },
+    {
+      "index": 10580,
+      "name": "Right-pons",
+      "volume_mm3": 3751.55,
+      "dice": 0.7928,
+      "centroid_mm": 1.626
+    },
+    {
+      "index": 10595,
+      "name": "Right-molecular_layer_of_pva",
+      "volume_mm3": 23549.95,
+      "dice": 0.4599,
+      "centroid_mm": 0.992
+    },
+    {
+      "index": 10597,
+      "name": "Right-granular_cell_layer_of_pva",
+      "volume_mm3": 22575.81,
+      "dice": 0.4245,
+      "centroid_mm": 1.114
+    },
+    {
+      "index": 10611,
+      "name": "Right-white_matter_of_hindbrain",
+      "volume_mm3": 2334.02,
+      "dice": 0.6233,
+      "centroid_mm": 1.286
+    },
+    {
+      "index": 10654,
+      "name": "Right-inferior_olive__principal_nucleus",
+      "volume_mm3": 2.62,
+      "dice": 0.0,
+      "centroid_mm": 8.686
+    },
+    {
+      "index": 10662,
+      "name": "Right-myelencephalon_(medulla_oblongata)",
+      "volume_mm3": 1055.23,
+      "dice": 0.7633,
+      "centroid_mm": 1.713
+    },
+    {
+      "index": 10697,
+      "name": "Right-inferior_cerebellar_peduncle",
+      "volume_mm3": 76.42,
+      "dice": 0.0,
+      "centroid_mm": 3.229
+    },
+    {
+      "index": 10715,
+      "name": "Right-fastigial_(medial)_nucleus",
+      "volume_mm3": 9.09,
+      "dice": 0.2139,
+      "centroid_mm": 1.283
+    },
+    {
+      "index": 10721,
+      "name": "Right-dentate_(lateral)_nucleus",
+      "volume_mm3": 639.23,
+      "dice": 0.3996,
+      "centroid_mm": 1.331
+    },
+    {
+      "index": 10751,
+      "name": "Right-medial_interpositus_(globose)_nucleus",
+      "volume_mm3": 21.25,
+      "dice": 0.4722,
+      "centroid_mm": 1.487
+    },
+    {
+      "index": 10752,
+      "name": "Right-lateral_interpositus_(emboliform)_nucleus",
+      "volume_mm3": 57.73,
+      "dice": 0.3111,
+      "centroid_mm": 1.53
+    },
+    {
+      "index": 10765,
+      "name": "Right-central_gray_of_medulla_oblongata",
+      "volume_mm3": 3.26,
+      "dice": 0.0,
+      "centroid_mm": 1.91
+    },
+    {
+      "index": 10811,
+      "name": "Right-superficial_pulvinar_nucleus",
+      "volume_mm3": 3.07,
+      "dice": 0.0526,
+      "centroid_mm": 0.763
+    },
+    {
+      "index": 10813,
+      "name": "Right-diffuse_pulvinar_nucleus",
+      "volume_mm3": 3.52,
+      "dice": 0.2289,
+      "centroid_mm": 0.532
+    },
+    {
+      "index": 10843,
+      "name": "Right-infundibular_stalk",
+      "volume_mm3": 20.16,
+      "dice": 0.0868,
+      "centroid_mm": 1.208
+    },
+    {
+      "index": 10846,
+      "name": "Right-white_matter_of_the_cerebellum",
+      "volume_mm3": 14176.26,
+      "dice": 0.7355,
+      "centroid_mm": 1.487
+    },
+    {
+      "index": 12001,
+      "name": "Right-ctx-rh-bankssts",
+      "volume_mm3": 2800.19,
+      "dice": 0.6407,
+      "centroid_mm": 2.94
+    },
+    {
+      "index": 12002,
+      "name": "Right-ctx-rh-caudalanteriorcingulate",
+      "volume_mm3": 1225.09,
+      "dice": 0.3217,
+      "centroid_mm": 4.966
+    },
+    {
+      "index": 12003,
+      "name": "Right-ctx-rh-caudalmiddlefrontal",
+      "volume_mm3": 4807.49,
+      "dice": 0.4841,
+      "centroid_mm": 1.528
+    },
+    {
+      "index": 12005,
+      "name": "Right-ctx-rh-cuneus",
+      "volume_mm3": 2667.33,
+      "dice": 0.5154,
+      "centroid_mm": 5.172
+    },
+    {
+      "index": 12006,
+      "name": "Right-ctx-rh-entorhinal",
+      "volume_mm3": 1423.1,
+      "dice": 0.6402,
+      "centroid_mm": 3.051
+    },
+    {
+      "index": 12007,
+      "name": "Right-ctx-rh-fusiform",
+      "volume_mm3": 9378.62,
+      "dice": 0.6783,
+      "centroid_mm": 2.428
+    },
+    {
+      "index": 12008,
+      "name": "Right-ctx-rh-inferiorparietal",
+      "volume_mm3": 12971.9,
+      "dice": 0.628,
+      "centroid_mm": 1.705
+    },
+    {
+      "index": 12009,
+      "name": "Right-ctx-rh-inferiortemporal",
+      "volume_mm3": 9652.54,
+      "dice": 0.6641,
+      "centroid_mm": 1.5
+    },
+    {
+      "index": 12010,
+      "name": "Right-ctx-rh-isthmuscingulate",
+      "volume_mm3": 1298.56,
+      "dice": 0.5429,
+      "centroid_mm": 6.826
+    },
+    {
+      "index": 12011,
+      "name": "Right-ctx-rh-lateraloccipital",
+      "volume_mm3": 7851.2,
+      "dice": 0.5451,
+      "centroid_mm": 0.42
+    },
+    {
+      "index": 12012,
+      "name": "Right-ctx-rh-lateralorbitofrontal",
+      "volume_mm3": 7381.38,
+      "dice": 0.6618,
+      "centroid_mm": 1.018
+    },
+    {
+      "index": 12013,
+      "name": "Right-ctx-rh-lingual",
+      "volume_mm3": 6070.72,
+      "dice": 0.6206,
+      "centroid_mm": 3.386
+    },
+    {
+      "index": 12014,
+      "name": "Right-ctx-rh-medialorbitofrontal",
+      "volume_mm3": 4765.57,
+      "dice": 0.7059,
+      "centroid_mm": 1.116
+    },
+    {
+      "index": 12015,
+      "name": "Right-ctx-rh-middletemporal",
+      "volume_mm3": 10602.94,
+      "dice": 0.6596,
+      "centroid_mm": 1.658
+    },
+    {
+      "index": 12016,
+      "name": "Right-ctx-rh-parahippocampal",
+      "volume_mm3": 1751.49,
+      "dice": 0.6219,
+      "centroid_mm": 1.071
+    },
+    {
+      "index": 12017,
+      "name": "Right-ctx-rh-paracentral",
+      "volume_mm3": 3860.35,
+      "dice": 0.4164,
+      "centroid_mm": 4.017
+    },
+    {
+      "index": 12018,
+      "name": "Right-ctx-rh-parsopercularis",
+      "volume_mm3": 3057.73,
+      "dice": 0.7272,
+      "centroid_mm": 0.39
+    },
+    {
+      "index": 12019,
+      "name": "Right-ctx-rh-parsorbitalis",
+      "volume_mm3": 2323.07,
+      "dice": 0.5695,
+      "centroid_mm": 3.006
+    },
+    {
+      "index": 12020,
+      "name": "Right-ctx-rh-parstriangularis",
+      "volume_mm3": 2464.96,
+      "dice": 0.5389,
+      "centroid_mm": 3.066
+    },
+    {
+      "index": 12021,
+      "name": "Right-ctx-rh-pericalcarine",
+      "volume_mm3": 2113.54,
+      "dice": 0.5683,
+      "centroid_mm": 2.199
+    },
+    {
+      "index": 12022,
+      "name": "Right-ctx-rh-postcentral",
+      "volume_mm3": 6822.78,
+      "dice": 0.5732,
+      "centroid_mm": 2.013
+    },
+    {
+      "index": 12023,
+      "name": "Right-ctx-rh-posteriorcingulate",
+      "volume_mm3": 1978.3,
+      "dice": 0.501,
+      "centroid_mm": 7.805
+    },
+    {
+      "index": 12024,
+      "name": "Right-ctx-rh-precentral",
+      "volume_mm3": 11879.42,
+      "dice": 0.5947,
+      "centroid_mm": 2.966
+    },
+    {
+      "index": 12025,
+      "name": "Right-ctx-rh-precuneus",
+      "volume_mm3": 6505.6,
+      "dice": 0.6149,
+      "centroid_mm": 3.833
+    },
+    {
+      "index": 12026,
+      "name": "Right-ctx-rh-rostralanteriorcingulate",
+      "volume_mm3": 1555.2,
+      "dice": 0.6187,
+      "centroid_mm": 3.102
+    },
+    {
+      "index": 12027,
+      "name": "Right-ctx-rh-rostralmiddlefrontal",
+      "volume_mm3": 14147.01,
+      "dice": 0.6229,
+      "centroid_mm": 1.846
+    },
+    {
+      "index": 12028,
+      "name": "Right-ctx-rh-superiorfrontal",
+      "volume_mm3": 14053.76,
+      "dice": 0.6396,
+      "centroid_mm": 3.647
+    },
+    {
+      "index": 12029,
+      "name": "Right-ctx-rh-superiorparietal",
+      "volume_mm3": 13348.61,
+      "dice": 0.5803,
+      "centroid_mm": 2.869
+    },
+    {
+      "index": 12030,
+      "name": "Right-ctx-rh-superiortemporal",
+      "volume_mm3": 8169.41,
+      "dice": 0.6795,
+      "centroid_mm": 1.746
+    },
+    {
+      "index": 12031,
+      "name": "Right-ctx-rh-supramarginal",
+      "volume_mm3": 8534.91,
+      "dice": 0.6525,
+      "centroid_mm": 3.046
+    },
+    {
+      "index": 12032,
+      "name": "Right-ctx-rh-frontalpole",
+      "volume_mm3": 1205.89,
+      "dice": 0.6031,
+      "centroid_mm": 1.181
+    },
+    {
+      "index": 12033,
+      "name": "Right-ctx-rh-temporalpole",
+      "volume_mm3": 1801.54,
+      "dice": 0.6162,
+      "centroid_mm": 1.735
+    },
+    {
+      "index": 12034,
+      "name": "Right-ctx-rh-transversetemporal",
+      "volume_mm3": 468.1,
+      "dice": 0.6401,
+      "centroid_mm": 1.396
+    },
+    {
+      "index": 12035,
+      "name": "Right-ctx-rh-insula",
+      "volume_mm3": 4823.42,
+      "dice": 0.7848,
+      "centroid_mm": 0.667
+    }
+  ]
+}

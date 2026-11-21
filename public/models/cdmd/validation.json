@@ -1014,7 +1014,8 @@
       "cerebral_tissue_unassigned": 0.0122,
       "hemisphere_agreement": 0.996
     },
-    "regions_with_shares": 1925
+    "regions_with_shares": 1612,
+    "small_structures_named": 345
   },
   "cerebellar_functions": {
     "checks": {
@@ -1071,7 +1072,7 @@
       },
       "structure_covered_min": 0.8281
     },
-    "regions_with_shares": 23
+    "regions_with_shares": 20
   },
   "coordinate_spaces": {
     "mni152nlin2009casym": {
@@ -5223,6 +5224,45 @@
         }
       ]
     }
+  },
+  "landing": {
+    "space": "mni152nlin2009casym",
+    "structures": 510,
+    "centroid_mm": {
+      "median": 1.16,
+      "p90": 2.93
+    },
+    "dice_median": 0.37,
+    "by_volume": [
+      {
+        "under_mm3": 20,
+        "structures": 191,
+        "dice_median": 0.12
+      },
+      {
+        "under_mm3": 100,
+        "structures": 130,
+        "dice_median": 0.36
+      },
+      {
+        "under_mm3": 500,
+        "structures": 83,
+        "dice_median": 0.53
+      },
+      {
+        "under_mm3": 2000,
+        "structures": 40,
+        "dice_median": 0.67
+      },
+      {
+        "under_mm3": null,
+        "structures": 66,
+        "dice_median": 0.64
+      }
+    ],
+    "under_mm3": 100,
+    "radius_mm": 3.0,
+    "method": "Every labelled voxel of the template's own NextBrain segmentation carried through the published field and painted on this brain's NextBrain grid; each structure scored against this brain's structure of the same label by Dice and by the distance between centres. An upper bound on registration error: it includes the disagreement between two segmentations"
   },
   "cortical_layers": {
     "parcels": 1220,

@@ -1,0 +1,12 @@
+{
+  "status": "complete",
+  "trial": "Throwaway. Run on Rorqual (job 27317774), 8 threads, not on the pinned macOS build.",
+  "input": "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz",
+  "input_sha256": "cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b",
+  "freesurfer_build": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+  "raw_import": {
+    "voxel_values": "exact",
+    "maximum_affine_error_mm": 0.0
+  },
+  "limitations": []
+}

@@ -371,6 +371,10 @@
     min-width: 0;
     overflow-wrap: anywhere;
   }
+  /* A row with no share: the name takes the bar's and the share's columns too. */
+  .region-detail .network-row-name.unshared {
+    grid-column: 2 / -1;
+  }
   .region-detail .network-share {
     text-align: right;
     color: var(--text-secondary);

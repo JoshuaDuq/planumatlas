@@ -15,6 +15,13 @@ export const en = {
   striatalNote:
     'Share of this structure’s voxels in each network’s striatal territory. Shares below 5% hidden without rescaling.',
   striatalUnassigned: (share: string) => `${share} lies outside the striatum the atlas labels.`,
+  // A striatal structure too small for shares names the networks round it.
+  striatalWithin: (radius: string) =>
+    `Every striatal voxel within ${radius} of this structure lies in this network’s striatal territory.`,
+  striatalBorder: (radius: string) =>
+    `A border between networks passes within ${radius} of this structure; the network holding most of that neighbourhood comes first.`,
+  striatalSmall: (floor: string, radius: string) =>
+    `A structure under ${floor} is given no shares: registration lands one structure in ten more than ${radius} off.`,
   striatalCaveat:
     'A group atlas registered onto this brain from FSL’s MNI152 template: borders sit a few millimetres off, and each voxel shows only the network its connectivity most resembles.',
   confidence: (confident: string, low: string, filled: string) =>
@@ -44,6 +51,12 @@ export const fr: typeof en = {
     'Part des voxels de cette structure dans le territoire striatal de chaque réseau. Parts inférieures à 5\u202f% masquées sans renormalisation.',
   striatalUnassigned: (share: string) =>
     `${share} se trouve hors du striatum que l’atlas étiquette.`,
+  striatalWithin: (radius: string) =>
+    `Tous les voxels du striatum à moins de ${radius} de cette structure se trouvent dans le territoire striatal de ce réseau.`,
+  striatalBorder: (radius: string) =>
+    `Une limite entre réseaux passe à moins de ${radius} de cette structure\u202f; le réseau qui occupe la plus grande part de ce voisinage vient en premier.`,
+  striatalSmall: (floor: string, radius: string) =>
+    `Une structure de moins de ${floor} ne reçoit aucune part\u202f: le recalage place une structure sur dix à plus de ${radius} de sa position.`,
   striatalCaveat:
     'Un atlas de groupe recalé sur ce cerveau depuis le gabarit MNI152 de FSL\u202f: les limites sont décalées de quelques millimètres, et chaque voxel ne montre que le réseau auquel sa connectivité ressemble le plus.',
   confidence: (confident: string, low: string, filled: string) =>

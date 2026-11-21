@@ -19,6 +19,7 @@ from .layers import (
     disorder_effects,
     functional_connectivity,
     functional_regions,
+    landing,
     networks,
     neuropsych_domains,
     neurosynth_terms,
@@ -223,6 +224,7 @@ LAYERS = (
             arterial_territories.DEFINITION,
             arterial_territories.volume_path(config),
             arterial_territories.report_path(config),
+            landing.path(config),
         ],
         compose=composer(arterial_territories, unit_grids=True),
         atlas=arterial_territories.ATLAS_ID,
@@ -269,6 +271,7 @@ LAYERS = (
             striatal_networks.template_aseg_path(config),
             striatal_networks.confidence_path(config),
             striatal_networks.report_path(config),
+            landing.path(config),
         ],
         compose=composer(striatal_networks, unit_grids=True),
         atlas=striatal_networks.ATLAS_ID,
@@ -306,6 +309,7 @@ LAYERS = (
         inputs=lambda config: [
             coordinate_spaces.DEFINITION,
             coordinate_spaces.report_path(config),
+            landing.path(config),
             *(coordinate_spaces.field_path(config, space)
               for space in coordinate_spaces.read_definition()["spaces"]),
         ],
@@ -316,6 +320,13 @@ LAYERS = (
             coordinate_spaces.read_definition()
         ),
         validate=lambda check: coordinate_spaces.validate(check.config, check.manifest),
+    ),
+    Layer(
+        "landing",
+        published=coordinate_spaces.is_declared,
+        export=lambda run: landing.published(landing.read(run.config)),
+        metadata=lambda config: landing.published(landing.read(config)),
+        validate=lambda check: landing.validate(check.config, check.manifest),
     ),
     Layer(
         "retinotopy",

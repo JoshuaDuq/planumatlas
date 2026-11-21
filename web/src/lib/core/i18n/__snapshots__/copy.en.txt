@@ -858,6 +858,45 @@
   "functionalConnectivity": "Functional connectivity (HCP)",
   "disorderEffects": "Brain differences in disorders (ENIGMA)",
   "strokeCases": "Stroke cases",
+  "registered": "Registered group maps",
+  "landing": [
+   "[\"Alpha\"] → \"Fine structures through registration (Alpha)\"",
+   "[\"\"] → \"Fine structures through registration ()\""
+  ],
+  "landingNote": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"The template’s own Alpha fine structures, carried by the published registration, land a median  from this brain’s own, nine in ten within Alpha. An upper bound: it includes the disagreement between two segmentations.\"",
+   "[\"\",\"Alpha\",\"\"] → \"The template’s own  fine structures, carried by the published registration, land a median Alpha from this brain’s own, nine in ten within . An upper bound: it includes the disagreement between two segmentations.\""
+  ],
+  "landingOverlap": [
+   "[\"Alpha\"] → \"throws classes.join is not a function\"",
+   "[\"\"] → \"throws classes.join is not a function\""
+  ],
+  "landingClass": [
+   "[\"Alpha\",\"\"] → \"Alpha under \"",
+   "[\"\",\"Alpha\"] → \" under Alpha\""
+  ],
+  "landingRule": [
+   "[\"Alpha\",\"\"] → \"A structure under Alpha takes no shares from a registered map: it names what lies within  of it.\"",
+   "[\"\",\"Alpha\"] → \"A structure under  takes no shares from a registered map: it names what lies within Alpha of it.\""
+  ],
+  "registeredChecks": {
+   "ventricles": [
+    "[\"Alpha\",\"\"] → \"Overlap (Dice) of the atlas’s ventricles with this brain’s: Alpha left,  right.\"",
+    "[\"\",\"Alpha\"] → \"Overlap (Dice) of the atlas’s ventricles with this brain’s:  left, Alpha right.\""
+   ],
+   "lobules": [
+    "[\"Alpha\"] → \"Overlap (Dice) of the template’s lobules with this brain’s: Alpha on average.\"",
+    "[\"\"] → \"Overlap (Dice) of the template’s lobules with this brain’s:  on average.\""
+   ],
+   "striatum": [
+    "[\"Alpha\"] → \"Overlap (Dice) of the template’s striatum with this brain’s: Alpha on average.\"",
+    "[\"\"] → \"Overlap (Dice) of the template’s striatum with this brain’s:  on average.\""
+   ],
+   "deep": [
+    "[\"Alpha\",\"\"] → \"Overlap (Dice) of the template’s structures with this brain’s: deep structures Alpha (median), cortex .\"",
+    "[\"\",\"Alpha\"] → \"Overlap (Dice) of the template’s structures with this brain’s: deep structures  (median), cortex Alpha.\""
+   ]
+  },
   "domains": "Neuropsychological domains",
   "supplemental": "Supplemental layers",
   "files": "Published files",
@@ -1805,6 +1844,18 @@
    "[\"Alpha\"] → \"Alpha lies outside the striatum the atlas labels.\"",
    "[\"\"] → \" lies outside the striatum the atlas labels.\""
   ],
+  "striatalWithin": [
+   "[\"Alpha\"] → \"Every striatal voxel within Alpha of this structure lies in this network’s striatal territory.\"",
+   "[\"\"] → \"Every striatal voxel within  of this structure lies in this network’s striatal territory.\""
+  ],
+  "striatalBorder": [
+   "[\"Alpha\"] → \"A border between networks passes within Alpha of this structure; the network holding most of that neighbourhood comes first.\"",
+   "[\"\"] → \"A border between networks passes within  of this structure; the network holding most of that neighbourhood comes first.\""
+  ],
+  "striatalSmall": [
+   "[\"Alpha\",\"\"] → \"A structure under Alpha is given no shares: registration lands one structure in ten more than  off.\"",
+   "[\"\",\"Alpha\"] → \"A structure under  is given no shares: registration lands one structure in ten more than Alpha off.\""
+  ],
   "striatalCaveat": "A group atlas registered onto this brain from FSL’s MNI152 template: borders sit a few millimetres off, and each voxel shows only the network its connectivity most resembles.",
   "confidence": [
    "[\"Alpha\",\"\",\"Alpha\"] → \"Choi’s confidence: Alpha of its labelled voxels confident,  low, Alpha filled.\"",
@@ -2458,6 +2509,18 @@
   "unassigned": [
    "[\"Alpha\"] → \"Alpha lies in no territory the atlas draws.\"",
    "[\"\"] → \" lies in no territory the atlas draws.\""
+  ],
+  "within": [
+   "[\"Alpha\"] → \"Every labelled voxel within Alpha of this structure lies in this territory.\"",
+   "[\"\"] → \"Every labelled voxel within  of this structure lies in this territory.\""
+  ],
+  "border": [
+   "[\"Alpha\"] → \"A territory border passes within Alpha of this structure; the territory holding most of that neighbourhood comes first.\"",
+   "[\"\"] → \"A territory border passes within  of this structure; the territory holding most of that neighbourhood comes first.\""
+  ],
+  "small": [
+   "[\"Alpha\",\"\"] → \"A structure under Alpha is given no shares: registration lands one structure in ten more than  off.\"",
+   "[\"\",\"Alpha\"] → \"A structure under  is given no shares: registration lands one structure in ten more than Alpha off.\""
   ],
   "caveat": "Typical territories from where infarcts fell in 1,298 stroke patients (Liu et al. 2023), registered onto this brain: not this brain’s own vessels. Collateral flow and variant anatomy move real territories by centimetres."
  },

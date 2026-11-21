@@ -548,6 +548,23 @@ describe('evidence sections', () => {
     expect(text(networks)).toContain('CAB-NP networks');
   });
 
+  test('a striatal structure under 100 mm³ names the networks round it, with no shares or confidence', async () => {
+    // The right posteroventral putamen, 35 mm³.
+    render(Fixture, { regionId: 'nextbrain:right:10349' });
+    const networks = section('Functional networks');
+    networks.open = true;
+    expect(text(networks)).toContain('Striatal networks (Choi et al. 2012)');
+    const rows = [...networks.querySelectorAll('.network-row')].map(text);
+    expect(rows.slice(0, 2)).toEqual(['Frontoparietal control', 'Limbic']);
+    expect(networks.querySelector('.network-bar, .network-share')).toBeNull();
+    expect(text(networks)).toContain(
+      'A border between networks passes within 3 mm of this structure',
+    );
+    expect(text(networks)).toContain('A structure under 100 mm³ is given no shares');
+    expect(text(networks)).not.toContain('Choi’s confidence');
+    expect(text(networks)).toContain('borders sit a few millimetres off');
+  });
+
   test('a striatal structure lists its networks’ striatal territories; a territory says what it is', async () => {
     const screen = await render(Fixture, { regionId: 'aseg:left:12' });
     const networks = () => section('Functional networks');
@@ -1378,6 +1395,39 @@ describe('typical arterial supply', () => {
     supply.open = true;
     expect(text(supply.querySelector('.network-row')!)).toMatch(
       /^Lenticulo-striées latérales 87\s?%$/,
+    );
+  });
+
+  test('a structure under 100 mm³ names the territory round it, with no shares', async () => {
+    // The paracentral nucleus of the thalamus, 96 mm³: one territory within 3 mm.
+    const screen = await render(Fixture, { regionId: 'nextbrain:left:285' });
+    const supply = () => section('Typical arterial supply');
+    supply().open = true;
+    expect([...supply().querySelectorAll('.network-row')].map(text)).toEqual([
+      'Posterior choroidal and thalamoperforating',
+    ]);
+    expect(supply().querySelector('.network-bar, .network-share')).toBeNull();
+    expect(text(supply())).toContain(
+      'Every labelled voxel within 3 mm of this structure lies in this territory.',
+    );
+    expect(text(supply())).toContain(
+      'A structure under 100 mm³ is given no shares: registration lands one structure in ten more than 3 mm off.',
+    );
+    expect(text(supply())).not.toContain('Share of this region’s voxels');
+    expect(text(supply())).toContain('not this brain’s own vessels');
+    await expectAxeClean();
+    // The medial septal nucleus, 98 mm³: a border within 3 mm, the larger neighbour first.
+    await screen.rerender({ regionId: 'nextbrain:left:103' });
+    supply().open = true;
+    expect([...supply().querySelectorAll('.network-row')].map(text)).toEqual([
+      'Lateral lenticulostriate',
+      'Posterior choroidal and thalamoperforating',
+    ]);
+    expect(text(supply())).toContain('A territory border passes within 3 mm of this structure');
+    await screen.rerender({ regionId: 'nextbrain:left:103', lang: 'fr' });
+    section('Vascularisation artérielle typique').open = true;
+    expect(text(section('Vascularisation artérielle typique'))).toContain(
+      'Une limite de territoire passe à moins de 3 mm de cette structure',
     );
   });
 });
