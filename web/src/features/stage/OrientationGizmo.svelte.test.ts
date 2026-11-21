@@ -607,7 +607,8 @@ describe('size', () => {
     const session = cdp();
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
     try {
-      expect(shown()).toEqual([false, false, false, false]);
+      // The chevrons fade out once the screen reads as touch: wait for the fade, not its first frame.
+      await expect.poll(shown).toEqual([false, false, false, false]);
       expect(turns().map((node) => getComputedStyle(node).pointerEvents)).toEqual(
         Array(4).fill('none'),
       );
@@ -628,7 +629,7 @@ describe('size', () => {
     }
     // A mouse sees them at rest.
     (document.activeElement as HTMLElement).blur();
-    expect(shown()).toEqual([true, true, true, true]);
+    await expect.poll(shown).toEqual([true, true, true, true]);
   });
 
   test('draws no plate: only the letters, the axes and the glyphs are painted', async () => {
