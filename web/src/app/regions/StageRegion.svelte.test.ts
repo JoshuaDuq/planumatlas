@@ -53,7 +53,7 @@ let detach: () => void;
 /** Composes the world over the fake engine and mounts only the stage region, as the shell does. */
 async function boot(status: 'ready' | 'loading' = 'ready') {
   app = createApp();
-  app.attach(await composeWorld(app, engine, 'cdmd'));
+  app.attach(await composeWorld(app, engine, { default: 'cdmd', anatomies: [] }));
   if (status === 'ready') app.session.setLoaded();
   region = mount(StageRegion, { target, context: new Map([[APP, app]]) }) as never;
   // In the page the grid sizes the stage.
@@ -92,7 +92,7 @@ afterEach(() => {
 describe('what the stage region holds', () => {
   test('one main landmark holds the overlay, the dock, the gizmo, the keys and the snippet it is given; no stage control is outside it', async () => {
     app = createApp();
-    app.attach(await composeWorld(app, engine, 'cdmd'));
+    app.attach(await composeWorld(app, engine, { default: 'cdmd', anatomies: [] }));
     app.session.setLoaded();
     region = mount(StageRegionFixture, { target, context: new Map([[APP, app]]) }) as never;
     flushSync();

@@ -465,12 +465,16 @@ export function createUserMap({
       const ask = ++request;
       const metadata = atlas.manifest.coordinate_spaces;
       if (!metadata) throw new Error('This anatomy publishes no template registration.');
-      const { id, field: record } = readIn(metadata, space);
+      const record = readIn(metadata, space);
+      const { id } = record;
       const job: CarryJob = { kind: 'carry', token: ++token, file, space: id, volume };
       const transfer: Transferable[] = [file];
       if (!inverted.has(id)) {
-        job.field = { record, data: await loadFieldData(record, baseUrl) };
-        transfer.push(job.field.data.buffer);
+        if (record.native) job.native = record.native;
+        else {
+          job.field = { record: record.field, data: await loadFieldData(record.field, baseUrl) };
+          transfer.push(job.field.data.buffer);
+        }
       }
       if (!cortexSent) {
         job.cortex = await cortexSurfaces();

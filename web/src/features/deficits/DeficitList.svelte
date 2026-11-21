@@ -6,7 +6,7 @@
 <script lang="ts">
   import { tick, untrack } from 'svelte';
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
-  import { t } from '../../lib/core/i18n/index.ts';
+  import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { deficitsForRegion } from '../../lib/core/panels/clinical.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
@@ -204,6 +204,11 @@
     <p class="scope-note">
       {text.coverage.replace('{count}', String(clinical.search('', lang).length))}
     </p>
+    {#if clinical.unavailable.length}
+      <p class="scope-note" data-not-here>
+        {templateCopy(lang).deficitsElsewhere(clinical.unavailable.length)}
+      </p>
+    {/if}
     <AboutData place="deficits" {lang} host="list" />
   {/if}
 </div>

@@ -28,8 +28,11 @@
     restoreHold = null,
     restoreFails = null,
     showShortcut = true,
+    complete = true,
   }: {
     manifest: Manifest;
+    /** The manifest must resolve every profile, as the default anatomy's does. */
+    complete?: boolean;
     onready: (fixture: Fixture) => void;
     /** Holds `openDeficit` for these deficits until the test releases it. */
     hold?: { id: string; release: Promise<boolean> }[];
@@ -48,7 +51,12 @@
   // svelte-ignore state_referenced_locally
   const catalog = createCatalog(manifest, 'en');
   // svelte-ignore state_referenced_locally
-  const clinical = createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units);
+  const clinical = createClinicalCatalog(
+    clinicalRecords as ClinicalData,
+    manifest,
+    domains.units,
+    complete,
+  );
   // svelte-ignore state_referenced_locally
   const regions = new Map<string, Region>(manifest.regions.map((region) => [region.id, region]));
   const calls: string[] = [];

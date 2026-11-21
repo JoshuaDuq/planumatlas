@@ -3,6 +3,7 @@ import { describe, test } from 'vitest';
 import { readRepoYaml } from '../../../../test/repo.ts';
 import { createClinicalCatalog, findingPaint } from './catalog.ts';
 import type { ClinicalCatalog } from './catalog.ts';
+import { anatomies } from '../catalog/test-support.ts';
 import { manifests } from './test-support.ts';
 import type { ClinicalData } from './types.ts';
 
@@ -18,9 +19,41 @@ test('every published deficit has a colour for each of its findings', () => {
 });
 
 describe('published clinical content resolves to the actual atlas and cited evidence', () => {
-  for (const [anatomy, manifest] of manifests) {
+  for (const [anatomy, manifest] of manifests.filter(([id]) => id === anatomies.default)) {
     test(anatomy, () => checkAnatomy(createClinicalCatalog(data, manifest, {})));
   }
+});
+
+test('the template leaves out each deficit with a finding it cannot place, and refuses to be complete', () => {
+  const template = manifests.find(([id]) => id === 'mni152')![1];
+  const regions = new Set(template.regions.map(({ id }) => id));
+  const catalog = createClinicalCatalog(data, template, {}, false);
+  const left = catalog.unavailable.map(({ id }) => id);
+  assert.deepEqual(left, [
+    'ataxia',
+    'coma',
+    'cerebellar-cognitive',
+    'dysarthria',
+    'smooth-pursuit',
+    'cerebellar-vertigo',
+    'motor-adaptation',
+    'room-tilt-illusion',
+  ]);
+  // Each is left out for a lobule or arousal nucleus the template does not have, never for less.
+  for (const id of left) {
+    const missing = data.associations
+      .filter((association) => association.deficit === id)
+      .flatMap((association) => association.mappings.map(({ region }) => region))
+      .filter((region) => !regions.has(region));
+    assert.ok(
+      missing.length &&
+        missing.every((region) => /^(learning:(lobule|crus|vermis)|aan:)/.test(region)),
+      id,
+    );
+  }
+  assert.equal(catalog.search('', 'en').length, data.deficits.length - left.length);
+  assert.throws(() => catalog.get('coma'), /Unknown deficit: coma/);
+  assert.throws(() => createClinicalCatalog(data, template, {}), /unknown region/);
 });
 
 function checkAnatomy(catalog: ClinicalCatalog) {

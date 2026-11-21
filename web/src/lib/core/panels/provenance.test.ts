@@ -3,6 +3,7 @@ import { test } from 'vitest';
 import { readRepoJson } from '../../../../test/repo.ts';
 import type { Manifest } from '../../types/index.ts';
 import type { NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
+import { loadTemplateCopy } from '../i18n/index.ts';
 import { methodsHref, oneBrainHref } from '../methods.ts';
 import {
   checkedParcels,
@@ -393,5 +394,22 @@ test('PROV-25 registered maps lead with the landing benchmark and its rule, then
   assert.throws(
     () => provenanceRows({ landing: registered.landing! }, { lang: 'en' }),
     /mni152nlin2009casym is not published/,
+  );
+});
+
+test('PROV-26 the MNI template says what it is, and its own space is no registered map', async () => {
+  await loadTemplateCopy();
+  const template = readRepoJson<Manifest>('public/models/mni152/manifest.json');
+  const rows = provenanceRows(template, { lang: 'en' });
+  const subject = rows.find(({ label }) => label === 'Subject')!;
+  assert.equal(subject.items[0]!.text, 'MNI template (ICBM 152 2009c)');
+  assert.match(
+    subject.items[0]!.note!,
+    /^Averaged reference template\. An average of 152 young adults’ MRI, scaled by 0\.9 to the mean brain size of the CDMD adults\./,
+  );
+  assert.equal(subject.items[0]!.link, undefined);
+  assert.equal(
+    rows.find(({ label }) => label === 'Registered group maps'),
+    undefined,
   );
 });

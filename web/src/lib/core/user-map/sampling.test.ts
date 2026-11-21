@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { test } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
 import { modelDirectory } from '../../engine/model/test-support.ts';
-import type { Manifest } from '../../types/index.ts';
+import type { Manifest, RegisteredSpace } from '../../types/index.ts';
 import { anatomies } from '../catalog/test-support.ts';
 import { createField } from '../coordinates/field.ts';
 import { invertField } from './inverse-field.ts';
@@ -102,7 +102,9 @@ const models = 'public/models/cdmd/';
 const { coordinate_spaces: spaces, solid_envelopes } = readRepoJson<Manifest>(
   `${models}manifest.json`,
 );
-const { field: record } = spaces!.spaces.find(({ id }) => id === 'mni152nlin2009casym')!;
+const { field: record } = spaces!.spaces.find(
+  ({ id }) => id === 'mni152nlin2009casym',
+) as RegisteredSpace;
 const bytes = gunzipSync(readFileSync(resolve(repoRoot, models, record.file)));
 const fieldData = new Int16Array(
   bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),

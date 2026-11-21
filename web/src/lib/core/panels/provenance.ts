@@ -2,8 +2,9 @@ import type { Language, Manifest } from '../../types/index.ts';
 import type { Translated } from '../clinical/types.ts';
 import { domainName, type NeuropsychDomains } from '../catalog/neuropsych-domains.ts';
 import { decimal, grouped, percent, withUnit } from '../format.ts';
-import { t } from '../i18n/index.ts';
+import { t, templateCopy } from '../i18n/index.ts';
 import { oneBrainHref } from '../methods.ts';
+import { nativeSpace } from '../coordinates/spaces.ts';
 import { citationOf, linkOf, type ListedWork } from './citations.ts';
 
 export interface ProvenanceLink {
@@ -162,7 +163,8 @@ function registeredMaps(manifest: Partial<Manifest>, lang: Language): Provenance
       ),
     });
   for (const space of spaces?.spaces ?? [])
-    items.push({ text: `${spaces!.label} · ${space.label}`, note: deep(space.registration) });
+    if (!space.native)
+      items.push({ text: `${spaces!.label} · ${space.label}`, note: deep(space.registration) });
   const strokeCases = manifest.stroke_cases;
   if (strokeCases) items.push({ text: strokeCases.label, note: deep(strokeCases.registration) });
   return items;
@@ -195,13 +197,20 @@ export function provenanceRows(
     if (kept.length) rows.push({ label, items: kept });
   };
 
-  // One person's brain says why it is one, what that costs, and where the methods site explains it.
+  // One person's brain says why it is one, what that costs, and where the methods site explains it;
+  // a template says what averaging leaves out and how its own space is placed on it.
+  const native = nativeSpace(manifest.coordinate_spaces);
   add(copy.subject, [
     anatomy?.display_name && {
       text: anatomy.display_name,
       note:
         typeof anatomy.individual === 'boolean'
-          ? copy.kind(anatomy.individual) + (anatomy.individual ? `. ${copy.oneBrain}` : '')
+          ? copy.kind(anatomy.individual) +
+            (anatomy.individual
+              ? `. ${copy.oneBrain}`
+              : native
+                ? `. ${templateCopy(lang).provenance(decimal(native.scale, 2, lang, { trim: true }))}`
+                : '')
           : null,
       ...(anatomy.individual === true && {
         link: { href: oneBrainHref(), text: copy.oneBrainLink },

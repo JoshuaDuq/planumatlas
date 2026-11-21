@@ -8,7 +8,7 @@
   - while a run is in flight a row stays focusable and refuses (deviations/x3-busy-keeps-focus.md).
 -->
 <script lang="ts">
-  import { t } from '../../lib/core/i18n/index.ts';
+  import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { CircuitExplorer } from './circuits-explorer.svelte.ts';
   import { landmarkTotal } from './circuits-view.ts';
@@ -98,6 +98,11 @@
       ? ` · ${maps.mapCount(1)}`
       : ''}
   </p>
+  {#if model.unavailable}
+    <p class="scope-note" data-not-here>
+      {templateCopy(model.lang).circuitsElsewhere(model.unavailable)}
+    </p>
+  {/if}
   <AboutData place="circuits" lang={model.lang} host="list" />
 </div>
 

@@ -178,6 +178,24 @@ describe('selection', () => {
   });
 });
 
+describe('a brain without retinotopy (the MNI template)', () => {
+  const asked = () =>
+    engine.calls.filter((call) => call.domain === 'visualField' && call.method === 'territories');
+
+  test('where retinotopy is published, the visual-field map asks for its territories', async () => {
+    await boot();
+    await expect.poll(() => asked().length).toBeGreaterThan(0);
+  });
+
+  test('where it is not, the map never asks and the Circuits list offers no map', async () => {
+    const { retinotopy: _retinotopy, ...without } = manifest as Manifest;
+    engine = createFakeEngine({ manifest: without as Manifest, domains: domains as never });
+    await boot();
+    expect(asked()).toEqual([]);
+    expect(document.querySelector('[data-map="visual-field"]')).toBeNull();
+  });
+});
+
 describe('what each tab shows (1.4)', () => {
   test.each([
     ['Anatomy', 'anatomy'],

@@ -2,6 +2,7 @@
 // and the related list, over the real catalogs. Decision record on #57; every difference from legacy
 // cites docs/decisions/deviations/x2-*.md.
 import { beforeEach, describe, expect, test } from 'vitest';
+import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import manifest from '../../../test/fixtures/cdmd-manifest.json';
@@ -225,6 +226,29 @@ describe('the list', () => {
     await expect.poll(() => currentItem()).toBe(row('aphasia'));
     expect(row('aphasia').getAttribute('aria-current')).toBe('true');
   });
+});
+
+test('the default brain places every profile, so the list says none is elsewhere', async () => {
+  await mount();
+  expect(document.querySelector('[data-deficit="coma"]')).not.toBeNull();
+  expect(document.querySelector('[data-not-here]')).toBeNull();
+});
+
+test('on a brain without arousal nuclei, the list leaves coma out and says one profile is on CDMD only', async () => {
+  const note = () => document.querySelector('[data-not-here]');
+  await loadTemplateCopy();
+  let fixture: Fixture | undefined;
+  const full = manifest as unknown as Manifest;
+  render(Harness, {
+    manifest: { ...full, regions: full.regions.filter(({ atlas }) => atlas !== 'aan') },
+    complete: false,
+    onready: (ready: Fixture) => (fixture = ready),
+  } as never);
+  await expect.poll(() => fixture).toBeDefined();
+  expect(note()!.textContent).toBe(
+    '1 more profile maps structures this template does not have, and is on CDMD sub_013 only.',
+  );
+  expect(document.querySelector('[data-deficit="coma"]')).toBeNull();
 });
 
 describe('opening a deficit', () => {

@@ -1,6 +1,7 @@
 // A published coordinate's report: shares are of the sphere, what no region covers is its own share,
 // only a deep structure at the landing point is named, and nothing functional or clinical is attached.
 import { afterEach, expect, test, vi } from 'vitest';
+import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { flushSync } from 'svelte';
 import { page } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
@@ -84,6 +85,7 @@ async function mount(
     { id: 'destrieux', name: 'Destrieux' },
     { id: 'schaefer', name: 'Schaefer' },
   ],
+  published: CoordinateSpaces = spaces,
 ) {
   let settle!: (value: LesionMeasurement) => void;
   const lesion = {
@@ -115,7 +117,7 @@ async function mount(
   render(CoordinateReport, {
     lesion: store,
     lang,
-    spaces,
+    spaces: published,
     anatomy: 'cdmd',
     atlases,
     networks: { id: 'yeo7', atlas: 'schaefer' },
@@ -154,6 +156,38 @@ test('the caveat comes before any share, and each share is of the sphere, with t
   expect(text()).toContain('Tracts passing within 5\u202fmm');
   expect(text()).not.toMatch(/What it reaches|Functions|Deficits|finding/);
   expect(text()).not.toContain('Template not stated');
+});
+
+test('on the MNI template its own space is placed by scaling, and no other template is offered', async () => {
+  const { field: _field, registration: _registration, ...record } = spaces.spaces[0];
+  const native: CoordinateSpaces = {
+    ...spaces,
+    spaces: [
+      {
+        ...record,
+        native: {
+          scale: 0.9,
+          template_to_surface_ras_mm: [
+            [0.9, 0, 0, -0.45],
+            [0, 0.9, 0, 15.75],
+            [0, 0, 0.9, -16.65],
+            [0, 0, 0, 1],
+          ],
+          bounds_ras_mm: [
+            [-71, -87, -91],
+            [70, 89, 66],
+          ],
+        },
+      },
+    ],
+    unstated: { reads_as: 'mni152nlin2009casym', alternatives: [] },
+  };
+  await loadTemplateCopy();
+  await mount('en', 'unstated', undefined, undefined, undefined, native);
+  expect(text()).toContain('A location on an average brain, placed by scaling alone');
+  expect(text()).not.toContain('A template location registered onto this brain');
+  expect(text()).toContain('Template not stated: read as MNI152NLin2009cAsym.');
+  expect(text()).not.toContain('Read in another template');
 });
 
 test('a section whose atlas the sphere does not reach is left out', async () => {

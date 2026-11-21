@@ -1,4 +1,4 @@
-import type { CoordinateField } from '../../types/index.ts';
+import type { CoordinateField, NativeSpace } from '../../types/index.ts';
 import { createField } from '../coordinates/field.ts';
 
 /** Newton stops once the forward field carries a node's solution to within this of the node (mm). */
@@ -18,8 +18,6 @@ export interface InverseField {
   readonly shape: readonly [number, number, number];
   readonly origin: readonly [number, number, number];
   readonly spacing: number;
-  /** Each node's template millimetres, x fastest, components interleaved; NaN where it has none. */
-  readonly nodes: Float32Array;
   /**
    * Write the template millimetres of surface RAS point (x, y, z) into `out`; false, leaving `out`
    * unspecified, where a node it needs has none or the point is off the grid.
@@ -55,8 +53,42 @@ function solve4(a: Float64Array, b: Float64Array, columns: number): Float64Array
   return r;
 }
 
+/** The template's own space on its reconstruction: the affine inverted, over the brain's extent. */
+export function nativeInverse({
+  template_to_surface_ras_mm: affine,
+  bounds_ras_mm: [low, high],
+}: NativeSpace): InverseField {
+  // A scaled, translated grid, as the build writes it: surface = scale·template + offset.
+  const scale = [0, 1, 2].map((axis) => affine[axis]![axis]!);
+  const offset = [0, 1, 2].map((axis) => affine[axis]![3]!);
+  if (
+    !scale.every((value) => value > 0) ||
+    affine.some((row, r) => row.some((v, c) => c < 3 && c !== r && v !== 0))
+  ) {
+    throw new Error('A native space needs an axis-aligned, positive scale.');
+  }
+  const origin = [low[0], low[1], low[2]] as const;
+  const shape = [0, 1, 2].map((axis) => high[axis]! - low[axis]! + 1) as [number, number, number];
+  return {
+    shape,
+    origin,
+    spacing: 1,
+    map(x, y, z, out) {
+      const point = [x, y, z];
+      for (let axis = 0; axis < 3; axis++) {
+        if (point[axis]! < low[axis]! || point[axis]! > high[axis]!) return false;
+        out[axis] = (point[axis]! - offset[axis]!) / scale[axis]!;
+      }
+      return true;
+    },
+  };
+}
+
 /** Invert a template's published field (as `loadField` decodes it) onto a surface RAS grid. */
-export function invertField(record: CoordinateField, data: Int16Array): InverseField {
+export function invertField(
+  record: CoordinateField,
+  data: Int16Array,
+): InverseField & { readonly nodes: Float32Array } {
   // createField checks the layout, the data length and the node affine.
   createField(record, data);
   const [nx, ny, nz] = record.shape as [number, number, number];

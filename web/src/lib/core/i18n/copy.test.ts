@@ -1,5 +1,12 @@
 import { expect, test } from 'vitest';
+import * as template from './areas/template.ts';
 import { TRANSLATIONS } from './index.ts';
+
+// The template's wording is loaded only with that brain, but approved as the rest is.
+const TABLES = {
+  en: { ...TRANSLATIONS.en, template: template.en },
+  fr: { ...TRANSLATIONS.fr, template: template.fr },
+};
 
 /**
  * I18N-04: the approved copy. Each language's table is written to a committed snapshot, every
@@ -30,6 +37,8 @@ const KINDS: Record<string, string> = {
   'functional.section': 'n',
   'functional.contested': 'nn',
   'footer.colophon': 'sb',
+  'template.deficitsElsewhere': 'n',
+  'template.circuitsElsewhere': 'n',
   'footer.kind': 'b',
   'footer.sourceFiles': 'nb',
   'footer.visibleRegions': 'n',
@@ -139,7 +148,7 @@ const visible = (json: string) =>
 
 for (const lang of ['en', 'fr'] as const) {
   test(`I18N-04 · the ${lang} interface says the approved copy`, async () => {
-    const text = JSON.stringify(resolve(TRANSLATIONS[lang], ''), null, 1);
+    const text = JSON.stringify(resolve(TABLES[lang], ''), null, 1);
     await expect(visible(text)).toMatchFileSnapshot(`./__snapshots__/copy.${lang}.txt`);
   });
 }
@@ -184,7 +193,7 @@ test('I18N-31 · the French spacing check finds a missing or wrong space', () =>
 
 test('I18N-31 · French sets NNBSP before ; : ? ! and NBSP inside « »', () => {
   const unused = new Set(FRENCH_SPACING_KEPT);
-  const found = texts(TRANSLATIONS.fr, '').flatMap(({ path, text }) => {
+  const found = texts(TABLES.fr, '').flatMap(({ path, text }) => {
     let rest = text;
     for (const kept of FRENCH_SPACING_KEPT) {
       if (kept.path !== path || !rest.includes(kept.excerpt)) continue;

@@ -10,4 +10,5 @@ const records = import('../../../../../data/neuropsychology.yaml');
 export const loadClinicalCatalog = async (
   manifest: Pick<Manifest, 'regions'>,
   units: Readonly<Record<string, string>>,
-) => createClinicalCatalog((await records).default as ClinicalData, manifest, units);
+  complete?: boolean,
+) => createClinicalCatalog((await records).default as ClinicalData, manifest, units, complete);

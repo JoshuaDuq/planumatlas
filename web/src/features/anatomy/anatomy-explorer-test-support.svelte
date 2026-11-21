@@ -11,6 +11,7 @@
   let {
     calls = [],
     lang = 'en',
+    template = false,
     settings: overrides = {},
     selected = null,
     crowd = 0,
@@ -18,6 +19,8 @@
   }: {
     calls?: string[];
     lang?: Language;
+    /** The brain is the MNI template. */
+    template?: boolean;
     /** Display settings over the defaults: a hidden hemisphere, the cut off, the cut's labels. */
     settings?: Record<string, unknown>;
     selected?: string | null;
@@ -101,6 +104,7 @@
   <AnatomyExplorer
     bind:this={explorer}
     {lang}
+    {template}
     bind:query
     search={(text) => catalog.search(text, current)}
     {groups}

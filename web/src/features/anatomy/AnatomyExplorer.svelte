@@ -22,6 +22,8 @@
 
   interface Props {
     lang: Language;
+    /** The brain is the MNI template, an average rather than a person. */
+    template: boolean;
     /** The field's text; it is the session's and is not in the link. */
     query: string;
     search: (query: string) => { rows: CatalogRow[]; total: number };
@@ -56,6 +58,7 @@
 
   let {
     lang,
+    template,
     query = $bindable(),
     search,
     groups,
@@ -147,7 +150,7 @@
         />
       </TreeHeader>
       {#if inside}{@render systemPicker?.()}{/if}
-      <ScopeLine place="anatomy" {lang} />
+      <ScopeLine place="anatomy" {lang} {template} />
     </div>
     <div class="tree-pane scroll-fade">
       <AnatomyTree
@@ -163,7 +166,7 @@
         {onHide}
         {onShow}
       />
-      <AboutData place="anatomy" {lang} host="list" />
+      <AboutData place="anatomy" {lang} host="list" {template} />
     </div>
   </div>
 </div>

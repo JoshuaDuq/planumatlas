@@ -8,15 +8,23 @@ import type { CircuitData } from './catalog.ts';
 // the anatomy rather than inside the entry script (BUILD-15).
 const records = import('../../../../../data/circuits.yaml');
 
-type CatalogInputs = [Pick<Manifest, 'regions' | 'anatomy'>, Pick<ClinicalCatalog, 'search'>];
+type CatalogInputs = [
+  Pick<Manifest, 'regions' | 'anatomy'>,
+  Pick<ClinicalCatalog, 'search'>,
+  complete?: boolean,
+];
 
 // A landmark draws only the anatomy's own streamlines, never another subject's.
-export const circuitCatalog = (data: CircuitData, ...[manifest, clinical]: CatalogInputs) =>
+export const circuitCatalog = (
+  data: CircuitData,
+  ...[manifest, clinical, complete]: CatalogInputs
+) =>
   createCircuitCatalog(
     data,
     manifest,
     clinical.search('', 'en').map((deficit) => deficit.id),
     ownTractIds(manifest.anatomy.id),
+    complete,
   );
 
 /** The records are parsed at build time; nothing reads YAML in the browser. */

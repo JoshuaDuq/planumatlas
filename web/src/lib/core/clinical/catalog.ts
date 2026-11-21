@@ -91,14 +91,17 @@ export function mappedRegionIds(associations: readonly Mapped[]): string[] {
 
 export type ClinicalCatalog = ReturnType<typeof createClinicalCatalog>;
 
+/** `complete`: the anatomy every record must resolve on; elsewhere one that names what it lacks is left out. */
 export function createClinicalCatalog(
   data: ClinicalData,
   manifest: Pick<Manifest, 'regions'>,
   units: Readonly<Record<string, string>>,
+  complete = true,
 ) {
-  const { groups, deficits, references, associations, regions } = validateClinicalData(
+  const { groups, deficits, references, associations, regions, unavailable } = validateClinicalData(
     data,
     manifest,
+    complete,
   );
   const standIns = teachingStandIns(units);
   const atlasOf = new Map(manifest.regions.map((region) => [region.id, region.atlas]));
@@ -146,6 +149,8 @@ export function createClinicalCatalog(
 
   return {
     revised: data.revised,
+    /** Deficits this anatomy cannot place: a finding names a structure it does not have. */
+    unavailable,
     groups: [...groups.values()] as ClinicalGroup[],
     /** Every finding, in authored order. */
     associations: [...associations.values()],

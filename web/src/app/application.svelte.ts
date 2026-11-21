@@ -10,6 +10,7 @@ import type { AppContext } from '../lib/controller/context.ts';
 import type { CoordinatePlacement } from '../lib/controller/coordinates.ts';
 import type { Excursions } from '../lib/controller/excursion.svelte.ts';
 import type { Links } from '../lib/controller/links.ts';
+import type { PublishedAnatomy } from '../lib/core/assets/published-anatomy.ts';
 import type { createCatalog } from '../lib/core/catalog/catalog.ts';
 import type { ClinicalCatalog } from '../lib/core/clinical/catalog.ts';
 import type { CircuitCatalog } from '../lib/core/learning/catalog.ts';
@@ -41,6 +42,8 @@ export interface StartFailure {
  * once and shared by every region. `AppContext` is what a controller is given.
  */
 export interface World extends AppContext {
+  /** Every published anatomy, as the index lists them: another is another page (`links.switchAnatomy`). */
+  anatomies: readonly PublishedAnatomy[];
   /** The anatomy catalog, as the language and settings it shows. */
   regions: ReturnType<typeof createCatalog>;
   clinical: ClinicalCatalog;

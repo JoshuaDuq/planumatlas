@@ -2915,5 +2915,41 @@
     "[\"\",\"Alpha\"] → \"Faisceaux<NNBSP>:  faisceaux correspondent à «<NBSP>Alpha<NBSP>»\""
    ]
   }
+ },
+ "template": {
+  "subjectNote": "La moyenne de 152 jeunes adultes à la taille adulte moyenne, sans faisceaux, lobules cérébelleux ni moelle épinière qui lui soient propres",
+  "provenance": [
+   "[\"Alpha\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur Alpha à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière qui lui soient propres. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\"",
+   "[\"\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur  à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière qui lui soient propres. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\""
+  ],
+  "coordinateCaveat": "Un emplacement sur un cerveau moyen, placé par une simple mise à l’échelle<NNBSP>: ni le pic propre de quelqu’un, ni ce qu’un cerveau fait à cet endroit.",
+  "deficitsElsewhere": [
+   "[0] → \"0 autres profil cartographie des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[1] → \"1 autres profil cartographie des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[2] → \"2 autres profils cartographient des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[183] → \"183 autres profils cartographient des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[12345] → \"12345 autres profils cartographient des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\""
+  ],
+  "circuitsElsewhere": [
+   "[0] → \"0 autres parcours demande des faisceaux ou des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[1] → \"1 autres parcours demande des faisceaux ou des structures que ce gabarit n’a pas, et ne est que sur CDMD sub_013.\"",
+   "[2] → \"2 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[183] → \"183 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\"",
+   "[12345] → \"12345 autres parcours demandent des faisceaux ou des structures que ce gabarit n’a pas, et ne sont que sur CDMD sub_013.\""
+  ],
+  "anatomy": {
+   "scope": "La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.",
+   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière, ni noyaux de l’éveil.",
+   "source": "Le gabarit ICBM 152 2009c non linéaire asymétrique (MNI152NLin2009cAsym), moyenne des IRM de 152 jeunes adultes, reconstruit avec FreeSurfer 8.2 à 0,9 de sa taille, la taille moyenne du cerveau des adultes de CDMD. Destrieux et Desikan-Killiany sont ses propres annotations<NNBSP>; HCP-MMP, Julich-Brain et Schaefer sont reportés depuis fsaverage par des sphères recalées.",
+   "caution": "Une moyenne, pas une personne<NNBSP>: la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée."
+  },
+  "coordinate": {
+   "source": "Ce cerveau est MNI152NLin2009cAsym lui-même<NNBSP>: une coordonnée de cet espace y est placée en la multipliant par 0,9, sans recalage<NNBSP>; un «<NBSP>MNI<NBSP>» sans précision est lu comme MNI152NLin2009cAsym. Les autres gabarits ne sont placés que sur CDMD sub_013. Talairach n’est pas accepté.",
+   "caution": "Le point d’arrivée est un emplacement sur un cerveau moyen, et non le pic de quelqu’un ni ce qu’un cerveau fait à cet endroit."
+  },
+  "overlay": {
+   "source": "Votre fichier, lu dans le navigateur<NNBSP>; il ne quitte jamais votre ordinateur. Une carte en MNI152NLin2009cAsym est tracée directement sur ce gabarit, multipliée par 0,9, sans recalage.",
+   "caution": "Espace de gabarit seulement, et celui de ce gabarit<NNBSP>: une carte dans un autre gabarit, en espace natif ou Talairach tombe au mauvais endroit, et aucun en-tête NIfTI n’indique dans quel gabarit MNI se trouve une carte. La carte n’est pas conservée dans un lien."
+  }
  }
 }

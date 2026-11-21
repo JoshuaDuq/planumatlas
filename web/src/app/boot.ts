@@ -150,7 +150,7 @@ export async function startApp(
       wanted,
     );
 
-    const world = await composeWorld(app, engine, published.default);
+    const world = await composeWorld(app, engine, published);
     // The regions that draw from the engine mount here, and hand over the ports the controllers reach.
     app.attach(world);
     flushSync();

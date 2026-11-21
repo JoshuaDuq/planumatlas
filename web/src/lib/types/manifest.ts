@@ -285,8 +285,15 @@ export interface CoordinateField {
   outside: number;
 }
 
-/** A template a published coordinate can be given in, and how well it registered to this brain. */
-export interface CoordinateSpace {
+/** This brain is the template itself, reconstructed at `scale` of its size: no field, no registration. */
+export interface NativeSpace {
+  scale: number;
+  template_to_surface_ras_mm: Matrix4;
+  /** The brain's extent with the field's margin, surface RAS mm: low corner, high corner. */
+  bounds_ras_mm: readonly [readonly [number, number, number], readonly [number, number, number]];
+}
+
+interface SpaceRecord {
   id: string;
   label: string;
   description: string;
@@ -294,9 +301,18 @@ export interface CoordinateSpace {
   doi: string;
   license: string;
   copyright: string;
+}
+
+/** A template registered to this brain, and how well it registered. */
+export interface RegisteredSpace extends SpaceRecord {
   field: CoordinateField;
   registration: Record<string, unknown>;
+  native?: never;
 }
+
+/** A template a published coordinate can be given in: registered to this brain, or this brain itself. */
+export type CoordinateSpace =
+  RegisteredSpace | (SpaceRecord & { native: NativeSpace; field?: never; registration?: never });
 
 /** Where another template's reading of the same numbers lands beside a published one's, in mm. */
 export interface CoordinateOffsets {

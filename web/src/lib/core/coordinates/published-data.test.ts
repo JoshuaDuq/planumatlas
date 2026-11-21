@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { test } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
-import type { Manifest } from '../../types/index.ts';
+import type { Manifest, RegisteredSpace } from '../../types/index.ts';
 import { createField } from './field.ts';
 import type { Coordinate } from './parse.ts';
 
@@ -37,7 +37,7 @@ test('each published field carries a coordinate where the build’s mapper does,
     published!.spaces.map(({ id }) => id),
     Object.keys(expected),
   );
-  for (const { id, field: record } of published!.spaces) {
+  for (const { id, field: record } of published!.spaces as RegisteredSpace[]) {
     const compressed = readFileSync(resolve(repoRoot, models, record.file));
     assert.equal(sha256(compressed), record.sha256, id);
     const bytes = gunzipSync(compressed);

@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { test } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
-import type { Manifest } from '../../types/index.ts';
+import type { Manifest, RegisteredSpace } from '../../types/index.ts';
 import { carryVolume } from './carry.ts';
 import { regionCourse } from './course.ts';
 import { invertField } from './inverse-field.ts';
@@ -14,7 +14,7 @@ import { gridSampler } from './sampling.ts';
 
 const models = 'public/models/cdmd/';
 const { field: record } = readRepoJson<Manifest>(`${models}manifest.json`).coordinate_spaces!
-  .spaces[0]!;
+  .spaces[0] as RegisteredSpace;
 const bytes = gunzipSync(readFileSync(resolve(repoRoot, models, record.file)));
 const inverse = invertField(
   record,

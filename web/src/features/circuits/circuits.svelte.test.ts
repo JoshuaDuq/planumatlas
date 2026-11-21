@@ -6,7 +6,7 @@ import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import { t } from '../../lib/core/i18n/index.ts';
+import { loadTemplateCopy, t } from '../../lib/core/i18n/index.ts';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
@@ -15,8 +15,8 @@ import Fixture from './circuits-test-support.svelte';
 
 let world: World;
 
-function mount(lang: 'en' | 'fr' = 'en', explorer = true) {
-  world = createWorld();
+function mount(lang: 'en' | 'fr' = 'en', explorer = true, lacking: string[] = []) {
+  world = createWorld({ lacking });
   if (explorer) world.session.setExplorer('circuits');
   world.session.setLang(lang);
   document.documentElement.lang = lang;
@@ -43,6 +43,25 @@ const summary = (name: string) =>
   [...document.querySelectorAll<HTMLElement>('summary')].find((s) => s.textContent === name)!;
 const returnButton = () =>
   document.querySelector<HTMLButtonElement>('.circuit-return button') ?? null;
+
+test('every tour is on the default brain, so the list says none is elsewhere', async () => {
+  mount();
+  await expect.poll(() => rows().length).toBe(45);
+  expect(document.querySelector('[data-not-here]')).toBeNull();
+});
+
+test('a brain without a cord leaves the cord tours out and says how many are on CDMD only', async () => {
+  const note = () => document.querySelector('[data-not-here]');
+  await loadTemplateCopy();
+  mount('en', true, ['pam50']);
+  const left = world.circuits.unavailable.map(({ id }) => id);
+  expect(left).toContain('spinothalamic');
+  await expect.poll(() => rows().length).toBe(45 - left.length);
+  expect(rowOf('spinothalamic')).toBeNull();
+  expect(note()!.textContent).toBe(
+    `${left.length} more circuits need tracts or structures this template does not have, and are on CDMD sub_013 only.`,
+  );
+});
 
 /** Opens a circuit's lesson on its whole route, and waits until the route's title has the focus. */
 async function openRoute(id: string) {

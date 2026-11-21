@@ -9,7 +9,7 @@
   import { UNSTATED } from '../../lib/core/coordinates/spaces.ts';
   import { formatRas, grouped, parseDecimal, percent, withUnit } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
-  import { readIn } from '../../lib/core/coordinates/spaces.ts';
+  import { nativeSpace, readIn } from '../../lib/core/coordinates/spaces.ts';
   import { clusterCsv, peakLabel } from '../../lib/core/user-map/cluster-csv.ts';
   import { mapFileReason } from '../../lib/core/user-map/map-file-error.ts';
   import {
@@ -412,7 +412,7 @@
       </button>
     {/if}
   </div>
-  <AboutData place="overlay" {lang} host="popover" />
+  <AboutData place="overlay" {lang} host="popover" template={nativeSpace(spaces) !== null} />
 </div>
 
 <style>

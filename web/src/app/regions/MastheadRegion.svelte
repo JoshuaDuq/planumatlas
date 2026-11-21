@@ -253,7 +253,6 @@
       {@const { model } = world.engine}
       {@const { anatomy, excursions, commands } = world}
       {@const tractReference = isIndependentTractReference(current)}
-      <!-- TODO(I3a): `anatomies` is world.anatomies, the published index (#4 issuecomment-6429895842 item 1). Until then no Subject field is offered and `onAnatomy` is unreachable. -->
       <DataBar
         lang={current.lang}
         status={current.status}
@@ -272,7 +271,7 @@
           cerebellar: model.manifest.cerebellar_functions,
         }}
         anatomy={model.manifest.anatomy}
-        anatomies={[model.manifest.anatomy]}
+        anatomies={world.anatomies}
         reference={tractReference ? reference(current.referenceAnatomy) : null}
         borrowed={borrowedAtlas(current)}
         bind:settingsOpen

@@ -52,7 +52,7 @@ beforeEach(async () => {
   // The failures are logged as well as said.
   vi.spyOn(console, 'error').mockImplementation(() => {});
   app = createApp();
-  app.attach(await composeWorld(app, engine, 'cdmd'));
+  app.attach(await composeWorld(app, engine, { default: 'cdmd', anatomies: [] }));
   app.session.setLoaded();
   region = mount(StageRegion, { target, context: new Map([[APP, app]]) }) as never;
   flushSync();

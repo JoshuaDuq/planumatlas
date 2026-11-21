@@ -2,6 +2,7 @@
 // the legacy navigator cases (navigator.js:390-461, 704-815; search-escape.test.js) and the A2
 // decision record on #52, as behaviour.
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import type { Elsewhere } from '../../lib/core/elsewhere.ts';
@@ -142,6 +143,26 @@ describe('results', () => {
         .filter((option) => option.getAttribute('aria-current') === 'true')
         .map((option) => option.textContent),
     ).toEqual([expect.stringContaining('Cuneus, right')]);
+  });
+});
+
+describe('what the brain is', () => {
+  const scope = () => document.querySelector('.scope-line')!.textContent!.trim();
+  const source = () =>
+    [...document.querySelectorAll('.about-parts dt')].find((dt) => dt.textContent === 'Source')!
+      .nextElementSibling!.textContent!;
+
+  test('one person’s brain is said to be one person’s', () => {
+    mount();
+    expect(scope()).toBe('One person’s brain and the atlases drawn on it.');
+    expect(source()).toMatch(/^The brain is MGH CDMD sub_013/);
+  });
+
+  test('the MNI template is said to be an average, and where it comes from', async () => {
+    await loadTemplateCopy();
+    mount({ template: true });
+    expect(scope()).toBe('An average of 152 adults’ brains and the atlases drawn on it.');
+    expect(source()).toMatch(/^The ICBM 152 2009c nonlinear asymmetric template/);
   });
 });
 

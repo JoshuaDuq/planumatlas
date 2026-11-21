@@ -88,8 +88,10 @@ test('the colophon and slice note name whichever brain was actually built', () =
  * each language and nothing else is.
  */
 test('every area file is composed into both languages, once', () => {
+  // The template's wording alone is loaded on demand (`loadTemplateCopy`), with that brain.
   const files = Object.keys(import.meta.glob('./areas/*.ts'))
     .map((path) => path.replace(/^\.\/areas\/(.*)\.ts$/, '$1'))
+    .filter((area) => area !== 'template')
     .sort();
   assert.deepEqual(Object.keys(TRANSLATIONS.en).sort(), files);
   assert.deepEqual(Object.keys(TRANSLATIONS.fr).sort(), files);

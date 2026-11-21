@@ -17,7 +17,7 @@ import type { VisualFieldExplorer } from './visual-field-explorer.svelte.ts';
 
 export interface CircuitExplorerDeps {
   view: Pick<ViewStore, 'current'>;
-  circuits: Pick<CircuitCatalog, 'all' | 'get' | 'reference' | 'revised'>;
+  circuits: Pick<CircuitCatalog, 'all' | 'unavailable' | 'get' | 'reference' | 'revised'>;
   /** The S3 controller's members the tab calls (`createExcursions`). */
   excursions: Pick<
     Excursions,
@@ -138,6 +138,10 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     },
     get circuits() {
       return circuits.all;
+    },
+    /** How many tours this brain cannot show. */
+    get unavailable() {
+      return circuits.unavailable.length;
     },
     get revised() {
       return circuits.revised;

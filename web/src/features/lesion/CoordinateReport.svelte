@@ -17,7 +17,7 @@
   import type { ShareRow, SphereShares } from '../../lib/core/coordinates/report.ts';
   import { UNSTATED, readIn } from '../../lib/core/coordinates/spaces.ts';
   import { decimal, formatRas, grouped, withUnit } from '../../lib/core/format.ts';
-  import { t } from '../../lib/core/i18n/index.ts';
+  import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { sharePercent } from '../../lib/core/lesion/report.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { CoordinateSpaces, Language } from '../../lib/types/index.ts';
@@ -147,7 +147,9 @@
         ['template_doi', space.doi],
         ['template_license', space.license],
         ['template_copyright', space.copyright],
-        ...flattened('registration', space.registration),
+        ...(space.native
+          ? flattened('native', space.native)
+          : flattened('registration', space.registration)),
         ...(unstated
           ? spaces.unstated.alternatives.flatMap((alternative) =>
               flattened(`unstated.${alternative.id}`, alternative.against[space.id]),
@@ -225,6 +227,8 @@
   {/if}
   {#if unstated}
     <p class="detail-note">{copy.readsAs(space.label)}</p>
+  {/if}
+  {#if unstated && spaces.unstated.alternatives.length}
     <p class="detail-note">{copy.alternativesNote}</p>
     <ul class="coordinate-alternatives">
       {#each spaces.unstated.alternatives as alternative (alternative.id)}
@@ -240,7 +244,7 @@
     </ul>
   {/if}
   <!-- Before any share: what follows is a template location on this brain, not this brain's function. -->
-  <p class="detail-note">{copy.caveat}</p>
+  <p class="detail-note">{space.native ? templateCopy(lang).coordinateCaveat : copy.caveat}</p>
   <div class="actions">
     <button type="button" onclick={lesion.remove}>{lesionCopy.remove}</button>
     <button type="button" disabled={!shares} onclick={download}>{copy.download}</button>

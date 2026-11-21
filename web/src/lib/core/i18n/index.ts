@@ -1,5 +1,6 @@
 /** Bilingual UI strings (English and French) for Planum, one file per area under areas/. Area files are frozen: later changes go through the i18n amendment queue on #4. */
 import type { Language } from '../../types/index.ts';
+import type * as templateArea from './areas/template.ts';
 import * as agreement from './areas/agreement.ts';
 import * as app from './areas/app.ts';
 import * as atlases from './areas/atlases.ts';
@@ -156,6 +157,19 @@ export function t<A extends Area>(lang: string, area: A): (typeof TRANSLATIONS.e
   return (Object.hasOwn(TRANSLATIONS, lang) ? TRANSLATIONS[lang as Language] : TRANSLATIONS.en)[
     area
   ];
+}
+
+let template: typeof templateArea | null = null;
+
+/** The MNI template's own wording, fetched only when that brain is opened (BUILD-15). */
+export async function loadTemplateCopy(): Promise<void> {
+  template ??= await import('./areas/template.ts');
+}
+
+/** The template's wording; throws until `loadTemplateCopy` has run. */
+export function templateCopy(lang: string): typeof templateArea.en {
+  if (!template) throw new Error('The template wording is not loaded.');
+  return lang === 'fr' ? template.fr : template.en;
 }
 
 /** Masthead atlas switch: a short name. The full title stays on the button’s title. */

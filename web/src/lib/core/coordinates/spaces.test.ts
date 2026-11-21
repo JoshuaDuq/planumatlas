@@ -87,3 +87,39 @@ test('refuses metadata it could not honour', () => {
     /not measured against second/,
   );
 });
+
+// The template's own space on its reconstruction at 0.9 of its size (public/models/mni152).
+const native = {
+  ...space('mni'),
+  field: undefined,
+  registration: undefined,
+  native: {
+    scale: 0.9,
+    template_to_surface_ras_mm: [
+      [0.9, 0, 0, -0.45],
+      [0, 0.9, 0, 15.75],
+      [0, 0, 0.9, -16.65],
+      [0, 0, 0, 1],
+    ],
+    bounds_ras_mm: [
+      [-71, -87, -91],
+      [70, 89, 66],
+    ] as const,
+  },
+};
+
+test('places a coordinate in this brain’s own template by its scale alone, downloading nothing', async () => {
+  const load = vi.fn();
+  const coordinates = createCoordinateSpaces(
+    { ...metadata, spaces: [native], unstated: { reads_as: 'mni', alternatives: [] } },
+    'https://example.test/',
+    load,
+  );
+  const placed = (await coordinates.map([-42, 22, 6], UNSTATED))!;
+  [-38.25, 35.55, -11.25].forEach((wanted, axis) =>
+    assert.ok(Math.abs(placed[axis]! - wanted) < 1e-9),
+  );
+  // −100 mm lands at −106.65, beyond the brain's lowest −91.
+  assert.equal(await coordinates.map([0, 0, -100], 'mni'), null);
+  assert.equal(load.mock.calls.length, 0);
+});

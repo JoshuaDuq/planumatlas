@@ -4,15 +4,16 @@ import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { test } from 'vitest';
 import { readRepoJson, repoRoot } from '../../../../test/repo.ts';
-import type { Manifest } from '../../types/index.ts';
+import type { Manifest, RegisteredSpace } from '../../types/index.ts';
 import { carryImage, carryVolume } from './carry.ts';
-import { invertField } from './inverse-field.ts';
+import { nativeSpace, placeNative } from '../coordinates/spaces.ts';
+import { invertField, nativeInverse } from './inverse-field.ts';
 import { volumeOf } from './nifti.ts';
 import type { NiftiImage } from './nifti.ts';
 
 const models = 'public/models/cdmd/';
 const { field: record } = readRepoJson<Manifest>(`${models}manifest.json`).coordinate_spaces!
-  .spaces[0]!;
+  .spaces[0] as RegisteredSpace;
 const bytes = gunzipSync(readFileSync(resolve(repoRoot, models, record.file)));
 const inverse = invertField(
   record,
@@ -104,4 +105,48 @@ test('a series reaches the cortex its voxels reach in any volume, and is refused
     () => carryImage(image([() => 0, () => 1], 5000), 0, inverse, cortex),
     /does not reach the brain/,
   );
+});
+
+test('on the MNI template a map in its own space lands where the scale puts it, with no field', () => {
+  const native = nativeSpace(
+    readRepoJson<Manifest>('public/models/mni152/manifest.json').coordinate_spaces,
+  )!;
+  // A 4 mm ball at MNI (−42, 22, 6) on a 1 mm template grid.
+  const peak = [-42, 22, 6];
+  const grid: [number, number, number] = [61, 61, 61];
+  const origin = peak.map((value) => value - 30);
+  const map = {
+    shape: grid,
+    voxelToWorld: [
+      [1, 0, 0, origin[0]!],
+      [0, 1, 0, origin[1]!],
+      [0, 0, 1, origin[2]!],
+      [0, 0, 0, 1],
+    ],
+    data: Float32Array.from({ length: 61 ** 3 }, (_, n) =>
+      Math.hypot((n % 61) - 30, (Math.floor(n / 61) % 61) - 30, Math.floor(n / 3721) - 30) <= 4
+        ? 1
+        : 0,
+    ),
+    intent: 0,
+    description: '',
+  };
+  const { grid: placed, volume } = carryVolume(map, nativeInverse(native), {
+    left: { pial: new Float32Array(), white: new Float32Array() },
+    right: { pial: new Float32Array(), white: new Float32Array() },
+  });
+  const sum = [0, 0, 0];
+  let count = 0;
+  const [nx, ny] = placed.shape;
+  for (let n = 0; n < volume.length / 2; n++) {
+    if (!(volume[2 * n + 1]! >= 0.5 && volume[2 * n]! / volume[2 * n + 1]! > 0.5)) continue;
+    const at = [n % nx, Math.floor(n / nx) % ny, Math.floor(n / (nx * ny))];
+    at.forEach((index, axis) => (sum[axis]! += placed.origin[axis]! + index * placed.spacing));
+    count++;
+  }
+  const centre = sum.map((value) => value / count);
+  const wanted = placeNative(native, peak as [number, number, number])!;
+  // The ball is drawn at 0.9 of its size, about its own centre.
+  assert.ok(Math.abs(count - (4 / 3) * Math.PI * (4 * 0.9) ** 3) < 40, String(count));
+  centre.forEach((value, axis) => assert.ok(Math.abs(value - wanted[axis]!) < 0.5, String(centre)));
 });

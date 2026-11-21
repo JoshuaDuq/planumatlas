@@ -11,9 +11,11 @@ import { ASSET_BASE } from '../../../build/site.ts';
 import * as snapshot from '../../features/snapshot/snapshot.ts';
 import { createShell, expectAxeCleanFitted } from './shell-test-support.ts';
 
+// One subject unless a test publishes the template beside it.
+const published = vi.hoisted(() => ({ anatomies: [{ id: 'cdmd' }] as object[] }));
 vi.mock('../../lib/core/assets/published-anatomy.ts', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../lib/core/assets/published-anatomy.ts')>()),
-  loadAnatomies: async () => ({ default: 'cdmd', anatomies: [{ id: 'cdmd' }] }),
+  loadAnatomies: async () => ({ default: 'cdmd', anatomies: published.anatomies }),
 }));
 // The real saver, watched: that the masthead reaches it with the stage is the rule under test.
 vi.mock('../../features/snapshot/snapshot.ts', async (importOriginal) => {
@@ -22,7 +24,10 @@ vi.mock('../../features/snapshot/snapshot.ts', async (importOriginal) => {
 });
 
 const shell = createShell();
-afterEach(() => shell.close());
+afterEach(() => {
+  shell.close();
+  published.anatomies = [{ id: 'cdmd' }];
+});
 
 const press = (key: string) =>
   document.body.dispatchEvent(
@@ -59,6 +64,23 @@ describe('what the masthead region holds', () => {
       .filter((select) => select.checkVisibility())
       .map((select) => select.labels[0]!.textContent);
     expect(fields).toEqual(['Atlas', 'Colour', 'Internal anatomy']);
+  });
+
+  test('with the template published, the popover offers every published brain as its Subject', async () => {
+    published.anatomies = [
+      { id: 'cdmd', display_name: 'MGH CDMD “sub_013”', label: '', individual: true },
+      { id: 'mni152', display_name: 'MNI template (ICBM 152 2009c)', label: '', individual: false },
+    ];
+    await shell.open();
+    await userEvent.click(page.getByRole('button', { name: /^Atlas and display settings/ }));
+    const subject = page.getByRole('combobox', { name: 'Subject', exact: true });
+    await expect.element(subject).toBeVisible();
+    const select = subject.element() as HTMLSelectElement;
+    expect([...select.options].map(({ value, text }) => [value, text])).toEqual([
+      ['cdmd', 'MGH CDMD sub_013'],
+      ['mni152', 'MNI template (ICBM 152 2009c)'],
+    ]);
+    expect(select.value).toBe('cdmd');
   });
 
   test('before the engine the masthead is there without a data bar, and Save image waits', async () => {

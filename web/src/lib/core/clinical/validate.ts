@@ -94,9 +94,22 @@ interface Indexes {
   regions: Map<string, Region>;
 }
 
+/** Whether this anatomy holds every region a finding maps, under the name the catalog gives it. */
+function resolves(association: ClinicalAssociation, regions: Map<string, Region>) {
+  return association.mappings.every((mapping) => {
+    const region = regions.get(mapping.region);
+    return (
+      region !== undefined &&
+      region.kind !== 'non-region' &&
+      canonicalSourceName(region.source_name!) === canonicalSourceName(mapping.source_name)
+    );
+  });
+}
+
 function validateAssociation(
   association: ClinicalAssociation,
   { deficits, references, regions }: Indexes,
+  complete: boolean,
 ) {
   const context = association.id;
   requireValue(deficits.has(association.deficit), `${context}: unknown deficit`);
@@ -121,7 +134,12 @@ function validateAssociation(
   }
   requireValue(Array.isArray(association.mappings), `${context}: mappings must be a list`);
   const mapped = new Set<string>();
+  // A finding another anatomy cannot place is left out there; its regions are checked on its own.
+  const placed = complete || resolves(association, regions);
   for (const mapping of association.mappings) {
+    requireValue(!mapped.has(mapping.region), `${context}: duplicate region ${mapping.region}`);
+    mapped.add(mapping.region);
+    if (!placed) continue;
     const region = regions.get(mapping.region);
     requireValue(
       region && region.kind !== 'non-region',
@@ -137,12 +155,18 @@ function validateAssociation(
       association.laterality === 'bilateral' || association.laterality === region.hemisphere,
       `${context}: hemisphere mismatch`,
     );
-    requireValue(!mapped.has(mapping.region), `${context}: duplicate region ${mapping.region}`);
-    mapped.add(mapping.region);
   }
 }
 
-export function validateClinicalData(data: ClinicalData, manifest: Pick<Manifest, 'regions'>) {
+/**
+ * The catalog's records indexed, every one checked. On the `complete` anatomy every finding must place
+ * its regions; on another, a deficit with a finding it cannot place is moved to `unavailable`.
+ */
+export function validateClinicalData(
+  data: ClinicalData,
+  manifest: Pick<Manifest, 'regions'>,
+  complete = true,
+) {
   requireValue(/^\d{4}-\d{2}-\d{2}$/.test(data?.revised), 'revision date is required');
   const indexes: Indexes = {
     groups: indexRecords(data.groups, 'group'),
@@ -161,7 +185,7 @@ export function validateClinicalData(data: ClinicalData, manifest: Pick<Manifest
   }
   for (const reference of indexes.references.values()) validateReference(reference);
   for (const association of indexes.associations.values())
-    validateAssociation(association, indexes);
+    validateAssociation(association, indexes, complete);
   // A profile is shown as a map, so one that colours no region has nothing to show.
   for (const deficit of indexes.deficits.keys()) {
     requireValue(
@@ -171,5 +195,15 @@ export function validateClinicalData(data: ClinicalData, manifest: Pick<Manifest
       `${deficit}: no finding maps a region`,
     );
   }
-  return indexes;
+  const unavailable: ClinicalDeficit[] = [];
+  for (const association of indexes.associations.values()) {
+    if (resolves(association, indexes.regions)) continue;
+    const deficit = indexes.deficits.get(association.deficit);
+    if (deficit) unavailable.push(deficit);
+    indexes.deficits.delete(association.deficit);
+  }
+  for (const [id, association] of indexes.associations) {
+    if (!indexes.deficits.has(association.deficit)) indexes.associations.delete(id);
+  }
+  return { ...indexes, unavailable };
 }

@@ -2,6 +2,7 @@
 // (chrome.contract.test.js:167-200, 249-273, header.test.js), as behaviour in a real browser.
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import type { ManifestAnatomy } from '../../lib/types/index.ts';
@@ -154,6 +155,20 @@ describe('DataBar fields', () => {
       document.getElementById(el(field('Atlas')).getAttribute('aria-describedby')!)!.textContent,
     ).toBe('Sulcal and gyral regions, 74 per hemisphere');
     expect(texts(el(field('Subject')))).toEqual(['CDMD sub_013', 'CDMD sub_014']);
+  });
+
+  test('the subject note says what the brain on screen is: one person, or the MNI average', async () => {
+    const note = () =>
+      document.getElementById(el(field('Subject')).getAttribute('aria-describedby')!)!.textContent;
+    await wide();
+    expect(note()).toBe('One individual’s MRI reconstruction');
+    cleanup();
+    await loadTemplateCopy();
+    const template = anatomy('mni152', false);
+    await wide(barProps({ anatomy: template, anatomies: [subjects[0], template] }));
+    expect(note()).toBe(
+      'An average of 152 young adults at mean adult size, with no tracts, cerebellar lobules or spinal cord of its own',
+    );
   });
 
   test('one subject and one detail level offer no field at all', async () => {

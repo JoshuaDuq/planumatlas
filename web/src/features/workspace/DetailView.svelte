@@ -269,7 +269,9 @@
 <div class="detail-body scroll-fade">
   <div class="tab-group">
     <CircuitProfile model={circuits} />
-    <VisualFieldMap model={circuits.map} />
+    {#if circuits.map.available}
+      <VisualFieldMap model={circuits.map} />
+    {/if}
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />
     <DeficitProfile explorer={deficits} view={current} />

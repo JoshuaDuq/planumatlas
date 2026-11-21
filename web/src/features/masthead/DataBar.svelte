@@ -23,7 +23,7 @@
   import { paintKind } from '../../lib/core/state/paint.ts';
   import type { ModelPort } from '../../lib/core/state/ports.ts';
   import { requiredAtlas } from '../../lib/core/state/scene-commands.ts';
-  import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
+  import { atlasSwitchLabel, t, templateCopy } from '../../lib/core/i18n/index.ts';
   import {
     type Language,
     type LoadProgress,
@@ -32,6 +32,7 @@
     type Paint,
     type SurfaceColor,
   } from '../../lib/types/index.ts';
+  import type { PublishedAnatomy } from '../../lib/core/assets/published-anatomy.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
 
@@ -57,7 +58,7 @@
       cerebellar?: unknown;
     } & Pick<ModelPort, 'cabNp'>;
     anatomy: ManifestAnatomy;
-    anatomies: readonly ManifestAnatomy[];
+    anatomies: readonly PublishedAnatomy[];
     /** The tract reference, another subject with nothing to choose. */
     reference: { label: string; description?: string } | null;
     /** The reader's own atlas while the tab's open function or deficit shows another; leaving it brings it back. */
@@ -222,7 +223,11 @@
     (t(lang, 'atlases') as Record<string, string | undefined>)[id] ??
     '';
   const kind = $derived(
-    typeof anatomy.individual === 'boolean' ? t(lang, 'footer').kind(anatomy.individual) : '',
+    anatomy.individual === false
+      ? templateCopy(lang).subjectNote
+      : typeof anatomy.individual === 'boolean'
+        ? t(lang, 'footer').kind(anatomy.individual)
+        : '',
   );
   const notes = $derived({
     subject: reference ? (reference.description ?? '') : kind,

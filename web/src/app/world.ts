@@ -13,12 +13,13 @@ import type { SceneReader } from '../lib/controller/excursion.svelte.ts';
 import { installKeymap } from '../lib/controller/keymap.ts';
 import { createLinks } from '../lib/controller/links.ts';
 import type { Links } from '../lib/controller/links.ts';
+import type { PublishedAnatomies } from '../lib/core/assets/published-anatomy.ts';
 import { createCatalog } from '../lib/core/catalog/catalog.ts';
 import { loadClinicalCatalog } from '../lib/core/clinical/load.ts';
 import { createCoordinateSpaces } from '../lib/core/coordinates/spaces.ts';
 import { isIndependentTractReference } from '../lib/core/diffusion/presentation.ts';
 import { failureNotice } from '../lib/core/i18n/errors.ts';
-import { t } from '../lib/core/i18n/index.ts';
+import { loadTemplateCopy, t } from '../lib/core/i18n/index.ts';
 import { loadCircuitCatalog } from '../lib/core/learning/load.ts';
 import type { ReaderState } from '../lib/core/state/reader-state.ts';
 import { createSceneCommands } from '../lib/core/state/scene-commands.ts';
@@ -55,7 +56,7 @@ import type { App, World } from './application.svelte.ts';
 export async function composeWorld(
   app: App,
   engine: Engine,
-  defaultAnatomy: string,
+  published: PublishedAnatomies,
 ): Promise<World> {
   app.defer(() => engine.dispose());
   const { session, language, keyPreference, stage, ports } = app;
@@ -65,13 +66,16 @@ export async function composeWorld(
     throw new Error('This build publishes no neuropsychological domains for the Functions tab.');
   }
   const regions = createCatalog(model.manifest, session.state.lang, model.cabNp, domains.units);
-  const clinical = await loadClinicalCatalog(model.manifest, domains.units);
-  const circuits = await loadCircuitCatalog(model.manifest, clinical);
+  // The default brain must hold everything the catalogs name; another may lack some of it.
+  const complete = model.manifest.anatomy.id === published.default;
+  if (!complete) await loadTemplateCopy();
+  const clinical = await loadClinicalCatalog(model.manifest, domains.units, complete);
+  const circuits = await loadCircuitCatalog(model.manifest, clinical, complete);
   // Each space's field is published beside the manifest the engine opened (boot.ts).
-  const published = model.manifest.coordinate_spaces;
-  const coordinates = published
+  const spaces = model.manifest.coordinate_spaces;
+  const coordinates = spaces
     ? createCoordinateSpaces(
-        published,
+        spaces,
         new URL(`${ASSET_BASE}models/${model.manifest.anatomy.id}/`, globalThis.location.href),
       )
     : null;
@@ -284,12 +288,13 @@ export async function composeWorld(
         showTracts: ports.showTracts,
       },
       followLanguage: language.follow,
-      defaultAnatomy,
+      defaultAnatomy: published.default,
       page: globalThis,
       embedded: app.embed !== null,
     });
     return {
       ...context,
+      anatomies: published.anatomies,
       regions,
       clinical,
       circuits,

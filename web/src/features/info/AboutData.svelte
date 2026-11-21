@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { t } from '../../lib/core/i18n/index.ts';
+  import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import type { MethodsPage } from '../../lib/core/methods.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
@@ -15,17 +15,23 @@
     place,
     lang,
     host,
+    template = false,
     children,
   }: {
     place: MethodsPage;
     lang: Language;
     host: 'list' | 'popover';
+    /** The brain is the MNI template: the place says what changes there. */
+    template?: boolean;
     /** What the place says of itself beyond the three parts, before its methods link (Tracts' notes). */
     children?: Snippet;
   } = $props();
 
   const copy = $derived(t(lang, 'info'));
-  const entry = $derived(copy[place]);
+  const entry = $derived({
+    ...copy[place],
+    ...(template && (templateCopy(lang) as Partial<Record<MethodsPage, object>>)[place]),
+  });
 </script>
 
 <div class="about-data" data-host={host} data-about={place}>

@@ -52,7 +52,8 @@ export function deferred<T = void>() {
   return { promise, resolve, reject };
 }
 
-export function createWorld() {
+/** `lacking`: atlases whose regions the catalogs do without, as on the MNI template. */
+export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = {}) {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const domains: NeuropsychDomains = validateNeuropsychDomains(
     domainsFile as unknown as NeuropsychDomains,
@@ -71,8 +72,18 @@ export function createWorld() {
   });
   const engineSync = createEngineSync(engine);
   const session = createSessionStore({ views: VIEW_NAMES });
-  const clinical = createClinicalCatalog(clinicalRecords as ClinicalData, manifest, domains.units);
-  const circuits = circuitCatalog(circuitRecords as CircuitData, manifest, clinical);
+  const complete = !lacking.length;
+  const placed = {
+    ...manifest,
+    regions: manifest.regions.filter(({ atlas }) => !lacking.some((id) => id === atlas)),
+  };
+  const clinical = createClinicalCatalog(
+    clinicalRecords as ClinicalData,
+    placed,
+    domains.units,
+    complete,
+  );
+  const circuits = circuitCatalog(circuitRecords as CircuitData, placed, clinical, complete);
   const lesson = createLessonStore(circuits);
   const view = createView({
     engine: engineSync,

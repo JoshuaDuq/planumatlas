@@ -4,9 +4,11 @@ import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { test } from 'vitest';
 import { readRepoJson, readRepoYaml, repoRoot } from '../../../../test/repo.ts';
-import type { Manifest } from '../../types/index.ts';
+import type { Manifest, RegisteredSpace } from '../../types/index.ts';
 import { createField } from '../coordinates/field.ts';
-import { invertField } from './inverse-field.ts';
+import { placeNative } from '../coordinates/spaces.ts';
+import { invertField, nativeInverse } from './inverse-field.ts';
+import { volumeGrid } from './sampling.ts';
 
 const models = 'public/models/cdmd/';
 const { coordinate_spaces: published } = readRepoJson<Manifest>(`${models}manifest.json`);
@@ -32,7 +34,7 @@ function random(seed: number) {
 const percentile = (values: number[], share: number) =>
   values.sort((a, b) => a - b)[Math.floor(share * (values.length - 1))]!;
 
-for (const { id, field: record } of published!.spaces) {
+for (const { id, field: record } of published!.spaces as RegisteredSpace[]) {
   const data = decoded(record.file);
   const forward = createField(record, data);
   const inverse = invertField(record, data);
@@ -82,7 +84,7 @@ for (const { id, field: record } of published!.spaces) {
 }
 
 test('a point off the inverse grid, or needing a node beyond the brain, has no template point', () => {
-  const { field: record } = published!.spaces[0]!;
+  const { field: record } = published!.spaces[0] as RegisteredSpace;
   const inverse = invertField(record, decoded(record.file));
   const out = new Float64Array(3);
   const [x, y, z] = inverse.origin;
@@ -90,4 +92,32 @@ test('a point off the inverse grid, or needing a node beyond the brain, has no t
   // A grid corner lies far outside the head.
   assert.equal(inverse.map(x, y, z, out), false);
   assert.equal(inverse.map(0, 0, 0, out), true);
+});
+
+test('a native space reads this brain’s points back in the template’s millimetres, over its brain only', () => {
+  const native = {
+    scale: 0.9,
+    template_to_surface_ras_mm: [
+      [0.9, 0, 0, -0.45],
+      [0, 0.9, 0, 15.75],
+      [0, 0, 0.9, -16.65],
+      [0, 0, 0, 1],
+    ],
+    bounds_ras_mm: [
+      [-71, -87, -91],
+      [70, 89, 66],
+    ] as const,
+  };
+  const inverse = nativeInverse(native);
+  const out = new Float64Array(3);
+  const template = [-42, 22, 6];
+  const point = placeNative(native, template as [number, number, number])!;
+  assert.ok(inverse.map(point[0], point[1], point[2], out));
+  out.forEach((value, axis) => assert.ok(Math.abs(value - template[axis]!) < 1e-9));
+  assert.equal(inverse.map(0, 0, -91.5, out), false);
+  assert.deepEqual(volumeGrid(inverse), {
+    origin: [-71, -87, -91],
+    shape: [142, 177, 158],
+    spacing: 1,
+  });
 });

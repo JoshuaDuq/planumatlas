@@ -7,6 +7,7 @@
 <script lang="ts">
   import { flushSync } from 'svelte';
   import type { App, World } from '../../app/application.svelte.ts';
+  import { nativeSpace } from '../../lib/core/coordinates/spaces.ts';
   import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
   import { tractEnds } from '../../lib/core/diffusion/ends.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
@@ -152,6 +153,7 @@
   <AnatomyExplorer
     bind:this={tree}
     lang={current.lang}
+    template={nativeSpace(manifest.coordinate_spaces) !== null}
     bind:query={() => current.query, (query) => session.setQuery(query)}
     search={catalog.search}
     groups={catalog.groups}

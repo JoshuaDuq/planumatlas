@@ -95,7 +95,7 @@ function requireRecord<T>(index: ReadonlyMap<string, T>, id: string, context: st
  * alternatives for anatomies divided differently (the cerebellar cortex whole
  * or as lobules); exactly one form's regions must all exist here.
  */
-function resolveStep(step: AuthoredStep, regions: ReadonlyMap<string, Region>) {
+function resolveStep(step: AuthoredStep, regions: ReadonlyMap<string, Region>, complete: boolean) {
   const { alternatives = [], ...base } = step;
   if (!alternatives.length) return base;
   const forms: Omit<AuthoredStep, 'alternatives'>[] = [
@@ -105,6 +105,7 @@ function resolveStep(step: AuthoredStep, regions: ReadonlyMap<string, Region>) {
   const present = forms.filter((form) =>
     [form.region, ...(form.covering_regions ?? [])].every((id) => regions.has(id)),
   );
+  if (!present.length && !complete) return null;
   if (present.length !== 1) {
     throw new Error(
       `${present.length} forms of landmark ${step.id} resolve in this anatomy: ${step.region}`,
@@ -159,12 +160,16 @@ function validateStep(
 
 export type CircuitCatalog = ReturnType<typeof createCircuitCatalog>;
 
-/** Authored lessons must resolve to the exact source labels and tract bundles of this anatomy. */
+/**
+ * Authored lessons must resolve to the exact source labels and tract bundles of the `complete`
+ * anatomy. On another, a lesson naming a region, tract or deficit it lacks is moved to `unavailable`.
+ */
 export function createCircuitCatalog(
   data: CircuitData,
   manifest: Pick<Manifest, 'regions'>,
   deficitIds: Iterable<string>,
   tractIds: Iterable<string>,
+  complete = true,
 ) {
   requireText(data.revised, 'revised');
   if (!Number.isFinite(data.context_margin_mm) || data.context_margin_mm <= 0) {
@@ -177,6 +182,12 @@ export function createCircuitCatalog(
   const deficits = new Set(deficitIds);
   const tracts = new Set(tractIds);
   const steps = new Map<string, Map<string, Landmark>>();
+  const unavailable: AuthoredCircuit[] = [];
+  const places = (step: Omit<AuthoredStep, 'alternatives'> | null) =>
+    step !== null &&
+    regions.get(step.region)?.source_name === step.source_name &&
+    (step.covering_regions ?? []).every((id) => regions.has(id)) &&
+    (step.tract === undefined || tracts.has(step.tract));
   for (const reference of references.values()) {
     requireText(reference.title, `${reference.id}.title`);
     requireText(reference.citation, `${reference.id}.citation`);
@@ -204,8 +215,6 @@ export function createCircuitCatalog(
     for (const key of ['name', 'summary', 'route', 'scope', 'clinical'] as const) {
       requireTranslation(circuit[key], `${circuit.id}.${key}`);
     }
-    if (!deficits.has(circuit.deficit))
-      throw new Error(`Unknown clinical target: ${circuit.deficit}`);
     if (!Array.isArray(circuit.references) || !circuit.references.length) {
       throw new Error(`Missing references: ${circuit.id}`);
     }
@@ -218,7 +227,14 @@ export function createCircuitCatalog(
     ) {
       throw new Error(`Invalid clinical references: ${circuit.id}`);
     }
-    const resolved = circuit.steps.map((step) => resolveStep(step, regions));
+    const forms = circuit.steps.map((step) => resolveStep(step, regions, complete));
+    if (!complete && !(deficits.has(circuit.deficit) && forms.every(places))) {
+      unavailable.push(circuit);
+      continue;
+    }
+    if (!deficits.has(circuit.deficit))
+      throw new Error(`Unknown clinical target: ${circuit.deficit}`);
+    const resolved = forms as Omit<AuthoredStep, 'alternatives'>[];
     // What other landmarks cover is uncovered again on arriving at this one.
     const covered = new Set(resolved.flatMap((step) => step.covering_regions ?? []));
     const landmarks = indexRecords(
@@ -234,6 +250,8 @@ export function createCircuitCatalog(
   }
   return {
     all: [...circuits.values()],
+    /** Lessons this anatomy cannot show: they name a region, tract or deficit it does not have. */
+    unavailable,
     revised: data.revised,
     contextMarginMm: data.context_margin_mm,
     get: (id: string) => requireRecord(circuits, id, 'circuit'),

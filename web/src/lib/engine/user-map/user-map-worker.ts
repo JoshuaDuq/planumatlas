@@ -5,12 +5,12 @@ import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import { regionCourse } from '../../core/user-map/course.ts';
 import type { MapCourse } from '../../core/user-map/course.ts';
 import type { MapSummary } from '../../core/user-map/display.ts';
-import { invertField } from '../../core/user-map/inverse-field.ts';
+import { invertField, nativeInverse } from '../../core/user-map/inverse-field.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import type { InverseField } from '../../core/user-map/inverse-field.ts';
 import { readNifti, volumeOf } from '../../core/user-map/nifti.ts';
 import type { NiftiImage } from '../../core/user-map/nifti.ts';
-import type { CoordinateField } from '../../types/index.ts';
+import type { CoordinateField, NativeSpace } from '../../types/index.ts';
 
 /** Read a file and carry one of its volumes onto this brain through a template's field. */
 export interface CarryJob {
@@ -21,6 +21,8 @@ export interface CarryJob {
   volume: number;
   /** Sent until the worker has inverted this space's field; it keeps the inversion. */
   field?: { record: CoordinateField; data: Int16Array };
+  /** In place of a field, where this brain is the space's template itself. */
+  native?: NativeSpace;
   /** Sent once; the worker keeps them. */
   cortex?: { left: CortexSurfaces; right: CortexSurfaces };
 }
@@ -106,6 +108,7 @@ scope.onmessage = async ({ data: job }) => {
     latest = Math.max(latest, job.token);
     if (job.cortex) cortex = job.cortex;
     if (job.field) inverses.set(job.space, invertField(job.field.record, job.field.data));
+    if (job.native) inverses.set(job.space, nativeInverse(job.native));
     const inverse = inverses.get(job.space);
     if (!inverse || !cortex) throw new Error(`No inverted field or cortex for ${job.space}.`);
     const image = await readNifti(job.file);

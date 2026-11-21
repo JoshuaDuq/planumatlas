@@ -1,4 +1,9 @@
-import type { CoordinateField, CoordinateSpace, CoordinateSpaces } from '../../types/index.ts';
+import type {
+  CoordinateField,
+  CoordinateSpace,
+  CoordinateSpaces,
+  NativeSpace,
+} from '../../types/index.ts';
 import { loadField } from './field.ts';
 import type { Field } from './field.ts';
 import type { Coordinate } from './parse.ts';
@@ -12,6 +17,25 @@ export function readIn(metadata: CoordinateSpaces, space: string): CoordinateSpa
   const record = metadata.spaces.find((entry) => entry.id === id);
   if (!record) throw new RangeError(`Unknown coordinate space: ${space}`);
   return record;
+}
+
+/** The template this brain is itself (the MNI template), or null for a person's brain. */
+export const nativeSpace = (metadata: CoordinateSpaces | undefined): NativeSpace | null =>
+  metadata?.spaces.find((space) => space.native)?.native ?? null;
+
+/** Where a point of the template lands on its own reconstruction, or null beyond its brain's extent. */
+export function placeNative(
+  { template_to_surface_ras_mm: affine, bounds_ras_mm: [low, high] }: NativeSpace,
+  point: Readonly<Coordinate>,
+): Coordinate | null {
+  const placed = [0, 1, 2].map(
+    (row) =>
+      affine[row]![0]! * point[0] +
+      affine[row]![1]! * point[1] +
+      affine[row]![2]! * point[2] +
+      affine[row]![3]!,
+  ) as Coordinate;
+  return placed.every((value, axis) => value >= low[axis]! && value <= high[axis]!) ? placed : null;
 }
 
 /**
@@ -47,7 +71,9 @@ export function createCoordinateSpaces(
     metadata,
     /** Where a coordinate in `space` lands on this brain, or null beyond its template's brain. */
     async map(point: Readonly<Coordinate>, space: string): Promise<Coordinate | null> {
-      const { id, field } = readIn(metadata, space);
+      const record = readIn(metadata, space);
+      if (record.native) return placeNative(record.native, point);
+      const { id, field } = record;
       let loading = fields.get(id);
       if (!loading) {
         loading = load(field, baseUrl);

@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 import { readRepoYaml } from '../../../../test/repo.ts';
+import { anatomies } from '../catalog/test-support.ts';
+import { createClinicalCatalog } from '../clinical/catalog.ts';
 import { manifests } from '../clinical/test-support.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import { ownTractIds } from '../diffusion/catalogs.ts';
 import { createCircuitCatalog } from './catalog.ts';
+import { circuitCatalog } from './load.ts';
 import type { AuthoredCircuit, CircuitData } from './catalog.ts';
 
 const data = readRepoYaml<CircuitData>('data/circuits.yaml');
@@ -14,6 +17,8 @@ const archived = readRepoYaml<CircuitData & { withheld_pending_rework: string[] 
 const clinical = readRepoYaml<ClinicalData>('data/neuropsychology.yaml');
 const deficitIds = clinical.deficits.map((deficit) => deficit.id);
 const published = manifests.map(([, manifest]) => manifest);
+const complete = (manifest: (typeof published)[number]) =>
+  manifest.anatomy.id === anatomies.default;
 
 const clone = () => structuredClone(data) as { -readonly [K in keyof CircuitData]: any };
 const circuitOf = (
@@ -21,8 +26,14 @@ const circuitOf = (
   id: string,
 ): AuthoredCircuit & Record<string, any> =>
   copy.circuits.find((circuit: AuthoredCircuit) => circuit.id === id);
-const create = (copy: object, manifest = published[0]) =>
-  createCircuitCatalog(copy as CircuitData, manifest, deficitIds, ownTractIds(manifest.anatomy.id));
+const create = (copy: object, manifest = published[0]!) =>
+  createCircuitCatalog(
+    copy as CircuitData,
+    manifest,
+    deficitIds,
+    ownTractIds(manifest.anatomy.id),
+    complete(manifest),
+  );
 
 const ACTIVE = [
   ['vision', 4, 'hemianopia'],
@@ -93,8 +104,8 @@ test('withdrawn tours remain source-checkable in the archive and cannot be opene
   }
 });
 
-test('the 45 active pathway tours resolve exact source landmarks on every published anatomy', () => {
-  for (const manifest of published) {
+test('the 45 active pathway tours resolve exact source landmarks on the default anatomy', () => {
+  for (const manifest of published.filter(complete)) {
     const catalog = create(data, manifest);
     assert.deepEqual(
       catalog.all.map((c) => c.id),
@@ -213,7 +224,9 @@ describe('a landmark with alternatives resolves to exactly one of them in each a
       const cortex = circuitOf(neither, 'cerebellar').steps[0] as Record<string, any>;
       cortex.alternatives[0].region = 'learning:missing';
       cortex.region = 'learning:missing';
-      assert.throws(() => create(neither, manifest), /0 forms/);
+      // A form missing from the default anatomy is an authoring error; elsewhere the tour is left out.
+      if (complete(manifest)) assert.throws(() => create(neither, manifest), /0 forms/);
+      else assert.ok(create(neither, manifest).unavailable.some(({ id }) => id === 'cerebellar'));
     });
   }
 });
@@ -726,4 +739,39 @@ test('CAT-54 · an unknown circuit, landmark or reference fails by name', () => 
   assert.throws(() => catalog.step('missing', 'chiasm'), { message: 'Unknown circuit: missing' });
   assert.throws(() => catalog.step('vision', 'missing'), { message: 'Unknown landmark: missing' });
   assert.throws(() => catalog.reference('missing'), { message: 'Unknown reference: missing' });
+});
+
+test('on the template, a tour naming a tract, cord or deficit it lacks is left out and the rest resolve', () => {
+  const template = manifests.find(([id]) => id === 'mni152')![1];
+  const catalog = circuitCatalog(
+    data,
+    template,
+    createClinicalCatalog(clinical, template, {}, false),
+    false,
+  );
+  assert.deepEqual(
+    catalog.unavailable.map(({ id }) => id),
+    [
+      'cerebellar',
+      'corticospinal',
+      'spinothalamic',
+      'pontine-motor',
+      'vestibular',
+      'ventral-spinocerebellar',
+      'rubrospinal-crossed',
+      'dorsal-spinocerebellar',
+      'olivocerebellar-flocculus',
+      'subthalamic-crus-ii',
+    ],
+  );
+  assert.deepEqual(
+    catalog.all.map(({ id }) => id),
+    ACTIVE.map(([id]) => id).filter((id) => !catalog.unavailable.some((c) => c.id === id)),
+  );
+  assert.throws(() => catalog.get('corticospinal'), { message: 'Unknown circuit: corticospinal' });
+  // Complete, as the default anatomy must be, the template is refused rather than trimmed.
+  assert.throws(
+    () => createCircuitCatalog(data, template, deficitIds, ownTractIds(template.anatomy.id)),
+    /Unknown tract bundle: cst-left|0 forms|Unknown region/,
+  );
 });
