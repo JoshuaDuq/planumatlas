@@ -18,7 +18,8 @@ const publishedModule = resolve(webRoot, 'src/lib/core/assets/published-files.ts
 const serviceWorkerSource = resolve(webRoot, 'src/service-worker.ts');
 const prefetchSource = resolve(webRoot, 'src/boot/prefetch.js');
 
-type Published = Record<string, PublishedRecord>;
+/** The build's record: the app's, with the version the head script and the service worker are given. */
+type Published = Record<string, PublishedRecord & { version: string }>;
 
 export interface WorkerVersions {
   base: string;
@@ -82,7 +83,11 @@ export function publishedAssets(): Plugin {
     enforce: 'pre',
     load(id) {
       if (id.split('?')[0] !== publishedModule) return null;
-      return `export default ${JSON.stringify({ base: ASSET_BASE, files: published })};`;
+      // The app derives each version from the sha256 (`versionOf`), so the entry does not carry it.
+      const files = Object.fromEntries(
+        Object.entries(published).map(([path, { version: _version, ...record }]) => [path, record]),
+      );
+      return `export default ${JSON.stringify({ base: ASSET_BASE, files })};`;
     },
     // Appended to <head> before Vite adds the stylesheet link, so the script still starts
     // ahead of the CSS while <meta charset> stays within the first 1024 bytes (HTML Standard 4.2.5.4).

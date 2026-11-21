@@ -1,6 +1,7 @@
 import { gzipSync } from 'node:zlib';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchAsset, handOverUnseen, type AssetProgress, type UnseenFile } from './asset-cache.ts';
+import { versionOf } from './published-assets.ts';
 import { publish, recordOf, sha256 } from './published-test-support.ts';
 
 const bytesOf = (count: number) => new Uint8Array(count).map((_, i) => i + 1);
@@ -160,12 +161,12 @@ describe('handOverUnseen', () => {
     const handed: UnseenFile[] = [];
     handOverUnseen((file) => handed.push(file));
     expect(handed.map(({ url }) => url)).toEqual([
-      `${base}manifest.json?v=${records['models/bert/manifest.json'].version}`,
+      `${base}manifest.json?v=${versionOf(records['models/bert/manifest.json'])}`,
     ]);
     await fetchAsset(`${base}learning.glb`);
     expect(handed.map(({ url }) => url)).toEqual([
-      `${base}manifest.json?v=${records['models/bert/manifest.json'].version}`,
-      `${base}learning.glb?v=${records['models/bert/learning.glb'].version}`,
+      `${base}manifest.json?v=${versionOf(records['models/bert/manifest.json'])}`,
+      `${base}learning.glb?v=${versionOf(records['models/bert/learning.glb'])}`,
     ]);
     expect(new Uint8Array(await handed[1]!.body.arrayBuffer())).toEqual(bytesOf(4));
     expect(handed[1]!.headers).toEqual([['content-length', '4']]);

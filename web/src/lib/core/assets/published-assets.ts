@@ -42,12 +42,18 @@ export function publishedRecord(url: string | URL): PublishedRecord | null {
   return record;
 }
 
+/**
+ * The 16-hex-digit version a published file's URL carries: its sha256's first digits
+ * (scripts/published-version.mjs), so the map the app loads does not carry it twice.
+ */
+export const versionOf = (record: PublishedRecord): string => record.sha256.slice(0, 16);
+
 /** Each file carries its own content version, so a deploy re-downloads only what changed. */
 function versioned(url: string | URL): string {
   const record = publishedRecord(url);
   if (!record) return String(url);
   const pinned = new URL(url, globalThis.location?.href);
-  pinned.searchParams.set('v', record.version);
+  pinned.searchParams.set('v', versionOf(record));
   return pinned.href;
 }
 

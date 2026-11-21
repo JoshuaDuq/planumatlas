@@ -18,5 +18,5 @@ export function publish(files: Record<string, PublishedRecord>): void {
 
 export function recordOf(bytes: Uint8Array): PublishedRecord {
   const digest = sha256(bytes);
-  return { version: digest.slice(0, 16), sha256: digest, size: bytes.byteLength };
+  return { sha256: digest, size: bytes.byteLength };
 }

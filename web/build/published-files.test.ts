@@ -165,9 +165,10 @@ describe('the dev server watcher', () => {
     server.watcher.emit('all', 'change', file);
     expect(server.ws.send).toHaveBeenLastCalledWith({ type: 'full-reload' });
     expect(server.moduleGraph.invalidateModule).toHaveBeenLastCalledWith(module);
-    expect(loadedFiles(plugin)['models/anatomies.json']).toMatchObject({
-      version: 'c24aea467c0bc797',
-    });
+    // The app's map carries no version: it is the sha256's first 16 digits.
+    const record = loadedFiles(plugin)['models/anatomies.json'] as Record<string, unknown>;
+    expect(record).not.toHaveProperty('version');
+    expect(record['sha256']).toMatch(/^c24aea467c0bc797/);
 
     server.watcher.emit('all', 'unlink', file);
     expect(server.ws.send).toHaveBeenCalledTimes(2);

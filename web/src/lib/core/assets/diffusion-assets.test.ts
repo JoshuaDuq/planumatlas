@@ -14,7 +14,7 @@ describe('diffusion assets', () => {
     const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(bytes));
     const url = 'https://example.test/neuroatlas/diffusion/brain.nii.gz';
     const asset = await fetchDiffusionAsset(url);
-    expect(fetch.mock.calls[0][0]).toBe(`${url}?v=${record.version}`);
+    expect(fetch.mock.calls[0][0]).toBe(`${url}?v=${record.sha256.slice(0, 16)}`);
     expect(fetch.mock.calls[0][1]).toMatchObject({ cache: 'no-cache' });
     expect(new Uint8Array(asset.buffer)).toEqual(bytes);
   });

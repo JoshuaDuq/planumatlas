@@ -1,4 +1,4 @@
-import { AssetError, fetchPublished, publishedRecord } from './published-assets.ts';
+import { AssetError, fetchPublished, publishedRecord, versionOf } from './published-assets.ts';
 
 /**
  * One in-flight request per URL.
@@ -136,7 +136,7 @@ async function download(
   // Released while this one downloaded: nothing will take it.
   if (record && passesWorker && !released) {
     const url = new URL(key);
-    url.searchParams.set('v', record.version);
+    url.searchParams.set('v', versionOf(record));
     // A copy, so the worker gets the bytes as verified whatever callers do with the buffer.
     const file = { url: url.href, headers: [...response.headers], body: new Blob([buffer]) };
     if (!handOver) unseen.push(file);

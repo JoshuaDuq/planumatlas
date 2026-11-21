@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchPublished, reloadWithoutStoredModels } from './published-assets.ts';
 import { publish } from './published-test-support.ts';
 
-const record = (version: string, fill: string) => ({ version, sha256: fill.repeat(64), size: 1 });
+const record = (fill: string) => ({ sha256: fill.repeat(64), size: 1 });
 
 function recordFetches() {
   return vi
@@ -13,17 +13,17 @@ function recordFetches() {
 describe('fetchPublished', () => {
   it('carries each published file’s own version', async () => {
     publish({
-      'models/bert/learning.glb': record('aaaa', 'a'),
-      'models/bert/manifest.json': record('bbbb', 'b'),
+      'models/bert/learning.glb': record('a'),
+      'models/bert/manifest.json': record('b'),
     });
     const fetch = recordFetches();
     await fetchPublished('https://example.test/neuroatlas/models/bert/learning.glb');
     await fetchPublished('https://example.test/neuroatlas/models/bert/manifest.json');
     expect(fetch.mock.calls[0][0]).toBe(
-      'https://example.test/neuroatlas/models/bert/learning.glb?v=aaaa',
+      'https://example.test/neuroatlas/models/bert/learning.glb?v=aaaaaaaaaaaaaaaa',
     );
     expect(fetch.mock.calls[1][0]).toBe(
-      'https://example.test/neuroatlas/models/bert/manifest.json?v=bbbb',
+      'https://example.test/neuroatlas/models/bert/manifest.json?v=bbbbbbbbbbbbbbbb',
     );
     expect(fetch.mock.calls[0][1]).toMatchObject({ cache: 'no-cache', priority: 'high' });
   });

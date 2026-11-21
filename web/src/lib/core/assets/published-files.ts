@@ -1,6 +1,5 @@
-/** One published file: its sha256, the 16-hex-digit version its URL carries and its decoded byte size. */
+/** One published file: its sha256 and its decoded byte size. */
 export interface PublishedRecord {
-  version: string;
   sha256: string;
   size: number;
   /** A `.gz` file's contents: a server may send it with `Content-Encoding: gzip`, and the browser then hands those over. */
