@@ -1,4 +1,4 @@
-import { ALL_DOMAINS, type NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
+import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import type { Engine } from '../engine/api.ts';
 import type { LesionStore } from '../state/lesion.svelte.ts';
@@ -92,8 +92,7 @@ export function createExplorerChoice({
  * A tab chosen during a lesson, or away from Functions and Deficits, waits for the scene from before
  * it to come back; a later choice wins (app.js:1335-1350). Back on Functions or Deficits after that
  * scene came back, or after another tab changed the atlas, the open item's regions are drawn again,
- * so its key never describes a brain that does not carry them. Functions entered with no function
- * open, no words searched and no region selected opens All functions.
+ * so its key never describes a brain that does not carry them.
  */
 export function createModes({
   engine,
@@ -144,19 +143,6 @@ export function createModes({
       const structuresDrawn = [domains.structure_atlas, domains.unit_atlas].includes(
         settings.detail,
       );
-      // Entered with nothing open, searched or selected, Functions lands on its overview, so the
-      // brain shows what the tab is about (2026-11-20 review): on HCP-MMP unless the shown atlas lists
-      // functions itself. Words carried from another tab show their results instead, and a selected
-      // region stays, its functions leading the list where its atlas has them.
-      if (
-        value === 'functions' &&
-        !selectedFunction &&
-        !session.state.functionQuery.trim() &&
-        !engine.model.state.selectedRegion &&
-        previous !== value
-      ) {
-        openFunction(ALL_DOMAINS);
-      }
       if (
         value === 'functions' &&
         selectedFunction &&

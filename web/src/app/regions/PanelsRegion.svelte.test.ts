@@ -199,19 +199,12 @@ describe('a brain without retinotopy (the MNI template)', () => {
 });
 
 describe('the Functions tab', () => {
-  test('entered from the opening picture, lands on All functions and paints the brain with it', async () => {
+  test('entered from the opening picture, shows its list and leaves the brain as it was', async () => {
     const world = await boot();
     await userEvent.click(page.getByRole('tab', { name: 'Functions' }));
-    await expect
-      .element(page.getByRole('heading', { level: 2, name: 'All functions' }))
-      .toBeVisible();
-    expect(world.view.current.selectedFunction).toBe('all');
-    await expect.poll(() => engine.model.settings.atlas).toBe('hcp-mmp');
-    // Its domains are the list in front, each opening its own map.
-    expect(detail().querySelectorAll('.function-link')).toHaveLength(11);
-    // Leaving the tab gives the opening atlas back.
-    await userEvent.click(page.getByRole('tab', { name: 'Anatomy' }));
-    await expect.poll(() => engine.model.settings.atlas).toBe('destrieux');
+    await expect.element(page.getByRole('button', { name: /^All functions/ })).toBeVisible();
+    expect(world.view.current.selectedFunction).toBeNull();
+    expect(engine.model.settings.atlas).toBe('destrieux');
   });
 });
 
@@ -228,10 +221,6 @@ describe('what each tab shows (1.4)', () => {
       await boot();
       await userEvent.click(page.getByRole('tab', { name }));
       flushSync();
-      // Functions lands on All functions; its list is one step back.
-      if (place === 'functions') {
-        await userEvent.click(page.getByRole('button', { name: 'Back to Functions' }));
-      }
       const copy = t('en', 'info');
       await expect
         .poll(() => list().querySelector(`[data-scope="${place}"]`)?.textContent)

@@ -6,6 +6,10 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Functions** opens on its list again, not on **All functions**; nothing is painted until a function is chosen.
+
 ## [0.1.0] - 2026-11-21
 
 The first numbered release, archived at [doi:10.5281/zenodo.24428326](https://doi.org/10.5281/zenodo.24428326).

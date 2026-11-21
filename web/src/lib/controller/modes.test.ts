@@ -306,26 +306,8 @@ describe('choosing a tab', () => {
     assert.equal(scene.excursions.restorable, true);
   });
 
-  test('Functions entered with nothing open lands on All functions; chosen again, searched or with a region selected, it does not', async () => {
+  test('Functions entered with nothing open opens nothing, so its list shows', async () => {
     const scene = createScene();
-    await scene.excursions.chooseMode('functions');
-    expect(scene.panels.openFunction).toHaveBeenCalledExactlyOnceWith('all');
-    scene.panels.openFunction.mockClear();
-    await scene.excursions.chooseMode('functions');
-    expect(scene.panels.openFunction).not.toHaveBeenCalled();
-    // Words carried from another tab show the list's results.
-    await scene.excursions.chooseMode('anatomy');
-    await scene.excursions.searchIn('functions', 'memory');
-    expect(scene.panels.openFunction).not.toHaveBeenCalled();
-    // A selected region stays, its functions leading the list.
-    scene.session.setFunctionQuery('');
-    await scene.excursions.chooseMode('anatomy');
-    const { model } = scene.engine;
-    model.select(
-      [...model.regions.values()].find(
-        (region) => region.atlas === model.settings.atlas && region.kind === 'cortex',
-      )!.id,
-    );
     await scene.excursions.chooseMode('functions');
     expect(scene.panels.openFunction).not.toHaveBeenCalled();
   });
