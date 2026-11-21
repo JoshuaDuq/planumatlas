@@ -3,16 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    # Agent, design and repository notes are not part of the site or its checks.
+    # Repository metadata and docs-unrelated notes are not part of the site or its checks.
     # CITATION.cff and docs/reference/references.md are read by web/build/references.ts, so stay watched.
     paths-ignore:
-      - deliverables/**
-      - AGENTS.md
-      - CLAUDE.md
       - CHANGELOG.md
       - LICENSE
       - NOTICE
-      - PRODUCT.md
       - README.md
       - SECURITY.md
       - .github/dependabot.yml

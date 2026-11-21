@@ -7,8 +7,7 @@ __pycache__/
 .DS_Store
 *.blend1
 data/cache/
-deliverables/*.blend
-deliverables/*.png
+data/nextbrain/
 # CDMD sub_013's recon-all tree stays in data/cache/freesurfer-subjects; its
 # completion marker and log stay local too.
 data/cdmd/scripts/*
@@ -16,18 +15,4 @@ data/cdmd/scripts/*
 data/mni152/scripts/*
 !data/mni152/scripts/build-stamp.txt
 docs/_build/
-data/nextbrain/
-# Agent tooling, design-review records and working notes stay local.
-.agents/
-.claude/
-.impeccable/
-skills-lock.json
-docs/superpowers/
-docs/reference/circuit-additions-2026-10-30.md
-docs/reference/circuit-classification-audit-2026-10-30.md
-DESIGN.md
 .wrangler/
-# Working folders: the catalogue reviews' logs, snapshots and evidence, and social-media media and drafts.
-deliverables/circuit-review/
-deliverables/deficit-review/
-deliverables/reddit/

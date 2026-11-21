@@ -1,9 +1,10 @@
+.*
+!.oxlintrc.json
+!.prettierrc
 dist/
 node_modules/
 test-results/
 playwright-report/
-.vitest/
-.impeccable/
 package-lock.json
 test/fixtures/
 docs/

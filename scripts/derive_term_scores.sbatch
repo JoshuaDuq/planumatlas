@@ -1,9 +1,9 @@
 #!/bin/bash
-# One array task of derive_term_scores.py run in its venv on Rorqual: every term whose vocabulary
-# index leaves this task's remainder, one fork per CPU. derive_term_scores_submit_rorqual.sh submits it.
-#SBATCH --account=def-mpcoll
+# One array task of derive_term_scores.py run in its venv on a Slurm cluster: every term whose
+# vocabulary index leaves this task's remainder, one fork per CPU. derive_term_scores_submit_rorqual.sh
+# submits it with SLURM_ACCOUNT, NEUROSYNTH_TERMS_WORK and OUT set.
 set -euo pipefail
-here=/scratch/joshduq/neurosynth_terms
+here="${NEUROSYNTH_TERMS_WORK:?set NEUROSYNTH_TERMS_WORK to the cluster work directory}"
 module load StdEnv/2023 python/3.12
 source "$here/venv/bin/activate"
 # FlexiBLAS's AOCL backend, the compute nodes' default, segfaults in nilearn's coordinate transform
