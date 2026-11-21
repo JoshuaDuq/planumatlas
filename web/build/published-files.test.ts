@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 import type { Plugin } from 'vite';
+import { documentTitle } from '../src/lib/core/workspace.ts';
 import { FIXTURE_FILES, FIXTURE_GZ } from './published-fixture.ts';
 import { headVersions, publishedAssets, workerVersions } from './published-files.ts';
 import { ASSET_BASE } from './site.ts';
@@ -108,10 +109,10 @@ describe('the version maps the build writes', () => {
 });
 
 describe('the build config', () => {
-  it('BUILD-09 declares lang="en" and the title "Planum"', () => {
+  it('BUILD-09 declares lang="en" and the title the app restores when nothing is selected', () => {
     const html = readFileSync(resolve(webRoot, 'index.html'), 'utf8');
     expect(html).toMatch(/<html lang="en">/);
-    expect(html).toMatch(/<title>Planum<\/title>/);
+    expect(html).toContain(`<title>${documentTitle({})}</title>`);
   });
 });
 

@@ -90,9 +90,12 @@ export function selectionName({ label = '', side, sideWord }: ContextSelection):
   return side && sideWord ? `${label} ${side}, ${sideWord}` : label;
 }
 
-/** The tab title names the selection, so bookmarks and history entries of different views differ. */
+/**
+ * The tab title names the selection, so bookmarks and history entries of different views differ.
+ * With none it is index.html's own title, which BUILD-09 holds equal.
+ */
 export function documentTitle({ label, sideWord }: ContextSelection): string {
-  if (!label) return 'Planum';
+  if (!label) return 'Planum — Interactive 3D Human Brain Atlas';
   return `${sideWord ? `${label}, ${sideWord}` : label} — Planum`;
 }
 

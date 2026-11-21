@@ -31,7 +31,8 @@ test('the page copy states the published counts', () => {
   const deficits = readRepoYaml<{ deficits: unknown[] }>('data/neuropsychology.yaml');
   const circuits = readRepoYaml<{ circuits: unknown[] }>('data/circuits.yaml');
 
-  expect(stated('cortical atlases')).toEqual([manifest.atlases.length]);
+  // The description, the share preview and the structured data each state it.
+  expect(stated('cortical atlases')).toEqual(Array(3).fill(manifest.atlases.length));
   expect(stated('Destrieux regions')).toEqual([atlas('destrieux')]);
   expect(stated('HCP-MMP areas')).toEqual([atlas('hcp-mmp')]);
   expect([...stated('NextBrain labels'), ...stated('histological labels')]).toEqual([
