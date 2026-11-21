@@ -13,7 +13,8 @@ to reproduce it and what an attacker could do with it.
 - The feedback Worker at `feedback.planumatlas.com` (`workers/feedback/`).
 - The build and deploy workflows in `.github/workflows/`.
 
-Only the current `main` branch and the live site are supported; there are no maintained releases.
+Only the current `main` branch and the live site are supported. Numbered releases are archived for
+citation and are not patched.
 
 Planum is a teaching atlas, not a clinical tool. A wrong label or a misplaced region is a correctness
 problem, not a security one: report it as an ordinary issue or through the site's feedback form.

@@ -6,6 +6,8 @@ message: >-
   https://planumatlas.com/docs/reference/references.html
 type: software
 title: Planum
+version: 0.1.0
+date-released: 2026-11-21
 abstract: >-
   An interactive, browser-based atlas of one real human brain (MGH CDMD
   subject sub_013), reconstructed with FreeSurfer from its own T1 scan, with

@@ -1,10 +1,14 @@
 # Changelog
 
 Notable changes to Planum, as a reader of [planumatlas.com](https://planumatlas.com/) would notice them.
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Planum has no numbered
-releases yet: the live site is deployed from `main`.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The live site is
+deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-11-21
+
+The first numbered release.
 
 ### Added
 
@@ -123,4 +127,5 @@ releases yet: the live site is deployed from `main`.
 - The Overlay refuses map files over about 528 MiB and stops inflating a `.nii.gz` past the size its
   header states.
 
-[Unreleased]: https://github.com/JoshuaDuq/planumatlas/commits/main
+[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.0...main
+[0.1.0]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.0

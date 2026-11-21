@@ -1,0 +1,34 @@
+{
+  "title": "Planum",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "AGPL-3.0-or-later",
+  "creators": [
+    {
+      "name": "Duquette, Joshua"
+    }
+  ],
+  "description": "<p>An interactive, browser-based atlas of one real human brain (MGH CDMD subject sub_013), reconstructed with FreeSurfer from its own T1 scan, with diffusion tracts from the same person. Users can cut, measure and query the brain against cortical and subcortical atlases, function and deficit maps, stimulation data and stroke lesion cases, each traced to its cited source. The live atlas is at <a href=\"https://planumatlas.com\">planumatlas.com</a>.</p><p><strong>Licence scope.</strong> The AGPL-3.0-or-later licence of this record covers the source code of the build pipeline and the web viewer only. The neuroimaging data and the assets derived from it (everything under <code>data/</code>, <code>public/models/</code> and <code>public/diffusion/</code>) stay under the terms of their origin, some of which are non-commercial or require an acknowledgement. <code>NOTICE</code> lists those terms, <code>docs/reference/references.md</code> gives each source and the acknowledgement it requires, and <code>public/models/licenses/</code> holds the licence texts shipped with the data.</p><p>Planum is for research and education. It is not a medical device and must not be used for diagnosis, treatment or any other clinical decision.</p>",
+  "keywords": [
+    "neuroanatomy",
+    "brain atlas",
+    "neuroimaging",
+    "MRI",
+    "FreeSurfer",
+    "tractography",
+    "3D visualization",
+    "education"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://planumatlas.com",
+      "relation": "isSupplementTo",
+      "resource_type": "other"
+    },
+    {
+      "identifier": "https://planumatlas.com/docs/",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-softwaredocumentation"
+    }
+  ]
+}
