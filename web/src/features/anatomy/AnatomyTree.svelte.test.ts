@@ -1,5 +1,5 @@
 // The anatomy tree against the APG Treegrid table, the legacy navigator.js cases
-// (navigator.test.js; chrome.contract.test.js:431) and decision 32 on #4, as behaviour in Chromium.
+// (navigator.test.js; chrome.contract.test.js:431), as behaviour in Chromium.
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';

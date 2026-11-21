@@ -1,7 +1,7 @@
 <!--
   The deficit search field (index.html:279-295): a native search input with a visible label
-  (WCAG 3.3.2, decision 37 on #4), a `/` hint, and one clear control (the browser's own is hidden, decision 38 on
-  #4). Not a combobox: the list under it is plain buttons. Escape with text clears it and keeps
+  (WCAG 3.3.2), a `/` hint, and one clear control (the browser's own is hidden).
+  Not a combobox: the list under it is plain buttons. Escape with text clears it and keeps
   focus; with none it is left to the page's Escape cascade.
 -->
 <script lang="ts">

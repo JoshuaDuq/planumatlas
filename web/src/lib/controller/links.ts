@@ -115,7 +115,7 @@ export interface LinksOptions {
 /**
  * Link restore and writing: the scene as a link carries it, and a decoded link applied to the
  * scene field by field. The camera's own parts (`restoreCamera`, `placeOrbit`, `orbitLink`) are the
- * engine's (decision 30 on #4).
+ * engine's.
  *
  * Create `announceView` before the first `restore`. Its speech starts with no hidden count, so
  * the first view it sees only records one; a link that loads hidden regions then changes it and

@@ -77,7 +77,7 @@ export function bundleName(bundle: TractBundle, lang: Language): string {
   return bundle.segment ? `${bundle.name[lang]} · ${bundle.segment[lang]}` : bundle.name[lang];
 }
 
-/** Lower case with the accents folded, so "arque" finds "Arqué" (decision 42 on #4). */
+/** Lower case with the accents folded, so "arque" finds "Arqué". */
 export function foldForSearch(text: string, lang: Language): string {
   return text.toLocaleLowerCase(lang).normalize('NFD').replace(/\p{M}/gu, '');
 }

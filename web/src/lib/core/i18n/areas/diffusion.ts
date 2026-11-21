@@ -30,7 +30,7 @@ export const en = {
     `Only the ${count} tract bundles reconstructed in ${dataset} are listed, and none matches this name.`,
   retry: 'Reload reference dataset',
   tryAgain: 'Try again',
-  // Spoken, not shown (decision 42 on #4).
+  // Spoken, not shown.
   matches: (count: number) => `${count} tract ${count === 1 ? 'bundle' : 'bundles'}`,
   loaded: (name: string) => `Loaded: ${name}`,
   restored: 'Default tracts restored.',
@@ -49,7 +49,7 @@ export const en = {
   noShown: 'No streamlines meet this length filter.',
   source: 'Dataset source · CC0',
   about: 'About this data',
-  // A tract's profile (supervisor review 4.3). The count is this tracking run's, not a connection strength.
+  // A tract's profile. The count is this tracking run's, not a connection strength.
   profileRun: (part: string, count: string) => `${part}: ${count} in this tracking run`,
   endsHeading: 'Where its streamlines end',
   endsNone: (share: string) => `No cortical region holds ${share} of its ends.`,

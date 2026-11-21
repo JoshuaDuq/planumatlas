@@ -1,7 +1,7 @@
 <!--
   The profile of one function (viewer/ui/panels/functions.js:173-318, 320-335): its name, the meta
   line, the kind of evidence, the caveat, then the overview, or the areas and lesion checks, the
-  method and the citation. Not a landmark (decision 13 on #4); the heading is the focus target
+  method and the citation. Not a landmark; the heading is the focus target
   when a function opens, and the meta line is the one live text.
   - one meta line stays in the page across profiles, so its text is announced when it changes
     (deviations/x1-meta-status.md);
@@ -70,7 +70,7 @@
     <p class="meta" role="status" data-error={String(model.failed)}>{model.meta}</p>
   {/key}
   {#if content && !content.all && content.areas.length}
-    <!-- What the stage line describes, so directly under it (supervisor review 3.2). -->
+    <!-- What the stage line describes, so directly under it. -->
     <div class="paint-from">
       <RangeField
         label={copy.paintFrom}

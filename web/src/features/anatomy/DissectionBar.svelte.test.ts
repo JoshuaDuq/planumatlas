@@ -1,4 +1,4 @@
-// The dissection bar against the legacy dissection.js cases and decision 36 on #4, as behaviour in
+// The dissection bar against the legacy dissection.js cases, as behaviour in
 // Chromium: what it shows, what its buttons do, and where focus goes when a button disables
 // itself or the bar leaves (deviations/a3-focus-fallback.md).
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

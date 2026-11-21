@@ -24,7 +24,7 @@ export const en = {
     'This teaching-set unit takes the score of the FreeSurfer structure most of it lies in on this brain.',
   note: (source: string) =>
     `Mean meta-analytic consistency over this whole HCP-MMP area for each term, from ${source}: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
-  // A Julich-Brain or Schaefer area, averaged over its own fsaverage parcel (supervisor review 1.1).
+  // A Julich-Brain or Schaefer area, averaged over its own fsaverage parcel.
   noteAtlas: (atlas: string, source: string) =>
     `Mean meta-analytic consistency over this whole ${atlas} area on fsaverage for each term, from ${source}: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
   keyTitle: 'Neuropsychological functions',

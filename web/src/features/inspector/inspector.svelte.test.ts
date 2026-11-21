@@ -655,7 +655,7 @@ describe('evidence sections', () => {
     expect(text(domains())).not.toContain('This teaching-set unit');
     await screen.rerender({ regionId: 'learning:left:amygdala' });
     expect(rows()).toEqual(amygdala);
-    // Highest z first (supervisor review 1.1, D3), where share of peak had put disgust first.
+    // Highest z first, where share of peak had put disgust first.
     expect(rows()[0]).toBe('Emotion “emotion” · z 23.5');
     expect(text(domains())).toContain('This teaching-set unit takes the score');
   });

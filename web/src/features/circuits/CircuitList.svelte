@@ -1,7 +1,7 @@
 <!--
   The Circuits tab's list (viewer/ui/panels/circuits.js:150-165, 328-335, index.html:309-312): the
-  guided circuits as rows, each opening a lesson, and the list's scope. A list of buttons (decision
-  37 on #4); every row is a Tab stop, and ArrowDown and ArrowUp walk the rows.
+  guided circuits as rows, each opening a lesson, and the list's scope. A list of buttons;
+  every row is a Tab stop, and ArrowDown and ArrowUp walk the rows.
   - the open circuit is `aria-current="true"`: a row opens a lesson, it does not toggle
     (deviations/x3-current-circuit.md);
   - the labelled list is a real group of `ul` (deviations/x3-list-structure.md);

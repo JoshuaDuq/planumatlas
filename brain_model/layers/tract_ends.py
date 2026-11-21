@@ -1,4 +1,4 @@
-"""Where each tract's streamlines end on this brain's cortex (supervisor review 4.3).
+"""Where each tract's streamlines end on this brain's cortex.
 
 For every bundle of a tract catalog, the share of its streamline ends that lie within `radius_mm` of
 each Destrieux region of the subject's own `aparc.a2009s+aseg`, the cortical ribbon FreeSurfer labels.

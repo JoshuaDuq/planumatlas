@@ -1,5 +1,5 @@
 <!--
-  Browse the anatomy as an APG treegrid (decision 8 on #4; viewer/ui/panels/navigator.js:465-702).
+  Browse the anatomy as an APG treegrid (viewer/ui/panels/navigator.js:465-702).
   U7's Treegrid is the grid: this component supplies its rows (a heading per section, a group
   row, a structure row) and its cells (the name, then one cell per side: a group's visibility eye,
   a structure's key). A structure is listed once, with a key for each side it has. Selection

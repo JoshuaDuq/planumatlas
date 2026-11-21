@@ -29,7 +29,7 @@ export interface DeficitsDeps {
   >;
   /** X1's entry point, which opens a function under its own runner. */
   openFunction: (id: string) => unknown;
-  /** The clinical material kept in reach of the list (supervisor review 4.2); absent where it is not published. */
+  /** The clinical material kept in reach of the list; absent where it is not published. */
   clinicalLinks?: {
     /** Opens the stage's Lesion tool. */
     simulateLesion(): void;

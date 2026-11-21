@@ -8,7 +8,7 @@ const THEME_CHOICES: readonly ThemeChoice[] = ['system', 'light', 'dark'];
 
 /**
  * The theme in effect for a stored value and the system's setting. The pre-paint script in
- * `index.html` (decision 2 on #4) applies the same rule before the app loads: a stored
+ * `index.html` applies the same rule before the app loads: a stored
  * 'light' or 'dark' wins, anything else follows the system.
  */
 export function resolveTheme(stored: string | null, systemDark: boolean): Theme {

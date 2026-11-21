@@ -124,7 +124,7 @@
       .map(({ id }) => ({ id, name: short[id] ?? id }));
   });
   const bundles = $derived(tractCatalog(manifest.anatomy.id).bundles);
-  // The Tracts tab's open tract (supervisor review 4.3); a region selected since takes the detail.
+  // The Tracts tab's open tract; a region selected since takes the detail.
   const tract = $derived.by(() => {
     if (current.explorer !== 'diffusion' || !current.selectedTract || current.selectedRegion) {
       return null;

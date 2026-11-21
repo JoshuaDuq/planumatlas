@@ -1,4 +1,4 @@
-/** "About this data": what each tab and dock tool shows, where its data come from, and its main caution (supervisor review 1.4). Every sentence is taken from the docs/features page its methods link opens. */
+/** "About this data": what each tab and dock tool shows, where its data come from, and its main caution. Every sentence is taken from the docs/features page its methods link opens. */
 export const en = {
   about: 'About this data',
   shows: 'Shows',

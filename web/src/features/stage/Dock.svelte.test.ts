@@ -1274,8 +1274,8 @@ describe('on a phone the camera frames the anatomy above the open popover', () =
     await page.viewport(390, 1300);
     try {
       // Tall enough that the Display popover grows by its changes before it reaches its cap and scrolls;
-      // at 844 px it opens at its cap since About this data closed it (1.4), at 1000 px since names on
-      // the brain joined it (WP21).
+      // at 844 px it opens at its cap since About this data closed it, at 1000 px since names on
+      // the brain joined it.
       await mount({ phone: true }, { width: 390, height: 1300 });
       await press('button', 'Display');
       await vi.waitFor(() => expect(plates).toHaveLength(1));

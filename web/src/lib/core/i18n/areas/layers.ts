@@ -11,7 +11,7 @@ const FR_AREAS: Record<KeyGround, string> = {
   grey: 'Les aires grises',
 };
 
-// BigBrain's cortical layers (plan 2, WP28): the region sheet's section and the stage key.
+// BigBrain's cortical layers: the region sheet's section and the stage key.
 export const en = {
   heading: 'Layers (one histological brain)',
   // The closed section's quiet value: layer IV's share, formatted.

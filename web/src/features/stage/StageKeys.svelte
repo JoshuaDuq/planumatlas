@@ -4,7 +4,7 @@
   the paint a tab draws (rows are toggles that show one alone) and the streamline direction.
 
   Folds are APG Disclosures, the paint rows an APG Toolbar of toggle
-  buttons (decision 6 on #4). The keys are interactive, so they are not inside the `aria-hidden`
+  buttons. The keys are interactive, so they are not inside the `aria-hidden`
   overlay layer. They take a band off the framing rectangle, which the stage-layout store reads
   through the key fitter registered here: built from the sizes the observer caches, so it forces no layout.
 -->

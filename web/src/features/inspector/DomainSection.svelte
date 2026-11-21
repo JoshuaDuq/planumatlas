@@ -31,7 +31,7 @@
 
   const copy = $derived(t(lang, 'domains'));
   const scored = $derived(domains !== null && region !== null && scoredRegion(domains, region));
-  // Highest z first and the first eight, as the Functions list shows them (supervisor review 1.1).
+  // Highest z first and the first eight, as the Functions list shows them.
   const found = $derived(scored ? functionsAt(domains!, region!.id) : []);
   let unfolded = $state(false);
   let rows = $state<HTMLElement>();

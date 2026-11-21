@@ -282,7 +282,7 @@
     color: var(--text-secondary);
   }
   /*
-   * Two captioned indexes (supervisor review 2.2), the tree's caption idiom: 13px/600 over a rule that
+   * Two captioned indexes, the tree's caption idiom: 13px/600 over a rule that
    * opens the index. A caption with no section under it for this region is not drawn.
    */
   .region-detail .region-index:not(:has(details)) {

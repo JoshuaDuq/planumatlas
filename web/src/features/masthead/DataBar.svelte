@@ -2,7 +2,7 @@
   The masthead's data group: one button reading "Subject <kind> Atlas <atlas> Colour <colour>", which
   opens every choice of Atlas, Colour, Internal anatomy and Subject as lists (DataLists.svelte, a chunk
   of its own fetched when the reader first points at, focuses or opens the summary: BUILD-15).
-  APG Disclosure (decision 14 on #4): the summary keeps focus when it opens, Tab enters the lists,
+  APG Disclosure: the summary keeps focus when it opens, Tab enters the lists,
   Escape, a press elsewhere or focus leaving closes it.
   - where the atlas would be cut short, the colour yields, then the subject; internal anatomy is in the name only;
   - `data-reference` on the root: the tract reference shows its name alone, with no popover;

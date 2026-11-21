@@ -1,5 +1,5 @@
 <!--
-  A non-modal disclosure (APG Disclosure; decisions 0005 and #4 decision 14): the trigger carries
+  A non-modal disclosure (APG Disclosure; decision 0005): the trigger carries
   aria-expanded and aria-controls, the content is ordinary controls in the tab order.
   - one menu and one stage popover are open at a time: opening another of its variant closes it;
   - the menu variant leaves focus on the trigger (APG Disclosure; Tab enters the content); the

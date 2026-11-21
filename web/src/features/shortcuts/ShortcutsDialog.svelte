@@ -3,7 +3,7 @@
   area, what a mouse or finger does on the model, then the note on turning single-key shortcuts off.
   Opened by the settings menu's item and by `?` through `open`; mounted only by I3b (decision 0008).
   Native modal Dialog: trap, Escape, inert page, `data-instant` and focus return are U5's. It does
-  not isolate keys (decision 7 on #4): `?` must reach the page keymap to close it.
+  not isolate keys: `?` must reach the page keymap to close it.
   - the title takes initial focus, not Close (deviations/s5b-initial-focus.md);
   - one <div> per group, not an unnamed <section> (deviations/s5b-group-structure.md);
   - a range's dash is read as "to" (deviations/s5b-shortcut-strings.md).

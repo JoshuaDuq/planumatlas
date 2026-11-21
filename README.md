@@ -155,7 +155,7 @@ Preparation scripts reconstruct, segment, track and register the subject once. T
 
 ## Getting started
 
-Open **[planumatlas.com](https://planumatlas.com/)**. To run the viewer locally you need Node.js 24 (`.nvmrc`) and a WebGL 2 browser. The published assets are in the repository, about 470 MB, so no Python build is needed to explore them.
+Open **[planumatlas.com](https://planumatlas.com/)**. To run the viewer locally you need Node.js 24 (`.nvmrc`) and a WebGL 2 browser. The published assets are in the repository, about 630 MB, so no Python build is needed to explore them.
 
 ```bash
 git clone --depth 1 https://github.com/JoshuaDuq/planumatlas.git
@@ -169,7 +169,7 @@ Vite prints the local address, normally `http://127.0.0.1:5173/`.
 <details>
 <summary><strong>Rebuild, validate and test</strong></summary>
 
-The pipeline uses [uv](https://docs.astral.sh/uv/) and Python 3.12 or 3.13.
+The pipeline uses [uv](https://docs.astral.sh/uv/) and Python 3.12 or 3.13. Some build layers read source downloads kept outside the repository under `data/cache/`; the [methods pages](https://planumatlas.com/docs/) name each source.
 
 ```bash
 uv sync --locked
@@ -206,7 +206,7 @@ Each methods page lists the commands that rebuild and test its feature under **C
 node scripts/readme-figures.mjs
 ```
 
-The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (installed for `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). For Fig. 6 it downloads the HCP map from NeuroVault and opens it in the Overlay tool, as a reader would. Pass another origin, such as a local server, as the first argument, or name figures to render only those.
+The [figure script](scripts/readme-figures.mjs) captures each panel from [planumatlas.com](https://planumatlas.com/) with Playwright’s Chromium (`npx playwright install chromium` in `web/`), hides the stage controls, crops each capture to its content without recolouring it, and writes light and dark versions to [`.github/assets/readme/`](.github/assets/readme). For Fig. 6 it downloads the HCP map from NeuroVault and opens it in the Overlay tool, as a reader would. Pass another origin, such as a local server, as the first argument, or name figures to render only those.
 
 </details>
 
@@ -218,6 +218,7 @@ If you use Planum, cite it and the data behind the views you use; the [reference
 @software{planum,
   author  = {Duquette, Joshua},
   title   = {Planum},
+  version = {0.1.0},
   year    = {2026},
   url     = {https://planumatlas.com},
   license = {AGPL-3.0-or-later}
@@ -226,7 +227,7 @@ If you use Planum, cite it and the data behind the views you use; the [reference
 
 ## Licence and data terms
 
-The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs a modified version for others, including as a website, must offer them its source. [NOTICE](NOTICE) sets out its scope. Neuroimaging data and derived assets under `data/`, `public/models/` and `public/diffusion/` keep the terms of their origin, with full texts in [`public/models/licenses/`](public/models/licenses):
+The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs a modified version for others, including as a website, must offer them its source. [NOTICE](NOTICE) sets out its scope. Neuroimaging data and derived assets under `data/`, `public/models/` and `public/diffusion/` keep the terms of their origin; [`public/models/licenses/`](public/models/licenses) holds the licence texts shipped with them, and the [references](https://planumatlas.com/docs/reference/references.html) link the rest:
 
 | Terms | Data |
 | :--- | :--- |
@@ -237,7 +238,7 @@ The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs
 | CC BY-NC-SA 4.0 | Julich-Brain, receptor fingerprints, F-TRACT, BigBrain cortical layers and cell densities |
 | CC BY-NC 3.0 | Nettekoven cerebellar atlas, SUIT |
 | CC BY-SA 4.0 | Arterial territories |
-| CC BY 4.0 | Lyu et al. stimulation responses, TractSeg weights, Wang et al. visual areas |
+| CC BY 4.0 | Lyu et al. stimulation responses, Domhof et al. functional connectivity, TractSeg weights, Wang et al. visual areas |
 | ODbL 1.0 | Neurosynth |
 | AGPL-3.0 | Benson visual-field template (neuropythy) |
 | MNI template licence | MNI152NLin2009cAsym |

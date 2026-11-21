@@ -1,6 +1,6 @@
 // The stage status against the legacy paintLoadProgress and update() cases
 // (viewport-chrome.js:63-83, 763-781), the failure screen of main.js:43-60, and the focus and
-// announcement rules of the H1b decision record (#39).
+// announcement rules.
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';

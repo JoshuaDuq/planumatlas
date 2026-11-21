@@ -1,6 +1,6 @@
 /**
  * The page's one polite live region. It is in the initial HTML, before the app mounts
- * (decision 18 on #4); `attachAnnouncer` takes it over.
+ *; `attachAnnouncer` takes it over.
  *
  * Two timings stay distinct, as in the legacy viewer:
  * - `announce` writes at once (main.js:47, app.js:88, panels/navigator.js:192);

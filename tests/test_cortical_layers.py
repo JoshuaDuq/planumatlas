@@ -130,7 +130,7 @@ def test_the_fetch_counts_cells_in_layers_one_to_six_and_reads_six_layer_areas_i
 
 
 def test_the_pinned_files_give_the_hcp_mmp_layer_iv_shares_measured_independently():
-    """Recomputed per vertex outside the module on 2026-11-16 (WP28 report): area 4, 3b, V1."""
+    """Recomputed per vertex outside the module on 2026-11-16: area 4, 3b, V1."""
     checks = cortical_layers.check(
         cortical_layers.parcel_shares(read_config("cdmd"), DEFINITION), DEFINITION
     )["hcp_mmp_layer_iv"]

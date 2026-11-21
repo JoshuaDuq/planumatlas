@@ -1,6 +1,6 @@
 <!--
   The anatomical letter at each edge of the picture (viewport-chrome.js:465-471, 834-838; stage.css:111-150).
-  Type with a halo, not a plate, and silent: the letters have no non-visual equivalent by decision 10b on #4.
+  Type with a halo, not a plate, and silent: the letters have no non-visual equivalent.
   They come from the engine's `camera` event; a language change re-words the letters the camera last
   reported and never reads the camera again, because a framing plan may have turned it toward somewhere it
   has not gone yet. Written straight into the text nodes, only where a letter changed.

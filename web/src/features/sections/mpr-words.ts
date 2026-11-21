@@ -50,7 +50,7 @@ export function readoutText(
 }
 
 // TODO(C1): the `mpr` additions of deviations g5-save-names, g5-save-announce and
-// g5-canvas-not-interactive (requested on #4).
+// g5-canvas-not-interactive.
 const NEW = {
   en: {
     adjective: { sagittal: 'sagittal', coronal: 'coronal', axial: 'axial' },

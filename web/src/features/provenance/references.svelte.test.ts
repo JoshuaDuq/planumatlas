@@ -1,4 +1,4 @@
-// The provenance sheet's references for the view (WP24): the library is asked for on the first
+// The provenance sheet's references for the view: the library is asked for on the first
 // opening, the works are listed under what they are behind, and the list leaves as text, BibTeX or RIS.
 // The list's content is citations.test.ts's; this is the dialog around it, in Chromium.
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';

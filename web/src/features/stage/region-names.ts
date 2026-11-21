@@ -248,7 +248,6 @@ export function cutCosine(back: Vec3, normal: Vec3, reverse: boolean): number {
 /**
  * Whether the names are drawn: the switch is on and the stage shows the anatomy where it lies, without
  * a focused ghost, mode paint, tracts, circuit lesson, or visual-field map already directing attention.
- * Plan 1's Study mode (WP8) must add itself here: names are always off while studying.
  */
 export function namesDrawn(view: {
   namesShown: boolean;

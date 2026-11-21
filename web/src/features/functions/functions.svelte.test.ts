@@ -1,6 +1,6 @@
 // The Functions tab in Chromium, against the real S3 controller over the fake engine: the search,
 // the list and its keys, the profile, every focus hand-off, the latest-wins run, the failure and
-// busy states, and the accessibility checks of decision record #56. The view-model's wording is
+// busy states, and the accessibility checks. The view-model's wording is
 // functions-view.test.ts.
 import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

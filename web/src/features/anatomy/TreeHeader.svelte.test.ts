@@ -1,4 +1,4 @@
-// The tree header's region table (WP24): the press saves the shown atlas and level as one CSV file.
+// The tree header's region table: the press saves the shown atlas and level as one CSV file.
 import { afterEach, expect, test, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';

@@ -1,7 +1,7 @@
 <!--
   The Deficits list (clinical.js:352-445), for the workspace's list slot: a search field over deficits
   grouped by domain. A list of buttons, not a listbox: rows open a profile, they are not options. Each
-  row stays a Tab stop and the arrow keys are a convenience (U6's `listNav`, decision 38 on #4).
+  row stays a Tab stop and the arrow keys are a convenience (U6's `listNav`).
 -->
 <script lang="ts">
   import { tick, untrack } from 'svelte';

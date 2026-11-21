@@ -1,4 +1,4 @@
-"""Which order a region's functions are listed in, and which cortical atlases list them (supervisor review 1.1).
+"""Which order a region's functions are listed in, and which cortical atlases list them.
 
 Reads what scripts/derive_domain_scores.py writes: the score table, and beside the cache the association
 test's means and the overview functions' fsaverage vertex values. Prints the measurement as JSON; its
@@ -6,11 +6,11 @@ result is recorded in config/neuropsych-domains.yaml (region_atlases) and docs/f
 
     uv run python scripts/measure_region_functions.py
 
-Criteria fixed in the plan before this run (docs/superpowers/plans/2026-11-10-supervisor-review.md):
+Criteria fixed before this run:
 - Order: an order passes when the expected function is first in >= 5 of 7 test regions and in the first
   three in all 7, and the right anterior ventral insula's 8th and 9th rows are not tied. If raw z and
   association z both pass, the one with more expected-first wins; on a tie, raw z.
-- Gate (confirmed by Joshua 2026-11-10): for each of the 11 overview functions, area-weighted Dice on the
+- Gate (2026-11-10): for each of the 11 overview functions, area-weighted Dice on the
   fsaverage pial surface between an atlas's painted parcels (parcel mean z >= 3) and the vertices whose own
   z >= 3. An atlas passes when its median Dice is no more than 0.1 below HCP-MMP's and no function has zero
   painted parcels.

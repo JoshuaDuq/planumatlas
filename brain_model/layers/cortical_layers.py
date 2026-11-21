@@ -27,7 +27,7 @@ LAYERS = ("I", "II", "III", "IV", "V", "VI")
 SIDES = {"lh": "L", "rh": "R"}
 # Shares are published in thousandths, rounded so that a parcel's six sum to 1000 exactly.
 THOUSAND = 1000
-# Fixed before the run (plan 2, WP28): on HCP-MMP, in each hemisphere, layer IV's share is smaller
+# Fixed before the run: on HCP-MMP, in each hemisphere, layer IV's share is smaller
 # in area 4 than in area 3b, and V1's lies in the highest quarter of areas.
 CHECK_ATLAS = "hcp-mmp"
 CHECK_AREAS = {"motor": "{side}_4_ROI", "somatosensory": "{side}_3b_ROI", "visual": "{side}_V1_ROI"}

@@ -1,5 +1,5 @@
-# Where each tract's streamlines end on the cortex, for its profile in the Tracts tab (supervisor
-# review 4.3). brain_model/layers/tract_ends.py reads every bundle of the catalog and counts, per
+# Where each tract's streamlines end on the cortex, for its profile in the Tracts tab.
+# brain_model/layers/tract_ends.py reads every bundle of the catalog and counts, per
 # Destrieux region of the subject's own aparc.a2009s+aseg, the share of the bundle's streamline ends
 # within `radius_mm` of it; an end near two regions counts for both. Regions below `minimum_share`
 # are not listed. The streamlines and the volume share the scanner frame (checked 2026-11-10: every

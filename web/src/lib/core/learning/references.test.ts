@@ -48,7 +48,7 @@ const { source: stimulation } = readRepoYaml<{ source: Source }>(
 );
 const { source: ftract } = readRepoYaml<{ source: Source }>('config/stimulation-ftract.yaml');
 const bibliography = readFileSync(resolve(repoRoot, 'docs/reference/references.md'), 'utf8');
-// What the published manifests' citation fields and the tract catalogs' sources cite (WP24).
+// What the published manifests' citation fields and the tract catalogs' sources cite.
 const published = [
   ...readRepoJson<{ anatomies: { id: string }[] }>(
     'public/models/anatomies.json',

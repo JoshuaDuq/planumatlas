@@ -1,8 +1,8 @@
 <!--
   The stage dock: one plate of three worded tools, Section, Display and Add, each opening a popover
   (index.html:433-490, stage.css:311-440). Add holds the three that bring something onto the brain, Lesion,
-  Coordinate and Overlay, as one segmented choice over the chosen one's body (2026-11-11 parsimony round;
-  they were three tools after a rule since supervisor review 2.1). APG Toolbar (deviation g2-dock-toolbar): the row is a labelled
+  Coordinate and Overlay, as one segmented choice over the chosen one's body (they were three tools after a rule
+  before). APG Toolbar (deviation g2-dock-toolbar): the row is a labelled
   `role="toolbar"` with one Tab stop; ← → ↑ ↓ and Home/End move between the visible tools, Enter and Space
   open. The tract reference has none of them, so the dock is not drawn over it.
   - U5's popover keeps its trigger and its content together, so the popovers' controls sit inside the toolbar

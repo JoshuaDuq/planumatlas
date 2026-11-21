@@ -1,5 +1,5 @@
 export const en = {
-  // Said after a link that leaves the app (decision 17 on #4).
+  // Said after a link that leaves the app.
   newTab: '(opens in a new tab)',
   // The methods site (docs/) is in English only; the French names say so.
   methods: 'Methods',

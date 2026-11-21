@@ -1,6 +1,6 @@
 <!--
   A link that leaves the app (clinical.js:104-125). It opens a new tab, which the link says in
-  words a screen reader reads and with an icon (WCAG technique G201, decision 17 on #4).
+  words a screen reader reads and with an icon (WCAG technique G201).
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';

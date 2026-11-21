@@ -84,7 +84,7 @@ export const en = {
   index: 'Index of the published anatomies',
   tractReference: 'Tract reference',
   sources: 'Sources',
-  // The works behind what is on screen (WP24), each under what it is behind.
+  // The works behind what is on screen, each under what it is behind.
   references: 'References for this view',
   referencesLoading: 'Loading the references…',
   referencesFailed: 'The references could not be loaded.',

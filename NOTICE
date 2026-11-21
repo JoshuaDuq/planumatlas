@@ -22,12 +22,14 @@ Scope
 The AGPL covers the source code of the build pipeline and the web viewer
 only. It does not cover the neuroimaging data or the assets derived from it:
 everything under data/, public/models/ and public/diffusion/ stays under the
-terms of its origin, listed in README.md and docs/reference/references.md, with
-the full texts in public/models/licenses/. Those terms include the FreeSurfer
+terms of its origin, listed in README.md and docs/reference/references.md;
+public/models/licenses/ holds the licence texts shipped with the data. Those
+terms include the FreeSurfer
 Software License, the HCP Open Access Data Use Terms, the non-commercial CAB-NP
 License, CC BY-NC-SA 4.0 (Julich-Brain, receptor fingerprints, F-TRACT),
 CC BY-NC 3.0 (Nettekoven cerebellar atlas, SUIT), CC BY-SA 4.0 (arterial
-territories), CC BY 4.0 (Lyu et al. stimulation responses, TractSeg weights),
+territories), CC BY 4.0 (Lyu et al. stimulation responses, Domhof et al. functional
+connectivity, TractSeg weights, Wang et al. visual areas),
 ODbL 1.0 (Neurosynth), AGPL-3.0 (Benson visual-field template, neuropythy), the
 MNI template licence (MNI152NLin2009cAsym), GPL-2.0-or-later (SPM12 tissue
 probability maps, built from IXI under CC BY-SA 3.0), MIT (Schaefer, PAM50),

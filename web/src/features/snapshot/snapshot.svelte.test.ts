@@ -151,7 +151,7 @@ describe('the keys in the image', () => {
       'rgba(0, 0, 0, 0)',
       'rgb(160, 120, 200)',
     ]);
-    // The note is not drawn, as in legacy (flagged on #4); the plate keeps its band.
+    // The note is not drawn, as in legacy; the plate keeps its band.
     expect(mark!.texts.some((text) => text.text === DEFICIT.note)).toBe(false);
     const box = plate('paint').getBoundingClientRect();
     expect(mark!.box).toMatchObject({ width: box.width, height: box.height });

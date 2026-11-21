@@ -1,7 +1,7 @@
 // Every icon the viewer draws, gathered once so no feature edits this file. Sources:
 // viewer/ui/chrome/button-label.js:2-9, index.html (<svg><path>), ui/panels/circuits.js:28,
 // ui/panels/visibility-control.js:36-45, diffusion/native-ui.js:15-26, and the four orbit arrows
-// of G2 (decision 22 on #4). All draw on a 24-unit grid.
+// of G2. All draw on a 24-unit grid.
 
 export type IconShape =
   { path: string; fillRule?: 'evenodd' } | { circle: readonly [cx: number, cy: number, r: number] };
@@ -48,7 +48,7 @@ export const ICONS = {
   'close-small': { shapes: [path('m6 6 12 12M6 18 18 6')], size: 14, strokeWidth: 1.6 },
   'chevron-right': { shapes: [path('m9 6 6 6-6 6')], size: 14 },
   search: { shapes: [circle(11, 11, 7), path('M20 20l-3.5-3.5')], size: 14, strokeWidth: 2 },
-  // A link that opens a new tab (T1, decision 17 on #4).
+  // A link that opens a new tab (T1).
   'external-link': { shapes: [path('M14 4h6v6m0-6-9 9M18 14v5H5V6h5')], size: 12 },
   reset: { shapes: [path('M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5')] },
   // A table saved as a file.

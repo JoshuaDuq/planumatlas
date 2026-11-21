@@ -23,7 +23,7 @@ method: >-
   whose z is the largest share of that domain's cortical maximum. Carried per area,
   never per vertex
 threshold_z: 3
-# The other cortical atlases whose regions list the functions they reach (supervisor review 1.1). A
+# The other cortical atlases whose regions list the functions they reach. A
 # parcel's mean z depends on its size, so each atlas was first measured against the unparcellated map:
 # for each overview function, the area-weighted Dice on the fsaverage pial surface between the atlas's
 # parcels at mean z >= 3 and the vertices whose own z reaches 3. An atlas is listed when its median is

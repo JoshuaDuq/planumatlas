@@ -1,5 +1,5 @@
 <!--
-  BigBrain's cortical layers at a cortical parcel (plan 2, WP28): a bar in six parts, I to VI, with each
+  BigBrain's cortical layers at a cortical parcel: a bar in six parts, I to VI, with each
   layer's share of the thickness, and where the parcel is a Julich-Brain area with cell counts, the cells
   per (0.1 mm)³ by layer and the number of patches. In Anatomy a tonal command paints layer IV's share
   across the cortex, an excursion a ruled strip names and Restore ends, as a disorder's paint is. The

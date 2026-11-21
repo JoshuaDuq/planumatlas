@@ -117,7 +117,7 @@ export function createWorld() {
   const mri = { show: vi.fn(), openPreparedPlane: vi.fn(async () => undefined) };
   const openDeficit = vi.fn();
 
-  // The panels' entry points are the explorer's own, as I1 wires them (decision 9 on #4).
+  // The panels' entry points are the explorer's own, as I1 wires them.
   const excursions = createExcursions(
     { engine, session, lesson, view },
     {

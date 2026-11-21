@@ -34,7 +34,7 @@ export interface TermRecord {
   studies: number;
   searchKey: string;
   areas: { region: string; z: number }[];
-  /** Its areas on each listed atlas with a term table (supervisor review 3.1), strongest first. */
+  /** Its areas on each listed atlas with a term table, strongest first. */
   atlasAreas: Record<string, { region: string; z: number }[]>;
 }
 
@@ -467,8 +467,8 @@ export const domainsOf = (partition: NeuropsychDomains | null | undefined, regio
   }));
 
 /**
- * The functions a region lists, highest z first: the order measured on 2026-11-10 (supervisor review
- * 1.1, D3) put the expected function first in 5 of 7 test regions, where share of peak managed 2.
+ * The functions a region lists, highest z first: the order measured on 2026-11-10
+ * put the expected function first in 5 of 7 test regions, where share of peak managed 2.
  */
 export const functionsAt = (partition: NeuropsychDomains, regionId: string) =>
   domainsOf(partition, regionId).sort((a, b) => b.z - a.z);
@@ -548,7 +548,7 @@ export function revealedRegions(
 }
 
 /**
- * The atlas a function is painted on (supervisor review 3.1): the reader's own where its regions list
+ * The atlas a function is painted on: the reader's own where its regions list
  * functions, for a curated function or the overview; otherwise HCP-MMP. Searched terms and
  * comparisons have no table on the other atlases.
  */
@@ -598,7 +598,7 @@ export function domainAreas(
 
 /** The z-scale band a mean z falls in: the last whose start it reaches. */
 export function zBand(partition: NeuropsychDomains, z: number): ZBand | undefined {
-  // Array.prototype.findLast is ES2023; web/tsconfig.app.json lib is ES2022 (reported on #4).
+  // Array.prototype.findLast is ES2023; web/tsconfig.app.json lib is ES2022.
   return partition.z_scale.reduceRight<ZBand | undefined>(
     (found, band) => found ?? (z >= band.from ? band : undefined),
     undefined,
@@ -622,7 +622,7 @@ export function domainPaint(
     throw new Error(`Unknown neuropsychological domain: ${id}`);
   if (paintAtlas(partition, id, atlas) !== atlas)
     throw new Error('Comparisons, and terms without a table there, are painted on HCP-MMP only.');
-  // One function or term alone takes a raised threshold (supervisor review 3.2); the rest keep the published one.
+  // One function or term alone takes a raised threshold; the rest keep the published one.
   if (from !== partition.threshold_z && (id === ALL_DOMAINS || compared))
     throw new Error('Only a single function or term takes another threshold.');
   const colors = new Map<string, Rgb>();

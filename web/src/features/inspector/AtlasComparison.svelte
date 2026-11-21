@@ -3,7 +3,7 @@
   region, the regions of the chosen atlas it overlaps, by area and share of its whole pial surface.
   Each declared pair is its own file, loaded the first time it is shown and kept.
   R1's `comparison` slot mounts it and keeps it mounted, so the panel's and the list's open state
-  survive from one selection to the next (decision 39 on #4); it is `hidden`, not removed, when the
+  survive from one selection to the next; it is `hidden`, not removed, when the
   manifest declares no comparison or the region is not cortex.
   - the data loads once, the first time the panel is shown, even while it is closed; Retry loads again;
   - a row is a toggle button that draws the overlap outline through `engine.comparison`; the latest

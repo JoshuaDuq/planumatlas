@@ -52,7 +52,7 @@ function rig(camera: Camera) {
 // idle machine, once per renderer), so a loaded machine can exceed the browser project's 15 s default.
 const SHADER_COMPILE_TIMEOUT_MS = 30_000;
 
-// Real WebGL, because PMREMGenerator draws the studio room into a render target (decision 25 on #4).
+// Real WebGL, because PMREMGenerator draws the studio room into a render target.
 test(
   'SHADER-33 and SHADER-34 the camera carries the light rig, the room is prefiltered and non-black at every roughness, and disposal clears both',
   { timeout: SHADER_COMPILE_TIMEOUT_MS },

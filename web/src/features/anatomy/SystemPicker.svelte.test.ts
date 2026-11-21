@@ -1,4 +1,4 @@
-// The system picker against the legacy internal-anatomy.js cases and decision 36 on #4, as
+// The system picker against the legacy internal-anatomy.js cases, as
 // behaviour in Chromium: the options, the choice, and a select that always shows the display's own
 // system (deviations/a3-system-value-sync.md).
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

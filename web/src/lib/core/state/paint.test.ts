@@ -105,7 +105,7 @@ const paintOf = (id: string): Paint => ({ id, colors: new Map() });
 test('a tab paints only while it is in front, on the atlas its map is defined on, and not once lifted', () => {
   assert.equal(paintFor(base, sources)!.id, 'function:all');
   assert.equal(paintFor({ ...base, atlas: 'destrieux' }, sources), null);
-  // FUNC-46: a listed atlas takes the paint on its own areas (supervisor review 3.1).
+  // FUNC-46: a listed atlas takes the paint on its own areas.
   const julich = paintFor({ ...base, atlas: 'julich', selectedFunction: 'language' }, sources)!;
   assert.deepEqual([...julich.colors.keys()], ['julich:left:1']);
   assert.equal(paintFor({ ...base, atlas: 'julich' }, sources)!.colors.get('julich:left:1')![0], 1);

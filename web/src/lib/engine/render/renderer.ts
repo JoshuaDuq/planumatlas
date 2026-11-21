@@ -140,7 +140,7 @@ export function createRenderer(
   renderer.toneMapping = NeutralToneMapping;
   renderer.domElement.tabIndex = 0;
   // It takes the arrow keys itself; a screen reader's browse mode would eat them. The localized
-  // aria-label and aria-roledescription are set by the facade from i18n (decision 28 on #4).
+  // aria-label and aria-roledescription are set by the facade from i18n.
   renderer.domElement.setAttribute('role', 'application');
   host.prepend(renderer.domElement);
 

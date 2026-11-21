@@ -190,7 +190,7 @@ function evidencePaint(
     return layerPaint(layers, state.atlas);
   }
   if (state.explorer === 'anatomy' && lesion) return lesion.paint;
-  // On its own atlas where the function was measured there (supervisor review 3.1), else on HCP-MMP.
+  // On its own atlas where the function was measured there, else on HCP-MMP.
   if (
     state.explorer === 'functions' &&
     state.selectedFunction &&

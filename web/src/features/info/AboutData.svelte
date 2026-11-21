@@ -1,5 +1,5 @@
 <!--
-  "About this data" (supervisor review 1.4): what a tab or dock tool shows, where its data come from, and
+  "About this data": what a tab or dock tool shows, where its data come from, and
   its main caution, then its methods page. The one disclosure, closed by default. In a tab it closes the
   list as Tracts' does; in a stage popover it takes the row its methods link took.
 -->

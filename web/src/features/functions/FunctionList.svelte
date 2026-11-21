@@ -1,8 +1,8 @@
 <!--
   The Functions tab's list (viewer/ui/panels/functions.js:384-390, 405-456, index.html:258-277,301-304):
   the search field, the functions under their groups, the Neurosynth terms a search finds, the
-  bridges to the other tabs that find the same words (U1) and the list's scope. A list of buttons, not a listbox (decision 37 on
-  #4): each row opens a profile, and every row is a Tab stop. In compare mode each row is a
+  bridges to the other tabs that find the same words (U1) and the list's scope. A list of buttons, not a listbox:
+  each row opens a profile, and every row is a Tab stop. In compare mode each row is a
   checkbox instead, and a bar under the list opens the comparison of the two picked. The field's
   Down and Enter and the rows' Up and Down are `listNav`, which leaves every other key alone.
   - the field has a visible label (WCAG 3.3.2, deviations/x1-search-label.md);

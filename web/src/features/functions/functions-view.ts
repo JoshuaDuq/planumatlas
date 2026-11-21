@@ -112,7 +112,7 @@ export interface FunctionGroup {
   rows: FunctionRow[];
 }
 
-/** The functions the selected region reaches, highest z first (supervisor review 1.1). */
+/** The functions the selected region reaches, highest z first. */
 export interface RegionFunctions {
   rows: FunctionRow[];
   /** A teaching unit, which carries its structure's score. */

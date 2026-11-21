@@ -34,7 +34,7 @@ The window is measured from the T1 inside every non-zero aseg voxel (`display_wi
 
 $$h = 2\left\lceil P_{99.9}/2 \right\rceil, \qquad \text{level} = h/2, \qquad \text{width} = h,$$
 
-so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displayed grey is proportional to T1 signal and surfaces, cut faces and planes show the same tissue at the same grey. The window is per subject because `orig.mgz` carries no common scale: white-matter medians were 144 in CDMD and 221 in the since-retired SNAIL subject. An empty segmentation or $h \le 0$ fails the build.
+so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displayed grey is proportional to T1 signal and surfaces, cut faces and planes show the same tissue at the same grey. The window is per subject because `orig.mgz` carries no common scale: white-matter medians were 144 in CDMD and 221 in the subject Planum published before it (DIPY's SNAIL example dataset, since retired). An empty segmentation or $h \le 0$ fails the build.
 
 ### Plane resampling
 

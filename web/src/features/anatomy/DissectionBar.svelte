@@ -1,7 +1,7 @@
 <!--
   The dissection bar (viewer/ui/panels/dissection.js; index.html:314-322): while parts are hidden,
   the count with Undo and Restore all, ruled off at the foot of the anatomy list. A group, not a
-  landmark (decision 36 on #4). The count is not a live region: S1 speaks it once with the
+  landmark. The count is not a live region: S1 speaks it once with the
   announcer's sentence. Focus is never left on a button that disabled itself or on a bar that left
   (deviations/a3-focus-fallback.md); Undo is also the target the inspector's Hide asks for.
 -->

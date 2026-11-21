@@ -205,7 +205,7 @@ The complete agreement is in [`public/models/licenses/FreeSurfer.html`](https://
 
 ### CC0 1.0 (CDMD)
 
-CDMD is dedicated to the public domain. Its T1 in `public/diffusion/cdmd-sub-013/` is the file its reconstruction imported, stored as int16 with a scale and offset on the same header, grid and affine; its 30 TRK bundles were tracked here from its own diffusion data (17 by RecoBundles, 13 by TractSeg) had their ends trimmed back inside the brain and were resampled to 0.5 mm steps, and its FA map is the tensor FA of that diffusion data resampled onto the T1, as `provenance.json` records.
+CDMD is dedicated to the public domain. Its T1 in `public/diffusion/cdmd-sub-013/` is the file its reconstruction imported, stored as int16 with a scale and offset on the same header, grid and affine; its 30 TRK bundles were tracked here from its own diffusion data (17 by RecoBundles, 13 by TractSeg), had their ends trimmed back inside the brain and were resampled to 0.5 mm steps, and its FA map is the tensor FA of that diffusion data resampled onto the T1, as `provenance.json` records.
 
 ### NextBrain
 
@@ -277,7 +277,7 @@ A paper, poster or talk that shows Planum's views cites Planum ([`CITATION.cff`]
 
 > Data were provided [in part] by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.
 
-**Computing.** CDMD's RecoBundles tracts and the Neurosynth term scores were computed on Rorqual. Publications about Planum itself therefore carry the [Alliance's acknowledgement](https://www.alliancecan.ca/en/our-services/advanced-research-computing/acknowledging-alliance):
+**Computing.** CDMD's RecoBundles tracts and the Neurosynth term scores were computed on Rorqual, a cluster of Calcul Québec and the Digital Research Alliance of Canada. Publications about Planum itself therefore carry the [Alliance's acknowledgement](https://www.alliancecan.ca/en/our-services/advanced-research-computing/acknowledging-alliance):
 
 > This research was enabled in part by support provided by Calcul Québec (calculquebec.ca) and the Digital Research Alliance of Canada (alliancecan.ca).
 

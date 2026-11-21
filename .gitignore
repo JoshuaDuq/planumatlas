@@ -16,3 +16,5 @@ data/mni152/scripts/*
 !data/mni152/scripts/build-stamp.txt
 docs/_build/
 .wrangler/
+# Development notes (decision records, test rule catalogues) stay local.
+web/docs/

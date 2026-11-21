@@ -9,7 +9,7 @@
     (deviations/h4-lang-of-parts.md);
   - a re-render that removes the focused link moves focus to the title, not to the page
     (deviations/h4-rerender-focus.md).
-  Under them, the works behind what is on screen (WP24): read from `references.json` the first time
+  Under them, the works behind what is on screen: read from `references.json` the first time
   the dialog opens, copied as text or saved as BibTeX and RIS.
 -->
 <script lang="ts">

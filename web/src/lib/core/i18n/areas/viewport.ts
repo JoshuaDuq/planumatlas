@@ -6,7 +6,7 @@ const megabytes = (bytes: number, unit: 'MB' | 'Mo', lang: 'en' | 'fr') =>
 export const en = {
   navigationHint: 'Drag to rotate · Scroll to zoom · Click to inspect',
   navigationHintTracts: 'Drag to rotate · Scroll to zoom',
-  // For a finger rather than a mouse (decision 21 on #4).
+  // For a finger rather than a mouse.
   navigationHintTouch: 'Drag to rotate · Pinch to zoom · Tap to inspect',
   navigationHintTractsTouch: 'Drag to rotate · Pinch to zoom',
   // Shown while the model has keyboard focus.
@@ -26,7 +26,7 @@ export const en = {
   // Add's one line on a phone, whose stage is too narrow for Overlay's controls beside the brain.
   overlayNarrow: 'Overlay, for your own brain map, needs a wider screen.',
   displayTool: 'Display',
-  // The stage dock and the orientation gizmo's turn buttons (decision 22 on #4).
+  // The stage dock and the orientation gizmo's turn buttons.
   dockLabel: '3D viewer tools',
   orbitGroup: 'Turn the model',
   orbitLeft: 'Turn left',

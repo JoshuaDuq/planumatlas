@@ -1,4 +1,4 @@
-<!-- One always-visible line under a tab's task controls saying what the tab shows (supervisor review 1.4). -->
+<!-- One always-visible line under a tab's task controls saying what the tab shows. -->
 <script lang="ts">
   import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';

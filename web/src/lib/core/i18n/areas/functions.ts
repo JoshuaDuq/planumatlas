@@ -35,7 +35,7 @@ export const en = {
   failed: (atlas: string) => `The ${atlas} areas could not be shown.`,
   shown: (atlas: string) => `Shown on the ${atlas} areas`,
   lesionsOn: 'Lesion checks are measured on HCP-MMP areas.',
-  // The profile's paint threshold (supervisor review 3.2): it changes the paint, the key and the count only.
+  // The profile's paint threshold: it changes the paint, the key and the count only.
   paintFrom: 'Paint areas from z ≥',
   paintFromNote: (threshold: string) =>
     `Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z\u00a0≥\u00a0${threshold}.`,
@@ -83,7 +83,7 @@ export const en = {
   neurosynthOpen: (term: string) => `Open “${term}” on Neurosynth`,
   neurosynthNote:
     'Neurosynth.org’s uniformity-test map is the one closest to Planum’s. The site thresholds it at an expected FDR of 0.01; Planum paints the unthresholded map averaged per area, so the two differ.',
-  // The selected region's functions, first in the list (supervisor review 1.1).
+  // The selected region's functions, first in the list.
   reportedHere: 'Reported here',
   reportedNote:
     'Studies of these functions report activation here. That does not make the region specific to them.',

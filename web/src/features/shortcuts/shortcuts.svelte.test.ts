@@ -1,5 +1,5 @@
-// The shortcuts dialog in Chromium: APG Dialog (Modal) keyboard paths, the focus hand-offs of the
-// decision record on #37, `data-instant`, the key list against the keymap, and axe. The key
+// The shortcuts dialog in Chromium: APG Dialog (Modal) keyboard paths, the focus hand-offs,
+// `data-instant`, the key list against the keymap, and axe. The key
 // handling itself is S5a's (controller/keymap.test.ts).
 import { beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';

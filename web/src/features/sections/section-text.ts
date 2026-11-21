@@ -19,7 +19,7 @@ const AXIS_ENDS = {
 
 const MINUS = '−';
 
-// TODO(C1): `cuts.positionRange` (requested on #4).
+// TODO(C1): `cuts.positionRange`.
 const RANGE_MESSAGE = {
   en: (min: string, max: string) => `Enter a position from ${min} to ${max}\u202fmm.`,
   fr: (min: string, max: string) => `Saisissez une position de ${min} à ${max}\u202fmm.`,

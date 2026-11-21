@@ -14,7 +14,7 @@
   interface Props {
     stage: StageLayout;
     lang: Language;
-    /** A finger rather than a mouse: the hints name touch gestures (decision 21 on #4). */
+    /** A finger rather than a mouse: the hints name touch gestures. */
     coarsePointer: boolean;
     /** The tract reference alone is shown: it has no regions to click. */
     tractReference: boolean;

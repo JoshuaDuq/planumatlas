@@ -236,7 +236,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     openStep: (index: number, direction?: Direction) =>
       run(() => excursions.openLessonStep(index), 'landmark', { direction }),
     /**
-     * The entry point S3 takes as `panels.openMri` (decision 9 on #4): the lesson's Linked MRI under
+     * The entry point S3 takes as `panels.openMri`: the lesson's Linked MRI under
      * this tab's busy run, with its progress and its failure text.
      */
     openMri: () => run(() => excursions.openLessonMri(), 'mri'),

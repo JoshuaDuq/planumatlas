@@ -1,5 +1,5 @@
 <!--
-  A tract's profile (supervisor review 4.3), the Tracts tab's detail: its name, how many streamlines
+  A tract's profile, the Tracts tab's detail: its name, how many streamlines
   this tracking run has on each side or segment and, once drawn, their lengths; the cortical regions
   its ends reach; MRI with tracts; how the ends were counted, last. Data first, method after.
 -->

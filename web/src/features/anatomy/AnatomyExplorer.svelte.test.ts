@@ -1,6 +1,5 @@
 // The anatomy explorer in Chromium: the search over a real catalog against the APG combobox table,
-// the legacy navigator cases (navigator.js:390-461, 704-815; search-escape.test.js) and the A2
-// decision record on #52, as behaviour.
+// the legacy navigator cases (navigator.js:390-461, 704-815; search-escape.test.js), as behaviour.
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { cdp, page, userEvent } from 'vitest/browser';

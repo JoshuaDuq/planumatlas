@@ -3,7 +3,7 @@
   what it is in one plain line (its network, strongest functions and deficits, read from the sections
   below), the commands that act on it, its measurements folded into one row, then the collapsed
   sections that qualify it.
-  Without a selection it is one hint line. The sections keep legacy's order (decision 35 on #4):
+  Without a selection it is one hint line. The sections keep legacy's order:
   the comparison slot (R2), constituents, functional division, domains, networks, with NextBrain's
   boundary certainty and segmentation agreement after the comparison, all being about the labels'
   source, then the receptor
@@ -383,7 +383,7 @@
       <p class="selected-hint">{cortexVisible ? copy.hintCortex : copy.hintStructures}</p>
     {/if}
   {/if}
-  <!-- Two indexes (supervisor review 2.2): what is known about the region, then the research data on it. -->
+  <!-- Two indexes: what is known about the region, then the research data on it. -->
   <div class="region-index" data-index="about">
     <h3 class="index-caption">{copy.aboutIndex}</h3>
     <DomainSection {region} {lang} {domains} />

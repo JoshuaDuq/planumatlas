@@ -1,5 +1,5 @@
 // The Deficits panels in Chromium: the list and its search, the profile, the region hand-offs, Restore
-// and the related list, over the real catalogs. Decision record on #57; every difference from legacy
+// and the related list, over the real catalogs. Every difference from legacy
 // cites docs/decisions/deviations/x2-*.md.
 import { beforeEach, describe, expect, test } from 'vitest';
 import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';

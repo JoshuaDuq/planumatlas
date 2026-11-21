@@ -1,5 +1,5 @@
 // The Provenance dialog and the colophon in Chromium: APG Dialog (Modal) keyboard paths, the focus
-// hand-offs of decision record on #42, `data-instant`, language of parts and axe. The row content
+// hand-offs, `data-instant`, language of parts and axe. The row content
 // is C5's (core/panels/provenance.test.ts).
 import { beforeEach, describe, expect, test } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';

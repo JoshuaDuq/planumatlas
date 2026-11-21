@@ -3,7 +3,7 @@
   APG Disclosure, not a menu (decision 0005): the trigger carries aria-expanded and aria-controls,
   the panel holds three radio groups (decision 0003, APG Radio Group) and three commands.
   - a pointer choice or a command closes the panel and focuses ⋯; a keyboard choice keeps it open
-    so arrows can walk the options (decision 15 on #4, deviation h2-close-on-keyboard-choice);
+    so arrows can walk the options (deviation h2-close-on-keyboard-choice);
   - every change is announced (WCAG 4.1.3, deviation h2-settings-announcements);
   - a command closes the panel first, so the dialog it opens captures ⋯ as its invoker
     (deviation h2-focus-before-dialog).

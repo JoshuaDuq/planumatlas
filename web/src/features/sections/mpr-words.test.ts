@@ -1,6 +1,6 @@
 // What the Linked MRI dialog says: the structure under the crosshair, the readout, and the names of
-// each plane's controls. Fixed expected words; the legacy source is not imported (decision on #4,
-// 2026-10-26: tests state business rules).
+// each plane's controls. Fixed expected words; the legacy source is not imported:
+// tests state business rules.
 import { describe, expect, test } from 'vitest';
 import { stagedFrame } from '../../lib/engine/slices/coordinates.ts';
 import {

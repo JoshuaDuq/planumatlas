@@ -72,7 +72,7 @@ The registered volumes are smaller than the template's (the DR 221 of 324 voxels
 
 ## Display
 
-Each nucleus is a supplemental structure (`aan:<side>:<nucleus>`), drawn at every detail level and listed in the Anatomy tree under Brainstem below a caption row **Arousal nuclei (Harvard atlas)** (French **Noyaux de l’éveil (atlas de Harvard)**; ANAT-60), apart from NextBrain's namesakes. Its layer downloads the first time a nucleus is chosen, opened or linked, or a cut is made (STATE-71, CTRL-40, ATLAS-55), and each nucleus caps its own cut face. The Coma profile's tegmental finding, whose overlap covered the raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial nucleus, maps to the Harvard median raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial complex, and to NextBrain's dorsal raphe. The lesson walking the ten (plan 1's WP9) does not exist yet.
+Each nucleus is a supplemental structure (`aan:<side>:<nucleus>`), drawn at every detail level and listed in the Anatomy tree under Brainstem below a caption row **Arousal nuclei (Harvard atlas)** (French **Noyaux de l’éveil (atlas de Harvard)**; ANAT-60), apart from NextBrain's namesakes. Its layer downloads the first time a nucleus is chosen, opened or linked, or a cut is made (STATE-71, CTRL-40, ATLAS-55), and each nucleus caps its own cut face. The Coma profile's tegmental finding, whose overlap covered the raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial nucleus, maps to the Harvard median raphe, locus coeruleus, laterodorsal tegmental nucleus, pontis oralis and parabrachial complex, and to NextBrain's dorsal raphe. A lesson walking the ten does not exist yet.
 
 ## Limitations
 

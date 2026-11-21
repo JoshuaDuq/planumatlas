@@ -331,7 +331,7 @@
 
 <!--
   The one complementary landmark: the panels inside it are sections or tabpanels, never nested
-  asides (decision 13 on #4). One instance in both shells (decision 0007): the sheet only decides how
+  asides. One instance in both shells (decision 0007): the sheet only decides how
   much of it is on screen.
 -->
 {#if app && world && panels}

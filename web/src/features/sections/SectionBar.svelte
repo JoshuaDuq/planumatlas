@@ -226,7 +226,7 @@
    */
   function focusTool() {
     const dock = bar.parentElement!;
-    // G2's Section tool carries its label as `section-tool-…` (Dock.svelte); a hand-off is requested on #4.
+    // G2's Section tool carries its label as `section-tool-…` (Dock.svelte).
     const next = tractReference
       ? dock.parentElement!.querySelector<HTMLElement>(':scope > canvas')
       : [...dock.querySelectorAll<HTMLElement>('.stage-tool')].find((tool) =>

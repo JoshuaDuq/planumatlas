@@ -1,7 +1,7 @@
 // The Circuits tab in Chromium, against the real S3 controller over the fake engine: the list and its
 // keys, opening a lesson, the stepper and its focus hand-offs, the landmark and the way back, the
 // notes, the related circuits, the busy and failure states, the linked MRI entry, and the
-// accessibility checks of decision record #58. The pure rules are circuits-view.test.ts.
+// accessibility checks. The pure rules are circuits-view.test.ts.
 import { flushSync } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';

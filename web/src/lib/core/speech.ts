@@ -17,7 +17,7 @@ export interface SpeechView {
  * accompanies, a changed count of hidden parts joins that sentence so one announcer speaks once,
  * and a lost or restored graphics context is said after it. An eye press hands over the part it
  * changed ("Hidden: X, left.") with `part`, and the next view that changes the count says it
- * ahead of the count (decision 36 on #4). A press always changes the count, so a part sentence
+ * ahead of the count. A press always changes the count, so a part sentence
  * the next view does not use is dropped.
  */
 export function createSpeech(regionName: (region: Region) => string) {

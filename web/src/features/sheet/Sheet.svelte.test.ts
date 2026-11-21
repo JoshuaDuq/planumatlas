@@ -1,6 +1,6 @@
 // The phone sheet in a real browser: the legacy sheet.test.js cases as behaviour (a hand-made DOM stub
-// there), the Material 3 standard-sheet and WCAG 2.2 criteria of the H6 decision record on #45, and the
-// desktop to phone transition after load that G1's review asked H6 to cover (#4, issuecomment-6405672591).
+// there), the Material 3 standard-sheet and WCAG 2.2 criteria, and the
+// desktop to phone transition after load.
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import axe from 'axe-core';
 import { cdp, page, userEvent } from 'vitest/browser';

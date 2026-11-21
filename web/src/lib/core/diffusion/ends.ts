@@ -1,4 +1,4 @@
-// Where each tract's streamlines end on the cortex (supervisor review 4.3), measured on the
+// Where each tract's streamlines end on the cortex, measured on the
 // subject's own aparc.a2009s+aseg by brain_model/layers/tract_ends.py. Only CDMD's tracts have it.
 import cdmdEnds from '../../../../../public/diffusion/cdmd-sub-013/tract-ends.json' with { type: 'json' };
 import type { TractCatalog } from './catalogs.ts';

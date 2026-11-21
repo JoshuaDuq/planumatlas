@@ -15,7 +15,7 @@ ATLAS_ID = "neurosynth-terms"
 FILENAME = "neurosynth-terms.json"
 DEFINITION = ROOT / "config/neurosynth-terms.yaml"
 SCORES = ROOT / "data/neurosynth-terms/term-scores.json"
-# The chosen terms' means per parcel of each atlas whose regions list functions (supervisor review 3.1).
+# The chosen terms' means per parcel of each atlas whose regions list functions.
 ATLAS_SCORES = ROOT / "data/neurosynth-terms/atlas-term-scores.json"
 # Each list in the definition, and the kind its terms are published as.
 KINDS = {"functions": "function", "populations": "population"}

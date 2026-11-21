@@ -188,7 +188,7 @@ def test_a_delay_is_published_only_where_its_rate_is_drawn_with_the_centroid_dis
 
 
 def test_farther_areas_answer_later():
-    """WP30's check, fixed before the run: measured on CDMD's centroids, independently of check_delays."""
+    """The check, fixed before the run: measured on CDMD's centroids, independently of check_delays."""
     published = json.loads((ROOT / "public/models/cdmd/stimulation-ftract.json").read_text())
     centroid = {region["id"]: np.array(region["centroid_ras_mm"]) for region in published_regions()
                 if "centroid_ras_mm" in region}

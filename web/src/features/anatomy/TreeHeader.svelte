@@ -1,7 +1,7 @@
 <!--
   The header over the tree (index.html:247-250): the browse scope beside it (A3's picker, as
   `children`), the one command that opens or closes every group (app.js:643-653), and the region
-  table of the shown atlas and level as a CSV file (WP24).
+  table of the shown atlas and level as a CSV file.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';

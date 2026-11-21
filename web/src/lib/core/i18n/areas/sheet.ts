@@ -1,7 +1,7 @@
 export const en = {
   expand: 'Expand panel',
   collapse: 'Collapse panel',
-  // Said politely after the reader moves the sheet (decision 20 on #4).
+  // Said politely after the reader moves the sheet.
   detent: {
     peek: 'Panel collapsed',
     half: 'Panel half open',

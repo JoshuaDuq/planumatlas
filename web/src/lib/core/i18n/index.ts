@@ -1,4 +1,4 @@
-/** Bilingual UI strings (English and French) for Planum, one file per area under areas/. Area files are frozen: later changes go through the i18n amendment queue on #4. */
+/** Bilingual UI strings (English and French) for Planum, one file per area under areas/. */
 import type { Language } from '../../types/index.ts';
 import type * as templateArea from './areas/template.ts';
 import * as agreement from './areas/agreement.ts';

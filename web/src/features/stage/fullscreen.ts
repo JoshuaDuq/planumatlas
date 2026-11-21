@@ -1,5 +1,5 @@
 // The stage in full screen (viewport-chrome.js:625-631), with a visible way out and labels that follow
-// `fullscreenchange` (decisions 4 and 33 on #4; deviations g6-fullscreen-*). One instance per stage; the
+// `fullscreenchange` (deviations g6-fullscreen-*). One instance per stage; the
 // masthead reads `active` and calls `toggle`, and the stage's "Exit full screen" button takes `exitControl`.
 import { on } from 'svelte/events';
 import { createSubscriber } from 'svelte/reactivity';

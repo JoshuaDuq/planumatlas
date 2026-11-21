@@ -53,7 +53,7 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
 }
 
 /**
- * One material for each distinct set of patches the app builds (decision 25 on #4), by name: the
+ * One material for each distinct set of patches the app builds, by name: the
  * anatomical surface with and without the network layer, alone, feathered, with the MRI and with
  * both in either order; a teaching-set structure with and without baked openness; a plain material with the MRI; the solid material with and without white matter, alone, with the MRI (mark
  * `capLift`) and with cap labels as well.

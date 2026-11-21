@@ -77,7 +77,7 @@
     /** The length filter in millimetres, as last applied. */
     minimum?: number;
     onOpenMri: (event: MouseEvent) => void;
-    /** The tract whose profile is open, and its opener (supervisor review 4.3); absent for a reference without profiles. */
+    /** The tract whose profile is open, and its opener; absent for a reference without profiles. */
     openTract?: string | null;
     onOpenTract?: (key: string) => void;
     /** The other tabs that find the same words. */

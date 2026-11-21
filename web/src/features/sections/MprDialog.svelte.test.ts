@@ -1,7 +1,7 @@
 // The Linked MRI dialog over the fake engine in a real browser: what the reader gets from the three
 // planes, the keyboard and the pointer, the phone's one-plane mode, the live region and the saved
-// PNG. Each test states one rule with fixed expected values; the legacy viewer is not imported
-// (decision on #4, 2026-10-26). The engine's own maths are proved in mpr-dialog.test.ts.
+// PNG. Each test states one rule with fixed expected values; the legacy viewer is not imported.
+// The engine's own maths are proved in mpr-dialog.test.ts.
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';

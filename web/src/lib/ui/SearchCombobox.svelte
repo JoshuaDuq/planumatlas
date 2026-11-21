@@ -80,7 +80,7 @@
   const announcer = createDebouncedAnnouncer();
   $effect(() => () => announcer.dispose());
   $effect(() => {
-    // A cleared search may say its count again (decision 37 on #4).
+    // A cleared search may say its count again.
     if (query.trim() === '') announcer.reset();
     else announcer.say(status);
   });
@@ -135,7 +135,7 @@
 
 <!--
   APG combobox, list autocomplete with manual selection, built by hand on U2's primitives
-  (decision 34 on #4): Bits' escape layer handles every Escape on the page while its list is open,
+ : Bits' escape layer handles every Escape on the page while its list is open,
   and the inline list has to stay up beside dialogs. Focus stays in the field; the armed option is
   pointed at with `aria-activedescendant`. Escape is handled only in the field.
 -->
