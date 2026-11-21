@@ -307,23 +307,22 @@ LAYERS = (
         "coordinate_spaces",
         published=coordinate_spaces.is_declared,
         inputs=lambda config: [
-            coordinate_spaces.DEFINITION,
-            coordinate_spaces.report_path(config),
-            landing.path(config),
-            *(coordinate_spaces.field_path(config, space)
-              for space in coordinate_spaces.read_definition()["spaces"]),
+            *coordinate_spaces.inputs(config),
+            *([] if coordinate_spaces.template_space(config) else [landing.path(config)]),
         ],
         export=lambda run: coordinate_spaces.export(
             run.config, coordinate_spaces.read_definition()
         ),
         limitations=lambda config: coordinate_spaces.limitations(
-            coordinate_spaces.read_definition()
+            config, coordinate_spaces.read_definition()
         ),
         validate=lambda check: coordinate_spaces.validate(check.config, check.manifest),
     ),
     Layer(
         "landing",
-        published=coordinate_spaces.is_declared,
+        # A template is not registered onto itself.
+        published=lambda config: coordinate_spaces.is_declared(config)
+        and not coordinate_spaces.template_space(config),
         export=lambda run: landing.published(landing.read(run.config)),
         metadata=lambda config: landing.published(landing.read(config)),
         validate=lambda check: landing.validate(check.config, check.manifest),

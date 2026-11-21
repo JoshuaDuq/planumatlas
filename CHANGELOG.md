@@ -8,6 +8,10 @@ releases yet: the live site is deployed from `main`.
 
 ### Added
 
+- **Subject** (in the data popover under the masthead) offers the **MNI template** (ICBM 152 2009c) beside
+  CDMD sub_013, at the mean adult brain size. Coordinates and maps in MNI152NLin2009cAsym land on it
+  directly, with no registration. It has no tracts, cerebellar lobules or spinal cord of its own, so the
+  8 deficit profiles and 10 circuits that need them stay on CDMD, and each tab says how many.
 - **Names on the brain** (Display) names the regions facing the reader, largest first, in columns beside
   the brain with a leader to each, as an atlas plate does; zooming in names smaller ones. Names hold
   still as the view turns or zooms and as a cut moves, fade where their region goes out of sight, and

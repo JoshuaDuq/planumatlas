@@ -290,7 +290,12 @@ def published_display_colors(path):
     }
 
 
-def published_field_ranges(path):
+def recorded_field_ranges(path):
+    """The spans a file records, for the fields it carries."""
     gltf, _ = _read_glb(path.read_bytes())
-    recorded = gltf.get("extras", {}).get("field_ranges", {})
+    return gltf.get("extras", {}).get("field_ranges", {})
+
+
+def published_field_ranges(path):
+    recorded = recorded_field_ranges(path)
     return {name: recorded.get(name, [0.0, 1.0]) for name in QUANTIZED_FIELDS}

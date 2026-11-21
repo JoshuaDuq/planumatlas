@@ -135,3 +135,45 @@ def test_the_published_field_decodes_to_the_committed_one_and_places_the_origin_
     voxel = np.rint(np.linalg.solve(aseg.header.get_vox2ras_tkr(), [*origin, 1])[:3]).astype(int)
     assert np.asarray(aseg.dataobj)[tuple(voxel)] != 0
     assert abs(origin[0]) < 5
+
+
+def test_the_template_places_its_own_millimetres_by_its_scale_and_nothing_else():
+    from brain_model.sources import read_config
+
+    config = read_config("mni152")
+    record = spaces.native_export(config, spaces.read_definition())
+    assert record["unstated"] == {"reads_as": "mni152nlin2009casym", "alternatives": []}
+    (space,) = record["spaces"]
+    assert "field" not in space and "registration" not in space
+    native = space["native"]
+    to_surface = np.array(native["template_to_surface_ras_mm"])
+    assert np.allclose(np.diag(to_surface)[:3], 0.9)
+    # MNI (0, 0, 0) lies near the anterior commissure: deep, between the hemispheres, inside this brain.
+    aseg = nib.load(config["source_directory"] / "mri/aseg.mgz")
+    origin = to_surface[:3, 3]
+    voxel = np.rint(np.linalg.solve(aseg.header.get_vox2ras_tkr(), [*origin, 1])[:3]).astype(int)
+    assert np.asarray(aseg.dataobj)[tuple(voxel)] != 0
+    assert abs(origin[0]) < 5
+    low, high = np.array(native["bounds_ras_mm"])
+    brain = nib.affines.apply_affine(
+        aseg.header.get_vox2ras_tkr(), np.argwhere(np.asarray(aseg.dataobj) > 0)
+    )
+    assert np.all(brain >= low) and np.all(brain <= high)
+
+
+def test_a_template_publishes_its_own_space_only_as_built():
+    from brain_model.sources import read_config
+
+    config = read_config("mni152")
+    manifest = {"coordinate_spaces": spaces.native_export(config, spaces.read_definition())}
+    assert spaces.validate(config, manifest) == {
+        "mni152nlin2009casym": manifest["coordinate_spaces"]["spaces"][0]["native"]
+    }
+    manifest["coordinate_spaces"]["spaces"][0]["native"]["scale"] = 1.0
+    with pytest.raises(ValueError, match="template's own"):
+        spaces.validate(config, manifest)
+    assert "no registration" in spaces.limitations(config, spaces.read_definition())[0]
+    assert spaces.inputs(config)[1:] == [
+        config["source_directory"] / "mri/orig.mgz",
+        config["source_directory"] / "mri/aseg.mgz",
+    ]

@@ -1,6 +1,6 @@
 """Measure how the published coordinate field lands a template's fine structures on an anatomy.
 
-The reference anatomy (the one declaring `landing_reference`) is the template itself,
+The reference anatomy (the one declaring `template_space`) is the template itself,
 reconstructed and segmented with NextBrain like any subject. Each of its labelled voxels is
 carried through the anatomy's published field for that template and scored against the
 anatomy's own NextBrain structure of the same label (brain_model/layers/landing.py).
@@ -33,9 +33,9 @@ METHOD = (
 
 
 def reference_of(document_anatomies):
-    declared = [name for name, anatomy in document_anatomies.items() if "landing_reference" in anatomy]
+    declared = [name for name, anatomy in document_anatomies.items() if "template_space" in anatomy]
     if len(declared) != 1:
-        raise SystemExit(f"Exactly one anatomy must declare `landing_reference`, not {declared}")
+        raise SystemExit(f"Exactly one anatomy must declare `template_space`, not {declared}")
     return declared[0]
 
 
@@ -63,7 +63,7 @@ def main():
     person = read_config(args.anatomy)
     document = yaml.safe_load((ROOT / "config/model.yaml").read_text())
     template = read_config(reference_of(document["anatomies"]))
-    reference = template["anatomy"]["landing_reference"]
+    reference = template["anatomy"]["template_space"]
     space = next(
         space for space in coordinate_spaces.read_definition()["spaces"]
         if space["id"] == reference["space"]

@@ -63,22 +63,32 @@ test.each(['models/cdmd/cortex-destrieux.glb', 'models/cdmd/tissue-envelopes.glb
 );
 
 test('BUILD-14 every published GLB is either a model layer or comparison geometry, never both', () => {
-  const directory = resolve(publicDirectory, 'models/cdmd');
-  const files = readdirSync(directory);
-  const comparison = files
-    .filter((file) => /^atlas-comparison.*\.json$/.test(file))
-    .map(
-      (file) =>
-        JSON.parse(readFileSync(resolve(directory, file), 'utf8')) as {
-          geometry: { file: string };
-        },
-    )
-    .map(({ geometry }) => `models/cdmd/${geometry.file}`);
   const layers = modelLayers(publicDirectory);
   assert.ok(layers.includes('models/cdmd/learning.glb'));
-  assert.ok(comparison.every((path) => !layers.includes(path)));
-  assert.deepEqual(
-    [...layers, ...comparison].sort(),
-    files.filter((file) => file.endsWith('.glb')).map((file) => `models/cdmd/${file}`),
-  );
+  const { anatomies } = JSON.parse(
+    readFileSync(resolve(publicDirectory, 'models/anatomies.json'), 'utf8'),
+  ) as { anatomies: { id: string }[] };
+  for (const { id } of anatomies) {
+    const directory = resolve(publicDirectory, `models/${id}`);
+    const files = readdirSync(directory);
+    const comparison = files
+      .filter((file) => /^atlas-comparison.*\.json$/.test(file))
+      .map(
+        (file) =>
+          JSON.parse(readFileSync(resolve(directory, file), 'utf8')) as {
+            geometry: { file: string };
+          },
+      )
+      .map(({ geometry }) => `models/${id}/${geometry.file}`);
+    const own = layers.filter((path) => path.startsWith(`models/${id}/`));
+    assert.ok(
+      comparison.every((path) => !own.includes(path)),
+      id,
+    );
+    assert.deepEqual(
+      [...own, ...comparison].sort(),
+      files.filter((file) => file.endsWith('.glb')).map((file) => `models/${id}/${file}`),
+      id,
+    );
+  }
 });

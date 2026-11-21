@@ -6,6 +6,12 @@
       "display_name": "MGH CDMD \u201csub_013\u201d",
       "label": "MGH CDMD single-subject reconstruction",
       "individual": true
+    },
+    {
+      "id": "mni152",
+      "display_name": "MNI template (ICBM 152 2009c)",
+      "label": "ICBM 152 2009c averaged template at mean adult size",
+      "individual": false
     }
   ]
 }

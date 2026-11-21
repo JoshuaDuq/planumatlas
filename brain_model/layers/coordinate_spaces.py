@@ -10,6 +10,7 @@ import numpy as np
 import yaml
 from scipy.spatial import cKDTree
 
+from ..labels.nextbrain import scanner_to_surface
 from ..sources import ROOT, declares, sha256
 
 LAYER = "coordinate_spaces"
@@ -64,6 +65,18 @@ def field_path(config, space):
 
 def published_name(space):
     return f"coordinates-{space['id']}.field"
+
+
+def template_space(config):
+    """`{space, scale}` for an anatomy that is a published template itself; None for a person."""
+    return config["anatomy"].get("template_space")
+
+
+def inputs(config):
+    if template_space(config):
+        return [DEFINITION, *(config["source_directory"] / f"mri/{name}.mgz" for name in ("orig", "aseg"))]
+    return [DEFINITION, report_path(config),
+            *(field_path(config, space) for space in read_definition()["spaces"])]
 
 
 def dice(a, b):
@@ -235,8 +248,46 @@ def export_field(config, space):
     }
 
 
+def native_space(config, definition):
+    """The template's own space on its reconstruction: one affine and the brain's extent, no field."""
+    reference = template_space(config)
+    space = next(space for space in definition["spaces"] if space["id"] == reference["space"])
+    # Reconstructed with its header scaled: its scanner millimetres are the space's times the scale.
+    to_surface = scanner_to_surface(config) @ np.diag([reference["scale"]] * 3 + [1.0])
+    aseg = nib.load(config["source_directory"] / "mri/aseg.mgz")
+    brain = nib.affines.apply_affine(
+        aseg.header.get_vox2ras_tkr(), np.argwhere(np.asarray(aseg.dataobj) > 0)
+    )
+    margin = definition["mask_margin_mm"]
+    return {
+        **{key: space[key] for key in ("id", "label", "description", "citation", "doi", "license", "copyright")},
+        "native": {
+            "scale": reference["scale"],
+            "template_to_surface_ras_mm": np.round(to_surface, 6).tolist(),
+            "bounds_ras_mm": [np.floor(brain.min(axis=0) - margin).tolist(),
+                              np.ceil(brain.max(axis=0) + margin).tolist()],
+        },
+    }
+
+
+def native_export(config, definition):
+    space = native_space(config, definition)
+    scale = space["native"]["scale"]
+    return {
+        "label": definition["label"],
+        "radius_mm": definition["radius_mm"],
+        "spaces": [space],
+        "unstated": {"reads_as": space["id"], "alternatives": []},
+        "method": f"This brain is {space['label']} itself, reconstructed with its header scaled by "
+                  f"{scale:g}: a coordinate's millimetres times {scale:g}, in FreeSurfer's surface RAS. "
+                  "Nothing is registered.",
+    }
+
+
 def export(config, definition):
     """What the viewer needs to place a published coordinate: each field, and what was measured."""
+    if template_space(config):
+        return native_export(config, definition)
     report = json.loads(report_path(config).read_text())
     accept(report, definition)
     spaces = []
@@ -269,7 +320,18 @@ def metadata(definition, report, spaces):
     }
 
 
-def limitations(definition):
+def limitations(config, definition):
+    reference = template_space(config)
+    if reference:
+        label = next(space["label"] for space in definition["spaces"] if space["id"] == reference["space"])
+        return [
+            (f"This brain is the {label} template at {reference['scale']:g} of its size, so a coordinate in "
+             "that space is placed by scaling alone, with no registration. Coordinates and maps in any other "
+             "template are not placed on it."),
+            (f"Cortical coordinates are reported as the regions within {definition['radius_mm']:g} mm, as on "
+             "an individual brain."),
+            f"An MNI coordinate whose template is not stated is read as {label}.",
+        ]
     return [
         "A published coordinate is placed by registering its template to this brain (SynthMorph, joint affine and deformable); it marks where that template location falls on this one brain, not where this person's own peak would be, and not what this brain does there.",
         f"Cortical coordinates are reported as the regions within {definition['radius_mm']:g} mm, not as one parcel: at template cortex, a single Schaefer parcel agreed between an MNI-space lookup and this brain's own projection only about 60% of the time.",
@@ -280,6 +342,11 @@ def limitations(definition):
 def validate(config, manifest):
     """The committed fields still pass their report, and the published ones decode to them."""
     definition = read_definition()
+    if template_space(config):
+        expected = json.loads(json.dumps(native_export(config, definition)))
+        if manifest["coordinate_spaces"] != expected:
+            raise ValueError("Published coordinate spaces differ from the template's own")
+        return {space["id"]: space["native"] for space in expected["spaces"]}
     report = json.loads(report_path(config).read_text())
     accept(report, definition)
     published = manifest["coordinate_spaces"]

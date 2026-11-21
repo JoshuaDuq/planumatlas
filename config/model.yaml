@@ -100,19 +100,20 @@ anatomies:
               temporal pole: 69
               temporal claustrum: 18
               optic tract: 10
-  # Not published: the ICBM 152 2009c template reconstructed and segmented like
-  # CDMD, so that scripts/measure_landing.py can score how the published
-  # coordinate field lands its fine structures on a person's. Its header is
-  # scaled by 0.90, the mean brain size of the 26 CDMD people (1,133 cm³ against
-  # the template's 1,548).
+  # The ICBM 152 2009c template reconstructed and segmented like CDMD: offered
+  # beside it for readers who work in MNI space, whose coordinates and maps it
+  # takes without registration, and the reference scripts/measure_landing.py
+  # scores the published coordinate field against. Its header is scaled by 0.90,
+  # the mean brain size of the 26 CDMD people (1,133 cm³ against the template's
+  # 1,548). It has no tracts, lobules, cord or registered group maps of its own.
   mni152:
     subject: MNI152NLin2009cAsym
-    display_name: ICBM 152 (2009c), real size
+    display_name: MNI template (ICBM 152 2009c)
     label: ICBM 152 2009c averaged template at mean adult size
     individual: false
     directory: data/mni152
     source_url: https://www.bic.mni.mcgill.ca/ServicesAtlases/ICBM152NLin2009
-    layers: [networks, nextbrain]
+    layers: [networks, nextbrain, coordinate_spaces]
     reconstruction:
       input: data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz
       input_sha256: cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b
@@ -121,7 +122,7 @@ anatomies:
       completion_marker: scripts/recon-all.done
     statistics: stats/aseg.stats
     project_hcp_from: fsaverage
-    landing_reference:
+    template_space:
       space: mni152nlin2009casym
       scale: 0.90
     structures:

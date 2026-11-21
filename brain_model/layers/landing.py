@@ -1,7 +1,7 @@
 """How a registered group map lands on this brain's fine structures, and the rule that follows.
 
 The MNI152NLin2009cAsym template is reconstructed and segmented like this brain (the anatomy that
-declares `landing_reference`). scripts/measure_landing.py carries each of the template's own
+declares `template_space`). scripts/measure_landing.py carries each of the template's own
 NextBrain structures through the published coordinate field and scores it against this brain's
 structure of the same label. The score bounds registration error from above: it also holds the
 disagreement between two segmentation runs.

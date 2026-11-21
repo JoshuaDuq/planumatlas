@@ -17,6 +17,7 @@ from .gltf.encode import (
     field_tolerance,
     normal_tolerance,
     published_field_ranges,
+    recorded_field_ranges,
 )
 from .gltf.export import compact_region
 from .labels import cerebellum, nextbrain, white_matter
@@ -455,7 +456,7 @@ def validate_atlas(config, atlas, records):
         "sha256": sha256(path),
         "mesh_count": len(meshes),
         "hemispheres": reports,
-        "field_ranges": ranges,
+        "field_ranges": recorded_field_ranges(path),
         "maximum_glb_coordinate_error_mm": max_error,
         "maximum_normal_component_error": normal_error,
         "maximum_sulcal_depth_error": sulcal_error,
