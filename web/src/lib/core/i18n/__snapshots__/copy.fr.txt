@@ -1652,6 +1652,7 @@
   "newTab": "(s’ouvre dans un nouvel onglet)",
   "methods": "Méthodes (en anglais)",
   "methodsPage": "Méthode et limites (en anglais)",
+  "source": "Code source sur GitHub",
   "notApplied": [
    "[\"Alpha\"] → \"Éléments du lien non appliqués<NNBSP>: Alpha.\"",
    "[\"\"] → \"Éléments du lien non appliqués<NNBSP>: .\""

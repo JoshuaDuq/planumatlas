@@ -4,6 +4,7 @@ export const en = {
   // The methods site (docs/) is in English only; the French names say so.
   methods: 'Methods',
   methodsPage: 'Method and limits',
+  source: 'Source code on GitHub',
   notApplied: (fields: string) => `Not applied from this link: ${fields}.`,
   fields: {
     anatomy: 'subject',
@@ -57,6 +58,7 @@ export const fr: typeof en = {
   newTab: '(s’ouvre dans un nouvel onglet)',
   methods: 'Méthodes (en anglais)',
   methodsPage: 'Méthode et limites (en anglais)',
+  source: 'Code source sur GitHub',
   notApplied: (fields: string) => `Éléments du lien non appliqués : ${fields}.`,
   fields: {
     anatomy: 'sujet',

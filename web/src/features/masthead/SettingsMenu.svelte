@@ -24,6 +24,8 @@
 
   type SingleKeys = 'on' | 'off';
 
+  const SOURCE_HREF = 'https://github.com/JoshuaDuq/planumatlas';
+
   interface Props {
     lang: Language;
     themeChoice: ThemeChoice;
@@ -304,6 +306,20 @@
       >
         <span
           >{t(lang, 'link').methods}<span class="visually-hidden"
+            >{` ${t(lang, 'link').newTab}`}</span
+          ></span
+        >{@render iconGraphic('external-link')}
+      </a>
+      <a
+        class="menu-item"
+        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+        href={SOURCE_HREF}
+        target="_blank"
+        rel="noreferrer"
+        onclick={close}
+      >
+        <span
+          >{t(lang, 'link').source}<span class="visually-hidden"
             >{` ${t(lang, 'link').newTab}`}</span
           ></span
         >{@render iconGraphic('external-link')}

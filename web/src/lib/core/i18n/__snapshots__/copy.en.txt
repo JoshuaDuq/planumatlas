@@ -1652,6 +1652,7 @@
   "newTab": "(opens in a new tab)",
   "methods": "Methods",
   "methodsPage": "Method and limits",
+  "source": "Source code on GitHub",
   "notApplied": [
    "[\"Alpha\"] → \"Not applied from this link: Alpha.\"",
    "[\"\"] → \"Not applied from this link: .\""

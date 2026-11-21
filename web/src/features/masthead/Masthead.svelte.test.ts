@@ -9,6 +9,7 @@ import Fixture from './masthead-test-support.svelte';
 const button = (name: string) => page.getByRole('button', { name, exact: true });
 const radio = (name: string) => page.getByRole('radio', { name, exact: true });
 const el = (locator: { element(): Element }) => locator.element() as HTMLElement;
+const SOURCE = 'Source code on GitHub (opens in a new tab)';
 const more = () => button('More settings');
 const panelOpen = () => el(more()).getAttribute('aria-expanded') === 'true';
 const announced = () => document.getElementById('announcer')!.textContent;
@@ -438,12 +439,32 @@ describe('Masthead', () => {
     document.removeEventListener('keydown', watch);
     expect(reached).toBe(false);
     await userEvent.keyboard('{Tab}');
-    expect(document.activeElement).toBe(el(button('Start over')));
+    expect(document.activeElement).toBe(el(page.getByRole('link', { name: SOURCE })));
     // The new tab is not opened here; the panel closes as for a command.
     const stay = (event: MouseEvent) => event.preventDefault();
     document.addEventListener('click', stay);
     try {
       await page.getByRole('link', { name: 'Methods (opens in a new tab)' }).click();
+    } finally {
+      document.removeEventListener('click', stay);
+    }
+    expect(panelOpen()).toBe(false);
+  });
+
+  test('the source code link opens the GitHub repository in a new tab, before Start over', async () => {
+    await render(Fixture);
+    await open();
+    const source = page.getByRole('link', { name: SOURCE }).element() as HTMLAnchorElement;
+    expect(source.href).toBe('https://github.com/JoshuaDuq/planumatlas');
+    expect(source.target).toBe('_blank');
+    expect(source.rel).toBe('noreferrer');
+    source.focus();
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(el(button('Start over')));
+    const stay = (event: MouseEvent) => event.preventDefault();
+    document.addEventListener('click', stay);
+    try {
+      await page.getByRole('link', { name: SOURCE }).click();
     } finally {
       document.removeEventListener('click', stay);
     }
@@ -513,6 +534,7 @@ describe('Masthead', () => {
         'How to use Planum',
         'Keyboard shortcuts ?',
         'Methods (opens in a new tab)',
+        'Source code on GitHub (opens in a new tab)',
         'Start over',
       ]);
       // The masthead's own button is display:none, so only the menu item is in the tree.
