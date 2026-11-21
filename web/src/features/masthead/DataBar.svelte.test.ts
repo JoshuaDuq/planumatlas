@@ -1,7 +1,7 @@
 // The data bar against the APG Disclosure table and the legacy header.js cases
 // (chrome.contract.test.js:167-200, 249-273, header.test.js), as behaviour in a real browser.
 import { tick } from 'svelte';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { loadTemplateCopy } from '../../lib/core/i18n/index.ts';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
@@ -9,6 +9,7 @@ import type { ManifestAnatomy } from '../../lib/types/index.ts';
 import axe from 'axe-core';
 import type { ComponentProps } from 'svelte';
 import { withMedia } from '../../lib/ui/a11y-test-support.ts';
+import { loadLists } from './data-lists.svelte.ts';
 import Fixture from './data-bar-test-support.svelte';
 
 type Bar = ComponentProps<typeof Fixture>['bar'];
@@ -148,6 +149,8 @@ async function wide(
   await settle();
   if (fields && !props.reference) {
     el(summary()).click();
+    // Opening waits for the lists' chunk.
+    await expect.poll(() => el(summary()).getAttribute('aria-expanded')).toBe('true');
     await settle();
   }
   return view;
@@ -159,6 +162,8 @@ async function phone(props = barProps(), extra: Record<string, unknown> = {}) {
   return view;
 }
 
+// The lists are a chunk the bar fetches on the first intent; fetched once here, a press opens them at once.
+beforeAll(() => loadLists());
 beforeEach(() => page.viewport(...WIDE));
 afterEach(() => {
   cleanup();

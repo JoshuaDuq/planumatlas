@@ -185,8 +185,15 @@ const coldStart = [
   return { path, raw: bytes.length, gzip: gzipSync(bytes).length };
 });
 const rawOf = (path) => coldStart.find((file) => file.path === path).raw;
+// The entry with the first-party chunks it preloads: the bundler can split a module the entry shares
+// with a lazy chunk into one of its own, which takes no byte off the first visit. Three and the BVH
+// index are split on purpose (vite.config.ts) and have a ceiling of their own or none.
+const vendor = [chunkPath('three'), chunkPath('bvh')];
+const preloaded = linked(/<link rel="modulepreload" crossorigin href="\/([^"]+)"/g).filter(
+  (path) => !vendor.includes(path),
+);
 const sizes = {
-  entry: rawOf(entry[0]),
+  entry: [entry[0], ...preloaded].reduce((sum, path) => sum + rawOf(path), 0),
   three: rawOf(chunkPath('three')),
   coldStart: coldStart.reduce((sum, file) => sum + file.gzip, 0),
 };

@@ -60,6 +60,8 @@ describe('what the masthead region holds', () => {
     expect(names.slice(-3)).toEqual(['Save image (PNG)', 'Share this view', 'More settings']);
     // One subject is published, so the summary's popover has no Subject list.
     await userEvent.click(page.getByRole('button', { name: /^Subject / }));
+    // The lists are a chunk of their own: the popover opens once it has arrived.
+    await expect.element(page.getByRole('toolbar', { name: 'Atlas', exact: true })).toBeVisible();
     const lists = [...header.querySelectorAll('[role=toolbar]')]
       .filter((list) => list.checkVisibility())
       .map((list) => document.getElementById(list.getAttribute('aria-labelledby')!)!.textContent);

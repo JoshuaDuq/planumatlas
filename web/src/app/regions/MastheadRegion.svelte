@@ -13,7 +13,8 @@
     viewCitations,
     type OnScreen,
   } from '../../lib/core/panels/citations.ts';
-  import { subjectName, type PaletteSources } from '../../lib/core/panels/header.ts';
+  import { subjectName } from '../../lib/core/panels/header.ts';
+  import type { PaletteSources } from '../../lib/core/panels/palettes.ts';
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';

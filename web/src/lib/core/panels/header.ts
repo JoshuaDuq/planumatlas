@@ -1,12 +1,4 @@
-import type {
-  ArterialTerritories,
-  CerebellarFunctions,
-  Language,
-  LoadProgress,
-  Rgb,
-  SurfaceColor,
-} from '../../types/index.ts';
-import { LOBE_COLORS } from '../catalog/lobes.ts';
+import type { Language, LoadProgress, SurfaceColor } from '../../types/index.ts';
 import { percent } from '../format.ts';
 import { atlasSwitchLabel, t } from '../i18n/index.ts';
 
@@ -85,44 +77,6 @@ export function colourGroups({
     entry[0],
     entry[1].filter((mode) => published[mode] ?? true),
   ]).filter(([, modes]) => modes.length);
-}
-
-/** A partition with named colours: Yeo's networks, and CAB-NP's. */
-interface NamedColours {
-  networks: readonly string[];
-  colors: Readonly<Record<string, Rgb>>;
-}
-
-/** Where each colouring's palette comes from: what the stage key draws from (stage-keys.ts). */
-export interface PaletteSources {
-  networks?: NamedColours | null;
-  cabNp?: NamedColours | null;
-  territories?: Pick<ArterialTerritories, 'territories'> | null;
-  cerebellar?: Pick<CerebellarFunctions, 'regions'> | null;
-}
-
-/**
- * A colouring's colours in its key's order, drawn beside its option; null for one with no palette of
- * its own (tissue, T1, an atlas's region colours). The striatal map's networks are Yeo's.
- */
-export function colourPalette(mode: SurfaceColor, sources: PaletteSources): readonly Rgb[] | null {
-  const named = (partition?: NamedColours | null) =>
-    partition ? partition.networks.map((key) => partition.colors[key]!) : null;
-  switch (mode) {
-    case 'lobe':
-      return Object.values(LOBE_COLORS);
-    case 'network':
-    case 'striatal':
-      return named(sources.networks);
-    case 'cab-np':
-      return named(sources.cabNp);
-    case 'territory':
-      return sources.territories?.territories.map(({ color }) => color) ?? null;
-    case 'cerebellar':
-      return sources.cerebellar?.regions.map(({ color }) => color) ?? null;
-    default:
-      return null;
-  }
 }
 
 /** What else a Colour option changes: the atlas it is defined on, when another is shown. */
