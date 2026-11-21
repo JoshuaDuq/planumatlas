@@ -84,3 +84,8 @@ releases yet: the live site is deployed from `main`.
   header states.
 
 [Unreleased]: https://github.com/JoshuaDuq/planumatlas/commits/main
+- On the NextBrain detail level the spinal cord now meets the medulla. NextBrain labels no medulla in
+  the 12 mm above the cord, and the cord stood apart from the brainstem, as in the rubrospinal tour;
+  that stretch is now drawn from FreeSurfer's brainstem label, as the teaching set already drew it.
+- A circuit's whole route is headed by the circuit's name, which the location bar truncates, instead of
+  "The whole route".

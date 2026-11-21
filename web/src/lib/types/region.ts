@@ -72,6 +72,8 @@ export interface Region {
   aliases?: Readonly<Record<string, string[]>>;
   notes?: Localised;
   cut_atlases?: string[];
+  /** Detail levels besides its own that draw it: the caudal medulla continues NextBrain's medulla. */
+  also_drawn_in?: string[];
   supplemental?: boolean;
   mri_registered?: boolean;
   tissue?: string;

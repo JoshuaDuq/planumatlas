@@ -141,7 +141,6 @@
   "inCircuits": "Dans les parcours guidés",
   "route": "Trajet",
   "wholeRoute": "Trajet complet",
-  "routeTitle": "Le trajet complet",
   "routeNote": "Chaque numéro marque l’emplacement de son repère dans ce cerveau, vu à travers le cortex<NNBSP>: un ordre, pas le chemin des fibres. Choisissez un numéro, ici ou sur l’image, pour l’ouvrir.",
   "routeMark": [
    "[\"Alpha\",\"\"] → \"Repère Alpha1<NNBSP>: \"",

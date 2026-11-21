@@ -3072,7 +3072,7 @@
       "id": "nextbrain",
       "label": "NextBrain histological atlas",
       "file": "nextbrain.glb",
-      "region_count": 292,
+      "region_count": 293,
       "voxel_to_surface_ras_mm": [
         [
           0.4000000059604645,
@@ -83446,6 +83446,9 @@
         "en": "Uses the part of FreeSurfer\u2019s brainstem label below the NextBrain medullary coverage to continue toward the spinal cord. This boundary is a source-coverage boundary, not a distinct anatomical subdivision or a traced decussation.",
         "fr": "Utilise la partie de l\u2019\u00e9tiquette du tronc c\u00e9r\u00e9bral de FreeSurfer situ\u00e9e sous la couverture bulbaire de NextBrain pour prolonger le volume vers la moelle. Cette limite correspond \u00e0 la couverture des sources, et non \u00e0 une subdivision anatomique distincte ou \u00e0 une d\u00e9cussation trac\u00e9e."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         128,
         134,
@@ -104143,6 +104146,7 @@
     "Learning units come from three segmentations of the same brain (aseg, NextBrain and CerebNet), so surfaces from different sources can overlap slightly where they meet.",
     "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",
     "Only one internal-anatomy detail level is drawn at a time; the coarse and fine layers segment the same anatomy.",
+    "Below NextBrain's lowest medullary voxel, the NextBrain level draws the teaching set's caudal medulla, which is FreeSurfer's brainstem label, so the medulla meets the spinal cord.",
     "Internal solids are marching-cubes surfaces smoothed for display by at most 0.6 mm and never across a voxel centre; between voxel centres their boundaries are a display convention, not a measurement.",
     "Where a segmented structure meets itself at a corner its surface pinches there and is not a two-manifold; validation counts those edges, and the volume each surface encloses stays definite.",
     "NextBrain cortical parcels are published as ctx-rh- names for both hemispheres, an artefact of the reused label block; the hemisphere field is authoritative.",

@@ -1,6 +1,6 @@
 <!--
-  The whole route ahead of a lesson's landmarks: the route the circuit takes and what the stage's
-  numbers mark. Then the open landmark (viewer/ui/panels/circuits.js:167-196, index.html:341): the
+  The whole route ahead of a lesson's landmarks: the circuit's name, the route it takes and what the
+  stage's numbers mark. Then the open landmark (viewer/ui/panels/circuits.js:167-196, index.html:341): the
   circuit's name for the outline, the step's title (the focus target when a landmark opens), its side
   and group, its role and explanation, and, once the reader has wandered to another region, a way back. The landmark's own
   commands are the region's, which I1 renders below this in `RegionDetail`; `landmarkSelected` on the
@@ -24,9 +24,9 @@
 
 {#if model.route && model.circuit}
   <div class="circuit-profile" aria-busy={model.busy} bind:this={root}>
-    <h2 class="visually-hidden">{model.circuit.name[lang]}</h2>
     <div class="circuit-content">
-      <h3 class="circuit-title" data-circuit-title tabindex="-1">{copy.routeTitle}</h3>
+      <!-- The location bar truncates the circuit's name, so the route spells it out. -->
+      <h2 class="circuit-title" data-circuit-title tabindex="-1">{model.circuit.name[lang]}</h2>
       <p class="circuit-explanation circuit-route">{model.circuit.route[lang]}</p>
       <p class="circuit-note">{copy.routeNote}</p>
     </div>

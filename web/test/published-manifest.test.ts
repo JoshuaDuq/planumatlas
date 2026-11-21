@@ -81,7 +81,8 @@ test('CAT-68: the anatomy, its atlases, detail levels, layers and colourings', (
   ]);
   expect(manifest.detail_levels.map(({ id, region_count }) => [id, region_count])).toEqual([
     ['aseg', 32],
-    ['nextbrain', 292],
+    // NextBrain's 292 nuclei and the teaching set's caudal medulla, which it draws too.
+    ['nextbrain', 293],
     ['learning', 106],
   ]);
   expect(manifest.supplemental_layers!.map(({ id, region_count }) => [id, region_count])).toEqual([

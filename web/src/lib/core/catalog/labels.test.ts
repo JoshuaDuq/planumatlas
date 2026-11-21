@@ -89,8 +89,10 @@ test('every region in the published manifest resolves to a name and a group', ()
     assert.equal(published.length, atlas.region_count, atlas.id);
   }
   for (const level of manifest.detail_levels) {
+    // A level also draws the teaching units that continue its own below its coverage.
     const published = manifest.regions.filter(
-      (r) => r.atlas === level.id && r.kind === 'structure',
+      (r) =>
+        (r.atlas === level.id || r.also_drawn_in?.includes(level.id)) && r.kind === 'structure',
     );
     assert.equal(published.length, level.region_count, level.id);
   }

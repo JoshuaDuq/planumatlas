@@ -209,16 +209,26 @@ def region_record(group, source, volume):
         "display_names": {"en": group["name"], "fr": group["name_fr"]},
         "system_names": {"en": group["system"], "fr": group["system_fr"]},
         **({"notes": group["notes"]} if "notes" in group else {}),
+        **also_drawn_in(group),
         "display_color": group["color"],
         "voxel_count": int(np.count_nonzero(np.isin(volume, members))),
     }
 
 
+def also_drawn_in(group):
+    """A unit continuing a NextBrain unit below its coverage is drawn on the NextBrain level too."""
+    return {"also_drawn_in": [nextbrain.ATLAS_ID]} if "below_nextbrain" in group else {}
+
+
 def build(config, field_ranges):
-    """The teaching set; its shading fields are quantized over the cortex's `field_ranges`."""
+    """The teaching set; its shading fields are quantized over the cortex's `field_ranges`.
+
+    Also returns the meshes the NextBrain level draws too, as `add_region` takes them.
+    """
     definition = read_definition(config)
     scene = trimesh.Scene()
     regions = []
+    bridges = []
     grids = []
     fissure_record = None
     for source, grid, table, groups in source_groups(config, nextbrain.load(config)):
@@ -253,14 +263,10 @@ def build(config, field_ranges):
                     np.linalg.norm(mesh.vertices - original.vertices, axis=1).max()
                 ),
             )
-            exported = add_region(
-                scene,
-                mesh.vertices,
-                mesh.faces,
-                mesh.vertex_normals,
-                region,
-                group["color"],
-            )
+            drawn_as = (mesh.vertices, mesh.faces, mesh.vertex_normals, dict(region), group["color"])
+            exported = add_region(scene, *drawn_as)
+            if "also_drawn_in" in region:
+                bridges.append(drawn_as)
             if field is not None:
                 exported.vertex_attributes["_OPENNESS"] = field.astype(np.float32)
             region.update(
@@ -289,4 +295,4 @@ def build(config, field_ranges):
                             "d / radius_mm open (appearance.occlusion)"}
                if fissure_record else {}),
         },
-    }, regions
+    }, regions, bridges

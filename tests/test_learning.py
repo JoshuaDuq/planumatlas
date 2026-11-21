@@ -202,6 +202,19 @@ def test_a_unit_below_a_nextbrain_floor_keeps_only_voxels_under_it():
     assert labels.ravel().tolist() == [7, 16, 16, 16, 16, 16]
 
 
+def test_only_a_unit_below_a_nextbrain_floor_is_drawn_on_the_nextbrain_level_too():
+    from brain_model.layers.learning import region_record
+
+    definition = read_definition(read_config("cdmd"))
+    volume = np.array([[[16, 4, 0]]])
+    drawn = {
+        unit["id"]: region_record(unit, "aseg", volume).get("also_drawn_in")
+        for unit in definition["aseg"]
+    }
+    assert drawn.pop("caudal-medulla") == ["nextbrain"]
+    assert set(drawn.values()) == {None}
+
+
 def test_the_caudal_medulla_joins_nextbrain_s_medulla_to_the_cord():
     """aseg's brainstem fills what NextBrain leaves unlabelled between its medulla and C1."""
     from brain_model.layers import spinal_cord

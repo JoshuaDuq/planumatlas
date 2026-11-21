@@ -118,7 +118,7 @@ describe('the published CDMD model', () => {
   afterAll(() => model.dispose());
 
   test(
-    'ATLAS-07 the aseg level holds 32 meshes, nextbrain 292 and the envelopes 4',
+    'ATLAS-07 the aseg level holds 32 meshes, nextbrain 293 and the envelopes 4',
     { timeout: 120_000 },
     async () => {
       const meshes = async (detail: string) => {
@@ -126,7 +126,8 @@ describe('the published CDMD model', () => {
         return (model.layers.get(detail)?.meshes ?? []).length;
       };
       assert.equal(await meshes('aseg'), 32);
-      assert.equal(await meshes('nextbrain'), 292);
+      // 292 NextBrain nuclei and the teaching set's caudal medulla.
+      assert.equal(await meshes('nextbrain'), 293);
       assert.equal((await model.ensureEnvelopes()).length, 4);
     },
   );

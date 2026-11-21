@@ -119,3 +119,46 @@ def test_a_midline_structure_is_judged_against_its_partner_not_against_x_zero(tm
 def test_a_partner_too_small_to_mesh_still_places_its_pair(tmp_path):
     volume, affine = paired_layer(tmp_path, left_x=0.5, right_x=4.0, meshed=(1,))
     check(tmp_path, volume, affine, meshed=(1,))
+
+
+def test_a_bridge_from_another_layer_is_published_and_counted_but_checked_there(tmp_path):
+    def ball(centre, radius_squared):
+        offsets = np.indices((24, 24, 24)) - np.array(centre, float)[:, None, None, None]
+        return ((offsets ** 2).sum(axis=0) < radius_squared).astype(np.int32)
+
+    volume = 17 * ball([18, 12, 12], 20)
+    affine = conformed_grid(nib.MGHImage(volume, TKR)).voxel_to_surface
+    # Another layer's surface, from a grid this layer does not label.
+    surface = extract_structure(ball([6, 12, 12], 6), 1, affine)
+    unit = {
+        "id": "learning:caudal-medulla", "label": "Caudal medulla · midline",
+        "source_name": "Caudal medulla", "atlas": "learning", "hemisphere": "midline",
+        "source_label_id": None, "kind": "structure", "also_drawn_in": ["aseg"],
+    }
+    config = {"output_directory": tmp_path, "structures": {"smoothing": SMOOTHING}}
+
+    def describe(label):
+        return {
+            "id": f"aseg:left:{label}", "label": "Left Hippocampus",
+            "source_name": "Left-Hippocampus", "atlas": "aseg", "hemisphere": "left",
+            "source_label_id": label, "kind": "structure",
+        }, [220, 216, 20]
+
+    bridge = (surface.vertices, surface.faces, surface.vertex_normals, unit, [128, 134, 168])
+    record, regions = build_structure_layer(
+        config, LabelGrid(volume, affine, [1.0] * 3), [17], describe, "structures.glb", [bridge]
+    )
+    path = tmp_path / "structures.glb"
+    meshes = read_meshes(path)
+    assert record["region_count"] == 2
+    assert [region["id"] for region in regions] == ["aseg:left:17"]
+    np.testing.assert_array_equal(meshes["learning:caudal-medulla"].faces, surface.faces)
+    assert meshes["learning:caudal-medulla"].metadata["also_drawn_in"] == ["aseg"]
+    # The bridge has no label in this layer's volume; its own layer checks it.
+    with pytest.raises(ValueError, match="absent"):
+        validate_structure_layer(path, volume, affine, [17], SMOOTHING, 2e-5)
+    report = validate_structure_layer(
+        path, volume, affine, [17], SMOOTHING, 2e-5,
+        checked_elsewhere={"learning:caudal-medulla"},
+    )
+    assert [region["id"] for region in report["regions"]] == ["aseg:left:17"]

@@ -4,6 +4,7 @@ import { Color, Mesh, Plane, Raycaster, Vector3 } from 'three';
 import type { Group } from 'three';
 import type { Region } from '../../types/index.ts';
 import { createCatalog } from '../../core/catalog/catalog.ts';
+import { labelOf } from '../../core/catalog/labels.ts';
 import type { CatalogSettings } from '../../core/catalog/catalog.ts';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { SolidSections } from '../tissues/solid-sections.ts';
@@ -134,6 +135,36 @@ test(
     );
   },
 );
+
+test('the brainstem reaches the cord in every detail level', { timeout: 120_000 }, async () => {
+  await model.setSpinalCordVisible(true);
+  const regions = new Map(manifest.regions.map((region) => [region.id, region]));
+  const box = (mesh: Mesh) => {
+    mesh.geometry.computeBoundingBox();
+    return mesh.geometry.boundingBox!;
+  };
+  for (const level of manifest.detail_levels) {
+    await model.setDetail(level.id);
+    const drawn = model.visibleMeshes;
+    const cordTop = Math.max(
+      ...drawn.filter((mesh) => mesh.userData['atlas'] === 'pam50').map((mesh) => box(mesh).max.y),
+    );
+    const brainstemBottom = Math.min(
+      ...drawn
+        .filter((mesh) => mesh.userData['atlas'] !== 'pam50')
+        .filter((mesh) => {
+          const region = regions.get(mesh.userData['region_id'] as string)!;
+          return labelOf(region, 'en')!.group === 'Brainstem';
+        })
+        .map((mesh) => box(mesh).min.y),
+    );
+    // Superior is +y in metres.
+    assert.ok(
+      brainstemBottom < cordTop,
+      `${level.id}: the brainstem ends ${((brainstemBottom - cordTop) * 1000).toFixed(1)} mm above the cord`,
+    );
+  }
+});
 
 test('each side of the cord follows the hemisphere filter', async () => {
   await model.setSpinalCordVisible(true);

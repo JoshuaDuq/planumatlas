@@ -2597,7 +2597,7 @@
       "id": "nextbrain",
       "label": "NextBrain histological atlas",
       "file": "nextbrain.glb",
-      "region_count": 292,
+      "region_count": 293,
       "voxel_to_surface_ras_mm": [
         [0.4000000059604645, 0.0, 0.0, -66.4000015258789],
         [0.0, 0.4000000059604645, 0.0, -81.5999984741211],
@@ -49833,6 +49833,7 @@
         "en": "Uses the part of FreeSurfer’s brainstem label below the NextBrain medullary coverage to continue toward the spinal cord. This boundary is a source-coverage boundary, not a distinct anatomical subdivision or a traced decussation.",
         "fr": "Utilise la partie de l’étiquette du tronc cérébral de FreeSurfer située sous la couverture bulbaire de NextBrain pour prolonger le volume vers la moelle. Cette limite correspond à la couverture des sources, et non à une subdivision anatomique distincte ou à une décussation tracée."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [128, 134, 168],
       "segmentation_volume_mm3": 1925.0,
       "surface_area_mm2": 909.1768375467815,

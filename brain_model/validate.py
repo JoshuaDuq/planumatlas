@@ -500,9 +500,14 @@ def validate_sides(sides, volume, affine, partner_of):
 
 
 def validate_structure_layer(
-    path, volume, affine, labels, smoothing, tolerance, partner_of=None, label_key="source_label_id"
+    path, volume, affine, labels, smoothing, tolerance, partner_of=None,
+    label_key="source_label_id", checked_elsewhere=frozenset(),
 ):
-    meshes = read_meshes(path)
+    """Each mesh against its label's voxels, but those another layer publishes and checks."""
+    meshes = {
+        region_id: mesh for region_id, mesh in read_meshes(path).items()
+        if region_id not in checked_elsewhere
+    }
     maximum = smoothing["maximum_displacement_mm"]
     reports = []
     found = set()
@@ -597,14 +602,29 @@ def validate_structures(config):
 def validate_nextbrain_structures(config, nextbrain_source):
     grid, table = nextbrain_source
     minimum = config[nextbrain.ATLAS_ID]["minimum_mesh_volume_mm3"]
+    path = config["output_directory"] / "nextbrain.glb"
+    # The teaching units drawn on this level too are checked against their source in learning.glb;
+    # here, only that this file holds the same surfaces.
+    bridges = {
+        region_id: mesh for region_id, mesh in read_meshes(path).items()
+        if mesh.metadata["atlas"] != nextbrain.ATLAS_ID
+    }
+    taught = read_meshes(config["output_directory"] / "learning.glb")
+    for region_id, mesh in bridges.items():
+        if not (
+            np.array_equal(mesh.vertices, taught[region_id].vertices)
+            and np.array_equal(mesh.faces, taught[region_id].faces)
+        ):
+            raise ValueError(f"NextBrain's copy differs from the teaching set's: {region_id}")
     return validate_structure_layer(
-        config["output_directory"] / "nextbrain.glb",
+        path,
         grid.labels,
         grid.voxel_to_surface,
         nextbrain.meshed_indices(grid, table, minimum),
         config["structures"]["smoothing"],
         config["validation"]["coordinate_tolerance_mm"],
         nextbrain.partner_of,
+        checked_elsewhere=set(bridges),
     )
 
 
@@ -845,10 +865,17 @@ def validate_manifest(config, manifest, nextbrain_source):
         measured.append((nuclei, nuclei_grid))
     if nextbrain.is_declared(config):
         fine, fine_grid = expected_nextbrain_metadata(config, nextbrain_source)
-        groups["nextbrain.glb"] = fine
-        expected_levels[nextbrain.ATLAS_ID] = ("nextbrain.glb", fine, grid_fields(fine_grid))
-        measured.append((fine, fine_grid))
         overview, overview_grids = validate_learning.expected_metadata(config, nextbrain_source)
+        # The teaching units that continue NextBrain's below its coverage are drawn on its level too.
+        bridges = {
+            region_id: unit for region_id, unit in overview.items()
+            if nextbrain.ATLAS_ID in unit.get("also_drawn_in", [])
+        }
+        groups["nextbrain.glb"] = {**fine, **bridges}
+        expected_levels[nextbrain.ATLAS_ID] = (
+            "nextbrain.glb", groups["nextbrain.glb"], grid_fields(fine_grid)
+        )
+        measured.append((fine, fine_grid))
         groups["learning.glb"] = overview
         expected_levels["learning"] = (
             "learning.glb", overview, {"source_grids": overview_grids}

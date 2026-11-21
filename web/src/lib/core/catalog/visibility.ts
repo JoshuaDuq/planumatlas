@@ -46,7 +46,9 @@ export const VISIBILITY_SETTINGS = [
 export type VisibilitySettings = Pick<DisplaySettings, (typeof VISIBILITY_SETTINGS)[number]>;
 
 export const belongsToDetail = (region: Region, detail: string) =>
-  region.supplemental === true || region.atlas === detail;
+  region.supplemental === true ||
+  region.atlas === detail ||
+  Boolean(region.also_drawn_in?.includes(detail));
 // Gyral white matter is drawn on the white envelope's cut face, which the cortex controls hide.
 const followsCortex = (region: Region) => isSurface(region) || region.atlas === 'wmparc';
 

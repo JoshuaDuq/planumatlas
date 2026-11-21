@@ -8,6 +8,7 @@ from .labels import cerebellum, nextbrain
 from .labels.volumes import load_on_grid, resample_nearest
 from .layers import neuropsych_domains
 from .layers.learning import (
+    also_drawn_in,
     below_floors,
     constituents,
     expand_nextbrain,
@@ -123,6 +124,7 @@ def expected_metadata(config, nextbrain_source):
                 "display_names": {"en": group["name"], "fr": group["name_fr"]},
                 "system_names": {"en": group["system"], "fr": group["system_fr"]},
                 **({"notes": group["notes"]} if "notes" in group else {}),
+                **also_drawn_in(group),
                 "voxel_count": count,
                 "segmentation_volume_mm3": count * grid.voxel_volume_mm3,
                 "voxel_size_mm": grid.spacing_mm,

@@ -1444,7 +1444,7 @@
   },
   "nextbrain_structures": {
     "file": "nextbrain.glb",
-    "sha256": "a4b5fed4be54e064baad11eef36e6cff5503bc501ea9456e7ebab8aa79e94ac1",
+    "sha256": "fb34f5dce8b2d39ad4bc12ebc7b5e745d4f7516a326cc11e941ef37b24544f95",
     "maximum_allowed_displacement_mm": 0.6,
     "regions": [
       {
@@ -3833,7 +3833,7 @@
   },
   "learning_structures": {
     "file": "learning.glb",
-    "sha256": "6213c78d8a77d67f7fd28b32e2c4ff05ad0d0bac7c49da6346b08a59050ba52a",
+    "sha256": "1a7b2da3639ab9d94acf4ef6805474387d123078d44ad31758c9979494a5cbbd",
     "regions": [
       {
         "id": "learning:left:caudate",

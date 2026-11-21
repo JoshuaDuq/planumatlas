@@ -90,11 +90,12 @@ function accessibleName(element: HTMLElement) {
 }
 
 describe('the whole route', () => {
-  test('a lesson opens on it: the route sentence, what the numbers mark, every landmark listed and none current', async () => {
+  test('a lesson opens on it: the circuit named, the route sentence, what the numbers mark, every landmark listed and none current', async () => {
     mount();
     await openRoute('vision');
     const circuit = world.circuits.get('vision');
-    expect(title().textContent).toBe('The whole route');
+    expect(title().textContent).toBe(circuit.name.en);
+    expect(title().tagName).toBe('H2');
     expect(document.querySelector('.circuit-route')!.textContent).toBe(circuit.route.en);
     expect(progress()).toBe('Route');
     expect(control('previous').hidden).toBe(true);
@@ -121,7 +122,7 @@ describe('the whole route', () => {
   test('is French in French', async () => {
     mount('fr');
     await openRoute('vision');
-    expect(title().textContent).toBe('Le trajet complet');
+    expect(title().textContent).toBe(world.circuits.get('vision').name.fr);
     expect(progress()).toBe('Trajet');
   });
 });

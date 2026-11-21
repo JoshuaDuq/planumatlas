@@ -141,7 +141,6 @@
   "inCircuits": "In guided circuits",
   "route": "Route",
   "wholeRoute": "Whole route",
-  "routeTitle": "The whole route",
   "routeNote": "Each number marks where its landmark lies in this brain, seen through the cortex: an order, not the path the fibres take. Choose a number, here or on the picture, to open it.",
   "routeMark": [
    "[\"Alpha\",\"\"] → \"Landmark Alpha1: \"",

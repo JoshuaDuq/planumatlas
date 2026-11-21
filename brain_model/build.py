@@ -246,7 +246,8 @@ def build_cortex(config, atlas, field_ranges=None, retinotopic=None):
     }, regions
 
 
-def build_structure_layer(config, grid, labels, describe, filename):
+def build_structure_layer(config, grid, labels, describe, filename, bridges=()):
+    """The labels' meshes, then `bridges`: meshes another layer publishes, as add_region takes them."""
     volume = grid.labels
     if not np.all(volume == np.rint(volume)):
         raise ValueError(f"{filename}: segmentation must hold integer labels")
@@ -279,10 +280,12 @@ def build_structure_layer(config, grid, labels, describe, filename):
             **placed[label],
         )
         regions.append(region)
+    for bridge in bridges:
+        add_region(scene, *bridge)
     write_scene(scene, config["output_directory"] / filename)
     return {
         "file": filename,
-        "region_count": len(regions),
+        "region_count": len(regions) + len(bridges),
         "voxel_to_surface_ras_mm": affine.tolist(),
         "voxel_size_mm": grid.spacing_mm,
         "display_geometry": {
@@ -320,7 +323,8 @@ def build_structures(config):
     )
 
 
-def build_nextbrain_structures(config):
+def build_nextbrain_structures(config, bridges):
+    """NextBrain's nuclei, and the teaching set's units that continue them below its coverage."""
     grid, table = nextbrain.load(config)
     settings = config[nextbrain.ATLAS_ID]
     chosen = nextbrain.meshed_indices(grid, table, settings["minimum_mesh_volume_mm3"])
@@ -340,7 +344,7 @@ def build_nextbrain_structures(config):
             "kind": "structure",
         }, color
 
-    return build_structure_layer(config, grid, chosen, describe, "nextbrain.glb")
+    return build_structure_layer(config, grid, chosen, describe, "nextbrain.glb", bridges)
 
 
 def detail_levels(config):
@@ -494,6 +498,7 @@ def base_limitations(config, supplemental, fine):
         *cerebellum_limitations(config),
         "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",
         "Only one internal-anatomy detail level is drawn at a time; the coarse and fine layers segment the same anatomy.",
+        "Below NextBrain's lowest medullary voxel, the NextBrain level draws the teaching set's caudal medulla, which is FreeSurfer's brainstem label, so the medulla meets the spinal cord.",
         f"Internal solids are marching-cubes surfaces smoothed for display by at most {config['structures']['smoothing']['maximum_displacement_mm']:g} mm and never across a voxel centre; between voxel centres their boundaries are a display convention, not a measurement.",
         "Where a segmented structure meets itself at a corner its surface pinches there and is not a two-manifold; validation counts those edges, and the volume each surface encloses stays definite.",
         "NextBrain cortical parcels are published as ctx-rh- names for both hemispheres, an artefact of the reused label block; the hemisphere field is authoritative.",
@@ -653,10 +658,10 @@ def main():
     levels[0].update(coarse)
     fine = None
     if nextbrain.is_declared(config):
-        fine, nuclei = build_nextbrain_structures(config)
+        overview, learning_regions, bridges = learning.build(config, field_ranges)
+        fine, nuclei = build_nextbrain_structures(config, bridges)
         levels[1].update(fine)
         regions.extend(nuclei)
-        overview, learning_regions = learning.build(config, field_ranges)
         levels.append(overview)
         regions.extend(learning_regions)
         # Whatever earned geometry is published as a structure, so it must not

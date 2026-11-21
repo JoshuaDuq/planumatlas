@@ -55,7 +55,7 @@ The 17 entries of `spinal_cord.structures` each pair two PAM50 regions [left, ri
 Each region is meshed by `build_structure_layer` as the aseg solids are ([internal anatomy](internal-anatomy.md#method)): marching cubes at level 0.5 on the 0.5 mm grid, then Taubin smoothing ($\lambda = 0.5$, $\nu = 0.53$, 16 iterations) with displacement clamped to 0.6 mm and halved near any voxel centre it carried across the surface until none is. The 34 meshes form `spinal-cord.glb`; every region record is `pam50:<side>:<id>`, `supplemental` and `mri_registered`, with a note that the cord is the subject's and its regions PAM50's and that it reaches C1–C5, where the scan ends.
 
 ### Medulla join
-NextBrain labels no medulla below surface z = −32.0 mm on CDMD, whereas the atlas cord's highest voxel centre is at z = −44.0 mm. The teaching set's `caudal-medulla` unit is aseg's brainstem (label 16) below that floor, z = −48.0 to −32.0 mm (voxel centres), so the medulla overlaps the cord's top ([internal anatomy](internal-anatomy.md#method)). The NextBrain detail level keeps the gap.
+NextBrain labels no medulla below surface z = −32.0 mm on CDMD, whereas the atlas cord's highest voxel centre is at z = −44.0 mm. The teaching set's `caudal-medulla` unit is aseg's brainstem (label 16) below that floor, z = −48.0 to −32.0 mm (voxel centres), so the medulla overlaps the cord's top ([internal anatomy](internal-anatomy.md#method)). The NextBrain detail level draws the same unit below its own medulla, so the cord is attached at every level; on NextBrain alone it would stand 10 mm below the brainstem.
 
 ## Display
 The cord is a hidden layer: `spinal-cord.glb` is downloaded only when shown, by Display › **Show spinal cord**, the <kbd>S</kbd> key, or `cord=1` in the URL. The switch is absent for a subject that publishes no cord, and the key then reports that none is published. Cord regions are solids: they are sectioned by the cut plane, their caps painted grey for grey matter and white for tracts under tissue colouring and kept, as MRI-registered solids, under MRI colouring. They belong to the system **Spinal cord** (Moelle épinière), follow the hemisphere filter, and are searchable in English and French in every detail level.
@@ -73,6 +73,7 @@ The cord is a hidden layer: `spinal-cord.glb` is downloaded only when shown, by 
 | `partner_of` | Each label's partner is the same region on the other side | passes |
 | Unresolved region in `most_probable_regions` | Counts toward the cord, takes no voxel | passes |
 | Caudal medulla meets the cord | Lowest aseg brainstem voxel below the cord's highest | −48.0 mm against −44.0 mm |
+| Brainstem reaches the cord (`spinal-cord.test.ts`) | At every detail level, the lowest drawn Brainstem mesh lies below the cord's highest | passes; NextBrain without the caudal medulla ends 10.0 mm above |
 | Viewer (`spinal-cord.test.ts`) | One supplemental, MRI-registered system; searchable, selectable and isolatable in every detail level; hidden cord neither drawn nor selectable; caps grey or white; caps pickable from both sides of four planes under MRI colouring; reset cancels a pending show | passes |
 
 ## Limitations
