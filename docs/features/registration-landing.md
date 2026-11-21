@@ -46,6 +46,28 @@ The floor and the radius were set after the measurement was seen, from its own c
 
 `scripts/measure_landing.py --record` refuses to replace the record with a result whose 90th-percentile centre miss is larger or whose median Dice is lower. A different registration, or a different person, is adopted only if it lands at least as well by this measurement. The record names the field and both segmentations by checksum, so a changed input has to be measured again.
 
+### A refinement that was tested and not adopted
+
+Because both brains hold the same NextBrain structures, a second registration can be driven by them. One was tested on 2026-11-21: after the registered field, a residual ANTs SyN registration (antspyx 0.6.3; MeanSquares on three label-contrast images in which each label has the same random intensity in both brains; 100 × 70 × 40 iterations) on this brain's 0.4 mm NextBrain grid. A registration cannot be scored on the labels that drove it, so every structure under 2,000 mm³ was hidden from one of two extra fits, its voxels given to the nearest visible label in both images, and scored by that fit.
+
+| Measure | Registered field | With the refinement |
+| :--- | :--- | :--- |
+| Hidden structures, median Dice: under 20 / 20–100 / 100–500 / 500–2,000 mm³ (442 structures) | 0.12 / 0.36 / 0.54 / 0.69 | 0.30 / 0.54 / 0.71 / 0.76 |
+| Hidden structures, centre miss: median / 90th percentile | 1.07 / 2.71 mm | 0.70 / 2.29 mm |
+| FreeSurfer's deep structures, median Dice (independent of NextBrain) | 0.881 | 0.884 |
+| FreeSurfer's cerebral cortex, Dice | 0.687 | 0.752 |
+| Left amygdala against FreeSurfer, Dice | 0.863 | 0.819 |
+| This brain's cortical points the template's cortex does not reach (198,492 mid-thickness vertices) | 23.5% | 15.1% |
+| Same Schaefer-400 parcel as this brain's own, over all points / where reached | 51.9% / 67.8% | 57.6% / 67.8% |
+
+The refinement lands structures and the cortical ribbon better, and names cortical areas no better once a point is in the cortex. It was not adopted, because the field it gives is not safe to publish on the 1.5 mm node grid the viewer reads:
+
+- one grid cell folds (Jacobian determinant −0.08) and 160 cells are squeezed below 0.1; the registered field's lowest is 0.121 and none folds;
+- the viewer's own inversion of the field, which [overlays](overlays.md) depend on, does not converge at 23 nodes;
+- smoothing the residual to the grid (Gaussian σ of 0.75 mm, then 1.5 mm) removes the fold but leaves the lowest determinant at 0.079 and 0.093, under the floor of 0.1 set before the smoothed fields were measured.
+
+The gain is real but comes with deformation too sharp for a coordinate field. These measurements were made with scripts that are not in the repository and are not recorded by validation.
+
 ## Display
 
 **Provenance › Registered group maps** (`registeredMaps`, `web/src/lib/core/panels/provenance.ts`) leads with the benchmark: the number of structures, the median and 90th-percentile centre miss, the median Dice by volume class, and the rule. Each registered map follows with the check its own registration was scored by.
