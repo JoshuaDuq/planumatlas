@@ -24,16 +24,64 @@ const circuitOf = (
 const create = (copy: object, manifest = published[0]) =>
   createCircuitCatalog(copy as CircuitData, manifest, deficitIds, ownTractIds(manifest.anatomy.id));
 
+const ACTIVE = [
+  ['vision', 4, 'hemianopia'],
+  ['memory', 5, 'amnesia'],
+  ['motor', 6, 'parkinsonism'],
+  ['cerebellar', 6, 'ataxia'],
+  ['corticospinal', 4, 'hemiparesis'],
+  ['touch', 4, 'somatosensory'],
+  ['spinothalamic', 4, 'central-pain'],
+  ['pontine-motor', 4, 'ataxic-hemiparesis'],
+  ['nigrostriatal', 2, 'parkinsonism'],
+  ['vestibular', 2, 'cerebellar-vertigo'],
+  ['ventral-spinocerebellar', 3, 'ataxia'],
+  ['entorhinal-ca1', 3, 'amnesia'],
+  ['stria-terminalis', 3, 'emotion-recognition'],
+  ['motion-mt-mst', 3, 'akinetopsia'],
+  ['colour', 3, 'achromatopsia'],
+  ['transcallosal-sma', 3, 'callosal-apraxia'],
+  ['piriform-orbitofrontal', 2, 'olfactory-recognition'],
+  ['schaffer-collaterals', 2, 'amnesia'],
+  ['navigation', 3, 'topographical-disorientation'],
+  ['slf3-opercular', 2, 'apraxia'],
+  ['gustatory-insulo-orbitofrontal', 2, 'taste-impairment'],
+  ['uncinate-temporopolar', 2, 'cognitive-estimation'],
+  ['arcuate-dorsal-frontotemporal', 2, 'aphasia'],
+  ['basal-amygdala-mediodorsal', 2, 'emotion-recognition'],
+  ['frontal-aslant-opercular', 2, 'speech-apraxia'],
+  ['motor-hyperdirect', 2, 'hemichorea'],
+  ['anterior-commissure-temporal', 4, 'cognitive-estimation'],
+  ['thalamocingulate-posterior', 2, 'amnesia'],
+  ['vertical-occipital-v3a-v4', 2, 'alexia'],
+  ['slf2-dorsal-frontoparietal', 2, 'neglect'],
+  ['inferior-pulvinar-mt', 2, 'akinetopsia'],
+  ['rubrospinal-crossed', 2, 'holmes-tremor'],
+  ['mediodorsal-prefrontal', 2, 'working-memory'],
+  ['dorsal-spinocerebellar', 2, 'ataxia'],
+  ['mdlf-parietotemporal', 2, 'aphasia'],
+  ['septohippocampal-ca1-oriens', 2, 'amnesia'],
+  ['valuation', 4, 'decision-making'],
+  ['associative-frontocaudate', 2, 'working-memory'],
+  ['dorsal-cingulum-anterior-posterior', 2, 'akinetic-mutism'],
+  ['olivocerebellar-flocculus', 2, 'room-tilt-illusion'],
+  ['basal-amygdala-area25', 2, 'decision-making'],
+  ['dentate-thalamo-putamen', 3, 'dystonia'],
+  ['ca1-subiculum', 3, 'amnesia'],
+  ['dorsal-geniculate-mt', 2, 'akinetopsia'],
+  ['subthalamic-crus-ii', 2, 'cerebellar-cognitive'],
+];
+
 test('withdrawn tours remain source-checkable in the archive and cannot be opened as active circuits', () => {
   const activeIds = new Set(data.circuits.map((circuit) => circuit.id));
-  assert.equal(archived.circuits.length, 33);
-  assert.deepEqual(archived.withheld_pending_rework, ['hearing', 'touch', 'valuation']);
+  assert.equal(archived.circuits.length, 28);
+  assert.deepEqual(archived.withheld_pending_rework, ['hearing']);
   assert.equal(
     [...data.circuits, ...archived.circuits].reduce(
       (sum, circuit) => sum + circuit.steps.length,
       0,
     ),
-    125,
+    210,
   );
   for (const manifest of published) {
     const catalog = create(data, manifest);
@@ -45,16 +93,16 @@ test('withdrawn tours remain source-checkable in the archive and cannot be opene
   }
 });
 
-test('only the five retained pathway tours resolve exact source landmarks on every published anatomy', () => {
+test('the 45 active pathway tours resolve exact source landmarks on every published anatomy', () => {
   for (const manifest of published) {
     const catalog = create(data, manifest);
     assert.deepEqual(
       catalog.all.map((c) => c.id),
-      ['vision', 'memory', 'motor', 'cerebellar', 'corticospinal'],
+      ACTIVE.map(([id]) => id),
     );
     assert.equal(
       catalog.all.reduce((count, circuit) => count + circuit.steps.length, 0),
-      25,
+      124,
     );
     assert.equal(catalog.contextMarginMm, 12);
     assert.equal(catalog.get('vision').steps.at(-1)!.region, 'hcp-mmp:left:1');
@@ -554,23 +602,17 @@ describe('CAT-52 · a landmark resolves to one form and uncovers what others cov
   });
 });
 
-test('CAT-53 · the published pathways: revision, margin, 23 references, five tours with their deficits and landmark counts', () => {
+test('CAT-53 · the published pathways: revision, margin, 262 references, 45 tours with their deficits and landmark counts', () => {
   const catalog = create(data);
-  assert.equal(catalog.revised, '2026-10-31');
+  assert.equal(catalog.revised, '2026-11-21');
   assert.equal(catalog.contextMarginMm, 12);
-  assert.equal(data.references.length, 23);
+  assert.equal(data.references.length, 262);
   for (const reference of data.references) {
     assert.ok(catalog.reference(reference.id).url.startsWith('https://'), reference.id);
   }
   assert.deepEqual(
     catalog.all.map((circuit) => [circuit.id, circuit.steps.length, circuit.deficit]),
-    [
-      ['vision', 4, 'hemianopia'],
-      ['memory', 5, 'amnesia'],
-      ['motor', 6, 'parkinsonism'],
-      ['cerebellar', 6, 'ataxia'],
-      ['corticospinal', 4, 'hemiparesis'],
-    ],
+    ACTIVE,
   );
 });
 
@@ -645,16 +687,10 @@ test('each archived deficit tour cites patient lesion evidence supporting the sa
   }
 });
 
-test('every landmark in the six archived lesion tours has cited full-text patient lesion provenance for its deficit', () => {
+// pontine-motor left this set when it was revived as an active pathway tour.
+test('every landmark in the five archived lesion tours has cited full-text patient lesion provenance for its deficit', () => {
   const references = new Map(clinical.references.map((reference) => [reference.id, reference]));
-  for (const id of [
-    'extinction',
-    'copying',
-    'cortical-hearing',
-    'oral-praxis',
-    'voices',
-    'pontine-motor',
-  ]) {
+  for (const id of ['extinction', 'copying', 'cortical-hearing', 'oral-praxis', 'voices']) {
     const circuit = archived.circuits.find((entry) => entry.id === id);
     assert.ok(circuit, `${id}: missing tour`);
     const cited = new Set(

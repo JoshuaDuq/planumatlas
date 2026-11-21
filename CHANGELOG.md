@@ -29,9 +29,20 @@ releases yet: the live site is deployed from `main`.
 - The feedback form takes an optional reply address and says why a send failed.
 - Colour **Striatal networks** and **Cerebellar functions** (group **Subcortical maps**): each draws its
   map voxel by voxel on cut faces, everything else in tissue colour, with a key.
+- **Circuits** has 45 tours and 124 landmarks, up from five tours and 25: 35 new pathway tours across
+  sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems, and the touch,
+  pontine motor, colour, navigation and valuation tours back from the archive, each re-checked against
+  its sources.
+- **Deficits** has 149 profiles, 271 findings and 472 references, up from 131, 218 and 339, among them
+  palinacousis, prosopometamorphopsia, utilization behaviour, musical alexia and receptive aprosodia.
 
 ### Changed
 
+- Deficit findings were re-read against their sources, 59 references now from the full text rather than
+  the abstract. Findings whose lesions lie in white matter or cannot be placed on a labelled structure
+  (such as amnesia after fornix or diencephalic injury) no longer colour a region.
+- The visual tour's optic tract and lateral geniculate nucleus are NextBrain's own labels, and the memory
+  tour's stops are NextBrain's except the mammillary nuclei.
 - Planum opens on Destrieux in its **Regions** colours, not **Lobes**, and **Start over** returns to
   Destrieux in Regions from any atlas. Lobes stays one choice under **Colour**; a link keeps the colour
   it was written with.

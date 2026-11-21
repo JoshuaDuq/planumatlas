@@ -7,8 +7,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { t } from '../../lib/core/i18n/index.ts';
-import archivedTours from '../../../../data/archived-circuit-tours.yaml';
-import type { CircuitData } from '../../lib/core/learning/catalog.ts';
 import { currentItem } from '../../lib/core/workspace.ts';
 import { expectAxeClean, withMedia } from '../../lib/ui/a11y-test-support.ts';
 import '../../app/layout.css';
@@ -129,7 +127,7 @@ describe('the whole route', () => {
 });
 
 describe('the list', () => {
-  test('offers only the retained pathways and no archived landmark or deferred circuit tours', () => {
+  test('offers the 45 active pathway tours and no archived landmark or deferred circuit tours', () => {
     mount();
     expect(rows().map((row) => row.dataset.circuit)).toEqual([
       'vision',
@@ -137,6 +135,46 @@ describe('the list', () => {
       'motor',
       'cerebellar',
       'corticospinal',
+      'touch',
+      'spinothalamic',
+      'pontine-motor',
+      'nigrostriatal',
+      'vestibular',
+      'ventral-spinocerebellar',
+      'entorhinal-ca1',
+      'stria-terminalis',
+      'motion-mt-mst',
+      'colour',
+      'transcallosal-sma',
+      'piriform-orbitofrontal',
+      'schaffer-collaterals',
+      'navigation',
+      'slf3-opercular',
+      'gustatory-insulo-orbitofrontal',
+      'uncinate-temporopolar',
+      'arcuate-dorsal-frontotemporal',
+      'basal-amygdala-mediodorsal',
+      'frontal-aslant-opercular',
+      'motor-hyperdirect',
+      'anterior-commissure-temporal',
+      'thalamocingulate-posterior',
+      'vertical-occipital-v3a-v4',
+      'slf2-dorsal-frontoparietal',
+      'inferior-pulvinar-mt',
+      'rubrospinal-crossed',
+      'mediodorsal-prefrontal',
+      'dorsal-spinocerebellar',
+      'mdlf-parietotemporal',
+      'septohippocampal-ca1-oriens',
+      'valuation',
+      'associative-frontocaudate',
+      'dorsal-cingulum-anterior-posterior',
+      'olivocerebellar-flocculus',
+      'basal-amygdala-area25',
+      'dentate-thalamo-putamen',
+      'ca1-subiculum',
+      'dorsal-geniculate-mt',
+      'subthalamic-crus-ii',
     ]);
   });
 
@@ -154,7 +192,7 @@ describe('the list', () => {
     await expect
       .element(
         page.getByRole('button', {
-          name: 'Visual pathway Chiasm → optic tract → lateral geniculate nucleus → V1 , 4 landmarks',
+          name: 'Visual pathway Optic chiasm → left optic tract → left dorsal lateral geniculate nucleus → left V1 , 4 landmarks',
         }),
       )
       .toBeVisible();
@@ -170,7 +208,7 @@ describe('the list', () => {
     await expect
       .element(
         page.getByRole('button', {
-          name: 'Voie visuelle Chiasma → tractus optique → noyau géniculé latéral → V1 , 4 repères',
+          name: 'Voie visuelle Chiasma optique → tractus optique gauche → noyau géniculé latéral dorsal gauche → V1 gauche , 4 repères',
         }),
       )
       .toBeVisible();
@@ -354,9 +392,11 @@ describe('the retained pathway tours', () => {
       await userEvent.click(summary(t(lang, 'circuits').evidence));
       await expect
         .element(
-          page.getByText(lang === 'en' ? 'Deficit evidence' : 'Données sur le déficit', {
-            exact: true,
-          }),
+          page
+            .getByText(lang === 'en' ? 'Deficit evidence' : 'Données sur le déficit', {
+              exact: true,
+            })
+            .first(),
         )
         .toBeVisible();
       expect(
@@ -369,18 +409,10 @@ describe('the retained pathway tours', () => {
   );
 
   test.each(['en', 'fr'] as const)(
-    'an archived corrected source still renders its published correction (%s)',
+    'a corrected source renders its published correction (%s)',
     async (lang) => {
       mount(lang);
-      // Exercise the correction renderer with a real archived source, without publishing its tour.
-      const corrected = (archivedTours as CircuitData).references.find(
-        (reference) => reference.id === 'clinical-bouvier-2006',
-      )!;
-      const reference = world.explorer.reference;
-      vi.spyOn(world.explorer, 'reference').mockImplementation((id) =>
-        id === 'clinical-zhang-2006' ? corrected : reference(id),
-      );
-      await open('vision');
+      await open('colour');
       await userEvent.click(summary(t(lang, 'circuits').evidence));
       await expect
         .element(page.getByRole('link', { name: /doi:10.1093\/cercor\/bhl065/ }))
@@ -389,8 +421,8 @@ describe('the retained pathway tours', () => {
         .element(
           page.getByText(
             lang === 'en'
-              ? /corrects the slice labels of Figure 2/
-              : /corrige les étiquettes des coupes de la figure 2/,
+              ? /corrects the axial slice labels in Figure 2/
+              : /indications de niveau des coupes axiales de la figure 2/,
           ),
         )
         .toBeVisible();

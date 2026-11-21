@@ -15,12 +15,12 @@ describe('an excursion into a deficit', () => {
   test('opens on the internal anatomy drawing most of its structures, not one drawing a few', async () => {
     const scene = createScene();
     await scene.engine.model.setDetail('aseg');
-    // Amnesia cites two FreeSurfer hippocampi, the teaching set's fornices and mammillary bodies,
-    // and NextBrain's anterior thalamus: FreeSurfer's segmentation draws two of the eight.
-    assert.equal(await scene.excursions.openDeficit('amnesia'), true);
+    // Dysarthria cites two FreeSurfer putamina and the teaching set's pontine halves and
+    // cerebellar lobules: FreeSurfer's segmentation draws two of the ten.
+    assert.equal(await scene.excursions.openDeficit('dysarthria'), true);
     const { settings } = scene.engine.model;
     assert.equal(settings.detail, 'learning');
-    for (const id of ['learning:left:fornix', 'learning:right:mammillary']) {
+    for (const id of ['learning:left:pons', 'learning:lobule-v-right']) {
       assert.equal(scene.engine.model.isRegionDrawn(id), true, id);
     }
     assert.equal(scene.excursions.restorable, true);

@@ -1085,15 +1085,15 @@
   },
   "deficits": {
    "scope": "Lesion evidence: where damage is linked to a deficit.",
-   "shows": "131 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.",
-   "source": "A curated selection of 339 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 252 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.",
+   "shows": "149 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.",
+   "source": "A curated selection of 472 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 214 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.",
    "caution": "The literature is selected, not systematically reviewed, and the catalogue is not diagnostic or prognostic. Group associations drawn on one reference brain do not predict an individual patient’s deficit. A whole parcel can be drawn where a study implicated part of it; white matter is left uncoloured."
   },
   "circuits": {
    "scope": "Tours of pathways described in the literature.",
-   "shows": "Five tours of anatomical pathways and loop branches, 25 landmarks in all: vision, memory, motor loop, cerebellar output and corticospinal. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.",
-   "source": "Each tour cites circuit background separately from the patient studies behind its linked deficit. The 23 references are 19 PubMed articles and 4 chapters of Purves et al., Neuroscience. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.",
-   "caution": "Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from monkey tracing. A deficit study supports a region–deficit association, not the pathway’s connections."
+   "shows": "45 tours of anatomical pathways and loop branches, 124 landmarks in all, through sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.",
+   "source": "Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.",
+   "caution": "Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections."
   },
   "tracts": {
    "scope": "White matter tracked in this brain’s own diffusion scan.",

@@ -49,9 +49,9 @@ describe('the list', () => {
       const label = document.getElementById(group.getAttribute('aria-labelledby')!)!;
       expect(label.tagName).toBe('H3');
     }
-    expect(rows()).toHaveLength(131);
+    expect(rows()).toHaveLength(149);
     expect(document.querySelector('.scope-note')!.textContent).toContain(
-      '131 profiles · adult acquired deficits',
+      '149 profiles · adult acquired deficits',
     );
     expect(document.querySelector('[role="group"][aria-label="Deficits"]')).not.toBeNull();
     await expect.element(page.getByRole('searchbox', { name: /search deficits/i })).toBeVisible();
@@ -75,7 +75,7 @@ describe('the list', () => {
     expect(field().value).toBe('');
     expect(document.activeElement).toBe(field());
     expect(calls.at(-1)).toBe('query:');
-    await expect.poll(announced, { timeout: 2000 }).toBe('131 deficits');
+    await expect.poll(announced, { timeout: 2000 }).toBe('149 deficits');
   });
 
   test('an equal sentence for a different query is said again', async () => {
@@ -158,7 +158,7 @@ describe('the list', () => {
       expect(items.length).toBeGreaterThan(0);
       expect(group.querySelectorAll('ul > li > button.row')).toHaveLength(items.length);
     }
-    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(131);
+    expect(document.querySelectorAll('ul > li > button.row')).toHaveLength(149);
   });
 
   test('one clear control: the custom button, with the native cancel hidden (D9)', async () => {
@@ -612,8 +612,8 @@ describe('the selected region’s deficits', () => {
 
   test('DEF-34 · a first group lists the deficits involving the region, in the list’s own order', async () => {
     const { view, explorer, calls } = await mount();
-    // The left middle temporal gyrus: aphasia and eight more.
-    view.selectedRegion = region('destrieux:left:38');
+    // The left short insular gyri: aphasia and ten more.
+    view.selectedRegion = region('destrieux:left:18');
     await expect.poll(group).not.toBeNull();
     const first = document.querySelector('[data-testid="list"] [role="group"][aria-labelledby]')!;
     expect(first).toBe(group());
@@ -621,17 +621,17 @@ describe('the selected region’s deficits', () => {
       'Involving this region',
     );
     showAll()!.click();
-    await expect.poll(() => ids(group()!).length).toBe(9);
+    await expect.poll(() => ids(group()!).length).toBe(11);
     const involving = new Set(
-      [...explorer.involved('destrieux:left:38')].flatMap((id) =>
+      [...explorer.involved('destrieux:left:18')].flatMap((id) =>
         explorer.deps.clinical.forRegion(id).map((association) => association.deficit),
       ),
     );
     expect(ids(group()!)).toContain('aphasia');
     await expectAxeClean();
     // Each keeps its place: the full list's rows, filtered.
-    const listed = ids(document.querySelector('[data-testid="list"]')!).slice(9);
-    expect(listed).toHaveLength(131);
+    const listed = ids(document.querySelector('[data-testid="list"]')!).slice(11);
+    expect(listed).toHaveLength(149);
     expect(ids(group()!)).toEqual(listed.filter((id) => involving.has(id!)));
     group()!.querySelector<HTMLElement>('[data-deficit="aphasia"] .row')!.click();
     expect(calls.at(-1)).toBe('deficit:aphasia');
@@ -640,7 +640,7 @@ describe('the selected region’s deficits', () => {
   test('DEF-35 · nothing selected, a region with no deficit, or a search: no group', async () => {
     const { view } = await mount();
     expect(group()).toBeNull();
-    expect(rows()).toHaveLength(131);
+    expect(rows()).toHaveLength(149);
     view.selectedRegion = region('destrieux:left:-1');
     await settled();
     expect(group()).toBeNull();
@@ -652,13 +652,13 @@ describe('the selected region’s deficits', () => {
 
   test('DEF-36 · more than eight show eight and “Show all N”, which shows the rest and moves focus to the first of them', async () => {
     const { view } = await mount();
-    // The left opercular inferior frontal gyrus: 12 deficits, the most of any region.
+    // The left opercular inferior frontal gyrus: 10 deficits.
     view.selectedRegion = region('destrieux:left:12');
     await expect.poll(() => ids(group()!).length).toBe(8);
-    expect(showAll()!.textContent!.trim()).toBe('Show all 12');
+    expect(showAll()!.textContent!.trim()).toBe('Show all 10');
     showAll()!.focus();
     await userEvent.keyboard('{Enter}');
-    await expect.poll(() => ids(group()!).length).toBe(12);
+    await expect.poll(() => ids(group()!).length).toBe(10);
     expect(showAll()).toBeNull();
     expect(document.activeElement).toBe(group()!.querySelectorAll('.row')[8]);
     // Exactly eight: all shown, no command. Another region starts folded again.
@@ -668,7 +668,7 @@ describe('the selected region’s deficits', () => {
     view.selectedRegion = region('destrieux:left:12');
     await expect.poll(() => showAll()).not.toBeNull();
     view.lang = 'fr';
-    await expect.poll(() => showAll()!.textContent!.trim()).toBe('Afficher les 12');
+    await expect.poll(() => showAll()!.textContent!.trim()).toBe('Afficher les 10');
     expect(group()!.querySelector('h3')!.textContent).toBe('Touchant cette région');
   });
 });

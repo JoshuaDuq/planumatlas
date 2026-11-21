@@ -392,7 +392,7 @@ describe('the controllers', () => {
     const world = app.world!;
     await vi.waitFor(() => expect(world.view.current.lesson.circuit).toBe('vision'));
     const landmark = world.view.current.selectedRegion?.id;
-    expect(landmark).toBe('learning:left:lateral-geniculate');
+    expect(landmark).toBe('nextbrain:left:484');
     ports.showDetailInPlace.mockClear();
     engine.emit('lesionPoint', { point: [10, 20, 30] });
     expect(world.lesion.sphere?.centre).toEqual([10, 20, 30]);

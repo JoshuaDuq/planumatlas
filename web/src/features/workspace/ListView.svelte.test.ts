@@ -93,7 +93,9 @@ describe('from the other lists', () => {
     await expect.element(bridge).toBeVisible();
     await expect
       .poll(() => shell.announcer.textContent)
-      .toBe('2 tract bundles. Anatomy: 2 regions match “arcuate”.');
+      .toBe(
+        '2 tract bundles. Anatomy: 2 regions match “arcuate”. Circuits: 1 guided circuit matches “arcuate”.',
+      );
     await bridge.click();
     await expect.poll(() => state().explorer).toBe('anatomy');
     expect(focused()).toBe(regionsField().element());
@@ -261,6 +263,7 @@ describe('a new view', () => {
     search.mockClear();
     viewChanges((change) => expect(search, `Anatomy, ${change}`).not.toHaveBeenCalled());
 
+    // A region is selected, so Functions opens on its list.
     await page.getByRole('tab', { name: 'Functions' }).click();
     await type(page.getByRole('searchbox', { name: 'Search functions' }), 'aphasia');
     await expect

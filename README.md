@@ -49,7 +49,7 @@ It runs in any WebGL 2 browser, in English and French, with keyboard and touch c
 | **Cerebellum and cord** | CerebNet lobules (25) · Nettekoven functional regions (32) · PAM50 cervical cord, C1–C5 (34 regions) |
 | **White matter** | 30 bundles from the subject’s diffusion MRI: 17 by DIPY RecoBundles, 13 by TractSeg |
 | **Histology** | BigBrain cortical layers per parcel · layer cell densities in 12 Julich-Brain areas |
-| **Evidence** | 70 Neurosynth maps · 131 deficit profiles · 228 stroke lesions · SEEG responses from 27 and 613 people · ENIGMA effects in 11 disorders |
+| **Evidence** | 70 Neurosynth maps · 149 deficit profiles · 228 stroke lesions · SEEG responses from 27 and 613 people · ENIGMA effects in 11 disorders |
 | **Your data** | MNI coordinates · NIfTI-1 maps and 4D series, read in the browser |
 
 ## Anatomy
@@ -105,8 +105,8 @@ These layers place published evidence beside the anatomy with its sources and li
 | Layer | What it shows |
 | :--- | :--- |
 | [Functions](https://planumatlas.com/docs/features/functions.html) | 70 curated Neurosynth consistency maps with ranked regional scores; 277 further terms by search. |
-| [Deficits](https://planumatlas.com/docs/features/deficits.html) | 131 acquired adult deficit profiles citing 339 references, each finding with its regions, population and limits. |
-| [Circuits](https://planumatlas.com/docs/features/circuits.html) | Five guided pathways with 25 landmarks and notes on the relays they omit. |
+| [Deficits](https://planumatlas.com/docs/features/deficits.html) | 149 acquired adult deficit profiles citing 472 references, each finding with its regions, population and limits. |
+| [Circuits](https://planumatlas.com/docs/features/circuits.html) | 45 guided pathways with 124 landmarks and notes on the relays they omit. |
 | [Stroke cases](https://planumatlas.com/docs/features/stroke-cases.html) | 228 Aphasia Recovery Cohort lesions, with lesion volume and WAB aphasia quotient. |
 | [Stimulation responses](https://planumatlas.com/docs/features/stimulation-responses.html) | SEEG response rates with their sample counts, from Lyu et al. (27 people) and F-TRACT v2307 (613 people), with F-TRACT’s peak delay by distance. |
 | [Disorder effects](https://planumatlas.com/docs/features/disorder-effects.html) | ENIGMA's case–control differences in cortical thickness and subcortical volume for 11 disorders, per Desikan-Killiany region and structure, significant differences only. |

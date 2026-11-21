@@ -680,7 +680,7 @@ describe('the published cdmd functions and deficits', () => {
         assert.equal(legend.rows.length, 3, id);
       }
     }
-    assert.equal(data.deficits.length, 131);
+    assert.equal(data.deficits.length, 149);
     for (const deficit of data.deficits) {
       const state: KeyState = {
         surfaceColor: 'tissue',

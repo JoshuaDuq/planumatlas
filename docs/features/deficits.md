@@ -1,6 +1,6 @@
 # Deficits
 
-The **Deficits** tab maps 131 acquired adult deficits onto the atlas regions that published patient studies associate with them. Each profile holds one to six findings; each finding cites supporting and qualifying studies, states its limitation and how the study's anatomy became atlas parcels, and is painted in its own colour. The catalogue is a curated selection of 339 PubMed-indexed studies, not a systematic review, and its parcels are atlas labels on one reference brain, not lesion volumes.
+The **Deficits** tab maps 149 acquired adult deficits onto the atlas regions that published patient studies associate with them. Each profile holds one to six findings; each finding cites supporting and qualifying studies, states its limitation and how the study's anatomy became atlas parcels, and is painted in its own colour. The catalogue is a curated selection of 472 PubMed-indexed studies, not a systematic review, and its parcels are atlas labels on one reference brain, not lesion volumes.
 
 ```{figure} figures/deficits-1.webp
 :alt: Three panels. a, a right hemisphere seen from the side and slightly behind, with an opaque beige cortex; gyri are painted blue, magenta, green and amber; a key at top right lists five findings. b, the same view with the cortex hidden: the caudate and putamen are painted violet among unpainted deep structures, and the key outlines the four cortical findings. c, the side panel showing the finding "Neglect after basal ganglia and thalamic lesions" with its regions, reported finding, interpretation, mapping note and the first of two publications.
@@ -13,12 +13,12 @@ The **Deficits** tab maps 131 acquired adult deficits onto the atlas regions tha
 
 | Input | Content |
 | :--- | :--- |
-| [`data/neuropsychology.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/neuropsychology.yaml), revision 2026-11-07 | 6 groups, 131 deficits, 218 findings (`associations`), 339 references |
-| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-16 | 459 identity records (434 PubMed articles, 5 Bookshelf chapters, 20 papers, abstracts and datasets recorded by DOI alone) for every work cited in the repository and the published manifests |
+| [`data/neuropsychology.yaml`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/neuropsychology.yaml), revision 2026-11-19 | 6 groups, 149 deficits, 271 findings (`associations`), 472 references |
+| [`data/reference-records.json`](https://github.com/JoshuaDuq/planumatlas/blob/main/data/reference-records.json), fetched 2026-11-16, with later additions | 786 identity records (756 PubMed articles, 10 Bookshelf chapters, 20 papers, abstracts and datasets recorded by DOI alone) for every work cited in the repository and the published manifests |
 | `public/models/<anatomy>/manifest.json` | The region ids and source labels that mappings must resolve to |
 | `public/models/<anatomy>/neuropsych-domains.json` | Teaching-set stand-ins for FreeSurfer structures (`units`); Functions maps that cite a finding (`lesion_checks`) |
 
-The 339 references span 1978–2026: 143 case series, 139 lesion-mapping studies, 48 case reports and 9 meta-analyses. Extraction scope is `abstract` for 252 and `full-text` for 87; six carry a recorded published correction. The 218 findings hold 439 evidence entries (312 supporting, 127 qualifying). Laterality: 107 bilateral, 63 left, 48 right. Findings per profile: one (64 profiles), two (58), three (4), four (1), five (2: hemispatial neglect, working memory) and six (2: aphasia, limb apraxia). Profiles per group: sensorimotor 42, perception and visuospatial abilities 24, attention and executive functions 21, social and emotional functions 17, language, reading and number 16, memory 11. The 456 mappings point to 171 distinct regions: Destrieux parcels (268 mappings), teaching-set structures (`learning:`, 83), FreeSurfer `aseg` structures (67), NextBrain nuclei (29) and Harvard arousal nuclei (`aan:`, 9). Twenty-four findings have no mapping.
+The 472 references span 1978–2026: 176 case series, 175 lesion-mapping studies, 111 case reports and 10 meta-analyses. Extraction scope is `abstract` for 214 and `full-text` for 258; six carry a recorded published correction. The 271 findings hold 600 evidence entries (368 supporting, 232 qualifying). Laterality: 124 bilateral, 77 left, 70 right. Findings per profile: one (69 profiles), two (58), three (9), four (8), five (3: hemispatial neglect, working memory, sign language aphasia) and six (2: aphasia, limb apraxia). Profiles per group: sensorimotor 45, perception and visuospatial abilities 31, attention and executive functions 22, language, reading and number 20, social and emotional functions 19, memory 12. The 498 mappings point to 172 distinct regions: Destrieux parcels (289 mappings), FreeSurfer `aseg` structures (87), teaching-set structures (`learning:`, 79), NextBrain nuclei (34) and Harvard arousal nuclei (`aan:`, 9). Fifty-one findings have no mapping.
 
 | Record | Fields |
 | :--- | :--- |
@@ -60,7 +60,7 @@ Each finding lists its regions as buttons, and its **Evidence** disclosure shows
 
 | Test | Criterion | Result |
 | :--- | :--- | :--- |
-| `data.test.ts` CAT-50 | Revision 2026-11-07: 6 groups, 131 deficits, 339 references, 218 findings | passes |
+| `data.test.ts` CAT-50 | Revision 2026-11-19: 6 groups, 149 deficits, 472 references, 271 findings | passes |
 | `data.test.ts` | Every published deficit resolves its regions, source labels and evidence on each published anatomy; every profile has a colour per finding | passes |
 | `data.test.ts`, `catalog.test.ts` CAT-49 | The six colours; a seventh finding throws; aphasia has the most findings (6) and paints 7 regions | passes |
 | `catalog.test.ts` | Each finding takes the next colour, a shared region the first, and one finding can be shown alone | passes |
@@ -72,7 +72,7 @@ Each finding lists its regions as buttons, and its **Evidence** disclosure shows
 
 ## Limitations
 - The literature is selected, not systematically reviewed; clinical accuracy has not been validated and the catalogue is not diagnostic or prognostic.
-- 252 of 339 references were extracted from the abstract only.
+- 214 of 472 references were extracted from the abstract only.
 - A single case does not show that the same lesion is required in everyone.
 - Group associations drawn on one reference brain do not predict an individual patient's deficit.
 - A parcel can be drawn whole where a study implicated part of it; anatomy without a parcel, such as white matter, is left uncoloured.

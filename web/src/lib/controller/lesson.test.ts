@@ -114,7 +114,7 @@ describe('opening a lesson', () => {
     const { model } = scene.engine;
     await scene.excursions.openCircuit('vision');
     await scene.excursions.openLessonStep(stepOf(scene, 'lgn'));
-    assert.equal(model.state.selectedRegion?.id, 'learning:left:lateral-geniculate');
+    assert.equal(model.state.selectedRegion?.id, 'nextbrain:left:484');
     assert.equal(model.settings.focused, true);
     await scene.excursions.openLessonStep(stepOf(scene, 'v1'));
     assert.equal(model.settings.focused, false);
@@ -128,10 +128,38 @@ describe('opening a lesson', () => {
     const { model } = scene.engine;
     await model.setDetail('aseg');
     await scene.excursions.openCircuit('vision');
-    assert.equal(model.settings.detail, 'learning');
+    assert.equal(model.settings.detail, 'nextbrain');
+    // The midline chiasm is the union of NextBrain's two chiasm labels, drawn here as them.
     for (const step of vision(scene).steps.filter((entry) => entry.id !== 'v1')) {
-      assert.equal(model.isRegionDrawn(step.region), true, step.id);
+      const parts = model.regions.get(step.region)!.constituent_regions ?? [];
+      assert.ok(
+        model.isRegionDrawn(step.region) ||
+          (parts.length > 0 && parts.every((id) => model.isRegionDrawn(id))),
+        step.id,
+      );
     }
+  });
+
+  test('every whole route draws all its deep landmarks but the pontine motor tour’s lobule V', async () => {
+    const undrawn: string[] = [];
+    for (const { id } of createScene().circuits.all) {
+      const scene = createScene();
+      const { model } = scene.engine;
+      await scene.excursions.openCircuit(id);
+      for (const step of scene.circuits.get(id).steps) {
+        const region = model.regions.get(step.region)!;
+        // A union's tissue-region parts are cut labels, drawn on no mesh.
+        const parts = (region.constituent_regions ?? []).filter(
+          (part) => model.regions.get(part)!.kind === 'structure',
+        );
+        const drawn =
+          model.isRegionDrawn(step.region) ||
+          (parts.length > 0 && parts.every((part) => model.isRegionDrawn(part)));
+        if (region.kind === 'structure' && !drawn) undrawn.push(`${id}/${step.id}`);
+      }
+    }
+    // Its pontine nuclei are NextBrain's alone and its lobule V the teaching set's alone.
+    assert.deepEqual(undrawn, ['pontine-motor/cerebellar-lobule-v']);
   });
 
   test('a lesson already open keeps the scene it holds', async () => {
@@ -261,7 +289,7 @@ describe('leaving a lesson', () => {
     await scene.excursions.openLessonStep(stepOf(scene, 'lgn'));
     scene.excursions.forget();
     await scene.excursions.leaveLesson();
-    assert.equal(scene.engine.model.state.selectedRegion?.id, 'learning:left:lateral-geniculate');
+    assert.equal(scene.engine.model.state.selectedRegion?.id, 'nextbrain:left:484');
     assert.equal(scene.engine.model.settings.focused, false);
   });
 

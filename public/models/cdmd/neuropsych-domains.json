@@ -1187,7 +1187,8 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Zola-Morgan et al. 1986"
+          "Zola-Morgan et al. 1986",
+          "Rempel-Clower et al. 1996"
         ],
         "mappings": [
           {
@@ -1464,7 +1465,7 @@
           },
           {
             "region": "destrieux:right:57",
-            "source_name": "S_intrapariet&P_trans",
+            "source_name": "S_intrapariet_and_P_trans",
             "coverage": 0.991
           }
         ]
@@ -1542,9 +1543,9 @@
           "fr": "Trouble de la reconnaissance des \u00e9motions"
         },
         "references": [
-          "Adolphs et al. 1994",
-          "Adolphs et al. 1999",
-          "Adolphs et al. 2005"
+          "Schmolck and Squire 2001",
+          "Hayakawa et al. 2010",
+          "Tippett et al. 2018"
         ],
         "mappings": [
           {
@@ -1567,32 +1568,20 @@
           "fr": "Trouble de la reconnaissance des \u00e9motions"
         },
         "references": [
-          "Adolphs et al. 2002"
+          "Sihvonen et al. 2022",
+          "Adolphs et al. 2002",
+          "Sheppard et al. 2020",
+          "Sheppard et al. 2021"
         ],
         "mappings": [
           {
-            "region": "destrieux:right:4",
-            "source_name": "G_and_S_subcentral",
+            "region": "aseg:right:51",
+            "source_name": "Right-Putamen",
             "coverage": 0.0
           },
           {
-            "region": "destrieux:right:12",
-            "source_name": "G_front_inf-Opercular",
-            "coverage": 0.295
-          },
-          {
-            "region": "destrieux:left:12",
-            "source_name": "G_front_inf-Opercular",
-            "coverage": 0.018
-          },
-          {
-            "region": "destrieux:left:5",
-            "source_name": "G_and_S_transv_frontopol",
-            "coverage": 0.002
-          },
-          {
-            "region": "destrieux:right:5",
-            "source_name": "G_and_S_transv_frontopol",
+            "region": "aseg:right:52",
+            "source_name": "Right-Pallidum",
             "coverage": 0.0
           }
         ]
@@ -1813,9 +1802,9 @@
           "fr": "Trouble de la reconnaissance des \u00e9motions"
         },
         "references": [
-          "Adolphs et al. 1994",
-          "Adolphs et al. 1999",
-          "Adolphs et al. 2005"
+          "Schmolck and Squire 2001",
+          "Hayakawa et al. 2010",
+          "Tippett et al. 2018"
         ],
         "mappings": [
           {
@@ -2071,7 +2060,7 @@
           },
           {
             "region": "destrieux:right:57",
-            "source_name": "S_intrapariet&P_trans",
+            "source_name": "S_intrapariet_and_P_trans",
             "coverage": 0.835
           }
         ]
@@ -2086,7 +2075,8 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Zola-Morgan et al. 1986"
+          "Zola-Morgan et al. 1986",
+          "Rempel-Clower et al. 1996"
         ],
         "mappings": [
           {
@@ -2402,7 +2392,7 @@
           },
           {
             "region": "destrieux:left:57",
-            "source_name": "S_intrapariet&P_trans",
+            "source_name": "S_intrapariet_and_P_trans",
             "coverage": 0.229
           }
         ]
@@ -2454,9 +2444,9 @@
           "fr": "Trouble de la reconnaissance des \u00e9motions"
         },
         "references": [
-          "Adolphs et al. 1994",
-          "Adolphs et al. 1999",
-          "Adolphs et al. 2005"
+          "Schmolck and Squire 2001",
+          "Hayakawa et al. 2010",
+          "Tippett et al. 2018"
         ],
         "mappings": [
           {
@@ -2579,7 +2569,8 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Zola-Morgan et al. 1986"
+          "Zola-Morgan et al. 1986",
+          "Rempel-Clower et al. 1996"
         ],
         "mappings": [
           {
@@ -2602,20 +2593,10 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Aggleton et al. 2000"
+          "Aggleton et al. 2000",
+          "Bradshaw et al. 2024"
         ],
-        "mappings": [
-          {
-            "region": "learning:left:fornix",
-            "source_name": "Fornix",
-            "coverage": null
-          },
-          {
-            "region": "learning:right:fornix",
-            "source_name": "Fornix",
-            "coverage": null
-          }
-        ]
+        "mappings": []
       },
       {
         "association": "amnesia-diencephalic",
@@ -2626,30 +2607,10 @@
         },
         "references": [
           "Harding et al. 2000",
-          "Vann et al. 2009"
+          "Vann et al. 2009",
+          "Danet et al. 2015"
         ],
-        "mappings": [
-          {
-            "region": "nextbrain:left:220",
-            "source_name": "anteroventral_nucleus_of_thalamus",
-            "coverage": null
-          },
-          {
-            "region": "nextbrain:right:10220",
-            "source_name": "anteroventral_nucleus_of_thalamus",
-            "coverage": null
-          },
-          {
-            "region": "learning:left:mammillary",
-            "source_name": "Mammillary nuclei",
-            "coverage": null
-          },
-          {
-            "region": "learning:right:mammillary",
-            "source_name": "Mammillary nuclei",
-            "coverage": null
-          }
-        ]
+        "mappings": []
       }
     ],
     "autobiographical-memory": [],
@@ -2688,7 +2649,7 @@
         "mappings": [
           {
             "region": "destrieux:left:57",
-            "source_name": "S_intrapariet&P_trans",
+            "source_name": "S_intrapariet_and_P_trans",
             "coverage": 0.83
           }
         ]
@@ -2835,7 +2796,8 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Zola-Morgan et al. 1986"
+          "Zola-Morgan et al. 1986",
+          "Rempel-Clower et al. 1996"
         ],
         "mappings": [
           {
@@ -2860,7 +2822,8 @@
           "fr": "Amn\u00e9sie"
         },
         "references": [
-          "Zola-Morgan et al. 1986"
+          "Zola-Morgan et al. 1986",
+          "Rempel-Clower et al. 1996"
         ],
         "mappings": [
           {
@@ -2886,9 +2849,9 @@
           "fr": "Trouble de la reconnaissance des \u00e9motions"
         },
         "references": [
-          "Adolphs et al. 1994",
-          "Adolphs et al. 1999",
-          "Adolphs et al. 2005"
+          "Schmolck and Squire 2001",
+          "Hayakawa et al. 2010",
+          "Tippett et al. 2018"
         ],
         "mappings": [
           {
@@ -2914,18 +2877,24 @@
         },
         "references": [
           "Goldenberg and Karnath 2006",
+          "Rosenzopf et al. 2024",
           "Achilles et al. 2017"
         ],
         "mappings": [
           {
-            "region": "destrieux:left:25",
-            "source_name": "G_pariet_inf-Angular",
+            "region": "destrieux:left:27",
+            "source_name": "G_parietal_sup",
+            "coverage": 0.398
+          },
+          {
+            "region": "destrieux:left:30",
+            "source_name": "G_precuneus",
             "coverage": 0.0
           },
           {
-            "region": "destrieux:left:26",
-            "source_name": "G_pariet_inf-Supramar",
-            "coverage": 0.158
+            "region": "destrieux:left:11",
+            "source_name": "G_cuneus",
+            "coverage": 0.0
           }
         ]
       }
@@ -3024,18 +2993,24 @@
         },
         "references": [
           "Goldenberg and Karnath 2006",
+          "Rosenzopf et al. 2024",
           "Achilles et al. 2017"
         ],
         "mappings": [
           {
-            "region": "destrieux:left:25",
-            "source_name": "G_pariet_inf-Angular",
-            "coverage": 0.036
+            "region": "destrieux:left:27",
+            "source_name": "G_parietal_sup",
+            "coverage": 0.227
           },
           {
-            "region": "destrieux:left:26",
-            "source_name": "G_pariet_inf-Supramar",
-            "coverage": 0.071
+            "region": "destrieux:left:30",
+            "source_name": "G_precuneus",
+            "coverage": 0.0
+          },
+          {
+            "region": "destrieux:left:11",
+            "source_name": "G_cuneus",
+            "coverage": 0.0
           }
         ]
       },
@@ -3048,15 +3023,11 @@
         },
         "references": [
           "Goldenberg and Karnath 2006",
+          "Perlova et al. 2025",
+          "Rosenzopf et al. 2024",
           "Achilles et al. 2017"
         ],
-        "mappings": [
-          {
-            "region": "destrieux:left:12",
-            "source_name": "G_front_inf-Opercular",
-            "coverage": 0.126
-          }
-        ]
+        "mappings": []
       }
     ],
     "taste": [
@@ -3083,12 +3054,12 @@
           },
           {
             "region": "destrieux:left:17",
-            "source_name": "G_Ins_lg&S_cent_ins",
+            "source_name": "G_Ins_lg_and_S_cent_ins",
             "coverage": 0.766
           },
           {
             "region": "destrieux:right:17",
-            "source_name": "G_Ins_lg&S_cent_ins",
+            "source_name": "G_Ins_lg_and_S_cent_ins",
             "coverage": 0.931
           }
         ]

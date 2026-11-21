@@ -25,20 +25,20 @@ export const en = {
   deficits: {
     scope: 'Lesion evidence: where damage is linked to a deficit.',
     shows:
-      '131 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.',
+      '149 acquired adult deficits, each mapped onto the atlas regions that published patient studies associate with it. A profile holds one to six findings, each painted in its own colour. Each finding cites supporting and qualifying studies and states its limitation and how the study’s anatomy became atlas parcels.',
     source:
-      'A curated selection of 339 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 252 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.',
+      'A curated selection of 472 PubMed-indexed studies: lesion-mapping studies, case series, case reports and meta-analyses. 214 of them were extracted from the abstract only. The parcels are atlas labels on one reference brain, not lesion volumes.',
     caution:
       'The literature is selected, not systematically reviewed, and the catalogue is not diagnostic or prognostic. Group associations drawn on one reference brain do not predict an individual patient’s deficit. A whole parcel can be drawn where a study implicated part of it; white matter is left uncoloured.',
   },
   circuits: {
     scope: 'Tours of pathways described in the literature.',
     shows:
-      'Five tours of anatomical pathways and loop branches, 25 landmarks in all: vision, memory, motor loop, cerebellar output and corticospinal. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.',
+      '45 tours of anatomical pathways and loop branches, 124 landmarks in all, through sensory, motor, cerebellar, hippocampal, limbic, association and commissural systems. Each landmark is a labelled region of this brain’s atlases, framed with 12 mm of surrounding anatomy.',
     source:
-      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 23 references are 19 PubMed articles and 4 chapters of Purves et al., Neuroscience. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.',
+      'Each tour cites circuit background separately from the patient studies behind its linked deficit. The 262 references are 252 PubMed articles, 9 chapters of Purves et al., Neuroscience, and a StatPearls chapter. The corticospinal tour draws the left corticospinal bundle tracked in this subject’s diffusion MRI.',
     caution:
-      'Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from monkey tracing. A deficit study supports a region–deficit association, not the pathway’s connections.',
+      'Apart from the corticospinal streamlines, the tours teach connections described in the literature and measure nothing in this brain. Atlas labels approximate the structures, and some projections are known from tracing in monkeys, cats, rabbits or rodents. A deficit study supports a region–deficit association, not the pathway’s connections.',
   },
   tracts: {
     scope: 'White matter tracked in this brain’s own diffusion scan.',
@@ -117,20 +117,20 @@ export const fr: typeof en = {
   deficits: {
     scope: 'Données lésionnelles\u202f: là où une lésion est liée à un déficit.',
     shows:
-      '131 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.',
+      '149 déficits acquis de l’adulte, chacun rapporté sur les régions d’atlas que des études de patients publiées y associent. Un profil réunit une à six observations, chacune peinte dans sa propre couleur. Chaque observation cite des études qui l’appuient ou la nuancent, et indique sa limite et la façon dont l’anatomie de l’étude est devenue des parcelles d’atlas.',
     source:
-      'Une sélection choisie de 339 études indexées dans PubMed\u202f: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 252 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.',
+      'Une sélection choisie de 472 études indexées dans PubMed\u202f: cartographies lésionnelles, séries de cas, études de cas et méta-analyses. 214 d’entre elles ont été extraites du seul résumé. Les parcelles sont des étiquettes d’atlas sur un cerveau de référence, et non des volumes lésionnels.',
     caution:
       'La littérature est sélectionnée, sans revue systématique, et le catalogue n’est ni diagnostique ni pronostique. Des associations de groupe tracées sur un seul cerveau de référence ne prédisent pas le déficit d’un patient individuel. Une parcelle peut être tracée entière là où une étude n’en impliquait qu’une partie\u202f; la substance blanche reste sans couleur.',
   },
   circuits: {
     scope: 'Des parcours de voies décrites dans la littérature.',
     shows:
-      'Cinq parcours de voies anatomiques et de branches de boucles, 25 repères en tout\u202f: vision, mémoire, boucle motrice, sortie cérébelleuse et voie corticospinale. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12\u00a0mm d’anatomie environnante.',
+      '45 parcours de voies anatomiques et de branches de boucles, 124 repères en tout, dans les systèmes sensoriels, moteurs, cérébelleux, hippocampiques, limbiques, d’association et commissuraux. Chaque repère est une région étiquetée des atlas de ce cerveau, cadrée avec 12\u00a0mm d’anatomie environnante.',
     source:
-      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 23 références sont 19 articles PubMed et 4 chapitres de Purves et al., Neuroscience. Le parcours corticospinal trace le faisceau corticospinal gauche suivi dans l’IRM de diffusion de ce sujet.',
+      'Chaque parcours cite le contexte du circuit à part des études de patients qui fondent son déficit lié. Les 262 références sont 252 articles PubMed, 9 chapitres de Purves et al., Neuroscience, et un chapitre de StatPearls. Le parcours corticospinal trace le faisceau corticospinal gauche suivi dans l’IRM de diffusion de ce sujet.',
     caution:
-      'Hormis les trajectoires corticospinales, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie.',
+      'Hormis les trajectoires corticospinales, les parcours enseignent des connexions décrites dans la littérature et ne mesurent rien dans ce cerveau. Les étiquettes d’atlas approchent les structures, et certaines projections ne sont connues que par traçage chez le singe, le chat, le lapin ou les rongeurs. Une étude de déficit appuie une association région–déficit, et non les connexions de la voie.',
   },
   tracts: {
     scope: 'La substance blanche suivie dans l’IRM de diffusion de ce cerveau.',

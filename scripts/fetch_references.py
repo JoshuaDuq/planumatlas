@@ -287,22 +287,31 @@ def book_record(accession):
     found = json.loads(get(f"{EUTILS}esearch.fcgi?db=books&retmode=json&term={accession}"))
     summaries = json.loads(get(
         f"{EUTILS}esummary.fcgi?db=books&retmode=json&id={','.join(found['esearchresult']['idlist'])}"))
-    # A section's tables and figures share its accession; the section itself is the citation.
-    chapters = [summaries["result"][uid] for uid in summaries["result"]["uids"]
-                if summaries["result"][uid]["accessionid"] == accession
-                and summaries["result"][uid]["rtype"] in ("chapter", "sec")]
+    # A section's tables and figures share its accession, as a chapter's sections share the
+    # chapter's; the chapter, else the section, is the citation.
+    entries = [summaries["result"][uid] for uid in summaries["result"]["uids"]
+               if summaries["result"][uid]["accessionid"] == accession]
+    chapters = ([entry for entry in entries if entry["rtype"] == "chapter"]
+                or [entry for entry in entries if entry["rtype"] == "sec"])
     if len(chapters) != 1:
         raise ValueError(f"Bookshelf has {len(chapters)} chapters for {accession}")
     info = ET.fromstring(chapters[0]["bookinfo"])
     parent = info.find("Citation/ParentRecord")
-    editors = parent.findtext("Contributors").removesuffix(", editors.").split(", ")
+    statement = parent.findtext("PublicationStatement")
+    # An edited book names its editors; one without (StatPearls), the chapter's authors.
+    editors = parent.findtext("Contributors")
+    people = ({"editors": editors.removesuffix(", editors.").split(", ")} if editors else
+              {"authors": info.findtext("Citation/MainRecord/Contributors")
+               .removesuffix(".").split(", ")})
     return {
         "nbk": accession,
         "title": text(info.find("Citation/MainRecord/Title")),
-        "book": text(parent.find("Title")),
-        "editors": editors,
-        "year": int(re.search(r"(\d{4})\.?$", parent.findtext("PublicationStatement"))[1]),
-        "publisher": parent.findtext("PublicationStatement").removesuffix("."),
+        # "[Internet]" is Bookshelf's medium designator, not part of the title.
+        "book": text(parent.find("Title")).removesuffix(" [Internet]"),
+        **people,
+        # "2001." or, for a book revised in place, "2022 Jan-."
+        "year": int(re.search(r"(\d{4})(?: [A-Z][a-z]{2}-)?\.?$", statement)[1]),
+        "publisher": statement.removesuffix("."),
         "corrections": [],
     }
 

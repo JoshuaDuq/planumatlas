@@ -301,9 +301,7 @@ describe('the display settings in effect', () => {
   test('a lesson step’s own display is not listed; Reset display gives that display back', async () => {
     await shell.open({ hash: '#tab=circuits&circuit=vision&step=3' });
     const { anatomy, view, engine } = shell.app.world!;
-    await vi.waitFor(() =>
-      expect(view.current.selectedRegion?.id).toBe('learning:left:lateral-geniculate'),
-    );
+    await vi.waitFor(() => expect(view.current.selectedRegion?.id).toBe('nextbrain:left:484'));
     flushSync();
     const step = { ...engine.model.settings };
     expect([step.hemisphere, step.focused]).toEqual(['left', true]);
