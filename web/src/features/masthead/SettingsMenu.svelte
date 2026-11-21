@@ -237,54 +237,32 @@
           />
         </div>
       </div>
+      {#snippet item(
+        label: string,
+        action: (event: MouseEvent) => void,
+        { phone = false, dialog = false, disabled = false } = {},
+      )}
+        <button
+          type="button"
+          class="menu-item"
+          class:phone-only={phone}
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+          aria-haspopup={dialog ? 'dialog' : undefined}
+          {disabled}
+          onclick={(event) => command(close, action, event)}
+        >
+          {label}
+        </button>
+      {/snippet}
       {#if fullscreenAvailable}
-        <button
-          type="button"
-          class="menu-item phone-only"
-          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-          disabled={!ready}
-          onclick={(event) => command(close, onFullscreen, event)}
-        >
-          {fullscreenLabel}
-        </button>
+        {@render item(fullscreenLabel, onFullscreen, { phone: true, disabled: !ready })}
       {/if}
-      <button
-        type="button"
-        class="menu-item phone-only"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        onclick={(event) => command(close, onCopyLink, event)}
-      >
-        {copy.copyLink}
-      </button>
-      <button
-        type="button"
-        class="menu-item phone-only"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        aria-haspopup="dialog"
-        onclick={(event) => command(close, onFeedback, event)}
-      >
-        {t(lang, 'footer').feedback}
-      </button>
+      {@render item(copy.copyLink, onCopyLink, { phone: true })}
+      {@render item(t(lang, 'footer').feedback, onFeedback, { phone: true, dialog: true })}
       {#if provenanceReady}
-        <button
-          type="button"
-          class="menu-item phone-only"
-          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-          aria-haspopup="dialog"
-          onclick={(event) => command(close, onProvenance, event)}
-        >
-          {t(lang, 'footer').provenance}
-        </button>
+        {@render item(t(lang, 'footer').provenance, onProvenance, { phone: true, dialog: true })}
       {/if}
-      <button
-        type="button"
-        class="menu-item"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        aria-haspopup="dialog"
-        onclick={(event) => command(close, onGuide, event)}
-      >
-        {copy.guide}
-      </button>
+      {@render item(copy.guide, onGuide, { dialog: true })}
       <button
         type="button"
         class="menu-item"
@@ -294,45 +272,24 @@
         <span>{copy.shortcuts}</span>
         <kbd aria-hidden="true">?</kbd>
       </button>
-      <!-- The English methods site, in a new tab so the view stays here. -->
-      <a
-        class="menu-item"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        href={methodsHref()}
-        hreflang="en"
-        target="_blank"
-        rel="noreferrer"
-        onclick={close}
-      >
-        <span
-          >{t(lang, 'link').methods}<span class="visually-hidden"
-            >{` ${t(lang, 'link').newTab}`}</span
-          ></span
-        >{@render iconGraphic('external-link')}
-      </a>
-      <a
-        class="menu-item"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        href={SOURCE_HREF}
-        target="_blank"
-        rel="noreferrer"
-        onclick={close}
-      >
-        <span
-          >{t(lang, 'link').source}<span class="visually-hidden"
-            >{` ${t(lang, 'link').newTab}`}</span
-          ></span
-        >{@render iconGraphic('external-link')}
-      </a>
-      <button
-        type="button"
-        class="menu-item"
-        {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
-        disabled={!ready}
-        onclick={(event) => command(close, onStartOver, event)}
-      >
-        {copy.startOver}
-      </button>
+      <!-- The English methods site and the source, in a new tab so the view stays here. -->
+      {#snippet newTab(href: string, label: string, hreflang?: string)}
+        <a
+          class="menu-item"
+          {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+          {href}
+          {hreflang}
+          target="_blank"
+          rel="noreferrer"
+          onclick={close}
+        >
+          <span>{label}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span></span
+          >{@render iconGraphic('external-link')}
+        </a>
+      {/snippet}
+      {@render newTab(methodsHref(), t(lang, 'link').methods, 'en')}
+      {@render newTab(SOURCE_HREF, t(lang, 'link').source)}
+      {@render item(copy.startOver, onStartOver, { disabled: !ready })}
     </div>
   {/snippet}
 </Popover>
