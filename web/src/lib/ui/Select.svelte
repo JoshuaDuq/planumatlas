@@ -191,6 +191,10 @@
       select {
         height: auto;
         min-height: 44px;
+        /* At this size a long value must fit its column: Chrome sizes a select to its longest option,
+           and a base-select one lets its value spill. */
+        min-width: 0;
+        overflow: hidden;
         font-size: var(--text-title);
       }
     }
