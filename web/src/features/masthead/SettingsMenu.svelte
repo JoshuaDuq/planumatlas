@@ -12,7 +12,7 @@
   import { tick } from 'svelte';
   import type { Attachment } from 'svelte/attachments';
   import { t } from '../../lib/core/i18n/index.ts';
-  import { methodsHref } from '../../lib/core/methods.ts';
+  import { methodsHref, SOURCE_HREF } from '../../lib/core/methods.ts';
   import type { ThemeChoice } from '../../lib/state/theme.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
@@ -23,8 +23,6 @@
   import Popover from '../../lib/ui/Popover.svelte';
 
   type SingleKeys = 'on' | 'off';
-
-  const SOURCE_HREF = 'https://github.com/JoshuaDuq/planumatlas';
 
   interface Props {
     lang: Language;
@@ -272,10 +270,15 @@
         <span>{copy.shortcuts}</span>
         <kbd aria-hidden="true">?</kbd>
       </button>
-      <!-- The English methods site and the source, in a new tab so the view stays here. -->
-      {#snippet newTab(href: string, label: string, hreflang?: string)}
+      <!-- The English methods site and, on phones, the source, in a new tab so the view stays here. -->
+      {#snippet newTab(
+        href: string,
+        label: string,
+        { hreflang = undefined as string | undefined, phone = false } = {},
+      )}
         <a
           class="menu-item"
+          class:phone-only={phone}
           {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
           {href}
           {hreflang}
@@ -287,8 +290,8 @@
           >{@render iconGraphic('external-link')}
         </a>
       {/snippet}
-      {@render newTab(methodsHref(), t(lang, 'link').methods, 'en')}
-      {@render newTab(SOURCE_HREF, t(lang, 'link').source)}
+      {@render newTab(methodsHref(), t(lang, 'link').methods, { hreflang: 'en' })}
+      {@render newTab(SOURCE_HREF, t(lang, 'link').source, { phone: true })}
       {@render item(copy.startOver, onStartOver, { disabled: !ready })}
     </div>
   {/snippet}
@@ -379,7 +382,7 @@
         background: var(--surface-hover);
       }
     }
-    /* The status bar carries Provenance on a desktop, and the masthead Full screen and Copy link. */
+    /* The status bar carries Provenance on a desktop, and the masthead Full screen, Copy link and the source. */
     .phone-only {
       display: none;
     }

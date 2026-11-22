@@ -21,6 +21,9 @@ export function methodsHref(page?: MethodsPage): string {
   return page ? `${ASSET_BASE}docs/features/${METHODS_PAGES[page]}.html` : `${ASSET_BASE}docs/`;
 }
 
+/** The source repository, linked from the masthead and, on phones, the ⋯ panel. */
+export const SOURCE_HREF = 'https://github.com/JoshuaDuq/planumatlas';
+
 /** The methods index's section on why Planum shows one brain; docs/index.md labels it. */
 export const ONE_BRAIN_ANCHOR = 'why-one-brain';
 export const oneBrainHref = (): string => `${methodsHref()}#${ONE_BRAIN_ANCHOR}`;

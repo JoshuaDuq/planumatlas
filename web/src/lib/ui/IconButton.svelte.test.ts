@@ -78,7 +78,7 @@ describe('IconButton', () => {
 
   test('every icon in icons.ts renders', async () => {
     const names = Object.keys(ICONS) as IconName[];
-    expect(names).toHaveLength(27);
+    expect(names).toHaveLength(28);
     for (const icon of names) {
       render(IconButton, { icon, label: icon });
       const svg = el(icon).querySelector('svg')!;

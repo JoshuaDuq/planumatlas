@@ -439,7 +439,7 @@ describe('Masthead', () => {
     document.removeEventListener('keydown', watch);
     expect(reached).toBe(false);
     await userEvent.keyboard('{Tab}');
-    expect(document.activeElement).toBe(el(page.getByRole('link', { name: SOURCE })));
+    expect(document.activeElement).toBe(el(button('Start over')));
     // The new tab is not opened here; the panel closes as for a command.
     const stay = (event: MouseEvent) => event.preventDefault();
     document.addEventListener('click', stay);
@@ -451,24 +451,19 @@ describe('Masthead', () => {
     expect(panelOpen()).toBe(false);
   });
 
-  test('the source code link opens the GitHub repository in a new tab, before Start over', async () => {
+  test('the GitHub link, before ⋯, opens the repository in a new tab', async () => {
     await render(Fixture);
-    await open();
     const source = page.getByRole('link', { name: SOURCE }).element() as HTMLAnchorElement;
+    expect(source.closest('.masthead-end')).not.toBeNull();
     expect(source.href).toBe('https://github.com/JoshuaDuq/planumatlas');
     expect(source.target).toBe('_blank');
     expect(source.rel).toBe('noreferrer');
-    source.focus();
+    expect(source.dataset.tooltip).toBe('Source code on GitHub');
+    el(button('Share this view')).focus();
     await userEvent.keyboard('{Tab}');
-    expect(document.activeElement).toBe(el(button('Start over')));
-    const stay = (event: MouseEvent) => event.preventDefault();
-    document.addEventListener('click', stay);
-    try {
-      await page.getByRole('link', { name: SOURCE }).click();
-    } finally {
-      document.removeEventListener('click', stay);
-    }
-    expect(panelOpen()).toBe(false);
+    expect(document.activeElement).toBe(source);
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(el(more()));
   });
 
   test('in French, Methods says the site is in English', async () => {
@@ -538,6 +533,9 @@ describe('Masthead', () => {
         'Start over',
       ]);
       // The masthead's own button is display:none, so only the menu item is in the tree.
+      const sources = page.getByRole('link', { name: SOURCE }).elements();
+      expect(sources).toHaveLength(1);
+      expect(sources[0]!.closest('.settings-menu')).not.toBeNull();
       expect(page.getByRole('button', { name: 'Full screen' }).elements()).toHaveLength(1);
       expect(page.getByRole('button', { name: 'Copy link to this view' }).elements()).toHaveLength(
         1,
