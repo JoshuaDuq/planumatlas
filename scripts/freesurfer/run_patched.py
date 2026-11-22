@@ -1,6 +1,7 @@
 """Run a FreeSurfer 8.2 Python script under fspython with three runtime workarounds.
 
-None of them changes a computed value. scripts/segment_nextbrain.py describes
+Two change no computed value; the sliced conv3d changes only the order in which
+SuperSynth's largest convolutions sum. scripts/segment_nextbrain.py describes
 each in WORKAROUNDS and records that description as provenance. NextBrain's
 segmentation also writes the posteriors behind its labels (see PATCHES).
 """

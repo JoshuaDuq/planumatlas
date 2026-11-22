@@ -2547,7 +2547,7 @@
     {
       "id": "nextbrain",
       "label": "NextBrain histological atlas",
-      "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+      "citation": "https://doi.org/10.1038/s41586-025-09708-2; https://doi.org/10.1162/imag.a.1244",
       "surface": false,
       "procedure": "subject-segmentation"
     },
@@ -61595,7 +61595,7 @@
           "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
           "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
         },
-        "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+        "citation": "https://doi.org/10.1038/s41586-025-09708-2; https://doi.org/10.1162/imag.a.1244",
         "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
       },
       {
@@ -61649,7 +61649,7 @@
           "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
           "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
         },
-        "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+        "citation": "https://doi.org/10.1038/s41586-025-09708-2; https://doi.org/10.1162/imag.a.1244",
         "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
       },
       {
@@ -61703,7 +61703,7 @@
           "supersynth_memory_releases": "SuperSynth's inference.py drops its first-pass network outputs before the flipped pass, and the flipped outputs once they are averaged in. Only when memory is freed changes.",
           "opencv_stand_in": "FreeSurfer 8.2's macOS Python has no OpenCV, yet ERC_bayesian_segmentation's ext/my_functions.py imports cv2 at module level for one helper that asserts False on entry. A stand-in module lets the import succeed and raises if any attribute of it is used."
         },
-        "citation": "https://doi.org/10.1038/s41586-025-09708-2",
+        "citation": "https://doi.org/10.1038/s41586-025-09708-2; https://doi.org/10.1162/imag.a.1244",
         "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
       },
       {

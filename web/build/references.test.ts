@@ -179,6 +179,7 @@ it('the opening view’s references are Planum, the subject’s dataset, Destrie
       ['internal'],
       'A probabilistic histological atlas of the human brain for MRI segmentation',
     ],
+    ['pmid:42212221', ['internal'], 'Fast segmentation with the NextBrain histological atlas'],
   ]);
 });
 

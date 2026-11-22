@@ -15,7 +15,7 @@ Planum draws the deep anatomy of one brain, MGH CDMD `sub_013`, at three exclusi
 | :--- | :--- | :--- |
 | T1 | MGH CDMD `sub_013` (figshare collection 5315474, file 30790102; CC0), defaced before release | `input_sha256: 16e91371…0c02` in `config/model.yaml` |
 | Reconstruction (`orig`, `brain`, `aseg`, `wmparc`, `ribbon`) | FreeSurfer 8.2 (`freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45`), `scripts/reconstruct_subject.py` | `data/sources.json`, `reconstruction.json` |
-| NextBrain labels | [NextBrain](../reference/references.md#cortical-and-subcortical-atlases) (Casamitjana et al. 2025) `atlas_simplified.zip`, run through SuperSynth (`SuperSynth_August_2025.pth`) | zip sha256 `8ea7c5aa…8f19`, extracted tree `20d9c58f…35e2`, model `7f759267…fd1d` |
+| NextBrain labels | [NextBrain](../reference/references.md#cortical-and-subcortical-atlases) (Casamitjana et al. 2025) `atlas_simplified.zip`, segmented as in Puonti et al. 2026 through SuperSynth (`SuperSynth_August_2025.pth`) | zip sha256 `8ea7c5aa…8f19`, extracted tree `20d9c58f…35e2`, model `7f759267…fd1d` |
 | Cerebellar lobules | [CerebNet](../reference/references.md#reference-datasets-and-tools), FastSurfer v2.6.0 (commit `1dc02473…6f21`; Apache-2.0) | commit and six checkpoint sha256 values in `scripts/segment_cerebellum.py` |
 
 CDMD was chosen from the 33 published FreeSurfer 6 reconstructions (26 participants and seven rescans) for the fewest surface defect holes (14). It was reconstructed again with FreeSurfer 8.2 from the same T1. With the FreeSurfer 6 aseg, NextBrain's left amygdala met aseg at Dice 0.793, below the 0.8 floor. The FreeSurfer 8.2 reconstruction has 8 defect holes before repair (3 left, 5 right; `stats/aseg.stats`).
@@ -28,7 +28,7 @@ CDMD was chosen from the 33 published FreeSurfer 6 reconstructions (26 participa
 
 The two hemispheres were joined on one isotropic 0.4 mm grid in surface RAS by nearest neighbour. The grid origin snaps to a 0.8 mm lattice, so every 2-voxel cut block lies on one fixed lattice. The largest label shift was 0.30 mm (left) and 0.17 mm (right). Right-hemisphere labels are offset by 10,000. A voxel claimed by both hemispheres goes to the right where SuperSynth's MNI *x* at its centre is ≥ 0, FreeSurfer's hemisphere rule; on CDMD no voxel was claimed twice. The joined volume (`nextbrain-cdmd.mgz`, int32) was read back label for label.
 
-Three runtime workarounds under `scripts/freesurfer/` change no computed value. A sliced `conv3d` avoids a CPU im2col buffer of about 90 GB and matches torch's `conv3d` to a relative 10⁻⁵. Earlier memory release in SuperSynth changes only when memory is freed. A stand-in replaces the missing OpenCV import and raises if used. The patched run also records the posteriors used by [boundary certainty](boundary-certainty.md#method) and reproduces the published labels byte for byte.
+Three runtime workarounds live under `scripts/freesurfer/`. Earlier memory release in SuperSynth changes only when memory is freed, and a stand-in replaces the missing OpenCV import and raises if used, so neither changes a computed value. A sliced `conv3d` avoids a CPU im2col buffer of about 90 GB. It sums the same products in another order, so SuperSynth's largest convolutions differ from torch's `conv3d` by rounding only, within a relative 10⁻⁵ on test volumes. Its effect on the labels was not compared with an unsliced run. The patched run also records the posteriors used by [boundary certainty](boundary-certainty.md#method) and reproduces the published labels byte for byte.
 
 ### Placement
 

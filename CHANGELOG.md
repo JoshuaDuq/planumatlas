@@ -6,6 +6,13 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Fixed
+
+- NextBrain's labels now also cite Puonti et al. (2026), the fast segmentation that produced them, beside
+  Casamitjana et al. (2025), in the reference list and on the methods pages.
+- The internal anatomy methods page no longer says the sliced `conv3d` workaround changes no computed value. It
+  changes SuperSynth's convolutions by rounding, and its effect on the labels was not measured.
+
 ## [0.1.1] - 2026-11-22
 
 Archived at [doi:10.5281/zenodo.24449724](https://doi.org/10.5281/zenodo.24449724).

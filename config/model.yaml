@@ -344,7 +344,7 @@ atlases:
 # in 967fed9); it is not published.
 nextbrain:
   label: NextBrain histological atlas
-  citation: https://doi.org/10.1038/s41586-025-09708-2
+  citation: https://doi.org/10.1038/s41586-025-09708-2; https://doi.org/10.1162/imag.a.1244
   lut: nextbrain-lut.txt
   # Below this, an ROI stays a cut label: a marching-cubes surface over a few
   # voxels claims a shape the grid cannot support. In mm³ so that it means the

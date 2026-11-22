@@ -33,6 +33,8 @@ Every paper here, and in the clinical and circuit data, is checked by its PMID a
 - **NextBrain probabilistic histological atlas.**
   Casamitjana, A., Mancini, M., Robinson, E., Peter, L., Annunziata, R., Althonayan, J., … Jaunmuktane, Z., & Iglesias, J. E. (2025). A probabilistic histological atlas of the human brain for MRI segmentation. *Nature*, 648(8094), 678–685. [doi:10.1038/s41586-025-09708-2](https://doi.org/10.1038/s41586-025-09708-2). PMID 41193801. Each brain's labels are its own segmentation with the atlas, produced by `scripts/segment_nextbrain.py` through FreeSurfer 8.2's SuperSynth and `mri_histo_atlas_segment_fireants`.
 
+  Puonti, O., Nolan, J., Dicamillo, R., Balbastre, Y., Casamitjana, A., Mancini, M., … Jaunmuktane, Z., & Iglesias, J. E. (2026). Fast segmentation with the NextBrain histological atlas. *Imaging Neuroscience*, 4, IMAG.a.1244. [doi:10.1162/imag.a.1244](https://doi.org/10.1162/imag.a.1244). PMID 42212221. The SuperSynth and FireANTs segmentation that `mri_histo_atlas_segment_fireants` runs.
+
 ### Reference datasets and tools
 
 - **MGH Connectome Diffusion Microstructure Dataset (CDMD).**

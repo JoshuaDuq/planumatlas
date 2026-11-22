@@ -30,7 +30,10 @@ from brain_model.sources import ROOT, read_config, sha256
 
 CACHE = ROOT / "data/cache"
 RUNTIME = Path(__file__).resolve().parent / "freesurfer"
-CITATION = "https://doi.org/10.1038/s41586-025-09708-2"
+CITATION = (
+    "https://doi.org/10.1038/s41586-025-09708-2; "
+    "https://doi.org/10.1162/imag.a.1244"
+)
 DIST = "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist"
 SUPERSYNTH = {
     "path": CACHE / "supersynth/SuperSynth_August_2025.pth",
