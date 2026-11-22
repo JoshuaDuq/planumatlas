@@ -4,7 +4,7 @@
 How each feature of the Planum brain viewer is built, displayed and validated.
 ```
 
-Planum renders one individual brain, MGH CDMD subject `sub_013`, reconstructed from its own T1-weighted scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. Cortical atlases, segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy.
+Planum is an atlas of the human brain in which cortical and deep parcellations, tractography and the published findings for each region are read on the same anatomy. That anatomy is one individual, MGH CDMD subject `sub_013`, reconstructed from its own T1-weighted scan with FreeSurfer 8.2, with tracts from the same person's diffusion scan. The MNI template can be chosen instead.
 
 Each page below documents one feature in a fixed order: data, method, display, validation, limitations and code availability. Every parameter and measured value is taken from the repository's code, published files and tests. Planum is for research and education. It is not clinical anatomy.
 
@@ -23,8 +23,26 @@ Why not an average
 What it costs
 : Group data must be registered onto this brain. Surface atlases arrive through `fsaverage` sphere registration ([cortical atlases](features/cortical-atlases.md)). Group volumes arrive through SynthMorph: across the two MNI templates, deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74. A single cortical parcel looked up from template space agrees with this brain's own parcellation for about 60% of cortex; a miss lies a median 2.2 mm away (90th percentile 5.9 mm). Coordinate therefore reports each region's share of a 5 mm sphere ([published coordinates](features/published-coordinates.md)). Fine structures land a median 1.2 mm from this brain's own and overlap poorly below about 100 mm³, so a structure that small takes no shares from a registered map ([registration landing](features/registration-landing.md)).
 
+The template
+: The MNI template (ICBM 152 2009c, at 0.9 of its size) can be chosen as the brain instead. Coordinates and maps in its space are then placed with no registration, and its tracts are an averaged atlas's ([tracts](features/tracts.md)). Its folds are smoothed, and it has no cerebellar lobules, spinal cord or arousal nuclei.
+
 Limit
-: One person's folding is not typical everywhere.
+: One person's folding is not typical everywhere, and one brain does not show how much people differ.
+
+(how-accurate)=
+## How accurate it is
+
+Each figure is measured on CDMD `sub_013`, except where the template is named, and comes from the validation of the page named beside it.
+
+| What you read | What was measured | Page |
+| :--- | :--- | :--- |
+| A structure's drawn surface | Within 0.6 mm of its source labels; no voxel centre misclassified | [Internal anatomy](features/internal-anatomy.md) |
+| HCP-MMP, Julich-Brain and Schaefer areas | Carried from `fsaverage` through registered spheres and re-derived byte for byte at each validation; Destrieux and Desikan-Killiany are the subject's own | [Cortical atlases](features/cortical-atlases.md) |
+| A deep structure's outline | NextBrain and FreeSurfer's aseg agree at Dice 0.77–0.89 on the 0.4 mm grid | [Segmentation agreement](features/segmentation-agreement.md) |
+| A coordinate from an MNI template | Deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74 across the two templates; a point carried there and back returns within 0.06 mm (median) | [Published coordinates](features/published-coordinates.md) |
+| A structure carried from the template | Its centre lands a median 1.2 mm from this brain's own (90th percentile 2.9 mm); a structure under 100 mm³ takes no values from registered maps | [Registration landing](features/registration-landing.md) |
+| A cortical parcel looked up from template space | Agrees with this brain's own parcellation for about 60% of cortex, a miss lying a median 2.2 mm away, so Coordinate reports shares of a 5 mm sphere | [Published coordinates](features/published-coordinates.md) |
+| Tracts | 94.6% of the streamline length of the subject's 17 RecoBundles bundles lies in its own white matter; 93.4% for the averaged atlas's 21 bundles on the template | [Tracts](features/tracts.md) |
 
 (methods)=
 ## Methods by feature

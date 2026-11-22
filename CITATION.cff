@@ -9,11 +9,17 @@ title: Planum
 version: 0.1.0
 date-released: 2026-11-21
 abstract: >-
-  An interactive, browser-based atlas of one real human brain (MGH CDMD
-  subject sub_013), reconstructed with FreeSurfer from its own T1 scan, with
-  diffusion tracts from the same person. Users can cut, measure and query the
-  brain against cortical and subcortical atlases, function and deficit maps,
-  stimulation data and stroke lesion cases, each traced to its cited source.
+  Planum is an open 3D atlas of the human brain, where cortical and deep
+  parcellations, tractography and the published findings for each region are
+  read on the same anatomy. It is built from real MRI data, with the surface,
+  the sections and the white-matter tracts all taken from the same brain, so
+  they agree with one another. Widely used cortical parcellations and a
+  histological atlas of the deep structures are drawn on that anatomy.
+  Selecting a region brings up what has been reported about it in meta-
+  analyses of the imaging literature, lesion studies, intracranial stimulation
+  and large group comparisons, each with its source. A coordinate or a
+  statistical map from a study can be placed on the brain to see where it
+  falls, and a standard MNI template can be used as the anatomy instead.
 authors:
   - given-names: Joshua
     family-names: Duquette

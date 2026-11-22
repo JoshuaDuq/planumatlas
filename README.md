@@ -7,8 +7,7 @@
   </a>
 </p>
 
-<p align="center"><strong>An interactive atlas of one human brain, traceable to its sources.</strong><br>
-Cut, measure and compare one person’s MRI-reconstructed brain in the browser, with its own white-matter pathways and published evidence registered onto it.</p>
+<p align="center"><strong>An open 3D atlas of the human brain, where cortical and deep parcellations, tractography and the published findings for each region are read on the same anatomy.</strong></p>
 
 <p align="center">
   <a href="https://planumatlas.com/"><strong>Open Planum</strong></a> ·
@@ -35,7 +34,9 @@ Cut, measure and compare one person’s MRI-reconstructed brain in the browser, 
 
 ## Overview
 
-Planum shows the brain of one person, MGH CDMD subject `sub_013`, reconstructed with FreeSurfer 8.2 from its own T1-weighted scan, with 30 tract bundles from the same person’s diffusion MRI. Cortical atlases, subcortical segmentations and group-level functional, vascular and clinical layers are registered onto this anatomy. Regions, cut faces and numbers in the viewer are traced to their sources, and each feature has a [methods page](https://planumatlas.com/docs/) giving its data, method, validation and limitations.
+Planum is an atlas of the human brain that runs in the browser. It is built from real MRI data, with the surface, the sections and the white-matter tracts all taken from the same brain, so they agree with one another. Widely used cortical parcellations, such as Destrieux, HCP-MMP and Julich-Brain, and a histological atlas of the deep structures are drawn on that anatomy, which makes it possible to see how differently they divide the same tissue. Selecting a region brings up what has been reported about it in meta-analyses of the imaging literature, lesion studies, intracranial stimulation and large group comparisons, each with its source.
+
+Guided tours follow the main pathways step by step, and every view is a link that can go into a lecture, a draft or a message to a colleague. A coordinate or a statistical map from a study can be placed on the brain to see where it falls, and a standard MNI template can be used as the anatomy instead. Planum is free, needs no account, and is meant for learning and research, not for clinical use.
 
 It runs in any WebGL 2 browser, in English and French, with keyboard and touch controls. Nothing is installed, and files you open stay on your computer.
 
@@ -45,6 +46,7 @@ It runs in any WebGL 2 browser, in English and French, with keyboard and touch c
 | Layer | Contents |
 | :--- | :--- |
 | **Subject** | MGH CDMD `sub_013` (CC0), FreeSurfer 8.2 reconstruction |
+| **Template** | MNI152NLin2009cAsym (ICBM 152 2009c) as a second brain, with 21 bundles of the HCP1065 averaged tract atlas |
 | **Cortex** | Destrieux (148 parcels) · Desikan-Killiany (68 regions) · HCP-MMP (360 areas) · Julich-Brain 3.1 (278 areas) · Schaefer (400 parcels) |
 | **Internal anatomy** | NextBrain (514 labels, 0.4 mm) · FreeSurfer aseg (32 structures) · teaching set (106 structures) · Harvard brainstem arousal nuclei (10 nuclei, 16 regions) |
 | **Cerebellum and cord** | CerebNet lobules (25) · Nettekoven functional regions (32) · PAM50 cervical cord, C1–C5 (34 regions) |
