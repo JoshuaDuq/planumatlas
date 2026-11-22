@@ -6,9 +6,35 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-22
+
+### Added
+
+- On the **MNI template**, Colour offers **Striatal networks** (Choi et al. 2012) and **Cerebellar functions**
+  (Nettekoven et al. 2024), registered onto the template by the steps that register them onto CDMD sub_013 and
+  held to the same limits.
+- On the **MNI template**, **Tracts** draws 21 bundles of the HCP1065 population-averaged atlas (Yeh 2022),
+  placed by the template's scale with no registration, in 3D and on **Linked MRI**. Before, it showed CDMD's
+  tracts in CDMD's outline. No FA map or tract profile is published for the template.
+- On the **MNI template**, the cerebellum is divided into CerebNet's 25 lobules, as on CDMD sub_013, so 148 of
+  149 deficit profiles and 41 of 45 circuits are listed there (before: 141 and 35). The averaged scan no longer
+  shows the fissures of the cerebellar hemispheres, so the lobule borders there are CerebNet's placement,
+  checked against SUIT's lobules.
+- The methods pages describe the MNI template on a page of its own, with a figure comparing it with CDMD
+  sub_013, and Tracts adds a figure of the template's bundles. The README has a section on the template.
+- The guided tour has a stop on **Subject**, where the reader chooses between CDMD sub_013 and the MNI template.
+
 ### Changed
 
 - **Functions** opens on its list again, not on **All functions**; nothing is painted until a function is chosen.
+- Choosing **Striatal networks** or **Cerebellar functions** with no cut open opens one through the map, axial
+  through the striatum and coronal through the cerebellum, turned to face the reader. Before, the brain looked
+  unchanged until a cut was made.
+
+### Fixed
+
+- On the MNI template, the guided tour's lesion stop placed its lesion outside the brain. It is now centred on
+  the precentral gyrus of whichever brain is open.
 
 ## [0.1.0] - 2026-11-21
 
@@ -131,5 +157,6 @@ The first numbered release, archived at [doi:10.5281/zenodo.24428326](https://do
 - The Overlay refuses map files over about 528 MiB and stops inflating a `.nii.gz` past the size its
   header states.
 
-[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.0...main
+[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.1...main
+[0.1.1]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.1
 [0.1.0]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.0
