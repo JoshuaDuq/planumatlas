@@ -478,6 +478,9 @@ def cerebellum_limitations(config):
     return [
         *limitations,
         "Learning cerebellar lobules are FastSurfer CerebNet's segmentation of this brain's 1 mm T1 in SUIT nomenclature; vermis I–V is part of lobules I–IV and V, and folia are not resolved.",
+        *([] if config["anatomy"]["individual"] else [
+            "Averaging removes the folia and finer fissures of the cerebellar hemispheres from the template's T1, so the lobule borders there follow the white-matter branches and the shape CerebNet learned from individual brains, not fissures that can be seen.",
+        ]),
         "Learning lobule surfaces leave out the lobule voxels the T1 reads as mostly fluid and open to the CSF, which shows the wider fissures; their volumes and placements are CerebNet's labels unchanged.",
         "Cerebellar lobules are published as teaching surfaces only; MRI cuts carry no lobule labels.",
         "Learning units come from three segmentations of the same brain (aseg, NextBrain and CerebNet), so surfaces from different sources can overlap slightly where they meet.",

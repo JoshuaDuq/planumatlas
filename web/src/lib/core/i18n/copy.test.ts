@@ -1,11 +1,12 @@
 import { expect, test } from 'vitest';
+import * as guide from './areas/guide.ts';
 import * as template from './areas/template.ts';
 import { TRANSLATIONS } from './index.ts';
 
-// The template's wording is loaded only with that brain, but approved as the rest is.
+// The tour's and the template's wording load on demand, but are approved as the rest is.
 const TABLES = {
-  en: { ...TRANSLATIONS.en, template: template.en },
-  fr: { ...TRANSLATIONS.fr, template: template.fr },
+  en: { ...TRANSLATIONS.en, guide: guide.en, template: template.en },
+  fr: { ...TRANSLATIONS.fr, guide: guide.fr, template: template.fr },
 };
 
 /**

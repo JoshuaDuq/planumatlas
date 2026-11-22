@@ -757,18 +757,7 @@ test('on the template, a tour naming a tract, cord or deficit it lacks is left o
   );
   assert.deepEqual(
     catalog.unavailable.map(({ id }) => id),
-    [
-      'cerebellar',
-      'corticospinal',
-      'spinothalamic',
-      'pontine-motor',
-      'vestibular',
-      'ventral-spinocerebellar',
-      'rubrospinal-crossed',
-      'dorsal-spinocerebellar',
-      'olivocerebellar-flocculus',
-      'subthalamic-crus-ii',
-    ],
+    ['corticospinal', 'spinothalamic', 'ventral-spinocerebellar', 'rubrospinal-crossed'],
   );
   assert.deepEqual(
     catalog.all.map(({ id }) => id),

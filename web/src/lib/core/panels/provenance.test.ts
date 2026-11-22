@@ -411,8 +411,12 @@ test('PROV-26 the MNI template says what it is, and its own space is no register
     /^Averaged reference template\. An average of 152 young adults’ MRI, scaled by 0\.9 to the mean brain size of the CDMD adults\./,
   );
   assert.equal(subject.items[0]!.link, undefined);
-  assert.equal(
-    rows.find(({ label }) => label === 'Registered group maps'),
-    undefined,
+  // Only the group maps registered onto it: its own space is placed by its scale.
+  assert.deepEqual(
+    rows.find(({ label }) => label === 'Registered group maps')!.items.map(({ text }) => text),
+    [
+      'Functional cerebellar regions (Nettekoven et al. 2024)',
+      'Striatal networks (Choi et al. 2012)',
+    ],
   );
 });

@@ -1698,7 +1698,7 @@
       "order": "F",
       "compression": "gzip",
       "byte_length": 227052,
-      "sha256": "627ab57b5b761c3068f5664b58a9c966af098047cbfc31a222e0c8e3b8ab42dc",
+      "sha256": "f5004276257eb8f877a81d7e4d15195d2641ca2da740a8927fd9f33aa8ad1792",
       "decoded_sha256": "91774f147a0781dbb8a6c649e793d9de196b0b6746b3e57e18bb5be11ac513e9",
       "voxel_to_surface_ras_mm": [
         [
@@ -1742,6 +1742,331 @@
         106
       ]
     }
+  },
+  "cerebellar_functions": {
+    "id": "nettekoven",
+    "label": "Functional cerebellar regions (Nettekoven et al. 2024)",
+    "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+    "license": "CC BY-NC 3.0",
+    "domains": {
+      "motor": {
+        "name": "Motor",
+        "name_fr": "Moteur"
+      },
+      "action": {
+        "name": "Action",
+        "name_fr": "Action"
+      },
+      "demand": {
+        "name": "Multiple demand",
+        "name_fr": "Demande multiple"
+      },
+      "social": {
+        "name": "Social, linguistic and spatial",
+        "name_fr": "Social, linguistique et spatial"
+      }
+    },
+    "regions": [
+      {
+        "id": "m1",
+        "domain": "motor",
+        "name": "M1 \u00b7 oculomotor",
+        "name_fr": "M1 \u00b7 oculomoteur",
+        "description": "The oculomotor vermis, most active for saccades, and also during reading, film watching and visual search.",
+        "description_fr": "Le vermis oculomoteur, le plus actif lors des saccades, et aussi pendant la lecture, un film ou la recherche visuelle.",
+        "color": [
+          128,
+          78,
+          160
+        ]
+      },
+      {
+        "id": "m2",
+        "domain": "motor",
+        "name": "M2 \u00b7 tongue",
+        "name_fr": "M2 \u00b7 langue",
+        "description": "A lateral part most active for tongue movements and a vermal part active for several body movements.",
+        "description_fr": "Une partie lat\u00e9rale la plus active lors des mouvements de la langue et une partie vermienne active pour plusieurs mouvements du corps.",
+        "color": [
+          157,
+          41,
+          224
+        ]
+      },
+      {
+        "id": "m3",
+        "domain": "motor",
+        "name": "M3 \u00b7 hand",
+        "name_fr": "M3 \u00b7 main",
+        "description": "Selectively active for movements of the hand on its own side.",
+        "description_fr": "S\u00e9lectivement active lors des mouvements de la main du m\u00eame c\u00f4t\u00e9.",
+        "color": [
+          101,
+          182,
+          249
+        ]
+      },
+      {
+        "id": "m4",
+        "domain": "motor",
+        "name": "M4 \u00b7 lower body",
+        "name_fr": "M4 \u00b7 bas du corps",
+        "description": "Most active for movements of the lower body, such as foot flexion and contraction of the gluteal muscles.",
+        "description_fr": "La plus active lors des mouvements du bas du corps, comme la flexion du pied et la contraction des fessiers.",
+        "color": [
+          98,
+          255,
+          118
+        ]
+      },
+      {
+        "id": "a1",
+        "domain": "action",
+        "name": "A1 \u00b7 action",
+        "name_fr": "A1 \u00b7 action",
+        "description": "Active when actions are observed, and especially for tasks that require spatial simulation, such as mental rotation.",
+        "description_fr": "Active lors de l\u2019observation d\u2019actions, et surtout pour les t\u00e2ches de simulation spatiale, comme la rotation mentale.",
+        "color": [
+          138,
+          137,
+          255
+        ]
+      },
+      {
+        "id": "a2",
+        "domain": "action",
+        "name": "A2 \u00b7 action",
+        "name_fr": "A2 \u00b7 action",
+        "description": "A classic action-observation region, with little response to tasks that neither show nor perform an action.",
+        "description_fr": "Une r\u00e9gion classique d\u2019observation de l\u2019action, peu active pour les t\u00e2ches qui ne montrent ni n\u2019ex\u00e9cutent d\u2019action.",
+        "color": [
+          83,
+          78,
+          225
+        ]
+      },
+      {
+        "id": "a3",
+        "domain": "action",
+        "name": "A3 \u00b7 action",
+        "name_fr": "A3 \u00b7 action",
+        "description": "Active when actions are observed and also when movements are imagined.",
+        "description_fr": "Active lors de l\u2019observation d\u2019actions et aussi lors de mouvements imagin\u00e9s.",
+        "color": [
+          95,
+          255,
+          255
+        ]
+      },
+      {
+        "id": "d1",
+        "domain": "demand",
+        "name": "D1 \u00b7 multiple demand",
+        "name_fr": "D1 \u00b7 demande multiple",
+        "description": "Active for executive control, such as updating, shifting and inhibition; the most medial part of Crus I and II.",
+        "description_fr": "Active lors du contr\u00f4le ex\u00e9cutif, comme la mise \u00e0 jour, l\u2019alternance et l\u2019inhibition ; la partie la plus m\u00e9diane des Crus I et II.",
+        "color": [
+          174,
+          62,
+          73
+        ]
+      },
+      {
+        "id": "d2",
+        "domain": "demand",
+        "name": "D2 \u00b7 multiple demand",
+        "name_fr": "D2 \u00b7 demande multiple",
+        "description": "Active for executive control; the innermost layer of the demand regions, repeated in lobule IX.",
+        "description_fr": "Active lors du contr\u00f4le ex\u00e9cutif ; la couche la plus interne des r\u00e9gions de demande, r\u00e9p\u00e9t\u00e9e dans le lobule IX.",
+        "color": [
+          255,
+          107,
+          179
+        ]
+      },
+      {
+        "id": "d3",
+        "domain": "demand",
+        "name": "D3 \u00b7 multiple demand",
+        "name_fr": "D3 \u00b7 demande multiple",
+        "description": "Active for executive control; the outermost layer of the demand regions, with vermal parts in lobules IV and IX.",
+        "description_fr": "Active lors du contr\u00f4le ex\u00e9cutif ; la couche la plus externe des r\u00e9gions de demande, avec des parties vermiennes dans les lobules IV et IX.",
+        "color": [
+          240,
+          83,
+          255
+        ]
+      },
+      {
+        "id": "d4",
+        "domain": "demand",
+        "name": "D4 \u00b7 multiple demand",
+        "name_fr": "D4 \u00b7 demande multiple",
+        "description": "The smallest region, functionally closest to D1; the most lateral of the demand regions.",
+        "description_fr": "La plus petite r\u00e9gion, fonctionnellement la plus proche de D1 ; la plus lat\u00e9rale des r\u00e9gions de demande.",
+        "color": [
+          208,
+          30,
+          130
+        ]
+      },
+      {
+        "id": "s1",
+        "domain": "social",
+        "name": "S1 \u00b7 social, linguistic, spatial",
+        "name_fr": "S1 \u00b7 social, linguistique, spatial",
+        "description": "The most medial of these regions, in the depth of the horizontal fissure; on the right, most active for language, such as verb generation.",
+        "description_fr": "La plus m\u00e9diane de ces r\u00e9gions, au fond de la fissure horizontale ; \u00e0 droite, la plus active pour le langage, comme la g\u00e9n\u00e9ration de verbes.",
+        "color": [
+          251,
+          194,
+          33
+        ]
+      },
+      {
+        "id": "s2",
+        "domain": "social",
+        "name": "S2 \u00b7 social, linguistic, spatial",
+        "name_fr": "S2 \u00b7 social, linguistique, spatial",
+        "description": "Most active for social processing, such as a theory-of-mind task on the right and an animated film on the left; active at rest.",
+        "description_fr": "La plus active pour le traitement social, comme une t\u00e2che de th\u00e9orie de l\u2019esprit \u00e0 droite et un film d\u2019animation \u00e0 gauche ; active au repos.",
+        "color": [
+          219,
+          255,
+          72
+        ]
+      },
+      {
+        "id": "s3",
+        "domain": "social",
+        "name": "S3 \u00b7 social, linguistic, spatial",
+        "name_fr": "S3 \u00b7 social, linguistique, spatial",
+        "description": "Overlaps S2 and S4 so much that it can be told apart from them only in an individual's own data; active at rest.",
+        "description_fr": "Recouvre tant S2 et S4 qu\u2019on ne l\u2019en distingue que dans les donn\u00e9es propres d\u2019un individu ; active au repos.",
+        "color": [
+          216,
+          255,
+          199
+        ]
+      },
+      {
+        "id": "s4",
+        "domain": "social",
+        "name": "S4 \u00b7 social, linguistic, spatial",
+        "name_fr": "S4 \u00b7 social, linguistique, spatial",
+        "description": "The most lateral tips of Crus I and II; most active for imagination and self-projection, such as imagining walking through a familiar home.",
+        "description_fr": "Les extr\u00e9mit\u00e9s les plus lat\u00e9rales des Crus I et II ; la plus active pour l\u2019imagination et la projection de soi, comme se promener en pens\u00e9e dans un lieu familier.",
+        "color": [
+          255,
+          255,
+          211
+        ]
+      },
+      {
+        "id": "s5",
+        "domain": "social",
+        "name": "S5 \u00b7 social, linguistic, spatial",
+        "name_fr": "S5 \u00b7 social, linguistique, spatial",
+        "description": "Active for imagination, spatial working memory and action observation, between this domain and the action regions.",
+        "description_fr": "Active pour l\u2019imagination, la m\u00e9moire de travail spatiale et l\u2019observation d\u2019actions, entre ce domaine et les r\u00e9gions d\u2019action.",
+        "color": [
+          82,
+          188,
+          93
+        ]
+      }
+    ],
+    "registration": {
+      "lobule_dice": {
+        "left_I_IV": 0.7834,
+        "right_I_IV": 0.7336,
+        "left_V": 0.7415,
+        "right_V": 0.7189,
+        "left_VI": 0.7477,
+        "right_VI": 0.7722,
+        "left_CrusI": 0.8426,
+        "right_CrusI": 0.8291,
+        "left_CrusII": 0.8113,
+        "right_CrusII": 0.8452,
+        "left_VIIb": 0.6683,
+        "right_VIIb": 0.7631,
+        "left_VIIIa": 0.7473,
+        "right_VIIIa": 0.7958,
+        "left_VIIIb": 0.7047,
+        "right_VIIIb": 0.7763,
+        "left_IX": 0.7838,
+        "right_IX": 0.8294,
+        "left_X": 0.5895,
+        "right_X": 0.8043,
+        "vermis_VII": 0.841,
+        "vermis_VIII": 0.8147,
+        "vermis_IX": 0.6781,
+        "vermis_X": 0.6979
+      },
+      "lobule_dice_mean": 0.7633,
+      "cerebellar_cortex_covered": 0.9509,
+      "side_agreement": 0.9941
+    },
+    "method": "The SUIT cerebellar template registered to this brain's skull-stripped T1, kept to its infratentorial compartment, with SynthMorph (joint affine and deformable); the atlas carried across by nearest neighbour and kept to this brain's cerebellar cortex. Each lobule's shares count its own voxels"
+  },
+  "striatal_networks": {
+    "id": "choi",
+    "label": "Striatal networks (Choi et al. 2012)",
+    "citation": "https://doi.org/10.1152/jn.00270.2012",
+    "license": "Distributed with FreeSurfer (FreeSurfer Software License)",
+    "networks": {
+      "Vis": {
+        "name": "Visual",
+        "name_fr": "Visuel"
+      },
+      "SomMot": {
+        "name": "Somatomotor",
+        "name_fr": "Somatomoteur"
+      },
+      "DorsAttn": {
+        "name": "Dorsal attention",
+        "name_fr": "Attention dorsale"
+      },
+      "SalVentAttn": {
+        "name": "Salience / ventral attention",
+        "name_fr": "Saillance / attention ventrale"
+      },
+      "Limbic": {
+        "name": "Limbic",
+        "name_fr": "Limbique"
+      },
+      "Cont": {
+        "name": "Frontoparietal control",
+        "name_fr": "Contr\u00f4le frontopari\u00e9tal"
+      },
+      "Default": {
+        "name": "Default mode",
+        "name_fr": "Mode par d\u00e9faut"
+      }
+    },
+    "minimum_confidence": 0.5,
+    "registration": {
+      "striatum_dice": {
+        "left_caudate": 0.8752,
+        "right_caudate": 0.8829,
+        "left_putamen": 0.8343,
+        "right_putamen": 0.8755,
+        "left_accumbens": 0.8026,
+        "right_accumbens": 0.7764
+      },
+      "striatum_dice_mean": 0.8411,
+      "structure_covered": {
+        "left_caudate": 0.9432,
+        "right_caudate": 0.9529,
+        "left_putamen": 0.9331,
+        "right_putamen": 0.9678,
+        "left_accumbens": 0.9692,
+        "right_accumbens": 0.8877
+      },
+      "structure_covered_min": 0.8877
+    },
+    "small": null,
+    "method": "FSL's MNI152 template (MNI152NLin6Asym), skull-stripped, registered to this brain's skull-stripped T1 with SynthMorph (joint affine and deformable); the atlas's loose mask carried across by nearest neighbour and kept to this brain's caudate, putamen and accumbens. A voxel the atlas does not reach takes the network of the nearest voxel it reaches in the same structure. Each region's shares count its own voxels. A structure under 100 mm\u00b3 takes no shares, and names none round it: no landing error was measured for maps registered onto this brain"
   },
   "coordinate_spaces": {
     "label": "Published coordinates",
@@ -1888,6 +2213,20 @@
       "citation": "https://doi.org/10.1038/s41586-025-09708-2",
       "surface": false,
       "procedure": "subject-segmentation"
+    },
+    {
+      "id": "nettekoven",
+      "label": "Functional cerebellar regions (Nettekoven et al. 2024)",
+      "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+      "surface": false,
+      "procedure": "registered-template"
+    },
+    {
+      "id": "choi",
+      "label": "Striatal networks (Choi et al. 2012)",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "surface": false,
+      "procedure": "registered-template"
     }
   ],
   "detail_levels": [
@@ -1981,7 +2320,7 @@
       "id": "learning",
       "label": "Learning anatomy",
       "file": "learning.glb",
-      "region_count": 83,
+      "region_count": 106,
       "source_grids": {
         "nextbrain": {
           "voxel_to_surface_ras_mm": [
@@ -2048,6 +2387,39 @@
             1.0,
             1.0
           ]
+        },
+        "cerebnet": {
+          "voxel_to_surface_ras_mm": [
+            [
+              -1.0,
+              0.0,
+              0.0,
+              128.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -128.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0,
+              128.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "voxel_size_mm": [
+            1.0,
+            1.0,
+            1.0
+          ]
         }
       },
       "palette_method": "Distinct teaching colours for display units, not the source LUT",
@@ -2055,7 +2427,17 @@
         "method": "Explicit source-label unions; bounded Taubin display smoothing",
         "iterations": 16,
         "maximum_displacement_mm": 0.6,
-        "source_volumes_unchanged": true
+        "source_volumes_unchanged": true,
+        "cerebellar_fissures": {
+          "method": "Lobule voxels below the midpoint of the lobules' and CSF's median T1, face-connected through such voxels to fluid outside the cerebellum",
+          "intensity": "mri/brain.mgz",
+          "lobule_median": 96.0,
+          "csf_median": 47.0,
+          "threshold": 71.5,
+          "opened_voxels": 7224,
+          "lobule_voxels": 111669
+        },
+        "openness": "_OPENNESS on CerebNet lobules: cosine-weighted share of rays from each vertex that clear the intact lobule surfaces together, a hit at d counting d / radius_mm open (appearance.occlusion)"
       }
     }
   ],
@@ -51377,7 +51759,66 @@
         -23.0,
         -41.0,
         -48.0
-      ]
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.1485424203966435
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.1367605553766598
+        },
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.12846400090921145
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.08603413331312863
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.07567291118140662
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.07446062925008998
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.06235675184210028
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.053491940219347264
+        },
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.04394522001022863
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.03405754550792719
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.02672702820449681
+        },
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.023525846229613775
+        },
+        {
+          "region": "nettekoven:left:a1",
+          "fraction": 0.013846532684257383
+        },
+        {
+          "region": "nettekoven:left:a3",
+          "fraction": 0.012331180270111567
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.058928267005095375
     },
     {
       "id": "aseg:left:10",
@@ -51437,7 +51878,28 @@
         -13.0,
         24.0,
         -8.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.523217636022514
+        },
+        {
+          "network": "Default",
+          "fraction": 0.4052532833020638
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.06449343339587242
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.05675422138836773,
+        "low": 0.018292682926829267,
+        "confident": 0.924953095684803
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:left:12",
@@ -51467,7 +51929,36 @@
         -24.0,
         16.0,
         -17.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.3190627202255109
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2339675828047921
+        },
+        {
+          "network": "Default",
+          "fraction": 0.1941508104298802
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.1427061310782241
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.10024665257223397
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.06694855532064835,
+        "low": 0.01744186046511628,
+        "confident": 0.9156095842142353
+      },
+      "striatal_networks_putamen": 1.0
     },
     {
       "id": "aseg:left:13",
@@ -51677,7 +52168,24 @@
         -9.0,
         25.0,
         -25.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8548387096774194
+        },
+        {
+          "network": "Default",
+          "fraction": 0.14516129032258066
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.030791788856304986,
+        "low": 0.005865102639296188,
+        "confident": 0.9633431085043989
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:left:28",
@@ -51827,7 +52335,66 @@
         22.0,
         -41.0,
         -48.0
-      ]
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:s2",
+          "fraction": 0.1463228708097498
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.14390257846892687
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.14113925256798734
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.0873973281497151
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.07647742648600232
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.07255159796466755
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.05934480590017723
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.055666723838926686
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.0486726506965487
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.033121795971261414
+        },
+        {
+          "region": "nettekoven:right:d4",
+          "fraction": 0.02551788538867608
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.021210908467211707
+        },
+        {
+          "region": "nettekoven:right:a1",
+          "fraction": 0.013645112724639339
+        },
+        {
+          "region": "nettekoven:right:a3",
+          "fraction": 0.013092447544451432
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.03912488327330246
     },
     {
       "id": "aseg:right:49",
@@ -51887,7 +52454,36 @@
         12.0,
         25.0,
         -8.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.5719916531416648
+        },
+        {
+          "network": "Default",
+          "fraction": 0.3366566195223742
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.06538372362624623
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.012288430326918618
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.011824715974959425
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.0470670067238581,
+        "low": 0.015766287966612568,
+        "confident": 0.9371667053095293
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:right:51",
@@ -51917,7 +52513,40 @@
         23.0,
         18.0,
         -17.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.42288917013198335
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2212981377689387
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.15910323630446574
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.11372265413126018
+        },
+        {
+          "network": "Default",
+          "fraction": 0.060748508407159646
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.018803109745073224
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.032182245525221476,
+        "low": 0.01030555053335744,
+        "confident": 0.9575122039414211
+      },
+      "striatal_networks_putamen": 1.0
     },
     {
       "id": "aseg:right:52",
@@ -52037,7 +52666,24 @@
         7.0,
         26.0,
         -24.0
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8770864946889226
+        },
+        {
+          "network": "Default",
+          "fraction": 0.12291350531107739
+        }
+      ],
+      "striatal_networks_unassigned": 0.0,
+      "striatal_networks_confidence": {
+        "filled": 0.11229135053110774,
+        "low": 0.004552352048558422,
+        "confident": 0.8831562974203339
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "aseg:right:60",
@@ -52248,7 +52894,28 @@
         -12.000002264976501,
         29.200003176927567,
         -12.800001323223114
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Default",
+          "fraction": 0.5493023851175491
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2968810001280027
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.13109613005077442
+        }
+      ],
+      "striatal_networks_unassigned": 0.02220847378077399,
+      "striatal_networks_confidence": {
+        "filled": 0.01978923483079877,
+        "low": 0.014051011280082038,
+        "confident": 0.9661597538891192
+      },
+      "striatal_networks_putamen": 0.00010909170248510899
     },
     {
       "id": "nextbrain:left:79",
@@ -52279,7 +52946,36 @@
         -24.000002443790436,
         17.200002998113632,
         -16.80000138282776
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.31724202891725145
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.22933641030471436
+        },
+        {
+          "network": "Default",
+          "fraction": 0.17937879715537136
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.13406018932793293
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.07374134601799086
+        }
+      ],
+      "striatal_networks_unassigned": 0.059824330052277115,
+      "striatal_networks_confidence": {
+        "filled": 0.03711913438779727,
+        "low": 0.014251543499768319,
+        "confident": 0.9486293221124344
+      },
+      "striatal_networks_putamen": 0.9970069253985548
     },
     {
       "id": "nextbrain:left:99",
@@ -52341,7 +53037,24 @@
         -9.600002229213715,
         22.800003081560135,
         -26.400001525878906
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8634807793575566
+        },
+        {
+          "network": "Default",
+          "fraction": 0.040547656661400734
+        }
+      ],
+      "striatal_networks_unassigned": 0.09597156398104266,
+      "striatal_networks_confidence": {
+        "filled": 0.0327653997378768,
+        "low": 0.013543031891655745,
+        "confident": 0.9536915683704674
+      },
+      "striatal_networks_putamen": 0.2162516382699869
     },
     {
       "id": "nextbrain:left:102",
@@ -52496,7 +53209,24 @@
         -14.400002300739288,
         11.60000291466713,
         0.7999988794326782
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.9148078778591293
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.010443271468301266
+        }
+      ],
+      "striatal_networks_unassigned": 0.0693001872978035,
+      "striatal_networks_confidence": {
+        "filled": 0.05457982680814733,
+        "low": 0.007195999512135626,
+        "confident": 0.938224173679717
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "nextbrain:left:119",
@@ -57053,7 +57783,32 @@
         10.799998074769974,
         30.40000319480896,
         -12.000001311302185
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Default",
+          "fraction": 0.44283714419038733
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.38234420735587327
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.12667034318924192
+        },
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.01189920671955203
+        }
+      ],
+      "striatal_networks_unassigned": 0.03480677045772706,
+      "striatal_networks_confidence": {
+        "filled": 0.0170091198769366,
+        "low": 0.010921876716844303,
+        "confident": 0.972069003406219
+      },
+      "striatal_networks_putamen": 0.0003076584990660367
     },
     {
       "id": "nextbrain:right:10079",
@@ -57084,7 +57839,40 @@
         22.799998253583908,
         18.400003015995026,
         -17.200001388788223
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.4092897141173003
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.2168582375478927
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.15543766578249338
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.07681697612732095
+        },
+        {
+          "network": "Default",
+          "fraction": 0.04973769525493663
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.016363100501031534
+        }
+      ],
+      "striatal_networks_unassigned": 0.07303271441202476,
+      "striatal_networks_confidence": {
+        "filled": 0.013302810632074271,
+        "low": 0.005176141421849167,
+        "confident": 0.9815210479460765
+      },
+      "striatal_networks_putamen": 0.9969350120819026
     },
     {
       "id": "nextbrain:right:10099",
@@ -57146,7 +57934,24 @@
         7.599998027086258,
         23.600003093481064,
         -26.00000151991844
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8997643144322751
+        },
+        {
+          "network": "Default",
+          "fraction": 0.05060307777623735
+        }
+      ],
+      "striatal_networks_unassigned": 0.04963260779148759,
+      "striatal_networks_confidence": {
+        "filled": 0.08884026258205689,
+        "low": 0.009482129832239242,
+        "confident": 0.9016776075857038
+      },
+      "striatal_networks_putamen": 0.22319474835886213
     },
     {
       "id": "nextbrain:right:10102",
@@ -57332,7 +58137,24 @@
         13.19999811053276,
         13.600002944469452,
         0.7999988794326782
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.9112590127565169
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.012479201331114808
+        }
+      ],
+      "striatal_networks_unassigned": 0.06727676095396562,
+      "striatal_networks_confidence": {
+        "filled": 0.05191175596122971,
+        "low": 0.006541000178390914,
+        "confident": 0.9415472438603794
+      },
+      "striatal_networks_putamen": 0.0
     },
     {
       "id": "nextbrain:right:10119",
@@ -62071,7 +62893,28 @@
         -12.80000227689743,
         23.600003093481064,
         -9.200001269578934
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.4571315505091247
+        },
+        {
+          "network": "Default",
+          "fraction": 0.3932512442732987
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.0935297788465929
+        }
+      ],
+      "striatal_networks_unassigned": 0.0528150256464894,
+      "striatal_networks_confidence": {
+        "filled": 0.028956629332647716,
+        "low": 0.012244701193938713,
+        "confident": 0.9587986694734135
+      },
+      "striatal_networks_putamen": 8.03458083591779e-05
     },
     {
       "id": "learning:right:caudate",
@@ -62129,7 +62972,28 @@
         11.999998092651367,
         25.20000311732292,
         -8.80000126361847
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Cont",
+          "fraction": 0.519158040651509
+        },
+        {
+          "network": "Default",
+          "fraction": 0.31627717759797497
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.0900872395244768
+        }
+      ],
+      "striatal_networks_unassigned": 0.06097726348144465,
+      "striatal_networks_confidence": {
+        "filled": 0.026427264850293637,
+        "low": 0.009739738776034144,
+        "confident": 0.9638329963736723
+      },
+      "striatal_networks_putamen": 0.00022463977407657007
     },
     {
       "id": "learning:left:putamen",
@@ -62185,7 +63049,36 @@
         -24.000002443790436,
         17.200002998113632,
         -16.80000138282776
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.31426705234673885
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.227279089297378
+        },
+        {
+          "network": "Default",
+          "fraction": 0.17880470280862182
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.13280302323411403
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.07715545395166558
+        }
+      ],
+      "striatal_networks_unassigned": 0.06333395539796585,
+      "striatal_networks_confidence": {
+        "filled": 0.03943665479540757,
+        "low": 0.015142081538116704,
+        "confident": 0.9454212636664757
+      },
+      "striatal_networks_putamen": 0.9970238836450577
     },
     {
       "id": "learning:right:putamen",
@@ -62241,7 +63134,40 @@
         22.799998253583908,
         18.400003015995026,
         -17.200001388788223
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 0.4049549181761982
+        },
+        {
+          "network": "Cont",
+          "fraction": 0.21456148740858247
+        },
+        {
+          "network": "SomMot",
+          "fraction": 0.15379142220615166
+        },
+        {
+          "network": "Limbic",
+          "fraction": 0.08195210712327808
+        },
+        {
+          "network": "Default",
+          "fraction": 0.04942087644197683
+        },
+        {
+          "network": "DorsAttn",
+          "fraction": 0.016189798560647593
+        }
+      ],
+      "striatal_networks_unassigned": 0.07669158900306766,
+      "striatal_networks_confidence": {
+        "filled": 0.016486015311149852,
+        "low": 0.0055837691705197205,
+        "confident": 0.9779302155183305
+      },
+      "striatal_networks_putamen": 0.9969554561762551
     },
     {
       "id": "learning:left:pallidum-external",
@@ -62495,7 +63421,24 @@
         -9.600002229213715,
         22.800003081560135,
         -26.400001525878906
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8634807793575566
+        },
+        {
+          "network": "Default",
+          "fraction": 0.040547656661400734
+        }
+      ],
+      "striatal_networks_unassigned": 0.09597156398104266,
+      "striatal_networks_confidence": {
+        "filled": 0.0327653997378768,
+        "low": 0.013543031891655745,
+        "confident": 0.9536915683704674
+      },
+      "striatal_networks_putamen": 0.2162516382699869
     },
     {
       "id": "learning:right:accumbens",
@@ -62549,7 +63492,24 @@
         7.599998027086258,
         23.600003093481064,
         -26.00000151991844
-      ]
+      ],
+      "striatal_networks": [
+        {
+          "network": "Limbic",
+          "fraction": 0.8997643144322751
+        },
+        {
+          "network": "Default",
+          "fraction": 0.05060307777623735
+        }
+      ],
+      "striatal_networks_unassigned": 0.04963260779148759,
+      "striatal_networks_confidence": {
+        "filled": 0.08884026258205689,
+        "low": 0.009482129832239242,
+        "confident": 0.9016776075857038
+      },
+      "striatal_networks_putamen": 0.22319474835886213
     },
     {
       "id": "learning:left:subthalamic",
@@ -66907,104 +67867,2059 @@
       ]
     },
     {
-      "id": "learning:cerebellar-cortex-left",
+      "id": "learning:lobules-i-iv-left",
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "left",
-      "label": "Cerebellar cortex \u00b7 left",
-      "source_name": "Cerebellar cortex",
+      "label": "Lobules I\u2013IV \u00b7 left",
+      "source_name": "Lobules I\u2013IV",
       "source_label_id": null,
-      "source_atlas": "aseg",
+      "source_atlas": "cerebnet",
       "source_label_ids": [
-        8
+        601
       ],
-      "constituent_regions": [
-        "aseg:left:8"
-      ],
+      "family_order": 0,
       "display_names": {
-        "en": "Cerebellar cortex",
-        "fr": "Cortex c\u00e9r\u00e9belleux"
+        "en": "Lobules I\u2013IV",
+        "fr": "Lobules I\u2013IV"
       },
       "system_names": {
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
       "display_color": [
-        138,
-        122,
-        110
+        176,
+        120,
+        92
       ],
-      "voxel_count": 52793,
+      "voxel_count": 3461,
       "voxel_size_mm": [
         1.0,
         1.0,
         1.0
       ],
-      "segmentation_volume_mm3": 52793.0,
-      "display_maximum_displacement_mm": 0.515858487994049,
-      "vertex_count": 26236,
-      "triangle_count": 52688,
-      "surface_area_mm2": 17544.2883806635,
+      "segmentation_volume_mm3": 3461.0,
+      "display_maximum_displacement_mm": 0.4758467291616043,
+      "vertex_count": 2520,
+      "triangle_count": 5096,
+      "surface_area_mm2": 1685.8105805346702,
       "centroid_ras_mm": [
-        -22.98139904911636,
-        -40.91697762960999,
-        -50.58606254617089
+        -8.314937879225658,
+        -25.40306269864201,
+        -31.41173071366657
       ],
       "anchor_ras_mm": [
-        -23.0,
-        -41.0,
-        -48.0
-      ]
+        -8.0,
+        -25.0,
+        -31.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.16700375613984397
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.16353655013002022
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.1138399306558798
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.10054897428488876
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.03813926610806125
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.01704709621496677
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.3912164114417798
     },
     {
-      "id": "learning:cerebellar-cortex-right",
+      "id": "learning:lobules-i-iv-right",
       "atlas": "learning",
       "kind": "structure",
       "hemisphere": "right",
-      "label": "Cerebellar cortex \u00b7 right",
-      "source_name": "Cerebellar cortex",
+      "label": "Lobules I\u2013IV \u00b7 right",
+      "source_name": "Lobules I\u2013IV",
       "source_label_id": null,
-      "source_atlas": "aseg",
+      "source_atlas": "cerebnet",
       "source_label_ids": [
-        47
+        602
       ],
-      "constituent_regions": [
-        "aseg:right:47"
-      ],
+      "family_order": 0,
       "display_names": {
-        "en": "Cerebellar cortex",
-        "fr": "Cortex c\u00e9r\u00e9belleux"
+        "en": "Lobules I\u2013IV",
+        "fr": "Lobules I\u2013IV"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
+      "display_color": [
+        176,
+        120,
+        92
+      ],
+      "voxel_count": 3691,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3691.0,
+      "display_maximum_displacement_mm": 0.5343489487441969,
+      "vertex_count": 2508,
+      "triangle_count": 5012,
+      "surface_area_mm2": 1680.4327924356653,
+      "centroid_ras_mm": [
+        7.731780005418586,
+        -25.23001896505012,
+        -31.740449742617177
+      ],
+      "anchor_ras_mm": [
+        8.0,
+        -25.0,
+        -32.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.17935518829585478
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.166621511785424
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.11406123001896505
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.08561365483608778
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.029802221620157138
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.4185857491194798
+    },
+    {
+      "id": "learning:lobule-v-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule V \u00b7 left",
+      "source_name": "Lobule V",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        603
+      ],
+      "family_order": 1,
+      "display_names": {
+        "en": "Lobule V",
+        "fr": "Lobule V"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
+      "display_color": [
+        92,
+        140,
+        176
+      ],
+      "voxel_count": 3884,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3884.0,
+      "display_maximum_displacement_mm": 0.4813754765682921,
+      "vertex_count": 2860,
+      "triangle_count": 5732,
+      "surface_area_mm2": 1877.7176362199323,
+      "centroid_ras_mm": [
+        -14.144438722966015,
+        -31.193357363542738,
+        -34.36045314109166
+      ],
+      "anchor_ras_mm": [
+        -14.0,
+        -31.0,
+        -34.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.41992790937178165
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.1611740473738414
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.08007209062821834
+        },
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.06848609680741503
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.26544799176107103
+    },
+    {
+      "id": "learning:lobule-v-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule V \u00b7 right",
+      "source_name": "Lobule V",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        604
+      ],
+      "family_order": 1,
+      "display_names": {
+        "en": "Lobule V",
+        "fr": "Lobule V"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "notes": {
+        "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
+        "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
+      },
+      "display_color": [
+        92,
+        140,
+        176
+      ],
+      "voxel_count": 3395,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3395.0,
+      "display_maximum_displacement_mm": 0.4588410724192612,
+      "vertex_count": 2755,
+      "triangle_count": 5518,
+      "surface_area_mm2": 1786.4183857787455,
+      "centroid_ras_mm": [
+        12.668924889543446,
+        -31.166715758468335,
+        -34.51899852724595
+      ],
+      "anchor_ras_mm": [
+        13.0,
+        -31.0,
+        -35.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.4600883652430044
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.2044182621502209
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.07540500736377025
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.05360824742268041
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.20176730486008837
+    },
+    {
+      "id": "learning:lobule-vi-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule VI \u00b7 left",
+      "source_name": "Lobule VI",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        605
+      ],
+      "family_order": 2,
+      "display_names": {
+        "en": "Lobule VI",
+        "fr": "Lobule VI"
       },
       "system_names": {
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
       "display_color": [
-        138,
-        122,
-        110
+        190,
+        168,
+        96
       ],
-      "voxel_count": 52473,
+      "voxel_count": 7232,
       "voxel_size_mm": [
         1.0,
         1.0,
         1.0
       ],
-      "segmentation_volume_mm3": 52473.0,
-      "display_maximum_displacement_mm": 0.5156702720780205,
-      "vertex_count": 26057,
-      "triangle_count": 52318,
-      "surface_area_mm2": 17364.097781434073,
+      "segmentation_volume_mm3": 7232.0,
+      "display_maximum_displacement_mm": 0.5000453566650506,
+      "vertex_count": 4354,
+      "triangle_count": 8724,
+      "surface_area_mm2": 2839.0658614325553,
       "centroid_ras_mm": [
-        21.37196272368647,
-        -40.81039772835553,
-        -50.6579383683037
+        -21.7985342920354,
+        -39.02806969026549,
+        -39.234651548672566
       ],
       "anchor_ras_mm": [
-        22.0,
-        -41.0,
-        -48.0
-      ]
+        -22.0,
+        -39.0,
+        -39.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.3075221238938053
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.22234513274336284
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.11863938053097345
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.053373893805309734
+        },
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.05268252212389381
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.03277101769911504
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.025719026548672565
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.024059734513274336
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.01686946902654867
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.1317754424778761
+    },
+    {
+      "id": "learning:lobule-vi-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule VI \u00b7 right",
+      "source_name": "Lobule VI",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        607
+      ],
+      "family_order": 2,
+      "display_names": {
+        "en": "Lobule VI",
+        "fr": "Lobule VI"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        190,
+        168,
+        96
+      ],
+      "voxel_count": 7407,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7407.0,
+      "display_maximum_displacement_mm": 0.4916767413510786,
+      "vertex_count": 4460,
+      "triangle_count": 8936,
+      "surface_area_mm2": 2918.62709274689,
+      "centroid_ras_mm": [
+        21.24706358849737,
+        -37.59268259754286,
+        -39.436073984069125
+      ],
+      "anchor_ras_mm": [
+        21.0,
+        -38.0,
+        -39.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.29526123936816523
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.19724584852166868
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.11624139327663022
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.059268259754286484
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.051707843931416225
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.04549750236262994
+        },
+        {
+          "region": "nettekoven:right:d4",
+          "fraction": 0.02983664101525584
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.02916160388821385
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.02443634399891994
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.012420683137572566
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.13014715809369515
+    },
+    {
+      "id": "learning:vermis-vi",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "midline",
+      "label": "Vermis VI (declive) \u00b7 midline",
+      "source_name": "Vermis VI (declive)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        606
+      ],
+      "family_order": 3,
+      "display_names": {
+        "en": "Vermis VI (declive)",
+        "fr": "Vermis VI (d\u00e9clive)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        136,
+        182,
+        168
+      ],
+      "voxel_count": 1823,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1823.0,
+      "display_maximum_displacement_mm": 0.46731302317694695,
+      "vertex_count": 1181,
+      "triangle_count": 2366,
+      "surface_area_mm2": 841.8200025941886,
+      "centroid_ras_mm": [
+        -0.3823368074602304,
+        -48.13274821722435,
+        -35.20076796489303
+      ],
+      "anchor_ras_mm": [
+        0.0,
+        -48.0,
+        -35.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.2353263850795392
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.1963795940756994
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.18102029621503016
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.16127262753702687
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.026330224904004388
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.022490400438837082
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.1738891936368623
+    },
+    {
+      "id": "learning:crus-i-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Crus I \u00b7 left",
+      "source_name": "Crus I",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        608
+      ],
+      "family_order": 4,
+      "display_names": {
+        "en": "Crus I",
+        "fr": "Crus I"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        120,
+        104,
+        170
+      ],
+      "voxel_count": 12492,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 12492.0,
+      "display_maximum_displacement_mm": 0.5289771336116457,
+      "vertex_count": 6831,
+      "triangle_count": 13738,
+      "surface_area_mm2": 4618.0414463717725,
+      "centroid_ras_mm": [
+        -33.77537624079411,
+        -46.35638808837656,
+        -45.58341338456612
+      ],
+      "anchor_ras_mm": [
+        -34.0,
+        -46.0,
+        -46.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.2526416906820365
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.16234390009606148
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.1335254562920269
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.12111751520973423
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.1111911623439001
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.049951969260326606
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.03858469420429075
+        },
+        {
+          "region": "nettekoven:left:s3",
+          "fraction": 0.01713096381684278
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.11351264809478066
+    },
+    {
+      "id": "learning:crus-i-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Crus I \u00b7 right",
+      "source_name": "Crus I",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        610
+      ],
+      "family_order": 4,
+      "display_names": {
+        "en": "Crus I",
+        "fr": "Crus I"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        120,
+        104,
+        170
+      ],
+      "voxel_count": 13214,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 13214.0,
+      "display_maximum_displacement_mm": 0.5024081020575492,
+      "vertex_count": 6845,
+      "triangle_count": 13730,
+      "surface_area_mm2": 4586.88936127763,
+      "centroid_ras_mm": [
+        32.60443469047979,
+        -45.609580747691844,
+        -45.94369607991524
+      ],
+      "anchor_ras_mm": [
+        33.0,
+        -46.0,
+        -46.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:s2",
+          "fraction": 0.3004389284092629
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.13273800514605721
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.12539730588769488
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.11344029060087786
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.11207809898592402
+        },
+        {
+          "region": "nettekoven:right:d4",
+          "fraction": 0.04593612834872105
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.04359013167852278
+        },
+        {
+          "region": "nettekoven:right:s3",
+          "fraction": 0.01755713637051612
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.10882397457242318
+    },
+    {
+      "id": "learning:crus-ii-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Crus II \u00b7 left",
+      "source_name": "Crus II",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        611
+      ],
+      "family_order": 5,
+      "display_names": {
+        "en": "Crus II",
+        "fr": "Crus II"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        104,
+        168,
+        132
+      ],
+      "voxel_count": 9565,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 9565.0,
+      "display_maximum_displacement_mm": 0.4787432579300072,
+      "vertex_count": 5439,
+      "triangle_count": 10922,
+      "surface_area_mm2": 3616.881338500249,
+      "centroid_ras_mm": [
+        -24.942812336644014,
+        -52.746262415054886,
+        -54.815891270256145
+      ],
+      "anchor_ras_mm": [
+        -25.0,
+        -53.0,
+        -55.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.26701515943544174
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.2537375849451124
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.18933612127548352
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.08060637741766859
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.07882906429691584
+        },
+        {
+          "region": "nettekoven:left:s3",
+          "fraction": 0.010454783063251438
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.010350235232618923
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.09869315211709358
+    },
+    {
+      "id": "learning:crus-ii-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Crus II \u00b7 right",
+      "source_name": "Crus II",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        613
+      ],
+      "family_order": 5,
+      "display_names": {
+        "en": "Crus II",
+        "fr": "Crus II"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        104,
+        168,
+        132
+      ],
+      "voxel_count": 8893,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 8893.0,
+      "display_maximum_displacement_mm": 0.49195758140637774,
+      "vertex_count": 5162,
+      "triangle_count": 10364,
+      "surface_area_mm2": 3432.6404791223085,
+      "centroid_ras_mm": [
+        22.660631957719556,
+        -53.610929944900484,
+        -54.331946474755426
+      ],
+      "anchor_ras_mm": [
+        23.0,
+        -54.0,
+        -54.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:s2",
+          "fraction": 0.29225233329585065
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.2374901608006297
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.2011694591251546
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.06803103564601372
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.06353311593388059
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.10615090520634207
+    },
+    {
+      "id": "learning:lobule-viib-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule VIIb \u00b7 left",
+      "source_name": "Lobule VIIb",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        614
+      ],
+      "family_order": 6,
+      "display_names": {
+        "en": "Lobule VIIb",
+        "fr": "Lobule VIIb"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        196,
+        116,
+        140
+      ],
+      "voxel_count": 4122,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4122.0,
+      "display_maximum_displacement_mm": 0.5212650029032007,
+      "vertex_count": 3623,
+      "triangle_count": 7250,
+      "surface_area_mm2": 2319.2568597300797,
+      "centroid_ras_mm": [
+        -26.237991266375545,
+        -42.886948083454634,
+        -62.27268316351286
+      ],
+      "anchor_ras_mm": [
+        -27.0,
+        -43.0,
+        -62.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.35686559922367783
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.24769529354682193
+        },
+        {
+          "region": "nettekoven:left:a1",
+          "fraction": 0.08248423095584667
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.07884522076661815
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.07472100921882581
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.053372149442018436
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.025230470645317808
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.06671518680252304
+    },
+    {
+      "id": "learning:lobule-viib-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule VIIb \u00b7 right",
+      "source_name": "Lobule VIIb",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        616
+      ],
+      "family_order": 6,
+      "display_names": {
+        "en": "Lobule VIIb",
+        "fr": "Lobule VIIb"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        196,
+        116,
+        140
+      ],
+      "voxel_count": 4505,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4505.0,
+      "display_maximum_displacement_mm": 0.5127585008012492,
+      "vertex_count": 3573,
+      "triangle_count": 7154,
+      "surface_area_mm2": 2296.507471402148,
+      "centroid_ras_mm": [
+        26.01354051054384,
+        -42.02108768035516,
+        -62.49544950055494
+      ],
+      "anchor_ras_mm": [
+        26.0,
+        -42.0,
+        -62.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.3700332963374029
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.24972253052164262
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.10588235294117647
+        },
+        {
+          "region": "nettekoven:right:a1",
+          "fraction": 0.06437291897891231
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.05460599334073252
+        },
+        {
+          "region": "nettekoven:right:d4",
+          "fraction": 0.05327413984461709
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.022641509433962263
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.06503884572697004
+    },
+    {
+      "id": "learning:vermis-vii",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "midline",
+      "label": "Vermis VII (folium and tuber) \u00b7 midline",
+      "source_name": "Vermis VII (folium and tuber)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        630
+      ],
+      "family_order": 7,
+      "display_names": {
+        "en": "Vermis VII (folium and tuber)",
+        "fr": "Vermis VII (folium et tuber)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        206,
+        172,
+        120
+      ],
+      "voxel_count": 854,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 854.0,
+      "display_maximum_displacement_mm": 0.527215231631236,
+      "vertex_count": 734,
+      "triangle_count": 1464,
+      "surface_area_mm2": 504.3473648161229,
+      "centroid_ras_mm": [
+        -0.26346604215456676,
+        -50.357142857142854,
+        -44.29391100702576
+      ],
+      "anchor_ras_mm": [
+        0.0,
+        -50.0,
+        -44.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.3114754098360656
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.21311475409836064
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.1053864168618267
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.08665105386416862
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.03161592505854801
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.01522248243559719
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.01405152224824356
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.01405152224824356
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.18032786885245902
+    },
+    {
+      "id": "learning:lobule-viiia-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule VIIIa \u00b7 left",
+      "source_name": "Lobule VIIIa",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        617
+      ],
+      "family_order": 8,
+      "display_names": {
+        "en": "Lobule VIIIa",
+        "fr": "Lobule VIIIa"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        88,
+        160,
+        168
+      ],
+      "voxel_count": 4248,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4248.0,
+      "display_maximum_displacement_mm": 0.4826198374105126,
+      "vertex_count": 3131,
+      "triangle_count": 6310,
+      "surface_area_mm2": 2070.8759510833133,
+      "centroid_ras_mm": [
+        -24.170668549905837,
+        -37.69303201506591,
+        -65.07015065913372
+      ],
+      "anchor_ras_mm": [
+        -24.0,
+        -38.0,
+        -65.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.3601694915254237
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.12876647834274954
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.12264595103578155
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.08168549905838042
+        },
+        {
+          "region": "nettekoven:left:a1",
+          "fraction": 0.0769774011299435
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.06779661016949153
+        },
+        {
+          "region": "nettekoven:left:a3",
+          "fraction": 0.0532015065913371
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.012711864406779662
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.011064030131826741
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.0748587570621469
+    },
+    {
+      "id": "learning:lobule-viiia-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule VIIIa \u00b7 right",
+      "source_name": "Lobule VIIIa",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        619
+      ],
+      "family_order": 8,
+      "display_names": {
+        "en": "Lobule VIIIa",
+        "fr": "Lobule VIIIa"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        88,
+        160,
+        168
+      ],
+      "voxel_count": 4436,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4436.0,
+      "display_maximum_displacement_mm": 0.48780019870460656,
+      "vertex_count": 3051,
+      "triangle_count": 6130,
+      "surface_area_mm2": 2053.7157304692078,
+      "centroid_ras_mm": [
+        21.006988277727682,
+        -38.454463480613164,
+        -65.34129846708747
+      ],
+      "anchor_ras_mm": [
+        21.0,
+        -38.0,
+        -65.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.3412984670874662
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.17200180342651036
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.10820559062218214
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.0811541929666366
+        },
+        {
+          "region": "nettekoven:right:a1",
+          "fraction": 0.08047790802524797
+        },
+        {
+          "region": "nettekoven:right:a3",
+          "fraction": 0.06492335437330929
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.06402164111812443
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.010595130748422003
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.06244364292155095
+    },
+    {
+      "id": "learning:lobule-viiib-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule VIIIb \u00b7 left",
+      "source_name": "Lobule VIIIb",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        620
+      ],
+      "family_order": 9,
+      "display_names": {
+        "en": "Lobule VIIIb",
+        "fr": "Lobule VIIIb"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        168,
+        140,
+        84
+      ],
+      "voxel_count": 3809,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3809.0,
+      "display_maximum_displacement_mm": 0.48467502558382386,
+      "vertex_count": 2594,
+      "triangle_count": 5236,
+      "surface_area_mm2": 1728.8007711419734,
+      "centroid_ras_mm": [
+        -18.29902861643476,
+        -30.12496718298766,
+        -66.15830926752429
+      ],
+      "anchor_ras_mm": [
+        -18.0,
+        -30.0,
+        -66.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.2819637700183775
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.18718823838277762
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.12549225518508794
+        },
+        {
+          "region": "nettekoven:left:a3",
+          "fraction": 0.10002625360987136
+        },
+        {
+          "region": "nettekoven:left:s5",
+          "fraction": 0.07797322131793122
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.05066946705171961
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.022053032291940142
+        },
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.01864006300866369
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.014964557626673668
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.0958256760304542
+    },
+    {
+      "id": "learning:lobule-viiib-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule VIIIb \u00b7 right",
+      "source_name": "Lobule VIIIb",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        622
+      ],
+      "family_order": 9,
+      "display_names": {
+        "en": "Lobule VIIIb",
+        "fr": "Lobule VIIIb"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        168,
+        140,
+        84
+      ],
+      "voxel_count": 3303,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3303.0,
+      "display_maximum_displacement_mm": 0.50675696239987,
+      "vertex_count": 2353,
+      "triangle_count": 4734,
+      "surface_area_mm2": 1587.4043747136245,
+      "centroid_ras_mm": [
+        14.996064184075083,
+        -31.756584922797458,
+        -66.40054495912807
+      ],
+      "anchor_ras_mm": [
+        15.0,
+        -32.0,
+        -66.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.3402966999697245
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.15985467756584923
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.1444141689373297
+        },
+        {
+          "region": "nettekoven:right:a3",
+          "fraction": 0.09536784741144415
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.09112927641537996
+        },
+        {
+          "region": "nettekoven:right:s5",
+          "fraction": 0.061156524371783226
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.0326975476839237
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.05812897366030881
+    },
+    {
+      "id": "learning:vermis-viii",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "midline",
+      "label": "Vermis VIII (pyramis) \u00b7 midline",
+      "source_name": "Vermis VIII (pyramis)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        631
+      ],
+      "family_order": 10,
+      "display_names": {
+        "en": "Vermis VIII (pyramis)",
+        "fr": "Vermis VIII (pyramide)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        124,
+        140,
+        196
+      ],
+      "voxel_count": 2013,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2013.0,
+      "display_maximum_displacement_mm": 0.45300132844246516,
+      "vertex_count": 1313,
+      "triangle_count": 2622,
+      "surface_area_mm2": 869.1734387057957,
+      "centroid_ras_mm": [
+        -0.7506209637357178,
+        -44.29905613512171,
+        -52.26378539493294
+      ],
+      "anchor_ras_mm": [
+        -1.0,
+        -44.0,
+        -52.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.17834078489816194
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.14456035767511177
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.13859910581222057
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.12568306010928962
+        },
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.037257824143070044
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.033283656234475906
+        },
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.03229011425732737
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.02533532041728763
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.02334823646299056
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.022851465474416296
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.019374068554396422
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.01689021361152509
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.01639344262295082
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.014903129657228018
+        },
+        {
+          "region": "nettekoven:right:a3",
+          "fraction": 0.013909587680079483
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.11773472429210134
+    },
+    {
+      "id": "learning:lobule-ix-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule IX (tonsil) \u00b7 left",
+      "source_name": "Lobule IX (tonsil)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        623
+      ],
+      "family_order": 11,
+      "display_names": {
+        "en": "Lobule IX (tonsil)",
+        "fr": "Lobule IX (tonsille)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        146,
+        124,
+        180
+      ],
+      "voxel_count": 3227,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3227.0,
+      "display_maximum_displacement_mm": 0.4759273716728362,
+      "vertex_count": 2071,
+      "triangle_count": 4170,
+      "surface_area_mm2": 1391.480944054994,
+      "centroid_ras_mm": [
+        -7.80105361016424,
+        -34.04834211341804,
+        -61.95568639603347
+      ],
+      "anchor_ras_mm": [
+        -8.0,
+        -34.0,
+        -62.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.2578246048961884
+        },
+        {
+          "region": "nettekoven:left:s4",
+          "fraction": 0.16052060737527116
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.11682677409358537
+        },
+        {
+          "region": "nettekoven:left:d2",
+          "fraction": 0.1109389525875426
+        },
+        {
+          "region": "nettekoven:left:m3",
+          "fraction": 0.05608924697861791
+        },
+        {
+          "region": "nettekoven:left:d4",
+          "fraction": 0.052990393554384875
+        },
+        {
+          "region": "nettekoven:left:s5",
+          "fraction": 0.050821196157421755
+        },
+        {
+          "region": "nettekoven:left:m4",
+          "fraction": 0.0368763557483731
+        },
+        {
+          "region": "nettekoven:left:a2",
+          "fraction": 0.029748992872637124
+        },
+        {
+          "region": "nettekoven:left:s3",
+          "fraction": 0.015184381778741865
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.10164239231484351
+    },
+    {
+      "id": "learning:lobule-ix-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule IX (tonsil) \u00b7 right",
+      "source_name": "Lobule IX (tonsil)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        625
+      ],
+      "family_order": 11,
+      "display_names": {
+        "en": "Lobule IX (tonsil)",
+        "fr": "Lobule IX (tonsille)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        146,
+        124,
+        180
+      ],
+      "voxel_count": 3364,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3364.0,
+      "display_maximum_displacement_mm": 0.6000000000000024,
+      "vertex_count": 2251,
+      "triangle_count": 4518,
+      "surface_area_mm2": 1485.9310538515845,
+      "centroid_ras_mm": [
+        5.6605231866825205,
+        -33.20927467300832,
+        -62.10136741973841
+      ],
+      "anchor_ras_mm": [
+        6.0,
+        -33.0,
+        -62.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:s2",
+          "fraction": 0.27526753864447084
+        },
+        {
+          "region": "nettekoven:right:s4",
+          "fraction": 0.15546967895362662
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.12336504161712247
+        },
+        {
+          "region": "nettekoven:right:d2",
+          "fraction": 0.10404280618311534
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.054696789536266346
+        },
+        {
+          "region": "nettekoven:right:s5",
+          "fraction": 0.045778834720570746
+        },
+        {
+          "region": "nettekoven:right:m3",
+          "fraction": 0.041617122473246136
+        },
+        {
+          "region": "nettekoven:right:d4",
+          "fraction": 0.04102259215219976
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.029429250891795482
+        },
+        {
+          "region": "nettekoven:left:s2",
+          "fraction": 0.027051129607609987
+        },
+        {
+          "region": "nettekoven:right:s3",
+          "fraction": 0.014268727705112961
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.07728894173602854
+    },
+    {
+      "id": "learning:vermis-ix",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "midline",
+      "label": "Vermis IX (uvula) \u00b7 midline",
+      "source_name": "Vermis IX (uvula)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        624
+      ],
+      "family_order": 12,
+      "display_names": {
+        "en": "Vermis IX (uvula)",
+        "fr": "Vermis IX (luette)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        190,
+        132,
+        112
+      ],
+      "voxel_count": 867,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 867.0,
+      "display_maximum_displacement_mm": 0.4691204041349064,
+      "vertex_count": 857,
+      "triangle_count": 1714,
+      "surface_area_mm2": 565.5627059709224,
+      "centroid_ras_mm": [
+        -0.748558246828143,
+        -35.89273356401384,
+        -52.50749711649365
+      ],
+      "anchor_ras_mm": [
+        -1.0,
+        -36.0,
+        -53.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.1776239907727797
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.14763552479815456
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.13494809688581316
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.12110726643598616
+        },
+        {
+          "region": "nettekoven:left:m1",
+          "fraction": 0.11303344867358708
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.049596309111880045
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.04844290657439446
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.04382929642445214
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.02768166089965398
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.02422145328719723
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.07035755478662054
+    },
+    {
+      "id": "learning:lobule-x-left",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "left",
+      "label": "Lobule X (flocculus) \u00b7 left",
+      "source_name": "Lobule X (flocculus)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        626
+      ],
+      "family_order": 13,
+      "display_names": {
+        "en": "Lobule X (flocculus)",
+        "fr": "Lobule X (flocculus)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        204,
+        150,
+        96
+      ],
+      "voxel_count": 727,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 727.0,
+      "display_maximum_displacement_mm": 0.4702038920715007,
+      "vertex_count": 592,
+      "triangle_count": 1176,
+      "surface_area_mm2": 380.704779205364,
+      "centroid_ras_mm": [
+        -19.779917469050893,
+        -18.709766162310867,
+        -58.196698762035766
+      ],
+      "anchor_ras_mm": [
+        -20.0,
+        -19.0,
+        -58.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.20495185694635487
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.19119669876203577
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.02888583218707015
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.5653370013755158
+    },
+    {
+      "id": "learning:lobule-x-right",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "right",
+      "label": "Lobule X (flocculus) \u00b7 right",
+      "source_name": "Lobule X (flocculus)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        628
+      ],
+      "family_order": 13,
+      "display_names": {
+        "en": "Lobule X (flocculus)",
+        "fr": "Lobule X (flocculus)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        204,
+        150,
+        96
+      ],
+      "voxel_count": 718,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 718.0,
+      "display_maximum_displacement_mm": 0.46315020529017087,
+      "vertex_count": 540,
+      "triangle_count": 1068,
+      "surface_area_mm2": 359.9480575160419,
+      "centroid_ras_mm": [
+        18.871866295264624,
+        -18.803621169916436,
+        -58.74373259052925
+      ],
+      "anchor_ras_mm": [
+        19.0,
+        -19.0,
+        -59.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.2757660167130919
+        },
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.19637883008356546
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.08635097493036212
+        },
+        {
+          "region": "nettekoven:right:m4",
+          "fraction": 0.05153203342618384
+        },
+        {
+          "region": "nettekoven:right:s5",
+          "fraction": 0.03064066852367688
+        },
+        {
+          "region": "nettekoven:right:a2",
+          "fraction": 0.016713091922005572
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.318941504178273
+    },
+    {
+      "id": "learning:vermis-x",
+      "atlas": "learning",
+      "kind": "structure",
+      "hemisphere": "midline",
+      "label": "Vermis X (nodulus) \u00b7 midline",
+      "source_name": "Vermis X (nodulus)",
+      "source_label_id": null,
+      "source_atlas": "cerebnet",
+      "source_label_ids": [
+        627
+      ],
+      "family_order": 14,
+      "display_names": {
+        "en": "Vermis X (nodulus)",
+        "fr": "Vermis X (nodule)"
+      },
+      "system_names": {
+        "en": "Cerebellum",
+        "fr": "Cervelet"
+      },
+      "display_color": [
+        150,
+        190,
+        120
+      ],
+      "voxel_count": 419,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 419.0,
+      "display_maximum_displacement_mm": 0.44121440961460834,
+      "vertex_count": 368,
+      "triangle_count": 732,
+      "surface_area_mm2": 240.03962054054824,
+      "centroid_ras_mm": [
+        -0.8186157517899761,
+        -28.92601431980907,
+        -49.13126491646778
+      ],
+      "anchor_ras_mm": [
+        -1.0,
+        -29.0,
+        -49.0
+      ],
+      "cerebellar_functions": [
+        {
+          "region": "nettekoven:right:d3",
+          "fraction": 0.26014319809069214
+        },
+        {
+          "region": "nettekoven:left:d3",
+          "fraction": 0.18138424821002386
+        },
+        {
+          "region": "nettekoven:left:s1",
+          "fraction": 0.07159904534606205
+        },
+        {
+          "region": "nettekoven:right:s1",
+          "fraction": 0.059665871121718374
+        },
+        {
+          "region": "nettekoven:left:d1",
+          "fraction": 0.057279236276849645
+        },
+        {
+          "region": "nettekoven:right:d1",
+          "fraction": 0.0477326968973747
+        },
+        {
+          "region": "nettekoven:right:m2",
+          "fraction": 0.021479713603818614
+        },
+        {
+          "region": "nettekoven:left:m2",
+          "fraction": 0.016706443914081145
+        },
+        {
+          "region": "nettekoven:right:m1",
+          "fraction": 0.014319809069212411
+        }
+      ],
+      "cerebellar_functions_unassigned": 0.26730310262529833
     },
     {
       "id": "nextbrain:left:7",
@@ -73470,6 +76385,1968 @@
           "fraction": 0.0013453218609963125
         }
       ]
+    },
+    {
+      "id": "nettekoven:left:m1",
+      "label": "M1 \u00b7 oculomotor \u00b7 left",
+      "source_name": "M1",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 1,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M1 \u00b7 oculomotor",
+        "fr": "M1 \u00b7 oculomoteur"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        128,
+        78,
+        160
+      ],
+      "voxel_count": 1328,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1328.0,
+      "centroid_ras_mm": [
+        -4.176204819277109,
+        -49.15210843373494,
+        -39.72816265060241
+      ],
+      "anchor_ras_mm": [
+        -4.0,
+        -50.0,
+        -40.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:m1",
+      "label": "M1 \u00b7 oculomotor \u00b7 right",
+      "source_name": "M1",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 17,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M1 \u00b7 oculomotor",
+        "fr": "M1 \u00b7 oculomoteur"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        128,
+        78,
+        160
+      ],
+      "voxel_count": 1140,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1140.0,
+      "centroid_ras_mm": [
+        3.67280701754386,
+        -47.70087719298245,
+        -39.93421052631579
+      ],
+      "anchor_ras_mm": [
+        4.0,
+        -49.0,
+        -40.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:m2",
+      "label": "M2 \u00b7 tongue \u00b7 left",
+      "source_name": "M2",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 2,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M2 \u00b7 tongue",
+        "fr": "M2 \u00b7 langue"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        157,
+        41,
+        224
+      ],
+      "voxel_count": 4036,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4036.0,
+      "centroid_ras_mm": [
+        -12.10356788899901,
+        -38.4187314172448,
+        -37.64990089197225
+      ],
+      "anchor_ras_mm": [
+        -12.0,
+        -38.0,
+        -38.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:m2",
+      "label": "M2 \u00b7 tongue \u00b7 right",
+      "source_name": "M2",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 18,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M2 \u00b7 tongue",
+        "fr": "M2 \u00b7 langue"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        157,
+        41,
+        224
+      ],
+      "voxel_count": 3895,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3895.0,
+      "centroid_ras_mm": [
+        11.22002567394095,
+        -37.453915275994866,
+        -37.317843388960206
+      ],
+      "anchor_ras_mm": [
+        11.0,
+        -37.0,
+        -37.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:m3",
+      "label": "M3 \u00b7 hand \u00b7 left",
+      "source_name": "M3",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 3,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M3 \u00b7 hand",
+        "fr": "M3 \u00b7 main"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        101,
+        182,
+        249
+      ],
+      "voxel_count": 3995,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3995.0,
+      "centroid_ras_mm": [
+        -14.471839799749688,
+        -33.441051314142676,
+        -43.415018773466834
+      ],
+      "anchor_ras_mm": [
+        -17.0,
+        -31.0,
+        -40.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:m3",
+      "label": "M3 \u00b7 hand \u00b7 right",
+      "source_name": "M3",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 19,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M3 \u00b7 hand",
+        "fr": "M3 \u00b7 main"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        101,
+        182,
+        249
+      ],
+      "voxel_count": 4013,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4013.0,
+      "centroid_ras_mm": [
+        13.230500872165463,
+        -32.54373286817842,
+        -43.19312235235485
+      ],
+      "anchor_ras_mm": [
+        16.0,
+        -30.0,
+        -41.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:m4",
+      "label": "M4 \u00b7 lower body \u00b7 left",
+      "source_name": "M4",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 4,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M4 \u00b7 lower body",
+        "fr": "M4 \u00b7 bas du corps"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        98,
+        255,
+        118
+      ],
+      "voxel_count": 2335,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2335.0,
+      "centroid_ras_mm": [
+        -17.225695931477517,
+        -23.813276231263384,
+        -55.65567451820129
+      ],
+      "anchor_ras_mm": [
+        -22.0,
+        -23.0,
+        -59.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:m4",
+      "label": "M4 \u00b7 lower body \u00b7 right",
+      "source_name": "M4",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 20,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "M4 \u00b7 lower body",
+        "fr": "M4 \u00b7 bas du corps"
+      },
+      "system_names": {
+        "en": "Motor",
+        "fr": "Moteur"
+      },
+      "display_color": [
+        98,
+        255,
+        118
+      ],
+      "voxel_count": 2554,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2554.0,
+      "centroid_ras_mm": [
+        16.057556773688333,
+        -23.529757243539546,
+        -56.2255285826155
+      ],
+      "anchor_ras_mm": [
+        17.0,
+        -22.0,
+        -60.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:a1",
+      "label": "A1 \u00b7 action \u00b7 left",
+      "source_name": "A1",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 5,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A1 \u00b7 action",
+        "fr": "A1 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        138,
+        137,
+        255
+      ],
+      "voxel_count": 731,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 731.0,
+      "centroid_ras_mm": [
+        -16.393980848153216,
+        -44.031463748290015,
+        -62.29822161422709
+      ],
+      "anchor_ras_mm": [
+        -15.0,
+        -46.0,
+        -62.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:a1",
+      "label": "A1 \u00b7 action \u00b7 right",
+      "source_name": "A1",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 21,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A1 \u00b7 action",
+        "fr": "A1 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        138,
+        137,
+        255
+      ],
+      "voxel_count": 716,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 716.0,
+      "centroid_ras_mm": [
+        15.604748603351956,
+        -42.92039106145251,
+        -62.20810055865922
+      ],
+      "anchor_ras_mm": [
+        13.0,
+        -46.0,
+        -62.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:a2",
+      "label": "A2 \u00b7 action \u00b7 left",
+      "source_name": "A2",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 6,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A2 \u00b7 action",
+        "fr": "A2 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        83,
+        78,
+        225
+      ],
+      "voxel_count": 1798,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1798.0,
+      "centroid_ras_mm": [
+        -22.334260289210235,
+        -29.39321468298109,
+        -56.1635150166852
+      ],
+      "anchor_ras_mm": [
+        -27.0,
+        -29.0,
+        -60.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:a2",
+      "label": "A2 \u00b7 action \u00b7 right",
+      "source_name": "A2",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 22,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A2 \u00b7 action",
+        "fr": "A2 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        83,
+        78,
+        225
+      ],
+      "voxel_count": 1738,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1738.0,
+      "centroid_ras_mm": [
+        21.042577675489067,
+        -29.09493670886076,
+        -54.107594936708864
+      ],
+      "anchor_ras_mm": [
+        22.0,
+        -27.0,
+        -60.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:a3",
+      "label": "A3 \u00b7 action \u00b7 left",
+      "source_name": "A3",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 7,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A3 \u00b7 action",
+        "fr": "A3 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        95,
+        255,
+        255
+      ],
+      "voxel_count": 651,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 651.0,
+      "centroid_ras_mm": [
+        -23.23963133640553,
+        -32.0568356374808,
+        -68.13056835637481
+      ],
+      "anchor_ras_mm": [
+        -23.0,
+        -32.0,
+        -68.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:a3",
+      "label": "A3 \u00b7 action \u00b7 right",
+      "source_name": "A3",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 23,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "A3 \u00b7 action",
+        "fr": "A3 \u00b7 action"
+      },
+      "system_names": {
+        "en": "Action",
+        "fr": "Action"
+      },
+      "display_color": [
+        95,
+        255,
+        255
+      ],
+      "voxel_count": 687,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 687.0,
+      "centroid_ras_mm": [
+        20.459970887918487,
+        -32.10480349344978,
+        -67.6098981077147
+      ],
+      "anchor_ras_mm": [
+        20.0,
+        -32.0,
+        -68.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:d1",
+      "label": "D1 \u00b7 multiple demand \u00b7 left",
+      "source_name": "D1",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 8,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D1 \u00b7 multiple demand",
+        "fr": "D1 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        174,
+        62,
+        73
+      ],
+      "voxel_count": 2827,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2827.0,
+      "centroid_ras_mm": [
+        -18.18146444994694,
+        -48.32649451715599,
+        -47.20728687654758
+      ],
+      "anchor_ras_mm": [
+        -23.0,
+        -46.0,
+        -43.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:d1",
+      "label": "D1 \u00b7 multiple demand \u00b7 right",
+      "source_name": "D1",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 24,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D1 \u00b7 multiple demand",
+        "fr": "D1 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        174,
+        62,
+        73
+      ],
+      "voxel_count": 2921,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2921.0,
+      "centroid_ras_mm": [
+        18.282779869907564,
+        -47.46319753509072,
+        -46.80657309140705
+      ],
+      "anchor_ras_mm": [
+        22.0,
+        -44.0,
+        -43.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:d2",
+      "label": "D2 \u00b7 multiple demand \u00b7 left",
+      "source_name": "D2",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 9,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D2 \u00b7 multiple demand",
+        "fr": "D2 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        255,
+        107,
+        179
+      ],
+      "voxel_count": 7258,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7258.0,
+      "centroid_ras_mm": [
+        -29.94736842105263,
+        -41.916092587489665,
+        -58.106089831909614
+      ],
+      "anchor_ras_mm": [
+        -32.0,
+        -42.0,
+        -57.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:d2",
+      "label": "D2 \u00b7 multiple demand \u00b7 right",
+      "source_name": "D2",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 25,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D2 \u00b7 multiple demand",
+        "fr": "D2 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        255,
+        107,
+        179
+      ],
+      "voxel_count": 7406,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7406.0,
+      "centroid_ras_mm": [
+        27.08722657304888,
+        -42.4873075884418,
+        -58.99054820415879
+      ],
+      "anchor_ras_mm": [
+        30.0,
+        -42.0,
+        -57.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:d3",
+      "label": "D3 \u00b7 multiple demand \u00b7 left",
+      "source_name": "D3",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 10,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D3 \u00b7 multiple demand",
+        "fr": "D3 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        240,
+        83,
+        255
+      ],
+      "voxel_count": 7867,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7867.0,
+      "centroid_ras_mm": [
+        -29.315749332655397,
+        -36.485826871742724,
+        -49.18978009406381
+      ],
+      "anchor_ras_mm": [
+        -28.0,
+        -36.0,
+        -47.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:d3",
+      "label": "D3 \u00b7 multiple demand \u00b7 right",
+      "source_name": "D3",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 26,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D3 \u00b7 multiple demand",
+        "fr": "D3 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        240,
+        83,
+        255
+      ],
+      "voxel_count": 7645,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7645.0,
+      "centroid_ras_mm": [
+        27.358665794637016,
+        -35.48449967298888,
+        -49.68842380640942
+      ],
+      "anchor_ras_mm": [
+        27.0,
+        -35.0,
+        -47.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:d4",
+      "label": "D4 \u00b7 multiple demand \u00b7 left",
+      "source_name": "D4",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 11,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D4 \u00b7 multiple demand",
+        "fr": "D4 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        208,
+        30,
+        130
+      ],
+      "voxel_count": 1411,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1411.0,
+      "centroid_ras_mm": [
+        -30.284195605953226,
+        -34.71863926293409,
+        -52.06236711552091
+      ],
+      "anchor_ras_mm": [
+        -30.0,
+        -34.0,
+        -49.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:d4",
+      "label": "D4 \u00b7 multiple demand \u00b7 right",
+      "source_name": "D4",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 27,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "D4 \u00b7 multiple demand",
+        "fr": "D4 \u00b7 demande multiple"
+      },
+      "system_names": {
+        "en": "Multiple demand",
+        "fr": "Demande multiple"
+      },
+      "display_color": [
+        208,
+        30,
+        130
+      ],
+      "voxel_count": 1339,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1339.0,
+      "centroid_ras_mm": [
+        29.47647498132935,
+        -34.30545182972367,
+        -51.05451829723675
+      ],
+      "anchor_ras_mm": [
+        31.0,
+        -33.0,
+        -49.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:s1",
+      "label": "S1 \u00b7 social, linguistic, spatial \u00b7 left",
+      "source_name": "S1",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 12,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S1 \u00b7 social, linguistic, spatial",
+        "fr": "S1 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        251,
+        194,
+        33
+      ],
+      "voxel_count": 4584,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4584.0,
+      "centroid_ras_mm": [
+        -14.451134380453752,
+        -52.23734729493892,
+        -48.30715532286213
+      ],
+      "anchor_ras_mm": [
+        -14.0,
+        -53.0,
+        -48.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:s1",
+      "label": "S1 \u00b7 social, linguistic, spatial \u00b7 right",
+      "source_name": "S1",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 28,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S1 \u00b7 social, linguistic, spatial",
+        "fr": "S1 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        251,
+        194,
+        33
+      ],
+      "voxel_count": 4586,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 4586.0,
+      "centroid_ras_mm": [
+        13.505233318796337,
+        -51.77845617095508,
+        -47.480375054513736
+      ],
+      "anchor_ras_mm": [
+        14.0,
+        -52.0,
+        -47.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:s2",
+      "label": "S2 \u00b7 social, linguistic, spatial \u00b7 left",
+      "source_name": "S2",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 13,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S2 \u00b7 social, linguistic, spatial",
+        "fr": "S2 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        219,
+        255,
+        72
+      ],
+      "voxel_count": 6842,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 6842.0,
+      "centroid_ras_mm": [
+        -25.163548669979537,
+        -51.91186787489038,
+        -50.86553639286758
+      ],
+      "anchor_ras_mm": [
+        -25.0,
+        -51.0,
+        -51.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:s2",
+      "label": "S2 \u00b7 social, linguistic, spatial \u00b7 right",
+      "source_name": "S2",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 29,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S2 \u00b7 social, linguistic, spatial",
+        "fr": "S2 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        219,
+        255,
+        72
+      ],
+      "voxel_count": 7678,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 7678.0,
+      "centroid_ras_mm": [
+        25.326517322219328,
+        -51.3810888252149,
+        -50.2827559260224
+      ],
+      "anchor_ras_mm": [
+        26.0,
+        -51.0,
+        -50.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:s3",
+      "label": "S3 \u00b7 social, linguistic, spatial \u00b7 left",
+      "source_name": "S3",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 14,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S3 \u00b7 social, linguistic, spatial",
+        "fr": "S3 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        216,
+        255,
+        199
+      ],
+      "voxel_count": 391,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 391.0,
+      "centroid_ras_mm": [
+        -26.66751918158568,
+        -57.10230179028133,
+        -50.8235294117647
+      ],
+      "anchor_ras_mm": [
+        -31.0,
+        -58.0,
+        -49.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:s3",
+      "label": "S3 \u00b7 social, linguistic, spatial \u00b7 right",
+      "source_name": "S3",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 30,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S3 \u00b7 social, linguistic, spatial",
+        "fr": "S3 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        216,
+        255,
+        199
+      ],
+      "voxel_count": 394,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 394.0,
+      "centroid_ras_mm": [
+        26.32994923857868,
+        -56.45685279187817,
+        -50.2005076142132
+      ],
+      "anchor_ras_mm": [
+        30.0,
+        -60.0,
+        -50.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:s4",
+      "label": "S4 \u00b7 social, linguistic, spatial \u00b7 left",
+      "source_name": "S4",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 15,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S4 \u00b7 social, linguistic, spatial",
+        "fr": "S4 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        255,
+        255,
+        211
+      ],
+      "voxel_count": 3295,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3295.0,
+      "centroid_ras_mm": [
+        -33.52261001517451,
+        -41.800606980273145,
+        -55.23368740515933
+      ],
+      "anchor_ras_mm": [
+        -36.0,
+        -43.0,
+        -54.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:s4",
+      "label": "S4 \u00b7 social, linguistic, spatial \u00b7 right",
+      "source_name": "S4",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 31,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S4 \u00b7 social, linguistic, spatial",
+        "fr": "S4 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        255,
+        255,
+        211
+      ],
+      "voxel_count": 3114,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3114.0,
+      "centroid_ras_mm": [
+        31.533076429030185,
+        -40.05780346820809,
+        -56.298651252408476
+      ],
+      "anchor_ras_mm": [
+        35.0,
+        -41.0,
+        -56.0
+      ]
+    },
+    {
+      "id": "nettekoven:left:s5",
+      "label": "S5 \u00b7 social, linguistic, spatial \u00b7 left",
+      "source_name": "S5",
+      "atlas": "nettekoven",
+      "hemisphere": "left",
+      "source_label_id": 16,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S5 \u00b7 social, linguistic, spatial",
+        "fr": "S5 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        82,
+        188,
+        93
+      ],
+      "voxel_count": 507,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 507.0,
+      "centroid_ras_mm": [
+        -16.005917159763314,
+        -25.240631163708088,
+        -65.6508875739645
+      ],
+      "anchor_ras_mm": [
+        -16.0,
+        -25.0,
+        -66.0
+      ]
+    },
+    {
+      "id": "nettekoven:right:s5",
+      "label": "S5 \u00b7 social, linguistic, spatial \u00b7 right",
+      "source_name": "S5",
+      "atlas": "nettekoven",
+      "hemisphere": "right",
+      "source_label_id": 32,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "S5 \u00b7 social, linguistic, spatial",
+        "fr": "S5 \u00b7 social, linguistique, spatial"
+      },
+      "system_names": {
+        "en": "Social, linguistic and spatial",
+        "fr": "Social, linguistique et spatial"
+      },
+      "display_color": [
+        82,
+        188,
+        93
+      ],
+      "voxel_count": 420,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 420.0,
+      "centroid_ras_mm": [
+        14.038095238095238,
+        -24.77857142857143,
+        -64.69285714285714
+      ],
+      "anchor_ras_mm": [
+        14.0,
+        -25.0,
+        -65.0
+      ]
+    },
+    {
+      "id": "choi:left:Vis",
+      "label": "Striatum \u00b7 Visual \u00b7 left",
+      "source_name": "Vis",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 1,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Visual",
+        "fr": "Striatum \u00b7 Visuel"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        120,
+        18,
+        134
+      ],
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 56,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 56.0,
+      "centroid_ras_mm": [
+        -25.589285714285715,
+        4.446428571428571,
+        -17.982142857142858
+      ],
+      "anchor_ras_mm": [
+        -26.0,
+        4.0,
+        -18.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.08928571428571429,
+        "low": 0.017857142857142856,
+        "confident": 0.8928571428571429
+      },
+      "striatal_networks_putamen": 0.9107142857142857
+    },
+    {
+      "id": "choi:left:SomMot",
+      "label": "Striatum \u00b7 Somatomotor \u00b7 left",
+      "source_name": "SomMot",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 2,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Somatomotor",
+        "fr": "Striatum \u00b7 Somatomoteur"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        70,
+        130,
+        180
+      ],
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 810,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 810.0,
+      "centroid_ras_mm": [
+        -28.238271604938273,
+        7.769135802469136,
+        -14.487654320987655
+      ],
+      "anchor_ras_mm": [
+        -28.0,
+        8.0,
+        -14.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.02962962962962963,
+        "low": 0.008641975308641974,
+        "confident": 0.9617283950617284
+      },
+      "striatal_networks_putamen": 1.0
+    },
+    {
+      "id": "choi:left:DorsAttn",
+      "label": "Striatum \u00b7 Dorsal attention \u00b7 left",
+      "source_name": "DorsAttn",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 3,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Dorsal attention",
+        "fr": "Striatum \u00b7 Attention dorsale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        0,
+        118,
+        14
+      ],
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 6,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 6.0,
+      "centroid_ras_mm": [
+        -25.666666666666668,
+        -0.3333333333333333,
+        -15.5
+      ],
+      "anchor_ras_mm": [
+        -27.0,
+        0.0,
+        -19.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.0,
+        "low": 0.3333333333333333,
+        "confident": 0.6666666666666666
+      },
+      "striatal_networks_putamen": 0.8333333333333334
+    },
+    {
+      "id": "choi:left:SalVentAttn",
+      "label": "Striatum \u00b7 Salience / ventral attention \u00b7 left",
+      "source_name": "SalVentAttn",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 4,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Salience / ventral attention",
+        "fr": "Striatum \u00b7 Saillance / attention ventrale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        196,
+        58,
+        250
+      ],
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1835,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1835.0,
+      "centroid_ras_mm": [
+        -24.14931880108992,
+        16.22506811989101,
+        -11.174386920980927
+      ],
+      "anchor_ras_mm": [
+        -24.0,
+        16.0,
+        -11.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.0653950953678474,
+        "low": 0.011989100817438692,
+        "confident": 0.9226158038147139
+      },
+      "striatal_networks_putamen": 0.9869209809264305
+    },
+    {
+      "id": "choi:left:Limbic",
+      "label": "Striatum \u00b7 Limbic \u00b7 left",
+      "source_name": "Limbic",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 5,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Limbic",
+        "fr": "Striatum \u00b7 Limbique"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        220,
+        248,
+        164
+      ],
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1427,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1427.0,
+      "centroid_ras_mm": [
+        -13.494043447792572,
+        24.607568325157672,
+        -24.693062368605467
+      ],
+      "anchor_ras_mm": [
+        -13.0,
+        25.0,
+        -25.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.07848633496846531,
+        "low": 0.025227750525578137,
+        "confident": 0.8962859145059565
+      },
+      "striatal_networks_putamen": 0.3987386124737211
+    },
+    {
+      "id": "choi:left:Cont",
+      "label": "Striatum \u00b7 Frontoparietal control \u00b7 left",
+      "source_name": "Cont",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 6,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Frontoparietal control",
+        "fr": "Striatum \u00b7 Contr\u00f4le frontopari\u00e9tal"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        230,
+        148,
+        34
+      ],
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 3559,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3559.0,
+      "centroid_ras_mm": [
+        -17.608878898567013,
+        18.87131216633886,
+        -9.010677156504636
+      ],
+      "anchor_ras_mm": [
+        -19.0,
+        19.0,
+        -9.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.060691205394773816,
+        "low": 0.019668446192750773,
+        "confident": 0.9196403484124754
+      },
+      "striatal_networks_putamen": 0.3731385220567575
+    },
+    {
+      "id": "choi:left:Default",
+      "label": "Striatum \u00b7 Default mode \u00b7 left",
+      "source_name": "Default",
+      "atlas": "choi",
+      "hemisphere": "left",
+      "source_label_id": 7,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Default mode",
+        "fr": "Striatum \u00b7 Mode par d\u00e9faut"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        205,
+        62,
+        78
+      ],
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2929,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2929.0,
+      "centroid_ras_mm": [
+        -15.652441106179584,
+        24.97132127005804,
+        -16.15807442813247
+      ],
+      "anchor_ras_mm": [
+        -15.0,
+        24.0,
+        -19.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.05667463298053943,
+        "low": 0.014680778422669852,
+        "confident": 0.9286445885967907
+      },
+      "striatal_networks_putamen": 0.37623762376237624
+    },
+    {
+      "id": "choi:right:Vis",
+      "label": "Striatum \u00b7 Visual \u00b7 right",
+      "source_name": "Vis",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 8,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Visual",
+        "fr": "Striatum \u00b7 Visuel"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        120,
+        18,
+        134
+      ],
+      "networks": [
+        {
+          "network": "Vis",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 27,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 27.0,
+      "centroid_ras_mm": [
+        21.59259259259259,
+        13.962962962962964,
+        -17.88888888888889
+      ],
+      "anchor_ras_mm": [
+        25.0,
+        7.0,
+        -22.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.037037037037037035,
+        "low": 0.0,
+        "confident": 0.9629629629629629
+      },
+      "striatal_networks_putamen": 0.7037037037037037
+    },
+    {
+      "id": "choi:right:SomMot",
+      "label": "Striatum \u00b7 Somatomotor \u00b7 right",
+      "source_name": "SomMot",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 9,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Somatomotor",
+        "fr": "Striatum \u00b7 Somatomoteur"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        70,
+        130,
+        180
+      ],
+      "networks": [
+        {
+          "network": "SomMot",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 880,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 880.0,
+      "centroid_ras_mm": [
+        26.805681818181817,
+        10.521590909090909,
+        -15.3
+      ],
+      "anchor_ras_mm": [
+        27.0,
+        11.0,
+        -15.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.006818181818181818,
+        "low": 0.005681818181818182,
+        "confident": 0.9875
+      },
+      "striatal_networks_putamen": 1.0
+    },
+    {
+      "id": "choi:right:DorsAttn",
+      "label": "Striatum \u00b7 Dorsal attention \u00b7 right",
+      "source_name": "DorsAttn",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 10,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Dorsal attention",
+        "fr": "Striatum \u00b7 Attention dorsale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        0,
+        118,
+        14
+      ],
+      "networks": [
+        {
+          "network": "DorsAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 155,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 155.0,
+      "centroid_ras_mm": [
+        24.52258064516129,
+        0.7612903225806451,
+        -13.432258064516128
+      ],
+      "anchor_ras_mm": [
+        24.0,
+        2.0,
+        -15.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.2709677419354839,
+        "low": 0.012903225806451613,
+        "confident": 0.7161290322580646
+      },
+      "striatal_networks_putamen": 0.6709677419354839
+    },
+    {
+      "id": "choi:right:SalVentAttn",
+      "label": "Striatum \u00b7 Salience / ventral attention \u00b7 right",
+      "source_name": "SalVentAttn",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 11,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Salience / ventral attention",
+        "fr": "Striatum \u00b7 Saillance / attention ventrale"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        196,
+        58,
+        250
+      ],
+      "networks": [
+        {
+          "network": "SalVentAttn",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 2392,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 2392.0,
+      "centroid_ras_mm": [
+        22.762541806020067,
+        18.42725752508361,
+        -12.725334448160535
+      ],
+      "anchor_ras_mm": [
+        23.0,
+        18.0,
+        -13.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.02717391304347826,
+        "low": 0.009615384615384616,
+        "confident": 0.9632107023411371
+      },
+      "striatal_networks_putamen": 0.9778428093645485
+    },
+    {
+      "id": "choi:right:Limbic",
+      "label": "Striatum \u00b7 Limbic \u00b7 right",
+      "source_name": "Limbic",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 12,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Limbic",
+        "fr": "Striatum \u00b7 Limbique"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        220,
+        248,
+        164
+      ],
+      "networks": [
+        {
+          "network": "Limbic",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1489,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1489.0,
+      "centroid_ras_mm": [
+        11.955674949630625,
+        25.104096709200807,
+        -24.52249832102082
+      ],
+      "anchor_ras_mm": [
+        12.0,
+        25.0,
+        -25.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.08797850906648758,
+        "low": 0.01544660846205507,
+        "confident": 0.8965748824714573
+      },
+      "striatal_networks_putamen": 0.42243116185359303
+    },
+    {
+      "id": "choi:right:Cont",
+      "label": "Striatum \u00b7 Frontoparietal control \u00b7 right",
+      "source_name": "Cont",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 13,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Frontoparietal control",
+        "fr": "Striatum \u00b7 Contr\u00f4le frontopari\u00e9tal"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        230,
+        148,
+        34
+      ],
+      "networks": [
+        {
+          "network": "Cont",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 3691,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 3691.0,
+      "centroid_ras_mm": [
+        15.815497155242483,
+        21.39718233541046,
+        -9.434570577079382
+      ],
+      "anchor_ras_mm": [
+        13.0,
+        23.0,
+        -7.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.03982660525602818,
+        "low": 0.01164995936060688,
+        "confident": 0.9485234353833649
+      },
+      "striatal_networks_putamen": 0.3316174478461122
+    },
+    {
+      "id": "choi:right:Default",
+      "label": "Striatum \u00b7 Default mode \u00b7 right",
+      "source_name": "Default",
+      "atlas": "choi",
+      "hemisphere": "right",
+      "source_label_id": 14,
+      "kind": "tissue-region",
+      "display_names": {
+        "en": "Striatum \u00b7 Default mode",
+        "fr": "Striatum \u00b7 Mode par d\u00e9faut"
+      },
+      "system_names": {
+        "en": "Striatal networks",
+        "fr": "R\u00e9seaux striataux"
+      },
+      "display_color": [
+        205,
+        62,
+        78
+      ],
+      "networks": [
+        {
+          "network": "Default",
+          "fraction": 1.0
+        }
+      ],
+      "voxel_count": 1869,
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "segmentation_volume_mm3": 1869.0,
+      "centroid_ras_mm": [
+        10.964151952915998,
+        28.530230069555913,
+        -15.452648475120386
+      ],
+      "anchor_ras_mm": [
+        11.0,
+        29.0,
+        -16.0
+      ],
+      "striatal_networks_confidence": {
+        "filled": 0.033707865168539325,
+        "low": 0.017121455323702513,
+        "confident": 0.9491706795077581
+      },
+      "striatal_networks_putamen": 0.1797752808988764
     }
   ],
   "boundary_convention": "Barycentric vertex cells on mixed-label triangles",
@@ -73485,7 +78362,11 @@
     "Learning anatomy is a derived overview of explicit label unions, with display smoothing bounded to 0.6 mm. Measurements remain source-voxel counts; smoothness does not add anatomical resolution.",
     "Learning brainstem territories omit separately displayed nuclei and pathways; they are not complete brainstem subdivisions.",
     "Learning publishes the cerebellar cortex and the deep nuclei, but not cerebellar white matter, which would enclose the nuclei; the nuclei therefore sit in the space it occupies.",
-    "Learning units come from two segmentations of the same brain, so an aseg-sourced and a NextBrain-sourced surface can overlap slightly where they meet.",
+    "Learning cerebellar lobules are FastSurfer CerebNet's segmentation of this brain's 1 mm T1 in SUIT nomenclature; vermis I\u2013V is part of lobules I\u2013IV and V, and folia are not resolved.",
+    "Averaging removes the folia and finer fissures of the cerebellar hemispheres from the template's T1, so the lobule borders there follow the white-matter branches and the shape CerebNet learned from individual brains, not fissures that can be seen.",
+    "Learning lobule surfaces leave out the lobule voxels the T1 reads as mostly fluid and open to the CSF, which shows the wider fissures; their volumes and placements are CerebNet's labels unchanged.",
+    "Cerebellar lobules are published as teaching surfaces only; MRI cuts carry no lobule labels.",
+    "Learning units come from three segmentations of the same brain (aseg, NextBrain and CerebNet), so surfaces from different sources can overlap slightly where they meet.",
     "NextBrain nuclei below the geometry threshold, its white matter, its cerebellar cortical layers and its cortical parcels have no mesh and remain cut labels only.",
     "Only one internal-anatomy detail level is drawn at a time; the coarse and fine layers segment the same anatomy.",
     "Below NextBrain's lowest medullary voxel, the NextBrain level draws the teaching set's caudal medulla, which is FreeSurfer's brainstem label, so the medulla meets the spinal cord.",
@@ -73520,6 +78401,12 @@
     "A Destrieux parcel takes an author label only when at least 10 cortical channels from 3 people land in it through fs_LR 32k \u2192 fsaverage surface registration and 60% of them carry that label; other parcels, and the HCP-MMP, Julich-Brain and Schaefer atlases, take none (Julich-Brain areas show F-TRACT's rates instead). Deep structures take labels by name, and the thalamus takes the authors' three positional sites, not nuclei.",
     "Functional connectivity is the group mean of 200 healthy young adults (HCP, ages 22\u201335) at rest, measured in MNI152 space on Julich-Brain's volumetric map, not in this brain: an area takes the parcel of its name. A correlation is not a connection, and without global signal regression nearly every pair correlates positively.",
     "Disorder effects are group differences between thousands of patients and controls scanned elsewhere, reported per Desikan-Killiany region and FreeSurfer structure, not measured in this brain. Most are small (|d| below 0.2 is common): patients and controls overlap almost entirely, so no difference says anything about one person. Medication, illness duration and site differ between the cohorts and are only partly adjusted for.",
+    "Functional cerebellar regions are a group atlas (Nettekoven et al. 2024) fused from seven task-based fMRI datasets and registered onto this brain from the SUIT template; this brain's function was not measured. Individual functional boundaries differ from the group's, and the authors show that an individual's own localizer data place them better.",
+    "Registration from a group template places lobule borders a few millimetres off: SUIT's own lobules, carried by the same warp, meet this brain's CerebNet lobules at a mean Dice of 0.76. A region's border on a cut is approximate; a lobule's shares, summed over its whole volume, are steadier.",
+    "Striatal networks are a group atlas (Choi et al. 2012) from 1,000 adults' resting-state connectivity, registered onto this brain from FSL's MNI152 template; this brain's function was not measured. Each voxel takes only the cortical network its connectivity most resembles.",
+    "Registration from a group template places network borders a few millimetres off. The atlas reached at least 89% of each striatal structure on this brain (least: right accumbens); the rest takes the network of the nearest voxel it reached in the same structure.",
+    "Choi et al. give each voxel a confidence: the fraction of its 25 most correlated cortical vertices that belong to its network. Of this brain's labelled striatum, 1% falls below 0.5, where its network holds only a plurality, and 5% was filled rather than reached; the cut draws both paler.",
+    "Choi et al. are least confident around the dorsal putamen, where signal from the adjacent insula is only partly removed, so a putamen's salience share may partly reflect the insula.",
     "This brain is the MNI152NLin2009cAsym template at 0.9 of its size, so a coordinate in that space is placed by scaling alone, with no registration. Coordinates and maps in any other template are not placed on it.",
     "Cortical coordinates are reported as the regions within 5 mm, as on an individual brain.",
     "An MNI coordinate whose template is not stated is read as MNI152NLin2009cAsym.",
@@ -74747,6 +79634,290 @@
         },
         "citation": "https://doi.org/10.1038/s41586-025-09708-2",
         "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
+      },
+      {
+        "path": "data/mni152/mri/cerebellum.CerebNet.mgz",
+        "sha256": "80407e4ccf0307e94667097ce164891fd156097ed51b2983cde90ff59e74fbe2",
+        "anatomy": "mni152",
+        "optional": true,
+        "derived_from": [
+          {
+            "path": "data/mni152/mri/orig.mgz",
+            "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161"
+          },
+          {
+            "url": "https://github.com/Deep-MI/FastSurfer",
+            "tag": "v2.6.0",
+            "commit": "1dc024735371f65bc4b94a272cf596be6ddf4f21"
+          },
+          {
+            "checkpoint": "aparc_vinn_axial_v2.0.0.pkl",
+            "sha256": "81ab25ccbfc432cc41fb6089d11ff2a45b5a88e659092096cb1e067269f806b8"
+          },
+          {
+            "checkpoint": "aparc_vinn_coronal_v2.0.0.pkl",
+            "sha256": "73813957e83ec99d2c4e22f7854308916ec276d66ab7ed8ef8bf3998ba05e289"
+          },
+          {
+            "checkpoint": "aparc_vinn_sagittal_v2.0.0.pkl",
+            "sha256": "edae6262d69526fea39a019f2dfd8df75eb705f8f025b9b97166e3e17b917414"
+          },
+          {
+            "checkpoint": "CerebNet_axial_v1.0.0.pkl",
+            "sha256": "7e93f3e69dc6a8e7b11d223b59069a9f09f7f48474eb3bd31ea70cee3f603e33"
+          },
+          {
+            "checkpoint": "CerebNet_coronal_v1.0.0.pkl",
+            "sha256": "3a6fb6c3ea1b5f549d00f99840cc9dd406dd1c0552213c7871f5fc0ef5ca9036"
+          },
+          {
+            "checkpoint": "CerebNet_sagittal_v1.0.0.pkl",
+            "sha256": "182a3984905035dd99eac640943292ce5a5872e77e0ba87823622758bc3fc495"
+          }
+        ],
+        "procedure": "scripts/segment_cerebellum.py: FastSurfer run_fastsurfer.sh --seg_only --no_hypothal --no_cc --no_biasfield --device cpu --threads 4 on orig.mgz; mri/cerebellum.CerebNet.nii.gz rewritten with orig.mgz's header, labels unchanged",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2022.119703",
+        "license": "FastSurfer and its CerebNet models are Apache-2.0."
+      },
+      {
+        "path": "data/mni152/mri/striatal-networks.mgz",
+        "sha256": "9f6444502e1981fe9a676aea55417060b5feb68b73b57e65e527b73c9faa1000",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/mni152/mri/striatal-networks-carried.mgz",
+        "sha256": "16ebd91bd48ac117be0fdced6e8db65d8ddc097d301123f0fab18f8b46ec72e4",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/mni152/mri/striatal-template-aseg.mgz",
+        "sha256": "044ad76a9d4675090f62f8114768e4169bcff9a82de9c0c1a3925accd8af7136",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/mni152/mri/striatal-networks-confidence.mgz",
+        "sha256": "08a04ce418b7107b9c96000d76b0fa67e882bf8611d044502f34aa3ce0817de1",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/mni152/striatal-registration.json",
+        "sha256": "6b3d69073e72b7bdcf8f4541a4a714457090440a53ea54814713047ce0f73cba",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+            "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+          },
+          {
+            "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+            "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+            "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+          },
+          {
+            "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+            "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+          }
+        ],
+        "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+        "citation": "https://doi.org/10.1152/jn.00270.2012",
+        "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+      },
+      {
+        "path": "data/mni152/mri/cerebellar-functions.mgz",
+        "sha256": "0faebdacdcee18bf97129dff6348b6dcb22bcf2a1284967ffd62d80b26e7601e",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+            "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+            "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+            "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+            "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+            "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+          }
+        ],
+        "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+        "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+        "license": "CC BY-NC 3.0"
+      },
+      {
+        "path": "data/mni152/mri/cerebellar-lobules-suit.mgz",
+        "sha256": "3886d82b1482724ec56f40b69880242faee5433759f183688bf78f0bdc624727",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+            "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+            "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+            "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+            "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+            "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+          }
+        ],
+        "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+        "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+        "license": "CC BY-NC 3.0"
+      },
+      {
+        "path": "data/mni152/cerebellar-registration.json",
+        "sha256": "c73d1049b488a82873277f74f4e165d22671b6b9560ae2686158358d2347ab04",
+        "anatomy": "mni152",
+        "derived_from": [
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+            "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+            "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+            "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+            "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+            "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+          }
+        ],
+        "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+        "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+        "license": "CC BY-NC 3.0"
       }
     ]
   },

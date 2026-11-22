@@ -257,7 +257,7 @@ LAYERS = (
         metadata=lambda config: cerebellar_functions.metadata(
             config, cerebellar_functions.read_definition()
         ),
-        limitations=lambda config: cerebellar_functions.limitations(),
+        limitations=lambda config: cerebellar_functions.limitations(config),
         validate=lambda check: cerebellar_functions.validate(check.config, check.manifest),
         shared=CUT_ONLY,
     ),
@@ -271,7 +271,7 @@ LAYERS = (
             striatal_networks.template_aseg_path(config),
             striatal_networks.confidence_path(config),
             striatal_networks.report_path(config),
-            landing.path(config),
+            *([] if coordinate_spaces.template_space(config) else [landing.path(config)]),
         ],
         compose=composer(striatal_networks, unit_grids=True),
         atlas=striatal_networks.ATLAS_ID,

@@ -29,6 +29,7 @@ const GROUNDS = { light: ['#ffffff', '#000000'], dark: ['#0d1117', '#e6edf3'] };
 
 const base = { anatomy: 'cdmd', lang: 'en', atlas: 'destrieux', detail: 'learning' };
 const nextbrain = { ...base, detail: 'nextbrain' };
+const template = { ...base, anatomy: 'mni152' };
 const cut = (state, plane, pos, view) => ({ state: { ...state, cut: plane, pos, view } });
 const surface = (state) => ({ state: { ...base, view: 'left', ...state } });
 const tracts = (view, ids) => ({ state: { ...base, tab: 'diffusion', view, opacity: '0.16', tracts: ids } });
@@ -98,6 +99,14 @@ const FIGURES = [
       overlay({ cut: 'coronal', pos: '-22', view: 'anterior' }),
       overlay({ cut: 'coronal', pos: '-22', view: 'anterior' }, { mri: 'coronal' }),
       overlay({ view: 'left' }, { clusters: true, viewport: [1400, 1600] }),
+    ],
+  },
+  {
+    name: 'template', columns: 3, aspect: 1.3, sameScale: true,
+    panels: [
+      surface({}),
+      surface(template),
+      { state: { ...template, tab: 'diffusion', view: 'left', opacity: '0.16', tracts: 'af-left,cst-left' } },
     ],
   },
 ];

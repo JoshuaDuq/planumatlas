@@ -105,7 +105,11 @@ anatomies:
   # takes without registration, and the reference scripts/measure_landing.py
   # scores the published coordinate field against. Its header is scaled by 0.90,
   # the mean brain size of the 26 CDMD people (1,133 cm³ against the template's
-  # 1,548). It has no tracts, lobules, cord or registered group maps of its own.
+  # 1,548). It has no cord; its tracts are the HCP1065 averaged atlas's
+  # (data/diffusion-mni152.yaml). Choi's striatal networks and Nettekoven's
+  # cerebellar regions were registered onto it as onto CDMD, on Rorqual with the
+  # Linux build, on 2026-11-22; SUIT's lobules, carried by that warp, meet its
+  # CerebNet lobules at a mean Dice of 0.763, lowest 0.590 (CDMD 0.651 and 0.485).
   mni152:
     subject: MNI152NLin2009cAsym
     display_name: MNI template (ICBM 152 2009c)
@@ -113,7 +117,7 @@ anatomies:
     individual: false
     directory: data/mni152
     source_url: https://www.bic.mni.mcgill.ca/ServicesAtlases/ICBM152NLin2009
-    layers: [networks, nextbrain, coordinate_spaces]
+    layers: [networks, nextbrain, cerebellar_lobules, cerebellar_functions, coordinate_spaces, striatal_networks]
     reconstruction:
       input: data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz
       input_sha256: cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b

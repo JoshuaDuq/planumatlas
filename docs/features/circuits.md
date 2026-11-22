@@ -85,6 +85,8 @@ A tour opens on its whole route, headed by the circuit's name (the location bar 
 
 The notes hold four disclosures: **Connections and scope**, **What this atlas shows**, **Clinical context** (with **Open deficit evidence**, which opens the linked deficit) and **Sources**. Sources labels each reference **Deficit evidence** or **Circuit background** and gives the revision date. Outside the Circuits tab, a region's inspector lists the landmarks on it and opens the tour there. Leaving a tour restores the scene from before it. URL state: `tab=circuits&circuit=<id>&step=<n>` (1-based) or `&route=1`. A link to an unknown or withdrawn tour or step reports those parameters as unsupported and applies the rest of the scene.
 
+On the [MNI template](mni-template.md) a tour is listed only if every landmark, tract and linked deficit exists there. Four have a landmark in the spinal cord, which the template lacks (corticospinal descent, the spinothalamic pathway, ventral spinocerebellar input and rubrospinal descent). These stay on CDMD sub_013, and the list's coverage line says how many. A landmark's tract is the template's averaged-atlas bundle of the same id.
+
 ## Validation
 
 | Test | Criterion | Result |

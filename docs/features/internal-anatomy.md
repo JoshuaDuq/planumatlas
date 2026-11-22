@@ -99,7 +99,7 @@ The masthead's **Internal anatomy** chooses one level: **Teaching set** (`learni
 - One individual; folds, sizes and asymmetries are not normative.
 - The scan is 1 mm. NextBrain's 0.4 mm grid is estimated from it, and where structures share T1 contrast, the atlas prior places the boundary.
 - NextBrain and CerebNet are model estimates. Agreement with aseg bounds their difference, not their accuracy. The claustrum is fragmented.
-- CerebNet lobules are published for CDMD only. SUIT folds vermis I–V into lobules I–IV and V, so the anterior vermis cannot be shown alone. A fissure with no voxel more than half fluid stays filled.
+- On the [MNI template](mni-template.md) CerebNet's lobule borders in the hemispheres do not follow fissures that can be seen. SUIT folds vermis I–V into lobules I–IV and V, so the anterior vermis cannot be shown alone. A fissure with no voxel more than half fluid stays filled.
 - Cut faces are coarser than surfaces (0.8 mm blocks), and 31 small labels appear on no cut.
 - 116 of the 324 aseg and NextBrain solids touch themselves across voxel corners (non-manifold edges); their enclosed volume stays definite.
 - The 0.6 mm smoothing is a display bound and adds no resolution.

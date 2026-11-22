@@ -12,7 +12,10 @@ import type { GuidePaint } from './tour.ts';
 
 const TARGETS = `
   <header id="masthead">
-    <div class="data-bar">Destrieux · Regions</div>
+    <div class="data-bar">
+      <button class="data-toggle" aria-expanded="false">Destrieux · Regions</button>
+      <div class="masthead-data" hidden><div class="data-field" data-field="subject">Subject</div></div>
+    </div>
     <div class="masthead-end"><span class="popover-host" style="display: contents"><button>⋯</button></span></div>
   </header>
   <aside id="workspace-panel" style="height: 120px">Region detail</aside>
@@ -38,6 +41,7 @@ const READER = '#anatomy=cdmd&atlas=destrieux&detail=learning&region=destrieux:l
 const HOME = '#anatomy=cdmd&atlas=destrieux&detail=learning';
 
 let closed = 0;
+let dataEvents: AbortController;
 let closedBy: { pointer: boolean }[] = [];
 let hashes: string[] = [];
 const recordHash = () => hashes.push(location.hash);
@@ -51,6 +55,23 @@ beforeEach(async () => {
   for (const button of document.querySelectorAll<HTMLElement>('#fixture button')) {
     Object.assign(button.style, { minWidth: '24px', minHeight: '24px', background: 'none' });
   }
+  // The data popover as the masthead's: its toggle opens it, a press outside closes it.
+  const toggle = document.querySelector<HTMLButtonElement>('#fixture .data-toggle')!;
+  const showData = (open: boolean) => {
+    toggle.setAttribute('aria-expanded', String(open));
+    const popover = document.querySelector<HTMLElement>('#fixture .masthead-data')!;
+    popover.hidden = !open;
+    popover.toggleAttribute('data-open', open);
+  };
+  toggle.addEventListener('click', () => showData(toggle.ariaExpanded !== 'true'));
+  dataEvents = new AbortController();
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!toggle.parentElement!.contains(event.target as Node)) showData(false);
+    },
+    { signal: dataEvents.signal },
+  );
   closed = 0;
   closedBy = [];
   mriOpens = [];
@@ -61,6 +82,7 @@ beforeEach(async () => {
 afterEach(() => {
   document.querySelector<HTMLButtonElement>('.driver-popover-close-btn')?.click();
   removeEventListener('hashchange', recordHash);
+  dataEvents.abort();
   document.getElementById('fixture')?.remove();
   history.replaceState(history.state, '', location.pathname + location.search);
   localStorage.removeItem('planum.guide');
@@ -107,6 +129,8 @@ const start = (lang: 'en' | 'fr' = 'en', short = false) =>
     },
     sheet: { raise: () => sheetCalls.push('raise'), lower: () => sheetCalls.push('lower') },
     reserve: (band) => reserved.push(band),
+    // A stand-in anchor, so the lesion stop is seen to centre on the loaded anatomy's own point.
+    anchorOf: (region) => (region === 'destrieux:left:29' ? [-44, 13, 28] : null),
   });
 const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
 const title = () => card().querySelector('.driver-popover-title')!.textContent;
@@ -117,8 +141,8 @@ const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
   return event;
 };
 
-const STOPS = 18;
-/** The full tour's stops a first visit leaves out: all but the welcome, the three on the brain, Section and Functions. */
+const STOPS = 19;
+/** The full tour's stops a first visit leaves out: all but the welcome, the three on the brain, Subject, Section and Functions. */
 const REST = 12;
 const progress = () => card().querySelector('.driver-popover-progress-text')!.textContent;
 const tryLine = () => card().querySelector('.guide-try');
@@ -139,7 +163,7 @@ const press = (target: Element, by: number) => {
 };
 const canvas = () => document.querySelector('#viewport canvas')!;
 
-test('eighteen stops in order, in English and French, with focus on Next', async () => {
+test('nineteen stops in order, in English and French, with focus on Next', async () => {
   start();
   const titles = [title()];
   await expect.poll(() => document.activeElement).toBe(next());
@@ -154,6 +178,7 @@ test('eighteen stops in order, in English and French, with focus on Next', async
     'Turn the brain',
     'Open a region',
     'The region in detail',
+    'One person or an average',
     'Look from any side',
     'Cut through it',
     'The scan behind it',
@@ -182,7 +207,7 @@ test('eighteen stops in order, in English and French, with focus on Next', async
   expect(progress()).toBe(`1 sur ${STOPS}`);
 });
 
-test('GUIDE-03 · a first visit runs six stops after the welcome; the last offers the rest', async () => {
+test('GUIDE-03 · a first visit runs seven stops after the welcome; the last offers the rest', async () => {
   start('en', true);
   const titles = [title()];
   while (next().textContent !== 'Start exploring') {
@@ -194,6 +219,7 @@ test('GUIDE-03 · a first visit runs six stops after the welcome; the last offer
     'Turn the brain',
     'Open a region',
     'The region in detail',
+    'One person or an average',
     'Cut through it',
     'Map a function',
     'Over to you',
@@ -247,6 +273,8 @@ test('each stop opens its feature over the home view, leaves the page undimmed, 
     HOME,
     // A reader who opened no region is shown the left precentral gyrus.
     `${HOME}&region=destrieux:left:29`,
+    // Subject opens its list over the home view.
+    HOME,
     `${HOME}&view=superior`,
     `${HOME}&cut=coronal`,
     `${HOME}&cut=coronal&region=destrieux:left:29`,
@@ -257,7 +285,7 @@ test('each stop opens its feature over the home view, leaves the page undimmed, 
     `${HOME}&tab=deficits&deficit=aphasia`,
     `${HOME}&tab=circuits&circuit=vision`,
     `${HOME}&tab=diffusion`,
-    `${HOME}&lesion=-35.5,-9.5,63.5,10`,
+    `${HOME}&lesion=-44,13,28,10`,
     `${HOME}&coord=-38,44,26&space=unstated`,
     // Overlay: a reader's map is never in a link.
     HOME,
@@ -339,7 +367,7 @@ test('GUIDE-07 · Open a region waits for a pick, then details the reader’s ow
   // Back from the next stop, the detail is still the reader's region.
   next().click();
   card().querySelector<HTMLButtonElement>('.driver-popover-prev-btn')!.click();
-  expect(location.hash).toBe(`${HOME}&view=superior&region=destrieux:left:5`);
+  expect(location.hash).toBe(`${HOME}&region=destrieux:left:5`);
   card().querySelector<HTMLButtonElement>('.driver-popover-close-btn')!.click();
   expect(pick).toBeNull();
 });
@@ -427,7 +455,7 @@ test('the close says whether a pointer or the keyboard ended the tour', async ()
 });
 
 test('starting the tour again ends the one under way first, so the reader’s view still comes back', () => {
-  startAt(4);
+  startAt(5);
   expect(location.hash).toBe(`${HOME}&view=superior`);
   start();
   expect(closed).toBe(1);
@@ -441,7 +469,7 @@ test('the Linked MRI stop opens the panel it points at, and leaving closes only 
     start();
     for (let i = 1; i < n; i++) next().click();
   };
-  const MRI_STOP = 7;
+  const MRI_STOP = 8;
   stop(MRI_STOP);
   expect(title()).toBe('The scan behind it');
   expect(document.querySelector('.driver-active-element')).toBe(
@@ -465,6 +493,33 @@ test('the Linked MRI stop opens the panel it points at, and leaving closes only 
   expect(document.querySelector('.mpr-dock')).not.toBeNull();
 });
 
+test('the Subject stop opens the data popover on its list, and leaving closes only what it opened', async () => {
+  const toggle = document.querySelector<HTMLButtonElement>('.data-toggle')!;
+  const subject = document.querySelector('[data-field="subject"]');
+  startAt(4);
+  expect(title()).toBe('One person or an average');
+  expect(toggle.ariaExpanded).toBe('true');
+  expect(document.querySelector('.driver-active-element')).toBe(subject);
+  // Next by keyboard presses nothing outside the popover: the tour closes it.
+  await expect.poll(() => document.activeElement).toBe(next());
+  await userEvent.keyboard('{ArrowRight}');
+  expect(title()).toBe('Look from any side');
+  expect(toggle.ariaExpanded).toBe('false');
+  // Back opens it again, and closing the tour closes it.
+  await expect.poll(() => document.activeElement).toBe(next());
+  await userEvent.keyboard('{ArrowLeft}');
+  expect(toggle.ariaExpanded).toBe('true');
+  await expect.poll(() => document.activeElement).toBe(next());
+  await userEvent.keyboard('{Escape}');
+  expect(closed).toBe(1);
+  expect(toggle.ariaExpanded).toBe('false');
+  // One the reader had open stays open after the stop.
+  toggle.click();
+  startAt(4);
+  next().click();
+  expect(toggle.ariaExpanded).toBe('true');
+});
+
 test('the Functions and Deficits stops open the Linked MRI on their paint, closed once the tour moves on', async () => {
   start();
   while (title() !== 'Map a function') next().click();
@@ -480,7 +535,7 @@ test('the Functions and Deficits stops open the Linked MRI on their paint, close
 
   // A first visit keeps the painted brain large: no MRI, and the card in the stage's band.
   mriOpens = [];
-  startAt(5, 'en', true);
+  startAt(6, 'en', true);
   expect([title(), mriOpens]).toEqual(['Map a function', []]);
   await expect
     .poll(() => reserved.at(-1))

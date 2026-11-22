@@ -19,7 +19,7 @@ The lesion publishes no file. It reads, from `public/models/<anatomy>/` and `pub
 | `white-matter.volume` | FreeSurfer `wmparc` gyral white matter (within 5 mm of cortex) |
 | `neuropsych-domains.json` | Each function's group and its territory: HCP-MMP areas and aseg structures with mean consistency z ≥ 3 (`threshold_z` in `config/neuropsych-domains.yaml`) |
 | `data/neuropsychology.yaml` | Each deficit finding's laterality and cited regions (`mappings`) |
-| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (30 bundle files on CDMD, 29 counted) and the scanner-to-surface transform |
+| `*.trk.gz`, `surface-space.json` | RecoBundles and TractSeg streamlines (30 bundle files on CDMD, 29 counted), or on the [MNI template](mni-template.md) the HCP1065 atlas's (21, 20 counted), and the scanner-to-surface transform |
 | Visible cortical meshes | The footprint |
 
 Label grids are described in [sections and cuts](sections-and-cuts.md#data); bundles in [tracts](tracts.md).
@@ -46,7 +46,7 @@ A finding's share is the largest $V_\text{inside}/V_\text{whole}$ among its cite
 A territory's share is of the lesion volume that falls in any territory, not of the territory: $V_\text{inside}(t)/\sum_{t'} V_\text{inside}(t')$.
 
 ### Streamlines
-Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus the seven callosal segments (`callosum_1`–`callosum_7`; the whole-callosum file is skipped). The centre is moved into scanner RAS through `surface-space.json`. A streamline is counted once when any of its points satisfies $\lVert \mathbf{p}-\mathbf{c}\rVert \le r$; a segment passing through the sphere between two outside points is not counted. Bundles are counted in a worker, four downloading at a time. The worker keeps which 2 mm cells each counted bundle has a point in, and a bundle with no such cell within $r$ crosses none, read without its points; it also keeps the decoded points of the bundles within 5 mm of the lesion, 64 MiB at most, so a lesion placed again nearby downloads and decodes nothing. A bundle the Tracts tab has decoded is not downloaded again.
+Bundles are chosen by side: left when $c_x - r < 0$, right when $c_x + r > 0$, plus the seven callosal segments (`callosum_1`–`callosum_7`; the whole-callosum file is skipped). The MNI template's atlas has no callosal segments, so there only its 20 lateral bundles are counted and the callosum is not. The centre is moved into scanner RAS through `surface-space.json`. A streamline is counted once when any of its points satisfies $\lVert \mathbf{p}-\mathbf{c}\rVert \le r$; a segment passing through the sphere between two outside points is not counted. Bundles are counted in a worker, four downloading at a time. The worker keeps which 2 mm cells each counted bundle has a point in, and a bundle with no such cell within $r$ crosses none, read without its points; it also keeps the decoded points of the bundles within 5 mm of the lesion, 64 MiB at most, so a lesion placed again nearby downloads and decodes nothing. A bundle the Tracts tab has decoded is not downloaded again.
 
 ### Footprint
 Every triangle of the visible cortical meshes whose centroid lies within $r$ is drawn with the surface's own normals in the overlay ink, with polygon offset −2. A dashed ring of 128 segments (dash $0.11\,r$, gap $0.077\,r$) and a centre dot, on halos of 2 px and 1.5 px CSS, mark the extent.
@@ -72,7 +72,7 @@ The tissue total, 14,147 mm³, is within 0.1% of $\tfrac{4}{3}\pi\,15^3 = 14{,}1
 - Function territories are group activation-consistency maps in healthy people, not lesion–deficit maps ([functions](functions.md)).
 - Deficit findings are group-level associations mapped onto a reference anatomy ([deficits](deficits.md)).
 - A sphere ignores the vascular, white-matter and network shape of real lesions.
-- Streamline counts are reconstructions from one diffusion scan, not axons and not a measure of disconnection; an anatomy without its own tracts shows none.
+- Streamline counts are reconstructions from one diffusion scan, not axons and not a measure of disconnection; an anatomy without its own tracts shows none. On the MNI template they are an averaged atlas's streamlines from 1,065 other people, and no callosal streamline is counted.
 - Structures drawn only as meshes (fornix, mammillary nuclei) have no label volume and are not measured.
 - Arterial territories are typical territories registered onto this brain ([arterial territories](arterial-territories.md)).
 - Membership follows the label grid: 1 mm, or 0.8 mm for NextBrain.

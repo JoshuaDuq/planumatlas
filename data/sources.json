@@ -2823,6 +2823,290 @@
       },
       "citation": "https://doi.org/10.1038/s41586-025-09708-2",
       "license": "Distributed with FreeSurfer; the NextBrain paper names no separate licence for the atlas."
+    },
+    {
+      "path": "data/mni152/mri/cerebellum.CerebNet.mgz",
+      "sha256": "80407e4ccf0307e94667097ce164891fd156097ed51b2983cde90ff59e74fbe2",
+      "anatomy": "mni152",
+      "optional": true,
+      "derived_from": [
+        {
+          "path": "data/mni152/mri/orig.mgz",
+          "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161"
+        },
+        {
+          "url": "https://github.com/Deep-MI/FastSurfer",
+          "tag": "v2.6.0",
+          "commit": "1dc024735371f65bc4b94a272cf596be6ddf4f21"
+        },
+        {
+          "checkpoint": "aparc_vinn_axial_v2.0.0.pkl",
+          "sha256": "81ab25ccbfc432cc41fb6089d11ff2a45b5a88e659092096cb1e067269f806b8"
+        },
+        {
+          "checkpoint": "aparc_vinn_coronal_v2.0.0.pkl",
+          "sha256": "73813957e83ec99d2c4e22f7854308916ec276d66ab7ed8ef8bf3998ba05e289"
+        },
+        {
+          "checkpoint": "aparc_vinn_sagittal_v2.0.0.pkl",
+          "sha256": "edae6262d69526fea39a019f2dfd8df75eb705f8f025b9b97166e3e17b917414"
+        },
+        {
+          "checkpoint": "CerebNet_axial_v1.0.0.pkl",
+          "sha256": "7e93f3e69dc6a8e7b11d223b59069a9f09f7f48474eb3bd31ea70cee3f603e33"
+        },
+        {
+          "checkpoint": "CerebNet_coronal_v1.0.0.pkl",
+          "sha256": "3a6fb6c3ea1b5f549d00f99840cc9dd406dd1c0552213c7871f5fc0ef5ca9036"
+        },
+        {
+          "checkpoint": "CerebNet_sagittal_v1.0.0.pkl",
+          "sha256": "182a3984905035dd99eac640943292ce5a5872e77e0ba87823622758bc3fc495"
+        }
+      ],
+      "procedure": "scripts/segment_cerebellum.py: FastSurfer run_fastsurfer.sh --seg_only --no_hypothal --no_cc --no_biasfield --device cpu --threads 4 on orig.mgz; mri/cerebellum.CerebNet.nii.gz rewritten with orig.mgz's header, labels unchanged",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2022.119703",
+      "license": "FastSurfer and its CerebNet models are Apache-2.0."
+    },
+    {
+      "path": "data/mni152/mri/striatal-networks.mgz",
+      "sha256": "9f6444502e1981fe9a676aea55417060b5feb68b73b57e65e527b73c9faa1000",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/mni152/mri/striatal-networks-carried.mgz",
+      "sha256": "16ebd91bd48ac117be0fdced6e8db65d8ddc097d301123f0fab18f8b46ec72e4",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/mni152/mri/striatal-template-aseg.mgz",
+      "sha256": "044ad76a9d4675090f62f8114768e4169bcff9a82de9c0c1a3925accd8af7136",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/mni152/mri/striatal-networks-confidence.mgz",
+      "sha256": "08a04ce418b7107b9c96000d76b0fa67e882bf8611d044502f34aa3ce0817de1",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/mni152/striatal-registration.json",
+      "sha256": "6b3d69073e72b7bdcf8f4541a4a714457090440a53ea54814713047ce0f73cba",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "4994c2b25810fc84c987115c693270d955a14fd00cc36b50b079e1dfb2b4b1f3"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7Networks_ColorLUT.txt",
+          "sha256": "f6e68af76dffac569c4e6b5d7cfe13036e5ce0a702192a3774ddae48af985e26"
+        },
+        {
+          "url": "FreeSurfer 8.2: average/Choi_JNeurophysiol12_MNI152/Choi2012_7NetworksConfidence_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz",
+          "sha256": "e2836fb5630c1827286c00649060a485bc331b9f6eb23e457150b7bb8332e11d"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz",
+          "sha256": "f675946c0a077e0682885c3d6085f10acb0dd22b2274a6cbbf04969c08a77258"
+        },
+        {
+          "url": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_desc-brain_mask.nii.gz",
+          "sha256": "6d540075dac093fa5070a929dc5ea52795d54cc9ab57fe1272086dc70314b428"
+        }
+      ],
+      "procedure": "scripts/register_striatal_networks.py: SynthMorph registration of MNI152NLin6Asym to brain.mgz, nearest-neighbour transfer kept to aseg's striatum",
+      "citation": "https://doi.org/10.1152/jn.00270.2012",
+      "license": "Distributed with FreeSurfer (FreeSurfer Software License)"
+    },
+    {
+      "path": "data/mni152/mri/cerebellar-functions.mgz",
+      "sha256": "0faebdacdcee18bf97129dff6348b6dcb22bcf2a1284967ffd62d80b26e7601e",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+          "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+          "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+          "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+          "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+          "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+        }
+      ],
+      "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+      "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "path": "data/mni152/mri/cerebellar-lobules-suit.mgz",
+      "sha256": "3886d82b1482724ec56f40b69880242faee5433759f183688bf78f0bdc624727",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+          "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+          "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+          "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+          "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+          "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+        }
+      ],
+      "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+      "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+      "license": "CC BY-NC 3.0"
+    },
+    {
+      "path": "data/mni152/cerebellar-registration.json",
+      "sha256": "c73d1049b488a82873277f74f4e165d22671b6b9560ae2686158358d2347ab04",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/tpl-SUIT/tpl-SUIT_T1w.nii",
+          "sha256": "9c84dd5d2dc3373d9d876ab675b1143d7c8397fd64bce7563650783c93ff530f"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32_space-SUIT_dseg.nii",
+          "sha256": "82f06b102bafac7b3ba7b641fd4ab1d8d7034a1d88fca163d3b49e79c9aa1476"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Nettekoven_2024/atl-NettekovenSym32.lut",
+          "sha256": "33a723b32cb861623a8459865454c9efb142bdb3ce2390ea5f29a586cfab0e24"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom_space-SUIT_dseg.nii",
+          "sha256": "cd9485752b10c385eb630a5d062cc9c8832fd1b94df1a11fec78c67b0a94ee96"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DiedrichsenLab/cerebellar_atlases/6857dfa732de6dd60c94da2f84d0b15ccf316618/Diedrichsen_2009/atl-Anatom.tsv",
+          "sha256": "dc682c847972bd37badaa979526cf22a25bc79cdf50f4f49c107391c517fe7ad"
+        }
+      ],
+      "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
+      "citation": "https://doi.org/10.1038/s41467-024-52371-w",
+      "license": "CC BY-NC 3.0"
     }
   ]
 }

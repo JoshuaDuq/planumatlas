@@ -193,7 +193,8 @@ export interface StriatalNetworks {
   /** Below this confidence a voxel's network holds a plurality, not a majority, of its 25 cortical vertices. */
   minimum_confidence: number;
   registration: Record<string, unknown>;
-  small: SmallStructureRule;
+  /** Null on the template: no landing error was measured for maps registered onto it. */
+  small: SmallStructureRule | null;
   method: string;
 }
 

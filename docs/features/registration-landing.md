@@ -11,7 +11,7 @@ Group maps reach this brain through a volume registration. Registration landing 
 | Registration | `data/cdmd/coordinates/mni152nlin2009casym-field.nii.gz`, the field the viewer ships ([published coordinates](published-coordinates.md)) | `field_sha256` in the record |
 | This brain's structures | `nextbrain-cdmd.mgz` | `nextbrain_sha256` in the record |
 
-The template anatomy is a measuring instrument only. It is not built into the viewer.
+The same reconstruction is published as a second brain, the [MNI template](mni-template.md). The benchmark reads its NextBrain volume, not the published meshes. As the benchmark's reference, the template has no landing record of its own: its striatal networks give a structure under the floor no shares and name nothing round it.
 
 ## Method
 

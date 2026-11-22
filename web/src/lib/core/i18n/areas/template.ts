@@ -4,9 +4,9 @@
  */
 export const en = {
   subjectNote:
-    'An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no cerebellar lobules or spinal cord',
+    'An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no spinal cord',
   provenance: (scale: string) =>
-    `An average of 152 young adults’ MRI, scaled by ${scale} to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no cerebellar lobules or spinal cord. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.`,
+    `An average of 152 young adults’ MRI, scaled by ${scale} to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no spinal cord. Its cerebellar lobules are CerebNet’s segmentation of the averaged scan, which no longer shows the fissures of the hemispheres. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.`,
   coordinateCaveat:
     'A location on an average brain, placed by scaling alone: not anyone’s own peak, nor what a brain does there.',
   deficitsElsewhere: (count: number) =>
@@ -16,11 +16,11 @@ export const en = {
   anatomy: {
     scope: 'An average of 152 adults’ brains and the atlases drawn on it.',
     shows:
-      'Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. Its tracts are an averaged atlas’s, and it has no cerebellar lobules, spinal cord or arousal nuclei.',
+      'Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. Its tracts are an averaged atlas’s, and it has no spinal cord or arousal nuclei.',
     source:
       'The ICBM 152 2009c nonlinear asymmetric template (MNI152NLin2009cAsym), an average of 152 young adults’ MRI, reconstructed with FreeSurfer 8.2 at 0.9 of its size, the mean brain size of the CDMD adults. Destrieux and Desikan-Killiany are its own annotations; HCP-MMP, Julich-Brain and Schaefer are carried from fsaverage through registered spheres.',
     caution:
-      'An average, not a person: averaging smooths the folds and blurs small structures, so nobody’s anatomy looks like this. Every segmentation is a model estimate, and clinical accuracy has not been validated.',
+      'An average, not a person: averaging smooths the folds and blurs small structures, so nobody’s anatomy looks like this. Its cerebellar lobules are drawn where CerebNet places them on the averaged scan, which no longer shows the fissures of the hemispheres. Every segmentation is a model estimate, and clinical accuracy has not been validated.',
   },
   tracts: {
     scope: 'White matter from an averaged atlas, built from 1,065 other people.',
@@ -47,9 +47,9 @@ export const en = {
 
 export const fr: typeof en = {
   subjectNote:
-    'La moyenne de 152 jeunes adultes à la taille adulte moyenne, avec les faisceaux d’un atlas moyen, sans lobules cérébelleux ni moelle épinière',
+    'La moyenne de 152 jeunes adultes à la taille adulte moyenne, avec les faisceaux d’un atlas moyen, sans moelle épinière',
   provenance: (scale: string) =>
-    `La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur ${scale} à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni lobules cérébelleux ni moelle épinière. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.`,
+    `La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur ${scale} à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a pas de moelle épinière. Ses lobules cérébelleux sont la segmentation par CerebNet de l’IRM moyenne, qui ne montre plus les fissures des hémisphères. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.`,
   coordinateCaveat:
     'Un emplacement sur un cerveau moyen, placé par une simple mise à l’échelle : ni le pic propre de quelqu’un, ni ce qu’un cerveau fait à cet endroit.',
   deficitsElsewhere: (count: number) =>
@@ -59,11 +59,11 @@ export const fr: typeof en = {
   anatomy: {
     scope: 'La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.',
     shows:
-      'Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Ses faisceaux sont ceux d’un atlas moyen, et il n’a ni lobules cérébelleux, ni moelle épinière, ni noyaux de l’éveil.',
+      'Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Ses faisceaux sont ceux d’un atlas moyen, et il n’a ni moelle épinière ni noyaux de l’éveil.',
     source:
       'Le gabarit ICBM 152 2009c non linéaire asymétrique (MNI152NLin2009cAsym), moyenne des IRM de 152 jeunes adultes, reconstruit avec FreeSurfer 8.2 à 0,9 de sa taille, la taille moyenne du cerveau des adultes de CDMD. Destrieux et Desikan-Killiany sont ses propres annotations ; HCP-MMP, Julich-Brain et Schaefer sont reportés depuis fsaverage par des sphères recalées.',
     caution:
-      'Une moyenne, pas une personne : la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée.',
+      'Une moyenne, pas une personne : la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Ses lobules cérébelleux sont tracés là où CerebNet les place sur l’IRM moyenne, qui ne montre plus les fissures des hémisphères. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée.',
   },
   tracts: {
     scope:

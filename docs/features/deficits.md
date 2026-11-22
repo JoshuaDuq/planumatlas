@@ -56,6 +56,8 @@ Opening a profile draws its mapped regions together: the cortical atlas is switc
 
 Each finding lists its regions as buttons, and its **Evidence** disclosure shows the network, the reported finding, its limitation, the mapping note and each publication. A publication shows its role, design, title (linked to doi.org), authors, year, journal, population, extraction scope, PubMed link and corrections. Titles, authors and journals stay in English. **Checked maps** opens the Functions maps whose `lesion_checks` cite one of the profile's findings ([functions](functions.md)). **Restore previous view** returns to the scene and tab from before the first profile opened. A region's inspector lists the deficits mapped on it. The [lesion report](lesion-report.md#method) ranks deficits by the share of cited regions a placed sphere reaches, and each [circuit](circuits.md) links to its deficit. URL state: `tab=deficits&deficit=<id>`; the chosen finding is not part of the link.
 
+On the [MNI template](mni-template.md) a profile is listed only if every finding's regions exist there. One, coma, maps brainstem arousal nuclei the template lacks. It stays on CDMD sub_013, and the list's coverage line says so.
+
 ## Validation
 
 | Test | Criterion | Result |

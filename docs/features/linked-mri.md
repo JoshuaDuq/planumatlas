@@ -1,6 +1,6 @@
 # Linked MRI
 
-Linked MRI shows the subject's own T1-weighted scan in three orthogonal planes around one crosshair shared with the 3D cut. The planes are resampled in the browser from the lossless `orig.mgz` and `aseg.mgz` grids of the FreeSurfer reconstruction, with a contrast window measured per subject and an optional segmentation overlay. Nothing is normalised or sharpened, so grey is proportional to T1 signal; the scan is 1 mm and not intensity-normalised across subjects.
+Linked MRI shows the subject's own T1-weighted scan in three orthogonal planes around one crosshair shared with the 3D cut. The planes are resampled in the browser from the lossless `orig.mgz` and `aseg.mgz` grids of the FreeSurfer reconstruction, with a contrast window measured per subject and an optional segmentation overlay. Nothing is normalised or sharpened, so grey is proportional to T1 signal; the scan is 1 mm and not intensity-normalised across subjects. On the [MNI template](mni-template.md) the planes show the template's own T1, an average of 152 people's scans.
 
 ```{figure} figures/linked-mri-1.webp
 :alt: Two copies of the linked MRI column: sagittal, coronal and axial T1 planes, each crossed by a cyan crosshair, with the readout, Window and Level sliders and the Segmentation overlay box; in the second copy the box is ticked and grey matter, white matter, ventricles, brainstem and cerebellum are tinted in their FreeSurfer colours.
@@ -34,7 +34,7 @@ The window is measured from the T1 inside every non-zero aseg voxel (`display_wi
 
 $$h = 2\left\lceil P_{99.9}/2 \right\rceil, \qquad \text{level} = h/2, \qquad \text{width} = h,$$
 
-so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displayed grey is proportional to T1 signal and surfaces, cut faces and planes show the same tissue at the same grey. The window is per subject because `orig.mgz` carries no common scale: white-matter medians were 144 in CDMD and 221 in the subject Planum published before it (DIPY's SNAIL example dataset, since retired). An empty segmentation or $h \le 0$ fails the build.
+so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displayed grey is proportional to T1 signal and surfaces, cut faces and planes show the same tissue at the same grey. The window is per subject because `orig.mgz` carries no common scale: white-matter medians were 144 in CDMD and 221 in the subject Planum published before it (DIPY's SNAIL example dataset, since retired). On the published files $h$ is 188 for CDMD and 256 for the MNI template, whose averaged T1 reaches the top of `orig.mgz`'s 8-bit range. An empty segmentation or $h \le 0$ fails the build.
 
 ### Plane resampling
 
@@ -47,7 +47,7 @@ so the window runs from 0 to an even ceiling $h$. The floor stays at 0 so displa
 - **Paint.** A pixel whose label on the cut atlas's grid is painted takes the paint's colour, whatever the window.
 - **Map.** The reader's [overlay](overlays.md) map is drawn over the result at its opacity, as the cut faces draw it.
 
-On the tracts' own anatomy, FA (viridis over 0–1, sampled at each pixel centre) is then blended over the pixels at **FA opacity**, and the drawn tracts within 2 mm of the plane (`TRACT_SLAB_MM`), clipped to that slab and laid flat on it, are drawn one pixel wide in their direction colours ([tracts](tracts.md#display)). Every pixel is drawn opaque, so voxels no label covers keep their T1 grey.
+On the tracts' own anatomy, FA where one is published (CDMD only; viridis over 0–1, sampled at each pixel centre) is then blended over the pixels at **FA opacity**, and the drawn tracts within 2 mm of the plane (`TRACT_SLAB_MM`), clipped to that slab and laid flat on it, are drawn one pixel wide in their direction colours ([tracts](tracts.md#display)). Every pixel is drawn opaque, so voxels no label covers keep their T1 grey.
 
 ### Plane frames
 

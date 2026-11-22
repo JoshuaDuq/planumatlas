@@ -125,8 +125,10 @@ def main():
     if not cerebellar_functions.is_declared(config):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the cerebellar_functions layer")
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
+    # An anatomy reconstructed elsewhere is registered with the build it declares.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
     definition = cerebellar_functions.read_definition()
     fetched = {kind: fetch(definition, kind) for kind in definition["source"]["files"]}
     check_tables(definition, fetched["lut"][0], fetched["lobule_names"][0])

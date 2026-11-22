@@ -90,7 +90,7 @@ Methods: [sections and cuts](https://planumatlas.com/docs/features/sections-and-
 
 <sub><b>Fig. 4 | Association, projection and commissural pathways of the same person.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&tab=diffusion&view=left&opacity=0.16&tracts=slf1-left,slf2-left,slf3-left">Left superior longitudinal fasciculus I–III</a>, from the left. <b>b</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&tab=diffusion&view=anterior&opacity=0.16&tracts=cst-left,cst-right">Left and right corticospinal tracts</a>, from the front. <b>c</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&tab=diffusion&view=superior&opacity=0.16&tracts=callosum-1,callosum-2,callosum-3,callosum-4,callosum-5,callosum-6,callosum-7">Seven corpus callosum segments</a>, from above. Streamlines are coloured by local direction (red left–right, green anterior–posterior, blue superior–inferior) inside a cortex at 16 % opacity.</sub>
 
-Load any of 30 bundles reconstructed from this subject’s diffusion scan, in both hemispheres where paired: the arcuate, uncinate, inferior fronto-occipital, inferior and middle longitudinal fasciculi, cingulum and corticospinal tract; the superior longitudinal fasciculus whole and as SLF I–III; and the corpus callosum whole and as seven segments. Filter streamlines by length, export their lengths as CSV, or inspect them on linked T1 and FA images. Streamline counts are not axon counts, and lengths do not measure connection strength.
+Load any of 30 bundles reconstructed from this subject’s diffusion scan, in both hemispheres where paired: the arcuate, uncinate, inferior fronto-occipital, inferior and middle longitudinal fasciculi, cingulum and corticospinal tract; the superior longitudinal fasciculus whole and as SLF I–III; and the corpus callosum whole and as seven segments. Filter streamlines by length, export their lengths as CSV, or inspect them on linked T1 and FA images. Streamline counts are not axon counts, and lengths do not measure connection strength. On the [MNI template](#the-mni-template) the tab draws 21 bundles of the HCP1065 averaged atlas instead.
 
 Methods: [tracts](https://planumatlas.com/docs/features/tracts.html)
 
@@ -127,10 +127,23 @@ A selected region also opens its [atlas comparison](https://planumatlas.com/docs
 
 <sub><b>Fig. 6 | A published group map, opened in the Overlay tool.</b> HCP motor task, right hand minus the average of all movements: the group z map of 486 people (<a href="https://neurovault.org/images/3161/">NeuroVault image 3161</a>), in FSL’s MNI152, opened as an MNI map of unstated template and drawn at |z| > 10, colours to 25. <b>a</b>, Left hemisphere, with the key titled in the tool: the hand area of the left motor cortex in red, the precentral cortex below it, where the other movements dominate, in blue. <b>b</b>, Sagittal cut at x = 18 mm, seen from the right: two right cerebellar clusters, the hand representations ipsilateral to the moving hand. <b>c</b>, Coronal cut at y = −22 mm, seen from the front: red in the left motor cortex, blue in the right. <b>d</b>, The same plane on the subject’s T1 in <b>Linked MRI</b>. <b>e</b>, The cluster table, computed as nilearn’s <code>get_clusters_table</code> computes it, in template millimetres. Data: Human Connectome Project, WU-Minn Consortium.</sub>
 
-- **[Published coordinates](https://planumatlas.com/docs/features/published-coordinates.html).** Place a coordinate from MNI152NLin2009cAsym or SPM12 space on this brain and read the regions around it.
+- **[Published coordinates](https://planumatlas.com/docs/features/published-coordinates.html).** Place a coordinate from MNI152NLin2009cAsym or SPM12 space on this brain, or one from MNI152NLin2009cAsym on the MNI template with no registration, and read the regions around it.
 - **[Overlays](https://planumatlas.com/docs/features/overlays.html).** Open an MNI-space NIfTI-1 map or 4D series and draw it on the surfaces, cut faces and MRI, with thresholds, clusters and a region time course. The file is read in the browser and never uploaded.
 - **[Lesion report](https://planumatlas.com/docs/features/lesion-report.html).** Place a sphere of 3–30 mm radius and measure the tissue, functions, deficits and tracts it reaches.
 - **[Links, images and references](https://planumatlas.com/docs/features/sharing-and-snapshots.html).** A link restores the selection, camera, section, display, highlights and placed lesion, and **Copy embed code** puts the view in a course page. **Save image** exports the stage at 2× or 3× with its orientation, scale and colour key. **References for this view** gives the sources behind what is shown as text, .bib or .ris, and the atlas’s region table downloads as CSV.
+
+## The MNI template
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/template-dark.webp">
+  <img src=".github/assets/readme/template-light.webp" alt="Three lateral views of a left hemisphere at the same scale. a, the individual brain in Destrieux colours, with deep, narrow folds and a cerebellum divided into coloured lobules. b, the MNI template in the same colours, with broader, smoother folds and a cerebellum divided into smoother lobules. c, the template see-through, with the arcuate fasciculus and corticospinal tract coloured by direction.">
+</picture>
+
+<sub><b>Fig. 7 | The same atlas on one person and on the template.</b> <b>a</b>, <a href="https://planumatlas.com/#anatomy=cdmd&lang=en&atlas=destrieux&detail=learning&view=left">CDMD <code>sub_013</code></a>, Destrieux, from the left. <b>b</b>, <a href="https://planumatlas.com/#anatomy=mni152&lang=en&atlas=destrieux&detail=learning&view=left">The MNI template</a> at 0.9 of its size, in the same view: broader, smoother folds, and the same 25 cerebellar lobules with fewer of their fissures showing. <b>c</b>, <a href="https://planumatlas.com/#anatomy=mni152&lang=en&atlas=destrieux&detail=learning&tab=diffusion&view=left&opacity=0.16&tracts=af-left,cst-left">The left arcuate fasciculus and corticospinal tract of the HCP1065 averaged atlas</a>, drawn on the template. Same camera and scale in every panel.</sub>
+
+Choose **MNI template** under **Subject** to put the atlases on ICBM 152 2009c (MNI152NLin2009cAsym), reconstructed and segmented as `sub_013` is and scaled to the mean adult brain size. A coordinate or map in its space then lands with no registration. It carries the same five cortical atlases, aseg, NextBrain and teaching set, the striatal networks and functional cerebellar regions registered onto it as onto `sub_013`, and its **Tracts** tab draws 21 bundles of the HCP1065 population-averaged atlas (Yeh, 2022), built from 1,065 other people. It is an average, so its folds are nobody’s, and it has no spinal cord or arousal nuclei. The one deficit profile and 4 circuits that need them stay on `sub_013`, as do the arterial territories, the stroke cases and the visual field map.
+
+Methods: [MNI template](https://planumatlas.com/docs/features/mni-template.html) · [tracts](https://planumatlas.com/docs/features/tracts.html#tracts-template)
 
 ## How it is built
 
@@ -144,7 +157,7 @@ flowchart LR
   src --> prep --> build --> assets --> web
 ```
 
-Preparation scripts reconstruct, segment, track and register the subject once. The `brain_model` compiler turns the results into meshes, gzipped label volumes and JSON layers, and records its measurements in `validation.json`; its validator checks the published anatomy against the source volumes, surfaces and labels. Deployment is gated on the Python tests, the anatomy validation and the web tests, each rerun when its inputs change. In the viewer, the **Provenance** panel names the subject, reconstruction, atlases and source files behind what is shown.
+Preparation scripts reconstruct, segment, track and register the subject once, and reconstruct and segment the MNI template the same way. The `brain_model` compiler turns the results into meshes, gzipped label volumes and JSON layers, and records its measurements in `validation.json`; its validator checks the published anatomy against the source volumes, surfaces and labels. Deployment is gated on the Python tests, the anatomy validation and the web tests, each rerun when its inputs change. In the viewer, the **Provenance** panel names the subject, reconstruction, atlases and source files behind what is shown.
 
 | Path | Contents |
 | :--- | :--- |

@@ -12,7 +12,7 @@
     "order": "F",
     "compression": "gzip",
     "byte_length": 16777216,
-    "sha256": "03683a1869b9efb9eaaec0286e54e3eb6221c73b2ccaf2c8d960ea6131fff21a",
+    "sha256": "4b6e4ac9685be2d5b84c98ef3936d9eddccdf5125d5a67d9d91f032dc0eb4a8c",
     "decoded_sha256": "02573aa68a2cf38babbad11105b11b2daf59f785e37ec55bd7c81096bdff699a",
     "voxel_to_surface_ras_mm": [
       [
@@ -57,7 +57,7 @@
     "order": "F",
     "compression": "gzip",
     "byte_length": 6793800,
-    "sha256": "b1152daab6836607d83f2e41e6e40e93cc956940437b1babf4912ee3a2139618",
+    "sha256": "f59e0f892203712221a1c4a11d3af94034bfaf1f25764e8ae3fd6d2a4544100f",
     "decoded_sha256": "c2c52f6b40f3391633f97bb8155dbb3d83de3ba55763236318916cf8742a5650",
     "voxel_to_surface_ras_mm": [
       [

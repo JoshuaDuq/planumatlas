@@ -131,8 +131,10 @@ def main():
     if not striatal_networks.is_declared(config):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the striatal_networks layer")
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
+    # An anatomy reconstructed elsewhere is registered with the build it declares.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
     definition = striatal_networks.read_definition()
     sources = {kind: installed(args.freesurfer, definition, kind) for kind in definition["source"]["files"]}
     check_lut(sources["lut"][0])

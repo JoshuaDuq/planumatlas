@@ -1,12 +1,15 @@
 // How to use Planum, as a driver.js tour over the live interface.
 import { driver, type DriveStep, type Side, type Alignment } from 'driver.js';
 import { t } from '../../lib/core/i18n/index.ts';
+// The tour's wording comes with the tour's own chunk, not the first visit's (BUILD-15).
+import * as guide from '../../lib/core/i18n/areas/guide.ts';
 import type { GuideStop } from '../../lib/core/i18n/areas/guide.ts';
 import { CAMERA_KEYS } from '../../lib/engine/held-view.ts';
+import { encodeState } from '../../lib/core/state/url-state.ts';
 import { PREF_KEYS, writePref } from '../../lib/state/prefs.ts';
 import { HOME_PARAMS, SEEN, parameters } from './first-launch.ts';
 import { PHONE_QUERY } from '../../lib/types/index.ts';
-import type { Language } from '../../lib/types/index.ts';
+import type { Language, Vec3 } from '../../lib/types/index.ts';
 import './tour.css';
 
 const dock = (tool: string) => `.stage-tool[data-tool="${tool}"]`;
@@ -15,6 +18,7 @@ const add = (choice: string) => `${dock('place')}[data-offers~="${choice}"]`;
 const STAGE = '#viewport canvas';
 const tab = (id: string) => `#workspace-tab-${id}`;
 const MRI_DOCK = '.mpr-dock';
+const DATA_TOGGLE = '#masthead .data-toggle';
 const PRECENTRAL = 'destrieux:left:29';
 /** The link's camera: an exact one, or a named view. */
 const CAMERA = ['cam', 'view'];
@@ -139,8 +143,8 @@ type Seat = 'overDock' | 'underTabs' | 'stageTop';
 /** What the reader does on the brain for a card that waits: turn it, or open a region. */
 type Try = 'turn' | 'pick';
 
-/** The scan's download, when the cut before has not already brought it. */
-const MRI_WAIT_MS = 10_000;
+/** The scan's download, when the cut before has not already brought it, or the data lists' chunk. */
+const OPEN_WAIT_MS = 10_000;
 
 /** Marks a card rendered but not yet placed (tour.css). */
 const ENTERING = 'data-entering';
@@ -166,12 +170,16 @@ const STOPS: Record<
     tries?: Try;
     /** The region the reader opened, seen as they left it, replaces the stop's own. */
     readersRegion?: true;
+    /** A 10 mm lesion centred on this region's anchor on the loaded anatomy. */
+    lesionIn?: string;
     /** A phone's sheet rises to show what the stop points at, and comes down after it. */
     raisesSheet?: true;
     /** The region the Linked MRI opens on. */
     opensMri?: string;
     /** The Linked MRI opens beside the stop on the function or deficit its view paints, as the profile's own does. */
     paintsMri?: true;
+    /** The masthead's data popover opens for the stop, which points into it. */
+    opensData?: true;
     /** The card sits in the stage's dark space, a band the anatomy is framed clear of. */
     inStage?: true;
     /** Where a phone's card sits, rather than over the anatomy. */
@@ -209,6 +217,13 @@ const STOPS: Record<
     raisesSheet: true,
     inStage: true,
     phone: 'stageTop',
+  },
+  // Another subject is another page, which would end the tour: the stop shows the choice, not a switch.
+  subject: {
+    selector: '#masthead .masthead-data[data-open] [data-field="subject"]',
+    side: 'bottom',
+    align: 'start',
+    opensData: true,
   },
   directions: {
     selector: '.orientation-gizmo',
@@ -269,12 +284,12 @@ const STOPS: Record<
     inStage: true,
     phone: 'underTabs',
   },
-  // The left precentral gyrus's centroid on this brain (its detail view's Centroid, surface RAS).
+  // Surface RAS differs between anatomies, so the centre is read from the one loaded.
   lesion: {
     selector: add('lesion'),
     side: 'top',
     align: 'start',
-    view: 'lesion=-35.5,-9.5,63.5,10',
+    lesionIn: PRECENTRAL,
   },
   // Fox et al. 2012 (Biol Psychiatry, PMID 22658708): the left DLPFC stimulation target that
   // connectivity with the subgenual cingulate optimises, in MNI. The paper names no MNI template,
@@ -305,6 +320,7 @@ const FIRST_VISIT: readonly GuideStop['id'][] = [
   'turn',
   'openRegion',
   'regionDetail',
+  'subject',
   'section',
   'functions',
   'finish',
@@ -381,6 +397,8 @@ interface GuideOptions {
   sheet: { raise(): void; lower(): void };
   /** Keeps bands this wide on the stage's right and above its dock clear of anatomy; 0 gives one back. */
   reserve: (band: { right: number; bottom: number }) => void;
+  /** The region's own voxel nearest its centroid on the loaded anatomy, surface RAS mm. */
+  anchorOf: (region: string) => Vec3 | null;
   /** A first visit's short tour, rather than every stop. */
   short?: boolean;
 }
@@ -421,7 +439,7 @@ const targetOf = (id: GuideStop['id'], phone: boolean) =>
 
 /** The stops a layout can show now: a control it hides is left out, so the count stays true. */
 function shownStops(lang: Language, kind: Kind, docksMri: boolean, phone: boolean): GuideStop[] {
-  const copy = t(lang, 'guide');
+  const copy = lang === 'fr' ? guide.fr : guide.en;
   const all = [...copy.stops, ...copy.firstVisit];
   const stops =
     kind === 'first'
@@ -429,13 +447,17 @@ function shownStops(lang: Language, kind: Kind, docksMri: boolean, phone: boolea
       : kind === 'rest'
         ? copy.stops.filter(({ id }) => !FIRST_VISIT.includes(id))
         : copy.stops;
-  return stops.filter(({ id }) => (STOPS[id].opensMri ? docksMri : rendered(targetOf(id, phone))));
+  return stops.filter(({ id }) =>
+    STOPS[id].opensMri
+      ? docksMri
+      : rendered(STOPS[id].opensData ? DATA_TOGGLE : targetOf(id, phone)),
+  );
 }
 
 /** The tour in one language, over the reader's view `reader`, which closing puts back. */
 function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind): void {
-  const { animate, onClose, onLanguage, mri, onPick, sheet, reserve } = options;
-  const copy = t(lang, 'guide');
+  const { animate, onClose, onLanguage, mri, onPick, sheet, reserve, anchorOf } = options;
+  const copy = lang === 'fr' ? guide.fr : guide.en;
   // The reader's colour gives way to the stops' own.
   const home = parameters(reader).filter(([key]) => HOME_PARAMS.includes(key));
   // A stop's parameters replace the home view's own, over those of the reader's it keeps.
@@ -454,8 +476,13 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
     sheet.lower();
   };
   const viewOf = (id: GuideStop['id']) => {
-    const { view = '', keeps = [], readersRegion } = STOPS[id];
+    const { view = '', keeps = [], readersRegion, lesionIn } = STOPS[id];
     if (readersRegion && opened) return { view: `region=${opened}`, keeps: CAMERA };
+    if (lesionIn) {
+      const centre = anchorOf(lesionIn);
+      if (!centre) throw new Error(`The anatomy has no ${lesionIn} to centre the lesion on.`);
+      return { view: encodeState({ lesion: { centre: [...centre], radius: 10 } }), keeps };
+    }
     return { view, keeps };
   };
   // Whether the tour opened the panel, so leaving its stops closes only what the tour opened.
@@ -473,6 +500,21 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
     // The stage widens back: the next card is placed against the settled layout.
     requestAnimationFrame(() => tour.refresh());
   };
+  // The popover closes itself on a press outside it, so Next or Back by pointer has closed it already.
+  let openedData = false;
+  const dataOpen = () =>
+    document.querySelector(DATA_TOGGLE)!.getAttribute('aria-expanded') === 'true';
+  const openData = () => {
+    leaveMri();
+    if (dataOpen()) return;
+    openedData = true;
+    document.querySelector<HTMLElement>(DATA_TOGGLE)!.click();
+  };
+  const leaveData = () => {
+    if (!openedData) return;
+    openedData = false;
+    if (dataOpen()) document.querySelector<HTMLElement>(DATA_TOGGLE)!.click();
+  };
   const phone = matchMedia(PHONE_QUERY).matches;
   // On a phone the MRI is a modal dialog, which a card cannot point beside.
   const docksMri = rendered(STAGE) && !phone;
@@ -484,7 +526,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
   // Where each stop's card sits on a phone, if not where driver.js puts it.
   const seats: { at?: Seat; selector?: string }[] = [];
   const steps: DriveStep[] = stops.map(({ id, title, body }) => {
-    const { side, align, view = '', opensMri, paintsMri } = STOPS[id];
+    const { side, align, view = '', opensMri, paintsMri, opensData } = STOPS[id];
     const selector = targetOf(id, phone);
     // A first visit keeps the painted brain large: the MRI beside it is the full tour's.
     const paintDocked = Boolean(paintsMri) && docksMri && kind !== 'first';
@@ -493,7 +535,9 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
         ? () => openMri(view, () => mri.open(opensMri))
         : paintDocked
           ? () => openMri(view, () => mri.openPaint(paintOf(view)))
-          : null,
+          : opensData
+            ? openData
+            : null,
     );
     // Beside the docked MRI the stage is too narrow for a band down its right: the card sits over
     // the dock instead, as a phone's does, and the anatomy is framed above it.
@@ -501,7 +545,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
     seats.push(phone ? { at: STOPS[id].phone, selector } : paintDocked ? { at: 'overDock' } : {});
     return {
       element: selector,
-      ...(opensMri && { waitForElement: MRI_WAIT_MS }),
+      ...((opensMri || opensData) && { waitForElement: OPEN_WAIT_MS }),
       popover: {
         title,
         description: body,
@@ -527,6 +571,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
   const move = (index: number) => {
     clearTimeout(doneTimer);
     const opening = enter[index];
+    if (!STOPS[stops[index]!.id].opensData) leaveData();
     if (opening) opening();
     else leaveMri();
     tour.moveTo(index);
@@ -744,6 +789,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
       removeEventListener('resize', placeCard);
       reserve({ right: 0, bottom: 0 });
       leaveMri();
+      leaveData();
       lowerSheet();
       tour.destroy();
       document.documentElement.removeAttribute(SHOWING);

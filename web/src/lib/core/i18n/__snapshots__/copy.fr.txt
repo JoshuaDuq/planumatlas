@@ -1169,121 +1169,6 @@
    "caution": "L’ombrage est illustratif<NNBSP>: la luminosité T1, l’ombrage des plis et les couleurs des tissus ne sont pas des propriétés optiques ou histologiques mesurées. La vue éclatée déplace chaque structure d’un bloc, et certains systèmes se traversent encore là où des structures fines passent entre eux."
   }
  },
- "guide": {
-  "next": "Suivant",
-  "previous": "Retour",
-  "done": "Terminé",
-  "close": "Fermer la visite",
-  "skip": "Passer la visite",
-  "start": "Commencer",
-  "explore": "Explorer",
-  "progress": "{{current}} sur {{total}}",
-  "rest": [
-   "[\"Alpha\"] → \"Voir la suite (Alpha étapes)\"",
-   "[\"\"] → \"Voir la suite ( étapes)\""
-  ],
-  "yourTurn": "Essayez",
-  "didIt": "Fait",
-  "firstVisit": [
-   {
-    "id": "finish",
-    "title": "À vous",
-    "body": "Chaque onglet est une entrée<NNBSP>: Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche."
-   }
-  ],
-  "stops": [
-   {
-    "id": "welcome",
-    "title": "Bienvenue dans Planum",
-    "body": "Le cerveau d’une personne, reconstruit à partir de son IRM et cartographié région par région, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique."
-   },
-   {
-    "id": "turn",
-    "title": "Tourner le cerveau",
-    "body": "Faites-le glisser pour le tourner. Molette ou pincement pour zoomer. Glissez avec Maj, ou à deux doigts sur un écran tactile, pour le déplacer<NNBSP>; double-cliquez ou touchez deux fois un point pour y centrer la vue."
-   },
-   {
-    "id": "openRegion",
-    "title": "Ouvrir une région",
-    "body": "Cliquez ou touchez une région du cerveau."
-   },
-   {
-    "id": "regionDetail",
-    "title": "La région en détail",
-    "body": "Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau."
-   },
-   {
-    "id": "directions",
-    "title": "Regarder de tous les côtés",
-    "body": "Choisissez une lettre pour regarder de ce côté, ici S pour supérieur. Le centre ramène la vue oblique."
-   },
-   {
-    "id": "section",
-    "title": "Couper le cerveau",
-    "body": "Coupe tranche le cerveau selon un plan, ici coronal. Faites glisser le curseur pour le parcourir."
-   },
-   {
-    "id": "linkedMri",
-    "title": "L’examen d’origine",
-    "body": "L’IRM d’où ce cerveau a été reconstruit, en trois plans. Cliquez le cerveau et le réticule suit<NNBSP>; cliquez l’examen pour sélectionner ce qui s’y trouve."
-   },
-   {
-    "id": "medial",
-    "title": "La face interne",
-    "body": "Affichez un hémisphère et regardez depuis l’autre côté pour voir sa face interne<NNBSP>: ici le gauche, vu de la droite. Affichage › Hémisphère, ou H."
-   },
-   {
-    "id": "explode",
-    "title": "Écarter les structures",
-    "body": "La vue éclatée déplace chaque structure d’un bloc, dans sa forme mesurée, et l’anatomie profonde apparaît. Affichage › Vue éclatée, ou E."
-   },
-   {
-    "id": "functions",
-    "title": "Cartographier une fonction",
-    "body": "Fonctions peint les régions où des études rapportent une activation pour une fonction, ici le langage<NNBSP>: des données de nombreuses personnes, tracées sur ce cerveau."
-   },
-   {
-    "id": "deficits",
-    "title": "Cartographier un déficit",
-    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit, ici l’aphasie."
-   },
-   {
-    "id": "circuits",
-    "title": "Suivre une voie",
-    "body": "Circuits parcourt une voie repère par repère<NNBSP>: ici la voie visuelle, à partir du chiasma optique."
-   },
-   {
-    "id": "tracts",
-    "title": "La substance blanche",
-    "body": "Faisceaux trace les faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de ce cerveau, colorés selon leur direction."
-   },
-   {
-    "id": "lesion",
-    "title": "Placer une lésion",
-    "body": "Ajouter › Lésion place une sphère et liste ce qu’elle atteint<NNBSP>: ici une sphère de 10 mm de rayon dans le gyrus précentral gauche."
-   },
-   {
-    "id": "coordinate",
-    "title": "Trouver une coordonnée",
-    "body": "Ajouter › Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve<NNBSP>: ici −38, 44, 26, une cible de stimulation préfrontale gauche."
-   },
-   {
-    "id": "overlay",
-    "title": "Apporter votre carte",
-    "body": "Ajouter › Superposition affiche votre propre carte NIfTI, dans l’espace MNI, sur ce cerveau et ses coupes. Le fichier ne quitte jamais votre ordinateur."
-   },
-   {
-    "id": "topBar",
-    "title": "Ce qui est dessiné",
-    "body": "Ceci nomme l’atlas et les couleurs du cerveau. Ouvrez-le pour les changer, ou l’anatomie interne, chacun avec une note sur ce qu’il montre."
-   },
-   {
-    "id": "settings",
-    "title": "Réglages",
-    "body": "La langue, le thème, les raccourcis clavier (touche ?) et Recommencer sont ici, avec cette visite quand vous voulez la revoir."
-   }
-  ]
- },
  "header": {
   "atlasShort": {
    "destrieux": "Destrieux",
@@ -2959,11 +2844,131 @@
    ]
   }
  },
+ "guide": {
+  "next": "Suivant",
+  "previous": "Retour",
+  "done": "Terminé",
+  "close": "Fermer la visite",
+  "skip": "Passer la visite",
+  "start": "Commencer",
+  "explore": "Explorer",
+  "progress": "{{current}} sur {{total}}",
+  "rest": [
+   "[\"Alpha\"] → \"Voir la suite (Alpha étapes)\"",
+   "[\"\"] → \"Voir la suite ( étapes)\""
+  ],
+  "yourTurn": "Essayez",
+  "didIt": "Fait",
+  "firstVisit": [
+   {
+    "id": "finish",
+    "title": "À vous",
+    "body": "Chaque onglet est une entrée<NNBSP>: Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche."
+   }
+  ],
+  "stops": [
+   {
+    "id": "welcome",
+    "title": "Bienvenue dans Planum",
+    "body": "Le cerveau d’une personne, reconstruit à partir de son IRM et cartographié région par région, pour l’apprentissage et la recherche. Ce n’est pas de l’anatomie clinique."
+   },
+   {
+    "id": "turn",
+    "title": "Tourner le cerveau",
+    "body": "Faites-le glisser pour le tourner. Molette ou pincement pour zoomer. Glissez avec Maj, ou à deux doigts sur un écran tactile, pour le déplacer<NNBSP>; double-cliquez ou touchez deux fois un point pour y centrer la vue."
+   },
+   {
+    "id": "openRegion",
+    "title": "Ouvrir une région",
+    "body": "Cliquez ou touchez une région du cerveau."
+   },
+   {
+    "id": "regionDetail",
+    "title": "La région en détail",
+    "body": "Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau."
+   },
+   {
+    "id": "subject",
+    "title": "Une personne ou une moyenne",
+    "body": "Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page."
+   },
+   {
+    "id": "directions",
+    "title": "Regarder de tous les côtés",
+    "body": "Choisissez une lettre pour regarder de ce côté, ici S pour supérieur. Le centre ramène la vue oblique."
+   },
+   {
+    "id": "section",
+    "title": "Couper le cerveau",
+    "body": "Coupe tranche le cerveau selon un plan, ici coronal. Faites glisser le curseur pour le parcourir."
+   },
+   {
+    "id": "linkedMri",
+    "title": "L’examen d’origine",
+    "body": "L’IRM d’où ce cerveau a été reconstruit, en trois plans. Cliquez le cerveau et le réticule suit<NNBSP>; cliquez l’examen pour sélectionner ce qui s’y trouve."
+   },
+   {
+    "id": "medial",
+    "title": "La face interne",
+    "body": "Affichez un hémisphère et regardez depuis l’autre côté pour voir sa face interne<NNBSP>: ici le gauche, vu de la droite. Affichage › Hémisphère, ou H."
+   },
+   {
+    "id": "explode",
+    "title": "Écarter les structures",
+    "body": "La vue éclatée déplace chaque structure d’un bloc, dans sa forme mesurée, et l’anatomie profonde apparaît. Affichage › Vue éclatée, ou E."
+   },
+   {
+    "id": "functions",
+    "title": "Cartographier une fonction",
+    "body": "Fonctions peint les régions où des études rapportent une activation pour une fonction, ici le langage<NNBSP>: des données de nombreuses personnes, tracées sur ce cerveau."
+   },
+   {
+    "id": "deficits",
+    "title": "Cartographier un déficit",
+    "body": "Déficits peint les régions que les études lésionnelles associent à un déficit, ici l’aphasie."
+   },
+   {
+    "id": "circuits",
+    "title": "Suivre une voie",
+    "body": "Circuits parcourt une voie repère par repère<NNBSP>: ici la voie visuelle, à partir du chiasma optique."
+   },
+   {
+    "id": "tracts",
+    "title": "La substance blanche",
+    "body": "Faisceaux trace les faisceaux de substance blanche reconstruits à partir de l’IRM de diffusion de ce cerveau, colorés selon leur direction."
+   },
+   {
+    "id": "lesion",
+    "title": "Placer une lésion",
+    "body": "Ajouter › Lésion place une sphère et liste ce qu’elle atteint<NNBSP>: ici une sphère de 10 mm de rayon dans le gyrus précentral gauche."
+   },
+   {
+    "id": "coordinate",
+    "title": "Trouver une coordonnée",
+    "body": "Ajouter › Coordonnée place une coordonnée MNI publiée sur ce cerveau et nomme ce qui s’y trouve<NNBSP>: ici −38, 44, 26, une cible de stimulation préfrontale gauche."
+   },
+   {
+    "id": "overlay",
+    "title": "Apporter votre carte",
+    "body": "Ajouter › Superposition affiche votre propre carte NIfTI, dans l’espace MNI, sur ce cerveau et ses coupes. Le fichier ne quitte jamais votre ordinateur."
+   },
+   {
+    "id": "topBar",
+    "title": "Ce qui est dessiné",
+    "body": "Ceci nomme l’atlas et les couleurs du cerveau. Ouvrez-le pour les changer, ou l’anatomie interne, chacun avec une note sur ce qu’il montre."
+   },
+   {
+    "id": "settings",
+    "title": "Réglages",
+    "body": "La langue, le thème, les raccourcis clavier (touche ?) et Recommencer sont ici, avec cette visite quand vous voulez la revoir."
+   }
+  ]
+ },
  "template": {
-  "subjectNote": "La moyenne de 152 jeunes adultes à la taille adulte moyenne, avec les faisceaux d’un atlas moyen, sans lobules cérébelleux ni moelle épinière",
+  "subjectNote": "La moyenne de 152 jeunes adultes à la taille adulte moyenne, avec les faisceaux d’un atlas moyen, sans moelle épinière",
   "provenance": [
-   "[\"Alpha\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur Alpha à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni lobules cérébelleux ni moelle épinière. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\"",
-   "[\"\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur  à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni lobules cérébelleux ni moelle épinière. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\""
+   "[\"Alpha\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur Alpha à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a pas de moelle épinière. Ses lobules cérébelleux sont la segmentation par CerebNet de l’IRM moyenne, qui ne montre plus les fissures des hémisphères. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\"",
+   "[\"\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur  à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a pas de moelle épinière. Ses lobules cérébelleux sont la segmentation par CerebNet de l’IRM moyenne, qui ne montre plus les fissures des hémisphères. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\""
   ],
   "coordinateCaveat": "Un emplacement sur un cerveau moyen, placé par une simple mise à l’échelle<NNBSP>: ni le pic propre de quelqu’un, ni ce qu’un cerveau fait à cet endroit.",
   "deficitsElsewhere": [
@@ -2982,9 +2987,9 @@
   ],
   "anatomy": {
    "scope": "La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.",
-   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Ses faisceaux sont ceux d’un atlas moyen, et il n’a ni lobules cérébelleux, ni moelle épinière, ni noyaux de l’éveil.",
+   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Ses faisceaux sont ceux d’un atlas moyen, et il n’a ni moelle épinière ni noyaux de l’éveil.",
    "source": "Le gabarit ICBM 152 2009c non linéaire asymétrique (MNI152NLin2009cAsym), moyenne des IRM de 152 jeunes adultes, reconstruit avec FreeSurfer 8.2 à 0,9 de sa taille, la taille moyenne du cerveau des adultes de CDMD. Destrieux et Desikan-Killiany sont ses propres annotations<NNBSP>; HCP-MMP, Julich-Brain et Schaefer sont reportés depuis fsaverage par des sphères recalées.",
-   "caution": "Une moyenne, pas une personne<NNBSP>: la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée."
+   "caution": "Une moyenne, pas une personne<NNBSP>: la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Ses lobules cérébelleux sont tracés là où CerebNet les place sur l’IRM moyenne, qui ne montre plus les fissures des hémisphères. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée."
   },
   "tracts": {
    "scope": "La substance blanche d’un atlas moyen, construit à partir de 1<NNBSP>065 autres personnes.",

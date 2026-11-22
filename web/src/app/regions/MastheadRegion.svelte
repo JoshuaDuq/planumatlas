@@ -177,6 +177,7 @@
         close: () => app.ports.closeMpr(),
       },
       onPick: (listener) => world!.engine.on('pick', ({ id }) => listener(id)),
+      anchorOf: (region) => world!.engine.model.anchorOf(region),
       sheet: { raise: () => app.ports.revealOnSelect(), lower: () => app.ports.lowerSheet() },
     });
   }

@@ -332,6 +332,7 @@ describe('the toolbar', () => {
           onPick: () => () => {},
           sheet: { raise: () => {}, lower: () => {} },
           reserve: () => {},
+          anchorOf: () => [0, 0, 0],
         });
         const card = () => document.querySelector<HTMLElement>('.driver-popover')!;
         const pointed: Record<string, string> = {};

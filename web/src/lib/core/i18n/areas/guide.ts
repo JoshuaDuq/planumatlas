@@ -5,6 +5,7 @@ export interface GuideStop {
     | 'turn'
     | 'openRegion'
     | 'regionDetail'
+    | 'subject'
     | 'directions'
     | 'section'
     | 'linkedMri'
@@ -67,6 +68,11 @@ export const en = {
       id: 'regionDetail',
       title: 'The region in detail',
       body: 'Where it lies, its size and what is known about it. Focus greys out the rest of the brain.',
+    },
+    {
+      id: 'subject',
+      title: 'One person or an average',
+      body: 'Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page.',
     },
     {
       id: 'directions',
@@ -180,6 +186,11 @@ export const fr: typeof en = {
       id: 'regionDetail',
       title: 'La région en détail',
       body: 'Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau.',
+    },
+    {
+      id: 'subject',
+      title: 'Une personne ou une moyenne',
+      body: 'Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page.',
     },
     {
       id: 'directions',

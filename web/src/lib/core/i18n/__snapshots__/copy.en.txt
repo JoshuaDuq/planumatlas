@@ -1169,121 +1169,6 @@
    "caution": "The shading is illustrative: T1 brightness, fold shading and tissue colours are not measured optical or histological properties. The exploded view moves each structure whole, and some systems still pass through each other where thin structures thread between them."
   }
  },
- "guide": {
-  "next": "Next",
-  "previous": "Back",
-  "done": "Done",
-  "close": "Close the tour",
-  "skip": "Skip tour",
-  "start": "Start tour",
-  "explore": "Start exploring",
-  "progress": "{{current}} of {{total}}",
-  "rest": [
-   "[\"Alpha\"] → \"See the rest (Alpha stops)\"",
-   "[\"\"] → \"See the rest ( stops)\""
-  ],
-  "yourTurn": "Try it",
-  "didIt": "Done",
-  "firstVisit": [
-   {
-    "id": "finish",
-    "title": "Over to you",
-    "body": "Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter."
-   }
-  ],
-  "stops": [
-   {
-    "id": "welcome",
-    "title": "Welcome to Planum",
-    "body": "One person’s brain, reconstructed from their MRI and mapped region by region, for learning and research. Not clinical anatomy."
-   },
-   {
-    "id": "turn",
-    "title": "Turn the brain",
-    "body": "Drag to turn it. Scroll or pinch to zoom. Drag with Shift, or with two fingers on a touch screen, to move it; double-click or double-tap a spot to centre the view on it."
-   },
-   {
-    "id": "openRegion",
-    "title": "Open a region",
-    "body": "Click or tap any region of the brain."
-   },
-   {
-    "id": "regionDetail",
-    "title": "The region in detail",
-    "body": "Where it lies, its size and what is known about it. Focus greys out the rest of the brain."
-   },
-   {
-    "id": "directions",
-    "title": "Look from any side",
-    "body": "Choose a letter to look from that side, here S for superior. The centre returns to the oblique view."
-   },
-   {
-    "id": "section",
-    "title": "Cut through it",
-    "body": "Section cuts the brain on a plane, here coronal. Drag the slider to move through it."
-   },
-   {
-    "id": "linkedMri",
-    "title": "The scan behind it",
-    "body": "The MRI this brain was reconstructed from, in three planes. Click the brain and the crosshair follows; click the scan to select what lies there."
-   },
-   {
-    "id": "medial",
-    "title": "The inner surface",
-    "body": "Show one hemisphere and look from the other side to see its inner surface: here the left, from the right. Display › Hemisphere, or H."
-   },
-   {
-    "id": "explode",
-    "title": "Pull it apart",
-    "body": "The exploded view moves each structure out whole, in its measured shape, so the deep anatomy shows. Display › Exploded view, or E."
-   },
-   {
-    "id": "functions",
-    "title": "Map a function",
-    "body": "Functions paints where studies report activation for a function, here language: evidence pooled from many people, drawn on this brain."
-   },
-   {
-    "id": "deficits",
-    "title": "Map a deficit",
-    "body": "Deficits paints the regions that lesion studies tie to a deficit, here aphasia."
-   },
-   {
-    "id": "circuits",
-    "title": "Follow a pathway",
-    "body": "Circuits walks through a pathway one landmark at a time: here the visual pathway, from the optic chiasm."
-   },
-   {
-    "id": "tracts",
-    "title": "White matter",
-    "body": "Tracts draws white-matter bundles reconstructed from this brain’s own diffusion scan, coloured by direction."
-   },
-   {
-    "id": "lesion",
-    "title": "Place a lesion",
-    "body": "Add › Lesion places a sphere and lists what it reaches: here one of 10 mm radius in the left precentral gyrus."
-   },
-   {
-    "id": "coordinate",
-    "title": "Find a coordinate",
-    "body": "Add › Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
-   },
-   {
-    "id": "overlay",
-    "title": "Bring your own map",
-    "body": "Add › Overlay draws your own NIfTI map, in MNI space, on this brain and its cuts. The file never leaves your computer."
-   },
-   {
-    "id": "topBar",
-    "title": "What is drawn",
-    "body": "This names the atlas and colours on the brain. Open it to change them or the internal anatomy, each with a note on what it shows."
-   },
-   {
-    "id": "settings",
-    "title": "Settings",
-    "body": "Language, theme, keyboard shortcuts (press ?) and Start over are here, with this tour whenever you want it again."
-   }
-  ]
- },
  "header": {
   "atlasShort": {
    "destrieux": "Destrieux",
@@ -2959,11 +2844,131 @@
    ]
   }
  },
+ "guide": {
+  "next": "Next",
+  "previous": "Back",
+  "done": "Done",
+  "close": "Close the tour",
+  "skip": "Skip tour",
+  "start": "Start tour",
+  "explore": "Start exploring",
+  "progress": "{{current}} of {{total}}",
+  "rest": [
+   "[\"Alpha\"] → \"See the rest (Alpha stops)\"",
+   "[\"\"] → \"See the rest ( stops)\""
+  ],
+  "yourTurn": "Try it",
+  "didIt": "Done",
+  "firstVisit": [
+   {
+    "id": "finish",
+    "title": "Over to you",
+    "body": "Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter."
+   }
+  ],
+  "stops": [
+   {
+    "id": "welcome",
+    "title": "Welcome to Planum",
+    "body": "One person’s brain, reconstructed from their MRI and mapped region by region, for learning and research. Not clinical anatomy."
+   },
+   {
+    "id": "turn",
+    "title": "Turn the brain",
+    "body": "Drag to turn it. Scroll or pinch to zoom. Drag with Shift, or with two fingers on a touch screen, to move it; double-click or double-tap a spot to centre the view on it."
+   },
+   {
+    "id": "openRegion",
+    "title": "Open a region",
+    "body": "Click or tap any region of the brain."
+   },
+   {
+    "id": "regionDetail",
+    "title": "The region in detail",
+    "body": "Where it lies, its size and what is known about it. Focus greys out the rest of the brain."
+   },
+   {
+    "id": "subject",
+    "title": "One person or an average",
+    "body": "Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page."
+   },
+   {
+    "id": "directions",
+    "title": "Look from any side",
+    "body": "Choose a letter to look from that side, here S for superior. The centre returns to the oblique view."
+   },
+   {
+    "id": "section",
+    "title": "Cut through it",
+    "body": "Section cuts the brain on a plane, here coronal. Drag the slider to move through it."
+   },
+   {
+    "id": "linkedMri",
+    "title": "The scan behind it",
+    "body": "The MRI this brain was reconstructed from, in three planes. Click the brain and the crosshair follows; click the scan to select what lies there."
+   },
+   {
+    "id": "medial",
+    "title": "The inner surface",
+    "body": "Show one hemisphere and look from the other side to see its inner surface: here the left, from the right. Display › Hemisphere, or H."
+   },
+   {
+    "id": "explode",
+    "title": "Pull it apart",
+    "body": "The exploded view moves each structure out whole, in its measured shape, so the deep anatomy shows. Display › Exploded view, or E."
+   },
+   {
+    "id": "functions",
+    "title": "Map a function",
+    "body": "Functions paints where studies report activation for a function, here language: evidence pooled from many people, drawn on this brain."
+   },
+   {
+    "id": "deficits",
+    "title": "Map a deficit",
+    "body": "Deficits paints the regions that lesion studies tie to a deficit, here aphasia."
+   },
+   {
+    "id": "circuits",
+    "title": "Follow a pathway",
+    "body": "Circuits walks through a pathway one landmark at a time: here the visual pathway, from the optic chiasm."
+   },
+   {
+    "id": "tracts",
+    "title": "White matter",
+    "body": "Tracts draws white-matter bundles reconstructed from this brain’s own diffusion scan, coloured by direction."
+   },
+   {
+    "id": "lesion",
+    "title": "Place a lesion",
+    "body": "Add › Lesion places a sphere and lists what it reaches: here one of 10 mm radius in the left precentral gyrus."
+   },
+   {
+    "id": "coordinate",
+    "title": "Find a coordinate",
+    "body": "Add › Coordinate places a published MNI coordinate on this brain and names what lies there: here −38, 44, 26, a left prefrontal stimulation target."
+   },
+   {
+    "id": "overlay",
+    "title": "Bring your own map",
+    "body": "Add › Overlay draws your own NIfTI map, in MNI space, on this brain and its cuts. The file never leaves your computer."
+   },
+   {
+    "id": "topBar",
+    "title": "What is drawn",
+    "body": "This names the atlas and colours on the brain. Open it to change them or the internal anatomy, each with a note on what it shows."
+   },
+   {
+    "id": "settings",
+    "title": "Settings",
+    "body": "Language, theme, keyboard shortcuts (press ?) and Start over are here, with this tour whenever you want it again."
+   }
+  ]
+ },
  "template": {
-  "subjectNote": "An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no cerebellar lobules or spinal cord",
+  "subjectNote": "An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no spinal cord",
   "provenance": [
-   "[\"Alpha\"] → \"An average of 152 young adults’ MRI, scaled by Alpha to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no cerebellar lobules or spinal cord. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\"",
-   "[\"\"] → \"An average of 152 young adults’ MRI, scaled by  to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no cerebellar lobules or spinal cord. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\""
+   "[\"Alpha\"] → \"An average of 152 young adults’ MRI, scaled by Alpha to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no spinal cord. Its cerebellar lobules are CerebNet’s segmentation of the averaged scan, which no longer shows the fissures of the hemispheres. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\"",
+   "[\"\"] → \"An average of 152 young adults’ MRI, scaled by  to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no spinal cord. Its cerebellar lobules are CerebNet’s segmentation of the averaged scan, which no longer shows the fissures of the hemispheres. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\""
   ],
   "coordinateCaveat": "A location on an average brain, placed by scaling alone: not anyone’s own peak, nor what a brain does there.",
   "deficitsElsewhere": [
@@ -2982,9 +2987,9 @@
   ],
   "anatomy": {
    "scope": "An average of 152 adults’ brains and the atlases drawn on it.",
-   "shows": "Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. Its tracts are an averaged atlas’s, and it has no cerebellar lobules, spinal cord or arousal nuclei.",
+   "shows": "Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. Its tracts are an averaged atlas’s, and it has no spinal cord or arousal nuclei.",
    "source": "The ICBM 152 2009c nonlinear asymmetric template (MNI152NLin2009cAsym), an average of 152 young adults’ MRI, reconstructed with FreeSurfer 8.2 at 0.9 of its size, the mean brain size of the CDMD adults. Destrieux and Desikan-Killiany are its own annotations; HCP-MMP, Julich-Brain and Schaefer are carried from fsaverage through registered spheres.",
-   "caution": "An average, not a person: averaging smooths the folds and blurs small structures, so nobody’s anatomy looks like this. Every segmentation is a model estimate, and clinical accuracy has not been validated."
+   "caution": "An average, not a person: averaging smooths the folds and blurs small structures, so nobody’s anatomy looks like this. Its cerebellar lobules are drawn where CerebNet places them on the averaged scan, which no longer shows the fissures of the hemispheres. Every segmentation is a model estimate, and clinical accuracy has not been validated."
   },
   "tracts": {
    "scope": "White matter from an averaged atlas, built from 1,065 other people.",

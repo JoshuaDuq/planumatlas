@@ -24,7 +24,7 @@ What it costs
 : Group data must be registered onto this brain. Surface atlases arrive through `fsaverage` sphere registration ([cortical atlases](features/cortical-atlases.md)). Group volumes arrive through SynthMorph: across the two MNI templates, deep grey matter and the lateral ventricles overlap at Dice 0.80–0.92 and cortex at 0.72–0.74. A single cortical parcel looked up from template space agrees with this brain's own parcellation for about 60% of cortex; a miss lies a median 2.2 mm away (90th percentile 5.9 mm). Coordinate therefore reports each region's share of a 5 mm sphere ([published coordinates](features/published-coordinates.md)). Fine structures land a median 1.2 mm from this brain's own and overlap poorly below about 100 mm³, so a structure that small takes no shares from a registered map ([registration landing](features/registration-landing.md)).
 
 The template
-: The MNI template (ICBM 152 2009c, at 0.9 of its size) can be chosen as the brain instead. Coordinates and maps in its space are then placed with no registration, and its tracts are an averaged atlas's ([tracts](features/tracts.md)). Its folds are smoothed, and it has no cerebellar lobules, spinal cord or arousal nuclei.
+: The MNI template (ICBM 152 2009c, at 0.9 of its size) can be chosen as the brain instead. Coordinates and maps in its space are then placed with no registration, and its tracts are an averaged atlas's. Its folds are smoothed, and it has no spinal cord or arousal nuclei ([MNI template](features/mni-template.md)).
 
 Limit
 : One person's folding is not typical everywhere, and one brain does not show how much people differ.
@@ -70,6 +70,7 @@ Each figure is measured on CDMD `sub_013`, except where the template is named, a
 - [Boundary certainty](features/boundary-certainty.md)
 - [Segmentation agreement](features/segmentation-agreement.md)
 - [Registration landing](features/registration-landing.md)
+- [MNI template](features/mni-template.md)
 - [Spinal cord](features/spinal-cord.md)
 - [Arousal nuclei](features/arousal-nuclei.md)
 - [Tracts](features/tracts.md)
@@ -116,11 +117,14 @@ Sources, citations and data licences are listed in [References](reference/refere
 Subject
 : MGH Connectome Diffusion Microstructure Dataset (CDMD) `sub_013`; FreeSurfer 8.2 reconstruction of its T1 ([Tian et al., 2022](reference/references.md#reference-datasets-and-tools)).
 
+Template
+: MNI152NLin2009cAsym at 0.9 of its size, reconstructed and segmented as CDMD is ([MNI template](features/mni-template.md)). Pages describe CDMD unless they name the template.
+
 Coordinate frame
 : FreeSurfer surface RAS in millimetres ($+R$ right, $+A$ anterior, $+S$ superior), centred on the conformed 256³ volume. Every coordinate, cut position and crosshair in these pages uses this frame unless MNI152 is named.
 
 Build
-: An offline Python compiler (`brain_model`) turns the reconstruction and source atlases into meshes (glTF), gzipped categorical label volumes and JSON layers under `public/models/cdmd/`. A WebGL 2 viewer on Three.js (`web/`) renders them in the browser.
+: An offline Python compiler (`brain_model`) turns the reconstruction and source atlases into meshes (glTF), gzipped categorical label volumes and JSON layers under `public/models/<anatomy>/` (`cdmd`, `mni152`). A WebGL 2 viewer on Three.js (`web/`) renders them in the browser.
 
 Validation
 : The compiler writes its measurements to `validation.json`. Each page's Validation table lists the tests that check the feature and the values they measure.
@@ -148,6 +152,7 @@ features/internal-anatomy
 features/boundary-certainty
 features/segmentation-agreement
 features/registration-landing
+features/mni-template
 features/spinal-cord
 features/arousal-nuclei
 features/tracts

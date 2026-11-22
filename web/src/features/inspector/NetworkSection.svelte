@@ -50,7 +50,7 @@
   // A striatal structure too small for shares names the networks round it.
   const near = $derived(atlas ? (region?.striatal_networks_near ?? []) : []);
   const radius = $derived(
-    withUnit(decimal(atlas?.small.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
+    withUnit(decimal(atlas?.small?.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
   );
   // The closed summary's hint: the largest share the region has, else CAB-NP's one network.
   const headline = $derived(networkHeadline(region, cabNp, lang));
@@ -146,7 +146,7 @@
         </ul>
         <p class="detail-note">
           {near.length === 1 ? copy.striatalWithin(radius) : copy.striatalBorder(radius)}
-          {copy.striatalSmall(withUnit(grouped(atlas!.small.under_mm3), 'mm³', lang), radius)}
+          {copy.striatalSmall(withUnit(grouped(atlas!.small!.under_mm3), 'mm³', lang), radius)}
         </p>
         <p class="detail-note">{copy.striatalCaveat}</p>
       {/if}

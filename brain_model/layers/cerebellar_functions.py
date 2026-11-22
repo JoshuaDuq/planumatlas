@@ -301,10 +301,11 @@ def metadata(config, definition):
     }
 
 
-def limitations():
+def limitations(config):
+    measured = json.loads(report_path(config).read_text())["checks"]
     return [
         "Functional cerebellar regions are a group atlas (Nettekoven et al. 2024) fused from seven task-based fMRI datasets and registered onto this brain from the SUIT template; this brain's function was not measured. Individual functional boundaries differ from the group's, and the authors show that an individual's own localizer data place them better.",
-        "Registration from a group template places lobule borders a few millimetres off: SUIT's own lobules, carried by the same warp, meet this brain's CerebNet lobules at a mean Dice of 0.65. A region's border on a cut is approximate; a lobule's shares, summed over its whole volume, are steadier.",
+        f"Registration from a group template places lobule borders a few millimetres off: SUIT's own lobules, carried by the same warp, meet this brain's CerebNet lobules at a mean Dice of {measured['lobule_dice_mean']:.2f}. A region's border on a cut is approximate; a lobule's shares, summed over its whole volume, are steadier.",
     ]
 
 
