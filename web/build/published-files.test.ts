@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -170,6 +170,26 @@ describe('the dev server watcher', () => {
       expect(loadedFiles(plugin)).toHaveProperty('models/bert/manifest.json');
     } finally {
       rmSync(resolve(fixture, 'models/mni152'), { recursive: true, force: true });
+    }
+  });
+
+  it('BUILD-16 leaves the tracts drawn on another anatomy to that chunk too', () => {
+    // public/diffusion/mni152-hcp1065's reference space names mni152, which is not the default.
+    const path = 'diffusion/mni152-hcp1065/af.left.trk.gz';
+    mkdirSync(resolve(fixture, 'diffusion/mni152-hcp1065'), { recursive: true });
+    copyFileSync(resolve(fixture, FIXTURE_GZ.path), resolve(fixture, path));
+    try {
+      const { plugin, server } = startServer();
+      server.watcher.emit('all', 'add', resolve(publicDirectory, path));
+      const elsewhere = JSON.parse(
+        (hook(plugin, 'load')(elsewhereModule) as string).replace(/^export default |;$/g, ''),
+      ) as Record<string, unknown>;
+      expect(Object.keys(elsewhere)).toEqual([path]);
+      expect(loadedFiles(plugin)).not.toHaveProperty(path);
+      // A dataset drawn on the default anatomy stays with the entry.
+      expect(loadedFiles(plugin)).toHaveProperty(FIXTURE_GZ.path);
+    } finally {
+      rmSync(resolve(fixture, 'diffusion/mni152-hcp1065'), { recursive: true, force: true });
     }
   });
 

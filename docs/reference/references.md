@@ -43,6 +43,8 @@ Every paper here, and in the clinical and circuit data, is checked by its PMID a
   Garyfallidis, E., Côté, M.-A., Rheault, F., Sidhu, J., Hau, J., Petit, L., Fortin, D., Cunanne, S., & Descoteaux, M. (2018). Recognition of white matter bundles using local and global streamline-based registration and clustering. *NeuroImage*, 170, 283–295. [doi:10.1016/j.neuroimage.2017.07.015](https://doi.org/10.1016/j.neuroimage.2017.07.015). PMID 28712994.
 - **HCP842 bundle atlas.**
   Yeh, F.-C., Panesar, S., Fernandes, D., Meola, A., Yoshino, M., Fernandez-Miranda, J. C., Vettel, J. M., & Verstynen, T. (2018). Population-averaged atlas of the macroscale human structural connectome and its network topology. *NeuroImage*, 178, 57–68. [doi:10.1016/j.neuroimage.2018.05.027](https://doi.org/10.1016/j.neuroimage.2018.05.027). PMID 29758339. Its RecoBundles curation ([figshare 7375883](https://doi.org/10.6084/m9.figshare.7375883.v2), CC BY 4.0) serves only as the recognition model; none of its streamlines are published.
+- **HCP1065 tract atlas.**
+  Yeh, F.-C. (2022). Population-based tract-to-region connectome of the human brain and its hierarchical topology. *Nature Communications*, 13(1), 4933. [doi:10.1038/s41467-022-32595-4](https://doi.org/10.1038/s41467-022-32595-4). PMID 35995773. Its population-averaged streamlines ([release `hcp1065`](https://github.com/data-others/atlas/releases/tag/hcp1065), CC BY-SA 4.0) are the tracts drawn on the MNI template.
 - **TractSeg.**
   Wasserthal, J., Neher, P., & Maier-Hein, K. H. (2018). TractSeg - Fast and accurate white matter tract segmentation. *NeuroImage*, 183, 239–253. [doi:10.1016/j.neuroimage.2018.07.070](https://doi.org/10.1016/j.neuroimage.2018.07.070). PMID 30086412. CDMD's SLF I–III and seven callosal segments are TractSeg 2.10's (Apache-2.0), with its pretrained weights (CC BY 4.0, Zenodo).
 - **MRtrix3.**
@@ -163,6 +165,7 @@ Each fingerprint is its own EBRAINS dataset of receptor densities measured by Zi
 | `fsaverage` assets (built locally, not published) | FreeSurfer distribution | FreeSurfer Software License |
 | `cdmd` assets and tracts | MGH CDMD, figshare | CC0 1.0 |
 | `cdmd` SLF I–III and callosal segments | TractSeg pretrained weights | CC BY 4.0 (attribution) |
+| `mni152` tracts (`public/diffusion/mni152-hcp1065/`) | HCP1065 population-averaged tract atlas (Yeh 2022) | CC BY-SA 4.0, with the HCP acknowledgment |
 | HCP-MMP-derived files | Human Connectome Project | WU-Minn HCP Open Access Data Use Terms |
 | `cab-np.json` | CAB-NP (Rutgers, Yale) | Non-commercial |
 | `cortex-julich.glb`, `ribbon-julich.labels`, `tissues-julich.volume` | Julich-Brain 3.1 (EBRAINS) | CC BY-NC-SA 4.0 |
@@ -226,6 +229,10 @@ Non-commercial, and shared alike: the Julich-Brain files derived for each brain 
 ### CC BY-SA 4.0 (arterial territories)
 
 Attribution, and shared alike: the arterial territory files derived for each brain stay under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), with Liu et al. (2023) credited and the changes stated (registration of the atlas's template to the subject, nearest-neighbour transfer, and per-vertex and per-region territories drawn from it). The atlas's label file names CC BY-SA 4.0 but links the CC BY legal code; Planum takes the stricter reading. The rest of each cortex mesh keeps its own source's terms.
+
+### CC BY-SA 4.0 (HCP1065 tract atlas)
+
+Attribution, and shared alike: the 21 TRK files in `public/diffusion/mni152-hcp1065/` stay under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), with Yeh (2022) credited and the changes stated in `provenance.json`: every fourth streamline of each atlas file kept, the points read at their voxel centres and multiplied by the template's scale of 0.9, the cingulum's five parts joined into one bundle per side, each end trimmed back inside the template's brain, and the lines resampled to 0.5 mm steps. The atlas is derived from Human Connectome Project data, whose acknowledgment `provenance.json` carries. The brain outline beside them is the template's own.
 
 ### CC BY-NC 3.0 (functional cerebellar atlas)
 

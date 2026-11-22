@@ -242,7 +242,7 @@ The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs
 | CAB-NP License (non-commercial) | CAB-NP networks |
 | CC BY-NC-SA 4.0 | Julich-Brain, receptor fingerprints, F-TRACT, BigBrain cortical layers and cell densities |
 | CC BY-NC 3.0 | Nettekoven cerebellar atlas, SUIT |
-| CC BY-SA 4.0 | Arterial territories |
+| CC BY-SA 4.0 | Arterial territories, HCP1065 tract atlas (the MNI template’s tracts) |
 | CC BY 4.0 | Lyu et al. stimulation responses, Domhof et al. functional connectivity, TractSeg weights, Wang et al. visual areas |
 | ODbL 1.0 | Neurosynth |
 | AGPL-3.0 | Benson visual-field template (neuropythy) |

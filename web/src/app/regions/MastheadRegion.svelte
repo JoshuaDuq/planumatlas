@@ -224,7 +224,7 @@
     const catalog = tractCatalog(referenceAnatomy);
     const text = t(lang, 'diffusion');
     const links: ProvenanceLink[] = [
-      { href: new URL(catalog.source, location.href).href, text: text.source },
+      { href: new URL(catalog.source, location.href).href, text: catalog.text[lang].source },
       {
         href: new URL(`${ASSET_BASE}diffusion/${catalog.brain_outline.provenance}`, location.href)
           .href,

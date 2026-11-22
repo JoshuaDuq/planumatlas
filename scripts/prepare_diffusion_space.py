@@ -26,7 +26,8 @@ def main():
         raise ValueError("The tract reference T1 checksum changed.")
     directory = config["source_directory"]
     stamp = (directory / "scripts/build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
+    # An anatomy reconstructed elsewhere declares that build; the transform is read from orig.mgz either way.
+    if stamp != settings.get("freesurfer_build", config["freesurfer_build"]):
         raise ValueError("The reconstruction's FreeSurfer build changed.")
     # recon-all imported the tract reference T1 itself; its record says so.
     reconstruction = json.loads((directory / settings["provenance"]).read_text())

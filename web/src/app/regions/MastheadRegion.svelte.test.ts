@@ -487,7 +487,7 @@ describe('the dialogs', () => {
     expect(labels).toEqual([t('en', 'footer').tractReference, t('en', 'footer').sources]);
     const links = [...dialog.querySelectorAll('dd a')].map((a) => a.textContent!.trim());
     expect(links).toHaveLength(2);
-    expect(links[0]).toContain(t('en', 'diffusion').source);
+    expect(links[0]).toContain(tractCatalog('reference-subject').text.en.source);
     expect(links[1]).toContain(t('en', 'diffusion').outlineProvenance);
     // The dataset's source, and the brain outline's provenance file (data/diffusion-cdmd.yaml).
     expect([...dialog.querySelectorAll('dd a')].map((a) => (a as HTMLAnchorElement).href)).toEqual([

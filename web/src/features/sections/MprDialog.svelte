@@ -74,7 +74,7 @@
     mpr: MprDialogController;
     engine: {
       sections: Pick<EngineSections, 'display' | 'sample' | 'mprFrame' | 'slice' | 'pixels'>;
-      tracts: Pick<EngineTracts, 'onPlane' | 'loadFa'>;
+      tracts: Pick<EngineTracts, 'onPlane' | 'loadFa' | 'hasFa'>;
     };
     /** The sections' display snapshot, replaced on every engine `change` (S1's engine sync). */
     engineState: { readonly sections: SectionsState };
@@ -528,7 +528,7 @@
             format={(value) => decimal(value, 0, lang)}
             oninput={(center) => mpr.setWindow({ center })}
           />
-          {#if tracts}
+          {#if tracts && engine.tracts.hasFa}
             <RangeField
               label={copy.faOpacity}
               value={faOpacity}
@@ -560,7 +560,7 @@
       <p>{copy.asStage}</p>
       <p>{copy.subtitle}</p>
       <p>{copy.note(anatomy)}</p>
-      {#if tracts}<p>{copy.tracts}</p>{/if}
+      {#if tracts}<p>{copy.tracts}{engine.tracts.hasFa ? ` ${copy.faNote}` : ''}</p>{/if}
     </div>
   </div>
 {/snippet}

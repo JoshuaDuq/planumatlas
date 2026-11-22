@@ -76,6 +76,16 @@ Streamlines stay in scanner RAS; the surfaces are in FreeSurfer surface RAS. The
 ### Brain outline (`scripts/prepare_diffusion_outline.py`)
 For an anatomy without its own tracts, CDMD's tracts are shown inside an outline of `brain.mgz`: the largest connected component at intensity ≥ 1, Lewiner marching cubes at step 2 voxels, mapped from RAS millimetres to the viewer's (R, S, −A) metres without registration (25,461 vertices, 50,526 triangles). A mesh with non-positive volume (inward faces) is refused.
 
+### Averaged tracts on the MNI template (`scripts/prepare_diffusion_mni152.py`)
+
+The MNI template has no diffusion scan, so its Tracts tab draws 21 bundles of the HCP1065 population-averaged atlas (Yeh 2022; CC BY-SA 4.0), built from 1,065 Human Connectome Project young adults: the same bundles as CDMD's by id and name, with the superior longitudinal fasciculus in its three parts, the corpus callosum whole, and the atlas's five cingulum parts joined per side. The atlas is in ICBM 2009a millimetres, the template's own space, so each point is multiplied by the template's scale of 0.9 and nothing is registered. Three things are done to it, each recorded in `provenance.json`:
+
+1. **Voxel centres.** The atlas's TRK files write a voxel's centre at its index, where the TrackVis format puts it half a voxel further, so NiBabel reads them 0.5 mm off on each axis. Against the atlas's own NIfTI volume of four bundles, the occupied voxels agree at Dice 0.75 as read and 0.96 with the half voxel restored; with it, the atlas's QA template meets the template's white matter within 0.25 mm on every axis.
+2. **Thinning.** The atlas draws 252,405 streamlines over these bundles, four times CDMD's 64,109. Every fourth streamline of each atlas file is kept, by its position in the file, which leaves 63,111 and each bundle's share of the whole (the left arcuate has 8,539 and the right 839).
+3. **Trimming and resampling**, as for CDMD: 9,463 streamlines lose an end run outside the template's brain, none lies wholly outside, and each is resampled to 0.5 mm steps.
+
+Of the published length, 93.4% lies in the template's white matter (`ribbon.mgz` and aseg), against 94.6% for CDMD's own tracts in CDMD by the same count; the script refuses to publish under 90%. No FA map and no tract profile is published for the template.
+
 ## Display
 Bundles are listed by class (association 20, projection 2, commissural 8) with **L**/**R** toggles, **Whole** for the RecoBundles callosum and **1**–**7** for the TractSeg segments; a TRK is downloaded once, when first selected, and decoded in a worker by Planum's `readTrk` (`tract-decode.ts`), whose float32 arithmetic reproduces NiiVue 0.69's `readTRK` bit for bit; the decode is shared by the 3D lines and Linked MRI, and the lesion count reuses it when the Tracts tab has one (otherwise the worker decodes the file with the same `readTrk`). `createNativeTractViewer` draws each bundle as three.js `LineSegments` on the decoded points in scanner RAS, under `RAS_MM_TO_WORLD` (millimetres to R, S, −A metres) and the group matrix from `surface-space.json`; `createReferenceTransform` refuses a bottom row other than 0 0 0 1 and any scale or reflection. Each point $i$ of a streamline is coloured by the unit central difference
 
@@ -113,7 +123,7 @@ Pressing a tract's name in the Tracts tab draws the tract, beside any already dr
 - The corticospinal streamlines end near the caudal medulla, above the decussation.
 - TractSeg's TOM tracking is stochastic; a rerun gives other streamlines.
 - Trimming removes whole end runs outside the brain volume, up to 31.6 mm (left cingulum); interior sulcal crossings remain.
-- On another anatomy CDMD's tracts are shown in CDMD's outline and are not placed on that anatomy.
+- On an anatomy with no tracts of its own CDMD's are shown in CDMD's outline and are not placed on that anatomy. The MNI template has an averaged atlas's instead (above), which are nobody's own pathways.
 
 ## Code availability
 

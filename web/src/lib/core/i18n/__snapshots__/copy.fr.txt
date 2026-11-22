@@ -478,7 +478,6 @@
   "cortexOpacity": "Opacité du cortex",
   "keepTracts": "Garder les faisceaux sur les autres onglets",
   "mriOpen": "IRM avec faisceaux",
-  "nativeReference": "Faisceaux dans leur propre cerveau de référence T1.",
   "nativeCanvas": "Cerveau de référence et faisceaux. Glisser ou utiliser les flèches pour tourner, défiler ou appuyer sur plus et moins pour zoomer. Sélectionner les faisceaux dans le panneau.",
   "outlineLimit": "Contour cérébral dérivé de l’IRM, sans étiquettes corticales sur ce contour.",
   "mriHint": "L’IRM liée utilise la même image et trace les faisceaux à moins de 2 mm de chaque coupe<NNBSP>; une coupe tranche les deux couches ensemble.",
@@ -519,7 +518,6 @@
   "mean": "moyenne",
   "range": "étendue",
   "noShown": "Aucune trajectoire ne satisfait ce filtre de longueur.",
-  "source": "Source des données · CC0",
   "about": "À propos de ces données",
   "profileRun": [
    "[\"Alpha\",\"\"] → \"Alpha<NNBSP>:  dans ce suivi\"",
@@ -1724,7 +1722,8 @@
    "[\"Alpha\"] → \"FA<NBSP>Alpha\"",
    "[\"\"] → \"FA<NBSP>\""
   ],
-  "tracts": "Faisceaux<NNBSP>: les trajectoires que trace la vue 3D, à moins de 2 mm de chaque coupe, colorées selon leur direction (rouge gauche–droite, vert avant–arrière, bleu haut–bas). FA<NNBSP>: anisotropie fractionnelle de l’image de diffusion de ce même sujet.",
+  "tracts": "Faisceaux<NNBSP>: les trajectoires que trace la vue 3D, à moins de 2 mm de chaque coupe, colorées selon leur direction (rouge gauche–droite, vert avant–arrière, bleu haut–bas).",
+  "faNote": "FA<NNBSP>: anisotropie fractionnelle de l’image de diffusion de ce même sujet.",
   "labels": {
    "sagittal": "Sagittal",
    "coronal": "Coronal",
@@ -2961,10 +2960,10 @@
   }
  },
  "template": {
-  "subjectNote": "La moyenne de 152 jeunes adultes à la taille adulte moyenne, sans faisceaux, lobules cérébelleux ni moelle épinière qui lui soient propres",
+  "subjectNote": "La moyenne de 152 jeunes adultes à la taille adulte moyenne, avec les faisceaux d’un atlas moyen, sans lobules cérébelleux ni moelle épinière",
   "provenance": [
-   "[\"Alpha\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur Alpha à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière qui lui soient propres. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\"",
-   "[\"\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur  à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière qui lui soient propres. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\""
+   "[\"Alpha\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur Alpha à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni lobules cérébelleux ni moelle épinière. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\"",
+   "[\"\"] → \"La moyenne des IRM de 152 jeunes adultes, réduite d’un facteur  à la taille moyenne du cerveau des adultes de CDMD. La moyenne lisse ses plis et brouille son IRM, et il n’a ni lobules cérébelleux ni moelle épinière. Ses faisceaux sont ceux d’un atlas moyen (HCP1065), et n’y ont pas été suivis. Les coordonnées et les cartes dans son propre espace y sont placées directement, sans recalage.\""
   ],
   "coordinateCaveat": "Un emplacement sur un cerveau moyen, placé par une simple mise à l’échelle<NNBSP>: ni le pic propre de quelqu’un, ni ce qu’un cerveau fait à cet endroit.",
   "deficitsElsewhere": [
@@ -2983,9 +2982,15 @@
   ],
   "anatomy": {
    "scope": "La moyenne des cerveaux de 152 adultes et les atlas tracés dessus.",
-   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Il n’a ni faisceaux, ni lobules cérébelleux, ni moelle épinière, ni noyaux de l’éveil.",
+   "shows": "Cinq atlas corticaux, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 et Schaefer 2018, tracés sur la surface piale du gabarit et sur les faces de coupe, avec à l’intérieur un ensemble pédagogique, l’aseg de FreeSurfer et NextBrain. Ses faisceaux sont ceux d’un atlas moyen, et il n’a ni lobules cérébelleux, ni moelle épinière, ni noyaux de l’éveil.",
    "source": "Le gabarit ICBM 152 2009c non linéaire asymétrique (MNI152NLin2009cAsym), moyenne des IRM de 152 jeunes adultes, reconstruit avec FreeSurfer 8.2 à 0,9 de sa taille, la taille moyenne du cerveau des adultes de CDMD. Destrieux et Desikan-Killiany sont ses propres annotations<NNBSP>; HCP-MMP, Julich-Brain et Schaefer sont reportés depuis fsaverage par des sphères recalées.",
    "caution": "Une moyenne, pas une personne<NNBSP>: la moyenne lisse les plis et brouille les petites structures, si bien que l’anatomie de personne ne ressemble à ceci. Chaque segmentation est une estimation de modèle, et l’exactitude clinique n’a pas été validée."
+  },
+  "tracts": {
+   "scope": "La substance blanche d’un atlas moyen, construit à partir de 1<NNBSP>065 autres personnes.",
+   "shows": "21 faisceaux de substance blanche d’un atlas moyen de population, placés sur le gabarit par sa seule mise à l’échelle, sans recalage<NNBSP>: l’atlas et le gabarit partagent un même espace. La couleur suit la direction locale<NNBSP>: rouge gauche–droite, vert avant–arrière, bleu haut–bas.",
+   "source": "L’atlas de tractographie moyen de population HCP1065 (Yeh 2022<NNBSP>; CC BY-SA 4.0), construit à partir des IRM de diffusion de 1<NNBSP>065 jeunes adultes du Human Connectome Project. Une trajectoire sur quatre est conservée, et chacune est raccourcie à ses extrémités pour rester dans le cerveau. Le faisceau longitudinal supérieur y est en trois parties et le corps calleux entier.",
+   "caution": "Une moyenne de 1<NNBSP>065 personnes, qui n’a été suivie dans aucun cerveau<NNBSP>: les voies de personne ne passent exactement ici, et une moyenne cache leur variabilité. Le nombre de trajectoires est la densité propre de l’atlas, et non un nombre d’axones ni la force d’une connexion. Ni carte de FA ni profil de faisceau ne sont publiés pour le gabarit."
   },
   "coordinate": {
    "source": "Ce cerveau est MNI152NLin2009cAsym lui-même<NNBSP>: une coordonnée de cet espace y est placée en la multipliant par 0,9, sans recalage<NNBSP>; un «<NBSP>MNI<NBSP>» sans précision est lu comme MNI152NLin2009cAsym. Les autres gabarits ne sont placés que sur CDMD sub_013. Talairach n’est pas accepté.",

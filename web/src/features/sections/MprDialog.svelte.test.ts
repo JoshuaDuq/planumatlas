@@ -735,6 +735,17 @@ describe('the tracts and FA', () => {
     expect(page.getByRole('slider', { name: 'FA opacity' }).query()).toBeNull();
   });
 
+  test('tracts published without an FA map, an averaged atlas’s, are drawn with no FA control or note', async () => {
+    Object.defineProperty(engine.tracts, 'hasFa', { value: false });
+    await withTracts();
+    const notes = shell().querySelector('.note')!.textContent;
+    expect(notes).toContain('Tracts: the streamlines the 3D view draws');
+    expect(notes).not.toContain('FA');
+    expect(page.getByRole('slider', { name: 'FA opacity' }).query()).toBeNull();
+    // The scan's own controls are still there.
+    expect(page.getByRole('slider', { name: 'Level' }).query()).not.toBeNull();
+  });
+
   test('FA downloads once its opacity leaves zero, is drawn in viridis, and joins the readout', async () => {
     const loadFa = vi.spyOn(engine.tracts, 'loadFa');
     await withTracts();

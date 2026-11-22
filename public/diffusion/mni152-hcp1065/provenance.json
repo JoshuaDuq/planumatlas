@@ -1,0 +1,1614 @@
+{
+  "dataset": "HCP1065 population-averaged tractography atlas, placed on the MNI template for Planum",
+  "citation": "Yeh FC. Population-based tract-to-region connectome of the human brain and its hierarchical topology. Nat Commun 13, 4933 (2022).",
+  "source": "https://doi.org/10.1038/s41467-022-32595-4",
+  "license": "CC-BY-SA-4.0",
+  "acknowledgment": "Data were provided in part by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.",
+  "atlas": {
+    "url": "https://github.com/data-others/atlas/releases/download/hcp1065/hcp1065_avg_tracts_trk.zip",
+    "sha256": "344aad4394f18b8926ed5e1bda911ad56e328c6cf75faa45e1302512ad779c67"
+  },
+  "template": {
+    "input": "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz",
+    "input_sha256": "cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b",
+    "space": "mni152nlin2009casym",
+    "scale": 0.9
+  },
+  "brain_volume": {
+    "ribbon_sha256": "d0a67859011dab5e262f1d01493364cdd615982b03770f406afa4437f7fe30a1",
+    "aseg_sha256": "b2c39d118c4a20cafa466ecb11d0be9b39c0901c95b3e9c1f5f271730ff2c4d1",
+    "outside_aseg_labels": [
+      3,
+      42,
+      24
+    ],
+    "white_matter": {
+      "ribbon": [
+        2,
+        41
+      ],
+      "aseg": [
+        7,
+        46,
+        16,
+        28,
+        60,
+        251,
+        252,
+        253,
+        254,
+        255
+      ]
+    }
+  },
+  "processing": "A population-averaged atlas built from the diffusion scans of 1,065 people, not tracked on this brain. Every 4th streamline of each atlas file kept, by its position in the file; its points moved by [-0.5, -0.5, 0.5] mm (the files write a voxel's centre at its index, which NiBabel reads half a voxel off) and multiplied by 0.9, the template's scale, with no registration; the runs of points at its ends outside the brain volume (ribbon.mgz, or aseg tissue other than [3, 42, 24]; nearest voxel) dropped, a streamline with fewer than two points inside left out; and resampled to 0.5 mm arc-length steps by linear interpolation.",
+  "white_matter_share": {
+    "published_length": 0.9341276577922853,
+    "minimum": 0.9
+  },
+  "spatial_validation": "The template T1's shape and affine agree with every TRK header at absolute tolerance 1e-5.",
+  "files": [
+    {
+      "file": "af.left.trk.gz",
+      "sources": {
+        "association/AF_L": 34156
+      },
+      "streamlines_kept": 8539,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "be7792d0ff4cceb7667feb954a02fbf1d4997944a30305c4e9fedd615c82d158",
+      "published_sha256": "50b2faebf20aca1932c2ba43d4ec8985bf9582ad8002a86da7c4048acd27f1f6",
+      "published_bytes": 20615934,
+      "white_matter_share": 0.9303625186853454,
+      "end_trimming": {
+        "points_removed": 2151,
+        "streamlines_trimmed": 927
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 342,
+          "median": 0.06915932741209095,
+          "max": 0.24832156614397843
+        }
+      },
+      "streamlines": 8539,
+      "points": 2066459,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -49.584373474121094,
+            7.4812469482421875,
+            -0.5906219482421875
+          ]
+        },
+        {
+          "index": 1033229,
+          "position": [
+            -29.358245849609375,
+            12.710372924804688,
+            29.880523681640625
+          ]
+        },
+        {
+          "index": 2066458,
+          "position": [
+            -59.540626525878906,
+            -21.796875,
+            6.328125
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 8539,
+          "mean_mm": 120.2308080090658,
+          "min_mm": 58.74299706909582,
+          "max_mm": 162.31716857859413
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 7526,
+          "mean_mm": 124.16733039589812,
+          "min_mm": 100.07606578896335,
+          "max_mm": 162.31716857859413
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "af.right.trk.gz",
+      "sources": {
+        "association/AF_R": 3356
+      },
+      "streamlines_kept": 839,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "1e06c82e63195a793c8941830b6b6819c75c434a72289c50becd85811f46df2c",
+      "published_sha256": "33db55cd4d08b38f0c7baf27b21ce5bef3be2a18136219212741389bbef89036",
+      "published_bytes": 2023283,
+      "white_matter_share": 0.9499977883826196,
+      "end_trimming": {
+        "points_removed": 105,
+        "streamlines_trimmed": 31
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 34,
+          "median": 0.08105120839489513,
+          "max": 0.24518725606357525
+        }
+      },
+      "streamlines": 839,
+      "points": 203471,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            36.056251525878906,
+            10.040618896484375,
+            43.368751525878906
+          ]
+        },
+        {
+          "index": 101735,
+          "position": [
+            31.61347198486328,
+            -25.852066040039062,
+            27.87122344970703
+          ]
+        },
+        {
+          "index": 203470,
+          "position": [
+            48.76874542236328,
+            -46.546875,
+            -7.481250762939453
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 839,
+          "mean_mm": 120.48727906615612,
+          "min_mm": 98.1364291228297,
+          "max_mm": 149.67399812220114
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 835,
+          "mean_mm": 120.58846482585733,
+          "min_mm": 100.64080741873329,
+          "max_mm": 149.67399812220114
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "cst.left.trk.gz",
+      "sources": {
+        "projection/CST_L": 5577
+      },
+      "streamlines_kept": 1395,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "b7a2b612359537333677649d13c80ea7660e064478d235061545b3415e885951",
+      "published_sha256": "e0f789aa23ad200b835be4c4277ec5f31b976882d731cf2319b0dbd613aaee94",
+      "published_bytes": 3381949,
+      "white_matter_share": 0.9866819754229192,
+      "end_trimming": {
+        "points_removed": 226,
+        "streamlines_trimmed": 77
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 56,
+          "median": 0.04053330324927004,
+          "max": 0.1988753467012622
+        }
+      },
+      "streamlines": 1395,
+      "points": 337062,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -6.4406280517578125,
+            -29.953125,
+            -45.759376525878906
+          ]
+        },
+        {
+          "index": 168531,
+          "position": [
+            -16.231536865234375,
+            -20.155380249023438,
+            63.599884033203125
+          ]
+        },
+        {
+          "index": 337061,
+          "position": [
+            -10.518753051757812,
+            -22.978126525878906,
+            65.64375305175781
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 1395,
+          "mean_mm": 120.1101617282524,
+          "min_mm": 104.45226309179625,
+          "max_mm": 130.0216567167751
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 1395,
+          "mean_mm": 120.1101617282524,
+          "min_mm": 104.45226309179625,
+          "max_mm": 130.0216567167751
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "cst.right.trk.gz",
+      "sources": {
+        "projection/CST_R": 2397
+      },
+      "streamlines_kept": 600,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "a024ab135ada016e8ca7ca1093c643a076ec1c16ec5ab0d114447cbca0465846",
+      "published_sha256": "e86eea5f8b7ccc58e5d21ec0e004692acfa9f811272b16bac93df81e93fb1b0d",
+      "published_bytes": 1439432,
+      "white_matter_share": 0.9902342931388575,
+      "end_trimming": {
+        "points_removed": 101,
+        "streamlines_trimmed": 26
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 24,
+          "median": 0.042559291514569705,
+          "max": 0.22849017662357574
+        }
+      },
+      "streamlines": 600,
+      "points": 143154,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            2.9250030517578125,
+            -27.703125,
+            -46.01250076293945
+          ]
+        },
+        {
+          "index": 71577,
+          "position": [
+            5.2195281982421875,
+            -20.887840270996094,
+            -29.809165954589844
+          ]
+        },
+        {
+          "index": 143153,
+          "position": [
+            37.631248474121094,
+            -4.696876525878906,
+            50.146873474121094
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 600,
+          "mean_mm": 118.61072627420857,
+          "min_mm": 101.76909202233068,
+          "max_mm": 129.86684901996807
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 600,
+          "mean_mm": 118.61072627420857,
+          "min_mm": 101.76909202233068,
+          "max_mm": 129.86684901996807
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "cg.left.trk.gz",
+      "sources": {
+        "association/C_FP_L": 10806,
+        "association/C_FPH_L": 679,
+        "association/C_PH_L": 1022,
+        "association/C_PHP_L": 74,
+        "association/C_PO_L": 1356
+      },
+      "streamlines_kept": 3486,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "cc0cc207abcc7babfd4fa2021292271f16f406cc7d6ce6c9af0e3bf17834a14a",
+      "published_sha256": "b8a8fe4a2f0ac6259eacd789c6dd951af0f8bf6f4b565a37dd8cfedbf03ef160",
+      "published_bytes": 5260238,
+      "white_matter_share": 0.892598285270018,
+      "end_trimming": {
+        "points_removed": 1658,
+        "streamlines_trimmed": 877
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 140,
+          "median": 0.0621617463575806,
+          "max": 0.24193955558267022
+        }
+      },
+      "streamlines": 3486,
+      "points": 558222,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -8.465621948242188,
+            20.278121948242188,
+            24.384376525878906
+          ]
+        },
+        {
+          "index": 279111,
+          "position": [
+            -14.713523864746094,
+            -44.14884948730469,
+            27.83161163330078
+          ]
+        },
+        {
+          "index": 558221,
+          "position": [
+            -2.1374969482421875,
+            19.856246948242188,
+            19.574996948242188
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 3486,
+          "mean_mm": 79.3722006341772,
+          "min_mm": 12.920589736366365,
+          "max_mm": 149.23361722965694
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 972,
+          "mean_mm": 112.33135758229234,
+          "min_mm": 100.03044781435563,
+          "max_mm": 149.23361722965694
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "cg.right.trk.gz",
+      "sources": {
+        "association/C_FP_R": 9146,
+        "association/C_FPH_R": 142,
+        "association/C_PH_R": 1245,
+        "association/C_PHP_R": 386,
+        "association/C_PO_R": 958
+      },
+      "streamlines_kept": 2972,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "396244598b63cac4ccea0078b1acf5afee5d854b03d44fae9140ff1ab56eb282",
+      "published_sha256": "23619a94fb9923ca61e186ed6f3613a80ab161bf49abec07a08d50e5fdb16147",
+      "published_bytes": 4304217,
+      "white_matter_share": 0.8431236009849944,
+      "end_trimming": {
+        "points_removed": 730,
+        "streamlines_trimmed": 370
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 119,
+          "median": 0.05967981571858829,
+          "max": 0.2391808324350928
+        }
+      },
+      "streamlines": 2972,
+      "points": 455231,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            1.1812515258789062,
+            30.768753051757812,
+            23.006248474121094
+          ]
+        },
+        {
+          "index": 227615,
+          "position": [
+            9.550178527832031,
+            20.9053955078125,
+            23.611099243164062
+          ]
+        },
+        {
+          "index": 455230,
+          "position": [
+            6.46875,
+            -29.081253051757812,
+            31.359375
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 2972,
+          "mean_mm": 75.90807556159834,
+          "min_mm": 12.25141681806542,
+          "max_mm": 151.63076490232314
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 514,
+          "mean_mm": 115.02719607790536,
+          "min_mm": 100.01833460377424,
+          "max_mm": 151.63076490232314
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "uf.left.trk.gz",
+      "sources": {
+        "association/UF_L": 5672
+      },
+      "streamlines_kept": 1418,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "6c05805dca0a225920b55050a276a837f9d6d84133c62b24dbb22f70e7778b0d",
+      "published_sha256": "13679c1a17c8800a99965e3a2665df86927ea30321eefb7d76dfe8b0e22d89a2",
+      "published_bytes": 2081408,
+      "white_matter_share": 0.9816862627267667,
+      "end_trimming": {
+        "points_removed": 0,
+        "streamlines_trimmed": 0
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 57,
+          "median": 0.06288941187181096,
+          "max": 0.24737024992584844
+        }
+      },
+      "streamlines": 1418,
+      "points": 203017,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -31.978126525878906,
+            17.409378051757812,
+            -17.15625
+          ]
+        },
+        {
+          "index": 101508,
+          "position": [
+            -17.015602111816406,
+            43.08781433105469,
+            -10.15316390991211
+          ]
+        },
+        {
+          "index": 203016,
+          "position": [
+            -35.60625076293945,
+            3.2906265258789062,
+            -27.759376525878906
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 1418,
+          "mean_mm": 70.86448985319123,
+          "min_mm": 26.36843007033423,
+          "max_mm": 90.97439557916073
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "uf.right.trk.gz",
+      "sources": {
+        "association/UF_R": 9425
+      },
+      "streamlines_kept": 2357,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "0892a0a50d89ba3c1af8af4f109a1f46882182b94326a440090ca23edd4003b1",
+      "published_sha256": "a1c2e05d045dd221003e5811ce408e199303556d4b9847116dd5410b56a7f4fc",
+      "published_bytes": 3782442,
+      "white_matter_share": 0.9646217417236691,
+      "end_trimming": {
+        "points_removed": 0,
+        "streamlines_trimmed": 0
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 95,
+          "median": 0.053598559437130995,
+          "max": 0.24518806557416203
+        }
+      },
+      "streamlines": 2357,
+      "points": 372206,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            11.868751525878906,
+            44.55000305175781,
+            -16.650001525878906
+          ]
+        },
+        {
+          "index": 186103,
+          "position": [
+            34.249267578125,
+            1.9298629760742188,
+            -26.541030883789062
+          ]
+        },
+        {
+          "index": 372205,
+          "position": [
+            36.67499542236328,
+            16.396881103515625,
+            -24.890625
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 2357,
+          "mean_mm": 78.24632962726264,
+          "min_mm": 50.18985928201986,
+          "max_mm": 95.34188059193052
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "ifof.left.trk.gz",
+      "sources": {
+        "association/IFOF_L": 30856
+      },
+      "streamlines_kept": 7714,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "1447d7cfa0a1a6763c73cdebdc3f795bc9b008d94abd745ff73b3277a8c11d8d",
+      "published_sha256": "5e01737a87d4eae421867072f41275a4ca6b830982392c2538605c932f2b598f",
+      "published_bytes": 26054598,
+      "white_matter_share": 0.9529255811565408,
+      "end_trimming": {
+        "points_removed": 5216,
+        "streamlines_trimmed": 2137
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 309,
+          "median": 0.0660400095024393,
+          "max": 0.2488962424219914
+        }
+      },
+      "streamlines": 7714,
+      "points": 2570908,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -10.265625,
+            64.51875305175781,
+            7.115623474121094
+          ]
+        },
+        {
+          "index": 1285454,
+          "position": [
+            -18.93456268310547,
+            -79.7313232421875,
+            9.043037414550781
+          ]
+        },
+        {
+          "index": 2570907,
+          "position": [
+            -5.428123474121094,
+            -91.3499984741211,
+            -0.140625
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 7714,
+          "mean_mm": 165.8312863401161,
+          "min_mm": 135.7097415141806,
+          "max_mm": 187.34957821691597
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 7714,
+          "mean_mm": 165.8312863401161,
+          "min_mm": 135.7097415141806,
+          "max_mm": 187.34957821691597
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "ifof.right.trk.gz",
+      "sources": {
+        "association/IFOF_R": 11167
+      },
+      "streamlines_kept": 2792,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "f4b5782ddb288ef4ab7e26f93d8cc8c50b27a765a28e6404bf61ea372abd6970",
+      "published_sha256": "f413352245e713bceb1fa9f7853f3ad3b2d5ab985c2ca9e4fa4d7721b8554cc3",
+      "published_bytes": 8449311,
+      "white_matter_share": 0.9716324443301374,
+      "end_trimming": {
+        "points_removed": 723,
+        "streamlines_trimmed": 253
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 112,
+          "median": 0.07664110357857841,
+          "max": 0.23457869969041836
+        }
+      },
+      "streamlines": 2792,
+      "points": 835955,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            18.59062957763672,
+            57.48750305175781,
+            13.528121948242188
+          ]
+        },
+        {
+          "index": 417977,
+          "position": [
+            32.40821075439453,
+            -6.2091217041015625,
+            -11.030189514160156
+          ]
+        },
+        {
+          "index": 835954,
+          "position": [
+            21.234375,
+            -70.84687805175781,
+            29.925003051757812
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 2792,
+          "mean_mm": 148.94214862618688,
+          "min_mm": 110.94527774429392,
+          "max_mm": 201.2161745491612
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 2792,
+          "mean_mm": 148.94214862618688,
+          "min_mm": 110.94527774429392,
+          "max_mm": 201.2161745491612
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 1,
+          "mean_mm": 201.2161745491612,
+          "min_mm": 201.2161745491612,
+          "max_mm": 201.2161745491612
+        }
+      ]
+    },
+    {
+      "file": "ilf.left.trk.gz",
+      "sources": {
+        "association/ILF_L": 21209
+      },
+      "streamlines_kept": 5303,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "dc96ecf108e9ac0efed750214837fca3e5fc760093882bdc7bc4bc1c4f97eb7e",
+      "published_sha256": "d4ec2514ad65719eb32845151a6e1221a790f5aa9d45b300737a538ad0d1c5f2",
+      "published_bytes": 11152783,
+      "white_matter_share": 0.9428884418183068,
+      "end_trimming": {
+        "points_removed": 1135,
+        "streamlines_trimmed": 396
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 213,
+          "median": 0.0741154792553402,
+          "max": 0.24721213287063504
+        }
+      },
+      "streamlines": 5303,
+      "points": 1105468,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -37.99687576293945,
+            -6.525001525878906,
+            -13.753124237060547
+          ]
+        },
+        {
+          "index": 552734,
+          "position": [
+            -37.11329650878906,
+            -37.963844299316406,
+            2.07879638671875
+          ]
+        },
+        {
+          "index": 1105467,
+          "position": [
+            -3.8531265258789062,
+            -85.078125,
+            -0.36562347412109375
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 5303,
+          "mean_mm": 103.50187626228066,
+          "min_mm": 37.93147850667251,
+          "max_mm": 140.49742958510555
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 3943,
+          "mean_mm": 112.5401626725519,
+          "min_mm": 100.0087118614618,
+          "max_mm": 140.49742958510555
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "ilf.right.trk.gz",
+      "sources": {
+        "association/ILF_R": 14596
+      },
+      "streamlines_kept": 3649,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "cd1f70d002064ee1601fa1f66691ae8095dc020bbfebfcab8c26913b53b01d4c",
+      "published_sha256": "297a9f05e90297105c4d204c77dffb778be7b3b8ce10cf56f5699020bda7b3a5",
+      "published_bytes": 7633224,
+      "white_matter_share": 0.9554283495634655,
+      "end_trimming": {
+        "points_removed": 1326,
+        "streamlines_trimmed": 364
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 146,
+          "median": 0.07409272129591417,
+          "max": 0.24839167624172123
+        }
+      },
+      "streamlines": 3649,
+      "points": 762368,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            32.962501525878906,
+            -16.087501525878906,
+            -24.665626525878906
+          ]
+        },
+        {
+          "index": 381184,
+          "position": [
+            26.885292053222656,
+            -61.60085678100586,
+            12.265182495117188
+          ]
+        },
+        {
+          "index": 762367,
+          "position": [
+            37.99687957763672,
+            -65.8125,
+            23.315628051757812
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 3649,
+          "mean_mm": 103.72466092470367,
+          "min_mm": 57.8809765388033,
+          "max_mm": 175.05937825100978
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 2333,
+          "mean_mm": 111.25066711593115,
+          "min_mm": 100.00270061249273,
+          "max_mm": 175.05937825100978
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "mdlf.left.trk.gz",
+      "sources": {
+        "association/MdLF_L": 1674
+      },
+      "streamlines_kept": 419,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "7a3e3c74c69bd5b0d7e2f865bf30729caacf23e235a060f22e218dbd5ce830e3",
+      "published_sha256": "a341a5c9b25158c73d97ca3d2f3bb046fe15c46b01abbeb46fc5cfe7d64965de",
+      "published_bytes": 862735,
+      "white_matter_share": 0.9081136331594529,
+      "end_trimming": {
+        "points_removed": 611,
+        "streamlines_trimmed": 280
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 17,
+          "median": 0.0664466019178271,
+          "max": 0.22848693668245737
+        }
+      },
+      "streamlines": 419,
+      "points": 85116,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -57.48749923706055,
+            -2.0250015258789062,
+            0.703125
+          ]
+        },
+        {
+          "index": 42558,
+          "position": [
+            -12.357398986816406,
+            -58.32072448730469,
+            53.586700439453125
+          ]
+        },
+        {
+          "index": 85115,
+          "position": [
+            -22.865623474121094,
+            -58.21875,
+            52.368751525878906
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 419,
+          "mean_mm": 100.83550176937067,
+          "min_mm": 65.5765504797007,
+          "max_mm": 118.81105466375983
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 281,
+          "mean_mm": 104.81674864261355,
+          "min_mm": 100.07456278297325,
+          "max_mm": 118.81105466375983
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "mdlf.right.trk.gz",
+      "sources": {
+        "association/MdLF_R": 3244
+      },
+      "streamlines_kept": 811,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "689e4a9db6bdc044b14cefee80ecce1dcc2754478334dde19ddb9c6a53f0c21b",
+      "published_sha256": "ba35429f7f70394e7d8d4f4076581ae59890f7638c0aa13cd51510972a2964ce",
+      "published_bytes": 1510127,
+      "white_matter_share": 0.7737047406124327,
+      "end_trimming": {
+        "points_removed": 370,
+        "streamlines_trimmed": 156
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 33,
+          "median": 0.05329302590617844,
+          "max": 0.08437487284418935
+        }
+      },
+      "streamlines": 811,
+      "points": 148947,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            58.35938262939453,
+            -17.268753051757812,
+            7.171875
+          ]
+        },
+        {
+          "index": 74473,
+          "position": [
+            30.814163208007812,
+            -27.112274169921875,
+            10.636322021484375
+          ]
+        },
+        {
+          "index": 148946,
+          "position": [
+            23.259376525878906,
+            -54.196876525878906,
+            58.61250305175781
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 811,
+          "mean_mm": 91.22520797975994,
+          "min_mm": 53.822468320511426,
+          "max_mm": 110.14128097801755
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 104,
+          "mean_mm": 103.59990751230892,
+          "min_mm": 100.82887463729176,
+          "max_mm": 110.14128097801755
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "cc.trk.gz",
+      "sources": {
+        "commissural/CC": 32200
+      },
+      "streamlines_kept": 8050,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "f288f3343ea28e71ae71f3d56f442f6a76e16b36a1b66ae946d78ec4e22d1d5e",
+      "published_sha256": "aab2a4fe7a36cb275fc3c017d6f2ab4b5a04205ba5c51f8d7290ad75663a57ca",
+      "published_bytes": 19744833,
+      "white_matter_share": 0.9289180108622968,
+      "end_trimming": {
+        "points_removed": 6299,
+        "streamlines_trimmed": 1426
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 322,
+          "median": 0.06802814198229382,
+          "max": 0.2467977427157631
+        }
+      },
+      "streamlines": 8050,
+      "points": 1962016,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            19.57500457763672,
+            60.86250305175781,
+            11.840621948242188
+          ]
+        },
+        {
+          "index": 981008,
+          "position": [
+            37.43544006347656,
+            -23.952415466308594,
+            4.192344665527344
+          ]
+        },
+        {
+          "index": 1962015,
+          "position": [
+            -12.684371948242188,
+            -43.34062194824219,
+            58.52812194824219
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 8050,
+          "mean_mm": 121.13620823362727,
+          "min_mm": 31.05923981801899,
+          "max_mm": 218.21043559380234
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 6506,
+          "mean_mm": 128.94215543795028,
+          "min_mm": 100.00932951304074,
+          "max_mm": 218.21043559380234
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 18,
+          "mean_mm": 207.47723698336017,
+          "min_mm": 200.56584371689829,
+          "max_mm": 218.21043559380234
+        }
+      ]
+    },
+    {
+      "file": "slf1.left.trk.gz",
+      "sources": {
+        "association/SLF1_L": 2514
+      },
+      "streamlines_kept": 629,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "4046f30bd3af5ae038591c19dbab724119f42aaaf3d9bbeb698b382354f9ce01",
+      "published_sha256": "c2250f861c2bb72775f4647f807ab4b85deec8cbace402fda464cba4cc0a23c3",
+      "published_bytes": 997587,
+      "white_matter_share": 0.878674159069475,
+      "end_trimming": {
+        "points_removed": 189,
+        "streamlines_trimmed": 94
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 26,
+          "median": 0.08494100471039318,
+          "max": 0.24397560354674835
+        }
+      },
+      "streamlines": 629,
+      "points": 101792,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -9.928123474121094,
+            8.353126525878906,
+            45.703125
+          ]
+        },
+        {
+          "index": 50896,
+          "position": [
+            -9.401039123535156,
+            -18.80310821533203,
+            32.31562805175781
+          ]
+        },
+        {
+          "index": 101791,
+          "position": [
+            -10.631248474121094,
+            -44.26875305175781,
+            53.74687194824219
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 629,
+          "mean_mm": 80.16655944909675,
+          "min_mm": 37.753897435687165,
+          "max_mm": 122.8416204400061
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 36,
+          "mean_mm": 105.54525517050527,
+          "min_mm": 100.0546285229851,
+          "max_mm": 122.8416204400061
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "slf1.right.trk.gz",
+      "sources": {
+        "association/SLF1_R": 4668
+      },
+      "streamlines_kept": 1167,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "7e5e0b1d4e649603590914d0f986df66b7bec3f9581df76f9c2c19f6936139b6",
+      "published_sha256": "07f8873485d0f5d25a02428cfdf2abf0d5dd6b5013dc85819d98b745caacee45",
+      "published_bytes": 2205491,
+      "white_matter_share": 0.8326685939647019,
+      "end_trimming": {
+        "points_removed": 2644,
+        "streamlines_trimmed": 1009
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 47,
+          "median": 0.07531425025901875,
+          "max": 0.2418448063262273
+        }
+      },
+      "streamlines": 1167,
+      "points": 224148,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            3.0093765258789062,
+            39.20625305175781,
+            48.318748474121094
+          ]
+        },
+        {
+          "index": 112074,
+          "position": [
+            6.513420104980469,
+            8.296875,
+            60.97972106933594
+          ]
+        },
+        {
+          "index": 224147,
+          "position": [
+            12.853126525878906,
+            -37.546875,
+            61.171875
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 1167,
+          "mean_mm": 95.2894022202839,
+          "min_mm": 39.8134684765163,
+          "max_mm": 120.90398269207142
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 586,
+          "mean_mm": 107.09342771786656,
+          "min_mm": 100.042633758794,
+          "max_mm": 120.90398269207142
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "slf2.left.trk.gz",
+      "sources": {
+        "association/SLF2_L": 12687
+      },
+      "streamlines_kept": 3172,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "d7eb1b4e43e56b600f1f7e1724189e0007300c13ef974d7d94309fbe600cece0",
+      "published_sha256": "37d20c9e67431541eb7b731589d272d7c2295a006a617b9b3e4ecfd3b8ab828e",
+      "published_bytes": 5045763,
+      "white_matter_share": 0.8785701596826087,
+      "end_trimming": {
+        "points_removed": 2233,
+        "streamlines_trimmed": 857
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 127,
+          "median": 0.08437500000086376,
+          "max": 0.24722444985048694
+        }
+      },
+      "streamlines": 3172,
+      "points": 506630,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -52.00312423706055,
+            -2.5031280517578125,
+            29.503128051757812
+          ]
+        },
+        {
+          "index": 253315,
+          "position": [
+            -45.796775817871094,
+            23.4814453125,
+            26.696495056152344
+          ]
+        },
+        {
+          "index": 506629,
+          "position": [
+            -23.034374237060547,
+            -13.556251525878906,
+            53.859375
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 3172,
+          "mean_mm": 79.10207112214536,
+          "min_mm": 3.8515240342152834,
+          "max_mm": 110.84680656010198
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 208,
+          "mean_mm": 101.91725675128677,
+          "min_mm": 100.0055267096489,
+          "max_mm": 110.84680656010198
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "slf2.right.trk.gz",
+      "sources": {
+        "association/SLF2_R": 11528
+      },
+      "streamlines_kept": 2882,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "9288f07e8ae090a9a3748172678520f1b087dad3adfd449327ecad6fdaaf4fe3",
+      "published_sha256": "8917f133150cc38a899f56fa3d9db29c2a5142224eddc415a74bc686c2d40fd0",
+      "published_bytes": 5919434,
+      "white_matter_share": 0.9206006946402566,
+      "end_trimming": {
+        "points_removed": 563,
+        "streamlines_trimmed": 142
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 116,
+          "median": 0.08484350659818438,
+          "max": 0.24357069096237416
+        }
+      },
+      "streamlines": 2882,
+      "points": 602902,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            40.19062042236328,
+            29.306243896484375,
+            2.2781219482421875
+          ]
+        },
+        {
+          "index": 301451,
+          "position": [
+            31.643531799316406,
+            -40.79579162597656,
+            29.418746948242188
+          ]
+        },
+        {
+          "index": 602901,
+          "position": [
+            45.02812957763672,
+            -48.178123474121094,
+            43.59375
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 2882,
+          "mean_mm": 103.89142890227278,
+          "min_mm": 48.42008296648644,
+          "max_mm": 140.0583410638326
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 1750,
+          "mean_mm": 115.60060871489809,
+          "min_mm": 100.00110221619019,
+          "max_mm": 140.0583410638326
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "slf3.left.trk.gz",
+      "sources": {
+        "association/SLF3_L": 2637
+      },
+      "streamlines_kept": 660,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "e959adbad0ed35f887c3408448a924a80284a3b1f1d682eb4f20015f45441bed",
+      "published_sha256": "f5510a2575a807e5604cdc7d8b8a0c107cf5e4883f58743615ebccad86479294",
+      "published_bytes": 819314,
+      "white_matter_share": 0.9164076577938491,
+      "end_trimming": {
+        "points_removed": 55,
+        "streamlines_trimmed": 25
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 27,
+          "median": 0.08440962392006368,
+          "max": 0.23925367596666725
+        }
+      },
+      "streamlines": 660,
+      "points": 82687,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            -49.556251525878906,
+            -3.234375,
+            27.871871948242188
+          ]
+        },
+        {
+          "index": 41343,
+          "position": [
+            -36.90102005004883,
+            -38.368621826171875,
+            27.78614044189453
+          ]
+        },
+        {
+          "index": 82686,
+          "position": [
+            -55.828125,
+            -30.431251525878906,
+            25.818748474121094
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 660,
+          "mean_mm": 61.915445568143475,
+          "min_mm": 26.549862546276163,
+          "max_mm": 87.06874926814649
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    },
+    {
+      "file": "slf3.right.trk.gz",
+      "sources": {
+        "association/SLF3_R": 17028
+      },
+      "streamlines_kept": 4257,
+      "streamlines_outside_the_brain": 0,
+      "resampled_sha256": "89b02d9cfb6b5e2b859628d0e404f735aaf7a89699ce84935fd668faad942f37",
+      "published_sha256": "0ee7874f00f2190bedf7df2d773edb868b59b62a4149eb1c6c3601e8e2c48588",
+      "published_bytes": 5217391,
+      "white_matter_share": 0.971161783507965,
+      "end_trimming": {
+        "points_removed": 66,
+        "streamlines_trimmed": 16
+      },
+      "resampling": {
+        "deviation_mm": {
+          "sampled_streamlines": 171,
+          "median": 0.07848050893903305,
+          "max": 0.2483939654574247
+        }
+      },
+      "streamlines": 4257,
+      "points": 520906,
+      "rasmm_samples": [
+        {
+          "index": 0,
+          "position": [
+            45.16875457763672,
+            7.7624969482421875,
+            4.7531280517578125
+          ]
+        },
+        {
+          "index": 260453,
+          "position": [
+            34.965553283691406,
+            -20.20056915283203,
+            30.390769958496094
+          ]
+        },
+        {
+          "index": 520905,
+          "position": [
+            52.70624542236328,
+            -24.131248474121094,
+            40.33125305175781
+          ]
+        }
+      ],
+      "length_summaries": [
+        {
+          "minimum_mm": 1,
+          "shown": 4257,
+          "mean_mm": 60.45572090240941,
+          "min_mm": 26.82263021889907,
+          "max_mm": 100.15688650615505
+        },
+        {
+          "minimum_mm": 100,
+          "shown": 1,
+          "mean_mm": 100.15688650615505,
+          "min_mm": 100.15688650615505,
+          "max_mm": 100.15688650615505
+        },
+        {
+          "minimum_mm": 200,
+          "shown": 0,
+          "mean_mm": null,
+          "min_mm": null,
+          "max_mm": null
+        }
+      ]
+    }
+  ]
+}

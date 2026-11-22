@@ -6,8 +6,8 @@ import { createClinicalCatalog } from '../clinical/catalog.ts';
 import { manifests } from '../clinical/test-support.ts';
 import type { ClinicalData } from '../clinical/types.ts';
 import { ownTractIds } from '../diffusion/catalogs.ts';
+import type { TractCatalog } from '../diffusion/catalogs.ts';
 import { createCircuitCatalog } from './catalog.ts';
-import { circuitCatalog } from './load.ts';
 import type { AuthoredCircuit, CircuitData } from './catalog.ts';
 
 const data = readRepoYaml<CircuitData>('data/circuits.yaml');
@@ -743,10 +743,16 @@ test('CAT-54 · an unknown circuit, landmark or reference fails by name', () => 
 
 test('on the template, a tour naming a tract, cord or deficit it lacks is left out and the rest resolve', () => {
   const template = manifests.find(([id]) => id === 'mni152')![1];
-  const catalog = circuitCatalog(
+  // The app loads the template's averaged tracts before its catalogs (boot.ts): the bundles it names.
+  const tracts = readRepoYaml<TractCatalog>('data/diffusion-mni152.yaml');
+  assert.equal(tracts.anatomy, template.anatomy.id);
+  const catalog = createCircuitCatalog(
     data,
     template,
-    createClinicalCatalog(clinical, template, {}, false),
+    createClinicalCatalog(clinical, template, {}, false)
+      .search('', 'en')
+      .map((deficit) => deficit.id),
+    tracts.bundles.map((bundle) => bundle.id),
     false,
   );
   assert.deepEqual(

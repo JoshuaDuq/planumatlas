@@ -478,7 +478,6 @@
   "cortexOpacity": "Cortex opacity",
   "keepTracts": "Keep tracts on other tabs",
   "mriOpen": "MRI with tracts",
-  "nativeReference": "Tracts in their own T1 reference brain.",
   "nativeCanvas": "Reference brain and tracts. Drag or use arrow keys to rotate, scroll or press plus and minus to zoom. Select tract bundles in the side panel.",
   "outlineLimit": "MRI-derived brain outline; no cortical atlas labels on this outline.",
   "mriHint": "The linked MRI uses the same scan and draws the tracts within 2 mm of each slice; a cut slices both layers together.",
@@ -519,7 +518,6 @@
   "mean": "mean",
   "range": "range",
   "noShown": "No streamlines meet this length filter.",
-  "source": "Dataset source · CC0",
   "about": "About this data",
   "profileRun": [
    "[\"Alpha\",\"\"] → \"Alpha:  in this tracking run\"",
@@ -1724,7 +1722,8 @@
    "[\"Alpha\"] → \"FA<NBSP>Alpha\"",
    "[\"\"] → \"FA<NBSP>\""
   ],
-  "tracts": "Tracts: the streamlines the 3D view draws, within 2 mm of each slice, coloured by direction (red left–right, green front–back, blue up–down). FA: fractional anisotropy of this subject’s own diffusion scan.",
+  "tracts": "Tracts: the streamlines the 3D view draws, within 2 mm of each slice, coloured by direction (red left–right, green front–back, blue up–down).",
+  "faNote": "FA: fractional anisotropy of this subject’s own diffusion scan.",
   "labels": {
    "sagittal": "Sagittal",
    "coronal": "Coronal",
@@ -2961,10 +2960,10 @@
   }
  },
  "template": {
-  "subjectNote": "An average of 152 young adults at mean adult size, with no tracts, cerebellar lobules or spinal cord of its own",
+  "subjectNote": "An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no cerebellar lobules or spinal cord",
   "provenance": [
-   "[\"Alpha\"] → \"An average of 152 young adults’ MRI, scaled by Alpha to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no tracts, cerebellar lobules or spinal cord of its own. Coordinates and maps in its own space are placed on it directly, with no registration.\"",
-   "[\"\"] → \"An average of 152 young adults’ MRI, scaled by  to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no tracts, cerebellar lobules or spinal cord of its own. Coordinates and maps in its own space are placed on it directly, with no registration.\""
+   "[\"Alpha\"] → \"An average of 152 young adults’ MRI, scaled by Alpha to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no cerebellar lobules or spinal cord. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\"",
+   "[\"\"] → \"An average of 152 young adults’ MRI, scaled by  to the mean brain size of the CDMD adults. Averaging smooths its folds and blurs its scan, and it has no cerebellar lobules or spinal cord. Its tracts are an averaged atlas’s (HCP1065), not tracked in it. Coordinates and maps in its own space are placed on it directly, with no registration.\""
   ],
   "coordinateCaveat": "A location on an average brain, placed by scaling alone: not anyone’s own peak, nor what a brain does there.",
   "deficitsElsewhere": [
@@ -2983,9 +2982,15 @@
   ],
   "anatomy": {
    "scope": "An average of 152 adults’ brains and the atlases drawn on it.",
-   "shows": "Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. It has no tracts, cerebellar lobules, spinal cord or arousal nuclei.",
+   "shows": "Five cortical atlases, Destrieux, Desikan-Killiany, HCP-MMP1.0, Julich-Brain 3.1 and Schaefer 2018, drawn on the template’s pial surface and on cut faces, with a teaching set, FreeSurfer’s aseg and NextBrain inside. Its tracts are an averaged atlas’s, and it has no cerebellar lobules, spinal cord or arousal nuclei.",
    "source": "The ICBM 152 2009c nonlinear asymmetric template (MNI152NLin2009cAsym), an average of 152 young adults’ MRI, reconstructed with FreeSurfer 8.2 at 0.9 of its size, the mean brain size of the CDMD adults. Destrieux and Desikan-Killiany are its own annotations; HCP-MMP, Julich-Brain and Schaefer are carried from fsaverage through registered spheres.",
    "caution": "An average, not a person: averaging smooths the folds and blurs small structures, so nobody’s anatomy looks like this. Every segmentation is a model estimate, and clinical accuracy has not been validated."
+  },
+  "tracts": {
+   "scope": "White matter from an averaged atlas, built from 1,065 other people.",
+   "shows": "21 white-matter bundles of a population-averaged atlas, placed on the template by its scale alone, with no registration: the atlas and the template share one space. Colour is local direction: red left–right, green front–back, blue up–down.",
+   "source": "The HCP1065 population-averaged tractography atlas (Yeh 2022; CC BY-SA 4.0), built from the diffusion scans of 1,065 Human Connectome Project young adults. Every fourth streamline is kept, and each is trimmed back into the brain at its ends. The superior longitudinal fasciculus comes in its three parts and the corpus callosum whole.",
+   "caution": "An average over 1,065 people, not tracked in any one brain: nobody’s pathways run exactly here, and an average hides how much they vary. Streamline counts are the atlas’s own density, not axon counts or connection strength. No FA map and no tract profile is published for the template."
   },
   "coordinate": {
    "source": "This brain is MNI152NLin2009cAsym itself, so a coordinate in it is placed by scaling it by 0.9, with no registration; an unstated “MNI” is read as MNI152NLin2009cAsym. Other templates are placed only on CDMD sub_013. Talairach is not accepted.",

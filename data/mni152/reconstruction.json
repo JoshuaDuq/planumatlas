@@ -8,5 +8,32 @@
     "voxel_values": "exact",
     "maximum_affine_error_mm": 0.0
   },
-  "limitations": []
+  "limitations": [],
+  "scanner_ras_to_surface_ras": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      -0.4499969482421875
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      15.75
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      -16.649993896484375
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "coordinate_method": "Exact FreeSurfer orig.mgz header transform; no anatomical registration."
 }

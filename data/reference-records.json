@@ -13966,6 +13966,23 @@
    "pages": "104813",
    "corrections": []
   },
+  "pmid:35995773": {
+   "pmid": "35995773",
+   "pmcid": "PMC9395399",
+   "doi": "10.1038/s41467-022-32595-4",
+   "doi_source": "pubmed",
+   "title": "Population-based tract-to-region connectome of the human brain and its hierarchical topology",
+   "authors": [
+    "Yeh FC"
+   ],
+   "year": 2022,
+   "pubdate": "2022 Aug 22",
+   "journal": "Nature Communications",
+   "volume": "13",
+   "issue": "1",
+   "pages": "4933",
+   "corrections": []
+  },
   "pmid:36056938": {
    "pmid": "36056938",
    "pmcid": null,

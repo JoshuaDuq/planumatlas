@@ -91,6 +91,8 @@
   const tracts = $derived(engine.tracts);
   const catalog = $derived(tractCatalog(anatomy));
   const matching = $derived(anatomy === catalog.anatomy);
+  // An averaged atlas on the template: what the tab says of it is the template's own wording.
+  const averaged = $derived(matching && catalog.atlas !== undefined);
   const rows = $derived(tractRows(catalog.bundles));
   const groups = $derived(tractGroups(rows));
   const text = $derived(t(lang, 'diffusion'));
@@ -403,7 +405,7 @@
         </button>
       {/if}
     </div>
-    <ScopeLine place="tracts" {lang} />
+    <ScopeLine place="tracts" {lang} template={averaged} />
   </div>
 
   <div class="body">
@@ -527,16 +529,15 @@
       </details>
     </fieldset>
 
-    <AboutData place="tracts" {lang} host="list">
-      <p class="note">{text.nativeReference}</p>
+    <AboutData place="tracts" {lang} host="list" template={averaged}>
+      <p class="note">{dataset.reference}</p>
       {#if !matching}<p class="note">{text.outlineLimit}</p>{/if}
       {#if matching}<p class="note">{text.mriHint}</p>{/if}
       <p class="note">{text.metricsScope}</p>
       <p class="note">{dataset.files}</p>
       <a class="source" href={catalog.source} target="_blank" rel="noreferrer">
-        {text.source}<span class="visually-hidden">{` ${link.newTab}`}</span>{@render iconGraphic(
-          'external-link',
-        )}
+        {dataset.source}<span class="visually-hidden">{` ${link.newTab}`}</span
+        >{@render iconGraphic('external-link')}
       </a>
       {#if !matching}
         <a

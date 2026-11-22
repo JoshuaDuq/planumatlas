@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformWithOxc, type Plugin, type ResolvedConfig } from 'vite';
@@ -89,9 +89,20 @@ export function publishedAssets(): Plugin {
       const index = JSON.parse(
         readFileSync(resolve(publicDirectory, 'models/anatomies.json'), 'utf8'),
       ) as { default: string; anatomies?: { id: string }[] };
+      // A tract dataset's reference space names the anatomy it is drawn on.
+      const tracts = readdirSync(resolve(publicDirectory, 'diffusion'), { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map(({ name }) => `diffusion/${name}/`)
+        .filter((prefix) => {
+          const space = JSON.parse(
+            readFileSync(resolve(publicDirectory, prefix, 'surface-space.json'), 'utf8'),
+          ) as { anatomy: string };
+          return space.anatomy !== index.default;
+        });
       const others = (index.anatomies ?? [])
         .map(({ id }) => `models/${id}/`)
-        .filter((prefix) => prefix !== `models/${index.default}/`);
+        .filter((prefix) => prefix !== `models/${index.default}/`)
+        .concat(tracts);
       const elsewhere = (path: string) => others.some((prefix) => path.startsWith(prefix));
       // The app derives each version from the sha256 (`versionOf`), so neither map carries it.
       const files = Object.fromEntries(

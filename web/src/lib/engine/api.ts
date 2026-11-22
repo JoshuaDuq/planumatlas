@@ -531,6 +531,8 @@ export interface EngineTracts {
   readonly streamlinesVisible: boolean;
   /** The cortex opacity the overlay opens with (native-ui.js:253). */
   readonly defaultOpacity: number;
+  /** An FA map is published with the anatomy's own tracts; an averaged atlas has none. */
+  readonly hasFa: boolean;
   /** The bundles loaded so far (native-viewer.js:116). */
   snapshot(): TractBundle[];
   hasBundle(id: string): boolean;
@@ -566,7 +568,7 @@ export interface EngineTracts {
   onPlane(frame: Pick<PlaneFrame, 'center' | 'normal' | 'u' | 'v'>): PlaneTracts;
   /**
    * The tracts' FA map at a point in surface RAS mm, NaN where it has no value. Downloads once; rejects
-   * on an anatomy whose tracts are another subject's.
+   * without `hasFa`.
    */
   loadFa(): Promise<(point: Vec3) => number>;
 }

@@ -16,8 +16,8 @@
 </script>
 
 <p class="scope-line" data-scope={place}>
-  {template && place === 'anatomy'
-    ? templateCopy(lang).anatomy.scope
+  {template && (place === 'anatomy' || place === 'tracts')
+    ? templateCopy(lang)[place].scope
     : t(lang, 'info')[place].scope}
 </p>
 

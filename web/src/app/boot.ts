@@ -4,6 +4,7 @@ import { keepAnatomyCached } from '../boot/keep-cached.ts';
 import { releaseUnseen } from '../lib/core/assets/asset-cache.ts';
 import { loadAnatomies, resolveAnatomy } from '../lib/core/assets/published-anatomy.ts';
 import { loadOtherAnatomyFiles } from '../lib/core/assets/published-assets.ts';
+import { loadTractCatalog } from '../lib/core/diffusion/catalogs.ts';
 import { t } from '../lib/core/i18n/index.ts';
 import { startFailure } from '../lib/core/i18n/errors.ts';
 import { prefetchAtlas } from '../lib/core/state/boot.ts';
@@ -139,7 +140,10 @@ export async function startApp(
     if (unpublished) link.rejected.push('anatomy');
     // Resolve the requested subject before constructing a scene for it.
     const anatomy = resolveAnatomy(published, unpublished ? undefined : requested);
-    if (anatomy !== published.default) await loadOtherAnatomyFiles();
+    if (anatomy !== published.default) {
+      await loadOtherAnatomyFiles();
+      await loadTractCatalog(anatomy);
+    }
     if (app.embed) {
       // A frame in a course page names its subject from the index, then downloads nothing until asked.
       app.embed.subject = published.anatomies.find(({ id }) => id === anatomy)!;

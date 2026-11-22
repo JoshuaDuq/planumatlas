@@ -101,6 +101,7 @@ export function createFakeTracts({
       return landmarkTract;
     },
     defaultOpacity,
+    hasFa: anatomy === tractAnatomy,
     snapshot: () => [...loaded.keys()].map(summary),
     hasBundle: (id) => loaded.has(id),
 

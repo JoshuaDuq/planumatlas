@@ -1697,9 +1697,11 @@ export function defineEngineContract(
         const above = { ...plane, center: [0, 0, 400] } as const;
         if (engine.model.manifest.anatomy.id !== tracts.anatomy) {
           assert.throws(() => tracts.onPlane(plane));
+          assert.equal(tracts.hasFa, false);
           await assert.rejects(tracts.loadFa());
           return;
         }
+        assert.equal(tracts.hasFa, true);
         await tracts.setActive(true);
         tracts.setOverlay(false);
         assert.equal(tracts.onPlane(plane).colors.length, 0);

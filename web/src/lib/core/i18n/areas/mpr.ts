@@ -13,7 +13,8 @@ export const en = {
   faFailed: 'The FA map could not be loaded.',
   fa: (value: string) => `FA\u00a0${value}`,
   tracts:
-    'Tracts: the streamlines the 3D view draws, within 2 mm of each slice, coloured by direction (red left–right, green front–back, blue up–down). FA: fractional anisotropy of this subject’s own diffusion scan.',
+    'Tracts: the streamlines the 3D view draws, within 2 mm of each slice, coloured by direction (red left–right, green front–back, blue up–down).',
+  faNote: 'FA: fractional anisotropy of this subject’s own diffusion scan.',
   labels: { sagittal: 'Sagittal', coronal: 'Coronal', axial: 'Axial' },
   planes: 'Section plane',
   positionLabel: (name: string) => `${name} position`,
@@ -51,7 +52,8 @@ export const fr: typeof en = {
   faFailed: 'La carte FA n’a pas pu être chargée.',
   fa: (value: string) => `FA\u00a0${value}`,
   tracts:
-    'Faisceaux\u202f: les trajectoires que trace la vue 3D, à moins de 2 mm de chaque coupe, colorées selon leur direction (rouge gauche–droite, vert avant–arrière, bleu haut–bas). FA\u202f: anisotropie fractionnelle de l’image de diffusion de ce même sujet.',
+    'Faisceaux\u202f: les trajectoires que trace la vue 3D, à moins de 2 mm de chaque coupe, colorées selon leur direction (rouge gauche–droite, vert avant–arrière, bleu haut–bas).',
+  faNote: 'FA\u202f: anisotropie fractionnelle de l’image de diffusion de ce même sujet.',
   labels: { sagittal: 'Sagittal', coronal: 'Coronal', axial: 'Axial' },
   planes: 'Plan de coupe',
   positionLabel: (name: string) => {

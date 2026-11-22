@@ -1,0 +1,167 @@
+id: mni152-hcp1065
+name:
+  en: HCP1065 averaged tract atlas
+  fr: Atlas de faisceaux moyens HCP1065
+source: https://doi.org/10.1038/s41467-022-32595-4
+license: CC-BY-SA-4.0
+# Not tracked on this brain: the population-averaged streamlines of Yeh 2022, placed on the
+# template by scripts/prepare_diffusion_mni152.py with no registration.
+provenance: mni152-hcp1065/provenance.json
+anatomy: mni152
+reference_space: mni152-hcp1065/surface-space.json
+overlay_cortex_opacity: 0.16
+resample_step_mm: 0.5
+atlas:
+  # Kept outside the repository (data/cache is ignored); the script refuses any other bytes.
+  archive: data/cache/hcp1065/hcp1065_avg_tracts_trk.zip
+  url: https://github.com/data-others/atlas/releases/download/hcp1065/hcp1065_avg_tracts_trk.zip
+  sha256: 344aad4394f18b8926ed5e1bda911ad56e328c6cf75faa45e1302512ad779c67
+  # The atlas draws 252,405 streamlines over these bundles, four times CDMD's 64,109. Every
+  # fourth streamline of each source file is kept, which leaves each bundle's share of the whole.
+  keep_every: 4
+  # DSI Studio writes a voxel's centre at its index, TrackVis half a voxel further, so NiBabel
+  # reads these files half a voxel off (LPS voxels: -0.5, -0.5, +0.5 mm in RAS). Measured
+  # 2026-11-22 on AF_R, CST_L, UF_L and SLF1_L against the atlas's own NIfTI volume of each:
+  # Dice 0.75 as read, 0.96 corrected. With it, the atlas's QA template meets this template's
+  # white matter within 0.25 mm on every axis. (Shifting the streamlines themselves raises their
+  # white-matter share by under a point at +0.6, -0.7, -0.6 mm, and does the same against the
+  # atlas's own QA image: where the atlas's lines lie in its own space, not a misplacement here.)
+  voxel_centre_correction_mm: [-0.5, -0.5, 0.5]
+  # The share of published streamline length in this template's white matter (ribbon.mgz and
+  # aseg) must reach this; measured 0.93, and 0.95 for CDMD's own tracts on CDMD.
+  minimum_white_matter_share: 0.9
+text:
+  en:
+    dataset: HCP1065 averaged tract atlas · MNI template
+    reference: An averaged atlas’s tracts on the template whose space they share.
+    source: Atlas source · CC BY-SA 4.0
+    otherAnatomy: The selected anatomical atlas is not the MNI template these averaged tracts are placed on.
+    files: "Files: each tract is one TRK streamline file from the HCP1065 population-averaged atlas (Yeh 2022, CC BY-SA 4.0), with every fourth streamline kept, scaled onto this template, its ends trimmed where they left the brain and resampled to 0.5 mm steps. No FA map is published for the template."
+  fr:
+    dataset: Atlas de faisceaux moyens HCP1065 · gabarit MNI
+    reference: Les faisceaux d’un atlas moyen sur le gabarit dont ils partagent l’espace.
+    source: Source de l’atlas · CC BY-SA 4.0
+    otherAnatomy: L’atlas anatomique sélectionné n’est pas le gabarit MNI sur lequel ces faisceaux moyens sont placés.
+    files: "Fichiers : chaque faisceau est un fichier de trajectoires TRK de l’atlas moyen de population HCP1065 (Yeh 2022, CC BY-SA 4.0), dont une trajectoire sur quatre est conservée, mis à l’échelle de ce gabarit, ses extrémités coupées là où elles sortaient du cerveau puis rééchantillonné à des pas de 0,5 mm. Aucune carte de FA n’est publiée pour le gabarit."
+brain_outline:
+  file: mni152-hcp1065/brain-outline.glb
+  provenance: mni152-hcp1065/brain-outline.json
+  source: data/mni152/mri/brain.mgz
+  intensity_threshold: 1
+  step_size: 2
+  opacity: 0.16
+# No T1 or FA of its own: the template's MRI is the anatomy's, and an average has no diffusion scan here.
+maps: []
+# Ids, names and classes are CDMD's (data/diffusion-cdmd.yaml), so a link or a circuit that names a
+# bundle means the same pathway on either brain. `sources` are the atlas files a bundle is made of.
+bundles:
+  - id: af-left
+    file: mni152-hcp1065/af.left.trk.gz
+    name: { en: Arcuate fasciculus · left, fr: Faisceau arqué · gauche }
+    class: association
+    initial: true
+    sources: [association/AF_L]
+  - id: af-right
+    file: mni152-hcp1065/af.right.trk.gz
+    name: { en: Arcuate fasciculus · right, fr: Faisceau arqué · droit }
+    class: association
+    sources: [association/AF_R]
+  - id: cst-left
+    file: mni152-hcp1065/cst.left.trk.gz
+    name: { en: Corticospinal tract · left, fr: Faisceau corticospinal · gauche }
+    class: projection
+    sources: [projection/CST_L]
+  - id: cst-right
+    file: mni152-hcp1065/cst.right.trk.gz
+    name: { en: Corticospinal tract · right, fr: Faisceau corticospinal · droit }
+    class: projection
+    initial: true
+    sources: [projection/CST_R]
+  # The atlas divides the cingulum into frontal-parietal, frontal-parahippocampal,
+  # parahippocampal, parahippocampal-parietal and parolfactory parts; one bundle here.
+  - id: cg-left
+    file: mni152-hcp1065/cg.left.trk.gz
+    name: { en: Cingulum · left, fr: Cingulum · gauche }
+    class: association
+    sources: [association/C_FP_L, association/C_FPH_L, association/C_PH_L, association/C_PHP_L, association/C_PO_L]
+  - id: cg-right
+    file: mni152-hcp1065/cg.right.trk.gz
+    name: { en: Cingulum · right, fr: Cingulum · droit }
+    class: association
+    sources: [association/C_FP_R, association/C_FPH_R, association/C_PH_R, association/C_PHP_R, association/C_PO_R]
+  - id: uf-left
+    file: mni152-hcp1065/uf.left.trk.gz
+    name: { en: Uncinate fasciculus · left, fr: Faisceau unciné · gauche }
+    class: association
+    sources: [association/UF_L]
+  - id: uf-right
+    file: mni152-hcp1065/uf.right.trk.gz
+    name: { en: Uncinate fasciculus · right, fr: Faisceau unciné · droit }
+    class: association
+    sources: [association/UF_R]
+  - id: ifof-left
+    file: mni152-hcp1065/ifof.left.trk.gz
+    name: { en: Inferior fronto-occipital fasciculus · left, fr: Faisceau fronto-occipital inférieur · gauche }
+    class: association
+    sources: [association/IFOF_L]
+  - id: ifof-right
+    file: mni152-hcp1065/ifof.right.trk.gz
+    name: { en: Inferior fronto-occipital fasciculus · right, fr: Faisceau fronto-occipital inférieur · droit }
+    class: association
+    sources: [association/IFOF_R]
+  - id: ilf-left
+    file: mni152-hcp1065/ilf.left.trk.gz
+    name: { en: Inferior longitudinal fasciculus · left, fr: Faisceau longitudinal inférieur · gauche }
+    class: association
+    sources: [association/ILF_L]
+  - id: ilf-right
+    file: mni152-hcp1065/ilf.right.trk.gz
+    name: { en: Inferior longitudinal fasciculus · right, fr: Faisceau longitudinal inférieur · droit }
+    class: association
+    sources: [association/ILF_R]
+  - id: mdlf-left
+    file: mni152-hcp1065/mdlf.left.trk.gz
+    name: { en: Middle longitudinal fasciculus · left, fr: Faisceau longitudinal moyen · gauche }
+    class: association
+    sources: [association/MdLF_L]
+  - id: mdlf-right
+    file: mni152-hcp1065/mdlf.right.trk.gz
+    name: { en: Middle longitudinal fasciculus · right, fr: Faisceau longitudinal moyen · droit }
+    class: association
+    sources: [association/MdLF_R]
+  - id: cc-1
+    file: mni152-hcp1065/cc.trk.gz
+    name: { en: Corpus callosum · whole, fr: Corps calleux · entier }
+    class: commissural
+    sources: [commissural/CC]
+  # The atlas's superior longitudinal fasciculus is these three parts and no whole beside them.
+  - id: slf1-left
+    file: mni152-hcp1065/slf1.left.trk.gz
+    name: { en: Superior longitudinal fasciculus I · left, fr: Faisceau longitudinal supérieur I · gauche }
+    class: association
+    sources: [association/SLF1_L]
+  - id: slf1-right
+    file: mni152-hcp1065/slf1.right.trk.gz
+    name: { en: Superior longitudinal fasciculus I · right, fr: Faisceau longitudinal supérieur I · droit }
+    class: association
+    sources: [association/SLF1_R]
+  - id: slf2-left
+    file: mni152-hcp1065/slf2.left.trk.gz
+    name: { en: Superior longitudinal fasciculus II · left, fr: Faisceau longitudinal supérieur II · gauche }
+    class: association
+    sources: [association/SLF2_L]
+  - id: slf2-right
+    file: mni152-hcp1065/slf2.right.trk.gz
+    name: { en: Superior longitudinal fasciculus II · right, fr: Faisceau longitudinal supérieur II · droit }
+    class: association
+    sources: [association/SLF2_R]
+  - id: slf3-left
+    file: mni152-hcp1065/slf3.left.trk.gz
+    name: { en: Superior longitudinal fasciculus III · left, fr: Faisceau longitudinal supérieur III · gauche }
+    class: association
+    sources: [association/SLF3_L]
+  - id: slf3-right
+    file: mni152-hcp1065/slf3.right.trk.gz
+    name: { en: Superior longitudinal fasciculus III · right, fr: Faisceau longitudinal supérieur III · droit }
+    class: association
+    sources: [association/SLF3_R]

@@ -15,7 +15,6 @@ export const en = {
   cortexOpacity: 'Cortex opacity',
   keepTracts: 'Keep tracts on other tabs',
   mriOpen: 'MRI with tracts',
-  nativeReference: 'Tracts in their own T1 reference brain.',
   nativeCanvas:
     'Reference brain and tracts. Drag or use arrow keys to rotate, scroll or press plus and minus to zoom. Select tract bundles in the side panel.',
   outlineLimit: 'MRI-derived brain outline; no cortical atlas labels on this outline.',
@@ -47,7 +46,6 @@ export const en = {
   mean: 'mean',
   range: 'range',
   noShown: 'No streamlines meet this length filter.',
-  source: 'Dataset source · CC0',
   about: 'About this data',
   // A tract's profile. The count is this tracking run's, not a connection strength.
   profileRun: (part: string, count: string) => `${part}: ${count} in this tracking run`,
@@ -81,7 +79,6 @@ export const fr: typeof en = {
   cortexOpacity: 'Opacité du cortex',
   keepTracts: 'Garder les faisceaux sur les autres onglets',
   mriOpen: 'IRM avec faisceaux',
-  nativeReference: 'Faisceaux dans leur propre cerveau de référence T1.',
   nativeCanvas:
     'Cerveau de référence et faisceaux. Glisser ou utiliser les flèches pour tourner, défiler ou appuyer sur plus et moins pour zoomer. Sélectionner les faisceaux dans le panneau.',
   outlineLimit: 'Contour cérébral dérivé de l’IRM, sans étiquettes corticales sur ce contour.',
@@ -111,7 +108,6 @@ export const fr: typeof en = {
   mean: 'moyenne',
   range: 'étendue',
   noShown: 'Aucune trajectoire ne satisfait ce filtre de longueur.',
-  source: 'Source des données · CC0',
   about: 'À propos de ces données',
   profileRun: (part: string, count: string) => `${part}\u202f: ${count} dans ce suivi`,
   endsHeading: 'Où se terminent ses trajectoires',

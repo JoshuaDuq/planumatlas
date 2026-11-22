@@ -118,15 +118,14 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
     return createReferenceTransform(await surfaceRows()).invert();
   }
 
+  const faMap = matchingAnatomy ? catalog.maps.find((entry) => entry.id === 'fa') : undefined;
   let fa: Promise<(point: Vec3) => number> | null = null;
   /** FA read trilinearly in surface RAS: its voxels carried through the rigid scanner-to-surface rows. */
   function loadFa(): Promise<(point: Vec3) => number> {
-    if (!matchingAnatomy) {
-      return Promise.reject(new Error('FA is drawn only on its own anatomy’s MRI.'));
+    if (!faMap) {
+      return Promise.reject(new Error('These tracts have no FA map.'));
     }
-    const map = catalog.maps.find((entry) => entry.id === 'fa');
-    if (!map) return Promise.reject(new Error('The tract catalog publishes no FA map.'));
-    fa ??= Promise.all([readDiffusionAsset(map.file), surfaceRows()]).then(
+    fa ??= Promise.all([readDiffusionAsset(faMap.file), surfaceRows()]).then(
       async ([{ buffer }, rows]) => {
         const image = await readNifti(buffer);
         if (image.volumes.length !== 1) throw new Error('The FA map must be one volume.');
@@ -224,6 +223,7 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
       return engine.bounds;
     },
     defaultOpacity: catalog.overlay_cortex_opacity,
+    hasFa: faMap !== undefined,
     own: matchingAnatomy
       ? {
           bundles: catalog.bundles,

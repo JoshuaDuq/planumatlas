@@ -74,7 +74,9 @@ def validate_diffusion_space(config):
     transform = orig.header.get_vox2ras_tkr() @ np.linalg.inv(orig.affine)
     shift = np.eye(4)
     shift[:3, 3] = -np.asarray(orig.header["Pxyz_c"], float)
-    if not np.allclose(transform, shift, rtol=0, atol=1e-6):
+    # 1e-5 mm, the affine tolerance used throughout: a c_ras that float32 cannot hold exactly
+    # (the template's 0.45 mm) leaves 3e-6 mm between the header's two routes to it.
+    if not np.allclose(transform, shift, rtol=0, atol=1e-5):
         raise ValueError("orig.mgz surface RAS is not its scanner RAS shifted by -c_ras")
     reconstruction = json.loads(
         (config["source_directory"] / config["anatomy"]["reconstruction"]["provenance"]).read_text()

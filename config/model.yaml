@@ -117,6 +117,8 @@ anatomies:
     reconstruction:
       input: data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz
       input_sha256: cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b
+      # Reconstructed on Rorqual, not with the pinned macOS install (data/mni152/reconstruction.json).
+      freesurfer_build: freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45
       threads: 4
       provenance: reconstruction.json
       completion_marker: scripts/recon-all.done
@@ -136,9 +138,10 @@ anatomies:
       procedure: subject-segmentation
 
 output_directory: public/models
-# Each anatomy with tracts of its own names them in one catalog; the viewer's
-# web/src/lib/core/diffusion/catalogs.ts imports the same files.
-tract_catalogs: [data/diffusion-cdmd.yaml]
+# Each anatomy with tracts names them in one catalog: its own tracking (CDMD), or an averaged
+# atlas placed on a template (mni152). The viewer's web/src/lib/core/diffusion/catalogs.ts
+# imports the same files.
+tract_catalogs: [data/diffusion-cdmd.yaml, data/diffusion-mni152.yaml]
 # scripts/prepare_subject.py checks this many evenly spaced vertices of every
 # annotation it projects against a brute-force nearest source vertex.
 annotation_projection:

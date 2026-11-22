@@ -23,6 +23,8 @@ export interface TractBundle {
   /** A numbered segment's anatomical part (TractSeg's CC_1–CC_7). */
   segment?: Translated;
   initial?: boolean;
+  /** The atlas files an averaged bundle is made of (scripts/prepare_diffusion_mni152.py). */
+  sources?: readonly string[];
 }
 
 /** One diffusion dataset's catalog (`data/diffusion-*.yaml`), as authored. */
@@ -36,7 +38,13 @@ export interface TractCatalog {
   reference_space: string;
   overlay_cortex_opacity: number;
   resample_step_mm: number;
-  text: Readonly<Record<'en' | 'fr', Readonly<Record<string, string>>>>;
+  /** What the Tracts tab says of the dataset: its name, what the view is, its source link and its files. */
+  text: Readonly<
+    Record<
+      'en' | 'fr',
+      Readonly<Record<'dataset' | 'reference' | 'source' | 'otherAnatomy' | 'files', string>>
+    >
+  >;
   brain_outline: {
     file: string;
     provenance: string;
@@ -47,12 +55,36 @@ export interface TractCatalog {
   };
   maps: readonly TractMap[];
   bundles: readonly TractBundle[];
+  /** Present when the tracts are an averaged atlas placed on a template, not tracked in the anatomy. */
+  atlas?: {
+    archive: string;
+    url: string;
+    sha256: string;
+    keep_every: number;
+    voxel_centre_correction_mm: readonly number[];
+    minimum_white_matter_share: number;
+  };
 }
 
 const cdmd = cdmdRecords as TractCatalog;
 
-/** Every tract catalog; config/model.yaml's tract_catalogs names the same files. */
-export const TRACT_CATALOGS: readonly TractCatalog[] = [cdmd];
+/** Every tract catalog loaded so far; config/model.yaml's tract_catalogs names the files. */
+export const TRACT_CATALOGS: TractCatalog[] = [cdmd];
+
+let template: Promise<unknown> | undefined;
+
+/**
+ * Adds the MNI template's catalog, fetched when that brain is opened and before anything reads
+ * `tractCatalog` for it (BUILD-15). Any other anatomy has no catalog beyond CDMD's to add.
+ */
+export function loadTractCatalog(anatomy: string): Promise<unknown> | undefined {
+  if (anatomy === 'mni152') {
+    template ??= import('../../../../../data/diffusion-mni152.yaml').then((records) =>
+      TRACT_CATALOGS.push(records.default as TractCatalog),
+    );
+  }
+  return template;
+}
 
 /** An anatomy's own tracts, or CDMD's as an independent reference for one without. */
 export function tractCatalog(anatomy: string): TractCatalog {

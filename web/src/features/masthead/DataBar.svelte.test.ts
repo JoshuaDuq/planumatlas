@@ -212,7 +212,7 @@ describe('DataBar lists', () => {
     const template = anatomy('mni152', false);
     await wide(barProps({ anatomy: template, anatomies: [subjects[0], template] }));
     expect(note('Subject')).toBe(
-      'An average of 152 young adults at mean adult size, with no tracts, cerebellar lobules or spinal cord of its own',
+      'An average of 152 young adults at mean adult size, with an averaged atlas’s tracts and no cerebellar lobules or spinal cord',
     );
   });
 

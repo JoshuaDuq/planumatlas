@@ -125,7 +125,7 @@ test('a segment’s name carries its anatomical part, and the search finds it', 
 });
 
 test('each published collection reads as one row per tract in both languages', () => {
-  const tracts: Record<string, number> = { 'cdmd-sub-013': 13 };
+  const tracts: Record<string, number> = { 'cdmd-sub-013': 13, 'mni152-hcp1065': 11 };
   const { tract_catalogs: paths } = readRepoYaml<{ tract_catalogs: string[] }>('config/model.yaml');
   for (const path of paths) {
     const catalog = readRepoYaml<TractCatalog>(path);

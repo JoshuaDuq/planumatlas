@@ -93,12 +93,18 @@ def brain_volume(directory):
     return inside, aseg.affine
 
 
-def trim(line, inside, affine):
-    """`line` without the runs of points outside `inside` at either end."""
+def points_in(line, inside, affine):
+    """Which of `line`'s points lie in the volume `inside`, by their nearest voxel."""
     voxels = np.rint(nib.affines.apply_affine(np.linalg.inv(affine), line)).astype(int)
     within = np.all((voxels >= 0) & (voxels < inside.shape), axis=1)
     kept = np.zeros(len(line), bool)
     kept[within] = inside[tuple(voxels[within].T)]
+    return kept
+
+
+def trim(line, inside, affine):
+    """`line` without the runs of points outside `inside` at either end."""
+    kept = points_in(line, inside, affine)
     if kept.sum() < 2:
         raise ValueError("A streamline lies outside the brain")
     first, last = np.flatnonzero(kept)[[0, -1]]
