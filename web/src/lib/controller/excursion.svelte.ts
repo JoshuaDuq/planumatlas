@@ -13,6 +13,7 @@ import {
   revealedRegions,
 } from '../core/catalog/neuropsych-domains.ts';
 import { DISORDER_ATLAS } from '../core/catalog/disorder-effects.ts';
+import { mapCut } from '../core/catalog/cut-labels.ts';
 import type { NeuropsychDomains } from '../core/catalog/neuropsych-domains.ts';
 import type { ClinicalCatalog } from '../core/clinical/catalog.ts';
 import { t } from '../core/i18n/index.ts';
@@ -53,9 +54,11 @@ export interface ExcursionDeps {
     SceneCommands,
     | 'begin'
     | 'fail'
+    | 'failIfCurrent'
     | 'revealRegions'
     | 'openRegion'
     | 'prepareCut'
+    | 'cut'
     | 'showSpinalCord'
     | 'chooseAtlas'
     | 'chooseSurfaceColor'
@@ -585,9 +588,26 @@ export function createExcursions(
       session.setDisorderShown(id);
       render();
     },
-    chooseSurfaceColor(value: Parameters<typeof commands.chooseSurfaceColor>[0]) {
+    /**
+     * A map only cuts show, chosen with no cut open, opens its cut through the map's centre, facing the
+     * reader; a cut already open stays where the reader put it.
+     */
+    async chooseSurfaceColor(value: Parameters<typeof commands.chooseSurfaceColor>[0]) {
       session.liftPaint();
-      return commands.chooseSurfaceColor(value);
+      if (!(await commands.chooseSurfaceColor(value)) || sections.active) return;
+      const opening = mapCut(value, model.regions.values());
+      if (!opening) return;
+      const current = commands.begin();
+      sections.setCrosshair(opening.centre);
+      try {
+        if (!(await commands.cut(opening.plane, current))) return;
+      } catch (error) {
+        commands.failIfCurrent(current, 'section', error);
+        return;
+      }
+      const faced = camera.faceCut();
+      if (faced) session.setView(faced);
+      render();
     },
 
     /** The curated functions whose lesion checks cite one of a deficit's associations, as the deficit lists them. */

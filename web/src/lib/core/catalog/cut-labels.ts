@@ -6,7 +6,7 @@
  * (NextBrain) samples those; anything else samples the surface atlas. A paint names the surface
  * atlas's regions, so it keeps the surface atlas.
  */
-import type { DisplaySettings, Region, SurfaceColor } from '../../types/index.ts';
+import type { CutMode, DisplaySettings, Region, SurfaceColor } from '../../types/index.ts';
 
 /** The colourings that are a cut-only atlas's own map, by that atlas. */
 export const MAP_ATLASES = {
@@ -31,6 +31,41 @@ export function mapColourOf(cutAtlas: string): MapColour | null {
     (Object.keys(MAP_ATLASES) as MapColour[]).find((colour) => MAP_ATLASES[colour] === cutAtlas) ??
     null
   );
+}
+
+/**
+ * The plane a map seen only on cuts opens on, through its centre: the one that shows the most of it
+ * there on CDMD (striatal networks axial, 10 of 14 against 6 coronal; cerebellar regions coronal, 26
+ * of 32 against 24 axial).
+ */
+const MAP_PLANES = { striatal: 'axial', cerebellar: 'coronal' } as const satisfies Partial<
+  Record<MapColour, CutMode>
+>;
+
+/**
+ * The cut choosing this colour opens, through its map regions' voxel-weighted centre in surface RAS
+ * millimetres; null for a colour the surface shows.
+ */
+export function mapCut(
+  colour: SurfaceColor,
+  regions: Iterable<Region>,
+): { plane: CutMode; centre: [number, number, number] } | null {
+  if (!Object.hasOwn(MAP_PLANES, colour)) return null;
+  const atlas = MAP_ATLASES[colour as keyof typeof MAP_PLANES];
+  const centre: [number, number, number] = [0, 0, 0];
+  let voxels = 0;
+  for (const region of regions) {
+    if (region.atlas !== atlas) continue;
+    const { voxel_count: count, centroid_ras_mm: centroid } = region;
+    if (!count || !centroid) throw new Error(`${region.id} has no voxels to place a cut by.`);
+    for (const axis of [0, 1, 2] as const) centre[axis] += centroid[axis] * count;
+    voxels += count;
+  }
+  if (!voxels) throw new Error(`No ${atlas} region to cut through.`);
+  return {
+    plane: MAP_PLANES[colour as keyof typeof MAP_PLANES],
+    centre: centre.map((sum) => sum / voxels) as [number, number, number],
+  };
 }
 
 /** The cut atlases whose cuts draw a cut-only region: its own, unless it is published for others. */

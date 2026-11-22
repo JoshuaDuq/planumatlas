@@ -285,20 +285,24 @@ export function createSceneCommands({
     if (current()) render();
   }
 
-  /** The masthead's colour field; an atlas it switches to was named in the option. */
-  async function chooseSurfaceColor(value: SurfaceColor) {
+  /**
+   * The masthead's colour field; an atlas it switches to was named in the option. True once the colour
+   * is shown and no later command has taken over.
+   */
+  async function chooseSurfaceColor(value: SurfaceColor): Promise<boolean> {
     const current = begin();
     session.notify(null);
     try {
-      if (!(await applySurfaceColor(value, current))) return;
+      if (!(await applySurfaceColor(value, current))) return false;
     } catch (error) {
       const said = t(lang(), 'display').surfaceColors[value];
       failChoice(current, 'colour', error, ['colour', said], () => {
         void chooseSurfaceColor(value);
       });
-      return;
+      return false;
     }
     render();
+    return true;
   }
 
   return {

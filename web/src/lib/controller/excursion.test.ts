@@ -503,6 +503,34 @@ describe('searching in the other evidence tab', () => {
   });
 });
 
+describe('a colour only cuts show', () => {
+  // Each registered volume's own voxel centroid in surface RAS mm, measured with nibabel on CDMD.
+  for (const [colour, plane, view, centre] of [
+    ['striatal', 'axial', 'superior', [0.4, 7.7, 27.9]],
+    ['cerebellar', 'coronal', 'anterior', [-3.2, -39.2, -20.2]],
+  ] as const) {
+    test(`${colour}, chosen with no cut open, cuts ${plane} through its map's centre, facing it`, async () => {
+      const scene = createScene();
+      await scene.excursions.chooseSurfaceColor(colour);
+      const { state } = scene.engine.sections;
+      assert.equal(state.mode, plane);
+      state.crosshair.forEach((value, axis) => expect(value).toBeCloseTo(centre[axis]!, 1));
+      assert.equal(scene.session.state.view, view);
+    });
+  }
+
+  test('a cut already open stays where the reader put it, and a surface colour opens none', async () => {
+    const scene = createScene();
+    await scene.excursions.chooseSurfaceColor('network');
+    assert.equal(scene.engine.sections.state.mode, 'off');
+    await scene.engine.sections.setMode('sagittal');
+    const before = scene.engine.sections.state.crosshair;
+    await scene.excursions.chooseSurfaceColor('striatal');
+    assert.equal(scene.engine.sections.state.mode, 'sagittal');
+    assert.deepEqual(scene.engine.sections.state.crosshair, before);
+  });
+});
+
 describe('the stage key', () => {
   test('on Functions a row opens that function, and none returns to all of them', async () => {
     const scene = createScene();

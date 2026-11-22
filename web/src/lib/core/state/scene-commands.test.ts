@@ -439,7 +439,7 @@ test('STATE-49 a newer success of the same masthead field retires that field’s
   vi.spyOn(console, 'error').mockImplementation(() => {});
   const offline = () => Object.assign(new Error('HTTP 503'), { code: 'asset-fetch' });
   const scene = fixture();
-  const failing = async (choice: Promise<void>, layer: string) => {
+  const failing = async (choice: Promise<unknown>, layer: string) => {
     await scene.settle();
     await scene.fail(layer, offline());
     await choice;
