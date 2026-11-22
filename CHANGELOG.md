@@ -8,6 +8,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [0.1.1] - 2026-11-22
 
+Archived at [doi:10.5281/zenodo.24449724](https://doi.org/10.5281/zenodo.24449724).
+
 ### Added
 
 - On the **MNI template**, Colour offers **Striatal networks** (Choi et al. 2012) and **Cerebellar functions**
