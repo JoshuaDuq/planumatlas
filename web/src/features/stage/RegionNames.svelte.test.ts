@@ -106,6 +106,22 @@ test('the same camera names the same regions in the same places', async () => {
   await vi.waitFor(() => expect(drawn()).toEqual(first));
 });
 
+test('a rest looks again at the names shown, which a late explode may have moved', async () => {
+  const engine = engineOf();
+  mount(engine);
+  await settled();
+  await frames();
+  const shown = namedRegions(engine, [
+    ...document.querySelectorAll<HTMLElement>('button.region-name'),
+  ]);
+  const look = vi.spyOn(engine.model, 'inSight');
+  // No camera event since they were chosen: the pieces moved under them on their own.
+  engine.emit('cameraSettled', undefined);
+  flushSync();
+  expect(look).toHaveBeenCalledTimes(1);
+  expect(new Set(look.mock.calls[0]![0].map(({ id }) => id))).toEqual(new Set(shown));
+});
+
 test('no name covers the dock, a key or the gizmo, where it would otherwise stand', async () => {
   mount(engineOf());
   await settled();

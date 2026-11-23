@@ -474,9 +474,12 @@
         moved();
       }),
       engine.on('viewport', chrome.stale),
+      // An exploded view's pieces arrive after the camera, with no camera event: the names kept are
+      // looked at again, not held where the pieces stood in flight.
       engine.on('cameraSettled', () => {
         clearTimeout(rest);
         chrome!.stale();
+        moves += 1;
         choose();
       }),
       // A cut dragged or a part hidden: looked at as it happens, chosen once it has rested.

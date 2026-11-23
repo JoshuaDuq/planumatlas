@@ -167,7 +167,15 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       }),
       cortexDrawn,
     ]);
-    stepAnatomy = (now) => atlas.stepExplode(now);
+    // The explode runs on past the camera's rest; the stage has rested once its anatomy has arrived too,
+    // the frame after its last step.
+    let anatomyMoving = false;
+    stepAnatomy = (now) => {
+      const moved = atlas.stepExplode(now);
+      if (anatomyMoving && !moved) events.emit('cameraSettled', undefined);
+      anatomyMoving = moved;
+      return moved;
+    };
     const anatomy = atlas.manifest.anatomy.id;
     // The internal anatomy's programs, before the frame that first draws it.
     await scene.compile(atlas.group);

@@ -111,6 +111,7 @@ export interface EngineEvents {
   /**
    * The camera was placed or came to rest; the link is written then (app.js:1825). A move the application
    * makes reports at once; one the reader makes, or a coast after it, reports once the camera has rested.
+   * An exploded view's pieces, which arrive after the camera, report again once they have.
    */
   cameraSettled: undefined;
   /** A click on the model chose a region (app.js:1813), at this surface RAS point when the model has a surface. */
