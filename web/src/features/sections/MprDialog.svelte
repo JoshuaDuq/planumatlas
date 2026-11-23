@@ -1033,7 +1033,12 @@
       margin-right: calc((16px - var(--control-height)) / 2);
     }
     /* Its own size decides its shape: a column beside the stage is taller than wide. */
+    /*
+     * The containing block of what it scrolls: a visually hidden heading or status line is placed
+     * absolutely, and on the dock it would escape this scroller and scroll the page.
+     */
     .mpr-dock-body {
+      position: relative;
       flex: 1;
       min-height: 0;
       padding: 0 var(--space-4) var(--space-4);
@@ -1042,12 +1047,20 @@
       container: mpr-dock / size;
     }
     @container mpr-dock (max-aspect-ratio: 1 / 1) {
+      /*
+       * The controls, taller than the axial plane beside them, would spread their height over its three
+       * rows and part its heading from its picture: the last row, alone flexible, takes it all.
+       */
       .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(5, auto) 1fr;
       }
       .controls {
         grid-column: auto;
         grid-row: span 3;
+      }
+      .position {
+        align-self: start;
       }
       .display {
         grid-template-columns: minmax(0, 1fr);
