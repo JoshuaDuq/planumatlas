@@ -520,6 +520,7 @@ describe('evidence sections', () => {
     expect(sections.map((details) => text(details.querySelector('summary')!))).toEqual([
       expect.stringMatching(/^Measurements and source, \d\S*\smm²$/),
       'Neuropsychological functions, 32',
+      expect.stringMatching(/^Neurosynth terms, \d+$/),
       'Functional networks, Dorsal attention 93%',
       'Typical arterial supply',
       'Functional division',
@@ -620,7 +621,7 @@ describe('evidence sections', () => {
     const screen = await render(Fixture, { regionId: V1 });
     const domains = () => section('Neuropsychological functions');
     domains().open = true;
-    expect(text(domains().querySelector('.network-row')!)).toMatch(/“.+” · z \d+\.\d/);
+    expect(text(domains().querySelector('.link-row')!)).toMatch(/“.+” · z \d+\.\d/);
     expect(text(domains())).toContain('this whole HCP-MMP area');
     await screen.rerender({ regionId: CERUBELLUM });
     expect(text(domains())).toContain('over this whole structure');
@@ -638,19 +639,56 @@ describe('evidence sections', () => {
     render(Fixture, { regionId: 'hcp-mmp:left:50' });
     const domains = section('Neuropsychological functions');
     domains.open = true;
-    const more = domains.querySelector<HTMLElement>('.show-all')!;
-    more.focus();
+    // The functions' own, not the folded terms'.
+    const more = () => domains.querySelector<HTMLElement>(':scope > .show-all');
+    more()!.focus();
     await userEvent.keyboard('{Enter}');
-    await expect.poll(() => domains.querySelector('.show-all')).toBeNull();
+    await expect.poll(more).toBeNull();
     expect(domains.contains(document.activeElement)).toBe(true);
     expect(document.activeElement).not.toBe(document.body);
+  });
+
+  test('FUNC-58 · a Destrieux or Desikan region lists the share its HCP-MMP areas cover, and a row opens its function', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, { regionId: 'destrieux:left:33', calls });
+    const domains = () => section('Neuropsychological functions');
+    domains().open = true;
+    const first = domains().querySelector<HTMLElement>('.link-row')!;
+    expect(text(first)).toBe('Auditory perception “auditory” · 100% · z 22.2');
+    expect(text(domains())).toContain('The share of this Destrieux region lying in HCP-MMP areas');
+    await userEvent.click(first);
+    expect(calls).toContain('function:auditory-perception');
+    // Pars opercularis: language, at 99%, before motor at 100%, by share times z.
+    await screen.rerender({ regionId: 'desikan:left:18' });
+    expect(text(domains().querySelector('.link-row')!)).toBe('Language “language” · 99% · z 15.0');
+  });
+
+  test('FUNC-59 · the searched terms fold under the functions, clinical groups marked, each opening its map', async () => {
+    const calls: unknown[] = [];
+    const screen = await render(Fixture, { regionId: 'hcp-mmp:left:50', calls });
+    section('Neuropsychological functions').open = true;
+    const terms = section('Neurosynth terms');
+    expect(terms.open).toBe(false);
+    await userEvent.click(terms.querySelector('summary')!);
+    const rows = [...terms.querySelectorAll<HTMLElement>('.link-row')];
+    expect(rows.length).toBeLessThanOrEqual(8);
+    expect(text(rows[0]!)).toMatch(/^.+ z \d+\.\d$/);
+    await userEvent.click(rows[0]!);
+    expect(calls.some((call) => String(call).startsWith('function:term:'))).toBe(true);
+    // A Destrieux parcel's terms carry their share; a clinical group says so.
+    await screen.rerender({ regionId: 'destrieux:left:33', lang: 'fr' });
+    const fold = section('Termes Neurosynth');
+    expect(text(fold.querySelector('.link-row')!)).toMatch(/ \d+ % · z \d+,\d$/);
+    expect(fold.querySelector('.link-row .name')!.getAttribute('lang')).toBe('en');
+    await userEvent.click(fold.querySelector<HTMLElement>('.show-all')!);
+    expect(text(fold)).toMatch(/Groupe clinique · \d+ % · z/);
   });
 
   test('a teaching unit lists its structure’s functions and says it takes that score', async () => {
     const screen = await render(Fixture, { regionId: 'aseg:left:18' });
     const domains = () => section('Neuropsychological functions');
     domains().open = true;
-    const rows = () => [...domains().querySelectorAll('.network-row')].map(text);
+    const rows = () => [...domains().querySelectorAll('.link-row')].map(text);
     const amygdala = rows();
     expect(text(domains())).not.toContain('This teaching-set unit');
     await screen.rerender({ regionId: 'learning:left:amygdala' });

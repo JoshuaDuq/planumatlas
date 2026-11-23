@@ -16,6 +16,7 @@ import {
   domainAreas,
   domainPaint,
   domainStudies,
+  functionsAt,
   groupedDomains,
   matchingTerms,
   nearestName,
@@ -461,13 +462,20 @@ describe('the published cdmd anatomy', () => {
     );
     const records = [...domains.search!.terms.values()];
     assert.equal(terms.regions.length, 379);
-    // Every sampled region, the 16 teaching units that carry a sampled structure's score, and the
-    // areas of the two atlases that passed the gate (278 Julich-Brain, 400 Schaefer); not Destrieux.
+    // Every sampled region, the 16 teaching units that carry a sampled structure's score, the areas
+    // of the two atlases that passed the gate (278 Julich-Brain, 400 Schaefer), and the regions of the
+    // two listed by share (148 Destrieux, 68 Desikan-Killiany).
     assert.deepEqual(domains.region_atlases, ['julich', 'schaefer']);
+    assert.deepEqual(domains.share_atlases, ['desikan', 'destrieux']);
     assert.equal(
       manifest.regions.filter((region) => scoredRegion(domains, region)).length,
-      379 + 16 + 278 + 400,
+      379 + 16 + 278 + 400 + 148 + 68,
     );
+    // The share atlases' anatomical anchors: Heschl's gyrus, the calcarine sulcus, pars opercularis.
+    const first = (id: string) => functionsAt(domains, id)[0]!.id;
+    assert.equal(first('destrieux:left:33'), 'auditory-perception');
+    assert.equal(first('destrieux:left:45'), 'visual-perception');
+    assert.equal(first('desikan:left:18'), 'language');
     assert.equal(records.length, 277);
     assert.equal(records.filter((record) => record.kind === 'function').length, 232);
     assert.equal(records.filter((record) => record.kind === 'population').length, 45);
@@ -475,6 +483,10 @@ describe('the published cdmd anatomy', () => {
     assert.deepEqual(domains.search!.atlases, ['julich', 'schaefer']);
     for (const atlas of domains.region_atlases) {
       assert.equal(records.filter((record) => !record.atlasAreas[atlas]!.length).length, 6);
+    }
+    // Every term is measured on both share atlases; eight cover 5% of no region of each.
+    for (const atlas of domains.share_atlases) {
+      assert.equal(records.filter((record) => !record.atlasShares[atlas]!.length).length, 8);
     }
   });
 });

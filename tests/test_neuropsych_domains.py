@@ -218,3 +218,63 @@ def test_an_atlas_parcel_without_a_score_is_rejected():
                "source_label_id": 999, "source_name": "x", "kind": "cortex"}
     with pytest.raises(ValueError, match="schaefer:left:999"):
         neuropsych_domains.assign_atlases([missing], definition, scores)
+
+
+def share_region(atlas, label, name, hemisphere="left"):
+    return {"id": f"{atlas}:{hemisphere}:{label}", "atlas": atlas, "hemisphere": hemisphere,
+            "source_label_id": label, "source_name": name, "kind": "cortex"}
+
+
+def test_a_function_covers_the_shares_of_the_areas_reaching_it_above_the_floor_largest_first():
+    overlap = {"L_A1_ROI": 0.4, "L_MBelt_ROI": 0.3, "L_STV_ROI": 0.02, "L_PBelt_ROI": 0.28}
+    reached = {"a": {"L_A1_ROI": 10.0, "L_MBelt_ROI": 3.0}, "b": {"L_STV_ROI": 9.0},
+               "c": {"L_STV_ROI": 4.0, "L_A1_ROI": 5.0}, "d": {"R_A1_ROI": 20.0},
+               "e": {"L_A1_ROI": 3.5, "L_PBelt_ROI": 3.0}, "f": {"L_A1_ROI": 4.0, "L_PBelt_ROI": 3.0},
+               "g": {"L_PBelt_ROI": 20.0}}
+    # Ordered by share times z: g covers least of what is listed and comes first.
+    assert neuropsych_domains.reached_shares(overlap, reached, 0.05) == [
+        ("g", 0.28, 20.0), ("a", 0.7, 7.0), ("f", 0.68, 3.59), ("e", 0.68, 3.29), ("c", 0.42, 4.95)]
+
+
+def test_a_share_atlas_region_is_measured_in_the_hcp_mmp_areas_of_its_own_side():
+    transverse = share_region("destrieux", 33, "G_temp_sup-G_T_transv")
+    overlap = neuropsych_domains.area_shares([transverse], "destrieux")["destrieux:left:33"]
+    assert overlap and all(name.startswith("L_") for name in overlap)
+    assert 0.9 < sum(overlap.values()) <= 1
+    assert max(overlap, key=overlap.get) == "L_A1_ROI"
+
+
+def test_a_share_atlas_region_named_otherwise_on_fsaverage_is_rejected():
+    wrong = share_region("desikan", 34, "precentral")
+    with pytest.raises(ValueError, match="desikan:left:34 is not precentral on fsaverage"):
+        neuropsych_domains.area_shares([wrong], "desikan")
+
+
+def test_destrieux_and_desikan_regions_list_the_functions_their_areas_cover():
+    definition = neuropsych_domains.read_definition()
+    scores = neuropsych_domains.read_scores(definition)
+    assert definition["share_atlases"] == ["desikan", "destrieux"]
+    regions = [share_region("destrieux", 33, "G_temp_sup-G_T_transv"),
+               share_region("destrieux", 45, "S_calcarine"),
+               share_region("desikan", 34, "transversetemporal"),
+               share_region("desikan", 24, "precentral", "right"),
+               share_region("desikan", 18, "parsopercularis")]
+    assigned = neuropsych_domains.share_members(regions, definition, scores)
+    first = {region: found[0]["domain"] for atlas in assigned.values() for region, found in atlas.items()}
+    assert first == {"destrieux:left:33": "auditory-perception", "destrieux:left:45": "visual-perception",
+                     "desikan:left:34": "auditory-perception", "desikan:right:24": "motor",
+                     "desikan:left:18": "language"}
+    for found in (found for atlas in assigned.values() for found in atlas.values()):
+        weights = [member["share"] * member["z"] for member in found]
+        assert weights == sorted(weights, reverse=True)
+        assert all(definition["share_floor"] <= member["share"] <= 1
+                   and member["z"] >= definition["threshold_z"] for member in found)
+
+
+@pytest.mark.parametrize("change, message", [
+    (lambda d: d.update(share_atlases=["destrieux", "lobes"]), "Unmeasured share atlases"),
+    (lambda d: d.update(share_floor=0), "share floor"),
+])
+def test_share_atlases_need_an_annotation_and_a_floor_in_range(tmp_path, change, message):
+    with pytest.raises(ValueError, match=message):
+        neuropsych_domains.read_definition(write_definition(tmp_path / "d.yaml", change))

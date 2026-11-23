@@ -3,20 +3,28 @@
   column whose name underlines on hover, with an optional colour mark and a second line.
 -->
 <script lang="ts">
-  import Swatch from '../../lib/ui/Swatch.svelte';
+  import Swatch from './Swatch.svelte';
 
   let {
     name,
+    nameLang,
     secondary,
     colour,
     onclick,
-  }: { name: string; secondary?: string; colour?: string; onclick: () => void } = $props();
+  }: {
+    name: string;
+    /** The name's language where it differs from the page's. */
+    nameLang?: string;
+    secondary?: string;
+    colour?: string;
+    onclick: () => void;
+  } = $props();
 </script>
 
 <button type="button" class="link-row" {onclick}>
   {#if colour}<span class="mark"><Swatch {colour} /></span>{/if}
   <span class="text">
-    <span class="name">{name}</span>
+    <span class="name" lang={nameLang}>{name}</span>
     {#if secondary}<span class="secondary">{secondary}</span>{/if}
   </span>
   <span class="chevron" aria-hidden="true"></span>

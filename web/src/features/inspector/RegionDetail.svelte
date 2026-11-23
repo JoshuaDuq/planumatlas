@@ -156,6 +156,8 @@
     onregion: (id: string) => void;
     /** A boundary's neighbour: selects it without moving the view. */
     onselect: (id: string) => void;
+    /** A listed function or term: opens its map. */
+    onfunction: (id: string) => void;
     /** S3's `openLinkedMri`; `instant` is true for a keyboard activation. */
     openLinkedMri: (options: { atRegion: true; instant: boolean }) => unknown;
     /** The Linked MRI is open beside the stage: its button is latched, and a press closes it, as `M` does. */
@@ -215,6 +217,7 @@
     onclear,
     onregion,
     onselect,
+    onfunction,
     openLinkedMri,
     mriOpen,
     closeLinkedMri,
@@ -386,7 +389,7 @@
   <!-- Two indexes: what is known about the region, then the research data on it. -->
   <div class="region-index" data-index="about">
     <h3 class="index-caption">{copy.aboutIndex}</h3>
-    <DomainSection {region} {lang} {domains} />
+    <DomainSection {region} {lang} {domains} {onfunction} />
     <NetworkSection {region} {lang} colors={networkColors} {cabNp} striatal={striatalNetworks} />
     <SupplySection {region} {lang} {territories} />
     <Constituents {region} {lang} get={catalog.get} label={catalog.label} {onregion} />

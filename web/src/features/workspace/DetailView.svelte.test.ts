@@ -64,12 +64,14 @@ describe('a region’s detail', () => {
     expect(document.activeElement).toBe(listField());
   });
 
-  test('leads with what the region is: its network and the deficits mapped on it', async () => {
+  test('leads with what the region is: its network, its functions and the deficits mapped on it', async () => {
     await shell.open();
-    // The left precentral gyrus.
+    // The left precentral gyrus, whose functions are listed by the share its HCP-MMP areas cover.
     await pick('destrieux:left:29');
     const lead = detail().querySelector('.region-lead')!;
-    expect(lead.textContent).toMatch(/^Network: Somatomotor 69\s?%\. Linked deficits: .+\.$/);
+    expect(lead.textContent).toMatch(
+      /^Network: Somatomotor 69\s?%\. Functions: Motor functions, .+\. Linked deficits: .+\.$/,
+    );
     // Before the commands and the folded measurements.
     const focus = page.getByRole('button', { name: 'Focus', exact: true }).element();
     expect(lead.compareDocumentPosition(focus) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

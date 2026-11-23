@@ -301,6 +301,7 @@
         onclear={() => void anatomy.clearSelection()}
         onregion={(id) => void anatomy.openConstituent(id)}
         onselect={(id) => anatomy.selectRegion(id)}
+        onfunction={(id) => void functions.openFunction(id)}
         openLinkedMri={excursions.openLinkedMri}
         mriOpen={app.ports.mriOpen()}
         closeLinkedMri={app.ports.closeMpr}

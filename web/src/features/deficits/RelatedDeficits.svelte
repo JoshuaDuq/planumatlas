@@ -8,7 +8,7 @@
   import { deficitsForRegion, relatedRegionVisible } from '../../lib/core/panels/clinical.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
-  import LinkRow from './LinkRow.svelte';
+  import LinkRow from '../../lib/ui/LinkRow.svelte';
 
   let { explorer, view }: { explorer: DeficitsExplorer; view: View } = $props();
 

@@ -23,6 +23,7 @@ import {
   scoredRegion,
   SHARED_COLOR,
   shownDomain,
+  termsAt,
   validComparison,
   validateNeuropsychDomains,
   type TermRecord,
@@ -35,12 +36,22 @@ import { asRegion } from './test-support.ts';
 type Fixture = any;
 
 const regions = new Map<string, Region>([
-  ['hcp-mmp:left:1', asRegion({ atlas: 'hcp-mmp', kind: 'cortex' })],
-  ['hcp-mmp:right:1', asRegion({ atlas: 'hcp-mmp', kind: 'cortex' })],
-  ['destrieux:left:1', asRegion({ atlas: 'destrieux' })],
+  ['hcp-mmp:left:1', asRegion({ id: 'hcp-mmp:left:1', atlas: 'hcp-mmp', kind: 'cortex' })],
+  ['hcp-mmp:right:1', asRegion({ id: 'hcp-mmp:right:1', atlas: 'hcp-mmp', kind: 'cortex' })],
+  ['destrieux:left:1', asRegion({ id: 'destrieux:left:1', atlas: 'destrieux', kind: 'cortex' })],
+  ['destrieux:left:2', asRegion({ id: 'destrieux:left:2', atlas: 'destrieux', kind: 'cortex' })],
+  ['nextbrain:left:7', asRegion({ id: 'nextbrain:left:7', atlas: 'nextbrain', kind: 'structure' })],
   ['julich:left:2', asRegion({ id: 'julich:left:2', atlas: 'julich', kind: 'cortex' })],
   ['julich:left:3', asRegion({ id: 'julich:left:3', atlas: 'julich', kind: 'cortex' })],
-  ['aseg:left:18', asRegion({ atlas: 'aseg', kind: 'structure', source_name: 'Left-Amygdala' })],
+  [
+    'aseg:left:18',
+    asRegion({
+      id: 'aseg:left:18',
+      atlas: 'aseg',
+      kind: 'structure',
+      source_name: 'Left-Amygdala',
+    }),
+  ],
   [
     'aseg:left:4',
     asRegion({ atlas: 'aseg', kind: 'structure', source_name: 'Left-Lateral-Ventricle' }),
@@ -120,6 +131,17 @@ const partition = (): Fixture => ({
       ],
     },
   },
+  share_atlases: ['destrieux'],
+  share_floor: 0.05,
+  share_regions: {
+    destrieux: {
+      'destrieux:left:1': [
+        { domain: 'visual', share: 1, z: 3.4 },
+        { domain: 'memory', share: 1, z: 7.5 },
+        { domain: 'language', share: 0.41, z: 9.2 },
+      ],
+    },
+  },
 });
 
 test('an area lists its domains strongest first and is drawn as the strongest unless one is picked', () => {
@@ -159,7 +181,7 @@ test('FUNC-40 · a region’s functions are listed by raw z, highest first, on H
   assert.equal(scoredRegion(published, regions.get('julich:left:3')), true);
   assert.deepEqual(functionsAt(published, 'julich:left:3'), []);
   // An atlas not listed is not scored.
-  assert.equal(scoredRegion(published, regions.get('destrieux:left:1')), false);
+  assert.equal(scoredRegion(published, regions.get('nextbrain:left:7')), false);
   // The listed atlases add nothing to a function's areas, its paint or its counts.
   assert.ok(
     domainAreas(published, 'language').every(({ region }) => !region.startsWith('julich:')),
@@ -464,7 +486,7 @@ test('a sampled structure is scored like an area; another structure, or another 
   assert.equal(scoredRegion(published, regions.get('aseg:left:18')), true);
   assert.equal(scoredRegion(published, regions.get('aseg:left:4')), false);
   assert.equal(scoredRegion(published, regions.get('hcp-mmp:left:1')), true);
-  assert.equal(scoredRegion(published, regions.get('destrieux:left:1')), false);
+  assert.equal(scoredRegion(published, regions.get('nextbrain:left:7')), false);
   assert.deepEqual(domainAreas(published, 'memory'), [
     { region: 'hcp-mmp:left:1', z: 7.5 },
     { region: 'aseg:left:18', z: 3.5 },
@@ -543,6 +565,21 @@ const terms = (): Fixture => ({
         'conditioned fear': [],
         interference: [],
         aphasia: [[0, 3.2]],
+      },
+    },
+  },
+  shares: {
+    destrieux: {
+      regions: ['destrieux:left:1', 'destrieux:left:2'],
+      terms: {
+        fear: [[0, 0.2, 12]],
+        'fear conditioning': [],
+        'conditioned fear': [[0, 0.6, 3.1]],
+        interference: [
+          [1, 0.9, 4],
+          [0, 0.6, 5.2],
+        ],
+        aphasia: [],
       },
     },
   },
@@ -767,4 +804,137 @@ test('CAT-42 · the allowance is one edit per four letters of the query', () => 
   assert.equal(nearest('lnagauge', ['Language']), 'Language'); // two edits, eight letters
   assert.equal(nearest('lnagaueg', ['Language']), null); // three edits, eight letters
   assert.equal(nearest('mtoro', ['Motor']), null); // two edits, five letters
+});
+
+test('FUNC-58 · a Destrieux region lists the functions its HCP-MMP areas cover, by share times z', () => {
+  const published = validateNeuropsychDomains(partition(), regions);
+  assert.equal(scoredRegion(published, regions.get('destrieux:left:1')), true);
+  assert.deepEqual(
+    functionsAt(published, 'destrieux:left:1').map((record) => [record.id, record.share, record.z]),
+    [
+      ['memory', 1, 7.5],
+      ['language', 0.41, 9.2],
+      ['visual', 1, 3.4],
+    ],
+  );
+  // A share atlas's region its areas cover with no function is scored, and lists none.
+  assert.equal(scoredRegion(published, regions.get('destrieux:left:2')), true);
+  assert.deepEqual(functionsAt(published, 'destrieux:left:2'), []);
+  // Off a share atlas a row carries no share.
+  assert.ok(functionsAt(published, 'julich:left:2').every((record) => !('share' in record)));
+  // The share atlases add nothing to a function's areas or paint.
+  assert.ok(
+    domainAreas(published, 'memory').every(({ region }) => !region.startsWith('destrieux:')),
+  );
+});
+
+test('FUNC-59 · a region lists the searched terms it reaches, in the order of its functions', () => {
+  const published = validateNeuropsychDomains(partition(), regions, terms());
+  const listed = (id: string) =>
+    termsAt(published, regions.get(id)!).map((record) => [
+      record.id,
+      record.share ?? null,
+      record.z,
+    ]);
+  assert.deepEqual(listed('hcp-mmp:left:1'), [
+    ['term:aphasia', null, 4],
+    ['term:fear', null, 3.4],
+  ]);
+  assert.deepEqual(listed('julich:left:2'), [['term:aphasia', null, 3.2]]);
+  assert.deepEqual(listed('learning:left:amygdala'), [
+    ['term:fear', null, 9.1],
+    ['term:fear conditioning', null, 6.2],
+  ]);
+  assert.deepEqual(listed('destrieux:left:1'), [
+    ['term:interference', 0.6, 5.2],
+    ['term:fear', 0.2, 12],
+    ['term:conditioned fear', 0.6, 3.1],
+  ]);
+  assert.deepEqual(listed('nextbrain:left:7'), []);
+  // Without a term search a region lists no term.
+  assert.deepEqual(
+    termsAt(validateNeuropsychDomains(partition(), regions), regions.get('hcp-mmp:left:1')!),
+    [],
+  );
+});
+
+test('a share below the floor or above one, a z below the threshold, or a share atlas off its regions is rejected', () => {
+  for (const [change, message] of [
+    [
+      (p: Fixture) => {
+        p.share_regions.destrieux['destrieux:left:1'][2].share = 0.04;
+      },
+      /assignment: destrieux:left:1/,
+    ],
+    [
+      (p: Fixture) => {
+        p.share_regions.destrieux['destrieux:left:1'][0].share = 1.01;
+      },
+      /assignment: destrieux:left:1/,
+    ],
+    [
+      (p: Fixture) => {
+        p.share_regions.destrieux['destrieux:left:1'][0].z = 2.9;
+      },
+      /assignment: destrieux:left:1/,
+    ],
+    [
+      (p: Fixture) => {
+        p.share_regions.destrieux['julich:left:2'] = [{ domain: 'visual', share: 1, z: 4 }];
+      },
+      /assignment: julich:left:2/,
+    ],
+    [
+      (p: Fixture) => {
+        p.share_atlases = ['desikan'];
+      },
+      /Invalid neuropsychological-domain partition/,
+    ],
+    [
+      (p: Fixture) => {
+        p.share_floor = 0;
+      },
+      /Invalid neuropsychological-domain partition/,
+    ],
+  ] as [(p: Fixture) => void, RegExp][]) {
+    const broken = partition();
+    change(broken);
+    assert.throws(() => validateNeuropsychDomains(broken, regions), message);
+  }
+  for (const [change, message] of [
+    [
+      (p: Fixture) => {
+        p.shares.destrieux.terms.fear[0][1] = 0.01;
+      },
+      /term on destrieux: fear/,
+    ],
+    [
+      (p: Fixture) => {
+        p.shares.destrieux.terms.fear[0][2] = 2.5;
+      },
+      /term on destrieux: fear/,
+    ],
+    [
+      (p: Fixture) => {
+        p.shares.destrieux.regions.push('julich:left:2');
+      },
+      /term search on destrieux/,
+    ],
+    [
+      (p: Fixture) => {
+        delete p.shares.destrieux.terms.aphasia;
+      },
+      /term search on destrieux/,
+    ],
+    [
+      (p: Fixture) => {
+        delete p.shares;
+      },
+      /Invalid Neurosynth term search/,
+    ],
+  ] as [(p: Fixture) => void, RegExp][]) {
+    const broken = terms();
+    change(broken);
+    assert.throws(() => validateNeuropsychDomains(partition(), regions, broken), message);
+  }
 });

@@ -6,7 +6,7 @@ import re
 
 import numpy as np
 import yaml
-from nibabel.freesurfer.io import read_annot
+from nibabel.freesurfer.io import read_annot, read_geometry
 
 from ..sources import HEMISPHERES, ROOT, write_json
 from .functional_regions import AREA_NAME, AREAS_PER_HEMISPHERE, area_of
@@ -25,6 +25,8 @@ ATLAS_ANNOTATIONS = {
     "julich": "JulichBrain3.1",
     "schaefer": "Schaefer2018_400Parcels_7Networks_order",
 }
+# The atlases whose regions list functions by the share their HCP-MMP areas cover, by annotation.
+SHARE_ANNOTATIONS = {"desikan": "aparc", "destrieux": "aparc.a2009s"}
 # The lesion mappings these checks can read: Destrieux parcels, on fsaverage's own annotation.
 CHECKED_ATLAS = "destrieux"
 CHECKED_ANNOTATION = "aparc.a2009s"
@@ -94,6 +96,10 @@ def read_definition(path=DEFINITION):
         raise ValueError("The membership threshold must be a positive z")
     if not set(definition["region_atlases"]) <= set(ATLAS_ANNOTATIONS):
         raise ValueError(f"Unscored region atlases {sorted(set(definition['region_atlases']) - set(ATLAS_ANNOTATIONS))}")
+    if not set(definition["share_atlases"]) <= set(SHARE_ANNOTATIONS):
+        raise ValueError(f"Unmeasured share atlases {sorted(set(definition['share_atlases']) - set(SHARE_ANNOTATIONS))}")
+    if not 0 < definition["share_floor"] < 1:
+        raise ValueError("The share floor must be in (0, 1)")
     scale = definition["z_scale"]
     starts = [band["from"] for band in scale]
     if (not scale or starts[0] != definition["threshold_z"] or starts != sorted(set(starts))
@@ -209,6 +215,75 @@ def assign_atlases(regions, definition, scores):
         found = members(scores, definition, key, scores["atlas_scores"][atlas])
         if found:
             assigned[atlas][region["id"]] = found
+    return assigned
+
+
+def vertex_areas(prefix):
+    """Each fsaverage vertex's third of its triangles' area on the mid-thickness surface, where the maps are read."""
+    white, faces = read_geometry(FSAVERAGE / "surf" / f"{prefix}.white")
+    pial, _ = read_geometry(FSAVERAGE / "surf" / f"{prefix}.pial")
+    corners = ((white + pial) / 2)[faces]
+    triangles = 0.5 * np.linalg.norm(
+        np.cross(corners[:, 1] - corners[:, 0], corners[:, 2] - corners[:, 0]), axis=1)
+    return np.bincount(faces.ravel(), np.repeat(triangles / 3, 3), minlength=len(white))
+
+
+def area_shares(regions, atlas):
+    """
+    Each cortical region of a share atlas: the share of its fsaverage area lying in each HCP-MMP area
+    it overlaps. Its vertices outside every area count in its whole.
+    """
+    sides = {}
+    for prefix, hemisphere in HEMISPHERES.items():
+        hcp, _, hcp_names = read_annot(FSAVERAGE / "label" / f"{prefix}.HCPMMP1.annot")
+        parcels, _, names = read_annot(FSAVERAGE / "label" / f"{prefix}.{SHARE_ANNOTATIONS[atlas]}.annot")
+        sides[hemisphere] = (hcp, [name.decode() for name in hcp_names], parcels,
+                             [name.decode() for name in names], vertex_areas(prefix))
+    shares = {}
+    for region in regions:
+        if region["atlas"] != atlas or region["kind"] != "cortex":
+            continue
+        hcp, hcp_names, parcels, names, area = sides[region["hemisphere"]]
+        if names[region["source_label_id"]] != region["source_name"]:
+            raise ValueError(f"{region['id']} is not {region['source_name']} on fsaverage")
+        inside = parcels == region["source_label_id"]
+        labelled = inside & (hcp >= 0)
+        overlap = np.bincount(hcp[labelled], area[labelled], minlength=len(hcp_names)) / area[inside].sum()
+        shares[region["id"]] = {name: float(value) for name, value in zip(hcp_names, overlap)
+                                if value > 0 and AREA_NAME.fullmatch(name)}
+    return shares
+
+
+def reached_shares(overlap, reached, floor):
+    """
+    Each key of `reached` (its HCP-MMP areas, each with its z) whose areas cover at least `floor` of a
+    region: the share, in whole percent as listed, and the z averaged over the part covered. Ordered by
+    share times z, the region's mean z with areas below the threshold counted as zero (measured
+    2026-11-23 in docs/features/functions.md: share alone ties near 100% in small regions).
+    """
+    found = []
+    for key, areas in reached.items():
+        covered = {name: share for name, share in overlap.items() if name in areas}
+        share = round(sum(covered.values()), 2)
+        if share >= floor:
+            z = sum(areas[name] * part for name, part in covered.items()) / sum(covered.values())
+            found.append((key, share, round(z, 2)))
+    return sorted(found, key=lambda entry: -entry[1] * entry[2])
+
+
+def share_members(regions, definition, scores):
+    """Each share atlas's regions with the functions whose HCP-MMP areas cover at least the floor of them."""
+    reached = {domain["id"]: {name: z for name, z in scores["scores"][domain["id"]].items()
+                              if z >= definition["threshold_z"]}
+               for domain in definition["domains"]}
+    assigned = {}
+    for atlas in definition["share_atlases"]:
+        assigned[atlas] = {}
+        for region, overlap in sorted(area_shares(regions, atlas).items()):
+            found = reached_shares(overlap, reached, definition["share_floor"])
+            if found:
+                assigned[atlas][region] = [{"domain": key, "share": share, "z": z}
+                                           for key, share, z in found]
     return assigned
 
 
@@ -335,6 +410,9 @@ def partition(regions):
         "regions": assign(regions, definition, scores),
         "region_atlases": definition["region_atlases"],
         "atlas_regions": assign_atlases(regions, definition, scores),
+        "share_atlases": definition["share_atlases"],
+        "share_floor": definition["share_floor"],
+        "share_regions": share_members(regions, definition, scores),
     }
 
 

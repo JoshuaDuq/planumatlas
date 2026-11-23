@@ -13,7 +13,7 @@
   import type { Explorer } from '../../lib/types/index.ts';
   import { createDebouncedAnnouncer } from '../../lib/ui/announcer.svelte.ts';
   import DrillRow from '../../lib/ui/DrillRow.svelte';
-  import LinkRow from './LinkRow.svelte';
+  import LinkRow from '../../lib/ui/LinkRow.svelte';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import { listNav } from '../../lib/ui/list-nav.ts';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';

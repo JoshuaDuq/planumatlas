@@ -4,6 +4,7 @@
   import cabNpFile from '../../../../public/models/cdmd/cab-np.json';
   import functionalFile from '../../../../public/models/cdmd/functional-regions.json';
   import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json';
+  import termsFile from '../../../../public/models/cdmd/neurosynth-terms.json';
   import boundaryFile from '../../../../public/models/cdmd/boundary-certainty.json';
   import receptorFile from '../../../../public/models/cdmd/receptor-fingerprints.json';
   import stimulationFile from '../../../../public/models/cdmd/stimulation-responses.json';
@@ -16,7 +17,11 @@
   import { createCatalog } from '../../lib/core/catalog/catalog.ts';
   import type { CabNpPartition } from '../../lib/core/catalog/networks.ts';
   import type { FunctionalRegions } from '../../lib/core/catalog/functional-regions.ts';
-  import type { NeuropsychDomains } from '../../lib/core/catalog/neuropsych-domains.ts';
+  import {
+    validateNeuropsychDomains,
+    type NeuropsychDomains,
+    type NeurosynthTerms,
+  } from '../../lib/core/catalog/neuropsych-domains.ts';
   import type { BoundaryCertainty } from '../../lib/core/catalog/boundary-certainty.ts';
   import type { ReceptorFingerprints } from '../../lib/core/catalog/receptor-fingerprints.ts';
   import type { StimulationResponses } from '../../lib/core/catalog/stimulation-responses.ts';
@@ -67,6 +72,12 @@
   } = $props();
 
   const regions = manifest.regions as unknown as Region[];
+  // Validated with the term search, as the model does; a copy, as validation attaches the search.
+  const domains = validateNeuropsychDomains(
+    structuredClone(domainsFile) as unknown as NeuropsychDomains,
+    new Map(regions.map((entry) => [entry.id, entry])),
+    termsFile as unknown as NeurosynthTerms,
+  );
   const catalog = createCatalog({ regions }, 'en', cabNpFile as unknown as CabNpPartition);
   $effect.pre(() => catalog.setLanguage(lang));
   const region = $derived(
@@ -90,7 +101,7 @@
   networkColors={manifest.networks.colors as unknown as Record<string, Rgb>}
   cabNp={cabNpFile as unknown as CabNpPartition}
   functionalRegions={functionalFile as unknown as FunctionalRegions}
-  domains={domainsFile as unknown as NeuropsychDomains}
+  {domains}
   boundaryCertainty={boundaryFile as unknown as BoundaryCertainty}
   segmentationAgreement={agreementFile as unknown as SegmentationAgreement}
   receptors={receptorFile as unknown as ReceptorFingerprints}
@@ -115,6 +126,7 @@
   onclear={() => calls.push('clear')}
   onregion={(id) => calls.push(`region:${id}`)}
   onselect={(id) => calls.push(`select:${id}`)}
+  onfunction={(id) => calls.push(`function:${id}`)}
   openLinkedMri={(options) => calls.push({ mri: options })}
   {mriOpen}
   closeLinkedMri={() => calls.push('close mri')}

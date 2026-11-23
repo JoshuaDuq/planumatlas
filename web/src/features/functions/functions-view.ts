@@ -15,6 +15,7 @@ import {
   functionsAt,
   groupedDomains,
   isTermId,
+  listedByShare,
   matchingTerms,
   nearestName,
   neurosynthPage,
@@ -25,7 +26,7 @@ import {
   type NeuropsychDomains,
   type TermRecord,
 } from '../../lib/core/catalog/neuropsych-domains.ts';
-import { count, decimal } from '../../lib/core/format.ts';
+import { count, decimal, percent } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import { checkedParcels } from '../../lib/core/panels/provenance.ts';
 import type { Region, Language, Rgb } from '../../lib/types/index.ts';
@@ -98,7 +99,7 @@ export interface FunctionRow {
   name: string;
   /** Null for the overview row and a region's rows. */
   studies: number | null;
-  /** A region's row: its z, as the column shows it. */
+  /** A region's row: its z, or on a share atlas its share, as the column shows it. */
   figure?: string;
   /** Read, not shown: the row's name continues with it. */
   detail: string;
@@ -112,11 +113,13 @@ export interface FunctionGroup {
   rows: FunctionRow[];
 }
 
-/** The functions the selected region reaches, highest z first. */
+/** The functions the selected region reaches, in its list order (`functionsAt`). */
 export interface RegionFunctions {
   rows: FunctionRow[];
   /** A teaching unit, which carries its structure's score. */
   unit: boolean;
+  /** A Destrieux or Desikan-Killiany region: the column gives each function's share of it. */
+  share: boolean;
 }
 
 export interface FunctionList {
@@ -167,16 +170,18 @@ export function functionList(
         : {
             rows: functionsAt(domains, region.id).map((record) => {
               const z = decimal(record.z, 1, lang);
+              const share = record.share === undefined ? null : percent(record.share, lang);
               return {
                 id: record.id,
                 name: domainName(record, lang),
                 studies: null,
-                figure: z,
-                detail: `z ${z}`,
+                figure: share ?? z,
+                detail: share ? `${share} · z ${z}` : `z ${z}`,
                 lang: null,
               };
             }),
             unit: region.id in domains.units,
+            share: listedByShare(domains, region),
           },
     overview: query
       ? null

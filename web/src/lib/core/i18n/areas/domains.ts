@@ -27,6 +27,17 @@ export const en = {
   // A Julich-Brain or Schaefer area, averaged over its own fsaverage parcel.
   noteAtlas: (atlas: string, source: string) =>
     `Mean meta-analytic consistency over this whole ${atlas} area on fsaverage for each term, from ${source}: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
+  // A Destrieux or Desikan-Killiany region, by the HCP-MMP areas it holds. Numbers arrive formatted.
+  shareScore: (term: string, share: string, z: string) => `“${term}” · ${share} · z\u00a0${z}`,
+  noneShare: (floor: string) => `No function’s areas cover ${floor} of this region.`,
+  noteShare: (atlas: string, source: string, threshold: string) =>
+    `The share of this ${atlas} region lying in HCP-MMP areas whose mean meta-analytic consistency reaches z\u00a0${threshold} for each term, on fsaverage, and the mean z over that share, from ${source}; listed by share times z. Where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.`,
+  terms: 'Neurosynth terms',
+  termScore: (z: string) => `z\u00a0${z}`,
+  termShareScore: (share: string, z: string) => `${share} · z\u00a0${z}`,
+  population: (score: string) => `Clinical group · ${score}`,
+  termsNote:
+    'Chosen for naming a function, task, stimulus or clinical group; their maps were not checked against what they name or against lesion studies. A clinical group’s map shows where its studies report activation, not where damage causes the condition.',
   keyTitle: 'Neuropsychological functions',
   // Numbers arrive formatted (format.js decimal); `to` is null for the open top band.
   band: (from: string, to: string | null) =>
@@ -68,6 +79,16 @@ export const fr: typeof en = {
     `Constance méta-analytique moyenne sur l’aire HCP-MMP entière pour chaque terme, d’après ${source}\u202f: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.`,
   noteAtlas: (atlas: string, source: string) =>
     `Constance méta-analytique moyenne sur l’aire ${atlas} entière, sur fsaverage, pour chaque terme, d’après ${source}\u202f: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.`,
+  shareScore: (term: string, share: string, z: string) => `« ${term} » · ${share} · z\u00a0${z}`,
+  noneShare: (floor: string) => `Les aires d’aucune fonction ne couvrent ${floor} de cette région.`,
+  noteShare: (atlas: string, source: string, threshold: string) =>
+    `La part de cette région ${atlas} située dans les aires HCP-MMP dont la constance méta-analytique moyenne atteint z\u00a0${threshold} pour chaque terme, sur fsaverage, et le z moyen sur cette part, d’après ${source}\u202f; classées par part multipliée par z. Là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.`,
+  terms: 'Termes Neurosynth',
+  termScore: (z: string) => `z\u00a0${z}`,
+  termShareScore: (share: string, z: string) => `${share} · z\u00a0${z}`,
+  population: (score: string) => `Groupe clinique · ${score}`,
+  termsNote:
+    'Choisis parce qu’ils désignent une fonction, une tâche, un stimulus ou un groupe clinique\u202f; leurs cartes n’ont été vérifiées ni par rapport à ce qu’ils désignent ni par des études lésionnelles. La carte d’un groupe clinique montre où ses études rapportent une activation, et non où une lésion cause l’affection.',
   keyTitle: 'Fonctions neuropsychologiques',
   band: (from: string, to: string | null) =>
     (to ? `z ${from} à ${to}` : `z ≥ ${from}`).replaceAll(' ', '\u00a0'),

@@ -88,6 +88,10 @@ export const en = {
   reportedNote:
     'Studies of these functions report activation here. That does not make the region specific to them.',
   noneHere: (threshold: string) => `No function reaches z\u00a0${threshold} here.`,
+  // A Destrieux or Desikan-Killiany region's column.
+  shareColumn: 'Share',
+  shareNote:
+    'Each share is the part of this region in HCP-MMP areas that reach the function; listed by share times z.',
   lesionBridgeHeading: 'Lesion evidence',
   // The query arrives as typed.
   deficitBridge: (count: number, query: string) =>
@@ -186,6 +190,9 @@ export const fr: typeof en = {
   reportedNote:
     'Les études de ces fonctions rapportent une activation ici. Cela ne signifie pas que la région leur soit propre.',
   noneHere: (threshold: string) => `Aucune fonction n’atteint z\u00a0${threshold} ici.`,
+  shareColumn: 'Part',
+  shareNote:
+    'Chaque part est celle de cette région située dans les aires HCP-MMP qui atteignent la fonction\u202f; classées par part multipliée par z.',
   lesionBridgeHeading: 'Données lésionnelles',
   deficitBridge: (count: number, query: string) =>
     `Déficits\u202f: ${count} ${count === 1 ? 'profil lésionnel correspond' : 'profils lésionnels correspondent'} à «\u00a0${query}\u00a0»`,

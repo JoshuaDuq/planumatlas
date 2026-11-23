@@ -108,6 +108,30 @@ def atlas_terms(regions, offered, domains, scores):
     return published
 
 
+def share_terms(regions, offered, domains, scores):
+    """
+    On each share atlas: its regions, and each offered term's regions whose HCP-MMP areas reaching it
+    cover at least the floor of them, with that share and z, in the order a region lists them.
+    """
+    from .neuropsych_domains import area_shares, reached_shares
+
+    threshold = domains["threshold_z"]
+    reached = {term: {name: z for name, z in zip(scores["areas"], area_z) if z >= threshold}
+               for term, _, area_z, _ in scores["terms"] if term in offered}
+    published = {}
+    for atlas in domains["share_atlases"]:
+        overlaps = area_shares(regions, atlas)
+        ids = sorted(overlaps)
+        terms = {term: [] for term in offered}
+        for index, region in enumerate(ids):
+            for term, share, z in reached_shares(overlaps[region], reached, domains["share_floor"]):
+                terms[term].append([index, share, z])
+        for found in terms.values():
+            found.sort(key=lambda entry: -entry[1] * entry[2])
+        published[atlas] = {"regions": ids, "terms": terms}
+    return published
+
+
 def partition(regions):
     """
     The scored regions of this anatomy, and for each offered term its kind and the regions whose mean
@@ -151,6 +175,7 @@ def partition(regions):
         "regions": [region["id"] for region in scored],
         "terms": terms,
         "atlases": atlas_terms(regions, offered, domains, read_atlas_scores(domains)),
+        "shares": share_terms(regions, offered, domains, scores),
         "neurosynth_org_missing": org_missing(term for term, *_ in terms),
     }
 

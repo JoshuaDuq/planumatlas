@@ -18,7 +18,7 @@
     functionName,
   } from '../../lib/core/catalog/neuropsych-domains.ts';
   import { bridgeText, type Elsewhere } from '../../lib/core/elsewhere.ts';
-  import { decimal, grouped } from '../../lib/core/format.ts';
+  import { decimal, grouped, percent } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { registerCurrentItem } from '../../lib/core/workspace.ts';
   import type { Explorer } from '../../lib/types/index.ts';
@@ -229,7 +229,9 @@
       <div role="group" aria-labelledby="{uid}-here" class="group" data-region-functions>
         <h3 id="{uid}-here" class="group-heading">
           <span>{copy.reportedHere}</span>
-          {#if here.rows.length}<span class="column-head" aria-hidden="true">z</span>{/if}
+          {#if here.rows.length}<span class="column-head" aria-hidden="true"
+              >{here.share ? copy.shareColumn : 'z'}</span
+            >{/if}
         </h3>
         {#if here.rows.length}
           <ul class="rows" bind:this={hereList}>
@@ -241,10 +243,15 @@
             <ShowAll label={t(lang, 'navigator').showAll(here.rows.length)} onclick={showAllHere} />
           {/if}
           <p class="note here-note">
-            {copy.reportedNote}{#if here.unit}{' '}{t(lang, 'domains').noteUnit}{/if}
+            {copy.reportedNote}{#if here.unit}{' '}{t(lang, 'domains')
+                .noteUnit}{/if}{#if here.share}{' '}{copy.shareNote}{/if}
           </p>
         {:else}
-          <p class="note here-note">{copy.noneHere(decimal(model.domains.threshold_z, 0, lang))}</p>
+          <p class="note here-note">
+            {here.share
+              ? t(lang, 'domains').noneShare(percent(model.domains.share_floor, lang))
+              : copy.noneHere(decimal(model.domains.threshold_z, 0, lang))}
+          </p>
         {/if}
       </div>
     {/if}

@@ -10,7 +10,7 @@
   import type { Language, Rgb } from '../../lib/types/index.ts';
   import Association from './Association.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
-  import LinkRow from './LinkRow.svelte';
+  import LinkRow from '../../lib/ui/LinkRow.svelte';
   import MethodsLink from '../info/MethodsLink.svelte';
 
   let {

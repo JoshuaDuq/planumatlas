@@ -31,6 +31,16 @@ threshold_z: 3
 # before the run; scripts/measure_region_functions.py). Measured 2026-11-10: HCP-MMP 0.728; Schaefer
 # 0.726 and Julich-Brain 0.648 listed; Destrieux 0.591 not.
 region_atlases: [julich, schaefer]
+# The cortical atlases whose regions list functions without their own parcel means (Destrieux failed the
+# bar above; Desikan-Killiany's parcels are larger still): each function with the share of the region's
+# fsaverage mid-thickness area lying in HCP-MMP areas that reach it, listed from `share_floor` up so a
+# sliver of a neighbouring area does not name a function, with the z averaged over the part covered.
+# Listed by share times z. On the cortical test regions of the order above, each atlas's nearest
+# parcel (area 44, p9-46v, 4, FFC, V1 on both atlases, measured 2026-11-23), it put the expected
+# function first in 8 of 10 and in the first three in all; share then z managed 6 of 10, z alone 5
+# and missed the first three twice.
+share_atlases: [desikan, destrieux]
+share_floor: 0.05
 # One function or searched term shown alone is drawn on this z scale rather than in its own
 # colour, so that its areas keep the order of strength the profile lists and two maps can be
 # compared. Each band holds the areas from its `from` up to the next band's. One blue ramp: blue

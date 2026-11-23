@@ -689,6 +689,32 @@
    "[\"Alpha\",\"\"] → \"Constance méta-analytique moyenne sur l’aire Alpha entière, sur fsaverage, pour chaque terme, d’après <NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\"",
    "[\"\",\"Alpha\"] → \"Constance méta-analytique moyenne sur l’aire  entière, sur fsaverage, pour chaque terme, d’après Alpha<NNBSP>: là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\""
   ],
+  "shareScore": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"«<NBSP>Alpha<NBSP>» ·  · z<NBSP>Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"«<NBSP><NBSP>» · Alpha · z<NBSP>\""
+  ],
+  "noneShare": [
+   "[\"Alpha\"] → \"Les aires d’aucune fonction ne couvrent Alpha de cette région.\"",
+   "[\"\"] → \"Les aires d’aucune fonction ne couvrent  de cette région.\""
+  ],
+  "noteShare": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"La part de cette région Alpha située dans les aires HCP-MMP dont la constance méta-analytique moyenne atteint z<NBSP>Alpha pour chaque terme, sur fsaverage, et le z moyen sur cette part, d’après <NNBSP>; classées par part multipliée par z. Là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\"",
+   "[\"\",\"Alpha\",\"\"] → \"La part de cette région  située dans les aires HCP-MMP dont la constance méta-analytique moyenne atteint z<NBSP> pour chaque terme, sur fsaverage, et le z moyen sur cette part, d’après Alpha<NNBSP>; classées par part multipliée par z. Là où les études qui emploient le terme rapportent régulièrement une activation, et non ce que fait ce cerveau ni ce qu’une lésion ici altérerait.\""
+  ],
+  "terms": "Termes Neurosynth",
+  "termScore": [
+   "[\"Alpha\"] → \"z<NBSP>Alpha\"",
+   "[\"\"] → \"z<NBSP>\""
+  ],
+  "termShareScore": [
+   "[\"Alpha\",\"\"] → \"Alpha · z<NBSP>\"",
+   "[\"\",\"Alpha\"] → \" · z<NBSP>Alpha\""
+  ],
+  "population": [
+   "[\"Alpha\"] → \"Groupe clinique · Alpha\"",
+   "[\"\"] → \"Groupe clinique · \""
+  ],
+  "termsNote": "Choisis parce qu’ils désignent une fonction, une tâche, un stimulus ou un groupe clinique<NNBSP>; leurs cartes n’ont été vérifiées ni par rapport à ce qu’ils désignent ni par des études lésionnelles. La carte d’un groupe clinique montre où ses études rapportent une activation, et non où une lésion cause l’affection.",
   "keyTitle": "Fonctions neuropsychologiques",
   "band": [
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>à<NBSP>3.5\"",
@@ -1092,6 +1118,8 @@
    "[\"Alpha\"] → \"Aucune fonction n’atteint z<NBSP>Alpha ici.\"",
    "[\"\"] → \"Aucune fonction n’atteint z<NBSP> ici.\""
   ],
+  "shareColumn": "Part",
+  "shareNote": "Chaque part est celle de cette région située dans les aires HCP-MMP qui atteignent la fonction<NNBSP>; classées par part multipliée par z.",
   "lesionBridgeHeading": "Données lésionnelles",
   "deficitBridge": [
    "[0,\"\"] → \"Déficits<NNBSP>: 0 profils lésionnels correspondent à «<NBSP><NBSP>»\"",

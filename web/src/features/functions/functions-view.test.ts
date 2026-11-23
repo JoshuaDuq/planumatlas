@@ -65,7 +65,7 @@ describe('the selected region’s functions (1.1)', () => {
     expect(functionList(domains, '', 'en', null).atRegion).toBeNull();
   });
 
-  test('FUNC-41 · a Julich-Brain or Schaefer area lists its own atlas’s scores; Destrieux lists none', () => {
+  test('FUNC-41 · a Julich-Brain or Schaefer area lists its own atlas’s scores; Destrieux its shares', () => {
     const julich = manifest.regions.find(
       (entry) =>
         entry.atlas === 'julich' &&
@@ -79,7 +79,17 @@ describe('the selected region’s functions (1.1)', () => {
         .julich![julich.id]!.reduce((top, member) => Math.max(top, member.z), 0)
         .toFixed(1),
     );
-    expect(functionList(domains, '', 'en', region('destrieux:left:12')).atRegion).toBeNull();
+    expect(functionList(domains, '', 'en', julich).atRegion!.share).toBe(false);
+    // Pars opercularis on Destrieux: language first, its share in the column, its z read after it.
+    const opercular = functionList(domains, '', 'en', region('destrieux:left:12')).atRegion!;
+    expect(opercular.share).toBe(true);
+    const { domain, share, z } = domains.share_regions.destrieux!['destrieux:left:12']![0]!;
+    expect(domain).toBe('language');
+    expect(opercular.rows[0]).toMatchObject({
+      id: 'language',
+      figure: `${Math.round(share! * 100)}%`,
+      detail: `${Math.round(share! * 100)}% · z ${z.toFixed(1)}`,
+    });
   });
 
   test('FUNC-42 · a query hides the group; a scored region reaching nothing has an empty group; French figures', () => {

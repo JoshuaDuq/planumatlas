@@ -689,6 +689,32 @@
    "[\"Alpha\",\"\"] → \"Mean meta-analytic consistency over this whole Alpha area on fsaverage for each term, from : where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\"",
    "[\"\",\"Alpha\"] → \"Mean meta-analytic consistency over this whole  area on fsaverage for each term, from Alpha: where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\""
   ],
+  "shareScore": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"“Alpha” ·  · z<NBSP>Alpha\"",
+   "[\"\",\"Alpha\",\"\"] → \"“” · Alpha · z<NBSP>\""
+  ],
+  "noneShare": [
+   "[\"Alpha\"] → \"No function’s areas cover Alpha of this region.\"",
+   "[\"\"] → \"No function’s areas cover  of this region.\""
+  ],
+  "noteShare": [
+   "[\"Alpha\",\"\",\"Alpha\"] → \"The share of this Alpha region lying in HCP-MMP areas whose mean meta-analytic consistency reaches z<NBSP>Alpha for each term, on fsaverage, and the mean z over that share, from ; listed by share times z. Where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\"",
+   "[\"\",\"Alpha\",\"\"] → \"The share of this  region lying in HCP-MMP areas whose mean meta-analytic consistency reaches z<NBSP> for each term, on fsaverage, and the mean z over that share, from Alpha; listed by share times z. Where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\""
+  ],
+  "terms": "Neurosynth terms",
+  "termScore": [
+   "[\"Alpha\"] → \"z<NBSP>Alpha\"",
+   "[\"\"] → \"z<NBSP>\""
+  ],
+  "termShareScore": [
+   "[\"Alpha\",\"\"] → \"Alpha · z<NBSP>\"",
+   "[\"\",\"Alpha\"] → \" · z<NBSP>Alpha\""
+  ],
+  "population": [
+   "[\"Alpha\"] → \"Clinical group · Alpha\"",
+   "[\"\"] → \"Clinical group · \""
+  ],
+  "termsNote": "Chosen for naming a function, task, stimulus or clinical group; their maps were not checked against what they name or against lesion studies. A clinical group’s map shows where its studies report activation, not where damage causes the condition.",
   "keyTitle": "Neuropsychological functions",
   "band": [
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>to<NBSP>3.5\"",
@@ -1092,6 +1118,8 @@
    "[\"Alpha\"] → \"No function reaches z<NBSP>Alpha here.\"",
    "[\"\"] → \"No function reaches z<NBSP> here.\""
   ],
+  "shareColumn": "Share",
+  "shareNote": "Each share is the part of this region in HCP-MMP areas that reach the function; listed by share times z.",
   "lesionBridgeHeading": "Lesion evidence",
   "deficitBridge": [
    "[0,\"\"] → \"Deficits: 0 lesion profiles match “”\"",

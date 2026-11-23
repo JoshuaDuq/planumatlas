@@ -147,3 +147,21 @@ def test_offered_terms_reach_listed_atlas_regions_at_the_threshold_strongest_fir
     assert atlas["regions"] == ["julich:left:2", "julich:left:3"]
     assert atlas["terms"]["placebo"] == [[1, 4.25], [0, 3.5]]
     assert published["atlases"]["schaefer"]["terms"]["placebo"] == []
+
+
+def test_offered_terms_list_on_share_atlas_regions_by_the_share_their_areas_cover(monkeypatch):
+    table = scores([])
+    table["terms"] = every_chosen_term(table, {"placebo": {"L_A1_ROI": 6.0, "R_A1_ROI": 9.0},
+                                               "anxiety": {"L_TA2_ROI": 4.0}})
+    monkeypatch.setattr(neurosynth_terms, "read_scores", lambda: table)
+    transverse = {"id": "destrieux:left:33", "atlas": "destrieux", "hemisphere": "left",
+                  "source_label_id": 33, "source_name": "G_temp_sup-G_T_transv", "kind": "cortex"}
+    calcarine = {**transverse, "id": "destrieux:left:45", "source_label_id": 45, "source_name": "S_calcarine"}
+    published = neurosynth_terms.partition(regions() + [transverse, calcarine])
+    a1 = neuropsych_domains.area_shares([transverse], "destrieux")["destrieux:left:33"]["L_A1_ROI"]
+    destrieux = published["shares"]["destrieux"]
+    assert destrieux["regions"] == ["destrieux:left:33", "destrieux:left:45"]
+    assert destrieux["terms"]["placebo"] == [[0, round(a1, 2), 6.0]]
+    # Under 1% of Heschl's gyrus is TA2: below the floor, so anxiety lists nowhere there.
+    assert destrieux["terms"]["anxiety"] == []
+    assert published["shares"]["desikan"] == {"regions": [], "terms": {term: [] for term, *_ in published["terms"]}}
