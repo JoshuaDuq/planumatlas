@@ -701,7 +701,6 @@
    "[\"Alpha\",\"\",\"Alpha\"] → \"The share of this Alpha region lying in HCP-MMP areas whose mean meta-analytic consistency reaches z<NBSP>Alpha for each term, on fsaverage, and the mean z over that share, from ; listed by share times z. Where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\"",
    "[\"\",\"Alpha\",\"\"] → \"The share of this  region lying in HCP-MMP areas whose mean meta-analytic consistency reaches z<NBSP> for each term, on fsaverage, and the mean z over that share, from Alpha; listed by share times z. Where studies using the term reliably report activation, not what this brain does, and not what damage here would impair.\""
   ],
-  "terms": "Neurosynth terms",
   "termScore": [
    "[\"Alpha\"] → \"z<NBSP>Alpha\"",
    "[\"\"] → \"z<NBSP>\""
@@ -714,7 +713,6 @@
    "[\"Alpha\"] → \"Clinical group · Alpha\"",
    "[\"\"] → \"Clinical group · \""
   ],
-  "termsNote": "Chosen for naming a function, task, stimulus or clinical group; their maps were not checked against what they name or against lesion studies. A clinical group’s map shows where its studies report activation, not where damage causes the condition.",
   "keyTitle": "Neuropsychological functions",
   "band": [
    "[\"Alpha\",\"3.5\"] → \"z<NBSP>Alpha<NBSP>to<NBSP>3.5\"",

@@ -42,6 +42,7 @@
   let termsOpen = $state(false);
 
   const copy = $derived(t(lang, 'domains'));
+  const termsCopy = $derived(t(lang, 'functions'));
   const scored = $derived(domains !== null && region !== null && scoredRegion(domains, region));
   const byShare = $derived(scored && listedByShare(domains!, region!));
   const found = $derived(scored ? functionsAt(domains!, region!.id) : []);
@@ -120,7 +121,11 @@
       {/if}
       {#if terms.length}
         <div class="terms">
-          <Disclosure summary={copy.terms} value={String(terms.length)} bind:open={termsOpen}>
+          <Disclosure
+            summary={termsCopy.termsHeading}
+            value={String(terms.length)}
+            bind:open={termsOpen}
+          >
             <ul class="function-links" bind:this={termRows}>
               {#each termsShown as record (record.id)}
                 <li>
@@ -142,7 +147,9 @@
                 onclick={() => showAll(termRows, () => (termsUnfolded = true))}
               />
             {/if}
-            <p class="detail-note">{copy.termsNote}</p>
+            <p class="detail-note">
+              {termsCopy.termCaveat}{#if terms.some((record) => record.kind === 'population')}{' '}{termsCopy.populationCaveat}{/if}
+            </p>
           </Disclosure>
         </div>
       {/if}

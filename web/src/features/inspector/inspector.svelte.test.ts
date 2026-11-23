@@ -682,6 +682,8 @@ describe('evidence sections', () => {
     expect(fold.querySelector('.link-row .name')!.getAttribute('lang')).toBe('en');
     await userEvent.click(fold.querySelector<HTMLElement>('.show-all')!);
     expect(text(fold)).toMatch(/Groupe clinique · \d+ % · z/);
+    // A clinical group listed brings its caveat.
+    expect(text(fold)).toContain('La carte montre où elles rapportent une activation');
   });
 
   test('a teaching unit lists its structure’s functions and says it takes that score', async () => {
