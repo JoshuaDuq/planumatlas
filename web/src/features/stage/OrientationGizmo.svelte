@@ -572,14 +572,18 @@
     .orientation-gizmo :global(.gizmo-turn[data-side='down'] .control-icon) {
       rotate: 90deg;
     }
-    /* In the corner under the axes, its glyph toward them; on a short stage, clear of the right letter. */
+    /*
+     * In the corner under the axes, its glyph toward them. On a phone the stage is short once the sheet or
+     * a colour key takes its band, and the right letter comes level with that corner: there it takes the
+     * left corner instead, clear of the letter.
+     */
     .orientation-gizmo :global(.gizmo-reset) {
       right: 0;
       bottom: 0;
       align-items: flex-start;
       justify-content: flex-start;
     }
-    @media (max-height: 480px) and (orientation: landscape) {
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .orientation-gizmo :global(.gizmo-reset) {
         right: auto;
         left: 0;
