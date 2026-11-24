@@ -292,6 +292,10 @@
       justify-items: start;
       min-width: 0;
     }
+    /* A bare link under a named source is that source's licence file: it stands with it, not midway to the next. */
+    .provenance-item:not(:first-child):has(> .provenance-link:first-child) {
+      margin-top: calc(-1 * var(--space-2));
+    }
     .provenance-value,
     .provenance-note {
       margin: 0;

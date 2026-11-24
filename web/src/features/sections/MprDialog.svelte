@@ -422,7 +422,7 @@
           aria-labelledby="{uid}-{plane}"
         >
           <h3 id="{uid}-{plane}">
-            {planeName(plane, lang)}
+            <span class="plane-name">{planeName(plane, lang)}</span>
             <span class="seen-from">{copy.seenFrom[seenFrom(plane, frame.edges)]}</span
             ><!-- The picture carries the convention's mark; the heading says it for those who cannot see it. -->
             {#if convention}<span class="visually-hidden"
@@ -1099,14 +1099,14 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-    /* The phone layout (PHONE_QUERY; dialogs.css:262-290): one plane, so one column, and the radio
-       group names it, so its heading is kept for assistive technology and not drawn (g5-plane-layout.md,
-       g5-panel-names.md). */
+    /* The phone layout (PHONE_QUERY; dialogs.css:262-290): one plane, so one column. The radio group
+       names the plane, so the heading draws only the side it is seen from, beside Save; the name is
+       kept for assistive technology (g5-plane-layout.md, g5-panel-names.md). */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .grid {
         grid-template-columns: minmax(0, 1fr);
       }
-      h3 {
+      .plane-name {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -1114,6 +1114,9 @@
         overflow: hidden;
         clip-path: inset(50%);
         white-space: nowrap;
+      }
+      .seen-from::first-letter {
+        text-transform: uppercase;
       }
     }
   }

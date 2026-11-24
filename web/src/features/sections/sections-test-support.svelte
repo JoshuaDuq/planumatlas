@@ -70,6 +70,7 @@
       get phone() {
         return live.phone;
       },
+      sideways: false,
     }}
     lang={live.lang}
     status="ready"

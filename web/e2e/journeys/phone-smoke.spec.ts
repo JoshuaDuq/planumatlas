@@ -38,7 +38,7 @@ test('boot: this WebKit has what the renderer needs, and a cold start reaches re
   });
   expect(missing, 'missing in this browser').toBeNull();
   await app.ready();
-  await expect(page).toHaveTitle('Planum — Interactive 3D Human Brain Atlas');
+  await expect(page).toHaveTitle('Planum · Interactive 3D Human Brain Atlas');
   await expect(page.locator('#viewport canvas')).toBeVisible();
 });
 

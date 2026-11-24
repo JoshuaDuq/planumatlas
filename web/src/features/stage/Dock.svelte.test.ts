@@ -32,6 +32,7 @@ interface Live {
   coordinates: boolean;
   overlay: boolean;
   phone: boolean;
+  sideways?: boolean;
   view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean; namesShown: boolean };
   cortexSurface: 'pial' | 'mid' | 'white';
 }
@@ -1258,6 +1259,31 @@ describe('on a wider screen the camera frames the anatomy beside the open popove
     } finally {
       await page.viewport(1280, 800);
     }
+  });
+});
+
+describe('STAGE-89 · a phone on its side stands the plate beside the brain', () => {
+  // Layout width: the plate may still be growing in, scaled.
+  const plateWidth = () =>
+    document.querySelector<HTMLElement>('.popover.stage-popover')!.offsetWidth;
+
+  test('the plate keeps its own width and the brain is framed in the band beside it', async () => {
+    // 20 + 272 + 20 of plate and gutters leave 180 px of a 492 px stage.
+    await mount({ phone: true, sideways: true }, { width: 492, height: 338 });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(stage.plateBand).toBeGreaterThan(0));
+    expect(plateWidth()).toBe(272);
+    expect(stage.plateBand).toBe(312);
+    expect(plates).toEqual([]);
+  });
+
+  test('a stage with under 160 px to leave the brain keeps the plate across it, as upright', async () => {
+    // An older phone's 315 px stage: the side plate would leave the brain 3 px.
+    await mount({ phone: true, sideways: true }, { width: 315, height: 323 });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(plates).toHaveLength(1));
+    expect(plateWidth()).toBe(315 - 2 * 20);
+    expect(stage.plateBand).toBe(0);
   });
 });
 

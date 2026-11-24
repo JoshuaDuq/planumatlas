@@ -387,10 +387,20 @@
     color: var(--text-primary);
     transition-duration: 0s;
   }
-  /* Touch keeps every eye, and gives the count its own column, so every section reserves Mid. */
+  /* Touch keeps every eye, so the count has no place to trade with them: it follows its group's name. */
   @media not ((hover: hover) and (pointer: fine)) {
-    .anatomy-tree[data-midline] .slot-mid {
-      display: block;
+    .group-main .row-name {
+      flex: 0 1 auto;
+    }
+    /* A tablet's narrow panel beside three eyes leaves a name under a word's width: the count gives way,
+       and the row's own name still says it. */
+    .anatomy-tree .row[aria-expanded] > .cell.primary {
+      container-type: inline-size;
+    }
+    @container (max-width: 140px) {
+      .group-count {
+        display: none;
+      }
     }
   }
 

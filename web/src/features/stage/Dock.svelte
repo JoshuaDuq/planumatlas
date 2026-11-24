@@ -47,7 +47,7 @@
 
   interface Props {
     stage: StageLayout;
-    media: Pick<Media, 'phone'>;
+    media: Pick<Media, 'phone' | 'sideways'>;
     lang: Language;
     status: SessionState['status'];
     /** The tract reference alone is shown: it has no sections, lesion or display settings. */
@@ -221,6 +221,19 @@
     return { left: parseFloat(marginLeft) || 0, bottom: parseFloat(marginBottom) || 0 };
   }
 
+  /**
+   * Whether an open plate spans the stage, as on an upright phone. A phone on its side has a wide, short
+   * stage: a plate across it showed one control over a brain framed in the strip left above, so there it
+   * stands at the side as on a desktop, wherever that leaves the brain this much room beside it.
+   */
+  const SIDEWAYS_ROOM_PX = 160;
+  const filling = $derived.by(() => {
+    if (!media.phone) return false;
+    const rect = stage.visibleRect;
+    if (!media.sideways || !rect) return true;
+    return rect.width - POPOVER_WIDTH - 3 * stage.gutter < SIDEWAYS_ROOM_PX;
+  });
+
   // Where the open popover goes: measured once the dock has moved to where the stage's variables put it.
   let spot = $state<ReturnType<typeof placePopover> | null>(null);
   $effect(() => {
@@ -228,7 +241,7 @@
     const { visibleRect } = stage;
     void [stage.hostSize, stage.dock, stage.gutter];
     if (!visibleRect) return;
-    const fill = media.phone;
+    const fill = filling;
     let current = true;
     tick().then(() => {
       if (!current) return;
@@ -268,7 +281,7 @@
   // Whether framing has a plate to withdraw.
   let plate = false;
   $effect(() => {
-    if (openTool < 0 || !media.phone || !spot) return;
+    if (openTool < 0 || !filling || !spot) return;
     let current = true;
     let observer: ResizeObserver | null = null;
     tick().then(() => {
@@ -289,7 +302,7 @@
     };
   });
   $effect(() => {
-    if (anyOpen && media.phone) return;
+    if (anyOpen && filling) return;
     untrack(() => {
       if (!plate) return;
       onPlate(null, { immediate: keyed });
@@ -298,9 +311,10 @@
   });
   // On a wider screen the open plate's band: the visible stage left of its right edge and a gutter.
   $effect(() => {
-    if (openTool < 0 || media.phone || !spot) return;
+    if (openTool < 0 || filling || !spot) return;
     const { visibleRect } = stage;
     if (!visibleRect) return;
+    const { sideways } = media;
     let current = true;
     tick().then(() => {
       if (!current) return;
@@ -308,7 +322,9 @@
       // Laid-out offsets, which the plate's entry scale does not move.
       const right = dock.offsetLeft + dock.clientLeft + element.offsetLeft + element.offsetWidth;
       const band = right + stage.gutter - visibleRect.x;
-      const roomy = visibleRect.width - band >= ROOM_BESIDE_PLATE_PX;
+      // On its side a phone has no room to spare, and a brain left under the plate could not be seen at all.
+      const roomy =
+        visibleRect.width - band >= (sideways ? SIDEWAYS_ROOM_PX : ROOM_BESIDE_PLATE_PX);
       stage.setPlateBand(roomy ? band : 0, { immediate: keyed });
     });
     return () => {
@@ -316,7 +332,7 @@
     };
   });
   $effect(() => {
-    if (anyOpen && !media.phone) return;
+    if (anyOpen && !filling) return;
     untrack(() => stage.setPlateBand(0, { immediate: keyed }));
   });
 

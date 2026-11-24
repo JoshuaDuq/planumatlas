@@ -997,8 +997,16 @@ describe('on a phone', () => {
     await expect
       .element(page.getByRole('heading', { name: 'Axial from above · neurological', level: 3 }))
       .toBeInTheDocument();
-    const heading = section('axial').querySelector('h3')!.getBoundingClientRect();
-    expect(heading.width).toBeLessThanOrEqual(1);
+    const heading = section('axial').querySelector('h3')!;
+    expect(heading.querySelector('.plane-name')!.getBoundingClientRect().width).toBeLessThanOrEqual(
+      1,
+    );
+    // The side the picture is seen from is drawn, on Save's line.
+    const seen = heading.querySelector('.seen-from')!.getBoundingClientRect();
+    const save = section('axial').querySelector('.save')!.getBoundingClientRect();
+    expect(seen.width).toBeGreaterThan(1);
+    expect(seen.top).toBeGreaterThanOrEqual(save.top);
+    expect(seen.bottom).toBeLessThanOrEqual(save.bottom);
   });
 
   test("the plane fills the dialog's width, up to 800 px of window", async () => {

@@ -95,8 +95,8 @@ export function selectionName({ label = '', side, sideWord }: ContextSelection):
  * With none it is index.html's own title, which BUILD-09 holds equal.
  */
 export function documentTitle({ label, sideWord }: ContextSelection): string {
-  if (!label) return 'Planum — Interactive 3D Human Brain Atlas';
-  return `${sideWord ? `${label}, ${sideWord}` : label} — Planum`;
+  if (!label) return 'Planum · Interactive 3D Human Brain Atlas';
+  return `${sideWord ? `${label}, ${sideWord}` : label} · Planum`;
 }
 
 /** The modes whose list already shows a selection of each kind. */

@@ -231,9 +231,6 @@
     return result;
   });
 
-  const anyMidline = $derived(
-    groups.some((group) => group.rows.some((row) => row.region.hemisphere === 'midline')),
-  );
   const rows = $derived(visibleRows(nodes, expanded));
   /** The selected region's row, drawn or not, and its side. */
   const selected = $derived.by(() => {
@@ -365,12 +362,7 @@
 
 <!-- A pointer affordance: the keyboard's way to the same action is the grid's own (Enter, Space). -->
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div
-  class="anatomy-tree"
-  bind:this={root}
-  onclick={onRowClick}
-  data-midline={anyMidline || undefined}
->
+<div class="anatomy-tree" bind:this={root} onclick={onRowClick}>
   {#if nodes.length}
     <Treegrid
       label={t(lang, 'navigator').browseAnatomy}

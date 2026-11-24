@@ -243,15 +243,41 @@
     .part:has(input:disabled) {
       cursor: default;
     }
+    /* A finger's keys, as the tree's (tree.css): a 44px target round a 28px face, so stacked rows do not read as slabs. */
     @media (pointer: coarse) {
+      .parts {
+        gap: 0;
+      }
       .part input {
         min-width: 44px;
         height: 44px;
+        border: 8px solid transparent;
+        border-radius: calc(var(--radius-small) + 8px);
+        background-clip: padding-box;
+      }
+      .part > span {
+        padding-inline: calc(var(--space-2) + 8px);
+      }
+      .part input:checked {
+        border-color: transparent;
+        box-shadow: inset 0 0 0 1px var(--accent);
+      }
+      .part input:checked:disabled {
+        border-color: transparent;
+        box-shadow: inset 0 0 0 1px var(--text-tertiary);
       }
     }
   }
 
   @layer a11y {
+    /* Where every key must show its edge, the edge is the target's own. */
+    @media (pointer: coarse) and ((prefers-contrast: more) or (forced-colors: active)) {
+      .part input {
+        border-width: 1px;
+        border-radius: var(--radius-small);
+        box-shadow: none;
+      }
+    }
     /* a11y.css:45 and 94-100. */
     @media (prefers-contrast: more) {
       .part input {

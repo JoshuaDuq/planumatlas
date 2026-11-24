@@ -40,7 +40,7 @@ test('a cold start reaches ready, asks for each prefetched file once and version
   await app.ready();
   await app.page.waitForLoadState('networkidle');
   await expect(app.page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(app.page).toHaveTitle('Planum — Interactive 3D Human Brain Atlas');
+  await expect(app.page).toHaveTitle('Planum · Interactive 3D Human Brain Atlas');
 
   for (const file of prefetched) {
     expect(

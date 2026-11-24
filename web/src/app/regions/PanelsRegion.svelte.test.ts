@@ -133,13 +133,13 @@ describe('selection', () => {
 
   test('the tab title names the selected region and its side, and only Planum once it is cleared', async () => {
     const world = await boot();
-    expect(document.title).toBe('Planum — Interactive 3D Human Brain Atlas');
+    expect(document.title).toBe('Planum · Interactive 3D Human Brain Atlas');
     engine.emit('pick', { id: REGION, point: null });
     flushSync();
-    expect(document.title).toBe(`${nameOf(REGION)}, left — Planum`);
+    expect(document.title).toBe(`${nameOf(REGION)}, left · Planum`);
     world.anatomy.selectRegion(null);
     flushSync();
-    expect(document.title).toBe('Planum — Interactive 3D Human Brain Atlas');
+    expect(document.title).toBe('Planum · Interactive 3D Human Brain Atlas');
   });
 
   test('the inspector’s Hide hands focus to the dissection’s Undo in the list', async () => {

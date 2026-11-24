@@ -70,7 +70,7 @@
 <span class="result" data-selected={selected || undefined} data-hidden={!shown.length || undefined}>
   <span class="line" aria-hidden="true" data-tooltip={shown.length ? undefined : spoken}>
     <span class="title"
-      >{@render marked(first.label.name)}{#if alias}<span class="alias"
+      >{@render marked(first.label.name)}{#if alias}{' '}<span class="alias"
           >({@render marked(alias)})</span
         >{/if}</span
     >
@@ -111,8 +111,9 @@
       overflow-wrap: anywhere;
       text-wrap: pretty;
     }
+    /* Whole on the name's line when it fits there, whole on the next when it does not: never split after "(includes". */
     .alias {
-      margin-inline-start: var(--space-1);
+      display: inline-block;
       color: var(--text-tertiary);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);

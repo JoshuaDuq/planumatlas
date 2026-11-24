@@ -324,6 +324,8 @@
     }
     /* One rule separates preferences from commands, rather than boxing every preference row. */
     .menu-row:nth-of-type(3) {
+      /* The rule's room is added to the row, so its control keeps the pitch of the two above. */
+      min-height: calc(var(--control-height) + 2 * var(--space-1) + var(--space-2));
       margin-bottom: var(--space-1);
       padding-bottom: var(--space-2);
       border-bottom: 1px solid var(--border-subtle);

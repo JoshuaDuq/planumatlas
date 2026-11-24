@@ -23,6 +23,7 @@
       coordinates: boolean;
       overlay: boolean;
       phone: boolean;
+      sideways?: boolean;
       view: Omit<DisplayView, 'lang'> & { spinalCordVisible: boolean; namesShown: boolean };
       cortexSurface: CortexSurface;
     };
@@ -67,6 +68,9 @@
     media={{
       get phone() {
         return live.phone;
+      },
+      get sideways() {
+        return live.sideways ?? false;
       },
     }}
     lang={live.lang}
