@@ -375,6 +375,10 @@
         explodable={!visualFieldMapOpen(current)}
         onLesionPlacing={world.lesion.setPlacing}
         onPlate={world.engine.camera.clearPlate}
+        onRoom={() => {
+          // A sheet at the side takes none of the stage's height.
+          if (!app.media.sideways) app.ports.lowerSheet();
+        }}
         {commands}
         coordinatePopover={world.coordinates ? coordinatePopover : undefined}
         overlayPopover={world.userMap.available && model.manifest.coordinate_spaces

@@ -75,6 +75,36 @@
       mask-size: 100% calc(100% + 12px);
     }
   }
+  /*
+   * A plate with an edge and a shadow cannot be masked: both would fade with it. It draws its own
+   * ground over its last 16px instead, while more lies below. `--scroll-ground` is the plate's fill.
+   */
+  @supports (animation-timeline: scroll()) {
+    .scroll-edge::after {
+      content: '';
+      position: sticky;
+      bottom: 0;
+      display: block;
+      grid-column: 1 / -1;
+      height: 16px;
+      margin-top: -16px;
+      background: linear-gradient(to top, var(--scroll-ground), transparent);
+      opacity: 0;
+      pointer-events: none;
+      animation: scroll-edge linear both;
+      animation-timeline: scroll(nearest block);
+      animation-range: calc(100% - 16px) 100%;
+    }
+  }
+  /* Nothing to scroll, no timeline: the edge keeps its resting opacity, none. */
+  @keyframes scroll-edge {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
   @keyframes scroll-rule {
     to {
       border-bottom-color: var(--border-subtle);

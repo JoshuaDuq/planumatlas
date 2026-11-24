@@ -20,7 +20,8 @@
   - The dock root carries `data-own-keys` (decision 7): the page's single-key shortcuts skip its controls.
   - On a phone, which hides the status bar, a mark on Display says its settings are away from their defaults.
   - On a phone an open popover's plate covers most of the stage, so the camera frames the anatomy above it
-    (`onPlate`) while it is open. On either screen the camera moves at once when the input that opened,
+    (`onPlate`) while it is open, and a tool that opens asks for the stage's room (`onRoom`: the sheet
+    comes down to its grip). On either screen the camera moves at once when the input that opened,
     changed or closed it was a key.
 -->
 <script lang="ts">
@@ -76,6 +77,8 @@
     onLesionPlacing: (placing: boolean) => void;
     /** On a phone, the open popover's top edge on the stage host, or null once it closes (`camera.clearPlate`). */
     onPlate: (top: number | null, options: { immediate: boolean }) => void;
+    /** On a phone a tool opened: its popover and the brain share the stage, which a raised sheet halves. */
+    onRoom?: () => void;
   }
 
   let {
@@ -97,6 +100,7 @@
     overlayPopover,
     onLesionPlacing,
     onPlate,
+    onRoom,
   }: Props = $props();
 
   const NARROW_STAGE_PX = 480;
@@ -145,6 +149,10 @@
   const anyOpen = $derived(sectionOpen || displayOpen || placeOpen);
   // Which one, so a swap from one tool to another measures the plate that opened.
   const openTool = $derived([sectionOpen, displayOpen, placeOpen].findIndex(Boolean));
+  // Once per opening, not per tool: a sheet the reader raises beside an open popover stays where they put it.
+  $effect(() => {
+    if (anyOpen && media.phone) untrack(() => onRoom?.());
+  });
   // A click places the lesion only while the reader chose so, and only until the Lesion popover closes.
   let placing = $state(false);
   $effect(() => {
@@ -204,6 +212,15 @@
     next?.focus({ preventScroll: true });
   }
 
+  /**
+   * How far a phone's sheet, still springing, holds the dock from where it will rest (Sheet.svelte writes
+   * it as the dock's margin). The stage's rectangle is already the rest's, so the plate is sized for it.
+   */
+  function sheetLag() {
+    const { marginLeft, marginBottom } = getComputedStyle(dock);
+    return { left: parseFloat(marginLeft) || 0, bottom: parseFloat(marginBottom) || 0 };
+  }
+
   // Where the open popover goes: measured once the dock has moved to where the stage's variables put it.
   let spot = $state<ReturnType<typeof placePopover> | null>(null);
   $effect(() => {
@@ -217,8 +234,12 @@
       if (!current) return;
       const origin = dock.offsetParent!.getBoundingClientRect();
       const corner = dock.getBoundingClientRect();
+      const lag = sheetLag();
       const placed = placePopover({
-        toolbar: { left: corner.left - origin.left, top: corner.top - origin.top },
+        toolbar: {
+          left: corner.left - origin.left - lag.left,
+          top: corner.top - origin.top + lag.bottom,
+        },
         visible: visibleRect,
         width: POPOVER_WIDTH,
         fill,
@@ -258,7 +279,7 @@
       )!;
       plate = true;
       // Laid-out offsets, which the plate's entry scale does not move.
-      const top = () => dock.offsetTop + dock.clientTop + element.offsetTop;
+      const top = () => dock.offsetTop + sheetLag().bottom + dock.clientTop + element.offsetTop;
       observer = new ResizeObserver(() => onPlate(top(), { immediate: keyed }));
       observer.observe(element);
     });

@@ -49,6 +49,8 @@ let onDock: () => void;
 let placing: boolean[];
 /** Each popover plate the dock has reported for framing, in order. */
 let plates: { top: number | null; immediate: boolean }[];
+/** Called each time a tool opening on a phone asks for the stage's room. */
+let onRoom: Mock<() => void>;
 
 function liveState(overrides: Partial<Live>): Live {
   const state = $state<Live>({
@@ -117,7 +119,17 @@ async function mount(
   );
   placing = [];
   plates = [];
-  const result = await render(Fixture, { stage, live, commands, width, height, placing, plates });
+  onRoom = vi.fn<() => void>();
+  const result = await render(Fixture, {
+    stage,
+    live,
+    commands,
+    width,
+    height,
+    placing,
+    plates,
+    onRoom,
+  });
   stage.setGutter(20);
   stage.setViewport(engine.camera.visibleRect, engine.camera.hostSize);
   flushSync();
@@ -1259,6 +1271,92 @@ describe('on a wider screen the camera frames the anatomy beside the open popove
       await press('button', 'Display');
       await vi.waitFor(() => expect(plates).toHaveLength(1));
       expect(stage.plateBand).toBe(0);
+    } finally {
+      await page.viewport(1280, 800);
+    }
+  });
+});
+
+describe('STAGE-86 · on a phone a tool that opens asks for the stage', () => {
+  const host = () => document.getElementById('viewport')!;
+
+  test('once for each opening, and never on a wider screen', async () => {
+    await mount({ phone: true }, { width: 390, height: 700 });
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(onRoom).toHaveBeenCalledOnce());
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(tool('Display').getAttribute('aria-expanded')).toBe('false'));
+    expect(onRoom).toHaveBeenCalledOnce();
+    await press('button', 'Section');
+    await vi.waitFor(() => expect(onRoom).toHaveBeenCalledTimes(2));
+  });
+
+  test('a wider screen has the room already', async () => {
+    await mount();
+    await press('button', 'Display');
+    await vi.waitFor(() => expect(tool('Display').getAttribute('aria-expanded')).toBe('true'));
+    expect(onRoom).not.toHaveBeenCalled();
+  });
+
+  test('the plate is sized and reported for where a sheet still coming down will rest', async () => {
+    await mount({ phone: true }, { width: 390, height: 700, bottomInset: 100 });
+    // Text at 200 % makes the popover taller than the room, so its height is its cap.
+    document.documentElement.style.fontSize = '200%';
+    try {
+      await press('button', 'Display');
+      await vi.waitFor(() => expect(plates).toHaveLength(1));
+      const rested = { height: popover().offsetHeight, top: plates[0]!.top! };
+      await press('button', 'Display');
+      await vi.waitFor(() => expect(plates.at(-1)!.top).toBeNull());
+      // The sheet's spring holds the dock 150 px above its rest, as its margin (Sheet.svelte).
+      dock().style.marginBottom = '150px';
+      await press('button', 'Display');
+      await vi.waitFor(() => expect(plates.at(-1)!.top).not.toBeNull());
+      expect(popover().offsetHeight).toBe(rested.height);
+      expect(plates.at(-1)!.top).toBe(rested.top);
+      // On screen the plate rides the dock, 150 px above where it was reported.
+      const drawn = popover().getBoundingClientRect().top - host().getBoundingClientRect().top;
+      expect(Math.round(drawn)).toBeCloseTo(rested.top - 150, -1);
+    } finally {
+      document.documentElement.style.fontSize = '';
+    }
+  });
+});
+
+describe('a popover taller than its room', () => {
+  const edge = () => getComputedStyle(popover(), '::after').opacity;
+
+  test('STAGE-87 · fades its last line while more lies below, and not once the end is reached', async () => {
+    await mount({}, { width: 900, height: 420 });
+    await open('Display');
+    await vi.waitFor(() => expect(popover().scrollHeight).toBeGreaterThan(popover().clientHeight));
+    await vi.waitFor(() => expect(edge()).toBe('1'));
+    popover().scrollTop = popover().scrollHeight;
+    await vi.waitFor(() => expect(edge()).toBe('0'));
+  });
+
+  test('STAGE-87 · one that fits has no edge to fade', async () => {
+    await mount();
+    await open('Section');
+    expect(popover().scrollHeight).toBe(popover().clientHeight);
+    expect(edge()).toBe('0');
+  });
+
+  test('STAGE-88 · Display fits the stage of a 1440 × 900 window with a change listed', async () => {
+    await page.viewport(1440, 900);
+    try {
+      await mount(
+        { view: { ...liveState({}).view, hemisphere: 'left' } },
+        { width: 1080, height: 820 },
+      );
+      await open('Display');
+      await vi.waitFor(() => expect(popover().querySelector('.changes')).not.toBeNull());
+      expect(popover().scrollHeight).toBe(popover().clientHeight);
+      // What changed and its undo share a line.
+      const [said, undo] = [...popover().querySelector('.changes')!.children].map((node) =>
+        node.getBoundingClientRect(),
+      );
+      expect(undo!.left).toBeGreaterThanOrEqual(said!.right);
     } finally {
       await page.viewport(1280, 800);
     }

@@ -285,20 +285,42 @@
 
 <style>
   @layer features {
-    /* Atlas, internal anatomy and subject down the popover's left; the colour beside them, as tall as they are. */
+    /* One list under another, in the order they are read; two columns where there is width (below). */
     .data-field {
-      grid-column: 1;
       min-width: 0;
       padding: var(--space-3) var(--space-2);
     }
     .data-field + .data-field {
       border-top: 1px solid var(--border-subtle);
     }
-    .data-field[data-field='colour'] {
-      grid-column: 2;
-      grid-row: 1 / span 3;
-      border-top: 0;
-      border-left: 1px solid var(--border-subtle);
+    /*
+     * Two rows of two, ruled straight across: Atlas beside Colour, internal anatomy beside Subject. Every
+     * list is then in sight on a laptop; with Subject third down the left it lay under the fold there.
+     * A phone on its side has the width too.
+     */
+    @media (min-width: 801px), (max-height: 480px) and (orientation: landscape) {
+      .data-field[data-field='atlas'],
+      .data-field[data-field='colour'] {
+        grid-row: 1;
+        border-top: 0;
+      }
+      .data-field[data-field='detail'],
+      .data-field[data-field='subject'] {
+        grid-row: 2;
+      }
+      .data-field[data-field='atlas'],
+      .data-field[data-field='detail'] {
+        grid-column: 1;
+      }
+      .data-field[data-field='colour'],
+      .data-field[data-field='subject'] {
+        grid-column: 2;
+        border-left: 1px solid var(--border-subtle);
+      }
+      /* With one subject there is no fourth list, and the colour's rule runs the popover's height. */
+      .data-field[data-field='colour']:not(:has(~ [data-field='subject'])) {
+        grid-row: 1 / span 2;
+      }
     }
     .data-label {
       margin: 0 0 var(--space-1);
@@ -388,30 +410,10 @@
       color: var(--text-secondary);
     }
 
-    /* Phones: one list, in the order it is read. */
-    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      .data-field[data-field='colour'] {
-        grid-column: 1;
-        grid-row: auto;
-        border-top: 1px solid var(--border-subtle);
-        border-left: 0;
-      }
-    }
-
     /* Touch targets: 44px options, whatever --control-height is. */
     @media (pointer: coarse), (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
       .data-option {
         min-height: 44px;
-      }
-    }
-
-    /* A phone on its side has width but little height: the two columns again. */
-    @media (max-height: 480px) and (orientation: landscape) {
-      .data-field[data-field='colour'] {
-        grid-column: 2;
-        grid-row: 1 / span 3;
-        border-top: 0;
-        border-left: 1px solid var(--border-subtle);
       }
     }
   }

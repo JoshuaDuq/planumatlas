@@ -371,7 +371,7 @@
   </button>
   <div
     id={dataId}
-    class="masthead-data"
+    class="masthead-data scroll-edge"
     data-open={open ? '' : undefined}
     data-instant={instant ? '' : undefined}
   >
@@ -542,6 +542,7 @@
       max-height: calc(100dvh - var(--header-height) - var(--space-4));
       overflow-y: auto;
       overscroll-behavior: contain;
+      --scroll-ground: var(--surface-base);
       background: var(--surface-base);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-panel);
@@ -563,9 +564,9 @@
         transform: scale(0.97);
       }
     }
-    /* The lists' grid: three rows on the left, the colour beside them (DataLists.svelte). */
+    /* The lists' grid: two rows of two (DataLists.svelte). */
     .masthead-data {
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto auto;
     }
 
     /* A tract reference offers no choices: its name sits in the bar, with no popover behind it. */
@@ -670,7 +671,7 @@
         width: min(640px, calc(100vw - 2 * var(--space-3)));
       }
       .masthead-data {
-        grid-template-rows: auto auto 1fr;
+        grid-template-rows: auto auto;
       }
     }
   }

@@ -115,7 +115,7 @@
   }
 </script>
 
-<Popover variant="stage" bind:open class="stage-popover" {style}>
+<Popover variant="stage" bind:open class="stage-popover scroll-edge" {style}>
   {#snippet trigger({ props })}
     <button
       {...props}
@@ -153,6 +153,7 @@
       left: 0;
       box-sizing: border-box;
       border-color: var(--stage-edge);
+      --scroll-ground: var(--overlay-plate);
     }
     /* The popover's words start on the tools' words: the dock's inset and a tool's padding. */
     :global(.stage-field-label) {

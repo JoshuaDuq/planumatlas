@@ -548,13 +548,28 @@ describe('DataBar summary and popover', () => {
     expect(top('Internal anatomy')).toBeLessThan(top('Subject'));
   });
 
-  test('on a wide window the colour stands beside the other lists', async () => {
+  test('MAST-45 · on a wide window the lists stand two by two, each row ruled straight across', async () => {
     await wide();
-    const box = (name: string) => el(list(name)).getBoundingClientRect();
-    expect(box('Colour').left).toBeGreaterThan(box('Atlas').right);
-    expect(box('Subject').left).toBe(box('Atlas').left);
+    const field = (name: string) =>
+      el(list(name)).closest<HTMLElement>('.data-field')!.getBoundingClientRect();
+    expect(field('Colour').left).toBeGreaterThanOrEqual(field('Atlas').right);
+    expect(field('Colour').top).toBe(field('Atlas').top);
+    expect(field('Internal anatomy').left).toBe(field('Atlas').left);
+    expect(field('Subject').left).toBe(field('Colour').left);
+    expect(field('Subject').top).toBe(field('Internal anatomy').top);
+    expect(field('Subject').top).toBeGreaterThanOrEqual(
+      Math.max(field('Atlas').bottom, field('Colour').bottom),
+    );
     const popover = bar().querySelector('.masthead-data')!.getBoundingClientRect();
     expect(popover.right).toBeLessThanOrEqual(window.innerWidth);
+  });
+
+  test("MAST-45 · with one subject the colour runs the popover's height beside the other two", async () => {
+    await wide(barProps({ anatomies: [subjects[0]] }));
+    const field = (name: string) =>
+      el(list(name)).closest<HTMLElement>('.data-field')!.getBoundingClientRect();
+    expect(field('Colour').top).toBe(field('Atlas').top);
+    expect(field('Colour').bottom).toBe(field('Internal anatomy').bottom);
   });
 
   test('the open popover reports its right edge for the stage, and nothing once closed', async () => {

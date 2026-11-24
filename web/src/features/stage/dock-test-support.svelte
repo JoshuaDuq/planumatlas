@@ -33,9 +33,11 @@
     placing: boolean[];
     /** Each popover plate the dock reports for framing. */
     plates: { top: number | null; immediate: boolean }[];
+    /** A tool opened on a phone. */
+    onRoom: () => void;
   }
 
-  let { stage, live, commands, width, height, placing, plates }: Props = $props();
+  let { stage, live, commands, width, height, placing, plates, onRoom }: Props = $props();
 
   let host: HTMLElement;
 
@@ -78,6 +80,7 @@
     {commands}
     onLesionPlacing={(next) => placing.push(next)}
     onPlate={(top, { immediate }) => plates.push({ top, immediate })}
+    {onRoom}
     coordinatePopover={live.coordinates ? coordinates : undefined}
     overlayPopover={live.overlay ? overlay : undefined}
   >

@@ -687,6 +687,7 @@ describe('the phone', () => {
   test('an open popover hides the scale bar and the letters, and closing shows them', async () => {
     await page.viewport(390, 844);
     await boot();
+    app.registerPorts({ lowerSheet: () => {} });
     const bar = document.getElementById('scale-bar')!;
     const letters = document.getElementById('orientation')!;
     expect(getComputedStyle(bar).visibility).toBe('visible');
@@ -695,6 +696,25 @@ describe('the phone', () => {
     expect(getComputedStyle(letters).visibility).toBe('hidden');
     await userEvent.keyboard('{Escape}');
     await vi.waitFor(() => expect(getComputedStyle(bar).visibility).toBe('visible'));
+  });
+
+  test('STAGE-86 · a tool opened on an upright phone brings the sheet down to its grip', async () => {
+    await page.viewport(390, 844);
+    await boot();
+    const lowerSheet = vi.fn();
+    app.registerPorts({ lowerSheet });
+    await userEvent.click(page.getByRole('button', { name: 'Display', exact: true }));
+    await vi.waitFor(() => expect(lowerSheet).toHaveBeenCalledOnce());
+  });
+
+  test("STAGE-86 · on its side the sheet takes none of the stage's height, and stays", async () => {
+    await page.viewport(844, 390);
+    await boot();
+    const lowerSheet = vi.fn();
+    app.registerPorts({ lowerSheet });
+    await userEvent.click(page.getByRole('button', { name: 'Display', exact: true }));
+    await vi.waitFor(() => expect(document.querySelector('.popover.stage-popover')).not.toBeNull());
+    expect(lowerSheet).not.toHaveBeenCalled();
   });
 
   test('in French at 390 px the exit control starts below the top letter', async () => {

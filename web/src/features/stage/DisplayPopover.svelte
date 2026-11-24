@@ -261,8 +261,14 @@
     .check span {
       min-width: 0;
     }
+    /* What is changed and its undo share a line while they fit, so the plate stays inside a 900px window. */
     .changes {
-      margin-top: var(--space-3);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      column-gap: var(--space-3);
+      margin-top: var(--space-2);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
       color: var(--overlay-ink-muted);
