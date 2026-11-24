@@ -64,13 +64,8 @@
   const LEAVE_MS = 160;
   /** The most a frame spends asking whether the names are still in sight; one is always asked. */
   const LOOK_MS = 1;
-  /**
-   * What a frame spends looking at the stage for names to choose: half the time since the frame before, so
-   * slow frames do not make the look slower still, within these bounds; and the rays asked between two looks
-   * at the clock.
-   */
+  /** The most a frame spends looking at the stage for names to choose, and the rays asked between two looks at the clock. */
   const SEE_MS = 5;
-  const SEE_MOST_MS = 30;
   const SEE_RAYS = 64;
   /** A name whose place moves farther than this from one drawing to the next glides there instead. */
   const JUMP_PX = 24;
@@ -112,13 +107,7 @@
   const lookedAt = new Map<string, number>();
   let looking = 0;
   /** A look at the stage under way: the grid's points and what the rays asked so far have met. */
-  let seeing: {
-    grid: SightGrid;
-    points: ScreenPoint[];
-    seen: (SeenPoint | null)[];
-    /** When its last frame's share began; none before the first. */
-    sawAt: number | null;
-  } | null = null;
+  let seeing: { grid: SightGrid; points: ScreenPoint[]; seen: (SeenPoint | null)[] } | null = null;
   let seeFrame = 0;
   let leave: ReturnType<typeof setTimeout> | undefined;
   /** The cut the names were chosen on; null without one. */
@@ -163,7 +152,7 @@
       width: Math.min(anatomy.x + anatomy.width, bounds.x + bounds.width) - x,
       height: Math.min(anatomy.y + anatomy.height, bounds.y + bounds.height) - y,
     });
-    seeing = { grid, points: sightPoints(grid), seen: [], sawAt: null };
+    seeing = { grid, points: sightPoints(grid), seen: [] };
     chosenCut = cutNow();
     see();
   }
@@ -171,14 +160,11 @@
   function see() {
     seeFrame = 0;
     const { model, camera } = engine;
-    const { grid, points, seen, sawAt } = seeing!;
+    const { grid, points, seen } = seeing!;
     const start = performance.now();
-    const share =
-      sawAt === null ? SEE_MS : Math.min(SEE_MOST_MS, Math.max(SEE_MS, (start - sawAt) / 2));
-    seeing!.sawAt = start;
     while (seen.length < points.length) {
       seen.push(...model.seenAt(points.slice(seen.length, seen.length + SEE_RAYS)));
-      if (seen.length < points.length && performance.now() - start >= share) {
+      if (seen.length < points.length && performance.now() - start >= SEE_MS) {
         seeFrame = requestAnimationFrame(see);
         return;
       }
