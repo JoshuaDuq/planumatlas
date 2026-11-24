@@ -475,14 +475,14 @@ test('a surfaceless cut atlas still caps and picks supplemental anatomy outside 
     sections.update(centeredFrame('coronal', [0, -40, -500]), 'destrieux');
     assert.equal(sections.solids.group.visible, true);
     assert.equal(sections.solids.solids[0].group.visible, true);
-    const ray = new Raycaster(new Vector3(0, -0.5, 0.2), new Vector3(0, 0, -1));
+    const ray = new Raycaster(new Vector3(0, -0.5, -0.2), new Vector3(0, 0, 1));
     assert.equal(sections.intersect(ray)?.region.id, cord.id);
   }
   envelope(sections);
   model.state.surfaceColor = 'atlas';
   model.state.isolatedRegion = null;
   sections.update(centeredFrame('coronal', [0, 0, 0]), 'destrieux');
-  const brainRay = new Raycaster(new Vector3(0, 0, 0.1), new Vector3(0, 0, -1));
+  const brainRay = new Raycaster(new Vector3(0, 0, -0.1), new Vector3(0, 0, 1));
   assert.equal(sections.intersect(brainRay)?.region.id, 'destrieux:left:1');
   sections.dispose();
 });
