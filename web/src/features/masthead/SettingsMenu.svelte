@@ -389,8 +389,10 @@
 
     /* Phones: a full-width column inset by the safe areas; rows wrap by their content. */
     @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      /* As wide as the screen allows, so a row's label and its choices share one line. Shrunk to its
+         content the menu put every choice under its label, some 100px taller on a 390px phone. */
       :global(.popover.settings-menu) {
-        width: auto;
+        width: calc(100vw - 2 * var(--space-3));
         min-width: 0;
       }
       .menu {

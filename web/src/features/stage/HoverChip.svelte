@@ -133,6 +133,8 @@
     .hover-label {
       max-width: min(280px, calc(100% - 16px));
       overflow-wrap: anywhere;
+      /* A name that wraps breaks into even lines, not a side or a word left alone on the last. */
+      text-wrap: balance;
     }
   }
 
