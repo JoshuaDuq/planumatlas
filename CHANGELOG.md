@@ -12,6 +12,9 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   named, each dot stands in the middle of the part that shows, and a cut names its faces as they are seen.
   Pointing at a name marks its region on the brain, and pointing at a region lights its name. Names no
   longer run under an open Display or Section menu, and zoomed in each stands level beside its dot.
+- **Cerebellar functions** now colours the outside of the cerebellum too, point by point from the map 1 mm
+  beneath the surface, as well as the cut faces. Pointing at the cerebellum names the functional region there,
+  and a click selects it, with or without a cut.
 
 ### Fixed
 

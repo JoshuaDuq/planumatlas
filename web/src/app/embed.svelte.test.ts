@@ -54,6 +54,8 @@ const openLink = (name = /^Open in Planum/) =>
   page.getByRole('link', { name }).element() as HTMLAnchorElement;
 
 beforeEach(async () => {
+  // A language another file saved would outrank the link's own `lang`.
+  localStorage.clear();
   await page.viewport(1280, 800);
   announcer = document.body.appendChild(document.createElement('p'));
   detach = attachAnnouncer(announcer);

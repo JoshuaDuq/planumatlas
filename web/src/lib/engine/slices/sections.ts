@@ -1,14 +1,17 @@
 import { Group, Plane, Vector3 } from 'three';
-import type { Intersection, Mesh, Raycaster } from 'three';
+import type { Mesh, Raycaster } from 'three';
 import type { CutMode, Region } from '../../types/index.ts';
-import { cutAtlasFor } from '../../core/catalog/cut-labels.ts';
+import { MAP_ATLASES, cutAtlasFor } from '../../core/catalog/cut-labels.ts';
 import { categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type {
   AgreementCategory,
   ComparedStructure,
   SegmentationAgreement,
 } from '../../core/catalog/segmentation-agreement.ts';
+import { hitRegion } from '../model/picking.ts';
+import type { StageHit } from '../model/picking.ts';
 import { TissueSections } from '../tissues/gpu-sections.ts';
+import type { SurfaceMap } from '../tissues/map-surface.ts';
 import { ghostKey } from '../tissues/palette.ts';
 import { STRIATAL_ATLAS } from '../tissues/striatal-overlay.ts';
 import type {
@@ -63,8 +66,9 @@ export interface SectionsModel extends CutModel {
   setClippingPlanes(planes: Plane[]): void;
   setCutState(state: { atlas: string; active: boolean }): void;
   setMriAnatomy(anatomy: Anatomy | null): void;
+  setCerebellarMap(map: SurfaceMap): void;
   setSurfaceColor(mode: string): void;
-  intersect(raycaster: Raycaster): (Intersection & { region?: Region | null }) | null;
+  intersect(raycaster: Raycaster): StageHit | null;
 }
 
 interface LoadedVolumes {
@@ -363,9 +367,16 @@ export class BrainSections extends EventTarget {
   async setSurfaceColor(mode: SurfaceColor, current: () => boolean = () => true): Promise<void> {
     const request = ++this.appearanceRequest;
     const live = () => request === this.appearanceRequest && !this.disposed && current();
-    if (mode === 'mri') {
+    // The scan, and the cerebellar map the cerebellar surfaces draw, are downloads of their own.
+    const needs: (() => Promise<unknown>) | null =
+      mode === 'mri'
+        ? () => this.tissues.loadMri()
+        : mode === 'cerebellar'
+          ? () => this.tissues.load(MAP_ATLASES.cerebellar)
+          : null;
+    if (needs) {
       try {
-        await this.whileLoading(() => this.tissues.loadMri());
+        await this.whileLoading(needs);
       } catch (error) {
         if (live()) this.report(error);
         else this.settle();
@@ -373,8 +384,13 @@ export class BrainSections extends EventTarget {
       }
       // Overtaken, the download lands without a colour, and only the loading it began is over.
       if (!live()) return this.settle();
+    }
+    if (mode === 'mri') {
       if (this.display) this.tissues.setWindow(this.display.windowCenter, this.display.windowWidth);
       this.model.setMriAnatomy(this.tissues.anatomy);
+    }
+    if (mode === 'cerebellar') {
+      this.model.setCerebellarMap(this.tissues.surfaceMap(MAP_ATLASES.cerebellar));
     }
     this.model.setSurfaceColor(mode);
     this.succeed();
@@ -691,13 +707,9 @@ export class BrainSections extends EventTarget {
   }
 
   /** Pick the nearest visible surface or categorical cut-face label. */
-  pick(raycaster: Raycaster): Region | null | undefined {
+  pick(raycaster: Raycaster): Region | null {
     const hit = this.intersect(raycaster);
-    if (!hit) return null;
-    if ('region' in hit && hit.region !== undefined) return hit.region;
-    return hit.object.userData['kind'] !== 'non-region'
-      ? this.model.regions.get(hit.object.userData['region_id'] as string)
-      : null;
+    return hit && hitRegion(hit, this.model.regions);
   }
 
   /** Loading while any download the status waits on runs, else the latest job's failure, else ready. */

@@ -625,6 +625,7 @@
   "startedOver": "Back to the opening picture.",
   "changed": ", settings changed",
   "mapOnCuts": "Drawn on cut faces, voxel by voxel.",
+  "mapOnCerebellum": "Drawn on the cerebellum and its cut faces, voxel by voxel.",
   "highlightKey": {
    "title": "Your highlights",
    "note": [

@@ -103,6 +103,8 @@ export const en = {
   // The stage key of the reader's highlights, and the saved image's caption line, which say they are the reader's.
   // Under a volumetric map's key: the brain's surfaces stay in tissue colour until it is cut.
   mapOnCuts: 'Drawn on cut faces, voxel by voxel.',
+  // The cerebellar map is drawn on the cerebellum's own surface too.
+  mapOnCerebellum: 'Drawn on the cerebellum and its cut faces, voxel by voxel.',
   highlightKey: {
     title: 'Your highlights',
     note: (ground: KeyGround) =>
@@ -195,6 +197,7 @@ export const fr: typeof en = {
   startedOver: 'Retour à l’image de départ.',
   changed: ', réglages modifiés',
   mapOnCuts: 'Tracées sur les faces de coupe, voxel par voxel.',
+  mapOnCerebellum: 'Tracées sur le cervelet et ses faces de coupe, voxel par voxel.',
   highlightKey: {
     title: 'Vos surlignages',
     note: (ground: KeyGround) =>

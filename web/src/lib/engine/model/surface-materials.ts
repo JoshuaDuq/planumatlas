@@ -13,6 +13,8 @@ import { addMriSurfaceAppearance, createMriUniforms } from '../render/mri-materi
 import type { MriSurfaceSample, MriUniforms } from '../render/mri-material.ts';
 import { addUserMapToSurface, createUserMapUniforms } from '../user-map/overlay.ts';
 import type { UserMapUniforms } from '../user-map/overlay.ts';
+import { addSurfaceMap, surfaceMapUniforms } from '../tissues/map-surface.ts';
+import type { SurfaceMap, SurfaceMapUniforms } from '../tissues/map-surface.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
 import type { AtlasManifest } from './manifest.ts';
 import type { AtlasMesh, Layer } from './layers.ts';
@@ -20,6 +22,9 @@ import type { AtlasMesh, Layer } from './layers.ts';
 /** The cortex carries its scan at mid-thickness (`_t1`); every other region reads it inside itself. */
 const mriSample = (region: Region): MriSurfaceSample =>
   region.kind === 'cortex' || region.kind === 'non-region' ? 'mid-thickness' : 'inside';
+
+/** The surfaces the cerebellar map is drawn on: the cerebellar cortex and lobules, which carry its shares. */
+const drawsCerebellarMap = (region: Region) => Boolean(region.cerebellar_functions?.length);
 
 /**
  * A copy that compiles to the same program. `clone` leaves the shader chain behind, and a physical
@@ -46,6 +51,9 @@ export class SurfaceMaterials {
   readonly sourceColors = new WeakMap<Mesh, Color>();
   /** The scan every surface samples, once attached (`attachMri`). */
   mri: MriUniforms | null = null;
+  /** The cerebellar map its surfaces draw, once attached (`attachCerebellarMap`). */
+  cerebellarMap: SurfaceMap | null = null;
+  private cerebellarUniforms: SurfaceMapUniforms | null = null;
   /** The network and territory colours each cortical vertex looks up by its index. */
   private readonly palettes: SurfacePalettes;
   private readonly manifest: AtlasManifest;
@@ -97,6 +105,9 @@ export class SurfaceMaterials {
     // Drawn before the structures it meets, whichever loaded first (`opaqueOrder`).
     if (cortical) shown.userData['cortical'] = true;
     if (this.mri) addMriSurfaceAppearance(shown.material, this.mri, mriSample(region));
+    if (this.cerebellarUniforms && drawsCerebellarMap(region)) {
+      addSurfaceMap(shown.material, this.cerebellarUniforms);
+    }
     this.sourceColors.set(shown, stageLegible(shown.material.color.clone()));
     return shown;
   }
@@ -138,6 +149,20 @@ export class SurfaceMaterials {
     for (const layer of layers) {
       for (const mesh of layer.meshes) {
         addMriSurfaceAppearance(mesh.material, this.mri, this.sampleOf(mesh, whiteMatter));
+      }
+    }
+  }
+
+  attachCerebellarMap(map: SurfaceMap, layers: Iterable<Layer>): void {
+    if (this.cerebellarMap === map) return;
+    if (this.cerebellarMap) throw new Error('The cerebellar map is already attached.');
+    this.cerebellarMap = map;
+    this.cerebellarUniforms = surfaceMapUniforms(map);
+    for (const layer of layers) {
+      for (const mesh of layer.meshes) {
+        if (drawsCerebellarMap(this.regions.get(mesh.userData['region_id'] as string)!)) {
+          addSurfaceMap(mesh.material, this.cerebellarUniforms);
+        }
       }
     }
   }

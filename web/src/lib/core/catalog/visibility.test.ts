@@ -279,6 +279,53 @@ test('hemisphere and isolation still apply to cut-only regions', () => {
   assert.equal(visibilityOf(tissue(), { ...cut, isolatedRegion: 'n:left:7' }).visible, true);
 });
 
+test('the cerebellar map is on show with no cut where the cerebellar surfaces draw it', () => {
+  const m3 = tissue({ id: 'nettekoven:left:m3', atlas: 'nettekoven' });
+  const uncut = settings({ cutAtlas: 'nettekoven', cutActive: false });
+  for (const detail of ['learning', 'aseg']) {
+    assert.equal(visibilityOf(m3, { ...uncut, detail }).visible, true, detail);
+  }
+  // NextBrain draws no cerebellar cortex, and hidden structures draw nothing.
+  assert.equal(visibilityOf(m3, { ...uncut, detail: 'nextbrain' }).reason, 'no-cut');
+  assert.equal(
+    visibilityOf(m3, { ...uncut, detail: 'learning', internalVisible: false }).reason,
+    'no-cut',
+  );
+  // Another colouring takes the map off the surfaces too.
+  assert.equal(
+    visibilityOf(m3, { ...uncut, cutAtlas: 'a', detail: 'learning' }).reason,
+    'other-colour',
+  );
+  // The striatal networks stay on cut faces alone.
+  const striatal = tissue({ id: 'choi:left:Cont', atlas: 'choi' });
+  assert.equal(
+    visibilityOf(striatal, { ...uncut, cutAtlas: 'choi', detail: 'learning' }).reason,
+    'no-cut',
+  );
+});
+
+test('an isolated cerebellar map region with no cut keeps the lobules that hold it', () => {
+  const lobule = (id: string, regions: string[]) =>
+    region({
+      id,
+      atlas: 'learning',
+      kind: 'structure',
+      cerebellar_functions: regions.map((share) => ({ region: share, fraction: 0.5 })),
+    });
+  const lobuleV = lobule('learning:lobule-v-left', ['nettekoven:left:m3', 'nettekoven:left:m2']);
+  const crusI = lobule('learning:crus-i-left', ['nettekoven:left:d2']);
+  const isolated = settings({
+    detail: 'learning',
+    cutAtlas: 'nettekoven',
+    cutActive: false,
+    isolatedRegion: 'nettekoven:left:m3',
+  });
+  assert.equal(visibilityOf(lobuleV, isolated).visible, true);
+  assert.equal(visibilityOf(crusI, isolated).reason, 'isolated');
+  // A cut shows the region on its face, so isolation hides the lobules as it hides everything else.
+  assert.equal(visibilityOf(lobuleV, { ...isolated, cutActive: true }).reason, 'isolated');
+});
+
 test('a missing cut atlas hides cut-only regions rather than showing them', () => {
   // Before the sections report their labels there is no cut to show them on.
   assert.deepEqual(visibilityOf(tissue(), { ...base, cutAtlas: undefined }), {

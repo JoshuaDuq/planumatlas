@@ -1,8 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import type { DisplaySettings, Paint } from '../../types/index.ts';
-import { asRegion } from './test-support.ts';
-import { colourShowing, cutAtlasFor, cutLabelsReason, mapColourOf } from './cut-labels.ts';
+import type { DisplaySettings, Paint, Region } from '../../types/index.ts';
+import { anatomies, asRegion, readModel } from './test-support.ts';
+import {
+  MAP_ATLASES,
+  SURFACE_MAPS,
+  colourShowing,
+  cutAtlasFor,
+  cutLabelsReason,
+  mapColourOf,
+} from './cut-labels.ts';
 
 const PUBLISHED = new Set([
   'destrieux',
@@ -94,4 +101,14 @@ test('a cut-only region off the cut names the control that would put it there', 
   assert.equal(cutLabelsReason(gyral, 'nextbrain'), 'other-detail');
   assert.equal(colourShowing(tissue('choi')), 'striatal');
   assert.equal(colourShowing(gyral), 'atlas');
+});
+
+test('the cerebellar map is drawn on the surfaces of exactly the detail levels whose structures carry its shares', () => {
+  for (const { id } of anatomies.anatomies) {
+    const { regions } = readModel<{ regions: Region[] }>(`${id}/manifest.json`);
+    const carriers = new Set(
+      regions.filter((region) => region.cerebellar_functions?.length).map(({ atlas }) => atlas),
+    );
+    assert.deepEqual([...carriers].sort(), [...SURFACE_MAPS[MAP_ATLASES.cerebellar]!].sort(), id);
+  }
 });

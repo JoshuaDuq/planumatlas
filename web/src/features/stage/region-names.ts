@@ -84,7 +84,7 @@ export interface Kept extends Pick<Named, 'key' | 'on' | 'face'> {
 export interface NameSources {
   /** Every region of the anatomy, for a cut face's record. */
   regions: ReadonlyMap<string, Region>;
-  /** The cortical regions and structures drawn now that a click could select: a surface names no other. */
+  /** The regions drawn now that a click could select (a map's, on the surfaces drawing it): a surface names no other. */
   drawn: readonly Region[];
   /** What the reader sees, over the anatomy on the visible stage. */
   sight: Sight;

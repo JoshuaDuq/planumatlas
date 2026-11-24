@@ -155,7 +155,7 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       rows: sources.cerebellar.map((region) =>
         row(region.id, region.color, lang === 'fr' ? region.name_fr : region.name),
       ),
-      note: onCuts,
+      note: t(lang, 'display').mapOnCerebellum,
       pickable: false,
     });
   }

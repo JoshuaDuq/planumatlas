@@ -11,6 +11,7 @@ import { majorityTerritoryColor } from '../render/network-colors.ts';
 import { writeFeatherPalette } from '../render/border-feather.ts';
 import { setPainted } from '../render/mri-material.ts';
 import { GHOST } from '../render/draw-order.ts';
+import { drawsSurfaceMap, showSurfaceMapRegions } from '../tissues/map-surface.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
 import type { AtlasMesh, Layer } from './layers.ts';
@@ -28,11 +29,13 @@ export function assertSurfaceColor(
     cabNp,
     atlas,
     scanned,
+    cerebellarMapped,
   }: {
     manifest: AtlasManifest;
     cabNp: CabNpPartition | null;
     atlas: string;
     scanned: boolean;
+    cerebellarMapped: boolean;
   },
 ): asserts mode is SurfaceColor {
   if (!isSurfaceColor(mode)) {
@@ -52,6 +55,9 @@ export function assertSurfaceColor(
   }
   if (mode === 'cerebellar' && !manifest.cerebellar_functions) {
     throw new Error('This model carries no cerebellar functional regions.');
+  }
+  if (mode === 'cerebellar' && !cerebellarMapped) {
+    throw new Error('The cerebellar map must load before the cerebellar surfaces draw it.');
   }
   if (mode === 'lobe' && !groupsByLobe(atlas)) {
     throw new Error(`${atlas} groups no regions by lobe; show a lobe atlas first.`);
@@ -102,7 +108,7 @@ export interface SurfaceView {
   clippingPlanes: Plane[];
   layers: ReadonlyMap<string, Layer>;
   whiteMatter: WhiteMatterSurfaces | null;
-  materials: Pick<SurfaceMaterials, 'sourceColors' | 'mri'>;
+  materials: Pick<SurfaceMaterials, 'sourceColors' | 'mri' | 'cerebellarMap'>;
 }
 
 /** The exposed white matter as the settings show it, and whether the scan colours the surface. */
@@ -146,6 +152,12 @@ export function drawLayers({
   const focusOpacity = settings.focused ? appearance.see_through_opacity! : 1;
   const { paint, surfaceColor } = settings;
   const mri = surfaceColor === 'mri';
+  if (materials.cerebellarMap && surfaceColor === 'cerebellar') {
+    showSurfaceMapRegions(
+      materials.cerebellarMap,
+      (id) => visibilityOf(regions.get(id)!, settings).visible,
+    );
+  }
   for (const [id, layer] of layers) {
     layer.scene.visible =
       id === settings.detail ||
@@ -179,6 +191,8 @@ export function drawLayers({
           userData.territoryMix.value = surfaceColor === 'territory' && !paint && !ghost ? 1 : 0;
         }
       }
+      const surfaceMap = drawsSurfaceMap(material);
+      if (surfaceMap) surfaceMap.value = surfaceColor === 'cerebellar' && !paint && !ghost;
       if (material.clippingPlanes !== clippingPlanes) {
         material.clippingPlanes = clippingPlanes;
         material.needsUpdate = true;

@@ -1,5 +1,5 @@
 import type { DisplaySettings, Region } from '../../types/index.ts';
-import { cutAtlasesOf, cutLabelsReason } from './cut-labels.ts';
+import { MAP_ATLASES, SURFACE_MAPS, cutAtlasesOf, cutLabelsReason } from './cut-labels.ts';
 import { labelOf } from './labels.ts';
 
 /**
@@ -66,6 +66,18 @@ export function internalSystemAllows(region: Region, settings: VisibilitySetting
   return labelOf(region, 'en')!.group === settings.internalSystem;
 }
 
+/** A map's region the stage draws on its structures' surfaces, with or without a cut (`SURFACE_MAPS`). */
+const onSurfaces = (region: Region, settings: VisibilitySettings) =>
+  region.atlas === settings.cutAtlas &&
+  Boolean(SURFACE_MAPS[region.atlas]?.includes(settings.detail)) &&
+  settings.internalVisible !== false;
+
+/** With no cut, an isolated cerebellar map region is drawn on the cerebellar surfaces that hold it. */
+const drawsIsolated = (region: Region, settings: VisibilitySettings) =>
+  !settings.cutActive &&
+  settings.cutAtlas === MAP_ATLASES.cerebellar &&
+  Boolean(region.cerebellar_functions?.some(({ region: id }) => id === settings.isolatedRegion));
+
 export type HiddenReason =
   | 'no-mri'
   | 'below-cut-resolution'
@@ -103,7 +115,9 @@ export function visibilityOf(region: Region, settings: VisibilitySettings): Visi
     // The cut's labels follow the colouring and the internal anatomy, so either can be the remedy.
     const relabelled = settings.cutAtlas && cutLabelsReason(region, settings.cutAtlas);
     if (relabelled) return hidden(relabelled);
-    if (!settings.cutActive || !settings.cutAtlas) return hidden('no-cut');
+    if ((!settings.cutActive || !settings.cutAtlas) && !onSurfaces(region, settings)) {
+      return hidden('no-cut');
+    }
   } else if (isStructure(region)) {
     if (!belongsToDetail(region, settings.detail)) return hidden('other-detail');
   } else if (isSurface(region) && region.atlas !== settings.atlas) {
@@ -122,7 +136,11 @@ export function visibilityOf(region: Region, settings: VisibilitySettings): Visi
     return hidden('spinal-cord-hidden');
   }
   if (settings.hiddenRegions?.has(region.id)) return hidden('removed');
-  if (settings.isolatedRegion && region.id !== settings.isolatedRegion) {
+  if (
+    settings.isolatedRegion &&
+    region.id !== settings.isolatedRegion &&
+    !drawsIsolated(region, settings)
+  ) {
     return hidden('isolated');
   }
   return { visible: true, reason: null };

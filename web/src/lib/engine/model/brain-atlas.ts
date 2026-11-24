@@ -39,6 +39,8 @@ import { createDissection } from '../../core/state/dissection.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { VisualFieldUniforms } from '../render/materials.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
+import { drawsSurfaceMap, surfaceMapRegionAt } from '../tissues/map-surface.ts';
+import type { SurfaceMap } from '../tissues/map-surface.ts';
 import type { SurfaceHit } from '../render/picking.ts';
 import type { UserMapUniforms } from '../user-map/overlay.ts';
 import type { NamedVisualArea, VisualFieldDot, VisualFieldReading } from '../api.ts';
@@ -48,8 +50,8 @@ import { ModelLayers, unknownLayer } from './layers.ts';
 import type { AtlasMesh, GlbLoader, Layer } from './layers.ts';
 import { fetchManifest, validateManifest } from './manifest.ts';
 import type { AtlasManifest } from './manifest.ts';
-import { inSight, nearestHit, regionOf } from './picking.ts';
-import type { FacingScene } from './picking.ts';
+import { hitRegion, inSight, nearestHit } from './picking.ts';
+import type { FacingScene, StageHit } from './picking.ts';
 import { Placement } from './placement.ts';
 import { combineProgress } from './progress.ts';
 import type { ProgressCallback } from './progress.ts';
@@ -534,10 +536,19 @@ export class BrainAtlas extends EventTarget {
     this.dispatchEvent(new CustomEvent('change', { detail: this.state }));
   }
 
-  /** The nearest visible hit the cut keeps (`nearestHit`). */
-  intersect(raycaster: Raycaster): Intersection<AtlasMesh> | null {
+  /**
+   * The nearest visible hit the cut keeps (`nearestHit`). On a surface drawing the cerebellar map it names the map's
+   * region there, as a cut face through it does; elsewhere on that surface, its own region.
+   */
+  intersect(raycaster: Raycaster): (Intersection<AtlasMesh> & Pick<StageHit, 'mapRegion'>) | null {
     this.group.updateMatrixWorld(true);
-    return this.nearestHit(raycaster, this.visibleMeshes);
+    const hit = this.nearestHit(raycaster, this.visibleMeshes);
+    const map = this.materials.cerebellarMap;
+    if (!hit || !map || !drawsSurfaceMap(hit.object.material)?.value) return hit;
+    const id = surfaceMapRegionAt(hit, map);
+    const region = id ? this.regions.get(id)! : null;
+    // A region hidden or isolated away is not drawn there (`showSurfaceMapRegions`), so the surface's own answers.
+    return region && this.canSelect(region) ? { ...hit, mapRegion: region } : hit;
   }
 
   nearestHit(raycaster: Raycaster, meshes: readonly AtlasMesh[]): Intersection<AtlasMesh> | null {
@@ -545,7 +556,8 @@ export class BrainAtlas extends EventTarget {
   }
 
   pick(raycaster: Raycaster): Region | null {
-    return regionOf(this.intersect(raycaster), this.regions);
+    const hit = this.intersect(raycaster);
+    return hit && hitRegion(hit, this.regions);
   }
 
   /** See `inSight` (`picking.ts`). */
@@ -734,6 +746,7 @@ export class BrainAtlas extends EventTarget {
       cabNp: this.cabNp,
       atlas: this.atlasId,
       scanned: Boolean(this.materials.mri),
+      cerebellarMapped: Boolean(this.materials.cerebellarMap),
     });
     this.surfaceColor = mode;
     this.update();
@@ -812,6 +825,11 @@ export class BrainAtlas extends EventTarget {
 
   setMriAnatomy(anatomy: { mriUniforms: MriUniforms } | null): void {
     this.materials.attachMri(anatomy, this.layers.values(), this.whiteMatterSurfaces);
+  }
+
+  /** The cerebellar map the cerebellar cortex and lobules draw under the cerebellar functions colour. */
+  setCerebellarMap(map: SurfaceMap): void {
+    this.materials.attachCerebellarMap(map, this.layers.values());
   }
 
   /** See `SurfaceMaterials.programSamples`. */

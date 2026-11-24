@@ -359,7 +359,7 @@ export function createAnatomyCommands(
     if (reason === 'isolated') model.clearIsolation();
     // A cut-only region is nowhere until a plane exists. Coronal is the
     // conventional default, and the panel moves it from there.
-    if (reason === 'no-cut') {
+    const cutThrough = async () => {
       await commands.cut('coronal', current);
       const coordinates = model.anchorOf(id);
       if (current() && coordinates && sections.active) {
@@ -367,12 +367,17 @@ export function createAnatomyCommands(
           crosshairThrough(coordinates, sections.frame.normal, sections.offsetRange),
         );
       }
-    }
+    };
+    if (reason === 'no-cut') await cutThrough();
     // A cut's labels follow the colouring and the internal anatomy: a region of a colouring's map
     // comes with that colouring, NextBrain's with its level, and gyral white matter, which the
     // surface atlases' cuts share, once neither replaces their labels.
     if (reason === 'other-colour') {
-      await commands.applySurfaceColor(colourShowing(model.regions.get(id)!), current);
+      const region = model.regions.get(id)!;
+      await commands.applySurfaceColor(colourShowing(region), current);
+      // A map's region is shown through itself even where the surfaces draw the map too: much of it lies
+      // out of sight of the surface.
+      if (current() && region.kind === 'tissue-region' && !sections.active) await cutThrough();
     }
     if (reason === 'other-detail') {
       const region = model.regions.get(id)!;

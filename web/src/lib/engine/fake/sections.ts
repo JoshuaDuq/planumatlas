@@ -331,8 +331,9 @@ export function createFakeSections({
       emit();
     },
     async setSurfaceColor(mode: SurfaceColor, current = () => true) {
-      // As the real engine: the colour loads the T1 alone, not the linked MRI's volumes.
-      if (mode === 'mri') {
+      // As the real engine: the colour loads the T1 alone, not the linked MRI's volumes, and the
+      // cerebellar colour loads the map its surfaces draw.
+      if (mode === 'mri' || mode === 'cerebellar') {
         state.status = 'loading';
         emit();
         await Promise.resolve();
@@ -341,7 +342,8 @@ export function createFakeSections({
           emit();
           return;
         }
-        model.attachMri();
+        if (mode === 'mri') model.attachMri();
+        else model.attachCerebellarMap();
       }
       model.applySurfaceColor(mode);
       state.status = 'ready';

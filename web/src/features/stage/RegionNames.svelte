@@ -178,8 +178,7 @@
       chooseNames({
         regions: model.regions,
         drawn: [...model.regions.values()].filter(
-          (region) =>
-            (region.kind === 'cortex' || region.kind === 'structure') && model.canSelect(region),
+          (region) => region.kind !== 'non-region' && model.canSelect(region),
         ),
         sight: { ...grid, seen },
         selected,

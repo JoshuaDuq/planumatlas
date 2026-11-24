@@ -55,7 +55,7 @@ export interface FakeModelOptions {
 
 /** The model plus the hooks the fake sections drive; the real model's sections call the same methods. */
 export interface FakeModel extends EngineModel {
-  /** brain-atlas.js:789 (the colour check) and :833 (the scan attached by `sections.setSurfaceColor`). */
+  /** brain-atlas.js:789 (the colour check) and :833 (the scan or map attached by `sections.setSurfaceColor`). */
   applySurfaceColor(mode: SurfaceColor): void;
   /** brain-atlas.js:466. */
   setCutState(cut: { atlas: string; active: boolean }): void;
@@ -64,6 +64,8 @@ export interface FakeModel extends EngineModel {
   /** Mark a layer downloaded (what `loadLayer` does, brain-atlas.js:364). */
   loadLayer(id: string): void;
   attachMri(): void;
+  /** The map the cerebellar surfaces draw (`BrainAtlas.setCerebellarMap`). */
+  attachCerebellarMap(): void;
   dispose(): void;
 }
 
@@ -110,6 +112,7 @@ export function createFakeModel({
   let envelopes = false;
   let spinalCord: SpinalCordLoad = 'unloaded';
   let mri = false;
+  let cerebellarMapped = false;
   let disposed = false;
   let selectedId: string | null = null;
 
@@ -572,6 +575,8 @@ export function createFakeModel({
         throw new Error('This model carries no striatal networks.');
       if (mode === 'cerebellar' && !manifest.cerebellar_functions)
         throw new Error('This model carries no cerebellar functional regions.');
+      if (mode === 'cerebellar' && !cerebellarMapped)
+        throw new Error('The cerebellar map must load before the cerebellar surfaces draw it.');
       if (mode === 'lobe' && !groupsByLobe(values.atlas)) {
         throw new Error(`${values.atlas} groups no regions by lobe; show a lobe atlas first.`);
       }
@@ -602,6 +607,9 @@ export function createFakeModel({
     },
     attachMri() {
       mri = true;
+    },
+    attachCerebellarMap() {
+      cerebellarMapped = true;
     },
     dispose() {
       disposed = true;

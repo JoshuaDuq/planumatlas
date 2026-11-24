@@ -1405,6 +1405,17 @@ export function defineEngineContract(
         );
       });
 
+      it('colours the cerebellum once the map its surfaces draw has loaded, and reuses it', async () => {
+        const { engine } = await fresh();
+        const { sections, model } = engine;
+        assert.throws(() => model.setSurfaceColor('cerebellar'), /cerebellar map must load/);
+        await sections.setSurfaceColor('cerebellar');
+        assert.equal(model.settings.surfaceColor, 'cerebellar');
+        await sections.setSurfaceColor('atlas');
+        await sections.setSurfaceColor('cerebellar');
+        assert.equal(model.settings.surfaceColor, 'cerebellar');
+      });
+
       it('stays loading while the MRI colour downloads, even when the cut is redrawn meanwhile', async () => {
         const { engine } = await fresh();
         const { sections } = engine;

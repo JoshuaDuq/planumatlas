@@ -101,13 +101,16 @@ export function regionOf(
   return regions.get(hit.object.userData['region_id'] as string) ?? null;
 }
 
-/** A hit on the drawn surfaces or on a cut face, which names its own region (`BrainSections.intersect`). */
-export type StageHit = Intersection & { region?: Region | null };
+/**
+ * A hit on the drawn surfaces or on a cut face, which names its own region (`BrainSections.intersect`). A surface
+ * drawing a map names the map's region where it has one (`BrainAtlas.intersect`).
+ */
+export type StageHit = Intersection & { region?: Region | null; mapRegion?: Region };
 
 /** The region a surface or cut-face hit names, as `BrainSections.pick` reads it. */
 export function hitRegion(hit: StageHit, regions: ReadonlyMap<string, Region>): Region | null {
   if (hit.region !== undefined) return hit.region;
-  return regionOf(hit as Intersection<AtlasMesh>, regions);
+  return hit.mapRegion ?? regionOf(hit as Intersection<AtlasMesh>, regions);
 }
 
 /** The stage a name's rays are cast on. */

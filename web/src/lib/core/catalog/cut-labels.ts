@@ -23,6 +23,14 @@ type MapColour = keyof typeof MAP_ATLASES;
  */
 export const CORTICAL_MAPS: ReadonlySet<string> = new Set([MAP_ATLASES.territory]);
 
+/**
+ * The maps the structures' surfaces draw too, by the detail levels whose structures carry them (the cerebellar
+ * cortex and lobules, which hold its shares): there their regions are on show with no cut.
+ */
+export const SURFACE_MAPS: Readonly<Record<string, readonly string[]>> = {
+  [MAP_ATLASES.cerebellar]: ['aseg', 'learning'],
+};
+
 const isMapColour = (colour: string): colour is MapColour => Object.hasOwn(MAP_ATLASES, colour);
 
 /** The colouring whose map is this cut atlas, or null for labels no colouring brings. */

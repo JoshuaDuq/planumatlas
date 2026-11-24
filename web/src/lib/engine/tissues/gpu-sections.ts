@@ -53,11 +53,9 @@ import type { MriUniforms } from '../render/mri-material.ts';
 import type { Appearance } from '../render/materials.ts';
 import { token } from '../render/tokens.ts';
 import { createCapLabels, updateCapLabels } from './cap-labels.ts';
-import {
-  STRIATAL_ATLAS,
-  createStriatalPalette,
-  createStriatalUniforms,
-} from './striatal-overlay.ts';
+import { STRIATAL_ATLAS, createStriatalUniforms } from './striatal-overlay.ts';
+import { createMapPalette } from './map-palette.ts';
+import type { SurfaceMap } from './map-surface.ts';
 import type { StriatalUniforms } from './striatal-overlay.ts';
 import type { UserMapUniforms } from '../user-map/overlay.ts';
 import type { CapLabelUniforms } from './cap-labels.ts';
@@ -161,7 +159,12 @@ export interface CutModel extends EventTarget {
 }
 
 /** A cut hit with the region it names and the label it landed on. */
-export type CutHit = (Intersection | SolidHit) & { region?: Region | null; label?: Label };
+export type CutHit = (Intersection | SolidHit) & {
+  region?: Region | null;
+  label?: Label;
+  /** A surface drawing a map names the map's region (`BrainAtlas.intersect`). */
+  mapRegion?: Region;
+};
 
 const readJson = async <T>(url: URL, priority?: RequestPriority): Promise<T> =>
   JSON.parse(new TextDecoder().decode(await fetchAsset(url, { priority }))) as T;
@@ -189,6 +192,7 @@ export class TissueSections {
   private whiteMatter: WhiteMatter | null = null;
   private paintKey: string | undefined;
   private striatalPalette: DataTexture | null = null;
+  private readonly surfaceMaps = new Map<string, SurfaceMap>();
   private striatalConfidence: {
     texture: Data3DTexture;
     worldToVoxel: Matrix4;
@@ -432,7 +436,7 @@ export class TissueSections {
   private updateStriatal(uniforms: StriatalUniforms, layer: TissueLayer): boolean {
     const source = this.wantsStriatal() ? this.layers.get(STRIATAL_ATLAS) : undefined;
     uniforms.striatalEnabled.value = Boolean(source);
-    if (source) this.striatalPalette ??= createStriatalPalette(source.metadata.labels);
+    if (source) this.striatalPalette ??= createMapPalette(source.metadata.labels, STRIATAL_ATLAS);
     const sampled = source ?? layer;
     uniforms.striatalVolume.value = sampled.texture;
     uniforms.striatalPalette.value = source ? this.striatalPalette : layer.palette;
@@ -444,6 +448,27 @@ export class TissueSections {
       confidence?.worldToVoxel ?? sampled.uniforms.worldToVoxel.value;
     uniforms.confidenceShape.value = confidence?.shape ?? sampled.uniforms.volumeShape.value;
     return Boolean(source);
+  }
+
+  /** A loaded map's label grid as the surfaces read it, one per atlas: the cut's own volume and highlight codes. */
+  surfaceMap(atlas: string): SurfaceMap {
+    const known = this.surfaceMaps.get(atlas);
+    if (known) return known;
+    const layer = this.layers.get(atlas);
+    if (!layer) throw new Error(`Tissue atlas has not loaded: ${atlas}`);
+    const map: SurfaceMap = {
+      atlas,
+      labels: layer.metadata.labels,
+      volume: layer.volume,
+      texture: layer.texture,
+      worldToVoxel: layer.uniforms.worldToVoxel.value,
+      shape: layer.uniforms.volumeShape.value,
+      palette: createMapPalette(layer.metadata.labels, atlas),
+      highlightCodes: layer.uniforms.highlightCodes.value,
+      highlightLifts: layer.uniforms.highlightLifts.value,
+    };
+    this.surfaceMaps.set(atlas, map);
+    return map;
   }
 
   /** The striatal network atlas's confidence classes on the GPU, beside its labels. */
@@ -761,6 +786,7 @@ export class TissueSections {
       layer.palette.dispose();
     }
     this.striatalPalette?.dispose();
+    for (const map of this.surfaceMaps.values()) map.palette.dispose();
     this.striatalConfidence?.texture.dispose();
     this.anatomy?.texture.dispose();
     this.anatomy = null;

@@ -1,13 +1,13 @@
-import { DataTexture, FloatType, Matrix4, RGBAFormat, Vector3 } from 'three';
+import { Matrix4, Vector3 } from 'three';
 import type {
   Data3DTexture,
+  DataTexture,
   IUniform,
   Material,
   WebGLProgramParametersWithUniforms,
   WebGLRenderer,
 } from 'three';
 import { LABEL_AT } from './label-sampling.ts';
-import type { Label } from './palette.ts';
 
 /** The cut atlas whose voxels give the striatum its network colours. */
 export const STRIATAL_ATLAS = 'choi';
@@ -74,34 +74,6 @@ vec3 striatalColour(vec3 rgb, vec3 world) {
   return grade < ${CONFIDENT}u ? mix(network.rgb, vec3(grey), ${UNCERTAIN_FADE.toFixed(2)}) : network.rgb;
 }
 `;
-
-/** Each striatal network label in its published colour, opaque; every other label transparent. */
-export function striatalPaletteData(labels: readonly Label[]): Float32Array {
-  const data = new Float32Array(labels.length * 4);
-  for (const [code, label] of labels.entries()) {
-    if (!label.region_id?.startsWith(`${STRIATAL_ATLAS}:`)) continue;
-    // The palette is linear, as the cut's own palette is after `setPublished`.
-    const [red, green, blue] = label.color.map((channel) => srgbToLinear(channel / 255));
-    data.set([red!, green!, blue!, 1], code * 4);
-  }
-  return data;
-}
-
-export function createStriatalPalette(labels: readonly Label[]): DataTexture {
-  const palette = new DataTexture(
-    striatalPaletteData(labels),
-    labels.length,
-    1,
-    RGBAFormat,
-    FloatType,
-  );
-  palette.needsUpdate = true;
-  return palette;
-}
-
-function srgbToLinear(channel: number): number {
-  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-}
 
 /** Let a cap take the striatal network colour where its solid is a striatal structure. */
 export function addStriatalOverlay(material: Material, uniforms: StriatalUniforms): void {

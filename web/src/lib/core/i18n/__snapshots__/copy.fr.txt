@@ -625,6 +625,7 @@
   "startedOver": "Retour à l’image de départ.",
   "changed": ", réglages modifiés",
   "mapOnCuts": "Tracées sur les faces de coupe, voxel par voxel.",
+  "mapOnCerebellum": "Tracées sur le cervelet et ses faces de coupe, voxel par voxel.",
   "highlightKey": {
    "title": "Vos surlignages",
    "note": [
