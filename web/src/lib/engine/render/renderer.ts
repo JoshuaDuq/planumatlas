@@ -28,7 +28,7 @@ export interface PipelineOptions {
 export const SNAPSHOT_PIXEL_RATIO = 2;
 
 /**
- * The composer for one resolution: scene, a two-tone outline and the output pass.
+ * The composer for one resolution: scene, the outline's two passes and the output pass.
  * Exported so a test can read the passes and their order without a GL context.
  */
 export function createPipeline({

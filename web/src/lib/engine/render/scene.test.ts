@@ -7,8 +7,10 @@ import {
   Mesh,
   BoxGeometry,
   Color,
+  NearestFilter,
   PerspectiveCamera,
   Scene,
+  UnsignedByteType,
   Vector3,
 } from 'three';
 import type { Material, Object3D, WebGLRenderer, WebGLRenderTarget } from 'three';
@@ -145,12 +147,23 @@ describe('render pipeline', () => {
   it('gives the halo and the core their thickness, with both outlines off until something is outlined', () => {
     const { halo, core } = fixture();
     assert.deepEqual([halo.edgeThickness, core.edgeThickness], [3, 1]);
+    // The fine line is the softer of the two, so a hover never reads as a selection.
+    assert.deepEqual([halo.edgeStrength, core.edgeStrength], [6, 3]);
     for (const pass of [halo, core]) {
-      assert.equal(pass.edgeStrength, 6);
       assert.equal(pass.edgeGlow, 0);
       assert.equal(pass.enabled, false);
       assert.equal(pass.depthMaterial.side, FrontSide);
       assert.equal(pass.prepareMaskMaterial.side, FrontSide);
+    }
+  });
+
+  it('SCENE-09a stores the outline depth in the bytes it is packed into, sampled unfiltered', () => {
+    const { halo, core } = fixture();
+    for (const pass of [halo, core]) {
+      const depth = pass.renderTargetDepthBuffer.texture;
+      assert.equal(depth.type, UnsignedByteType);
+      assert.equal(depth.minFilter, NearestFilter);
+      assert.equal(depth.magFilter, NearestFilter);
     }
   });
 
@@ -453,6 +466,38 @@ describe('scene lifecycle', () => {
       getPropertyValue: (name: string) => (name === '--scene-exposure' ? '1.2' : '#808080'),
     }));
     assert.doesNotThrow(() => stage.applyTheme());
+    stage.dispose();
+  });
+
+  it('SCENE-09 rings a selection with the wide ring and the fine line, a hover with the fine line alone', () => {
+    const passes: OutlinePass[] = [];
+    const addPass = EffectComposer.prototype.addPass;
+    vi.spyOn(EffectComposer.prototype, 'addPass').mockImplementation(function (
+      this: EffectComposer,
+      pass,
+    ) {
+      if (pass instanceof OutlinePass) passes.push(pass);
+      addPass.call(this, pass);
+    });
+    const stage = createScene(host);
+    const [a, b] = [new Mesh(new BoxGeometry()), new Mesh(new BoxGeometry())];
+    // Two pipelines, each a halo then a core.
+    const pairs = [passes.slice(0, 2), passes.slice(2, 4)] as [OutlinePass, OutlinePass][];
+    assert.equal(passes.length, 4);
+    const state = () =>
+      pairs.map(([halo, core]) => [
+        halo.enabled && halo.selectedObjects,
+        core.enabled && core.selectedObjects,
+      ]);
+    stage.setOutlined({ selected: [a], hovered: [b] });
+    for (const drawn of state()) assert.deepEqual(drawn, [[a], [a, b]]);
+    stage.setOutlined({ hovered: [b] });
+    for (const drawn of state()) assert.deepEqual(drawn, [false, [b]]);
+    // Hovering the selection itself adds nothing to it.
+    stage.setOutlined({ selected: [a], hovered: [a] });
+    for (const drawn of state()) assert.deepEqual(drawn, [[a], [a]]);
+    stage.setOutlined();
+    for (const drawn of state()) assert.deepEqual(drawn, [false, false]);
     stage.dispose();
   });
 

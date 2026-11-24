@@ -4,7 +4,9 @@ import {
   FrontSide,
   Group,
   Mesh,
+  NearestFilter,
   Scene,
+  UnsignedByteType,
   Vector2,
 } from 'three';
 import type { Object3D, PerspectiveCamera, WebGLRenderer, WebGLRenderTarget } from 'three';
@@ -24,7 +26,7 @@ export class ScaledOutlinePass extends OutlinePass {
   }
 }
 
-/** One two-tone outline: a light halo behind a dark core. */
+/** One outline: a wide light ring (the halo) and a fine light line (the core). */
 export interface OutlinePasses {
   halo: ScaledOutlinePass;
   core: ScaledOutlinePass;
@@ -43,11 +45,10 @@ const EDGE_TARGETS = [
 const EDGE_DOWNSAMPLE = 2;
 
 /**
- * Two passes make one two-tone outline. No single colour clears 3:1 against
- * all 512 atlas colours, but no colour can be close to both black and
- * white, so a light halo behind a dark core is legible over any of them.
- * The halo also carries hover on its own, which keeps hover and selection
- * visually distinct without a third pass.
+ * Two passes tell a selection from a hover. The core is a fine line and the halo a wide ring around
+ * it: a hovered region gets the line alone, a selected one both. The pass only adds light, so the
+ * two cannot differ by a dark tone: until 2026-11-23 the core was meant to be a dark line inside
+ * the halo, added near-black, which drew nothing, and hover and selection were one white ring.
  */
 export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): OutlinePasses {
   const halo = new ScaledOutlinePass(new Vector2(1, 1), scene, camera);
@@ -56,7 +57,7 @@ export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): Ou
   halo.edgeGlow = 0;
   halo.enabled = false;
   const core = new ScaledOutlinePass(new Vector2(1, 1), scene, camera);
-  core.edgeStrength = 6;
+  core.edgeStrength = 3;
   core.edgeThickness = 1;
   core.edgeGlow = 0;
   core.enabled = false;
@@ -71,14 +72,20 @@ export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): Ou
   for (const pass of [halo, core]) {
     pass.depthMaterial.side = FrontSide;
     pass.prepareMaskMaterial.side = FrontSide;
+    // The pass packs depth into four bytes, which its stock half-float target rounds: an error of
+    // millimetres at this camera. Cortex lying on white matter was masked as hidden behind it, so
+    // a selected gyrus got the hidden line along most of its border.
+    const depth = pass.renderTargetDepthBuffer.texture;
+    depth.type = UnsignedByteType;
+    depth.minFilter = depth.magFilter = NearestFilter;
   }
   for (const pass of [halo, core]) {
     const render = pass.render.bind(pass);
     pass.render = (...args) => withOutlineOccluders(pass, () => render(...args));
   }
   const renderCore = core.render.bind(core);
-  // Selection draws both tones of one silhouette. The second pass would
-  // render every mesh again for a mask the halo already built.
+  // A selection with no hover draws the ring and the line on one silhouette. The second pass
+  // would render every mesh again for a mask the halo already built.
   core.render = function (
     this: OutlinePass,
     renderer,
@@ -102,17 +109,17 @@ export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): Ou
   return { halo, core };
 }
 
-/** Selection gets both tones; hover gets the halo alone. */
+/** Selection gets the wide ring over the fine line; hover gets the fine line alone. */
 export function outline(
   passes: readonly OutlinePasses[],
   { selected = [], hovered = [] }: Outlined,
 ) {
-  const ringed = [...new Set([...selected, ...hovered])];
+  const lined = [...new Set([...selected, ...hovered])];
   for (const { halo, core } of passes) {
-    halo.selectedObjects = ringed;
-    core.selectedObjects = [...selected];
-    halo.enabled = ringed.length > 0;
-    core.enabled = selected.length > 0;
+    halo.selectedObjects = [...selected];
+    core.selectedObjects = lined;
+    halo.enabled = selected.length > 0;
+    core.enabled = lined.length > 0;
   }
 }
 
@@ -131,11 +138,10 @@ export function scaleOutlines({ halo, core }: OutlinePasses, pixelRatio: number)
 /** The outline colours from the theme's tokens. */
 export function themeOutlines(passes: readonly OutlinePasses[]): void {
   for (const { halo, core } of passes) {
-    halo.visibleEdgeColor.set(token('--scene-outline-halo'));
-    core.visibleEdgeColor.set(token('--scene-outline-core'));
-    // The pass adds its edges times edgeStrength, which turned this slate into near-white lines
-    // wherever the selection runs on behind other cortex. Divided, the hidden edge adds its token.
     for (const pass of [halo, core]) {
+      pass.visibleEdgeColor.set(token('--scene-outline'));
+      // The pass adds its edges times edgeStrength, which turned this slate into near-white lines
+      // wherever the selection runs on behind other cortex. Divided, the hidden edge adds its token.
       pass.hiddenEdgeColor
         .set(token('--scene-outline-hidden'))
         .multiplyScalar(1 / pass.edgeStrength);

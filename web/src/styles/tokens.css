@@ -33,8 +33,7 @@
 
     /* The stage stays dark in both themes; panel colours change above. */
     --scene-background: #000000;
-    --scene-outline-core: #0b1114;
-    --scene-outline-halo: #f2f6fa;
+    --scene-outline: #f2f6fa;
     --scene-outline-hidden: #46505e;
     --scene-exposure: 1;
     /* Streamline direction: |R|, |A|, |S| drive red, green, blue (native-geometry.js). */
