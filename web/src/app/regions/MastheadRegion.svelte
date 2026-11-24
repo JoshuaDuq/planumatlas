@@ -24,7 +24,6 @@
   import DataBar from '../../features/masthead/DataBar.svelte';
   import Masthead from '../../features/masthead/Masthead.svelte';
   import FeedbackDialog from '../../features/colophon/FeedbackDialog.svelte';
-  import ProvenanceDialog from '../../features/provenance/ProvenanceDialog.svelte';
   import ShortcutsDialog from '../../features/shortcuts/ShortcutsDialog.svelte';
   import { ROOM_BESIDE_PLATE_PX } from '../../lib/state/stage-layout.svelte.ts';
   import { getApp } from '../application.svelte.ts';
@@ -105,10 +104,23 @@
   let feedbackOpen = $state(false);
   let feedbackInstant = $state(false);
 
+  // The dialog and the sources it lists are a chunk of their own (BUILD-15), fetched when first asked for.
+  let Provenance =
+    $state<typeof import('../../features/provenance/ProvenanceDialog.svelte').default>();
+
   /** The colophon's Provenance button, and the phone menu's item. */
   export function openProvenance(event: MouseEvent) {
     provenanceInstant = isKeyboardActivation(event);
     provenanceOpen = true;
+    if (Provenance) return;
+    import('../../features/provenance/ProvenanceDialog.svelte').then(
+      (module) => (Provenance = module.default),
+      (error: unknown) => {
+        // Closed again, so another press asks again; the failure itself surfaces.
+        provenanceOpen = false;
+        throw error;
+      },
+    );
   }
 
   /**
@@ -325,11 +337,11 @@
   {lang}
   fallbackFocus={settingsButton}
 />
-{#if world}
+{#if world && Provenance}
   {@const { model } = world.engine}
   {@const current = world.view.current}
   {@const tractReference = isIndependentTractReference(current)}
-  <ProvenanceDialog
+  <Provenance
     bind:open={provenanceOpen}
     bind:instant={provenanceInstant}
     lang={current.lang}

@@ -88,11 +88,10 @@ describe('the one tooltip, when its trigger goes', () => {
 });
 
 describe('the dialogs', () => {
-  test('three native dialogs are children of the app root, and an open one makes the regions inert', async () => {
+  test('the native dialogs are children of the app root, and an open one makes the regions inert', async () => {
     await shell.open();
-    expect(dialogs().map(titleOf).sort()).toEqual(
-      ['Feedback', 'Keyboard shortcuts', 'Provenance'].sort(),
-    );
+    // Provenance joins them when first asked for (BUILD-15); MastheadRegion's tests open it.
+    expect(dialogs().map(titleOf).sort()).toEqual(['Feedback', 'Keyboard shortcuts']);
     for (const dialog of dialogs()) expect(dialog.parentElement).toBe(shell.target);
 
     shell.app.ports.toggleShortcuts({ instant: true });

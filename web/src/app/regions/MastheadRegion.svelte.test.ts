@@ -38,6 +38,13 @@ const dialogNamed = (name: string) =>
   [...document.querySelectorAll('dialog')].find(
     (dialog) => dialog.querySelector('h2')?.textContent === name,
   )!;
+/** A dialog fetched on its first opening (Provenance): there once its chunk has arrived. */
+const dialogArrived = (name: string) =>
+  vi.waitFor(() => {
+    const dialog = dialogNamed(name);
+    expect(dialog).toBeDefined();
+    return dialog;
+  });
 
 describe('what the masthead region holds', () => {
   test('the one banner is #masthead; the data bar sits between the brand and the buttons', async () => {
@@ -400,7 +407,7 @@ describe('the dialogs', () => {
     ] as const) {
       opener.focus();
       await open();
-      const dialog = dialogNamed(title);
+      const dialog = await dialogArrived(title);
       await vi.waitFor(() => expect(dialog.open).toBe(true));
       // A phone hides the status bar, and the opener with it.
       await page.viewport(390, 844);
@@ -438,7 +445,7 @@ describe('the dialogs', () => {
     await page.viewport(390, 844);
     await userEvent.click(button('More settings'));
     await userEvent.click(button('Provenance'));
-    const dialog = dialogNamed('Provenance');
+    const dialog = await dialogArrived('Provenance');
     await vi.waitFor(() => expect(dialog.open).toBe(true));
     expect(dialog.parentElement).toBe(shell.target);
     expect(dialog.textContent).toContain('Neuropsychological domains');
@@ -486,7 +493,7 @@ describe('the dialogs', () => {
     await page.viewport(390, 844);
     await userEvent.click(button('More settings'));
     await userEvent.click(button('Provenance'));
-    const dialog = dialogNamed('Provenance');
+    const dialog = await dialogArrived('Provenance');
     await vi.waitFor(() => expect(dialog.open).toBe(true));
     const labels = [...dialog.querySelectorAll('dt')].map((term) => term.textContent);
     expect(labels).toEqual([t('en', 'footer').tractReference, t('en', 'footer').sources]);

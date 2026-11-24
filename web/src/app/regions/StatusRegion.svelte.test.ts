@@ -360,12 +360,20 @@ describe('the display settings in effect', () => {
 });
 
 describe('Provenance', () => {
+  /** Fetched on its first opening: the open dialog, once its chunk has arrived. */
+  const arrived = () =>
+    vi.waitFor(() => {
+      const dialog = [...document.querySelectorAll('dialog')].find((candidate) => candidate.open);
+      expect(dialog).toBeDefined();
+      return dialog!;
+    });
+
   test('is in the reader’s language', async () => {
     await shell.open();
     shell.app.chooseLanguage('fr');
     flushSync();
     await userEvent.click(page.getByRole('button', { name: 'Provenance' }));
-    const dialog = [...document.querySelectorAll('dialog')].find((candidate) => candidate.open)!;
+    const dialog = await arrived();
     expect(dialog.textContent).toContain(t('fr', 'footer').intendedUse);
   });
 
@@ -373,9 +381,7 @@ describe('Provenance', () => {
     await shell.open();
     const opener = page.getByRole('button', { name: 'Provenance' });
     await userEvent.click(opener);
-    const dialog = [...document.querySelectorAll('dialog')].find(
-      (candidate) => candidate.querySelector('h2')?.textContent === 'Provenance',
-    )!;
+    const dialog = await arrived();
     await vi.waitFor(() => expect(dialog.open).toBe(true));
     expect(dialog.hasAttribute('data-instant')).toBe(false);
     expect(dialog.textContent).toContain('Neuropsychological domains');
@@ -388,9 +394,7 @@ describe('Provenance', () => {
     await shell.open();
     page.getByRole('button', { name: 'Provenance' }).element().focus();
     await userEvent.keyboard('{Enter}');
-    const dialog = [...document.querySelectorAll('dialog')].find(
-      (candidate) => candidate.querySelector('h2')?.textContent === 'Provenance',
-    )!;
+    const dialog = await arrived();
     await vi.waitFor(() => expect(dialog.open).toBe(true));
     expect(dialog.hasAttribute('data-instant')).toBe(true);
   });
