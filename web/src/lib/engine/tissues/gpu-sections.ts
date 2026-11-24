@@ -706,6 +706,8 @@ export class TissueSections {
 
   intersect(raycaster: Raycaster): CutHit | null {
     if (!this.current) return null;
+    // A cut face is only seen from the cut-away side of its clipping plane, never from the kept side.
+    if (this.solids.plane.distanceToPoint(raycaster.ray.origin) >= 0) return null;
     this.group.updateMatrixWorld(true);
     const hit = this.solids.intersect(raycaster, (candidate) => this.capVisibleAt(candidate));
     return hit && this.named(hit);
