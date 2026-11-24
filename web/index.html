@@ -64,7 +64,8 @@
       other's value. Each rule is the app's own, restated here because the
       app has not loaded: theme is `resolveTheme` (src/lib/state/theme.svelte.ts), language is
       `startLanguage` with the link's `lang` and the browser's languages
-      (src/lib/state/language.svelte.ts), keys are PREF_KEYS
+      (src/lib/state/language.svelte.ts), an embedded frame is the link's `embed=1` as decodeState
+      reads it (src/lib/core/state/url-state.ts), keys are PREF_KEYS
       (src/lib/state/prefs.ts) and the two theme-color values are --surface-base in tokens.css.
       src/app/head-script.test.ts holds them equal. Site data can be blocked, which makes reading
       localStorage throw.
@@ -82,9 +83,13 @@
           theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         // A repeated `lang` is rejected by decodeState, so it decides nothing here either.
-        var values = new URLSearchParams(location.hash.replace(/^#/, '')).getAll('lang');
+        var link = new URLSearchParams(location.hash.replace(/^#/, ''));
+        var values = link.getAll('lang');
         var linked = values.length === 1 ? values[0] : null;
         root.dataset.theme = theme;
+        // An embedded frame is the stage alone, so the frame painted before the app leaves its rails out.
+        var frames = link.getAll('embed');
+        if (frames.length === 1 && frames[0] === '1') root.dataset.embed = '';
         // The reader's saved choice wins over a link's.
         var lang = saved === 'en' || saved === 'fr' ? saved : linked;
         for (var i = 0; lang !== 'en' && lang !== 'fr' && i < navigator.languages.length; i++) {

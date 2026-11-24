@@ -8,6 +8,33 @@
     height: 100dvh;
     min-height: 0;
   }
+  /*
+   * Before the scripts run the mount point is empty, for seconds on a slow connection. It paints
+   * the frame the app will fill, so the page opens on the workspace and not on a blank sheet:
+   * the masthead, the tabs' band, the panel and the status bar on their grounds, each with its
+   * rule, around the stage. Flat fills only, listed front to back.
+   */
+  #app:empty {
+    --shell-ground: linear-gradient(var(--surface-base), var(--surface-base));
+    --shell-band: linear-gradient(var(--surface-navigation), var(--surface-navigation));
+    --shell-rule: linear-gradient(var(--border-subtle), var(--border-subtle));
+    background:
+      var(--shell-rule) left 0 top calc(var(--header-height) - 1px) / 100% 1px no-repeat,
+      var(--shell-ground) left top / 100% var(--header-height) no-repeat,
+      var(--shell-rule) left 0 bottom calc(var(--footer-height) - 1px) / 100% 1px no-repeat,
+      var(--shell-ground) left bottom / 100% var(--footer-height) no-repeat,
+      var(--shell-rule) left calc(var(--rail-width) - 1px) top 0 / 1px 100% no-repeat,
+      var(--shell-rule) left 0 top calc(var(--header-height) + var(--tab-height)) /
+        var(--rail-width) 1px no-repeat,
+      var(--shell-band) left 0 top var(--header-height) / var(--rail-width) var(--tab-height)
+        no-repeat,
+      var(--shell-ground) left top / var(--rail-width) 100% no-repeat,
+      var(--scene-background);
+  }
+  /* A frame in a course page is the stage alone (the head script reads `embed=1` before the app does). */
+  :root[data-embed] #app:empty {
+    background: var(--scene-background);
+  }
   /* Pinned to their rows, so an empty slot cannot shift the grid. */
   #app > header {
     grid-column: 1 / -1;
@@ -139,6 +166,15 @@
     /* After the tablet rule above, as phone.css followed layout.css: a landscape phone is 801-1000 px wide too. */
     :root {
       --panel-inset: var(--space-4);
+    }
+    /* The sheet arrives with the app; before it, the masthead over the stage. */
+    :root:not([data-embed]) #app:empty {
+      background:
+        var(--shell-rule) left 0 top calc(var(--header-height) + env(safe-area-inset-top) - 1px) /
+          100% 1px no-repeat,
+        var(--shell-ground) left top / 100% calc(var(--header-height) + env(safe-area-inset-top))
+          no-repeat,
+        var(--scene-background);
     }
     #app {
       padding: 0;

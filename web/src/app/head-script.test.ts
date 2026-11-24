@@ -17,6 +17,7 @@ interface Page {
   theme?: string;
   lang: string;
   themeColor?: string;
+  embed: boolean;
 }
 
 /** Runs a head script against a page with the given storage, system theme and link. */
@@ -36,11 +37,15 @@ function run(
     languages?: string[];
   } = {},
 ): Page {
-  const page: Page = { lang: 'en', theme: undefined };
+  const page: Page = { lang: 'en', theme: undefined, embed: false };
   const root = {
     dataset: {
       set theme(value: string) {
         page.theme = value;
+      },
+      set embed(value: string) {
+        expect(value).toBe('');
+        page.embed = true;
       },
     },
     set lang(value: string) {
@@ -121,6 +126,26 @@ describe('the pre-paint script', () => {
     expect(lang('#lang=en', 'fr')).toBe('fr');
     expect(lang('#lang=fr')).toBe('fr');
     expect(lang('#lang=fr', 'de')).toBe('fr');
+  });
+
+  test('SHELL-22 · marks an embedded frame exactly where decodeState reads the link as embedded', () => {
+    const hashes = [
+      '',
+      '#embed=1',
+      '#embed=0',
+      '#embed=',
+      '#embed=true',
+      '#embed=1&embed=1',
+      '#embed=0&embed=1',
+      '#region=destrieux:left:29&embed=1',
+      'embed=1',
+    ];
+    for (const hash of hashes) {
+      // The app embeds on a link whose `embed` reads true; absent or rejected, it does not.
+      expect(run(paint!, { hash }).embed, hash).toBe(decodeState(hash).state.embed === true);
+    }
+    expect(run(paint!, { hash: '#embed=1' }).embed).toBe(true);
+    expect(run(paint!, { hash: '' }).embed).toBe(false);
   });
 
   test('colours the browser chrome with each theme’s --surface-base', () => {
