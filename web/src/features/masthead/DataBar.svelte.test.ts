@@ -240,8 +240,8 @@ describe('DataBar lists', () => {
     ]);
     expect(asides('Colour')).toEqual([null, null, null, null, null, 'Atlas becomes HCP-MMP']);
     expect(
-      [...el(list('Colour')).querySelectorAll('[role=group]')].map((group) =>
-        group.getAttribute('aria-label'),
+      [...el(list('Colour')).querySelectorAll('[role=group]')].map(
+        (group) => document.getElementById(group.getAttribute('aria-labelledby')!)?.textContent,
       ),
     ).toEqual(['Appearance', 'Parcellation', 'Networks']);
     // Colour defined on HCP-MMP areas: the option for another atlas names the colour it drops.
@@ -447,8 +447,8 @@ describe('DataBar lists', () => {
       expect(options(name).length, name).toBeGreaterThan(0);
     }
     expect(
-      [...el(list('Couleur')).querySelectorAll('[role=group]')].map((group) =>
-        group.getAttribute('aria-label'),
+      [...el(list('Couleur')).querySelectorAll('[role=group]')].map(
+        (group) => document.getElementById(group.getAttribute('aria-labelledby')!)?.textContent,
       ),
     ).toEqual(['Apparence', 'Parcellisation', 'Réseaux']);
     expect(asides('Couleur').at(-1)).toBe('L’atlas devient HCP-MMP');
