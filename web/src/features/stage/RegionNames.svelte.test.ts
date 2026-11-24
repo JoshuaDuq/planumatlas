@@ -80,7 +80,12 @@ const placed = () =>
 /** Each placed name's words and box, in drawing order. */
 const drawn = () =>
   placed().map((node) => ({ text: node.textContent!.trim(), box: node.style.transform }));
-const settled = () => vi.waitFor(() => expect(placed().length).toBeGreaterThan(2));
+/** The names placed, in the type they are measured in: a late webfont changes their widths and so their places. */
+const settled = async () => {
+  await vi.waitFor(() => expect(placed().length).toBeGreaterThan(2));
+  await document.fonts.ready;
+  await frames();
+};
 /** Each region name's region, by its accessible name: the placed ones, or all chosen. */
 const namedRegions = (engine: FakeEngine, nodes = placed()) =>
   nodes.map((node) => {
