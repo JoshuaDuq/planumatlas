@@ -1298,7 +1298,13 @@ describe('STAGE-86 · on a phone a tool that opens asks for the stage', () => {
       await vi.waitFor(() => expect(plates.at(-1)!.top).not.toBeNull());
       expect(popover().offsetHeight).toBe(rested.height);
       expect(plates.at(-1)!.top).toBe(rested.top);
-      // On screen the plate rides the dock, 150 px above where it was reported.
+      // On screen the plate rides the dock, 150 px above where it was reported, once it has grown in
+      // from its entry scale (Popover.svelte), which draws its top lower.
+      await Promise.all(
+        popover()
+          .getAnimations()
+          .map((animation) => animation.finished),
+      );
       const drawn = popover().getBoundingClientRect().top - host().getBoundingClientRect().top;
       expect(Math.round(drawn)).toBeCloseTo(rested.top - 150, -1);
     } finally {
