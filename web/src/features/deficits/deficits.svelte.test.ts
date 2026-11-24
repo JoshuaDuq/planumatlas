@@ -708,7 +708,7 @@ describe('related deficits', () => {
     )!;
     const section = document.querySelector<HTMLElement>('section.related')!;
     await expect.poll(() => section.hidden).toBe(false);
-    expect(section.querySelector('h3')!.textContent).toBe('Neuropsychology');
+    expect(section.querySelector('h3')!.textContent).toBe('Linked deficits');
     expect(section.getAttribute('aria-labelledby')).toBeNull();
     // Each row shows its chevron at rest, as a link does, not only on hover.
     const chevrons = [...section.querySelectorAll<HTMLElement>('.chevron')];

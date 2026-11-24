@@ -623,8 +623,30 @@ describe('evidence sections', () => {
     domains().open = true;
     expect(text(domains().querySelector('.link-row')!)).toMatch(/“.+” · z \d+\.\d/);
     expect(text(domains())).toContain('this whole HCP-MMP area');
-    await screen.rerender({ regionId: CERUBELLUM });
+    // The left amygdala, a sampled structure that lists functions.
+    await screen.rerender({ regionId: 'aseg:left:18' });
     expect(text(domains())).toContain('over this whole structure');
+  });
+
+  test('INSP-12a · a scored region with no function and no term has no functions row; with terms alone, a row without a count', async () => {
+    const summary = () =>
+      [...document.querySelectorAll('details > summary')]
+        .map(text)
+        .find((words) => words.startsWith('Neuropsychological functions'));
+    // The cerebellar cortex is sampled and reaches no function or term.
+    const screen = await render(Fixture, { regionId: CERUBELLUM });
+    expect(summary()).toBeUndefined();
+    // Area 7Pm: one searched term, no curated function.
+    await screen.rerender({ regionId: 'hcp-mmp:left:29' });
+    expect(summary()).toBe('Neuropsychological functions');
+    const domains = section('Neuropsychological functions');
+    domains.open = true;
+    expect(domains.querySelector(':scope > :not(summary) .function-links')).not.toBeNull();
+    expect(text(section('Neurosynth terms').querySelector('summary')!)).toBe('Neurosynth terms, 1');
+    expect(text(domains)).toMatch(/No function reaches z\s3 here\./);
+    // One with functions keeps its count.
+    await screen.rerender({ regionId: V1 });
+    expect(summary()).toBe('Neuropsychological functions, 1');
   });
 
   test('FUNC-41 · a Julich-Brain area says its scores are means over its own parcel, not a structure’s', async () => {

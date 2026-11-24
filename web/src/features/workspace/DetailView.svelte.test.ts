@@ -68,10 +68,15 @@ describe('a region’s detail', () => {
     await shell.open();
     // The left precentral gyrus, whose functions are listed by the share its HCP-MMP areas cover.
     await pick('destrieux:left:29');
-    const lead = detail().querySelector('.region-lead')!;
-    expect(lead.textContent).toMatch(
-      /^Network: Somatomotor 69\s?%\. Functions: Motor functions, .+\. Linked deficits: .+\.$/,
-    );
+    const lead = detail().querySelector('dl.region-lead')!;
+    const rows = [...lead.querySelectorAll('dt')].map((label) => [
+      label.textContent,
+      label.nextElementSibling!.textContent,
+    ]);
+    expect(rows.map(([label]) => label)).toEqual(['Network', 'Functions', 'Linked deficits']);
+    expect(rows[0]![1]).toMatch(/^Somatomotor 69\s?%$/);
+    expect(rows[1]![1]).toMatch(/^Motor functions, .+/);
+    expect(rows[2]![1]).toMatch(/^.+, .+$/);
     // Before the commands and the folded measurements.
     const focus = page.getByRole('button', { name: 'Focus', exact: true }).element();
     expect(lead.compareDocumentPosition(focus) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

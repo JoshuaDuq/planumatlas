@@ -64,12 +64,16 @@ export function sourceLabel(
   return { atlas: sourceAtlas, ids: ids.join(', '), stacked: ids.length > 2 };
 }
 
-/** How many functions and deficits the lead line names; the sections below list them all. */
+/** How many functions and deficits the lead names; the sections below list them all. */
 const LEAD_NAMES = 2;
 
+/** One labelled row of the lead: what kind of fact it is, then the region's value for it. */
+export type LeadRow = [label: string, value: string];
+
 /**
- * The region in one plain line for a reader new to it (2026-11-20 review): its network, its
- * strongest functions and the deficits mapped on it, each as its section has it. Null with none.
+ * The region at a glance for a reader new to it (2026-11-20 review): its network, its strongest
+ * functions and the deficits mapped on it, each as its section has it, one labelled row apiece.
+ * A region with none has no rows.
  */
 export function regionLead(
   {
@@ -78,13 +82,12 @@ export function regionLead(
     deficits,
   }: { network: string | null; functions: readonly string[]; deficits: readonly string[] },
   lang: Language,
-): string | null {
+): LeadRow[] {
   const copy = t(lang, 'inspector').lead;
   const named = (names: readonly string[]) => names.slice(0, LEAD_NAMES).join(', ');
-  const parts = [
-    network && copy.network(network),
-    functions.length > 0 && copy.functions(named(functions)),
-    deficits.length > 0 && copy.deficits(named(deficits)),
-  ].filter((part) => typeof part === 'string');
-  return parts.length ? parts.join(' ') : null;
+  const rows: LeadRow[] = [];
+  if (network) rows.push([copy.network, network]);
+  if (functions.length) rows.push([copy.functions, named(functions)]);
+  if (deficits.length) rows.push([copy.deficits, named(deficits)]);
+  return rows;
 }

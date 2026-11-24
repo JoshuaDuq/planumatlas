@@ -16,12 +16,8 @@ export const en = {
   sourceLabel: 'Source label',
   // The datasheet's one closed row, its summary hinting at the area or volume.
   measurements: 'Measurements and source',
-  // The region in one plain line, read from its sections: its network, functions and deficits.
-  lead: {
-    network: (headline: string) => `Network: ${headline}.`,
-    functions: (names: string) => `Functions: ${names}.`,
-    deficits: (names: string) => `Linked deficits: ${names}.`,
-  },
+  // The region at a glance, read from its sections: the labels of its network, functions and deficits.
+  lead: { network: 'Network', functions: 'Functions', deficits: 'Linked deficits' },
   copyValue: { copy: 'Copy', copied: 'Copied', failed: 'Could not copy' },
   linkedMri: 'Linked MRI',
   // A function's or deficit's structures beneath its opaque cortex, shown by hiding the cortex.
@@ -88,11 +84,7 @@ export const fr: typeof en = {
   centroid: 'Centroïde (RAS de surface)',
   sourceLabel: 'Étiquette source',
   measurements: 'Mesures et source',
-  lead: {
-    network: (headline: string) => `Réseau\u202f: ${headline}.`,
-    functions: (names: string) => `Fonctions\u202f: ${names}.`,
-    deficits: (names: string) => `Déficits associés\u202f: ${names}.`,
-  },
+  lead: { network: 'Réseau', functions: 'Fonctions', deficits: 'Déficits associés' },
   copyValue: { copy: 'Copier', copied: 'Copié', failed: 'Copie impossible' },
   linkedMri: 'IRM liée',
   showDeep: (count: number) =>

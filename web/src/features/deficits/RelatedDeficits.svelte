@@ -22,7 +22,8 @@
 
 <section class="related" hidden={!visible}>
   {#if visible}
-    <h3>{t(lang, 'clinical').related}</h3>
+    <!-- The lead's own label, so the row above and this list say one thing. -->
+    <h3>{t(lang, 'inspector').lead.deficits}</h3>
     <ul>
       {#each deficits as id (id)}
         {@const deficit = clinical.get(id)}
@@ -45,11 +46,15 @@
       margin-block: var(--space-6);
       padding-inline: var(--panel-inset);
     }
+    /* The sheet's caption idiom (inspector.css `.index-caption`): 13px/600 over the rule that opens the list. */
     h3 {
-      margin: 0 0 var(--space-2);
-      font-size: var(--text-ui);
+      margin: 0 0 var(--space-1);
+      padding-bottom: var(--space-1);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
       font-weight: 600;
-      line-height: var(--lh-ui);
+      line-height: var(--lh-caption);
     }
     ul {
       margin: 0;

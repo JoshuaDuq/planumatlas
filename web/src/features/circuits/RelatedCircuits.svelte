@@ -46,10 +46,15 @@
       margin-block: var(--space-6);
       padding-inline: var(--panel-inset);
     }
+    /* The sheet's caption idiom, as the deficits list above it. */
     .related-heading {
-      font-size: var(--text-ui);
+      margin-bottom: var(--space-1);
+      padding-bottom: var(--space-1);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
       font-weight: 600;
-      line-height: var(--lh-ui);
+      line-height: var(--lh-caption);
     }
     .links {
       margin: 0;

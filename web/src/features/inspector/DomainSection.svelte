@@ -2,8 +2,9 @@
   Neuropsychological functions (inspector.js:207-235): the curated functions a region lists, then the
   searched Neurosynth terms in a fold, each row opening its map. HCP-MMP areas, sampled structures and
   the listed atlases give each its z; Destrieux and Desikan-Killiany regions the share their HCP-MMP
-  areas cover, with the z over that share. The section stays mounted so its open state survives from
-  one selection to the next.
+  areas cover, with the z over that share. A scored region that lists neither a function nor a term
+  has no section (2026-11-23: a row reading "0" answered nothing), and one with terms alone has no
+  count. The component stays mounted so its open state survives from one selection to the next.
 -->
 <script lang="ts">
   import { tick } from 'svelte';
@@ -93,9 +94,14 @@
   }
 </script>
 
-{#if scored}
+{#if scored && (found.length || terms.length)}
   <div class="evidence-section">
-    <Disclosure variant="section" summary={copy.heading} value={String(found.length)} bind:open>
+    <Disclosure
+      variant="section"
+      summary={copy.heading}
+      value={found.length ? String(found.length) : null}
+      bind:open
+    >
       {#if found.length}
         <ul class="function-links" bind:this={rows}>
           {#each shown as record (record.id)}

@@ -255,7 +255,7 @@
   });
   const chrome = $derived(inspectorEmptyChrome({ selectedRegion: region, explorer }));
   const label = $derived(region ? catalog.label(region.id) : null);
-  // What the region is, in one line, before the commands and the measurements.
+  // What the region is, at a glance, before the commands and the measurements.
   const lead = $derived(
     region &&
       regionLead(
@@ -299,7 +299,14 @@
       <dt class="visually-hidden">{copy.group}</dt>
       <dd class="context-group">{label.group ?? '—'}</dd>
     </dl>
-    {#if lead}<p class="region-lead">{lead}</p>{/if}
+    {#if lead?.length}
+      <dl class="region-lead">
+        {#each lead as row}
+          <dt>{row[0]}</dt>
+          <dd>{row[1]}</dd>
+        {/each}
+      </dl>
+    {/if}
     {#if region.notes}<p class="selected-hint">{region.notes[lang]}</p>{/if}
     <div class="actions">
       <button

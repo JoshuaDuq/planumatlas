@@ -180,7 +180,6 @@
    "[183] → \"183 deficits\"",
    "[12345] → \"12345 deficits\""
   ],
-  "related": "Neuropsychology",
   "atRegion": "Involving this region",
   "simulateLesion": "Simulate a lesion",
   "strokeSelect": "Select a region to see the stroke cases whose lesion reaches it.",
@@ -1313,18 +1312,9 @@
   "sourceLabel": "Source label",
   "measurements": "Measurements and source",
   "lead": {
-   "network": [
-    "[\"Alpha\"] → \"Network: Alpha.\"",
-    "[\"\"] → \"Network: .\""
-   ],
-   "functions": [
-    "[\"Alpha\"] → \"Functions: Alpha.\"",
-    "[\"\"] → \"Functions: .\""
-   ],
-   "deficits": [
-    "[\"Alpha\"] → \"Linked deficits: Alpha.\"",
-    "[\"\"] → \"Linked deficits: .\""
-   ]
+   "network": "Network",
+   "functions": "Functions",
+   "deficits": "Linked deficits"
   },
   "copyValue": {
    "copy": "Copy",

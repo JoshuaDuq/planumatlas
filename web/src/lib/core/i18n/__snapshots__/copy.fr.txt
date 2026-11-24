@@ -180,7 +180,6 @@
    "[183] → \"183 déficits\"",
    "[12345] → \"12345 déficits\""
   ],
-  "related": "Neuropsychologie",
   "atRegion": "Touchant cette région",
   "simulateLesion": "Simuler une lésion",
   "strokeSelect": "Sélectionnez une région pour voir les cas d’AVC dont la lésion l’atteint.",
@@ -1313,18 +1312,9 @@
   "sourceLabel": "Étiquette source",
   "measurements": "Mesures et source",
   "lead": {
-   "network": [
-    "[\"Alpha\"] → \"Réseau<NNBSP>: Alpha.\"",
-    "[\"\"] → \"Réseau<NNBSP>: .\""
-   ],
-   "functions": [
-    "[\"Alpha\"] → \"Fonctions<NNBSP>: Alpha.\"",
-    "[\"\"] → \"Fonctions<NNBSP>: .\""
-   ],
-   "deficits": [
-    "[\"Alpha\"] → \"Déficits associés<NNBSP>: Alpha.\"",
-    "[\"\"] → \"Déficits associés<NNBSP>: .\""
-   ]
+   "network": "Réseau",
+   "functions": "Fonctions",
+   "deficits": "Déficits associés"
   },
   "copyValue": {
    "copy": "Copier",

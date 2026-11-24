@@ -102,7 +102,7 @@ test('PANEL-18 eight ids are listed, nine are counted and the full list is kept'
 });
 
 test('INSP-61 the lead names the network, two functions and two deficits, each only where known', () => {
-  assert.equal(
+  assert.deepEqual(
     regionLead(
       {
         network: 'Somatomotor 69%',
@@ -111,11 +111,14 @@ test('INSP-61 the lead names the network, two functions and two deficits, each o
       },
       'en',
     ),
-    'Network: Somatomotor 69%. Functions: Action execution, Pain. Linked deficits: Hemiparesis, Apraxia.',
+    [
+      ['Network', 'Somatomotor 69%'],
+      ['Functions', 'Action execution, Pain'],
+      ['Linked deficits', 'Hemiparesis, Apraxia'],
+    ],
   );
-  assert.equal(
-    regionLead({ network: null, functions: [], deficits: ['Aphasie'] }, 'fr'),
-    'Déficits associés\u202f: Aphasie.',
-  );
-  assert.equal(regionLead({ network: null, functions: [], deficits: [] }, 'en'), null);
+  assert.deepEqual(regionLead({ network: null, functions: [], deficits: ['Aphasie'] }, 'fr'), [
+    ['Déficits associés', 'Aphasie'],
+  ]);
+  assert.deepEqual(regionLead({ network: null, functions: [], deficits: [] }, 'en'), []);
 });

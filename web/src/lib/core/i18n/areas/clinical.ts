@@ -13,7 +13,6 @@ export const en = {
     `Functions: ${count} activation ${count === 1 ? 'map matches' : 'maps match'} “${query}”`,
   results: (count: number) =>
     count ? `${count} ${count === 1 ? 'deficit' : 'deficits'}` : 'No match',
-  related: 'Neuropsychology',
   // The Deficits list's first group while a region is selected.
   atRegion: 'Involving this region',
   // Above the list: the Lesion tool, and the stroke cases of the selected region (4.2).
@@ -94,7 +93,6 @@ export const fr: typeof en = {
     `Fonctions\u202f: ${count} ${count === 1 ? 'carte d’activation correspond' : 'cartes d’activation correspondent'} à «\u00a0${query}\u00a0»`,
   results: (count: number) =>
     count ? `${count} ${count === 1 ? 'déficit' : 'déficits'}` : 'Aucun résultat',
-  related: 'Neuropsychologie',
   atRegion: 'Touchant cette région',
   simulateLesion: 'Simuler une lésion',
   strokeSelect: 'Sélectionnez une région pour voir les cas d’AVC dont la lésion l’atteint.',
