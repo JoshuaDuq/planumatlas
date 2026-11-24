@@ -113,11 +113,6 @@
   {/if}
   {#if comparison}
     <div class="content">
-      <p class="note caveat first">
-        {copy.caveat}{#if comparison.functions.some( (entry) => isTermId(entry.id) )}{' '}{copy.termCaveat}{/if}
-      </p>
-      <p class="note caveat">{copy.consistencyNote} {copy.compareNote}</p>
-
       <div class="section">
         <h3 class="section-heading">{copy.overviewHeading}</h3>
         <ul class="links">
@@ -195,10 +190,16 @@
         </div>
       {/each}
 
-      <p class="note method">{comparison.method}</p>
-      <p class="note sources">{comparison.citation}</p>
-      {@render neurosynthLinks(comparison.functions.flatMap((entry) => entry.neurosynth ?? []))}
-      <p class="note methods"><MethodsLink page="functions" {lang} /></p>
+      <div class="profile-notes">
+        <p class="note caveat">
+          {copy.caveat}{#if comparison.functions.some( (entry) => isTermId(entry.id) )}{' '}{copy.termCaveat}{/if}
+        </p>
+        <p class="note caveat">{copy.consistencyNote} {copy.compareNote}</p>
+        <p class="note method">{comparison.method}</p>
+        <p class="note sources">{comparison.citation}</p>
+        {@render neurosynthLinks(comparison.functions.flatMap((entry) => entry.neurosynth ?? []))}
+        <p class="note methods"><MethodsLink page="functions" {lang} /></p>
+      </div>
     </div>
   {/if}
   {#if content && id}
@@ -210,10 +211,6 @@
           {content.term.before}<span lang="en">{content.term.term}</span>{content.term.after}
         </p>
       {/if}
-      <p class="note caveat">{content.caveat}</p>
-      <p class="note caveat">
-        {copy.consistencyNote}{#if content.all}{' '}{copy.overviewNote}{/if}
-      </p>
 
       {#if content.all}
         <div class="section">
@@ -297,10 +294,16 @@
         {/if}
       {/if}
 
-      <p class="note method">{content.method}</p>
-      <p class="note sources">{content.citation}</p>
-      {@render neurosynthLinks(content.neurosynth ? [content.neurosynth] : [])}
-      <p class="note methods"><MethodsLink page="functions" {lang} /></p>
+      <div class="profile-notes">
+        <p class="note caveat">{content.caveat}</p>
+        <p class="note caveat">
+          {copy.consistencyNote}{#if content.all}{' '}{copy.overviewNote}{/if}
+        </p>
+        <p class="note method">{content.method}</p>
+        <p class="note sources">{content.citation}</p>
+        {@render neurosynthLinks(content.neurosynth ? [content.neurosynth] : [])}
+        <p class="note methods"><MethodsLink page="functions" {lang} /></p>
+      </div>
     </div>
   {/if}
 </div>
@@ -450,38 +453,33 @@
       line-height: var(--lh-caption);
       font-variant-numeric: tabular-nums;
     }
-    .kind + .caveat {
-      margin-top: var(--space-2);
-    }
-    .summary + .caveat,
-    .caveat + .caveat {
-      margin-top: var(--space-2);
-    }
     .note {
       color: var(--text-secondary);
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
     }
-    .content > .method {
+    /* Caveats, method and citation sit together in one quiet footer below the areas. */
+    .profile-notes {
       margin-top: var(--space-6);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-subtle);
     }
-    .content > .method + .sources {
+    .profile-notes > .note + .note {
       margin-top: var(--space-2);
     }
-    .content > .sources {
+    .profile-notes > .sources {
       color: var(--text-tertiary);
     }
-    .content > .methods,
-    .content > .neurosynth-note {
-      margin-top: var(--space-2);
-    }
     /* The site's page sits with the sentence that says how its map differs. */
-    .content > .neurosynth {
+    .profile-notes > .neurosynth {
       margin-top: var(--space-1);
     }
 
     .section {
-      margin-top: var(--space-6);
+      margin-top: var(--space-5);
+    }
+    .content > .section:first-child {
+      margin-top: var(--space-4);
     }
     .section-heading {
       margin-bottom: var(--space-2);
@@ -506,9 +504,6 @@
     }
     .lesion-note {
       margin-top: var(--space-2);
-    }
-    .caveat.first {
-      margin-top: var(--space-4);
     }
     .swatched {
       display: flex;

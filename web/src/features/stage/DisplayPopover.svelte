@@ -22,7 +22,7 @@
   import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Hemisphere, Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
-  import AboutData from '../info/AboutData.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import Select from '../../lib/ui/Select.svelte';
 
@@ -142,14 +142,16 @@
         format={(fraction) => percent(fraction, lang)}
         oninput={onCortexOpacity}
       />
-      <label class="stage-field-label surface-label" for={surfaceId}>{surfaceCopy.surface}</label>
+      <label class="stage-field-label surface-label" for={surfaceId} data-tooltip={copy.surfaceHint}
+        >{surfaceCopy.surface}</label
+      >
       <Select
         id={surfaceId}
         options={surfaces}
         describedby={surfaceHintId}
         bind:value={() => cortexSurface, (surface) => onCortexSurface(surface as CortexSurface)}
       />
-      <p id={surfaceHintId} class="hint">{copy.surfaceHint}</p>
+      <span id={surfaceHintId} class="visually-hidden">{copy.surfaceHint}</span>
     </div>
   {/if}
   <label class="check">
@@ -174,7 +176,7 @@
 <div class="view-aids">
   <p class="stage-field-label section-label">{copy.viewAidsSection}</p>
   {#if explodable}
-    <label class="check">
+    <label class="check" data-tooltip={copy.explodeHint}>
       <input
         type="checkbox"
         checked={exploded}
@@ -183,9 +185,9 @@
       />
       <span>{copy.explode}</span>
     </label>
-    <p id={explodeHintId} class="hint explode-hint">{copy.explodeHint}</p>
+    <span id={explodeHintId} class="visually-hidden">{copy.explodeHint}</span>
   {/if}
-  <label class="check">
+  <label class="check" data-tooltip={copy.namesHint}>
     <input
       type="checkbox"
       checked={namesShown}
@@ -194,7 +196,7 @@
     />
     <span>{copy.names}</span>
   </label>
-  <p id={namesHintId} class="hint explode-hint">{copy.namesHint}</p>
+  <span id={namesHintId} class="visually-hidden">{copy.namesHint}</span>
 </div>
 {#if shown.length}
   <div class="changes">
@@ -202,7 +204,7 @@
     <button type="button" class="reset-display" onclick={reset}>{copy.resetDisplay}</button>
   </div>
 {/if}
-<AboutData place="display" {lang} host="popover" />
+<p class="stage-methods"><MethodsLink page="display" {lang} /></p>
 
 <style>
   @layer features {
@@ -236,17 +238,6 @@
     }
     .surface-label {
       margin-top: var(--space-2);
-    }
-    /* Under its box's words, as the opacity rows are. */
-    .hint.explode-hint {
-      margin: 0;
-      padding: 0 0 var(--space-2) var(--space-6);
-    }
-    .hint {
-      margin: var(--space-2) 0 0;
-      font-size: var(--text-caption);
-      line-height: var(--lh-caption);
-      color: var(--overlay-ink-muted);
     }
     .check {
       display: flex;

@@ -1,7 +1,6 @@
 <!--
-  "About this data": what a tab or dock tool shows, where its data come from, and
-  its main caution, then its methods page. The one disclosure, closed by default. In a tab it closes the
-  list as Tracts' does; in a stage popover it takes the row its methods link took.
+  "About this data": what a tab shows, where its data come from, and its main caution, then its
+  methods page. The one disclosure, closed by default, at the foot of each tab's list.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
@@ -62,12 +61,6 @@
     .about-data[data-host='list'] {
       margin: var(--space-6) var(--panel-inset) 0;
       padding-block: var(--space-1) var(--space-4);
-      border-top: 1px solid var(--border-subtle);
-    }
-    /* In a popover it stands where the methods link stood, under the tool's own controls. */
-    .about-data[data-host='popover'] {
-      margin-top: var(--space-3);
-      padding-top: var(--space-1);
       border-top: 1px solid var(--border-subtle);
     }
     .about-parts {

@@ -8,7 +8,6 @@ import { flushSync } from 'svelte';
 import { cdp, page, userEvent } from 'vitest/browser';
 import { cleanup, render } from 'vitest-browser-svelte';
 import manifest from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
-import { TRANSLATIONS } from '../../lib/core/i18n/index.ts';
 import { methodsHref } from '../../lib/core/methods.ts';
 import { createFakeEngine } from '../../lib/engine/fake.ts';
 import type { FakeEngine } from '../../lib/engine/fake.ts';
@@ -403,29 +402,14 @@ describe('a tool and its popover', () => {
     expect(page.getByRole('dialog', { name, exact: true }).elements()).toHaveLength(1);
   });
 
-  // The other four bodies come in as the fixture's snippets; their own tests open their About.
+  // The other four bodies come in as the fixture's snippets; their own tests verify their methods links.
   test.each([['Display', 'display']] as const)(
-    'the %s popover ends with About this data: closed, then Shows, Source, Caution and its methods page',
+    'the %s popover ends with a link to its methods page',
     async (name, place) => {
       await mount();
       await open(name);
-      const about = document.querySelector<HTMLElement>(`[data-about="${place}"]`)!;
-      const details = about.querySelector('details')!;
-      expect(details.open).toBe(false);
-      about.querySelector<HTMLElement>('summary')!.click();
-      await vi.waitFor(() => expect(details.open).toBe(true));
-      const copy = TRANSLATIONS.en.info;
-      expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
-        copy.shows,
-        copy.source,
-        copy.caution,
-      ]);
-      expect([...about.querySelectorAll('dd')].map((dd) => dd.textContent)).toEqual([
-        copy[place].shows,
-        copy[place].source,
-        copy[place].caution,
-      ]);
-      expect(about.querySelector('a')!.getAttribute('href')).toBe(methodsHref(place));
+      const link = document.querySelector<HTMLAnchorElement>('.stage-methods a')!;
+      expect(link.getAttribute('href')).toBe(methodsHref(place));
       await expectAxeClean();
     },
   );

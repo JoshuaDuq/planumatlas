@@ -35,7 +35,6 @@
   import { ASSET_BASE } from '../../../build/site.ts';
   import EmptyState from '../../lib/ui/EmptyState.svelte';
   import AboutData from '../info/AboutData.svelte';
-  import ScopeLine from '../info/ScopeLine.svelte';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
@@ -405,7 +404,6 @@
         </button>
       {/if}
     </div>
-    <ScopeLine place="tracts" {lang} template={averaged} />
   </div>
 
   <div class="body">
@@ -685,11 +683,9 @@
       color: var(--text-tertiary);
       font-variant-numeric: tabular-nums;
     }
-    .list :global(.bundle + .bundle) {
-      border-top: 1px solid var(--border-subtle);
-    }
     /* Fibre classes follow the tree's section rhythm: a rule, then the caption 16px under it. */
     .group:not([hidden]) ~ .group .list-heading {
+      margin-top: var(--space-2);
       padding-top: var(--space-4);
       border-top: 1px solid var(--border-subtle);
     }

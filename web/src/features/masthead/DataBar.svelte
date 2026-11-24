@@ -220,15 +220,24 @@
     untrack(fit);
   });
   $effect(() => {
-    const observer = new ResizeObserver(fit);
+    let frame = 0;
+    const scheduleFit = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        fit();
+      });
+    };
+    const observer = new ResizeObserver(scheduleFit);
     observer.observe(root);
-    window.addEventListener('resize', fit);
+    window.addEventListener('resize', scheduleFit);
     let live = true;
     void document.fonts.ready.then(() => live && fit());
     return () => {
       live = false;
+      if (frame) cancelAnimationFrame(frame);
       observer.disconnect();
-      window.removeEventListener('resize', fit);
+      window.removeEventListener('resize', scheduleFit);
     };
   });
 

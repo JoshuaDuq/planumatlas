@@ -43,9 +43,11 @@
     view: Pick<View, 'surfaceColor' | 'paint'>;
     /** The tract reference is shown alone, without the brain or its cut. */
     tractReference: boolean;
+    /** Linked MRI is currently open, so its trigger latches as pressed. */
+    mriOpen?: boolean;
   }
 
-  let { controls, stage, lang, view, tractReference }: Props = $props();
+  let { controls, stage, lang, view, tractReference, mriOpen = false }: Props = $props();
 
   const uid = $props.id();
   const positionId = `cut-position-${uid}`;
@@ -381,7 +383,8 @@
             </label>
             <button
               type="button"
-              class="stage-command"
+              class="stage-command cut-mri"
+              aria-pressed={mriOpen}
               aria-keyshortcuts={ARIA_KEYSHORTCUTS.linkedMri}
               aria-disabled={controls.opening ? 'true' : undefined}
               data-tooltip={copy.openMprTitle}
@@ -617,6 +620,11 @@
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
       color: var(--overlay-danger);
+    }
+    .cut-mri[aria-pressed='true'] {
+      border: 1px solid var(--overlay-accent);
+      background: var(--overlay-accent-wash);
+      color: var(--overlay-accent);
     }
     .cut-details {
       grid-area: details;

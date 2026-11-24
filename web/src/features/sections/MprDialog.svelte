@@ -42,6 +42,7 @@
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import { REPEAT_GAP_MS } from '../../lib/ui/announcer.svelte.ts';
   import Dialog from '../../lib/ui/Dialog.svelte';
+  import Disclosure from '../../lib/ui/Disclosure.svelte';
   import { captureInvoker } from '../../lib/ui/focus.ts';
   import IconButton from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
@@ -477,12 +478,13 @@
               oninput={(event) => mpr.moveTo(plane, event.currentTarget.valueAsNumber)}
             />
           </div>
-          <button
-            type="button"
+          <IconButton
             class="save"
-            aria-label={`${copy.savePng}${saveSuffix(plane, lang)}`}
-            onclick={() => save(plane)}>{copy.savePng}</button
-          >
+            icon="download"
+            label={`${copy.savePng}${saveSuffix(plane, lang)}`}
+            data-tooltip={`${copy.savePng}${saveSuffix(plane, lang)}`}
+            onclick={() => save(plane)}
+          />
         </section>
       {/each}
 
@@ -556,11 +558,15 @@
       </div>
     </div>
 
-    <div class="note">
-      <p>{copy.asStage}</p>
-      <p>{copy.subtitle}</p>
-      <p>{copy.note(anatomy)}</p>
-      {#if tracts}<p>{copy.tracts}{engine.tracts.hasFa ? ` ${copy.faNote}` : ''}</p>{/if}
+    <div class="mpr-about">
+      <Disclosure summary={t(lang, 'info').about} variant="section">
+        <div class="note">
+          <p>{copy.asStage}</p>
+          <p>{copy.subtitle}</p>
+          <p>{copy.note(anatomy)}</p>
+          {#if tracts}<p>{copy.tracts}{engine.tracts.hasFa ? ` ${copy.faNote}` : ''}</p>{/if}
+        </div>
+      </Disclosure>
     </div>
   </div>
 {/snippet}
@@ -674,6 +680,12 @@
       color: var(--text-secondary);
       font-weight: 400;
     }
+    .plane :global(.save) {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+      color: var(--text-secondary);
+    }
     .save {
       grid-column: 2;
       grid-row: 1;
@@ -772,11 +784,13 @@
     [data-edge='right'] {
       right: var(--space-2);
     }
-    /* Which way left and right fall, in the corner the top letter leaves free. */
+    /* Which way left and right fall, quiet in the corner the top letter leaves free. */
     .convention {
       top: var(--space-1);
       left: var(--space-2);
+      color: var(--overlay-ink-muted);
       font-size: var(--text-caption);
+      font-weight: 500;
       letter-spacing: 0.02em;
     }
     /* A picture too narrow for the word beside the top letter takes it a line lower. */
@@ -922,9 +936,22 @@
       color: var(--danger);
       font-size: var(--text-ui);
     }
-    .note {
-      padding-top: var(--space-3);
+    .mpr-about {
+      padding-top: var(--space-1);
       border-top: 1px solid var(--border-subtle);
+    }
+    .mpr-about :global(details.section) {
+      margin-top: 0;
+    }
+    .mpr-about :global(details.section > summary) {
+      min-height: var(--row-height);
+      font-weight: 500;
+    }
+    .note {
+      padding-bottom: var(--space-1);
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
     }
     .note > p {
       margin: 0;

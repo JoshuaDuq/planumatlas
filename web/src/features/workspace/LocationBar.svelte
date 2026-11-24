@@ -108,7 +108,7 @@
       height: var(--tab-height);
       /* The rule is drawn inside, so the way back and the crumb keep the bar's full 44px as their target. */
       box-shadow: inset 0 -1px var(--border-subtle);
-      background: var(--surface-navigation);
+      background: var(--surface-base);
     }
     /*
      * The path starts from its own width, so on a short row the place and the trailing action give way

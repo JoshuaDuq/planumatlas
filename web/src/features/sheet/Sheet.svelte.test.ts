@@ -601,12 +601,10 @@ describe('the selection in the grip', () => {
     await vi.waitFor(() => expect(focused()).toBe(document.querySelector('.detail-back')));
     expect(sheet().dataset.view).toBe('detail');
     expect(announced()).toBe('');
-    // The detail names itself, so the grip stops naming it; its clear stays, on the statement's line.
+    // The detail owns its title and clear button beside the headline; the grip keeps the statement alone.
     expect(strip().checkVisibility()).toBe(false);
-    expect(clearButton().checkVisibility()).toBe(true);
+    expect(clearButton().checkVisibility()).toBe(false);
     const statement = box(document.querySelector('.sheet-disclaimer')!);
-    const middle = (rect: DOMRect) => rect.top + rect.height / 2;
-    expect(Math.abs(middle(box(clearButton())) - (statement.top + 9))).toBeLessThan(1);
     expect(box(document.querySelector('.sheet-grip-row')!).bottom).toBe(statement.bottom);
   });
 
@@ -618,10 +616,9 @@ describe('the selection in the grip', () => {
     await vi.waitFor(() => expect(sheet().dataset.view).toBe('detail'));
     await rested();
     expect(strip().checkVisibility()).toBe(false);
+    expect(clearButton().checkVisibility()).toBe(false);
     const statement = box(document.querySelector('.sheet-disclaimer')!);
     expect(statement.top).toBe(box(sheet()).top);
-    expect(box(clearButton()).top).toBeGreaterThanOrEqual(statement.top);
-    expect(box(clearButton()).bottom).toBeLessThanOrEqual(statement.bottom);
   });
 
   test('a pointer activation that left focus where it was does not take it, and a raised sheet is not lowered', async () => {

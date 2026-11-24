@@ -110,6 +110,17 @@
     .section[open] > summary::before {
       --chevron-turn: -90deg;
     }
+    details[open] > :not(summary) {
+      animation: disclosure-reveal var(--ui-transition) var(--ease-ui);
+    }
+    @keyframes disclosure-reveal {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
     @media (hover: hover) and (pointer: fine) {
       summary:hover {
         color: var(--accent);
@@ -126,6 +137,9 @@
     @media (prefers-reduced-motion: reduce) {
       summary::before {
         transition: none;
+      }
+      details[open] > :not(summary) {
+        animation: none;
       }
     }
   }

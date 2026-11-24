@@ -388,10 +388,11 @@ describe('opening a lesson', () => {
 
 describe('the retained pathway tours', () => {
   test.each(['en', 'fr'] as const)(
-    'the clinical validation limit is visible before opening notes (%s)',
+    'the clinical validation limit sits in Clinical context (%s)',
     async (lang) => {
       mount(lang);
       await open('vision');
+      await userEvent.click(summary(t(lang, 'circuits').clinical));
       await expect
         .element(
           page.getByText(

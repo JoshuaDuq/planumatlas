@@ -19,7 +19,6 @@
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import ShowAll from '../../lib/ui/ShowAll.svelte';
   import AboutData from '../info/AboutData.svelte';
-  import ScopeLine from '../info/ScopeLine.svelte';
   import DeficitSearch from './DeficitSearch.svelte';
   import type { DeficitsExplorer } from './explorer.svelte.ts';
 
@@ -129,7 +128,6 @@
     controls="{uid}-list"
     onquery={(value) => explorer.setQuery(value)}
   />
-  <ScopeLine place="deficits" {lang} />
 </div>
 <div class="deficit-body scroll-fade">
   <div id="{uid}-list" role="group" aria-label={text.deficits} bind:this={list}>
@@ -226,11 +224,36 @@
     .group {
       isolation: isolate;
     }
-    /* The tab's clinical tools, on the text column above the groups, as a region's related findings are. */
+    /* The tab's clinical tools, set apart as compact tonal commands above the deficit index. */
     .clinical-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
       margin: 0;
-      padding: var(--space-2) var(--panel-inset);
+      padding: var(--space-3) var(--panel-inset);
+      border-bottom: 1px solid var(--border-subtle);
       list-style: none;
+    }
+    .clinical-links :global(.link-row) {
+      width: auto;
+      min-height: var(--control-height);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-control);
+      background: var(--surface-tonal);
+      font-weight: 500;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .clinical-links :global(.link-row:hover) {
+        background: var(--surface-tonal-hover);
+      }
+      .clinical-links :global(.link-row:hover .link-name) {
+        text-decoration: none;
+      }
+    }
+    @media (pointer: coarse) {
+      .clinical-links :global(.link-row) {
+        min-height: 44px;
+      }
     }
     .group + .group {
       margin-top: var(--space-2);
@@ -261,6 +284,7 @@
     /* DrillRow has no selected look of its own (navigator.css:31). */
     /* Arrow navigation keeps the focused row below its sticky group heading (clinical.css:44). */
     .rows :global(.row) {
+      padding-block: var(--space-2);
       scroll-margin-block-start: calc(var(--lh-caption) + var(--space-6));
     }
     .rows :global(.row[data-selected='true']) {

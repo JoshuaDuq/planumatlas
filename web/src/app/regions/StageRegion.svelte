@@ -358,6 +358,7 @@
           lang={current.lang}
           view={current}
           {tractReference}
+          mriOpen={stage.mpr.open}
         />
       </div>
     {:else}
@@ -400,6 +401,7 @@
             lang={current.lang}
             view={current}
             {tractReference}
+            mriOpen={stage.mpr.open}
           />
         {/snippet}
         {#snippet lesionPopover({ close, placing, setPlacing })}

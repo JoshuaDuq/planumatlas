@@ -13,28 +13,76 @@
 
   const uid = $props.id();
   const copy = $derived(t(model.lang, 'circuits'));
+
+  // Group repeated hits in the same circuit under one heading so identical titles never stack back-to-back.
+  const grouped = $derived.by(() => {
+    const groups: {
+      circuit: (typeof model.related)[number]['circuit'];
+      steps: number[];
+    }[] = [];
+    const byId = new Map<string, (typeof groups)[number]>();
+    for (const { circuit, index } of model.related) {
+      let group = byId.get(circuit.id);
+      if (!group) {
+        group = { circuit, steps: [] };
+        byId.set(circuit.id, group);
+        groups.push(group);
+      }
+      group.steps.push(index);
+    }
+    return groups;
+  });
 </script>
 
-{#if model.related.length}
+{#if grouped.length}
   <div class="related">
     <h3 id="{uid}-heading" class="related-heading">{copy.inCircuits}</h3>
     <ul class="links" aria-labelledby="{uid}-heading">
-      {#each model.related as { circuit, index } (`${circuit.id}:${index}`)}
-        <li>
-          <button
-            type="button"
-            class="circuit-link"
-            data-landmark-circuit={circuit.id}
-            data-landmark-step={index}
-            aria-disabled={model.busy ? 'true' : undefined}
-            onclick={() => model.openLandmark(circuit.id, index)}
-          >
-            <span class="link-name">{circuit.name[model.lang]}</span>
-            <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
-            <span class="visually-hidden">, {copy.landmark}</span>
-            <span class="chevron" aria-hidden="true"></span>
-          </button>
-        </li>
+      {#each grouped as { circuit, steps } (circuit.id)}
+        {#if steps.length === 1}
+          {@const index = steps[0]!}
+          <li>
+            <button
+              type="button"
+              class="circuit-link"
+              data-landmark-circuit={circuit.id}
+              data-landmark-step={index}
+              aria-disabled={model.busy ? 'true' : undefined}
+              onclick={() => model.openLandmark(circuit.id, index)}
+            >
+              <span class="link-name">{circuit.name[model.lang]}</span>
+              <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
+              <span class="visually-hidden">, {copy.landmark}</span>
+              <span class="chevron" aria-hidden="true"></span>
+            </button>
+          </li>
+        {:else}
+          <li class="circuit-group">
+            <p class="circuit-group-name">{circuit.name[model.lang]}</p>
+            <ul class="circuit-substeps">
+              {#each steps as index (`${circuit.id}:${index}`)}
+                {@const step = circuit.steps[index]!}
+                <li>
+                  <button
+                    type="button"
+                    class="circuit-link circuit-sublink"
+                    data-landmark-circuit={circuit.id}
+                    data-landmark-step={index}
+                    aria-disabled={model.busy ? 'true' : undefined}
+                    onclick={() => model.openLandmark(circuit.id, index)}
+                  >
+                    <span class="link-name">{step.name[model.lang]}</span>
+                    <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
+                    <span class="visually-hidden"
+                      >, {circuit.name[model.lang]}, {copy.landmark}</span
+                    >
+                    <span class="chevron" aria-hidden="true"></span>
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          </li>
+        {/if}
       {/each}
     </ul>
   </div>
@@ -56,10 +104,34 @@
       font-weight: 600;
       line-height: var(--lh-caption);
     }
-    .links {
+    .links,
+    .circuit-substeps {
       margin: 0;
       padding: 0;
       list-style: none;
+    }
+    .circuit-group {
+      padding-block: var(--space-2) var(--space-1);
+    }
+    .circuit-group-name {
+      margin: 0 0 var(--space-1);
+      color: var(--text-primary);
+      font-size: var(--text-ui);
+      font-weight: 500;
+      line-height: var(--lh-ui);
+      overflow-wrap: anywhere;
+    }
+    .circuit-substeps {
+      padding-left: var(--space-3);
+      border-left: 1px solid var(--border-subtle);
+    }
+    .circuit-sublink {
+      min-height: 28px;
+      padding-block: var(--space-1);
+      color: var(--text-secondary);
+    }
+    .circuit-sublink .link-name {
+      font-weight: 400;
     }
     .circuit-link {
       display: flex;

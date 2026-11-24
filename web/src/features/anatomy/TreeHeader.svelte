@@ -14,7 +14,7 @@
   import { t } from '../../lib/core/i18n/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import { announce } from '../../lib/ui/announcer.svelte.ts';
-  import IconButton from '../../lib/ui/IconButton.svelte';
+  import { iconGraphic } from '../../lib/ui/IconButton.svelte';
   import { downloadText } from '../../lib/ui/download.ts';
 
   interface Props {
@@ -52,12 +52,63 @@
     >
       {allExpanded ? copy.collapseAll : copy.expandAll}
     </button>
-    <IconButton
+    <button
+      type="button"
       class="tree-download"
-      icon="download"
-      label={copy.downloadTable}
+      aria-label={copy.downloadTable}
       data-tooltip={copy.downloadTable}
       onclick={downloadTable}
-    />
+    >
+      {@render iconGraphic('download')}
+      <span aria-hidden="true">CSV</span>
+    </button>
   </div>
 </div>
+
+<style>
+  @layer features {
+    .tree-download {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      min-height: var(--control-height);
+      padding: 0 var(--space-2);
+      border: 0;
+      border-radius: var(--radius-control);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: var(--text-caption);
+      font-weight: 500;
+      line-height: var(--lh-caption);
+      cursor: pointer;
+      transition:
+        background-color var(--ui-transition) var(--ease-ui),
+        color var(--ui-transition) var(--ease-ui),
+        transform var(--press-transition) var(--ease-ui);
+    }
+    .tree-download:active:not(:focus-visible) {
+      transform: scale(var(--press-scale));
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .tree-download:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+      }
+    }
+    @media (pointer: coarse) {
+      .tree-download {
+        min-height: 44px;
+      }
+    }
+  }
+  @layer a11y {
+    @media (prefers-reduced-motion: reduce) {
+      .tree-download {
+        transition-property: background-color, color;
+      }
+      .tree-download:active {
+        transform: none;
+      }
+    }
+  }
+</style>

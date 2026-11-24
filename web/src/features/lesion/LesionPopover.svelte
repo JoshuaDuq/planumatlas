@@ -12,7 +12,7 @@
   import type { Language } from '../../lib/types/index.ts';
   import ChoiceGroup from '../../lib/ui/ChoiceGroup.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
-  import AboutData from '../info/AboutData.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
 
   let {
     lesion,
@@ -87,7 +87,7 @@
     </div>
   {/if}
 {/if}
-<AboutData place="lesion" {lang} host="popover" />
+<p class="stage-methods"><MethodsLink page="lesion" {lang} /></p>
 
 <style>
   @layer features {

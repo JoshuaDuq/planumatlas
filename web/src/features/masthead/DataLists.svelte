@@ -211,11 +211,15 @@
       {@attach roving}
     >
       {#each groups as group, index (group.label ?? index)}
+        {@const groupId = group.label ? `${name}-group-${index}-${uid}` : undefined}
         <div
           class="data-option-group"
           role={group.label ? 'group' : undefined}
-          aria-label={group.label}
+          aria-labelledby={groupId}
         >
+          {#if group.label}
+            <p id={groupId} class="data-group-label">{group.label}</p>
+          {/if}
           {#each group.options as option (option.value)}
             {@const id = `${name}-${option.value}-${uid}`}
             <button
@@ -335,9 +339,17 @@
       flex-direction: column;
     }
     .data-option-group + .data-option-group {
-      margin-top: var(--space-1);
-      padding-top: var(--space-1);
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
       border-top: 1px solid var(--border-subtle);
+    }
+    .data-group-label {
+      margin: 0 0 var(--space-1);
+      padding: 0 var(--space-2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: var(--lh-caption);
+      color: var(--text-tertiary);
     }
     .data-option {
       display: grid;
@@ -386,10 +398,11 @@
     /* The colouring's own colours, as its key draws them, beside its name. */
     .data-option-palette {
       display: flex;
+      gap: 1px;
       grid-column: 3;
       grid-row: 1;
-      width: 48px;
-      height: 8px;
+      width: 52px;
+      height: 10px;
       border-radius: var(--radius-mark);
       overflow: hidden;
     }

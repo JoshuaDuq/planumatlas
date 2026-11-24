@@ -438,12 +438,17 @@
     .stage-key-list button[aria-pressed='true'] {
       font-weight: 600;
     }
-    /* A finding with no region coloured in this view: keyed, but faint, its swatch hollowed to an outline. */
+    /* A finding with no region coloured in this view: keyed, but faint, its swatch hatched so it never reads as an unchecked box. */
     .stage-key-list li[data-absent] {
       color: var(--overlay-ink-faint);
     }
     .stage-key-list li[data-absent] :global(.network-swatch) {
-      box-shadow: inset 0 0 0 1px currentColor;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent 0 2px,
+        rgb(144 150 158 / 0.35) 2px 3px
+      );
+      box-shadow: inset 0 0 0 1px rgb(144 150 158 / 0.5);
     }
     @media (hover: hover) and (pointer: fine) {
       .stage-key-list button:hover {

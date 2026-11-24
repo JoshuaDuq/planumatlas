@@ -202,21 +202,18 @@ describe('results', () => {
 });
 
 describe('what the brain is', () => {
-  const scope = () => document.querySelector('.scope-line')!.textContent!.trim();
   const source = () =>
     [...document.querySelectorAll('.about-parts dt')].find((dt) => dt.textContent === 'Source')!
       .nextElementSibling!.textContent!;
 
   test('one person’s brain is said to be one person’s', () => {
     mount();
-    expect(scope()).toBe('One person’s brain and the atlases drawn on it.');
     expect(source()).toMatch(/^The brain is MGH CDMD sub_013/);
   });
 
   test('the MNI template is said to be an average, and where it comes from', async () => {
     await loadTemplateCopy();
     mount({ template: true });
-    expect(scope()).toBe('An average of 152 adults’ brains and the atlases drawn on it.');
     expect(source()).toMatch(/^The ICBM 152 2009c nonlinear asymmetric template/);
   });
 });

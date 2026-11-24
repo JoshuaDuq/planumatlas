@@ -476,17 +476,31 @@
   }
 
   onMount(() => {
+    // Coalesce ResizeObserver callbacks into animation frames so layout writes never loop.
+    let resizeFrame = 0;
+    const scheduleResize = () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        onResize();
+      });
+    };
     // A rotation can move the safe areas after its resize event; the probe's own box says when. Observing
     // reports its box once, after layout, which is the first report made from a laid-out grip.
-    const safeObserver = new ResizeObserver(onResize);
+    const safeObserver = new ResizeObserver(scheduleResize);
     safeObserver.observe(probe, { box: 'border-box' });
 
     // The grip and the tabs are sized by their text, which arrives after setup and changes with the
     // language, the selection and the notice; a peek that follows them springs like any other change of rest.
+    let topFrame = 0;
     const topObserver = new ResizeObserver(() => {
-      if (!media.phone || detent !== 'peek' || press?.dragging) return;
-      const peek = heights().peek;
-      if (peek !== rest) settleTo(peek);
+      if (topFrame) return;
+      topFrame = requestAnimationFrame(() => {
+        topFrame = 0;
+        if (!media.phone || detent !== 'peek' || press?.dragging) return;
+        const peek = heights().peek;
+        if (peek !== rest) settleTo(peek);
+      });
     });
     const watch = () => {
       topObserver.disconnect();
@@ -501,6 +515,8 @@
     mutations.observe(workspace().tabs.parentElement!, { childList: true });
 
     return () => {
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      if (topFrame) cancelAnimationFrame(topFrame);
       stopSpring();
       safeObserver.disconnect();
       topObserver.disconnect();
@@ -845,24 +861,20 @@
         padding-bottom: var(--space-2);
       }
 
-      /* The detail owns its complete title; the grip keeps the statement, and the clear beside it. */
+      /* The detail owns its complete title and clear button beside the headline; the grip keeps the statement. */
       #sheet[data-view='detail']:not([data-panel='hidden']) .sheet-grip-row {
         grid-template-rows: var(--handle-row) auto;
       }
-      #sheet[data-view='detail']:not([data-panel='hidden']) .sheet-selection {
-        display: none;
-      }
-      /* Centred on the statement's line; its 44px reaches past that line without making it taller. */
+      #sheet[data-view='detail']:not([data-panel='hidden']) .sheet-selection,
       #sheet[data-view='detail']:not([data-panel='hidden'])
         .sheet-grip-row
         :global(.sheet-selection-clear) {
-        grid-row: 2;
-        align-self: start;
-        margin-block: calc((var(--lh-caption) - var(--control-height)) / 2);
+        display: none;
       }
       #sheet[data-view='detail']:not([data-panel='hidden']) .sheet-disclaimer {
+        grid-column: 1 / -1;
         grid-row: 2;
-        padding: 0 var(--space-2) var(--space-2) var(--panel-inset);
+        padding: 0 var(--panel-inset) var(--space-2);
       }
 
       /* The labels run from the sheet's column to its right edge, so the first stands under the words above it. */

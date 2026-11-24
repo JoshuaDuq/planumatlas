@@ -53,7 +53,6 @@
       {/if}
       <p class="circuit-role">{step.role[lang]}</p>
       <p class="circuit-explanation">{step.explanation[lang]}</p>
-      <p class="circuit-note">{copy.clinicalNote}</p>
       {#if step.map && model.map.available}
         <p class="circuit-note circuit-return">
           <button

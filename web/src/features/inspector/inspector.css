@@ -10,12 +10,6 @@
   .region-detail:not(:last-child) {
     padding-bottom: 0;
   }
-  /* The sheet's grip has its own clear (phone.css:142). */
-  @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-    .region-detail .selection-clear {
-      display: none;
-    }
-  }
 
   /* Region ------------------------------------------------------------- */
   .region-detail .selection-head {

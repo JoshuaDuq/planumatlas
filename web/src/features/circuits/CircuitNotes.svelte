@@ -103,6 +103,7 @@
       <Disclosure summary={copy.clinical} variant="section" bind:open={open.clinical}>
         <div class="body">
           <p>{circuit.clinical[lang]}</p>
+          <p class="small">{copy.clinicalNote}</p>
           <button
             type="button"
             class="command"

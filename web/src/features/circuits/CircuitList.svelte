@@ -14,7 +14,6 @@
   import { landmarkTotal } from './circuits-view.ts';
   import { neighbourKeys } from './neighbour-keys.ts';
   import AboutData from '../info/AboutData.svelte';
-  import ScopeLine from '../info/ScopeLine.svelte';
 
   let { model }: { model: CircuitExplorer } = $props();
   const map = $derived(model.map);
@@ -39,10 +38,12 @@
 
 <div class="browser scroll-fade" hidden={!model.exploring}>
   <h2 class="visually-hidden">{t(model.lang, 'workspace').modes.circuits}</h2>
-  <div class="scope-head"><ScopeLine place="circuits" lang={model.lang} /></div>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
     <div class="group" role="group" aria-labelledby="{uid}-guided">
-      <h3 id="{uid}-guided" class="group-heading">{maps.guided}</h3>
+      <h3 id="{uid}-guided" class="group-heading group-heading-counts">
+        <span>{maps.guided}</span>
+        <span class="column-head" aria-hidden="true">{copy.landmarks}</span>
+      </h3>
       <ul class="rows">
         {#each model.circuits as circuit (circuit.id)}
           {@const current = circuit.id === model.lesson.circuit}
@@ -118,6 +119,18 @@
       font-size: var(--text-caption);
       font-weight: 600;
       line-height: var(--lh-caption);
+    }
+    .group-heading-counts {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+    .column-head {
+      flex: none;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      white-space: nowrap;
     }
     .group:first-child > .group-heading {
       padding-top: var(--space-3);
@@ -241,11 +254,6 @@
       }
     }
     /* A list's scope: one tertiary line at its foot. */
-    /* Circuits has no search: its scope line heads the list, ruled off as the other tabs' heads are. */
-    .scope-head {
-      padding: var(--space-3) var(--panel-inset);
-      border-bottom: 1px solid var(--border-subtle);
-    }
     .scope-note {
       padding: var(--space-3) var(--panel-inset) var(--space-4);
       border-top: 1px solid var(--border-subtle);

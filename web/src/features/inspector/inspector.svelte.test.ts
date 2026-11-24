@@ -266,10 +266,10 @@ describe('selected region', () => {
     expect(getComputedStyle(research()).paddingBottom).not.toBe('0px');
   });
 
-  test('on a phone the inspector has no Clear button of its own', async () => {
+  test('on a phone the inspector keeps its Clear button beside the region headline', async () => {
     render(Fixture, { regionId: V1 });
     await page.viewport(390, 844);
-    expect(getComputedStyle(root().querySelector('.selection-clear')!).display).toBe('none');
+    expect(getComputedStyle(root().querySelector('.selection-clear')!).display).not.toBe('none');
     await page.viewport(1280, 800);
     expect(getComputedStyle(root().querySelector('.selection-clear')!).display).not.toBe('none');
   });

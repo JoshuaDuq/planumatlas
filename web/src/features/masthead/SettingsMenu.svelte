@@ -238,12 +238,13 @@
       {#snippet item(
         label: string,
         action: (event: MouseEvent) => void,
-        { phone = false, dialog = false, disabled = false } = {},
+        { phone = false, dialog = false, disabled = false, reset = false } = {},
       )}
         <button
           type="button"
           class="menu-item"
           class:phone-only={phone}
+          class:menu-item-reset={reset}
           {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
           aria-haspopup={dialog ? 'dialog' : undefined}
           {disabled}
@@ -292,7 +293,7 @@
       {/snippet}
       {@render newTab(methodsHref(), t(lang, 'link').methods, { hreflang: 'en' })}
       {@render newTab(SOURCE_HREF, t(lang, 'link').source, { phone: true })}
-      {@render item(copy.startOver, onStartOver, { disabled: !ready })}
+      {@render item(copy.startOver, onStartOver, { disabled: !ready, reset: true })}
     </div>
   {/snippet}
 </Popover>
@@ -309,6 +310,7 @@
       display: grid;
       /* One choice column for every row, as wide as the widest (Système | Clair | Sombre): nothing wraps, every edge aligns. */
       grid-template-columns: minmax(0, 1fr) minmax(11.5rem, max-content);
+      padding-block: var(--space-1);
     }
     .menu-row {
       display: grid;
@@ -319,6 +321,11 @@
       /* Rows and commands share one pitch: a control and 4px above and below it (52px on touch). */
       min-height: calc(var(--control-height) + 2 * var(--space-1));
       padding: 0 var(--space-3);
+    }
+    /* One rule separates preferences from commands, rather than boxing every preference row. */
+    .menu-row:nth-of-type(3) {
+      margin-bottom: var(--space-1);
+      padding-bottom: var(--space-2);
       border-bottom: 1px solid var(--border-subtle);
     }
     .menu-label {
@@ -371,8 +378,11 @@
       color: var(--text-tertiary);
       cursor: default;
     }
-    .menu-item:not(:last-child) {
-      border-bottom: 1px solid var(--border-subtle);
+    .menu-item-reset {
+      margin-top: var(--space-1);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
     }
     .menu-item:focus-visible {
       outline-offset: -2px;
@@ -380,6 +390,9 @@
     @media (hover: hover) and (pointer: fine) {
       .menu-item:hover:not(:disabled) {
         background: var(--surface-hover);
+      }
+      .menu-item-reset:hover:not(:disabled) {
+        color: var(--danger);
       }
     }
     /* The status bar carries Provenance on a desktop, and the masthead Full screen, Copy link and the source. */

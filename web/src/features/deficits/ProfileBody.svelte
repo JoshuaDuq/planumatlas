@@ -39,7 +39,6 @@
 
 <p class="kind">{text.evidenceKind(found.length)}</p>
 <p class="summary">{deficit.summary[lang]}</p>
-<p class="note caveat">{text.referenceOnly}</p>
 <section class="section">
   <h3 class="section-heading">{text.associations}</h3>
   {#each found as association (association.id)}
@@ -74,8 +73,11 @@
     </ul>
   </section>
 {/if}
-<p class="note sources">{text.sources} · {text.revised}: {clinical.revised}</p>
-<p class="note methods"><MethodsLink page="deficits" {lang} /></p>
+<div class="profile-notes">
+  <p class="note caveat">{text.referenceOnly}</p>
+  <p class="note sources">{text.sources} · {text.revised}: {clinical.revised}</p>
+  <p class="note methods"><MethodsLink page="deficits" {lang} /></p>
+</div>
 
 <style>
   @layer features {
@@ -100,15 +102,16 @@
       font-size: var(--text-caption);
       line-height: var(--lh-caption);
     }
-    .caveat {
+    .profile-notes {
+      margin-top: var(--space-6);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .profile-notes > .note + .note {
       margin-top: var(--space-2);
     }
     .sources {
-      margin-top: var(--space-5);
       color: var(--text-tertiary);
-    }
-    .methods {
-      margin-top: var(--space-2);
     }
     .section {
       margin-top: var(--space-6);

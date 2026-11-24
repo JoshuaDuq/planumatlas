@@ -13,7 +13,7 @@
   import { CUTS } from '../../lib/types/index.ts';
   import type { Language } from '../../lib/types/index.ts';
   import ToggleToolbar from '../../lib/ui/ToggleToolbar.svelte';
-  import AboutData from '../info/AboutData.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
   import type { SectionControls } from './section-controls.svelte.ts';
 
   interface Props {
@@ -52,7 +52,7 @@
     close();
   }}
 />
-<AboutData place="section" {lang} host="popover" />
+<p class="stage-methods"><MethodsLink page="section" {lang} /></p>
 
 <style>
   @layer features {

@@ -167,6 +167,14 @@
     :global(.stage-field) {
       margin-top: var(--space-4);
     }
+    /* One quiet link to the tool's methods and limits, ruled off at the foot of the plate. */
+    :global(.stage-methods) {
+      margin: var(--space-3) 0 0;
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--overlay-border);
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+    }
     /* A held slider's row keeps a strip of the plate, so its name and value stay legible over the picture. */
     :global(.popover.stage-popover [data-held]) {
       margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));

@@ -54,9 +54,8 @@ test('offers each published space by its label, then the unstated choice, which 
   );
 });
 
-test('links its English methods page, under About this data', async () => {
+test('links its English methods page', async () => {
   mount(async () => true);
-  await userEvent.click(page.getByText('About this data'));
   const methods = page.getByRole('link', {
     name: 'Method and limits (opens in a new tab)',
     exact: true,

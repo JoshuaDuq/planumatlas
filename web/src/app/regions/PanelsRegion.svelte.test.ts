@@ -215,30 +215,27 @@ describe('what each tab shows (1.4)', () => {
     ['Deficits', 'deficits'],
     ['Circuits', 'circuits'],
     ['Tracts', 'tracts'],
-  ] as const)(
-    'the %s list says its scope under its controls and ends with About this data',
-    async (name, place) => {
-      await boot();
-      await userEvent.click(page.getByRole('tab', { name }));
-      flushSync();
-      const copy = t('en', 'info');
-      await expect
-        .poll(() => list().querySelector(`[data-scope="${place}"]`)?.textContent)
-        .toBe(copy[place].scope);
-      const about = list().querySelector<HTMLElement>(`[data-about="${place}"]`)!;
-      const details = about.querySelector('details')!;
-      expect(details.open).toBe(false);
-      await userEvent.click(about.querySelector<HTMLElement>('summary')!);
-      expect(details.open).toBe(true);
-      expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
-        copy.shows,
-        copy.source,
-        copy.caution,
-      ]);
-      const links = [...about.querySelectorAll('a')];
-      expect(links.at(-1)!.getAttribute('href')).toBe(methodsHref(place));
-    },
-  );
+  ] as const)('the %s list ends with About this data', async (name, place) => {
+    await boot();
+    await userEvent.click(page.getByRole('tab', { name }));
+    flushSync();
+    const copy = t('en', 'info');
+    await expect
+      .poll(() => list().querySelector<HTMLElement>(`[data-about="${place}"]`))
+      .not.toBeNull();
+    const about = list().querySelector<HTMLElement>(`[data-about="${place}"]`)!;
+    const details = about.querySelector('details')!;
+    expect(details.open).toBe(false);
+    await userEvent.click(about.querySelector<HTMLElement>('summary')!);
+    expect(details.open).toBe(true);
+    expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
+      copy.shows,
+      copy.source,
+      copy.caution,
+    ]);
+    const links = [...about.querySelectorAll('a')];
+    expect(links.at(-1)!.getAttribute('href')).toBe(methodsHref(place));
+  });
 });
 
 describe('clinical material in the Deficits list (4.2)', () => {

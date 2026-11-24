@@ -6,13 +6,13 @@
   import { tick, untrack } from 'svelte';
   import type { CoordinatePlacement } from '../../lib/controller/coordinates.ts';
   import { parseCoordinate } from '../../lib/core/coordinates/parse.ts';
-  import { UNSTATED, nativeSpace } from '../../lib/core/coordinates/spaces.ts';
+  import { UNSTATED } from '../../lib/core/coordinates/spaces.ts';
   import { formatRas } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import type { LesionStore } from '../../lib/state/lesion.svelte.ts';
   import type { Language } from '../../lib/types/index.ts';
   import Select from '../../lib/ui/Select.svelte';
-  import AboutData from '../info/AboutData.svelte';
+  import MethodsLink from '../info/MethodsLink.svelte';
 
   let {
     lesion,
@@ -127,12 +127,7 @@
     {/if}
   {/if}
 </form>
-<AboutData
-  place="coordinate"
-  {lang}
-  host="popover"
-  template={nativeSpace(placement.metadata) !== null}
-/>
+<p class="stage-methods"><MethodsLink page="coordinate" {lang} /></p>
 
 <style>
   @layer features {

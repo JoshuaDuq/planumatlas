@@ -533,7 +533,18 @@
     /* A finger held on a chevron turns the model; it must not start a pan that cancels the press. */
     .orientation-gizmo :global(.gizmo-turn) {
       touch-action: none;
-      transition: opacity var(--ui-transition) var(--ease-ui);
+      color: var(--overlay-ink-faint);
+      transition:
+        opacity var(--ui-transition) var(--ease-ui),
+        color var(--ui-transition) var(--ease-ui);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .orientation-gizmo:is(:hover, :focus-within) :global(.gizmo-turn) {
+        color: var(--overlay-ink-muted);
+      }
+      .orientation-gizmo :global(.gizmo-turn:hover) {
+        color: var(--overlay-ink);
+      }
     }
     /* On a touch screen the chevrons wait for a touch on the gizmo, or a key's focus in it. */
     @media (pointer: coarse) {

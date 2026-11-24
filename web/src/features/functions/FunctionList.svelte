@@ -27,7 +27,6 @@
   import { listNav } from '../../lib/ui/list-nav.ts';
   import SearchBridge from '../../lib/ui/SearchBridge.svelte';
   import AboutData from '../info/AboutData.svelte';
-  import ScopeLine from '../info/ScopeLine.svelte';
   import type { FunctionExplorer } from './functions-explorer.svelte.ts';
   import { functionList, resultsSentence, type FunctionRow } from './functions-view.ts';
   import { REGION_ROWS_SHOWN } from '../../lib/types/constants.ts';
@@ -219,7 +218,6 @@
       <kbd class="search-shortcut" aria-hidden="true">/</kbd>
     {/if}
   </div>
-  <ScopeLine place="functions" {lang} />
 </div>
 
 <div class="browser scroll-fade" hidden={!model.exploring} bind:this={scroller}>
@@ -234,7 +232,7 @@
             >{/if}
         </h3>
         {#if here.rows.length}
-          <ul class="rows" bind:this={hereList}>
+          <ul class="rows" role="list" bind:this={hereList}>
             {#each hereRows as item (item.id)}
               <li>{@render row(item, false, false)}</li>
             {/each}
@@ -256,7 +254,7 @@
       </div>
     {/if}
     {#if content.overview && !model.comparing}
-      <ul class="rows">
+      <ul class="rows" role="list">
         <li>{@render row(content.overview, true)}</li>
       </ul>
     {/if}
@@ -271,7 +269,7 @@
           <span>{group.name}</span>
           <span class="column-head" aria-hidden="true">{copy.studiesColumn}</span>
         </h3>
-        <ul class="rows">
+        <ul class="rows" role="list">
           {#each group.rows as item (item.id)}
             <li>{@render row(item)}</li>
           {/each}

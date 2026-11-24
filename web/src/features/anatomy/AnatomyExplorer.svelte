@@ -18,7 +18,6 @@
   import AnatomyTree from './AnatomyTree.svelte';
   import TreeHeader from './TreeHeader.svelte';
   import AboutData from '../info/AboutData.svelte';
-  import ScopeLine from '../info/ScopeLine.svelte';
 
   interface Props {
     lang: Language;
@@ -150,7 +149,6 @@
         />
       </TreeHeader>
       {#if inside}{@render systemPicker?.()}{/if}
-      <ScopeLine place="anatomy" {lang} {template} />
     </div>
     <div class="tree-pane scroll-fade">
       <AnatomyTree
