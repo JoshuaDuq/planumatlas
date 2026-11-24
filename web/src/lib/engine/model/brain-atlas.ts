@@ -48,7 +48,7 @@ import { ModelLayers, unknownLayer } from './layers.ts';
 import type { AtlasMesh, GlbLoader, Layer } from './layers.ts';
 import { fetchManifest, validateManifest } from './manifest.ts';
 import type { AtlasManifest } from './manifest.ts';
-import { facing, facingArea, inSight, nearestHit, regionOf } from './picking.ts';
+import { inSight, nearestHit, regionOf } from './picking.ts';
 import type { FacingScene } from './picking.ts';
 import { Placement } from './placement.ts';
 import { combineProgress } from './progress.ts';
@@ -546,16 +546,6 @@ export class BrainAtlas extends EventTarget {
 
   pick(raycaster: Raycaster): Region | null {
     return regionOf(this.intersect(raycaster), this.regions);
-  }
-
-  /** See `facing` (`picking.ts`). */
-  facing(ids: readonly string[], view: Omit<FacingScene, 'regions' | 'meshes'>) {
-    return facing(ids, { ...view, regions: this.regions, meshes: this.visibleMeshes });
-  }
-
-  /** See `facingArea` (`picking.ts`). */
-  facingArea(ids: readonly string[], view: Omit<FacingScene, 'regions' | 'meshes'>) {
-    return facingArea(ids, { ...view, regions: this.regions, meshes: this.visibleMeshes });
   }
 
   /** See `inSight` (`picking.ts`). */

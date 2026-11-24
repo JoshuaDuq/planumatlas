@@ -6,6 +6,13 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Names on the brain** now names what is actually seen: a region hidden behind another is no longer
+  named, each dot stands in the middle of the part that shows, and a cut names its faces as they are seen.
+  Pointing at a name marks its region on the brain, and pointing at a region lights its name. Names no
+  longer run under an open Display or Section menu, and zoomed in each stands level beside its dot.
+
 ### Fixed
 
 - NextBrain's labels now also cite Puonti et al. (2026), the fast segmentation that produced them, beside

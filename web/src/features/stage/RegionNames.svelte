@@ -1,33 +1,37 @@
 <!--
-  Names on the brain (Display › Names on the brain, N): the regions facing the reader that the camera
-  shows large enough to label (region-names.ts), each in the route landmarks' haloed type with its dot.
-  Where the stage has room beside the anatomy they stand there in columns, a leader to each dot, as an
-  atlas plate labels its figure (name-columns.ts); zoomed in past that room they stand beside their dots
-  (stage-labels.ts). A name with no clear place is left out. They are chosen when the stage comes to
-  rest, keeping the names already shown where they still can be, and carried with the camera between:
-  each keeps its column or its side of its dot, glides where its place jumps, and fades while its point
-  is out of sight. A moved cut carries the names on its faces. Each region's name is a button that
-  selects it, as a click on the region does. Under Lobes colour a lobe's name is drawn only: the key
-  lists the lobes, and a lobe is no region to select.
+  Names on the brain (Display › Names on the brain, N): the regions the reader sees large enough to label,
+  found by looking at the stage through a grid of rays (region-names.ts), each in the route landmarks'
+  haloed type with its dot in the middle of what shows of it. Where the stage has room beside the anatomy
+  they stand there in columns, a leader to each dot, as an atlas plate labels its figure (name-columns.ts);
+  zoomed in past that room each stands level beside its dot (stage-labels.ts). A name with no clear place is
+  left out. They are chosen when the stage comes to rest, keeping the names already shown where they still
+  can be, and carried with the camera between: each keeps its column or its side of its dot, glides where
+  its place jumps, and fades while its point is out of sight. A moved cut carries the names on its faces.
+  Each region's name is a button that selects it, as a click on the region does; the pointer or the keyboard
+  on a name marks its region on the stage, and a region pointed at lights its name. Under Lobes colour a
+  lobe's name is drawn only: the key lists the lobes, and a lobe is no region to select.
 -->
 <script lang="ts">
   import { untrack } from 'svelte';
-  import type { Engine, Rect, ScreenPoint, Size, Vec3 } from '../../lib/engine/api.ts';
+  import type { Engine, Rect, ScreenPoint, SeenPoint, Size, Vec3 } from '../../lib/engine/api.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import { placeColumns, wrap } from './name-columns.ts';
   import type { Words } from './name-columns.ts';
-  import { chooseNames, cutCosine } from './region-names.ts';
-  import type { Named } from './region-names.ts';
-  import { calloutEnd, labelBounds, leaderEnd, placeLabels, watchChrome } from './stage-labels.ts';
+  import { chooseNames, sightGrid, sightPoints } from './region-names.ts';
+  import type { Named, SightGrid } from './region-names.ts';
+  import { calloutEnd, labelBounds, placeBeside, watchChrome } from './stage-labels.ts';
   import type { Side } from './stage-labels.ts';
   import './stage-vars.css';
 
   interface Props {
     engine: Pick<Engine, 'on'> & {
-      model: Pick<Engine['model'], 'regions' | 'canSelect' | 'facing' | 'facingArea' | 'inSight'>;
-      sections: Pick<Engine['sections'], 'active' | 'frame' | 'state' | 'capAnchors'>;
-      camera: Pick<Engine['camera'], 'project' | 'visibleRect' | 'view' | 'anatomyRect'>;
+      model: Pick<
+        Engine['model'],
+        'regions' | 'canSelect' | 'anchorOf' | 'seenAt' | 'inSight' | 'point'
+      >;
+      sections: Pick<Engine['sections'], 'active' | 'frame' | 'state'>;
+      camera: Pick<Engine['camera'], 'project' | 'visibleRect' | 'anatomyRect'>;
     };
     /** The names are drawn (`namesDrawn`). */
     shown: boolean;
@@ -50,6 +54,8 @@
   const TARGET_PX = 24;
   /** A name's widest line where it has room, in em: narrower than a landmark's 20, to fit a column. */
   const NAME_EM = 14;
+  /** The most lines a name wraps to in a column: one that needs more has no place there. */
+  const MAX_LINES = 3;
   /** Room a wrapped line keeps beyond its measured width, for the browser's own rounding. */
   const WRAP_SLACK_PX = 2;
   /** How long the display must rest after a change before the names are chosen again: the camera's settle. */
@@ -58,6 +64,9 @@
   const LEAVE_MS = 160;
   /** The most a frame spends asking whether the names are still in sight; one is always asked. */
   const LOOK_MS = 1;
+  /** The most a frame spends looking at the stage for names to choose, and the rays asked between two looks at the clock. */
+  const SEE_MS = 5;
+  const SEE_RAYS = 64;
   /** A name whose place moves farther than this from one drawing to the next glides there instead. */
   const JUMP_PX = 24;
   /** The glide's time constant: a name is most of the way there after three of these. */
@@ -76,9 +85,8 @@
   /** Each name's words as drawn, measured once it is attached and again when its text changes size. */
   const words = new Map<string, Words & { em: number }>();
   let ruler: CanvasRenderingContext2D | null = null;
-  /** The column each name stood in last, and the side of its dot it stood on last (`placeLabels`' slot). */
+  /** The column each name stood in last, or the side of its dot where the stage has no room for columns. */
   const sides = new Map<string, Side>();
-  const slots = new Map<string, number>();
   /** The columns open at the last drawing (`placeColumns`). */
   let open: Side[] = [];
   /** The camera or the display has moved since the names were last chosen: names keep their columns. */
@@ -98,10 +106,16 @@
   let moves = 0;
   const lookedAt = new Map<string, number>();
   let looking = 0;
+  /** A look at the stage under way: the grid's points and what the rays asked so far have met. */
+  let seeing: { grid: SightGrid; points: ScreenPoint[]; seen: (SeenPoint | null)[] } | null = null;
+  let seeFrame = 0;
   let leave: ReturnType<typeof setTimeout> | undefined;
   /** The cut the names were chosen on; null without one. */
   let chosenCut: { normal: Vec3; offset: number; reverse: boolean } | null = null;
   let chrome: ReturnType<typeof watchChrome> | null = null;
+  /** The name whose region the stage marks as pointed at, and the name the pointer or the keyboard is on. */
+  let hot: string | null = null;
+  let pointed: string | null = null;
   let roving: ReturnType<typeof bindRoving> | null = null;
 
   const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -113,37 +127,70 @@
     return { normal, offset: dot(center, normal), reverse: sections.state.reverse };
   }
 
+  /** Stops a look at the stage that has not finished: what it would see is no longer there. */
+  function stopSeeing() {
+    cancelAnimationFrame(seeFrame);
+    seeFrame = 0;
+    seeing = null;
+  }
+
+  /** Looks at the stage, a frame's share of rays at a time, and names what it shows once all are back. */
   function choose() {
     moving = false;
-    const { model, sections, camera } = engine;
-    const scale = camera.view.scale;
-    const cosine = sections.active
-      ? cutCosine(camera.view.basis.back, sections.frame.normal, sections.state.reverse)
-      : 0;
+    stopSeeing();
+    const { camera } = engine;
+    const bounds = labelBounds(camera.visibleRect);
+    const anatomy = camera.anatomyRect();
+    if (!anatomy) {
+      replace([]);
+      return;
+    }
+    const [x, y] = [Math.max(anatomy.x, bounds.x), Math.max(anatomy.y, bounds.y)];
+    const grid = sightGrid({
+      x,
+      y,
+      width: Math.min(anatomy.x + anatomy.width, bounds.x + bounds.width) - x,
+      height: Math.min(anatomy.y + anatomy.height, bounds.y + bounds.height) - y,
+    });
+    seeing = { grid, points: sightPoints(grid), seen: [] };
     chosenCut = cutNow();
+    see();
+  }
+
+  function see() {
+    seeFrame = 0;
+    const { model, camera } = engine;
+    const { grid, points, seen } = seeing!;
+    const start = performance.now();
+    while (seen.length < points.length) {
+      seen.push(...model.seenAt(points.slice(seen.length, seen.length + SEE_RAYS)));
+      if (seen.length < points.length && performance.now() - start >= SEE_MS) {
+        seeFrame = requestAnimationFrame(see);
+        return;
+      }
+    }
+    seeing = null;
+    // A selection too small for the grid is asked at its own anchor.
+    const anchor = selected === null ? null : model.anchorOf(selected);
+    const [at] = anchor ? camera.project([anchor]) : [null];
+    const [met] = at ? model.seenAt([at]) : [null];
     replace(
-      scale
-        ? chooseNames({
-            regions: model.regions,
-            drawn: [...model.regions.values()].filter(
-              (region) =>
-                (region.kind === 'cortex' || region.kind === 'structure') &&
-                model.canSelect(region),
-            ),
-            scale: scale.pixels / scale.millimetres,
-            selected,
-            byLobe: lobes !== null,
-            // From the side the cut keeps, the anatomy hides its faces.
-            faces: cosine > 0 ? sections.capAnchors() : [],
-            faceCosine: cosine,
-            bounds: labelBounds(camera.visibleRect),
-            kept: kept(),
-            words: ({ region, lobe }) => (region ? nameOf(region).name : lobeLabel(lobe!)),
-            facingArea: (ids) => model.facingArea(ids),
-            facing: (ids) => model.facing(ids),
-            project: (points) => camera.project(points),
-          })
-        : [],
+      chooseNames({
+        regions: model.regions,
+        drawn: [...model.regions.values()].filter(
+          (region) =>
+            (region.kind === 'cortex' || region.kind === 'structure') && model.canSelect(region),
+        ),
+        sight: { ...grid, seen },
+        selected,
+        selectedAt: at && met?.id === selected ? { ...at, ...met } : null,
+        byLobe: lobes !== null,
+        bounds: labelBounds(camera.visibleRect),
+        kept: kept(),
+        words: ({ region, lobe }) => (region ? nameOf(region).name : lobeLabel(lobe!)),
+        project: (points) => camera.project(points),
+        seenAt: (points) => model.seenAt(points),
+      }),
     );
   }
 
@@ -176,7 +223,6 @@
     carried.clear();
     lookedAt.clear();
     for (const { key } of next) lookedAt.set(key, moves);
-    for (const key of slots.keys()) if (!keys.has(key)) slots.delete(key);
     for (const key of sides.keys()) if (!keys.has(key)) sides.delete(key);
     for (const key of drawnAt.keys()) if (!keys.has(key)) drawnAt.delete(key);
     for (const key of hopping.keys()) if (!keys.has(key)) hopping.delete(key);
@@ -212,6 +258,7 @@
     const measured = words.get(key)!;
     const limit = Math.min(room - 2 * PAD_PX - WRAP_SLACK_PX, measured.em * NAME_EM);
     const { width, lines } = wrap(measured, limit);
+    if (room < Infinity && lines > MAX_LINES) return { width: Infinity, height: 0 };
     return {
       width: Math.ceil(width + WRAP_SLACK_PX + 2 * PAD_PX),
       height: Math.max(TARGET_PX, Math.ceil(lines * measured.line) + 6),
@@ -225,14 +272,13 @@
   function draw(
     node: HTMLElement,
     point: ScreenPoint | null,
-    placement: { box: Rect; leader: boolean; side?: Side } | null,
+    placement: { box: Rect; leader: boolean; side: Side } | null,
   ) {
     node.inert = !placement;
     node.dataset.placed = String(Boolean(placement));
     if (!placement || !point) return;
     const { box, leader, side } = placement;
-    if (side) node.dataset.side = side;
-    else delete node.dataset.side;
+    node.dataset.side = side;
     node.style.transform = `translate(${box.x}px, ${box.y}px)`;
     node.style.width = `${box.width}px`;
     node.style.height = `${box.height}px`;
@@ -241,7 +287,7 @@
       `${box.width - 2 * PAD_PX}px`;
     const dot = { x: point.x - box.x, y: point.y - box.y };
     node.querySelector<HTMLElement>('.stage-label-dot')!.style.translate = `${dot.x}px ${dot.y}px`;
-    const end = side ? calloutEnd(box, side) : leaderEnd(point, box);
+    const end = calloutEnd(box, side);
     const length = Math.hypot(end.x - point.x, end.y - point.y);
     node.dataset.leader = String(leader && length > 4);
     if (leader && length > 4) {
@@ -325,7 +371,7 @@
     const drawPlaced = (
       key: string,
       point: ScreenPoint | null,
-      placement: { box: Rect; leader: boolean; side?: Side } | null,
+      placement: { box: Rect; leader: boolean; side: Side } | null,
     ) => {
       if (!placement) {
         drawnAt.delete(key);
@@ -358,20 +404,19 @@
         drawPlaced(key, points[index]!, placed && { ...placed, leader: true });
       });
     } else {
-      const beside = placeLabels(
+      const beside = placeBeside(
         ready.map(({ key }, index) => ({
           point: points[index]!,
-          sizes: [sizeOf(key)],
-          optional: true,
-          slot: slots.get(key),
+          size: sizeOf(key),
+          side: sides.get(key),
         })),
         bounds,
         rects,
       );
       ready.forEach(({ key }, index) => {
-        const placement = beside[index]!;
-        if (placement) slots.set(key, placement.slot);
-        drawPlaced(key, points[index]!, placement);
+        const placed = beside[index]!;
+        if (placed) sides.set(key, placed.side);
+        drawPlaced(key, points[index]!, placed && { ...placed, leader: false });
       });
     }
     if (gliding.size || hopping.size) {
@@ -447,6 +492,21 @@
     place();
   }
 
+  /** The region the stage marks as pointed at lights its name, whether the pointer is on the name or the region. */
+  function light(id: string | null) {
+    if (id === hot) return;
+    if (hot !== null) delete nodes.get(hot)?.dataset.hot;
+    hot = id;
+    if (id !== null && nodes.has(id)) nodes.get(id)!.dataset.hot = '';
+  }
+
+  /** The pointer or the keyboard came onto a name, or left it: the stage marks its region as pointed at. */
+  function point(id: string | null) {
+    if (id === null && pointed === null) return;
+    pointed = id;
+    engine.model.point(id);
+  }
+
   function lobeLabel(lobe: string): string {
     const row = lobes?.find(({ id }) => id === lobe);
     if (!row) throw new Error(`The key lists no lobe ${lobe}.`);
@@ -470,10 +530,13 @@
     const stops = [
       engine.on('camera', () => {
         moving = true;
+        // Its rest looks again.
+        stopSeeing();
         place();
         moved();
       }),
       engine.on('viewport', chrome.stale),
+      engine.on('hover', ({ region }) => light(region?.id ?? null)),
       // An exploded view's pieces arrive after the camera, with no camera event: the names kept are
       // looked at again, not held where the pieces stood in flight.
       engine.on('cameraSettled', () => {
@@ -485,6 +548,7 @@
       // A cut dragged or a part hidden: looked at as it happens, chosen once it has rested.
       engine.on('change', () => {
         clearTimeout(rest);
+        stopSeeing();
         rest = setTimeout(choose, REST_MS);
         moving = true;
         follow();
@@ -493,10 +557,13 @@
     ];
     return () => {
       clearTimeout(rest);
+      stopSeeing();
       cancelAnimationFrame(looking);
       cancelAnimationFrame(glideFrame);
       [looking, glideFrame] = [0, 0];
       stops.forEach((stop) => stop());
+      point(null);
+      light(null);
       chrome!.dispose();
       chrome = null;
     };
@@ -507,9 +574,9 @@
     void [selected, lobes];
     if (!shown) {
       clearTimeout(leave);
+      stopSeeing();
       names = [];
       leaving = [];
-      slots.clear();
       sides.clear();
       drawnAt.clear();
       gliding.clear();
@@ -550,9 +617,12 @@
       {@const track = (node: HTMLElement) => {
         nodes.set(named.key, node);
         untrack(() => (attached += 1));
+        if (named.key === hot) node.dataset.hot = '';
         return () => {
           nodes.delete(named.key);
           words.delete(named.key);
+          // A name taken away under the pointer hears no leave.
+          if (named.key === pointed) point(null);
         };
       }}
       {#if named.region}
@@ -563,6 +633,10 @@
           class="region-name stage-label"
           aria-label={words.label}
           onclick={() => onSelect(region)}
+          onpointerenter={() => point(region)}
+          onpointerleave={() => point(null)}
+          onfocus={() => point(region)}
+          onblur={() => point(null)}
           {@attach track}
         >
           <span class="stage-label-leader" aria-hidden="true"></span>
@@ -622,11 +696,14 @@
       pointer-events: auto;
       cursor: pointer;
     }
-    @media (hover: hover) and (pointer: fine) {
-      button.region-name:hover {
-        color: var(--overlay-accent);
-        --label-dot: var(--overlay-accent);
-      }
+    /* Pointed at, on the name or on the region itself: the name, its leader and its dot in the accent, over the rest. */
+    .region-name[data-hot] {
+      z-index: 1;
+      color: var(--overlay-accent);
+      --label-dot: var(--overlay-accent);
+    }
+    .region-name[data-hot] :global(.stage-label-leader) {
+      background: var(--overlay-accent);
     }
   }
 </style>

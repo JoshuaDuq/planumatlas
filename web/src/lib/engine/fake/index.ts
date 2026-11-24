@@ -110,6 +110,17 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
     domains: options.domains,
     segmentationAgreement: options.segmentationAgreement,
     camera: () => camera,
+    cut: () => {
+      const cut = sectionsRef.current;
+      if (!cut?.active) return null;
+      const { center, normal } = cut.frame;
+      return {
+        normal,
+        offset: center[0] * normal[0] + center[1] * normal[1] + center[2] * normal[2],
+        reverse: cut.state.reverse,
+      };
+    },
+    pointed: (region) => events.emit('hover', { region, position: null }),
     changed: () => {
       if (disposed || !sectionsRef.current) return;
       sectionsRef.current.follow();

@@ -26,6 +26,17 @@ import { coded, sameSet } from './support.ts';
 
 type FakeFile = { atlas: string; [field: string]: unknown };
 
+const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+type Cut = { normal: Vec3; offset: number; reverse: boolean };
+
+/** Positive while the camera, looking along `back`, sees the cut's open side; a reversed cut keeps the other. */
+function openSide(back: Vec3, { normal, reverse }: Cut): number {
+  // World x, y, z are RAS right, superior and posterior.
+  const toward = back[0] * normal[0] - back[2] * normal[1] + back[1] * normal[2];
+  return reverse ? -toward : toward;
+}
+
 export interface FakeModelOptions {
   manifest: Manifest;
   cabNp?: FakeFile;
@@ -34,8 +45,12 @@ export interface FakeModelOptions {
   segmentationAgreement?: SegmentationAgreementData;
   /** Called after every state change, as the real model's `change` event (brain-atlas.js:602). */
   changed: () => void;
-  /** The camera `facing` looks through, made after the model. */
+  /** The camera `seenAt` looks through, made after the model. */
   camera: () => Pick<EngineCamera, 'view' | 'project'>;
+  /** The cut `seenAt` sees faces on, in RAS: its normal, its offset along it, and whether it keeps the other side; null without one. */
+  cut: () => Cut | null;
+  /** Called when `point` marks a region, as the real engine's `hover` event. */
+  pointed: (region: Region | null) => void;
 }
 
 /** The model plus the hooks the fake sections drive; the real model's sections call the same methods. */
@@ -82,11 +97,15 @@ export function createFakeModel({
   segmentationAgreement,
   changed,
   camera,
+  cut,
+  pointed,
 }: FakeModelOptions): FakeModel {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const levels = manifest.detail_levels;
   const defaultDetail = (levels.find((level) => level.id === 'learning') ?? levels[0]!).id;
   const layers = new Set<string>();
+  /** The region `point` marks. */
+  let marked: string | null = null;
   const dissection = { hidden: new Set<string>(), history: [] as Dissected[] };
   let envelopes = false;
   let spinalCord: SpinalCordLoad = 'unloaded';
@@ -236,51 +255,102 @@ export function createFakeModel({
       return point && [point[0], point[1] + 1, point[2]];
     },
     canSelect,
-    // Nothing is drawn to meet a ray: a drawn region faces the reader when its anchor lies on the
-    // camera's side of the brain's centre.
-    facing(ids) {
+    // Nothing is drawn to meet a ray. A drawn region whose anchor lies on the camera's side of the brain's
+    // centre shows as a disc round its anchor, a quarter of its surface in area, a convex body's mean; a
+    // cut seen from its open side shows, in front of those, a face for each drawn region whose anchor lies
+    // within 10 mm of the plane: that slice of a 10 mm ball, round the anchor moved onto the plane. A point
+    // is seen as the nearest of the discs that hold it: on a surface where the point itself lies on the
+    // disc, so it projects back to where it was asked, as a ray's hit does; on a face at the disc's centre,
+    // which is on the plane.
+    seenAt(points) {
       const { view, project } = camera();
-      return ids.map((id) => {
-        const region = regions.get(id);
-        if (!region) throw new Error(`Unknown region: ${id}`);
-        if (region.kind !== 'cortex' && region.kind !== 'structure') {
-          throw new Error(`A ${region.kind} is not named on the stage: ${id}`);
+      if (!view.scale) return points.map(() => null);
+      const scale = view.scale.pixels / view.scale.millimetres;
+      const back = view.basis.back;
+      const plane = cut();
+      const toward = plane ? openSide(back, plane) : 0;
+      const discs: { id: string; face: boolean; drawn: Vec3; radius: number }[] = [];
+      for (const region of regions.values()) {
+        if (region.kind !== 'cortex' && region.kind !== 'structure') continue;
+        if (!model.isRegionDrawn(region.id)) continue;
+        const anchor = model.anchorOf(region.id)!;
+        if (plane && toward > 0) {
+          const distance = dot(anchor, plane.normal) - plane.offset;
+          if (Math.abs(distance) < 10) {
+            discs.push({
+              id: region.id,
+              face: true,
+              drawn: [
+                anchor[0] - distance * plane.normal[0],
+                anchor[1] - distance * plane.normal[1],
+                anchor[2] - distance * plane.normal[2],
+              ],
+              radius: Math.sqrt(100 - distance * distance) * scale,
+            });
+          }
         }
-        const anchor = model.anchorOf(id)!;
-        const back = view.basis.back;
-        if (
-          !model.isRegionDrawn(id) ||
-          anchor[0] * back[0] + anchor[1] * back[1] + anchor[2] * back[2] <= 0
-        ) {
-          return null;
-        }
-        return { ...project([anchor])[0]!, drawn: anchor };
-      });
-    },
-    // As `facing`: a quarter of a drawn region's surface, a convex body's mean, on the camera's side.
-    facingArea(ids) {
-      const back = camera().view.basis.back;
-      return ids.map((id) => {
-        const region = regions.get(id);
-        if (!region) throw new Error(`Unknown region: ${id}`);
-        const anchor = model.anchorOf(id);
-        if (!model.isRegionDrawn(id) || !anchor) return 0;
-        const toward = anchor[0] * back[0] + anchor[1] * back[1] + anchor[2] * back[2] > 0;
+        if (dot(anchor, back) <= 0) continue;
         if (region.surface_area_mm2 === undefined) {
-          throw new Error(`The manifest gives no surface area for ${id}.`);
+          throw new Error(`The manifest gives no surface area for ${region.id}.`);
         }
-        return toward ? region.surface_area_mm2 / 4 : 0;
+        discs.push({
+          id: region.id,
+          face: false,
+          drawn: anchor,
+          radius: Math.sqrt(region.surface_area_mm2 / 4 / Math.PI) * scale,
+        });
+      }
+      const centres = project(discs.map(({ drawn }) => drawn));
+      return points.map(({ x, y }) => {
+        let [best, least] = [-1, Infinity];
+        discs.forEach((disc, index) => {
+          const centre = centres[index];
+          if (!centre) return;
+          const off = Math.hypot(centre.x - x, centre.y - y);
+          if (off > disc.radius) return;
+          // A face stands in front of every surface.
+          const rank = off + (disc.face ? 0 : 1e6);
+          if (rank < least) [best, least] = [index, rank];
+        });
+        if (best < 0) return null;
+        const { id, face, drawn } = discs[best]!;
+        if (face) return { id, face, drawn };
+        const centre = centres[best]!;
+        const [across, up] = [(x - centre.x) / scale, (centre.y - y) / scale];
+        const { right, up: top } = view.basis;
+        return {
+          id,
+          face,
+          drawn: [
+            drawn[0] + across * right[0] + up * top[0],
+            drawn[1] + across * right[1] + up * top[1],
+            drawn[2] + across * right[2] + up * top[2],
+          ],
+        };
       });
     },
-    // As `facing`: a drawn region's point is in sight on the camera's side of the brain's centre.
+    // As the real engine: a region no click could select is not marked, and only a change is reported.
+    point(id) {
+      const region = id === null ? null : regions.get(id);
+      if (region === undefined) throw new Error(`Unknown region: ${id}`);
+      const next = region && canSelect(region) ? region : null;
+      if ((next?.id ?? null) === marked) return;
+      marked = next?.id ?? null;
+      pointed(next);
+    },
+    // As `seenAt`: a drawn region's point is in sight on the camera's side of the brain's centre, or on
+    // the cut's plane while the reader sees its open side.
     inSight(targets) {
       const back = camera().view.basis.back;
+      const plane = cut();
       return targets.map(({ id, point }) => {
         if (!regions.has(id)) throw new Error(`Unknown region: ${id}`);
-        return (
-          model.isRegionDrawn(id) &&
-          point[0] * back[0] + point[1] * back[1] + point[2] * back[2] > 0
-        );
+        if (!model.isRegionDrawn(id)) return false;
+        const onFace =
+          plane !== null &&
+          openSide(back, plane) > 0 &&
+          Math.abs(dot(point, plane.normal) - plane.offset) < 1e-6;
+        return onFace || dot(point, back) > 0;
       });
     },
 

@@ -16,9 +16,8 @@ import {
   Vector3,
 } from 'three';
 import type { Color, Intersection, IUniform, Material, Raycaster } from 'three';
-import type { CapAnchor, Region } from '../../types/index.ts';
+import type { Region } from '../../types/index.ts';
 import type { Frame } from '../slices/coordinates.ts';
-import { capAnchors } from './cap-anchors.ts';
 import { CORTICAL_MAPS } from '../../core/catalog/cut-labels.ts';
 import { clippingPlane, worldToRas, worldToVoxelMatrix } from '../slices/coordinates.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
@@ -749,17 +748,6 @@ export class TissueSections {
   whiteMatterAt(hit: SolidHit): string | null | undefined {
     if (hit.source.userData['boundary'] !== 'white' || !this.whiteMatter?.active) return undefined;
     return this.whiteMatter.regionAt(new Vector3(...worldToRas(hit.point)));
-  }
-
-  /** See `capAnchors` (`cap-anchors.ts`); none before a cut atlas loads. */
-  capAnchors(): CapAnchor[] {
-    if (!this.current) return [];
-    const state = this.model.state;
-    return capAnchors({
-      solids: this.solids,
-      visibleAt: (hit) => this.capVisibleAt(hit, state),
-      regionAt: (hit) => this.named(hit, state).region?.id ?? null,
-    });
   }
 
   dispose(): void {

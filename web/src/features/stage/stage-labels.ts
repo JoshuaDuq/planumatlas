@@ -17,10 +17,6 @@ export interface LabelRequest {
   point: ScreenPoint | null;
   /** The label's sizes, preferred first. */
   sizes: readonly Size[];
-  /** Left out (null) where no slot is clear, rather than placed where it overlaps least: a region's name. */
-  optional?: boolean;
-  /** The slot it stood in last: its side is tried first at each distance, so a moving label keeps its side. */
-  slot?: number;
 }
 
 /** Above right (where the route's numbers have always stood), right, below right, the left side, then above and below. */
@@ -42,14 +38,6 @@ const DOT_PX = 8;
 const GAP_PX = 2;
 
 const SLOTS = SIDES.length * STEPS.length;
-
-/** The slots in the order they are tried: nearest first, and at each distance the side it stood on first. */
-function slotOrder(last: number | undefined): number[] {
-  const side = last === undefined ? 0 : last % SIDES.length;
-  return STEPS.flatMap((_, step) =>
-    SIDES.map((__, at) => step * SIDES.length + (at === 0 ? side : at <= side ? at - 1 : at)),
-  );
-}
 
 /** A label's box in `slot` round `point`: diagonal sides put the dot at the box's near corner, as before. */
 function slotBox(point: ScreenPoint, { width, height }: Size, slot: number): Rect {
@@ -111,8 +99,8 @@ function outside(box: Rect, bounds: Rect): number {
 }
 
 /**
- * Each label's place, in order: the first clear slot, trying each size in turn, else its last size where
- * it overlaps least, or none for an optional one. Null for a point behind the camera.
+ * Each label's place, in order: the first clear slot, nearest first, trying each size in turn, else its last
+ * size where it overlaps least. Null for a point behind the camera.
  */
 export function placeLabels(
   requests: readonly LabelRequest[],
@@ -128,7 +116,7 @@ export function placeLabels(
   // The chrome, then each label as it is placed.
   const blockers = [...obstacles];
   const leaders: [ScreenPoint, ScreenPoint][] = [];
-  return requests.map(({ point, sizes, optional = false, slot: last }, index) => {
+  return requests.map(({ point, sizes }, index) => {
     if (!point) return null;
     // Its own dot sits at the box's near corner or edge, outside it.
     const others = dots.filter((dot, at): dot is Rect => dot !== null && at !== index);
@@ -145,9 +133,8 @@ export function placeLabels(
       return spent;
     };
     let chosen: Placement | null = null;
-    const order = slotOrder(last);
     for (let variant = 0; variant < sizes.length && !chosen; variant++) {
-      for (const slot of order) {
+      for (let slot = 0; slot < SLOTS; slot++) {
         const box = slotBox(point, sizes[variant]!, slot);
         // Under a square pixel: rounding, not a collision.
         if (cost(box, slot) < 1) {
@@ -156,7 +143,6 @@ export function placeLabels(
         }
       }
     }
-    if (!chosen && optional) return null;
     if (!chosen) {
       const variant = sizes.length - 1;
       let least = Infinity;
@@ -192,6 +178,40 @@ export function calloutEnd(box: Rect, side: Side): ScreenPoint {
   return { x: side === 'left' ? box.x + box.width : box.x, y: box.y + box.height / 2 };
 }
 
+/** How far a name beside its dot stands from it. */
+const BESIDE_PX = 6;
+
+/**
+ * Names beside their dots, where the stage has no room for columns, in order of priority: each level with
+ * its dot, on its right where that is clear of the stage's edge, its chrome and the names and dots already
+ * placed, else on its left, the side it stood on last tried first; left out (null), dot and all, where neither
+ * is, or where its dot would stand under a name already placed. Under a square pixel is rounding, not a
+ * collision, as for `placeLabels`.
+ */
+export function placeBeside(
+  requests: readonly { point: ScreenPoint | null; size: Size; side?: Side }[],
+  bounds: Rect,
+  obstacles: readonly Rect[],
+): ({ box: Rect; side: Side } | null)[] {
+  const names: Rect[] = [];
+  const blockers = [...obstacles];
+  return requests.map(({ point, size: { width, height }, side: last = 'right' }) => {
+    if (!point) return null;
+    const dot = { x: point.x - DOT_PX / 2, y: point.y - DOT_PX / 2, width: DOT_PX, height: DOT_PX };
+    if (names.some((name) => overlap(dot, name, 0) >= 1)) return null;
+    for (const side of [last, last === 'right' ? 'left' : 'right'] as const) {
+      const x = side === 'right' ? point.x + BESIDE_PX : point.x - BESIDE_PX - width;
+      const box = { x, y: point.y - height / 2, width, height };
+      if (outside(box, bounds) >= 1) continue;
+      if (blockers.some((other) => overlap(box, other, GAP_PX) >= 1)) continue;
+      names.push(box);
+      blockers.push(box, dot);
+      return { box, side };
+    }
+    return null;
+  });
+}
+
 /**
  * Names that stand on what they name, each centred on its point, in order of priority: one that would leave
  * `bounds`, cover an obstacle or a name already placed is left out (null), never moved off its point.
@@ -215,6 +235,7 @@ export function placeCentred(
 /** The stage's own chrome a label must not cover. */
 const CHROME = [
   '.stage-dock',
+  '.popover.stage-popover',
   '.orientation-gizmo',
   '.stage-key',
   '#scale-bar',
@@ -236,7 +257,10 @@ function measureChrome(host: HTMLElement): Rect[] {
   });
 }
 
-/** The chrome's boxes, measured again only after a resize or `stale()`: a camera frame reads no layout. */
+/**
+ * The chrome's boxes, measured again only after a resize, a menu opened or closed on the dock, a chrome
+ * box's own transition ended, or `stale()`: a camera frame reads no layout.
+ */
 export function watchChrome(host: HTMLElement, changed: () => void) {
   let rects: Rect[] | null = null;
   const stale = () => {
@@ -246,10 +270,25 @@ export function watchChrome(host: HTMLElement, changed: () => void) {
   const observer = new ResizeObserver(stale);
   observer.observe(host);
   for (const node of host.querySelectorAll(`${CHROME}, #stage-keys`)) observer.observe(node);
+  // A dock menu is mounted when it opens, and scales in: measured as it arrives and once it has.
+  const menus = new MutationObserver(stale);
+  for (const dock of host.querySelectorAll('.stage-dock')) {
+    menus.observe(dock, { childList: true, subtree: true });
+  }
+  const ended = ({ target }: Event) => {
+    if (target instanceof Element && target.matches(CHROME)) stale();
+  };
+  host.addEventListener('transitionend', ended);
+  host.addEventListener('animationend', ended);
   return {
     rects: () => (rects ??= measureChrome(host)),
     stale,
-    dispose: () => observer.disconnect(),
+    dispose: () => {
+      observer.disconnect();
+      menus.disconnect();
+      host.removeEventListener('transitionend', ended);
+      host.removeEventListener('animationend', ended);
+    },
   };
 }
 

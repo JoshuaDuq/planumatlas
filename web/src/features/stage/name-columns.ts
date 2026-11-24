@@ -46,11 +46,14 @@ export interface ColumnPlacement {
 /** Clear space between the anatomy and a column's near edge. */
 export const ANATOMY_GAP_PX = 16;
 /**
- * A column opens once it has this much room, and stays open until it has less than `KEEP_COLUMN_PX`: a turn
- * at the edge of the room does not move the names back and forth.
+ * A column opens once it has this much room, a short name's line, and stays open until it has less than
+ * `KEEP_COLUMN_PX`: a turn at the edge of the room does not move the names back and forth. A name too long
+ * for a narrow column has no place in it (`ColumnRequest.size`).
  */
-export const OPEN_COLUMN_PX = 112;
-export const KEEP_COLUMN_PX = 80;
+export const OPEN_COLUMN_PX = 96;
+export const KEEP_COLUMN_PX = 72;
+/** A column this wide ends short of chrome beside the anatomy, rather than break its rows round it. */
+export const COMFORTABLE_COLUMN_PX = 144;
 /** Clear space between two names in a column, and between a name and a chrome box. */
 const ROW_GAP_PX = 2;
 /**
@@ -178,15 +181,17 @@ export function placeColumns(
   open: readonly Side[] = [],
   moving = false,
 ): { placed: (ColumnPlacement | null)[]; open: Side[] } | null {
+  const leftNear = anatomy.x - ANATOMY_GAP_PX;
+  const rightNear = anatomy.x + anatomy.width + ANATOMY_GAP_PX;
   const left: Column = {
     side: 'left',
-    near: anatomy.x - ANATOMY_GAP_PX,
-    width: anatomy.x - ANATOMY_GAP_PX - bounds.x,
+    near: leftNear,
+    width: leftNear - farEdge('left', leftNear, bounds.x),
   };
   const right: Column = {
     side: 'right',
-    near: anatomy.x + anatomy.width + ANATOMY_GAP_PX,
-    width: bounds.x + bounds.width - (anatomy.x + anatomy.width + ANATOMY_GAP_PX),
+    near: rightNear,
+    width: farEdge('right', rightNear, bounds.x + bounds.width) - rightNear,
   };
   const columns = [left, right].filter(
     ({ side, width }) => width >= (open.includes(side) ? KEEP_COLUMN_PX : OPEN_COLUMN_PX),
@@ -230,6 +235,27 @@ export function placeColumns(
     if (!moved) break;
   }
   return { placed: best.placed, open: columns.map(({ side }) => side) };
+
+  /**
+   * Where a column's room ends, from its `near` edge out to the stage's `edge`: at the nearest chrome box
+   * standing beside the anatomy that either leaves a comfortable column short of it, as an orientation
+   * letter at the stage's edge does, or stands along half the anatomy's height, as an open menu does. Chrome
+   * that does neither takes rows out of the column instead (`freeSpans`).
+   */
+  function farEdge(side: Side, near: number, edge: number): number {
+    let far = edge;
+    for (const box of obstacles) {
+      const along =
+        Math.min(box.y + box.height, anatomy.y + anatomy.height) - Math.max(box.y, anatomy.y);
+      if (along <= 0) continue;
+      const [low, high] = [box.x - ROW_GAP_PX, box.x + box.width + ROW_GAP_PX];
+      const room = side === 'left' ? near - high : low - near;
+      if (room < 0) continue;
+      if (room < COMFORTABLE_COLUMN_PX && along < anatomy.height / 2) continue;
+      far = side === 'left' ? Math.max(far, high) : Math.min(far, low);
+    }
+    return far;
+  }
 
   function layout(assignment: readonly (Column | null)[]) {
     const placed: (ColumnPlacement | null)[] = requests.map(() => null);
@@ -352,24 +378,30 @@ function conflicts(leaders: readonly Leader[]): number {
   return count;
 }
 
+/** Rounds of steering leaders clear of the dots they pass over. */
+const CLEAR_ROUNDS = 4;
+
 /**
  * The tops of one span's names, packed in their dots' order, then two neighbours swapped wherever that
  * leaves fewer leaders in conflict: dots at different depths across the anatomy can cross, or pass over each
- * other, where their names stand in order. The order changes in place.
+ * other, where their names stand in order. The order changes in place. A leader still passing over another
+ * name's dot, as the farther of two level dots' does, is then steered clear, a few rounds: its name is asked
+ * for the level that takes the leader `DOT_CLEAR_PX` past that dot, on its own name's side of that dot's
+ * name, unless that leaves more conflicts.
  */
 function untangle(group: Row[], span: [number, number], column: Column): number[] {
+  const wants = new Map(group.map((row) => [row, row.point.y - row.size.height / 2]));
   const tops = () =>
     pack(
-      group.map(({ point, size }) => ({ want: point.y - size.height / 2, height: size.height })),
+      group.map((row) => ({ want: wants.get(row)!, height: row.size.height })),
       span,
     );
-  const tangle = (at: number[]) =>
-    conflicts(
-      group.map(({ point, size }, row) => ({
-        dot: point,
-        end: calloutEnd(boxIn(column, size, at[row]!), column.side),
-      })),
-    );
+  const leaders = (at: number[]): Leader[] =>
+    group.map(({ point, size }, row) => ({
+      dot: point,
+      end: calloutEnd(boxIn(column, size, at[row]!), column.side),
+    }));
+  const tangle = (at: number[]) => conflicts(leaders(at));
   let at = tops();
   let tangled = tangle(at);
   for (let pass = 0; pass < group.length && tangled; pass++) {
@@ -385,6 +417,37 @@ function untangle(group: Row[], span: [number, number], column: Column): number[
       [group[row], group[row + 1]] = [group[row + 1]!, group[row]!];
     }
     if (!improved) break;
+  }
+  for (let round = 0; round < CLEAR_ROUNDS && tangled; round++) {
+    const drawn = leaders(at);
+    const before = new Map(wants);
+    drawn.forEach((far, row) => {
+      let push = 0;
+      for (const near of drawn) {
+        const [run, along] = [far.end.x - far.dot.x, near.dot.x - far.dot.x];
+        // Only a dot the leader runs past, between its own dot and its name.
+        if (near === far || along * run <= 0 || Math.abs(along) >= Math.abs(run)) continue;
+        if (away(near.dot, far.dot, far.end) >= DOT_CLEAR_PX) continue;
+        // Past the dot on the side its own name stands of that dot's name, so the two leaders do not cross.
+        const side = far.end.y < near.end.y ? -1 : 1;
+        const passes = far.dot.y + ((far.end.y - far.dot.y) * along) / run;
+        const short = DOT_CLEAR_PX + 1 - side * (passes - near.dot.y);
+        const farther = (side * short * run) / along;
+        if (Math.abs(farther) > Math.abs(push)) push = farther;
+      }
+      if (!push) return;
+      // From the farther of what it asked for and where it stands: crowded names give each other only
+      // part of what one asks.
+      const [asked, stands] = [wants.get(group[row]!)!, at[row]!];
+      wants.set(group[row]!, (push > 0 ? Math.max(asked, stands) : Math.min(asked, stands)) + push);
+    });
+    const tried = tops();
+    const left = tangle(tried);
+    if (left > tangled) {
+      for (const [row, want] of before) wants.set(row, want);
+      break;
+    }
+    [at, tangled] = [tried, left];
   }
   return at;
 }

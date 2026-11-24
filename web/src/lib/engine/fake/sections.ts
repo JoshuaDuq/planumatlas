@@ -402,24 +402,5 @@ export function createFakeSections({
     async regionAt() {
       return null;
     },
-    // Each drawn region whose anchor lies within 10 mm of the plane has a face there: the anchor moved
-    // onto the plane, as large as that slice of a 10 mm ball, so a face nearer the anchor is larger.
-    capAnchors() {
-      if (!active()) return [];
-      const { normal } = frame();
-      const offset = dot(state.crosshair, normal);
-      return [...model.regions.values()]
-        .filter(
-          ({ id, kind }) => (kind === 'cortex' || kind === 'structure') && model.isRegionDrawn(id),
-        )
-        .flatMap(({ id }) => {
-          const anchor = model.anchorOf(id)!;
-          const distance = dot(anchor, normal) - offset;
-          if (Math.abs(distance) >= 10) return [];
-          const point = anchor.map((value, axis) => value - distance * normal[axis]!) as Vector;
-          return [{ region: id, point, areaMm2: Math.PI * (100 - distance * distance) }];
-        })
-        .sort((a, b) => b.areaMm2 - a.areaMm2 || a.region.localeCompare(b.region));
-    },
   };
 }

@@ -1,7 +1,15 @@
 import { assert } from './assert.ts';
 import { afterAll, afterEach, beforeAll, describe, it, onTestFinished, vi } from 'vitest';
 import type { Region } from '../../types/index.ts';
-import type { Engine, EngineEvents, SectionsState, Vec3 } from '../api.ts';
+import type {
+  Engine,
+  EngineEvents,
+  Rect,
+  ScreenPoint,
+  SectionsState,
+  SeenPoint,
+  Vec3,
+} from '../api.ts';
 
 export interface ContractFixtures {
   /** An overlap the atlas comparison can outline, with its geometry file; omit to skip those cases. */
@@ -35,6 +43,13 @@ const near = (actual: readonly number[], expected: readonly number[], tolerance 
 
 const dot = (a: readonly number[], b: readonly number[]) =>
   a.reduce((sum, value, axis) => sum + value * b[axis]!, 0);
+
+/** The centres of a `side` × `side` grid of cells over a rectangle of the canvas. */
+const gridOver = ({ x, y, width, height }: Rect, side = 24): ScreenPoint[] =>
+  Array.from({ length: side * side }, (_, cell) => ({
+    x: x + (((cell % side) + 0.5) / side) * width,
+    y: y + ((Math.floor(cell / side) + 0.5) / side) * height,
+  }));
 
 /** Collect an event's payloads until the test ends. */
 function collect<K extends keyof EngineEvents>(engine: Engine, type: K) {
@@ -505,100 +520,94 @@ export function defineEngineContract(
         assert.ok(midline.length > 0 && midline.every((region) => ids.includes(region)));
       });
 
-      it('says where each drawn region faces the reader, from the side it lies on, and the same each time', () => {
-        const { engine, regions, atlas, cortex, otherAtlas } = world();
+      it('says what the reader sees at each point of the stage: drawn regions of the side in view, where asked, the same each time', () => {
+        const { engine, regions } = world();
         const { model, camera } = engine;
-        const side = (hemisphere: 'left' | 'right') =>
-          [...regions.values()]
-            .filter(
-              (region) =>
-                region.atlas === atlas &&
-                region.kind === 'cortex' &&
-                region.hemisphere === hemisphere,
-            )
-            .map(({ id }) => id);
-        const faced = (ids: readonly string[]) => model.facing(ids).filter(Boolean).length;
+        /** How many regions of each hemisphere are seen over the anatomy. */
+        const sides = (seen: readonly (SeenPoint | null)[]) => {
+          const ids = [...new Set(seen.flatMap((hit) => (hit ? [hit.id] : [])))];
+          const count = (side: 'left' | 'right') =>
+            ids.filter((id) => regions.get(id)!.hemisphere === side).length;
+          return { left: count('left'), right: count('right') };
+        };
         camera.applyView('left', { immediate: true });
-        const points = model.facing(side('left'));
-        assert.equal(points.length, side('left').length);
-        for (const point of points) {
-          if (point) assert.ok([point.x, point.y, ...point.drawn].every(Number.isFinite));
-        }
-        assert.ok(faced(side('left')) > faced(side('right')), 'the left view faces the left');
+        const points = gridOver(camera.anatomyRect()!);
+        const seen = model.seenAt(points);
+        assert.equal(seen.length, points.length);
+        seen.forEach((hit, index) => {
+          if (!hit) return;
+          assert.ok(regions.has(hit.id) && model.isRegionDrawn(hit.id), hit.id);
+          assert.equal(hit.face, false, 'no cut, no face');
+          assert.ok(hit.drawn.length === 3 && hit.drawn.every(Number.isFinite), hit.id);
+          // Where the ray met it is drawn where it was asked: a name's dot stays under its point.
+          const [at] = camera.project([hit.drawn]);
+          const asked = points[index]!;
+          assert.ok(
+            at && Math.hypot(at.x - asked.x, at.y - asked.y) < 0.5,
+            `${hit.id} projects back`,
+          );
+        });
+        const fromLeft = sides(seen);
+        assert.ok(fromLeft.left > fromLeft.right, 'the left view shows the left');
+        assert.deepEqual(model.seenAt(points), seen);
         camera.applyView('right', { immediate: true });
-        assert.ok(faced(side('right')) > faced(side('left')), 'the right view faces the right');
-        assert.deepEqual(model.facing(side('right')), model.facing(side('right')));
-        // A hidden region and one of an atlas not drawn face no one.
-        const shown = side('right')[model.facing(side('right')).findIndex(Boolean)]!;
-        model.hideRegions([shown]);
-        assert.deepEqual(model.facing([shown, cortex('right', otherAtlas).id]), [null, null]);
-        assert.throws(() => model.facing(['no-such-region']), /Unknown region: no-such-region/);
+        const fromRight = sides(model.seenAt(gridOver(camera.anatomyRect()!)));
+        assert.ok(fromRight.right > fromRight.left, 'the right view shows the right');
       });
 
-      it('measures the anatomy’s extent on the stage round where it faces the reader', () => {
-        const { engine, regions, atlas } = world();
-        const { model, camera } = engine;
+      it('sees past a region once it is hidden', () => {
+        const { model, camera } = world().engine;
+        camera.applyView('left', { immediate: true });
+        const points = gridOver(camera.anatomyRect()!);
+        const shown = model.seenAt(points).find((hit) => hit !== null)?.id;
+        assert.ok(shown, 'the left view shows a region');
+        model.hideRegions([shown]);
+        assert.ok(model.seenAt(points).every((hit) => hit?.id !== shown));
+      });
+
+      it('measures the anatomy’s extent on the stage: seen in every quarter of it, and nowhere half its size beyond it', () => {
+        const { model, camera } = world().engine;
         camera.applyView('left', { immediate: true });
         const rect = camera.anatomyRect()!;
         assert.ok(rect.width > 0 && rect.height > 0);
-        const ids = [...regions.values()]
-          .filter((region) => region.atlas === atlas && region.kind === 'cortex')
-          .map(({ id }) => id);
-        const points = model.facing(ids).filter((point) => point !== null);
-        assert.ok(points.length > 0);
-        // Measured on a sample of the vertices: a few pixels of slack.
-        for (const { x, y } of points) {
-          assert.ok(x >= rect.x - 8 && x <= rect.x + rect.width + 8, `x ${x} within the extent`);
-          assert.ok(y >= rect.y - 8 && y <= rect.y + rect.height + 8, `y ${y} within the extent`);
-        }
+        // The rectangle and one of its size on every side.
+        const points = gridOver({
+          x: rect.x - rect.width,
+          y: rect.y - rect.height,
+          width: 3 * rect.width,
+          height: 3 * rect.height,
+        });
+        const seen = model.seenAt(points);
+        // Each hit from the extent's centre, in its widths and heights: the edge is a half away.
+        const hits = points
+          .filter((_, index) => seen[index])
+          .map(({ x, y }) => [(x - rect.x) / rect.width - 0.5, (y - rect.y) / rect.height - 0.5]);
+        const away = ([x, y]: number[]) => Math.max(Math.abs(x!), Math.abs(y!));
+        const quarters = hits
+          .filter((hit) => away(hit) < 0.5)
+          .map(([x, y]) => `${x! < 0},${y! < 0}`);
+        assert.equal(
+          new Set(quarters).size,
+          4,
+          'the anatomy is seen in each quarter of its extent',
+        );
+        // The fake's regions are discs round the anchors its extent is measured on, so the half
+        // rectangle past the edge is not judged.
+        assert.deepEqual(
+          hits.filter((hit) => away(hit) > 1),
+          [],
+          'nothing is seen half a rectangle beyond the extent',
+        );
       });
 
-      it('measures more of each side’s surface turned toward a view of that side, and none of a hidden region', () => {
-        const { engine, regions, atlas } = world();
-        const { model, camera } = engine;
-        const side = (hemisphere: 'left' | 'right') =>
-          [...regions.values()]
-            .filter(
-              (region) =>
-                region.atlas === atlas &&
-                region.kind === 'cortex' &&
-                region.hemisphere === hemisphere,
-            )
-            .map(({ id }) => id);
-        const total = (ids: readonly string[]) =>
-          model.facingArea(ids).reduce((sum, area) => sum + area, 0);
-        camera.applyView('left', { immediate: true });
-        // What stands in front is not counted out: the far side's medial wall faces the camera too.
-        assert.ok(
-          total(side('left')) > total(side('right')),
-          'the left view sees more of the left',
-        );
-        camera.applyView('right', { immediate: true });
-        assert.ok(
-          total(side('right')) > total(side('left')),
-          'the right view sees more of the right',
-        );
-        const [shown] = side('right').filter((id) => model.facingArea([id])[0]! > 0);
-        model.hideRegions([shown!]);
-        assert.deepEqual(model.facingArea([shown!]), [0]);
-        assert.throws(() => model.facingArea(['no-such-region']), /Unknown region: no-such-region/);
-      });
-
-      it('keeps a facing point in sight from where it was found, not from the other side or once hidden', () => {
-        const { engine, regions, atlas } = world();
-        const { model, camera } = engine;
-        const left = [...regions.values()]
-          .filter(
-            (region) =>
-              region.atlas === atlas && region.kind === 'cortex' && region.hemisphere === 'left',
-          )
-          .map(({ id }) => id);
+      it('keeps a point the reader sees in sight from where it was seen, not from the other side or once hidden', () => {
+        const { model, camera } = world().engine;
         camera.applyView('left', { immediate: true });
         const targets = model
-          .facing(left)
-          .flatMap((point, index) => (point ? [{ id: left[index]!, point: point.drawn }] : []));
+          .seenAt(gridOver(camera.anatomyRect()!))
+          .flatMap((hit) => (hit ? [{ id: hit.id, point: hit.drawn }] : []));
         assert.ok(targets.length > 0);
-        assert.ok(model.inSight(targets).every(Boolean), 'each found point is in sight');
+        assert.ok(model.inSight(targets).every(Boolean), 'each seen point is in sight');
         camera.applyView('right', { immediate: true });
         assert.ok(
           model.inSight(targets).filter(Boolean).length < targets.length / 2,
@@ -611,6 +620,28 @@ export function defineEngineContract(
           () => model.inSight([{ id: 'no-such-region', point: [0, 0, 0] }]),
           /Unknown region: no-such-region/,
         );
+      });
+
+      it('marks the region it is pointed at and says so once, clears the mark, and refuses an unknown id', () => {
+        const { engine, left, right } = world();
+        const hovers = collect(engine, 'hover');
+        // Nothing is marked yet, and a region pointed at again is marked already: neither is a change.
+        engine.model.point(null);
+        engine.model.point(left.id);
+        engine.model.point(left.id);
+        engine.model.point(right.id);
+        engine.model.point(null);
+        engine.model.point(null);
+        const told = [left.id, right.id, null].map((id) => ({ id, position: null }));
+        const heard = () =>
+          hovers.map(({ region, position }) => ({ id: region?.id ?? null, position }));
+        assert.deepEqual(heard(), told);
+        refuses(
+          () => engine.model.point('no-such-region'),
+          Error,
+          'Unknown region: no-such-region',
+        );
+        assert.deepEqual(heard(), told, 'a refusal reports nothing');
       });
 
       it('isolates the selection and releases it on a setting change', () => {
@@ -1269,22 +1300,38 @@ export function defineEngineContract(
         assert.equal(model.settings.cutAtlas, otherAtlas);
       });
 
-      it('anchors each cut face once, largest first, on the plane, and none without a cut', async () => {
+      it('shows the cut’s faces, on the plane, to a reader on its open side and none from the side it keeps', async () => {
         const { engine, regions } = world();
-        const { sections } = engine;
-        assert.deepEqual(sections.capAnchors(), []);
-        await sections.setMode('axial');
-        const anchors = sections.capAnchors();
-        assert.ok(anchors.length > 0, 'an axial cut through the brain has faces');
-        assert.equal(new Set(anchors.map(({ region }) => region)).size, anchors.length);
-        anchors.forEach(({ region, point, areaMm2 }, index) => {
-          assert.ok(regions.has(region), region);
-          assert.ok(areaMm2 > 0 && (index === 0 || anchors[index - 1]!.areaMm2 >= areaMm2));
-          const off = dot(point, sections.frame.normal) - sections.offset;
-          assert.ok(Math.abs(off) <= 0.5, `${region} lies ${off} mm off the plane`);
-        });
+        const { model, sections, camera } = engine;
+        await sections.setMode('coronal');
+        camera.faceCut({ immediate: true });
+        const points = gridOver(camera.anatomyRect()!);
+        const faces = () => model.seenAt(points).flatMap((hit) => (hit?.face ? [hit] : []));
+        const open = faces();
+        assert.ok(open.length > 0, 'a coronal cut through the brain shows faces');
+        for (const { id, drawn } of open) {
+          assert.ok(regions.has(id), id);
+          const off = dot(drawn, sections.frame.normal) - sections.offset;
+          assert.ok(Math.abs(off) <= 1e-3, `${id} is seen ${off} mm off the plane`);
+        }
+        // The same camera now stands on the side the cut keeps.
+        sections.setDisplay({ reverse: true });
+        assert.equal(faces().length, 0);
+        camera.faceCut({ immediate: true });
+        assert.ok(faces().length > 0, 'faced again, the reversed cut shows its faces');
         await sections.setMode('off');
-        assert.deepEqual(sections.capAnchors(), []);
+        assert.equal(faces().length, 0, 'a closed cut has no face');
+      });
+
+      it('keeps a cut face the reader sees in sight', async () => {
+        const { model, sections, camera } = world().engine;
+        await sections.setMode('coronal');
+        camera.faceCut({ immediate: true });
+        const targets = model
+          .seenAt(gridOver(camera.anatomyRect()!))
+          .flatMap((hit) => (hit?.face ? [{ id: hit.id, point: hit.drawn }] : []));
+        assert.ok(targets.length > 0);
+        assert.ok(model.inSight(targets).every(Boolean), 'each seen face is in sight');
       });
 
       it('selects a region only the cut shows, while the colour puts its map on the cut', async () => {

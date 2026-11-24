@@ -1,10 +1,12 @@
 // Names in columns beside the anatomy: level with their dots where nothing crowds them, wrapped to their
 // column, pushed apart in their dots' order where names crowd, moved to the other column where that keeps
-// their leaders short and level, clear of the chrome, and none where the anatomy leaves no room.
+// their leaders short and level, ended short of the chrome beside the anatomy or broken round it, and none
+// where the anatomy leaves no room.
 import { describe, expect, test } from 'vitest';
 import type { Rect, Size } from '../../lib/engine/api.ts';
 import {
   ANATOMY_GAP_PX,
+  COMFORTABLE_COLUMN_PX,
   KEEP_COLUMN_PX,
   OPEN_COLUMN_PX,
   placeColumns as placeWithOpen,
@@ -26,6 +28,9 @@ const name = (x: number, y: number, extra: Partial<ColumnRequest> = {}): ColumnR
   size: () => fixed,
   ...extra,
 });
+/** A name on one line 270 px wide where its column has the room, else on two lines as wide as the column. */
+const filling = (width: number): Size =>
+  width >= 270 ? { width: 270, height: 24 } : { width, height: 48 };
 const middleOf = (box: Rect) => box.y + box.height / 2;
 const meet = (a: Rect, b: Rect) =>
   Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x) &&
@@ -140,6 +145,36 @@ describe('placeColumns', () => {
     expect(leadersCross([requests[0]!, placed[0]!], [requests[1]!, placed[1]!])).toBe(false);
   });
 
+  test('a leader is steered clear of a dot level with its own that it would pass over', () => {
+    // Three dots on one level, far from the only column with room: with their names side by side, in any
+    // order, a farther name's leader would run within 5 px of the dot before it.
+    const wide = { x: 100, y: 100, width: 600, height: 400 };
+    const requests = [name(500, 300), name(440, 300), name(380, 300)];
+    const placed = placeColumns(requests, wide, bounds, [])!;
+    expect(placed.map((entry) => entry?.side)).toEqual(['right', 'right', 'right']);
+    const leaders = requests.map((request, index) => ({
+      dot: request.point!,
+      end: calloutEnd(placed[index]!.box, 'right'),
+    }));
+    /** How far a dot is from a leader, measured down the stage where the leader passes it. */
+    const clearance = (dot: { x: number; y: number }, leader: (typeof leaders)[number]) => {
+      const along = (dot.x - leader.dot.x) / (leader.end.x - leader.dot.x);
+      return Math.abs(leader.dot.y + along * (leader.end.y - leader.dot.y) - dot.y);
+    };
+    // The farthest dot's leader passes both nearer dots, the middle one's the nearest.
+    expect(clearance(leaders[0]!.dot, leaders[2]!)).toBeGreaterThanOrEqual(9);
+    expect(clearance(leaders[1]!.dot, leaders[2]!)).toBeGreaterThanOrEqual(9);
+    expect(clearance(leaders[0]!.dot, leaders[1]!)).toBeGreaterThanOrEqual(9);
+    for (const [a, b] of [
+      [0, 1],
+      [0, 2],
+      [1, 2],
+    ] as const) {
+      expect(meet(placed[a]!.box, placed[b]!.box)).toBe(false);
+      expect(leadersCross([requests[a]!, placed[a]!], [requests[b]!, placed[b]!])).toBe(false);
+    }
+  });
+
   test('a name moves to the other column where its own would push it far off its dot’s level', () => {
     // The right column is blocked down to 300 px; a dot just right of the middle at 120 px goes left.
     const chrome = [{ x: 700, y: 0, width: 300, height: 300 }];
@@ -195,14 +230,104 @@ describe('placeColumns', () => {
   });
 
   test('a chrome box blocks only names wide enough to reach it', () => {
-    // A key at the stage's right edge, level with the dot.
-    const key = { x: 900, y: 150, width: 100, height: 100 };
+    // A key in the right column, level with the dot, too near the anatomy for the column to end short of it.
+    const key = { x: 840, y: 150, width: 100, height: 100 };
     const [narrow] = placeColumns([name(650, 200)], anatomy, bounds, [key])!;
     expect(middleOf(narrow!.box)).toBe(200);
     const wide = { width: 250, height: 24 };
     const [pushed] = placeColumns([name(650, 200, { size: () => wide })], anatomy, bounds, [key])!;
     expect(meet(pushed!.box, key)).toBe(false);
     expect(middleOf(pushed!.box)).not.toBe(200);
+  });
+
+  test('a column ends short of chrome at the stage’s edge beside the anatomy, and its names wrap to it', () => {
+    // Orientation letters at both edges, level with the anatomy's middle and with two dots on each side.
+    const letters = [
+      { x: 4, y: 288, width: 24, height: 24 },
+      { x: 972, y: 288, width: 24, height: 24 },
+    ];
+    const size = filling;
+    const placed = placeColumns(
+      [
+        name(400, 296, { size }),
+        name(360, 304, { size }),
+        name(600, 296, { size }),
+        name(640, 304, { size }),
+      ],
+      anatomy,
+      bounds,
+      letters,
+    );
+    // Each column 2 px clear of its letter, its two names together rather than above and below the letter.
+    expect(placed).toEqual([
+      { side: 'left', box: { x: 30, y: 251, width: 254, height: 48 } },
+      { side: 'left', box: { x: 30, y: 301, width: 254, height: 48 } },
+      { side: 'right', box: { x: 716, y: 251, width: 254, height: 48 } },
+      { side: 'right', box: { x: 716, y: 301, width: 254, height: 48 } },
+    ]);
+  });
+
+  test('chrome that leaves less than a comfortable column short of it takes rows out of the column instead', () => {
+    const requests = [name(600, 296, { size: filling }), name(640, 304, { size: filling })];
+    const box = (x: number) => [{ x, y: 288, width: 24, height: 24 }];
+    // A comfortable column and the 2 px kept clear of the box: the names wrap to it, together.
+    const comfortable = 700 + ANATOMY_GAP_PX + COMFORTABLE_COLUMN_PX + 2;
+    expect(placeColumns(requests, anatomy, bounds, box(comfortable))).toEqual([
+      { side: 'right', box: { x: 716, y: 251, width: COMFORTABLE_COLUMN_PX, height: 48 } },
+      { side: 'right', box: { x: 716, y: 301, width: COMFORTABLE_COLUMN_PX, height: 48 } },
+    ]);
+    // A pixel nearer, the column keeps its whole width: the names, on one line, stand above and below the box.
+    expect(placeColumns(requests, anatomy, bounds, box(comfortable - 1))).toEqual([
+      { side: 'right', box: { x: 716, y: 262, width: 270, height: 24 } },
+      { side: 'right', box: { x: 716, y: 314, width: 270, height: 24 } },
+    ]);
+  });
+
+  test('of two boxes a column could end short of, it ends at the nearer, whichever is listed first', () => {
+    const letter = { x: 972, y: 288, width: 24, height: 24 };
+    const key = { x: 900, y: 120, width: 100, height: 60 };
+    for (const chrome of [
+      [letter, key],
+      [key, letter],
+    ]) {
+      expect(placeColumns([name(650, 400, { size: filling })], anatomy, bounds, chrome)).toEqual([
+        { side: 'right', box: { x: 716, y: 376, width: 182, height: 48 } },
+      ]);
+    }
+  });
+
+  test('chrome along half the anatomy’s height closes its column, however little room it leaves', () => {
+    // An open menu 64 px off the anatomy's right; dots beside it, under it and, for the selection, over it.
+    const menu = { x: 780, y: 200, width: 220, height: 200 };
+    const requests = [name(520, 300), name(650, 480), name(650, 150, { always: true })];
+    expect(placeWithOpen(requests, anatomy, bounds, [menu])).toEqual({
+      placed: [
+        { side: 'left', box: { x: 164, y: 288, width: 120, height: 24 } },
+        null,
+        { side: 'left', box: { x: 164, y: 138, width: 120, height: 24 } },
+      ],
+      open: ['left'],
+    });
+    // A pixel short of half, it only takes its rows: the column stays open over and under it.
+    expect(placeWithOpen(requests, anatomy, bounds, [{ ...menu, height: 199 }])).toEqual({
+      placed: [
+        { side: 'left', box: { x: 164, y: 288, width: 120, height: 24 } },
+        { side: 'right', box: { x: 716, y: 468, width: 120, height: 24 } },
+        { side: 'right', box: { x: 716, y: 138, width: 120, height: 24 } },
+      ],
+      open: ['left', 'right'],
+    });
+  });
+
+  test('chrome above or below the anatomy does not narrow the column beside it', () => {
+    // Boxes at the stage's right edge, one ending where the anatomy begins, one beginning where it ends.
+    const chrome = [
+      { x: 900, y: 40, width: 100, height: 60 },
+      { x: 900, y: 500, width: 100, height: 60 },
+    ];
+    expect(placeColumns([name(650, 300, { size: filling })], anatomy, bounds, chrome)).toEqual([
+      { side: 'right', box: { x: 716, y: 288, width: 270, height: 24 } },
+    ]);
   });
 
   test('a dot just past the middle keeps the column it stood in; well past it, it changes', () => {

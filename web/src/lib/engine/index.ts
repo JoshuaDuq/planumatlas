@@ -34,6 +34,7 @@ import { createStrokeCaseSolids } from './lesion/stroke-cases.ts';
 import { createUserMap } from './user-map/user-map.ts';
 import { createVisualAreas } from './visual-areas.ts';
 import { BrainAtlas } from './model/brain-atlas.ts';
+import { seenAt } from './model/picking.ts';
 import type { FacingScene } from './model/picking.ts';
 import { anatomicalPoint } from './model/explode.ts';
 import { createPresentation } from './presentation.ts';
@@ -537,9 +538,13 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       on: events.on,
       canvas: scene.domElement,
       model: createEngineModel(atlas, {
-        facing: (ids) => atlas.facing(ids, rays()),
-        facingArea: (ids) => atlas.facingArea(ids, rays()),
         inSight: (targets) => atlas.inSight(targets, rays()),
+        seenAt: (points) => seenAt(points, { ...rays(), regions: atlas.regions }),
+        point(id) {
+          const region = id === null ? null : atlas.regions.get(id);
+          if (region === undefined) throw new Error(`Unknown region: ${id}`);
+          presentation.hover(region, null);
+        },
       }),
       sections: engineSections,
       camera: stage.camera,

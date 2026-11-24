@@ -38,14 +38,12 @@ import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
   CameraSnapshot,
   CameraView,
-  CapAnchor,
   ChromeInsets,
   ChromeMotion,
   CutMode,
   DisplayChange,
   DisplaySettings,
   EngineError,
-  FacingPoint,
   FrameRegionOptions,
   FramingClearance,
   Hemisphere,
@@ -73,6 +71,7 @@ import type {
   Region,
   ScreenPoint,
   SectionsState,
+  SeenPoint,
   Size,
   SnapshotCapture,
   SnapshotOptions,
@@ -223,23 +222,23 @@ export interface EngineModel {
   /** The shared visibility rule for the current settings (brain-atlas.js:714). */
   canSelect(region: Region): boolean;
   /**
-   * Where each region shows on the stage: a point of its surface (the middle of its side in view first, its
-   * label point last) that a ray from the camera meets that region at first, a cut face of it included;
-   * null where nothing of it is met, it is cut away or behind the camera, or it is not drawn. A few rays
-   * per region: read it once the camera has settled, never per frame.
-   */
-  facing(ids: readonly string[]): (FacingPoint | null)[];
-  /**
-   * How much of each region's surface is turned toward the camera, in mm² as the camera sees it, whatever
-   * stands in front; 0 for a region not drawn. No rays: a stage of hundreds of regions can ask all of them.
-   */
-  facingArea(ids: readonly string[]): number[];
-  /**
-   * Whether each point a name stands on (`facing`'s drawn point, or a cut face's anchor) is still in
+   * Whether each point a name stands on (where `seenAt` met its region) is still in
    * sight: a ray from the camera to it meets that region first, at the point or before it. One ray each:
    * a moving camera asks a few a frame.
    */
   inSight(targets: readonly { id: string; point: Vec3 }[]): boolean[];
+  /**
+   * What the reader sees at each point of the canvas: the region whose surface or cut face a ray from the
+   * camera through it meets first, and where; null where it meets nothing, or a surface no region names.
+   * One ray each: read a grid of them once the stage has rested, a few hundred a frame.
+   */
+  seenAt(points: readonly ScreenPoint[]): (SeenPoint | null)[];
+  /**
+   * Marks a region as the pointer over it on the stage does, ringed on a surface and lit on a cut face, and
+   * reports it (`hover`, with no position); null clears the mark. A name pointed at marks what it names.
+   * Throws for an unknown id.
+   */
+  point(id: string | null): void;
 
   /** Throws for an unknown, non-region or invisible id (brain-atlas.js:719). */
   select(id: string | null): void;
@@ -386,11 +385,6 @@ export interface EngineSections {
   sample(point: Vec3): VolumeSample;
   /** The region whose drawn 3D solid holds a point; null where none does. */
   regionAt(point: Vec3): Promise<Region | null>;
-  /**
-   * Each region's cut face as drawn now, ranked caps over the ones they cover, at its own point nearest
-   * its centroid; none without a cut. Measured on a 1 mm grid over the plane when called.
-   */
-  capAnchors(): CapAnchor[];
 }
 
 // ---------------------------------------------------------------------------

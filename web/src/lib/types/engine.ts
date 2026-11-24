@@ -43,16 +43,12 @@ export interface ScreenPoint {
   y: number;
 }
 
-/** A region's label point as the camera sees it: on the canvas, and where it is drawn in RAS mm, which the exploded view moves. */
-export interface FacingPoint extends ScreenPoint {
+/** What the reader sees at a point of the canvas: the region met first there, on its surface or its cut face, and where in RAS mm. */
+export interface SeenPoint {
+  id: string;
+  /** Met on a cut face, which a moved cut carries. */
+  face: boolean;
   drawn: Vec3;
-}
-
-/** A cut face as drawn: its region, its own point nearest its centroid (RAS mm, on the plane) and its area. */
-export interface CapAnchor {
-  region: string;
-  point: Vec3;
-  areaMm2: number;
 }
 
 /** Where the pointer is over the stage, in CSS pixels relative to the canvas (picking.js:93). */
