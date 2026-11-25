@@ -2757,7 +2757,7 @@
    {
     "id": "finish",
     "title": "Over to you",
-    "body": "Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter."
+    "body": "Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter. The top bar changes the atlas and the colours."
    }
   ],
   "stops": [
@@ -2782,9 +2782,24 @@
     "body": "Where it lies, its size and what is known about it. Focus greys out the rest of the brain."
    },
    {
+    "id": "atlas",
+    "title": "Choose an atlas",
+    "body": "The top bar names what is drawn; open it to change it. Atlas chooses how the cortex is divided into regions: here HCP-MMP, 180 areas per hemisphere. Each choice has a note on what it shows."
+   },
+   {
+    "id": "colour",
+    "title": "Change the colours",
+    "body": "Colour chooses what the surface shows: the atlas’s regions, lobes, functional networks, blood supply or a measure such as sulcal depth. Here one colour per lobe."
+   },
+   {
     "id": "subject",
     "title": "One person or an average",
     "body": "Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page, so the list waits for the tour to end."
+   },
+   {
+    "id": "internalAnatomy",
+    "title": "Change the internal anatomy",
+    "body": "Internal anatomy chooses how the structures under the cortex are divided: the Teaching set of overview structures, FreeSurfer aseg or the finer NextBrain atlas. Here FreeSurfer aseg, inside the left hemisphere."
    },
    {
     "id": "directions",
@@ -2845,11 +2860,6 @@
     "id": "overlay",
     "title": "Bring your own map",
     "body": "Add › Overlay draws your own NIfTI map, in MNI space, on this brain and its cuts. The file never leaves your computer."
-   },
-   {
-    "id": "topBar",
-    "title": "What is drawn",
-    "body": "This names the atlas and colours on the brain. Open it to change them or the internal anatomy, each with a note on what it shows."
    },
    {
     "id": "settings",

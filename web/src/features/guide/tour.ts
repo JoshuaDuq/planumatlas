@@ -19,6 +19,12 @@ const STAGE = '#viewport canvas';
 const tab = (id: string) => `#workspace-tab-${id}`;
 const MRI_DOCK = '.mpr-dock';
 const DATA_TOGGLE = '#masthead .data-toggle';
+/** A list of the masthead's data popover (DataLists.svelte). */
+type DataList = 'atlas' | 'colour' | 'subject' | 'detail';
+/** The list in the open popover, which is fetched and drawn when the popover first opens. */
+const list = (name: DataList) => `#masthead .masthead-data[data-open] [data-field="${name}"]`;
+/** The summary, where its popover holds this list: one subject, or one level, offers no list of them. */
+const offers = (name: DataList) => `${DATA_TOGGLE}[data-offers~="${name}"]`;
 const PRECENTRAL = 'destrieux:left:29';
 /** The link's camera: an exact one, or a named view. */
 const CAMERA = ['cam', 'view'];
@@ -98,6 +104,16 @@ function placeAtSeat(card: HTMLElement, at: Seat, selector?: string) {
   const top = dockTop();
   const stage = document.querySelector(STAGE)?.getBoundingClientRect();
   if (top === undefined || !stage) return;
+  if (at === 'stageCorner') {
+    // A window too narrow to seat the card right of the list it points at seats it left of that list.
+    const pointed = document.querySelector(selector!)?.getBoundingClientRect();
+    const cardTop = top - PANEL_GAP - c.height;
+    let left = stage.right - PANEL_GAP - c.width;
+    if (pointed && left < pointed.right + PANEL_GAP && cardTop < pointed.bottom)
+      left = Math.max(stage.left + PANEL_GAP, pointed.left - PANEL_GAP - c.width);
+    setAside(card, `${left - c.left}px ${cardTop - c.top}px`);
+    return;
+  }
   if (at === 'stageTop') {
     setAside(card, `0 ${stage.top + PANEL_GAP - c.top}px`);
     return;
@@ -137,8 +153,10 @@ function placeInStage(card: HTMLElement) {
 /**
  * Where a card sits rather than over the anatomy: a phone's, or one beside the docked MRI. A phone's
  * card about the raised sheet sits at the stage's top, over the little anatomy left above the sheet.
+ * A card about a list of the data popover sits in the stage's far corner over the dock's line, so
+ * the lists stay whole and the anatomy the choice changed is framed between them and the card.
  */
-type Seat = 'overDock' | 'underTabs' | 'stageTop';
+type Seat = 'overDock' | 'underTabs' | 'stageTop' | 'stageCorner';
 
 /** What the reader does on the brain for a card that waits: turn it, or open a region. */
 type Try = 'turn' | 'pick';
@@ -178,8 +196,8 @@ const STOPS: Record<
     opensMri?: string;
     /** The Linked MRI opens beside the stop on the function or deficit its view paints, as the profile's own does. */
     paintsMri?: true;
-    /** The masthead's data popover opens for the stop, which points into it. */
-    opensData?: true;
+    /** The masthead's data popover opens for the stop, which points at this list in it. */
+    opensData?: DataList;
     /** The card sits in the stage's dark space, a band the anatomy is framed clear of. */
     inStage?: true;
     /** Where a phone's card sits, rather than over the anatomy. */
@@ -218,12 +236,38 @@ const STOPS: Record<
     inStage: true,
     phone: 'stageTop',
   },
+  // What is drawn is chosen in the masthead's lists: each stop opens them, points at one and makes
+  // a choice in it, as its link would, so the reader sees on the brain what the list changes.
+  // HCP-MMP is the atlas the Functions stop paints on, so the full tour fetches no atlas twice.
+  atlas: {
+    selector: list('atlas'),
+    side: 'right',
+    align: 'start',
+    view: 'atlas=hcp-mmp&cuts=hcp-mmp',
+    opensData: 'atlas',
+  },
+  colour: {
+    selector: list('colour'),
+    side: 'right',
+    align: 'start',
+    view: 'colors=lobe',
+    opensData: 'colour',
+  },
   // Another subject is another page, which would end the tour: the stop shows the choice, not a switch.
   subject: {
-    selector: '#masthead .masthead-data[data-open] [data-field="subject"]',
-    side: 'bottom',
+    selector: list('subject'),
+    side: 'right',
     align: 'start',
-    opensData: true,
+    opensData: 'subject',
+  },
+  // aseg is the smallest level to fetch, and unlike the teaching set at a glance; one hemisphere
+  // from its inner side shows the structures the level divides.
+  internalAnatomy: {
+    selector: list('detail'),
+    side: 'right',
+    align: 'start',
+    view: 'detail=aseg&hemi=left&view=right',
+    opensData: 'detail',
   },
   directions: {
     selector: '.orientation-gizmo',
@@ -303,8 +347,8 @@ const STOPS: Record<
   },
   // A reader's map is their own file and never in a link: the stop points at the tool to try.
   overlay: { selector: add('overlay'), side: 'top', align: 'start' },
-  topBar: { selector: '#masthead .data-bar', side: 'bottom', align: 'center' },
-  settings: { selector: '.masthead-end .popover-host > button', side: 'bottom', align: 'end' },
+  // By its own class: the masthead's Save image and Share menus are popovers too, and come first.
+  settings: { selector: '#masthead .settings-button', side: 'bottom', align: 'end' },
   finish: {
     selector: '.workspace-tabs',
     side: 'right',
@@ -314,13 +358,17 @@ const STOPS: Record<
   },
 };
 
-/** A first visit's tour: the welcome, the brain in the reader's hands, then what to open next. */
+/**
+ * A first visit's tour: the welcome, the brain in the reader's hands, the brain and the internal
+ * anatomy it can be changed for, then what to open next.
+ */
 const FIRST_VISIT: readonly GuideStop['id'][] = [
   'welcome',
   'turn',
   'openRegion',
   'regionDetail',
   'subject',
+  'internalAnatomy',
   'section',
   'functions',
   'finish',
@@ -447,11 +495,10 @@ function shownStops(lang: Language, kind: Kind, docksMri: boolean, phone: boolea
       : kind === 'rest'
         ? copy.stops.filter(({ id }) => !FIRST_VISIT.includes(id))
         : copy.stops;
-  return stops.filter(({ id }) =>
-    STOPS[id].opensMri
-      ? docksMri
-      : rendered(STOPS[id].opensData ? DATA_TOGGLE : targetOf(id, phone)),
-  );
+  return stops.filter(({ id }) => {
+    const { opensMri, opensData } = STOPS[id];
+    return opensMri ? docksMri : rendered(opensData ? offers(opensData) : targetOf(id, phone));
+  });
 }
 
 /** The tour in one language, over the reader's view `reader`, which closing puts back. */
@@ -500,7 +547,8 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
     // The stage widens back: the next card is placed against the settled layout.
     requestAnimationFrame(() => tour.refresh());
   };
-  // The popover closes itself on a press outside it, so Next or Back by pointer has closed it already.
+  // The popover stays open under a press on the card (DataBar.svelte), so stops on its lists follow
+  // one another without it closing; a press elsewhere closes it, and the next of its stops reopens it.
   let openedData = false;
   const dataOpen = () =>
     document.querySelector(DATA_TOGGLE)!.getAttribute('aria-expanded') === 'true';
@@ -542,7 +590,15 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
     // Beside the docked MRI the stage is too narrow for a band down its right: the card sits over
     // the dock instead, as a phone's does, and the anatomy is framed above it.
     inStage.push(Boolean(STOPS[id].inStage) && !phone && !paintDocked);
-    seats.push(phone ? { at: STOPS[id].phone, selector } : paintDocked ? { at: 'overDock' } : {});
+    seats.push(
+      phone
+        ? { at: STOPS[id].phone, selector }
+        : paintDocked
+          ? { at: 'overDock' }
+          : opensData
+            ? { at: 'stageCorner', selector }
+            : {},
+    );
     return {
       element: selector,
       ...((opensMri || opensData) && { waitForElement: OPEN_WAIT_MS }),
@@ -800,5 +856,7 @@ function drive(lang: Language, options: GuideOptions, reader: string, kind: Kind
   };
   const finish = () => self.finish();
   current = self;
+  // The rest of a first visit's tour starts on a list, which it opens as any stop opens its panel.
+  enter[0]?.();
   tour.drive();
 }

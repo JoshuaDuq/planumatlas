@@ -13,10 +13,18 @@ import type { GuidePaint } from './tour.ts';
 const TARGETS = `
   <header id="masthead">
     <div class="data-bar">
-      <button class="data-toggle" aria-expanded="false">Destrieux · Regions</button>
-      <div class="masthead-data" hidden><div class="data-field" data-field="subject">Subject</div></div>
+      <button class="data-toggle" aria-expanded="false" data-offers="atlas colour subject detail">Destrieux · Regions</button>
+      <div class="masthead-data" hidden>
+        <div class="data-field" data-field="atlas">Atlas</div>
+        <div class="data-field" data-field="colour">Colour</div>
+        <div class="data-field" data-field="subject">Subject</div>
+        <div class="data-field" data-field="detail">Internal anatomy</div>
+      </div>
     </div>
-    <div class="masthead-end"><span class="popover-host" style="display: contents"><button>⋯</button></span></div>
+    <div class="masthead-end">
+      <span class="popover-host" style="display: contents"><button>Save image</button></span>
+      <span class="popover-host" style="display: contents"><button class="settings-button">⋯</button></span>
+    </div>
   </header>
   <aside id="workspace-panel" style="height: 120px">Region detail</aside>
   <section id="sheet" style="height: 40px">Sheet</section>
@@ -141,9 +149,12 @@ const key = (target: Element, type: 'keydown' | 'keyup', name: string) => {
   return event;
 };
 
-const STOPS = 19;
-/** The full tour's stops a first visit leaves out: all but the welcome, the three on the brain, Subject, Section and Functions. */
-const REST = 12;
+const STOPS = 21;
+/**
+ * The full tour's stops a first visit leaves out: all but the welcome, the three on the brain,
+ * Subject, Internal anatomy, Section and Functions.
+ */
+const REST = 13;
 const progress = () => card().querySelector('.driver-popover-progress-text')!.textContent;
 const tryLine = () => card().querySelector('.guide-try');
 /** The tour after `n` presses of Next. */
@@ -163,7 +174,7 @@ const press = (target: Element, by: number) => {
 };
 const canvas = () => document.querySelector('#viewport canvas')!;
 
-test('nineteen stops in order, in English and French, with focus on Next', async () => {
+test('twenty-one stops in order, in English and French, with focus on Next', async () => {
   start();
   const titles = [title()];
   await expect.poll(() => document.activeElement).toBe(next());
@@ -178,7 +189,10 @@ test('nineteen stops in order, in English and French, with focus on Next', async
     'Turn the brain',
     'Open a region',
     'The region in detail',
+    'Choose an atlas',
+    'Change the colours',
     'One person or an average',
+    'Change the internal anatomy',
     'Look from any side',
     'Cut through it',
     'The scan behind it',
@@ -191,12 +205,12 @@ test('nineteen stops in order, in English and French, with focus on Next', async
     'Place a lesion',
     'Find a coordinate',
     'Bring your own map',
-    'What is drawn',
     'Settings',
   ]);
   expect(next().textContent).toBe('Done');
+  // Settings is the ⋯ button, not the first of the masthead's menus.
   expect(document.querySelector('.driver-active-element')).toBe(
-    document.querySelector('.masthead-end button'),
+    document.querySelector('.masthead-end .settings-button'),
   );
   next().click();
   expect(closed).toBe(1);
@@ -207,7 +221,7 @@ test('nineteen stops in order, in English and French, with focus on Next', async
   expect(progress()).toBe(`1 sur ${STOPS}`);
 });
 
-test('GUIDE-03 · a first visit runs seven stops after the welcome; the last offers the rest', async () => {
+test('GUIDE-03 · a first visit runs eight stops after the welcome; the last offers the rest', async () => {
   start('en', true);
   const titles = [title()];
   while (next().textContent !== 'Start exploring') {
@@ -220,6 +234,7 @@ test('GUIDE-03 · a first visit runs seven stops after the welcome; the last off
     'Open a region',
     'The region in detail',
     'One person or an average',
+    'Change the internal anatomy',
     'Cut through it',
     'Map a function',
     'Over to you',
@@ -236,7 +251,7 @@ test('GUIDE-03 · a first visit runs seven stops after the welcome; the last off
   expect(new Set(tops).size).toBe(1);
   rest.click();
   // The rest goes on from what the first visit left out, with no welcome again.
-  expect([title(), progress()]).toEqual(['Look from any side', `1 of ${REST}`]);
+  expect([title(), progress()]).toEqual(['Choose an atlas', `1 of ${REST}`]);
   const titles2 = [title()];
   while (next().textContent !== 'Done') {
     next().click();
@@ -273,8 +288,12 @@ test('each stop opens its feature over the home view, leaves the page undimmed, 
     HOME,
     // A reader who opened no region is shown the left precentral gyrus.
     `${HOME}&region=destrieux:left:29`,
-    // Subject opens its list over the home view.
+    // The top bar's lists: another atlas, another colour, the subject over the home view (choosing
+    // one would reload the page), and another level of internal anatomy inside one hemisphere.
+    '#anatomy=cdmd&atlas=hcp-mmp&detail=learning&cuts=hcp-mmp',
+    `${HOME}&colors=lobe`,
     HOME,
+    '#anatomy=cdmd&atlas=destrieux&detail=aseg&hemi=left&view=right',
     `${HOME}&view=superior`,
     `${HOME}&cut=coronal`,
     `${HOME}&cut=coronal&region=destrieux:left:29`,
@@ -288,7 +307,6 @@ test('each stop opens its feature over the home view, leaves the page undimmed, 
     `${HOME}&lesion=-44,13,28,10`,
     `${HOME}&coord=-38,44,26&space=unstated`,
     // Overlay: a reader's map is never in a link.
-    HOME,
     HOME,
     HOME,
   ]);
@@ -405,7 +423,8 @@ test("GUIDE-04 · the reader's colour gives way to the stops' own, and comes bac
   }
   next().click();
   expect(shown).toHaveLength(STOPS);
-  expect(shown.filter((hash) => hash.includes('colors='))).toEqual([]);
+  // Only the Colour stop colours the brain, and in its own colour.
+  expect(shown.filter((hash) => hash.includes('colors='))).toEqual([`${HOME}&colors=lobe`]);
   expect(location.hash).toBe(`${HOME}&colors=lobe`);
 });
 
@@ -455,7 +474,7 @@ test('the close says whether a pointer or the keyboard ended the tour', async ()
 });
 
 test('starting the tour again ends the one under way first, so the reader’s view still comes back', () => {
-  startAt(5);
+  startAt(8);
   expect(location.hash).toBe(`${HOME}&view=superior`);
   start();
   expect(closed).toBe(1);
@@ -469,7 +488,7 @@ test('the Linked MRI stop opens the panel it points at, and leaving closes only 
     start();
     for (let i = 1; i < n; i++) next().click();
   };
-  const MRI_STOP = 8;
+  const MRI_STOP = 11;
   stop(MRI_STOP);
   expect(title()).toBe('The scan behind it');
   expect(document.querySelector('.driver-active-element')).toBe(
@@ -493,31 +512,88 @@ test('the Linked MRI stop opens the panel it points at, and leaving closes only 
   expect(document.querySelector('.mpr-dock')).not.toBeNull();
 });
 
-test('the Subject stop opens the data popover on its list, and leaving closes only what it opened', async () => {
+test('the top bar’s stops open the data popover on their lists, keep it open from one to the next, and leaving closes only what they opened', async () => {
   const toggle = document.querySelector<HTMLButtonElement>('.data-toggle')!;
-  const subject = document.querySelector('[data-field="subject"]');
+  const field = (name: string) => document.querySelector(`[data-field="${name}"]`);
+  const onward = async (arrow: string) => {
+    await expect.poll(() => document.activeElement).toBe(next());
+    await userEvent.keyboard(arrow);
+  };
   startAt(4);
-  expect(title()).toBe('One person or an average');
-  expect(toggle.ariaExpanded).toBe('true');
-  expect(document.querySelector('.driver-active-element')).toBe(subject);
-  // Next by keyboard presses nothing outside the popover: the tour closes it.
-  await expect.poll(() => document.activeElement).toBe(next());
-  await userEvent.keyboard('{ArrowRight}');
-  expect(title()).toBe('Look from any side');
+  const stops = [
+    ['Choose an atlas', 'atlas'],
+    ['Change the colours', 'colour'],
+    ['One person or an average', 'subject'],
+    ['Change the internal anatomy', 'detail'],
+  ] as const;
+  for (const [stop, name] of stops) {
+    expect([title(), toggle.ariaExpanded]).toEqual([stop, 'true']);
+    expect(document.querySelector('.driver-active-element')).toBe(field(name));
+    if (name !== 'detail') await onward('{ArrowRight}');
+  }
+  // Next by keyboard presses nothing outside the popover: the tour closes it past its last list.
+  await onward('{ArrowRight}');
+  expect([title(), toggle.ariaExpanded]).toEqual(['Look from any side', 'false']);
+  // Back opens it again.
+  await onward('{ArrowLeft}');
+  expect([title(), toggle.ariaExpanded]).toEqual(['Change the internal anatomy', 'true']);
+  // A press elsewhere on the page closes it, as the masthead's does: the next of its stops reopens it.
+  await userEvent.click(canvas());
   expect(toggle.ariaExpanded).toBe('false');
-  // Back opens it again, and closing the tour closes it.
-  await expect.poll(() => document.activeElement).toBe(next());
-  await userEvent.keyboard('{ArrowLeft}');
-  expect(toggle.ariaExpanded).toBe('true');
-  await expect.poll(() => document.activeElement).toBe(next());
-  await userEvent.keyboard('{Escape}');
+  next().focus();
+  await onward('{ArrowLeft}');
+  expect([title(), toggle.ariaExpanded]).toEqual(['One person or an average', 'true']);
+  // Closing the tour closes it.
+  await onward('{Escape}');
   expect(closed).toBe(1);
   expect(toggle.ariaExpanded).toBe('false');
-  // One the reader had open stays open after the stop.
+  // One the reader had open stays open after the stops.
   toggle.click();
   startAt(4);
-  next().click();
-  expect(toggle.ariaExpanded).toBe('true');
+  for (let i = 0; i < stops.length; i++) next().click();
+  expect([title(), toggle.ariaExpanded]).toEqual(['Look from any side', 'true']);
+});
+
+test('a top bar with one subject and one internal anatomy level has no stop for those lists', () => {
+  document.querySelector<HTMLElement>('.data-toggle')!.dataset.offers = 'atlas colour';
+  start();
+  expect(progress()).toBe(`1 of ${STOPS - 2}`);
+  const titles = [title()];
+  for (let i = 1; i < STOPS - 2; i++) {
+    next().click();
+    titles.push(title());
+  }
+  expect(titles).toContain('Change the colours');
+  expect(titles).not.toContain('One person or an average');
+  expect(titles).not.toContain('Change the internal anatomy');
+});
+
+test('the top bar’s cards sit in the stage’s far corner over the dock’s line, clear of the lists', async () => {
+  startAt(7);
+  expect(title()).toBe('Change the internal anatomy');
+  const stage = canvas().getBoundingClientRect();
+  const dock = document.querySelector('.stage-dock')!.getBoundingClientRect();
+  await expect
+    .poll(() => Math.round(card().getBoundingClientRect().right), { timeout: 2000 })
+    .toBe(Math.round(stage.right - 8));
+  expect(Math.round(card().getBoundingClientRect().bottom)).toBe(Math.round(dock.top - 8));
+  // The anatomy the choice changed is framed above the card.
+  await expect
+    .poll(() => reserved.at(-1))
+    .toEqual({ right: 0, bottom: Math.round(card().offsetHeight) + 16 });
+  // In a window too narrow for that the list lies where the card would sit: it sits left of the list.
+  const list = document.querySelector<HTMLElement>('[data-field="detail"]')!;
+  Object.assign(list.style, {
+    position: 'fixed',
+    top: '0',
+    right: '0',
+    width: '360px',
+    height: '100vh',
+  });
+  dispatchEvent(new Event('resize'));
+  await expect
+    .poll(() => Math.round(card().getBoundingClientRect().right), { timeout: 2000 })
+    .toBe(Math.round(list.getBoundingClientRect().left - 8));
 });
 
 test('the Functions and Deficits stops open the Linked MRI on their paint, closed once the tour moves on', async () => {
@@ -535,7 +611,7 @@ test('the Functions and Deficits stops open the Linked MRI on their paint, close
 
   // A first visit keeps the painted brain large: no MRI, and the card in the stage's band.
   mriOpens = [];
-  startAt(6, 'en', true);
+  startAt(7, 'en', true);
   expect([title(), mriOpens]).toEqual(['Map a function', []]);
   await expect
     .poll(() => reserved.at(-1))
@@ -764,8 +840,13 @@ test('Add without Overlay to offer, as on a phone’s stage, has no Overlay stop
 
 test('a target re-rendered after the tour starts is still the one highlighted', () => {
   start();
-  const host = document.querySelector('.masthead-end .popover-host')!;
-  host.replaceChildren(Object.assign(document.createElement('button'), { textContent: '⋯' }));
+  const host = document.querySelector('.masthead-end .settings-button')!.parentElement!;
+  host.replaceChildren(
+    Object.assign(document.createElement('button'), {
+      textContent: '⋯',
+      className: 'settings-button',
+    }),
+  );
   for (let i = 1; i < STOPS; i++) next().click();
   expect(document.querySelector('.driver-active-element')).toBe(host.firstElementChild);
 });

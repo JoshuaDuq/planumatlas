@@ -64,7 +64,10 @@
     onDetail: (id: string) => unknown;
     /** Another subject is another page: the link is rewritten and the page reloads (S4). */
     onAnatomy: (id: string) => void;
-    /** The guided tour runs, which a reload would end: the Subject list waits for it. */
+    /**
+     * The guided tour runs: a reload would end it, so the Subject list waits for it, and a press on
+     * its card leaves the lists open.
+     */
     touring?: boolean;
     /** The open popover's right edge in the window, so the stage can frame the anatomy beside it; null once closed. */
     onPanel?: (right: number | null, immediate: boolean) => void;
@@ -107,6 +110,15 @@
   const display = $derived(t(lang, 'display'));
   const switching = $derived(status === 'switching');
   const offersDetail = $derived(detailLevels.length > 1);
+  // The lists the popover holds, read before they are fetched: the guided tour stops only at these.
+  const offers = $derived(
+    [
+      'atlas',
+      'colour',
+      ...(anatomies.length > 1 ? ['subject'] : []),
+      ...(offersDetail ? ['detail'] : []),
+    ].join(' '),
+  );
   const painted = $derived(reference ? null : paintKind(paint));
   const values = $derived<Record<Field, string>>({
     atlas,
@@ -258,6 +270,8 @@
     if (!open) return;
     const outside = (event: PointerEvent) => {
       if (root.contains(event.target as Node)) return;
+      // The tour's card points into the lists: its Next and Back leave them open from stop to stop.
+      if (touring && (event.target as Element).closest('.guide-card')) return;
       instant = keyed = false;
       open = false;
     };
@@ -367,6 +381,7 @@
     aria-expanded={open}
     aria-controls={dataId}
     aria-label={summaryLabel}
+    data-offers={offers}
     data-tooltip={copy.dataSummary}
     onclick={onToggle}
     onpointerenter={intent}

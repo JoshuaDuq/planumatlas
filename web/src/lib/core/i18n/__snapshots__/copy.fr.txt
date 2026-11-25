@@ -2757,7 +2757,7 @@
    {
     "id": "finish",
     "title": "À vous",
-    "body": "Chaque onglet est une entrée<NNBSP>: Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche."
+    "body": "Chaque onglet est une entrée<NNBSP>: Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche. La barre du haut change l’atlas et les couleurs."
    }
   ],
   "stops": [
@@ -2782,9 +2782,24 @@
     "body": "Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau."
    },
    {
+    "id": "atlas",
+    "title": "Choisir un atlas",
+    "body": "La barre du haut nomme ce qui est dessiné<NNBSP>; ouvrez-la pour le changer. Atlas choisit le découpage du cortex en régions<NNBSP>: ici HCP-MMP, 180 aires par hémisphère. Chaque choix porte une note sur ce qu’il montre."
+   },
+   {
+    "id": "colour",
+    "title": "Changer les couleurs",
+    "body": "Couleur choisit ce que la surface montre<NNBSP>: les régions de l’atlas, les lobes, les réseaux fonctionnels, la vascularisation ou une mesure comme la profondeur sulcale. Ici, une couleur par lobe."
+   },
+   {
     "id": "subject",
     "title": "Une personne ou une moyenne",
     "body": "Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page<NNBSP>: la liste attend donc la fin de la visite."
+   },
+   {
+    "id": "internalAnatomy",
+    "title": "Changer l’anatomie interne",
+    "body": "Anatomie interne choisit le découpage des structures sous le cortex<NNBSP>: l’Ensemble pédagogique de grandes structures, FreeSurfer aseg ou l’atlas NextBrain, plus fin. Ici FreeSurfer aseg, à l’intérieur de l’hémisphère gauche."
    },
    {
     "id": "directions",
@@ -2845,11 +2860,6 @@
     "id": "overlay",
     "title": "Apporter votre carte",
     "body": "Ajouter › Superposition affiche votre propre carte NIfTI, dans l’espace MNI, sur ce cerveau et ses coupes. Le fichier ne quitte jamais votre ordinateur."
-   },
-   {
-    "id": "topBar",
-    "title": "Ce qui est dessiné",
-    "body": "Ceci nomme l’atlas et les couleurs du cerveau. Ouvrez-le pour les changer, ou l’anatomie interne, chacun avec une note sur ce qu’il montre."
    },
    {
     "id": "settings",

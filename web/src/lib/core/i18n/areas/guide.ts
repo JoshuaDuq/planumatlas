@@ -5,7 +5,10 @@ export interface GuideStop {
     | 'turn'
     | 'openRegion'
     | 'regionDetail'
+    | 'atlas'
+    | 'colour'
     | 'subject'
+    | 'internalAnatomy'
     | 'directions'
     | 'section'
     | 'linkedMri'
@@ -18,7 +21,6 @@ export interface GuideStop {
     | 'lesion'
     | 'coordinate'
     | 'overlay'
-    | 'topBar'
     | 'settings'
     | 'finish';
   title: string;
@@ -45,7 +47,7 @@ export const en = {
     {
       id: 'finish',
       title: 'Over to you',
-      body: 'Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter.',
+      body: 'Each tab is a way in: Anatomy lists every region, Functions and Deficits map published evidence, Circuits walks through pathways and Tracts shows white matter. The top bar changes the atlas and the colours.',
     },
   ] as GuideStop[],
   stops: [
@@ -70,9 +72,24 @@ export const en = {
       body: 'Where it lies, its size and what is known about it. Focus greys out the rest of the brain.',
     },
     {
+      id: 'atlas',
+      title: 'Choose an atlas',
+      body: 'The top bar names what is drawn; open it to change it. Atlas chooses how the cortex is divided into regions: here HCP-MMP, 180 areas per hemisphere. Each choice has a note on what it shows.',
+    },
+    {
+      id: 'colour',
+      title: 'Change the colours',
+      body: 'Colour chooses what the surface shows: the atlas’s regions, lobes, functional networks, blood supply or a measure such as sulcal depth. Here one colour per lobe.',
+    },
+    {
       id: 'subject',
       title: 'One person or an average',
       body: 'Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page, so the list waits for the tour to end.',
+    },
+    {
+      id: 'internalAnatomy',
+      title: 'Change the internal anatomy',
+      body: 'Internal anatomy chooses how the structures under the cortex are divided: the Teaching set of overview structures, FreeSurfer aseg or the finer NextBrain atlas. Here FreeSurfer aseg, inside the left hemisphere.',
     },
     {
       id: 'directions',
@@ -135,11 +152,6 @@ export const en = {
       body: 'Add › Overlay draws your own NIfTI map, in MNI space, on this brain and its cuts. The file never leaves your computer.',
     },
     {
-      id: 'topBar',
-      title: 'What is drawn',
-      body: 'This names the atlas and colours on the brain. Open it to change them or the internal anatomy, each with a note on what it shows.',
-    },
-    {
       id: 'settings',
       title: 'Settings',
       body: 'Language, theme, keyboard shortcuts (press ?) and Start over are here, with this tour whenever you want it again.',
@@ -163,7 +175,7 @@ export const fr: typeof en = {
     {
       id: 'finish',
       title: 'À vous',
-      body: 'Chaque onglet est une entrée : Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche.',
+      body: 'Chaque onglet est une entrée : Anatomie recense chaque région, Fonctions et Déficits cartographient des données publiées, Circuits parcourt des voies et Faisceaux montre la substance blanche. La barre du haut change l’atlas et les couleurs.',
     },
   ] as GuideStop[],
   stops: [
@@ -188,9 +200,24 @@ export const fr: typeof en = {
       body: 'Où elle se trouve, sa taille et ce que l’on sait d’elle. Cibler grise le reste du cerveau.',
     },
     {
+      id: 'atlas',
+      title: 'Choisir un atlas',
+      body: 'La barre du haut nomme ce qui est dessiné ; ouvrez-la pour le changer. Atlas choisit le découpage du cortex en régions : ici HCP-MMP, 180 aires par hémisphère. Chaque choix porte une note sur ce qu’il montre.',
+    },
+    {
+      id: 'colour',
+      title: 'Changer les couleurs',
+      body: 'Couleur choisit ce que la surface montre : les régions de l’atlas, les lobes, les réseaux fonctionnels, la vascularisation ou une mesure comme la profondeur sulcale. Ici, une couleur par lobe.',
+    },
+    {
       id: 'subject',
       title: 'Une personne ou une moyenne',
       body: 'Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page : la liste attend donc la fin de la visite.',
+    },
+    {
+      id: 'internalAnatomy',
+      title: 'Changer l’anatomie interne',
+      body: 'Anatomie interne choisit le découpage des structures sous le cortex : l’Ensemble pédagogique de grandes structures, FreeSurfer aseg ou l’atlas NextBrain, plus fin. Ici FreeSurfer aseg, à l’intérieur de l’hémisphère gauche.',
     },
     {
       id: 'directions',
@@ -251,11 +278,6 @@ export const fr: typeof en = {
       id: 'overlay',
       title: 'Apporter votre carte',
       body: 'Ajouter › Superposition affiche votre propre carte NIfTI, dans l’espace MNI, sur ce cerveau et ses coupes. Le fichier ne quitte jamais votre ordinateur.',
-    },
-    {
-      id: 'topBar',
-      title: 'Ce qui est dessiné',
-      body: 'Ceci nomme l’atlas et les couleurs du cerveau. Ouvrez-le pour les changer, ou l’anatomie interne, chacun avec une note sur ce qu’il montre.',
     },
     {
       id: 'settings',
