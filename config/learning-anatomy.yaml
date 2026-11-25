@@ -361,6 +361,9 @@ aseg:
         couverture bulbaire de NextBrain pour prolonger le volume vers la moelle. Cette
         limite correspond à la couverture des sources, et non à une subdivision anatomique
         distincte ou à une décussation tracée.
+  # NextBrain labels no CSF, and its corpus callosum lies inside forebrain white
+  # matter it leaves unmeshed, so the ventricles and the callosum are drawn on the
+  # NextBrain level too (drawn_in_nextbrain).
   - id: ventricles-left
     color: [87, 139, 194]
     hemisphere: left
@@ -369,6 +372,7 @@ aseg:
     system: Ventricles and CSF
     system_fr: Ventricules et LCR
     labels: [4, 5]
+    drawn_in_nextbrain: true
     notes:
       en: >-
         Combines the lateral ventricle and inferior lateral ventricle labels. This solid
@@ -384,6 +388,7 @@ aseg:
     system: Ventricles and CSF
     system_fr: Ventricules et LCR
     labels: [43, 44]
+    drawn_in_nextbrain: true
     notes:
       en: >-
         Combines the lateral ventricle and inferior lateral ventricle labels. This solid
@@ -391,8 +396,8 @@ aseg:
       fr: >-
         Réunit les étiquettes du ventricule latéral et de sa partie inférieure. Ce volume
         représente un espace liquidien, et non du tissu nerveux.
-  - {id: third-ventricle, color: [87, 139, 194], hemisphere: midline, name: Third ventricle, name_fr: Troisième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [14]}
-  - {id: fourth-ventricle, color: [87, 139, 194], hemisphere: midline, name: Fourth ventricle, name_fr: Quatrième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [15]}
+  - {id: third-ventricle, color: [87, 139, 194], hemisphere: midline, name: Third ventricle, name_fr: Troisième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [14], drawn_in_nextbrain: true}
+  - {id: fourth-ventricle, color: [87, 139, 194], hemisphere: midline, name: Fourth ventricle, name_fr: Quatrième ventricule, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [15], drawn_in_nextbrain: true}
   - {id: choroid-plexus-left, color: [171, 114, 155], hemisphere: left, name: Choroid plexus, name_fr: Plexus choroïde, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [31]}
   - {id: choroid-plexus-right, color: [171, 114, 155], hemisphere: right, name: Choroid plexus, name_fr: Plexus choroïde, system: Ventricles and CSF, system_fr: Ventricules et LCR, labels: [63]}
   - id: corpus-callosum
@@ -403,6 +408,7 @@ aseg:
     system: White matter pathways
     system_fr: Voies de substance blanche
     labels: [251, 252, 253, 254, 255]
+    drawn_in_nextbrain: true
     notes:
       en: >-
         Combines FreeSurfer’s five corpus callosum labels. This is segmented tissue, not a
@@ -412,13 +418,17 @@ aseg:
         segmenté, et non d’une reconstruction des fibres calleuses individuelles.
   # NextBrain has no cerebellar cortex, so the mantle comes from aseg. Its
   # cerebellar white matter stays out: the deep nuclei sit inside that label.
-  - {id: cerebellar-cortex-left, color: [138, 122, 110], hemisphere: left, name: Cerebellar cortex, name_fr: Cortex cérébelleux, system: Cerebellum, system_fr: Cervelet, labels: [8]}
-  - {id: cerebellar-cortex-right, color: [138, 122, 110], hemisphere: right, name: Cerebellar cortex, name_fr: Cortex cérébelleux, system: Cerebellum, system_fr: Cervelet, labels: [47]}
+  # The NextBrain level meshes none of its own cerebellar cortical layers, so
+  # this mantle is drawn there too (drawn_in_nextbrain).
+  - {id: cerebellar-cortex-left, color: [138, 122, 110], hemisphere: left, name: Cerebellar cortex, name_fr: Cortex cérébelleux, system: Cerebellum, system_fr: Cervelet, labels: [8], drawn_in_nextbrain: true}
+  - {id: cerebellar-cortex-right, color: [138, 122, 110], hemisphere: right, name: Cerebellar cortex, name_fr: Cortex cérébelleux, system: Cerebellum, system_fr: Cervelet, labels: [47], drawn_in_nextbrain: true}
 # FastSurfer CerebNet's lobules (SUIT nomenclature) for anatomies declaring
 # cerebellar_lobules. They subdivide the cortical mantle aseg publishes whole,
 # so those units are replaced. SUIT folds vermis I–V into lobules I–IV and V.
+# Like the mantle they replace, every lobule is drawn on the NextBrain level too.
 cerebnet:
   replaces_aseg_units: [cerebellar-cortex-left, cerebellar-cortex-right]
+  drawn_in_nextbrain: true
   units:
     - id: lobules-i-iv-left
       color: [176, 120, 92]

@@ -36,7 +36,9 @@ def read_definition(config):
     definition["aseg"] = [
         unit for unit in definition["aseg"] if unit["id"] not in excluded + replaced
     ]
-    definition["cerebnet"] = lobules["units"] if cerebellum.is_declared(config) else []
+    definition["cerebnet"] = [
+        {**unit, "drawn_in_nextbrain": lobules["drawn_in_nextbrain"]} for unit in lobules["units"]
+    ] if cerebellum.is_declared(config) else []
     return definition
 
 
@@ -216,14 +218,21 @@ def region_record(group, source, volume):
 
 
 def also_drawn_in(group):
-    """A unit continuing a NextBrain unit below its coverage is drawn on the NextBrain level too."""
-    return {"also_drawn_in": [nextbrain.ATLAS_ID]} if "below_nextbrain" in group else {}
+    """A unit NextBrain's level has no surface for is drawn on that level too.
+
+    One continues a NextBrain unit below its coverage. The others are the cerebellar cortex and the
+    corpus callosum, which lie in tissue that level leaves unmeshed (`nextbrain.BULK_TISSUE`), and
+    the ventricles, which NextBrain does not label.
+    """
+    shared = "below_nextbrain" in group or group.get("drawn_in_nextbrain")
+    return {"also_drawn_in": [nextbrain.ATLAS_ID]} if shared else {}
 
 
 def build(config, field_ranges):
     """The teaching set; its shading fields are quantized over the cortex's `field_ranges`.
 
-    Also returns the meshes the NextBrain level draws too, as `add_region` takes them.
+    Also returns the meshes the NextBrain level draws too: each as `add_region` takes it, then its
+    openness (None where it carries none).
     """
     definition = read_definition(config)
     scene = trimesh.Scene()
@@ -266,7 +275,7 @@ def build(config, field_ranges):
             drawn_as = (mesh.vertices, mesh.faces, mesh.vertex_normals, dict(region), group["color"])
             exported = add_region(scene, *drawn_as)
             if "also_drawn_in" in region:
-                bridges.append(drawn_as)
+                bridges.append((*drawn_as, field))
             if field is not None:
                 exported.vertex_attributes["_OPENNESS"] = field.astype(np.float32)
             region.update(

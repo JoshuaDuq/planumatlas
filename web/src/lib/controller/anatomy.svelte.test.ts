@@ -853,6 +853,17 @@ describe('the six reveal reasons beyond the first two (CTRL-18)', () => {
     expect(framedRegion().map((call) => call.args[0])).toEqual([NEXTBRAIN_CAUDATE_HEAD]);
   });
 
+  test('CTRL-18 other-detail: a region the surface atlases’ cuts share leaves NextBrain’s own labels for the teaching set', async () => {
+    const { anatomy } = build();
+    await engine.sections.setMode('coronal');
+    await engine.model.setDetail('nextbrain');
+    // NextBrain labels the cut itself, which hides gyral white matter.
+    expect(engine.model.settings.cutAtlas).toBe('nextbrain');
+    await anatomy.revealRegion('other-detail', CUT_ONLY);
+    expect(engine.model.settings.detail).toBe('learning');
+    expect(engine.model.state.selectedRegion?.id).toBe(CUT_ONLY);
+  });
+
   test('CTRL-18 other-system: the system filter is cleared, then the region is selected', async () => {
     const { anatomy } = build();
     engine.model.setInternalSystem('Basal ganglia');

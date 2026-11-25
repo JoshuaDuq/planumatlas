@@ -12,6 +12,7 @@
     loadingText,
     subjectName,
   } from '../../lib/core/panels/header.ts';
+  import { defaultDetailOf } from '../../lib/core/catalog/visibility.ts';
   import type { PaletteSources } from '../../lib/core/panels/palettes.ts';
   import type { ModelPort } from '../../lib/core/state/ports.ts';
   import { atlasSwitchLabel, t, templateCopy } from '../../lib/core/i18n/index.ts';
@@ -38,7 +39,7 @@
     note: string | null;
     /** A colouring's own colours, drawn beside its name. */
     palette?: readonly Rgb[] | null;
-    /** What a first visit opens on: the manifest's first atlas, the default colour. */
+    /** What a first visit opens on: the manifest's first atlas, the default colour and level. */
     isDefault?: boolean;
   }
 
@@ -180,12 +181,14 @@
       })),
     })),
   ]);
+  const defaultDetail = $derived(defaultDetailOf(detailLevels.map((id) => ({ id }))));
   const detailOptions = $derived<Choice[]>(
     detailLevels.map((id) => ({
       value: id,
       name: atlasSwitchLabel(id, lang),
       aside: aside('detail', id, null),
       note: line('detail', id, shown.detail, brief(id)),
+      isDefault: id === defaultDetail,
     })),
   );
   const subjectOptions = $derived<Choice[]>(

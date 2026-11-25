@@ -13,6 +13,17 @@ deployed from `main`, so it can run ahead of the latest numbered release.
   brain: HCP-MMP for the atlas, one colour per lobe, and FreeSurfer aseg inside the left hemisphere. A first
   visit's tour includes the Internal anatomy stop. These replace the stop that only named the top bar.
 
+### Changed
+
+- **NextBrain** draws the cerebellum, the corpus callosum and the ventricles. It showed the cerebellar
+  nuclei with nothing around them and left the medial wall empty, because NextBrain meshes neither its
+  cerebellar cortex nor the white matter holding its callosum, and labels no ventricles. It now draws the
+  **Teaching set**'s cerebellar lobules (aseg's cerebellar cortex on a brain without lobules), corpus
+  callosum, lateral ventricles and third and fourth ventricles, and **Cerebellar functions** colours the
+  lobules there as on the other levels. The pontine motor tour's whole route shows its lobule V.
+- The **Internal anatomy** list marks the **Teaching set** **(Default)**, as the **Atlas** and **Colour**
+  lists mark theirs.
+
 ### Fixed
 
 - The guided tour's **Settings** stop ringed **Save image** instead of the **⋯** button.

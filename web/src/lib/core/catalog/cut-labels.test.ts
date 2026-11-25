@@ -103,11 +103,13 @@ test('a cut-only region off the cut names the control that would put it there', 
   assert.equal(colourShowing(gyral), 'atlas');
 });
 
-test('the cerebellar map is drawn on the surfaces of exactly the detail levels whose structures carry its shares', () => {
+test('the cerebellar map is drawn on the surfaces of exactly the detail levels that draw the structures carrying its shares', () => {
   for (const { id } of anatomies.anatomies) {
     const { regions } = readModel<{ regions: Region[] }>(`${id}/manifest.json`);
     const carriers = new Set(
-      regions.filter((region) => region.cerebellar_functions?.length).map(({ atlas }) => atlas),
+      regions
+        .filter((region) => region.cerebellar_functions?.length)
+        .flatMap((region) => [region.atlas, ...(region.also_drawn_in ?? [])]),
     );
     assert.deepEqual([...carriers].sort(), [...SURFACE_MAPS[MAP_ATLASES.cerebellar]!].sort(), id);
   }

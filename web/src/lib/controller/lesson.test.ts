@@ -140,7 +140,7 @@ describe('opening a lesson', () => {
     }
   });
 
-  test('every whole route draws all its deep landmarks but the pontine motor tour’s lobule V', async () => {
+  test('every whole route draws all its deep landmarks', async () => {
     const undrawn: string[] = [];
     for (const { id } of createScene().circuits.all) {
       const scene = createScene();
@@ -158,8 +158,9 @@ describe('opening a lesson', () => {
         if (region.kind === 'structure' && !drawn) undrawn.push(`${id}/${step.id}`);
       }
     }
-    // Its pontine nuclei are NextBrain's alone and its lobule V the teaching set's alone.
-    assert.deepEqual(undrawn, ['pontine-motor/cerebellar-lobule-v']);
+    // The pontine motor tour's pontine nuclei are NextBrain's alone; its lobule V is the teaching
+    // set's, which NextBrain's level draws too.
+    assert.deepEqual(undrawn, []);
   });
 
   test('a lesson already open keeps the scene it holds', async () => {

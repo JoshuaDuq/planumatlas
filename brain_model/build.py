@@ -246,8 +246,12 @@ def build_cortex(config, atlas, field_ranges=None, retinotopic=None):
     }, regions
 
 
-def build_structure_layer(config, grid, labels, describe, filename, bridges=()):
-    """The labels' meshes, then `bridges`: meshes another layer publishes, as add_region takes them."""
+def build_structure_layer(config, grid, labels, describe, filename, bridges=(), field_ranges=None):
+    """The labels' meshes, then `bridges`: meshes another layer publishes.
+
+    A bridge is what add_region takes, then its openness or None; openness is quantized over
+    `field_ranges`, the span the layer that publishes the mesh quantized it over.
+    """
     volume = grid.labels
     if not np.all(volume == np.rint(volume)):
         raise ValueError(f"{filename}: segmentation must hold integer labels")
@@ -280,9 +284,11 @@ def build_structure_layer(config, grid, labels, describe, filename, bridges=()):
             **placed[label],
         )
         regions.append(region)
-    for bridge in bridges:
-        add_region(scene, *bridge)
-    write_scene(scene, config["output_directory"] / filename)
+    for *surface, openness in bridges:
+        exported = add_region(scene, *surface)
+        if openness is not None:
+            exported.vertex_attributes["_OPENNESS"] = openness.astype(np.float32)
+    write_scene(scene, config["output_directory"] / filename, ranges=field_ranges)
     return {
         "file": filename,
         "region_count": len(regions) + len(bridges),
@@ -323,8 +329,8 @@ def build_structures(config):
     )
 
 
-def build_nextbrain_structures(config, bridges):
-    """NextBrain's nuclei, and the teaching set's units that continue them below its coverage."""
+def build_nextbrain_structures(config, bridges, field_ranges=None):
+    """NextBrain's nuclei, and the teaching set's units this level has no surface of its own for."""
     grid, table = nextbrain.load(config)
     settings = config[nextbrain.ATLAS_ID]
     chosen = nextbrain.meshed_indices(grid, table, settings["minimum_mesh_volume_mm3"])
@@ -344,7 +350,9 @@ def build_nextbrain_structures(config, bridges):
             "kind": "structure",
         }, color
 
-    return build_structure_layer(config, grid, chosen, describe, "nextbrain.glb", bridges)
+    return build_structure_layer(
+        config, grid, chosen, describe, "nextbrain.glb", bridges, field_ranges
+    )
 
 
 def detail_levels(config):
@@ -662,7 +670,7 @@ def main():
     fine = None
     if nextbrain.is_declared(config):
         overview, learning_regions, bridges = learning.build(config, field_ranges)
-        fine, nuclei = build_nextbrain_structures(config, bridges)
+        fine, nuclei = build_nextbrain_structures(config, bridges, field_ranges)
         levels[1].update(fine)
         regions.extend(nuclei)
         levels.append(overview)

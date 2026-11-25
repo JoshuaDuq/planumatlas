@@ -34,7 +34,7 @@ import { validateDisorderEffects } from '../../core/catalog/disorder-effects.ts'
 import type { DisorderEffects } from '../../core/catalog/disorder-effects.ts';
 import type { StimulationFtract } from '../../core/catalog/stimulation-ftract.ts';
 import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
-import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
+import { belongsToDetail, defaultDetailOf, visibilityOf } from '../../core/catalog/visibility.ts';
 import { createDissection } from '../../core/state/dissection.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { VisualFieldUniforms } from '../render/materials.ts';
@@ -284,8 +284,7 @@ export class BrainAtlas extends EventTarget {
 
   /** The grouped learning overview when published, otherwise the native segmentation. */
   get defaultDetail(): string {
-    const levels = this.manifest.detail_levels;
-    return (levels.find((level) => level.id === 'learning') ?? levels[0]!).id;
+    return defaultDetailOf(this.manifest.detail_levels);
   }
 
   /** The visual-field map's uniforms, shared by every cortical material; null without retinotopy. */

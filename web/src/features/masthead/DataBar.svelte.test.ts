@@ -233,8 +233,9 @@ describe('DataBar lists', () => {
 
   test('every option is listed, colours in named groups, each saying what else it changes', async () => {
     const view = await wide();
-    // The opening atlas and colour say so; no other option does.
+    // The opening atlas, colour and internal anatomy say so; no other option does.
     expect(names('Atlas')).toEqual(['Destrieux (Default)', 'HCP-MMP', 'FreeSurfer aseg']);
+    expect(names('Internal anatomy')).toEqual(['Teaching set (Default)', 'NextBrain']);
     // No paint option while no tab paints: assistive technology lists only real choices.
     expect(names('Colour')).toEqual([
       'Tissue',
@@ -254,6 +255,11 @@ describe('DataBar lists', () => {
     await view.rerender({ bar: barProps({ atlas: 'hcp-mmp', surfaceColor: 'cab-np' }) });
     expect(asides('Atlas')).toEqual(['Colour becomes Regions', null, 'Colour becomes Regions']);
     expect(asides('Colour')[0]).toBeNull();
+    // The teaching set is the default wherever it is listed; without it, the first level is.
+    await view.rerender({ bar: barProps({ detailLevels: ['nextbrain', 'learning'] }) });
+    expect(names('Internal anatomy')).toEqual(['NextBrain', 'Teaching set (Default)']);
+    await view.rerender({ bar: barProps({ detailLevels: ['aseg', 'nextbrain'] }) });
+    expect(names('Internal anatomy')).toEqual(['FreeSurfer aseg (Default)', 'NextBrain']);
   });
 
   test('a colouring with colours of its own draws them beside its name, unannounced', async () => {
@@ -577,7 +583,7 @@ describe('DataBar summary and popover', () => {
       ['Atlas', 'Destrieux (Default)'],
       ['Colour', 'Tissue'],
       ['Subject', 'CDMD sub_013'],
-      ['Internal anatomy', 'Teaching set'],
+      ['Internal anatomy', 'Teaching set (Default)'],
     ]) {
       await userEvent.keyboard('{Tab}');
       expect(document.activeElement, name).toBe(option(name, stop));

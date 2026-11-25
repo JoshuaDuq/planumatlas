@@ -2597,7 +2597,7 @@
       "id": "nextbrain",
       "label": "NextBrain histological atlas",
       "file": "nextbrain.glb",
-      "region_count": 293,
+      "region_count": 323,
       "voxel_to_surface_ras_mm": [
         [0.4000000059604645, 0.0, 0.0, -66.4000015258789],
         [0.0, 0.4000000059604645, 0.0, -81.5999984741211],
@@ -49868,6 +49868,7 @@
         "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
         "fr": "Réunit les étiquettes du ventricule latéral et de sa partie inférieure. Ce volume représente un espace liquidien, et non du tissu nerveux."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [87, 139, 194],
       "segmentation_volume_mm3": 7127.0,
       "surface_area_mm2": 4208.59814307213
@@ -49895,6 +49896,7 @@
         "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
         "fr": "Réunit les étiquettes du ventricule latéral et de sa partie inférieure. Ce volume représente un espace liquidien, et non du tissu nerveux."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [87, 139, 194],
       "segmentation_volume_mm3": 7760.0,
       "surface_area_mm2": 4322.455690161684
@@ -49918,6 +49920,7 @@
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [87, 139, 194],
       "segmentation_volume_mm3": 643.0,
       "surface_area_mm2": 657.8827677763431
@@ -49941,6 +49944,7 @@
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [87, 139, 194],
       "segmentation_volume_mm3": 1955.0,
       "surface_area_mm2": 1493.0406761078639
@@ -49974,6 +49978,7 @@
         "en": "Combines FreeSurfer’s five corpus callosum labels. This is segmented tissue, not a reconstruction of individual callosal fibres.",
         "fr": "Réunit les cinq étiquettes du corps calleux de FreeSurfer. Il s’agit de tissu segmenté, et non d’une reconstruction des fibres calleuses individuelles."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [214, 197, 160],
       "segmentation_volume_mm3": 3222.0,
       "surface_area_mm2": 2336.737315457034,
@@ -50016,6 +50021,7 @@
         "en": "CerebNet’s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.",
         "fr": "Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être isolé en unités distinctes dans cet ensemble."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [176, 120, 92],
       "segmentation_volume_mm3": 2818.0,
       "surface_area_mm2": 1805.0388079690338,
@@ -50081,6 +50087,7 @@
         "en": "CerebNet’s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.",
         "fr": "Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être isolé en unités distinctes dans cet ensemble."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [176, 120, 92],
       "segmentation_volume_mm3": 2579.0,
       "surface_area_mm2": 1683.8332673619047,
@@ -50138,6 +50145,7 @@
         "en": "CerebNet’s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.",
         "fr": "Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être isolé en unités distinctes dans cet ensemble."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [92, 140, 176],
       "segmentation_volume_mm3": 3190.0,
       "surface_area_mm2": 2096.6641818475623,
@@ -50195,6 +50203,7 @@
         "en": "CerebNet’s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I–V cannot be isolated as separate units in this set.",
         "fr": "Les étiquettes de CerebNet fondées sur SUIT incluent le vermis antérieur correspondant dans les lobules hémisphériques. Le vermis I–V ne peut pas être isolé en unités distinctes dans cet ensemble."
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [92, 140, 176],
       "segmentation_volume_mm3": 3155.0,
       "surface_area_mm2": 2148.623202534875,
@@ -50244,6 +50253,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [190, 168, 96],
       "segmentation_volume_mm3": 5862.0,
       "surface_area_mm2": 2976.173319385874,
@@ -50321,6 +50331,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [190, 168, 96],
       "segmentation_volume_mm3": 6033.0,
       "surface_area_mm2": 3030.3244885971467,
@@ -50394,6 +50405,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [136, 182, 168],
       "segmentation_volume_mm3": 1312.0,
       "surface_area_mm2": 814.8730059154409,
@@ -50455,6 +50467,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [120, 104, 170],
       "segmentation_volume_mm3": 10728.0,
       "surface_area_mm2": 5415.35276781557,
@@ -50524,6 +50537,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [120, 104, 170],
       "segmentation_volume_mm3": 10637.0,
       "surface_area_mm2": 5072.486703344765,
@@ -50593,6 +50607,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [104, 168, 132],
       "segmentation_volume_mm3": 6208.0,
       "surface_area_mm2": 3299.4170983398794,
@@ -50650,6 +50665,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [104, 168, 132],
       "segmentation_volume_mm3": 6968.0,
       "surface_area_mm2": 3530.469502852685,
@@ -50707,6 +50723,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [196, 116, 140],
       "segmentation_volume_mm3": 3931.0,
       "surface_area_mm2": 2441.861956330712,
@@ -50772,6 +50789,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [196, 116, 140],
       "segmentation_volume_mm3": 4001.0,
       "surface_area_mm2": 2476.8287009344645,
@@ -50833,6 +50851,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [206, 172, 120],
       "segmentation_volume_mm3": 665.0,
       "surface_area_mm2": 466.4804237843967,
@@ -50906,6 +50925,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [88, 160, 168],
       "segmentation_volume_mm3": 4732.0,
       "surface_area_mm2": 2423.053585946644,
@@ -50971,6 +50991,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [88, 160, 168],
       "segmentation_volume_mm3": 3919.0,
       "surface_area_mm2": 2245.586697456436,
@@ -51036,6 +51057,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [168, 140, 84],
       "segmentation_volume_mm3": 2826.0,
       "surface_area_mm2": 1711.3237107763339,
@@ -51109,6 +51131,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [168, 140, 84],
       "segmentation_volume_mm3": 2937.0,
       "surface_area_mm2": 1751.8618951534067,
@@ -51170,6 +51193,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [124, 140, 196],
       "segmentation_volume_mm3": 1808.0,
       "surface_area_mm2": 901.7378694909387,
@@ -51275,6 +51299,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [146, 124, 180],
       "segmentation_volume_mm3": 3075.0,
       "surface_area_mm2": 1487.5489768918292,
@@ -51352,6 +51377,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [146, 124, 180],
       "segmentation_volume_mm3": 3003.0,
       "surface_area_mm2": 1447.4047137216685,
@@ -51429,6 +51455,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [190, 132, 112],
       "segmentation_volume_mm3": 753.0,
       "surface_area_mm2": 510.8841074473384,
@@ -51506,6 +51533,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [204, 150, 96],
       "segmentation_volume_mm3": 405.0,
       "surface_area_mm2": 338.4277800047395,
@@ -51555,6 +51583,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [204, 150, 96],
       "segmentation_volume_mm3": 504.0,
       "surface_area_mm2": 392.3705277864421,
@@ -51608,6 +51637,7 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": ["nextbrain"],
       "display_color": [150, 190, 120],
       "segmentation_volume_mm3": 327.0,
       "surface_area_mm2": 247.3289890913605,
