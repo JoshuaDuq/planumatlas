@@ -6,8 +6,8 @@ message: >-
   https://planumatlas.com/docs/reference/references.html
 type: software
 title: Planum
-version: 0.1.1
-date-released: 2026-11-22
+version: 0.1.2
+date-released: 2026-11-25
 abstract: >-
   Planum is an open 3D atlas of the human brain, where cortical and deep
   parcellations, tractography and the published findings for each region are
@@ -24,7 +24,7 @@ authors:
   - given-names: Joshua
     family-names: Duquette
     email: joshua.duquette.1@ulaval.ca
-doi: 10.5281/zenodo.24449724
+doi: 10.5281/zenodo.24428325
 identifiers:
   - type: other
     value: RRID:SCR_029332

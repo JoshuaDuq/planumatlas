@@ -6,6 +6,28 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-25
+
+### Added
+
+- On the **MNI template**: gyral white matter, the search of 277 further Neurosynth terms, atlas comparison,
+  the arterial territories (Liu et al. 2023) and the brainstem arousal nuclei, and **Coordinate** and
+  **Overlay** read coordinates and maps in SPM12's space. Each met the checks its CDMD sub_013 counterpart
+  met, fixed in advance. The arousal nuclei were placed by SegmentAAN, as on CDMD, so coma, the one deficit
+  profile the template lacked, is listed there too. The visual field map and the stroke cases failed those
+  checks on the template and stay on CDMD sub_013, with the spinal cord.
+- **Colour › Morphometry** offers **Cortical thickness**, FreeSurfer's measure on CDMD sub_013, and
+  **Sulcal depth**, on both brains. A region's **Measurements and source** gives its mean thickness.
+- The Yeo networks key opens a **Correlation matrix**: resting-state correlations between Schaefer's 200
+  parcels, sorted by Yeo's seven networks, with each pair of networks' mean. Six of the seven networks
+  correlate more within themselves than with any other; limbic does not, and the dialog says so.
+- **Linked MRI** offers **Serial sections**: eleven evenly spaced sections across the brain beside a
+  localizer, saved as one sheet. Its **Overlay** can show the 3D view's colours on the scan, the selected
+  region is outlined there, and the crosshair can be hidden.
+- Every cortical region lists the Neurosynth functions and terms whose maps reach it, each opening its map.
+  A Destrieux or Desikan-Killiany region lists them by how much of it lies in the HCP-MMP areas they reach.
+- A masthead button links the GitHub repository.
+
 ### Changed
 
 - **Names on the brain** now names what is actually seen: a region hidden behind another is no longer
@@ -15,9 +37,26 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 - **Cerebellar functions** now colours the outside of the cerebellum too, point by point from the map 1 mm
   beneath the surface, as well as the cut faces. Pointing at the cerebellum names the functional region there,
   and a click selects it, with or without a cut.
+- A region's summary is set as labelled rows. A region with no listed function has no Neuropsychological
+  functions row, where it read "0", and its deficits list is headed **Linked deficits**.
+- Leaving **Functions** or **Deficits** for another tab puts the previous view back without a notice;
+  **Restore previous view** still says so. The data popover's lists mark each default.
+- The data popover stands its lists two by two, so all four fit a laptop window. On a phone, an opened tool
+  brings the sheet down, the settings menu takes the screen's width, the orientation gizmo's reset sits in
+  its left corner and, upright, the gizmo shares its row with the stage key. A phone on its side keeps a
+  tool's plate beside the brain when the brain keeps room.
+- The page draws the workspace's frame before the app's script loads, so a first visit no longer opens on a
+  blank page.
+- The methods pages are rewritten in one order (Data, Method, Display, Validation, Limitations, Code
+  availability), and every figure is redrawn in light and dark.
 
 ### Fixed
 
+- A selected region's ring ran along only part of its border; it now goes all the way round, and a hovered
+  region gets a fine line.
+- A translucent cortex no longer speckles where a far fold blended over a near one, and a selected region's
+  outline no longer traces the part a cut has removed.
+- Names on the brain are chosen again once an exploded view's pieces arrive, and keep moving on slow frames.
 - NextBrain's labels now also cite Puonti et al. (2026), the fast segmentation that produced them, beside
   Casamitjana et al. (2025), in the reference list and on the methods pages.
 - The internal anatomy methods page no longer says the sliced `conv3d` workaround changes no computed value. It
@@ -176,6 +215,7 @@ The first numbered release, archived at [doi:10.5281/zenodo.24428326](https://do
 - The Overlay refuses map files over about 528 MiB and stops inflating a `.nii.gz` past the size its
   header states.
 
-[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.1...main
+[Unreleased]: https://github.com/JoshuaDuq/planumatlas/compare/v0.1.2...main
+[0.1.2]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.2
 [0.1.1]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.1
 [0.1.0]: https://github.com/JoshuaDuq/planumatlas/releases/tag/v0.1.0
