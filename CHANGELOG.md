@@ -6,6 +6,20 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [Unreleased]
 
+### Added
+
+- The guided tour stops at the top bar's **Atlas**, **Colour** and **Internal anatomy** lists, beside
+  **Subject**. Each stop opens the lists, points at one and makes a choice in it, so the change shows on the
+  brain: HCP-MMP for the atlas, one colour per lobe, and FreeSurfer aseg inside the left hemisphere. A first
+  visit's tour includes the Internal anatomy stop. These replace the stop that only named the top bar.
+
+### Fixed
+
+- The guided tour's **Settings** stop ringed **Save image** instead of the **⋯** button.
+- The guided tour's **Subject** card lay over the **Internal anatomy** list. A card about one of the top
+  bar's lists now sits in the stage's far corner, and the lists stay open from one of these stops to the
+  next.
+
 ## [0.1.2] - 2026-11-25
 
 Archived at [doi:10.5281/zenodo.24538436](https://doi.org/10.5281/zenodo.24538436).

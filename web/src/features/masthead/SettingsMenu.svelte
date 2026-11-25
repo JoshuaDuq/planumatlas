@@ -172,6 +172,7 @@
       {...props}
       aria-haspopup={undefined}
       {...{ [OWN_KEYS_ATTRIBUTE]: '' }}
+      class="settings-button"
       icon="more"
       {disabled}
       {@attach (node) => {

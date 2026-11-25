@@ -224,6 +224,11 @@ describe('DataBar lists', () => {
     expect(bar().querySelector('.study-name')).toBeNull();
     const captions = [...bar().querySelectorAll('.masthead-data .data-label')];
     expect(captions.map((caption) => caption.textContent)).toEqual(['Atlas', 'Colour']);
+    // The summary says so before the lists are drawn: the guided tour stops only at a list it holds.
+    expect(el(summary()).dataset.offers).toBe('atlas colour');
+    cleanup();
+    await wide(barProps(), { fields: false });
+    expect(el(summary()).dataset.offers).toBe('atlas colour subject detail');
   });
 
   test('every option is listed, colours in named groups, each saying what else it changes', async () => {
@@ -456,6 +461,28 @@ describe('DataBar lists', () => {
       .toBe(false);
     option('Subject', 'CDMD sub_014').click();
     expect(commands(calls)).toEqual(['anatomy:sub_014']);
+  });
+
+  test('a press on the tour’s card leaves the lists open while the tour runs; any other press outside closes them', async () => {
+    const props = $state(barProps({ touring: true }));
+    await wide(props);
+    // The tour's card, as driver.js draws it outside the bar, with its Next.
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div class="driver-popover guide-card" style="position: fixed; right: 0; bottom: 0"><button style="min-width: 44px; min-height: 44px">Next</button></div>',
+    );
+    const card = document.querySelector<HTMLElement>('.guide-card')!;
+    try {
+      await userEvent.click(card.querySelector('button')!);
+      expect(el(summary()).getAttribute('aria-expanded')).toBe('true');
+      // With no tour running the card is any other part of the page.
+      props.touring = false;
+      await settle();
+      await userEvent.click(card.querySelector('button')!);
+      expect(el(summary()).getAttribute('aria-expanded')).toBe('false');
+    } finally {
+      card.remove();
+    }
   });
 
   test('French strings and names', async () => {
