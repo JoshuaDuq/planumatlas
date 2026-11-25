@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from brain_model.build import build_structure_layer
+from brain_model.gltf.encode import decode_field, recorded_field_ranges
 from brain_model.labels.volumes import LabelGrid, conformed_grid
 from brain_model.surfaces.geometry import extract_structure, misclassified_voxels
 from brain_model.validate import read_meshes, validate_structure_layer
@@ -144,12 +145,23 @@ def test_a_bridge_from_another_layer_is_published_and_counted_but_checked_there(
             "source_label_id": label, "kind": "structure",
         }, [220, 216, 20]
 
-    bridge = (surface.vertices, surface.faces, surface.vertex_normals, unit, [128, 134, 168])
+    # A bridge's openness is quantized over the span its own layer quantized it over.
+    openness = np.linspace(0.25, 0.75, len(surface.vertices))
+    bridge = (
+        surface.vertices, surface.faces, surface.vertex_normals, unit, [128, 134, 168], openness
+    )
     record, regions = build_structure_layer(
-        config, LabelGrid(volume, affine, [1.0] * 3), [17], describe, "structures.glb", [bridge]
+        config, LabelGrid(volume, affine, [1.0] * 3), [17], describe, "structures.glb", [bridge],
+        {"_OPENNESS": [0.0, 1.0], "_SULC": [-2.0, 2.0]},
     )
     path = tmp_path / "structures.glb"
     meshes = read_meshes(path)
+    assert recorded_field_ranges(path) == {"_OPENNESS": [0.0, 1.0]}
+    published = meshes["learning:caudal-medulla"].vertex_attributes["_OPENNESS"]
+    np.testing.assert_allclose(
+        decode_field(published.ravel(), [0.0, 1.0]), openness, atol=1 / 65535
+    )
+    assert "_OPENNESS" not in meshes["aseg:left:17"].vertex_attributes
     assert record["region_count"] == 2
     assert [region["id"] for region in regions] == ["aseg:left:17"]
     np.testing.assert_array_equal(meshes["learning:caudal-medulla"].faces, surface.faces)

@@ -114,7 +114,7 @@ On the [Montreal Neurological Institute (MNI) template](mni-template.md) a tour 
 | `catalog.test.ts` | 28 archived tours (210 landmarks with the active ones) resolve but cannot be opened as active circuits | passes |
 | `catalog.test.ts` | On the MNI template the four tours with a spinal cord landmark are left out and the other 41 resolve; loaded as a default anatomy the template is refused | passes |
 | `references.test.ts` | Active and archived circuit references name the works their identifiers resolve to | passes |
-| `lesson.test.ts` | Route first; the visual route draws NextBrain with its chiasm; every whole route draws its deep landmarks but the pontine motor tour's lobule V; deep landmark opens focused; ungeometried landmark refused; Linked MRI opens the prepared plane | passes |
+| `lesson.test.ts` | Route first; the visual route draws NextBrain with its chiasm; every whole route draws its deep landmarks; deep landmark opens focused; ungeometried landmark refused; Linked MRI opens the prepared plane | passes |
 
 ## Limitations
 
@@ -128,7 +128,7 @@ Some projections are known from tracing in nonhuman primates, cats, rabbits or r
 
 Each tour's `scope` names what it omits. The visual tour, for example, omits the retina, optic nerves and optic radiations, and the memory tour is one branch, not a complete or necessary Papez circuit.
 
-A route draws one internal anatomy at a time. The pontine motor tour's pontine nuclei are NextBrain's alone and its lobule V the teaching set's alone, so its whole route draws no lobule V. The lobule appears when that landmark is opened. Its pontine nuclei are not widened to the teaching set's pontine territory, 6.7 times their volume, to draw it.
+A route draws one internal anatomy at a time. The pontine motor tour's pontine nuclei are NextBrain's alone, so its whole route is drawn on the NextBrain level, which draws the teaching set's lobule V too ([internal anatomy](internal-anatomy.md)). Its pontine nuclei are not widened to the teaching set's pontine territory, 6.7 times their volume.
 
 A deficit study supports a region–deficit association, not the pathway's connections. Clinical accuracy has not been validated.
 

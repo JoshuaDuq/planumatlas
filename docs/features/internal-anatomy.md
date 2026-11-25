@@ -63,6 +63,10 @@ NextBrain labels no medulla below its lowest medullary voxel, whereas the scan a
 
 The NextBrain level draws the unit too, so the medulla meets the spinal cord there as well. The unit's record carries `also_drawn_in: [nextbrain]`, `build_nextbrain_structures` writes the same mesh into `nextbrain.glb`, and `belongsToDetail` counts it in that level. Validation holds that copy identical to the teaching set's, which is checked against its source. The NextBrain level's `region_count` includes it.
 
+### What the NextBrain level borrows from the teaching set
+
+NextBrain leaves some tissue without a surface of its own. It meshes none of its cerebellar cortical layers (the `_of_pva` labels are bulk tissue), its corpus callosum lies inside the forebrain white matter it also leaves unmeshed, and it labels no cerebrospinal fluid, so it has no ventricles. Its level alone would show the cerebellar nuclei with no cerebellum around them, and an empty medial wall where the callosum and the lateral ventricles lie. The level therefore draws these teaching-set units as it draws the caudal medulla: CerebNet's 25 lobules where they are published (aseg's two cerebellar-cortex units elsewhere), the corpus callosum, both lateral ventricles and the third and fourth ventricles (`drawn_in_nextbrain` in `config/learning-anatomy.yaml`). Each record carries `also_drawn_in: [nextbrain]` and `nextbrain.glb` holds the same mesh, with the lobules' openness quantized over the span `learning.glb` uses. The level's `region_count` is therefore 323 on CDMD: 292 NextBrain solids, the caudal medulla, 25 lobules, the callosum and four ventricles. These units enclose or touch NextBrain's own as they do in the teaching set (the lobules hold the cerebellar nuclei, the callosum meets the fornix); hiding or isolating a region, or a cut, shows what lies inside.
+
 ### Cerebellar lobules
 
 `scripts/segment_cerebellum.py` ran FastSurfer (`--seg_only --no_hypothal --no_cc --no_biasfield --device cpu --threads 4`) on the conformed `orig.mgz`. The lobules were written as int16 to `mri/cerebellum.CerebNet.mgz`, because `orig.mgz`'s uchar type would clip ids above 255. `cerebellum.load` accepts only the 25 lobule ids (601–631) and cerebellar white matter (7, 46).
@@ -79,7 +83,7 @@ CerebNet's labels fill the fissures, so the lobule surfaces are drawn with fluid
 
 ## Display
 
-The masthead's **Internal anatomy** chooses one level: **Teaching set** (`learning.glb`), **FreeSurfer aseg** (`structures.glb`) or **NextBrain** (`nextbrain.glb`). The URL key is `detail=learning|aseg|nextbrain`. **Show internal anatomy** (**Display**, key **U**) shows or hides the level. The ten [arousal nuclei](arousal-nuclei.md) (layer `aan`, `arousal-nuclei.glb`) are listed under Brainstem at every level.
+The masthead's **Internal anatomy** chooses one level: **Teaching set** (`learning.glb`), **FreeSurfer aseg** (`structures.glb`) or **NextBrain** (`nextbrain.glb`). The URL key is `detail=learning|aseg|nextbrain`. A link that names no level opens on the teaching set, or on aseg where there is none (`defaultDetailOf`), and the list marks that level **(Default)**. **Show internal anatomy** (**Display**, key **U**) shows or hides the level. The ten [arousal nuclei](arousal-nuclei.md) (layer `aan`, `arousal-nuclei.glb`) are listed under Brainstem at every level.
 
 The **Anatomy** tab groups teaching units by system (URL key `system`). A unit's `constituent_regions` lead to its NextBrain labels. **Download table (CSV)** in the Anatomy list writes every region of the anatomy, atlas and level shown to `planum-regions-<anatomy>-<atlas>-<detail>.csv`. Each row gives the id, atlas, English and French name and group, hemisphere, source label, area or volume, centroid and anchor, and the largest network and arterial territory with their shares (`region-table.ts`).
 

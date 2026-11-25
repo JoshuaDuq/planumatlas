@@ -202,17 +202,33 @@ def test_a_unit_below_a_nextbrain_floor_keeps_only_voxels_under_it():
     assert labels.ravel().tolist() == [7, 16, 16, 16, 16, 16]
 
 
-def test_only_a_unit_below_a_nextbrain_floor_is_drawn_on_the_nextbrain_level_too():
+def test_only_what_nextbrain_has_no_surface_for_is_drawn_on_the_nextbrain_level_too():
+    """The unit below NextBrain's medulla, and what its level leaves unmeshed or unlabelled: the
+    cerebellar cortex, the corpus callosum and the ventricles."""
     from brain_model.layers.learning import region_record
 
-    definition = read_definition(read_config("cdmd"))
     volume = np.array([[[16, 4, 0]]])
-    drawn = {
-        unit["id"]: region_record(unit, "aseg", volume).get("also_drawn_in")
-        for unit in definition["aseg"]
+
+    def shared(config, source):
+        return {
+            unit["id"] for unit in read_definition(config)[source]
+            if region_record(unit, source, volume).get("also_drawn_in") == ["nextbrain"]
+        }
+
+    unlabelled = {
+        "corpus-callosum", "ventricles-left", "ventricles-right", "third-ventricle",
+        "fourth-ventricle",
     }
-    assert drawn.pop("caudal-medulla") == ["nextbrain"]
-    assert set(drawn.values()) == {None}
+    # CerebNet's lobules replace aseg's cerebellar cortex where they are published.
+    lobules = read_config("cdmd")
+    assert shared(lobules, "aseg") == {"caudal-medulla", *unlabelled}
+    assert shared(lobules, "cerebnet") == {unit["id"] for unit in read_definition(lobules)["cerebnet"]}
+    assert len(shared(lobules, "cerebnet")) == 25
+    whole = read_config("fsaverage")
+    assert shared(whole, "aseg") == {
+        "caudal-medulla", "cerebellar-cortex-left", "cerebellar-cortex-right", *unlabelled
+    }
+    assert read_definition(whole)["cerebnet"] == []
 
 
 def test_the_caudal_medulla_joins_nextbrain_s_medulla_to_the_cord():

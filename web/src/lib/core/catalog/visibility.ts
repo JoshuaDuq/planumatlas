@@ -45,6 +45,10 @@ export const VISIBILITY_SETTINGS = [
 ] as const satisfies readonly (keyof DisplaySettings)[];
 export type VisibilitySettings = Pick<DisplaySettings, (typeof VISIBILITY_SETTINGS)[number]>;
 
+/** The internal anatomy a brain opens on: the grouped teaching set, else the native segmentation. */
+export const defaultDetailOf = (levels: readonly { id: string }[]): string =>
+  (levels.find((level) => level.id === 'learning') ?? levels[0]!).id;
+
 export const belongsToDetail = (region: Region, detail: string) =>
   region.supplemental === true ||
   region.atlas === detail ||

@@ -282,11 +282,11 @@ test('hemisphere and isolation still apply to cut-only regions', () => {
 test('the cerebellar map is on show with no cut where the cerebellar surfaces draw it', () => {
   const m3 = tissue({ id: 'nettekoven:left:m3', atlas: 'nettekoven' });
   const uncut = settings({ cutAtlas: 'nettekoven', cutActive: false });
-  for (const detail of ['learning', 'aseg']) {
+  // NextBrain's level draws the teaching set's cerebellar cortex, so it carries the map too.
+  for (const detail of ['learning', 'aseg', 'nextbrain']) {
     assert.equal(visibilityOf(m3, { ...uncut, detail }).visible, true, detail);
   }
-  // NextBrain draws no cerebellar cortex, and hidden structures draw nothing.
-  assert.equal(visibilityOf(m3, { ...uncut, detail: 'nextbrain' }).reason, 'no-cut');
+  // Hidden structures draw nothing.
   assert.equal(
     visibilityOf(m3, { ...uncut, detail: 'learning', internalVisible: false }).reason,
     'no-cut',

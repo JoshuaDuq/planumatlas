@@ -3150,7 +3150,7 @@
       "id": "nextbrain",
       "label": "NextBrain histological atlas",
       "file": "nextbrain.glb",
-      "region_count": 293,
+      "region_count": 323,
       "voxel_to_surface_ras_mm": [
         [
           0.4000000059604645,
@@ -83590,6 +83590,9 @@
         "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
         "fr": "R\u00e9unit les \u00e9tiquettes du ventricule lat\u00e9ral et de sa partie inf\u00e9rieure. Ce volume repr\u00e9sente un espace liquidien, et non du tissu nerveux."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         87,
         139,
@@ -83646,6 +83649,9 @@
         "en": "Combines the lateral ventricle and inferior lateral ventricle labels. This solid represents a fluid space, not neural tissue.",
         "fr": "R\u00e9unit les \u00e9tiquettes du ventricule lat\u00e9ral et de sa partie inf\u00e9rieure. Ce volume repr\u00e9sente un espace liquidien, et non du tissu nerveux."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         87,
         139,
@@ -83696,6 +83702,9 @@
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         87,
         139,
@@ -83746,6 +83755,9 @@
         "en": "Ventricles and CSF",
         "fr": "Ventricules et LCR"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         87,
         139,
@@ -83808,6 +83820,9 @@
         "en": "Combines FreeSurfer\u2019s five corpus callosum labels. This is segmented tissue, not a reconstruction of individual callosal fibres.",
         "fr": "R\u00e9unit les cinq \u00e9tiquettes du corps calleux de FreeSurfer. Il s\u2019agit de tissu segment\u00e9, et non d\u2019une reconstruction des fibres calleuses individuelles."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         214,
         197,
@@ -83875,6 +83890,9 @@
         "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
         "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         176,
         120,
@@ -83965,6 +83983,9 @@
         "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
         "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         176,
         120,
@@ -84047,6 +84068,9 @@
         "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
         "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         92,
         140,
@@ -84129,6 +84153,9 @@
         "en": "CerebNet\u2019s SUIT-based labels include the corresponding anterior vermis within the hemispheric lobules. Vermis I\u2013V cannot be isolated as separate units in this set.",
         "fr": "Les \u00e9tiquettes de CerebNet fond\u00e9es sur SUIT incluent le vermis ant\u00e9rieur correspondant dans les lobules h\u00e9misph\u00e9riques. Le vermis I\u2013V ne peut pas \u00eatre isol\u00e9 en unit\u00e9s distinctes dans cet ensemble."
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         92,
         140,
@@ -84203,6 +84230,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         190,
         168,
@@ -84305,6 +84335,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         190,
         168,
@@ -84403,6 +84436,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         136,
         182,
@@ -84489,6 +84525,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         120,
         104,
@@ -84583,6 +84622,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         120,
         104,
@@ -84677,6 +84719,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         104,
         168,
@@ -84759,6 +84804,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         104,
         168,
@@ -84841,6 +84889,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         196,
         116,
@@ -84931,6 +84982,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         196,
         116,
@@ -85017,6 +85071,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         206,
         172,
@@ -85115,6 +85172,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         88,
         160,
@@ -85205,6 +85265,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         88,
         160,
@@ -85295,6 +85358,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         168,
         140,
@@ -85393,6 +85459,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         168,
         140,
@@ -85479,6 +85548,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         124,
         140,
@@ -85609,6 +85681,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         146,
         124,
@@ -85711,6 +85786,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         146,
         124,
@@ -85813,6 +85891,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         190,
         132,
@@ -85915,6 +85996,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         204,
         150,
@@ -85989,6 +86073,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         204,
         150,
@@ -86067,6 +86154,9 @@
         "en": "Cerebellum",
         "fr": "Cervelet"
       },
+      "also_drawn_in": [
+        "nextbrain"
+      ],
       "display_color": [
         150,
         190,

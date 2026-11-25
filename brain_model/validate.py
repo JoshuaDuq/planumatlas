@@ -610,13 +610,25 @@ def validate_nextbrain_structures(config, nextbrain_source):
         region_id: mesh for region_id, mesh in read_meshes(path).items()
         if mesh.metadata["atlas"] != nextbrain.ATLAS_ID
     }
-    taught = read_meshes(config["output_directory"] / "learning.glb")
+    overview = config["output_directory"] / "learning.glb"
+    taught = read_meshes(overview)
     for region_id, mesh in bridges.items():
+        shading = [
+            surface.vertex_attributes.get("_OPENNESS") for surface in (mesh, taught[region_id])
+        ]
         if not (
             np.array_equal(mesh.vertices, taught[region_id].vertices)
             and np.array_equal(mesh.faces, taught[region_id].faces)
+            and (shading[0] is None) == (shading[1] is None)
+            and (shading[0] is None or np.array_equal(*shading))
         ):
             raise ValueError(f"NextBrain's copy differs from the teaching set's: {region_id}")
+    # The copies' openness is the same integers only where both files quantize it over one span.
+    if any("_OPENNESS" in mesh.vertex_attributes for mesh in bridges.values()) and (
+        recorded_field_ranges(path).get("_OPENNESS")
+        != recorded_field_ranges(overview).get("_OPENNESS")
+    ):
+        raise ValueError("NextBrain's copies quantize openness over another span")
     return validate_structure_layer(
         path,
         grid.labels,
@@ -867,7 +879,7 @@ def validate_manifest(config, manifest, nextbrain_source):
     if nextbrain.is_declared(config):
         fine, fine_grid = expected_nextbrain_metadata(config, nextbrain_source)
         overview, overview_grids = validate_learning.expected_metadata(config, nextbrain_source)
-        # The teaching units that continue NextBrain's below its coverage are drawn on its level too.
+        # The teaching units NextBrain has no surface of its own for are drawn on its level too.
         bridges = {
             region_id: unit for region_id, unit in overview.items()
             if nextbrain.ATLAS_ID in unit.get("also_drawn_in", [])

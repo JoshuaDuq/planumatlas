@@ -19,7 +19,7 @@ import type {
   SpinalCordLoad,
   Vec3,
 } from '../api.ts';
-import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
+import { belongsToDetail, defaultDetailOf, visibilityOf } from '../../core/catalog/visibility.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
 import { groupsByLobe } from '../../core/catalog/lobes.ts';
 import { sulcExtent } from '../../core/catalog/sulcal-depth.ts';
@@ -107,7 +107,7 @@ export function createFakeModel({
 }: FakeModelOptions): FakeModel {
   const regions = new Map(manifest.regions.map((region) => [region.id, region]));
   const levels = manifest.detail_levels;
-  const defaultDetail = (levels.find((level) => level.id === 'learning') ?? levels[0]!).id;
+  const defaultDetail = defaultDetailOf(levels);
   const layers = new Set<string>();
   /** The region `point` marks. */
   let marked: string | null = null;
@@ -634,9 +634,15 @@ export function createFakeModel({
     },
   };
 
-  /** A region's geometry is downloaded: its atlas or detail layer is in. */
+  /**
+   * A region's geometry is downloaded: its atlas or detail layer is in, or a level that draws it
+   * too (`also_drawn_in`).
+   */
   function layerLoaded(region: Region): boolean {
-    return layers.has(region.atlas ?? '');
+    return (
+      layers.has(region.atlas ?? '') ||
+      Boolean(region.also_drawn_in?.some((level) => layers.has(level)))
+    );
   }
 
   return model;
