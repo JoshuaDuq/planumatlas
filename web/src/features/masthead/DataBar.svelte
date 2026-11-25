@@ -64,6 +64,8 @@
     onDetail: (id: string) => unknown;
     /** Another subject is another page: the link is rewritten and the page reloads (S4). */
     onAnatomy: (id: string) => void;
+    /** The guided tour runs, which a reload would end: the Subject list waits for it. */
+    touring?: boolean;
     /** The open popover's right edge in the window, so the stage can frame the anatomy beside it; null once closed. */
     onPanel?: (right: number | null, immediate: boolean) => void;
   }
@@ -90,6 +92,7 @@
     onSurfaceColor,
     onDetail,
     onAnatomy,
+    touring = false,
     onPanel,
   }: Props = $props();
 
@@ -417,7 +420,7 @@
         {anatomy}
         {anatomies}
         {borrowed}
-        {switching}
+        holdsSubject={switching || touring}
         required={(colour, atlas) => requiredAtlas(colourings, colour as SurfaceColor, atlas)}
         palette={(mode) => colourPalette(mode, colourings)}
         onChoose={(field, value) =>

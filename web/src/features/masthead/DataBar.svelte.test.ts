@@ -443,6 +443,21 @@ describe('DataBar lists', () => {
     expect(option('Atlas', 'HCP-MMP').hasAttribute('aria-disabled')).toBe(false);
   });
 
+  test('another subject waits while the tour runs, then is free again', async () => {
+    const calls: string[] = [];
+    const props = $state(barProps({ touring: true }));
+    await wide(props, { calls });
+    expect(option('Subject', 'CDMD sub_014').getAttribute('aria-disabled')).toBe('true');
+    option('Subject', 'CDMD sub_014').click();
+    expect(commands(calls)).toEqual([]);
+    props.touring = false;
+    await expect
+      .poll(() => option('Subject', 'CDMD sub_014').hasAttribute('aria-disabled'))
+      .toBe(false);
+    option('Subject', 'CDMD sub_014').click();
+    expect(commands(calls)).toEqual(['anatomy:sub_014']);
+  });
+
   test('French strings and names', async () => {
     await wide(barProps({ lang: 'fr' }));
     for (const name of ['Sujet', 'Atlas', 'Couleur', 'Anatomie interne']) {

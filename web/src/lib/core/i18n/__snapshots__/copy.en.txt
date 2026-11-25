@@ -2784,7 +2784,7 @@
    {
     "id": "subject",
     "title": "One person or an average",
-    "body": "Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page."
+    "body": "Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page, so the list waits for the tour to end."
    },
    {
     "id": "directions",

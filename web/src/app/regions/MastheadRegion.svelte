@@ -155,6 +155,9 @@
   // as the page unmounts finds the masthead already gone, and with it any button to focus.
   const settingsButton = () => masthead?.settingsButton() ?? null;
 
+  // Another subject reloads the page, which would end the tour: the Subject list waits for it.
+  let touring = $state(false);
+
   async function guide(short = false) {
     // The stops open regions, and with them their groups in the tree: closing folds those back.
     const expanded = new Set(app.session.state.expanded);
@@ -171,6 +174,7 @@
       short,
       animate: !app.media.reducedMotion,
       onClose: ({ pointer }) => {
+        touring = false;
         app.session.setExpanded(expanded);
         // A tap or click that ended the tour leaves no ring, and so no tooltip, over the stage.
         settingsButton()?.focus({ focusVisible: !pointer });
@@ -192,6 +196,8 @@
       anchorOf: (region) => world!.engine.model.anchorOf(region),
       sheet: { raise: () => app.ports.revealOnSelect(), lower: () => app.ports.lowerSheet() },
     });
+    // After the start: a tour already running closes inside it, and its close clears the flag.
+    touring = true;
   }
 
   // The key that opens the shortcuts sheet, and the first launch's tour (ports.ts).
@@ -320,6 +326,7 @@
           anatomy.chooseLayer(() => excursions.chooseSurfaceColor(colour))}
         onDetail={(id) => anatomy.chooseLayer(() => commands.chooseDetail(id))}
         onAnatomy={world.links.switchAnatomy}
+        {touring}
         onPanel={(right, immediate) => (dataPanel = { right, immediate })}
       />
     {/if}

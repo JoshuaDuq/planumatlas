@@ -72,7 +72,7 @@ export const en = {
     {
       id: 'subject',
       title: 'One person or an average',
-      body: 'Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page.',
+      body: 'Subject chooses the brain. CDMD sub_013 is one person’s, reconstructed from their MRI. The MNI template is an average of 152 adults, in the space most published coordinates use. Choosing one reloads the page, so the list waits for the tour to end.',
     },
     {
       id: 'directions',
@@ -190,7 +190,7 @@ export const fr: typeof en = {
     {
       id: 'subject',
       title: 'Une personne ou une moyenne',
-      body: 'Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page.',
+      body: 'Sujet choisit le cerveau. CDMD sub_013 est celui d’une personne, reconstruit à partir de son IRM. Le modèle MNI est la moyenne de 152 adultes, dans l’espace de la plupart des coordonnées publiées. Choisir l’un recharge la page : la liste attend donc la fin de la visite.',
     },
     {
       id: 'directions',

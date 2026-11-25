@@ -64,8 +64,8 @@
     anatomy: ManifestAnatomy;
     anatomies: readonly PublishedAnatomy[];
     borrowed: { own: string; by: 'functions' | 'deficits' } | null;
-    /** A download runs: another subject, another page, waits for it. */
-    switching: boolean;
+    /** A download or the tour runs: another subject, another page, would end it, so it waits. */
+    holdsSubject: boolean;
     /** A colouring's own colours, in its key's order (palettes.ts). */
     palette: (mode: SurfaceColor) => readonly Rgb[] | null;
     /** The atlas a colouring would need, were `atlas` the one shown. */
@@ -88,7 +88,7 @@
     anatomy,
     anatomies,
     borrowed,
-    switching,
+    holdsSubject,
     required,
     palette,
     onChoose,
@@ -275,7 +275,7 @@
 {@render list('colour', copy.colour, colourOptions, shown.colour, (value) =>
   onChoose('colour', value),
 )}
-<!-- Another subject reloads the page, so it waits for a download to land. -->
+<!-- Another subject reloads the page, so it waits for a download to land and the tour to end. -->
 {#if anatomies.length > 1}
   {@render list(
     'subject',
@@ -283,7 +283,7 @@
     [{ options: subjectOptions }],
     anatomy.id,
     onAnatomy,
-    switching,
+    holdsSubject,
   )}
 {/if}
 {#if detailLevels.length > 1}
