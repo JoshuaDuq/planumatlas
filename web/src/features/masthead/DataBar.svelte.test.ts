@@ -463,7 +463,7 @@ describe('DataBar lists', () => {
     expect(commands(calls)).toEqual(['anatomy:sub_014']);
   });
 
-  test('a press on the tour’s card leaves the lists open while the tour runs; any other press outside closes them', async () => {
+  test('a press on the tour’s card leaves the lists open while the tour runs, after a choice in them too; any other press outside closes them', async () => {
     const props = $state(barProps({ touring: true }));
     await wide(props);
     // The tour's card, as driver.js draws it outside the bar, with its Next.
@@ -473,6 +473,11 @@ describe('DataBar lists', () => {
     );
     const card = document.querySelector<HTMLElement>('.guide-card')!;
     try {
+      await userEvent.click(card.querySelector('button')!);
+      expect(el(summary()).getAttribute('aria-expanded')).toBe('true');
+      // A choice leaves focus in the lists, and Next takes it from them.
+      await userEvent.click(option('Colour', 'T1 MRI'));
+      expect(el(list('Colour')).contains(document.activeElement)).toBe(true);
       await userEvent.click(card.querySelector('button')!);
       expect(el(summary()).getAttribute('aria-expanded')).toBe('true');
       // With no tour running the card is any other part of the page.

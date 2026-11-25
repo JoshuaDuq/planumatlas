@@ -266,12 +266,14 @@
   $effect(() => {
     if (settingsOpen) open = false;
   });
+  // The tour's card points into the lists: its Next and Back, pressed or focused, leave them open
+  // from stop to stop.
+  const onTourCard = (target: EventTarget | null) =>
+    touring && target instanceof Element && target.closest('.guide-card') !== null;
   $effect(() => {
     if (!open) return;
     const outside = (event: PointerEvent) => {
-      if (root.contains(event.target as Node)) return;
-      // The tour's card points into the lists: its Next and Back leave them open from stop to stop.
-      if (touring && (event.target as Element).closest('.guide-card')) return;
+      if (root.contains(event.target as Node) || onTourCard(event.target)) return;
       instant = keyed = false;
       open = false;
     };
@@ -324,7 +326,7 @@
   // Tabbing past the last control leaves the popover. No related target means the window lost focus.
   function onfocusout(event: FocusEvent) {
     const next = event.relatedTarget as Node | null;
-    if (!open || next === null || root.contains(next)) return;
+    if (!open || next === null || root.contains(next) || onTourCard(next)) return;
     instant = keyed = true;
     open = false;
   }
