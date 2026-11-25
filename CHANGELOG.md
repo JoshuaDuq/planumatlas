@@ -8,6 +8,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ## [0.1.2] - 2026-11-25
 
+Archived at [doi:10.5281/zenodo.24538436](https://doi.org/10.5281/zenodo.24538436).
+
 ### Added
 
 - On the **MNI template**: gyral white matter, the search of 277 further Neurosynth terms, atlas comparison,

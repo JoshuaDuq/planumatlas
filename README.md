@@ -234,15 +234,15 @@ The [figure script](scripts/figures.mjs) reads the [figure definitions](scripts/
 
 If you use Planum, cite it and the data behind the views you use; the [references](https://planumatlas.com/docs/reference/references.html) list each source and the acknowledgement it requires. GitHub’s **Cite this repository** menu reads [`CITATION.cff`](CITATION.cff).
 
-Each release is archived on Zenodo. [10.5281/zenodo.24449724](https://doi.org/10.5281/zenodo.24449724) is version 0.1.1; [10.5281/zenodo.24428325](https://doi.org/10.5281/zenodo.24428325) always resolves to the latest release. Planum is registered in the SciCrunch Registry as [RRID:SCR_029332](https://scicrunch.org/resolver/RRID:SCR_029332).
+Each release is archived on Zenodo. [10.5281/zenodo.24538436](https://doi.org/10.5281/zenodo.24538436) is version 0.1.2; [10.5281/zenodo.24428325](https://doi.org/10.5281/zenodo.24428325) always resolves to the latest release. Planum is registered in the SciCrunch Registry as [RRID:SCR_029332](https://scicrunch.org/resolver/RRID:SCR_029332).
 
 ```bibtex
 @software{planum,
   author  = {Duquette, Joshua},
   title   = {Planum},
-  version = {0.1.1},
+  version = {0.1.2},
   year    = {2026},
-  doi     = {10.5281/zenodo.24449724},
+  doi     = {10.5281/zenodo.24538436},
   url     = {https://planumatlas.com},
   note    = {RRID:SCR_029332},
   license = {AGPL-3.0-or-later}
