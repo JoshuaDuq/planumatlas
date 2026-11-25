@@ -654,8 +654,11 @@ describe('related circuits', () => {
     world.session.setExplorer('anatomy');
     flushSync();
     const link = page.getByRole('button', { name: 'Visual pathway 1 of 4 , Landmark' });
+    await expect.element(link).not.toBeInTheDocument();
+    const summary = document.querySelector<HTMLElement>('.related summary')!;
+    expect(summary.textContent).toBe('In guided circuits, 1');
+    await userEvent.click(summary);
     await expect.element(link).toBeVisible();
-    expect(document.querySelector('.related h3')!.textContent).toBe('In guided circuits');
     // Label in name: what is seen, in order, begins the name (WCAG 2.5.3).
     const row = document.querySelector<HTMLElement>('[data-landmark-circuit="vision"]')!;
     expect(words(accessibleName(row)).startsWith(words(visibleText(row)))).toBe(true);
@@ -675,6 +678,7 @@ describe('related circuits', () => {
     const row = document.querySelector<HTMLElement>(
       `[data-landmark-circuit="memory"][data-landmark-step="${last}"]`,
     )!;
+    await userEvent.click(document.querySelector<HTMLElement>('.related summary')!);
     await userEvent.click(row);
     await expect.poll(() => world.lesson.state).toMatchObject({ circuit: 'memory', step: last });
     await expect.poll(() => title().textContent).toBe(memory.steps[last]!.name.en);
@@ -993,6 +997,8 @@ describe('accessibility', () => {
       await open('vision');
       world.session.setExplorer('anatomy');
       flushSync();
+      check('.related summary');
+      await userEvent.click(document.querySelector<HTMLElement>('.related summary')!);
       check('.circuit-link');
       world.session.setExplorer('circuits');
       flushSync();

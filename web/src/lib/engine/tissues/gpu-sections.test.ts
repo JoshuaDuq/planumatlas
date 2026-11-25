@@ -616,3 +616,14 @@ test('pointing at white matter lifts its parcel code on the cap', () => {
   assert.deepEqual(sections.whiteMatter.uniforms.whiteMatterCodes.value.toArray(), [-1, 2]);
   sections.dispose();
 });
+
+test("SECT-46 the linked MRI takes each cut label's colour as the cut face shows it, in sRGB bytes, and none for a hidden region", () => {
+  const { sections, model, layer, region } = fixture();
+  sections.metadata = { atlases: { destrieux: { labels: layer.metadata.labels } } };
+  // The published colour of the region's label, back from the cut's linear palette.
+  assert.deepEqual(sections.labelColours('destrieux'), [null, [23, 220, 60]]);
+  model.state.hiddenRegions = new Set([region.id]);
+  assert.deepEqual(sections.labelColours('destrieux'), [null, null]);
+  assert.throws(() => sections.labelColours('julich'), /julich cut labels have not loaded/);
+  sections.dispose();
+});

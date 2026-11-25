@@ -176,6 +176,10 @@ export function createEngineSections(
     get publishedWindow() {
       return published();
     },
+    get labelBox() {
+      const box = sections.labelBox;
+      return box && { min: [...box.min] as Vec3, max: [...box.max] as Vec3 };
+    },
     mriWindowLink() {
       const shown = sections.display;
       const window = published();
@@ -202,7 +206,7 @@ export function createEngineSections(
       const { crosshair, mode, reverse } = sections.state;
       return planeFrame(stagedFrame(plane, crosshair, mode === plane && reverse));
     },
-    slice: (frame) => sections.slice(frameOf(frame)) as unknown as PlaneSlice,
+    slice: (frame, crop) => sections.slice(frameOf(frame), crop) as unknown as PlaneSlice,
     pixels: (slice) => sections.pixels(slice as unknown as SliceSamples),
     sample: (point): VolumeSample => sections.sample(point),
     regionAt: (point) => drawnRegionAt(sections.model, sections.metadataUrl, point),

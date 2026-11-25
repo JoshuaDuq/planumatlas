@@ -26,6 +26,8 @@ export const SURFACE_COLORS = [
   'territory',
   'striatal',
   'cerebellar',
+  'thickness',
+  'sulc',
 ] as const;
 
 export const FUNCTIONAL_LEVELS = ['named', 'sections'] as const;

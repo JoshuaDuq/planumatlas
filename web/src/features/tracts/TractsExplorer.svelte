@@ -421,58 +421,6 @@
     {/if}
 
     <fieldset disabled={busy || !ready}>
-      <div id="native-tract-bundles" class="list">
-        {#each groups as group (group.fibreClass)}
-          {@const count = bundlesKept(group.rows)}
-          <div
-            class="group"
-            role="group"
-            aria-labelledby="native-tract-class-{group.fibreClass}"
-            hidden={!count}
-          >
-            <h4 class="list-heading" id="native-tract-class-{group.fibreClass}">
-              <span>{text.classes[group.fibreClass]}</span><span class="visually-hidden"
-                >{', '}</span
-              ><span class="count">{grouped(count)}</span>
-            </h4>
-            {#each group.rows as row (row.key)}
-              <TractRow
-                {row}
-                {lang}
-                {loaded}
-                {pending}
-                glyphs={t(lang, 'sides').glyphs}
-                {text}
-                hidden={!kept.has(row.key)}
-                ontoggle={toggle}
-                current={row.key === openTract}
-                onopen={onOpenTract && openRow}
-              />
-            {/each}
-          </div>
-        {/each}
-      </div>
-      <!-- The search narrows the rows; the drawn bundles' counts come back when it is cleared. -->
-      <TractMetrics
-        rows={groups.flatMap((group) => group.rows)}
-        {lang}
-        {loaded}
-        {text}
-        hidden={Boolean(needle)}
-      />
-      {#if matches === 0}
-        <EmptyState title={noMatch} message={noMatchHint} />
-      {/if}
-      {#each others as other (other.mode)}
-        <SearchBridge
-          text={bridgeText(lang, other, query.trim())}
-          onclick={() => onElsewhere(other.mode, query)}
-        />
-      {/each}
-      {#if !matching}
-        <p class="scope">{dataset.otherAnatomy}</p>
-      {/if}
-
       <details class="settings" bind:open={settingsOpen}>
         <summary>
           <span>{text.settings}</span>
@@ -525,6 +473,57 @@
           <button type="button" class="quiet" onclick={exportCsv}>{text.exportMetrics}</button>
         </div>
       </details>
+      <div id="native-tract-bundles" class="list">
+        {#each groups as group (group.fibreClass)}
+          {@const count = bundlesKept(group.rows)}
+          <div
+            class="group"
+            role="group"
+            aria-labelledby="native-tract-class-{group.fibreClass}"
+            hidden={!count}
+          >
+            <h4 class="list-heading" id="native-tract-class-{group.fibreClass}">
+              <span>{text.classes[group.fibreClass]}</span><span class="visually-hidden"
+                >{', '}</span
+              ><span class="count">{grouped(count)}</span>
+            </h4>
+            {#each group.rows as row (row.key)}
+              <TractRow
+                {row}
+                {lang}
+                {loaded}
+                {pending}
+                glyphs={t(lang, 'sides').glyphs}
+                {text}
+                hidden={!kept.has(row.key)}
+                ontoggle={toggle}
+                current={row.key === openTract}
+                onopen={onOpenTract && openRow}
+              />
+            {/each}
+          </div>
+        {/each}
+      </div>
+      <!-- The search narrows the rows; the drawn bundles' counts come back when it is cleared. -->
+      <TractMetrics
+        rows={groups.flatMap((group) => group.rows)}
+        {lang}
+        {loaded}
+        {text}
+        hidden={Boolean(needle)}
+      />
+      {#if matches === 0}
+        <EmptyState title={noMatch} message={noMatchHint} />
+      {/if}
+      {#each others as other (other.mode)}
+        <SearchBridge
+          text={bridgeText(lang, other, query.trim())}
+          onclick={() => onElsewhere(other.mode, query)}
+        />
+      {/each}
+      {#if !matching}
+        <p class="scope">{dataset.otherAnatomy}</p>
+      {/if}
     </fieldset>
 
     <AboutData place="tracts" {lang} host="list" template={averaged}>
@@ -695,12 +694,11 @@
       color: var(--text-tertiary);
     }
 
-    /* Settings and provenance follow the tract list on the shared text column. */
+    /* Keep display controls after search, ahead of the bundle list. */
     .settings {
-      margin-top: var(--space-6);
       margin-inline: var(--panel-inset);
       padding-block: var(--space-1);
-      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
     }
     .settings > summary {
       display: flex;

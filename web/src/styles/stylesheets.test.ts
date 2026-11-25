@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseCss, styleBlocks, styleViolations, walk } from './css-scan.ts';
-import { components, fontsource, main, sheets } from './sources.ts';
+import { components, fontsource, main, sheets, stageVars } from './sources.ts';
 
 const LAYERS = ['tokens', 'base', 'elements', 'components', 'features', 'a11y'];
 const LAYER_STATEMENT = `@layer ${LAYERS.join(', ')}`;
@@ -100,7 +100,8 @@ describe('invariants over src/styles and every component <style>', () => {
 
   it('every token read without a fallback is declared somewhere', () => {
     const declared = new Set([
-      ...styles.flatMap(({ css }) =>
+      // The stage's own sheet as well, which every stage component imports.
+      ...[...styles.map(({ css }) => css), stageVars].flatMap((css) =>
         [...css.matchAll(/(--[\w-]+)\s*:/g)].map(([, token]) => token),
       ),
       // Custom properties set from markup: style="--x: 1" and style:--x={value}.

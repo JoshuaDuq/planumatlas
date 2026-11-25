@@ -44,7 +44,7 @@
         <span>{maps.guided}</span>
         <span class="column-head" aria-hidden="true">{copy.landmarks}</span>
       </h3>
-      <ul class="rows">
+      <ul class="rows" role="list">
         {#each model.circuits as circuit (circuit.id)}
           {@const current = circuit.id === model.lesson.circuit}
           <li>
@@ -57,7 +57,7 @@
               data-selected={String(current)}
               onclick={() => model.openCircuit(circuit.id)}
             >
-              <span class="text">
+              <span class="text guided-text">
                 <span class="row-name">{circuit.name[model.lang]}</span>
                 <span class="route">{circuit.route[model.lang]}</span>
               </span>
@@ -72,7 +72,7 @@
     {#if map.available}
       <div class="group" role="group" aria-labelledby="{uid}-maps">
         <h3 id="{uid}-maps" class="group-heading">{maps.maps}</h3>
-        <ul class="rows">
+        <ul class="rows" role="list">
           <li>
             <button
               type="button"
@@ -125,6 +125,7 @@
       align-items: baseline;
       justify-content: space-between;
       gap: var(--space-3);
+      padding-inline-end: calc(var(--panel-inset) + var(--space-5));
     }
     .column-head {
       flex: none;
@@ -177,6 +178,7 @@
     .row-name {
       overflow-wrap: anywhere;
       text-wrap: pretty;
+      font-weight: 500;
     }
     .route {
       color: var(--text-secondary);
@@ -185,10 +187,22 @@
       line-height: var(--lh-caption);
       text-wrap: pretty;
     }
+    /* The full route appears at the start of the lesson. */
+    .guided-text .route {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      text-wrap: wrap;
+    }
+    .circuit-choice[data-selected='true'] .row-name {
+      font-weight: 600;
+    }
     .circuit-choice[data-selected='true'] .route {
       color: inherit;
     }
-    /* The landmark count stands in the tree's count column; its noun is read, not shown. */
+    /* Counts stay on the same edge as their column heading, including on hover and focus. */
     .group-count {
       flex: none;
       align-self: flex-start;
@@ -219,13 +233,9 @@
     .circuit-choice[aria-current='true'] .chevron {
       color: inherit;
     }
-    /* A mouse sees the chevron on hover, focus or selection; touch always. A figure keeps the data edge at rest and gives its place to the chevron. */
+    /* Keep the chevron's gutter even when it is quiet, so it never takes the count's place. */
     @media (hover: hover) and (pointer: fine) {
       .chevron {
-        position: absolute;
-        top: 50%;
-        right: var(--panel-inset);
-        margin-top: -3px;
         opacity: 0;
       }
       .circuit-choice:hover:not([data-selected='true'], [aria-disabled='true']) {
@@ -238,9 +248,6 @@
       .circuit-choice:focus-visible .chevron,
       .circuit-choice[aria-current='true'] .chevron {
         opacity: 1;
-      }
-      .circuit-choice:is(:hover, :focus-visible) .group-count {
-        visibility: hidden;
       }
     }
     /* After the hover rule, which shares its weight: a pointer press tints the row at once. */

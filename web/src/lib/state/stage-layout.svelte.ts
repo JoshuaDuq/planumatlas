@@ -49,6 +49,7 @@ export function createStageLayout({
 }) {
   let visibleRect = $state.raw<Rect | null>(null);
   let hostSize = $state.raw<Size | null>(null);
+  let sheetRoom = $state.raw<Size | null>(null);
   let dock = $state.raw<Size>({ width: 0, height: 0 });
   let keyInset = $state.raw({ top: 0, right: 0 });
   let keySize = $state.raw<Size>({ width: 0, height: 0 });
@@ -227,7 +228,15 @@ export function createStageLayout({
     if (!host) return;
     host.style.setProperty('--key-top', `${keyInset.top}px`);
     host.style.setProperty('--key-right', `${keyInset.right}px`);
+    host.toggleAttribute('data-key-top', keyInset.top > 0);
     host.style.setProperty('--plate-left', `${leftBand()}px`);
+  }
+
+  /** The visible room at the sheet's destination. A drag leaves this value alone. */
+  function recordSheetRoom() {
+    if (!visibleRect || (sheetRoom && sameSize(sheetRoom, visibleRect))) return;
+    const { width, height } = visibleRect;
+    sheetRoom = { width, height };
   }
 
   /** Runs G3's fitting without signalling a refit; true when it changed the key band. */
@@ -255,6 +264,9 @@ export function createStageLayout({
     },
     get hostSize() {
       return hostSize;
+    },
+    get sheetRoom() {
+      return sheetRoom;
     },
     get dock() {
       return dock;
@@ -312,24 +324,28 @@ export function createStageLayout({
      */
     setViewport(rect: Rect, size: Size) {
       if (!size.width || !size.height) return;
+      const resized = !hostSize || !sameSize(hostSize, size);
       if (
+        !resized &&
         visibleRect &&
         visibleRect.x === rect.x &&
         visibleRect.y === rect.y &&
         visibleRect.width === rect.width &&
-        visibleRect.height === rect.height &&
-        hostSize &&
-        sameSize(hostSize, size)
+        visibleRect.height === rect.height
       ) {
         return;
       }
       visibleRect = rect;
       hostSize = size;
+      // On rotation the sheet can report its rest before the canvas reports its new size.
+      if (resized && sheetRoom) recordSheetRoom();
       writeDock();
       // A desktop resize reframes at once; a phone's sheet reframes when it settles on a detent
       // (viewport-chrome.js:721-722).
       if (fitKeys() && !media.phone) onDock?.();
     },
+
+    recordSheetRoom,
 
     /** The stage host, whose dock variables are written at once; returns the function that lets go. */
     attachHost(element: HTMLElement): () => void {

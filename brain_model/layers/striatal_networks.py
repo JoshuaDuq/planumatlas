@@ -12,7 +12,7 @@ from scipy import ndimage
 from ..labels.placement import placements
 from ..labels.volumes import label_box, validate_same_grid
 from ..sources import ROOT, declares
-from . import coordinate_spaces, landing, networks
+from . import landing, networks
 from .arterial_territories import grid_counts
 
 ATLAS_ID = "choi"
@@ -278,12 +278,6 @@ def composition_of_counts(counts):
     }
 
 
-def landing_record(config):
-    """The measured landing of registered maps on this brain; None on the template, which is that
-    measurement's reference, so no landing error was measured for maps registered onto it."""
-    return None if coordinate_spaces.template_space(config) else landing.read(config)
-
-
 def compose(config, definition, regions, grids, unit_grids):
     """Each volumetric region's striatal network shares, from its voxels on the grid that defines it.
 
@@ -302,7 +296,7 @@ def compose(config, definition, regions, grids, unit_grids):
             padded = np.zeros((table.shape[0], width), np.int64)
             padded[:, :table.shape[1]] = table
             tables.setdefault(key, []).append(padded)
-    record = landing_record(config)
+    record = landing.measured(config)
     boxes = {}
     for region in regions:
         if region["atlas"] in grids and region["kind"] != "cortex" and region.get("source_label_id") is not None:
@@ -387,7 +381,7 @@ def cut_atlas(definition):
 
 def metadata(config, definition):
     report = json.loads(report_path(config).read_text())
-    record = landing_record(config)
+    record = landing.measured(config)
     return {
         "id": ATLAS_ID,
         "label": definition["label"],

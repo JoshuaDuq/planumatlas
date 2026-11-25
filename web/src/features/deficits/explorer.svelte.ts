@@ -33,8 +33,6 @@ export interface DeficitsDeps {
   clinicalLinks?: {
     /** Opens the stage's Lesion tool. */
     simulateLesion(): void;
-    /** Opens the selected region's stroke cases, or says to select one; null where no cohort is published. */
-    showStrokeCases: (() => void) | null;
   };
 }
 

@@ -296,10 +296,14 @@ export function defineEngineContract(
         const { sections } = world().engine;
         assert.equal(sections.volumesLoaded, false);
         assert.equal(sections.display, null);
+        assert.equal(sections.labelBox, null);
         assert.equal(sections.mriWindowLink(), null);
         assert.throws(() => sections.setWindow(100, 200), RangeError);
         await sections.load();
         assert.equal(sections.volumesLoaded, true);
+        const { min, max } = sections.labelBox!;
+        for (const axis of [0, 1, 2])
+          assert.ok(min[axis]! < max[axis]!, `the box spans axis ${axis}`);
         const display = sections.display!;
         const published = sections.publishedWindow!;
         assert.deepEqual(published, { center: display.windowCenter, width: display.windowWidth });
@@ -1290,6 +1294,31 @@ export function defineEngineContract(
         assert.deepEqual([sections.state.reverse, sections.state.overlay], [true, false]);
       });
 
+      it('draws one overlay at a time on the linked MRI: the segmentation or the cut faces’ colours', () => {
+        const { sections } = world().engine;
+        const shown = () => [sections.state.overlay, sections.state.colours];
+        assert.deepEqual(shown(), [false, false]);
+        sections.setDisplay({ colours: true });
+        assert.deepEqual(shown(), [false, true]);
+        sections.setDisplay({ overlay: true });
+        assert.deepEqual(shown(), [true, false]);
+        sections.setDisplay({ reverse: false });
+        assert.deepEqual(shown(), [true, false], 'another option leaves the overlay alone');
+        refuses(
+          () => sections.setDisplay({ overlay: true, colours: true }),
+          TypeError,
+          'The linked MRI draws one overlay at a time.',
+        );
+        refuses(
+          () => sections.setDisplay({ colours: 1 as never }),
+          TypeError,
+          'Section display options must be boolean.',
+        );
+        assert.deepEqual(shown(), [true, false]);
+        sections.setDisplay({ overlay: false, colours: false });
+        assert.deepEqual(shown(), [false, false]);
+      });
+
       it('labels the cut with the atlas the model shows', async () => {
         const { engine, atlas, otherAtlas } = world();
         const { sections, model } = engine;
@@ -1414,6 +1443,31 @@ export function defineEngineContract(
         await sections.setSurfaceColor('atlas');
         await sections.setSurfaceColor('cerebellar');
         assert.equal(model.settings.surfaceColor, 'cerebellar');
+      });
+
+      it('colours the cortex by its thickness once the shown atlas carries it, and keeps it across atlases', async () => {
+        const { engine } = await fresh();
+        const { sections, model } = engine;
+        assert.throws(() => model.setSurfaceColor('thickness'), /thickness must load/);
+        await sections.setSurfaceColor('thickness');
+        assert.equal(model.settings.surfaceColor, 'thickness');
+        const other = model.manifest.atlases.find(({ id }) => id !== model.settings.atlas)!.id;
+        await model.setAtlas(other);
+        assert.deepEqual(
+          [model.settings.atlas, model.settings.surfaceColor],
+          [other, 'thickness'],
+          'the other atlas comes with its thickness',
+        );
+      });
+
+      it('colours the cortex by its sulcal depth at once, downloading nothing, on any atlas', async () => {
+        const { engine } = await fresh();
+        const { model } = engine;
+        model.setSurfaceColor('sulc');
+        assert.equal(model.settings.surfaceColor, 'sulc');
+        const other = model.manifest.atlases.find(({ id }) => id !== model.settings.atlas)!.id;
+        await model.setAtlas(other);
+        assert.deepEqual([model.settings.atlas, model.settings.surfaceColor], [other, 'sulc']);
       });
 
       it('stays loading while the MRI colour downloads, even when the cut is redrawn meanwhile', async () => {
@@ -1772,6 +1826,32 @@ export function defineEngineContract(
         assert.ok(Number.isNaN(fa([0, 0, 400])));
         const middle = fa([0, 0, 0]);
         assert.ok(middle >= 0 && middle <= 1, `FA ${middle}`);
+      });
+
+      it('takes parallel sections in one pass as it takes each alone, and refuses planes that are not parallel', async () => {
+        const { engine } = world();
+        const { tracts } = engine;
+        const plane = { center: [0, 0, 0], normal: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0] } as const;
+        if (engine.model.manifest.anatomy.id !== tracts.anatomy) {
+          assert.throws(() => tracts.onPlanes([plane]));
+          return;
+        }
+        await tracts.setActive(true);
+        tracts.setOverlay(true);
+        const sections = [-26, -13, 0, 13].map((z) => ({ ...plane, center: [0, 0, z] as const }));
+        const together = tracts.onPlanes(sections);
+        sections.forEach((section, n) => {
+          const alone = tracts.onPlane(section);
+          assert.deepEqual([...together[n]!.colors], [...alone.colors]);
+          assert.equal(together[n]!.ends.length, alone.ends.length);
+          together[n]!.ends.forEach((value, k) =>
+            assert.ok(Math.abs(value - alone.ends[k]!) < 1e-4),
+          );
+        });
+        assert.ok(together.some((pieces) => pieces.colors.length > 0));
+        const coronal = { ...plane, normal: [0, 1, 0], u: [1, 0, 0], v: [0, 0, 1] } as const;
+        assert.throws(() => tracts.onPlanes([plane, coronal]), RangeError);
+        assert.throws(() => tracts.onPlanes([plane, { ...plane, center: [5, 0, 0] }]), RangeError);
       });
     });
 

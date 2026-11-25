@@ -9,6 +9,7 @@ const COLOUR_GROUPS: readonly (readonly [string | null, readonly SurfaceColor[]]
   ['networks', ['network', 'cab-np']],
   ['subcortical', ['striatal', 'cerebellar']],
   ['vascular', ['territory']],
+  ['morphometry', ['thickness', 'sulc']],
 ];
 
 interface NamedEntry {
@@ -59,12 +60,16 @@ export function colourGroups({
   territories,
   striatal,
   cerebellar,
+  thickness,
+  sulc,
 }: {
   networks?: unknown;
   cabNp?: unknown;
   territories?: unknown;
   striatal?: unknown;
   cerebellar?: unknown;
+  thickness?: unknown;
+  sulc?: unknown;
 }): [string | null, SurfaceColor[]][] {
   const published: Partial<Record<SurfaceColor, boolean>> = {
     network: Boolean(networks),
@@ -72,6 +77,8 @@ export function colourGroups({
     territory: Boolean(territories),
     striatal: Boolean(striatal),
     cerebellar: Boolean(cerebellar),
+    thickness: Boolean(thickness),
+    sulc: Boolean(sulc),
   };
   return COLOUR_GROUPS.map((entry): [string | null, SurfaceColor[]] => [
     entry[0],

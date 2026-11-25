@@ -83,6 +83,8 @@
 
   const uid = $props.id();
   const hemisphereLabelId = `hemisphere-label-${uid}`;
+  const visibilityLabelId = `visibility-label-${uid}`;
+  const viewAidsLabelId = `view-aids-label-${uid}`;
   const surfaceId = `display-surface-${uid}`;
   const surfaceHintId = `display-surface-hint-${uid}`;
   const explodeHintId = `display-explode-hint-${uid}`;
@@ -121,8 +123,8 @@
   options={sides}
   bind:value={() => hemisphere, onHemisphere}
 />
-<div class="visibility">
-  <p class="stage-field-label section-label">{copy.visibilitySection}</p>
+<div class="display-group" role="group" aria-labelledby={visibilityLabelId}>
+  <p class="stage-field-label section-label" id={visibilityLabelId}>{copy.visibilitySection}</p>
   <label class="check">
     <input
       type="checkbox"
@@ -132,7 +134,7 @@
     <span>{copy.showCortex}</span>
   </label>
   {#if cortexVisible}
-    <div class="opacity">
+    <div class="cortex-controls">
       <RangeField
         label={copy.cortexOpacity}
         value={cortexOpacity}
@@ -142,15 +144,17 @@
         format={(fraction) => percent(fraction, lang)}
         oninput={onCortexOpacity}
       />
-      <label class="stage-field-label surface-label" for={surfaceId} data-tooltip={copy.surfaceHint}
-        >{surfaceCopy.surface}</label
-      >
-      <Select
-        id={surfaceId}
-        options={surfaces}
-        describedby={surfaceHintId}
-        bind:value={() => cortexSurface, (surface) => onCortexSurface(surface as CortexSurface)}
-      />
+      <div class="surface-field">
+        <label class="stage-field-label" for={surfaceId} data-tooltip={copy.surfaceHint}
+          >{surfaceCopy.surface}</label
+        >
+        <Select
+          id={surfaceId}
+          options={surfaces}
+          describedby={surfaceHintId}
+          bind:value={() => cortexSurface, (surface) => onCortexSurface(surface as CortexSurface)}
+        />
+      </div>
       <span id={surfaceHintId} class="visually-hidden">{copy.surfaceHint}</span>
     </div>
   {/if}
@@ -173,8 +177,8 @@
     </label>
   {/if}
 </div>
-<div class="view-aids">
-  <p class="stage-field-label section-label">{copy.viewAidsSection}</p>
+<div class="display-group" role="group" aria-labelledby={viewAidsLabelId}>
+  <p class="stage-field-label section-label" id={viewAidsLabelId}>{copy.viewAidsSection}</p>
   {#if explodable}
     <label class="check" data-tooltip={copy.explodeHint}>
       <input
@@ -222,22 +226,35 @@
       font-size: var(--text-stage);
       white-space: normal;
     }
-    /* Two small sections (visibility and view aids), each within working-memory limits. */
-    .visibility,
-    .view-aids {
-      margin-top: var(--space-3);
-      padding-top: var(--space-3);
+    .display-group {
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
       border-top: 1px solid var(--overlay-border);
     }
     .section-label {
-      margin-bottom: var(--space-1);
+      margin: 0;
+      color: var(--text-primary);
+      font-weight: 600;
     }
     /* Indented to the checkbox's words: a 16px box and its 8px gap. */
-    .opacity {
+    .cortex-controls {
       padding: 0 0 var(--space-2) var(--space-6);
     }
-    .surface-label {
-      margin-top: var(--space-2);
+    .surface-field {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-1) var(--space-2);
+      margin-top: var(--space-1);
+    }
+    .surface-field > label {
+      margin: 0;
+    }
+    .surface-field > :global(select) {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+      max-width: 100%;
     }
     .check {
       display: flex;

@@ -158,7 +158,7 @@ test('the caveat comes before any share, and each share is of the sphere, with t
   expect(text()).not.toContain('Template not stated');
 });
 
-test('on the MNI template its own space is placed by scaling, and no other template is offered', async () => {
+test('on the MNI template a landing in its own space or SPM12 is a location on an average brain', async () => {
   const { field: _field, registration: _registration, ...record } = spaces.spaces[0];
   const native: CoordinateSpaces = {
     ...spaces,
@@ -179,15 +179,22 @@ test('on the MNI template its own space is placed by scaling, and no other templ
           ],
         },
       },
+      { ...spaces.spaces[0], id: 'spm12', label: 'SPM12 (TPM)' },
     ],
     unstated: { reads_as: 'mni152nlin2009casym', alternatives: [] },
   };
   await loadTemplateCopy();
   await mount('en', 'unstated', undefined, undefined, undefined, native);
-  expect(text()).toContain('A location on an average brain, placed by scaling alone');
+  expect(text()).toContain('A location on an average brain: not anyone’s own peak');
   expect(text()).not.toContain('A template location registered onto this brain');
   expect(text()).toContain('Template not stated: read as MNI152NLin2009cAsym.');
   expect(text()).not.toContain('Read in another template');
+  cleanup();
+  stop();
+  await mount('en', 'spm12', undefined, undefined, undefined, native);
+  expect(text()).toContain('SPM12 (TPM)');
+  expect(text()).toContain('A location on an average brain: not anyone’s own peak');
+  expect(text()).not.toContain('A template location registered onto this brain');
 });
 
 test('a section whose atlas the sphere does not reach is left out', async () => {

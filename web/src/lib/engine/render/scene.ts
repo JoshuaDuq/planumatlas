@@ -1,5 +1,5 @@
 import { Color, NeutralToneMapping, NoToneMapping, PerspectiveCamera, Scene } from 'three';
-import type { Box3, Object3D, Vector3 } from 'three';
+import type { Box3, Object3D, Plane, Vector3 } from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { token } from './tokens.ts';
 import { createAnatomicalLighting } from './lighting.ts';
@@ -64,6 +64,10 @@ export interface SceneCallbacks {
 export interface Outlined {
   selected?: readonly Object3D[];
   hovered?: readonly Object3D[];
+  /** The cut's planes, which the outline's depth and mask are clipped by as the anatomy is. */
+  planes?: readonly Plane[];
+  /** Drawn on the stage but left out of the outline's depth and mask. */
+  leaveOut?: readonly Object3D[];
 }
 
 export interface MoveOptions {

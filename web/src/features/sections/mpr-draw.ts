@@ -5,36 +5,15 @@
  */
 import { decimal } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
-import type { MprPlane, PlaneFrame, PlaneTracts, Vec3 } from '../../lib/engine/api.ts';
+import type { MprPlane, PlaneFrame, PlaneTracts, SliceCrop, Vec3 } from '../../lib/engine/api.ts';
 import type { Language } from '../../lib/types/index.ts';
-import { sideConvention } from './mpr-words.ts';
+import { AXES } from './mpr-geometry.ts';
+import { mprCopy, sideConvention } from './mpr-words.ts';
 
-/** The crosshair axis each plane's slider moves (sections.js:17). */
-export const AXES: Readonly<Record<MprPlane, 0 | 1 | 2>> = { sagittal: 0, coronal: 1, axial: 2 };
-export const PLANES = ['sagittal', 'coronal', 'axial'] as const satisfies readonly MprPlane[];
-
-/** The coordinate limit of the MRI's slider and the keys' clamp (sections.js:289). */
-export const COORDINATE_LIMIT = 128;
+export { AXES, COORDINATE_LIMIT, PLANES, pointOnPlane } from './mpr-geometry.ts';
 
 const dot = (a: readonly number[], b: readonly number[]) =>
   a[0]! * b[0]! + a[1]! * b[1]! + a[2]! * b[2]!;
-
-/**
- * The point under a click at (`xFraction`, `yFraction`) of the picture, from its top-left corner
- * (coordinates.js pointOnFrame). `fieldOfView` is the side of the square the frame spans.
- */
-export function pointOnPlane(
-  frame: PlaneFrame,
-  xFraction: number,
-  yFraction: number,
-  fieldOfView: number,
-): Vec3 {
-  const across = (xFraction - 0.5) * fieldOfView;
-  const up = (0.5 - yFraction) * fieldOfView;
-  return [0, 1, 2].map(
-    (axis) => frame.center[axis]! + frame.u[axis]! * across + frame.v[axis]! * up,
-  ) as unknown as Vec3;
-}
 
 /** NiiVue's viridis, as the tract MRI drew FA: its four stops, linear between them over 256 levels. */
 const VIRIDIS_STOPS = [
@@ -58,20 +37,21 @@ export const VIRIDIS: readonly (readonly [number, number, number])[] = Array.fro
 
 /**
  * FA on a slice as its viridis level, 0–255 over FA 0–1, each pixel at its centre as the engine samples
- * the slice; −1 where FA has no value. Kept with the plane, so a new opacity or window does not read FA
- * again (SECT-38).
+ * the slice; −1 where FA has no value or outside the crop. Kept with the plane, so a new opacity or
+ * window does not read FA again (SECT-38).
  */
 export function faLevels(
   frame: PlaneFrame,
   size: number,
   fieldOfView: number,
   fa: (point: Vec3) => number,
+  crop: SliceCrop = { x: 0, y: 0, width: size, height: size },
 ): Int16Array {
-  const levels = new Int16Array(size * size);
+  const levels = new Int16Array(size * size).fill(-1);
   const step = fieldOfView / size;
   const point: [number, number, number] = [0, 0, 0];
-  for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++) {
+  for (let y = Math.max(0, crop.y); y < Math.min(size, crop.y + crop.height); y++)
+    for (let x = Math.max(0, crop.x); x < Math.min(size, crop.x + crop.width); x++) {
       const across = (x + 0.5) * step - fieldOfView / 2;
       const up = fieldOfView / 2 - (y + 0.5) * step;
       for (let axis = 0; axis < 3; axis++)
@@ -139,22 +119,34 @@ export function crosshairOnPlane(
   ];
 }
 
+export type { SliceCrop as Crop } from '../../lib/engine/api.ts';
+
 /**
  * Draws the slice alone: the crosshair and letters are marked over it at screen resolution, so they
- * stay one pixel and legible however small the panel is. The canvas takes the slice's size, which clears it.
+ * stay one pixel and legible however small the panel is. The canvas takes the crop's size, which
+ * clears it; what the crop takes beyond the sampled square stays transparent.
  */
 export function drawSlice(
   canvas: HTMLCanvasElement,
   pixels: Uint8ClampedArray,
   size: number,
+  crop: SliceCrop = { x: 0, y: 0, width: size, height: size },
 ): void {
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = crop.width;
+  canvas.height = crop.height;
   // The MRI keeps all source intensities, including voxels no label covers.
   for (let index = 3; index < pixels.length; index += 4) pixels[index] = 255;
   canvas
     .getContext('2d')!
-    .putImageData(new ImageData(pixels as Uint8ClampedArray<ArrayBuffer>, size, size), 0, 0);
+    .putImageData(
+      new ImageData(pixels as Uint8ClampedArray<ArrayBuffer>, size, size),
+      -crop.x,
+      -crop.y,
+      crop.x,
+      crop.y,
+      crop.width,
+      crop.height,
+    );
 }
 
 export interface PanelMarks {
@@ -162,6 +154,8 @@ export interface PanelMarks {
   frame: PlaneFrame;
   fieldOfView: number;
   crosshair: Vec3;
+  /** The crosshair is drawn only as the panel shows it. */
+  crosshairShown: boolean;
   lang: Language;
 }
 
@@ -170,7 +164,7 @@ export interface PanelMarks {
  * an axial or coronal panel and the plane's offset in the bitmap.
  */
 export function annotatedCopy(slice: HTMLCanvasElement, marks: PanelMarks): HTMLCanvasElement {
-  const { plane, frame, fieldOfView, crosshair, lang } = marks;
+  const { plane, frame, fieldOfView, crosshair, crosshairShown, lang } = marks;
   const size = slice.width;
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -178,20 +172,22 @@ export function annotatedCopy(slice: HTMLCanvasElement, marks: PanelMarks): HTML
   const context = canvas.getContext('2d')!;
   context.drawImage(slice, 0, 0);
 
-  const [across, down] = crosshairOnPlane(frame, crosshair, fieldOfView);
-  const x = across * size;
-  const y = down * size;
-  context.beginPath();
-  context.moveTo(x, 0);
-  context.lineTo(x, size);
-  context.moveTo(0, y);
-  context.lineTo(size, y);
-  context.strokeStyle = CROSSHAIR_RING;
-  context.lineWidth = 3;
-  context.stroke();
-  context.strokeStyle = CROSSHAIR_INK;
-  context.lineWidth = 1;
-  context.stroke();
+  if (crosshairShown) {
+    const [across, down] = crosshairOnPlane(frame, crosshair, fieldOfView);
+    const x = across * size;
+    const y = down * size;
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, size);
+    context.moveTo(0, y);
+    context.lineTo(size, y);
+    context.strokeStyle = CROSSHAIR_RING;
+    context.lineWidth = 3;
+    context.stroke();
+    context.strokeStyle = CROSSHAIR_INK;
+    context.lineWidth = 1;
+    context.stroke();
+  }
 
   context.textAlign = 'center';
   context.font = '600 15px ui-sans-serif, system-ui, sans-serif';
@@ -213,13 +209,13 @@ export function annotatedCopy(slice: HTMLCanvasElement, marks: PanelMarks): HTML
   const convention = sideConvention(frame.edges);
   context.textAlign = 'left';
   if (convention) {
-    const mark = t(lang, 'mpr').conventionMarks[convention];
+    const mark = mprCopy(lang).conventionMarks[convention];
     context.font = '600 13px ui-sans-serif, system-ui, sans-serif';
     context.strokeText(mark, 10, 22);
     context.fillText(mark, 10, 22);
   }
 
-  const annotation = `${t(lang, 'mpr').labels[plane]} ${decimal(crosshair[AXES[plane]], 1, lang, { signed: true })} mm`;
+  const annotation = `${mprCopy(lang).labels[plane]} ${decimal(crosshair[AXES[plane]], 1, lang, { signed: true })} mm`;
   context.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
   context.strokeText(annotation, 10, size - 12);
   context.fillText(annotation, 10, size - 12);

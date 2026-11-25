@@ -1,15 +1,23 @@
 import {
   BufferGeometry,
+  DoubleSide,
   Float32BufferAttribute,
   FrontSide,
   Group,
   Mesh,
   NearestFilter,
+  Plane,
   Scene,
   UnsignedByteType,
   Vector2,
 } from 'three';
-import type { Object3D, PerspectiveCamera, WebGLRenderer, WebGLRenderTarget } from 'three';
+import type {
+  Object3D,
+  PerspectiveCamera,
+  ShaderMaterial,
+  WebGLRenderer,
+  WebGLRenderTarget,
+} from 'three';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { token } from './tokens.ts';
 import { paintOutlineEdges, sameMeshSet } from './outline-edges.ts';
@@ -17,9 +25,19 @@ import { withOutlineOccluders } from './outline-occluders.ts';
 import { outlineMaskScale } from './quality.ts';
 import type { Outlined } from './scene.ts';
 
+/**
+ * How far past the cut the outline's depth keeps the anatomy, in world metres: the caps lie on the
+ * plane itself, and clipped exactly there they would come and go with the float error.
+ */
+const CAP_DEPTH_SLACK_M = 1e-4;
+
 /** OutlinePass with its mask and depth drawn at `maskScale` of the frame it is sized to. */
 export class ScaledOutlinePass extends OutlinePass {
   maskScale = 1;
+  /** The cut's planes (`Outlined.planes`), read as each frame draws: a cut moves them in place. */
+  planes: readonly Plane[] = [];
+  /** Hidden while the pass draws its depth and mask (`Outlined.leaveOut`). */
+  leaveOut: readonly Object3D[] = [];
 
   override setSize(width: number, height: number): void {
     super.setSize(width * this.maskScale, height * this.maskScale);
@@ -78,10 +96,23 @@ export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): Ou
     const depth = pass.renderTargetDepthBuffer.texture;
     depth.type = UnsignedByteType;
     depth.minFilter = depth.magFilter = NearestFilter;
+    clipMask(pass.prepareMaskMaterial);
   }
   for (const pass of [halo, core]) {
     const render = pass.render.bind(pass);
-    pass.render = (...args) => withOutlineOccluders(pass, () => render(...args));
+    pass.render = (...args) => {
+      for (const [index, plane] of pass.planes.entries()) {
+        const depth = pass.depthMaterial.clippingPlanes![index]!.copy(plane);
+        depth.constant += CAP_DEPTH_SLACK_M;
+      }
+      const shown = pass.leaveOut.filter((object) => object.visible);
+      for (const object of shown) object.visible = false;
+      try {
+        return withOutlineOccluders(pass, () => render(...args));
+      } finally {
+        for (const object of shown) object.visible = true;
+      }
+    };
   }
   const renderCore = core.render.bind(core);
   // A selection with no hover draws the ring and the line on one silhouette. The second pass
@@ -109,17 +140,58 @@ export function createOutlinePasses(scene: Scene, camera: PerspectiveCamera): Ou
   return { halo, core };
 }
 
-/** Selection gets the wide ring over the fine line; hover gets the fine line alone. */
+/**
+ * Let OutlinePass's mask shader honour `clippingPlanes`: a ShaderMaterial is clipped only when it
+ * asks to be and carries three's clipping chunks, which are empty while no plane is set.
+ */
+function clipMask(material: ShaderMaterial): void {
+  material.clipping = true;
+  material.vertexShader = material.vertexShader
+    .replace('void main() {', '#include <clipping_planes_pars_vertex>\nvoid main() {')
+    .replace(
+      '#include <project_vertex>',
+      '#include <project_vertex>\n#include <clipping_planes_vertex>',
+    );
+  material.fragmentShader = material.fragmentShader.replace(
+    'void main() {',
+    '#include <clipping_planes_pars_fragment>\nvoid main() {\n#include <clipping_planes_fragment>',
+  );
+  if (
+    !material.vertexShader.includes('<clipping_planes_vertex>') ||
+    !material.fragmentShader.includes('<clipping_planes_fragment>')
+  )
+    throw new Error('OutlinePass changed its mask shader; the cut can no longer clip it.');
+}
+
+/**
+ * Selection gets the wide ring over the fine line; hover gets the fine line alone.
+ *
+ * On a cut the masks are clipped as the anatomy is, and the caps hide what lies behind them in the
+ * depth, as on screen; a stencil cap is a quad as wide as the plane, so it is left out. The depth is
+ * drawn from both sides: front faces alone let a selected gyrus's white-matter side show through the
+ * cut, and it was ringed there.
+ */
 export function outline(
   passes: readonly OutlinePasses[],
-  { selected = [], hovered = [] }: Outlined,
+  { selected = [], hovered = [], planes = [], leaveOut = [] }: Outlined,
 ) {
   const lined = [...new Set([...selected, ...hovered])];
+  const depthSide = planes.length ? DoubleSide : FrontSide;
   for (const { halo, core } of passes) {
     halo.selectedObjects = [...selected];
     core.selectedObjects = lined;
     halo.enabled = selected.length > 0;
     core.enabled = lined.length > 0;
+    for (const pass of [halo, core]) {
+      pass.planes = planes;
+      pass.leaveOut = leaveOut;
+      pass.prepareMaskMaterial.clippingPlanes = [...planes];
+      pass.depthMaterial.clippingPlanes = planes.map(() => new Plane());
+      if (pass.depthMaterial.side !== depthSide) {
+        pass.depthMaterial.side = depthSide;
+        pass.depthMaterial.needsUpdate = true;
+      }
+    }
   }
 }
 

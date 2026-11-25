@@ -1,4 +1,5 @@
-"""Group-mean resting functional connectivity on Planum's Destrieux and Julich-Brain atlases (plan 4.1).
+"""Group-mean resting functional connectivity on Planum's Destrieux and Julich-Brain atlases (plan 4.1),
+and on Schaefer's 200 parcels sorted by Yeo's seven networks, the network matrix (2026-11-24).
 
 For each atlas in config/functional-connectivity.yaml, every subject's concatenated-series Pearson
 matrix from Domhof et al.'s archive is Fisher-z transformed, averaged and transformed back. Rows are
@@ -10,6 +11,7 @@ by sha256.
     uv run python scripts/derive_functional_connectivity.py
 """
 
+import csv
 import io
 import json
 import sys
@@ -19,6 +21,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 from nibabel.freesurfer.io import read_annot, read_geometry
+from scipy.stats import spearmanr
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from brain_model.layers.neuropsych_domains import ATLAS_ANNOTATIONS
@@ -131,6 +134,110 @@ def neighbour_share(names, r, kept, touching, top):
     return shares
 
 
+def centroid_table(path):
+    """CBIG's centroid table: each parcel's name and RAS centroid, in label order."""
+    with open(path, newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if [int(row["ROI Label"]) for row in rows] != list(range(1, len(rows) + 1)):
+        raise ValueError(f"{path}: labels are not 1 to {len(rows)} in order")
+    return [(row["ROI Name"], (int(row["R"]), int(row["A"]), int(row["S"]))) for row in rows]
+
+
+def seven_network_names(seventeen, seven):
+    """
+    Each 17-network parcel's name in the 7-network version, matched by centroid. The two are the same
+    parcels; a centroid matching none or several, or a side that changes, stops the run.
+    """
+    by_centroid = {}
+    for name, centroid in seven:
+        by_centroid.setdefault(centroid, []).append(name)
+    names = []
+    for name, centroid in seventeen:
+        match = by_centroid.get(centroid, [])
+        if len(match) != 1 or match[0].split("_")[1] != name.split("_")[1]:
+            raise ValueError(f"{name}: no single 7-network parcel at {centroid}")
+        names.append(match[0])
+    if len(set(names)) != len(names):
+        raise ValueError("Two 17-network parcels share a 7-network parcel")
+    return names
+
+
+def order_check(r, centroids, permutations, seed):
+    """Spearman's rho between group r and centroid distance, against `permutations` random row orders."""
+    upper = np.triu_indices(len(r), 1)
+    values = r[upper]
+    distance = lambda points: np.linalg.norm(points[:, None] - points[None], axis=2)[upper]
+    rho = spearmanr(values, distance(centroids)).statistic
+    rng = np.random.default_rng(seed)
+    null = [spearmanr(values, distance(centroids[rng.permutation(len(r))])).statistic for _ in range(permutations)]
+    return {"rho": round(float(rho), 4), "null_min": round(float(min(null)), 4),
+            "null_max": round(float(max(null)), 4), "permutations": permutations, "seed": seed,
+            "passed": bool(rho < min(null))}
+
+
+def block_means(r, labels, networks):
+    """The Fisher-z mean r between each pair of networks, self pairs left out, back to r."""
+    labels = np.asarray(labels)
+    small = [network for network in networks if (labels == network).sum() < 2]
+    if small:
+        raise ValueError(f"{small}: fewer than two parcels, so no mean within")
+    z = r.astype(float)
+    np.fill_diagonal(z, np.nan)
+    z = np.arctanh(z)
+    return [[float(np.tanh(np.nanmean(z[np.ix_(labels == a, labels == b)]))) for b in networks] for a in networks]
+
+
+def derive_network_matrix(definition, subjects, matrix):
+    spec = definition["network_matrix"]
+    name, digest = spec["archive"]
+    path = CACHE / name
+    if sha256(path) != digest:
+        raise ValueError(f"{name} does not match its pinned sha256")
+    seventeen = centroid_table(ROOT / spec["centroids"]["seventeen"])
+    seven_table = centroid_table(ROOT / spec["centroids"]["seven"])
+    seven = seven_network_names(seventeen, seven_table)
+    seven_label = {name: label for label, (name, _) in enumerate(seven_table, start=1)}
+    with zipfile.ZipFile(path) as bundle:
+        r, present = group_mean(bundle, Path(name).stem, matrix, subjects)
+    if r.shape != (len(seven), len(seven)) or np.isnan(r[~np.eye(len(r), dtype=bool)]).any() or (present != subjects).any():
+        raise ValueError(f"{name}: not a complete {len(seven)}-parcel matrix over {subjects} subjects")
+    np.fill_diagonal(r, 1.0)
+    order = order_check(r, np.array([centroid for _, centroid in seventeen], float), **spec["order_check"])
+    print("network matrix row order:", json.dumps(order))
+    if not order["passed"]:
+        raise ValueError("The rows do not fall off with distance: their order is not the parcels'")
+    networks = spec["networks"]
+    labels = [name.split("_")[2] for name in seven]
+    if set(labels) != set(networks):
+        raise ValueError(f"Networks {sorted(set(labels))} are not {networks}")
+    blocks = block_means(r, labels, networks)
+    within = [blocks[k][k] > max(blocks[k][j] for j in range(len(networks)) if j != k) for k in range(len(networks))]
+    values = r[np.triu_indices(len(r), 1)]
+    top = float(np.percentile(values, 99))
+    step = spec["scale_step"]
+    for network, block, passed in zip(networks, blocks, within):
+        print(f"  {network:12s} within {block[networks.index(network)]:.3f}  strongest other "
+              f"{max(v for v, other in zip(block, networks) if other != network):.3f}  {'pass' if passed else 'FAIL'}")
+    return {
+        "archive": name,
+        "seventeen": [name for name, _ in seventeen],
+        "seven": seven,
+        # Each row's label in the 7-network order: network by network, left then right.
+        "seven_labels": [seven_label[name] for name in seven],
+        "r": [[round(float(value), 4) for value in row] for row in r],
+        "order_check": order,
+        "networks": networks,
+        "blocks": [[round(value, 4) for value in row] for row in blocks],
+        "within_exceeds": dict(zip(networks, within)),
+        "scale": [0, round(float(np.ceil(top / step) * step), 2)],
+        "measured": {
+            "r_percentiles": {str(q): round(float(np.percentile(values, q)), 4) for q in (1, 5, 25, 50, 75, 95, 99)},
+            "r_negative_share": round(float((values < 0).mean()), 4),
+            "pairs": int(values.size),
+        },
+    }
+
+
 def main():
     definition = yaml.safe_load(DEFINITION.read_text())
     subjects = definition["cohort"]["people"]
@@ -182,6 +289,8 @@ def main():
             failures.append(atlas)
     if failures:
         print("Not written, validation failed:", ", ".join(failures))
+    result["network_matrix"] = derive_network_matrix(definition, subjects, definition["files"]["matrix"])
+    result["derivation"]["files"][result["network_matrix"]["archive"]] = definition["network_matrix"]["archive"][1]
     OUTPUT.write_text(json.dumps(result, separators=(",", ":"), allow_nan=False) + "\n")
 
 

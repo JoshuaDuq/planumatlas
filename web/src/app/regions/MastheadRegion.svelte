@@ -305,6 +305,8 @@
           territories: model.manifest.arterial_territories,
           striatal: model.manifest.striatal_networks,
           cerebellar: model.manifest.cerebellar_functions,
+          thickness: model.manifest.cortical_thickness,
+          sulc: model.manifest.appearance.field_ranges?.['_SULC'],
         }}
         anatomy={model.manifest.anatomy}
         anatomies={world.anatomies}

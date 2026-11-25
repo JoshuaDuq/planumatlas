@@ -69,10 +69,11 @@ myst_heading_anchors = 4
 myst_substitutions = {"release": release}
 
 # ---------------------------------------------------------------------------
-# Figures: numbered per page and captioned as in a journal ("Fig. 1 | Title.")
+# Link check
 # ---------------------------------------------------------------------------
-numfig = True
-numfig_format = {"figure": "Fig. %s |", "table": "Table %s |"}
+# A legend links the view it shows. The viewer keeps that view after the "#" of its address, so the
+# fragment is state to restore, not an anchor to find in the page.
+linkcheck_anchors_ignore_for_url = [r"https://planumatlas\.com/"]
 
 # ---------------------------------------------------------------------------
 # HTML output: furo, coloured from the viewer's own tokens (web/src/styles/tokens.css)
@@ -178,3 +179,36 @@ html_theme_options = {
 
 html_context = {"viewer_url": "https://planumatlas.com/"}
 
+
+# ---------------------------------------------------------------------------
+# Figures: numbered per page, captioned as in a journal ("Fig. 1 | Title.") and drawn in both themes
+# ---------------------------------------------------------------------------
+def journal_figures(app, doctree):
+    """Number each page's figures from 1 and give each `-light.webp` image its `-dark.webp` twin.
+
+    Sphinx's own numbering (`numfig`) counts figures across the whole site, so a page's second
+    figure would not be its Fig. 2. A page names the light image once, so the figure is numbered
+    once; furo's `only-light` and `only-dark` classes show the image of the theme in use.
+    scripts/figures.mjs writes both files.
+    """
+    from docutils import nodes
+
+    for number, figure in enumerate(doctree.findall(nodes.figure), start=1):
+        for caption in figure.findall(nodes.caption):
+            caption.insert(
+                0, nodes.inline("", f"Fig. {number} | ", classes=["caption-number"])
+            )
+        for image in list(figure.findall(nodes.image)):
+            if not image["uri"].endswith("-light.webp"):
+                continue
+            dark = image.deepcopy()
+            dark["uri"] = image["uri"].removesuffix("-light.webp") + "-dark.webp"
+            image["classes"].append("only-light")
+            dark["classes"].append("only-dark")
+            image.parent.insert(image.parent.index(image) + 1, dark)
+
+
+def setup(app):
+    # Before Sphinx collects the images (priority 500), so the twin is copied with the build.
+    app.connect("doctree-read", journal_figures, priority=400)
+    return {"parallel_read_safe": True, "parallel_write_safe": True}

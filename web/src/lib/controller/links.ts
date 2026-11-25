@@ -171,6 +171,8 @@ export function createLinks({
       ...(model.manifest.arterial_territories ? ['territory'] : []),
       ...(model.manifest.striatal_networks ? ['striatal'] : []),
       ...(model.manifest.cerebellar_functions ? ['cerebellar'] : []),
+      ...(model.manifest.cortical_thickness ? ['thickness'] : []),
+      ...(model.manifest.appearance.field_ranges?.['_SULC'] ? ['sulc'] : []),
     ]),
     functions: {
       has: (id: string) => functions.has(id) || validComparison(domains, id),

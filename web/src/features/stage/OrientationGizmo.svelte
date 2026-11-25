@@ -18,6 +18,7 @@
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import type { DockCommands } from './dock-commands.ts';
+  import './stage-vars.css';
 
   interface Props {
     engine: Pick<Engine, 'on'> & {
@@ -77,9 +78,8 @@
   const buttons = {} as Record<Letter, HTMLElement>;
   // Each axis is drawn twice: the stage's dark halo under a faint line, so it reads over tissue too.
   const axes: Partial<Record<Letter, SVGLineElement[]>> = {};
-  // A letter's target and how far its centre goes from the axes' origin, in pixels; they change with the
-  // pointer and the device class, which change the gizmo's own box.
-  let metrics = { target: 24, reach: 21 };
+  // How far a letter's centre goes from the axes' origin, in pixels; read again when the gizmo resizes.
+  let reach = 21;
 
   // The basis last drawn, for a re-measure between camera events.
   let shown: CameraView['basis'];
@@ -116,9 +116,7 @@
     for (const { letter, x, y, depth } of drawn) {
       buttons[letter].dataset.behind = String(
         depth < 0 &&
-          toward.some(
-            (other) => Math.hypot(other.x - x, other.y - y) * metrics.reach < BEHIND_DISTANCE,
-          ),
+          toward.some((other) => Math.hypot(other.x - x, other.y - y) * reach < BEHIND_DISTANCE),
       );
     }
     marks = [
@@ -128,8 +126,8 @@
         .map(({ letter, x, y }) => ({
           view: VIEWS[letter],
           node: buttons[letter],
-          x: x * metrics.reach,
-          y: y * metrics.reach,
+          x: x * reach,
+          y: y * reach,
           layer: buttons[letter].style.zIndex,
         })),
     ];
@@ -178,10 +176,7 @@
     stage.registerGizmo(node);
     const observer = new ResizeObserver(() => {
       const style = getComputedStyle(node);
-      metrics = {
-        target: parseFloat(style.getPropertyValue('--gizmo-letter-target')),
-        reach: parseFloat(style.getPropertyValue('--gizmo-span')) / 2 - DRAWN_RADIUS,
-      };
+      reach = parseFloat(style.getPropertyValue('--gizmo-span')) / 2 - DRAWN_RADIUS;
       place(shown);
     });
     observer.observe(node);
@@ -354,19 +349,17 @@
      * outward, never past the gutter.
      */
     .orientation-gizmo {
-      --gizmo-span: 60px;
-      --gizmo-letter-target: 24px;
-      --gizmo-target: 24px;
-      --gizmo-spill: min(var(--gizmo-target) - 24px, var(--stage-gutter));
       /* How far a letter's centre goes: its drawn circle (18 px) stays inside the span. */
       --gizmo-reach: calc(var(--gizmo-span) / 2 - 9px);
-      --gizmo-ring: calc(var(--gizmo-span) / 2 + 3px);
       position: absolute;
       z-index: 2;
-      top: calc(var(--vis-top) + var(--key-top) + var(--stage-gutter) - var(--gizmo-spill));
+      top: calc(
+        var(--vis-top) + var(--gizmo-drop, var(--key-top)) + var(--stage-gutter) -
+          var(--gizmo-spill)
+      );
       right: calc(var(--vis-right) + var(--key-right) + var(--stage-gutter) - var(--gizmo-spill));
-      width: calc(2 * (var(--gizmo-ring) + var(--gizmo-target)));
-      height: calc(2 * (var(--gizmo-ring) + var(--gizmo-target)));
+      width: var(--gizmo-size);
+      height: var(--gizmo-size);
       pointer-events: none;
     }
     .orientation-gizmo[hidden] {
@@ -374,17 +367,6 @@
     }
     .orientation-gizmo :global(button) {
       pointer-events: auto;
-    }
-    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      .orientation-gizmo {
-        --gizmo-span: 56px;
-      }
-    }
-    @media (pointer: coarse) {
-      .orientation-gizmo {
-        --gizmo-letter-target: 44px;
-        --gizmo-target: 44px;
-      }
     }
     .gizmo-field {
       position: absolute;
@@ -415,9 +397,9 @@
       left: 0;
       display: grid;
       place-items: center;
-      width: var(--gizmo-letter-target);
-      height: var(--gizmo-letter-target);
-      margin: calc(var(--gizmo-letter-target) / -2);
+      width: var(--gizmo-target);
+      height: var(--gizmo-target);
+      margin: calc(var(--gizmo-target) / -2);
       padding: 0;
       border: 0;
       border-radius: 50%;

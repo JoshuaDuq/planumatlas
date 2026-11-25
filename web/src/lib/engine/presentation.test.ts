@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { Mesh } from 'three';
+import { Mesh, Plane } from 'three';
 import type { Region } from '../types/index.ts';
 import { createPresentation } from './presentation.ts';
 
@@ -12,6 +12,8 @@ function fixture() {
     [0, 1].map(() => Object.assign(new Mesh(), { userData: { region_id: id } })),
   );
   const first = (id: string) => meshes.find((mesh) => mesh.userData['region_id'] === id)!;
+  const clippingPlanes = [new Plane()];
+  const stencilCaps = [new Mesh()];
   const state = {
     selected: null as string | null,
     blocked: new Set<string>(),
@@ -30,12 +32,14 @@ function fixture() {
         return { selectedRegion: state.selected ? regions.get(state.selected) : null } as never;
       },
       visibleMeshes: meshes,
+      clippingPlanes,
       canSelect: (region) => !state.blocked.has(region.id),
     },
     sections: {
       get active() {
         return state.cut;
       },
+      stencilCaps,
       setHighlight: (highlight) => log.push(['highlight', highlight]),
     },
     overlay: {
@@ -49,7 +53,7 @@ function fixture() {
     }) as never,
   });
   const only = (kind: string) => log.filter(([name]) => name === kind);
-  return { presentation, regions, state, log, only, first };
+  return { presentation, regions, state, log, only, first, clippingPlanes, stencilCaps };
 }
 
 describe('hover and selection marking', () => {
@@ -94,13 +98,22 @@ describe('hover and selection marking', () => {
     assert.deepEqual(only('highlight').at(-1), ['highlight', { hovered: 'c', selected: 'b' }]);
   });
 
-  it('FACADE-29 while a cut is open nothing is outlined and the cut faces light the regions', () => {
-    const { presentation, regions, state, only } = fixture();
+  it('FACADE-29 while a cut is open the surface is outlined through the cut and the cut faces light', () => {
+    const { presentation, regions, state, only, first, clippingPlanes, stencilCaps } = fixture();
     state.cut = true;
     state.selected = 'b';
     presentation.hover(regions.get('c')!, { x: 1, y: 2 });
-    presentation.outline();
-    assert.deepEqual(only('outlined'), [['outlined', undefined]]);
+    assert.deepEqual(only('outlined'), [
+      [
+        'outlined',
+        {
+          selected: [first('b')],
+          hovered: [first('c')],
+          planes: clippingPlanes,
+          leaveOut: stencilCaps,
+        },
+      ],
+    ]);
     assert.deepEqual(only('highlight').at(-1), ['highlight', { hovered: 'c', selected: 'b' }]);
   });
 

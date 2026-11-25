@@ -142,3 +142,11 @@ def test_a_name_cut_at_a_comma_is_refused_rather_than_published(tmp_path):
     with pytest.raises(ValueError, match="mca-frontal has keys"):
         territories.read_definition(write_definition(tmp_path / "d.yaml", cut))
     assert definition()["territories"][3]["name"] == "Middle cerebral artery, frontal"
+
+
+def test_on_the_template_a_small_structure_takes_no_shares_and_names_no_territory():
+    # The template is the landing measurement's reference, so no landing error was measured on it.
+    metadata = territories.metadata(read_config("mni152"), definition())
+    assert metadata["small"] is None
+    assert "names none round it" in metadata["method"]
+    assert published()["arterial_territories"]["small"] is not None

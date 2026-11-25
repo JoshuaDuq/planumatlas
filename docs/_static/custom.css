@@ -36,7 +36,7 @@
   --docs-sidebar-width: 19rem;
   --docs-reading-font: "Source Serif 4 Variable", Georgia, serif;
   --radius-control: 4px;
-  --radius-panel: 6px;
+  --radius-panel: 0;
 }
 html {
   font-size: 100%;
@@ -44,6 +44,7 @@ html {
 }
 body {
   --rule: 1px solid var(--color-background-border);
+  --rule-strong: 1px solid var(--color-foreground-primary);
   --color-sidebar-item-background--current: var(--color-accent-surface);
   --color-sidebar-link-text--top-level: var(--color-foreground-secondary);
   --color-code-background: var(--color-background-secondary);
@@ -258,6 +259,8 @@ article a.reference { text-decoration-thickness: 1px; text-decoration-color: var
 article a.reference:hover { text-decoration-color: currentColor; }
 .headerlink { font-family: var(--font-stack); font-weight: 400; font-size: 0.65em; }
 .hero-lede { color: var(--color-foreground-secondary); font-family: var(--font-stack); font-size: 1.25rem; line-height: 1.5; }
+/* The standfirst: what the feature shows, from which data, by which method, and its main limit. */
+article section > h1 + p:not(.hero-lede) { margin-bottom: 2rem; font-family: var(--font-stack); font-size: 1.1875rem; line-height: 1.55; }
 
 /* A directory, not a table of densely packed links. */
 .methods-directory { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; row-gap: 1.75rem; margin-block: 1.5rem 2.5rem; }
@@ -275,17 +278,24 @@ article a.reference:hover { text-decoration-color: currentColor; }
 }
 .methods-directory a.reference:hover { color: var(--color-brand-primary); text-decoration: underline; }
 
-figure { margin: 2.5rem 0; }
-figure img { display: block; box-sizing: border-box; width: 100%; height: auto; border: 0; border-radius: 0; }
-figcaption { margin-top: 1rem; padding-bottom: 1.5rem; border-bottom: var(--rule); font-family: var(--font-stack); color: var(--color-foreground-secondary); font-size: 0.875rem; line-height: 1.6; }
-figcaption p, figcaption .caption-text { text-align: left; line-height: inherit; }
+/* A figure and its legend, set as in a journal: the figure at the column's full width, then
+ * "Fig. N | Title." in bold and the panels' legend in the caption face. */
+figure { margin: 2.5rem 0 3rem; }
+figure img { box-sizing: border-box; width: 100%; height: auto; border: 0; border-radius: 0; }
+figcaption { margin-top: 1rem; padding-bottom: 1.5rem; border-bottom: var(--rule); font-family: var(--font-stack); color: var(--color-foreground-secondary); font-size: 0.875rem; line-height: 1.6; text-align: left; }
+figcaption p { margin: 0; text-align: left; line-height: inherit; }
+figcaption .caption-text { display: inline; }
 figcaption .caption-number, figcaption strong { color: var(--color-foreground-primary); font-weight: 600; }
+figcaption a.reference { text-decoration-color: var(--color-foreground-border); }
+figcaption .legend { margin-top: 0.5rem; }
 
-dl.myst { margin: 1.5rem 0; font-family: var(--font-stack); font-size: 1rem; }
-dl.myst > dt { margin: 0; padding-top: 1rem; font-weight: 600; }
-dl.myst > dt:first-child { padding-top: 0; }
-dl.myst > dd { margin: 0.25rem 0 0; padding-bottom: 1rem; border-bottom: var(--rule); color: var(--color-foreground-secondary); }
+/* Definition lists read as a ledger: the term in the margin on a wide column, above its entry on a narrow one. */
+dl.myst { display: grid; grid-template-columns: 9rem minmax(0, 1fr); margin: 1.5rem 0; border-top: var(--rule-strong); border-bottom: var(--rule-strong); font-family: var(--font-stack); font-size: 0.9375rem; line-height: 1.6; }
+dl.myst > dt { margin: 0; padding: 0.75rem 1rem 0.75rem 0; border-top: var(--rule); font-weight: 600; }
+dl.myst > dd { margin: 0; padding: 0.75rem 0; border-top: var(--rule); color: var(--color-foreground-secondary); }
+dl.myst > :is(dt:first-child, dt:first-child + dd) { border-top: 0; }
 dl.myst > dd > p { margin: 0; }
+dl.myst > dd > p + p { margin-top: 0.5rem; }
 
 code.literal, kbd { border-radius: var(--radius-control); background: var(--color-background-hover); font-family: var(--font-stack--monospace); font-size: 0.8125em; }
 code.literal { padding: 0.1em 0; border: 0; background: transparent; white-space: normal; overflow-wrap: anywhere; }
@@ -295,23 +305,25 @@ div.highlight { box-sizing: border-box; margin-block: 1.5rem; border: var(--rule
 div.highlight pre { margin: 0; padding: 1rem 1.25rem; border-radius: inherit; background: transparent; font-size: 0.8125rem; line-height: 1.7; overflow-wrap: normal; }
 article pre { overflow-x: auto; }
 
-/* Data stays tabular; long paths wrap rather than force unreadably narrow prose. */
+/* Tables as in a journal: a rule above, a rule under the column heads and a rule below; no rules between
+ * rows and none between columns. Numbers are tabular and their columns right-aligned (`---:` in the source). */
 article .table-wrapper { box-sizing: border-box; max-width: 100%; margin: 1.5rem 0; padding: 0; overflow-x: auto; }
-article table.docutils { width: 100%; margin: 0; border: 0; border-collapse: collapse; box-shadow: none; font-family: var(--font-stack); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+article table.docutils { width: 100%; margin: 0; border: 0; border-top: var(--rule-strong); border-bottom: var(--rule-strong); border-radius: 0; border-collapse: collapse; box-shadow: none; font-family: var(--font-stack); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
 /* break-word, not anywhere: a column is never sized narrower than its longest word. */
-table.docutils th, table.docutils td { padding: 0.875rem 1rem; border: 0; border-bottom: var(--rule); vertical-align: top; overflow-wrap: break-word; }
-table.docutils th { border-top: 1px solid var(--color-foreground-secondary); background: transparent; color: var(--color-foreground-secondary); font-size: 0.875rem; font-weight: 600; }
+table.docutils th, table.docutils td { padding: 0.4375rem 0.75rem; border: 0; background: transparent; vertical-align: top; overflow-wrap: break-word; }
+table.docutils thead th { padding-block: 0.625rem; border-bottom: var(--rule-strong); color: var(--color-foreground-primary); font-size: 0.875rem; font-weight: 600; vertical-align: bottom; }
+table.docutils tbody tr:first-child > * { padding-top: 0.75rem; }
+table.docutils tbody tr:last-child > * { padding-bottom: 0.75rem; }
+table.docutils tbody tr:hover { background: transparent; }
 table.docutils :is(th, td):first-child { padding-left: 0; }
 table.docutils :is(th, td):last-child { padding-right: 0; }
-table.docutils :is(th, td) p { margin: 0; line-height: 1.6; text-wrap: wrap; }
+table.docutils :is(th, td) p { margin: 0; line-height: 1.55; text-wrap: wrap; }
+table.docutils :is(th, td).text-right { text-align: right; white-space: nowrap; }
+table.docutils :is(th, td).text-center { text-align: center; }
+/* A path wraps inside its cell, but its column keeps room for a short word. */
 table.docutils code.literal { font-size: 0.875em; white-space: normal; overflow-wrap: anywhere; }
-/* Give filenames, criteria and results a real column instead of letting the
- * longest prose cell squeeze its neighbours into fragments. */
-table.docutils:has(tr > :nth-child(3)):not(:has(tr > :nth-child(4))) { min-width: 40rem; table-layout: fixed; }
-#code-availability table.docutils { min-width: 32rem; table-layout: fixed; }
-#code-availability table.docutils :is(th, td):first-child { width: 8rem; }
-/* MyST's empty column heads in code-availability ledgers carry no information. */
-table.docutils thead:has(th:empty):not(:has(th:not(:empty))) { display: none; }
+table.docutils :is(th, td) { min-width: 5.5rem; }
+table.docutils :is(th, td).text-right { min-width: 0; }
 .math-wrapper { max-width: 100%; overflow-x: auto; }
 article .math, article mjx-container { max-width: 100%; }
 article mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; padding-block: 0.25rem; }
@@ -378,9 +390,13 @@ dl.py > dt.sig { border: var(--rule); border-radius: var(--radius-control); back
   .methods-directory { grid-template-columns: 1fr; gap: 1.5rem; }
   .methods-directory a.reference { padding-block: 0.4375rem; }
   figure { margin-block: 1.5rem; }
-  table.docutils { min-width: 40rem; }
-  /* Two-column source ledgers fit the page; three-column data tables scroll. */
-  table.docutils:not(:has(tr > :nth-child(3))) { min-width: 0; }
+  /* Two-column ledgers fit the page; wider tables scroll inside their own box. */
+  table.docutils:has(tr > :nth-child(3)) { min-width: 34rem; }
+  table.docutils:has(tr > :nth-child(5)) { min-width: 44rem; }
+  dl.myst { grid-template-columns: minmax(0, 1fr); }
+  dl.myst > dt { padding-bottom: 0; }
+  dl.myst > dd { padding-top: 0.25rem; border-top: 0; }
+  article section > h1 + p:not(.hero-lede) { font-size: 1.0625rem; }
   .related-pages { gap: 1rem; }
 }
 @media (pointer: coarse) {

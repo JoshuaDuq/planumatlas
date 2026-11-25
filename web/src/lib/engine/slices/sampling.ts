@@ -2,6 +2,7 @@ import { AGREEMENT_COLORS, categoryAt } from '../../core/catalog/segmentation-ag
 import type { ComparedStructure } from '../../core/catalog/segmentation-agreement.ts';
 import { mapColour } from '../../core/user-map/display.ts';
 import type { MapDisplay, MapOverlap } from '../../core/user-map/display.ts';
+import type { SliceCrop } from '../../types/index.ts';
 import type { Frame } from './coordinates.ts';
 import type { Volume } from './volume.ts';
 
@@ -22,6 +23,20 @@ export interface SliceVolumes {
   map?: SliceMap;
   /** A tab's paint, drawn over the scan as its cut faces are: each label of the cut atlas's grid in its colour. */
   paint?: SlicePaint;
+  /** The colours the stage's cut faces show, by the same grid, mixed into the grey as the overlay's are. */
+  colours?: SlicePaint;
+  /**
+   * The selection, tinted as the overlay tints and outlined over everything else on the slice, but
+   * not over an agreement, which inks the selected structure itself.
+   */
+  selection?: SliceSelection;
+}
+
+/** The cut atlas's labels that are the selected region, and the colour of its outline. */
+export interface SliceSelection {
+  volume: Volume;
+  codes: ReadonlySet<number>;
+  colour: Rgb;
 }
 
 /** The cut atlas's label grid and, by label code, the paint's colour, or null where it paints nothing. */
@@ -73,14 +88,22 @@ export interface SliceSamples {
   map: { pixels: Uint32Array; terms: Float64Array; keep: number } | null;
 }
 
-/** Canvas rows run from superior/anterior to inferior/posterior. */
+/**
+ * Canvas rows run from superior/anterior to inferior/posterior. With a crop, the pixels outside it are
+ * not sampled: they read as transparent and unlabelled, and windowing draws them black or grey.
+ */
 export function sampleSlice(
   volumes: SliceVolumes,
   frame: Frame,
   display: SliceDisplay,
+  crop: SliceCrop = { x: 0, y: 0, width: display.size, height: display.size },
 ): SliceSamples {
   const { size, fieldOfView, overlay } = display;
-  const { agreement, paint, map } = volumes;
+  const { agreement, paint, colours, selection, map } = volumes;
+  // The paint and the colours are the cut's labels; the selection may be another grid's.
+  const cut = paint?.volume ?? colours?.volume;
+  if (paint && colours && paint.volume !== colours.volume)
+    throw new Error('The paint and the colours are drawn by one grid of cut labels.');
   if (
     !Number.isInteger(size) ||
     size < 2 ||
@@ -92,11 +115,12 @@ export function sampleSlice(
   }
   const count = size * size;
   const intensity = new Float64Array(count);
-  // Filled in pixel order, so it holds no holes.
-  const tint: (Rgb | null)[] = [];
+  const tint = Array<Rgb | null>(count).fill(null);
   const painted = new Uint8Array(count);
   const fixed = new Uint8ClampedArray(count * 4);
   const mapped = map && { pixels: new Uint32Array(count), terms: new Float64Array(count * 3) };
+  // An outline over an agreement would hide the pixels one segmentation alone labels at its edge.
+  const chosen = selection && !agreement ? new Uint8Array(count) : null;
   let mappedCount = 0;
   const step = fieldOfView / size;
   const origin = frame.center
@@ -104,25 +128,36 @@ export function sampleSlice(
     .addScaledVector(frame.u, -fieldOfView / 2 + step / 2)
     .addScaledVector(frame.v, fieldOfView / 2 - step / 2);
   const point: [number, number, number] = [0, 0, 0];
-  for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++) {
+  const [left, right] = [Math.max(0, crop.x), Math.min(size, crop.x + crop.width)];
+  const [top, bottom] = [Math.max(0, crop.y), Math.min(size, crop.y + crop.height)];
+  for (let y = top; y < bottom; y++)
+    for (let x = left; x < right; x++) {
       point[0] = origin.x + step * (x * frame.u.x - y * frame.v.x);
       point[1] = origin.y + step * (x * frame.u.y - y * frame.v.y);
       point[2] = origin.z + step * (x * frame.u.z - y * frame.v.z);
       const pixel = y * size + x;
       const index = pixel * 4;
       const label = volumes.segmentation.label(point);
+      const code = cut ? cut.label(point) : 0;
       intensity[pixel] = volumes.mri.linear(point);
+      if (
+        chosen &&
+        selection!.codes.has(selection!.volume === cut ? code : selection!.volume.label(point))
+      )
+        chosen[pixel] = 1;
       const category =
         agreement && categoryAt(agreement.structure, label, agreement.compared.label(point));
-      tint.push(
+      tint[pixel] =
         (agreement
           ? category && AGREEMENT_COLORS[category]
-          : overlay && label
-            ? volumes.metadata.labels[label]!.color
-            : null) ?? null,
-      );
-      const colour = paint && paint.colors[paint.volume.label(point)];
+          : colours
+            ? colours.colors[code]
+            : overlay && label
+              ? volumes.metadata.labels[label]!.color
+              : null) ?? null;
+      // The selection is tinted as the overlay tints, over any other tint, and outlined below.
+      if (chosen?.[pixel]) tint[pixel] = selection!.colour;
+      const colour = paint && paint.colors[code];
       if (colour) {
         painted[pixel] = 1;
         for (let channel = 0; channel < 3; channel++) fixed[index + channel] = colour[channel]!;
@@ -150,6 +185,33 @@ export function sampleSlice(
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
       fixed[index + 3] = label || category || colour ? 255 : 0;
     }
+  if (chosen) {
+    // Two pixels wide, one either side of the boundary, so it holds where a picture is drawn small.
+    for (let y = top; y < bottom; y++)
+      for (let x = left; x < right; x++) {
+        const pixel = y * size + x;
+        const inside = chosen[pixel];
+        const edge =
+          (x > left && chosen[pixel - 1] !== inside) ||
+          (x < right - 1 && chosen[pixel + 1] !== inside) ||
+          (y > top && chosen[pixel - size] !== inside) ||
+          (y < bottom - 1 && chosen[pixel + size] !== inside);
+        if (!edge) continue;
+        painted[pixel] = 1;
+        fixed.set([...Array.from(selection!.colour), 255], pixel * 4);
+      }
+    // The map is drawn under the outline, not over it.
+    if (mapped) {
+      let kept = 0;
+      for (let n = 0; n < mappedCount; n++) {
+        if (painted[mapped.pixels[n]!]) continue;
+        mapped.pixels[kept] = mapped.pixels[n]!;
+        mapped.terms.copyWithin(kept * 3, n * 3, n * 3 + 3);
+        kept++;
+      }
+      mappedCount = kept;
+    }
+  }
   return {
     intensity,
     tint,

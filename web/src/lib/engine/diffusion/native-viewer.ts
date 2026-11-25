@@ -26,7 +26,7 @@ import {
   createMotionGeometry,
   createTractGeometry,
   filterTractGeometry,
-  segmentsNearPlane,
+  segmentsNearPlanes,
 } from './native-geometry.ts';
 import { createReferenceTransform } from './reference-space.ts';
 import { summarizeLengths } from './streamlines.ts';
@@ -374,6 +374,67 @@ export function createNativeTractViewer(
     invalidate();
   }
 
+  /**
+   * `onPlane` for planes that share their axes and lie along their normal from one another, in one
+   * pass over the streamlines. Throws a `RangeError` for planes that do not.
+   */
+  function onPlanes(frames: readonly PlaneAxes[]): PlaneTracts[] {
+    const [first] = frames;
+    if (!first) return [];
+    const along = frames.map(({ center, normal, u, v }) => {
+      const shift = center.map((value, i) => value - first.center[i]!);
+      const offset = shift.reduce((sum, value, i) => sum + value * first.normal[i]!, 0);
+      const parallel = [normal, u, v].every((axis, which) =>
+        axis.every(
+          (value, i) => Math.abs(value - [first.normal, first.u, first.v][which]![i]!) < 1e-9,
+        ),
+      );
+      const sideways = Math.hypot(...shift.map((value, i) => value - offset * first.normal[i]!));
+      if (!parallel || sideways > 1e-6)
+        throw new RangeError('Planes taken in one pass must share their axes and normal line.');
+      return offset;
+    });
+    const shown = group.visible ? [...bundles.values()].filter((entry) => entry.lines.visible) : [];
+    if (shown.length === 0)
+      return frames.map(() => ({ ends: new Float32Array(0), colors: new Uint8Array(0) }));
+    // loadReference stops the matrix updating once it has placed the group.
+    if (group.matrixAutoUpdate) {
+      throw new Error('The tracts were drawn before their reference space loaded.');
+    }
+    // The plane in scanner RAS, where the points are: the transform is rigid, so its axes stay unit
+    // and the offsets along the normal stay the same.
+    const toScanner = group.matrix.clone().invert();
+    const scanner = (point: readonly number[]) =>
+      worldToRas(rasToWorld(point as Ras).applyMatrix4(toScanner));
+    const origin = scanner(first.center);
+    const [n, a, b] = [first.normal, first.u, first.v].map((axis) =>
+      scanner(first.center.map((value, i) => value + axis[i]!)).map(
+        (value, i) => value - origin[i]!,
+      ),
+    ) as [number[], number[], number[]];
+    const plane = { origin, normal: n, u: a, v: b };
+    const pieces = shown.map(({ still }) =>
+      segmentsNearPlanes(
+        still.getAttribute('position').array as Float32Array,
+        (still.index!.array as Uint32Array).subarray(0, still.drawRange.count),
+        plane,
+        along,
+      ),
+    );
+    return frames.map((_, number) => {
+      const parts = pieces.map((bundle) => bundle[number]!);
+      const ends = new Float32Array(parts.reduce((sum, part) => sum + part.ends.length, 0));
+      const colors = new Uint8Array(parts.reduce((sum, part) => sum + part.colors.length, 0));
+      let at = 0;
+      for (const part of parts) {
+        ends.set(part.ends, (4 * at) / 3);
+        colors.set(part.colors, at);
+        at += part.colors.length;
+      }
+      return { ends, colors };
+    });
+  }
+
   return {
     group,
     scannerToSurface(point: Ras) {
@@ -383,41 +444,8 @@ export function createNativeTractViewer(
       return worldToRas(rasToWorld(point).applyMatrix4(group.matrix.clone().invert()));
     },
     /** What `still` draws of each shown bundle, clipped to the slab about a surface-RAS plane. */
-    onPlane({ center, normal, u, v }: PlaneAxes): PlaneTracts {
-      const shown = group.visible
-        ? [...bundles.values()].filter((entry) => entry.lines.visible)
-        : [];
-      if (shown.length === 0) return { ends: new Float32Array(0), colors: new Uint8Array(0) };
-      // loadReference stops the matrix updating once it has placed the group.
-      if (group.matrixAutoUpdate) {
-        throw new Error('The tracts were drawn before their reference space loaded.');
-      }
-      // The plane in scanner RAS, where the points are: the transform is rigid, so its axes stay unit.
-      const toScanner = group.matrix.clone().invert();
-      const scanner = (point: readonly number[]) =>
-        worldToRas(rasToWorld(point as Ras).applyMatrix4(toScanner));
-      const origin = scanner(center);
-      const [n, a, b] = [normal, u, v].map((axis) =>
-        scanner(center.map((value, i) => value + axis[i]!)).map((value, i) => value - origin[i]!),
-      ) as [number[], number[], number[]];
-      const plane = { origin, normal: n, u: a, v: b };
-      const pieces = shown.map(({ still }) =>
-        segmentsNearPlane(
-          still.getAttribute('position').array as Float32Array,
-          (still.index!.array as Uint32Array).subarray(0, still.drawRange.count),
-          plane,
-        ),
-      );
-      const ends = new Float32Array(pieces.reduce((sum, piece) => sum + piece.ends.length, 0));
-      const colors = new Uint8Array(pieces.reduce((sum, piece) => sum + piece.colors.length, 0));
-      let at = 0;
-      for (const piece of pieces) {
-        ends.set(piece.ends, (4 * at) / 3);
-        colors.set(piece.colors, at);
-        at += piece.colors.length;
-      }
-      return { ends, colors };
-    },
+    onPlane: (frame: PlaneAxes): PlaneTracts => onPlanes([frame])[0]!,
+    onPlanes,
     get ready() {
       return Boolean(outline);
     },

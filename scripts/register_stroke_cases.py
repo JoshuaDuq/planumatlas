@@ -79,8 +79,10 @@ def main():
     if not stroke_cases.is_declared(config):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the stroke_cases layer")
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
+    # An anatomy reconstructed elsewhere is registered with the build it declares.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
     definition = stroke_cases.read_definition()
 
     participants = definition["participants"]

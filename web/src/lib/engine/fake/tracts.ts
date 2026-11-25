@@ -1,4 +1,4 @@
-import type { EngineTracts, TractBundle } from '../api.ts';
+import type { EngineTracts, PlaneFrame, PlaneTracts, TractBundle } from '../api.ts';
 import type { Emit } from './support.ts';
 
 export interface FakeBundle {
@@ -86,6 +86,26 @@ export function createFakeTracts({
     emit('tractsVisibility', undefined);
   }
 
+  // Each drawn bundle crosses a plane within 50 mm of the origin once at its centre, 10 mm either side along `u`, pure red.
+  function onPlane({ center, normal }: Pick<PlaneFrame, 'center' | 'normal'>): PlaneTracts {
+    if (anatomy !== tractAnatomy) {
+      throw new Error('The linked MRI draws only its own anatomy’s tracts.');
+    }
+    const reached =
+      Math.abs(center[0] * normal[0] + center[1] * normal[1] + center[2] * normal[2]) <= 50;
+    const drawn = !reached
+      ? []
+      : landmarkTract
+        ? [landmarkTract]
+        : streamlinesVisible()
+          ? [...loaded].filter(([, visible]) => visible).map(([id]) => id)
+          : [];
+    return {
+      ends: Float32Array.from(drawn.flatMap(() => [-10, 0, 10, 0])),
+      colors: Uint8Array.from(drawn.flatMap(() => [255, 0, 0])),
+    };
+  }
+
   return {
     anatomy: tractAnatomy,
     get referenceActive() {
@@ -157,24 +177,22 @@ export function createFakeTracts({
     // The surface sits off the scanner, so a caller that skips the conversion is caught.
     scannerToSurface: ([x, y, z]) => [x + 1, y - 2, z + 3],
     surfaceToScanner: ([x, y, z]) => [x - 1, y + 2, z - 3],
-    // Each drawn bundle crosses a plane within 50 mm of the origin once at its centre, 10 mm either side along `u`, pure red.
-    onPlane({ center, normal }) {
-      if (anatomy !== tractAnatomy) {
-        throw new Error('The linked MRI draws only its own anatomy’s tracts.');
+    onPlane,
+    // One plane at a time: the real tracts' one pass draws the same pieces, for the same planes.
+    onPlanes: (frames) => {
+      const [first] = frames;
+      for (const { center, normal, u, v } of frames) {
+        const shift = center.map((value, axis) => value - first!.center[axis]!);
+        const along = shift.reduce((sum, value, axis) => sum + value * first!.normal[axis]!, 0);
+        const same = [normal, u, v].every((vector, which) =>
+          vector.every(
+            (value, axis) => value === [first!.normal, first!.u, first!.v][which]![axis],
+          ),
+        );
+        if (!same || shift.some((value, axis) => value !== along * first!.normal[axis]!))
+          throw new RangeError('Planes taken in one pass must share their axes and normal line.');
       }
-      const reached =
-        Math.abs(center[0] * normal[0] + center[1] * normal[1] + center[2] * normal[2]) <= 50;
-      const drawn = !reached
-        ? []
-        : landmarkTract
-          ? [landmarkTract]
-          : streamlinesVisible()
-            ? [...loaded].filter(([, visible]) => visible).map(([id]) => id)
-            : [];
-      return {
-        ends: Float32Array.from(drawn.flatMap(() => [-10, 0, 10, 0])),
-        colors: Uint8Array.from(drawn.flatMap(() => [255, 0, 0])),
-      };
+      return frames.map(onPlane);
     },
     // FA rises from 0 at x = -50 mm to 1 at x = 50 mm inside a 100 mm cube about the origin, and has no value beyond.
     async loadFa() {

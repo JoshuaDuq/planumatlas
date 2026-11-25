@@ -1,4 +1,4 @@
-import type { Mesh, Object3D } from 'three';
+import type { Mesh, Object3D, Plane } from 'three';
 import type { ModelState, Region } from '../types/index.ts';
 import type { HoverEvent } from './api.ts';
 import type { Emit } from './framing.ts';
@@ -15,13 +15,20 @@ interface Hovered {
 export interface PresentationModel {
   readonly state: ModelState;
   readonly visibleMeshes: readonly Mesh[];
+  /** The cut's planes, which the anatomy is clipped by; none without a cut. */
+  readonly clippingPlanes: readonly Plane[];
   canSelect(region: Region): boolean;
 }
 
 export interface PresentationOptions {
   scene: Pick<EngineScene, 'setOutlined' | 'invalidate'>;
   model: PresentationModel;
-  sections: { readonly active: boolean; setHighlight(highlight: Highlight): void };
+  sections: {
+    readonly active: boolean;
+    /** Caps as wide as the plane, which the outline's depth leaves out. */
+    readonly stencilCaps: readonly Object3D[];
+    setHighlight(highlight: Highlight): void;
+  };
   overlay: { readonly outlined: readonly Object3D[] };
   /** The tract reference is shown: nothing is outlined or lit. */
   referenceActive: () => boolean;
@@ -33,13 +40,13 @@ export interface Presentation {
   hover(region: Region | null, position: { x: number; y: number } | null): void;
   /** Forget what the pointer was over (app.js:1434). */
   clearHover(): void;
-  /** Mark what the pointer is on and the selection: a cut face lights, a surface outlines. */
+  /** Mark what the pointer is on and the selection: a surface outlines, and a cut face also lights. */
   outline(): void;
 }
 
 /**
- * What is marked on the stage: the pointer's region and the selection, lit on a cut and outlined on a
- * surface (app.js:1718-1751). Kept out of the state loop: hover answers once per frame of a pointer move.
+ * What is marked on the stage: the pointer's region and the selection, outlined on the surface and,
+ * on a cut, lit on the face as well (app.js:1718-1751). Kept out of the state loop: hover answers once per frame of a pointer move.
  */
 export function createPresentation({
   scene,
@@ -74,12 +81,6 @@ export function createPresentation({
       return;
     }
     highlight();
-    // An outline is drawn from an unclipped depth render, so on a cut it would ring the whole solid
-    // rather than the face. The cut lights its faces instead, which is what `highlight` just did.
-    if (sections.active) {
-      scene.setOutlined();
-      return;
-    }
     const meshes = model.visibleMeshes;
     const meshFor = (id: string | undefined): Object3D[] => {
       const mesh = id && meshes.find((candidate) => candidate.userData['region_id'] === id);
@@ -91,6 +92,7 @@ export function createPresentation({
     scene.setOutlined({
       selected: overlap.length ? overlap : selected,
       hovered: meshFor(hovered?.region.id),
+      ...(sections.active && { planes: model.clippingPlanes, leaveOut: sections.stencilCaps }),
     });
   }
 
@@ -99,8 +101,7 @@ export function createPresentation({
       const regionChanged = region?.id !== hovered?.region.id;
       hovered = region ? { region, position } : null;
       if (regionChanged) {
-        if (sections.active) highlight();
-        else outline();
+        outline();
       } else if (position) {
         publishHover();
       }

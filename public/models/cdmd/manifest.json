@@ -1822,6 +1822,37 @@
     ],
     "method": "The Fisher-z mean of 200 HCP young adults' resting-state Pearson correlations between the parcel-mean BOLD series of Julich-Brain 3.1 areas in MNI152 space; each area takes the parcel of the same name"
   },
+  "network_matrix": {
+    "id": "network-matrix",
+    "file": "network-connectivity.json",
+    "label": "Network matrix (resting fMRI, HCP young adults, Schaefer 200 parcels)",
+    "license": "CC BY 4.0",
+    "citations": [
+      "https://doi.org/10.25493/3PMM-FPW",
+      "https://pubmed.ncbi.nlm.nih.gov/34746628/",
+      "https://doi.org/10.1093/cercor/bhx179"
+    ],
+    "method": "The Fisher-z mean of 200 HCP young adults' resting-state Pearson correlations between the parcel-mean BOLD series of Schaefer's 200 parcels in MNI152 space, each parcel labelled with its Yeo network",
+    "validation": {
+      "row_order": {
+        "rho": -0.2304,
+        "null_min": -0.065,
+        "null_max": 0.0603,
+        "permutations": 1000,
+        "seed": 20261124,
+        "passed": true
+      },
+      "within_exceeds": {
+        "Vis": true,
+        "SomMot": true,
+        "DorsAttn": true,
+        "SalVentAttn": true,
+        "Limbic": false,
+        "Cont": true,
+        "Default": true
+      }
+    }
+  },
   "disorder_effects": {
     "id": "disorder-effects",
     "file": "disorder-effects.json",
@@ -2961,6 +2992,53 @@
           "visual_rank": 0.994,
           "areas": 177
         }
+      }
+    }
+  },
+  "cortical_thickness": {
+    "label": "Cortical thickness",
+    "source": "FreeSurfer recon-all (freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45) of this subject: surf/lh.thickness, surf/rh.thickness",
+    "method": "FreeSurfer's per-vertex distance between the white and pial surfaces, carried to each atlas's published cortex vertices: a vertex the parcel boundaries add takes the mean of the measured source vertices it is made from, and the unmeasured medial wall stays 0. Each cortical region's mean and standard deviation are over its source vertices, as FreeSurfer's statistics tables give them",
+    "file": "cortical-thickness.json",
+    "files": {
+      "destrieux": {
+        "file": "thickness-destrieux.field",
+        "vertex_count": 358511
+      },
+      "hcp-mmp": {
+        "file": "thickness-hcp-mmp.field",
+        "vertex_count": 447870
+      },
+      "julich": {
+        "file": "thickness-julich.field",
+        "vertex_count": 422464
+      },
+      "schaefer": {
+        "file": "thickness-schaefer.field",
+        "vertex_count": 434569
+      },
+      "desikan": {
+        "file": "thickness-desikan.field",
+        "vertex_count": 296804
+      }
+    },
+    "encoding": {
+      "maximum_mm": 5.0,
+      "levels": 255,
+      "unmeasured": 0
+    },
+    "display_range_mm": [
+      1.0,
+      4.0
+    ],
+    "measured_vertices": {
+      "left": 100219,
+      "right": 100129
+    },
+    "validation": {
+      "largest_difference_from_freesurfer_tables_mm": {
+        "desikan": 0.0005,
+        "destrieux": 0.0005
       }
     }
   },
@@ -104180,6 +104258,7 @@
     "Stimulation responses are counts of stereo-EEG channel pairs from 27 people with focal epilepsy (Lyu et al. 2025), pooled by the authors' anatomical labels and by side. They are not measured in this brain, both hemispheres show the same values, and a person with many channels weighs more than one with few.",
     "A Destrieux parcel takes an author label only when at least 10 cortical channels from 3 people land in it through fs_LR 32k \u2192 fsaverage surface registration and 60% of them carry that label; other parcels, and the HCP-MMP, Julich-Brain and Schaefer atlases, take none (Julich-Brain areas show F-TRACT's rates instead). Deep structures take labels by name, and the thalamus takes the authors' three positional sites, not nuclei.",
     "Functional connectivity is the group mean of 200 healthy young adults (HCP, ages 22\u201335) at rest, measured in MNI152 space on Julich-Brain's volumetric map, not in this brain: an area takes the parcel of its name. A correlation is not a connection, and without global signal regression nearly every pair correlates positively.",
+    "The network matrix is the group mean of 200 healthy young adults (HCP, ages 22\u201335) at rest on Schaefer's 200 parcels in MNI152 space, the same on every brain. A correlation is not a connection, and without global signal regression nearly every pair correlates positively. Parcels of the limbic network correlate no more with each other than with another network.",
     "Disorder effects are group differences between thousands of patients and controls scanned elsewhere, reported per Desikan-Killiany region and FreeSurfer structure, not measured in this brain. Most are small (|d| below 0.2 is common): patients and controls overlap almost entirely, so no difference says anything about one person. Medication, illness duration and site differ between the cohorts and are only partly adjusted for.",
     "Gyral white matter is FreeSurfer's wmparc: each voxel within 5 mm of cortex takes the nearest Desikan cortical label whichever surface atlas is shown, and deeper white matter is unsegmented and belongs to no region.",
     "Arterial territories are typical territories drawn from where acute infarcts fell in 1,298 stroke patients (Liu et al. 2023), registered onto this brain from the atlas's template; they are not this brain's own, and no vessel of it was imaged. Collateral circulation and variants such as a fetal posterior communicating artery move real territories by centimetres.",
@@ -104207,6 +104286,7 @@
     "Cortex that has no six layers, the hippocampus and the olfactory (piriform) cortex, is left out, as is a parcel BigBrain's layers cover on less than 50% of its area.",
     "Cell densities count every cell body a network detected in 5 to 11 patches per area of the same brain, not neurons alone, and reach a region only by the name of the Julich-Brain area the patches were cut from; both hemispheres show the same values.",
     "BigBrain and the cell datasets are CC BY-NC-SA 4.0: non-commercial use only, and derived work is shared alike.",
+    "Cortical thickness is FreeSurfer's estimate from one individual's 1 mm T1. It is measured where grey meets white matter on the scan, so heavily myelinated cortex such as the primary motor cortex reads thinner than histology finds it; the temporal pole and insula, where the scan's contrast is poor, are the least reliable. The medial wall is not measured.",
     "F-TRACT stimulation responses are rates of stereo-EEG stimulation\u2013recording pairs from 613 people with focal epilepsy, aggregated by F-TRACT over Julich-Brain 3.0 areas in MNI152 space. They are not measured in this brain; each hemisphere shows its own values. A rate is published from 10 pairs and drawn here only from 3 implantations.",
     "A Julich-Brain area takes the F-TRACT area of the same name, not of the same place: F-TRACT placed contacts with Julich-Brain's volumetric map in MNI152, while this surface carries the published fsaverage map. Areas Julich-Brain 3.1 added from 3.0's gap maps, and its subicular complex, take none.",
     "F-TRACT peak delays come from people with focal epilepsy. Each is a median across the responding stimulation\u2013recording pairs of every implantation that tested the pair, not one person's delay, published from 10 responses within 50 ms and shown only where the rate is drawn. A response may arrive through more than one synapse, and the peak includes the time the recorded area takes to respond, so a delay is not a conduction time along one fibre. Distances are between the two areas' centroids in this brain, not between the contacts. Onset delay is not shown: the data descriptor defines it two ways.",
@@ -105875,6 +105955,66 @@
         "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
       },
       {
+        "path": "data/cdmd/surf/lh.thickness",
+        "sha256": "5d731ca2e3f05847763f0dbb9e5a32f43528753961dee55fc51e951d9c02e2c3",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/surf/rh.thickness",
+        "sha256": "d9c134bc3e4f07bc5fed79ae1927039ad4e0911b7f1a309ae59120b695771e0e",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/stats/lh.aparc.stats",
+        "sha256": "02d5f8d3adc09da2d699803e4dce7ee2151ff6291b411bd93f117b65671f9580",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/stats/rh.aparc.stats",
+        "sha256": "cb383a5fe18a477df94acb09fe9872e9e81bd748bcb677946d2c0e779b6a867a",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/stats/lh.aparc.a2009s.stats",
+        "sha256": "74d1298fd941ca705216c0a6643d608f547db905af81c890363e251233b6d37f",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/cdmd/stats/rh.aparc.a2009s.stats",
+        "sha256": "ff2122de4ce4cb35a1b615e15d2a631da35ef52194c4fa3c795819261c3b40bf",
+        "anatomy": "cdmd",
+        "derived_from": [
+          "data/cdmd/input/sub_013_t1w.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
         "path": "data/cdmd/label/rh.aparc.a2009s.annot",
         "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
         "anatomy": "cdmd",
@@ -106496,6 +106636,20 @@
         "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
         "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
         "license": "FreeSurfer Software License"
+      },
+      {
+        "path": "data/schaefer200/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+        "sha256": "60f08eb38abe1313dc87ddd4ffcfb7c60428769a0304bd66cc46d359dd4e0de9",
+        "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI/Centroid_coordinates/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+        "citation": "https://doi.org/10.1093/cercor/bhx179",
+        "license": "MIT (ThomasYeoLab/CBIG)"
+      },
+      {
+        "path": "data/schaefer200/Schaefer2018_200Parcels_17Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+        "sha256": "4dd296821b75bfb32c7dc8d587913f5f9cb83a0c6d11b0b9fa0fb6f10e485377",
+        "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI/Centroid_coordinates/Schaefer2018_200Parcels_17Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+        "citation": "https://doi.org/10.1093/cercor/bhx179",
+        "license": "MIT (ThomasYeoLab/CBIG)"
       }
     ]
   },

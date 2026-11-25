@@ -48,6 +48,12 @@
     territories?: readonly ArterialTerritory[] | null;
     /** The cerebellar functional regions, when the build publishes them. */
     cerebellar?: readonly CerebellarFunctionRegion[] | null;
+    /** The thickness key's ends in mm, when the build publishes this brain's cortical thickness. */
+    thickness?: KeySources['thickness'];
+    /** The sulcal depth key's half-width in mm (`sulcExtent`). */
+    sulc?: KeySources['sulc'];
+    /** The build publishes the network matrix, which Yeo's networks' key opens. */
+    networkMatrix?: boolean;
     /** The lobes of the atlas on screen, for the lobe colouring's key. */
     lobes?: KeySources['lobes'];
     /** The key of the paint on show (`legendFor`), or null. */
@@ -59,6 +65,8 @@
     directionShown: boolean;
     /** A row alone, or null for every row (`excursions.pickPaint`). */
     onPaintPick: (id: string | null) => void;
+    /** A plate's command (`KeyPlate.action`), with the press that asked for it. */
+    onPlateAction?: (id: NonNullable<KeyPlate['action']>['id'], event: MouseEvent) => void;
   }
 
   let {
@@ -71,12 +79,16 @@
     cabNp,
     territories = null,
     cerebellar = null,
+    thickness = null,
+    sulc = null,
+    networkMatrix = false,
     lobes = null,
     legend,
     cases = null,
     map = null,
     directionShown,
     onPaintPick,
+    onPlateAction,
   }: Props = $props();
 
   const plates = $derived(
@@ -88,6 +100,9 @@
       cabNp,
       territories,
       cerebellar,
+      thickness,
+      sulc,
+      networkMatrix,
       lobes,
       legend,
       cases,
@@ -103,18 +118,18 @@
 
   let host: HTMLElement | undefined;
 
-  // The crowd default is weighed when a plate's map or length, the device or the stage's first size
-  // changes, as legacy did on each update, not on every frame of a resize or a sheet drag.
+  // On phones use the room at the sheet's destination, updated on a resize or a change of detent.
   const sized = $derived(stage.visibleRect !== null);
   $effect.pre(() => {
     void sized;
     const { phone, coarsePointer: coarse } = media;
+    const sheetRoom = phone ? stage.sheetRoom : null;
     const current = plates;
     untrack(() => {
       const active = document.activeElement;
       const holder =
         active instanceof HTMLElement ? active.closest<HTMLElement>('.stage-key') : null;
-      const rect = stage.visibleRect;
+      const rect = sheetRoom ?? stage.visibleRect;
       const room = rect
         ? {
             width: rect.width,
@@ -126,7 +141,8 @@
       // Each plate is weighed under the ones above it, as the reader's folds leave them.
       let above = 0;
       for (const plate of current) {
-        const sized = { ...plate, count: plate.rows.length };
+        // A plate's command takes a row's height.
+        const sized = { ...plate, count: plate.rows.length + (plate.action ? 1 : 0) };
         const open = defaultOpen(sized, { phone, coarse }, room, above);
         crowd.set(plate.map, open);
         above += keyHeight(sized, { phone, coarse }, folds.get(plate.map) ?? open) + KEY_GAP_PX;
@@ -286,6 +302,15 @@
         {:else if plate.note}
           <p class="stage-key-note">{plate.note}</p>
         {/if}
+        {#if plate.action && onPlateAction}
+          {@const action = plate.action}
+          <button
+            type="button"
+            class="stage-key-action"
+            aria-haspopup="dialog"
+            onclick={(event) => onPlateAction(action.id, event)}>{action.label}</button
+          >
+        {/if}
       </div>
     </div>
   {/each}
@@ -294,7 +319,7 @@
 <style>
   @layer features {
     /*
-     * Top right, inside the framing's own band, so neither the anatomy nor a letter is ever under one.
+     * Inside the framing's own band, so neither the anatomy nor a letter is ever under one.
      * A long list scrolls rather than reach the dock's line, where the scale bar sits.
      */
     .stage-keys {
@@ -361,6 +386,9 @@
       font-weight: 600;
       line-height: var(--lh-caption);
       cursor: pointer;
+    }
+    .stage-key-toggle > span:first-child {
+      overflow-wrap: anywhere;
     }
     .stage-key-toggle:focus-visible,
     .stage-key-list button:focus-visible {
@@ -461,6 +489,29 @@
     }
     .stage-key-note:global([data-clipped]) {
       display: none;
+    }
+    /* A quiet text command at the plate's foot, underlined so it reads as one. */
+    .stage-key-action {
+      align-self: flex-start;
+      min-height: 24px;
+      margin-bottom: var(--space-2);
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--overlay-ink);
+      font: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    .stage-key-action:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    @media (pointer: coarse) {
+      .stage-key-action {
+        min-height: 44px;
+      }
     }
 
     /* A key's title row is a full target; its rows run in two columns, so the band it takes stays short. */

@@ -1,12 +1,33 @@
 import { expect, test } from 'vitest';
 import * as guide from './areas/guide.ts';
+import * as info from './areas/info.ts';
+import * as networkMatrix from './areas/networkMatrix.ts';
+import * as mpr from './areas/mpr.ts';
+import * as serial from './areas/serial.ts';
 import * as template from './areas/template.ts';
 import { TRANSLATIONS } from './index.ts';
 
-// The tour's and the template's wording load on demand, but are approved as the rest is.
+// The tour's, the template's, the Linked MRI's, About this data's and the network matrix's wording load on demand, but are approved as the
+// rest is.
 const TABLES = {
-  en: { ...TRANSLATIONS.en, guide: guide.en, template: template.en },
-  fr: { ...TRANSLATIONS.fr, guide: guide.fr, template: template.fr },
+  en: {
+    ...TRANSLATIONS.en,
+    guide: guide.en,
+    template: template.en,
+    mpr: mpr.en,
+    serial: serial.en,
+    info: info.en,
+    networkMatrix: networkMatrix.en,
+  },
+  fr: {
+    ...TRANSLATIONS.fr,
+    guide: guide.fr,
+    template: template.fr,
+    mpr: mpr.fr,
+    serial: serial.fr,
+    info: info.fr,
+    networkMatrix: networkMatrix.fr,
+  },
 };
 
 /**

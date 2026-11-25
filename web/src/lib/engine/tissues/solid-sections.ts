@@ -550,6 +550,11 @@ export class SolidSections {
     solid.sectioned = true;
   }
 
+  /** The caps drawn by stencil: quads as wide as the plane, where the face is the stencil's. */
+  get stencilCaps(): Mesh[] {
+    return this.solids.filter((solid) => !solid.sectioned).map((solid) => solid.cap);
+  }
+
   /** The stencil cap remains for a cut the sectioner will not vouch for. */
   private presentStencil(solid: Solid): void {
     solid.back.visible = true;

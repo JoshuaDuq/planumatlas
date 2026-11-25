@@ -1,4 +1,5 @@
 import {
+  Color,
   Data3DTexture,
   DataTexture,
   FloatType,
@@ -10,12 +11,13 @@ import {
   RedFormat,
   RedIntegerFormat,
   RGBAFormat,
+  SRGBColorSpace,
   UnsignedByteType,
   UnsignedShortType,
   Vector2,
   Vector3,
 } from 'three';
-import type { Color, Intersection, IUniform, Material, Raycaster } from 'three';
+import type { Intersection, IUniform, Material, Raycaster } from 'three';
 import type { Region } from '../../types/index.ts';
 import type { Frame } from '../slices/coordinates.ts';
 import { CORTICAL_MAPS } from '../../core/catalog/cut-labels.ts';
@@ -220,6 +222,29 @@ export class TissueSections {
         territories: manifest.arterial_territories.territories,
       }),
     };
+  }
+
+  /**
+   * The colour each label of a cut atlas's grid takes on the stage's cut faces now, as sRGB bytes, or
+   * null where its face is not drawn: the palette the cut samples, for the linked MRI.
+   */
+  labelColours(atlas: string): ([number, number, number] | null)[] {
+    const record = this.metadata?.atlases[atlas];
+    if (!record) throw new Error(`The ${atlas} cut labels have not loaded.`);
+    const palette = createPalette(
+      record.labels,
+      this.model.state,
+      this.model.manifest.appearance.tissue,
+      this.paletteLookup,
+    );
+    const colour = new Color();
+    return record.labels.map((_, code) => {
+      if (!palette[code * 4 + 3]) return null;
+      const { r, g, b } = colour
+        .setRGB(palette[code * 4]!, palette[code * 4 + 1]!, palette[code * 4 + 2]!)
+        .getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace);
+      return [r, g, b].map((value) => Math.round(value * 255)) as [number, number, number];
+    });
   }
 
   async loadMetadata(priority?: RequestPriority): Promise<void> {

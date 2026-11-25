@@ -1920,6 +1920,66 @@
       "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
     },
     {
+      "path": "data/cdmd/surf/lh.thickness",
+      "sha256": "5d731ca2e3f05847763f0dbb9e5a32f43528753961dee55fc51e951d9c02e2c3",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/surf/rh.thickness",
+      "sha256": "d9c134bc3e4f07bc5fed79ae1927039ad4e0911b7f1a309ae59120b695771e0e",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/stats/lh.aparc.stats",
+      "sha256": "02d5f8d3adc09da2d699803e4dce7ee2151ff6291b411bd93f117b65671f9580",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/stats/rh.aparc.stats",
+      "sha256": "cb383a5fe18a477df94acb09fe9872e9e81bd748bcb677946d2c0e779b6a867a",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/stats/lh.aparc.a2009s.stats",
+      "sha256": "74d1298fd941ca705216c0a6643d608f547db905af81c890363e251233b6d37f",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/stats/rh.aparc.a2009s.stats",
+      "sha256": "ff2122de4ce4cb35a1b615e15d2a631da35ef52194c4fa3c795819261c3b40bf",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the cortical_thickness layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
       "path": "data/cdmd/label/rh.aparc.a2009s.annot",
       "sha256": "5fc2cddc9cb4c1652b7512dc689227e07f7ac4dfb6bc7dccc4bcce04de368742",
       "anatomy": "cdmd",
@@ -3107,6 +3167,554 @@
       "procedure": "scripts/register_cerebellar_functions.py: SynthMorph registration of the SUIT template to brain.mgz's infratentorial compartment, nearest-neighbour transfer",
       "citation": "https://doi.org/10.1038/s41467-024-52371-w",
       "license": "CC BY-NC 3.0"
+    },
+    {
+      "path": "data/schaefer200/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+      "sha256": "60f08eb38abe1313dc87ddd4ffcfb7c60428769a0304bd66cc46d359dd4e0de9",
+      "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI/Centroid_coordinates/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+      "citation": "https://doi.org/10.1093/cercor/bhx179",
+      "license": "MIT (ThomasYeoLab/CBIG)"
+    },
+    {
+      "path": "data/schaefer200/Schaefer2018_200Parcels_17Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+      "sha256": "4dd296821b75bfb32c7dc8d587913f5f9cb83a0c6d11b0b9fa0fb6f10e485377",
+      "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI/Centroid_coordinates/Schaefer2018_200Parcels_17Networks_order_FSLMNI152_2mm.Centroid_RAS.csv",
+      "citation": "https://doi.org/10.1093/cercor/bhx179",
+      "license": "MIT (ThomasYeoLab/CBIG)"
+    },
+    {
+      "path": "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz",
+      "sha256": "cdfcac3b4ffb2d784011fa6793dba16d6ac1b257278f422150af4fc9ba84d48b",
+      "anatomy": "mni152",
+      "url": "https://www.bic.mni.mcgill.ca/ServicesAtlases/ICBM152NLin2009"
+    },
+    {
+      "path": "data/mni152/mri/orig.mgz",
+      "sha256": "9f9f85bd63b2b634ce5df8e9ab5a8d803afd6b99dafe69c17e6f41232c47a161",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/aseg.mgz",
+      "sha256": "b2c39d118c4a20cafa466ecb11d0be9b39c0901c95b3e9c1f5f271730ff2c4d1",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/aparc.a2009s+aseg.mgz",
+      "sha256": "95d62750c4f7e12ac682fe3c70f1acc94eb27d5b8e1fc98b298cfff645d98c4a",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/ribbon.mgz",
+      "sha256": "d0a67859011dab5e262f1d01493364cdd615982b03770f406afa4437f7fe30a1",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/brain.mgz",
+      "sha256": "9c208630c3af0b57906ef3acdca1a5146426b9640fda7d7150a9ab592e3040b7",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/wmparc.mgz",
+      "sha256": "d3d436e0e10caa070e7ed76914923b4f1fa37abc00464ed68f04f009d05d6d55",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/scripts/build-stamp.txt",
+      "sha256": "8a1600fb20972b7518249f8f714a6fed51b1d1f21e17430f60f85c0eea48e277",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/stats/aseg.stats",
+      "sha256": "2fbbf7ab95dcea78101d1accdb30a4a310d7748f7c401148216f42e7d4fcb702",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/lh.pial",
+      "sha256": "6983030f00fe8af6a3b938018d10112378e473f52b34a76d194a1f03e6627c1b",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/lh.white",
+      "sha256": "cee15294c605afc08a2debdb17c9400999788bbe68a283e394142aa8e5a6af26",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/lh.sulc",
+      "sha256": "49952df46f40b6ff1c42c6b700dba096d476d502f3c7f23eab76ba791c10949f",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/lh.sphere.reg",
+      "sha256": "3d0e9ea35d4b189724827121640da3ab2e4fd0f1263d435d1ddc533113df4358",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/lh.aparc.a2009s.annot",
+      "sha256": "ec1f4c028b5dcb8e96da5d44c1e6b030fc6796093c44fd440373975d7eeffae4",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/lh.aparc.annot",
+      "sha256": "d316efcdc59f836f609163252916231a31c19719efe42c30c9d418f817feb298",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/rh.pial",
+      "sha256": "ab603ed90e63d51708bcfbe2f1bc8ac97e94e2632edfd599b890a7de178e7c33",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/rh.white",
+      "sha256": "c50b2e28cd005b0967250d06b98fc1349af72cfdec885665166d6e236841586a",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/rh.sulc",
+      "sha256": "161be483e2b80123c61b1b38e86b112637c316c7308ad6e67aafa8b54d18c29e",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/surf/rh.sphere.reg",
+      "sha256": "cc6ebe5993059e60286575a59b6581c788b8aeb1abbbb14e958456d3ca238f51",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/rh.aparc.a2009s.annot",
+      "sha256": "1503d056142a8a02a5128addad8764c6893ed200b2228bb63c54619b495a2cd4",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/rh.aparc.annot",
+      "sha256": "c531dcea741b2d718d3f65485711f0ea873a6e55572e16b5c7d74568302bd297",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/reconstruction.json",
+      "sha256": "a82a97dc3d96ba27fdd3800366b590b47427bd665c1a5a4b176c214d08852240",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/mri/arterial-territories.mgz",
+      "sha256": "37e6cf98280ebcfb109129bc06099cef2041f618a78c5f7d7316119fa5fc3f18",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/ArterialAtlas_padding.nii.gz",
+          "sha256": "3659447397867b18f2404406173cc13f5fe221aa30c9275d506272d367485ba0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/ArterialAtlasLables.txt",
+          "sha256": "480ffc17764ecf35a5c12bf08165a9733eb0c7d23f7b6d1a2cc104d93627b048"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/JHU_SS_b0_ss_padding.nii.gz",
+          "sha256": "445c077024e40e327109b366b02119852aa676bbf7395e325fb80f62fdda3dda"
+        }
+      ],
+      "procedure": "scripts/register_arterial_territories.py: SynthMorph registration of the atlas template to brain.mgz, nearest-neighbour transfer",
+      "citation": "https://doi.org/10.1038/s41597-022-01923-0",
+      "license": "CC BY-SA 4.0"
+    },
+    {
+      "path": "data/mni152/arterial-registration.json",
+      "sha256": "7b0d4d2d89926701c20aec969c891a67f32d9f1bbe0ebd7ae591bfd82e14d2f4",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/ArterialAtlas_padding.nii.gz",
+          "sha256": "3659447397867b18f2404406173cc13f5fe221aa30c9275d506272d367485ba0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/ArterialAtlasLables.txt",
+          "sha256": "480ffc17764ecf35a5c12bf08165a9733eb0c7d23f7b6d1a2cc104d93627b048"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/Chin-Fu-Liu/Acute-stroke_Detection_Segmentation/159df3a34a769f804d22790752013d4e5ed04944/data/template/JHU_SS_b0_ss_padding.nii.gz",
+          "sha256": "445c077024e40e327109b366b02119852aa676bbf7395e325fb80f62fdda3dda"
+        }
+      ],
+      "procedure": "scripts/register_arterial_territories.py: SynthMorph registration of the atlas template to brain.mgz, nearest-neighbour transfer",
+      "citation": "https://doi.org/10.1038/s41597-022-01923-0",
+      "license": "CC BY-SA 4.0"
+    },
+    {
+      "path": "data/mni152/coordinates/spm12-field.nii.gz",
+      "sha256": "87deb4f0bfc222b376fe263698baa1b7482c4c1dd262335af14d8581291755cf",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/spm/spm12/03ac9473cad402407b6472228377c0167fdc54b8/tpm/TPM.nii",
+          "sha256": "259527f0d92ca5eb0c21684f854e9d8cd7104f9f6a7ebf17ee98de420d9fc68f"
+        }
+      ],
+      "procedure": "scripts/register_coordinate_spaces.py: SynthMorph registration of each MNI template to brain.mgz, inverse warp sampled on a coarse grid",
+      "citation": "https://doi.org/10.1016/S1053-8119(09)70884-5; https://doi.org/10.1016/j.neuroimage.2005.02.018",
+      "license": "MNI template licence (use, copy, modify and distribute with the copyright notice); GPL-2.0 or later (SPM12, version 7771); the maps derive from the IXI dataset (CC BY-SA 3.0)"
+    },
+    {
+      "path": "data/mni152/coordinate-registration.json",
+      "sha256": "f38b14226e3aab113c45f3bdc3da4cebfdd2b73de3dbe34fbe51b4693a6329c6",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://raw.githubusercontent.com/spm/spm12/03ac9473cad402407b6472228377c0167fdc54b8/tpm/TPM.nii",
+          "sha256": "259527f0d92ca5eb0c21684f854e9d8cd7104f9f6a7ebf17ee98de420d9fc68f"
+        }
+      ],
+      "procedure": "scripts/register_coordinate_spaces.py: SynthMorph registration of each MNI template to brain.mgz, inverse warp sampled on a coarse grid",
+      "citation": "https://doi.org/10.1016/S1053-8119(09)70884-5; https://doi.org/10.1016/j.neuroimage.2005.02.018",
+      "license": "MNI template licence (use, copy, modify and distribute with the copyright notice); GPL-2.0 or later (SPM12, version 7771); the maps derive from the IXI dataset (CC BY-SA 3.0)"
+    },
+    {
+      "path": "data/mni152/mri/arousal-nuclei.mgz",
+      "sha256": "55206cbeb63bb675633b53e154de8ec1b3179aae44fa5ec3d2d8c8426ba8a5c3",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/mni152/mri/arousal-nuclei-carried.mgz",
+      "sha256": "a600d63d4f4c2e64a194766a1b6296b83d386910b02af4f15b77f682ef879614",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/mni152/arousal-registration.json",
+      "sha256": "204ab3e3d6d6d5a19be1248fb0fe045d885670fb73b67ec5199291c017301e39",
+      "anatomy": "mni152",
+      "derived_from": [
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_MNI152_1mm_v2p0.nii)",
+          "sha256": "e6a7746f13a8c5e3f79aa3701e3a088fcc9f7b7365fc6fed7249884a64e2eb47"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_Brainstem_v2p0_Color_LUT_FreeSurfer.txt)",
+          "sha256": "b6cc5d69748965de155bd68065ff9b0160083318d071d7ae301032eef7770b88"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_DR_MNI152_1mm_v2p0.nii)",
+          "sha256": "7b1bf0ad0148536327b19491d2e2b6ff51b3d8a2b9e621e8c0bdcc93a07d3c00"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_MnR_MNI152_1mm_v2p0.nii)",
+          "sha256": "483ad7edbdcfa4669936094c7b4ecbad1af93a8f98101cfb417fdda2dafbd5c4"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PAG_MNI152_1mm_v2p0.nii)",
+          "sha256": "fd4cd8cfe60694252a429540252b53a1ef8bfcdf9fd44ea64853889cdbe25fde"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_VTA_MNI152_1mm_v2p0.nii)",
+          "sha256": "3561f5d0b56d65da97f7ebb073573189c8dca786c7c18b9b9046879b2a3024fa"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0a2b14a1a7ab1725d48fe3524b33b242e1a27186d7a947aefee80abb29024977"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "103bac9e8723a36d6d457a898b3f4a8ef93d4b7e4e11b904b732e04224ea9475"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "692a897993d926debd58b894ac48bff5d8695d3802c4c049f187db131c194b7b"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_LDTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "7df6137d5514e8a99c4567ef2717b912f77f6b7f6b5710147eabbd2f5096e17e"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "93bd272520268621f710ec54b2bd362649a6c6eacc4ff42704a57733e77b57ba"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_mRt_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "11cca2079edf034aa7ad3286572af1e5a1295a10aff9a43f99bee1fd433f4ad9"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "2bd1a79f9f024934de74e3da550d3ed7e73eab7567a76d6affef19c3ce1ac3c5"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PBC_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "41647f4b333e4088211af0cfa3e8d1026a56de529f8249171050b2a11ade0a5f"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "b02137dbc9c7ee84e604fac7b186f8e2a0c45a71265a50d515c184ba9a2a12a0"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PnO_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "f4396c4d0f456778209e9f114a47e742f510a6fda4504000e4a555e64fcc9368"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_L_MNI152_1mm_v2p0.nii)",
+          "sha256": "0ded846187192ea4cc803760afbc40aa3192c429a11a3408199936688e83e64d"
+        },
+        {
+          "url": "https://doi.org/10.5061/dryad.zw3r228d2 (AAN_PTg_R_MNI152_1mm_v2p0.nii)",
+          "sha256": "2ad455344ed3e63d91055b809eb0c8d198be51ed5bca9eb0e17188506ab5c4d7"
+        }
+      ],
+      "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
+      "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
+      "license": "FreeSurfer Software License"
     }
   ]
 }

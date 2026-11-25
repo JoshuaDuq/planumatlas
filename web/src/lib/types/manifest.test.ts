@@ -20,13 +20,21 @@ import type {
 it('CAT-06: the cdmd manifest fits the Manifest sections', () => {
   const atlases: ManifestAtlas[] = manifest.atlases;
   const levels: ManifestDetailLevel[] = manifest.detail_levels;
-  // JSON arrays are not tuples: the two-corner shape is the only field narrowed.
+  // JSON arrays are not tuples: the two-corner shape and the fields' spans are the only ones narrowed.
   const layers: ManifestSupplementalLayer[] = manifest.supplemental_layers.map((layer) => ({
     ...layer,
     bounds_ras_mm: layer.bounds_ras_mm as [number[], number[]],
   }));
   const cutAtlases: ManifestCutAtlas[] = manifest.cut_atlases;
-  const appearance: ManifestAppearance = manifest.appearance;
+  const appearance: ManifestAppearance = {
+    ...manifest.appearance,
+    field_ranges: Object.fromEntries(
+      Object.entries(manifest.appearance.field_ranges).map(([field, span]) => [
+        field,
+        span as [number, number],
+      ]),
+    ),
+  };
   const anatomy: ManifestAnatomy = manifest.anatomy;
   assert.ok(atlases.length && levels.length && layers.length && cutAtlases.length);
   assert.equal(appearance.tissue !== undefined && anatomy.id, 'cdmd');

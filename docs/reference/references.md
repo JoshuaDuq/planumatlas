@@ -95,7 +95,7 @@ Nothing here was measured in the brain shown. Each source reaches it by an area'
 
   Upschulte, E., Harmeling, S., Amunts, K., & Dickscheid, T. (2022). Contour proposal networks for biomedical instance segmentation. *Medical Image Analysis*, 77, 102371. [doi:10.1016/j.media.2022.102371](https://doi.org/10.1016/j.media.2022.102371). PMID 35180674. The cell segmentation behind the twelve EBRAINS datasets "Layer-specific distributions of segmented cells" (Dickscheid, Bludau, Paquola, Schiffer, Upschulte & Amunts, 2021), whose DOIs are listed on the [cortical layers](../features/cortical-layers.md#data) page.
 - **Functional connectivity.**
-  Domhof, J. W. M., Jung, K., Eickhoff, S. B., & Popovych, O. V. (2021). Parcellation-induced variation of empirical and simulated brain connectomes at group and subject levels. *Network Neuroscience*, 5(3), 798–830. [doi:10.1162/netn_a_00202](https://doi.org/10.1162/netn_a_00202). PMID 34746628. The data are the EBRAINS dataset "Atlas based HCP connectomes" v1.2 ([10.25493/3PMM-FPW](https://doi.org/10.25493/3PMM-FPW)), from HCP S1200 data on Julich-Brain's volumetric map.
+  Domhof, J. W. M., Jung, K., Eickhoff, S. B., & Popovych, O. V. (2021). Parcellation-induced variation of empirical and simulated brain connectomes at group and subject levels. *Network Neuroscience*, 5(3), 798–830. [doi:10.1162/netn_a_00202](https://doi.org/10.1162/netn_a_00202). PMID 34746628. The data are the EBRAINS dataset "Atlas based HCP connectomes" v1.2 ([10.25493/3PMM-FPW](https://doi.org/10.25493/3PMM-FPW)), from HCP S1200 data on Julich-Brain's volumetric map. The network matrix uses the same dataset's archive for Schaefer's 200 parcels (17-network version), each parcel given its 7-network label from the CBIG centroid tables of Schaefer et al. (2018, above).
 - **F-TRACT stimulation responses.**
   Trebaul, L., Deman, P., Tuyisenge, V., Jedynak, M., Hugues, E., Rudrauf, D., … Kahane, P., & David, O. (2018). Probabilistic functional tractography of the human cortex revisited. *NeuroImage*, 181, 414–429. [doi:10.1016/j.neuroimage.2018.07.039](https://doi.org/10.1016/j.neuroimage.2018.07.039). PMID 30025851. The data are the parcellation-based atlas F-TRACT_P_01_v2307 (Jedynak, Boyer, Lemaréchal, Trebaul, Tadel, … & F-TRACT Consortium, 2023, EBRAINS, [10.25493/JYVR-WJ7](https://doi.org/10.25493/JYVR-WJ7)), on Julich-Brain 3.0's areas.
 
@@ -166,20 +166,22 @@ Each fingerprint is its own EBRAINS dataset of receptor densities measured by Zi
 | :--- | :--- | :--- |
 | `fsaverage` assets (built locally, not published) | FreeSurfer distribution | FreeSurfer Software License |
 | `cdmd` assets and tracts | MGH CDMD, figshare | CC0 1.0 |
+| `cortical-thickness.json`, `thickness-destrieux.field`, `thickness-desikan.field` | FreeSurfer 8.2 thickness of CDMD sub_013 | CC0 1.0; the HCP-MMP, Julich-Brain and Schaefer means in `cortical-thickness.json` follow those atlases' rows |
 | `cdmd` SLF I–III and callosal segments | TractSeg pretrained weights | CC BY 4.0 (attribution) |
 | `mni152` tracts (`public/diffusion/mni152-hcp1065/`) | HCP1065 population-averaged tract atlas (Yeh 2022) | CC BY-SA 4.0, with the HCP acknowledgment |
 | HCP-MMP-derived files | Human Connectome Project | WU-Minn HCP Open Access Data Use Terms |
 | `cab-np.json` | CAB-NP (Rutgers, Yale) | Non-commercial |
-| `cortex-julich.glb`, `ribbon-julich.labels`, `tissues-julich.volume` | Julich-Brain 3.1 (EBRAINS) | CC BY-NC-SA 4.0 |
+| `cortex-julich.glb`, `ribbon-julich.labels`, `tissues-julich.volume`, `thickness-julich.field` | Julich-Brain 3.1 (EBRAINS) | CC BY-NC-SA 4.0 |
 | `tissues-arterial.volume`, the cortex meshes' `_TERRITORY` attribute, arterial regions and territory shares in `manifest.json` | Liu et al. 2023 | CC BY-SA 4.0 |
 | `tissues-nettekoven.volume`, cerebellar functional regions and shares in `manifest.json` | Nettekoven et al. 2024 on the SUIT template (Diedrichsen lab) | CC BY-NC 3.0 |
 | `tissues-choi.volume`, striatal network regions and shares in `manifest.json` | Choi et al. 2012, distributed with FreeSurfer 8.2 | FreeSurfer Software License |
-| `cortex-schaefer.glb`, `ribbon-schaefer.labels`, `tissues-schaefer.volume` | Schaefer 2018 (ThomasYeoLab/CBIG) | MIT |
+| `cortex-schaefer.glb`, `ribbon-schaefer.labels`, `tissues-schaefer.volume`, `thickness-schaefer.field` | Schaefer 2018 (ThomasYeoLab/CBIG) | MIT |
 | `neuropsych-domains.json`, area scores | Neurosynth | ODbL 1.0 |
 | `receptor-fingerprints.json` | Zilles and Palomero-Gallagher receptor datasets (EBRAINS) | CC BY-NC-SA 4.0 |
 | `stimulation-ftract.json` | F-TRACT_P_01_v2307 (EBRAINS) | CC BY-NC-SA 4.0 |
 | `cortical-layers.json` | BigBrain layers (Wagstyl et al. 2020, via BigBrainWarp) and the EBRAINS cell datasets | CC BY-NC-SA 4.0 |
 | `functional-connectivity.json` | Atlas based HCP connectomes v1.2 (EBRAINS) | CC BY 4.0; HCP Open Access Data Use Terms |
+| `network-connectivity.json` | Atlas based HCP connectomes v1.2 (EBRAINS); Schaefer 2018 network labels (ThomasYeoLab/CBIG) | CC BY 4.0; HCP Open Access Data Use Terms; MIT for the labels |
 | `arousal-nuclei.glb`, the arousal nuclei in `manifest.json` | FreeSurfer 8.2 SegmentAAN on CDMD (Harvard Ascending Arousal Network Atlas 2.0, CC0 1.0) | FreeSurfer Software License |
 | `stimulation-responses.json` | Lyu et al. 2025 (Zenodo) | CC BY 4.0 |
 | `disorder-effects.json` | ENIGMA working groups' summary statistics, as the ENIGMA Toolbox republishes them | BSD-3-Clause |
@@ -218,7 +220,7 @@ The atlas and SuperSynth model come from FreeSurfer's distribution server; the s
 
 ### HCP Open Access Data Use Terms
 
-`cortex-hcp-mmp.glb`, `ribbon-hcp-mmp.labels`, `tissues-hcp-mmp.volume`, `functional-regions.json` and `cab-np.json` derive from HCP-MMP1.0. `functional-connectivity.json` derives from HCP S1200 data, whose terms its data descriptor says also apply. The terms pass to every recipient, require an acknowledgement in the wording given under [Acknowledgements](#acknowledgements) and forbid identifying or contacting participants. Full terms: [`HCP-Data-Use-Terms.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/HCP-Data-Use-Terms.txt).
+`cortex-hcp-mmp.glb`, `ribbon-hcp-mmp.labels`, `tissues-hcp-mmp.volume`, `functional-regions.json` and `cab-np.json` derive from HCP-MMP1.0. `functional-connectivity.json` and `network-connectivity.json` derive from HCP S1200 data, whose terms their data descriptor says also apply. The terms pass to every recipient, require an acknowledgement in the wording given under [Acknowledgements](#acknowledgements) and forbid identifying or contacting participants. Full terms: [`HCP-Data-Use-Terms.txt`](https://github.com/JoshuaDuq/planumatlas/blob/main/public/models/licenses/HCP-Data-Use-Terms.txt).
 
 ### CAB-NP licence
 
@@ -256,7 +258,7 @@ Non-commercial, and shared alike, as for Julich-Brain. `receptor-fingerprints.js
 
 ### CC BY 4.0 (stimulation responses)
 
-Attribution: `stimulation-responses.json` credits Lyu et al. (2025) and its Zenodo record and states the changes: the authors' per-pair classifications pooled into response rates for each pair of their labels, by side, and contacts assigned to Destrieux areas through HCP's sphere deformations. `functional-connectivity.json` credits Domhof et al. (2021) and its EBRAINS dataset; the change: each Julich-Brain area's correlations given to the parcel of its name. TractSeg's pretrained weights, behind the SLF I–III and callosal segments, are under the same licence and credited in the bibliography. So are the visual areas of Wang et al. (2015), credited with the HCP 7T retinotopy dataset that distributes them; the change: each area carried from `fsaverage` onto this brain from the nearest vertex of the registered spheres, with a name's anchor chosen in each.
+Attribution: `stimulation-responses.json` credits Lyu et al. (2025) and its Zenodo record and states the changes: the authors' per-pair classifications pooled into response rates for each pair of their labels, by side, and contacts assigned to Destrieux areas through HCP's sphere deformations. `functional-connectivity.json` credits Domhof et al. (2021) and its EBRAINS dataset; the change: each Julich-Brain area's correlations given to the parcel of its name. `network-connectivity.json` credits the same; the change: the 200 subjects' matrices averaged in Fisher z, each Schaefer parcel given its 7-network label, and the parcels sorted by network. TractSeg's pretrained weights, behind the SLF I–III and callosal segments, are under the same licence and credited in the bibliography. So are the visual areas of Wang et al. (2015), credited with the HCP 7T retinotopy dataset that distributes them; the change: each area carried from `fsaverage` onto this brain from the nearest vertex of the registered spheres, with a name's anchor chosen in each.
 
 ### AGPL-3.0 (visual field map)
 

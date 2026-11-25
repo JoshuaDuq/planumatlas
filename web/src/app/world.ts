@@ -37,6 +37,7 @@ import { createMapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import { createLesionStore } from '../lib/state/lesion.svelte.ts';
 import { createStrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import { createCorticalLayersStore } from '../lib/state/cortical-layers.svelte.ts';
+import { createRegionThicknessStore } from '../lib/state/cortical-thickness.svelte.ts';
 import { createUserMapStore } from '../lib/state/user-map.svelte.ts';
 import { createHighlights, showOverLift } from '../lib/state/highlights.svelte.ts';
 import { highlightStatus } from '../lib/core/state/paint.ts';
@@ -150,6 +151,16 @@ export async function composeWorld(
             .setSurfaceColor(color)
             .catch((error: unknown) => console.error(error)),
       },
+    });
+    const modelDirectory = new URL(
+      `${ASSET_BASE}models/${model.manifest.anatomy.id}/`,
+      globalThis.location.href,
+    );
+    // Published beside the manifest; downloaded when a cortical region's measurements first open.
+    const thicknessFile = model.manifest.cortical_thickness?.file;
+    const regionThickness = createRegionThicknessStore({
+      url: thicknessFile ? new URL(thicknessFile, modelDirectory) : null,
+      regions: model.regions,
     });
     // Published beside the manifest; downloaded when a cortical region's sheet first asks.
     const layersFile = model.manifest.cortical_layers?.file;
@@ -308,6 +319,7 @@ export async function composeWorld(
       userMap,
       highlights,
       corticalLayers,
+      regionThickness,
       mapOverlap,
       visualFieldMap,
       coordinates:

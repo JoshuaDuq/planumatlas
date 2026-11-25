@@ -31,6 +31,52 @@ test('MRI interpolation preserves a coordinate ramp and native voxel centers', (
   assert.equal(volume.linear([-1, 0, 0]), 0);
 });
 
+test('the labelled box reaches the outer faces of the non-zero voxels, through a permuted, scaled affine', () => {
+  const data = new Uint16Array(5 * 4 * 3);
+  for (const [x, y, z] of [
+    [1, 2, 0],
+    [3, 2, 1],
+  ])
+    data[x! + 5 * (y! + 4 * z!)] = 17;
+  const volume = new Volume(
+    {
+      shape: [5, 4, 3],
+      voxel_to_surface_ras_mm: [
+        [-1, 0, 0, 10],
+        [0, 0, 1, -20],
+        [0, -2, 0, 5],
+        [0, 0, 0, 1],
+      ],
+      order: 'F',
+    },
+    data,
+  );
+  assert.deepEqual(volume.labelledBox(), { min: [6.5, -20.5, 0], max: [9.5, -18.5, 2] });
+  assert.equal(
+    new Volume(
+      { shape: [2, 2, 2], voxel_to_surface_ras_mm: identity, order: 'F' },
+      new Uint8Array(8),
+    ).labelledBox(),
+    null,
+  );
+});
+
+test('SECT-39 on the published CDMD segmentation, the labelled box is the one nibabel measures on aseg.mgz', () => {
+  const record = readModel<{
+    segmentation: ConstructorParameters<typeof Volume>[0] & { file: string };
+  }>('cdmd/volumes.json').segmentation;
+  const data = gunzipSync(readFileSync(new URL(record.file, modelDirectory('cdmd'))));
+  const volume = new Volume(
+    record,
+    new Uint16Array(data.buffer, data.byteOffset, data.byteLength / 2),
+  );
+  // nibabel: aseg.mgz's non-zero voxels, ±0.5 voxel, through get_vox2ras_tkr().
+  assert.deepEqual(volume.labelledBox(), {
+    min: [-68.5, -85.5, -51.5],
+    max: [66.5, 66.5, 89.5],
+  });
+});
+
 test('segmentation sampling never invents intermediate labels', () => {
   const volume = ramp();
   assert.equal(volume.label([1.4, 1.4, 1.4]), 51);

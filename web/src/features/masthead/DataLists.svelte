@@ -15,6 +15,7 @@
   import type { PaletteSources } from '../../lib/core/panels/palettes.ts';
   import type { ModelPort } from '../../lib/core/state/ports.ts';
   import { atlasSwitchLabel, t, templateCopy } from '../../lib/core/i18n/index.ts';
+  import { DEFAULTS } from '../../lib/core/state/url-state.ts';
   import type {
     Language,
     LoadProgress,
@@ -37,6 +38,8 @@
     note: string | null;
     /** A colouring's own colours, drawn beside its name. */
     palette?: readonly Rgb[] | null;
+    /** What a first visit opens on: the manifest's first atlas, the default colour. */
+    isDefault?: boolean;
   }
 
   interface ChoiceGroup {
@@ -143,6 +146,7 @@
       name: atlasSwitchLabel(id, lang),
       aside: aside('atlas', id, atlasAside(lang, id, required(shown.colour, id))),
       note: line('atlas', id, shown.atlas, brief(id)),
+      isDefault: id === atlases[0],
     })),
   );
   const colourOptions = $derived<ChoiceGroup[]>([
@@ -172,6 +176,7 @@
         ),
         note: line('colour', mode, shown.colour, null),
         palette: palette(mode),
+        isDefault: mode === DEFAULTS.surfaceColor,
       })),
     })),
   ]);
@@ -238,7 +243,11 @@
               <span class="data-option-check">
                 {#if option.value === pressed}{@render iconGraphic('check')}{/if}
               </span>
-              <span class="data-option-name" id="{id}-name">{option.name}</span>
+              <span class="data-option-name" id="{id}-name"
+                >{option.name}{#if option.isDefault}{' '}<span class="data-option-default"
+                    >{copy.isDefault}</span
+                  >{/if}</span
+              >
               {#if option.palette}
                 <span class="data-option-palette" aria-hidden="true">
                   {#each option.palette as [r, g, b], index (index)}
@@ -266,15 +275,6 @@
 {@render list('colour', copy.colour, colourOptions, shown.colour, (value) =>
   onChoose('colour', value),
 )}
-{#if detailLevels.length > 1}
-  {@render list(
-    'detail',
-    display.internalAnatomy,
-    [{ options: detailOptions }],
-    shown.detail,
-    (value) => onChoose('detail', value),
-  )}
-{/if}
 <!-- Another subject reloads the page, so it waits for a download to land. -->
 {#if anatomies.length > 1}
   {@render list(
@@ -284,6 +284,15 @@
     anatomy.id,
     onAnatomy,
     switching,
+  )}
+{/if}
+{#if detailLevels.length > 1}
+  {@render list(
+    'detail',
+    display.internalAnatomy,
+    [{ options: detailOptions }],
+    shown.detail,
+    (value) => onChoose('detail', value),
   )}
 {/if}
 
@@ -297,33 +306,28 @@
     .data-field + .data-field {
       border-top: 1px solid var(--border-subtle);
     }
-    /*
-     * Two rows of two, ruled straight across: Atlas beside Colour, internal anatomy beside Subject. Every
-     * list is then in sight on a laptop; with Subject third down the left it lay under the fold there.
-     * A phone on its side has the width too.
-     */
+    /* Atlas and Colour start together. Subject and Internal anatomy stack under Atlas. */
     @media (min-width: 801px), (max-height: 480px) and (orientation: landscape) {
-      .data-field[data-field='atlas'],
-      .data-field[data-field='colour'] {
-        grid-row: 1;
-        border-top: 0;
+      .data-field {
+        padding-block: var(--space-2);
       }
-      .data-field[data-field='detail'],
+      .data-field[data-field='atlas'] {
+        grid-row: 1;
+      }
       .data-field[data-field='subject'] {
         grid-row: 2;
       }
-      .data-field[data-field='atlas'],
       .data-field[data-field='detail'] {
+        grid-row: 3;
+      }
+      .data-field:not([data-field='colour']) {
         grid-column: 1;
       }
-      .data-field[data-field='colour'],
-      .data-field[data-field='subject'] {
+      .data-field[data-field='colour'] {
+        grid-row: 1 / -1;
         grid-column: 2;
+        border-top: 0;
         border-left: 1px solid var(--border-subtle);
-      }
-      /* With one subject there is no fourth list, and the colour's rule runs the popover's height. */
-      .data-field[data-field='colour']:not(:has(~ [data-field='subject'])) {
-        grid-row: 1 / span 2;
       }
     }
     .data-label {
@@ -394,6 +398,10 @@
     .data-option-name {
       min-width: 0;
       font-variant-numeric: tabular-nums;
+    }
+    .data-option-default {
+      font-weight: 400;
+      color: var(--text-tertiary);
     }
     /* The colouring's own colours, as its key draws them, beside its name. */
     .data-option-palette {

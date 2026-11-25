@@ -44,6 +44,8 @@ export const en = {
     territory: 'Arterial territories',
     striatal: 'Striatal networks',
     cerebellar: 'Cerebellar functions',
+    thickness: 'Cortical thickness',
+    sulc: 'Sulcal depth',
   },
   // The Colour field's value while a tab paints the brain; it is never offered as a choice.
   paints: {
@@ -105,6 +107,14 @@ export const en = {
   mapOnCuts: 'Drawn on cut faces, voxel by voxel.',
   // The cerebellar map is drawn on the cerebellum's own surface too.
   mapOnCerebellum: 'Drawn on the cerebellum and its cut faces, voxel by voxel.',
+  // A measure's key: its range, then what the measure is.
+  keyRange: (low: string, high: string) => `${low} to ${high}`,
+  // Under Yeo's networks' key: the network matrix, a figure of its own.
+  networkMatrix: 'Correlation matrix',
+  thicknessNote:
+    'Measured on this scan by FreeSurfer. Densely myelinated cortex, as in the primary motor cortex, reads thinner than under the microscope.',
+  sulcNote:
+    'FreeSurfer’s depth: how far each point moved as the surface was inflated, outward in sulci (red), inward on gyral crowns (blue), around the hemisphere’s mean.',
   highlightKey: {
     title: 'Your highlights',
     note: (ground: KeyGround) =>
@@ -143,6 +153,8 @@ export const fr: typeof en = {
     territory: 'Territoires artériels',
     striatal: 'Réseaux striataux',
     cerebellar: 'Fonctions cérébelleuses',
+    thickness: 'Épaisseur corticale',
+    sulc: 'Profondeur sulcale',
   },
   paints: {
     function: 'Fonctions',
@@ -198,6 +210,12 @@ export const fr: typeof en = {
   changed: ', réglages modifiés',
   mapOnCuts: 'Tracées sur les faces de coupe, voxel par voxel.',
   mapOnCerebellum: 'Tracées sur le cervelet et ses faces de coupe, voxel par voxel.',
+  keyRange: (low: string, high: string) => `${low} à ${high}`,
+  networkMatrix: 'Matrice de corrélation',
+  thicknessNote:
+    'Mesurée sur cet examen par FreeSurfer. Le cortex très myélinisé, comme le cortex moteur primaire, y paraît plus mince qu’au microscope.',
+  sulcNote:
+    'Profondeur selon FreeSurfer : le déplacement de chaque point quand la surface est gonflée, vers l’extérieur dans les sillons (rouge), vers l’intérieur sur les crêtes des gyrus (bleu), autour de la moyenne de l’hémisphère.',
   highlightKey: {
     title: 'Vos surlignages',
     note: (ground: KeyGround) =>

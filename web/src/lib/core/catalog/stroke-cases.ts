@@ -113,20 +113,6 @@ export function reaching(data: StrokeCases, region: string, maxGap: number): Str
 }
 
 /**
- * Of these regions, the one the most lesions reach in any test window: the first of a tie, null when
- * none is reached. Stroke cases asked for with nothing selected open there (2026-11-20 review).
- */
-export function mostReached(data: StrokeCases, regions: readonly string[]): string | null {
-  let best: string | null = null;
-  let most = 0;
-  for (const region of regions) {
-    const count = reaching(data, region, Infinity).length;
-    if (count > most) [best, most] = [region, count];
-  }
-  return best;
-}
-
-/**
  * Lesions of a similar volume whose scores differ widely, lower score first. Widest gap first, and
  * each person appears in one pair only, so stepping through them does not keep showing one case.
  */

@@ -113,12 +113,15 @@ export function createFakeSections({
     ...manifest.atlases.map((atlas) => atlas.id),
     ...(manifest.cut_atlases ?? []).map((atlas) => atlas.id),
   ]);
-  const state: { -readonly [K in Exclude<keyof SectionsState, 'paint'>]: SectionsState[K] } = {
+  const state: {
+    -readonly [K in Exclude<keyof SectionsState, 'paint' | 'labels'>]: SectionsState[K];
+  } = {
     mode: 'off',
     cutAtlas: cutAtlasFor(model.state, cutAtlases),
     crosshair: [0, 0, 0],
     reverse: false,
     overlay: false,
+    colours: false,
     agreement: null,
     tilt: 30,
     azimuth: 30,
@@ -173,11 +176,20 @@ export function createFakeSections({
   const paint = () =>
     display && model.state.paint ? { id: model.state.paint.id, atlas: state.cutAtlas } : null;
 
+  /** The cut faces' colours and the selection's outline, as the linked MRI draws them once loaded. */
+  const labels = () => {
+    const selected = model.state.selectedRegion?.id ?? null;
+    return display && (state.colours || selected)
+      ? JSON.stringify([state.cutAtlas, state.colours, selected])
+      : null;
+  };
+
   /** A copy, so a listener comparing the last and next state sees a difference (sections.js:55 is live). */
   const snapshot = (): SectionsState => ({
     ...state,
     crosshair: [...state.crosshair],
     paint: paint(),
+    labels: labels(),
   });
 
   function emit() {
@@ -257,6 +269,10 @@ export function createFakeSections({
     get publishedWindow() {
       return display ? { ...publishedWindow } : null;
     },
+    // A fixed brain-sized box: the fake's MRI is a gradient with no labels to measure.
+    get labelBox() {
+      return display && { min: [-60, -90, -60] as Vec3, max: [60, 70, 80] as Vec3 };
+    },
     mriWindowLink(): MriWindow | null {
       if (!display) return null;
       const same =
@@ -308,11 +324,18 @@ export function createFakeSections({
       Object.assign(state, { tilt, azimuth });
       emit();
     },
-    setDisplay({ reverse = state.reverse, overlay = state.overlay } = {}) {
-      if (![reverse, overlay].every((value) => typeof value === 'boolean')) {
+    setDisplay({ reverse = state.reverse, overlay, colours } = {}) {
+      if (overlay === true && colours === true)
+        throw new TypeError('The linked MRI draws one overlay at a time.');
+      const next = {
+        reverse,
+        overlay: overlay ?? (colours ? false : state.overlay),
+        colours: colours ?? (overlay ? false : state.colours),
+      };
+      if (!Object.values(next).every((value) => typeof value === 'boolean')) {
         throw new TypeError('Section display options must be boolean.');
       }
-      Object.assign(state, { reverse, overlay });
+      Object.assign(state, next);
       emit();
     },
     async setAgreement(code) {
@@ -331,9 +354,9 @@ export function createFakeSections({
       emit();
     },
     async setSurfaceColor(mode: SurfaceColor, current = () => true) {
-      // As the real engine: the colour loads the T1 alone, not the linked MRI's volumes, and the
-      // cerebellar colour loads the map its surfaces draw.
-      if (mode === 'mri' || mode === 'cerebellar') {
+      // As the real engine: the colour loads the T1 alone, not the linked MRI's volumes, the
+      // cerebellar colour the map its surfaces draw, and thickness the cortex's own.
+      if (mode === 'mri' || mode === 'cerebellar' || mode === 'thickness') {
         state.status = 'loading';
         emit();
         await Promise.resolve();
@@ -343,7 +366,8 @@ export function createFakeSections({
           return;
         }
         if (mode === 'mri') model.attachMri();
-        else model.attachCerebellarMap();
+        else if (mode === 'cerebellar') model.attachCerebellarMap();
+        else model.attachThickness();
       }
       model.applySurfaceColor(mode);
       state.status = 'ready';

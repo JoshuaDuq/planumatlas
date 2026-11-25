@@ -6,6 +6,8 @@ import type {
   Rgb,
   SurfaceColor,
 } from '../../types/index.ts';
+import { SULC_RAMP } from '../catalog/sulcal-depth.ts';
+import { THICKNESS_RAMP } from '../catalog/thickness-ramp.ts';
 import { LOBE_COLORS } from '../catalog/lobes.ts';
 
 /** A partition with named colours: Yeo's networks, and CAB-NP's. */
@@ -20,6 +22,10 @@ export interface PaletteSources {
   cabNp?: NamedColours | null;
   territories?: Pick<ArterialTerritories, 'territories'> | null;
   cerebellar?: Pick<CerebellarFunctions, 'regions'> | null;
+  /** Present when the build publishes this brain's cortical thickness. */
+  thickness?: unknown;
+  /** Present when the cortex carries its sulcal depth's span (`appearance.field_ranges._SULC`). */
+  sulc?: unknown;
 }
 
 /**
@@ -41,6 +47,10 @@ export function colourPalette(mode: SurfaceColor, sources: PaletteSources): read
       return sources.territories?.territories.map(({ color }) => color) ?? null;
     case 'cerebellar':
       return sources.cerebellar?.regions.map(({ color }) => color) ?? null;
+    case 'thickness':
+      return sources.thickness ? THICKNESS_RAMP : null;
+    case 'sulc':
+      return sources.sulc ? SULC_RAMP : null;
     default:
       return null;
   }

@@ -27,11 +27,14 @@ export const en = {
     networks: 'Networks',
     subcortical: 'Subcortical maps',
     vascular: 'Blood supply',
+    morphometry: 'Morphometry',
   },
   // Said under the option, before it is chosen: what else choosing it changes.
   atlasBecomes: (atlas: string) => `Atlas becomes ${atlas}`,
   colourBecomes: (colour: string) => `Colour becomes ${colour}`,
   dataSummary: 'Atlas and display settings',
+  // Beside the atlas and colour a first visit opens on.
+  isDefault: '(Default)',
   // While a function or deficit shows its regions on another atlas than the reader's own.
   borrowedBy: { functions: 'via Functions', deficits: 'via Deficits' },
   borrowedNote: {
@@ -119,10 +122,12 @@ export const fr: typeof en = {
     networks: 'Réseaux',
     subcortical: 'Cartes sous-corticales',
     vascular: 'Vascularisation',
+    morphometry: 'Morphométrie',
   },
   atlasBecomes: (atlas: string) => `L’atlas devient ${atlas}`,
   colourBecomes: (colour: string) => `La couleur devient ${colour}`,
   dataSummary: 'Réglages de l’atlas et de l’affichage',
+  isDefault: '(par défaut)',
   borrowedBy: { functions: 'via Fonctions', deficits: 'via Déficits' },
   borrowedNote: {
     functions: (atlas: string, own: string) =>

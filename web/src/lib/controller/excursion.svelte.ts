@@ -259,14 +259,14 @@ export function createExcursions(
     if (!beforeExcursion || from === value) return;
     if (from !== 'functions' && from !== 'deficits') return;
     if (value === 'functions' || value === 'deficits') return;
-    await putBack();
+    await putBack({ confirm: false });
   }
 
   /**
    * The scene from before the excursion, back in the tab in front, which opens on its list. Held until
    * it lands, as Restore holds it, so one a later command overtook can still be restored.
    */
-  async function putBack(): Promise<void> {
+  async function putBack({ confirm }: { confirm: boolean }): Promise<void> {
     const current = commands.begin();
     const failures = await reader.apply(beforeExcursion!, current);
     if (!current()) return;
@@ -286,7 +286,7 @@ export function createExcursions(
       );
       return;
     }
-    session.notify({ kind: 'info', text: t(lang(), 'clinical').stageRestored });
+    if (confirm) session.notify({ kind: 'info', text: t(lang(), 'clinical').stageRestored });
   }
 
   /**
@@ -295,13 +295,13 @@ export function createExcursions(
    */
   async function closeDeficit(): Promise<void> {
     session.setDeficit(null);
-    if (beforeExcursion) return putBack();
+    if (beforeExcursion) return putBack({ confirm: true });
     render();
   }
 
   async function closeFunction(): Promise<void> {
     session.setFunction(null);
-    if (beforeExcursion) return putBack();
+    if (beforeExcursion) return putBack({ confirm: true });
     render();
   }
 
@@ -313,8 +313,12 @@ export function createExcursions(
    * What a reveal changed, what of it the framing cannot show, and any hint about seeing what it
    * revealed, as one notice; false when there was nothing to say.
    */
-  function sayRevealed(before: RevealSettings, unseen: string | null = null): boolean {
-    const said = revealNotice(lang(), before, revealSettings());
+  function sayRevealed(
+    before: RevealSettings,
+    unseen: string | null = null,
+    { atlasInProfile = false } = {},
+  ): boolean {
+    const said = revealNotice(lang(), before, revealSettings(), { atlasInProfile });
     if (!said && !unseen) return false;
     session.notify({ kind: 'info', text: [said, unseen].filter(Boolean).join(' '), action: null });
     return true;
@@ -399,7 +403,8 @@ export function createExcursions(
               .map(({ region }) => region),
           ),
     );
-    sayRevealed(before, unseenNotice(unseen));
+    // The profile status and masthead already identify the atlas it borrowed.
+    sayRevealed(before, unseenNotice(unseen), { atlasInProfile: true });
     render();
     return true;
   }

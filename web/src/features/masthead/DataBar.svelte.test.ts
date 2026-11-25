@@ -228,13 +228,14 @@ describe('DataBar lists', () => {
 
   test('every option is listed, colours in named groups, each saying what else it changes', async () => {
     const view = await wide();
-    expect(names('Atlas')).toEqual(['Destrieux', 'HCP-MMP', 'FreeSurfer aseg']);
+    // The opening atlas and colour say so; no other option does.
+    expect(names('Atlas')).toEqual(['Destrieux (Default)', 'HCP-MMP', 'FreeSurfer aseg']);
     // No paint option while no tab paints: assistive technology lists only real choices.
     expect(names('Colour')).toEqual([
       'Tissue',
       'T1 MRI',
       'Lobes',
-      'Regions',
+      'Regions (Default)',
       'Yeo 7 networks',
       'CAB-NP networks',
     ]);
@@ -259,7 +260,8 @@ describe('DataBar lists', () => {
     expect(strip('Yeo 7 networks')).toEqual(['rgb(120, 18, 134)', 'rgb(205, 62, 78)']);
     expect(strip('CAB-NP networks')).toEqual(['rgb(0, 0, 255)']);
     expect(strip('Lobes')).toHaveLength(9);
-    for (const name of ['Tissue', 'T1 MRI', 'Regions']) expect(strip(name), name).toEqual([]);
+    for (const name of ['Tissue', 'T1 MRI', 'Regions (Default)'])
+      expect(strip(name), name).toEqual([]);
     const yeo = option('Colour', 'Yeo 7 networks');
     expect(yeo.querySelector('.data-option-palette')!.getAttribute('aria-hidden')).toBe('true');
     await expect
@@ -278,7 +280,7 @@ describe('DataBar lists', () => {
         );
       }
     }
-    expect(chosen('Atlas')).toBe('Destrieux');
+    expect(chosen('Atlas')).toBe('Destrieux (Default)');
     expect(chosen('Colour')).toBe('Tissue');
   });
 
@@ -297,7 +299,7 @@ describe('DataBar lists', () => {
     await expect.poll(() => chosen('Atlas')).toMatch(/^HCP-MMP · Loading 34/);
     bar.status = 'ready';
     land();
-    await expect.poll(() => chosen('Atlas')).toBe('Destrieux');
+    await expect.poll(() => chosen('Atlas')).toBe('Destrieux (Default)');
   });
 
   test('a choice stays pressed before its download has begun', async () => {
@@ -335,7 +337,7 @@ describe('DataBar lists', () => {
   test('each list calls its command and the popover stays open; the pressed option calls nothing', async () => {
     const calls: string[] = [];
     await wide(barProps(), { calls });
-    await userEvent.click(option('Atlas', 'Destrieux'));
+    await userEvent.click(option('Atlas', 'Destrieux (Default)'));
     await userEvent.click(option('Atlas', 'FreeSurfer aseg'));
     await userEvent.click(option('Colour', 'T1 MRI'));
     await userEvent.click(option('Internal anatomy', 'NextBrain'));
@@ -352,7 +354,7 @@ describe('DataBar lists', () => {
   test('arrows move between options without choosing; Enter chooses (decision 0003)', async () => {
     const calls: string[] = [];
     await wide(barProps(), { calls });
-    option('Atlas', 'Destrieux').focus();
+    option('Atlas', 'Destrieux (Default)').focus();
     await userEvent.keyboard('{ArrowDown}');
     expect(document.activeElement).toBe(option('Atlas', 'HCP-MMP'));
     await userEvent.keyboard('{ArrowDown}');
@@ -525,10 +527,10 @@ describe('DataBar summary and popover', () => {
     await expect.element(list('Subject')).toBeVisible();
     expect(document.activeElement).toBe(el(summary()));
     for (const [name, stop] of [
-      ['Atlas', 'Destrieux'],
+      ['Atlas', 'Destrieux (Default)'],
       ['Colour', 'Tissue'],
-      ['Internal anatomy', 'Teaching set'],
       ['Subject', 'CDMD sub_013'],
+      ['Internal anatomy', 'Teaching set'],
     ]) {
       await userEvent.keyboard('{Tab}');
       expect(document.activeElement, name).toBe(option(name, stop));
@@ -539,27 +541,25 @@ describe('DataBar summary and popover', () => {
     expect(el(summary()).getAttribute('aria-expanded')).toBe('false');
   });
 
-  test('on a phone the colour follows the atlas, as it is read', async () => {
+  test('on a phone the fields stack in keyboard order', async () => {
     await phone();
     await summary().click();
     const top = (name: string) => el(list(name)).getBoundingClientRect().top;
     expect(top('Atlas')).toBeLessThan(top('Colour'));
-    expect(top('Colour')).toBeLessThan(top('Internal anatomy'));
-    expect(top('Internal anatomy')).toBeLessThan(top('Subject'));
+    expect(top('Colour')).toBeLessThan(top('Subject'));
+    expect(top('Subject')).toBeLessThan(top('Internal anatomy'));
   });
 
-  test('MAST-45 · on a wide window the lists stand two by two, each row ruled straight across', async () => {
+  test('MAST-45 · on a wide window the long Colour list leaves room for Subject and Internal anatomy beside it', async () => {
     await wide();
     const field = (name: string) =>
       el(list(name)).closest<HTMLElement>('.data-field')!.getBoundingClientRect();
     expect(field('Colour').left).toBeGreaterThanOrEqual(field('Atlas').right);
     expect(field('Colour').top).toBe(field('Atlas').top);
+    expect(field('Subject').left).toBe(field('Atlas').left);
+    expect(field('Subject').top).toBeCloseTo(field('Atlas').bottom);
     expect(field('Internal anatomy').left).toBe(field('Atlas').left);
-    expect(field('Subject').left).toBe(field('Colour').left);
-    expect(field('Subject').top).toBe(field('Internal anatomy').top);
-    expect(field('Subject').top).toBeGreaterThanOrEqual(
-      Math.max(field('Atlas').bottom, field('Colour').bottom),
-    );
+    expect(field('Internal anatomy').top).toBeCloseTo(field('Subject').bottom);
     const popover = bar().querySelector('.masthead-data')!.getBoundingClientRect();
     expect(popover.right).toBeLessThanOrEqual(window.innerWidth);
   });

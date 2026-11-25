@@ -20,13 +20,11 @@ import * as footer from './areas/footer.ts';
 import * as functional from './areas/functional.ts';
 import * as functions from './areas/functions.ts';
 import * as header from './areas/header.ts';
-import * as info from './areas/info.ts';
 import * as inspector from './areas/inspector.ts';
 import * as layers from './areas/layers.ts';
 import * as lesion from './areas/lesion.ts';
 import * as link from './areas/link.ts';
 import * as menu from './areas/menu.ts';
-import * as mpr from './areas/mpr.ts';
 import * as mri from './areas/mri.ts';
 import * as navigator from './areas/navigator.ts';
 import * as networks from './areas/networks.ts';
@@ -68,14 +66,12 @@ export const TRANSLATIONS = {
     footer: footer.en,
     functional: functional.en,
     functions: functions.en,
-    info: info.en,
     header: header.en,
     inspector: inspector.en,
     layers: layers.en,
     lesion: lesion.en,
     link: link.en,
     menu: menu.en,
-    mpr: mpr.en,
     mri: mri.en,
     navigator: navigator.en,
     networks: networks.en,
@@ -116,14 +112,12 @@ export const TRANSLATIONS = {
     footer: footer.fr,
     functional: functional.fr,
     functions: functions.fr,
-    info: info.fr,
     header: header.fr,
     inspector: inspector.fr,
     layers: layers.fr,
     lesion: lesion.fr,
     link: link.fr,
     menu: menu.fr,
-    mpr: mpr.fr,
     mri: mri.fr,
     navigator: navigator.fr,
     networks: networks.fr,

@@ -456,7 +456,7 @@
     /* The summary: caption and value for the subject, the atlas and the colour, on one line. */
     .data-bar .data-toggle {
       display: inline-flex;
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       align-items: center;
       gap: var(--space-2);
       min-width: 0;
@@ -467,7 +467,7 @@
       padding: var(--space-1) var(--space-2);
       border: 0;
       border-radius: var(--radius-control);
-      background: transparent;
+      background: var(--surface-navigation);
       color: var(--text-secondary);
       font-weight: 400;
       transition:
@@ -546,9 +546,9 @@
       top: calc(100% + var(--space-1));
       right: 0;
       display: none;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
       width: var(--data-width);
-      max-height: calc(100dvh - var(--header-height) - var(--space-4));
+      max-height: calc(100dvh - var(--header-height) - var(--footer-height) - var(--space-2));
       overflow-y: auto;
       overscroll-behavior: contain;
       --scroll-ground: var(--surface-base);
@@ -573,11 +573,6 @@
         transform: scale(0.97);
       }
     }
-    /* The lists' grid: two rows of two (DataLists.svelte). */
-    .masthead-data {
-      grid-template-rows: auto auto;
-    }
-
     /* A tract reference offers no choices: its name sits in the bar, with no popover behind it. */
     .data-bar[data-reference] .data-toggle {
       display: none;
@@ -627,7 +622,6 @@
         padding-left: var(--stage-gutter);
       }
       .data-bar .data-toggle {
-        flex: 0 1 auto;
         margin-left: calc(-1px - var(--space-2));
       }
       .masthead-data {
@@ -637,6 +631,13 @@
           calc(100vw - var(--rail-width) - var(--data-width) - var(--space-3))
         );
         transform-origin: top left;
+      }
+    }
+
+    @media (min-width: 801px), (max-height: 480px) and (orientation: landscape) {
+      .masthead-data {
+        /* The Colour list spans all three rows. The first two size to Atlas and Subject. */
+        grid-template-rows: max-content max-content 1fr;
       }
     }
 
@@ -656,10 +657,6 @@
             var(--space-3)
         );
       }
-      /* One list, in the order it is read. */
-      .masthead-data {
-        grid-template-rows: none;
-      }
       .data-label {
         display: none;
       }
@@ -678,9 +675,6 @@
         right: auto;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: min(640px, calc(100vw - 2 * var(--space-3)));
-      }
-      .masthead-data {
-        grid-template-rows: auto auto;
       }
     }
   }

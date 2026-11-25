@@ -1,5 +1,8 @@
 // What the stage's colour keys say and how they fit the stage (viewport-chrome.js:23-42, 269-402).
+import { SULC_RAMP } from '../../lib/core/catalog/sulcal-depth.ts';
+import { THICKNESS_RAMP } from '../../lib/core/catalog/thickness-ramp.ts';
 import { cabNpName, networkCss, networkName } from '../../lib/core/catalog/networks.ts';
+import { decimal, withUnit } from '../../lib/core/format.ts';
 import { t } from '../../lib/core/i18n/index.ts';
 import type { Legend } from '../../lib/core/state/paint.ts';
 import { modelUsable } from '../../lib/core/state/session.ts';
@@ -16,6 +19,8 @@ import type {
 /** A key longer than this many rows starts folded where the stage is crowded. */
 const KEY_FOLD_ROWS = 8;
 const KEY_FOLD_WIDTH_PX = 1000;
+/** Stage room to keep for the anatomy before expanding a phone's legend. */
+const PHONE_ANATOMY_ROOM_PX = 240;
 const KEY_ROW_PX = 24;
 const TOUCH_ROW_PX = 44;
 /** Narrower than this, a paint key keeps its rows and drops its note. */
@@ -50,6 +55,8 @@ export interface KeyPlate {
   note: string;
   /** Each row is a toggle that shows that row alone. */
   pickable: boolean;
+  /** A command under the rows that opens a figure of the map's own (Yeo's networks: their matrix). */
+  action?: { id: 'network-matrix'; label: string };
 }
 
 /** A partition with named colours: Yeo's networks and CAB-NP. */
@@ -68,6 +75,12 @@ export interface KeySources {
   territories?: readonly ArterialTerritory[] | null;
   /** The cerebellar functional regions, in the atlas's order, when the build publishes them. */
   cerebellar?: readonly CerebellarFunctionRegion[] | null;
+  /** The thickness key's ends in mm, when the build publishes this brain's cortical thickness. */
+  thickness?: readonly [number, number] | null;
+  /** The build publishes the network matrix (`manifest.network_matrix`). */
+  networkMatrix?: boolean;
+  /** The sulcal depth key's half-width in mm, centred on 0, when the cortex carries the depth's span. */
+  sulc?: number | null;
   /** The lobes of the atlas on screen, in key order (`lobeRows`); empty for an atlas grouped otherwise. */
   lobes?: readonly { id: string; color: Rgb; label: string }[] | null;
   /** The key of the paint on show (`legendFor`), or null. */
@@ -144,6 +157,10 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
       rows: partition.networks.map((key) => row(key, partition.colors[key]!, name(key, lang))),
       note: surfaceColor === 'striatal' ? onCuts : '',
       pickable: false,
+      ...(surfaceColor === 'network' &&
+        sources.networkMatrix && {
+          action: { id: 'network-matrix' as const, label: t(lang, 'display').networkMatrix },
+        }),
     });
   }
 
@@ -156,6 +173,52 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
         row(region.id, region.color, lang === 'fr' ? region.name_fr : region.name),
       ),
       note: t(lang, 'display').mapOnCerebellum,
+      pickable: false,
+    });
+  }
+
+  if (ready && !legend && surfaceColor === 'thickness' && sources.thickness) {
+    const [low, high] = sources.thickness;
+    const words = t(lang, 'display');
+    plates.push({
+      name: 'network',
+      map: surfaceColor,
+      title: maps[surfaceColor]!,
+      rows: [
+        {
+          ...row(
+            'thickness',
+            THICKNESS_RAMP[0]!,
+            words.keyRange(decimal(low, 1, lang), withUnit(decimal(high, 1, lang), 'mm', lang)),
+          ),
+          ramp: THICKNESS_RAMP.map(networkCss),
+        },
+      ],
+      note: words.thicknessNote,
+      pickable: false,
+    });
+  }
+
+  if (ready && !legend && surfaceColor === 'sulc' && sources.sulc) {
+    const words = t(lang, 'display');
+    plates.push({
+      name: 'network',
+      map: surfaceColor,
+      title: maps[surfaceColor]!,
+      rows: [
+        {
+          ...row(
+            'sulc',
+            SULC_RAMP[0]!,
+            words.keyRange(
+              decimal(-sources.sulc, 0, lang),
+              withUnit(decimal(sources.sulc, 0, lang, { signed: true }), 'mm', lang),
+            ),
+          ),
+          ramp: SULC_RAMP.map(networkCss),
+        },
+      ],
+      note: words.sulcNote,
       pickable: false,
     });
   }
@@ -269,9 +332,9 @@ export function keyHeight(plate: SizedPlate, { phone, coarse }: KeyDevice, open:
 /**
  * Whether a plate starts open when the reader has not folded it (viewport-chrome.js:304-320). A long
  * key starts folded to its title where the stage is narrow or its rows would not fit above the dock;
- * on a phone any key does where it would take more than half that room from the picture. Both weigh
- * the plate where it stands: under the `above` pixels the plates before it and their gaps take. `stage` is
- * null until the stage has a size.
+ * on a phone an expanded key uses at most half that room and leaves room for the anatomy. Weigh
+ * each plate under the `above` pixels taken by earlier plates and their gaps. `stage` is null until
+ * the stage has a size.
  */
 export function defaultOpen(
   plate: SizedPlate,
@@ -282,9 +345,10 @@ export function defaultOpen(
   const need = above + keyHeight(plate, device, true);
   const room = stage ? stage.height - 3 * stage.gutter - stage.dockHeight : -Infinity;
   const crowded = Boolean(stage?.width) && (stage!.width < KEY_FOLD_WIDTH_PX || need > room);
+  const phoneBudget = Math.min(room / 2, room - PHONE_ANATOMY_ROOM_PX);
   return !(
     (plate.count > KEY_FOLD_ROWS && crowded) ||
-    (device.phone && Boolean(stage?.height) && need > room / 2)
+    (device.phone && Boolean(stage?.height) && need > phoneBudget)
   );
 }
 

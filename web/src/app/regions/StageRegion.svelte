@@ -1,8 +1,10 @@
 <script lang="ts">
   import { hasContext, untrack } from 'svelte';
+  import { ASSET_BASE } from '../../../build/site.ts';
   import type { Snippet } from 'svelte';
   import { tractCatalog } from '../../lib/core/diffusion/catalogs.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
+  import { sulcExtent } from '../../lib/core/catalog/sulcal-depth.ts';
   import { visibilityOf } from '../../lib/core/catalog/visibility.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import { comparesMap, legendFor, paintFor, paintKind } from '../../lib/core/state/paint.ts';
@@ -11,6 +13,7 @@
   import type { CutMode, Explorer, ViewName } from '../../lib/types/index.ts';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
+  import { isKeyboardActivation } from '../../lib/ui/instant.ts';
   import { createMprDialog } from '../../features/sections/mpr-dialog.svelte.ts';
   import type MprDialog from '../../features/sections/MprDialog.svelte';
   import { createSectionControls } from '../../features/sections/section-controls.svelte.ts';
@@ -56,6 +59,11 @@
   // The Linked MRI's code is a chunk of its own, fetched the first time the dialog opens.
   let LinkedMri = $state<typeof MprDialog>();
   let fetchingLinkedMri = false;
+  // The network matrix and its wording are a chunk of their own (BUILD-15), fetched when first asked for.
+  let NetworkMatrix =
+    $state<typeof import('../../features/connectivity/NetworkMatrixDialog.svelte').default>();
+  let matrixOpen = $state(false);
+  let matrixInstant = $state(false);
 
   /** What the stage's controls reach, built once for the world they run in. */
   function controllers({ engine, engineState, session, commands, anatomy, excursions }: World) {
@@ -232,6 +240,21 @@
       (candidate) => candidate.querySelector('[id^="section-tool-"]'),
     );
     return tool?.checkVisibility() ? tool : canvas;
+  }
+
+  /** Yeo's networks' key's command. */
+  function openNetworkMatrix(event: MouseEvent) {
+    matrixInstant = isKeyboardActivation(event);
+    matrixOpen = true;
+    if (NetworkMatrix) return;
+    import('../../features/connectivity/NetworkMatrixDialog.svelte').then(
+      (module) => (NetworkMatrix = module.default),
+      (error: unknown) => {
+        // Closed again, so another press asks again; the failure itself surfaces.
+        matrixOpen = false;
+        throw error;
+      },
+    );
   }
 
   async function fetchLinkedMri({ mpr }: NonNullable<typeof stage>, { commands }: World) {
@@ -486,6 +509,8 @@
       cabNp={model.cabNp}
       territories={model.manifest.arterial_territories?.territories ?? null}
       cerebellar={model.manifest.cerebellar_functions?.regions ?? null}
+      thickness={model.manifest.cortical_thickness?.display_range_mm ?? null}
+      sulc={sulcExtent(model.manifest.appearance.field_ranges)}
       {lobes}
       legend={tractReference || (mapDrawn && !againstMap)
         ? null
@@ -531,6 +556,8 @@
       map={tractReference || againstMap ? null : mapKey(world.userMap, current.lang)}
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
+      networkMatrix={Boolean(model.manifest.network_matrix)}
+      onPlateAction={(_, event) => openNetworkMatrix(event)}
     />
   {/if}
   {#if fullscreen}
@@ -577,6 +604,21 @@
       tracts={current.anatomy === engine.tracts.anatomy
         ? { key: `${tractsEpoch}|${app.tractsMinimum}` }
         : null}
+    />
+  {/if}
+  {@const manifest = world.engine.model.manifest}
+  {@const networks = manifest.networks as ColoredNetworks | undefined}
+  {#if NetworkMatrix && manifest.network_matrix && networks}
+    <NetworkMatrix
+      bind:open={matrixOpen}
+      bind:instant={matrixInstant}
+      lang={current.lang}
+      url={new URL(
+        manifest.network_matrix.file,
+        new URL(`${ASSET_BASE}models/${manifest.anatomy.id}/`, globalThis.location.href),
+      )}
+      {networks}
+      fallbackFocus={() => engine.canvas}
     />
   {/if}
 {/if}

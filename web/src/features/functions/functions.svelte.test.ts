@@ -637,6 +637,8 @@ describe('the paint threshold (3.2)', () => {
     mount();
     await open('working-memory');
     const range = slider()!;
+    expect(range.checkVisibility()).toBe(true);
+    expect(range.closest('.paint-from')?.previousElementSibling?.matches('.meta')).toBe(true);
     expect(range.labels![0]!.textContent).toContain('Paint areas from z ≥');
     expect([range.min, range.step, range.value]).toEqual(['3', '0.5', '3']);
     // At the published threshold the paint and the lists agree, so no note stands under it.
@@ -658,6 +660,7 @@ describe('the paint threshold (3.2)', () => {
     );
     await open('attention');
     await expect.poll(() => slider()!.value).toBe('3');
+    expect(slider()!.checkVisibility()).toBe(true);
     expect(world.session.state.paintFrom).toBeNull();
   });
 
@@ -705,7 +708,7 @@ describe('areas', () => {
     await open(many().id);
     const all = domainAreas(world.domains, many().id);
     expect(document.querySelectorAll('.profile .areas > li').length).toBe(all.length);
-    const details = document.querySelector<HTMLDetailsElement>('.profile details')!;
+    const details = document.querySelector<HTMLDetailsElement>('.profile .more details')!;
     expect(details.open).toBe(false);
     expect(details.querySelector('summary')!.textContent).toBe(
       `${all.length - AREAS_SHOWN} more areas`,
@@ -723,7 +726,7 @@ describe('areas', () => {
       (d) => domainAreas(world.domains, d.id).length > AREAS_SHOWN,
     )[1]!;
     await open(second.id);
-    expect(document.querySelector<HTMLDetailsElement>('details')!.open).toBe(false);
+    expect(document.querySelector<HTMLDetailsElement>('.profile .more details')!.open).toBe(false);
   });
 
   test('an area button is named by what it shows: name, side, division, z', async () => {

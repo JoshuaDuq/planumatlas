@@ -77,14 +77,17 @@ test('the status bar keeps the not-clinical statement in every state', () => {
   }
 });
 
-test('Colour groups appearance, the lobes and atlas regions, networks and blood supply', () => {
-  const all = { networks: {}, cabNp: {}, territories: {} };
+test('Colour groups appearance, the lobes and atlas regions, networks, blood supply and morphometry', () => {
+  const all = { networks: {}, cabNp: {}, territories: {}, thickness: {}, sulc: [-14, 17] };
   assert.deepEqual(colourGroups(all), [
     ['appearance', ['tissue', 'mri']],
     ['parcellation', ['lobe', 'atlas']],
     ['networks', ['network', 'cab-np']],
     ['vascular', ['territory']],
+    ['morphometry', ['thickness', 'sulc']],
   ]);
+  // The template publishes no thickness, but every cortex carries its sulcal depth.
+  assert.deepEqual(colourGroups({ sulc: [-12, 16] }).at(-1), ['morphometry', ['sulc']]);
   assert.deepEqual(
     colourGroups({ networks: {} }),
     [

@@ -3,6 +3,7 @@
   the overlay writes, and the keys. Not shipped.
 -->
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
   import type { Legend } from '../../lib/core/state/paint.ts';
   import type { Media } from '../../lib/state/media.svelte.ts';
   import type { StageLayout } from '../../lib/state/stage-layout.svelte.ts';
@@ -24,6 +25,8 @@
       media: Pick<Media, 'phone' | 'coarsePointer'>;
     };
     onPaintPick?: (id: string | null) => void;
+    networkMatrix?: boolean;
+    onPlateAction?: ComponentProps<typeof StageKeys>['onPlateAction'];
     /** The stage's size in CSS pixels. */
     width?: number;
     height?: number;
@@ -33,7 +36,16 @@
 
   let keys: StageKeys;
 
-  let { stage, live, onPaintPick = () => {}, width = 1200, height = 800, handle }: Props = $props();
+  let {
+    stage,
+    live,
+    onPaintPick = () => {},
+    networkMatrix = false,
+    onPlateAction,
+    width = 1200,
+    height = 800,
+    handle,
+  }: Props = $props();
 
   $effect(() => {
     if (handle) handle.model = () => keys.model();
@@ -65,6 +77,8 @@
     legend={live.legend}
     directionShown={live.directionShown}
     {onPaintPick}
+    {networkMatrix}
+    {onPlateAction}
   />
 </main>
 

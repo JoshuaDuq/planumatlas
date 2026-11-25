@@ -75,16 +75,17 @@ export function revealNotice(
   lang: Language,
   before: RevealSettings,
   after: RevealSettings,
+  { atlasInProfile = false }: { atlasInProfile?: boolean } = {},
 ): string | null {
   const said = t(lang, 'clinical').changed;
   const clauses: string[] = [];
   if (before.cut && !after.cut) clauses.push(said.cut);
   if (before.isolated && !after.isolated) clauses.push(said.isolation);
   const atlasMoved = before.atlas !== after.atlas;
-  if (atlasMoved) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
+  if (atlasMoved && !atlasInProfile) clauses.push(said.atlas(atlasSwitchLabel(after.atlas, lang)));
   // Lobes that gave way to an atlas without any are that atlas's doing, which its clause has said.
   const lobesGaveWay = before.colour === 'lobe' && atlasMoved && !groupsByLobe(after.atlas);
-  if (before.colour !== after.colour && !lobesGaveWay) {
+  if (before.colour !== after.colour && (!lobesGaveWay || atlasInProfile)) {
     clauses.push(said.colour(t(lang, 'display').surfaceColors[after.colour]));
   }
   if (before.detail !== after.detail) {

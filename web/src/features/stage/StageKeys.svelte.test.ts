@@ -82,7 +82,14 @@ function mount(
     width = 1200,
     height = 800,
     sized = true,
-  }: { width?: number; height?: number; sized?: boolean } = {},
+    ...keys
+  }: {
+    width?: number;
+    height?: number;
+    sized?: boolean;
+    networkMatrix?: boolean;
+    onPlateAction?: (id: 'network-matrix', event: MouseEvent) => void;
+  } = {},
 ) {
   stage = createStageLayout({ media: { phone: false }, onDock, storage: null });
   stage.setGutter(12);
@@ -101,7 +108,7 @@ function mount(
   });
   live = reactive;
   handle = {};
-  return render(Fixture, { stage, live, onPaintPick, width, height, handle });
+  return render(Fixture, { stage, live, onPaintPick, width, height, handle, ...keys });
 }
 
 const find = <T extends HTMLElement = HTMLElement>(selector: string) =>
@@ -231,12 +238,12 @@ describe('folding', () => {
     expect(model()[0]!.open).toBe(false);
   });
 
-  test('on a phone a key folds where, under the keys above it, it would take more than half the room', async () => {
+  test('on a phone a key folds if the keys above it leave too little room for the anatomy', async () => {
     const phone = { phone: true, coarsePointer: false };
-    // Room 380 - 3 × 12 - 38 = 306 px, half 153. The direction key alone takes 42 + 3 × 24 = 114 px.
+    // 450 - 3 × 12 - 38 - 240 = 136 px for keys. The direction key takes 114 px on its own.
     mount(
       { surfaceColor: 'atlas', directionShown: true, media: phone },
-      { width: 390, height: 380 },
+      { width: 390, height: 450 },
     );
     await expect
       .element(toggle('Local streamline direction'))
@@ -245,12 +252,40 @@ describe('folding', () => {
     // Under CAB-NP folded to its title and the gap (42 + 8 px) it would reach 164 px.
     mount(
       { surfaceColor: 'cab-np', directionShown: true, media: phone },
-      { width: 390, height: 380 },
+      { width: 390, height: 450 },
     );
     await expect.element(toggle('CAB-NP networks')).toHaveAttribute('aria-expanded', 'false');
     await expect
       .element(toggle('Local streamline direction'))
       .toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('a phone key follows the sheet’s resting size and honors a manual choice', async () => {
+    mount(
+      { surfaceColor: 'atlas', directionShown: true, media: { phone: true, coarsePointer: true } },
+      { width: 390, height: 600 },
+    );
+    const key = toggle('Local streamline direction');
+    const size = { width: 390, height: 600 };
+    stage.recordSheetRoom();
+    await expect.element(key).toHaveAttribute('aria-expanded', 'true');
+
+    // The drag changed the visible rectangle, but the sheet is still moving under the finger.
+    stage.setViewport({ ...size, x: 0, y: 0, height: 380 }, size);
+    await tick();
+    expect(key.element().getAttribute('aria-expanded')).toBe('true');
+    stage.recordSheetRoom();
+    await expect.element(key).toHaveAttribute('aria-expanded', 'false');
+
+    stage.setViewport({ ...size, x: 0, y: 0 }, size);
+    stage.recordSheetRoom();
+    await expect.element(key).toHaveAttribute('aria-expanded', 'true');
+    await key.click();
+    stage.setViewport({ ...size, x: 0, y: 0, height: 380 }, size);
+    stage.recordSheetRoom();
+    stage.setViewport({ ...size, x: 0, y: 0 }, size);
+    stage.recordSheetRoom();
+    await expect.element(key).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('a resize does not refold a key the stage has already drawn', async () => {
@@ -259,6 +294,18 @@ describe('folding', () => {
     stage.setViewport({ x: 0, y: 0, width: 800, height: 800 }, { width: 800, height: 800 });
     await tick();
     expect(toggle('CAB-NP networks').element().getAttribute('aria-expanded')).toBe('true');
+  });
+
+  test('a phone key updates when the viewport resizes after the sheet reported its rest', async () => {
+    mount(
+      { surfaceColor: 'atlas', directionShown: true, media: { phone: true, coarsePointer: true } },
+      { width: 390, height: 600 },
+    );
+    const key = toggle('Local streamline direction');
+    stage.recordSheetRoom();
+    await expect.element(key).toHaveAttribute('aria-expanded', 'true');
+    stage.setViewport({ x: 422, y: 0, width: 422, height: 338 }, { width: 844, height: 338 });
+    await expect.element(key).toHaveAttribute('aria-expanded', 'false');
   });
 });
 
@@ -630,5 +677,20 @@ describe('targets, reflow and the stage’s colours', () => {
     mount({ legend: picked(DEFICIT, 'f1') });
     await expect.element(page.getByRole('toolbar', { name: 'Aphasia' })).toBeVisible();
     await expectAxeClean();
+  });
+});
+
+describe('NETM-03 Yeo’s networks’ key', () => {
+  test('ends with the correlation matrix, which its command asks for, where it is published', async () => {
+    const onPlateAction = vi.fn();
+    await mount({}, { networkMatrix: true, onPlateAction });
+    const command = page.getByRole('button', { name: 'Correlation matrix' });
+    await expect.element(command).toHaveAttribute('aria-haspopup', 'dialog');
+    await command.click();
+    expect(onPlateAction).toHaveBeenCalledOnce();
+    expect(onPlateAction.mock.calls[0]![0]).toBe('network-matrix');
+    cleanup();
+    await mount({}, { networkMatrix: false, onPlateAction });
+    expect(page.getByRole('button', { name: 'Correlation matrix' }).elements()).toHaveLength(0);
   });
 });

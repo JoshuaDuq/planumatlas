@@ -795,3 +795,78 @@ test("a paint whose labels fail to load is logged once, is not the cut's failure
   assert.equal(loads, 2);
   error.mockRestore();
 });
+
+test('SECT-47 the selection is drawn by the cut’s labels when they hold it, else by the grid that holds the regions it gathers', async () => {
+  const { model, tissues, sections } = fixture();
+  const metadata = {
+    shape: [4, 4, 4],
+    order: 'F',
+    voxel_to_surface_ras_mm: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ],
+  };
+  // Destrieux labels the putamen of aseg on the last column; NextBrain its own putamen on the first.
+  const grid = (column: number) =>
+    new Volume(
+      metadata,
+      new Uint16Array(64).map((_, index) => (index % 4 === column ? 1 : 0)),
+    );
+  const atlases = {
+    destrieux: { labels: [{ region_id: null }, { region_id: 'aseg:left:12' }] },
+    nextbrain: { labels: [{ region_id: null }, { region_id: 'nextbrain:left:79' }] },
+  };
+  tissues.layers = new Map([
+    ['destrieux', { volume: grid(3), metadata: atlases.destrieux }],
+    ['nextbrain', { volume: grid(0), metadata: atlases.nextbrain }],
+  ]);
+  tissues.loadMetadata = async () => {};
+  tissues.metadata = { atlases };
+  tissues.labelColours = () => [null, [200, 40, 0]];
+  sections.volumes = {
+    metadata: { labels: { 0: { name: 'Unknown', color: [0, 0, 0] } } },
+    mri: new Volume(metadata, new Uint8Array(64).fill(100)),
+    segmentation: new Volume(metadata, new Uint16Array(64)),
+  } as never;
+  sections.display = { fieldOfView: 4, size: 4, windowCenter: 127.5, windowWidth: 255 } as never;
+  const row = () =>
+    Array.from(
+      sections.pixels(sections.slice(createFrame('axial', [1.5, 1.5, 1]))).slice(0, 16),
+    ).filter((_, index) => index % 4 === 0);
+  const select = (region: object | null) => {
+    model.state.selectedRegion = region;
+    model.dispatchEvent(new Event('change'));
+  };
+
+  // A teaching-set region: Destrieux does not hold it, NextBrain holds what it gathers.
+  select({ id: 'learning:left:putamen', constituent_regions: ['nextbrain:left:79'] });
+  await vi.waitFor(() =>
+    assert.deepEqual(JSON.parse(sections.state.labels!), [
+      'destrieux',
+      null,
+      ['learning:left:putamen', 'nextbrain'],
+    ]),
+  );
+  // Red channel: x = 0 inside and outlined, x = 1 outlined across the edge, then the scan.
+  assert.deepEqual(row(), [127, 127, 100, 100]);
+  select({ id: 'aseg:left:12' });
+  await vi.waitFor(() => assert.match(sections.state.labels!, /"destrieux"\]\]$/));
+  assert.deepEqual(row(), [100, 100, 127, 127]);
+  select(null);
+  await vi.waitFor(() => assert.equal(sections.state.labels, null));
+  assert.deepEqual(row(), [100, 100, 100, 100]);
+
+  // The colours by the cut's labels, turning the overlay off; the overlay turns them off again.
+  sections.setDisplay({ overlay: true });
+  sections.setDisplay({ colours: true });
+  assert.equal(sections.state.overlay, false);
+  await vi.waitFor(() => assert.notEqual(sections.state.labels, null));
+  // 100 × 0.55 + 200 × 0.45 on the column Destrieux labels.
+  assert.deepEqual(row(), [100, 100, 100, 145]);
+  sections.setDisplay({ overlay: true });
+  assert.equal(sections.state.colours, false);
+  await vi.waitFor(() => assert.equal(sections.state.labels, null));
+  assert.throws(() => sections.setDisplay({ overlay: true, colours: true }), TypeError);
+});

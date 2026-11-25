@@ -282,6 +282,7 @@
         paintDisorder={current.explorer === 'anatomy' ? excursions.showDisorder : null}
         restoreDisorder={() => session.setDisorderShown(null)}
         corticalLayers={world.corticalLayers.available ? world.corticalLayers : null}
+        regionThickness={manifest.cortical_thickness ? world.regionThickness : null}
         layersPainted={layersShownNow}
         paintLayers={current.explorer === 'anatomy' ? () => session.setLayersShown(true) : null}
         restoreLayers={() => session.setLayersShown(false)}

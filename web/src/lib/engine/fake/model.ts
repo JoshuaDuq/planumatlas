@@ -22,6 +22,7 @@ import type {
 import { belongsToDetail, visibilityOf } from '../../core/catalog/visibility.ts';
 import { labelOf } from '../../core/catalog/labels.ts';
 import { groupsByLobe } from '../../core/catalog/lobes.ts';
+import { sulcExtent } from '../../core/catalog/sulcal-depth.ts';
 import { coded, sameSet } from './support.ts';
 
 type FakeFile = { atlas: string; [field: string]: unknown };
@@ -66,6 +67,8 @@ export interface FakeModel extends EngineModel {
   attachMri(): void;
   /** The map the cerebellar surfaces draw (`BrainAtlas.setCerebellarMap`). */
   attachCerebellarMap(): void;
+  /** The shown atlas's cortex carries its thickness (`BrainAtlas.ensureThickness`). */
+  attachThickness(): void;
   dispose(): void;
 }
 
@@ -113,6 +116,8 @@ export function createFakeModel({
   let spinalCord: SpinalCordLoad = 'unloaded';
   let mri = false;
   let cerebellarMapped = false;
+  // The atlases whose cortex carries its thickness.
+  const thickened = new Set<string>();
   let disposed = false;
   let selectedId: string | null = null;
 
@@ -520,6 +525,8 @@ export function createFakeModel({
       release(manifest.atlases, [id, previous.atlas]);
       if (values.surfaceColor === 'cab-np' && id !== cabNp?.atlas) values.surfaceColor = 'atlas';
       if (values.surfaceColor === 'lobe' && !groupsByLobe(id)) values.surfaceColor = 'atlas';
+      // As the real model: shown, the thickness comes with the atlas.
+      if (values.surfaceColor === 'thickness') thickened.add(id);
       values.isolatedRegion = null;
       select(null);
     },
@@ -577,6 +584,12 @@ export function createFakeModel({
         throw new Error('This model carries no cerebellar functional regions.');
       if (mode === 'cerebellar' && !cerebellarMapped)
         throw new Error('The cerebellar map must load before the cerebellar surfaces draw it.');
+      if (mode === 'sulc' && sulcExtent(manifest.appearance.field_ranges) === null)
+        throw new Error('This model publishes no span for its sulcal depth.');
+      if (mode === 'thickness' && !manifest.cortical_thickness)
+        throw new Error('This model carries no cortical thickness.');
+      if (mode === 'thickness' && !thickened.has(values.atlas))
+        throw new Error('The cortical thickness must load before the cortex draws it.');
       if (mode === 'lobe' && !groupsByLobe(values.atlas)) {
         throw new Error(`${values.atlas} groups no regions by lobe; show a lobe atlas first.`);
       }
@@ -610,6 +623,11 @@ export function createFakeModel({
     },
     attachCerebellarMap() {
       cerebellarMapped = true;
+    },
+    attachThickness() {
+      if (!manifest.cortical_thickness)
+        throw new Error('This model carries no cortical thickness.');
+      thickened.add(values.atlas);
     },
     dispose() {
       disposed = true;

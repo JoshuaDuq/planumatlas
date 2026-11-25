@@ -4977,6 +4977,25 @@
       "amygdala right": 0.8497
     }
   },
+  "network_matrix": {
+    "row_order": {
+      "rho": -0.2304,
+      "null_min": -0.065,
+      "null_max": 0.0603,
+      "permutations": 1000,
+      "seed": 20261124,
+      "passed": true
+    },
+    "within_exceeds": {
+      "Vis": true,
+      "SomMot": true,
+      "DorsAttn": true,
+      "SalVentAttn": true,
+      "Limbic": false,
+      "Cont": true,
+      "Default": true
+    }
+  },
   "arousal_nuclei": {
     "method": "segment-aan",
     "checks": {
@@ -5288,6 +5307,12 @@
     "regions": 1220,
     "cell_regions": 24
   },
+  "cortical_thickness": {
+    "largest_difference_from_freesurfer_tables_mm": {
+      "desikan": 0.0005,
+      "destrieux": 0.0005
+    }
+  },
   "volumes": {
     "mri": {
       "file": "mri.volume",
@@ -5517,7 +5542,9 @@
     "striatal_networks",
     "retinotopy",
     "stroke_cases",
-    "arousal_nuclei"
+    "arousal_nuclei",
+    "cortical_thickness",
+    "network_matrix"
   ],
   "published_files": [
     "arousal-nuclei.glb",
@@ -5544,12 +5571,14 @@
     "cortex-julich.glb",
     "cortex-schaefer.glb",
     "cortical-layers.json",
+    "cortical-thickness.json",
     "disorder-effects.json",
     "functional-connectivity.json",
     "functional-regions.json",
     "learning.glb",
     "manifest.json",
     "mri.volume",
+    "network-connectivity.json",
     "neuropsych-domains.json",
     "neurosynth-terms.json",
     "nextbrain-compared.volume",
@@ -5568,6 +5597,11 @@
     "stroke-cases.json",
     "stroke-cases.masks",
     "structures.glb",
+    "thickness-desikan.field",
+    "thickness-destrieux.field",
+    "thickness-hcp-mmp.field",
+    "thickness-julich.field",
+    "thickness-schaefer.field",
     "tissue-envelopes.glb",
     "tissue-labels.json",
     "tissues-arterial.volume",

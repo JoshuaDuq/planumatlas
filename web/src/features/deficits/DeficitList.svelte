@@ -135,9 +135,6 @@
       {@const links = explorer.clinicalLinks}
       <ul class="clinical-links">
         <li><LinkRow name={text.simulateLesion} onclick={links.simulateLesion} /></li>
-        {#if links.showStrokeCases}
-          <li><LinkRow name={t(lang, 'strokeCases').heading} onclick={links.showStrokeCases} /></li>
-        {/if}
       </ul>
     {/if}
     {#if atRegion.length}

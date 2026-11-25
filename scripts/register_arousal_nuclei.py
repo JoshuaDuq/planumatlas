@@ -3,7 +3,7 @@
 Dryad serves the atlas only to a browser or an API token, so its archive is downloaded
 by hand; `check` verifies every file against Dryad's own SHA-256 list, and says how to
 download it when files are missing. Two methods place the same ten nuclei, each run
-alone, its labels and checks written under data/cache/arousal-nuclei/<method>/:
+alone, its labels and checks written under data/cache/arousal-nuclei/<anatomy>/<method>/:
 
 - `synthmorph`: FSL's MNI152 (MNI152NLin6Asym), skull-stripped, registered to the
   anatomy's brain.mgz with SynthMorph (joint affine and deformable); the release's
@@ -137,8 +137,9 @@ def freesurfer(home, command, *arguments, subjects=None):
 
 
 def peak_memory_gb():
-    """The largest resident set of any finished child process so far (macOS reports bytes)."""
-    return round(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1e9, 2)
+    """The largest resident set of any finished child process so far (macOS reports bytes, Linux KiB)."""
+    peak = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+    return round(peak * (1 if sys.platform == "darwin" else 1024) / 1e9, 2)
 
 
 def run_synthmorph(config, definition, args, work):
@@ -178,7 +179,7 @@ def run_synthmorph(config, definition, args, work):
 
 
 def run_segment_aan(config, definition, args, work):
-    recon = args.recon
+    recon = args.recon or ROOT / "data/cache/freesurfer-subjects" / config["anatomy"]["id"]
     subjects = work / "subjects"
     subject = subjects / config["anatomy"]["id"]
     for pattern in SEGMENT_AAN_INPUTS:
@@ -216,9 +217,14 @@ def run(method, args):
     config = read_config(args.anatomy)
     definition = arousal_nuclei.read_definition()
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
-    output = arousal_nuclei.method_directory(method)
+    # An anatomy reconstructed elsewhere is registered with the build it declares, except by SegmentAAN:
+    # every Linux 8.2.0 build ships its compiled program as an empty file, so it runs on the macOS one.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if method == "segment-aan":
+        expected = config["freesurfer_build"]
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
+    output = arousal_nuclei.method_directory(config, method)
     output.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
     # Worked on the internal disk; only the results go to the cache drive.
@@ -251,13 +257,13 @@ def publish(args):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the arousal_nuclei layer")
     reports = {}
     for method in METHODS:
-        path = arousal_nuclei.method_directory(method) / "report.json"
+        path = arousal_nuclei.method_directory(config, method) / "report.json"
         if path.exists():
             reports[method] = json.loads(path.read_text())
     if "synthmorph" not in reports:
         raise SystemExit("Run the synthmorph method first")
     for method, report in reports.items():
-        labels = arousal_nuclei.method_directory(method) / "labels.mgz"
+        labels = arousal_nuclei.method_directory(config, method) / "labels.mgz"
         if sha256(labels) != report["labels_sha256"]:
             raise SystemExit(f"{labels} changed since its report")
         # The gates are measured again here, not taken from the report.
@@ -268,8 +274,8 @@ def publish(args):
         for method, report in reports.items():
             print(method, arousal_nuclei.failures(report["checks"], definition))
         raise SystemExit("No method passes the fixed gates; the layer is not published")
-    carried = nib.load(arousal_nuclei.method_directory(chosen) / "labels.mgz")
-    shutil.copyfile(arousal_nuclei.method_directory(chosen) / "labels.mgz", arousal_nuclei.carried_path(config))
+    carried = nib.load(arousal_nuclei.method_directory(config, chosen) / "labels.mgz")
+    shutil.copyfile(arousal_nuclei.method_directory(config, chosen) / "labels.mgz", arousal_nuclei.carried_path(config))
     grid = arousal_nuclei.label_grid(config, arousal_nuclei.carried_path(config))
     kept = arousal_nuclei.keep(config, definition, grid)
     header = carried.header.copy()
@@ -323,8 +329,9 @@ def main():
     parser.add_argument("--anatomy", help="place the nuclei on this declared anatomy instead of the selected one")
     parser.add_argument("--freesurfer", type=Path,
                         default=Path(os.environ.get("FREESURFER_HOME", "/Applications/freesurfer/8.2.0")))
-    parser.add_argument("--recon", type=Path, default=ROOT / "data/cache/freesurfer-subjects/cdmd",
-                        help="the full recon-all subject directory SegmentAAN reads")
+    parser.add_argument("--recon", type=Path,
+                        help="the full recon-all subject directory SegmentAAN reads "
+                             "(default data/cache/freesurfer-subjects/<anatomy>)")
     parser.add_argument("--threads", type=int, default=min(8, os.cpu_count() or 1))
     parser.add_argument("--record", action="store_true", help="add the published files to data/sources.json")
     args = parser.parse_args()

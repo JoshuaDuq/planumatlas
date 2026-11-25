@@ -6,7 +6,6 @@
   import { keyGround } from '../../lib/core/state/paint.ts';
   import { reloadWithoutStoredModels } from '../../lib/core/assets/published-assets.ts';
   import { documentTitle, offeredNotice, searchLabel } from '../../lib/core/workspace.ts';
-  import { mostReached, reaching } from '../../lib/core/catalog/stroke-cases.ts';
   import type { ContextSelection, WorkspaceView } from '../../lib/core/workspace.ts';
   import type { ChromeInsets, ChromeMotion } from '../../lib/engine/api.ts';
   import type { Explorer, Language, Notice, ViewName } from '../../lib/types/index.ts';
@@ -43,7 +42,6 @@
     excursions,
     lesson,
     visualFieldMap,
-    strokeCases,
     mapOverlap,
   }: World) {
     const { domains, functionalRegions } = engine.model;
@@ -73,7 +71,6 @@
           flushSync();
           app!.ports.openStageTool('lesion');
         },
-        showStrokeCases: strokeCases.available ? showStrokeCases : null,
       },
     });
     const lessons = createCircuitExplorer({
@@ -160,59 +157,6 @@
     return lesson.circuit ? world.circuits.get(lesson.circuit).name[language] : null;
   });
 
-  /** Stroke cases was pressed with nothing selected while the cohort downloaded: it goes on once read. */
-  let strokeCasesAsked = $state(false);
-  $effect(() => {
-    const status = world?.strokeCases.cohort.status;
-    if (!strokeCasesAsked || status === 'idle' || status === 'loading') return;
-    untrack(() => {
-      strokeCasesAsked = false;
-      // Leaving the Deficits tab meanwhile withdrew the ask.
-      if (world!.view.current.explorer === 'deficits') showStrokeCases();
-    });
-  });
-
-  /**
-   * The Deficits list's Stroke cases: the selected region's cases, opened in its detail. With nothing
-   * selected, they open on the region shown that the most lesions reach, and the notice says why
-   * (2026-11-20 review); where no case reaches the selection, the notice says so.
-   */
-  function showStrokeCases() {
-    const { session, view, strokeCases, catalog, anatomy } = world!;
-    const copy = t(view.current.lang, 'clinical');
-    const { cohort } = strokeCases;
-    const selected = view.current.selectedRegion?.id;
-    if (!selected) {
-      if (cohort.status === 'idle' || cohort.status === 'loading') {
-        strokeCasesAsked = true;
-        strokeCases.load();
-        return;
-      }
-      const shown = catalog.groups.flatMap((group) => group.rows).filter((row) => row.visible);
-      const region =
-        cohort.status === 'ready'
-          ? mostReached(
-              cohort.data,
-              shown.map((row) => row.region.id),
-            )
-          : null;
-      if (region === null) {
-        session.notify({ kind: 'info', text: copy.strokeSelect });
-        return;
-      }
-      anatomy.selectRegion(region);
-      // The section withdraws an ask made under another region: it sees this one first.
-      flushSync();
-      session.notify({ kind: 'info', text: copy.strokeMost(catalog.label(region).name) });
-    } else if (cohort.status === 'ready' && !reaching(cohort.data, selected, Infinity).length) {
-      session.notify({ kind: 'info', text: copy.strokeNone(catalog.label(selected).name) });
-      return;
-    }
-    strokeCases.reveal();
-    workspace!.showDetail();
-    sheet?.raise();
-  }
-
   /** The strip's clear takes the region first, then the function or deficit it sits under (app.js:1563-1569). */
   function clearContext() {
     const { anatomy, excursions, view } = world!;
@@ -262,6 +206,7 @@
     camera.setChromeInsets(insets, motion);
     app!.stage.setViewport(camera.visibleRect, camera.hostSize);
     if (!motion.settle) return;
+    if (app!.media.phone) app!.stage.recordSheetRoom();
     if (own) camera.keepFraming(fitBefore!);
     fitBefore = null;
   }

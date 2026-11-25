@@ -1,9 +1,8 @@
 /**
  * How far a cut face is lifted toward white when it is pointed at or chosen.
  *
- * A lift rather than an outline: the outline passes draw a silhouette from
- * an unclipped depth render, so on a cut they would ring the whole solid
- * instead of the face, and the cap they would ring is one shared quad.
+ * The outline rings a region's surface; a cap is not a region's mesh, so its
+ * face is lifted instead.
  */
 export const HIGHLIGHT_LIFT = { hovered: 0.26, selected: 0.45 } as const;
 

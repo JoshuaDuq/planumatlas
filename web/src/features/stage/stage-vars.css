@@ -5,6 +5,48 @@
  * StageOverlay.svelte, where the stylesheet test can see them.
  */
 @layer features {
+  /* The legend leaves room for the orientation controls, including their touch targets. */
+  #viewport {
+    --gizmo-span: 60px;
+    --gizmo-target: 24px;
+    --gizmo-ring: calc(var(--gizmo-span) / 2 + 3px);
+    --gizmo-spill: min(var(--gizmo-target) - 24px, var(--stage-gutter));
+    --gizmo-size: calc(2 * (var(--gizmo-ring) + var(--gizmo-target)));
+  }
+
+  @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+    #viewport {
+      --gizmo-span: 56px;
+    }
+  }
+
+  @media (pointer: coarse) {
+    #viewport {
+      --gizmo-target: 44px;
+    }
+  }
+
+  /* A top-band key shares the row with the gizmo on upright phones. Keep its width bound the same
+     on either side so reflow cannot make the fitter switch bands back and forth. */
+  @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+    @media (orientation: portrait) {
+      #viewport:not(:fullscreen, [data-sheet-full='true']) .stage-keys {
+        max-width: calc(
+          100% - var(--vis-left) - var(--vis-right) - 2 * var(--stage-gutter) - var(--gizmo-size) +
+            var(--gizmo-spill) - var(--space-2)
+        );
+      }
+      #viewport[data-key-top]:not(:fullscreen, [data-sheet-full='true']) {
+        --gizmo-drop: 0px;
+      }
+      #viewport[data-key-top]:not(:fullscreen, [data-sheet-full='true']) .stage-keys {
+        left: calc(var(--vis-left) + var(--stage-gutter));
+        right: auto;
+        align-items: flex-start;
+      }
+    }
+  }
+
   /* Controls on the stage read the overlay palette through the panel's token names. */
   .stage-dock,
   .stage-keys,

@@ -1,6 +1,5 @@
-/** "About this data": what each tab and dock tool shows, where its data come from, and its main caution. Every sentence is taken from the docs/features page its methods link opens. */
+/** "About this data": what each tab and dock tool shows, where its data come from, and its main caution. Every sentence is taken from the docs/features page its methods link opens. Loaded when a disclosure first opens (BUILD-15); its summary is `link.aboutData`. */
 export const en = {
-  about: 'About this data',
   shows: 'Shows',
   source: 'Source',
   caution: 'Caution',
@@ -92,7 +91,6 @@ export const en = {
 };
 
 export const fr: typeof en = {
-  about: 'À propos de ces données',
   shows: 'Ce qui est montré',
   source: 'Source',
   caution: 'Prudence',

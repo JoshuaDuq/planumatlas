@@ -230,6 +230,37 @@ describe('the stage layout', () => {
     expect(document.getElementById('viewport')!.style.getPropertyValue('--vis-right')).toBe('0px');
   });
 
+  test('on an upright phone the top legend and the orientation controls share a row', async () => {
+    await page.viewport(390, 844);
+    await boot();
+    const viewport = document.getElementById('viewport')!;
+    viewport.style.cssText = 'width: 390px; height: 500px';
+    engine.emit('viewport', {
+      visibleRect: { x: 0, y: 0, width: 390, height: 500 },
+      hostSize: { width: 390, height: 500 },
+    });
+    engine.model.setSurfaceColor('lobe');
+    await vi.waitFor(() => expect(app.stage.keyInset.top).toBeGreaterThan(0));
+    const legend = viewport.querySelector('.stage-key')!;
+    const gizmo = viewport.querySelector('.orientation-gizmo')!;
+    const gutter = app.stage.gutter;
+    function expectSharedRow() {
+      const stageBox = viewport.getBoundingClientRect();
+      const legendBox = legend.getBoundingClientRect();
+      const gizmoBox = gizmo.getBoundingClientRect();
+      expect(legendBox.left - stageBox.left).toBeCloseTo(gutter);
+      expect(gizmoBox.top).toBeCloseTo(legendBox.top);
+      expect(gizmoBox.left - legendBox.right).toBeGreaterThanOrEqual(8);
+    }
+    expectSharedRow();
+    const toggle = legend.querySelector('button')!;
+    const open = toggle.getAttribute('aria-expanded');
+    await userEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).not.toBe(open);
+    await vi.waitFor(expectSharedRow);
+    expect(document.activeElement).toBe(toggle);
+  });
+
   test('a full phone sheet hides the dock, the gizmo, the scale bar and the letters', async () => {
     await boot();
     const dock = document.querySelector<HTMLElement>('.stage-dock')!;

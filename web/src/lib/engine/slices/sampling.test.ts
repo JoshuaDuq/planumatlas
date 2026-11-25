@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import { expect, test } from 'vitest';
 import { readRepoJson } from '../../../../test/repo.ts';
 import type { SegmentationAgreement } from '../../core/catalog/segmentation-agreement.ts';
 import { createFrame, pointOnFrame, stagedFrame } from './coordinates.ts';
@@ -245,4 +245,76 @@ test('SLICE-41 a slice sampled once draws, through any window, the bytes that sa
       }
     }
   }
+});
+
+test('SECT-41 a cropped slice samples only its crop, and there draws the bytes of the whole slice', () => {
+  const wide = { ...display, fieldOfView: 8, size: 8, overlay: true };
+  const whole = renderSlice(volumes, frame, wide);
+  const crop = { x: 2, y: 3, width: 4, height: 6 };
+  let reads = 0;
+  const counted = {
+    ...volumes,
+    mri: Object.assign(Object.create(volumes.mri) as Volume, {
+      linear: (point: Iterable<number>) => (reads++, volumes.mri.linear(point)),
+    }),
+  };
+  const cropped = windowSlice(sampleSlice(counted, frame, wide, crop), wide);
+  // Rows 3–8 of an 8-row square: the crop's last two rows lie past it and are not read.
+  expect(reads).toBe(4 * 5);
+  for (let y = 0; y < 8; y++)
+    for (let x = 0; x < 8; x++) {
+      const index = (y * 8 + x) * 4;
+      const inside = x >= 2 && x < 6 && y >= 3;
+      const pixel = Array.from(cropped.slice(index, index + 4));
+      if (inside) expect(pixel).toEqual(Array.from(whole.slice(index, index + 4)));
+      else expect(pixel[3]).toBe(0);
+    }
+});
+
+/** Label 1 on the two columns x = 2 and 3 of the 4 × 4 × 4 grid, 0 elsewhere. */
+const rightHalf = () =>
+  new Volume(
+    metadata,
+    new Uint16Array(64).map((_, index) => (index % 4 >= 2 ? 1 : 0)),
+  );
+/** The first row of the axial slice at z = 1, RGB only: grey 70 to 73 through the identity window. */
+const firstRow = (extra: Partial<SliceVolumes>) =>
+  Array.from(renderSlice({ ...volumes, ...extra }, frame, display).slice(0, 16)).filter(
+    (_, index) => index % 4 < 3,
+  );
+
+test('SECT-46 the 3D view’s colours are mixed into the grey as the overlay’s are: 0.55 grey, 0.45 colour', () => {
+  const colours = { volume: rightHalf(), colors: [null, [200, 40, 0]] };
+  // x = 2: 72 × 0.55 + (200, 40, 0) × 0.45 = (129.6, 57.6, 39.6).
+  expect(firstRow({ colours })).toEqual([70, 70, 70, 71, 71, 71, 130, 58, 40, 130, 58, 40]);
+  const paint = { volume: rightHalf(), colors: [null, [1, 2, 3]] };
+  expect(() => firstRow({ colours, paint })).toThrow('one grid of cut labels');
+});
+
+test('SECT-47 the selection is tinted as the overlay tints, and outlined two pixels wide across its edge', () => {
+  const selection = { volume: rightHalf(), codes: new Set([1]), colour: [127, 208, 204] };
+  // x = 1 and 2 straddle the edge; x = 3 is inside: 73 × 0.55 + colour × 0.45.
+  expect(firstRow({ selection })).toEqual([70, 70, 70, 127, 208, 204, 127, 208, 204, 97, 134, 132]);
+  // Over a paint by another grid, the outline is still drawn.
+  const paint = {
+    volume: new Volume(metadata, new Uint16Array(64).fill(1)),
+    colors: [null, [9, 9, 9]],
+  };
+  expect(firstRow({ selection, paint })).toEqual([9, 9, 9, 127, 208, 204, 127, 208, 204, 9, 9, 9]);
+});
+
+test('SECT-47 a shown agreement inks the selected structure itself, so the selection draws nothing over it', () => {
+  // aseg labels every voxel 1 and NextBrain the left half 3: aseg only on the right, both on the left.
+  const agreement = {
+    structure: { code: 3, aseg_label: 1 },
+    compared: new Volume(
+      metadata,
+      new Uint8Array(64).map((_, index) => (index % 4 < 2 ? 3 : 0)),
+    ),
+  };
+  const selection = { volume: rightHalf(), codes: new Set([1]), colour: [127, 208, 204] };
+  // Grey 70 to 73: 0.55 grey + 0.45 × both (236, 236, 236) on the left, aseg only (235, 70, 210) on the right.
+  const inked = [145, 145, 145, 145, 145, 145, 145, 71, 134, 146, 72, 135];
+  expect(firstRow({ agreement })).toEqual(inked);
+  expect(firstRow({ agreement, selection })).toEqual(inked);
 });

@@ -76,8 +76,10 @@ def main():
     if not arterial_territories.is_declared(config):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the arterial_territories layer")
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
+    # An anatomy reconstructed elsewhere is registered with the build it declares.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
     definition = arterial_territories.read_definition()
     fetched = {kind: fetch(definition, kind) for kind in definition["source"]["files"]}
     check_atlas_sides(fetched["atlas"][0], definition)

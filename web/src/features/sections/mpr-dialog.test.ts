@@ -144,6 +144,19 @@ describe('a click on a picture', () => {
   });
 });
 
+describe('a click on a serial section', () => {
+  test('SECT-42 places the crosshair at the point clicked, cuts the stage on its plane, and selects what is there', async () => {
+    const mpr = build();
+    mpr.pick('axial', [-30.5, -0.6, 19]);
+    expect(crosshair()).toEqual([-30.5, -0.6, 19]);
+    expect(showPlane.mock.calls).toEqual([['axial']]);
+    answers[0]!.resolve({ id: 'aseg:left:12' } as Region);
+    await answers[0]!.promise;
+    await Promise.resolve();
+    expect(select.mock.calls).toEqual([['aseg:left:12']]);
+  });
+});
+
 describe('the region under the crosshair', () => {
   const found = { id: 'ctx-lh-1' } as Region;
 
@@ -214,11 +227,13 @@ describe('opening', () => {
     expect(mpr.instant).toBe(true);
   });
 
-  test("a lesson's plane opens on that plane, animated", async () => {
+  test("a lesson's plane opens on that plane, animated, as three planes even after serial sections", async () => {
     const mpr = build();
+    mpr.layout = 'series';
     await mpr.openPreparedPlane('coronal', () => true);
     expect(mpr.isOpen()).toBe(true);
     expect(mpr.plane).toBe('coronal');
+    expect(mpr.layout).toBe('planes');
     expect(mpr.instant).toBe(false);
   });
 

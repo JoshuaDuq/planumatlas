@@ -73,6 +73,7 @@ import type {
   SectionsState,
   SeenPoint,
   Size,
+  SliceCrop,
   SnapshotCapture,
   SnapshotOptions,
   SpinalCordLoad,
@@ -335,6 +336,8 @@ export interface EngineSections {
   readonly display: MriDisplay | null;
   /** The window the scan publishes, null until it loads (app.js:827). */
   readonly publishedWindow: MriWindow | null;
+  /** The box the linked segmentation labels, in RAS mm to its voxels' outer faces; null until it loads. */
+  readonly labelBox: { readonly min: Vec3; readonly max: Vec3 } | null;
   /** The reader's window when it differs from the published one, else null (app.js:825-831). */
   mriWindowLink(): MriWindow | null;
   /** Voxel spacing of a cut atlas in mm, 1 when unpublished (ui/chrome/sections.js:496). */
@@ -357,8 +360,11 @@ export interface EngineSections {
   setOffsetReady(offset: number): Promise<void>;
   setAngles(tilt: number, azimuth: number): void;
   setAnglesReady(tilt: number, azimuth: number): Promise<void>;
-  /** Throws a `TypeError` for a non-boolean (sections.js:363). */
-  setDisplay(options: { reverse?: boolean; overlay?: boolean }): void;
+  /**
+   * Throws a `TypeError` for a non-boolean, or for the overlay and the colours both on: turning one on
+   * turns the other off (sections.js:363).
+   */
+  setDisplay(options: { reverse?: boolean; overlay?: boolean; colours?: boolean }): void;
   /**
    * Show a compared structure's agreement on the linked MRI, or none. The first downloads the compared
    * volume; an unpublished code throws a `RangeError`.
@@ -378,7 +384,7 @@ export interface EngineSections {
    * A frame sampled at `display.size` square (sections.js:414): all of its pixels but the MRI window,
    * which `pixels` applies. Needs the MRI loaded.
    */
-  slice(frame: PlaneFrame): PlaneSlice;
+  slice(frame: PlaneFrame, crop?: SliceCrop): PlaneSlice;
   /** RGBA pixels of a sampled frame through the current MRI window, without sampling it again. */
   pixels(slice: PlaneSlice): Uint8ClampedArray;
   /** Needs the MRI loaded (sections.js:418). */
@@ -561,6 +567,11 @@ export interface EngineTracts {
   surfaceToScanner(point: Vec3): Vec3;
   /** The streamlines the stage draws, on a linked MRI plane given in surface RAS mm. */
   onPlane(frame: Pick<PlaneFrame, 'center' | 'normal' | 'u' | 'v'>): PlaneTracts;
+  /**
+   * `onPlane` for each of planes that share their axes and differ only along their normal, as serial
+   * sections do, in one pass; a `RangeError` for planes that do not.
+   */
+  onPlanes(frames: readonly Pick<PlaneFrame, 'center' | 'normal' | 'u' | 'v'>[]): PlaneTracts[];
   /**
    * The tracts' FA map at a point in surface RAS mm, NaN where it has no value. Downloads once; rejects
    * without `hasFa`.

@@ -18,7 +18,7 @@ import numpy as np
 from nibabel.affines import apply_affine
 from scipy import ndimage
 
-from .coordinate_spaces import map_points
+from .coordinate_spaces import map_points, template_space
 
 # Below this volume the template's structures met this brain's at a median Dice under 0.4.
 SMALL_MM3 = 100
@@ -31,6 +31,12 @@ SHARE_FIELDS = ("territories", "striatal_networks", "cerebellar_functions")
 
 def path(config):
     return config["source_directory"] / "coordinate-landing.json"
+
+
+def measured(config):
+    """The measured landing of registered maps on this brain; None on the template, which is that
+    measurement's reference, so no landing error was measured for maps registered onto it."""
+    return None if template_space(config) else read(config)
 
 
 def carry(template, template_to_space, field, node_to_template, person, chunk=2_000_000):

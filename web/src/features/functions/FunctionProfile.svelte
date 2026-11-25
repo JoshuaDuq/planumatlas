@@ -87,6 +87,11 @@
       {/if}
     </div>
   {/if}
+  {#if content?.term}
+    <p class="kind">
+      {content.term.before}<span lang="en">{content.term.term}</span>{content.term.after}
+    </p>
+  {/if}
   {#if model.mapOverlap}
     {@const { title, areas } = model.mapOverlap}
     {@const above = mapNumber(model.mapOverlap.threshold, lang)}
@@ -106,10 +111,12 @@
     </p>
   {/if}
   {#if id}
-    <LinkedMriButton {lang} onopen={model.openMri} />
-    {#if model.beneath}
-      <DeepToggle {lang} beneath={model.beneath} ontoggle={model.showBeneathCortex} />
-    {/if}
+    <div class="map-actions">
+      <LinkedMriButton {lang} onopen={model.openMri} />
+      {#if model.beneath}
+        <DeepToggle {lang} beneath={model.beneath} ontoggle={model.showBeneathCortex} />
+      {/if}
+    </div>
   {/if}
   {#if comparison}
     <div class="content">
@@ -206,10 +213,6 @@
     <div class="content">
       {#if content.all}
         <p class="summary">{t(lang, 'domains').keyAll(model.ground)}</p>
-      {:else if content.term}
-        <p class="kind">
-          {content.term.before}<span lang="en">{content.term.term}</span>{content.term.after}
-        </p>
       {/if}
 
       {#if content.all}
@@ -429,6 +432,16 @@
     .meta[data-error='true'] {
       color: var(--danger);
     }
+    .map-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+    .map-actions > :global(button) {
+      margin: 0;
+    }
     .paint-from {
       margin-top: var(--space-3);
     }
@@ -446,7 +459,7 @@
     }
     /* Which kind of evidence a profile rests on, said under its headline. */
     .kind {
-      margin-top: var(--space-4);
+      margin-top: var(--space-2);
       color: var(--text-secondary);
       font-size: var(--text-caption);
       font-weight: 600;
@@ -668,6 +681,22 @@
         color: var(--accent-hover);
         text-decoration: underline;
         text-underline-offset: 3px;
+      }
+    }
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .profile-name {
+        padding-top: var(--space-3);
+      }
+      .meta:not(:empty),
+      .kind {
+        margin-top: var(--space-1);
+      }
+      .map-actions,
+      .content > .section:first-child {
+        margin-top: var(--space-2);
+      }
+      .areas-heading {
+        margin-bottom: var(--space-1);
       }
     }
     @media (pointer: coarse) {

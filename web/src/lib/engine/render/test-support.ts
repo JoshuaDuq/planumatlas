@@ -34,6 +34,7 @@ export const appearance = published as unknown as Appearance;
 export const networkPalettes = (): SurfacePalettes => ({
   network: networkPalette(networks as unknown as NetworkMetadata),
   territory: null,
+  thickness: null,
 });
 
 /** A cortical mesh with the shading fields (and, if asked, the network layer) the model checks for. */

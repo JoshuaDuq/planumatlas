@@ -43,12 +43,10 @@ export function mapColourOf(cutAtlas: string): MapColour | null {
 
 /**
  * The plane a map seen only on cuts opens on, through its centre: the one that shows the most of it
- * there on CDMD (striatal networks axial, 10 of 14 against 6 coronal; cerebellar regions coronal, 26
- * of 32 against 24 axial).
+ * there on CDMD (striatal networks axial, 10 of 14 against 6 coronal). The cerebellar map is drawn on
+ * the cerebellum's surface, so it opens none.
  */
-const MAP_PLANES = { striatal: 'axial', cerebellar: 'coronal' } as const satisfies Partial<
-  Record<MapColour, CutMode>
->;
+const MAP_PLANES = { striatal: 'axial' } as const satisfies Partial<Record<MapColour, CutMode>>;
 
 /**
  * The cut choosing this colour opens, through its map regions' voxel-weighted centre in surface RAS

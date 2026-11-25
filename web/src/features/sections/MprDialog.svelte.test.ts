@@ -146,16 +146,37 @@ describe('docked beside the stage', () => {
     expect(box(canvas('axial')).left).toBe(box(canvas('sagittal')).left);
   });
 
-  test('a short, narrower window keeps it beside the stage, its planes stacked, so the anatomy stays in view', async () => {
-    await page.viewport(1024, 768);
+  test('a narrow dock switches planes in place and keeps the display controls below the current slice', async () => {
+    await page.viewport(1024, 700);
     await opened();
     const stage = document.getElementById('viewport')!;
     expect(document.querySelector('dialog:modal')).toBeNull();
     expect(box(dock()!).left).toBe(box(stage).right);
     expect(box(dock()!).height).toBe(box(stage).height);
     expect(box(stage).width).toBeGreaterThan(box(dock()!).width);
-    expect(box(canvas('coronal')).top).toBeGreaterThan(box(canvas('sagittal')).bottom);
-    expect(box(canvas('coronal')).left).toBe(box(canvas('sagittal')).left);
+    const axial = page.getByRole('radio', { name: 'Axial' });
+    await expect.element(axial).toBeChecked();
+    const slice = box(canvas('axial'));
+    expect(section('coronal').hidden).toBe(true);
+    await page.getByRole('radio', { name: 'Coronal' }).click();
+    expect(section('axial').hidden).toBe(true);
+    expect(box(canvas('coronal')).top).toBe(slice.top);
+    expect(box(canvas('coronal')).width).toBe(slice.width);
+    const windowSlider = box(sliderElement('Window'));
+    const levelSlider = box(sliderElement('Level'));
+    expect(windowSlider.bottom).toBeLessThan(box(dock()!).bottom);
+    expect(levelSlider.top).toBe(windowSlider.top);
+  });
+
+  test('resizing the dock hands focus between its plane selector and a slice control', async () => {
+    await opened();
+    sliderElement('Coronal position').focus();
+    mpr.width = 300;
+    await expect.element(page.getByRole('radio', { name: 'Axial' })).toHaveFocus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect.element(page.getByRole('radio', { name: 'Coronal' })).toBeChecked();
+    mpr.width = null;
+    await expect.element(slider('Coronal position')).toHaveFocus();
   });
 
   test('just wider than a phone, where docking would leave the stage under 360 px, it is the modal instead', async () => {
@@ -292,19 +313,20 @@ describe('the three planes', () => {
     expect(crosshair()).toEqual([0, 0, 0]);
   });
 
-  test("Tab visits Close, then each plane's slider and Save, then Window, Level, the overlay and Reset display", async () => {
+  test("Tab visits Close, the view, then each plane's slider and Save, then Window, Level, the overlay and Reset display", async () => {
     await opened();
     const nameOf = (element: HTMLElement) =>
       (element as HTMLInputElement).labels?.[0]?.textContent?.trim() ??
       element.getAttribute('aria-label') ??
       element.textContent!.trim();
     const names: string[] = [];
-    for (let stop = 0; stop < 11; stop++) {
+    for (let stop = 0; stop < 13; stop++) {
       names.push(nameOf(document.activeElement as HTMLElement));
       await userEvent.tab();
     }
     expect(names).toEqual([
       'Close',
+      'Three planes',
       'Sagittal position',
       'Save PNG, sagittal',
       'Coronal position',
@@ -313,7 +335,8 @@ describe('the three planes', () => {
       'Save PNG, axial',
       'Window',
       'Level',
-      'Segmentation overlay',
+      'None',
+      'Crosshair',
       'Reset display',
     ]);
   });
@@ -450,26 +473,44 @@ describe('display', () => {
     expect(engine.sections.display).toMatchObject({ windowWidth: 181, windowCenter: 89 });
   });
 
-  test("the segmentation overlay is a checkbox that sets the sections' overlay", async () => {
+  test('SECT-46 the overlay is none, the segmentation or the 3D view’s colours, one at a time, and each draws the planes again', async () => {
     await opened();
-    const box = page.getByRole('checkbox', { name: 'Segmentation overlay' });
-    await box.click();
-    expect(engine.sections.state.overlay).toBe(true);
-    await box.click();
-    expect(engine.sections.state.overlay).toBe(false);
+    const shown = () => [engine.sections.state.overlay, engine.sections.state.colours];
+    await expect.element(page.getByRole('radio', { name: 'None' })).toBeChecked();
+    const sampled = calls('slice').length;
+    await page.getByRole('radio', { name: 'Segmentation' }).click();
+    expect(shown()).toEqual([true, false]);
+    await page.getByRole('radio', { name: '3D view' }).click();
+    expect(shown()).toEqual([false, true]);
+    await expect.poll(() => calls('slice').length).toBe(sampled + 6);
+    await page.getByRole('radio', { name: 'None' }).click();
+    expect(shown()).toEqual([false, false]);
+  });
+
+  test('SECT-47 a region selected on the 3D brain is drawn on the planes: they are sampled again with it', async () => {
+    await opened();
+    const sampled = calls('slice').length;
+    const region = [...engine.model.regions.values()].find(
+      (candidate) => candidate.kind === 'structure' && engine.model.canSelect(candidate),
+    )!;
+    engine.model.select(region.id);
+    await expect.poll(() => calls('slice').length).toBe(sampled + 3);
+    engine.model.select(null);
+    await expect.poll(() => calls('slice').length).toBe(sampled + 6);
   });
 
   test("Reset display returns Window and Level to the scan's window and clears the overlay", async () => {
     await opened();
     engine.sections.setWindow(60, 40);
-    await page.getByRole('checkbox', { name: 'Segmentation overlay' }).click();
+    await page.getByRole('radio', { name: '3D view' }).click();
     // A slider move still waiting for its frame does not undo the reset.
     mpr.setWindow({ width: 120 });
     await page.getByRole('button', { name: 'Reset display' }).click();
     await frame();
     await frame();
     expect(engine.sections.display).toMatchObject({ windowWidth: 180, windowCenter: 90 });
-    expect(engine.sections.state.overlay).toBe(false);
+    expect([engine.sections.state.overlay, engine.sections.state.colours]).toEqual([false, false]);
+    await expect.element(page.getByRole('radio', { name: 'None' })).toBeChecked();
     expect(sliderElement('Window').value).toBe('180');
     expect(sliderElement('Level').value).toBe('90');
   });
@@ -824,6 +865,39 @@ describe('the readout', () => {
   });
 });
 
+describe('SECT-48 hiding the crosshair', () => {
+  test('Crosshair hides it on the planes and in a saved PNG, and Reset display shows it again', async () => {
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const saved: HTMLCanvasElement[] = [];
+    const toDataURL = HTMLCanvasElement.prototype.toDataURL;
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockImplementation(function (
+      this: HTMLCanvasElement,
+      ...args
+    ) {
+      saved.push(this);
+      return toDataURL.apply(this, args);
+    });
+    await opened();
+    await expect.poll(() => canvas('axial').width).toBe(SIZE);
+    const marks = () => shell().querySelectorAll('.crosshair-across, .crosshair-down').length;
+    expect(marks()).toBe(6);
+    const toggle = page.getByRole('switch', { name: 'Crosshair' });
+    await expect.element(toggle).toBeChecked();
+    await toggle.click();
+    expect(marks()).toBe(0);
+    // The crosshair at the origin runs down column 64 of the saved picture: hidden, it is the slice.
+    await page.getByRole('button', { name: 'Save PNG, axial', exact: true }).click();
+    expect(pixel(saved[0]!, SIZE / 2, 40)).toEqual(pixel(canvas('axial'), SIZE / 2, 40));
+    await toggle.click();
+    await page.getByRole('button', { name: 'Save PNG, axial', exact: true }).click();
+    expect(pixel(saved[1]!, SIZE / 2, 40)).not.toEqual(pixel(canvas('axial'), SIZE / 2, 40));
+    await toggle.click();
+    await page.getByRole('button', { name: 'Reset display' }).click();
+    await expect.element(toggle).toBeChecked();
+    expect(marks()).toBe(6);
+  });
+});
+
 describe('Save PNG', () => {
   test("saves the plane's picture under subject, plane and offset, and says it did", async () => {
     const clicked: { download: string; href: string }[] = [];
@@ -1109,14 +1183,6 @@ describe('contrast and colour modes', () => {
     });
   });
 
-  test('forced colours draw the checkbox as a system control', async () => {
-    await opened();
-    await withMedia([{ name: 'forced-colors', value: 'active' }], () => {
-      const box = page.getByRole('checkbox').element();
-      expect(getComputedStyle(box).appearance).toBe('auto');
-    });
-  });
-
   test('more contrast gives the dialog the stronger text and border colours', async () => {
     await opened();
     const probe = (variable: string) => {
@@ -1147,8 +1213,11 @@ describe('accessibility', () => {
 
 describe('segmentation agreement', () => {
   const key = () => shell().querySelector<HTMLElement>('.agreement');
-  const overlay = () =>
-    page.getByRole('checkbox', { name: 'Segmentation overlay' }).element() as HTMLInputElement;
+  /** The overlay's choices refuse a change while an agreement holds it, and stay reachable. */
+  const overlayHeld = () =>
+    [...shell().querySelectorAll('.mpr-overlay [role="radio"]')].map(
+      (radio) => radio.getAttribute('aria-disabled') === 'true',
+    );
 
   test('the shown structure is named with the planes’ key; it holds the overlay, and Hide clears it', async () => {
     await render(Fixture, {
@@ -1168,7 +1237,7 @@ describe('segmentation agreement', () => {
       'aseg only',
       'NextBrain only',
     ]);
-    expect(overlay().disabled).toBe(true);
+    expect(overlayHeld()).toEqual([true, true, true]);
     await userEvent.click(page.getByRole('button', { name: 'Hide agreement' }));
     expect(calls('setAgreement').map((call) => call.args)).toEqual([[null]]);
     await expectAxeClean();
@@ -1178,6 +1247,6 @@ describe('segmentation agreement', () => {
     await mount();
     await userEvent.click(opener());
     expect(key()).toBeNull();
-    expect(overlay().disabled).toBe(false);
+    expect(overlayHeld()).toEqual([false, false, false]);
   });
 });

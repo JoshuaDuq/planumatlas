@@ -15,13 +15,8 @@ export const en = {
     count ? `${count} ${count === 1 ? 'deficit' : 'deficits'}` : 'No match',
   // The Deficits list's first group while a region is selected.
   atRegion: 'Involving this region',
-  // Above the list: the Lesion tool, and the stroke cases of the selected region (4.2).
+  // Above the list: the Lesion tool (4.2).
   simulateLesion: 'Simulate a lesion',
-  strokeSelect: 'Select a region to see the stroke cases whose lesion reaches it.',
-  strokeNone: (name: string) => `No stroke case in the cohort reaches ${name}.`,
-  // Stroke cases asked for with nothing selected: they open on the region shown that most reach.
-  strokeMost: (name: string) =>
-    `Of the regions shown, the most lesions in the cohort reach ${name}. Select another region to see its cases.`,
   associations: 'Associations',
   findings: 'Evidence',
   studyFinding: 'Reported finding',
@@ -95,10 +90,6 @@ export const fr: typeof en = {
     count ? `${count} ${count === 1 ? 'déficit' : 'déficits'}` : 'Aucun résultat',
   atRegion: 'Touchant cette région',
   simulateLesion: 'Simuler une lésion',
-  strokeSelect: 'Sélectionnez une région pour voir les cas d’AVC dont la lésion l’atteint.',
-  strokeNone: (name: string) => `Aucun cas d’AVC de la cohorte n’atteint ${name}.`,
-  strokeMost: (name: string) =>
-    `Des régions affichées, ${name} est celle qu’atteignent le plus de lésions de la cohorte. Sélectionnez une autre région pour voir ses cas.`,
   associations: 'Associations',
   findings: 'Données probantes',
   studyFinding: 'Résultat rapporté',

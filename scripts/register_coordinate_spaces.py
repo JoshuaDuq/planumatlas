@@ -216,8 +216,10 @@ def main():
     if not coordinate_spaces.is_declared(config):
         raise SystemExit(f"{config['anatomy']['id']} does not declare the coordinate_spaces layer")
     stamp = (args.freesurfer / "build-stamp.txt").read_text().strip()
-    if stamp != config["freesurfer_build"]:
-        raise SystemExit(f"Expected FreeSurfer {config['freesurfer_build']}, found {stamp}.")
+    # An anatomy reconstructed elsewhere is registered with the build it declares.
+    expected = config["anatomy"]["reconstruction"].get("freesurfer_build", config["freesurfer_build"])
+    if stamp != expected:
+        raise SystemExit(f"Expected FreeSurfer {expected}, found {stamp}.")
     definition = coordinate_spaces.read_definition()
     if definition["radius_mm"] != int(definition["radius_mm"]):
         raise SystemExit("The overlap measurement needs a whole-millimetre radius on aseg's 1 mm grid")
@@ -233,7 +235,7 @@ def main():
         work = Path(work)
         fixed = work / "fixed.nii.gz"
         nib.save(nib.Nifti1Image(np.asarray(brain.dataobj).astype(np.float32), brain.affine), fixed)
-        for space in definition["spaces"]:
+        for space in coordinate_spaces.registered_spaces(config, definition):
             (work / space["id"]).mkdir()
             inv, mask, measured, space_origins, seg, affine = register(
                 args.freesurfer, args.threads, space, fixed, aseg, work / space["id"])
@@ -251,7 +253,8 @@ def main():
             report["spaces"][space["id"]] = {"checks": measured, "grid_error_mm": error, "field_sha256": sha256(path)}
             origins += space_origins
             fields.append(path)
-        for alternative in definition["alternatives"]:
+        # On the template an unstated "MNI" is its own space, read without registration.
+        for alternative in [] if coordinate_spaces.template_space(config) else definition["alternatives"]:
             (work / alternative["id"]).mkdir()
             inv, _, measured, alternative_origins, _, _ = register(
                 args.freesurfer, args.threads, alternative, fixed, aseg, work / alternative["id"])
@@ -265,9 +268,10 @@ def main():
         "mri_synthmorph register -m joint (skull-stripped template → brain.mgz); SynthSeg --parc --robust reads the "
         "template, carried by apply -m nearest onto aseg's grid and scored against aseg. A published field samples "
         f"the inverse warp every {definition['grid_spacing_mm']:g} mm over the template's brain dilated "
-        f"{definition['mask_margin_mm']:g} mm. Offsets read the same numbers as each template at the first published "
-        f"template's own cortex and deep grey, with {definition['radius_mm']:g} mm sphere overlap of this brain's "
-        "Schaefer-400 parcels."
+        f"{definition['mask_margin_mm']:g} mm."
+        + ("" if not report["alternatives"] else
+           f" Offsets read the same numbers as each template at the first published template's own cortex and deep "
+           f"grey, with {definition['radius_mm']:g} mm sphere overlap of this brain's Schaefer-400 parcels.")
     )
     coordinate_spaces.report_path(config).write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))

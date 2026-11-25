@@ -6,7 +6,7 @@
   .region-detail {
     padding: var(--panel-inset);
   }
-  /* Related deficits or circuits follow as sections of their own and bring their own 24px (detail.css:75). */
+  /* The research index has its own separation below this body. */
   .region-detail:not(:last-child) {
     padding-bottom: 0;
   }
@@ -327,8 +327,7 @@
     line-height: var(--lh-caption);
   }
   /*
-   * The research index closes the detail: its caption's 24px collapses with the related sections' own,
-   * and its bottom inset is the detail's, there even when it has nothing to list.
+   * The research index closes the detail with its own top margin and the panel's bottom inset.
    */
   .region-detail.region-research {
     padding-top: 0;

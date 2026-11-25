@@ -72,11 +72,17 @@ def template_space(config):
     return config["anatomy"].get("template_space")
 
 
+def registered_spaces(config, definition):
+    """The spaces placed through a registered field: every one on a person, all but its own on a template."""
+    reference = template_space(config)
+    return [space for space in definition["spaces"] if not reference or space["id"] != reference["space"]]
+
+
 def inputs(config):
-    if template_space(config):
-        return [DEFINITION, *(config["source_directory"] / f"mri/{name}.mgz" for name in ("orig", "aseg"))]
-    return [DEFINITION, report_path(config),
-            *(field_path(config, space) for space in read_definition()["spaces"])]
+    native = ([config["source_directory"] / f"mri/{name}.mgz" for name in ("orig", "aseg")]
+              if template_space(config) else [])
+    return [DEFINITION, *native, report_path(config),
+            *(field_path(config, space) for space in registered_spaces(config, read_definition()))]
 
 
 def dice(a, b):
@@ -270,28 +276,26 @@ def native_space(config, definition):
     }
 
 
-def native_export(config, definition):
+def native_export(config, definition, report, registered):
     space = native_space(config, definition)
     scale = space["native"]["scale"]
     return {
         "label": definition["label"],
         "radius_mm": definition["radius_mm"],
-        "spaces": [space],
+        "spaces": [space, *registered],
         "unstated": {"reads_as": space["id"], "alternatives": []},
         "method": f"This brain is {space['label']} itself, reconstructed with its header scaled by "
-                  f"{scale:g}: a coordinate's millimetres times {scale:g}, in FreeSurfer's surface RAS. "
-                  "Nothing is registered.",
+                  f"{scale:g}: a coordinate's millimetres times {scale:g}, in FreeSurfer's surface RAS, with "
+                  f"nothing registered. Any other space: {report['method']}",
     }
 
 
 def export(config, definition):
     """What the viewer needs to place a published coordinate: each field, and what was measured."""
-    if template_space(config):
-        return native_export(config, definition)
     report = json.loads(report_path(config).read_text())
     accept(report, definition)
     spaces = []
-    for space in definition["spaces"]:
+    for space in registered_spaces(config, definition):
         entry = report["spaces"][space["id"]]
         if entry["field_sha256"] != sha256(field_path(config, space)):
             raise ValueError(f"{space['id']}'s field is not the one its registration report measured")
@@ -300,6 +304,8 @@ def export(config, definition):
             "field": export_field(config, space),
             "registration": entry["checks"],
         })
+    if template_space(config):
+        return native_export(config, definition, report, spaces)
     return metadata(definition, report, spaces)
 
 
@@ -326,8 +332,10 @@ def limitations(config, definition):
         label = next(space["label"] for space in definition["spaces"] if space["id"] == reference["space"])
         return [
             (f"This brain is the {label} template at {reference['scale']:g} of its size, so a coordinate in "
-             "that space is placed by scaling alone, with no registration. Coordinates and maps in any other "
-             "template are not placed on it."),
+             "that space is placed by scaling alone, with no registration. "
+             + ", ".join(space["label"] for space in registered_spaces(config, definition))
+             + " is placed by registering its template to this brain (SynthMorph, joint affine and deformable); "
+             "coordinates and maps in any other template are not placed on it."),
             (f"Cortical coordinates are reported as the regions within {definition['radius_mm']:g} mm, as on "
              "an individual brain."),
             f"An MNI coordinate whose template is not stated is read as {label}.",
@@ -342,25 +350,24 @@ def limitations(config, definition):
 def validate(config, manifest):
     """The committed fields still pass their report, and the published ones decode to them."""
     definition = read_definition()
-    if template_space(config):
-        expected = json.loads(json.dumps(native_export(config, definition)))
-        if manifest["coordinate_spaces"] != expected:
-            raise ValueError("Published coordinate spaces differ from the template's own")
-        return {space["id"]: space["native"] for space in expected["spaces"]}
     report = json.loads(report_path(config).read_text())
     accept(report, definition)
     published = manifest["coordinate_spaces"]
-    if len(published["spaces"]) != len(definition["spaces"]):
+    registered = registered_spaces(config, definition)
+    records = [record for record in published["spaces"] if "field" in record]
+    if len(published["spaces"]) != len(definition["spaces"]) or len(records) != len(registered):
         raise ValueError("Published coordinate spaces differ from their definition")
     # Each field record is checked by decoding it below; everything else must be the definition and report's.
-    expected = metadata(definition, report, [
+    fields = [
         {**{key: space[key] for key in ("id", "label", "description", "citation", "doi", "license", "copyright")},
          "field": record["field"], "registration": report["spaces"][space["id"]]["checks"]}
-        for space, record in zip(definition["spaces"], published["spaces"])
-    ])
+        for space, record in zip(registered, records)
+    ]
+    expected = (json.loads(json.dumps(native_export(config, definition, report, fields)))
+                if template_space(config) else metadata(definition, report, fields))
     if published != expected:
         raise ValueError("Published coordinate spaces differ from their definition and report")
-    for space, record in zip(definition["spaces"], published["spaces"]):
+    for space, record in zip(registered, records):
         field, node_to_template = load_field(config, space)
         payload = gzip.decompress((config["output_directory"] / record["field"]["file"]).read_bytes())
         decoded = np.frombuffer(payload, "<i2").reshape((3, *record["field"]["shape"]), order="F")

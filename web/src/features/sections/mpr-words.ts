@@ -8,11 +8,15 @@ import { DESTRIEUX_LABELS_FR } from '../../lib/core/catalog/destrieux-labels.fr.
 import { STRUCTURE_LABELS } from '../../lib/core/catalog/structure-groups.ts';
 import { STRUCTURE_LABELS_FR } from '../../lib/core/catalog/structure-groups.fr.ts';
 import { t } from '../../lib/core/i18n/index.ts';
+import * as mpr from '../../lib/core/i18n/areas/mpr.ts';
 import type { AgreementCategory } from '../../lib/core/catalog/segmentation-agreement.ts';
 import type { MprPlane } from '../../lib/engine/api.ts';
 import type { Language } from '../../lib/types/index.ts';
 
 const EM_DASH = '—';
+
+/** The Linked MRI's wording, loaded with it rather than with the page (BUILD-15); English by default. */
+export const mprCopy = (lang: string): typeof mpr.en => (lang === 'fr' ? mpr.fr : mpr.en);
 
 /** The label volume's raw name as the reader's language words it (sections.js:390-407). */
 export function sampleName(raw: string, lang: Language): string {
@@ -44,7 +48,7 @@ export function readoutText(
   const structure = sampleName(sample.name, lang);
   const name = cutName && cutName !== structure ? `${cutName} · ${structure}` : structure;
   const text = structure
-    ? t(lang, 'mpr').readout(ras, name, sample.labelId)
+    ? mprCopy(lang).readout(ras, name, sample.labelId)
     : `${ras} ${EM_DASH} ${t(lang, 'mri').tissueNames.Unknown}`;
   return sample.agreement ? `${text} · ${t(lang, 'agreement').category[sample.agreement]}` : text;
 }
@@ -91,7 +95,7 @@ const NEW = {
 
 const SIDES = ['top', 'right', 'bottom', 'left'] as const;
 
-export const planeName = (plane: MprPlane, lang: Language): string => t(lang, 'mpr').labels[plane];
+export const planeName = (plane: MprPlane, lang: Language): string => mprCopy(lang).labels[plane];
 
 type Side = 'right' | 'left' | 'anterior' | 'posterior' | 'superior' | 'inferior';
 
@@ -121,7 +125,7 @@ export function seenFrom(plane: MprPlane, edges: readonly string[]): Side {
 
 /** The slider's visible label, and so its name (deviations/g5-slider-label-in-name.md). */
 export const positionLabel = (plane: MprPlane, lang: Language): string =>
-  t(lang, 'mpr').positionLabel(planeName(plane, lang));
+  mprCopy(lang).positionLabel(planeName(plane, lang));
 
 /** What the Save PNG button says aloud after its visible words (deviations/g5-save-names.md). */
 export const saveSuffix = (plane: MprPlane, lang: Language): string =>

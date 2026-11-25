@@ -6,7 +6,8 @@
 -->
 <script lang="ts">
   import type { Language, Region } from '../../lib/types/index.ts';
-  import { formatRas, quantity } from '../../lib/core/format.ts';
+  import { decimal, formatRas, quantity, withUnit } from '../../lib/core/format.ts';
+  import type { RegionThicknessStore } from '../../lib/state/cortical-thickness.svelte.ts';
   import { t } from '../../lib/core/i18n/index.ts';
   import CopyValue from '../../lib/ui/CopyValue.svelte';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
@@ -16,11 +17,14 @@
     region,
     lang,
     centroid,
+    thickness = null,
   }: {
     region: Region & { atlas: string };
     lang: Language;
     /** RAS millimetres, or null where the model has no centroid. */
     centroid: readonly number[] | null;
+    /** A cortical region's thickness, downloaded when the measurements first open; null for none. */
+    thickness?: RegionThicknessStore | null;
   } = $props();
 
   const copy = $derived(t(lang, 'inspector'));
@@ -33,6 +37,17 @@
   );
   const ABSENT = '—';
   let open = $state(false);
+  $effect(() => {
+    if (open) thickness?.load();
+  });
+  const thicknessText = $derived.by(() => {
+    const state = thickness?.state;
+    if (state?.status !== 'ready') return state?.status === 'error' ? ABSENT : '…';
+    const measured = state.data.get(region.id);
+    return measured
+      ? `${decimal(measured.mean, 2, lang)} ± ${withUnit(decimal(measured.sd, 2, lang), 'mm', lang)}`
+      : ABSENT;
+  });
 </script>
 
 {#snippet value(text: string)}
@@ -49,6 +64,12 @@
     <dl class="facts">
       <dt>{byVolume ? copy.volume : copy.surfaceArea}</dt>
       <dd class="fact-metric measure">{@render value(metric)}</dd>
+      {#if thickness}
+        <dt>{copy.meanThickness}</dt>
+        <dd class="measure">
+          {#if thicknessText === '…'}{thicknessText}{:else}{@render value(thicknessText)}{/if}
+        </dd>
+      {/if}
       <dt>{copy.centroid}</dt>
       <dd class="measure">{@render value(centroid ? formatRas(centroid, lang) : ABSENT)}</dd>
       {#key `${region.id}:${lang}`}

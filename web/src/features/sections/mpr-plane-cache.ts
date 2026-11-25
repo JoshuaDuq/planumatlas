@@ -10,7 +10,8 @@ import type {
   SectionsState,
   Vec3,
 } from '../../lib/engine/api.ts';
-import { PLANES, blendFa, drawSlice, drawTracts, faLevels } from './mpr-draw.ts';
+import { blendFa, drawSlice, drawTracts, faLevels } from './mpr-draw.ts';
+import type { Crop } from './mpr-draw.ts';
 
 interface Made<T> {
   key: string;
@@ -22,13 +23,15 @@ function reuse<T>(made: Made<T> | undefined, key: string, make: () => T): Made<T
 }
 
 /** What the planes are drawn from. Read inside an effect, each is a dependency of it. */
-export interface PlanesView {
+export interface PlanesView<Id extends string = MprPlane> {
   display: MriDisplay;
-  /** The planes shown; only they keep anything. */
-  shown: readonly MprPlane[];
-  canvases: Partial<Record<MprPlane, HTMLCanvasElement>>;
-  frames: Record<MprPlane, PlaneFrame>;
-  sections: Pick<SectionsState, 'overlay' | 'agreement' | 'paint'>;
+  /** The pictures shown; only they keep anything. */
+  shown: readonly Id[];
+  canvases: Partial<Record<Id, HTMLCanvasElement | null>>;
+  frames: Record<Id, PlaneFrame>;
+  /** The part of each sampled square a picture shows; the whole square without one. */
+  crops?: Partial<Record<Id, Crop>>;
+  sections: Pick<SectionsState, 'overlay' | 'agreement' | 'paint' | 'labels'>;
   /** Changes whenever how the reader's map is drawn does; undefined while none is. */
   mapKey: string | undefined;
   /** Changes whenever what the stage draws of this brain's tracts does; null when the planes draw none. */
@@ -55,10 +58,10 @@ export interface PlaneSources {
  * drawn when it is shown (sections.js:315-351), and a canvas that replaced another is drawn afresh.
  * Only the planes shown keep anything, and only while the MRI is open.
  */
-export function createPlaneCache({ engine, fa }: PlaneSources) {
-  const drawn = new Map<MprPlane, { canvas: HTMLCanvasElement; key: string }>();
+export function createPlaneCache<Id extends string = MprPlane>({ engine, fa }: PlaneSources) {
+  const drawn = new Map<Id, { canvas: HTMLCanvasElement; key: string }>();
   const kept = new Map<
-    MprPlane,
+    Id,
     {
       slice: Made<PlaneSlice>;
       fa: Made<Int16Array> | undefined;
@@ -77,18 +80,22 @@ export function createPlaneCache({ engine, fa }: PlaneSources) {
       shown,
       canvases,
       frames,
+      crops = {},
       sections,
       mapKey,
       tractsKey,
       faOpacity,
-    }: PlanesView): void {
-      const { overlay, agreement, paint } = sections;
-      for (const plane of PLANES) if (!shown.includes(plane)) kept.delete(plane);
+    }: PlanesView<Id>): void {
+      const { overlay, agreement, paint, labels } = sections;
+      for (const plane of kept.keys()) if (!shown.includes(plane)) kept.delete(plane);
       for (const plane of shown) {
         const canvas = canvases[plane]!;
         const frame = frames[plane];
+        const crop = crops[plane];
         const place = JSON.stringify([frame.center, frame.u, frame.v]);
-        const slice = JSON.stringify([place, overlay, agreement, paint, mapKey]);
+        // A crop samples only its own pixels, so what is kept is named by it too.
+        const sampled = JSON.stringify([place, crop]);
+        const slice = JSON.stringify([sampled, overlay, agreement, paint, labels, mapKey]);
         const onPlane = tractsKey === null ? null : JSON.stringify([place, tractsKey]);
         const key = JSON.stringify([
           slice,
@@ -104,11 +111,11 @@ export function createPlaneCache({ engine, fa }: PlaneSources) {
           const live = engine();
           const held = kept.get(plane);
           const layers = {
-            slice: reuse(held?.slice, slice, () => live.sections.slice(frame)),
+            slice: reuse(held?.slice, slice, () => live.sections.slice(frame, crop)),
             fa:
               faOpacity !== null
-                ? reuse(held?.fa, place, () =>
-                    faLevels(frame, display.size, display.fieldOfView, fa()!),
+                ? reuse(held?.fa, sampled, () =>
+                    faLevels(frame, display.size, display.fieldOfView, fa()!, crop),
                   )
                 : undefined,
             tracts: onPlane
@@ -121,7 +128,7 @@ export function createPlaneCache({ engine, fa }: PlaneSources) {
           if (layers.tracts) {
             drawTracts(pixels, display.size, display.fieldOfView, layers.tracts.value);
           }
-          drawSlice(canvas, pixels, display.size);
+          drawSlice(canvas, pixels, display.size, crop);
         });
       }
     },

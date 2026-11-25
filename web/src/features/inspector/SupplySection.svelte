@@ -30,7 +30,7 @@
   const rest = $derived(region?.territory_unassigned ?? 0);
   const near = $derived(territories ? (region?.territories_near ?? []) : []);
   const radius = $derived(
-    withUnit(decimal(territories?.small.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
+    withUnit(decimal(territories?.small?.radius_mm ?? 0, 1, lang, { trim: true }), 'mm', lang),
   );
 
   function territory(id: string) {
@@ -77,7 +77,7 @@
       </ul>
       <p class="detail-note">
         {near.length === 1 ? copy.within(radius) : copy.border(radius)}
-        {copy.small(withUnit(grouped(territories!.small.under_mm3), 'mm³', lang), radius)}
+        {copy.small(withUnit(grouped(territories!.small!.under_mm3), 'mm³', lang), radius)}
       </p>
       <p class="detail-note">{copy.caveat}</p>
     </Disclosure>

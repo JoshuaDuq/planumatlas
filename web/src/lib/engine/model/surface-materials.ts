@@ -1,5 +1,12 @@
 import { BufferAttribute, Matrix4, Mesh, Plane, Vector3 } from 'three';
-import type { BufferGeometry, Color, DataTexture, Material, MeshStandardMaterial } from 'three';
+import type {
+  BufferGeometry,
+  Color,
+  DataTexture,
+  IUniform,
+  Material,
+  MeshStandardMaterial,
+} from 'three';
 import type { Region } from '../../types/index.ts';
 import { createAnatomicalMaterial, stageLegible } from '../render/materials.ts';
 import type { SurfacePalettes, VisualFieldUniforms } from '../render/materials.ts';
@@ -80,7 +87,13 @@ export class SurfaceMaterials {
       territory: manifest.arterial_territories
         ? paletteTexture(manifest.arterial_territories.territories.map(({ color }) => color))
         : null,
+      thickness: manifest.cortical_thickness ? { value: null } : null,
     };
+  }
+
+  /** The shared thickness palette, empty until the first atlas's thickness downloads; null unpublished. */
+  get thicknessPalette(): IUniform<DataTexture | null> | null {
+    return this.palettes.thickness;
   }
 
   /** A published region mesh in its anatomical material, which replaces the glTF one. */
@@ -212,6 +225,7 @@ export class SurfaceMaterials {
   dispose(): void {
     this.palettes.network?.dispose();
     this.palettes.territory?.dispose();
+    this.palettes.thickness?.value?.dispose();
   }
 
   /** Exposed white matter carries no region of its own; it reads the white matter inside it. */

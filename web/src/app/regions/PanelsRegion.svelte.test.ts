@@ -8,7 +8,6 @@ import { page, userEvent } from 'vitest/browser';
 import manifestFile from '../../../test/fixtures/cdmd-manifest.json' with { type: 'json' };
 import domainsFile from '../../../../public/models/cdmd/neuropsych-domains.json' with { type: 'json' };
 import strokeFile from '../../../../public/models/cdmd/stroke-cases.json' with { type: 'json' };
-import { reaching, type StrokeCases } from '../../lib/core/catalog/stroke-cases.ts';
 import {
   domainName,
   domainRecord,
@@ -219,7 +218,7 @@ describe('what each tab shows (1.4)', () => {
     await boot();
     await userEvent.click(page.getByRole('tab', { name }));
     flushSync();
-    const copy = t('en', 'info');
+    const { en: copy } = await import('../../lib/core/i18n/areas/info.ts');
     await expect
       .poll(() => list().querySelector<HTMLElement>(`[data-about="${place}"]`))
       .not.toBeNull();
@@ -228,11 +227,9 @@ describe('what each tab shows (1.4)', () => {
     expect(details.open).toBe(false);
     await userEvent.click(about.querySelector<HTMLElement>('summary')!);
     expect(details.open).toBe(true);
-    expect([...about.querySelectorAll('dt')].map((dt) => dt.textContent)).toEqual([
-      copy.shows,
-      copy.source,
-      copy.caution,
-    ]);
+    await expect
+      .poll(() => [...about.querySelectorAll('dt')].map((dt) => dt.textContent))
+      .toEqual([copy.shows, copy.source, copy.caution]);
     const links = [...about.querySelectorAll('a')];
     expect(links.at(-1)!.getAttribute('href')).toBe(methodsHref(place));
   });
@@ -240,7 +237,6 @@ describe('what each tab shows (1.4)', () => {
 
 describe('clinical material in the Deficits list (4.2)', () => {
   const links = () => [...list().querySelectorAll<HTMLElement>('.clinical-links .link-row')];
-  const notice = () => document.querySelector('.notice-text')?.textContent ?? null;
   const deficits = async () => {
     await userEvent.click(page.getByRole('tab', { name: 'Deficits' }));
     flushSync();
@@ -249,7 +245,6 @@ describe('clinical material in the Deficits list (4.2)', () => {
   test('DEF-37 · Simulate a lesion stands above the groups and opens the Lesion tool', async () => {
     await boot();
     await deficits();
-    // No cohort published: the stroke cases row is not offered.
     expect(links().map((row) => row.textContent!.trim())).toEqual(['Simulate a lesion']);
     const first = list().querySelector('.clinical-links')!;
     // The navigator holds every tab's list: the groups are this one's.
@@ -291,37 +286,16 @@ describe('clinical material in the Deficits list (4.2)', () => {
     expect(detail().querySelector('.clinical-profile')).not.toBeNull();
   });
 
-  test('DEF-38 · Stroke cases opens on the region shown most lesions reach, then on the selected region’s', async () => {
+  test('DEF-38 · with a cohort published, the list still offers Simulate a lesion alone', async () => {
     engine = createFakeEngine({
       manifest,
       domains: domains as never,
       strokeCases: strokeFile as never,
     });
     const world = await boot();
+    expect(world.strokeCases.available).toBe(true);
     await deficits();
-    const stroke = () => links().find((row) => row.textContent!.trim() === 'Stroke cases')!;
-    const section = () => detail().querySelector<HTMLDetailsElement>('.stroke-cases details');
-    // Nothing selected: once the cohort is read, the region shown that the most lesions reach.
-    await userEvent.click(stroke());
-    await expect.poll(() => world.view.current.selectedRegion?.id).toBeTruthy();
-    const chosen = world.view.current.selectedRegion!.id;
-    const cases = strokeFile as unknown as StrokeCases;
-    const reached = (id: string) => reaching(cases, id, Infinity).length;
-    const shown = world.catalog.groups.flatMap((group) => group.rows).filter((row) => row.visible);
-    expect(Math.max(...shown.map((row) => reached(row.region.id)))).toBe(reached(chosen));
-    expect(notice()).toBe(
-      `Of the regions shown, the most lesions in the cohort reach ${nameOf(chosen)}. Select another region to see its cases.`,
-    );
-    await expect.poll(() => section()?.open).toBe(true);
-    await expect.poll(() => document.activeElement).toBe(section()!.querySelector('summary'));
-    // The left supramarginal gyrus, selected by the reader: its own cases.
-    engine.emit('pick', { id: 'destrieux:left:26', point: null });
-    flushSync();
-    await deficits();
-    await userEvent.click(stroke());
-    await expect.poll(() => section()?.open).toBe(true);
-    await expect.poll(() => document.activeElement).toBe(section()!.querySelector('summary'));
-    expect(world.view.current.selectedRegion?.id).toBe('destrieux:left:26');
+    expect(links().map((row) => row.textContent!.trim())).toEqual(['Simulate a lesion']);
   });
 });
 

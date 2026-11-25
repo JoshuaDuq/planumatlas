@@ -2,6 +2,7 @@ import type { StrokeCasesStore } from '../lib/state/stroke-cases.svelte.ts';
 import type { UserMapStore } from '../lib/state/user-map.svelte.ts';
 import type { HighlightsStore } from '../lib/state/highlights.svelte.ts';
 import type { CorticalLayersStore } from '../lib/state/cortical-layers.svelte.ts';
+import type { RegionThicknessStore } from '../lib/state/cortical-thickness.svelte.ts';
 import type { MapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
@@ -69,6 +70,8 @@ export interface World extends AppContext {
   highlights: HighlightsStore;
   /** BigBrain's cortical layers, downloaded when a cortical region's sheet first asks. */
   corticalLayers: CorticalLayersStore;
+  /** Each cortical region's mean thickness, downloaded when its measurements first open. */
+  regionThickness: RegionThicknessStore;
   /** That map drawn against the open function, and the cortex both cover. */
   mapOverlap: MapOverlap;
 }

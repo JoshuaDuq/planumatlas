@@ -126,9 +126,27 @@ export function segmentsNearPlane(
     v: readonly number[];
   },
 ): PlaneTracts {
+  return segmentsNearPlanes(points, index, plane, [0])[0]!;
+}
+
+/**
+ * `segmentsNearPlane` for planes parallel to `plane`, each `offsets` mm from it along its normal, in
+ * one pass over the segments: a series of sections costs about what one plane does.
+ */
+export function segmentsNearPlanes(
+  points: Float32Array,
+  index: Uint32Array,
+  plane: {
+    origin: readonly number[];
+    normal: readonly number[];
+    u: readonly number[];
+    v: readonly number[];
+  },
+  offsets: readonly number[],
+): PlaneTracts[] {
   const { origin, normal, u, v } = plane;
-  const ends: number[] = [];
-  const colors: number[] = [];
+  const ends = offsets.map((): number[] => []);
+  const colors = offsets.map((): number[] => []);
   for (let k = 0; k < index.length; k += 2) {
     const i = 3 * index[k]!;
     const j = 3 * index[k + 1]!;
@@ -140,25 +158,36 @@ export function segmentsNearPlane(
     ];
     const length = Math.hypot(step[0]!, step[1]!, step[2]!);
     if (length === 0) continue;
-    const from = dot(normal, p);
+    const start0 = dot(normal, p);
     const rise = dot(normal, step);
-    // The part of the segment inside the slab, as fractions of it.
-    let start = 0;
-    let end = 1;
-    if (rise === 0) {
-      if (Math.abs(from) > TRACT_SLAB_MM) continue;
-    } else {
-      const low = (-TRACT_SLAB_MM - from) / rise;
-      const high = (TRACT_SLAB_MM - from) / rise;
-      start = Math.max(0, Math.min(low, high));
-      end = Math.min(1, Math.max(low, high));
-      if (start > end) continue;
+    const lowest = Math.min(start0, start0 + rise) - TRACT_SLAB_MM;
+    const highest = Math.max(start0, start0 + rise) + TRACT_SLAB_MM;
+    for (let n = 0; n < offsets.length; n++) {
+      const offset = offsets[n]!;
+      if (offset < lowest || offset > highest) continue;
+      const from = start0 - offset;
+      // The part of the segment inside the slab, as fractions of it.
+      let start = 0;
+      let end = 1;
+      if (rise === 0) {
+        if (Math.abs(from) > TRACT_SLAB_MM) continue;
+      } else {
+        const low = (-TRACT_SLAB_MM - from) / rise;
+        const high = (TRACT_SLAB_MM - from) / rise;
+        start = Math.max(0, Math.min(low, high));
+        end = Math.min(1, Math.max(low, high));
+        if (start > end) continue;
+      }
+      // In-plane positions do not depend on the offset: u and v are normal to it.
+      for (const t of [start, end]) {
+        const q = [p[0]! + t * step[0]!, p[1]! + t * step[1]!, p[2]! + t * step[2]!];
+        ends[n]!.push(dot(u, q), dot(v, q));
+      }
+      for (const value of step) colors[n]!.push(Math.round((255 * Math.abs(value)) / length));
     }
-    for (const t of [start, end]) {
-      const q = [p[0]! + t * step[0]!, p[1]! + t * step[1]!, p[2]! + t * step[2]!];
-      ends.push(dot(u, q), dot(v, q));
-    }
-    for (const value of step) colors.push(Math.round((255 * Math.abs(value)) / length));
   }
-  return { ends: Float32Array.from(ends), colors: Uint8Array.from(colors) };
+  return offsets.map((_, n) => ({
+    ends: Float32Array.from(ends[n]!),
+    colors: Uint8Array.from(colors[n]!),
+  }));
 }

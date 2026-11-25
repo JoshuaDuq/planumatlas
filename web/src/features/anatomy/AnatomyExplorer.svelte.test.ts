@@ -202,19 +202,24 @@ describe('results', () => {
 });
 
 describe('what the brain is', () => {
-  const source = () =>
-    [...document.querySelectorAll('.about-parts dt')].find((dt) => dt.textContent === 'Source')!
-      .nextElementSibling!.textContent!;
+  /** About this data's source, once it is opened and its wording has come. */
+  const source = async () => {
+    await userEvent.click(page.getByText('About this data'));
+    await expect.poll(() => document.querySelector('.about-parts')).not.toBeNull();
+    return [...document.querySelectorAll('.about-parts dt')].find(
+      (dt) => dt.textContent === 'Source',
+    )!.nextElementSibling!.textContent!;
+  };
 
-  test('one person’s brain is said to be one person’s', () => {
+  test('one person’s brain is said to be one person’s', async () => {
     mount();
-    expect(source()).toMatch(/^The brain is MGH CDMD sub_013/);
+    expect(await source()).toMatch(/^The brain is MGH CDMD sub_013/);
   });
 
   test('the MNI template is said to be an average, and where it comes from', async () => {
     await loadTemplateCopy();
     mount({ template: true });
-    expect(source()).toMatch(/^The ICBM 152 2009c nonlinear asymmetric template/);
+    expect(await source()).toMatch(/^The ICBM 152 2009c nonlinear asymmetric template/);
   });
 });
 

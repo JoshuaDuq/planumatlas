@@ -553,9 +553,12 @@ describe('loading, failure and retry', () => {
 });
 
 describe('settings', () => {
-  test('closed by default; the summary reads out opacity and the length filter', async () => {
+  test('Tract display comes between search and the bundles, with a readout when closed', async () => {
     await ready();
     expect(settings().open).toBe(false);
+    expect(settings().compareDocumentPosition(el('Arcuate fasciculus · left'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     await expect.element(page.getByText('16% · ≥1 mm')).toBeVisible();
     await page.getByText('Tract display').click();
     expect(settings().open).toBe(true);
@@ -697,7 +700,7 @@ describe('settings', () => {
     const summary = document.querySelector<HTMLElement>('.settings > summary')!;
     summary.focus();
     const order: string[] = [];
-    for (let step = 0; step < 6; step += 1) {
+    for (let step = 0; step < 5; step += 1) {
       await userEvent.tab();
       const active = document.activeElement as HTMLElement;
       const label = (active as HTMLInputElement).labels?.[0] ?? active;
@@ -709,8 +712,9 @@ describe('settings', () => {
       'Minimum length (mm)',
       'Restore default tracts',
       'Export lengths CSV',
-      'About this data',
     ]);
+    await userEvent.tab();
+    expect(document.activeElement).toBe(el('Arcuate fasciculus · left'));
   });
 });
 
@@ -790,6 +794,7 @@ describe('targets and media', () => {
       const { view } = await ready(createEngine(), { lang });
       await page.getByText(lang === 'en' ? 'Tract display' : 'Affichage des faisceaux').click();
       await page.getByText(lang === 'en' ? 'About this data' : 'À propos de ces données').click();
+      await expect.poll(() => document.querySelector('.about-parts')).not.toBeNull();
       // The full theme and width matrix once, in English; French is the same layout, so once.
       await (lang === 'en' ? expectAxeClean() : expectAxeCleanOnce('light', 1280));
       view.unmount();
@@ -960,6 +965,7 @@ describe('media, reflow and targets', () => {
     await ready();
     await page.getByText('Tract display').click();
     await page.getByText('About this data').click();
+    await expect.poll(() => document.querySelector('.about-parts')).not.toBeNull();
     await stage(320, 700);
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
     const body = document.querySelector<HTMLElement>('.body')!;

@@ -700,7 +700,7 @@ describe('the selected region’s deficits', () => {
 });
 
 describe('related deficits', () => {
-  test('a region lists the deficits mapped on it, and one opens the profile', async () => {
+  test('a region folds its linked deficits into a counted disclosure, and a link opens the profile', async () => {
     const { view, calls } = await mount();
     view.explorer = 'anatomy';
     view.selectedRegion = (manifest as unknown as Manifest).regions.find(
@@ -708,7 +708,12 @@ describe('related deficits', () => {
     )!;
     const section = document.querySelector<HTMLElement>('section.related')!;
     await expect.poll(() => section.hidden).toBe(false);
-    expect(section.querySelector('h3')!.textContent).toBe('Linked deficits');
+    const detail = page.getByTestId('detail');
+    const link = detail.getByRole('button', { name: /Aphasia/ });
+    await expect.element(link).not.toBeInTheDocument();
+    const summary = section.querySelector<HTMLElement>('summary')!;
+    expect(summary.textContent).toMatch(/^Linked deficits, \d+$/);
+    await userEvent.click(summary);
     expect(section.getAttribute('aria-labelledby')).toBeNull();
     // Each row shows its chevron at rest, as a link does, not only on hover.
     const chevrons = [...section.querySelectorAll<HTMLElement>('.chevron')];
@@ -716,10 +721,7 @@ describe('related deficits', () => {
     expect(chevrons.map((chevron) => getComputedStyle(chevron).opacity)).toEqual(
       chevrons.map(() => '1'),
     );
-    await page
-      .getByTestId('detail')
-      .getByRole('button', { name: /Aphasia/ })
-      .click();
+    await link.click();
     expect(calls.at(-1)).toBe('deficit:aphasia');
     await expect.poll(() => document.activeElement).toBe(heading());
   });

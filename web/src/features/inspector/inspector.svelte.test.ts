@@ -162,16 +162,14 @@ describe('selected region', () => {
     expect(root().querySelector('.selected-hint')).toBeNull();
   });
 
-  test('the slots follow About this region: deficits and circuits after its body, the comparison in Research data', async () => {
+  test('related links are in About this region and the comparison is in Research data', async () => {
     render(Fixture, { regionId: V1 });
-    const comparison = document.querySelector('[data-slot=comparison]')!;
+    const about = document.querySelector('[data-index=about]')!;
     const research = document.querySelector('[data-index=research]')!;
-    expect(research.contains(comparison)).toBe(true);
-    expect(root().contains(document.querySelector('[data-slot=deficits]'))).toBe(false);
-    const after = (a: Element, b: Element) =>
-      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(after(root(), document.querySelector('[data-slot=deficits]')!)).toBe(true);
-    expect(after(document.querySelector('[data-slot=circuits]')!, research)).toBe(true);
+    const slots = (index: Element) =>
+      [...index.querySelectorAll<HTMLElement>('[data-slot]')].map((slot) => slot.dataset.slot);
+    expect(slots(about)).toEqual(['deficits', 'circuits']);
+    expect(slots(research)).toEqual(['comparison']);
   });
 
   test('INSP-47 · an HCP-MMP area lists About this region, then Research data, each over its own sections', async () => {

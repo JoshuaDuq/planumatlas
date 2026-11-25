@@ -15,7 +15,7 @@
     sphereShares,
   } from '../../lib/core/coordinates/report.ts';
   import type { ShareRow, SphereShares } from '../../lib/core/coordinates/report.ts';
-  import { UNSTATED, readIn } from '../../lib/core/coordinates/spaces.ts';
+  import { UNSTATED, nativeSpace, readIn } from '../../lib/core/coordinates/spaces.ts';
   import { decimal, formatRas, grouped, withUnit } from '../../lib/core/format.ts';
   import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import { sharePercent } from '../../lib/core/lesion/report.ts';
@@ -244,7 +244,9 @@
     </ul>
   {/if}
   <!-- Before any share: what follows is a template location on this brain, not this brain's function. -->
-  <p class="detail-note">{space.native ? templateCopy(lang).coordinateCaveat : copy.caveat}</p>
+  <p class="detail-note">
+    {nativeSpace(spaces) ? templateCopy(lang).coordinateCaveat : copy.caveat}
+  </p>
   <div class="actions">
     <button type="button" onclick={lesion.remove}>{lesionCopy.remove}</button>
     <button type="button" disabled={!shares} onclick={download}>{copy.download}</button>

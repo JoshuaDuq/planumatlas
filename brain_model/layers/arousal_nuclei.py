@@ -16,6 +16,7 @@ from nibabel.affines import apply_affine
 from ..labels import nextbrain
 from ..labels.volumes import LabelGrid, conformed_grid
 from ..sources import ROOT, declares, sha256
+from .coordinate_spaces import template_space
 
 ATLAS_ID = "aan"
 LAYER = "arousal_nuclei"
@@ -35,6 +36,14 @@ NOTES = {
     "fr": "Un atlas de groupe tracé sur un gabarit d’après l’histologie et l’IRM ex vivo d’autres "
           "cerveaux, placé sur ce cerveau. Un noyau mesure un ou deux millimètres : le masque "
           "indique à peu près où il se trouve, pas son contour chez cette personne.",
+}
+TEMPLATE_NOTES = {
+    "en": "A group atlas drawn on a template from histology and ex-vivo MRI of other brains, "
+          "placed on this average brain. A nucleus is a millimetre or two across: the mask marks "
+          "about where it lies, not an outline seen in this scan.",
+    "fr": "Un atlas de groupe tracé sur un gabarit d’après l’histologie et l’IRM ex vivo d’autres "
+          "cerveaux, placé sur ce cerveau moyen. Un noyau mesure un ou deux millimètres : le masque "
+          "indique à peu près où il se trouve, pas un contour visible sur cette image.",
 }
 
 
@@ -89,8 +98,8 @@ def report_path(config):
     return config["source_directory"] / "arousal-registration.json"
 
 
-def method_directory(method):
-    return ROOT / "data/cache/arousal-nuclei" / method
+def method_directory(config, method):
+    return ROOT / "data/cache/arousal-nuclei" / config["anatomy"]["id"] / method
 
 
 def hemisphere_of(nucleus, index):
@@ -321,6 +330,7 @@ def describer(config, definition):
     table = unit_table(definition)
     family = definition["family"]
     excepted = exception_notes(config, definition)
+    notes = TEMPLATE_NOTES if template_space(config) else NOTES
 
     def describe(code):
         nucleus, hemisphere = table[code]
@@ -344,7 +354,7 @@ def describer(config, definition):
             "family_names": dict(family),
             "family_order": 0,
             "aliases": {lang: list(nucleus["aliases"][lang]) for lang in ("en", "fr")},
-            "notes": {lang: f"{NOTES[lang]} {exception[lang]}" for lang in NOTES} if exception else dict(NOTES),
+            "notes": {lang: f"{notes[lang]} {exception[lang]}" for lang in notes} if exception else dict(notes),
         }, nucleus["color"]
 
     return describe
@@ -383,9 +393,12 @@ def limitations(config, definition):
         if recorded["chosen"] == "synthmorph"
         else "placed here by FreeSurfer's SegmentAAN, a Bayesian segmentation of this brain's T1 against them"
     )
+    average = template_space(config)
+    whose = "nuclei seen in this average brain" if average else "this person's nuclei"
+    outline = "an outline seen in this scan" if average else "its outline in this person"
     return [
-        f"Arousal nuclei are the Harvard Ascending Arousal Network Atlas 2.0: masks drawn on a template from histology and ex-vivo MRI of other brains, {placement}. They are not this person's nuclei.",
-        "Each nucleus is a millimetre or two across: a mask marks about where it lies, not its outline in this person. The masks are not probabilistic.",
+        f"Arousal nuclei are the Harvard Ascending Arousal Network Atlas 2.0: masks drawn on a template from histology and ex-vivo MRI of other brains, {placement}. They are not {whose}.",
+        f"Each nucleus is a millimetre or two across: a mask marks about where it lies, not {outline}. The masks are not probabilistic.",
         "Of the ten nuclei, this brain's own NextBrain segmentation also labels three; the carried masks' centroids lie "
         + ", ".join(f"{entry['centroid_distance_mm']:g} mm ({nucleus.replace('-', ' ')}, Dice {entry['dice']:.2f})"
                     for nucleus, entry in shared.items())

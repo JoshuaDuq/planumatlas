@@ -6,7 +6,6 @@ import {
   differences,
   discordantPairs,
   exceptions,
-  mostReached,
   reaching,
   validateStrokeCases,
   type StrokeCase,
@@ -76,24 +75,6 @@ test('a case reaches a region from the threshold share, within the test window',
     reaching(data, IFG, 365).map((entry) => entry.id),
     ['A', 'C'],
   );
-});
-
-test('DEF-38 the region the most lesions reach in any window, the first of a tie, none when none is reached', () => {
-  at = 0;
-  const STG = 'destrieux:left:34';
-  const data = cohort([
-    person('A', 20, 50, { [IFG]: 0.5, [STG]: 0.2 }),
-    person('B', 20, 50, { [STG]: 0.3 }, 400),
-    person('C', 20, 50, { [STG]: 0.01, [IFG]: 0.04 }),
-  ]);
-  // A tested long after the scan still counts: no window is chosen yet.
-  assert.equal(mostReached(data, [IFG, STG]), STG);
-  assert.equal(mostReached(data, ['destrieux:left:1', IFG]), IFG);
-  assert.equal(mostReached(cohort([person('D', 20, 50, { [STG]: 0.5 })]), [IFG, STG]), STG);
-  assert.equal(mostReached(data, ['destrieux:left:1']), null);
-  at = 0;
-  const tie = cohort([person('E', 20, 50, { [IFG]: 0.5, [STG]: 0.5 })]);
-  assert.equal(mostReached(tie, [STG, IFG]), STG);
 });
 
 test('pairs match volume within the ratio, differ by the score gap, widest first, each person once', () => {

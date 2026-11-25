@@ -293,6 +293,10 @@ export function createTracts({ anatomy, scene, emit }: TractsOptions): Tracts {
       if (!matchingAnatomy) throw new Error('The linked MRI draws only its own anatomy’s tracts.');
       return engine.onPlane(frame);
     },
+    onPlanes(frames) {
+      if (!matchingAnatomy) throw new Error('The linked MRI draws only its own anatomy’s tracts.');
+      return engine.onPlanes(frames);
+    },
     loadFa,
     setClippingPlanes: engine.setClippingPlanes,
     setMotion: engine.setMotion,

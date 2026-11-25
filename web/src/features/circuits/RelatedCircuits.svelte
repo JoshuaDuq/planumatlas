@@ -6,12 +6,13 @@
   name, which a hidden "Landmark" completes (WCAG 2.5.3, deviations/x3-label-in-name.md).
 -->
 <script lang="ts">
+  import { decimal } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import Disclosure from '../../lib/ui/Disclosure.svelte';
   import type { CircuitExplorer } from './circuits-explorer.svelte.ts';
 
   let { model }: { model: CircuitExplorer } = $props();
 
-  const uid = $props.id();
   const copy = $derived(t(model.lang, 'circuits'));
 
   // Group repeated hits in the same circuit under one heading so identical titles never stack back-to-back.
@@ -35,75 +36,66 @@
 </script>
 
 {#if grouped.length}
-  <div class="related">
-    <h3 id="{uid}-heading" class="related-heading">{copy.inCircuits}</h3>
-    <ul class="links" aria-labelledby="{uid}-heading">
-      {#each grouped as { circuit, steps } (circuit.id)}
-        {#if steps.length === 1}
-          {@const index = steps[0]!}
-          <li>
-            <button
-              type="button"
-              class="circuit-link"
-              data-landmark-circuit={circuit.id}
-              data-landmark-step={index}
-              aria-disabled={model.busy ? 'true' : undefined}
-              onclick={() => model.openLandmark(circuit.id, index)}
-            >
-              <span class="link-name">{circuit.name[model.lang]}</span>
-              <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
-              <span class="visually-hidden">, {copy.landmark}</span>
-              <span class="chevron" aria-hidden="true"></span>
-            </button>
-          </li>
-        {:else}
-          <li class="circuit-group">
-            <p class="circuit-group-name">{circuit.name[model.lang]}</p>
-            <ul class="circuit-substeps">
-              {#each steps as index (`${circuit.id}:${index}`)}
-                {@const step = circuit.steps[index]!}
-                <li>
-                  <button
-                    type="button"
-                    class="circuit-link circuit-sublink"
-                    data-landmark-circuit={circuit.id}
-                    data-landmark-step={index}
-                    aria-disabled={model.busy ? 'true' : undefined}
-                    onclick={() => model.openLandmark(circuit.id, index)}
-                  >
-                    <span class="link-name">{step.name[model.lang]}</span>
-                    <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
-                    <span class="visually-hidden"
-                      >, {circuit.name[model.lang]}, {copy.landmark}</span
+  <div class="related evidence-section">
+    <Disclosure
+      variant="section"
+      summary={copy.inCircuits}
+      value={decimal(grouped.length, 0, model.lang)}
+    >
+      <ul class="links" role="list">
+        {#each grouped as { circuit, steps } (circuit.id)}
+          {#if steps.length === 1}
+            {@const index = steps[0]!}
+            <li>
+              <button
+                type="button"
+                class="circuit-link"
+                data-landmark-circuit={circuit.id}
+                data-landmark-step={index}
+                aria-disabled={model.busy ? 'true' : undefined}
+                onclick={() => model.openLandmark(circuit.id, index)}
+              >
+                <span class="link-name">{circuit.name[model.lang]}</span>
+                <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
+                <span class="visually-hidden">, {copy.landmark}</span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {:else}
+            <li class="circuit-group">
+              <p class="circuit-group-name">{circuit.name[model.lang]}</p>
+              <ul class="circuit-substeps" role="list">
+                {#each steps as index (`${circuit.id}:${index}`)}
+                  {@const step = circuit.steps[index]!}
+                  <li>
+                    <button
+                      type="button"
+                      class="circuit-link circuit-sublink"
+                      data-landmark-circuit={circuit.id}
+                      data-landmark-step={index}
+                      aria-disabled={model.busy ? 'true' : undefined}
+                      onclick={() => model.openLandmark(circuit.id, index)}
                     >
-                    <span class="chevron" aria-hidden="true"></span>
-                  </button>
-                </li>
-              {/each}
-            </ul>
-          </li>
-        {/if}
-      {/each}
-    </ul>
+                      <span class="link-name">{step.name[model.lang]}</span>
+                      <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
+                      <span class="visually-hidden"
+                        >, {circuit.name[model.lang]}, {copy.landmark}</span
+                      >
+                      <span class="chevron" aria-hidden="true"></span>
+                    </button>
+                  </li>
+                {/each}
+              </ul>
+            </li>
+          {/if}
+        {/each}
+      </ul>
+    </Disclosure>
   </div>
 {/if}
 
 <style>
   @layer features {
-    .related {
-      margin-block: var(--space-6);
-      padding-inline: var(--panel-inset);
-    }
-    /* The sheet's caption idiom, as the deficits list above it. */
-    .related-heading {
-      margin-bottom: var(--space-1);
-      padding-bottom: var(--space-1);
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-size: var(--text-caption);
-      font-weight: 600;
-      line-height: var(--lh-caption);
-    }
     .links,
     .circuit-substeps {
       margin: 0;

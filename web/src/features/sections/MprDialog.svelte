@@ -5,7 +5,7 @@
   loads the scan), or by a lesson; StageRegion mounts it.
   - on a desktop it is a region docked beside the live stage, with no focus trap;
   - on a phone, over the full-screen stage, or where docking would leave the stage under 360 px, it
-    is the modal Dialog (U5), and a phone shows one plane at a time, chosen by a radio group
+    is the modal Dialog (U5). A phone or a narrow dock shows one plane at a time, chosen by a radio group
     (deviations/g5-plane-radio.md, g5-plane-layout.md); each plane is a named section whose heading
     stays for assistive technology (g5-panel-names.md);
   - the pictures are `canvas role=img`, not focusable and without key handlers; the plane's slider is
@@ -27,6 +27,7 @@
   } from '../../lib/core/catalog/segmentation-agreement.ts';
   import { decimal, formatRas, millimetres, percent } from '../../lib/core/format.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import * as serialCopy from '../../lib/core/i18n/areas/serial.ts';
   import { mapNumber } from '../../lib/core/user-map/display.ts';
   import type { Statistic } from '../../lib/core/user-map/display.ts';
   import type {
@@ -47,7 +48,9 @@
   import IconButton from '../../lib/ui/IconButton.svelte';
   import RangeField from '../../lib/ui/RangeField.svelte';
   import StatusLine from '../../lib/ui/StatusLine.svelte';
+  import Switch from '../../lib/ui/Switch.svelte';
   import type { MprDialogController } from './mpr-dialog.svelte.ts';
+  import MprSeries from './MprSeries.svelte';
   import {
     AXES,
     COORDINATE_LIMIT,
@@ -59,8 +62,10 @@
     edgeLetter,
   } from './mpr-draw.ts';
   import { createPlaneCache } from './mpr-plane-cache.ts';
+  import { SERIES_COUNT } from './mpr-series.ts';
   import {
     canvasName,
+    mprCopy,
     planeName,
     seenFrom,
     sideConvention,
@@ -74,8 +79,11 @@
   interface Props {
     mpr: MprDialogController;
     engine: {
-      sections: Pick<EngineSections, 'display' | 'sample' | 'mprFrame' | 'slice' | 'pixels'>;
-      tracts: Pick<EngineTracts, 'onPlane' | 'loadFa' | 'hasFa'>;
+      sections: Pick<
+        EngineSections,
+        'display' | 'sample' | 'mprFrame' | 'slice' | 'pixels' | 'labelBox'
+      >;
+      tracts: Pick<EngineTracts, 'onPlane' | 'onPlanes' | 'loadFa' | 'hasFa'>;
     };
     /** The sections' display snapshot, replaced on every engine `change` (S1's engine sync). */
     engineState: { readonly sections: SectionsState };
@@ -117,7 +125,8 @@
   const EDGES = ['top', 'right', 'bottom', 'left'] as const;
 
   const uid = $props.id();
-  const copy = $derived(t(lang, 'mpr'));
+  const copy = $derived(mprCopy(lang));
+  const serial = $derived(lang === 'fr' ? serialCopy.fr : serialCopy.en);
   const agreementCopy = $derived(t(lang, 'agreement'));
   const phone = new MediaQuery(PHONE_QUERY);
   const fullscreenChange = createSubscriber((update) => on(document, 'fullscreenchange', update));
@@ -125,6 +134,9 @@
   // The dock may be dragged between its narrowest useful width and leaving the stage this much.
   const DOCK_MIN = 240;
   const STAGE_MIN = 360;
+  // Two 200 px slices need space for the gap and the dock's two insets.
+  const MULTI_PLANE_DOCK_MIN = 448;
+  let dockWidth = $state(0);
   /**
    * Beside the rail, the dock at its narrowest would leave the stage less than its minimum, as a window
    * just wider than a phone's does (820 px leaves 260 px and wraps the stage's tools; 2026-11-20
@@ -145,6 +157,9 @@
     fullscreenChange();
     return phone.current || cramped || document.fullscreenElement !== null;
   });
+  const singlePlane = $derived(
+    modal ? phone.current : dockWidth > 0 && dockWidth < MULTI_PLANE_DOCK_MIN,
+  );
   // The region's one live region: the phone's modal makes the page's announcer inert.
   let said = $state('');
   let quiet: ReturnType<typeof setTimeout> | undefined;
@@ -194,7 +209,16 @@
       PLANES.map((plane) => [plane, engine.sections.mprFrame(plane)]),
     ) as Record<MprPlane, PlaneFrame>;
   });
-  const visible = $derived(PLANES.filter((plane) => !phone.current || plane === mpr.plane));
+  const series = $derived(mpr.layout === 'series');
+  const OVERLAYS = ['none', 'segmentation', 'colours'] as const;
+  const overlay = $derived(
+    engineState.sections.colours
+      ? 'colours'
+      : engineState.sections.overlay
+        ? 'segmentation'
+        : 'none',
+  );
+  const visible = $derived(series ? [] : singlePlane ? [mpr.plane] : PLANES);
   const readout = $derived.by(() => {
     if (!reading) return '';
     const text = readoutText(
@@ -263,32 +287,42 @@
     return () => observer.disconnect();
   });
 
-  // Focus inside what the viewport change removes goes to what replaces it: a plane that becomes
-  // hidden hands it to the radio group; the radio group going hands it to the plane's slider.
-  let handOff: 'radio' | 'slider' | null = null;
+  // Focus inside what a layout change removes goes to what replaces it: a plane that becomes
+  // hidden hands it to the plane picker; the picker going hands it to the plane's slider; a radio
+  // group drawn again in the other shell takes it back.
+  const picker = $derived(singlePlane || series);
+  let handOff: 'picker' | 'layout' | 'slider' | null = null;
+  let wasModal = false;
   $effect.pre(() => {
-    const isPhone = phone.current;
-    const shown = mpr.plane;
+    const shellChanged = modal !== wasModal;
+    wasModal = modal;
+    const pickerShown = picker;
+    const shown = visible;
     untrack(() => {
       const focused = document.activeElement;
       if (!root?.contains(focused)) return;
       const inPlane = (focused as Element).closest<HTMLElement>('.plane');
-      if (isPhone && inPlane && inPlane.dataset.plane !== shown) handOff = 'radio';
-      else if (!isPhone && (focused as Element).closest('[role="radiogroup"]')) handOff = 'slider';
+      if (inPlane && !shown.includes(inPlane.dataset.plane as MprPlane))
+        handOff = pickerShown ? 'picker' : null;
+      else if ((shellChanged || !pickerShown) && (focused as Element).closest('.mpr-plane-picker'))
+        handOff = pickerShown ? 'picker' : 'slider';
+      else if (shellChanged && (focused as Element).closest('.mpr-layout')) handOff = 'layout';
     });
   });
   $effect(() => {
-    void phone.current;
-    void mpr.plane;
+    void modal;
+    void visible;
     if (!handOff) return;
     const target = handOff;
     handOff = null;
     void tick().then(() => {
       const next =
-        target === 'radio'
-          ? root?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')
-          : root?.querySelector<HTMLElement>(
+        target === 'slider'
+          ? root?.querySelector<HTMLElement>(
               `.plane[data-plane="${mpr.plane}"] input[type="range"]`,
+            )
+          : root?.querySelector<HTMLElement>(
+              `.mpr-${target === 'picker' ? 'plane-picker' : 'layout'} [role="radio"][aria-checked="true"]`,
             );
       next?.focus();
     });
@@ -318,7 +352,6 @@
   }
 
   const RESIZE_STEP = 24;
-  let dockWidth = $state(0);
   let resizing: { x: number; width: number; max: number } | null = null;
 
   /** The widest the dock may be now: what it and the stage share, less the stage's minimum. */
@@ -384,14 +417,18 @@
       frame: frames[plane],
       fieldOfView: reading!.display.fieldOfView,
       crosshair,
+      crosshairShown: mpr.crosshairShown,
       lang,
     }).toDataURL('image/png');
     link.click();
-    // The same sentence again must change the region to be spoken again: cleared, then written after
-    // a gap, as the page announcer does, so the two writes fall in separate rendering updates.
+    announce(savedAnnouncement(plane, lang));
+  }
+
+  // The same sentence again must change the region to be spoken again: cleared, then written after
+  // a gap, as the page announcer does, so the two writes fall in separate rendering updates.
+  function announce(sentence: string) {
     clearTimeout(quiet);
     said = '';
-    const sentence = savedAnnouncement(plane, lang);
     quiet = setTimeout(() => (said = sentence), REPEAT_GAP_MS);
   }
 </script>
@@ -400,11 +437,23 @@
   <div
     class="mpr"
     bind:this={root}
+    data-single-plane={(singlePlane && !series) || undefined}
+    data-series={series || undefined}
     style:--crosshair-ink={CROSSHAIR_INK}
     style:--crosshair-ring={CROSSHAIR_RING}
   >
-    {#if phone.current}
+    <ChoiceGroup
+      class="mpr-layout"
+      label={serial.layout}
+      options={(['planes', 'series'] as const).map((layout) => ({
+        value: layout,
+        label: serial.layouts[layout],
+      }))}
+      bind:value={mpr.layout}
+    />
+    {#if picker}
       <ChoiceGroup
+        class="mpr-plane-picker"
         label={copy.planes}
         options={PLANES.map((plane) => ({ value: plane, label: planeName(plane, lang) }))}
         bind:value={mpr.plane}
@@ -412,6 +461,25 @@
     {/if}
 
     <div class="grid">
+      {#if series && reading}
+        <MprSeries
+          {engine}
+          plane={mpr.plane}
+          {frames}
+          display={reading.display}
+          sections={engineState.sections}
+          {crosshair}
+          crosshairShown={mpr.crosshairShown}
+          mapKey={map?.key}
+          tractsKey={tracts && tracts.key}
+          faOpacity={faShown ? faOpacity : null}
+          fa={() => fa}
+          {lang}
+          subject={anatomy.subject}
+          pick={(plane, point) => mpr.pick(plane, point)}
+          {announce}
+        />
+      {/if}
       {#each PLANES as plane (plane)}
         {@const frame = frames[plane]}
         {@const convention = sideConvention(frame.edges)}
@@ -447,8 +515,10 @@
                 reading.display.fieldOfView,
               )}
               <!-- The canvas's name says which way each edge faces; these marks are its picture. -->
-              <div class="crosshair-across" aria-hidden="true" style:top="{down * 100}%"></div>
-              <div class="crosshair-down" aria-hidden="true" style:left="{across * 100}%"></div>
+              {#if mpr.crosshairShown}
+                <div class="crosshair-across" aria-hidden="true" style:top="{down * 100}%"></div>
+                <div class="crosshair-down" aria-hidden="true" style:left="{across * 100}%"></div>
+              {/if}
               {#each EDGES as edge, index (edge)}
                 <span class="edge" data-edge={edge} aria-hidden="true"
                   >{edgeLetter(frame.edges[index]!, lang)}</span
@@ -512,24 +582,26 @@
         <StatusLine class="visually-hidden" text={said} />
 
         <div class="display">
-          <RangeField
-            label={copy.contrastWindow}
-            value={reading?.display.windowWidth ?? 0}
-            min={10}
-            max={256}
-            step={1}
-            format={(value) => decimal(value, 0, lang)}
-            oninput={(width) => mpr.setWindow({ width })}
-          />
-          <RangeField
-            label={copy.windowCenter}
-            value={reading?.display.windowCenter ?? 0}
-            min={0}
-            max={255}
-            step={1}
-            format={(value) => decimal(value, 0, lang)}
-            oninput={(center) => mpr.setWindow({ center })}
-          />
+          <div class="window-controls">
+            <RangeField
+              label={copy.contrastWindow}
+              value={reading?.display.windowWidth ?? 0}
+              min={10}
+              max={256}
+              step={1}
+              format={(value) => decimal(value, 0, lang)}
+              oninput={(width) => mpr.setWindow({ width })}
+            />
+            <RangeField
+              label={copy.windowCenter}
+              value={reading?.display.windowCenter ?? 0}
+              min={0}
+              max={255}
+              step={1}
+              format={(value) => decimal(value, 0, lang)}
+              oninput={(center) => mpr.setWindow({ center })}
+            />
+          </div>
           {#if tracts && engine.tracts.hasFa}
             <RangeField
               label={copy.faOpacity}
@@ -541,15 +613,22 @@
               onchange={setFaOpacity}
             />
           {/if}
-          <label class="check">
-            <input
-              type="checkbox"
-              disabled={agreementName !== null}
-              checked={engineState.sections.overlay}
-              onchange={(event) => mpr.setOverlay(event.currentTarget.checked)}
+          <div class="overlay">
+            <span id="{uid}-overlay" class="overlay-label">{copy.overlay}</span>
+            <!-- A shown agreement holds the overlay: the choice stays reachable but does not change. -->
+            <ChoiceGroup
+              class="mpr-overlay"
+              labelledby="{uid}-overlay"
+              options={OVERLAYS.map((choice) => ({ value: choice, label: copy.overlays[choice] }))}
+              bind:value={() => overlay, (choice) => mpr.setOverlay(choice)}
+              ariaDisabled={agreementName !== null}
             />
-            <span>{copy.segmentationOverlay}</span>
-          </label>
+          </div>
+          <Switch
+            class="crosshair-switch"
+            label={copy.crosshair}
+            bind:checked={mpr.crosshairShown}
+          />
           <button type="button" class="save reset" onclick={resetDisplay}
             >{copy.resetDisplay}</button
           >
@@ -559,11 +638,13 @@
     </div>
 
     <div class="mpr-about">
-      <Disclosure summary={t(lang, 'info').about} variant="section">
+      <Disclosure summary={t(lang, 'link').aboutData} variant="section">
         <div class="note">
           <p>{copy.asStage}</p>
           <p>{copy.subtitle}</p>
           <p>{copy.note(anatomy)}</p>
+          <p>{copy.coloursNote}</p>
+          <p>{serial.note(SERIES_COUNT)}</p>
           {#if tracts}<p>{copy.tracts}{engine.tracts.hasFa ? ` ${copy.faNote}` : ''}</p>{/if}
         </div>
       </Disclosure>
@@ -884,46 +965,22 @@
       gap: var(--space-2) var(--space-6);
       padding-top: var(--space-2);
     }
-    .check {
+    .window-controls {
+      display: contents;
+    }
+    .overlay {
       grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      min-height: var(--control-height);
-      font-size: var(--text-ui);
-      cursor: pointer;
-    }
-    input[type='checkbox'] {
-      appearance: none;
       display: grid;
-      place-content: center;
-      flex: none;
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      border: 1px solid var(--border-control);
-      border-radius: var(--radius-small);
-      background: var(--surface-base);
-      cursor: pointer;
+      gap: var(--space-1);
+      font-size: var(--text-ui);
     }
-    input[type='checkbox']::before {
-      content: '';
-      width: 8px;
-      height: 4px;
-      border-left: 1.5px solid transparent;
-      border-bottom: 1.5px solid transparent;
-      transform: rotate(-45deg) translateY(-1px);
+    .overlay-label {
+      font-weight: 500;
+      color: var(--text-secondary);
     }
-    input[type='checkbox']:checked {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-    input[type='checkbox']:checked::before {
-      border-color: var(--surface-base);
-    }
-    input[type='checkbox']:disabled {
-      opacity: 0.5;
-      cursor: default;
+    .display :global(.crosshair-switch) {
+      grid-column: 1 / -1;
+      justify-self: start;
     }
     .display .reset {
       grid-column: 1 / -1;
@@ -1093,31 +1150,53 @@
         grid-template-columns: minmax(0, 1fr);
       }
     }
-    /* A narrow column stacks the planes, each as wide as the column. */
-    @container mpr-dock (max-width: 400px) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    /* One plane or the serial sections take the whole width, the controls under them. With one plane
+       the radio group names it: the heading keeps the name for assistive technology and shows the
+       side it is seen from beside Save. */
+    .mpr:is([data-single-plane], [data-series]) {
+      row-gap: var(--space-2);
     }
-    /* The phone layout (PHONE_QUERY; dialogs.css:262-290): one plane, so one column. The radio group
-       names the plane, so the heading draws only the side it is seen from, beside Save; the name is
-       kept for assistive technology (g5-plane-layout.md, g5-panel-names.md). */
-    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .plane-name {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-        white-space: nowrap;
-      }
-      .seen-from::first-letter {
-        text-transform: uppercase;
-      }
+    .mpr:is([data-single-plane], [data-series]) .grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+    }
+    .mpr:is([data-single-plane], [data-series]) .controls {
+      grid-column: 1;
+      grid-row: auto;
+      gap: var(--space-2);
+    }
+    .mpr:is([data-single-plane], [data-series]) .display {
+      padding-top: 0;
+    }
+    .mpr:is([data-single-plane], [data-series]) .window-controls {
+      display: flex;
+      flex-wrap: wrap;
+      grid-column: 1 / -1;
+      gap: var(--space-2) var(--space-4);
+    }
+    .mpr:is([data-single-plane], [data-series]) .window-controls > :global(.control-field) {
+      flex: 1 1 min(7rem, 100%);
+      min-width: 0;
+    }
+    .mpr[data-single-plane] .plane-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .mpr[data-single-plane] .seen-from::first-letter {
+      text-transform: uppercase;
+    }
+    .mpr :global(:is(.mpr-plane-picker, .mpr-layout, .mpr-overlay)) {
+      flex-wrap: wrap;
+    }
+    .mpr :global(:is(.mpr-plane-picker, .mpr-layout, .mpr-overlay) [role='radio']) {
+      flex: 1;
+      min-width: min-content;
+      padding-inline: var(--space-2);
     }
   }
 
@@ -1136,18 +1215,8 @@
       }
     }
     @media (forced-colors: active) {
-      .save:focus-visible,
-      input[type='checkbox']:focus-visible {
+      .save:focus-visible {
         outline: 2px solid Highlight;
-      }
-      /* The tick would be forced to ink on every box, checked or not: the system control draws itself. */
-      input[type='checkbox'] {
-        appearance: auto;
-        background: Canvas;
-        border-color: CanvasText;
-      }
-      input[type='checkbox']::before {
-        content: none;
       }
     }
   }

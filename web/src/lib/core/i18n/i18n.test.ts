@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 import { count } from '../format.ts';
+import * as mpr from './areas/mpr.ts';
 import { TRANSLATIONS, atlasSwitchLabel, t } from './index.ts';
 
 const both = <A extends keyof typeof TRANSLATIONS.en>(area: A) => ({
@@ -70,7 +71,7 @@ test('the colophon and slice note name whichever brain was actually built', () =
     // Neither description may survive into the other brain's colophon.
     assert.doesNotMatch(colophon(template), /bert/);
 
-    const { note } = t(lang, 'mpr');
+    const { note } = lang === 'fr' ? mpr.fr : mpr.en;
     assert.match(note(subject), /1 mm/);
     assert.notEqual(note(subject), note(template));
   }
@@ -88,10 +89,14 @@ test('the colophon and slice note name whichever brain was actually built', () =
  * each language and nothing else is.
  */
 test('every area file is composed into both languages, once', () => {
-  // Loaded on demand: the template's wording with that brain (`loadTemplateCopy`), the tour's with the tour.
+  // Loaded on demand: the template's wording with that brain (`loadTemplateCopy`), the tour's with the
+  // tour, the Linked MRI's and its serial sections' with the Linked MRI, About this data's when one opens,
+  // the network matrix's with its dialog.
   const files = Object.keys(import.meta.glob('./areas/*.ts'))
     .map((path) => path.replace(/^\.\/areas\/(.*)\.ts$/, '$1'))
-    .filter((area) => area !== 'template' && area !== 'guide')
+    .filter(
+      (area) => !['template', 'guide', 'mpr', 'serial', 'info', 'networkMatrix'].includes(area),
+    )
     .sort();
   assert.deepEqual(Object.keys(TRANSLATIONS.en).sort(), files);
   assert.deepEqual(Object.keys(TRANSLATIONS.fr).sort(), files);

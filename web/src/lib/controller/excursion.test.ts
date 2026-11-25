@@ -390,13 +390,22 @@ describe('an excursion into a function', () => {
     assert.equal(scene.session.state.notice!.text, 'Previous view restored.');
   });
 
-  test('CTRL-30 opening a function says the atlas it changed, and labels the cut by that atlas', async () => {
+  test('CTRL-30 a function uses its atlas on the cut without repeating the masthead’s atlas as a notice', async () => {
     const scene = createScene();
     assert.equal(scene.engine.model.settings.atlas, 'destrieux');
     await scene.excursions.openFunction('language');
     assert.equal(scene.engine.model.settings.atlas, 'hcp-mmp');
-    assert.match(scene.session.state.notice!.text, /HCP-MMP/);
+    assert.equal(scene.session.state.notice, null);
     assert.equal(scene.engine.sections.state.cutAtlas, 'hcp-mmp');
+  });
+
+  test('switching away from a function restores the view quietly', async () => {
+    const scene = createScene();
+    await scene.excursions.openFunction('language');
+    await scene.excursions.chooseMode('diffusion');
+    assert.equal(scene.reader.apply.mock.calls.length, 1);
+    assert.equal(scene.session.state.explorer, 'diffusion');
+    assert.equal(scene.session.state.notice, null);
   });
 
   test('a region it names is selected and framed, and holds the scene if none is held', async () => {
@@ -507,7 +516,6 @@ describe('a colour only cuts show', () => {
   // Each registered volume's own voxel centroid in surface RAS mm, measured with nibabel on CDMD.
   for (const [colour, plane, view, centre] of [
     ['striatal', 'axial', 'superior', [0.4, 7.7, 27.9]],
-    ['cerebellar', 'coronal', 'anterior', [-3.2, -39.2, -20.2]],
   ] as const) {
     test(`${colour}, chosen with no cut open, cuts ${plane} through its map's centre, facing it`, async () => {
       const scene = createScene();
@@ -523,6 +531,11 @@ describe('a colour only cuts show', () => {
     const scene = createScene();
     await scene.excursions.chooseSurfaceColor('network');
     assert.equal(scene.engine.sections.state.mode, 'off');
+    const view = scene.session.state.view;
+    await scene.excursions.chooseSurfaceColor('cerebellar');
+    assert.equal(scene.engine.model.settings.surfaceColor, 'cerebellar');
+    assert.equal(scene.engine.sections.state.mode, 'off', 'the cerebellar map is on its surface');
+    assert.equal(scene.session.state.view, view);
     await scene.engine.sections.setMode('sagittal');
     const before = scene.engine.sections.state.crosshair;
     await scene.excursions.chooseSurfaceColor('striatal');

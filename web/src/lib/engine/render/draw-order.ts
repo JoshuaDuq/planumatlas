@@ -1,4 +1,5 @@
-import type { RenderItem } from 'three';
+import { DoubleSide, Mesh, MeshBasicMaterial } from 'three';
+import type { BufferGeometry, Material, RenderItem } from 'three';
 
 /**
  * Focus draws everything but the selection as a ghost (brain-atlas.ts). Translucent layers that all
@@ -9,16 +10,64 @@ import type { RenderItem } from 'three';
 export const GHOST = { none: 0, deep: 1, cortex: 2 } as const;
 export type Ghost = (typeof GHOST)[keyof typeof GHOST];
 
-const ghostOf = (item: RenderItem): Ghost => (item.object.userData['ghost'] as Ghost) ?? GHOST.none;
+/**
+ * Where a translucent surface falls among the rest. A translucent cortex, ghost or not, is drawn
+ * last, after its depth: its triangles are not sorted, so without that a far fold blended over a
+ * near one wherever it came later in the mesh, a speckle that grew with the opacity.
+ */
+export const TRANSLUCENT = { surface: 0, deepGhost: 1, cortexDepth: 2, cortex: 3 } as const;
+export type Translucent = (typeof TRANSLUCENT)[keyof typeof TRANSLUCENT];
 
-/** three.js's own translucent order (reversePainterSortStable), with ghosts drawn as above. */
+const rankOf = (item: RenderItem): Translucent =>
+  (item.object.userData['translucent'] as Translucent) ?? TRANSLUCENT.surface;
+
+/** three.js's own translucent order (reversePainterSortStable), with the ranks above. */
 export function transparentOrder(a: RenderItem, b: RenderItem): number {
   if (a.groupOrder !== b.groupOrder) return a.groupOrder - b.groupOrder;
   if (a.renderOrder !== b.renderOrder) return a.renderOrder - b.renderOrder;
-  const ghost = ghostOf(a);
-  if (ghost !== ghostOf(b)) return ghost - ghostOf(b);
-  if (a.z !== b.z) return ghost === GHOST.deep ? a.z - b.z : b.z - a.z;
+  const rank = rankOf(a);
+  if (rank !== rankOf(b)) return rank - rankOf(b);
+  if (a.z !== b.z) return rank === TRANSLUCENT.deepGhost ? a.z - b.z : b.z - a.z;
   return a.id - b.id;
+}
+
+const depthTwins = new WeakMap<Mesh, Mesh<BufferGeometry, MeshBasicMaterial>>();
+
+/**
+ * While `mesh` is a translucent cortex, a child draws its depth alone just before it, so it blends
+ * only its nearest fold over what lies beneath. Offset back a step: the two programs need not
+ * compute the same depth to the last bit.
+ */
+export function drawDepthFirst(mesh: Mesh<BufferGeometry, Material>, on: boolean): void {
+  let twin = depthTwins.get(mesh);
+  if (!on) {
+    twin?.removeFromParent();
+    return;
+  }
+  if (!twin) {
+    twin = new Mesh(
+      mesh.geometry,
+      new MeshBasicMaterial({
+        colorWrite: false,
+        side: DoubleSide,
+        transparent: true,
+        forceSinglePass: true,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1,
+      }),
+    );
+    twin.userData['translucent'] = TRANSLUCENT.cortexDepth;
+    // Picking names regions; the twin has none.
+    twin.raycast = () => {};
+    depthTwins.set(mesh, twin);
+  }
+  const { clippingPlanes } = mesh.material;
+  if (twin.material.clippingPlanes !== clippingPlanes) {
+    twin.material.clippingPlanes = clippingPlanes;
+    twin.material.needsUpdate = true;
+  }
+  if (twin.parent !== mesh) mesh.add(twin);
 }
 
 const cortical = (item: RenderItem): number => (item.object.userData['cortical'] ? 0 : 1);

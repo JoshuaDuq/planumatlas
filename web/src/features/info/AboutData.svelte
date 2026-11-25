@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type * as infoArea from '../../lib/core/i18n/areas/info.ts';
   import { t, templateCopy } from '../../lib/core/i18n/index.ts';
   import type { MethodsPage } from '../../lib/core/methods.ts';
   import type { Language } from '../../lib/types/index.ts';
@@ -26,25 +27,36 @@
     children?: Snippet;
   } = $props();
 
-  const copy = $derived(t(lang, 'info'));
-  const entry = $derived({
-    ...copy[place],
-    ...(template && (templateCopy(lang) as Partial<Record<MethodsPage, object>>)[place]),
+  let open = $state(false);
+  let area = $state.raw<typeof infoArea | null>(null);
+  // The wording comes when the reader first opens it: none of it is needed before (BUILD-15).
+  $effect(() => {
+    if (open && !area)
+      void import('../../lib/core/i18n/areas/info.ts').then((loaded) => (area = loaded));
   });
+  const copy = $derived(area && (lang === 'fr' ? area.fr : area.en));
+  const entry = $derived(
+    copy && {
+      ...copy[place],
+      ...(template && (templateCopy(lang) as Partial<Record<MethodsPage, object>>)[place]),
+    },
+  );
 </script>
 
 <div class="about-data" data-host={host} data-about={place}>
-  <Disclosure summary={copy.about} variant="section">
-    <dl class="about-parts">
-      <dt>{copy.shows}</dt>
-      <dd>{entry.shows}</dd>
-      <dt>{copy.source}</dt>
-      <dd>{entry.source}</dd>
-      <dt>{copy.caution}</dt>
-      <dd>{entry.caution}</dd>
-    </dl>
-    {@render children?.()}
-    <p class="about-methods"><MethodsLink page={place} {lang} /></p>
+  <Disclosure summary={t(lang, 'link').aboutData} variant="section" bind:open>
+    {#if copy && entry}
+      <dl class="about-parts">
+        <dt>{copy.shows}</dt>
+        <dd>{entry.shows}</dd>
+        <dt>{copy.source}</dt>
+        <dd>{entry.source}</dd>
+        <dt>{copy.caution}</dt>
+        <dd>{entry.caution}</dd>
+      </dl>
+      {@render children?.()}
+      <p class="about-methods"><MethodsLink page={place} {lang} /></p>
+    {/if}
   </Disclosure>
 </div>
 

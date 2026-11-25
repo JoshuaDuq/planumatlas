@@ -92,6 +92,68 @@ describe('keyPlates', () => {
     expect(plate!.rows.map((row) => row.label)).toEqual(['Visuel primaire', 'Langage']);
   });
 
+  test('THICK-04 thickness keys its ramp over the published range, says what it measures, and gives way to a paint', () => {
+    const [plate] = keyPlates(sources({ surfaceColor: 'thickness', thickness: [1, 4] }));
+    expect(plate).toMatchObject({ name: 'network', map: 'thickness', title: 'Cortical thickness' });
+    expect(plate!.rows.map((row) => row.label)).toEqual(['1.0 to 4.0\u202fmm']);
+    expect(plate!.rows[0]!.ramp).toEqual([
+      'rgb(65 68 135)',
+      'rgb(52 95 141)',
+      'rgb(42 120 142)',
+      'rgb(33 144 140)',
+      'rgb(34 168 132)',
+      'rgb(67 191 113)',
+      'rgb(122 209 81)',
+      'rgb(188 223 39)',
+      'rgb(253 231 37)',
+    ]);
+    expect(plate!.note).toMatch(/^Measured on this scan by FreeSurfer\./);
+    expect(
+      keyPlates(sources({ surfaceColor: 'thickness', thickness: [1, 4], lang: 'fr' }))[0]!.rows[0]!
+        .label,
+    ).toBe('1,0 à 4,0\u202fmm');
+    expect(
+      names(keyPlates(sources({ surfaceColor: 'thickness', thickness: [1, 4], legend }))),
+    ).toEqual(['paint']);
+    expect(keyPlates(sources({ surfaceColor: 'thickness' }))).toEqual([]);
+  });
+
+  test('NETM-03 Yeo’s networks’ key alone offers the correlation matrix, where it is published', () => {
+    const plate = (extra: Partial<KeySources>) => keyPlates(sources(extra))[0];
+    expect(plate({ surfaceColor: 'network', networkMatrix: true })!.action).toEqual({
+      id: 'network-matrix',
+      label: 'Correlation matrix',
+    });
+    expect(plate({ surfaceColor: 'network', networkMatrix: true, lang: 'fr' })!.action!.label).toBe(
+      'Matrice de corrélation',
+    );
+    // Not where it is unpublished, nor under the striatal map, which keys the same networks.
+    expect(plate({ surfaceColor: 'network', networkMatrix: false })!.action).toBeUndefined();
+    expect(plate({ surfaceColor: 'striatal', networkMatrix: true })!.action).toBeUndefined();
+  });
+
+  test('SULC-02 sulcal depth keys its ramp around 0, says what the depth is, and gives way to a paint', () => {
+    const [plate] = keyPlates(sources({ surfaceColor: 'sulc', sulc: 18 }));
+    expect(plate).toMatchObject({ name: 'network', map: 'sulc', title: 'Sulcal depth' });
+    expect(plate!.rows.map((row) => row.label)).toEqual(['\u221218 to +18\u202fmm']);
+    const ramp = plate!.rows[0]!.ramp!;
+    // matplotlib's coolwarm: blue, its neutral centre, red.
+    expect([ramp[0], ramp[16], ramp.at(-1), ramp.length]).toEqual([
+      'rgb(59 76 192)',
+      'rgb(221 221 221)',
+      'rgb(180 4 38)',
+      33,
+    ]);
+    expect(plate!.note).toMatch(/outward in sulci \(red\), inward on gyral crowns \(blue\)/);
+    expect(
+      keyPlates(sources({ surfaceColor: 'sulc', sulc: 18, lang: 'fr' }))[0]!.rows[0]!.label,
+    ).toBe('\u221218 à +18\u202fmm');
+    expect(names(keyPlates(sources({ surfaceColor: 'sulc', sulc: 18, legend })))).toEqual([
+      'paint',
+    ]);
+    expect(keyPlates(sources({ surfaceColor: 'sulc' }))).toEqual([]);
+  });
+
   test('a paint covers the colour under it: its plate stands alone and carries the legend', () => {
     const plates = keyPlates(sources({ surfaceColor: 'network', legend }));
     expect(names(plates)).toEqual(['paint']);
@@ -193,18 +255,19 @@ describe('defaultOpen', () => {
     expect(defaultOpen(plate(30), { phone: true, coarse: true }, null)).toBe(true);
   });
 
-  test('on a phone any key folds where it would take more than half the room', () => {
+  test('on a phone the legend leaves 240 px above the dock when the room allows', () => {
     const phone = { phone: true, coarse: false };
-    // Two columns: 42 + 2 rows of 24 = 90 px against (500 - 60 - 40) / 2 = 200 px.
+    // Four entries take 90 px. A 430 px stage has 330 px above the dock and gutters.
+    expect(defaultOpen(plate(4), phone, room({ width: 390, height: 430 }))).toBe(true);
+    expect(defaultOpen(plate(4), phone, room({ width: 390, height: 429 }))).toBe(false);
     expect(defaultOpen(plate(4), phone, room({ width: 390, height: 500 }))).toBe(true);
-    // 42 + 5 rows of 24 = 162 px against (320 - 60 - 40) / 2 = 110 px.
     expect(defaultOpen(plate(10), phone, room({ width: 390, height: 320 }))).toBe(false);
   });
 
   test('touch toggles are 44 px rows, a deficit runs one column and the direction key never two', () => {
     const phone = { phone: true, coarse: true };
-    const wide = room({ width: 390, height: 400 });
-    // (400 - 60 - 40) / 2 = 150 px. Eight toggle rows in two columns: 42 + 4 * 44 = 218 px.
+    const wide = room({ width: 390, height: 500 });
+    // 500 - 60 - 40 - 240 = 160 px for keys. Eight toggle rows in two columns take 218 px.
     expect(defaultOpen(plate(8, { pickable: true }), phone, wide)).toBe(false);
     // The same rows as plain 24 px rows: 42 + 4 * 24 = 138 px.
     expect(defaultOpen(plate(8), phone, wide)).toBe(true);
@@ -217,10 +280,10 @@ describe('defaultOpen', () => {
   test('a key is weighed under the keys stacked above it', () => {
     const phone = { phone: true, coarse: false };
     const direction = plate(3, { name: 'direction', map: 'direction' });
-    // Half room (400 - 60 - 40) / 2 = 150 px; the direction key takes 42 + 3 rows of 24 = 114 px,
+    // Room for keys (500 - 60 - 40 - 240) = 160 px; the direction key takes 114 px,
     // and 164 px under a key folded to its 42 px title and the 8 px gap.
-    expect(defaultOpen(direction, phone, room({ width: 390, height: 400 }))).toBe(true);
-    expect(defaultOpen(direction, phone, room({ width: 390, height: 400 }), 50)).toBe(false);
+    expect(defaultOpen(direction, phone, room({ width: 390, height: 500 }))).toBe(true);
+    expect(defaultOpen(direction, phone, room({ width: 390, height: 500 }), 50)).toBe(false);
     // A long key's 258 px fit the 300 px above the dock alone, not under 50 px of keys.
     expect(defaultOpen(plate(9), desktop, room({ height: 400 }))).toBe(true);
     expect(defaultOpen(plate(9), desktop, room({ height: 400 }), 50)).toBe(false);

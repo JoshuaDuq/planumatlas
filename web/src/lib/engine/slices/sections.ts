@@ -1,6 +1,6 @@
 import { Group, Plane, Vector3 } from 'three';
 import type { Mesh, Raycaster } from 'three';
-import type { CutMode, Region } from '../../types/index.ts';
+import type { CutMode, Paint, Region, SliceCrop } from '../../types/index.ts';
 import { MAP_ATLASES, cutAtlasFor } from '../../core/catalog/cut-labels.ts';
 import { categoryAt } from '../../core/catalog/segmentation-agreement.ts';
 import type {
@@ -24,7 +24,7 @@ import type {
 import { centeredFrame, clippingPlane } from './coordinates.ts';
 import type { Frame, Ras } from './coordinates.ts';
 import { sampleSlice, windowSlice } from './sampling.ts';
-import type { SliceMap, SlicePaint, SliceSamples } from './sampling.ts';
+import type { SliceMap, SlicePaint, SliceSamples, SliceSelection } from './sampling.ts';
 import { loadVolume } from './volume.ts';
 import type { Volume, VolumeFile } from './volume.ts';
 import type { SurfaceColor } from '../../types/index.ts';
@@ -48,6 +48,8 @@ interface SectionsStateRecord {
   agreement: number | null;
   /** The paint the linked MRI draws and the cut atlas whose labels draw it. */
   paint: { id: string; atlas: string } | null;
+  colours: boolean;
+  labels: string | null;
   tilt: number;
   azimuth: number;
   status: SectionsStatus;
@@ -67,6 +69,8 @@ export interface SectionsModel extends CutModel {
   setCutState(state: { atlas: string; active: boolean }): void;
   setMriAnatomy(anatomy: Anatomy | null): void;
   setCerebellarMap(map: SurfaceMap): void;
+  /** The cortical thickness on a loaded atlas's cortex, downloaded once each time it loads. */
+  ensureThickness(atlas: string, baseUrl: string | URL): Promise<void>;
   setSurfaceColor(mode: string): void;
   intersect(raycaster: Raycaster): StageHit | null;
 }
@@ -100,6 +104,17 @@ function projectBounds(bounds: Bounds, normal: Vector3): [number, number] {
   return [Math.min(...projections), Math.max(...projections)];
 }
 
+/** The selection's outline on the linked MRI: the dark stage's accent (tokens.css --overlay-accent). */
+const SELECTION_INK = [127, 208, 204] as const;
+
+/** A short name for a long text, FNV-1a: what a key needs of a whole palette. */
+function fingerprint(text: string): string {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index++)
+    hash = Math.imul(hash ^ text.charCodeAt(index), 0x01000193);
+  return (hash >>> 0).toString(36);
+}
+
 const isCode = (error: unknown): error is { code: string } =>
   typeof error === 'object' && error !== null && 'code' in error;
 
@@ -115,13 +130,21 @@ export class BrainSections extends EventTarget {
   private comparedVolume: Volume | null = null;
   private agreementRequest = 0;
   display: MriDisplay | null = null;
+  private box: { min: Ras; max: Ras } | null = null;
   /** The reader's own map while the stage draws it; the linked MRI draws it too. */
   private userMap: SliceMap | null = null;
   /** The model's paint on the cut atlas's label grid, as the linked MRI draws it. */
   private shownPaint: SlicePaint | null = null;
-  /** The paint and cut atlas last asked for, so each pair loads once. */
+  /** The stage's cut-face colours on the same grid, while the linked MRI draws them. */
+  private shownColours: SlicePaint | null = null;
+  private shownSelection: (SliceSelection & { atlas: string }) | null = null;
+  /** Cut label grids the linked MRI downloaded for itself, by atlas. */
+  private readonly grids = new Map<string, Promise<Volume>>();
+  /** What the cut labels were last drawn for, with the model's change count, so each is drawn once. */
   private paintKey: string | null = null;
+  private failedLabels: string | null = null;
   private paintRequest = 0;
+  private modelVersion = 0;
   readonly state: SectionsStateRecord;
   /** The downloads the status waits on: the linked views, a cut being prepared, the MRI colour. */
   private readonly loading = new Set<object>();
@@ -154,14 +177,17 @@ export class BrainSections extends EventTarget {
       crosshair: [0, 0, 0],
       reverse: false,
       overlay: false,
+      colours: false,
       agreement: null,
       paint: null,
+      labels: null,
       tilt: 30,
       azimuth: 30,
       status: 'idle',
       error: null,
     };
     this.onModelChange = () => {
+      this.modelVersion++;
       this.tissues.releaseDetails();
       const s = model.state;
       // The labels follow the atlas, the colouring and the detail level, so the cut never names or
@@ -367,13 +393,16 @@ export class BrainSections extends EventTarget {
   async setSurfaceColor(mode: SurfaceColor, current: () => boolean = () => true): Promise<void> {
     const request = ++this.appearanceRequest;
     const live = () => request === this.appearanceRequest && !this.disposed && current();
-    // The scan, and the cerebellar map the cerebellar surfaces draw, are downloads of their own.
+    // The scan, the cerebellar map the cerebellar surfaces draw, and the cortex's thickness are
+    // downloads of their own.
     const needs: (() => Promise<unknown>) | null =
       mode === 'mri'
         ? () => this.tissues.loadMri()
         : mode === 'cerebellar'
           ? () => this.tissues.load(MAP_ATLASES.cerebellar)
-          : null;
+          : mode === 'thickness'
+            ? () => this.model.ensureThickness(this.model.state.atlas, this.metadataUrl)
+            : null;
     if (needs) {
       try {
         await this.whileLoading(needs);
@@ -497,14 +526,23 @@ export class BrainSections extends EventTarget {
     this.update();
   }
 
+  /** The overlay and the 3D view's colours exclude each other: turning one on turns the other off. */
   setDisplay({
     reverse = this.state.reverse,
-    overlay = this.state.overlay,
-  }: { reverse?: boolean; overlay?: boolean } = {}): void {
-    if (![reverse, overlay].every((value) => typeof value === 'boolean'))
+    overlay,
+    colours,
+  }: { reverse?: boolean; overlay?: boolean; colours?: boolean } = {}): void {
+    if (overlay === true && colours === true)
+      throw new TypeError('The linked MRI draws one overlay at a time.');
+    const next = {
+      reverse,
+      overlay: overlay ?? (colours ? false : this.state.overlay),
+      colours: colours ?? (overlay ? false : this.state.colours),
+    };
+    if (!Object.values(next).every((value) => typeof value === 'boolean'))
       throw new TypeError('Section display options must be boolean.');
     const recut = reverse !== this.state.reverse;
-    Object.assign(this.state, { reverse, overlay });
+    Object.assign(this.state, next);
     if (recut) this.update();
     else this.emit();
   }
@@ -580,8 +618,22 @@ export class BrainSections extends EventTarget {
     }
   }
 
-  /** A frame sampled at the display's size: all of its pixels but the MRI window, which `pixels` applies. */
-  slice(frame: Frame): SliceSamples {
+  /** The segmentation's labelled box, measured the first time it is asked for; null before the MRI loads. */
+  get labelBox(): { min: Ras; max: Ras } | null {
+    if (!this.volumes) return null;
+    if (!this.box) {
+      const box = this.volumes.segmentation.labelledBox();
+      if (!box) throw new Error('The linked segmentation labels no voxel.');
+      this.box = box;
+    }
+    return this.box;
+  }
+
+  /**
+   * A frame sampled at the display's size: all of its pixels but the MRI window, which `pixels` applies.
+   * With a crop, only its pixels are sampled.
+   */
+  slice(frame: Frame, crop?: SliceCrop): SliceSamples {
     const { volumes, display } = this;
     if (!volumes || !display) throw new Error('The linked MRI has not loaded.');
     const shown = this.shownAgreement;
@@ -593,9 +645,12 @@ export class BrainSections extends EventTarget {
         ...(shown && { agreement: shown }),
         ...(this.userMap && { map: this.userMap }),
         ...(this.shownPaint && { paint: this.shownPaint }),
+        ...(this.shownColours && { colours: this.shownColours }),
+        ...(this.shownSelection && { selection: this.shownSelection }),
       },
       frame,
       { size: display.size, fieldOfView: display.fieldOfView, overlay: this.state.overlay },
+      crop,
     );
   }
 
@@ -647,40 +702,112 @@ export class BrainSections extends EventTarget {
   }
 
   /**
-   * Draw the model's paint on the linked MRI, by the cut atlas's own labels as its cut faces are, once
-   * the views have loaded. The label grid downloads the first time; `state.paint` names the paint and
-   * the cut atlas once they are drawn, so the planes are sampled again when either changes (SECT-38).
-   * A failure is reported once, and the next paint or cut atlas tries again.
+   * Draw, on the linked MRI, what the stage draws by the cut atlas's own labels: the model's paint,
+   * the cut faces' colours while `colours` is on, and the selection's outline. The label grid
+   * downloads the first time one is needed; `state.paint` and `state.labels` name what is drawn once
+   * it is, so the planes are sampled again when it changes (SECT-38). A failed download is reported
+   * once and tried again when the paint, cut atlas, colours or selection change.
    */
   private async syncPaint(): Promise<void> {
     if (!this.volumes) return;
-    const paint = this.model.state.paint ?? null;
+    const model = this.model.state;
+    const paint = model.paint ?? null;
+    const region = model.selectedRegion;
     const atlas = this.state.cutAtlas;
-    const key = paint && `${paint.id}|${atlas}`;
+    // Under MRI colour the cut faces show the scan: there are no colours to carry.
+    const colours = this.state.colours && model.surfaceColor !== 'mri';
+    const wanted = JSON.stringify([paint?.id ?? null, atlas, colours, region?.id ?? null]);
+    const key = JSON.stringify([wanted, this.modelVersion]);
     if (key === this.paintKey) return;
     this.paintKey = key;
     const request = ++this.paintRequest;
-    if (paint) {
-      try {
-        await this.tissues.load(atlas);
-      } catch (error) {
-        // The linked MRI is drawn without the paint; this is not the cut's failure.
-        if (request === this.paintRequest) console.error(error);
-        return;
+    if ((paint || colours || region) && wanted === this.failedLabels) return;
+    let drawn;
+    try {
+      drawn = await this.labelsToDraw(paint, colours, region, atlas);
+    } catch (error) {
+      // The linked MRI is drawn without them; this is not the cut's failure.
+      if (request === this.paintRequest) {
+        this.failedLabels = wanted;
+        console.error(error);
       }
-      if (request !== this.paintRequest || this.disposed) return;
-      const { volume, metadata } = this.tissues.layers.get(atlas)!;
-      this.shownPaint = {
-        volume,
-        colors: metadata.labels.map(
-          (label) => (label.region_id && paint.colors.get(label.region_id)) || null,
-        ),
-      };
-    } else {
-      this.shownPaint = null;
+      return;
     }
-    this.state.paint = paint && { id: paint.id, atlas };
-    this.emit();
+    if (request !== this.paintRequest || this.disposed) return;
+    this.failedLabels = null;
+    this.shownPaint = drawn.paint;
+    this.shownColours = drawn.colours;
+    this.shownSelection = drawn.selection;
+    const before = JSON.stringify([this.state.paint, this.state.labels]);
+    this.state.paint = drawn.paint && { id: paint!.id, atlas };
+    this.state.labels =
+      drawn.colours || drawn.selection
+        ? JSON.stringify([
+            atlas,
+            drawn.colours && fingerprint(JSON.stringify(drawn.colours.colors)),
+            drawn.selection && [region!.id, drawn.selection.atlas],
+          ])
+        : null;
+    if (JSON.stringify([this.state.paint, this.state.labels]) !== before) this.emit();
+  }
+
+  /**
+   * The paint and the colours by the cut's own grid, and the selection by the first grid that labels
+   * it or the regions it gathers: the cut's, the surface atlas's, then any published one.
+   */
+  private async labelsToDraw(
+    paint: Paint | null,
+    colours: boolean,
+    region: Region | null,
+    atlas: string,
+  ) {
+    if (!paint && !colours && !region) return { paint: null, colours: null, selection: null };
+    if (paint) await this.tissues.load(atlas);
+    const layer = paint ? this.tissues.layers.get(atlas)! : null;
+    if (colours || region) await this.tissues.loadMetadata();
+    const atlases = this.tissues.metadata?.atlases ?? {};
+    const ids = new Set(region ? [region.id, ...(region.constituent_regions ?? [])] : []);
+    const codesIn = (name: string) =>
+      new Set(
+        (atlases[name]?.labels ?? []).flatMap((label, code) =>
+          label.region_id && ids.has(label.region_id) ? [code] : [],
+        ),
+      );
+    const chosen = region
+      ? [atlas, this.model.state.atlas, ...Object.keys(atlases)].find(
+          (name) => codesIn(name).size > 0,
+        )
+      : undefined;
+    const [grid, selectionGrid] = await Promise.all([
+      colours ? this.labelGrid(atlas) : null,
+      chosen ? this.labelGrid(chosen) : null,
+    ]);
+    return {
+      paint: layer && {
+        volume: layer.volume,
+        colors: layer.metadata.labels.map(
+          (label) => (label.region_id && paint!.colors.get(label.region_id)) || null,
+        ),
+      },
+      colours: grid && { volume: grid, colors: this.tissues.labelColours(atlas) },
+      selection:
+        chosen && selectionGrid
+          ? { volume: selectionGrid, codes: codesIn(chosen), colour: SELECTION_INK, atlas: chosen }
+          : null,
+    };
+  }
+
+  /** A cut atlas's label grid: the cut's own once it has loaded, else downloaded for the linked MRI alone. */
+  private async labelGrid(atlas: string): Promise<Volume> {
+    const layer = this.tissues.layers.get(atlas);
+    if (layer) return layer.volume;
+    let grid = this.grids.get(atlas);
+    if (!grid) {
+      grid = loadVolume(this.tissues.metadata!.atlases[atlas]!, this.metadataUrl);
+      this.grids.set(atlas, grid);
+      grid.catch(() => this.grids.delete(atlas));
+    }
+    return grid;
   }
 
   private agreementAt(point: Ras, labelId: number): AgreementCategory | null {
@@ -704,6 +831,11 @@ export class BrainSections extends EventTarget {
       }
     }
     return surfaceHit;
+  }
+
+  /** See `SolidSections.stencilCaps`. */
+  get stencilCaps(): Mesh[] {
+    return this.tissues.solids.stencilCaps;
   }
 
   /** Pick the nearest visible surface or categorical cut-face label. */

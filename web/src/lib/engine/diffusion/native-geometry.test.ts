@@ -8,6 +8,7 @@ import {
   createTractGeometry,
   filterTractGeometry,
   segmentsNearPlane,
+  segmentsNearPlanes,
 } from './native-geometry.ts';
 
 const points = new Float32Array([
@@ -156,4 +157,35 @@ test('a plane keeps the segments within the slab whole and drops those beyond it
   );
   assert.deepEqual([...ends], [0, 0, 5, 0, 0, 0, 0, 2]);
   assert.equal(colors.length, 6);
+});
+
+test('SECT-44 parallel planes taken in one pass keep, each, what the plane alone keeps', () => {
+  // A random walk of 3,000 points in steps up to 1 mm that climbs from z −20 to +20 mm: segments that
+  // cross, graze and miss each slab.
+  let state = 11;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 2 ** 32 - 0.5;
+  };
+  const points = new Float32Array(3000 * 3);
+  points[2] = -20;
+  for (let n = 3; n < points.length; n += 3) {
+    points[n] = points[n - 3]! + random();
+    points[n + 1] = points[n - 2]! + random();
+    points[n + 2] = points[n - 1]! + 40 / 2999 + random();
+  }
+  const index = new Uint32Array(2 * 2999).map((_, k) => (k >> 1) + (k & 1));
+  const plane = { origin: [1, -2, 0.25], normal: [0, 0, -1], u: [-1, 0, 0], v: [0, 1, 0] };
+  const offsets = [-13, 0, 4, 13];
+  const together = segmentsNearPlanes(points, index, plane, offsets);
+  offsets.forEach((offset, n) => {
+    const alone = segmentsNearPlane(points, index, {
+      ...plane,
+      origin: plane.origin.map((value, axis) => value + offset * plane.normal[axis]!),
+    });
+    assert.ok(alone.colors.length > 0, `the plane ${offset} mm along keeps segments`);
+    assert.deepEqual([...together[n]!.colors], [...alone.colors]);
+    assert.equal(together[n]!.ends.length, alone.ends.length);
+    together[n]!.ends.forEach((value, k) => assert.ok(Math.abs(value - alone.ends[k]!) < 1e-4));
+  });
 });

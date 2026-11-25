@@ -95,10 +95,26 @@ export interface SectionsState {
    * draw it.
    */
   readonly paint: { readonly id: string; readonly atlas: string } | null;
+  /** The linked MRI mixes the colours of the stage's cut faces into the scan; the overlay is then off. */
+  readonly colours: boolean;
+  /**
+   * What the cut atlas's labels draw on the linked MRI besides a paint, once loaded: the cut faces'
+   * colours and the selection's outline, named so the planes are sampled again when either changes;
+   * null for neither.
+   */
+  readonly labels: string | null;
   readonly tilt: number;
   readonly azimuth: number;
   readonly status: SectionsStatus;
   readonly error: SectionsErrorCode | null;
+}
+
+/** Pixels of a sampled square, from its top-left corner; they may reach past the square. */
+export interface SliceCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 /** A plane through the volume, in RAS millimetres (coordinates.js:36). */

@@ -4,6 +4,8 @@ export const en = {
   // The methods site (docs/) is in English only; the French names say so.
   methods: 'Methods',
   methodsPage: 'Method and limits',
+  // The disclosure that says what a tab or tool shows, where its data come from and its caution.
+  aboutData: 'About this data',
   source: 'Source code on GitHub',
   notApplied: (fields: string) => `Not applied from this link: ${fields}.`,
   fields: {
@@ -58,6 +60,7 @@ export const fr: typeof en = {
   newTab: '(s’ouvre dans un nouvel onglet)',
   methods: 'Méthodes (en anglais)',
   methodsPage: 'Méthode et limites (en anglais)',
+  aboutData: 'À propos de ces données',
   source: 'Code source sur GitHub',
   notApplied: (fields: string) => `Éléments du lien non appliqués : ${fields}.`,
   fields: {

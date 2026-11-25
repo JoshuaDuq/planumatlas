@@ -75,6 +75,7 @@
   import CerebellarFunctionsSection from './CerebellarFunctionsSection.svelte';
   import LayersSection from './LayersSection.svelte';
   import type { CorticalLayersStore } from '../../lib/state/cortical-layers.svelte.ts';
+  import type { RegionThicknessStore } from '../../lib/state/cortical-thickness.svelte.ts';
   import MapCourseSection from './MapCourseSection.svelte';
   import RegionFacts from './RegionFacts.svelte';
   import './inspector.css';
@@ -135,6 +136,8 @@
     striatalNetworks?: StriatalNetworks | null;
     /** BigBrain's cortical layers; none on an anatomy that publishes none. */
     corticalLayers?: CorticalLayersStore | null;
+    /** Each cortical region's mean thickness; none on an anatomy that publishes none. */
+    regionThickness?: RegionThicknessStore | null;
     /** The stage paints layer IV's share now. */
     layersPainted?: boolean;
     /** Paints layer IV's share; null where the stage cannot show it. */
@@ -206,6 +209,7 @@
     cerebellarFunctions = null,
     striatalNetworks = null,
     corticalLayers = null,
+    regionThickness = null,
     layersPainted = false,
     paintLayers = null,
     restoreLayers = () => {},
@@ -386,7 +390,12 @@
         <span id="{uid}-{command}" hidden>{hint}</span>
       {/each}
     </div>
-    <RegionFacts region={atlasRegion} {lang} centroid={centroidOf(region.id)} />
+    <RegionFacts
+      region={atlasRegion}
+      {lang}
+      centroid={centroidOf(region.id)}
+      thickness={region.kind === 'cortex' ? regionThickness : null}
+    />
   {:else}
     {#if !chrome.hideHint}
       <h2 class="selection-empty">{copy.noRegionSelected}</h2>
@@ -410,10 +419,10 @@
       onpaint={paintLayers}
       onrestore={restoreLayers}
     />
+    {@render relatedDeficits?.()}
+    {@render relatedCircuits?.()}
   </div>
 </div>
-{@render relatedDeficits?.()}
-{@render relatedCircuits?.()}
 <div class="region-detail region-research">
   <!-- `toggle` does not bubble, so a section opening inside is heard on the way down. -->
   <div class="region-index" data-index="research" ontogglecapture={onResearchToggle}>

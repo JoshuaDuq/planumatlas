@@ -284,7 +284,7 @@ describe('choosing a tab', () => {
     assert.ok(engine.calls.slice(mark).some((call) => call.method === 'frameRegions'));
   });
 
-  test('away from Functions, puts back the scene from before the function and says so', async () => {
+  test('away from Functions, puts back the scene from before the function, quietly', async () => {
     const scene = createScene();
     await scene.excursions.openFunction('language');
     await scene.settled();
@@ -293,7 +293,7 @@ describe('choosing a tab', () => {
     assert.equal(scene.reader.apply.mock.calls.at(-1)![0], held);
     assert.equal(scene.session.state.explorer, 'anatomy');
     assert.equal(scene.session.state.selectedFunction, 'language');
-    assert.equal(scene.session.state.notice?.text, 'Previous view restored.');
+    assert.equal(scene.session.state.notice, null);
     assert.equal(scene.excursions.restorable, false);
   });
 

@@ -30,6 +30,7 @@ export class Volume {
   readonly inverse: number[];
   readonly shape: readonly [number, number, number];
   readonly data: VolumeData;
+  private readonly toSurface: number[];
   private candidates: Float64Array | undefined;
   private weights: Float64Array | undefined;
 
@@ -55,6 +56,7 @@ export class Volume {
     }
     const matrix = new Matrix4().set(...(affine.flat() as Parameters<Matrix4['set']>));
     if (matrix.determinant() === 0) throw new Error('Singular volume affine.');
+    this.toSurface = [...matrix.elements];
     this.inverse = matrix.invert().elements;
     this.shape = [shape[0]!, shape[1]!, shape[2]!];
     this.data = data;
@@ -108,6 +110,43 @@ export class Volume {
     let best = 0;
     for (let n = 1; n < count; n++) if (weights[n]! > weights[best]!) best = n;
     return labels[best]!;
+  }
+
+  /**
+   * The box of the non-zero voxels in source RAS, to their outer faces, so a one-voxel label is 1 mm
+   * thick on a 1 mm grid; null when every voxel is zero.
+   */
+  labelledBox(): { min: [number, number, number]; max: [number, number, number] } | null {
+    const [nx, ny, nz] = this.shape;
+    const low = [nx, ny, nz];
+    const high = [-1, -1, -1];
+    let index = 0;
+    for (let z = 0; z < nz; z++)
+      for (let y = 0; y < ny; y++)
+        for (let x = 0; x < nx; x++, index++) {
+          if (this.data[index] === 0) continue;
+          if (x < low[0]!) low[0] = x;
+          if (x > high[0]!) high[0] = x;
+          if (y < low[1]!) low[1] = y;
+          if (y > high[1]!) high[1] = y;
+          if (z < low[2]!) low[2] = z;
+          if (z > high[2]!) high[2] = z;
+        }
+    if (high[0] === -1) return null;
+    const m = this.toSurface;
+    const min: [number, number, number] = [Infinity, Infinity, Infinity];
+    const max: [number, number, number] = [-Infinity, -Infinity, -Infinity];
+    for (let corner = 0; corner < 8; corner++) {
+      const i = corner & 1 ? high[0]! + 0.5 : low[0]! - 0.5;
+      const j = corner & 2 ? high[1]! + 0.5 : low[1]! - 0.5;
+      const k = corner & 4 ? high[2]! + 0.5 : low[2]! - 0.5;
+      for (let axis = 0; axis < 3; axis++) {
+        const value = m[axis]! * i + m[4 + axis]! * j + m[8 + axis]! * k + m[12 + axis]!;
+        min[axis] = Math.min(min[axis]!, value);
+        max[axis] = Math.max(max[axis]!, value);
+      }
+    }
+    return { min, max };
   }
 
   linear(point: Point): number {

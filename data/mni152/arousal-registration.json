@@ -1,0 +1,258 @@
+{
+  "chosen": "segment-aan",
+  "selection": {
+    "tie_margin_mm": 0.25
+  },
+  "acceptance": {
+    "centroid_distance_max_mm": 3,
+    "inside_envelope_min": 0.95,
+    "inside_envelope_exceptions": {
+      "aan:midline:periaqueductal-grey": 0.9
+    },
+    "nextbrain": {
+      "dorsal-raphe": "dorsal_raphe_nucleus",
+      "ventral-tegmental-area": "ventral_tegmental_area",
+      "periaqueductal-grey": "periaqueductal_gray_substance"
+    }
+  },
+  "methods": {
+    "synthmorph": {
+      "freesurfer_build": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+      "method": "mri_synthmorph register -m joint (skull-stripped MNI152NLin6Asym \u2192 brain.mgz); apply -m nearest to the release's labels on the template's grid",
+      "voxels_claimed_twice_in_release": 2,
+      "runtime_minutes": 2.4,
+      "peak_memory_gb": 19.72,
+      "labels_sha256": "33d895333ab6c66c65c33b648e85ff73e666947ee53d414d5fe9ed1ab9609690",
+      "checks": {
+        "voxel_size_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "nuclei": {
+          "aan:midline:dorsal-raphe": {
+            "voxels": 252,
+            "volume_mm3": 252.0,
+            "inside_envelope": 0.9841
+          },
+          "aan:midline:median-raphe": {
+            "voxels": 130,
+            "volume_mm3": 130.0,
+            "inside_envelope": 1.0
+          },
+          "aan:midline:periaqueductal-grey": {
+            "voxels": 348,
+            "volume_mm3": 348.0,
+            "inside_envelope": 0.8793
+          },
+          "aan:midline:ventral-tegmental-area": {
+            "voxels": 384,
+            "volume_mm3": 384.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:locus-coeruleus": {
+            "voxels": 31,
+            "volume_mm3": 31.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:locus-coeruleus": {
+            "voxels": 23,
+            "volume_mm3": 23.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:laterodorsal-tegmental-nucleus": {
+            "voxels": 8,
+            "volume_mm3": 8.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:laterodorsal-tegmental-nucleus": {
+            "voxels": 9,
+            "volume_mm3": 9.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:mesencephalic-reticular-formation": {
+            "voxels": 243,
+            "volume_mm3": 243.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:mesencephalic-reticular-formation": {
+            "voxels": 213,
+            "volume_mm3": 213.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:parabrachial-complex": {
+            "voxels": 56,
+            "volume_mm3": 56.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:parabrachial-complex": {
+            "voxels": 60,
+            "volume_mm3": 60.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:pontis-oralis": {
+            "voxels": 114,
+            "volume_mm3": 114.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:pontis-oralis": {
+            "voxels": 104,
+            "volume_mm3": 104.0,
+            "inside_envelope": 1.0
+          },
+          "aan:left:pedunculotegmental-nucleus": {
+            "voxels": 68,
+            "volume_mm3": 68.0,
+            "inside_envelope": 1.0
+          },
+          "aan:right:pedunculotegmental-nucleus": {
+            "voxels": 72,
+            "volume_mm3": 72.0,
+            "inside_envelope": 1.0
+          }
+        },
+        "inside_envelope_min": 0.8793,
+        "nextbrain": {
+          "dorsal-raphe": {
+            "nextbrain": "dorsal_raphe_nucleus",
+            "centroid_distance_mm": 3.67,
+            "dice": 0.1093
+          },
+          "periaqueductal-grey": {
+            "nextbrain": "periaqueductal_gray_substance",
+            "centroid_distance_mm": 1.38,
+            "dice": 0.5114
+          },
+          "ventral-tegmental-area": {
+            "nextbrain": "ventral_tegmental_area",
+            "centroid_distance_mm": 4.91,
+            "dice": 0.03
+          }
+        },
+        "centroid_distance_max_mm": 4.91,
+        "centroid_distance_mean_mm": 3.32,
+        "dice_mean": 0.2169
+      },
+      "passes": false
+    },
+    "segment-aan": {
+      "freesurfer_build": "freesurfer-macOS-darwin_arm64-8.2.0-20260314-d932c45",
+      "method": "FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes",
+      "runtime_minutes": 35.9,
+      "peak_memory_gb": 2.17,
+      "labels_sha256": "a600d63d4f4c2e64a194766a1b6296b83d386910b02af4f15b77f682ef879614",
+      "checks": {
+        "voxel_size_mm": [
+          0.375,
+          0.375,
+          0.375
+        ],
+        "nuclei": {
+          "aan:midline:dorsal-raphe": {
+            "voxels": 2413,
+            "volume_mm3": 127.25,
+            "inside_envelope": 1.0
+          },
+          "aan:midline:median-raphe": {
+            "voxels": 1411,
+            "volume_mm3": 74.41,
+            "inside_envelope": 1.0
+          },
+          "aan:midline:periaqueductal-grey": {
+            "voxels": 7950,
+            "volume_mm3": 419.24,
+            "inside_envelope": 0.9087
+          },
+          "aan:midline:ventral-tegmental-area": {
+            "voxels": 5253,
+            "volume_mm3": 277.01,
+            "inside_envelope": 0.9871
+          },
+          "aan:left:locus-coeruleus": {
+            "voxels": 349,
+            "volume_mm3": 18.4,
+            "inside_envelope": 1.0
+          },
+          "aan:right:locus-coeruleus": {
+            "voxels": 304,
+            "volume_mm3": 16.03,
+            "inside_envelope": 1.0
+          },
+          "aan:left:laterodorsal-tegmental-nucleus": {
+            "voxels": 65,
+            "volume_mm3": 3.43,
+            "inside_envelope": 1.0
+          },
+          "aan:right:laterodorsal-tegmental-nucleus": {
+            "voxels": 58,
+            "volume_mm3": 3.06,
+            "inside_envelope": 1.0
+          },
+          "aan:left:mesencephalic-reticular-formation": {
+            "voxels": 4577,
+            "volume_mm3": 241.37,
+            "inside_envelope": 1.0
+          },
+          "aan:right:mesencephalic-reticular-formation": {
+            "voxels": 4594,
+            "volume_mm3": 242.26,
+            "inside_envelope": 1.0
+          },
+          "aan:left:parabrachial-complex": {
+            "voxels": 236,
+            "volume_mm3": 12.45,
+            "inside_envelope": 1.0
+          },
+          "aan:right:parabrachial-complex": {
+            "voxels": 301,
+            "volume_mm3": 15.87,
+            "inside_envelope": 1.0
+          },
+          "aan:left:pontis-oralis": {
+            "voxels": 1282,
+            "volume_mm3": 67.61,
+            "inside_envelope": 1.0
+          },
+          "aan:right:pontis-oralis": {
+            "voxels": 1219,
+            "volume_mm3": 64.28,
+            "inside_envelope": 1.0
+          },
+          "aan:left:pedunculotegmental-nucleus": {
+            "voxels": 1032,
+            "volume_mm3": 54.42,
+            "inside_envelope": 1.0
+          },
+          "aan:right:pedunculotegmental-nucleus": {
+            "voxels": 1153,
+            "volume_mm3": 60.8,
+            "inside_envelope": 1.0
+          }
+        },
+        "inside_envelope_min": 0.9087,
+        "nextbrain": {
+          "dorsal-raphe": {
+            "nextbrain": "dorsal_raphe_nucleus",
+            "centroid_distance_mm": 1.1,
+            "dice": 0.0319
+          },
+          "periaqueductal-grey": {
+            "nextbrain": "periaqueductal_gray_substance",
+            "centroid_distance_mm": 0.94,
+            "dice": 0.669
+          },
+          "ventral-tegmental-area": {
+            "nextbrain": "ventral_tegmental_area",
+            "centroid_distance_mm": 1.56,
+            "dice": 0.1492
+          }
+        },
+        "centroid_distance_max_mm": 1.56,
+        "centroid_distance_mean_mm": 1.2,
+        "dice_mean": 0.2834
+      },
+      "passes": true
+    }
+  },
+  "not_run": []
+}

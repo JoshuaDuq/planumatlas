@@ -1,11 +1,11 @@
 /**
  * What the Linked MRI dialog does beside drawing (ui/chrome/sections.js:212-262, 284-300, 585-592):
- * whether it is open, which plane a phone shows, and the moves of the shared crosshair: a slider, a
+ * whether it is open, which plane a compact view shows, and the moves of the shared crosshair: a slider, a
  * click, the wheel. I2 builds one, registers `show`, `openPreparedPlane`, `close` and `isOpen` as the
  * `showMri`, `openPreparedPlane`, `closeMpr` and `mprOpen` ports, and mounts `MprDialog` with it.
  */
 import type { EngineSections, MprPlane, Vec3 } from '../../lib/engine/api.ts';
-import { AXES, COORDINATE_LIMIT, PLANES, pointOnPlane } from './mpr-draw.ts';
+import { AXES, COORDINATE_LIMIT, PLANES, pointOnPlane } from './mpr-geometry.ts';
 
 export interface MprDialogDeps {
   engine: {
@@ -29,6 +29,8 @@ export interface MprDialogDeps {
   showPlane: (plane: MprPlane) => unknown;
 }
 
+export type Overlay = 'none' | 'segmentation' | 'colours';
+
 const clamp = (value: number) => Math.max(-COORDINATE_LIMIT, Math.min(COORDINATE_LIMIT, value));
 
 /**
@@ -46,10 +48,14 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
   const { sections } = engine;
   let open = $state(false);
   let instant = $state(false);
-  // The plane a phone shows; the crosshair stays linked across all three.
+  // The plane a compact view shows; the crosshair stays linked across all three.
   let plane = $state<MprPlane>('axial');
   // The dock's width the reader dragged it to, in CSS pixels; null keeps the layout's own.
   let width = $state<number | null>(null);
+  // Three planes through the crosshair, or serial sections of `plane`.
+  let layout = $state<'planes' | 'series'>('planes');
+  // Whether the pictures mark the crosshair; it moves and reads out all the same.
+  let crosshairShown = $state(true);
 
   // One frame of work per kind, the latest value only: a drag is not a queue of resamples (sections.js:130-136).
   const waiting = new Map<string, () => void>();
@@ -111,6 +117,18 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
     set plane(value: MprPlane) {
       plane = value;
     },
+    get layout() {
+      return layout;
+    },
+    get crosshairShown() {
+      return crosshairShown;
+    },
+    set crosshairShown(value: boolean) {
+      crosshairShown = value;
+    },
+    set layout(value: 'planes' | 'series') {
+      layout = value;
+    },
     /** The `mprOpen` question. */
     isOpen: () => open,
     /** The `showMri` port: S3 has loaded the scan (app.js:1406). */
@@ -121,6 +139,7 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
       await sections.load();
       if (!canOpen()) return;
       plane = name;
+      layout = 'planes';
       show({ instant: false });
     },
     /** The `closeMpr` port: `M` is a keyboard close. */
@@ -149,6 +168,11 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
       selectPoint(pointOnPlane(sections.mprFrame(name), xFraction, yFraction, fieldOfView));
       void showPlane(name);
     },
+    /** A click on a serial section or its localizer, at the point under it; the stage cuts on `name`. */
+    pick(name: MprPlane, point: Vec3) {
+      selectPoint(point);
+      void showPlane(name);
+    },
     /** The wheel over a panel; false when the page should keep it. */
     wheel(name: MprPlane, deltaY: number): boolean {
       const next = wheelCoordinate(sections.state.crosshair[AXES[name]], deltaY);
@@ -166,16 +190,21 @@ export function createMprDialog({ engine, select, showPlane }: MprDialogDeps) {
         sections.setWindow(center, width);
       });
     },
-    setOverlay(overlay: boolean) {
-      sections.setDisplay({ overlay });
+    /** What is mixed into the scan: nothing, the segmentation's colours or the 3D view's. */
+    setOverlay(choice: Overlay) {
+      sections.setDisplay({ overlay: choice === 'segmentation', colours: choice === 'colours' });
     },
-    /** The scan's own window and no overlay, at once: a move still waiting for its frame is dropped. */
+    /**
+     * The scan's own window, no overlay and the crosshair shown, at once: a move still waiting for its
+     * frame is dropped.
+     */
     resetDisplay() {
+      crosshairShown = true;
       const { center, width } = sections.publishedWindow!;
       waiting.delete('window');
       windowChange = null;
       sections.setWindow(center, width);
-      sections.setDisplay({ overlay: false });
+      sections.setDisplay({ overlay: false, colours: false });
     },
     /** Hiding never downloads, so it cannot fail. */
     hideAgreement() {

@@ -1,0 +1,39 @@
+{
+  "freesurfer_build": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+  "spaces": {
+    "spm12": {
+      "checks": {
+        "hemisphere_agreement": 0.9987,
+        "subcortical_dice": {
+          "thalamus-left": 0.8743,
+          "thalamus-right": 0.9124,
+          "caudate-left": 0.8417,
+          "caudate-right": 0.8559,
+          "putamen-left": 0.8263,
+          "putamen-right": 0.8313,
+          "pallidum-left": 0.752,
+          "pallidum-right": 0.8141,
+          "hippocampus-left": 0.8698,
+          "hippocampus-right": 0.8646,
+          "amygdala-left": 0.8566,
+          "amygdala-right": 0.8292,
+          "lateral-ventricle-left": 0.8817,
+          "lateral-ventricle-right": 0.8799
+        },
+        "cortex_dice": 0.7521,
+        "round_trip_mm": {
+          "median": 0.0277,
+          "p95": 0.0962
+        }
+      },
+      "grid_error_mm": {
+        "median": 0.0024,
+        "p95": 0.0044,
+        "max": 0.0073
+      },
+      "field_sha256": "87deb4f0bfc222b376fe263698baa1b7482c4c1dd262335af14d8581291755cf"
+    }
+  },
+  "alternatives": {},
+  "method": "mri_synthmorph register -m joint (skull-stripped template \u2192 brain.mgz); SynthSeg --parc --robust reads the template, carried by apply -m nearest onto aseg's grid and scored against aseg. A published field samples the inverse warp every 1.5 mm over the template's brain dilated 4 mm."
+}

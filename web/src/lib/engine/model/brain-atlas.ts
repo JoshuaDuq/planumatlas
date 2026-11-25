@@ -185,6 +185,8 @@ export class BrainAtlas extends EventTarget {
   private atlasRequest = 0;
   private detailRequest = 0;
   private isDisposed = false;
+  /** Where the thickness files are, from its first download, and the atlas layers that carry it. */
+  private thickness: { base: string | URL; carried: WeakSet<Layer> } | null = null;
 
   constructor(
     manifest: AtlasManifest,
@@ -415,6 +417,11 @@ export class BrainAtlas extends EventTarget {
     const request = ++this.atlasRequest;
     await this.loadLayer(id, atlas.file, onProgress);
     if (request !== this.atlasRequest) return;
+    // Shown, the thickness comes with the atlas, so its cortex is never drawn without it.
+    if (this.surfaceColor === 'thickness') {
+      await this.ensureThickness(id, this.thickness!.base);
+      if (request !== this.atlasRequest) return;
+    }
     if (id !== this.atlasId) this.previousAtlas = this.atlasId;
     this.atlasId = id;
     this.release(this.manifest.atlases, [id, this.previousAtlas]);
@@ -747,9 +754,40 @@ export class BrainAtlas extends EventTarget {
       atlas: this.atlasId,
       scanned: Boolean(this.materials.mri),
       cerebellarMapped: Boolean(this.materials.cerebellarMap),
+      thickened: this.carriesThickness(this.atlasId),
     });
     this.surfaceColor = mode;
     this.update();
+  }
+
+  /** Whether the loaded cortex of `atlas` carries its thickness. */
+  carriesThickness(atlas: string): boolean {
+    const layer = this.layers.get(atlas);
+    return Boolean(layer && this.thickness?.carried.has(layer));
+  }
+
+  /**
+   * This brain's cortical thickness on a loaded atlas's cortex, a byte per vertex, downloaded once for
+   * each time that atlas loads. Rejects for an atlas the build publishes none for.
+   */
+  async ensureThickness(atlas: string, baseUrl: string | URL): Promise<void> {
+    const record = this.manifest.cortical_thickness?.files[atlas];
+    if (!record) throw new Error(`No cortical thickness is published for the ${atlas} cortex.`);
+    const layer = this.layers.get(atlas);
+    if (!layer) throw new Error(`The ${atlas} cortex has not loaded.`);
+    this.thickness ??= { base: baseUrl, carried: new WeakSet() };
+    if (this.thickness.carried.has(layer)) return;
+    const url = new URL(record.file, new URL(baseUrl, globalThis.location?.href));
+    const [buffer, { attachThickness, thicknessPalette }] = await Promise.all([
+      fetchAsset(url),
+      import('./cortical-thickness.ts'),
+    ]);
+    // A layer released while its thickness downloaded is not drawn; its next load downloads again.
+    if (this.layers.get(atlas) !== layer || this.thickness.carried.has(layer)) return;
+    const palette = this.materials.thicknessPalette!;
+    palette.value ??= thicknessPalette(this.manifest.cortical_thickness!);
+    attachThickness(layer, new Uint8Array(buffer), this.manifest.regions, atlas);
+    this.thickness.carried.add(layer);
   }
 
   /**

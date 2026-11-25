@@ -168,6 +168,8 @@ test('SNAP-05: every colouring has its words in English and French', () => {
       territory: 'Arterial territories',
       striatal: 'Striatal networks',
       cerebellar: 'Cerebellar functions',
+      thickness: 'Cortical thickness',
+      sulc: 'Sulcal depth',
     },
     fr: {
       tissue: 'Tissu',
@@ -180,6 +182,8 @@ test('SNAP-05: every colouring has its words in English and French', () => {
       territory: 'Territoires artériels',
       striatal: 'Réseaux striataux',
       cerebellar: 'Fonctions cérébelleuses',
+      thickness: 'Épaisseur corticale',
+      sulc: 'Profondeur sulcale',
     },
   } as const;
   const teaching = { en: 'Teaching set', fr: 'Ensemble pédagogique' };

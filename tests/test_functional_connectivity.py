@@ -118,3 +118,82 @@ def test_every_julich_area_is_published_with_each_pair_once_in_percent():
     rows = functional_connectivity.match(published_regions(), "julich", data["names"])
     first, second = (rows.index(region) for region in table["regions"][:2])
     assert table["r"][0] == round(data["r"][first][second] * 100)
+
+
+# The network matrix (2026-11-24): Schaefer's 200 parcels by Yeo network.
+from brain_model.layers import network_matrix
+
+
+def test_a_17_network_parcel_takes_the_7_network_name_at_its_centroid():
+    seventeen = [("17Networks_LH_ContA_1", (-40, 10, 30)), ("17Networks_RH_VisCent_1", (20, -90, 0))]
+    seven = [("7Networks_RH_Vis_3", (20, -90, 0)), ("7Networks_LH_DorsAttn_2", (-40, 10, 30))]
+    # By centroid, not by the 17-network name: this ContA parcel is dorsal attention.
+    assert derive.seven_network_names(seventeen, seven) == ["7Networks_LH_DorsAttn_2", "7Networks_RH_Vis_3"]
+    with pytest.raises(ValueError, match="no single"):
+        derive.seven_network_names(seventeen, seven[:1])
+    with pytest.raises(ValueError, match="no single"):
+        derive.seven_network_names(seventeen, [("7Networks_LH_Vis_3", (20, -90, 0)), seven[1]])
+    with pytest.raises(ValueError, match="no single"):
+        derive.seven_network_names(seventeen, [*seven, ("7Networks_LH_Cont_1", (-40, 10, 30))])
+
+
+def test_rows_in_the_parcels_order_fall_off_with_distance_and_shuffled_ones_do_not():
+    rng = np.random.default_rng(0)
+    centroids = rng.uniform(-70, 70, size=(60, 3))
+    distance = np.linalg.norm(centroids[:, None] - centroids[None], axis=2)
+    r = np.exp(-distance / 40) + rng.normal(0, 0.05, distance.shape)
+    r = (r + r.T) / 2
+    np.fill_diagonal(r, 1)
+    assert derive.order_check(r, centroids, permutations=200, seed=1)["passed"]
+    shuffled = rng.permutation(60)
+    assert not derive.order_check(r[np.ix_(shuffled, shuffled)], centroids, permutations=200, seed=1)["passed"]
+
+
+def test_block_means_are_fisher_z_means_without_a_parcel_with_itself():
+    r = np.array([[1.0, 0.6, 0.1, 0.2], [0.6, 1.0, 0.3, 0.4], [0.1, 0.3, 1.0, 0.5], [0.2, 0.4, 0.5, 1.0]])
+    means = derive.block_means(r, ["A", "A", "B", "B"], ["A", "B"])
+    assert means[0][0] == pytest.approx(0.6)
+    assert means[1][1] == pytest.approx(0.5)
+    assert means[0][1] == pytest.approx(np.tanh(np.arctanh([0.1, 0.2, 0.3, 0.4]).mean()))
+    assert means[1][0] == pytest.approx(means[0][1])
+    # A network of one parcel has no pair within it.
+    with pytest.raises(ValueError, match="fewer than two"):
+        derive.block_means(r[:3, :3], ["A", "A", "B"], ["A", "B"])
+
+
+def test_the_published_matrix_runs_network_by_network_left_before_right_with_each_pair_once():
+    derived = network_matrix.read_matrix()
+    published = network_matrix.partition()
+    parcels, networks, n = published["parcels"], published["networks"], len(published["parcels"])
+    assert n == 200 and len(published["r"]) == n * (n - 1) // 2
+    keys = [(networks.index(p["network"]), p["hemisphere"]) for p in parcels]
+    assert keys == sorted(keys, key=lambda key: (key[0], key[1] != "left"))
+    # The published pair (i, j) is the derived pair of the same two parcels, in percent.
+    rows = {(p["network"], p["hemisphere"], p["name"]): i for i, p in
+            enumerate(network_matrix.parcel(name) for name in derived["seven"])}
+    index = [rows[(p["network"], p["hemisphere"], p["name"])] for p in parcels]
+    at = lambda i, j: i * n - i * (i + 1) // 2 + (j - i - 1)
+    for i, j in [(0, 1), (0, 199), (57, 140), (198, 199)]:
+        assert published["r"][at(i, j)] == round(derived["r"][index[i]][index[j]] * 100)
+    # The block means were measured on the 7-network labels the parcels show.
+    labels = [network_matrix.parcel(name)["network"] for name in derived["seven"]]
+    means = derive.block_means(np.array(derived["r"]), labels, networks)
+    assert np.allclose(published["blocks"], np.round(means, 2))
+    assert published["within_exceeds"] == [means[k][k] > max(np.delete(means[k], k)) for k in range(7)]
+
+
+def test_the_network_matrix_scale_is_the_99th_percentile_out_to_the_next_005():
+    derived = network_matrix.read_matrix()
+    r = np.array(derived["r"])
+    top = np.percentile(r[np.triu_indices(len(r), 1)], 99)
+    assert derived["scale"] == [0, round(float(np.ceil(top / 0.05) * 0.05), 2)]
+    assert derived["scale"][1] - 0.05 < top <= derived["scale"][1]
+
+
+def test_a_network_matrix_whose_rows_failed_their_order_is_refused(tmp_path):
+    data = json.loads(network_matrix.DATA.read_text())
+    data["network_matrix"]["order_check"]["passed"] = False
+    path = tmp_path / "functional-connectivity.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="order check"):
+        network_matrix.read_matrix(path)

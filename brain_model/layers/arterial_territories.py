@@ -261,7 +261,7 @@ def compose(config, definition, regions, grids, unit_grids):
               for atlas, (labels, matrix) in grids.items()}
     unit_counts = {source: grid_counts(labels, matrix, index, surface_to_voxel)
                    for source, (labels, matrix) in unit_grids.items()}
-    radius = landing.radius_mm(landing.read(config))
+    record = landing.measured(config)
     names = [territory["id"] for territory in definition["territories"]]
     boxes = {}
     for region in regions:
@@ -279,11 +279,14 @@ def compose(config, definition, regions, grids, unit_grids):
         if missing:
             raise ValueError(f"{region['id']}: labels {missing} are not on its grid")
         if landing.is_small(region):
-            # Too small for its own voxels' shares to survive the registration's landing error.
+            # Too small for its own voxels' shares to survive the registration's landing error; with
+            # none measured, it names nothing round it either.
+            if record is None:
+                continue
             if key not in boxes:
                 boxes[key] = landing.boxes_of(grid[0])
             near = landing.near(landing.neighbourhood_counts(
-                *grid, labels, boxes[key], index, surface_to_voxel, radius), names)
+                *grid, labels, boxes[key], index, surface_to_voxel, landing.radius_mm(record)), names)
             if near:
                 region["territories_near"] = near
             continue
@@ -344,6 +347,7 @@ def metadata(config, definition):
     import json
 
     report = json.loads(report_path(config).read_text())
+    record = landing.measured(config)
     return {
         "id": ATLAS_ID,
         "label": definition["label"],
@@ -356,14 +360,16 @@ def metadata(config, definition):
             for territory in definition["territories"]
         ],
         "registration": report["checks"],
-        "small": landing.rule(landing.read(config)),
+        "small": landing.rule(record) if record else None,
         "method": (
             "The atlas's template b0 registered to this brain's skull-stripped T1 with SynthMorph "
             "(joint affine and deformable), the atlas carried across by nearest neighbour; cortical "
             "vertices take the territory at the midpoint of their pial and white positions, and each "
-            "region's shares count its own voxels or vertices. A structure under the small volume "
-            "takes no shares: it names the territories found within the registration's measured "
-            "landing error of it"
+            "region's shares count its own voxels or vertices. "
+            + ("A structure under the small volume takes no shares: it names the territories found "
+               "within the registration's measured landing error of it" if record else
+               f"A structure under {landing.SMALL_MM3} mm³ takes no shares, and names none round it: "
+               "no landing error was measured for maps registered onto this brain")
         ),
     }
 

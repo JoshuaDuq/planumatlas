@@ -11,6 +11,8 @@ export const en = {
   hemisphere: 'Hemisphere',
   group: 'Lobe / System',
   surfaceArea: 'Surface area',
+  // FreeSurfer's mean ± standard deviation over the region's vertices.
+  meanThickness: 'Mean thickness',
   volume: 'Volume',
   centroid: 'Centroid (surface RAS)',
   sourceLabel: 'Source label',
@@ -80,6 +82,7 @@ export const fr: typeof en = {
   hemisphere: 'Hémisphère',
   group: 'Lobe / Système',
   surfaceArea: 'Surface',
+  meanThickness: 'Épaisseur moyenne',
   volume: 'Volume',
   centroid: 'Centroïde (RAS de surface)',
   sourceLabel: 'Étiquette source',

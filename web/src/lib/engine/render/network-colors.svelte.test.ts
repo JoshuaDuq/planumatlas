@@ -19,6 +19,7 @@ import {
 } from 'three';
 import type { BufferGeometry, Material, WebGLProgramParametersWithUniforms } from 'three';
 import { arterial_territories, networks } from '../../../../test/fixtures/cdmd-manifest.json';
+import { SULC_RAMP, sulcExtent } from '../../core/catalog/sulcal-depth.ts';
 import type { Region, Rgb } from '../../types/index.ts';
 import { createAnatomicalMaterial } from './materials.ts';
 import type { AnatomicalUserData, SurfacePalettes } from './materials.ts';
@@ -176,6 +177,7 @@ for (const mode of ['network', 'territory'] as const) {
       const palettes = {
         network: networkPalette(networks as never),
         territory: paletteTexture(TERRITORY_COLORS),
+        thickness: null,
       };
       const geometry = cortex();
       const looked = draw(geometry, surface(geometry, mode, palettes, 1));
@@ -199,3 +201,72 @@ for (const mode of ['network', 'territory'] as const) {
     },
   );
 }
+
+/** A flat patch whose every vertex lies `depth` mm from its hemisphere's mean, as the build encodes it. */
+function patchAt(depth: number): BufferGeometry {
+  const geometry = new PlaneGeometry(0.01, 0.01, 1, 1);
+  const [low, high] = appearance.field_ranges!['_SULC']!;
+  const constant = (value: number) => new BufferAttribute(new Float32Array(4).fill(value), 1);
+  geometry.setAttribute('_sulc', constant((depth - low) / (high - low)));
+  geometry.setAttribute('_openness', constant(0.8));
+  geometry.setAttribute('_t1', constant(0.5));
+  return geometry;
+}
+
+/** The key's colour at `share` of the way along it: its sRGB stops interpolated, as a CSS gradient does. */
+function keyColour(share: number): Color {
+  const at = Math.min(1, Math.max(0, share)) * (SULC_RAMP.length - 1);
+  const low = Math.min(Math.floor(at), SULC_RAMP.length - 2);
+  const [red, green, blue] = [0, 1, 2].map(
+    (channel) =>
+      (SULC_RAMP[low]![channel]! * (low + 1 - at) + SULC_RAMP[low + 1]![channel]! * (at - low)) /
+      255,
+  ) as [number, number, number];
+  return new Color().setRGB(red, green, blue, SRGBColorSpace);
+}
+
+function sulcSurface(geometry: BufferGeometry, mix: number, colour?: Color) {
+  const mesh = new Mesh(
+    geometry,
+    new MeshStandardMaterial({ color: '#8a7f78', roughness: 0.6, side: DoubleSide }),
+  );
+  const material = createAnatomicalMaterial(
+    mesh,
+    { id: 'r', kind: 'cortex' } as Region,
+    appearance,
+  );
+  const userData = material.userData as AnatomicalUserData;
+  userData.tissueVariation.value = 0;
+  userData.sulcMix!.value = mix;
+  if (colour) material.color.copy(colour);
+  return material;
+}
+
+test(
+  'SULC-01 the cortex draws each depth in the key’s colour for it: blue crowns, red sulci, clamped at the ends',
+  { timeout: SHADER_COMPILE_TIMEOUT_MS },
+  () => {
+    const extent = sulcExtent(appearance.field_ranges)!;
+    // CDMD's published depths run from −14.0 to 17.4 mm, so the key spans ±18 mm.
+    expect(extent).toBe(18);
+    const drawn = new Map<number, Float32Array>();
+    // A crown at the key's end, a stop exactly (0, the centre), between two stops, and past the end.
+    for (const depth of [-extent, -5.3, 0, 6.66, 2 * extent]) {
+      const geometry = patchAt(depth);
+      const coloured = draw(geometry, sulcSurface(geometry, 1));
+      // The same lighting over a surface painted the key's colour: only the colour lookup differs.
+      const expected = draw(
+        geometry,
+        sulcSurface(geometry, 0, keyColour(0.5 + depth / (2 * extent))),
+      );
+      expect(largestDifference(coloured, expected), `${depth} mm`).toBeLessThan(1e-3);
+      drawn.set(depth, coloured);
+      geometry.dispose();
+    }
+    // Sulci (positive) are red, crowns blue; past the end holds the end's colour.
+    const [red, , blue] = drawn.get(2 * extent)!;
+    expect(red).toBeGreaterThan(5 * blue!);
+    const [crownRed, , crownBlue] = drawn.get(-extent)!;
+    expect(crownBlue).toBeGreaterThan(3 * crownRed!);
+  },
+);

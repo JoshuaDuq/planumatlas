@@ -10,6 +10,7 @@ import type {
 } from 'three';
 import type { Region } from '../../types/index.ts';
 import { VISUAL_RESPONSE_THRESHOLD } from '../../core/learning/visual-field.ts';
+import { SULC_RAMP, sulcExtent } from '../../core/catalog/sulcal-depth.ts';
 import { POSITIVE_RAMP } from '../../core/user-map/display.ts';
 import {
   USER_MAP_COLOUR,
@@ -66,8 +67,24 @@ export interface AnatomicalUserData {
   tissueVariation: IUniform<number>;
   networkMix: IUniform<number> | null;
   territoryMix: IUniform<number> | null;
+  /** 1 while the cortex shows its thickness, where its vertices carry it. */
+  thicknessMix: IUniform<number> | null;
+  /** This mesh's thickness bytes, one texel per vertex in vertex order, once its atlas's have loaded. */
+  thickness: ThicknessUniforms | null;
+  /** 1 while the cortex shows its sulcal depth; null for a file without the depth's span. */
+  sulcMix: IUniform<number> | null;
   /** True once this mesh carries the reader's map per vertex (`_user_map`). */
   userMapReady: IUniform<boolean>;
+}
+
+/**
+ * A mesh's thickness, read by vertex index rather than as an attribute: the cortex already draws on as
+ * many attributes as WebGL guarantees. Row-major, `width` texels a row; `ready` false reads none.
+ */
+export interface ThicknessUniforms {
+  thicknessCodes: IUniform<DataTexture | null>;
+  thicknessWidth: IUniform<number>;
+  thicknessReady: IUniform<boolean>;
 }
 
 /**
@@ -77,6 +94,11 @@ export interface AnatomicalUserData {
 export interface SurfacePalettes {
   network: DataTexture | null;
   territory: DataTexture | null;
+  /**
+   * The colour of each published thickness byte, texel 0 (the unmeasured) none: a uniform every
+   * cortical material shares, filled when the first atlas's thickness downloads.
+   */
+  thickness: IUniform<DataTexture | null> | null;
 }
 
 /** The visual-field map's uniforms, one set shared by every cortical material of an anatomy. */
@@ -208,6 +230,21 @@ export function fieldDecode(ranges: Appearance['field_ranges'], name: string): [
 }
 
 /**
+ * Every cortical vertex carries its depth, the medial wall's too: the ramp is centred on 0, each
+ * hemisphere's mean, and spans ±`sulcExtent`; interpolated in sRGB as the key's gradient is.
+ */
+const SULC_FRAGMENT = `
+      if (sulcMix > 0.0) {
+        float sulcAt = clamp(0.5 + 0.5 * vSulcalDepth / sulcExtent, 0.0, 1.0) * ${SULC_RAMP.length - 1}.0;
+        int sulcLow = min(int(sulcAt), ${SULC_RAMP.length - 2});
+        vec3 sulcSrgb = mix(sulcRamp[sulcLow], sulcRamp[sulcLow + 1], sulcAt - float(sulcLow));
+        diffuseColor.rgb = mix(diffuseColor.rgb, sRGBTransferEOTF(vec4(sulcSrgb, 1.0)).rgb, sulcMix);
+      }`;
+
+/** The sulcal depth ramp's sRGB stops, 0–1, as the shader's `sulcRamp` array reads them. */
+const SULC_STOPS = new Float32Array(SULC_RAMP.flat().map((channel) => channel / 255));
+
+/**
  * Source morphometry modulates illumination, independently of atlas colour.
  *
  * The network layer is all-or-nothing across a build — either it was built
@@ -221,18 +258,32 @@ function addFoldShading(
   { folds, intensity, field_ranges: ranges }: Appearance,
   networkPalette: DataTexture | null,
   territoryPalette: DataTexture | null,
+  thicknessPalette: IUniform<DataTexture | null> | null,
   visual: VisualFieldUniforms | null,
   userMap: UserMapUniforms,
 ): void {
   const withNetworks = networkPalette !== null;
   const withTerritories = territoryPalette !== null;
+  const withThickness = thicknessPalette !== null;
+  const extent = sulcExtent(ranges);
+  const withSulc = extent !== null;
   const variation = { value: intensity.surface_strength };
   const networkMix = { value: 0 };
   const territoryMix = { value: 0 };
+  const thicknessMix = { value: 0 };
+  const sulcMix = { value: 0 };
+  const thickness: ThicknessUniforms = {
+    thicknessCodes: { value: null },
+    thicknessWidth: { value: 1 },
+    thicknessReady: { value: false },
+  };
   const userData: AnatomicalUserData = {
     tissueVariation: variation,
     networkMix: withNetworks ? networkMix : null,
     territoryMix: withTerritories ? territoryMix : null,
+    thicknessMix: withThickness ? thicknessMix : null,
+    thickness: withThickness ? thickness : null,
+    sulcMix: withSulc ? sulcMix : null,
     userMapReady: { value: false },
   };
   Object.assign(material.userData, userData);
@@ -246,6 +297,16 @@ function addFoldShading(
     if (withTerritories) {
       shader.uniforms.territoryMix = territoryMix;
       shader.uniforms.territoryPalette = { value: territoryPalette };
+    }
+    if (withThickness) {
+      shader.uniforms.thicknessMix = thicknessMix;
+      shader.uniforms.thicknessPalette = thicknessPalette;
+      Object.assign(shader.uniforms, thickness);
+    }
+    if (withSulc) {
+      shader.uniforms.sulcMix = sulcMix;
+      shader.uniforms.sulcExtent = { value: extent };
+      shader.uniforms.sulcRamp = { value: SULC_STOPS };
     }
     if (visual) {
       Object.assign(shader.uniforms, visual);
@@ -280,6 +341,7 @@ varying float vSulcalDepth;
 varying vec2 vUserMap;
 ${withNetworks ? 'attribute float _network;\nuniform highp sampler2D networkPalette;\nvarying vec4 vNetworkColor;' : ''}
 ${withTerritories ? 'attribute float _territory;\nuniform highp sampler2D territoryPalette;\nvarying vec4 vTerritoryColor;' : ''}
+${withThickness ? 'uniform highp sampler2D thicknessPalette;\nuniform highp sampler2D thicknessCodes;\nuniform int thicknessWidth;\nuniform bool thicknessReady;\nvarying vec4 vThicknessColor;' : ''}
 ${visual ? visualVertexDeclarations(visual.visualAreaClass.value.length) : ''}
 ${shader.vertexShader}`.replace(
       '#include <begin_vertex>',
@@ -290,6 +352,7 @@ vT1 = _t1 * t1Decode.y + t1Decode.x;
 vUserMap = userMapBlend < 1.0 ? mix(_user_map_previous, _user_map, userMapBlend) : _user_map;
 ${withNetworks ? 'vNetworkColor = texelFetch(networkPalette, ivec2(int(_network + 0.5), 0), 0);' : ''}
 ${withTerritories ? 'vTerritoryColor = texelFetch(territoryPalette, ivec2(int(_territory + 0.5), 0), 0);' : ''}
+${withThickness ? THICKNESS_VERTEX : ''}
 ${visual ? VISUAL_VERTEX : ''}`,
     );
     shader.fragmentShader = `varying float vSulcalDepth;
@@ -306,6 +369,8 @@ uniform vec3 userMapBase;
 ${USER_MAP_COLOUR}
 ${withNetworks ? 'varying vec4 vNetworkColor;\nuniform float networkMix;' : ''}
 ${withTerritories ? 'varying vec4 vTerritoryColor;\nuniform float territoryMix;' : ''}
+${withThickness ? 'varying vec4 vThicknessColor;\nuniform float thicknessMix;' : ''}
+${withSulc ? `uniform float sulcMix;\nuniform float sulcExtent;\nuniform vec3 sulcRamp[${SULC_RAMP.length}];` : ''}
 ${visual ? VISUAL_FRAGMENT_DECLARATIONS : ''}
 ${shader.fragmentShader}`
       .replace(
@@ -328,6 +393,15 @@ ${shader.fragmentShader}`
         diffuseColor.rgb, vTerritoryColor.rgb, territoryMix * vTerritoryColor.a);`
           : ''
       }
+      ${
+        withThickness
+          ? `
+      // A vertex not measured, or whose thickness has not loaded (byte 0), keeps its tissue colour.
+      diffuseColor.rgb = mix(
+        diffuseColor.rgb, vThicknessColor.rgb, thicknessMix * vThicknessColor.a);`
+          : ''
+      }
+      ${withSulc ? SULC_FRAGMENT : ''}
       ${visual ? VISUAL_FRAGMENT : ''}
       ${USER_MAP_FRAGMENT}
       float intensity = clamp((vT1 - t1Range.x) / (t1Range.y - t1Range.x), 0.0, 1.0);
@@ -347,7 +421,7 @@ ${shader.fragmentShader}`
       .replace('#include <tonemapping_fragment>', USER_MAP_OVER_SCAN);
   };
   material.customProgramCacheKey = () =>
-    `source-tissue-relief-v7${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${visual ? '-visual' : ''}`;
+    `source-tissue-relief-v7${withNetworks ? '-network' : ''}${withTerritories ? '-territory' : ''}${withThickness ? '-thickness' : ''}${withSulc ? '-sulc' : ''}${visual ? '-visual' : ''}`;
 }
 
 /**
@@ -392,6 +466,12 @@ ${shader.fragmentShader}`.replace(
  * weight back out: a triangle reaching past V3 then interpolates only its V1–V3 corners, where a
  * plain average would pull it towards fixation (zero) across the band.
  */
+// gl_VertexID is the vertex's own index in an indexed draw, so it finds the vertex's byte.
+const THICKNESS_VERTEX = `float thicknessCode = thicknessReady
+  ? texelFetch(thicknessCodes, ivec2(gl_VertexID % thicknessWidth, gl_VertexID / thicknessWidth), 0).r * 255.0
+  : 0.0;
+vThicknessColor = texelFetch(thicknessPalette, ivec2(int(thicknessCode + 0.5), 0), 0);`;
+
 const visualVertexDeclarations = (areaCodes: number) => `attribute float _field_x;
 attribute float _field_y;
 attribute float _prf_sigma;
@@ -528,7 +608,7 @@ export function createAnatomicalMaterial(
   appearance: Appearance,
   visual: VisualFieldUniforms | null = null,
   userMap: UserMapUniforms = createUserMapUniforms(),
-  palettes: SurfacePalettes = { network: null, territory: null },
+  palettes: SurfacePalettes = { network: null, territory: null, thickness: null },
 ): MeshPhysicalMaterial {
   const material = new MeshPhysicalMaterial();
   MeshStandardMaterial.prototype.copy.call(material, mesh.material);
@@ -569,6 +649,8 @@ export function createAnatomicalMaterial(
       appearance,
       palette('_network', palettes.network),
       palette('_territory', palettes.territory),
+      // Every cortical mesh can carry it: each atlas's thickness is attached once it downloads.
+      palettes.thickness,
       visual,
       userMap,
     );

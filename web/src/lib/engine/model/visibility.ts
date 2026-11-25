@@ -4,13 +4,14 @@ import { SURFACE_COLORS } from '../../types/index.ts';
 import type { DisplaySettings, Region, SurfaceColor } from '../../types/index.ts';
 import { groupsByLobe, lobeColor } from '../../core/catalog/lobes.ts';
 import type { CabNpPartition } from '../../core/catalog/networks.ts';
+import { sulcExtent } from '../../core/catalog/sulcal-depth.ts';
 import { visibilityOf } from '../../core/catalog/visibility.ts';
 import { ghostColor, tissueColor } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
 import { majorityTerritoryColor } from '../render/network-colors.ts';
 import { writeFeatherPalette } from '../render/border-feather.ts';
 import { setPainted } from '../render/mri-material.ts';
-import { GHOST } from '../render/draw-order.ts';
+import { drawDepthFirst, GHOST, TRANSLUCENT } from '../render/draw-order.ts';
 import { drawsSurfaceMap, showSurfaceMapRegions } from '../tissues/map-surface.ts';
 import { ghosted, ghosting } from '../tissues/palette.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
@@ -30,12 +31,15 @@ export function assertSurfaceColor(
     atlas,
     scanned,
     cerebellarMapped,
+    thickened,
   }: {
     manifest: AtlasManifest;
     cabNp: CabNpPartition | null;
     atlas: string;
     scanned: boolean;
     cerebellarMapped: boolean;
+    /** The atlas's cortex carries its thickness. */
+    thickened: boolean;
   },
 ): asserts mode is SurfaceColor {
   if (!isSurfaceColor(mode)) {
@@ -58,6 +62,15 @@ export function assertSurfaceColor(
   }
   if (mode === 'cerebellar' && !cerebellarMapped) {
     throw new Error('The cerebellar map must load before the cerebellar surfaces draw it.');
+  }
+  if (mode === 'sulc' && sulcExtent(manifest.appearance.field_ranges) === null) {
+    throw new Error('This model publishes no span for its sulcal depth.');
+  }
+  if (mode === 'thickness' && !manifest.cortical_thickness) {
+    throw new Error('This model carries no cortical thickness.');
+  }
+  if (mode === 'thickness' && !thickened) {
+    throw new Error('The cortical thickness must load before the cortex draws it.');
   }
   if (mode === 'lobe' && !groupsByLobe(atlas)) {
     throw new Error(`${atlas} groups no regions by lobe; show a lobe atlas first.`);
@@ -190,6 +203,12 @@ export function drawLayers({
         if (userData.territoryMix) {
           userData.territoryMix.value = surfaceColor === 'territory' && !paint && !ghost ? 1 : 0;
         }
+        if (userData.thicknessMix) {
+          userData.thicknessMix.value = surfaceColor === 'thickness' && !paint && !ghost ? 1 : 0;
+        }
+        if (userData.sulcMix) {
+          userData.sulcMix.value = surfaceColor === 'sulc' && !paint && !ghost ? 1 : 0;
+        }
       }
       const surfaceMap = drawsSurfaceMap(material);
       if (surfaceMap) surfaceMap.value = surfaceColor === 'cerebellar' && !paint && !ghost;
@@ -240,7 +259,14 @@ export function drawLayers({
         material.transparent = transparent;
         material.needsUpdate = true;
       }
-      material.depthWrite = !transparent || mesh.userData['ghost'] === GHOST.deep;
+      const deepGhost = mesh.userData['ghost'] === GHOST.deep;
+      material.depthWrite = !transparent || deepGhost;
+      mesh.userData['translucent'] = !transparent
+        ? TRANSLUCENT.surface
+        : deepGhost
+          ? TRANSLUCENT.deepGhost
+          : TRANSLUCENT.cortex;
+      drawDepthFirst(mesh, mesh.userData['translucent'] === TRANSLUCENT.cortex);
     }
     // Under the scan only a painted parcel shows its colour, so only it is blended into.
     if (layer.featherPalette) {

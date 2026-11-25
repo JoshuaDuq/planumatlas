@@ -27,6 +27,27 @@ atlases:
     archive: [414-Julich-Brain.zip, b9f16eda88dac161aba50821032a630719032df8fb4ad48fdfcb2e054d2040fd]
     # Region names, "<area> left|right", listed in 0ImageProcessing/Link.txt in matrix order.
     order: link
+# The network-sorted matrix (2026-11-24), a figure of its own: Schaefer's 200 parcels, which carry
+# Yeo's seven networks by construction. The dataset has their 17-network files only; the 200 parcels
+# are the 7-network version's (each CBIG centroid matches exactly one), so each takes its 7-network
+# label by centroid, not by its 17-network name (7 ContA parcels are DorsAttn). Rows: the 17-network
+# order, left 1–100 then right 101–200 (0ImageProcessing/Modifications.sh).
+network_matrix:
+  archive: [200-Schaefer17Networks.zip, 5086f4b3405acff84ffe132cee17c67a90000a3fae98da50d4e14fb55d7f5d57]
+  centroids:
+    seventeen: data/schaefer200/Schaefer2018_200Parcels_17Networks_order_FSLMNI152_2mm.Centroid_RAS.csv
+    seven: data/schaefer200/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv
+  networks: [Vis, SomMot, DorsAttn, SalVentAttn, Limbic, Cont, Default]
+  # The row order, a check that stops the derivation: group r falls with the parcels' centroid
+  # distance (Spearman) more steeply than under every one of these random orders.
+  order_check: {permutations: 1000, seed: 20261124}
+  # Written 2026-11-24 before any Schaefer value was read, after Julich-Brain met it for 4 of 7
+  # networks: each network's Fisher-z mean r within itself (self pairs excluded) exceeds its mean with
+  # every other network. Recorded, not a stop: the pilot met it for 6 of 7 (Limbic not), and the matrix
+  # was published by the user's decision of 2026-11-24 with its note naming the networks that do not.
+  # The colour scale runs from 0 to the 99th percentile of the parcels' pairs, out to the next 0.05,
+  # a rule fixed before any colour was drawn.
+  scale_step: 0.05
 # Written 2026-11-11 before any group value was read (plan 4.1). The derivation stops when one fails.
 validation:
   destrieux:

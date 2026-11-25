@@ -123,3 +123,27 @@ test('places a coordinate in this brain’s own template by its scale alone, dow
   assert.equal(await coordinates.map([0, 0, -100], 'mni'), null);
   assert.equal(load.mock.calls.length, 0);
 });
+
+test('on the template, its own space is placed by scale and SPM12 through its field, loaded once', async () => {
+  const load = vi.fn(async (_record: { file: string }) => ({
+    map: ([x, y, z]: readonly number[]) => [x! + 1, y!, z!] as [number, number, number],
+  }));
+  const coordinates = createCoordinateSpaces(
+    {
+      ...metadata,
+      spaces: [native, space('spm12')],
+      unstated: { reads_as: 'mni', alternatives: [] },
+    },
+    'https://example.test/',
+    load,
+  );
+  const own = (await coordinates.map([-42, 22, 6], 'mni'))!;
+  assert.ok(Math.abs(own[0] + 38.25) < 1e-9);
+  assert.equal(load.mock.calls.length, 0);
+  assert.deepEqual(await coordinates.map([-42, 22, 6], 'spm12'), [-41, 22, 6]);
+  await coordinates.map([0, 0, 0], 'spm12');
+  assert.deepEqual(
+    load.mock.calls.map(([record]) => record.file),
+    ['coordinates-spm12.field'],
+  );
+});

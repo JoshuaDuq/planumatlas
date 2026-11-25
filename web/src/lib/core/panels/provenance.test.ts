@@ -202,7 +202,7 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
   assert.deepEqual(
     rowOf(en, 'Published files').items.map((item) => [item.link!.text, item.note]),
     [
-      ['manifest.json', '86 source files, each with a SHA-256 checksum'],
+      ['manifest.json', '94 source files, each with a SHA-256 checksum'],
       ['anatomies.json', 'Index of the published anatomies'],
     ],
   );
@@ -411,12 +411,14 @@ test('PROV-26 the MNI template says what it is, and its own space is no register
     /^Averaged reference template\. An average of 152 young adults’ MRI, scaled by 0\.9 to the mean brain size of the CDMD adults\./,
   );
   assert.equal(subject.items[0]!.link, undefined);
-  // Only the group maps registered onto it: its own space is placed by its scale.
+  // Only the maps registered onto it: SPM12's space is, its own space is placed by its scale.
   assert.deepEqual(
     rows.find(({ label }) => label === 'Registered group maps')!.items.map(({ text }) => text),
     [
+      'Arterial territories (Liu et al. 2023)',
       'Functional cerebellar regions (Nettekoven et al. 2024)',
       'Striatal networks (Choi et al. 2012)',
+      'Published coordinates · SPM12 (TPM)',
     ],
   );
 });

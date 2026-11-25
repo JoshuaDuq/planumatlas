@@ -141,9 +141,8 @@ def test_the_template_places_its_own_millimetres_by_its_scale_and_nothing_else()
     from brain_model.sources import read_config
 
     config = read_config("mni152")
-    record = spaces.native_export(config, spaces.read_definition())
-    assert record["unstated"] == {"reads_as": "mni152nlin2009casym", "alternatives": []}
-    (space,) = record["spaces"]
+    space = spaces.native_space(config, spaces.read_definition())
+    assert space["id"] == "mni152nlin2009casym"
     assert "field" not in space and "registration" not in space
     native = space["native"]
     to_surface = np.array(native["template_to_surface_ras_mm"])
@@ -161,19 +160,31 @@ def test_the_template_places_its_own_millimetres_by_its_scale_and_nothing_else()
     assert np.all(brain >= low) and np.all(brain <= high)
 
 
-def test_a_template_publishes_its_own_space_only_as_built():
+def test_a_template_publishes_its_own_space_and_registers_only_the_others(tmp_path):
     from brain_model.sources import read_config
 
-    config = read_config("mni152")
-    manifest = {"coordinate_spaces": spaces.native_export(config, spaces.read_definition())}
-    assert spaces.validate(config, manifest) == {
-        "mni152nlin2009casym": manifest["coordinate_spaces"]["spaces"][0]["native"]
-    }
-    manifest["coordinate_spaces"]["spaces"][0]["native"]["scale"] = 1.0
-    with pytest.raises(ValueError, match="template's own"):
-        spaces.validate(config, manifest)
-    assert "no registration" in spaces.limitations(config, spaces.read_definition())[0]
+    config = {**read_config("mni152"), "output_directory": tmp_path}
+    definition = spaces.read_definition()
+    manifest = {"coordinate_spaces": json.loads(json.dumps(spaces.export(config, definition)))}
+    own, spm12 = manifest["coordinate_spaces"]["spaces"]
+    assert own == json.loads(json.dumps(spaces.native_space(config, definition)))
+    assert spm12["id"] == "spm12" and "native" not in spm12
+    # An unstated "MNI" is the template's own space, so no other template is measured against it.
+    assert manifest["coordinate_spaces"]["unstated"] == {"reads_as": own["id"], "alternatives": []}
+    assert set(spaces.validate(config, manifest)) == {"spm12"}
+    altered = json.loads(json.dumps(manifest))
+    altered["coordinate_spaces"]["spaces"][0]["native"]["scale"] = 1.0
+    with pytest.raises(ValueError, match="differ from their definition and report"):
+        spaces.validate(config, altered)
+    # MNI (0, 0, 0) in SPM12's space lands deep and near the midline, as it does through the template's own.
+    field, node_to_template = spaces.load_field(config, definition["spaces"][1])
+    origin = spaces.map_points(field, node_to_template, np.zeros((1, 3)))[0]
+    assert np.linalg.norm(origin - np.array(own["native"]["template_to_surface_ras_mm"])[:3, 3]) < 5
+    limitation = spaces.limitations(config, definition)[0]
+    assert "no registration" in limitation and "SPM12 (TPM) is placed by registering" in limitation
     assert spaces.inputs(config)[1:] == [
         config["source_directory"] / "mri/orig.mgz",
         config["source_directory"] / "mri/aseg.mgz",
+        spaces.report_path(config),
+        spaces.field_path(config, definition["spaces"][1]),
     ]

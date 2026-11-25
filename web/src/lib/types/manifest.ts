@@ -81,7 +81,8 @@ export interface ManifestAppearance {
   intensity?: Record<string, unknown>;
   lighting?: Record<string, unknown>;
   occlusion?: Record<string, unknown>;
-  field_ranges?: Record<string, unknown>;
+  /** Each baked shading field's [min, max], over which it is quantised. */
+  field_ranges?: Readonly<Record<string, readonly [number, number]>>;
 }
 
 export interface ManifestAnatomy {
@@ -128,8 +129,11 @@ export interface Manifest {
   stimulation_responses?: ManifestFile & Record<string, unknown>;
   stimulation_ftract?: ManifestFile & Record<string, unknown>;
   functional_connectivity?: ManifestFile & Record<string, unknown>;
+  /** Schaefer 200 parcels' resting correlation by Yeo network, a figure the same on every brain. */
+  network_matrix?: ManifestFile & Record<string, unknown>;
   disorder_effects?: ManifestFile & Record<string, unknown>;
   cortical_layers?: ManifestFile & Record<string, unknown>;
+  cortical_thickness?: CorticalThickness;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
@@ -217,7 +221,8 @@ export interface ArterialTerritories {
   major: Record<string, { name: string; name_fr: string; short: string }>;
   territories: ArterialTerritory[];
   registration: Record<string, unknown>;
-  small: SmallStructureRule;
+  /** Null on the template: no landing error was measured for maps registered onto it. */
+  small: SmallStructureRule | null;
   method: string;
 }
 
@@ -240,6 +245,22 @@ export interface StrokeCasesRecord extends ManifestFile {
   citations: string[];
   registration: Record<string, unknown>;
   method: string;
+}
+
+/**
+ * `manifest.cortical_thickness`: FreeSurfer's thickness of this brain, a byte per vertex of each atlas's
+ * cortex in the published regions' order (`files`), and each cortical region's mean in `file`.
+ */
+export interface CorticalThickness extends ManifestFile {
+  label: string;
+  source: string;
+  method: string;
+  files: Record<string, { file: string; vertex_count: number }>;
+  encoding: { maximum_mm: number; levels: number; unmeasured: number };
+  /** The key's ends: the measured vertices' 1st and 99th percentiles, out to the half millimetre. */
+  display_range_mm: readonly [number, number];
+  measured_vertices: Record<'left' | 'right', number>;
+  validation: Record<string, unknown>;
 }
 
 /** `manifest.retinotopy`: V1–V3 retinotopy predicted by the Benson template, carried per cortical vertex. */
