@@ -20,6 +20,10 @@ export async function expectAxeCleanOnce(
   try {
     root.dataset.theme = theme;
     await page.viewport(width, width === 1280 ? 800 : 844);
+    // So would a reveal still fading in: what ends is read as it ends.
+    for (const animation of document.getAnimations()) {
+      if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish();
+    }
     // A component fixture has no landmarks; page-level rules are the integration chunks' job.
     const results = await axe.run(document.body, {
       runOnly: TAGS,
