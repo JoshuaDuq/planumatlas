@@ -1277,6 +1277,11 @@
   "moreActions": "More",
   "focusHint": "Frame this region in its colour, with the rest see-through grey",
   "isolateHint": "Show this region alone, framed",
+  "showParts": "Parts",
+  "showPartsHint": [
+   "[\"Alpha\"] → \"Show its parts alone, as Alpha draws them\"",
+   "[\"\"] → \"Show its parts alone, as  draws them\""
+  ],
   "restoreHint": "Show the rest of the brain again, framed whole",
   "hideHint": "Remove this region from view; Undo brings it back",
   "highlight": "Highlight",

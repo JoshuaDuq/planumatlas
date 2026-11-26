@@ -54,7 +54,9 @@
     disorderPainted = null,
     mriOpen = false,
     highlight = null,
+    parts = null,
   }: {
+    parts?: { detail: string; system: string } | null;
     regionId?: string | null;
     lang?: Language;
     explorer?: Explorer;
@@ -125,6 +127,8 @@
   onhighlight={() => calls.push('highlight')}
   onclear={() => calls.push('clear')}
   onregion={(id) => calls.push(`region:${id}`)}
+  {parts}
+  onparts={(shown) => calls.push({ parts: shown })}
   onselect={(id) => calls.push(`select:${id}`)}
   onfunction={(id) => calls.push(`function:${id}`)}
   openLinkedMri={(options) => calls.push({ mri: options })}

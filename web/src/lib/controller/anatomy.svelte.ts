@@ -546,6 +546,40 @@ export function createAnatomyCommands(
     }
   }
 
+  /**
+   * A grouped unit's parts on their own (`partsSystem`): the level that draws them, on their system
+   * alone, by the internal anatomy's door. The unit is not drawn at that level, so the selection ends
+   * and the list shows the parts. Leaving internal anatomy gives the reader's level back.
+   */
+  async function showParts(detail: string, system: string) {
+    const current = commands.begin();
+    const before = captureBeforeInternal(model.settings, detail);
+    try {
+      await commands.loadDetail(detail, current);
+      if (!current()) return;
+      if (!insideInternal(model.settings)) {
+        beforeInternal = before;
+        model.setSurfaceColor('atlas');
+        model.setCortexVisible(false);
+      } else if (beforeInternal) {
+        beforeInternal = { ...beforeInternal, appliedDetail: detail };
+      }
+      model.setInternalSystem(system);
+      session.setQuery('');
+      selectRegion(null);
+      const group = catalog.groups.find((entry) => entry.kind === 'structure');
+      if (group && !view.current.expanded.has(group.key)) session.toggleGroup(group.key);
+      commands.succeeded('system');
+      camera.frameInternal();
+      await tick();
+      rescueFocus(FOCUS_TARGETS.activeTab);
+    } catch (error) {
+      commands.failIfCurrent(current, 'system', error, undefined, () => {
+        void showParts(detail, system);
+      });
+    }
+  }
+
   async function setSpinalCordVisible(visible: boolean) {
     if (!hasSpinalCord) {
       session.notify({
@@ -667,6 +701,7 @@ export function createAnatomyCommands(
     openConstituent,
     toggleInternalAnatomy,
     chooseInternalSystem,
+    showParts,
     chooseLayer,
     setHemisphere: (value: Parameters<typeof model.setHemisphere>[0]) =>
       display(() => {

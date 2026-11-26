@@ -284,6 +284,33 @@ describe('commands', () => {
     expect(calls).toEqual(['focus', 'hide', 'clear']);
   });
 
+  test.each([
+    ['en', 'Parts', 'Show its parts alone, as NextBrain draws them'],
+    ['fr', 'Parties', 'Afficher ses parties seules, telles que NextBrain les dessine'],
+  ] as const)(
+    'INSP-63 · a unit whose parts can be shown alone offers it after Linked MRI, %s',
+    async (lang, name, hint) => {
+      const calls: unknown[] = [];
+      const parts = { detail: 'nextbrain', system: 'Thalamus' };
+      render(Fixture, { regionId: THALAMUS, lang, calls, parts });
+      const show = page.getByRole('button', { name, exact: true }).element() as HTMLElement;
+      // Said as a tooltip and, without a hover, as the button's description.
+      expect(show.dataset.tooltip).toBe(hint);
+      expect(document.getElementById(show.getAttribute('aria-describedby')!)!.textContent).toBe(
+        hint,
+      );
+      expect(show.previousElementSibling!.classList.contains('linked-mri')).toBe(true);
+      await userEvent.click(show);
+      expect(calls).toEqual([{ parts }]);
+    },
+  );
+
+  test('INSP-63 · a region with no parts view has no such button', async () => {
+    render(Fixture, { regionId: THALAMUS });
+    await expect.element(button('Focus')).toBeVisible();
+    expect(document.querySelector('.show-parts')).toBeNull();
+  });
+
   test('Focus keeps its name, and is drawn and announced as pressed while it holds', async () => {
     const calls: unknown[] = [];
     const screen = await render(Fixture, { regionId: V1, calls });

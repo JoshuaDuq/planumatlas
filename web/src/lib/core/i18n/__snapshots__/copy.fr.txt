@@ -1277,6 +1277,11 @@
   "moreActions": "Plus",
   "focusHint": "Cadrer cette région dans sa couleur, le reste en gris transparent",
   "isolateHint": "Afficher cette région seule, cadrée",
+  "showParts": "Parties",
+  "showPartsHint": [
+   "[\"Alpha\"] → \"Afficher ses parties seules, telles que Alpha les dessine\"",
+   "[\"\"] → \"Afficher ses parties seules, telles que  les dessine\""
+  ],
   "restoreHint": "Réafficher le reste du cerveau, cadré en entier",
   "hideHint": "Retirer cette région de la vue<NNBSP>; Annuler la rétablit",
   "highlight": "Surligner",

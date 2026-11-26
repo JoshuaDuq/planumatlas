@@ -633,6 +633,51 @@ describe('internal anatomy', () => {
     expect(engine.model.settings).toMatchObject({ cortexVisible: true, internalSystem: null });
   });
 
+  test('CTRL-42 a unit’s parts: their level and system alone, selection ended; leaving gives the level back', async () => {
+    const { anatomy, session } = build();
+    const before = engine.model.settings;
+    anatomy.selectRegion('learning:left:thalamus');
+    await anatomy.showParts('nextbrain', 'Thalamus');
+    expect(engine.model.settings).toMatchObject({
+      cortexVisible: false,
+      surfaceColor: 'atlas',
+      detail: 'nextbrain',
+      internalSystem: 'Thalamus',
+    });
+    expect(engine.model.state.selectedRegion).toBeNull();
+    expect(session.state.notice).toBeNull();
+    expect([...session.state.expanded].some((key) => key.startsWith('structure:'))).toBe(true);
+    expect(cameraMethods().at(-1)).toBe('frameInternal');
+
+    await anatomy.toggleInternalAnatomy();
+    expect(engine.model.settings).toMatchObject({
+      cortexVisible: true,
+      detail: before.detail,
+      internalSystem: null,
+    });
+  });
+
+  test('CTRL-42 from inside internal anatomy, the parts’ level is still given back on leaving', async () => {
+    const { anatomy } = build();
+    const before = engine.model.settings;
+    await anatomy.toggleInternalAnatomy();
+    await anatomy.showParts('nextbrain', 'Thalamus');
+    expect(engine.model.settings).toMatchObject({
+      detail: 'nextbrain',
+      internalSystem: 'Thalamus',
+    });
+    await anatomy.toggleInternalAnatomy();
+    expect(engine.model.settings).toMatchObject({ cortexVisible: true, detail: before.detail });
+  });
+
+  test('CTRL-42 a parts view a later command overtook changes nothing', async () => {
+    const { anatomy, scene } = build();
+    const showing = anatomy.showParts('nextbrain', 'Thalamus');
+    scene.begin();
+    await showing;
+    expect(engine.model.settings).toMatchObject({ cortexVisible: true, internalSystem: null });
+  });
+
   test('an unknown system fails the command and tells the reader', async () => {
     const { anatomy, session } = build();
     vi.spyOn(console, 'error').mockImplementation(() => {});

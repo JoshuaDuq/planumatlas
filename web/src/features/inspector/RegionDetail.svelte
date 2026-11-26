@@ -42,7 +42,7 @@
   import type { StimulationResponses } from '../../lib/core/catalog/stimulation-responses.ts';
   import type { StimulationFtract } from '../../lib/core/catalog/stimulation-ftract.ts';
   import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
-  import { t } from '../../lib/core/i18n/index.ts';
+  import { atlasSwitchLabel, t } from '../../lib/core/i18n/index.ts';
   import { MAX_HIGHLIGHTS } from '../../lib/types/constants.ts';
   import { inspectorEmptyChrome, regionLead } from '../../lib/core/panels/inspector.ts';
   import { networkHeadline } from '../../lib/core/catalog/networks.ts';
@@ -157,6 +157,10 @@
     onclear: () => void;
     /** A constituent structure: opens it, as S2's `openConstituent`. */
     onregion: (id: string) => void;
+    /** Where the region's parts can be shown on their own (`partsSystem`); none where they cannot. */
+    parts?: { detail: string; system: string } | null;
+    /** Shows those parts: S2's `showParts`, which ends the selection and hands focus on. */
+    onparts?: (parts: { detail: string; system: string }) => void;
     /** A boundary's neighbour: selects it without moving the view. */
     onselect: (id: string) => void;
     /** A listed function or term: opens its map. */
@@ -220,6 +224,8 @@
     onhighlight = () => {},
     onclear,
     onregion,
+    parts = null,
+    onparts,
     onselect,
     onfunction,
     openLinkedMri,
@@ -253,6 +259,7 @@
     focus: copy.focusHint,
     isolate: isolated ? copy.restoreHint : copy.isolateHint,
     hide: copy.hideHint,
+    ...(parts && { parts: copy.showPartsHint(atlasSwitchLabel(parts.detail, lang)) }),
     ...(highlight && {
       highlight: highlightBlocked ? copy.highlightFull(MAX_HIGHLIGHTS) : copy.highlightHint,
     }),
@@ -337,6 +344,17 @@
       >
         {copy.linkedMri}
       </button>
+      {#if parts && onparts}
+        <button
+          type="button"
+          class="show-parts"
+          aria-describedby="{uid}-parts"
+          data-tooltip={hints.parts}
+          onclick={() => onparts(parts)}
+        >
+          {copy.showParts}
+        </button>
+      {/if}
       <button
         type="button"
         class="more-actions"

@@ -10,6 +10,7 @@
 <script lang="ts">
   import { getApp, type World } from '../../app/application.svelte.ts';
   import { ASSET_BASE } from '../../../build/site.ts';
+  import { partsSystem } from '../../lib/core/catalog/parts.ts';
   import { isIndependentTractReference } from '../../lib/core/diffusion/presentation.ts';
   import type { Region, Rgb } from '../../lib/types/index.ts';
   import CircuitNotes from '../circuits/CircuitNotes.svelte';
@@ -301,6 +302,10 @@
         onhighlight={() => toggleHighlight(current.selectedRegion!)}
         onclear={() => void anatomy.clearSelection()}
         onregion={(id) => void anatomy.openConstituent(id)}
+        parts={current.explorer === 'anatomy' && current.selectedRegion
+          ? partsSystem(current.selectedRegion, engine.model.regions)
+          : null}
+        onparts={({ detail, system }) => void anatomy.showParts(detail, system)}
         onselect={(id) => anatomy.selectRegion(id)}
         onfunction={(id) => void functions.openFunction(id)}
         openLinkedMri={excursions.openLinkedMri}

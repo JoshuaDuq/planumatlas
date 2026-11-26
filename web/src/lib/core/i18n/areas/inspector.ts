@@ -33,6 +33,8 @@ export const en = {
   // One line each on what the command does: the button's tooltip and its description.
   focusHint: 'Frame this region in its colour, with the rest see-through grey',
   isolateHint: 'Show this region alone, framed',
+  showParts: 'Parts',
+  showPartsHint: (level: string) => `Show its parts alone, as ${level} draws them`,
   restoreHint: 'Show the rest of the brain again, framed whole',
   hideHint: 'Remove this region from view; Undo brings it back',
   // The reader's own highlights: More's toggle, and the strip above the panel that lists them.
@@ -99,6 +101,8 @@ export const fr: typeof en = {
   moreActions: 'Plus',
   focusHint: 'Cadrer cette région dans sa couleur, le reste en gris transparent',
   isolateHint: 'Afficher cette région seule, cadrée',
+  showParts: 'Parties',
+  showPartsHint: (level: string) => `Afficher ses parties seules, telles que ${level} les dessine`,
   restoreHint: 'Réafficher le reste du cerveau, cadré en entier',
   hideHint: 'Retirer cette région de la vue\u202f; Annuler la rétablit',
   highlight: 'Surligner',

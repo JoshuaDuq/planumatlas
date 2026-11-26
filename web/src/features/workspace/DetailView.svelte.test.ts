@@ -90,6 +90,26 @@ describe('a region’s detail', () => {
   });
 });
 
+describe('a unit’s parts', () => {
+  test('INSP-63 · the thalamus shows its nuclei alone at the NextBrain level, the list in front; a cortical area offers nothing', async () => {
+    await shell.open();
+    await pick();
+    expect(detail().querySelector('.show-parts')).toBeNull();
+    await pick('learning:left:thalamus');
+    await page.getByRole('button', { name: 'Parts', exact: true }).click();
+    await expect.poll(() => state().internalSystem).toBe('Thalamus');
+    expect(state()).toMatchObject({
+      detail: 'nextbrain',
+      cortexVisible: false,
+      selectedRegion: null,
+    });
+    await expect.poll(() => list().hidden).toBe(false);
+    expect(detail().hidden).toBe(true);
+    // The button left with the sheet: focus is handed on, not dropped on the page.
+    await expect.poll(() => document.activeElement).not.toBe(document.body);
+  });
+});
+
 describe('other tabs', () => {
   test('a function’s profile has the Functions search icon', async () => {
     await shell.open({ hash: '#tab=functions&function=language' });

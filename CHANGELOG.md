@@ -8,6 +8,9 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ### Added
 
+- A grouped structure whose parts make up most of a system offers **Parts** on its sheet. The thalamus
+  shows its nuclei alone at the NextBrain level, listed by name. The hypothalamus, hippocampus, amygdala,
+  septal nuclei, subthalamic nucleus, lateral ventricles and corpus callosum offer the same.
 - The guided tour stops at the top bar's **Atlas**, **Colour** and **Internal anatomy** lists, beside
   **Subject**. Each stop opens the lists, points at one and makes a choice in it, so the change shows on the
   brain: HCP-MMP for the atlas, one colour per lobe, and FreeSurfer aseg inside the left hemisphere. A first
