@@ -16,5 +16,7 @@ data/mni152/scripts/*
 !data/mni152/scripts/build-stamp.txt
 docs/_build/
 .wrangler/
-# Development notes (decision records, test rule catalogues) stay local.
-web/docs/
+# Development notes (test rule catalogues) stay local; decision records are
+# tracked because docs and CI cite them.
+web/docs/*
+!web/docs/decisions/
