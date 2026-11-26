@@ -32,8 +32,10 @@
     onclick={(event) => {
       instant = isKeyboardActivation(event);
       open = true;
-    }}>Keyboard shortcuts</button
+    }}
   >
+    Keyboard shortcuts
+  </button>
 {/if}
 <button type="button" bind:this={more}>More</button>
 <ShortcutsDialog bind:open bind:instant {lang} {singleKeys} fallbackFocus={() => more} />

@@ -308,8 +308,10 @@
             type="button"
             class="stage-key-action"
             aria-haspopup="dialog"
-            onclick={(event) => onPlateAction(action.id, event)}>{action.label}</button
+            onclick={(event) => onPlateAction(action.id, event)}
           >
+            {action.label}
+          </button>
         {/if}
       </div>
     </div>

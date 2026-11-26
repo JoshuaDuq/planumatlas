@@ -64,10 +64,11 @@
     onpointerenter={refresh}
     onclick={refresh}
     oncontextmenu={refresh}
-    ><span>{copy.openInPlanum}</span><span class="visually-hidden"
-      >{` ${t(lang, 'link').newTab}`}</span
-    >{@render iconGraphic('external-link')}</a
   >
+    <span>{copy.openInPlanum}</span><span class="visually-hidden">
+      {` ${t(lang, 'link').newTab}`}
+    </span>{@render iconGraphic('external-link')}
+  </a>
 </footer>
 
 <style>

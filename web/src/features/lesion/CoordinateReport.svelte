@@ -236,9 +236,9 @@
         <li>
           {copy.alternative(alternative.label, millimetres(offset.median), millimetres(offset.p95))}
           <!-- The published description is English. -->
-          <span class="alternative-description" lang={lang === 'en' ? undefined : 'en'}
-            >{alternative.description}</span
-          >
+          <span class="alternative-description" lang={lang === 'en' ? undefined : 'en'}>
+            {alternative.description}
+          </span>
         </li>
       {/each}
     </ul>
@@ -270,8 +270,10 @@
               <button
                 type="button"
                 aria-pressed={choice.id === shownAtlas}
-                onclick={() => (atlas = choice.id)}>{choice.name}</button
+                onclick={() => (atlas = choice.id)}
               >
+                {choice.name}
+              </button>
             {/each}
           </div>
         {/if}

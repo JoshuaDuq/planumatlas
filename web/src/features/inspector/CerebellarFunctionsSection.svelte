@@ -58,9 +58,9 @@
               <Swatch colour={networkCss(entry.color)} />
               <span class="network-row-name">
                 {nameOf(entry)}{bothSides ? ` · ${sides[side]}` : ''}
-                <span class="cerebellar-domain-note"
-                  >{nameOf(functions!.domains[entry.domain]!)}</span
-                >
+                <span class="cerebellar-domain-note">
+                  {nameOf(functions!.domains[entry.domain]!)}
+                </span>
               </span>
               <Swatch kind="bar" share={share.fraction} />
               <span class="network-share measure">{percent(share.fraction, lang)}</span>

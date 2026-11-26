@@ -66,9 +66,9 @@
             <Swatch colour={rgb(category)} />
             <span class="network-row-name">{copy.category[category]}</span>
             <Swatch kind="bar" share={voxels / total} />
-            <span class="network-share measure"
-              >{quantity(voxels * agreement!.voxel_volume_mm3, 'mm³', lang)}</span
-            >
+            <span class="network-share measure">
+              {quantity(voxels * agreement!.voxel_volume_mm3, 'mm³', lang)}
+            </span>
           </li>
         {/each}
       </ul>

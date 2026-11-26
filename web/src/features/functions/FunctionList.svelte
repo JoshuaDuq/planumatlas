@@ -227,9 +227,9 @@
       <div role="group" aria-labelledby="{uid}-here" class="group" data-region-functions>
         <h3 id="{uid}-here" class="group-heading">
           <span>{copy.reportedHere}</span>
-          {#if here.rows.length}<span class="column-head" aria-hidden="true"
-              >{here.share ? copy.shareColumn : 'z'}</span
-            >{/if}
+          {#if here.rows.length}<span class="column-head" aria-hidden="true">
+              {here.share ? copy.shareColumn : 'z'}
+            </span>{/if}
         </h3>
         {#if here.rows.length}
           <ul class="rows" role="list" bind:this={hereList}>

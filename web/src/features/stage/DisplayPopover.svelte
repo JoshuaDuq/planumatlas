@@ -145,9 +145,9 @@
         oninput={onCortexOpacity}
       />
       <div class="surface-field">
-        <label class="stage-field-label" for={surfaceId} data-tooltip={copy.surfaceHint}
-          >{surfaceCopy.surface}</label
-        >
+        <label class="stage-field-label" for={surfaceId} data-tooltip={copy.surfaceHint}>
+          {surfaceCopy.surface}
+        </label>
         <Select
           id={surfaceId}
           options={surfaces}

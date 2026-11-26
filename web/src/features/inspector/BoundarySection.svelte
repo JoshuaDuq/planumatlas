@@ -55,9 +55,9 @@
               class="network-row-name boundary-neighbour"
               onclick={() => onselect(boundary.neighbour)}
             >
-              {label(boundary.neighbour).name}<span class="visually-hidden"
-                >, {boundary.soft ? copy.soft : copy.firm}</span
-              >
+              {label(boundary.neighbour).name}<span class="visually-hidden">
+                , {boundary.soft ? copy.soft : copy.firm}
+              </span>
             </button>
             <Swatch kind="bar" share={boundary.share} />
             <span class="network-share measure">{percent(boundary.share, lang)}</span>

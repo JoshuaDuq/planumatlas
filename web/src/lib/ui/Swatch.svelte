@@ -8,9 +8,9 @@
 </script>
 
 {#if props.kind === 'bar'}
-  <span class="network-bar" aria-hidden="true"
-    ><span style:width="{Math.min(1, Math.max(0, props.share)) * 100}%"></span></span
-  >
+  <span class="network-bar" aria-hidden="true">
+    <span style:width="{Math.min(1, Math.max(0, props.share)) * 100}%"></span>
+  </span>
 {:else}
   <span class="network-swatch" aria-hidden="true" style:background={props.colour}></span>
 {/if}

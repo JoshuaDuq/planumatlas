@@ -24,13 +24,13 @@
 </script>
 
 <details class={variant} bind:open>
-  <summary
-    >{#if value}<span class="summary-text"
-        >{summary}<span class="visually-hidden">{', '}</span><span class="summary-value"
-          >{value}</span
-        ></span
-      >{:else}{summary}{/if}</summary
-  >
+  <summary>
+    {#if value}<span class="summary-text">
+        {summary}<span class="visually-hidden">{', '}</span><span class="summary-value">
+          {value}
+        </span>
+      </span>{:else}{summary}{/if}
+  </summary>
   {@render children()}
 </details>
 

@@ -340,13 +340,9 @@
               {#each peaks.slice(0, LISTED) as peak (peak.label)}
                 <li>
                   <button type="button" class="peak" onclick={() => onPlace(peak.mm)}>
-                    <span
-                      >{copy.peak(
-                        peak.label,
-                        statisticValue(peak.value),
-                        formatRas(peak.mm, lang),
-                      )}</span
-                    >
+                    <span>
+                      {copy.peak(peak.label, statisticValue(peak.value), formatRas(peak.mm, lang))}
+                    </span>
                     {#if peak.size !== null}
                       <span class="size">{copy.clusterSize(grouped(Math.round(peak.size)))}</span>
                     {/if}

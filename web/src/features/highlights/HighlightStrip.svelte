@@ -137,8 +137,10 @@
           </Popover>
           <span class="highlight-name">
             {row.name}<span class="highlight-side" aria-hidden="true">{row.side}</span><span
-              class="visually-hidden">, {row.sideWord}</span
+              class="visually-hidden"
             >
+              , {row.sideWord}
+            </span>
             {#if row.elsewhere}
               <span class="highlight-elsewhere">{strip.elsewhere[row.elsewhere]}</span>
             {/if}

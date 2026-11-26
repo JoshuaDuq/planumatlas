@@ -69,11 +69,11 @@
 
 <span class="result" data-selected={selected || undefined} data-hidden={!shown.length || undefined}>
   <span class="line" aria-hidden="true" data-tooltip={shown.length ? undefined : spoken}>
-    <span class="title"
-      >{@render marked(first.label.name)}{#if alias}{' '}<span class="alias"
-          >({@render marked(alias)})</span
-        >{/if}</span
-    >
+    <span class="title">
+      {@render marked(first.label.name)}{#if alias}{' '}<span class="alias">
+          ({@render marked(alias)})
+        </span>{/if}
+    </span>
     <span class="sides">
       {#each sides as row (row.region.id)}
         <span
@@ -82,8 +82,9 @@
           data-state={row.visible ? 'shown' : 'hidden'}
           data-selected={row.region.id === selectedId || undefined}
           data-pick={usable(row) ? row.region.id : undefined}
-          >{t(lang, 'sides').glyphs[row.region.hemisphere]}</span
         >
+          {t(lang, 'sides').glyphs[row.region.hemisphere]}
+        </span>
       {/each}
     </span>
     <span class="second">{reason !== null && !underSet ? reason : place}</span>

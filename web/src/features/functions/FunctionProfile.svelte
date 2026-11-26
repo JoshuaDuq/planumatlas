@@ -318,10 +318,9 @@
     <p class="note neurosynth-note">{copy.neurosynthNote}</p>
     {#each links as link (link.href)}
       <p class="note neurosynth">
-        <ExternalLink href={link.href} {lang} hreflang="en"
-          >{before}<span lang={lang === 'en' ? undefined : 'en'}>{link.term}</span
-          >{after}</ExternalLink
-        >
+        <ExternalLink href={link.href} {lang} hreflang="en">
+          {before}<span lang={lang === 'en' ? undefined : 'en'}>{link.term}</span>{after}
+        </ExternalLink>
       </p>
     {/each}
   {/if}

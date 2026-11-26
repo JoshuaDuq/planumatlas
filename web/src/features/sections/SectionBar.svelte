@@ -476,9 +476,9 @@
   {/if}
   <!-- The slider and the field state the position; the sentence carrying it is spoken once it settles. -->
   <p role="status" class="cut-status">
-    <span class="visually-hidden">{said}</span>{#if shown || failed}<span aria-hidden="true"
-        >{sentences.shown}</span
-      >{/if}
+    <span class="visually-hidden">{said}</span>{#if shown || failed}<span aria-hidden="true">
+        {sentences.shown}
+      </span>{/if}
   </p>
 </div>
 

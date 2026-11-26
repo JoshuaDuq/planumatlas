@@ -65,9 +65,9 @@
 </script>
 
 {#snippet symbol(parts: SymbolPart[])}
-  {#each parts as piece, index (index)}{#if typeof piece === 'string'}{piece}{:else}<sub
-        >{piece.sub}</sub
-      >{/if}{/each}
+  {#each parts as piece, index (index)}{#if typeof piece === 'string'}{piece}{:else}<sub>
+        {piece.sub}
+      </sub>{/if}{/each}
 {/snippet}
 
 {#if fingerprint}
@@ -88,13 +88,13 @@
             <li class="network-row receptor-row">
               <span class="network-row-name">{@render symbol(row.receptor.display)}</span>
               <Swatch kind="bar" share={row.share} />
-              <span class="network-share measure"
-                >{grouped(row.density.mean)}{#if row.density.sd === null}<span aria-hidden="true"
-                    >{' ± —'}</span
-                  ><span class="visually-hidden">{`, ${copy.noSd}`}</span>{:else}{` ± ${grouped(
-                    row.density.sd,
-                  )}`}{/if}</span
-              >
+              <span class="network-share measure">
+                {grouped(row.density.mean)}{#if row.density.sd === null}<span aria-hidden="true">
+                    {' ± —'}
+                  </span><span class="visually-hidden">
+                    {`, ${copy.noSd}`}
+                  </span>{:else}{` ± ${grouped(row.density.sd)}`}{/if}
+              </span>
             </li>
           {/each}
         </ul>
@@ -133,15 +133,17 @@
       </p>
       <p class="detail-note">{copy.measuredIn(fingerprint.measured_in)}</p>
       <div class="receptor-sources">
-        <a href={fingerprint.doi} target="_blank" rel="noopener noreferrer"
-          >{copy.dataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
+        <a href={fingerprint.doi} target="_blank" rel="noopener noreferrer">
+          {copy.dataset}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
         {#each sources as source (source.doi)}
-          <a href={source.doi} target="_blank" rel="noopener noreferrer"
-            >{source.short}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-            >{@render iconGraphic('external-link')}</a
-          >
+          <a href={source.doi} target="_blank" rel="noopener noreferrer">
+            {source.short}<span class="visually-hidden">
+              {` ${t(lang, 'link').newTab}`}
+            </span>{@render iconGraphic('external-link')}
+          </a>
         {/each}
       </div>
     </Disclosure>

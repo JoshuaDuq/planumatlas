@@ -491,11 +491,12 @@
         >
           <h3 id="{uid}-{plane}">
             <span class="plane-name">{planeName(plane, lang)}</span>
-            <span class="seen-from">{copy.seenFrom[seenFrom(plane, frame.edges)]}</span
-            ><!-- The picture carries the convention's mark; the heading says it for those who cannot see it. -->
-            {#if convention}<span class="visually-hidden"
-                >{`· ${copy.conventions[convention]}`}</span
-              >{/if}
+            <span class="seen-from">
+              {copy.seenFrom[seenFrom(plane, frame.edges)]}
+            </span><!-- The picture carries the convention's mark; the heading says it for those who cannot see it. -->
+            {#if convention}<span class="visually-hidden">
+                {`· ${copy.conventions[convention]}`}
+              </span>{/if}
           </h3>
           <div class="picture">
             <!-- A picture of data is an image (ARIA 1.2 img; HTML-AAM allows it on canvas). -->
@@ -520,22 +521,23 @@
                 <div class="crosshair-down" aria-hidden="true" style:left="{across * 100}%"></div>
               {/if}
               {#each EDGES as edge, index (edge)}
-                <span class="edge" data-edge={edge} aria-hidden="true"
-                  >{edgeLetter(frame.edges[index]!, lang)}</span
-                >
+                <span class="edge" data-edge={edge} aria-hidden="true">
+                  {edgeLetter(frame.edges[index]!, lang)}
+                </span>
               {/each}
               {#if convention}
                 <!-- The heading says it too, but a row of pictures is scanned, not read. -->
-                <span class="convention" aria-hidden="true">{copy.conventionMarks[convention]}</span
-                >
+                <span class="convention" aria-hidden="true">
+                  {copy.conventionMarks[convention]}
+                </span>
               {/if}
             {/if}
           </div>
           <div class="position">
             <label for="{uid}-position-{plane}">{positionLabel(plane, lang)}</label>
-            <output class="value" for="{uid}-position-{plane}" aria-hidden="true"
-              >{millimetres(crosshair[AXES[plane]], lang)}</output
-            >
+            <output class="value" for="{uid}-position-{plane}" aria-hidden="true">
+              {millimetres(crosshair[AXES[plane]], lang)}
+            </output>
             <input
               id="{uid}-position-{plane}"
               class="slider"
@@ -574,9 +576,9 @@
                 </li>
               {/each}
             </ul>
-            <button type="button" class="save" onclick={() => mpr.hideAgreement()}
-              >{agreementCopy.hide}</button
-            >
+            <button type="button" class="save" onclick={() => mpr.hideAgreement()}>
+              {agreementCopy.hide}
+            </button>
           </div>
         {/if}
         <StatusLine class="visually-hidden" text={said} />
@@ -629,9 +631,9 @@
             label={copy.crosshair}
             bind:checked={mpr.crosshairShown}
           />
-          <button type="button" class="save reset" onclick={resetDisplay}
-            >{copy.resetDisplay}</button
-          >
+          <button type="button" class="save reset" onclick={resetDisplay}>
+            {copy.resetDisplay}
+          </button>
         </div>
         {#if faFailed}<p class="alert" role="alert">{copy.faFailed}</p>{/if}
       </div>

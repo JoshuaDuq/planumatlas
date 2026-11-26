@@ -483,9 +483,9 @@
             hidden={!count}
           >
             <h4 class="list-heading" id="native-tract-class-{group.fibreClass}">
-              <span>{text.classes[group.fibreClass]}</span><span class="visually-hidden"
-                >{', '}</span
-              ><span class="count">{grouped(count)}</span>
+              <span>{text.classes[group.fibreClass]}</span><span class="visually-hidden">
+                {', '}
+              </span><span class="count">{grouped(count)}</span>
             </h4>
             {#each group.rows as row (row.key)}
               <TractRow
@@ -533,8 +533,9 @@
       <p class="note">{text.metricsScope}</p>
       <p class="note">{dataset.files}</p>
       <a class="source" href={catalog.source} target="_blank" rel="noreferrer">
-        {dataset.source}<span class="visually-hidden">{` ${link.newTab}`}</span
-        >{@render iconGraphic('external-link')}
+        {dataset.source}<span class="visually-hidden">
+          {` ${link.newTab}`}
+        </span>{@render iconGraphic('external-link')}
       </a>
       {#if !matching}
         <a
@@ -544,8 +545,8 @@
           rel="noreferrer"
         >
           {text.outlineProvenance}<span class="visually-hidden">
-            {link.newTab}</span
-          >{@render iconGraphic('external-link')}
+            {link.newTab}
+          </span>{@render iconGraphic('external-link')}
         </a>
       {/if}
     </AboutData>
