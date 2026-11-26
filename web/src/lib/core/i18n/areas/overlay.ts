@@ -50,6 +50,15 @@ export const en = {
   max: 'Colours up to',
   invalid: 'Give a threshold of 0 or more, below the top of the scale.',
   opacity: 'Opacity',
+  colours: 'Colours',
+  colourScales: { 'red-yellow': 'Red–yellow, blue–light blue', 'green-magenta': 'Green, magenta' },
+  maps: 'Maps',
+  add: 'Add another map…',
+  onTop: 'Draw on top',
+  covers: (title: string) => `Covers ${title} where both pass their thresholds.`,
+  coveredBy: (title: string) => `Covered by ${title} where both pass their thresholds.`,
+  hues: 'The two colour scales differ in hue, which red–green colour blindness can lose.',
+  captionOver: (title: string) => `drawn over ${title}`,
   minVoxels: 'Minimum cluster size, voxels',
   minVoxelsHint:
     'Clusters of fewer of the map’s own voxels are neither drawn nor listed, as nilearn’s cluster_threshold.',
@@ -129,6 +138,8 @@ export const en = {
     noFinite: 'This map holds no finite values.',
     zeros: 'This map holds only zeros.',
     outside: 'This map does not reach the brain; check the template it is in.',
+    secondSeries:
+      'The other map is already a series of volumes, and only one map can be; remove it to step through this one.',
   },
 };
 
@@ -183,6 +194,15 @@ export const fr: typeof en = {
   max: 'Couleurs jusqu’à',
   invalid: 'Donnez un seuil de 0 ou plus, sous le haut de l’échelle.',
   opacity: 'Opacité',
+  colours: 'Couleurs',
+  colourScales: { 'red-yellow': 'Rouge–jaune, bleu–bleu clair', 'green-magenta': 'Vert, magenta' },
+  maps: 'Cartes',
+  add: 'Ajouter une carte…',
+  onTop: 'Afficher au-dessus',
+  covers: (title: string) => `Couvre ${title} là où les deux dépassent leur seuil.`,
+  coveredBy: (title: string) => `Couverte par ${title} là où les deux dépassent leur seuil.`,
+  hues: 'Les deux échelles de couleurs diffèrent par la teinte, que le daltonisme rouge–vert peut confondre.',
+  captionOver: (title: string) => `affichée par-dessus ${title}`,
   minVoxels: 'Taille minimale des amas, voxels',
   minVoxelsHint:
     'Les amas de moins de voxels de la carte ne sont ni affichés ni listés, comme cluster_threshold de nilearn.',
@@ -266,5 +286,7 @@ export const fr: typeof en = {
     noFinite: 'Cette carte ne contient aucune valeur finie.',
     zeros: 'Cette carte ne contient que des zéros.',
     outside: 'Cette carte n’atteint pas le cerveau ; vérifiez le gabarit dans lequel elle est.',
+    secondSeries:
+      'L’autre carte est déjà une série de volumes, et une seule carte peut l’être ; retirez-la pour parcourir celle-ci.',
   },
 };

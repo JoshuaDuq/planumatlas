@@ -20,21 +20,25 @@ const summary: MapSummary = {
   cortexCovered: 0.99,
 };
 
+/**
+ * The maps and their fake engine; `store` and `engine` are the first slot's, which a single map
+ * is read into.
+ */
 function setup(color: SurfaceColor = 'atlas', table?: (threshold: number) => Cluster[]) {
-  const engine = createFakeUserMap(true, table);
+  const engines = createFakeUserMap(true, table);
   const display = {
     color,
     setColor(value: SurfaceColor) {
       display.color = value;
     },
   };
-  const store = createUserMapStore({ engine, display });
-  return { engine, display, store };
+  const maps = createUserMapStore({ engine: engines, display });
+  return { engine: engines.maps[0]!, engines, display, store: maps.maps[0]!, maps };
 }
 
 const file = (name: string) => new File([new Uint8Array(4)], name);
 // `open` reads the file before it asks the engine, which then waits to be settled.
-const loading = (engine: ReturnType<typeof createFakeUserMap>) =>
+const loading = (engine: { readonly loading: boolean }) =>
   expect.poll(() => engine.loading).toBe(true);
 
 test('a statistical map waits for its threshold, then is drawn over the tissue colour it takes from the atlas', async () => {
@@ -45,14 +49,19 @@ test('a statistical map waits for its threshold, then is drawn over the tissue c
   engine.settle(summary);
   await opened;
   expect(store.state).toEqual({ status: 'ready', name: 'zstat1.nii.gz', summary });
-  expect(store.settings).toEqual({ threshold: Number.NaN, max: 7.81, opacity: 1 });
+  expect(store.settings).toEqual({
+    threshold: Number.NaN,
+    max: 7.81,
+    opacity: 1,
+    colours: 'red-yellow',
+  });
   expect(store.title).toBe('zstat1');
   expect(store.statistic).toBe('z');
   expect(engine.shown).toBeNull();
   expect(display.color).toBe('atlas');
 
   store.setSettings({ ...store.settings, threshold: 3.1 });
-  expect(engine.shown).toEqual({ threshold: 3.1, max: 7.81, opacity: 1 });
+  expect(engine.shown).toEqual({ threshold: 3.1, max: 7.81, opacity: 1, colours: 'red-yellow' });
   expect(display.color).toBe('tissue');
   store.setShown(false);
   expect(engine.shown).toBeNull();
@@ -79,11 +88,11 @@ test('a threshold the stage cannot draw hides the map until it can', async () =>
   await loading(engine);
   engine.settle(summary);
   await opened;
-  store.setSettings({ threshold: 9, max: 7.81, opacity: 1 });
+  store.setSettings({ threshold: 9, max: 7.81, opacity: 1, colours: 'red-yellow' });
   expect(engine.shown).toBeNull();
   expect(store.drawn).toBe(false);
-  store.setSettings({ threshold: 3.1, max: 7.81, opacity: 0.5 });
-  expect(engine.shown).toEqual({ threshold: 3.1, max: 7.81, opacity: 0.5 });
+  store.setSettings({ threshold: 3.1, max: 7.81, opacity: 0.5, colours: 'red-yellow' });
+  expect(engine.shown).toEqual({ threshold: 3.1, max: 7.81, opacity: 0.5, colours: 'red-yellow' });
 });
 
 test('the scan and a colour the reader chose meanwhile are left as they are', async () => {
@@ -92,7 +101,7 @@ test('the scan and a colour the reader chose meanwhile are left as they are', as
   await loading(engine);
   engine.settle({ ...summary, range: [0, 1], binary: true });
   await opened;
-  expect(store.settings).toEqual({ threshold: 0.5, max: 1, opacity: 1 });
+  expect(store.settings).toEqual({ threshold: 0.5, max: 1, opacity: 1, colours: 'red-yellow' });
   expect(display.color).toBe('mri');
 
   display.color = 'atlas';
@@ -158,7 +167,7 @@ test('another template reads the same file again and keeps how it is drawn', asy
   await loading(engine);
   engine.settle(summary);
   await opened;
-  store.setSettings({ threshold: 3.1, max: 6, opacity: 0.8 });
+  store.setSettings({ threshold: 3.1, max: 6, opacity: 0.8, colours: 'red-yellow' });
   store.setTitle('Faces > Houses');
   const moved = store.setSpace('spm12');
   await loading(engine);
@@ -166,7 +175,7 @@ test('another template reads the same file again and keeps how it is drawn', asy
   engine.settle(summary);
   await moved;
   expect(engine.loaded).toBe('spm12');
-  expect(engine.shown).toEqual({ threshold: 3.1, max: 6, opacity: 0.8 });
+  expect(engine.shown).toEqual({ threshold: 3.1, max: 6, opacity: 0.8, colours: 'red-yellow' });
   expect(store.title).toBe('Faces > Houses');
 });
 
@@ -204,9 +213,9 @@ test('the cluster table follows the threshold the map is drawn at, not its scale
 });
 
 test('the cortex surface chosen reaches the engine', () => {
-  const { engine, store } = setup();
-  store.setSurface('mid');
-  expect([store.surface, engine.surface]).toEqual(['mid', 'mid']);
+  const { engines, maps } = setup();
+  maps.setSurface('mid');
+  expect([maps.surface, engines.surface]).toEqual(['mid', 'mid']);
 });
 
 test('a minimum cluster size trims the drawn map and the table at the threshold drawn', async () => {
@@ -301,15 +310,115 @@ test('a drawn series plays volume by volume and loops, listing no clusters until
 
 test('a region’s course is the engine’s', async () => {
   const course = { means: Float32Array.of(1, 2, 3), counts: Uint32Array.of(5, 5, 5), points: 5 };
-  const engine = createFakeUserMap(true, undefined, (region) => (region === 'v1' ? course : null));
+  const engines = createFakeUserMap(true, undefined, (region) => (region === 'v1' ? course : null));
   const store = createUserMapStore({
-    engine,
+    engine: engines,
     display: { color: 'atlas' as SurfaceColor, setColor() {} },
-  });
+  }).maps[0]!;
+  const engine = engines.maps[0]!;
   const opened = store.open(file('fir.nii.gz'));
   await loading(engine);
   engine.settle(series);
   await opened;
   expect(await store.course('v1')).toBe(course);
   expect(await store.course('thalamus')).toBeNull();
+});
+
+/** A first map read and drawn in `space`, and the maps it was read into. */
+async function drawnFirst(space = 'spm12') {
+  const context = setup();
+  const { engine, store } = context;
+  const opened = store.open(file('zstat1.nii.gz'), space);
+  await loading(engine);
+  engine.settle(summary);
+  await opened;
+  store.setSettings({ ...store.settings, threshold: 3.1 });
+  return context;
+}
+
+test('FUNC-60 · a map added beside another goes on top in its template, in the other colour scale', async () => {
+  const { engines, display, maps, store } = await drawnFirst();
+  expect(maps.free).toBe(1);
+  const added = maps.add(file('mask.nii'));
+  const second = maps.maps[1]!;
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle({ ...summary, range: [0, 1], binary: true });
+  await added;
+  expect([maps.top, engines.top]).toEqual([1, 1]);
+  expect(engines.maps[1]!.loaded).toBe('spm12');
+  expect(second.settings).toEqual({ threshold: 0.5, max: 1, opacity: 1, colours: 'green-magenta' });
+  expect(maps.drawnMaps.map((map) => map.slot)).toEqual([1, 0]);
+  expect(maps.free).toBeNull();
+  expect(() => maps.add(file('third.nii'))).toThrow(/Every map slot/);
+  // The tissue colour is held until the last drawn map goes.
+  expect(display.color).toBe('tissue');
+  store.setShown(false);
+  expect(display.color).toBe('tissue');
+  second.remove();
+  expect(display.color).toBe('atlas');
+  expect(maps.listed.map((map) => map.slot)).toEqual([0]);
+});
+
+test('FUNC-60 · either map can be drawn on top, but only a loaded one', async () => {
+  const { engines, maps } = await drawnFirst();
+  expect(() => maps.setTop(1)).toThrow(/slot 1/);
+  const added = maps.add(file('b.nii'));
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle(summary);
+  await added;
+  maps.setTop(0);
+  expect([maps.top, engines.top]).toEqual([0, 0]);
+  expect(maps.listed.map((map) => map.slot)).toEqual([0, 1]);
+  // A map added in place of the one underneath goes over the one left.
+  maps.maps[1]!.remove();
+  const again = maps.add(file('c.nii'));
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle(summary);
+  await again;
+  expect([maps.top, engines.top]).toEqual([1, 1]);
+});
+
+test('FUNC-62 · a second series is refused while the other map is one, which stays as it was drawn', async () => {
+  const { engines, maps, store } = await drawnFirst();
+  const added = maps.add(file('fir.nii.gz'));
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle(series);
+  await added;
+  expect(maps.maps[1]!.state.status).toBe('ready');
+  // Read again in place of the first: now both would step through volumes.
+  const again = store.open(file('fir2.nii.gz'));
+  await loading(engines.maps[0]!);
+  engines.maps[0]!.settle(series);
+  await again;
+  expect(store.state).toMatchObject({ status: 'error', name: 'fir2.nii.gz' });
+  expect((store.state as { error: MapFileError }).error.code).toBe('secondSeries');
+  expect(engines.maps[0]!.loaded).toBeNull();
+  expect(maps.maps[1]!.state).toMatchObject({ status: 'ready', summary: series });
+  expect(engines.maps[1]!.loaded).toBe('spm12');
+});
+
+test('FUNC-60 · a removed map leaves nothing of itself in its slot: the next map read there is drawn whole', async () => {
+  const { engines, maps } = await drawnFirst();
+  const second = maps.maps[1]!;
+  const added = maps.add(file('b.nii'));
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle(summary);
+  await added;
+  second.setSettings({ ...second.settings, threshold: 3 });
+  second.setMinVoxels(20);
+  second.setShown(false);
+  second.setTitle('Faces');
+  second.remove();
+  const again = maps.add(file('c.nii'));
+  await loading(engines.maps[1]!);
+  engines.maps[1]!.settle(summary);
+  await again;
+  second.setSettings({ ...second.settings, threshold: 3 });
+  expect([second.shown, second.drawn, second.minVoxels, second.title]).toEqual([
+    true,
+    true,
+    0,
+    'c',
+  ]);
+  expect(engines.maps[1]!.extents.at(-1)).toEqual([3, 0, 0]);
 });

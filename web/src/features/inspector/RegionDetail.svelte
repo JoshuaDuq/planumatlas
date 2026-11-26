@@ -486,7 +486,7 @@
         <StrokeCasesSection {region} {lang} store={strokeCases} label={catalog.label} />
       {/if}
       {#if userMap}
-        <MapCourseSection {region} {lang} map={userMap} label={catalog.label} />
+        <MapCourseSection {region} {lang} maps={userMap} label={catalog.label} />
       {/if}
     </Disclosure>
   </div>

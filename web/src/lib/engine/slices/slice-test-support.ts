@@ -102,15 +102,14 @@ export function referenceSlice(
       const painted = volumes.paint && volumes.paint.colors[volumes.paint.volume.label(point)];
       if (painted)
         for (let channel = 0; channel < 3; channel++) pixels[index + channel] = painted[channel]!;
-      const mapped =
-        volumes.map &&
-        mapColour(
-          volumes.map.at(...point),
-          volumes.map.display,
-          volumes.map.overlap && { colours: volumes.map.overlap, painted: Boolean(painted) },
+      for (const map of volumes.maps ?? []) {
+        const mapped = mapColour(
+          map.at(...point),
+          map.display,
+          map.overlap && { colours: map.overlap, painted: Boolean(painted) },
         );
-      if (mapped) {
-        const { opacity } = volumes.map!.display;
+        if (!mapped) continue;
+        const { opacity } = map.display;
         for (let channel = 0; channel < 3; channel++) {
           pixels[index + channel] =
             pixels[index + channel]! * (1 - opacity) + mapped[channel]! * 255 * opacity;

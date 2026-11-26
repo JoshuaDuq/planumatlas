@@ -4,7 +4,7 @@ import { comparesMap, MAP_OVERLAP } from '../core/state/paint.ts';
 import type { PaintState } from '../core/state/paint.ts';
 import type { OverlapAreas } from '../core/user-map/overlap.ts';
 import type { EngineUserMap } from '../engine/api.ts';
-import type { UserMapStore } from './user-map.svelte.ts';
+import type { MapLayer } from './user-map.svelte.ts';
 
 /** What the open function's profile says of the reader's map drawn against it. */
 export interface MapOverlapFacts {
@@ -16,7 +16,8 @@ export interface MapOverlapFacts {
 
 /**
  * The reader's drawn map against the open function: the engine draws it in the overlap colours while
- * `comparesMap` holds, and the cortex both cover is measured for each map, threshold and paint drawn.
+ * `comparesMap` holds, one map alone being drawn, and the cortex both cover is measured for each map,
+ * threshold and paint drawn.
  */
 export function createMapOverlap({
   engine,
@@ -24,19 +25,24 @@ export function createMapOverlap({
   userMap,
   domains,
 }: {
-  engine: Pick<EngineUserMap, 'setOverlap' | 'overlapAreas'>;
+  engine: Pick<EngineUserMap, 'setOverlap' | 'maps'>;
   view: { readonly current: PaintState };
-  userMap: Pick<UserMapStore, 'drawn' | 'placed' | 'settings' | 'title'>;
+  userMap: {
+    readonly drawnMaps: readonly Pick<MapLayer, 'slot' | 'placed' | 'settings' | 'title'>[];
+  };
   domains: NeuropsychDomains;
 }) {
-  const on = $derived(comparesMap(view.current, userMap.drawn, domains));
+  const alone = $derived(userMap.drawnMaps.length === 1 ? userMap.drawnMaps[0]! : null);
+  const on = $derived(comparesMap(view.current, alone !== null, domains));
   // The painted areas, as `paintFor` paints them, and what a measurement is of.
   const asked = $derived.by(() => {
     if (!on) return null;
     const { selectedFunction, atlas, paintFrom } = view.current;
     const paint = domainPaint(domains, selectedFunction!, atlas, paintFrom ?? domains.threshold_z);
+    const { slot, placed, settings } = alone!;
     return {
-      key: JSON.stringify([paint.id, atlas, userMap.placed, userMap.settings.threshold]),
+      key: JSON.stringify([paint.id, atlas, slot, placed, settings.threshold]),
+      slot,
       regions: [...paint.colors.keys()],
     };
   });
@@ -45,9 +51,9 @@ export function createMapOverlap({
   $effect.pre(() => engine.setOverlap(on ? MAP_OVERLAP : null));
   $effect(() => {
     if (!asked) return;
-    const { key, regions } = asked;
+    const { key, slot, regions } = asked;
     let current = true;
-    engine.overlapAreas(regions).then(
+    engine.maps[slot]!.overlapAreas(regions).then(
       (areas) => {
         if (current) measured = { key, areas };
       },
@@ -64,8 +70,8 @@ export function createMapOverlap({
     get current(): MapOverlapFacts | null {
       if (!asked) return null;
       return {
-        title: userMap.title,
-        threshold: userMap.settings.threshold,
+        title: alone!.title,
+        threshold: alone!.settings.threshold,
         areas: measured?.key === asked.key ? measured.areas : null,
       };
     },

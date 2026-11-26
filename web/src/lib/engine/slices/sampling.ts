@@ -19,8 +19,8 @@ export interface SliceVolumes {
     /** NextBrain's compared structures on the segmentation's grid. */
     compared: Volume;
   };
-  /** The reader's own map, drawn over the scan and the segmentation as the cut faces draw it. */
-  map?: SliceMap;
+  /** The reader's drawn maps, the one under first, drawn over the scan and the segmentation as the cut faces draw them. */
+  maps?: readonly SliceMap[];
   /** A tab's paint, drawn over the scan as its cut faces are: each label of the cut atlas's grid in its colour. */
   paint?: SlicePaint;
   /** The colours the stage's cut faces show, by the same grid, mixed into the grey as the overlay's are. */
@@ -45,8 +45,10 @@ export interface SlicePaint {
   colors: readonly (Rgb | null)[];
 }
 
-/** The reader's map at a point of this brain (surface RAS mm; NaN for none), and how it is drawn. */
+/** One of the reader's maps at a point of this brain (surface RAS mm; NaN for none), and how it is drawn. */
 export interface SliceMap {
+  /** The map slot it is drawn from. */
+  slot: number;
   at(x: number, y: number, z: number): number;
   display: MapDisplay;
   /** Drawn against the paint, a function's areas, instead of on its own scale. */
@@ -79,13 +81,14 @@ export interface SliceSamples {
   tint: (Rgb | null)[];
   /** 1 where a paint covers the pixel: its colour then hides the grey, whatever the window. */
   painted: Uint8Array;
-  /** Every pixel's alpha, and each painted pixel's colour with the map drawn over it. */
+  /** Every pixel's alpha, and each painted pixel's colour with the maps drawn over it. */
   fixed: Uint8ClampedArray;
   /**
-   * The reader's map over the unpainted pixels it colours: their indices, and three terms per pixel,
-   * `colour · 255 · opacity`, added to `keep` (1 − opacity) of what the window draws there.
+   * Each of the reader's maps, in drawing order, over the unpainted pixels it colours: their indices,
+   * and three terms per pixel, `colour · 255 · opacity`, added to `keep` (1 − opacity) of what the
+   * window and the maps under it draw there.
    */
-  map: { pixels: Uint32Array; terms: Float64Array; keep: number } | null;
+  maps: { pixels: Uint32Array; terms: Float64Array; keep: number }[];
 }
 
 /**
@@ -99,7 +102,7 @@ export function sampleSlice(
   crop: SliceCrop = { x: 0, y: 0, width: display.size, height: display.size },
 ): SliceSamples {
   const { size, fieldOfView, overlay } = display;
-  const { agreement, paint, colours, selection, map } = volumes;
+  const { agreement, paint, colours, selection, maps = [] } = volumes;
   // The paint and the colours are the cut's labels; the selection may be another grid's.
   const cut = paint?.volume ?? colours?.volume;
   if (paint && colours && paint.volume !== colours.volume)
@@ -118,10 +121,13 @@ export function sampleSlice(
   const tint = Array<Rgb | null>(count).fill(null);
   const painted = new Uint8Array(count);
   const fixed = new Uint8ClampedArray(count * 4);
-  const mapped = map && { pixels: new Uint32Array(count), terms: new Float64Array(count * 3) };
+  const mapped = maps.map(() => ({
+    pixels: new Uint32Array(count),
+    terms: new Float64Array(count * 3),
+    count: 0,
+  }));
   // An outline over an agreement would hide the pixels one segmentation alone labels at its edge.
   const chosen = selection && !agreement ? new Uint8Array(count) : null;
-  let mappedCount = 0;
   const step = fieldOfView / size;
   const origin = frame.center
     .clone()
@@ -162,24 +168,24 @@ export function sampleSlice(
         painted[pixel] = 1;
         for (let channel = 0; channel < 3; channel++) fixed[index + channel] = colour[channel]!;
       }
-      const shown =
-        map &&
-        mapColour(
+      for (const [layer, map] of maps.entries()) {
+        const shown = mapColour(
           map.at(...point),
           map.display,
           map.overlap && { colours: map.overlap, painted: Boolean(colour) },
         );
-      if (shown) {
-        const { opacity } = map!.display;
+        if (!shown) continue;
+        const { opacity } = map.display;
         if (colour) {
           for (let channel = 0; channel < 3; channel++)
             fixed[index + channel] =
               fixed[index + channel]! * (1 - opacity) + shown[channel]! * 255 * opacity;
         } else {
-          mapped!.pixels[mappedCount] = pixel;
+          const own = mapped[layer]!;
+          own.pixels[own.count] = pixel;
           for (let channel = 0; channel < 3; channel++)
-            mapped!.terms[mappedCount * 3 + channel] = shown[channel]! * 255 * opacity;
-          mappedCount++;
+            own.terms[own.count * 3 + channel] = shown[channel]! * 255 * opacity;
+          own.count++;
         }
       }
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
@@ -200,16 +206,16 @@ export function sampleSlice(
         painted[pixel] = 1;
         fixed.set([...Array.from(selection!.colour), 255], pixel * 4);
       }
-    // The map is drawn under the outline, not over it.
-    if (mapped) {
+    // The maps are drawn under the outline, not over it.
+    for (const own of mapped) {
       let kept = 0;
-      for (let n = 0; n < mappedCount; n++) {
-        if (painted[mapped.pixels[n]!]) continue;
-        mapped.pixels[kept] = mapped.pixels[n]!;
-        mapped.terms.copyWithin(kept * 3, n * 3, n * 3 + 3);
+      for (let n = 0; n < own.count; n++) {
+        if (painted[own.pixels[n]!]) continue;
+        own.pixels[kept] = own.pixels[n]!;
+        own.terms.copyWithin(kept * 3, n * 3, n * 3 + 3);
         kept++;
       }
-      mappedCount = kept;
+      own.count = kept;
     }
   }
   return {
@@ -217,19 +223,17 @@ export function sampleSlice(
     tint,
     painted,
     fixed,
-    map: mapped
-      ? {
-          pixels: mapped.pixels.slice(0, mappedCount),
-          terms: mapped.terms.slice(0, mappedCount * 3),
-          keep: 1 - map!.display.opacity,
-        }
-      : null,
+    maps: mapped.map((own, layer) => ({
+      pixels: own.pixels.slice(0, own.count),
+      terms: own.terms.slice(0, own.count * 3),
+      keep: 1 - maps[layer]!.display.opacity,
+    })),
   };
 }
 
 /**
  * A sampled slice's RGBA pixels through an MRI window: the grey, mixed 0.55 to 0.45 with a pixel's
- * tint, then the reader's map over it at its opacity. Each step rounds as the canvas's bytes do, so the
+ * tint, then each of the reader's maps over it at its opacity, in drawing order. Each step rounds as the canvas's bytes do, so the
  * pixels are those that sampling through this window draws.
  */
 export function windowSlice(
@@ -239,7 +243,7 @@ export function windowSlice(
   if (!Number.isFinite(windowCenter) || !Number.isFinite(windowWidth) || windowWidth <= 0) {
     throw new RangeError('Invalid MRI window.');
   }
-  const { intensity, tint, painted, map } = samples;
+  const { intensity, tint, painted, maps } = samples;
   const pixels = samples.fixed.slice();
   for (let pixel = 0; pixel < intensity.length; pixel++) {
     if (painted[pixel]) continue;
@@ -253,7 +257,7 @@ export function windowSlice(
       pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
     }
   }
-  if (map)
+  for (const map of maps)
     for (let n = 0; n < map.pixels.length; n++) {
       const index = map.pixels[n]! * 4;
       for (let channel = 0; channel < 3; channel++) {

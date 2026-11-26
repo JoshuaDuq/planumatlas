@@ -52,8 +52,8 @@ export interface CaptionFacts {
   section?: SnapshotSection | null;
   /** The selected region's name, with its side as a word when it has one. */
   selection?: string | null;
-  /** The reader's own map on the stage: its title, then its file, template and scale, worded. */
-  overlay?: { title: string; details: string[] } | null;
+  /** The reader's own maps on the stage, the one on top first: each title, then its file, template and scale, worded. */
+  overlays?: { title: string; details: string[] }[];
   /** The reader's highlights on the stage: the key's title, that they are the reader's marks, the regions. */
   highlights?: { title: string; details: string[] } | null;
 }
@@ -74,7 +74,7 @@ export function snapshotCaption(
     view,
     section,
     selection,
-    overlay,
+    overlays = [],
     highlights,
   }: CaptionFacts,
 ): CaptionLine[] {
@@ -108,11 +108,13 @@ export function snapshotCaption(
     lines.push([fact(t(lang, 'viewport').namedView(t(lang, 'views')[view]))]);
   }
   if (selection) lines.push([fact(t(lang, 'viewport').snapshotSelected(selection))]);
-  if (overlay && !reference) {
-    lines.push([
-      fact(overlay.title, { strong: true }),
-      ...overlay.details.map((detail) => fact(detail)),
-    ]);
+  if (!reference) {
+    for (const overlay of overlays) {
+      lines.push([
+        fact(overlay.title, { strong: true }),
+        ...overlay.details.map((detail) => fact(detail)),
+      ]);
+    }
   }
   if (highlights && !reference) {
     lines.push([
@@ -572,8 +574,8 @@ export interface SnapshotSubject {
   section: SnapshotSection | null;
   /** The selected region, named with its side, or null. */
   selection: string | null;
-  /** The reader’s own map on the stage, or null. */
-  overlay?: CaptionFacts['overlay'];
+  /** The reader’s own maps on the stage, the one on top first. */
+  overlays?: CaptionFacts['overlays'];
 }
 
 /** The markings plan and caption for the visible stage, measured now. */
@@ -593,7 +595,7 @@ export function snapshotPlan(
     view: engine.camera.viewHeld ? subject.view : null,
     section: reference ? null : subject.section,
     selection: subject.selection,
-    overlay: subject.overlay,
+    overlays: subject.overlays,
     // Read from the key the image draws, so the caption names the regions it does.
     highlights: highlightCaption(keys.model(), lang),
   });

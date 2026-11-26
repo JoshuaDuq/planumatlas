@@ -30,7 +30,7 @@ const KEY_HEAD_PX = 42;
 /** The space between stacked plates (`--space-2`). */
 export const KEY_GAP_PX = 8;
 
-export type KeyName = 'map' | 'network' | 'paint' | 'cases' | 'direction';
+export type KeyName = 'map' | 'map-2' | 'network' | 'paint' | 'cases' | 'direction';
 
 export interface KeyRow {
   id: string;
@@ -89,8 +89,12 @@ export interface KeySources {
   cases?: { title: string; rows: { id: string; color: Rgb | string; label: string }[] } | null;
   /** The streamlines are drawn, coloured by direction. */
   directionShown: boolean;
-  /** The reader's own map on the stage: its name, and each sign's colour scale and range. */
-  map?: { title: string; rows: { id: string; ramp: readonly string[]; label: string }[] } | null;
+  /** The reader's own maps on the stage, the one on top first: each one's slot, name, and each sign's colour scale and range. */
+  maps?: {
+    slot: number;
+    title: string;
+    rows: { id: string; ramp: readonly string[]; label: string }[];
+  }[];
 }
 
 const row = (id: string, color: Rgb | string, label: string, pressed = false, absent = false) => ({
@@ -122,12 +126,13 @@ export function keyPlates(sources: KeySources): KeyPlate[] {
   const { lang, surfaceColor, legend } = sources;
   const ready = modelUsable(sources.status);
   const plates: KeyPlate[] = [];
-  if (ready && sources.map) {
+  for (const map of ready ? (sources.maps ?? []) : []) {
     plates.push({
-      name: 'map',
-      map: 'user-map',
-      title: sources.map.title,
-      rows: sources.map.rows.map((entry) => ({
+      // One plate per slot, each folded on its own.
+      name: map.slot === 0 ? 'map' : 'map-2',
+      map: map.slot === 0 ? 'user-map' : 'user-map-2',
+      title: map.title,
+      rows: map.rows.map((entry) => ({
         ...row(entry.id, entry.ramp[0]!, entry.label),
         ramp: entry.ramp,
       })),

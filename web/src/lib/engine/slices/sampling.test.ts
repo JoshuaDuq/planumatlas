@@ -120,20 +120,24 @@ test('SLICE-14 a size outside 2..2048 or non-integer, a flat field of view or wi
 test('the reader’s map is drawn over the scan where it passes its threshold, by its opacity', () => {
   // x + y in the map: 0 at the first pixel's point (0, 3) is 3, the last's (3, 0) is 3 too, so use z.
   const map = (opacity: number) => ({
+    slot: 0,
     at: (x: number, y: number) => (x === 0 && y === 3 ? 5 : x === 3 && y === 0 ? -5 : Number.NaN),
-    display: { threshold: 3, max: 7, opacity },
+    display: { threshold: 3, max: 7, opacity, colours: 'red-yellow' as const },
     overlap: null,
   });
-  const full = renderSlice({ ...volumes, map: map(1) }, frame, display);
+  const full = renderSlice({ ...volumes, maps: [map(1)] }, frame, display);
   // 5 is halfway up the positive scale (red to yellow); −5 halfway up the negative (blue to light blue).
   assert.deepEqual(Array.from(full.slice(0, 4)), [255, 128, 0, 255]);
   assert.deepEqual(Array.from(full.slice(-4)), [0, 128, 255, 255]);
   // Half opacity lets the grey show through: 0.5 * 70 + 0.5 * 255 = 162.5, 0.5 * 70 + 0.5 * 127.5 = 98.75.
-  const half = renderSlice({ ...volumes, map: map(0.5) }, frame, display);
+  const half = renderSlice({ ...volumes, maps: [map(0.5)] }, frame, display);
   assert.deepEqual(Array.from(half.slice(0, 3)), [162, 99, 35]);
   // Within ±threshold, or without a value, the scan stays as it was.
   const hidden = renderSlice(
-    { ...volumes, map: { ...map(1), display: { threshold: 6, max: 7, opacity: 1 } } },
+    {
+      ...volumes,
+      maps: [{ ...map(1), display: { threshold: 6, max: 7, opacity: 1, colours: 'red-yellow' } }],
+    },
     frame,
     display,
   );
@@ -141,16 +145,41 @@ test('the reader’s map is drawn over the scan where it passes its threshold, b
   assert.deepEqual(Array.from(full.slice(4, 8)), Array.from(hidden.slice(4, 8)));
 });
 
+test('FUNC-60 · two maps are drawn in their own colours, the later in the list over the earlier where both pass', () => {
+  const first = {
+    slot: 0,
+    at: (x: number, y: number) => (x === 0 && y === 3 ? 5 : x === 3 && y === 0 ? -5 : Number.NaN),
+    display: { threshold: 3, max: 7, opacity: 1, colours: 'red-yellow' as const },
+    overlap: null,
+  };
+  // Over the first's positive pixel only, and halfway up its own green scale.
+  const second = {
+    slot: 1,
+    at: (x: number, y: number) => (x === 0 && y === 3 ? 5 : Number.NaN),
+    display: { threshold: 3, max: 7, opacity: 1, colours: 'green-magenta' as const },
+    overlap: null,
+  };
+  const over = renderSlice({ ...volumes, maps: [first, second] }, frame, display);
+  assert.deepEqual(Array.from(over.slice(0, 4)), [0, 204, 0, 255], 'the second over the first');
+  assert.deepEqual(Array.from(over.slice(-4)), [0, 128, 255, 255], 'the first alone');
+  const under = renderSlice({ ...volumes, maps: [second, first] }, frame, display);
+  assert.deepEqual(Array.from(under.slice(0, 4)), [255, 128, 0, 255], 'the first over the second');
+});
+
 test('against a paint, the map’s positive values take one colour off the paint and another on it', () => {
   const labels = new Uint16Array(64);
   for (let index = 0; index < 64; index++) labels[index] = index % 4 >= 2 ? 2 : 1;
   const paint = { volume: new Volume(metadata, labels), colors: [null, null, [10, 200, 30]] };
   const map = {
+    slot: 0,
     at: (x: number) => (x === 0 || x === 3 ? 5 : x === 1 ? -5 : Number.NaN),
-    display: { threshold: 3, max: 7, opacity: 1 },
+    display: { threshold: 3, max: 7, opacity: 1, colours: 'red-yellow' as const },
     overlap: { map: [213, 81, 129], both: [0, 131, 0] } as const,
   };
-  const pixels = renderSlice({ ...volumes, paint, map }, frame, { ...display, overlay: true });
+  const pixels = renderSlice({ ...volumes, paint, maps: [map] }, frame, {
+    ...display,
+    overlay: true,
+  });
   const unmapped = renderSlice({ ...volumes, paint }, frame, { ...display, overlay: true });
   // The first row runs x = 0..3; x >= 2 is painted.
   const row = (x: number) => Array.from(pixels.slice(4 * x, 4 * x + 4));
@@ -197,19 +226,28 @@ test('SLICE-41 a slice sampled once draws, through any window, the bytes that sa
     ),
   };
   const map = (overlap: { map: number[]; both: number[] } | null) => ({
+    slot: 0,
     at: (x: number, y: number, z: number) =>
       Math.abs(x + 30) < 2 ? Number.NaN : Math.sin(x / 5) * Math.cos(y / 7) + z / 100,
-    display: { threshold: 0.3, max: 1.2, opacity: 0.65 },
+    display: { threshold: 0.3, max: 1.2, opacity: 0.65, colours: 'red-yellow' as const },
     overlap: overlap as never,
   });
+  // A second map over the first, half see-through, so both mix where both pass.
+  const over = {
+    slot: 1,
+    at: (x: number, y: number) => Math.cos(x / 4) * Math.sin(y / 6),
+    display: { threshold: 0.4, max: 1, opacity: 0.5, colours: 'green-magenta' as const },
+    overlap: null,
+  };
   const layers: [string, SliceVolumes, boolean][] = [
     ['the scan alone', volumes, false],
     ['labels', volumes, true],
     ['the left putamen’s agreement', { ...volumes, agreement: { structure, compared } }, true],
-    ['a paint and a map', { ...volumes, paint, map: map(null) }, true],
+    ['a paint and a map', { ...volumes, paint, maps: [map(null)] }, true],
+    ['a paint and two maps', { ...volumes, paint, maps: [map(null), over] }, true],
     [
       'a map against the paint',
-      { ...volumes, paint, map: map({ map: [213, 81, 129], both: [0, 131, 0] }) },
+      { ...volumes, paint, maps: [map({ map: [213, 81, 129], both: [0, 131, 0] })] },
       false,
     ],
   ];

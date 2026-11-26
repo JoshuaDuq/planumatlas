@@ -16,6 +16,8 @@ import type { CoordinateField, NativeSpace } from '../../types/index.ts';
 export interface CarryJob {
   kind: 'carry';
   token: number;
+  /** The map slot the file is read into; each slot keeps its own file. */
+  slot: number;
   file: ArrayBuffer;
   space: string;
   volume: number;
@@ -27,29 +29,32 @@ export interface CarryJob {
   cortex?: { left: CortexSurfaces; right: CortexSurfaces };
 }
 
-/** A volume of the last carried map's clusters and peaks beyond a threshold, in its own template space. */
+/** A volume of a slot's map's clusters and peaks beyond a threshold, in its own template space. */
 export interface ClusterJob {
   kind: 'clusters';
   token: number;
+  slot: number;
   volume: number;
   threshold: number;
   /** nilearn's cluster_threshold: smaller clusters are left out. */
   minVoxels: number;
 }
 
-/** A volume of the last carried map, its clusters smaller than `minVoxels` beyond ±threshold removed. */
+/** A volume of a slot's map, its clusters smaller than `minVoxels` beyond ±threshold removed. */
 export interface ExtentJob {
   kind: 'extent';
   token: number;
+  slot: number;
   volume: number;
   threshold: number;
   minVoxels: number;
 }
 
-/** A region's mean in each volume of the last carried map, over its points (surface RAS mm). */
+/** A region's mean in each volume of a slot's map, over its points (surface RAS mm). */
 export interface CourseJob {
   kind: 'course';
   token: number;
+  slot: number;
   points: Float32Array;
 }
 
@@ -69,10 +74,10 @@ interface WorkerScope {
 const scope = globalThis as unknown as WorkerScope;
 const inverses = new Map<string, InverseField>();
 let cortex: CarryJob['cortex'];
-// Kept for its volumes, clusters and their extent, with the space it was carried from.
-let source: { image: NiftiImage; inverse: InverseField } | null = null;
-// The newest carry asked for, by token (an older one may arrive later): only it is kept as the source.
-let latest = 0;
+// By slot, kept for its volumes, clusters and their extent, with the space it was carried from.
+const sources = new Map<number, { image: NiftiImage; inverse: InverseField }>();
+// By slot, the newest carry asked for, by token (an older one may arrive later): only it is kept.
+const latest = new Map<number, number>();
 
 function post(token: number, map: CarriedMap, summary?: MapSummary) {
   scope.postMessage({ token, map, summary }, [
@@ -85,7 +90,8 @@ function post(token: number, map: CarriedMap, summary?: MapSummary) {
 scope.onmessage = async ({ data: job }) => {
   try {
     if (job.kind !== 'carry') {
-      if (!source || !cortex) throw new Error('No map has been carried.');
+      const source = sources.get(job.slot);
+      if (!source || !cortex) throw new Error(`No map has been carried into slot ${job.slot}.`);
       const { image, inverse } = source;
       if (job.kind === 'course') {
         const course = regionCourse(image, inverse, job.points);
@@ -105,7 +111,7 @@ scope.onmessage = async ({ data: job }) => {
       post(job.token, carryVolume({ ...read, data }, inverse, cortex));
       return;
     }
-    latest = Math.max(latest, job.token);
+    latest.set(job.slot, Math.max(latest.get(job.slot) ?? 0, job.token));
     if (job.cortex) cortex = job.cortex;
     if (job.field) inverses.set(job.space, invertField(job.field.record, job.field.data));
     if (job.native) inverses.set(job.space, nativeInverse(job.native));
@@ -113,7 +119,7 @@ scope.onmessage = async ({ data: job }) => {
     if (!inverse || !cortex) throw new Error(`No inverted field or cortex for ${job.space}.`);
     const image = await readNifti(job.file);
     const { map, summary } = carryImage(image, job.volume, inverse, cortex);
-    if (job.token === latest) source = { image, inverse };
+    if (job.token === latest.get(job.slot)) sources.set(job.slot, { image, inverse });
     post(job.token, map, summary);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

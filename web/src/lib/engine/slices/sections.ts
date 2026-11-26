@@ -131,8 +131,8 @@ export class BrainSections extends EventTarget {
   private agreementRequest = 0;
   display: MriDisplay | null = null;
   private box: { min: Ras; max: Ras } | null = null;
-  /** The reader's own map while the stage draws it; the linked MRI draws it too. */
-  private userMap: SliceMap | null = null;
+  /** The reader's maps the stage draws, the one under first; the linked MRI draws them too. */
+  private userMaps: readonly SliceMap[] = [];
   /** The model's paint on the cut atlas's label grid, as the linked MRI draws it. */
   private shownPaint: SlicePaint | null = null;
   /** The stage's cut-face colours on the same grid, while the linked MRI draws them. */
@@ -643,7 +643,7 @@ export class BrainSections extends EventTarget {
         segmentation: volumes.segmentation,
         metadata: { labels: volumes.metadata.labels },
         ...(shown && { agreement: shown }),
-        ...(this.userMap && { map: this.userMap }),
+        ...(this.userMaps.length && { maps: this.userMaps }),
         ...(this.shownPaint && { paint: this.shownPaint }),
         ...(this.shownColours && { colours: this.shownColours }),
         ...(this.shownSelection && { selection: this.shownSelection }),
@@ -668,7 +668,8 @@ export class BrainSections extends EventTarget {
     ras: Ras;
     agreement: AgreementCategory | null;
     cutRegion: Region | null;
-    mapValue: number | null;
+    /** Each drawn map's value here, by slot, in drawing order. */
+    mapValues: { slot: number; value: number }[];
   } {
     const { volumes } = this;
     if (!volumes) throw new Error('The linked MRI has not loaded.');
@@ -691,13 +692,13 @@ export class BrainSections extends EventTarget {
       ras: point,
       agreement: this.agreementAt(point, labelId),
       cutRegion: (cutId && this.model.regions.get(cutId)) || null,
-      mapValue: this.userMap ? this.userMap.at(...point) : null,
+      mapValues: this.userMaps.map(({ slot, at }) => ({ slot, value: at(...point) })),
     };
   }
 
-  /** Draw the reader's map on the linked MRI, or stop; the planes are drawn again by their next change. */
-  setUserMap(map: SliceMap | null): void {
-    this.userMap = map;
+  /** Draw the reader's maps on the linked MRI, the one under first; the planes are drawn again by their next change. */
+  setUserMaps(maps: readonly SliceMap[]): void {
+    this.userMaps = maps;
     this.emit();
   }
 

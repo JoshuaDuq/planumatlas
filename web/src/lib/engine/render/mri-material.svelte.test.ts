@@ -208,9 +208,10 @@ test(
     const mapped = (light: typeof SQUARE) => {
       const uniforms = scan(UNIFORM, 150, 200);
       const userMap = createUserMapUniforms();
-      setUserMapDisplay(userMap, { threshold: 0, max: 1, opacity: 1 });
+      setUserMapDisplay(userMap, 0, { threshold: 0, max: 1, opacity: 1, colours: 'red-yellow' });
       setUserMapVolume(
         userMap,
+        0,
         { shape: [2, 2, 2], origin: [-0.5, -0.5, -0.5], spacing: 1 },
         new Float32Array(16).map((_, index) => (index % 2 ? 1 : 0.8)),
       );
@@ -220,7 +221,7 @@ test(
       addMriSurfaceAppearance(material, uniforms, 'inside');
       const tone = draw(material, light);
       release(material, uniforms);
-      clearUserMapVolume(userMap);
+      clearUserMapVolume(userMap, 0);
       return tone;
     };
     const square = mapped(SQUARE);

@@ -1,16 +1,25 @@
 import { UNSTATED } from '../core/coordinates/spaces.ts';
 import {
+  COLOUR_SCALE_IDS,
+  MAP_SLOTS,
   VOLUMES_PER_SECOND,
   defaultDisplay,
   fileStatistic,
   mapTitle,
   validDisplay,
 } from '../core/user-map/display.ts';
-import type { CortexSurface, MapDisplay, MapSummary, Statistic } from '../core/user-map/display.ts';
+import type {
+  ColourScale,
+  CortexSurface,
+  MapDisplay,
+  MapSummary,
+  Statistic,
+} from '../core/user-map/display.ts';
 import type { Cluster } from '../core/user-map/clusters.ts';
 import type { MapCourse } from '../core/user-map/course.ts';
+import { MapFileError } from '../core/user-map/map-file-error.ts';
 import { readMapFile } from '../core/user-map/nifti.ts';
-import type { EngineUserMap } from '../engine/api.ts';
+import type { EngineMapSlot, EngineUserMap } from '../engine/api.ts';
 import type { SurfaceColor } from '../types/index.ts';
 
 export type UserMapState =
@@ -26,13 +35,16 @@ export type ClusterState =
   | ({ status: 'ready'; data: Cluster[] } & ClusterAsk)
   | ({ status: 'error'; message: string } & ClusterAsk);
 
-/** Colourings the map is drawn over as they are: the tissue's own, and the achromatic scan. */
+/** Colourings the maps are drawn over as they are: the tissue's own, and the achromatic scan. */
 const UNDER: readonly SurfaceColor[] = ['tissue', 'mri'];
 
+const isSeries = (map: MapLayer) => map.state.status === 'ready' && map.state.summary.volumes > 1;
+
 /**
- * The reader's own map: the file, the template it is in, and how it is drawn. While it is shown, the
- * surface colour is the tissue's, so no atlas colour competes with the map's; hiding or removing it
- * gives back the colour it replaced, unless the reader has changed it meanwhile.
+ * The reader's own maps, `MAP_SLOTS` of them: each its file, the template it is in, and how it is
+ * drawn, the one added last on top. While any is shown, the surface colour is the tissue's, so no
+ * atlas colour competes with the maps'; hiding or removing the last gives back the colour it
+ * replaced, unless the reader has changed it meanwhile.
  */
 export function createUserMapStore({
   engine,
@@ -41,14 +53,135 @@ export function createUserMapStore({
   engine: EngineUserMap;
   display: { readonly color: SurfaceColor; setColor(color: SurfaceColor): void };
 }) {
+  let surface = $state<CortexSurface>('pial');
+  let top = $state(MAP_SLOTS - 1);
+  let heldColor: SurfaceColor | null = null;
+
+  /** The tissue colour is held while any map is drawn, and given back once none is. */
+  function syncColor() {
+    if (maps.some((map) => map.drawn)) {
+      if (heldColor !== null || UNDER.includes(display.color)) return;
+      heldColor = display.color;
+      display.setColor('tissue');
+      return;
+    }
+    const color = heldColor;
+    heldColor = null;
+    if (color !== null && display.color === 'tissue') display.setColor(color);
+  }
+
+  /** The first scale no other loaded map is drawn in. */
+  function freeColours(slot: number): ColourScale {
+    const taken = new Set(
+      maps
+        .filter((map) => map.slot !== slot && map.state.status === 'ready')
+        .map((map) => map.settings.colours),
+    );
+    return COLOUR_SCALE_IDS.find((id) => !taken.has(id)) ?? COLOUR_SCALE_IDS[0]!;
+  }
+
+  function setTop(slot: number) {
+    top = slot;
+    engine.setTop(slot);
+  }
+
+  const maps: MapLayer[] = Array.from({ length: MAP_SLOTS }, (_, slot) =>
+    createMapLayer({
+      slot,
+      engine: engine.maps[slot]!,
+      changed: syncColor,
+      colours: () => freeColours(slot),
+      seriesElsewhere: () => maps.some((map) => map.slot !== slot && isSeries(map)),
+    }),
+  );
+
+  /** In use: loading, ready or failed, the one on top first. */
+  const listed = () =>
+    maps.filter((map) => map.state.status !== 'empty').sort((a, b) => order(a) - order(b));
+  const order = (map: MapLayer) => (map.slot === top ? 0 : 1);
+
+  return {
+    get available() {
+      return engine.available;
+    },
+    /** Every slot's map, in slot order, whether or not it holds one. */
+    maps: maps as readonly MapLayer[],
+    /** The maps in use, the one drawn on top first. */
+    get listed(): MapLayer[] {
+      return listed();
+    },
+    /** The maps on the stage now, the one on top first. */
+    get drawnMaps(): MapLayer[] {
+      return listed().filter((map) => map.drawn);
+    },
+    /** A map is on the stage now. */
+    get drawn() {
+      return maps.some((map) => map.drawn);
+    },
+    /** The slot drawn over the other. */
+    get top() {
+      return top;
+    },
+    setTop(slot: number): void {
+      if (maps[slot]?.state.status !== 'ready')
+        throw new Error(`No map is loaded in slot ${slot}.`);
+      setTop(slot);
+    },
+    /** An empty slot a map can be added to, or null when every slot holds one. */
+    get free(): number | null {
+      return maps.find((map) => map.state.status === 'empty')?.slot ?? null;
+    },
+    /**
+     * Read a file into an empty slot, on top of the map there is, in that map's template; its
+     * threshold and scale start at the defaults.
+     */
+    add(file: File): Promise<void> {
+      const map = maps.find((entry) => entry.state.status === 'empty');
+      if (!map) throw new Error('Every map slot holds a map.');
+      const other = listed()[0];
+      setTop(map.slot);
+      return map.open(file, other?.space);
+    },
+    /** The surface the cortex is drawn on, map or not (Overlay and Display both set it); a cut draws the pial. */
+    get surface() {
+      return surface;
+    },
+    setSurface(next: CortexSurface): void {
+      surface = next;
+      engine.setSurface(next);
+    },
+  };
+}
+
+/** One slot's map and how it is drawn. */
+function createMapLayer({
+  slot,
+  engine,
+  changed,
+  colours,
+  seriesElsewhere,
+}: {
+  slot: number;
+  engine: EngineMapSlot;
+  /** Called after the map is drawn, hidden or removed. */
+  changed: () => void;
+  /** The colour scale a newly read map takes. */
+  colours: () => ColourScale;
+  /** Another slot holds a series: only one map may step through volumes. */
+  seriesElsewhere: () => boolean;
+}) {
   let state = $state.raw<UserMapState>({ status: 'empty' });
   let space = $state(UNSTATED);
-  let settings = $state.raw<MapDisplay>({ threshold: Number.NaN, max: 1, opacity: 1 });
+  let settings = $state.raw<MapDisplay>({
+    threshold: Number.NaN,
+    max: 1,
+    opacity: 1,
+    colours: 'red-yellow',
+  });
   let shown = $state(true);
   // What the key and caption call the map: its file's name and its statistic until the reader says.
   let title = $state('');
   let statistic = $state<Statistic | null>(null);
-  let surface = $state<CortexSurface>('pial');
   let clusters = $state.raw<ClusterState>({ status: 'idle' });
   let clusterRequest = 0;
   // nilearn's cluster_threshold: clusters of fewer voxels are neither drawn nor listed.
@@ -60,29 +193,17 @@ export function createUserMapStore({
   let playRequest = 0;
   // Counts each map the engine has finished placing, carried or trimmed, for what redraws from it.
   let placed = $state(0);
-  let heldColor: SurfaceColor | null = null;
   let file: File | null = null;
   let request = 0;
 
-  function hold() {
-    if (heldColor !== null || UNDER.includes(display.color)) return;
-    heldColor = display.color;
-    display.setColor('tissue');
-  }
-
-  function release() {
-    const color = heldColor;
-    heldColor = null;
-    if (color !== null && display.color === 'tissue') display.setColor(color);
-  }
+  const isDrawn = () => state.status === 'ready' && shown && validDisplay(settings);
 
   /**
    * The table follows the volume, threshold and minimum size the map is drawn at; a newer request
    * wins. A playing series lists none, so its volumes are not held up by tables nobody reads.
    */
   function tabulate() {
-    const drawn = state.status === 'ready' && shown && validDisplay(settings);
-    if (!drawn || playing) {
+    if (!isDrawn() || playing) {
       clusterRequest++;
       clusters = { status: 'idle' };
       return;
@@ -127,12 +248,11 @@ export function createUserMapStore({
   }
 
   function draw(): Promise<void> {
-    const drawn = state.status === 'ready' && shown && validDisplay(settings);
+    const drawn = isDrawn();
     if (!drawn) stop();
     const placing = drawn ? trim() : Promise.resolve();
     engine.show(drawn ? settings : null);
-    if (drawn) hold();
-    else release();
+    changed();
     tabulate();
     return placing;
   }
@@ -159,20 +279,24 @@ export function createUserMapStore({
     stop();
     const at = keep ? volume : 0;
     engine.clear();
-    release();
     clusterRequest++;
     clusters = { status: 'idle' };
     state = { status: 'loading', name: next.name };
+    changed();
     try {
       const summary = await engine.load(await readMapFile(next), nextSpace, at);
       if (ask !== request) return;
+      if (summary.volumes > 1 && seriesElsewhere()) {
+        engine.clear();
+        throw new MapFileError('secondSeries');
+      }
       file = next;
       volume = at;
       if (!keep) {
         title = mapTitle(next.name);
         statistic = fileStatistic(summary.intent, summary.description, next.name);
       }
-      settings = keep ?? defaultDisplay(summary);
+      settings = keep ?? defaultDisplay(summary, colours());
       placed++;
       state = { status: 'ready', name: next.name, summary };
       draw();
@@ -186,9 +310,7 @@ export function createUserMapStore({
   }
 
   return {
-    get available() {
-      return engine.available;
-    },
+    slot,
     get state() {
       return state;
     },
@@ -235,12 +357,7 @@ export function createUserMapStore({
         return;
       }
       if (playing) return;
-      if (
-        state.status !== 'ready' ||
-        !shown ||
-        !validDisplay(settings) ||
-        state.summary.volumes < 2
-      ) {
+      if (state.status !== 'ready' || !isDrawn() || state.summary.volumes < 2) {
         throw new Error('Only a drawn series of volumes can play.');
       }
       playing = true;
@@ -273,20 +390,13 @@ export function createUserMapStore({
       minVoxels = next;
       draw();
     },
-    /** The surface the cortex is drawn on, map or not (Overlay and Display both set it); a cut draws the pial. */
-    get surface() {
-      return surface;
-    },
-    setSurface(next: CortexSurface): void {
-      surface = next;
-      engine.setSurface(next);
-    },
     /** The map is on the stage now. */
     get drawn() {
-      return state.status === 'ready' && shown && validDisplay(settings);
+      return isDrawn();
     },
-    /** Read a file in the chosen template; its threshold and scale start at the defaults. */
-    open(next: File): Promise<void> {
+    /** Read a file in the chosen template, or `inSpace`; its threshold and scale start at the defaults. */
+    open(next: File, inSpace: string = space): Promise<void> {
+      space = inSpace;
       return read(next, space, null);
     },
     /** Read the open file again in another template, keeping how it is drawn. */
@@ -303,6 +413,7 @@ export function createUserMapStore({
       shown = next;
       draw();
     },
+    /** Forget the map, and how it was drawn: the next file read into this slot starts afresh. */
     remove(): void {
       request++;
       stop();
@@ -310,10 +421,16 @@ export function createUserMapStore({
       clusters = { status: 'idle' };
       file = null;
       engine.clear();
-      release();
       state = { status: 'empty' };
+      shown = true;
+      minVoxels = 0;
+      volume = 0;
+      title = '';
+      statistic = null;
+      changed();
     },
   };
 }
 
+export type MapLayer = ReturnType<typeof createMapLayer>;
 export type UserMapStore = ReturnType<typeof createUserMapStore>;

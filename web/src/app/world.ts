@@ -184,7 +184,7 @@ export async function composeWorld(
           connectivity: model.connectivity,
           disorders: model.disorders,
           layers: corticalLayers.data,
-          mapDrawn: userMap.drawn,
+          mapsDrawn: userMap.drawnMaps.length,
         }),
       showPaint: () => showOverLift(session, lesion),
     });

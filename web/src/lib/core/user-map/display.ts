@@ -1,15 +1,43 @@
 import { decimal, grouped, withUnit } from '../format.ts';
 import type { Language, Rgb } from '../../types/index.ts';
 
-/** sRGB ends of each sign's scale, threshold first: FSL's Red-Yellow and Blue-Lightblue. */
-export const POSITIVE_RAMP = [
-  [1, 0, 0],
-  [1, 1, 0],
-] as const;
-export const NEGATIVE_RAMP = [
-  [0, 0, 1],
-  [0, 1, 1],
-] as const;
+/** How many of the reader's maps are drawn at once: the cortex carries both in one vec4 attribute. */
+export const MAP_SLOTS = 2;
+
+type Ramp = readonly [readonly [number, number, number], readonly [number, number, number]];
+
+/**
+ * sRGB ends of each sign's scale, threshold first. The first is FSL's Red-Yellow and Blue-Lightblue.
+ * The second keeps 0.19 OKLab ΔE from every colour of the first in normal vision; under simulated
+ * protan or deutan vision (Machado 2009) its green meets red–yellow and its magenta blue–cyan.
+ */
+export const COLOUR_SCALES = {
+  'red-yellow': {
+    positive: [
+      [1, 0, 0],
+      [1, 1, 0],
+    ],
+    negative: [
+      [0, 0, 1],
+      [0, 1, 1],
+    ],
+  },
+  'green-magenta': {
+    positive: [
+      [0, 0.6, 0],
+      [0, 1, 0],
+    ],
+    negative: [
+      [0.6, 0, 0.6],
+      [1, 0, 1],
+    ],
+  },
+} as const satisfies Record<string, { positive: Ramp; negative: Ramp }>;
+export type ColourScale = keyof typeof COLOUR_SCALES;
+export const COLOUR_SCALE_IDS = Object.keys(COLOUR_SCALES) as ColourScale[];
+
+export const POSITIVE_RAMP = COLOUR_SCALES['red-yellow'].positive;
+export const NEGATIVE_RAMP = COLOUR_SCALES['red-yellow'].negative;
 
 /** How a map is drawn: values whose magnitude exceeds `threshold`, coloured up to `max`, over the grey. */
 export interface MapDisplay {
@@ -17,6 +45,7 @@ export interface MapDisplay {
   max: number;
   /** 1 draws the map's colours as the key gives them; less lets the tissue show through. */
   opacity: number;
+  colours: ColourScale;
 }
 
 /** The native surfaces the cortex can be drawn on, all this brain's own, one vertex each. */
@@ -73,14 +102,15 @@ export interface MapSummary {
 }
 
 /** A display is drawable with a threshold of zero or more below a finite top, and an opacity in (0, 1]. */
-export function validDisplay({ threshold, max, opacity }: MapDisplay): boolean {
+export function validDisplay({ threshold, max, opacity, colours }: MapDisplay): boolean {
   return (
     Number.isFinite(threshold) &&
     Number.isFinite(max) &&
     threshold >= 0 &&
     max > threshold &&
     opacity > 0 &&
-    opacity <= 1
+    opacity <= 1 &&
+    Object.hasOwn(COLOUR_SCALES, colours)
   );
 }
 
@@ -113,12 +143,12 @@ export function volumeParts(
  * rounded up to three significant digits so the key's number is the scale's. A mask is thresholded
  * at 0.5, where interpolation puts its edge, as the stroke lesions are.
  */
-export function defaultDisplay({ range, binary }: MapSummary): MapDisplay {
-  if (binary) return { threshold: 0.5, max: 1, opacity: 1 };
+export function defaultDisplay({ range, binary }: MapSummary, colours: ColourScale): MapDisplay {
+  if (binary) return { threshold: 0.5, max: 1, opacity: 1, colours };
   const largest = Math.max(Math.abs(range[0]), Math.abs(range[1]));
   const step = 10 ** (Math.floor(Math.log10(largest)) - (DIGITS - 1));
   const max = Number((Math.ceil(largest / step) * step).toPrecision(DIGITS));
-  return { threshold: Number.NaN, max, opacity: 1 };
+  return { threshold: Number.NaN, max, opacity: 1, colours };
 }
 
 /**
@@ -133,7 +163,7 @@ export interface MapOverlap {
 /** A value's sRGB colour, or null where it is not drawn (NaN, or not beyond the threshold). */
 export function mapColour(
   value: number,
-  { threshold, max }: Pick<MapDisplay, 'threshold' | 'max'>,
+  { threshold, max, colours }: Pick<MapDisplay, 'threshold' | 'max' | 'colours'>,
   overlap: { colours: MapOverlap; painted: boolean } | null = null,
 ): [number, number, number] | null {
   if (overlap) {
@@ -144,6 +174,7 @@ export function mapColour(
   const magnitude = Math.abs(value);
   if (!(magnitude > threshold)) return null;
   const share = Math.min(1, (magnitude - threshold) / (max - threshold));
-  const [low, high] = value > 0 ? POSITIVE_RAMP : NEGATIVE_RAMP;
+  const { positive, negative } = COLOUR_SCALES[colours];
+  const [low, high] = value > 0 ? positive : negative;
   return [0, 1, 2].map((c) => low[c] + share * (high[c] - low[c])) as [number, number, number];
 }

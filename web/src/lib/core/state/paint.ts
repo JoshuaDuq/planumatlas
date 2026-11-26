@@ -74,7 +74,8 @@ export interface PaintSources {
   disorders?: DisorderEffects | null;
   /** BigBrain's cortical layers, once a region's sheet has downloaded them. */
   layers?: CorticalLayers | null;
-  mapDrawn?: boolean;
+  /** How many of the reader's maps are drawn: a function is compared with one alone. */
+  mapsDrawn?: number;
   /** The reader's highlighted regions, in the order they were added. */
   highlights?: readonly HighlightedRegion[];
 }
@@ -101,15 +102,18 @@ export const paintKind = (paint: Paint | null | undefined): string | null =>
 export const FUNCTION_OVERLAP_COLOR: Rgb = COMPARE_COLORS[0]!;
 export const MAP_OVERLAP: MapOverlap = { map: COMPARE_COLORS[1]!, both: SHARED_COLOR };
 
-/** Whether the reader's drawn map is compared with the open function: one function or term alone, painted. */
+/**
+ * Whether the reader's drawn map is compared with the open function: one function or term alone,
+ * painted, against one map alone (`oneMapDrawn`).
+ */
 export function comparesMap(
   state: PaintState,
-  mapDrawn: boolean,
+  oneMapDrawn: boolean,
   domains: NeuropsychDomains,
 ): boolean {
   const id = state.selectedFunction;
   return (
-    mapDrawn &&
+    oneMapDrawn &&
     !state.paintLifted &&
     state.explorer === 'functions' &&
     id !== null &&
@@ -147,7 +151,7 @@ export function highlightStatus(
 ): 'drawn' | 'aside' | 'lifted' {
   const { explorer, lesson } = state;
   const aside =
-    Boolean(sources.mapDrawn) ||
+    Boolean(sources.mapsDrawn) ||
     (explorer === 'functions' && state.selectedFunction !== null) ||
     (explorer === 'deficits' && state.selectedDeficit !== null) ||
     (explorer === 'circuits' && (lesson.circuit !== null || Boolean(lesson.map))) ||
@@ -167,7 +171,7 @@ function evidencePaint(
     connectivity = null,
     disorders = null,
     layers = null,
-    mapDrawn = false,
+    mapsDrawn = 0,
   }: PaintSources,
 ): Paint | null {
   if (
@@ -203,7 +207,7 @@ function evidencePaint(
       state.atlas,
       single ? (state.paintFrom ?? domains.threshold_z) : domains.threshold_z,
     );
-    if (!comparesMap(state, mapDrawn, domains)) return paint;
+    if (!comparesMap(state, mapsDrawn === 1, domains)) return paint;
     return {
       id: `${paint.id}:map`,
       colors: new Map([...paint.colors.keys()].map((region) => [region, FUNCTION_OVERLAP_COLOR])),

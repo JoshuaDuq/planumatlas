@@ -1801,6 +1801,27 @@
   "max": "Couleurs jusqu’à",
   "invalid": "Donnez un seuil de 0 ou plus, sous le haut de l’échelle.",
   "opacity": "Opacité",
+  "colours": "Couleurs",
+  "colourScales": {
+   "red-yellow": "Rouge–jaune, bleu–bleu clair",
+   "green-magenta": "Vert, magenta"
+  },
+  "maps": "Cartes",
+  "add": "Ajouter une carte…",
+  "onTop": "Afficher au-dessus",
+  "covers": [
+   "[\"Alpha\"] → \"Couvre Alpha là où les deux dépassent leur seuil.\"",
+   "[\"\"] → \"Couvre  là où les deux dépassent leur seuil.\""
+  ],
+  "coveredBy": [
+   "[\"Alpha\"] → \"Couverte par Alpha là où les deux dépassent leur seuil.\"",
+   "[\"\"] → \"Couverte par  là où les deux dépassent leur seuil.\""
+  ],
+  "hues": "Les deux échelles de couleurs diffèrent par la teinte, que le daltonisme rouge–vert peut confondre.",
+  "captionOver": [
+   "[\"Alpha\"] → \"affichée par-dessus Alpha\"",
+   "[\"\"] → \"affichée par-dessus \""
+  ],
   "minVoxels": "Taille minimale des amas, voxels",
   "minVoxelsHint": "Les amas de moins de voxels de la carte ne sont ni affichés ni listés, comme cluster_threshold de nilearn.",
   "minVoxelsInvalid": "Donnez un nombre entier de voxels, 0 ou plus.",
@@ -1977,7 +1998,8 @@
    "slice": "Cette carte n’est qu’une seule coupe selon un axe<NNBSP>; il lui faut trois dimensions.",
    "noFinite": "Cette carte ne contient aucune valeur finie.",
    "zeros": "Cette carte ne contient que des zéros.",
-   "outside": "Cette carte n’atteint pas le cerveau<NNBSP>; vérifiez le gabarit dans lequel elle est."
+   "outside": "Cette carte n’atteint pas le cerveau<NNBSP>; vérifiez le gabarit dans lequel elle est.",
+   "secondSeries": "L’autre carte est déjà une série de volumes, et une seule carte peut l’être<NNBSP>; retirez-la pour parcourir celle-ci."
   }
  },
  "reasons": {

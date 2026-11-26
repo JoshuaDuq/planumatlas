@@ -316,8 +316,8 @@ export interface VolumeSample {
   agreement: AgreementCategory | null;
   /** The region the stage's cut labels name here; null before a cut in that atlas loads, or unlabelled. */
   cutRegion: Region | null;
-  /** The reader's map here while it is drawn (NaN where it has no value); null without one. */
-  mapValue?: number | null;
+  /** Each drawn map's value here by slot, the one under first (NaN where it has no value). */
+  mapValues?: readonly { slot: number; value: number }[];
 }
 
 export interface EngineSections {
@@ -659,14 +659,32 @@ export interface EngineBodyMap {
   show(part: BodyPart | 'all' | null): Promise<void>;
 }
 
-/** The reader's own map, read from a file on their machine and carried onto this brain. */
+/** The reader's own maps, read from files on their machine and carried onto this brain. */
 export interface EngineUserMap {
-  /** The anatomy publishes template registrations; without them `load` rejects. */
+  /** The anatomy publishes template registrations; without them a slot's `load` rejects. */
   readonly available: boolean;
+  /** `MAP_SLOTS` maps, each drawn on its own scale; where both are drawn, the top one is drawn over. */
+  readonly maps: readonly EngineMapSlot[];
+  /** Draw this slot's map over the other's. */
+  setTop(slot: number): void;
+  /**
+   * Draw the cortex on this brain's pial, mid-thickness or white surface, with or without a map, while
+   * no cut is open: the same vertices and values, the sulci opened as far as the surface opens them.
+   */
+  setSurface(surface: CortexSurface): void;
+  /**
+   * Draw the maps against the paint, a function's areas: positive values above the threshold in
+   * `map`, or `both` where the paint is, the paint kept beneath; null draws them on their own scales.
+   */
+  setOverlap(overlap: MapOverlap | null): void;
+}
+
+/** One of the reader's maps. */
+export interface EngineMapSlot {
   /**
    * Read a NIfTI map given in a published template space (or `unstated`) and carry its volume `volume`
-   * onto this brain, replacing any map; nothing is drawn until `show`. Rejects with why it cannot be
-   * read or placed, or with an `AbortError` when a newer map was asked for first.
+   * onto this brain, replacing this slot's map; nothing is drawn until `show`. Rejects with why it
+   * cannot be read or placed, or with an `AbortError` when a newer map was asked for first.
    */
   load(file: ArrayBuffer, space: string, volume: number): Promise<MapSummary>;
   /**
@@ -685,18 +703,8 @@ export interface EngineUserMap {
    * `AbortError` when a newer map was opened first.
    */
   course(region: string): Promise<MapCourse | null>;
-  /**
-   * Draw the cortex on this brain's pial, mid-thickness or white surface, with or without a map, while
-   * no cut is open: the same vertices and values, the sulci opened as far as the surface opens them.
-   */
-  setSurface(surface: CortexSurface): void;
   /** Draw the loaded map with these settings, or hide it with null. */
   show(display: MapDisplay | null): void;
-  /**
-   * Draw the map against the paint, a function's areas: its positive values above the threshold in
-   * `map`, or `both` where the paint is, the paint kept beneath; null draws it on its own scale.
-   */
-  setOverlap(overlap: MapOverlap | null): void;
   /**
    * The drawn map's overlap with these regions over the shown atlas's cortex, in mm² of this brain's
    * mid-thickness surface: where it is above its threshold, where the regions are, and both.

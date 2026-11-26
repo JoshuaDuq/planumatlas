@@ -208,7 +208,7 @@ test('a comparison keys each function and the areas both reach, greying a colour
 test('FUNC-51 · against a drawn map, one function paints its areas in one colour and keys three', () => {
   const state = { ...base, selectedFunction: 'memory' };
   const plain = paintFor(state, sources)!;
-  const paint = paintFor(state, { ...sources, mapDrawn: true })!;
+  const paint = paintFor(state, { ...sources, mapsDrawn: 1 })!;
   assert.equal(paint.id, 'function:memory:map');
   assert.deepEqual([...paint.colors.keys()], [...plain.colors.keys()]);
   assert.ok([...paint.colors.values()].every((color) => color === FUNCTION_OVERLAP_COLOR));
@@ -232,7 +232,7 @@ test('FUNC-51 · against a drawn map, one function paints its areas in one colou
   // A raised threshold that paints nothing greys the function's row.
   const empty = { ...base, selectedFunction: 'language', paintFrom: 5 };
   const none = legendFor(
-    { ...empty, paint: paintFor(empty, { ...sources, mapDrawn: true }) },
+    { ...empty, paint: paintFor(empty, { ...sources, mapsDrawn: 1 }) },
     { ...sources, map: { title: 'zstat1', threshold: 3 } },
   )!;
   assert.equal(none.rows[0]!.absent, true);
@@ -251,11 +251,13 @@ test('FUNC-51 · only one function, painted in front, is drawn against the map',
   ]) {
     assert.equal(comparesMap(state, true, domains), false);
     assert.equal(
-      paintFor(state, { ...sources, mapDrawn: true })?.id.endsWith(':map') ?? false,
+      paintFor(state, { ...sources, mapsDrawn: 1 })?.id.endsWith(':map') ?? false,
       false,
     );
   }
   assert.equal(comparesMap(one, false, domains), false);
+  // Two maps drawn at once: the function keeps its own paint, and neither map is compared.
+  assert.equal(paintFor(one, { ...sources, mapsDrawn: 2 })!.id, paintFor(one, sources)!.id);
   // Without a map the key is the z scale, whatever the source says.
   const plain = legendFor({ ...one, paint: paintFor(one, sources) }, { ...sources, map: null })!;
   assert.equal(plain.rows.length, domains.z_scale.length);
@@ -825,7 +827,8 @@ describe('the reader’s highlights', () => {
     const lesion = { kind: 'deficits' as const, paint: paintOf('lesion:x'), rows: [] };
     assert.equal(paintFor(anatomy, { ...withMarks, lesion })!.id, 'lesion:x');
     assert.equal(highlightStatus(anatomy, { ...withMarks, lesion }), 'aside');
-    assert.equal(paintFor(anatomy, { ...withMarks, mapDrawn: true }), null);
+    assert.equal(paintFor(anatomy, { ...withMarks, mapsDrawn: 1 }), null);
+    assert.equal(paintFor(anatomy, { ...withMarks, mapsDrawn: 2 }), null);
   });
 
   test('STATE-68 · a masthead choice lifts them as it lifts any paint; behind evidence they are aside', () => {

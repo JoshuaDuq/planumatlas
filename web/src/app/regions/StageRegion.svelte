@@ -7,6 +7,7 @@
   import { sulcExtent } from '../../lib/core/catalog/sulcal-depth.ts';
   import { visibilityOf } from '../../lib/core/catalog/visibility.ts';
   import { t } from '../../lib/core/i18n/index.ts';
+  import { mapFileReason } from '../../lib/core/user-map/map-file-error.ts';
   import { comparesMap, legendFor, paintFor, paintKind } from '../../lib/core/state/paint.ts';
   import { publishesSpinalCord } from '../../lib/core/state/scene-commands.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
@@ -21,8 +22,7 @@
   import type { SnapshotStage, SnapshotSubject } from '../../features/snapshot/snapshot.ts';
   import SectionPopover from '../../features/sections/SectionPopover.svelte';
   import CoordinatePopover from '../../features/lesion/CoordinatePopover.svelte';
-  import { mapCaption, mapKey } from '../../features/user-map/key.ts';
-  import OverlayPopover from '../../features/user-map/OverlayPopover.svelte';
+  import { mapCaptions, mapKey, mapKeys } from '../../features/user-map/key.ts';
   import LesionPopover from '../../features/lesion/LesionPopover.svelte';
   import Dock from '../../features/stage/Dock.svelte';
   import type { DockCommands } from '../../features/stage/dock-commands.ts';
@@ -111,6 +111,12 @@
 
   // The drawing code is fetched with the first save or copy.
   const snapshotCode = () => import('../../features/snapshot/snapshot.ts');
+  // Downloaded the first time the Overlay tool opens, off the first visit's entry (BUILD-15).
+  const overlayPopoverCode = () =>
+    import('../../features/user-map/OverlayPopover.svelte').catch((error: unknown) => {
+      console.error(error);
+      throw error;
+    });
 
   /** The masthead's Save image: the visible stage as a captioned PNG (G6), `scale` image pixels per CSS pixel. */
   export async function saveImage(scale = DEFAULT_SCALE) {
@@ -163,9 +169,9 @@
         selection:
           region &&
           `${world!.catalog.label(region.id).name}, ${t(view.lang, 'sides').words[region.hemisphere]}`,
-        overlay: manifest.coordinate_spaces
-          ? mapCaption(world!.userMap, manifest.coordinate_spaces, view.lang)
-          : null,
+        overlays: manifest.coordinate_spaces
+          ? mapCaptions(world!.userMap, manifest.coordinate_spaces, view.lang)
+          : [],
       },
     ];
   }
@@ -352,14 +358,20 @@
       {sources}
     />
     {#snippet overlayPopover({ close }: { close: () => void })}
-      <OverlayPopover
-        map={world.userMap}
-        spaces={model.manifest.coordinate_spaces!}
-        lang={current.lang}
-        onPlace={async (mm) => {
-          if (await world.coordinates!.place(mm, world.userMap.space)) showReport(close);
-        }}
-      />
+      {#await overlayPopoverCode() then { default: OverlayPopover }}
+        <OverlayPopover
+          map={world.userMap}
+          spaces={model.manifest.coordinate_spaces!}
+          lang={current.lang}
+          onPlace={async (mm, space) => {
+            if (await world.coordinates!.place(mm, space)) showReport(close);
+          }}
+        />
+      {:catch error}
+        <p class="overlay-failed" role="alert">
+          {mapFileReason(t(current.lang, 'overlay'), t(current.lang, 'errors'), error)}
+        </p>
+      {/await}
     {/snippet}
     {#snippet coordinatePopover({ close }: { close: () => void })}
       <CoordinatePopover
@@ -496,8 +508,8 @@
       viewName={current.view}
       {commands}
     />
-    {@const mapDrawn = world.userMap.drawn}
-    {@const againstMap = comparesMap(current, mapDrawn, model.domains!)}
+    {@const mapsDrawn = world.userMap.drawnMaps}
+    {@const againstMap = comparesMap(current, mapsDrawn.length === 1, model.domains!)}
     <StageKeys
       bind:this={keys}
       stage={app.stage}
@@ -514,7 +526,7 @@
       thickness={model.manifest.cortical_thickness?.display_range_mm ?? null}
       sulc={sulcExtent(model.manifest.appearance.field_ranges)}
       {lobes}
-      legend={tractReference || (mapDrawn && !againstMap)
+      legend={tractReference || (mapsDrawn.length && !againstMap)
         ? null
         : legendFor(
             // The paint the session asks for, which the model may not show yet (syncPaint runs in
@@ -528,7 +540,7 @@
                 connectivity: model.connectivity,
                 disorders: model.disorders,
                 layers: world.corticalLayers.data,
-                mapDrawn,
+                mapsDrawn: mapsDrawn.length,
                 highlights: world.highlights.list,
               }),
             },
@@ -546,8 +558,8 @@
                 `${world.catalog.label(id).name}, ${t(current.lang, 'sides').words[world.regions.get(id)!.region.hemisphere]}`,
               map: againstMap
                 ? {
-                    title: mapKey(world.userMap, current.lang)!.title,
-                    threshold: world.userMap.settings.threshold,
+                    title: mapKey(mapsDrawn[0]!, current.lang)!.title,
+                    threshold: mapsDrawn[0]!.settings.threshold,
                   }
                 : null,
             },
@@ -555,7 +567,7 @@
       cases={!tractReference && world.strokeCases.cohort.status === 'ready'
         ? casesKey(world.strokeCases.cohort.data, world.strokeCases.chosen, current.lang)
         : null}
-      map={tractReference || againstMap ? null : mapKey(world.userMap, current.lang)}
+      maps={tractReference || againstMap ? [] : mapKeys(world.userMap, current.lang)}
       {directionShown}
       onPaintPick={world.excursions.pickPaint}
       networkMatrix={Boolean(model.manifest.network_matrix)}
@@ -591,16 +603,16 @@
       agreementName={agreementName(world)}
       regionName={(id) => world.catalog.label(id).name}
       fallbackFocus={() => sectionToolOrCanvas(engine.canvas)}
-      map={world.userMap.drawn && world.userMap.state.status === 'ready'
+      maps={world.userMap.drawn
         ? {
-            key: JSON.stringify([
-              world.userMap.state.name,
-              world.userMap.space,
-              world.userMap.settings,
-              world.userMap.placed,
-            ]),
-            title: world.userMap.title,
-            statistic: world.userMap.statistic,
+            key: JSON.stringify(
+              world.userMap.drawnMaps.map((map) => [map.slot, map.space, map.settings, map.placed]),
+            ),
+            drawn: world.userMap.drawnMaps.map(({ slot, title, statistic }) => ({
+              slot,
+              title,
+              statistic,
+            })),
           }
         : null}
       tracts={current.anatomy === engine.tracts.anatomy
@@ -637,6 +649,13 @@
           var(--stage-gutter) + 2 * var(--lh-caption) + var(--space-1) + var(--space-2)
         );
       }
+    }
+    /* As the Overlay words a file it cannot read. */
+    .overlay-failed {
+      margin: 0;
+      font-size: var(--text-caption);
+      line-height: var(--lh-caption);
+      color: var(--danger);
     }
     /* A frame's section row stands where the dock would, on its plate, drawn only while a plane is cut. */
     .embed-dock {

@@ -603,15 +603,10 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       },
       userMap: {
         available: Boolean(atlas.manifest.coordinate_spaces),
-        load: userMap.load,
-        clusters: userMap.clusters,
-        extent: userMap.extent,
-        course: userMap.course,
+        maps: userMap.maps,
+        setTop: userMap.setTop,
         setSurface: userMap.setSurface,
-        show: userMap.show,
         setOverlap: userMap.setOverlap,
-        overlapAreas: userMap.overlapAreas,
-        clear: userMap.clear,
       },
 
       applyTheme() {

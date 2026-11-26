@@ -58,8 +58,8 @@ export function syncPaint(
     disorders?: DisorderEffects | null;
     /** BigBrain's cortical layers, downloaded when a region's sheet first asks. */
     layers?: { readonly data: CorticalLayers | null };
-    /** The reader's map, which a function is then painted against. */
-    userMap?: { readonly drawn: boolean };
+    /** The reader's maps; a function is painted against one drawn alone. */
+    userMap?: { readonly drawnMaps: readonly unknown[] };
     /** The reader's highlights, painted while nothing else is. */
     highlights?: { readonly list: readonly HighlightedRegion[] };
   },
@@ -70,7 +70,7 @@ export function syncPaint(
         ...sources,
         lesion: sources.lesion?.paint ?? null,
         layers: sources.layers?.data ?? null,
-        mapDrawn: sources.userMap?.drawn ?? false,
+        mapsDrawn: sources.userMap?.drawnMaps.length ?? 0,
         highlights: sources.highlights?.list ?? [],
       }),
     ),

@@ -33,15 +33,26 @@ afterEach(() => {
   cleanup();
 });
 
+/** The popover over a first map read with `result`; that map, the maps and their fake engine. */
 async function opened(result: MapSummary | Error) {
-  const engine = createFakeUserMap(true);
-  const map = createUserMapStore({ engine, display: { color: 'atlas', setColor() {} } });
-  await render(OverlayPopover, { map, spaces, lang: 'fr', onPlace() {} });
+  const engines = createFakeUserMap(true);
+  const maps = createUserMapStore({ engine: engines, display: { color: 'atlas', setColor() {} } });
+  await render(OverlayPopover, { map: maps, spaces, lang: 'fr', onPlace() {} });
+  const map = maps.maps[0]!;
   const reading = map.open(new File([new Uint8Array(4)], 'zstat1.nii'));
-  await expect.poll(() => engine.loading).toBe(true);
-  engine.settle(result);
+  await expect.poll(() => engines.maps[0]!.loading).toBe(true);
+  engines.maps[0]!.settle(result);
   await reading;
-  return map;
+  return Object.assign(map, { maps, engines });
+}
+
+/** Give the popover's file input a file, as choosing one in the system dialog does. */
+function choose(name: string) {
+  const input = document.querySelector<HTMLInputElement>('.overlay input[type=file]')!;
+  const files = new DataTransfer();
+  files.items.add(new File([new Uint8Array(4)], name));
+  input.files = files.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 test('Remove hands focus to the button that chooses another file', async () => {
@@ -134,4 +145,79 @@ test('what is adjusted while looking comes first; what is set once folds under a
   await userEvent.click(page.getByText(fr.settings, { exact: true }));
   await expect.element(page.getByLabelText(fr.space, { exact: true })).toBeVisible();
   await expect.element(page.getByText(changed)).not.toBeInTheDocument();
+});
+
+test('FUNC-60 · a second map is added on top, chosen by name, and the one under can be drawn on top', async () => {
+  const { maps, engines } = await opened(summary);
+  await expect.element(page.getByRole('radiogroup', { name: fr.maps })).not.toBeInTheDocument();
+  await userEvent.click(page.getByRole('button', { name: fr.add }));
+  choose('mask.nii');
+  await expect.poll(() => engines.maps[1]!.loading).toBe(true);
+  engines.maps[1]!.settle({ ...summary, range: [0, 1], binary: true });
+  const group = page.getByRole('radiogroup', { name: fr.maps });
+  await expect.element(group.getByRole('radio', { name: 'mask' })).toBeChecked();
+  await expect.element(page.getByText('mask.nii', { exact: true })).toBeVisible();
+  // Every slot holds a map: none can be added.
+  await expect.element(page.getByRole('button', { name: fr.add })).not.toBeInTheDocument();
+  expect(maps.top).toBe(1);
+  // Each map says which it covers or is covered by; only the one under offers the top.
+  await expect.element(page.getByText(fr.covers('zstat1'))).toBeVisible();
+  await expect.element(page.getByRole('button', { name: fr.onTop })).not.toBeInTheDocument();
+  await userEvent.click(group.getByRole('radio', { name: 'zstat1' }));
+  await expect.element(page.getByText(fr.coveredBy('mask'))).toBeVisible();
+  await userEvent.click(page.getByRole('button', { name: fr.onTop }));
+  expect(maps.top).toBe(0);
+  await expect.element(page.getByText(fr.covers('mask'))).toBeVisible();
+  await expect.element(page.getByRole('button', { name: fr.onTop })).not.toBeInTheDocument();
+  // The choices keep their places whichever is on top: the first map read stays first.
+  const names = group
+    .getByRole('radio')
+    .elements()
+    .map((radio) => radio.textContent?.trim());
+  expect(names).toEqual(['zstat1', 'mask']);
+  // The colour-blindness note stands with the caveat while two maps are open.
+  await expect.element(page.getByText(fr.hues)).toBeVisible();
+});
+
+test('FUNC-60 · a map added that cannot be read covers nothing: the one kept says no order', async () => {
+  const { engines } = await opened(summary);
+  await userEvent.click(page.getByRole('button', { name: fr.add }));
+  choose('bold.nii');
+  await expect.poll(() => engines.maps[1]!.loading).toBe(true);
+  engines.maps[1]!.settle(new MapFileError('tooManyVolumes', [300, 61]));
+  const group = page.getByRole('radiogroup', { name: fr.maps });
+  await expect.element(page.getByRole('alert')).toBeVisible();
+  await userEvent.click(group.getByRole('radio', { name: 'zstat1' }));
+  await expect.element(page.getByLabelText(fr.threshold, { exact: true })).toBeVisible();
+  await expect.element(page.getByText(/^(Couverte par|Couvre) /)).not.toBeInTheDocument();
+  await expect.element(page.getByRole('button', { name: fr.onTop })).not.toBeInTheDocument();
+});
+
+test('a map read here asks for its threshold; one chosen in the list does not take focus', async () => {
+  const { engines } = await opened(summary);
+  await userEvent.click(page.getByRole('button', { name: fr.add }));
+  choose('zstat2.nii');
+  await expect.poll(() => engines.maps[1]!.loading).toBe(true);
+  engines.maps[1]!.settle(summary);
+  await expect.element(page.getByLabelText(fr.threshold, { exact: true })).toHaveFocus();
+  const first = page.getByRole('radio', { name: 'zstat1' });
+  await userEvent.click(first);
+  await expect.element(first).toHaveFocus();
+});
+
+test('FUNC-61 · a map’s colours are chosen beside its opacity, the second map’s other than the first’s', async () => {
+  const { maps, engines } = await opened(summary);
+  const colours = page.getByLabelText(fr.colours, { exact: true });
+  await expect.element(colours).toHaveValue('red-yellow');
+  await userEvent.click(page.getByRole('button', { name: fr.add }));
+  choose('zstat2.nii');
+  await expect.poll(() => engines.maps[1]!.loading).toBe(true);
+  engines.maps[1]!.settle(summary);
+  await expect
+    .element(page.getByLabelText(fr.colours, { exact: true }))
+    .toHaveValue('green-magenta');
+  // Chosen for the first map too, both are drawn in one scale: the reader's call.
+  await userEvent.click(page.getByRole('radio', { name: 'zstat1' }));
+  await userEvent.selectOptions(page.getByLabelText(fr.colours, { exact: true }), 'green-magenta');
+  expect(maps.maps.map((map) => map.settings.colours)).toEqual(['green-magenta', 'green-magenta']);
 });

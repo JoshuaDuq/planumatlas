@@ -34,18 +34,20 @@ afterEach(() => {
   cleanup();
 });
 
-async function shown(region: string, volumes = 4) {
-  const engine = createFakeUserMap(true, undefined, (id) => courses[id] ?? null);
-  const map = createUserMapStore({ engine, display: { color: 'atlas', setColor() {} } });
+/** A series read into `slot`; the section is handed both maps, as the region sheet hands them. */
+async function shown(region: string, volumes = 4, slot = 0) {
+  const engines = createFakeUserMap(true, undefined, (id) => courses[id] ?? null);
+  const maps = createUserMapStore({ engine: engines, display: { color: 'atlas', setColor() {} } });
+  const map = maps.maps[slot]!;
   const reading = map.open(new File([new Uint8Array(4)], 'fir.nii'));
-  await expect.poll(() => engine.loading).toBe(true);
-  engine.settle({ ...summary, volumes });
+  await expect.poll(() => engines.maps[slot]!.loading).toBe(true);
+  engines.maps[slot]!.settle({ ...summary, volumes });
   await reading;
   map.setStatistic('z');
   await render(MapCourseSection, {
     region: { id: region } as Region,
     lang: 'en',
-    map,
+    maps,
     label: (id: string) => ({ name: id === 'v1' ? 'V1' : id }),
   });
   return map;
@@ -77,11 +79,13 @@ test('a region without a solid, or where the map has no value, says so instead o
 });
 
 test('the same region handed in again, as each volume placed hands it, keeps its plot and is not read again', async () => {
-  const engine = createFakeUserMap(true, undefined, (id) => courses[id] ?? null);
+  const engines = createFakeUserMap(true, undefined, (id) => courses[id] ?? null);
+  const engine = engines.maps[0]!;
   let reads = 0;
   const course = engine.course;
   engine.course = (id) => (reads++, course(id));
-  const map = createUserMapStore({ engine, display: { color: 'atlas', setColor() {} } });
+  const maps = createUserMapStore({ engine: engines, display: { color: 'atlas', setColor() {} } });
+  const map = maps.maps[0]!;
   const reading = map.open(new File([new Uint8Array(4)], 'fir.nii'));
   await expect.poll(() => engine.loading).toBe(true);
   engine.settle(summary);
@@ -90,13 +94,13 @@ test('the same region handed in again, as each volume placed hands it, keeps its
   const view = await render(MapCourseSection, {
     region: { id: 'v1' } as Region,
     lang: 'en',
-    map,
+    maps,
     label,
   });
   const plot = page.getByRole('slider');
   await expect.element(plot).toBeInTheDocument();
   expect(reads).toBe(1);
-  await view.rerender({ region: { id: 'v1' } as Region, lang: 'en', map, label });
+  await view.rerender({ region: { id: 'v1' } as Region, lang: 'en', maps, label });
   await expect.element(plot).toBeInTheDocument();
   expect(reads).toBe(1);
 });
@@ -104,4 +108,13 @@ test('the same region handed in again, as each volume placed hands it, keeps its
 test('a single map has no course', async () => {
   await shown('v1', 1);
   await expect.element(page.getByText(copy.course)).not.toBeInTheDocument();
+});
+
+test('FUNC-62 · a series read into the second slot has its course, read from that slot', async () => {
+  const map = await shown('v1', 4, 1);
+  const plot = page.getByRole('slider', { name: copy.courseLabel('fir', 'V1') });
+  await expect.element(plot).toHaveAttribute('aria-valuetext', '0 s: z 0.5');
+  await userEvent.click(plot);
+  await userEvent.keyboard('{End}');
+  expect(map.volume).toBe(3);
 });

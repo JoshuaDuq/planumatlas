@@ -5,7 +5,7 @@ import { loadFieldData } from '../../core/coordinates/field.ts';
 import { readIn } from '../../core/coordinates/spaces.ts';
 import type { CarriedMap, CortexSurfaces } from '../../core/user-map/carry.ts';
 import type { MapCourse } from '../../core/user-map/course.ts';
-import { VOLUMES_PER_SECOND } from '../../core/user-map/display.ts';
+import { MAP_SLOTS, VOLUMES_PER_SECOND } from '../../core/user-map/display.ts';
 import type {
   CortexSurface,
   MapDisplay,
@@ -24,6 +24,7 @@ import type { OverlapAreas } from '../../core/user-map/overlap.ts';
 import { gridSampler } from '../../core/user-map/sampling.ts';
 import type { BrainAtlas, Layer } from '../model/brain-atlas.ts';
 import type { BrainSections } from '../slices/sections.ts';
+import type { SliceMap } from '../slices/sampling.ts';
 import { greyed } from '../render/materials.ts';
 import type { AnatomicalUserData } from '../render/materials.ts';
 import { prefersReducedMotion } from '../render/camera-motion.ts';
@@ -51,7 +52,9 @@ type Hemisphere = (typeof HEMISPHERES)[number];
 
 /** How far from the pial towards the white surface each lies. */
 const SURFACE_DEPTH: Record<Exclude<CortexSurface, 'pial'>, number> = { mid: 0.5, white: 1 };
+/** Each cortical vertex's sum and share for both maps: the first's in xy, the second's in zw. */
 const ATTRIBUTE = '_user_map';
+const ITEM_SIZE = 2 * MAP_SLOTS;
 /** The cortex's values in the volume drawn before, while a series moves on from it. */
 const PREVIOUS = '_user_map_previous';
 /** A volume's share of a second at the fastest playback. */
@@ -90,8 +93,9 @@ const extentKey = (volume: number, threshold: number, minVoxels: number) =>
   minVoxels > 1 ? `${volume}/${threshold}/${minVoxels}` : `${volume}`;
 
 /**
- * The reader's own map on this brain: read and carried in a worker, drawn per vertex on the cortex
- * and per voxel on every cut face. `baseUrl` is where the anatomy publishes its fields and labels.
+ * The reader's own maps on this brain, `MAP_SLOTS` of them: each read and carried in one worker, drawn
+ * per vertex on the cortex and per voxel on every cut face, the one on top over the other. `baseUrl`
+ * is where the anatomy publishes its fields and labels.
  */
 export function createUserMap({
   atlas,
@@ -100,8 +104,8 @@ export function createUserMap({
   invalidate,
 }: {
   atlas: BrainAtlas;
-  /** The linked MRI, which draws the map on its planes from the same 1 mm grid as the cut faces. */
-  sections: Pick<BrainSections, 'setUserMap'>;
+  /** The linked MRI, which draws the maps on its planes from the same 1 mm grids as the cut faces. */
+  sections: Pick<BrainSections, 'setUserMaps'>;
   baseUrl: URL;
   invalidate: () => void;
 }) {
@@ -114,10 +118,6 @@ export function createUserMap({
   >();
   const inverted = new Set<string>();
   let cortexSent = false;
-  let carried: CarriedMap | null = null;
-  let at: ((x: number, y: number, z: number) => number) | null = null;
-  let painted: string | null = null;
-  let request = 0;
   const ribbons = new Map<string, Promise<Uint16Array>>();
   // Each region's whole-millimetre points, by atlas and region: the solids do not change.
   const regions = new Map<string, Float32Array>();
@@ -261,45 +261,6 @@ export function createUserMap({
     return found;
   };
 
-  /**
-   * Give each parcel of the drawn cortical atlas its vertices' values, once per map and atlas; with
-   * `blend`, each keeps the values drawn until now to move on from.
-   */
-  const paintCortex = async (blend = false) => {
-    const id = atlas.settings.atlas;
-    const map = carried;
-    if (!map || painted === id) return;
-    const hemispheres = await layout(id);
-    if (map !== carried || id !== atlas.settings.atlas) return;
-    for (const [hemisphere, { parents, meshes }] of hemispheres) {
-      for (const [index, field] of partitionField(parents, map.cortex[hemisphere])) {
-        const mesh = meshes.get(index)!;
-        const drawn = mesh.geometry.getAttribute(ATTRIBUTE) as BufferAttribute | undefined;
-        if (blend && drawn) {
-          const kept = mesh.geometry.getAttribute(PREVIOUS) as BufferAttribute | undefined;
-          if (kept) overwrite(checked(kept, drawn.array), drawn.array);
-          else mesh.geometry.setAttribute(PREVIOUS, new BufferAttribute(drawn.array.slice(), 2));
-        }
-        // Written over in place: a replaced attribute's GPU buffer is freed only with its geometry.
-        if (drawn) overwrite(checked(drawn, field), field);
-        else mesh.geometry.setAttribute(ATTRIBUTE, new BufferAttribute(field, 2));
-        userData(mesh).userMapReady.value = true;
-      }
-    }
-    painted = id;
-    invalidate();
-  };
-
-  const unpaint = () => {
-    for (const layer of atlas.layers.values()) {
-      for (const mesh of layer.meshes) {
-        // The values stay for the next map to write over; `userMapReady` hides them.
-        if (mesh.geometry.getAttribute(ATTRIBUTE)) userData(mesh).userMapReady.value = false;
-      }
-    }
-    painted = null;
-  };
-
   // The surface the cortex is drawn on: the reader's choice, map or not, while no cut is open (a cut face
   // spans pial to white, so the surface it meets must be the pial).
   let surfaceChoice: CortexSurface = 'pial';
@@ -370,25 +331,18 @@ export function createUserMap({
     }
   };
 
-  // How the map is drawn now; a new extent of it is drawn the same way.
-  let shown: MapDisplay | null = null;
+  // Drawn against a function, every drawn map takes the overlap colours (the app compares one alone).
   let overlap: MapOverlap | null = null;
-  let drawnExtent = '';
-  let drawnVolume = 0;
-  let extentRequest = 0;
-  const extents = newestOnly();
-  const tables = newestOnly();
 
-  // A series moving between volumes: the frame request, and when the last volume was placed.
+  // A series moving between volumes (`userMapMoving` names its slot): the frame request.
   let blendFrame = 0;
-  let placedAt = -Infinity;
 
   const stopBlend = () => {
     if (blendFrame) cancelAnimationFrame(blendFrame);
     blendFrame = 0;
   };
 
-  /** Stop any move between volumes and draw the current one alone. */
+  /** Stop any move between volumes and draw every map's current one alone. */
   const settle = () => {
     stopBlend();
     dropPrevious(uniforms);
@@ -412,25 +366,265 @@ export function createUserMap({
     blendFrame = requestAnimationFrame(frame);
   };
 
-  /**
-   * Put a carried map on the cut faces, the linked MRI and the cortex; with `blend`, the volume drawn
-   * until now moves into it (never under reduced motion).
-   */
-  const place = async (map: CarriedMap, blend = false) => {
-    const moving = blend && !prefersReducedMotion();
-    stopBlend();
-    unpaint();
-    carried = map;
-    at = gridSampler(map.grid, map.volume);
-    setUserMapVolume(uniforms, map.grid, map.volume, moving);
-    if (moving) uniforms.userMapBlend.value = 0;
-    if (shown) sections.setUserMap({ at, display: shown, overlap });
-    await paintCortex(moving);
-    const now = performance.now();
-    if (moving) blendIn(now - placedAt);
-    placedAt = now;
-    invalidate();
+  /** The drawn maps on the linked MRI, the one under first. */
+  const drawSections = () => {
+    const top = uniforms.userMapTop.value;
+    const drawn = slots
+      .map((slot) => slot.slice())
+      .filter((map): map is SliceMap => map !== null)
+      .sort((a, b) => Number(a.slot === top) - Number(b.slot === top));
+    sections.setUserMaps(drawn);
   };
+
+  /** A map slot: its carried volume, how it is drawn, and its half of each cortical vertex's values. */
+  const createSlot = (slot: number) => {
+    let carried: CarriedMap | null = null;
+    let at: ((x: number, y: number, z: number) => number) | null = null;
+    let painted: string | null = null;
+    let request = 0;
+    let shown: MapDisplay | null = null;
+    let drawnExtent = '';
+    let drawnVolume = 0;
+    let extentRequest = 0;
+    let placedAt = -Infinity;
+    const extents = newestOnly();
+    const tables = newestOnly();
+
+    const moving = () =>
+      uniforms.userMapMoving.value === slot && uniforms.userMapPrevious.value !== null;
+
+    /**
+     * Give each parcel of the drawn cortical atlas this map's half of its vertices' values, once per map
+     * and atlas; with `blend`, each keeps the values drawn until now to move on from.
+     */
+    const paintCortex = async (blend = false) => {
+      const id = atlas.settings.atlas;
+      const map = carried;
+      if (!map || painted === id) return;
+      const hemispheres = await layout(id);
+      if (map !== carried || id !== atlas.settings.atlas) return;
+      for (const [hemisphere, { parents, meshes }] of hemispheres) {
+        for (const [index, field] of partitionField(parents, map.cortex[hemisphere])) {
+          const mesh = meshes.get(index)!;
+          const drawn = packed(mesh, ATTRIBUTE, field.length / 2);
+          if (blend) {
+            const kept = packed(mesh, PREVIOUS, field.length / 2).copyArray(drawn.array);
+            kept.needsUpdate = true;
+          }
+          // Written over in place: a replaced attribute's GPU buffer is freed only with its geometry.
+          const values = drawn.array as Float32Array;
+          for (let v = 0, n = 2 * slot; v < field.length; v += 2, n += ITEM_SIZE) {
+            values[n] = field[v]!;
+            values[n + 1] = field[v + 1]!;
+          }
+          drawn.needsUpdate = true;
+          userData(mesh).userMapReady[slot]!.value = true;
+        }
+      }
+      painted = id;
+      invalidate();
+    };
+
+    const unpaint = () => {
+      for (const layer of atlas.layers.values()) {
+        for (const mesh of layer.meshes) {
+          // The values stay for the next map to write over; `userMapReady` hides them.
+          if (mesh.geometry.getAttribute(ATTRIBUTE))
+            userData(mesh).userMapReady[slot]!.value = false;
+        }
+      }
+      painted = null;
+    };
+
+    /**
+     * Put a carried map on the cut faces, the linked MRI and the cortex; with `blend`, the volume drawn
+     * until now moves into it (never under reduced motion), and another map's move stops.
+     */
+    const place = async (map: CarriedMap, blend = false) => {
+      const move = blend && !prefersReducedMotion();
+      if (move || moving()) stopBlend();
+      unpaint();
+      carried = map;
+      at = gridSampler(map.grid, map.volume);
+      setUserMapVolume(uniforms, slot, map.grid, map.volume, move);
+      if (move) uniforms.userMapBlend.value = 0;
+      if (shown) drawSections();
+      await paintCortex(move);
+      const now = performance.now();
+      if (move) blendIn(now - placedAt);
+      placedAt = now;
+      invalidate();
+    };
+
+    return {
+      /** What the linked MRI draws of this map, or null while it is not drawn. */
+      slice(): SliceMap | null {
+        return shown && at ? { slot, at, display: shown, overlap } : null;
+      },
+      /** Paint the shown atlas's cortex after an atlas change. */
+      follow(): void {
+        if (!carried || painted === atlas.settings.atlas) return;
+        if (moving()) settle();
+        unpaint();
+        paintCortex().catch(report);
+      },
+      api: {
+        async load(file: ArrayBuffer, space: string, volume: number): Promise<MapSummary> {
+          const ask = ++request;
+          const metadata = atlas.manifest.coordinate_spaces;
+          if (!metadata) throw new Error('This anatomy publishes no template registration.');
+          const record = readIn(metadata, space);
+          const { id } = record;
+          const job: CarryJob = { kind: 'carry', token: ++token, slot, file, space: id, volume };
+          const transfer: Transferable[] = [file];
+          if (!inverted.has(id)) {
+            if (record.native) job.native = record.native;
+            else {
+              job.field = {
+                record: record.field,
+                data: await loadFieldData(record.field, baseUrl),
+              };
+              transfer.push(job.field.data.buffer);
+            }
+          }
+          if (!cortexSent) {
+            job.cortex = await cortexSurfaces();
+            for (const side of HEMISPHERES) {
+              transfer.push(job.cortex[side].pial.buffer, job.cortex[side].white.buffer);
+            }
+          }
+          const { map, summary } = (await post(job, transfer)) as {
+            map: CarriedMap;
+            summary: MapSummary;
+          };
+          inverted.add(id);
+          cortexSent = true;
+          if (ask !== request) throw new SupersededError('A newer map was opened.');
+          drawnExtent = extentKey(volume, Number.NaN, 0);
+          drawnVolume = volume;
+          shown = null;
+          setUserMapDisplay(uniforms, slot, null);
+          drawSections();
+          uniforms.userMapBase.value.setFromColor(
+            greyed(new Color(atlas.manifest.appearance.tissue.cortex)),
+          );
+          await place(map);
+          return summary;
+        },
+        async clusters(threshold: number, minVoxels: number, volume: number): Promise<Cluster[]> {
+          if (!carried) throw new Error('No map is loaded.');
+          const job: ClusterJob = {
+            kind: 'clusters',
+            token: ++token,
+            slot,
+            volume,
+            threshold,
+            minVoxels,
+          };
+          const reply = await tables(() => post(job, []));
+          return (reply as { clusters: Cluster[] }).clusters;
+        },
+        async extent(threshold: number, minVoxels: number, volume: number): Promise<void> {
+          if (!carried) throw new Error('No map is loaded.');
+          const key = extentKey(volume, threshold, minVoxels);
+          if (key === drawnExtent) return;
+          const ask = ++extentRequest;
+          const loaded = request;
+          const job: ExtentJob = {
+            kind: 'extent',
+            token: ++token,
+            slot,
+            volume,
+            threshold,
+            minVoxels,
+          };
+          const { map } = (await extents(() => post(job, []))) as { map: CarriedMap };
+          if (ask !== extentRequest || loaded !== request) {
+            throw new SupersededError('A newer extent was asked for.');
+          }
+          const moved = volume !== drawnVolume;
+          drawnExtent = key;
+          drawnVolume = volume;
+          await place(map, moved);
+        },
+        async course(region: string): Promise<MapCourse | null> {
+          if (!carried) throw new Error('No map is loaded.');
+          const loaded = request;
+          const key = `${atlas.settings.atlas}/${region}`;
+          let points = regions.get(key);
+          if (!points) {
+            const solids = await solidsOf(region);
+            if (!solids.length) return null;
+            points = regionPoints(solids);
+            regions.set(key, points);
+          }
+          const job: CourseJob = { kind: 'course', token: ++token, slot, points: points.slice() };
+          const { course } = (await post(job, [job.points.buffer])) as { course: MapCourse };
+          if (loaded !== request) throw new SupersededError('A newer map was opened.');
+          return course;
+        },
+        show(display: MapDisplay | null): void {
+          if (display && !carried) throw new Error('No map is loaded.');
+          shown = display;
+          setUserMapDisplay(uniforms, slot, display);
+          drawSections();
+          void placeSurface().catch(report);
+          invalidate();
+        },
+        async overlapAreas(regions: readonly string[]): Promise<OverlapAreas> {
+          if (!carried || !shown) throw new Error('No map is drawn.');
+          const map = carried;
+          const { threshold } = shown;
+          const id = atlas.settings.atlas;
+          const record = atlas.manifest.atlases.find((entry) => entry.id === id)?.ribbon_labels as
+            RibbonLabels | undefined;
+          if (!record) throw new Error(`No native labels for the ${id} cortex.`);
+          const [labels, areas] = await Promise.all([ribbon(record), nativeAreas()]);
+          const wanted = new Set(regions);
+          const cortex = new Set<number>();
+          const inside = new Set<number>();
+          for (const [index, region] of record.region_ids.entries()) {
+            if (atlas.regions.get(region)?.kind === 'cortex') cortex.add(index);
+            if (wanted.has(region)) inside.add(index);
+          }
+          const total: OverlapAreas = { map: 0, function: 0, both: 0 };
+          let at = 0;
+          for (const hemisphere of HEMISPHERES) {
+            const count = record.vertex_counts[hemisphere];
+            const part = overlapAreas(
+              {
+                values: map.cortex[hemisphere],
+                labels: labels.subarray(at, at + count),
+                areas: areas[hemisphere],
+              },
+              cortex,
+              inside,
+              threshold,
+            );
+            at += count;
+            total.map += part.map;
+            total.function += part.function;
+            total.both += part.both;
+          }
+          return total;
+        },
+        clear(): void {
+          request++;
+          if (moving()) stopBlend();
+          carried = null;
+          at = null;
+          shown = null;
+          unpaint();
+          clearUserMapVolume(uniforms, slot);
+          drawSections();
+          void placeSurface().catch(report);
+          invalidate();
+        },
+      },
+    };
+  };
+
+  const slots = Array.from({ length: MAP_SLOTS }, (_, slot) => createSlot(slot));
 
   /** A structure's closed solids, or else the shown cortical atlas's ribbon solid for a parcel. */
   const solidsOf = async (id: string): Promise<Mesh[]> => {
@@ -443,11 +637,7 @@ export function createUserMap({
   };
 
   const onChange = () => {
-    if (carried && painted !== atlas.settings.atlas) {
-      settle();
-      unpaint();
-      paintCortex().catch(report);
-    }
+    for (const slot of slots) slot.follow();
     void placeSurface().catch(report);
   };
   const report = (error: Error) => {
@@ -458,96 +648,19 @@ export function createUserMap({
 
   return {
     /**
-     * Read a NIfTI file given in `space` and carry it onto this brain, replacing any map; nothing is
-     * drawn until `show`. Rejects with the reason a file cannot be read or placed.
+     * The map slots. Each one's `load` reads a NIfTI file given in `space` and carries it onto this
+     * brain, replacing that slot's map; nothing is drawn until its `show`. It rejects with the reason a
+     * file cannot be read or placed.
      */
-    async load(file: ArrayBuffer, space: string, volume: number): Promise<MapSummary> {
-      const ask = ++request;
-      const metadata = atlas.manifest.coordinate_spaces;
-      if (!metadata) throw new Error('This anatomy publishes no template registration.');
-      const record = readIn(metadata, space);
-      const { id } = record;
-      const job: CarryJob = { kind: 'carry', token: ++token, file, space: id, volume };
-      const transfer: Transferable[] = [file];
-      if (!inverted.has(id)) {
-        if (record.native) job.native = record.native;
-        else {
-          job.field = { record: record.field, data: await loadFieldData(record.field, baseUrl) };
-          transfer.push(job.field.data.buffer);
-        }
+    maps: slots.map((slot) => slot.api),
+    /** Draw this slot's map over the other's. */
+    setTop(slot: number): void {
+      if (!Number.isInteger(slot) || slot < 0 || slot >= MAP_SLOTS) {
+        throw new RangeError(`There is no map slot ${slot}.`);
       }
-      if (!cortexSent) {
-        job.cortex = await cortexSurfaces();
-        for (const side of HEMISPHERES) {
-          transfer.push(job.cortex[side].pial.buffer, job.cortex[side].white.buffer);
-        }
-      }
-      const { map, summary } = (await post(job, transfer)) as {
-        map: CarriedMap;
-        summary: MapSummary;
-      };
-      inverted.add(id);
-      cortexSent = true;
-      if (ask !== request) throw new SupersededError('A newer map was opened.');
-      drawnExtent = extentKey(volume, Number.NaN, 0);
-      drawnVolume = volume;
-      shown = null;
-      sections.setUserMap(null);
-      setUserMapDisplay(uniforms, null);
-      uniforms.userMapBase.value.setFromColor(
-        greyed(new Color(atlas.manifest.appearance.tissue.cortex)),
-      );
-      await place(map);
-      return summary;
-    },
-    /** A volume's clusters and peaks beyond `threshold`, as nilearn's `get_clusters_table`. */
-    async clusters(threshold: number, minVoxels: number, volume: number): Promise<Cluster[]> {
-      if (!carried) throw new Error('No map is loaded.');
-      const reply = await tables(() =>
-        post({ kind: 'clusters', token: ++token, volume, threshold, minVoxels } as ClusterJob, []),
-      );
-      return (reply as { clusters: Cluster[] }).clusters;
-    },
-    /**
-     * Draw a volume of the map without its clusters smaller than `minVoxels` beyond ±threshold, as
-     * nilearn's `threshold_img(…, cluster_threshold=minVoxels)`; below two voxels, the whole volume.
-     */
-    async extent(threshold: number, minVoxels: number, volume: number): Promise<void> {
-      if (!carried) throw new Error('No map is loaded.');
-      const key = extentKey(volume, threshold, minVoxels);
-      if (key === drawnExtent) return;
-      const ask = ++extentRequest;
-      const loaded = request;
-      const { map } = (await extents(() =>
-        post({ kind: 'extent', token: ++token, volume, threshold, minVoxels } as ExtentJob, []),
-      )) as { map: CarriedMap };
-      if (ask !== extentRequest || loaded !== request) {
-        throw new SupersededError('A newer extent was asked for.');
-      }
-      const moved = volume !== drawnVolume;
-      drawnExtent = key;
-      drawnVolume = volume;
-      await place(map, moved);
-    },
-    /**
-     * A region's mean in each volume of the loaded map, over its whole millimetres inside the region's
-     * solid; null for a region with none (neither a structure nor a parcel of the shown cortex).
-     */
-    async course(region: string): Promise<MapCourse | null> {
-      if (!carried) throw new Error('No map is loaded.');
-      const loaded = request;
-      const key = `${atlas.settings.atlas}/${region}`;
-      let points = regions.get(key);
-      if (!points) {
-        const solids = await solidsOf(region);
-        if (!solids.length) return null;
-        points = regionPoints(solids);
-        regions.set(key, points);
-      }
-      const job: CourseJob = { kind: 'course', token: ++token, points: points.slice() };
-      const { course } = (await post(job, [job.points.buffer])) as { course: MapCourse };
-      if (loaded !== request) throw new SupersededError('A newer map was opened.');
-      return course;
+      uniforms.userMapTop.value = slot;
+      drawSections();
+      invalidate();
     },
     /** The surface the shown atlas's cortex is drawn on now. */
     drawnSurface(): CortexSurface {
@@ -561,74 +674,11 @@ export function createUserMap({
       surfaceChoice = surface;
       void placeSurface().catch(report);
     },
-    /** Draw the loaded map with these settings, or hide it with null. */
-    show(display: MapDisplay | null): void {
-      if (display && !carried) throw new Error('No map is loaded.');
-      shown = display;
-      setUserMapDisplay(uniforms, display);
-      sections.setUserMap(display && { at: at!, display, overlap });
-      void placeSurface().catch(report);
-      invalidate();
-    },
-    /** Draw the map against the paint, a function's areas, in these colours; null draws it on its own scale. */
+    /** Draw the maps against the paint, a function's areas, in these colours; null draws them on their own scales. */
     setOverlap(next: MapOverlap | null): void {
       overlap = next;
       setUserMapOverlap(uniforms, next);
-      if (shown && at) sections.setUserMap({ at, display: shown, overlap });
-      invalidate();
-    },
-    /**
-     * The drawn map's cortical overlap with `regions` on the shown atlas, in mm² of this brain's
-     * mid-thickness surface, counted as the stage draws it against a function: values above the threshold.
-     */
-    async overlapAreas(regions: readonly string[]): Promise<OverlapAreas> {
-      if (!carried || !shown) throw new Error('No map is drawn.');
-      const map = carried;
-      const { threshold } = shown;
-      const id = atlas.settings.atlas;
-      const record = atlas.manifest.atlases.find((entry) => entry.id === id)?.ribbon_labels as
-        RibbonLabels | undefined;
-      if (!record) throw new Error(`No native labels for the ${id} cortex.`);
-      const [labels, areas] = await Promise.all([ribbon(record), nativeAreas()]);
-      const wanted = new Set(regions);
-      const cortex = new Set<number>();
-      const inside = new Set<number>();
-      for (const [index, region] of record.region_ids.entries()) {
-        if (atlas.regions.get(region)?.kind === 'cortex') cortex.add(index);
-        if (wanted.has(region)) inside.add(index);
-      }
-      const total: OverlapAreas = { map: 0, function: 0, both: 0 };
-      let at = 0;
-      for (const hemisphere of HEMISPHERES) {
-        const count = record.vertex_counts[hemisphere];
-        const part = overlapAreas(
-          {
-            values: map.cortex[hemisphere],
-            labels: labels.subarray(at, at + count),
-            areas: areas[hemisphere],
-          },
-          cortex,
-          inside,
-          threshold,
-        );
-        at += count;
-        total.map += part.map;
-        total.function += part.function;
-        total.both += part.both;
-      }
-      return total;
-    },
-    /** Forget the map. */
-    clear(): void {
-      request++;
-      stopBlend();
-      carried = null;
-      at = null;
-      shown = null;
-      unpaint();
-      clearUserMapVolume(uniforms);
-      sections.setUserMap(null);
-      void placeSurface().catch(report);
+      drawSections();
       invalidate();
     },
     dispose(): void {
@@ -638,9 +688,31 @@ export function createUserMap({
       for (const job of waiting.values()) job.reject(new SupersededError('The engine closed.'));
       waiting.clear();
       stopBlend();
-      clearUserMapVolume(uniforms);
+      for (const slot of slots.keys()) clearUserMapVolume(uniforms, slot);
     },
   };
+}
+
+/**
+ * A parcel's packed per-vertex values for both maps, made the first time either map is drawn on it.
+ * Whoever writes it marks it for upload.
+ */
+function packed(mesh: Mesh, name: string, vertices: number): BufferAttribute {
+  const found = mesh.geometry.getAttribute(name);
+  if (!found) {
+    const made = new BufferAttribute(new Float32Array(vertices * ITEM_SIZE), ITEM_SIZE);
+    mesh.geometry.setAttribute(name, made);
+    return made;
+  }
+  if (
+    !(found instanceof BufferAttribute) ||
+    found.itemSize !== ITEM_SIZE ||
+    found.count !== vertices ||
+    !(found.array instanceof Float32Array)
+  ) {
+    throw new Error(`${name} does not hold ${ITEM_SIZE} floats for each of ${vertices} vertices.`);
+  }
+  return found;
 }
 
 // A moved parcel's published pial positions and normals as stored (the normals quantized), copied

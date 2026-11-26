@@ -1801,6 +1801,27 @@
   "max": "Colours up to",
   "invalid": "Give a threshold of 0 or more, below the top of the scale.",
   "opacity": "Opacity",
+  "colours": "Colours",
+  "colourScales": {
+   "red-yellow": "Red–yellow, blue–light blue",
+   "green-magenta": "Green, magenta"
+  },
+  "maps": "Maps",
+  "add": "Add another map…",
+  "onTop": "Draw on top",
+  "covers": [
+   "[\"Alpha\"] → \"Covers Alpha where both pass their thresholds.\"",
+   "[\"\"] → \"Covers  where both pass their thresholds.\""
+  ],
+  "coveredBy": [
+   "[\"Alpha\"] → \"Covered by Alpha where both pass their thresholds.\"",
+   "[\"\"] → \"Covered by  where both pass their thresholds.\""
+  ],
+  "hues": "The two colour scales differ in hue, which red–green colour blindness can lose.",
+  "captionOver": [
+   "[\"Alpha\"] → \"drawn over Alpha\"",
+   "[\"\"] → \"drawn over \""
+  ],
   "minVoxels": "Minimum cluster size, voxels",
   "minVoxelsHint": "Clusters of fewer of the map’s own voxels are neither drawn nor listed, as nilearn’s cluster_threshold.",
   "minVoxelsInvalid": "Give a whole number of voxels, 0 or more.",
@@ -1977,7 +1998,8 @@
    "slice": "This map is a single slice along one axis; it needs three dimensions.",
    "noFinite": "This map holds no finite values.",
    "zeros": "This map holds only zeros.",
-   "outside": "This map does not reach the brain; check the template it is in."
+   "outside": "This map does not reach the brain; check the template it is in.",
+   "secondSeries": "The other map is already a series of volumes, and only one map can be; remove it to step through this one."
   }
  },
  "reasons": {

@@ -96,10 +96,13 @@
     /** Takes focus on close when the opener is gone. */
     fallbackFocus?: () => HTMLElement | null;
     /**
-     * The reader's own map while the stage draws it: what the readout calls it, and a key that changes
-     * whenever how it is drawn does, so the planes are drawn again.
+     * The reader's own maps while the stage draws them, the one on top first: what the readout calls
+     * each, and a key that changes whenever how they are drawn does, so the planes are drawn again.
      */
-    map?: { key: string; title: string; statistic: Statistic | null } | null;
+    maps?: {
+      key: string;
+      drawn: readonly { slot: number; title: string; statistic: Statistic | null }[];
+    } | null;
     /**
      * Present while the tracts are this brain's own: a key that changes whenever what the stage draws
      * of them does. The planes then draw them, and offer FA.
@@ -116,7 +119,7 @@
     agreementName,
     regionName,
     fallbackFocus,
-    map = null,
+    maps = null,
     tracts = null,
   }: Props = $props();
 
@@ -227,11 +230,18 @@
       lang,
       reading.sample.cutRegion && regionName(reading.sample.cutRegion.id),
     );
-    const value = reading.sample.mapValue;
-    const mapped =
-      map && typeof value === 'number' && Number.isFinite(value)
-        ? `${text} · ${t(lang, 'overlay').readout(map.title, map.statistic, mapNumber(value, lang))}`
-        : text;
+    const values = new Map(
+      (reading.sample.mapValues ?? []).map(({ slot, value }) => [slot, value]),
+    );
+    const mapped = [
+      text,
+      ...(maps?.drawn ?? []).flatMap(({ slot, title, statistic }) => {
+        const value = values.get(slot);
+        return value !== undefined && Number.isFinite(value)
+          ? [t(lang, 'overlay').readout(title, statistic, mapNumber(value, lang))]
+          : [];
+      }),
+    ].join(' · ');
     const anisotropy = faShown ? fa!(crosshair) : NaN;
     return Number.isNaN(anisotropy)
       ? mapped
@@ -251,7 +261,7 @@
       canvases,
       frames,
       sections: engineState.sections,
-      mapKey: map?.key,
+      mapKey: maps?.key,
       tractsKey: tracts && tracts.key,
       faOpacity: faShown ? faOpacity : null,
     });
@@ -470,7 +480,7 @@
           sections={engineState.sections}
           {crosshair}
           crosshairShown={mpr.crosshairShown}
-          mapKey={map?.key}
+          mapKey={maps?.key}
           tractsKey={tracts && tracts.key}
           faOpacity={faShown ? faOpacity : null}
           fa={() => fa}

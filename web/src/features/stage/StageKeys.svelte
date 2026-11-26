@@ -60,8 +60,8 @@
     legend: Legend | null;
     /** The stroke cases on the stage, or null. */
     cases?: KeySources['cases'];
-    /** The reader's own map on the stage, or null. */
-    map?: KeySources['map'];
+    /** The reader's own maps on the stage, the one on top first. */
+    maps?: KeySources['maps'];
     directionShown: boolean;
     /** A row alone, or null for every row (`excursions.pickPaint`). */
     onPaintPick: (id: string | null) => void;
@@ -85,7 +85,7 @@
     lobes = null,
     legend,
     cases = null,
-    map = null,
+    maps = [],
     directionShown,
     onPaintPick,
     onPlateAction,
@@ -106,7 +106,7 @@
       lobes,
       legend,
       cases,
-      map,
+      maps,
       directionShown,
     }),
   );

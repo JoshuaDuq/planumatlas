@@ -7,10 +7,10 @@ import type {
   MapSummary,
 } from '../../core/user-map/display.ts';
 import type { OverlapAreas } from '../../core/user-map/overlap.ts';
-import { validDisplay } from '../../core/user-map/display.ts';
-import type { EngineUserMap } from '../api.ts';
+import { MAP_SLOTS, validDisplay } from '../../core/user-map/display.ts';
+import type { EngineMapSlot, EngineUserMap } from '../api.ts';
 
-export interface FakeUserMap extends EngineUserMap {
+export interface FakeMapSlot extends EngineMapSlot {
   /** The space of the loaded map, the volume it was carried at, and what the stage draws. */
   readonly loaded: string | null;
   readonly loadedVolume: number | null;
@@ -22,27 +22,69 @@ export interface FakeUserMap extends EngineUserMap {
   /** Each [threshold, minVoxels, volume] the clusters and the drawn extent were asked for, in order. */
   readonly clusterSizes: readonly (readonly [number, number, number])[];
   readonly extents: readonly (readonly [number, number, number])[];
-  readonly surface: CortexSurface;
-  readonly overlap: MapOverlap | null;
   /** Settle the pending `load` with this summary, or reject it with this error. */
   settle(result: MapSummary | Error): void;
 }
 
-/** The map without a brain: `load` waits until the test settles it, so its loading state can be seen. */
+export interface FakeUserMap extends EngineUserMap {
+  readonly maps: readonly FakeMapSlot[];
+  readonly top: number;
+  readonly surface: CortexSurface;
+  readonly overlap: MapOverlap | null;
+}
+
+/** The maps without a brain: `load` waits until the test settles it, so its loading state can be seen. */
 export function createFakeUserMap(
   available: boolean,
   table: (threshold: number) => Cluster[] = () => [],
   courses: (region: string) => MapCourse | null = () => null,
   areas: (regions: readonly string[]) => OverlapAreas = () => ({ map: 0, function: 0, both: 0 }),
 ): FakeUserMap {
+  let top = MAP_SLOTS - 1;
+  let surface: CortexSurface = 'pial';
+  let overlap: MapOverlap | null = null;
+  const maps = Array.from({ length: MAP_SLOTS }, () =>
+    createFakeMapSlot(available, table, courses, areas),
+  );
+  return {
+    available,
+    maps,
+    get top() {
+      return top;
+    },
+    setTop(slot) {
+      if (!Number.isInteger(slot) || slot < 0 || slot >= MAP_SLOTS) {
+        throw new RangeError(`There is no map slot ${slot}.`);
+      }
+      top = slot;
+    },
+    get surface() {
+      return surface;
+    },
+    setSurface(next) {
+      surface = next;
+    },
+    get overlap() {
+      return overlap;
+    },
+    setOverlap(next) {
+      overlap = next;
+    },
+  };
+}
+
+function createFakeMapSlot(
+  available: boolean,
+  table: (threshold: number) => Cluster[],
+  courses: (region: string) => MapCourse | null,
+  areas: (regions: readonly string[]) => OverlapAreas,
+): FakeMapSlot {
   const clusterThresholds: number[] = [];
   const clusterSizes: [number, number, number][] = [];
   const extents: [number, number, number][] = [];
   let loaded: string | null = null;
   let loadedVolume: number | null = null;
-  let surface: CortexSurface = 'pial';
   let shown: MapDisplay | null = null;
-  let overlap: MapOverlap | null = null;
   let pending: {
     space: string;
     volume: number;
@@ -50,7 +92,6 @@ export function createFakeUserMap(
     reject: (error: Error) => void;
   } | null = null;
   return {
-    available,
     get loaded() {
       return loaded;
     },
@@ -80,21 +121,9 @@ export function createFakeUserMap(
       if (!loaded) throw new Error('No map is loaded.');
       return courses(region);
     },
-    get surface() {
-      return surface;
-    },
-    get overlap() {
-      return overlap;
-    },
-    setOverlap(next) {
-      overlap = next;
-    },
     async overlapAreas(regions) {
       if (!loaded || !shown) throw new Error('No map is drawn.');
       return areas(regions);
-    },
-    setSurface(next) {
-      surface = next;
     },
     async clusters(threshold, minVoxels, volume) {
       if (!loaded) throw new Error('No map is loaded.');

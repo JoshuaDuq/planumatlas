@@ -18,6 +18,7 @@ import {
   addUserMapPainted,
   addUserMapToSurface,
   createUserMapUniforms,
+  stackUserMaps,
 } from '../user-map/overlay.ts';
 import type { UserMapUniforms } from '../user-map/overlay.ts';
 import { isPhone } from './device.ts';
@@ -73,8 +74,8 @@ export interface AnatomicalUserData {
   thickness: ThicknessUniforms | null;
   /** 1 while the cortex shows its sulcal depth; null for a file without the depth's span. */
   sulcMix: IUniform<number> | null;
-  /** True once this mesh carries the reader's map per vertex (`_user_map`). */
-  userMapReady: IUniform<boolean>;
+  /** By map slot: true once this mesh carries that map per vertex (its half of `_user_map`). */
+  userMapReady: readonly [IUniform<boolean>, IUniform<boolean>];
   /** This mesh's body-map codes, as `thickness` holds its thickness; null without a body map. */
   bodyMap: BodyMapUniforms | null;
 }
@@ -316,7 +317,7 @@ function addFoldShading(
     thicknessMix: withThickness ? thicknessMix : null,
     thickness: withThickness ? thickness : null,
     sulcMix: withSulc ? sulcMix : null,
-    userMapReady: { value: false },
+    userMapReady: [{ value: false }, { value: false }],
     bodyMap: withBodyMap ? bodyCodes : null,
   };
   Object.assign(material.userData, userData);
@@ -349,7 +350,9 @@ function addFoldShading(
       shader.uniforms.visualSigmaDecode = { value: fieldDecode(ranges, '_PRF_SIGMA') };
     }
     Object.assign(shader.uniforms, userMap);
-    shader.uniforms.userMapReady = userData.userMapReady;
+    userData.userMapReady.forEach(
+      (ready, slot) => (shader.uniforms[`userMapReady${slot}`] = ready),
+    );
     shader.uniforms.userMapPainted = painted;
     shader.uniforms.sulcDecode = { value: fieldDecode(ranges, '_SULC') };
     shader.uniforms.opennessDecode = { value: fieldDecode(ranges, '_OPENNESS') };
@@ -366,13 +369,14 @@ attribute float _t1;
 uniform vec2 sulcDecode;
 uniform vec2 opennessDecode;
 uniform vec2 t1Decode;
-attribute vec2 _user_map;
-attribute vec2 _user_map_previous;
+attribute vec4 _user_map;
+attribute vec4 _user_map_previous;
 uniform float userMapBlend;
+uniform int userMapMoving;
 varying float vOpenness;
 varying float vT1;
 varying float vSulcalDepth;
-varying vec2 vUserMap;
+varying vec4 vUserMap;
 ${withNetworks ? 'attribute float _network;\nuniform highp sampler2D networkPalette;\nvarying vec4 vNetworkColor;' : ''}
 ${withTerritories ? 'attribute float _territory;\nuniform highp sampler2D territoryPalette;\nvarying vec4 vTerritoryColor;' : ''}
 ${withCodes ? 'varying vec4 vCodeColor;' : ''}
@@ -385,7 +389,12 @@ ${shader.vertexShader}`.replace(
 vSulcalDepth = _sulc * sulcDecode.y + sulcDecode.x;
 vOpenness = _openness * opennessDecode.y + opennessDecode.x;
 vT1 = _t1 * t1Decode.y + t1Decode.x;
-vUserMap = userMapBlend < 1.0 ? mix(_user_map_previous, _user_map, userMapBlend) : _user_map;
+vUserMap = _user_map;
+if (userMapBlend < 1.0) {
+  vec4 moved = mix(_user_map_previous, _user_map, userMapBlend);
+  if (userMapMoving == 0) vUserMap.xy = moved.xy;
+  else vUserMap.zw = moved.zw;
+}
 ${withNetworks ? 'vNetworkColor = texelFetch(networkPalette, ivec2(int(_network + 0.5), 0), 0);' : ''}
 ${withTerritories ? 'vTerritoryColor = texelFetch(territoryPalette, ivec2(int(_territory + 0.5), 0), 0);' : ''}
 ${withCodes ? 'vCodeColor = vec4(0.0);' : ''}
@@ -401,8 +410,9 @@ uniform vec2 t1Range;
 uniform float tissueVariation;
 uniform vec2 foldRange;
 uniform vec2 foldStrength;
-varying vec2 vUserMap;
-uniform bool userMapReady;
+varying vec4 vUserMap;
+uniform bool userMapReady0;
+uniform bool userMapReady1;
 uniform vec3 userMapBase;
 ${USER_MAP_COLOUR}
 ${withNetworks ? 'varying vec4 vNetworkColor;\nuniform float networkMix;' : ''}
@@ -609,19 +619,22 @@ float visualCovered(float d, float r, float s) {
 }`;
 
 /*
- * While the reader's map is on, the cortex is one grey, keeping its T1 texture and fold shading, and a
- * vertex whose parents mostly have a value takes the map's colour beyond the threshold, lit as tissue is.
+ * While a reader's map is on, the cortex is one grey, keeping its T1 texture and fold shading, and a
+ * vertex whose parents mostly have a value takes each map's colour beyond its threshold, lit as tissue
+ * is, the map on top last. `_user_map` holds the first map's sum and share in xy, the second's in zw.
  * Against a function, its painted areas keep the paint.
  */
 const USER_MAP_FRAGMENT = `
-      bool userMapDrawn = userMapOn && userMapReady;
-      if (userMapDrawn && userMapGreys()) diffuseColor.rgb = userMapBase;`;
+      bool userMapDrawn0 = userMapOn0 && userMapReady0;
+      bool userMapDrawn1 = userMapOn1 && userMapReady1;
+      if ((userMapDrawn0 || userMapDrawn1) && userMapGreys()) diffuseColor.rgb = userMapBase;`;
 
 const USER_MAP_COLOUR_FRAGMENT = `
-      vec4 userMapMapped = vec4(0.0);
-      if (userMapDrawn && vUserMap.y >= 0.5) userMapMapped = userMapColour(vUserMap.x / vUserMap.y);
-      diffuseColor.rgb = mix(
-        diffuseColor.rgb, sRGBTransferEOTF(vec4(userMapMapped.rgb, 1.0)).rgb, userMapMapped.a);`;
+      vec4 userMapMapped0 = userMapDrawn0 && vUserMap.y >= 0.5
+        ? userMapColour0(vUserMap.x / vUserMap.y) : vec4(0.0);
+      vec4 userMapMapped1 = userMapDrawn1 && vUserMap.w >= 0.5
+        ? userMapColour1(vUserMap.z / vUserMap.w) : vec4(0.0);
+      ${stackUserMaps('diffuseColor.rgb')}`;
 
 const [V1_TONE, V2_TONE, V3_TONE] = VISUAL_TONES.areas.map((tone) => tone.toFixed(3));
 

@@ -5,6 +5,7 @@ import { MAP_OVERLAP } from '../core/state/paint.ts';
 import type { PaintState } from '../core/state/paint.ts';
 import type { MapOverlap as Colours } from '../core/user-map/display.ts';
 import type { OverlapAreas } from '../core/user-map/overlap.ts';
+import type { EngineMapSlot } from '../engine/api.ts';
 import { createMapOverlap } from './map-overlap.svelte.ts';
 
 const domains = {
@@ -39,25 +40,32 @@ function setup() {
       lang: 'en',
     },
   });
-  const userMap = $state({
-    drawn: true,
+  const drawn = (slot: number, title: string) => ({
+    slot,
     placed: 1,
-    settings: { threshold: 3, max: 8, opacity: 1 },
-    title: 'zstat1',
+    settings: { threshold: 3, max: 8, opacity: 1, colours: 'red-yellow' as const },
+    title,
   });
+  const userMap = $state({ drawnMaps: [drawn(0, 'zstat1')] });
   const overlaps: (Colours | null)[] = [];
-  const asked: { regions: readonly string[]; resolve: (areas: OverlapAreas) => void }[] = [];
+  const asked: {
+    slot: number;
+    regions: readonly string[];
+    resolve: (areas: OverlapAreas) => void;
+  }[] = [];
   const engine = {
     setOverlap: (overlap: Colours | null) => void overlaps.push(overlap),
-    overlapAreas: (regions: readonly string[]) =>
-      new Promise<OverlapAreas>((resolve) => asked.push({ regions, resolve })),
+    maps: [0, 1].map((slot) => ({
+      overlapAreas: (regions: readonly string[]) =>
+        new Promise<OverlapAreas>((resolve) => asked.push({ slot, regions, resolve })),
+    })) as unknown as EngineMapSlot[],
   };
   let store!: ReturnType<typeof createMapOverlap>;
   const stop = $effect.root(() => {
     store = createMapOverlap({ engine, view, userMap, domains });
   });
   flushSync();
-  return { view, userMap, overlaps, asked, store, stop };
+  return { view, userMap, drawn, overlaps, asked, store, stop };
 }
 
 const settled = () => new Promise((resolve) => setTimeout(resolve));
@@ -78,7 +86,7 @@ test('FUNC-54 · a drawn map is drawn against one function and measured over the
   expect(store.current!.areas).toBeNull();
 
   // A new extent is measured again; the answer for the one before it, arriving last, is dropped.
-  userMap.placed = 2;
+  userMap.drawnMaps[0]!.placed = 2;
   flushSync();
   asked.at(-1)!.resolve({ map: 10, function: 20, both: 2 });
   await settled();
@@ -86,9 +94,24 @@ test('FUNC-54 · a drawn map is drawn against one function and measured over the
   await settled();
   expect(store.current!.areas).toEqual({ map: 10, function: 20, both: 2 });
 
-  userMap.drawn = false;
+  userMap.drawnMaps = [];
   flushSync();
   expect(overlaps.at(-1)).toBeNull();
   expect(store.current).toBeNull();
+  stop();
+});
+
+test('FUNC-63 · two drawn maps are not drawn against the function; the one left alone is, from its own slot', async () => {
+  const { userMap, drawn, overlaps, asked, store, stop } = setup();
+  userMap.drawnMaps = [drawn(1, 'mask'), drawn(0, 'zstat1')];
+  flushSync();
+  expect(overlaps.at(-1)).toBeNull();
+  expect(store.current).toBeNull();
+  const before = asked.length;
+  userMap.drawnMaps = [drawn(1, 'mask')];
+  flushSync();
+  expect(overlaps.at(-1)).toEqual(MAP_OVERLAP);
+  expect(asked.slice(before).map(({ slot }) => slot)).toEqual([1]);
+  expect(store.current).toEqual({ title: 'mask', threshold: 3, areas: null });
   stop();
 });

@@ -7,6 +7,7 @@ import type { MapSummary } from '../../core/user-map/display.ts';
 import { MapFileError } from '../../core/user-map/map-file-error.ts';
 import { AssetError } from '../../core/assets/published-assets.ts';
 import type { BrainAtlas } from '../model/brain-atlas.ts';
+import type { SliceMap } from '../slices/sampling.ts';
 import { createUserMapUniforms } from './overlay.ts';
 import type { UserMapJob, UserMapReply } from './user-map-worker.ts';
 import { createUserMap } from './user-map.ts';
@@ -121,7 +122,7 @@ function setup() {
   vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
   const parcel = (region: string, hemisphere: string) => {
     const material = new MeshPhysicalMaterial();
-    material.userData['userMapReady'] = { value: false };
+    material.userData['userMapReady'] = [{ value: false }, { value: false }];
     return Object.assign(new Mesh(triangle(0.01), material), {
       userData: { region_id: region, hemisphere },
     });
@@ -170,13 +171,21 @@ function setup() {
   atlas.addEventListener('loaderror', (event) => {
     throw (event as CustomEvent).detail;
   });
+  // Each list of maps the linked MRI was given, as slots in drawing order.
+  const sliced: number[][] = [];
   const userMap = createUserMap({
     atlas: atlas as unknown as BrainAtlas,
-    sections: { setUserMap() {} },
+    sections: {
+      setUserMaps: (maps: readonly SliceMap[]) => sliced.push(maps.map((map) => map.slot)),
+    },
     baseUrl: new URL('https://planum.test/'),
     invalidate() {},
   });
-  return { userMap, atlas, mesh: layers.get('hcp')!.meshes[0]!, layers };
+  const [first, second] = userMap.maps as [
+    (typeof userMap.maps)[number],
+    (typeof userMap.maps)[number],
+  ];
+  return { userMap, first, second, sliced, atlas, mesh: layers.get('hcp')!.meshes[0]!, layers };
 }
 
 afterEach(() => {
@@ -188,36 +197,45 @@ afterEach(() => {
   FakeWorker.created = 0;
 });
 
-const ready = (mesh: Mesh) =>
-  (mesh.material as MeshPhysicalMaterial).userData['userMapReady'].value as boolean;
+const ready = (mesh: Mesh, slot = 0) =>
+  (mesh.material as MeshPhysicalMaterial).userData['userMapReady'][slot].value as boolean;
+const display = { threshold: 1, max: 2, opacity: 1, colours: 'red-yellow' } as const;
+/** Slot 0's values at the three vertices, the vec4's first half: (sum, share) pairs. */
+const own = (values: ArrayLike<number>, slot = 0) =>
+  Array.from({ length: values.length / 4 }, (_, v) => [
+    values[4 * v + 2 * slot],
+    values[4 * v + 2 * slot + 1],
+  ]).flat();
 
 test('each map and extent is written over the cortex’s own buffer, and a removed map is hidden', async () => {
-  const { userMap, mesh } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  const { first, mesh } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
   const drawn = mesh.geometry.getAttribute('_user_map');
-  assert.deepEqual([...drawn.array], [1, 1, 1, 1, 1, 1]);
+  assert.deepEqual([...drawn.array], [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0]);
   assert.equal(ready(mesh), true);
-  await userMap.extent(2, 5, 0);
+  const version = (drawn as BufferAttribute).version;
+  await first.extent(2, 5, 0);
   assert.equal(mesh.geometry.getAttribute('_user_map'), drawn);
-  assert.deepEqual([...drawn.array], [2, 2, 2, 2, 2, 2]);
-  assert.equal((drawn as BufferAttribute).version, 1);
-  userMap.clear();
+  assert.deepEqual(own(drawn.array), [2, 2, 2, 2, 2, 2]);
+  assert.equal((drawn as BufferAttribute).version, version + 1);
+  first.clear();
   assert.equal(ready(mesh), false);
 });
 
 test('a new volume of a series moves from the last one drawn, on the grid and the cortex', async () => {
-  const { userMap, atlas, mesh } = setup();
+  const { first, atlas, mesh } = setup();
   const uniforms = atlas.userMap;
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
-  const first = uniforms.userMapVolume.value;
-  assert.ok(first);
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  const loaded = uniforms.userMapVolume0.value;
+  assert.ok(loaded);
   assert.equal(uniforms.userMapPrevious.value, null);
-  await userMap.extent(1, 0, 1);
-  assert.equal(uniforms.userMapPrevious.value, first);
-  assert.notEqual(uniforms.userMapVolume.value, first);
+  await first.extent(1, 0, 1);
+  assert.equal(uniforms.userMapPrevious.value, loaded);
+  assert.notEqual(uniforms.userMapVolume0.value, loaded);
   assert.equal(uniforms.userMapBlend.value, 0);
-  assert.deepEqual([...mesh.geometry.getAttribute('_user_map_previous').array], [1, 1, 1, 1, 1, 1]);
-  assert.deepEqual([...mesh.geometry.getAttribute('_user_map').array], [2, 2, 2, 2, 2, 2]);
+  assert.equal(uniforms.userMapMoving.value, 0);
+  assert.deepEqual(own(mesh.geometry.getAttribute('_user_map_previous').array), [1, 1, 1, 1, 1, 1]);
+  assert.deepEqual(own(mesh.geometry.getAttribute('_user_map').array), [2, 2, 2, 2, 2, 2]);
   drawFrames(100);
   assert.ok(uniforms.userMapBlend.value > 0 && uniforms.userMapBlend.value < 1);
   drawFrames(1000);
@@ -226,28 +244,28 @@ test('a new volume of a series moves from the last one drawn, on the grid and th
 });
 
 test('a new extent of the same volume, or any volume under reduced motion, is drawn at once', async () => {
-  const { userMap, atlas } = setup();
+  const { first, atlas } = setup();
   const uniforms = atlas.userMap;
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
-  await userMap.extent(1, 5, 0);
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  await first.extent(1, 5, 0);
   assert.equal(uniforms.userMapPrevious.value, null);
   assert.equal(uniforms.userMapBlend.value, 1);
   assert.equal(frames.size, 0);
   vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('reduce') }));
-  await userMap.extent(1, 5, 1);
+  await first.extent(1, 5, 1);
   assert.equal(uniforms.userMapPrevious.value, null);
   assert.equal(uniforms.userMapBlend.value, 1);
   assert.equal(frames.size, 0);
 });
 
 test('the cortex moves between surfaces in its own buffers and comes back to the published pial', async () => {
-  const { userMap, mesh } = setup();
+  const { userMap, first, mesh } = setup();
   const position = mesh.geometry.getAttribute('position');
   const normal = mesh.geometry.getAttribute('normal');
   const pial = [...position.array];
   const pialNormals = [...normal.array];
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
-  userMap.show({ threshold: 1, max: 2, opacity: 1 });
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  first.show(display);
   const x = () => position.array[0]!;
   userMap.setSurface('white');
   await vi.waitFor(() => assert.ok(Math.abs(x() - 0.03) < 1e-7));
@@ -278,24 +296,22 @@ test('the cortex takes the chosen surface without a map, and the pial under a cu
 });
 
 test('a file the worker refused rejects with its code, for the overlay to word', async () => {
-  const { userMap } = setup();
+  const { first } = setup();
   FakeWorker.refusal = {
     error: 'This map holds only zeros.',
     file: { code: 'zeros', params: [] },
   };
-  const refused = await userMap.load(new ArrayBuffer(4), 'mni', 0).catch((error: unknown) => error);
+  const refused = await first.load(new ArrayBuffer(4), 'mni', 0).catch((error: unknown) => error);
   assert.ok(refused instanceof MapFileError);
   assert.equal(refused.code, 'zeros');
 });
 
 test('a worker script a newer deploy removed rejects as updated, and the next load tries a new worker', async () => {
-  const { userMap } = setup();
+  const { first } = setup();
   vi.stubGlobal('dispatchEvent', () => true);
   FakeWorker.unloaded = true;
   for (const attempt of [1, 2]) {
-    const failed = await userMap
-      .load(new ArrayBuffer(4), 'mni', 0)
-      .catch((error: unknown) => error);
+    const failed = await first.load(new ArrayBuffer(4), 'mni', 0).catch((error: unknown) => error);
     assert.ok(failed instanceof AssetError);
     assert.equal(failed.code, 'asset-updated');
     assert.equal(FakeWorker.created, attempt);
@@ -303,9 +319,9 @@ test('a worker script a newer deploy removed rejects as updated, and the next lo
 });
 
 test('ATLAS-10 an atlas released and loaded again is painted and moved on its new meshes', async () => {
-  const { userMap, atlas, layers } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
-  userMap.show({ threshold: 1, max: 2, opacity: 1 });
+  const { userMap, first, atlas, layers } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  first.show(display);
   userMap.setSurface('white');
   const released = layers.get('hcp')!.meshes[0]!;
   await vi.waitFor(() => assert.ok(ready(released)));
@@ -321,7 +337,7 @@ test('ATLAS-10 an atlas released and loaded again is painted and moved on its ne
   layers.set('hcp', {
     meshes: (['left', 'right'] as const).map((hemisphere, at) => {
       const material = new MeshPhysicalMaterial();
-      material.userData['userMapReady'] = { value: false };
+      material.userData['userMapReady'] = [{ value: false }, { value: false }];
       return Object.assign(new Mesh(triangle(0.01), material), {
         userData: { region_id: 'ab'[at], hemisphere },
       });
@@ -336,9 +352,9 @@ test('ATLAS-10 an atlas released and loaded again is painted and moved on its ne
 });
 
 test('an atlas changed while its parcels were being moved is left on the pial', async () => {
-  const { userMap, atlas, layers } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
-  userMap.show({ threshold: 1, max: 2, opacity: 1 });
+  const { userMap, first, atlas, layers } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  first.show(display);
   const [hcp, julich] = ['hcp', 'julich'].map(
     (id) => layers.get(id)!.meshes[0]!.geometry.getAttribute('position').array,
   );
@@ -350,14 +366,14 @@ test('an atlas changed while its parcels were being moved is left on the pial', 
 });
 
 test('a volume is carried once for each volume and extent asked for, never again for the one drawn', async () => {
-  const { userMap, mesh } = setup();
-  assert.deepEqual(await userMap.load(new ArrayBuffer(4), 'mni', 1), { volumes: 3 });
+  const { first, mesh } = setup();
+  assert.deepEqual(await first.load(new ArrayBuffer(4), 'mni', 1), { volumes: 3 });
   // Below two voxels nothing is trimmed, so the volume carried at load is the one drawn at any threshold.
-  await userMap.extent(2, 0, 1);
-  await userMap.extent(3, 1, 1);
-  await userMap.extent(2, 0, 2);
-  await userMap.extent(2, 5, 2);
-  await userMap.extent(2, 5, 2);
+  await first.extent(2, 0, 1);
+  await first.extent(3, 1, 1);
+  await first.extent(2, 0, 2);
+  await first.extent(2, 5, 2);
+  await first.extent(2, 5, 2);
   const jobs = FakeWorker.jobs.map((job) =>
     job.kind === 'carry' || job.kind === 'extent' ? [job.kind, job.volume] : [job.kind],
   );
@@ -366,45 +382,96 @@ test('a volume is carried once for each volume and extent asked for, never again
     ['extent', 2],
     ['extent', 2],
   ]);
-  assert.deepEqual([...mesh.geometry.getAttribute('_user_map').array], [3, 3, 3, 3, 3, 3]);
+  assert.deepEqual(own(mesh.geometry.getAttribute('_user_map').array), [3, 3, 3, 3, 3, 3]);
 });
 
 test('a structure’s course is read at its whole millimetres; a region without a solid has none', async () => {
-  const { userMap } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  const { first } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
   // −1, 0 and 1 mm along each axis of the 3 mm cube.
-  const course = await userMap.course('thalamus');
+  const course = await first.course('thalamus');
   assert.equal(course?.points, 27);
-  assert.equal(await userMap.course('nowhere'), null);
+  assert.equal(await first.course('nowhere'), null);
   // The worker is sent a copy, so the points kept for the region survive the transfer.
-  await userMap.course('thalamus');
+  await first.course('thalamus');
   const sent = FakeWorker.jobs.filter((job) => job.kind === 'course');
   assert.equal(sent.length, 2);
   assert.notEqual(sent[0]!.points, sent[1]!.points);
 });
 
 test('volumes asked for while one is carried are sent only if still the newest when it is done', async () => {
-  const { userMap } = setup();
-  await userMap.load(new ArrayBuffer(4), 'mni', 0);
+  const { first } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
   const carried = () =>
     FakeWorker.jobs.flatMap((job) => (job.kind === 'extent' ? [job.volume] : []));
   const outcome = (volume: number) =>
-    userMap.extent(2, 0, volume).then(
+    first.extent(2, 0, volume).then(
       () => 'drawn',
       (error: Error) => error.name,
     );
   FakeWorker.held = [];
-  const first = outcome(1);
+  const earliest = outcome(1);
   await vi.waitFor(() => assert.deepEqual(carried(), [1]));
   const later = [2, 3, 4].map(outcome);
   FakeWorker.held.shift()!();
   await vi.waitFor(() => assert.deepEqual(carried(), [1, 4]));
   FakeWorker.held.shift()!();
   // The first was carried, but is not drawn over the newer one asked for meanwhile.
-  assert.deepEqual(await Promise.all([first, ...later]), [
+  assert.deepEqual(await Promise.all([earliest, ...later]), [
     'AbortError',
     'AbortError',
     'AbortError',
     'drawn',
   ]);
+});
+
+test('FUNC-60 · two maps write their own halves of each vertex, and removing one hides only its own', async () => {
+  const { first, second, mesh } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  await second.load(new ArrayBuffer(4), 'mni', 0);
+  const drawn = mesh.geometry.getAttribute('_user_map');
+  // The worker carries each map with its token as every value: 1 for the first, 2 for the second.
+  assert.deepEqual([...drawn.array], [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2]);
+  assert.deepEqual([ready(mesh, 0), ready(mesh, 1)], [true, true]);
+  second.clear();
+  assert.deepEqual([ready(mesh, 0), ready(mesh, 1)], [true, false]);
+  const jobs = FakeWorker.jobs.map((job) => [job.kind, job.slot]);
+  assert.deepEqual(jobs, [
+    ['carry', 0],
+    ['carry', 1],
+  ]);
+});
+
+test('FUNC-60 · the linked MRI is given the drawn maps under first, and the one on top follows setTop', async () => {
+  const { userMap, first, second, sliced, atlas } = setup();
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  await second.load(new ArrayBuffer(4), 'mni', 0);
+  first.show(display);
+  second.show({ ...display, colours: 'green-magenta' });
+  assert.equal(atlas.userMap.userMapTop.value, 1);
+  assert.deepEqual(sliced.at(-1), [0, 1]);
+  userMap.setTop(0);
+  assert.equal(atlas.userMap.userMapTop.value, 0);
+  assert.deepEqual(sliced.at(-1), [1, 0]);
+  first.show(null);
+  assert.deepEqual(sliced.at(-1), [1]);
+  assert.throws(() => userMap.setTop(2), RangeError);
+});
+
+test('FUNC-60 · another map placed while a series moves leaves the move alone', async () => {
+  const { first, second, atlas } = setup();
+  const uniforms = atlas.userMap;
+  await first.load(new ArrayBuffer(4), 'mni', 0);
+  await second.load(new ArrayBuffer(4), 'mni', 0);
+  await first.extent(1, 0, 1);
+  const held = uniforms.userMapPrevious.value;
+  assert.ok(held);
+  assert.equal(uniforms.userMapMoving.value, 0);
+  // A new extent of the other map, without a volume change: drawn at once, the series keeps moving.
+  await second.extent(1, 5, 0);
+  assert.equal(uniforms.userMapPrevious.value, held);
+  assert.equal(uniforms.userMapBlend.value, 0);
+  drawFrames(1000);
+  assert.equal(uniforms.userMapPrevious.value, null);
+  assert.equal(uniforms.userMapBlend.value, 1);
 });

@@ -17,12 +17,13 @@
   let {
     region,
     lang,
-    map,
+    maps,
     label,
   }: {
     region: Region | null;
     lang: Language;
-    map: UserMapStore;
+    /** The reader's maps, of which one at most is a series. */
+    maps: Pick<UserMapStore, 'maps'>;
     label: (id: string) => { name: string };
   } = $props();
 
@@ -42,6 +43,10 @@
   let hover = $state<number | null>(null);
 
   const copy = $derived(t(lang, 'overlay'));
+  const map = $derived(
+    maps.maps.find(({ state }) => state.status === 'ready' && state.summary.volumes > 1) ??
+      maps.maps[0]!,
+  );
   // A new object for each map read, so a map read again in another template is read again here.
   const series = $derived(
     map.state.status === 'ready' && map.state.summary.volumes > 1 ? map.state : null,

@@ -48,9 +48,10 @@ const send = (job: UserMapJob) =>
   (globalThis as unknown as { onmessage: (event: { data: UserMapJob }) => void }).onmessage({
     data: job,
   });
-const carry = (token: number, name: string): CarryJob => ({
+const carry = (token: number, name: string, slot = 0): CarryJob => ({
   kind: 'carry',
   token,
+  slot,
   file: new TextEncoder().encode(name).buffer,
   space: 'mni',
   volume: 0,
@@ -81,8 +82,22 @@ test('a carry that finishes after a newer one does not become the map its cluste
   await reply(2);
   reads.get('older')!(image('older'));
   await reply(1);
-  send({ kind: 'clusters', token: 3, volume: 1, threshold: 1, minVoxels: 0 });
+  send({ kind: 'clusters', token: 3, slot: 0, volume: 1, threshold: 1, minVoxels: 0 });
   assert.deepEqual(await reply(3), { token: 3, clusters: [{ id: 'newer 1' }] });
+});
+
+test('FUNC-60 · each slot keeps its own file: a carry into one is not the map the other slot is read from', async () => {
+  send(carry(5, 'first', 0));
+  reads.get('first')!(image('first'));
+  await reply(5);
+  // Newer by token, but in the other slot.
+  send(carry(6, 'second', 1));
+  reads.get('second')!(image('second'));
+  await reply(6);
+  send({ kind: 'clusters', token: 7, slot: 0, volume: 1, threshold: 1, minVoxels: 0 });
+  send({ kind: 'clusters', token: 8, slot: 1, volume: 1, threshold: 1, minVoxels: 0 });
+  assert.deepEqual(await reply(7), { token: 7, clusters: [{ id: 'first 1' }] });
+  assert.deepEqual(await reply(8), { token: 8, clusters: [{ id: 'second 1' }] });
 });
 
 test('a file that cannot be read is answered with its code and values, for the page to word', async () => {
