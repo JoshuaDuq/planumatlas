@@ -39,6 +39,13 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 - The guided tour's **Subject** card lay over the **Internal anatomy** list. A card about one of the top
   bar's lists now sits in the stage's far corner, and the lists stay open from one of these stops to the
   next.
+- The exploded view at the NextBrain level moved nearly the whole forebrain as one block, and cut
+  structures such as the hippocampus into pieces that drifted apart. A structure drawn in parts now moves
+  whole, at every level: the hippocampal formation with its layers, the thalamus with its nuclei, the
+  corpus callosum with its segments. A structure labelled on one side only no longer holds the two sides
+  together, so the left and right deep structures part as they do at the teaching level.
+- The first exploded view of a level jumped part of the way open: its layout was measured after the
+  move had started. It is now measured first.
 
 ## [0.1.2] - 2026-11-25
 

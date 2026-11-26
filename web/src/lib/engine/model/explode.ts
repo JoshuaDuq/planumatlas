@@ -19,18 +19,19 @@ export const DEEP_SPREAD = 0.6;
 
 /**
  * Move internal pieces radially. If that would cross or contain another piece, join them and
- * recompute their common offset; their mirror images join too (`mirrors[i]` is group i's
- * counterpart on the other side, or i itself), since one side's narrower clearance would otherwise
- * send a structure off alone while its counterpart stays put. Each pass either reduces the piece
- * count or finishes; no piece is shuffled onto a different axis, and the caller caches this layout
- * between frames.
+ * recompute their common offset; their mirror images join too, since one side's narrower clearance
+ * would otherwise send a structure off alone while its counterpart stays put. `mirrors[i]` is group
+ * i's counterpart on the other side, i itself for a midline group, and null for a structure one side
+ * alone has: read as midline, that one would join both sides to the piece it travels with. Each pass
+ * either reduces the piece count or finishes; no piece is shuffled onto a different axis, and the
+ * caller caches this layout between frames.
  */
 export function deepShifts(
   groups: readonly (readonly Mesh[])[],
-  mirrors: readonly number[],
+  mirrors: readonly (number | null)[],
 ): Map<Mesh, Vector3> {
-  if (mirrors.length !== groups.length || mirrors.some((m, i) => mirrors[m] !== i)) {
-    throw new Error('Every group needs one mirror image, and that image must mirror it back.');
+  if (mirrors.length !== groups.length || mirrors.some((m, i) => m !== null && mirrors[m] !== i)) {
+    throw new Error("A group's mirror image must mirror it back.");
   }
   const pieces = groups.map((meshes, index) => {
     const entries = meshes.map((mesh) => {
@@ -88,7 +89,12 @@ export function deepShifts(
     }
     for (const piece of pieces.slice()) {
       if (!pieces.includes(piece)) continue;
-      const [first, ...rest] = new Set(piece.groups.map((group) => pieceOf(mirrors[group]!)));
+      const [first, ...rest] = new Set(
+        piece.groups.flatMap((group) => {
+          const mirror = mirrors[group]!;
+          return mirror === null ? [] : [pieceOf(mirror)];
+        }),
+      );
       for (const other of rest) join(first!, other);
     }
   } while (pieces.length < previousCount);

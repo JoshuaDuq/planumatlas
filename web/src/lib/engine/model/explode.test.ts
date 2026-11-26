@@ -143,14 +143,23 @@ test.each(['aseg', 'nextbrain', 'learning'])(
   },
 );
 
+/** A cube of `size` metres centred at `x`, as the layout reads a structure. */
+function box(size: number, x: number): Mesh {
+  const geometry = new BoxGeometry(size, size, size);
+  geometry.boundsTree = new MeshBVH(geometry);
+  const mesh = new Mesh(geometry);
+  mesh.position.x = x;
+  return mesh;
+}
+
+function disposeBoxes(list: readonly Mesh[]) {
+  for (const mesh of list) {
+    mesh.geometry.dispose();
+    (mesh.material as import('three').Material).dispose();
+  }
+}
+
 test('interlocking and enclosed regions move together instead of being rearranged', () => {
-  const box = (size: number, x: number) => {
-    const geometry = new BoxGeometry(size, size, size);
-    geometry.boundsTree = new MeshBVH(geometry);
-    const mesh = new Mesh(geometry);
-    mesh.position.x = x;
-    return mesh;
-  };
   const outer = box(0.02, 0);
   const inner = box(0.005, 0);
   const crossing = box(0.02, 0.008);
@@ -163,11 +172,61 @@ test('interlocking and enclosed regions move together instead of being rearrange
   close(shifts.get(outer)!, shifts.get(inner)!, 'an enclosed region');
   close(shifts.get(outer)!, shifts.get(crossing)!, 'an interlocking region');
   assert.ok(shifts.get(outer)!.x < 0 && shifts.get(separate)!.x > 0, 'the pieces still expand');
-  for (const mesh of list) {
-    mesh.geometry.dispose();
-    (mesh.material as import('three').Material).dispose();
-  }
+  disposeBoxes(list);
 });
+
+test('a structure one side alone has holds nothing to the other side', () => {
+  const left = box(0.02, -0.03);
+  const right = box(0.02, 0.03);
+  const lone = box(0.02, -0.038);
+  const shifts = deepShifts([[left], [right], [lone]], [1, 0, null]);
+  close(shifts.get(lone)!, shifts.get(left)!, 'it travels with the neighbour it interlocks');
+  assert.ok(shifts.get(left)!.x < 0 && shifts.get(right)!.x > 0, 'the sides still part');
+  disposeBoxes([left, right, lone]);
+});
+
+test.each(['cdmd', 'mni152'])(
+  'on %s, a structure drawn in parts moves whole, and the two sides part',
+  async (anatomy) => {
+    const brain = new BrainAtlas(readManifest(anatomy), publishedLoader(modelDirectory(anatomy)));
+    await brain.initialize(ATLAS);
+    for (const detail of ['aseg', 'nextbrain', 'learning']) {
+      await brain.setDetail(detail);
+      at(1000);
+      brain.setExploded(true);
+      brain.stepExplode(Number.MAX_SAFE_INTEGER);
+      const drawn = new Map(
+        brain.layers.get(detail)!.meshes.map((mesh) => [mesh.userData['region_id'], mesh]),
+      );
+      /** Where a unit is drawn: its own surface, or the parts this level draws it in. */
+      const shiftsOf = (unit: string) =>
+        [unit, ...(brain.regions.get(unit)!.constituent_regions ?? [])].flatMap((id) => {
+          const mesh = drawn.get(id);
+          return mesh ? [drawnShift(mesh)] : [];
+        });
+      let inParts = 0;
+      for (const unit of brain.regions.values()) {
+        const [first, ...rest] = shiftsOf(unit.id);
+        for (const shift of rest) close(shift, first!, `${detail}: a part of ${unit.id}`);
+        if (rest.length) inParts += 1;
+      }
+      const least = { aseg: 3, nextbrain: 25, learning: 0 }[detail]!;
+      assert.ok(inParts >= least, `${detail}: ${inParts} units drawn in parts`);
+      const [left] = shiftsOf('learning:left:thalamus');
+      const [right] = shiftsOf('learning:right:thalamus');
+      if (left && right) {
+        assert.ok(
+          left.x < -0.005 && right.x > 0.005,
+          `${detail}: thalami at ${left.x}, ${right.x}`,
+        );
+      }
+      brain.setExploded(false);
+      brain.stepExplode(Number.MAX_SAFE_INTEGER);
+    }
+    brain.dispose();
+  },
+  120_000,
+);
 
 test.each(['cdmd', 'mni152'])(
   'on %s, what travels together on one side travels together on the other',
@@ -313,6 +372,27 @@ test('under reduced motion the brain parts with the next frame, with no way betw
   assert.equal(model.stepExplode(1016), false, 'nothing is left to move');
 });
 
+test('the layout is measured before the move starts, so its cost takes nothing off the way', async () => {
+  await model.setDetail('aseg');
+  let clock = 1000;
+  vi.spyOn(performance, 'now').mockImplementation(() => clock);
+  const measure = MeshBVH.prototype.intersectsGeometry;
+  vi.spyOn(MeshBVH.prototype, 'intersectsGeometry').mockImplementation(function (
+    this: MeshBVH,
+    ...args
+  ) {
+    clock += 1;
+    return measure.apply(this, args);
+  });
+  const mesh = meshes(ATLAS)[0]!;
+  model.setExploded(true);
+  // The toggle frames the brain where it is going, which reads the layout.
+  model.settledMatrixWorld(mesh);
+  assert.ok(clock > 1000, 'this level had still to be laid out');
+  model.stepExplode(clock);
+  assert.equal(drawnShift(mesh).length(), 0, 'the first frame draws the brain still assembled');
+});
+
 test('framing reads where the pieces are going before they move', () => {
   at(1000);
   model.setExploded(true);
@@ -383,10 +463,13 @@ test('a cord loaded while exploded retains its connection to the brainstem', asy
   for (const detail of model.manifest.detail_levels) {
     await model.setDetail(detail.id);
     assertHemispheresClear();
-    const stem = meshes(detail.id).find(
-      (mesh) =>
-        labelOf(model.regions.get(mesh.userData['region_id'])!, 'en')!.group === 'Brainstem',
-    )!;
+    // A part travels as the unit holding it, so the brainstem is what no other system's unit holds.
+    const units = [...model.regions.values()];
+    const stem = meshes(detail.id).find((mesh) => {
+      const id = mesh.userData['region_id'] as string;
+      const whole = units.find((unit) => unit.constituent_regions?.includes(id));
+      return labelOf(whole ?? model.regions.get(id)!, 'en')!.group === 'Brainstem';
+    })!;
     const cord = model.manifest.supplemental_layers!.flatMap((layer) => meshes(layer.id));
     assertDeepPiecesClear([...meshes(detail.id), ...cord]);
     for (const mesh of cord) {

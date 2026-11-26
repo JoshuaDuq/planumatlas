@@ -86,6 +86,8 @@ export class Placement {
    */
   explode(exploded: boolean): void {
     this.exploded = exploded;
+    // Laid out before the move starts: measured after, its time would be taken off the way.
+    if (exploded) this.shifts();
     this.move(exploded ? 1 : 0);
   }
 
@@ -244,11 +246,17 @@ export class Placement {
       return side as 'left' | 'right';
     };
     for (const mesh of cortex) halves[sideOf(mesh)].union(restBox(mesh));
+    // A structure drawn in parts moves whole: each part travels as the unit that holds it.
+    const wholes = new Map<string, Region>();
+    for (const unit of regions.values()) {
+      for (const part of unit.constituent_regions ?? []) wholes.set(part, unit);
+    }
     const groups = new Map<string, Mesh[]>();
     // A lateral structure's group under its side-free name and side, to find its mirror image.
     const sided = new Map<string, string>();
     for (const mesh of layers.get(detailId)!.meshes) {
-      const region = regions.get(mesh.userData['region_id'] as string)!;
+      const part = regions.get(mesh.userData['region_id'] as string)!;
+      const region = wholes.get(part.id) ?? part;
       const label = labelOf(region, 'en');
       if (!label) throw new Error(`No anatomical system holds ${region.id}.`);
       const name =
@@ -260,15 +268,19 @@ export class Placement {
         continue;
       }
       const key = `${label.name}|${region.hemisphere}`;
-      if (sided.has(key)) throw new Error(`Two ${region.hemisphere} structures are ${label.name}.`);
+      const held = sided.get(key);
+      if (held && held !== name) {
+        throw new Error(`Two ${region.hemisphere} structures are ${label.name}.`);
+      }
       sided.set(key, name);
     }
     const names = [...groups.keys()];
+    // A structure only one side has is no midline structure: it has no mirror image.
     const mirrorOf = (name: string) => {
       const region = regions.get(name);
       if (region?.hemisphere !== 'left' && region?.hemisphere !== 'right') return name;
       const other = region.hemisphere === 'left' ? 'right' : 'left';
-      return sided.get(`${labelOf(region, 'en')!.name}|${other}`) ?? name;
+      return sided.get(`${labelOf(region, 'en')!.name}|${other}`) ?? null;
     };
     if (cords.length) {
       const brainstem = groups.get('Brainstem');
@@ -277,7 +289,10 @@ export class Placement {
     }
     const shifts = deepShifts(
       [...groups.values()],
-      names.map((name) => names.indexOf(mirrorOf(name))),
+      names.map((name) => {
+        const mirror = mirrorOf(name);
+        return mirror === null ? null : names.indexOf(mirror);
+      }),
     );
     const deep = new Box3();
     for (const [mesh, shift] of shifts) deep.union(restBox(mesh).translate(shift));
