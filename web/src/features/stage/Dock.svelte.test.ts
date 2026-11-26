@@ -444,6 +444,8 @@ describe('a tool and its popover', () => {
     // The choice, then the chosen body's own controls.
     expect(active()).toBe(control('radio', 'Lesion'));
     await userEvent.keyboard('{Tab}');
+    expect(active()).toBe(control('slider', 'Radius'));
+    await userEvent.keyboard('{Tab}');
     expect(active()).toBe(control('button', 'Place'));
     await userEvent.keyboard('{Tab}');
     expect(active()).toBe(control('button', 'After'));
@@ -1141,6 +1143,21 @@ describe('scrubbing a slider clears the plate off the picture', () => {
     for (const element of others) expect(getComputedStyle(element).opacity).toBe('1');
     expect(getComputedStyle(popover()).backgroundColor).toBe(plate);
     expect(others.flatMap((element) => element.getAnimations())).toEqual([]);
+  });
+
+  test("Add's tabs stay while a slider under them is held", async () => {
+    await mount();
+    await pressTool('Lesion');
+    await vi.waitFor(() => expect(popover().hasAttribute('data-instant')).toBe(false));
+    await settled([popover()]);
+    const radius = control('slider', 'Radius');
+    const tabs = popover().querySelector('.place-choice')!;
+    const place = control('button', 'Place');
+    hold('pointerdown', radius);
+    await settled([popover(), tabs, place]);
+    expect(getComputedStyle(place).opacity).toBe('0');
+    expect(getComputedStyle(tabs).opacity).toBe('1');
+    hold('pointerup', window);
   });
 
   test('what changed waits for the release, so the plate never grows under the thumb', async () => {

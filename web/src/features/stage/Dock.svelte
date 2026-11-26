@@ -426,7 +426,7 @@
       {#snippet body({ close })}
         {#if placeOptions.length > 1}
           <ChoiceGroup
-            class="place-choice"
+            class="place-choice stage-tabs"
             label={copy.placeChoice}
             options={placeOptions}
             bind:value={() => placeTool, (next) => (placeChoice = next)}

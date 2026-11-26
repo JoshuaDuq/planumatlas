@@ -11,7 +11,7 @@
   The classes `stage-field-label`, `stage-field` and `stage-command` are for every popover body on the stage.
   - While a pointer holds a slider, the plate clears off the picture it adjusts (`data-scrubbing`): its ground,
     its edge and everything beside the slider's row fade out, the row keeps a strip of the plate, and all come
-    back on release. The body hears `scrubbing`, so nothing it adds grows the plate under the thumb.
+    back on release. A popover's tabs (`stage-tabs`) stay, so the reader still sees whose slider it is. The body hears `scrubbing`, so nothing it adds grows the plate under the thumb.
 -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
@@ -78,7 +78,11 @@
     const plate = dialog!.closest<HTMLElement>('.popover')!;
     const beside: Element[] = [];
     for (let node: Element = row; node !== dialog; node = node.parentElement!) {
-      beside.push(...[...node.parentElement!.children].filter((other) => other !== node));
+      beside.push(
+        ...[...node.parentElement!.children].filter(
+          (other) => other !== node && !other.classList.contains('stage-tabs'),
+        ),
+      );
     }
     // The plate fades as it does when it closes, and comes back the same way.
     const style = getComputedStyle(plate);

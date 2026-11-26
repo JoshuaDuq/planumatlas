@@ -6,6 +6,7 @@
   import type { Language, SessionState } from '../../lib/types/index.ts';
   import type { DisplayView } from '../../lib/state/display-state.ts';
   import '../../styles/index.css';
+  import RangeField from '../../lib/ui/RangeField.svelte';
   import Dock from './Dock.svelte';
   import type { DockCommands } from './dock-commands.ts';
   import './stage-vars.css';
@@ -93,6 +94,7 @@
       <button type="button">Sagittal</button>
     {/snippet}
     {#snippet lesionPopover({ placing: on, setPlacing })}
+      <RangeField label="Radius" value={10} min={2} max={20} format={(radius) => `${radius} mm`} />
       <button type="button" aria-pressed={on} onclick={() => setPlacing(!on)}>Place</button>
     {/snippet}
   </Dock>
