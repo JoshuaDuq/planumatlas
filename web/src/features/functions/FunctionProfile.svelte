@@ -242,6 +242,7 @@
               </li>
             {/each}
           </ul>
+          {#if content.unmapped}<p class="note unmapped">{content.unmapped}</p>{/if}
         </div>
       {:else}
         {#if content.lesionBridge}
@@ -263,6 +264,7 @@
           {:else}
             {@render areaList(content.areas)}
           {/if}
+          {#if content.unmapped}<p class="note unmapped">{content.unmapped}</p>{/if}
         </div>
         {#if content.lesions}
           <div class="section">
@@ -514,7 +516,8 @@
       line-height: var(--lh-caption);
       white-space: nowrap;
     }
-    .lesion-note {
+    .lesion-note,
+    .unmapped {
       margin-top: var(--space-2);
     }
     .swatched {

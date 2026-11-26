@@ -277,6 +277,8 @@ export interface FunctionProfileContent {
   lesions: LesionRow[] | null;
   /** Said with the lesion checks when the function is painted on another atlas than theirs. */
   lesionsOn: string | null;
+  /** On Julich-Brain: its gap maps are unscored, so they stay grey. */
+  unmapped: string | null;
   method: string;
   citation: string;
   /** Null for the overview and for a term neurosynth.org has no page for. */
@@ -398,6 +400,7 @@ export function functionProfile(
         }))
       : null,
     lesionsOn: checks && atlas !== domains.atlas ? copy.lesionsOn : null,
+    unmapped: atlas === 'julich' ? copy.unmappedJulich : null,
     method: domainCopy.note(source.short),
     citation: source.citation,
     neurosynth: all ? null : neurosynthLink(domains, id),

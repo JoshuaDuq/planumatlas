@@ -1048,6 +1048,7 @@
    "[\"\"] → \"Affichée sur les aires \""
   ],
   "lesionsOn": "Les vérifications lésionnelles sont mesurées sur les aires HCP-MMP.",
+  "unmappedJulich": "Julich-Brain n’a pas encore cartographié environ un quart du cortex. Ces zones non cartographiées n’ont pas de score et restent grises, même là où une fonction est forte.",
   "paintFrom": "Peindre les aires à partir de z ≥",
   "paintFromNote": [
    "[\"Alpha\"] → \"Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z<NBSP>≥<NBSP>Alpha.\"",

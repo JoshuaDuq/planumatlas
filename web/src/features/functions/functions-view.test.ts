@@ -115,6 +115,20 @@ describe('a function painted on the reader’s atlas (3.1)', () => {
     expect(functionProfile(deps(), 'language', 'en').lesionsOn).toBeNull();
     expect(areaCount(domains, 'language', 'en')).toMatch(/^95 HCP-MMP areas/);
   });
+
+  test('FUNC-57 · on Julich-Brain a function and the overview say its gap maps are unscored; other atlases say nothing', () => {
+    const julich = { ...deps(), atlas: 'julich' };
+    expect(functionProfile(julich, 'executive', 'en').unmapped).toMatch(
+      /^Julich-Brain has not yet mapped about a quarter/,
+    );
+    expect(functionProfile(julich, ALL_DOMAINS, 'fr').unmapped).toMatch(
+      /^Julich-Brain n’a pas encore cartographié/,
+    );
+    expect(functionProfile(deps(), 'executive', 'en').unmapped).toBeNull();
+    expect(
+      functionProfile({ ...deps(), atlas: 'schaefer' }, 'executive', 'en').unmapped,
+    ).toBeNull();
+  });
 });
 
 describe('functionList', () => {

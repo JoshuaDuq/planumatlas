@@ -1048,6 +1048,7 @@
    "[\"\"] → \"Shown on the  areas\""
   ],
   "lesionsOn": "Lesion checks are measured on HCP-MMP areas.",
+  "unmappedJulich": "Julich-Brain has not yet mapped about a quarter of the cortex. Those gap maps have no scores, so they stay grey even where a function is strong.",
   "paintFrom": "Paint areas from z ≥",
   "paintFromNote": [
    "[\"Alpha\"] → \"Changes what is painted and counted. The areas listed below, and every region’s list, keep the published z<NBSP>≥<NBSP>Alpha.\"",

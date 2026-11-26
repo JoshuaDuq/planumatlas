@@ -35,6 +35,9 @@ export const en = {
   failed: (atlas: string) => `The ${atlas} areas could not be shown.`,
   shown: (atlas: string) => `Shown on the ${atlas} areas`,
   lesionsOn: 'Lesion checks are measured on HCP-MMP areas.',
+  // Julich-Brain's gap maps cover 25% of the cortex (fsaverage, CDMD and the MNI template, measured 2026-11-26).
+  unmappedJulich:
+    'Julich-Brain has not yet mapped about a quarter of the cortex. Those gap maps have no scores, so they stay grey even where a function is strong.',
   // The profile's paint threshold: it changes the paint, the key and the count only.
   paintFrom: 'Paint areas from z ≥',
   paintFromNote: (threshold: string) =>
@@ -142,6 +145,8 @@ export const fr: typeof en = {
   failed: (atlas: string) => `Les aires ${atlas} n’ont pas pu être affichées.`,
   shown: (atlas: string) => `Affichée sur les aires ${atlas}`,
   lesionsOn: 'Les vérifications lésionnelles sont mesurées sur les aires HCP-MMP.',
+  unmappedJulich:
+    'Julich-Brain n’a pas encore cartographié environ un quart du cortex. Ces zones non cartographiées n’ont pas de score et restent grises, même là où une fonction est forte.',
   paintFrom: 'Peindre les aires à partir de z ≥',
   paintFromNote: (threshold: string) =>
     `Change ce qui est peint et compté. Les aires listées ci-dessous, et la liste de chaque région, gardent le seuil publié z\u00a0≥\u00a0${threshold}.`,
