@@ -589,3 +589,55 @@ describe('the visual-field map', () => {
     assert.equal(scene.reader.apply.mock.calls.length, 2);
   });
 });
+
+describe('BODY-09 the body map', () => {
+  test('opens over the held scene from above, uncut, opaque and in tissue colour, so a cut shows no atlas', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.engine.sections.setMode('axial');
+    scene.engine.model.setCortexOpacity(0.3);
+    assert.notEqual(scene.engine.model.settings.surfaceColor, 'tissue');
+    await scene.excursions.openBodyMap();
+
+    assert.equal(scene.reader.capture.mock.calls.length, 1);
+    assert.deepEqual(scene.lesson.state, {
+      circuit: null,
+      step: 0,
+      visited: [],
+      route: false,
+      map: 'body-map',
+    });
+    const { settings, state } = scene.engine.model;
+    assert.deepEqual(
+      [
+        settings.surfaceColor,
+        settings.hemisphere,
+        settings.cortexOpacity,
+        settings.internalVisible,
+        state.selectedRegion,
+      ],
+      ['tissue', 'both', 1, false, null],
+    );
+    assert.equal(scene.engine.sections.state.mode, 'off');
+    assert.equal(scene.session.state.view, 'superior');
+  });
+
+  test('leaving it puts back the scene from before it, colour included', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.excursions.openBodyMap();
+    await scene.excursions.leaveLesson();
+    assert.equal(scene.reader.apply.mock.calls.length, 1);
+    assert.equal(scene.reader.apply.mock.calls[0]![0], scene.reader.capture.mock.results[0]!.value);
+    assert.deepEqual(scene.lesson.state, { circuit: null, step: 0, visited: [], route: false });
+  });
+
+  test('opened from the visual field map, it ends the medial pair', async () => {
+    const scene = createScene();
+    scene.session.setExplorer('circuits');
+    await scene.excursions.openMap({ x: 2, y: 1, radius: 1 });
+    await scene.excursions.openBodyMap();
+    assert.equal(scene.engine.visualField.shown, null);
+    assert.equal(scene.lesson.state.map, 'body-map');
+  });
+});

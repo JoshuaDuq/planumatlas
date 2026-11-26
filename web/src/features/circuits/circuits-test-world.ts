@@ -35,9 +35,11 @@ import { createEngineSync } from '../../lib/state/engine-sync.svelte.ts';
 import { createLessonStore, createSessionStore } from '../../lib/state/session.svelte.ts';
 import { createView } from '../../lib/state/view.svelte.ts';
 import { createVisualFieldMapStore } from '../../lib/state/visual-field-map.svelte.ts';
+import { createBodyMapStore } from '../../lib/state/body-map.svelte.ts';
 import { VIEW_NAMES, type Manifest } from '../../lib/types/index.ts';
 import { createCircuitExplorer } from './circuits-explorer.svelte.ts';
 import { createVisualFieldExplorer } from './visual-field-explorer.svelte.ts';
+import { createBodyMapExplorer } from './body-map-explorer.svelte.ts';
 
 export const manifest = manifestFile as unknown as Manifest;
 
@@ -94,6 +96,7 @@ export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = 
   });
   const anatomy = createCatalog(manifest);
   const visualFieldMap = createVisualFieldMapStore(lesson);
+  const bodyMap = createBodyMapStore();
 
   const real = createSceneCommands({
     model: engine.model,
@@ -172,6 +175,12 @@ export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = 
       ),
       openTour: (id) => explorer.openCircuit(id),
     }),
+    bodyMap: createBodyMapExplorer({
+      view,
+      excursions,
+      store: bodyMap,
+      record: manifest.body_map ?? null,
+    }),
   });
   return {
     engine,
@@ -187,6 +196,7 @@ export function createWorld({ lacking = [] }: { lacking?: readonly string[] } = 
     openDeficit,
     hold,
     visualFieldMap,
+    bodyMap,
   };
 }
 

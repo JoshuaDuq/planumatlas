@@ -18,6 +18,7 @@
   import type { ProvenanceLink } from '../../lib/core/panels/provenance.ts';
   import type { View } from '../../lib/state/view.svelte.ts';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
+  import { bodyMapOpen } from '../../lib/state/body-map.svelte.ts';
   import { modelUsable } from '../../lib/core/state/session.ts';
   import type { Explorer, Language, ViewName } from '../../lib/types/index.ts';
   import { isKeyboardActivation } from '../../lib/ui/instant.ts';
@@ -235,6 +236,7 @@
       tracts: tractsDrawn ? tractCatalog(current.referenceAnatomy).source : null,
       strokeCases: strokeCases.chosen.length > 0,
       visualFieldMap: visualFieldMapOpen(current),
+      bodyMap: bodyMapOpen(current),
     };
   }
 

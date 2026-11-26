@@ -1,0 +1,59 @@
+# Body map: on each brain's central strip, the movement whose HCP group task map wins there among
+# the opposite foot, the opposite hand and the tongue. scripts/fetch_body_map.py reads each pinned
+# map at every fsaverage vertex through registration fusion into data/fsaverage/surf; the build
+# carries those values to the brain by nearest registered sphere vertex. Passed a gate fixed in
+# advance on CDMD and the MNI template on 2026-11-26 (data/cache/hcp-motor/gate-strip-2026-11-26).
+label: Body map
+# NeuroVault collection 457: the HCP WU-Minn group's z map of each movement's "minus AVG" contrast,
+# on FSL's MNI152 2 mm grid.
+source: HCP WU-Minn motor task group z maps (LF-AVG, LH-AVG, RF-AVG, RH-AVG, T-AVG), NeuroVault collection 457
+people: 486
+grid: [91, 109, 91]
+sources:
+  - {id: 3155, contrast: LF-AVG, part: foot, side: left, file: tfMRI_MOTOR_LF-AVG_zstat1.nii.gz,
+     url: https://neurovault.org/media/images/457/tfMRI_MOTOR_LF-AVG_zstat1.nii.gz,
+     sha256: 689fd607c453e1a5c0ee2724efcc47c4e607985796a37e7c514f982edd363386}
+  - {id: 3157, contrast: LH-AVG, part: hand, side: left, file: tfMRI_MOTOR_LH-AVG_zstat1.nii.gz,
+     url: https://neurovault.org/media/images/457/tfMRI_MOTOR_LH-AVG_zstat1.nii.gz,
+     sha256: c32aa17820c2af2d9254e35a8f8d5c1dfaeefe3d70667372ff09ce65f022df60}
+  - {id: 3159, contrast: RF-AVG, part: foot, side: right, file: tfMRI_MOTOR_RF-AVG_zstat1.nii.gz,
+     url: https://neurovault.org/media/images/457/tfMRI_MOTOR_RF-AVG_zstat1.nii.gz,
+     sha256: 033baf705c9dbd404562d2157108c8e94a6f93458249f243d70f17ac1a869c8a}
+  - {id: 3161, contrast: RH-AVG, part: hand, side: right, file: tfMRI_MOTOR_RH-AVG_zstat1.nii.gz,
+     url: https://neurovault.org/media/images/457/tfMRI_MOTOR_RH-AVG_zstat1.nii.gz,
+     sha256: fb4098d43df1c02d7925c97b36658152bea061f25e252217877a815c416d94e1}
+  - {id: 3163, contrast: T-AVG, part: tongue, side: null, file: tfMRI_MOTOR_T-AVG_zstat1.nii.gz,
+     url: https://neurovault.org/media/images/457/tfMRI_MOTOR_T-AVG_zstat1.nii.gz,
+     sha256: 7f626a4a722a73bfd66812c2e60e7b985ee75ac08ddb14fbd50cfc0b48acf05a}
+# Each fsaverage vertex's FSL MNI152 coordinate (RF-ANTs, CBIG, MIT), the copy
+# scripts/derive_domain_scores.py reads; read when the maps are fetched, not redistributed.
+registration_fusion:
+  url: https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/
+  files:
+    lh: {file: lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat,
+         sha256: 3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd}
+    rh: {file: rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat,
+         sha256: c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319}
+# A strip vertex is assigned only where the winning z reaches floor_d · √people.
+floor_d: 0.5
+# The strip: cortex.label vertices with these Destrieux labels.
+strip: [G_precentral, S_central, G_postcentral, G_and_S_paracentral, G_and_S_subcentral]
+# The gate, in each hemisphere; the build fails when any criterion fails. Also: area-weighted median
+# superior coordinate foot > hand > tongue, and median distance from the midline foot < hand < tongue.
+gate:
+  minimum_component_share: 0.8
+  minimum_area_mm2: 100
+  # Each label's assigned area is won mostly by this part.
+  landmarks: {G_and_S_paracentral: foot, G_and_S_subcentral: tongue}
+citations:
+  # Quoted: each title holds a colon.
+  - citation: "Barch DM, Burgess GC, Harms MP, Petersen SE, Schlaggar BL, Corbetta M, Glasser MF, Curtiss S, Dixit S, Feldt C, Nolan D, Bryant E, Hartley T, Footer O, Bjork JM, Poldrack R, Smith S, Johansen-Berg H, Snyder AZ, Van Essen DC; WU-Minn HCP Consortium (2013) Function in the human connectome: task-fMRI and individual differences in behavior. NeuroImage 80:169–189"
+    doi: https://doi.org/10.1016/j.neuroimage.2013.05.033
+    pmid: 23684877
+  - citation: "Van Essen DC, Smith SM, Barch DM, Behrens TE, Yacoub E, Ugurbil K; WU-Minn HCP Consortium (2013) The WU-Minn Human Connectome Project: an overview. NeuroImage 80:62–79"
+    doi: https://doi.org/10.1016/j.neuroimage.2013.05.041
+    pmid: 23684880
+  - citation: Wu J, Ngo GH, Greve D, Li J, He T, Fischl B, Eickhoff SB, Yeo BTT (2018) Accurate nonlinear mapping between MNI volumetric and FreeSurfer surface coordinate systems. Hum Brain Mapp 39:3793–3808
+    doi: https://doi.org/10.1002/hbm.24213
+    pmid: 29770530
+license: HCP Open Access Data Use Terms

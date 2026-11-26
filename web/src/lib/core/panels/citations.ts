@@ -50,6 +50,7 @@ export const BEHIND = [
   'tracts',
   'strokeCases',
   'visualField',
+  'bodyMap',
 ] as const;
 export type Behind = (typeof BEHIND)[number];
 
@@ -79,6 +80,7 @@ export interface OnScreen {
   tracts: string | null;
   strokeCases: boolean;
   visualFieldMap: boolean;
+  bodyMap: boolean;
 }
 
 export interface ViewCitations {
@@ -178,11 +180,13 @@ export function viewCitations(manifest: Partial<Manifest>, view: OnScreen): View
       manifest.retinotopy?.visual_areas.citation,
     ]);
   }
+  if (view.bodyMap) add('bodyMap', manifest.body_map?.citations ?? []);
   const hcp =
     view.atlas === 'hcp-mmp' ||
     view.surfaceColor === 'cab-np' ||
     (view.explorer === 'anatomy' && view.connectivitySeed !== null) ||
-    view.visualFieldMap;
+    view.visualFieldMap ||
+    view.bodyMap;
   return { cited, hcp };
 }
 

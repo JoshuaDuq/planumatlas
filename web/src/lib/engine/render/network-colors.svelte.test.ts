@@ -178,6 +178,7 @@ for (const mode of ['network', 'territory'] as const) {
         network: networkPalette(networks as never),
         territory: paletteTexture(TERRITORY_COLORS),
         thickness: null,
+        bodyMap: null,
       };
       const geometry = cortex();
       const looked = draw(geometry, surface(geometry, mode, palettes, 1));

@@ -95,6 +95,7 @@ Each figure is measured on CDMD `sub_013`, except where the template is named, a
 - [Cortical layers](features/cortical-layers.md)
 - [Cortical thickness](features/cortical-thickness.md)
 - [Sulcal depth](features/sulcal-depth.md)
+- [Body map](features/body-map.md)
 :::
 
 :::{container}
@@ -199,6 +200,7 @@ features/receptor-fingerprints
 features/cortical-layers
 features/cortical-thickness
 features/sulcal-depth
+features/body-map
 ```
 
 ```{toctree}

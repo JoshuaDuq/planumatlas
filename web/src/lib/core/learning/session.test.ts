@@ -106,7 +106,7 @@ test('CAT-55 · going to a landmark before any start fails, and a failed start c
 test('a map opens in place of the lesson with its dot, and a lesson or closing ends both', () => {
   const session = createCircuitSession(catalog);
   const dot = { x: 2, y: -1, radius: 0.5 };
-  assert.throws(() => session.moveDot(dot), /No map is open/);
+  assert.throws(() => session.moveDot(dot), /No visual-field map is open/);
   session.start('vision');
   session.go(1);
   session.openMap('visual-field', dot);
@@ -128,4 +128,20 @@ test('a map opens in place of the lesson with its dot, and a lesson or closing e
   session.close();
   assert.equal(session.snapshot().map, undefined);
   assert.throws(() => session.openMap('somatotopy' as never, dot), /Unknown circuit map/);
+});
+
+test('BODY-04 the body map opens in place of a lesson without a dot; only the visual field map has one', () => {
+  const session = createCircuitSession(catalog);
+  assert.throws(() => session.openMap('body-map', { x: 1, y: 1, radius: 1 }), /has no dot/);
+  assert.throws(() => session.openMap('visual-field'), /needs a dot/);
+  session.start('vision');
+  session.openMap('body-map');
+  assert.deepEqual(session.snapshot(), {
+    circuit: null,
+    step: 0,
+    visited: [],
+    route: false,
+    map: 'body-map',
+  });
+  assert.throws(() => session.moveDot({ x: 1, y: 1, radius: 1 }), /No visual-field map is open/);
 });

@@ -36,6 +36,7 @@ import type { FunctionalConnectivity } from '../core/catalog/functional-connecti
 import type { DisorderEffects } from '../core/catalog/disorder-effects.ts';
 import type { StrokeCases } from '../core/catalog/stroke-cases.ts';
 import type {
+  BodyPart,
   CameraSnapshot,
   CameraView,
   ChromeInsets,
@@ -646,6 +647,18 @@ export interface EngineVisualField {
   centralRegion(hemisphere: 'left' | 'right'): string;
 }
 
+/** Where the HCP group's foot, hand and tongue movements win on the central strip. */
+export interface EngineBodyMap {
+  /** The anatomy publishes the body map; without it `show` rejects. */
+  readonly available: boolean;
+  /**
+   * Draw the map on the shown atlas's cortex, every part or one alone, the rest of the cortex grey;
+   * null gives the cortex its colours back. The atlas's codes download on its first showing, and the
+   * map follows an atlas change while it is drawn. A later call overrides one still downloading.
+   */
+  show(part: BodyPart | 'all' | null): Promise<void>;
+}
+
 /** The reader's own map, read from a file on their machine and carried onto this brain. */
 export interface EngineUserMap {
   /** The anatomy publishes template registrations; without them `load` rejects. */
@@ -707,6 +720,7 @@ export interface Engine extends Emitter<EngineEvents> {
   readonly tracts: EngineTracts;
   readonly lesion: EngineLesion;
   readonly visualField: EngineVisualField;
+  readonly bodyMap: EngineBodyMap;
   readonly strokeCases: EngineStrokeCases;
   readonly userMap: EngineUserMap;
 

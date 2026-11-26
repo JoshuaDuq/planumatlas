@@ -3715,6 +3715,148 @@
       "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
       "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
       "license": "FreeSurfer Software License"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_LF-AVG_zstat1.mgz",
+      "sha256": "4d7c80bf789a037859744463caff335424d546aff2d66aa9c88530ebc79ee181",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_LF-AVG_zstat1.nii.gz",
+          "sha256": "689fd607c453e1a5c0ee2724efcc47c4e607985796a37e7c514f982edd363386"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_LH-AVG_zstat1.mgz",
+      "sha256": "f0828c8e9cc53e60b1da710a5d8db9c11ab4f7e2d6a99ee4c336923b121a1eac",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_LH-AVG_zstat1.nii.gz",
+          "sha256": "c32aa17820c2af2d9254e35a8f8d5c1dfaeefe3d70667372ff09ce65f022df60"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_RF-AVG_zstat1.mgz",
+      "sha256": "c6998872e152814f693400b6652e7e1ffe43a557818543b91f718f0c557c366d",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_RF-AVG_zstat1.nii.gz",
+          "sha256": "033baf705c9dbd404562d2157108c8e94a6f93458249f243d70f17ac1a869c8a"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_RH-AVG_zstat1.mgz",
+      "sha256": "c91d07a8656fca9f5506084177e6692a32f207d1437fe009c3d5d44bf796ee66",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_RH-AVG_zstat1.nii.gz",
+          "sha256": "fb4098d43df1c02d7925c97b36658152bea061f25e252217877a815c416d94e1"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_T-AVG_zstat1.mgz",
+      "sha256": "cd6467d5afec66ec1048eabce5ae9bfc918b4a36268a1f5e710779872e9cc77f",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_T-AVG_zstat1.nii.gz",
+          "sha256": "7f626a4a722a73bfd66812c2e60e7b985ee75ac08ddb14fbd50cfc0b48acf05a"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_T-AVG_zstat1.mgz",
+      "sha256": "4857a86429f4e5b85287eb82c14c6208186a13214fb272b745611395ec2bf2a1",
+      "derived_from": [
+        {
+          "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_T-AVG_zstat1.nii.gz",
+          "sha256": "7f626a4a722a73bfd66812c2e60e7b985ee75ac08ddb14fbd50cfc0b48acf05a"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+        }
+      ],
+      "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+      "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "license": "HCP Open Access Data Use Terms"
+    },
+    {
+      "path": "data/cdmd/label/lh.cortex.label",
+      "sha256": "5290a5704aad82196aed158ad3eff42c88abd9c5b3801c815d54dc9629129436",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/cdmd/label/rh.cortex.label",
+      "sha256": "93ca3d42351aef9b82615acd834a28c5482c2e7b9b70ceff4d21473bd3d2e4c6",
+      "anatomy": "cdmd",
+      "derived_from": [
+        "data/cdmd/input/sub_013_t1w.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all; see reconstruction.json for exact commands. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/lh.cortex.label",
+      "sha256": "da773445437d3eb522515cec5e78f3819a89b5cf0cd2f9e148d33bd50c5e394e",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+    },
+    {
+      "path": "data/mni152/label/rh.cortex.label",
+      "sha256": "08402ea1e3ecbfdb49b649f9919dcac3af5f5e69e61ef1f9e7641247989095f4",
+      "anatomy": "mni152",
+      "derived_from": [
+        "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+      ],
+      "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+      "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
     }
   ]
 }

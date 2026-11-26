@@ -154,6 +154,7 @@ const OPENING: OnScreen = {
   tracts: null,
   strokeCases: false,
   visualFieldMap: false,
+  bodyMap: false,
 };
 
 it('the opening view’s references are Planum, the subject’s dataset, Destrieux and NextBrain', () => {

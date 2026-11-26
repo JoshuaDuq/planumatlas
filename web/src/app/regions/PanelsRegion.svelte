@@ -12,6 +12,7 @@
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
   import { createCircuitExplorer } from '../../features/circuits/circuits-explorer.svelte.ts';
   import { createVisualFieldExplorer } from '../../features/circuits/visual-field-explorer.svelte.ts';
+  import { createBodyMapExplorer } from '../../features/circuits/body-map-explorer.svelte.ts';
   import CircuitStepper from '../../features/circuits/CircuitStepper.svelte';
   import DeficitRestore from '../../features/deficits/DeficitRestore.svelte';
   import { createDeficitsExplorer } from '../../features/deficits/explorer.svelte.ts';
@@ -22,6 +23,7 @@
   import ListView from '../../features/workspace/ListView.svelte';
   import Workspace from '../../features/workspace/Workspace.svelte';
   import { APP, getApp } from '../application.svelte.ts';
+  import type { CircuitMap } from '../../lib/core/learning/session.ts';
   import type { World } from '../application.svelte.ts';
 
   let { lang }: { lang: Language } = $props();
@@ -31,6 +33,10 @@
   const world = $derived(app?.world ?? null);
 
   /** The explorers whose state the list and the detail share, built once for the world they run in. */
+  /** The open map's name, as the strip and the location bar give it. */
+  const mapName = (map: CircuitMap, language: Language) =>
+    t(language, map === 'body-map' ? 'bodyMap' : 'visualField').name;
+
   function explorers({
     engine,
     session,
@@ -42,6 +48,7 @@
     excursions,
     lesson,
     visualFieldMap,
+    bodyMap,
     mapOverlap,
   }: World) {
     const { domains, functionalRegions } = engine.model;
@@ -91,6 +98,12 @@
         ),
         openTour: (id) => lessons.openCircuit(id),
       }),
+      bodyMap: createBodyMapExplorer({
+        view,
+        excursions,
+        store: bodyMap,
+        record: engine.model.manifest.body_map ?? null,
+      }),
     });
     return { functions, deficits, circuits: lessons };
   }
@@ -139,7 +152,7 @@
       return { kind: 'lesson', label, clearable: false };
     }
     if (current.explorer === 'circuits' && current.lesson.map) {
-      return { kind: 'lesson', label: t(current.lang, 'visualField').name, clearable: false };
+      return { kind: 'lesson', label: mapName(current.lesson.map, current.lang), clearable: false };
     }
     return {};
   });
@@ -153,7 +166,7 @@
     if (!world) return null;
     const { explorer, lesson, lang: language } = world.view.current;
     if (explorer !== 'circuits') return null;
-    if (lesson.map) return t(language, 'visualField').name;
+    if (lesson.map) return mapName(lesson.map, language);
     return lesson.circuit ? world.circuits.get(lesson.circuit).name[language] : null;
   });
 

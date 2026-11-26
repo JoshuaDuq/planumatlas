@@ -832,7 +832,8 @@
    "streamlines": "Could not show this landmark’s streamlines.",
    "map": "Could not open the visual field map.",
    "guide": "Could not start the tour.",
-   "snapshotSize": "Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller."
+   "snapshotSize": "Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller.",
+   "bodyMap": "Could not show the body map."
   }
  },
  "footer": {
@@ -968,7 +969,8 @@
    "deficit": "Deficit",
    "tracts": "Tracts",
    "strokeCases": "Stroke cases",
-   "visualField": "Visual field map"
+   "visualField": "Visual field map",
+   "bodyMap": "Body map"
   },
   "acknowledgement": "Acknowledgement",
   "copyReferences": "Copy as text",
@@ -2726,6 +2728,10 @@
   "method": "Template method (Benson et al. 2014)",
   "areasSource": "Visual areas (Wang et al. 2015)"
  },
+ "bodyMap": {
+  "name": "Body map",
+  "summary": "Foot, hand, tongue ↔ central strip, group average"
+ },
  "workspace": {
   "modes": {
    "anatomy": "Anatomy",
@@ -3141,5 +3147,46 @@
   "saved": "Saved the matrix as a PNG.",
   "sheetTitle": "Resting-state correlation, Schaefer 200 parcels by Yeo network",
   "close": "Close"
+ },
+ "bodyMapPanel": {
+  "intro": "Where moving the foot, the hand or the tongue raises activity most along the central strip, in 486 adults of the Human Connectome Project. Each hemisphere maps the opposite foot and hand, and both map the tongue.",
+  "part": "Part shown",
+  "all": "All",
+  "parts": {
+   "foot": "Foot",
+   "hand": "Hand",
+   "tongue": "Tongue"
+  },
+  "table": "Area on the strip",
+  "partColumn": "Part",
+  "side": [
+   "[\"Alpha\"] → \"Right hemisphere\"",
+   "[\"\"] → \"Right hemisphere\""
+  ],
+  "area": [
+   "[\"Alpha\"] → \"NaN mm²\"",
+   "[\"\"] → \"0 mm²\""
+  ],
+  "sides": "The left hemisphere maps the right foot and hand, the right hemisphere the left.",
+  "limits": "What the map leaves out",
+  "group": [
+   "[\"Alpha\"] → \"A group average of Alpha other adults, carried onto this brain through its folding: not what this brain does.\"",
+   "[\"\"] → \"A group average of  other adults, carried onto this brain through its folding: not what this brain does.\""
+  ],
+  "floor": [
+   "[\"Alpha\"] → \"A vertex is coloured where one movement wins with at least a medium effect (Cohen’s d ≥ Alpha); the rest of the strip stays grey.\"",
+   "[\"\"] → \"A vertex is coloured where one movement wins with at least a medium effect (Cohen’s d ≥ ); the rest of the strip stays grey.\""
+  ],
+  "strip": [
+   "[\"Alpha\",\"\"] → \"Only the central strip is drawn. Moving the foot also raises activity well beyond it, in the supplementary motor area, the cingulate cortex and the parietal lobe: NaN–0% of the foot’s map at that effect lies off the strip.\"",
+   "[\"\",\"Alpha\"] → \"Only the central strip is drawn. Moving the foot also raises activity well beyond it, in the supplementary motor area, the cingulate cortex and the parietal lobe: 0–NaN% of the foot’s map at that effect lies off the strip.\""
+  ],
+  "sensorimotor": "At the group maps’ 2 mm resolution motor and sensory cortex cannot be told apart: each patch spans both banks of the central sulcus.",
+  "five": "Five movements only: the trunk, single fingers and the face beyond the tongue were not tested.",
+  "sources": "Sources",
+  "dataset": "HCP motor task, group maps (NeuroVault 457)",
+  "task": "Barch et al. 2013, the HCP task battery",
+  "project": "Van Essen et al. 2013, the Human Connectome Project",
+  "registration": "Wu et al. 2018, MNI to surface registration"
  }
 }

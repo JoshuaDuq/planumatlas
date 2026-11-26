@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import * as bodyMapPanel from './areas/bodyMapPanel.ts';
 import * as guide from './areas/guide.ts';
 import * as info from './areas/info.ts';
 import * as networkMatrix from './areas/networkMatrix.ts';
@@ -7,8 +8,8 @@ import * as serial from './areas/serial.ts';
 import * as template from './areas/template.ts';
 import { TRANSLATIONS } from './index.ts';
 
-// The tour's, the template's, the Linked MRI's, About this data's and the network matrix's wording load on demand, but are approved as the
-// rest is.
+// The tour's, the template's, the Linked MRI's, About this data's, the network matrix's and the body map panel's wording load on
+// demand, but are approved as the rest is.
 const TABLES = {
   en: {
     ...TRANSLATIONS.en,
@@ -18,6 +19,7 @@ const TABLES = {
     serial: serial.en,
     info: info.en,
     networkMatrix: networkMatrix.en,
+    bodyMapPanel: bodyMapPanel.en,
   },
   fr: {
     ...TRANSLATIONS.fr,
@@ -27,6 +29,7 @@ const TABLES = {
     serial: serial.fr,
     info: info.fr,
     networkMatrix: networkMatrix.fr,
+    bodyMapPanel: bodyMapPanel.fr,
   },
 };
 

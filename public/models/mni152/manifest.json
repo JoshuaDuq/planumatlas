@@ -2569,6 +2569,151 @@
       }
     }
   },
+  "body_map": {
+    "label": "Body map",
+    "source": "HCP WU-Minn motor task group z maps (LF-AVG, LH-AVG, RF-AVG, RH-AVG, T-AVG), NeuroVault collection 457",
+    "citations": [
+      "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+      "https://doi.org/10.1016/j.neuroimage.2013.05.041",
+      "https://doi.org/10.1002/hbm.24213"
+    ],
+    "license": "HCP Open Access Data Use Terms",
+    "files": {
+      "destrieux": {
+        "file": "body-map-destrieux.field",
+        "vertex_count": 411512
+      },
+      "hcp-mmp": {
+        "file": "body-map-hcp-mmp.field",
+        "vertex_count": 507207
+      },
+      "julich": {
+        "file": "body-map-julich.field",
+        "vertex_count": 475654
+      },
+      "schaefer": {
+        "file": "body-map-schaefer.field",
+        "vertex_count": 496912
+      },
+      "desikan": {
+        "file": "body-map-desikan.field",
+        "vertex_count": 337167
+      }
+    },
+    "parts": [
+      {
+        "code": 1,
+        "id": "foot"
+      },
+      {
+        "code": 2,
+        "id": "hand"
+      },
+      {
+        "code": 3,
+        "id": "tongue"
+      }
+    ],
+    "people": 486,
+    "floor": {
+      "d": 0.5,
+      "z": 11.02
+    },
+    "hemispheres": {
+      "left": {
+        "moves": "right",
+        "strip_mm2": 7604.5,
+        "assigned_share": 0.816,
+        "area_mm2": {
+          "foot": 1626.9,
+          "hand": 2181.0,
+          "tongue": 2395.2
+        },
+        "off_strip_share": {
+          "foot": 0.649,
+          "hand": 0.109,
+          "tongue": 0.23
+        }
+      },
+      "right": {
+        "moves": "left",
+        "strip_mm2": 7192.9,
+        "assigned_share": 0.799,
+        "area_mm2": {
+          "foot": 1474.3,
+          "hand": 2039.4,
+          "tongue": 2236.0
+        },
+        "off_strip_share": {
+          "foot": 0.739,
+          "hand": 0.176,
+          "tongue": 0.225
+        }
+      }
+    },
+    "validation": {
+      "midline_x_mm": -0.4,
+      "left": {
+        "median_superior_mm": {
+          "foot": 48.7,
+          "hand": 36.0,
+          "tongue": 10.8
+        },
+        "median_distance_from_midline_mm": {
+          "foot": 9.1,
+          "hand": 37.3,
+          "tongue": 51.9
+        },
+        "largest_component_share": {
+          "foot": 0.974,
+          "hand": 0.993,
+          "tongue": 1.0
+        },
+        "landmark_shares": {
+          "G_and_S_paracentral": {
+            "foot": 1.0,
+            "hand": 0.0,
+            "tongue": 0.0
+          },
+          "G_and_S_subcentral": {
+            "foot": 0.054,
+            "hand": 0.018,
+            "tongue": 0.927
+          }
+        }
+      },
+      "right": {
+        "median_superior_mm": {
+          "foot": 50.4,
+          "hand": 35.5,
+          "tongue": 9.2
+        },
+        "median_distance_from_midline_mm": {
+          "foot": 8.5,
+          "hand": 36.9,
+          "tongue": 51.6
+        },
+        "largest_component_share": {
+          "foot": 0.992,
+          "hand": 0.992,
+          "tongue": 1.0
+        },
+        "landmark_shares": {
+          "G_and_S_paracentral": {
+            "foot": 1.0,
+            "hand": 0.0,
+            "tongue": 0.0
+          },
+          "G_and_S_subcentral": {
+            "foot": 0.015,
+            "hand": 0.02,
+            "tongue": 0.965
+          }
+        }
+      }
+    },
+    "method": "Each group map is read at every fsaverage vertex's MNI152 coordinate from registration fusion (RF-ANTs), linearly interpolated, and each vertex of this brain takes the values of its nearest fsaverage vertex on the registered spheres. On the central strip, the cortex vertices Destrieux labels G_precentral, S_central, G_postcentral, G_and_S_paracentral or G_and_S_subcentral, a vertex takes the movement whose z is largest among the opposite foot, the opposite hand and the tongue, where that z reaches 11.02 (Cohen's d 0.5 over 486 people); every other vertex is 0. Areas are on the mid-thickness surface. A vertex the parcel boundaries add takes the movement carrying the most weight among the source vertices it is made from, and 0 on a tie or where none carries any"
+  },
   "cut_atlases": [
     {
       "id": "destrieux",
@@ -100501,6 +100646,7 @@
     "Cortex that has no six layers, the hippocampus and the olfactory (piriform) cortex, is left out, as is a parcel BigBrain's layers cover on less than 50% of its area.",
     "Cell densities count every cell body a network detected in 5 to 11 patches per area of the same brain, not neurons alone, and reach a region only by the name of the Julich-Brain area the patches were cut from; both hemispheres show the same values.",
     "BigBrain and the cell datasets are CC BY-NC-SA 4.0: non-commercial use only, and derived work is shared alike.",
+    "The body map is a group average, the HCP motor task maps of 486 adults carried onto this brain through registered spheres, not movements measured in this brain. It is drawn on the central strip only, which hides activity elsewhere: most of the foot map's above-floor area lies off the strip. At 2 mm and averaged over people, the maps cannot separate motor from sensory cortex, so the territories span both banks of the central sulcus. Five movements were mapped, each foot, each hand and the tongue: the trunk, the individual digits and the face beyond the tongue have no territory.",
     "F-TRACT stimulation responses are rates of stereo-EEG stimulation\u2013recording pairs from 613 people with focal epilepsy, aggregated by F-TRACT over Julich-Brain 3.0 areas in MNI152 space. They are not measured in this brain; each hemisphere shows its own values. A rate is published from 10 pairs and drawn here only from 3 implantations.",
     "A Julich-Brain area takes the F-TRACT area of the same name, not of the same place: F-TRACT placed contacts with Julich-Brain's volumetric map in MNI152, while this surface carries the published fsaverage map. Areas Julich-Brain 3.1 added from 3.0's gap maps, and its subicular complex, take none.",
     "F-TRACT peak delays come from people with focal epilepsy. Each is a median across the responding stimulation\u2013recording pairs of every implantation that tested the pair, not one person's delay, published from 10 responses within 50 ms and shown only where the rate is drawn. A response may arrive through more than one synapse, and the peak includes the time the recorded area takes to respond, so a delay is not a conduction time along one fibre. Distances are between the two areas' centroids in this brain, not between the contacts. Onset delay is not shown: the data descriptor defines it two ways."
@@ -102553,6 +102699,128 @@
         "procedure": "scripts/register_arousal_nuclei.py: FreeSurfer SegmentAAN.sh on a copy of the recon (mri/*.mgz, mri/transforms/talairach.xfm); labels at 0.375 mm mapped to the release's codes; kept to aseg's brainstem and VentralDC",
         "citation": "https://doi.org/10.5061/dryad.zw3r228d2",
         "license": "FreeSurfer Software License"
+      },
+      {
+        "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_LF-AVG_zstat1.mgz",
+        "sha256": "4d7c80bf789a037859744463caff335424d546aff2d66aa9c88530ebc79ee181",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_LF-AVG_zstat1.nii.gz",
+            "sha256": "689fd607c453e1a5c0ee2724efcc47c4e607985796a37e7c514f982edd363386"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_LH-AVG_zstat1.mgz",
+        "sha256": "f0828c8e9cc53e60b1da710a5d8db9c11ab4f7e2d6a99ee4c336923b121a1eac",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_LH-AVG_zstat1.nii.gz",
+            "sha256": "c32aa17820c2af2d9254e35a8f8d5c1dfaeefe3d70667372ff09ce65f022df60"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_RF-AVG_zstat1.mgz",
+        "sha256": "c6998872e152814f693400b6652e7e1ffe43a557818543b91f718f0c557c366d",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_RF-AVG_zstat1.nii.gz",
+            "sha256": "033baf705c9dbd404562d2157108c8e94a6f93458249f243d70f17ac1a869c8a"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_RH-AVG_zstat1.mgz",
+        "sha256": "c91d07a8656fca9f5506084177e6692a32f207d1437fe009c3d5d44bf796ee66",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_RH-AVG_zstat1.nii.gz",
+            "sha256": "fb4098d43df1c02d7925c97b36658152bea061f25e252217877a815c416d94e1"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/fsaverage/surf/lh.tfMRI_MOTOR_T-AVG_zstat1.mgz",
+        "sha256": "cd6467d5afec66ec1048eabce5ae9bfc918b4a36268a1f5e710779872e9cc77f",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_T-AVG_zstat1.nii.gz",
+            "sha256": "7f626a4a722a73bfd66812c2e60e7b985ee75ac08ddb14fbd50cfc0b48acf05a"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/fsaverage/surf/rh.tfMRI_MOTOR_T-AVG_zstat1.mgz",
+        "sha256": "4857a86429f4e5b85287eb82c14c6208186a13214fb272b745611395ec2bf2a1",
+        "derived_from": [
+          {
+            "url": "https://neurovault.org/media/images/457/tfMRI_MOTOR_T-AVG_zstat1.nii.gz",
+            "sha256": "7f626a4a722a73bfd66812c2e60e7b985ee75ac08ddb14fbd50cfc0b48acf05a"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/5bdb7f571365465c97cba811b8f40270f3746cd8/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+            "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+          }
+        ],
+        "procedure": "scripts/fetch_body_map.py: the NeuroVault image read at each fsaverage vertex's RF-ANTs MNI152 coordinate, linearly interpolated, written as float32",
+        "citation": "https://doi.org/10.1016/j.neuroimage.2013.05.033",
+        "license": "HCP Open Access Data Use Terms"
+      },
+      {
+        "path": "data/mni152/label/lh.cortex.label",
+        "sha256": "da773445437d3eb522515cec5e78f3819a89b5cf0cd2f9e148d33bd50c5e394e",
+        "anatomy": "mni152",
+        "derived_from": [
+          "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
+      },
+      {
+        "path": "data/mni152/label/rh.cortex.label",
+        "sha256": "08402ea1e3ecbfdb49b649f9919dcac3af5f5e69e61ef1f9e7641247989095f4",
+        "anatomy": "mni152",
+        "derived_from": [
+          "data/mni152/input/tpl-MNI152NLin2009cAsym_res-01_T1w_scale-0.90.nii.gz"
+        ],
+        "procedure": "FreeSurfer recon-all, Linux build on Rorqual (job 27317774); see reconstruction.json. Copied from the same run after its report was written (its surfaces and annotations are byte for byte the pinned ones), for the body_map layer",
+        "citation": "https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all"
       }
     ]
   },

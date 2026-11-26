@@ -1,6 +1,6 @@
 <!--
   The Circuits tab's list (viewer/ui/panels/circuits.js:150-165, 328-335, index.html:309-312): the
-  guided circuits as rows, each opening a lesson, and the list's scope. A list of buttons;
+  maps and the guided circuits as rows, each opening a map or a lesson, and the list's scope. A list of buttons;
   every row is a Tab stop, and ArrowDown and ArrowUp walk the rows.
   - the open circuit is `aria-current="true"`: a row opens a lesson, it does not toggle
     (deviations/x3-current-circuit.md);
@@ -17,10 +17,13 @@
 
   let { model }: { model: CircuitExplorer } = $props();
   const map = $derived(model.map);
+  const bodyMap = $derived(model.bodyMap);
+  const mapsOffered = $derived(Number(map.available) + Number(bodyMap.available));
 
   const uid = $props.id();
   const copy = $derived(t(model.lang, 'circuits'));
   const maps = $derived(t(model.lang, 'visualField'));
+  const body = $derived(t(model.lang, 'bodyMap'));
   let listElement = $state<HTMLElement | null>(null);
 
   $effect(() => {
@@ -39,6 +42,52 @@
 <div class="browser scroll-fade" hidden={!model.exploring}>
   <h2 class="visually-hidden">{t(model.lang, 'workspace').modes.circuits}</h2>
   <div role="group" aria-label={copy.heading} bind:this={listElement}>
+    <!-- The maps come first: below 45 circuits a reader would not find them. -->
+    {#if mapsOffered}
+      <div class="group" role="group" aria-labelledby="{uid}-maps">
+        <h3 id="{uid}-maps" class="group-heading">{maps.maps}</h3>
+        <ul class="rows" role="list">
+          {#if map.available}
+            <li>
+              <button
+                type="button"
+                class="circuit-choice"
+                data-map="visual-field"
+                aria-current={map.open ? 'true' : undefined}
+                aria-disabled={model.busy ? 'true' : undefined}
+                data-selected={String(map.open)}
+                onclick={() => void model.openMap()}
+              >
+                <span class="text">
+                  <span class="row-name">{maps.name}</span>
+                  <span class="route">{maps.summary}</span>
+                </span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {/if}
+          {#if bodyMap.available}
+            <li>
+              <button
+                type="button"
+                class="circuit-choice"
+                data-map="body-map"
+                aria-current={bodyMap.open ? 'true' : undefined}
+                aria-disabled={model.busy ? 'true' : undefined}
+                data-selected={String(bodyMap.open)}
+                onclick={() => void model.openBodyMap()}
+              >
+                <span class="text">
+                  <span class="row-name">{body.name}</span>
+                  <span class="route">{body.summary}</span>
+                </span>
+                <span class="chevron" aria-hidden="true"></span>
+              </button>
+            </li>
+          {/if}
+        </ul>
+      </div>
+    {/if}
     <div class="group" role="group" aria-labelledby="{uid}-guided">
       <h3 id="{uid}-guided" class="group-heading group-heading-counts">
         <span>{maps.guided}</span>
@@ -69,34 +118,10 @@
         {/each}
       </ul>
     </div>
-    {#if map.available}
-      <div class="group" role="group" aria-labelledby="{uid}-maps">
-        <h3 id="{uid}-maps" class="group-heading">{maps.maps}</h3>
-        <ul class="rows" role="list">
-          <li>
-            <button
-              type="button"
-              class="circuit-choice"
-              data-map="visual-field"
-              aria-current={map.open ? 'true' : undefined}
-              aria-disabled={model.busy ? 'true' : undefined}
-              data-selected={String(map.open)}
-              onclick={() => void model.openMap()}
-            >
-              <span class="text">
-                <span class="row-name">{maps.name}</span>
-                <span class="route">{maps.summary}</span>
-              </span>
-              <span class="chevron" aria-hidden="true"></span>
-            </button>
-          </li>
-        </ul>
-      </div>
-    {/if}
   </div>
   <p class="scope-note">
-    {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{map.available
-      ? ` · ${maps.mapCount(1)}`
+    {copy.coverage(model.circuits.length, landmarkTotal(model.circuits))}{mapsOffered
+      ? ` · ${maps.mapCount(mapsOffered)}`
       : ''}{model.unavailable
       ? ` · ${templateCopy(model.lang).circuitsElsewhere(model.unavailable)}`
       : ''}

@@ -423,6 +423,21 @@ export const FIGURES = [
     }),
   },
   {
+    // Both strips from above, the left hemisphere's from its lateral side, and the map's panel, which is its key.
+    name: 'body-map-1', to: 'docs', columns: 5, aspect: 0.572, grid: SIDE,
+    panels: (() => {
+      const map = { tab: 'circuits', map: 'body-map', internal: '0', colors: 'tissue' };
+      return [
+        stage({ ...map, view: 'superior' }),
+        stage({ ...map, view: 'left' }),
+        // The sources are the page's references, so the panel ends at what the map leaves out.
+        panel(stage({ ...map, view: 'superior' }), [['style', '#inspector .body-map :is(h4:last-of-type, .sources){display:none!important}']], {
+          shot: '#inspector .body-map',
+        }),
+      ];
+    })(),
+  },
+  {
     name: 'overlays-1', to: 'docs', columns: 5, aspect: 0.572, grid: SIDE,
     panels: [
       surface({}, { map: 'synthetic', steps: [...synthetic, ['press', 'Escape']], keys: true }),

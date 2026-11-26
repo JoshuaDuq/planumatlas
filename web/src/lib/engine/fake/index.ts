@@ -16,6 +16,8 @@ import type {
 import { createFakeCamera } from './camera.ts';
 import { createFakeLesion } from './lesion.ts';
 import { createFakeStrokeCases } from './stroke-cases.ts';
+import { createFakeBodyMap } from './body-map.ts';
+import type { FakeBodyMap } from './body-map.ts';
 import { createFakeUserMap } from './user-map.ts';
 import type { FakeUserMap } from './user-map.ts';
 import type { FakeStrokeCases } from './stroke-cases.ts';
@@ -74,6 +76,7 @@ export interface FakeEngine extends Engine {
   readonly tracts: FakeTracts;
   readonly lesion: FakeLesion;
   readonly visualField: FakeVisualField;
+  readonly bodyMap: FakeBodyMap;
   readonly strokeCases: FakeStrokeCases;
   readonly userMap: FakeUserMap;
   /** Every call into the engine's domains, in order. Events and getters are not recorded. */
@@ -211,6 +214,7 @@ export function createFakeEngine(options: FakeEngineOptions): FakeEngine {
       ),
       calls,
     ),
+    bodyMap: recorded('bodyMap', createFakeBodyMap(options.manifest.body_map), calls),
     strokeCases: recorded(
       'strokeCases',
       createFakeStrokeCases(options.strokeCases, assemble),

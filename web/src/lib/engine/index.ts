@@ -588,6 +588,14 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
           if (box) stage.follow(box);
         },
       },
+      bodyMap: {
+        available: Boolean(atlas.manifest.body_map),
+        async show(part) {
+          await atlas.showBodyMap(part, absoluteManifestUrl);
+          // Only colours change: a frame, no new framing.
+          scene.invalidate();
+        },
+      },
       strokeCases: {
         available: Boolean(atlas.manifest.stroke_cases),
         cases: loadStrokeCases,

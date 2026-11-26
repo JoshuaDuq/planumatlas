@@ -1,15 +1,9 @@
-import { BufferAttribute, Matrix4, Mesh, Plane, Vector3 } from 'three';
-import type {
-  BufferGeometry,
-  Color,
-  DataTexture,
-  IUniform,
-  Material,
-  MeshStandardMaterial,
-} from 'three';
+import { BufferAttribute, Color, Matrix4, Mesh, Plane, Vector3 } from 'three';
+import type { BufferGeometry, DataTexture, IUniform, Material, MeshStandardMaterial } from 'three';
 import type { Region } from '../../types/index.ts';
-import { createAnatomicalMaterial, stageLegible } from '../render/materials.ts';
-import type { SurfacePalettes, VisualFieldUniforms } from '../render/materials.ts';
+import { createAnatomicalMaterial, greyed, stageLegible } from '../render/materials.ts';
+import type { BodyMapShared, SurfacePalettes, VisualFieldUniforms } from '../render/materials.ts';
+import { BODY_PART_COLORS } from '../../core/learning/body-map.ts';
 import { checkTerritories, networkPalette, paletteTexture } from '../render/network-colors.ts';
 import {
   FEATHER_ITEM_SIZE,
@@ -89,7 +83,25 @@ export class SurfaceMaterials {
         ? paletteTexture(manifest.arterial_territories.territories.map(({ color }) => color))
         : null,
       thickness: manifest.cortical_thickness ? { value: null } : null,
+      bodyMap: manifest.body_map
+        ? {
+            bodyMapMix: { value: 0 },
+            bodyMapPart: { value: 0 },
+            bodyMapPalette: { value: paletteTexture(BODY_PART_COLORS) },
+            // The grey the reader's map draws the cortex in (`user-map.ts`).
+            bodyMapBase: {
+              value: new Vector3().setFromColor(
+                greyed(new Color(manifest.appearance.tissue.cortex)),
+              ),
+            },
+          }
+        : null,
     };
+  }
+
+  /** The body map's shared uniforms; null without a body map. */
+  get bodyMap(): BodyMapShared | null {
+    return this.palettes.bodyMap;
   }
 
   /** The shared thickness palette, empty until the first atlas's thickness downloads; null unpublished. */
@@ -228,6 +240,7 @@ export class SurfaceMaterials {
     this.palettes.network?.dispose();
     this.palettes.territory?.dispose();
     this.palettes.thickness?.value?.dispose();
+    this.palettes.bodyMap?.bodyMapPalette.value?.dispose();
   }
 
   /** Exposed white matter carries no region of its own; it reads the white matter inside it. */

@@ -8,6 +8,11 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ### Added
 
+- **Circuits** › **Maps** offers a **Body map**: the central strip of both hemispheres coloured by where
+  moving the foot, the hand or the tongue raises activity most, from the Human Connectome Project's group
+  maps of 486 adults. A choice shows one part alone, and a table gives each part's area per hemisphere.
+  It is a group average placed on this brain by its folding, drawn on the strip alone: most of the foot's
+  activity lies elsewhere, and the panel says so. Opens with `map=body-map`, on CDMD and the MNI template.
 - The **Basal ganglia motor loops** circuit shows **Excitation and inhibition**, a flat diagram of its six
   landmarks and the sign of each projection between them: an arrowhead and a + where a projection excites,
   a bar and a − where it inhibits. A box opens its landmark and stays where it stands in the panel. The
@@ -22,6 +27,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ### Changed
 
+- The **Circuits** list opens on its **Maps**, above the guided circuits: below 45 circuits they went
+  unnoticed.
 - The touch circuit is named **Dorsal column–medial lemniscus pathway**. Its landmarks are unchanged: it
   still begins at the thalamus, where the lemniscus ends.
 - **NextBrain** draws the cerebellum, the corpus callosum and the ventricles. It showed the cerebellar

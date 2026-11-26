@@ -832,7 +832,8 @@
    "streamlines": "Impossible d’afficher les trajectoires de ce repère.",
    "map": "Impossible d’ouvrir la carte du champ visuel.",
    "guide": "Impossible de lancer la visite.",
-   "snapshotSize": "Impossible d’enregistrer l’image à cette taille<NNBSP>: elle dépasserait ce que cet appareil peut dessiner. Choisissez une taille plus petite ou réduisez la fenêtre."
+   "snapshotSize": "Impossible d’enregistrer l’image à cette taille<NNBSP>: elle dépasserait ce que cet appareil peut dessiner. Choisissez une taille plus petite ou réduisez la fenêtre.",
+   "bodyMap": "Impossible d’afficher la carte du corps."
   }
  },
  "footer": {
@@ -968,7 +969,8 @@
    "deficit": "Déficit",
    "tracts": "Faisceaux",
    "strokeCases": "Cas d’AVC",
-   "visualField": "Carte du champ visuel"
+   "visualField": "Carte du champ visuel",
+   "bodyMap": "Carte du corps"
   },
   "acknowledgement": "Remerciements",
   "copyReferences": "Copier en texte",
@@ -2726,6 +2728,10 @@
   "method": "Méthode du gabarit (Benson et al. 2014)",
   "areasSource": "Aires visuelles (Wang et al. 2015)"
  },
+ "bodyMap": {
+  "name": "Carte du corps",
+  "summary": "Pied, main, langue ↔ bande centrale, moyenne de groupe"
+ },
  "workspace": {
   "modes": {
    "anatomy": "Anatomie",
@@ -3141,5 +3147,46 @@
   "saved": "Matrice enregistrée en PNG.",
   "sheetTitle": "Corrélation au repos, 200 parcelles de Schaefer par réseau de Yeo",
   "close": "Fermer"
+ },
+ "bodyMapPanel": {
+  "intro": "Là où bouger le pied, la main ou la langue augmente le plus l’activité le long de la bande centrale, chez 486 adultes du Human Connectome Project. Chaque hémisphère représente le pied et la main opposés, et tous deux la langue.",
+  "part": "Partie affichée",
+  "all": "Toutes",
+  "parts": {
+   "foot": "Pied",
+   "hand": "Main",
+   "tongue": "Langue"
+  },
+  "table": "Aire sur la bande",
+  "partColumn": "Partie",
+  "side": [
+   "[\"Alpha\"] → \"Hémisphère droit\"",
+   "[\"\"] → \"Hémisphère droit\""
+  ],
+  "area": [
+   "[\"Alpha\"] → \"NaN<NBSP>mm²\"",
+   "[\"\"] → \"0<NBSP>mm²\""
+  ],
+  "sides": "L’hémisphère gauche représente le pied et la main droits, l’hémisphère droit les gauches.",
+  "limits": "Ce que la carte laisse de côté",
+  "group": [
+   "[\"Alpha\"] → \"Une moyenne de groupe de Alpha autres adultes, portée sur ce cerveau par ses plissements<NNBSP>: ce n’est pas ce que fait ce cerveau.\"",
+   "[\"\"] → \"Une moyenne de groupe de  autres adultes, portée sur ce cerveau par ses plissements<NNBSP>: ce n’est pas ce que fait ce cerveau.\""
+  ],
+  "floor": [
+   "[\"Alpha\"] → \"Un sommet est coloré là où un mouvement l’emporte avec un effet au moins moyen (d de Cohen ≥ Alpha)<NNBSP>; le reste de la bande reste gris.\"",
+   "[\"\"] → \"Un sommet est coloré là où un mouvement l’emporte avec un effet au moins moyen (d de Cohen ≥ )<NNBSP>; le reste de la bande reste gris.\""
+  ],
+  "strip": [
+   "[\"Alpha\",\"\"] → \"Seule la bande centrale est dessinée. Bouger le pied augmente aussi l’activité bien au-delà, dans l’aire motrice supplémentaire, le cortex cingulaire et le lobe pariétal<NNBSP>: NaN–0<NBSP>% de la carte du pied à cet effet se trouve hors de la bande.\"",
+   "[\"\",\"Alpha\"] → \"Seule la bande centrale est dessinée. Bouger le pied augmente aussi l’activité bien au-delà, dans l’aire motrice supplémentaire, le cortex cingulaire et le lobe pariétal<NNBSP>: 0–NaN<NBSP>% de la carte du pied à cet effet se trouve hors de la bande.\""
+  ],
+  "sensorimotor": "À la résolution de 2<NBSP>mm des cartes de groupe, le cortex moteur et le cortex sensitif ne se distinguent pas<NNBSP>: chaque plage couvre les deux berges du sillon central.",
+  "five": "Cinq mouvements seulement<NNBSP>: le tronc, les doigts un à un et le visage au-delà de la langue n’ont pas été testés.",
+  "sources": "Sources",
+  "dataset": "Tâche motrice du HCP, cartes de groupe (NeuroVault 457)",
+  "task": "Barch et al. 2013, la batterie de tâches du HCP",
+  "project": "Van Essen et al. 2013, le Human Connectome Project",
+  "registration": "Wu et al. 2018, recalage du MNI vers la surface"
  }
 }

@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { HEMISPHERES, SURFACE_COLORS } from '../../types/index.ts';
 import type {
+  BodyPart,
   DisplaySettings,
   Hemisphere,
   LoadProgress,
@@ -36,6 +37,7 @@ import type { StimulationFtract } from '../../core/catalog/stimulation-ftract.ts
 import type { StimulationResponses } from '../../core/catalog/stimulation-responses.ts';
 import { belongsToDetail, defaultDetailOf, visibilityOf } from '../../core/catalog/visibility.ts';
 import { createDissection } from '../../core/state/dissection.ts';
+import { bodyPartCode, checkBodyMap } from '../../core/learning/body-map.ts';
 import { fetchAsset } from '../../core/assets/asset-cache.ts';
 import type { VisualFieldUniforms } from '../render/materials.ts';
 import type { MriUniforms } from '../render/mri-material.ts';
@@ -187,6 +189,13 @@ export class BrainAtlas extends EventTarget {
   private isDisposed = false;
   /** Where the thickness files are, from its first download, and the atlas layers that carry it. */
   private thickness: { base: string | URL; carried: WeakSet<Layer> } | null = null;
+  /** As `thickness`, for the body map, with the part drawn: every part, one, or none. */
+  private body: {
+    base: string | URL;
+    carried: WeakSet<Layer>;
+    shown: BodyPart | 'all' | null;
+  } | null = null;
+  private bodyRequest = 0;
 
   constructor(
     manifest: AtlasManifest,
@@ -419,6 +428,10 @@ export class BrainAtlas extends EventTarget {
     // Shown, the thickness comes with the atlas, so its cortex is never drawn without it.
     if (this.surfaceColor === 'thickness') {
       await this.ensureThickness(id, this.thickness!.base);
+      if (request !== this.atlasRequest) return;
+    }
+    if (this.body?.shown) {
+      await this.ensureBodyMap(id, this.body.base);
       if (request !== this.atlasRequest) return;
     }
     if (id !== this.atlasId) this.previousAtlas = this.atlasId;
@@ -787,6 +800,51 @@ export class BrainAtlas extends EventTarget {
     palette.value ??= thicknessPalette(this.manifest.cortical_thickness!);
     attachThickness(layer, new Uint8Array(buffer), this.manifest.regions, atlas);
     this.thickness.carried.add(layer);
+  }
+
+  /**
+   * The body map on a loaded atlas's cortex, a byte per vertex, downloaded once for each time that atlas
+   * loads. Rejects for an atlas the build publishes none for.
+   */
+  async ensureBodyMap(atlas: string, baseUrl: string | URL): Promise<void> {
+    const record = this.manifest.body_map?.files[atlas];
+    if (!record) throw new Error(`No body map is published for the ${atlas} cortex.`);
+    const layer = this.layers.get(atlas);
+    if (!layer) throw new Error(`The ${atlas} cortex has not loaded.`);
+    this.body ??= { base: baseUrl, carried: new WeakSet(), shown: null };
+    if (this.body.carried.has(layer)) return;
+    const url = new URL(record.file, new URL(baseUrl, globalThis.location?.href));
+    const [buffer, { attachBodyMap }] = await Promise.all([
+      fetchAsset(url),
+      import('./body-map.ts'),
+    ]);
+    // A layer released while its codes downloaded is not drawn; its next load downloads again.
+    if (this.layers.get(atlas) !== layer || this.body.carried.has(layer)) return;
+    attachBodyMap(layer, new Uint8Array(buffer), this.manifest.regions, atlas);
+    this.body.carried.add(layer);
+  }
+
+  /**
+   * Draw the body map over the shown atlas's cortex, every part or one alone, the rest of the cortex
+   * grey; null gives the cortex its colours back. A later call overrides one still downloading.
+   */
+  async showBodyMap(part: BodyPart | 'all' | null, baseUrl: string | URL): Promise<void> {
+    const uniforms = this.materials.bodyMap;
+    if (!uniforms || !this.manifest.body_map)
+      throw new Error('This anatomy publishes no body map.');
+    checkBodyMap(this.manifest.body_map);
+    const request = ++this.bodyRequest;
+    if (part !== null) await this.ensureBodyMap(this.atlasId, baseUrl);
+    if (request !== this.bodyRequest) return;
+    this.body ??= { base: baseUrl, carried: new WeakSet(), shown: null };
+    this.body.shown = part;
+    uniforms.bodyMapMix.value = part ? 1 : 0;
+    uniforms.bodyMapPart.value = part && part !== 'all' ? bodyPartCode(part) : 0;
+  }
+
+  /** The body map's part drawn, every part, or null while it is not. */
+  get bodyMapShown(): BodyPart | 'all' | null {
+    return this.body?.shown ?? null;
   }
 
   /**

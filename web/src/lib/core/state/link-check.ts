@@ -70,7 +70,7 @@ export function checkLink(
   if ('circuitRoute' in state && !state.circuit) reject('circuitRoute');
   // A map opens in place of a lesson, and its dot means nothing without it.
   if ('circuitMap' in state && state.circuit) reject('circuitMap');
-  if ('mapDot' in state && !state.circuitMap) reject('mapDot');
+  if ('mapDot' in state && state.circuitMap !== 'visual-field') reject('mapDot');
   if (state.spinalCordVisible && !known.spinalCord) reject('spinalCordVisible');
   // A coordinate needs its space, one this anatomy publishes; it and a lesion are the one sphere.
   const coordinate = 'coordinate' in state,

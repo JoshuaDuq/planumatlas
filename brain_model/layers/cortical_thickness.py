@@ -234,7 +234,7 @@ def check_order(config, fields, regions):
                 raise ValueError(f"{region['id']}: the cortex file's vertices are not in the measured order")
             covered += len(published)
         if covered != len(fields[atlas["id"]]):
-            raise ValueError(f"{atlas['id']}: the thickness field does not cover the cortex file")
+            raise ValueError(f"{atlas['id']}: the published field does not cover the cortex file")
 
 
 def validate(config, manifest):

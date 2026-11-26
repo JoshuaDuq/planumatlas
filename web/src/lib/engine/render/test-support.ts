@@ -39,6 +39,7 @@ export const networkPalettes = (): SurfacePalettes => ({
   network: networkPalette(networks as unknown as NetworkMetadata),
   territory: null,
   thickness: null,
+  bodyMap: null,
 });
 
 /** A cortical mesh with the shading fields (and, if asked, the network layer) the model checks for. */
@@ -80,7 +81,9 @@ export function publishedCortexMaterial(): Material {
   for (const name of ['_field_x', '_field_y', '_prf_sigma']) {
     mesh.geometry.setAttribute(name, new BufferAttribute(new Uint16Array(count), 1, true));
   }
-  const materials = new SurfaceMaterials(manifest as never, new Map());
+  // CDMD publishes both channels read by vertex index; the trimmed fixture carries neither record.
+  const dressed = { ...manifest, cortical_thickness: {}, body_map: {} };
+  const materials = new SurfaceMaterials(dressed as never, new Map());
   const shown = materials.dress(mesh as never, { id: 'r', kind: 'cortex' } as Region, true);
   materials.addFeathers([shown]);
   addMriSurfaceAppearance(shown.material, createMriUniforms(scanAnatomy()), 'mid-thickness');

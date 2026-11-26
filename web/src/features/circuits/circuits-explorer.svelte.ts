@@ -14,6 +14,7 @@ import { announce } from '../../lib/ui/announcer.svelte.ts';
 import { scrollToTop } from '../../lib/ui/scroll.ts';
 import { relatedLandmarks } from './circuits-view.ts';
 import type { VisualFieldExplorer } from './visual-field-explorer.svelte.ts';
+import type { BodyMapExplorer } from './body-map-explorer.svelte.ts';
 
 export interface CircuitExplorerDeps {
   view: Pick<ViewStore, 'current'>;
@@ -35,10 +36,12 @@ export interface CircuitExplorerDeps {
   openDeficit: (id: string) => unknown;
   /** The visual-field map the tab offers beside its lessons. */
   map: VisualFieldExplorer;
+  /** The body map, the tab's second map. */
+  bodyMap: BodyMapExplorer;
 }
 
 /** What the reader is told could not be done: `failureNotice`'s operation. */
-type Operation = 'landmark' | 'mri' | 'map';
+type Operation = 'landmark' | 'mri' | 'map' | 'bodyMap';
 export type Direction = 'previous' | 'next';
 
 export function createCircuitExplorer(deps: CircuitExplorerDeps) {
@@ -129,6 +132,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
 
   return {
     map: deps.map,
+    bodyMap: deps.bodyMap,
     get lang() {
       return view.current.lang;
     },
@@ -196,7 +200,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
 
     /** The `/` key: the first circuit takes focus. */
     focusFirst() {
-      list?.querySelector<HTMLElement>('button')?.focus();
+      list?.querySelector<HTMLElement>('[data-circuit]')?.focus();
     },
     attachList(root: HTMLElement) {
       list = root;
@@ -227,6 +231,8 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     openCircuit: (id: string) => run(() => excursions.openCircuit(id), 'landmark', {}),
     /** The visual-field map opens in place of a lesson, under the same refuse-while-busy run. */
     openMap: () => run(() => deps.map.openMap(), 'map'),
+    /** The body map opens in place of a lesson, under the same runner. */
+    openBodyMap: () => run(() => deps.bodyMap.openMap(), 'bodyMap'),
     /** The open lesson goes back to its whole route, from its first landmark's Previous. */
     openRoute: () => run(() => excursions.openLessonRoute(), 'landmark', { direction: 'previous' }),
     /** A lesson opens on one of its landmarks, from the lessons a region takes part in. */

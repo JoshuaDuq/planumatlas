@@ -47,6 +47,7 @@ const { source: stimulation } = readRepoYaml<{ source: Source }>(
   'config/stimulation-responses.yaml',
 );
 const { source: ftract } = readRepoYaml<{ source: Source }>('config/stimulation-ftract.yaml');
+const bodyMap = readRepoYaml<{ citations: Source[] }>('config/body-map.yaml');
 const bibliography = readFileSync(resolve(repoRoot, 'docs/reference/references.md'), 'utf8');
 // What the published manifests' citation fields and the tract catalogs' sources cite.
 const published = [
@@ -209,6 +210,7 @@ test('the records file holds exactly the cited works', () => {
     `pmid:${striatal.pmid}`,
     `pmid:${stimulation.pmid}`,
     `pmid:${ftract.pmid}`,
+    ...bodyMap.citations.map((source) => `pmid:${source.pmid}`),
     ...bibliographyEntries.map((line) => `pmid:${line.match(/\bPMID (\d+)\b/)?.[1]}`),
     ...published.flatMap(({ pmids }) => pmids.map((pmid) => `pmid:${pmid}`)),
   ]);

@@ -1,4 +1,7 @@
+import type { BODY_PARTS } from './constants.ts';
 import type { Rgb } from './paint.ts';
+
+export type BodyPart = (typeof BODY_PARTS)[number];
 import type { Region } from './region.ts';
 
 type Matrix4 = readonly (readonly number[])[];
@@ -134,6 +137,7 @@ export interface Manifest {
   disorder_effects?: ManifestFile & Record<string, unknown>;
   cortical_layers?: ManifestFile & Record<string, unknown>;
   cortical_thickness?: CorticalThickness;
+  body_map?: BodyMap;
   stroke_cases?: StrokeCasesRecord;
   volumes?: ManifestFile;
   tissues?: ManifestFile;
@@ -260,6 +264,35 @@ export interface CorticalThickness extends ManifestFile {
   /** The key's ends: the measured vertices' 1st and 99th percentiles, out to the half millimetre. */
   display_range_mm: readonly [number, number];
   measured_vertices: Record<'left' | 'right', number>;
+  validation: Record<string, unknown>;
+}
+
+/** One hemisphere of the body map: the opposite side's limbs and the tongue, on its central strip. */
+export interface BodyMapHemisphere {
+  /** The body side whose foot and hand this hemisphere maps. */
+  moves: 'left' | 'right';
+  strip_mm2: number;
+  assigned_share: number;
+  area_mm2: Record<BodyPart, number>;
+  /** The share of each part's map above the floor that lies off the strip, which the map leaves out. */
+  off_strip_share: Record<BodyPart, number>;
+}
+
+/**
+ * `manifest.body_map`: on the central strip, the movement whose HCP group map wins at each vertex, a
+ * byte per vertex of each atlas's cortex in the published regions' order (0 none, then `parts`' codes).
+ */
+export interface BodyMap {
+  label: string;
+  source: string;
+  citations: string[];
+  license: string;
+  method: string;
+  files: Record<string, { file: string; vertex_count: number }>;
+  parts: { code: number; id: BodyPart }[];
+  people: number;
+  floor: { d: number; z: number };
+  hemispheres: Record<'left' | 'right', BodyMapHemisphere>;
   validation: Record<string, unknown>;
 }
 

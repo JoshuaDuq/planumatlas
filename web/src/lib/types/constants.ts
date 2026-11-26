@@ -46,6 +46,9 @@ export const LESION_MODES = ['lesion', 'functions', 'deficits'] as const;
 /** The reader's highlight colours, as links name them: the deficits' six finding colours, in their order. */
 export const HIGHLIGHT_COLORS = ['blue', 'raspberry', 'green', 'amber', 'violet', 'pink'] as const;
 
+/** The movements the body map tells apart, in the order of their published codes (1, 2, 3). */
+export const BODY_PARTS = ['foot', 'hand', 'tongue'] as const;
+
 /** The most regions a reader can highlight at once. */
 export const MAX_HIGHLIGHTS = 12;
 

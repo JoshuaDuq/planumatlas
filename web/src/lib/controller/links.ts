@@ -180,7 +180,10 @@ export function createLinks({
     regions: model.regions,
     deficits: new Set(clinical.search('', 'en').map((deficit) => deficit.id)),
     circuits: new Map(circuits.all.map((circuit) => [circuit.id, circuit.steps.length])),
-    maps: new Set(model.manifest.retinotopy ? ['visual-field'] : []),
+    maps: new Set([
+      ...(model.manifest.retinotopy ? ['visual-field'] : []),
+      ...(model.manifest.body_map ? ['body-map'] : []),
+    ]),
     spinalCord: publishesSpinalCord(model.manifest),
     coordinateSpaces: new Set(
       coordinates ? [...coordinates.metadata.spaces.map(({ id }) => id), UNSTATED] : [],
@@ -427,7 +430,9 @@ export function createLinks({
         lesson.go(valid.circuitStep ?? 0);
       } else if (valid.circuitMap) {
         // The link carries the map's own scene; the map comes back over it, on its dot.
-        lesson.openMap(valid.circuitMap as CircuitMap, valid.mapDot ?? START_DOT);
+        if (valid.circuitMap === 'visual-field') {
+          lesson.openMap('visual-field', valid.mapDot ?? START_DOT);
+        } else lesson.openMap(valid.circuitMap as CircuitMap);
       } else {
         lesson.close();
       }

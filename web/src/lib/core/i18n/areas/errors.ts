@@ -35,6 +35,7 @@ export const en = {
     guide: 'Could not start the tour.',
     snapshotSize:
       'Could not save the image at this size: it would be larger than this device can draw. Choose a smaller size or make the window smaller.',
+    bodyMap: 'Could not show the body map.',
   },
 };
 
@@ -75,5 +76,6 @@ export const fr: typeof en = {
     guide: 'Impossible de lancer la visite.',
     snapshotSize:
       'Impossible d’enregistrer l’image à cette taille : elle dépasserait ce que cet appareil peut dessiner. Choisissez une taille plus petite ou réduisez la fenêtre.',
+    bodyMap: 'Impossible d’afficher la carte du corps.',
   },
 };

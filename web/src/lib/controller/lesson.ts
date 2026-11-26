@@ -35,6 +35,8 @@ export interface MriDialog {
 const MAP_CONTEXT_MM = 30;
 // Seen from the subject's right, the medial pair shows both medial walls.
 const MAP_VIEW = 'right';
+// From above, both central strips run from the midline down to the Sylvian fissure.
+const BODY_MAP_VIEW = 'superior';
 
 /**
  * Guided lessons (app.js:1298-1411): a lesson opens over the scene it found, draws and frames its
@@ -205,11 +207,33 @@ export function createLessons({
   }
 
   /**
+   * The body map's scene: both hemispheres whole, uncut, opaque and with nothing selected, from above,
+   * so both strips show. The colour is tissue, so a cut opened over the map shows no other colouring.
+   * The stage draws the map itself from the lesson (`syncBodyMap`).
+   */
+  async function showBodyMapScene(current: () => boolean) {
+    await sections.setMode('off');
+    if (!current()) return false;
+    model.setSurfaceColor('tissue');
+    model.select(null);
+    model.clearIsolation();
+    model.setHemisphere('both');
+    model.setExploded(false);
+    model.setCortexVisible(true);
+    model.setCortexOpacity(1);
+    model.setInternalVisible(false);
+    session.setView(BODY_MAP_VIEW);
+    camera.applyView(BODY_MAP_VIEW);
+    prepare(preparedOf(model.settings));
+    return true;
+  }
+
+  /**
    * The map's medial pair and orbit limit end before another scene is framed or put back: the stage's
    * sync would end them only once the lesson state had changed, after the camera had moved.
    */
   function endMapStage() {
-    if (lesson.state.map) visualField.show(null);
+    if (lesson.state.map === 'visual-field') visualField.show(null);
   }
 
   function seeThroughOpacity() {
@@ -371,6 +395,18 @@ export function createLessons({
       shell.showDetail();
       if (!(await showMapScene(dot, current))) return;
       lesson.openMap('visual-field', dot);
+      render();
+      shell.showDetail();
+    },
+
+    /** The body map opens over the scene it found. */
+    async openBodyMap() {
+      const current = commands.begin();
+      endMapStage();
+      rememberBeforeLesson();
+      shell.showDetail();
+      if (!(await showBodyMapScene(current))) return;
+      lesson.openMap('body-map');
       render();
       shell.showDetail();
     },

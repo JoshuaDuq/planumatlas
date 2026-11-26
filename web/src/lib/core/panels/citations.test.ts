@@ -109,6 +109,7 @@ const opening: OnScreen = {
   tracts: null,
   strokeCases: false,
   visualFieldMap: false,
+  bodyMap: false,
 };
 const manifest = {
   anatomy: { source_url: 'https://doi.org/10.1/subject' },
@@ -148,6 +149,13 @@ const manifest = {
     citation: 'https://doi.org/10.1/benson18',
     method_citation: 'https://doi.org/10.1/benson14',
     visual_areas: { citation: 'https://doi.org/10.1/wang' },
+  },
+  body_map: {
+    citations: [
+      'https://doi.org/10.1/barch',
+      'https://doi.org/10.1/vanessen',
+      'https://doi.org/10.1/wu',
+    ],
   },
 } as unknown as Partial<Manifest>;
 const cited = (view: Partial<OnScreen>) =>
@@ -222,6 +230,16 @@ test('the HCP acknowledgement goes with HCP-MMP, CAB-NP, HCP connectivity and th
   assert.equal(hcp({ connectivitySeed: 'destrieux:left:1' }), true);
   assert.equal(hcp({ visualFieldMap: true }), true);
   assert.equal(hcp({ surfaceColor: 'network' }), false);
+});
+
+test('BODY-07 the open body map cites its task, project and registration papers, with the HCP acknowledgement', () => {
+  assert.deepEqual(
+    cited({ bodyMap: true }).filter((c) => c.startsWith('bodyMap')),
+    ['bodyMap barch', 'bodyMap vanessen', 'bodyMap wu'],
+  );
+  assert.ok(!cited({ bodyMap: false }).some((c) => c.startsWith('bodyMap')));
+  assert.equal(viewCitations(manifest, { ...opening, bodyMap: true }).hcp, true);
+  assert.equal(viewCitations(manifest, { ...opening, bodyMap: false }).hcp, false);
 });
 
 const library: ReferenceLibrary = {

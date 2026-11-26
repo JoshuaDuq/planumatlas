@@ -7,13 +7,13 @@ export interface CircuitSessionState {
   visited: number[];
   /** The whole route is shown, every landmark at once, ahead of the steps. */
   route: boolean;
-  /** An interactive map is open in place of a lesson, with the dot it shows; both absent otherwise. */
+  /** An interactive map is open in place of a lesson; absent otherwise. The visual field's has its dot. */
   map?: CircuitMap;
   dot?: VisualFieldDot;
 }
 
 /** The interactive maps the Circuits tab offers beside its lessons. */
-export const CIRCUIT_MAPS = ['visual-field'] as const;
+export const CIRCUIT_MAPS = ['visual-field', 'body-map'] as const;
 export type CircuitMap = (typeof CIRCUIT_MAPS)[number];
 
 function checkedDot(dot: VisualFieldDot): VisualFieldDot {
@@ -35,14 +35,19 @@ export function createCircuitSession(catalog: Pick<CircuitCatalog, 'get'>) {
     close() {
       state = { circuit: null, step: 0, visited: [], route: false };
     },
-    /** A map opens in place of any lesson, showing `dot`. */
-    openMap(map: CircuitMap, dot: VisualFieldDot) {
+    /** A map opens in place of any lesson; the visual field's shows `dot`, and only it has one. */
+    openMap(map: CircuitMap, dot?: VisualFieldDot) {
       if (!CIRCUIT_MAPS.includes(map)) throw new RangeError(`Unknown circuit map: ${map}`);
-      state = { circuit: null, step: 0, visited: [], route: false, map, dot: checkedDot(dot) };
+      if ((map === 'visual-field') !== (dot !== undefined)) {
+        throw new Error(`The ${map} map ${dot ? 'has no dot' : 'needs a dot'}.`);
+      }
+      state = { circuit: null, step: 0, visited: [], route: false, map };
+      if (dot) state.dot = checkedDot(dot);
     },
     /** The open map's dot moves or changes size. */
     moveDot(dot: VisualFieldDot) {
-      if (!state.map) throw new Error('No map is open to move the dot of.');
+      if (state.map !== 'visual-field')
+        throw new Error('No visual-field map is open to move the dot of.');
       state = { ...state, dot: checkedDot(dot) };
     },
     go(step: number) {

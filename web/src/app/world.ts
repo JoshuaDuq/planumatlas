@@ -3,6 +3,7 @@ import {
   syncVisualFieldMap,
   visualFieldMapOpen,
 } from '../lib/state/visual-field-map.svelte.ts';
+import { createBodyMapStore, syncBodyMap } from '../lib/state/body-map.svelte.ts';
 import { flushSync } from 'svelte';
 import { ASSET_BASE } from '../../build/site.ts';
 import { createCoordinatePlacement } from '../lib/controller/coordinates.ts';
@@ -204,6 +205,8 @@ export async function composeWorld(
     syncRouteGhost(model, view, circuits);
     const visualFieldMap = createVisualFieldMapStore(lesson);
     syncVisualFieldMap(engine.visualField, view, visualFieldMap);
+    const bodyMap = createBodyMapStore();
+    syncBodyMap(engine.bodyMap, view, bodyMap, (error) => commands.fail('bodyMap', error));
     const catalog = createCatalogStore(regions, view);
     // Before the first restore: a link that loads hidden regions then says their count once.
     const speech = announceView(view, (region, current) => regions.label(region.id, current).name);
@@ -322,6 +325,7 @@ export async function composeWorld(
       regionThickness,
       mapOverlap,
       visualFieldMap,
+      bodyMap,
       coordinates:
         coordinates &&
         createCoordinatePlacement({

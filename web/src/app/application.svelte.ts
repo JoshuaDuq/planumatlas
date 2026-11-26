@@ -5,6 +5,7 @@ import type { CorticalLayersStore } from '../lib/state/cortical-layers.svelte.ts
 import type { RegionThicknessStore } from '../lib/state/cortical-thickness.svelte.ts';
 import type { MapOverlap } from '../lib/state/map-overlap.svelte.ts';
 import type { VisualFieldMapStore } from '../lib/state/visual-field-map.svelte.ts';
+import type { BodyMapStore } from '../lib/state/body-map.svelte.ts';
 import { flushSync, getContext } from 'svelte';
 import type { AnatomyCommands } from '../lib/controller/anatomy.svelte.ts';
 import type { AppContext } from '../lib/controller/context.ts';
@@ -62,6 +63,8 @@ export interface World extends AppContext {
   coordinates: CoordinatePlacement | null;
   /** The visual-field map's dot and the cortex last read. */
   visualFieldMap: VisualFieldMapStore;
+  /** The body map's part the reader picked. */
+  bodyMap: BodyMapStore;
   /** The stroke cases on the stage, and the cohort they come from. */
   strokeCases: StrokeCasesStore;
   /** The reader's own map, read from a file on their machine. */

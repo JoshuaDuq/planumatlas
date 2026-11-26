@@ -175,6 +175,17 @@ test('a map must be one this anatomy shows, never beside a lesson, and its dot n
   assert.deepEqual(blind.rejected, ['map']);
 });
 
+test('BODY-04 a link opens the body map without a dot, and refuses one beside it', () => {
+  const withBody = { ...known, maps: new Set(['visual-field', 'body-map']) };
+  const opened = checkLink(decodeState('#tab=circuits&map=body-map').state, withBody);
+  assert.deepEqual(opened.rejected, []);
+  assert.equal(opened.state.circuitMap, 'body-map');
+  const dotted = checkLink(decodeState('#tab=circuits&map=body-map&dot=2,1,1').state, withBody);
+  assert.deepEqual(dotted.rejected, ['dot']);
+  // An anatomy that publishes no body map does not open one.
+  assert.deepEqual(check('#tab=circuits&map=body-map').rejected, ['map']);
+});
+
 test('STATE-70 highlights name regions the reader can select, or the whole set is not applied', () => {
   assert.deepEqual(check('mark=destrieux:left:29:blue,aseg:left:17:amber'), {
     state: {

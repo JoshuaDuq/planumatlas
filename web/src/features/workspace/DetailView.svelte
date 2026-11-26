@@ -19,6 +19,7 @@
   import type { CircuitExplorer } from '../circuits/circuits-explorer.svelte.ts';
   import RelatedCircuits from '../circuits/RelatedCircuits.svelte';
   import VisualFieldMap from '../circuits/VisualFieldMap.svelte';
+  import { bodyMapPanel, loadBodyMapPanel } from '../circuits/body-map-panel.svelte.ts';
   import DeficitProfile from '../deficits/DeficitProfile.svelte';
   import type { DeficitsExplorer } from '../deficits/explorer.svelte.ts';
   import RelatedDeficits from '../deficits/RelatedDeficits.svelte';
@@ -66,6 +67,11 @@
     commands,
   } = $derived(world);
   const current = $derived(view.current);
+  // A link can open the body map with no press of its row: its panel's code then loads here.
+  const BodyMap = $derived(bodyMapPanel.component);
+  $effect(() => {
+    if (circuits.bodyMap.open) void loadBodyMapPanel();
+  });
 
   const app = getApp();
   const {
@@ -202,6 +208,9 @@
     <CircuitProfile model={circuits} />
     {#if circuits.map.available}
       <VisualFieldMap model={circuits.map} />
+    {/if}
+    {#if BodyMap}
+      <BodyMap model={circuits.bodyMap} />
     {/if}
     <CircuitStatus model={circuits} />
     <FunctionProfile model={functions} />

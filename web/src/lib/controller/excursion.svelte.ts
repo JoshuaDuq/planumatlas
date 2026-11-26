@@ -638,6 +638,7 @@ export function createExcursions(
     lessonLandmark: lessons.lessonLandmark,
     openCircuit: lessons.openCircuit,
     openMap: lessons.openMap,
+    openBodyMap: lessons.openBodyMap,
     showMapScene: lessons.showMapScene,
     openLessonLandmark: lessons.openLandmarkOf,
     openLessonStep: lessons.openStep,

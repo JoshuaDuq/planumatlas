@@ -29,7 +29,7 @@ def is_cortical_area(name):
 LAYERS = ("networks", "nextbrain", "cerebellar_lobules", "white_matter", "spinal_cord",
           "neurosynth_terms", "arterial_territories", "cerebellar_functions", "coordinate_spaces",
           "striatal_networks", "retinotopy", "stroke_cases", "arousal_nuclei", "cortical_thickness",
-          "network_matrix")
+          "network_matrix", "body_map")
 
 
 def resolve_config(document):

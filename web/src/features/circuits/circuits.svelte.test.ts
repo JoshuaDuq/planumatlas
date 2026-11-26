@@ -203,9 +203,9 @@ describe('the list', () => {
     const group = page.getByRole('group', { name: 'Guided learning', exact: true });
     await expect.element(group).toBeVisible();
     const buttons = group.element().querySelectorAll('ul > li > button');
-    // The guided circuits, then the one map.
+    // The one map first, where a reader sees it, then the guided circuits.
     expect(buttons.length).toBe(world.circuits.all.length + 1);
-    expect((buttons[buttons.length - 1] as HTMLElement).dataset.map).toBe('visual-field');
+    expect((buttons[0] as HTMLElement).dataset.map).toBe('visual-field');
     const vision = rowOf('vision');
     expect(vision.querySelector('.group-count')!.getAttribute('aria-hidden')).toBe('true');
     expect(vision.querySelector('.chevron')!.getAttribute('aria-hidden')).toBe('true');
@@ -249,23 +249,24 @@ describe('the list', () => {
 
   test('every row is a Tab stop, and ArrowDown and ArrowUp walk them without wrapping', async () => {
     mount();
-    const [first, second] = rows();
-    first!.focus();
-    await userEvent.tab();
-    expect(document.activeElement).toBe(second);
-    await userEvent.keyboard('{ArrowUp}');
-    expect(document.activeElement).toBe(first);
-    await userEvent.keyboard('{ArrowUp}');
-    expect(document.activeElement).toBe(first);
-    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(document.activeElement).toBe(rows()[2]);
-    // The last guided circuit leads on to the map, the last row of all.
+    // The map comes first, where a reader sees it, and leads on to the guided circuits.
+    const all = [...document.querySelectorAll<HTMLElement>('.circuit-choice')];
     const map = document.querySelector<HTMLElement>('[data-map="visual-field"]')!;
+    expect(all[0]).toBe(map);
+    expect(all.slice(1)).toEqual(rows());
+    map.focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(rows()[0]);
+    await userEvent.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(map);
+    await userEvent.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(map);
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    expect(document.activeElement).toBe(rows()[1]);
+    // The last guided circuit is the last row of all.
     rows().at(-1)!.focus();
     await userEvent.keyboard('{ArrowDown}');
-    expect(document.activeElement).toBe(map);
-    await userEvent.keyboard('{ArrowDown}');
-    expect(document.activeElement).toBe(map);
+    expect(document.activeElement).toBe(rows().at(-1));
   });
 
   test('keys with a modifier are left to the browser', async () => {

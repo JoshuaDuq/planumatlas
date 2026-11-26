@@ -44,6 +44,7 @@ import * as sides from './areas/sides.ts';
 import * as viewport from './areas/viewport.ts';
 import * as views from './areas/views.ts';
 import * as visualField from './areas/visualField.ts';
+import * as bodyMap from './areas/bodyMap.ts';
 import * as workspace from './areas/workspace.ts';
 
 export const TRANSLATIONS = {
@@ -91,6 +92,7 @@ export const TRANSLATIONS = {
     viewport: viewport.en,
     views: views.en,
     visualField: visualField.en,
+    bodyMap: bodyMap.en,
     workspace: workspace.en,
   },
   fr: {
@@ -137,6 +139,7 @@ export const TRANSLATIONS = {
     viewport: viewport.fr,
     views: views.fr,
     visualField: visualField.fr,
+    bodyMap: bodyMap.fr,
     workspace: workspace.fr,
   },
 };

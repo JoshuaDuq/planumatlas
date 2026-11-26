@@ -91,11 +91,14 @@ test('the colophon and slice note name whichever brain was actually built', () =
 test('every area file is composed into both languages, once', () => {
   // Loaded on demand: the template's wording with that brain (`loadTemplateCopy`), the tour's with the
   // tour, the Linked MRI's and its serial sections' with the Linked MRI, About this data's when one opens,
-  // the network matrix's with its dialog.
+  // the network matrix's with its dialog, the body map panel's with the panel.
   const files = Object.keys(import.meta.glob('./areas/*.ts'))
     .map((path) => path.replace(/^\.\/areas\/(.*)\.ts$/, '$1'))
     .filter(
-      (area) => !['template', 'guide', 'mpr', 'serial', 'info', 'networkMatrix'].includes(area),
+      (area) =>
+        !['template', 'guide', 'mpr', 'serial', 'info', 'networkMatrix', 'bodyMapPanel'].includes(
+          area,
+        ),
     )
     .sort();
   assert.deepEqual(Object.keys(TRANSLATIONS.en).sort(), files);

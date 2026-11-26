@@ -202,7 +202,7 @@ test('PROV-03 the subject, its reconstruction and the source files are named in 
   assert.deepEqual(
     rowOf(en, 'Published files').items.map((item) => [item.link!.text, item.note]),
     [
-      ['manifest.json', '94 source files, each with a SHA-256 checksum'],
+      ['manifest.json', '102 source files, each with a SHA-256 checksum'],
       ['anatomies.json', 'Index of the published anatomies'],
     ],
   );

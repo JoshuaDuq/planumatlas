@@ -35,6 +35,7 @@
   import { namesDrawn } from '../../features/stage/region-names.ts';
   import VisualAreaNames from '../../features/stage/VisualAreaNames.svelte';
   import { visualFieldMapOpen } from '../../lib/state/visual-field-map.svelte.ts';
+  import { bodyMapOpen } from '../../lib/state/body-map.svelte.ts';
   import { keyedSurface } from '../../features/stage/stage-keys.ts';
   import type { ColoredNetworks } from '../../features/stage/stage-keys.ts';
   import StageKeys from '../../features/stage/StageKeys.svelte';
@@ -151,7 +152,8 @@
         anatomy: manifest.anatomy,
         atlas: view.atlas,
         // The tract reference and the visual field map draw their own colours, not the masthead's.
-        surfaceColor: reference || visualFieldMapOpen(view) ? 'tissue' : view.surfaceColor,
+        surfaceColor:
+          reference || visualFieldMapOpen(view) || bodyMapOpen(view) ? 'tissue' : view.surfaceColor,
         detail: view.detail,
         offersDetail: manifest.detail_levels.length > 1,
         view: view.view as ViewName,
@@ -446,7 +448,7 @@
         exploded: current.exploded,
         tractReference,
         lessonOpen: current.explorer === 'circuits' && Boolean(current.lesson.circuit),
-        mapOpen: visualFieldMapOpen(current),
+        mapOpen: visualFieldMapOpen(current) || bodyMapOpen(current),
         focused: current.focused,
         painted:
           current.explorer === 'functions' ||
@@ -502,7 +504,7 @@
       media={app.media}
       lang={current.lang}
       status={current.status}
-      surfaceColor={tractReference || visualFieldMapOpen(current)
+      surfaceColor={tractReference || visualFieldMapOpen(current) || bodyMapOpen(current)
         ? 'tissue'
         : keyedSurface(current)}
       networks={(model.manifest.networks as ColoredNetworks | undefined) ?? null}

@@ -12,6 +12,7 @@ from .labels import boundary_certainty, nextbrain, segmentation_agreement, white
 from .layers import (
     arousal_nuclei,
     arterial_territories,
+    body_map,
     cab_np,
     cerebellar_functions,
     coordinate_spaces,
@@ -355,6 +356,14 @@ LAYERS = (
         export=lambda run: cortical_thickness.export(run.config, run.regions),
         limitations=lambda config: cortical_thickness.limitations(),
         validate=lambda check: cortical_thickness.validate(check.config, check.manifest),
+    ),
+    Layer(
+        "body_map",
+        published=body_map.is_declared,
+        inputs=body_map.inputs,
+        export=lambda run: body_map.export(run.config, run.regions),
+        limitations=lambda config: body_map.limitations(),
+        validate=lambda check: body_map.validate(check.config, check.manifest),
     ),
     Layer(
         "stroke_cases",
