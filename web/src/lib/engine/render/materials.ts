@@ -78,8 +78,9 @@ export interface AnatomicalUserData {
 }
 
 /**
- * A mesh's thickness, read by vertex index rather than as an attribute: the cortex already draws on as
- * many attributes as WebGL guarantees. Row-major, `width` texels a row; `ready` false reads none.
+ * A mesh's thickness, read by vertex index rather than as an attribute: vertex attributes are the
+ * cortex program's scarcest resource (`VISUAL_FIELD`). Row-major, `width` texels a row; `ready` false
+ * reads none.
  */
 export interface ThicknessUniforms {
   thicknessCodes: IUniform<DataTexture | null>;
@@ -472,11 +473,17 @@ const THICKNESS_VERTEX = `float thicknessCode = thicknessReady
   : 0.0;
 vThicknessColor = texelFetch(thicknessPalette, ivec2(int(thicknessCode + 0.5), 0), 0);`;
 
-const visualVertexDeclarations = (areaCodes: number) => `attribute float _field_x;
-attribute float _field_y;
-attribute float _prf_sigma;
-attribute float _visual_area;
-attribute float _wang_area;
+/**
+ * The retinotopy each cortical vertex is published with, packed two attributes from five
+ * (`packVisualField`): field x, field y and pRF sigma as published, then the V1–V3 code and the named
+ * area's code. Unpacked, the cortex program needs every vertex attribute WebGL 2 guarantees, gl_VertexID
+ * counted, and a GPU that counts one more fails to link it: the cortex is then never drawn.
+ */
+export const VISUAL_FIELD = '_visual_field';
+export const VISUAL_CODES = '_visual_codes';
+
+const visualVertexDeclarations = (areaCodes: number) => `attribute vec3 ${VISUAL_FIELD};
+attribute vec2 ${VISUAL_CODES};
 uniform vec2 visualXDecode;
 uniform vec2 visualYDecode;
 uniform vec2 visualSigmaDecode;
@@ -489,13 +496,13 @@ varying vec4 vVisualAreaClass;`;
  * A named area's code cannot be interpolated, so each vertex carries its area's border class as one of
  * four channels; across a triangle the channels interpolate to each class's share of the point.
  */
-const VISUAL_VERTEX = `float visualIn = step(0.5, _visual_area);
+const VISUAL_VERTEX = `float visualIn = step(0.5, ${VISUAL_CODES}.x);
 vVisualField = visualIn * vec3(
-  _field_x * visualXDecode.y + visualXDecode.x,
-  _field_y * visualYDecode.y + visualYDecode.x,
-  _prf_sigma * visualSigmaDecode.y + visualSigmaDecode.x);
-vVisualArea = vec2(visualIn * _visual_area, visualIn);
-int visualBorderClass = int(visualAreaClass[int(_wang_area + 0.5)] + 0.5);
+  ${VISUAL_FIELD}.x * visualXDecode.y + visualXDecode.x,
+  ${VISUAL_FIELD}.y * visualYDecode.y + visualYDecode.x,
+  ${VISUAL_FIELD}.z * visualSigmaDecode.y + visualSigmaDecode.x);
+vVisualArea = vec2(visualIn * ${VISUAL_CODES}.x, visualIn);
+int visualBorderClass = int(visualAreaClass[int(${VISUAL_CODES}.y + 0.5)] + 0.5);
 vVisualAreaClass = vec4(equal(ivec4(visualBorderClass), ivec4(1, 2, 3, 4)));`;
 
 const VISUAL_FRAGMENT_DECLARATIONS = `varying vec3 vVisualField;
@@ -634,8 +641,11 @@ export function createAnatomicalMaterial(
   if (cortical) {
     for (const name of ['_sulc', '_openness', '_t1']) field(name);
     if (visual) {
-      for (const name of ['_field_x', '_field_y', '_prf_sigma', '_visual_area', '_wang_area']) {
-        if (!mesh.geometry.getAttribute(name)) {
+      for (const [name, itemSize] of [
+        [VISUAL_FIELD, 3],
+        [VISUAL_CODES, 2],
+      ] as const) {
+        if (mesh.geometry.getAttribute(name)?.itemSize !== itemSize) {
           material.dispose();
           throw new Error(`Missing visual-field attribute ${name}: ${region.id}`);
         }

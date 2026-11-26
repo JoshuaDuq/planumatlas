@@ -2,8 +2,15 @@
 // border between them; a map that four classes cannot separate is refused.
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { BufferGeometry, Float32BufferAttribute, Mesh, MeshPhysicalMaterial } from 'three';
-import { areaBorderClasses } from './visual-field.ts';
+import {
+  BufferAttribute,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Mesh,
+  MeshPhysicalMaterial,
+} from 'three';
+import { VISUAL_CODES, VISUAL_FIELD } from '../render/materials.ts';
+import { areaBorderClasses, packVisualField } from './visual-field.ts';
 import type { AtlasMesh } from './layers.ts';
 
 /** A mesh of the given triangles, each corner its own vertex carrying the named area's code. */
@@ -17,7 +24,13 @@ function surface(triangles: readonly (readonly [number, number, number])[]): Atl
       3,
     ),
   );
-  geometry.setAttribute('_wang_area', new Float32BufferAttribute(corners, 1));
+  geometry.setAttribute(
+    VISUAL_CODES,
+    new Float32BufferAttribute(
+      corners.flatMap((code) => [0, code]),
+      2,
+    ),
+  );
   geometry.setIndex(corners.map((_, index) => index));
   const mesh = new Mesh(geometry, new MeshPhysicalMaterial()) as AtlasMesh;
   mesh.userData = { region_id: 'a-left' };
@@ -59,4 +72,28 @@ test('a map four classes cannot separate is refused', () => {
     [1, 3, 4],
   ]);
   assert.throws(() => areaBorderClasses([mesh], 6), /meets areas of all four border classes/);
+});
+
+test('packing keeps every published retinotopy value exactly, in its type and in the order the shader reads it', () => {
+  const geometry = new BufferGeometry();
+  const fields = {
+    _field_x: [0, 1, 65535],
+    _field_y: [7, 30000, 2],
+    _prf_sigma: [65535, 0, 12345],
+  };
+  for (const [name, values] of Object.entries(fields)) {
+    geometry.setAttribute(name, new BufferAttribute(Uint16Array.from(values), 1, true));
+  }
+  geometry.setAttribute('_visual_area', new BufferAttribute(Uint8Array.from([0, 1, 3]), 1));
+  geometry.setAttribute('_wang_area', new BufferAttribute(Uint8Array.from([25, 0, 9]), 1));
+  packVisualField(geometry, 'a-left');
+  const field = geometry.getAttribute(VISUAL_FIELD) as BufferAttribute;
+  assert.ok(field.array instanceof Uint16Array && field.normalized);
+  assert.deepEqual([...field.array], [0, 7, 65535, 1, 30000, 0, 65535, 2, 12345]);
+  const codes = geometry.getAttribute(VISUAL_CODES) as BufferAttribute;
+  assert.ok(codes.array instanceof Uint8Array && !codes.normalized);
+  assert.deepEqual([...codes.array], [0, 25, 1, 0, 3, 9]);
+  for (const name of [...Object.keys(fields), '_visual_area', '_wang_area']) {
+    assert.equal(geometry.getAttribute(name), undefined);
+  }
 });

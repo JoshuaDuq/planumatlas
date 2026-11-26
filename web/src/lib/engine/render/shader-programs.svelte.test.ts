@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { page } from 'vitest/browser';
 import { Mesh, PerspectiveCamera, PlaneGeometry, Scene, WebGLRenderer } from 'three';
-import { patchCombinations } from './test-support.ts';
+import { patchCombinations, publishedCortexMaterial } from './test-support.ts';
 
 // Real WebGL: nothing else proves a patched shader compiles and links. Each distinct combination of
 // patches is drawn once on one shared renderer at a desktop viewport and again at a phone viewport,
@@ -56,3 +56,29 @@ test(
     renderer.forceContextLoss();
   },
 );
+
+// At sixteen active attributes, the most WebGL 2 guarantees and gl_VertexID among them, Chrome on some
+// phones and tablets failed to link the cortex, and it was never drawn.
+const CORTEX_ATTRIBUTES = 13;
+
+test('SHADER-36 the cortex as dressed on CDMD links with three of the sixteen vertex attributes WebGL 2 guarantees free', () => {
+  const renderer = new WebGLRenderer({ canvas: document.createElement('canvas') });
+  renderer.debug.checkShaderErrors = true;
+  const camera = new PerspectiveCamera();
+  camera.position.z = 1;
+  const material = publishedCortexMaterial();
+  const scene = new Scene();
+  scene.add(new Mesh(new PlaneGeometry(0.1, 0.1), material));
+  renderer.render(scene, camera);
+  const programs = renderer.info.programs! as unknown as { program: WebGLProgram }[];
+  expect(programs).toHaveLength(1);
+  const gl = renderer.getContext();
+  const { program } = programs[0]!;
+  expect(gl.getProgramParameter(program, gl.LINK_STATUS)).toBe(true);
+  expect(gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES)).toBeLessThanOrEqual(
+    CORTEX_ATTRIBUTES,
+  );
+  material.dispose();
+  renderer.dispose();
+  renderer.forceContextLoss();
+});

@@ -25,6 +25,7 @@ import type { SurfaceMap, SurfaceMapUniforms } from '../tissues/map-surface.ts';
 import type { WhiteMatterSurfaces } from '../tissues/white-matter-surfaces.ts';
 import type { AtlasManifest } from './manifest.ts';
 import type { AtlasMesh, Layer } from './layers.ts';
+import { packVisualField } from './visual-field.ts';
 
 /** The cortex carries its scan at mid-thickness (`_t1`); every other region reads it inside itself. */
 const mriSample = (region: Region): MriSurfaceSample =>
@@ -105,12 +106,13 @@ export class SurfaceMaterials {
     if (this.manifest.arterial_territories) {
       checkTerritories(mesh.geometry, this.manifest.arterial_territories.territories);
     }
+    // Every cortical atlas carries the predicted retinotopy on every vertex.
+    if (cortical && this.visualField) packVisualField(mesh.geometry, region.id);
     const shown = mesh as unknown as AtlasMesh;
     shown.material = createAnatomicalMaterial(
       mesh,
       region,
       this.manifest.appearance,
-      // Every cortical atlas carries the predicted retinotopy on every vertex.
       cortical ? this.visualField : null,
       this.userMap,
       this.palettes,

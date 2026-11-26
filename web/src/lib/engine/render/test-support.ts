@@ -13,7 +13,11 @@ import {
   UnsignedByteType,
 } from 'three';
 import type { Material } from 'three';
-import { networks, appearance as published } from '../../../../../public/models/cdmd/manifest.json';
+import manifest, {
+  networks,
+  appearance as published,
+} from '../../../../../public/models/cdmd/manifest.json';
+import { SurfaceMaterials } from '../model/surface-materials.ts';
 import type { Region } from '../../types/index.ts';
 import { Volume } from '../slices/volume.ts';
 import { addCapLabels, createCapLabels } from '../tissues/cap-labels.ts';
@@ -53,6 +57,36 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
   );
 }
 
+/** A 2×2×2 scan, as an attached MRI anatomy gives a material. */
+const scanAnatomy = () => ({
+  texture: Object.assign(new Data3DTexture(new Uint8Array(8), 2, 2, 2), {
+    format: RedFormat,
+    type: UnsignedByteType,
+  }),
+  worldToVoxel: new Matrix4().makeTranslation(1, 2, 3),
+  volume: { shape: [2, 2, 2] as [number, number, number] },
+});
+
+/**
+ * A cortical mesh as the model dresses it on CDMD: every layer the anatomy publishes, retinotopy in
+ * its published types, then feathered and given the scan.
+ */
+export function publishedCortexMaterial(): Material {
+  const mesh = corticalMesh(true);
+  const count = mesh.geometry.getAttribute('position').count;
+  for (const name of ['_territory', '_visual_area', '_wang_area']) {
+    mesh.geometry.setAttribute(name, new BufferAttribute(new Uint8Array(count).fill(1), 1));
+  }
+  for (const name of ['_field_x', '_field_y', '_prf_sigma']) {
+    mesh.geometry.setAttribute(name, new BufferAttribute(new Uint16Array(count), 1, true));
+  }
+  const materials = new SurfaceMaterials(manifest as never, new Map());
+  const shown = materials.dress(mesh as never, { id: 'r', kind: 'cortex' } as Region, true);
+  materials.addFeathers([shown]);
+  addMriSurfaceAppearance(shown.material, createMriUniforms(scanAnatomy()), 'mid-thickness');
+  return shown.material;
+}
+
 /**
  * One material for each distinct set of patches the app builds, by name: the
  * anatomical surface with and without the network layer, alone, feathered, with the MRI and with
@@ -61,14 +95,7 @@ export function corticalMesh(withNetworks: boolean, count = 5) {
  */
 export function patchCombinations(): Map<string, Material> {
   const combinations = new Map<string, Material>();
-  const anatomy = {
-    texture: Object.assign(new Data3DTexture(new Uint8Array(8), 2, 2, 2), {
-      format: RedFormat,
-      type: UnsignedByteType,
-    }),
-    worldToVoxel: new Matrix4().makeTranslation(1, 2, 3),
-    volume: { shape: [2, 2, 2] as [number, number, number] },
-  };
+  const anatomy = scanAnatomy();
   const feather = () => new DataTexture(new Float32Array(8), 2, 1);
   const add = (name: string, build: () => Material) => combinations.set(name, build());
   const surface = (withNetworks: boolean) =>

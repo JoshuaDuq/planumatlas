@@ -1,12 +1,57 @@
-import { Box3, Triangle, Vector3 } from 'three';
+import { Box3, BufferAttribute, Triangle, Vector3 } from 'three';
+import type { BufferGeometry, TypedArray } from 'three';
 import type { Region } from '../../types/index.ts';
 import { VISUAL_RESPONSE_THRESHOLD, predictedResponse } from '../../core/learning/visual-field.ts';
-import { fieldDecode } from '../render/materials.ts';
+import { VISUAL_CODES, VISUAL_FIELD, fieldDecode } from '../render/materials.ts';
 import type { VisualFieldUniforms } from '../render/materials.ts';
 import type { SurfaceHit } from '../render/picking.ts';
 import type { NamedVisualArea, VisualFieldDot, VisualFieldReading } from '../api.ts';
 import type { AtlasMesh, Layer } from './layers.ts';
 import type { AtlasManifest } from './manifest.ts';
+
+/**
+ * Pack the five retinotopy fields a cortical mesh is published with into `VISUAL_FIELD` and
+ * `VISUAL_CODES`, each keeping its fields' published type, so the cortex program links on every GPU.
+ */
+export function packVisualField(geometry: BufferGeometry, regionId: string): void {
+  pack(geometry, ['_field_x', '_field_y', '_prf_sigma'], VISUAL_FIELD, regionId);
+  pack(geometry, ['_visual_area', '_wang_area'], VISUAL_CODES, regionId);
+}
+
+function pack(
+  geometry: BufferGeometry,
+  names: readonly string[],
+  packed: string,
+  regionId: string,
+): void {
+  const sources = names.map((name) => {
+    const source = geometry.getAttribute(name);
+    if (source?.itemSize !== 1) {
+      throw new Error(`Missing visual-field attribute ${name}: ${regionId}`);
+    }
+    return source;
+  });
+  const { array, normalized, count } = sources[0]!;
+  if (
+    sources.some(
+      (source) =>
+        source.array.constructor !== array.constructor ||
+        source.normalized !== normalized ||
+        source.count !== count,
+    )
+  ) {
+    throw new Error(`Visual-field attributes ${names.join(', ')} differ in type: ${regionId}`);
+  }
+  const Typed = array.constructor as new (length: number) => TypedArray;
+  const attribute = new BufferAttribute(new Typed(count * names.length), names.length, normalized);
+  sources.forEach((source, component) => {
+    for (let vertex = 0; vertex < count; vertex += 1) {
+      attribute.setComponent(vertex, component, source.getX(vertex));
+    }
+  });
+  for (const name of names) geometry.deleteAttribute(name);
+  geometry.setAttribute(packed, attribute);
+}
 
 /**
  * The world box of the drawn cortex the dot is predicted to drive at least as strongly as the map
@@ -26,19 +71,17 @@ export function visualFieldActivation(
   const point = new Vector3();
   for (const mesh of meshes) {
     const { geometry } = mesh;
-    const area = geometry.getAttribute('_visual_area');
-    if (!area) continue;
-    const [x, y, sigma] = ['_field_x', '_field_y', '_prf_sigma'].map((name) =>
-      geometry.getAttribute(name)!,
-    );
+    const codes = geometry.getAttribute(VISUAL_CODES);
+    if (!codes) continue;
+    const field = geometry.getAttribute(VISUAL_FIELD);
     const position = geometry.getAttribute('position');
     mesh.updateWorldMatrix(true, false);
-    for (let vertex = 0; vertex < area.count; vertex += 1) {
-      if (area.getX(vertex) < 0.5) continue;
-      const s = sigma!.getX(vertex) * sigmaSpan + sigmaLow;
+    for (let vertex = 0; vertex < codes.count; vertex += 1) {
+      if (codes.getX(vertex) < 0.5) continue;
+      const s = field.getZ(vertex) * sigmaSpan + sigmaLow;
       const distance = Math.hypot(
-        x!.getX(vertex) * xSpan + xLow - dot.x,
-        y!.getX(vertex) * ySpan + yLow - dot.y,
+        field.getX(vertex) * xSpan + xLow - dot.x,
+        field.getY(vertex) * ySpan + yLow - dot.y,
       );
       if (distance > dot.radius + 6 * s) continue;
       if (predictedResponse(distance, dot.radius, s) < VISUAL_RESPONSE_THRESHOLD) continue;
@@ -67,16 +110,15 @@ export function visualFieldRegion(
     const region = regions.get(mesh.userData['region_id'] as string)!;
     if (region.kind !== 'cortex' || region.hemisphere !== hemisphere) continue;
     const { geometry } = mesh;
-    const [area, x, y] = ['_visual_area', '_field_x', '_field_y'].map((name) =>
-      geometry.getAttribute(name)!,
-    );
+    const codes = geometry.getAttribute(VISUAL_CODES);
+    const field = geometry.getAttribute(VISUAL_FIELD);
     let count = 0;
-    for (let vertex = 0; vertex < area!.count; vertex += 1) {
+    for (let vertex = 0; vertex < codes.count; vertex += 1) {
       const eccentricity = Math.hypot(
-        x!.getX(vertex) * xSpan + xLow,
-        y!.getX(vertex) * ySpan + yLow,
+        field.getX(vertex) * xSpan + xLow,
+        field.getY(vertex) * ySpan + yLow,
       );
-      if (area!.getX(vertex) === 1 && eccentricity <= measured) count += 1;
+      if (codes.getX(vertex) === 1 && eccentricity <= measured) count += 1;
     }
     if (count > (best?.count ?? 0)) best = { id: region.id, count };
   }
@@ -95,36 +137,38 @@ export function visualFieldAt(
   regions: ReadonlyMap<string, Region>,
 ): VisualFieldReading | null {
   const mesh = hit.object as AtlasMesh | undefined;
-  const area = mesh?.geometry?.getAttribute('_visual_area');
-  if (!mesh || !hit.face || !area) return null;
+  const codes = mesh?.geometry?.getAttribute(VISUAL_CODES);
+  if (!mesh || !hit.face || !codes) return null;
   const weights = cornerWeights(mesh, hit.point, hit.face);
   if (!weights) return null;
   const { a, b, c } = hit.face;
   const corners = [a, b, c];
   const inside = corners.map((corner, k) =>
-    area.getX(corner) >= 0.5 ? weights.getComponent(k) : 0,
+    codes.getX(corner) >= 0.5 ? weights.getComponent(k) : 0,
   );
   const share = inside[0]! + inside[1]! + inside[2]!;
   if (share < 0.5) return null;
   const ranges = manifest.appearance.field_ranges;
-  const read = (name: string, attribute: string): number => {
+  const field = mesh.geometry.getAttribute(VISUAL_FIELD);
+  const read = (name: string, component: number): number => {
     const [low, span] = fieldDecode(ranges, name);
-    const values = mesh.geometry.getAttribute(attribute);
     return (
-      corners.reduce((sum, corner, k) => sum + inside[k]! * (values.getX(corner) * span + low), 0) /
-      share
+      corners.reduce(
+        (sum, corner, k) => sum + inside[k]! * (field.getComponent(corner, component) * span + low),
+        0,
+      ) / share
     );
   };
   const code = Math.round(
-    corners.reduce((sum, corner, k) => sum + inside[k]! * area.getX(corner), 0) / share,
+    corners.reduce((sum, corner, k) => sum + inside[k]! * codes.getX(corner), 0) / share,
   );
   const name = manifest.retinotopy!.areas.find((entry) => entry.code === code)?.name;
   if (!name) throw new Error(`Visual-area code ${code} is not published.`);
   const region = regions.get(mesh.userData['region_id'] as string)!;
   return {
-    x: read('_FIELD_X', '_field_x'),
-    y: read('_FIELD_Y', '_field_y'),
-    sigma: read('_PRF_SIGMA', '_prf_sigma'),
+    x: read('_FIELD_X', 0),
+    y: read('_FIELD_Y', 1),
+    sigma: read('_PRF_SIGMA', 2),
     area: name as VisualFieldReading['area'],
     hemisphere: region.hemisphere as VisualFieldReading['hemisphere'],
   };
@@ -156,14 +200,14 @@ export function visualAreaAt(
   regions: ReadonlyMap<string, Region>,
 ): NamedVisualArea | null {
   const mesh = hit.object as AtlasMesh | undefined;
-  const codes = mesh?.geometry?.getAttribute('_wang_area');
+  const codes = mesh?.geometry?.getAttribute(VISUAL_CODES);
   if (!mesh || !hit.face || !codes) return null;
   const weights = cornerWeights(mesh, hit.point, hit.face);
   if (!weights) return null;
   const shares = new Map<number, number>();
   const { a, b, c } = hit.face;
   [a, b, c].forEach((corner, k) => {
-    const code = Math.round(codes.getX(corner));
+    const code = Math.round(codes.getY(corner));
     shares.set(code, (shares.get(code) ?? 0) + weights.getComponent(k));
   });
   const [code] = [...shares].reduce((best, entry) => (entry[1] > best[1] ? entry : best));
@@ -182,10 +226,10 @@ export function visualAreaAt(
 export function areaBorderClasses(meshes: readonly AtlasMesh[], size: number): Float32Array {
   const neighbours = Array.from({ length: size }, () => new Set<number>());
   for (const mesh of meshes) {
-    const codes = mesh.geometry.getAttribute('_wang_area');
+    const codes = mesh.geometry.getAttribute(VISUAL_CODES);
     if (!codes) throw new Error(`No named visual areas on ${mesh.userData['region_id']}.`);
     const index = mesh.geometry.getIndex();
-    const corner = (at: number) => Math.round(codes.getX(index ? index.getX(at) : at));
+    const corner = (at: number) => Math.round(codes.getY(index ? index.getX(at) : at));
     for (let at = 0; at < (index ? index.count : codes.count); at += 3) {
       const [p, q, r] = [corner(at), corner(at + 1), corner(at + 2)];
       for (const [one, other] of [
