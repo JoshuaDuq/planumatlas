@@ -617,7 +617,7 @@ describe('CAT-52 · a landmark resolves to one form and uncovers what others cov
 
 test('CAT-53 · the published pathways: revision, margin, 262 references, 45 tours with their deficits and landmark counts', () => {
   const catalog = create(data);
-  assert.equal(catalog.revised, '2026-11-21');
+  assert.equal(catalog.revised, '2026-11-26');
   assert.equal(catalog.contextMarginMm, 12);
   assert.equal(data.references.length, 262);
   for (const reference of data.references) {
@@ -731,6 +731,83 @@ test('every landmark in the five archived lesion tours has cited full-text patie
       );
     }
   }
+});
+
+describe('CAT-70 · a circuit diagram places landmarks on a grid and signs the projections between neighbours', () => {
+  const broken = (change: (diagram: any) => void) => {
+    const copy = clone();
+    change(circuitOf(copy, 'motor').diagram);
+    return () => create(copy);
+  };
+
+  test('CAT-70 · the basal ganglia loops: six landmarks, six signed projections', () => {
+    const { diagram, steps } = create(data).get('motor');
+    assert.deepEqual(
+      diagram!.nodes.map((node) => node.step).sort(),
+      steps.map((step) => step.id).sort(),
+    );
+    assert.deepEqual(
+      diagram!.edges.map((edge) => `${edge.from}>${edge.to}:${edge.sign}`),
+      [
+        'cortex>putamen:excitatory',
+        'putamen>gpi:inhibitory',
+        'gpi>thalamus:inhibitory',
+        'putamen>gpe:inhibitory',
+        'gpe>stn:inhibitory',
+        'stn>gpi:excitatory',
+      ],
+    );
+    assert.equal(create(data).get('vision').diagram, undefined);
+  });
+
+  test('CAT-70 · each malformed diagram fails by name', () => {
+    assert.throws(
+      broken((d) => (d.nodes = [])),
+      /^Error: Empty diagram: motor$/,
+    );
+    assert.throws(
+      broken((d) => (d.edges = [])),
+      /^Error: Empty diagram: motor$/,
+    );
+    assert.throws(
+      broken((d) => (d.nodes[0].step = 'retina')),
+      /^Error: Unknown diagram landmark: retina$/,
+    );
+    assert.throws(
+      broken((d) => (d.nodes[1].step = 'cortex')),
+      /^Error: Duplicate diagram node: cortex$/,
+    );
+    for (const cell of [0, 1.5, '1']) {
+      assert.throws(
+        broken((d) => (d.nodes[0].column = cell)),
+        /^Error: Invalid diagram cell: cortex$/,
+      );
+    }
+    assert.throws(
+      broken((d) => Object.assign(d.nodes[4], { column: 1, row: 2 })),
+      /^Error: Diagram nodes share a cell: gpe$/,
+    );
+    assert.throws(
+      broken((d) => delete d.nodes[0].label.fr),
+      /^Error: Missing text: motor\.diagram\.cortex\.fr$/,
+    );
+    assert.throws(
+      broken((d) => (d.edges[0].to = 'striatum')),
+      /^Error: Unknown diagram node: striatum$/,
+    );
+    assert.throws(
+      broken((d) => (d.edges[0].sign = 'plus')),
+      /^Error: Unknown sign: plus$/,
+    );
+    assert.throws(
+      broken((d) => (d.edges[0].to = 'gpi')),
+      /^Error: Diagram edge between cells that are not neighbours: cortex, gpi$/,
+    );
+    assert.throws(
+      broken((d) => d.edges.push({ from: 'gpi', to: 'putamen', sign: 'inhibitory' })),
+      /^Error: Duplicate diagram edge: gpi, putamen$/,
+    );
+  });
 });
 
 test('CAT-54 · an unknown circuit, landmark or reference fails by name', () => {

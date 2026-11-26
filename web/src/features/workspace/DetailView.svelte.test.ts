@@ -132,6 +132,35 @@ describe('other tabs', () => {
   });
 });
 
+describe('a circuit’s diagram', () => {
+  test('CIRC-30 · a pressed box stays where it stands when the notes are drawn again for its landmark', async () => {
+    await page.viewport(1280, 520);
+    await shell.open();
+    const world = shell.app.world!;
+    await userEvent.click(page.getByRole('tab', { name: 'Circuits' }));
+    await world.excursions.openCircuit('motor');
+    flushSync();
+    const box = () => document.getElementById('circuit-box-gpe');
+    await expect.poll(box).not.toBeNull();
+    const pressed = box()!;
+    pressed.scrollIntoView({ block: 'center' });
+    const scrolled = () => {
+      let parent = box()!.parentElement!;
+      while (!parent.scrollTop && parent.parentElement) parent = parent.parentElement;
+      return parent.scrollTop;
+    };
+    expect(scrolled()).toBeGreaterThan(0);
+    const top = pressed.getBoundingClientRect().top;
+    await userEvent.click(pressed);
+    await expect.poll(() => state().lesson.step).toBe(4);
+    await expect.poll(() => document.activeElement).toBe(box());
+    // The route's notes left the page with the pressed box; its successor stands where it stood.
+    expect(pressed.isConnected).toBe(false);
+    expect(Math.abs(box()!.getBoundingClientRect().top - top)).toBeLessThanOrEqual(1);
+    expect(scrolled()).toBeGreaterThan(0);
+  });
+});
+
 describe('the phone sheet', () => {
   test('the search icon is on screen and takes a tap', async () => {
     await shell.open();

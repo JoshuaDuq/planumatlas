@@ -14,6 +14,9 @@
     --primary-fill-hover: var(--accent-hover);
     --primary-ink: #ffffff;
     --danger: #a61b1b;
+    /* The sign of a projection in a circuit diagram: scientific colours, apart from the UI's teal and its danger red. Each passes 4.5:1 on the panel grounds. */
+    --sign-excitatory: #b5391c;
+    --sign-inhibitory: #1f5fa6;
 
     /* Near-neutral greys: teal and the anatomy carry the only colour. */
     --surface-base: #ffffff;
@@ -136,6 +139,8 @@
     --primary-fill: var(--overlay-primary-fill);
     --primary-fill-hover: var(--overlay-primary-fill-hover);
     --danger: #f1928f;
+    --sign-excitatory: #f29a63;
+    --sign-inhibitory: #8ab8f0;
     --surface-base: #1b1e21;
     --surface-navigation: #191c1f;
     --surface-sunken: #141517;

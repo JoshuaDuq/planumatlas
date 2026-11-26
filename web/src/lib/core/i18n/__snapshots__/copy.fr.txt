@@ -146,7 +146,23 @@
    "[\"Alpha\",\"\"] → \"Repère Alpha1<NNBSP>: \"",
    "[\"\",\"Alpha\"] → \"Repère 1<NNBSP>: Alpha\""
   ],
-  "openMap": "Explorer la carte du champ visuel"
+  "openMap": "Explorer la carte du champ visuel",
+  "signs": "Excitation et inhibition",
+  "sign": {
+   "excitatory": "Excitatrice",
+   "inhibitory": "Inhibitrice"
+  },
+  "projection": {
+   "excitatory": [
+    "[\"Alpha\",\"\"] → \"Alpha vers <NNBSP>: excitatrice\"",
+    "[\"\",\"Alpha\"] → \" vers Alpha<NNBSP>: excitatrice\""
+   ],
+   "inhibitory": [
+    "[\"Alpha\",\"\"] → \"Alpha vers <NNBSP>: inhibitrice\"",
+    "[\"\",\"Alpha\"] → \" vers Alpha<NNBSP>: inhibitrice\""
+   ]
+  },
+  "signsNote": "Signes tels que les énonce l’explication de chaque repère. Les cases ne sont pas des positions et les lignes ne sont pas des trajets de fibres."
  },
  "clinical": {
   "deficits": "Déficits",

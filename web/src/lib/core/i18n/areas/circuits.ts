@@ -34,6 +34,14 @@ export const en = {
     'Each number marks where its landmark lies in this brain, seen through the cortex: an order, not the path the fibres take. Choose a number, here or on the picture, to open it.',
   routeMark: (index: number, name: string) => `Landmark ${index + 1}: ${name}`,
   openMap: 'Explore the visual field map',
+  signs: 'Excitation and inhibition',
+  sign: { excitatory: 'Excitatory', inhibitory: 'Inhibitory' },
+  projection: {
+    excitatory: (from: string, to: string) => `${from} to ${to}: excitatory`,
+    inhibitory: (from: string, to: string) => `${from} to ${to}: inhibitory`,
+  },
+  signsNote:
+    'Signs as each landmark’s explanation states them. The boxes are not positions and the lines are not fibre paths.',
 };
 
 export const fr: typeof en = {
@@ -72,4 +80,12 @@ export const fr: typeof en = {
     'Chaque numéro marque l’emplacement de son repère dans ce cerveau, vu à travers le cortex\u202f: un ordre, pas le chemin des fibres. Choisissez un numéro, ici ou sur l’image, pour l’ouvrir.',
   routeMark: (index: number, name: string) => `Repère ${index + 1}\u202f: ${name}`,
   openMap: 'Explorer la carte du champ visuel',
+  signs: 'Excitation et inhibition',
+  sign: { excitatory: 'Excitatrice', inhibitory: 'Inhibitrice' },
+  projection: {
+    excitatory: (from: string, to: string) => `${from} vers ${to}\u202f: excitatrice`,
+    inhibitory: (from: string, to: string) => `${from} vers ${to}\u202f: inhibitrice`,
+  },
+  signsNote:
+    'Signes tels que les énonce l’explication de chaque repère. Les cases ne sont pas des positions et les lignes ne sont pas des trajets de fibres.',
 };

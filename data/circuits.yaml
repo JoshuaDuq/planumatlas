@@ -1,4 +1,4 @@
-revised: '2026-11-21'
+revised: '2026-11-26'
 context_margin_mm: 12
 references:
   - id: visual-pathways
@@ -1637,6 +1637,23 @@ circuits:
     deficit: parkinsonism
     references: [basal-ganglia, motor-learning, striatal-input, motor-corticostriatal, motor-striatopallidal, motor-pallidosubthalamic, motor-pallidothalamic, motor-thalamocortical, cerebellothalamic-course, cortical-parcellation, clinical-fearnley-1991, clinical-bhatia-1994, clinical-holm-2025]
     clinical_references: [clinical-fearnley-1991, clinical-bhatia-1994, clinical-holm-2025]
+    # The landmarks on a grid and the sign of each projection between them, as each landmark's
+    # explanation states it. Connected landmarks sit in neighbouring cells.
+    diagram:
+      nodes:
+        - { step: cortex, column: 1, row: 1, label: { en: Motor cortex, fr: Cortex moteur } }
+        - { step: putamen, column: 1, row: 2, label: { en: Putamen, fr: Putamen } }
+        - { step: gpi, column: 1, row: 3, label: { en: GPi, fr: GPi } }
+        - { step: thalamus, column: 1, row: 4, label: { en: Thalamus, fr: Thalamus } }
+        - { step: gpe, column: 2, row: 2, label: { en: GPe, fr: GPe } }
+        - { step: stn, column: 2, row: 3, label: { en: Subthalamic nucleus, fr: Noyau sous-thalamique } }
+      edges:
+        - { from: cortex, to: putamen, sign: excitatory }
+        - { from: putamen, to: gpi, sign: inhibitory }
+        - { from: gpi, to: thalamus, sign: inhibitory }
+        - { from: putamen, to: gpe, sign: inhibitory }
+        - { from: gpe, to: stn, sign: inhibitory }
+        - { from: stn, to: gpi, sign: excitatory }
     steps:
       - id: cortex
         region: hcp-mmp:left:8
@@ -1920,10 +1937,10 @@ circuits:
         plane: axial
 
   - id: touch
-    name: { en: Touch from thalamus to parietal operculum, fr: Voie tactile du thalamus à l’opercule pariétal }
+    name: { en: Dorsal column–medial lemniscus pathway, fr: Voie des colonnes dorsales et du lemnisque médial }
     summary:
-      en: Follow touch signals from the right side of the body along one branch through the left thalamus and cortex.
-      fr: Du thalamus au cortex de l’hémisphère gauche, suivez une branche qui transmet les signaux tactiles du côté droit du corps.
+      en: Follow touch signals from the right side of the body, carried by the dorsal columns and the medial lemniscus, along one branch through the left thalamus and cortex.
+      fr: Du thalamus au cortex de l’hémisphère gauche, suivez une branche qui transmet les signaux tactiles du côté droit du corps, acheminés par les colonnes dorsales et le lemnisque médial.
     route:
       en: Left ventral posterolateral thalamic nucleus → area 3b → parietal opercular area OP1 → area OP4
       fr: Noyau ventral postérolatéral gauche → aire 3b → aire OP1 de l’opercule pariétal → aire OP4

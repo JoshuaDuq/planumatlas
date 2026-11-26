@@ -102,7 +102,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
   async function run(
     action: () => unknown,
     operation: Operation,
-    landmark?: { direction?: Direction },
+    landmark?: { direction?: Direction; stay?: boolean },
   ): Promise<boolean> {
     const regionBefore = view.current.selectedRegion?.id;
     const done = await runner.run(action, {
@@ -121,7 +121,7 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
       },
     });
     if (done && landmark) {
-      await settle(landmark.direction);
+      if (!landmark.stay) await settle(landmark.direction);
       announceStep(regionBefore);
     }
     return done;
@@ -232,9 +232,12 @@ export function createCircuitExplorer(deps: CircuitExplorerDeps) {
     /** A lesson opens on one of its landmarks, from the lessons a region takes part in. */
     openLandmark: (id: string, index: number) =>
       run(() => excursions.openLessonLandmark(id, index), 'landmark', {}),
-    /** The open lesson moves to another landmark; a stepper control passes its direction. */
-    openStep: (index: number, direction?: Direction) =>
-      run(() => excursions.openLessonStep(index), 'landmark', { direction }),
+    /**
+     * The open lesson moves to another landmark; a stepper control passes its direction. A control
+     * that keeps its own place and focus (a box of the diagram) asks to `stay`.
+     */
+    openStep: (index: number, direction?: Direction, stay?: boolean) =>
+      run(() => excursions.openLessonStep(index), 'landmark', { direction, stay }),
     /**
      * The entry point S3 takes as `panels.openMri`: the lesson's Linked MRI under
      * this tab's busy run, with its progress and its failure text.

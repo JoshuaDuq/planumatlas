@@ -1061,6 +1061,142 @@ describe('accessibility', () => {
   });
 });
 
+describe('CIRC-30 · the signed diagram of the basal ganglia loops', () => {
+  const figure = () => document.querySelector<HTMLElement>('figure.signs');
+  const nodes = () => [...figure()!.querySelectorAll<HTMLElement>('.node')];
+  const edges = () => [...figure()!.querySelectorAll<HTMLElement>('.grid .edge')];
+  const said = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
+  /** Opens the loops on their whole route and waits for the diagram's own chunk. */
+  async function openLoops() {
+    await openRoute('motor');
+    await expect.poll(figure).not.toBeNull();
+  }
+
+  test.each([
+    [
+      'en',
+      'Excitation and inhibition',
+      ['1 Motor cortex', '2 Putamen', '3 GPi', '4 Thalamus', '5 GPe', '6 Subthalamic nucleus'],
+      [
+        'Motor cortex to Putamen: excitatory',
+        'Putamen to GPi: inhibitory',
+        'GPi to Thalamus: inhibitory',
+        'Putamen to GPe: inhibitory',
+        'GPe to Subthalamic nucleus: inhibitory',
+        'Subthalamic nucleus to GPi: excitatory',
+      ],
+    ],
+    [
+      'fr',
+      'Excitation et inhibition',
+      ['1 Cortex moteur', '2 Putamen', '3 GPi', '4 Thalamus', '5 GPe', '6 Noyau sous-thalamique'],
+      [
+        'Cortex moteur vers Putamen\u202f: excitatrice',
+        'Putamen vers GPi\u202f: inhibitrice',
+        'GPi vers Thalamus\u202f: inhibitrice',
+        'Putamen vers GPe\u202f: inhibitrice',
+        'GPe vers Noyau sous-thalamique\u202f: inhibitrice',
+        'Noyau sous-thalamique vers GPi\u202f: excitatrice',
+      ],
+    ],
+  ] as const)(
+    'numbers its landmarks, reads each projection with its sign, and tells sign by shape and colour, %s',
+    async (lang, heading, boxes, sentences) => {
+      mount(lang);
+      await openLoops();
+      expect(figure()!.querySelector('h3')!.textContent).toBe(heading);
+      expect(nodes().map(said)).toEqual([...boxes]);
+      expect(
+        [...figure()!.querySelectorAll('ul.visually-hidden li')].map((item) => item.textContent),
+      ).toEqual([...sentences]);
+      expect(edges().map((edge) => `${edge.dataset.sign} ${edge.dataset.direction}`)).toEqual([
+        'excitatory down',
+        'inhibitory down',
+        'inhibitory down',
+        'inhibitory right',
+        'inhibitory down',
+        'excitatory left',
+      ]);
+      const marks = (key: (edge: HTMLElement) => string) =>
+        new Set(edges().map((edge) => `${edge.dataset.sign} ${key(edge)}`));
+      expect(marks((edge) => edge.querySelector('path')!.getAttribute('d')!).size).toBe(2);
+      expect(marks((edge) => getComputedStyle(edge).color).size).toBe(2);
+      await expectAxeClean();
+    },
+    60_000,
+  );
+
+  test('each connection lies in the track between its two boxes, at 1280 and 390 px', async () => {
+    mount('fr');
+    await openLoops();
+    const box = (index: number) => nodes()[index]!.getBoundingClientRect();
+    for (const width of [1280, 390]) {
+      await page.viewport(width, 800);
+      const [, , , across, , back] = edges().map((edge) => edge.getBoundingClientRect());
+      // Putamen (2) → GPe (5), and subthalamic nucleus (6) → GPi (3): between the two columns.
+      for (const [edge, left, right] of [
+        [across!, box(1), box(4)],
+        [back!, box(2), box(5)],
+      ] as const) {
+        expect(edge.left).toBeGreaterThanOrEqual(left.right - 0.5);
+        expect(edge.right).toBeLessThanOrEqual(right.left + 0.5);
+        expect(edge.width).toBeGreaterThanOrEqual(24);
+      }
+      // Motor cortex (1) → putamen (2): between the two rows, under the first box.
+      const down = edges()[0]!.getBoundingClientRect();
+      expect(down.top).toBeGreaterThanOrEqual(box(0).bottom - 0.5);
+      expect(down.bottom).toBeLessThanOrEqual(box(1).top + 0.5);
+      expect(down.height).toBeGreaterThanOrEqual(24);
+      for (const node of nodes())
+        expect(node.scrollWidth).toBeLessThanOrEqual(node.clientWidth + 1);
+      const root = document.documentElement;
+      expect(root.scrollWidth - root.clientWidth).toBe(0);
+    }
+  });
+
+  test('a box opens its landmark and is marked current', async () => {
+    mount();
+    await openLoops();
+    expect(nodes().some((node) => node.hasAttribute('aria-current'))).toBe(false);
+    await userEvent.click(nodes()[4]!);
+    await expect.poll(() => world.lesson.state.route).toBe(false);
+    expect(world.lesson.state.step).toBe(4);
+    await expect
+      .poll(() => nodes().map((node) => node.getAttribute('aria-current')))
+      .toEqual([null, null, null, null, 'step', null]);
+  });
+
+  test('a pressed box stays where it stands and keeps focus, from the route and from a landmark', async () => {
+    mount();
+    await openLoops();
+    const detail = document.querySelector<HTMLElement>('.detail')!;
+    detail.style.cssText = 'height: 320px; overflow-y: auto';
+    for (const index of [4, 1]) {
+      const box = nodes()[index]!;
+      box.scrollIntoView({ block: 'center' });
+      const top = box.getBoundingClientRect().top;
+      expect(detail.scrollTop).toBeGreaterThan(0);
+      await userEvent.click(box);
+      await expect.poll(() => world.lesson.state.step).toBe(index);
+      await expect.poll(() => document.activeElement).toBe(nodes()[index]);
+      expect(Math.abs(nodes()[index]!.getBoundingClientRect().top - top)).toBeLessThanOrEqual(1);
+      expect(detail.scrollTop).toBeGreaterThan(0);
+    }
+    // A row of the sequence still opens its landmark at the top (CIRC-05).
+    await userEvent.click(stepRows()[2]!);
+    await expect.poll(() => world.lesson.state.step).toBe(2);
+    await expect.poll(() => detail.scrollTop).toBe(0);
+  });
+
+  test('a circuit without a diagram shows none, once the diagram’s chunk is loaded', async () => {
+    mount();
+    await openLoops();
+    await world.explorer.openCircuit('vision');
+    await expect.poll(() => world.lesson.state.circuit).toBe('vision');
+    await expect.poll(figure).toBeNull();
+  });
+});
+
 describe('the visual-field map', () => {
   const handle = () =>
     document.querySelector<SVGElement>('[aria-roledescription="two-dimensional slider"]')!;

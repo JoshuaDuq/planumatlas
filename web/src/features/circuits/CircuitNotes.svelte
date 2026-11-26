@@ -4,6 +4,7 @@
   atlas shows, clinical context, sources). The sequence is an ordered list of buttons: `aria-current=
   "step"` marks the current one, a visually hidden "seen" the visited ones, and a ring, a disc and
   the accent tell ahead, seen and current apart by shape as well as ink; ArrowDown and ArrowUp walk it.
+  A circuit that has a diagram shows it between the sequence and the notes.
   - the notes stay as the reader left them while the lesson moves on
     (deviations/x3-disclosure-state.md);
   - the sequence is `role="list"`, which Safari drops from a list without markers
@@ -15,6 +16,7 @@
   import { publishedCorrections } from '../../lib/core/panels/clinical.ts';
   import Disclosure from '../../lib/ui/Disclosure.svelte';
   import { iconGraphic } from '../../lib/ui/IconButton.svelte';
+  import { circuitDiagram, loadCircuitDiagram } from './circuit-diagram.svelte.ts';
   import type { CircuitExplorer } from './circuits-explorer.svelte.ts';
   import { neighbourKeys } from './neighbour-keys.ts';
 
@@ -42,6 +44,11 @@
         ? 'visited'
         : 'upcoming'
       : stepProgress(index, model.lesson);
+
+  const CircuitDiagram = $derived(circuitDiagram.component);
+  $effect(() => {
+    if (model.circuit?.diagram) void loadCircuitDiagram();
+  });
 
   let sequence = $state<HTMLElement | null>(null);
   $effect(() => {
@@ -78,6 +85,18 @@
         {/each}
       </ol>
     </div>
+
+    {#if circuit.diagram && CircuitDiagram}
+      <div class="signs">
+        <CircuitDiagram
+          {circuit}
+          {lang}
+          current={model.route ? null : model.lesson.step}
+          busy={model.busy}
+          onopen={(index) => model.openStep(index, undefined, true)}
+        />
+      </div>
+    {/if}
 
     <div class="note">
       <Disclosure summary={copy.connections} variant="section" bind:open={open.connections}>
@@ -241,7 +260,8 @@
       border-bottom: 1px solid var(--border-subtle);
     }
     /* The notes are a ruled index, as the region's sections: the first opens on a rule, clear of the sequence. */
-    .landmarks + .note {
+    .landmarks + .note,
+    .signs + .note {
       margin-top: var(--space-4);
       border-top: 1px solid var(--border-subtle);
     }

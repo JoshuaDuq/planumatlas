@@ -146,7 +146,23 @@
    "[\"Alpha\",\"\"] → \"Landmark Alpha1: \"",
    "[\"\",\"Alpha\"] → \"Landmark 1: Alpha\""
   ],
-  "openMap": "Explore the visual field map"
+  "openMap": "Explore the visual field map",
+  "signs": "Excitation and inhibition",
+  "sign": {
+   "excitatory": "Excitatory",
+   "inhibitory": "Inhibitory"
+  },
+  "projection": {
+   "excitatory": [
+    "[\"Alpha\",\"\"] → \"Alpha to : excitatory\"",
+    "[\"\",\"Alpha\"] → \" to Alpha: excitatory\""
+   ],
+   "inhibitory": [
+    "[\"Alpha\",\"\"] → \"Alpha to : inhibitory\"",
+    "[\"\",\"Alpha\"] → \" to Alpha: inhibitory\""
+   ]
+  },
+  "signsNote": "Signs as each landmark’s explanation states them. The boxes are not positions and the lines are not fibre paths."
  },
  "clinical": {
   "deficits": "Deficits",

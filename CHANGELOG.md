@@ -8,6 +8,10 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ### Added
 
+- The **Basal ganglia motor loops** circuit shows **Excitation and inhibition**, a flat diagram of its six
+  landmarks and the sign of each projection between them: an arrowhead and a + where a projection excites,
+  a bar and a − where it inhibits. A box opens its landmark and stays where it stands in the panel. The
+  diagram is a schematic: its lines are not fibre paths.
 - A grouped structure whose parts make up most of a system offers **Parts** on its sheet. The thalamus
   shows its nuclei alone at the NextBrain level, listed by name. The hypothalamus, hippocampus, amygdala,
   septal nuclei, subthalamic nucleus, lateral ventricles and corpus callosum offer the same.
@@ -18,6 +22,8 @@ deployed from `main`, so it can run ahead of the latest numbered release.
 
 ### Changed
 
+- The touch circuit is named **Dorsal column–medial lemniscus pathway**. Its landmarks are unchanged: it
+  still begins at the thalamus, where the lemniscus ends.
 - **NextBrain** draws the cerebellum, the corpus callosum and the ventricles. It showed the cerebellar
   nuclei with nothing around them and left the medial wall empty, because NextBrain meshes neither its
   cerebellar cortex nor the white matter holding its callosum, and labels no ventricles. It now draws the

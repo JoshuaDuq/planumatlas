@@ -35,6 +35,17 @@ export interface CircuitReference {
   corrections?: readonly ClinicalCorrection[];
 }
 
+export const SIGNS = ['excitatory', 'inhibitory'] as const;
+
+/**
+ * A circuit's landmarks on a grid, and the sign of each projection between them. Connected landmarks
+ * sit in neighbouring cells, so every connection is one straight segment.
+ */
+export interface CircuitDiagram {
+  nodes: readonly { step: string; column: number; row: number; label: Translated }[];
+  edges: readonly { from: string; to: string; sign: (typeof SIGNS)[number] }[];
+}
+
 export interface AuthoredCircuit {
   id: string;
   deficit: string;
@@ -46,6 +57,7 @@ export interface AuthoredCircuit {
   references: readonly string[];
   /** Sources for the linked deficit; the other citations provide circuit background. */
   clinical_references: readonly string[];
+  diagram?: CircuitDiagram;
   steps: readonly AuthoredStep[];
 }
 
@@ -158,6 +170,41 @@ function validateStep(
   }
 }
 
+function validateDiagram(circuit: AuthoredCircuit, landmarks: ReadonlyMap<string, Landmark>) {
+  const { nodes, edges } = circuit.diagram!;
+  if (!Array.isArray(nodes) || !nodes.length) throw new Error(`Empty diagram: ${circuit.id}`);
+  if (!Array.isArray(edges) || !edges.length) throw new Error(`Empty diagram: ${circuit.id}`);
+  const cells = new Map<string, (typeof nodes)[number]>();
+  const taken = new Set<string>();
+  for (const node of nodes) {
+    requireRecord(landmarks, node.step, 'diagram landmark');
+    if (cells.has(node.step)) throw new Error(`Duplicate diagram node: ${node.step}`);
+    if (![node.column, node.row].every((value) => Number.isInteger(value) && value >= 1)) {
+      throw new Error(`Invalid diagram cell: ${node.step}`);
+    }
+    const cell = `${node.column},${node.row}`;
+    if (taken.has(cell)) throw new Error(`Diagram nodes share a cell: ${node.step}`);
+    taken.add(cell);
+    cells.set(node.step, node);
+    requireTranslation(node.label, `${circuit.id}.diagram.${node.step}`);
+  }
+  const joined = new Set<string>();
+  for (const edge of edges) {
+    const from = requireRecord(cells, edge.from, 'diagram node');
+    const to = requireRecord(cells, edge.to, 'diagram node');
+    if (!SIGNS.includes(edge.sign)) throw new Error(`Unknown sign: ${edge.sign}`);
+    if (Math.abs(from.column - to.column) + Math.abs(from.row - to.row) !== 1) {
+      throw new Error(
+        `Diagram edge between cells that are not neighbours: ${edge.from}, ${edge.to}`,
+      );
+    }
+    // Two connections between one pair would be drawn over each other.
+    const pair = [edge.from, edge.to].sort().join();
+    if (joined.has(pair)) throw new Error(`Duplicate diagram edge: ${edge.from}, ${edge.to}`);
+    joined.add(pair);
+  }
+}
+
 export type CircuitCatalog = ReturnType<typeof createCircuitCatalog>;
 
 /**
@@ -245,6 +292,7 @@ export function createCircuitCatalog(
       `${circuit.id} landmark`,
     );
     for (const step of landmarks.values()) validateStep(step, regions, tracts);
+    if (Object.hasOwn(circuit, 'diagram')) validateDiagram(circuit, landmarks);
     steps.set(circuit.id, landmarks);
     circuits.set(circuit.id, { ...circuit, steps: [...landmarks.values()] });
   }
