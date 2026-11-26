@@ -2,7 +2,13 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { RELAY } from '../src/features/colophon/feedback.ts';
-import { contentSecurityPolicy, inlineScripts, pagePolicy } from './content-security-policy.ts';
+import {
+  ANALYTICS_REPORT,
+  ANALYTICS_SCRIPT,
+  contentSecurityPolicy,
+  inlineScripts,
+  pagePolicy,
+} from './content-security-policy.ts';
 
 const page = (head: string) =>
   `<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8" />\n${head}  </head>\n</html>\n`;
@@ -53,6 +59,7 @@ describe('the page policy the build writes', () => {
     expect(html.indexOf('Content-Security-Policy')).toBeLessThan(html.indexOf('<script'));
     expect(directives(html).get('script-src')).toEqual([
       "'self'",
+      ANALYTICS_SCRIPT,
       sha256(theme),
       sha256('window.__planumAssets = {};'),
       "'wasm-unsafe-eval'",
@@ -74,7 +81,7 @@ describe('the page policy the build writes', () => {
     ).toEqual(['a()', 'c()']);
   });
 
-  it('BUILD-16 allows the site itself and the feedback relay, and nothing by wildcard', () => {
+  it('BUILD-16 allows the site itself, the feedback relay and the analytics beacon, and nothing by wildcard', () => {
     const policy = directives(transform(page('')));
     expect([...policy.keys()]).toEqual([
       'default-src',
@@ -86,7 +93,7 @@ describe('the page policy the build writes', () => {
       'form-action',
     ]);
     expect(policy.get('default-src')).toEqual(["'self'"]);
-    expect(policy.get('connect-src')).toEqual(["'self'", new URL(RELAY).origin]);
+    expect(policy.get('connect-src')).toEqual(["'self'", new URL(RELAY).origin, ANALYTICS_REPORT]);
     expect(policy.get('object-src')).toEqual(["'none'"]);
     expect(policy.get('base-uri')).toEqual(["'none'"]);
     expect(policy.get('form-action')).toEqual(["'none'"]);

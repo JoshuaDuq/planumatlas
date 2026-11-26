@@ -2,6 +2,10 @@ import { createHash } from 'node:crypto';
 import type { Plugin } from 'vite';
 import { RELAY } from '../src/features/colophon/feedback.ts';
 
+/** Cloudflare Web Analytics: the beacon script and the endpoint it reports to. */
+export const ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com';
+export const ANALYTICS_REPORT = 'https://cloudflareinsights.com';
+
 const CHARSET = '<meta charset="UTF-8" />';
 
 /** The text of each inline script in a page, as the browser hashes it. */
@@ -13,13 +17,13 @@ export function inlineScripts(html: string): string[] {
 
 /**
  * The page's Content-Security-Policy. Each source is one the built app loads:
- * - scripts: the bundle; its module workers and the service worker, which `worker-src` leaves to
+ * - scripts: the bundle; the Cloudflare Web Analytics beacon; its module workers and the service worker, which `worker-src` leaves to
  *   `script-src`; the head's inline scripts by their hashes; and the WebAssembly the meshopt decoder
  *   compiles (`three/addons/libs/meshopt_decoder.module.js`, which is never asked for its blob workers);
  * - styles: the stylesheets, and inline: the app sets styles through the CSSOM alone, which no
  *   policy governs, but a `style` attribute in template markup (Svelte's, Bits UI's, driver.js's)
  *   would otherwise work in development and be refused in the built site only;
- * - requests: the published files, and the feedback relay;
+ * - requests: the published files, the feedback relay, and the analytics report;
  * - fonts and images: the site's own files (`default-src`); the saved PNGs and CSVs are downloads.
  * No form is submitted (each is handled in script) and the page sets no `<base>`.
  */
@@ -29,9 +33,9 @@ export function pagePolicy(scripts: readonly string[]): string {
   );
   return [
     "default-src 'self'",
-    `script-src 'self' ${hashes.join(' ')} 'wasm-unsafe-eval'`,
+    `script-src 'self' ${ANALYTICS_SCRIPT} ${hashes.join(' ')} 'wasm-unsafe-eval'`,
     "style-src 'self' 'unsafe-inline'",
-    `connect-src 'self' ${new URL(RELAY).origin}`,
+    `connect-src 'self' ${new URL(RELAY).origin} ${ANALYTICS_REPORT}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'none'",
