@@ -486,6 +486,23 @@ describe('the Display popover', () => {
     expect(tool('Display').getAttribute('aria-expanded')).toBe('true');
   });
 
+  test('STAGE-90 · each box and the hemisphere show their key, and none shows while single keys are off', async () => {
+    await mount({ explodable: true });
+    await open('Display');
+    const shown = () =>
+      [...popover().querySelectorAll('.key-hint')]
+        .filter((hint) => getComputedStyle(hint).display !== 'none')
+        .map((hint) => hint.textContent);
+    expect(shown()).toEqual(['H', 'C', 'U', 'S', 'E', 'N']);
+    expect(control('checkbox', 'Show cortex').getAttribute('aria-keyshortcuts')).toBe('C');
+    document.documentElement.dataset.singleKeys = 'off';
+    try {
+      expect(shown()).toEqual([]);
+    } finally {
+      delete document.documentElement.dataset.singleKeys;
+    }
+  });
+
   test('the checkboxes show the display they are given', async () => {
     await mount({
       view: { ...liveState({}).view, internalVisible: false, spinalCordVisible: true },

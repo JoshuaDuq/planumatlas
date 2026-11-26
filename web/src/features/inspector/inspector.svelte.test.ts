@@ -393,7 +393,8 @@ describe('commands', () => {
     await userEvent.hover(page.getByRole('heading', { level: 2 }));
     (document.querySelector('.selection-clear') as HTMLElement).focus();
     await userEvent.keyboard('{Tab}');
-    await expect.element(page.getByRole('tooltip')).toHaveTextContent(said.Focus);
+    // The tooltip draws Focus's key after its words; the description leaves the key out (UI-78).
+    await expect.element(page.getByRole('tooltip')).toHaveTextContent(`${said.Focus}F`);
     await expect.element(button('Focus')).toHaveAccessibleDescription(said.Focus);
     await screen.rerender({ regionId: V1, isolated: true });
     await expect

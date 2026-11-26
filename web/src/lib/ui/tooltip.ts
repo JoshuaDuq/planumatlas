@@ -113,6 +113,17 @@ export function describedBy(
   return ids.length > 0 ? ids.join(' ') : null;
 }
 
+/**
+ * The key a trigger declares in `aria-keyshortcuts`, written as the shortcuts dialog writes it
+ * ("Ctrl Z", "?"); none for a single key while the reader has single-key shortcuts off.
+ */
+export function tooltipKey(trigger: Element, root: HTMLElement): string | null {
+  const first = trigger.getAttribute('aria-keyshortcuts')?.split(' ')[0];
+  if (!first) return null;
+  if (!/^(Control|Meta|Alt)\+/.test(first) && root.dataset.singleKeys === 'off') return null;
+  return first === 'Shift+/' ? '?' : first.replace('Control', 'Ctrl').replaceAll('+', ' ');
+}
+
 export interface TooltipHost {
   /** The id of the tooltip element once it is drawn. */
   tipId: string;

@@ -18,6 +18,7 @@
   import { tick } from 'svelte';
   import { t } from '../../lib/core/i18n/index.ts';
   import { percent } from '../../lib/core/format.ts';
+  import { ARIA_KEYSHORTCUTS, SHORTCUT_KEYS } from '../../lib/controller/keymap.ts';
   import { CORTEX_SURFACES } from '../../lib/core/user-map/display.ts';
   import type { CortexSurface } from '../../lib/core/user-map/display.ts';
   import type { Hemisphere, Language } from '../../lib/types/index.ts';
@@ -116,7 +117,10 @@
   }
 </script>
 
-<p id={hemisphereLabelId} class="stage-field-label">{copy.hemisphere}</p>
+<p id={hemisphereLabelId} class="stage-field-label hemisphere-label">
+  <span>{copy.hemisphere}</span>
+  <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.hemisphere}</kbd>
+</p>
 <ChoiceGroup
   labelledby={hemisphereLabelId}
   class="hemisphere"
@@ -129,9 +133,11 @@
     <input
       type="checkbox"
       checked={cortexVisible}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.cortex}
       onchange={(event) => onCortexVisible(event.currentTarget.checked)}
     />
     <span>{copy.showCortex}</span>
+    <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.cortex}</kbd>
   </label>
   {#if cortexVisible}
     <div class="cortex-controls">
@@ -162,18 +168,22 @@
     <input
       type="checkbox"
       checked={internalVisible}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.internal}
       onchange={(event) => onInternalVisible(event.currentTarget.checked)}
     />
     <span>{copy.showInternal}</span>
+    <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.internal}</kbd>
   </label>
   {#if hasSpinalCord}
     <label class="check">
       <input
         type="checkbox"
         checked={spinalCordVisible}
+        aria-keyshortcuts={ARIA_KEYSHORTCUTS.spinalCord}
         onchange={(event) => onSpinalCordVisible(event.currentTarget.checked)}
       />
       <span>{copy.showSpinalCord}</span>
+      <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.spinalCord}</kbd>
     </label>
   {/if}
 </div>
@@ -185,9 +195,11 @@
         type="checkbox"
         checked={exploded}
         aria-describedby={explodeHintId}
+        aria-keyshortcuts={ARIA_KEYSHORTCUTS.explode}
         onchange={(event) => onExploded(event.currentTarget.checked)}
       />
       <span>{copy.explode}</span>
+      <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.explode}</kbd>
     </label>
     <span id={explodeHintId} class="visually-hidden">{copy.explodeHint}</span>
   {/if}
@@ -196,9 +208,11 @@
       type="checkbox"
       checked={namesShown}
       aria-describedby={namesHintId}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.names}
       onchange={(event) => onNamesShown(event.currentTarget.checked)}
     />
     <span>{copy.names}</span>
+    <kbd class="key-hint" aria-hidden="true">{SHORTCUT_KEYS.names}</kbd>
   </label>
   <span id={namesHintId} class="visually-hidden">{copy.namesHint}</span>
 </div>
@@ -268,6 +282,30 @@
     }
     .check span {
       min-width: 0;
+    }
+    /* The row's key, at its end as in a menu: gone while single keys are off and on a phone. */
+    .hemisphere-label {
+      display: flex;
+      align-items: center;
+    }
+    .key-hint {
+      flex-shrink: 0;
+      min-width: 0;
+      margin-left: auto;
+      padding: 0;
+      color: var(--overlay-ink-faint);
+      background: none;
+      border: 0;
+      box-shadow: none;
+    }
+    :global(:root[data-single-keys='off']) .key-hint {
+      display: none;
+    }
+    /* The phone layout (PHONE_QUERY; phone.css:26, 46). */
+    @media (max-width: 800px), (max-height: 480px) and (orientation: landscape) {
+      .key-hint {
+        display: none;
+      }
     }
     /* What is changed and its undo share a line while they fit, so the plate stays inside a 900px window. */
     .changes {

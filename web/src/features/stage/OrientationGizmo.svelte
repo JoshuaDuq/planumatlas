@@ -16,6 +16,7 @@
   import type { Language, ViewName } from '../../lib/types/index.ts';
   import IconButton from '../../lib/ui/IconButton.svelte';
   import { OWN_KEYS_ATTRIBUTE } from '../../lib/core/keyboard.ts';
+  import { ARIA_KEYSHORTCUTS } from '../../lib/controller/keymap.ts';
   import { bindRoving } from '../../lib/ui/roving.ts';
   import type { DockCommands } from './dock-commands.ts';
   import './stage-vars.css';
@@ -298,6 +299,7 @@
       class="gizmo-centre"
       aria-label={copy.namedView(names.oblique)}
       aria-pressed={heldName === 'oblique'}
+      aria-keyshortcuts={ARIA_KEYSHORTCUTS.views.oblique}
       data-tooltip={copy.namedView(names.oblique)}
       onclick={(event) => press(event, 'oblique')}
       bind:this={centre}
@@ -309,6 +311,7 @@
         aria-label={copy.namedView(names[VIEWS[letter]])}
         aria-pressed={heldName === VIEWS[letter]}
         data-letter={letter}
+        aria-keyshortcuts={ARIA_KEYSHORTCUTS.views[VIEWS[letter]]}
         data-tooltip={copy.namedView(names[VIEWS[letter]])}
         onclick={(event) => press(event, VIEWS[letter])}
         {@attach (node) => void (buttons[letter] = node)}

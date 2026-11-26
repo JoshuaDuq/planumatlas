@@ -7,12 +7,13 @@
 <script lang="ts">
   import { Tooltip } from 'bits-ui';
   import { onMount } from 'svelte';
-  import { startTooltips } from './tooltip.ts';
+  import { startTooltips, tooltipKey } from './tooltip.ts';
 
   const tipId = 'tooltip';
 
   let anchor = $state<HTMLElement | null>(null);
   let text = $state('');
+  let key = $state<string | null>(null);
   let instant = $state(false);
   let open = $state(false);
   // A modal dialog and a fullscreen element draw only their own descendants over the page.
@@ -29,6 +30,7 @@
           document.body;
         anchor = trigger;
         text = trigger.dataset.tooltip ?? '';
+        key = tooltipKey(trigger, document.documentElement);
         instant = isInstant;
         open = true;
       },
@@ -54,7 +56,7 @@
         collisionPadding={8}
         data-instant={instant ? '' : undefined}
       >
-        {text}
+        {text}{#if key}<kbd class="tooltip-key" aria-hidden="true">{key}</kbd>{/if}
       </Tooltip.Content>
     </Tooltip.Portal>
   </Tooltip.Root>
@@ -64,6 +66,8 @@
   @layer components {
     /* Anything with data-tooltip: the stage's hover chip, in both themes (components.css:507-539). */
     :global(.tooltip) {
+      /* Bits copies this to its wrapper: above the masthead's 60 and the gizmo's stack. */
+      z-index: 100;
       max-width: min(280px, calc(100vw - 2 * var(--space-2)));
       margin: 0;
       padding: var(--space-1) var(--space-2);
@@ -84,6 +88,16 @@
     }
     :global(.tooltip[data-instant]) {
       transition: none;
+    }
+    /* The trigger's shortcut, on the plate's own colours. */
+    :global(.tooltip-key) {
+      min-width: 0;
+      margin-left: var(--space-2);
+      padding: 0;
+      color: var(--overlay-ink-faint);
+      background: none;
+      border: 0;
+      box-shadow: none;
     }
     @starting-style {
       :global(.tooltip) {

@@ -7,6 +7,7 @@ import {
   createTooltipTiming,
   describedBy,
   inGraceArea,
+  tooltipKey,
 } from './tooltip.ts';
 
 // A clock and timers the test advances by hand.
@@ -157,5 +158,21 @@ describe('describedBy', () => {
   test('a tooltip that only repeats the name or an existing note is not added', () => {
     expect(describedBy('note', 'tooltip', true, true)).toBe('note');
     expect(describedBy(null, 'tooltip', true, true)).toBeNull();
+  });
+});
+
+describe('tooltipKey', () => {
+  const trigger = (keys: string | null) => ({ getAttribute: () => keys }) as unknown as Element;
+  const root = (singleKeys?: 'on' | 'off') =>
+    ({ dataset: singleKeys ? { singleKeys } : {} }) as unknown as HTMLElement;
+
+  test('UI-78 · writes the declared key as the shortcuts dialog does, and drops single keys while they are off', () => {
+    expect(tooltipKey(trigger('1'), root())).toBe('1');
+    expect(tooltipKey(trigger('Shift+/'), root('on'))).toBe('?');
+    expect(tooltipKey(trigger('Control+Z Meta+Z'), root('on'))).toBe('Ctrl Z');
+    expect(tooltipKey(trigger(null), root('on'))).toBeNull();
+    expect(tooltipKey(trigger('1'), root('off'))).toBeNull();
+    expect(tooltipKey(trigger('Shift+/'), root('off'))).toBeNull();
+    expect(tooltipKey(trigger('Control+Z Meta+Z'), root('off'))).toBe('Ctrl Z');
   });
 });
