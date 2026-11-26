@@ -129,9 +129,10 @@ test('the reader’s map is drawn over the scan where it passes its threshold, b
   // 5 is halfway up the positive scale (red to yellow); −5 halfway up the negative (blue to light blue).
   assert.deepEqual(Array.from(full.slice(0, 4)), [255, 128, 0, 255]);
   assert.deepEqual(Array.from(full.slice(-4)), [0, 128, 255, 255]);
-  // Half opacity lets the grey show through: 0.5 * 70 + 0.5 * 255 = 162.5, 0.5 * 70 + 0.5 * 127.5 = 98.75.
+  // Half opacity lets the grey show through, mixed in linear light as on the cut faces: grey 70 is
+  // 0.0612 linear, so red 1 gives (0.0612 + 1) / 2 → 192.6, orange 0.5 gives 103.7, blue 0 gives 48.9.
   const half = renderSlice({ ...volumes, maps: [map(0.5)] }, frame, display);
-  assert.deepEqual(Array.from(half.slice(0, 3)), [162, 99, 35]);
+  assert.deepEqual(Array.from(half.slice(0, 3)), [193, 104, 49]);
   // Within ±threshold, or without a value, the scan stays as it was.
   const hidden = renderSlice(
     {
@@ -164,6 +165,21 @@ test('FUNC-60 · two maps are drawn in their own colours, the later in the list 
   assert.deepEqual(Array.from(over.slice(-4)), [0, 128, 255, 255], 'the first alone');
   const under = renderSlice({ ...volumes, maps: [second, first] }, frame, display);
   assert.deepEqual(Array.from(under.slice(0, 4)), [255, 128, 0, 255], 'the first over the second');
+  // Half see-through on top, both at 0.8 between 0.5 and 1: the bytes a cut face draws (FUNC-60 in
+  // overlay.svelte.test.ts), not the 128, 184, 0 of mixing sRGB bytes.
+  const scale = { threshold: 0.5, max: 1 };
+  const both = renderSlice(
+    {
+      ...volumes,
+      maps: [
+        { ...first, at: () => 0.8, display: { ...first.display, ...scale } },
+        { ...second, at: () => 0.8, display: { ...second.display, ...scale, opacity: 0.5 } },
+      ],
+    },
+    frame,
+    display,
+  );
+  assert.deepEqual(Array.from(both.slice(0, 4)), [188, 187, 0, 255]);
 });
 
 test('against a paint, the map’s positive values take one colour off the paint and another on it', () => {
@@ -339,6 +355,15 @@ test('SECT-47 the selection is tinted as the overlay tints, and outlined two pix
     colors: [null, [9, 9, 9]],
   };
   expect(firstRow({ selection, paint })).toEqual([9, 9, 9, 127, 208, 204, 127, 208, 204, 9, 9, 9]);
+  // The maps are drawn under the outline: x = 1 and 2 keep it, and x = 3 its own value, not theirs.
+  const scale = { threshold: 3, max: 7, opacity: 1, colours: 'red-yellow' as const };
+  const maps = [
+    { slot: 0, at: (x: number) => [5, 7, 7, -5][x]!, display: scale, overlap: null },
+    { slot: 1, at: () => Number.NaN, display: scale, overlap: null },
+  ];
+  expect(firstRow({ selection, maps })).toEqual([
+    255, 128, 0, 127, 208, 204, 127, 208, 204, 0, 128, 255,
+  ]);
 });
 
 test('SECT-47 a shown agreement inks the selected structure itself, so the selection draws nothing over it', () => {

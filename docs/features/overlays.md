@@ -54,6 +54,8 @@ $$\text{colour}(v) = \mathbf{c}_0 + \min\!\left(1, \frac{\lvert v\rvert - \tau}{
 
 where $(\mathbf{c}_0, \mathbf{c}_1)$ is red (1, 0, 0) to yellow (1, 1, 0) for $v > 0$ and blue (0, 0, 1) to cyan (0, 1, 1) for $v < 0$ (FSL Red-Yellow, Blue-Lightblue). The second scale runs from green (0, 0.6, 0) to (0, 1, 0) for $v > 0$ and from magenta (0.6, 0, 0.6) to (1, 0, 1) for $v < 0$. A statistical map has no default $\tau$. Its $m$ defaults to $\max\lvert v\rvert$ rounded up to three significant digits. A map whose finite values are all 0 or 1 is a mask, drawn at $\tau = 0.5$, $m = 1$. The statistic (z, t, F, r) is taken from the intent code, else an SPM `SPM{T_[df]}` description, else FSL or SPM output names (`zstat1`, `tstat1`, `zfstat1`, `fstat1`, `spmT_0001`, `spmF_0001`).
 
+Every view mixes a map in linear light. With sRGB colour $\mathbf{c}$ and opacity $\alpha$ over sRGB $\mathbf{b}$, a pixel is $f\big((1-\alpha)\,f^{-1}(\mathbf{b}) + \alpha\,f^{-1}(\mathbf{c})\big)$, where $f$ is the sRGB transfer function, and a second map is mixed over the result in the same way. The Linked MRI mixes from its pixel's bytes and rounds once, and gives the bytes a cut face draws: at 0.8 in both maps ($\tau$ = 0.5, $m$ = 1), green at 50% over red–yellow is (188, 187, 0) in both (`sampling.test.ts`, `overlay.svelte.test.ts`). Mixing sRGB bytes, as matplotlib does, draws a see-through map darker: red–yellow at 0.8 and 50% over grey 128 is (205, 141, 92) in linear light and (192, 140, 64) in sRGB bytes, and the two differ by up to 73 levels at 25% over black. At full opacity the two rules agree.
+
 ### Against a function
 
 While one function or term is painted in **Functions** and a map is drawn, the two are compared point by point. The function's areas take one colour (the comparison's first, blue), and the map is drawn as its positive values $v > \tau$ only: in a second colour (pink) off the painted areas and in a third (green) on them, at the map's opacity. Negative values are left out because the paint is evidence of activation. The surfaces compare each vertex's value, and the cut faces and Linked MRI the 1 mm grid, with the paint of the region the point lies in. The three colours are the comparison's, which stay apart under colour-blind vision.
@@ -159,6 +161,8 @@ The region course is the mean of the map's values in the region, not a statistic
 With two maps, the top one covers the other where both pass their thresholds, so their overlap is hidden unless the top one is made see-through, and then it is drawn in mixed colours that neither key gives. The two colour scales differ in hue, which protan and deutan vision lose, and tritan vision brings the green close to blue–cyan: for such readers the maps are told apart by their keys and by switching one off, not by colour. Only one map can be a series.
 
 Against a function, overlap is a picture of coincidence on this brain: the function's z grows with study count, its areas are whole atlas areas, and the map's place depends on the template registration. The shares count cortex only.
+
+Linked MRI images of a see-through map saved before 26 November 2026 mixed sRGB bytes, so the map is darker in them than on the 3D views; at full opacity they are unchanged.
 
 The map is not carried in a link; the saved image keeps it.
 

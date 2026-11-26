@@ -147,18 +147,13 @@ test(
     expect(
       capOf([{ value: 0.8 }, { value: 0.2, colours: 'green-magenta' }], { ...off, top: 1 }),
     ).toEqual(warm);
-    // Half see-through on top: mixed in linear light, each channel between the two.
-    const [r, g, b] = capOf(
-      [{ value: 0.8 }, { value: 0.8, colours: 'green-magenta', opacity: 0.5 }],
-      {
+    // Half see-through on top: mixed in linear light, the bytes the Linked MRI draws (sampling.test.ts).
+    expect(
+      capOf([{ value: 0.8 }, { value: 0.8, colours: 'green-magenta', opacity: 0.5 }], {
         ...off,
         top: 1,
-      },
-    );
-    expect(r).toBe(Math.round(oetf(0.5) * 255));
-    expect(g).toBeGreaterThan(153);
-    expect(g).toBeLessThan(214);
-    expect(b).toBe(0);
+      }),
+    ).toEqual([Math.round(oetf(0.5) * 255), 187, 0]);
   },
 );
 

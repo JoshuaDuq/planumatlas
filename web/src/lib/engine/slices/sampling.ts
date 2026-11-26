@@ -83,12 +83,37 @@ export interface SliceSamples {
   painted: Uint8Array;
   /** Every pixel's alpha, and each painted pixel's colour with the maps drawn over it. */
   fixed: Uint8ClampedArray;
-  /**
-   * Each of the reader's maps, in drawing order, over the unpainted pixels it colours: their indices,
-   * and three terms per pixel, `colour · 255 · opacity`, added to `keep` (1 − opacity) of what the
-   * window and the maps under it draw there.
-   */
-  maps: { pixels: Uint32Array; terms: Float64Array; keep: number }[];
+  /** The unpainted pixels any of the reader's maps colours, and how the maps mix there. */
+  maps: SliceMaps;
+}
+
+/**
+ * At each pixel, each of `layers` maps in drawing order, in linear light as the cut faces mix them:
+ * `keep` (1 − opacity, or 1 where that map draws nothing) of what lies under it, plus three terms,
+ * the map's linear colour · opacity (0 where it draws nothing).
+ */
+export interface SliceMaps {
+  layers: number;
+  pixels: Uint32Array;
+  keep: Float64Array;
+  terms: Float64Array;
+}
+
+const toLinear = (value: number) =>
+  value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+const toSrgb = (value: number) =>
+  value <= 0.0031308 ? 12.92 * value : 1.055 * value ** (1 / 2.4) - 0.055;
+const LINEAR_BYTES = Float64Array.from({ length: 256 }, (_, byte) => toLinear(byte / 255));
+
+/** Mix the maps recorded at `slot` over the pixel at `index` in linear light, and write it back in sRGB bytes. */
+function mixMaps(pixels: Uint8ClampedArray, index: number, maps: SliceMaps, slot: number): void {
+  const { layers, keep, terms } = maps;
+  for (let channel = 0; channel < 3; channel++) {
+    let light = LINEAR_BYTES[pixels[index + channel]!]!;
+    for (let at = slot * layers; at < (slot + 1) * layers; at++)
+      light = light * keep[at]! + terms[at * 3 + channel]!;
+    pixels[index + channel] = toSrgb(light) * 255;
+  }
 }
 
 /**
@@ -121,11 +146,14 @@ export function sampleSlice(
   const tint = Array<Rgb | null>(count).fill(null);
   const painted = new Uint8Array(count);
   const fixed = new Uint8ClampedArray(count * 4);
-  const mapped = maps.map(() => ({
-    pixels: new Uint32Array(count),
-    terms: new Float64Array(count * 3),
-    count: 0,
-  }));
+  const layers = maps.length;
+  const mapped: SliceMaps = {
+    layers,
+    pixels: new Uint32Array(layers ? count : 0),
+    keep: new Float64Array(count * layers),
+    terms: new Float64Array(count * layers * 3),
+  };
+  let mappedCount = 0;
   // An outline over an agreement would hide the pixels one segmentation alone labels at its edge.
   const chosen = selection && !agreement ? new Uint8Array(count) : null;
   const step = fieldOfView / size;
@@ -168,26 +196,23 @@ export function sampleSlice(
         painted[pixel] = 1;
         for (let channel = 0; channel < 3; channel++) fixed[index + channel] = colour[channel]!;
       }
+      let drawn = false;
       for (const [layer, map] of maps.entries()) {
         const shown = mapColour(
           map.at(...point),
           map.display,
           map.overlap && { colours: map.overlap, painted: Boolean(colour) },
         );
-        if (!shown) continue;
-        const { opacity } = map.display;
-        if (colour) {
-          for (let channel = 0; channel < 3; channel++)
-            fixed[index + channel] =
-              fixed[index + channel]! * (1 - opacity) + shown[channel]! * 255 * opacity;
-        } else {
-          const own = mapped[layer]!;
-          own.pixels[own.count] = pixel;
-          for (let channel = 0; channel < 3; channel++)
-            own.terms[own.count * 3 + channel] = shown[channel]! * 255 * opacity;
-          own.count++;
-        }
+        const at = mappedCount * layers + layer;
+        const opacity = shown ? map.display.opacity : 0;
+        mapped.keep[at] = 1 - opacity;
+        for (let channel = 0; channel < 3; channel++)
+          mapped.terms[at * 3 + channel] = shown ? toLinear(shown[channel]!) * opacity : 0;
+        drawn ||= Boolean(shown);
       }
+      // A painted pixel is mixed now; its slot is then free for the next pixel.
+      if (drawn && colour) mixMaps(fixed, index, mapped, mappedCount);
+      else if (drawn) mapped.pixels[mappedCount++] = pixel;
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
       fixed[index + 3] = label || category || colour ? 255 : 0;
     }
@@ -207,34 +232,34 @@ export function sampleSlice(
         fixed.set([...Array.from(selection!.colour), 255], pixel * 4);
       }
     // The maps are drawn under the outline, not over it.
-    for (const own of mapped) {
-      let kept = 0;
-      for (let n = 0; n < own.count; n++) {
-        if (painted[own.pixels[n]!]) continue;
-        own.pixels[kept] = own.pixels[n]!;
-        own.terms.copyWithin(kept * 3, n * 3, n * 3 + 3);
-        kept++;
-      }
-      own.count = kept;
+    let kept = 0;
+    for (let n = 0; n < mappedCount; n++) {
+      if (painted[mapped.pixels[n]!]) continue;
+      mapped.pixels[kept] = mapped.pixels[n]!;
+      mapped.keep.copyWithin(kept * layers, n * layers, (n + 1) * layers);
+      mapped.terms.copyWithin(kept * layers * 3, n * layers * 3, (n + 1) * layers * 3);
+      kept++;
     }
+    mappedCount = kept;
   }
   return {
     intensity,
     tint,
     painted,
     fixed,
-    maps: mapped.map((own, layer) => ({
-      pixels: own.pixels.slice(0, own.count),
-      terms: own.terms.slice(0, own.count * 3),
-      keep: 1 - maps[layer]!.display.opacity,
-    })),
+    maps: {
+      layers,
+      pixels: mapped.pixels.slice(0, mappedCount),
+      keep: mapped.keep.slice(0, mappedCount * layers),
+      terms: mapped.terms.slice(0, mappedCount * layers * 3),
+    },
   };
 }
 
 /**
  * A sampled slice's RGBA pixels through an MRI window: the grey, mixed 0.55 to 0.45 with a pixel's
- * tint, then each of the reader's maps over it at its opacity, in drawing order. Each step rounds as the canvas's bytes do, so the
- * pixels are those that sampling through this window draws.
+ * tint and rounded to sRGB bytes, then the reader's maps over it at their opacities, in drawing order,
+ * in linear light and rounded once, so the pixels are those that sampling through this window draws.
  */
 export function windowSlice(
   samples: SliceSamples,
@@ -257,12 +282,6 @@ export function windowSlice(
       pixels[index + channel] = color ? gray * 0.55 + color[channel]! * 0.45 : gray;
     }
   }
-  for (const map of maps)
-    for (let n = 0; n < map.pixels.length; n++) {
-      const index = map.pixels[n]! * 4;
-      for (let channel = 0; channel < 3; channel++) {
-        pixels[index + channel] = pixels[index + channel]! * map.keep + map.terms[n * 3 + channel]!;
-      }
-    }
+  for (let n = 0; n < maps.pixels.length; n++) mixMaps(pixels, maps.pixels[n]! * 4, maps, n);
   return pixels;
 }

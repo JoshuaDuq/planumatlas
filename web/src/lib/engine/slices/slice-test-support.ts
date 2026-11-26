@@ -45,9 +45,15 @@ export function publishedSlices() {
   };
 }
 
+const toLinear = (value: number) =>
+  value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+const toSrgb = (value: number) =>
+  value <= 0.0031308 ? 12.92 * value : 1.055 * value ** (1 / 2.4) - 0.055;
+
 /**
- * `renderSlice` as the linked MRI drew each plane with on every window change before P13, verbatim but
- * for its name and its display's type.
+ * `renderSlice` as the linked MRI drew each plane with on every window change before P13, but for its
+ * name, its display's type, and the maps, which it mixed in sRGB bytes: here in linear light, as the
+ * cut faces mix them, from the scan's or the paint's bytes, and rounded once.
  */
 export function referenceSlice(
   volumes: SliceVolumes,
@@ -102,6 +108,8 @@ export function referenceSlice(
       const painted = volumes.paint && volumes.paint.colors[volumes.paint.volume.label(point)];
       if (painted)
         for (let channel = 0; channel < 3; channel++) pixels[index + channel] = painted[channel]!;
+      const light = [0, 1, 2].map((channel) => toLinear(pixels[index + channel]! / 255));
+      let drawn = false;
       for (const map of volumes.maps ?? []) {
         const mapped = mapColour(
           map.at(...point),
@@ -109,12 +117,15 @@ export function referenceSlice(
           map.overlap && { colours: map.overlap, painted: Boolean(painted) },
         );
         if (!mapped) continue;
+        drawn = true;
         const { opacity } = map.display;
         for (let channel = 0; channel < 3; channel++) {
-          pixels[index + channel] =
-            pixels[index + channel]! * (1 - opacity) + mapped[channel]! * 255 * opacity;
+          light[channel] = light[channel]! * (1 - opacity) + toLinear(mapped[channel]!) * opacity;
         }
       }
+      if (drawn)
+        for (let channel = 0; channel < 3; channel++)
+          pixels[index + channel] = toSrgb(light[channel]!) * 255;
       // A structure only NextBrain labels can lie where aseg labels nothing; it is still drawn.
       pixels[index + 3] = label || category || painted ? 255 : 0;
     }
