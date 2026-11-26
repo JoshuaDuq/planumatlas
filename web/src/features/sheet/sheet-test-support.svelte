@@ -130,8 +130,10 @@
                 type="button"
                 data-row
                 data-selected={world.selectedRegion?.id === id}
-                onclick={() => select(id)}>{id}</button
+                onclick={() => select(id)}
               >
+                {id}
+              </button>
             {/each}
           </div>
         {/snippet}

@@ -246,11 +246,11 @@
               <span class="data-option-check">
                 {#if option.value === pressed}{@render iconGraphic('check')}{/if}
               </span>
-              <span class="data-option-name" id="{id}-name"
-                >{option.name}{#if option.isDefault}{' '}<span class="data-option-default"
-                    >{copy.isDefault}</span
-                  >{/if}</span
-              >
+              <span class="data-option-name" id="{id}-name">
+                {option.name}{#if option.isDefault}{' '}<span class="data-option-default">
+                    {copy.isDefault}
+                  </span>{/if}
+              </span>
               {#if option.palette}
                 <span class="data-option-palette" aria-hidden="true">
                   {#each option.palette as [r, g, b], index (index)}

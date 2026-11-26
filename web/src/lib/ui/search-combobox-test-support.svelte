@@ -44,16 +44,19 @@
     status={`${found.length} matches.`}
     onselect={(value) => picks.push(value)}
   >
-    {#snippet option(item)}<span style:display="block" style:min-height={tall ? '200px' : undefined}
-        >{all.find((row) => row.value === item.value)?.label}</span
-      >{/snippet}
+    {#snippet option(item)}<span
+        style:display="block"
+        style:min-height={tall ? '200px' : undefined}
+      >
+        {all.find((row) => row.value === item.value)?.label}
+      </span>{/snippet}
     {#snippet notes()}
       {#if query.trim() !== '' && found.length === 0}
         <p>No match for {query}.</p>
       {/if}
-      <button type="button" style:color="inherit" style:background="transparent"
-        >Switch atlas</button
-      >
+      <button type="button" style:color="inherit" style:background="transparent">
+        Switch atlas
+      </button>
     {/snippet}
   </SearchCombobox>
 </div>

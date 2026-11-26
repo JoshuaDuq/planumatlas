@@ -56,11 +56,11 @@
           {#if keys}
             {#each caps(term) as token}
               {#if isRange(token)}
-                <span class="key-range"
-                  ><span aria-hidden="true">{token}</span><span class="visually-hidden"
-                    >{copy.rangeTo}</span
-                  ></span
-                >
+                <span class="key-range">
+                  <span aria-hidden="true">{token}</span><span class="visually-hidden">
+                    {copy.rangeTo}
+                  </span>
+                </span>
               {:else}
                 <kbd>{token}</kbd>
               {/if}

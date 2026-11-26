@@ -63,8 +63,10 @@
             <button
               type="button"
               class="network-row-name connectivity-partner"
-              onclick={() => onselect(partner.region)}>{name(partner.region)}</button
+              onclick={() => onselect(partner.region)}
             >
+              {name(partner.region)}
+            </button>
             <Swatch kind="bar" share={Math.max(partner.r, 0)} />
             <span class="network-share measure">{decimal(partner.r, 2, lang)}</span>
           </li>
@@ -86,17 +88,20 @@
       <p class="detail-note">{copy.note(connectivity!.people, connectivity!.ages)}</p>
       <p class="detail-note">{copy.basis}</p>
       <div class="stimulation-sources">
-        <a href={connectivity!.source.dataset} target="_blank" rel="noopener noreferrer"
-          >{copy.dataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
+        <a href={connectivity!.source.dataset} target="_blank" rel="noopener noreferrer">
+          {copy.dataset}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
         <a
           href="https://pubmed.ncbi.nlm.nih.gov/{connectivity!.source.pmid}/"
           target="_blank"
           rel="noopener noreferrer"
-          >{copy.paper}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
         >
+          {copy.paper}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
       </div>
     </Disclosure>
   </div>

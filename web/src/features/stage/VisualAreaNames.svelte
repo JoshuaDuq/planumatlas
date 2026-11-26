@@ -93,8 +93,10 @@
         {@attach (node) => {
           spans.set(key, node);
           return () => spans.delete(key);
-        }}>{name}</span
+        }}
       >
+        {name}
+      </span>
     {/each}
   </div>
 {/if}

@@ -45,8 +45,10 @@
         const instant = isKeyboardActivation(event);
         await engine.sections.load();
         mpr.show({ instant });
-      }}>Linked MRI</button
+      }}
     >
+      Linked MRI
+    </button>
   </header>
   <div id="workspace-panel">
     <button type="button" bind:this={more}>More</button>
@@ -55,8 +57,9 @@
     <button
       type="button"
       onclick={() => void document.getElementById('viewport')!.requestFullscreen()}
-      >Full screen</button
     >
+      Full screen
+    </button>
   </main>
   <MprDialog
     bind:this={view}

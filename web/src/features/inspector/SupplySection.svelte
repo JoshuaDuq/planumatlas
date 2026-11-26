@@ -69,9 +69,9 @@
           {@const entry = territory(id)}
           <li class="network-row">
             <Swatch colour={networkCss(entry.color)} />
-            <span class="network-row-name unshared"
-              >{lang === 'fr' ? entry.name_fr : entry.name}</span
-            >
+            <span class="network-row-name unshared">
+              {lang === 'fr' ? entry.name_fr : entry.name}
+            </span>
           </li>
         {/each}
       </ul>

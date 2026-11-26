@@ -156,28 +156,34 @@
                     class="tick"
                     x={x(mm)}
                     y={height - M.bottom + 1.15 * em}
-                    text-anchor={mm === reach ? 'end' : 'middle'}>{mm}</text
+                    text-anchor={mm === reach ? 'end' : 'middle'}
                   >
+                    {mm}
+                  </text>
                 {/each}
                 {#each delayTicks as ms (ms)}
                   <line class="grid" x1={M.left} x2={width - M.right} y1={y(ms)} y2={y(ms)} />
-                  <text class="tick" x={M.left - 0.4 * em} y={y(ms)} dy="0.32em" text-anchor="end"
-                    >{decimal(ms, 0, lang)}</text
-                  >
+                  <text class="tick" x={M.left - 0.4 * em} y={y(ms)} dy="0.32em" text-anchor="end">
+                    {decimal(ms, 0, lang)}
+                  </text>
                 {/each}
                 <text
                   class="axis"
                   x={(M.left + width - M.right) / 2}
                   y={height - 0.4 * em}
-                  text-anchor="middle">{copy.distanceAxis}</text
+                  text-anchor="middle"
                 >
+                  {copy.distanceAxis}
+                </text>
                 <text
                   class="axis"
                   x={-(M.top + height - M.bottom) / 2}
                   y={1.05 * em}
                   transform="rotate(-90)"
-                  text-anchor="middle">{copy.delayAxis}</text
+                  text-anchor="middle"
                 >
+                  {copy.delayAxis}
+                </text>
                 {#each placed as entry (entry.parcel)}
                   <circle
                     class="dot"
@@ -224,14 +230,16 @@
       </p>
       <p class="detail-note">{copy.ftractBasis(ftract!.parcels[parcel]!.name)}</p>
       <div class="stimulation-sources">
-        <a href={ftract!.source.dataset} target="_blank" rel="noopener noreferrer"
-          >{copy.ftractDataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
-        <a href={ftract!.source.doi} target="_blank" rel="noopener noreferrer"
-          >{copy.ftractMethod}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
+        <a href={ftract!.source.dataset} target="_blank" rel="noopener noreferrer">
+          {copy.ftractDataset}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
+        <a href={ftract!.source.doi} target="_blank" rel="noopener noreferrer">
+          {copy.ftractMethod}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
       </div>
     </Disclosure>
   </div>

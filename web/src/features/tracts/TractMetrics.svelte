@@ -50,9 +50,9 @@
         <span class="meta-name" aria-hidden="true">{bundleName(bundle, lang)}</span>
         <span class="values">
           <span class="count">{text.streamlines(metrics.shown, metrics.total)}</span>
-          <span class="length"
-            ><span>{metrics.shown ? lengthSummary(metrics, text, lang) : text.noShown}</span></span
-          >
+          <span class="length">
+            <span>{metrics.shown ? lengthSummary(metrics, text, lang) : text.noShown}</span>
+          </span>
         </span>
       </p>
     {/each}

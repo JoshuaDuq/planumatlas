@@ -106,9 +106,9 @@
                 <th scope="row">{layer}</th>
                 <td>{share(shares[index]!)}</td>
                 {#if cells}
-                  <td
-                    >{decimal(cells.mean[index], 0, lang)} ± {decimal(cells.sd[index], 0, lang)}</td
-                  >
+                  <td>
+                    {decimal(cells.mean[index], 0, lang)} ± {decimal(cells.sd[index], 0, lang)}
+                  </td>
                 {/if}
               </tr>
             {/each}
@@ -129,17 +129,18 @@
         <p class="detail-note">{copy.basis}</p>
         <div class="stimulation-sources">
           {#each sources as { href, label } (href)}
-            <a {href} target="_blank" rel="noopener noreferrer"
-              >{label}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-              >{@render iconGraphic('external-link')}</a
-            >
+            <a {href} target="_blank" rel="noopener noreferrer">
+              {label}<span class="visually-hidden">
+                {` ${t(lang, 'link').newTab}`}
+              </span>{@render iconGraphic('external-link')}
+            </a>
           {/each}
         </div>
       {:else}
         <p class="detail-note">{copy.failed}</p>
-        <button type="button" class="layers-paint" onclick={() => layers!.retry()}
-          >{copy.retry}</button
-        >
+        <button type="button" class="layers-paint" onclick={() => layers!.retry()}>
+          {copy.retry}
+        </button>
       {/if}
     </Disclosure>
   </div>

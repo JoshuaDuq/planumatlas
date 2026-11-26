@@ -74,12 +74,13 @@
                   aria-pressed={painted === disorder.id}
                   aria-label={copy.paint(name)}
                   onclick={() => onpaint(disorder.id)}
-                  >{name} <span class="disorder-meta">{meta}</span></button
                 >
+                  {name} <span class="disorder-meta">{meta}</span>
+                </button>
               {:else}
-                <span class="network-row-name"
-                  >{name} <span class="disorder-meta">{meta}</span></span
-                >
+                <span class="network-row-name">
+                  {name} <span class="disorder-meta">{meta}</span>
+                </span>
               {/if}
               <span class="network-share measure">{decimal(d, 2, lang)}</span>
             </li>
@@ -100,9 +101,11 @@
               href="https://pubmed.ncbi.nlm.nih.gov/{cohort.pmid}/"
               target="_blank"
               rel="noopener noreferrer"
-              >{copy.paper}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-              >{@render iconGraphic('external-link')}</a
             >
+              {copy.paper}<span class="visually-hidden">
+                {` ${t(lang, 'link').newTab}`}
+              </span>{@render iconGraphic('external-link')}
+            </a>
           </p>
           <button type="button" class="disorder-restore" onclick={onrestore}>
             {t(lang, 'clinical').restore}
@@ -116,9 +119,11 @@
           href="{disorders!.source.repository}/tree/{disorders!.source.commit}"
           target="_blank"
           rel="noopener noreferrer"
-          >{copy.toolbox}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
         >
+          {copy.toolbox}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
       </div>
     </Disclosure>
   </div>

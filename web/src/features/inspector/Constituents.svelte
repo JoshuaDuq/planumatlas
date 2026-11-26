@@ -43,34 +43,34 @@
 
 {#if region?.constituent_regions}
   <details class="constituents" bind:open>
-    <summary
-      >{copy.constituentsHeading} <span class="disclosure-count">{entries.length}</span></summary
-    >
+    <summary>
+      {copy.constituentsHeading} <span class="disclosure-count">{entries.length}</span>
+    </summary>
     <ul class="constituents-list">
       {#each entries as { id, region: part, label } (id)}
         <li>
           {#if part.kind === 'structure'}
-            <button type="button" onclick={() => onregion(id)}
-              >{label.name}{#if sided}<span class="visually-hidden"
-                  >, {sides.words[part.hemisphere]}</span
-                >{/if}</button
-            >
+            <button type="button" onclick={() => onregion(id)}>
+              {label.name}{#if sided}<span class="visually-hidden">
+                  , {sides.words[part.hemisphere]}
+                </span>{/if}
+            </button>
           {:else}
-            <span
-              >{label.name}{#if sided}<span class="visually-hidden"
-                  >, {sides.words[part.hemisphere]}</span
-                >{/if}</span
-            >
+            <span>
+              {label.name}{#if sided}<span class="visually-hidden">
+                  , {sides.words[part.hemisphere]}
+                </span>{/if}
+            </span>
           {/if}
           <!-- Opening a constituent switches Internal anatomy to the set that holds it. -->
-          <span class="constituent-set"
-            >{part.kind === 'structure'
+          <span class="constituent-set">
+            {part.kind === 'structure'
               ? atlasSwitchLabel(part.atlas!, lang)
-              : copy.constituentCutOnly}</span
-          >
-          {#if sided}<span class="constituent-side" aria-hidden="true"
-              >{sides.glyphs[part.hemisphere]}</span
-            >{/if}
+              : copy.constituentCutOnly}
+          </span>
+          {#if sided}<span class="constituent-side" aria-hidden="true">
+              {sides.glyphs[part.hemisphere]}
+            </span>{/if}
         </li>
       {/each}
     </ul>

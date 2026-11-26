@@ -27,11 +27,13 @@
   data-state={copier.state}
   data-tooltip={copier.state === 'idle' ? words.copy : undefined}
   onclick={() => copier.copy(value)}
-  >{value}<span class="copy-icon" aria-hidden="true">{@render iconGraphic('copy')}</span
-  >{#if copier.state !== 'idle'}<span class="copy-said" aria-hidden="true"
-      >{words[copier.state]}</span
-    >{/if}</button
 >
+  {value}<span class="copy-icon" aria-hidden="true">
+    {@render iconGraphic('copy')}
+  </span>{#if copier.state !== 'idle'}<span class="copy-said" aria-hidden="true">
+      {words[copier.state]}
+    </span>{/if}
+</button>
 
 <style>
   @layer components {

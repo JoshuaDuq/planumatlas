@@ -97,8 +97,10 @@
             class="fx"
             data-row
             data-selected={world.selectedRegion?.id === id}
-            onclick={() => select(id)}>{id}</button
+            onclick={() => select(id)}
           >
+            {id}
+          </button>
         {/each}
       </div>
     {/snippet}
@@ -114,18 +116,20 @@
     <button
       type="button"
       class="fx step"
-      aria-label={world.lang === 'fr' ? 'Précédent' : 'Previous'}>‹</button
+      aria-label={world.lang === 'fr' ? 'Précédent' : 'Previous'}
     >
+      ‹
+    </button>
     <span>2 / 7</span>
-    <button type="button" class="fx step" aria-label={world.lang === 'fr' ? 'Suivant' : 'Next'}
-      >›</button
-    >
+    <button type="button" class="fx step" aria-label={world.lang === 'fr' ? 'Suivant' : 'Next'}>
+      ›
+    </button>
   </div>
 {/snippet}
 {#snippet trailing()}
-  <button type="button"
-    >{world.lang === 'fr' ? 'Rétablir la vue précédente' : 'Restore previous view'}</button
-  >
+  <button type="button">
+    {world.lang === 'fr' ? 'Rétablir la vue précédente' : 'Restore previous view'}
+  </button>
 {/snippet}
 
 <style>

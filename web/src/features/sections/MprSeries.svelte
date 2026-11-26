@@ -225,8 +225,10 @@
   <h3 id="{uid}-heading">
     <span>{planeName(plane, lang)}</span>
     <span class="seen-from">{copy.seenFrom[seenFrom(plane, base.edges)]}</span>{#if convention}<span
-        class="visually-hidden">{`· ${copy.conventions[convention]}`}</span
-      >{/if}
+        class="visually-hidden"
+      >
+        {`· ${copy.conventions[convention]}`}
+      </span>{/if}
   </h3>
   <IconButton
     class="save"
@@ -265,9 +267,9 @@
           ></div>
         {/each}
         {#each EDGES as edge, index (edge)}
-          <span class="edge" data-edge={edge} aria-hidden="true"
-            >{edgeLetter(localizer.edges[index]!, lang)}</span
-          >
+          <span class="edge" data-edge={edge} aria-hidden="true">
+            {edgeLetter(localizer.edges[index]!, lang)}
+          </span>
         {/each}
         <span class="label" aria-hidden="true">{planeName(across, lang)} {at(localizerAt)}</span>
       </div>
@@ -298,9 +300,9 @@
           {/if}
           {#if index === 0}
             {#each EDGES as edge, side (edge)}
-              <span class="edge" data-edge={edge} aria-hidden="true"
-                >{edgeLetter(base.edges[side]!, lang)}</span
-              >
+              <span class="edge" data-edge={edge} aria-hidden="true">
+                {edgeLetter(base.edges[side]!, lang)}
+              </span>
             {/each}
             {#if convention}
               <span class="convention" aria-hidden="true">{copy.conventionMarks[convention]}</span>

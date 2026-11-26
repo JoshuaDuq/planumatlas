@@ -301,10 +301,11 @@
     <ul class="sources">
       {#each [[record.citation, copy.dataset], [record.method_citation, copy.method], [record.visual_areas.citation, copy.areasSource]] as [href, name] (href)}
         <li>
-          <a {href} target="_blank" rel="noreferrer"
-            >{name}<span class="visually-hidden">{` ${t(model.lang, 'link').newTab}`}</span
-            >{@render iconGraphic('external-link')}</a
-          >
+          <a {href} target="_blank" rel="noreferrer">
+            {name}<span class="visually-hidden">
+              {` ${t(model.lang, 'link').newTab}`}
+            </span>{@render iconGraphic('external-link')}
+          </a>
         </li>
       {/each}
     </ul>

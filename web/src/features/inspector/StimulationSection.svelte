@@ -141,15 +141,16 @@
         <p class="detail-note">{copy.thalamus}</p>
       {/if}
       <div class="stimulation-sources">
-        <a href={stimulation!.source.doi} target="_blank" rel="noopener noreferrer"
-          >{stimulation!.source.short}<span class="visually-hidden"
-            >{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
-        <a href={stimulation!.source.dataset} target="_blank" rel="noopener noreferrer"
-          >{copy.dataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
+        <a href={stimulation!.source.doi} target="_blank" rel="noopener noreferrer">
+          {stimulation!.source.short}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
+        <a href={stimulation!.source.dataset} target="_blank" rel="noopener noreferrer">
+          {copy.dataset}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
       </div>
     </Disclosure>
   </div>

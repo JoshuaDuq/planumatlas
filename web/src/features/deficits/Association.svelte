@@ -88,9 +88,9 @@
   </div>
 
   <details class="evidence" bind:open>
-    <summary
-      >{text.findings}<span class="visually-hidden">{`, ${association.title[lang]}`}</span></summary
-    >
+    <summary>
+      {text.findings}<span class="visually-hidden">{`, ${association.title[lang]}`}</span>
+    </summary>
     <div class="body">
       <p class="note">{association.network[lang]}</p>
       <h5>{text.studyFinding}</h5>
