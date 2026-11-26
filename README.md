@@ -274,3 +274,7 @@ The code is licensed under the [GNU AGPL 3.0 or later](LICENSE): anyone who runs
 Some terms are non-commercial or require attribution. Consult the [references, licences and acknowledgements](https://planumatlas.com/docs/reference/references.html) before reusing any data.
 
 The map in Fig. 6 is not distributed with Planum; [the figure script](scripts/figures.mjs) downloads it from NeuroVault. Data were provided by the Human Connectome Project, WU-Minn Consortium (Principal Investigators: David Van Essen and Kamil Ugurbil; 1U54MH091657) funded by the 16 NIH Institutes and Centers that support the NIH Blueprint for Neuroscience Research; and by the McDonnell Center for Systems Neuroscience at Washington University.
+
+## AI assistance
+
+Much of the code was written with Claude (Anthropic) through Claude Code; those commits carry a `Co-Authored-By: Claude` trailer. The subject, every atlas and dataset, the check each had to pass before it shipped, and what was published or rejected were chosen or approved by the author.
