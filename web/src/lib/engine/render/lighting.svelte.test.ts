@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest';
 import {
-  CubeUVReflectionMapping,
   DirectionalLight,
   Group,
   HemisphereLight,
@@ -83,7 +82,7 @@ test(
       expect(light.target.position.toArray()).toStrictEqual([0, 0, -1]);
 
     // SHADER-34: a PMREM texture that reflects something at every roughness.
-    expect(lighting.texture.mapping).toBe(CubeUVReflectionMapping);
+    expect(lighting.texture.isPMREMTexture).toBe(true);
     for (const roughness of [0, 0.5, 1]) {
       const pixels = reflect(renderer, lighting.texture, roughness);
       expect(
