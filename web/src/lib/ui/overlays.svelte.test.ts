@@ -533,6 +533,8 @@ describe('Tooltip', () => {
     // The page's timers and its clock are faked (beforeEach), so the delays and the skip window
     // hold however loaded the machine is; frames stay real, because drawing needs them.
     render(Fixture);
+    // The test before this one leaves the pointer over Snapshot.
+    await parkPointer();
     await button('Snapshot').hover();
     // The pointer may reach the page after `hover()` returns; the delay starts there.
     await frames(() => el('Snapshot').matches(':hover'), 'the pointer reached the trigger');
@@ -549,7 +551,11 @@ describe('Tooltip', () => {
       await vi.advanceTimersByTimeAsync(10);
     expect(attr('Snapshot', 'aria-describedby')).toBeNull();
     await vi.advanceTimersByTimeAsync(250);
-    await button('Fullscreen').hover();
+    // A real hover moves the faked clock on by as long as it takes (50 ms measured, more on a loaded
+    // runner), which can carry it past the window; dispatching the arrival keeps it at 250 ms.
+    el('Fullscreen').dispatchEvent(
+      new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }),
+    );
     // Opens with no timer advanced; only the frames Svelte and Bits need to draw it.
     await frames(
       () => tooltip()?.textContent === 'Enter full screen',
