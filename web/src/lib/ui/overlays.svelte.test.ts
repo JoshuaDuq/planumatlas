@@ -531,28 +531,42 @@ describe('Tooltip', () => {
 
   test('hover waits 500 ms, names the trigger by aria-describedby, and the next one skips the wait', async () => {
     // The page's timers and its clock are faked (beforeEach), so the delays and the skip window
-    // hold however loaded the machine is; frames stay real, because drawing needs them.
+    // hold however loaded the machine is; frames stay real, because drawing needs them. A pointer
+    // command ticks the faked clock 50 ms per 50 ms it waits (vitest's FAKE_TIMERS_TICK), so it can
+    // return with time gone since its event: the delays are timed from the events.
     render(Fixture);
     // The test before this one leaves the pointer over Snapshot.
     await parkPointer();
+    const snapshot = el('Snapshot');
+    let arrived = NaN;
+    snapshot.addEventListener('pointerover', () => (arrived = performance.now()), { once: true });
     await button('Snapshot').hover();
     // The pointer may reach the page after `hover()` returns; the delay starts there.
-    await frames(() => el('Snapshot').matches(':hover'), 'the pointer reached the trigger');
-    await vi.advanceTimersByTimeAsync(499);
+    await frames(() => !Number.isNaN(arrived), 'the pointer reached the trigger');
+    expect(performance.now() - arrived, 'the hover returned inside the delay').toBeLessThan(499);
+    await vi.advanceTimersByTimeAsync(arrived + 499 - performance.now());
     expect(tooltip()).toBeNull();
     await vi.advanceTimersByTimeAsync(1);
     await frames(() => tooltip()?.textContent === 'Save a PNG', 'the tooltip shows at 500 ms');
     expect(attr('Snapshot', 'aria-describedby')).toBe(tooltip()!.id);
 
-    await userEvent.unhover(el('Snapshot'));
-    await frames(() => !el('Snapshot').matches(':hover'), 'the pointer left the trigger');
     // The skip window starts when the trigger closes, not when the exit transition removes the element.
-    for (let step = 0; step < 100 && attr('Snapshot', 'aria-describedby') !== null; step++)
+    let closed = NaN;
+    const closing = new MutationObserver(() => {
+      if (Number.isNaN(closed) && !snapshot.hasAttribute('aria-describedby')) {
+        closed = performance.now();
+      }
+    });
+    closing.observe(snapshot, { attributeFilter: ['aria-describedby'] });
+    await userEvent.unhover(snapshot);
+    await frames(() => !snapshot.matches(':hover'), 'the pointer left the trigger');
+    for (let step = 0; step < 100 && Number.isNaN(closed); step++)
       await vi.advanceTimersByTimeAsync(10);
+    closing.disconnect();
     expect(attr('Snapshot', 'aria-describedby')).toBeNull();
-    await vi.advanceTimersByTimeAsync(250);
-    // A real hover moves the faked clock on by as long as it takes (50 ms measured, more on a loaded
-    // runner), which can carry it past the window; dispatching the arrival keeps it at 250 ms.
+    expect(performance.now() - closed, 'the unhover returned inside the window').toBeLessThan(250);
+    await vi.advanceTimersByTimeAsync(closed + 250 - performance.now());
+    // Dispatched, so no pointer command ticks the clock past the window.
     el('Fullscreen').dispatchEvent(
       new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }),
     );
