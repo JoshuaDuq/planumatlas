@@ -108,8 +108,28 @@ export function createTractGeometry(
   return { geometry, lengths };
 }
 
-const dot = (a: readonly number[], b: readonly number[]) =>
-  a[0]! * b[0]! + a[1]! * b[1]! + a[2]! * b[2]!;
+/** Indexed segments per box in `segmentRuns`. */
+const RUN = 16;
+
+/**
+ * The box round each run of RUN indexed segments of `points`, as min x, y, z then max x, y, z, so a
+ * plane query tests a run once rather than each of its segments.
+ */
+export function segmentRuns(points: Float32Array, index: Uint32Array): Float32Array {
+  const runs = new Float32Array(6 * Math.ceil(index.length / (2 * RUN)));
+  for (let run = 0; run < runs.length / 6; run++) {
+    const box = 6 * run;
+    runs.fill(Infinity, box, box + 3).fill(-Infinity, box + 3, box + 6);
+    for (let k = 2 * RUN * run; k < Math.min(index.length, 2 * RUN * (run + 1)); k++) {
+      const point = 3 * index[k]!;
+      for (let axis = 0; axis < 3; axis++) {
+        runs[box + axis] = Math.min(runs[box + axis]!, points[point + axis]!);
+        runs[box + 3 + axis] = Math.max(runs[box + 3 + axis]!, points[point + axis]!);
+      }
+    }
+  }
+  return runs;
+}
 
 /**
  * The indexed segments of `points` (RAS mm) within TRACT_SLAB_MM of a plane through `origin`, each
@@ -126,12 +146,13 @@ export function segmentsNearPlane(
     v: readonly number[];
   },
 ): PlaneTracts {
-  return segmentsNearPlanes(points, index, plane, [0])[0]!;
+  return segmentsNearPlanes(points, index, plane, [0], segmentRuns(points, index))[0]!;
 }
 
 /**
  * `segmentsNearPlane` for planes parallel to `plane`, each `offsets` mm from it along its normal, in
- * one pass over the segments: a series of sections costs about what one plane does.
+ * one pass over the segments: a series of sections costs about what one plane does. `runs` is
+ * `segmentRuns` of these points and this index.
  */
 export function segmentsNearPlanes(
   points: Float32Array,
@@ -143,28 +164,53 @@ export function segmentsNearPlanes(
     v: readonly number[];
   },
   offsets: readonly number[],
+  runs: Float32Array,
 ): PlaneTracts[] {
+  if (runs.length !== 6 * Math.ceil(index.length / (2 * RUN)))
+    throw new RangeError('The segment runs were taken of another index.');
   const { origin, normal, u, v } = plane;
-  const ends = offsets.map((): number[] => []);
-  const colors = offsets.map((): number[] => []);
+  // Each plane's segments, written into arrays that double as they fill: a plane keeps hundreds of
+  // thousands of segments of every tract shown.
+  const kept = offsets.map(() => ({
+    count: 0,
+    ends: new Float32Array(4096),
+    colors: new Uint8Array(3072),
+  }));
+  // Whether a run's box comes within the slab of a plane; the micrometre covers rounding.
+  const reaches = (box: number) => {
+    let middle = 0;
+    let reach = TRACT_SLAB_MM + 1e-3;
+    for (let axis = 0; axis < 3; axis++) {
+      middle += normal[axis]! * ((runs[box + axis]! + runs[box + 3 + axis]!) / 2 - origin[axis]!);
+      reach += (Math.abs(normal[axis]!) * (runs[box + 3 + axis]! - runs[box + axis]!)) / 2;
+    }
+    for (const offset of offsets) if (Math.abs(offset - middle) <= reach) return true;
+    return false;
+  };
   for (let k = 0; k < index.length; k += 2) {
+    if (k % (2 * RUN) === 0 && !reaches((6 * k) / (2 * RUN))) {
+      k += 2 * RUN - 2;
+      continue;
+    }
     const i = 3 * index[k]!;
     const j = 3 * index[k + 1]!;
-    const p = [points[i]! - origin[0]!, points[i + 1]! - origin[1]!, points[i + 2]! - origin[2]!];
-    const step = [
-      points[j]! - points[i]!,
-      points[j + 1]! - points[i + 1]!,
-      points[j + 2]! - points[i + 2]!,
-    ];
-    const length = Math.hypot(step[0]!, step[1]!, step[2]!);
-    if (length === 0) continue;
-    const start0 = dot(normal, p);
-    const rise = dot(normal, step);
+    // Scalars, and the length only for a segment that reaches a slab: most of a run's do not.
+    const px = points[i]! - origin[0]!,
+      py = points[i + 1]! - origin[1]!,
+      pz = points[i + 2]! - origin[2]!;
+    const sx = points[j]! - points[i]!,
+      sy = points[j + 1]! - points[i + 1]!,
+      sz = points[j + 2]! - points[i + 2]!;
+    const start0 = normal[0]! * px + normal[1]! * py + normal[2]! * pz;
+    const rise = normal[0]! * sx + normal[1]! * sy + normal[2]! * sz;
     const lowest = Math.min(start0, start0 + rise) - TRACT_SLAB_MM;
     const highest = Math.max(start0, start0 + rise) + TRACT_SLAB_MM;
+    let length = -1;
     for (let n = 0; n < offsets.length; n++) {
       const offset = offsets[n]!;
       if (offset < lowest || offset > highest) continue;
+      if (length < 0) length = Math.hypot(sx, sy, sz);
+      if (length === 0) break;
       const from = start0 - offset;
       // The part of the segment inside the slab, as fractions of it.
       let start = 0;
@@ -179,15 +225,33 @@ export function segmentsNearPlanes(
         if (start > end) continue;
       }
       // In-plane positions do not depend on the offset: u and v are normal to it.
-      for (const t of [start, end]) {
-        const q = [p[0]! + t * step[0]!, p[1]! + t * step[1]!, p[2]! + t * step[2]!];
-        ends[n]!.push(dot(u, q), dot(v, q));
+      const ax = px + start * sx,
+        ay = py + start * sy,
+        az = pz + start * sz;
+      const bx = px + end * sx,
+        by = py + end * sy,
+        bz = pz + end * sz;
+      const piece = kept[n]!;
+      if (4 * piece.count === piece.ends.length) {
+        const ends = new Float32Array(2 * piece.ends.length);
+        const colors = new Uint8Array(2 * piece.colors.length);
+        ends.set(piece.ends);
+        colors.set(piece.colors);
+        Object.assign(piece, { ends, colors });
       }
-      for (const value of step) colors[n]!.push(Math.round((255 * Math.abs(value)) / length));
+      const e = 4 * piece.count;
+      const c = 3 * piece.count++;
+      piece.ends[e] = u[0]! * ax + u[1]! * ay + u[2]! * az;
+      piece.ends[e + 1] = v[0]! * ax + v[1]! * ay + v[2]! * az;
+      piece.ends[e + 2] = u[0]! * bx + u[1]! * by + u[2]! * bz;
+      piece.ends[e + 3] = v[0]! * bx + v[1]! * by + v[2]! * bz;
+      piece.colors[c] = Math.round((255 * Math.abs(sx)) / length);
+      piece.colors[c + 1] = Math.round((255 * Math.abs(sy)) / length);
+      piece.colors[c + 2] = Math.round((255 * Math.abs(sz)) / length);
     }
   }
-  return offsets.map((_, n) => ({
-    ends: Float32Array.from(ends[n]!),
-    colors: Uint8Array.from(colors[n]!),
+  return kept.map(({ count, ends, colors }) => ({
+    ends: ends.slice(0, 4 * count),
+    colors: colors.slice(0, 3 * count),
   }));
 }

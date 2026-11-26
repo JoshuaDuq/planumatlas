@@ -11,7 +11,11 @@ function link(display: object | null, published: object | null) {
     state: { crosshair: [0, 0, 0] },
     frame: centeredFrame('axial', [0, 0, 0]),
   };
-  return createEngineSections(stub as never, async () => {}).mriWindowLink();
+  return createEngineSections(
+    stub as never,
+    async () => {},
+    () => {},
+  ).mriWindowLink();
 }
 
 const PUBLISHED = { window_center: 94, window_width: 188 };
@@ -52,5 +56,34 @@ describe('the model', () => {
     });
     assert.equal(model.hasLayer('a'), true);
     assert.equal(model.hasLayer('b'), false);
+  });
+});
+
+describe('a slide', () => {
+  it('SCENE-08 draws as the camera moving once each step has landed; a typed position does not', async () => {
+    const order: string[] = [];
+    const stub = {
+      setOffsetReady: async () => void order.push('offset landed'),
+      setAnglesReady: async () => void order.push('angles landed'),
+      setOffset: () => void order.push('offset set'),
+      setAngles: () => void order.push('angles set'),
+    };
+    const sections = createEngineSections(
+      stub as never,
+      async () => {},
+      () => order.push('moving'),
+    );
+    await sections.setOffsetReady(4);
+    await sections.setAnglesReady(30, 20);
+    sections.setOffset(5);
+    sections.setAngles(40, 10);
+    assert.deepEqual(order, [
+      'offset landed',
+      'moving',
+      'angles landed',
+      'moving',
+      'offset set',
+      'angles set',
+    ]);
   });
 });

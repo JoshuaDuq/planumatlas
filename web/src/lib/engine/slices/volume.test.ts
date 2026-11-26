@@ -106,6 +106,16 @@ test('every voxel centre keeps its own label', () => {
   assert.equal(volume.label([1, 1, 1]), 9);
 });
 
+test('any one of the eight voxels around a point outweighs the other seven near its centre', () => {
+  assert.equal(corner(Array<number>(8).fill(5)).label([0.3, 0.6, 0.2]), 5, 'all eight agree');
+  for (let lone = 0; lone < 8; lone++) {
+    const volume = corner(Array.from({ length: 8 }, (_, n) => (n === lone ? 2 : 5)));
+    const near = [lone & 1, (lone >> 1) & 1, (lone >> 2) & 1].map((axis) => 0.1 + 0.8 * axis);
+    assert.equal(volume.label(near), 2, `voxel ${lone}`);
+    assert.equal(volume.label([0.5, 0.5, 0.5].map((v, a) => v - (near[a]! - 0.5))), 5);
+  }
+});
+
 test('outside the grid is background, weighed like any other label', () => {
   const volume = corner([7, 7, 7, 7, 7, 7, 7, 7]);
   assert.equal(volume.label([-0.4, 0.5, 0.5]), 7);

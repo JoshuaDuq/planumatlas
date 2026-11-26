@@ -133,11 +133,13 @@ export function createEngineModel(
 /**
  * `BrainSections` as the contract's sections: the cut's own frame and pixels in tuples, a fresh
  * snapshot of its state on every read, and the reads the panels used to make on its fields. The class
- * stays a 1-1 port (`ui/chrome/sections.js` and `app.js:825-831` computed these).
+ * stays a 1-1 port (`ui/chrome/sections.js` and `app.js:825-831` computed these). `markMotion` draws
+ * a slide as the camera moving: at the motion resolution, and in full once it rests.
  */
 export function createEngineSections(
   sections: BrainSections,
   prefetch: () => Promise<void>,
+  markMotion: () => void,
 ): EngineSections {
   const snapshot = (): SectionsState => ({
     ...sections.state,
@@ -194,9 +196,9 @@ export function createEngineSections(
     setMode: (mode) => sections.setMode(mode),
     setCrosshair: (point) => sections.setCrosshair(point),
     setOffset: (offset) => sections.setOffset(offset),
-    setOffsetReady: (offset) => sections.setOffsetReady(offset),
+    setOffsetReady: (offset) => sections.setOffsetReady(offset).then(markMotion),
     setAngles: (tilt, azimuth) => sections.setAngles(tilt, azimuth),
-    setAnglesReady: (tilt, azimuth) => sections.setAnglesReady(tilt, azimuth),
+    setAnglesReady: (tilt, azimuth) => sections.setAnglesReady(tilt, azimuth).then(markMotion),
     setDisplay: (options) => sections.setDisplay(options),
     setAgreement: (code) => sections.setAgreement(code),
     setWindow: (center, width) => sections.setWindow(center, width),

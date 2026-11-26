@@ -102,6 +102,8 @@ export interface EngineScene {
   setOutlined(outlined?: Outlined): void;
   moveTo(plan: CameraPlan, options?: MoveOptions): void;
   invalidate(): void;
+  /** Draw as a moving camera does, at the motion resolution until SETTLE_MS pass without a call. */
+  markMotion(): void;
   /** Compile the outline programs before a pointer reaches a region, off this thread. */
   warmOutlines(root: Object3D): Promise<void>;
   /** Compile the programs `root`'s materials need now, off the frame that first draws them. */
@@ -368,6 +370,7 @@ export function createScene(
     setOutlined,
     moveTo: motion.moveTo,
     invalidate,
+    markMotion: cameraMoved,
     compile: (root) => rendering.compile(root),
     warmOutlines: (root) =>
       warmOutlines(settled, root, {

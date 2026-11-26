@@ -7,6 +7,7 @@ import {
   createMotionGeometry,
   createTractGeometry,
   filterTractGeometry,
+  segmentRuns,
   segmentsNearPlane,
   segmentsNearPlanes,
 } from './native-geometry.ts';
@@ -177,7 +178,7 @@ test('SECT-44 parallel planes taken in one pass keep, each, what the plane alone
   const index = new Uint32Array(2 * 2999).map((_, k) => (k >> 1) + (k & 1));
   const plane = { origin: [1, -2, 0.25], normal: [0, 0, -1], u: [-1, 0, 0], v: [0, 1, 0] };
   const offsets = [-13, 0, 4, 13];
-  const together = segmentsNearPlanes(points, index, plane, offsets);
+  const together = segmentsNearPlanes(points, index, plane, offsets, segmentRuns(points, index));
   offsets.forEach((offset, n) => {
     const alone = segmentsNearPlane(points, index, {
       ...plane,
@@ -188,4 +189,73 @@ test('SECT-44 parallel planes taken in one pass keep, each, what the plane alone
     assert.equal(together[n]!.ends.length, alone.ends.length);
     together[n]!.ends.forEach((value, k) => assert.ok(Math.abs(value - alone.ends[k]!) < 1e-4));
   });
+});
+
+test('a run’s box is the extent of its segments’ ends, sixteen segments to a run', () => {
+  // Point p is (p, −3p − 1, −3p − 2). A filter has left 20 segments of one streamline, then 10 of
+  // another from point 32: a run spans both.
+  const points = new Float32Array(60 * 3).map((_, n) => (n % 3 === 0 ? n / 3 : -n));
+  const index = new Uint32Array([
+    ...Array.from({ length: 20 }, (_, s) => [s, s + 1]).flat(),
+    ...Array.from({ length: 10 }, (_, s) => [32 + s, 33 + s]).flat(),
+  ]);
+  const runs = segmentRuns(points, index);
+  // prettier-ignore
+  assert.deepEqual([...runs], [
+    0, -49, -50, 16, -1, -2, // the first 16 segments: points 0 to 16
+    16, -127, -128, 42, -49, -50, // the last 14: points 16 to 20 and 32 to 42
+  ]);
+});
+
+test('runs skip only segments the slab would drop: what is kept is what testing every segment keeps', () => {
+  // A random walk of 4,000 points in steps up to 1 mm through z −30 to +30 mm, cut by an oblique plane.
+  let state = 5;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 2 ** 32 - 0.5;
+  };
+  const points = new Float32Array(4000 * 3);
+  points[2] = -30;
+  for (let n = 3; n < points.length; n += 3) {
+    points[n] = points[n - 3]! + random();
+    points[n + 1] = points[n - 2]! + random();
+    points[n + 2] = points[n - 1]! + 60 / 3999 + random();
+  }
+  // Pieces of 23 segments in shuffled order, so a run beyond the slab can be followed by one in it.
+  const pieces = Array.from({ length: Math.ceil(3999 / 23) }, (_, n) => n);
+  for (let n = pieces.length - 1; n > 0; n--) {
+    const other = Math.floor((random() + 0.5) * (n + 1));
+    [pieces[n], pieces[other]] = [pieces[other]!, pieces[n]!];
+  }
+  const index = new Uint32Array(
+    pieces.flatMap((piece) =>
+      Array.from({ length: Math.min(23, 3999 - 23 * piece) }, (_, s) => [
+        23 * piece + s,
+        23 * piece + s + 1,
+      ]).flat(),
+    ),
+  );
+  const normal = [0.3, -0.2, 0.9].map((value, _, all) => value / Math.hypot(...all));
+  const u = [0.2, 0.3, 0].map((value, _, all) => value / Math.hypot(...all));
+  const v = [
+    normal[1]! * u[2]! - normal[2]! * u[1]!,
+    normal[2]! * u[0]! - normal[0]! * u[2]!,
+    normal[0]! * u[1]! - normal[1]! * u[0]!,
+  ];
+  const plane = { origin: [0.4, -1.1, 0.7], normal, u, v };
+  // One box round everything: no run is skipped.
+  const everything = segmentRuns(points, index).map((_, n) => (n % 6 < 3 ? -1e30 : 1e30));
+  const runs = segmentRuns(points, index);
+  // One plane at a time, as a slide asks, then a series of them in one pass.
+  for (const offsets of [...Array.from({ length: 121 }, (_, n) => [-24 + n * 0.4]), [-20, 0, 9]]) {
+    const [culled, whole] = [runs, everything].map((boxes) =>
+      segmentsNearPlanes(points, index, plane, offsets, boxes),
+    );
+    offsets.forEach((offset, n) => {
+      assert.ok(whole![n]!.colors.length > 0, `the plane ${offset} mm along keeps segments`);
+      assert.deepEqual([...culled![n]!.ends], [...whole![n]!.ends], `ends at ${offset} mm`);
+      assert.deepEqual([...culled![n]!.colors], [...whole![n]!.colors], `colours at ${offset} mm`);
+    });
+  }
+  assert.throws(() => segmentsNearPlanes(points, index.subarray(0, 64), plane, [0], runs), /runs/);
 });

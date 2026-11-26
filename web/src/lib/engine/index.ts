@@ -440,7 +440,7 @@ export const createEngine: CreateEngine = async (options: EngineOptions): Promis
       samples.add(...atlas.cutProgramSamples(), ...sections.tissues.solids.programSamples());
       await scene.compile(samples);
     };
-    const engineSections = createEngineSections(sections, prefetchCut);
+    const engineSections = createEngineSections(sections, prefetchCut, scene.markMotion);
     const onChange = () => {
       // A change can set the anatomy moving, which the frame loop steps.
       scene.invalidate();

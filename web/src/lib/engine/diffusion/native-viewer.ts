@@ -26,6 +26,7 @@ import {
   createMotionGeometry,
   createTractGeometry,
   filterTractGeometry,
+  segmentRuns,
   segmentsNearPlanes,
 } from './native-geometry.ts';
 import { createReferenceTransform } from './reference-space.ts';
@@ -68,6 +69,8 @@ interface LoadedBundle {
   offsets: Uint32Array;
   /** Ordinary tract visibility, retained while the lesion or a landmark isolates a bundle. */
   visible: boolean;
+  /** `segmentRuns` of what `still` draws, and the index version and count they were taken of. */
+  runs?: { version: number; count: number; boxes: Float32Array };
 }
 
 /**
@@ -413,14 +416,17 @@ export function createNativeTractViewer(
       ),
     ) as [number[], number[], number[]];
     const plane = { origin, normal: n, u: a, v: b };
-    const pieces = shown.map(({ still }) =>
-      segmentsNearPlanes(
-        still.getAttribute('position').array as Float32Array,
-        (still.index!.array as Uint32Array).subarray(0, still.drawRange.count),
-        plane,
-        along,
-      ),
-    );
+    const pieces = shown.map((entry) => {
+      const { still } = entry;
+      const points = still.getAttribute('position').array as Float32Array;
+      const { version, array } = still.index!;
+      const count = still.drawRange.count;
+      const index = (array as Uint32Array).subarray(0, count);
+      // Taken again only when a filter rewrites the index, not as the plane moves.
+      if (entry.runs?.version !== version || entry.runs.count !== count)
+        entry.runs = { version, count, boxes: segmentRuns(points, index) };
+      return segmentsNearPlanes(points, index, plane, along, entry.runs.boxes);
+    });
     return frames.map((_, number) => {
       const parts = pieces.map((bundle) => bundle[number]!);
       const ends = new Float32Array(parts.reduce((sum, part) => sum + part.ends.length, 0));

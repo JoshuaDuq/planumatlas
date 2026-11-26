@@ -31,6 +31,7 @@ export class Volume {
   readonly shape: readonly [number, number, number];
   readonly data: VolumeData;
   private readonly toSurface: number[];
+  private corners: Float64Array | undefined;
   private candidates: Float64Array | undefined;
   private weights: Float64Array | undefined;
 
@@ -84,6 +85,18 @@ export class Volume {
     const ix = Math.floor(x),
       iy = Math.floor(y),
       iz = Math.floor(z);
+    const values = (this.corners ??= new Float64Array(8));
+    let uniform = true;
+    for (let corner = 0; corner < 8; corner++) {
+      const cx = ix + (corner & 1),
+        cy = iy + ((corner >> 1) & 1),
+        cz = iz + ((corner >> 2) & 1);
+      const inside = cx >= 0 && cy >= 0 && cz >= 0 && cx < nx && cy < ny && cz < nz;
+      values[corner] = inside ? this.data[cx + nx * (cy + ny * cz)]! : 0;
+      if (values[corner] !== values[0]) uniform = false;
+    }
+    // Most points of a slice lie inside one label or outside the grid, where the vote has one candidate.
+    if (uniform) return values[0]!;
     const fx = x - ix,
       fy = y - iy,
       fz = z - iz;
@@ -94,11 +107,7 @@ export class Volume {
       const i = corner & 1,
         j = (corner >> 1) & 1,
         k = (corner >> 2) & 1;
-      const cx = ix + i,
-        cy = iy + j,
-        cz = iz + k;
-      const inside = cx >= 0 && cy >= 0 && cz >= 0 && cx < nx && cy < ny && cz < nz;
-      const value = inside ? this.data[cx + nx * (cy + ny * cz)]! : 0;
+      const value = values[corner]!;
       const weight = (i ? fx : 1 - fx) * (j ? fy : 1 - fy) * (k ? fz : 1 - fz);
       let seen = 0;
       while (seen < count && labels[seen] !== value) seen++;

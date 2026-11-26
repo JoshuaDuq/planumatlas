@@ -1156,6 +1156,22 @@ describe('scene motion', () => {
     stage.dispose();
   });
 
+  it('SCENE-08 a sliding cut draws at the reduced ratio, and at full once it has rested 150 ms', () => {
+    vi.stubGlobal('devicePixelRatio', 2);
+    const { stage, settledRatio } = resting();
+    clock = origin + 10;
+    stage.markMotion();
+    composerRatios = [];
+    frame(10);
+    assert.ok(composerRatios.length === 1 && composerRatios[0]! < settledRatio);
+    composerRatios = [];
+    frame(100);
+    assert.deepEqual(composerRatios, [], 'nothing new is drawn while the cut holds still');
+    frame(161);
+    assert.deepEqual(composerRatios, [settledRatio]);
+    stage.dispose();
+  });
+
   /** A phone of display density 3 whose one-pixel read back takes the GPU `gpu.ms` of the clock. */
   function phoneAtRest() {
     vi.stubGlobal('devicePixelRatio', 3);
