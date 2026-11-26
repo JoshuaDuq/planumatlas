@@ -168,9 +168,11 @@
       href={item.link.href}
       target="_blank"
       rel="noreferrer"
-      >{item.link.text}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-      >{@render iconGraphic('external-link')}</a
     >
+      {item.link.text}<span class="visually-hidden">
+        {` ${t(lang, 'link').newTab}`}
+      </span>{@render iconGraphic('external-link')}
+    </a>
   {/if}
 {/snippet}
 
@@ -216,9 +218,9 @@
     {#if listed}
       {@render facts(references, referencesEnglish)}
       <div class="provenance-actions">
-        <button type="button" onclick={() => copier.copy(referenceText(listed!, acknowledgement))}
-          >{copyLabel}</button
-        >
+        <button type="button" onclick={() => copier.copy(referenceText(listed!, acknowledgement))}>
+          {copyLabel}
+        </button>
         <button
           type="button"
           onclick={() =>
@@ -227,8 +229,10 @@
               'bib',
               'application/x-bibtex;charset=utf-8',
               copy.bibtexDownloaded,
-            )}>{copy.downloadBibtex}</button
+            )}
         >
+          {copy.downloadBibtex}
+        </button>
         <button
           type="button"
           onclick={() =>
@@ -237,8 +241,10 @@
               'ris',
               'application/x-research-info-systems;charset=utf-8',
               copy.risDownloaded,
-            )}>{copy.downloadRis}</button
+            )}
         >
+          {copy.downloadRis}
+        </button>
       </div>
     {:else if loading === 'failed'}
       <p class="provenance-note">{copy.referencesFailed}</p>
@@ -250,10 +256,11 @@
     {/if}
   </section>
   <p class="provenance-methods">
-    <a class="provenance-link" href={methodsHref()} hreflang="en" target="_blank" rel="noreferrer"
-      >{t(lang, 'link').methods}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-      >{@render iconGraphic('external-link')}</a
-    >
+    <a class="provenance-link" href={methodsHref()} hreflang="en" target="_blank" rel="noreferrer">
+      {t(lang, 'link').methods}<span class="visually-hidden">
+        {` ${t(lang, 'link').newTab}`}
+      </span>{@render iconGraphic('external-link')}
+    </a>
   </p>
   <p class="provenance-use">{copy.intendedUse}</p>
 </Dialog>

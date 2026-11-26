@@ -24,10 +24,10 @@
   } = $props();
 </script>
 
-<a {href} {hreflang} target="_blank" rel="noreferrer"
-  ><span lang={contentLang}>{@render children()}</span><span class="visually-hidden"
-    >{` ${t(lang, 'link').newTab}`}</span
-  ><svg
+<a {href} {hreflang} target="_blank" rel="noreferrer">
+  <span lang={contentLang}>{@render children()}</span><span class="visually-hidden">
+    {` ${t(lang, 'link').newTab}`}
+  </span><svg
     class="new-tab"
     viewBox="0 0 24 24"
     width="11"
@@ -38,9 +38,11 @@
     stroke-linecap="round"
     stroke-linejoin="round"
     aria-hidden="true"
-    focusable="false"><path d="M7 17 17 7M8 7h9v9" /></svg
-  ></a
->
+    focusable="false"
+  >
+    <path d="M7 17 17 7M8 7h9v9" />
+  </svg>
+</a>
 
 <style>
   @layer features {

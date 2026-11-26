@@ -343,8 +343,10 @@
               <button
                 type="button"
                 aria-pressed={choice.id === shownAtlas}
-                onclick={() => (atlas = choice.id)}>{choice.name}</button
+                onclick={() => (atlas = choice.id)}
               >
+                {choice.name}
+              </button>
             {/each}
           </div>
         {/if}

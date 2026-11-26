@@ -170,11 +170,11 @@
             aria-hidden="true"
             style:background="linear-gradient(to right, {MAGMA.map(networkCss).join(', ')})"
           ></span>
-          <span class="matrix-scale-ends"
-            ><span>{decimal(matrix.scale[0], 0, lang)}</span><span
-              >{decimal(matrix.scale[1], 2, lang)}</span
-            ></span
-          >
+          <span class="matrix-scale-ends">
+            <span>{decimal(matrix.scale[0], 0, lang)}</span><span>
+              {decimal(matrix.scale[1], 2, lang)}
+            </span>
+          </span>
           <p class="matrix-note">{copy.scaleEnds(decimal(matrix.scale[1], 2, lang))}</p>
         </div>
       </div>
@@ -222,21 +222,25 @@
         <p>{copy.independent}</p>
         <p>{copy.positive(withUnit(decimal(positive * 100, 1, lang), '%', lang))}</p>
         <div class="matrix-links">
-          <a href={matrix.source.dataset} target="_blank" rel="noopener noreferrer"
-            >{copy.dataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-            >{@render iconGraphic('external-link')}</a
-          >
+          <a href={matrix.source.dataset} target="_blank" rel="noopener noreferrer">
+            {copy.dataset}<span class="visually-hidden">
+              {` ${t(lang, 'link').newTab}`}
+            </span>{@render iconGraphic('external-link')}
+          </a>
           <a
             href="https://pubmed.ncbi.nlm.nih.gov/{matrix.source.pmid}/"
             target="_blank"
             rel="noopener noreferrer"
-            >{copy.paper}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-            >{@render iconGraphic('external-link')}</a
           >
-          <a href={matrix.parcellation.doi} target="_blank" rel="noopener noreferrer"
-            >{copy.parcels}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-            >{@render iconGraphic('external-link')}</a
-          >
+            {copy.paper}<span class="visually-hidden">
+              {` ${t(lang, 'link').newTab}`}
+            </span>{@render iconGraphic('external-link')}
+          </a>
+          <a href={matrix.parcellation.doi} target="_blank" rel="noopener noreferrer">
+            {copy.parcels}<span class="visually-hidden">
+              {` ${t(lang, 'link').newTab}`}
+            </span>{@render iconGraphic('external-link')}
+          </a>
         </div>
         <button type="button" class="matrix-save" onclick={save}>{copy.save}</button>
       </div>

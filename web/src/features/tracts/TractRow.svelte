@@ -54,11 +54,12 @@
         id={nameId}
         aria-current={current ? 'true' : undefined}
         onclick={() => onopen(row.key)}
-        ><span class="drill-text">{tractRowName(row, lang)}</span><span
+      >
+        <span class="drill-text">{tractRowName(row, lang)}</span><span
           class="chevron"
           aria-hidden="true"
-        ></span></button
-      >
+        ></span>
+      </button>
     {:else}
       <span class="name" id={nameId}>{tractRowName(row, lang)}</span>
     {/if}

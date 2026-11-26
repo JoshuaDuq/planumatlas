@@ -78,9 +78,9 @@
                     >
                       <span class="link-name">{step.name[model.lang]}</span>
                       <span class="link-step">{copy.stepShort(index, circuit.steps.length)}</span>
-                      <span class="visually-hidden"
-                        >, {circuit.name[model.lang]}, {copy.landmark}</span
-                      >
+                      <span class="visually-hidden">
+                        , {circuit.name[model.lang]}, {copy.landmark}
+                      </span>
                       <span class="chevron" aria-hidden="true"></span>
                     </button>
                   </li>

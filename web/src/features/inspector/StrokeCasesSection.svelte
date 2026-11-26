@@ -400,32 +400,37 @@
                   x={x(stop)}
                   y={height - M.bottom + 1.15 * em}
                   text-anchor={stop === high ? 'end' : stop === low ? 'start' : 'middle'}
-                  >{tickText(stop)}</text
                 >
+                  {tickText(stop)}
+                </text>
               {/each}
               {#each [0, 50, 100] as aq (aq)}
                 <line class="grid" x1={M.left} x2={width - M.right} y1={y(aq)} y2={y(aq)} />
-                <text class="tick" x={M.left - 0.4 * em} y={y(aq)} dy="0.32em" text-anchor="end"
-                  >{aq}</text
-                >
+                <text class="tick" x={M.left - 0.4 * em} y={y(aq)} dy="0.32em" text-anchor="end">
+                  {aq}
+                </text>
               {/each}
               <line class="normal" x1={M.left} x2={width - M.right} y1={y(normal)} y2={y(normal)} />
-              <text class="axis" x={width - M.right} y={y(normal) - 0.3 * em} text-anchor="end"
-                >{copy.normal}</text
-              >
+              <text class="axis" x={width - M.right} y={y(normal) - 0.3 * em} text-anchor="end">
+                {copy.normal}
+              </text>
               <text
                 class="axis"
                 x={(M.left + width - M.right) / 2}
                 y={height - 0.4 * em}
-                text-anchor="middle">{copy.volumeAxis}</text
+                text-anchor="middle"
               >
+                {copy.volumeAxis}
+              </text>
               <text
                 class="axis"
                 x={-(M.top + height - M.bottom) / 2}
                 y={1.05 * em}
                 transform="rotate(-90)"
-                text-anchor="middle">{copy.scoreAxis}</text
+                text-anchor="middle"
               >
+                {copy.scoreAxis}
+              </text>
               {#if a && b && list.includes(a) && list.includes(b)}
                 <line
                   class="link"
@@ -480,10 +485,9 @@
                         : 'descending'
                       : undefined}
                   >
-                    <button type="button" onclick={() => sortBy(column)}
-                      >{copy.columns[column]}<span class="sort-mark" aria-hidden="true"
-                      ></span></button
-                    >
+                    <button type="button" onclick={() => sortBy(column)}>
+                      {copy.columns[column]}<span class="sort-mark" aria-hidden="true"></span>
+                    </button>
                   </th>
                 {/each}
               </tr>
@@ -573,9 +577,9 @@
             </span>
             {#if pairs.length > 1}
               <div class="actions">
-                <button type="button" bind:this={nextPair} onclick={() => showPair(pairAt + 1)}
-                  >{copy.nextPair}</button
-                >
+                <button type="button" bind:this={nextPair} onclick={() => showPair(pairAt + 1)}>
+                  {copy.nextPair}
+                </button>
               </div>
             {/if}
           </div>
@@ -586,16 +590,15 @@
             {#each differ as row, index (row.id)}
               <li class="differ-row">
                 <span class="differ-name">
-                  {label(row.id).name}{#if index === 0}<span class="differ-this"
-                      >{` · ${copy.thisRegion}`}</span
-                    >{/if}
+                  {label(row.id).name}{#if index === 0}<span class="differ-this">
+                      {` · ${copy.thisRegion}`}
+                    </span>{/if}
                 </span>
                 {#each [[row.a, COLOR_A], [row.b, COLOR_B]] as [value, color] (color)}
                   <span class="differ-value">
-                    <span class="twin"
-                      ><span style:width={`${Number(value) * 100}%`} style:background={color}
-                      ></span></span
-                    >
+                    <span class="twin">
+                      <span style:width={`${Number(value) * 100}%`} style:background={color}></span>
+                    </span>
                     <span class="measure">{share(Number(value))}</span>
                   </span>
                 {/each}
@@ -613,14 +616,16 @@
       {/if}
       <p class="detail-note">{copy.note(data.cases.length)}</p>
       <div class="stroke-sources">
-        <a href={data.source.doi} target="_blank" rel="noopener noreferrer"
-          >{data.source.short}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
-        <a href={data.source.dataset} target="_blank" rel="noopener noreferrer"
-          >{copy.dataset}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span
-          >{@render iconGraphic('external-link')}</a
-        >
+        <a href={data.source.doi} target="_blank" rel="noopener noreferrer">
+          {data.source.short}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
+        <a href={data.source.dataset} target="_blank" rel="noopener noreferrer">
+          {copy.dataset}<span class="visually-hidden">
+            {` ${t(lang, 'link').newTab}`}
+          </span>{@render iconGraphic('external-link')}
+        </a>
       </div>
     </Disclosure>
   </div>

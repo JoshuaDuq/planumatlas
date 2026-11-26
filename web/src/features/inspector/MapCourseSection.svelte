@@ -171,14 +171,14 @@
             >
               {#each ticks as tick (tick)}
                 <line class="grid" x1={PAD.left} x2={width - PAD.right} y1={y(tick)} y2={y(tick)} />
-                <text class="tick" x={PAD.left - 6} y={y(tick)} text-anchor="end" dy="0.32em"
-                  >{mapNumber(tick, lang)}</text
-                >
+                <text class="tick" x={PAD.left - 6} y={y(tick)} text-anchor="end" dy="0.32em">
+                  {mapNumber(tick, lang)}
+                </text>
               {/each}
               <text class="tick" x={x(0)} y={HEIGHT - 6} text-anchor="start">{at(0)}</text>
-              <text class="tick" x={x(count - 1)} y={HEIGHT - 6} text-anchor="end"
-                >{at(count - 1)}</text
-              >
+              <text class="tick" x={x(count - 1)} y={HEIGHT - 6} text-anchor="end">
+                {at(count - 1)}
+              </text>
               {#if hover !== null && hover !== volume}
                 <line
                   class="crosshair"
@@ -210,8 +210,9 @@
             <thead>
               <tr>
                 <th scope="col">{copy.volume}</th>
-                {#if series.summary.secondsPerVolume !== null}<th scope="col">{copy.courseTime}</th
-                  >{/if}
+                {#if series.summary.secondsPerVolume !== null}<th scope="col">
+                    {copy.courseTime}
+                  </th>{/if}
                 <th scope="col">{copy.courseMean(map.statistic)}</th>
                 <th scope="col">{copy.courseValued}</th>
               </tr>

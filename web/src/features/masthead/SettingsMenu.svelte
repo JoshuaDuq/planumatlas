@@ -288,8 +288,9 @@
           rel="noreferrer"
           onclick={close}
         >
-          <span>{label}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span></span
-          >{@render iconGraphic('external-link')}
+          <span>
+            {label}<span class="visually-hidden">{` ${t(lang, 'link').newTab}`}</span>
+          </span>{@render iconGraphic('external-link')}
         </a>
       {/snippet}
       {@render newTab(methodsHref(), t(lang, 'link').methods, { hreflang: 'en' })}

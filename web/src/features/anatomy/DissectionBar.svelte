@@ -61,8 +61,10 @@
       bind:this={undo}
       disabled={!canUndo}
       aria-keyshortcuts={ARIA_KEYSHORTCUTS.undo}
-      onclick={onUndo}>{copy.undo}</button
+      onclick={onUndo}
     >
+      {copy.undo}
+    </button>
     <button type="button" bind:this={restore} onclick={onRestore}>{copy.restoreAll}</button>
   </div>
 {/if}

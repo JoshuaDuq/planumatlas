@@ -69,8 +69,10 @@
   onclick={(event) => {
     dialogInstant = isKeyboardActivation(event);
     dialogOpen = true;
-  }}>Shortcuts</button
+  }}
 >
+  Shortcuts
+</button>
 <button type="button" bind:this={fallback}>Fallback</button>
 <Dialog
   bind:open={dialogOpen}

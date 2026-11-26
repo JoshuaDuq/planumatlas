@@ -8,6 +8,6 @@
   let { page, lang }: { page: MethodsPage; lang: Language } = $props();
 </script>
 
-<ExternalLink href={methodsHref(page)} {lang} hreflang="en"
-  >{t(lang, 'link').methodsPage}</ExternalLink
->
+<ExternalLink href={methodsHref(page)} {lang} hreflang="en">
+  {t(lang, 'link').methodsPage}
+</ExternalLink>

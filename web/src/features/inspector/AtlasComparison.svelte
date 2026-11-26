@@ -332,16 +332,16 @@
         {#if comparison.unassignedAreaMm2 > 0}
           <div class="comparison-row unassigned">
             <span>{copy.unassigned}</span>
-            <span class="measure"
-              >{overlapArea(comparison.unassignedAreaMm2, lang)}<span class="visually-hidden"
-                >{' mm²'}</span
-              ></span
-            >
-            <span class="measure"
-              >{overlapShare(comparison.unassignedFraction, lang)}<span class="visually-hidden"
-                >{' %'}</span
-              ></span
-            >
+            <span class="measure">
+              {overlapArea(comparison.unassignedAreaMm2, lang)}<span class="visually-hidden">
+                {' mm²'}
+              </span>
+            </span>
+            <span class="measure">
+              {overlapShare(comparison.unassignedFraction, lang)}<span class="visually-hidden">
+                {' %'}
+              </span>
+            </span>
           </div>
         {/if}
         {#if !outlineAvailable}
@@ -362,11 +362,11 @@
             </p>
             <div class="comparison-sources">
               {#each manifest.atlases.filter( (atlas) => loaded!.data.atlases.includes(atlas.id) ) as atlas (atlas.id)}
-                <a href={atlas.citation} target="_blank" rel="noopener noreferrer"
-                  >{atlasSwitchLabel(atlas.id, lang)}<span class="visually-hidden"
-                    >{` ${t(lang, 'link').newTab}`}</span
-                  >{@render iconGraphic('external-link')}</a
-                >
+                <a href={atlas.citation} target="_blank" rel="noopener noreferrer">
+                  {atlasSwitchLabel(atlas.id, lang)}<span class="visually-hidden">
+                    {` ${t(lang, 'link').newTab}`}
+                  </span>{@render iconGraphic('external-link')}
+                </a>
               {/each}
             </div>
           </Disclosure>
